@@ -1,6 +1,7 @@
 #include "addmonstersdialog.h"
 #include "ui_addmonstersdialog.h"
 #include "bestiary.h"
+#include <QIntValidator>
 
 AddMonstersDialog::AddMonstersDialog(QWidget *parent) :
     QDialog(parent),
