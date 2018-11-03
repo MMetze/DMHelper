@@ -1,0 +1,71 @@
+#include "undofill.h"
+#include "mapframe.h"
+#include "map.h"
+#include "dmconstants.h"
+#include <QDomElement>
+
+UndoFill::UndoFill(Map& map, const MapEditFill& mapEditFill) :
+    UndoBase(map, QString("Fill")),
+    _mapEditFill(mapEditFill)
+{
+}
+
+void UndoFill::undo()
+{
+    if( _map.getRegisteredWindow() )
+        _map.getRegisteredWindow()->undoPaint();
+}
+
+void UndoFill::redo()
+{
+    if( _map.getRegisteredWindow() )
+    {
+        apply(true, 0);
+        _map.getRegisteredWindow()->updateFoW();
+    }
+}
+
+void UndoFill::apply( bool preview, QPaintDevice* target ) const
+{
+    QColor applyColor = _mapEditFill.color();
+    if(preview)
+    {
+        applyColor.setAlpha(_mapEditFill.color().alpha() / 2);
+    }
+
+    _map.fillFoW(applyColor,target);
+}
+
+void UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const
+{
+    Q_UNUSED(doc);
+    Q_UNUSED(targetDirectory)
+
+    element.setAttribute( "r", _mapEditFill.color().red() );
+    element.setAttribute( "g", _mapEditFill.color().green() );
+    element.setAttribute( "b", _mapEditFill.color().blue() );
+    element.setAttribute( "a", _mapEditFill.color().alpha() );
+}
+
+void UndoFill::inputXML(const QDomElement &element)
+{
+    _mapEditFill.setRed(element.attribute( QString("r") ).toInt());
+    _mapEditFill.setGreen(element.attribute( QString("g") ).toInt());
+    _mapEditFill.setBlue(element.attribute( QString("b") ).toInt());
+    _mapEditFill.setAlpha(element.attribute( QString("a") ).toInt());
+}
+
+int UndoFill::getType() const
+{
+    return DMHelper::ActionType_Fill;
+}
+
+const MapEditFill& UndoFill::mapEditFill() const
+{
+    return _mapEditFill;
+}
+
+MapEditFill& UndoFill::mapEditFill()
+{
+    return _mapEditFill;
+}

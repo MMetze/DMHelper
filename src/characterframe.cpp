@@ -1,0 +1,497 @@
+#include "characterframe.h"
+#include "ui_characterframe.h"
+#include "character.h"
+#include "scaledpixmap.h"
+#include <QCheckBox>
+#include <QMouseEvent>
+#include <QFileDialog>
+#include <QIntValidator>
+
+CharacterFrame::CharacterFrame(QWidget *parent) :
+    QFrame(parent),
+    ui(new Ui::CharacterFrame),
+    _character(0),
+    _mouseDown(false)
+{
+    ui->setupUi(this);
+
+    connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
+
+    ui->edtLevel->setValidator(new QIntValidator(1,100,this));
+    ui->edtArmorClass->setValidator(new QIntValidator(0,100,this));
+    ui->edtInitiative->setValidator(new QIntValidator(0,100,this));
+    ui->edtPassivePerception->setValidator(new QIntValidator(0,100,this));
+    ui->edtStr->setValidator(new QIntValidator(0,100,this));
+    ui->edtDex->setValidator(new QIntValidator(0,100,this));
+    ui->edtCon->setValidator(new QIntValidator(0,100,this));
+    ui->edtInt->setValidator(new QIntValidator(0,100,this));
+    ui->edtWis->setValidator(new QIntValidator(0,100,this));
+    ui->edtCha->setValidator(new QIntValidator(0,100,this));
+    ui->edtExperience->setValidator(new QIntValidator(0,1000000,this));
+    ui->edtLevel2->setValidator(new QIntValidator(0,100,this));
+    ui->edtSpeed->setValidator(new QIntValidator(0,1000,this));
+    ui->edtProficiencyBonus->setValidator(new QIntValidator(0,100,this));
+    ui->edtPlatinum->setValidator(new QIntValidator(0,INT_MAX,this));
+    ui->edtGold->setValidator(new QIntValidator(0,INT_MAX,this));
+    ui->edtSilver->setValidator(new QIntValidator(0,INT_MAX,this));
+    ui->edtCopper->setValidator(new QIntValidator(0,INT_MAX,this));
+
+    connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+    connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+    connect(ui->edtCon,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+    connect(ui->edtInt,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+    connect(ui->edtWis,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+    connect(ui->edtCha,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+    connect(ui->chkStrSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkAthletics,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkDexSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkStealth,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkAcrobatics,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkSleightOfHand,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkConSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkIntSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkInvestigation,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkArcana,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkNature,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkHistory,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkReligion,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkWisSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkMedicine,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkAnimalHandling,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkPerception,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkInsight,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkSurvival,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkChaSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkPerformance,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(calculateMods()));
+
+    connect(ui->edtName,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtPlayer,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtRace,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtExperience,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtLevel,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtClass2,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtLevel2,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtHitPoints,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtArmorClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtInitiative,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtAge,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtHeight,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtWeight,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtSex,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtEyes,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtHair,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtSpeed,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtAlignment,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtBackground,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtPassivePerception,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtStr,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtDex,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtCon,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtInt,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtWis,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtCha,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtProficiencyBonus,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->chkStrSave,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkAthletics,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkDexSave,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkStealth,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkAcrobatics,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkSleightOfHand,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkConSave,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkIntSave,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkInvestigation,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkArcana,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkNature,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkHistory,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkReligion,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkWisSave,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkMedicine,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkAnimalHandling,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkPerception,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkInsight,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkSurvival,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkChaSave,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkPerformance,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->edtPlatinum,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtGold,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtSilver,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtCopper,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtEquipment,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+    connect(ui->edtProficiencies,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+    connect(ui->edtSpells,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+    connect(ui->edtNotes,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+}
+
+CharacterFrame::~CharacterFrame()
+{
+    delete ui;
+}
+
+void CharacterFrame::setCharacter(Character* character)
+{
+    if(character)
+    {
+        _character = character;
+        readCharacterData();
+    }
+}
+
+void CharacterFrame::calculateMods()
+{
+    if(!_character)
+        return;
+
+    ui->lblStrMod->setText(Character::getAbilityModStr(ui->edtStr->text().toInt()));
+    ui->lblDexMod->setText(Character::getAbilityModStr(ui->edtDex->text().toInt()));
+    ui->lblConMod->setText(Character::getAbilityModStr(ui->edtCon->text().toInt()));
+    ui->lblIntMod->setText(Character::getAbilityModStr(ui->edtInt->text().toInt()));
+    ui->lblWisMod->setText(Character::getAbilityModStr(ui->edtWis->text().toInt()));
+    ui->lblChaMod->setText(Character::getAbilityModStr(ui->edtCha->text().toInt()));
+
+    int proficiencyBonus = ui->edtProficiencyBonus->text().toInt();
+
+    ui->edtPassivePerception->setText(QString::number(_character->getPassivePerception()));
+
+    updateCheckboxName(ui->chkStrSave, Character::getAbilityMod(ui->edtStr->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkAthletics, Character::getAbilityMod(ui->edtStr->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkDexSave, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkStealth, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkAcrobatics, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkSleightOfHand, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkConSave, Character::getAbilityMod(ui->edtCon->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkIntSave, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkInvestigation, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkArcana, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkNature, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkHistory, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkReligion, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkWisSave, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkMedicine, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkAnimalHandling, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkPerception, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkInsight, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkSurvival, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkChaSave, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkPerformance, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkDeception, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkPersuasion, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus);
+    updateCheckboxName(ui->chkIntimidation, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus);
+}
+
+void CharacterFrame::clear()
+{
+    _character = 0;
+
+    QSignalBlocker blocker(this);
+
+    ui->lblIcon->setPixmap(ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Showcase));
+
+    ui->edtName->setText(QString(""));
+    ui->edtPlayer->setText(QString(""));
+    ui->edtRace->setText(QString(""));
+    ui->edtExperience->setText(QString(""));
+    ui->edtClass->setText(QString(""));
+    ui->edtLevel->setText(QString(""));
+    ui->edtClass2->setText(QString(""));
+    ui->edtLevel2->setText(QString(""));
+    ui->edtHitPoints->setText(QString(""));
+    ui->edtArmorClass->setText(QString(""));
+    ui->edtInitiative->setText(QString(""));
+    ui->edtAge->setText(QString(""));
+    ui->edtHeight->setText(QString(""));
+    ui->edtWeight->setText(QString(""));
+    ui->edtSex->setText(QString(""));
+    ui->edtEyes->setText(QString(""));
+    ui->edtHair->setText(QString(""));
+    ui->edtSpeed->setText(QString(""));
+    ui->edtAlignment->setText(QString(""));
+    ui->edtBackground->setText(QString(""));
+    ui->edtNextLevel->setText(QString(""));
+
+    ui->edtStr->setText(QString(""));
+    ui->edtDex->setText(QString(""));
+    ui->edtCon->setText(QString(""));
+    ui->edtInt->setText(QString(""));
+    ui->edtWis->setText(QString(""));
+    ui->edtCha->setText(QString(""));
+
+    ui->edtProficiencyBonus->setText(QString(""));
+    ui->chkStrSave->setChecked(false);
+    ui->chkAthletics->setChecked(false);
+    ui->chkDexSave->setChecked(false);
+    ui->chkStealth->setChecked(false);
+    ui->chkAcrobatics->setChecked(false);
+    ui->chkSleightOfHand->setChecked(false);
+    ui->chkConSave->setChecked(false);
+    ui->chkIntSave->setChecked(false);
+    ui->chkInvestigation->setChecked(false);
+    ui->chkArcana->setChecked(false);
+    ui->chkNature->setChecked(false);
+    ui->chkHistory->setChecked(false);
+    ui->chkReligion->setChecked(false);
+    ui->chkWisSave->setChecked(false);
+    ui->chkMedicine->setChecked(false);
+    ui->chkAnimalHandling->setChecked(false);
+    ui->chkPerception->setChecked(false);
+    ui->chkInsight->setChecked(false);
+    ui->chkSurvival->setChecked(false);
+    ui->chkChaSave->setChecked(false);
+    ui->chkPerformance->setChecked(false);
+    ui->chkDeception->setChecked(false);
+    ui->chkPersuasion->setChecked(false);
+    ui->chkIntimidation->setChecked(false);
+
+    ui->edtPlatinum->setText(QString(""));
+    ui->edtGold->setText(QString(""));
+    ui->edtSilver->setText(QString(""));
+    ui->edtCopper->setText(QString(""));
+    ui->edtEquipment->setText(QString(""));
+    ui->edtProficiencies->setText(QString(""));
+    ui->edtSpells->setText(QString(""));
+    ui->edtNotes->setText(QString(""));
+
+    ui->lblStrMod->setText(QString(""));
+    ui->lblDexMod->setText(QString(""));
+    ui->lblConMod->setText(QString(""));
+    ui->lblIntMod->setText(QString(""));
+    ui->lblWisMod->setText(QString(""));
+    ui->lblChaMod->setText(QString(""));
+
+    ui->edtPassivePerception->setText(QString(""));
+
+    updateCheckboxName(ui->chkStrSave, 0, 0);
+    updateCheckboxName(ui->chkAthletics, 0, 0);
+    updateCheckboxName(ui->chkDexSave, 0, 0);
+    updateCheckboxName(ui->chkStealth, 0, 0);
+    updateCheckboxName(ui->chkAcrobatics, 0, 0);
+    updateCheckboxName(ui->chkSleightOfHand, 0, 0);
+    updateCheckboxName(ui->chkConSave, 0, 0);
+    updateCheckboxName(ui->chkIntSave, 0, 0);
+    updateCheckboxName(ui->chkInvestigation, 0, 0);
+    updateCheckboxName(ui->chkArcana, 0, 0);
+    updateCheckboxName(ui->chkNature, 0, 0);
+    updateCheckboxName(ui->chkHistory, 0, 0);
+    updateCheckboxName(ui->chkReligion, 0, 0);
+    updateCheckboxName(ui->chkWisSave, 0, 0);
+    updateCheckboxName(ui->chkMedicine, 0, 0);
+    updateCheckboxName(ui->chkAnimalHandling, 0, 0);
+    updateCheckboxName(ui->chkPerception, 0, 0);
+    updateCheckboxName(ui->chkInsight, 0, 0);
+    updateCheckboxName(ui->chkSurvival, 0, 0);
+    updateCheckboxName(ui->chkChaSave, 0, 0);
+    updateCheckboxName(ui->chkPerformance, 0, 0);
+    updateCheckboxName(ui->chkDeception, 0, 0);
+    updateCheckboxName(ui->chkPersuasion, 0, 0);
+    updateCheckboxName(ui->chkIntimidation, 0, 0);
+}
+
+void CharacterFrame::mousePressEvent(QMouseEvent * event)
+{
+    Q_UNUSED(event);
+    ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    _mouseDown = true;
+}
+
+void CharacterFrame::mouseReleaseEvent(QMouseEvent * event)
+{
+    if(_mouseDown)
+    {
+        ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
+        _mouseDown = false;
+        if(ui->lblIcon->frameGeometry().contains(event->pos()))
+        {
+            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+            if(!filename.isEmpty())
+            {
+                _character->setIcon(filename);
+                loadCharacterImage();
+            }
+        }
+    }
+}
+
+void CharacterFrame::readCharacterData()
+{
+    if(!_character)
+        return;
+
+    loadCharacterImage();
+
+    ui->edtName->setText(_character->getName());
+    ui->edtPlayer->setText(_character->getStringValue(Character::StringValue_player));
+    ui->edtRace->setText(_character->getStringValue(Character::StringValue_race));
+    ui->edtExperience->setText(QString::number(_character->getIntValue(Character::IntValue_experience)));
+    ui->edtClass->setText(_character->getStringValue(Character::StringValue_class));
+    ui->edtLevel->setText(QString::number(_character->getIntValue(Character::IntValue_level)));
+    ui->edtClass2->setText(_character->getStringValue(Character::StringValue_class2));
+    ui->edtLevel2->setText(QString::number(_character->getIntValue(Character::IntValue_level2)));
+    ui->edtHitPoints->setText(QString::number(_character->getHitPoints()));
+    ui->edtArmorClass->setText(QString::number(_character->getArmorClass()));
+    ui->edtInitiative->setText(QString::number(_character->getInitiative()));
+    ui->edtAge->setText(_character->getStringValue(Character::StringValue_age));
+    ui->edtHeight->setText(_character->getStringValue(Character::StringValue_height));
+    ui->edtWeight->setText(_character->getStringValue(Character::StringValue_weight));
+    ui->edtSex->setText(_character->getStringValue(Character::StringValue_sex));
+    ui->edtEyes->setText(_character->getStringValue(Character::StringValue_eyes));
+    ui->edtHair->setText(_character->getStringValue(Character::StringValue_hair));
+    ui->edtSpeed->setText(QString::number(_character->getIntValue(Character::IntValue_speed)));
+    ui->edtAlignment->setText(_character->getStringValue(Character::StringValue_alignment));
+    ui->edtBackground->setText(_character->getStringValue(Character::StringValue_background));
+
+    ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
+
+    ui->edtStr->setText(QString::number(_character->getIntValue(Character::IntValue_strength)));
+    ui->edtDex->setText(QString::number(_character->getIntValue(Character::IntValue_dexterity)));
+    ui->edtCon->setText(QString::number(_character->getIntValue(Character::IntValue_constitution)));
+    ui->edtInt->setText(QString::number(_character->getIntValue(Character::IntValue_intelligence)));
+    ui->edtWis->setText(QString::number(_character->getIntValue(Character::IntValue_wisdom)));
+    ui->edtCha->setText(QString::number(_character->getIntValue(Character::IntValue_charisma)));
+
+    ui->edtProficiencyBonus->setText(QString::number(_character->getProficiencyBonus()));
+    ui->chkStrSave->setChecked(_character->getSkillValue(Combatant::Skills_strengthSave));
+    ui->chkAthletics->setChecked(_character->getSkillValue(Combatant::Skills_athletics));
+    ui->chkDexSave->setChecked(_character->getSkillValue(Combatant::Skills_dexteritySave));
+    ui->chkStealth->setChecked(_character->getSkillValue(Combatant::Skills_stealth));
+    ui->chkAcrobatics->setChecked(_character->getSkillValue(Combatant::Skills_acrobatics));
+    ui->chkSleightOfHand->setChecked(_character->getSkillValue(Combatant::Skills_sleightOfHand));
+    ui->chkConSave->setChecked(_character->getSkillValue(Combatant::Skills_constitutionSave));
+    ui->chkIntSave->setChecked(_character->getSkillValue(Combatant::Skills_intelligenceSave));
+    ui->chkInvestigation->setChecked(_character->getSkillValue(Combatant::Skills_investigation));
+    ui->chkArcana->setChecked(_character->getSkillValue(Combatant::Skills_arcana));
+    ui->chkNature->setChecked(_character->getSkillValue(Combatant::Skills_nature));
+    ui->chkHistory->setChecked(_character->getSkillValue(Combatant::Skills_history));
+    ui->chkReligion->setChecked(_character->getSkillValue(Combatant::Skills_religion));
+    ui->chkWisSave->setChecked(_character->getSkillValue(Combatant::Skills_wisdomSave));
+    ui->chkMedicine->setChecked(_character->getSkillValue(Combatant::Skills_medicine));
+    ui->chkAnimalHandling->setChecked(_character->getSkillValue(Combatant::Skills_animalHandling));
+    ui->chkPerception->setChecked(_character->getSkillValue(Combatant::Skills_perception));
+    ui->chkInsight->setChecked(_character->getSkillValue(Combatant::Skills_insight));
+    ui->chkSurvival->setChecked(_character->getSkillValue(Combatant::Skills_survival));
+    ui->chkChaSave->setChecked(_character->getSkillValue(Combatant::Skills_charismaSave));
+    ui->chkPerformance->setChecked(_character->getSkillValue(Combatant::Skills_performance));
+    ui->chkDeception->setChecked(_character->getSkillValue(Combatant::Skills_deception));
+    ui->chkPersuasion->setChecked(_character->getSkillValue(Combatant::Skills_persuasion));
+    ui->chkIntimidation->setChecked(_character->getSkillValue(Combatant::Skills_intimidation));
+
+    ui->edtPlatinum->setText(QString::number(_character->getIntValue(Character::IntValue_platinum)));
+    ui->edtGold->setText(QString::number(_character->getIntValue(Character::IntValue_gold)));
+    ui->edtSilver->setText(QString::number(_character->getIntValue(Character::IntValue_silver)));
+    ui->edtCopper->setText(QString::number(_character->getIntValue(Character::IntValue_copper)));
+    ui->edtEquipment->setText(_character->getStringValue(Character::StringValue_equipment));
+    ui->edtProficiencies->setText(_character->getStringValue(Character::StringValue_proficiencies));
+    ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
+    ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
+
+    calculateMods();
+}
+
+void CharacterFrame::writeCharacterData()
+{
+    if(_character)
+    {
+        _character->beginBatchChanges();
+
+        _character->setName(ui->edtName->text());
+        _character->setStringValue(Character::StringValue_player, ui->edtPlayer->text());
+        _character->setStringValue(Character::StringValue_race, ui->edtRace->text());
+        _character->setIntValue(Character::IntValue_experience, ui->edtExperience->text().toInt());
+        _character->setStringValue(Character::StringValue_class, ui->edtClass->text());
+        _character->setIntValue(Character::IntValue_level, ui->edtLevel->text().toInt());
+        _character->setStringValue(Character::StringValue_class2, ui->edtClass2->text());
+        _character->setIntValue(Character::IntValue_level2, ui->edtLevel2->text().toInt());
+        _character->setHitPoints(ui->edtHitPoints->text().toInt());
+        _character->setArmorClass(ui->edtArmorClass->text().toInt());
+        _character->setInitiative(ui->edtInitiative->text().toInt());
+        _character->setStringValue(Character::StringValue_age, ui->edtAge->text());
+        _character->setStringValue(Character::StringValue_height, ui->edtHeight->text());
+        _character->setStringValue(Character::StringValue_weight, ui->edtWeight->text());
+        _character->setStringValue(Character::StringValue_sex, ui->edtSex->text());
+        _character->setStringValue(Character::StringValue_eyes, ui->edtEyes->text());
+        _character->setStringValue(Character::StringValue_hair, ui->edtHair->text());
+        _character->setIntValue(Character::IntValue_speed, ui->edtSpeed->text().toInt());
+        _character->setStringValue(Character::StringValue_alignment, ui->edtAlignment->text());
+        _character->setStringValue(Character::StringValue_background, ui->edtBackground->text());
+
+        _character->setIntValue(Character::IntValue_strength, ui->edtStr->text().toInt());
+        _character->setIntValue(Character::IntValue_dexterity, ui->edtDex->text().toInt());
+        _character->setIntValue(Character::IntValue_constitution, ui->edtCon->text().toInt());
+        _character->setIntValue(Character::IntValue_intelligence, ui->edtInt->text().toInt());
+        _character->setIntValue(Character::IntValue_wisdom, ui->edtWis->text().toInt());
+        _character->setIntValue(Character::IntValue_charisma, ui->edtCha->text().toInt());
+
+        _character->setSkillValue(Combatant::Skills_athletics, ui->chkAthletics->isChecked());
+        _character->setSkillValue(Combatant::Skills_strengthSave, ui->chkStrSave->isChecked());
+        _character->setSkillValue(Combatant::Skills_dexteritySave, ui->chkDexSave->isChecked());
+        _character->setSkillValue(Combatant::Skills_stealth, ui->chkStealth->isChecked());
+        _character->setSkillValue(Combatant::Skills_acrobatics, ui->chkAcrobatics->isChecked());
+        _character->setSkillValue(Combatant::Skills_sleightOfHand, ui->chkSleightOfHand->isChecked());
+        _character->setSkillValue(Combatant::Skills_constitutionSave, ui->chkConSave->isChecked());
+        _character->setSkillValue(Combatant::Skills_intelligenceSave, ui->chkIntSave->isChecked());
+        _character->setSkillValue(Combatant::Skills_investigation, ui->chkInvestigation->isChecked());
+        _character->setSkillValue(Combatant::Skills_arcana, ui->chkArcana->isChecked());
+        _character->setSkillValue(Combatant::Skills_nature, ui->chkNature->isChecked());
+        _character->setSkillValue(Combatant::Skills_history, ui->chkHistory->isChecked());
+        _character->setSkillValue(Combatant::Skills_religion, ui->chkReligion->isChecked());
+        _character->setSkillValue(Combatant::Skills_wisdomSave, ui->chkWisSave->isChecked());
+        _character->setSkillValue(Combatant::Skills_medicine, ui->chkMedicine->isChecked());
+        _character->setSkillValue(Combatant::Skills_animalHandling, ui->chkAnimalHandling->isChecked());
+        _character->setSkillValue(Combatant::Skills_perception, ui->chkPerception->isChecked());
+        _character->setSkillValue(Combatant::Skills_insight, ui->chkInsight->isChecked());
+        _character->setSkillValue(Combatant::Skills_survival, ui->chkSurvival->isChecked());
+        _character->setSkillValue(Combatant::Skills_charismaSave, ui->chkChaSave->isChecked());
+        _character->setSkillValue(Combatant::Skills_performance, ui->chkPerformance->isChecked());
+        _character->setSkillValue(Combatant::Skills_deception, ui->chkDeception->isChecked());
+        _character->setSkillValue(Combatant::Skills_persuasion, ui->chkPersuasion->isChecked());
+        _character->setSkillValue(Combatant::Skills_intimidation, ui->chkIntimidation->isChecked());
+
+        _character->setIntValue(Character::IntValue_platinum, ui->edtPlatinum->text().toInt());
+        _character->setIntValue(Character::IntValue_gold, ui->edtGold->text().toInt());
+        _character->setIntValue(Character::IntValue_silver, ui->edtSilver->text().toInt());
+        _character->setIntValue(Character::IntValue_copper, ui->edtCopper->text().toInt());
+        _character->setStringValue(Character::StringValue_equipment, ui->edtEquipment->toPlainText());
+        _character->setStringValue(Character::StringValue_proficiencies, ui->edtProficiencies->toPlainText());
+        _character->setStringValue(Character::StringValue_spells, ui->edtSpells->toPlainText());
+        _character->setStringValue(Character::StringValue_notes, ui->edtNotes->toPlainText());
+
+        _character->endBatchChanges();
+
+        calculateMods();
+    }
+}
+
+void CharacterFrame::handlePublishClicked()
+{
+    if(!_character)
+        return;
+
+    QImage iconImg;
+    QString iconFile = _character->getIcon();
+    //QString iconPath = Bestiary::Instance()->getDirectory().filePath(iconFile);
+    if(iconImg.load(iconFile) == true)
+    {
+        emit publishCharacterImage(iconImg);
+    }
+}
+
+void CharacterFrame::loadCharacterImage()
+{
+    ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
+}
+
+void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus)
+{
+    QString chkName = chk->text();
+    chkName.truncate(chkName.indexOf(":") + 1);
+    int skillBonus = abilityMod + (chk->isChecked() ? proficiencyBonus : 0);
+    if(skillBonus >= 0)
+        chkName.append("+");
+    chkName.append(QString::number(skillBonus));
+    chk->setText(chkName);
+}

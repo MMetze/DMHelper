@@ -1,0 +1,101 @@
+TODOs
+
+Colored (Effect) Markers on individual combatants to indicate states
+
+
+
+Enhance monster reading to store skill scores
+Add WidgetCharacter to the list
+Clean up mouse handling in CombatantWidget vs WidgetCombatantBase
+Remove encounter does not deactivate the widget
+Add Legendary support
+Improve bestiary saving/loading
+Add NPCs
+make the frame and countdown timer look better
+Initial status (Known/visible) for monsters
+Make the select highlight circular
+Improve individual combatant hiding, include options when adding a new monster or wave
+Fix flashing background for small publish window sizes
+Snap to grid
+High-res publish but not necessarily in battle dlg itself
+Outsource more of the scene contents to the scene itself
+Check updates of character and monster contents (AC, Image, etc) when changes separately
+Make remove work properly
+Make removal of combatants correct (removing monsters requires delete, characters not! How to handle special monsters/NPCs?)
+    Maybe not necessary because the monsters are given the battle dialog as a parent and should be deleted with delete
+drag and drop to change order
+Better way to switch between description and preview pane without hiding arrow
+Clock should move in both directions
+Publishing battles still too slow - different selection marker?
+pulsing arrow colors?
+Large roll - enemies only? dead enemies out!
+NPCs should be visible/invisible
+effects 5% transparency editable
+chance on deck when they die
+enter while editing HP turns off publish
+Add a round counter, add countdown of effects, add effects to individuals
+
+DONE
+v0.15.0
+CRASH bug fixed in battle
+Distance measurement in battle
+Compass visualization in battle
+Preliminary network client
+
+v0.14.0
+Enhanced combat selection to include image and direct link to bestiary
+Effect dice roll dialog - moved DC and type of check directly in the dialog
+Changing icon in character view is visible immediately
+Fixed battle dialog hide/open
+Publishing of character/NPC images enabled
+Battle Dialog on-deck images show only blank head for invisible, known combatants. Unknown combatants are not shown.
+Battle Dialog on-deck images are centered vertically and horizontally
+Save and load effects with battles
+Dirty flag on campaign when loading/starting/publishing a battle
+Character view tab order fixed
+Edited monster stats are reflected immediately in ability modifiers
+Start/Open/Load Battle buttons on Battle Encounter are only shown when appropriate
+Added preview to battle map selection
+(internal)
+SaveBattle should do something.
+
+
+v0.13.0
+Add line effect (5')
+Center new wave/monster/effects on the position of a right-mouse click or in the middle of the map
+Size of create impacts coverage of AoE items
+Click to unselect
+Improved combatant selection widget
+OE: automatic saving throw calculation for all hit combatants
+dd monster doesn't use name??
+dd monster adds icon even without a map??
+licking advantage/disadvantage should re-roll for that combatant right away
+Hide individual combatants (unknown and invisible)
+Change battle dialog to a window (maximize button available)
+Save battle
+Prepare battle (save per battle?)
+Store grid size & offsets with battle
+Store visible/not visible
+Add countdown timer to the DM's view
+Increase grid size moving creatures will hide them
+Show grid doesn't work after hiding/resizing
+Multiselect and move
+Moving colored combatant out of AOE should remove coloring
+Selecting AOE colors only combatants in that AOE, not others
+Zoom onto part of the battle-field
+
+
+v0.12.0
+Make countdown timer show & duration configurable, make show of at bat/on deck configurable
+AOE: Color configurable
+AOE: impacted combatants automatically highlighted
+Add character
+Change new map to be also able to just re-zoom to keep icon positions
+Show/Publish widget for effects, grid, background, characters
+Option etwas unsichtbar zu machen (Layer)
+Animation performance improvements
+Next player anzeige
+sand-clock time down for turns
+Large/HUGE monsters!
+Add AOEs
+Scaling of map handles position properly

@@ -1,0 +1,20 @@
+Edit cursor in text encounter - default back to IBeam from Link pointyhand...
+Size of map frame is not reset to new map
+Text color in the goods
+Changing monster ability score doesn't update bonus value
+Check copy&paste on monster descriptions
+
+FIXED (clear on hide) Select character, minimize & maximize ==> image is "default".
+
+
+BattleDialog
+Optimize publishing of the battle dialog
+Lock to grid option
+Zoom and scroll (publish only visible) on a battle map
+
+Selection doesn't disappear when dead selected is hidden
+Selection doesn't disappear when nobody selected (deselected)
+Conditions have red text
+Battle dialog as main menu not dialog
+Remove publishing image log with timer activated...
+When publishing in battle dialog, editing HP doesn't work

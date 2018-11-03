@@ -1,0 +1,68 @@
+#include "undomarker.h"
+#include "mapframe.h"
+#include "mapmarkergraphicsitem.h"
+#include "map.h"
+#include "dmconstants.h"
+#include <QDomElement>
+
+UndoMarker::UndoMarker(Map& map, const MapMarker& marker) :
+    UndoBase(map, QString("Set Marker")),
+    _marker(marker),
+    _markerGraphicsItem(0)
+{
+}
+
+UndoMarker::~UndoMarker()
+{
+    delete _markerGraphicsItem;
+}
+
+void UndoMarker::undo()
+{
+    delete _markerGraphicsItem;
+    _markerGraphicsItem = 0;
+}
+
+void UndoMarker::redo()
+{
+    if( _map.getRegisteredWindow() )
+    {
+        delete _markerGraphicsItem;
+        _markerGraphicsItem = _map.getRegisteredWindow()->addMapMarker(_marker);
+    }
+}
+
+void UndoMarker::apply( bool preview, QPaintDevice* target ) const
+{
+    Q_UNUSED(preview);
+    Q_UNUSED(target);
+}
+
+void UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const
+{
+    Q_UNUSED(doc);
+    Q_UNUSED(targetDirectory);
+
+    element.setAttribute( "x", _marker.position().x() );
+    element.setAttribute( "y", _marker.position().y() );
+    element.setAttribute( "title", _marker.title() );
+    element.setAttribute( "description", _marker.description() );
+}
+
+void UndoMarker::inputXML(const QDomElement &element)
+{
+    _marker.setX(element.attribute(QString("x")).toInt());
+    _marker.setY(element.attribute(QString("y")).toInt());
+    _marker.setTitle(element.attribute( QString("title") ));
+    _marker.setDescription(element.attribute( QString("description") ));
+}
+
+int UndoMarker::getType() const
+{
+    return DMHelper::ActionType_SetMarker;
+}
+
+const MapMarker& UndoMarker::marker() const
+{
+    return _marker;
+}

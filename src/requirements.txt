@@ -1,0 +1,73 @@
+DONE: crash, grid ein/aus, animations ein/aus, selected killed leaves selection onm select in list then move without reselect
+
+House rules bucket
+Split Bestiary into Generic Bestiary and Custom Bestiary, merged into a single list
+Text encounters need font and color management
+Markers for maps
+
+NPC/Monster generic additions
+Rapid NPC creation?
+
+Scrolling text (encounter)
+Save battle
+Change map in battle
+    --> change zoom (only show visible, etc)
+Multiselect
+Draw things on battle map
+Correct XP calculations - calculate to reflect multiple monsters
+    Calculate XP
+Export/Import of individual adventures, party, characters, encounters
+Only write the bestiary if something is actually changed, but then push it after changing monster/losing focus
+Auto-load the last campaign, if feasible.
+Battle: Saving throw for all monsters (or draw a radius and then save!!)
+Battle: Add a character
+Battle: Add an NPC
+Item cards like in Critical Role
+
+Tree Types
+* Campaign
+    * General Notes
+    * Party
+        * Characters
+    * Adventures
+        * Encounters
+            * with automated links to everything mentioned elsewhere
+            * explicit link to maps somehow
+    * Enviroment
+        * Settings
+            * Locations
+            * Maps (with and without FOW)
+        * People
+            * NPCs
+
+Be able to reorder adventures
+Be able to reorder party members
+NPCs and Monsters as party members
+
+
+Test:
+1. New Character
+
+Battle Map:
+Select
+w/ names
+scale image down not up
+performance enhancement, only publish on drop
+
+DONE Timeline tracker (start with day and NEXT DAY button, then time of day, then hours)
+Remove items from settings
+Add to settings should select directly
+Add chaser
+Chase visualization disappears
+
+Save battle
+Multiple battles
+
+DONE Zoom not working
+DONE Zoom in DM view of map
+Notes all over?
+Paint Window with joint painting (client server)
+Zoom big battle maps
+DONE remove icons from removed characters or don't show dead creatures
+DONE   ==> leads to crash!!
+Treasure generator --> no opensource tables
