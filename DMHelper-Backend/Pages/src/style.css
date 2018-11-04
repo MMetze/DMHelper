@@ -1,0 +1,294 @@
+/* page layout */
+/*#= id
+.= klassen*/
+#Header{
+        /* border: 1px dashed silver; */
+        border-bottom: 2px solid darkblue;
+        /* overflow: auto; */
+        position: fixed !important;
+        /* position: relative; */
+        width: 100%;
+        height: 100px;
+        left: 136px;
+        z-index: 9999;
+        background: inherit;
+        top: 0px;
+        padding: 0;
+}
+
+#Headsup{
+  position: absolute;
+  width: 300px;
+  height: 80px;
+  top: 10px;
+  left: 415px;
+  display: block;
+  z-index: 15;
+  background-color: #ffff00;
+
+  /*border: 1px solid silver;*/
+  /* overflow: auto; */
+  font-size: 0.85em;
+}
+
+#Navigation{
+        position: fixed !important;
+        z-index: 9999;
+        background: inherit;
+        width: 120px;
+        height: 100%;
+        left: 0px;
+        padding-left: 8px;
+        border-right: 1px solid darkblue;
+        border-top-right-radius: 10px;
+        /*border: 1px solid silver;*/
+        /* overflow: auto; */
+        font-size: 0.85em;
+}
+#Navigation a{
+        font-size: 0.95em;
+        text-decoration: none;
+        padding: 0em;
+}
+
+#Navigation a:link{
+        color: black;
+}
+
+#Navigation a:visited{
+        color: black;
+}
+
+#Navigation a:hover{
+        color: #666;
+        background-color: #eee;
+        text-decoration: underline;
+}
+
+#Navigation a:active{
+        color: white;
+}
+
+#Contentnav{
+        /* overflow: hidden; */
+        position: absolute;
+        width: 100%;
+        top: 110px;
+        left: 136px;
+        /* border: 1px solid blue; */
+        /* border-left: 1px solid darkblue; */
+        padding-left: 15px;
+        height: 25px;
+        z-index: 10;
+        /* background: inherit; */
+}
+
+#Contentnav a{
+        margin-right: 5px;
+}
+
+#Contentwrap{
+        /*overflow: auto;*/
+        /* overflow: auto; */
+        position: absolute;
+        width: 100%;
+        top: 127px;
+        left: 140px;
+        /*bottom: 0;*/
+        /* border: 1px solid red; */
+        /* border-left: 1px solid darkblue; */
+        z-index: 5;
+}
+.anchor {
+  display: block;
+  height: 127px;
+  margin-top: -127px;
+  visibility: hidden;
+}
+
+.Contentsplit{
+        float: left;
+        margin-left: 15px;
+/*      top: 0px;
+        left: 450;
+        position: absolute;
+        margin: 1px solid green; */
+}
+
+/* styles */
+body {
+        color: black;
+        background-color: white;
+        font-size: 100%;
+        font-family: Helvetica,Arial,sans-serif;
+
+        /* addin for fixed header, disable scrollbars */
+        /* overflow: hidden; */
+        width: 100%;
+        height: 100%;
+}
+
+a{
+        text-decoration: none;
+}
+a:link{
+        color: black;
+}
+a:visited{
+        color: black;
+}
+a:hover{
+        color: #666;
+        background-color: #eee;
+        text-decoration: underline;
+}
+a:active{
+        color: white;
+}
+
+h1{
+        font-size: 120%;
+        padding-left: 15px;
+        padding-top: 5px;
+}
+h5{
+        margin-bottom: 3px;
+        margin-top: 10px;
+}
+/* global table definition */
+/* global table style */
+table{
+        border: none;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+        margin-top: 15px;
+        margin-left: 15px;
+        width: 400px;
+        white-space: nowrap;
+}
+
+/* table row style (black borders, alternating background color) */
+table tr{
+        border-bottom: 1px solid silver;
+}
+
+table tr:nth-child(even){
+        background-color: #eee;
+}
+
+/* hover color background */
+table tr:hover{
+        background-color: #add8e6;
+}
+
+/* overwrite hover color for first row with standard background color */
+table tr:first-child{
+        border-bottom: 1px solid black;
+        background-color: white;
+}
+
+table tr:last-child{
+        border-bottom: 1px solid black;
+}
+
+/* table header style */
+table th{
+        height: 120%;
+        border-bottom: 1px solid black;
+        border-left: 1px solid black;
+        vertical-align: top;
+        text-align: left;
+        padding-right: 10px;
+}
+
+table th:last-child{
+        border-right: 1px solid black;
+}
+
+/* table data style */
+table td{
+        vertical-align: top;
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-top: 1px solid black;
+}
+
+table td a, td a:link, td a:visited{
+        text-decoration: none;
+}
+
+#TreeContent td input[type="text"]{
+        width: 100%;
+}
+
+/* TreeView Navigation */
+#TreeNavigation {
+        margin-left: 15px;
+        float: left;
+}
+
+/* TreeView Elements */
+div.TreeElement {
+        padding-left: 5px;
+        border-left: 1px solid darkblue;
+        margin-top: 2px;
+        margin-left: 10px;
+}
+
+/* TreeView Content */
+#TreeContent{
+        margin-left: 15px;
+        float: left;
+}
+
+/* inactive list element */
+div.inactive {
+        color: grey;
+}
+
+/* image with textoverlay */
+.image_overlay {
+        position: relative;
+}
+
+.overlay {
+        position: absolute;
+        top: 40px;
+        left: 53px;
+        font-size: 50%;
+}
+
+/* hidden and visible class for use with JavaScript Function toggle_visibility(ElementID) */
+.hidden{
+        display: none;
+}
+
+.visible{
+        display: inline;
+        visibility: visible;
+}
+
+.collapsed{
+      display: none;
+      visibility: collapse;
+}
+
+.uncollapsed{
+    display: inline;
+    visibility: visible;
+}
+
+.TableColOne{
+    background-color: #82CAFF;
+}
+
+.TableColTwo{
+    background-color: #E799A3;
+}
+
+/* Custom tag, just for developer */
+question{
+  background-color: #add8e6;
+  font-family: courier;
+  font-size: 0.85em;
+}
