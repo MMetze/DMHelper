@@ -1,0 +1,39 @@
+#DMHelper ignores
+DMHelper/bin
+DMHelper/build-debug
+DMHelper/build-release
+DMHelper/rawdata
+DMHelper/release
+DMHelper/src/DMHelper.pro.user*
+DMHelper/working
+DMHelper/DM Helper release.__zip
+DMHelper/DMHelper.log
+DMHelper/src.zip
+
+#DMHelper Shared ignores
+DMHelperShared/bin
+DMHelperShared/build-debug
+DMHelperShared/build-release
+DMHelperShared/release
+DMHelperShared/src/DMHelperShared.pro.user*
+DMHelperShared/DM Helper Shared release.__zip
+DMHelperShared/src.zip
+
+#DMHelper Client ignores
+DMHelperClient/bin
+DMHelperClient/build-debug
+DMHelperClient/build-release
+DMHelperClient/rawdata
+DMHelperClient/release
+DMHelperClient/working
+DMHelperClient/src/DMHelperClient.pro.user*
+DMHelperClient/DM Helper Client release.__zip
+DMHelperClient/DMHelperClient.log
+DMHelperClient/src.zip
+
+#DMHelper Test ignores
+DMHelperTest/bin
+DMHelperTest/build-debug
+DMHelperTest/build-release
+DMHelperTest/working
+DMHelperTest/src/DMHelperTest.pro.user*
