@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>data/dmhelper.png</file>
+        <file>data/parchment.jpg</file>
+    </qresource>
+</RCC>
