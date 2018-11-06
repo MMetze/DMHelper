@@ -65,15 +65,15 @@
 		$_SESSION["logged_in"]= true;
 		if( strtolower( $_SERVER[ 'REQUEST_METHOD' ] ) == 'post' && !empty( $_FILES ) ) {
 
-	#		if( $$_SERVER['DOCUMENT_ROOT']=="c:/xampp/htdocs" ) {
-	#			$uploads_dir= 'C:/xampp/Git/DM-Helper-Backend/Pages/files';
-	$uploads_dir= str_replace( pathinfo(__FILE__, PATHINFO_FILENAME) . ".php", "", __FILE__) . "files/";
-	#		} else {
-	#			$uploads_dir= "/files";
-	#		}
+				#		if( $$_SERVER['DOCUMENT_ROOT']=="c:/xampp/htdocs" ) {
+				#			$uploads_dir= 'C:/xampp/Git/DM-Helper-Backend/Pages/files';
+				$uploads_dir= str_replace( pathinfo(__FILE__, PATHINFO_FILENAME) . ".php", "", __FILE__) . "files/";
+				#		} else {
+				#			$uploads_dir= "/files";
+				#		}
 
 			# check if file is already in DB
-			$dbc->query= "SELECT ID FROM $pf"."file WHERE ID=? AND user=? LIMIT 1;";
+			$dbc->query= "SELECT ID FROM $pf"."file WHERE md5=? AND user=? LIMIT 1;";
 			$dbc->bind= "ss";
 			$dbc->prepare();
 
@@ -85,8 +85,9 @@
 				$dbc->bind();
 				$result= $dbc->execute();
 
-					if( $result->num_rows>0 ) {
-						$msg->data[]= array( "name" => $_FILES["myFile"]["name"][$key], "id" => md5_file( $_FILES["myFile"]["tmp_name"][$key] ) );
+					if( $result->num_rows>0 && isset($result)  ) {
+						$row= $dbc->result->fetch_object();
+						$msg->data[]= array( "name" => $_FILES["myFile"]["name"][$key], "id" => $row->ID, "md5" => md5_file( $_FILES["myFile"]["tmp_name"][$key] ) );
 						unset($_FILES["myFile"]["error"]["$key"]);
 					} else {
 						$_FILES["myFile"]["md5"][$key]= $md5;
@@ -96,32 +97,33 @@
 
 
 			# Store binary data in database
-			$dbc->query= "INSERT INTO $pf"."file ( ID, user, name, time, data ) VALUES ( ?, ?, ?, NOW(), ? );";
+			$dbc->query= "INSERT INTO $pf"."file ( ID, md5, user, name, time, data ) VALUES ( ?, ?, ?, ?, NOW(), ? );";
 			$dbc->bind= "sssb";
 			$dbc->prepare();
 			foreach ($_FILES["myFile"]["error"] as $key => $error) {
 				$null= NULL; # placeholder to bind for binary
 				if ($error == UPLOAD_ERR_OK) {
-				$tmp_name = $_FILES["myFile"]["tmp_name"][$key];
-				$name = basename($_FILES["myFile"]["name"][$key]);
-				$md5= md5_file($tmp_name, TRUE);
-				$md5str= md5_file($tmp_name);
+					$uuid= myUUID::v4();
+					$tmp_name = $_FILES["myFile"]["tmp_name"][$key];
+					$name = basename($_FILES["myFile"]["name"][$key]);
+					$md5= md5_file($tmp_name, TRUE);
+					$md5str= md5_file($tmp_name);
 
-				# open and read file
-				$handle= fopen( $tmp_name, "rb" );
-				if( isset($handle) ) {
-					$data= fread($handle, filesize($tmp_name));
-				}
+					# open and read file
+					$handle= fopen( $tmp_name, "rb" );
+					if( isset($handle) ) {
+						$data= fread($handle, filesize($tmp_name));
+					}
 
-				if( !is_null($data) ) {
-					$dbc->values= array( $md5, $_SESSION["user"]->ID, $name, $null );
-					$dbc->bind();
-					# send $data to placeholder
-					$dbc->send_long_data(3, $data );
-					$dbc->execute();
-				}
-				$msg->data[]= array( "name" => $name, "id" => $md5str );
-				#move_uploaded_file($tmp_name, $uploads_dir. $_SESSION["user"]->ID ."-".$name );
+					if( !is_null($data) ) {
+						$dbc->values= array( $uuid, $md5, $_SESSION["user"]->ID, $name, $null );
+						$dbc->bind();
+						# send $data to placeholder
+						$dbc->send_long_data(3, $data );
+						$dbc->execute();
+					}
+					$msg->data[]= array( "name" => $name, "id" => $uuid, "md5" => $md5str );
+					#move_uploaded_file($tmp_name, $uploads_dir. $_SESSION["user"]->ID ."-".$name );
 
 				}
 			}
