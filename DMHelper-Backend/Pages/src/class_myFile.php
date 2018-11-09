@@ -5,6 +5,7 @@ include_once "xt_UUID.php";
 class myFile {
   private
     $ID,
+    $md5,
     $name,
     $user,
     $data,
@@ -73,7 +74,7 @@ class myFile {
   }
 
   public function fileList($user=NULL) {
-    $this->dbc->query= "SELECT files.ID AS ID, files.name AS name,";
+    $this->dbc->query= "SELECT files.IDh AS ID, files.md5 AS md5, files.name AS name,";
     if( !isset($user) ){
       $this->dbc->query.= " users.username AS user,";
     }
@@ -86,9 +87,9 @@ class myFile {
 
     while( $row= $result->fetch_assoc() ) {
       if( !isset($user) ) {
-        $retval[]= array( 'md5' => (bin2hex($row["ID"])), 'name' => $row["name"], 'user' => $row["user"], 'size' => $row["size"] );
+        $retval[]= array( 'ID' => ($row["ID"]), 'md5' => (bin2hex($row["md5"])), 'name' => $row["name"], 'user' => $row["user"], 'size' => $row["size"] );
       } else {
-        $retval[]= array( 'md5' => (bin2hex($row["ID"])), 'name' => $row["name"], 'size' => $row["size"] );
+        $retval[]= array( 'ID' => ($row["ID"]), 'md5' => (bin2hex($row["md5"])), 'name' => $row["name"], 'size' => $row["size"] );
       }
     }
     return isset($retval)?$retval:NULL;
@@ -96,7 +97,7 @@ class myFile {
 
   public function exists( $files, $user ) {
     $this->dbc->bind= "";
-    $this->dbc->query= "SELECT ID, name FROM $this->pf"."file WHERE ID IN (";
+    $this->dbc->query= "SELECT ID, md5, name FROM $this->pf"."file WHERE ID IN (";
     foreach( $files as $file => $key ) {
       $this->dbc->query.= "?, ";
       $this->dbc->bind.= "s";
@@ -119,7 +120,7 @@ class myFile {
   }
 
   private function getFile( $ID ) {
-    $this->dbc->query= "SELECT ID, name, data FROM $this->pf"."file WHERE ID=? AND user=? ORDER BY name LIMIT 1;";
+    $this->dbc->query= "SELECT ID, md5, name, data FROM $this->pf"."file WHERE ID=? AND user=? ORDER BY name LIMIT 1;";
     $this->dbc->bind= "ss";
     $this->dbc->prepare();
     $this->dbc->values= array( hex2bin($ID), $this->user);
@@ -132,6 +133,7 @@ class myFile {
       $row= $this->dbc->result->fetch_object();
       $this->name= $row->name;
       $this->data= $row->data;
+      $this->md5= $row->md5;
       $this->ID= $ID;
     }
   }

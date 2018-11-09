@@ -98,7 +98,7 @@
 
 			# Store binary data in database
 			$dbc->query= "INSERT INTO $pf"."file ( ID, md5, user, name, time, data ) VALUES ( ?, ?, ?, ?, NOW(), ? );";
-			$dbc->bind= "sssb";
+			$dbc->bind= "ssssb";
 			$dbc->prepare();
 			foreach ($_FILES["myFile"]["error"] as $key => $error) {
 				$null= NULL; # placeholder to bind for binary
@@ -119,7 +119,7 @@
 						$dbc->values= array( $uuid, $md5, $_SESSION["user"]->ID, $name, $null );
 						$dbc->bind();
 						# send $data to placeholder
-						$dbc->send_long_data(3, $data );
+						$dbc->send_long_data(4, $data );
 						$dbc->execute();
 					}
 					$msg->data[]= array( "name" => $name, "id" => $uuid, "md5" => $md5str );
