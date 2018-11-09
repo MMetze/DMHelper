@@ -3,4 +3,4 @@ CREATE TABLE `dmh_varearights` (
   `aID` int(10) unsigned NOT NULL,
   KEY `userID` (`uID`),
   KEY `AreaID` (`aID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=latin1
