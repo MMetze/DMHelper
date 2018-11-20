@@ -67,9 +67,16 @@
           $msg->mode= "file_pull";
           if( strtolower( $_SERVER[ 'REQUEST_METHOD' ] ) == 'post' && !empty( $files ) ) {
             foreach( $files AS $pfile => $key ) {
-              $file->ID= $key["md5"];
+              $file->ID= $key["ID"];
               $msg->data[]= $file();
             }
+          }
+          break;
+
+          case "update":
+          $msg->mode= "file_update";
+          if( !empty( $files ) ){
+            $file->update("0336461393038346265343166346133613f373f33553f163f7c04413f3f533f3f");
           }
           break;
       }
