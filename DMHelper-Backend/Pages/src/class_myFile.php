@@ -35,7 +35,7 @@ class myFile {
       switch( $name ) {
         case "ID":
           $this->getFile( $value );
-          break;
+        break;
 
         case "user":
           $tmp= myUUID::hex2uuid(bin2hex($value));
@@ -74,7 +74,7 @@ class myFile {
   }
 
   public function fileList($user=NULL) {
-    $this->dbc->query= "SELECT files.IDh AS ID, files.md5 AS md5, files.name AS name,";
+    $this->dbc->query= "SELECT files.ID AS ID, files.md5 AS md5, files.name AS name,";
     if( !isset($user) ){
       $this->dbc->query.= " users.username AS user,";
     }
@@ -87,9 +87,9 @@ class myFile {
 
     while( $row= $result->fetch_assoc() ) {
       if( !isset($user) ) {
-        $retval[]= array( 'ID' => ($row["ID"]), 'md5' => (bin2hex($row["md5"])), 'name' => $row["name"], 'user' => $row["user"], 'size' => $row["size"] );
+        $retval[]= array( 'ID' => (bin2hex($row["ID"])), 'md5' => (bin2hex($row["md5"])), 'name' => $row["name"], 'user' => $row["user"], 'size' => $row["size"] );
       } else {
-        $retval[]= array( 'ID' => ($row["ID"]), 'md5' => (bin2hex($row["md5"])), 'name' => $row["name"], 'size' => $row["size"] );
+        $retval[]= array( 'ID' => (bin2hex($row["ID"])), 'md5' => (bin2hex($row["md5"])), 'name' => $row["name"], 'size' => $row["size"] );
       }
     }
     return isset($retval)?$retval:NULL;
@@ -99,10 +99,13 @@ class myFile {
     $this->dbc->bind= "";
     $this->dbc->query= "SELECT ID, md5, name FROM $this->pf"."file WHERE ID IN (";
     foreach( $files as $file => $key ) {
-      $this->dbc->query.= "?, ";
-      $this->dbc->bind.= "s";
+      if( !is_null($key) ) {
+        $this->dbc->query.= "?, ";
+        $this->dbc->bind.= "s";
 
-      $files[$file]= str_replace( "-", "", hex2bin($key) );
+        $files[$file]= str_replace( "-", "", $key );
+        $files[$file]= hex2bin($files[$file]);
+      }
     }
     $this->dbc->query= rtrim($this->dbc->query, ", ") . ") AND user=?;";
     $this->dbc->bind.= "s";
@@ -114,9 +117,19 @@ class myFile {
 
     while( $row= $return->fetch_assoc() ) {
       $row["ID"]= bin2hex($row["ID"]);
+      $row["md5"]= bin2hex($row["md5"]);
       $retval[]= $row;
     }
     return $retval;
+  }
+
+  public function update( $ID, $data ) {
+    $this->dbc->query= "SELECT $md5 FROM $pf"."file WHERE ID=? LIMIT 1;";
+    $this->dbc->bind= "s";
+    $this->dbc->prepare();
+    $this->dbc->values= array( $ID );
+    $this->dbc->bind();
+    $this->dbc->execute();
   }
 
   private function getFile( $ID ) {

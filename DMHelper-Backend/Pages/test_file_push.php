@@ -16,6 +16,16 @@
 
     <input name="ok" type="submit" value="debug" />
   </form>
+  <form name="test" action="file.php?debug=1" method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="update" />
+    <input name="user" type="text" value="c.turner" /><br />
+    <input name="password" type="password" value="" /><br />
+    <input name="fileids" type="text" value="3da9084be41f4a3a" /><br />
+
+    <input type="file" name="myFile[]" multiple />
+
+    <input name="ok" type="submit" value="debug" />
+  </form>
 
 </body>
 </html>

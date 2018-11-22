@@ -16,6 +16,7 @@
     $_SESSION["user"]= $_SESSION["user"]??NULL;
     $files= $_POST["fileids"]??NULL;
     $action= $_POST["action"]??NULL;
+    $id= $_POST["ID"]??NULL;
 
     # check for active session
     if( !isset($_SESSION["logged_in"]) || $_SESSION["user"]->ID != $user ) {
@@ -76,7 +77,7 @@
           case "update":
           $msg->mode= "file_update";
           if( !empty( $files ) ){
-            $file->update("0336461393038346265343166346133613f373f33553f163f7c04413f3f533f3f");
+            $tmpFile= $file->exists( $id, $user );
           }
           break;
       }
