@@ -37,3 +37,7 @@ DMHelperTest/build-debug
 DMHelperTest/build-release
 DMHelperTest/working
 DMHelperTest/src/DMHelperTest.pro.user*
+
+#DMHelper Backend ignores
+DMHelper-Backend/Pages/config.inc.php
+DMHelper-Backend/Pages/dbv/data/meta/revision

@@ -1,0 +1,9 @@
+<?php		
+	$config= array (
+		"db_host" => "%SQLSERVER",
+		"db_user" => "%USER",
+		"db_pass" => "%PASSWORD",
+		"db_name" => "%DATABASE",
+		"db_prefix" => "%TABLEPREFIX"
+	);
+?>
