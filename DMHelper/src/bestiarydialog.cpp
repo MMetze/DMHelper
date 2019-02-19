@@ -3,6 +3,9 @@
 #include "monsterclass.h"
 #include "combatant.h"
 #include "dmconstants.h"
+#include "monsteraction.h"
+#include "monsteractionframe.h"
+#include "monsteractioneditdialog.h"
 #include <QIntValidator>
 #include <QDoubleValidator>
 #include <QInputDialog>
@@ -11,9 +14,15 @@
 #include <QDebug>
 #include "ui_bestiarydialog.h"
 
+//TODO: fix the dialog to match the contents
+
 BestiaryDialog::BestiaryDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BestiaryDialog),
+    _actionsWidget(nullptr),
+    _legendaryActionsWidget(nullptr),
+    _specialAbilitiesWidget(nullptr),
+    _reactionsWidget(nullptr),
     _monster(nullptr),
     _edit(false),
     _mouseDown(false)
@@ -36,6 +45,11 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
     connect(ui->edtName,SIGNAL(editingFinished()),this,SLOT(monsterRenamed()));
 
+    connect(ui->btnAddAction, SIGNAL(clicked()), this, SLOT(addAction()));
+    connect(ui->btnAddLegendaryAction, SIGNAL(clicked()), this, SLOT(addLegendaryAction()));
+    connect(ui->btnAddSpecialAbility, SIGNAL(clicked()), this, SLOT(addSpecialAbility()));
+    connect(ui->btnAddReaction, SIGNAL(clicked()), this, SLOT(addAddReaction()));
+
     ui->edtArmorClass->setValidator(new QIntValidator(0,100));
     ui->edtAverageHitPoints->setValidator(new QIntValidator(0,10000));
     ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
@@ -44,6 +58,8 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
 BestiaryDialog::~BestiaryDialog()
 {
+    clearActionWidgets();
+
     delete ui;
 }
 
@@ -76,7 +92,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtMonsterType->setText(_monster->getMonsterType());
     ui->edtAlignment->setText(_monster->getAlignment());
     ui->edtArmorClass->setText(QString::number(_monster->getArmorClass()));
-    ui->edtArmorClassDescription->setText(_monster->getArmorClassDescription());
     ui->edtHitDice->setText(_monster->getHitDice().toString());
     ui->edtAverageHitPoints->setText(QString::number(_monster->getAverageHitPoints()));
     ui->edtSpeed->setText(_monster->getSpeed());
@@ -86,18 +101,88 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtIntelligence->setText(QString::number(_monster->getIntelligence()));
     ui->edtWisdom->setText(QString::number(_monster->getWisdom()));
     ui->edtCharisma->setText(QString::number(_monster->getCharisma()));
-    ui->edtSkills->setText(_monster->getSkills());
-    ui->edtResistances->setText(_monster->getResistances());
     ui->edtSenses->setText(_monster->getSenses());
     ui->edtLanguages->setText(_monster->getLanguages());
     if(_monster->getLanguages().isEmpty())
     {
         ui->edtLanguages->setText("---");
     }
-    ui->edtChallenge->setText(QString::number(_monster->getChallenge()));
+    ui->edtChallenge->setText(_monster->getChallenge());
     ui->edtXP->setText(QString::number(_monster->getXP()));
-    ui->edtTraits->setHtml(_monster->getTraits());
-    ui->edtActions->setHtml(_monster->getActions());
+
+    clearActionWidgets();
+
+    QList<MonsterAction> actionList = _monster->getActions();
+    ui->scrollActions->setVisible(actionList.count() > 0);
+    //ui->lblActions->setVisible(actionList.count() > 0);
+    //ui->lineActions->setVisible(actionList.count() > 0);
+//    if(actionList.count() > 0)
+    {
+        _actionsWidget = new QWidget;
+        QVBoxLayout* actionsLayout = new QVBoxLayout(_actionsWidget);
+        actionsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+        for(int i = 0; i < actionList.count(); ++i)
+        {
+            MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
+            connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteAction(const MonsterAction&)));
+            actionsLayout->addWidget(newFrame);
+        }
+        ui->scrollActions->setWidget(_actionsWidget);
+    }
+
+    actionList = _monster->getLegendaryActions();
+    ui->scrollLegendaryActions->setVisible(actionList.count() > 0);
+    //ui->lblLegendaryActions->setVisible(actionList.count() > 0);
+    //ui->lineLegendaryActions->setVisible(actionList.count() > 0);
+//    if(actionList.count() > 0)
+    {
+        _legendaryActionsWidget = new QWidget;
+        QVBoxLayout* actionsLayout = new QVBoxLayout(_legendaryActionsWidget);
+        actionsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+        for(int i = 0; i < actionList.count(); ++i)
+        {
+            MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
+            connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteLegendaryAction(const MonsterAction&)));
+            actionsLayout->addWidget(newFrame);
+        }
+        ui->scrollLegendaryActions->setWidget(_legendaryActionsWidget);
+    }
+
+    actionList = _monster->getSpecialAbilities();
+    ui->scrollSpecialAbilities->setVisible(actionList.count() > 0);
+    //ui->lblSpecialAbilities->setVisible(actionList.count() > 0);
+    //ui->lineSpecialAbilities->setVisible(actionList.count() > 0);
+//    if(actionList.count() > 0)
+    {
+        _specialAbilitiesWidget = new QWidget;
+        QVBoxLayout* actionsLayout = new QVBoxLayout(_specialAbilitiesWidget);
+        actionsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+        for(int i = 0; i < actionList.count(); ++i)
+        {
+            MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
+            connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteSpecialAbility(const MonsterAction&)));
+            actionsLayout->addWidget(newFrame);
+        }
+        ui->scrollSpecialAbilities->setWidget(_specialAbilitiesWidget);
+    }
+
+    actionList = _monster->getReactions();
+    ui->scrollReactions->setVisible(actionList.count() > 0);
+    //ui->lblReactions->setVisible(actionList.count() > 0);
+    //ui->lineReactions->setVisible(actionList.count() > 0);
+//    if(actionList.count() > 0)
+    {
+        _reactionsWidget = new QWidget;
+        QVBoxLayout* actionsLayout = new QVBoxLayout(_reactionsWidget);
+        actionsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+        for(int i = 0; i < actionList.count(); ++i)
+        {
+            MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
+            connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteReaction(const MonsterAction&)));
+            actionsLayout->addWidget(newFrame);
+        }
+        ui->scrollReactions->setWidget(_reactionsWidget);
+    }
 
     updateAbilityMods();
 
@@ -106,26 +191,11 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
         ui->btnLeft->hide();
         ui->btnRight->hide();
 
-        if(_monster->getSkills().isEmpty())
-        {
-            ui->edtSkills->hide();
-            ui->lblSkills->hide();
-        }
-
-        if(_monster->getResistances().isEmpty())
-        {
-            ui->edtResistances->hide();
-            ui->lblResistances->hide();
-        }
-
         if(_monster->getSenses().isEmpty())
         {
             ui->edtSenses->hide();
             ui->lblSenses->hide();
         }
-
-        if(_monster->getTraits().isEmpty())
-            ui->edtTraits->hide();
     }
 
     ui->btnLeft->setEnabled(_monster != Bestiary::Instance()->getFirstMonsterClass());
@@ -151,8 +221,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtLanguages->setReadOnly(!_edit);
     ui->edtChallenge->setReadOnly(!_edit);
     ui->edtXP->setReadOnly(!_edit);
-    ui->edtTraits->setReadOnly(!_edit);
-    ui->edtActions->setReadOnly(!_edit);
 }
 
 void BestiaryDialog::setMonster(const QString& monsterName, bool edit)
@@ -262,6 +330,106 @@ void BestiaryDialog::handlePublishButton()
     }
 }
 
+void BestiaryDialog::addAction()
+{
+    if((!_monster) || (!ui->scrollActions->widget()) || (!ui->scrollActions->widget()->layout()))
+        return;
+
+    MonsterActionEditDialog dlg(MonsterAction(0, QString(), QString(), Dice()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        _monster->addAction(dlg.getAction());
+        MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
+        ui->scrollActions->widget()->layout()->addWidget(newFrame);
+        connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteAction(const MonsterAction&)));
+        ui->scrollActions->setVisible(true);
+    }
+}
+
+void BestiaryDialog::deleteAction(const MonsterAction& action)
+{
+    if(_monster)
+    {
+        if(_monster->removeAction(action) <= 0)
+            ui->scrollActions->setVisible(false);
+    }
+}
+
+void BestiaryDialog::addLegendaryAction()
+{
+    if((!_monster) || (!ui->scrollLegendaryActions->widget()) || (!ui->scrollLegendaryActions->widget()->layout()))
+        return;
+
+    MonsterActionEditDialog dlg(MonsterAction(0, QString(), QString(), Dice()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        _monster->addLegendaryAction(dlg.getAction());
+        MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
+        ui->scrollLegendaryActions->widget()->layout()->addWidget(newFrame);
+        connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteLegendaryAction(const MonsterAction&)));
+        ui->scrollLegendaryActions->setVisible(true);
+    }
+}
+
+void BestiaryDialog::deleteLegendaryAction(const MonsterAction& action)
+{
+    if(_monster)
+    {
+        if(_monster->removeLegendaryAction(action) <= 0)
+            ui->scrollLegendaryActions->setVisible(false);
+    }
+}
+
+void BestiaryDialog::addSpecialAbility()
+{
+    if((!_monster) || (!ui->scrollSpecialAbilities->widget()) || (!ui->scrollSpecialAbilities->widget()->layout()))
+        return;
+
+    MonsterActionEditDialog dlg(MonsterAction(0, QString(), QString(), Dice()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        _monster->addSpecialAbility(dlg.getAction());
+        MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
+        ui->scrollSpecialAbilities->widget()->layout()->addWidget(newFrame);
+        connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteSpecialAbility(const MonsterAction&)));
+        ui->scrollSpecialAbilities->setVisible(true);
+    }
+}
+
+void BestiaryDialog::deleteSpecialAbility(const MonsterAction& action)
+{
+    if(_monster)
+    {
+        if(_monster->removeSpecialAbility(action) <= 0)
+            ui->scrollSpecialAbilities->setVisible(false);
+    }
+}
+
+void BestiaryDialog::addReaction()
+{
+    if((!_monster) || (!ui->scrollReactions->widget()) || (!ui->scrollReactions->widget()->layout()))
+        return;
+
+    MonsterActionEditDialog dlg(MonsterAction(0, QString(), QString(), Dice()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        _monster->addReaction(dlg.getAction());
+        MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
+        ui->scrollReactions->widget()->layout()->addWidget(newFrame);
+        connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteReaction(const MonsterAction&)));
+        ui->scrollReactions->setVisible(true);
+    }
+}
+
+void BestiaryDialog::deleteReaction(const MonsterAction& action)
+{
+    if(_monster)
+    {
+        if(_monster->removeReaction(action) <= 0)
+            ui->scrollReactions->setVisible(false);
+    }
+}
+
 void BestiaryDialog::closeEvent(QCloseEvent * event)
 {
     Q_UNUSED(event);
@@ -275,8 +443,11 @@ void BestiaryDialog::mousePressEvent(QMouseEvent * event)
     Q_UNUSED(event);
     if(_edit && _monster)
     {
-        ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-        _mouseDown = true;
+        if(ui->lblIcon->frameGeometry().contains(event->pos()))
+        {
+            ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+            _mouseDown = true;
+        }
     }
 }
 
@@ -284,10 +455,10 @@ void BestiaryDialog::mouseReleaseEvent(QMouseEvent * event)
 {
     if(_edit && _mouseDown && _monster)
     {
-        ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        _mouseDown = false;
         if(ui->lblIcon->frameGeometry().contains(event->pos()))
         {
+            ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
+            _mouseDown = false;
             QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
             if(!filename.isEmpty())
             {
@@ -351,23 +522,106 @@ void BestiaryDialog::storeMonsterData()
     _monster->beginBatchChanges();
 
     _monster->setPrivate(ui->chkPrivate->isChecked());
-    _monster->setLegendary(ui->chkLegendary->isChecked());
     _monster->setName(ui->edtName->text());
     _monster->setMonsterType(ui->edtMonsterType->text());
     _monster->setAlignment(ui->edtAlignment->text());
     _monster->setArmorClass(ui->edtArmorClass->text().toInt());
-    _monster->setArmorClassDescription(ui->edtArmorClassDescription->text());
     _monster->setHitDice(Dice(ui->edtHitDice->text()));
     _monster->setAverageHitPoints(ui->edtAverageHitPoints->text().toInt());
     _monster->setSpeed(ui->edtSpeed->text());
-    _monster->setSkills(ui->edtSkills->text());
-    _monster->setResistances(ui->edtResistances->text());
     _monster->setSenses(ui->edtSenses->text());
     _monster->setLanguages(ui->edtLanguages->text());
-    _monster->setChallenge(ui->edtChallenge->text().toFloat());
-    _monster->setXP(ui->edtXP->text().toInt());
-    _monster->setTraits(ui->edtTraits->toHtml());
-    _monster->setActions(ui->edtActions->toHtml());
+    _monster->setChallenge(ui->edtChallenge->text());
+
+    if((ui->scrollActions->widget()) && (ui->scrollActions->widget()->layout()))
+    {
+        for(int i = 0; i < ui->scrollActions->widget()->layout()->count(); ++i)
+        {
+            QLayoutItem* item = ui->scrollActions->widget()->layout()->itemAt(i);
+            MonsterActionFrame* frame = dynamic_cast<MonsterActionFrame*>(item->widget());
+            if(frame)
+            {
+                _monster->setAction(i, frame->getAction());
+            }
+        }
+    }
+
+    if((ui->scrollLegendaryActions->widget()) && (ui->scrollLegendaryActions->widget()->layout()))
+    {
+        for(int i = 0; i < ui->scrollLegendaryActions->widget()->layout()->count(); ++i)
+        {
+            QLayoutItem* item = ui->scrollLegendaryActions->widget()->layout()->itemAt(i);
+            MonsterActionFrame* frame = dynamic_cast<MonsterActionFrame*>(item->widget());
+            if(frame)
+            {
+                _monster->setLegendaryAction(i, frame->getAction());
+            }
+        }
+    }
+
+    if((ui->scrollSpecialAbilities->widget()) && (ui->scrollSpecialAbilities->widget()->layout()))
+    {
+        for(int i = 0; i < ui->scrollSpecialAbilities->widget()->layout()->count(); ++i)
+        {
+            QLayoutItem* item = ui->scrollSpecialAbilities->widget()->layout()->itemAt(i);
+            MonsterActionFrame* frame = dynamic_cast<MonsterActionFrame*>(item->widget());
+            if(frame)
+            {
+                _monster->setSpecialAbility(i, frame->getAction());
+            }
+        }
+    }
+
+    if((ui->scrollReactions->widget()) && (ui->scrollReactions->widget()->layout()))
+    {
+        for(int i = 0; i < ui->scrollReactions->widget()->layout()->count(); ++i)
+        {
+            QLayoutItem* item = ui->scrollReactions->widget()->layout()->itemAt(i);
+            MonsterActionFrame* frame = dynamic_cast<MonsterActionFrame*>(item->widget());
+            if(frame)
+            {
+                _monster->setReaction(i, frame->getAction());
+            }
+        }
+    }
 
     _monster->endBatchChanges();
+}
+
+void BestiaryDialog::clearActionWidgets()
+{
+    ui->scrollActions->takeWidget();
+    clearWidget(_actionsWidget);
+    delete _actionsWidget;
+    _actionsWidget = nullptr;
+
+    ui->scrollLegendaryActions->takeWidget();
+    clearWidget(_legendaryActionsWidget);
+    delete _legendaryActionsWidget;
+    _legendaryActionsWidget = nullptr;
+
+    ui->scrollSpecialAbilities->takeWidget();
+    clearWidget(_specialAbilitiesWidget);
+    delete _specialAbilitiesWidget;
+    _specialAbilitiesWidget = nullptr;
+
+    ui->scrollReactions->takeWidget();
+    clearWidget(_reactionsWidget);
+    delete _reactionsWidget;
+    _reactionsWidget = nullptr;
+
+}
+
+void BestiaryDialog::clearWidget(QWidget* widget)
+{
+    if(!widget)
+        return;
+
+    QLayout* layout = widget->layout();
+    if(!layout)
+        return;
+
+    QLayoutItem *child;
+    while ((child = layout->takeAt(0)) != nullptr)
+        delete child;
 }

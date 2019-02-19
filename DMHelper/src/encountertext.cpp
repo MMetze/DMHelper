@@ -103,7 +103,7 @@ void EncounterText::setText(const QString& newText)
 
     QTextDocument doc;
     doc.setHtml(newText);
-    qDebug() << "[EncounterText] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
+    // qDebug() << "[EncounterText] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
 
     if(_text != newText)
     {
@@ -117,7 +117,7 @@ void EncounterText::widgetChanged()
     if(!_widget)
         return;
 
-    qDebug() << "[EncounterText] Widget Changed " << getID() << " """ << _name;
+    //  qDebug() << "[EncounterText] Widget Changed " << getID() << " """ << _name;
 
     EncounterTextEdit* textEdit = dynamic_cast<EncounterTextEdit*>(_widget);
     if(!textEdit)

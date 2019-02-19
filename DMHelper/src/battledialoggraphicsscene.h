@@ -31,8 +31,11 @@ public slots:
 signals:
     void effectChanged(QAbstractGraphicsShapeItem* effect);
     void applyEffect(QAbstractGraphicsShapeItem* effect);
-    void itemMoved(QGraphicsPixmapItem* item);
     void distanceChanged(const QString& distance);
+
+    void itemMouseDown(QGraphicsPixmapItem* item);
+    void itemMoved(QGraphicsPixmapItem* item, bool* result);
+    void itemMouseUp(QGraphicsPixmapItem* item);
 
 protected slots:
     void editItem();

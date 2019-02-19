@@ -29,8 +29,8 @@
       <string notr="true">QGroupBox { 
 border: 2px solid gray; 
 border-radius: 3px; 
-border-color: rgb(85, 0, 0);
-color: rgb(85, 0, 0);
+border-color: rgb(85, 85, 85);
+color: rgb(85, 85, 85);
  } </string>
      </property>
      <property name="title">
@@ -329,8 +329,8 @@ color: rgb(85, 0, 0);
       <string notr="true">QGroupBox { 
 border: 2px solid gray; 
 border-radius: 3px; 
-border-color: rgb(85, 0, 0);
-color: rgb(85, 0, 0);
+border-color: rgb(85, 85, 85);
+color: rgb(85, 85, 85);
  } </string>
      </property>
      <property name="title">
@@ -369,8 +369,8 @@ color: rgb(85, 0, 0);
       <string notr="true">QGroupBox { 
 border: 2px solid gray; 
 border-radius: 3px; 
-border-color: rgb(85, 0, 0);
-color: rgb(85, 0, 0);
+border-color: rgb(85, 85, 85);
+color: rgb(85, 85, 85);
  } </string>
      </property>
      <property name="title">

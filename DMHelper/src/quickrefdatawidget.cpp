@@ -43,7 +43,7 @@ void QuickRefDataWidget::setIcon(const QString& icon)
         QPixmap finalPix = iconScaled;
         QPainter painter(&finalPix);
         painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        painter.fillRect(iconScaled.rect(), QColor(115, 18, 0));
+        painter.fillRect(iconScaled.rect(), QColor(85, 85, 85));
         painter.end();
         ui->lblIcon->setPixmap(finalPix);
     }
@@ -124,7 +124,7 @@ void QuickRefDataWidget::showQuickRefDetails()
         QPixmap coloredPix = iconPix;
         QPainter painter(&coloredPix);
         painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        painter.fillRect(coloredPix.rect(), QColor(115, 18, 0));
+        painter.fillRect(coloredPix.rect(), QColor(85, 85, 85));
         painter.end();
         infoBox.setIconPixmap(coloredPix);
     }

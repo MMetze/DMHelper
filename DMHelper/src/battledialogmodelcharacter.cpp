@@ -61,7 +61,7 @@ int BattleDialogModelCharacter::getStrength() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getStrength!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getStrength!";
         return 0;
     }
 }
@@ -75,7 +75,7 @@ int BattleDialogModelCharacter::getDexterity() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getDexterity!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getDexterity!";
         return 0;
     }
 }
@@ -89,7 +89,7 @@ int BattleDialogModelCharacter::getConstitution() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getConstitution!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getConstitution!";
         return 0;
     }
 }
@@ -103,7 +103,7 @@ int BattleDialogModelCharacter::getIntelligence() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getIntelligence!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getIntelligence!";
         return 0;
     }
 }
@@ -117,7 +117,7 @@ int BattleDialogModelCharacter::getWisdom() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getWisdom!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getWisdom!";
         return 0;
     }
 }
@@ -131,7 +131,7 @@ int BattleDialogModelCharacter::getCharisma() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getCharisma!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getCharisma!";
         return 0;
     }
 }
@@ -152,6 +152,20 @@ int BattleDialogModelCharacter::getSkillModifier(Combatant::Skills skill) const
     return modifier;
 }
 
+int BattleDialogModelCharacter::getSpeed() const
+{
+    // TODO: should this just be impossible?
+    if(_combatant)
+    {
+        return _combatant->getSpeed();
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getSpeed!";
+        return 30;
+    }
+}
+
 int BattleDialogModelCharacter::getArmorClass() const
 {
     // TODO: should this just be impossible?
@@ -161,7 +175,7 @@ int BattleDialogModelCharacter::getArmorClass() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getArmorClass!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getArmorClass!";
         return 10;
     }
 }
@@ -174,7 +188,7 @@ int BattleDialogModelCharacter::getHitPoints() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getHitPoints!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getHitPoints!";
         return 0;
     }
 }
@@ -187,7 +201,7 @@ void BattleDialogModelCharacter::setHitPoints(int hitPoints)
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in setHitPoints!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in setHitPoints!";
     }
 }
 
@@ -199,7 +213,7 @@ QString BattleDialogModelCharacter::getName() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getName!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getName!";
         return QString();
     }
 }
@@ -212,7 +226,7 @@ QPixmap BattleDialogModelCharacter::getIconPixmap(DMHelper::PixmapSize iconSize)
     }
     else
     {
-        qDebug() << "[BattleDialogModelCharacter] No valid character in getIconPixmap!";
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getIconPixmap!";
         return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
     }
 }

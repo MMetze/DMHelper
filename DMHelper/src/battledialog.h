@@ -10,6 +10,7 @@ class CombatantWidget;
 class QVBoxLayout;
 class EncounterBattle;
 class BattleDialogModel;
+class BattleDialogLogger;
 class Grid;
 class Map;
 class QTimer;
@@ -84,6 +85,7 @@ protected:
     virtual bool eventFilter(QObject *obj, QEvent *event);
     virtual void resizeEvent(QResizeEvent *event);
     virtual void showEvent(QShowEvent *event);
+    virtual void timerEvent(QTimerEvent *event);
 
 private slots:
     void setCompassVisibility(bool visible);
@@ -97,10 +99,16 @@ private slots:
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
     void handleApplyEffect(QAbstractGraphicsShapeItem* effect);
 
+    void handleItemMouseDown(QGraphicsPixmapItem* item);
+    void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
+    void handleItemMouseUp(QGraphicsPixmapItem* item);
+
     void removeCombatant();
     void activateCombatant();
+    void damageCombatant();
     void setSelectedCombatant(BattleDialogModelCombatant* selected);
     void updateCombatantWidget(BattleDialogModelCombatant* combatant);
+    void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
     void togglePublishing(bool publishing);
     void publishImage();
@@ -160,6 +168,7 @@ private:
     Ui::BattleDialog *ui;
     BattleDialogModel& _model;
     QVBoxLayout* _combatantLayout;
+    BattleDialogLogger* _logger;
 
     EncounterBattle* _battle;
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
@@ -177,6 +186,7 @@ private:
     QGraphicsPixmapItem* _selectedPixmap;
     int _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
+    QGraphicsEllipseItem* _movementPixmap;
 
     QTimer* _countdownTimer;
     int _countdown;
@@ -196,6 +206,10 @@ private:
 
     QRect _rubberBandRect;
     qreal _scale;
+
+    qreal _moveRadius;
+    QPointF _moveStart;
+    int _moveTimer;
 };
 
 #endif // BATTLEDIALOG_H

@@ -4,9 +4,9 @@
 #include "dmhobjectbase.h"
 
 class Campaign;
-class QDomDocument;
-class QDomElement;
-class QDir;
+//class QDomDocument;
+//class QDomElement;
+//class QDir;
 
 class CampaignObjectBase : public DMHObjectBase
 {

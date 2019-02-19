@@ -120,9 +120,10 @@ void WidgetCombatantBase::handleHitPointsChanged(int hp)
 {
     if(getCombatant() && (getCombatant()->getHitPoints() != hp))
     {
+        int hpDelta = hp - getCombatant()->getHitPoints();
         getCombatant()->setHitPoints(hp);
         updateData();
-        emit hitPointsChanged();
+        emit hitPointsChanged(getCombatant(), hpDelta);
     }
 }
 

@@ -48,7 +48,7 @@ ScrollTabWidget::ScrollTabWidget(QWidget* page, QSizeF parentRatio, QWidget *par
         _parentRatio = parentRatio;
 
     _handleFrame = new QFrame(this);
-    _handleFrame->setStyleSheet(QString("background-color: rgb(159,109,58);"));
+    _handleFrame->setStyleSheet(QString("background-color: rgb(200,200,200);"));
 
     _scrollLabel = new QLabel(this);
     _page->setParent(_scrollLabel);
@@ -57,12 +57,13 @@ ScrollTabWidget::ScrollTabWidget(QWidget* page, QSizeF parentRatio, QWidget *par
     myShadow->setOffset(SHADOW_WIDTH);
     _scrollLabel->setGraphicsEffect(myShadow);
 
-    _scrollLabel->setStyleSheet("background-image: url(:/img/data/parchmentdark.png);");
+    //_scrollLabel->setStyleSheet("background-image: url(:/img/data/parchmentdark.jpg);");
+    _scrollLabel->setStyleSheet("background-image: url(:/img/data/parchment.jpg);");
     _scrollLabel->setFrameStyle(QFrame::Box);
     _borderTop = new QFrame(this);
-    _borderTop ->setStyleSheet(QString("background-color: rgb(159,109,58);"));
+    _borderTop ->setStyleSheet(QString("background-color: rgb(200,200,200);"));
     _borderBottom = new QFrame(this);
-    _borderBottom ->setStyleSheet(QString("background-color: rgb(159,109,58);"));
+    _borderBottom ->setStyleSheet(QString("background-color: rgb(200,200,200);"));
 }
 
 ScrollTabWidget::~ScrollTabWidget()
@@ -253,7 +254,7 @@ bool ScrollTabWidget::eventFilter(QObject *watched, QEvent *event)
 
 void ScrollTabWidget::transitionComplete()
 {
-    _transition = 0;
+    _transition = nullptr;
     _page->show();
     _handleFrame->show();
     _scrollLabel->show();

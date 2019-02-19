@@ -14,7 +14,7 @@
    <string>Dialog</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchmentdark.png);</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_36">
    <item>
@@ -6849,7 +6849,6 @@
         </spacer>
        </item>
       </layout>
-      <zorder>label_393</zorder>
      </widget>
      <widget class="QWidget" name="tab_4">
       <attribute name="title">

@@ -14,7 +14,7 @@
    <string>TabWidget</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/img/data/parchmentdark.png);</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <property name="currentIndex">
    <number>0</number>

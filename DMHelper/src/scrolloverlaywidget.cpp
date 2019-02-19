@@ -3,14 +3,19 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+const int SCROLLWIDGET_BUTTONSIZE = 40;
+const int SCROLLWIDGET_BUTTONSIZE_ICON = SCROLLWIDGET_BUTTONSIZE - 5;
+const int SCROLLWIDGET_SPACING = 10;
+
 ScrollOverlayWidget::ScrollOverlayWidget(QWidget *parent) :
     QWidget(parent),
     _tabList(),
-    _mainLayout(0),
+    _mainLayout(nullptr),
     _widgetOffset()
 {
     _mainLayout = new QVBoxLayout(this);
     _mainLayout->addStretch();
+    _mainLayout->setSpacing(SCROLLWIDGET_SPACING);
     setLayout(_mainLayout);
 }
 
@@ -61,9 +66,9 @@ void ScrollOverlayWidget::resizeTabs()
 
     // Find the offset from mutual parents
     QWidget* p = this;
-    QWidget* tabParent = _tabList.first() ? _tabList.first()->parentWidget() : 0;
+    QWidget* tabParent = _tabList.first() ? _tabList.first()->parentWidget() : nullptr;
     _widgetOffset = QPoint();
-    while((p != 0) && (p != tabParent))
+    while((p != nullptr) && (p != tabParent))
     {
         _widgetOffset += p->pos();
         p = p->parentWidget();
@@ -92,10 +97,11 @@ int ScrollOverlayWidget::addTab(ScrollTabWidget* tab, const QIcon &icon)
     QPushButton* button = new QPushButton(icon, QString(), this);
     button->setFlat(true);
     button->setCheckable(true);
-    button->setStyleSheet(QString("QPushButton:checked {background-color: rgb(159,109,58);}"));
-    button->resize(30,30);
-    button->setMinimumSize(30,30);
-    button->setMaximumSize(30,30);
+    button->setStyleSheet(QString("QPushButton:checked {background-color: rgb(200,200,200);}"));
+    button->resize(SCROLLWIDGET_BUTTONSIZE, SCROLLWIDGET_BUTTONSIZE);
+    button->setMinimumSize(SCROLLWIDGET_BUTTONSIZE, SCROLLWIDGET_BUTTONSIZE);
+    button->setMaximumSize(SCROLLWIDGET_BUTTONSIZE, SCROLLWIDGET_BUTTONSIZE);
+    button->setIconSize(QSize(SCROLLWIDGET_BUTTONSIZE_ICON, SCROLLWIDGET_BUTTONSIZE_ICON));
     button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
     connect(button,SIGNAL(toggled(bool)),tab,SLOT(activateTab(bool)));

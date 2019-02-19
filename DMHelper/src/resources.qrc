@@ -159,5 +159,8 @@
         <file>data/icon_music.png</file>
         <file>data/compass.png</file>
         <file>data/distance.png</file>
+        <file>data/dmhelper_large.png</file>
+        <file>data/movement.png</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>

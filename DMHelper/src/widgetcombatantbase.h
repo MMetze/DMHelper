@@ -33,7 +33,7 @@ public:
 signals:
 
     void contextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
-    void hitPointsChanged();
+    void hitPointsChanged(BattleDialogModelCombatant* combatant, int change);
 
 public slots:
 

@@ -52,7 +52,7 @@ void ScrollingTextWindow::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
     qreal elapsedtime = _elapsed.restart();
-    _textPos.ry() -= (int)(_encounter.getScrollSpeed() * elapsedtime / 1000.0);
+    _textPos.ry() -= _encounter.getScrollSpeed() * elapsedtime / 1000.0;
     drawScene();
 }
 
@@ -71,7 +71,7 @@ void ScrollingTextWindow::closeEvent(QCloseEvent *event)
 
 void ScrollingTextWindow::rewind()
 {
-    _textPos.setY(_scaledBackground.height());
+    _textPos.setY(static_cast<qreal>(_scaledBackground.height()));
     drawScene();
 }
 
@@ -121,11 +121,11 @@ void ScrollingTextWindow::prepareImages()
     int textWidth = _targetRect.width() * _encounter.getImageWidth() / 100;
     _targetRect.setWidth(textWidth);
     _targetRect.setX((_targetRect.width() - textWidth) / 2);
-    _textPos.setX((targetSize.width() - textWidth) / 2);
+    _textPos.setX(static_cast<qreal>(targetSize.width() - textWidth) / 2.0);
     if(_previousHeight <= 0)
-        _textPos.setY(targetSize.height());
+        _textPos.setY(static_cast<qreal>(targetSize.height()));
     else
-        _textPos.setY(((qreal)_textPos.y() / (qreal)_previousHeight) * (qreal)targetSize.height());
+        _textPos.setY((_textPos.y() / static_cast<qreal>(_previousHeight)) * static_cast<qreal>(targetSize.height()));
     _previousHeight = targetSize.height();
 
     QFontMetrics fontMetrics(font);
@@ -144,6 +144,6 @@ void ScrollingTextWindow::drawScene()
 {
     QPixmap targetPix = _scaledBackground;
     QPainter painter(&targetPix);
-    painter.drawPixmap(_textPos, _textImage, _textImage.rect());
+    painter.drawPixmap(_textPos.toPoint(), _textImage, _textImage.rect());
     ui->lblImage->setPixmap(targetPix);
 }

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMap>
 #include <QDir>
+#include <QStringList>
 
 class MonsterClass;
 class Monster;
@@ -16,7 +17,7 @@ class Bestiary : public QObject
 {
     Q_OBJECT
 public:
-    explicit Bestiary(QObject *parent = 0);
+    explicit Bestiary(QObject *parent = nullptr);
     ~Bestiary();
 
     static Bestiary* Instance();
@@ -29,11 +30,12 @@ public:
     QString getVersion() const;
     bool isVersionCompatible() const;
     bool isVersionIdentical() const;
-    QString getExpectedVersion() const;
+    static QString getExpectedVersion();
 
     bool exists(const QString& name) const;
     int count() const;
     QList<QString> getMonsterList() const;
+    QStringList getLicenseText() const;
 
     MonsterClass* getMonsterClass(const QString& name) const;
     MonsterClass* getFirstMonsterClass() const;
@@ -65,6 +67,7 @@ private:
     QDir _bestiaryDirectory;
     int _majorVersion;
     int _minorVersion;
+    QStringList _licenseText;
 };
 
 #endif // BESTIARY_H

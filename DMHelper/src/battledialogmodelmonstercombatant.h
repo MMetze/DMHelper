@@ -37,6 +37,7 @@ public:
     virtual int getWisdom() const;
     virtual int getCharisma() const;
 
+    virtual int getSpeed() const;
     virtual int getArmorClass() const;
     virtual int getHitPoints() const;
     virtual void setHitPoints(int hitPoints);

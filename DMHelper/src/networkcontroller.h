@@ -1,6 +1,8 @@
 #ifndef NETWORKCONTROLLER_H
 #define NETWORKCONTROLLER_H
 
+#ifdef INCLUDE_NETWORK_SUPPORT
+
 #include <QObject>
 #include <QImage>
 
@@ -11,7 +13,7 @@ class NetworkController : public QObject
 {
     Q_OBJECT
 public:
-    explicit NetworkController(QObject *parent = 0);
+    explicit NetworkController(QObject *parent = nullptr);
     ~NetworkController();
 
 signals:
@@ -45,5 +47,7 @@ private:
     bool _enabled;
 
 };
+
+#endif // INCLUDE_NETWORK_SUPPORT
 
 #endif // NETWORKCONTROLLER_H

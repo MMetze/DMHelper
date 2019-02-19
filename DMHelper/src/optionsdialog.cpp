@@ -15,12 +15,19 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
     if(_options)
     {
         ui->edtBestiary->setText(_options->getBestiaryFileName());
+#ifdef INCLUDE_CHASE_SUPPORT
         ui->edtChase->setText(_options->getChaseFileName());
+#else
+        ui->lblChase->hide();
+        ui->edtChase->hide();
+        ui->btnChase->hide();
+#endif
         ui->chkShowAnimations->setChecked(_options->getShowAnimations());
         ui->chkShowOnDeck->setChecked(_options->getShowOnDeck());
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
         ui->edtCountdownDuration->setValidator(new QIntValidator(1,1000,this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
+#ifdef INCLUDE_NETWORK_SUPPORT
         ui->chkEnableNetworkClient->setChecked(_options->getNetworkEnabled());
         ui->edtUserName->setText(_options->getUserName());
         ui->edtURL->setText(_options->getURLString());
@@ -41,13 +48,19 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->lblInviteID->setEnabled(_options->getNetworkEnabled());
         ui->edtInviteID->setEnabled(_options->getNetworkEnabled());
         ui->btnGenerateInvite->setEnabled(_options->getNetworkEnabled());
+#else
+        ui->grpNetwork->hide();
+#endif
 
         connect(ui->btnBestiary,SIGNAL(clicked()),this,SLOT(browseBestiary()));
+#ifdef INCLUDE_CHASE_SUPPORT
         connect(ui->btnChase,SIGNAL(clicked()),this,SLOT(browseChase()));
+#endif
         connect(ui->chkShowAnimations,SIGNAL(clicked(bool)),_options,SLOT(setShowAnimations(bool)));
         connect(ui->chkShowOnDeck,SIGNAL(clicked(bool)),_options,SLOT(setShowOnDeck(bool)));
         connect(ui->chkShowCountdown,SIGNAL(clicked(bool)),_options,SLOT(setShowCountdown(bool)));
         connect(ui->edtCountdownDuration,SIGNAL(textChanged(QString)),_options,SLOT(setCountdownDuration(QString)));
+#ifdef INCLUDE_NETWORK_SUPPORT
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
         connect(ui->edtURL, SIGNAL(textChanged(QString)), _options, SLOT(setURLString(QString)));
         connect(ui->edtUserName, SIGNAL(textChanged(QString)), _options, SLOT(setUserName(QString)));
@@ -67,7 +80,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), ui->lblInviteID, SLOT(setEnabled(bool)));
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), ui->edtInviteID, SLOT(setEnabled(bool)));
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), ui->btnGenerateInvite, SLOT(setEnabled(bool)));
-
+#endif
     }
 }
 
@@ -92,6 +105,7 @@ void OptionsDialog::browseBestiary()
     _options->setBestiaryFileName(bestiaryFileName);
 }
 
+#ifdef INCLUDE_CHASE_SUPPORT
 void OptionsDialog::browseChase()
 {
     QString chaseFileName = QFileDialog::getOpenFileName(this,QString("Select Chase File"),QString(),QString("XML files (*.xml)"));
@@ -102,3 +116,4 @@ void OptionsDialog::browseChase()
     ui->edtChase->setText(chaseFileName);
     _options->setChaseFileName(chaseFileName);
 }
+#endif

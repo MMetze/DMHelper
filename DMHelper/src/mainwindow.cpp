@@ -6,6 +6,7 @@
 #include "dicerollframe.h"
 #include "countdownframe.h"
 #include "character.h"
+#include "characterimporter.h"
 #include "characterframe.h"
 #include "campaign.h"
 #include "adventure.h"
@@ -19,7 +20,6 @@
 #include "encounterbattle.h"
 #include "encounterscrollingtext.h"
 #include "encounterscrollingtextedit.h"
-#include "dmconstants.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
 #include "battledialogmanager.h"
@@ -29,7 +29,9 @@
 #include "bestiary.h"
 #include "textpublishdialog.h"
 #include "combatantselectdialog.h"
-#include "chaserselectiondialog.h"
+#ifdef INCLUDE_CHASE_SUPPORT
+    #include "chaserselectiondialog.h"
+#endif
 #include "optionsdialog.h"
 #include "selectzoom.h"
 #include "scrolltabwidget.h"
@@ -38,7 +40,10 @@
 #include "timeanddateframe.h"
 #include "audiotrackedit.h"
 #include "audioplayer.h"
-#include "networkcontroller.h"
+#ifdef INCLUDE_NETWORK_SUPPORT
+    #include "networkcontroller.h"
+#endif
+#include "aboutdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -128,10 +133,14 @@ MainWindow::MainWindow(QWidget *parent) :
     _options(nullptr),
     bestiaryDlg(),
     dmScreenDlg(),
+#ifdef INCLUDE_CHASE_SUPPORT
     chaseDlg(nullptr),
+#endif
     _battleDlgMgr(nullptr),
     _audioPlayer(nullptr),
+#ifdef INCLUDE_NETWORK_SUPPORT
     _networkController(nullptr),
+#endif
     mouseDown(false),
     mouseDownPos(),
     undoAction(nullptr),
@@ -140,6 +149,11 @@ MainWindow::MainWindow(QWidget *parent) :
     dirty(false)
 {
     qDebug() << "[Main] Initializing Main";
+
+    qDebug() << "[Main] DMHelper version information";
+    qDebug() << "[Main]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION);
+    qDebug() << "[Main]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
+    qDebug() << "[Main]     Build: " << __DATE__ << " " << __TIME__;
 
     qDebug() << "[Main] Qt Information";
     qDebug() << "[Main]     Qt Version: " << QLibraryInfo::version().toString();
@@ -181,6 +195,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(clearDirty()));
     connect(ui->actionNew_Adventure,SIGNAL(triggered()),this,SLOT(newAdventure()));
     connect(ui->actionNew_Character,SIGNAL(triggered()),this,SLOT(newCharacter()));
+    connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
     connect(ui->actionNew_Text_Encounter,SIGNAL(triggered()),this,SLOT(newTextEncounter()));
     connect(ui->actionNew_Battle_Encounter,SIGNAL(triggered()),this,SLOT(newBattleEncounter()));
     connect(ui->actionNew_Scrolling_Text_Encounter,SIGNAL(triggered()),this,SLOT(newScrollingTextEncounter()));
@@ -191,7 +206,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_New_Monster,SIGNAL(triggered()),&bestiaryDlg,SLOT(createNewMonster()));
     connect(ui->actionOpen_DM_Screen,SIGNAL(triggered()),this,SLOT(openDMScreen()));
     connect(ui->actionPublish_Text,SIGNAL(triggered()),this,SLOT(openTextPublisher()));
+#ifdef INCLUDE_CHASE_SUPPORT
     connect(ui->action_Chase_Dialog,SIGNAL(triggered()),this,SLOT(startChase()));
+#endif
+    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(openAboutDialog()));
 
     connect(ui->treeView,SIGNAL(expanded(QModelIndex)),this,SLOT(handleTreeItemExpanded(QModelIndex)));
     connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
@@ -343,6 +361,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
     connect(encounterBattleEdit, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
+#ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
     _networkController->enableNetworkController(_options->getNetworkEnabled());
@@ -351,6 +370,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
     _battleDlgMgr->setNetworkManager(_networkController);
+#endif
 
     emit campaignLoaded(nullptr);
 
@@ -512,7 +532,7 @@ void MainWindow::openDiceDialog()
 
 void MainWindow::openCharacter(int id)
 {
-    if(!campaign)
+    if((!campaign) || (id == DMH_GLOBAL_INVALID_ID))
         return;
 
     Character* selectedChar = campaign->getCharacterById(id);
@@ -543,6 +563,9 @@ void MainWindow::openMonster(const QString& monsterClass)
 
 void MainWindow::newCharacter()
 {
+    if(!campaign)
+        return;
+
     bool ok;
     QString characterName = QInputDialog::getText(this, QString("Enter New Character Name"),QString("Character"),QLineEdit::Normal,QString(),&ok);
     if((!ok) || (characterName.isEmpty()))
@@ -552,6 +575,15 @@ void MainWindow::newCharacter()
     newCharacter->setName(characterName);
     campaign->addCharacter(newCharacter);
     openCharacter(newCharacter->getID());
+}
+
+void MainWindow::importCharacter()
+{
+    if(!campaign)
+        return;
+
+    CharacterImporter importer;
+    openCharacter(importer.importCharacter(*campaign));
 }
 
 void MainWindow::newNPC()
@@ -1406,14 +1438,12 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Blank);
 
     updateCampaignTree();
-    calculateThresholds();
     updateMapFiles();
     updateClock();
 
     if(campaign)
     {
         connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
-        connect(campaign,SIGNAL(dirty()),this,SLOT(calculateThresholds()));
         connect(campaign,SIGNAL(changed()),this,SLOT(updateCampaignTree()));
         setWindowTitle(QString("DM Helper - ") + campaign->getName() + QString("[*]"));
     }
@@ -2041,6 +2071,14 @@ void MainWindow::openBestiary()
     }
 }
 
+void MainWindow::openAboutDialog()
+{
+    qDebug() << "[Main] Opening About Box";
+
+    AboutDialog dlg;
+    dlg.exec();
+}
+
 void MainWindow::openDMScreen()
 {
     dmScreenDlg.show();
@@ -2055,6 +2093,8 @@ void MainWindow::openTextPublisher()
     dlg->show();
     dlg->activateWindow();
 }
+
+#ifdef INCLUDE_CHASE_SUPPORT
 
 void MainWindow::startChase()
 {
@@ -2127,31 +2167,4 @@ void MainWindow::handleChaseComplete()
     }
 }
 
-void MainWindow::calculateThresholds()
-{
-    if(!campaign)
-    {
-        ui->lblEasy->setText(QString("---"));
-        ui->lblMedium->setText(QString("---"));
-        ui->lblHard->setText(QString("---"));
-        ui->lblDeadly->setText(QString("---"));
-        return;
-    }
-
-    int thresholds[4] = {0,0,0,0};
-
-    QList<Character*> activeCharacters = campaign->getActiveCharacters();
-    for(int i = 0; i < activeCharacters.count(); ++i)
-    {
-        Character* character = activeCharacters.at(i);
-        for(int j = 0; j < 4; ++j)
-        {
-            thresholds[j] += character->getXPThreshold(j);
-        }
-    }
-
-    ui->lblEasy->setText(QString::number(thresholds[DMHelper::XPThreshold_Easy]));
-    ui->lblMedium->setText(QString::number(thresholds[DMHelper::XPThreshold_Medium]));
-    ui->lblHard->setText(QString::number(thresholds[DMHelper::XPThreshold_Hard]));
-    ui->lblDeadly->setText(QString::number(thresholds[DMHelper::XPThreshold_Deadly]));
-}
+#endif //INCLUDE_CHASE_SUPPORT

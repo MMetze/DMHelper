@@ -1,8 +1,18 @@
 #ifndef DMCONSTANTS_H
 #define DMCONSTANTS_H
 
+#include <Qt>
+
+//#define INCLUDE_NETWORK_SUPPORT
+//#define INCLUDE_CHASE_SUPPORT
+
 namespace DMHelper
 {
+    const int DMHELPER_MAJOR_VERSION = 0;
+    const int DMHELPER_MINOR_VERSION = 17;
+
+    const int BESTIARY_MAJOR_VERSION = 2;
+    const int BESTIARY_MINOR_VERSION = 0;
 
     enum
     {
@@ -13,6 +23,13 @@ namespace DMHelper
         EncounterType_Map,
         EncounterType_ScrollingText,
         EncounterType_AudioTrack
+    };
+
+    enum
+    {
+        BattleEvent_Blank = 0,
+        BattleEvent_NewRound,
+        BattleEvent_Damage
     };
 
     enum
@@ -109,9 +126,6 @@ namespace DMHelper
     const int CHARACTER_WIDGET_HEIGHT = 20;
     const int CHARACTER_ICON_WIDTH = CHARACTER_WIDGET_HEIGHT * 4 / 3;
     const int CHARACTER_ICON_HEIGHT = CHARACTER_WIDGET_HEIGHT * 2;
-
-    const int BESTIARY_MAJOR_VERSION = 1;
-    const int BESTIARY_MINOR_VERSION = 0;
 
     const int STARTING_GRID_SCALE = 25;
 

@@ -4,7 +4,10 @@
 #include "characterdialog.h"
 #include "bestiarydialog.h"
 #include "dmscreendialog.h"
+#include "dmconstants.h"
+#ifdef INCLUDE_CHASE_SUPPORT
 #include "chasedialog.h"
+#endif
 #include "optionscontainer.h"
 #include <QMainWindow>
 #include <QLabel>
@@ -28,7 +31,9 @@ class QVBoxLayout;
 class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
+#ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -56,6 +61,7 @@ public slots:
     void openMonster(const QString& monsterClass);
 
     void newCharacter();
+    void importCharacter();
     void newNPC();
     void removeCurrentCharacter();
     void newAdventure();
@@ -135,12 +141,15 @@ protected slots:
 
     // Bestiary
     void openBestiary();
+    void openAboutDialog();
 
     void openDMScreen();
     void openTextPublisher();
+
+#ifdef INCLUDE_CHASE_SUPPORT
     void startChase();
     void handleChaseComplete();
-    void calculateThresholds();
+#endif
 
 private:
     Ui::MainWindow *ui;
@@ -165,13 +174,17 @@ private:
 
     DMScreenDialog dmScreenDlg;
 
+#ifdef INCLUDE_CHASE_SUPPORT
     ChaseDialog* chaseDlg;
+#endif
 
     BattleDialogManager* _battleDlgMgr;
 
     AudioPlayer* _audioPlayer;
 
+#ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;
+#endif
 
     bool mouseDown;
     QPoint mouseDownPos;

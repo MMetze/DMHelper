@@ -3,20 +3,21 @@
 
 #include <QFrame>
 
-class QTreeWidget;
+namespace Ui {
+class EncounterBattleEdit;
+}
+
 class QTreeWidgetItem;
-class QTextEdit;
-class QPushButton;
-class QComboBox;
-class QLabel;
 class EncounterBattle;
 class AudioTrack;
 
 class EncounterBattleEdit : public QFrame
 {
     Q_OBJECT
+
 public:
-    explicit EncounterBattleEdit(QWidget *parent = 0);
+    explicit EncounterBattleEdit(QWidget *parent = nullptr);
+    ~EncounterBattleEdit();
 
     EncounterBattle* getBattle() const;
     void setBattle(EncounterBattle* battle);
@@ -38,10 +39,9 @@ public slots:
     void removeCombatant();
     void selectionChanged();
     void textChanged();
-
     void clear();
-
     void updateStatus();
+    void calculateThresholds();
 
 protected slots:
     void startBattleClicked();
@@ -50,23 +50,14 @@ protected slots:
     void trackSelected(int index);
 
 protected:
+    // From QWidget
+    virtual void showEvent(QShowEvent *event);
 
+private:
     void updateCombatantList();
     void loadTracks();
 
-    QTreeWidget* _tree;
-    QTextEdit* _textEdit;
-    QComboBox* _cmbTracks;
-    QPushButton* _addWaveButton;
-    QPushButton* _deleteWaveButton;
-    QPushButton* _addButton;
-    QPushButton* _deleteButton;
-    QPushButton* _loadBattle;
-    QPushButton* _deleteBattle;
-    QPushButton* _startBattle;
-    QLabel* _totalXP;
-    QLabel* _challengeRating;
-
+    Ui::EncounterBattleEdit *ui;
     EncounterBattle* _battle;
 
     enum EncounterBattleEdit_CombatantList
