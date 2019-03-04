@@ -420,6 +420,12 @@ void BattleDialogManager::setCountdownDuration(int countdownDuration)
         _dlg->setCountdownDuration(countdownDuration);
 }
 
+void BattleDialogManager::cancelPublish()
+{
+    if(_dlg)
+        _dlg->cancelPublish();
+}
+
 void BattleDialogManager::completeBattle()
 {
     delete _dlg;
@@ -496,6 +502,7 @@ BattleDialog* BattleDialogManager::createBattleDialog(BattleDialogModel* dlgMode
     connect(dlg,SIGNAL(monsterSelected(QString)),this,SIGNAL(monsterSelected(QString)));
     connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(publishImage(QImage)));
     connect(dlg,SIGNAL(animateImage(QImage)),this,SIGNAL(animateImage(QImage)));
+    connect(dlg,SIGNAL(showPublishWindow()),this,SIGNAL(showPublishWindow()));
 
     connect(dlg,SIGNAL(battleComplete()),this,SLOT(completeBattle()));
     connect(dlg,SIGNAL(selectNewMap()),this,SLOT(selectBattleMap()));

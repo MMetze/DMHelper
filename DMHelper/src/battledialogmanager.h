@@ -36,6 +36,7 @@ signals:
     void monsterSelected(QString);
     void publishImage(QImage);
     void animateImage(QImage);
+    void showPublishWindow();
 
     void dirty();
 
@@ -56,6 +57,8 @@ public slots:
     void setShowOnDeck(bool showOnDeck);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
+
+    void cancelPublish();
 
 protected slots:
     void completeBattle();

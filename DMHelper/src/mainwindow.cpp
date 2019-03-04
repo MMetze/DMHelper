@@ -247,7 +247,7 @@ MainWindow::MainWindow(QWidget *parent) :
     readBestiary();
     qDebug() << "[Main] Bestiary Loaded";
 
-    connect(this,SIGNAL(dispatchPublishImage(QImage)),this,SLOT(handlePublishImage(QImage)));
+    connect(this,SIGNAL(dispatchPublishImage(QImage)),this,SLOT(showPublishWindow()));
     connect(this,SIGNAL(dispatchPublishImage(QImage)),pubWindow,SLOT(setImage(QImage)));
     connect(this,SIGNAL(dispatchAnimateImage(QImage)),pubWindow,SLOT(setImageNoScale(QImage)));
 
@@ -331,9 +331,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleDlgMgr, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
     connect(_battleDlgMgr, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(_battleDlgMgr, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(_battleDlgMgr, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_battleDlgMgr, SIGNAL(dirty()), this, SLOT(setDirty()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), _battleDlgMgr, SLOT(targetResized(QSize)));
     connect(this, SIGNAL(campaignLoaded(Campaign*)), _battleDlgMgr, SLOT(setCampaign(Campaign*)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage)), _battleDlgMgr, SLOT(cancelPublish()));
     _battleDlgMgr->setShowOnDeck(_options->getShowOnDeck());
     _battleDlgMgr->setShowCountdown(_options->getShowCountdown());
     _battleDlgMgr->setCountdownDuration(_options->getCountdownDuration());
@@ -849,6 +851,15 @@ void MainWindow::setDirty()
 {
     dirty = true;
     setWindowModified(dirty);
+}
+
+void MainWindow::showPublishWindow()
+{
+    if(!pubWindow->isVisible())
+    {
+        pubWindow->show();
+        pubWindow->activateWindow();
+    }
 }
 
 void MainWindow::linkActivated(const QUrl & link)
@@ -1418,17 +1429,6 @@ void MainWindow::openFile(const QString& filename)
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(filename);
-}
-
-void MainWindow::handlePublishImage(QImage img)
-{
-    Q_UNUSED(img);
-
-    if(!pubWindow->isVisible())
-    {
-        pubWindow->show();
-        pubWindow->activateWindow();
-    }
 }
 
 void MainWindow::handleCampaignLoaded(Campaign* campaign)

@@ -281,7 +281,7 @@
      <item>
       <widget class="QLabel" name="lblTracks">
        <property name="text">
-        <string>Background Tracks:</string>
+        <string>Track:</string>
        </property>
       </widget>
      </item>

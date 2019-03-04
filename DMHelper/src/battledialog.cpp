@@ -508,6 +508,11 @@ void BattleDialog::cancelSelect()
     setMapCursor();
 }
 
+void BattleDialog::cancelPublish()
+{
+    ui->btnPublish->setChecked(false);
+}
+
 void BattleDialog::keyPressEvent(QKeyEvent * e)
 {
     switch(e->key())
@@ -906,6 +911,9 @@ void BattleDialog::handleApplyEffect(QAbstractGraphicsShapeItem* effect)
 
 void BattleDialog::handleItemMouseDown(QGraphicsPixmapItem* item)
 {
+    if(!ui->chkLimitMovement->isChecked())
+        return;
+
     BattleDialogModelCombatant* activeCombatant = _model.getActiveCombatant();
 
     if((!_movementPixmap) || (!activeCombatant))
@@ -922,7 +930,7 @@ void BattleDialog::handleItemMouseDown(QGraphicsPixmapItem* item)
         //_moveRadius = _model.getGridScale() * speedSquares / SELECTED_PIXMAP_SIZE;
         //_moveStart = _combatantIcons.value(_selectedCombatant)->pos();
         _moveStart = _combatantIcons.value(activeCombatant)->pos();
-        qDebug() << "[Battle Dialog] setting selected pixmap to size " << _moveRadius;
+        //qDebug() << "[Battle Dialog] setting selected pixmap to size " << _moveRadius;
         //_movementPixmap->setScale(_moveRadius);
         //moveRectToPixmap(_movementPixmap, item);
         _movementPixmap->setPos(_moveStart);
@@ -934,6 +942,9 @@ void BattleDialog::handleItemMouseDown(QGraphicsPixmapItem* item)
 
 void BattleDialog::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
 {
+    if(!ui->chkLimitMovement->isChecked())
+        return;
+
     BattleDialogModelCombatant* activeCombatant = _model.getActiveCombatant();
 
     if((!_movementPixmap) || (!activeCombatant))
@@ -968,7 +979,7 @@ void BattleDialog::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
     {
         //_movementPixmap->setScale(_moveRadius);
         _moveStart = combatantPos;
-        qDebug() << "[Battle Dialog] setting selected pixmap to size " << _moveRadius << " and position to " << _moveStart;
+        //qDebug() << "[Battle Dialog] setting selected pixmap to size " << _moveRadius << " and position to " << _moveStart;
     }
 
     _movementPixmap->setPos(combatantPos);
@@ -979,7 +990,7 @@ void BattleDialog::handleItemMouseUp(QGraphicsPixmapItem* item)
 {
     if(_movementPixmap)
     {
-        qDebug() << "[Battle Dialog] setting selected pixmap to size " << _model.getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE;
+        //qDebug() << "[Battle Dialog] setting selected pixmap to size " << _model.getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE;
         //_movementPixmap->setScale(_model.getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE);
         //moveRectToPixmap(_movementPixmap, item);
         _movementPixmap->setRotation(0.0);
@@ -1150,11 +1161,15 @@ void BattleDialog::togglePublishing(bool publishing)
     _publishing = publishing;
     if(_publishing)
     {
+        ui->btnPublish->setStyleSheet(QString("QPushButton {color: red; font-weight: bold; }"));
+        ui->btnPublish->setText(QString("Publishing!"));
         createPrescaledBackground();
         publishImage();
     }
     else
     {
+        ui->btnPublish->setStyleSheet(QString("QPushButton {color: gray; font-weight: normal; }"));
+        ui->btnPublish->setText(QString("Publish"));
         _publishTimer->stop();
     }
 }
@@ -1165,7 +1180,8 @@ void BattleDialog::publishImage()
     {
         if(!_publishTimer->isActive())
         {
-            executePublishImage();
+            //executePublishImage();
+            emit showPublishWindow();
             // OPTIMIZE: optimize this to be faster, doing only changes?
             _publishTimer->start(25);
             qDebug() << "[Battle Dialog] publish timer activated";

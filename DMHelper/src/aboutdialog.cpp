@@ -9,8 +9,14 @@ AboutDialog::AboutDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    QString licenseText;
+
+    licenseText += QString("Quick reference icons provided by http://game-icons.net/\n\n\n");
+
     if(Bestiary::Instance())
-        ui->edtLicenses->setText(Bestiary::Instance()->getLicenseText().join(QString("\n")));
+        licenseText += Bestiary::Instance()->getLicenseText().join(QString("\n")).append(QString("\n"));
+
+    ui->edtLicenses->setText(licenseText);
 
     ui->lblVersion->setText(QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION));
     ui->lblBestiaryVersion->setText(Bestiary::getExpectedVersion());

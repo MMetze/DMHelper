@@ -68,12 +68,15 @@ public slots:
     void zoomSelect();
     void cancelSelect();
 
+    void cancelPublish();
+
 signals:
     void battleComplete();
     void characterSelected(int id);
     void monsterSelected(const QString& monsterClass);
     void publishImage(QImage img);
     void animateImage(QImage img);
+    void showPublishWindow();
     void selectNewMap();
     void addMonsters();
     void addWave();

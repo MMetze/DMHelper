@@ -28,6 +28,13 @@ MapFrame::MapFrame(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // TODO: reactivate markers
+    ui->grpMode->setVisible(false);
+    ui->btnModeFoW->setVisible(false);
+    ui->btnModeEdit->setVisible(false);
+    ui->btnModeMove->setVisible(false);
+    ui->btnShowMarkers->setVisible(false);
+
     _scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(_scene);
     ui->graphicsView->viewport()->installEventFilter(this);

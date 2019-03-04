@@ -161,6 +161,7 @@
         <file>data/distance.png</file>
         <file>data/dmhelper_large.png</file>
         <file>data/movement.png</file>
+        <file>data/icon_reload.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

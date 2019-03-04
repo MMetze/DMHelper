@@ -339,8 +339,8 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
             BattleDialogModelEffect* effect = _model.getEffectById(_mouseDownItem->data(0).toInt());
             if(effect)
                 effect->setRotation(_previousRotation + angle);
-            else
-                qDebug() << "[Battle Dialog Scene] ERROR: unable to find effect model data for rotation" << _mouseDownItem;
+            //else
+            //    qDebug() << "[Battle Dialog Scene] ERROR: unable to find effect model data for rotation" << _mouseDownItem;
             emit effectChanged(abstractShape);
         }
 
@@ -351,11 +351,11 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
     {
         if(abstractShape)
         {
-            qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
+            //qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
             BattleDialogModelEffect* effect = _model.getEffectById(abstractShape->data(0).toInt());
             if(effect)
             {
-                qDebug() << "[Battle Dialog Scene] left button setting effect position for " << effect << " to shape " << abstractShape;
+                //qDebug() << "[Battle Dialog Scene] left button setting effect position for " << effect << " to shape " << abstractShape;
                 effect->setPosition(abstractShape->pos());
             }
             emit effectChanged(abstractShape);
@@ -365,7 +365,7 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
             QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(_mouseDownItem);
             if(pixItem)
             {
-                qDebug() << "[Battle Dialog Scene] left mouse move on combatant " << pixItem;
+                //qDebug() << "[Battle Dialog Scene] left mouse move on combatant " << pixItem;
                 bool result = true;
                 emit itemMoved(pixItem, &result);
                 if(!result)
@@ -374,7 +374,7 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
         }
     }
 
-    qDebug() << "[Battle Dialog Scene] mouse move default handling triggered " << mouseEvent;
+    //qDebug() << "[Battle Dialog Scene] mouse move default handling triggered " << mouseEvent;
     // If the function reaches this point, default handling (ie drag and move) is expected
     QGraphicsScene::mouseMoveEvent(mouseEvent);
 }

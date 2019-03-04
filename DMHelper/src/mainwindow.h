@@ -76,6 +76,8 @@ public slots:
     void clearDirty();
     void setDirty();
 
+    void showPublishWindow();
+
     void linkActivated(const QUrl & link);
 
     // Bestiary
@@ -122,7 +124,6 @@ protected:
 
 protected slots:
     void openFile(const QString& filename);
-    void handlePublishImage(QImage img);
     void handleCampaignLoaded(Campaign* campaign);
     void updateCampaignTree();
     void updateMapFiles();

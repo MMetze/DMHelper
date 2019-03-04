@@ -50,11 +50,19 @@ enter while editing HP turns off publish
 Add a round counter, add countdown of effects, add effects to individuals
 
 DONE
+v0.17.0
+Remodelled buttons in battle encounter editor and battle dialog
+Added "Limit Movement" checkbox in battle editor
+Removed references to Markers in maps
+Publish button on battle dialog is more highlighted
+Added a splash screen
+
 v0.16.0
 New sketchbook style
 New Bestiary file format *** WARNING - BESTIARY INCOMPATIBILITY ***
 Improved Bestiary contents
 Added About Dialog with verion and license information
+Movement distance in battle dialogs
 
 v0.15.0
 CRASH bug fixed in battle
