@@ -8,7 +8,23 @@
   <adventures>
    <adventure expanded="1" name="First Adventure" _baseID="1001">
     <encounters/>
-    <maps/>
+    <maps>
+     <map filename="Ancient Catacombs.jpg" name="Ancient Catacombs" audiotrack="-1" _baseID="1002">
+      <actions/>
+     </map>
+     <map filename="Big Hilltop Camp.jpg" name="Big Hilltop Camp" audiotrack="-1" _baseID="1003">
+      <actions/>
+     </map>
+     <map filename="Crumbling Facility.jpg" name="Crumbling Facility" audiotrack="-1" _baseID="1004">
+      <actions/>
+     </map>
+     <map filename="Cultist Lair.jpg" name="Cultist Lair" audiotrack="-1" _baseID="1005">
+      <actions/>
+     </map>
+     <map filename="Forked Road.jpg" name="Forked Road" audiotrack="-1" _baseID="1006">
+      <actions/>
+     </map>
+    </maps>
    </adventure>
   </adventures>
   <settings/>
