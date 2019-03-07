@@ -19,11 +19,11 @@ Unpack the archive to an destination of your choosing. Keep in mind that you mig
 There are no more installation steps neccessary. Just start DMHelper.example
 
 ## First run
-When DMHelper is started for the first time, you can open a bestiary.xml. This file will include a database with lots of monsters, statblocks and images, for easy use within DMHelper.
-![Select bestiary dialog](Images/bestiary.jpg)
+When DMHelper is started for the first time, you can open a bestiary.xml. This file will include a database with lots of monsters, statblocks and images, for easy use within DMHelper.  
+![Select bestiary dialog](Images/bestiary.jpg)  
 This step is skippable and the bestiary can be imported later.
 After skipping, or importing, a bestiary, the main interface will be opened.
 
 ## Empty campaign
-First of all, a new campaign has to be created or opened. Hit _File_ to
+First of all, a new campaign has to be created or opened. Hit _File_ to see your options.  
 ![Interface](Images/interface_01.jpg)
