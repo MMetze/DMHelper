@@ -33,16 +33,19 @@ QMenu{background-image: url(:/img/data/parchment.jpg);}
 QToolBar{background-image: url(:/img/data/parchment.jpg);}
 QStatusBar{background-image: url(:/img/data/parchment.jpg);}
 QMainWindow{background-image: url(:/img/data/parchment.jpg);}
-QSplitter:handle{background: rgb(232, 199, 130);}
-QScrollArea{background: rgb(247, 230, 174);}
-QScrollBar{background: rgb(247, 230, 174);}
+QSplitter:handle{background: rgb(200, 200, 200);}
+QScrollArea{background: rgb(200, 200, 200);}
+QScrollBar{background: rgb(200, 200, 200);}
 QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
     <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
+   <layout class="QGridLayout" name="gridLayout" columnstretch="0,0">
+    <item row="0" column="1">
+     <widget class="ScrollOverlayWidget" name="scrollWidget" native="true"/>
+    </item>
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
       <property name="orientation">
@@ -57,7 +60,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
        </property>
        <property name="minimumSize">
         <size>
-         <width>350</width>
+         <width>300</width>
          <height>0</height>
         </size>
        </property>
@@ -101,109 +104,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
        </property>
        <widget class="QWidget" name="page"/>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <property name="sizeConstraint">
-         <enum>QLayout::SetMinimumSize</enum>
-        </property>
-        <item>
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Challenge Thresholds</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_4">
-          <item>
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Easy:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblEasy">
-            <property name="text">
-             <string>---</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Medium:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblMedium">
-            <property name="text">
-             <string>---</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Hard:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblHard">
-            <property name="text">
-             <string>---</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3">
-          <item>
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Deadly:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblDeadly">
-            <property name="text">
-             <string>---</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <spacer name="verticalSpacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
-      </widget>
      </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="ScrollOverlayWidget" name="scrollWidget" native="true"/>
     </item>
    </layout>
   </widget>
@@ -213,7 +114,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <x>0</x>
      <y>0</y>
      <width>1467</width>
-     <height>26</height>
+     <height>17</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -253,6 +154,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     </widget>
     <addaction name="actionNew_Adventure"/>
     <addaction name="actionNew_Character"/>
+    <addaction name="action_Import_Character"/>
     <addaction name="separator"/>
     <addaction name="menuNew_Encounter"/>
     <addaction name="actionNew_Map"/>
@@ -272,6 +174,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <addaction name="actionPublish_Text"/>
     <addaction name="separator"/>
     <addaction name="actionOptions"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Edit"/>
@@ -392,7 +295,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="actionOptions">
    <property name="text">
-    <string>Options</string>
+    <string>Options...</string>
    </property>
   </action>
   <action name="actionBattle_Dialog">
@@ -411,6 +314,16 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionStart_Battle">
    <property name="text">
     <string>Start New Battle</string>
+   </property>
+  </action>
+  <action name="action_Import_Character">
+   <property name="text">
+    <string>&amp;Import Character</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About...</string>
    </property>
   </action>
  </widget>

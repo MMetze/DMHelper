@@ -86,11 +86,10 @@ int Monster::getType() const
 
 int Monster::getSpeed() const
 {
-    if(!_monsterClass)
+    if(_monsterClass)
+        return _monsterClass->getSpeedValue();
+    else
         return 0;
-
-    QString speedStr = _monsterClass->getSpeed();
-    return speedStr.left(speedStr.indexOf(" ")).toInt();
 }
 
 int Monster::getArmorClass() const

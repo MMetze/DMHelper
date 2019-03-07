@@ -18,7 +18,9 @@
 #include "itemselectdialog.h"
 #include "mapselectdialog.h"
 #include "selectzoom.h"
-#include "networkcontroller.h"
+#ifdef INCLUDE_NETWORK_SUPPORT
+    #include "networkcontroller.h"
+#endif
 #include <QMessageBox>
 #include <QDebug>
 
@@ -27,7 +29,9 @@ BattleDialogManager::BattleDialogManager(QWidget *parent) :
     _dlg(nullptr),
     _encounterBattle(nullptr),
     _campaign(nullptr),
+#ifdef INCLUDE_NETWORK_SUPPORT
     _networkManager(nullptr),
+#endif
     _targetSize(),
     _showOnDeck(true),
     _showCountdown(true),
@@ -52,10 +56,12 @@ QList<BattleDialogModelCombatant*> BattleDialogManager::getLivingMonsters() cons
     }
 }
 
+#ifdef INCLUDE_NETWORK_SUPPORT
 void BattleDialogManager::setNetworkManager(NetworkController* networkManager)
 {
     _networkManager = networkManager;
 }
+#endif
 
 void BattleDialogManager::setCampaign(Campaign* campaign)
 {
@@ -414,6 +420,12 @@ void BattleDialogManager::setCountdownDuration(int countdownDuration)
         _dlg->setCountdownDuration(countdownDuration);
 }
 
+void BattleDialogManager::cancelPublish()
+{
+    if(_dlg)
+        _dlg->cancelPublish();
+}
+
 void BattleDialogManager::completeBattle()
 {
     delete _dlg;
@@ -458,8 +470,13 @@ void BattleDialogManager::selectBattleMap()
 
 void BattleDialogManager::uploadBattleModel()
 {
+#ifdef INCLUDE_NETWORK_SUPPORT
     if((!_dlg) || (!_networkManager))
         return;
+#else
+    if(!_dlg)
+        return;
+#endif
 
     qDebug() << "[Battle Dialog Manager] Uploading current battle model.";
 
@@ -470,7 +487,9 @@ void BattleDialogManager::uploadBattleModel()
     QDir emptyDir;
     _dlg->getModel().outputXML(doc, root, emptyDir);
 
+#ifdef INCLUDE_NETWORK_SUPPORT
     _networkManager->setPayload(QString("battle"), doc.toString());
+#endif
 }
 
 BattleDialog* BattleDialogManager::createBattleDialog(BattleDialogModel* dlgModel)
@@ -483,6 +502,7 @@ BattleDialog* BattleDialogManager::createBattleDialog(BattleDialogModel* dlgMode
     connect(dlg,SIGNAL(monsterSelected(QString)),this,SIGNAL(monsterSelected(QString)));
     connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(publishImage(QImage)));
     connect(dlg,SIGNAL(animateImage(QImage)),this,SIGNAL(animateImage(QImage)));
+    connect(dlg,SIGNAL(showPublishWindow()),this,SIGNAL(showPublishWindow()));
 
     connect(dlg,SIGNAL(battleComplete()),this,SLOT(completeBattle()));
     connect(dlg,SIGNAL(selectNewMap()),this,SLOT(selectBattleMap()));

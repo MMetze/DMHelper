@@ -339,27 +339,42 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
             BattleDialogModelEffect* effect = _model.getEffectById(_mouseDownItem->data(0).toInt());
             if(effect)
                 effect->setRotation(_previousRotation + angle);
-            else
-                qDebug() << "[Battle Dialog Scene] ERROR: unable to find effect model data for rotation" << _mouseDownItem;
+            //else
+            //    qDebug() << "[Battle Dialog Scene] ERROR: unable to find effect model data for rotation" << _mouseDownItem;
             emit effectChanged(abstractShape);
         }
 
         mouseEvent->accept();
         return;
     }
-    else if((mouseEvent->buttons() & Qt::LeftButton) && (abstractShape))
+    else if(mouseEvent->buttons() & Qt::LeftButton)
     {
-        qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
-        BattleDialogModelEffect* effect = _model.getEffectById(abstractShape->data(0).toInt());
-        if(effect)
+        if(abstractShape)
         {
-            qDebug() << "[Battle Dialog Scene] left button setting effect position for " << effect << " to shape " << abstractShape;
-            effect->setPosition(abstractShape->pos());
+            //qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
+            BattleDialogModelEffect* effect = _model.getEffectById(abstractShape->data(0).toInt());
+            if(effect)
+            {
+                //qDebug() << "[Battle Dialog Scene] left button setting effect position for " << effect << " to shape " << abstractShape;
+                effect->setPosition(abstractShape->pos());
+            }
+            emit effectChanged(abstractShape);
         }
-        emit effectChanged(abstractShape);
+        else
+        {
+            QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(_mouseDownItem);
+            if(pixItem)
+            {
+                //qDebug() << "[Battle Dialog Scene] left mouse move on combatant " << pixItem;
+                bool result = true;
+                emit itemMoved(pixItem, &result);
+                if(!result)
+                    return;
+            }
+        }
     }
 
-    qDebug() << "[Battle Dialog Scene] mouse move default handling triggered " << mouseEvent;
+    //qDebug() << "[Battle Dialog Scene] mouse move default handling triggered " << mouseEvent;
     // If the function reaches this point, default handling (ie drag and move) is expected
     QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
@@ -390,34 +405,49 @@ void BattleDialogGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseE
 
     qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
 
-    if((item)&&(item->data(0).toInt() > 0))
+    if(item)
     {
-        _mouseDown = true;
-        _mouseDownPos = mouseEvent->scenePos() - item->scenePos();
-        _mouseDownItem = item;
+        if(item->data(0).toInt() > 0)
+        {
+            _mouseDown = true;
+            _mouseDownPos = mouseEvent->scenePos() - item->scenePos();
+            _mouseDownItem = item;
 
-        if(mouseEvent->button() == Qt::RightButton)
-        {
-            _previousRotation = _mouseDownItem->rotation();
-             qDebug() << "[Battle Dialog Scene] right mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ", rot=" << _previousRotation;
-            mouseEvent->accept();
-            return;
+            if(mouseEvent->button() == Qt::RightButton)
+            {
+                _previousRotation = _mouseDownItem->rotation();
+                 qDebug() << "[Battle Dialog Scene] right mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ", rot=" << _previousRotation;
+                mouseEvent->accept();
+                return;
+            }
+            else if(mouseEvent->button() == Qt::LeftButton)
+            {
+                qDebug() << "[Battle Dialog Scene] left mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
+                emit effectChanged(abstractShape);
+            }
+            else
+            {
+                qDebug() << "[Battle Dialog Scene] other mouse button down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
+            }
         }
-        else if(mouseEvent->button() == Qt::LeftButton)
+        else if((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
         {
-            qDebug() << "[Battle Dialog Scene] left mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
-            emit effectChanged(abstractShape);
+            QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+            if(pixItem)
+            {
+                _mouseDown = true;
+                _mouseDownItem = item;
+                qDebug() << "[Battle Dialog Scene] left mouse down on combatant " << pixItem;
+                emit itemMouseDown(pixItem);
+                mouseEvent->accept();
+            }
         }
         else
         {
-            qDebug() << "[Battle Dialog Scene] other mouse button down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
+            qDebug() << "[Battle Dialog Scene] ignoring mouse click for non-selectable item " << item;
+            mouseEvent->ignore();
+            return;
         }
-    }
-    else if((item)&&((item->flags() & QGraphicsItem::ItemIsSelectable) != QGraphicsItem::ItemIsSelectable))
-    {
-        qDebug() << "[Battle Dialog Scene] ignoring mouse click for non-selectable item " << item;
-        mouseEvent->ignore();
-        return;
     }
 
     qDebug() << "[Battle Dialog Scene] mouse press default handling triggered " << mouseEvent;
@@ -492,9 +522,9 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
 
         menu.exec(mouseEvent->screenPos());
 
-        _contextMenuItem = nullptr;
-        _mouseDown = false;
-        _mouseDownItem = nullptr;
+        //_contextMenuItem = nullptr;
+        //_mouseDown = false;
+        //_mouseDownItem = nullptr;
 
         // Check: These two lines removed to avoid weird rubber band when cancelling context menu
         // mouseEvent->accept();
@@ -502,14 +532,14 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
     }
     else if(mouseEvent->button() == Qt::LeftButton)
     {
-        QGraphicsView* localView = views().first();
-        QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(itemAt(mouseEvent->scenePos(),localView->transform()));
-        qDebug() << "[Battle Dialog Scene] left mouse released at " << mouseEvent->scenePos() << " for item " << item;
-        // TODO: should this be topobject?
+        //QGraphicsView* localView = views().first();
+        //QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(itemAt(mouseEvent->scenePos(),localView->transform()));
+        QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(_mouseDownItem);
 
-        if(item)
+        if(pixItem)
         {
-            emit itemMoved(item);
+            qDebug() << "[Battle Dialog Scene] left mouse released at " << mouseEvent->scenePos() << " for item " << pixItem;
+            emit itemMouseUp(pixItem);
         }
         else
         {

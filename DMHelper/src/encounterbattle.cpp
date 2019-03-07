@@ -361,7 +361,7 @@ void EncounterBattle::setText(const QString& newText)
 {
     QTextDocument doc;
     doc.setHtml(newText);
-    qDebug() << "[EncounterBattle] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
+    // qDebug() << "[EncounterBattle] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
 
     if(_text != newText)
     {
@@ -431,9 +431,11 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
     if(rootBattleElement.isNull())
         return;
 
+    /*
     int battleId = rootBattleElement.attribute("battleID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
     if(battleId != getID())
         return;
+    */
 
     _battleModel = new BattleDialogModel();
     _battleModel->inputXML(rootBattleElement);
@@ -479,7 +481,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
                     if(monster)
                         combatant = new BattleDialogModelMonsterCombatant(monster);
                     else
-                        qDebug() << "[Battle Dialog Manager] Unknown monster ID type found: " << combatantId << " for battle " << battleId;
+                        qDebug() << "[Battle Dialog Manager] Unknown monster ID type found: " << combatantId << " for battle";// " << battleId;
                 }
                 else if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Class)
                 {

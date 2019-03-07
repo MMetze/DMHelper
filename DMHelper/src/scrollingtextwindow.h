@@ -37,7 +37,7 @@ private:
 
     const EncounterScrollingText& _encounter;
     QRect _targetRect;
-    QPoint _textPos;
+    QPointF _textPos;
     int _previousHeight;
     int _timerId;
     QElapsedTimer _elapsed;

@@ -47,6 +47,7 @@ public:
     virtual int getAbilityValue(Combatant::Ability ability) const;
     virtual int getSkillModifier(Combatant::Skills skill) const = 0;
 
+    virtual int getSpeed() const = 0;
     virtual int getArmorClass() const = 0;
     virtual int getHitPoints() const = 0;
     virtual void setHitPoints(int hitPoints) = 0;

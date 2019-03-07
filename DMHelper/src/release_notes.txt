@@ -1,5 +1,19 @@
 TODOs
 
+Better battle render performance
+ON AIR icon for battle publish
+Turn Off Network (compile flag)
+Only change bestiary when no campaign is loaded
+Compass in zoom
+Compass with rotation
+MAC
+    Menus useful for Apple
+    Check in cross-compiled code
+
+Website "coming soon"
+Website first version with Forum and Bug Tracker
+
+
 Colored (Effect) Markers on individual combatants to indicate states
 
 
@@ -36,6 +50,20 @@ enter while editing HP turns off publish
 Add a round counter, add countdown of effects, add effects to individuals
 
 DONE
+v0.17.0
+Remodelled buttons in battle encounter editor and battle dialog
+Added "Limit Movement" checkbox in battle editor
+Removed references to Markers in maps
+Publish button on battle dialog is more highlighted
+Added a splash screen
+
+v0.16.0
+New sketchbook style
+New Bestiary file format *** WARNING - BESTIARY INCOMPATIBILITY ***
+Improved Bestiary contents
+Added About Dialog with verion and license information
+Movement distance in battle dialogs
+
 v0.15.0
 CRASH bug fixed in battle
 Distance measurement in battle

@@ -99,7 +99,7 @@ int BattleDialogModelMonsterCombatant::getStrength() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getStrength!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getStrength!";
         return 0;
     }
 }
@@ -113,7 +113,7 @@ int BattleDialogModelMonsterCombatant::getDexterity() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getDexterity!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getDexterity!";
         return 0;
     }
 }
@@ -127,7 +127,7 @@ int BattleDialogModelMonsterCombatant::getConstitution() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getConstitution!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getConstitution!";
         return 0;
     }
 }
@@ -141,7 +141,7 @@ int BattleDialogModelMonsterCombatant::getIntelligence() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getIntelligence!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getIntelligence!";
         return 0;
     }
 }
@@ -155,7 +155,7 @@ int BattleDialogModelMonsterCombatant::getWisdom() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getWisdom!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getWisdom!";
         return 0;
     }
 }
@@ -169,8 +169,22 @@ int BattleDialogModelMonsterCombatant::getCharisma() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getCharisma!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getCharisma!";
         return 0;
+    }
+}
+
+int BattleDialogModelMonsterCombatant::getSpeed() const
+{
+    // TODO: should this just be impossible?
+    if(_combatant)
+    {
+        return _combatant->getSpeed();
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getSpeed!";
+        return 30;
     }
 }
 
@@ -183,7 +197,7 @@ int BattleDialogModelMonsterCombatant::getArmorClass() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getArmorClass!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getArmorClass!";
         return 10;
     }
 }
@@ -211,7 +225,7 @@ QPixmap BattleDialogModelMonsterCombatant::getIconPixmap(DMHelper::PixmapSize ic
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getIconPixmap!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getIconPixmap!";
         return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
     }
 }
@@ -230,7 +244,7 @@ MonsterClass* BattleDialogModelMonsterCombatant::getMonsterClass() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterCombatant] No valid monster in getMonsterClass!";
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getMonsterClass!";
         return 0;
     }
 }

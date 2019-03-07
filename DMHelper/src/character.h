@@ -61,8 +61,8 @@ public:
         INTVALUE_COUNT
     };
 
-    explicit Character(QObject *parent = 0);
-    explicit Character(QDomElement &element, QObject *parent = 0);
+    explicit Character(QObject *parent = nullptr);
+    explicit Character(QDomElement &element, QObject *parent = nullptr);
     explicit Character(const Character &obj);  // copy constructor
 
     // From CampaignObjectBase
@@ -75,6 +75,8 @@ public:
     virtual Combatant* clone() const;
 
     virtual int getType() const;
+    virtual int getDndBeyondID() const;
+    virtual void setDndBeyondID(int id);
 
     virtual int getSpeed() const;
 
@@ -117,6 +119,7 @@ protected:
 private:
     void setDefaultValues();
 
+    int _dndBeyondID;
     QVector<QString> _stringValues;
     QVector<int> _intValues;
     QVector<bool> _skillValues;

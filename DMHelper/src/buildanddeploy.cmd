@@ -35,12 +35,12 @@ windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin
 
 cd ..\bin
 copy NUL DMHelper.log
-rename "DMHelper.exe" "DMHelper.__exe"
+rem NOT NEEDED rename "DMHelper.exe" "DMHelper.__exe"
 "C:\Program Files\7-Zip\7z" a -tzip archive.zip *
 cd ..
 move bin\archive.zip .\archive.zip
-del "DM Helper release.__zip"
-rename archive.zip "DM Helper release.__zip"
+del "DM Helper release.zip"
+rename archive.zip "DM Helper release.zip"
 
 del src.zip
 "C:\Program Files\7-Zip\7z" a -tzip src.zip src\*

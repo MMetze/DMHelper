@@ -3,6 +3,7 @@
 
 #include "combatant.h"
 #include "scaledpixmap.h"
+#include "monsteraction.h"
 #include <QString>
 #include <QMap>
 
@@ -12,8 +13,9 @@ class MonsterClass : public QObject
 {
     Q_OBJECT
 public:
-    explicit MonsterClass(const QString& name, QObject *parent = 0);
-    explicit MonsterClass(QDomElement &element, QObject *parent = 0);
+
+    explicit MonsterClass(const QString& name, QObject *parent = nullptr);
+    explicit MonsterClass(const QDomElement &element, QObject *parent = nullptr);
 
     void inputXML(const QDomElement &element);
     void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const;
@@ -24,70 +26,88 @@ public:
     int getType() const;
     bool getPrivate() const;
 
-    bool getLegendary() const;
+    bool getLegendary() const; // bool equivalent to having existing legendary actions
     QString getIcon() const;
     QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
     QString getName() const;
     QString getMonsterType() const;
+    QString getMonsterSubType() const;
     QString getMonsterSize() const;
     int getMonsterSizeCategory() const;
     int getMonsterSizeFactor() const;
+    QString getSpeed() const;
+    int getSpeedValue() const;
     QString getAlignment() const;
+    QString getLanguages() const;
     int getArmorClass() const;
-    QString getArmorClassDescription() const;
     Dice getHitDice() const;
     int getAverageHitPoints() const;
-    QString getSpeed() const;
+    QString getConditionImmunities() const;
+    QString getDamageImmunities() const;
+    QString getDamageResistances() const;
+    QString getDamageVulnerabilities() const;
+    QString getSenses() const;
+    QString getChallenge() const;
+    float getChallengeNumber() const;
+    int getXP() const;
     int getStrength() const;
     int getDexterity() const;
     int getConstitution() const;
     int getIntelligence() const;
     int getWisdom() const;
     int getCharisma() const;
-    QString getSkills() const;
-    QString getResistances() const;
-    QString getSenses() const;
-    QString getLanguages() const;
-    float getChallenge() const;
-    int getXP() const;
-    QString getTraits() const;
-    QString getActions() const;
 
     int getAbilityValue(Combatant::Ability ability) const;
     int getSkillValue(Combatant::Skills skill) const;
 
+    QList<MonsterAction> getActions() const;
+    void addAction(const MonsterAction& action);
+    void setAction(int index, const MonsterAction& action);
+    int removeAction(const MonsterAction& action);
+    QList<MonsterAction> getLegendaryActions() const;
+    void addLegendaryAction(const MonsterAction& action);
+    void setLegendaryAction(int index, const MonsterAction& action);
+    int removeLegendaryAction(const MonsterAction& action);
+    QList<MonsterAction> getSpecialAbilities() const;
+    void addSpecialAbility(const MonsterAction& action);
+    void setSpecialAbility(int index, const MonsterAction& action);
+    int removeSpecialAbility(const MonsterAction& action);
+    QList<MonsterAction> getReactions() const;
+    void addReaction(const MonsterAction& action);
+    void setReaction(int index, const MonsterAction& action);
+    int removeReaction(const MonsterAction& action);
+
     static int convertSizeToCategory(const QString& monsterSize);
     static int convertSizeCategoryToScaleFactor(int category);
     static int convertSizeToScaleFactor(const QString& monsterSize);
-
+    static void outputValue(QDomDocument &doc, QDomElement &element, const QString& valueName, const QString& valueText);
 
 public slots:
     void setPrivate(bool isPrivate);
-    void setLegendary(bool isLegendary);
     void setIcon(const QString& newIcon);
     void searchForIcon(const QString &newIcon);
     void setName(const QString& name);
     void setMonsterType(const QString& monsterType);
+    void setMonsterSubType(const QString& monsterSubType);
+    void setMonsterSize(const QString& monsterSize);
+    void setSpeed(const QString& speed);
     void setAlignment(const QString& alignment);
+    void setLanguages(const QString& languages);
     void setArmorClass(int armorClass);
-    void setArmorClassDescription(const QString& armorClassDescription);
     void setHitDice(const Dice& hitDice);
     void setAverageHitPoints(int averageHitPoints);
-    void setSpeed(const QString& speed);
+    void setConditionImmunities(const QString& conditionImmunities);
+    void setDamageImmunities(const QString& damageImmunities);
+    void setDamageResistances(const QString& damageResistances);
+    void setDamageVulnerabilities(const QString& damageVulnerabilities);
+    void setSenses(const QString& senses);
+    void setChallenge(const QString& challenge);
     void setStrength(int score);
     void setDexterity(int score);
     void setConstitution(int score);
     void setIntelligence(int score);
     void setWisdom(int score);
     void setCharisma(int score);
-    void setSkills(const QString& skills);
-    void setResistances(const QString& resistances);
-    void setSenses(const QString& senses);
-    void setLanguages(const QString& languages);
-    void setChallenge(float challenge);
-    void setXP(int xp);
-    void setTraits(const QString& traits);
-    void setActions(const QString& actions);
 
 signals:
     void iconChanged();
@@ -95,35 +115,59 @@ signals:
 
 protected:
 
+    void calculateHitDiceBonus();
     void registerChange();
+    void checkForSkill(const QDomElement& element, const QString& skillName, Combatant::Skills skill);
+    void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList);
+    void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList) const;
+
+    static int convertCRtoXP(float challengeRating);
 
     bool _private;
-    bool _legendary;
+    // bool _legendary; Removed
+
     QString _icon;
+
     QString _name;
-    QString _monsterType;
+    QString _monsterType; // Now only type, no size
+    QString _monsterSubType; // New
+
+    QString _monsterSize; // new
     int _monsterSizeCategory;
+
+    QString _speed;
     QString _alignment;
+    QString _languages;
     int _armorClass;
-    QString _armorClassDescription;
+    //QString _armorClassDescription; REMOVE
     Dice _hitDice;
     int _averageHitPoints;
-    QString _speed;
+    //QString _resistances; REMOVE
+    QString _conditionImmunities; // New
+    QString _damageImmunities; // New
+    QString _damageResistances; // New
+    QString _damageVulnerabilities; // New
+    QString _senses;
+    QString _challenge; // changed from float to string, need both getters
+
+    //QString _skills; // completely changed to individual values to be read
+    QMap<int,int> _skillValues;
+
     int _strength;
     int _dexterity;
     int _constitution;
     int _intelligence;
     int _wisdom;
     int _charisma;
-    QString _skills;
-    QMap<int,int> _skillValues;
-    QString _resistances;
-    QString _senses;
-    QString _languages;
-    float _challenge;
-    int _XP;
-    QString _traits;
-    QString _actions;
+
+    //int _XP; removed, derive from CR
+    //QString _traits; removed
+    //QString _actions; removed
+
+    QList<MonsterAction> _actions; //NEW
+    QList<MonsterAction> _legendaryActions; // NEW
+    QList<MonsterAction> _specialAbilities; // NEW
+    QList<MonsterAction> _reactions; // NEW
 
     bool _batchChanges;
     bool _changesMade;

@@ -4,7 +4,9 @@
 #include <QDialog>
 
 class MonsterClass;
+class MonsterAction;
 class Bestiary;
+class QVBoxLayout;
 
 namespace Ui {
 class BestiaryDialog;
@@ -15,7 +17,7 @@ class BestiaryDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BestiaryDialog(QWidget *parent = 0);
+    explicit BestiaryDialog(QWidget *parent = nullptr);
     ~BestiaryDialog();
 
     MonsterClass* getMonster() const;
@@ -41,6 +43,15 @@ protected slots:
     void monsterRenamed();
     void handlePublishButton();
 
+    void addAction();
+    void deleteAction(const MonsterAction& action);
+    void addLegendaryAction();
+    void deleteLegendaryAction(const MonsterAction& action);
+    void addSpecialAbility();
+    void deleteSpecialAbility(const MonsterAction& action);
+    void addReaction();
+    void deleteReaction(const MonsterAction& action);
+
 protected:
     // From QWidget
     virtual void closeEvent(QCloseEvent * event);
@@ -54,7 +65,14 @@ private:
     void loadMonsterImage();
     void storeMonsterData();
 
+    void clearActionWidgets();
+    void clearWidget(QWidget* widget);
+
     Ui::BestiaryDialog *ui;
+    QWidget* _actionsWidget;
+    QWidget* _legendaryActionsWidget;
+    QWidget* _specialAbilitiesWidget;
+    QWidget* _reactionsWidget;
 
     MonsterClass* _monster;
     bool _edit;

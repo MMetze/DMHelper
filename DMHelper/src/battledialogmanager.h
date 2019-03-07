@@ -2,6 +2,7 @@
 #define BATTLEDIALOGMANAGER_H
 
 #include "battledialogmodel.h"
+#include "dmconstants.h"
 #include <QObject>
 #include <QImage>
 #include <QString>
@@ -24,7 +25,9 @@ public:
     virtual ~BattleDialogManager();
 
     QList<BattleDialogModelCombatant*> getLivingMonsters() const;
+#ifdef INCLUDE_NETWORK_SUPPORT
     void setNetworkManager(NetworkController* networkManager);
+#endif
 
 signals:
     void battleActive(bool active);
@@ -33,6 +36,7 @@ signals:
     void monsterSelected(QString);
     void publishImage(QImage);
     void animateImage(QImage);
+    void showPublishWindow();
 
     void dirty();
 
@@ -54,6 +58,8 @@ public slots:
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
 
+    void cancelPublish();
+
 protected slots:
     void completeBattle();
     void selectBattleMap(Map* preselectedMap, Adventure* relatedAdventure);
@@ -68,7 +74,9 @@ protected:
     BattleDialog* _dlg;
     EncounterBattle* _encounterBattle;
     Campaign* _campaign;
+#ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkManager;
+#endif
     QSize _targetSize;
 
     bool _showOnDeck;

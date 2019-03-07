@@ -38,6 +38,7 @@ public:
 
     int getCharacterCount();
     Character* getCharacterById(int id);
+    Character* getCharacterByDndBeyondId(int id);
     Character* getCharacterByIndex(int index);
     int addCharacter(Character* character);
     Character* removeCharacter(int id);

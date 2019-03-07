@@ -343,6 +343,17 @@ Character* Campaign::getCharacterById(int id)
     return nullptr;
 }
 
+Character* Campaign::getCharacterByDndBeyondId(int id)
+{
+    for(int i = 0; i < characters.count(); ++i)
+    {
+        if(characters.at(i)->getDndBeyondID() == id)
+            return characters.at(i);
+    }
+
+    return nullptr;
+}
+
 Character* Campaign::getCharacterByIndex(int index)
 {
     if((index < 0)||(index >= characters.size()))

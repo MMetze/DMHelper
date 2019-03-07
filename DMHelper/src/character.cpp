@@ -177,6 +177,7 @@ const char* SKILLVALUE_WRITTENNAMES[Combatant::SKILLS_COUNT] =
 
 Character::Character(QObject *parent) :
     Combatant(parent),
+    _dndBeyondID(-1),
     _stringValues(STRINGVALUE_COUNT),
     _intValues(INTVALUE_COUNT),
     _skillValues(SKILLS_COUNT),
@@ -191,6 +192,7 @@ Character::Character(QObject *parent) :
 
 Character::Character(QDomElement &element, QObject *parent) :
     Combatant(parent),
+    _dndBeyondID(-1),
     _stringValues(STRINGVALUE_COUNT),
     _intValues(INTVALUE_COUNT),
     _skillValues(SKILLS_COUNT),
@@ -202,6 +204,7 @@ Character::Character(QDomElement &element, QObject *parent) :
 
 Character::Character(const Character &obj) :
     Combatant(obj),
+    _dndBeyondID(obj._dndBeyondID),
     _stringValues(obj._stringValues),
     _intValues(obj._intValues),
     _skillValues(obj._skillValues),
@@ -216,6 +219,8 @@ void Character::inputXML(const QDomElement &element)
     beginBatchChanges();
 
     Combatant::inputXML(element);
+
+    setDndBeyondID(element.attribute(QString("dndBeyondID"),QString::number(-1)).toInt());
 
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)
@@ -268,6 +273,16 @@ Combatant* Character::clone() const
 int Character::getType() const
 {
     return DMHelper::CombatantType_Character;
+}
+
+int Character::getDndBeyondID() const
+{
+    return _dndBeyondID;
+}
+
+void Character::setDndBeyondID(int id)
+{
+    _dndBeyondID = id;
 }
 
 void Character::setIcon(const QString &newIcon)
@@ -467,6 +482,8 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
+
+    element.setAttribute( "dndBeyondID", getDndBeyondID() );
 
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)

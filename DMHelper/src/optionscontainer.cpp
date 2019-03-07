@@ -8,12 +8,15 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     QObject(parent),
     _bestiaryFileName(),
     _lastMonster(),
+#ifdef INCLUDE_CHASE_SUPPORT
     _chaseFileName(),
+#endif
     _showAnimations(false),
     _audioVolume(100),
     _showOnDeck(true),
     _showCountdown(true),
     _countdownDuration(15),
+#ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
     _userName(),
@@ -21,6 +24,7 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     _password(), // note: password will not be stored in settings
     _sessionID(),
     _inviteID(),
+#endif
     _mruHandler(nullptr)
 {
 }
@@ -34,11 +38,12 @@ QString OptionsContainer::getBestiaryFileName() const
     return _bestiaryFileName;
 }
 
+#ifdef INCLUDE_CHASE_SUPPORT
 QString OptionsContainer::getChaseFileName() const
 {
     return _chaseFileName;
 }
-
+#endif
 
 QString OptionsContainer::getLastMonster() const
 {
@@ -69,6 +74,8 @@ int OptionsContainer::getCountdownDuration() const
 {
     return _countdownDuration;
 }
+
+#ifdef INCLUDE_NETWORK_SUPPORT
 
 bool OptionsContainer::getNetworkEnabled() const
 {
@@ -104,6 +111,8 @@ QString OptionsContainer::getInviteID() const
 {
     return _inviteID;
 }
+
+#endif //INCLUDE_NETWORK_SUPPORT
 
 MRUHandler* OptionsContainer::getMRUHandler() const
 {
@@ -142,12 +151,15 @@ void OptionsContainer::readSettings()
     // Note: password will not be stored in settings
     setBestiaryFileName(settings.value("bestiary","").toString());
     setLastMonster(settings.value("lastMonster","").toString());
+#ifdef INCLUDE_CHASE_SUPPORT
     setChaseFileName(settings.value("chase data","").toString());
+#endif
     setShowAnimations(settings.value("showAnimations",QVariant(false)).toBool());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
+#ifdef INCLUDE_NETWORK_SUPPORT
     setNetworkEnabled(settings.value("networkEnabled",QVariant(false)).toBool());
     setURLString(settings.value("url","").toString());
     setUserName(settings.value("username","").toString());
@@ -155,7 +167,7 @@ void OptionsContainer::readSettings()
     setPassword(settings.value("password","").toString());
     setSessionID(settings.value("sessionID","").toString());
     setInviteID(settings.value("inviteID","").toString());
-
+#endif
 
     if(_mruHandler)
     {
@@ -178,12 +190,15 @@ void OptionsContainer::writeSettings()
     // Note: password will not be stored in settings
     settings.setValue("bestiary", getBestiaryFileName());
     settings.setValue("lastMonster", getLastMonster());
+#ifdef INCLUDE_CHASE_SUPPORT
     settings.setValue("chase data", getChaseFileName());
+#endif
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("showOnDeck", getShowOnDeck());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
+#ifdef INCLUDE_NETWORK_SUPPORT
     settings.setValue("networkEnabled", getNetworkEnabled());
     settings.setValue("url", getURLString());
     settings.setValue("username", getUserName());
@@ -192,6 +207,7 @@ void OptionsContainer::writeSettings()
         settings.setValue("password", getPassword());
     settings.setValue("sessionID", getSessionID());
     settings.setValue("inviteID", getInviteID());
+#endif
 
     if(_mruHandler)
     {
@@ -212,6 +228,7 @@ void OptionsContainer::setBestiaryFileName(const QString& filename)
     }
 }
 
+#ifdef INCLUDE_CHASE_SUPPORT
 void OptionsContainer::setChaseFileName(const QString& filename)
 {
     if(_chaseFileName != filename)
@@ -220,6 +237,8 @@ void OptionsContainer::setChaseFileName(const QString& filename)
         emit chaseFileNameChanged();
     }
 }
+#endif
+
 void OptionsContainer::setLastMonster(const QString& lastMonster)
 {
     if(_lastMonster != lastMonster)
@@ -285,6 +304,8 @@ void OptionsContainer::setCountdownDuration(const QString& countdownDuration)
         setCountdownDuration(newDuration);
     }
 }
+
+#ifdef INCLUDE_NETWORK_SUPPORT
 
 void OptionsContainer::setNetworkEnabled(bool enabled)
 {
@@ -354,17 +375,22 @@ void OptionsContainer::setInviteID(const QString& inviteID)
     }
 }
 
+#endif //INCLUDE_NETWORK_SUPPORT
+
 void OptionsContainer::copy(OptionsContainer* other)
 {
     if(other)
     {
         setBestiaryFileName(other->_bestiaryFileName);
         setLastMonster(other->_lastMonster);
+#ifdef INCLUDE_CHASE_SUPPORT
         setChaseFileName(other->_chaseFileName);
+#endif
         setShowAnimations(other->_showAnimations);
         setShowOnDeck(other->_showOnDeck);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
+#ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);
         setUserName(other->_userName);
@@ -372,5 +398,6 @@ void OptionsContainer::copy(OptionsContainer* other)
         setPassword(other->_password);
         setSessionID(other->_sessionID);
         setInviteID(other->_inviteID);
+#endif
     }
 }

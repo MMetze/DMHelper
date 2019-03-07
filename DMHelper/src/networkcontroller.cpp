@@ -1,4 +1,7 @@
 #include "networkcontroller.h"
+
+#ifdef INCLUDE_NETWORK_SUPPORT
+
 #include "audiotrack.h"
 #include "dmhnetworkmanager.h"
 #include "dmhpayload.h"
@@ -256,3 +259,5 @@ void NetworkController::uploadPayload()
     payload.setPayload(_payload);
     _networkManager->uploadPayload(payload);
 }
+
+#endif // INCLUDE_NETWORK_SUPPORT

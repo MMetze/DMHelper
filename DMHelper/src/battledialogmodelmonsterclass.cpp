@@ -66,7 +66,7 @@ int BattleDialogModelMonsterClass::getSizeFactor() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getSizeFactor!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getSizeFactor!";
         return 1;
     }
 }
@@ -81,7 +81,7 @@ int BattleDialogModelMonsterClass::getSizeCategory() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getSizeCategory!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getSizeCategory!";
         return DMHelper::CombatantSize_Medium;
     }
 }
@@ -95,7 +95,7 @@ int BattleDialogModelMonsterClass::getStrength() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getStrength!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getStrength!";
         return 0;
     }
 }
@@ -109,7 +109,7 @@ int BattleDialogModelMonsterClass::getDexterity() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getDexterity!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getDexterity!";
         return 0;
     }
 }
@@ -123,7 +123,7 @@ int BattleDialogModelMonsterClass::getConstitution() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getConstitution!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getConstitution!";
         return 0;
     }
 }
@@ -137,7 +137,7 @@ int BattleDialogModelMonsterClass::getIntelligence() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getIntelligence!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getIntelligence!";
         return 0;
     }
 }
@@ -151,7 +151,7 @@ int BattleDialogModelMonsterClass::getWisdom() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getWisdom!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getWisdom!";
         return 0;
     }
 }
@@ -165,8 +165,22 @@ int BattleDialogModelMonsterClass::getCharisma() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getCharisma!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getCharisma!";
         return 0;
+    }
+}
+
+int BattleDialogModelMonsterClass::getSpeed() const
+{
+    // TODO: should this just be impossible?
+    if(_monsterClass)
+    {
+        return _monsterClass->getSpeedValue();
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getSpeed!";
+        return 30;
     }
 }
 
@@ -179,7 +193,7 @@ int BattleDialogModelMonsterClass::getArmorClass() const
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getArmorClass!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getArmorClass!";
         return 10;
     }
 }
@@ -209,7 +223,7 @@ QString BattleDialogModelMonsterClass::getName() const
         }
         else
         {
-            qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getName!";
+            qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getName!";
             return QString();
         }
     }
@@ -227,7 +241,7 @@ QPixmap BattleDialogModelMonsterClass::getIconPixmap(DMHelper::PixmapSize iconSi
     }
     else
     {
-        qDebug() << "[BattleDialogModelMonsterClass] No valid monster class in getIconPixmap!";
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getIconPixmap!";
         return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
     }
 }

@@ -45,7 +45,6 @@ SOURCES += main.cpp\
     dice.cpp \
     attack.cpp \
     combatantdialog.cpp \
-    encounterbattleedit.cpp \
     battledialog.cpp \
     monster.cpp \
     monsterwidget.cpp \
@@ -133,7 +132,18 @@ SOURCES += main.cpp\
     audiotrack.cpp \
     audiotrackedit.cpp \
     audioplayer.cpp \
-    networkcontroller.cpp
+    networkcontroller.cpp \
+    monsteractionframe.cpp \
+    monsteraction.cpp \
+    encounterbattleedit.cpp \
+    battledialoglogger.cpp \
+    battledialogevent.cpp \
+    battledialogeventnewround.cpp \
+    battledialogeventdamage.cpp \
+    characterimporter.cpp \
+    battledialoglogview.cpp \
+    monsteractioneditdialog.cpp \
+    aboutdialog.cpp
 
 HEADERS  += mainwindow.h \
     publishwindow.h \
@@ -161,7 +171,6 @@ HEADERS  += mainwindow.h \
     dice.h \
     attack.h \
     combatantdialog.h \
-    encounterbattleedit.h \
     battledialog.h \
     monster.h \
     monsterwidget.h \
@@ -249,7 +258,18 @@ HEADERS  += mainwindow.h \
     audiotrack.h \
     audiotrackedit.h \
     audioplayer.h \
-    networkcontroller.h
+    networkcontroller.h \
+    monsteractionframe.h \
+    monsteraction.h \
+    encounterbattleedit.h \
+    battledialoglogger.h \
+    battledialogevent.h \
+    battledialogeventnewround.h \
+    battledialogeventdamage.h \
+    characterimporter.h \
+    battledialoglogview.h \
+    monsteractioneditdialog.h \
+    aboutdialog.h
 
 FORMS    += mainwindow.ui \
     dicerolldialog.ui \
@@ -290,7 +310,12 @@ FORMS    += mainwindow.ui \
     countdownframe.ui \
     countdownsubframe.ui \
     audioplaybackframe.ui \
-    audiotrackedit.ui
+    audiotrackedit.ui \
+    monsteractionframe.ui \
+    encounterbattleedit.ui \
+    battledialoglogview.ui \
+    monsteractioneditdialog.ui \
+    aboutdialog.ui
 
 RESOURCES += \
     resources.qrc
