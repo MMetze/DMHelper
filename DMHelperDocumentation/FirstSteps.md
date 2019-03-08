@@ -26,4 +26,7 @@ After skipping, or importing, a bestiary, the main interface will be opened.
 
 ## Empty campaign
 First of all, a new campaign has to be created or opened. Hit _File_ to see your options.  
-![Interface](Images/interface_01.jpg)
+![Interface](Images/interface_01.jpg)  
+If there is no recent campaign to open, the options are opening the example campaign, or creating a new one.  Just hit _New Campaign_ or _Ctrl+N_ to open a dialog for creation. There the name of the new campaign can be set. I'll use _DMHelper Realm_ for this example.  
+![Create new campaign](Images/interface_02.jpg)  
+Hit okay, then the DMHelper interface will be active and we can start adding our first content.
