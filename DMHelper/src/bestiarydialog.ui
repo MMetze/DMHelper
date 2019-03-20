@@ -456,19 +456,17 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="edtArmorClassDescription">
-           <property name="font">
-            <font>
-             <italic>false</italic>
-            </font>
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
            </property>
-           <property name="text">
-            <string>Armor Class Description</string>
-           </property>
-          </widget>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -499,6 +497,9 @@ color: rgb(50, 50, 50);</string>
            </property>
            <property name="text">
             <string>Average Hit Points</string>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

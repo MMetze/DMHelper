@@ -54,6 +54,26 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     ui->edtAverageHitPoints->setValidator(new QIntValidator(0,10000));
     ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
     ui->edtXP->setValidator(new QIntValidator(0,1000000));
+
+    connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtMonsterType, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtAlignment, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtArmorClass, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtHitDice, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtSpeed, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtStrength, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtDexterity, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtConstitution, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtIntelligence, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtWisdom, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtCharisma, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtSenses, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtLanguages, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtXP, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    // TOdO: what about actions, etc?
+
+    ui->chkPrivate->hide();
 }
 
 BestiaryDialog::~BestiaryDialog()
@@ -125,6 +145,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
         {
             MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
             connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteAction(const MonsterAction&)));
+            connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
             actionsLayout->addWidget(newFrame);
         }
         ui->scrollActions->setWidget(_actionsWidget);
@@ -143,6 +164,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
         {
             MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
             connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteLegendaryAction(const MonsterAction&)));
+            connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
             actionsLayout->addWidget(newFrame);
         }
         ui->scrollLegendaryActions->setWidget(_legendaryActionsWidget);
@@ -161,6 +183,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
         {
             MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
             connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteSpecialAbility(const MonsterAction&)));
+            connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
             actionsLayout->addWidget(newFrame);
         }
         ui->scrollSpecialAbilities->setWidget(_specialAbilitiesWidget);
@@ -179,6 +202,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
         {
             MonsterActionFrame* newFrame = new MonsterActionFrame(actionList.at(i));
             connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteReaction(const MonsterAction&)));
+            connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
             actionsLayout->addWidget(newFrame);
         }
         ui->scrollReactions->setWidget(_reactionsWidget);
@@ -205,9 +229,8 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtMonsterType->setReadOnly(!_edit);
     ui->edtAlignment->setReadOnly(!_edit);
     ui->edtArmorClass->setReadOnly(!_edit);
-    ui->edtArmorClassDescription->setReadOnly(!_edit);
     ui->edtHitDice->setReadOnly(!_edit);
-    ui->edtAverageHitPoints->setReadOnly(!_edit);
+    //ui->edtAverageHitPoints->setReadOnly(!_edit);
     ui->edtSpeed->setReadOnly(!_edit);
     ui->edtStrength->setReadOnly(!_edit);
     ui->edtDexterity->setReadOnly(!_edit);
@@ -342,7 +365,9 @@ void BestiaryDialog::addAction()
         MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
         ui->scrollActions->widget()->layout()->addWidget(newFrame);
         connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteAction(const MonsterAction&)));
+        connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
         ui->scrollActions->setVisible(true);
+        handleEditedData();
     }
 }
 
@@ -351,7 +376,10 @@ void BestiaryDialog::deleteAction(const MonsterAction& action)
     if(_monster)
     {
         if(_monster->removeAction(action) <= 0)
+        {
             ui->scrollActions->setVisible(false);
+        }
+        handleEditedData();
     }
 }
 
@@ -367,7 +395,9 @@ void BestiaryDialog::addLegendaryAction()
         MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
         ui->scrollLegendaryActions->widget()->layout()->addWidget(newFrame);
         connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteLegendaryAction(const MonsterAction&)));
+        connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
         ui->scrollLegendaryActions->setVisible(true);
+        handleEditedData();
     }
 }
 
@@ -376,7 +406,10 @@ void BestiaryDialog::deleteLegendaryAction(const MonsterAction& action)
     if(_monster)
     {
         if(_monster->removeLegendaryAction(action) <= 0)
+        {
             ui->scrollLegendaryActions->setVisible(false);
+        }
+        handleEditedData();
     }
 }
 
@@ -392,7 +425,9 @@ void BestiaryDialog::addSpecialAbility()
         MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
         ui->scrollSpecialAbilities->widget()->layout()->addWidget(newFrame);
         connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteSpecialAbility(const MonsterAction&)));
+        connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
         ui->scrollSpecialAbilities->setVisible(true);
+        handleEditedData();
     }
 }
 
@@ -401,7 +436,10 @@ void BestiaryDialog::deleteSpecialAbility(const MonsterAction& action)
     if(_monster)
     {
         if(_monster->removeSpecialAbility(action) <= 0)
+        {
             ui->scrollSpecialAbilities->setVisible(false);
+        }
+        handleEditedData();
     }
 }
 
@@ -417,7 +455,9 @@ void BestiaryDialog::addReaction()
         MonsterActionFrame* newFrame = new MonsterActionFrame(dlg.getAction());
         ui->scrollReactions->widget()->layout()->addWidget(newFrame);
         connect(newFrame, SIGNAL(deleteAction(const MonsterAction&)), this, SLOT(deleteReaction(const MonsterAction&)));
+        connect(newFrame, SIGNAL(frameChanged()), this, SLOT(handleEditedData()));
         ui->scrollReactions->setVisible(true);
+        handleEditedData();
     }
 }
 
@@ -426,8 +466,17 @@ void BestiaryDialog::deleteReaction(const MonsterAction& action)
     if(_monster)
     {
         if(_monster->removeReaction(action) <= 0)
+        {
             ui->scrollReactions->setVisible(false);
+        }
+        handleEditedData();
     }
+}
+
+void BestiaryDialog::handleEditedData()
+{
+    qDebug() << "[Bestiary Dialog] Bestiary Dialog edit detected... storing data";
+    storeMonsterData();
 }
 
 void BestiaryDialog::closeEvent(QCloseEvent * event)
@@ -527,7 +576,7 @@ void BestiaryDialog::storeMonsterData()
     _monster->setAlignment(ui->edtAlignment->text());
     _monster->setArmorClass(ui->edtArmorClass->text().toInt());
     _monster->setHitDice(Dice(ui->edtHitDice->text()));
-    _monster->setAverageHitPoints(ui->edtAverageHitPoints->text().toInt());
+    //_monster->setAverageHitPoints(ui->edtAverageHitPoints->text().toInt());
     _monster->setSpeed(ui->edtSpeed->text());
     _monster->setSenses(ui->edtSenses->text());
     _monster->setLanguages(ui->edtLanguages->text());

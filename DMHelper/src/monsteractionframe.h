@@ -21,6 +21,7 @@ public:
 
 signals:
     void deleteAction(const MonsterAction& action);
+    void frameChanged();
 
 protected:
     // From QWidget

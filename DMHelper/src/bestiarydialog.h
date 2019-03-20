@@ -52,6 +52,8 @@ protected slots:
     void addReaction();
     void deleteReaction(const MonsterAction& action);
 
+    void handleEditedData();
+
 protected:
     // From QWidget
     virtual void closeEvent(QCloseEvent * event);

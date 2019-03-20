@@ -10,7 +10,7 @@
 CharacterFrame::CharacterFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::CharacterFrame),
-    _character(0),
+    _character(nullptr),
     _mouseDown(false)
 {
     ui->setupUi(this);

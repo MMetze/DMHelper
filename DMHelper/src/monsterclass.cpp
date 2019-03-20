@@ -703,6 +703,12 @@ void MonsterClass::setAverageHitPoints(int averageHitPoints)
         return;
 
     _averageHitPoints = averageHitPoints;
+
+    if((_averageHitPoints != _hitDice.average()) && (_hitDice.getBonus() == 0))
+    {
+        _hitDice = Dice(_hitDice.getCount(), _hitDice.getType(), _averageHitPoints - _hitDice.average());
+    }
+
     registerChange();
 }
 
