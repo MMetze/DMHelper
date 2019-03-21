@@ -330,20 +330,25 @@ DISTFILES += \
     binsrc/quickref_data.xml \
     bugs.txt \
     buildanddeploy.cmd \
-    release_notes.txt
+    release_notes.txt \
+    buildanddeploymac
 
 CONFIG( debug, debug|release ) {
     # debug
-    QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/debug/
+    win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/debug/
+    else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/
+
     win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/DMHelperShared.lib
-    else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/libDMHelperShared.a
+    else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
 } else {
     # release
-    QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
+    win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
+    else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
+
     win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/DMHelperShared.lib
-    else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/libDMHelperShared.a
+    else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/libDMHelperShared.1.0.0.dylib
 }
-unix|win32: LIBS += -lDMHelperShared
+LIBS += -lDMHelperShared
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
