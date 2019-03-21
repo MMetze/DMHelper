@@ -327,7 +327,7 @@ color: rgb(50, 50, 50);</string>
         <x>0</x>
         <y>0</y>
         <width>704</width>
-        <height>718</height>
+        <height>720</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -353,7 +353,19 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,4,4,4,1,1">
+         <item>
+          <widget class="QLineEdit" name="edtMonsterSize">
+           <property name="font">
+            <font>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>Monster Size</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QLineEdit" name="edtMonsterType">
            <property name="font">
@@ -366,6 +378,18 @@ color: rgb(50, 50, 50);</string>
            </property>
            <property name="text">
             <string>Monster Type</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="edtMonsterSubType">
+           <property name="font">
+            <font>
+             <italic>true</italic>
+            </font>
+           </property>
+           <property name="text">
+            <string>Monster Subtype</string>
            </property>
           </widget>
          </item>
@@ -869,7 +893,7 @@ color: rgb(50, 50, 50);</string>
          <item>
           <widget class="QLabel" name="lblSkills">
            <property name="text">
-            <string>Skills</string>
+            <string>Skills/Saves</string>
            </property>
           </widget>
          </item>
@@ -886,6 +910,9 @@ color: rgb(50, 50, 50);</string>
            <property name="text">
             <string>Skills</string>
            </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
         </layout>
@@ -895,12 +922,12 @@ color: rgb(50, 50, 50);</string>
          <item>
           <widget class="QLabel" name="lblResistances">
            <property name="text">
-            <string>Resistances</string>
+            <string>Condition Immunities</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="edtResistances">
+          <widget class="QLineEdit" name="edtConditionImmunities">
            <property name="font">
             <font>
              <italic>false</italic>
@@ -910,7 +937,53 @@ color: rgb(50, 50, 50);</string>
             <string notr="true"/>
            </property>
            <property name="text">
-            <string>Resistances</string>
+            <string>Condition Immunities</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_10">
+           <property name="text">
+            <string>Damage Immunities</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="edtDamageImmunities">
+           <property name="text">
+            <string>Damage Immunities</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_20">
+         <item>
+          <widget class="QLabel" name="label_11">
+           <property name="text">
+            <string>Damage Resistances</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="edtDamageResistances">
+           <property name="text">
+            <string>Damage Resistances</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_12">
+           <property name="text">
+            <string>Damage Vulnerabilities</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="edtDamageVulnerabilities">
+           <property name="text">
+            <string>Damage Vulnerabilities</string>
            </property>
           </widget>
          </item>
@@ -940,31 +1013,31 @@ color: rgb(50, 50, 50);</string>
            </property>
           </widget>
          </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="layoutLanguages">
          <item>
-          <widget class="QLabel" name="lblLanguages">
-           <property name="text">
-            <string>Languages</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="edtLanguages">
-           <property name="font">
-            <font>
-             <italic>false</italic>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string>Languages</string>
-           </property>
-          </widget>
+          <layout class="QHBoxLayout" name="layoutLanguages">
+           <item>
+            <widget class="QLabel" name="lblLanguages">
+             <property name="text">
+              <string>Languages</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="edtLanguages">
+             <property name="font">
+              <font>
+               <italic>false</italic>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="text">
+              <string>Languages</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>

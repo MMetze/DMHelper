@@ -335,18 +335,26 @@ DISTFILES += \
 
 CONFIG( debug, debug|release ) {
     # debug
-    win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/debug/
-    else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/
-
+    win32: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/debug/
+    else:unix: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/
     win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/DMHelperShared.lib
-    else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
+    else:win32:win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/libDMHelperShared.a
+    else:unix: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
+    #win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/debug/
+    #else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/
+    #win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/DMHelperShared.lib
+    #else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
 } else {
     # release
     win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
-    else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
-
+    else:unix: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
     win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/DMHelperShared.lib
-    else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/libDMHelperShared.1.0.0.dylib
+    else:win32:win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/libDMHelperShared.a
+    else:unix: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/libDMHelperShared.1.0.0.dylib
+    #win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
+    #else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
+    #win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/DMHelperShared.lib
+    #else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/libDMHelperShared.1.0.0.dylib
 }
 LIBS += -lDMHelperShared
 

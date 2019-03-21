@@ -420,6 +420,32 @@ int MonsterClass::getSkillValue(Combatant::Skills skill) const
         return Combatant::getAbilityMod(getAbilityValue(Combatant::getSkillAbility(skill)));
 }
 
+QString MonsterClass::getSkillString() const
+{
+    QString result;
+
+    QList<int> keyList = _skillValues.keys();
+    for(int s : keyList)
+    {
+        if(_skillValues.contains(s))
+        {
+            if(!result.isEmpty())
+                result.append(", ");
+
+            result.append(Character::getWrittenSkillName(s));
+            result.append(" ");
+
+            int v = _skillValues.value(s);
+            if(v >= 0)
+                result.append("+");
+
+            result.append(QString::number(v));
+        }
+    }
+
+    return result;
+}
+
 QList<MonsterAction> MonsterClass::getActions() const
 {
     return _actions;

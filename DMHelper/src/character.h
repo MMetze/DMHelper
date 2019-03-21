@@ -105,6 +105,7 @@ public:
     int getPassivePerception() const;
 
     static int findKeyForSkillName(const QString& skillName);
+    static QString getWrittenSkillName(int skill);
 
 signals:
     void iconChanged();

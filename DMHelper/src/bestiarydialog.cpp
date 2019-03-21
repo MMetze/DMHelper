@@ -14,7 +14,8 @@
 #include <QDebug>
 #include "ui_bestiarydialog.h"
 
-//TODO: fix the dialog to match the contents
+//TODO: Make skills editable
+
 
 BestiaryDialog::BestiaryDialog(QWidget *parent) :
     QDialog(parent),
@@ -56,7 +57,9 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     ui->edtXP->setValidator(new QIntValidator(0,1000000));
 
     connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtMonsterSize, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtMonsterType, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtMonsterSubType, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtAlignment, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtArmorClass, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtHitDice, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -67,6 +70,10 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->edtIntelligence, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtWisdom, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtCharisma, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtConditionImmunities, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtDamageImmunities, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtDamageResistances, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtDamageVulnerabilities, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtSenses, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtLanguages, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -109,7 +116,9 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->chkPrivate->setChecked(_monster->getPrivate());
     ui->chkLegendary->setChecked(_monster->getLegendary());
     ui->edtName->setText(_monster->getName());
+    ui->edtMonsterSize->setText(_monster->getMonsterSize());
     ui->edtMonsterType->setText(_monster->getMonsterType());
+    ui->edtMonsterSubType->setText(_monster->getMonsterSubType());
     ui->edtAlignment->setText(_monster->getAlignment());
     ui->edtArmorClass->setText(QString::number(_monster->getArmorClass()));
     ui->edtHitDice->setText(_monster->getHitDice().toString());
@@ -121,6 +130,11 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtIntelligence->setText(QString::number(_monster->getIntelligence()));
     ui->edtWisdom->setText(QString::number(_monster->getWisdom()));
     ui->edtCharisma->setText(QString::number(_monster->getCharisma()));
+    ui->edtSkills->setText(_monster->getSkillString());
+    ui->edtConditionImmunities->setText(_monster->getConditionImmunities());
+    ui->edtDamageImmunities->setText(_monster->getDamageImmunities());
+    ui->edtDamageResistances->setText(_monster->getDamageResistances());
+    ui->edtDamageVulnerabilities->setText(_monster->getDamageVulnerabilities());
     ui->edtSenses->setText(_monster->getSenses());
     ui->edtLanguages->setText(_monster->getLanguages());
     if(_monster->getLanguages().isEmpty())
@@ -226,7 +240,9 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->btnRight->setEnabled(_monster != Bestiary::Instance()->getLastMonsterClass());
 
     ui->edtName->setReadOnly(!_edit);
+    ui->edtMonsterSize->setReadOnly(!_edit);
     ui->edtMonsterType->setReadOnly(!_edit);
+    ui->edtMonsterSubType->setReadOnly(!_edit);
     ui->edtAlignment->setReadOnly(!_edit);
     ui->edtArmorClass->setReadOnly(!_edit);
     ui->edtHitDice->setReadOnly(!_edit);
@@ -239,7 +255,10 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtWisdom->setReadOnly(!_edit);
     ui->edtCharisma->setReadOnly(!_edit);
     ui->edtSkills->setReadOnly(!_edit);
-    ui->edtResistances->setReadOnly(!_edit);
+    ui->edtConditionImmunities->setReadOnly(!_edit);
+    ui->edtDamageImmunities->setReadOnly(!_edit);
+    ui->edtDamageResistances->setReadOnly(!_edit);
+    ui->edtDamageVulnerabilities->setReadOnly(!_edit);
     ui->edtSenses->setReadOnly(!_edit);
     ui->edtLanguages->setReadOnly(!_edit);
     ui->edtChallenge->setReadOnly(!_edit);
@@ -572,12 +591,18 @@ void BestiaryDialog::storeMonsterData()
 
     _monster->setPrivate(ui->chkPrivate->isChecked());
     _monster->setName(ui->edtName->text());
+    _monster->setMonsterSize(ui->edtMonsterSize->text());
     _monster->setMonsterType(ui->edtMonsterType->text());
+    _monster->setMonsterSubType(ui->edtMonsterSubType->text());
     _monster->setAlignment(ui->edtAlignment->text());
     _monster->setArmorClass(ui->edtArmorClass->text().toInt());
     _monster->setHitDice(Dice(ui->edtHitDice->text()));
     //_monster->setAverageHitPoints(ui->edtAverageHitPoints->text().toInt());
     _monster->setSpeed(ui->edtSpeed->text());
+    _monster->setConditionImmunities(ui->edtConditionImmunities->text());
+    _monster->setDamageImmunities(ui->edtDamageImmunities->text());
+    _monster->setDamageResistances(ui->edtDamageResistances->text());
+    _monster->setDamageVulnerabilities(ui->edtDamageVulnerabilities->text());
     _monster->setSenses(ui->edtSenses->text());
     _monster->setLanguages(ui->edtLanguages->text());
     _monster->setChallenge(ui->edtChallenge->text());

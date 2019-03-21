@@ -478,6 +478,18 @@ int Character::findKeyForSkillName(const QString& skillName)
     return -1;
 }
 
+QString Character::getWrittenSkillName(int skill)
+{
+    if((skill < 0) || (skill >= Combatant::SKILLS_COUNT))
+    {
+        return QString();
+    }
+    else
+    {
+        return QString(SKILLVALUE_WRITTENNAMES[skill]);
+    }
+}
+
 void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
 {
     Q_UNUSED(doc);
