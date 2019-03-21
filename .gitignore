@@ -41,3 +41,11 @@ DMHelperTest/src/DMHelperTest.pro.user*
 #DMHelper Backend ignores
 DMHelper-Backend/Pages/config.inc.php
 DMHelper-Backend/Pages/dbv/data/meta/revision
+DMHelper/.DS_Store
+.DS_Store
+DMHelper/DM Helper Release MAC.zip
+DMHelper/src/.qmake.stash
+DMHelper/src/DMHelper.pro.user
+DMHelper/src/DMHelper.pro.user
+DMHelper/src/Makefile
+*.user
