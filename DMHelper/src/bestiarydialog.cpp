@@ -46,10 +46,12 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
     connect(ui->edtName,SIGNAL(editingFinished()),this,SLOT(monsterRenamed()));
 
+    connect(ui->edtHitDice, SIGNAL(editingFinished()), this, SLOT(hitDiceChanged()));
+
     connect(ui->btnAddAction, SIGNAL(clicked()), this, SLOT(addAction()));
     connect(ui->btnAddLegendaryAction, SIGNAL(clicked()), this, SLOT(addLegendaryAction()));
     connect(ui->btnAddSpecialAbility, SIGNAL(clicked()), this, SLOT(addSpecialAbility()));
-    connect(ui->btnAddReaction, SIGNAL(clicked()), this, SLOT(addAddReaction()));
+    connect(ui->btnAddReaction, SIGNAL(clicked()), this, SLOT(addReaction()));
 
     ui->edtArmorClass->setValidator(new QIntValidator(0,100));
     ui->edtAverageHitPoints->setValidator(new QIntValidator(0,10000));
@@ -320,6 +322,12 @@ void BestiaryDialog::dataChanged()
     _monster = nullptr;
     ui->cmbSearch->clear();
     ui->cmbSearch->addItems(Bestiary::Instance()->getMonsterList());
+}
+
+void BestiaryDialog::hitDiceChanged()
+{
+    Dice newHitDice(ui->edtHitDice->text());
+    ui->edtAverageHitPoints->setText(QString::number(newHitDice.average()));
 }
 
 void BestiaryDialog::abilityChanged()

@@ -188,7 +188,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_SaveCampaign,SIGNAL(triggered()),this,SLOT(saveCampaign()));
     connect(ui->actionSave_Campaign_As,SIGNAL(triggered()),this,SLOT(saveCampaignAs()));
     connect(ui->actionClose_Campaign,SIGNAL(triggered()),this,SLOT(closeCampaign()));
-    connect(ui->actionE_xit,SIGNAL(triggered()),qApp,SLOT(quit()));
+    //connect(ui->actionE_xit,SIGNAL(triggered()),qApp,SLOT(quit()));
+    connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
     connect(ui->actionDice,SIGNAL(triggered()),this,SLOT(openDiceDialog()));
 
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(handleCampaignLoaded(Campaign*)));
@@ -265,10 +266,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterBattleEdit, SIGNAL(openMonster(QString)), this, SLOT(openMonster(QString)));
     ui->stackedWidgetEncounter->addWidget(encounterBattleEdit);
     // EncounterType_Character
+    /*
     QScrollArea* scrollArea = new QScrollArea;
     CharacterFrame* charFrame = new CharacterFrame;
     scrollArea->setWidget(charFrame);
     ui->stackedWidgetEncounter->addWidget(scrollArea);
+    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    */
+    CharacterFrame* charFrame = new CharacterFrame;
+    ui->stackedWidgetEncounter->addWidget(charFrame);
     connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
@@ -1381,24 +1387,39 @@ void MainWindow::openFile(const QString& filename)
     QDomDocument doc( "DMHelperXML" );
     QFile file( filename );
     if( !file.open( QIODevice::ReadOnly ) )
+    {
+        qDebug() << "[Main] Loading Failed: Unable to open campaign file";
         return;
+    }
 
     QTextStream in(&file);
     in.setCodec("UTF-8");
-    bool contentResult = doc.setContent( in.readAll() );
+    QString contentError;
+    int contentErrorLine = 0;
+    int contentErrorColumn = 0;
+    bool contentResult = doc.setContent(in.readAll(), &contentError, &contentErrorLine, &contentErrorColumn);
 
     file.close();
 
     if( contentResult == false )
+    {
+        qDebug() << "[Main] Loading Failed: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
         return;
+    }
 
     QDomElement root = doc.documentElement();
     if( (root.isNull()) || (root.tagName() != "root") )
+    {
+        qDebug() << "[Main] Loading Failed: Error reading XML - unable to find root entry";
         return;
+    }
 
     QDomElement campaignElement = root.firstChildElement( QString("campaign") );
     if( campaignElement.isNull() )
+    {
+        qDebug() << "[Main] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
+    }
 
     campaignFileName = filename;
     QFileInfo fileInfo(campaignFileName);
@@ -1896,16 +1917,17 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     {
         ui->stackedWidgetEncounter->setEnabled(true);
         ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Character);
-        QScrollArea* scrollArea = dynamic_cast<QScrollArea*>(ui->stackedWidgetEncounter->currentWidget());
-        if(scrollArea)
-        {
-            CharacterFrame* characterFrame = dynamic_cast<CharacterFrame*>(scrollArea->widget());
+//        QScrollArea* scrollArea = dynamic_cast<QScrollArea*>(ui->stackedWidgetEncounter->currentWidget());
+//        if(scrollArea)
+//        {
+//            CharacterFrame* characterFrame = dynamic_cast<CharacterFrame*>(scrollArea->widget());
+            CharacterFrame* characterFrame = dynamic_cast<CharacterFrame*>(ui->stackedWidgetEncounter->currentWidget());
             if(characterFrame)
             {
                 characterFrame->setCharacter(character);
                 connect(character,SIGNAL(destroyed(QObject*)),characterFrame,SLOT(clear()));
             }
-        }
+//        }
         return;
     }
 

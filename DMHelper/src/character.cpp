@@ -23,7 +23,8 @@ const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
     "", // StringValue_equipment
     "", // StringValue_proficiencies
     "", // StringValue_spells
-    ""  // StringValue_notes
+    "",  // StringValue_notes
+    "medium"  // StringValue_size
 };
 
 const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
@@ -45,7 +46,8 @@ const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
     "equipment", // StringValue_equipment
     "proficiencies", // StringValue_proficiencies
     "spells", // StringValue_spells
-    "notes"  // StringValue_notes
+    "notes",  // StringValue_notes
+    "size"  // StringValue_size
 };
 
 const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =

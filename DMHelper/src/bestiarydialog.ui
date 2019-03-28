@@ -325,7 +325,7 @@ color: rgb(50, 50, 50);</string>
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>0</y>
+        <y>-70</y>
         <width>704</width>
         <height>720</height>
        </rect>
@@ -1476,6 +1476,49 @@ color: rgb(50, 50, 50);</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cmbSearch</tabstop>
+  <tabstop>btnLeft</tabstop>
+  <tabstop>btnRight</tabstop>
+  <tabstop>btnPublish</tabstop>
+  <tabstop>btnNewMonster</tabstop>
+  <tabstop>btnDeleteMonster</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>edtName</tabstop>
+  <tabstop>edtMonsterSize</tabstop>
+  <tabstop>edtMonsterType</tabstop>
+  <tabstop>edtMonsterSubType</tabstop>
+  <tabstop>edtAlignment</tabstop>
+  <tabstop>chkLegendary</tabstop>
+  <tabstop>chkPrivate</tabstop>
+  <tabstop>edtArmorClass</tabstop>
+  <tabstop>edtAverageHitPoints</tabstop>
+  <tabstop>edtHitDice</tabstop>
+  <tabstop>edtSpeed</tabstop>
+  <tabstop>edtStrength</tabstop>
+  <tabstop>edtDexterity</tabstop>
+  <tabstop>edtConstitution</tabstop>
+  <tabstop>edtIntelligence</tabstop>
+  <tabstop>edtWisdom</tabstop>
+  <tabstop>edtCharisma</tabstop>
+  <tabstop>edtSkills</tabstop>
+  <tabstop>edtConditionImmunities</tabstop>
+  <tabstop>edtDamageImmunities</tabstop>
+  <tabstop>edtDamageResistances</tabstop>
+  <tabstop>edtDamageVulnerabilities</tabstop>
+  <tabstop>edtSenses</tabstop>
+  <tabstop>edtLanguages</tabstop>
+  <tabstop>edtChallenge</tabstop>
+  <tabstop>edtXP</tabstop>
+  <tabstop>scrollActions</tabstop>
+  <tabstop>btnAddAction</tabstop>
+  <tabstop>scrollLegendaryActions</tabstop>
+  <tabstop>btnAddLegendaryAction</tabstop>
+  <tabstop>scrollSpecialAbilities</tabstop>
+  <tabstop>btnAddSpecialAbility</tabstop>
+  <tabstop>scrollReactions</tabstop>
+  <tabstop>btnAddReaction</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

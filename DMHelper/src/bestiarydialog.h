@@ -38,6 +38,7 @@ public slots:
     void dataChanged();
 
 protected slots:
+    void hitDiceChanged();
     void abilityChanged();
     void updateAbilityMods();
     void monsterRenamed();

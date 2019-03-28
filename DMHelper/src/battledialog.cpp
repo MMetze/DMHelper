@@ -988,6 +988,8 @@ void BattleDialog::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
 
 void BattleDialog::handleItemMouseUp(QGraphicsPixmapItem* item)
 {
+    Q_UNUSED(item);
+
     if(_movementPixmap)
     {
         //qDebug() << "[Battle Dialog] setting selected pixmap to size " << _model.getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE;

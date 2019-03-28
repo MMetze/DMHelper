@@ -7,6 +7,8 @@
 #include <QFileDialog>
 #include <QIntValidator>
 
+// TODO: automate character level, next level exp, proficiency bonus
+
 CharacterFrame::CharacterFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::CharacterFrame),
@@ -17,7 +19,6 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
 
     connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
 
-    ui->edtLevel->setValidator(new QIntValidator(1,100,this));
     ui->edtArmorClass->setValidator(new QIntValidator(0,100,this));
     ui->edtInitiative->setValidator(new QIntValidator(0,100,this));
     ui->edtPassivePerception->setValidator(new QIntValidator(0,100,this));
@@ -28,13 +29,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     ui->edtWis->setValidator(new QIntValidator(0,100,this));
     ui->edtCha->setValidator(new QIntValidator(0,100,this));
     ui->edtExperience->setValidator(new QIntValidator(0,1000000,this));
-    ui->edtLevel2->setValidator(new QIntValidator(0,100,this));
     ui->edtSpeed->setValidator(new QIntValidator(0,1000,this));
     ui->edtProficiencyBonus->setValidator(new QIntValidator(0,100,this));
-    ui->edtPlatinum->setValidator(new QIntValidator(0,INT_MAX,this));
-    ui->edtGold->setValidator(new QIntValidator(0,INT_MAX,this));
-    ui->edtSilver->setValidator(new QIntValidator(0,INT_MAX,this));
-    ui->edtCopper->setValidator(new QIntValidator(0,INT_MAX,this));
 
     connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
     connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
@@ -72,18 +68,11 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->edtRace,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtExperience,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtLevel,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtClass2,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtLevel2,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtHitPoints,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtArmorClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtInitiative,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtAge,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtHeight,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtWeight,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtSex,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtEyes,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtHair,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtSize,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtSpeed,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtAlignment,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtBackground,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
@@ -119,13 +108,6 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
     connect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
     connect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
-    connect(ui->edtPlatinum,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtGold,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtSilver,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtCopper,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtEquipment,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
-    connect(ui->edtProficiencies,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
-    connect(ui->edtSpells,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
     connect(ui->edtNotes,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
 }
 
@@ -187,7 +169,7 @@ void CharacterFrame::calculateMods()
 
 void CharacterFrame::clear()
 {
-    _character = 0;
+    _character = nullptr;
 
     QSignalBlocker blocker(this);
 
@@ -198,18 +180,11 @@ void CharacterFrame::clear()
     ui->edtRace->setText(QString(""));
     ui->edtExperience->setText(QString(""));
     ui->edtClass->setText(QString(""));
-    ui->edtLevel->setText(QString(""));
-    ui->edtClass2->setText(QString(""));
-    ui->edtLevel2->setText(QString(""));
     ui->edtHitPoints->setText(QString(""));
     ui->edtArmorClass->setText(QString(""));
     ui->edtInitiative->setText(QString(""));
-    ui->edtAge->setText(QString(""));
-    ui->edtHeight->setText(QString(""));
-    ui->edtWeight->setText(QString(""));
     ui->edtSex->setText(QString(""));
-    ui->edtEyes->setText(QString(""));
-    ui->edtHair->setText(QString(""));
+    ui->edtSize->setText(QString(""));
     ui->edtSpeed->setText(QString(""));
     ui->edtAlignment->setText(QString(""));
     ui->edtBackground->setText(QString(""));
@@ -248,13 +223,6 @@ void CharacterFrame::clear()
     ui->chkPersuasion->setChecked(false);
     ui->chkIntimidation->setChecked(false);
 
-    ui->edtPlatinum->setText(QString(""));
-    ui->edtGold->setText(QString(""));
-    ui->edtSilver->setText(QString(""));
-    ui->edtCopper->setText(QString(""));
-    ui->edtEquipment->setText(QString(""));
-    ui->edtProficiencies->setText(QString(""));
-    ui->edtSpells->setText(QString(""));
     ui->edtNotes->setText(QString(""));
 
     ui->lblStrMod->setText(QString(""));
@@ -329,18 +297,11 @@ void CharacterFrame::readCharacterData()
     ui->edtRace->setText(_character->getStringValue(Character::StringValue_race));
     ui->edtExperience->setText(QString::number(_character->getIntValue(Character::IntValue_experience)));
     ui->edtClass->setText(_character->getStringValue(Character::StringValue_class));
-    ui->edtLevel->setText(QString::number(_character->getIntValue(Character::IntValue_level)));
-    ui->edtClass2->setText(_character->getStringValue(Character::StringValue_class2));
-    ui->edtLevel2->setText(QString::number(_character->getIntValue(Character::IntValue_level2)));
     ui->edtHitPoints->setText(QString::number(_character->getHitPoints()));
     ui->edtArmorClass->setText(QString::number(_character->getArmorClass()));
     ui->edtInitiative->setText(QString::number(_character->getInitiative()));
-    ui->edtAge->setText(_character->getStringValue(Character::StringValue_age));
-    ui->edtHeight->setText(_character->getStringValue(Character::StringValue_height));
-    ui->edtWeight->setText(_character->getStringValue(Character::StringValue_weight));
     ui->edtSex->setText(_character->getStringValue(Character::StringValue_sex));
-    ui->edtEyes->setText(_character->getStringValue(Character::StringValue_eyes));
-    ui->edtHair->setText(_character->getStringValue(Character::StringValue_hair));
+    ui->edtSize->setText(_character->getStringValue(Character::StringValue_size));
     ui->edtSpeed->setText(QString::number(_character->getIntValue(Character::IntValue_speed)));
     ui->edtAlignment->setText(_character->getStringValue(Character::StringValue_alignment));
     ui->edtBackground->setText(_character->getStringValue(Character::StringValue_background));
@@ -380,13 +341,6 @@ void CharacterFrame::readCharacterData()
     ui->chkPersuasion->setChecked(_character->getSkillValue(Combatant::Skills_persuasion));
     ui->chkIntimidation->setChecked(_character->getSkillValue(Combatant::Skills_intimidation));
 
-    ui->edtPlatinum->setText(QString::number(_character->getIntValue(Character::IntValue_platinum)));
-    ui->edtGold->setText(QString::number(_character->getIntValue(Character::IntValue_gold)));
-    ui->edtSilver->setText(QString::number(_character->getIntValue(Character::IntValue_silver)));
-    ui->edtCopper->setText(QString::number(_character->getIntValue(Character::IntValue_copper)));
-    ui->edtEquipment->setText(_character->getStringValue(Character::StringValue_equipment));
-    ui->edtProficiencies->setText(_character->getStringValue(Character::StringValue_proficiencies));
-    ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
     calculateMods();
@@ -403,18 +357,11 @@ void CharacterFrame::writeCharacterData()
         _character->setStringValue(Character::StringValue_race, ui->edtRace->text());
         _character->setIntValue(Character::IntValue_experience, ui->edtExperience->text().toInt());
         _character->setStringValue(Character::StringValue_class, ui->edtClass->text());
-        _character->setIntValue(Character::IntValue_level, ui->edtLevel->text().toInt());
-        _character->setStringValue(Character::StringValue_class2, ui->edtClass2->text());
-        _character->setIntValue(Character::IntValue_level2, ui->edtLevel2->text().toInt());
         _character->setHitPoints(ui->edtHitPoints->text().toInt());
         _character->setArmorClass(ui->edtArmorClass->text().toInt());
         _character->setInitiative(ui->edtInitiative->text().toInt());
-        _character->setStringValue(Character::StringValue_age, ui->edtAge->text());
-        _character->setStringValue(Character::StringValue_height, ui->edtHeight->text());
-        _character->setStringValue(Character::StringValue_weight, ui->edtWeight->text());
         _character->setStringValue(Character::StringValue_sex, ui->edtSex->text());
-        _character->setStringValue(Character::StringValue_eyes, ui->edtEyes->text());
-        _character->setStringValue(Character::StringValue_hair, ui->edtHair->text());
+        _character->setStringValue(Character::StringValue_size, ui->edtSize->text());
         _character->setIntValue(Character::IntValue_speed, ui->edtSpeed->text().toInt());
         _character->setStringValue(Character::StringValue_alignment, ui->edtAlignment->text());
         _character->setStringValue(Character::StringValue_background, ui->edtBackground->text());
@@ -451,13 +398,6 @@ void CharacterFrame::writeCharacterData()
         _character->setSkillValue(Combatant::Skills_persuasion, ui->chkPersuasion->isChecked());
         _character->setSkillValue(Combatant::Skills_intimidation, ui->chkIntimidation->isChecked());
 
-        _character->setIntValue(Character::IntValue_platinum, ui->edtPlatinum->text().toInt());
-        _character->setIntValue(Character::IntValue_gold, ui->edtGold->text().toInt());
-        _character->setIntValue(Character::IntValue_silver, ui->edtSilver->text().toInt());
-        _character->setIntValue(Character::IntValue_copper, ui->edtCopper->text().toInt());
-        _character->setStringValue(Character::StringValue_equipment, ui->edtEquipment->toPlainText());
-        _character->setStringValue(Character::StringValue_proficiencies, ui->edtProficiencies->toPlainText());
-        _character->setStringValue(Character::StringValue_spells, ui->edtSpells->toPlainText());
         _character->setStringValue(Character::StringValue_notes, ui->edtNotes->toPlainText());
 
         _character->endBatchChanges();

@@ -1,5 +1,6 @@
 #include "battledialogmodelcharacter.h"
 #include "character.h"
+#include "monsterclass.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -44,7 +45,11 @@ BattleDialogModelCombatant* BattleDialogModelCharacter::clone() const
 
 int BattleDialogModelCharacter::getSizeFactor() const
 {
-    return 1;
+    Character* character = getCharacter();
+    if(!character)
+        return 1;
+
+    return MonsterClass::convertSizeToScaleFactor(character->getStringValue(Character::StringValue_size));
 }
 
 int BattleDialogModelCharacter::getSizeCategory() const
@@ -138,10 +143,7 @@ int BattleDialogModelCharacter::getCharisma() const
 
 int BattleDialogModelCharacter::getSkillModifier(Combatant::Skills skill) const
 {
-    if((!_combatant) || (_combatant->getType() != DMHelper::CombatantType_Character))
-        return 0;
-
-    Character* character = dynamic_cast<Character*>(_combatant);
+    Character* character = getCharacter();
     if(!character)
         return 0;
 
@@ -233,6 +235,9 @@ QPixmap BattleDialogModelCharacter::getIconPixmap(DMHelper::PixmapSize iconSize)
 
 Character* BattleDialogModelCharacter::getCharacter() const
 {
+    if((!_combatant) || (_combatant->getType() != DMHelper::CombatantType_Character))
+        return nullptr;
+
     return dynamic_cast<Character*>(_combatant);
 }
 

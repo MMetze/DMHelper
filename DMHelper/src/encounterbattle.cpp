@@ -467,6 +467,9 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
             if(combatantType == DMHelper::CombatantType_Character)
             {
                 Character* character = campaign->getCharacterById(combatantId);
+                if(!character)
+                    character = campaign->getNPCById(combatantId);
+
                 if(character)
                     combatant = new BattleDialogModelCharacter(character);
                 else

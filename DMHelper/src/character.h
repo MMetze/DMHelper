@@ -36,6 +36,7 @@ public:
         StringValue_proficiencies,
         StringValue_spells,
         StringValue_notes,
+        StringValue_size,
 
         STRINGVALUE_COUNT
     };

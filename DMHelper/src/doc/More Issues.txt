@@ -1,13 +1,29 @@
 Bestiary
-- DOES NOT SAVE!!!!
+DONE - DOES NOT SAVE!!!!
 DONE - Armor Class Description entry missing
-- Resistances and Skills???
+DONE - Resistances and Skills???
 DONE - Remove Private check box
 DONE - average HP should not be editable
 DONE - Hit Dice changes reflected in average HP
 DONE - SRD bestiary does not include bonuses
-- Update monster class on edit, not close
+DONE - Update monster class on edit, not close
 
 Character
-- Bad layout, clean it up and simplify
-- Publish doesn't work --> probably only because image not set
+DONE - Bad layout, clean it up and simplify
+DONE - Publish doesn't work --> probably only because image not set
+DONE - Add size to character
+Average HP doesn't update when changing details
+
+Other
+DONE - fixed File --> Exit which was not saving anything!!!
+
+NPC doesn't save as part of a battle
+
+
+Pre-add an NPC to a battle
+Use new in-battle character widget
+Change character selection to a rectangle showing the size of the creature
+Map rect isn't saved with the battle
+
+
+DONE - Something weird with saving of the bestiary
