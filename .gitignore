@@ -1,6 +1,7 @@
 #DMHelper ignores
 DMHelper/bin
 DMHelper/build-debug
+DMHelper/build-profile
 DMHelper/build-release
 DMHelper/rawdata
 DMHelper/release
@@ -13,6 +14,7 @@ DMHelper/src.zip
 #DMHelper Shared ignores
 DMHelperShared/bin
 DMHelperShared/build-debug
+DMHelperShared/build-profile
 DMHelperShared/build-release
 DMHelperShared/release
 DMHelperShared/src/DMHelperShared.pro.user*
@@ -22,6 +24,7 @@ DMHelperShared/src.zip
 #DMHelper Client ignores
 DMHelperClient/bin
 DMHelperClient/build-debug
+DMHelperClient/build-profile
 DMHelperClient/build-release
 DMHelperClient/rawdata
 DMHelperClient/release
@@ -34,6 +37,7 @@ DMHelperClient/src.zip
 #DMHelper Test ignores
 DMHelperTest/bin
 DMHelperTest/build-debug
+DMHelperTest/build-profile
 DMHelperTest/build-release
 DMHelperTest/working
 DMHelperTest/src/DMHelperTest.pro.user*
