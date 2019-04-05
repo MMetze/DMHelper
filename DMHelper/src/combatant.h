@@ -55,7 +55,7 @@ public:
         SKILLS_COUNT
     };
 
-    explicit Combatant(QObject *parent = 0);
+    explicit Combatant(QObject *parent = nullptr);
     explicit Combatant(const Combatant &obj);  // copy constructor
     virtual ~Combatant();
 

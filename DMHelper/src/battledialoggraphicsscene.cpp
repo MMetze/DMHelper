@@ -15,6 +15,9 @@
 
 // TODO: adjust grid offsets to really match resized battle contents.
 
+// Uncomment this to log all mouse movement actions
+//#define BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+
 BattleDialogGraphicsScene::BattleDialogGraphicsScene(BattleDialogModel& model, QObject *parent) :
     QGraphicsScene(parent),
     _contextMenuItem(nullptr),
@@ -316,7 +319,9 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
         _distanceText->setText(distanceText);
         _distanceText->setPos(line.center());
         emit distanceChanged(distanceText);
-        //qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+        qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
+#endif
         mouseEvent->accept();
         return;
     }
@@ -325,7 +330,9 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
 
     if(mouseEvent->buttons() & Qt::RightButton)
     {
-        //qDebug() << "[Battle Dialog Scene] right button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+        qDebug() << "[Battle Dialog Scene] right button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
+#endif
 
         if((_mouseDown) && (abstractShape))
         {
@@ -339,8 +346,10 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
             BattleDialogModelEffect* effect = _model.getEffectById(_mouseDownItem->data(0).toInt());
             if(effect)
                 effect->setRotation(_previousRotation + angle);
-            //else
-            //    qDebug() << "[Battle Dialog Scene] ERROR: unable to find effect model data for rotation" << _mouseDownItem;
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+            else
+                qDebug() << "[Battle Dialog Scene] ERROR: unable to find effect model data for rotation" << _mouseDownItem;
+#endif
             emit effectChanged(abstractShape);
         }
 
@@ -351,11 +360,15 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
     {
         if(abstractShape)
         {
-            //qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+            qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
+#endif
             BattleDialogModelEffect* effect = _model.getEffectById(abstractShape->data(0).toInt());
             if(effect)
             {
-                //qDebug() << "[Battle Dialog Scene] left button setting effect position for " << effect << " to shape " << abstractShape;
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+                qDebug() << "[Battle Dialog Scene] left button setting effect position for " << effect << " to shape " << abstractShape;
+#endif
                 effect->setPosition(abstractShape->pos());
             }
             emit effectChanged(abstractShape);
@@ -365,7 +378,9 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
             QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(_mouseDownItem);
             if(pixItem)
             {
-                //qDebug() << "[Battle Dialog Scene] left mouse move on combatant " << pixItem;
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+                qDebug() << "[Battle Dialog Scene] left mouse move on combatant " << pixItem;
+#endif
                 bool result = true;
                 emit itemMoved(pixItem, &result);
                 if(!result)
@@ -374,7 +389,9 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
         }
     }
 
-    //qDebug() << "[Battle Dialog Scene] mouse move default handling triggered " << mouseEvent;
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+    qDebug() << "[Battle Dialog Scene] mouse move default handling triggered " << mouseEvent;
+#endif
     // If the function reaches this point, default handling (ie drag and move) is expected
     QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
@@ -442,12 +459,12 @@ void BattleDialogGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseE
                 mouseEvent->accept();
             }
         }
-        else
-        {
-            qDebug() << "[Battle Dialog Scene] ignoring mouse click for non-selectable item " << item;
-            mouseEvent->ignore();
-            return;
-        }
+    }
+    else
+    {
+        qDebug() << "[Battle Dialog Scene] ignoring mouse click for non-selectable item " << item;
+        mouseEvent->ignore();
+        return;
     }
 
     qDebug() << "[Battle Dialog Scene] mouse press default handling triggered " << mouseEvent;

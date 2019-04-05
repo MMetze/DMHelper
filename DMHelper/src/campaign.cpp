@@ -343,6 +343,17 @@ Character* Campaign::getCharacterById(int id)
     return nullptr;
 }
 
+const Character* Campaign::getCharacterById(int id) const
+{
+    for(int i = 0; i < characters.count(); ++i)
+    {
+        if(characters.at(i)->getID() == id)
+            return characters.at(i);
+    }
+
+    return nullptr;
+}
+
 Character* Campaign::getCharacterByDndBeyondId(int id)
 {
     for(int i = 0; i < characters.count(); ++i)
@@ -532,6 +543,17 @@ int Campaign::getNPCCount()
 }
 
 Character* Campaign::getNPCById(int id)
+{
+    for(int i = 0; i < npcs.count(); ++i)
+    {
+        if(npcs.at(i)->getID() == id)
+            return npcs.at(i);
+    }
+
+    return nullptr;
+}
+
+const Character* Campaign::getNPCById(int id) const
 {
     for(int i = 0; i < npcs.count(); ++i)
     {

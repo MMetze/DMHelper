@@ -250,9 +250,23 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btnEditMonster">
+         <property name="text">
+          <string>Edit Monster</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnAddNPC">
+         <property name="text">
+          <string>Add NPC</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btnDeleteMonster">
          <property name="text">
-          <string>Delete Monster</string>
+          <string>Delete Combatant</string>
          </property>
         </widget>
        </item>

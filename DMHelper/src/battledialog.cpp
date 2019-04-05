@@ -215,7 +215,15 @@ void BattleDialog::setBattleMap()
 {
     if(_model.isMapChanged())
     {
+        disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+        disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         replaceBattleMap();
+        connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+        connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     }
     else
     {
@@ -498,7 +506,7 @@ void BattleDialog::zoomFit()
 
 void BattleDialog::zoomSelect()
 {
-    ui->btnZoomSelect->setChecked(true);
+    //ui->btnZoomSelect->setChecked(true);
     setMapCursor();
 }
 
@@ -687,7 +695,7 @@ void BattleDialog::resizeEvent(QResizeEvent *event)
     qDebug() << "[Battle Dialog] resized: " << event->size().width() << "x" << event->size().height();
     if(_background)
     {
-        _scene->setSceneRect(_scene->itemsBoundingRect());
+        // CHANGE _scene->setSceneRect(_scene->itemsBoundingRect());
         // NEW ui->graphicsView->fitInView(_background, Qt::KeepAspectRatio);
         ui->graphicsView->fitInView(_model.getMapRect(), Qt::KeepAspectRatio);
     }
@@ -700,7 +708,7 @@ void BattleDialog::showEvent(QShowEvent *event)
     qDebug() << "[Battle Dialog] shown (" << isVisible() << ")";
     if(_background)
     {
-        _scene->setSceneRect(_scene->itemsBoundingRect());
+        // CHANGE _scene->setSceneRect(_scene->itemsBoundingRect());
         // NEW ui->graphicsView->fitInView(_background, Qt::KeepAspectRatio);
         ui->graphicsView->fitInView(_model.getMapRect(), Qt::KeepAspectRatio);
     }
@@ -1309,6 +1317,8 @@ void BattleDialog::handleRubberBandChanged(QRect rubberBandRect, QPointF fromSce
 {
     Q_UNUSED(fromScenePoint);
     Q_UNUSED(toScenePoint);
+
+    qDebug() << "[Battle Dialog] Rubber band changed to " << rubberBandRect;
 
     if(!ui->btnZoomSelect->isChecked())
         return;

@@ -107,7 +107,7 @@ void EncounterBattle::inputXML(const QDomElement &element)
                             int combatantType = combatantElement.attribute("type").toInt(&ok);
                             if(ok)
                             {
-                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement);
+                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, this);
                                 if(newCombatant)
                                 {
                                     addCombatant(wave, combatantCount, newCombatant);
@@ -350,8 +350,9 @@ void EncounterBattle::removeBattleDialogModel()
         return;
 
     qDebug() << "[EncounterBattle] Removing battle model " << _battleModel->getID() << " from encounter " << getID();
-    delete _battleModel;
+    BattleDialogModel* battleModel = _battleModel;
     _battleModel = nullptr;
+    delete battleModel;
 
     emit changed();
     emit dirty();

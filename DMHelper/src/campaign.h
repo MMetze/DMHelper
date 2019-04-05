@@ -38,6 +38,7 @@ public:
 
     int getCharacterCount();
     Character* getCharacterById(int id);
+    const Character* getCharacterById(int id) const;
     Character* getCharacterByDndBeyondId(int id);
     Character* getCharacterByIndex(int index);
     int addCharacter(Character* character);
@@ -59,6 +60,7 @@ public:
 
     int getNPCCount();
     Character* getNPCById(int id);
+    const Character* getNPCById(int id) const;
     Character* getNPCByIndex(int index);
     int addNPC(Character* npc);
     Character* removeNPC(int id);

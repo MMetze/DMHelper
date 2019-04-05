@@ -18,6 +18,7 @@
 #include "itemselectdialog.h"
 #include "mapselectdialog.h"
 #include "selectzoom.h"
+#include "combatantreference.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
 #endif
@@ -430,6 +431,7 @@ void BattleDialogManager::completeBattle()
 {
     delete _dlg;
     _dlg = nullptr;
+    deleteBattle(_encounterBattle);
     _encounterBattle = nullptr;
     emit battleActive(false);
     emit dirty();
@@ -576,26 +578,48 @@ QList<BattleDialogModelCombatant*> BattleDialogManager::createWaveMonsters(Encou
     if(_dlg)
         combatantPos = _dlg->viewportCenter();
 
+    qDebug() << "[Battle Dialog Manager] Creating monster wave " << wave << "...";
+
     CombatantGroupList combatantsList = battle->getCombatants(wave);
     for(int i = 0; i < combatantsList.count(); ++i)
     {
         CombatantGroup combatantGroup = combatantsList.at(i);
-        if((combatantGroup.second) && (combatantGroup.second->getType() == DMHelper::CombatantType_Monster))
+        if(combatantGroup.second)
         {
-            Monster* monster = dynamic_cast<Monster*>(combatantGroup.second);
-            if(monster)
+            if(combatantGroup.second->getType() == DMHelper::CombatantType_Monster)
             {
-                QString baseName = combatantGroup.second->getName().isEmpty() ? monster->getMonsterClassName() : combatantGroup.second->getName();
-
-                for(int n = 0; n < combatantGroup.first; ++n)
+                Monster* monster = dynamic_cast<Monster*>(combatantGroup.second);
+                if(monster)
                 {
-                    BattleDialogModelMonsterCombatant* newMonster = new BattleDialogModelMonsterCombatant(monster,
-                                                                                        (combatantGroup.first > 1) ? baseName + QString("#") + QString::number(n+1) : baseName,
-                                                                                        -1,
-                                                                                        (monster->getHitPoints() > 0) ? monster->getHitPoints() : monster->getHitDice().roll());
-                    newMonster->setInitiative(Dice::d20() + Combatant::getAbilityMod(monster->getDexterity()));                    
-                    newMonster->setPosition(combatantPos);
-                    result.append(newMonster);
+                    QString baseName = combatantGroup.second->getName().isEmpty() ? monster->getMonsterClassName() : combatantGroup.second->getName();
+
+                    for(int n = 0; n < combatantGroup.first; ++n)
+                    {
+                        BattleDialogModelMonsterCombatant* newMonster = new BattleDialogModelMonsterCombatant(monster,
+                                                                                            (combatantGroup.first > 1) ? baseName + QString("#") + QString::number(n+1) : baseName,
+                                                                                            -1,
+                                                                                            (monster->getHitPoints() > 0) ? monster->getHitPoints() : monster->getHitDice().roll());
+                        newMonster->setInitiative(Dice::d20() + Combatant::getAbilityMod(monster->getDexterity()));
+                        newMonster->setPosition(combatantPos);
+                        result.append(newMonster);
+                    }
+
+                    qDebug() << "[Battle Dialog Manager] ... " << combatantGroup.first << "x monster " << monster->getName() << " added.";
+                }
+            }
+            else if(combatantGroup.second->getType() == DMHelper::CombatantType_Reference)
+            {
+                CombatantReference* npcReference = dynamic_cast<CombatantReference*>(combatantGroup.second);
+                if(npcReference)
+                {
+                    Character* npc = dynamic_cast<Character*>(npcReference->getReference());
+                    if(npc)
+                    {
+                        BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(npc);
+                        newCharacter->setPosition(combatantPos);
+                        result.append(newCharacter);
+                        qDebug() << "[Battle Dialog Manager] ... NPC " << npc->getName() << " added.";
+                    }
                 }
             }
         }

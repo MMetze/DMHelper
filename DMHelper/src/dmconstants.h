@@ -53,6 +53,7 @@ namespace DMHelper
         CombatantType_Base = 0,
         CombatantType_Character,
         CombatantType_Monster,
+        CombatantType_Reference
     };
 
     enum

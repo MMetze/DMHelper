@@ -143,7 +143,8 @@ SOURCES += main.cpp\
     characterimporter.cpp \
     battledialoglogview.cpp \
     monsteractioneditdialog.cpp \
-    aboutdialog.cpp
+    aboutdialog.cpp \
+    combatantreference.cpp
 
 HEADERS  += mainwindow.h \
     publishwindow.h \
@@ -269,7 +270,8 @@ HEADERS  += mainwindow.h \
     characterimporter.h \
     battledialoglogview.h \
     monsteractioneditdialog.h \
-    aboutdialog.h
+    aboutdialog.h \
+    combatantreference.h
 
 FORMS    += mainwindow.ui \
     dicerolldialog.ui \
@@ -346,7 +348,7 @@ CONFIG( debug, debug|release ) {
     #else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
 } else {
     # release
-    win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
+    win32: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
     else:unix: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
     win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/DMHelperShared.lib
     else:win32:win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/libDMHelperShared.a
