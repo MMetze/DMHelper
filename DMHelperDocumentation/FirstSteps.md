@@ -3,7 +3,7 @@ This tutorial will guide you through creating your first campaign (in this case 
 
 ## Download and install
 Get the latest copy of DMHelper from our [itch.io](https://dm-helper.itch.io/dm-helper) page.<br />
-Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and charakter portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br />
+Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and character portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br />
 * [MyCampaigns]
  * [DMHelper]
  * [Campaign ONE]
