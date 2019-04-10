@@ -1,3 +1,8 @@
+# DM Helper
+![DM Helper](Images/dmhelper_large.png)
+
+The DM Helper will act as your in-game assistance, taking care of the administrative tasks and allowing you to focus on your players, the narrative and the fun!
+
 # First Steps
 This tutorial will guide you through creating your first campaign (in this case the example campaing), using the interface and setting up your world to run your game in.
 
