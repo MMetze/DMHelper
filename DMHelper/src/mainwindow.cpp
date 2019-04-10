@@ -196,7 +196,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(clearDirty()));
     connect(ui->actionNew_Adventure,SIGNAL(triggered()),this,SLOT(newAdventure()));
     connect(ui->actionNew_Character,SIGNAL(triggered()),this,SLOT(newCharacter()));
-    connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    // TODO: reenable Import Character (?)
+    //connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    ui->action_Import_Character->setVisible(false);
     connect(ui->actionNew_Text_Encounter,SIGNAL(triggered()),this,SLOT(newTextEncounter()));
     connect(ui->actionNew_Battle_Encounter,SIGNAL(triggered()),this,SLOT(newBattleEncounter()));
     connect(ui->actionNew_Scrolling_Text_Encounter,SIGNAL(triggered()),this,SLOT(newScrollingTextEncounter()));

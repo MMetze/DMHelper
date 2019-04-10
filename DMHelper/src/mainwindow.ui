@@ -208,7 +208,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="actionDice">
    <property name="text">
-    <string>Dice</string>
+    <string>&amp;Dice</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -270,7 +270,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="action_Open_Bestiary">
    <property name="text">
-    <string>&amp;Open Bestiary</string>
+    <string>Open &amp;Bestiary</string>
    </property>
   </action>
   <action name="action_New_Monster">
@@ -280,7 +280,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="actionOpen_DM_Screen">
    <property name="text">
-    <string>Open &amp;DM Screen</string>
+    <string>Open DM &amp;Screen</string>
    </property>
   </action>
   <action name="actionPublish_Text">
@@ -295,7 +295,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="actionOptions">
    <property name="text">
-    <string>Options...</string>
+    <string>&amp;Options...</string>
    </property>
   </action>
   <action name="actionBattle_Dialog">
@@ -303,7 +303,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Open Battle Dialog</string>
+    <string>&amp;Open Battle Dialog</string>
    </property>
   </action>
   <action name="actionNew_Scrolling_Text_Encounter">
@@ -313,7 +313,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="actionStart_Battle">
    <property name="text">
-    <string>Start New Battle</string>
+    <string>&amp;Start New Battle</string>
    </property>
   </action>
   <action name="action_Import_Character">
@@ -323,7 +323,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About...</string>
+    <string>&amp;About...</string>
    </property>
   </action>
  </widget>

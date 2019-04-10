@@ -1,4 +1,7 @@
 TODOs
+Campaign menu - hide Start Battle if the current encounter has a battle active
+Change scrolling text to use the publish window
+Add audio track playback to scrolling text encounters
 
 Better battle render performance
 Only change bestiary when no campaign is loaded
@@ -51,6 +54,9 @@ enter while editing HP turns off publish
 Add a round counter, add countdown of effects, add effects to individuals
 
 DONE
+v0.19.0
+Starting/opening/saving more than one battle works properly
+
 v0.18.0
 Bestiary Updates
 	SRD bestiary updated to include Hit Dice bonuses: SRD v2.1 (compatible with v2.0)

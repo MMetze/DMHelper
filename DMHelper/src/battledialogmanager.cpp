@@ -92,11 +92,16 @@ void BattleDialogManager::startNewBattle(EncounterBattle* battleEncounter)
 
     if(_dlg)
     {
+        /*
         QMessageBox::StandardButton result = QMessageBox::critical(_dlg, QString("Confirm Close Battle"), QString("There is an existing battle still ongoing. Are you sure you wish to end that battle to start a new one? All changes will be discarded."), QMessageBox::Yes | QMessageBox::No);
         if(result == QMessageBox::No)
             return;
 
         completeBattle();
+        */
+
+        delete _dlg;
+        _dlg = nullptr;
     }
 
     BattleDialogModel* battleModel = new BattleDialogModel();
@@ -154,11 +159,16 @@ void BattleDialogManager::loadBattle(EncounterBattle* battleEncounter)
             return;
         }
 
+        /*
         QMessageBox::StandardButton result = QMessageBox::critical(_dlg, QString("Confirm Close Battle"), QString("There is an existing battle still ongoing. Are you sure you wish to end that battle to load a new one? All changes will be discarded."), QMessageBox::Yes | QMessageBox::No);
         if(result == QMessageBox::No)
             return;
 
         completeBattle();
+        */
+
+        delete _dlg;
+        _dlg = nullptr;
     }
 
     BattleDialogModel* battleModel = battleEncounter->getBattleDialogModel();
