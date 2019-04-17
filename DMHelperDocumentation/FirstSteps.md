@@ -1,5 +1,5 @@
 # DM Helper
-![DM Helper](Images/dmhelper_large.png)
+![DM Helper](Images/DMH-icon.png)
 
 The DM Helper will act as your in-game assistance, taking care of the administrative tasks and allowing you to focus on your players, the narrative and the fun!
 

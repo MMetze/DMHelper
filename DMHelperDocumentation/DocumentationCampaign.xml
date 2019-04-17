@@ -1,34 +1,82 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign worldExpanded="1" _baseID="1" partyExpanded="1" name="Sample Campaign" date="01/01/0000" time="0" adventuresExpanded="1" worldNPCsExpanded="1" worldSettingsExpanded="1">
+ <campaign name="Sample Campaign" adventuresExpanded="1" worldNPCsExpanded="1" _baseID="1" date="01/01/0000" time="0" partyExpanded="1" worldSettingsExpanded="1" worldExpanded="1">
   <notes>
-   <encounter _baseID="1000" name="" type="1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+   <encounter name="" _baseID="1000" type="1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">In the last session, the party successfully defeated what they assumed was the BBEG... wait until they find the truth!</p></body></html>]]></encounter>
   </notes>
   <characters>
-   <combatant copper="0" proficiencies="" intelligenceSave="0" constitutionSave="0" intimidation="0" dexterity="10" level3="0" persuasion="0" investigation="0" insight="0" wisdomSave="0" notes="" _baseID="1007" equipment="" eyes="" intelligence="10" platinum="0" icon="" athletics="0" type="1" gold="0" weight="" charisma="10" hitDice="0d0" perception="0" strength="10" arcana="0" constitution="10" background="N/A" spells="" dexteritySave="0" player="N/A" sex="" medicine="0" deception="0" speed="30" sleightOfHand="0" religion="0" hair="" race="" dndBeyondID="-1" height="" animalHandling="0" performance="0" age="" armorClass="10" class3="N/A" subrace="N/A" alignment="" history="0" active="1" experience="0" silver="0" stealth="0" class2="N/A" charismaSave="0" level2="0" wisdom="10" class="" level="1" acrobatics="0" nature="0" survival="0" strengthSave="0" hitPoints="1" name="Jiminy">
+   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Jiminy" spells="" intelligenceSave="0" medicine="0" _baseID="1007" nature="0" charisma="10" gold="0" icon="Images/Aroc-the-grey.png" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="24" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="10" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
     <attacks/>
    </combatant>
-   <combatant copper="0" proficiencies="" intelligenceSave="0" constitutionSave="0" intimidation="0" dexterity="10" level3="0" persuasion="0" investigation="0" insight="0" wisdomSave="0" notes="" _baseID="1008" equipment="" eyes="" intelligence="10" platinum="0" icon="" athletics="0" type="1" gold="0" weight="" charisma="10" hitDice="0d0" perception="0" strength="10" arcana="0" constitution="10" background="N/A" spells="" dexteritySave="0" player="N/A" sex="" medicine="0" deception="0" speed="30" sleightOfHand="0" religion="0" hair="" race="" dndBeyondID="-1" height="" animalHandling="0" performance="0" age="" armorClass="10" class3="N/A" subrace="N/A" alignment="" history="0" active="1" experience="0" silver="0" stealth="0" class2="N/A" charismaSave="0" level2="0" wisdom="10" class="" level="1" acrobatics="0" nature="0" survival="0" strengthSave="0" hitPoints="1" name="Axyno">
+   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Kraxas" spells="" intelligenceSave="0" medicine="0" _baseID="1009" nature="0" charisma="10" gold="0" icon="Images/Possessed-torgun.png" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="58" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
     <attacks/>
    </combatant>
-   <combatant copper="0" proficiencies="" intelligenceSave="0" constitutionSave="0" intimidation="0" dexterity="10" level3="0" persuasion="0" investigation="0" insight="0" wisdomSave="0" notes="" _baseID="1009" equipment="" eyes="" intelligence="10" platinum="0" icon="" athletics="0" type="1" gold="0" weight="" charisma="10" hitDice="0d0" perception="0" strength="10" arcana="0" constitution="10" background="N/A" spells="" dexteritySave="0" player="N/A" sex="" medicine="0" deception="0" speed="30" sleightOfHand="0" religion="0" hair="" race="" dndBeyondID="-1" height="" animalHandling="0" performance="0" age="" armorClass="10" class3="N/A" subrace="N/A" alignment="" history="0" active="1" experience="0" silver="0" stealth="0" class2="N/A" charismaSave="0" level2="0" wisdom="10" class="" level="1" acrobatics="0" nature="0" survival="0" strengthSave="0" hitPoints="1" name="Kraxas">
-    <attacks/>
-   </combatant>
-   <combatant copper="0" proficiencies="" intelligenceSave="0" constitutionSave="0" intimidation="0" dexterity="10" level3="0" persuasion="0" investigation="0" insight="0" wisdomSave="0" notes="" _baseID="1010" equipment="" eyes="" intelligence="10" platinum="0" icon="" athletics="0" type="1" gold="0" weight="" charisma="10" hitDice="0d0" perception="0" strength="10" arcana="0" constitution="10" background="N/A" spells="" dexteritySave="0" player="N/A" sex="" medicine="0" deception="0" speed="30" sleightOfHand="0" religion="0" hair="" race="" dndBeyondID="-1" height="" animalHandling="0" performance="0" age="" armorClass="10" class3="N/A" subrace="N/A" alignment="" history="0" active="1" experience="0" silver="0" stealth="0" class2="N/A" charismaSave="0" level2="0" wisdom="10" class="" level="1" acrobatics="0" nature="0" survival="0" strengthSave="0" hitPoints="1" name="Iulian O'Nally">
+   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Iulian O'Nally" spells="" intelligenceSave="0" medicine="0" _baseID="1010" nature="0" charisma="10" gold="0" icon="Images/Immarel-the-magnificent.png" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="22" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
     <attacks/>
    </combatant>
   </characters>
   <adventures>
-   <adventure expanded="1" _baseID="1001" name="First Adventure">
-    <encounters/>
+   <adventure expanded="1" name="First Adventure" _baseID="1001">
+    <encounters>
+     <encounter audiotrack="1015" name="Hydra Battle" _baseID="1018" type="2"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">As the party enters the room, they disturb a small party of goblins who have set up camp in the northern area of the room, who attack immediately.</p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">After two rounds, the coffin area in the west of the room explodes upwards, sending chunks of stone flying in a 40' radius. All creatures within that area need to make a Dexterity save or take 2d10 bludgeoning damage. Beneath the rubble, an underground river is revealed flowing through a natural tunnel. A hydra heaves its body through the opening into the room. It will attack anything that moves!</p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The goblins carry 1d6 gold pieces and 1d10 silver pieces on their bodies. </p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The underground river is 50' wide and 20' deep, flowing north to south, filling half of the tunnel it has carved out over the millenia. It is ice-cold and characters who fall or jump into the hole are quickly swept away to an underground cavern miles away...</p></body></html>]]><waves>
+       <wave>
+        <combatants>
+         <combatantPair count="5">
+          <combatant notes="" hitDice="3d6+4" passivePerception="10" name="" hitPoints="0" active="1" _baseID="1019" icon="" monsterClass="Goblin" armorClass="15" type="2">
+           <attacks/>
+          </combatant>
+         </combatantPair>
+        </combatants>
+       </wave>
+       <wave>
+        <combatants>
+         <combatantPair count="1">
+          <combatant notes="" hitDice="15d12+75" passivePerception="10" name="" hitPoints="0" active="1" _baseID="1021" icon="" monsterClass="Hydra" armorClass="15" type="2">
+           <attacks/>
+          </combatant>
+         </combatantPair>
+        </combatants>
+       </wave>
+      </waves>
+      <battle mapRectX="124" showGrid="0" gridOffsetX="0" showAlive="1" mapRectY="525" mapRectHeight="801" gridScale="72" showEffects="255" showDead="0" mapID="1002" activeId="1029" mapRectWidth="1121" gridOffsetY="0" showCompass="0">
+       <combatants>
+        <battlecombatant isKnown="1" positionX="746.6964113969667" combatantId="1019" legendaryCount="3" monsterName="Goblin#4" monsterHP="16" initiative="21" monsterType="1" isShown="1" _baseID="1026" monsterSize="-1" positionY="623.0344705691922" type="2"/>
+        <battlecombatant isKnown="1" positionX="325.7891421487404" combatantId="1021" legendaryCount="3" monsterName="Hydra" monsterHP="138" initiative="20" monsterType="1" isShown="1" _baseID="1029" monsterSize="-1" positionY="906.3049971727962" type="2"/>
+        <battlecombatant positionX="822.2231738506074" combatantId="1010" initiative="19" _baseID="1022" positionY="963.3648074712548" type="1"/>
+        <battlecombatant isKnown="1" positionX="678.9369479236735" combatantId="1019" legendaryCount="3" monsterName="Goblin#5" monsterHP="9" initiative="18" monsterType="1" isShown="1" _baseID="1027" monsterSize="-1" positionY="757.5313844920494" type="2"/>
+        <battlecombatant positionX="750.6822621895135" combatantId="1009" initiative="17" _baseID="1021" positionY="825.3930492677162" type="1"/>
+        <battlecombatant isKnown="1" positionX="1116.642795169415" combatantId="-1" legendaryCount="3" monsterName="Goblin#1" monsterHP="14" initiative="16" monsterType="2" isShown="0" _baseID="1032" monsterClass="Goblin" positionY="1045.126416012332" type="2"/>
+        <battlecombatant isKnown="1" positionX="473.7167327587054" combatantId="1019" legendaryCount="3" monsterName="Goblin#2" monsterHP="9" initiative="13" monsterType="1" isShown="1" _baseID="1024" monsterSize="-1" positionY="756.9181766778113" type="2"/>
+        <battlecombatant isKnown="1" positionX="1117.581282794511" combatantId="-1" legendaryCount="3" monsterName="Goblin#2" monsterHP="13" initiative="13" monsterType="2" isShown="0" _baseID="1033" monsterClass="Goblin" positionY="753.2567646073692" type="2"/>
+        <battlecombatant positionX="612.7105039859744" combatantId="1007" initiative="12" _baseID="1020" positionY="1120.754813125662" type="1"/>
+        <battlecombatant isKnown="1" positionX="759.8803794030828" combatantId="1019" legendaryCount="3" monsterName="Goblin#1" monsterHP="19" initiative="11" monsterType="1" isShown="1" _baseID="1023" monsterSize="-1" positionY="763.0502548201911" type="2"/>
+        <battlecombatant isKnown="1" positionX="481.8928369485448" combatantId="1019" legendaryCount="3" monsterName="Goblin#3" monsterHP="16" initiative="3" monsterType="1" isShown="1" _baseID="1025" monsterSize="-1" positionY="687.421291064177" type="2"/>
+       </combatants>
+       <effects>
+        <battleeffect positionX="31.786240081546" colorG="192" rotation="0" colorR="192" _baseID="1030" colorB="192" size="40" positionY="626.5978198923583" tip="" type="1"/>
+        <battleeffect positionX="753.2235984889499" colorG="0" rotation="157.1066489212927" colorR="203" _baseID="1031" colorB="0" size="15" positionY="829.8745752686937" tip="" type="2"/>
+       </effects>
+      </battle>
+     </encounter>
+    </encounters>
     <maps>
-     <map filename="images/Ancient Catacombs.jpg" _baseID="1002" name="Ancient Catacombs" audiotrack="-1">
+     <map audiotrack="-1" name="Ancient Catacombs" _baseID="1002" filename="images/Ancient Catacombs.jpg">
       <actions>
-       <action radius="80" erase="1" type="1" brushtype="0">
+       <action radius="80" brushtype="0" erase="1" type="1">
         <points>
          <point x="918" y="906"/>
          <point x="916" y="906"/>
@@ -300,7 +348,7 @@ p, li { white-space: pre-wrap; }
          <point x="701" y="901"/>
         </points>
        </action>
-       <action radius="80" erase="1" type="1" brushtype="0">
+       <action radius="80" brushtype="0" erase="1" type="1">
         <points>
          <point x="832" y="903"/>
          <point x="843" y="899"/>
@@ -473,45 +521,45 @@ p, li { white-space: pre-wrap; }
        </action>
       </actions>
      </map>
-     <map filename="Big Hilltop Camp.jpg" _baseID="1003" name="Big Hilltop Camp" audiotrack="-1">
+     <map audiotrack="-1" name="Big Hilltop Camp" _baseID="1003" filename="images/Big Hilltop Camp.jpg">
       <actions/>
      </map>
-     <map filename="Crumbling Facility.jpg" _baseID="1004" name="Crumbling Facility" audiotrack="-1">
+     <map audiotrack="-1" name="Crumbling Facility" _baseID="1004" filename="images/Crumbling Facility.jpg">
       <actions/>
      </map>
-     <map filename="Cultist Lair.jpg" _baseID="1005" name="Cultist Lair" audiotrack="-1">
+     <map audiotrack="-1" name="Cultist Lair" _baseID="1005" filename="images/Cultist Lair.jpg">
       <actions/>
      </map>
-     <map filename="Forked Road.jpg" _baseID="1006" name="Forked Road" audiotrack="-1">
+     <map audiotrack="-1" name="Forked Road" _baseID="1006" filename="images/Forked Road.jpg">
       <actions/>
      </map>
     </maps>
    </adventure>
   </adventures>
   <settings>
-   <map filename="images/Lost Library 1.jpg" _baseID="1011" name="World View" audiotrack="-1">
+   <map audiotrack="-1" name="World View" _baseID="1011" filename="images/Lost Library 1.jpg">
     <actions/>
    </map>
-   <map filename="images/Forked Road.jpg" _baseID="1012" name="St. Anger" audiotrack="-1">
+   <map audiotrack="-1" name="Sankt Stefs" _baseID="1012" filename="images/Forked Road.jpg">
     <actions/>
    </map>
   </settings>
   <npcs>
-   <combatant copper="0" proficiencies="" intelligenceSave="0" constitutionSave="0" intimidation="0" dexterity="10" level3="0" persuasion="0" investigation="0" insight="0" wisdomSave="0" notes="" _baseID="1013" equipment="" eyes="" intelligence="10" platinum="0" icon="" athletics="0" type="1" gold="0" weight="" charisma="10" hitDice="0d0" perception="0" strength="10" arcana="0" constitution="10" background="N/A" spells="" dexteritySave="0" player="N/A" sex="" medicine="0" deception="0" speed="30" sleightOfHand="0" religion="0" hair="" race="" dndBeyondID="-1" height="" animalHandling="0" performance="0" age="" armorClass="10" class3="N/A" subrace="N/A" alignment="" history="0" active="1" experience="0" silver="0" stealth="0" class2="N/A" charismaSave="0" level2="0" wisdom="10" class="" level="1" acrobatics="0" nature="0" survival="0" strengthSave="0" hitPoints="1" name="Elm D'Zurth">
+   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Elm D'Zurth" spells="" intelligenceSave="0" medicine="0" _baseID="1013" nature="0" charisma="10" gold="0" icon="" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="10" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
     <attacks/>
    </combatant>
-   <combatant copper="0" proficiencies="" intelligenceSave="0" constitutionSave="0" intimidation="0" dexterity="10" level3="0" persuasion="0" investigation="0" insight="0" wisdomSave="0" notes="" _baseID="1014" equipment="" eyes="" intelligence="10" platinum="0" icon="" athletics="0" type="1" gold="0" weight="" charisma="10" hitDice="0d0" perception="0" strength="10" arcana="0" constitution="10" background="N/A" spells="" dexteritySave="0" player="N/A" sex="" medicine="0" deception="0" speed="30" sleightOfHand="0" religion="0" hair="" race="" dndBeyondID="-1" height="" animalHandling="0" performance="0" age="" armorClass="10" class3="N/A" subrace="N/A" alignment="" history="0" active="1" experience="0" silver="0" stealth="0" class2="N/A" charismaSave="0" level2="0" wisdom="10" class="" level="1" acrobatics="0" nature="0" survival="0" strengthSave="0" hitPoints="1" name="Eva Devengelo">
+   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Eva Devengelo" spells="" intelligenceSave="0" medicine="0" _baseID="1014" nature="0" charisma="10" gold="0" icon="" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="10" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
     <attacks/>
    </combatant>
   </npcs>
   <tracks>
-   <track _baseID="1015" name="Battle" md5="">
+   <track md5="" name="Battle" _baseID="1015">
     <url><![CDATA[c:/Users/Craig/Documents/GitHub/DMHelper/DMHelper/working/music/79_Medieval_Battle.mp3]]></url>
    </track>
-   <track _baseID="1016" name="Mellow Mood" md5="">
+   <track md5="" name="Mellow Mood" _baseID="1016">
     <url><![CDATA[c:/Users/Craig/Documents/GitHub/DMHelper/DMHelper/working/music/131_The_Bog_Standard.mp3]]></url>
    </track>
-   <track _baseID="1017" name="Festival" md5="">
+   <track md5="" name="Festival" _baseID="1017">
     <url><![CDATA[c:/Users/Craig/Documents/GitHub/DMHelper/DMHelper/working/music/133_Halfling_Festival.mp3]]></url>
    </track>
   </tracks>

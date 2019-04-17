@@ -1,5 +1,5 @@
 # DM Helper
-![DM Helper](Images/dmhelper_large.png)
+![DM Helper](Images/DMH-icon.png)
 
 The DM Helper will act as your in-game assistance, taking care of the administrative tasks and allowing you to focus on your players, the narrative and the fun!
 
@@ -15,7 +15,7 @@ Key Features include:
 * Animation of scrolling text over a background for easy cut-scene creation
 
 ## Download and install
-Get the latest copy of DMHelper from our [itch.io](https://dm-helper.itch.io/dm-helper) page.<br />
+Get the latest copy of DMHelper from our [itch.io](https://dm-helper.itch.io/dm-helper) page: https://dm-helper.itch.io/dm-helper<br />
 Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and character portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br />
 
 There are no more installation steps neccessary. For a further introduction, see our Getting Started Guide.
@@ -120,28 +120,53 @@ Opens the options dialog.
 Opens the about dialog with information about the DM Helper and any relevant license information.
 
 #### 3. Campaign Tree
+The full campaign is listed in a tree form for reference. Each entry has a context menu with content-specific entries, entries can be re-ordered by drag and drop and the status of the tree is saved with the campaign. Most entries can also be renamed by double-clicking on them.
 
 ##### Notes
+This is a simple text field useful for recording campaign notes like party progress, surprising events, spontaneous notes to self or pretty much anything else you need to write down.
+
+As with *Text Encounters*, the names of encounters, maps, characters or NPCs are automatically converted into hyperlinks to allow quick reference between entries.
 
 ##### Party
+All members of the party are listed here.
+
+Checkboxes next to the character names allow the characters to be marked as currently active or inactive. When a new *Battle* is started, all active (checked) characters are automatically added to the initial list of combatants.
 
 ##### Adventures
+Adventures are listed here in a simple tree structure. Each adventure is comprised of a set of *Encounters* and *Maps*. There is no specific relationship of any kind required between multiple encounters and/or maps, so an adventures can be anything from a sequential list of numbered rooms in a mapped dungeon to a loosely connected set of possible events. Similarly, maps can be related directly to encounters, but do not have to be.
 
 ##### World
+There are elements of a campaign's world that are not exclusively connected to a single adventure.
 
-###### *Settings*
+Settings have all the same features as *Maps* in an adventure.
 
-###### *NPCs*
+*NPCs* are the same as characters, but not necessarily directly tied to the party. NPCs can also be manually added to a battle.
 
 ##### Audio Tracks
+A campaign includes a simple list of audio tracks. These can be played back manually via double-click in the list or assigned to a *Map* or *Battle Encounter* and will be automatically when that map is published or battle is started.
 
-#### 4. Content Details
-TBD
+In the current version of DM Helper, tracks can only be played locally and not streamed to a remote client.
+
+#### 4. Contents Pane
+This pane shows the detailed contents of the selected campaign content. For further details, see the following chapters.
 
 #### 5. Quick References
-TBD
+**Preview**</br>
+Provides a preview view of the currently published contents.
+
+This is particularly useful for the DM when the published window is not visible to the DM, for example when it is being shared on a second display on the table facing the players.
+
+To allow the DM to point out specific items on the map in the published window, for example if the window is being shared online via a screen-sharing application, the DM can toggle a pointer with the *space bar*. The pointer is visible both in the preview and the publish screens.
+
+**Time**</br>
+A useful chronometer for tracking the time and date in the campaign. Seasons and daylight are visualized. You can make changes by either entering them in the text boxes, dragging the large hand to set the date or clicking the "Next Day" button, which automatically moves the date forward by 1 day and sets the time to 7:00am.
 
 ## Characters and NPCs
+Characters and NPCs are presented and edited in the same manner in the DM Helper. There are many fully developed character creation and management tools available. The DM Helper does not aim to replace those - we also think many of them are pretty awesome. Instead, our focus is as always to make the job of the DM easier at the table. Our reduced character/NPC sheet was designed with that goal in mind.
+
+All of the key characteristics of a character can be entered and tracked and there is a general notes location for further information. The information can be used for in-game management of hit points and experience, tailoring encounters to fit experience levels or for handling saving throws and to-hit rolls during battles.
+
+None of the information is mandatory, so you can safely ignore any parts you don't need. For example, if you don't intend to track player hit points yourself, any positive number of hit points (default is 1) is sufficient to ensure the DM Helper knows the character is alive.
 
 ## Battle Encounters
 
