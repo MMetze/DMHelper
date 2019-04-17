@@ -1079,17 +1079,15 @@ void MainWindow::deleteCampaign()
         treeModel->clear();
     }
 
+    Campaign* oldCampaign = campaign;
+    campaign = nullptr;
+    emit campaignLoaded(campaign);
+
     // Clear the campaign itself
-    if(campaign)
-    {
-        delete campaign;
-        campaign = nullptr;
-    }
+    delete oldCampaign;
 
     // Ensure the file name is removed
     campaignFileName.clear();
-
-    emit campaignLoaded(campaign);
 }
 
 void MainWindow::enableCampaignMenu()
@@ -1384,7 +1382,7 @@ void MainWindow::openFile(const QString& filename)
     if( !closeCampaign() )
         return;
 
-    qDebug() << "[Main] Loading Campaign: " << campaignFileName;
+    qDebug() << "[Main] Loading Campaign: " << filename;
 
     QDomDocument doc( "DMHelperXML" );
     QFile file( filename );

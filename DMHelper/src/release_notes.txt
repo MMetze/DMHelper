@@ -1,7 +1,14 @@
 TODOs
+Add character level back into level.
+NPC spell slot tracking?
+Archive/Un-archive adventures (and others?) plus check mark to show/hide archived campaign content)
+More complex Settings
+Non-Character party members (e.g. Creatures)
 Campaign menu - hide Start Battle if the current encounter has a battle active
 Change scrolling text to use the publish window
 Add audio track playback to scrolling text encounters
+Add active checkboxes to NPCs to include them as active.
+Move audio track management out of the campaign into a more general list? Might make sharing easier too.
 
 Better battle render performance
 Only change bestiary when no campaign is loaded
