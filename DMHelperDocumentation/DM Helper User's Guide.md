@@ -167,10 +167,20 @@ To allow the DM to point out specific items on the map in the published window, 
 
 A useful chronometer for tracking the time and date in the campaign. Seasons and daylight are visualized. You can make changes by either entering them in the text boxes, dragging the large hand to set the date or clicking the "Next Day" button, which automatically moves the date forward by 1 day and sets the time to 7:00am.
 
-
 **Actions and Conditions**</br>
 
 ![Main Menu](Images/Quickref Screenshot - Quickref.png)  
+
+This list of actions, conditions and other effects is derived from the D&D 5e quick reference sheet created and maintained by crobi. For a preview of the original, check it out here: https://crobi.github.io/dnd5e-quickref/preview/quickref.html
+
+The dropdown allows you to select between different categories, listed below. Clicking on an individual item will display up further details abotu that action or condition including a reference to the specific details in the official rules.
+
+* Actions - a list of common actions that can be taken by a creature during their turn.
+* Bonus Actions - a list of bonus actions that may be able to be taken by a creature on their turn.
+* Conditions - a list of the conditions that may be applied to a creature and the impact of those conditions
+* Environmental Effects - various environmental conditions such as lighting and cover that can impact a creature's ability to see or do something.
+* Movement - different forms of movement available to a creature, including the cost and implications of that movement.
+* Reaction - a list of common reactions that can be taken by a creature as a result of some trigger occurrance.
 
 **Tables**</br>
 
