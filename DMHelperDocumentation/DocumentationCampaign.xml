@@ -1,28 +1,28 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign name="Sample Campaign" adventuresExpanded="1" worldNPCsExpanded="1" _baseID="1" date="23/06/1492" time="25200000" partyExpanded="1" worldSettingsExpanded="1" worldExpanded="1">
+ <campaign date="23/06/1492" name="Sample Campaign" partyExpanded="1" adventuresExpanded="1" time="25200000" worldNPCsExpanded="1" worldExpanded="1" worldSettingsExpanded="1" _baseID="1">
   <notes>
-   <encounter name="" _baseID="1000" type="1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+   <encounter type="1" name="" _baseID="1000"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">In the last session, the party successfully defeated what they assumed was the BBEG... wait until they find the truth!</p></body></html>]]></encounter>
   </notes>
   <characters>
-   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Jiminy" spells="" intelligenceSave="0" medicine="0" _baseID="1007" nature="0" charisma="10" gold="0" icon="Images/Aroc-the-grey.png" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="24" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="10" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
+   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="18" history="0" type="1" strength="12" platinum="0" level="1" dexterity="13" hitPoints="24" constitutionSave="1" experience="8500" armorClass="13" spells="" constitution="15" persuasion="0" athletics="1" level2="0" charisma="8" nature="0" wisdomSave="0" animalHandling="0" icon="Images/Aroc-the-grey.png" investigation="0" height="" perception="1" intelligenceSave="1" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Jiminy Arg" deception="0" player="Jack" size="medium" acrobatics="0" notes="" eyes="" background="Sage" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="CG" age="" weight="" level3="0" equipment="" subrace="N/A" sex="Male" speed="30" wisdom="14" intimidation="0" _baseID="1007" sleightOfHand="0" stealth="1" insight="1" arcana="1" active="1" race="Half-orc" class="Wizard" silver="0">
     <attacks/>
    </combatant>
-   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Kraxas" spells="" intelligenceSave="0" medicine="0" _baseID="1009" nature="0" charisma="10" gold="0" icon="Images/Possessed-torgun.png" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="58" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
+   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="58" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="Images/Possessed-torgun.png" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Kraxas" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1009" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
     <attacks/>
    </combatant>
-   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Iulian O'Nally" spells="" intelligenceSave="0" medicine="0" _baseID="1010" nature="0" charisma="10" gold="0" icon="Images/Immarel-the-magnificent.png" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="22" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
+   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="22" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="Images/Immarel-the-magnificent.png" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Iulian O'Nally" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1010" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
     <attacks/>
    </combatant>
   </characters>
   <adventures>
-   <adventure expanded="1" name="First Adventure" _baseID="1001">
+   <adventure name="First Adventure" expanded="1" _baseID="1001">
     <encounters>
-     <encounter audiotrack="1015" name="Hydra Battle" _baseID="1018" type="2"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+     <encounter audiotrack="1015" type="2" name="Hydra Battle" _baseID="1018"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
@@ -36,7 +36,7 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="5">
-          <combatant notes="" hitDice="3d6+4" passivePerception="10" name="" hitPoints="0" active="1" _baseID="1019" icon="" monsterClass="Goblin" armorClass="15" type="2">
+          <combatant type="2" notes="" name="" passivePerception="10" monsterClass="Goblin" hitPoints="0" armorClass="15" icon="" hitDice="3d6+4" _baseID="1019" active="1">
            <attacks/>
           </combatant>
          </combatantPair>
@@ -45,523 +45,541 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="1">
-          <combatant notes="" hitDice="15d12+75" passivePerception="10" name="" hitPoints="0" active="1" _baseID="1021" icon="" monsterClass="Hydra" armorClass="15" type="2">
+          <combatant type="2" notes="" name="" passivePerception="10" monsterClass="Hydra" hitPoints="0" armorClass="15" icon="" hitDice="15d12+75" _baseID="1021" active="1">
            <attacks/>
           </combatant>
          </combatantPair>
         </combatants>
        </wave>
       </waves>
-      <battle mapRectX="124" showGrid="0" gridOffsetX="0" showAlive="1" mapRectY="525" mapRectHeight="801" gridScale="72" showEffects="255" showDead="0" mapID="1002" activeId="1029" mapRectWidth="1121" gridOffsetY="0" showCompass="0">
+      <battle mapID="1002" showAlive="1" gridOffsetX="0" mapRectHeight="15374" gridOffsetY="0" mapRectY="0" showGrid="0" showCompass="0" showDead="0" showEffects="1" mapRectX="-6137" activeId="1029" mapRectWidth="14421" gridScale="72">
        <combatants>
-        <battlecombatant isKnown="1" positionX="746.6964113969667" combatantId="1019" legendaryCount="3" monsterName="Goblin#4" monsterHP="16" initiative="21" monsterType="1" isShown="1" _baseID="1026" monsterSize="-1" positionY="623.0344705691922" type="2"/>
-        <battlecombatant isKnown="1" positionX="325.7891421487404" combatantId="1021" legendaryCount="3" monsterName="Hydra" monsterHP="138" initiative="20" monsterType="1" isShown="1" _baseID="1029" monsterSize="-1" positionY="906.3049971727962" type="2"/>
-        <battlecombatant positionX="822.2231738506074" combatantId="1010" initiative="19" _baseID="1022" positionY="963.3648074712548" type="1"/>
-        <battlecombatant isKnown="1" positionX="678.9369479236735" combatantId="1019" legendaryCount="3" monsterName="Goblin#5" monsterHP="9" initiative="18" monsterType="1" isShown="1" _baseID="1027" monsterSize="-1" positionY="757.5313844920494" type="2"/>
-        <battlecombatant positionX="750.6822621895135" combatantId="1009" initiative="17" _baseID="1021" positionY="825.3930492677162" type="1"/>
-        <battlecombatant isKnown="1" positionX="1116.642795169415" combatantId="-1" legendaryCount="3" monsterName="Goblin#1" monsterHP="14" initiative="16" monsterType="2" isShown="0" _baseID="1032" monsterClass="Goblin" positionY="1045.126416012332" type="2"/>
-        <battlecombatant isKnown="1" positionX="473.7167327587054" combatantId="1019" legendaryCount="3" monsterName="Goblin#2" monsterHP="9" initiative="13" monsterType="1" isShown="1" _baseID="1024" monsterSize="-1" positionY="756.9181766778113" type="2"/>
-        <battlecombatant isKnown="1" positionX="1117.581282794511" combatantId="-1" legendaryCount="3" monsterName="Goblin#2" monsterHP="13" initiative="13" monsterType="2" isShown="0" _baseID="1033" monsterClass="Goblin" positionY="753.2567646073692" type="2"/>
-        <battlecombatant positionX="612.7105039859744" combatantId="1007" initiative="12" _baseID="1020" positionY="1120.754813125662" type="1"/>
-        <battlecombatant isKnown="1" positionX="759.8803794030828" combatantId="1019" legendaryCount="3" monsterName="Goblin#1" monsterHP="19" initiative="11" monsterType="1" isShown="1" _baseID="1023" monsterSize="-1" positionY="763.0502548201911" type="2"/>
-        <battlecombatant isKnown="1" positionX="481.8928369485448" combatantId="1019" legendaryCount="3" monsterName="Goblin#3" monsterHP="16" initiative="3" monsterType="1" isShown="1" _baseID="1025" monsterSize="-1" positionY="687.421291064177" type="2"/>
+        <battlecombatant type="2" isShown="1" initiative="21" monsterType="1" monsterName="Goblin#4" monsterHP="16" positionY="623.0344705691922" legendaryCount="3" positionX="746.6964113969667" combatantId="1019" isKnown="1" _baseID="1026" monsterSize="-1"/>
+        <battlecombatant type="2" isShown="1" initiative="20" monsterType="1" monsterName="Hydra" monsterHP="138" positionY="906.3049971727962" legendaryCount="3" positionX="325.7891421487404" combatantId="1021" isKnown="1" _baseID="1029" monsterSize="-1"/>
+        <battlecombatant type="1" initiative="19" positionY="963.3648074712548" positionX="822.2231738506074" combatantId="1010" _baseID="1022"/>
+        <battlecombatant type="2" isShown="1" initiative="18" monsterType="1" monsterName="Goblin#5" monsterHP="9" positionY="757.5313844920494" legendaryCount="3" positionX="678.9369479236735" combatantId="1019" isKnown="1" _baseID="1027" monsterSize="-1"/>
+        <battlecombatant type="1" initiative="17" positionY="825.3930492677162" positionX="750.6822621895135" combatantId="1009" _baseID="1021"/>
+        <battlecombatant type="2" isShown="1" initiative="16" monsterClass="Goblin" monsterType="2" monsterName="Goblin#1" monsterHP="14" positionY="1045.126416012332" legendaryCount="3" positionX="1116.642795169415" combatantId="-1" isKnown="1" _baseID="1032"/>
+        <battlecombatant type="2" isShown="1" initiative="13" monsterType="1" monsterName="Goblin#2" monsterHP="9" positionY="756.9181766778113" legendaryCount="3" positionX="473.7167327587054" combatantId="1019" isKnown="1" _baseID="1024" monsterSize="-1"/>
+        <battlecombatant type="2" isShown="1" initiative="13" monsterClass="Goblin" monsterType="2" monsterName="Goblin#2" monsterHP="13" positionY="753.2567646073692" legendaryCount="3" positionX="1117.581282794511" combatantId="-1" isKnown="1" _baseID="1033"/>
+        <battlecombatant type="1" initiative="12" positionY="1120.754813125662" positionX="612.7105039859744" combatantId="1007" _baseID="1020"/>
+        <battlecombatant type="2" isShown="1" initiative="11" monsterType="1" monsterName="Goblin#1" monsterHP="19" positionY="763.0502548201911" legendaryCount="3" positionX="759.8803794030828" combatantId="1019" isKnown="1" _baseID="1023" monsterSize="-1"/>
+        <battlecombatant type="2" isShown="1" initiative="3" monsterType="1" monsterName="Goblin#3" monsterHP="16" positionY="687.421291064177" legendaryCount="3" positionX="481.8928369485448" combatantId="1019" isKnown="1" _baseID="1025" monsterSize="-1"/>
        </combatants>
        <effects>
-        <battleeffect positionX="31.786240081546" colorG="192" rotation="0" colorR="192" _baseID="1030" colorB="192" size="40" positionY="626.5978198923583" tip="" type="1"/>
-        <battleeffect positionX="753.2235984889499" colorG="0" rotation="157.1066489212927" colorR="203" _baseID="1031" colorB="0" size="15" positionY="829.8745752686937" tip="" type="2"/>
+        <battleeffect rotation="0" type="1" colorB="192" colorG="192" tip="" size="40" positionY="626.5978198923583" positionX="31.786240081546" _baseID="1030" colorR="192"/>
+        <battleeffect rotation="157.1066489212927" type="2" colorB="0" colorG="0" tip="" size="15" positionY="829.8745752686937" positionX="753.2235984889499" _baseID="1031" colorR="203"/>
        </effects>
       </battle>
      </encounter>
+     <encounter fontSize="14" type="5" fontColor="#50004b" alignment="4" name="Mountain View" imageWidth="80" imageFile="Images/rixt-heerschop-view-of-gorges-du-tarn-2.jpg" fontBold="0" scrollSpeed="50" fontItalics="0" fontFamily="Calibri" _baseID="1033"><![CDATA[The world is a busy place. Loud and industrial, it is in perpetual motion and constant change. It is also a place of contradiction and conflict. The wealthy upper class, with their noble arcane machinery of gem-encrusted polished brass, live in a practically utopian society sharing their time between leisure pursuits of the arts or academia and the obligations of high society. The generally ignored truth is that this world of wonders is built on layers and layers of lower classes who live in a much darker and dirtier reality. The common folk are surrounded by steam-driven machines, their hydraulic pistons grinding endlessly as the coal fires fueling them belch out their thick, black smoke. Factories, stream-driven vehicles from trains to ships to aeroships, gadgets and personal physical improvements, magical devices, arcane flying vessels small and large; all of these are common-place parts of daily life in Londarem.
+
+The dominant force of this world is the Brettanux Empire which has grown over the past 300 years and subsumed, overrun and conquered all of the civilized parts of the world and many of the lesser civilized regions as well. Across the reaches of the Empire there is an continuous if somewhat uneasy peace, with the Royal Army holding back wild frontiersmen and quelling occassional local uprisings while the Royal Guard keeps the rabble under control closer to home.
+
+The heart and soul of the empire is the capital city of Londarem, located at the mouth of the small, energetic Fen River where it joins the slow and lazy Wedge River in its way to the Bracken Sea. The city is electrifying, pulsing with life and industry. Sprawling nearly three times the size of the next largest city in the Empire, Calum which is located far away across the Great Southern Desert, Londarem was never a modest city. It grew out of a convenient crossing point for the twin rivers and was early on a wild collection of inns, drinking houses, brothels and worse. As the country of Brettanus grew around the royal De Briar dynasty, Londarem was the natural centre of their power. The fast-flowing Fen River delivered the first industrial push and the discovery of vast coal fields further upstream provided the fuel that rocketed Londarem to the technological forefront of civilization, where it has remained for centuries.
+
+With progress came dominance, wealth and growth, but also pollution and disease. The Fen was transformed from a set of wild tumbling rapids to a fast-moving source of brown sludge and windows across the city were covered daily in a film of sticky black soot as the factories and steam engines pumped their outputs directly into the surrounding environment. North of the Fen mouth, the Wedge remained clean and safe, but the waters south of the Join became heavily contaminated and completely unable to support life of any kind. The development of arcane propulsion 200 years ago offered short-lived hope of improvement. The high cost of materials and limited access for the masses to the necessary magics lead to an improved standard of cleanliness for society's elite as they grouped more and more together in the long and narrow Inland region to the west of the clean arm of the Wedge between the river and the rolling Menman hills beyond - and centered around the Royal Palace of the De Briars. The Inlanders, as they became known, have a high standard of living with ready access to both fresh water and clean air. The rest of Londarem society, split between the middle-classed Midland peninsula, the working class Southwest and heavily industrial Southeast regions, must survive as best they can in conditions varying from tolerable to despicable.
+
+Londarem and Brettanux have internationally rooted economies based at their core on strong import/export business. The De Briar family recognized this central role very early on and declared a monopoly on all transportation business for the Royal Trading Company, who enjoy an extremely central position as a result. The president of the RTC is de facto politically every bit as powerful as the Prime Minister himself. This monopoly has serve the royal family very well and eliminated many trade conflicts across the empire by allowing direct interactions between the army and the RTC for protection and strategic planning. Traders and merchants receive fair rates to have their goods transported throughout the empire, with the royal family profiting from every transaction. Otherwise, the De Briar's have held themselves out of most of the day-to-day administration of the empire, allowing the Parliament to take care of the details. After a major incident left tens of thousands dead across the city, however, the royals stepped in and declared their second monopoly: drug trading. This covers all aspects of drug development, production and distribution both for medicinal and recreational use. Overnight, the Royal Guard seized and annexed the seven major pharmaceutical companies and declared all other competitors null and void. All drugs were decriminalized and the new Royal Health and Drug Organization was given free reign to define the prices and distribution mechanisms as they saw fit, effectively eliminating the underground criminal distribution of many dangerous recreational drugs. The further effects and repercussions of creating the RHDO has never concerned the royals as the massive increase in cashflow allowed them to easily and ruthlessly eliminate any resistance to their decision.
+
+All other areas of life, including education, health care or even the provision of basic human needs are left to the often greedy hands of an extremely liberal free market economy. The few regulations are primarily designed to encourage competition and minimize the risk of any one person, family or organization growing wealthy and powerful enough to become a significant threat to the De Briar family. Those who find a way to better their position do so inevitably to the detriment of others. High society is extremely fickle, differentiating only between Haves and Have-nots. Old money has no more value than new money. Scandals and honor, while providing an endless source of entertainment, have no value. Even family ties are of limited value and by no means a guarantee of financial support in times of need. After all, everybody in high society claims some kind of familiar ties to the royal family.
+
+Beyond the responsibilities of the Royal Guard in Londarem and the Royal Army across the farther reaches of Brettanux, all of the policing in the Empire is privately run. In the City, private security companies compete for contracts to provide police services for individual departments, always under the watchful eye of the Guard. An zero-tolerance policy for corruption or unauthorized brutality, combined with the threat of immediate contractual penalties maintains an equilibrium of sorts. Inevitably, however, Inlanders have a long leash when it comes to bending the laws and often allow themselves the luxury of regarding the police forces as a necessary evil to be ignored. In lower-income regions, police forces are much tougher and are given the benefit of the doubt in most complaint cases, leading to an unsteady relationship between police and inhabitants. For this reason, many of the security companies have to employ foreigners from far reaches of the Empire in their forces, which further exascerbates the relationship to the point of occassional open conflict. When violence does spill into the streets, the Guard steps in and the responsible security company and their employees are often replaced.
+
+To handle more complicated investigations, these private security companies keep small teams of freelance specialists with unusual skillsets on retainer, who can be deployed at relatively short notice. These jobs do not pay well and are renowed for being highly dangerous, but promise much opportunity. For some, it is the thrill of the chase, for others the opportunity to contribute to the greater good. For most, it is an opportunity for garnering valuable experience, connections and information over time that might help get an advantage over others.
+
+You have just been hired by Mech Security Incorporated, to join one of these freelance teams. Good luck!
+]]></encounter>
     </encounters>
     <maps>
-     <map audiotrack="-1" name="Ancient Catacombs" _baseID="1002" filename="images/Ancient Catacombs.jpg">
+     <map audiotrack="-1" name="Ancient Catacombs" filename="images/Ancient Catacombs.jpg" _baseID="1002">
       <actions>
-       <action radius="80" brushtype="0" erase="1" type="1">
+       <action type="1" radius="80" erase="1" brushtype="0">
         <points>
-         <point x="918" y="906"/>
-         <point x="916" y="906"/>
-         <point x="911" y="906"/>
-         <point x="886" y="908"/>
-         <point x="855" y="913"/>
-         <point x="852" y="916"/>
-         <point x="850" y="916"/>
-         <point x="848" y="916"/>
-         <point x="848" y="913"/>
-         <point x="842" y="908"/>
-         <point x="840" y="899"/>
-         <point x="838" y="894"/>
-         <point x="838" y="876"/>
-         <point x="838" y="872"/>
-         <point x="838" y="862"/>
-         <point x="837" y="845"/>
-         <point x="835" y="840"/>
-         <point x="833" y="825"/>
-         <point x="833" y="816"/>
-         <point x="830" y="801"/>
-         <point x="826" y="777"/>
-         <point x="826" y="771"/>
-         <point x="825" y="765"/>
-         <point x="823" y="745"/>
-         <point x="821" y="740"/>
-         <point x="820" y="730"/>
-         <point x="813" y="708"/>
-         <point x="811" y="703"/>
-         <point x="808" y="689"/>
-         <point x="799" y="669"/>
-         <point x="793" y="655"/>
-         <point x="791" y="650"/>
-         <point x="786" y="642"/>
-         <point x="776" y="627"/>
-         <point x="759" y="610"/>
-         <point x="752" y="608"/>
-         <point x="743" y="606"/>
-         <point x="720" y="606"/>
-         <point x="694" y="606"/>
-         <point x="677" y="606"/>
-         <point x="666" y="608"/>
-         <point x="659" y="608"/>
-         <point x="647" y="606"/>
-         <point x="620" y="601"/>
-         <point x="606" y="596"/>
-         <point x="586" y="589"/>
-         <point x="579" y="588"/>
-         <point x="572" y="586"/>
-         <point x="566" y="584"/>
-         <point x="555" y="584"/>
-         <point x="539" y="583"/>
-         <point x="522" y="583"/>
-         <point x="508" y="583"/>
-         <point x="472" y="586"/>
-         <point x="428" y="596"/>
-         <point x="410" y="598"/>
-         <point x="388" y="601"/>
-         <point x="366" y="605"/>
-         <point x="351" y="606"/>
-         <point x="337" y="610"/>
-         <point x="329" y="613"/>
-         <point x="317" y="615"/>
-         <point x="303" y="618"/>
-         <point x="288" y="625"/>
-         <point x="268" y="633"/>
-         <point x="247" y="642"/>
-         <point x="235" y="649"/>
-         <point x="230" y="654"/>
-         <point x="222" y="659"/>
-         <point x="217" y="667"/>
-         <point x="210" y="674"/>
-         <point x="203" y="686"/>
-         <point x="200" y="696"/>
-         <point x="200" y="703"/>
-         <point x="193" y="713"/>
-         <point x="191" y="727"/>
-         <point x="190" y="740"/>
-         <point x="188" y="749"/>
-         <point x="183" y="772"/>
-         <point x="180" y="787"/>
-         <point x="178" y="799"/>
-         <point x="176" y="821"/>
-         <point x="174" y="842"/>
-         <point x="174" y="865"/>
-         <point x="176" y="884"/>
-         <point x="180" y="898"/>
-         <point x="180" y="914"/>
-         <point x="180" y="930"/>
-         <point x="180" y="945"/>
-         <point x="180" y="960"/>
-         <point x="178" y="982"/>
-         <point x="176" y="997"/>
-         <point x="176" y="1006"/>
-         <point x="180" y="1033"/>
-         <point x="188" y="1052"/>
-         <point x="195" y="1072"/>
-         <point x="203" y="1099"/>
-         <point x="208" y="1109"/>
-         <point x="210" y="1111"/>
-         <point x="224" y="1124"/>
-         <point x="247" y="1140"/>
-         <point x="269" y="1150"/>
-         <point x="317" y="1177"/>
-         <point x="345" y="1184"/>
-         <point x="359" y="1185"/>
-         <point x="379" y="1191"/>
-         <point x="401" y="1199"/>
-         <point x="422" y="1206"/>
-         <point x="444" y="1213"/>
-         <point x="476" y="1219"/>
-         <point x="510" y="1224"/>
-         <point x="535" y="1228"/>
-         <point x="569" y="1229"/>
-         <point x="591" y="1229"/>
-         <point x="618" y="1229"/>
-         <point x="640" y="1229"/>
-         <point x="662" y="1229"/>
-         <point x="682" y="1229"/>
-         <point x="688" y="1229"/>
-         <point x="727" y="1229"/>
-         <point x="740" y="1228"/>
-         <point x="759" y="1218"/>
-         <point x="772" y="1207"/>
-         <point x="779" y="1201"/>
-         <point x="789" y="1191"/>
-         <point x="794" y="1180"/>
-         <point x="803" y="1167"/>
-         <point x="808" y="1155"/>
-         <point x="816" y="1140"/>
-         <point x="820" y="1123"/>
-         <point x="820" y="1108"/>
-         <point x="820" y="1089"/>
-         <point x="820" y="1072"/>
-         <point x="825" y="1042"/>
-         <point x="826" y="1025"/>
-         <point x="830" y="1011"/>
-         <point x="833" y="999"/>
-         <point x="837" y="986"/>
-         <point x="837" y="977"/>
-         <point x="838" y="970"/>
-         <point x="842" y="960"/>
-         <point x="848" y="952"/>
-         <point x="854" y="942"/>
-         <point x="860" y="935"/>
-         <point x="872" y="930"/>
-         <point x="884" y="925"/>
-         <point x="894" y="921"/>
-         <point x="899" y="918"/>
-         <point x="901" y="916"/>
-         <point x="899" y="916"/>
-         <point x="887" y="920"/>
-         <point x="864" y="925"/>
-         <point x="820" y="926"/>
-         <point x="791" y="926"/>
-         <point x="774" y="923"/>
-         <point x="759" y="916"/>
-         <point x="745" y="899"/>
-         <point x="730" y="877"/>
-         <point x="727" y="867"/>
-         <point x="720" y="837"/>
-         <point x="715" y="823"/>
-         <point x="711" y="803"/>
-         <point x="708" y="793"/>
-         <point x="701" y="771"/>
-         <point x="698" y="762"/>
-         <point x="682" y="745"/>
-         <point x="669" y="737"/>
-         <point x="642" y="721"/>
-         <point x="620" y="711"/>
-         <point x="594" y="703"/>
-         <point x="567" y="698"/>
-         <point x="537" y="698"/>
-         <point x="493" y="698"/>
-         <point x="478" y="698"/>
-         <point x="395" y="718"/>
-         <point x="374" y="725"/>
-         <point x="364" y="730"/>
-         <point x="354" y="735"/>
-         <point x="342" y="743"/>
-         <point x="339" y="745"/>
-         <point x="323" y="760"/>
-         <point x="317" y="774"/>
-         <point x="308" y="793"/>
-         <point x="301" y="818"/>
-         <point x="295" y="847"/>
-         <point x="286" y="874"/>
-         <point x="281" y="894"/>
-         <point x="278" y="909"/>
-         <point x="274" y="930"/>
-         <point x="274" y="947"/>
-         <point x="278" y="959"/>
-         <point x="281" y="967"/>
-         <point x="291" y="982"/>
-         <point x="305" y="999"/>
-         <point x="327" y="1013"/>
-         <point x="347" y="1021"/>
-         <point x="371" y="1038"/>
-         <point x="427" y="1064"/>
-         <point x="461" y="1079"/>
-         <point x="483" y="1087"/>
-         <point x="513" y="1097"/>
-         <point x="528" y="1102"/>
-         <point x="574" y="1114"/>
-         <point x="615" y="1119"/>
-         <point x="647" y="1124"/>
-         <point x="671" y="1126"/>
-         <point x="701" y="1126"/>
-         <point x="718" y="1123"/>
-         <point x="732" y="1108"/>
-         <point x="740" y="1087"/>
-         <point x="742" y="1070"/>
-         <point x="740" y="1047"/>
-         <point x="732" y="1030"/>
-         <point x="716" y="1016"/>
-         <point x="696" y="997"/>
-         <point x="679" y="986"/>
-         <point x="660" y="981"/>
-         <point x="655" y="981"/>
-         <point x="574" y="984"/>
-         <point x="527" y="986"/>
-         <point x="510" y="986"/>
-         <point x="501" y="986"/>
-         <point x="474" y="965"/>
-         <point x="456" y="948"/>
-         <point x="432" y="926"/>
-         <point x="410" y="901"/>
-         <point x="403" y="894"/>
-         <point x="395" y="882"/>
-         <point x="390" y="864"/>
-         <point x="390" y="854"/>
-         <point x="400" y="845"/>
-         <point x="423" y="832"/>
-         <point x="464" y="818"/>
-         <point x="495" y="818"/>
-         <point x="513" y="821"/>
-         <point x="525" y="826"/>
-         <point x="559" y="854"/>
-         <point x="581" y="874"/>
-         <point x="593" y="882"/>
-         <point x="623" y="899"/>
-         <point x="657" y="903"/>
-         <point x="662" y="903"/>
-         <point x="664" y="904"/>
-         <point x="669" y="906"/>
-         <point x="672" y="906"/>
-         <point x="672" y="908"/>
-         <point x="672" y="906"/>
-         <point x="664" y="894"/>
-         <point x="637" y="865"/>
-         <point x="584" y="811"/>
-         <point x="581" y="811"/>
-         <point x="579" y="809"/>
-         <point x="569" y="798"/>
-         <point x="567" y="796"/>
-         <point x="569" y="796"/>
-         <point x="584" y="794"/>
-         <point x="627" y="794"/>
-         <point x="642" y="796"/>
-         <point x="674" y="816"/>
-         <point x="701" y="843"/>
-         <point x="708" y="850"/>
-         <point x="716" y="864"/>
-         <point x="721" y="879"/>
-         <point x="720" y="884"/>
-         <point x="708" y="894"/>
-         <point x="703" y="899"/>
-         <point x="703" y="901"/>
-         <point x="701" y="901"/>
+         <point y="906" x="918"/>
+         <point y="906" x="916"/>
+         <point y="906" x="911"/>
+         <point y="908" x="886"/>
+         <point y="913" x="855"/>
+         <point y="916" x="852"/>
+         <point y="916" x="850"/>
+         <point y="916" x="848"/>
+         <point y="913" x="848"/>
+         <point y="908" x="842"/>
+         <point y="899" x="840"/>
+         <point y="894" x="838"/>
+         <point y="876" x="838"/>
+         <point y="872" x="838"/>
+         <point y="862" x="838"/>
+         <point y="845" x="837"/>
+         <point y="840" x="835"/>
+         <point y="825" x="833"/>
+         <point y="816" x="833"/>
+         <point y="801" x="830"/>
+         <point y="777" x="826"/>
+         <point y="771" x="826"/>
+         <point y="765" x="825"/>
+         <point y="745" x="823"/>
+         <point y="740" x="821"/>
+         <point y="730" x="820"/>
+         <point y="708" x="813"/>
+         <point y="703" x="811"/>
+         <point y="689" x="808"/>
+         <point y="669" x="799"/>
+         <point y="655" x="793"/>
+         <point y="650" x="791"/>
+         <point y="642" x="786"/>
+         <point y="627" x="776"/>
+         <point y="610" x="759"/>
+         <point y="608" x="752"/>
+         <point y="606" x="743"/>
+         <point y="606" x="720"/>
+         <point y="606" x="694"/>
+         <point y="606" x="677"/>
+         <point y="608" x="666"/>
+         <point y="608" x="659"/>
+         <point y="606" x="647"/>
+         <point y="601" x="620"/>
+         <point y="596" x="606"/>
+         <point y="589" x="586"/>
+         <point y="588" x="579"/>
+         <point y="586" x="572"/>
+         <point y="584" x="566"/>
+         <point y="584" x="555"/>
+         <point y="583" x="539"/>
+         <point y="583" x="522"/>
+         <point y="583" x="508"/>
+         <point y="586" x="472"/>
+         <point y="596" x="428"/>
+         <point y="598" x="410"/>
+         <point y="601" x="388"/>
+         <point y="605" x="366"/>
+         <point y="606" x="351"/>
+         <point y="610" x="337"/>
+         <point y="613" x="329"/>
+         <point y="615" x="317"/>
+         <point y="618" x="303"/>
+         <point y="625" x="288"/>
+         <point y="633" x="268"/>
+         <point y="642" x="247"/>
+         <point y="649" x="235"/>
+         <point y="654" x="230"/>
+         <point y="659" x="222"/>
+         <point y="667" x="217"/>
+         <point y="674" x="210"/>
+         <point y="686" x="203"/>
+         <point y="696" x="200"/>
+         <point y="703" x="200"/>
+         <point y="713" x="193"/>
+         <point y="727" x="191"/>
+         <point y="740" x="190"/>
+         <point y="749" x="188"/>
+         <point y="772" x="183"/>
+         <point y="787" x="180"/>
+         <point y="799" x="178"/>
+         <point y="821" x="176"/>
+         <point y="842" x="174"/>
+         <point y="865" x="174"/>
+         <point y="884" x="176"/>
+         <point y="898" x="180"/>
+         <point y="914" x="180"/>
+         <point y="930" x="180"/>
+         <point y="945" x="180"/>
+         <point y="960" x="180"/>
+         <point y="982" x="178"/>
+         <point y="997" x="176"/>
+         <point y="1006" x="176"/>
+         <point y="1033" x="180"/>
+         <point y="1052" x="188"/>
+         <point y="1072" x="195"/>
+         <point y="1099" x="203"/>
+         <point y="1109" x="208"/>
+         <point y="1111" x="210"/>
+         <point y="1124" x="224"/>
+         <point y="1140" x="247"/>
+         <point y="1150" x="269"/>
+         <point y="1177" x="317"/>
+         <point y="1184" x="345"/>
+         <point y="1185" x="359"/>
+         <point y="1191" x="379"/>
+         <point y="1199" x="401"/>
+         <point y="1206" x="422"/>
+         <point y="1213" x="444"/>
+         <point y="1219" x="476"/>
+         <point y="1224" x="510"/>
+         <point y="1228" x="535"/>
+         <point y="1229" x="569"/>
+         <point y="1229" x="591"/>
+         <point y="1229" x="618"/>
+         <point y="1229" x="640"/>
+         <point y="1229" x="662"/>
+         <point y="1229" x="682"/>
+         <point y="1229" x="688"/>
+         <point y="1229" x="727"/>
+         <point y="1228" x="740"/>
+         <point y="1218" x="759"/>
+         <point y="1207" x="772"/>
+         <point y="1201" x="779"/>
+         <point y="1191" x="789"/>
+         <point y="1180" x="794"/>
+         <point y="1167" x="803"/>
+         <point y="1155" x="808"/>
+         <point y="1140" x="816"/>
+         <point y="1123" x="820"/>
+         <point y="1108" x="820"/>
+         <point y="1089" x="820"/>
+         <point y="1072" x="820"/>
+         <point y="1042" x="825"/>
+         <point y="1025" x="826"/>
+         <point y="1011" x="830"/>
+         <point y="999" x="833"/>
+         <point y="986" x="837"/>
+         <point y="977" x="837"/>
+         <point y="970" x="838"/>
+         <point y="960" x="842"/>
+         <point y="952" x="848"/>
+         <point y="942" x="854"/>
+         <point y="935" x="860"/>
+         <point y="930" x="872"/>
+         <point y="925" x="884"/>
+         <point y="921" x="894"/>
+         <point y="918" x="899"/>
+         <point y="916" x="901"/>
+         <point y="916" x="899"/>
+         <point y="920" x="887"/>
+         <point y="925" x="864"/>
+         <point y="926" x="820"/>
+         <point y="926" x="791"/>
+         <point y="923" x="774"/>
+         <point y="916" x="759"/>
+         <point y="899" x="745"/>
+         <point y="877" x="730"/>
+         <point y="867" x="727"/>
+         <point y="837" x="720"/>
+         <point y="823" x="715"/>
+         <point y="803" x="711"/>
+         <point y="793" x="708"/>
+         <point y="771" x="701"/>
+         <point y="762" x="698"/>
+         <point y="745" x="682"/>
+         <point y="737" x="669"/>
+         <point y="721" x="642"/>
+         <point y="711" x="620"/>
+         <point y="703" x="594"/>
+         <point y="698" x="567"/>
+         <point y="698" x="537"/>
+         <point y="698" x="493"/>
+         <point y="698" x="478"/>
+         <point y="718" x="395"/>
+         <point y="725" x="374"/>
+         <point y="730" x="364"/>
+         <point y="735" x="354"/>
+         <point y="743" x="342"/>
+         <point y="745" x="339"/>
+         <point y="760" x="323"/>
+         <point y="774" x="317"/>
+         <point y="793" x="308"/>
+         <point y="818" x="301"/>
+         <point y="847" x="295"/>
+         <point y="874" x="286"/>
+         <point y="894" x="281"/>
+         <point y="909" x="278"/>
+         <point y="930" x="274"/>
+         <point y="947" x="274"/>
+         <point y="959" x="278"/>
+         <point y="967" x="281"/>
+         <point y="982" x="291"/>
+         <point y="999" x="305"/>
+         <point y="1013" x="327"/>
+         <point y="1021" x="347"/>
+         <point y="1038" x="371"/>
+         <point y="1064" x="427"/>
+         <point y="1079" x="461"/>
+         <point y="1087" x="483"/>
+         <point y="1097" x="513"/>
+         <point y="1102" x="528"/>
+         <point y="1114" x="574"/>
+         <point y="1119" x="615"/>
+         <point y="1124" x="647"/>
+         <point y="1126" x="671"/>
+         <point y="1126" x="701"/>
+         <point y="1123" x="718"/>
+         <point y="1108" x="732"/>
+         <point y="1087" x="740"/>
+         <point y="1070" x="742"/>
+         <point y="1047" x="740"/>
+         <point y="1030" x="732"/>
+         <point y="1016" x="716"/>
+         <point y="997" x="696"/>
+         <point y="986" x="679"/>
+         <point y="981" x="660"/>
+         <point y="981" x="655"/>
+         <point y="984" x="574"/>
+         <point y="986" x="527"/>
+         <point y="986" x="510"/>
+         <point y="986" x="501"/>
+         <point y="965" x="474"/>
+         <point y="948" x="456"/>
+         <point y="926" x="432"/>
+         <point y="901" x="410"/>
+         <point y="894" x="403"/>
+         <point y="882" x="395"/>
+         <point y="864" x="390"/>
+         <point y="854" x="390"/>
+         <point y="845" x="400"/>
+         <point y="832" x="423"/>
+         <point y="818" x="464"/>
+         <point y="818" x="495"/>
+         <point y="821" x="513"/>
+         <point y="826" x="525"/>
+         <point y="854" x="559"/>
+         <point y="874" x="581"/>
+         <point y="882" x="593"/>
+         <point y="899" x="623"/>
+         <point y="903" x="657"/>
+         <point y="903" x="662"/>
+         <point y="904" x="664"/>
+         <point y="906" x="669"/>
+         <point y="906" x="672"/>
+         <point y="908" x="672"/>
+         <point y="906" x="672"/>
+         <point y="894" x="664"/>
+         <point y="865" x="637"/>
+         <point y="811" x="584"/>
+         <point y="811" x="581"/>
+         <point y="809" x="579"/>
+         <point y="798" x="569"/>
+         <point y="796" x="567"/>
+         <point y="796" x="569"/>
+         <point y="794" x="584"/>
+         <point y="794" x="627"/>
+         <point y="796" x="642"/>
+         <point y="816" x="674"/>
+         <point y="843" x="701"/>
+         <point y="850" x="708"/>
+         <point y="864" x="716"/>
+         <point y="879" x="721"/>
+         <point y="884" x="720"/>
+         <point y="894" x="708"/>
+         <point y="899" x="703"/>
+         <point y="901" x="703"/>
+         <point y="901" x="701"/>
         </points>
        </action>
-       <action radius="80" brushtype="0" erase="1" type="1">
+       <action type="1" radius="80" erase="1" brushtype="0">
         <points>
-         <point x="832" y="903"/>
-         <point x="843" y="899"/>
-         <point x="855" y="899"/>
-         <point x="872" y="899"/>
-         <point x="891" y="898"/>
-         <point x="913" y="896"/>
-         <point x="930" y="889"/>
-         <point x="937" y="886"/>
-         <point x="947" y="876"/>
-         <point x="950" y="867"/>
-         <point x="952" y="862"/>
-         <point x="952" y="859"/>
-         <point x="948" y="854"/>
-         <point x="947" y="850"/>
-         <point x="947" y="847"/>
-         <point x="947" y="843"/>
-         <point x="948" y="838"/>
-         <point x="959" y="830"/>
-         <point x="965" y="826"/>
-         <point x="974" y="821"/>
-         <point x="986" y="820"/>
-         <point x="994" y="818"/>
-         <point x="997" y="818"/>
-         <point x="999" y="818"/>
-         <point x="1008" y="818"/>
-         <point x="1011" y="818"/>
-         <point x="1018" y="818"/>
-         <point x="1030" y="818"/>
-         <point x="1043" y="818"/>
-         <point x="1055" y="818"/>
-         <point x="1062" y="818"/>
-         <point x="1069" y="818"/>
-         <point x="1082" y="818"/>
-         <point x="1094" y="818"/>
-         <point x="1106" y="818"/>
-         <point x="1116" y="816"/>
-         <point x="1118" y="816"/>
-         <point x="1119" y="816"/>
-         <point x="1119" y="815"/>
-         <point x="1119" y="811"/>
-         <point x="1118" y="804"/>
-         <point x="1114" y="793"/>
-         <point x="1106" y="776"/>
-         <point x="1104" y="771"/>
-         <point x="1104" y="769"/>
-         <point x="1104" y="764"/>
-         <point x="1108" y="757"/>
-         <point x="1118" y="750"/>
-         <point x="1123" y="747"/>
-         <point x="1124" y="747"/>
-         <point x="1126" y="747"/>
-         <point x="1130" y="749"/>
-         <point x="1131" y="749"/>
-         <point x="1131" y="750"/>
-         <point x="1131" y="752"/>
-         <point x="1123" y="752"/>
-         <point x="1106" y="757"/>
-         <point x="1102" y="757"/>
-         <point x="1092" y="757"/>
-         <point x="1089" y="759"/>
-         <point x="1084" y="764"/>
-         <point x="1082" y="774"/>
-         <point x="1082" y="786"/>
-         <point x="1082" y="796"/>
-         <point x="1084" y="818"/>
-         <point x="1086" y="837"/>
-         <point x="1086" y="845"/>
-         <point x="1087" y="850"/>
-         <point x="1087" y="855"/>
-         <point x="1087" y="860"/>
-         <point x="1089" y="870"/>
-         <point x="1091" y="879"/>
-         <point x="1091" y="889"/>
-         <point x="1092" y="914"/>
-         <point x="1094" y="921"/>
-         <point x="1096" y="928"/>
-         <point x="1096" y="937"/>
-         <point x="1091" y="940"/>
-         <point x="1053" y="942"/>
-         <point x="996" y="948"/>
-         <point x="989" y="948"/>
-         <point x="986" y="948"/>
-         <point x="974" y="955"/>
-         <point x="967" y="959"/>
-         <point x="965" y="964"/>
-         <point x="964" y="967"/>
-         <point x="965" y="967"/>
-         <point x="975" y="967"/>
-         <point x="989" y="969"/>
-         <point x="1001" y="972"/>
-         <point x="1018" y="974"/>
-         <point x="1021" y="974"/>
-         <point x="1042" y="979"/>
-         <point x="1047" y="979"/>
-         <point x="1050" y="984"/>
-         <point x="1058" y="991"/>
-         <point x="1064" y="997"/>
-         <point x="1070" y="1006"/>
-         <point x="1075" y="1016"/>
-         <point x="1080" y="1023"/>
-         <point x="1086" y="1026"/>
-         <point x="1091" y="1030"/>
-         <point x="1092" y="1031"/>
-         <point x="1096" y="1035"/>
-         <point x="1106" y="1038"/>
-         <point x="1109" y="1038"/>
-         <point x="1116" y="1040"/>
-         <point x="1123" y="1040"/>
-         <point x="1130" y="1040"/>
-         <point x="1138" y="1036"/>
-         <point x="1143" y="1035"/>
-         <point x="1153" y="1025"/>
-         <point x="1155" y="1018"/>
-         <point x="1157" y="1011"/>
-         <point x="1160" y="997"/>
-         <point x="1163" y="992"/>
-         <point x="1172" y="989"/>
-         <point x="1197" y="984"/>
-         <point x="1218" y="984"/>
-         <point x="1235" y="982"/>
-         <point x="1253" y="981"/>
-         <point x="1274" y="981"/>
-         <point x="1284" y="982"/>
-         <point x="1289" y="984"/>
-         <point x="1290" y="984"/>
-         <point x="1294" y="977"/>
-         <point x="1296" y="969"/>
-         <point x="1297" y="955"/>
-         <point x="1299" y="945"/>
-         <point x="1299" y="925"/>
-         <point x="1296" y="906"/>
-         <point x="1292" y="894"/>
-         <point x="1287" y="884"/>
-         <point x="1280" y="862"/>
-         <point x="1275" y="848"/>
-         <point x="1268" y="842"/>
-         <point x="1260" y="835"/>
-         <point x="1248" y="828"/>
-         <point x="1233" y="828"/>
-         <point x="1213" y="837"/>
-         <point x="1201" y="838"/>
-         <point x="1191" y="840"/>
-         <point x="1172" y="842"/>
-         <point x="1148" y="848"/>
-         <point x="1135" y="857"/>
-         <point x="1121" y="872"/>
-         <point x="1118" y="877"/>
-         <point x="1121" y="877"/>
-         <point x="1133" y="877"/>
-         <point x="1199" y="879"/>
-         <point x="1257" y="882"/>
-         <point x="1292" y="882"/>
-         <point x="1323" y="886"/>
-         <point x="1343" y="887"/>
-         <point x="1357" y="887"/>
-         <point x="1363" y="889"/>
-         <point x="1375" y="892"/>
-         <point x="1387" y="894"/>
-         <point x="1416" y="898"/>
-         <point x="1439" y="898"/>
-         <point x="1453" y="899"/>
-         <point x="1460" y="899"/>
-         <point x="1468" y="899"/>
-         <point x="1472" y="899"/>
-         <point x="1478" y="901"/>
-         <point x="1480" y="901"/>
-         <point x="1482" y="901"/>
+         <point y="903" x="832"/>
+         <point y="899" x="843"/>
+         <point y="899" x="855"/>
+         <point y="899" x="872"/>
+         <point y="898" x="891"/>
+         <point y="896" x="913"/>
+         <point y="889" x="930"/>
+         <point y="886" x="937"/>
+         <point y="876" x="947"/>
+         <point y="867" x="950"/>
+         <point y="862" x="952"/>
+         <point y="859" x="952"/>
+         <point y="854" x="948"/>
+         <point y="850" x="947"/>
+         <point y="847" x="947"/>
+         <point y="843" x="947"/>
+         <point y="838" x="948"/>
+         <point y="830" x="959"/>
+         <point y="826" x="965"/>
+         <point y="821" x="974"/>
+         <point y="820" x="986"/>
+         <point y="818" x="994"/>
+         <point y="818" x="997"/>
+         <point y="818" x="999"/>
+         <point y="818" x="1008"/>
+         <point y="818" x="1011"/>
+         <point y="818" x="1018"/>
+         <point y="818" x="1030"/>
+         <point y="818" x="1043"/>
+         <point y="818" x="1055"/>
+         <point y="818" x="1062"/>
+         <point y="818" x="1069"/>
+         <point y="818" x="1082"/>
+         <point y="818" x="1094"/>
+         <point y="818" x="1106"/>
+         <point y="816" x="1116"/>
+         <point y="816" x="1118"/>
+         <point y="816" x="1119"/>
+         <point y="815" x="1119"/>
+         <point y="811" x="1119"/>
+         <point y="804" x="1118"/>
+         <point y="793" x="1114"/>
+         <point y="776" x="1106"/>
+         <point y="771" x="1104"/>
+         <point y="769" x="1104"/>
+         <point y="764" x="1104"/>
+         <point y="757" x="1108"/>
+         <point y="750" x="1118"/>
+         <point y="747" x="1123"/>
+         <point y="747" x="1124"/>
+         <point y="747" x="1126"/>
+         <point y="749" x="1130"/>
+         <point y="749" x="1131"/>
+         <point y="750" x="1131"/>
+         <point y="752" x="1131"/>
+         <point y="752" x="1123"/>
+         <point y="757" x="1106"/>
+         <point y="757" x="1102"/>
+         <point y="757" x="1092"/>
+         <point y="759" x="1089"/>
+         <point y="764" x="1084"/>
+         <point y="774" x="1082"/>
+         <point y="786" x="1082"/>
+         <point y="796" x="1082"/>
+         <point y="818" x="1084"/>
+         <point y="837" x="1086"/>
+         <point y="845" x="1086"/>
+         <point y="850" x="1087"/>
+         <point y="855" x="1087"/>
+         <point y="860" x="1087"/>
+         <point y="870" x="1089"/>
+         <point y="879" x="1091"/>
+         <point y="889" x="1091"/>
+         <point y="914" x="1092"/>
+         <point y="921" x="1094"/>
+         <point y="928" x="1096"/>
+         <point y="937" x="1096"/>
+         <point y="940" x="1091"/>
+         <point y="942" x="1053"/>
+         <point y="948" x="996"/>
+         <point y="948" x="989"/>
+         <point y="948" x="986"/>
+         <point y="955" x="974"/>
+         <point y="959" x="967"/>
+         <point y="964" x="965"/>
+         <point y="967" x="964"/>
+         <point y="967" x="965"/>
+         <point y="967" x="975"/>
+         <point y="969" x="989"/>
+         <point y="972" x="1001"/>
+         <point y="974" x="1018"/>
+         <point y="974" x="1021"/>
+         <point y="979" x="1042"/>
+         <point y="979" x="1047"/>
+         <point y="984" x="1050"/>
+         <point y="991" x="1058"/>
+         <point y="997" x="1064"/>
+         <point y="1006" x="1070"/>
+         <point y="1016" x="1075"/>
+         <point y="1023" x="1080"/>
+         <point y="1026" x="1086"/>
+         <point y="1030" x="1091"/>
+         <point y="1031" x="1092"/>
+         <point y="1035" x="1096"/>
+         <point y="1038" x="1106"/>
+         <point y="1038" x="1109"/>
+         <point y="1040" x="1116"/>
+         <point y="1040" x="1123"/>
+         <point y="1040" x="1130"/>
+         <point y="1036" x="1138"/>
+         <point y="1035" x="1143"/>
+         <point y="1025" x="1153"/>
+         <point y="1018" x="1155"/>
+         <point y="1011" x="1157"/>
+         <point y="997" x="1160"/>
+         <point y="992" x="1163"/>
+         <point y="989" x="1172"/>
+         <point y="984" x="1197"/>
+         <point y="984" x="1218"/>
+         <point y="982" x="1235"/>
+         <point y="981" x="1253"/>
+         <point y="981" x="1274"/>
+         <point y="982" x="1284"/>
+         <point y="984" x="1289"/>
+         <point y="984" x="1290"/>
+         <point y="977" x="1294"/>
+         <point y="969" x="1296"/>
+         <point y="955" x="1297"/>
+         <point y="945" x="1299"/>
+         <point y="925" x="1299"/>
+         <point y="906" x="1296"/>
+         <point y="894" x="1292"/>
+         <point y="884" x="1287"/>
+         <point y="862" x="1280"/>
+         <point y="848" x="1275"/>
+         <point y="842" x="1268"/>
+         <point y="835" x="1260"/>
+         <point y="828" x="1248"/>
+         <point y="828" x="1233"/>
+         <point y="837" x="1213"/>
+         <point y="838" x="1201"/>
+         <point y="840" x="1191"/>
+         <point y="842" x="1172"/>
+         <point y="848" x="1148"/>
+         <point y="857" x="1135"/>
+         <point y="872" x="1121"/>
+         <point y="877" x="1118"/>
+         <point y="877" x="1121"/>
+         <point y="877" x="1133"/>
+         <point y="879" x="1199"/>
+         <point y="882" x="1257"/>
+         <point y="882" x="1292"/>
+         <point y="886" x="1323"/>
+         <point y="887" x="1343"/>
+         <point y="887" x="1357"/>
+         <point y="889" x="1363"/>
+         <point y="892" x="1375"/>
+         <point y="894" x="1387"/>
+         <point y="898" x="1416"/>
+         <point y="898" x="1439"/>
+         <point y="899" x="1453"/>
+         <point y="899" x="1460"/>
+         <point y="899" x="1468"/>
+         <point y="899" x="1472"/>
+         <point y="901" x="1478"/>
+         <point y="901" x="1480"/>
+         <point y="901" x="1482"/>
         </points>
        </action>
       </actions>
      </map>
-     <map audiotrack="-1" name="Big Hilltop Camp" _baseID="1003" filename="images/Big Hilltop Camp.jpg">
+     <map audiotrack="-1" name="Big Hilltop Camp" filename="images/Big Hilltop Camp.jpg" _baseID="1003">
       <actions>
-       <action r="0" g="0" b="0" a="0" type="0"/>
+       <action type="0" a="0" r="0" b="0" g="0"/>
       </actions>
      </map>
-     <map audiotrack="-1" name="Crumbling Facility" _baseID="1004" filename="images/Crumbling Facility.jpg">
+     <map audiotrack="-1" name="Crumbling Facility" filename="images/Crumbling Facility.jpg" _baseID="1004">
       <actions/>
      </map>
-     <map audiotrack="-1" name="Cultist Lair" _baseID="1005" filename="images/Cultist Lair.jpg">
+     <map audiotrack="-1" name="Cultist Lair" filename="images/Cultist Lair.jpg" _baseID="1005">
       <actions/>
      </map>
-     <map audiotrack="-1" name="Forked Road" _baseID="1006" filename="images/Forked Road.jpg">
+     <map audiotrack="-1" name="Forked Road" filename="images/Forked Road.jpg" _baseID="1006">
       <actions/>
      </map>
     </maps>
    </adventure>
   </adventures>
   <settings>
-   <map audiotrack="-1" name="World View" _baseID="1011" filename="images/Lost Library 1.jpg">
+   <map audiotrack="-1" name="World View" filename="images/Lost Library 1.jpg" _baseID="1011">
     <actions/>
    </map>
-   <map audiotrack="-1" name="Sankt Stefs" _baseID="1012" filename="images/Forked Road.jpg">
+   <map audiotrack="-1" name="Sankt Stefs" filename="images/Forked Road.jpg" _baseID="1012">
     <actions/>
    </map>
   </settings>
   <npcs>
-   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Elm D'Zurth" spells="" intelligenceSave="0" medicine="0" _baseID="1013" nature="0" charisma="10" gold="0" icon="" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="10" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
+   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="10" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Elm D'Zurth" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1013" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
     <attacks/>
    </combatant>
-   <combatant player="N/A" acrobatics="0" insight="0" intimidation="0" subrace="N/A" age="" experience="0" name="Eva Devengelo" spells="" intelligenceSave="0" medicine="0" _baseID="1014" nature="0" charisma="10" gold="0" icon="" hair="" arcana="0" dexterity="10" platinum="0" hitPoints="1" perception="0" type="1" level3="0" sleightOfHand="0" eyes="" alignment="" strengthSave="0" class2="N/A" sex="" weight="" athletics="0" performance="0" strength="10" size="medium" survival="0" class="" wisdomSave="0" level2="0" copper="0" dndBeyondID="-1" height="" history="0" deception="0" notes="" armorClass="10" speed="30" charismaSave="0" equipment="" silver="0" intelligence="10" constitutionSave="0" investigation="0" religion="0" dexteritySave="0" race="" level="1" animalHandling="0" stealth="0" active="1" hitDice="1d0" wisdom="10" class3="N/A" persuasion="0" proficiencies="" background="N/A" constitution="10">
+   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="10" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Eva Devengelo" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1014" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
     <attacks/>
    </combatant>
   </npcs>
   <tracks>
-   <track md5="" name="Battle" _baseID="1015">
+   <track name="Battle" md5="" _baseID="1015">
     <url><![CDATA[c:/Users/Craig/Documents/GitHub/DMHelper/DMHelper/working/music/79_Medieval_Battle.mp3]]></url>
    </track>
-   <track md5="" name="Mellow Mood" _baseID="1016">
+   <track name="Mellow Mood" md5="" _baseID="1016">
     <url><![CDATA[c:/Users/Craig/Documents/GitHub/DMHelper/DMHelper/working/music/131_The_Bog_Standard.mp3]]></url>
    </track>
-   <track md5="" name="Festival" _baseID="1017">
+   <track name="Festival" md5="" _baseID="1017">
     <url><![CDATA[c:/Users/Craig/Documents/GitHub/DMHelper/DMHelper/working/music/133_Halfling_Festival.mp3]]></url>
    </track>
   </tracks>

@@ -35,3 +35,20 @@ First of all, a new campaign has to be created or opened. Hit _File_ to see your
 If there is no recent campaign to open, the options are opening the example campaign, or creating a new one.  Just hit _New Campaign_ or _Ctrl+N_ to open a dialog for creation. There the name of the new campaign can be set. I'll use _DMHelper Realm_ for this example.  
 ![Create new campaign](Images/interface_02.jpg)  
 Hit okay, then the DMHelper interface will be active and we can start adding our first content.
+
+
+## References
+Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!
+
+**Background images and character images donated by: <br/>**
+Rixt Heerschop <br/>
+Artist & Illustrator <br/>
+www.rixtheerschop.com <br/>
+
+**Maps donated by: <br/>**
+Alex van der Aa <br/>
+https://www.patreon.com/neutralparty <br/>
+https://www.reddit.com/user/Urza_Is_Mine <br/>
+
+Rustajb <br/>
+https://www.reddit.com/user/rustajb
