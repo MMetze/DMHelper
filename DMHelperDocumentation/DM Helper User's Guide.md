@@ -152,6 +152,9 @@ This pane shows the detailed contents of the selected campaign content. For furt
 
 #### 5. Quick References
 **Preview**</br>
+
+![Main Menu](Images/Quickref Screenshot - Preview.png)  
+
 Provides a preview view of the currently published contents.
 
 This is particularly useful for the DM when the published window is not visible to the DM, for example when it is being shared on a second display on the table facing the players.
@@ -159,7 +162,31 @@ This is particularly useful for the DM when the published window is not visible 
 To allow the DM to point out specific items on the map in the published window, for example if the window is being shared online via a screen-sharing application, the DM can toggle a pointer with the *space bar*. The pointer is visible both in the preview and the publish screens.
 
 **Time**</br>
+
+![Main Menu](Images/Quickref Screenshot - Time.png)  
+
 A useful chronometer for tracking the time and date in the campaign. Seasons and daylight are visualized. You can make changes by either entering them in the text boxes, dragging the large hand to set the date or clicking the "Next Day" button, which automatically moves the date forward by 1 day and sets the time to 7:00am.
+
+
+**Actions and Conditions**</br>
+
+![Main Menu](Images/Quickref Screenshot - Quickref.png)  
+
+**Tables**</br>
+
+![Main Menu](Images/Quickref Screenshot - Tables.png)  
+
+**Dice**</br>
+
+![Main Menu](Images/Quickref Screenshot - Dice.png)  
+
+**Timer**</br>
+
+![Main Menu](Images/Quickref Screenshot - Timer.png)  
+
+**Player**</br>
+
+![Main Menu](Images/Quickref Screenshot - Player.png)  
 
 ## Characters and NPCs
 Characters and NPCs are presented and edited in the same manner in the DM Helper. There are many fully developed character creation and management tools available. The DM Helper does not aim to replace those - we also think many of them are pretty awesome. Instead, our focus is as always to make the job of the DM easier at the table. Our reduced character/NPC sheet was designed with that goal in mind.

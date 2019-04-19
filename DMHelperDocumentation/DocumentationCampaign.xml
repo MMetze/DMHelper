@@ -1,6 +1,6 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign name="Sample Campaign" adventuresExpanded="1" worldNPCsExpanded="1" _baseID="1" date="01/01/0000" time="0" partyExpanded="1" worldSettingsExpanded="1" worldExpanded="1">
+ <campaign name="Sample Campaign" adventuresExpanded="1" worldNPCsExpanded="1" _baseID="1" date="23/06/1492" time="25200000" partyExpanded="1" worldSettingsExpanded="1" worldExpanded="1">
   <notes>
    <encounter name="" _baseID="1000" type="1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
@@ -522,7 +522,9 @@ p, li { white-space: pre-wrap; }
       </actions>
      </map>
      <map audiotrack="-1" name="Big Hilltop Camp" _baseID="1003" filename="images/Big Hilltop Camp.jpg">
-      <actions/>
+      <actions>
+       <action r="0" g="0" b="0" a="0" type="0"/>
+      </actions>
      </map>
      <map audiotrack="-1" name="Crumbling Facility" _baseID="1004" filename="images/Crumbling Facility.jpg">
       <actions/>
