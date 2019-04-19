@@ -18,7 +18,7 @@ CombatantDialog::CombatantDialog(QDialogButtonBox::StandardButtons buttons, QWid
 {
     ui->setupUi(this);
 
-    ui->edtCount->setValidator(new QIntValidator(0,100,this));
+    ui->edtCount->setValidator(new QIntValidator(1,100,this));
     ui->edtHitPointsLocal->setValidator(new QIntValidator(-10,1000,this));
     ui->buttonBox->setStandardButtons(buttons);
 

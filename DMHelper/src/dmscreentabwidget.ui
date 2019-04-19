@@ -3033,7 +3033,7 @@
         <item>
          <widget class="QLabel" name="label_1249">
           <property name="text">
-           <string>Disad</string>
+           <string>Disadvantage</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -3097,7 +3097,7 @@
         <item>
          <widget class="QLabel" name="label_1255">
           <property name="text">
-           <string>Disad</string>
+           <string>Disadvantage</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -3117,7 +3117,7 @@
         <item>
          <widget class="QLabel" name="label_1257">
           <property name="text">
-           <string>Disad</string>
+           <string>Disadvantage</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -3141,7 +3141,7 @@
         <item>
          <widget class="QLabel" name="label_1259">
           <property name="text">
-           <string>Disad</string>
+           <string>Disadvantage</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -3151,7 +3151,7 @@
         <item>
          <widget class="QLabel" name="label_1260">
           <property name="text">
-           <string>Disad</string>
+           <string>Disadvantage</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -3161,7 +3161,7 @@
         <item>
          <widget class="QLabel" name="label_1261">
           <property name="text">
-           <string>Disad</string>
+           <string>Disadvantage</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -3171,7 +3171,7 @@
         <item>
          <widget class="QLabel" name="label_1262">
           <property name="text">
-           <string>Disad</string>
+           <string>Disadvantage</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -11273,7 +11273,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Weight</string>
+               <string>Speed</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>

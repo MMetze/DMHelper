@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>DM Helper Options</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -69,7 +69,7 @@
       <item>
        <widget class="QCheckBox" name="chkShowAnimations">
         <property name="text">
-         <string>Show Animations</string>
+         <string>Show Quick Reference Animations</string>
         </property>
        </widget>
       </item>

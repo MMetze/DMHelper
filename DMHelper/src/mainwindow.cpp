@@ -217,9 +217,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeView,SIGNAL(expanded(QModelIndex)),this,SLOT(handleTreeItemExpanded(QModelIndex)));
     connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
 
-    qDebug() << "[Main] Creating Publish Window";
-    pubWindow = new PublishWindow(QString("DM Helper Publish Window"));
-    qDebug() << "[Main] Publish Window Created";
+    qDebug() << "[Main] Creating Player's Window";
+    pubWindow = new PublishWindow(QString("DM Helper Player's Window"));
+    qDebug() << "[Main] Player's Window Created";
 
     qDebug() << "[Main] Creating Tree Model";
     ui->treeView->setHeaderHidden(true);
