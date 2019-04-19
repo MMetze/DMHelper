@@ -284,17 +284,88 @@ If "Use Average HP" is selected, the average hit points from the hit dice will b
 If a number is entered as the override hit points, each combatant created will be assigned that number of hit points regardless of the *Bestiary* hit dice.
 
 ### Battle Dialog
-TBD
+The *Battle Dialog* allows you to control and run a battle encounter in-game.
 
 ![Battle Dialog](Images/Battle Dialog Screenshot.png)
 
+##### 1. Battle Window
+All creatures and effects in the *Battle Window* can be moved around the map by clicking and dragging them with the mouse.
+
+**Effects** can be created by opening the context menu in the *Battle Window* (right click on the map). Effects can be edited by double-clicking them and rotated by right clicking and dragging them. When editing an effect, you can set its name (visible via mouse-over in the *Battle Window*), size, rotation and color.
+
+Right-clicking on an effect also provides the options to Delete the effect or open the Roll for the effect, which opens the *Dice Rolling Dialog* for rolling saving throws and applying the results of the effect to the creatures within its area.
+
+Supported effect types are:
+* Radius Effects
+* Cone Effects
+* Cube Effects
+* Line Effects
+
+###### a. **Radius Effect**
+A large white radius effect surrounding the hydra and covering also two goblins.
+
+###### b. **Active Creature**
+The active creature is highlighted as the hydra in the sample battle image.
+
+###### c. **Cone Effect**
+A cone effect, such as *Burning Hands*, emanating from Kraxas and impacting three goblins.
+
+###### d. **Invisible Creatures**
+The two goblins on the right-hand side are hiding and have been marked as not visible. They are not shown on the *Player's Window*. See the *Combatant List* section for more details on visible and known combatants.
+
+##### 2. Map Controls
+Various controls are available for handling the *Map*:
+* The **New Map...** button allows you to select a new map for the battle.
+* The *Reload* button allows you to reload the currently selected map. This is useful if you edit the map to, for example, change the Fog of War. See the chapter on **Maps** for further details.
+* The *Grid Scale* can be set to change the scale of the map grid. Even if the grid is turned off in the *Battle Controls*, this grid scale determines the size of a standard 5x5 square in the battle and therefore the size of creature icons.
+* *X Offset* and *Y Offset* allow you to shift the exact location of the grid on the map horizontally and vertically.
+* The *Zoom In* button zooms in on the *Battle Window*
+* The *Zoom Out* button zooms out on the *Battle Window*
+* The *Full Map Zoom* button sets the zoom of the *Battle Window* so that the whole map is visible.
+* The *Rubber Band Zoom* lets you drag a rubber band across the map to zoom on a specific area.
+* The *Measurement* button lets you measure the distance between any two points on the map. The measurement is shown in the text box next to the button, directly in the *Battle Window* and in the *Player's Window* if the *Publish* button is activated.
+
+TBD - add the icons to the list?
+
+##### 3. Combatant List
+All characters, creatures and NPCs involved in the battle are listed here in initiative order.
+
+Clicking on an entry selects that creature. It is highlighted in the *Combatant List*, in the *Battle Window* and in the *Player's Window*.
+
+Double-clicking an entry will open that creature's details page, either in the *DM Helper Main Menu* for characters and NPCs or in the *Bestiary* for monsters. Any changes made in the details page are reflected directly in the *Battle Dialog*.
+
+Through the context menu, you can also **Activate** a combatant, rather than following the initiative order through the *Combatant Controls*.
+
+For monsters, characters and NPCs, you can edit their initiative and hit points directly in the *Combatant List*. Note that editing initiative values does not resort the *Combatant List*, to allow you to edit all combatants quickly without having to search for them. To resort the list, use the **Sort** button in the *Combatant Controls*.
+
+Additionally, you can set the *Known* and *Visible* checkboxes for each monster. Both are checked by default.
+* If *Known* is not checked, the monster is assumed to be unknown to the players. <br/>
+The monster is not shown on the *Player's Window* and is not included in the initiative order. The players should not be able to become aware of its existance.
+* If *Visible* is not checked, the monster is assumed to be invisible, but known to the players.<br/>
+The monster is not shown on the *Player's Window*, but is still included in the initiative order. If the On-Deck icons are activated (see *Options Dialog*), a generic icon is shown rather than the creature's real icon.
+
+##### 4. Combatant Controls
+**Sort** resorts the combatant list by initiative order.<br/>
+**Next** activates the next combatant in initiative order. Dead combatants or unknown monsters are skipped.<br/>
+The countdown timer, shown optionally in the *Player's Window* is also shown here.
+
+##### 5. Battle Options
+TBD
+
+##### 6. Battle Controls
+TBD
+
+#### Dice Rolling Dialog
+TBD
+
+#### Player's Window
 As long as the *Publish* button is activated, the visible contents of the battle are animated to the *Player's Window*:
 
 ![Battle Dialog Published](Images/Battle Dialog Publish Screenshot.png)
 
 In the *Player's Window*, you can see:
 * All visible creatures and any movement/effect visuals are seen exactly as in the *Battle Dialog*
-* Hidden creatures (the two goblins) are not visible
+* Hidden creatures (the two goblins) are not shown
 * The currently active and on deck creatures as well as the countdown timer are show to the right of the battle map along, as long as these options are selected in the DM Helper *Options Dialog*.
 
 ## Scrolling Text Encounters
