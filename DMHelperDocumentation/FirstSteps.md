@@ -1,5 +1,20 @@
-# DM Helper
-![DM Helper](Images/DMH-icon.png)
+<center>
+<p style="font-size:72px; padding: 1em 0 0 0">
+<font face="Felix Titling"><b>DM Helper</b></font>
+</p>
+<p style="padding: 0 0 0 0">
+<img src="Images/DMH-icon.png" width="75%">
+</p>
+<p style="padding: 0 0 1em 0">
+<font size="5" face="Felix Titling">A Dungeon Master's Helping Hand</font>
+</p>
+<p style="padding: 6em 0 0 0">
+<font size="6" face="Felix Titling">Getting Started</font>
+</p>
+</center>
+
+<p style="page-break-after: always;">&nbsp;</p>
+
 
 The DM Helper will act as your in-game assistance, taking care of the administrative tasks and allowing you to focus on your players, the narrative and the fun!
 
