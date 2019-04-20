@@ -2,6 +2,9 @@ TODOs
 Add character level back into level for calculating the encounter complexity
 Add mouse over tips for all icon-based buttons, especially in the map and battle dialogs
 Battle dialog separate measuring stick from map controls
+DiceRollDialogCombatants with entry for damage and direct application of damage to all combatants, based on die roll results.
+
+Undo functionality in the battles
 
 NPC spell slot tracking?
 Archive/Un-archive adventures (and others?) plus check mark to show/hide archived campaign content)
