@@ -316,16 +316,14 @@ The two goblins on the right-hand side are hiding and have been marked as not vi
 ##### 2. Map Controls
 Various controls are available for handling the *Map*:
 * The **New Map...** button allows you to select a new map for the battle.
-* The *Reload* button allows you to reload the currently selected map. This is useful if you edit the map to, for example, change the Fog of War. See the chapter on **Maps** for further details.
+* The *Reload* button ![Reload](Images/icon_reload.png) allows you to reload the currently selected map. This is useful if you edit the map to, for example, change the Fog of War. See the chapter on **Maps** for further details.
 * The *Grid Scale* can be set to change the scale of the map grid. Even if the grid is turned off in the *Battle Controls*, this grid scale determines the size of a standard 5x5 square in the battle and therefore the size of creature icons.
 * *X Offset* and *Y Offset* allow you to shift the exact location of the grid on the map horizontally and vertically.
-* The *Zoom In* button zooms in on the *Battle Window*
-* The *Zoom Out* button zooms out on the *Battle Window*
-* The *Full Map Zoom* button sets the zoom of the *Battle Window* so that the whole map is visible.
-* The *Rubber Band Zoom* lets you drag a rubber band across the map to zoom on a specific area.
-* The *Measurement* button lets you measure the distance between any two points on the map. The measurement is shown in the text box next to the button, directly in the *Battle Window* and in the *Player's Window* if the *Publish* button is activated.
-
-TBD - add the icons to the list?
+* The *Zoom In* button ![Reload](Images/icon_zoomin.png) zooms in on the *Battle Window*
+* The *Zoom Out* button ![Reload](Images/icon_zoomout.png) zooms out on the *Battle Window*
+* The *Map Fit Zoom* button ![Reload](Images/icon_zoomfit.png) sets the zoom of the *Battle Window* so that the whole map is visible.
+* The *Rubber Band Zoom* button ![Rubber Band](Images/icon_zoomselect.png) lets you drag a rubber band across the map to zoom on a specific area.
+* The *Distance* button ![Distance](Images/distance.png) lets you measure the distance between any two points on the map. The measurement is shown in the text box next to the button, directly in the *Battle Window* and in the *Player's Window* if the *Publish* button is activated.
 
 ##### 3. Combatant List
 All characters, creatures and NPCs involved in the battle are listed here in initiative order.
@@ -350,13 +348,37 @@ The monster is not shown on the *Player's Window*, but is still included in the 
 The countdown timer, shown optionally in the *Player's Window* is also shown here.
 
 ##### 5. Battle Options
-TBD
+These options impact the visualization and behavior of the battle both in the *Battle Window* and in the *Player's Window*
+* If **Lair Actions** is selected, you will be reminded to execute every time the initiative order number 20 is passed (using the **Next** button).
+* If **Limit Movement** is selected, movement of the *active* combatant will be limited by their maximum. The remaining distance is visualized in the *Battle Window* and *Player's Window* as long as the left mouse button is held down on the active combatant. This is not a hard limit; to continue moving the active combatant, you can simply release the mouse button and start again.
+* **Show Compass** visualizes a compass in both the *Battle Window* and *Player's Window*.
+* **Show Effects** determines whether all effects are  shown or hidden.
+* **Show Grid** determines whether the map grid is shown or hidden.
+* **Show Living Combatants** determines whether the living combatants of the battle are shown or hidden.
+* **Show Dead Combatants** determines whether the dead combatants of the battle are shown or hidden.
 
 ##### 6. Battle Controls
-TBD
+The **Publish** button toggles whether the contents of the *Battle Window* are animated continuously to the *Player's Window*. As long as this button is pressed, all changes to the battle are animated in the *Player's Window* (based on the *Battle Options* and any visibility options set in the *Combatant List*).
+
+**Hide Battle** closes the *Battle Dialog*, but does not end the battle. A hidden battle can be reopened through the *Battle Encounter* screen or the *Open Battle Dialog* entry in the *Campaign* menu.
+
+**End Battle** ends the battle and closes the *Battle Dialog*.
 
 #### Dice Rolling Dialog
-TBD
+
+This dialog allows you to roll mass saving throws and applying the results of the effect to the creatures within its area. This is particularly useful for handling the effects of area of effects spells on multiple creatures at once.
+
+![Dice Rolling Dialog](Images/Dice Rolling Dialog Screenshot.png)
+
+All creatures included in the effect's area are automatically added to the dialog. You can adjust the basic die roll at the top of the dialog.
+
+The target DC, check type and whether dead creatures should be included can all be set on the right-hand side.
+
+Each creature entry includes the creature's name, hit points and rolls. With the up and down arrows on the right-hand side of a creature's entry, you can give them advantage or disadvantage on their roll.
+
+Clicking the **Roll** button rolls for all creatures as once. The color of the roll results is set to green for success and red for failure, reflecting also any advantage or disadvantage.
+
+If you adjust the hit points of a creature in this dialog, the changes will be directly reflected in the *Combatant List* as well.
 
 #### Player's Window
 As long as the *Publish* button is activated, the visible contents of the battle are animated to the *Player's Window*:

@@ -795,26 +795,55 @@ If a number is entered as the override hit points, each combatant created will b
 <p>Various controls are available for handling the <em>Map</em>:</p>
 <ul>
 <li>The <strong>New Map...</strong> button allows you to select a new map for the battle.</li>
-<li>The <em>Reload</em> button allows you to reload the currently selected map. This is useful if you edit the map to, for example, change the Fog of War. See the chapter on <strong>Maps</strong> for further details.</li>
+<li>The <em>Reload</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_reload.png"> allows you to reload the currently selected map. This is useful if you edit the map to, for example, change the Fog of War. See the chapter on <strong>Maps</strong> for further details.</li>
 <li>The <em>Grid Scale</em> can be set to change the scale of the map grid. Even if the grid is turned off in the <em>Battle Controls</em>, this grid scale determines the size of a standard 5x5 square in the battle and therefore the size of creature icons.</li>
 <li><em>X Offset</em> and <em>Y Offset</em> allow you to shift the exact location of the grid on the map horizontally and vertically.</li>
-<li>The <em>Zoom In</em> button zooms in on the <em>Battle Window</em></li>
-<li>The <em>Zoom Out</em> button zooms out on the <em>Battle Window</em></li>
-<li>The <em>Full Map Zoom</em> button sets the zoom of the <em>Battle Window</em> so that the whole map is visible.</li>
-<li>The <em>Rubber Band Zoom</em> lets you drag a rubber band across the map to zoom on a specific area.</li>
-<li>The <em>Measurement</em> button lets you measure the distance between any two points on the map. The measurement is shown in the text box next to the button, directly in the <em>Battle Window</em> and in the <em>Player's Window</em> if the <em>Publish</em> button is activated.</li>
+<li>The <em>Zoom In</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomin.png"> zooms in on the <em>Battle Window</em></li>
+<li>The <em>Zoom Out</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomout.png"> zooms out on the <em>Battle Window</em></li>
+<li>The <em>Map Fit Zoom</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomfit.png"> sets the zoom of the <em>Battle Window</em> so that the whole map is visible.</li>
+<li>The <em>Rubber Band Zoom</em> button <img alt="Rubber Band" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomselect.png"> lets you drag a rubber band across the map to zoom on a specific area.</li>
+<li>The <em>Distance</em> button <img alt="Distance" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\distance.png"> lets you measure the distance between any two points on the map. The measurement is shown in the text box next to the button, directly in the <em>Battle Window</em> and in the <em>Player's Window</em> if the <em>Publish</em> button is activated.</li>
 </ul>
-<p>TBD - add the icons to the list?</p>
 <h5 id="3-combatant-list">3. Combatant List</h5>
-<p>TBD</p>
+<p>All characters, creatures and NPCs involved in the battle are listed here in initiative order.</p>
+<p>Clicking on an entry selects that creature. It is highlighted in the <em>Combatant List</em>, in the <em>Battle Window</em> and in the <em>Player's Window</em>.</p>
+<p>Double-clicking an entry will open that creature's details page, either in the <em>DM Helper Main Menu</em> for characters and NPCs or in the <em>Bestiary</em> for monsters. Any changes made in the details page are reflected directly in the <em>Battle Dialog</em>.</p>
+<p>Through the context menu, you can also <strong>Activate</strong> a combatant, rather than following the initiative order through the <em>Combatant Controls</em>.</p>
+<p>For monsters, characters and NPCs, you can edit their initiative and hit points directly in the <em>Combatant List</em>. Note that editing initiative values does not resort the <em>Combatant List</em>, to allow you to edit all combatants quickly without having to search for them. To resort the list, use the <strong>Sort</strong> button in the <em>Combatant Controls</em>.</p>
+<p>Additionally, you can set the <em>Known</em> and <em>Visible</em> checkboxes for each monster. Both are checked by default.</p>
+<ul>
+<li>If <em>Known</em> is not checked, the monster is assumed to be unknown to the players. <br>
+The monster is not shown on the <em>Player's Window</em> and is not included in the initiative order. The players should not be able to become aware of its existance.</li>
+<li>If <em>Visible</em> is not checked, the monster is assumed to be invisible, but known to the players.<br>
+The monster is not shown on the <em>Player's Window</em>, but is still included in the initiative order. If the On-Deck icons are activated (see <em>Options Dialog</em>), a generic icon is shown rather than the creature's real icon.</li>
+</ul>
 <h5 id="4-combatant-controls">4. Combatant Controls</h5>
-<p>TBD</p>
+<p><strong>Sort</strong> resorts the combatant list by initiative order.<br>
+<strong>Next</strong> activates the next combatant in initiative order. Dead combatants or unknown monsters are skipped.<br>
+The countdown timer, shown optionally in the <em>Player's Window</em> is also shown here.</p>
 <h5 id="5-battle-options">5. Battle Options</h5>
-<p>TBD</p>
+<p>These options impact the visualization and behavior of the battle both in the <em>Battle Window</em> and in the <em>Player's Window</em></p>
+<ul>
+<li>If <strong>Lair Actions</strong> is selected, you will be reminded to execute every time the initiative order number 20 is passed (using the <strong>Next</strong> button).</li>
+<li>If <strong>Limit Movement</strong> is selected, movement of the <em>active</em> combatant will be limited by their maximum. The remaining distance is visualized in the <em>Battle Window</em> and <em>Player's Window</em> as long as the left mouse button is held down on the active combatant. This is not a hard limit; to continue moving the active combatant, you can simply release the mouse button and start again.</li>
+<li><strong>Show Compass</strong> visualizes a compass in both the <em>Battle Window</em> and <em>Player's Window</em>.</li>
+<li><strong>Show Effects</strong> determines whether all effects are  shown or hidden.</li>
+<li><strong>Show Grid</strong> determines whether the map grid is shown or hidden.</li>
+<li><strong>Show Living Combatants</strong> determines whether the living combatants of the battle are shown or hidden.</li>
+<li><strong>Show Dead Combatants</strong> determines whether the dead combatants of the battle are shown or hidden.</li>
+</ul>
 <h5 id="6-battle-controls">6. Battle Controls</h5>
-<p>TBD</p>
+<p>The <strong>Publish</strong> button toggles whether the contents of the <em>Battle Window</em> are animated continuously to the <em>Player's Window</em>. As long as this button is pressed, all changes to the battle are animated in the <em>Player's Window</em> (based on the <em>Battle Options</em> and any visibility options set in the <em>Combatant List</em>).</p>
+<p><strong>Hide Battle</strong> closes the <em>Battle Dialog</em>, but does not end the battle. A hidden battle can be reopened through the <em>Battle Encounter</em> screen or the <em>Open Battle Dialog</em> entry in the <em>Campaign</em> menu.</p>
+<p><strong>End Battle</strong> ends the battle and closes the <em>Battle Dialog</em>.</p>
 <h4 id="dice-rolling-dialog">Dice Rolling Dialog</h4>
-<p>TBD</p>
+<p>This dialog allows you to roll mass saving throws and applying the results of the effect to the creatures within its area. This is particularly useful for handling the effects of area of effects spells on multiple creatures at once.</p>
+<p><img alt="Dice Rolling Dialog" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Dice Rolling Dialog Screenshot.png"></p>
+<p>All creatures included in the effect's area are automatically added to the dialog. You can adjust the basic die roll at the top of the dialog.</p>
+<p>The target DC, check type and whether dead creatures should be included can all be set on the right-hand side.</p>
+<p>Each creature entry includes the creature's name, hit points and rolls. With the up and down arrows on the right-hand side of a creature's entry, you can give them advantage or disadvantage on their roll.</p>
+<p>Clicking the <strong>Roll</strong> button rolls for all creatures as once. The color of the roll results is set to green for success and red for failure, reflecting also any advantage or disadvantage.</p>
+<p>If you adjust the hit points of a creature in this dialog, the changes will be directly reflected in the <em>Combatant List</em> as well.</p>
 <h4 id="player-s-window">Player's Window</h4>
 <p>As long as the <em>Publish</em> button is activated, the visible contents of the battle are animated to the <em>Player's Window</em>:</p>
 <p><img alt="Battle Dialog Published" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Battle Dialog Publish Screenshot.png"></p>
