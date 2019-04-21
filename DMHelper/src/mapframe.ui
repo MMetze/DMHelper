@@ -247,6 +247,9 @@ color: rgb(85, 0, 0);</string>
           <property name="toolTip">
            <string>Fog of War Brush Size</string>
           </property>
+          <property name="minimum">
+           <number>1</number>
+          </property>
           <property name="maximum">
            <number>999</number>
           </property>
@@ -587,7 +590,7 @@ color: rgb(85, 0, 0);</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="grpEditMode"/>
   <buttongroup name="grpBrush"/>
+  <buttongroup name="grpEditMode"/>
  </buttongroups>
 </ui>
