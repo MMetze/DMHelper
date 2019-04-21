@@ -247,6 +247,39 @@ The speed entry, in feet, is used in the a *Battle* to limit the movement of tha
 
 The character icon can be changed by clicking on it and selecting an image file. Clicking on the *Publish* button will show the icon in full size in the *Player's Window*.
 
+## Maps
+
+Maps in the DM Helper can be used either directly for showing to the players or as a backdrop for a *Battle Encounter*. All maps support fog of war. In the main window, the fog of war is shown as a translucent layer over the map and in the *Player's Window*, it is an opaque black layer.
+
+![Map Screenshot](Images/Map Screenshot.png)
+
+##### Map Controls
+Various controls are available for handling the *Map*:
+* The *Erase* button ![Erase](Images/icon_fowerase.png) allows you to toggle between erasing and drawing fog of war in the *Map Window*.
+* The *Circular Brush* ![Circular](Images/circle.png) and *Square Brush* ![Square](Images/square.png) buttons allow you to shape of the brush for erasing or drawing fog of war.
+* The size of the brush can be set in the spin box between 1 and 999 pixels.
+* The *Zoom In* button ![Reload](Images/icon_zoomin.png) zooms in on the *Battle Window*
+* The *Zoom Out* button ![Reload](Images/icon_zoomout.png) zooms out on the *Battle Window*
+* The *Zoom 100%* button ![Reload](Images/icon_zoomone.png) resets the zoom of the *Battle Window* to a 1:1 ratio of the map.
+* The *Map Fit Zoom* button ![Reload](Images/icon_zoomfit.png) sets the zoom of the *Battle Window* so that the whole map is visible.
+* The *Rubber Band Zoom* button ![Rubber Band](Images/icon_zoomselect.png) lets you drag a rubber band across the map to zoom on a specific area.
+* An audio track from the list of tracks added to the active campaign can be selected here. This audio track will be automatically played if the battle is started or opened.
+* The fog of war can be completely cleared or reset with the dedicated buttons.
+* The *Publish Visible* ![Rubber Band](Images/icon_shrink.png) and *Publish Zoom* ![Rubber Band](Images/icon_zoom.png) buttons control what parts of the map are copied to the *Player's Window* when the *Publish* button is clicked. <br/>
+<ul>
+<li> If neither button is selected, the entire map is published.
+<li> If the *Publish Visible* button is pressed, all visible portions of the map are published.
+<li> If the *Publish Zoom* is pressed, the part of the map currently visible in the DM Helper main window is published.
+</ul>
+* The *Publish* button publishes the map with the current fog of war status to the *Player's Window*.
+
+##### Player's Window
+
+In the *Player's Window*, the fog of war is an opaque black layer and the map can be zoomed to only show visible portions of the map.
+
+![Map Publish Screenshot](Images/Map Publish Screenshot.png)
+
+
 ## Battle Encounters
 
 Battle Encounters allow you to prepare and run battles or other turn-based encounters.
@@ -423,9 +456,6 @@ Finally, with the button *Animate*, a new window is opened containing the animat
 ![Scrolling Text Encounter Animation](Images/Scrolling Encounter Animation Screenshot.png)
 
 The scrolling text animation screen has two controls to play/pause and rewind the animation. Closing the window also stops the animation.
-
-## Maps
-TBD
 
 ## Bestiary
 The *Bestiary* contains the full list of creatures and monsters available in the DM Helper. In this dialog, you can browse through the existing list, edit individual entries or add new creatures.

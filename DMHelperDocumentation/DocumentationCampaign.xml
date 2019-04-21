@@ -1,28 +1,28 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign date="23/06/1492" name="Sample Campaign" partyExpanded="1" adventuresExpanded="1" time="25200000" worldNPCsExpanded="1" worldExpanded="1" worldSettingsExpanded="1" _baseID="1">
+ <campaign name="Sample Campaign" worldSettingsExpanded="1" _baseID="1" partyExpanded="1" adventuresExpanded="1" worldExpanded="1" worldNPCsExpanded="1" time="25200000" date="23/06/1492">
   <notes>
-   <encounter type="1" name="" _baseID="1000"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+   <encounter name="" _baseID="1000" type="1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">In the last session, the party successfully defeated what they assumed was the BBEG... wait until they find the truth!</p></body></html>]]></encounter>
   </notes>
   <characters>
-   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="18" history="0" type="1" strength="12" platinum="0" level="1" dexterity="13" hitPoints="24" constitutionSave="1" experience="8500" armorClass="13" spells="" constitution="15" persuasion="0" athletics="1" level2="0" charisma="8" nature="0" wisdomSave="0" animalHandling="0" icon="Images/Aroc-the-grey.png" investigation="0" height="" perception="1" intelligenceSave="1" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Jiminy Arg" deception="0" player="Jack" size="medium" acrobatics="0" notes="" eyes="" background="Sage" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="CG" age="" weight="" level3="0" equipment="" subrace="N/A" sex="Male" speed="30" wisdom="14" intimidation="0" _baseID="1007" sleightOfHand="0" stealth="1" insight="1" arcana="1" active="1" race="Half-orc" class="Wizard" silver="0">
+   <combatant proficiencies="" class2="N/A" hair="" intelligenceSave="1" stealth="1" constitution="15" player="Jack" dexteritySave="0" intelligence="18" experience="8500" notes="" equipment="" perception="1" active="1" background="Sage" type="1" alignment="CG" copper="0" class3="N/A" acrobatics="0" race="Half-orc" gold="0" wisdom="14" speed="30" constitutionSave="1" charisma="8" investigation="0" deception="0" dexterity="13" weight="" survival="0" performance="0" arcana="1" subrace="N/A" level2="0" religion="0" height="" strengthSave="0" hitDice="1d0" nature="0" history="0" wisdomSave="0" level3="0" class="Wizard" icon="Images/Aroc-the-grey.png" dndBeyondID="-1" sleightOfHand="0" sex="Male" spells="" animalHandling="0" persuasion="0" _baseID="1007" eyes="" medicine="0" silver="0" hitPoints="24" armorClass="13" size="medium" charismaSave="0" age="" intimidation="0" insight="1" athletics="1" platinum="0" name="Jiminy Arg" level="1" strength="12">
     <attacks/>
    </combatant>
-   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="58" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="Images/Possessed-torgun.png" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Kraxas" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1009" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
+   <combatant proficiencies="" class2="N/A" hair="" intelligenceSave="0" stealth="0" constitution="10" player="N/A" dexteritySave="0" intelligence="10" experience="0" notes="" equipment="" perception="0" active="1" background="N/A" type="1" alignment="" copper="0" class3="N/A" acrobatics="0" race="" gold="0" wisdom="10" speed="30" constitutionSave="0" charisma="10" investigation="0" deception="0" dexterity="10" weight="" survival="0" performance="0" arcana="0" subrace="N/A" level2="0" religion="0" height="" strengthSave="0" hitDice="1d0" nature="0" history="0" wisdomSave="0" level3="0" class="" icon="Images/Possessed-torgun.png" dndBeyondID="-1" sleightOfHand="0" sex="" spells="" animalHandling="0" persuasion="0" _baseID="1009" eyes="" medicine="0" silver="0" hitPoints="58" armorClass="14" size="medium" charismaSave="0" age="" intimidation="0" insight="0" athletics="0" platinum="0" name="Kraxas" level="1" strength="10">
     <attacks/>
    </combatant>
-   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="22" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="Images/Immarel-the-magnificent.png" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Iulian O'Nally" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1010" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
+   <combatant proficiencies="" class2="N/A" hair="" intelligenceSave="0" stealth="0" constitution="10" player="N/A" dexteritySave="0" intelligence="10" experience="0" notes="" equipment="" perception="0" active="1" background="N/A" type="1" alignment="" copper="0" class3="N/A" acrobatics="0" race="" gold="0" wisdom="10" speed="30" constitutionSave="0" charisma="10" investigation="0" deception="0" dexterity="10" weight="" survival="0" performance="0" arcana="0" subrace="N/A" level2="0" religion="0" height="" strengthSave="0" hitDice="1d0" nature="0" history="0" wisdomSave="0" level3="0" class="" icon="Images/Immarel-the-magnificent.png" dndBeyondID="-1" sleightOfHand="0" sex="" spells="" animalHandling="0" persuasion="0" _baseID="1010" eyes="" medicine="0" silver="0" hitPoints="22" armorClass="14" size="medium" charismaSave="0" age="" intimidation="0" insight="0" athletics="0" platinum="0" name="Iulian O'Nally" level="1" strength="10">
     <attacks/>
    </combatant>
   </characters>
   <adventures>
-   <adventure name="First Adventure" expanded="1" _baseID="1001">
+   <adventure name="First Adventure" _baseID="1001" expanded="1">
     <encounters>
-     <encounter audiotrack="1015" type="2" name="Hydra Battle" _baseID="1018"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+     <encounter name="Hydra Battle" _baseID="1018" type="2" audiotrack="1015"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
@@ -36,7 +36,7 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="5">
-          <combatant type="2" notes="" name="" passivePerception="10" monsterClass="Goblin" hitPoints="0" armorClass="15" icon="" hitDice="3d6+4" _baseID="1019" active="1">
+          <combatant name="" armorClass="15" _baseID="1019" active="1" hitDice="3d6+4" monsterClass="Goblin" icon="" passivePerception="10" notes="" type="2" hitPoints="0">
            <attacks/>
           </combatant>
          </combatantPair>
@@ -45,34 +45,34 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="1">
-          <combatant type="2" notes="" name="" passivePerception="10" monsterClass="Hydra" hitPoints="0" armorClass="15" icon="" hitDice="15d12+75" _baseID="1021" active="1">
+          <combatant name="" armorClass="15" _baseID="1021" active="1" hitDice="15d12+75" monsterClass="Hydra" icon="" passivePerception="10" notes="" type="2" hitPoints="0">
            <attacks/>
           </combatant>
          </combatantPair>
         </combatants>
        </wave>
       </waves>
-      <battle mapID="1002" showAlive="1" gridOffsetX="0" mapRectHeight="15374" gridOffsetY="0" mapRectY="0" showGrid="0" showCompass="0" showDead="0" showEffects="1" mapRectX="-6137" activeId="1029" mapRectWidth="14421" gridScale="72">
+      <battle mapRectX="0" mapID="1002" gridScale="72" mapRectY="270" showGrid="0" activeId="1029" showAlive="1" showCompass="0" mapRectHeight="1227" showDead="0" showEffects="1" mapRectWidth="1717" gridOffsetX="0" gridOffsetY="0">
        <combatants>
-        <battlecombatant type="2" isShown="1" initiative="21" monsterType="1" monsterName="Goblin#4" monsterHP="16" positionY="623.0344705691922" legendaryCount="3" positionX="746.6964113969667" combatantId="1019" isKnown="1" _baseID="1026" monsterSize="-1"/>
-        <battlecombatant type="2" isShown="1" initiative="20" monsterType="1" monsterName="Hydra" monsterHP="138" positionY="906.3049971727962" legendaryCount="3" positionX="325.7891421487404" combatantId="1021" isKnown="1" _baseID="1029" monsterSize="-1"/>
-        <battlecombatant type="1" initiative="19" positionY="963.3648074712548" positionX="822.2231738506074" combatantId="1010" _baseID="1022"/>
-        <battlecombatant type="2" isShown="1" initiative="18" monsterType="1" monsterName="Goblin#5" monsterHP="9" positionY="757.5313844920494" legendaryCount="3" positionX="678.9369479236735" combatantId="1019" isKnown="1" _baseID="1027" monsterSize="-1"/>
-        <battlecombatant type="1" initiative="17" positionY="825.3930492677162" positionX="750.6822621895135" combatantId="1009" _baseID="1021"/>
-        <battlecombatant type="2" isShown="1" initiative="16" monsterClass="Goblin" monsterType="2" monsterName="Goblin#1" monsterHP="14" positionY="1045.126416012332" legendaryCount="3" positionX="1116.642795169415" combatantId="-1" isKnown="1" _baseID="1032"/>
-        <battlecombatant type="2" isShown="1" initiative="13" monsterType="1" monsterName="Goblin#2" monsterHP="9" positionY="756.9181766778113" legendaryCount="3" positionX="473.7167327587054" combatantId="1019" isKnown="1" _baseID="1024" monsterSize="-1"/>
-        <battlecombatant type="2" isShown="1" initiative="13" monsterClass="Goblin" monsterType="2" monsterName="Goblin#2" monsterHP="13" positionY="753.2567646073692" legendaryCount="3" positionX="1117.581282794511" combatantId="-1" isKnown="1" _baseID="1033"/>
-        <battlecombatant type="1" initiative="12" positionY="1120.754813125662" positionX="612.7105039859744" combatantId="1007" _baseID="1020"/>
-        <battlecombatant type="2" isShown="1" initiative="11" monsterType="1" monsterName="Goblin#1" monsterHP="19" positionY="763.0502548201911" legendaryCount="3" positionX="759.8803794030828" combatantId="1019" isKnown="1" _baseID="1023" monsterSize="-1"/>
-        <battlecombatant type="2" isShown="1" initiative="3" monsterType="1" monsterName="Goblin#3" monsterHP="16" positionY="687.421291064177" legendaryCount="3" positionX="481.8928369485448" combatantId="1019" isKnown="1" _baseID="1025" monsterSize="-1"/>
+        <battlecombatant monsterName="Goblin#4" positionY="623.0344705691922" isShown="1" positionX="746.6964113969667" _baseID="1026" isKnown="1" monsterHP="16" legendaryCount="3" initiative="21" monsterSize="-1" type="2" combatantId="1019" monsterType="1"/>
+        <battlecombatant monsterName="Hydra" positionY="906.3049971727962" isShown="1" positionX="325.7891421487404" _baseID="1029" isKnown="1" monsterHP="138" legendaryCount="3" initiative="20" monsterSize="-1" type="2" combatantId="1021" monsterType="1"/>
+        <battlecombatant positionY="963.3648074712548" positionX="822.2231738506074" _baseID="1022" initiative="19" type="1" combatantId="1010"/>
+        <battlecombatant monsterName="Goblin#5" positionY="757.5313844920494" isShown="1" positionX="678.9369479236735" _baseID="1027" isKnown="1" monsterHP="9" legendaryCount="3" initiative="18" monsterSize="-1" type="2" combatantId="1019" monsterType="1"/>
+        <battlecombatant positionY="825.3930492677162" positionX="750.6822621895135" _baseID="1021" initiative="17" type="1" combatantId="1009"/>
+        <battlecombatant monsterName="Goblin#1" positionY="1045.126416012332" isShown="1" positionX="1116.642795169415" _baseID="1032" isKnown="1" monsterHP="14" legendaryCount="3" initiative="16" monsterClass="Goblin" type="2" combatantId="-1" monsterType="2"/>
+        <battlecombatant monsterName="Goblin#2" positionY="756.9181766778113" isShown="1" positionX="473.7167327587054" _baseID="1024" isKnown="1" monsterHP="9" legendaryCount="3" initiative="13" monsterSize="-1" type="2" combatantId="1019" monsterType="1"/>
+        <battlecombatant monsterName="Goblin#2" positionY="753.2567646073692" isShown="1" positionX="1117.581282794511" _baseID="1033" isKnown="1" monsterHP="13" legendaryCount="3" initiative="13" monsterClass="Goblin" type="2" combatantId="-1" monsterType="2"/>
+        <battlecombatant positionY="1120.754813125662" positionX="612.7105039859744" _baseID="1020" initiative="12" type="1" combatantId="1007"/>
+        <battlecombatant monsterName="Goblin#1" positionY="763.0502548201911" isShown="1" positionX="759.8803794030828" _baseID="1023" isKnown="1" monsterHP="19" legendaryCount="3" initiative="11" monsterSize="-1" type="2" combatantId="1019" monsterType="1"/>
+        <battlecombatant monsterName="Goblin#3" positionY="687.421291064177" isShown="1" positionX="481.8928369485448" _baseID="1025" isKnown="1" monsterHP="16" legendaryCount="3" initiative="3" monsterSize="-1" type="2" combatantId="1019" monsterType="1"/>
        </combatants>
        <effects>
-        <battleeffect rotation="0" type="1" colorB="192" colorG="192" tip="" size="40" positionY="626.5978198923583" positionX="31.786240081546" _baseID="1030" colorR="192"/>
-        <battleeffect rotation="157.1066489212927" type="2" colorB="0" colorG="0" tip="" size="15" positionY="829.8745752686937" positionX="753.2235984889499" _baseID="1031" colorR="203"/>
+        <battleeffect colorR="192" positionY="626.5978198923583" positionX="31.786240081546" _baseID="1030" rotation="0" tip="" size="40" colorB="192" type="1" colorG="192"/>
+        <battleeffect colorR="203" positionY="838.9164917684112" positionX="786.8078597736144" _baseID="1031" rotation="149.7801256018078" tip="" size="15" colorB="0" type="2" colorG="0"/>
        </effects>
       </battle>
      </encounter>
-     <encounter fontSize="14" type="5" fontColor="#50004b" alignment="4" name="Mountain View" imageWidth="80" imageFile="Images/rixt-heerschop-view-of-gorges-du-tarn-2.jpg" fontBold="0" scrollSpeed="50" fontItalics="0" fontFamily="Calibri" _baseID="1033"><![CDATA[The world is a busy place. Loud and industrial, it is in perpetual motion and constant change. It is also a place of contradiction and conflict. The wealthy upper class, with their noble arcane machinery of gem-encrusted polished brass, live in a practically utopian society sharing their time between leisure pursuits of the arts or academia and the obligations of high society. The generally ignored truth is that this world of wonders is built on layers and layers of lower classes who live in a much darker and dirtier reality. The common folk are surrounded by steam-driven machines, their hydraulic pistons grinding endlessly as the coal fires fueling them belch out their thick, black smoke. Factories, stream-driven vehicles from trains to ships to aeroships, gadgets and personal physical improvements, magical devices, arcane flying vessels small and large; all of these are common-place parts of daily life in Londarem.
+     <encounter scrollSpeed="50" fontBold="0" name="Mountain View" alignment="4" imageWidth="80" _baseID="1033" fontSize="14" imageFile="Images/rixt-heerschop-view-of-gorges-du-tarn-2.jpg" fontItalics="0" fontFamily="Calibri" fontColor="#50004b" type="5"><![CDATA[The world is a busy place. Loud and industrial, it is in perpetual motion and constant change. It is also a place of contradiction and conflict. The wealthy upper class, with their noble arcane machinery of gem-encrusted polished brass, live in a practically utopian society sharing their time between leisure pursuits of the arts or academia and the obligations of high society. The generally ignored truth is that this world of wonders is built on layers and layers of lower classes who live in a much darker and dirtier reality. The common folk are surrounded by steam-driven machines, their hydraulic pistons grinding endlessly as the coal fires fueling them belch out their thick, black smoke. Factories, stream-driven vehicles from trains to ships to aeroships, gadgets and personal physical improvements, magical devices, arcane flying vessels small and large; all of these are common-place parts of daily life in Londarem.
 
 The dominant force of this world is the Brettanux Empire which has grown over the past 300 years and subsumed, overrun and conquered all of the civilized parts of the world and many of the lesser civilized regions as well. Across the reaches of the Empire there is an continuous if somewhat uneasy peace, with the Royal Army holding back wild frontiersmen and quelling occassional local uprisings while the Royal Guard keeps the rabble under control closer to home.
 
@@ -92,483 +92,1535 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
 ]]></encounter>
     </encounters>
     <maps>
-     <map audiotrack="-1" name="Ancient Catacombs" filename="images/Ancient Catacombs.jpg" _baseID="1002">
+     <map name="Ancient Catacombs" _baseID="1002" filename="images/Ancient Catacombs.jpg" audiotrack="-1">
       <actions>
-       <action type="1" radius="80" erase="1" brushtype="0">
+       <action erase="1" brushtype="0" radius="80" type="1">
         <points>
-         <point y="906" x="918"/>
-         <point y="906" x="916"/>
-         <point y="906" x="911"/>
-         <point y="908" x="886"/>
-         <point y="913" x="855"/>
-         <point y="916" x="852"/>
-         <point y="916" x="850"/>
-         <point y="916" x="848"/>
-         <point y="913" x="848"/>
-         <point y="908" x="842"/>
-         <point y="899" x="840"/>
-         <point y="894" x="838"/>
-         <point y="876" x="838"/>
-         <point y="872" x="838"/>
-         <point y="862" x="838"/>
-         <point y="845" x="837"/>
-         <point y="840" x="835"/>
-         <point y="825" x="833"/>
-         <point y="816" x="833"/>
-         <point y="801" x="830"/>
-         <point y="777" x="826"/>
-         <point y="771" x="826"/>
-         <point y="765" x="825"/>
-         <point y="745" x="823"/>
-         <point y="740" x="821"/>
-         <point y="730" x="820"/>
-         <point y="708" x="813"/>
-         <point y="703" x="811"/>
-         <point y="689" x="808"/>
-         <point y="669" x="799"/>
-         <point y="655" x="793"/>
-         <point y="650" x="791"/>
-         <point y="642" x="786"/>
-         <point y="627" x="776"/>
-         <point y="610" x="759"/>
-         <point y="608" x="752"/>
-         <point y="606" x="743"/>
-         <point y="606" x="720"/>
-         <point y="606" x="694"/>
-         <point y="606" x="677"/>
-         <point y="608" x="666"/>
-         <point y="608" x="659"/>
-         <point y="606" x="647"/>
-         <point y="601" x="620"/>
-         <point y="596" x="606"/>
-         <point y="589" x="586"/>
-         <point y="588" x="579"/>
-         <point y="586" x="572"/>
-         <point y="584" x="566"/>
-         <point y="584" x="555"/>
-         <point y="583" x="539"/>
-         <point y="583" x="522"/>
-         <point y="583" x="508"/>
-         <point y="586" x="472"/>
-         <point y="596" x="428"/>
-         <point y="598" x="410"/>
-         <point y="601" x="388"/>
-         <point y="605" x="366"/>
-         <point y="606" x="351"/>
-         <point y="610" x="337"/>
-         <point y="613" x="329"/>
-         <point y="615" x="317"/>
-         <point y="618" x="303"/>
-         <point y="625" x="288"/>
-         <point y="633" x="268"/>
-         <point y="642" x="247"/>
-         <point y="649" x="235"/>
-         <point y="654" x="230"/>
-         <point y="659" x="222"/>
-         <point y="667" x="217"/>
-         <point y="674" x="210"/>
-         <point y="686" x="203"/>
-         <point y="696" x="200"/>
-         <point y="703" x="200"/>
-         <point y="713" x="193"/>
-         <point y="727" x="191"/>
-         <point y="740" x="190"/>
-         <point y="749" x="188"/>
-         <point y="772" x="183"/>
-         <point y="787" x="180"/>
-         <point y="799" x="178"/>
-         <point y="821" x="176"/>
-         <point y="842" x="174"/>
-         <point y="865" x="174"/>
-         <point y="884" x="176"/>
-         <point y="898" x="180"/>
-         <point y="914" x="180"/>
-         <point y="930" x="180"/>
-         <point y="945" x="180"/>
-         <point y="960" x="180"/>
-         <point y="982" x="178"/>
-         <point y="997" x="176"/>
-         <point y="1006" x="176"/>
-         <point y="1033" x="180"/>
-         <point y="1052" x="188"/>
-         <point y="1072" x="195"/>
-         <point y="1099" x="203"/>
-         <point y="1109" x="208"/>
-         <point y="1111" x="210"/>
-         <point y="1124" x="224"/>
-         <point y="1140" x="247"/>
-         <point y="1150" x="269"/>
-         <point y="1177" x="317"/>
-         <point y="1184" x="345"/>
-         <point y="1185" x="359"/>
-         <point y="1191" x="379"/>
-         <point y="1199" x="401"/>
-         <point y="1206" x="422"/>
-         <point y="1213" x="444"/>
-         <point y="1219" x="476"/>
-         <point y="1224" x="510"/>
-         <point y="1228" x="535"/>
-         <point y="1229" x="569"/>
-         <point y="1229" x="591"/>
-         <point y="1229" x="618"/>
-         <point y="1229" x="640"/>
-         <point y="1229" x="662"/>
-         <point y="1229" x="682"/>
-         <point y="1229" x="688"/>
-         <point y="1229" x="727"/>
-         <point y="1228" x="740"/>
-         <point y="1218" x="759"/>
-         <point y="1207" x="772"/>
-         <point y="1201" x="779"/>
-         <point y="1191" x="789"/>
-         <point y="1180" x="794"/>
-         <point y="1167" x="803"/>
-         <point y="1155" x="808"/>
-         <point y="1140" x="816"/>
-         <point y="1123" x="820"/>
-         <point y="1108" x="820"/>
-         <point y="1089" x="820"/>
-         <point y="1072" x="820"/>
-         <point y="1042" x="825"/>
-         <point y="1025" x="826"/>
-         <point y="1011" x="830"/>
-         <point y="999" x="833"/>
-         <point y="986" x="837"/>
-         <point y="977" x="837"/>
-         <point y="970" x="838"/>
-         <point y="960" x="842"/>
-         <point y="952" x="848"/>
-         <point y="942" x="854"/>
-         <point y="935" x="860"/>
-         <point y="930" x="872"/>
-         <point y="925" x="884"/>
-         <point y="921" x="894"/>
-         <point y="918" x="899"/>
-         <point y="916" x="901"/>
-         <point y="916" x="899"/>
-         <point y="920" x="887"/>
-         <point y="925" x="864"/>
-         <point y="926" x="820"/>
-         <point y="926" x="791"/>
-         <point y="923" x="774"/>
-         <point y="916" x="759"/>
-         <point y="899" x="745"/>
-         <point y="877" x="730"/>
-         <point y="867" x="727"/>
-         <point y="837" x="720"/>
-         <point y="823" x="715"/>
-         <point y="803" x="711"/>
-         <point y="793" x="708"/>
-         <point y="771" x="701"/>
-         <point y="762" x="698"/>
-         <point y="745" x="682"/>
-         <point y="737" x="669"/>
-         <point y="721" x="642"/>
-         <point y="711" x="620"/>
-         <point y="703" x="594"/>
-         <point y="698" x="567"/>
-         <point y="698" x="537"/>
-         <point y="698" x="493"/>
-         <point y="698" x="478"/>
-         <point y="718" x="395"/>
-         <point y="725" x="374"/>
-         <point y="730" x="364"/>
-         <point y="735" x="354"/>
-         <point y="743" x="342"/>
-         <point y="745" x="339"/>
-         <point y="760" x="323"/>
-         <point y="774" x="317"/>
-         <point y="793" x="308"/>
-         <point y="818" x="301"/>
-         <point y="847" x="295"/>
-         <point y="874" x="286"/>
-         <point y="894" x="281"/>
-         <point y="909" x="278"/>
-         <point y="930" x="274"/>
-         <point y="947" x="274"/>
-         <point y="959" x="278"/>
-         <point y="967" x="281"/>
-         <point y="982" x="291"/>
-         <point y="999" x="305"/>
-         <point y="1013" x="327"/>
-         <point y="1021" x="347"/>
-         <point y="1038" x="371"/>
-         <point y="1064" x="427"/>
-         <point y="1079" x="461"/>
-         <point y="1087" x="483"/>
-         <point y="1097" x="513"/>
-         <point y="1102" x="528"/>
-         <point y="1114" x="574"/>
-         <point y="1119" x="615"/>
-         <point y="1124" x="647"/>
-         <point y="1126" x="671"/>
-         <point y="1126" x="701"/>
-         <point y="1123" x="718"/>
-         <point y="1108" x="732"/>
-         <point y="1087" x="740"/>
-         <point y="1070" x="742"/>
-         <point y="1047" x="740"/>
-         <point y="1030" x="732"/>
-         <point y="1016" x="716"/>
-         <point y="997" x="696"/>
-         <point y="986" x="679"/>
-         <point y="981" x="660"/>
-         <point y="981" x="655"/>
-         <point y="984" x="574"/>
-         <point y="986" x="527"/>
-         <point y="986" x="510"/>
-         <point y="986" x="501"/>
-         <point y="965" x="474"/>
-         <point y="948" x="456"/>
-         <point y="926" x="432"/>
-         <point y="901" x="410"/>
-         <point y="894" x="403"/>
-         <point y="882" x="395"/>
-         <point y="864" x="390"/>
-         <point y="854" x="390"/>
-         <point y="845" x="400"/>
-         <point y="832" x="423"/>
-         <point y="818" x="464"/>
-         <point y="818" x="495"/>
-         <point y="821" x="513"/>
-         <point y="826" x="525"/>
-         <point y="854" x="559"/>
-         <point y="874" x="581"/>
-         <point y="882" x="593"/>
-         <point y="899" x="623"/>
-         <point y="903" x="657"/>
-         <point y="903" x="662"/>
-         <point y="904" x="664"/>
-         <point y="906" x="669"/>
-         <point y="906" x="672"/>
-         <point y="908" x="672"/>
-         <point y="906" x="672"/>
-         <point y="894" x="664"/>
-         <point y="865" x="637"/>
-         <point y="811" x="584"/>
-         <point y="811" x="581"/>
-         <point y="809" x="579"/>
-         <point y="798" x="569"/>
-         <point y="796" x="567"/>
-         <point y="796" x="569"/>
-         <point y="794" x="584"/>
-         <point y="794" x="627"/>
-         <point y="796" x="642"/>
-         <point y="816" x="674"/>
-         <point y="843" x="701"/>
-         <point y="850" x="708"/>
-         <point y="864" x="716"/>
-         <point y="879" x="721"/>
-         <point y="884" x="720"/>
-         <point y="894" x="708"/>
-         <point y="899" x="703"/>
-         <point y="901" x="703"/>
-         <point y="901" x="701"/>
+         <point x="918" y="906"/>
+         <point x="916" y="906"/>
+         <point x="911" y="906"/>
+         <point x="886" y="908"/>
+         <point x="855" y="913"/>
+         <point x="852" y="916"/>
+         <point x="850" y="916"/>
+         <point x="848" y="916"/>
+         <point x="848" y="913"/>
+         <point x="842" y="908"/>
+         <point x="840" y="899"/>
+         <point x="838" y="894"/>
+         <point x="838" y="876"/>
+         <point x="838" y="872"/>
+         <point x="838" y="862"/>
+         <point x="837" y="845"/>
+         <point x="835" y="840"/>
+         <point x="833" y="825"/>
+         <point x="833" y="816"/>
+         <point x="830" y="801"/>
+         <point x="826" y="777"/>
+         <point x="826" y="771"/>
+         <point x="825" y="765"/>
+         <point x="823" y="745"/>
+         <point x="821" y="740"/>
+         <point x="820" y="730"/>
+         <point x="813" y="708"/>
+         <point x="811" y="703"/>
+         <point x="808" y="689"/>
+         <point x="799" y="669"/>
+         <point x="793" y="655"/>
+         <point x="791" y="650"/>
+         <point x="786" y="642"/>
+         <point x="776" y="627"/>
+         <point x="759" y="610"/>
+         <point x="752" y="608"/>
+         <point x="743" y="606"/>
+         <point x="720" y="606"/>
+         <point x="694" y="606"/>
+         <point x="677" y="606"/>
+         <point x="666" y="608"/>
+         <point x="659" y="608"/>
+         <point x="647" y="606"/>
+         <point x="620" y="601"/>
+         <point x="606" y="596"/>
+         <point x="586" y="589"/>
+         <point x="579" y="588"/>
+         <point x="572" y="586"/>
+         <point x="566" y="584"/>
+         <point x="555" y="584"/>
+         <point x="539" y="583"/>
+         <point x="522" y="583"/>
+         <point x="508" y="583"/>
+         <point x="472" y="586"/>
+         <point x="428" y="596"/>
+         <point x="410" y="598"/>
+         <point x="388" y="601"/>
+         <point x="366" y="605"/>
+         <point x="351" y="606"/>
+         <point x="337" y="610"/>
+         <point x="329" y="613"/>
+         <point x="317" y="615"/>
+         <point x="303" y="618"/>
+         <point x="288" y="625"/>
+         <point x="268" y="633"/>
+         <point x="247" y="642"/>
+         <point x="235" y="649"/>
+         <point x="230" y="654"/>
+         <point x="222" y="659"/>
+         <point x="217" y="667"/>
+         <point x="210" y="674"/>
+         <point x="203" y="686"/>
+         <point x="200" y="696"/>
+         <point x="200" y="703"/>
+         <point x="193" y="713"/>
+         <point x="191" y="727"/>
+         <point x="190" y="740"/>
+         <point x="188" y="749"/>
+         <point x="183" y="772"/>
+         <point x="180" y="787"/>
+         <point x="178" y="799"/>
+         <point x="176" y="821"/>
+         <point x="174" y="842"/>
+         <point x="174" y="865"/>
+         <point x="176" y="884"/>
+         <point x="180" y="898"/>
+         <point x="180" y="914"/>
+         <point x="180" y="930"/>
+         <point x="180" y="945"/>
+         <point x="180" y="960"/>
+         <point x="178" y="982"/>
+         <point x="176" y="997"/>
+         <point x="176" y="1006"/>
+         <point x="180" y="1033"/>
+         <point x="188" y="1052"/>
+         <point x="195" y="1072"/>
+         <point x="203" y="1099"/>
+         <point x="208" y="1109"/>
+         <point x="210" y="1111"/>
+         <point x="224" y="1124"/>
+         <point x="247" y="1140"/>
+         <point x="269" y="1150"/>
+         <point x="317" y="1177"/>
+         <point x="345" y="1184"/>
+         <point x="359" y="1185"/>
+         <point x="379" y="1191"/>
+         <point x="401" y="1199"/>
+         <point x="422" y="1206"/>
+         <point x="444" y="1213"/>
+         <point x="476" y="1219"/>
+         <point x="510" y="1224"/>
+         <point x="535" y="1228"/>
+         <point x="569" y="1229"/>
+         <point x="591" y="1229"/>
+         <point x="618" y="1229"/>
+         <point x="640" y="1229"/>
+         <point x="662" y="1229"/>
+         <point x="682" y="1229"/>
+         <point x="688" y="1229"/>
+         <point x="727" y="1229"/>
+         <point x="740" y="1228"/>
+         <point x="759" y="1218"/>
+         <point x="772" y="1207"/>
+         <point x="779" y="1201"/>
+         <point x="789" y="1191"/>
+         <point x="794" y="1180"/>
+         <point x="803" y="1167"/>
+         <point x="808" y="1155"/>
+         <point x="816" y="1140"/>
+         <point x="820" y="1123"/>
+         <point x="820" y="1108"/>
+         <point x="820" y="1089"/>
+         <point x="820" y="1072"/>
+         <point x="825" y="1042"/>
+         <point x="826" y="1025"/>
+         <point x="830" y="1011"/>
+         <point x="833" y="999"/>
+         <point x="837" y="986"/>
+         <point x="837" y="977"/>
+         <point x="838" y="970"/>
+         <point x="842" y="960"/>
+         <point x="848" y="952"/>
+         <point x="854" y="942"/>
+         <point x="860" y="935"/>
+         <point x="872" y="930"/>
+         <point x="884" y="925"/>
+         <point x="894" y="921"/>
+         <point x="899" y="918"/>
+         <point x="901" y="916"/>
+         <point x="899" y="916"/>
+         <point x="887" y="920"/>
+         <point x="864" y="925"/>
+         <point x="820" y="926"/>
+         <point x="791" y="926"/>
+         <point x="774" y="923"/>
+         <point x="759" y="916"/>
+         <point x="745" y="899"/>
+         <point x="730" y="877"/>
+         <point x="727" y="867"/>
+         <point x="720" y="837"/>
+         <point x="715" y="823"/>
+         <point x="711" y="803"/>
+         <point x="708" y="793"/>
+         <point x="701" y="771"/>
+         <point x="698" y="762"/>
+         <point x="682" y="745"/>
+         <point x="669" y="737"/>
+         <point x="642" y="721"/>
+         <point x="620" y="711"/>
+         <point x="594" y="703"/>
+         <point x="567" y="698"/>
+         <point x="537" y="698"/>
+         <point x="493" y="698"/>
+         <point x="478" y="698"/>
+         <point x="395" y="718"/>
+         <point x="374" y="725"/>
+         <point x="364" y="730"/>
+         <point x="354" y="735"/>
+         <point x="342" y="743"/>
+         <point x="339" y="745"/>
+         <point x="323" y="760"/>
+         <point x="317" y="774"/>
+         <point x="308" y="793"/>
+         <point x="301" y="818"/>
+         <point x="295" y="847"/>
+         <point x="286" y="874"/>
+         <point x="281" y="894"/>
+         <point x="278" y="909"/>
+         <point x="274" y="930"/>
+         <point x="274" y="947"/>
+         <point x="278" y="959"/>
+         <point x="281" y="967"/>
+         <point x="291" y="982"/>
+         <point x="305" y="999"/>
+         <point x="327" y="1013"/>
+         <point x="347" y="1021"/>
+         <point x="371" y="1038"/>
+         <point x="427" y="1064"/>
+         <point x="461" y="1079"/>
+         <point x="483" y="1087"/>
+         <point x="513" y="1097"/>
+         <point x="528" y="1102"/>
+         <point x="574" y="1114"/>
+         <point x="615" y="1119"/>
+         <point x="647" y="1124"/>
+         <point x="671" y="1126"/>
+         <point x="701" y="1126"/>
+         <point x="718" y="1123"/>
+         <point x="732" y="1108"/>
+         <point x="740" y="1087"/>
+         <point x="742" y="1070"/>
+         <point x="740" y="1047"/>
+         <point x="732" y="1030"/>
+         <point x="716" y="1016"/>
+         <point x="696" y="997"/>
+         <point x="679" y="986"/>
+         <point x="660" y="981"/>
+         <point x="655" y="981"/>
+         <point x="574" y="984"/>
+         <point x="527" y="986"/>
+         <point x="510" y="986"/>
+         <point x="501" y="986"/>
+         <point x="474" y="965"/>
+         <point x="456" y="948"/>
+         <point x="432" y="926"/>
+         <point x="410" y="901"/>
+         <point x="403" y="894"/>
+         <point x="395" y="882"/>
+         <point x="390" y="864"/>
+         <point x="390" y="854"/>
+         <point x="400" y="845"/>
+         <point x="423" y="832"/>
+         <point x="464" y="818"/>
+         <point x="495" y="818"/>
+         <point x="513" y="821"/>
+         <point x="525" y="826"/>
+         <point x="559" y="854"/>
+         <point x="581" y="874"/>
+         <point x="593" y="882"/>
+         <point x="623" y="899"/>
+         <point x="657" y="903"/>
+         <point x="662" y="903"/>
+         <point x="664" y="904"/>
+         <point x="669" y="906"/>
+         <point x="672" y="906"/>
+         <point x="672" y="908"/>
+         <point x="672" y="906"/>
+         <point x="664" y="894"/>
+         <point x="637" y="865"/>
+         <point x="584" y="811"/>
+         <point x="581" y="811"/>
+         <point x="579" y="809"/>
+         <point x="569" y="798"/>
+         <point x="567" y="796"/>
+         <point x="569" y="796"/>
+         <point x="584" y="794"/>
+         <point x="627" y="794"/>
+         <point x="642" y="796"/>
+         <point x="674" y="816"/>
+         <point x="701" y="843"/>
+         <point x="708" y="850"/>
+         <point x="716" y="864"/>
+         <point x="721" y="879"/>
+         <point x="720" y="884"/>
+         <point x="708" y="894"/>
+         <point x="703" y="899"/>
+         <point x="703" y="901"/>
+         <point x="701" y="901"/>
         </points>
        </action>
-       <action type="1" radius="80" erase="1" brushtype="0">
+       <action erase="1" brushtype="0" radius="80" type="1">
         <points>
-         <point y="903" x="832"/>
-         <point y="899" x="843"/>
-         <point y="899" x="855"/>
-         <point y="899" x="872"/>
-         <point y="898" x="891"/>
-         <point y="896" x="913"/>
-         <point y="889" x="930"/>
-         <point y="886" x="937"/>
-         <point y="876" x="947"/>
-         <point y="867" x="950"/>
-         <point y="862" x="952"/>
-         <point y="859" x="952"/>
-         <point y="854" x="948"/>
-         <point y="850" x="947"/>
-         <point y="847" x="947"/>
-         <point y="843" x="947"/>
-         <point y="838" x="948"/>
-         <point y="830" x="959"/>
-         <point y="826" x="965"/>
-         <point y="821" x="974"/>
-         <point y="820" x="986"/>
-         <point y="818" x="994"/>
-         <point y="818" x="997"/>
-         <point y="818" x="999"/>
-         <point y="818" x="1008"/>
-         <point y="818" x="1011"/>
-         <point y="818" x="1018"/>
-         <point y="818" x="1030"/>
-         <point y="818" x="1043"/>
-         <point y="818" x="1055"/>
-         <point y="818" x="1062"/>
-         <point y="818" x="1069"/>
-         <point y="818" x="1082"/>
-         <point y="818" x="1094"/>
-         <point y="818" x="1106"/>
-         <point y="816" x="1116"/>
-         <point y="816" x="1118"/>
-         <point y="816" x="1119"/>
-         <point y="815" x="1119"/>
-         <point y="811" x="1119"/>
-         <point y="804" x="1118"/>
-         <point y="793" x="1114"/>
-         <point y="776" x="1106"/>
-         <point y="771" x="1104"/>
-         <point y="769" x="1104"/>
-         <point y="764" x="1104"/>
-         <point y="757" x="1108"/>
-         <point y="750" x="1118"/>
-         <point y="747" x="1123"/>
-         <point y="747" x="1124"/>
-         <point y="747" x="1126"/>
-         <point y="749" x="1130"/>
-         <point y="749" x="1131"/>
-         <point y="750" x="1131"/>
-         <point y="752" x="1131"/>
-         <point y="752" x="1123"/>
-         <point y="757" x="1106"/>
-         <point y="757" x="1102"/>
-         <point y="757" x="1092"/>
-         <point y="759" x="1089"/>
-         <point y="764" x="1084"/>
-         <point y="774" x="1082"/>
-         <point y="786" x="1082"/>
-         <point y="796" x="1082"/>
-         <point y="818" x="1084"/>
-         <point y="837" x="1086"/>
-         <point y="845" x="1086"/>
-         <point y="850" x="1087"/>
-         <point y="855" x="1087"/>
-         <point y="860" x="1087"/>
-         <point y="870" x="1089"/>
-         <point y="879" x="1091"/>
-         <point y="889" x="1091"/>
-         <point y="914" x="1092"/>
-         <point y="921" x="1094"/>
-         <point y="928" x="1096"/>
-         <point y="937" x="1096"/>
-         <point y="940" x="1091"/>
-         <point y="942" x="1053"/>
-         <point y="948" x="996"/>
-         <point y="948" x="989"/>
-         <point y="948" x="986"/>
-         <point y="955" x="974"/>
-         <point y="959" x="967"/>
-         <point y="964" x="965"/>
-         <point y="967" x="964"/>
-         <point y="967" x="965"/>
-         <point y="967" x="975"/>
-         <point y="969" x="989"/>
-         <point y="972" x="1001"/>
-         <point y="974" x="1018"/>
-         <point y="974" x="1021"/>
-         <point y="979" x="1042"/>
-         <point y="979" x="1047"/>
-         <point y="984" x="1050"/>
-         <point y="991" x="1058"/>
-         <point y="997" x="1064"/>
-         <point y="1006" x="1070"/>
-         <point y="1016" x="1075"/>
-         <point y="1023" x="1080"/>
-         <point y="1026" x="1086"/>
-         <point y="1030" x="1091"/>
-         <point y="1031" x="1092"/>
-         <point y="1035" x="1096"/>
-         <point y="1038" x="1106"/>
-         <point y="1038" x="1109"/>
-         <point y="1040" x="1116"/>
-         <point y="1040" x="1123"/>
-         <point y="1040" x="1130"/>
-         <point y="1036" x="1138"/>
-         <point y="1035" x="1143"/>
-         <point y="1025" x="1153"/>
-         <point y="1018" x="1155"/>
-         <point y="1011" x="1157"/>
-         <point y="997" x="1160"/>
-         <point y="992" x="1163"/>
-         <point y="989" x="1172"/>
-         <point y="984" x="1197"/>
-         <point y="984" x="1218"/>
-         <point y="982" x="1235"/>
-         <point y="981" x="1253"/>
-         <point y="981" x="1274"/>
-         <point y="982" x="1284"/>
-         <point y="984" x="1289"/>
-         <point y="984" x="1290"/>
-         <point y="977" x="1294"/>
-         <point y="969" x="1296"/>
-         <point y="955" x="1297"/>
-         <point y="945" x="1299"/>
-         <point y="925" x="1299"/>
-         <point y="906" x="1296"/>
-         <point y="894" x="1292"/>
-         <point y="884" x="1287"/>
-         <point y="862" x="1280"/>
-         <point y="848" x="1275"/>
-         <point y="842" x="1268"/>
-         <point y="835" x="1260"/>
-         <point y="828" x="1248"/>
-         <point y="828" x="1233"/>
-         <point y="837" x="1213"/>
-         <point y="838" x="1201"/>
-         <point y="840" x="1191"/>
-         <point y="842" x="1172"/>
-         <point y="848" x="1148"/>
-         <point y="857" x="1135"/>
-         <point y="872" x="1121"/>
-         <point y="877" x="1118"/>
-         <point y="877" x="1121"/>
-         <point y="877" x="1133"/>
-         <point y="879" x="1199"/>
-         <point y="882" x="1257"/>
-         <point y="882" x="1292"/>
-         <point y="886" x="1323"/>
-         <point y="887" x="1343"/>
-         <point y="887" x="1357"/>
-         <point y="889" x="1363"/>
-         <point y="892" x="1375"/>
-         <point y="894" x="1387"/>
-         <point y="898" x="1416"/>
-         <point y="898" x="1439"/>
-         <point y="899" x="1453"/>
-         <point y="899" x="1460"/>
-         <point y="899" x="1468"/>
-         <point y="899" x="1472"/>
-         <point y="901" x="1478"/>
-         <point y="901" x="1480"/>
-         <point y="901" x="1482"/>
+         <point x="832" y="903"/>
+         <point x="843" y="899"/>
+         <point x="855" y="899"/>
+         <point x="872" y="899"/>
+         <point x="891" y="898"/>
+         <point x="913" y="896"/>
+         <point x="930" y="889"/>
+         <point x="937" y="886"/>
+         <point x="947" y="876"/>
+         <point x="950" y="867"/>
+         <point x="952" y="862"/>
+         <point x="952" y="859"/>
+         <point x="948" y="854"/>
+         <point x="947" y="850"/>
+         <point x="947" y="847"/>
+         <point x="947" y="843"/>
+         <point x="948" y="838"/>
+         <point x="959" y="830"/>
+         <point x="965" y="826"/>
+         <point x="974" y="821"/>
+         <point x="986" y="820"/>
+         <point x="994" y="818"/>
+         <point x="997" y="818"/>
+         <point x="999" y="818"/>
+         <point x="1008" y="818"/>
+         <point x="1011" y="818"/>
+         <point x="1018" y="818"/>
+         <point x="1030" y="818"/>
+         <point x="1043" y="818"/>
+         <point x="1055" y="818"/>
+         <point x="1062" y="818"/>
+         <point x="1069" y="818"/>
+         <point x="1082" y="818"/>
+         <point x="1094" y="818"/>
+         <point x="1106" y="818"/>
+         <point x="1116" y="816"/>
+         <point x="1118" y="816"/>
+         <point x="1119" y="816"/>
+         <point x="1119" y="815"/>
+         <point x="1119" y="811"/>
+         <point x="1118" y="804"/>
+         <point x="1114" y="793"/>
+         <point x="1106" y="776"/>
+         <point x="1104" y="771"/>
+         <point x="1104" y="769"/>
+         <point x="1104" y="764"/>
+         <point x="1108" y="757"/>
+         <point x="1118" y="750"/>
+         <point x="1123" y="747"/>
+         <point x="1124" y="747"/>
+         <point x="1126" y="747"/>
+         <point x="1130" y="749"/>
+         <point x="1131" y="749"/>
+         <point x="1131" y="750"/>
+         <point x="1131" y="752"/>
+         <point x="1123" y="752"/>
+         <point x="1106" y="757"/>
+         <point x="1102" y="757"/>
+         <point x="1092" y="757"/>
+         <point x="1089" y="759"/>
+         <point x="1084" y="764"/>
+         <point x="1082" y="774"/>
+         <point x="1082" y="786"/>
+         <point x="1082" y="796"/>
+         <point x="1084" y="818"/>
+         <point x="1086" y="837"/>
+         <point x="1086" y="845"/>
+         <point x="1087" y="850"/>
+         <point x="1087" y="855"/>
+         <point x="1087" y="860"/>
+         <point x="1089" y="870"/>
+         <point x="1091" y="879"/>
+         <point x="1091" y="889"/>
+         <point x="1092" y="914"/>
+         <point x="1094" y="921"/>
+         <point x="1096" y="928"/>
+         <point x="1096" y="937"/>
+         <point x="1091" y="940"/>
+         <point x="1053" y="942"/>
+         <point x="996" y="948"/>
+         <point x="989" y="948"/>
+         <point x="986" y="948"/>
+         <point x="974" y="955"/>
+         <point x="967" y="959"/>
+         <point x="965" y="964"/>
+         <point x="964" y="967"/>
+         <point x="965" y="967"/>
+         <point x="975" y="967"/>
+         <point x="989" y="969"/>
+         <point x="1001" y="972"/>
+         <point x="1018" y="974"/>
+         <point x="1021" y="974"/>
+         <point x="1042" y="979"/>
+         <point x="1047" y="979"/>
+         <point x="1050" y="984"/>
+         <point x="1058" y="991"/>
+         <point x="1064" y="997"/>
+         <point x="1070" y="1006"/>
+         <point x="1075" y="1016"/>
+         <point x="1080" y="1023"/>
+         <point x="1086" y="1026"/>
+         <point x="1091" y="1030"/>
+         <point x="1092" y="1031"/>
+         <point x="1096" y="1035"/>
+         <point x="1106" y="1038"/>
+         <point x="1109" y="1038"/>
+         <point x="1116" y="1040"/>
+         <point x="1123" y="1040"/>
+         <point x="1130" y="1040"/>
+         <point x="1138" y="1036"/>
+         <point x="1143" y="1035"/>
+         <point x="1153" y="1025"/>
+         <point x="1155" y="1018"/>
+         <point x="1157" y="1011"/>
+         <point x="1160" y="997"/>
+         <point x="1163" y="992"/>
+         <point x="1172" y="989"/>
+         <point x="1197" y="984"/>
+         <point x="1218" y="984"/>
+         <point x="1235" y="982"/>
+         <point x="1253" y="981"/>
+         <point x="1274" y="981"/>
+         <point x="1284" y="982"/>
+         <point x="1289" y="984"/>
+         <point x="1290" y="984"/>
+         <point x="1294" y="977"/>
+         <point x="1296" y="969"/>
+         <point x="1297" y="955"/>
+         <point x="1299" y="945"/>
+         <point x="1299" y="925"/>
+         <point x="1296" y="906"/>
+         <point x="1292" y="894"/>
+         <point x="1287" y="884"/>
+         <point x="1280" y="862"/>
+         <point x="1275" y="848"/>
+         <point x="1268" y="842"/>
+         <point x="1260" y="835"/>
+         <point x="1248" y="828"/>
+         <point x="1233" y="828"/>
+         <point x="1213" y="837"/>
+         <point x="1201" y="838"/>
+         <point x="1191" y="840"/>
+         <point x="1172" y="842"/>
+         <point x="1148" y="848"/>
+         <point x="1135" y="857"/>
+         <point x="1121" y="872"/>
+         <point x="1118" y="877"/>
+         <point x="1121" y="877"/>
+         <point x="1133" y="877"/>
+         <point x="1199" y="879"/>
+         <point x="1257" y="882"/>
+         <point x="1292" y="882"/>
+         <point x="1323" y="886"/>
+         <point x="1343" y="887"/>
+         <point x="1357" y="887"/>
+         <point x="1363" y="889"/>
+         <point x="1375" y="892"/>
+         <point x="1387" y="894"/>
+         <point x="1416" y="898"/>
+         <point x="1439" y="898"/>
+         <point x="1453" y="899"/>
+         <point x="1460" y="899"/>
+         <point x="1468" y="899"/>
+         <point x="1472" y="899"/>
+         <point x="1478" y="901"/>
+         <point x="1480" y="901"/>
+         <point x="1482" y="901"/>
         </points>
        </action>
       </actions>
      </map>
-     <map audiotrack="-1" name="Big Hilltop Camp" filename="images/Big Hilltop Camp.jpg" _baseID="1003">
+     <map name="Big Hilltop Camp" _baseID="1003" filename="images/Big Hilltop Camp.jpg" audiotrack="-1">
       <actions>
-       <action type="0" a="0" r="0" b="0" g="0"/>
+       <action g="0" a="0" b="0" type="0" r="0"/>
       </actions>
      </map>
-     <map audiotrack="-1" name="Crumbling Facility" filename="images/Crumbling Facility.jpg" _baseID="1004">
+     <map name="Crumbling Facility" _baseID="1004" filename="images/Crumbling Facility.jpg" audiotrack="-1">
       <actions/>
      </map>
-     <map audiotrack="-1" name="Cultist Lair" filename="images/Cultist Lair.jpg" _baseID="1005">
-      <actions/>
+     <map name="Cultist Lair" _baseID="1005" filename="images/Cultist Lair.jpg" audiotrack="-1">
+      <actions>
+       <action erase="1" brushtype="0" radius="200" type="1">
+        <points>
+         <point x="1687" y="112"/>
+         <point x="1672" y="114"/>
+         <point x="1562" y="123"/>
+         <point x="1426" y="129"/>
+         <point x="1390" y="129"/>
+         <point x="1362" y="124"/>
+         <point x="1349" y="123"/>
+         <point x="1330" y="120"/>
+         <point x="1256" y="106"/>
+         <point x="1177" y="91"/>
+         <point x="1120" y="85"/>
+         <point x="1098" y="85"/>
+         <point x="985" y="76"/>
+         <point x="941" y="74"/>
+         <point x="839" y="71"/>
+         <point x="771" y="74"/>
+         <point x="711" y="70"/>
+         <point x="699" y="70"/>
+         <point x="657" y="76"/>
+         <point x="608" y="77"/>
+         <point x="575" y="74"/>
+         <point x="540" y="74"/>
+         <point x="516" y="71"/>
+         <point x="510" y="71"/>
+         <point x="404" y="71"/>
+         <point x="352" y="74"/>
+         <point x="306" y="71"/>
+         <point x="255" y="68"/>
+         <point x="211" y="68"/>
+         <point x="181" y="71"/>
+         <point x="150" y="73"/>
+         <point x="99" y="90"/>
+         <point x="86" y="94"/>
+         <point x="50" y="115"/>
+         <point x="36" y="144"/>
+         <point x="15" y="211"/>
+         <point x="11" y="240"/>
+         <point x="8" y="243"/>
+         <point x="6" y="270"/>
+         <point x="6" y="275"/>
+         <point x="6" y="309"/>
+         <point x="24" y="337"/>
+         <point x="52" y="353"/>
+         <point x="59" y="358"/>
+         <point x="108" y="372"/>
+         <point x="156" y="381"/>
+         <point x="221" y="381"/>
+         <point x="270" y="376"/>
+         <point x="300" y="376"/>
+         <point x="350" y="373"/>
+         <point x="422" y="364"/>
+         <point x="467" y="355"/>
+         <point x="516" y="353"/>
+         <point x="557" y="349"/>
+         <point x="592" y="349"/>
+         <point x="595" y="349"/>
+         <point x="663" y="358"/>
+         <point x="725" y="367"/>
+         <point x="775" y="372"/>
+         <point x="860" y="376"/>
+         <point x="933" y="373"/>
+         <point x="944" y="372"/>
+         <point x="1097" y="375"/>
+         <point x="1167" y="376"/>
+         <point x="1189" y="364"/>
+         <point x="1218" y="369"/>
+         <point x="1311" y="387"/>
+         <point x="1376" y="397"/>
+         <point x="1382" y="399"/>
+         <point x="1444" y="405"/>
+         <point x="1473" y="405"/>
+         <point x="1478" y="405"/>
+         <point x="1575" y="397"/>
+         <point x="1632" y="391"/>
+         <point x="1705" y="381"/>
+         <point x="1740" y="378"/>
+         <point x="1754" y="381"/>
+         <point x="1767" y="396"/>
+         <point x="1782" y="434"/>
+         <point x="1779" y="476"/>
+         <point x="1752" y="525"/>
+         <point x="1735" y="546"/>
+         <point x="1710" y="572"/>
+         <point x="1682" y="607"/>
+         <point x="1661" y="620"/>
+         <point x="1588" y="639"/>
+         <point x="1573" y="643"/>
+         <point x="1390" y="666"/>
+         <point x="1267" y="658"/>
+         <point x="1236" y="655"/>
+         <point x="972" y="654"/>
+         <point x="944" y="654"/>
+         <point x="939" y="652"/>
+         <point x="922" y="648"/>
+         <point x="912" y="648"/>
+         <point x="851" y="652"/>
+         <point x="755" y="649"/>
+         <point x="663" y="648"/>
+         <point x="608" y="649"/>
+         <point x="595" y="649"/>
+         <point x="514" y="652"/>
+         <point x="505" y="655"/>
+         <point x="411" y="664"/>
+         <point x="399" y="664"/>
+         <point x="279" y="669"/>
+         <point x="273" y="669"/>
+         <point x="185" y="663"/>
+         <point x="173" y="663"/>
+         <point x="108" y="658"/>
+         <point x="82" y="658"/>
+         <point x="77" y="658"/>
+         <point x="50" y="658"/>
+         <point x="38" y="658"/>
+         <point x="29" y="661"/>
+         <point x="24" y="661"/>
+         <point x="18" y="675"/>
+         <point x="8" y="739"/>
+         <point x="5" y="780"/>
+         <point x="2" y="824"/>
+         <point x="2" y="857"/>
+         <point x="2" y="860"/>
+         <point x="5" y="874"/>
+         <point x="5" y="875"/>
+         <point x="6" y="880"/>
+         <point x="8" y="881"/>
+         <point x="44" y="887"/>
+         <point x="53" y="889"/>
+         <point x="129" y="890"/>
+         <point x="168" y="890"/>
+         <point x="208" y="890"/>
+         <point x="256" y="881"/>
+         <point x="278" y="875"/>
+         <point x="287" y="874"/>
+         <point x="293" y="871"/>
+         <point x="296" y="869"/>
+         <point x="303" y="866"/>
+         <point x="363" y="851"/>
+         <point x="452" y="833"/>
+         <point x="502" y="827"/>
+         <point x="508" y="827"/>
+         <point x="587" y="821"/>
+         <point x="619" y="819"/>
+         <point x="640" y="821"/>
+         <point x="681" y="827"/>
+         <point x="693" y="828"/>
+         <point x="801" y="851"/>
+         <point x="904" y="868"/>
+         <point x="941" y="875"/>
+         <point x="978" y="881"/>
+         <point x="1045" y="890"/>
+         <point x="1056" y="890"/>
+         <point x="1118" y="887"/>
+         <point x="1124" y="887"/>
+         <point x="1258" y="878"/>
+         <point x="1280" y="877"/>
+         <point x="1299" y="880"/>
+         <point x="1367" y="887"/>
+         <point x="1456" y="893"/>
+         <point x="1526" y="900"/>
+         <point x="1573" y="906"/>
+         <point x="1597" y="909"/>
+         <point x="1600" y="909"/>
+         <point x="1652" y="915"/>
+         <point x="1705" y="916"/>
+         <point x="1775" y="913"/>
+         <point x="1846" y="893"/>
+         <point x="1878" y="883"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="0" radius="200" type="1">
+        <points>
+         <point x="1267" y="1154"/>
+         <point x="1268" y="1154"/>
+         <point x="1270" y="1154"/>
+         <point x="1271" y="1154"/>
+         <point x="1280" y="1157"/>
+         <point x="1285" y="1159"/>
+         <point x="1324" y="1191"/>
+         <point x="1327" y="1192"/>
+         <point x="1350" y="1212"/>
+         <point x="1359" y="1221"/>
+         <point x="1367" y="1226"/>
+         <point x="1373" y="1229"/>
+         <point x="1374" y="1230"/>
+         <point x="1420" y="1248"/>
+         <point x="1455" y="1267"/>
+         <point x="1496" y="1299"/>
+         <point x="1500" y="1303"/>
+         <point x="1538" y="1318"/>
+         <point x="1541" y="1318"/>
+         <point x="1637" y="1256"/>
+         <point x="1646" y="1248"/>
+         <point x="1649" y="1245"/>
+         <point x="1655" y="1244"/>
+         <point x="1660" y="1242"/>
+         <point x="1664" y="1242"/>
+         <point x="1666" y="1241"/>
+         <point x="1669" y="1241"/>
+         <point x="1672" y="1241"/>
+         <point x="1673" y="1241"/>
+         <point x="1675" y="1239"/>
+         <point x="1676" y="1239"/>
+         <point x="1678" y="1242"/>
+         <point x="1682" y="1247"/>
+         <point x="1682" y="1248"/>
+         <point x="1684" y="1255"/>
+        </points>
+       </action>
+       <action erase="0" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="247" y="1127"/>
+         <point x="247" y="1126"/>
+         <point x="247" y="1124"/>
+         <point x="249" y="1110"/>
+         <point x="250" y="1082"/>
+         <point x="250" y="1063"/>
+         <point x="250" y="1056"/>
+         <point x="250" y="1045"/>
+         <point x="252" y="1039"/>
+         <point x="253" y="1033"/>
+         <point x="253" y="1027"/>
+         <point x="255" y="1010"/>
+         <point x="256" y="995"/>
+         <point x="256" y="988"/>
+         <point x="258" y="986"/>
+         <point x="261" y="969"/>
+         <point x="261" y="968"/>
+         <point x="262" y="950"/>
+         <point x="262" y="948"/>
+         <point x="265" y="924"/>
+         <point x="265" y="922"/>
+         <point x="272" y="915"/>
+         <point x="273" y="913"/>
+         <point x="276" y="913"/>
+         <point x="278" y="913"/>
+         <point x="314" y="907"/>
+         <point x="343" y="907"/>
+         <point x="352" y="906"/>
+         <point x="369" y="904"/>
+         <point x="410" y="900"/>
+         <point x="416" y="900"/>
+         <point x="432" y="900"/>
+         <point x="434" y="900"/>
+         <point x="455" y="900"/>
+         <point x="464" y="900"/>
+         <point x="466" y="900"/>
+         <point x="508" y="904"/>
+         <point x="510" y="904"/>
+         <point x="523" y="904"/>
+         <point x="525" y="904"/>
+         <point x="534" y="904"/>
+         <point x="558" y="906"/>
+         <point x="561" y="906"/>
+         <point x="564" y="906"/>
+         <point x="569" y="909"/>
+         <point x="576" y="912"/>
+         <point x="578" y="912"/>
+         <point x="595" y="919"/>
+         <point x="596" y="919"/>
+         <point x="601" y="921"/>
+         <point x="627" y="933"/>
+         <point x="633" y="936"/>
+         <point x="634" y="937"/>
+         <point x="636" y="937"/>
+         <point x="645" y="944"/>
+         <point x="655" y="957"/>
+         <point x="655" y="959"/>
+         <point x="663" y="966"/>
+         <point x="666" y="974"/>
+         <point x="670" y="980"/>
+         <point x="675" y="988"/>
+         <point x="677" y="991"/>
+         <point x="683" y="1001"/>
+         <point x="689" y="1012"/>
+         <point x="695" y="1021"/>
+         <point x="699" y="1029"/>
+         <point x="701" y="1032"/>
+         <point x="704" y="1044"/>
+         <point x="702" y="1044"/>
+         <point x="693" y="1030"/>
+         <point x="686" y="1021"/>
+         <point x="678" y="1018"/>
+         <point x="672" y="1016"/>
+         <point x="610" y="1007"/>
+         <point x="578" y="1001"/>
+         <point x="569" y="1000"/>
+         <point x="534" y="998"/>
+         <point x="531" y="998"/>
+         <point x="490" y="997"/>
+         <point x="488" y="997"/>
+         <point x="461" y="994"/>
+         <point x="444" y="994"/>
+         <point x="443" y="994"/>
+         <point x="423" y="989"/>
+         <point x="416" y="989"/>
+         <point x="411" y="989"/>
+         <point x="410" y="989"/>
+         <point x="397" y="992"/>
+         <point x="384" y="997"/>
+         <point x="381" y="998"/>
+         <point x="379" y="998"/>
+         <point x="372" y="1006"/>
+         <point x="363" y="1018"/>
+         <point x="358" y="1025"/>
+         <point x="355" y="1032"/>
+         <point x="353" y="1036"/>
+         <point x="352" y="1038"/>
+         <point x="341" y="1054"/>
+         <point x="340" y="1057"/>
+         <point x="338" y="1057"/>
+         <point x="338" y="1047"/>
+         <point x="338" y="1045"/>
+         <point x="335" y="1000"/>
+         <point x="335" y="997"/>
+         <point x="334" y="988"/>
+         <point x="334" y="986"/>
+         <point x="334" y="985"/>
+         <point x="334" y="986"/>
+         <point x="334" y="988"/>
+         <point x="334" y="989"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="824" y="1021"/>
+         <point x="824" y="1022"/>
+         <point x="824" y="1024"/>
+         <point x="825" y="1024"/>
+         <point x="830" y="1025"/>
+         <point x="831" y="1027"/>
+         <point x="833" y="1027"/>
+         <point x="837" y="1027"/>
+         <point x="837" y="1029"/>
+         <point x="839" y="1030"/>
+         <point x="842" y="1036"/>
+         <point x="842" y="1038"/>
+         <point x="846" y="1045"/>
+         <point x="850" y="1053"/>
+         <point x="851" y="1056"/>
+         <point x="854" y="1063"/>
+         <point x="854" y="1065"/>
+         <point x="859" y="1069"/>
+         <point x="862" y="1074"/>
+         <point x="862" y="1076"/>
+         <point x="868" y="1083"/>
+         <point x="875" y="1091"/>
+         <point x="878" y="1098"/>
+         <point x="880" y="1101"/>
+         <point x="880" y="1104"/>
+         <point x="889" y="1113"/>
+         <point x="892" y="1118"/>
+         <point x="898" y="1124"/>
+         <point x="900" y="1124"/>
+         <point x="900" y="1126"/>
+         <point x="901" y="1126"/>
+         <point x="901" y="1127"/>
+         <point x="906" y="1130"/>
+         <point x="916" y="1139"/>
+         <point x="919" y="1142"/>
+         <point x="921" y="1144"/>
+         <point x="922" y="1144"/>
+         <point x="924" y="1144"/>
+         <point x="925" y="1145"/>
+         <point x="928" y="1147"/>
+         <point x="930" y="1151"/>
+         <point x="934" y="1154"/>
+         <point x="937" y="1156"/>
+         <point x="939" y="1156"/>
+         <point x="944" y="1156"/>
+         <point x="953" y="1160"/>
+         <point x="956" y="1160"/>
+         <point x="968" y="1165"/>
+         <point x="972" y="1165"/>
+         <point x="977" y="1165"/>
+         <point x="978" y="1165"/>
+         <point x="985" y="1165"/>
+         <point x="986" y="1165"/>
+         <point x="989" y="1165"/>
+         <point x="994" y="1165"/>
+         <point x="1000" y="1165"/>
+         <point x="1003" y="1164"/>
+         <point x="1009" y="1164"/>
+         <point x="1013" y="1162"/>
+         <point x="1025" y="1162"/>
+         <point x="1041" y="1162"/>
+         <point x="1045" y="1162"/>
+         <point x="1047" y="1162"/>
+         <point x="1054" y="1164"/>
+         <point x="1076" y="1164"/>
+         <point x="1095" y="1164"/>
+         <point x="1100" y="1164"/>
+         <point x="1121" y="1164"/>
+         <point x="1139" y="1164"/>
+         <point x="1150" y="1162"/>
+         <point x="1151" y="1160"/>
+         <point x="1153" y="1160"/>
+         <point x="1153" y="1156"/>
+         <point x="1153" y="1154"/>
+         <point x="1142" y="1145"/>
+         <point x="1132" y="1138"/>
+         <point x="1104" y="1126"/>
+         <point x="1072" y="1118"/>
+         <point x="1066" y="1115"/>
+         <point x="1065" y="1115"/>
+         <point x="1039" y="1112"/>
+         <point x="1035" y="1109"/>
+         <point x="1012" y="1106"/>
+         <point x="1012" y="1104"/>
+         <point x="1009" y="1104"/>
+         <point x="1004" y="1101"/>
+         <point x="1003" y="1100"/>
+         <point x="998" y="1097"/>
+         <point x="992" y="1089"/>
+         <point x="983" y="1076"/>
+         <point x="977" y="1066"/>
+         <point x="975" y="1065"/>
+         <point x="975" y="1063"/>
+         <point x="975" y="1060"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="1327" y="1427"/>
+         <point x="1329" y="1427"/>
+         <point x="1330" y="1427"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="1370" y="1426"/>
+         <point x="1371" y="1426"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="1270" y="1288"/>
+         <point x="1270" y="1291"/>
+         <point x="1267" y="1297"/>
+         <point x="1264" y="1299"/>
+         <point x="1259" y="1303"/>
+         <point x="1256" y="1305"/>
+         <point x="1255" y="1306"/>
+         <point x="1253" y="1306"/>
+         <point x="1248" y="1308"/>
+         <point x="1245" y="1308"/>
+         <point x="1244" y="1308"/>
+         <point x="1241" y="1309"/>
+         <point x="1238" y="1309"/>
+         <point x="1233" y="1311"/>
+         <point x="1224" y="1314"/>
+         <point x="1204" y="1314"/>
+         <point x="1150" y="1314"/>
+         <point x="1145" y="1314"/>
+         <point x="1142" y="1314"/>
+         <point x="1142" y="1311"/>
+         <point x="1141" y="1306"/>
+         <point x="1141" y="1302"/>
+         <point x="1141" y="1299"/>
+         <point x="1138" y="1295"/>
+         <point x="1138" y="1294"/>
+         <point x="1136" y="1291"/>
+         <point x="1136" y="1286"/>
+         <point x="1136" y="1277"/>
+         <point x="1135" y="1270"/>
+         <point x="1135" y="1265"/>
+         <point x="1135" y="1264"/>
+         <point x="1135" y="1262"/>
+         <point x="1135" y="1261"/>
+         <point x="1135" y="1259"/>
+         <point x="1135" y="1251"/>
+         <point x="1135" y="1250"/>
+         <point x="1135" y="1245"/>
+         <point x="1135" y="1241"/>
+         <point x="1135" y="1239"/>
+         <point x="1136" y="1230"/>
+         <point x="1139" y="1227"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="705" y="957"/>
+         <point x="707" y="954"/>
+         <point x="707" y="953"/>
+         <point x="705" y="942"/>
+         <point x="704" y="939"/>
+         <point x="683" y="915"/>
+         <point x="678" y="912"/>
+         <point x="628" y="884"/>
+         <point x="608" y="880"/>
+         <point x="601" y="880"/>
+         <point x="587" y="877"/>
+         <point x="583" y="875"/>
+         <point x="554" y="875"/>
+         <point x="531" y="872"/>
+         <point x="514" y="872"/>
+         <point x="511" y="874"/>
+         <point x="495" y="877"/>
+         <point x="472" y="880"/>
+         <point x="469" y="881"/>
+         <point x="429" y="887"/>
+         <point x="413" y="889"/>
+         <point x="391" y="890"/>
+         <point x="376" y="887"/>
+         <point x="340" y="881"/>
+         <point x="334" y="880"/>
+         <point x="329" y="880"/>
+         <point x="314" y="880"/>
+         <point x="305" y="883"/>
+         <point x="288" y="887"/>
+         <point x="287" y="887"/>
+         <point x="282" y="889"/>
+         <point x="273" y="897"/>
+         <point x="258" y="910"/>
+         <point x="256" y="910"/>
+         <point x="243" y="919"/>
+         <point x="243" y="921"/>
+         <point x="237" y="928"/>
+         <point x="229" y="951"/>
+         <point x="228" y="956"/>
+         <point x="209" y="989"/>
+         <point x="209" y="994"/>
+         <point x="208" y="1000"/>
+         <point x="208" y="1001"/>
+         <point x="212" y="1018"/>
+         <point x="214" y="1024"/>
+         <point x="220" y="1033"/>
+         <point x="234" y="1054"/>
+         <point x="235" y="1057"/>
+         <point x="241" y="1068"/>
+         <point x="244" y="1079"/>
+         <point x="246" y="1088"/>
+         <point x="247" y="1101"/>
+         <point x="247" y="1121"/>
+         <point x="247" y="1138"/>
+         <point x="247" y="1159"/>
+         <point x="247" y="1164"/>
+         <point x="247" y="1171"/>
+         <point x="249" y="1179"/>
+         <point x="250" y="1186"/>
+         <point x="253" y="1192"/>
+         <point x="256" y="1197"/>
+         <point x="256" y="1200"/>
+         <point x="262" y="1211"/>
+         <point x="264" y="1215"/>
+         <point x="267" y="1221"/>
+         <point x="267" y="1224"/>
+         <point x="276" y="1239"/>
+         <point x="276" y="1241"/>
+         <point x="279" y="1245"/>
+         <point x="279" y="1247"/>
+         <point x="284" y="1250"/>
+         <point x="285" y="1255"/>
+         <point x="287" y="1256"/>
+         <point x="290" y="1262"/>
+         <point x="291" y="1262"/>
+         <point x="291" y="1264"/>
+         <point x="293" y="1264"/>
+         <point x="293" y="1265"/>
+         <point x="294" y="1268"/>
+         <point x="296" y="1270"/>
+         <point x="296" y="1271"/>
+         <point x="297" y="1271"/>
+         <point x="300" y="1273"/>
+         <point x="306" y="1279"/>
+         <point x="312" y="1285"/>
+         <point x="316" y="1288"/>
+         <point x="317" y="1288"/>
+         <point x="319" y="1289"/>
+         <point x="320" y="1289"/>
+         <point x="322" y="1289"/>
+         <point x="323" y="1289"/>
+         <point x="325" y="1289"/>
+         <point x="331" y="1289"/>
+         <point x="334" y="1289"/>
+         <point x="338" y="1289"/>
+         <point x="340" y="1289"/>
+         <point x="341" y="1289"/>
+         <point x="343" y="1289"/>
+         <point x="344" y="1289"/>
+         <point x="349" y="1289"/>
+         <point x="355" y="1291"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="323" y="1305"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="408" y="1306"/>
+         <point x="410" y="1306"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="491" y="1311"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="593" y="1308"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="634" y="1302"/>
+         <point x="634" y="1300"/>
+         <point x="634" y="1297"/>
+         <point x="634" y="1294"/>
+         <point x="634" y="1291"/>
+         <point x="634" y="1289"/>
+         <point x="634" y="1288"/>
+         <point x="634" y="1286"/>
+         <point x="636" y="1286"/>
+         <point x="637" y="1283"/>
+         <point x="639" y="1282"/>
+         <point x="640" y="1276"/>
+         <point x="642" y="1276"/>
+         <point x="643" y="1271"/>
+         <point x="645" y="1268"/>
+         <point x="646" y="1265"/>
+         <point x="649" y="1264"/>
+         <point x="649" y="1262"/>
+         <point x="652" y="1261"/>
+         <point x="657" y="1255"/>
+         <point x="660" y="1251"/>
+         <point x="661" y="1250"/>
+         <point x="663" y="1248"/>
+         <point x="664" y="1245"/>
+         <point x="666" y="1245"/>
+         <point x="666" y="1241"/>
+         <point x="670" y="1239"/>
+         <point x="670" y="1238"/>
+         <point x="672" y="1236"/>
+         <point x="674" y="1232"/>
+         <point x="677" y="1229"/>
+         <point x="680" y="1229"/>
+         <point x="680" y="1226"/>
+         <point x="681" y="1226"/>
+         <point x="684" y="1221"/>
+         <point x="687" y="1218"/>
+         <point x="689" y="1217"/>
+         <point x="689" y="1215"/>
+         <point x="690" y="1214"/>
+         <point x="692" y="1214"/>
+         <point x="693" y="1212"/>
+         <point x="693" y="1209"/>
+         <point x="695" y="1209"/>
+         <point x="696" y="1206"/>
+         <point x="698" y="1203"/>
+         <point x="699" y="1200"/>
+         <point x="699" y="1198"/>
+         <point x="701" y="1198"/>
+         <point x="702" y="1198"/>
+         <point x="702" y="1197"/>
+         <point x="702" y="1195"/>
+         <point x="702" y="1185"/>
+         <point x="704" y="1173"/>
+         <point x="705" y="1170"/>
+         <point x="707" y="1164"/>
+         <point x="707" y="1160"/>
+         <point x="707" y="1156"/>
+         <point x="707" y="1150"/>
+         <point x="707" y="1147"/>
+         <point x="708" y="1135"/>
+         <point x="708" y="1133"/>
+         <point x="708" y="1130"/>
+         <point x="708" y="1129"/>
+         <point x="710" y="1113"/>
+         <point x="711" y="1106"/>
+         <point x="711" y="1104"/>
+         <point x="711" y="1079"/>
+         <point x="711" y="1068"/>
+         <point x="710" y="1056"/>
+         <point x="710" y="1053"/>
+         <point x="710" y="1019"/>
+         <point x="710" y="1016"/>
+         <point x="710" y="983"/>
+         <point x="710" y="978"/>
+         <point x="708" y="978"/>
+         <point x="707" y="975"/>
+         <point x="702" y="971"/>
+         <point x="695" y="968"/>
+         <point x="681" y="966"/>
+         <point x="639" y="963"/>
+         <point x="633" y="962"/>
+         <point x="552" y="962"/>
+         <point x="546" y="962"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="546" y="962"/>
+         <point x="534" y="962"/>
+         <point x="449" y="972"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="373" y="972"/>
+         <point x="372" y="972"/>
+         <point x="367" y="977"/>
+         <point x="360" y="978"/>
+         <point x="352" y="985"/>
+         <point x="347" y="992"/>
+         <point x="341" y="1006"/>
+         <point x="338" y="1013"/>
+         <point x="338" y="1018"/>
+         <point x="337" y="1025"/>
+         <point x="337" y="1035"/>
+         <point x="335" y="1038"/>
+         <point x="335" y="1039"/>
+         <point x="335" y="1045"/>
+         <point x="335" y="1054"/>
+         <point x="335" y="1062"/>
+         <point x="335" y="1071"/>
+         <point x="335" y="1079"/>
+         <point x="335" y="1082"/>
+         <point x="337" y="1089"/>
+         <point x="340" y="1101"/>
+         <point x="341" y="1103"/>
+         <point x="347" y="1115"/>
+         <point x="355" y="1127"/>
+         <point x="358" y="1133"/>
+         <point x="367" y="1142"/>
+         <point x="372" y="1151"/>
+         <point x="373" y="1151"/>
+         <point x="378" y="1160"/>
+         <point x="382" y="1164"/>
+         <point x="382" y="1165"/>
+         <point x="385" y="1170"/>
+         <point x="387" y="1173"/>
+         <point x="388" y="1179"/>
+         <point x="391" y="1183"/>
+         <point x="393" y="1186"/>
+         <point x="394" y="1192"/>
+         <point x="399" y="1197"/>
+         <point x="402" y="1198"/>
+         <point x="405" y="1204"/>
+         <point x="408" y="1208"/>
+         <point x="417" y="1214"/>
+         <point x="434" y="1220"/>
+         <point x="441" y="1223"/>
+         <point x="446" y="1224"/>
+         <point x="449" y="1226"/>
+         <point x="475" y="1232"/>
+         <point x="484" y="1233"/>
+         <point x="491" y="1235"/>
+         <point x="505" y="1236"/>
+         <point x="511" y="1236"/>
+         <point x="514" y="1236"/>
+         <point x="526" y="1233"/>
+         <point x="543" y="1232"/>
+         <point x="552" y="1229"/>
+         <point x="557" y="1227"/>
+         <point x="558" y="1226"/>
+         <point x="584" y="1215"/>
+         <point x="592" y="1206"/>
+         <point x="598" y="1201"/>
+         <point x="613" y="1197"/>
+         <point x="613" y="1195"/>
+         <point x="617" y="1185"/>
+         <point x="623" y="1171"/>
+         <point x="623" y="1167"/>
+         <point x="625" y="1151"/>
+         <point x="625" y="1135"/>
+         <point x="625" y="1126"/>
+         <point x="625" y="1109"/>
+         <point x="622" y="1098"/>
+         <point x="622" y="1097"/>
+         <point x="616" y="1069"/>
+         <point x="610" y="1062"/>
+         <point x="602" y="1053"/>
+         <point x="601" y="1050"/>
+         <point x="595" y="1044"/>
+         <point x="587" y="1042"/>
+         <point x="575" y="1041"/>
+         <point x="569" y="1041"/>
+         <point x="557" y="1042"/>
+         <point x="543" y="1045"/>
+         <point x="532" y="1048"/>
+         <point x="520" y="1050"/>
+         <point x="519" y="1050"/>
+         <point x="487" y="1051"/>
+         <point x="473" y="1048"/>
+         <point x="461" y="1048"/>
+         <point x="448" y="1047"/>
+         <point x="443" y="1047"/>
+         <point x="441" y="1045"/>
+         <point x="435" y="1050"/>
+         <point x="435" y="1051"/>
+         <point x="431" y="1057"/>
+         <point x="431" y="1060"/>
+         <point x="429" y="1066"/>
+         <point x="429" y="1072"/>
+         <point x="428" y="1076"/>
+         <point x="428" y="1079"/>
+         <point x="444" y="1101"/>
+         <point x="457" y="1113"/>
+         <point x="466" y="1124"/>
+         <point x="478" y="1130"/>
+         <point x="491" y="1139"/>
+         <point x="493" y="1141"/>
+         <point x="519" y="1156"/>
+         <point x="542" y="1159"/>
+         <point x="546" y="1159"/>
+         <point x="561" y="1150"/>
+         <point x="572" y="1138"/>
+         <point x="572" y="1127"/>
+         <point x="572" y="1126"/>
+         <point x="555" y="1118"/>
+         <point x="552" y="1118"/>
+         <point x="552" y="1116"/>
+         <point x="551" y="1116"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="490" y="1384"/>
+         <point x="490" y="1385"/>
+         <point x="490" y="1387"/>
+         <point x="490" y="1389"/>
+         <point x="490" y="1394"/>
+         <point x="490" y="1395"/>
+         <point x="491" y="1401"/>
+         <point x="491" y="1403"/>
+         <point x="491" y="1404"/>
+         <point x="491" y="1409"/>
+         <point x="492" y="1410"/>
+         <point x="492" y="1417"/>
+         <point x="492" y="1419"/>
+         <point x="492" y="1420"/>
+         <point x="492" y="1429"/>
+         <point x="492" y="1435"/>
+         <point x="491" y="1439"/>
+         <point x="491" y="1440"/>
+         <point x="490" y="1445"/>
+         <point x="490" y="1447"/>
+         <point x="490" y="1449"/>
+         <point x="490" y="1452"/>
+         <point x="490" y="1454"/>
+         <point x="490" y="1456"/>
+         <point x="490" y="1460"/>
+         <point x="490" y="1464"/>
+         <point x="490" y="1466"/>
+         <point x="490" y="1470"/>
+         <point x="490" y="1477"/>
+         <point x="490" y="1484"/>
+         <point x="490" y="1489"/>
+         <point x="489" y="1494"/>
+         <point x="489" y="1496"/>
+         <point x="489" y="1499"/>
+         <point x="489" y="1500"/>
+         <point x="489" y="1502"/>
+         <point x="489" y="1503"/>
+         <point x="489" y="1510"/>
+         <point x="489" y="1511"/>
+         <point x="489" y="1514"/>
+         <point x="489" y="1515"/>
+         <point x="489" y="1517"/>
+         <point x="489" y="1521"/>
+         <point x="489" y="1527"/>
+         <point x="489" y="1531"/>
+         <point x="489" y="1532"/>
+         <point x="489" y="1533"/>
+         <point x="489" y="1535"/>
+         <point x="489" y="1538"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="438" y="1460"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="554" y="1620"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="552" y="1686"/>
+         <point x="552" y="1687"/>
+         <point x="552" y="1688"/>
+         <point x="552" y="1691"/>
+         <point x="553" y="1693"/>
+         <point x="553" y="1695"/>
+         <point x="553" y="1696"/>
+         <point x="553" y="1700"/>
+         <point x="553" y="1704"/>
+         <point x="553" y="1709"/>
+         <point x="553" y="1710"/>
+         <point x="553" y="1716"/>
+         <point x="553" y="1717"/>
+         <point x="553" y="1725"/>
+         <point x="553" y="1726"/>
+         <point x="552" y="1730"/>
+         <point x="552" y="1735"/>
+         <point x="552" y="1736"/>
+         <point x="552" y="1737"/>
+         <point x="552" y="1738"/>
+         <point x="552" y="1739"/>
+         <point x="552" y="1742"/>
+         <point x="552" y="1743"/>
+         <point x="552" y="1745"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="486" y="1823"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="427" y="1740"/>
+         <point x="427" y="1741"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="420" y="1671"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="421" y="1617"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="498" y="1626"/>
+         <point x="499" y="1626"/>
+         <point x="499" y="1627"/>
+         <point x="499" y="1629"/>
+         <point x="499" y="1630"/>
+         <point x="497" y="1639"/>
+         <point x="496" y="1641"/>
+         <point x="494" y="1662"/>
+         <point x="494" y="1664"/>
+         <point x="491" y="1683"/>
+         <point x="491" y="1692"/>
+         <point x="491" y="1702"/>
+         <point x="491" y="1709"/>
+         <point x="491" y="1716"/>
+         <point x="491" y="1717"/>
+         <point x="491" y="1722"/>
+         <point x="491" y="1723"/>
+         <point x="491" y="1724"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="649" y="1691"/>
+         <point x="650" y="1691"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="697" y="1691"/>
+         <point x="698" y="1691"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="785" y="1689"/>
+         <point x="785" y="1688"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="864" y="1688"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="935" y="1692"/>
+         <point x="935" y="1691"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="1002" y="1688"/>
+         <point x="1003" y="1688"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="1015" y="1622"/>
+        </points>
+       </action>
+       <action erase="1" brushtype="1" radius="50" type="1">
+        <points>
+         <point x="1019" y="1777"/>
+         <point x="1019" y="1776"/>
+         <point x="1020" y="1776"/>
+         <point x="1022" y="1776"/>
+         <point x="1024" y="1777"/>
+         <point x="1028" y="1778"/>
+         <point x="1030" y="1778"/>
+         <point x="1030" y="1778"/>
+         <point x="1032" y="1776"/>
+         <point x="1034" y="1775"/>
+         <point x="1038" y="1771"/>
+         <point x="1038" y="1769"/>
+         <point x="1046" y="1764"/>
+         <point x="1046" y="1764"/>
+         <point x="1049" y="1760"/>
+         <point x="1051" y="1759"/>
+         <point x="1052" y="1759"/>
+         <point x="1056" y="1754"/>
+         <point x="1059" y="1749"/>
+         <point x="1063" y="1740"/>
+         <point x="1065" y="1737"/>
+         <point x="1065" y="1734"/>
+         <point x="1067" y="1726"/>
+         <point x="1069" y="1718"/>
+         <point x="1069" y="1711"/>
+         <point x="1069" y="1702"/>
+         <point x="1069" y="1697"/>
+         <point x="1068" y="1692"/>
+         <point x="1066" y="1684"/>
+         <point x="1064" y="1678"/>
+         <point x="1062" y="1672"/>
+         <point x="1062" y="1667"/>
+         <point x="1060" y="1662"/>
+         <point x="1057" y="1656"/>
+         <point x="1055" y="1654"/>
+         <point x="1054" y="1649"/>
+         <point x="1053" y="1646"/>
+         <point x="1052" y="1644"/>
+         <point x="1047" y="1638"/>
+         <point x="1046" y="1634"/>
+         <point x="1046" y="1633"/>
+         <point x="1043" y="1632"/>
+         <point x="1040" y="1630"/>
+         <point x="1040" y="1629"/>
+         <point x="1038" y="1629"/>
+         <point x="1035" y="1626"/>
+         <point x="1030" y="1623"/>
+         <point x="1026" y="1620"/>
+         <point x="1021" y="1618"/>
+         <point x="1020" y="1618"/>
+         <point x="1019" y="1617"/>
+         <point x="1019" y="1616"/>
+         <point x="1019" y="1615"/>
+         <point x="1018" y="1615"/>
+        </points>
+       </action>
+      </actions>
      </map>
-     <map audiotrack="-1" name="Forked Road" filename="images/Forked Road.jpg" _baseID="1006">
+     <map name="Forked Road" _baseID="1006" filename="images/Forked Road.jpg" audiotrack="-1">
       <actions/>
      </map>
     </maps>
    </adventure>
   </adventures>
   <settings>
-   <map audiotrack="-1" name="World View" filename="images/Lost Library 1.jpg" _baseID="1011">
+   <map name="World View" _baseID="1011" filename="images/Lost Library 1.jpg" audiotrack="-1">
     <actions/>
    </map>
-   <map audiotrack="-1" name="Sankt Stefs" filename="images/Forked Road.jpg" _baseID="1012">
+   <map name="Sankt Stefs" _baseID="1012" filename="images/Forked Road.jpg" audiotrack="-1">
     <actions/>
    </map>
   </settings>
   <npcs>
-   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="10" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Elm D'Zurth" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1013" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
+   <combatant proficiencies="" class2="N/A" hair="" intelligenceSave="0" stealth="0" constitution="10" player="N/A" dexteritySave="0" intelligence="10" experience="0" notes="" equipment="" perception="0" active="1" background="N/A" type="1" alignment="" copper="0" class3="N/A" acrobatics="0" race="" gold="0" wisdom="10" speed="30" constitutionSave="0" charisma="10" investigation="0" deception="0" dexterity="10" weight="" survival="0" performance="0" arcana="0" subrace="N/A" level2="0" religion="0" height="" strengthSave="0" hitDice="1d0" nature="0" history="0" wisdomSave="0" level3="0" class="" icon="" dndBeyondID="-1" sleightOfHand="0" sex="" spells="" animalHandling="0" persuasion="0" _baseID="1013" eyes="" medicine="0" silver="0" hitPoints="1" armorClass="10" size="medium" charismaSave="0" age="" intimidation="0" insight="0" athletics="0" platinum="0" name="Elm D'Zurth" level="1" strength="10">
     <attacks/>
    </combatant>
-   <combatant gold="0" copper="0" hitDice="1d0" class2="N/A" proficiencies="" intelligence="10" history="0" type="1" strength="10" platinum="0" level="1" dexterity="10" hitPoints="1" constitutionSave="0" experience="0" armorClass="10" spells="" constitution="10" persuasion="0" athletics="0" level2="0" charisma="10" nature="0" wisdomSave="0" animalHandling="0" icon="" investigation="0" height="" perception="0" intelligenceSave="0" hair="" dndBeyondID="-1" dexteritySave="0" medicine="0" performance="0" name="Eva Devengelo" deception="0" player="N/A" size="medium" acrobatics="0" notes="" eyes="" background="N/A" survival="0" strengthSave="0" charismaSave="0" religion="0" class3="N/A" alignment="" age="" weight="" level3="0" equipment="" subrace="N/A" sex="" speed="30" wisdom="10" intimidation="0" _baseID="1014" sleightOfHand="0" stealth="0" insight="0" arcana="0" active="1" race="" class="" silver="0">
+   <combatant proficiencies="" class2="N/A" hair="" intelligenceSave="0" stealth="0" constitution="10" player="N/A" dexteritySave="0" intelligence="10" experience="0" notes="" equipment="" perception="0" active="1" background="N/A" type="1" alignment="" copper="0" class3="N/A" acrobatics="0" race="" gold="0" wisdom="10" speed="30" constitutionSave="0" charisma="10" investigation="0" deception="0" dexterity="10" weight="" survival="0" performance="0" arcana="0" subrace="N/A" level2="0" religion="0" height="" strengthSave="0" hitDice="1d0" nature="0" history="0" wisdomSave="0" level3="0" class="" icon="" dndBeyondID="-1" sleightOfHand="0" sex="" spells="" animalHandling="0" persuasion="0" _baseID="1014" eyes="" medicine="0" silver="0" hitPoints="1" armorClass="10" size="medium" charismaSave="0" age="" intimidation="0" insight="0" athletics="0" platinum="0" name="Eva Devengelo" level="1" strength="10">
     <attacks/>
    </combatant>
   </npcs>
