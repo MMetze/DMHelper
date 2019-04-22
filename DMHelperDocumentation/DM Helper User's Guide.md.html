@@ -600,10 +600,26 @@ pre.editor-colors .fold-marker:after {
 
 <p style="page-break-after: always;">&nbsp;</p>
 
+<p><font size="5"><b>Table of Contents</b></font>
+</p>
+<ol>
+<li><a href="#overview">Overview</a>   </li>
+<li><a href="#download-and-installation">Download and Installation</a>   </li>
+<li><a href="#dm-helper-main-screen">DM Helper Main Screen</a>   </li>
+<li><a href="#characters-and-npcs">Characters and NPCs</a>   </li>
+<li><a href="#maps">Maps</a>   </li>
+<li><a href="#battle-encounters">Battle Encounters</a><br> 6.1. <a href="#edit-combatants">Edit Combatants</a><br> 6.2. <a href="#battle-dialog">Battle Dialog</a>   </li>
+<li><a href="#scrolling-text-encounters">Scrolling Text Encounters</a>   </li>
+<li><a href="#bestiary">Bestiary</a>   </li>
+<li><a href="#options">Options</a>   </li>
+<li><a href="#references">References</a>   </li>
+</ol>
+
+<h2 id="overview">Overview</h2>
 <p>The DM Helper will act as your in-game assistance, taking care of the administrative tasks and allowing you to focus on your players, the narrative and the fun!</p>
 <p>Key Features include:</p>
 <ul>
-<li>Presentation of all tool content in a Player's Window. This can be shown to players on an external monitor or shared via streaming tools for either face-to-face or ongoing games</li>
+<li>Presentation of all tool content in a <em>Player's Window</em>. This can be shown to players on an external monitor or shared via streaming tools for either face-to-face or ongoing games</li>
 <li>Full battle support including a full battle map, initiative and hit point tracking, area effects, mass saving throws/damage</li>
 <li>Map visualization, in or out of battles, including fog of war, zooming and an in-map pointer for highlighting items</li>
 <li>A detailed bestiary, pre-filled with all open-source SRD monsters</li>
@@ -613,10 +629,12 @@ pre.editor-colors .fold-marker:after {
 <li>A campaign clock for tracking time and date throughout adventures</li>
 <li>Animation of scrolling text over a background for easy cut-scene creation</li>
 </ul>
-<h2 id="download-and-install">Download and install</h2>
+<h2 id="download-and-installation">Download and Installation</h2>
 <p>Get the latest copy of DMHelper from our <a href="https://dm-helper.itch.io/dm-helper">itch.io</a> page: <a href="https://dm-helper.itch.io/dm-helper">https://dm-helper.itch.io/dm-helper</a><br>
 Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and character portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br></p>
 <p>There are no more installation steps neccessary. For a further introduction, see our Getting Started Guide.</p>
+<p style="page-break-after: always;">&nbsp;</p>
+
 <h2 id="dm-helper-main-screen">DM Helper Main Screen</h2>
 <p><img alt="Main Menu" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Main Menu Screenshot.png">  </p>
 <h4 id="1-campaign-title">1.    Campaign Title</h4>
@@ -741,6 +759,8 @@ If an audio track is selected, it will be automatically played when the battle i
 <p><img alt="Quickref Player Screenshot" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Quickref Screenshot - Player.png">  </p>
 <p>The DM Helper provides rudimentary support for playing audio files. Audio tracks can be added to a campaign in the <em>Campaign Tree</em> and started either manually by double clicking them directly in the <em>Campaign Tree</em> or automatically by connecting them to a <em>Map</em> or <em>Encounter</em>.</p>
 <p>This tab can be used to control the track playback, starting or pausing the track as well as setting the playback volume.</p>
+<p style="page-break-after: always;">&nbsp;</p>
+
 <h2 id="characters-and-npcs">Characters and NPCs</h2>
 <p>Characters and NPCs are presented and edited in the same manner in the DM Helper. There are many fully developed character creation and management tools available. The DM Helper does not aim to replace those - we also think many of them are pretty awesome. Instead, our focus is as always to make the job of the DM easier at the table. Our reduced character/NPC sheet was designed with that goal in mind.</p>
 <p><img alt="Character" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Character Screenshot.png"></p>
@@ -748,6 +768,36 @@ If an audio track is selected, it will be automatically played when the battle i
 <p>None of the information is mandatory, so you can safely ignore any parts you don't need. For example, if you don't intend to track player hit points yourself, any positive number of hit points (default is 1) is sufficient to ensure the DM Helper knows the character is alive.</p>
 <p>The speed entry, in feet, is used in the a <em>Battle</em> to limit the movement of that creature if that option is activated.</p>
 <p>The character icon can be changed by clicking on it and selecting an image file. Clicking on the <em>Publish</em> button will show the icon in full size in the <em>Player's Window</em>.</p>
+<p style="page-break-after: always;">&nbsp;</p>
+
+<h2 id="maps">Maps</h2>
+<p>Maps in the DM Helper can be used either directly for showing to the players or as a backdrop for a <em>Battle Encounter</em>. All maps support fog of war. In the main window, the fog of war is shown as a translucent layer over the map and in the <em>Player's Window</em>, it is an opaque black layer.</p>
+<p><img alt="Map Screenshot" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Map Screenshot.png"></p>
+<h5 id="map-controls">Map Controls</h5>
+<p>Various controls are available for handling the <em>Map</em>:</p>
+<ul>
+<li>The <em>Erase</em> button <img alt="Erase" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_fowerase.png"> allows you to toggle between erasing and drawing fog of war in the <em>Map Window</em>.</li>
+<li>The <em>Circular Brush</em> <img alt="Circular" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\circle.png"> and <em>Square Brush</em> <img alt="Square" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\square.png"> buttons allow you to shape of the brush for erasing or drawing fog of war.</li>
+<li>The size of the brush can be set in the spin box between 1 and 999 pixels.</li>
+<li>The <em>Zoom In</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomin.png"> zooms in on the <em>Battle Window</em></li>
+<li>The <em>Zoom Out</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomout.png"> zooms out on the <em>Battle Window</em></li>
+<li>The <em>Zoom 100%</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomone.png"> resets the zoom of the <em>Battle Window</em> to a 1:1 ratio of the map.</li>
+<li>The <em>Map Fit Zoom</em> button <img alt="Reload" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomfit.png"> sets the zoom of the <em>Battle Window</em> so that the whole map is visible.</li>
+<li>The <em>Rubber Band Zoom</em> button <img alt="Rubber Band" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoomselect.png"> lets you drag a rubber band across the map to zoom on a specific area.</li>
+<li>An audio track from the list of tracks added to the active campaign can be selected here. This audio track will be automatically played if the battle is started or opened.</li>
+<li>The fog of war can be completely cleared or reset with the dedicated buttons.</li>
+<li>The <em>Publish Visible</em> <img alt="Rubber Band" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_shrink.png"> and <em>Publish Zoom</em> <img alt="Rubber Band" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\icon_zoom.png"> buttons control what parts of the map are copied to the <em>Player's Window</em> when the <em>Publish</em> button is clicked. <br><ul>
+<li> If neither button is selected, the entire map is published.
+</li><li> If the <em>Publish Visible</em> button is pressed, all visible portions of the map are published.
+</li><li> If the <em>Publish Zoom</em> is pressed, the part of the map currently visible in the DM Helper main window is published.
+</li></ul></li>
+<li>The <em>Publish</em> button publishes the map with the current fog of war status to the <em>Player's Window</em>.</li>
+</ul>
+<h5 id="player-s-window">Player's Window</h5>
+<p>In the <em>Player's Window</em>, the fog of war is an opaque black layer and the map can be zoomed to only show visible portions of the map.</p>
+<p><img alt="Map Publish Screenshot" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Map Publish Screenshot.png"></p>
+<p style="page-break-after: always;">&nbsp;</p>
+
 <h2 id="battle-encounters">Battle Encounters</h2>
 <p>Battle Encounters allow you to prepare and run battles or other turn-based encounters.</p>
 <p><img alt="Battle Encounter" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Battle Encounter Screenshot.png"></p>
@@ -868,6 +918,8 @@ The countdown timer, shown optionally in the <em>Player's Window</em> is also sh
 <li>Hidden creatures (the two goblins) are not shown</li>
 <li>The currently active and on deck creatures as well as the countdown timer are show to the right of the battle map along, as long as these options are selected in the DM Helper <em>Options Dialog</em>.</li>
 </ul>
+<p style="page-break-after: always;">&nbsp;</p>
+
 <h2 id="scrolling-text-encounters">Scrolling Text Encounters</h2>
 <p>Scrolling text encounters are indended to be used as introductions or cut scenes in between other role-playing action.</p>
 <p><img alt="Scrolling Text Encounter" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Scrolling Encounter Screenshot.png"></p>
@@ -883,8 +935,8 @@ Format changes are applied directly to both the text in the edit box and the pre
 <p>Finally, with the button <em>Animate</em>, a new window is opened containing the animation screen for the scrolling text. This is currently a separate window from the <em>Player's Window</em> and will need to be shared with them separately.</p>
 <p><img alt="Scrolling Text Encounter Animation" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Scrolling Encounter Animation Screenshot.png"></p>
 <p>The scrolling text animation screen has two controls to play/pause and rewind the animation. Closing the window also stops the animation.</p>
-<h2 id="maps">Maps</h2>
-<p>TBD</p>
+<p style="page-break-after: always;">&nbsp;</p>
+
 <h2 id="bestiary">Bestiary</h2>
 <p>The <em>Bestiary</em> contains the full list of creatures and monsters available in the DM Helper. In this dialog, you can browse through the existing list, edit individual entries or add new creatures.</p>
 <p><img alt="Bestiary Dialog" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Bestiary Screenshot.png"></p>
@@ -934,6 +986,8 @@ Format changes are applied directly to both the text in the edit box and the pre
 <p>In the Battle section, you can set options for the visualization of a Battle in the <em>Player's Window</em>. <br>
 If the On Deck is selected, the icon of the currently active creature and the next active creature are shown next to the battle map. This is useful to show players when their characters are next in the initiative order. <br>
 If the Countdown Timer is selected, a visual timer is shown in the <em>Player's Window</em> which counts down for the number of seconds entered in the options dialog. This can be useful if you would like to put a time limit on players' decision-making time on their turn in combat.</p>
+<p style="page-break-after: always;">&nbsp;</p>
+
 <h2 id="references">References</h2>
 <p>Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!</p>
 <p><strong>Background images and character images donated by: <br></strong>

@@ -15,10 +15,29 @@
 
 <p style="page-break-after: always;">&nbsp;</p>
 
+<font size="5"><b>Table of Contents</b></font>
+<!-- MDTOC maxdepth:2 firsth1:0 numbering:1 flatten:0 bullets:0 updateOnSave:1 -->
+
+1. [Overview](#overview)   
+2. [Download and Installation](#download-and-installation)   
+3. [DM Helper Main Screen](#dm-helper-main-screen)   
+4. [Characters and NPCs](#characters-and-npcs)   
+5. [Maps](#maps)   
+6. [Battle Encounters](#battle-encounters)   
+&emsp;6.1. [Edit Combatants](#edit-combatants)   
+&emsp;6.2. [Battle Dialog](#battle-dialog)   
+7. [Scrolling Text Encounters](#scrolling-text-encounters)   
+8. [Bestiary](#bestiary)   
+9. [Options](#options)   
+10. [References](#references)   
+
+<!-- /MDTOC -->
+
+## Overview
 The DM Helper will act as your in-game assistance, taking care of the administrative tasks and allowing you to focus on your players, the narrative and the fun!
 
 Key Features include:
-* Presentation of all tool content in a Player's Window. This can be shown to players on an external monitor or shared via streaming tools for either face-to-face or ongoing games
+* Presentation of all tool content in a *Player's Window*. This can be shown to players on an external monitor or shared via streaming tools for either face-to-face or ongoing games
 * Full battle support including a full battle map, initiative and hit point tracking, area effects, mass saving throws/damage
 * Map visualization, in or out of battles, including fog of war, zooming and an in-map pointer for highlighting items
 * A detailed bestiary, pre-filled with all open-source SRD monsters
@@ -28,11 +47,13 @@ Key Features include:
 * A campaign clock for tracking time and date throughout adventures
 * Animation of scrolling text over a background for easy cut-scene creation
 
-## Download and install
+## Download and Installation
 Get the latest copy of DMHelper from our [itch.io](https://dm-helper.itch.io/dm-helper) page: https://dm-helper.itch.io/dm-helper<br />
 Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and character portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br />
 
 There are no more installation steps neccessary. For a further introduction, see our Getting Started Guide.
+
+<p style="page-break-after: always;">&nbsp;</p>
 
 ## DM Helper Main Screen
 ![Main Menu](Images/Main Menu Screenshot.png)  
@@ -234,6 +255,8 @@ The DM Helper provides rudimentary support for playing audio files. Audio tracks
 
 This tab can be used to control the track playback, starting or pausing the track as well as setting the playback volume.
 
+<p style="page-break-after: always;">&nbsp;</p>
+
 ## Characters and NPCs
 Characters and NPCs are presented and edited in the same manner in the DM Helper. There are many fully developed character creation and management tools available. The DM Helper does not aim to replace those - we also think many of them are pretty awesome. Instead, our focus is as always to make the job of the DM easier at the table. Our reduced character/NPC sheet was designed with that goal in mind.
 
@@ -246,6 +269,8 @@ None of the information is mandatory, so you can safely ignore any parts you don
 The speed entry, in feet, is used in the a *Battle* to limit the movement of that creature if that option is activated.
 
 The character icon can be changed by clicking on it and selecting an image file. Clicking on the *Publish* button will show the icon in full size in the *Player's Window*.
+
+<p style="page-break-after: always;">&nbsp;</p>
 
 ## Maps
 
@@ -279,6 +304,7 @@ In the *Player's Window*, the fog of war is an opaque black layer and the map ca
 
 ![Map Publish Screenshot](Images/Map Publish Screenshot.png)
 
+<p style="page-break-after: always;">&nbsp;</p>
 
 ## Battle Encounters
 
@@ -437,6 +463,8 @@ In the *Player's Window*, you can see:
 * Hidden creatures (the two goblins) are not shown
 * The currently active and on deck creatures as well as the countdown timer are show to the right of the battle map along, as long as these options are selected in the DM Helper *Options Dialog*.
 
+<p style="page-break-after: always;">&nbsp;</p>
+
 ## Scrolling Text Encounters
 
 Scrolling text encounters are indended to be used as introductions or cut scenes in between other role-playing action.
@@ -456,6 +484,8 @@ Finally, with the button *Animate*, a new window is opened containing the animat
 ![Scrolling Text Encounter Animation](Images/Scrolling Encounter Animation Screenshot.png)
 
 The scrolling text animation screen has two controls to play/pause and rewind the animation. Closing the window also stops the animation.
+
+<p style="page-break-after: always;">&nbsp;</p>
 
 ## Bestiary
 The *Bestiary* contains the full list of creatures and monsters available in the DM Helper. In this dialog, you can browse through the existing list, edit individual entries or add new creatures.
@@ -517,6 +547,8 @@ Several visual animations are included with the *Quick Reference* buttons as opt
 In the Battle section, you can set options for the visualization of a Battle in the *Player's Window*. <br/>
 If the On Deck is selected, the icon of the currently active creature and the next active creature are shown next to the battle map. This is useful to show players when their characters are next in the initiative order. <br/>
 If the Countdown Timer is selected, a visual timer is shown in the *Player's Window* which counts down for the number of seconds entered in the options dialog. This can be useful if you would like to put a time limit on players' decision-making time on their turn in combat.
+
+<p style="page-break-after: always;">&nbsp;</p>
 
 ## References
 Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!
