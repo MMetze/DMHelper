@@ -4,6 +4,10 @@ Add mouse over tips for all icon-based buttons, especially in the map and battle
 Battle dialog separate measuring stick from map controls
 DiceRollDialogCombatants with entry for damage and direct application of damage to all combatants, based on die roll results.
 
+Battles:
+    Give individuals a specific background or highlight color
+    Allow events to set the transparency between 0 and 100
+
 Undo functionality in the battles
 
 NPC spell slot tracking?

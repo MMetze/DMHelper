@@ -31,6 +31,10 @@ public slots:
     void stateChanged(AudioPlayer::State state);
     void setVolume(int volume);
 
+protected:
+    // from QObject
+    virtual bool eventFilter(QObject *obj, QEvent *event);
+
 private slots:
     void togglePlay(bool checked);
 
@@ -42,6 +46,7 @@ private:
     qint64 _currentDuration;
     qint64 _currentPosition;
     int _currentVolume;
+    bool _sliderGrabbed;
 
 };
 

@@ -3,13 +3,15 @@
 #include "audiotrack.h"
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QDebug>
 
 AudioPlaybackFrame::AudioPlaybackFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::AudioPlaybackFrame),
     _currentDuration(0),
     _currentPosition(0),
-    _currentVolume(100)
+    _currentVolume(100),
+    _sliderGrabbed(false)
 {
     ui->setupUi(this);
 
@@ -18,6 +20,8 @@ AudioPlaybackFrame::AudioPlaybackFrame(QWidget *parent) :
     connect(ui->sliderVolume, SIGNAL(valueChanged(int)), this, SLOT(setVolume(int)));
 
     ui->sliderVolume->setValue(_currentVolume);
+
+    ui->sliderPlayback->installEventFilter(this);
 }
 
 AudioPlaybackFrame::~AudioPlaybackFrame()
@@ -44,9 +48,48 @@ void AudioPlaybackFrame::setPosition(qint64 position)
     _currentPosition = position;
     qlonglong seconds = position / 1000;
     ui->lblPlayed->setText(QString("%1:%2").arg(seconds / 60).arg(seconds % 60, 2, 10, QChar('0')));
-    ui->sliderPlayback->setSliderPosition(_currentDuration == 0 ? 0 : 100 * _currentPosition / _currentDuration);
 
-    emit positionChanged(_currentPosition);
+    if(!_sliderGrabbed)
+        ui->sliderPlayback->setSliderPosition(_currentDuration == 0 ? 0 : 100 * _currentPosition / _currentDuration);
+
+    //emit positionChanged(_currentPosition);
+}
+
+void AudioPlaybackFrame::trackChanged(AudioTrack* track)
+{
+    if(track == nullptr)
+    {
+        setPlayerEnabled(false);
+        ui->lblCurrent->setText(QString("No track"));
+        ui->lblPlayed->setText(QString("--:--"));
+        ui->lblLength->setText(QString("--:--"));
+        qDebug() << QString("[AudioPlaybackFrame] Track set to null");
+    }
+    else
+    {
+        setPlayerEnabled(true);
+        ui->lblCurrent->setText(track->getName());
+        ui->lblPlayed->setText(QString("0:00"));
+        ui->lblLength->setText(QString("0:00"));
+        qDebug() << QString("[AudioPlaybackFrame] Track set to ") << track->getName();
+    }
+}
+
+void AudioPlaybackFrame::stateChanged(AudioPlayer::State state)
+{
+    switch(state)
+    {
+        case AudioPlayer::Playing:
+            ui->btnPlay->setChecked(true);
+            qDebug() << QString("[AudioPlaybackFrame] Player set to playing.");
+            break;
+        case AudioPlayer::Paused:
+        case AudioPlayer::Stopped:
+        default:
+            ui->btnPlay->setChecked(false);
+            qDebug() << QString("[AudioPlaybackFrame] Player set to paused.");
+            break;
+    }
 }
 
 void AudioPlaybackFrame::setVolume(int volume)
@@ -62,37 +105,27 @@ void AudioPlaybackFrame::setVolume(int volume)
     emit volumeChanged(_currentVolume);
 }
 
-void AudioPlaybackFrame::trackChanged(AudioTrack* track)
+bool AudioPlaybackFrame::eventFilter(QObject *obj, QEvent *event)
 {
-    if(track == nullptr)
+    if(qobject_cast<QSlider*>(obj) == ui->sliderPlayback)
     {
-        setPlayerEnabled(false);
-        ui->lblCurrent->setText(QString("No track"));
-        ui->lblPlayed->setText(QString("--:--"));
-        ui->lblLength->setText(QString("--:--"));
+        if(event->type() == QEvent::MouseButtonPress)
+        {
+            _sliderGrabbed = true;
+            qDebug() << QString("[AudioPlaybackFrame] Slider grabbed");
+        }
+        if(event->type() == QEvent::MouseButtonRelease)
+        {
+            qDebug() << QString("[AudioPlaybackFrame] Slider released");
+            _sliderGrabbed = false;
+            qint64 newPosition = _currentDuration * ui->sliderPlayback->sliderPosition() / 100;
+            if(_currentPosition != newPosition)
+                emit positionChanged(newPosition);
+        }
     }
-    else
-    {
-        setPlayerEnabled(true);
-        ui->lblCurrent->setText(track->getName());
-        ui->lblPlayed->setText(QString("0:00"));
-        ui->lblLength->setText(QString("0:00"));
-    }
-}
 
-void AudioPlaybackFrame::stateChanged(AudioPlayer::State state)
-{
-    switch(state)
-    {
-        case AudioPlayer::Playing:
-            ui->btnPlay->setChecked(true);
-            break;
-        case AudioPlayer::Paused:
-        case AudioPlayer::Stopped:
-        default:
-            ui->btnPlay->setChecked(false);
-            break;
-    }
+    // standard event processing
+    return QObject::eventFilter(obj, event);
 }
 
 void AudioPlaybackFrame::togglePlay(bool checked)
