@@ -71,8 +71,13 @@ enter while editing HP turns off publish
 Add a round counter, add countdown of effects, add effects to individuals
 
 DONE
+v1.0
+
+
 v0.19.0
 Starting/opening/saving more than one battle works properly
+Shifting the position of the audio player playback slider works properly
+Other minor editorial changes
 
 v0.18.0
 Bestiary Updates
