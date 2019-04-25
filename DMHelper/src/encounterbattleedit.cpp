@@ -62,6 +62,7 @@ void EncounterBattleEdit::setBattle(EncounterBattle* battle)
     _battle = battle;
     updateCombatantList();
     updateStatus();
+    calculateThresholds();
     connect(battle,SIGNAL(changed()),this,SLOT(updateStatus()));
 
     Campaign* campaign = battle->getCampaign();

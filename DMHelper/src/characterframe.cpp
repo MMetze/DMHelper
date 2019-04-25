@@ -31,6 +31,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     ui->edtExperience->setValidator(new QIntValidator(0,1000000,this));
     ui->edtSpeed->setValidator(new QIntValidator(0,1000,this));
     ui->edtProficiencyBonus->setValidator(new QIntValidator(0,100,this));
+    ui->edtLevel->setValidator(new QIntValidator(1,100,this));
 
     connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
     connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
@@ -64,7 +65,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(calculateMods()));
 
     connect(ui->edtName,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtPlayer,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtLevel,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtRace,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtExperience,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
@@ -176,7 +177,7 @@ void CharacterFrame::clear()
     ui->lblIcon->setPixmap(ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Showcase));
 
     ui->edtName->setText(QString(""));
-    ui->edtPlayer->setText(QString(""));
+    ui->edtLevel->setText(QString(""));
     ui->edtRace->setText(QString(""));
     ui->edtExperience->setText(QString(""));
     ui->edtClass->setText(QString(""));
@@ -293,7 +294,7 @@ void CharacterFrame::readCharacterData()
     loadCharacterImage();
 
     ui->edtName->setText(_character->getName());
-    ui->edtPlayer->setText(_character->getStringValue(Character::StringValue_player));
+    ui->edtLevel->setText(QString::number(_character->getIntValue(Character::IntValue_level)));
     ui->edtRace->setText(_character->getStringValue(Character::StringValue_race));
     ui->edtExperience->setText(QString::number(_character->getIntValue(Character::IntValue_experience)));
     ui->edtClass->setText(_character->getStringValue(Character::StringValue_class));
@@ -353,7 +354,7 @@ void CharacterFrame::writeCharacterData()
         _character->beginBatchChanges();
 
         _character->setName(ui->edtName->text());
-        _character->setStringValue(Character::StringValue_player, ui->edtPlayer->text());
+        _character->setIntValue(Character::IntValue_level, ui->edtLevel->text().toInt());
         _character->setStringValue(Character::StringValue_race, ui->edtRace->text());
         _character->setIntValue(Character::IntValue_experience, ui->edtExperience->text().toInt());
         _character->setStringValue(Character::StringValue_class, ui->edtClass->text());
@@ -403,6 +404,7 @@ void CharacterFrame::writeCharacterData()
         _character->endBatchChanges();
 
         calculateMods();
+        ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
     }
 }
 

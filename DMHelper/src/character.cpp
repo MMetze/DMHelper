@@ -434,7 +434,9 @@ void Character::setActive(bool active)
 
 int Character::getTotalLevel() const
 {
-    return getIntValue(IntValue_level) + getIntValue(IntValue_level2) + getIntValue(IntValue_level3);
+    // Only supporting a single level currently
+    // return getIntValue(IntValue_level) + getIntValue(IntValue_level2) + getIntValue(IntValue_level3);
+    return getIntValue(IntValue_level);
 }
 
 int Character::getXPThreshold(int threshold) const

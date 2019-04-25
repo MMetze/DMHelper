@@ -88,27 +88,23 @@
     <layout class="QVBoxLayout" name="verticalLayout_12">
      <item>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Name:</string>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="edtSize"/>
+       </item>
+       <item row="2" column="3">
+        <widget class="QLineEdit" name="edtBackground"/>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLineEdit" name="edtNextLevel">
+         <property name="readOnly">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="edtName"/>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_3">
+       <item row="2" column="4">
+        <widget class="QLabel" name="label_11">
          <property name="text">
-          <string>Class:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QLineEdit" name="edtClass">
-         <property name="text">
-          <string/>
+          <string>Initiative:</string>
          </property>
         </widget>
        </item>
@@ -129,29 +125,49 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_14">
-         <property name="text">
-          <string>Player:</string>
-         </property>
-        </widget>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="edtName"/>
        </item>
        <item row="1" column="1">
-        <widget class="QLineEdit" name="edtPlayer">
+        <widget class="QLineEdit" name="edtAlignment">
          <property name="text">
           <string/>
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
-        <widget class="QLabel" name="label_47">
-         <property name="text">
-          <string>Alignment:</string>
+       <item row="1" column="6">
+        <widget class="QLineEdit" name="edtArmorClass">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
         </widget>
        </item>
        <item row="1" column="3">
-        <widget class="QLineEdit" name="edtAlignment"/>
+        <widget class="QLineEdit" name="edtLevel"/>
+       </item>
+       <item row="1" column="2">
+        <widget class="QLabel" name="label_47">
+         <property name="text">
+          <string>Level:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_17">
+         <property name="text">
+          <string>Size:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="edtClass">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
        <item row="1" column="4">
         <widget class="QLabel" name="label_10">
@@ -160,42 +176,22 @@
          </property>
         </widget>
        </item>
+       <item row="3" column="4">
+        <widget class="QLabel" name="label_52">
+         <property name="text">
+          <string>Speed:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="edtSex"/>
+       </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
           <string>Race:</string>
          </property>
         </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="edtRace"/>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="label_58">
-         <property name="text">
-          <string>Background:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QLineEdit" name="edtBackground"/>
-       </item>
-       <item row="2" column="4">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Initiative:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_46">
-         <property name="text">
-          <string>Sex:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="edtSex"/>
        </item>
        <item row="3" column="2">
         <widget class="QLabel" name="label_54">
@@ -204,17 +200,68 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Class:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="edtRace"/>
+       </item>
+       <item row="4" column="6">
+        <widget class="QLineEdit" name="edtProficiencyBonus">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="6">
+        <widget class="QLineEdit" name="edtInitiative">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QLabel" name="label_16">
+         <property name="text">
+          <string>Next Level:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QLabel" name="label_58">
+         <property name="text">
+          <string>Background:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_14">
+         <property name="text">
+          <string>Alignment:</string>
+         </property>
+        </widget>
+       </item>
        <item row="3" column="3">
         <widget class="QLineEdit" name="edtExperience">
          <property name="text">
           <string/>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="4">
-        <widget class="QLabel" name="label_52">
-         <property name="text">
-          <string>Speed:</string>
          </property>
         </widget>
        </item>
@@ -242,46 +289,6 @@
          </item>
         </layout>
        </item>
-       <item row="4" column="2">
-        <widget class="QLabel" name="label_16">
-         <property name="text">
-          <string>Next Level:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QLineEdit" name="edtNextLevel"/>
-       </item>
-       <item row="4" column="6">
-        <widget class="QLineEdit" name="edtProficiencyBonus">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="6">
-        <widget class="QLineEdit" name="edtArmorClass">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="6">
-        <widget class="QLineEdit" name="edtInitiative">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
        <item row="4" column="4">
         <widget class="QLabel" name="label_12">
          <property name="text">
@@ -289,15 +296,12 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_17">
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_46">
          <property name="text">
-          <string>Size:</string>
+          <string>Sex:</string>
          </property>
         </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="edtSize"/>
        </item>
       </layout>
      </item>
@@ -1439,8 +1443,8 @@
   <tabstop>edtName</tabstop>
   <tabstop>edtClass</tabstop>
   <tabstop>edtHitPoints</tabstop>
-  <tabstop>edtPlayer</tabstop>
   <tabstop>edtAlignment</tabstop>
+  <tabstop>edtLevel</tabstop>
   <tabstop>edtArmorClass</tabstop>
   <tabstop>edtRace</tabstop>
   <tabstop>edtBackground</tabstop>

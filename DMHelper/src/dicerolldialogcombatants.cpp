@@ -28,10 +28,12 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
         _modifiers = modifiers;
     */
 
+    ui->edtDamage->setValidator(new QIntValidator(0,INT_MAX,this));
+
     ui->editDiceCount->setText(QString::number(dice.getCount()));
     ui->editDiceType->setText(QString::number(dice.getType()));
     ui->editBonus->setText(QString::number(dice.getBonus()));
-    ui->editTarget->setText(QString::number(rollDC));
+    ui->edtTarget->setText(QString::number(rollDC));
 
     createCombatantWidgets();
     //rollDice();
@@ -68,6 +70,38 @@ void DiceRollDialogCombatants::rollDice()
             rollForWidget(qobject_cast<WidgetBattleCombatant*>(layoutItem->widget()),
                           readDice(),
                           (_modifiers.count() > 0) ? (_modifiers.at(rc)) : 0);
+        }
+    }
+}
+
+void DiceRollDialogCombatants::applyDamage()
+{
+    if(_combatants.count() != _combatantLayout->count())
+        return;
+
+    int target = ui->edtTarget->text().toInt();
+    int damage = ui->edtDamage->text().toInt();
+
+    for(int rc = 0; rc < _combatants.count(); ++rc)
+    {
+        QLayoutItem* layoutItem = _combatantLayout->itemAt(rc);
+        if(layoutItem)
+        {
+            WidgetBattleCombatant* combatantWidget = qobject_cast<WidgetBattleCombatant*>(layoutItem->widget());
+            if((combatantWidget) && (combatantWidget->isVisible()))
+            {
+                if(combatantWidget->getResult() >= target)
+                {
+                    if(ui->chkHalfDamage->isChecked())
+                    {
+                        combatantWidget->applyDamage(damage / 2);
+                    }
+                }
+                else
+                {
+                    combatantWidget->applyDamage(damage);
+                }
+            }
         }
     }
 }
@@ -148,7 +182,7 @@ void DiceRollDialogCombatants::init()
     QValidator *valBonus = new QIntValidator(0, 100, this);
     ui->editBonus->setValidator(valBonus);
     QValidator *valTarget = new QIntValidator(0, 100, this);
-    ui->editTarget->setValidator(valTarget);
+    ui->edtTarget->setValidator(valTarget);
 
     connect(ui->btnRoll,SIGNAL(clicked()),this,SLOT(rollDice()));
     connect(ui->editDiceType, SIGNAL(textChanged(QString)), this, SLOT(diceTypeChanged()));
@@ -273,7 +307,7 @@ void DiceRollDialogCombatants::rollForWidget(WidgetBattleCombatant* widget, cons
     else
         result = roll1;
 
-    int target = ui->editTarget->text().toInt();
+    int target = ui->edtTarget->text().toInt();
     if(result >= target)
     {
         resultStr.prepend(QString("<font color=""#00ff00"">"));
@@ -287,6 +321,7 @@ void DiceRollDialogCombatants::rollForWidget(WidgetBattleCombatant* widget, cons
 
     // Add this result to the text
     widget->setResult(resultStr);
+    widget->setResult(result);
 }
 
 Dice DiceRollDialogCombatants::readDice()

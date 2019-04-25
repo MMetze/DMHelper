@@ -30,6 +30,7 @@ signals:
 
 public slots:
     void rollDice();
+    void applyDamage();
     void rerollWidget(WidgetBattleCombatant* widget);
     void setWidgetVisibility();
 

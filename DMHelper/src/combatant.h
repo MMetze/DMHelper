@@ -104,6 +104,7 @@ public slots:
     virtual void addAttack(const Attack& attack);
     virtual void removeAttack(int index);
     virtual void setHitPoints(int hitPoints);
+    virtual void applyDamage(int damage);
     virtual void setHitDice(const Dice& hitDice);
     virtual void setIcon(const QString &newIcon);
 

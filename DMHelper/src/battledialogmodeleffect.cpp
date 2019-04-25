@@ -11,7 +11,7 @@ BattleDialogModelEffect::BattleDialogModelEffect() :
     _size(20),
     _position(0,0),
     _rotation(0),
-    _color(115,18,0),
+    _color(115,18,0,64),
     _tip()
 {
 }
@@ -54,6 +54,7 @@ void BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, 
     element.setAttribute("colorR", _color.red());
     element.setAttribute("colorG", _color.green());
     element.setAttribute("colorB", _color.blue());
+    element.setAttribute("colorA", _color.alpha());
     element.setAttribute("tip", _tip);
 
     parent.appendChild(element);
@@ -69,7 +70,8 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element)
     _rotation = element.attribute("rotation",QString::number(0)).toDouble();
     _color = QColor(element.attribute("colorR",QString::number(255)).toInt(),
                     element.attribute("colorG",QString::number(255)).toInt(),
-                    element.attribute("colorB",QString::number(255)).toInt());
+                    element.attribute("colorB",QString::number(255)).toInt(),
+                    element.attribute("colorA",QString::number(64)).toInt());
     _tip = element.attribute("tip");
 }
 
@@ -79,7 +81,7 @@ void BattleDialogModelEffect::applyEffectValues(QAbstractGraphicsShapeItem& item
     item.setPos(getPosition());
     item.setRotation(getRotation());
     item.setPen(QPen(getColor(), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    item.setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),64)));
+    item.setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
     item.setToolTip(getTip());
 
     item.setScale((qreal)getSize() * gridScale / 500.0);

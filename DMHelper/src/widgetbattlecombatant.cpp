@@ -9,7 +9,8 @@ WidgetBattleCombatant::WidgetBattleCombatant(BattleDialogModelCombatant* combata
     ui(new Ui::WidgetBattleCombatant),
     _combatant(combatant),
     _mouseDown(false),
-    _mouseDownPos()
+    _mouseDownPos(),
+    _result(0)
 {
     ui->setupUi(this);
     QValidator* valHitPoints = new QIntValidator(-10, 9999, this);
@@ -39,6 +40,29 @@ bool WidgetBattleCombatant::hasDisadvantage() const
 void WidgetBattleCombatant::setResult(const QString &text)
 {
     ui->edtResult->setText(text);
+}
+
+void WidgetBattleCombatant::setResult(int result)
+{
+    _result = result;
+}
+
+int WidgetBattleCombatant::getResult() const
+{
+    return _result;
+}
+
+void WidgetBattleCombatant::applyDamage(int damage)
+{
+    if(!_combatant)
+        return;
+
+    if(_combatant->getHitPoints() > damage)
+        _combatant->setHitPoints(_combatant->getHitPoints() - damage);
+    else
+        _combatant->setHitPoints(0);
+
+    emit combatantChanged(_combatant);
 }
 
 void WidgetBattleCombatant::mousePressEvent(QMouseEvent *event)
