@@ -148,6 +148,11 @@ Opens the dice rolling dialog in a separate window for easy use. This is as an a
 ###### *Publish <b><u>T</u></b>ext*
 Opens a simple dialog to allow the DM to enter and publish a simple text to the *Player's Window*. This is useful for providing spontaneous text input to the party.
 
+###### *Translate <b><u>T</u></b>ext*
+Opens a dialog to allow the DM to enter and partially translate a text based on a roll. The result can be published to the *Player's Window*. Based on the percentage success of th3 die roll, random words will be replaced by random characters with the same length and capitalization as the original word. Non-alphabetic characters such as numbers or punctuation remain untouched.
+
+Thanks to Alex (https://www.reddit.com/user/wurschtbrotwilli) for the original Python-based inspiration!
+
 ###### *<b><u>O</u></b>ptions...*
 Opens the options dialog.
 
@@ -364,7 +369,7 @@ The *Battle Dialog* allows you to control and run a battle encounter in-game.
 ##### 1. Battle Window
 All creatures and effects in the *Battle Window* can be moved around the map by clicking and dragging them with the mouse.
 
-**Effects** can be created by opening the context menu in the *Battle Window* (right click on the map). Effects can be edited by double-clicking them and rotated by right clicking and dragging them. When editing an effect, you can set its name (visible via mouse-over in the *Battle Window*), size, rotation and color.
+**Effects** can be created by opening the context menu in the *Battle Window* (right click on the map). Effects can be edited by double-clicking them and rotated by right clicking and dragging them. When editing an effect, you can set its name (visible via mouse-over in the *Battle Window*), size, rotation, color and transparency.
 
 Right-clicking on an effect also provides the options to Delete the effect or open the Roll for the effect, which opens the *Dice Rolling Dialog* for rolling saving throws and applying the results of the effect to the creatures within its area.
 
@@ -452,6 +457,8 @@ Each creature entry includes the creature's name, hit points and rolls. With the
 Clicking the **Roll** button rolls for all creatures as once. The color of the roll results is set to green for success and red for failure, reflecting also any advantage or disadvantage.
 
 If you adjust the hit points of a creature in this dialog, the changes will be directly reflected in the *Combatant List* as well.
+
+Alternatively, you can use the **Apply Damage** button to apply a single damage to all combatants, dependent on the result of their rolls. Full damage is applied to those combatants who  failed on their roll and either half damage or no damage us applied to those who succeeded (depending on whether the *Half Damage* checkbox is checked).
 
 #### Player's Window
 As long as the *Publish* button is activated, the visible contents of the battle are animated to the *Player's Window*:

@@ -696,6 +696,9 @@ If an audio track is selected, it will be automatically played when the battle i
 <p>Opens the dice rolling dialog in a separate window for easy use. This is as an alternative to the same dialog available in the Quick Reference bar on the right hand side of the main screen.</p>
 <h6 id="publish-b-u-t-u-b-ext"><em>Publish <b><u>T</u></b>ext</em></h6>
 <p>Opens a simple dialog to allow the DM to enter and publish a simple text to the <em>Player's Window</em>. This is useful for providing spontaneous text input to the party.</p>
+<h6 id="translate-b-u-t-u-b-ext"><em>Translate <b><u>T</u></b>ext</em></h6>
+<p>Opens a dialog to allow the DM to enter and partially translate a text based on a roll. The result can be published to the <em>Player's Window</em>. Based on the percentage success of th3 die roll, random words will be replaced by random characters with the same length and capitalization as the original word. Non-alphabetic characters such as numbers or punctuation remain untouched.</p>
+<p>Thanks to Alex (<a href="https://www.reddit.com/user/wurschtbrotwilli">https://www.reddit.com/user/wurschtbrotwilli</a>) for the original Python-based inspiration!</p>
 <h6 id="-b-u-o-u-b-ptions-"><em><b><u>O</u></b>ptions...</em></h6>
 <p>Opens the options dialog.</p>
 <h6 id="-b-u-a-u-b-bout-"><em><b><u>A</u></b>bout...</em></h6>
@@ -839,7 +842,7 @@ If a number is entered as the override hit points, each combatant created will b
 <p><img alt="Battle Dialog" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Battle Dialog Screenshot.png"></p>
 <h5 id="1-battle-window">1. Battle Window</h5>
 <p>All creatures and effects in the <em>Battle Window</em> can be moved around the map by clicking and dragging them with the mouse.</p>
-<p><strong>Effects</strong> can be created by opening the context menu in the <em>Battle Window</em> (right click on the map). Effects can be edited by double-clicking them and rotated by right clicking and dragging them. When editing an effect, you can set its name (visible via mouse-over in the <em>Battle Window</em>), size, rotation and color.</p>
+<p><strong>Effects</strong> can be created by opening the context menu in the <em>Battle Window</em> (right click on the map). Effects can be edited by double-clicking them and rotated by right clicking and dragging them. When editing an effect, you can set its name (visible via mouse-over in the <em>Battle Window</em>), size, rotation, color and transparency.</p>
 <p>Right-clicking on an effect also provides the options to Delete the effect or open the Roll for the effect, which opens the <em>Dice Rolling Dialog</em> for rolling saving throws and applying the results of the effect to the creatures within its area.</p>
 <p>Supported effect types are:</p>
 <ul>
@@ -909,6 +912,7 @@ The countdown timer, shown optionally in the <em>Player's Window</em> is also sh
 <p>Each creature entry includes the creature's name, hit points and rolls. With the up and down arrows on the right-hand side of a creature's entry, you can give them advantage or disadvantage on their roll.</p>
 <p>Clicking the <strong>Roll</strong> button rolls for all creatures as once. The color of the roll results is set to green for success and red for failure, reflecting also any advantage or disadvantage.</p>
 <p>If you adjust the hit points of a creature in this dialog, the changes will be directly reflected in the <em>Combatant List</em> as well.</p>
+<p>Alternatively, you can use the <strong>Apply Damage</strong> button to apply a single damage to all combatants, dependent on the result of their rolls. Full damage is applied to those combatants who  failed on their roll and either half damage or no damage us applied to those who succeeded (depending on whether the <em>Half Damage</em> checkbox is checked).</p>
 <h4 id="player-s-window">Player's Window</h4>
 <p>As long as the <em>Publish</em> button is activated, the visible contents of the battle are animated to the <em>Player's Window</em>:</p>
 <p><img alt="Battle Dialog Published" src="C:\Users\Craig\Documents\GitHub\DMHelper\DMHelperDocumentation\Images\Battle Dialog Publish Screenshot.png"></p>
