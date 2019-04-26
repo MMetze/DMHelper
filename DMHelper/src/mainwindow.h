@@ -146,6 +146,7 @@ protected slots:
 
     void openDMScreen();
     void openTextPublisher();
+    void openTextTranslator();
 
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();

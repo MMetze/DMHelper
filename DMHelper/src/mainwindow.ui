@@ -172,6 +172,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <addaction name="separator"/>
     <addaction name="actionDice"/>
     <addaction name="actionPublish_Text"/>
+    <addaction name="actionTranslate_Text"/>
     <addaction name="separator"/>
     <addaction name="actionOptions"/>
     <addaction name="actionAbout"/>
@@ -324,6 +325,11 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionAbout">
    <property name="text">
     <string>&amp;About...</string>
+   </property>
+  </action>
+  <action name="actionTranslate_Text">
+   <property name="text">
+    <string>Translate Text</string>
    </property>
   </action>
  </widget>

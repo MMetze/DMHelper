@@ -144,7 +144,8 @@ SOURCES += main.cpp\
     battledialoglogview.cpp \
     monsteractioneditdialog.cpp \
     aboutdialog.cpp \
-    combatantreference.cpp
+    combatantreference.cpp \
+    texttranslatedialog.cpp
 
 HEADERS  += mainwindow.h \
     publishwindow.h \
@@ -271,7 +272,8 @@ HEADERS  += mainwindow.h \
     battledialoglogview.h \
     monsteractioneditdialog.h \
     aboutdialog.h \
-    combatantreference.h
+    combatantreference.h \
+    texttranslatedialog.h
 
 FORMS    += mainwindow.ui \
     dicerolldialog.ui \
@@ -317,7 +319,8 @@ FORMS    += mainwindow.ui \
     encounterbattleedit.ui \
     battledialoglogview.ui \
     monsteractioneditdialog.ui \
-    aboutdialog.ui
+    aboutdialog.ui \
+    texttranslatedialog.ui
 
 RESOURCES += \
     resources.qrc

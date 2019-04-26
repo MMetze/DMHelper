@@ -28,6 +28,7 @@
 #include "monsterclass.h"
 #include "bestiary.h"
 #include "textpublishdialog.h"
+#include "texttranslatedialog.h"
 #include "combatantselectdialog.h"
 #ifdef INCLUDE_CHASE_SUPPORT
     #include "chaserselectiondialog.h"
@@ -209,6 +210,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_New_Monster,SIGNAL(triggered()),&bestiaryDlg,SLOT(createNewMonster()));
     connect(ui->actionOpen_DM_Screen,SIGNAL(triggered()),this,SLOT(openDMScreen()));
     connect(ui->actionPublish_Text,SIGNAL(triggered()),this,SLOT(openTextPublisher()));
+    connect(ui->actionTranslate_Text,SIGNAL(triggered()),this,SLOT(openTextTranslator()));
 #ifdef INCLUDE_CHASE_SUPPORT
     connect(ui->action_Chase_Dialog,SIGNAL(triggered()),this,SLOT(startChase()));
 #endif
@@ -2110,6 +2112,15 @@ void MainWindow::openDMScreen()
 void MainWindow::openTextPublisher()
 {
     TextPublishDialog* dlg = new TextPublishDialog(this);
+
+    connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    dlg->show();
+    dlg->activateWindow();
+}
+
+void MainWindow::openTextTranslator()
+{
+    TextTranslateDialog* dlg = new TextTranslateDialog(this);
 
     connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
     dlg->show();

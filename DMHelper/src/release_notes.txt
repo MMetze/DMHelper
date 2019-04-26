@@ -71,6 +71,7 @@ v1.0.0
 The transparency/opacity of events in battles can to set anything between 0 and 100
 Character level re-added to the character sheet and used for calculating the encounter complexity
 Dice Roll Dialog for battle effects has the option to apply damage directly to all affected combatants
+Added text translation tool
 
 v0.19.0
 Starting/opening/saving more than one battle works properly

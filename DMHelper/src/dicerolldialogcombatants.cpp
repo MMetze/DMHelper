@@ -184,9 +184,10 @@ void DiceRollDialogCombatants::init()
     QValidator *valTarget = new QIntValidator(0, 100, this);
     ui->edtTarget->setValidator(valTarget);
 
-    connect(ui->btnRoll,SIGNAL(clicked()),this,SLOT(rollDice()));
+    connect(ui->btnRoll, SIGNAL(clicked()), this, SLOT(rollDice()));
     connect(ui->editDiceType, SIGNAL(textChanged(QString)), this, SLOT(diceTypeChanged()));
     connect(ui->cmbType, SIGNAL(currentIndexChanged(int)), this, SLOT(modifierTypeChanged()));
+    connect(ui->btnDamage, SIGNAL(clicked()), this, SLOT(applyDamage()));
 
     ui->cmbType->addItem(QString("None"), QVariant());
     ui->cmbType->addItem(QString("Strength Check"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Strength, -1)));

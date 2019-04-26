@@ -63,7 +63,7 @@ void AudioPlaybackFrame::trackChanged(AudioTrack* track)
         ui->lblCurrent->setText(QString("No track"));
         ui->lblPlayed->setText(QString("--:--"));
         ui->lblLength->setText(QString("--:--"));
-        qDebug() << QString("[AudioPlaybackFrame] Track set to null");
+        qDebug() << "[AudioPlaybackFrame] Track set to null";
     }
     else
     {
@@ -71,7 +71,7 @@ void AudioPlaybackFrame::trackChanged(AudioTrack* track)
         ui->lblCurrent->setText(track->getName());
         ui->lblPlayed->setText(QString("0:00"));
         ui->lblLength->setText(QString("0:00"));
-        qDebug() << QString("[AudioPlaybackFrame] Track set to ") << track->getName();
+        qDebug() << "[AudioPlaybackFrame] Track set to " << track->getName();
     }
 }
 
@@ -81,13 +81,13 @@ void AudioPlaybackFrame::stateChanged(AudioPlayer::State state)
     {
         case AudioPlayer::Playing:
             ui->btnPlay->setChecked(true);
-            qDebug() << QString("[AudioPlaybackFrame] Player set to playing.");
+            qDebug() << "[AudioPlaybackFrame] Player set to playing.";
             break;
         case AudioPlayer::Paused:
         case AudioPlayer::Stopped:
         default:
             ui->btnPlay->setChecked(false);
-            qDebug() << QString("[AudioPlaybackFrame] Player set to paused.");
+            qDebug() << "[AudioPlaybackFrame] Player set to paused.";
             break;
     }
 }
@@ -112,11 +112,11 @@ bool AudioPlaybackFrame::eventFilter(QObject *obj, QEvent *event)
         if(event->type() == QEvent::MouseButtonPress)
         {
             _sliderGrabbed = true;
-            qDebug() << QString("[AudioPlaybackFrame] Slider grabbed");
+            qDebug() << "[AudioPlaybackFrame] Slider grabbed";
         }
         if(event->type() == QEvent::MouseButtonRelease)
         {
-            qDebug() << QString("[AudioPlaybackFrame] Slider released");
+            qDebug() << "[AudioPlaybackFrame] Slider released";
             _sliderGrabbed = false;
             qint64 newPosition = _currentDuration * ui->sliderPlayback->sliderPosition() / 100;
             if(_currentPosition != newPosition)
