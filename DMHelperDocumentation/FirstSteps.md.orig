@@ -49,6 +49,7 @@ First of all, a new campaign has to be created or opened. Hit _File_ to see your
 ![Interface](Images/interface_01.jpg)  
 If there is no recent campaign to open, the options are opening the example campaign, or creating a new one.  Just hit _New Campaign_ or _Ctrl+N_ to open a dialog for creation. There the name of the new campaign can be set. I'll use _DMHelper Realm_ for this example.  
 ![Create new campaign](Images/interface_02.jpg)  
+<<<<<<< HEAD
 Hit okay, then the DMHelper interface will be active and we can start adding our first content. This is a good moment to save your file in a location where it is safe.
 
 ## Creating the first Content
@@ -120,6 +121,9 @@ _John_ did nothing, _Viol_ moved and then used a cone shaped spell. I added the 
 This are the first steps with DMHelper and should get you started for the first adventure. This firsts steps file covers the base functions of DMHelper, there is lots more to do. For example: Music Tracks can be played, NPCs can be added and whole campaigns can be planned.
 
 If there are issues, ideas or questions, feel free to get in contact.
+=======
+Hit okay, then the DMHelper interface will be active and we can start adding our first content.
+
 
 ## References
 Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!
@@ -136,3 +140,4 @@ https://www.reddit.com/user/Urza_Is_Mine <br/>
 
 Rustajb <br/>
 https://www.reddit.com/user/rustajb
+>>>>>>> 0f261c654d8f1a46fc12273dd76c719df6495f9a
