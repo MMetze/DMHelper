@@ -120,3 +120,19 @@ _John_ did nothing, _Viol_ moved and then used a cone shaped spell. I added the 
 This are the first steps with DMHelper and should get you started for the first adventure. This firsts steps file covers the base functions of DMHelper, there is lots more to do. For example: Music Tracks can be played, NPCs can be added and whole campaigns can be planned.
 
 If there are issues, ideas or questions, feel free to get in contact.
+
+## References
+Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!
+
+**Background images and character images donated by: <br/>**
+Rixt Heerschop <br/>
+Artist & Illustrator <br/>
+www.rixtheerschop.com <br/>
+
+**Maps donated by: <br/>**
+Alex van der Aa <br/>
+https://www.patreon.com/neutralparty <br/>
+https://www.reddit.com/user/Urza_Is_Mine <br/>
+
+Rustajb <br/>
+https://www.reddit.com/user/rustajb
