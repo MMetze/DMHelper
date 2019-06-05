@@ -1,8 +1,0 @@
-Bestiary
-- Armor Class Description entry missing
-- Resistances and Skills???
-- Remove Private check box
-- average HP should not be editable
-- Hit Dice changes reflected in average HP
-- Update monster class on edit, not close
-- SRD bestiary does not include bonuses

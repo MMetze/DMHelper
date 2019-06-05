@@ -21,6 +21,10 @@ public:
     bool hasDisadvantage() const;
 
     void setResult(const QString &text);
+    void setResult(int result);
+    int getResult() const;
+
+    void applyDamage(int damage);
 
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);
@@ -48,6 +52,7 @@ private:
 
     bool _mouseDown;
     QPoint _mouseDownPos;
+    int _result;
 };
 
 #endif // WIDGETBATTLECOMBATANT_H

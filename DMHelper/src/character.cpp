@@ -23,7 +23,8 @@ const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
     "", // StringValue_equipment
     "", // StringValue_proficiencies
     "", // StringValue_spells
-    ""  // StringValue_notes
+    "",  // StringValue_notes
+    "medium"  // StringValue_size
 };
 
 const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
@@ -45,7 +46,8 @@ const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
     "equipment", // StringValue_equipment
     "proficiencies", // StringValue_proficiencies
     "spells", // StringValue_spells
-    "notes"  // StringValue_notes
+    "notes",  // StringValue_notes
+    "size"  // StringValue_size
 };
 
 const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
@@ -432,7 +434,9 @@ void Character::setActive(bool active)
 
 int Character::getTotalLevel() const
 {
-    return getIntValue(IntValue_level) + getIntValue(IntValue_level2) + getIntValue(IntValue_level3);
+    // Only supporting a single level currently
+    // return getIntValue(IntValue_level) + getIntValue(IntValue_level2) + getIntValue(IntValue_level3);
+    return getIntValue(IntValue_level);
 }
 
 int Character::getXPThreshold(int threshold) const
@@ -476,6 +480,18 @@ int Character::findKeyForSkillName(const QString& skillName)
     }
 
     return -1;
+}
+
+QString Character::getWrittenSkillName(int skill)
+{
+    if((skill < 0) || (skill >= Combatant::SKILLS_COUNT))
+    {
+        return QString();
+    }
+    else
+    {
+        return QString(SKILLVALUE_WRITTENNAMES[skill]);
+    }
 }
 
 void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)

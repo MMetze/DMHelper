@@ -29,6 +29,7 @@ void MonsterActionFrame::mouseDoubleClickEvent(QMouseEvent *event)
     {
         _action = dlg.getAction();
         updateFields();
+        emit frameChanged();
     }
     else if(dlg.isDeleted())
     {

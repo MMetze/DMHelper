@@ -13,7 +13,7 @@ class ScrollOverlayWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ScrollOverlayWidget(QWidget *parent = 0);
+    explicit ScrollOverlayWidget(QWidget *parent = nullptr);
     virtual ~ScrollOverlayWidget();
 
 signals:

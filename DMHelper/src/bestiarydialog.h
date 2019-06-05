@@ -38,6 +38,7 @@ public slots:
     void dataChanged();
 
 protected slots:
+    void hitDiceChanged();
     void abilityChanged();
     void updateAbilityMods();
     void monsterRenamed();
@@ -51,6 +52,8 @@ protected slots:
     void deleteSpecialAbility(const MonsterAction& action);
     void addReaction();
     void deleteReaction(const MonsterAction& action);
+
+    void handleEditedData();
 
 protected:
     // From QWidget

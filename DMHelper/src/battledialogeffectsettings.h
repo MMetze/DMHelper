@@ -22,6 +22,7 @@ public:
     int getSizeValue() const;
     qreal getRotation() const;
     QColor getColor() const;
+    int getAlpha() const;
 
     void copyValues(BattleDialogModelEffect& effect);
 

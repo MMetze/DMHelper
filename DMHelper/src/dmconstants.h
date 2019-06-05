@@ -8,11 +8,11 @@
 
 namespace DMHelper
 {
-    const int DMHELPER_MAJOR_VERSION = 0;
-    const int DMHELPER_MINOR_VERSION = 17;
+    const int DMHELPER_MAJOR_VERSION = 1;
+    const int DMHELPER_MINOR_VERSION = 0;
 
     const int BESTIARY_MAJOR_VERSION = 2;
-    const int BESTIARY_MINOR_VERSION = 0;
+    const int BESTIARY_MINOR_VERSION = 1;
 
     enum
     {
@@ -53,6 +53,7 @@ namespace DMHelper
         CombatantType_Base = 0,
         CombatantType_Character,
         CombatantType_Monster,
+        CombatantType_Reference
     };
 
     enum

@@ -3,6 +3,7 @@
 #include "monster.h"
 #include "dmconstants.h"
 #include "bestiary.h"
+#include "combatantreference.h"
 #include <QDomElement>
 #include <QString>
 
@@ -13,7 +14,7 @@ CombatantFactory::CombatantFactory(QObject *parent) :
 
 Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElement& element, QObject *parent)
 {
-    Combatant* combatant = NULL;
+    Combatant* combatant = nullptr;
 
     switch(combatantType)
     {
@@ -24,6 +25,9 @@ Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElemen
             break;
         case DMHelper::CombatantType_Monster:
             combatant = Bestiary::Instance()->createMonster(element);
+            break;
+        case DMHelper::CombatantType_Reference:
+            combatant = new CombatantReference(parent);
             break;
         default:
             break;

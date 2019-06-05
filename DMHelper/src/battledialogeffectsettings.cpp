@@ -17,9 +17,11 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(int sizeval, qreal rotati
     ui->edtSize->selectAll();
     ui->edtRotation->setValidator(new QDoubleValidator(0, 360, 5, this));
     ui->edtRotation->setText(QString::number(rotation));
+    ui->sliderTransparency->setSliderPosition(color.alpha());
 
     connect(ui->btnColor,SIGNAL(clicked()),this,SLOT(selectNewColor()));
 
+    _color.setAlpha(255);
     setButtonColor(_color);
 }
 
@@ -36,9 +38,11 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(const BattleDialogModelEf
     ui->edtSize->selectAll();
     ui->edtRotation->setValidator(new QDoubleValidator(0, 360, 5, this));
     ui->edtRotation->setText(QString::number(effect.getRotation()));
+    ui->sliderTransparency->setSliderPosition(effect.getColor().alpha());
 
     connect(ui->btnColor,SIGNAL(clicked()),this,SLOT(selectNewColor()));
 
+    _color.setAlpha(255);
     setButtonColor(_color);
 }
 
@@ -67,12 +71,20 @@ QColor BattleDialogEffectSettings::getColor() const
     return _color;
 }
 
+int BattleDialogEffectSettings::getAlpha() const
+{
+    return ui->sliderTransparency->sliderPosition();
+}
+
 void BattleDialogEffectSettings::copyValues(BattleDialogModelEffect& effect)
 {
     effect.setRotation(getRotation());
     effect.setSize(getSizeValue());
-    effect.setColor(getColor());
     effect.setTip(getTip());
+
+    QColor effectColor = getColor();
+    effectColor.setAlpha(getAlpha());
+    effect.setColor(effectColor);
 }
 
 void BattleDialogEffectSettings::selectNewColor()

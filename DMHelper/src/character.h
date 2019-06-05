@@ -36,6 +36,7 @@ public:
         StringValue_proficiencies,
         StringValue_spells,
         StringValue_notes,
+        StringValue_size,
 
         STRINGVALUE_COUNT
     };
@@ -105,6 +106,7 @@ public:
     int getPassivePerception() const;
 
     static int findKeyForSkillName(const QString& skillName);
+    static QString getWrittenSkillName(int skill);
 
 signals:
     void iconChanged();

@@ -8,7 +8,10 @@
 #include "character.h"
 #include "audiotrack.h"
 #include "encounterbattle.h"
+#include "itemselectdialog.h"
+#include "combatantreference.h"
 #include <QMessageBox>
+#include <QDebug>
 
 const int EncounterBattleEdit_CombatantIndexWave = -1;
 
@@ -22,8 +25,10 @@ EncounterBattleEdit::EncounterBattleEdit(QWidget *parent) :
     connect(ui->btnAddWave,SIGNAL(clicked()),this,SLOT(addWave()));
     connect(ui->btnDeleteWave,SIGNAL(clicked()),this,SLOT(removeWave()));
     connect(ui->btnAddMonster,SIGNAL(clicked()),this,SLOT(addCombatant()));
+    connect(ui->btnAddNPC,SIGNAL(clicked()),this,SLOT(addNPC()));
     connect(ui->btnDeleteMonster,SIGNAL(clicked()),this,SLOT(removeCombatant()));
     connect(ui->treeWidget,SIGNAL(itemSelectionChanged()),this,SLOT(selectionChanged()));
+    connect(ui->btnEditMonster,SIGNAL(clicked()),this,SLOT(editCombatant()));
     connect(ui->treeWidget,SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),this,SLOT(editCombatant(QTreeWidgetItem*,int)));
     connect(ui->textEdit,SIGNAL(textChanged()),this,SLOT(textChanged()));
     connect(ui->btnStartNewBattle,SIGNAL(clicked()),this,SLOT(startBattleClicked()));
@@ -51,10 +56,13 @@ void EncounterBattleEdit::setBattle(EncounterBattle* battle)
     if(!battle)
         return;
 
+    ui->btnEditMonster->setEnabled(false);
+
     ui->textEdit->setHtml(battle->getText());
     _battle = battle;
     updateCombatantList();
     updateStatus();
+    calculateThresholds();
     connect(battle,SIGNAL(changed()),this,SLOT(updateStatus()));
 
     Campaign* campaign = battle->getCampaign();
@@ -76,6 +84,7 @@ void EncounterBattleEdit::unsetBattle(EncounterBattle* battle)
             disconnect(campaign, nullptr, this, nullptr);
     }
 
+     ui->btnEditMonster->setEnabled(false);
     _battle = nullptr;
 }
 
@@ -157,6 +166,67 @@ void EncounterBattleEdit::addCombatant()
     }
 }
 
+void EncounterBattleEdit::addNPC()
+{
+    if(!_battle)
+        return;
+
+    QTreeWidgetItem* selection = ui->treeWidget->currentItem();
+    if(!selection)
+        return;
+
+    Campaign* campaign = _battle->getCampaign();
+    if(!campaign)
+        return;
+
+    ItemSelectDialog characterSelectDlg;
+    characterSelectDlg.setWindowTitle(QString("Select an NPC"));
+    characterSelectDlg.setLabel(QString("Select NPC:"));
+
+    CombatantGroupList combatantList = _battle->getCombatantsAllWaves();
+
+    for(int i = 0; i < campaign->getNPCCount(); ++i)
+    {
+        Character* character = campaign->getNPCByIndex(i);
+        if((character) && (_battle->getCombatantById(character->getID()) == nullptr))
+        {
+            characterSelectDlg.addItem(character->getName(), QVariant::fromValue(character));
+        }
+    }
+
+    if(characterSelectDlg.getItemCount() > 0)
+    {
+        if(characterSelectDlg.exec() == QDialog::Accepted)
+        {
+            Character* selectedCharacter = characterSelectDlg.getSelectedData().value<Character*>();
+            if(selectedCharacter)
+            {
+                CombatantReference* newReference = new CombatantReference(*selectedCharacter, _battle);
+                int waveId = selection->data(1,EncounterBattleEdit_WaveId).toInt();
+                _battle->addCombatant(waveId, 1, newReference);
+                updateCombatantList();
+                QTreeWidgetItem* item = ui->treeWidget->topLevelItem(waveId);
+                if(item)
+                    ui->treeWidget->setCurrentItem(item->child(item->childCount() - 1));
+            }
+        }
+        else
+        {
+            qDebug() << "[EncounterBattleEdit] ... add NPC dialog cancelled";
+        }
+    }
+    else
+    {
+        QMessageBox::information(this, QString("Add NPC"), QString("No further NPCs could be found to add to the current battle."));
+        qDebug() << "[EncounterBattleEdit] ... no NPCs found to add";
+    }
+}
+
+void EncounterBattleEdit::editCombatant()
+{
+    editCombatant(ui->treeWidget->currentItem(), 0);
+}
+
 void EncounterBattleEdit::editCombatant(QTreeWidgetItem * item, int column)
 {
     Q_UNUSED(column);
@@ -170,12 +240,15 @@ void EncounterBattleEdit::editCombatant(QTreeWidgetItem * item, int column)
     if((index < 0) || (index >= combatants.count()))
         return;
 
-    CombatantDialog dlg(QDialogButtonBox::Save);
-    connect(&dlg, SIGNAL(openMonster(QString)), this, SIGNAL(openMonster(QString)));
-    dlg.setCombatant(combatants.at(index).first, combatants.at(index).second);
-    dlg.exec();
-    _battle->editCombatant(wave, index, dlg.getCount(), combatants.at(index).second);
-    updateCombatantList();
+    if(combatants.at(index).second->getType() == DMHelper::CombatantType_Monster)
+    {
+        CombatantDialog dlg(QDialogButtonBox::Save);
+        connect(&dlg, SIGNAL(openMonster(QString)), this, SIGNAL(openMonster(QString)));
+        dlg.setCombatant(combatants.at(index).first, combatants.at(index).second);
+        dlg.exec();
+        _battle->editCombatant(wave, index, dlg.getCount(), combatants.at(index).second);
+        updateCombatantList();
+    }
 }
 
 void EncounterBattleEdit::removeCombatant()
@@ -225,6 +298,8 @@ void EncounterBattleEdit::selectionChanged()
     if(!_battle)
     {
         ui->btnAddMonster->setEnabled(false);
+        ui->btnAddNPC->setEnabled(false);
+        ui->btnEditMonster->setEnabled(false);
         ui->btnDeleteMonster->setEnabled(false);
         ui->btnAddWave->setEnabled(false);
         ui->btnDeleteWave->setEnabled(false);
@@ -232,8 +307,20 @@ void EncounterBattleEdit::selectionChanged()
     else
     {
         QTreeWidgetItem* selection = ui->treeWidget->currentItem();
+        int wave = EncounterBattleEdit_CombatantIndexWave;
+        int index = EncounterBattleEdit_CombatantIndexWave;
+        if(selection)
+        {
+            wave = selection->data(1,EncounterBattleEdit_WaveId).toInt();
+            index = selection->data(1,EncounterBattleEdit_CombatantIndex).toInt();
+        }
+
+        CombatantGroupList combatants = _battle->getCombatants(wave);
+
         ui->btnAddMonster->setEnabled(selection);
-        ui->btnDeleteMonster->setEnabled( ( selection ) && ( selection->data(1,EncounterBattleEdit_CombatantIndex).toInt() != EncounterBattleEdit_CombatantIndexWave) );
+        ui->btnAddNPC->setEnabled(selection);
+        ui->btnEditMonster->setEnabled((index >= 0) && (index < combatants.count()) && (combatants.at(index).second->getType() == DMHelper::CombatantType_Monster));
+        ui->btnDeleteMonster->setEnabled(index != EncounterBattleEdit_CombatantIndexWave);
         ui->btnAddWave->setEnabled(true);
         ui->btnDeleteWave->setEnabled(_battle->getWaveCount() > 1);
     }
@@ -330,6 +417,8 @@ void EncounterBattleEdit::deleteBattleClicked()
 
 void EncounterBattleEdit::trackSelected(int index)
 {
+    Q_UNUSED(index);
+
     if(!_battle)
         return;
 

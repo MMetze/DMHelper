@@ -28,6 +28,7 @@ public slots:
 
 protected slots:
     virtual void setHighlighted(bool highlighted);
+    virtual void hitPointsEdited();
 
 protected:
 
@@ -40,6 +41,7 @@ protected:
     // UI elements
     QHBoxLayout* pairName;
     QHBoxLayout* pairArmorClass;
+    QLineEdit* _edtHP;
 
 };
 

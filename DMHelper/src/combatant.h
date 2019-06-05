@@ -55,7 +55,7 @@ public:
         SKILLS_COUNT
     };
 
-    explicit Combatant(QObject *parent = 0);
+    explicit Combatant(QObject *parent = nullptr);
     explicit Combatant(const Combatant &obj);  // copy constructor
     virtual ~Combatant();
 
@@ -104,6 +104,7 @@ public slots:
     virtual void addAttack(const Attack& attack);
     virtual void removeAttack(int index);
     virtual void setHitPoints(int hitPoints);
+    virtual void applyDamage(int damage);
     virtual void setHitDice(const Dice& hitDice);
     virtual void setIcon(const QString &newIcon);
 

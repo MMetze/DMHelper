@@ -122,8 +122,8 @@ void MonsterClass::inputXML(const QDomElement &element)
     setAlignment(element.firstChildElement(QString("alignment")).text());
     setLanguages(element.firstChildElement(QString("languages")).text());
     setArmorClass(element.firstChildElement(QString("armor_class")).text().toInt());
-    setHitDice(Dice(element.firstChildElement(QString("hit_dice")).text()));
     setAverageHitPoints(element.firstChildElement(QString("hit_points")).text().toInt());
+    setHitDice(Dice(element.firstChildElement(QString("hit_dice")).text()));
     setConditionImmunities(element.firstChildElement(QString("condition_immunities")).text());
     setDamageImmunities(element.firstChildElement(QString("damage_immunities")).text());
     setDamageResistances(element.firstChildElement(QString("damage_resistances")).text());
@@ -420,6 +420,32 @@ int MonsterClass::getSkillValue(Combatant::Skills skill) const
         return Combatant::getAbilityMod(getAbilityValue(Combatant::getSkillAbility(skill)));
 }
 
+QString MonsterClass::getSkillString() const
+{
+    QString result;
+
+    QList<int> keyList = _skillValues.keys();
+    for(int s : keyList)
+    {
+        if(_skillValues.contains(s))
+        {
+            if(!result.isEmpty())
+                result.append(", ");
+
+            result.append(Character::getWrittenSkillName(s));
+            result.append(" ");
+
+            int v = _skillValues.value(s);
+            if(v >= 0)
+                result.append("+");
+
+            result.append(QString::number(v));
+        }
+    }
+
+    return result;
+}
+
 QList<MonsterAction> MonsterClass::getActions() const
 {
     return _actions;
@@ -530,17 +556,17 @@ int MonsterClass::removeReaction(const MonsterAction& action)
 
 int MonsterClass::convertSizeToCategory(const QString& monsterSize)
 {
-    if(monsterSize == QString("Tiny"))
+    if(QString::compare(monsterSize, QString("Tiny"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Tiny;
-    else if(monsterSize == QString("Small"))
+    else if(QString::compare(monsterSize, QString("Small"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Small;
-    else if(monsterSize == QString("Medium"))
+    else if(QString::compare(monsterSize, QString("Medium"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Medium;
-    else if(monsterSize == QString("Large"))
+    else if(QString::compare(monsterSize, QString("Large"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Large;
-    else if(monsterSize == QString("Huge"))
+    else if(QString::compare(monsterSize, QString("Huge"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Huge;
-    else if(monsterSize == QString("Gargantuan"))
+    else if(QString::compare(monsterSize, QString("Gargantuan"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Gargantuan;
     else
         return DMHelper::CombatantSize_Unknown;
@@ -694,6 +720,7 @@ void MonsterClass::setHitDice(const Dice& hitDice)
         return;
 
     _hitDice = hitDice;
+    setAverageHitPoints(_hitDice.average());
     registerChange();
 }
 
@@ -703,6 +730,16 @@ void MonsterClass::setAverageHitPoints(int averageHitPoints)
         return;
 
     _averageHitPoints = averageHitPoints;
+
+    /*
+     * Removed as no longer needed to correct the hit dice bonus in the data!
+     *
+    if((_averageHitPoints != _hitDice.average()) && (_hitDice.getBonus() == 0))
+    {
+        _hitDice = Dice(_hitDice.getCount(), _hitDice.getType(), _averageHitPoints - _hitDice.average());
+    }
+    */
+
     registerChange();
 }
 

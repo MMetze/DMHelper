@@ -11,9 +11,9 @@ class CombatantFactory : public QObject
 {
     Q_OBJECT
 public:
-    explicit CombatantFactory(QObject *parent = 0);
+    explicit CombatantFactory(QObject *parent = nullptr);
 
-    static Combatant* createCombatant(int combatantType, const QDomElement& element, QObject *parent = 0);
+    static Combatant* createCombatant(int combatantType, const QDomElement& element, QObject *parent = nullptr);
 
 signals:
 

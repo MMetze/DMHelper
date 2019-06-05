@@ -28,6 +28,7 @@
 #include "monsterclass.h"
 #include "bestiary.h"
 #include "textpublishdialog.h"
+#include "texttranslatedialog.h"
 #include "combatantselectdialog.h"
 #ifdef INCLUDE_CHASE_SUPPORT
     #include "chaserselectiondialog.h"
@@ -188,14 +189,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_SaveCampaign,SIGNAL(triggered()),this,SLOT(saveCampaign()));
     connect(ui->actionSave_Campaign_As,SIGNAL(triggered()),this,SLOT(saveCampaignAs()));
     connect(ui->actionClose_Campaign,SIGNAL(triggered()),this,SLOT(closeCampaign()));
-    connect(ui->actionE_xit,SIGNAL(triggered()),qApp,SLOT(quit()));
+    //connect(ui->actionE_xit,SIGNAL(triggered()),qApp,SLOT(quit()));
+    connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
     connect(ui->actionDice,SIGNAL(triggered()),this,SLOT(openDiceDialog()));
 
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(handleCampaignLoaded(Campaign*)));
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(clearDirty()));
     connect(ui->actionNew_Adventure,SIGNAL(triggered()),this,SLOT(newAdventure()));
     connect(ui->actionNew_Character,SIGNAL(triggered()),this,SLOT(newCharacter()));
-    connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    // TODO: reenable Import Character (?)
+    //connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    ui->action_Import_Character->setVisible(false);
     connect(ui->actionNew_Text_Encounter,SIGNAL(triggered()),this,SLOT(newTextEncounter()));
     connect(ui->actionNew_Battle_Encounter,SIGNAL(triggered()),this,SLOT(newBattleEncounter()));
     connect(ui->actionNew_Scrolling_Text_Encounter,SIGNAL(triggered()),this,SLOT(newScrollingTextEncounter()));
@@ -206,6 +210,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_New_Monster,SIGNAL(triggered()),&bestiaryDlg,SLOT(createNewMonster()));
     connect(ui->actionOpen_DM_Screen,SIGNAL(triggered()),this,SLOT(openDMScreen()));
     connect(ui->actionPublish_Text,SIGNAL(triggered()),this,SLOT(openTextPublisher()));
+    connect(ui->actionTranslate_Text,SIGNAL(triggered()),this,SLOT(openTextTranslator()));
 #ifdef INCLUDE_CHASE_SUPPORT
     connect(ui->action_Chase_Dialog,SIGNAL(triggered()),this,SLOT(startChase()));
 #endif
@@ -214,9 +219,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeView,SIGNAL(expanded(QModelIndex)),this,SLOT(handleTreeItemExpanded(QModelIndex)));
     connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
 
-    qDebug() << "[Main] Creating Publish Window";
-    pubWindow = new PublishWindow(QString("DM Helper Publish Window"));
-    qDebug() << "[Main] Publish Window Created";
+    qDebug() << "[Main] Creating Player's Window";
+    pubWindow = new PublishWindow(QString("DM Helper Player's Window"));
+    qDebug() << "[Main] Player's Window Created";
 
     qDebug() << "[Main] Creating Tree Model";
     ui->treeView->setHeaderHidden(true);
@@ -265,10 +270,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterBattleEdit, SIGNAL(openMonster(QString)), this, SLOT(openMonster(QString)));
     ui->stackedWidgetEncounter->addWidget(encounterBattleEdit);
     // EncounterType_Character
+    /*
     QScrollArea* scrollArea = new QScrollArea;
     CharacterFrame* charFrame = new CharacterFrame;
     scrollArea->setWidget(charFrame);
     ui->stackedWidgetEncounter->addWidget(scrollArea);
+    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    */
+    CharacterFrame* charFrame = new CharacterFrame;
+    ui->stackedWidgetEncounter->addWidget(charFrame);
     connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
@@ -1071,17 +1081,15 @@ void MainWindow::deleteCampaign()
         treeModel->clear();
     }
 
+    Campaign* oldCampaign = campaign;
+    campaign = nullptr;
+    emit campaignLoaded(campaign);
+
     // Clear the campaign itself
-    if(campaign)
-    {
-        delete campaign;
-        campaign = nullptr;
-    }
+    delete oldCampaign;
 
     // Ensure the file name is removed
     campaignFileName.clear();
-
-    emit campaignLoaded(campaign);
 }
 
 void MainWindow::enableCampaignMenu()
@@ -1376,29 +1384,44 @@ void MainWindow::openFile(const QString& filename)
     if( !closeCampaign() )
         return;
 
-    qDebug() << "[Main] Loading Campaign: " << campaignFileName;
+    qDebug() << "[Main] Loading Campaign: " << filename;
 
     QDomDocument doc( "DMHelperXML" );
     QFile file( filename );
     if( !file.open( QIODevice::ReadOnly ) )
+    {
+        qDebug() << "[Main] Loading Failed: Unable to open campaign file";
         return;
+    }
 
     QTextStream in(&file);
     in.setCodec("UTF-8");
-    bool contentResult = doc.setContent( in.readAll() );
+    QString contentError;
+    int contentErrorLine = 0;
+    int contentErrorColumn = 0;
+    bool contentResult = doc.setContent(in.readAll(), &contentError, &contentErrorLine, &contentErrorColumn);
 
     file.close();
 
     if( contentResult == false )
+    {
+        qDebug() << "[Main] Loading Failed: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
         return;
+    }
 
     QDomElement root = doc.documentElement();
     if( (root.isNull()) || (root.tagName() != "root") )
+    {
+        qDebug() << "[Main] Loading Failed: Error reading XML - unable to find root entry";
         return;
+    }
 
     QDomElement campaignElement = root.firstChildElement( QString("campaign") );
     if( campaignElement.isNull() )
+    {
+        qDebug() << "[Main] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
+    }
 
     campaignFileName = filename;
     QFileInfo fileInfo(campaignFileName);
@@ -1896,16 +1919,17 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     {
         ui->stackedWidgetEncounter->setEnabled(true);
         ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Character);
-        QScrollArea* scrollArea = dynamic_cast<QScrollArea*>(ui->stackedWidgetEncounter->currentWidget());
-        if(scrollArea)
-        {
-            CharacterFrame* characterFrame = dynamic_cast<CharacterFrame*>(scrollArea->widget());
+//        QScrollArea* scrollArea = dynamic_cast<QScrollArea*>(ui->stackedWidgetEncounter->currentWidget());
+//        if(scrollArea)
+//        {
+//            CharacterFrame* characterFrame = dynamic_cast<CharacterFrame*>(scrollArea->widget());
+            CharacterFrame* characterFrame = dynamic_cast<CharacterFrame*>(ui->stackedWidgetEncounter->currentWidget());
             if(characterFrame)
             {
                 characterFrame->setCharacter(character);
                 connect(character,SIGNAL(destroyed(QObject*)),characterFrame,SLOT(clear()));
             }
-        }
+//        }
         return;
     }
 
@@ -2088,6 +2112,15 @@ void MainWindow::openDMScreen()
 void MainWindow::openTextPublisher()
 {
     TextPublishDialog* dlg = new TextPublishDialog(this);
+
+    connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    dlg->show();
+    dlg->activateWindow();
+}
+
+void MainWindow::openTextTranslator()
+{
+    TextTranslateDialog* dlg = new TextTranslateDialog(this);
 
     connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
     dlg->show();

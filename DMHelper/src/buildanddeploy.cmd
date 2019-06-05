@@ -26,10 +26,10 @@ cd build-release
 
 :build_done
 
-xcopy .\release\DMHelper.exe ..\bin
-xcopy ..\..\DMHelperShared\bin\DMHelperShared.dll ..\bin
-xcopy C:\Qt\5.11.1\mingw53_32\bin\Qt5Xml.dll ..\bin
-xcopy ..\src\binsrc\* ..\bin
+xcopy .\release\DMHelper.exe ..\bin\
+xcopy ..\..\DMHelperShared\bin\DMHelperShared.dll ..\bin\
+xcopy C:\Qt\5.11.1\mingw53_32\bin\Qt5Xml.dll ..\bin\
+xcopy ..\src\binsrc\* ..\bin\*
 
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin
 

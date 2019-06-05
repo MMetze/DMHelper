@@ -1,9 +1,29 @@
+<center>
+<p style="font-size:72px; padding: 1em 0 0 0">
+<font face="Felix Titling"><b>DM Helper</b></font>
+</p>
+<p style="padding: 0 0 0 0">
+<img src="Images/DMH-icon.png" width="75%">
+</p>
+<p style="padding: 0 0 1em 0">
+<font size="5" face="Felix Titling">A Dungeon Master's Helping Hand</font>
+</p>
+<p style="padding: 6em 0 0 0">
+<font size="6" face="Felix Titling">Getting Started</font>
+</p>
+</center>
+
+<p style="page-break-after: always;">&nbsp;</p>
+
+
+The DM Helper will act as your in-game assistance, taking care of the administrative tasks and allowing you to focus on your players, the narrative and the fun!
+
 # First Steps
 This tutorial will guide you through creating your first campaign (in this case the example campaign), using the interface and setting up your world to run your game in.
 
 ## Download and install
 Get the latest copy of DMHelper from our [itch.io](https://dm-helper.itch.io/dm-helper) page.<br />
-Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and charakter portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br />
+Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and character portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br />
 * [MyCampaigns]
  * [DMHelper]
  * [Campaign ONE]  

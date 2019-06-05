@@ -1,18 +1,21 @@
 #DMHelper ignores
 DMHelper/bin
 DMHelper/build-debug
+DMHelper/build-profile
 DMHelper/build-release
 DMHelper/rawdata
 DMHelper/release
 DMHelper/src/DMHelper.pro.user*
 DMHelper/working
 DMHelper/DM Helper release.__zip
+DMHelper/DM Helper release.zip
 DMHelper/DMHelper.log
 DMHelper/src.zip
 
 #DMHelper Shared ignores
 DMHelperShared/bin
 DMHelperShared/build-debug
+DMHelperShared/build-profile
 DMHelperShared/build-release
 DMHelperShared/release
 DMHelperShared/src/DMHelperShared.pro.user*
@@ -22,6 +25,7 @@ DMHelperShared/src.zip
 #DMHelper Client ignores
 DMHelperClient/bin
 DMHelperClient/build-debug
+DMHelperClient/build-profile
 DMHelperClient/build-release
 DMHelperClient/rawdata
 DMHelperClient/release
@@ -34,6 +38,7 @@ DMHelperClient/src.zip
 #DMHelper Test ignores
 DMHelperTest/bin
 DMHelperTest/build-debug
+DMHelperTest/build-profile
 DMHelperTest/build-release
 DMHelperTest/working
 DMHelperTest/src/DMHelperTest.pro.user*
@@ -41,3 +46,11 @@ DMHelperTest/src/DMHelperTest.pro.user*
 #DMHelper Backend ignores
 DMHelper-Backend/Pages/config.inc.php
 DMHelper-Backend/Pages/dbv/data/meta/revision
+DMHelper/.DS_Store
+.DS_Store
+DMHelper/DM Helper Release MAC.zip
+DMHelper/src/.qmake.stash
+DMHelper/src/DMHelper.pro.user
+DMHelper/src/DMHelper.pro.user
+DMHelper/src/Makefile
+*.user

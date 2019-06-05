@@ -332,6 +332,19 @@ void Combatant::setHitPoints(int hitPoints)
     }
 }
 
+void Combatant::applyDamage(int damage)
+{
+    if(damage <= 0)
+        return;
+
+    if(_hitPoints > damage)
+        _hitPoints -= damage;
+    else
+        _hitPoints = 0;
+
+    registerChange();
+}
+
 void Combatant::setHitDice(const Dice& hitDice)
 {
     if(hitDice != _hitDice)

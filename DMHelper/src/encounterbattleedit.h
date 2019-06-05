@@ -35,6 +35,8 @@ public slots:
     void addWave();
     void removeWave();
     void addCombatant();
+    void addNPC();
+    void editCombatant();
     void editCombatant(QTreeWidgetItem * item, int column);
     void removeCombatant();
     void selectionChanged();
