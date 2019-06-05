@@ -40,11 +40,11 @@ Combatant::~Combatant()
 {
 }
 
-void Combatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void Combatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "combatant" );
 
-    CampaignObjectBase::outputXML(doc, element, targetDirectory);
+    CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute( "name", getName() );
     element.setAttribute( "type", getType() );
@@ -72,14 +72,14 @@ void Combatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDi
     }
     element.appendChild(attacksElement);
 
-    internalOutputXML(doc, element, targetDirectory);
+    internalOutputXML(doc, element, targetDirectory, isExport);
 
     parent.appendChild(element);
 }
 
-void Combatant::inputXML(const QDomElement &element)
+void Combatant::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element);
+    CampaignObjectBase::inputXML(element, isImport);
 
     setName(element.attribute("name"));
     setArmorClass(element.attribute("armorClass").toInt());
@@ -364,11 +364,12 @@ void Combatant::setIcon(const QString &newIcon)
     }
 }
 
-void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
     Q_UNUSED(element);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport)
 }
 
 void Combatant::registerChange()

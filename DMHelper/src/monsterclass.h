@@ -15,10 +15,10 @@ class MonsterClass : public QObject
 public:
 
     explicit MonsterClass(const QString& name, QObject *parent = nullptr);
-    explicit MonsterClass(const QDomElement &element, QObject *parent = nullptr);
+    explicit MonsterClass(const QDomElement &element, bool isImport, QObject *parent = nullptr);
 
-    void inputXML(const QDomElement &element);
-    void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const;
+    void inputXML(const QDomElement &element, bool isImport);
+    void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
 
     void beginBatchChanges();
     void endBatchChanges();
@@ -81,12 +81,13 @@ public:
     static int convertSizeToCategory(const QString& monsterSize);
     static int convertSizeCategoryToScaleFactor(int category);
     static int convertSizeToScaleFactor(const QString& monsterSize);
-    static void outputValue(QDomDocument &doc, QDomElement &element, const QString& valueName, const QString& valueText);
+    static void outputValue(QDomDocument &doc, QDomElement &element, bool isExport, const QString& valueName, const QString& valueText);
 
 public slots:
     void setPrivate(bool isPrivate);
     void setIcon(const QString& newIcon);
     void searchForIcon(const QString &newIcon);
+    void clearIcon();
     void setName(const QString& name);
     void setMonsterType(const QString& monsterType);
     void setMonsterSubType(const QString& monsterSubType);
@@ -118,9 +119,9 @@ protected:
 
     void calculateHitDiceBonus();
     void registerChange();
-    void checkForSkill(const QDomElement& element, const QString& skillName, Combatant::Skills skill);
-    void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList);
-    void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList) const;
+    void checkForSkill(const QDomElement& element, const QString& skillName, Combatant::Skills skill, bool isImport);
+    void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport);
+    void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const;
 
     static int convertCRtoXP(float challengeRating);
 

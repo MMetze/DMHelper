@@ -38,26 +38,26 @@ BattleDialogModelCombatant::~BattleDialogModelCombatant()
 {
 }
 
-void BattleDialogModelCombatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void BattleDialogModelCombatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "battlecombatant" );
 
-    CampaignObjectBase::outputXML(doc, element, targetDirectory);
+    CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
 
-    element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID() : DMH_GLOBAL_INVALID_ID);
+    element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
     element.setAttribute("type", getType() );
     element.setAttribute("initiative", _initiative);
     element.setAttribute("positionX", _position.x());
     element.setAttribute("positionY", _position.y());
 
-    internalOutputXML(doc, element, targetDirectory);
+    internalOutputXML(doc, element, targetDirectory, isExport);
 
     parent.appendChild(element);
 }
 
-void BattleDialogModelCombatant::inputXML(const QDomElement &element)
+void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element);
+    CampaignObjectBase::inputXML(element, isImport);
 
     _initiative = element.attribute("initiative",QString::number(0)).toInt();
     _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),

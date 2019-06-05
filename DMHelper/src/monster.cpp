@@ -16,7 +16,7 @@ Monster::Monster(MonsterClass* monsterClass, QObject *parent) :
 //    setHitPoints(getHitDice().roll());
 }
 
-Monster::Monster(MonsterClass* monsterClass, const QDomElement &element, QObject *parent) :
+Monster::Monster(MonsterClass* monsterClass, const QDomElement &element, bool isImport, QObject *parent) :
     Combatant(parent),
     _monsterClass(monsterClass),
     _passivePerception(10),
@@ -24,7 +24,7 @@ Monster::Monster(MonsterClass* monsterClass, const QDomElement &element, QObject
     _notes(""),
     _iconChanged(false)
 {
-    inputXML(element);
+    inputXML(element, isImport);
 }
 
 Monster::Monster(const Monster &obj) :
@@ -37,14 +37,14 @@ Monster::Monster(const Monster &obj) :
 {
 }
 
-void Monster::inputXML(const QDomElement &element)
+void Monster::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
 
-    Combatant::inputXML(element);
+    Combatant::inputXML(element, isImport);
 
     setPassivePerception(element.attribute("passivePerception").toInt());
-    setActive((bool)(element.attribute("active").toInt()));
+    setActive(static_cast<bool>(element.attribute("active").toInt()));
     setNotes(element.attribute("notes"));
 
     endBatchChanges();
@@ -244,13 +244,14 @@ void Monster::setNotes(const QString& newNotes)
     registerChange();
 }
 
-void Monster::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void Monster::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isImport)
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isImport);
 
-    element.setAttribute( "monsterClass", getMonsterClass() != NULL ? getMonsterClass()->getName() : QString("") );
+    element.setAttribute( "monsterClass", getMonsterClass() != nullptr ? getMonsterClass()->getName() : QString("") );
     element.setAttribute( "passivePerception", getPassivePerception() );
-    element.setAttribute( "active", (int)getActive());
+    element.setAttribute( "active", static_cast<int>(getActive()));
     element.setAttribute( "notes", getNotes() );
 }

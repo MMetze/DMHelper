@@ -5,42 +5,47 @@
 
 CombatantReference::CombatantReference(QObject *parent) :
     Combatant(parent),
-    _referenceId(DMH_GLOBAL_INVALID_ID)
+    _referenceId(),
+    _referenceIntId(DMH_GLOBAL_INVALID_ID)
 {
 }
 
 CombatantReference::CombatantReference(const Combatant &combatant, QObject *parent) :
     Combatant(parent),
-    _referenceId(combatant.getID())
+    _referenceId(combatant.getID()),
+    _referenceIntId(combatant.getIntID())
 {
 }
 
-CombatantReference::CombatantReference(int combatantId, QObject *parent) :
+CombatantReference::CombatantReference(QUuid combatantId, QObject *parent) :
    Combatant(parent),
-   _referenceId(combatantId)
+   _referenceId(combatantId),
+   _referenceIntId(DMH_GLOBAL_INVALID_ID)
 {
 }
 
 CombatantReference::CombatantReference(const CombatantReference &obj) :
     Combatant(obj),
-    _referenceId(obj._referenceId)
+    _referenceId(obj._referenceId),
+    _referenceIntId(obj._referenceIntId)
 {
 }
 
 Combatant* CombatantReference::getReference()
 {
-    if(_referenceId == DMH_GLOBAL_INVALID_ID)
+    QUuid referenceId = getReferenceId();
+    if(referenceId.isNull())
         return nullptr;
 
     Campaign* campaign = getCampaign();
     if(!campaign)
         return nullptr;
 
-    Character* result = campaign->getCharacterById(_referenceId);
+    Character* result = campaign->getCharacterById(referenceId);
     if(result)
         return result;
 
-    result = campaign->getNPCById(_referenceId);
+    result = campaign->getNPCById(referenceId);
     if(result)
         return result;
 
@@ -49,27 +54,45 @@ Combatant* CombatantReference::getReference()
 
 const Combatant* CombatantReference::getReference() const
 {
-    if(_referenceId == DMH_GLOBAL_INVALID_ID)
+    QUuid referenceId = getReferenceId();
+    if(referenceId.isNull())
         return nullptr;
 
     const Campaign* campaign = getCampaign();
     if(!campaign)
         return nullptr;
 
-    const Character* result = campaign->getCharacterById(_referenceId);
+    const Character* result = campaign->getCharacterById(referenceId);
     if(result)
         return result;
 
-    result = campaign->getNPCById(_referenceId);
+    result = campaign->getNPCById(referenceId);
     if(result)
         return result;
 
     return nullptr;
 }
 
-int CombatantReference::getReferenceId() const
+QUuid CombatantReference::getReferenceId()
 {
+    if((_referenceId.isNull()) && (_referenceIntId != DMH_GLOBAL_INVALID_ID))
+    {
+        _referenceId = findUuid(_referenceIntId);
+    }
+
     return _referenceId;
+}
+
+QUuid CombatantReference::getReferenceId() const
+{
+    if((_referenceId.isNull()) && (_referenceIntId != DMH_GLOBAL_INVALID_ID))
+    {
+        return findUuid(_referenceIntId);
+    }
+    else
+    {
+        return _referenceId;
+    }
 }
 
 Combatant* CombatantReference::clone() const
@@ -112,13 +135,13 @@ int CombatantReference::getCharisma() const
     return 0;
 }
 
-void CombatantReference::inputXML(const QDomElement &element)
+void CombatantReference::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
 
-    Combatant::inputXML(element);
+    Combatant::inputXML(element, isImport);
 
-    _referenceId = element.attribute("referenceId").toInt();
+    _referenceId = parseIdString(element.attribute("referenceId"), &_referenceIntId);
 
     endBatchChanges();
 }
@@ -137,11 +160,12 @@ int CombatantReference::getType() const
     return DMHelper::CombatantType_Reference;
 }
 
-void CombatantReference::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void CombatantReference::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 
-    element.setAttribute( "referenceId", getReferenceId() );
+    element.setAttribute("referenceId", getReferenceId().toString());
 }
 

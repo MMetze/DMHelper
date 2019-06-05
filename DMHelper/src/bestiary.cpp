@@ -45,7 +45,7 @@ void Bestiary::Shutdown()
     delete _instance;
 }
 
-void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory) const
+void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const
 {
     qDebug() << "[Bestiary] Saving bestiary...";
     QDomElement bestiaryElement = doc.createElement( "bestiary" );
@@ -60,7 +60,7 @@ void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
         if(monsterClass)
         {
             QDomElement monsterElement = doc.createElement("element");
-            monsterClass->outputXML(doc, monsterElement, targetDirectory);
+            monsterClass->outputXML(doc, monsterElement, targetDirectory, isExport);
             bestiaryElement.appendChild(monsterElement);
         }
 
@@ -80,7 +80,7 @@ void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
     qDebug() << "[Bestiary] Saving bestiary completed";
 }
 
-void Bestiary::inputXML(const QDomElement &element)
+void Bestiary::inputXML(const QDomElement &element, bool isImport)
 {
     qDebug() << "[Bestiary] Loading bestiary...";
 
@@ -113,7 +113,7 @@ void Bestiary::inputXML(const QDomElement &element)
     QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
     while( !monsterElement.isNull() )
     {
-        MonsterClass* monster = new MonsterClass(monsterElement);
+        MonsterClass* monster = new MonsterClass(monsterElement, isImport);
         insertMonsterClass(monster);
         monsterElement = monsterElement.nextSiblingElement( QString("element") );
     }
@@ -283,7 +283,7 @@ Monster* Bestiary::createMonster(const QString& name) const
     return new Monster(getMonsterClass(name));
 }
 
-Monster* Bestiary::createMonster(const QDomElement& element) const
+Monster* Bestiary::createMonster(const QDomElement& element, bool isImport) const
 {
     QString monsterName = element.attribute(QString("monsterClass"));
 
@@ -294,7 +294,7 @@ Monster* Bestiary::createMonster(const QDomElement& element) const
         return nullptr;
     }
 
-    return new Monster(getMonsterClass(monsterName), element);
+    return new Monster(getMonsterClass(monsterName), element, isImport);
 }
 
 QString Bestiary::findMonsterImage(const QString& monsterName, const QString& iconFile)

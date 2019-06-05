@@ -16,8 +16,8 @@ public:
 
     virtual void apply( bool preview, QPaintDevice* target ) const = 0;
 
-    virtual void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const = 0;
-    virtual void inputXML(const QDomElement &element) = 0;
+    virtual void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const = 0;
+    virtual void inputXML(const QDomElement &element, bool isImport) = 0;
 
     virtual int getType() const;
 

@@ -28,9 +28,9 @@ BattleDialogModelCharacter::~BattleDialogModelCharacter()
 {
 }
 
-void BattleDialogModelCharacter::inputXML(const QDomElement &element)
+void BattleDialogModelCharacter::inputXML(const QDomElement &element, bool isImport)
 {
-    BattleDialogModelCombatant::inputXML(element);
+    BattleDialogModelCombatant::inputXML(element, isImport);
 }
 
 int BattleDialogModelCharacter::getType() const
@@ -246,9 +246,10 @@ void BattleDialogModelCharacter::setCharacter(Character* character)
     setCombatant(character);
 }
 
-void BattleDialogModelCharacter::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void BattleDialogModelCharacter::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
     Q_UNUSED(element);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 }

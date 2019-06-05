@@ -60,8 +60,8 @@ public:
     virtual ~Combatant();
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     virtual void beginBatchChanges();
     virtual void endBatchChanges();
@@ -110,7 +110,7 @@ public slots:
 
 protected:
 
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
     void registerChange();
 
     QString _name;

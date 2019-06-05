@@ -497,7 +497,7 @@ void BattleDialogManager::uploadBattleModel()
     doc.appendChild(root);
 
     QDir emptyDir;
-    _dlg->getModel().outputXML(doc, root, emptyDir);
+    _dlg->getModel().outputXML(doc, root, emptyDir, false);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkManager->setPayload(QString("battle"), doc.toString());
@@ -510,18 +510,19 @@ BattleDialog* BattleDialogManager::createBattleDialog(BattleDialogModel* dlgMode
         return nullptr;
 
     BattleDialog* dlg = new BattleDialog(*dlgModel);
-    connect(dlg,SIGNAL(characterSelected(int)),this,SIGNAL(characterSelected(int)));
-    connect(dlg,SIGNAL(monsterSelected(QString)),this,SIGNAL(monsterSelected(QString)));
-    connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(publishImage(QImage)));
-    connect(dlg,SIGNAL(animateImage(QImage)),this,SIGNAL(animateImage(QImage)));
-    connect(dlg,SIGNAL(showPublishWindow()),this,SIGNAL(showPublishWindow()));
+    connect(dlg, SIGNAL(characterSelected(QUuid)), this, SIGNAL(characterSelected(QUuid)));
+    connect(dlg, SIGNAL(monsterSelected(QString)), this, SIGNAL(monsterSelected(QString)));
+    connect(dlg, SIGNAL(publishImage(QImage)), this, SIGNAL(publishImage(QImage)));
+    connect(dlg, SIGNAL(animationStarted()), this, SIGNAL(animationStarted()));
+    connect(dlg, SIGNAL(animateImage(QImage)), this, SIGNAL(animateImage(QImage)));
+    connect(dlg, SIGNAL(showPublishWindow()), this, SIGNAL(showPublishWindow()));
 
-    connect(dlg,SIGNAL(battleComplete()),this,SLOT(completeBattle()));
-    connect(dlg,SIGNAL(selectNewMap()),this,SLOT(selectBattleMap()));
-    connect(dlg,SIGNAL(addMonsters()),this,SLOT(addMonsters()));
-    connect(dlg,SIGNAL(addWave()),this,SLOT(addWave()));
-    connect(dlg,SIGNAL(addCharacter()),this,SLOT(addCharacter()));
-    connect(dlg,SIGNAL(addNPC()),this,SLOT(addNPC()));
+    connect(dlg, SIGNAL(battleComplete()), this, SLOT(completeBattle()));
+    connect(dlg, SIGNAL(selectNewMap()), this, SLOT(selectBattleMap()));
+    connect(dlg, SIGNAL(addMonsters()), this, SLOT(addMonsters()));
+    connect(dlg, SIGNAL(addWave()), this, SLOT(addWave()));
+    connect(dlg, SIGNAL(addCharacter()), this, SLOT(addCharacter()));
+    connect(dlg, SIGNAL(addNPC()), this, SLOT(addNPC()));
 
     dlg->setShowOnDeck(_showOnDeck);
     dlg->setShowCountdown(_showCountdown);

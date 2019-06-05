@@ -40,11 +40,11 @@ BattleDialogModelEffect::~BattleDialogModelEffect()
 {
 }
 
-void BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "battleeffect" );
 
-    CampaignObjectBase::outputXML(doc, element, targetDirectory);
+    CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute("type", getType());
     element.setAttribute("size", _size);
@@ -60,9 +60,9 @@ void BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, 
     parent.appendChild(element);
 }
 
-void BattleDialogModelEffect::inputXML(const QDomElement &element)
+void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element);
+    CampaignObjectBase::inputXML(element, isImport);
 
     _size = element.attribute("size",QString::number(20)).toInt();
     _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),

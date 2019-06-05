@@ -167,6 +167,7 @@ void CombatantWidget::loadImage()
     {
         _lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
         _lblIcon->setPixmap(getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
+        emit imageChanged(getCombatant());
     }
 }
 

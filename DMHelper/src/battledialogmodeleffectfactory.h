@@ -10,10 +10,10 @@ class BattleDialogModelEffectFactory : public QObject
 {
     Q_OBJECT
 public:
-    explicit BattleDialogModelEffectFactory(QObject *parent = 0);
+    explicit BattleDialogModelEffectFactory(QObject *parent = nullptr);
 
     static BattleDialogModelEffect* createEffect(int effectType);
-    static BattleDialogModelEffect* createEffect(const QDomElement& element);
+    static BattleDialogModelEffect* createEffect(const QDomElement& element, bool isImport);
 
 signals:
 

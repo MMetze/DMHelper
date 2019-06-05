@@ -20,7 +20,7 @@ public:
     virtual ~BattleDialogModelMonsterClass();
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     // Local
     virtual BattleDialogModelMonsterClass* clone() const;
@@ -48,7 +48,7 @@ public:
 
 protected:
     // From BattleDialogModelCombatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
     MonsterClass* _monsterClass;
     QString _monsterName;

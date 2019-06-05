@@ -16,27 +16,27 @@ BattleDialogLogger::~BattleDialogLogger()
     qDeleteAll(_battleEvents);
 }
 
-void BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(targetDirectory);
-
     QDomElement loggerElement = doc.createElement( "battlelogger" );
 
-    DMHObjectBase::outputXML(doc, loggerElement, targetDirectory);
+    DMHObjectBase::outputXML(doc, loggerElement, targetDirectory, isExport);
 
     for(BattleDialogEvent* i : _battleEvents)
     {
         QDomElement eventElement = doc.createElement( "battleevent");
         eventElement.setAttribute( "type", i->getType());
-        i->outputXML(eventElement);
+        i->outputXML(eventElement, isExport);
         loggerElement.appendChild(eventElement);
     }
 
     parent.appendChild(loggerElement);
 }
 
-void BattleDialogLogger::inputXML(const QDomElement &element)
+void BattleDialogLogger::inputXML(const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     qDeleteAll(_battleEvents);
     _battleEvents.clear();
 
@@ -60,9 +60,9 @@ void BattleDialogLogger::inputXML(const QDomElement &element)
     }
 }
 
-void BattleDialogLogger::postProcessXML(const QDomElement &element)
+void BattleDialogLogger::postProcessXML(const QDomElement &element, bool isImport)
 {
-    Q_UNUSED(element);
+    DMHObjectBase::postProcessXML(element, isImport);
 }
 
 QList<BattleDialogEvent*> BattleDialogLogger::getEvents() const
@@ -70,7 +70,7 @@ QList<BattleDialogEvent*> BattleDialogLogger::getEvents() const
     return _battleEvents;
 }
 
-void BattleDialogLogger::damageDone(int combatantID, int targetID, int damage)
+void BattleDialogLogger::damageDone(QUuid combatantID, QUuid targetID, int damage)
 {
     _battleEvents.append(new BattleDialogEventDamage(combatantID, targetID, damage));
 }

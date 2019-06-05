@@ -36,7 +36,7 @@ QAbstractGraphicsShapeItem* BattleDialogModelEffectLine::createEffectShape(qreal
 {
     QGraphicsRectItem* rectItem = new QGraphicsRectItem(-250.0, 0.0, 500.0, (qreal)getSize() * 100.f);
 
-    rectItem->setData(0, getID());
+    rectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
     //qreal scaledSize = _model.getGridScale() / 500.f;
 
     prepareItem(*rectItem);

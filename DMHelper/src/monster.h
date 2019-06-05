@@ -11,12 +11,12 @@ class Monster : public Combatant
 {
     Q_OBJECT
 public:
-    explicit Monster(MonsterClass* monsterClass, QObject *parent = 0);
-    explicit Monster(MonsterClass* monsterClass, const QDomElement &element, QObject *parent = 0);
+    explicit Monster(MonsterClass* monsterClass, QObject *parent = nullptr);
+    explicit Monster(MonsterClass* monsterClass, const QDomElement &element, bool isImport, QObject *parent = nullptr);
     explicit Monster(const Monster &obj);  // copy constructor
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     // From Combatant
     virtual void beginBatchChanges();
@@ -57,7 +57,7 @@ signals:
 
 protected:
     // From Combatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
     MonsterClass* _monsterClass;
     int _passivePerception;

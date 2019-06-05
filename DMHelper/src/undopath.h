@@ -12,8 +12,8 @@ public:
     virtual void undo();
     virtual void redo();
     virtual void apply( bool preview, QPaintDevice* target ) const;
-    virtual void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const;
-    virtual void inputXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     virtual int getType() const;
 

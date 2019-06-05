@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QDomElement>
+#include <QUuid>
 
 //class DMHObjectBase;
 class QDomDocument;
@@ -21,21 +22,24 @@ public:
     DMHObjectBase_Private(const DMHObjectBase_Private& other);
     virtual ~DMHObjectBase_Private();
 
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
-    virtual void postProcessXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
-    int getID() const;
-    void setID(int id);
+    QUuid getID() const;
+    int getIntID() const;
+    void setID(QUuid id);
+    void setIntID(int id);
 
     // STATIC FUNCTIONS
-    static void setBaseId(int baseId);
-    static void resetBaseId();
-    static int createId();
-    static int _id_global;
+    //static void setBaseId(int baseId);
+    //static void resetBaseId();
+    //static int createId();
+    //static int _id_global;
 
 private:
-    int _id;
+    QUuid _id;
+    int _intId;
 
 };
 

@@ -8,15 +8,15 @@ class AudioTrack : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit AudioTrack(const QString& trackName, const QUrl& trackUrl, QObject *parent = 0);
-    explicit AudioTrack(QDomElement &element, QObject *parent = 0);
+    explicit AudioTrack(const QString& trackName, const QUrl& trackUrl, QObject *parent = nullptr);
+    explicit AudioTrack(QDomElement &element, bool isImport, QObject *parent = nullptr);
     explicit AudioTrack(const AudioTrack &obj);  // copy constructor
     ~AudioTrack();
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
-    virtual void postProcessXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
     // Local
     virtual QString getName() const;
@@ -27,6 +27,10 @@ public:
 
     virtual QString getMD5() const;
     virtual void setMD5(const QString& md5);
+
+signals:
+    void changed();
+    void dirty();
 
 protected:
     QString _name;

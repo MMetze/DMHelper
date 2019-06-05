@@ -14,6 +14,7 @@
 #include <QFileInfo>
 #include <QList>
 #include <QMap>
+#include <QUuid>
 
 class PublishWindow;
 class ScrollTabWidget;
@@ -31,6 +32,7 @@ class QVBoxLayout;
 class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
+class PublishFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -57,13 +59,14 @@ public slots:
     bool closeCampaign();
     void openDiceDialog();
 
-    void openCharacter(int id);
+    void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
 
     void newCharacter();
     void importCharacter();
+    void importItem();
     void newNPC();
-    void removeCurrentCharacter();
+    //void removeCurrentCharacter();
     void newAdventure();
     void newTextEncounter();
     void newBattleEncounter();
@@ -72,6 +75,7 @@ public slots:
     void editCurrentMap();
     void removeCurrentItem();
     void editCurrentItem();
+    void exportCurrentItem();
 
     void clearDirty();
     void setDirty();
@@ -111,9 +115,9 @@ protected:
     Adventure* adventureFromIndex(const QModelIndex & index);
     Encounter* encounterFromIndex(const QModelIndex & index);
     Map* mapFromIndex(const QModelIndex & index);
-    bool selectItem(int itemType, int itemId);
-    bool selectItem(int itemType, int itemId, int adventureId);
-    QStandardItem* findItem(QStandardItem* parent, int itemType, int itemId);
+    bool selectItem(int itemType, QUuid itemId);
+    bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
+    QStandardItem* findItem(QStandardItem* parent, int itemType, QUuid itemId);
     QStandardItem* findParentbyType(QStandardItem* child, int parentType);
     void setIndexExpanded(bool expanded, const QModelIndex& index);
 
@@ -140,6 +144,9 @@ protected slots:
     void handleLoadBattle();
     void handleDeleteBattle();
 
+    void handleAnimationStarted();
+    void handleAnimationPreview(QImage img);
+
     // Bestiary
     void openBestiary();
     void openAboutDialog();
@@ -159,6 +166,7 @@ private:
     PublishWindow* pubWindow;
     ScrollTabWidget* previewTab;
     TimeAndDateFrame* timeAndDateFrame;
+    PublishFrame* previewFrame;
 
     EncounterTextEdit* encounterTextEdit;
 
@@ -168,7 +176,7 @@ private:
     Campaign* campaign;
     QString campaignFileName;
 
-    int currentCharacter;
+    //QUuid currentCharacter;
 
     OptionsContainer* _options;
 
@@ -196,6 +204,7 @@ private:
 
     bool initialized;
     bool dirty;
+    int _animationFrameCount;
 };
 
 #endif // MAINWINDOW_H

@@ -71,7 +71,7 @@ MonsterClass::MonsterClass(const QString& name, QObject *parent) :
 {
 }
 
-MonsterClass::MonsterClass(const QDomElement &element, QObject *parent) :
+MonsterClass::MonsterClass(const QDomElement &element, bool isImport, QObject *parent) :
     QObject(parent),
     _private(false),
     _icon(""),
@@ -104,11 +104,13 @@ MonsterClass::MonsterClass(const QDomElement &element, QObject *parent) :
     _iconChanged(false),
     _scaledPixmap()
 {
-    inputXML(element);
+    inputXML(element, isImport);
 }
 
-void MonsterClass::inputXML(const QDomElement &element)
+void MonsterClass::inputXML(const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     beginBatchChanges();
 
     setPrivate(static_cast<bool>(element.attribute("private",QString::number(0)).toInt()));
@@ -138,17 +140,17 @@ void MonsterClass::inputXML(const QDomElement &element)
     setCharisma(element.firstChildElement(QString("charisma")).text().toInt());
 
     for(int s = Combatant::Skills_strengthSave; s < Combatant::SKILLS_COUNT; ++s)
-        checkForSkill(element, SKILLELEMEMT_NAMES[s], static_cast<Combatant::Skills>(s));
+        checkForSkill(element, SKILLELEMEMT_NAMES[s], static_cast<Combatant::Skills>(s), isImport);
 
-    readActionList(element, QString("actions"), _actions);
-    readActionList(element, QString("legendary_actions"), _legendaryActions);
-    readActionList(element, QString("special_abilities"), _specialAbilities);
-    readActionList(element, QString("reactions"), _reactions);
+    readActionList(element, QString("actions"), _actions, isImport);
+    readActionList(element, QString("legendary_actions"), _legendaryActions, isImport);
+    readActionList(element, QString("special_abilities"), _specialAbilities, isImport);
+    readActionList(element, QString("reactions"), _reactions, isImport);
 
     endBatchChanges();
 }
 
-void MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const
+void MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     element.setAttribute( "private", static_cast<int>(getPrivate()) );
 
@@ -162,39 +164,39 @@ void MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
         element.setAttribute( "icon", targetDirectory.relativeFilePath(iconPath));
     }
 
-    outputValue(doc, element, QString("name"), getName());
-    outputValue(doc, element, QString("type"), getMonsterType());
-    outputValue(doc, element, QString("subtype"), getMonsterSubType());
-    outputValue(doc, element, QString("size"), getMonsterSize());
-    outputValue(doc, element, QString("speed"), getSpeed());
-    outputValue(doc, element, QString("alignment"), getAlignment());
-    outputValue(doc, element, QString("languages"), getLanguages());
-    outputValue(doc, element, QString("armor_class"), QString::number(getArmorClass()));
-    outputValue(doc, element, QString("hit_dice"), getHitDice().toString());
-    outputValue(doc, element, QString("hit_points"), QString::number(getAverageHitPoints()));
-    outputValue(doc, element, QString("condition_immunities"), getConditionImmunities());
-    outputValue(doc, element, QString("damage_immunities"), getDamageImmunities());
-    outputValue(doc, element, QString("damage_resistances"), getDamageResistances());
-    outputValue(doc, element, QString("damage_vulnerabilities"), getDamageVulnerabilities());
-    outputValue(doc, element, QString("senses"), getSenses());
-    outputValue(doc, element, QString("challenge_rating"), getChallenge());
-    outputValue(doc, element, QString("strength"), QString::number(getStrength()));
-    outputValue(doc, element, QString("dexterity"), QString::number(getDexterity()));
-    outputValue(doc, element, QString("constitution"), QString::number(getConstitution()));
-    outputValue(doc, element, QString("intelligence"), QString::number(getIntelligence()));
-    outputValue(doc, element, QString("wisdom"), QString::number(getWisdom()));
-    outputValue(doc, element, QString("charisma"), QString::number(getCharisma()));
+    outputValue(doc, element, isExport, QString("name"), getName());
+    outputValue(doc, element, isExport, QString("type"), getMonsterType());
+    outputValue(doc, element, isExport, QString("subtype"), getMonsterSubType());
+    outputValue(doc, element, isExport, QString("size"), getMonsterSize());
+    outputValue(doc, element, isExport, QString("speed"), getSpeed());
+    outputValue(doc, element, isExport, QString("alignment"), getAlignment());
+    outputValue(doc, element, isExport, QString("languages"), getLanguages());
+    outputValue(doc, element, isExport, QString("armor_class"), QString::number(getArmorClass()));
+    outputValue(doc, element, isExport, QString("hit_dice"), getHitDice().toString());
+    outputValue(doc, element, isExport, QString("hit_points"), QString::number(getAverageHitPoints()));
+    outputValue(doc, element, isExport, QString("condition_immunities"), getConditionImmunities());
+    outputValue(doc, element, isExport, QString("damage_immunities"), getDamageImmunities());
+    outputValue(doc, element, isExport, QString("damage_resistances"), getDamageResistances());
+    outputValue(doc, element, isExport, QString("damage_vulnerabilities"), getDamageVulnerabilities());
+    outputValue(doc, element, isExport, QString("senses"), getSenses());
+    outputValue(doc, element, isExport, QString("challenge_rating"), getChallenge());
+    outputValue(doc, element, isExport, QString("strength"), QString::number(getStrength()));
+    outputValue(doc, element, isExport, QString("dexterity"), QString::number(getDexterity()));
+    outputValue(doc, element, isExport, QString("constitution"), QString::number(getConstitution()));
+    outputValue(doc, element, isExport, QString("intelligence"), QString::number(getIntelligence()));
+    outputValue(doc, element, isExport, QString("wisdom"), QString::number(getWisdom()));
+    outputValue(doc, element, isExport, QString("charisma"), QString::number(getCharisma()));
 
     for(int s = Combatant::Skills_strengthSave; s < Combatant::SKILLS_COUNT; ++s)
     {
         if(_skillValues.contains(static_cast<Combatant::Skills>(s)))
-            outputValue(doc, element, SKILLELEMEMT_NAMES[s], QString::number(_skillValues[s]));
+            outputValue(doc, element, isExport, SKILLELEMEMT_NAMES[s], QString::number(_skillValues[s]));
     }
 
-    writeActionList(doc, element, QString("actions"), _actions);
-    writeActionList(doc, element, QString("legendary_actions"), _legendaryActions);
-    writeActionList(doc, element, QString("special_abilities"), _specialAbilities);
-    writeActionList(doc, element, QString("reactions"), _reactions);
+    writeActionList(doc, element, QString("actions"), _actions, isExport);
+    writeActionList(doc, element, QString("legendary_actions"), _legendaryActions, isExport);
+    writeActionList(doc, element, QString("special_abilities"), _specialAbilities, isExport);
+    writeActionList(doc, element, QString("reactions"), _reactions, isExport);
 
 }
 
@@ -598,8 +600,10 @@ int MonsterClass::convertSizeToScaleFactor(const QString& monsterSize)
     return convertSizeCategoryToScaleFactor(convertSizeToCategory(monsterSize));
 }
 
-void MonsterClass::outputValue(QDomDocument &doc, QDomElement &element, const QString& valueName, const QString& valueText)
+void MonsterClass::outputValue(QDomDocument &doc, QDomElement &element, bool isExport, const QString& valueName, const QString& valueText)
 {
+    Q_UNUSED(isExport);
+
     QDomElement newChild = doc.createElement(valueName);
     newChild.appendChild(doc.createTextNode(valueText));
     element.appendChild(newChild);
@@ -638,6 +642,21 @@ void MonsterClass::searchForIcon(const QString &newIcon)
         {
             emit iconChanged();
         }
+    }
+}
+
+void MonsterClass::clearIcon()
+{
+    _icon = QString("");
+    _scaledPixmap.invalidate();
+    registerChange();
+    if(_batchChanges)
+    {
+        _iconChanged = true;
+    }
+    else
+    {
+        emit iconChanged();
     }
 }
 
@@ -869,8 +888,10 @@ void MonsterClass::registerChange()
     }
 }
 
-void MonsterClass::checkForSkill(const QDomElement& element, const QString& skillName, Combatant::Skills skill)
+void MonsterClass::checkForSkill(const QDomElement& element, const QString& skillName, Combatant::Skills skill, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     QDomElement skillElement = element.firstChildElement(skillName);
     if(skillElement.isNull())
         return;
@@ -878,7 +899,7 @@ void MonsterClass::checkForSkill(const QDomElement& element, const QString& skil
     _skillValues[skill] = skillElement.text().toInt();
 }
 
-void MonsterClass::readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList)
+void MonsterClass::readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport)
 {
     QDomElement actionListElement = element.firstChildElement(actionName);
     if(actionListElement.isNull())
@@ -887,20 +908,20 @@ void MonsterClass::readActionList(const QDomElement& element, const QString& act
     QDomElement actionElement = actionListElement.firstChildElement("element");
     while(!actionElement.isNull())
     {
-        MonsterAction newAction(actionElement);
+        MonsterAction newAction(actionElement, isImport);
         actionList.append(newAction);
         actionElement = actionElement.nextSiblingElement("element");
     }
 }
 
-void MonsterClass::writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList) const
+void MonsterClass::writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const
 {
     QDomElement actionListElement = doc.createElement(actionName);
 
     for(int i = 0; i < actionList.count(); ++i)
     {
         QDomElement actionElement = doc.createElement("element");
-        actionList.at(i).outputXML(doc, actionElement);
+        actionList.at(i).outputXML(doc, actionElement, isExport);
         actionListElement.appendChild(actionElement);
     }
 

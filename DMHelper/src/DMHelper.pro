@@ -20,7 +20,9 @@ INSTALLS += \
 win32:RC_ICONS += dmhelper.ico
 
 SOURCES += main.cpp\
+    campaignexporter.cpp \
         mainwindow.cpp \
+    objectimporter.cpp \
     publishwindow.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -148,6 +150,8 @@ SOURCES += main.cpp\
     texttranslatedialog.cpp
 
 HEADERS  += mainwindow.h \
+    campaignexporter.h \
+    objectimporter.h \
     publishwindow.h \
     undopoint.h \
     undopath.h \

@@ -114,7 +114,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <x>0</x>
      <y>0</y>
      <width>1467</width>
-     <height>17</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -154,10 +154,12 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     </widget>
     <addaction name="actionNew_Adventure"/>
     <addaction name="actionNew_Character"/>
-    <addaction name="action_Import_Character"/>
-    <addaction name="separator"/>
     <addaction name="menuNew_Encounter"/>
     <addaction name="actionNew_Map"/>
+    <addaction name="separator"/>
+    <addaction name="actionExport_Item"/>
+    <addaction name="actionImport_Item"/>
+    <addaction name="action_Import_Character"/>
     <addaction name="separator"/>
     <addaction name="actionBattle_Dialog"/>
     <addaction name="actionStart_Battle"/>
@@ -319,7 +321,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="action_Import_Character">
    <property name="text">
-    <string>&amp;Import Character</string>
+    <string>I&amp;mport External Character</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -330,6 +332,16 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionTranslate_Text">
    <property name="text">
     <string>Translate Text</string>
+   </property>
+  </action>
+  <action name="actionImport_Item">
+   <property name="text">
+    <string>&amp;Import Item...</string>
+   </property>
+  </action>
+  <action name="actionExport_Item">
+   <property name="text">
+    <string>E&amp;xport Item...</string>
    </property>
   </action>
  </widget>

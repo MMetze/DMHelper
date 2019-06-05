@@ -34,7 +34,7 @@ QAbstractGraphicsShapeItem* BattleDialogModelEffectRadius::createEffectShape(qre
 {
     QGraphicsEllipseItem* circleItem = new QGraphicsEllipseItem(0,0,100,100);
 
-    circleItem->setData(0, getID());
+    circleItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
     prepareItem(*circleItem);
     applyEffectValues(*circleItem, gridScale);
 

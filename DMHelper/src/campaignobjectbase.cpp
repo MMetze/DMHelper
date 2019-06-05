@@ -23,11 +23,19 @@ CampaignObjectBase::~CampaignObjectBase()
 void CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
 {
 }
+*/
 
-void CampaignObjectBase::inputXML(const QDomElement &element)
+void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
 {
+    DMHObjectBase::inputXML(element, isImport);
+
+    if(getID().isNull())
+    {
+        setID(findUuid(getIntID()));
+    }
 }
 
+/*
 void CampaignObjectBase::postProcessXML(const QDomElement &element)
 {
 }
@@ -80,3 +88,32 @@ int CampaignObjectBase::createId()
     return _id_global++;
 }
 */
+
+QUuid CampaignObjectBase::parseIdString(QString idString, int* intId, bool isLocal)
+{
+    QUuid result(idString);
+    if(result.isNull())
+    {
+        bool ok = false;
+        int tempIntId = idString.toInt(&ok);
+        if(ok)
+        {
+            if(intId)
+                *intId = tempIntId;
+
+            if(!isLocal)
+                result = findUuid(tempIntId);
+        }
+    }
+
+    return result;
+}
+
+QUuid CampaignObjectBase::findUuid(int intId) const
+{
+    const Campaign* campaign = getCampaign();
+    if(!campaign)
+        return QUuid();
+
+    return campaign->getUuidFromIntId(intId);
+}

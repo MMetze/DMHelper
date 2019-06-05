@@ -24,9 +24,9 @@ EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QOb
     _fontFamily = QGuiApplication::font().family();
 }
 
-void EncounterScrollingText::inputXML(const QDomElement &element)
+void EncounterScrollingText::inputXML(const QDomElement &element, bool isImport)
 {
-    Encounter::inputXML(element);
+    Encounter::inputXML(element, isImport);
 
     setScrollSpeed(element.attribute("scrollSpeed").toDouble());
     setImgFile(element.attribute("imageFile"));
@@ -58,7 +58,7 @@ void EncounterScrollingText::widgetActivated(QWidget* widget)
     if(!textEdit)
         return;
 
-    if(textEdit->getScrollingText() != 0)
+    if(textEdit->getScrollingText() != nullptr)
     {
         qDebug() << "[EncounterScrollingText] ERROR: Scrolling text not deactivated: " << textEdit->getScrollingText()->getID() << " """ << textEdit->getScrollingText()->getName();
         qDebug() << "[EncounterScrollingText] ERROR: Previous scrolling text will now be deactivated. This should happen previously!";
@@ -88,8 +88,8 @@ void EncounterScrollingText::widgetDeactivated(QWidget* widget)
 
     textEdit->unsetScrollingText(this);
 
-    disconnect(textEdit,0,this,0);
-    _widget = NULL;
+    disconnect(textEdit, nullptr, this, nullptr);
+    _widget = nullptr;
 }
 
 int EncounterScrollingText::getType() const
@@ -247,8 +247,10 @@ void EncounterScrollingText::widgetChanged()
         return;
 }
 
-void EncounterScrollingText::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void EncounterScrollingText::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
+    Q_UNUSED(isExport);
+
     element.setAttribute( "scrollSpeed", getScrollSpeed());
     element.setAttribute( "imageFile", targetDirectory.relativeFilePath(getImgFile()) );
 
@@ -257,8 +259,8 @@ void EncounterScrollingText::internalOutputXML(QDomDocument &doc, QDomElement &e
 
     element.setAttribute( "fontFamily", getFontFamily());
     element.setAttribute( "fontSize", getFontSize());
-    element.setAttribute( "fontBold", (int)getFontBold());
-    element.setAttribute( "fontItalics", (int)getFontItalics());
+    element.setAttribute( "fontBold", static_cast<int>(getFontBold()));
+    element.setAttribute( "fontItalics", static_cast<int>(getFontItalics()));
     element.setAttribute( "alignment", getAlignment());
     element.setAttribute( "imageWidth", getImageWidth());
     element.setAttribute( "fontColor", getFontColor().name());

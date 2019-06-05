@@ -15,16 +15,16 @@ public:
     BattleDialogLogger(const BattleDialogLogger& other) = delete;
     BattleDialogLogger& operator=(const BattleDialogLogger& other) = delete;
 
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
-    virtual void postProcessXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
     virtual QList<BattleDialogEvent*> getEvents() const;
 
 signals:
 
 public slots:
-    void damageDone(int combatantID, int targetID, int damage);
+    void damageDone(QUuid combatantID, QUuid targetID, int damage);
     void newRound();
 
 protected:

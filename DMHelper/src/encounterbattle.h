@@ -18,8 +18,8 @@ public:
     virtual ~EncounterBattle();
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element);
-    virtual void postProcessXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
     // Base functions to handle UI widgets
     virtual void widgetActivated(QWidget* widget);
@@ -32,7 +32,7 @@ public:
     virtual QString getText() const;
 
     AudioTrack* getAudioTrack();
-    int getAudioTrackId();
+    QUuid getAudioTrackId();
     void setAudioTrack(AudioTrack* track);
 
     int getWaveCount() const;
@@ -45,7 +45,7 @@ public:
     void addCombatant(int wave, int count, Combatant* combatant);
     void editCombatant(int wave, int index, int count, Combatant* combatant);
     void removeCombatant(int wave, int index);
-    Combatant* getCombatantById(int combatantId) const;
+    Combatant* getCombatantById(QUuid combatantId, int combatantIntId) const;
 
     void setBattleDialogModel(BattleDialogModel* model);
     BattleDialogModel* getBattleDialogModel() const;
@@ -56,13 +56,13 @@ public slots:
 
 protected slots:
     virtual void widgetChanged();
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
 protected:
-    void inputXMLBattle(const QDomElement &element);
+    void inputXMLBattle(const QDomElement &element, bool isImport);
 
     QString _text;
-    int _audioTrackId;
+    QUuid _audioTrackId;
     QList<CombatantGroupList> _combatantWaves;
     BattleDialogModel* _battleModel;
 

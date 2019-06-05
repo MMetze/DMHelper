@@ -7,6 +7,8 @@
 
 class QAbstractGraphicsShapeItem;
 
+const int BATTLE_DIALOG_MODEL_EFFECT_ID = 0;
+
 class BattleDialogModelEffect : public CampaignObjectBase
 {
     Q_OBJECT
@@ -27,8 +29,8 @@ public:
     virtual ~BattleDialogModelEffect();
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     virtual BattleDialogModelEffect* clone() const = 0;
 

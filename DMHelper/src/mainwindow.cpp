@@ -7,6 +7,7 @@
 #include "countdownframe.h"
 #include "character.h"
 #include "characterimporter.h"
+#include "objectimporter.h"
 #include "characterframe.h"
 #include "campaign.h"
 #include "adventure.h"
@@ -45,6 +46,7 @@
     #include "networkcontroller.h"
 #endif
 #include "aboutdialog.h"
+#include "campaignexporter.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -124,13 +126,14 @@ MainWindow::MainWindow(QWidget *parent) :
     pubWindow(nullptr),
     previewTab(nullptr),
     timeAndDateFrame(nullptr),
+    previewFrame(nullptr),
     encounterTextEdit(nullptr),
     treeModel(nullptr),
     treeIndexMap(),
     characterLayout(nullptr),
     campaign(nullptr),
     campaignFileName(),
-    currentCharacter(DMH_GLOBAL_INVALID_ID),
+    //currentCharacter(),
     _options(nullptr),
     bestiaryDlg(),
     dmScreenDlg(),
@@ -147,13 +150,15 @@ MainWindow::MainWindow(QWidget *parent) :
     undoAction(nullptr),
     redoAction(nullptr),
     initialized(false),
-    dirty(false)
+    dirty(false),
+    _animationFrameCount(DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES)
 {
     qDebug() << "[Main] Initializing Main";
 
     qDebug() << "[Main] DMHelper version information";
     qDebug() << "[Main]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION);
     qDebug() << "[Main]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
+    qDebug() << "[Main]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
     qDebug() << "[Main]     Build: " << __DATE__ << " " << __TIME__;
 
     qDebug() << "[Main] Qt Information";
@@ -197,13 +202,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(clearDirty()));
     connect(ui->actionNew_Adventure,SIGNAL(triggered()),this,SLOT(newAdventure()));
     connect(ui->actionNew_Character,SIGNAL(triggered()),this,SLOT(newCharacter()));
-    // TODO: reenable Import Character (?)
-    //connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
-    ui->action_Import_Character->setVisible(false);
     connect(ui->actionNew_Text_Encounter,SIGNAL(triggered()),this,SLOT(newTextEncounter()));
     connect(ui->actionNew_Battle_Encounter,SIGNAL(triggered()),this,SLOT(newBattleEncounter()));
     connect(ui->actionNew_Scrolling_Text_Encounter,SIGNAL(triggered()),this,SLOT(newScrollingTextEncounter()));
     connect(ui->actionNew_Map,SIGNAL(triggered()),this,SLOT(newMap()));
+    connect(ui->actionExport_Item,SIGNAL(triggered()),this,SLOT(exportCurrentItem()));
+    // TODO: reenable Import Character (?)
+    //connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    ui->action_Import_Character->setVisible(false);
     connect(ui->actionStart_Battle,SIGNAL(triggered()),this,SLOT(handleStartNewBattle()));
 
     connect(ui->action_Open_Bestiary,SIGNAL(triggered()),this,SLOT(openBestiary()));
@@ -255,6 +261,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,SIGNAL(dispatchPublishImage(QImage)),this,SLOT(showPublishWindow()));
     connect(this,SIGNAL(dispatchPublishImage(QImage)),pubWindow,SLOT(setImage(QImage)));
     connect(this,SIGNAL(dispatchAnimateImage(QImage)),pubWindow,SLOT(setImageNoScale(QImage)));
+    connect(this,SIGNAL(dispatchAnimateImage(QImage)),this,SLOT(handleAnimationPreview(QImage)));
 
     connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
 
@@ -295,7 +302,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Load the quick reference tabs
     qDebug() << "[Main] Creating Reference Tabs";
-    PublishFrame* previewFrame = new PublishFrame(this);
+    previewFrame = new PublishFrame(this);
     connect(previewFrame,SIGNAL(visibleChanged(bool)),pubWindow,SLOT(setArrowVisible(bool)));
     connect(previewFrame,SIGNAL(visibleChanged(bool)),previewFrame,SLOT(setArrowVisible(bool)));
     connect(previewFrame,SIGNAL(positionChanged(QPointF)),previewFrame,SLOT(setArrowPosition(QPointF)));
@@ -337,10 +344,11 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleDlgMgr = new BattleDialogManager(this);
     connect(ui->actionBattle_Dialog, SIGNAL(triggered()), _battleDlgMgr, SLOT(showBattleDialog()));
     connect(_battleDlgMgr, SIGNAL(battleActive(bool)), ui->actionBattle_Dialog, SLOT(setEnabled(bool)));
-    connect(_battleDlgMgr, SIGNAL(characterSelected(int)), this, SLOT(openCharacter(int)));
+    connect(_battleDlgMgr, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
     connect(_battleDlgMgr, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
     connect(_battleDlgMgr, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(_battleDlgMgr, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(_battleDlgMgr, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
     connect(_battleDlgMgr, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_battleDlgMgr, SIGNAL(dirty()), this, SLOT(setDirty()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), _battleDlgMgr, SLOT(targetResized(QSize)));
@@ -417,7 +425,7 @@ void MainWindow::newCampaign()
         campaign = new Campaign(campaignName);
         qDebug() << "[Main] Campaign created: " << campaignName;
         emit campaignLoaded(campaign);
-        selectItem(DMHelper::TreeType_Campaign,0);
+        selectItem(DMHelper::TreeType_Campaign, QUuid());
         setDirty();
     }
 }
@@ -461,7 +469,7 @@ bool MainWindow::saveCampaign()
 
     QFileInfo fileInfo(campaignFileName);
     QDir targetDir(fileInfo.absoluteDir());
-    campaign->outputXML(doc, root, targetDir);
+    campaign->outputXML(doc, root, targetDir, false);
 
     QFile file(campaignFileName);
     if( !file.open( QIODevice::WriteOnly ) )
@@ -542,9 +550,9 @@ void MainWindow::openDiceDialog()
     drDlg->show();
 }
 
-void MainWindow::openCharacter(int id)
+void MainWindow::openCharacter(QUuid id)
 {
-    if((!campaign) || (id == DMH_GLOBAL_INVALID_ID))
+    if((!campaign) || (id.isNull()))
         return;
 
     Character* selectedChar = campaign->getCharacterById(id);
@@ -598,6 +606,23 @@ void MainWindow::importCharacter()
     openCharacter(importer.importCharacter(*campaign));
 }
 
+void MainWindow::importItem()
+{
+    if(!campaign)
+        return;
+
+    QStandardItem* importTarget = nullptr;
+
+    if(treeModel)
+    {
+        QModelIndex index = ui->treeView->currentIndex();
+        importTarget = treeModel->itemFromIndex(index);
+    }
+
+    ObjectImporter importer;
+    importer.importObject(*campaign, importTarget);
+}
+
 void MainWindow::newNPC()
 {
     bool ok;
@@ -611,6 +636,7 @@ void MainWindow::newNPC()
     openCharacter(newNPC->getID());
 }
 
+/*
 void MainWindow::removeCurrentCharacter()
 {
     if(!campaign)
@@ -625,6 +651,7 @@ void MainWindow::removeCurrentCharacter()
         delete campaign->removeCharacter(currentCharacter);
     }
 }
+*/
 
 void MainWindow::newAdventure()
 {
@@ -671,7 +698,7 @@ void MainWindow::newMap()
         }
     }
 
-    int id = parentItem->data(DMHelper::TreeItemData_ID).toInt();
+    QUuid id = QUuid(parentItem->data(DMHelper::TreeItemData_ID).toString());
     bool ok = false;
     QString mapName = QInputDialog::getText(this, QString("Enter Map Name"),QString("New Map"),QLineEdit::Normal,QString(),&ok);
     if(!ok)
@@ -693,7 +720,7 @@ void MainWindow::newMap()
         campaign->addSetting(newMap);
     }
 
-    selectItem(DMHelper::TreeType_Map,newMap->getID(),id);
+    selectItem(DMHelper::TreeType_Map, newMap->getID(), id);
 }
 
 void MainWindow::editCurrentMap()
@@ -709,17 +736,17 @@ void MainWindow::editCurrentMap()
         QStandardItem* adventureItem = findParentbyType(mapItem, DMHelper::TreeType_Adventure);
         if(adventureItem)
         {
-            adventure = campaign->getAdventureById(adventureItem->data(DMHelper::TreeItemData_ID).toInt());
+            adventure = campaign->getAdventureById(QUuid(adventureItem->data(DMHelper::TreeItemData_ID).toString()));
         }
 
         Map* map = nullptr;
         if(adventure)
         {
-            map = adventure->getMapById(mapItem->data(DMHelper::TreeItemData_ID).toInt());
+            map = adventure->getMapById(QUuid(mapItem->data(DMHelper::TreeItemData_ID).toString()));
         }
         else
         {
-            map = campaign->getSettingById(mapItem->data(DMHelper::TreeItemData_ID).toInt());
+            map = campaign->getSettingById(QUuid(mapItem->data(DMHelper::TreeItemData_ID).toString()));
         }
 
         QString filename = QFileDialog::getOpenFileName(this,QString("Select Map Image..."));
@@ -741,7 +768,7 @@ void MainWindow::removeCurrentItem()
     QStandardItem* adventureItem = findParentbyType(removeItem, DMHelper::TreeType_Adventure);
     if(adventureItem)
     {
-        Adventure* adventure = campaign->getAdventureById(adventureItem->data(DMHelper::TreeItemData_ID).toInt());
+        Adventure* adventure = campaign->getAdventureById(QUuid(adventureItem->data(DMHelper::TreeItemData_ID).toString()));
         if(!adventure)
             return;
 
@@ -749,25 +776,25 @@ void MainWindow::removeCurrentItem()
         {
             if(QMessageBox::question(this,QString("Confirm Delete Adventure"),QString("Are you sure you would like to delete the adventure ") + adventure->getName() + QString("?")) == QMessageBox::Yes)
             {
-                delete campaign->removeAdventure(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+                delete campaign->removeAdventure(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             }
         }
         else if(type == DMHelper::TreeType_Encounter)
         {
-            Encounter* encounter = adventure->getEncounterById(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+            Encounter* encounter = adventure->getEncounterById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             if(QMessageBox::question(this,QString("Confirm Delete Encounter"),QString("Are you sure you would like to delete the encounter ") + encounter->getName() + QString("?")) == QMessageBox::Yes)
             {
                 encounter->widgetDeactivated(ui->stackedWidgetEncounter->currentWidget());
-                delete adventure->removeEncounter(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+                delete adventure->removeEncounter(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             }
         }
         else if(type == DMHelper::TreeType_Map)
         {
-            Map* map = adventure->getMapById(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+            Map* map = adventure->getMapById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             if(QMessageBox::question(this,QString("Confirm Delete Map"),QString("Are you sure you would like to delete the map ") + map->getName() + QString("?")) == QMessageBox::Yes)
             {
                 //TODO: is it right that this isn't a delete?
-                adventure->removeMap(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+                adventure->removeMap(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             }
         }
     }
@@ -775,7 +802,7 @@ void MainWindow::removeCurrentItem()
     {
         if(type == DMHelper::TreeType_Character)
         {
-            Character* character = campaign->getCharacterById(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+            Character* character = campaign->getCharacterById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             if(character)
             {
                 if(QMessageBox::question(this,QString("Confirm Delete Character"),QString("Are you sure you would like to delete the character ") + character->getName() + QString("?")) == QMessageBox::Yes)
@@ -785,7 +812,7 @@ void MainWindow::removeCurrentItem()
             }
             else
             {
-                character = campaign->getNPCById(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+                character = campaign->getNPCById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
                 if(character)
                 {
                     if(QMessageBox::question(this,QString("Confirm Delete NPC"),QString("Are you sure you would like to delete the npc ") + character->getName() + QString("?")) == QMessageBox::Yes)
@@ -797,11 +824,11 @@ void MainWindow::removeCurrentItem()
         }
         else if(type == DMHelper::TreeType_Map)
         {
-            Map* map = campaign->getSettingById(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+            Map* map = campaign->getSettingById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             if(QMessageBox::question(this,QString("Confirm Delete Setting"),QString("Are you sure you would like to delete the setting ") + map->getName() + QString("?")) == QMessageBox::Yes)
             {
                 //TODO: is it right that this isn't a delete?
-                campaign->removeSetting(removeItem->data(DMHelper::TreeItemData_ID).toInt());
+                campaign->removeSetting(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             }
         }
     }
@@ -826,16 +853,16 @@ void MainWindow::editCurrentItem()
         QStandardItem* adventureItem = findParentbyType(editItem, DMHelper::TreeType_Adventure);
         if(adventureItem)
         {
-            Adventure* adventure = campaign->getAdventureById(adventureItem->data(DMHelper::TreeItemData_ID).toInt());
+            Adventure* adventure = campaign->getAdventureById(QUuid(adventureItem->data(DMHelper::TreeItemData_ID).toString()));
             if(adventure)
             {
-                map = adventure->getMapById(editItem->data(DMHelper::TreeItemData_ID).toInt());
+                map = adventure->getMapById(QUuid(editItem->data(DMHelper::TreeItemData_ID).toString()));
             }
         }
 
         if(!map)
         {
-            map = campaign->getSettingById(editItem->data(DMHelper::TreeItemData_ID).toInt());
+            map = campaign->getSettingById(QUuid(editItem->data(DMHelper::TreeItemData_ID).toString()));
         }
 
         if(map)
@@ -849,6 +876,49 @@ void MainWindow::editCurrentItem()
             }
         }
     }
+}
+
+void MainWindow::exportCurrentItem()
+{
+    if((!campaign)||(!treeModel))
+        return;
+
+    QModelIndex index = ui->treeView->currentIndex();
+    QStandardItem* exportItem = treeModel->itemFromIndex(index);
+    if(!exportItem)
+        return;
+
+    QString exportFileName = QFileDialog::getSaveFileName(this,QString("Export Object"),QString(),QString("XML files (*.xml)"));
+    if(exportFileName.isEmpty())
+        return;
+
+    QFileInfo fileInfo(exportFileName);
+    QDir targetDir(fileInfo.absoluteDir());
+
+    QUuid exportId(exportItem->data(DMHelper::TreeItemData_ID).toString());
+
+    qDebug() << "[Main] Exporting object with ID " << exportId << " to " << exportFileName;
+
+    CampaignExporter exporter(*campaign, exportId, targetDir);
+    if(!exporter.isValid())
+    {
+        qDebug() << "[Main] Error - invalid export created!";
+        return;
+    }
+
+    QFile file(exportFileName);
+    if( !file.open( QIODevice::WriteOnly ) )
+    {
+        qDebug() << "[Main] Not able to open export file " << exportFileName;
+        return;
+    }
+
+    QTextStream ts(&file);
+    ts.setCodec("UTF-8");
+    ts << exporter.getExportDocument().toString();
+    file.close();
+
+    qDebug() << "[Main] Export complete";
 }
 
 void MainWindow::clearDirty()
@@ -943,7 +1013,7 @@ void MainWindow::readBestiary()
 
     QFileInfo fileInfo(bestiaryFileName);
     Bestiary::Instance()->setDirectory(fileInfo.absoluteDir());
-    Bestiary::Instance()->inputXML(root);
+    Bestiary::Instance()->inputXML(root, false);
 
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
         bestiaryDlg.setMonster(_options->getLastMonster());
@@ -1148,9 +1218,9 @@ Character* MainWindow::characterFromIndex(const QModelIndex & index)
     if(type != DMHelper::TreeType_Character)
         return nullptr;
 
-    Character* character = campaign->getCharacterById(item->data(DMHelper::TreeItemData_ID).toInt());
+    Character* character = campaign->getCharacterById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
     if(!character)
-        character = campaign->getNPCById(item->data(DMHelper::TreeItemData_ID).toInt());
+        character = campaign->getNPCById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
 
     return character;
 }
@@ -1168,7 +1238,7 @@ Adventure* MainWindow::adventureFromIndex(const QModelIndex & index)
     if(!item)
         return nullptr;
     else
-        return campaign->getAdventureById(item->data(DMHelper::TreeItemData_ID).toInt());
+        return campaign->getAdventureById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
 }
 
 Encounter* MainWindow::encounterFromIndex(const QModelIndex & index)
@@ -1188,7 +1258,7 @@ Encounter* MainWindow::encounterFromIndex(const QModelIndex & index)
     if(!adventure)
         return nullptr;
 
-    return adventure->getEncounterById(item->data(DMHelper::TreeItemData_ID).toInt());
+    return adventure->getEncounterById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
 }
 
 Map* MainWindow::mapFromIndex(const QModelIndex & index)
@@ -1215,15 +1285,15 @@ Map* MainWindow::mapFromIndex(const QModelIndex & index)
     int parentType = adventureParent->data(DMHelper::TreeItemData_Type).toInt();
     if(parentType == DMHelper::TreeType_Adventure)
     {
-        Adventure* adventure = campaign->getAdventureById(adventureParent->data(DMHelper::TreeItemData_ID).toInt());
+        Adventure* adventure = campaign->getAdventureById(QUuid(adventureParent->data(DMHelper::TreeItemData_ID).toString()));
         if(!adventure)
             return nullptr;
 
-        return adventure->getMapById(item->data(DMHelper::TreeItemData_ID).toInt());
+        return adventure->getMapById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
     }
     else if(parentType == DMHelper::TreeType_World)
     {
-        return campaign->getSettingById(item->data(DMHelper::TreeItemData_ID).toInt());
+        return campaign->getSettingById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
     }
     else
     {
@@ -1231,7 +1301,7 @@ Map* MainWindow::mapFromIndex(const QModelIndex & index)
     }
 }
 
-bool MainWindow::selectItem(int itemType, int itemId)
+bool MainWindow::selectItem(int itemType, QUuid itemId)
 {
     if((campaign)&&(treeModel))
     {
@@ -1246,7 +1316,7 @@ bool MainWindow::selectItem(int itemType, int itemId)
     return false;
 }
 
-bool MainWindow::selectItem(int itemType, int itemId, int adventureId)
+bool MainWindow::selectItem(int itemType, QUuid itemId, QUuid adventureId)
 {
     if((campaign)&&(treeModel))
     {
@@ -1265,7 +1335,7 @@ bool MainWindow::selectItem(int itemType, int itemId, int adventureId)
     return false;
 }
 
-QStandardItem* MainWindow::findItem(QStandardItem* parent, int itemType, int itemId)
+QStandardItem* MainWindow::findItem(QStandardItem* parent, int itemType, QUuid itemId)
 {
     if(!parent)
         return nullptr;
@@ -1273,7 +1343,7 @@ QStandardItem* MainWindow::findItem(QStandardItem* parent, int itemType, int ite
     for(int i = 0; i < parent->rowCount(); ++i)
     {
         QStandardItem* child = parent->child(i);
-        if( ( child->data(DMHelper::TreeItemData_Type).toInt() == itemType ) && ( child->data(DMHelper::TreeItemData_ID).toInt() == itemId ) )
+        if( ( child->data(DMHelper::TreeItemData_Type).toInt() == itemType ) && ( QUuid(child->data(DMHelper::TreeItemData_ID).toString()) == itemId ) )
         {
             return child;
         }
@@ -1334,7 +1404,7 @@ void MainWindow::writeBestiary()
 
     QFileInfo fileInfo(bestiaryFileName);
     QDir targetDirectory(fileInfo.absoluteDir());
-    Bestiary::Instance()->outputXML(doc, root, targetDirectory);
+    Bestiary::Instance()->outputXML(doc, root, targetDirectory, false);
 
     QFile file(bestiaryFileName);
     if( !file.open( QIODevice::WriteOnly ) )
@@ -1359,7 +1429,7 @@ void MainWindow::newEncounter(int encounterType)
     if(!adventureItem)
         return;
 
-    int id = adventureItem->data(DMHelper::TreeItemData_ID).toInt();
+    QUuid id = QUuid(adventureItem->data(DMHelper::TreeItemData_ID).toString());
     bool ok;
     QString encounterName = QInputDialog::getText(this, QString("Enter Encounter Name"),QString("New Encounter"),QLineEdit::Normal,QString(),&ok);
     if(ok)
@@ -1371,7 +1441,7 @@ void MainWindow::newEncounter(int encounterType)
             if(encounter)
             {
                 adventure->addEncounter(encounter);
-                selectItem(DMHelper::TreeType_Encounter,encounter->getID(),id);
+                selectItem(DMHelper::TreeType_Encounter, encounter->getID(), id);
             }
         }
     }
@@ -1426,7 +1496,7 @@ void MainWindow::openFile(const QString& filename)
     campaignFileName = filename;
     QFileInfo fileInfo(campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
-    campaign = new Campaign(campaignElement);
+    campaign = new Campaign(campaignElement, false);
     if(!campaign->isValid())
     {
         QMessageBox::StandardButton result = QMessageBox::critical(this,
@@ -1437,7 +1507,7 @@ void MainWindow::openFile(const QString& filename)
         {
             QMessageBox::information(this,
                                      QString("Invalid Campaign"),
-                                     QString("The campaign has not been opened. Please contact customer support!"));
+                                     QString("The campaign has not been opened."));
             qDebug() << "[Main] Invalid campaign discarded";
             delete campaign;
             campaign = nullptr;
@@ -1446,7 +1516,7 @@ void MainWindow::openFile(const QString& filename)
     }
 
     emit campaignLoaded(campaign);
-    selectItem(DMHelper::TreeType_Campaign,0);
+    selectItem(DMHelper::TreeType_Campaign, QUuid());
 
     //_battleDlgMgr->loadBattle(campaign, root);
 
@@ -1493,36 +1563,36 @@ void MainWindow::updateCampaignTree()
         QStandardItem* campaignItem = new QStandardItem(campaign->getName());
         campaignItem->setEditable(true);
         campaignItem->setData(QVariant(DMHelper::TreeType_Campaign),DMHelper::TreeItemData_Type);
-        campaignItem->setData(QVariant(0),DMHelper::TreeItemData_ID);
+        campaignItem->setData(QVariant(QString()),DMHelper::TreeItemData_ID);
         treeModel->appendRow(campaignItem);
         ui->treeView->expand(campaignItem->index());
 
         QStandardItem* generalNotesItem = new QStandardItem(QString("Notes"));
         generalNotesItem->setData(QVariant(DMHelper::TreeType_Notes),DMHelper::TreeItemData_Type);
-        generalNotesItem->setData(QVariant(DMH_GLOBAL_INVALID_ID),DMHelper::TreeItemData_ID);
+        generalNotesItem->setData(QVariant(QUuid().toString()),DMHelper::TreeItemData_ID);
         campaignItem->appendRow(generalNotesItem);
 
         QStandardItem* partyTitleItem = new QStandardItem(QString("Party"));
         partyTitleItem->setData(QVariant(DMHelper::TreeType_Party_Title),DMHelper::TreeItemData_Type);
-        partyTitleItem->setData(QVariant(DMH_GLOBAL_INVALID_ID),DMHelper::TreeItemData_ID);
+        partyTitleItem->setData(QVariant(QUuid().toString()),DMHelper::TreeItemData_ID);
         campaignItem->appendRow(partyTitleItem);
         setIndexExpanded(campaign->getPartyExpanded(), partyTitleItem->index());
 
         QStandardItem* adventuresTitleItem = new QStandardItem(QString("Adventures"));
         adventuresTitleItem->setData(QVariant(DMHelper::TreeType_Adventure_Title),DMHelper::TreeItemData_Type);
-        adventuresTitleItem->setData(QVariant(DMH_GLOBAL_INVALID_ID),DMHelper::TreeItemData_ID);
+        adventuresTitleItem->setData(QVariant(QUuid().toString()),DMHelper::TreeItemData_ID);
         campaignItem->appendRow(adventuresTitleItem);
         setIndexExpanded(campaign->getAdventuresExpanded(), adventuresTitleItem->index());
 
         QStandardItem* worldTitleItem = new QStandardItem(QString("World"));
         worldTitleItem->setData(QVariant(DMHelper::TreeType_World),DMHelper::TreeItemData_Type);
-        worldTitleItem->setData(QVariant(DMH_GLOBAL_INVALID_ID),DMHelper::TreeItemData_ID);
+        worldTitleItem->setData(QVariant(QUuid().toString()),DMHelper::TreeItemData_ID);
         campaignItem->appendRow(worldTitleItem);
         setIndexExpanded(campaign->getWorldExpanded(), worldTitleItem->index());
 
         QStandardItem* audioTitleItem = new QStandardItem(QString("Audio Tracks"));
         audioTitleItem->setData(QVariant(DMHelper::TreeType_AudioTrack),DMHelper::TreeItemData_Type);
-        audioTitleItem->setData(QVariant(DMH_GLOBAL_INVALID_ID),DMHelper::TreeItemData_ID);
+        audioTitleItem->setData(QVariant(QUuid().toString()),DMHelper::TreeItemData_ID);
         campaignItem->appendRow(audioTitleItem);
 
         // Set up the party
@@ -1533,7 +1603,7 @@ void MainWindow::updateCampaignTree()
             {
                 QStandardItem* characterItem = new QStandardItem(character->getName());
                 characterItem->setData(QVariant(DMHelper::TreeType_Character),DMHelper::TreeItemData_Type);
-                characterItem->setData(QVariant(character->getID()),DMHelper::TreeItemData_ID);
+                characterItem->setData(QVariant(character->getID().toString()),DMHelper::TreeItemData_ID);
                 characterItem->setEditable(false);
                 characterItem->setCheckable(true);
                 characterItem->setCheckState(character->getActive() ? Qt::Checked : Qt::Unchecked);
@@ -1550,7 +1620,7 @@ void MainWindow::updateCampaignTree()
             {
                 QStandardItem* adventureItem = new QStandardItem(adventure->getName());
                 adventureItem->setData(QVariant(DMHelper::TreeType_Adventure),DMHelper::TreeItemData_Type);
-                adventureItem->setData(QVariant(adventure->getID()),DMHelper::TreeItemData_ID);
+                adventureItem->setData(QVariant(adventure->getID().toString()),DMHelper::TreeItemData_ID);
                 adventureItem->setEditable(true);
                 adventuresTitleItem->appendRow(adventureItem);
                 treeIndexMap.insert(adventureItem->text(),adventureItem->index());
@@ -1558,7 +1628,7 @@ void MainWindow::updateCampaignTree()
                 QStandardItem* encountersTitleItem = new QStandardItem(QString("Encounters"));
                 encountersTitleItem->setEditable(false);
                 encountersTitleItem->setData(QVariant(DMHelper::TreeType_Encounter_Title),DMHelper::TreeItemData_Type);
-                encountersTitleItem->setData(QVariant(adventure->getID()),DMHelper::TreeItemData_ID);
+                encountersTitleItem->setData(QVariant(adventure->getID().toString()),DMHelper::TreeItemData_ID);
                 adventureItem->appendRow(encountersTitleItem);
                 treeIndexMap.insert(encountersTitleItem->text(),encountersTitleItem->index());
 
@@ -1572,7 +1642,7 @@ void MainWindow::updateCampaignTree()
                             encounterName += " (*)";
                         QStandardItem* encounterItem = new QStandardItem(encounterName);
                         encounterItem->setData(QVariant(DMHelper::TreeType_Encounter),DMHelper::TreeItemData_Type);
-                        encounterItem->setData(QVariant(encounter->getID()),DMHelper::TreeItemData_ID);
+                        encounterItem->setData(QVariant(encounter->getID().toString()),DMHelper::TreeItemData_ID);
                         encounterItem->setEditable(true);
                         encountersTitleItem->appendRow(encounterItem);
                         treeIndexMap.insert(encounterItem->text(),encounterItem->index());
@@ -1582,7 +1652,7 @@ void MainWindow::updateCampaignTree()
                 QStandardItem* mapsTitleItem = new QStandardItem(QString("Maps"));
                 mapsTitleItem->setEditable(false);
                 mapsTitleItem->setData(QVariant(DMHelper::TreeType_Map_Title),DMHelper::TreeItemData_Type);
-                mapsTitleItem->setData(QVariant(adventure->getID()),DMHelper::TreeItemData_ID);
+                mapsTitleItem->setData(QVariant(adventure->getID().toString()),DMHelper::TreeItemData_ID);
                 adventureItem->appendRow(mapsTitleItem);
 
                 for( int m = 0; m < adventure->getMapCount(); ++m )
@@ -1592,7 +1662,7 @@ void MainWindow::updateCampaignTree()
                     {
                         QStandardItem* mapItem = new QStandardItem(map->getName());
                         mapItem->setData(QVariant(DMHelper::TreeType_Map),DMHelper::TreeItemData_Type);
-                        mapItem->setData(QVariant(map->getID()),DMHelper::TreeItemData_ID);
+                        mapItem->setData(QVariant(map->getID().toString()),DMHelper::TreeItemData_ID);
                         mapItem->setEditable(false);
                         mapsTitleItem->appendRow(mapItem);
                         treeIndexMap.insert(mapItem->text(),mapItem->index());
@@ -1608,7 +1678,7 @@ void MainWindow::updateCampaignTree()
         // Set up the world
         QStandardItem* settingTitleItem = new QStandardItem(QString("Settings"));
         settingTitleItem->setData(QVariant(DMHelper::TreeType_Settings_Title),DMHelper::TreeItemData_Type);
-        settingTitleItem->setData(QVariant(DMH_GLOBAL_INVALID_ID),DMHelper::TreeItemData_ID);
+        settingTitleItem->setData(QVariant(QUuid().toString()),DMHelper::TreeItemData_ID);
         worldTitleItem->appendRow(settingTitleItem);
         setIndexExpanded(campaign->getWorldSettingsExpanded(), settingTitleItem->index());
 
@@ -1619,7 +1689,7 @@ void MainWindow::updateCampaignTree()
             {
                 QStandardItem* mapItem = new QStandardItem(map->getName());
                 mapItem->setData(QVariant(DMHelper::TreeType_Map),DMHelper::TreeItemData_Type);
-                mapItem->setData(QVariant(map->getID()),DMHelper::TreeItemData_ID);
+                mapItem->setData(QVariant(map->getID().toString()),DMHelper::TreeItemData_ID);
                 mapItem->setEditable(false);
                 settingTitleItem->appendRow(mapItem);
                 treeIndexMap.insert(mapItem->text(),mapItem->index());
@@ -1628,7 +1698,7 @@ void MainWindow::updateCampaignTree()
 
         QStandardItem* peopleTitleItem = new QStandardItem(QString("People"));
         peopleTitleItem->setData(QVariant(DMHelper::TreeType_People_Title),DMHelper::TreeItemData_Type);
-        peopleTitleItem->setData(QVariant(DMH_GLOBAL_INVALID_ID),DMHelper::TreeItemData_ID);
+        peopleTitleItem->setData(QVariant(QUuid().toString()),DMHelper::TreeItemData_ID);
         worldTitleItem->appendRow(peopleTitleItem);
         setIndexExpanded(campaign->getWorldNPCsExpanded(), peopleTitleItem->index());
 
@@ -1639,7 +1709,7 @@ void MainWindow::updateCampaignTree()
             {
                 QStandardItem* characterItem = new QStandardItem(character->getName());
                 characterItem->setData(QVariant(DMHelper::TreeType_Character),DMHelper::TreeItemData_Type);
-                characterItem->setData(QVariant(character->getID()),DMHelper::TreeItemData_ID);
+                characterItem->setData(QVariant(character->getID().toString()),DMHelper::TreeItemData_ID);
                 characterItem->setEditable(false);
                 peopleTitleItem->appendRow(characterItem);
                 treeIndexMap.insert(characterItem->text(),characterItem->index());
@@ -1760,6 +1830,12 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
                 contextMenu->addAction(removeItem);
             }
 
+            contextMenu->addSeparator();
+
+            QAction* exportItem = new QAction(QString("Export Item..."));
+            connect(exportItem, SIGNAL(triggered()), this, SLOT(exportCurrentItem()));
+            contextMenu->addAction(exportItem);
+
             if(contextMenu->actions().count() > 0)
                 contextMenu->exec(ui->treeView->mapToGlobal(point));
             delete contextMenu;
@@ -1777,7 +1853,7 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
     campaign->beginBatchChanges();
 
     int type = item->data(DMHelper::TreeItemData_Type).toInt();
-    int id = item->data(DMHelper::TreeItemData_ID).toInt();
+    QUuid id = QUuid(item->data(DMHelper::TreeItemData_ID).toString());
     if(type == DMHelper::TreeType_Adventure)
     {
         Adventure* adventure = campaign->getAdventureById(id);
@@ -1796,7 +1872,7 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
             Adventure* oldAdventure = encounter->getAdventure();
             if((item->parent()) && (item->parent()->parent()) && (item->parent()->parent()->data(DMHelper::TreeItemData_Type).toInt() == DMHelper::TreeType_Adventure))
             {
-                int newAdventureID = item->parent()->parent()->data(DMHelper::TreeItemData_ID).toInt();
+                QUuid newAdventureID = QUuid(item->parent()->parent()->data(DMHelper::TreeItemData_ID).toString());
                 if(oldAdventure->getID() == newAdventureID)
                 {
                     oldAdventure->moveEncounterTo(id,item->row());
@@ -1823,7 +1899,7 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
             Adventure* oldAdventure = map->getAdventure();
             if((item->parent()) && (item->parent()->parent()) && (item->parent()->parent()->data(DMHelper::TreeItemData_Type).toInt() == DMHelper::TreeType_Adventure))
             {
-                int newAdventureID = item->parent()->parent()->data(DMHelper::TreeItemData_ID).toInt();
+                QUuid newAdventureID = QUuid(item->parent()->parent()->data(DMHelper::TreeItemData_ID).toString());
                 if(oldAdventure->getID() == newAdventureID)
                 {
                     oldAdventure->moveMapTo(id,item->row());
@@ -2009,7 +2085,7 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
         return;
 
     int itemType = item->data(DMHelper::TreeItemData_Type).toInt();
-    int itemId = item->data(DMHelper::TreeItemData_ID).toInt();
+    QUuid itemId = QUuid(item->data(DMHelper::TreeItemData_ID).toString());
 
     switch(itemType)
     {
@@ -2074,6 +2150,23 @@ void MainWindow::handleDeleteBattle()
         return;
 
     _battleDlgMgr->deleteBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
+}
+
+void MainWindow::handleAnimationStarted()
+{
+    _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
+}
+
+void MainWindow::handleAnimationPreview(QImage img)
+{
+    if(!previewFrame)
+        return;
+
+    if(++_animationFrameCount > DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES)
+    {
+        previewFrame->setImage(img);
+        _animationFrameCount = 0;
+    }
 }
 
 void MainWindow::openBestiary()

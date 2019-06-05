@@ -4,6 +4,7 @@
 #include "dmhglobal.h"
 #include <memory>
 #include <QObject>
+#include <QUuid>
 
 class DMHObjectBase_Private;
 class QDomDocument;
@@ -21,23 +22,26 @@ public:
     DMHObjectBase(const DMHObjectBase& other);
     virtual ~DMHObjectBase();
 
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
-    virtual void postProcessXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
-    int getID() const;
+    QUuid getID() const;
+    int getIntID() const;
 
     // STATIC FUNCTIONS
-    static void setBaseId(int baseId);
-    static void resetBaseId();
-    static int createId();
+    //static void setBaseId(int baseId);
+    //static void resetBaseId();
+    //static int createId();
+    //static QString createId();
 
 signals:
 
 public slots:
 
 protected:
-    void setID(int id);
+    void setID(QUuid id);
+    void setIntID(int id);
 
 private:
     std::unique_ptr<DMHObjectBase_Private> d;

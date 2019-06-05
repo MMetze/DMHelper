@@ -26,7 +26,7 @@ public:
     virtual ~BattleDialogModelMonsterBase();
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     virtual int getType() const;
     virtual int getMonsterType() const = 0;
@@ -45,7 +45,7 @@ public slots:
 
 protected:
     // From BattleDialogModelCombatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
     //int convertSizeToFactor(const QString& monsterSize) const;
 

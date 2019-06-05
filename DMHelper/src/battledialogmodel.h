@@ -21,8 +21,8 @@ public:
     virtual ~BattleDialogModel();
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     /*
     // Local
@@ -33,7 +33,7 @@ public:
     QList<BattleDialogModelCombatant*> getCombatantList() const;
     int getCombatantCount() const;
     BattleDialogModelCombatant* getCombatant(int index) const;
-    BattleDialogModelCombatant* getCombatantById(int combatantId) const;
+    BattleDialogModelCombatant* getCombatantById(QUuid combatantId) const;
     void insertCombatant(int index, BattleDialogModelCombatant* combatant);
     BattleDialogModelCombatant* removeCombatant(int index);
     void appendCombatant(BattleDialogModelCombatant* combatant);
@@ -42,7 +42,7 @@ public:
     QList<BattleDialogModelEffect*> getEffectList() const;
     int getEffectCount() const;
     BattleDialogModelEffect* getEffect(int index) const;
-    BattleDialogModelEffect* getEffectById(int effectId) const;
+    BattleDialogModelEffect* getEffectById(QUuid effectId) const;
     void insertEffect(int index, BattleDialogModelEffect* effect);
     BattleDialogModelEffect* removeEffect(int index);
     bool removeEffect(BattleDialogModelEffect* effect);

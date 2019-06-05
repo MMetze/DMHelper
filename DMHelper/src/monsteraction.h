@@ -11,10 +11,10 @@ class MonsterAction
 {
 public:
     explicit MonsterAction(int attackBonus, QString description, QString name, Dice damageDice);
-    explicit MonsterAction(const QDomElement &element);
+    explicit MonsterAction(const QDomElement &element, bool isImport);
     MonsterAction(const MonsterAction& other);
 
-    void outputXML(QDomDocument &doc, QDomElement &element) const;
+    void outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const;
     QString summaryString() const;
 
     int getAttackBonus() const;

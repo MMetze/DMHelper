@@ -43,9 +43,9 @@ BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
 {
 }
 
-void BattleDialogModelMonsterClass::inputXML(const QDomElement &element)
+void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool isImport)
 {
-    BattleDialogModelCombatant::inputXML(element);
+    BattleDialogModelCombatant::inputXML(element, isImport);
 
     _monsterName = element.attribute("monsterName");
     _monsterHP = element.attribute("monsterHP",QString::number(0)).toInt();
@@ -261,9 +261,9 @@ void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
     _monsterName = monsterName;
 }
 
-void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory);
+    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute("monsterClass", _monsterClass->getName());
     element.setAttribute("monsterName", _monsterName);

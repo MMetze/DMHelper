@@ -833,7 +833,7 @@ void BattleDialog::handleSelectionChanged()
     else
     {
         QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(selectedList.first());
-        if((shapeItem)&&(shapeItem->data(0).toInt() >= 1))
+        if((shapeItem)&&(!(QUuid(shapeItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()).isNull())))
         {
             handleEffectChanged(shapeItem);
         }
@@ -1157,6 +1157,20 @@ void BattleDialog::updateCombatantWidget(BattleDialogModelCombatant* combatant)
     widget->updateData();
 }
 
+void BattleDialog::updateCombatantIcon(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    QGraphicsPixmapItem* item = _combatantIcons.value(combatant, nullptr);
+    if(!item)
+        return;
+
+    QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
+    item->setPixmap(pix);
+    item->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
+}
+
 void BattleDialog::registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage)
 {
     if((!_logger) || (!combatant) || (!_model.getActiveCombatant()))
@@ -1193,7 +1207,8 @@ void BattleDialog::publishImage()
             //executePublishImage();
             emit showPublishWindow();
             // OPTIMIZE: optimize this to be faster, doing only changes?
-            _publishTimer->start(25);
+            _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
+            emit animationStarted();
             qDebug() << "[Battle Dialog] publish timer activated";
         }
     }
@@ -1451,7 +1466,8 @@ CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant*
             {
                 qDebug() << "[Battle Dialog] creating character widget for " << character->getName();
                 newWidget = new CharacterWidget(character, ui->scrollAreaWidgetContents);
-                connect(dynamic_cast<CharacterWidget*>(newWidget), SIGNAL(clicked(int)),this,SIGNAL(characterSelected(int)));
+                connect(dynamic_cast<CharacterWidget*>(newWidget), SIGNAL(clicked(QUuid)), this, SIGNAL(characterSelected(QUuid)));
+                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SIGNAL(updateCombatantIcon(BattleDialogModelCombatant*)));
                 connect(newWidget, SIGNAL(contextMenu(BattleDialogModelCombatant*,QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*,QPoint)));
             }
             break;
@@ -1470,6 +1486,7 @@ CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant*
                 connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*,int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isShownChanged(bool)), monster, SLOT(setShown(bool)));
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isKnownChanged(bool)), monster, SLOT(setKnown(bool)));
+                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SIGNAL(updateCombatantIcon(BattleDialogModelCombatant*)));
             }
             break;
         }

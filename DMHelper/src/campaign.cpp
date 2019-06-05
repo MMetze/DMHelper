@@ -32,14 +32,14 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _dirtyMade(false),
     _isValid(true)
 {
-    setID(1);
-    CampaignObjectBase::resetBaseId();
+    //setID(1);
+    //CampaignObjectBase::resetBaseId();
 
     _notes = EncounterFactory::createEncounter(DMHelper::EncounterType_Text, QString(""), this);
     connect(_notes,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
 }
 
-Campaign::Campaign(const QDomElement& element, QObject *parent) :
+Campaign::Campaign(const QDomElement& element, bool isImport, QObject *parent) :
     CampaignObjectBase(parent),
     _name(),
     _notes(nullptr),
@@ -60,32 +60,24 @@ Campaign::Campaign(const QDomElement& element, QObject *parent) :
     _dirtyMade(false),
     _isValid(false)
 {
-    inputXML(element);
-    postProcessXML(element);
+    inputXML(element, isImport);
+    postProcessXML(element, isImport);
 }
 
 Campaign::~Campaign()
 {
-    if(_batchChanges)
-        endBatchChanges();
-
-    delete _notes;
-    qDeleteAll(characters);
-    qDeleteAll(adventures);
-    qDeleteAll(settings);
-    qDeleteAll(npcs);
-    qDeleteAll(tracks);
-
-    CampaignObjectBase::resetBaseId();
+    cleanupCampaign(true);
 }
 
-void Campaign::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void Campaign::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement campaignElement = doc.createElement( "campaign" );
 
-    CampaignObjectBase::outputXML(doc, campaignElement, targetDirectory);
+    CampaignObjectBase::outputXML(doc, campaignElement, targetDirectory, isExport);
 
     campaignElement.setAttribute( "name", getName() );
+    campaignElement.setAttribute( "majorVersion", DMHelper::CAMPAIGN_MAJOR_VERSION );
+    campaignElement.setAttribute( "minorVersion", DMHelper::CAMPAIGN_MINOR_VERSION );
     campaignElement.setAttribute( "partyExpanded", static_cast<int>(getPartyExpanded()) );
     campaignElement.setAttribute( "adventuresExpanded", static_cast<int>(getAdventuresExpanded()) );
     campaignElement.setAttribute( "worldExpanded", static_cast<int>(getWorldExpanded()) );
@@ -97,47 +89,57 @@ void Campaign::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
 
     QDomElement notesElement = doc.createElement( "notes" );
     campaignElement.appendChild(notesElement);
-    _notes->outputXML(doc, notesElement, targetDirectory);
+    if(_notes)
+        _notes->outputXML(doc, notesElement, targetDirectory, isExport);
 
     QDomElement charactersElement = doc.createElement( "characters" );
     campaignElement.appendChild(charactersElement);
     for( int charIt = 0; charIt < characters.size(); ++charIt )
     {
-        characters.at(charIt)->outputXML(doc, charactersElement, targetDirectory);
+        characters.at(charIt)->outputXML(doc, charactersElement, targetDirectory, isExport);
     }
 
     QDomElement adventuresElement = doc.createElement( "adventures" );
     campaignElement.appendChild(adventuresElement);
     for( int advIt = 0; advIt < adventures.size(); ++advIt )
     {
-        adventures.at(advIt)->outputXML(doc, adventuresElement, targetDirectory);
+        adventures.at(advIt)->outputXML(doc, adventuresElement, targetDirectory, isExport);
     }
 
     QDomElement settingsElement = doc.createElement( "settings" );
     campaignElement.appendChild(settingsElement);
     for( int settingIt = 0; settingIt < settings.size(); ++settingIt )
     {
-        settings.at(settingIt)->outputXML(doc, settingsElement, targetDirectory);
+        settings.at(settingIt)->outputXML(doc, settingsElement, targetDirectory, isExport);
     }
 
     QDomElement npcsElement = doc.createElement( "npcs" );
     campaignElement.appendChild(npcsElement);
     for( int npcIt = 0; npcIt < npcs.size(); ++npcIt )
     {
-        npcs.at(npcIt)->outputXML(doc, npcsElement, targetDirectory);
+        npcs.at(npcIt)->outputXML(doc, npcsElement, targetDirectory, isExport);
     }
 
     QDomElement tracksElement = doc.createElement( "tracks" );
     campaignElement.appendChild(tracksElement);
     for( int trackIt = 0; trackIt < tracks.size(); ++trackIt )
     {
-        tracks.at(trackIt)->outputXML(doc, tracksElement, targetDirectory);
+        tracks.at(trackIt)->outputXML(doc, tracksElement, targetDirectory, isExport);
     }
 }
 
-void Campaign::inputXML(const QDomElement &element)
+void Campaign::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element);
+    int majorVersion = element.attribute("majorVersion",QString::number(0)).toInt();
+    int minorVersion = element.attribute("minorVersion",QString::number(0)).toInt();
+    qDebug() << "[Campaign]    Campaign file version: " << majorVersion << "." << minorVersion;
+    if(!isVersionCompatible(majorVersion, minorVersion))
+    {
+        qDebug() << "[Campaign]    ERROR: The camapaign file version is not compatible with this version of DM Helper.";
+        return;
+    }
+
+    CampaignObjectBase::inputXML(element, isImport);
 
     int encounterCount = 0;
     int mapCount = 0;
@@ -153,7 +155,7 @@ void Campaign::inputXML(const QDomElement &element)
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time",QString::number(0)).toInt()));
 
     QDomElement notesElement = element.firstChildElement( QString("notes") );
-    _notes = EncounterFactory::createEncounter(DMHelper::EncounterType_Text, notesElement.firstChildElement(), this);
+    _notes = EncounterFactory::createEncounter(DMHelper::EncounterType_Text, notesElement.firstChildElement(), isImport, this);
     connect(_notes,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
 
     QDomElement charactersElement = element.firstChildElement( QString("characters") );
@@ -162,7 +164,7 @@ void Campaign::inputXML(const QDomElement &element)
         QDomElement characterElement = charactersElement.firstChildElement( QString("combatant") );
         while( !characterElement.isNull() )
         {
-            Character* newCharacter = new Character(characterElement);
+            Character* newCharacter = new Character(characterElement, isImport);
             addCharacter(newCharacter);
             characterElement = characterElement.nextSiblingElement( QString("combatant") );
         }
@@ -174,7 +176,7 @@ void Campaign::inputXML(const QDomElement &element)
         QDomElement adventureElement = adventuresElement.firstChildElement( QString("adventure") );
         while( !adventureElement.isNull() )
         {
-            Adventure* newAdventure = new Adventure(adventureElement);
+            Adventure* newAdventure = new Adventure(adventureElement, isImport);
             addAdventure(newAdventure);
 
             encounterCount += newAdventure->getEncounterCount();
@@ -190,7 +192,7 @@ void Campaign::inputXML(const QDomElement &element)
         QDomElement mapElement = settingsElement.firstChildElement( QString("map") );
         while( !mapElement.isNull() )
         {
-            Map* newMap = new Map(mapElement);
+            Map* newMap = new Map(mapElement, isImport);
             addSetting(newMap);
             mapElement = mapElement.nextSiblingElement( QString("map") );
         }
@@ -202,7 +204,7 @@ void Campaign::inputXML(const QDomElement &element)
         QDomElement characterElement = npcsElement.firstChildElement( QString("combatant") );
         while( !characterElement.isNull() )
         {
-            Character* newCharacter = new Character(characterElement);
+            Character* newCharacter = new Character(characterElement, isImport);
             addNPC(newCharacter);
             characterElement = characterElement.nextSiblingElement( QString("combatant") );
         }
@@ -214,7 +216,7 @@ void Campaign::inputXML(const QDomElement &element)
         QDomElement trackElement = tracksElement.firstChildElement( QString("track") );
         while( !trackElement.isNull() )
         {
-            AudioTrack* newTrack = new AudioTrack(trackElement);
+            AudioTrack* newTrack = new AudioTrack(trackElement, isImport);
             addTrack(newTrack);
             trackElement = trackElement.nextSiblingElement( QString("track") );
         }
@@ -236,7 +238,7 @@ void Campaign::inputXML(const QDomElement &element)
     validateCampaignIds();
 }
 
-void Campaign::postProcessXML(const QDomElement &element)
+void Campaign::postProcessXML(const QDomElement &element, bool isImport)
 {
     QDomElement charactersElement = element.firstChildElement( QString("characters") );
     if( !charactersElement.isNull() )
@@ -244,9 +246,9 @@ void Campaign::postProcessXML(const QDomElement &element)
         QDomElement characterElement = charactersElement.firstChildElement( QString("combatant") );
         while( !characterElement.isNull() )
         {
-            Character* character = getCharacterById(element.attribute( QString("_baseID") ).toInt());
+            Character* character = getCharacterById(parseIdString(characterElement.attribute( QString("_baseID") )));
             if(character)
-                character->postProcessXML(characterElement);
+                character->postProcessXML(characterElement, isImport);
             characterElement = characterElement.nextSiblingElement( QString("combatant") );
         }
     }
@@ -257,9 +259,9 @@ void Campaign::postProcessXML(const QDomElement &element)
         QDomElement adventureElement = adventuresElement.firstChildElement( QString("adventure") );
         while( !adventureElement.isNull() )
         {
-            Adventure* adventure = getAdventureById(adventureElement.attribute( QString("_baseID") ).toInt());
+            Adventure* adventure = getAdventureById(parseIdString(adventureElement.attribute( QString("_baseID") )));
             if(adventure)
-                adventure->postProcessXML(adventureElement);
+                adventure->postProcessXML(adventureElement, isImport);
             adventureElement = adventureElement.nextSiblingElement( QString("adventure") );
         }
     }
@@ -270,9 +272,9 @@ void Campaign::postProcessXML(const QDomElement &element)
         QDomElement mapElement = settingsElement.firstChildElement( QString("map") );
         while( !mapElement.isNull() )
         {
-            Map* map = getSettingById(mapElement.attribute( QString("_baseID") ).toInt());
+            Map* map = getSettingById(parseIdString(mapElement.attribute( QString("_baseID") )));
             if(map)
-                map->postProcessXML(mapElement);
+                map->postProcessXML(mapElement, isImport);
             mapElement = mapElement.nextSiblingElement( QString("map") );
         }
     }
@@ -283,12 +285,14 @@ void Campaign::postProcessXML(const QDomElement &element)
         QDomElement characterElement = npcsElement.firstChildElement( QString("combatant") );
         while( !characterElement.isNull() )
         {
-            Character* character = getNPCById(characterElement.attribute( QString("_baseID") ).toInt());
+            Character* character = getNPCById(parseIdString(characterElement.attribute( QString("_baseID") )));
             if(character)
-                character->postProcessXML(characterElement);
+                character->postProcessXML(characterElement, isImport);
             characterElement = characterElement.nextSiblingElement( QString("combatant") );
         }
     }
+
+    CampaignObjectBase::postProcessXML(element, isImport);
 }
 
 void Campaign::beginBatchChanges()
@@ -332,7 +336,7 @@ int Campaign::getCharacterCount()
     return characters.count();
 }
 
-Character* Campaign::getCharacterById(int id)
+Character* Campaign::getCharacterById(QUuid id)
 {
     for(int i = 0; i < characters.count(); ++i)
     {
@@ -343,7 +347,7 @@ Character* Campaign::getCharacterById(int id)
     return nullptr;
 }
 
-const Character* Campaign::getCharacterById(int id) const
+const Character* Campaign::getCharacterById(QUuid id) const
 {
     for(int i = 0; i < characters.count(); ++i)
     {
@@ -373,10 +377,10 @@ Character* Campaign::getCharacterByIndex(int index)
     return characters.at(index);
 }
 
-int Campaign::addCharacter(Character* character)
+QUuid Campaign::addCharacter(Character* character)
 {
     if(!character)
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     characters.append(character);
     connect(character,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
@@ -386,7 +390,7 @@ int Campaign::addCharacter(Character* character)
     return character->getID();
 }
 
-Character* Campaign::removeCharacter(int id)
+Character* Campaign::removeCharacter(QUuid id)
 {
     Character* character = getCharacterById(id);
     if(character)
@@ -433,7 +437,7 @@ int Campaign::getAdventureCount()
     return adventures.count();
 }
 
-Adventure* Campaign::getAdventureById(int id)
+Adventure* Campaign::getAdventureById(QUuid id)
 {
     for(int i = 0; i < adventures.count(); ++i)
     {
@@ -453,10 +457,10 @@ Adventure* Campaign::getAdventureByIndex(int index)
 }
 
 
-int Campaign::addAdventure(Adventure* adventure)
+QUuid Campaign::addAdventure(Adventure* adventure)
 {
     if(!adventure)
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     adventure->setParent(this);
     adventures.append(adventure);
@@ -467,7 +471,7 @@ int Campaign::addAdventure(Adventure* adventure)
     return adventure->getID();
 }
 
-Adventure* Campaign::removeAdventure(int id)
+Adventure* Campaign::removeAdventure(QUuid id)
 {
     Adventure* adventure = getAdventureById(id);
     if(adventure)
@@ -488,7 +492,7 @@ int Campaign::getSettingCount()
     return settings.count();
 }
 
-Map* Campaign::getSettingById(int id)
+Map* Campaign::getSettingById(QUuid id)
 {
     for(int i = 0; i < settings.count(); ++i)
     {
@@ -507,10 +511,10 @@ Map* Campaign::getSettingByIndex(int index)
     return settings.at(index);
 }
 
-int Campaign::addSetting(Map* setting)
+QUuid Campaign::addSetting(Map* setting)
 {
     if(!setting)
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     setting->setParent(this);
     settings.append(setting);
@@ -521,7 +525,7 @@ int Campaign::addSetting(Map* setting)
     return setting->getID();
 }
 
-Map* Campaign::removeSetting(int id)
+Map* Campaign::removeSetting(QUuid id)
 {
     Map* setting = getSettingById(id);
     if(setting)
@@ -542,7 +546,7 @@ int Campaign::getNPCCount()
     return npcs.count();
 }
 
-Character* Campaign::getNPCById(int id)
+Character* Campaign::getNPCById(QUuid id)
 {
     for(int i = 0; i < npcs.count(); ++i)
     {
@@ -553,7 +557,7 @@ Character* Campaign::getNPCById(int id)
     return nullptr;
 }
 
-const Character* Campaign::getNPCById(int id) const
+const Character* Campaign::getNPCById(QUuid id) const
 {
     for(int i = 0; i < npcs.count(); ++i)
     {
@@ -572,10 +576,10 @@ Character* Campaign::getNPCByIndex(int index)
     return npcs.at(index);
 }
 
-int Campaign::addNPC(Character* npc)
+QUuid Campaign::addNPC(Character* npc)
 {
     if(!npc)
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     npcs.append(npc);
     connect(npc,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
@@ -585,7 +589,7 @@ int Campaign::addNPC(Character* npc)
     return npc->getID();
 }
 
-Character* Campaign::removeNPC(int id)
+Character* Campaign::removeNPC(QUuid id)
 {
     Character* npc = getNPCById(id);
     if(npc)
@@ -606,7 +610,7 @@ int Campaign::getTrackCount()
     return tracks.count();
 }
 
-AudioTrack* Campaign::getTrackById(int id)
+AudioTrack* Campaign::getTrackById(QUuid id)
 {
     for(int i = 0; i < tracks.count(); ++i)
     {
@@ -625,10 +629,10 @@ AudioTrack* Campaign::getTrackByIndex(int index)
     return tracks.at(index);
 }
 
-int Campaign::addTrack(AudioTrack* track)
+QUuid Campaign::addTrack(AudioTrack* track)
 {
     if(!track)
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     tracks.append(track);
     connect(track,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
@@ -638,7 +642,7 @@ int Campaign::addTrack(AudioTrack* track)
     return track->getID();
 }
 
-AudioTrack* Campaign::removeTrack(int id)
+AudioTrack* Campaign::removeTrack(QUuid id)
 {
     AudioTrack* track = getTrackById(id);
     if(track)
@@ -654,9 +658,9 @@ AudioTrack* Campaign::removeTrack(int id)
     return nullptr;
 }
 
-CampaignObjectBase* Campaign::getObjectbyId(int id)
+CampaignObjectBase* Campaign::getObjectbyId(QUuid id)
 {
-    if(id == DMH_GLOBAL_INVALID_ID)
+    if(id.isNull())
         return nullptr;
 
     CampaignObjectBase* result;
@@ -687,7 +691,64 @@ CampaignObjectBase* Campaign::getObjectbyId(int id)
     if(result)
         return result;
 
+    result = getTrackById(id);
+    if(result)
+        return result;
+
     return nullptr;
+}
+
+QUuid Campaign::getUuidFromIntId(int intId) const
+{
+    if(intId == DMH_GLOBAL_INVALID_ID)
+        return QUuid();
+
+    int i, j;
+    for(i = 0; i < characters.count(); ++i)
+    {
+        if(characters.at(i)->getIntID() == intId)
+            return characters.at(i)->getID();
+    }
+
+    for(i = 0; i < adventures.count(); ++i)
+    {
+        Adventure* adventure = adventures.at(i);
+        if(adventure->getIntID() == intId)
+            return adventure->getID();
+
+        for(j = 0; j < adventure->getEncounterCount(); ++j)
+        {
+            if(adventure->getEncounterByIndex(j)->getIntID() == intId)
+                return adventure->getEncounterByIndex(j)->getID();
+        }
+
+        for(j = 0; j < adventure->getMapCount(); ++j)
+        {
+            if(adventure->getMapByIndex(j)->getIntID() == intId)
+                return adventure->getMapByIndex(j)->getID();
+        }
+    }
+
+    for(i = 0; i < settings.count(); ++i)
+    {
+        if(settings.at(i)->getIntID() == intId)
+            return settings.at(i)->getID();
+    }
+
+    for(i = 0; i < npcs.count(); ++i)
+    {
+        if(npcs.at(i)->getIntID() == intId)
+            return npcs.at(i)->getID();
+    }
+
+    for(i = 0; i < tracks.count(); ++i)
+    {
+        if(tracks.at(i)->getIntID() == intId)
+            return tracks.at(i)->getID();
+    }
+
+    qDebug() << "[Campaign] WARNING: unable to find matching object for Integer ID " << intId;
+    return QUuid();
 }
 
 bool Campaign::getPartyExpanded() const
@@ -775,6 +836,32 @@ bool Campaign::isValid() const
     return _isValid;
 }
 
+void Campaign::cleanupCampaign(bool deleteAll)
+{
+    if(_batchChanges)
+        endBatchChanges();
+
+    delete _notes;
+    _notes = nullptr;
+
+    if(deleteAll)
+    {
+        qDeleteAll(characters);
+        qDeleteAll(adventures);
+        qDeleteAll(settings);
+        qDeleteAll(npcs);
+        qDeleteAll(tracks);
+    }
+    else
+    {
+        characters.clear();
+        adventures.clear();
+        settings.clear();
+        npcs.clear();
+        tracks.clear();
+    }
+}
+
 void Campaign::setDate(const BasicDate& date)
 {
     if(date.isValid() && (_date != date))
@@ -798,43 +885,40 @@ void Campaign::setTime(const QTime& time)
 bool Campaign::validateCampaignIds()
 {
     bool validResult;
-    QHash<int, int> knownIds;
-    int largestId = DMH_GLOBAL_INVALID_ID;
+    QList<QUuid> knownIds;
 
-    validResult = validateSingleId(knownIds, largestId, this);
-    validResult = validResult && validateSingleId(knownIds, largestId, _notes);
+    validResult = validateSingleId(knownIds, this);
+    validResult = validResult && validateSingleId(knownIds, _notes);
 
     int i;
     for(i = 0; i < characters.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, largestId, characters.at(i));
+        validResult = validResult && validateSingleId(knownIds, characters.at(i));
 
     for(i = 0; i < adventures.count(); ++i)
     {
-        validResult = validResult && validateSingleId(knownIds, largestId, adventures.at(i));
+        validResult = validResult && validateSingleId(knownIds, adventures.at(i));
 
         if(adventures.at(i))
         {
             int j;
             for(j = 0; j < adventures.at(i)->getEncounterCount(); ++j)
-                validResult = validResult && validateSingleId(knownIds, largestId, adventures.at(i)->getEncounterByIndex(j));
+                validResult = validResult && validateSingleId(knownIds, adventures.at(i)->getEncounterByIndex(j));
 
             for(j = 0; j < adventures.at(i)->getMapCount(); ++j)
-                validResult = validResult && validateSingleId(knownIds, largestId, adventures.at(i)->getMapByIndex(j));
+                validResult = validResult && validateSingleId(knownIds, adventures.at(i)->getMapByIndex(j));
         }
     }
 
     for(i = 0; i < settings.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, largestId, settings.at(i));
+        validResult = validResult && validateSingleId(knownIds, settings.at(i));
 
     for(i = 0; i < npcs.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, largestId, npcs.at(i));
+        validResult = validResult && validateSingleId(knownIds, npcs.at(i));
 
     for(i = 0; i < tracks.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, largestId, tracks.at(i));
+        validResult = validResult && validateSingleId(knownIds, tracks.at(i));
 
-    CampaignObjectBase::setBaseId(largestId + 1);
-
-    qDebug() << "[Campaign] IDs validated result = " << validResult << ",  " << knownIds.count()<< " unique IDs, largest ID = " << largestId;
+    qDebug() << "[Campaign] IDs validated result = " << validResult << ",  " << knownIds.count()<< " unique IDs";
 
     _isValid = validResult;
     return _isValid;
@@ -856,14 +940,10 @@ void Campaign::handleInternalDirty()
         emit dirty();
 }
 
-bool Campaign::validateSingleId(QHash<int, int>& knownIds, int& largestId, CampaignObjectBase* baseObject)
+bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject)
 {
     if(!baseObject)
         return false;
-
-    // Check the value of the object ID
-    if(baseObject->getID() > largestId)
-        largestId = baseObject->getID();
 
     if(knownIds.contains(baseObject->getID()))
     {
@@ -872,7 +952,20 @@ bool Campaign::validateSingleId(QHash<int, int>& knownIds, int& largestId, Campa
     }
     else
     {
-        knownIds.insert(baseObject->getID(), 1);
+        knownIds.append(baseObject->getID());
+        qSort(knownIds.begin(), knownIds.end());
         return true;
     }
+}
+
+bool Campaign::isVersionCompatible(int majorVersion, int minorVersion) const
+{
+    if(majorVersion > DMHelper::CAMPAIGN_MAJOR_VERSION)
+        return false;
+
+    if((majorVersion == DMHelper::CAMPAIGN_MAJOR_VERSION) &&
+       (minorVersion > DMHelper::CAMPAIGN_MINOR_VERSION))
+        return false;
+
+    return true;
 }

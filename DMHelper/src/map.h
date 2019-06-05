@@ -16,12 +16,13 @@ class Map : public AdventureItem
 {
     Q_OBJECT
 public:
-    explicit Map(const QString& mapName, const QString& fileName, QObject *parent = 0);
-    explicit Map(const QDomElement& element, QObject *parent = 0);
+    explicit Map(const QString& mapName, const QString& fileName, QObject *parent = nullptr);
+    explicit Map(const QDomElement& element, bool isImport, QObject *parent = nullptr);
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
     QString getName() const;
     void setName(const QString& newName);
@@ -30,7 +31,7 @@ public:
     void setFileName(const QString& newFileName);
 
     AudioTrack* getAudioTrack();
-    int getAudioTrackId();
+    QUuid getAudioTrackId();
     void setAudioTrack(AudioTrack* track);
 
     QUndoStack* getUndoStack() const;
@@ -72,7 +73,7 @@ private:
     QUndoStack* _undoStack;
     MapFrame* _mapFrame;
     QList<MapMarker> _markerList;
-    int _audioTrackId;
+    QUuid _audioTrackId;
 
     bool _initialized;
     QImage _imgBackground;

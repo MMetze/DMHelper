@@ -14,8 +14,8 @@ public:
     explicit Encounter(const QString& encounterName, QObject *parent);
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     // Base functions to handle UI widgets
     virtual void widgetActivated(QWidget* widget) = 0;
@@ -36,7 +36,7 @@ public slots:
 
 protected slots:
     virtual void widgetChanged() = 0;
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) = 0;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) = 0;
 
 protected:
     QString _name;

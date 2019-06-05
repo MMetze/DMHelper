@@ -14,13 +14,13 @@ CharacterImporter::CharacterImporter(QObject *parent) :
 }
 
 
-int CharacterImporter::importCharacter(Campaign& campaign)
+QUuid CharacterImporter::importCharacter(Campaign& campaign)
 {
     int i;
     bool ok;
     QString characterText = QInputDialog::getMultiLineText(nullptr, QString("Enter Import Character Details"), QString("Character"),QString(), &ok);
     if((!ok) || (characterText.isEmpty()))
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(characterText.toUtf8(), &err);
@@ -29,12 +29,12 @@ int CharacterImporter::importCharacter(Campaign& campaign)
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("Unable to parse the input string\n") + err.errorString());
         qDebug() << "[Character Importer] ERROR: " << err.error << " in column " << err.offset;
         qDebug() << "[Character Importer] ERROR: " << err.errorString();
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
     }
 
     QJsonObject rootObject = doc.object();
     if((!rootObject.contains("character")) || (!rootObject["character"].isObject()))
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     QJsonObject characterObject = rootObject["character"].toObject();
 

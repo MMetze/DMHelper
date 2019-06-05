@@ -2,6 +2,7 @@
 #define CHARACTERIMPORTER_H
 
 #include <QObject>
+#include <QUuid>
 
 class Campaign;
 class Character;
@@ -15,7 +16,7 @@ public:
 signals:
 
 public slots:
-    int importCharacter(Campaign& campaign);
+    QUuid importCharacter(Campaign& campaign);
 
 protected:
     void scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character);

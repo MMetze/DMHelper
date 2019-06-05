@@ -22,11 +22,9 @@ public:
 
     void setLegendaryMaximum(int legendaryMaximum);
     int getLegendaryMaximum() const;
-    //int getLegendaryCount() const;
 
 signals:
 
-    //void contextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void clicked(const QString& monsterClass);
 
 public slots:
@@ -34,9 +32,6 @@ public slots:
     virtual void updateData();
     virtual void setInitiative(int initiative);
     virtual void setHitPoints(int hp);
-
-    //void setShown(bool isShown);
-    //void setKnown(bool isKnown);
 
     void decrementLegendary();
     void resetLegendary();
@@ -54,8 +49,6 @@ protected:
     BattleDialogModelMonsterBase* _monster;
 
     int _legendaryMaximum;
-
-    Qt::MouseButton _mouseDown;
 };
 
 #endif // WIDGETMONSTERINTERNAL_H
