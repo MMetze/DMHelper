@@ -1,6 +1,7 @@
 #include "audiotrack.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QDir>
 
 AudioTrack::AudioTrack(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     CampaignObjectBase(parent),
@@ -40,8 +41,15 @@ void AudioTrack::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetD
     element.setAttribute( "name", getName() );
     element.setAttribute( "md5", getMD5() );
 
+
+    QString urlString;
+    if(_url.isLocalFile())
+        urlString = targetDirectory.relativeFilePath(_url.toString());
+    else
+        urlString = _url.toString();
+
     QDomElement urlElement = doc.createElement( "url" );
-    QDomCDATASection urlData = doc.createCDATASection(getUrl().toString());
+    QDomCDATASection urlData = doc.createCDATASection(urlString);
     urlElement.appendChild(urlData);
     element.appendChild(urlElement);
 
