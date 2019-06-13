@@ -69,3 +69,5 @@ DMHelper/src/.qmake.stash
 DMHelper/src/DMHelper.pro.user
 DMHelper/src/DMHelper.pro.user
 DMHelper/src/Makefile
+*.user
+DMHelper/src/DMHelper.pro.user
