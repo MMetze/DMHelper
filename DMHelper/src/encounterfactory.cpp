@@ -16,7 +16,7 @@ Encounter* EncounterFactory::createEncounter(int encounterType, const QString& e
     switch(encounterType)
     {
         case DMHelper::EncounterType_Blank:
-            return NULL;
+            return nullptr;
         case DMHelper::EncounterType_Text:
             return new EncounterText(encounterName, parent);
         case DMHelper::EncounterType_Battle:
@@ -24,13 +24,13 @@ Encounter* EncounterFactory::createEncounter(int encounterType, const QString& e
         case DMHelper::EncounterType_ScrollingText:
             return new EncounterScrollingText(encounterName, parent);
         default:
-            return NULL;
+            return nullptr;
     }
 }
 
-Encounter* EncounterFactory::createEncounter(int encounterType, const QDomElement& element, QObject *parent)
+Encounter* EncounterFactory::createEncounter(int encounterType, const QDomElement& element, bool isImport, QObject *parent)
 {
-    Encounter* encounter = NULL;
+    Encounter* encounter = nullptr;
 
     switch(encounterType)
     {
@@ -44,12 +44,13 @@ Encounter* EncounterFactory::createEncounter(int encounterType, const QDomElemen
             break;
         case DMHelper::EncounterType_ScrollingText:
             encounter = new EncounterScrollingText(QString(""), parent);
+            break;
         default:
             break;
     }
 
     if(encounter)
-        encounter->inputXML(element);
+        encounter->inputXML(element, isImport);
 
     return encounter;
 }

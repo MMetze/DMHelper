@@ -39,9 +39,9 @@ BattleDialogModelMonsterBase::~BattleDialogModelMonsterBase()
 {
 }
 
-void BattleDialogModelMonsterBase::inputXML(const QDomElement &element)
+void BattleDialogModelMonsterBase::inputXML(const QDomElement &element, bool isImport)
 {
-    BattleDialogModelCombatant::inputXML(element);
+    BattleDialogModelCombatant::inputXML(element, isImport);
 
     _isShown = (bool)element.attribute("isShown",QString::number(0)).toInt();
     _isKnown = (bool)element.attribute("isKnown",QString::number(0)).toInt();
@@ -92,10 +92,11 @@ void BattleDialogModelMonsterBase::setLegendaryCount(int legendaryCount)
     _legendaryCount = legendaryCount;
 }
 
-void BattleDialogModelMonsterBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void BattleDialogModelMonsterBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 
     element.setAttribute("monsterType", getMonsterType());
     element.setAttribute("isShown", _isShown);

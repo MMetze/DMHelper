@@ -63,11 +63,11 @@ public:
     };
 
     explicit Character(QObject *parent = nullptr);
-    explicit Character(QDomElement &element, QObject *parent = nullptr);
+    explicit Character(QDomElement &element, bool isImport, QObject *parent = nullptr);
     explicit Character(const Character &obj);  // copy constructor
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     // From Combatant
     virtual void beginBatchChanges();
@@ -116,7 +116,7 @@ public slots:
 
 protected:
     // From Combatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
 private:
     void setDefaultValues();

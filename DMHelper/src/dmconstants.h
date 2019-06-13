@@ -9,7 +9,10 @@
 namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 1;
-    const int DMHELPER_MINOR_VERSION = 0;
+    const int DMHELPER_MINOR_VERSION = 1;
+
+    const int CAMPAIGN_MAJOR_VERSION = 1;
+    const int CAMPAIGN_MINOR_VERSION = 0;
 
     const int BESTIARY_MAJOR_VERSION = 2;
     const int BESTIARY_MINOR_VERSION = 1;
@@ -53,7 +56,7 @@ namespace DMHelper
         CombatantType_Base = 0,
         CombatantType_Character,
         CombatantType_Monster,
-        CombatantType_Reference
+        CombatantType_Reference     // In-battle reference to an NPC/Character
     };
 
     enum
@@ -131,6 +134,10 @@ namespace DMHelper
     const int STARTING_GRID_SCALE = 25;
 
     const int CURSOR_SIZE = 30;
+
+    const int ANIMATION_TIMER_DURATION = 25;
+    const int ANIMATION_TIMER_PREVIEW = 5000;
+    const int ANIMATION_TIMER_PREVIEW_FRAMES = ANIMATION_TIMER_PREVIEW / ANIMATION_TIMER_DURATION;
 
     const int XPThresholds[4][20] = {
         { 25,  50,  75, 125,  250,  300,  350,  450,  550,  600,  800, 1000, 1100, 1250, 1400, 1600, 2000, 2100,  2400,  2800},

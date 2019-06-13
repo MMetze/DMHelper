@@ -3,7 +3,7 @@
 #include <QDomElement>
 #include <QDebug>
 
-BattleDialogEventDamage::BattleDialogEventDamage(int combatant, int target, int damage) :
+BattleDialogEventDamage::BattleDialogEventDamage(QUuid combatant, QUuid target, int damage) :
     BattleDialogEvent(),
     _combatant(combatant),
     _target(target),
@@ -13,8 +13,8 @@ BattleDialogEventDamage::BattleDialogEventDamage(int combatant, int target, int 
 
 BattleDialogEventDamage::BattleDialogEventDamage(const QDomElement& element) :
     BattleDialogEvent(element),
-    _combatant(element.attribute("combatant").toInt()),
-    _target(element.attribute("target").toInt()),
+    _combatant(element.attribute("combatant")),
+    _target(element.attribute("target")),
     _damage(element.attribute("damage").toInt())
 {
 }
@@ -36,19 +36,21 @@ int BattleDialogEventDamage::getType() const
     return DMHelper::BattleEvent_Damage;
 }
 
-void BattleDialogEventDamage::outputXML(QDomElement &element)
+void BattleDialogEventDamage::outputXML(QDomElement &element, bool isExport)
 {
-    element.setAttribute( "combatant", _combatant );
-    element.setAttribute( "target", _target );
+    Q_UNUSED(isExport);
+
+    element.setAttribute( "combatant", _combatant.toString() );
+    element.setAttribute( "target", _target.toString() );
     element.setAttribute( "damage", _damage );
 }
 
-int BattleDialogEventDamage::getCombatant() const
+QUuid BattleDialogEventDamage::getCombatant() const
 {
     return _combatant;
 }
 
-int BattleDialogEventDamage::getTarget() const
+QUuid BattleDialogEventDamage::getTarget() const
 {
     return _target;
 }

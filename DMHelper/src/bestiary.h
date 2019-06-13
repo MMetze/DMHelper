@@ -24,8 +24,8 @@ public:
     static void Initialize();
     static void Shutdown();
 
-    void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory) const;
-    void inputXML(const QDomElement &element);
+    void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
+    void inputXML(const QDomElement &element, bool isImport);
 
     QString getVersion() const;
     bool isVersionCompatible() const;
@@ -51,7 +51,7 @@ public:
     const QDir& getDirectory() const;
 
     Monster* createMonster(const QString& name) const;
-    Monster* createMonster(const QDomElement& element) const;
+    Monster* createMonster(const QDomElement& element, bool isImport) const;
 
     QString findMonsterImage(const QString& monsterName, const QString& iconFile);
 

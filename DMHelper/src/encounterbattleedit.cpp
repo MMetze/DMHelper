@@ -188,7 +188,7 @@ void EncounterBattleEdit::addNPC()
     for(int i = 0; i < campaign->getNPCCount(); ++i)
     {
         Character* character = campaign->getNPCByIndex(i);
-        if((character) && (_battle->getCombatantById(character->getID()) == nullptr))
+        if((character) && (_battle->getCombatantById(character->getID(), character->getIntID()) == nullptr))
         {
             characterSelectDlg.addItem(character->getName(), QVariant::fromValue(character));
         }

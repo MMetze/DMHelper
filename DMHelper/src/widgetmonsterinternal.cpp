@@ -68,50 +68,14 @@ int WidgetMonsterInternal::getLegendaryMaximum() const
     return _legendaryMaximum;
 }
 
-/*
-int WidgetMonsterInternal::getLegendaryCount() const
-{
-    return _legendaryCount;
-}
-*/
-
 void WidgetMonsterInternal::updateData()
 {
     if(_widgetParent)
         _widgetParent->updateData();
 }
 
-/*
 void WidgetMonsterInternal::setInitiative(int initiative)
 {
-    // TODO: change widget and character initiative
-    Q_UNUSED(initiative);
-}
-
-void WidgetMonsterInternal::setHitPoints(int hp)
-{
-    Q_UNUSED(hp);
-}
-*/
-
-/*
-void WidgetMonsterInternal::setShown(bool isShown)
-{
-    if(_monster)
-        _monster->setShown(isShown);
-
-    updateData();
-}
-
-void WidgetMonsterInternal::setKnown(bool isKnown)
-{
-
-}
-*/
-
-void WidgetMonsterInternal::setInitiative(int initiative)
-{
-    // TODO: change widget and character initiative
     Q_UNUSED(initiative);
 
     if(!_widgetParent || !_monster)

@@ -23,7 +23,7 @@
 EncounterBattle::EncounterBattle(const QString& encounterName, QObject *parent) :
     Encounter(encounterName, parent),
     _text(),
-    _audioTrackId(-1),
+    _audioTrackId(),
     _combatantWaves(),
     _battleModel(nullptr)
 {
@@ -42,17 +42,15 @@ EncounterBattle::~EncounterBattle()
     }
 }
 
-void EncounterBattle::inputXML(const QDomElement &element)
+void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 {
-    Encounter::inputXML(element);
+    Encounter::inputXML(element, isImport);
 
     if( ( !element.firstChild().isNull() ) && ( element.firstChild().isCDATASection() ) )
     {
         QDomCDATASection cdata = element.firstChild().toCDATASection();
         setText(cdata.data());
     }
-
-    _audioTrackId = element.attribute("audiotrack").toInt();
 
     // Backwards compatibility; TODO: can be removed eventually
     QDomElement rootCombatantsElement = element.firstChildElement( "combatants" );
@@ -71,7 +69,7 @@ void EncounterBattle::inputXML(const QDomElement &element)
                 int combatantType = combatantElement.attribute("type").toInt(&ok);
                 if(ok)
                 {
-                    Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement);
+                    Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, isImport);
                     if(newCombatant)
                     {
                         addCombatant(0, combatantCount, newCombatant);
@@ -107,7 +105,7 @@ void EncounterBattle::inputXML(const QDomElement &element)
                             int combatantType = combatantElement.attribute("type").toInt(&ok);
                             if(ok)
                             {
-                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, this);
+                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, isImport, this);
                                 if(newCombatant)
                                 {
                                     addCombatant(wave, combatantCount, newCombatant);
@@ -125,10 +123,14 @@ void EncounterBattle::inputXML(const QDomElement &element)
     }
 }
 
-void EncounterBattle::postProcessXML(const QDomElement &element)
+void EncounterBattle::postProcessXML(const QDomElement &element, bool isImport)
 {
+    _audioTrackId = parseIdString(element.attribute("audiotrack"));
+
     // Read the battle
-    inputXMLBattle(element);
+    inputXMLBattle(element, isImport);
+
+    Encounter::postProcessXML(element, isImport);
 }
 
 void EncounterBattle::widgetActivated(QWidget* widget)
@@ -188,14 +190,14 @@ AudioTrack* EncounterBattle::getAudioTrack()
     return campaign->getTrackById(_audioTrackId);
 }
 
-int EncounterBattle::getAudioTrackId()
+QUuid EncounterBattle::getAudioTrackId()
 {
     return _audioTrackId;
 }
 
 void EncounterBattle::setAudioTrack(AudioTrack* track)
 {
-    int newTrackId = (track == nullptr) ? -1 : track->getID();
+    QUuid newTrackId = (track == nullptr) ? QUuid() : track->getID();
     if(_audioTrackId != newTrackId)
     {
         _audioTrackId = newTrackId;
@@ -308,14 +310,28 @@ void EncounterBattle::removeCombatant(int wave, int index)
     emit dirty();
 }
 
-Combatant* EncounterBattle::getCombatantById(int combatantId) const
+Combatant* EncounterBattle::getCombatantById(QUuid combatantId, int combatantIntId) const
 {
-    for(CombatantGroupList combatantGroupList : _combatantWaves)
+    if(combatantId.isNull())
     {
-        for(CombatantGroup combatantGroup : combatantGroupList)
+        for(CombatantGroupList combatantGroupList : _combatantWaves)
         {
-            if((combatantGroup.second) && (combatantGroup.second->getID() == combatantId))
-                return combatantGroup.second;
+            for(CombatantGroup combatantGroup : combatantGroupList)
+            {
+                if((combatantGroup.second) && (combatantGroup.second->getIntID() == combatantIntId))
+                    return combatantGroup.second;
+            }
+        }
+    }
+    else
+    {
+        for(CombatantGroupList combatantGroupList : _combatantWaves)
+        {
+            for(CombatantGroup combatantGroup : combatantGroupList)
+            {
+                if((combatantGroup.second) && (combatantGroup.second->getID() == combatantId))
+                    return combatantGroup.second;
+            }
         }
     }
 
@@ -385,14 +401,14 @@ void EncounterBattle::widgetChanged()
     battleEdit->setBattle(this);
 }
 
-void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(targetDirectory);
 
     QDomCDATASection cdata = doc.createCDATASection(getText());
     element.appendChild(cdata);
 
-    element.setAttribute( "audiotrack", _audioTrackId );
+    element.setAttribute( "audiotrack", _audioTrackId.toString() );
 
     QDomElement wavesElement = doc.createElement( "waves" );
     element.appendChild(wavesElement);
@@ -409,17 +425,17 @@ void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element,
             QDomElement combatantPairElement = doc.createElement( QString("combatantPair") );
 
             combatantPairElement.setAttribute( "count", combatantPair.first );
-            combatantPair.second->outputXML(doc, combatantPairElement, targetDirectory);
+            combatantPair.second->outputXML(doc, combatantPairElement, targetDirectory, isExport);
 
             combatantsElement.appendChild(combatantPairElement);
         }
     }
 
-    if(_battleModel)
-        _battleModel->outputXML(doc, element, targetDirectory);
+    if(_battleModel && !isExport)
+        _battleModel->outputXML(doc, element, targetDirectory, isExport);
 }
 
-void EncounterBattle::inputXMLBattle(const QDomElement &element)
+void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 {
     if(_battleModel)
         return;
@@ -439,10 +455,12 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
     */
 
     _battleModel = new BattleDialogModel();
-    _battleModel->inputXML(rootBattleElement);
+    _battleModel->inputXML(rootBattleElement, isImport);
     //_battleModel->setBattle(this);
 
-    int mapId = rootBattleElement.attribute("mapID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
+    //int mapId = rootBattleElement.attribute("mapID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
+    int mapIdInt = DMH_GLOBAL_INVALID_ID;
+    QUuid mapId = parseIdString(rootBattleElement.attribute("mapID"), &mapIdInt);
     Map* battleMap = dynamic_cast<Map*>(campaign->getObjectbyId(mapId));
     if(battleMap)
     {
@@ -454,7 +472,9 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
         _battleModel->setMap(battleMap, mapRect);
     }
 
-    int activeId = rootBattleElement.attribute("activeId",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
+    //int activeId = rootBattleElement.attribute("activeId",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
+    int activeIdInt = DMH_GLOBAL_INVALID_ID;
+    QUuid activeId = parseIdString(rootBattleElement.attribute("activeId"), &activeIdInt, true);
 
     QDomElement combatantsElement = rootBattleElement.firstChildElement("combatants");
     if(!combatantsElement.isNull())
@@ -463,10 +483,13 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
         while(!combatantElement.isNull())
         {
             BattleDialogModelCombatant* combatant = nullptr;
-            int combatantId = combatantElement.attribute("combatantId",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
+            //int combatantId = combatantElement.attribute("combatantId",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
+            int combatantIntId = DMH_GLOBAL_INVALID_ID;
+            QUuid combatantId;
             int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
             if(combatantType == DMHelper::CombatantType_Character)
             {
+                combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId);
                 Character* character = campaign->getCharacterById(combatantId);
                 if(!character)
                     character = campaign->getNPCById(combatantId);
@@ -481,7 +504,8 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
                 int monsterType = combatantElement.attribute("monsterType",QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
                 if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Combatant)
                 {
-                    Monster* monster = dynamic_cast<Monster*>(getCombatantById(combatantId));
+                    combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId, true);
+                    Monster* monster = dynamic_cast<Monster*>(getCombatantById(combatantId, combatantIntId));
                     if(monster)
                         combatant = new BattleDialogModelMonsterCombatant(monster);
                     else
@@ -508,10 +532,13 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
 
             if(combatant)
             {
-                combatant->inputXML(combatantElement);
+                combatant->inputXML(combatantElement, isImport);
                 _battleModel->appendCombatant(combatant);
-                if(combatant->getID() == activeId)
+                if( ((!activeId.isNull()) && (combatant->getID() == activeId)) ||
+                    (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
+                {
                     _battleModel->setActiveCombatant(combatant);
+                }
             }
 
             combatantElement = combatantElement.nextSiblingElement();
@@ -524,7 +551,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element)
         QDomElement effectElement = effectsElement.firstChildElement();
         while(!effectElement.isNull())
         {
-            BattleDialogModelEffect* newEffect = BattleDialogModelEffectFactory::createEffect(effectElement);
+            BattleDialogModelEffect* newEffect = BattleDialogModelEffectFactory::createEffect(effectElement, isImport);
             if(newEffect)
                 _battleModel->appendEffect(newEffect);
 

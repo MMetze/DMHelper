@@ -19,26 +19,32 @@ DMHObjectBase::~DMHObjectBase()
 {
 }
 
-void DMHObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void DMHObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
-    d->outputXML(doc, parent, targetDirectory);
+    d->outputXML(doc, parent, targetDirectory, isExport);
 }
 
-void DMHObjectBase::inputXML(const QDomElement &element)
+void DMHObjectBase::inputXML(const QDomElement &element, bool isImport)
 {
-    d->inputXML(element);
+    d->inputXML(element, isImport);
 }
 
-void DMHObjectBase::postProcessXML(const QDomElement &element)
+void DMHObjectBase::postProcessXML(const QDomElement &element, bool isImport)
 {
-    d->postProcessXML(element);
+    d->postProcessXML(element, isImport);
 }
 
-int DMHObjectBase::getID() const
+QUuid DMHObjectBase::getID() const
 {
     return d->getID();
 }
 
+int DMHObjectBase::getIntID() const
+{
+    return d->getIntID();
+}
+
+/*
 void DMHObjectBase::setBaseId(int baseId)
 {
     DMHObjectBase_Private::setBaseId(baseId);
@@ -53,9 +59,15 @@ int DMHObjectBase::createId()
 {
     return DMHObjectBase_Private::createId();
 }
+*/
 
-void DMHObjectBase::setID(int id)
+void DMHObjectBase::setID(QUuid id)
 {
     d->setID(id);
+}
+
+void DMHObjectBase::setIntID(int id)
+{
+    d->setIntID(id);
 }
 

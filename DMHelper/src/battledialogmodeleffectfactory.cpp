@@ -14,7 +14,7 @@ BattleDialogModelEffectFactory::BattleDialogModelEffectFactory(QObject *parent) 
 
 BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effectType)
 {
-    BattleDialogModelEffect* result = 0;
+    BattleDialogModelEffect* result = nullptr;
 
     switch(effectType)
     {
@@ -40,14 +40,14 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
     return result;
 }
 
-BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDomElement& element)
+BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDomElement& element, bool isImport)
 {
     int effectType = element.attribute("type",QString::number(BattleDialogModelEffect::BattleDialogModelEffect_Base)).toInt();
     BattleDialogModelEffect* result = createEffect(effectType);
 
     if(result)
     {
-        result->inputXML(element);
+        result->inputXML(element, isImport);
         qDebug() << "[Battle Dialog Model Effect Factor] read model effect " << result << " of type " << result->getType();
     }
 

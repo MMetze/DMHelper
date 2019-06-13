@@ -13,7 +13,7 @@ class CombatantFactory : public QObject
 public:
     explicit CombatantFactory(QObject *parent = nullptr);
 
-    static Combatant* createCombatant(int combatantType, const QDomElement& element, QObject *parent = nullptr);
+    static Combatant* createCombatant(int combatantType, const QDomElement& element, bool isImport, QObject *parent = nullptr);
 
 signals:
 

@@ -4,7 +4,7 @@
 #include <QFile>
 #include <QDebug>
 
-ScaledPixmap* ScaledPixmap::_defaultPixmap = 0;
+ScaledPixmap* ScaledPixmap::_defaultPixmap = nullptr;
 
 ScaledPixmap::ScaledPixmap() :
     _pixmaps(DMHelper::PixmapSize_Count)
@@ -34,7 +34,7 @@ ScaledPixmap* ScaledPixmap::defaultPixmap()
 void ScaledPixmap::cleanupDefaultPixmap()
 {
     delete _defaultPixmap;
-    _defaultPixmap = 0;
+    _defaultPixmap = nullptr;
 }
 
 bool ScaledPixmap::setBasePixmap(const QString& basePixmap)

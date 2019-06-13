@@ -1,8 +1,12 @@
 #DMHelper ignores
-DMHelper/bin
-DMHelper/build-debug
-DMHelper/build-profile
-DMHelper/build-release
+DMHelper/bin32
+DMHelper/bin64
+DMHelper/build-32_bit-debug
+DMHelper/build-32_bit-profile
+DMHelper/build-32_bit-release
+DMHelper/build-64_bit-debug
+DMHelper/build-64_bit-profile
+DMHelper/build-64_bit-release
 DMHelper/rawdata
 DMHelper/release
 DMHelper/src/DMHelper.pro.user*
@@ -13,20 +17,28 @@ DMHelper/DMHelper.log
 DMHelper/src.zip
 
 #DMHelper Shared ignores
-DMHelperShared/bin
-DMHelperShared/build-debug
-DMHelperShared/build-profile
-DMHelperShared/build-release
+DMHelperShared/bin32
+DMHelperShared/bin64
+DMHelperShared/build-32_bit-debug
+DMHelperShared/build-32_bit-profile
+DMHelperShared/build-32_bit-release
+DMHelperShared/build-64_bit-debug
+DMHelperShared/build-64_bit-profile
+DMHelperShared/build-64_bit-release
 DMHelperShared/release
 DMHelperShared/src/DMHelperShared.pro.user*
 DMHelperShared/DM Helper Shared release.__zip
 DMHelperShared/src.zip
 
 #DMHelper Client ignores
-DMHelperClient/bin
-DMHelperClient/build-debug
-DMHelperClient/build-profile
-DMHelperClient/build-release
+DMHelperClient/bin32
+DMHelperClient/bin64
+DMHelperClient/build-32_bit-debug
+DMHelperClient/build-32_bit-profile
+DMHelperClient/build-32_bit-release
+DMHelperClient/build-64_bit-debug
+DMHelperClient/build-64_bit-profile
+DMHelperClient/build-64_bit-release
 DMHelperClient/rawdata
 DMHelperClient/release
 DMHelperClient/working
@@ -36,10 +48,14 @@ DMHelperClient/DMHelperClient.log
 DMHelperClient/src.zip
 
 #DMHelper Test ignores
-DMHelperTest/bin
-DMHelperTest/build-debug
-DMHelperTest/build-profile
-DMHelperTest/build-release
+DMHelperTest/bin32
+DMHelperTest/bin64
+DMHelperTest/build-32_bit-debug
+DMHelperTest/build-32_bit-profile
+DMHelperTest/build-32_bit-release
+DMHelperTest/build-64_bit-debug
+DMHelperTest/build-64_bit-profile
+DMHelperTest/build-64_bit-release
 DMHelperTest/working
 DMHelperTest/src/DMHelperTest.pro.user*
 
@@ -54,3 +70,4 @@ DMHelper/src/DMHelper.pro.user
 DMHelper/src/DMHelper.pro.user
 DMHelper/src/Makefile
 *.user
+DMHelper/src/DMHelper.pro.user

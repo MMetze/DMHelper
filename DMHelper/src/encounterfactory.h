@@ -11,10 +11,10 @@ class EncounterFactory : public QObject
 {
     Q_OBJECT
 public:
-    explicit EncounterFactory(QObject *parent = 0);
+    explicit EncounterFactory(QObject *parent = nullptr);
 
     static Encounter* createEncounter(int encounterType, const QString& encounterName, QObject *parent);
-    static Encounter* createEncounter(int encounterType, const QDomElement& element, QObject *parent);
+    static Encounter* createEncounter(int encounterType, const QDomElement& element, bool isImport, QObject *parent);
 
 signals:
 

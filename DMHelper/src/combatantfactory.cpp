@@ -12,7 +12,7 @@ CombatantFactory::CombatantFactory(QObject *parent) :
 {
 }
 
-Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElement& element, QObject *parent)
+Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElement& element, bool isImport, QObject *parent)
 {
     Combatant* combatant = nullptr;
 
@@ -24,7 +24,7 @@ Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElemen
             combatant = new Character(parent);
             break;
         case DMHelper::CombatantType_Monster:
-            combatant = Bestiary::Instance()->createMonster(element);
+            combatant = Bestiary::Instance()->createMonster(element, isImport);
             break;
         case DMHelper::CombatantType_Reference:
             combatant = new CombatantReference(parent);
@@ -34,7 +34,7 @@ Combatant* CombatantFactory::createCombatant(int combatantType, const QDomElemen
     }
 
     if(combatant)
-        combatant->inputXML(element);
+        combatant->inputXML(element, isImport);
 
     return combatant;
 }

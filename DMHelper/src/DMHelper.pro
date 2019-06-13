@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml multimedia
+QT       += core gui xml multimedia multimediawidgets opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -20,7 +20,9 @@ INSTALLS += \
 win32:RC_ICONS += dmhelper.ico
 
 SOURCES += main.cpp\
+    campaignexporter.cpp \
         mainwindow.cpp \
+    objectimporter.cpp \
     publishwindow.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -148,6 +150,8 @@ SOURCES += main.cpp\
     texttranslatedialog.cpp
 
 HEADERS  += mainwindow.h \
+    campaignexporter.h \
+    objectimporter.h \
     publishwindow.h \
     undopoint.h \
     undopath.h \
@@ -340,26 +344,56 @@ DISTFILES += \
 
 CONFIG( debug, debug|release ) {
     # debug
-    win32: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/debug/
+    win32: {
+        contains(QT_ARCH, i386) {
+            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-32_bit-debug/debug/
+        } else {
+            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-64_bit-debug/debug/
+        }
+    }
     else:unix: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/
-    win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/DMHelperShared.lib
-    else:win32:win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/libDMHelperShared.a
+
+    win32:!win32-g++: {
+        contains(QT_ARCH, i386) {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-debug/debug/DMHelperShared.lib
+        } else {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-debug/debug/DMHelperShared.lib
+        }
+    }
+    else:win32:win32-g++: {
+        contains(QT_ARCH, i386) {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-debug/debug/libDMHelperShared.a
+        } else {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-debug/debug/libDMHelperShared.a
+        }
+    }
     else:unix: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
-    #win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/debug/
-    #else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/
-    #win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/debug/DMHelperShared.lib
-    #else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
 } else {
     # release
-    win32: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
+    win32: {
+        contains(QT_ARCH, i386) {
+            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-32_bit-release/release/
+        } else {
+            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-64_bit-release/release/
+        }
+    }
     else:unix: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
-    win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/DMHelperShared.lib
-    else:win32:win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/libDMHelperShared.a
+
+    win32:!win32-g++: {
+        contains(QT_ARCH, i386) {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-release/release/DMHelperShared.lib
+        } else {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-release/release/DMHelperShared.lib
+        }
+    }
+    else:win32:win32-g++: {
+        contains(QT_ARCH, i386) {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-release/release/libDMHelperShared.a
+        } else {
+            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-release/release/libDMHelperShared.a
+        }
+    }
     else:unix: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/libDMHelperShared.1.0.0.dylib
-    #win32:!win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/release/
-    #else:unix|win32-g++: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
-    #win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/release/DMHelperShared.lib
-    #else:unix|win32-g++: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/libDMHelperShared.1.0.0.dylib
 }
 LIBS += -lDMHelperShared
 

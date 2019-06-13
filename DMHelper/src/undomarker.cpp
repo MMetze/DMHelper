@@ -8,7 +8,7 @@
 UndoMarker::UndoMarker(Map& map, const MapMarker& marker) :
     UndoBase(map, QString("Set Marker")),
     _marker(marker),
-    _markerGraphicsItem(0)
+    _markerGraphicsItem(nullptr)
 {
 }
 
@@ -20,7 +20,7 @@ UndoMarker::~UndoMarker()
 void UndoMarker::undo()
 {
     delete _markerGraphicsItem;
-    _markerGraphicsItem = 0;
+    _markerGraphicsItem = nullptr;
 }
 
 void UndoMarker::redo()
@@ -32,16 +32,17 @@ void UndoMarker::redo()
     }
 }
 
-void UndoMarker::apply( bool preview, QPaintDevice* target ) const
+void UndoMarker::apply(bool preview, QPaintDevice* target) const
 {
     Q_UNUSED(preview);
     Q_UNUSED(target);
 }
 
-void UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const
+void UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 
     element.setAttribute( "x", _marker.position().x() );
     element.setAttribute( "y", _marker.position().y() );
@@ -49,8 +50,10 @@ void UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& target
     element.setAttribute( "description", _marker.description() );
 }
 
-void UndoMarker::inputXML(const QDomElement &element)
+void UndoMarker::inputXML(const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     _marker.setX(element.attribute(QString("x")).toInt());
     _marker.setY(element.attribute(QString("y")).toInt());
     _marker.setTitle(element.attribute( QString("title") ));

@@ -11,12 +11,14 @@ MonsterAction::MonsterAction(int attackBonus, QString description, QString name,
 {
 }
 
-MonsterAction::MonsterAction(const QDomElement &element) :
+MonsterAction::MonsterAction(const QDomElement &element, bool isImport) :
     _attackBonus(0),
     _description(QString()),
     _name(QString()),
     _damageDice(Dice())
 {
+    Q_UNUSED(isImport);
+
     _attackBonus = element.firstChildElement(QString("attack_bonus")).text().toInt();
     _description = element.firstChildElement(QString("desc")).text();
     _name = element.firstChildElement(QString("name")).text();
@@ -32,14 +34,14 @@ MonsterAction::MonsterAction(const MonsterAction& other) :
 {
 }
 
-void MonsterAction::outputXML(QDomDocument &doc, QDomElement &element) const
+void MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const
 {
-    MonsterClass::outputValue(doc, element, QString("attack_bonus"), QString::number(getAttackBonus()));
-    MonsterClass::outputValue(doc, element, QString("desc"), getDescription());
-    MonsterClass::outputValue(doc, element, QString("name"), getName());
-    MonsterClass::outputValue(doc, element, QString("damage_bonus"), QString::number(getDamageDice().getBonus()));
+    MonsterClass::outputValue(doc, element, isExport, QString("attack_bonus"), QString::number(getAttackBonus()));
+    MonsterClass::outputValue(doc, element, isExport, QString("desc"), getDescription());
+    MonsterClass::outputValue(doc, element, isExport, QString("name"), getName());
+    MonsterClass::outputValue(doc, element, isExport, QString("damage_bonus"), QString::number(getDamageDice().getBonus()));
     Dice outputDice = Dice(getDamageDice().getCount(), getDamageDice().getType(), 0);
-    MonsterClass::outputValue(doc, element, QString("damage_dice"), outputDice.toString());
+    MonsterClass::outputValue(doc, element, isExport, QString("damage_dice"), outputDice.toString());
 }
 
 QString MonsterAction::summaryString() const

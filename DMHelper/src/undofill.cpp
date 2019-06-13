@@ -36,10 +36,11 @@ void UndoFill::apply( bool preview, QPaintDevice* target ) const
     _map.fillFoW(applyColor,target);
 }
 
-void UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const
+void UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
-    Q_UNUSED(targetDirectory)
+    Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 
     element.setAttribute( "r", _mapEditFill.color().red() );
     element.setAttribute( "g", _mapEditFill.color().green() );
@@ -47,8 +48,10 @@ void UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDi
     element.setAttribute( "a", _mapEditFill.color().alpha() );
 }
 
-void UndoFill::inputXML(const QDomElement &element)
+void UndoFill::inputXML(const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     _mapEditFill.setRed(element.attribute( QString("r") ).toInt());
     _mapEditFill.setGreen(element.attribute( QString("g") ).toInt());
     _mapEditFill.setBlue(element.attribute( QString("b") ).toInt());

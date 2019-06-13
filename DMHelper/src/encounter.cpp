@@ -7,29 +7,29 @@
 Encounter::Encounter(const QString& encounterName, QObject *parent) :
     AdventureItem(parent),
     _name(encounterName),
-    _widget(NULL)
+    _widget(nullptr)
 {
 }
 
-void Encounter::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void Encounter::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(targetDirectory);
 
     QDomElement element = doc.createElement( "encounter" );
 
-    AdventureItem::outputXML(doc, element, targetDirectory);
+    AdventureItem::outputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute( "name", getName() );
     element.setAttribute( "type", getType() );
 
-    internalOutputXML(doc, element, targetDirectory);
+    internalOutputXML(doc, element, targetDirectory, isExport);
 
     parent.appendChild(element);
 }
 
-void Encounter::inputXML(const QDomElement &element)
+void Encounter::inputXML(const QDomElement &element, bool isImport)
 {
-    AdventureItem::inputXML(element);
+    AdventureItem::inputXML(element, isImport);
 
     setName(element.attribute("name"));
 }

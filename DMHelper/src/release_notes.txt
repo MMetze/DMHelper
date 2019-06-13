@@ -1,4 +1,13 @@
 TODOs
+validateSingleId
+Scrolling text preview without image is slow (minimum default width)
+Scrolling text text entry space should always use black text
+Change character image in battle
+Check unique IDs for NPCs, do they load/set right?
+Export/Import functionality, including menus to update in documentation
+Custom weapon and armour types, etc. into the reference tables so we can use homebrew items. A quick and dirty version might be to have a separate table or section in each tab for a dedicated ta for homebrew reference notes.
+Custom clock/calendar
+
 Add mouse over tips for all icon-based buttons, especially in the map and battle dialogs
 
 Battles:
@@ -67,6 +76,9 @@ enter while editing HP turns off publish
 Add a round counter, add countdown of effects, add effects to individuals
 
 DONE
+v1.1.0
+Bestiary reload & clear buttons for images
+
 v1.0.0
 The transparency/opacity of events in battles can to set anything between 0 and 100
 Character level re-added to the character sheet and used for calculating the encounter complexity

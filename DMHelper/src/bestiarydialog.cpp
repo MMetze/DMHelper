@@ -14,9 +14,6 @@
 #include <QDebug>
 #include "ui_bestiarydialog.h"
 
-//TODO: Make skills editable
-
-
 BestiaryDialog::BestiaryDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BestiaryDialog),
@@ -36,6 +33,8 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->btnDeleteMonster,SIGNAL(clicked()),this,SLOT(deleteCurrentMonster()));
     connect(ui->cmbSearch,SIGNAL(activated(QString)),this,SLOT(setMonster(QString)));
     connect(ui->btnPublish,SIGNAL(clicked()),this,SLOT(handlePublishButton()));
+    connect(ui->btnReload, SIGNAL(clicked()), this, SLOT(handleReloadImage()));
+    connect(ui->btnClear, SIGNAL(clicked()), this, SLOT(handleClearImage()));
 
     connect(ui->edtStrength,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
     connect(ui->edtDexterity,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
@@ -80,7 +79,6 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->edtLanguages, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtXP, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    // TOdO: what about actions, etc?
 
     ui->chkPrivate->hide();
 }
@@ -150,9 +148,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 
     QList<MonsterAction> actionList = _monster->getActions();
     ui->scrollActions->setVisible(actionList.count() > 0);
-    //ui->lblActions->setVisible(actionList.count() > 0);
-    //ui->lineActions->setVisible(actionList.count() > 0);
-//    if(actionList.count() > 0)
     {
         _actionsWidget = new QWidget;
         QVBoxLayout* actionsLayout = new QVBoxLayout(_actionsWidget);
@@ -169,9 +164,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 
     actionList = _monster->getLegendaryActions();
     ui->scrollLegendaryActions->setVisible(actionList.count() > 0);
-    //ui->lblLegendaryActions->setVisible(actionList.count() > 0);
-    //ui->lineLegendaryActions->setVisible(actionList.count() > 0);
-//    if(actionList.count() > 0)
     {
         _legendaryActionsWidget = new QWidget;
         QVBoxLayout* actionsLayout = new QVBoxLayout(_legendaryActionsWidget);
@@ -188,9 +180,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 
     actionList = _monster->getSpecialAbilities();
     ui->scrollSpecialAbilities->setVisible(actionList.count() > 0);
-    //ui->lblSpecialAbilities->setVisible(actionList.count() > 0);
-    //ui->lineSpecialAbilities->setVisible(actionList.count() > 0);
-//    if(actionList.count() > 0)
     {
         _specialAbilitiesWidget = new QWidget;
         QVBoxLayout* actionsLayout = new QVBoxLayout(_specialAbilitiesWidget);
@@ -207,9 +196,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 
     actionList = _monster->getReactions();
     ui->scrollReactions->setVisible(actionList.count() > 0);
-    //ui->lblReactions->setVisible(actionList.count() > 0);
-    //ui->lineReactions->setVisible(actionList.count() > 0);
-//    if(actionList.count() > 0)
     {
         _reactionsWidget = new QWidget;
         QVBoxLayout* actionsLayout = new QVBoxLayout(_reactionsWidget);
@@ -248,7 +234,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtAlignment->setReadOnly(!_edit);
     ui->edtArmorClass->setReadOnly(!_edit);
     ui->edtHitDice->setReadOnly(!_edit);
-    //ui->edtAverageHitPoints->setReadOnly(!_edit);
     ui->edtSpeed->setReadOnly(!_edit);
     ui->edtStrength->setReadOnly(!_edit);
     ui->edtDexterity->setReadOnly(!_edit);
@@ -378,6 +363,24 @@ void BestiaryDialog::handlePublishButton()
     {
         emit publishMonsterImage(iconImg);
     }
+}
+
+void BestiaryDialog::handleReloadImage()
+{
+    if(!_monster)
+        return;
+
+    _monster->searchForIcon(_monster->getIcon());
+    loadMonsterImage();
+}
+
+void BestiaryDialog::handleClearImage()
+{
+    if(!_monster)
+        return;
+
+    _monster->clearIcon();
+    loadMonsterImage();
 }
 
 void BestiaryDialog::addAction()
@@ -605,7 +608,6 @@ void BestiaryDialog::storeMonsterData()
     _monster->setAlignment(ui->edtAlignment->text());
     _monster->setArmorClass(ui->edtArmorClass->text().toInt());
     _monster->setHitDice(Dice(ui->edtHitDice->text()));
-    //_monster->setAverageHitPoints(ui->edtAverageHitPoints->text().toInt());
     _monster->setSpeed(ui->edtSpeed->text());
     _monster->setConditionImmunities(ui->edtConditionImmunities->text());
     _monster->setDamageImmunities(ui->edtDamageImmunities->text());

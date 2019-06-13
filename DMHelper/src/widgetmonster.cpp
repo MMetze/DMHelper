@@ -170,6 +170,7 @@ void WidgetMonster::loadImage()
     {
         ui->lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
         ui->lblIcon->setPixmap(_internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
+        emit imageChanged(_internals->getCombatant());
     }
 
     /*

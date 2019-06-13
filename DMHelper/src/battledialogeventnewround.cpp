@@ -26,7 +26,8 @@ int BattleDialogEventNewRound::getType() const
     return DMHelper::BattleEvent_NewRound;
 }
 
-void BattleDialogEventNewRound::outputXML(QDomElement &element)
+void BattleDialogEventNewRound::outputXML(QDomElement &element, bool isExport)
 {
     Q_UNUSED(element);
+    Q_UNUSED(isExport);
 }

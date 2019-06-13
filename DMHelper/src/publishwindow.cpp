@@ -4,9 +4,10 @@
 
 PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     QMainWindow(parent),
-    _publishFrame(0)
+    _publishFrame(nullptr)
 {
     setWindowTitle(title);
+    // Not quite...setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
 
     _publishFrame = new PublishFrame(this);
     setCentralWidget(_publishFrame);

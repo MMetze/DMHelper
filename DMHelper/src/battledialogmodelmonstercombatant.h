@@ -23,7 +23,7 @@ public:
     virtual ~BattleDialogModelMonsterCombatant();
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     // Local
     virtual BattleDialogModelCombatant* clone() const;
@@ -54,7 +54,7 @@ public:
 
 protected:
     // From BattleDialogModelCombatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
     int _monsterSize;
     QString _monsterName;

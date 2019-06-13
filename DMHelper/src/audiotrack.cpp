@@ -1,6 +1,7 @@
 #include "audiotrack.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QDir>
 
 AudioTrack::AudioTrack(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     CampaignObjectBase(parent),
@@ -10,13 +11,13 @@ AudioTrack::AudioTrack(const QString& trackName, const QUrl& trackUrl, QObject *
 {
 }
 
-AudioTrack::AudioTrack(QDomElement &element, QObject *parent) :
+AudioTrack::AudioTrack(QDomElement &element, bool isImport, QObject *parent) :
     CampaignObjectBase(parent),
     _name(),
     _url(),
     _md5()
 {
-    inputXML(element);
+    inputXML(element, isImport);
 }
 
 AudioTrack::AudioTrack(const AudioTrack &obj) :
@@ -31,26 +32,33 @@ AudioTrack::~AudioTrack()
 {
 }
 
-void AudioTrack::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void AudioTrack::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "track" );
 
-    CampaignObjectBase::outputXML(doc, element, targetDirectory);
+    CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute( "name", getName() );
     element.setAttribute( "md5", getMD5() );
 
+
+    QString urlString;
+    if(_url.isLocalFile())
+        urlString = targetDirectory.relativeFilePath(_url.toString());
+    else
+        urlString = _url.toString();
+
     QDomElement urlElement = doc.createElement( "url" );
-    QDomCDATASection urlData = doc.createCDATASection(getUrl().toString());
+    QDomCDATASection urlData = doc.createCDATASection(urlString);
     urlElement.appendChild(urlData);
     element.appendChild(urlElement);
 
     parent.appendChild(element);
 }
 
-void AudioTrack::inputXML(const QDomElement &element)
+void AudioTrack::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element);
+    CampaignObjectBase::inputXML(element, isImport);
 
     setName(element.attribute("name"));
     setMD5(element.attribute("md5"));
@@ -60,9 +68,9 @@ void AudioTrack::inputXML(const QDomElement &element)
     setUrl(QUrl(urlData.data()));
 }
 
-void AudioTrack::postProcessXML(const QDomElement &element)
+void AudioTrack::postProcessXML(const QDomElement &element, bool isImport)
 {
-    Q_UNUSED(element);
+    CampaignObjectBase::postProcessXML(element, isImport);
 }
 
 QString AudioTrack::getName() const
@@ -72,7 +80,12 @@ QString AudioTrack::getName() const
 
 void AudioTrack::setName(const QString& trackName)
 {
-    _name = trackName;
+    if(_name != trackName)
+    {
+        _name = trackName;
+        emit changed();
+        emit dirty();
+    }
 }
 
 QUrl AudioTrack::getUrl() const
@@ -82,7 +95,12 @@ QUrl AudioTrack::getUrl() const
 
 void AudioTrack::setUrl(const QUrl& trackUrl)
 {
-    _url = trackUrl;
+    if(_url != trackUrl)
+    {
+        _url = trackUrl;
+        emit changed();
+        emit dirty();
+    }
 }
 
 QString AudioTrack::getMD5() const

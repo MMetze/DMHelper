@@ -89,16 +89,20 @@ void MapMarker::setDescription(const QString& description)
     _description = description;
 }
 
-void MapMarker::outputXML(QDomElement &element) const
+void MapMarker::outputXML(QDomElement &element, bool isExport) const
 {
+    Q_UNUSED(isExport);
+
     element.setAttribute( "x", _position.x() );
     element.setAttribute( "y", _position.y() );
     element.setAttribute( "title", _title );
     element.setAttribute( "description", _description );
 }
 
-void MapMarker::inputXML(const QDomElement &element)
+void MapMarker::inputXML(const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     setX(element.attribute(QString("x")).toInt());
     setY(element.attribute(QString("y")).toInt());
     setTitle(element.attribute( QString("title") ));

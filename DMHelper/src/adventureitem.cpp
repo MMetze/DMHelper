@@ -11,12 +11,12 @@ Adventure* AdventureItem::getAdventure() const
     return dynamic_cast<Adventure*>(parent());
 }
 
-void AdventureItem::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void AdventureItem::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
-    CampaignObjectBase::outputXML(doc, parent, targetDirectory);
+    CampaignObjectBase::outputXML(doc, parent, targetDirectory, isExport);
 }
 
-void AdventureItem::inputXML(const QDomElement &element)
+void AdventureItem::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element);
+    CampaignObjectBase::inputXML(element, isImport);
 }

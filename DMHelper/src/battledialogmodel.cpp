@@ -21,6 +21,7 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _showCompass(false),
     _showAlive(true),
     _showDead(false),
+    _showEffects(true),
     _activeCombatant(nullptr)
 {
 }
@@ -41,6 +42,7 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
     _showCompass(other._showCompass),
     _showAlive(other._showAlive),
     _showDead(other._showDead),
+    _showEffects(other._showEffects),
     _activeCombatant(nullptr)
 {
     for(int i = 0; i < other._combatants.count(); ++i)
@@ -72,12 +74,12 @@ BattleDialogModel::~BattleDialogModel()
     qDeleteAll(_effects);
 }
 
-void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement battleElement = doc.createElement( "battle" );
 
     //battleElement.setAttribute("battleID", _battle->getID());
-    battleElement.setAttribute("mapID", _map ? _map->getID() : DMH_GLOBAL_INVALID_ID);
+    battleElement.setAttribute("mapID", _map ? _map->getID().toString() : QUuid().toString());
     battleElement.setAttribute("mapRectX", _mapRect.x());
     battleElement.setAttribute("mapRectY", _mapRect.y());
     battleElement.setAttribute("mapRectWidth", _mapRect.width());
@@ -90,13 +92,13 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
     battleElement.setAttribute("showAlive", _showAlive);
     battleElement.setAttribute("showDead", _showDead);
     battleElement.setAttribute("showEffects", _showEffects);
-    battleElement.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID() : DMH_GLOBAL_INVALID_ID);
+    battleElement.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
 
     QDomElement combatantsElement = doc.createElement("combatants");
     for(BattleDialogModelCombatant* combatant : _combatants)
     {
         if(combatant)
-            combatant->outputXML(doc, combatantsElement, targetDirectory);
+            combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
     }
     battleElement.appendChild(combatantsElement);
 
@@ -104,7 +106,7 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
     for(BattleDialogModelEffect* effect : _effects)
     {
         if(effect)
-            effect->outputXML(doc, effectsElement, targetDirectory);
+            effect->outputXML(doc, effectsElement, targetDirectory, isExport);
     }
     battleElement.appendChild(effectsElement);
 
@@ -112,8 +114,10 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
 
 }
 
-void BattleDialogModel::inputXML(const QDomElement &element)
+void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     // TODO: Manager needs to set battle
     // TODO: Manager needs to set map and rect
     // TODO: Manager needs to add combatants
@@ -160,7 +164,7 @@ BattleDialogModelCombatant* BattleDialogModel::getCombatant(int index) const
         return _combatants.at(index);
 }
 
-BattleDialogModelCombatant* BattleDialogModel::getCombatantById(int combatantId) const
+BattleDialogModelCombatant* BattleDialogModel::getCombatantById(QUuid combatantId) const
 {
     for(BattleDialogModelCombatant* combatant : _combatants)
     {
@@ -212,7 +216,7 @@ BattleDialogModelEffect* BattleDialogModel::getEffect(int index) const
         return _effects.at(index);
 }
 
-BattleDialogModelEffect* BattleDialogModel::getEffectById(int effectId) const
+BattleDialogModelEffect* BattleDialogModel::getEffectById(QUuid effectId) const
 {
     for(BattleDialogModelEffect* effect : _effects)
     {

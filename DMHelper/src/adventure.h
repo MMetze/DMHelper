@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include <QList>
+#include <QUuid>
 
 class Map;
 class Encounter;
@@ -13,36 +14,38 @@ class Adventure : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit Adventure(const QString& adventureName, QObject *parent = 0);
-    explicit Adventure(const QDomElement& element, QObject *parent = 0);
+    explicit Adventure(const QString& adventureName, QObject *parent = nullptr);
+    explicit Adventure(const QDomElement& element, bool isImport, QObject *parent = nullptr);
     ~Adventure();
 
     int getEncounterCount();
-    Encounter* getEncounterById(int id);
+    Encounter* getEncounterById(QUuid id);
     Encounter* getEncounterByIndex(int index);
-    int addEncounter(Encounter* newItem);
-    int addEncounter(Encounter* newItem, int index);
-    Encounter* removeEncounter(int id);
-    void moveEncounterTo(int id, int index);
+    QUuid addEncounter(Encounter* newItem);
+    QUuid addEncounter(Encounter* newItem, int index);
+    Encounter* removeEncounter(QUuid id);
+    void moveEncounterTo(QUuid id, int index);
 
     int getMapCount();
-    Map* getMapById(int id);
+    Map* getMapById(QUuid id);
     Map* getMapByIndex(int index);
-    int addMap(Map* newItem);
-    int addMap(Map* newItem, int index);
-    Map* removeMap(int id);
-    void moveMapTo(int id, int index);
+    QUuid addMap(Map* newItem);
+    QUuid addMap(Map* newItem, int index);
+    Map* removeMap(QUuid id);
+    void moveMapTo(QUuid id, int index);
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
-    virtual void inputXML(const QDomElement &element);
-    virtual void postProcessXML(const QDomElement &element);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
     QString getName() const;
     void setName(const QString& adventureName);
 
     bool getExpanded() const;
     void setExpanded(bool expanded);
+
+    void clear();
 
 signals:
     void changed();

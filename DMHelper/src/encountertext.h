@@ -14,7 +14,7 @@ public:
     explicit EncounterText(const QString& encounterName, QObject *parent);
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
     // Base functions to handle UI widgets
     virtual void widgetActivated(QWidget* widget);
@@ -29,7 +29,7 @@ public slots:
 
 protected slots:
     virtual void widgetChanged();
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
 protected:
     QString _text;

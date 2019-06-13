@@ -192,7 +192,7 @@ Character::Character(QObject *parent) :
     setDefaultValues();
 }
 
-Character::Character(QDomElement &element, QObject *parent) :
+Character::Character(QDomElement &element, bool isImport, QObject *parent) :
     Combatant(parent),
     _dndBeyondID(-1),
     _stringValues(STRINGVALUE_COUNT),
@@ -201,7 +201,7 @@ Character::Character(QDomElement &element, QObject *parent) :
     _active(true),
     _iconChanged(false)
 {
-    inputXML(element);
+    inputXML(element, isImport);
 }
 
 Character::Character(const Character &obj) :
@@ -216,32 +216,32 @@ Character::Character(const Character &obj) :
     qDebug("[Character] WARNING: Character copied - this is a highly questionable action!");
 }
 
-void Character::inputXML(const QDomElement &element)
+void Character::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
 
-    Combatant::inputXML(element);
+    Combatant::inputXML(element, isImport);
 
     setDndBeyondID(element.attribute(QString("dndBeyondID"),QString::number(-1)).toInt());
 
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)
     {
-        setStringValue((StringValue)i, element.attribute(STRINGVALUE_NAMES[i],STRINGVALUE_DEFAULTS[i]) );
+        setStringValue(static_cast<StringValue>(i), element.attribute(STRINGVALUE_NAMES[i],STRINGVALUE_DEFAULTS[i]) );
     }
 
     for(i = 0; i < INTVALUE_COUNT; ++i)
     {
-        setIntValue((IntValue)i, element.attribute(INTVALUE_NAMES[i],QString::number(INTVALUE_DEFAULTS[i])).toInt() );
+        setIntValue(static_cast<IntValue>(i), element.attribute(INTVALUE_NAMES[i],QString::number(INTVALUE_DEFAULTS[i])).toInt() );
     }
 
     for(i = 0; i < SKILLS_COUNT; ++i)
     {
         //setBoolValue((BoolValue)i, (bool)element.attribute(BOOLVALUE_NAMES[i],QString::number((int)BOOLVALUE_DEFAULTS[i])).toInt() );
-        setSkillValue((Skills)i, (bool)element.attribute(SKILLVALUE_NAMES[i],QString::number((int)false)).toInt() );
+        setSkillValue(static_cast<Skills>(i), static_cast<bool>(element.attribute(SKILLVALUE_NAMES[i],QString::number(static_cast<int>(false))).toInt()));
     }
 
-    setActive((bool)element.attribute(QString("active"),QString::number(true)).toInt());
+    setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
 
     endBatchChanges();
 }
@@ -494,30 +494,31 @@ QString Character::getWrittenSkillName(int skill)
     }
 }
 
-void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 
     element.setAttribute( "dndBeyondID", getDndBeyondID() );
 
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)
     {
-        element.setAttribute( STRINGVALUE_NAMES[i], getStringValue((StringValue)i) );
+        element.setAttribute( STRINGVALUE_NAMES[i], getStringValue(static_cast<StringValue>(i)) );
     }
 
     for(i = 0; i < INTVALUE_COUNT; ++i)
     {
-        element.setAttribute( INTVALUE_NAMES[i], getIntValue((IntValue)i) );
+        element.setAttribute( INTVALUE_NAMES[i], getIntValue(static_cast<IntValue>(i)) );
     }
 
     for(i = 0; i < SKILLS_COUNT; ++i)
     {
-        element.setAttribute( SKILLVALUE_NAMES[i], (int)getSkillValue((Skills)i) );
+        element.setAttribute( SKILLVALUE_NAMES[i], static_cast<int>(getSkillValue(static_cast<Skills>(i))) );
     }
 
-    element.setAttribute("active", (int)getActive());
+    element.setAttribute("active", static_cast<int>(getActive()));
 }
 
 void Character::setDefaultValues()

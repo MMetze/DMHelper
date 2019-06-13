@@ -13,6 +13,8 @@
 #include <QUndoStack>
 #include <QDir>
 #include <QPainter>
+#include <QImageReader>
+#include <QDebug>
 
 Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     AdventureItem(parent),
@@ -21,7 +23,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _undoStack(nullptr),
     _mapFrame(nullptr),
     _markerList(),
-    _audioTrackId(-1),
+    _audioTrackId(),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -29,31 +31,31 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _undoStack = new QUndoStack(this);
 }
 
-Map::Map(const QDomElement& element, QObject *parent) :
+Map::Map(const QDomElement& element, bool isImport, QObject *parent) :
     AdventureItem(parent),
     _name(),
     _filename(),
     _undoStack(nullptr),
     _mapFrame(nullptr),
     _markerList(),
-    _audioTrackId(-1),
+    _audioTrackId(),
     _initialized(false),
     _imgBackground(),
     _imgFow()
 {
     _undoStack = new QUndoStack(this);
-    inputXML(element);
+    inputXML(element, isImport);
 }
 
-void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "map" );
 
-    AdventureItem::outputXML(doc, element, targetDirectory);
+    AdventureItem::outputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute( "name", getName() );
     element.setAttribute( "filename", targetDirectory.relativeFilePath(getFileName()) );
-    element.setAttribute( "audiotrack", _audioTrackId );
+    element.setAttribute( "audiotrack", _audioTrackId.toString() );
 
     QDomElement actionsElement = doc.createElement( "actions" );
     int i;
@@ -61,7 +63,7 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
     {
         QDomElement actionElement = doc.createElement( "action" );
         actionElement.setAttribute( "type", DMHelper::ActionType_SetMarker );
-        _markerList.at(i).outputXML(actionElement);
+        _markerList.at(i).outputXML(actionElement, isExport);
         actionsElement.appendChild(actionElement);
     }
 
@@ -72,7 +74,7 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
         {
             QDomElement actionElement = doc.createElement( "action" );
             actionElement.setAttribute( "type", action->getType() );
-            action->outputXML(doc, actionElement, targetDirectory);
+            action->outputXML(doc, actionElement, targetDirectory, isExport);
             actionsElement.appendChild(actionElement);
         }
     }
@@ -81,13 +83,12 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
     parent.appendChild(element);
 }
 
-void Map::inputXML(const QDomElement &element)
+void Map::inputXML(const QDomElement &element, bool isImport)
 {
-    AdventureItem::inputXML(element);
+    AdventureItem::inputXML(element, isImport);
 
     setName(element.attribute("name"));
     setFileName(element.attribute("filename"));
-    _audioTrackId = element.attribute("audiotrack").toInt();
 
     QDomElement actionsElement = element.firstChildElement( QString("actions") );
     if( !actionsElement.isNull() )
@@ -95,7 +96,7 @@ void Map::inputXML(const QDomElement &element)
         QDomElement actionElement = actionsElement.firstChildElement( QString("action") );
         while( !actionElement.isNull() )
         {
-            UndoBase* newAction = NULL;
+            UndoBase* newAction = nullptr;
             switch( actionElement.attribute( QString("type") ).toInt() )
             {
                 case DMHelper::ActionType_Fill:
@@ -110,7 +111,7 @@ void Map::inputXML(const QDomElement &element)
                 case DMHelper::ActionType_SetMarker:
                     {
                         MapMarker m(QPoint(0,0), QString(""), QString(""));
-                        m.inputXML(actionElement);
+                        m.inputXML(actionElement, isImport);
                         _markerList.append(m);
                     }
                     break;
@@ -121,7 +122,7 @@ void Map::inputXML(const QDomElement &element)
 
             if(newAction)
             {
-                newAction->inputXML(actionElement);
+                newAction->inputXML(actionElement, isImport);
                 _undoStack->push(newAction);
             }
 
@@ -129,6 +130,12 @@ void Map::inputXML(const QDomElement &element)
         }
     }
 
+}
+
+void Map::postProcessXML(const QDomElement &element, bool isImport)
+{
+    _audioTrackId = parseIdString(element.attribute("audiotrack"));
+    AdventureItem::postProcessXML(element, isImport);
 }
 
 QString Map::getName() const
@@ -162,14 +169,14 @@ AudioTrack* Map::getAudioTrack()
     return campaign->getTrackById(_audioTrackId);
 }
 
-int Map::getAudioTrackId()
+QUuid Map::getAudioTrackId()
 {
     return _audioTrackId;
 }
 
 void Map::setAudioTrack(AudioTrack* track)
 {
-    int newTrackId = (track == nullptr) ? -1 : track->getID();
+    QUuid newTrackId = (track == nullptr) ? QUuid() : track->getID();
     if(_audioTrackId != newTrackId)
     {
         _audioTrackId = newTrackId;
@@ -244,7 +251,7 @@ MapMarker* Map::getMapMarker(int id)
     */
 
     // Marker not found.
-    return 0;
+    return nullptr;
 }
 
 QImage Map::getBackgroundImage()
@@ -260,7 +267,7 @@ QImage Map::getFoWImage()
 void Map::registerWindow(MapFrame* mapFrame)
 {
     _mapFrame = mapFrame;
-    if(mapFrame != NULL)
+    if(mapFrame != nullptr)
     {
         for(int i = 0; i < _markerList.count(); ++i)
         {
@@ -275,7 +282,7 @@ void Map::unregisterWindow(MapFrame* mapFrame)
     if(mapFrame == _mapFrame)
     {
         disconnect(_mapFrame);
-        registerWindow(NULL);
+        registerWindow(nullptr);
     }
 }
 
@@ -287,13 +294,20 @@ void Map::initialize()
     if((_filename.isNull()) || (_filename.isEmpty()))
         return;
 
-    _imgBackground.load(_filename);
+    QImageReader reader(_filename);
+    _imgBackground = reader.read();
+
+    // _imgBackground.load(_filename);
 
     if(_imgBackground.isNull())
+    {
+        qDebug() << "[Map] Error reading map file " << _filename;
+        qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
         return;
+    }
 
     _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
-    applyPaintTo(0, QColor(0,0,0,128), _undoStack->index());
+    applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
     _initialized = true;
 }
@@ -321,7 +335,7 @@ void Map::paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* tar
         {
             QRadialGradient grad(point, mapDraw.radius());
             grad.setColorAt(0,QColor(0,0,0,0));
-            grad.setColorAt(1.0 - (5.0/(qreal)mapDraw.radius()),QColor(0,0,0,0));
+            grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())),QColor(0,0,0,0));
             grad.setColorAt(1,QColor(255,255,255));
             p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
             p.setBrush(grad);

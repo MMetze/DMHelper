@@ -48,9 +48,9 @@ BattleDialogModelMonsterCombatant::~BattleDialogModelMonsterCombatant()
 {
 }
 
-void BattleDialogModelMonsterCombatant::inputXML(const QDomElement &element)
+void BattleDialogModelMonsterCombatant::inputXML(const QDomElement &element, bool isImport)
 {
-    BattleDialogModelCombatant::inputXML(element);
+    BattleDialogModelCombatant::inputXML(element, isImport);
 
     _monsterSize = element.attribute("monsterSize",QString::number(DMHelper::CombatantSize_Medium)).toInt();
     _monsterName = element.attribute("monsterName");
@@ -264,9 +264,9 @@ void BattleDialogModelMonsterCombatant::setMonster(Monster* monster)
     setCombatant(monster);
 }
 
-void BattleDialogModelMonsterCombatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void BattleDialogModelMonsterCombatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory);
+    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute("monsterSize", _monsterSize);
     element.setAttribute("monsterName", _monsterName);

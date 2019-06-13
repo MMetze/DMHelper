@@ -13,14 +13,14 @@ class CharacterWidget : public CombatantWidget
 {
     Q_OBJECT
 public:
-    explicit CharacterWidget(BattleDialogModelCharacter* character, QWidget *parent = 0);
+    explicit CharacterWidget(BattleDialogModelCharacter* character, QWidget *parent = nullptr);
 
     virtual BattleDialogModelCombatant* getCombatant();
     BattleDialogModelCharacter* getCharacter();
 
 signals:
 
-    void clicked(int characterID);
+    void clicked(QUuid characterID);
 
 public slots:
     // From CombatantWidget

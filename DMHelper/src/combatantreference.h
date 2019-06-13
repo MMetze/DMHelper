@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "combatant.h"
+#include <QUuid>
 
 class CombatantReference : public Combatant
 {
@@ -10,12 +11,13 @@ class CombatantReference : public Combatant
 public:
     explicit CombatantReference(QObject *parent = nullptr);
     explicit CombatantReference(const Combatant &combatant, QObject *parent = nullptr);
-    explicit CombatantReference(int combatantId, QObject *parent = nullptr);
+    explicit CombatantReference(QUuid combatantId, QObject *parent = nullptr);
     explicit CombatantReference(const CombatantReference &obj);  // copy constructor
 
     Combatant* getReference();
     const Combatant* getReference() const;
-    int getReferenceId() const;
+    QUuid getReferenceId();
+    QUuid getReferenceId() const;
 
     // From Combatant - required
     virtual Combatant* clone() const;
@@ -28,7 +30,7 @@ public:
     virtual int getCharisma() const;
 
     // From Combatant - additional
-    virtual void inputXML(const QDomElement &element);
+    virtual void inputXML(const QDomElement &element, bool isImport);
     virtual QString getName() const;
     virtual int getType() const;
 
@@ -37,10 +39,11 @@ signals:
 public slots:
 
 protected:
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
 private:
-    int _referenceId;
+    QUuid _referenceId;
+    int _referenceIntId;
 };
 
 #endif // COMBATANTREFERENCE_H

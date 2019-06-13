@@ -20,7 +20,7 @@ void UndoPath::redo()
 {
     if( _map.getRegisteredWindow() )
     {
-        apply(true, 0);
+        apply(true, nullptr);
         _map.getRegisteredWindow()->updateFoW();
     }
 }
@@ -33,14 +33,15 @@ void UndoPath::apply( bool preview, QPaintDevice* target ) const
     }
 }
 
-void UndoPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory) const
+void UndoPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 
     element.setAttribute( "radius", _mapDrawPath.radius() );
     element.setAttribute( "brushtype", _mapDrawPath.brushType() );
-    element.setAttribute( "erase", (int)_mapDrawPath.erase() );
+    element.setAttribute( "erase", static_cast<int>(_mapDrawPath.erase()) );
     QDomElement pointsElement = doc.createElement( "points" );
     for( int i = 0; i < _mapDrawPath.points().count(); ++i )
     {
@@ -52,11 +53,13 @@ void UndoPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDi
     element.appendChild(pointsElement);
 }
 
-void UndoPath::inputXML(const QDomElement &element)
+void UndoPath::inputXML(const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(isImport);
+
     _mapDrawPath.setRadius(element.attribute( QString("radius") ).toInt());
     _mapDrawPath.setBrushType(element.attribute( QString("brushtype") ).toInt());
-    _mapDrawPath.setErase((bool)(element.attribute("erase",QString::number(1)).toInt()));
+    _mapDrawPath.setErase(static_cast<bool>(element.attribute("erase",QString::number(1)).toInt()));
 
     QDomElement pointsElement = element.firstChildElement( QString("points") );
     if( !pointsElement.isNull() )
@@ -83,7 +86,7 @@ void UndoPath::addPoint(QPoint aPoint)
     _mapDrawPath.addPoint(aPoint);
     if( _map.getRegisteredWindow() )
     {
-        _map.paintFoWPoint( aPoint, _mapDrawPath, 0, true );
+        _map.paintFoWPoint( aPoint, _mapDrawPath, nullptr, true );
         _map.getRegisteredWindow()->updateFoW();
     }
 }

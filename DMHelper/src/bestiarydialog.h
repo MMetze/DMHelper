@@ -44,6 +44,9 @@ protected slots:
     void monsterRenamed();
     void handlePublishButton();
 
+    void handleReloadImage();
+    void handleClearImage();
+
     void addAction();
     void deleteAction(const MonsterAction& action);
     void addLegendaryAction();

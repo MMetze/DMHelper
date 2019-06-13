@@ -28,6 +28,7 @@ signals:
     void contextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void isShownChanged(bool isShown);
     void isKnownChanged(bool isKnown);
+    void imageChanged(BattleDialogModelCombatant* combatant);
 
 public slots:
 

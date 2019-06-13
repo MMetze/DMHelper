@@ -14,9 +14,9 @@ EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
 {
 }
 
-void EncounterText::inputXML(const QDomElement &element)
+void EncounterText::inputXML(const QDomElement &element, bool isImport)
 {
-    Encounter::inputXML(element);
+    Encounter::inputXML(element, isImport);
 
     if( ( !element.firstChild().isNull() ) && ( element.firstChild().isCDATASection() ) )
     {
@@ -31,7 +31,7 @@ void EncounterText::widgetActivated(QWidget* widget)
     if(!textEdit)
         return;
 
-    if(textEdit->getEncounter() != 0)
+    if(textEdit->getEncounter() != nullptr)
     {
         qDebug() << "[EncounterText] ERROR: Encounter not deactivated: " << textEdit->getEncounter()->getID() << " """ << textEdit->getEncounter()->getName();
         qDebug() << "[EncounterText] ERROR: Previous encounter will now be deactivated. This should happen previously!";
@@ -77,11 +77,11 @@ void EncounterText::widgetDeactivated(QWidget* widget)
         return;
 
     qDebug() << "[EncounterText] Widget Deactivated " << getID() << " """ << _name;
-    textEdit->setEncounter(0);
+    textEdit->setEncounter(nullptr);
 
     _text = textEdit->toHtml();
-    disconnect(textEdit,0,this,0);
-    _widget = NULL;
+    disconnect(textEdit, nullptr, this, nullptr);
+    _widget = nullptr;
 }
 
 int EncounterText::getType() const
@@ -126,9 +126,10 @@ void EncounterText::widgetChanged()
     setText(textEdit->toHtml());
 }
 
-void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory)
+void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
 
     QDomCDATASection cdata = doc.createCDATASection(getText());
     element.appendChild(cdata);

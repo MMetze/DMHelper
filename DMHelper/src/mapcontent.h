@@ -43,8 +43,8 @@ public:
     virtual void setTitle(const QString& title);
     virtual void setDescription(const QString& description);
 
-    virtual void outputXML(QDomElement &element) const;
-    virtual void inputXML(const QDomElement &element);
+    virtual void outputXML(QDomElement &element, bool isExport) const;
+    virtual void inputXML(const QDomElement &element, bool isImport);
 
 private:
     QPoint _position;

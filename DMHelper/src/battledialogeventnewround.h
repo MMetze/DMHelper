@@ -14,7 +14,7 @@ public:
 
     virtual int getType() const;
 
-    virtual void outputXML(QDomElement &element);
+    virtual void outputXML(QDomElement &element, bool isExport);
 
 signals:
 

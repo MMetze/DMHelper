@@ -2,21 +2,22 @@
 #define BATTLEDIALOGEVENTDAMAGE_H
 
 #include "battledialogevent.h"
+#include <QUuid>
 
 class BattleDialogEventDamage : public BattleDialogEvent
 {
     Q_OBJECT
 public:
-    explicit BattleDialogEventDamage(int combatant, int target, int damage);
+    explicit BattleDialogEventDamage(QUuid combatant, QUuid target, int damage);
     BattleDialogEventDamage(const QDomElement& element);
     BattleDialogEventDamage(const BattleDialogEventDamage& other);
     virtual ~BattleDialogEventDamage();
 
     virtual int getType() const;
-    virtual void outputXML(QDomElement &element);
+    virtual void outputXML(QDomElement &element, bool isExport);
 
-    virtual int getCombatant() const;
-    virtual int getTarget() const;
+    virtual QUuid getCombatant() const;
+    virtual QUuid getTarget() const;
     virtual int getDamage() const;
 
 signals:
@@ -24,8 +25,8 @@ signals:
 public slots:
 
 protected:
-    int _combatant;
-    int _target;
+    QUuid _combatant;
+    QUuid _target;
     int _damage;
 };
 

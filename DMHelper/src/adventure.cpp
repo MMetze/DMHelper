@@ -15,14 +15,14 @@ Adventure::Adventure(const QString& adventureName, QObject *parent) :
 {
 }
 
-Adventure::Adventure(const QDomElement& element, QObject *parent) :
+Adventure::Adventure(const QDomElement& element, bool isImport, QObject *parent) :
     CampaignObjectBase(parent),
     _name(),
     encounters(),
     maps(),
     _expanded(false)
 {
-    inputXML(element);
+    inputXML(element, isImport);
 }
 
 Adventure::~Adventure()
@@ -36,7 +36,7 @@ int Adventure::getEncounterCount()
     return encounters.count();
 }
 
-Encounter* Adventure::getEncounterById(int id)
+Encounter* Adventure::getEncounterById(QUuid id)
 {
     for(int i = 0; i < encounters.count(); ++i)
     {
@@ -44,26 +44,26 @@ Encounter* Adventure::getEncounterById(int id)
             return encounters.at(i);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 Encounter* Adventure::getEncounterByIndex(int index)
 {
     if((index < 0)||(index >= encounters.size()))
-        return NULL;
+        return nullptr;
 
     return encounters.at(index);
 }
 
-int Adventure::addEncounter(Encounter* newItem)
+QUuid Adventure::addEncounter(Encounter* newItem)
 {
     return addEncounter(newItem, encounters.count());
 }
 
-int Adventure::addEncounter(Encounter* newItem, int index)
+QUuid Adventure::addEncounter(Encounter* newItem, int index)
 {
     if(!newItem)
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     if(index < 0)
         index = 0;
@@ -79,7 +79,7 @@ int Adventure::addEncounter(Encounter* newItem, int index)
     return newItem->getID();
 }
 
-Encounter* Adventure::removeEncounter(int id)
+Encounter* Adventure::removeEncounter(QUuid id)
 {
     Encounter* encounter = getEncounterById(id);
     if(encounter)
@@ -92,10 +92,10 @@ Encounter* Adventure::removeEncounter(int id)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-void Adventure::moveEncounterTo(int id, int index)
+void Adventure::moveEncounterTo(QUuid id, int index)
 {
     if(index < 0)
         index = 0;
@@ -119,7 +119,7 @@ int Adventure::getMapCount()
     return maps.count();
 }
 
-Map* Adventure::getMapById(int id)
+Map* Adventure::getMapById(QUuid id)
 {
     for(int i = 0; i < maps.count(); ++i)
     {
@@ -127,26 +127,26 @@ Map* Adventure::getMapById(int id)
             return maps.at(i);
     }
 
-    return NULL;
+    return nullptr;
 }
 
 Map* Adventure::getMapByIndex(int index)
 {
     if((index < 0)||(index >= maps.size()))
-        return NULL;
+        return nullptr;
 
     return maps.at(index);
 }
 
-int Adventure::addMap(Map* newItem)
+QUuid Adventure::addMap(Map* newItem)
 {
     return addMap(newItem, maps.count());
 }
 
-int Adventure::addMap(Map* newItem, int index)
+QUuid Adventure::addMap(Map* newItem, int index)
 {
     if(!newItem)
-        return DMH_GLOBAL_INVALID_ID;
+        return QUuid();
 
     if(index < 0)
         index = 0;
@@ -162,7 +162,7 @@ int Adventure::addMap(Map* newItem, int index)
     return newItem->getID();
 }
 
-Map* Adventure::removeMap(int id)
+Map* Adventure::removeMap(QUuid id)
 {
     Map* map = getMapById(id);
     if(map)
@@ -175,10 +175,10 @@ Map* Adventure::removeMap(int id)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
-void Adventure::moveMapTo(int id, int index)
+void Adventure::moveMapTo(QUuid id, int index)
 {
     if(index < 0)
         index = 0;
@@ -197,37 +197,37 @@ void Adventure::moveMapTo(int id, int index)
     }
 }
 
-void Adventure::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+void Adventure::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement adventureElement = doc.createElement( "adventure" );
 
-    CampaignObjectBase::outputXML(doc, adventureElement, targetDirectory);
+    CampaignObjectBase::outputXML(doc, adventureElement, targetDirectory, isExport);
 
     adventureElement.setAttribute( "name", getName() );
-    adventureElement.setAttribute( "expanded", (int)getExpanded() );
+    adventureElement.setAttribute( "expanded", static_cast<int>(getExpanded()) );
     parent.appendChild(adventureElement);
 
     QDomElement encountersElement = doc.createElement( "encounters" );
     adventureElement.appendChild(encountersElement);
     for( int encIt = 0; encIt < encounters.size(); ++encIt )
     {
-        encounters.at(encIt)->outputXML(doc, encountersElement, targetDirectory);
+        encounters.at(encIt)->outputXML(doc, encountersElement, targetDirectory, isExport);
     }
 
     QDomElement mapsElement = doc.createElement( "maps" );
     adventureElement.appendChild(mapsElement);
     for( int mapIt = 0; mapIt < maps.size(); ++mapIt )
     {
-        maps.at(mapIt)->outputXML(doc, mapsElement, targetDirectory);
+        maps.at(mapIt)->outputXML(doc, mapsElement, targetDirectory, isExport);
     }
 }
 
-void Adventure::inputXML(const QDomElement &element)
+void Adventure::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element);
+    CampaignObjectBase::inputXML(element, isImport);
 
     _name = element.attribute("name");
-    _expanded = (bool)(element.attribute("expanded",QString::number(0)).toInt());
+    _expanded = static_cast<bool>(element.attribute("expanded",QString::number(0)).toInt());
 
     QDomElement encountersElement = element.firstChildElement( QString("encounters") );
     if( !encountersElement.isNull() )
@@ -239,7 +239,7 @@ void Adventure::inputXML(const QDomElement &element)
             int encounterType = encounterElement.attribute("type").toInt(&ok);
             if(ok)
             {
-                Encounter* newEncounter = EncounterFactory::createEncounter(encounterType, encounterElement, this);
+                Encounter* newEncounter = EncounterFactory::createEncounter(encounterType, encounterElement, isImport, this);
                 if(newEncounter)
                 {
                     addEncounter(newEncounter);
@@ -255,14 +255,14 @@ void Adventure::inputXML(const QDomElement &element)
         QDomElement mapElement = mapsElement.firstChildElement( QString("map") );
         while( !mapElement.isNull() )
         {
-            Map* newMap = new Map(mapElement);
+            Map* newMap = new Map(mapElement, isImport);
             addMap(newMap);
             mapElement = mapElement.nextSiblingElement( QString("map") );
         }
     }
 }
 
-void Adventure::postProcessXML(const QDomElement &element)
+void Adventure::postProcessXML(const QDomElement &element, bool isImport)
 {
     QDomElement encountersElement = element.firstChildElement( QString("encounters") );
     if( !encountersElement.isNull() )
@@ -270,9 +270,9 @@ void Adventure::postProcessXML(const QDomElement &element)
         QDomElement encounterElement = encountersElement.firstChildElement( QString("encounter") );
         while( !encounterElement.isNull() )
         {
-            Encounter* encounter = getEncounterById(encounterElement.attribute( QString("_baseID") ).toInt());
+            Encounter* encounter = getEncounterById(parseIdString(encounterElement.attribute( QString("_baseID") )));
             if(encounter)
-                encounter->postProcessXML(encounterElement);
+                encounter->postProcessXML(encounterElement, isImport);
             encounterElement = encounterElement.nextSiblingElement( QString("encounter") );
         }
     }
@@ -283,12 +283,14 @@ void Adventure::postProcessXML(const QDomElement &element)
         QDomElement mapElement = mapsElement.firstChildElement( QString("map") );
         while( !mapElement.isNull() )
         {
-            Map* map = getMapById(mapElement.attribute( QString("_baseID") ).toInt());
+            Map* map = getMapById(parseIdString(mapElement.attribute( QString("_baseID") )));
             if(map)
-                map->postProcessXML(mapElement);
+                map->postProcessXML(mapElement, isImport);
             mapElement = mapElement.nextSiblingElement( QString("map") );
         }
     }
+
+    CampaignObjectBase::postProcessXML(element, isImport);
 }
 
 QString Adventure::getName() const
@@ -317,4 +319,10 @@ void Adventure::setExpanded(bool expanded)
         _expanded = expanded;
         emit dirty();
     }
+}
+
+void Adventure::clear()
+{
+    encounters.clear();
+    maps.clear();
 }

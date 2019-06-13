@@ -20,7 +20,8 @@ BattleDialogEvent::~BattleDialogEvent()
 {
 }
 
-void BattleDialogEvent::outputXML(QDomElement &element)
+void BattleDialogEvent::outputXML(QDomElement &element, bool isExport)
 {
     Q_UNUSED(element);
+    Q_UNUSED(isExport);
 }

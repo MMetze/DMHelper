@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QMap>
+#include <QUuid>
 #include "battledialoggraphicsscene.h"
 
 class BattleDialogModelCombatant;
@@ -72,9 +73,10 @@ public slots:
 
 signals:
     void battleComplete();
-    void characterSelected(int id);
+    void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
     void publishImage(QImage img);
+    void animationStarted();
     void animateImage(QImage img);
     void showPublishWindow();
     void selectNewMap();
@@ -111,6 +113,7 @@ private slots:
     void damageCombatant();
     void setSelectedCombatant(BattleDialogModelCombatant* selected);
     void updateCombatantWidget(BattleDialogModelCombatant* combatant);
+    void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
     void togglePublishing(bool publishing);
