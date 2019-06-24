@@ -1,394 +1,377 @@
 <!DOCTYPE DMHelperDataXML>
 <root>
     <magicitems>
-        <magicitem name="Adamantine Armor" category="Armor (medium or heavy, but not hide)" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Ammunition, +1" category="Weapon (any ammunition)" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Ammunition, +2" category="Weapon (any ammunition)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Ammunition, +3" category="Weapon (any ammunition)" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Amulet of Health" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Amulet of the Planes" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Animated Shield" category="Armor (shield)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Apparatus of the Crab" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Armor, +1" category="Armor (light, medium, or heavy)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Armor, +2" category="Armor (light, medium, or heavy)" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Armor, +3" category="Armor (light, medium, or heavy)" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Armor of Invulnerability" category="Armor (plate)" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Armor of Resistance" category="Armor (light, medium, or heavy)" probability="rare" attunement="y">
-            <subcategory name="Acid" probability=""></subcategory>
-            <subcategory name="Cold" probability=""></subcategory>
-            <subcategory name="Fire" probability=""></subcategory>
-            <subcategory name="Force" probability=""></subcategory>
-            <subcategory name="Lightning" probability=""></subcategory>
-            <subcategory name="Necrotic" probability=""></subcategory>
-            <subcategory name="Poison" probability=""></subcategory>
-            <subcategory name="Psychic" probability=""></subcategory>
-            <subcategory name="Radiant" probability=""></subcategory>
-            <subcategory name="Thunder" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Armor of Vulnerability" category="Armor (plate)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Arrow-Catching Shield" category="Armor (shield)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Arrow of Slaying" category="Weapon (arrow)" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Bag of Beans" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Bag of Devouring" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Bag of Holding" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Bag of Tricks" category="Wondrous item" probability="uncommon" attunement="">
-            <subcategory name="Gray Bag of Tricks" probability=""></subcategory>
-            <subcategory name="Rust Bag of Tricks" probability=""></subcategory>
-            <subcategory name="Tan Bag of Tricks" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Bead of Force" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Belt of Dwarvenkind" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Belt of Giant Strength" category="Wondrous item" probability="" attunement="y">
-            <subcategory name="Hill giant" probability="rare"></subcategory>
-            <subcategory name="Stone giant" probability="very rare"></subcategory>
-            <subcategory name="Frost giant" probability="very rare"></subcategory>
-            <subcategory name="Fire giant" probability="very rare"></subcategory>
-            <subcategory name="Cloud giant" probability="legendary"></subcategory>
-            <subcategory name="Storm giant" probability="legendary"></subcategory>
-        </magicitem>
-        <magicitem name="Berserker Axe" category="Weapon (any axe)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Boots of Elvenkind" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Boots of Levitation" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Boots of Speed" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Boots of Striding and Springing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Boots of the Winterlands" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Bowl of Commanding Water Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Bracers of Archery" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Bracers of Defense" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Brazier of Commanding Fire Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Brooch of Shielding" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Broom of Flying" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Candle of Invocation" category="Wondrous item" probability="very rare" attunement="y">
-            <subcategory name="Chaotic evil" probability=""></subcategory>
-            <subcategory name="Chaotic neutral" probability=""></subcategory>
-            <subcategory name="Chaotic good" probability=""></subcategory>
-            <subcategory name="Neutral evil" probability=""></subcategory>
-            <subcategory name="Neutral" probability=""></subcategory>
-            <subcategory name="Neutral good" probability=""></subcategory>
-            <subcategory name="Lawful evil" probability=""></subcategory>
-            <subcategory name="Lawful neutral" probability=""></subcategory>
-            <subcategory name="Lawful good" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Cape of the Mountebank" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Carpet of Flying" category="Wondrous item" probability="very rare" attunement="">
-            <subcategory name="3ft. x 5 ft." probability=""></subcategory>
-            <subcategory name="4ft. x 6ft." probability=""></subcategory>
-            <subcategory name="5ft. x 7 ft." probability=""></subcategory>
-            <subcategory name="6ft. x 9 ft." probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Censer of Controlling Air Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Censer of Controlling Earth Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Censer of Controlling Fire Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Censer of Controlling Water Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Chime of Opening" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Circlet of Blasting" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Cloak of Arachnida" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Cloak of Displacement" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Cloak of Elvenkind" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Cloak of Protection" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Cloak of the Bat" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Cloak of the Manta Ray" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Crystal Ball" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Crystal Ball of Mind Reading" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Crystal Ball of Telepathy" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Crystal Ball of True Seeing" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Cube of Force" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Cubic Gate" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Dagger of Venom " category="Weapon (dagger)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Dancing Sword" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Decanter of Endless Water" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Deck of Illusions" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Deck of many things" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Defender" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Demon armor" category="Armor (plate)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Dimensional shackles" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Dragon Scale Mail" category="Armor (scale mail)" probability="very rare" attunement="y">
-            <subcategory name="Black - Acid" probability=""></subcategory>
-            <subcategory name="Gold - Fire" probability=""></subcategory>
-            <subcategory name="Blue - Lightning" probability=""></subcategory>
-            <subcategory name="Green - Poison" probability=""></subcategory>
-            <subcategory name="Brass - Fire" probability=""></subcategory>
-            <subcategory name="Red - Fire" probability=""></subcategory>
-            <subcategory name="Bronze - Lightning" probability=""></subcategory>
-            <subcategory name="Silver - Cold" probability=""></subcategory>
-            <subcategory name="Copper - Acid" probability=""></subcategory>
-            <subcategory name="White - Cold" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Dragon Slayer" category="Weapon (any sword)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Dust of Disappearance  " category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Dust of Dryness" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Dust of Sneezing and Choking" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Dwarven Thrower" category="Weapon (warhammer)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Efficient Quiver" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Efreeti Bottle" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Elemental Gem" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Eversmoking Bottle" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Eyes of Charming" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Eyes of Minute Seeing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Eyes of the Eagle" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Feather Token" category="Wondrous item" probability="rare" attunement="">
-            <subcategory name="Anchor" probability=""></subcategory>
-            <subcategory name="Swan boat" probability=""></subcategory>
-            <subcategory name="Bird" probability=""></subcategory>
-            <subcategory name="Tree" probability=""></subcategory>
-            <subcategory name="Fan" probability=""></subcategory>
-            <subcategory name="Whip" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Figurine of Wondrous Power" category="Wondrous item" probability="" attunement="">
-            <subcategory name="Bronze Griffon" probability="rare"></subcategory>
-            <subcategory name="Ebony Fly" probability="rare"></subcategory>
-            <subcategory name="Golden Lions" probability="rare"></subcategory>
-            <subcategory name="Ivory Goats" probability="rare"></subcategory>
-            <subcategory name="Marble Elephant" probability="rare"></subcategory>
-            <subcategory name="Obsidian Steed" probability="very rare"></subcategory>
-            <subcategory name="Onyx Dog" probability="rare"></subcategory>
-            <subcategory name="Serpentine Owl" probability="rare"></subcategory>
-            <subcategory name="Silver Raven" probability="uncommon"></subcategory>
-        </magicitem>
-        <magicitem name="Flame Tongue" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Folding Boat" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Frost Brand" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Gauntlets of Ogre Power" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Gem of Brightness" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Gem of Seeing" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Giant Slayer" category="Weapon (any axe or sword)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Glamoured Studded Leather" category="Armor (studded leather)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Gloves of Missile Snaring" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Gloves of Swimming and Climbing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Goggles of Night" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Hammer of Thunderbolts" category="Weapon (maul)" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Handy Haversack" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Hat of Disguise" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Headband of Intellect" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Helm of Brilliance" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Helm of Comprehending Languages" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Helm of Telepathy" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Helm of Teleportation" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Holy Avenger" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Horn of Blasting" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Horn of Valhalla" category="Wondrous item" probability="" attunement="">
-            <subcategory name="Silver" probability="rare"></subcategory>
-            <subcategory name="Brass" probability="rare"></subcategory>
-            <subcategory name="Bronze" probability="very rare"></subcategory>
-            <subcategory name="Iron" probability="legendary"></subcategory>
-        </magicitem>
-        <magicitem name="Horseshoes of a Zephyr" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Horseshoes of Speed" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Immovable Rod" category="Rod" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Instant Fortress" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Ioun Stone" category="Wondrous item" probability="" attunement="y">
-            <subcategory name="Absorption" probability="very rare"></subcategory>
-            <subcategory name="Agility" probability="very rare"></subcategory>
-            <subcategory name="Awareness" probability="rare"></subcategory>
-            <subcategory name="Fortitude" probability="very rare"></subcategory>
-            <subcategory name="Greater Absorption" probability="legendary"></subcategory>
-            <subcategory name="Insight" probability="very rare"></subcategory>
-            <subcategory name="Intellect" probability="very rare"></subcategory>
-            <subcategory name="Leadership" probability="very rare"></subcategory>
-            <subcategory name="Mastery" probability="legendary"></subcategory>
-            <subcategory name="Protection" probability="rare"></subcategory>
-            <subcategory name="Reserve" probability="rare"></subcategory>
-            <subcategory name="Strength" probability="very rare"></subcategory>
-            <subcategory name="Sustenance" probability="rare"></subcategory>
-        </magicitem>
-        <magicitem name="Iron Bands of Binding" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Iron Flask" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Javelin of Lightning" category="Weapon (javelin)" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Lantern of Revealing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Luck Blade" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Mace of Disruption" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Mace of Smiting" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Mace of Terror" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Mantle of Spell Resistance" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Manual of Bodily Health" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Manual of Gainful Exercise" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Manual of Golems" category="Wondrous item" probability="very rare" attunement="">
-            <subcategory name="Clay" probability=""></subcategory>
-            <subcategory name="Flesh" probability=""></subcategory>
-            <subcategory name="Iron" probability=""></subcategory>
-            <subcategory name="Stone" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Manual of Quickness of Action" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Marvelous Pigments" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Medallion of Thoughts" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Mirror of Life Trapping" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Mithral Armor" category="Armor (medium or heavy, but not hide)" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Necklace of Adaptation" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Necklace of Fireballs" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Necklace of Prayer Beads" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Nine Lives Stealer" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Oathbow" category="Weapon (longbow)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Oil of Etherealness" category="Potion" probability="rare" attunement=""></magicitem>
-        <magicitem name="Oil of Sharpness" category="Potion" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Oil of Slipperiness" category="Potion" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Pearl of Power" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Periapt of Health" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Periapt of Proof against Poison" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Periapt of Wound Closure" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Philter of Love" category="potion" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Pipes of Haunting" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Pipes of the Sewers" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Plate Armor of Etherealness" category="Armor (plate)" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Portable Hole" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Potion of Animal Friendship" category="Potion" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Potion of Clairvoyance" category="Potion" probability="rare" attunement=""></magicitem>
-        <magicitem name="Potion of Climbing" category="Potion" probability="common" attunement=""></magicitem>
-        <magicitem name="Potion of Diminution" category="Potion" probability="rare" attunement=""></magicitem>
-        <magicitem name="Potion of Flying" category="Potion" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Potion of Gaseous Form" category="Potion" probability="rare" attunement=""></magicitem>
-        <magicitem name="Potion of Giant Strength" category="Potion" probability="" attunement="">
-            <subcategory name="Hill giant" probability="uncommon"></subcategory>
-            <subcategory name="Frost giant" probability="rare"></subcategory>
-            <subcategory name="Stone giant" probability="rare"></subcategory>
-            <subcategory name="Fire giant" probability="rare"></subcategory>
-            <subcategory name="Cloud giant" probability="very rare"></subcategory>
-            <subcategory name="Storm giant" probability="legendary"></subcategory>
-        </magicitem>
-        <magicitem name="Potion of Growth" category="Potion" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Potion of Healing" category="Potion" probability="" attunement="">
-            <subcategory name="Healing" probability="common"></subcategory>
-            <subcategory name="Greater healing" probability="uncommon"></subcategory>
-            <subcategory name="Superior healing" probability="rare"></subcategory>
-            <subcategory name="Supreme healing" probability="very rare"></subcategory>
-        </magicitem>
-        <magicitem name="Potion of Heroism" category="Potion" probability="rare" attunement=""></magicitem>
-        <magicitem name="Potion of Invisibility" category="Potion" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Potion of Mind Reading" category="Potion" probability="rare" attunement=""></magicitem>
-        <magicitem name="Potion of Poison" category="Potion" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Potion of Resistance" category="Potion" probability="uncommon" attunement="">
-            <subcategory name="Acid" probability=""></subcategory>
-            <subcategory name="Necrotic" probability=""></subcategory>
-            <subcategory name="Cold" probability=""></subcategory>
-            <subcategory name="Poison" probability=""></subcategory>
-            <subcategory name="Fire" probability=""></subcategory>
-            <subcategory name="Psychic" probability=""></subcategory>
-            <subcategory name="Force" probability=""></subcategory>
-            <subcategory name="Radiant" probability=""></subcategory>
-            <subcategory name="Lightning" probability=""></subcategory>
-            <subcategory name="Thunder" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Potion of Speed" category="Potion" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Potion of Water Breathing" category="Potion" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Restorative Ointment" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Ring of Animal Influence" category="Ring" probability="rare" attunement=""></magicitem>
-        <magicitem name="Ring of Djinni Summoning" category="Ring" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Ring of Elemental Command" category="Ring" probability="legendary" attunement="y">
-            <subcategory name="Ring of Air Elemental Command" probability=""></subcategory>
-            <subcategory name="Ring of Earth Elemental Command" probability=""></subcategory>
-            <subcategory name="Ring of Fire Elemental Command" probability=""></subcategory>
-            <subcategory name="Ring of Water Elemental Command" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Ring of Evasion" category="Ring" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Feather Falling" category="Ring" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Free Action" category="Ring" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Invisibility" category="Ring" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Ring of Jumping" category="Ring" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Ring of Mind Shielding" category="Ring" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Ring of Protection" category="Ring" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Regeneration " category="Ring" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Resistance" category="Ring" probability="rare" attunement="y">
-            <subcategory name="Acid" probability=""></subcategory>
-            <subcategory name="Cold" probability=""></subcategory>
-            <subcategory name="Fire" probability=""></subcategory>
-            <subcategory name="Force" probability=""></subcategory>
-            <subcategory name="Lightning" probability=""></subcategory>
-            <subcategory name="Necrotic" probability=""></subcategory>
-            <subcategory name="Poison" probability=""></subcategory>
-            <subcategory name="Psychic" probability=""></subcategory>
-            <subcategory name="Radiant" probability=""></subcategory>
-            <subcategory name="Thunder" probability=""></subcategory>
-        </magicitem>
-        <magicitem name="Ring of Shooting Stars" category="Ring" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Spell Storing" category="Ring" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Spell Turning" category="Ring" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Ring of Swimming" category="Ring" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Ring of Telekinesis" category="Ring" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Ring of the Ram" category="Ring" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Ring of Three Wishes " category="Ring" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Ring of Warmth" category="Ring" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Ring of Water Walking" category="Ring" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Ring of X-ray Vision" category="Ring" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Robe of Eyes" category="Wondrous item" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Robe of Scintillating Colors" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Robe of Stars" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Robe of the Archmagi" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Robe of Useful magicitems" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Rod of Absorption" category="Rod" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Rod of Alertness" category="Rod" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Rod of Lordly Might" category="Rod" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Rod of Rulership" category="Rod" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Rod of Security" category="Rod" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Rope of Climbing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Rope of Entanglement" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Scarab of Protection" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Scimitar of Speed " category="Weapon (scimitar)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Shield, +1" category="Armor (shield)" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Shield, +2" category="Armor (shield)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Shield, +3" category="Armor (shield)" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Shield of Missile Attraction" category="Armor (shield)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Slippers of Spider Climbing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Sovereign Glue" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Spell Scroll" category="Scroll" probability="" attunement="">
-            <subcategory name="Cantrip" probability="common"></subcategory>
-            <subcategory name="1st" probability="common"></subcategory>
-            <subcategory name="2nd" probability="uncommon"></subcategory>
-            <subcategory name="3rd" probability="uncommon"></subcategory>
-            <subcategory name="4th" probability="rare"></subcategory>
-            <subcategory name="5th" probability="rare"></subcategory>
-            <subcategory name="6th" probability="very rare"></subcategory>
-            <subcategory name="7th" probability="very rare"></subcategory>
-            <subcategory name="8th" probability="very rare"></subcategory>
-            <subcategory name="9th" probability="legendary"></subcategory>
-        </magicitem>
-        <magicitem name="Spellguard Shield" category="Armor (shield)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Sphere of Annihilation" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Staff of Charming" category="Staff" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Fire" category="Staff" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Frost" category="Staff" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Healing" category="Staff" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Power" category="Staff" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Striking" category="Staff" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Swarming Insects" category="Staff" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Staff of the Magi" category="Staff" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Staff of the Python" category="Staff" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Staff of the Woodlands" category="Staff" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Thunder and Lightning" category="Staff" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Staff of Withering" category="Staff" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Stone of Controlling Earth Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
-        <magicitem name="Stone of Good Luck (Luckstone)" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Sun Blade" category="Weapon (longsword)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Sword of Life Stealing" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Sword of Sharpness" category="Weapon (any sword that deals slashing damage)" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Sword of Wounding" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Talisman of Pure Good" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Talisman of the Sphere" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Talisman of Ultimate Evil" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Tome of Clear Thought" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Tome of Leadership and Influence" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Tome of Understanding" category="Wondrous item" probability="very rare" attunement=""></magicitem>
-        <magicitem name="Trident of Fish Command" category="Weapon (trident)" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Universal Solvent" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Vicious Weapon" category="Weapon (any)" probability="rare" attunement=""></magicitem>
-        <magicitem name="Vorpal Sword" category="Weapon (any sword that deals slashing damage)" probability="legendary" attunement="y"></magicitem>
-        <magicitem name="Wand of Binding" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Enemy Detection" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Fear" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Fireballs" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Lightning Bolts" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Magic Detection" category="Wand" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Wand of Magic Missiles" category="Wand" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Wand of Paralysis" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Polymorph" category="Wand" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Secrets" category="Wand" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Wand of the War Mage, +1" category="Wand" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Wand of the War Mage, +2" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Wand of the War Mage, +3" category="Wand" probability="very rare" attunement="y"></magicitem>
-        <magicitem name="Wand of Web" category="Wand" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Wand of Wonder" category="Wand" probability="rare" attunement="y"></magicitem>
-        <magicitem name="Well of Many Worlds" category="Wondrous item" probability="legendary" attunement=""></magicitem>
-        <magicitem name="Wind Fan" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
-        <magicitem name="Winged Boots" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-        <magicitem name="Wings of Flying" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+        <magicitem name="Adamantine Armor" category="Armor (medium or heavy, but not hide)" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Ammunition, +1" category="Weapon (any ammunition)" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Ammunition, +2" category="Weapon (any ammunition)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Ammunition, +3" category="Weapon (any ammunition)" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Amulet of Health" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Amulet of the Planes" category="Wondrous item" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Animated Shield" category="Armor (shield)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Apparatus of the Crab" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Armor, +1" category="Armor (light, medium, or heavy)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Armor, +2" category="Armor (light, medium, or heavy)" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Armor, +3" category="Armor (light, medium, or heavy)" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Armor of Invulnerability" category="Armor (plate)" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Armor of Resistance" category="Armor (light, medium, or heavy)" probability="rare" attunement="y"></magicitem>    
+	    <subcategory name="Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Force" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Necrotic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Psychic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Radiant" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Thunder" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Armor of Vulnerability" category="Armor (plate)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Arrow-Catching Shield" category="Armor (shield)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Arrow of Slaying" category="Weapon (arrow)" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Bag of Beans" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Bag of Devouring" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Bag of Holding" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Bag of Tricks" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	    <subcategory name="Gray Bag of Tricks" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Rust Bag of Tricks" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Tan Bag of Tricks" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Bead of Force" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Belt of Dwarvenkind" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Belt of Giant Strength" category="Wondrous item" probability="" attunement="y"></magicitem>    
+	    <subcategory name="Hill giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Stone giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Frost giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Fire giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Cloud giant" category="" probability="legendary" attunement=""></subcategory>
+	    <subcategory name="Storm giant" category="" probability="legendary" attunement=""></subcategory>
+	<magicitem name="Berserker Axe" category="Weapon (any axe)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Boots of Elvenkind" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Boots of Levitation" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Boots of Speed" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Boots of Striding and Springing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Boots of the Winterlands" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Bowl of Commanding Water Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Bracers of Archery" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Bracers of Defense" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Brazier of Commanding Fire Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Brooch of Shielding" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Broom of Flying" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Candle of Invocation" category="Wondrous item" probability="very rare" attunement="y"></magicitem>    
+	    <subcategory name="Chaotic evil" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Chaotic neutral" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Chaotic good" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Neutral evil" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Neutral" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Neutral good" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lawful evil" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lawful neutral" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lawful good" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Cape of the Mountebank" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Carpet of Flying" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	    <subcategory name="3ft. x 5 ft." category="" probability="" attunement=""></subcategory>
+	    <subcategory name="4ft. x 6ft." category="" probability="" attunement=""></subcategory>
+	    <subcategory name="5ft. x 7 ft." category="" probability="" attunement=""></subcategory>
+	    <subcategory name="6ft. x 9 ft." category="" probability="" attunement=""></subcategory>
+	<magicitem name="Censer of Controlling Air Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Censer of Controlling Earth Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Censer of Controlling Fire Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Censer of Controlling Water Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Chime of Opening" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Circlet of Blasting" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Cloak of Arachnida" category="Wondrous item" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Cloak of Displacement" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Cloak of Elvenkind" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Cloak of Protection" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Cloak of the Bat" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Cloak of the Manta Ray" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Crystal Ball" category="Wondrous item" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Crystal Ball of Mind Reading" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Crystal Ball of Telepathy" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Crystal Ball of True Seeing" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Cube of Force" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Cubic Gate" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Dagger of Venom" category="Weapon (dagger)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Dancing Sword" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Decanter of Endless Water" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Deck of Illusions" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Deck of many things" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Defender" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Demon armor" category="Armor (plate)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Dimensional shackles" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Dragon Scale Mail" category="Armor (scale mail)" probability="very rare" attunement="y"></magicitem>    
+	    <subcategory name="Black - Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Gold - Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Blue - Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Green - Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Brass - Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Red - Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Bronze - Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Silver - Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Copper - Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="White - Cold" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Dragon Slayer" category="Weapon (any sword)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Dust of Disappearance" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Dust of Dryness" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Dust of Sneezing and Choking" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Dwarven Thrower" category="Weapon (warhammer)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Efficient Quiver" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Efreeti Bottle" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Elemental Gem" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Eversmoking Bottle" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Eyes of Charming" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Eyes of Minute Seeing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Eyes of the Eagle" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Feather Token" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	    <subcategory name="Anchor" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Swan boat" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Bird" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Tree" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fan" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Whip" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Figurine of Wondrous Power" category="Wondrous item" probability="" attunement=""></magicitem>    
+	    <subcategory name="Bronze Griffon" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Ebony Fly" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Golden Lions" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Ivory Goats" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Marble Elephant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Obsidian Steed" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Onyx Dog" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Serpentine Owl" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Silver Raven" category="" probability="uncommon" attunement=""></subcategory>
+	<magicitem name="Flame Tongue" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Folding Boat" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Frost Brand" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Gauntlets of Ogre Power" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Gem of Brightness" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Gem of Seeing" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Giant Slayer" category="Weapon (any axe or sword)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Glamoured Studded Leather" category="Armor (studded leather)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Gloves of Missile Snaring" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Gloves of Swimming and Climbing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Goggles of Night" category="wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Hammer of Thunderbolts" category="Weapon (maul)" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Handy Haversack" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Hat of Disguise" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Headband of Intellect" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Helm of Brilliance" category="Wondrous item" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Helm of Comprehending Languages" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Helm of Telepathy" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Helm of Teleportation" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Holy Avenger" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Horn of Blasting" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Horn of Valhalla" category="Wondrous item" probability="" attunement=""></magicitem>    
+	    <subcategory name="Silver" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Brass" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Bronze" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Iron" category="" probability="legendary" attunement=""></subcategory>
+	<magicitem name="Horseshoes of a Zephyr" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Horseshoes of Speed" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Immovable Rod" category="Rod" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Instant Fortress" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Ioun Stone" category="Wondrous item" probability="" attunement="y"></magicitem>    
+	    <subcategory name="Absorption" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Agility" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Awareness" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Fortitude" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Greater Absorption" category="" probability="legendary" attunement=""></subcategory>
+	    <subcategory name="Insight" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Intellect" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Leadership" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Mastery" category="" probability="legendary" attunement=""></subcategory>
+	    <subcategory name="Protection" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Reserve" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Strength" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Sustenance" category="" probability="rare" attunement=""></subcategory>
+	<magicitem name="Iron Bands of Binding" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Iron Flask" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Javelin of Lightning" category="Weapon (javelin)" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Lantern of Revealing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Luck Blade" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Mace of Disruption" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Mace of Smiting" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Mace of Terror" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Mantle of Spell Resistance" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Manual of Bodily Health" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Manual of Gainful Exercise" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Manual of Golems" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	    <subcategory name="Clay" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Flesh" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Iron" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Stone" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Manual of Quickness of Action" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Marvelous Pigments" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Medallion of Thoughts" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Mirror of Life Trapping" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Mithral Armor" category="Armor (medium or heavy, but not hide)" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Necklace of Adaptation" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Necklace of Fireballs" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Necklace of Prayer Beads" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Nine Lives Stealer" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Oathbow" category="Weapon (longbow)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Oil of Etherealness" category="Potion" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Oil of Sharpness" category="Potion" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Oil of Slipperiness" category="Potion" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Pearl of Power" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Periapt of Health" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Periapt of Proof against Poison" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Periapt of Wound Closure" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Philter of Love" category="potion" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Pipes of Haunting" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Pipes of the Sewers" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Plate Armor of Etherealness" category="Armor (plate)" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Portable Hole" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Animal Friendship" category="Potion" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Potion of Clairvoyance" category="Potion" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Climbing" category="Potion" probability="common" attunement=""></magicitem>    
+	<magicitem name="Potion of Diminution" category="Potion" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Flying" category="Potion" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Gaseous Form" category="Potion" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Giant Strength" category="Potion" probability="" attunement=""></magicitem>    
+	    <subcategory name="Hill giant" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="Frost giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Stone giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Fire giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Cloud giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Storm giant" category="" probability="legendary" attunement=""></subcategory>
+	<magicitem name="Potion of Growth" category="Potion" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Potion of Healing" category="Potion" probability="" attunement=""></magicitem>    
+	    <subcategory name="Healing" category="" probability="common" attunement=""></subcategory>
+	    <subcategory name="Greater healing" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="Superior healing" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Supreme healing" category="" probability="very rare" attunement=""></subcategory>
+	<magicitem name="Potion of Heroism" category="Potion" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Invisibility" category="Potion" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Mind Reading" category="Potion" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Poison" category="Potion" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Potion of Resistance" category="Potion" probability="uncommon" attunement=""></magicitem>    
+	    <subcategory name="Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Necrotic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Psychic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Force" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Radiant" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Thunder" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Potion of Speed" category="Potion" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Potion of Water Breathing" category="Potion" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Restorative Ointment" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Ring of Animal Influence" category="Ring" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Ring of Djinni Summoning" category="Ring" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Ring of Elemental Command" category="Ring" probability="legendary" attunement="y"></magicitem>    
+	    <subcategory name="Ring of Air Elemental Command" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Ring of Earth Elemental Command" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Ring of Fire Elemental Command" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Ring of Water Elemental Command" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Ring of Evasion" category="Ring" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Feather Falling" category="Ring" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Free Action" category="Ring" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Invisibility" category="Ring" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Ring of Jumping" category="Ring" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Ring of Mind Shielding" category="Ring" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Ring of Protection" category="Ring" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Regeneration" category="Ring" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Resistance" category="Ring" probability="rare" attunement="y"></magicitem>    
+	    <subcategory name="Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Force" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Necrotic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Psychic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Radiant" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Thunder" category="" probability="" attunement=""></subcategory>
+	<magicitem name="Ring of Shooting Stars" category="Ring" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Spell Storing" category="Ring" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Spell Turning" category="Ring" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Ring of Swimming" category="Ring" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Ring of Telekinesis" category="Ring" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of the Ram" category="Ring" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Ring of Three Wishes" category="Ring" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Ring of Warmth" category="Ring" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Ring of Water Walking" category="Ring" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Ring of X-ray Vision" category="Ring" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Robe of Eyes" category="Wondrous item" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Robe of Scintillating Colors" category="Wondrous item" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Robe of Stars" category="Wondrous item" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Robe of the Archmagi" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Robe of Useful Items" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Rod of Absorption" category="Rod" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Rod of Alertness" category="Rod" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Rod of Lordly Might" category="Rod" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Rod of Rulership" category="Rod" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Rod of Security" category="Rod" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Rope of Climbing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Rope of Entanglement" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Scarab of Protection" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Scimitar of Speed" category="Weapon (scimitar)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Shield, +1" category="Armor (shield)" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Shield, +2" category="Armor (shield)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Shield, +3" category="Armor (shield)" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Shield of Missile Attraction" category="Armor (shield)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Slippers of Spider Climbing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Sovereign Glue" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Spell Scroll" category="Scroll" probability="" attunement=""></magicitem>    
+	    <subcategory name="Cantrip" category="" probability="common" attunement=""></subcategory>
+	    <subcategory name="1st level" category="" probability="common" attunement=""></subcategory>
+	    <subcategory name="2nd level" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="3rd level" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="4th level" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="5th level" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="6th level" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="7th level" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="8th level" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="9th level" category="" probability="legendary" attunement=""></subcategory>
+	<magicitem name="Spellguard Shield" category="Armor (shield)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Sphere of Annihilation" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Staff of Charming" category="Staff" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Fire" category="Staff" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Frost" category="Staff" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Healing" category="Staff" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Power" category="Staff" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Striking" category="Staff" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Swarming Insects" category="Staff" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of the Magi" category="Staff" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Staff of the Python" category="Staff" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Staff of the Woodlands" category="Staff" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Thunder and Lightning" category="Staff" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Staff of Withering" category="Staff" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Stone of Controlling Earth Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Stone of Good Luck (Luckstone)" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Sun Blade" category="Weapon (longsword)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Sword of Life Stealing" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Sword of Sharpness" category="Weapon (any sword that deals slashing damage)" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Sword of Wounding" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Talisman of Pure Good" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Talisman of the Sphere" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Talisman of Ultimate Evil" category="Wondrous item" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Tome of Clear Thought" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Tome of Leadership and Influence" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Tome of Understanding" category="Wondrous item" probability="very rare" attunement=""></magicitem>    
+	<magicitem name="Trident of Fish Command" category="Weapon (trident)" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Universal Solvent" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Vicious Weapon" category="Weapon (any)" probability="rare" attunement=""></magicitem>    
+	<magicitem name="Vorpal Sword" category="Weapon (any sword that deals slashing damage)" probability="legendary" attunement="y"></magicitem>    
+	<magicitem name="Wand of Binding" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Enemy Detection" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Fear" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Fireballs" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Lightning Bolts" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Magic Detection" category="Wand" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Wand of Magic Missiles" category="Wand" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Wand of Paralysis" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Polymorph" category="Wand" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Secrets" category="Wand" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Wand of the War Mage, +1" category="Wand" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Wand of the War Mage, +2" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of the War Mage, +3" category="Wand" probability="very rare" attunement="y"></magicitem>    
+	<magicitem name="Wand of Web" category="Wand" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Wand of Wonder" category="Wand" probability="rare" attunement="y"></magicitem>    
+	<magicitem name="Well of Many Worlds" category="Wondrous item" probability="legendary" attunement=""></magicitem>    
+	<magicitem name="Wind Fan" category="Wondrous item" probability="uncommon" attunement=""></magicitem>    
+	<magicitem name="Winged Boots" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>    
+	<magicitem name="Wings of Flying" category="Wondrous item" probability="rare" attunement="y"></magicitem>
     </magicitems>
     <armor>        
         <lightarmor>    
