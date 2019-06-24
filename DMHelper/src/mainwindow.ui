@@ -161,6 +161,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <addaction name="actionImport_Item"/>
     <addaction name="action_Import_Character"/>
     <addaction name="separator"/>
+    <addaction name="actionOpen_Players_Window"/>
     <addaction name="actionBattle_Dialog"/>
     <addaction name="actionStart_Battle"/>
    </widget>
@@ -342,6 +343,11 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionExport_Item">
    <property name="text">
     <string>E&amp;xport Item...</string>
+   </property>
+  </action>
+  <action name="actionOpen_Players_Window">
+   <property name="text">
+    <string>Open Player's Window</string>
    </property>
   </action>
  </widget>

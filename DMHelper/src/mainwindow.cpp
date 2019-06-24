@@ -221,6 +221,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->action_Open_Bestiary,SIGNAL(triggered()),this,SLOT(openBestiary()));
     connect(ui->action_New_Monster,SIGNAL(triggered()),&bestiaryDlg,SLOT(createNewMonster()));
+    connect(ui->actionOpen_Players_Window,SIGNAL(triggered()),this,SLOT(showPublishWindow()));
     connect(ui->actionOpen_DM_Screen,SIGNAL(triggered()),this,SLOT(openDMScreen()));
     connect(ui->actionPublish_Text,SIGNAL(triggered()),this,SLOT(openTextPublisher()));
     connect(ui->actionTranslate_Text,SIGNAL(triggered()),this,SLOT(openTextTranslator()));
