@@ -9,7 +9,8 @@ class DMHPayload;
 class DMHLogon;
 class DMHNetworkObserver_Private;
 
-class DMHSHARED_EXPORT DMHNetworkObserver : public QObject
+//class DMHSHARED_EXPORT DMHNetworkObserver : public QObject
+class DMHNetworkObserver : public QObject
 {
     Q_OBJECT
 public:

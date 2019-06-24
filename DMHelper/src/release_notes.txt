@@ -77,6 +77,11 @@ Add a round counter, add countdown of effects, add effects to individuals
 
 DONE
 v1.1.0
+Made Equipment configurable
+Made Calendar configurable
+Added background color for publish
+Centered battle in publish window
+Added "F" key to make publish window fullscreen
 Bestiary reload & clear buttons for images
 
 v1.0.0

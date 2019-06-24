@@ -512,8 +512,8 @@ BattleDialog* BattleDialogManager::createBattleDialog(BattleDialogModel* dlgMode
     BattleDialog* dlg = new BattleDialog(*dlgModel);
     connect(dlg, SIGNAL(characterSelected(QUuid)), this, SIGNAL(characterSelected(QUuid)));
     connect(dlg, SIGNAL(monsterSelected(QString)), this, SIGNAL(monsterSelected(QString)));
-    connect(dlg, SIGNAL(publishImage(QImage)), this, SIGNAL(publishImage(QImage)));
-    connect(dlg, SIGNAL(animationStarted()), this, SIGNAL(animationStarted()));
+    connect(dlg, SIGNAL(publishImage(QImage,QColor)), this, SIGNAL(publishImage(QImage, QColor)));
+    connect(dlg, SIGNAL(animationStarted(QColor)), this, SIGNAL(animationStarted(QColor)));
     connect(dlg, SIGNAL(animateImage(QImage)), this, SIGNAL(animateImage(QImage)));
     connect(dlg, SIGNAL(showPublishWindow()), this, SIGNAL(showPublishWindow()));
 

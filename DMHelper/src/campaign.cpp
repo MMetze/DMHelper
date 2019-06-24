@@ -6,6 +6,7 @@
 #include "map.h"
 #include "audiotrack.h"
 #include "dmconstants.h"
+#include "basicdateserver.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QHash>
@@ -83,6 +84,7 @@ void Campaign::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
     campaignElement.setAttribute( "worldExpanded", static_cast<int>(getWorldExpanded()) );
     campaignElement.setAttribute( "worldSettingsExpanded", static_cast<int>(getWorldSettingsExpanded()) );
     campaignElement.setAttribute( "worldNPCsExpanded", static_cast<int>(getWorldNPCsExpanded()) );
+    campaignElement.setAttribute( "calendar", BasicDateServer::Instance() ? BasicDateServer::Instance()->getActiveCalendarName() : QString() );
     campaignElement.setAttribute( "date", getDate().toStringDDMMYYYY() );
     campaignElement.setAttribute( "time", getTime().msecsSinceStartOfDay() );
     parent.appendChild(campaignElement);
@@ -150,6 +152,9 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     _worldExpanded = static_cast<bool>(element.attribute("worldExpanded",QString::number(0)).toInt());
     _worldSettingsExpanded = static_cast<bool>(element.attribute("worldSettingsExpanded",QString::number(0)).toInt());
     _worldNPCsExpanded = static_cast<bool>(element.attribute("worldNPCsExpanded",QString::number(0)).toInt());
+    QString calendarName = element.attribute("calendar", QString("Gregorian"));
+    if(BasicDateServer::Instance())
+        BasicDateServer::Instance()->setActiveCalendar(calendarName);
     BasicDate inputDate(element.attribute("date",QString("")));
     setDate(inputDate);
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time",QString::number(0)).toInt()));

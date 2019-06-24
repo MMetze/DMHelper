@@ -40,7 +40,7 @@ public:
 
 signals:
     void chaseComplete();
-    void publishChaseScene(QImage img);
+    void publishChaseScene(QImage img, QColor color);
 
 public slots:
     void generateComplication();

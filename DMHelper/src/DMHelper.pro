@@ -20,7 +20,23 @@ INSTALLS += \
 win32:RC_ICONS += dmhelper.ico
 
 SOURCES += main.cpp\
+    ../../DMHelperShared/src/dmhlogon.cpp \
+    ../../DMHelperShared/src/dmhlogon_private.cpp \
+    ../../DMHelperShared/src/dmhnetworkdata.cpp \
+    ../../DMHelperShared/src/dmhnetworkdata_private.cpp \
+    ../../DMHelperShared/src/dmhnetworkdatafactory.cpp \
+    ../../DMHelperShared/src/dmhnetworkmanager.cpp \
+    ../../DMHelperShared/src/dmhnetworkmanager_private.cpp \
+    ../../DMHelperShared/src/dmhnetworkobserver.cpp \
+    ../../DMHelperShared/src/dmhnetworkobserver_private.cpp \
+    ../../DMHelperShared/src/dmhobjectbase.cpp \
+    ../../DMHelperShared/src/dmhobjectbase_private.cpp \
+    ../../DMHelperShared/src/dmhpayload.cpp \
+    ../../DMHelperShared/src/dmhpayload_private.cpp \
+    ../../DMHelperShared/src/dmhshared.cpp \
+    basicdateserver.cpp \
     campaignexporter.cpp \
+    colorpushbutton.cpp \
         mainwindow.cpp \
     objectimporter.cpp \
     publishwindow.cpp \
@@ -150,7 +166,24 @@ SOURCES += main.cpp\
     texttranslatedialog.cpp
 
 HEADERS  += mainwindow.h \
+    ../../DMHelperShared/inc/dmhglobal.h \
+    ../../DMHelperShared/inc/dmhlogon.h \
+    ../../DMHelperShared/inc/dmhnetworkdata.h \
+    ../../DMHelperShared/inc/dmhnetworkmanager.h \
+    ../../DMHelperShared/inc/dmhnetworkobserver.h \
+    ../../DMHelperShared/inc/dmhobjectbase.h \
+    ../../DMHelperShared/inc/dmhpayload.h \
+    ../../DMHelperShared/src/dmhlogon_private.h \
+    ../../DMHelperShared/src/dmhnetworkdata_private.h \
+    ../../DMHelperShared/src/dmhnetworkdatafactory.h \
+    ../../DMHelperShared/src/dmhnetworkmanager_private.h \
+    ../../DMHelperShared/src/dmhnetworkobserver_private.h \
+    ../../DMHelperShared/src/dmhobjectbase_private.h \
+    ../../DMHelperShared/src/dmhpayload_private.h \
+    ../../DMHelperShared/src/dmhshared.h \
+    basicdateserver.h \
     campaignexporter.h \
+    colorpushbutton.h \
     objectimporter.h \
     publishwindow.h \
     undopoint.h \
@@ -334,6 +367,8 @@ OTHER_FILES += \
     bugs.txt
 
 DISTFILES += \
+    binsrc/calendar.xml \
+    binsrc/equipment.xml \
     deploy.cmd \
     deploy.cmd \
     binsrc/quickref_data.xml \
@@ -342,61 +377,7 @@ DISTFILES += \
     release_notes.txt \
     buildanddeploymac
 
-CONFIG( debug, debug|release ) {
-    # debug
-    win32: {
-        contains(QT_ARCH, i386) {
-            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-32_bit-debug/debug/
-        } else {
-            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-64_bit-debug/debug/
-        }
-    }
-    else:unix: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-debug/
-
-    win32:!win32-g++: {
-        contains(QT_ARCH, i386) {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-debug/debug/DMHelperShared.lib
-        } else {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-debug/debug/DMHelperShared.lib
-        }
-    }
-    else:win32:win32-g++: {
-        contains(QT_ARCH, i386) {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-debug/debug/libDMHelperShared.a
-        } else {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-debug/debug/libDMHelperShared.a
-        }
-    }
-    else:unix: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-debug/libDMHelperShared.1.0.0.dylib
-} else {
-    # release
-    win32: {
-        contains(QT_ARCH, i386) {
-            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-32_bit-release/release/
-        } else {
-            QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-64_bit-release/release/
-        }
-    }
-    else:unix: QMAKE_LIBDIR += $$PWD/../../DMHelperShared/build-release/
-
-    win32:!win32-g++: {
-        contains(QT_ARCH, i386) {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-release/release/DMHelperShared.lib
-        } else {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-release/release/DMHelperShared.lib
-        }
-    }
-    else:win32:win32-g++: {
-        contains(QT_ARCH, i386) {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-32_bit-release/release/libDMHelperShared.a
-        } else {
-            PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-64_bit-release/release/libDMHelperShared.a
-        }
-    }
-    else:unix: PRE_TARGETDEPS += $$PWD/../../DMHelperShared/build-release/libDMHelperShared.1.0.0.dylib
-}
-LIBS += -lDMHelperShared
-
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
+DEPENDPATH += $$PWD/../../DMHelperShared/src
 

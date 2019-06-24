@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1189</width>
+    <width>1549</width>
     <height>632</height>
    </rect>
   </property>
@@ -575,6 +575,31 @@ color: rgb(85, 0, 0);</string>
       </widget>
      </item>
      <item>
+      <widget class="ColorPushButton" name="btnColor">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>39</width>
+         <height>35</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>39</width>
+         <height>35</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btnPublish">
        <property name="text">
         <string>Publish</string>
@@ -585,12 +610,19 @@ color: rgb(85, 0, 0);</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ColorPushButton</class>
+   <extends>QPushButton</extends>
+   <header>colorpushbutton.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="grpBrush"/>
   <buttongroup name="grpEditMode"/>
+  <buttongroup name="grpBrush"/>
  </buttongroups>
 </ui>

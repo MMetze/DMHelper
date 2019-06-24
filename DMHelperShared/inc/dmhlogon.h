@@ -7,7 +7,8 @@
 
 class DMHLogon_Private;
 
-class DMHSHARED_EXPORT DMHLogon
+//class DMHSHARED_EXPORT DMHLogon
+class DMHLogon
 {
 public:
     DMHLogon();

@@ -15,7 +15,7 @@ TextPublishDialog::TextPublishDialog(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->btnPublish, SIGNAL(clicked()), this, SLOT(publishTextImage()));
-    connect(this,SIGNAL(publishImage(QImage)),this,SLOT(setPreviewImage(QImage)));
+    connect(this, SIGNAL(publishImage(QImage, QColor)), this, SLOT(setPreviewImage(QImage, QColor)));
     connect(ui->btnClear, SIGNAL(clicked()), ui->textEdit, SLOT(clear()));
 }
 
@@ -34,11 +34,13 @@ void TextPublishDialog::publishTextImage()
     QPainter painter(&pub);
     ui->textEdit->document()->drawContents(&painter);
 
-    emit publishImage(pub);
+    emit publishImage(pub, Qt::white);
 }
 
-void TextPublishDialog::setPreviewImage(QImage img)
+void TextPublishDialog::setPreviewImage(QImage img, QColor color)
 {
+    Q_UNUSED(color);
+
     QImage scaledImg = img.scaled(ui->lblPreview->size(),Qt::KeepAspectRatio);
     ui->lblPreview->setPixmap(QPixmap::fromImage(scaledImg));
 }

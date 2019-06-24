@@ -20,7 +20,7 @@ public slots:
     void publishTextImage();
 
 signals:
-    void publishImage(QImage img);
+    void publishImage(QImage img, QColor color);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event);

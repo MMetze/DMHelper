@@ -361,7 +361,7 @@ void BestiaryDialog::handlePublishButton()
     QString iconPath = Bestiary::Instance()->getDirectory().filePath(iconFile);
     if((!iconPath.isEmpty()) && (iconImg.load(iconPath) == true))
     {
-        emit publishMonsterImage(iconImg);
+        emit publishMonsterImage(iconImg, Qt::white);
     }
 }
 

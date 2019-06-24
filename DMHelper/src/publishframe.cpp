@@ -10,15 +10,16 @@
 
 PublishFrame::PublishFrame(QWidget *parent) :
     QWidget(parent),
-    _scrollArea(0),
-    _label(0),
-    _arrow(0),
+    _scrollArea(nullptr),
+    _label(nullptr),
+    _arrow(nullptr),
     _publishImg(),
     _isScaled(false),
     _arrowVisible(false),
     _arrowPosition(0, 0)
 {
     _scrollArea = new QScrollArea(this);
+    _scrollArea->setFrameShape(QFrame::NoFrame);
     _label = new QLabel(_scrollArea);
     _arrow = new QLabel(_scrollArea);
     _arrow->setStyleSheet("background-image: url(); background-color: rgba(0,0,0,0);");

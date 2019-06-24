@@ -143,6 +143,7 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     connect(ui->btnDistance, SIGNAL(clicked(bool)), _scene, SLOT(setShowDistance(bool)));
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(selectNewMap()));
     connect(ui->btnReloadMap, SIGNAL(clicked(bool)),this,SLOT(updateMap()));
+    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
     connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SLOT(togglePublishing(bool)));
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
@@ -1192,7 +1193,7 @@ void BattleDialog::togglePublishing(bool publishing)
     }
     else
     {
-        ui->btnPublish->setStyleSheet(QString("QPushButton {color: gray; font-weight: normal; }"));
+        ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
         ui->btnPublish->setText(QString("Publish"));
         _publishTimer->stop();
     }
@@ -1208,7 +1209,7 @@ void BattleDialog::publishImage()
             emit showPublishWindow();
             // OPTIMIZE: optimize this to be faster, doing only changes?
             _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
-            emit animationStarted();
+            emit animationStarted(_model.getBackgroundColor());
             qDebug() << "[Battle Dialog] publish timer activated";
         }
     }
@@ -1220,7 +1221,7 @@ void BattleDialog::executePublishImage()
 
     QImage pub;
     getImageForPublishing(pub);
-    emit publishImage(pub);
+    emit publishImage(pub, _model.getBackgroundColor());
 }
 
 void BattleDialog::executeAnimateImage()
@@ -1446,6 +1447,12 @@ void BattleDialog::storeViewRect()
     }
 }
 
+void BattleDialog::setBackgroundColor(QColor color)
+{
+    _model.setBackgroundColor(color);
+}
+
+
 CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant* combatant)
 {
     CombatantWidget* newWidget = nullptr;
@@ -1467,7 +1474,7 @@ CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant*
                 qDebug() << "[Battle Dialog] creating character widget for " << character->getName();
                 newWidget = new CharacterWidget(character, ui->scrollAreaWidgetContents);
                 connect(dynamic_cast<CharacterWidget*>(newWidget), SIGNAL(clicked(QUuid)), this, SIGNAL(characterSelected(QUuid)));
-                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SIGNAL(updateCombatantIcon(BattleDialogModelCombatant*)));
+                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
                 connect(newWidget, SIGNAL(contextMenu(BattleDialogModelCombatant*,QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*,QPoint)));
             }
             break;
@@ -1486,7 +1493,7 @@ CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant*
                 connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*,int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isShownChanged(bool)), monster, SLOT(setShown(bool)));
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isKnownChanged(bool)), monster, SLOT(setKnown(bool)));
-                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SIGNAL(updateCombatantIcon(BattleDialogModelCombatant*)));
+                connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
             }
             break;
         }
@@ -1736,6 +1743,12 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     publishSize.rwidth() = widthBackgroundToWindow(publishSize.width());
     imageForPublishing = QImage(publishSize, QImage::Format_ARGB32);
 
+    imageForPublishing.fill(_model.getBackgroundColor());
+
+    int imageWidth = widthBackgroundToWindow(_prescaledBackground.width());
+    int xOffset = (publishSize.width() - imageWidth) / 2;
+    int yOffset = (publishSize.height() - _prescaledBackground.height())/ 2;
+
     QPainter painter(&imageForPublishing);
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
@@ -1743,7 +1756,7 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 #endif
 
     // Draw the background image
-    painter.drawImage(0, 0, _prescaledBackground);
+    painter.drawImage(xOffset, yOffset, _prescaledBackground);
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn";
 #endif
@@ -1754,7 +1767,7 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     QRect viewportRect = ui->graphicsView->viewport()->rect();
     QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
     QRect sourceRect = viewportRect.intersected(sceneViewportRect);
-    ui->graphicsView->render(&painter, QRectF(QPointF(0,0),_targetSize), sourceRect);
+    ui->graphicsView->render(&painter, QRectF(QPointF(xOffset, yOffset),_targetSize), sourceRect);
     setPublishVisibility(false);
     _background->setVisible(true);
 
@@ -1775,10 +1788,10 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
             else
                 pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate);
 
-            painter.drawImage(_prescaledBackground.width(), 0, _combatantFrame);
+            painter.drawImage(_prescaledBackground.width() + xOffset, yOffset, _combatantFrame);
             int dx = qMax(5, (_combatantFrame.width()-pmp.width())/2);
             int dy = qMax(5, (_combatantFrame.height()-pmp.height())/2);
-            painter.drawPixmap(_prescaledBackground.width() + dx, dy, pmp);
+            painter.drawPixmap(_prescaledBackground.width() + dx + xOffset, dy + yOffset, pmp);
             nextCombatant = getNextCombatant(_model.getActiveCombatant());
         }
 
@@ -1790,9 +1803,9 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
             if(_countdown > 0)
             {
                 painter.setBrush(QBrush(_countdownColor));
-                painter.drawRect(xPos + 5, _countdownFrame.height() - _countdown - 5, 10, _countdown);
+                painter.drawRect(xPos + 5 + xOffset, _countdownFrame.height() - _countdown - 5, 10 + yOffset, _countdown);
             }
-            painter.drawImage(xPos, 0, _countdownFrame);
+            painter.drawImage(xPos + xOffset, yOffset, _countdownFrame);
         }
 
         if((_showOnDeck) && (nextCombatant))
@@ -1802,10 +1815,10 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
                 nextPmp = nextCombatant->getIconPixmap(DMHelper::PixmapSize_Animate);
             else
                 nextPmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate);
-            painter.drawImage(_prescaledBackground.width(), DMHelper::PixmapSizes[DMHelper::PixmapSize_Animate][1] + 10, _combatantFrame);
+            painter.drawImage(_prescaledBackground.width() + xOffset, DMHelper::PixmapSizes[DMHelper::PixmapSize_Animate][1] + 10 + yOffset, _combatantFrame);
             int dx = qMax(5, (_combatantFrame.width()-nextPmp.width())/2);
             int dy = qMax(5, (_combatantFrame.height()-nextPmp.height())/2);
-            painter.drawPixmap(_prescaledBackground.width() + dx, _combatantFrame.height() + dy, nextPmp);
+            painter.drawPixmap(_prescaledBackground.width() + dx + xOffset, _combatantFrame.height() + dy + yOffset, nextPmp);
         }
     }
 
@@ -1939,15 +1952,9 @@ int BattleDialog::widthWindowToBackground(int windowWidth)
 
 int BattleDialog::widthBackgroundToWindow(int backgroundWidth)
 {
-    int result = backgroundWidth;
-
-    if(_showOnDeck)
-        result += _combatantFrame.width();
-
-    if(_showCountdown)
-        result += _countdownFrame.width();
-
-    return result;
+    return backgroundWidth +
+           (_showOnDeck ? _combatantFrame.width() : 0) +
+           (_showCountdown ? _countdownFrame.width() : 0);
 }
 
 bool BattleDialog::isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect)

@@ -13,7 +13,8 @@ class QDir;
 
 const int DMH_GLOBAL_INVALID_ID = -1;
 
-class DMHSHARED_EXPORT DMHObjectBase : public QObject
+//class DMHSHARED_EXPORT DMHObjectBase : public QObject
+class DMHObjectBase : public QObject
 {
     Q_OBJECT
 public:

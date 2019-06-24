@@ -22,7 +22,7 @@ UnselectedPixmap::UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelComba
 void UnselectedPixmap::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     QStyleOptionGraphicsItem myoption = (*option);
-    myoption.state &= !QStyle::State_Selected;
+    myoption.state &= ~QStyle::State_Selected;
     QGraphicsPixmapItem::paint(painter, &myoption, widget);
 }
 

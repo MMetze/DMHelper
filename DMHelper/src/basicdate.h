@@ -24,6 +24,7 @@ public:
     virtual int daysInMonth() const;
     virtual int daysUntilMonth() const;
     virtual int dayOfYear() const;
+    virtual int monthsInYear() const;
     virtual int daysInYear() const;
 
     virtual void getDate(int *year, int *month, int *day) const;

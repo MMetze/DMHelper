@@ -32,11 +32,11 @@ public:
 signals:
     void battleActive(bool active);
 
-    void characterSelected(QUuid);
-    void monsterSelected(QString);
-    void publishImage(QImage);
-    void animationStarted();
-    void animateImage(QImage);
+    void characterSelected(QUuid characterId);
+    void monsterSelected(QString monster);
+    void publishImage(QImage image, QColor color);
+    void animationStarted(QColor color);
+    void animateImage(QImage image);
     void showPublishWindow();
 
     void dirty();

@@ -21,7 +21,7 @@ public:
     void setCharacter(Character* character);
 
 signals:
-    void publishCharacterImage(QImage img);
+    void publishCharacterImage(QImage img, QColor color);
 
 public slots:
     void calculateMods();

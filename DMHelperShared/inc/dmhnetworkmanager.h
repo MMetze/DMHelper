@@ -11,7 +11,7 @@ class DMHLogon;
 class QFile;
 class DMHNetworkManager_Private;
 
-class DMHSHARED_EXPORT DMHNetworkManager : public QObject
+class DMHNetworkManager : public QObject
 {
     Q_OBJECT
 public:

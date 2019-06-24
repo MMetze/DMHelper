@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1366</width>
-    <height>817</height>
+    <height>1040</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -335,23 +335,46 @@ color: rgb(85, 85, 85);
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="btnPublish">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {color: gray; font-weight: normal; }</string>
-        </property>
-        <property name="text">
-         <string>Publish</string>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="autoDefault">
-         <bool>false</bool>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_10">
+        <item>
+         <widget class="ColorPushButton" name="btnColor">
+          <property name="minimumSize">
+           <size>
+            <width>39</width>
+            <height>35</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>39</width>
+            <height>35</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnPublish">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Publish</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
        <spacer name="verticalSpacer_5">
@@ -590,8 +613,8 @@ color: rgb(85, 85, 85);
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>288</width>
-          <height>759</height>
+          <width>272</width>
+          <height>934</height>
          </rect>
         </property>
        </widget>
@@ -694,6 +717,11 @@ color: rgb(85, 85, 85);
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ColorPushButton</class>
+   <extends>QPushButton</extends>
+   <header>colorpushbutton.h</header>
+  </customwidget>
   <customwidget>
    <class>BattleDialogGraphicsView</class>
    <extends>QGraphicsView</extends>

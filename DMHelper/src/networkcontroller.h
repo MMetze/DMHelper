@@ -20,7 +20,7 @@ signals:
 
 public slots:
     void uploadTrack(AudioTrack* track);
-    void uploadImage(QImage img);
+    void uploadImage(QImage img, QColor color);
     void setPayload(const QString& command, const QString& payload);
     void clearTrack();
     void clearImage();

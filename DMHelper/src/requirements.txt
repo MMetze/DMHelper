@@ -1,3 +1,5 @@
+white grid or black screen at button click
+
 DONE: crash, grid ein/aus, animations ein/aus, selected killed leaves selection onm select in list then move without reselect
 
 House rules bucket

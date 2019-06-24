@@ -17,10 +17,11 @@ signals:
     void frameResized(const QSize& newSize);
 
 public slots:
-    void setImage(QImage img);
+    void setImage(QImage img, QColor color);
     void setImageNoScale(QImage img);
     void setArrowVisible(bool visible);
     void setArrowPosition(const QPointF& position);
+    void setBackgroundColor(QColor color);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event);

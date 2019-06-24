@@ -14,6 +14,7 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _mapRect(),
     _previousMap(nullptr),
     _previousMapRect(),
+    _background(Qt::black),
     _gridOn(true),
     _gridScale(DMHelper::STARTING_GRID_SCALE),
     _gridOffsetX(0),
@@ -35,6 +36,7 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
     _mapRect(other._mapRect),
     _previousMap(other._previousMap),
     _previousMapRect(other._previousMapRect),
+    _background(other._background),
     _gridOn(other._gridOn),
     _gridScale(other._gridScale),
     _gridOffsetX(other._gridOffsetX),
@@ -84,6 +86,10 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
     battleElement.setAttribute("mapRectY", _mapRect.y());
     battleElement.setAttribute("mapRectWidth", _mapRect.width());
     battleElement.setAttribute("mapRectHeight", _mapRect.height());
+    battleElement.setAttribute("backgroundColorR", _background.red());
+    battleElement.setAttribute("backgroundColorG", _background.green());
+    battleElement.setAttribute("backgroundColorB", _background.blue());
+    battleElement.setAttribute("background", _mapRect.height());
     battleElement.setAttribute("showGrid", _gridOn);
     battleElement.setAttribute("gridScale", _gridScale);
     battleElement.setAttribute("gridOffsetX", _gridOffsetX);
@@ -123,6 +129,9 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     // TODO: Manager needs to add combatants
     // TODO: Manager needs to set active combatant
 
+    _background= QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
+                        element.attribute("backgroundColorG",QString::number(0)).toInt(),
+                        element.attribute("backgroundColorB",QString::number(0)).toInt());
     _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
     _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
@@ -312,6 +321,16 @@ const QRect& BattleDialogModel::getPreviousMapRect() const
 Map* BattleDialogModel::getPreviousMap() const
 {
     return _previousMap;
+}
+
+QColor BattleDialogModel::getBackgroundColor() const
+{
+    return _background;
+}
+
+void BattleDialogModel::setBackgroundColor(QColor color)
+{
+    _background = color;
 }
 
 bool BattleDialogModel::getGridOn() const

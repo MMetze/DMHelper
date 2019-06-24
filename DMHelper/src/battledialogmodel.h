@@ -58,6 +58,9 @@ public:
     const QRect& getPreviousMapRect() const;
     Map* getPreviousMap() const;
 
+    QColor getBackgroundColor() const;
+    void setBackgroundColor(QColor color);
+
     bool getGridOn() const;
     void setGridOn(bool gridOn);
 
@@ -101,6 +104,8 @@ private:
     QRect _mapRect;
     Map* _previousMap;
     QRect _previousMapRect;
+
+    QColor _background;
 
     bool _gridOn;
     int _gridScale;

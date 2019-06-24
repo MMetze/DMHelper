@@ -226,7 +226,7 @@ void MapFrame::publishFoWImage()
         }
     }
 
-    emit publishImage(pub);
+    emit publishImage(pub, ui->btnColor->getColor());
     emit startTrack(_mapSource->getAudioTrack());
 }
 

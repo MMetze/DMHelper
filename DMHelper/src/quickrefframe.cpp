@@ -41,38 +41,44 @@ void QuickRefFrame::readQuickRef()
 
     QString quickRefFileName("quickref_data.xml");
 
-    QDomDocument doc( "DMHelperDataXML" );
-    QFile file( quickRefFileName );
-    if( !file.open( QIODevice::ReadOnly ) )
+    QDomDocument doc("DMHelperDataXML");
+    QFile file(quickRefFileName);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[QuickRef] Unable to read quickref file: " << quickRefFileName;
         return;
+    }
 
     QTextStream in(&file);
     in.setCodec("UTF-8");
     QString errMsg;
     int errRow;
     int errColumn;
-    bool contentResult = doc.setContent( in.readAll(), &errMsg, &errRow, &errColumn);
+    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
 
     file.close();
 
-    if( contentResult == false )
+    if(contentResult == false)
     {
-        qDebug() << "[QuickRef] Unable to read the quickref data file.";
+        qDebug() << "[QuickRef] Unable to parse the quickref data file.";
         qDebug() << errMsg << errRow << errColumn;
         return;
     }
 
     QDomElement root = doc.documentElement();
-    if( (root.isNull()) || (root.tagName() != "root") )
+    if((root.isNull()) || (root.tagName() != "root"))
+    {
+        qDebug() << "[QuickRef] Unable to find the root element in the quickref data file.";
         return;
+    }
 
-    QDomElement sectionElement = root.firstChildElement( QString("section") );
-    while( !sectionElement.isNull() )
+    QDomElement sectionElement = root.firstChildElement(QString("section"));
+    while(!sectionElement.isNull())
     {
         QuickRefSection* newSection = new QuickRefSection(sectionElement);
         _quickRef.append(newSection);
         ui->cmbQuickRef->addItem(newSection->getName());
-        sectionElement = sectionElement.nextSiblingElement( QString("section") );
+        sectionElement = sectionElement.nextSiblingElement(QString("section"));
     }
 
     if(!_quickRef.empty())

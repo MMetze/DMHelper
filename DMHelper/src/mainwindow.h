@@ -90,7 +90,7 @@ public slots:
 signals:
     void openPreview();
     void campaignLoaded(Campaign* campaign);
-    void dispatchPublishImage(QImage img);
+    void dispatchPublishImage(QImage img, QColor color);
     void dispatchAnimateImage(QImage img);
 
 protected:
@@ -144,7 +144,7 @@ protected slots:
     void handleLoadBattle();
     void handleDeleteBattle();
 
-    void handleAnimationStarted();
+    void handleAnimationStarted(QColor color);
     void handleAnimationPreview(QImage img);
 
     // Bestiary

@@ -418,7 +418,7 @@ void CharacterFrame::handlePublishClicked()
     //QString iconPath = Bestiary::Instance()->getDirectory().filePath(iconFile);
     if(iconImg.load(iconFile) == true)
     {
-        emit publishCharacterImage(iconImg);
+        emit publishCharacterImage(iconImg, Qt::white);
     }
 }
 

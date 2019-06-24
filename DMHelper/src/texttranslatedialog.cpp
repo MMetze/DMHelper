@@ -62,7 +62,7 @@ void TextTranslateDialog::publishTextImage()
     QPainter painter(&pub);
     ui->txtTranslated->document()->drawContents(&painter);
 
-    emit publishImage(pub);
+    emit publishImage(pub, Qt::white);
 }
 
 void TextTranslateDialog::keyPressEvent(QKeyEvent * event)

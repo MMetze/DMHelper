@@ -34,9 +34,11 @@ signals:
     void timeChanged(const QTime& time);
 
 private slots:
-    void dateEdited(const QString &text);
+    void dateEdited();
     void handsChanged();
+    void calendarChanged();
     void setTimeTarget(const QTime &time);
+    void setDateVisualization();
 
 private:
     Ui::TimeAndDateFrame *ui;

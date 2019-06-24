@@ -7,7 +7,8 @@
 class QString;
 class DMHPayload_Private;
 
-class DMHSHARED_EXPORT DMHPayload
+//class DMHSHARED_EXPORT DMHPayload
+class DMHPayload
 {
 public:
     DMHPayload();

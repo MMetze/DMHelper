@@ -36,7 +36,7 @@ public:
     QAction* getRedoAction(QObject* parent);
 
 signals:
-    void publishImage(QImage img);
+    void publishImage(QImage img, QColor color);
     void openPreview();
     void windowClosed(MapFrame* mapFrame);
     void dirty();

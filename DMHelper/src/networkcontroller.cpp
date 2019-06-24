@@ -59,7 +59,7 @@ void NetworkController::uploadTrack(AudioTrack* track)
     }
 }
 
-void NetworkController::uploadImage(QImage img)
+void NetworkController::uploadImage(QImage img, QColor color)
 {
 //    if((_currentImageRequest > 0) || (!_enabled))
     if(!_enabled)
@@ -75,6 +75,8 @@ void NetworkController::uploadImage(QImage img)
     if(!img.save(&buffer, "PNG"))
         return;
     _currentImageRequest = _networkManager->uploadData(data);
+
+    need to also upload the background color
 }
 
 void NetworkController::setPayload(const QString& command, const QString& payload)

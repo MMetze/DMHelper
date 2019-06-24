@@ -14,7 +14,8 @@ class DMHNetworkData_Upload_Private;
 class DMHNetworkData_Exists_Private;
 
 
-class DMHSHARED_EXPORT DMHNetworkData
+//class DMHSHARED_EXPORT DMHNetworkData
+class DMHNetworkData
 {
 public:
     DMHNetworkData();
@@ -31,7 +32,8 @@ private:
 
 
 
-class DMHSHARED_EXPORT DMHNetworkData_Payload : public DMHNetworkData
+//class DMHSHARED_EXPORT DMHNetworkData_Payload : public DMHNetworkData
+class DMHNetworkData_Payload : public DMHNetworkData
 {
 public:
     DMHNetworkData_Payload(QDomElement data);
@@ -52,7 +54,8 @@ private:
 
 
 
-class DMHSHARED_EXPORT DMHNetworkData_Raw : public DMHNetworkData
+//class DMHSHARED_EXPORT DMHNetworkData_Raw : public DMHNetworkData
+class DMHNetworkData_Raw : public DMHNetworkData
 {
 public:
     DMHNetworkData_Raw(QDomElement data);
@@ -76,7 +79,8 @@ private:
 
 
 
-class DMHSHARED_EXPORT DMHNetworkData_Upload : public DMHNetworkData
+//class DMHSHARED_EXPORT DMHNetworkData_Upload : public DMHNetworkData
+class DMHNetworkData_Upload : public DMHNetworkData
 {
 public:
     DMHNetworkData_Upload(QDomElement data);
@@ -100,7 +104,8 @@ private:
 
 
 
-class DMHSHARED_EXPORT DMHNetworkData_Exists : public DMHNetworkData
+//class DMHSHARED_EXPORT DMHNetworkData_Exists : public DMHNetworkData
+class DMHNetworkData_Exists : public DMHNetworkData
 {
 public:
     DMHNetworkData_Exists(QDomElement data);

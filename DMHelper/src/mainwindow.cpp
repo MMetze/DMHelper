@@ -42,11 +42,13 @@
 #include "timeanddateframe.h"
 #include "audiotrackedit.h"
 #include "audioplayer.h"
+#include "basicdateserver.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
 #endif
 #include "aboutdialog.h"
 #include "campaignexporter.h"
+#include "basicdateserver.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -160,6 +162,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
     qDebug() << "[Main]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
     qDebug() << "[Main]     Build: " << __DATE__ << " " << __TIME__;
+    qDebug() << "[Main]     Working Directory: " << QDir::currentPath();
 
     qDebug() << "[Main] Qt Information";
     qDebug() << "[Main]     Qt Version: " << QLibraryInfo::version().toString();
@@ -188,6 +191,10 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main] Initializing Bestiary";
     Bestiary::Initialize();
     qDebug() << "[Main] Bestiary Initialized";
+
+    qDebug() << "[Main] Initializing BasicDateServer";
+    BasicDateServer::Initialize();
+    qDebug() << "[Main] BasicDateServer Initialized";
 
     connect(ui->action_NewCampaign,SIGNAL(triggered()),this,SLOT(newCampaign()));
     connect(ui->action_OpenCampaign,SIGNAL(triggered()),this,SLOT(openFileDialog()));
@@ -258,12 +265,12 @@ MainWindow::MainWindow(QWidget *parent) :
     readBestiary();
     qDebug() << "[Main] Bestiary Loaded";
 
-    connect(this,SIGNAL(dispatchPublishImage(QImage)),this,SLOT(showPublishWindow()));
-    connect(this,SIGNAL(dispatchPublishImage(QImage)),pubWindow,SLOT(setImage(QImage)));
-    connect(this,SIGNAL(dispatchAnimateImage(QImage)),pubWindow,SLOT(setImageNoScale(QImage)));
-    connect(this,SIGNAL(dispatchAnimateImage(QImage)),this,SLOT(handleAnimationPreview(QImage)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), this, SLOT(showPublishWindow()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), pubWindow, SLOT(setImage(QImage, QColor)));
+    connect(this, SIGNAL(dispatchAnimateImage(QImage)), pubWindow, SLOT(setImageNoScale(QImage)));
+    connect(this, SIGNAL(dispatchAnimateImage(QImage)), this, SLOT(handleAnimationPreview(QImage)));
 
-    connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     // TODO: insert a MAP in between to be explicit about this mapping
@@ -282,15 +289,15 @@ MainWindow::MainWindow(QWidget *parent) :
     CharacterFrame* charFrame = new CharacterFrame;
     scrollArea->setWidget(charFrame);
     ui->stackedWidgetEncounter->addWidget(scrollArea);
-    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(charFrame, SIGNAL(publishCharacterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     */
     CharacterFrame* charFrame = new CharacterFrame;
     ui->stackedWidgetEncounter->addWidget(charFrame);
-    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(charFrame, SIGNAL(publishCharacterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addWidget(mapFrame);
-    connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    connect(mapFrame,SIGNAL(publishImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
     // EncounterType_ScrollingText
     EncounterScrollingTextEdit* scrollingTextEdit = new EncounterScrollingTextEdit;
     ui->stackedWidgetEncounter->addWidget(scrollingTextEdit);
@@ -307,7 +314,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(previewFrame,SIGNAL(visibleChanged(bool)),previewFrame,SLOT(setArrowVisible(bool)));
     connect(previewFrame,SIGNAL(positionChanged(QPointF)),previewFrame,SLOT(setArrowPosition(QPointF)));
     connect(previewFrame,SIGNAL(positionChanged(QPointF)),pubWindow,SLOT(setArrowPosition(QPointF)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage)),previewFrame,SLOT(setImage(QImage)));
+    connect(this,SIGNAL(dispatchPublishImage(QImage,QColor)),previewFrame,SLOT(setImage(QImage)));
     // Add the preview tab
     previewTab = new ScrollTabWidget(previewFrame, QSizeF(0.9, 0.9), this);
     previewTab->setToolTip(QString("Preview"));
@@ -346,14 +353,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleDlgMgr, SIGNAL(battleActive(bool)), ui->actionBattle_Dialog, SLOT(setEnabled(bool)));
     connect(_battleDlgMgr, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
     connect(_battleDlgMgr, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
-    connect(_battleDlgMgr, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(_battleDlgMgr, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     connect(_battleDlgMgr, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(_battleDlgMgr, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(_battleDlgMgr, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
     connect(_battleDlgMgr, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_battleDlgMgr, SIGNAL(dirty()), this, SLOT(setDirty()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), _battleDlgMgr, SLOT(targetResized(QSize)));
     connect(this, SIGNAL(campaignLoaded(Campaign*)), _battleDlgMgr, SLOT(setCampaign(Campaign*)));
-    connect(this, SIGNAL(dispatchPublishImage(QImage)), _battleDlgMgr, SLOT(cancelPublish()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _battleDlgMgr, SLOT(cancelPublish()));
     _battleDlgMgr->setShowOnDeck(_options->getShowOnDeck());
     _battleDlgMgr->setShowCountdown(_options->getShowCountdown());
     _battleDlgMgr->setCountdownDuration(_options->getCountdownDuration());
@@ -2152,9 +2159,10 @@ void MainWindow::handleDeleteBattle()
     _battleDlgMgr->deleteBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
 }
 
-void MainWindow::handleAnimationStarted()
+void MainWindow::handleAnimationStarted(QColor color)
 {
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
+    pubWindow->setBackgroundColor(color);
 }
 
 void MainWindow::handleAnimationPreview(QImage img)
@@ -2206,7 +2214,7 @@ void MainWindow::openTextPublisher()
 {
     TextPublishDialog* dlg = new TextPublishDialog(this);
 
-    connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    connect(dlg, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     dlg->show();
     dlg->activateWindow();
 }
@@ -2215,7 +2223,7 @@ void MainWindow::openTextTranslator()
 {
     TextTranslateDialog* dlg = new TextTranslateDialog(this);
 
-    connect(dlg,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    connect(dlg, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     dlg->show();
     dlg->activateWindow();
 }
@@ -2272,8 +2280,8 @@ void MainWindow::startChase()
         chaseDlg->addCombatants(selectDlg->getQuarry(), false);
         chaseDlg->addCombatantGroups(selectDlg->getQuarryGroups(), false);
 
-        connect(chaseDlg,SIGNAL(chaseComplete()),this,SLOT(handleChaseComplete()));
-        connect(chaseDlg,SIGNAL(publishChaseScene(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+        connect(chaseDlg, SIGNAL(chaseComplete()), this, SLOT(handleChaseComplete()));
+        connect(chaseDlg, SIGNAL(publishChaseScene(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     }
 
     chaseDlg->show();

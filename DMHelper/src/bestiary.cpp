@@ -43,6 +43,7 @@ void Bestiary::Initialize()
 void Bestiary::Shutdown()
 {
     delete _instance;
+    _instance = nullptr;
 }
 
 void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const

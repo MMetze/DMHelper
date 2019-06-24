@@ -772,7 +772,7 @@ void ChaseDialog::handlePublishButton()
     image.fill(Qt::transparent);                                                    // Start all pixels transparent
     QPainter painter(&image);
     _animation->getGraphicsView()->render(&painter);
-    emit publishChaseScene(image);
+    emit publishChaseScene(image, Qt::black);
 }
 
 void ChaseDialog::updateAnimation()

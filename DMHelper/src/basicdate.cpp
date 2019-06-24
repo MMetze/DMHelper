@@ -1,35 +1,6 @@
 #include "basicdate.h"
+#include "basicdateserver.h"
 #include <QStringList>
-
-const int DaysPerMonth[12] = {
-    31,   // January
-    28,   // February
-    31,   // March
-    30,   // April
-    31,   // May
-    30,   // June
-    31,   // July
-    31,   // August
-    30,   // September
-    31,   // October
-    30,   // November
-    31,   // December
-};
-
-const int DaysUntilMonth[12] = {
-    0,   // January
-    31,   // February
-    59,   // March
-    90,   // April
-   120,   // May
-   151,   // June
-   181,   // July
-   212,   // August
-   243,   // September
-   273,   // October
-   304,   // November
-   334,   // December
-};
 
 BasicDate::BasicDate(int d, int m, int y) :
     _day(d),
@@ -59,17 +30,13 @@ BasicDate::~BasicDate()
 
 bool BasicDate::isValid() const
 {
-    if((_month < 1) ||
-       (_month > 12) ||
-       (_day < 1) ||
-       (_day > daysInMonth()))
-    {
+    if((_day < 1) ||
+       (_day > daysInMonth()) ||
+       (_month < 1) ||
+       (_month > monthsInYear()))
         return false;
-    }
     else
-    {
         return true;
-    }
 }
 
 void BasicDate::addDay()
@@ -84,6 +51,39 @@ void BasicDate::addDay()
 
 void BasicDate::addMonths(int nmonths)
 {
+    if((nmonths <= 0) || (!BasicDateServer::Instance()))
+        return;
+
+    int yearMonths = BasicDateServer::Instance()->getMonthsInYear(_year);
+    if(yearMonths <= 0)
+        return;
+
+    while(nmonths >= yearMonths)
+    {
+        nmonths -= yearMonths;
+        ++_year;
+        yearMonths = BasicDateServer::Instance()->getMonthsInYear(_year);
+        if(yearMonths <= 0)
+            return;
+    }
+
+    _month += nmonths;
+    if(_month > yearMonths)
+    {
+        _month -= yearMonths;
+        ++_year;
+    }
+
+    while(BasicDateServer::Instance()->getDaysInMonth(_month, _year) == 0)
+    {
+        if(++_month > yearMonths)
+        {
+            _month -= yearMonths;
+            ++_year;
+        }
+    }
+
+    /*
     addYears(nmonths / 12);
     _month += nmonths % 12;
     if(_month > 12)
@@ -91,6 +91,7 @@ void BasicDate::addMonths(int nmonths)
         _month -= 12;
         ++_year;
     }
+    */
 }
 
 void BasicDate::addYears(int nyears)
@@ -115,18 +116,24 @@ int BasicDate::year() const
 
 int BasicDate::daysInMonth() const
 {
-    if((_month < 1) || (_month > 12))
+    if(!BasicDateServer::Instance())
+        return 0;
+
+    if((_month < 1) || (_month > BasicDateServer::Instance()->getMonthsInYear(_year)))
         return 0;
     else
-        return DaysPerMonth[_month-1];
+        return BasicDateServer::Instance()->getDaysInMonth(_month, _year);
 }
 
 int BasicDate::daysUntilMonth() const
 {
+    if(!BasicDateServer::Instance())
+        return -1;
+
     if((_month < 1) || (_month > 12))
-        return 0;
+        return -1;
     else
-        return DaysUntilMonth[_month-1];
+        return BasicDateServer::Instance()->getDaysBeforeMonth(_month, _year);
 }
 
 int BasicDate::dayOfYear() const
@@ -134,9 +141,20 @@ int BasicDate::dayOfYear() const
     return daysUntilMonth() + _day;
 }
 
+int BasicDate::monthsInYear() const
+{
+    if(!BasicDateServer::Instance())
+        return -1;
+
+    return BasicDateServer::Instance()->getMonthsInYear(_year);
+}
+
 int BasicDate::daysInYear() const
 {
-    return 365;
+    if(!BasicDateServer::Instance())
+        return -1;
+
+    return BasicDateServer::Instance()->getDaysInYear(_year);
 }
 
 void BasicDate::getDate(int *year, int *month, int *day) const

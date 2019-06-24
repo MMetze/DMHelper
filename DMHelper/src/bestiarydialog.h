@@ -24,7 +24,7 @@ public:
 
 signals:
     void monsterChanged();
-    void publishMonsterImage(QImage img);
+    void publishMonsterImage(QImage img, QColor color);
 
 public slots:
     void setMonster(MonsterClass* monster, bool edit = true);

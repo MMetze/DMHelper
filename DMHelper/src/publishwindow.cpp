@@ -7,7 +7,9 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     _publishFrame(nullptr)
 {
     setWindowTitle(title);
-    // Not quite...setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+    // Not this: setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+
+    setStyleSheet("background-color: rgba(0,0,0,255);");
 
     _publishFrame = new PublishFrame(this);
     setCentralWidget(_publishFrame);
@@ -18,8 +20,9 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     connect(_publishFrame,SIGNAL(frameResized(QSize)),this,SIGNAL(frameResized(QSize)));
 }
 
-void PublishWindow::setImage(QImage img)
+void PublishWindow::setImage(QImage img, QColor color)
 {
+    setBackgroundColor(color);
     _publishFrame->setImage(img);
 }
 
@@ -38,11 +41,27 @@ void PublishWindow::setArrowPosition(const QPointF& position)
     _publishFrame->setArrowPosition(position);
 }
 
+void PublishWindow::setBackgroundColor(QColor color)
+{
+    QString styleString("background-color: rgba(");
+    styleString += QString::number(color.red());
+    styleString += QString(",");
+    styleString += QString::number(color.green());
+    styleString += QString(",");
+    styleString += QString::number(color.blue());
+    styleString += QString(");");
+    setStyleSheet(styleString);
+}
+
 void PublishWindow::keyPressEvent(QKeyEvent * event)
 {
-    if( event->key() == Qt::Key_Escape )
+    if(event->key() == Qt::Key_Escape)
     {
         hide();
+    }
+    else if(event->key() == Qt::Key_F)
+    {
+        setWindowState(windowState() ^ Qt::WindowFullScreen);
     }
     else
     {

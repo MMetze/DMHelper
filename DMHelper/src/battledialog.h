@@ -75,8 +75,8 @@ signals:
     void battleComplete();
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
-    void publishImage(QImage img);
-    void animationStarted();
+    void publishImage(QImage img, QColor color);
+    void animationStarted(QColor color);
     void animateImage(QImage img);
     void showPublishWindow();
     void selectNewMap();
@@ -133,6 +133,7 @@ private slots:
     void setMapCursor();
     void setScale(qreal s);
     void storeViewRect();
+    void setBackgroundColor(QColor color);
 
 private:
 
