@@ -15,11 +15,13 @@ class EncounterBattle : public Encounter
 public:
 
     explicit EncounterBattle(const QString& encounterName, QObject *parent);
+    explicit EncounterBattle(const EncounterBattle& obj);
     virtual ~EncounterBattle();
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport);
     virtual void postProcessXML(const QDomElement &element, bool isImport);
+    virtual void resolveReferences();
 
     // Base functions to handle UI widgets
     virtual void widgetActivated(QWidget* widget);

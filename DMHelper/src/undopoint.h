@@ -16,6 +16,7 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport);
 
     virtual int getType() const;
+    virtual UndoBase* clone() const;
 
     virtual const MapDrawPoint& mapDrawPoint() const;
     virtual MapDrawPoint& mapDrawPoint();

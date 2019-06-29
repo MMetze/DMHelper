@@ -15,6 +15,7 @@ public:
 
     static Encounter* createEncounter(int encounterType, const QString& encounterName, QObject *parent);
     static Encounter* createEncounter(int encounterType, const QDomElement& element, bool isImport, QObject *parent);
+    static Encounter* cloneEncounter(Encounter& encounter);
 
 signals:
 

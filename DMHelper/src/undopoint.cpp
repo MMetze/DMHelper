@@ -59,6 +59,11 @@ int UndoPoint::getType() const
     return DMHelper::ActionType_Point;
 }
 
+UndoBase* UndoPoint::clone() const
+{
+    return new UndoPoint(_map, _mapDrawPoint);
+}
+
 const MapDrawPoint& UndoPoint::mapDrawPoint() const
 {
     return _mapDrawPoint;

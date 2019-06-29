@@ -3,7 +3,6 @@
 
 #include "characterdialog.h"
 #include "bestiarydialog.h"
-#include "dmscreendialog.h"
 #include "dmconstants.h"
 #ifdef INCLUDE_CHASE_SUPPORT
 #include "chasedialog.h"
@@ -46,7 +45,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
     static const int DEFAULT_MRU_FILE_COUNT = 4;
@@ -181,8 +180,6 @@ private:
     OptionsContainer* _options;
 
     BestiaryDialog bestiaryDlg;
-
-    DMScreenDialog dmScreenDlg;
 
 #ifdef INCLUDE_CHASE_SUPPORT
     ChaseDialog* chaseDlg;

@@ -50,8 +50,6 @@ int AudioPlayer::MS2MIN(qint64 ms)
 
 void AudioPlayer::playTrack(AudioTrack* track)
 {
-    return;
-
     if((!_player) || (!_playlist))
         return;
 

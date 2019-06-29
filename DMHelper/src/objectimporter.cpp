@@ -6,10 +6,13 @@
 #include "encounterfactory.h"
 #include "map.h"
 #include "adventure.h"
+#include "audiotrack.h"
 #include <QDomDocument>
 #include <QFileDialog>
 #include <QStandardItem>
 #include <QTextStream>
+#include <QMessageBox>
+#include <QScopedPointer>
 #include <QDebug>
 
 ObjectImporter::ObjectImporter(QObject *parent) :
@@ -17,13 +20,13 @@ ObjectImporter::ObjectImporter(QObject *parent) :
 {
 }
 
-QUuid ObjectImporter::importObject(Campaign& campaign, QStandardItem* item)
+bool ObjectImporter::importObject(Campaign& campaign)
 {
     QString filename = QFileDialog::getOpenFileName(nullptr,QString("Select Campaign"));
     if((filename.isNull()) || (filename.isEmpty()) || (!QFile::exists(filename)))
     {
         qDebug() << "[ObjectImporter] Not able to find the selected file " << filename;
-        return QUuid();
+        return false;
     }
 
     QDomDocument doc("DMHelperXML");
@@ -31,7 +34,7 @@ QUuid ObjectImporter::importObject(Campaign& campaign, QStandardItem* item)
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[ObjectImporter] Not able to open the selected file " << filename;
-        return QUuid();
+        return false;
     }
 
     QTextStream in(&file);
@@ -46,16 +49,120 @@ QUuid ObjectImporter::importObject(Campaign& campaign, QStandardItem* item)
     if(contentResult == false)
     {
         qDebug() << "[ObjectImporter] Loading Failed: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
-        return QUuid();
+        return false;
     }
 
     QDomElement rootObject = doc.documentElement();
-    if((rootObject.isNull()) || (rootObject.tagName() != "object"))
+    if((rootObject.isNull()) || (rootObject.tagName() != "root"))
     {
-        qDebug() << "[ObjectImporter] Loading Failed: Error reading XML - unable to find root object entry";
-        return QUuid();
+        qDebug() << "[ObjectImporter] Loading Failed: Error reading XML - unable to find root entry";
+        return false;
     }
 
+    QDomElement campaignElement = rootObject.firstChildElement(QString("campaign"));
+    if(campaignElement.isNull())
+    {
+        qDebug() << "[ObjectImporter] Loading Failed: Error reading XML - unable to find campaign entry";
+        return false;
+    }
+
+    QFileInfo fileInfo(filename);
+    QDir::setCurrent(fileInfo.absolutePath());
+    QScopedPointer<Campaign> importCampaign(new Campaign(campaignElement, true));
+    if(!importCampaign->isValid())
+    {
+        QMessageBox::critical(nullptr,
+                              QString("Invalid Campaign"),
+                              QString("The imported file contains a campaign with an invalid structure."));
+        return false;
+    }
+
+    int i;
+
+    // Check the party
+    for(i = 0; i < importCampaign->getCharacterCount(); ++i)
+    {
+        Character* character = importCampaign->getCharacterByIndex(i);
+        if(character)
+        {
+            if(campaign.getCharacterById(character->getID()) == nullptr)
+                campaign.addCharacter(new Character(*character));
+        }
+    }
+
+    // Check the settings
+    for(i = 0; i < importCampaign->getSettingCount(); ++i)
+    {
+        Map* setting = importCampaign->getSettingByIndex(i);
+        if(setting)
+        {
+            if(campaign.getSettingById(setting->getID()) == nullptr)
+                campaign.addSetting(new Map(*setting));
+        }
+    }
+
+    // Check the NPCs
+    for(i = 0; i < importCampaign->getNPCCount(); ++i)
+    {
+        Character* npc = importCampaign->getNPCByIndex(i);
+        if(npc)
+        {
+            if(campaign.getNPCById(npc->getID()) == nullptr)
+                campaign.addNPC(new Character(*npc));
+        }
+    }
+
+    // Check the audio tracks
+    for(i = 0; i < importCampaign->getTrackCount(); ++i)
+    {
+        AudioTrack* track = importCampaign->getTrackByIndex(i);
+        if(track)
+        {
+            if(campaign.getTrackById(track->getID()) == nullptr)
+                campaign.addTrack(new AudioTrack(*track));
+        }
+    }
+
+    // Iterate through the adventures and check them and their contents
+    for(i = 0; i < importCampaign->getAdventureCount(); ++i)
+    {
+        Adventure* importAdventure = importCampaign->getAdventureByIndex(i);
+        if(importAdventure)
+        {
+            Adventure* adventure = campaign.getAdventureById(importAdventure->getID());
+            if(adventure == nullptr)
+            {
+                campaign.addAdventure(new Adventure(*importAdventure));
+            }
+            else
+            {
+                int j;
+                for(j = 0; j < importAdventure->getEncounterCount(); ++j)
+                {
+                    Encounter* encounter = importAdventure->getEncounterByIndex(j);
+                    if(encounter)
+                    {
+                        if(adventure->getEncounterById(encounter->getID()) == nullptr)
+                            adventure->addEncounter(EncounterFactory::cloneEncounter(*encounter));
+                    }
+                }
+
+                for(j = 0; j < importAdventure->getMapCount(); ++j)
+                {
+                    Map* map = importAdventure->getMapByIndex(j);
+                    if(map)
+                    {
+                        if(adventure->getMapById(map->getID()) == nullptr)
+                            adventure->addMap(new Map(*map));
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+
+    /*
     QDomElement baseElement = rootObject.firstChildElement();
     if(baseElement.tagName() == QString("combatant"))
     {
@@ -75,9 +182,11 @@ QUuid ObjectImporter::importObject(Campaign& campaign, QStandardItem* item)
     }
 
     qDebug() << "[ObjectImporter] Loading Failed: Unable to find a supported object for import";
-    return QUuid();
+    return false;
+    */
 }
 
+/*
 QUuid ObjectImporter::importCombatant(Campaign& campaign, QStandardItem* item, QDomElement& element)
 {
     Character* newCharacter = new Character(element, true);
@@ -186,3 +295,4 @@ QStandardItem* ObjectImporter::findParentbyType(QStandardItem* child, int parent
 
     return nullptr;
 }
+*/

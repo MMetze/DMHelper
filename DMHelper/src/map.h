@@ -18,6 +18,7 @@ class Map : public AdventureItem
 public:
     explicit Map(const QString& mapName, const QString& fileName, QObject *parent = nullptr);
     explicit Map(const QDomElement& element, bool isImport, QObject *parent = nullptr);
+    explicit Map(const Map &obj);  // copy constructor
 
     // From CampaignObjectBase
     virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);

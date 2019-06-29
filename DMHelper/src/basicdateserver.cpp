@@ -89,7 +89,7 @@ int BasicDateServer::getDaysInYear(int year)
 int BasicDateServer::getMonthsInYear(int year)
 {
     Q_UNUSED(year);
-    return _calendars.at(_activeIndex)._months.count() + 1;
+    return _calendars.at(_activeIndex)._months.count();
 }
 
 int BasicDateServer::getDaysInMonth(int month, int year)

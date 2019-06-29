@@ -81,6 +81,11 @@ int UndoPath::getType() const
     return DMHelper::ActionType_Path;
 }
 
+UndoBase* UndoPath::clone() const
+{
+    return new UndoPath(_map, _mapDrawPath);
+}
+
 void UndoPath::addPoint(QPoint aPoint)
 {
     _mapDrawPath.addPoint(aPoint);

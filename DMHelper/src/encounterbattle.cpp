@@ -29,6 +29,15 @@ EncounterBattle::EncounterBattle(const QString& encounterName, QObject *parent) 
 {
 }
 
+EncounterBattle::EncounterBattle(const EncounterBattle& obj) :
+    Encounter(obj),
+    _text(obj._text),
+    _audioTrackId(obj._audioTrackId),
+    _combatantWaves(obj._combatantWaves),
+    _battleModel(new BattleDialogModel(*(obj._battleModel)))
+{
+}
+
 EncounterBattle::~EncounterBattle()
 {
     while(_combatantWaves.count() > 0)
@@ -131,6 +140,19 @@ void EncounterBattle::postProcessXML(const QDomElement &element, bool isImport)
     inputXMLBattle(element, isImport);
 
     Encounter::postProcessXML(element, isImport);
+}
+
+void EncounterBattle::resolveReferences()
+{
+    for( int wave = 0; wave < _combatantWaves.count(); ++wave )
+    {
+        for( int i = 0; i < _combatantWaves.at(wave).count(); ++i )
+        {
+            CombatantGroup combatantPair = _combatantWaves.at(wave).at(i);
+            if(combatantPair.second)
+                combatantPair.second->resolveReferences();
+        }
+    }
 }
 
 void EncounterBattle::widgetActivated(QWidget* widget)
@@ -437,7 +459,7 @@ void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element,
 
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 {
-    if(_battleModel)
+    if((_battleModel)||(isImport))
         return;
 
     Campaign* campaign = getCampaign();

@@ -16,7 +16,10 @@ class Adventure : public CampaignObjectBase
 public:
     explicit Adventure(const QString& adventureName, QObject *parent = nullptr);
     explicit Adventure(const QDomElement& element, bool isImport, QObject *parent = nullptr);
+    explicit Adventure(const Adventure &obj);  // copy constructor
     ~Adventure();
+
+    Adventure* createShellClone();
 
     int getEncounterCount();
     Encounter* getEncounterById(QUuid id);
@@ -38,6 +41,7 @@ public:
     virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
     virtual void inputXML(const QDomElement &element, bool isImport);
     virtual void postProcessXML(const QDomElement &element, bool isImport);
+    virtual void resolveReferences();
 
     QString getName() const;
     void setName(const QString& adventureName);

@@ -17,9 +17,10 @@ public:
 signals:
 
 public slots:
-    QUuid importObject(Campaign& campaign, QStandardItem* item);
+    bool importObject(Campaign& campaign);
 
 protected:
+    /*
     QUuid importCombatant(Campaign& campaign, QStandardItem* item, QDomElement& element);
     QUuid importEncounter(Campaign& campaign, QStandardItem* item, QDomElement& element);
     QUuid importMap(Campaign& campaign, QStandardItem* item, QDomElement& element);
@@ -27,6 +28,7 @@ protected:
 
     bool isWorldEntry(QStandardItem* item);
     QStandardItem* findParentbyType(QStandardItem* child, int parentType);
+    */
 };
 
 #endif // OBJECTIMPORTER_H

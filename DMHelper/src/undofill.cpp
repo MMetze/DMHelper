@@ -20,7 +20,7 @@ void UndoFill::redo()
 {
     if( _map.getRegisteredWindow() )
     {
-        apply(true, 0);
+        apply(true, nullptr);
         _map.getRegisteredWindow()->updateFoW();
     }
 }
@@ -61,6 +61,11 @@ void UndoFill::inputXML(const QDomElement &element, bool isImport)
 int UndoFill::getType() const
 {
     return DMHelper::ActionType_Fill;
+}
+
+UndoBase* UndoFill::clone() const
+{
+    return new UndoFill(_map, _mapEditFill);
 }
 
 const MapEditFill& UndoFill::mapEditFill() const

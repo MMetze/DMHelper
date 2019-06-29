@@ -65,6 +65,11 @@ int UndoMarker::getType() const
     return DMHelper::ActionType_SetMarker;
 }
 
+UndoBase* UndoMarker::clone() const
+{
+    return new UndoMarker(_map, _marker);
+}
+
 const MapMarker& UndoMarker::marker() const
 {
     return _marker;

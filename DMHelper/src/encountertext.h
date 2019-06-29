@@ -12,6 +12,7 @@ class EncounterText : public Encounter
 public:
 
     explicit EncounterText(const QString& encounterName, QObject *parent);
+    explicit EncounterText(const EncounterText& obj);
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport);

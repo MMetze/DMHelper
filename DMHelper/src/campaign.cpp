@@ -300,6 +300,35 @@ void Campaign::postProcessXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::postProcessXML(element, isImport);
 }
 
+void Campaign::resolveReferences()
+{
+    for( int charIt = 0; charIt < characters.size(); ++charIt )
+    {
+        characters.at(charIt)->resolveReferences();
+    }
+
+    for( int advIt = 0; advIt < adventures.size(); ++advIt )
+    {
+        adventures.at(advIt)->resolveReferences();
+    }
+
+    for( int settingIt = 0; settingIt < settings.size(); ++settingIt )
+    {
+        settings.at(settingIt)->resolveReferences();
+    }
+
+    for( int npcIt = 0; npcIt < npcs.size(); ++npcIt )
+    {
+        npcs.at(npcIt)->resolveReferences();
+    }
+
+    for( int trackIt = 0; trackIt < tracks.size(); ++trackIt )
+    {
+        tracks.at(trackIt)->resolveReferences();
+    }
+}
+
+
 void Campaign::beginBatchChanges()
 {
     _batchChanges = true;

@@ -13,6 +13,7 @@ class EncounterScrollingText : public Encounter
 public:
 
     explicit EncounterScrollingText(const QString& encounterName, QObject *parent);
+    explicit EncounterScrollingText(const EncounterScrollingText& obj);
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport);

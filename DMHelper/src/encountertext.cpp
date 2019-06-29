@@ -14,6 +14,12 @@ EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
 {
 }
 
+EncounterText::EncounterText(const EncounterText& obj) :
+    Encounter(obj),
+    _text(obj._text)
+{
+}
+
 void EncounterText::inputXML(const QDomElement &element, bool isImport)
 {
     Encounter::inputXML(element, isImport);

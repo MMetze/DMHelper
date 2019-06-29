@@ -171,8 +171,6 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     </property>
     <addaction name="action_Open_Bestiary"/>
     <addaction name="separator"/>
-    <addaction name="actionOpen_DM_Screen"/>
-    <addaction name="separator"/>
     <addaction name="actionDice"/>
     <addaction name="actionPublish_Text"/>
     <addaction name="actionTranslate_Text"/>

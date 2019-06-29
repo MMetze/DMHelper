@@ -47,6 +47,30 @@ Map::Map(const QDomElement& element, bool isImport, QObject *parent) :
     inputXML(element, isImport);
 }
 
+Map::Map(const Map &obj) :
+    AdventureItem(obj),
+    _name(obj._name),
+    _filename(obj._filename),
+    _undoStack(nullptr),
+    _mapFrame(nullptr),
+    _markerList(obj._markerList),
+    _audioTrackId(obj._audioTrackId),
+    _initialized(false),
+    _imgBackground(),
+    _imgFow()
+{
+    if(obj._undoStack)
+    {
+        _undoStack = new QUndoStack(this);
+        for(int i = 0; i < obj._undoStack->count(); ++i)
+        {
+            const UndoBase* baseObj = dynamic_cast<const UndoBase*>(obj._undoStack->command(i));
+            if(baseObj)
+                _undoStack->push(baseObj->clone());
+        }
+    }
+}
+
 void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "map" );

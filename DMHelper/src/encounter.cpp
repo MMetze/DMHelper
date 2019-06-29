@@ -11,6 +11,13 @@ Encounter::Encounter(const QString& encounterName, QObject *parent) :
 {
 }
 
+Encounter::Encounter(const Encounter& obj) :
+    AdventureItem(nullptr),
+    _name(obj._name),
+    _widget(nullptr)
+{
+}
+
 void Encounter::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(targetDirectory);

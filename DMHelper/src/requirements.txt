@@ -1,4 +1,5 @@
 white grid or black screen at button click
+Import/Export bestiary
 
 DONE: crash, grid ein/aus, animations ein/aus, selected killed leaves selection onm select in list then move without reselect
 

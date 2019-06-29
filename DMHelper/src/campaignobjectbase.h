@@ -4,9 +4,6 @@
 #include "dmhobjectbase.h"
 
 class Campaign;
-//class QDomDocument;
-//class QDomElement;
-//class QDir;
 
 class CampaignObjectBase : public DMHObjectBase
 {
@@ -14,16 +11,13 @@ class CampaignObjectBase : public DMHObjectBase
 public:
 
     // Allow full access to the Campaign class
-//    friend class Campaign;
 
     explicit CampaignObjectBase(QObject *parent = nullptr);
     explicit CampaignObjectBase(const CampaignObjectBase &obj);  // copy constructor
     virtual ~CampaignObjectBase();
 
-//    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
     virtual void inputXML(const QDomElement &element, bool isImport);
-//    virtual void postProcessXML(const QDomElement &element, bool isImport);
-//    int getID() const;
+    virtual void resolveReferences();
 
     const Campaign* getCampaign() const;
     Campaign* getCampaign();

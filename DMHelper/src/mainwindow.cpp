@@ -138,7 +138,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //currentCharacter(),
     _options(nullptr),
     bestiaryDlg(),
-    dmScreenDlg(),
 #ifdef INCLUDE_CHASE_SUPPORT
     chaseDlg(nullptr),
 #endif
@@ -214,6 +213,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionNew_Scrolling_Text_Encounter,SIGNAL(triggered()),this,SLOT(newScrollingTextEncounter()));
     connect(ui->actionNew_Map,SIGNAL(triggered()),this,SLOT(newMap()));
     connect(ui->actionExport_Item,SIGNAL(triggered()),this,SLOT(exportCurrentItem()));
+    connect(ui->actionImport_Item,SIGNAL(triggered()),this,SLOT(importItem()));
     // TODO: reenable Import Character (?)
     //connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
     ui->action_Import_Character->setVisible(false);
@@ -222,7 +222,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_Open_Bestiary,SIGNAL(triggered()),this,SLOT(openBestiary()));
     connect(ui->action_New_Monster,SIGNAL(triggered()),&bestiaryDlg,SLOT(createNewMonster()));
     connect(ui->actionOpen_Players_Window,SIGNAL(triggered()),this,SLOT(showPublishWindow()));
-    connect(ui->actionOpen_DM_Screen,SIGNAL(triggered()),this,SLOT(openDMScreen()));
     connect(ui->actionPublish_Text,SIGNAL(triggered()),this,SLOT(openTextPublisher()));
     connect(ui->actionTranslate_Text,SIGNAL(triggered()),this,SLOT(openTextTranslator()));
 #ifdef INCLUDE_CHASE_SUPPORT
@@ -619,16 +618,8 @@ void MainWindow::importItem()
     if(!campaign)
         return;
 
-    QStandardItem* importTarget = nullptr;
-
-    if(treeModel)
-    {
-        QModelIndex index = ui->treeView->currentIndex();
-        importTarget = treeModel->itemFromIndex(index);
-    }
-
     ObjectImporter importer;
-    importer.importObject(*campaign, importTarget);
+    importer.importObject(*campaign);
 }
 
 void MainWindow::newNPC()
@@ -914,6 +905,13 @@ void MainWindow::exportCurrentItem()
         return;
     }
 
+    QString exportString = exporter.getExportDocument().toString();
+    if(exportString.isEmpty())
+    {
+        qDebug() << "[Main] Error - export null string found, no export created!";
+        return;
+    }
+
     QFile file(exportFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
@@ -923,7 +921,7 @@ void MainWindow::exportCurrentItem()
 
     QTextStream ts(&file);
     ts.setCodec("UTF-8");
-    ts << exporter.getExportDocument().toString();
+    ts << exportString;
     file.close();
 
     qDebug() << "[Main] Export complete";
@@ -2203,12 +2201,6 @@ void MainWindow::openAboutDialog()
 
     AboutDialog dlg;
     dlg.exec();
-}
-
-void MainWindow::openDMScreen()
-{
-    dmScreenDlg.show();
-    dmScreenDlg.activateWindow();
 }
 
 void MainWindow::openTextPublisher()

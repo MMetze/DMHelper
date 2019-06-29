@@ -20,6 +20,7 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport) = 0;
 
     virtual int getType() const;
+    virtual UndoBase* clone() const = 0;
 
 protected:
     Map& _map;

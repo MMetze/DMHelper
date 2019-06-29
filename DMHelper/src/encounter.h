@@ -12,6 +12,7 @@ class Encounter : public AdventureItem
 public:
 
     explicit Encounter(const QString& encounterName, QObject *parent);
+    explicit Encounter(const Encounter& obj);
 
     // From CampaignObjectBase
     virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);

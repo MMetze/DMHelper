@@ -74,7 +74,6 @@ SOURCES += main.cpp\
     combatantwidget.cpp \
     campaigntree.cpp \
     campaigntreemodel.cpp \
-    dmscreendialog.cpp \
     textpublishdialog.cpp \
     chasedialog.cpp \
     chaserwidget.cpp \
@@ -221,7 +220,6 @@ HEADERS  += mainwindow.h \
     combatantwidget.h \
     campaigntree.h \
     campaigntreemodel.h \
-    dmscreendialog.h \
     textpublishdialog.h \
     chasedialog.h \
     chaserwidget.h \
@@ -319,7 +317,6 @@ FORMS    += mainwindow.ui \
     battledialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
-    dmscreendialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \

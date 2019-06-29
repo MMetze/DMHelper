@@ -24,6 +24,21 @@ EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QOb
     _fontFamily = QGuiApplication::font().family();
 }
 
+EncounterScrollingText::EncounterScrollingText(const EncounterScrollingText& obj) :
+    Encounter(obj),
+    _scrollSpeed(obj._scrollSpeed),
+    _imgFile(obj._imgFile),
+    _text(obj._text),
+    _fontFamily(obj._fontFamily),
+    _fontSize(obj._fontSize),
+    _fontBold(obj._fontBold),
+    _fontItalics(obj._fontItalics),
+    _alignment(obj._alignment),
+    _imageWidth(obj._imageWidth),
+    _fontColor(obj._fontColor)
+{
+}
+
 void EncounterScrollingText::inputXML(const QDomElement &element, bool isImport)
 {
     Encounter::inputXML(element, isImport);

@@ -17,7 +17,7 @@
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <property name="currentIndex">
-   <number>5</number>
+   <number>0</number>
   </property>
   <widget class="QWidget" name="tab">
    <attribute name="title">

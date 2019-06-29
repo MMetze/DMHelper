@@ -12,18 +12,11 @@ CampaignObjectBase::CampaignObjectBase(QObject *parent) :
 CampaignObjectBase::CampaignObjectBase(const CampaignObjectBase &obj) :
     DMHObjectBase(obj)
 {
-//    qDebug() << "[CampaignObjectBase] WARNING: Object copied - this is a highly questionable action leading to duplicate IDs! ID: " << _id;
 }
 
 CampaignObjectBase::~CampaignObjectBase()
 {
 }
-
-/*
-void CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
-{
-}
-*/
 
 void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
 {
@@ -35,16 +28,9 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
     }
 }
 
-/*
-void CampaignObjectBase::postProcessXML(const QDomElement &element)
+void CampaignObjectBase::resolveReferences()
 {
 }
-
-int CampaignObjectBase::getID() const
-{
-    return _id;
-}
-*/
 
 const Campaign* CampaignObjectBase::getCampaign() const
 {
@@ -71,23 +57,6 @@ Campaign* CampaignObjectBase::getCampaign()
     else
         return nullptr;
 }
-
-/*
-void CampaignObjectBase::setBaseId(int baseId)
-{
-    _id_global = baseId;
-}
-
-void CampaignObjectBase::resetBaseId()
-{
-    _id_global = DMHelper::GLOBAL_BASE_ID;
-}
-
-int CampaignObjectBase::createId()
-{
-    return _id_global++;
-}
-*/
 
 QUuid CampaignObjectBase::parseIdString(QString idString, int* intId, bool isLocal)
 {

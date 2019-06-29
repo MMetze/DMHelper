@@ -27,6 +27,7 @@ public:
     virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
     virtual void inputXML(const QDomElement &element, bool isImport);
     virtual void postProcessXML(const QDomElement &element, bool isImport);
+    virtual void resolveReferences();
 
     virtual void beginBatchChanges();
     virtual void endBatchChanges();

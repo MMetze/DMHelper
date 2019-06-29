@@ -5,6 +5,7 @@
 #include "map.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QDebug>
 
 Adventure::Adventure(const QString& adventureName, QObject *parent) :
     CampaignObjectBase(parent),
@@ -25,10 +26,37 @@ Adventure::Adventure(const QDomElement& element, bool isImport, QObject *parent)
     inputXML(element, isImport);
 }
 
+Adventure::Adventure(const Adventure &obj) :
+    CampaignObjectBase(obj),
+    _name(obj._name),
+    encounters(),
+    maps(),
+    _expanded(obj._expanded)
+{
+    for(Encounter* encounter: obj.encounters)
+    {
+        addEncounter(EncounterFactory::cloneEncounter(*encounter));
+    }
+
+    for(Map* map : obj.maps)
+    {
+        addMap(new Map(*map));
+    }
+}
+
 Adventure::~Adventure()
 {
     qDeleteAll(encounters);
     qDeleteAll(maps);
+}
+
+Adventure* Adventure::createShellClone()
+{
+    qDebug() << "[Adventure]: WARNING - Creating a clone ID of the adventure " << _name << "! Only do this for very good reasons!!";
+
+    Adventure* shell = new Adventure(_name);
+    shell->setID(getID());
+    return shell;
 }
 
 int Adventure::getEncounterCount()
@@ -291,6 +319,19 @@ void Adventure::postProcessXML(const QDomElement &element, bool isImport)
     }
 
     CampaignObjectBase::postProcessXML(element, isImport);
+}
+
+void Adventure::resolveReferences()
+{
+    for( int encIt = 0; encIt < encounters.size(); ++encIt )
+    {
+        encounters.at(encIt)->resolveReferences();
+    }
+
+    for( int mapIt = 0; mapIt < maps.size(); ++mapIt )
+    {
+        maps.at(mapIt)->resolveReferences();
+    }
 }
 
 QString Adventure::getName() const

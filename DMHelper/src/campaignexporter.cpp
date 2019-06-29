@@ -52,14 +52,15 @@ bool CampaignExporter::populateExport()
 {
     bool result = addObjectForExport(_exportId);
 
-    QDomElement rootObject = _exportDocument->createElement("root");
-    _exportDocument->appendChild(rootObject);
-
-    _exportCampaign->outputXML(*_exportDocument, rootObject, _exportDirectory, true);
+    if(result)
+    {
+        QDomElement rootObject = _exportDocument->createElement("root");
+        _exportDocument->appendChild(rootObject);
+        _exportCampaign->outputXML(*_exportDocument, rootObject, _exportDirectory, true);
+    }
 
     return result;
 }
-
 
 bool CampaignExporter::addObjectForExport(QUuid exportId)
 {
@@ -200,7 +201,7 @@ void CampaignExporter::addWholeAdventure(Adventure& adventure)
 
 Adventure* CampaignExporter::addShellAdventure(Adventure& adventure)
 {
-    Adventure* shell = new Adventure(adventure.getName());
+    Adventure* shell = adventure.createShellClone();
     _shellAdventures.append(shell);
     _exportCampaign->addAdventure(shell);
     return shell;

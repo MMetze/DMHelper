@@ -55,3 +55,38 @@ Encounter* EncounterFactory::createEncounter(int encounterType, const QDomElemen
     return encounter;
 }
 
+Encounter* EncounterFactory::cloneEncounter(Encounter& encounter)
+{
+    Encounter* clone = nullptr;
+
+    switch(encounter.getType())
+    {
+        case DMHelper::EncounterType_Blank:
+            break;
+        case DMHelper::EncounterType_Text:
+            {
+                EncounterText* encounterText = dynamic_cast<EncounterText*>(&encounter);
+                if(encounterText)
+                    clone = new EncounterText(*encounterText);
+            }
+            break;
+        case DMHelper::EncounterType_Battle:
+            {
+                EncounterBattle* encounterBattle = dynamic_cast<EncounterBattle*>(&encounter);
+                if(encounterBattle)
+                    clone = new EncounterBattle(*encounterBattle);
+            }
+            break;
+        case DMHelper::EncounterType_ScrollingText:
+            {
+                EncounterScrollingText* encounterScrollingText = dynamic_cast<EncounterScrollingText*>(&encounter);
+                if(encounterScrollingText)
+                    clone = new EncounterScrollingText(*encounterScrollingText);
+            }
+            break;
+        default:
+            break;
+    }
+
+    return clone;
+}
