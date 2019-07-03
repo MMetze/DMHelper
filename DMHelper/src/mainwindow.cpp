@@ -976,6 +976,7 @@ void MainWindow::readBestiary()
 
     if(bestiaryFileName.isEmpty())
     {
+        /*
         QMessageBox::StandardButton result = QMessageBox::question(this, QString("Select Bestiary"),QString("A current bestiary could not be found. Would you like to open an existing bestiary?"));
 
         if(result == QMessageBox::Yes)
@@ -991,7 +992,12 @@ void MainWindow::readBestiary()
             return;
 
         _options->setBestiaryFileName(bestiaryFileName);
+        */
+
+        qDebug() << "[Main] No known bestiary found, attempting to load default bestiary";
+        QString bestiaryFileName = QString("./bestiary/DMHelperBestiary.xml");
     }
+
     qDebug() << "[Main] Reading bestiary: " << bestiaryFileName;
 
     QDomDocument doc( "DMHelperBestiaryXML" );

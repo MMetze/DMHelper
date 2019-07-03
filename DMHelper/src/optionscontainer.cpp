@@ -149,7 +149,7 @@ void OptionsContainer::readSettings()
 #endif
 
     // Note: password will not be stored in settings
-    setBestiaryFileName(settings.value("bestiary","").toString());
+    setBestiaryFileName(settings.value("bestiary","./bestiary/DMHelperBestiary.xml").toString());
     setLastMonster(settings.value("lastMonster","").toString());
 #ifdef INCLUDE_CHASE_SUPPORT
     setChaseFileName(settings.value("chase data","").toString());
