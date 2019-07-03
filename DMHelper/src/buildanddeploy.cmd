@@ -4,43 +4,45 @@
 if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
-set PATH=C:\Qt\5.11.1\mingw53_32\bin;C:\Qt\Tools\mingw530_32\bin;%PATH%
+set PATH=C:\Qt\5.12.3\mingw73_64\bin;C:\Qt\Tools\mingw730_64\bin;%PATH%
 
-rmdir /s /q ..\bin
-mkdir ..\bin
+rmdir /s /q ..\bin64
+mkdir ..\bin64
+mkdir ..\bin64\bestiary
+mkdir ..\bin64\doc
 
 cd ..
 
 rem Uncomment the following line to skip actually building the SW
 rem goto skip_build
 
-rmdir /s /q .\build-release
-mkdir build-release
-cd build-release
+rmdir /s /q .\build-64_bit-release
+mkdir build-64_bit-release
+cd build-64_bit-release
 qmake.exe ..\src\DMHelper.pro -spec win32-g++
 mingw32-make
 goto build_done
 
 :skip_build
-cd build-release
+cd build-64_bit-release
 
 :build_done
 
-xcopy .\release\DMHelper.exe ..\bin\
-xcopy ..\..\DMHelperShared\bin\DMHelperShared.dll ..\bin\
-xcopy C:\Qt\5.11.1\mingw53_32\bin\Qt5Xml.dll ..\bin\
-xcopy ..\src\binsrc\* ..\bin\*
+xcopy .\release\DMHelper.exe ..\bin64\
+xcopy C:\Qt\5.12.3\mingw73_64\bin\Qt5Xml.dll ..\bin64\
+xcopy ..\src\binsrc\* ..\bin64\*
+xcopy /s ..\src\bestiary\* ..\bin64\bestiary\*
+xcopy ..\src\doc\* ..\bin64\doc\*
 
-windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin
+windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64
 
-cd ..\bin
+cd ..\bin64
 copy NUL DMHelper.log
-rem NOT NEEDED rename "DMHelper.exe" "DMHelper.__exe"
 "C:\Program Files\7-Zip\7z" a -tzip archive.zip *
 cd ..
-move bin\archive.zip .\archive.zip
-del "DM Helper release.zip"
-rename archive.zip "DM Helper release.zip"
+move bin64\archive.zip .\archive.zip
+del "DM Helper 64-bit release.zip"
+rename archive.zip "DM Helper 64-bit release.zip"
 
 del src.zip
 "C:\Program Files\7-Zip\7z" a -tzip src.zip src\*
