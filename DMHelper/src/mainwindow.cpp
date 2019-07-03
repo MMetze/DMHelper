@@ -28,6 +28,7 @@
 #include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
+#include "equipmentserver.h"
 #include "textpublishdialog.h"
 #include "texttranslatedialog.h"
 #include "combatantselectdialog.h"
@@ -193,6 +194,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qDebug() << "[Main] Initializing BasicDateServer";
     BasicDateServer::Initialize();
+    qDebug() << "[Main] BasicDateServer Initialized";
+
+    qDebug() << "[Main] Initializing EquipmentServer";
+    EquipmentServer::Initialize();
     qDebug() << "[Main] BasicDateServer Initialized";
 
     connect(ui->action_NewCampaign,SIGNAL(triggered()),this,SLOT(newCampaign()));

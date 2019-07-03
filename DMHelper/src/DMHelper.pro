@@ -37,9 +37,11 @@ SOURCES += main.cpp\
     basicdateserver.cpp \
     campaignexporter.cpp \
     colorpushbutton.cpp \
+    equipmentserver.cpp \
         mainwindow.cpp \
     objectimporter.cpp \
     publishwindow.cpp \
+    randommarketdialog.cpp \
     undopoint.cpp \
     undopath.cpp \
     undofill.cpp \
@@ -183,8 +185,10 @@ HEADERS  += mainwindow.h \
     basicdateserver.h \
     campaignexporter.h \
     colorpushbutton.h \
+    equipmentserver.h \
     objectimporter.h \
     publishwindow.h \
+    randommarketdialog.h \
     undopoint.h \
     undopath.h \
     undofill.h \
@@ -317,6 +321,7 @@ FORMS    += mainwindow.ui \
     battledialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    randommarketdialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \

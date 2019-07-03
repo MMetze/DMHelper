@@ -150,7 +150,6 @@ protected slots:
     void openBestiary();
     void openAboutDialog();
 
-    void openDMScreen();
     void openTextPublisher();
     void openTextTranslator();
 

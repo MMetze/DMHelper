@@ -183,11 +183,16 @@ void DMScreenTabWidget::readEquipment()
         readEquipmentSection(magicElement, sectionMagicCount, QString("magicitem"), QString("subcategory"), *ui->layoutMagicName2, QString("name"), *ui->layoutMagicType2, QString("category"), *ui->layoutMagicProbability2, QString("probability"), *ui->layoutMagicAttunement2, QString("attunement"));
         readEquipmentSection(magicElement, sectionMagicCount, QString("magicitem"), QString("subcategory"), *ui->layoutMagicName3, QString("name"), *ui->layoutMagicType3, QString("category"), *ui->layoutMagicProbability3, QString("probability"), *ui->layoutMagicAttunement3, QString("attunement"));
 
-        ui->scrollAreaWidgetContents_6->layout()->activate();
-
         if(!magicElement.isNull())
             qDebug() << "[DMScreen] Not all magic item elements were added to the DM Screen!";
     }
+
+    ui->scrollAreaWidgetContents->layout()->activate();
+    ui->scrollAreaWidgetContents_2->layout()->activate();
+    ui->scrollAreaWidgetContents_3->layout()->activate();
+    ui->scrollAreaWidgetContents_4->layout()->activate();
+    ui->scrollAreaWidgetContents_5->layout()->activate();
+    ui->scrollAreaWidgetContents_6->layout()->activate();
 
     qDebug() << "[DMScreen] Completed reading equipment for DM Screen";
 }
