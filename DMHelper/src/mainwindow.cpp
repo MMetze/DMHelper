@@ -31,6 +31,7 @@
 #include "equipmentserver.h"
 #include "textpublishdialog.h"
 #include "texttranslatedialog.h"
+#include "randommarketdialog.h"
 #include "combatantselectdialog.h"
 #ifdef INCLUDE_CHASE_SUPPORT
     #include "chaserselectiondialog.h"
@@ -229,6 +230,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionOpen_Players_Window,SIGNAL(triggered()),this,SLOT(showPublishWindow()));
     connect(ui->actionPublish_Text,SIGNAL(triggered()),this,SLOT(openTextPublisher()));
     connect(ui->actionTranslate_Text,SIGNAL(triggered()),this,SLOT(openTextTranslator()));
+    connect(ui->actionRandom_Market,SIGNAL(triggered()),this,SLOT(openRandomMarkets()));
 #ifdef INCLUDE_CHASE_SUPPORT
     connect(ui->action_Chase_Dialog,SIGNAL(triggered()),this,SLOT(startChase()));
 #endif
@@ -995,7 +997,7 @@ void MainWindow::readBestiary()
         */
 
         qDebug() << "[Main] No known bestiary found, attempting to load default bestiary";
-        QString bestiaryFileName = QString("./bestiary/DMHelperBestiary.xml");
+        bestiaryFileName = QString("./bestiary/DMHelperBestiary.xml");
     }
 
     qDebug() << "[Main] Reading bestiary: " << bestiaryFileName;
@@ -2228,6 +2230,14 @@ void MainWindow::openTextTranslator()
     TextTranslateDialog* dlg = new TextTranslateDialog(this);
 
     connect(dlg, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+    dlg->show();
+    dlg->activateWindow();
+}
+
+void MainWindow::openRandomMarkets()
+{
+    RandomMarketDialog* dlg = new RandomMarketDialog(this);
+
     dlg->show();
     dlg->activateWindow();
 }

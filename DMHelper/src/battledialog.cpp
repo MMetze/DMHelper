@@ -1762,14 +1762,16 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 #endif
 
     // Draw the contents of the battle dialog in publish mode
-    _background->setVisible(false);
+    if(_background)
+        _background->setVisible(false);
     setPublishVisibility(true);
     QRect viewportRect = ui->graphicsView->viewport()->rect();
     QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
     QRect sourceRect = viewportRect.intersected(sceneViewportRect);
     ui->graphicsView->render(&painter, QRectF(QPointF(xOffset, yOffset),_targetSize), sourceRect);
     setPublishVisibility(false);
-    _background->setVisible(true);
+    if(_background)
+        _background->setVisible(true);
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; contents drawn";
@@ -1846,6 +1848,7 @@ void BattleDialog::replaceBattleMap()
 
     ui->btnReloadMap->setEnabled(_model.getMap() != nullptr);
     ui->btnPublish->setEnabled(_model.getMap() != nullptr);
+
     if(!_model.getMap())
         return;
 

@@ -152,6 +152,7 @@ protected slots:
 
     void openTextPublisher();
     void openTextTranslator();
+    void openRandomMarkets();
 
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();

@@ -110,6 +110,9 @@ void EquipmentServer::readEquipment()
 
 EquipmentServer::ItemProbability EquipmentServer::probabilityFromString(QString probability)
 {
+    if(probability == QString("always"))
+        return EquipmentServer::Probability_Always;
+
     if(probability == QString("common"))
         return EquipmentServer::Probability_Common;
 
@@ -124,6 +127,8 @@ EquipmentServer::ItemProbability EquipmentServer::probabilityFromString(QString 
 
     if(probability == QString("legendary"))
         return EquipmentServer::Probability_Legendary;
+
+    qDebug() << "[EquipmentServer] Unknown probability seen: " << probability;
 
     return EquipmentServer::Probability_Common;
 }

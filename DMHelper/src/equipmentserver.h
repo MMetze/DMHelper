@@ -11,7 +11,8 @@ class EquipmentServer
 public:
     enum ItemProbability
     {
-        Probability_Common = 0,
+        Probability_Always = 0,
+        Probability_Common,
         Probability_Uncommon,
         Probability_Rare,
         Probability_Very_Rare,

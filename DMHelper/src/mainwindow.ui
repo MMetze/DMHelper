@@ -114,7 +114,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <x>0</x>
      <y>0</y>
      <width>1467</width>
-     <height>31</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -174,6 +174,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <addaction name="actionDice"/>
     <addaction name="actionPublish_Text"/>
     <addaction name="actionTranslate_Text"/>
+    <addaction name="actionRandom_Market"/>
     <addaction name="separator"/>
     <addaction name="actionOptions"/>
     <addaction name="actionAbout"/>
@@ -346,6 +347,11 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionOpen_Players_Window">
    <property name="text">
     <string>Open Player's Window</string>
+   </property>
+  </action>
+  <action name="actionRandom_Market">
+   <property name="text">
+    <string>Random Market...</string>
    </property>
   </action>
  </widget>

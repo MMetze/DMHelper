@@ -78,9 +78,12 @@ int BasicDateServer::getDaysInYear(int year)
 {
     int days = 0;
 
-    for(int i = 0; i < _calendars.at(_activeIndex)._months.count(); ++i)
+    if((_activeIndex >= 0) && (_activeIndex < _calendars.count()))
     {
-        days += getDaysInMonth(i, year);
+        for(int i = 0; i < _calendars.at(_activeIndex)._months.count(); ++i)
+        {
+            days += getDaysInMonth(i, year);
+        }
     }
 
     return days;
@@ -89,11 +92,17 @@ int BasicDateServer::getDaysInYear(int year)
 int BasicDateServer::getMonthsInYear(int year)
 {
     Q_UNUSED(year);
-    return _calendars.at(_activeIndex)._months.count();
+    if((_activeIndex < 0) || (_activeIndex >= _calendars.count()))
+        return 0;
+    else
+        return _calendars.at(_activeIndex)._months.count();
 }
 
 int BasicDateServer::getDaysInMonth(int month, int year)
 {
+    if((_activeIndex < 0) || (_activeIndex >= _calendars.count()))
+        return -1;
+
     if((month < 1) || (month > _calendars.at(_activeIndex)._months.count()))
         return -1;
 
@@ -109,6 +118,9 @@ int BasicDateServer::getDaysInMonth(int month, int year)
 
 int BasicDateServer::getDaysBeforeMonth(int month, int year)
 {
+    if((_activeIndex < 0) || (_activeIndex >= _calendars.count()))
+        return -1;
+
     if((month < 1) || (month > _calendars.at(_activeIndex)._months.count()))
         return -1;
 
@@ -124,6 +136,9 @@ int BasicDateServer::getDaysBeforeMonth(int month, int year)
 
 QString BasicDateServer::getMonthName(int month)
 {
+    if((_activeIndex < 0) || (_activeIndex >= _calendars.count()))
+        return QString();
+
     if((month < 1) || (month > _calendars.at(_activeIndex)._months.count()))
         return QString();
 
@@ -132,6 +147,9 @@ QString BasicDateServer::getMonthName(int month)
 
 QString BasicDateServer::getMonthAlternativeName(int month)
 {
+    if((_activeIndex < 0) || (_activeIndex >= _calendars.count()))
+        return QString();
+
     if((month < 1) || (month > _calendars.at(_activeIndex)._months.count()))
         return QString();
 
@@ -140,6 +158,9 @@ QString BasicDateServer::getMonthAlternativeName(int month)
 
 QString BasicDateServer::getSpecialDayName(int day, int month)
 {
+    if((_activeIndex < 0) || (_activeIndex >= _calendars.count()))
+        return QString();
+
     if((month < 1) || (month > _calendars.at(_activeIndex)._months.count()))
         return QString();
 
@@ -154,6 +175,9 @@ QString BasicDateServer::getSpecialDayName(int day, int month)
 
 QString BasicDateServer::getLeapDayName(int day, int month, int year)
 {
+    if((_activeIndex < 0) || (_activeIndex >= _calendars.count()))
+        return QString();
+
     if((month < 1) || (month > _calendars.at(_activeIndex)._months.count()))
         return QString();
 
@@ -183,9 +207,12 @@ QStringList BasicDateServer::getMonthNames() const
 {
     QStringList names;
 
-    for(int i = 0; i < _calendars.at(_activeIndex)._months.count(); ++i)
+    if((_activeIndex >= 0) && (_activeIndex < _calendars.count()))
     {
-        names.append(_calendars.at(_activeIndex)._months.at(i)._name);
+        for(int i = 0; i < _calendars.at(_activeIndex)._months.count(); ++i)
+        {
+            names.append(_calendars.at(_activeIndex)._months.at(i)._name);
+        }
     }
 
     return names;
@@ -195,12 +222,15 @@ QStringList BasicDateServer::getMonthNamesWithAlternatives() const
 {
     QStringList names;
 
-    for(int i = 0; i < _calendars.at(_activeIndex)._months.count(); ++i)
+    if((_activeIndex >= 0) && (_activeIndex < _calendars.count()))
     {
-        QString fullName = _calendars.at(_activeIndex)._months.at(i)._name;
-        if(!_calendars.at(_activeIndex)._months.at(i)._alternativeName.isEmpty())
-            fullName += " (" + _calendars.at(_activeIndex)._months.at(i)._alternativeName + ")";
-        names.append(fullName);
+        for(int i = 0; i < _calendars.at(_activeIndex)._months.count(); ++i)
+        {
+            QString fullName = _calendars.at(_activeIndex)._months.at(i)._name;
+            if(!_calendars.at(_activeIndex)._months.at(i)._alternativeName.isEmpty())
+                fullName += " (" + _calendars.at(_activeIndex)._months.at(i)._alternativeName + ")";
+            names.append(fullName);
+        }
     }
 
     return names;

@@ -18,6 +18,7 @@ public:
 private slots:
     void loadMarkets();
     void randomizeMarket();
+    void locationSelected(int index);
 
 private:
     Ui::RandomMarketDialog *ui;

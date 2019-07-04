@@ -357,6 +357,9 @@ color: rgb(85, 85, 85);
         </item>
         <item>
          <widget class="QPushButton" name="btnPublish">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="font">
            <font>
             <weight>75</weight>
@@ -613,8 +616,8 @@ color: rgb(85, 85, 85);
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>272</width>
-          <height>934</height>
+          <width>277</width>
+          <height>948</height>
          </rect>
         </property>
        </widget>
