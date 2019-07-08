@@ -7,7 +7,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::EncounterTextEdit),
     _keys(),
-    _encounter(0)
+    _encounter(nullptr)
 {
     ui->setupUi(this);
 

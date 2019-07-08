@@ -2,6 +2,7 @@
 #define RANDOMMARKETDIALOG_H
 
 #include <QDialog>
+#include "equipmentserver.h"
 
 namespace Ui {
 class RandomMarketDialog;
@@ -29,6 +30,7 @@ private:
         Shop() :
             _name(),
             _mundane(1.0),
+            _goods(1.0),
             _magic_armor(1.0),
             _magic_potion(1.0),
             _magic_ring(1.0),
@@ -45,6 +47,7 @@ private:
 
         QString _name;
         qreal _mundane;
+        qreal _goods;
         qreal _magic_armor;
         qreal _magic_potion;
         qreal _magic_ring;
@@ -72,6 +75,9 @@ private:
         qreal _probability;
         QList<Shop> _shops;
     };
+
+    qreal getProbability(const Location& location, const Shop& shop, EquipmentServer::ItemCategory category, EquipmentServer::ItemProbability itemProbability);
+    void addTitle(const QString& titleName);
 
     QList<Location> _locations;
 

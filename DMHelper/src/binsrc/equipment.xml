@@ -225,7 +225,7 @@
 	<magicitem name="Periapt of Health" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
 	<magicitem name="Periapt of Proof against Poison" category="Wondrous item" probability="rare" attunement=""></magicitem>
 	<magicitem name="Periapt of Wound Closure" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-	<magicitem name="Philter of Love" category="potion" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Philter of Love" category="Potion" probability="uncommon" attunement=""></magicitem>
 	<magicitem name="Pipes of Haunting" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
 	<magicitem name="Pipes of the Sewers" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
 	<magicitem name="Plate Armor of Etherealness" category="Armor (plate)" probability="legendary" attunement="y"></magicitem>
