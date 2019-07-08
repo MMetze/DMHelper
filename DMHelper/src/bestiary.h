@@ -24,7 +24,7 @@ public:
     static void Initialize();
     static void Shutdown();
 
-    void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
+    int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
     void inputXML(const QDomElement &element, bool isImport);
 
     QString getVersion() const;

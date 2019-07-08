@@ -46,8 +46,10 @@ void Bestiary::Shutdown()
     _instance = nullptr;
 }
 
-void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const
+int Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const
 {
+    int monsterCount = 0;
+
     qDebug() << "[Bestiary] Saving bestiary...";
     QDomElement bestiaryElement = doc.createElement( "bestiary" );
     bestiaryElement.setAttribute( "majorversion", _majorVersion );
@@ -65,6 +67,7 @@ void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
             bestiaryElement.appendChild(monsterElement);
         }
 
+        ++monsterCount;
         ++i;
     }
 
@@ -78,7 +81,8 @@ void Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
     bestiaryElement.appendChild(licenseElement);
 
     parent.appendChild(bestiaryElement);
-    qDebug() << "[Bestiary] Saving bestiary completed";
+    qDebug() << "[Bestiary] Saving bestiary completed: " << monsterCount << " monsters written to XML";
+    return monsterCount;
 }
 
 void Bestiary::inputXML(const QDomElement &element, bool isImport)

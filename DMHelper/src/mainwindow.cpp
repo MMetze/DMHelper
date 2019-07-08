@@ -1404,6 +1404,12 @@ void MainWindow::writeBestiary()
     if(!Bestiary::Instance())
         return;
 
+    if(Bestiary::Instance()->count() <= 0)
+    {
+        qDebug() << "[Main] Bestiary is empty, no file will be written";
+        return;
+    }
+
     QString bestiaryFileName = _options->getBestiaryFileName();
     qDebug() << "[Main] Writing Bestiary to " << bestiaryFileName;
 
@@ -1423,11 +1429,16 @@ void MainWindow::writeBestiary()
 
     QFileInfo fileInfo(bestiaryFileName);
     QDir targetDirectory(fileInfo.absoluteDir());
-    Bestiary::Instance()->outputXML(doc, root, targetDirectory, false);
+    if( Bestiary::Instance()->outputXML(doc, root, targetDirectory, false) <= 0)
+    {
+        qDebug() << "[Main] Bestiary output did not find any monsters. Aborting writing to file";
+        return;
+    }
 
     QFile file(bestiaryFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
+        qDebug() << "[Main] Unable to open Bestiary file for writing: " << bestiaryFileName;
         bestiaryFileName.clear();
         return;
     }
