@@ -38,11 +38,6 @@ Unpack the archive to an destination of your choosing. Keep in mind that you mig
 
 There are no more installation steps neccessary. Just start DMHelper.exe
 
-## First run
-When the DM Helper is started for the first time, you can open a bestiary.xml. This file includes a database with the statblocks of all monsters used within the DM Helper.  
-![Select bestiary dialog](Images/bestiary.jpg)  
-This step is skippable and the bestiary can be imported later. After skipping, or importing, a bestiary, the main interface will be opened.
-
 ## Empty campaign
 First of all, a new campaign has to be created or opened. Hit _File_ to see your options.  
 ![Interface](Images/interface_01.jpg)  
@@ -118,7 +113,14 @@ _John_ did nothing, _Viol_ moved and then used a cone shaped spell. I added the 
 ## Conclusion
 This are the first steps with the DM Helper and should get you started for the first adventure. This firsts steps file covers the base functions of the DM Helper, there is lots more to do. For example: Music Tracks can be played, NPCs can be added and whole campaigns can be planned.
 
-If there are issues, ideas or questions, feel free to get in contact.
+If there are issues, ideas or questions, feel free to get in contact with us.
+
+## Contact
+
+You can reach us under the usual channels:
+Email: info@dmhelper.net
+Twitter: @therealdmhelper
+Facebook:
 
 ## References
 Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!
@@ -135,3 +137,13 @@ https://www.reddit.com/user/Urza_Is_Mine <br/>
 
 Rustajb <br/>
 https://www.reddit.com/user/rustajb
+
+
+
+**Feature Improvements: <br/>**
+Furthermore, thanks to the following community members for their ideas, requests and recommendations to help us make the DM Helper as good as possible!
+* Cricketot (https://www.reddit.com/user/Cricketot) for the Random Marketplace inspiration and algorithm
+* NutritiousCookie for the improvements to the Player's Window (rotation still to come!)
+* anomalystic777 for the customizable calendars and reference tables
+
+... and many more for their chats and wise words on Reddit or the other clever corners of the Internet

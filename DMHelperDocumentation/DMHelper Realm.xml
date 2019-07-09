@@ -1,45 +1,45 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign worldExpanded="1" adventuresExpanded="1" time="0" date="01/01/0000" worldNPCsExpanded="0" name="DMHelper Realm" partyExpanded="1" _baseID="1" worldSettingsExpanded="0">
+ <campaign _baseID="{64b5ffe3-53d2-49e7-8742-985c464020ae}" worldSettingsExpanded="0" date="01/01/0000" minorVersion="0" adventuresExpanded="1" calendar="Gregorian" worldExpanded="1" partyExpanded="1" time="0" name="DMHelper Realm" majorVersion="1" worldNPCsExpanded="0">
   <notes>
-   <encounter name="" type="1" _baseID="1000"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+   <encounter _baseID="{c5ba9f7c-8d15-4e06-bb09-dcea3c86b444}" type="1" name=""><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]></encounter>
   </notes>
   <characters>
-   <combatant class="" intelligenceSave="0" subrace="N/A" speed="30" wisdomSave="0" survival="0" constitutionSave="0" sleightOfHand="0" medicine="0" stealth="0" intimidation="0" strength="10" eyes="" type="1" strengthSave="0" equipment="" level2="0" acrobatics="0" silver="0" charismaSave="0" weight="" constitution="10" class3="N/A" platinum="0" hair="" alignment="" arcana="0" charisma="10" insight="0" level="1" size="medium" dndBeyondID="-1" persuasion="0" religion="0" active="1" height="" investigation="0" hitPoints="1" race="" notes="" hitDice="1d0" copper="0" spells="" deception="0" icon="J.jpg" armorClass="10" class2="N/A" gold="0" background="N/A" wisdom="10" experience="0" sex="" level3="0" performance="0" dexterity="10" proficiencies="" nature="0" intelligence="10" _baseID="1008" athletics="0" history="0" animalHandling="0" player="N/A" age="" dexteritySave="0" perception="0" name="John">
+   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/Aroc-the-grey.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="John" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{05371e24-d5aa-456f-96b1-347f4a00f4b8}" hair="" wisdom="10" intelligenceSave="0">
     <attacks/>
    </combatant>
-   <combatant class="" intelligenceSave="0" subrace="N/A" speed="30" wisdomSave="0" survival="0" constitutionSave="0" sleightOfHand="0" medicine="0" stealth="0" intimidation="0" strength="10" eyes="" type="1" strengthSave="0" equipment="" level2="0" acrobatics="0" silver="0" charismaSave="0" weight="" constitution="10" class3="N/A" platinum="0" hair="" alignment="" arcana="0" charisma="10" insight="0" level="1" size="medium" dndBeyondID="-1" persuasion="0" religion="0" active="1" height="" investigation="0" hitPoints="1" race="" notes="" hitDice="1d0" copper="0" spells="" deception="0" icon="V.jpg" armorClass="10" class2="N/A" gold="0" background="N/A" wisdom="10" experience="0" sex="" level3="0" performance="0" dexterity="10" proficiencies="" nature="0" intelligence="10" _baseID="1009" athletics="0" history="0" animalHandling="0" player="N/A" age="" dexteritySave="0" perception="0" name="Viol">
+   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/Possessed-torgun.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="Viol" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{a64c8ad3-b4f8-4f17-b68e-6dac55b26354}" hair="" wisdom="10" intelligenceSave="0">
     <attacks/>
    </combatant>
-   <combatant class="" intelligenceSave="0" subrace="N/A" speed="30" wisdomSave="0" survival="0" constitutionSave="0" sleightOfHand="0" medicine="0" stealth="0" intimidation="0" strength="10" eyes="" type="1" strengthSave="0" equipment="" level2="0" acrobatics="0" silver="0" charismaSave="0" weight="" constitution="10" class3="N/A" platinum="0" hair="" alignment="" arcana="0" charisma="10" insight="0" level="1" size="medium" dndBeyondID="-1" persuasion="0" religion="0" active="1" height="" investigation="0" hitPoints="1" race="" notes="" hitDice="1d0" copper="0" spells="" deception="0" icon="T.jpg" armorClass="10" class2="N/A" gold="0" background="N/A" wisdom="10" experience="0" sex="" level3="0" performance="0" dexterity="10" proficiencies="" nature="0" intelligence="10" _baseID="1010" athletics="0" history="0" animalHandling="0" player="N/A" age="" dexteritySave="0" perception="0" name="Tick">
+   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/Immarel-the-magnificent.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="Tick" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{78a2dfea-56f8-4e27-be34-77d52d801afd}" hair="" wisdom="10" intelligenceSave="0">
     <attacks/>
    </combatant>
-   <combatant class="" intelligenceSave="0" subrace="N/A" speed="30" wisdomSave="0" survival="0" constitutionSave="0" sleightOfHand="0" medicine="0" stealth="0" intimidation="0" strength="10" eyes="" type="1" strengthSave="0" equipment="" level2="0" acrobatics="0" silver="0" charismaSave="0" weight="" constitution="10" class3="N/A" platinum="0" hair="" alignment="" arcana="0" charisma="10" insight="0" level="1" size="medium" dndBeyondID="-1" persuasion="0" religion="0" active="1" height="" investigation="0" hitPoints="1" race="" notes="" hitDice="1d0" copper="0" spells="" deception="0" icon="G.jpg" armorClass="10" class2="N/A" gold="0" background="N/A" wisdom="10" experience="0" sex="" level3="0" performance="0" dexterity="10" proficiencies="" nature="0" intelligence="10" _baseID="1011" athletics="0" history="0" animalHandling="0" player="N/A" age="" dexteritySave="0" perception="0" name="Grog">
+   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/The-archmage.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="Grog" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{7a147c2a-68ce-4d7d-84b0-54b767465b44}" hair="" wisdom="10" intelligenceSave="0">
     <attacks/>
    </combatant>
   </characters>
   <adventures>
-   <adventure expanded="1" name="Lair of the Necromancer" _baseID="1001">
+   <adventure _baseID="{ea9484c3-ad3e-4809-83e0-b26c57b29e98}" name="Lair of the Necromancer" expanded="1">
     <encounters>
-     <encounter name="Room 1" type="1" _baseID="1003"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+     <encounter _baseID="{dba68e8f-8e9d-423d-997d-0a9049885a99}" type="1" name="Room 1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8.25pt;">The room is mostly dark. Only lightened by the bit of moonlight, shining through the hole in the ceiling through which you dropped into here. You can see that the ceiling was braced by some wooden planks and one broke, creating an instability which caused the cavein and you dropping down. At first glance this is an mostly empty room, just some broken furniture, some empty barrels and shit, left by rats who long wandered away. </span></p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8.25pt;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8.25pt;">There are two wooden doors to the east and one in the south.</span></p></body></html>]]></encounter>
-     <encounter name="Room 19" type="1" _baseID="1006"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+     <encounter _baseID="{9a4c93b1-511b-4d6e-8721-5f60bcbc785b}" type="1" name="Room 19"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The old, wooden door opens to your pushing it, the hinges creaking loudly. After a few inches the door gets stuck, just wide enough opened for you and your companions to push through, one by one. The following room is dark. Really dark. The little light spilling over from the room before does not help, even a little</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If the players have a torch or darkvision: The room is mostly empty. Here and there are some little clusters of rubble. The door got stuck on a rock, embedded in the muddy ground. On the other corner of the room, there are two, halfling sized holes, right next to each other. (perception check) You think you saw a reflection off an eye. Just before two large rats emerge from the holes.</p></body></html>]]></encounter>
-     <encounter name="Room 19 Battle" type="2" audiotrack="-1" _baseID="1007"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+     <encounter _baseID="{adc4a7d4-3c12-43ad-b622-1f83bbbed98b}" type="2" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Room 19 Battle"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
@@ -48,7 +48,7 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="2">
-          <combatant name="" active="1" hitPoints="0" monsterClass="Giant Rat" type="2" armorClass="12" hitDice="2d6" passivePerception="10" icon="" _baseID="1008" notes="">
+          <combatant _baseID="{e43c7fb8-4db2-4c55-8c37-5c191e57c045}" passivePerception="10" active="1" type="2" hitDice="2d6" monsterClass="Giant Rat" notes="" name="" hitPoints="0" armorClass="12" icon="">
            <attacks/>
           </combatant>
          </combatantPair>
@@ -57,32 +57,32 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="4">
-          <combatant name="" active="1" hitPoints="0" monsterClass="Giant Rat" type="2" armorClass="12" hitDice="2d6" passivePerception="10" icon="" _baseID="1009" notes="">
+          <combatant _baseID="{0a95e757-a08e-4e96-9053-faad016036f1}" passivePerception="10" active="1" type="2" hitDice="2d6" monsterClass="Giant Rat" notes="" name="" hitPoints="0" armorClass="12" icon="">
            <attacks/>
           </combatant>
          </combatantPair>
         </combatants>
        </wave>
       </waves>
-      <battle activeId="1043" mapRectY="711" mapRectX="566" showGrid="1" showDead="0" showEffects="0" mapRectHeight="141" mapID="1020" gridScale="14" showCompass="0" gridOffsetX="0" mapRectWidth="177" showAlive="1" gridOffsetY="11">
+      <battle showEffects="0" background="301" gridOffsetY="11" showAlive="1" showCompass="0" gridScale="14" backgroundColorB="0" activeId="{da7e94ca-64cc-47b1-a76d-08e5dc853078}" mapRectWidth="421" mapRectX="344" backgroundColorG="0" showGrid="1" mapID="{5514b407-1167-482f-abc3-76c1a9983338}" mapRectY="618" mapRectHeight="301" gridOffsetX="0" backgroundColorR="0" showDead="0">
        <combatants>
-        <battlecombatant type="1" positionX="611.1380175658723" positionY="808.5382685069009" combatantId="1008" initiative="0" _baseID="1042"/>
-        <battlecombatant type="1" positionX="639.120451693852" positionY="778.3350062735258" combatantId="1009" initiative="0" _baseID="1043"/>
-        <battlecombatant type="1" positionX="621.7979924717693" positionY="825.6386449184442" combatantId="1010" initiative="0" _baseID="1044"/>
-        <battlecombatant type="1" positionX="582.9335006273524" positionY="814.0903387703889" combatantId="1011" initiative="0" _baseID="1045"/>
-        <battlecombatant isKnown="1" legendaryCount="3" type="2" positionX="663.7716436637389" positionY="721.9259723964864" monsterSize="-1" isShown="1" combatantId="1008" initiative="15" monsterName="Giant Rat#1" monsterHP="9" _baseID="1046" monsterType="1"/>
-        <battlecombatant isKnown="1" legendaryCount="3" type="2" positionX="643.5621079046423" positionY="721.9259723964867" monsterSize="-1" isShown="1" combatantId="1008" initiative="21" monsterName="Giant Rat#2" monsterHP="10" _baseID="1047" monsterType="1"/>
+        <battlecombatant _baseID="{7cd5b7b0-609c-446a-846c-6107b1e6a736}" type="1" positionX="611.1380175658723" positionY="808.5382685069009" combatantId="{05371e24-d5aa-456f-96b1-347f4a00f4b8}" initiative="0"/>
+        <battlecombatant _baseID="{da7e94ca-64cc-47b1-a76d-08e5dc853078}" type="1" positionX="639.120451693852" positionY="778.3350062735258" combatantId="{a64c8ad3-b4f8-4f17-b68e-6dac55b26354}" initiative="0"/>
+        <battlecombatant _baseID="{19c4f461-cd0a-4147-8aea-ce89e8c4dc85}" type="1" positionX="621.7979924717693" positionY="825.6386449184442" combatantId="{78a2dfea-56f8-4e27-be34-77d52d801afd}" initiative="0"/>
+        <battlecombatant _baseID="{34b0ff39-fe82-4c2b-8b53-cb7b593db60b}" type="1" positionX="582.9335006273524" positionY="814.0903387703889" combatantId="{7a147c2a-68ce-4d7d-84b0-54b767465b44}" initiative="0"/>
+        <battlecombatant _baseID="{f1f46c40-2e3b-4d14-895b-876748b92ca1}" type="2" positionX="663.771643663739" positionY="721.5743104857147" combatantId="{e43c7fb8-4db2-4c55-8c37-5c191e57c045}" monsterName="Giant Rat#1" monsterHP="9" initiative="15" monsterType="1" legendaryCount="3" isKnown="1" isShown="1" monsterSize="-1"/>
+        <battlecombatant _baseID="{b00ebffd-ee98-4876-a017-6ef033f58385}" type="2" positionX="643.9137698154141" positionY="721.9259723964868" combatantId="{e43c7fb8-4db2-4c55-8c37-5c191e57c045}" monsterName="Giant Rat#2" monsterHP="10" initiative="21" monsterType="1" legendaryCount="3" isKnown="1" isShown="1" monsterSize="-1"/>
        </combatants>
        <effects>
-        <battleeffect size="20" colorB="0" type="2" tip="Test" positionX="641.5972396486825" positionY="770.405269761606" rotation="191.2553339693965" colorR="115" colorG="18" _baseID="1049"/>
+        <battleeffect _baseID="{f9ef7209-37ee-48ad-b0cd-54871a01aacd}" rotation="191.2553339693965" colorB="0" type="2" positionX="641.5972396486825" positionY="770.405269761606" colorR="115" tip="Test" size="20" colorG="18" colorA="64"/>
        </effects>
       </battle>
      </encounter>
     </encounters>
     <maps>
-     <map name="Lair of the Necromancer" filename="D:/Lokale_Dateien/GitHub/DMHelper/DMHelperDocumentation/Images/LairoftheNecromancer.jpg" audiotrack="-1" _baseID="1020">
+     <map _baseID="{5514b407-1167-482f-abc3-76c1a9983338}" filename="Images/LairoftheNecromancer.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Lair of the Necromancer">
       <actions>
-       <action erase="1" radius="30" type="1" brushtype="0">
+       <action type="1" radius="30" erase="1" brushtype="0">
         <points>
          <point x="460" y="822"/>
          <point x="461" y="822"/>
@@ -357,7 +357,7 @@ p, li { white-space: pre-wrap; }
          <point x="510" y="863"/>
         </points>
        </action>
-       <action erase="1" radius="30" type="1" brushtype="0">
+       <action type="1" radius="30" erase="1" brushtype="0">
         <points>
          <point x="596" y="738"/>
          <point x="596" y="737"/>

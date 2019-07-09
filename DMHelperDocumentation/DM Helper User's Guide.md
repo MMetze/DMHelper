@@ -47,6 +47,15 @@ Key Features include:
 * A campaign clock for tracking time and date throughout adventures
 * Animation of scrolling text over a background for easy cut-scene creation
 
+New Features in v1.1 include:
+* Import/Export: transfer your characters between campaigns, share maps or cool encounters or even prepare and import full adventures with all the bells and whistles into your existing campaign
+* Editable Reference Tables (community request): not quite clear how, but you will be able to modify the reference tables, for example to include homebrew items
+* Including a random contents generator for Marketplaces
+* Configurable Calendar (community request): define the calendar for your campaign to be something other than the traditional Gregorian calendar
+* Configurable Player's Window
+  * Selectable background color
+  * Toggleable fullscreen/borderless window mode
+
 ## Download and Installation
 Get the latest copy of DMHelper from our [itch.io](https://dm-helper.itch.io/dm-helper) page: https://dm-helper.itch.io/dm-helper<br />
 Unpack the archive to an destination of your choosing. Keep in mind that you might want to put some files (like maps and character portraits) in the same location. If kept in different folders, it is a little bit less likely to accidentaly delete some files of your campaign if you do an update.<br />
@@ -56,7 +65,7 @@ There are no more installation steps neccessary. For a further introduction, see
 <p style="page-break-after: always;">&nbsp;</p>
 
 ## DM Helper Main Screen
-![Main Menu](Images/Main Menu Screenshot.png)  
+![Main Menu](Images/main_menu_screenshot.png)
 
 #### 1.	Campaign Title
 The name of your campaign is shown in the title bar. A "\*" along with the title indicates that there have been changes in your campaign that need to be saved.
@@ -151,8 +160,6 @@ Opens a simple dialog to allow the DM to enter and publish a simple text to the 
 ###### *Translate <b><u>T</u></b>ext*
 Opens a dialog to allow the DM to enter and partially translate a text based on a roll. The result can be published to the *Player's Window*. Based on the percentage success of th3 die roll, random words will be replaced by random characters with the same length and capitalization as the original word. Non-alphabetic characters such as numbers or punctuation remain untouched.
 
-Thanks to Alex (https://www.reddit.com/user/wurschtbrotwilli) for the original Python-based inspiration!
-
 ###### *<b><u>O</u></b>ptions...*
 Opens the options dialog.
 
@@ -195,7 +202,7 @@ This pane shows the detailed contents of the selected campaign content. For furt
 #### 5. Quick References
 **Preview**</br>
 
-![Quickref Preview Screenshot](Images/Quickref Screenshot - Preview.png)  
+![Quickref Preview Screenshot](Images/quickref_screenshot_preview.png)  
 
 Provides a preview view of the current contents of the *Player's Window*.
 
@@ -205,13 +212,13 @@ To allow the DM to point out specific items on the map in the *Player's Window*,
 
 **Time**</br>
 
-![Quickref Time Screenshot](Images/Quickref Screenshot - Time.png)  
+![Quickref Time Screenshot](Images/quickref_screenshot_time.png)  
 
 A useful chronometer for tracking the time and date in the campaign. Seasons and daylight are visualized. You can make changes by either entering them in the text boxes, dragging the large hand to set the date or clicking the "Next Day" button, which automatically moves the date forward by 1 day and sets the time to 7:00am.
 
 **Actions and Conditions**</br>
 
-![Quickref Quick Reference Screenshot](Images/Quickref Screenshot - Quickref.png)  
+![Quickref Quick Reference Screenshot](Images/quickref_screenshot_quickref.png)  
 
 This list of actions, conditions and other effects is derived from the D&D 5e quick reference sheet created and maintained by crobi. For a preview of the original, check it out here: https://crobi.github.io/dnd5e-quickref/preview/quickref.html
 
@@ -226,7 +233,7 @@ The dropdown allows you to select between different categories, listed below. Cl
 
 **Tables**</br>
 
-![Quickref Tables Screenshot](Images/Quickref Screenshot - Tables.png)  
+![Quickref Tables Screenshot](Images/quickref_screenshot_tables.png)  
 
 This quick reference tab has several useful SRD tables including weapons, armor, gear, containers tools & trade goods and finally travel, lodging & service items.
 
@@ -236,7 +243,7 @@ For weapons, the damage, damage type and properties are given. The damage is als
 
 **Dice**</br>
 
-![Quickref Dice Screenshot](Images/Quickref Screenshot - Dice.png)  
+![Quickref Dice Screenshot](Images/quickref_screenshot_dice.png)  
 
 A simple dice rolling reference tab to rapidly roll and summarize as many dice as required of any type. The total of the rolled dice is also presented.
 
@@ -244,7 +251,7 @@ The individual rolls are shown in the list box on the left-hand side of the tab.
 
 **Timer**</br>
 
-![Quickref Timer Screenshot](Images/Quickref Screenshot - Timer.png)  
+![Quickref Timer Screenshot](Images/quickref_screenshot_timer.png)  
 
 A simple countdown timer. The time entries can be edited and the timer started, stopped or resetted.
 
@@ -254,7 +261,7 @@ Nothing particular happens when the timer reaches zero, other than that it autom
 
 **Player**</br>
 
-![Quickref Player Screenshot](Images/Quickref Screenshot - Player.png)  
+![Quickref Player Screenshot](Images/quickref_screenshot_player.png)  
 
 The DM Helper provides rudimentary support for playing audio files. Audio tracks can be added to a campaign in the *Campaign Tree* and started either manually by double clicking them directly in the *Campaign Tree* or automatically by connecting them to a *Map* or *Encounter*.
 
@@ -265,7 +272,7 @@ This tab can be used to control the track playback, starting or pausing the trac
 ## Characters and NPCs
 Characters and NPCs are presented and edited in the same manner in the DM Helper. There are many fully developed character creation and management tools available. The DM Helper does not aim to replace those - we also think many of them are pretty awesome. Instead, our focus is as always to make the job of the DM easier at the table. Our reduced character/NPC sheet was designed with that goal in mind.
 
-![Character](Images/Character Screenshot.png)
+![Character](Images/character_screenshot.png)
 
 All of the key characteristics of a character can be entered and tracked and there is a general notes location for further information. The information can be used for in-game management of hit points and experience, tailoring encounters to fit experience levels or for handling saving throws and to-hit rolls during battles.
 
@@ -281,7 +288,7 @@ The character icon can be changed by clicking on it and selecting an image file.
 
 Maps in the DM Helper can be used either directly for showing to the players or as a backdrop for a *Battle Encounter*. All maps support fog of war. In the main window, the fog of war is shown as a translucent layer over the map and in the *Player's Window*, it is an opaque black layer.
 
-![Map Screenshot](Images/Map Screenshot.png)
+![Map Screenshot](Images/map_screenshot.png)
 
 ##### Map Controls
 Various controls are available for handling the *Map*:
@@ -307,7 +314,7 @@ Various controls are available for handling the *Map*:
 
 In the *Player's Window*, the fog of war is an opaque black layer and the map can be zoomed to only show visible portions of the map.
 
-![Map Publish Screenshot](Images/Map Publish Screenshot.png)
+![Map Publish Screenshot](Images/map_publish_screenshot.png)
 
 <p style="page-break-after: always;">&nbsp;</p>
 
@@ -315,7 +322,7 @@ In the *Player's Window*, the fog of war is an opaque black layer and the map ca
 
 Battle Encounters allow you to prepare and run battles or other turn-based encounters.
 
-![Battle Encounter](Images/Battle Encounter Screenshot.png)
+![Battle Encounter](Images/battle_encounter_screenshot.png)
 
 #### 1.	Encounter Statistics
 This section shows the basic statistics of the battle based on the creatures in the Combatants section. The total XP for completing the encounter as well as the challenge rating of the encounter and the standard challenge thresholds for the current party are shown here.
@@ -345,7 +352,7 @@ The state of all battles will be saved with the campaign until they are explicit
 ### Edit Combatants
 This dialog allows you to select and modify creatures for the battle.
 
-![Edit Combatants](Images/Edit Combatant Screenshot.png)
+![Edit Combatants](Images/edit_combatant_screenshot.png)
 
 #### 1.	Count
 You can add 1-100 copies of this monster as a single entry in the *Battle Encounter*.
@@ -364,7 +371,7 @@ If a number is entered as the override hit points, each combatant created will b
 ### Battle Dialog
 The *Battle Dialog* allows you to control and run a battle encounter in-game.
 
-![Battle Dialog](Images/Battle Dialog Screenshot.png)
+![Battle Dialog](Images/battle_dialog_screenshot.png)
 
 ##### 1. Battle Window
 All creatures and effects in the *Battle Window* can be moved around the map by clicking and dragging them with the mouse.
@@ -446,7 +453,7 @@ The **Publish** button toggles whether the contents of the *Battle Window* are a
 
 This dialog allows you to roll mass saving throws and applying the results of the effect to the creatures within its area. This is particularly useful for handling the effects of area of effects spells on multiple creatures at once.
 
-![Dice Rolling Dialog](Images/Dice Rolling Dialog Screenshot.png)
+![Dice Rolling Dialog](Images/dice_rolling_dialog_screenshot.png)
 
 All creatures included in the effect's area are automatically added to the dialog. You can adjust the basic die roll at the top of the dialog.
 
@@ -463,7 +470,7 @@ Alternatively, you can use the **Apply Damage** button to apply a single damage 
 #### Player's Window
 As long as the *Publish* button is activated, the visible contents of the battle are animated to the *Player's Window*:
 
-![Battle Dialog Published](Images/Battle Dialog Publish Screenshot.png)
+![Battle Dialog Published](Images/battle_dialog_publish_screenshot.png)
 
 In the *Player's Window*, you can see:
 * All visible creatures and any movement/effect visuals are seen exactly as in the *Battle Dialog*
@@ -476,7 +483,7 @@ In the *Player's Window*, you can see:
 
 Scrolling text encounters are indended to be used as introductions or cut scenes in between other role-playing action.
 
-![Scrolling Text Encounter](Images/Scrolling Encounter Screenshot.png)
+![Scrolling Text Encounter](Images/scrolling_encounter_screenshot.png)
 
 The encounter screen is split into three sections:
 1. The top section provides a rough preview of how the scrolling text will look on top of the selected background. <br/>
@@ -488,7 +495,7 @@ Format changes are applied directly to both the text in the edit box and the pre
 
 Finally, with the button *Animate*, a new window is opened containing the animation screen for the scrolling text. This is currently a separate window from the *Player's Window* and will need to be shared with them separately.
 
-![Scrolling Text Encounter Animation](Images/Scrolling Encounter Animation Screenshot.png)
+![Scrolling Text Encounter Animation](Images/scrolling_encounter_animation_screenshot.png)
 
 The scrolling text animation screen has two controls to play/pause and rewind the animation. Closing the window also stops the animation.
 
@@ -497,7 +504,7 @@ The scrolling text animation screen has two controls to play/pause and rewind th
 ## Bestiary
 The *Bestiary* contains the full list of creatures and monsters available in the DM Helper. In this dialog, you can browse through the existing list, edit individual entries or add new creatures.
 
-![Bestiary Dialog](Images/Bestiary Screenshot.png)
+![Bestiary Dialog](Images/bestiary_screenshot.png)
 
 #### 1. Monster selection drop-down
 Here you can select an individual monster in the *Bestiary*, either through the drop-down box or by typing the name of the monster. The names are listed in the drop-down alphabetically.
@@ -545,7 +552,7 @@ Actions, Legendary Actions, Special Abilities and Reactions are all shown in the
 ## Options
 This dialog allows you to set basic options impacting the overall behavior of the DM Helper. These settings are stored locally by the application independent of any campaign files.
 
-![Options Dialog](Images/Options Dialog Screenshot.png)
+![Options Dialog](Images/options_dialog_screenshot.png)
 
 The *Bestiary* file can be selected in the first line. The first time you start the DM Helper, if no *Bestiary* has been selected, you will be directly asked to select one. A default *Bestiary* file is available along with the application download.
 
@@ -556,6 +563,15 @@ If the On Deck is selected, the icon of the currently active creature and the ne
 If the Countdown Timer is selected, a visual timer is shown in the *Player's Window* which counts down for the number of seconds entered in the options dialog. This can be useful if you would like to put a time limit on players' decision-making time on their turn in combat.
 
 <p style="page-break-after: always;">&nbsp;</p>
+
+
+## Contact
+
+You can reach us under the usual channels:
+Email: info@dmhelper.net
+Twitter: @therealdmhelper
+Facebook:
+
 
 ## References
 Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!
@@ -572,3 +588,14 @@ https://www.reddit.com/user/Urza_Is_Mine <br/>
 
 Rustajb <br/>
 https://www.reddit.com/user/rustajb
+
+
+**Feature Improvements: <br/>**
+Furthermore, thanks to the following community members for their ideas, requests and recommendations to help us make the DM Helper as good as possible!
+* Cricketot (https://www.reddit.com/user/Cricketot) for the Random Marketplace inspiration and algorithm
+* NutritiousCookie for the improvements to the Player's Window (rotation still to come!)
+* anomalystic777 for the customizable calendars and reference tables
+* Thanks to Alex (https://www.reddit.com/user/wurschtbrotwilli) for the original Python-based inspiration for the Translate Text menu
+
+
+... and many more for their chats and wise words on Reddit or the other clever corners of the Internet
