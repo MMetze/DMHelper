@@ -142,5 +142,8 @@ void TimeAndDateFrame::setDateVisualization()
         ui->cmbMonth->setCurrentIndex(_date.month() - 1);
     ui->edtYear->setText(QString::number(_date.year()));
 
+    if(BasicDateServer::Instance())
+        ui->edtDayName->setText(BasicDateServer::Instance()->getSpecialDayName(_date.day(), _date.month()));
+
     ui->frame->setSmallHandAngle(360.f * (float)(_date.dayOfYear() - 1) / (float)(_date.daysInYear()));
 }
