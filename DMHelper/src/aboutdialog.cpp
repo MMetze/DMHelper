@@ -11,6 +11,8 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     QString licenseText;
 
+    licenseText += QString("The DM Helper is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.\n\n\n");
+
     licenseText += QString("Quick reference icons provided by http://game-icons.net/\n\n\n");
 
     licenseText += QString("Quick reference source originally from https://github.com/crobi/dnd5e-quickref provided under the following license:\n\n");
@@ -20,7 +22,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
     licenseText += QString("The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\n");
     licenseText += QString("THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n\n");
 
-    licenseText += QString("Some content provided in the default Bestiary and the quick reference tables are from the Wizards of the Coast SRD (Systems Reference Document) published under the OPEN GAME LICENSE Version 1.0a as follows\n\n");
+    licenseText += QString("Some content provided in the bestiary and the quick reference tables are from the Wizards of the Coast SRD (Systems Reference Document) published under the OPEN GAME LICENSE Version 1.0a as follows\n\n");
     if(Bestiary::Instance())
         licenseText += Bestiary::Instance()->getLicenseText().join(QString("\n")).append(QString("\n"));
 
