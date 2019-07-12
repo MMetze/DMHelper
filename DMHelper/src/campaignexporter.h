@@ -20,6 +20,9 @@ public:
     QDomDocument& getExportDocument();
     bool isValid() const;
 
+    CampaignExporter(CampaignExporter const &) = delete;
+    void operator=(CampaignExporter const &exporter) = delete;
+
 protected:
     bool populateExport();
     bool addObjectForExport(QUuid exportId);

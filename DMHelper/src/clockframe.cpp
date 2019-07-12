@@ -222,14 +222,14 @@ void ClockFrame::scaleClockFrame(int scaleFactor)
 void ClockFrame::positionClockHands()
 {
     QTransform largeTransform;
-    largeTransform.rotate(_largeHandAngle);
+    largeTransform.rotate(static_cast<qreal>(_largeHandAngle));
     QImage transformedImg = _largeHandScaled.transformed(largeTransform, Qt::SmoothTransformation);
     QRect rect = _largeHandScaled.rect().translated((transformedImg.width() - _largeHandScaled.width()) / 2,
                                                     (transformedImg.height() - _largeHandScaled.height()) / 2);
     ui->lblHandLarge->setPixmap(QPixmap::fromImage(transformedImg.copy(rect)));
 
     QTransform smallTransform;
-    smallTransform.rotate(_smallHandAngle);
+    smallTransform.rotate(static_cast<qreal>(_smallHandAngle));
     transformedImg = _smallHandScaled.transformed(smallTransform, Qt::SmoothTransformation);
     rect = _smallHandScaled.rect().translated((transformedImg.width() - _largeHandScaled.width()) / 2,
                                               (transformedImg.height() - _largeHandScaled.height()) / 2);

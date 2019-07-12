@@ -48,7 +48,7 @@ private:
     void interpretRequestFinished(QNetworkReply* reply);
     QString outputElements(const QDomElement& element);
     void iterateElement(QString& output, const QDomElement& element);
-    void registerRequestError(QString errorStr, int replyID);
+    void registerRequestError(const QString& errorStr, int replyID);
 
     QNetworkAccessManager* _manager;
     DMHLogon _logon;

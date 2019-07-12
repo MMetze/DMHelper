@@ -11,12 +11,12 @@ public:
     explicit AudioTrack(const QString& trackName, const QUrl& trackUrl, QObject *parent = nullptr);
     explicit AudioTrack(QDomElement &element, bool isImport, QObject *parent = nullptr);
     explicit AudioTrack(const AudioTrack &obj);  // copy constructor
-    ~AudioTrack();
+    virtual ~AudioTrack() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
-    virtual void postProcessXML(const QDomElement &element, bool isImport);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
 
     // Local
     virtual QString getName() const;

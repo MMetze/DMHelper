@@ -11,7 +11,7 @@ class PublishFrame : public QWidget
     Q_OBJECT
 
 public:
-    explicit PublishFrame(QWidget *parent = 0);
+    explicit PublishFrame(QWidget *parent = nullptr);
     ~PublishFrame();
 
     virtual QSize sizeHint() const;

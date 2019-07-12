@@ -1,5 +1,6 @@
 #include "dice.h"
 #include <QRegularExpression>
+#include <QRandomGenerator>
 
 Dice::Dice() :
     _dieCount(0),
@@ -76,7 +77,7 @@ int Dice::roll()
     int result = 0;
     for(int dc = 0; dc < _dieCount; ++dc)
     {
-        result += 1 + (qrand() * _dieType)/RAND_MAX;
+        result += 1 + QRandomGenerator::global()->bounded(_dieType);
     }
 
     result += _dieBonus;
@@ -104,42 +105,42 @@ int Dice::average()
 
 int Dice::d4()
 {
-    return 1 + (qrand() * 4)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(4);
 }
 
 int Dice::d6()
 {
-    return 1 + (qrand() * 6)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(6);
 }
 
 int Dice::d8()
 {
-    return 1 + (qrand() * 8)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(8);
 }
 
 int Dice::d10()
 {
-    return 1 + (qrand() * 10)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(10);
 }
 
 int Dice::d12()
 {
-    return 1 + (qrand() * 12)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(12);
 }
 
 int Dice::d20()
 {
-    return 1 + (qrand() * 20)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(20);
 }
 
 int Dice::d100()
 {
-    return 1 + (qrand() * 100)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(100);
 }
 
 int Dice::dX(int X)
 {
-    return 1 + (qrand() * X)/RAND_MAX;
+    return 1 + QRandomGenerator::global()->bounded(X);
 }
 
 void Dice::readString(const QString& diceString)

@@ -129,7 +129,7 @@ void ScrollingTextWindow::prepareImages()
     _previousHeight = targetSize.height();
 
     QFontMetrics fontMetrics(font);
-    QRect boundingRect = fontMetrics.boundingRect(_targetRect, (Qt::AlignmentFlag)_encounter.getAlignment() | Qt::TextWordWrap, _encounter.getText());
+    QRect boundingRect = fontMetrics.boundingRect(_targetRect, static_cast<Qt::AlignmentFlag>(_encounter.getAlignment()) | Qt::TextWordWrap, _encounter.getText());
     _targetRect.setHeight(boundingRect.height());
 
     _textImage = QPixmap(_targetRect.size());
@@ -137,7 +137,7 @@ void ScrollingTextWindow::prepareImages()
     QPainter painter(&_textImage);
     painter.setFont(font);
     painter.setPen(_encounter.getFontColor());
-    painter.drawText(_targetRect, (Qt::AlignmentFlag)_encounter.getAlignment() | Qt::TextWordWrap, _encounter.getText());
+    painter.drawText(_targetRect, static_cast<Qt::AlignmentFlag>(_encounter.getAlignment()) | Qt::TextWordWrap, _encounter.getText());
 }
 
 void ScrollingTextWindow::drawScene()

@@ -21,13 +21,13 @@ class Campaign : public CampaignObjectBase
 public:
     explicit Campaign(const QString& campaignName, QObject *parent = nullptr);
     explicit Campaign(const QDomElement& element, bool isImport, QObject *parent = nullptr);
-    ~Campaign();
+    virtual ~Campaign() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
-    virtual void postProcessXML(const QDomElement &element, bool isImport);
-    virtual void resolveReferences();
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
+    virtual void resolveReferences() override;
 
     virtual void beginBatchChanges();
     virtual void endBatchChanges();

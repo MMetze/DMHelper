@@ -12,7 +12,7 @@ class MRUHandler : public QObject
     Q_OBJECT
 public:
     // Note: supports up to 99 MRU files
-    explicit MRUHandler(QMenu* actionsMenu, int mruCount, QObject *parent = 0);
+    explicit MRUHandler(QMenu* actionsMenu, int mruCount, QObject *parent = nullptr);
 
     void addMRUFile(const QString &mruFile);
 

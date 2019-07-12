@@ -12,7 +12,7 @@ class CountdownFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit CountdownFrame(QWidget *parent = 0);
+    explicit CountdownFrame(QWidget *parent = nullptr);
     ~CountdownFrame();
 
 signals:

@@ -10,7 +10,7 @@ QuickRefFrame::QuickRefFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::QuickRefFrame),
     _quickRef(),
-    _quickRefLayout(0)
+    _quickRefLayout(nullptr)
 
 {
     ui->setupUi(this);
@@ -94,7 +94,7 @@ void QuickRefFrame::handleQuickRefChange(int selection)
 
     // Delete existing widgets
     QLayoutItem *child;
-    while ((child = _quickRefLayout->takeAt(0)) != 0)
+    while ((child = _quickRefLayout->takeAt(0)) != nullptr)
     {
       child->widget()->deleteLater();
       delete child;

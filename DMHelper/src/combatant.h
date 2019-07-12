@@ -57,11 +57,11 @@ public:
 
     explicit Combatant(QObject *parent = nullptr);
     explicit Combatant(const Combatant &obj);  // copy constructor
-    virtual ~Combatant();
+    virtual ~Combatant() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     virtual void beginBatchChanges();
     virtual void endBatchChanges();

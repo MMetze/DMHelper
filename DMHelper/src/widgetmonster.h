@@ -17,27 +17,27 @@ class WidgetMonster : public CombatantWidget //QFrame
 
 public:
     explicit WidgetMonster(QWidget *parent = nullptr);
-    ~WidgetMonster();
+    virtual ~WidgetMonster() override;
 
     // From CombatantWidget
-    virtual BattleDialogModelCombatant* getCombatant();
+    virtual BattleDialogModelCombatant* getCombatant() override;
 
     void setInternals(WidgetMonsterInternal* internals);
-    virtual bool isShown();
-    virtual bool isKnown();
+    virtual bool isShown() override;
+    virtual bool isKnown() override;
 
 public slots:
-    virtual void updateData();
+    virtual void updateData() override;
 
     // From CombatantWidget
-    virtual void setActive(bool active);
+    virtual void setActive(bool active) override;
 
 protected:
     // From QWidget
-    virtual void leaveEvent(QEvent * event);
-    virtual void mousePressEvent(QMouseEvent * event);
-    virtual void mouseReleaseEvent(QMouseEvent * event);
-    virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    virtual void leaveEvent(QEvent * event) override;
+    virtual void mousePressEvent(QMouseEvent * event) override;
+    virtual void mouseReleaseEvent(QMouseEvent * event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private slots:
     void edtInitiativeChanged();
@@ -46,7 +46,7 @@ private slots:
 private:
 
     void readInternals();
-    virtual void loadImage();
+    virtual void loadImage() override;
 
     Ui::WidgetMonster *ui;
 

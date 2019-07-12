@@ -11,7 +11,7 @@ BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(int size, const QPo
 {
 }
 
-BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const BattleDialogModelEffect& other) :
+BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const BattleDialogModelEffectRadius& other) :
     BattleDialogModelEffect(other)
 {
 }

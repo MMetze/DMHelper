@@ -15,7 +15,7 @@ class QuickRefFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit QuickRefFrame(QWidget *parent = 0);
+    explicit QuickRefFrame(QWidget *parent = nullptr);
     ~QuickRefFrame();
 
 protected:

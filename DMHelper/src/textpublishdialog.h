@@ -12,7 +12,7 @@ class TextPublishDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit TextPublishDialog(QWidget *parent = 0);
+    explicit TextPublishDialog(QWidget *parent = nullptr);
     ~TextPublishDialog();
 
 public slots:

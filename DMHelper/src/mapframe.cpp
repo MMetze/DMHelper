@@ -52,7 +52,7 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(ui->btnPublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
     connect(ui->btnClearFoW,SIGNAL(clicked()),this,SLOT(clearFoW()));
     connect(ui->btnResetFoW,SIGNAL(clicked()),this,SLOT(resetFoW()));
-    connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
+    //TODO Markers: connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
 
     connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(zoomIn()));
     connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(cancelSelect()));
@@ -172,7 +172,7 @@ void MapFrame::resetFoW()
     if(!_mapSource)
         return;
 
-    UndoFill* undoFill = new UndoFill(*_mapSource, QColor(0,0,0,255));
+    UndoFill* undoFill = new UndoFill(*_mapSource, MapEditFill(QColor(0,0,0,255)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
 }
@@ -182,7 +182,7 @@ void MapFrame::clearFoW()
     if(!_mapSource)
         return;
 
-    UndoFill* undoFill = new UndoFill(*_mapSource, QColor(0,0,0,0));
+    UndoFill* undoFill = new UndoFill(*_mapSource, MapEditFill(QColor(0,0,0,0)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
 }
@@ -279,8 +279,8 @@ void MapFrame::zoomOne()
 
 void MapFrame::zoomFit()
 {
-    qreal widthFactor = ((qreal)ui->graphicsView->viewport()->width()) / _scene->width();
-    qreal heightFactor = ((qreal)ui->graphicsView->viewport()->height()) / _scene->height();
+    qreal widthFactor = static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scene->width();
+    qreal heightFactor = static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scene->height();
     setScale(qMin(widthFactor, heightFactor));
 }
 
@@ -408,8 +408,8 @@ bool MapFrame::execEventFilterSelectZoom(QObject *obj, QEvent *event)
 
             target.setRect(target.x() / _scale, target.y() / _scale, target.width() / _scale, target.height() / _scale);
 
-            qreal hScale = ((qreal)(ui->graphicsView->width())) / ((qreal)(target.width()));
-            qreal vScale = ((qreal)(ui->graphicsView->height())) / ((qreal)(target.height()));
+            qreal hScale = (static_cast<qreal>(ui->graphicsView->width())) / (static_cast<qreal>(target.width()));
+            qreal vScale = (static_cast<qreal>(ui->graphicsView->height())) / (static_cast<qreal>(target.height()));
             qreal minScale = qMin(hScale,vScale);
 
             setScale(minScale);

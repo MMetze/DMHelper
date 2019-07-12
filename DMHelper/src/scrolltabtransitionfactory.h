@@ -10,7 +10,7 @@ class ScrollTabTransitionFactory : public QObject
 {
     Q_OBJECT
 public:
-    explicit ScrollTabTransitionFactory(QObject *parent = 0);
+    explicit ScrollTabTransitionFactory(QObject *parent = nullptr);
 
     static ScrollTabTransitionBase* createTransition(ScrollTabWidget* widget);
     static ScrollTabTransitionBase* createInstantTransition(ScrollTabWidget* widget);

@@ -7,7 +7,7 @@ class DMHPayload_Private
 {
 public:
     DMHPayload_Private();
-    DMHPayload_Private(const QString& data);
+    explicit DMHPayload_Private(const QString& data);
 
     QString getImageFile() const;
     void setImageFile(const QString& imageFile);

@@ -28,13 +28,13 @@ const int FRAME_HEIGHT = 30;
 ScrollTabWidget::ScrollTabWidget(QWidget* page, QSizeF parentRatio, QWidget *parent) :
     QWidget(parent),
     _page(page),
-    _scrollLabel(0),
-    _borderTop(0),
-    _borderBottom(0),
-    _handleFrame(0),
+    _scrollLabel(nullptr),
+    _borderTop(nullptr),
+    _borderBottom(nullptr),
+    _handleFrame(nullptr),
     _offset(0),
     _parentRatio(0,0),
-    _transition(0),
+    _transition(nullptr),
     _animated(false)
 {
     if(!_page)
@@ -87,7 +87,7 @@ QSize ScrollTabWidget::sizeHint() const
 
     if(validRatio(_parentRatio) && parentWidget())
     {
-        return QSize((qreal)(parentWidget()->width()) * _parentRatio.width(), (qreal)(parentWidget()->height()) * _parentRatio.height());
+        return QSize(static_cast<qreal>(parentWidget()->width()) * _parentRatio.width(), static_cast<qreal>(parentWidget()->height()) * _parentRatio.height());
     }
     else
     {
@@ -127,7 +127,7 @@ void ScrollTabWidget::activateTab(bool activated)
     else
     {
         delete _transition;
-        _transition = 0;
+        _transition = nullptr;
         hide();
     }
 }
@@ -167,8 +167,8 @@ void ScrollTabWidget::resizeEvent(QResizeEvent *event)
         QSize pageSize;
         if(validRatio(_parentRatio) && parentWidget())
         {
-            w = (qreal)width() - FRAME_WIDTH;
-            h = (qreal)height();
+            w = static_cast<qreal>(width()) - FRAME_WIDTH;
+            h = static_cast<qreal>(height());
 #ifdef SCROLL_PAGE_MULTIPLIED
             pageSize = QSize(w * SCROLL_X_FACTOR, h * SCROLL_Y_FACTOR);
 #else
@@ -193,8 +193,8 @@ void ScrollTabWidget::resizeEvent(QResizeEvent *event)
             if(pageSize.height() > (height() - SCROLL_GAP_SIZE_DOUBLE - SHADOW_WIDTH))
                 pageSize.setHeight(height() - SCROLL_GAP_SIZE_DOUBLE - SHADOW_WIDTH);
 */
-            w = (qreal)pageSize.width() + SCROLL_GAP_SIZE_DOUBLE + SHADOW_WIDTH;
-            h = (qreal)pageSize.height() + SCROLL_GAP_SIZE_DOUBLE + SHADOW_WIDTH;
+            w = static_cast<qreal>(pageSize.width()) + SCROLL_GAP_SIZE_DOUBLE + SHADOW_WIDTH;
+            h = static_cast<qreal>(pageSize.height()) + SCROLL_GAP_SIZE_DOUBLE + SHADOW_WIDTH;
 #endif
             resize(w + FRAME_WIDTH, h);
         }

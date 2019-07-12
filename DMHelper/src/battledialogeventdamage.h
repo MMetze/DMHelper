@@ -9,12 +9,12 @@ class BattleDialogEventDamage : public BattleDialogEvent
     Q_OBJECT
 public:
     explicit BattleDialogEventDamage(QUuid combatant, QUuid target, int damage);
-    BattleDialogEventDamage(const QDomElement& element);
+    explicit BattleDialogEventDamage(const QDomElement& element);
     BattleDialogEventDamage(const BattleDialogEventDamage& other);
-    virtual ~BattleDialogEventDamage();
+    virtual ~BattleDialogEventDamage() override;
 
-    virtual int getType() const;
-    virtual void outputXML(QDomElement &element, bool isExport);
+    virtual int getType() const override;
+    virtual void outputXML(QDomElement &element, bool isExport) override;
 
     virtual QUuid getCombatant() const;
     virtual QUuid getTarget() const;

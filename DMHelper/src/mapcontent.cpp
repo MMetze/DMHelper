@@ -7,7 +7,8 @@ MapContent::MapContent() :
 {
 }
 
-MapContent::MapContent(const MapContent &obj)
+MapContent::MapContent(const MapContent &obj):
+    _id(obj._id)
 {
     Q_UNUSED(obj);
 }

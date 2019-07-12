@@ -6,7 +6,7 @@
 TextEditFormatterFrame::TextEditFormatterFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::TextEditFormatterFrame),
-    _textEdit(0)
+    _textEdit(nullptr)
 {
     ui->setupUi(this);
 
@@ -38,7 +38,7 @@ void TextEditFormatterFrame::setTextEdit(QTextEdit* textEdit)
         return;
 
     if(_textEdit)
-        disconnect(_textEdit, 0, this, 0);
+        disconnect(_textEdit, nullptr, this, nullptr);
 
     _textEdit = textEdit;
     if(_textEdit)
@@ -125,6 +125,6 @@ void TextEditFormatterFrame::setAlignment(int id)
     if(!_textEdit)
         return;
 
-    _textEdit->setAlignment((Qt::AlignmentFlag)id);
+    _textEdit->setAlignment(static_cast<Qt::AlignmentFlag>(id));
 }
 

@@ -15,7 +15,7 @@ class CharacterWidget : public CombatantWidget
 public:
     explicit CharacterWidget(BattleDialogModelCharacter* character, QWidget *parent = nullptr);
 
-    virtual BattleDialogModelCombatant* getCombatant();
+    virtual BattleDialogModelCombatant* getCombatant() override;
     BattleDialogModelCharacter* getCharacter();
 
 signals:
@@ -24,16 +24,16 @@ signals:
 
 public slots:
     // From CombatantWidget
-    virtual void updateData();
+    virtual void updateData() override;
 
 protected slots:
-    virtual void setHighlighted(bool highlighted);
+    virtual void setHighlighted(bool highlighted) override;
     virtual void hitPointsEdited();
 
 protected:
 
     // From CombatantWidget
-    virtual void executeDoubleClick();
+    virtual void executeDoubleClick() override;
 
     // Data
     BattleDialogModelCharacter* _character;

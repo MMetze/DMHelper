@@ -12,14 +12,14 @@ class BattleDialogModelCombatant : public CampaignObjectBase
 
 public:
     BattleDialogModelCombatant();
-    BattleDialogModelCombatant(Combatant* combatant);
-    BattleDialogModelCombatant(Combatant* combatant, int initiative, const QPointF& position);
+    explicit BattleDialogModelCombatant(Combatant* combatant);
+    explicit BattleDialogModelCombatant(Combatant* combatant, int initiative, const QPointF& position);
     BattleDialogModelCombatant(const BattleDialogModelCombatant& other);
-    virtual ~BattleDialogModelCombatant();
+    virtual ~BattleDialogModelCombatant() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // Local
     virtual int getType() const = 0;

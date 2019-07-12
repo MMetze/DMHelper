@@ -187,7 +187,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // TODO: cleanup this constructor and mainwindow in general
     ui->setupUi(this);
 
-    qsrand(static_cast<unsigned int>(QTime::currentTime().msec()));
+    //qsrand(static_cast<unsigned int>(QTime::currentTime().msec()));
 
     qDebug() << "[Main] Initializing Bestiary";
     Bestiary::Initialize();
@@ -501,6 +501,9 @@ bool MainWindow::saveCampaign()
     clearDirty();
 
     qDebug() << "[Main] Campaign saved: " << campaignFileName;
+
+    if(_options->getMRUHandler())
+        _options->getMRUHandler()->addMRUFile(campaignFileName);
 
     return true;
 }
@@ -1476,8 +1479,6 @@ void MainWindow::newEncounter(int encounterType)
         }
     }
 }
-
-
 
 void MainWindow::openFile(const QString& filename)
 {

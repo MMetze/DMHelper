@@ -8,7 +8,7 @@
 CharacterDialog::CharacterDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CharacterDialog),
-    _character(0),
+    _character(nullptr),
     mouseDown(false)
 {
     ui->setupUi(this);

@@ -6,9 +6,9 @@
 class ScrollTabTransitionInstant : public ScrollTabTransitionBase
 {
 public:
-    explicit ScrollTabTransitionInstant(ScrollTabWidget* tabWidget, bool deleteOnFinish = true, QObject *parent = 0);
+    explicit ScrollTabTransitionInstant(ScrollTabWidget* tabWidget, bool deleteOnFinish = true, QObject *parent = nullptr);
 
-    virtual void paintTransition(QPainter& painter);
+    virtual void paintTransition(QPainter& painter) override;
 };
 
 #endif // SCROLLTABTRANSITIONINSTANT_H

@@ -14,7 +14,7 @@ class AddBattleWaveDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddBattleWaveDialog(EncounterBattle* battle, QWidget *parent = 0);
+    explicit AddBattleWaveDialog(EncounterBattle* battle, QWidget *parent = nullptr);
     ~AddBattleWaveDialog();
 
     int selectedWave() const;

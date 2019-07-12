@@ -15,7 +15,7 @@ class ChaseAnimationDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ChaseAnimationDialog(QWidget *parent = 0);
+    explicit ChaseAnimationDialog(QWidget *parent = nullptr);
     ~ChaseAnimationDialog();
 
     QGraphicsView* getGraphicsView() const;

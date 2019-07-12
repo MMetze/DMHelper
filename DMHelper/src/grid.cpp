@@ -61,15 +61,21 @@ void Grid::rebuildGrid(BattleDialogModel& model)
 
     for(int x = 0; x <= xCount; ++x)
     {
-        QGraphicsItem* newItem = scene()->addLine((x*model.getGridScale()) + xOffset, 0, (x*model.getGridScale()) + xOffset, _gridShape.height());
-        newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-        _grid.append(newItem);
+        QGraphicsItem* newLineItem = scene()->addLine((x*model.getGridScale()) + xOffset, 0, (x*model.getGridScale()) + xOffset, _gridShape.height());
+        if(newLineItem)
+        {
+            newLineItem->setZValue(DMHelper::BattleDialog_Z_Grid);
+            _grid.append(newLineItem);
+        }
     }
 
     for(int y = 0; y <= yCount; ++y)
     {
-        QGraphicsItem* newItem = scene()->addLine(0, (y*model.getGridScale()) + yOffset, _gridShape.width(), (y*model.getGridScale()) + yOffset);
-        newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-        _grid.append(newItem);
+        QGraphicsItem* newLineItem = scene()->addLine(0, (y*model.getGridScale()) + yOffset, _gridShape.width(), (y*model.getGridScale()) + yOffset);
+        if(newLineItem)
+        {
+            newLineItem->setZValue(DMHelper::BattleDialog_Z_Grid);
+            _grid.append(newLineItem);
+        }
     }
 }

@@ -12,7 +12,7 @@ class CountdownSubFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit CountdownSubFrame(QWidget *parent = 0);
+    explicit CountdownSubFrame(QWidget *parent = nullptr);
     ~CountdownSubFrame();
 
     int getHours() const;

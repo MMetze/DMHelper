@@ -14,7 +14,7 @@ class TimeAndDateFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit TimeAndDateFrame(QWidget *parent = 0);
+    explicit TimeAndDateFrame(QWidget *parent = nullptr);
     ~TimeAndDateFrame();
 
     BasicDate getDate() const;

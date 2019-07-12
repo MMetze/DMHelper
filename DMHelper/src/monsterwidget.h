@@ -15,13 +15,13 @@ class MonsterWidget : public CombatantWidget
 {
     Q_OBJECT
 public:
-    explicit MonsterWidget(BattleDialogModelMonsterBase* monster, QWidget *parent = 0);
+    explicit MonsterWidget(BattleDialogModelMonsterBase* monster, QWidget *parent = nullptr);
 
-    virtual BattleDialogModelCombatant* getCombatant();
+    virtual BattleDialogModelCombatant* getCombatant() override;
     BattleDialogModelMonsterBase* getMonster();
 
-    virtual bool isShown();
-    virtual bool isKnown();
+    virtual bool isShown() override;
+    virtual bool isKnown() override;
 
 signals:
 
@@ -31,11 +31,11 @@ signals:
 
 public slots:
     // From CombatantWidget
-    virtual void updateData();
+    virtual void updateData() override;
 
 protected slots:
     // From CombatantWidget
-    virtual void setHighlighted(bool highlighted);
+    virtual void setHighlighted(bool highlighted) override;
 
     // local
     void localHitPointsChanged();
@@ -43,7 +43,7 @@ protected slots:
 protected:
 
     // From CombatantWidget
-    virtual void executeDoubleClick();
+    virtual void executeDoubleClick() override;
 
     // Data
     BattleDialogModelMonsterBase* _monster;

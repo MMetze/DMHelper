@@ -10,7 +10,7 @@ class OptionsContainer : public QObject
 {
     Q_OBJECT
 public:
-    OptionsContainer(QObject *parent = nullptr);
+    explicit OptionsContainer(QObject *parent = nullptr);
     ~OptionsContainer();
 
     // General settings

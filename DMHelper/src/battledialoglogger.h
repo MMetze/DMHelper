@@ -12,6 +12,7 @@ class BattleDialogLogger : public DMHObjectBase
 public:
     explicit BattleDialogLogger(QObject *parent = nullptr);
     virtual ~BattleDialogLogger();
+
     BattleDialogLogger(const BattleDialogLogger& other) = delete;
     BattleDialogLogger& operator=(const BattleDialogLogger& other) = delete;
 

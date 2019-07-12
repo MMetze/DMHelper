@@ -15,7 +15,7 @@ class MapSelectDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit MapSelectDialog(QWidget *parent = 0);
+    explicit MapSelectDialog(QWidget *parent = nullptr);
     ~MapSelectDialog();
 
     void addMap(Map* newMap);

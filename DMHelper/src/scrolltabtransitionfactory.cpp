@@ -5,6 +5,7 @@
 #include "scrolltabtransitionsmoke.h"
 #include "scrolltabtransitionzap.h"
 #include "scrolltabtransitioninstant.h"
+#include <QRandomGenerator>
 #include <QtGlobal>
 
 ScrollTabTransitionFactory::ScrollTabTransitionFactory(QObject *parent) :
@@ -14,7 +15,7 @@ ScrollTabTransitionFactory::ScrollTabTransitionFactory(QObject *parent) :
 
 ScrollTabTransitionBase* ScrollTabTransitionFactory::createTransition(ScrollTabWidget* widget)
 {
-    int randomValue = qrand() % 4;
+    int randomValue = QRandomGenerator::system()->bounded(4);//qrand() % 4;
 
     switch(randomValue)
     {

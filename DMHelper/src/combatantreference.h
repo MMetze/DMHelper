@@ -20,26 +20,26 @@ public:
     QUuid getReferenceId() const;
 
     // From Combatant - required
-    virtual Combatant* clone() const;
-    virtual int getSpeed() const;
-    virtual int getStrength() const;
-    virtual int getDexterity() const;
-    virtual int getConstitution() const;
-    virtual int getIntelligence() const;
-    virtual int getWisdom() const;
-    virtual int getCharisma() const;
+    virtual Combatant* clone() const override;
+    virtual int getSpeed() const override;
+    virtual int getStrength() const override;
+    virtual int getDexterity() const override;
+    virtual int getConstitution() const override;
+    virtual int getIntelligence() const override;
+    virtual int getWisdom() const override;
+    virtual int getCharisma() const override;
 
     // From Combatant - additional
-    virtual void inputXML(const QDomElement &element, bool isImport);
-    virtual QString getName() const;
-    virtual int getType() const;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual QString getName() const override;
+    virtual int getType() const override;
 
 signals:
 
 public slots:
 
 protected:
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
 private:
     QUuid _referenceId;

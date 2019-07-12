@@ -9,15 +9,15 @@ class BattleDialogModelEffectRadius : public BattleDialogModelEffect
 
 public:
     BattleDialogModelEffectRadius();
-    BattleDialogModelEffectRadius(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
-    BattleDialogModelEffectRadius(const BattleDialogModelEffect& other);
-    virtual ~BattleDialogModelEffectRadius();
+    explicit BattleDialogModelEffectRadius(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
+    BattleDialogModelEffectRadius(const BattleDialogModelEffectRadius& other);
+    virtual ~BattleDialogModelEffectRadius() override;
 
-    virtual BattleDialogModelEffect* clone() const;
+    virtual BattleDialogModelEffect* clone() const override;
 
-    virtual int getType() const;
+    virtual int getType() const override;
 
-    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const;
+    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTRADIUS_H

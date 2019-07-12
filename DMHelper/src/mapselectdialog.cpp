@@ -31,7 +31,7 @@ Map* MapSelectDialog::getSelectedMap() const
 {
     QListWidgetItem* currentItem = ui->lstMaps->currentItem();
     if(!currentItem)
-        return 0;
+        return nullptr;
 
     return currentItem->data(Qt::UserRole).value<Map*>();
 }

@@ -17,7 +17,7 @@ public:
     explicit Adventure(const QString& adventureName, QObject *parent = nullptr);
     explicit Adventure(const QDomElement& element, bool isImport, QObject *parent = nullptr);
     explicit Adventure(const Adventure &obj);  // copy constructor
-    ~Adventure();
+    virtual ~Adventure() override;
 
     Adventure* createShellClone();
 
@@ -38,10 +38,10 @@ public:
     void moveMapTo(QUuid id, int index);
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
-    virtual void postProcessXML(const QDomElement &element, bool isImport);
-    virtual void resolveReferences();
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
+    virtual void resolveReferences() override;
 
     QString getName() const;
     void setName(const QString& adventureName);

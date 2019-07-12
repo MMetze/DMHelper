@@ -13,7 +13,7 @@
 CombatantDialog::CombatantDialog(QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CombatantDialog),
-    _combatant(NULL),
+    _combatant(nullptr),
     _count(1)
 {
     ui->setupUi(this);
@@ -77,7 +77,7 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
         return;
 
     MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
-    if(monsterClass == NULL)
+    if(monsterClass == nullptr)
         return;
 
     _count = ui->edtCount->text().toInt();
@@ -98,7 +98,7 @@ void CombatantDialog::accept()
 void CombatantDialog::monsterClassChanged(const QString &text)
 {
     MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(text);
-    if(monsterClass == NULL)
+    if(monsterClass == nullptr)
     {
         qDebug() << "[Combatant Dialog] invalid monster class change detected, monster class not found: " << text;
         return;

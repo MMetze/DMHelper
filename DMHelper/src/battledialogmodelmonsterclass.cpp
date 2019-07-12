@@ -5,7 +5,7 @@
 
 BattleDialogModelMonsterClass::BattleDialogModelMonsterClass() :
     BattleDialogModelMonsterBase(),
-    _monsterClass(0),
+    _monsterClass(nullptr),
     _monsterName(),
     _monsterHP(-1)
 {
@@ -22,7 +22,7 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monst
 }
 
 BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monsterClass, const QString& monsterName, int initiative, const QPointF& position) :
-    BattleDialogModelMonsterBase(0, initiative, position),
+    BattleDialogModelMonsterBase(nullptr, initiative, position),
     _monsterClass(monsterClass),
     _monsterName(monsterName),
     _monsterHP(-1)

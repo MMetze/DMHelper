@@ -16,36 +16,36 @@ class BattleDialogModelMonsterCombatant : public BattleDialogModelMonsterBase
 
 public:
     BattleDialogModelMonsterCombatant();
-    BattleDialogModelMonsterCombatant(Monster* monster);
+    explicit BattleDialogModelMonsterCombatant(Monster* monster);
     BattleDialogModelMonsterCombatant(Monster* monster, const QString& monsterName, int monsterSize, int monsterHP);
     BattleDialogModelMonsterCombatant(Monster* monster, const QString& monsterName, int monsterSize, int monsterHP, int initiative, const QPointF& position);
     BattleDialogModelMonsterCombatant(const BattleDialogModelMonsterCombatant& other);
-    virtual ~BattleDialogModelMonsterCombatant();
+    virtual ~BattleDialogModelMonsterCombatant() override;
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // Local
-    virtual BattleDialogModelCombatant* clone() const;
-    virtual int getSizeFactor() const;
-    virtual int getSizeCategory() const;
+    virtual BattleDialogModelCombatant* clone() const override;
+    virtual int getSizeFactor() const override;
+    virtual int getSizeCategory() const override;
 
-    virtual int getStrength() const;
-    virtual int getDexterity() const;
-    virtual int getConstitution() const;
-    virtual int getIntelligence() const;
-    virtual int getWisdom() const;
-    virtual int getCharisma() const;
+    virtual int getStrength() const override;
+    virtual int getDexterity() const override;
+    virtual int getConstitution() const override;
+    virtual int getIntelligence() const override;
+    virtual int getWisdom() const override;
+    virtual int getCharisma() const override;
 
-    virtual int getSpeed() const;
-    virtual int getArmorClass() const;
-    virtual int getHitPoints() const;
-    virtual void setHitPoints(int hitPoints);
-    virtual QString getName() const;
-    virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const;
+    virtual int getSpeed() const override;
+    virtual int getArmorClass() const override;
+    virtual int getHitPoints() const override;
+    virtual void setHitPoints(int hitPoints) override;
+    virtual QString getName() const override;
+    virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const override;
 
-    virtual int getMonsterType() const;
-    virtual MonsterClass* getMonsterClass() const;
+    virtual int getMonsterType() const override;
+    virtual MonsterClass* getMonsterClass() const override;
 
     void setMonsterName(const QString& monsterName);
 
@@ -54,7 +54,7 @@ public:
 
 protected:
     // From BattleDialogModelCombatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     int _monsterSize;
     QString _monsterName;

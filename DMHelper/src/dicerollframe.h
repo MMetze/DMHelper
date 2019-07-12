@@ -13,8 +13,8 @@ class DiceRollFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit DiceRollFrame(QWidget *parent = 0);
-    explicit DiceRollFrame(const Dice& dice, QWidget *parent = 0);
+    explicit DiceRollFrame(QWidget *parent = nullptr);
+    explicit DiceRollFrame(const Dice& dice, QWidget *parent = nullptr);
     ~DiceRollFrame();
 
 public slots:

@@ -13,7 +13,7 @@ class ItemSelectDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ItemSelectDialog(QWidget *parent = 0);
+    explicit ItemSelectDialog(QWidget *parent = nullptr);
     ~ItemSelectDialog();
 
     void setLabel(const QString& label);

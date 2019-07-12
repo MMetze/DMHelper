@@ -16,7 +16,7 @@ class CombatantDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CombatantDialog(QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = 0);
+    explicit CombatantDialog(QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = nullptr);
     ~CombatantDialog();
 
     void setCombatant(int combatantCount, Combatant* combatant);

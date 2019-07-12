@@ -38,8 +38,8 @@ private:
 class DMHNetworkData_Payload_Private : public DMHNetworkData_Private_Base
 {
 public:
-    DMHNetworkData_Payload_Private(QDomElement data);
-    virtual ~DMHNetworkData_Payload_Private();
+    explicit DMHNetworkData_Payload_Private(QDomElement data);
+    virtual ~DMHNetworkData_Payload_Private() override;
 
     // From DMHNetworkData
     virtual bool isValid();
@@ -58,8 +58,8 @@ protected:
 class DMHNetworkData_Raw_Private : public DMHNetworkData_Private_Base
 {
 public:
-    DMHNetworkData_Raw_Private(QDomElement data);
-    virtual ~DMHNetworkData_Raw_Private();
+    explicit DMHNetworkData_Raw_Private(QDomElement data);
+    virtual ~DMHNetworkData_Raw_Private() override;
 
     // From DMHNetworkData
     virtual bool isValid();
@@ -82,8 +82,8 @@ protected:
 class DMHNetworkData_Upload_Private : public DMHNetworkData_Private_Base
 {
 public:
-    DMHNetworkData_Upload_Private(QDomElement data);
-    virtual ~DMHNetworkData_Upload_Private();
+    explicit DMHNetworkData_Upload_Private(QDomElement data);
+    virtual ~DMHNetworkData_Upload_Private() override;
 
     // From DMHNetworkData
     virtual bool isValid();
@@ -103,8 +103,8 @@ protected:
 class DMHNetworkData_Exists_Private : public DMHNetworkData_Private_Base
 {
 public:
-    DMHNetworkData_Exists_Private(QDomElement data);
-    virtual ~DMHNetworkData_Exists_Private();
+    explicit DMHNetworkData_Exists_Private(QDomElement data);
+    virtual ~DMHNetworkData_Exists_Private() override;
 
     // From DMHNetworkData
     virtual bool isValid();

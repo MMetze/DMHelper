@@ -8,7 +8,7 @@ SelectZoom::SelectZoom(QImage img, QWidget *parent) :
     ui(new Ui::SelectZoom),
     _img(img),
     _scaledSize(),
-    _rubberBand(0),
+    _rubberBand(nullptr),
     _mouseDownPos()
 {
     ui->setupUi(this);

@@ -12,7 +12,7 @@ class AddMonstersDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddMonstersDialog(QWidget *parent = 0);
+    explicit AddMonstersDialog(QWidget *parent = nullptr);
     ~AddMonstersDialog();
 
     int getMonsterCount() const;

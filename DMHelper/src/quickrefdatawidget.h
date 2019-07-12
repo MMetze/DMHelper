@@ -13,7 +13,7 @@ class QuickRefDataWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit QuickRefDataWidget(const QuickRefData& data, QWidget *parent = 0);
+    explicit QuickRefDataWidget(const QuickRefData& data, QWidget *parent = nullptr);
     ~QuickRefDataWidget();
 
     //virtual QSize sizeHint() const;

@@ -13,7 +13,7 @@ EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QOb
     _scrollSpeed(5.0),
     _imgFile(),
     _text(),
-    _fontFamily(),
+    _fontFamily(QGuiApplication::font().family()),
     _fontSize(12),
     _fontBold(false),
     _fontItalics(false),
@@ -21,7 +21,6 @@ EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QOb
     _imageWidth(80),
     _fontColor(Qt::white)
 {
-    _fontFamily = QGuiApplication::font().family();
 }
 
 EncounterScrollingText::EncounterScrollingText(const EncounterScrollingText& obj) :
