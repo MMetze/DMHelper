@@ -39,6 +39,7 @@
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
 //#define BATTLE_DIALOG_LOG_MOVEMENT
+//#define TEST_90_DEGREE_ROTATION
 
 const qreal SELECTED_PIXMAP_SIZE = 800.0;
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
@@ -616,7 +617,7 @@ bool BattleDialog::eventFilter(QObject *obj, QEvent *event)
             QDragMoveEvent* dragMoveEvent = dynamic_cast<QDragMoveEvent*>(event);
             if(dragMoveEvent)
             {
-                qDebug() << "[Battle Dialog] combatant widget drag moved (" << dragMoveEvent->pos().x() << "," << dragMoveEvent->pos().y() << ")";
+                //qDebug() << "[Battle Dialog] combatant widget drag moved (" << dragMoveEvent->pos().x() << "," << dragMoveEvent->pos().y() << ")";
 
                 const QMimeData* mimeData = dragMoveEvent->mimeData();
                 if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
@@ -634,7 +635,7 @@ bool BattleDialog::eventFilter(QObject *obj, QEvent *event)
                     if((draggedWidget)&&(targetWidget)&&(draggedWidget != targetWidget))
                     {
                         int targetIndex = _combatantLayout->indexOf(targetWidget);
-                        qDebug() << "[Battle Dialog] combatant widget drag move: index " << index << ": " << _model.getCombatant(index)->getName() << " (" << reinterpret_cast<std::uintptr_t>(draggedWidget) << "), from pos " << currentIndex << " to pos " << targetIndex << " (" << reinterpret_cast<std::uintptr_t>(targetWidget) << ")";
+                        //qDebug() << "[Battle Dialog] combatant widget drag move: index " << index << ": " << _model.getCombatant(index)->getName() << " (" << reinterpret_cast<std::uintptr_t>(draggedWidget) << "), from pos " << currentIndex << " to pos " << targetIndex << " (" << reinterpret_cast<std::uintptr_t>(targetWidget) << ")";
                         QLayoutItem* item = _combatantLayout->takeAt(currentIndex);
                         _combatantLayout->insertItem(targetIndex, item);
                     }
@@ -1324,9 +1325,16 @@ void BattleDialog::createPrescaledBackground()
     t.start();
 #endif
 
+#ifdef TEST_90_DEGREE_ROTATION
     QImage battleMap = _model.getMap()->getPublishImage().copy(sourceRect);
-    //QTransform transformation
+    QTransform rotateTr;
+    rotateTr.rotate(90.0);
+    QImage rotatedMap = battleMap.transformed(rotateTr);
+    _prescaledBackground = rotatedMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+#else
+    QImage battleMap = _model.getMap()->getPublishImage().copy(sourceRect);
     _prescaledBackground = battleMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+#endif
 
 #ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
     qDebug() << "[Battle Dialog][PROFILE] " << t.elapsed() << "; prescaled background created";
@@ -1339,7 +1347,7 @@ void BattleDialog::handleRubberBandChanged(QRect rubberBandRect, QPointF fromSce
     Q_UNUSED(fromScenePoint);
     Q_UNUSED(toScenePoint);
 
-    qDebug() << "[Battle Dialog] Rubber band changed to " << rubberBandRect;
+    //qDebug() << "[Battle Dialog] Rubber band changed to " << rubberBandRect;
 
     if(!ui->btnZoomSelect->isChecked())
         return;
@@ -1766,7 +1774,9 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn";
 #endif
 
-    // Figure this out: ui->graphicsView->rotate(90);
+#ifdef TEST_90_DEGREE_ROTATION
+    ui->graphicsView->rotate(90);
+#endif
 
     // Draw the contents of the battle dialog in publish mode
     if(_background)
@@ -1780,7 +1790,9 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     if(_background)
         _background->setVisible(true);
 
-    // Figure this out: ui->graphicsView->rotate(-90);
+#ifdef TEST_90_DEGREE_ROTATION
+    ui->graphicsView->rotate(-90);
+#endif
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; contents drawn";
