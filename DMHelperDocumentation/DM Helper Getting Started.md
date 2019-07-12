@@ -123,6 +123,17 @@ You can reach us under the usual channels:<br/>
 Email: info@dmhelper.net<br/>
 Twitter: @TheRealDMHelper<br/>
 
+<br/>
+You can get the DM Helper for free from the following portals:<br/>
+Itch.io: https://dm-helper.itch.io/dm-helper <br/>
+DriveThruRPG.com: https://www.drivethrurpg.com/product/274208/DM-Helper <br/>
+
+<br/>
+We are happy for everybody to use the DM Helper for free and believe in providing our tool in this way for anybody interested in using it. <br/>
+If you feel you would like to support us in our efforts financially, you are welcome to do so, either through one of the download portals or via our Patreon here:<br/>
+www.patreon.com/dmhelper<br/>
+
+
 ## References
 Many thanks to the following people for allowing us to use their amazing artwork and maps for our documentation! We highly recommend that you check out their work and support them in every way possible!
 
