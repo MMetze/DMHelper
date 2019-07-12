@@ -36,11 +36,11 @@ private:
 class DMHNetworkData_Payload : public DMHNetworkData
 {
 public:
-    DMHNetworkData_Payload(QDomElement data);
-    virtual ~DMHNetworkData_Payload();
+    explicit DMHNetworkData_Payload(QDomElement data);
+    virtual ~DMHNetworkData_Payload() override;
 
     // From DMHNetworkData
-    virtual bool isValid();
+    virtual bool isValid() override;
 
     const DMHPayload& getPayload() const;
     QString getTimestamp() const;
@@ -58,11 +58,11 @@ private:
 class DMHNetworkData_Raw : public DMHNetworkData
 {
 public:
-    DMHNetworkData_Raw(QDomElement data);
-    virtual ~DMHNetworkData_Raw();
+    explicit DMHNetworkData_Raw(QDomElement data);
+    virtual ~DMHNetworkData_Raw() override;
 
     // From DMHNetworkData
-    virtual bool isValid();
+    virtual bool isValid() override;
 
     QString getName() const;
     QString getId() const;
@@ -83,11 +83,11 @@ private:
 class DMHNetworkData_Upload : public DMHNetworkData
 {
 public:
-    DMHNetworkData_Upload(QDomElement data);
-    virtual ~DMHNetworkData_Upload();
+    explicit DMHNetworkData_Upload(QDomElement data);
+    virtual ~DMHNetworkData_Upload() override;
 
     // From DMHNetworkData
-    virtual bool isValid();
+    virtual bool isValid() override;
 
     QString getName() const;
     QString getId() const;
@@ -108,11 +108,11 @@ private:
 class DMHNetworkData_Exists : public DMHNetworkData
 {
 public:
-    DMHNetworkData_Exists(QDomElement data);
-    virtual ~DMHNetworkData_Exists();
+    explicit DMHNetworkData_Exists(QDomElement data);
+    virtual ~DMHNetworkData_Exists() override;
 
     // From DMHNetworkData
-    virtual bool isValid();
+    virtual bool isValid() override;
 
     bool exists() const;
     QString getName() const;

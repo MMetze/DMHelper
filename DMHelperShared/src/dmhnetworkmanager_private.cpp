@@ -261,6 +261,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             }
             catch(const std::bad_cast& e)
             {
+                Q_UNUSED(e);
                 qDebug() << "[DMHNetworkManager] ERROR identified reading raw data: Unexpected failure casting data from download to raw data type!";
                 emit requestError(replyData);
                 return;
@@ -276,6 +277,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             }
             catch(const std::bad_cast& e)
             {
+                Q_UNUSED(e);
                 qDebug() << "[DMHNetworkManager] ERROR identified reading exists data: Unexpected failure casting data from download to raw data type!";
                 emit requestError(replyData);
                 return;
@@ -305,6 +307,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
         }
         catch(const std::bad_cast& e)
         {
+            Q_UNUSED(e);
             qDebug() << "[DMHNetworkManager] ERROR identified reading raw data: Unexpected failure casting data from upload to raw data type!";
         }
     }
@@ -332,7 +335,7 @@ void DMHNetworkManager_Private::iterateElement(QString& output, const QDomElemen
     output += QString(">");
 }
 
-void DMHNetworkManager_Private::registerRequestError(QString errorStr, int replyID)
+void DMHNetworkManager_Private::registerRequestError(const QString& errorStr, int replyID)
 {
     qDebug() << errorStr;
     if(replyID >= VALID_REQUEST_ID)

@@ -13,12 +13,12 @@ class WidgetMonsterInternal : public WidgetCombatantBase
 public:
     explicit WidgetMonsterInternal(BattleDialogModelMonsterBase* monster, WidgetMonster* parent);
 
-    virtual BattleDialogModelCombatant* getCombatant();
-    virtual QFrame* getFrame();
+    virtual BattleDialogModelCombatant* getCombatant() override;
+    virtual QFrame* getFrame() override;
 
-    virtual int getInitiative() const;
-    virtual bool isShown();
-    virtual bool isKnown();
+    virtual int getInitiative() const override;
+    virtual bool isShown() override;
+    virtual bool isKnown() override;
 
     void setLegendaryMaximum(int legendaryMaximum);
     int getLegendaryMaximum() const;
@@ -29,20 +29,20 @@ signals:
 
 public slots:
 
-    virtual void updateData();
-    virtual void setInitiative(int initiative);
-    virtual void setHitPoints(int hp);
+    virtual void updateData() override;
+    virtual void setInitiative(int initiative) override;
+    virtual void setHitPoints(int hp) override;
 
     void decrementLegendary();
     void resetLegendary();
 
 protected slots:
-    virtual void setHighlighted(bool highlighted);
+    virtual void setHighlighted(bool highlighted) override;
 
 protected:
 
     // local
-    virtual void executeDoubleClick();
+    virtual void executeDoubleClick() override;
 
     // Data
     WidgetMonster* _widgetParent;

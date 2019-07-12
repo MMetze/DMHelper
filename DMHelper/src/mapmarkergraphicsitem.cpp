@@ -9,9 +9,9 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     QGraphicsItemGroup(),
     _marker(marker.getID()),
     _mapFrame(mapFrame),
-    _markerIcon(0),
-    _title(0),
-    _details(0),
+    _markerIcon(nullptr),
+    _title(nullptr),
+    _details(nullptr),
     _detailsVisible(false),
     _clicked(false)
 {

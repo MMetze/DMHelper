@@ -74,7 +74,7 @@ void TimeAndDateFrame::setTime(const QTime& time)
     {
         _time = time;
         ui->timeEdit->setTime(time);
-        ui->frame->setLargeHandAngle((float)(time.msecsSinceStartOfDay()) * 360.f / 86400000.f);
+        ui->frame->setLargeHandAngle(static_cast<float>(time.msecsSinceStartOfDay()) * 360.f / 86400000.f);
         emit timeChanged(_time);
     }
 }
@@ -130,7 +130,7 @@ void TimeAndDateFrame::setTimeTarget(const QTime &time)
     {
         _time = time;
         ui->timeEdit->setTime(time);
-        ui->frame->setLargeHandAngleTarget((float)(time.msecsSinceStartOfDay()) * 360.f / 86400000.f);
+        ui->frame->setLargeHandAngleTarget(static_cast<float>(time.msecsSinceStartOfDay()) * 360.f / 86400000.f);
         emit timeChanged(_time);
     }
 }
@@ -145,5 +145,5 @@ void TimeAndDateFrame::setDateVisualization()
     if(BasicDateServer::Instance())
         ui->edtDayName->setText(BasicDateServer::Instance()->getSpecialDayName(_date.day(), _date.month()));
 
-    ui->frame->setSmallHandAngle(360.f * (float)(_date.dayOfYear() - 1) / (float)(_date.daysInYear()));
+    ui->frame->setSmallHandAngle(360.f * static_cast<float>(_date.dayOfYear() - 1) / static_cast<float>(_date.daysInYear()));
 }

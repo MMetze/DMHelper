@@ -15,8 +15,8 @@ class DiceRollDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit DiceRollDialog(QWidget *parent = 0);
-    explicit DiceRollDialog(const Dice& dice, QWidget *parent = 0);
+    explicit DiceRollDialog(QWidget *parent = nullptr);
+    explicit DiceRollDialog(const Dice& dice, QWidget *parent = nullptr);
     //explicit DiceRollDialog(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, int rollDC = 10, QWidget *parent = 0);
     //explicit DiceRollDialog(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, const QList<int>& modifiers, int rollDC = 10, QWidget *parent = 0);
     ~DiceRollDialog();

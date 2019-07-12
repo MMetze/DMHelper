@@ -9,7 +9,7 @@ class PublishWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit PublishWindow(const QString& title, QWidget *parent = 0);
+    explicit PublishWindow(const QString& title, QWidget *parent = nullptr);
 
 signals:
     void visibleChanged(bool visible);

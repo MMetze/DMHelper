@@ -14,7 +14,7 @@ class SelectZoom : public QDialog
     Q_OBJECT
 
 public:
-    explicit SelectZoom(QImage img, QWidget *parent = 0);
+    explicit SelectZoom(QImage img, QWidget *parent = nullptr);
     ~SelectZoom();
 
     QImage getZoomImage();

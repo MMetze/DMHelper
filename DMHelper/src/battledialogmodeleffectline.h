@@ -9,16 +9,16 @@ class BattleDialogModelEffectLine : public BattleDialogModelEffect
 
 public:
     BattleDialogModelEffectLine();
-    BattleDialogModelEffectLine(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
-    BattleDialogModelEffectLine(const BattleDialogModelEffect& other);
-    virtual ~BattleDialogModelEffectLine();
+    explicit BattleDialogModelEffectLine(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
+    BattleDialogModelEffectLine(const BattleDialogModelEffectLine& other);
+    virtual ~BattleDialogModelEffectLine() override;
 
-    virtual BattleDialogModelEffect* clone() const;
+    virtual BattleDialogModelEffect* clone() const override;
 
-    virtual int getType() const;
+    virtual int getType() const override;
 
-    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const;
-    virtual void applyEffectValues(QAbstractGraphicsShapeItem& item, qreal gridScale) const;
+    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const override;
+    virtual void applyEffectValues(QAbstractGraphicsShapeItem& item, qreal gridScale) const override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTLINE_H

@@ -16,9 +16,9 @@
 EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::EncounterScrollingTextEdit),
-    _scrollingText(0),
-    _textScene(0),
-    _textItem(0),
+    _scrollingText(nullptr),
+    _textScene(nullptr),
+    _textItem(nullptr),
     _backgroundWidth(0)
 {
     ui->setupUi(this);
@@ -103,7 +103,7 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
 void EncounterScrollingTextEdit::unsetScrollingText(EncounterScrollingText* scrollingText)
 {
     Q_UNUSED(scrollingText);
-    _scrollingText = 0;
+    _scrollingText = nullptr;
 }
 
 void EncounterScrollingTextEdit::resizeEvent(QResizeEvent *event)
@@ -199,8 +199,8 @@ void EncounterScrollingTextEdit::createScene()
     if(_textScene)
     {
         delete _textScene;
-        _textScene = 0;
-        _textItem = 0;
+        _textScene = nullptr;
+        _textItem = nullptr;
     }
     _textScene = new QGraphicsScene(this);
     ui->graphicsView->setScene(_textScene);
@@ -295,7 +295,7 @@ Qt::AlignmentFlag EncounterScrollingTextEdit::getAlignment()
     case Qt::AlignLeft:
     case Qt::AlignHCenter:
     case Qt::AlignRight:
-        return (Qt::AlignmentFlag)(ui->buttonGroup->checkedId());
+        return static_cast<Qt::AlignmentFlag>(ui->buttonGroup->checkedId());
     default:
         return Qt::AlignHCenter;
     }

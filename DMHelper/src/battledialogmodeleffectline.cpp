@@ -13,7 +13,7 @@ BattleDialogModelEffectLine::BattleDialogModelEffectLine(int size, const QPointF
 {
 }
 
-BattleDialogModelEffectLine::BattleDialogModelEffectLine(const BattleDialogModelEffect& other) :
+BattleDialogModelEffectLine::BattleDialogModelEffectLine(const BattleDialogModelEffectLine& other) :
     BattleDialogModelEffect(other)
 {
 }

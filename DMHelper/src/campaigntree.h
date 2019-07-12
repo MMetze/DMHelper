@@ -7,7 +7,7 @@ class CampaignTree : public QTreeView
 {
     Q_OBJECT
 public:
-    explicit CampaignTree(QWidget *parent = 0);
+    explicit CampaignTree(QWidget *parent = nullptr);
 
 signals:
 

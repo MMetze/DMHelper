@@ -245,7 +245,7 @@ MonsterClass* BattleDialogModelMonsterCombatant::getMonsterClass() const
     else
     {
         qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getMonsterClass!";
-        return 0;
+        return nullptr;
     }
 }
 

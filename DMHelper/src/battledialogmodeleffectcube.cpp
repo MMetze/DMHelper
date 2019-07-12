@@ -10,7 +10,7 @@ BattleDialogModelEffectCube::BattleDialogModelEffectCube(int size, const QPointF
 {
 }
 
-BattleDialogModelEffectCube::BattleDialogModelEffectCube(const BattleDialogModelEffect& other) :
+BattleDialogModelEffectCube::BattleDialogModelEffectCube(const BattleDialogModelEffectCube& other) :
     BattleDialogModelEffect(other)
 {
 }

@@ -10,16 +10,16 @@ class UndoMarker : public UndoBase
 {
 public:
     UndoMarker(Map& map, const MapMarker& marker);
-    virtual ~UndoMarker();
+    virtual ~UndoMarker() override;
 
-    virtual void undo();
-    virtual void redo();
-    virtual void apply(bool preview, QPaintDevice* target) const;
-    virtual void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void undo() override;
+    virtual void redo() override;
+    virtual void apply(bool preview, QPaintDevice* target) const override;
+    virtual void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
-    virtual int getType() const;
-    virtual UndoBase* clone() const;
+    virtual int getType() const override;
+    virtual UndoBase* clone() const override;
 
     const MapMarker& marker() const;
 

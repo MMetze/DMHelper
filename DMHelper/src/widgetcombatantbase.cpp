@@ -16,7 +16,7 @@ WidgetCombatantBase::WidgetCombatantBase(QWidget *parent) :
 //    _lblInitName(0),
 //    _edtInit(0),
     _angle(0),
-    _timer(0)
+    _timer(nullptr)
 {
     //setAutoFillBackground(true);
 }

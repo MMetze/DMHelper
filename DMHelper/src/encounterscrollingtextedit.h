@@ -16,7 +16,7 @@ class EncounterScrollingTextEdit : public QFrame
     Q_OBJECT
 
 public:
-    explicit EncounterScrollingTextEdit(QWidget *parent = 0);
+    explicit EncounterScrollingTextEdit(QWidget *parent = nullptr);
     ~EncounterScrollingTextEdit();
 
     EncounterScrollingText* getScrollingText() const;

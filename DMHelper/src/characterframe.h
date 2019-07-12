@@ -15,7 +15,7 @@ class CharacterFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit CharacterFrame(QWidget *parent = 0);
+    explicit CharacterFrame(QWidget *parent = nullptr);
     ~CharacterFrame();
 
     void setCharacter(Character* character);

@@ -15,7 +15,7 @@ class ScrollingTextWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit ScrollingTextWindow(const EncounterScrollingText& encounter, QWidget *parent = 0);
+    explicit ScrollingTextWindow(const EncounterScrollingText& encounter, QWidget *parent = nullptr);
     ~ScrollingTextWindow();
 
 protected:

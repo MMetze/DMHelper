@@ -7,7 +7,7 @@ class BasicDate
 {
 public:
     BasicDate(int d, int m, int y);
-    BasicDate(const QString &ddmmyyyy);
+    explicit BasicDate(const QString &ddmmyyyy);
     BasicDate(const BasicDate &d);
     virtual ~BasicDate();
 

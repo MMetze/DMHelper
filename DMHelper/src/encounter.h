@@ -15,8 +15,8 @@ public:
     explicit Encounter(const Encounter& obj);
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // Base functions to handle UI widgets
     virtual void widgetActivated(QWidget* widget) = 0;

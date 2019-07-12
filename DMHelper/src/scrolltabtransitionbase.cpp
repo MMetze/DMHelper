@@ -5,7 +5,7 @@
 ScrollTabTransitionBase::ScrollTabTransitionBase(ScrollTabWidget* tabWidget, bool deleteOnFinish, QObject *parent) :
     QObject(parent),
     _tabWidget(tabWidget),
-    _timer(0),
+    _timer(nullptr),
     _duration(1000),
     _steps(1),
     _currentStep(0),

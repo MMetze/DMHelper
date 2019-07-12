@@ -14,7 +14,7 @@ class EncounterTextEdit : public QFrame
     Q_OBJECT
 
 public:
-    explicit EncounterTextEdit(QWidget *parent = 0);
+    explicit EncounterTextEdit(QWidget *parent = nullptr);
     ~EncounterTextEdit();
 
     void setKeys(QList<QString> keys);

@@ -13,7 +13,7 @@ class WidgetCombatantBase : public QObject
 {
     Q_OBJECT
 public:
-    explicit WidgetCombatantBase(QWidget *parent = 0);
+    explicit WidgetCombatantBase(QWidget *parent = nullptr);
 
     virtual BattleDialogModelCombatant* getCombatant() = 0;
     virtual QFrame* getFrame() = 0;

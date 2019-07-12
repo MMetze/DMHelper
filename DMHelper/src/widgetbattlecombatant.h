@@ -14,7 +14,7 @@ class WidgetBattleCombatant : public QWidget
     Q_OBJECT
 
 public:
-    explicit WidgetBattleCombatant(BattleDialogModelCombatant* combatant, QWidget *parent = 0);
+    explicit WidgetBattleCombatant(BattleDialogModelCombatant* combatant, QWidget *parent = nullptr);
     ~WidgetBattleCombatant();
 
     bool hasAdvantage() const;

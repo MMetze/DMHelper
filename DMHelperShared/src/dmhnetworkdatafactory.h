@@ -12,7 +12,7 @@
 class DMHNetworkDataFactory
 {
 public:
-    DMHNetworkDataFactory(const QByteArray& data);
+    explicit DMHNetworkDataFactory(const QByteArray& data);
 
     QDomElement getVersion() const;
     QDomElement getMode() const;

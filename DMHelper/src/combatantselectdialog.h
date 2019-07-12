@@ -15,7 +15,7 @@ class CombatantSelectDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CombatantSelectDialog(QList<Combatant*> combatants, bool selected = true, QWidget *parent = 0);
+    explicit CombatantSelectDialog(QList<Combatant*> combatants, bool selected = true, QWidget *parent = nullptr);
     ~CombatantSelectDialog();
 
     void setCombatantList(QList<Combatant*> combatants, bool selected = true);

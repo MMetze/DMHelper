@@ -83,7 +83,7 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
 
     QDomElement actionsElement = doc.createElement( "actions" );
     int i;
-    for(int i = 0; i < _markerList.count(); ++i)
+    for(i = 0; i < _markerList.count(); ++i)
     {
         QDomElement actionElement = doc.createElement( "action" );
         actionElement.setAttribute( "type", DMHelper::ActionType_SetMarker );
@@ -91,7 +91,7 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
         actionsElement.appendChild(actionElement);
     }
 
-    for( i = 0; i < _undoStack->index(); ++i )
+    for(i = 0; i < _undoStack->index(); ++i )
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)
@@ -213,7 +213,7 @@ QUndoStack* Map::getUndoStack() const
     return _undoStack;
 }
 
-void Map::applyPaintTo(QImage* target, QColor clearColor, int count)
+void Map::applyPaintTo(QImage* target, QColor clearColor, int index)
 {
     bool preview = false;
 
@@ -223,15 +223,15 @@ void Map::applyPaintTo(QImage* target, QColor clearColor, int count)
         preview = true;
     }
 
-    if(count < 0)
+    if(index < 0)
         return;
 
-    if(count > _undoStack->count())
-        count = _undoStack->count();
+    if(index > _undoStack->count())
+        index = _undoStack->count();
 
     target->fill(clearColor);
 
-    for( int i = 0; i < count; ++i )
+    for( int i = 0; i < index; ++i )
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)

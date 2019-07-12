@@ -8,13 +8,13 @@ class BattleDialogEventNewRound : public BattleDialogEvent
     Q_OBJECT
 public:
     explicit BattleDialogEventNewRound();
-    BattleDialogEventNewRound(const QDomElement& element);
+    explicit BattleDialogEventNewRound(const QDomElement& element);
     BattleDialogEventNewRound(const BattleDialogEventNewRound& other);
-    virtual ~BattleDialogEventNewRound();
+    virtual ~BattleDialogEventNewRound() override;
 
-    virtual int getType() const;
+    virtual int getType() const override;
 
-    virtual void outputXML(QDomElement &element, bool isExport);
+    virtual void outputXML(QDomElement &element, bool isExport) override;
 
 signals:
 

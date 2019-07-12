@@ -97,7 +97,7 @@ void MRUHandler::writeMRUToSettings(QSettings& settings)
 
 void MRUHandler::updateMRUActions()
 {
-    if(_actionsMenu == NULL)
+    if(_actionsMenu == nullptr)
         return;
 
     // Clear the list of existing MRU files
@@ -108,16 +108,18 @@ void MRUHandler::updateMRUActions()
 
     // Insert the new list of MRU files in front of the last separator
     QString actionStr;
-    MRUAction* newAction;
     for(int i = 0; i < _mruFiles.count(); ++i)
     {
         actionStr = "&";
         actionStr.append(QString::number(i+1));
         actionStr.append(". ");
         actionStr.append(_mruFiles.at(i));
-        newAction = new MRUAction(_mruFiles.at(i), actionStr, 0);
-        connect(newAction, SIGNAL(triggerFile(QString)),this,SIGNAL(triggerMRU(QString)));
-        _actionsMenu->addAction(newAction);
+        MRUAction* newAction = new MRUAction(_mruFiles.at(i), actionStr, nullptr);
+        if(newAction)
+        {
+            connect(newAction, SIGNAL(triggerFile(QString)),this,SIGNAL(triggerMRU(QString)));
+            _actionsMenu->addAction(newAction);
+        }
     }
 }
 

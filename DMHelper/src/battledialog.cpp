@@ -37,11 +37,11 @@
 #include <QtMath>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
-#define BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
+//#define BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
+//#define BATTLE_DIALOG_LOG_MOVEMENT
 
 const qreal SELECTED_PIXMAP_SIZE = 800.0;
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
-const qreal COUNTDOWN_DURATION = 15;
 const qreal COUNTDOWN_TIMER = 0.05;
 const qreal COMPASS_SCALE = 0.4;
 const int ROTATION_TIMER = 50;
@@ -365,7 +365,7 @@ void BattleDialog::next()
     int activeInitiative = activeCombatant->getInitiative();
     int nextInitiative = nextCombatant->getInitiative();
 
-    if(ui->chkLair->isChecked() && nextCombatant)
+    if(ui->chkLair->isChecked())
     {
         if((activeInitiative >= 20) && (nextInitiative < 20))
         {
@@ -401,7 +401,6 @@ void BattleDialog::setGridScale(int gridScale)
         _model.setGridScale(gridScale);
 
         qreal scaleFactor;
-        qreal oldScaleFactor;
 
         QMapIterator<BattleDialogModelCombatant*, QGraphicsPixmapItem*> i(_combatantIcons);
         while(i.hasNext())
@@ -413,7 +412,7 @@ void BattleDialog::setGridScale(int gridScale)
                 if(_combatantIcons.key(i.value(), nullptr))
                     combatantScaleFactor = _combatantIcons.key(i.value(), nullptr)->getSizeFactor();
                 scaleFactor = (static_cast<qreal>(gridScale-2)) * combatantScaleFactor / static_cast<qreal>(qMax(i.value()->pixmap().width(),i.value()->pixmap().height()));
-                oldScaleFactor = i.value()->scale();
+//                oldScaleFactor = i.value()->scale();
                 i.value()->setScale(scaleFactor);
             }
         }
@@ -421,7 +420,7 @@ void BattleDialog::setGridScale(int gridScale)
         if(_selectedPixmap)
         {
             scaleFactor = static_cast<qreal>((gridScale)/SELECTED_PIXMAP_SIZE);
-            oldScaleFactor = _selectedPixmap->scale();
+            qreal oldScaleFactor = _selectedPixmap->scale();
             _selectedPixmap->setScale(scaleFactor);
             _selectedPixmap->setPos(_selectedPixmap->pos() * scaleFactor/oldScaleFactor);
         }
@@ -429,7 +428,7 @@ void BattleDialog::setGridScale(int gridScale)
         if(_activePixmap)
         {
             scaleFactor = static_cast<qreal>((gridScale * _activeScale)/ACTIVE_PIXMAP_SIZE);
-            oldScaleFactor = _activePixmap->scale();
+            qreal oldScaleFactor = _activePixmap->scale();
             _activePixmap->setScale(scaleFactor);
             _activePixmap->setPos(_activePixmap->pos() * scaleFactor/oldScaleFactor);
         }
@@ -843,7 +842,9 @@ void BattleDialog::handleSelectionChanged()
 
 void BattleDialog::handleEffectChanged(QAbstractGraphicsShapeItem* effect)
 {
+#ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Dialog] Handle effect changed for " << effect;
+#endif
 
     for(QGraphicsPixmapItem* item : _combatantIcons.values())
     {
@@ -865,7 +866,9 @@ void BattleDialog::handleCombatantMoved(BattleDialogModelCombatant* combatant)
     if((!_scene) || (!combatant))
         return;
 
+#ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Dialog] Handle Combatant Moved for " << combatant;
+#endif
 
     QGraphicsPixmapItem* item = _combatantIcons.value(combatant, nullptr);
     if(!item)
@@ -1056,9 +1059,10 @@ void BattleDialog::removeCombatant()
 
     // Remove the combatant
     BattleDialogModelCombatant* combatant = _model.removeCombatant(i);
-    qDebug() << "[Battle Dialog] removing combatant from list " << combatant->getName();
     if(combatant)
     {
+        qDebug() << "[Battle Dialog] removing combatant from list " << combatant->getName();
+
         // Remove the widget from the list of widgets
         // TODO: should this be above with deleting the widget for the combatant?
         _combatantWidgets.remove(combatant);
@@ -1321,6 +1325,7 @@ void BattleDialog::createPrescaledBackground()
 #endif
 
     QImage battleMap = _model.getMap()->getPublishImage().copy(sourceRect);
+    //QTransform transformation
     _prescaledBackground = battleMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
 #ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
@@ -1761,6 +1766,8 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn";
 #endif
 
+    // Figure this out: ui->graphicsView->rotate(90);
+
     // Draw the contents of the battle dialog in publish mode
     if(_background)
         _background->setVisible(false);
@@ -1772,6 +1779,8 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     setPublishVisibility(false);
     if(_background)
         _background->setVisible(true);
+
+    // Figure this out: ui->graphicsView->rotate(-90);
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; contents drawn";
@@ -1986,14 +1995,18 @@ void BattleDialog::removeEffectsFromItem(QGraphicsPixmapItem* item)
     if(!item)
         return;
 
+#ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Dialog] Removing effects from item " << item;
+#endif
 
     // Remove any existing effects on this combatant
     for(QGraphicsItem* childItem : item->childItems())
     {
         if((childItem) && (childItem->data(BattleDialogItemChild_Index).toInt() == BattleDialogItemChild_AreaEffect))
         {
+#ifdef BATTLE_DIALOG_LOG_MOVEMENT
             qDebug() << "[Battle Dialog] Deleting child item: " << childItem;
+#endif
             childItem->setParentItem(nullptr);
             delete childItem;
         }
@@ -2018,8 +2031,9 @@ void BattleDialog::applyEffectToItem(QGraphicsPixmapItem* item, QAbstractGraphic
     effectItem->setData(BattleDialogItemChild_Index, BattleDialogItemChild_AreaEffect);
     effectItem->setParentItem(item);
 
+#ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Dialog] applying effects to item. Item: " << item << ", effect: " << effect << " with effect item " << effectItem;
-
+#endif
 }
 
 void BattleDialog::applyPersonalEffectToItem(QGraphicsPixmapItem* item)

@@ -9,15 +9,15 @@ class BattleDialogModelEffectCone : public BattleDialogModelEffect
 
 public:
     BattleDialogModelEffectCone();
-    BattleDialogModelEffectCone(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
-    BattleDialogModelEffectCone(const BattleDialogModelEffect& other);
-    virtual ~BattleDialogModelEffectCone();
+    explicit BattleDialogModelEffectCone(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
+    BattleDialogModelEffectCone(const BattleDialogModelEffectCone& other);
+    virtual ~BattleDialogModelEffectCone() override;
 
-    virtual BattleDialogModelEffect* clone() const;
+    virtual BattleDialogModelEffect* clone() const override;
 
-    virtual int getType() const;
+    virtual int getType() const override;
 
-    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const;
+    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTCONE_H

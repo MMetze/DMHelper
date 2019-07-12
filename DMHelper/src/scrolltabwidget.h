@@ -11,7 +11,7 @@ class ScrollTabWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ScrollTabWidget(QWidget* page, QSizeF parentRatio = QSizeF(0,0), QWidget *parent = 0);
+    explicit ScrollTabWidget(QWidget* page, QSizeF parentRatio = QSizeF(0,0), QWidget *parent = nullptr);
     virtual ~ScrollTabWidget();
 
     virtual int getTabOffset() const;

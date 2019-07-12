@@ -66,7 +66,7 @@ public:
 class MapEditFill : public MapEdit
 {
 public:
-    MapEditFill(const QColor& color);
+    explicit MapEditFill(const QColor& color);
     MapEditFill(const MapEditFill &obj);
     virtual ~MapEditFill();
 

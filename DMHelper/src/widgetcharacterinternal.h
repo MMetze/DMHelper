@@ -13,10 +13,10 @@ class WidgetCharacterInternal : public WidgetCombatantBase
 public:
     explicit WidgetCharacterInternal(BattleDialogModelCharacter* character, WidgetCharacter *parent);
 
-    virtual BattleDialogModelCombatant* getCombatant();
-    virtual QFrame* getFrame();
+    virtual BattleDialogModelCombatant* getCombatant() override;
+    virtual QFrame* getFrame() override;
 
-    virtual int getInitiative() const;
+    virtual int getInitiative() const override;
 //    virtual bool isActive();
 //    virtual bool isSelected();
 //    virtual bool isShown();
@@ -28,14 +28,14 @@ signals:
 
 public slots:
 
-    virtual void updateData();
-    virtual void setInitiative(int initiative);
-    virtual void setHitPoints(int hp);
+    virtual void updateData() override;
+    virtual void setInitiative(int initiative) override;
+    virtual void setHitPoints(int hp) override;
     //virtual void setActive(bool active);
     //virtual void setSelected(bool selected);
 
 protected slots:
-    virtual void setHighlighted(bool highlighted);
+    virtual void setHighlighted(bool highlighted) override;
     //virtual void timerExpired();
 
 protected:
@@ -47,7 +47,7 @@ protected:
     //virtual void mouseDoubleClickEvent(QMouseEvent *event);
 
     // local
-    virtual void executeDoubleClick();
+    virtual void executeDoubleClick() override;
     //virtual void loadImage();
     //virtual QHBoxLayout* createPairLayout(const QString& pairName, const QString& pairValue);
     //virtual void updatePairData(QHBoxLayout* pair, const QString& pairValue);
@@ -59,7 +59,7 @@ protected:
     WidgetCharacter* _widgetParent;
     BattleDialogModelCharacter* _character;
 
-    Qt::MouseButton _mouseDown;
+    //Qt::MouseButton _localMouseDown;
     //bool _active;
     //bool _selected;
 

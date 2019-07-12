@@ -43,8 +43,8 @@ void BattleDialogModelMonsterBase::inputXML(const QDomElement &element, bool isI
 {
     BattleDialogModelCombatant::inputXML(element, isImport);
 
-    _isShown = (bool)element.attribute("isShown",QString::number(0)).toInt();
-    _isKnown = (bool)element.attribute("isKnown",QString::number(0)).toInt();
+    _isShown = static_cast<bool>(element.attribute("isShown",QString::number(0)).toInt());
+    _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(0)).toInt());
     _legendaryCount = element.attribute("legendaryCount",QString::number(-1)).toInt();
 }
 

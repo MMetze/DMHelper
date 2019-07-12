@@ -8,13 +8,13 @@
 class ScrollTabTransitionZap : public ScrollTabTransitionBase
 {
 public:
-    explicit ScrollTabTransitionZap(ScrollTabWidget* tabWidget, bool deleteOnFinish = true, QObject *parent = 0);
+    explicit ScrollTabTransitionZap(ScrollTabWidget* tabWidget, bool deleteOnFinish = true, QObject *parent = nullptr);
 
-    virtual void paintTransition(QPainter& painter);
+    virtual void paintTransition(QPainter& painter) override;
 
 protected:
-    virtual void handleStart();
-    virtual void handleStep();
+    virtual void handleStart() override;
+    virtual void handleStep() override;
 
     QPixmap _widgetPmp;
     QList<QPixmap> _animPmp;

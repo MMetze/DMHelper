@@ -1,6 +1,7 @@
 #include "dicerolldialog.h"
 #include "ui_dicerolldialog.h"
 #include "character.h"
+#include "dice.h"
 #include <QtGlobal>
 #include <QMouseEvent>
 #include <QIntValidator>
@@ -129,12 +130,11 @@ void DiceRollDialog::rollDice()
     int diceType = ui->editDiceType->text().toInt();
     int target = ui->editTarget->text().toInt();
     int bonus = ui->editBonus->text().toInt();
-    int randNum;
+    //int randNum;
     int total = 0;
 
     for(int rc = 0; rc < rcEnd; ++rc)
     {
-        int roll;
         int result = 0;
         QString resultStr;
 
@@ -149,8 +149,8 @@ void DiceRollDialog::rollDice()
         // Go through and roll the dice, building up the string along the way
         for(int dc = 0; dc < dcEnd; ++dc)
         {
-            randNum = qrand();
-            roll = 1 + (randNum * diceType)/RAND_MAX;
+            //randNum = qrand();
+            int roll = Dice::dX(diceType); //1 + (randNum * diceType)/RAND_MAX;
             if(dc > 0)
             {
                 resultStr.append(QString(" + "));

@@ -12,7 +12,7 @@ CountdownFrame::CountdownFrame(QWidget *parent) :
     _minutesCurrent(0),
     _secondsCurrent(0),
     _timerId(-1),
-    _publishDlg(0)
+    _publishDlg(nullptr)
 {
     ui->setupUi(this);
 
@@ -142,6 +142,6 @@ void CountdownFrame::publishClicked(bool checked)
     else
     {
         delete _publishDlg;
-        _publishDlg = 0;
+        _publishDlg = nullptr;
     }
 }

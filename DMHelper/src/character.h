@@ -67,26 +67,26 @@ public:
     explicit Character(const Character &obj);  // copy constructor
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // From Combatant
-    virtual void beginBatchChanges();
-    virtual void endBatchChanges();
+    virtual void beginBatchChanges() override;
+    virtual void endBatchChanges() override;
 
-    virtual Combatant* clone() const;
+    virtual Combatant* clone() const override;
 
-    virtual int getType() const;
+    virtual int getType() const override;
     virtual int getDndBeyondID() const;
     virtual void setDndBeyondID(int id);
 
-    virtual int getSpeed() const;
+    virtual int getSpeed() const override;
 
-    virtual int getStrength() const;
-    virtual int getDexterity() const;
-    virtual int getConstitution() const;
-    virtual int getIntelligence() const;
-    virtual int getWisdom() const;
-    virtual int getCharisma() const;
+    virtual int getStrength() const override;
+    virtual int getDexterity() const override;
+    virtual int getConstitution() const override;
+    virtual int getIntelligence() const override;
+    virtual int getWisdom() const override;
+    virtual int getCharisma() const override;
 
     QString getStringValue(StringValue key) const;
     int getIntValue(IntValue key) const;
@@ -112,11 +112,11 @@ signals:
     void iconChanged();
 
 public slots:
-    virtual void setIcon(const QString &newIcon);
+    virtual void setIcon(const QString &newIcon) override;
 
 protected:
     // From Combatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
 private:
     void setDefaultValues();

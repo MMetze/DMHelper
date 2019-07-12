@@ -7,7 +7,7 @@ class CampaignTreeModel : public QStandardItemModel
 {
     Q_OBJECT
 public:
-    explicit CampaignTreeModel(QObject *parent = 0);
+    explicit CampaignTreeModel(QObject *parent = nullptr);
 
 signals:
 

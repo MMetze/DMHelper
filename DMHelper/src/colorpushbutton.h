@@ -8,7 +8,7 @@ class ColorPushButton : public QPushButton
 {
     Q_OBJECT
 public:
-    ColorPushButton(QWidget *parent = nullptr);
+    explicit ColorPushButton(QWidget *parent = nullptr);
 
     QColor getColor() const;
 

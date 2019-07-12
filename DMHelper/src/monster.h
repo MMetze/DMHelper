@@ -16,30 +16,30 @@ public:
     explicit Monster(const Monster &obj);  // copy constructor
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // From Combatant
-    virtual void beginBatchChanges();
-    virtual void endBatchChanges();
+    virtual void beginBatchChanges() override;
+    virtual void endBatchChanges() override;
 
-    virtual Combatant* clone() const;
+    virtual Combatant* clone() const override;
 
-    virtual int getType() const;
-    virtual int getSpeed() const;
-    virtual int getArmorClass() const;
-    virtual Dice getHitDice() const;
+    virtual int getType() const override;
+    virtual int getSpeed() const override;
+    virtual int getArmorClass() const override;
+    virtual Dice getHitDice() const override;
 
     MonsterClass* getMonsterClass() const;
     QString getMonsterClassName() const;
-    virtual QString getIcon(bool localOnly) const;
-    virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
+    virtual QString getIcon(bool localOnly) const override;
+    virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) override;
 
-    virtual int getStrength() const;
-    virtual int getDexterity() const;
-    virtual int getConstitution() const;
-    virtual int getIntelligence() const;
-    virtual int getWisdom() const;
-    virtual int getCharisma() const;
+    virtual int getStrength() const override;
+    virtual int getDexterity() const override;
+    virtual int getConstitution() const override;
+    virtual int getIntelligence() const override;
+    virtual int getWisdom() const override;
+    virtual int getCharisma() const override;
 
     int getPassivePerception() const;
     bool getActive() const;
@@ -47,7 +47,7 @@ public:
 
 public slots:
     virtual void setMonsterClass(MonsterClass* newMonsterClass);
-    virtual void setIcon(const QString& newIcon);
+    virtual void setIcon(const QString& newIcon) override;
     void setPassivePerception(int value);
     void setActive(bool value);
     void setNotes(const QString& newNotes);
@@ -57,7 +57,7 @@ signals:
 
 protected:
     // From Combatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     MonsterClass* _monsterClass;
     int _passivePerception;

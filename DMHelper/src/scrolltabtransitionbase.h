@@ -11,7 +11,7 @@ class ScrollTabTransitionBase : public QObject
 {
     Q_OBJECT
 public:
-    explicit ScrollTabTransitionBase(ScrollTabWidget* tabWidget, bool deleteOnFinish = true, QObject *parent = 0);
+    explicit ScrollTabTransitionBase(ScrollTabWidget* tabWidget, bool deleteOnFinish = true, QObject *parent = nullptr);
     virtual ~ScrollTabTransitionBase();
 
     virtual ScrollTabWidget* scrollTabWidget() const;

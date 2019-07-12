@@ -8,7 +8,7 @@ class BattleDialogGraphicsView : public QGraphicsView
     Q_OBJECT
 
 public:
-    explicit BattleDialogGraphicsView(QWidget *parent = 0);
+    explicit BattleDialogGraphicsView(QWidget *parent = nullptr);
     virtual ~BattleDialogGraphicsView();
 
 };

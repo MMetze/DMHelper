@@ -14,7 +14,7 @@ class TextEditFormatterFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit TextEditFormatterFrame(QWidget *parent = 0);
+    explicit TextEditFormatterFrame(QWidget *parent = nullptr);
     ~TextEditFormatterFrame();
 
     void setTextEdit(QTextEdit* textEdit);

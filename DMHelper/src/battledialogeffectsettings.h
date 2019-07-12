@@ -14,8 +14,8 @@ class BattleDialogEffectSettings : public QDialog
     Q_OBJECT
 
 public:
-    explicit BattleDialogEffectSettings(int sizeval, qreal rotation, QColor color, QString tip, QWidget *parent = 0);
-    explicit BattleDialogEffectSettings(const BattleDialogModelEffect& effect, QWidget *parent = 0);
+    explicit BattleDialogEffectSettings(int sizeval, qreal rotation, QColor color, QString tip, QWidget *parent = nullptr);
+    explicit BattleDialogEffectSettings(const BattleDialogModelEffect& effect, QWidget *parent = nullptr);
     ~BattleDialogEffectSettings();
 
     QString getTip() const;

@@ -8,7 +8,7 @@
 WidgetCharacter::WidgetCharacter(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::WidgetCharacter),
-    _internals(0)
+    _internals(nullptr)
 {
     ui->setupUi(this);
 
@@ -32,7 +32,7 @@ BattleDialogModelCombatant* WidgetCharacter::getCombatant()
     if(_internals)
         return _internals->getCombatant();
     else
-        return 0;
+        return nullptr;
 }
 
 void WidgetCharacter::setInternals(WidgetCharacterInternal* internals)

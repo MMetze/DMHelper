@@ -183,7 +183,7 @@ void EncounterBattleEdit::addNPC()
     characterSelectDlg.setWindowTitle(QString("Select an NPC"));
     characterSelectDlg.setLabel(QString("Select NPC:"));
 
-    CombatantGroupList combatantList = _battle->getCombatantsAllWaves();
+    //CombatantGroupList combatantList = _battle->getCombatantsAllWaves();
 
     for(int i = 0; i < campaign->getNPCCount(); ++i)
     {

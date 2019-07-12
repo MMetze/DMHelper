@@ -297,10 +297,10 @@ void BattleDialogManager::addCharacter()
         if(character)
         {
             bool found = false;
-            QListIterator<BattleDialogModelCombatant*> i(combatantList);
-            while((!found) && (i.hasNext()))
+            QListIterator<BattleDialogModelCombatant*> it(combatantList);
+            while((!found) && (it.hasNext()))
             {
-                BattleDialogModelCombatant* combatant = i.next();
+                BattleDialogModelCombatant* combatant = it.next();
                 if((combatant) && (combatant->getCombatant()) && (combatant->getCombatant()->getID() == character->getID()))
                 {
                     found = true;
@@ -359,10 +359,10 @@ void BattleDialogManager::addNPC()
         if(character)
         {
             bool found = false;
-            QListIterator<BattleDialogModelCombatant*> i(combatantList);
-            while((!found) && (i.hasNext()))
+            QListIterator<BattleDialogModelCombatant*> it(combatantList);
+            while((!found) && (it.hasNext()))
             {
-                BattleDialogModelCombatant* combatant = i.next();
+                BattleDialogModelCombatant* combatant = it.next();
                 if((combatant) && (combatant->getCombatant()) && (combatant->getCombatant()->getID() == character->getID()))
                 {
                     found = true;

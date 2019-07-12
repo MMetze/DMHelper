@@ -244,11 +244,11 @@ void Monster::setNotes(const QString& newNotes)
     registerChange();
 }
 
-void Monster::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isImport)
+void Monster::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
-    Q_UNUSED(isImport);
+    Q_UNUSED(isExport);
 
     element.setAttribute( "monsterClass", getMonsterClass() != nullptr ? getMonsterClass()->getName() : QString("") );
     element.setAttribute( "passivePerception", getPassivePerception() );

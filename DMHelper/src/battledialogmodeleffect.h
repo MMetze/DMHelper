@@ -26,11 +26,11 @@ public:
     BattleDialogModelEffect();
     BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
     BattleDialogModelEffect(const BattleDialogModelEffect& other);
-    virtual ~BattleDialogModelEffect();
+    virtual ~BattleDialogModelEffect() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
 

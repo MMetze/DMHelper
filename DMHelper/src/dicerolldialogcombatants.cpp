@@ -166,9 +166,9 @@ void DiceRollDialogCombatants::modifierTypeChanged()
     {
         int modifier = 0;
         if(abilitySkillPair.second == -1)
-            modifier = Combatant::getAbilityMod(combatant->getAbilityValue((Combatant::Ability)abilitySkillPair.first));
+            modifier = Combatant::getAbilityMod(combatant->getAbilityValue(static_cast<Combatant::Ability>(abilitySkillPair.first)));
         else
-            modifier = combatant->getSkillModifier((Combatant::Skills)abilitySkillPair.second);
+            modifier = combatant->getSkillModifier(static_cast<Combatant::Skills>(abilitySkillPair.second));
         _modifiers.append(modifier);
     }
 }
@@ -254,7 +254,8 @@ int DiceRollDialogCombatants::rollOnce(const Dice& dice, int modifier, QString& 
     // Go through and roll the dice, building up the string along the way
     for(int dc = 0; dc < dice.getCount(); ++dc)
     {
-        int roll = 1 + (qrand() * dice.getType())/RAND_MAX;
+        //int roll = 1 + (qrand() * dice.getType())/RAND_MAX;
+        int roll = Dice::dX(dice.getType()); //1 + (qrand() * dice.getType())/RAND_MAX;
         if(dc > 0)
         {
             resultStr.append(QString(" + "));

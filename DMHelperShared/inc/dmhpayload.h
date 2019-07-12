@@ -12,8 +12,8 @@ class DMHPayload
 {
 public:
     DMHPayload();
-    DMHPayload(const QString& data);
-    ~DMHPayload();
+    explicit DMHPayload(const QString& data);
+    virtual ~DMHPayload();
 
     QString getImageFile() const;
     void setImageFile(const QString& imageFile);

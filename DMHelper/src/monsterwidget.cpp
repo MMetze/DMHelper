@@ -15,12 +15,12 @@
 MonsterWidget::MonsterWidget(BattleDialogModelMonsterBase* monster, QWidget *parent) :
     CombatantWidget(parent),
     _monster(monster),
-    _pairName(0),
-    _pairArmorClass(0),
-    _lblHP(0),
-    _edtHP(0),
-    _chkVisible(0),
-    _chkKnown(0)
+    _pairName(nullptr),
+    _pairArmorClass(nullptr),
+    _lblHP(nullptr),
+    _edtHP(nullptr),
+    _chkVisible(nullptr),
+    _chkKnown(nullptr)
 {
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     setLineWidth(2);

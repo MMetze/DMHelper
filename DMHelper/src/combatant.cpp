@@ -16,7 +16,9 @@ Combatant::Combatant(QObject *parent) :
     _hitPoints(0),
     _hitDice(),
     _icon(""),
-    _iconPixmap()
+    _iconPixmap(),
+    _batchChanges(false),
+    _changesMade(false)
 {
 }
 
@@ -28,7 +30,9 @@ Combatant::Combatant(const Combatant &obj) :
     _hitPoints(obj._hitPoints),
     _hitDice(obj._hitDice.toString()),
     _icon(obj._icon),
-    _iconPixmap(obj._iconPixmap)
+    _iconPixmap(obj._iconPixmap),
+    _batchChanges(obj._batchChanges),
+    _changesMade(obj._changesMade)
 {
     for(int i = 0; i < obj._attacks.count(); ++i)
     {

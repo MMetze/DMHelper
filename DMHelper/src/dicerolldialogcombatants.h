@@ -19,7 +19,7 @@ class DiceRollDialogCombatants : public QDialog
 
 public:
     //explicit DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, const QList<int>& modifiers, int rollDC = 10, QWidget *parent = 0);
-    explicit DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, int rollDC = 10, QWidget *parent = 0);
+    explicit DiceRollDialogCombatants(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, int rollDC = 10, QWidget *parent = nullptr);
     ~DiceRollDialogCombatants();
 
     void fireAndForget();

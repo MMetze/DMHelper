@@ -7,7 +7,7 @@
 class QuickRefData
 {
 public:
-    QuickRefData(QDomElement &element);
+    explicit QuickRefData(QDomElement &element);
 
     QString getTitle() const;
     QString getIcon() const;
@@ -28,7 +28,7 @@ private:
 class QuickRefSubsection
 {
 public:
-    QuickRefSubsection(QDomElement &element);
+    explicit QuickRefSubsection(QDomElement &element);
 
     QString getDescription() const;
     QList<QuickRefData> getData() const;
@@ -41,7 +41,7 @@ private:
 class QuickRefSection
 {
 public:
-    QuickRefSection(QDomElement &element);
+    explicit QuickRefSection(QDomElement &element);
 
     QString getName() const;
     QString getLimitation() const;

@@ -39,13 +39,21 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
             newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
         }
 
-        if(_combatant)
-            _combatant->setPosition(newPos);
+        //if(_combatant)
+        //    _combatant->setPosition(newPos);
 
         //qDebug() << "[UnselectedPixmap] item change identified: " << newPos << ", out of bounds: " << posOutOfBounds;
 
         if(posOutOfBounds)
             return newPos;
+    }
+    else if(change == ItemPositionHasChanged)
+    {
+        if(_combatant)
+        {
+            QPointF newPos = value.toPointF();
+            _combatant->setPosition(newPos);
+        }
     }
 
     return QGraphicsItem::itemChange(change, value);
