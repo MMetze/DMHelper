@@ -500,7 +500,7 @@ In the *Player's Window*, you can see:
 * Hidden creatures (the two goblins) are not shown
 * The currently active and on deck creatures as well as the countdown timer are show to the right of the battle map along, as long as these options are selected in the DM Helper *Options Dialog*.
 
-<p style="page-break-after: always;">&nbsp;</p>
+<!-- <p style="page-break-after: always;">&nbsp;</p> -->
 
 ## Scrolling Text Encounters
 
