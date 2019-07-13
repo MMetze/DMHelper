@@ -158,7 +158,7 @@ DriveThruRPG.com: https://www.drivethrurpg.com/product/274208/DM-Helper <br/>
 
 <br/>
 We are happy for everybody to use the DM Helper for free and believe in providing our tool in this way for anybody interested in using it. <br/>
-If you feel you would like to support us in our efforts financially, you are welcome to do so, either through one of the download portals or via our Patreon here:<br/>
+If you would like to support us in our efforts to continually improve and expand you are welcome to do so, either through one of the download portals or via our Patreon here:<br/>
 www.patreon.com/dmhelper<br/>
 
 
