@@ -145,21 +145,26 @@ The following text is the property of Wizards of the Coast, Inc. and is Copyrigh
 
 <p style="page-break-after: always;">&nbsp;</p>
 
+## Download
+
+You can get the DM Helper for free from the following portals:
+
+Itch.io: [https://dm-helper.itch.io/dm-helper](https://dm-helper.itch.io/dm-helper)
+
+DriveThruRPG.com: [https://www.drivethrurpg.com/product/274208/DM-Helper](https://www.drivethrurpg.com/product/274208/DM-Helper)
+
 ## Contact
 
 You can reach us under the usual channels:<br/>
 Email: info@dmhelper.net<br/>
 Twitter: @TheRealDMHelper<br/>
+Join us on our Discord server here: [https://discord.gg/C7zPKBp](https://discord.gg/C7zPKBp)<br/>
 
 <br/>
-You can get the DM Helper for free from the following portals:<br/>
-Itch.io: https://dm-helper.itch.io/dm-helper <br/>
-DriveThruRPG.com: https://www.drivethrurpg.com/product/274208/DM-Helper <br/>
+We are happy for everybody to use the DM Helper for free and are committed to giving to our tool to anybody interested in using it.  
 
-<br/>
-We are happy for everybody to use the DM Helper for free and believe in providing our tool in this way for anybody interested in using it. <br/>
-If you would like to support us in our efforts to continually improve and expand you are welcome to do so, either through one of the download portals or via our Patreon here:<br/>
-www.patreon.com/dmhelper<br/>
+If you would like to support us in our efforts to continually improve and expand, you are welcome to do so either through one of the download portals or via our Patreon here:  
+[www.patreon.com/dmhelper](www.patreon.com/dmhelper)
 
 
 ## References
