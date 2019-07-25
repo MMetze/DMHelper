@@ -135,6 +135,7 @@ void DMHNetworkObserver_Private::interpretReply(QNetworkReply* reply)
     }
     catch(const std::bad_cast& e)
     {
+        Q_UNUSED(e);
         qDebug() << "[DMHNetworkObserver] ERROR identified reading payload data: Unexpected failure casting data from download to payload data type!";
     }
 }
