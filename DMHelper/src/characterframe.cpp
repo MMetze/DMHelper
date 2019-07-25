@@ -20,7 +20,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
 
     ui->edtArmorClass->setValidator(new QIntValidator(0,100,this));
-    ui->edtInitiative->setValidator(new QIntValidator(0,100,this));
+    ui->edtInitiative->setValidator(new QIntValidator(-10,100,this));
     ui->edtPassivePerception->setValidator(new QIntValidator(0,100,this));
     ui->edtStr->setValidator(new QIntValidator(0,100,this));
     ui->edtDex->setValidator(new QIntValidator(0,100,this));
@@ -30,8 +30,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     ui->edtCha->setValidator(new QIntValidator(0,100,this));
     ui->edtExperience->setValidator(new QIntValidator(0,1000000,this));
     ui->edtSpeed->setValidator(new QIntValidator(0,1000,this));
-    ui->edtProficiencyBonus->setValidator(new QIntValidator(0,100,this));
-    ui->edtLevel->setValidator(new QIntValidator(1,100,this));
+    ui->edtProficiencyBonus->setValidator(new QIntValidator(-10,100,this));
+    ui->edtLevel->setValidator(new QIntValidator(0,100,this));
 
     connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
     connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
@@ -109,6 +109,9 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
     connect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
     connect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(writeCharacterData()));
+    connect(ui->edtFeatures,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+    connect(ui->edtEquipment,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+    connect(ui->edtSpells,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
     connect(ui->edtNotes,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
 }
 
@@ -224,6 +227,9 @@ void CharacterFrame::clear()
     ui->chkPersuasion->setChecked(false);
     ui->chkIntimidation->setChecked(false);
 
+    ui->edtFeatures->setText(QString(""));
+    ui->edtEquipment->setText(QString(""));
+    ui->edtSpells->setText(QString(""));
     ui->edtNotes->setText(QString(""));
 
     ui->lblStrMod->setText(QString(""));
@@ -342,6 +348,9 @@ void CharacterFrame::readCharacterData()
     ui->chkPersuasion->setChecked(_character->getSkillValue(Combatant::Skills_persuasion));
     ui->chkIntimidation->setChecked(_character->getSkillValue(Combatant::Skills_intimidation));
 
+    ui->edtFeatures->setText(_character->getStringValue(Character::StringValue_proficiencies));
+    ui->edtEquipment->setText(_character->getStringValue(Character::StringValue_equipment));
+    ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
     calculateMods();
@@ -399,6 +408,9 @@ void CharacterFrame::writeCharacterData()
         _character->setSkillValue(Combatant::Skills_persuasion, ui->chkPersuasion->isChecked());
         _character->setSkillValue(Combatant::Skills_intimidation, ui->chkIntimidation->isChecked());
 
+        _character->setStringValue(Character::StringValue_proficiencies, ui->edtFeatures->toPlainText());
+        _character->setStringValue(Character::StringValue_equipment, ui->edtEquipment->toPlainText());
+        _character->setStringValue(Character::StringValue_spells, ui->edtSpells->toPlainText());
         _character->setStringValue(Character::StringValue_notes, ui->edtNotes->toPlainText());
 
         _character->endBatchChanges();

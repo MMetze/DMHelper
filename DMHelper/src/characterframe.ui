@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>864</width>
-    <height>745</height>
+    <width>1136</width>
+    <height>779</height>
    </rect>
   </property>
   <property name="styleSheet">
@@ -1416,20 +1416,57 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_25">
        <item>
-        <widget class="QLabel" name="label_13">
-         <property name="text">
-          <string>Notes:</string>
+        <widget class="QTabWidget" name="tabWidget">
+         <property name="currentIndex">
+          <number>0</number>
          </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTextEdit" name="edtNotes">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+         <widget class="QWidget" name="tabFeatures">
+          <attribute name="title">
+           <string>Features</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_22">
+           <item>
+            <widget class="QTextEdit" name="edtFeatures"/>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabEquipment">
+          <attribute name="title">
+           <string>Equipment</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_15">
+           <item>
+            <widget class="QTextEdit" name="edtEquipment"/>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabSpells">
+          <attribute name="title">
+           <string>Spells</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_23">
+           <item>
+            <widget class="QTextEdit" name="edtSpells"/>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="tabNotes">
+          <attribute name="title">
+           <string>Notes</string>
+          </attribute>
+          <layout class="QVBoxLayout" name="verticalLayout_19">
+           <item>
+            <widget class="QTextEdit" name="edtNotes">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </widget>
        </item>
       </layout>
@@ -1486,7 +1523,6 @@
   <tabstop>chkIntimidation</tabstop>
   <tabstop>chkPerformance</tabstop>
   <tabstop>chkPersuasion</tabstop>
-  <tabstop>edtNotes</tabstop>
  </tabstops>
  <resources/>
  <connections/>
