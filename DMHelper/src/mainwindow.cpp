@@ -974,10 +974,16 @@ void MainWindow::linkActivated(const QUrl & link)
 
 void MainWindow::readBestiary()
 {
+    qDebug() << "[Main] Requested to read Bestiary.";
+
     if(!Bestiary::Instance())
+    {
+        qDebug() << "[Main] Bestiary instance not found, reading stopped";
         return;
+    }
 
     QString bestiaryFileName = _options->getBestiaryFileName();
+    qDebug() << "[Main] Bestiary file from options: " << bestiaryFileName;
 
     if(bestiaryFileName.isEmpty())
     {
@@ -1031,7 +1037,10 @@ void MainWindow::readBestiary()
 
     QDomElement root = doc.documentElement();
     if( (root.isNull()) || (root.tagName() != "root") )
+    {
+        qDebug() << "[Main] Bestiary file missing root item";
         return;
+    }
 
     QFileInfo fileInfo(bestiaryFileName);
     Bestiary::Instance()->setDirectory(fileInfo.absoluteDir());
@@ -1041,6 +1050,9 @@ void MainWindow::readBestiary()
         bestiaryDlg.setMonster(_options->getLastMonster());
     else
         bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
+
+    qDebug() << "[Main] Bestiary reading complete.";
+
 }
 
 void MainWindow::showEvent(QShowEvent * event)
@@ -1404,8 +1416,13 @@ void MainWindow::setIndexExpanded(bool expanded, const QModelIndex& index)
 
 void MainWindow::writeBestiary()
 {
+    qDebug() << "[Main] Bestiary now to be written to file";
+
     if(!Bestiary::Instance())
+    {
+        qDebug() << "[Main] Bestiary instance not found, no file written.";
         return;
+    }
 
     if(Bestiary::Instance()->count() <= 0)
     {
@@ -1451,6 +1468,8 @@ void MainWindow::writeBestiary()
     ts << doc.toString();
 
     file.close();
+
+    qDebug() << "[Main] Bestiary file writing complete: " << bestiaryFileName;
 }
 
 void MainWindow::newEncounter(int encounterType)
