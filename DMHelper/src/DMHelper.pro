@@ -38,7 +38,7 @@ SOURCES += main.cpp\
     campaignexporter.cpp \
     colorpushbutton.cpp \
     equipmentserver.cpp \
-        mainwindow.cpp \
+    mainwindow.cpp \
     objectimporter.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
@@ -383,3 +383,4 @@ INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
 
+LIBS += -L$$PWD/vlc -llibvlc

@@ -8,6 +8,10 @@
 #include <QRubberBand>
 #include "undopath.h"
 
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#include <vlc/vlc.h>
+
 namespace Ui {
 class MapFrame;
 }
@@ -21,7 +25,7 @@ class MapFrame : public QWidget
     Q_OBJECT
 
 public:
-    explicit MapFrame(QWidget *parent = 0);
+    explicit MapFrame(QWidget *parent = nullptr);
     ~MapFrame();
 
     void setMap(Map* map);
@@ -93,6 +97,10 @@ private:
     qreal _scale;
 
     Map* _mapSource;
+
+    libvlc_instance_t *vlcInstance;
+    libvlc_media_list_player_t *vlcListPlayer;
+
 };
 
 #endif // MAPFRAME_H

@@ -24,7 +24,9 @@ MapFrame::MapFrame(QWidget *parent) :
     _undoPath(nullptr),
     _rubberBand(nullptr),
     _scale(1.0),
-    _mapSource(nullptr)
+    _mapSource(nullptr),
+    vlcInstance(nullptr),
+    vlcListPlayer(nullptr)
 {
     ui->setupUi(this);
 
@@ -325,14 +327,63 @@ void MapFrame::initializeFoW()
         return;
 
     _mapSource->initialize();
+    if(_mapSource->isInitialized())
+    {
+        _background = _scene->addPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
+        _background->setEnabled(false);
+        _background->setZValue(-2);
 
-    _background = _scene->addPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
-    _background->setEnabled(false);
-    _background->setZValue(-2);
+        _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+        _fow->setEnabled(false);
+        _fow->setZValue(-1);
 
-    _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-    _fow->setEnabled(false);
-    _fow->setZValue(-1);
+        ui->graphicsView->show();
+    }
+    else
+    {
+        ui->graphicsView->hide();
+
+        if(!vlcInstance)
+            vlcInstance = libvlc_new(0, nullptr);
+
+        if(!vlcInstance)
+            return;
+
+        QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
+
+        // Stop if something is playing
+        if (vlcListPlayer && libvlc_media_list_player_is_playing(vlcListPlayer))
+            return;
+
+        // Create a new Media List and add the media to it
+        libvlc_media_list_t *vlcMediaList = libvlc_media_list_new(vlcInstance);
+        if (!vlcMediaList)
+            return;
+
+        // Create a new Media
+        libvlc_media_t *vlcMedia = libvlc_media_new_path(vlcInstance, fileOpen.toUtf8().constData());
+        if (!vlcMedia)
+            return;
+
+        libvlc_media_list_add_media(vlcMediaList, vlcMedia);
+        libvlc_media_release(vlcMedia);
+
+        // Create a new libvlc player
+        vlcListPlayer = libvlc_media_list_player_new(vlcInstance);
+        libvlc_media_player_t *player = libvlc_media_player_new(vlcInstance);
+
+        libvlc_media_list_player_set_media_list(vlcListPlayer, vlcMediaList);
+        libvlc_media_list_player_set_playback_mode(vlcListPlayer, libvlc_playback_mode_loop);
+
+        libvlc_media_list_player_set_media_player(vlcListPlayer, player);
+
+        // Integrate the video in the interface
+        libvlc_media_player_set_hwnd(player, (void *)ui->frame->winId());
+
+        // And start playback
+        libvlc_media_list_player_play(vlcListPlayer);
+
+    }
 }
 
 void MapFrame::uninitializeFoW()
