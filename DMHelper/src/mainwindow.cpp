@@ -71,6 +71,7 @@
 #include <QDesktopServices>
 #include <QDebug>
 #include <QLibraryInfo>
+#include <QSplashScreen>
 
 // Next Todos:
 // DONE: Add empty DMHelper.log as part of the deploy procedure
@@ -156,6 +157,11 @@ MainWindow::MainWindow(QWidget *parent) :
     dirty(false),
     _animationFrameCount(DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES)
 {
+    QPixmap pixmap(":/img/data/dmhelper_large.png");
+    QSplashScreen splash(pixmap);
+    splash.show();
+    splash.showMessage(QString("Initializing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+
     qDebug() << "[Main] Initializing Main";
 
     qDebug() << "[Main] DMHelper version information";
@@ -269,6 +275,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
     connect(_options,SIGNAL(showAnimationsChanged(bool)),ui->scrollWidget,SLOT(setAnimatedTransitions(bool)));
     qDebug() << "[Main] Loading Bestiary";
+    splash.showMessage(QString("Initializing Bestiary...\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    qApp->processEvents();
     readBestiary();
     qDebug() << "[Main] Bestiary Loaded";
 
@@ -315,6 +323,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main] Encounter Pages Created";
 
     // Load the quick reference tabs
+    splash.showMessage(QString("Initializing Quick Reference tabs...\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    qApp->processEvents();
     qDebug() << "[Main] Creating Reference Tabs";
     previewFrame = new PublishFrame(this);
     connect(previewFrame,SIGNAL(visibleChanged(bool)),pubWindow,SLOT(setArrowVisible(bool)));
@@ -353,6 +363,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //Initialize animation settings
     ui->scrollWidget->setAnimatedTransitions(_options->getShowAnimations());
     qDebug() << "[Main] Reference Tabs Created";
+
+    splash.showMessage(QString("Preparing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    qApp->processEvents();
 
     qDebug() << "[Main] Initializing Battle Dialog Manager";
     _battleDlgMgr = new BattleDialogManager(this);
@@ -407,6 +420,8 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 
     emit campaignLoaded(nullptr);
+
+    splash.finish(this);
 
     qDebug() << "[Main] Main Initialization complete";
 }
