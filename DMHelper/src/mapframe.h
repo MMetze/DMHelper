@@ -8,6 +8,10 @@
 #include <QRubberBand>
 #include "undopath.h"
 
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#include <vlc/vlc.h>
+
 namespace Ui {
 class MapFrame;
 }
@@ -21,7 +25,7 @@ class MapFrame : public QWidget
     Q_OBJECT
 
 public:
-    explicit MapFrame(QWidget *parent = 0);
+    explicit MapFrame(QWidget *parent = nullptr);
     ~MapFrame();
 
     void setMap(Map* map);
@@ -34,6 +38,13 @@ public:
 
     QAction* getUndoAction(QObject* parent);
     QAction* getRedoAction(QObject* parent);
+
+    void* lockCallback(void **planes);
+    void unlockCallback(void *picture, void *const *planes);
+    void displayCallback(void *picture);
+    unsigned formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines);
+    void cleanupCallback();
+
 
 signals:
     void publishImage(QImage img, QColor color);
@@ -64,12 +75,17 @@ protected:
     void uninitializeFoW();
     void loadTracks();
 
-    virtual void hideEvent(QHideEvent * event);
+    virtual void hideEvent(QHideEvent * event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+
+    virtual void timerEvent(QTimerEvent *event) override;
 
     bool execEventFilterSelectZoom(QObject *obj, QEvent *event);
     bool execEventFilterEditModeFoW(QObject *obj, QEvent *event);
     bool execEventFilterEditModeEdit(QObject *obj, QEvent *event);
     bool execEventFilterEditModeMove(QObject *obj, QEvent *event);
+
+    void cleanupBuffers();
 
 protected slots:
     void setMapCursor();
@@ -93,6 +109,17 @@ private:
     qreal _scale;
 
     Map* _mapSource;
+
+    libvlc_instance_t *vlcInstance;
+    libvlc_media_list_player_t *vlcListPlayer;
+    unsigned int _nativeWidth;
+    unsigned int _nativeHeight;
+    uchar* _nativeBufferNotAligned;
+    uchar* _nativeBuffer;
+    QImage _loadImage;
+    bool _newImage;
+    int _timerId;
+
 };
 
 #endif // MAPFRAME_H

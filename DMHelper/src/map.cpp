@@ -278,6 +278,11 @@ MapMarker* Map::getMapMarker(int id)
     return nullptr;
 }
 
+bool Map::isInitialized()
+{
+    return _initialized;
+}
+
 QImage Map::getBackgroundImage()
 {
     return _imgBackground;

@@ -4,7 +4,6 @@
 #include <QTextStream>
 #include <QtGlobal>
 #include <QDebug>
-#include <QSplashScreen>
 
 #ifndef QT_NO_DEBUG_OUTPUT
     QTextStream *out = nullptr;
@@ -44,10 +43,6 @@
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-
-    QPixmap pixmap(":/img/data/dmhelper_large.png");
-    QSplashScreen splash(pixmap);
-    splash.show();
 
 #ifndef QT_NO_DEBUG_OUTPUT
     QString fileName = QCoreApplication::applicationFilePath().replace(".exe", ".log");

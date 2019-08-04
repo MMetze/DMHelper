@@ -179,7 +179,6 @@ void BattleDialogManager::loadBattle(EncounterBattle* battleEncounter)
         return;
 
     connect(battleModel,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
-    _dlg->setBattleMap();
     emit battleActive(true);
 
     showBattleDialog();
@@ -529,6 +528,7 @@ BattleDialog* BattleDialogManager::createBattleDialog(BattleDialogModel* dlgMode
     dlg->setCountdownDuration(_countdownDuration);
 
     dlg->setTargetSize(_targetSize);
+    dlg->setBattleMap();
     dlg->recreateCombatantWidgets();
 
     emit dirty();

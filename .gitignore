@@ -8,6 +8,7 @@ DMHelper/build-64_bit-debug
 DMHelper/build-64_bit-profile
 DMHelper/build-64_bit-release
 DMHelper/rawdata
+DMHelper/testdata
 DMHelper/release
 DMHelper/src/DMHelper.pro.user*
 DMHelper/working

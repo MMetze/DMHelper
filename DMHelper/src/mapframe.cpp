@@ -12,6 +12,131 @@
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include <QDebug>
+
+// libvlc callback static functions
+/**
+ * Callback prototype to allocate and lock a picture buffer.
+ *
+ * Whenever a new video frame needs to be decoded, the lock callback is
+ * invoked. Depending on the video chroma, one or three pixel planes of
+ * adequate dimensions must be returned via the second parameter. Those
+ * planes must be aligned on 32-bytes boundaries.
+ *
+ * \param opaque private pointer as passed to libvlc_video_set_callbacks() [IN]
+ * \param planes start address of the pixel planes (LibVLC allocates the array
+ *             of void pointers, this callback must initialize the array) [OUT]
+ * \return a private pointer for the display and unlock callbacks to identify
+ *         the picture buffers
+ */
+void * mapFrameLockCallback(void *opaque, void **planes)
+{
+    if(!opaque)
+        return nullptr;
+
+    MapFrame* mapFrame = static_cast<MapFrame*>(opaque);
+    return mapFrame->lockCallback(planes);
+}
+
+/**
+ * Callback prototype to unlock a picture buffer.
+ *
+ * When the video frame decoding is complete, the unlock callback is invoked.
+ * This callback might not be needed at all. It is only an indication that the
+ * application can now read the pixel values if it needs to.
+ *
+ * \note A picture buffer is unlocked after the picture is decoded,
+ * but before the picture is displayed.
+ *
+ * \param opaque private pointer as passed to libvlc_video_set_callbacks() [IN]
+ * \param picture private pointer returned from the @ref libvlc_video_lock_cb
+ *                callback [IN]
+ * \param planes pixel planes as defined by the @ref libvlc_video_lock_cb
+ *               callback (this parameter is only for convenience) [IN]
+ */
+void mapFrameUnlockCallback(void *opaque, void *picture, void *const *planes)
+{
+    if(!opaque)
+        return;
+
+    MapFrame* mapFrame = static_cast<MapFrame*>(opaque);
+    mapFrame->unlockCallback(picture, planes);
+}
+
+/**
+ * Callback prototype to display a picture.
+ *
+ * When the video frame needs to be shown, as determined by the media playback
+ * clock, the display callback is invoked.
+ *
+ * \param opaque private pointer as passed to libvlc_video_set_callbacks() [IN]
+ * \param picture private pointer returned from the @ref libvlc_video_lock_cb
+ *                callback [IN]
+ */
+void mapFrameDisplayCallback(void *opaque, void *picture)
+{
+    if(!opaque)
+        return;
+
+    MapFrame* mapFrame = static_cast<MapFrame*>(opaque);
+    mapFrame->displayCallback(picture);
+}
+
+/**
+ * Callback prototype to configure picture buffers format.
+ * This callback gets the format of the video as output by the video decoder
+ * and the chain of video filters (if any). It can opt to change any parameter
+ * as it needs. In that case, LibVLC will attempt to convert the video format
+ * (rescaling and chroma conversion) but these operations can be CPU intensive.
+ *
+ * \param opaque pointer to the private pointer passed to
+ *               libvlc_video_set_callbacks() [IN/OUT]
+ * \param chroma pointer to the 4 bytes video format identifier [IN/OUT]
+ * \param width pointer to the pixel width [IN/OUT]
+ * \param height pointer to the pixel height [IN/OUT]
+ * \param pitches table of scanline pitches in bytes for each pixel plane
+ *                (the table is allocated by LibVLC) [OUT]
+ * \param lines table of scanlines count for each plane [OUT]
+ * \return the number of picture buffers allocated, 0 indicates failure
+ *
+ * \note
+ * For each pixels plane, the scanline pitch must be bigger than or equal to
+ * the number of bytes per pixel multiplied by the pixel width.
+ * Similarly, the number of scanlines must be bigger than of equal to
+ * the pixel height.
+ * Furthermore, we recommend that pitches and lines be multiple of 32
+ * to not break assumptions that might be held by optimized code
+ * in the video decoders, video filters and/or video converters.
+ */
+unsigned mapFrameFormatCallback(void **opaque, char *chroma,
+                                unsigned *width, unsigned *height,
+                                unsigned *pitches,
+                                unsigned *lines)
+{
+    if((!opaque)||(!(*opaque)))
+        return 0;
+
+    MapFrame* mapFrame = static_cast<MapFrame*>(*opaque);
+    return mapFrame->formatCallback(chroma, width, height, pitches, lines);
+}
+
+/**
+ * Callback prototype to configure picture buffers format.
+ *
+ * \param opaque private pointer as passed to libvlc_video_set_callbacks()
+ *               (and possibly modified by @ref libvlc_video_format_cb) [IN]
+ */
+void mapFrameCleanupCallback(void *opaque)
+{
+    if(!opaque)
+        return;
+
+    MapFrame* mapFrame = static_cast<MapFrame*>(opaque);
+    mapFrame->cleanupCallback();
+}
+
+
+// MapFrame definitions
 
 MapFrame::MapFrame(QWidget *parent) :
     QWidget(parent),
@@ -24,9 +149,31 @@ MapFrame::MapFrame(QWidget *parent) :
     _undoPath(nullptr),
     _rubberBand(nullptr),
     _scale(1.0),
-    _mapSource(nullptr)
+    _mapSource(nullptr),
+    vlcInstance(nullptr),
+    vlcListPlayer(nullptr),
+    _nativeWidth(0),
+    _nativeHeight(0),
+    _nativeBufferNotAligned(nullptr),
+    _nativeBuffer(nullptr),
+    _loadImage(),
+    _newImage(false),
+    _timerId(0)
 {
     ui->setupUi(this);
+
+    /*
+    QLabel* frame = new QLabel(QString("TEST!!!"),ui->frame);
+    frame->move(50,50);
+    frame->resize(200,200);
+    ui->graphicsView->setStyleSheet("background-image: none; background-color: transparent;");
+    frame->setPixmap(QPixmap(":/img/data/active.png"));
+    //frame->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    frame->setWindowFlags(Qt::Window);
+    frame->setAttribute(Qt::WA_TranslucentBackground);
+    frame->setAttribute(Qt::WA_NoSystemBackground);
+    frame->raise();
+    */
 
     // TODO: reactivate markers
     ui->grpMode->setVisible(false);
@@ -38,6 +185,8 @@ MapFrame::MapFrame(QWidget *parent) :
     _scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(_scene);
     ui->graphicsView->viewport()->installEventFilter(this);
+    //ui->graphicsView->setStyleSheet("background: white");
+    ui->graphicsView->setStyleSheet("background-color: transparent;");
 
     // Set up the edit mode button group
     ui->grpEditMode->setId(ui->btnModeFoW, DMHelper::EditMode_FoW);
@@ -76,6 +225,19 @@ MapFrame::MapFrame(QWidget *parent) :
 
 MapFrame::~MapFrame()
 {
+    killTimer(_timerId);
+
+    if(vlcListPlayer)
+    {
+        libvlc_media_list_player_stop(vlcListPlayer);
+        libvlc_media_list_player_release(vlcListPlayer);
+    }
+
+    if(vlcInstance)
+        libvlc_release(vlcInstance);
+
+    cleanupBuffers();
+
     cancelSelect();
     delete ui;
 }
@@ -158,6 +320,79 @@ QAction* MapFrame::getRedoAction(QObject* parent)
 {
     return _mapSource->getUndoStack()->createRedoAction(parent);
 }
+
+void* MapFrame::lockCallback(void **planes)
+{
+    if((planes) && (_nativeBuffer))
+    {
+        *planes = _nativeBuffer;
+    }
+
+    return nullptr;
+}
+
+void MapFrame::unlockCallback(void *picture, void *const *planes)
+{
+    return;
+}
+
+void MapFrame::displayCallback(void *picture)
+{
+    if((!_nativeBuffer)  || (_nativeWidth == 0) || (_nativeHeight == 0))
+        return;
+
+    _loadImage = QImage(_nativeBuffer, _nativeWidth, _nativeHeight, QImage::Format_RGB32); // QImage::Format_RGB32 works fine as well and it's much faster
+
+    //QImage image(_nativeBuffer, _nativeWidth, _nativeHeight, QImage::Format_RGB32); // QImage::Format_RGB32 works fine as well and it's much faster
+    //_background->setPixmap(QPixmap::fromImage(image));
+    //update();
+    _newImage = true;
+}
+
+unsigned MapFrame::formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines)
+{
+    if((!chroma)||(!width)||(!height)||(!pitches)||(!lines))
+        return 0;
+
+    if(_nativeBufferNotAligned)
+        return 0;
+
+    qDebug() << "[MapFrame] Format Callback with chroma: " << QString(chroma) << ", width: " << *width << ", height: " << *height << ", pitches: " << *pitches << ", lines: " << *lines;
+
+    memcpy(chroma, "RV32", sizeof("RV32") - 1);
+
+    _nativeWidth = *width;
+    _nativeHeight = *height;
+    *pitches = (*width) * 4;
+    *lines = *height;
+
+    _nativeBufferNotAligned = (uchar*)malloc((_nativeWidth * _nativeHeight * 4) + 31);
+    _nativeBuffer = (uchar*)((size_t(_nativeBufferNotAligned)+31) & (~31));
+    //loadImage = QImage(QSize(_nativeWidth, _nativeHeight), QImage::Format_ARGB32);
+
+    /*
+    _loadImage = QImage(QSize(_nativeWidth, _nativeHeight), QImage::Format_RGB32);
+    _background = _scene->addPixmap(QPixmap::fromImage(_loadImage));
+    _background->setEnabled(false);
+    _background->setZValue(-2);
+    _newImage = false;
+
+    QImage imgFow = QImage(QSize(_nativeWidth, _nativeHeight), QImage::Format_ARGB32);
+    imgFow.fill(QColor(0,0,0,128));
+    _fow = _scene->addPixmap(QPixmap::fromImage(imgFow));
+    _fow->setEnabled(false);
+    _fow->setZValue(1);
+    */
+
+    return 1;
+}
+
+void MapFrame::cleanupCallback()
+{
+    qDebug() << "[MapFrame] Cleanup Callback";
+    cleanupBuffers();
+}
+
 
 void MapFrame::updateFoW()
 {
@@ -325,18 +560,106 @@ void MapFrame::initializeFoW()
         return;
 
     _mapSource->initialize();
+    if(_mapSource->isInitialized())
+    {
+        _background = _scene->addPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
+        _background->setEnabled(false);
+        _background->setZValue(-2);
 
-    _background = _scene->addPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
-    _background->setEnabled(false);
-    _background->setZValue(-2);
+        _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+        _fow->setEnabled(false);
+        _fow->setZValue(-1);
+    }
+    else
+    {
+        if(!vlcInstance)
+            vlcInstance = libvlc_new(0, nullptr);
 
-    _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-    _fow->setEnabled(false);
-    _fow->setZValue(-1);
+        if(!vlcInstance)
+            return;
+
+        QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
+
+        // Stop if something is playing
+        if (vlcListPlayer && libvlc_media_list_player_is_playing(vlcListPlayer))
+            return;
+
+        // Create a new Media List and add the media to it
+        libvlc_media_list_t *vlcMediaList = libvlc_media_list_new(vlcInstance);
+        if (!vlcMediaList)
+            return;
+
+        // Create a new Media
+        libvlc_media_t *vlcMedia = libvlc_media_new_path(vlcInstance, fileOpen.toUtf8().constData());
+        if (!vlcMedia)
+            return;
+
+        libvlc_media_list_add_media(vlcMediaList, vlcMedia);
+        libvlc_media_release(vlcMedia);
+
+        // Create a new libvlc player
+        vlcListPlayer = libvlc_media_list_player_new(vlcInstance);
+        libvlc_media_player_t *player = libvlc_media_player_new(vlcInstance);
+
+        libvlc_media_list_player_set_media_list(vlcListPlayer, vlcMediaList);
+        libvlc_media_list_player_set_playback_mode(vlcListPlayer, libvlc_playback_mode_loop);
+
+        libvlc_media_list_player_set_media_player(vlcListPlayer, player);
+
+        unsigned x = 0;
+        unsigned y = 0;
+        int result = libvlc_video_get_size(player, 0, &x, &y);
+        qDebug() << "[MapFrame] Video size (result: " << result << "): " << x << " x " << y << ". File: " << fileOpen;
+
+        // Integrate the video in the interface
+        //libvlc_media_player_set_hwnd(player, (void *)ui->graphicsView->winId());
+        //libvlc_media_player_set_hwnd(player, (void *)ui->frame->winId());
+        //libvlc_media_player_set_hwnd(player, (void *)vlcFrame->winId());
+
+        /*
+        // Draw using callbacks
+        _nativeWidth = 300;
+        _nativeHeight = 300;
+        _nativeBufferNotAligned = (uchar*)malloc((_nativeWidth * _nativeHeight * 4) + 31);
+        _nativeBuffer = (uchar*)((size_t(_nativeBufferNotAligned)+31) & (~31));
+        //loadImage = QImage(QSize(_nativeWidth, _nativeHeight), QImage::Format_ARGB32);
+
+        _loadImage = QImage(QSize(_nativeWidth, _nativeHeight), QImage::Format_RGB32);
+        _background = _scene->addPixmap(QPixmap::fromImage(_loadImage));
+        _background->setEnabled(false);
+        _background->setZValue(-2);
+        _newImage = false;
+
+        QImage imgFow = QImage(QSize(_nativeWidth, _nativeHeight), QImage::Format_ARGB32);
+        imgFow.fill(QColor(0,0,0,128));
+        _fow = _scene->addPixmap(QPixmap::fromImage(imgFow));
+        _fow->setEnabled(false);
+        _fow->setZValue(1);
+        */
+
+        libvlc_video_set_callbacks(player, mapFrameLockCallback, mapFrameUnlockCallback, mapFrameDisplayCallback, this);
+        libvlc_video_set_format_callbacks(player, mapFrameFormatCallback, mapFrameCleanupCallback);
+        //libvlc_video_set_format(player, "RV32", _nativeWidth, _nativeHeight, _nativeWidth*4);
+
+        // And start playback
+        libvlc_media_list_player_play(vlcListPlayer);
+        _timerId = startTimer(0);
+    }
 }
 
 void MapFrame::uninitializeFoW()
 {
+    killTimer(_timerId);
+    _timerId = 0;
+
+    if(vlcListPlayer)
+    {
+        libvlc_media_list_player_stop(vlcListPlayer);
+        libvlc_media_list_player_release(vlcListPlayer);
+        vlcListPlayer = nullptr;
+    }
+
+    cleanupBuffers();
 }
 
 void MapFrame::loadTracks()
@@ -370,6 +693,33 @@ void MapFrame::hideEvent(QHideEvent * event)
     emit windowClosed(this);
 
     QWidget::hideEvent(event);
+}
+
+void MapFrame::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
+}
+
+void MapFrame::timerEvent(QTimerEvent *event)
+{
+    Q_UNUSED(event);
+
+    if(_newImage)
+    {
+        if(!_background)
+        {
+            _background = _scene->addPixmap(QPixmap::fromImage(_loadImage));
+            _background->setEnabled(false);
+            _background->setZValue(-2);
+        }
+        else
+        {
+            _background->setPixmap(QPixmap::fromImage(_loadImage));
+        }
+
+        update();
+        _newImage = false;
+    }
 }
 
 bool MapFrame::execEventFilterSelectZoom(QObject *obj, QEvent *event)
@@ -525,6 +875,21 @@ bool MapFrame::execEventFilterEditModeMove(QObject *obj, QEvent *event)
     //TODO: Implement
     _scene->clearSelection();
     return false;
+}
+
+void MapFrame::cleanupBuffers()
+{
+    delete _background;
+    _background = nullptr;
+    delete _fow;
+    _fow = nullptr;
+
+    if(_nativeBufferNotAligned)
+    {
+        free(_nativeBufferNotAligned);
+        _nativeBufferNotAligned = nullptr;
+        _nativeBuffer = nullptr;
+    }
 }
 
 void MapFrame::setMapCursor()
