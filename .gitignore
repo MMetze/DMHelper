@@ -1,6 +1,7 @@
 #DMHelper ignores
 DMHelper/bin32
 DMHelper/bin64
+DMHelper/build*
 DMHelper/build-32_bit-debug
 DMHelper/build-32_bit-profile
 DMHelper/build-32_bit-release
@@ -10,6 +11,7 @@ DMHelper/build-64_bit-release
 DMHelper/rawdata
 DMHelper/testdata
 DMHelper/release
+DMHelper/src/DMHelper.pro.user
 DMHelper/src/DMHelper.pro.user*
 DMHelper/working
 DMHelper/DM Helper release.__zip
@@ -73,4 +75,6 @@ DMHelper/src/Makefile
 *.user
 DMHelper/src/DMHelper.pro.user
 DMHelper/DM Helper 64-bit release.zip
+DMHelper/src/DMHelper.pro.user
+DMHelper/DM Helper macOS release.zip
 DMHelper/src/DMHelper.pro.user
