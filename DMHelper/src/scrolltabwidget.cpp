@@ -42,7 +42,7 @@ ScrollTabWidget::ScrollTabWidget(QWidget* page, QSizeF parentRatio, QWidget *par
 
     setFocusPolicy(Qt::ClickFocus);
     setFocusProxy(_page);
-    setStyleSheet(QString("ScrollTabWidget{background-color: rgba(0,0,0,0);}"));
+    setStyleSheet(QString("ScrollTabWidget{background-color: rgba(0,0,0,255);}"));
 
     if(validRatio(parentRatio))
         _parentRatio = parentRatio;

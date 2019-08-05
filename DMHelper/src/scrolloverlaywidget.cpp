@@ -2,6 +2,7 @@
 #include "scrolltabwidget.h"
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QDebug>
 
 const int SCROLLWIDGET_BUTTONSIZE = 40;
 const int SCROLLWIDGET_BUTTONSIZE_ICON = SCROLLWIDGET_BUTTONSIZE - 5;
@@ -65,13 +66,16 @@ void ScrollOverlayWidget::resizeTabs()
     }
 
     // Find the offset from mutual parents
-    QWidget* p = this;
-    QWidget* tabParent = _tabList.first() ? _tabList.first()->parentWidget() : nullptr;
-    _widgetOffset = QPoint();
-    while((p != nullptr) && (p != tabParent))
+    if(!_tabList.isEmpty())
     {
-        _widgetOffset += p->pos();
-        p = p->parentWidget();
+        QWidget* p = this;
+        QWidget* tabParent = _tabList.first() ? _tabList.first()->parentWidget() : nullptr;
+        _widgetOffset = QPoint();
+        while((p != nullptr) && (p != tabParent))
+        {
+            _widgetOffset += p->pos();
+            p = p->parentWidget();
+        }
     }
 
     repositionAllTabs();
@@ -125,6 +129,8 @@ void ScrollOverlayWidget::moveEvent(QMoveEvent *event)
 void ScrollOverlayWidget::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
+
+    resizeTabs();
 }
 
 void ScrollOverlayWidget::repositionAllTabs()

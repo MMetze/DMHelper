@@ -14,6 +14,8 @@
 #include <QScrollBar>
 #include <QDebug>
 
+#ifdef ANIMATED_MAPS
+
 // libvlc callback static functions
 /**
  * Callback prototype to allocate and lock a picture buffer.
@@ -135,6 +137,7 @@ void mapFrameCleanupCallback(void *opaque)
     mapFrame->cleanupCallback();
 }
 
+#endif
 
 // MapFrame definitions
 
@@ -149,7 +152,9 @@ MapFrame::MapFrame(QWidget *parent) :
     _undoPath(nullptr),
     _rubberBand(nullptr),
     _scale(1.0),
-    _mapSource(nullptr),
+    _mapSource(nullptr)
+#ifdef ANIMATED_MAPS
+    ,
     vlcInstance(nullptr),
     vlcListPlayer(nullptr),
     _nativeWidth(0),
@@ -159,6 +164,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _loadImage(),
     _newImage(false),
     _timerId(0)
+#endif
 {
     ui->setupUi(this);
 
@@ -225,6 +231,7 @@ MapFrame::MapFrame(QWidget *parent) :
 
 MapFrame::~MapFrame()
 {
+#ifdef ANIMATED_MAPS
     killTimer(_timerId);
 
     if(vlcListPlayer)
@@ -237,6 +244,7 @@ MapFrame::~MapFrame()
         libvlc_release(vlcInstance);
 
     cleanupBuffers();
+#endif
 
     cancelSelect();
     delete ui;
@@ -321,6 +329,8 @@ QAction* MapFrame::getRedoAction(QObject* parent)
     return _mapSource->getUndoStack()->createRedoAction(parent);
 }
 
+#ifdef ANIMATED_MAPS
+
 void* MapFrame::lockCallback(void **planes)
 {
     if((planes) && (_nativeBuffer))
@@ -393,6 +403,7 @@ void MapFrame::cleanupCallback()
     cleanupBuffers();
 }
 
+#endif
 
 void MapFrame::updateFoW()
 {
@@ -570,6 +581,9 @@ void MapFrame::initializeFoW()
         _fow->setEnabled(false);
         _fow->setZValue(-1);
     }
+
+#ifdef ANIMATED_MAPS
+
     else
     {
         if(!vlcInstance)
@@ -645,10 +659,12 @@ void MapFrame::initializeFoW()
         libvlc_media_list_player_play(vlcListPlayer);
         _timerId = startTimer(0);
     }
+#endif
 }
 
 void MapFrame::uninitializeFoW()
 {
+#ifdef ANIMATED_MAPS
     killTimer(_timerId);
     _timerId = 0;
 
@@ -660,6 +676,7 @@ void MapFrame::uninitializeFoW()
     }
 
     cleanupBuffers();
+#endif
 }
 
 void MapFrame::loadTracks()
@@ -704,6 +721,7 @@ void MapFrame::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
+#ifdef ANIMATED_MAPS
     if(_newImage)
     {
         if(!_background)
@@ -720,6 +738,7 @@ void MapFrame::timerEvent(QTimerEvent *event)
         update();
         _newImage = false;
     }
+#endif
 }
 
 bool MapFrame::execEventFilterSelectZoom(QObject *obj, QEvent *event)
@@ -884,12 +903,14 @@ void MapFrame::cleanupBuffers()
     delete _fow;
     _fow = nullptr;
 
+#ifdef ANIMATED_MAPS
     if(_nativeBufferNotAligned)
     {
         free(_nativeBufferNotAligned);
         _nativeBufferNotAligned = nullptr;
         _nativeBuffer = nullptr;
     }
+#endif
 }
 
 void MapFrame::setMapCursor()

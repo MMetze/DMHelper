@@ -8,9 +8,14 @@
 #include <QRubberBand>
 #include "undopath.h"
 
-#include <BaseTsd.h>
-typedef SSIZE_T ssize_t;
-#include <vlc/vlc.h>
+//#define ANIMATED_MAPS
+
+
+#ifdef ANIMATED_MAPS
+    #include <BaseTsd.h>
+    typedef SSIZE_T ssize_t;
+    #include <vlc/vlc.h>
+#endif
 
 namespace Ui {
 class MapFrame;
@@ -39,11 +44,13 @@ public:
     QAction* getUndoAction(QObject* parent);
     QAction* getRedoAction(QObject* parent);
 
+#ifdef ANIMATED_MAPS
     void* lockCallback(void **planes);
     void unlockCallback(void *picture, void *const *planes);
     void displayCallback(void *picture);
     unsigned formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines);
     void cleanupCallback();
+#endif
 
 
 signals:
@@ -110,6 +117,7 @@ private:
 
     Map* _mapSource;
 
+#ifdef ANIMATED_MAPS
     libvlc_instance_t *vlcInstance;
     libvlc_media_list_player_t *vlcListPlayer;
     unsigned int _nativeWidth;
@@ -119,6 +127,7 @@ private:
     QImage _loadImage;
     bool _newImage;
     int _timerId;
+#endif
 
 };
 

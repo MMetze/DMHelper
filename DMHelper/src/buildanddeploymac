@@ -1,21 +1,26 @@
 echo Building DM Helper for MAC
 
-export PATH=$PATH:/Users/test/Qt5.11.2/5.11.2/clang_64/bin
+export PATH=$PATH:/Users/test/Qt/5.13.0/clang_64/bin
 
 cd ..
-rm -R build-release
-rm "DM Helper Release MAC.zip"
-mkdir build-release
-cd build-release
+rm -R build-clang_64bit-Release
+rm "DM Helper macOS release.zip"
+mkdir build-clang_64bit-Release
+cd build-clang_64bit-Release
 qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
-/usr/bin/make
+make -j4
 
-macdeployqt DMHelper.app/
+cp -R DMHelper.app/ ../release/DMHelper.app/
+cp -R ../src/binsrc/ ../release/binsrc/
+cp -R ../src/bestiary/ ../release/bestiary/
+cp -R ../src/doc/ ../release/doc/
 
-cp ../../DMHelperShared/build-release/libDMHelperShared* DMHelper.app/Contents/Frameworks
-install_name_tool -change libDMHelperShared.1.dylib @executable_path/../Frameworks/libDMHelperShared.1.dylib DMHelper.app/Contents/MacOS/DMHelper
+macdeployqt ../release/DMHelper.app/
 
-zip -r "DM Helper Release MAC.zip" DMHelper.app
+cd ../release
 
-mv "DM Helper Release MAC.zip" ../
+zip -r "DM Helper macOS release.zip" *
+
+mv "DM Helper macOS release.zip" ../
+
 

@@ -43,6 +43,7 @@ void QuickRefFrame::readQuickRef()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(quickRefFileName);
+    qDebug() << "[QuickRef] Quickref data file: " << file.symLinkTarget();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[QuickRef] Unable to read quickref file: " << quickRefFileName;

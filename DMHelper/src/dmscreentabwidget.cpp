@@ -31,6 +31,7 @@ void DMScreenTabWidget::readEquipment()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(equipmentFileName);
+    qDebug() << "[DMScreen] Equipment file: " << file.symLinkTarget();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[DMScreen] Unable to read equipment file: " << equipmentFileName;

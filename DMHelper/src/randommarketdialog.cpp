@@ -36,6 +36,7 @@ void RandomMarketDialog::loadMarkets()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(shopFileName);
+    qDebug() << "[RandomMarketDialog] Market file: " << file.symLinkTarget();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[RandomMarketDialog] Unable to read market file: " << shopFileName;

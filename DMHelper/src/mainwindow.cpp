@@ -71,7 +71,9 @@
 #include <QDesktopServices>
 #include <QDebug>
 #include <QLibraryInfo>
+#ifndef Q_OS_MAC
 #include <QSplashScreen>
+#endif
 
 // Next Todos:
 // DONE: Add empty DMHelper.log as part of the deploy procedure
@@ -157,10 +159,12 @@ MainWindow::MainWindow(QWidget *parent) :
     dirty(false),
     _animationFrameCount(DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES)
 {
+#ifndef Q_OS_MAC
     QPixmap pixmap(":/img/data/dmhelper_large.png");
     QSplashScreen splash(pixmap);
     splash.show();
     splash.showMessage(QString("Initializing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+#endif
 
     qDebug() << "[Main] Initializing Main";
 
@@ -275,7 +279,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
     connect(_options,SIGNAL(showAnimationsChanged(bool)),ui->scrollWidget,SLOT(setAnimatedTransitions(bool)));
     qDebug() << "[Main] Loading Bestiary";
+#ifndef Q_OS_MAC
     splash.showMessage(QString("Initializing Bestiary...\n"),Qt::AlignBottom | Qt::AlignHCenter);
+#endif
     qApp->processEvents();
     readBestiary();
     qDebug() << "[Main] Bestiary Loaded";
@@ -323,7 +329,9 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main] Encounter Pages Created";
 
     // Load the quick reference tabs
+#ifndef Q_OS_MAC
     splash.showMessage(QString("Initializing Quick Reference tabs...\n"),Qt::AlignBottom | Qt::AlignHCenter);
+#endif
     qApp->processEvents();
     qDebug() << "[Main] Creating Reference Tabs";
     previewFrame = new PublishFrame(this);
@@ -364,7 +372,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->scrollWidget->setAnimatedTransitions(_options->getShowAnimations());
     qDebug() << "[Main] Reference Tabs Created";
 
+#ifndef Q_OS_MAC
     splash.showMessage(QString("Preparing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+#endif
     qApp->processEvents();
 
     qDebug() << "[Main] Initializing Battle Dialog Manager";
@@ -421,7 +431,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     emit campaignLoaded(nullptr);
 
+#ifndef Q_OS_MAC
     splash.finish(this);
+#endif
 
     qDebug() << "[Main] Main Initialization complete";
 }

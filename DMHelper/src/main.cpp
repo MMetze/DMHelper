@@ -3,6 +3,7 @@
 #include <QDateTime>
 #include <QTextStream>
 #include <QtGlobal>
+#include <QDir>
 #include <QDebug>
 
 #ifndef QT_NO_DEBUG_OUTPUT
@@ -45,7 +46,17 @@ int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
 #ifndef QT_NO_DEBUG_OUTPUT
-    QString fileName = QCoreApplication::applicationFilePath().replace(".exe", ".log");
+
+    #ifdef Q_OS_MAC
+        QDir filePath(QCoreApplication::applicationDirPath());
+        filePath.cdUp();
+        filePath.cdUp();
+        filePath.cdUp();
+        QString fileName = filePath.path() + QString("/DMHelper.log");
+    #else
+        QString fileName = QCoreApplication::applicationFilePath().replace(".exe", ".log");
+    #endif
+
     QFile *log = nullptr;
 
     if(QFile::exists(fileName)) {
