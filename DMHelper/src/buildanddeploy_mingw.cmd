@@ -32,7 +32,7 @@ xcopy .\release\DMHelper.exe ..\bin64\
 xcopy C:\Qt\5.12.3\mingw73_64\bin\Qt5Xml.dll ..\bin64\
 xcopy ..\src\binsrc\* ..\bin64\*
 xcopy /s ..\src\bestiary\* ..\bin64\bestiary\*
-xcopy ..\src\doc\* ..\bin64\doc\*
+xcopy /s ..\src\doc\* ..\bin64\doc\*
 
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64
 
