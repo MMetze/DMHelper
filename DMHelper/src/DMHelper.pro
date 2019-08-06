@@ -124,6 +124,7 @@ SOURCES += main.cpp\
     battledialoggraphicsview.cpp \
     battledialoggraphicsscene.cpp \
     battledialogeffectsettings.cpp \
+    welcomeframe.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
     widgetcharacter.cpp \
@@ -272,6 +273,7 @@ HEADERS  += mainwindow.h \
     battledialoggraphicsview.h \
     battledialoggraphicsscene.h \
     battledialogeffectsettings.h \
+    welcomeframe.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \
     widgetcharacter.h \
@@ -343,6 +345,7 @@ FORMS    += mainwindow.ui \
     scrollingtextwindow.ui \
     dicerollframe.ui \
     battledialogeffectsettings.ui \
+    welcomeframe.ui \
     widgetbattlecombatant.ui \
     dicerolldialogcombatants.ui \
     widgetcharacter.ui \
