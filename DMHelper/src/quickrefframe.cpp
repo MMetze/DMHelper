@@ -4,6 +4,7 @@
 #include "quickrefdatawidget.h"
 #include <QFile>
 #include <QTextStream>
+#include <QFileInfo>
 #include <QDebug>
 
 QuickRefFrame::QuickRefFrame(QWidget *parent) :
@@ -43,7 +44,7 @@ void QuickRefFrame::readQuickRef()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(quickRefFileName);
-    qDebug() << "[QuickRef] Quickref data file: " << file.symLinkTarget();
+    qDebug() << "[QuickRef] Quickref data file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[QuickRef] Unable to read quickref file: " << quickRefFileName;
