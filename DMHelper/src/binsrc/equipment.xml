@@ -155,7 +155,7 @@
 	<magicitem name="Glamoured Studded Leather" category="Armor (studded leather)" probability="rare" attunement=""></magicitem>
 	<magicitem name="Gloves of Missile Snaring" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
 	<magicitem name="Gloves of Swimming and Climbing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
-	<magicitem name="Goggles of Night" category="wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Goggles of Night" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
 	<magicitem name="Hammer of Thunderbolts" category="Weapon (maul)" probability="legendary" attunement=""></magicitem>
 	<magicitem name="Handy Haversack" category="Wondrous item" probability="rare" attunement=""></magicitem>
 	<magicitem name="Hat of Disguise" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>

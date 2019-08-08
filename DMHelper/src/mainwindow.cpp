@@ -51,6 +51,7 @@
 #include "aboutdialog.h"
 #include "campaignexporter.h"
 #include "basicdateserver.h"
+#include "welcomeframe.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -326,6 +327,12 @@ MainWindow::MainWindow(QWidget *parent) :
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
     connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addWidget(audioTrackEdit);
+    // EncounterType_WelcomeScreen
+    WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
+    connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openFile(QString)));
+    connect(ui->action_Users_Guide, SIGNAL(triggered()), welcomeFrame, SLOT(openUsersGuide()));
+    connect(ui->action_Getting_Started, SIGNAL(triggered()), welcomeFrame, SLOT(openGettingStarted()));
+    ui->stackedWidgetEncounter->addWidget(welcomeFrame);
     qDebug() << "[Main] Encounter Pages Created";
 
     // Load the quick reference tabs
@@ -416,6 +423,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _audioPlayer, SLOT(setVolume(int)));
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _options, SLOT(setAudioVolume(int)));
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
+    connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(mapFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
+    connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(encounterBattleEdit, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -981,8 +991,8 @@ void MainWindow::showPublishWindow()
     if(!pubWindow->isVisible())
     {
         pubWindow->show();
-        pubWindow->activateWindow();
     }
+    pubWindow->activateWindow();
 }
 
 void MainWindow::linkActivated(const QUrl & link)
@@ -1620,6 +1630,8 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     else
     {
         setWindowTitle(QString("DM Helper [*]"));
+        ui->stackedWidgetEncounter->setEnabled(true);
+        ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
     }
 }
 

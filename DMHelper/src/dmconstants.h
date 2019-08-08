@@ -25,7 +25,8 @@ namespace DMHelper
         EncounterType_Character,
         EncounterType_Map,
         EncounterType_ScrollingText,
-        EncounterType_AudioTrack
+        EncounterType_AudioTrack,
+        EncounterType_WelcomeScreen
     };
 
     enum

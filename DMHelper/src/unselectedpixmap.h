@@ -15,6 +15,7 @@ public:
 
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    virtual bool sceneEvent(QEvent *event);
 
 private:
     BattleDialogModelCombatant* _combatant;

@@ -1,6 +1,7 @@
 #include "equipmentserver.h"
 #include <QDebug>
 #include <QDomDocument>
+#include <QFileInfo>
 
 EquipmentServer* EquipmentServer::_instance = nullptr;
 
@@ -76,7 +77,7 @@ void EquipmentServer::readEquipment()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(equipmentFileName);
-    qDebug() << "[EquipmentServer] Equipment file: " << file.symLinkTarget();
+    qDebug() << "[EquipmentServer] Equipment file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[EquipmentServer] Unable to read equipment file: " << equipmentFileName;

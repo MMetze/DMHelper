@@ -12,6 +12,7 @@
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
+#include <QTimer>
 #include <QDebug>
 
 #ifdef ANIMATED_MAPS
@@ -163,7 +164,8 @@ MapFrame::MapFrame(QWidget *parent) :
     _nativeBuffer(nullptr),
     _loadImage(),
     _newImage(false),
-    _timerId(0)
+    _timerId(0),
+    _publishTimer(nullptr)
 #endif
 {
     ui->setupUi(this);
@@ -224,6 +226,12 @@ MapFrame::MapFrame(QWidget *parent) :
 
     connect(ui->grpBrush,SIGNAL(buttonClicked(int)),this,SLOT(setMapCursor()));
     connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(setMapCursor()));
+
+#ifdef ANIMATED_MAPS
+    _publishTimer = new QTimer(this);
+    _publishTimer->setSingleShot(false);
+    connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
+#endif
 
     setMapCursor();
     setScale(1.0);
@@ -409,7 +417,7 @@ void MapFrame::updateFoW()
 {
     if((_fow)&&(_mapSource))
     {
-        _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+       _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
     }
 }
 
@@ -448,32 +456,56 @@ void MapFrame::publishFoWImage()
     if(!_mapSource)
         return;
 
-    QImage pub;
-    if(ui->btnPublishZoom->isChecked())
+    if(!ui->btnPublish->isCheckable())
     {
-        QRect imgRect(ui->graphicsView->horizontalScrollBar()->value() / _scale,
-                      ui->graphicsView->verticalScrollBar()->value() / _scale,
-                      ui->graphicsView->viewport()->width() / _scale,
-                      ui->graphicsView->viewport()->height() / _scale);
-
-        // TODO: Consider zoom factor...
-
-        pub = _mapSource->getPublishImage(imgRect);
-    }
-    else
-    {
-        if(ui->btnPublishVisible->isChecked())
+        QImage pub;
+        if(ui->btnPublishZoom->isChecked())
         {
-            pub = _mapSource->getShrunkPublishImage();
+            QRect imgRect(ui->graphicsView->horizontalScrollBar()->value() / _scale,
+                          ui->graphicsView->verticalScrollBar()->value() / _scale,
+                          ui->graphicsView->viewport()->width() / _scale,
+                          ui->graphicsView->viewport()->height() / _scale);
+
+            // TODO: Consider zoom factor...
+
+            pub = _mapSource->getPublishImage(imgRect);
         }
         else
         {
-            pub = _mapSource->getPublishImage();
+            if(ui->btnPublishVisible->isChecked())
+            {
+                pub = _mapSource->getShrunkPublishImage();
+            }
+            else
+            {
+                pub = _mapSource->getPublishImage();
+            }
+        }
+
+        emit publishImage(pub, ui->btnColor->getColor());
+        emit showPublishWindow();
+        emit startTrack(_mapSource->getAudioTrack());
+    }
+#ifdef ANIMATED_MAPS
+    else
+    {
+        if(ui->btnPublish->isChecked())
+        {
+            killTimer(_timerId);
+            _timerId = 0;
+            _bwFoWImage = _mapSource->getBWFoWImage(_loadImage);
+            _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
+            emit animationStarted(ui->btnColor->getColor());
+            emit showPublishWindow();
+            emit startTrack(_mapSource->getAudioTrack());
+        }
+        else
+        {
+            _publishTimer->stop();
+            _timerId = startTimer(0);
         }
     }
-
-    emit publishImage(pub, ui->btnColor->getColor());
-    emit startTrack(_mapSource->getAudioTrack());
+#endif
 }
 
 void MapFrame::clear()
@@ -580,6 +612,8 @@ void MapFrame::initializeFoW()
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         _fow->setEnabled(false);
         _fow->setZValue(-1);
+
+        ui->btnPublish->setCheckable(false);
     }
 
 #ifdef ANIMATED_MAPS
@@ -658,6 +692,8 @@ void MapFrame::initializeFoW()
         // And start playback
         libvlc_media_list_player_play(vlcListPlayer);
         _timerId = startTimer(0);
+
+        ui->btnPublish->setCheckable(true);
     }
 #endif
 }
@@ -722,6 +758,9 @@ void MapFrame::timerEvent(QTimerEvent *event)
     Q_UNUSED(event);
 
 #ifdef ANIMATED_MAPS
+    if(!_mapSource)
+        return;
+
     if(_newImage)
     {
         if(!_background)
@@ -729,6 +768,13 @@ void MapFrame::timerEvent(QTimerEvent *event)
             _background = _scene->addPixmap(QPixmap::fromImage(_loadImage));
             _background->setEnabled(false);
             _background->setZValue(-2);
+
+            QImage fowImage = QImage(_loadImage.size(), QImage::Format_ARGB32);
+            fowImage.fill(QColor(0,0,0,128));
+            _mapSource->setExternalFoWImage(fowImage);
+            _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+            _fow->setEnabled(false);
+            _fow->setZValue(1);
         }
         else
         {
@@ -966,6 +1012,22 @@ void MapFrame::setScale(qreal s)
     ui->graphicsView->setTransform(QTransform::fromScale(_scale,_scale));
     setMapCursor();
 }
+
+#ifdef ANIMATED_MAPS
+void MapFrame::executeAnimateImage()
+{
+    if(!_mapSource)
+        return;
+
+    QImage result(_loadImage);
+    QPainter p;
+    p.begin(&result);
+        p.drawImage(0, 0, _bwFoWImage);
+    p.end();
+
+    emit animateImage(result);
+}
+#endif
 
 void MapFrame::trackSelected(int index)
 {

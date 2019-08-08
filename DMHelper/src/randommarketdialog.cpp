@@ -6,6 +6,7 @@
 #include <QRandomGenerator>
 #include <QTextCharFormat>
 #include <QScrollBar>
+#include <QFileInfo>
 #include <QDebug>
 
 RandomMarketDialog::RandomMarketDialog(QWidget *parent) :
@@ -36,7 +37,7 @@ void RandomMarketDialog::loadMarkets()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(shopFileName);
-    qDebug() << "[RandomMarketDialog] Market file: " << file.symLinkTarget();
+    qDebug() << "[RandomMarketDialog] Market file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[RandomMarketDialog] Unable to read market file: " << shopFileName;

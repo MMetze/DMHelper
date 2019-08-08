@@ -58,3 +58,18 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
 
     return QGraphicsItem::itemChange(change, value);
 }
+
+bool UnselectedPixmap::sceneEvent(QEvent *event)
+{
+    if((!isVisible()) && (event->type() == QEvent::GraphicsSceneMouseMove))
+    {
+        setVisible(true);
+        bool result = QGraphicsPixmapItem::sceneEvent(event);
+        setVisible(false);
+        return result;
+    }
+    else
+    {
+        return QGraphicsPixmapItem::sceneEvent(event);
+    }
+}

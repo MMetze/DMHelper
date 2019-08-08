@@ -114,7 +114,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <x>0</x>
      <y>0</y>
      <width>1467</width>
-     <height>26</height>
+     <height>31</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -177,12 +177,21 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <addaction name="actionRandom_Market"/>
     <addaction name="separator"/>
     <addaction name="actionOptions"/>
+   </widget>
+   <widget class="QMenu" name="menu_Help">
+    <property name="title">
+     <string>&amp;Help</string>
+    </property>
     <addaction name="actionAbout"/>
+    <addaction name="separator"/>
+    <addaction name="action_Users_Guide"/>
+    <addaction name="action_Getting_Started"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Edit"/>
    <addaction name="menu_Campaign"/>
    <addaction name="menu_Bestiary"/>
+   <addaction name="menu_Help"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -352,6 +361,16 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionRandom_Market">
    <property name="text">
     <string>Random Market...</string>
+   </property>
+  </action>
+  <action name="action_Users_Guide">
+   <property name="text">
+    <string>Open &amp;User's Guide</string>
+   </property>
+  </action>
+  <action name="action_Getting_Started">
+   <property name="text">
+    <string>Open &amp;Getting Started</string>
    </property>
   </action>
  </widget>

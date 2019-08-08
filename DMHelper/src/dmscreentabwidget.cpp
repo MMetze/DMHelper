@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QDomDocument>
 #include <QDomElement>
+#include <QFileInfo>
 #include <QDebug>
 
 DMScreenTabWidget::DMScreenTabWidget(QWidget *parent) :
@@ -31,7 +32,7 @@ void DMScreenTabWidget::readEquipment()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(equipmentFileName);
-    qDebug() << "[DMScreen] Equipment file: " << file.symLinkTarget();
+    qDebug() << "[DMScreen] Equipment file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[DMScreen] Unable to read equipment file: " << equipmentFileName;

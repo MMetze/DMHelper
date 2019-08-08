@@ -3,6 +3,7 @@
 #include <QTextStream>
 #include <QDomDocument>
 #include <QDomElement>
+#include <QFileInfo>
 #include <QDebug>
 
 BasicDateServer* BasicDateServer::_instance = nullptr;
@@ -244,7 +245,7 @@ void BasicDateServer::readDateInformation()
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(calendarFileName);
-    qDebug() << "[BasicDateServer] Calendar file: " << file.symLinkTarget();
+    qDebug() << "[BasicDateServer] Calendar file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[BasicDateServer] Unable to read calendar file: " << calendarFileName;
