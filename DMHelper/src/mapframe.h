@@ -31,7 +31,7 @@ class MapFrame : public QWidget
 
 public:
     explicit MapFrame(QWidget *parent = nullptr);
-    ~MapFrame();
+    virtual ~MapFrame() override;
 
     void setMap(Map* map);
 
@@ -39,7 +39,7 @@ public:
     void mapMarkerMoved(int markerId);
     void editMapMarker(int markerId);
 
-    virtual bool eventFilter(QObject *obj, QEvent *event);
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
 
     QAction* getUndoAction(QObject* parent);
     QAction* getRedoAction(QObject* parent);
@@ -59,6 +59,12 @@ signals:
     void windowClosed(MapFrame* mapFrame);
     void dirty();
     void startTrack(AudioTrack* track);
+    void showPublishWindow();
+
+#ifdef ANIMATED_MAPS
+    void animationStarted(QColor color);
+    void animateImage(QImage img);
+#endif
 
 public slots:
     void updateFoW();
@@ -101,6 +107,10 @@ protected slots:
     void trackSelected(int index);
     void setScale(qreal s);
 
+#ifdef ANIMATED_MAPS
+    void executeAnimateImage();
+#endif
+
 private:
     Ui::MapFrame *ui;
 
@@ -127,6 +137,8 @@ private:
     QImage _loadImage;
     bool _newImage;
     int _timerId;
+    QTimer* _publishTimer;
+    QImage _bwFoWImage;
 #endif
 
 };
