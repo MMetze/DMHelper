@@ -1,6 +1,8 @@
 #include "optionscontainer.h"
 #include "optionsdialog.h"
 #include <QSettings>
+#include <QDir>
+#include <QCoreApplication>
 
 // TODO: consider copy of MRU functionality
 
@@ -149,7 +151,16 @@ void OptionsContainer::readSettings()
 #endif
 
     // Note: password will not be stored in settings
-    setBestiaryFileName(settings.value("bestiary","./bestiary/DMHelperBestiary.xml").toString());
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
+#else
+    QString bestiaryFileName = QString("bestiary","./bestiary/DMHelperBestiary.xml");
+#endif
+    setBestiaryFileName(settings.value("bestiary",bestiaryFileName).toString());
     setLastMonster(settings.value("lastMonster","").toString());
 #ifdef INCLUDE_CHASE_SUPPORT
     setChaseFileName(settings.value("chase data","").toString());

@@ -4,6 +4,8 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QFileInfo>
+#include <QDir>
+#include <QCoreApplication>
 #include <QDebug>
 
 BasicDateServer* BasicDateServer::_instance = nullptr;
@@ -241,7 +243,15 @@ void BasicDateServer::readDateInformation()
 {
     qDebug() << "[BasicDateServer] Reading calendar information";
 
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString calendarFileName = fileDirPath.path() + QString("/calendar.xml");
+#else
     QString calendarFileName("calendar.xml");
+#endif
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(calendarFileName);

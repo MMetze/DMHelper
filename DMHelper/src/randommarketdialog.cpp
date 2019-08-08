@@ -7,6 +7,8 @@
 #include <QTextCharFormat>
 #include <QScrollBar>
 #include <QFileInfo>
+#include <QDir>
+#include <QCoreApplication>
 #include <QDebug>
 
 RandomMarketDialog::RandomMarketDialog(QWidget *parent) :
@@ -33,7 +35,15 @@ void RandomMarketDialog::loadMarkets()
 {
     qDebug() << "[RandomMarketDialog] Reading markets...";
 
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString shopFileName = fileDirPath.path() + QString("/shops.xml");
+#else
     QString shopFileName("shops.xml");
+#endif
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(shopFileName);

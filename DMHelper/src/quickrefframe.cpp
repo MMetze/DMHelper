@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QFileInfo>
+#include <QDir>
+#include <QCoreApplication>
 #include <QDebug>
 
 QuickRefFrame::QuickRefFrame(QWidget *parent) :
@@ -40,7 +42,15 @@ void QuickRefFrame::readQuickRef()
 
     ui->cmbQuickRef->clear();
 
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString quickRefFileName = fileDirPath.path() + QString("/quickref_data.xml");
+#else
     QString quickRefFileName("quickref_data.xml");
+#endif
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(quickRefFileName);

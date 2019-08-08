@@ -72,6 +72,7 @@
 #include <QDesktopServices>
 #include <QDebug>
 #include <QLibraryInfo>
+#include <QCoreApplication>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
@@ -1043,7 +1044,15 @@ void MainWindow::readBestiary()
         */
 
         qDebug() << "[Main] No known bestiary found, attempting to load default bestiary";
+#ifdef Q_OS_MAC
+        QDir fileDirPath(QCoreApplication::applicationDirPath());
+        fileDirPath.cdUp();
+        fileDirPath.cdUp();
+        fileDirPath.cdUp();
+        bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
+#else
         bestiaryFileName = QString("./bestiary/DMHelperBestiary.xml");
+#endif
     }
 
     qDebug() << "[Main] Reading bestiary: " << bestiaryFileName;

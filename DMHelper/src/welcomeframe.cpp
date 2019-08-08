@@ -3,6 +3,7 @@
 #include "mruhandler.h"
 #include <QDesktopServices>
 #include <QUrl>
+#include <QDir>
 #include <QtDebug>
 
 WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
@@ -52,11 +53,11 @@ void WelcomeFrame::openGettingStarted()
 void WelcomeFrame::openSampleCampaign()
 {
 #ifdef Q_OS_MAC
-    QDir filePath(QCoreApplication::applicationDirPath());
-    filePath.cdUp();
-    filePath.cdUp();
-    filePath.cdUp();
-    QString filePath = filePath.path() + QString("/doc/DMHelper Realm.xml");
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString filePath = fileDirPath.path() + QString("/doc/DMHelper Realm.xml");
 #else
     QString filePath = QCoreApplication::applicationDirPath() + QString("/doc/DMHelper Realm.xml");
 #endif
@@ -109,11 +110,11 @@ void WelcomeFrame::openCampaign(const QString& campaignText)
 void WelcomeFrame::openDoc(const QString& docName)
 {
 #ifdef Q_OS_MAC
-    QDir filePath(QCoreApplication::applicationDirPath());
-    filePath.cdUp();
-    filePath.cdUp();
-    filePath.cdUp();
-    QString filePath = filePath.path() + QString("/doc/") + docName;
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString filePath = fileDirPath.path() + QString("/doc/") + docName;
 #else
     QString filePath = QCoreApplication::applicationDirPath() + QString("/doc/") + docName;
 #endif

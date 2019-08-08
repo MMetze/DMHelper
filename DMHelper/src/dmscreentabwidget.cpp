@@ -8,6 +8,8 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QFileInfo>
+#include <QDir>
+#include <QCoreApplication>
 #include <QDebug>
 
 DMScreenTabWidget::DMScreenTabWidget(QWidget *parent) :
@@ -28,7 +30,15 @@ void DMScreenTabWidget::readEquipment()
 {
     qDebug() << "[DMScreen] Reading equipment for DM Screen";
 
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString equipmentFileName = fileDirPath.path() + QString("/equipment.xml");
+#else
     QString equipmentFileName("equipment.xml");
+#endif
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(equipmentFileName);

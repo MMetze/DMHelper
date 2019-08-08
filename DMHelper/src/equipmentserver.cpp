@@ -2,6 +2,8 @@
 #include <QDebug>
 #include <QDomDocument>
 #include <QFileInfo>
+#include <QDir>
+#include <QCoreApplication>
 
 EquipmentServer* EquipmentServer::_instance = nullptr;
 
@@ -73,7 +75,15 @@ void EquipmentServer::readEquipment()
 {
     qDebug() << "[EquipmentServer] Reading equipment...";
 
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    fileDirPath.cdUp();
+    QString equipmentFileName = fileDirPath.path() + QString("/equipment.xml");
+#else
     QString equipmentFileName("equipment.xml");
+#endif
 
     QDomDocument doc("DMHelperDataXML");
     QFile file(equipmentFileName);
