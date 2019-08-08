@@ -383,4 +383,4 @@ INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
 
-LIBS += -L$$PWD/vlc -llibvlc
+# win32: LIBS += -L$$PWD/vlc -llibvlc
