@@ -4,20 +4,25 @@ export PATH=$PATH:/Users/test/Qt/5.13.0/clang_64/bin
 
 cd ..
 rm -R build-clang_64bit-Release
+rm -R release
 rm "DM Helper macOS release.zip"
 mkdir build-clang_64bit-Release
+mkdir release
 cd build-clang_64bit-Release
 qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
 make -j4
 
 cp -R DMHelper.app/ ../release/DMHelper.app/
-cp -R ../src/binsrc/ ../release/binsrc/
+cp -R ../src/binsrc/ ../release/
 cp -R ../src/bestiary/ ../release/bestiary/
 cp -R ../src/doc/ ../release/doc/
 
 macdeployqt ../release/DMHelper.app/
 
 cd ../release
+
+rm libeay32.dll
+rm ssleay32.dll
 
 zip -r "DM Helper macOS release.zip" *
 
