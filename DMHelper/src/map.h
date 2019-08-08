@@ -42,6 +42,7 @@ public:
     MapMarker* getMapMarker(int id);
 
     bool isInitialized();
+    void setExternalFoWImage(QImage externalImage);
     QImage getBackgroundImage();
     QImage getFoWImage();
 

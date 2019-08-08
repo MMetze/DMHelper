@@ -283,6 +283,12 @@ bool Map::isInitialized()
     return _initialized;
 }
 
+void Map::setExternalFoWImage(QImage externalImage)
+{
+    _imgFow = externalImage;
+    applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
+}
+
 QImage Map::getBackgroundImage()
 {
     return _imgBackground;
