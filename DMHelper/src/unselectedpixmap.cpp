@@ -7,23 +7,33 @@
 
 UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant) :
     QGraphicsPixmapItem(),
-    _combatant(combatant)
+    _combatant(combatant),
+    _draw(true)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 UnselectedPixmap::UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant) :
     QGraphicsPixmapItem(pixmap),
-    _combatant(combatant)
+    _combatant(combatant),
+    _draw(true)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
 }
 
 void UnselectedPixmap::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    QStyleOptionGraphicsItem myoption = (*option);
-    myoption.state &= ~QStyle::State_Selected;
-    QGraphicsPixmapItem::paint(painter, &myoption, widget);
+    if(_draw)
+    {
+        QStyleOptionGraphicsItem myoption = (*option);
+        myoption.state &= ~QStyle::State_Selected;
+        QGraphicsPixmapItem::paint(painter, &myoption, widget);
+    }
+}
+
+void UnselectedPixmap::setDraw(bool draw)
+{
+    _draw = draw;
 }
 
 QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -59,17 +69,24 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
     return QGraphicsItem::itemChange(change, value);
 }
 
+/*
 bool UnselectedPixmap::sceneEvent(QEvent *event)
 {
-    if((!isVisible()) && (event->type() == QEvent::GraphicsSceneMouseMove))
+    if((!isVisible()))
     {
-        setVisible(true);
-        bool result = QGraphicsPixmapItem::sceneEvent(event);
-        setVisible(false);
-        return result;
+        if((event->type() == QEvent::GraphicsSceneMousePress) ||
+           (event->type() == QEvent::GraphicsSceneMouseRelease) ||
+           (event->type() == QEvent::GrabMouse) ||
+           (event->type() == QEvent::UngrabMouse) ||
+           (event->type() == QEvent::GraphicsSceneMouseMove))
+        {
+            setVisible(true);
+            bool result = QGraphicsPixmapItem::sceneEvent(event);
+            setVisible(false);
+            return result;
+        }
     }
-    else
-    {
-        return QGraphicsPixmapItem::sceneEvent(event);
-    }
+
+    return QGraphicsPixmapItem::sceneEvent(event);
 }
+*/

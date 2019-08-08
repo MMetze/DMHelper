@@ -12,13 +12,15 @@ public:
     UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant);
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
+    void setDraw(bool draw);
 
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-    virtual bool sceneEvent(QEvent *event);
+//    virtual bool sceneEvent(QEvent *event);
 
 private:
     BattleDialogModelCombatant* _combatant;
+    bool _draw;
 };
 
 #endif // UNSELECTEDPIXMAP_H

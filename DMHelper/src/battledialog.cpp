@@ -1379,6 +1379,11 @@ void BattleDialog::setCombatantVisibility(bool aliveVisible, bool deadVisible, b
         }
 
         QGraphicsPixmapItem* item = _combatantIcons.value(_model.getCombatant(i));
+        //UnselectedPixmap* unselectedItem = dynamic_cast<UnselectedPixmap*>(item);
+        //if(unselectedItem)
+        //    unselectedItem->setDraw(vis);
+        //else if(item)
+        //    item->setVisible(vis);
         if(item)
             item->setVisible(vis);
 
@@ -1413,7 +1418,11 @@ void BattleDialog::setPublishVisibility(bool publish)
                 QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
                 if(item)
                 {
-                    item->setVisible(!publish);
+                    UnselectedPixmap* unselectedItem = dynamic_cast<UnselectedPixmap*>(item);
+                    if(unselectedItem)
+                        unselectedItem->setDraw(!publish);
+                    else
+                        item->setVisible(!publish);
 
                     if((_selectedPixmap) && (combatant == _selectedCombatant))
                         _selectedPixmap->setVisible(!publish);
