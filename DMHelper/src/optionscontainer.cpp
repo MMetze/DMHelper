@@ -158,7 +158,7 @@ void OptionsContainer::readSettings()
     fileDirPath.cdUp();
     QString bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
 #else
-    QString bestiaryFileName = QString("bestiary","./bestiary/DMHelperBestiary.xml");
+    QString bestiaryFileName = QString("./bestiary/DMHelperBestiary.xml");
 #endif
     setBestiaryFileName(settings.value("bestiary",bestiaryFileName).toString());
     setLastMonster(settings.value("lastMonster","").toString());
