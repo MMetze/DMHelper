@@ -1420,9 +1420,21 @@ void BattleDialog::setPublishVisibility(bool publish)
                 {
                     UnselectedPixmap* unselectedItem = dynamic_cast<UnselectedPixmap*>(item);
                     if(unselectedItem)
+                    {
                         unselectedItem->setDraw(!publish);
+                        //Since we aren't making the item invisible, we have to manually make it's children invisible
+                        if(item->childItems().count() > 0)
+                        {
+                            for(QGraphicsItem* child : item->childItems())
+                            {
+                                child->setVisible(!publish);
+                            }
+                        }
+                    }
                     else
+                    {
                         item->setVisible(!publish);
+                    }
 
                     if((_selectedPixmap) && (combatant == _selectedCombatant))
                         _selectedPixmap->setVisible(!publish);
