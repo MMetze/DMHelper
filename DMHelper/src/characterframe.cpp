@@ -13,7 +13,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::CharacterFrame),
     _character(nullptr),
-    _mouseDown(false)
+    _mouseDown(false),
+    _reading(false)
 {
     ui->setupUi(this);
 
@@ -176,6 +177,7 @@ void CharacterFrame::clear()
     _character = nullptr;
 
     QSignalBlocker blocker(this);
+    _reading = true;
 
     ui->lblIcon->setPixmap(ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Showcase));
 
@@ -265,6 +267,8 @@ void CharacterFrame::clear()
     updateCheckboxName(ui->chkDeception, 0, 0);
     updateCheckboxName(ui->chkPersuasion, 0, 0);
     updateCheckboxName(ui->chkIntimidation, 0, 0);
+
+    _reading = false;
 }
 
 void CharacterFrame::mousePressEvent(QMouseEvent * event)
@@ -296,6 +300,9 @@ void CharacterFrame::readCharacterData()
 {
     if(!_character)
         return;
+
+    QSignalBlocker blocker(this);
+    _reading = true;
 
     loadCharacterImage();
 
@@ -354,11 +361,14 @@ void CharacterFrame::readCharacterData()
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
     calculateMods();
+
+    _reading = false;
+
 }
 
 void CharacterFrame::writeCharacterData()
 {
-    if(_character)
+    if((_character) && (!_reading))
     {
         _character->beginBatchChanges();
 

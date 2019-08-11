@@ -43,6 +43,7 @@ private:
     Ui::CharacterFrame *ui;
     Character* _character;
     bool _mouseDown;
+    bool _reading;
 };
 
 #endif // CHARACTERFRAME_H
