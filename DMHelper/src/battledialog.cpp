@@ -1800,14 +1800,22 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 
     // Set up the target image for publishing
     QSize publishSize = localTargetSize;
-    publishSize.rwidth() = widthBackgroundToWindow(publishSize.width());
+    if(_rotation % 180 == 0)
+        publishSize.rwidth() = widthBackgroundToWindow(publishSize.width());
+    else
+        publishSize.rheight() = widthBackgroundToWindow(publishSize.height());
     QImage drawingImageForPublishing = QImage(publishSize, QImage::Format_ARGB32);
 
     drawingImageForPublishing.fill(_model.getBackgroundColor());
 
-    int imageWidth = widthBackgroundToWindow(_prescaledBackground.width());
+    int imageWidth = _prescaledBackground.width();
+    int imageHeight = _prescaledBackground.height();
+    if(_rotation % 180 == 0)
+        imageWidth = widthBackgroundToWindow(_prescaledBackground.width());
+    else
+        imageHeight = widthBackgroundToWindow(_prescaledBackground.height());
     int xOffset = (publishSize.width() - imageWidth) / 2;
-    int yOffset = (publishSize.height() - _prescaledBackground.height())/ 2;
+    int yOffset = (publishSize.height() - imageHeight)/ 2;
 
     QPainter painter;
     painter.begin(&drawingImageForPublishing);
