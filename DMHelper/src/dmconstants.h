@@ -49,7 +49,8 @@ namespace DMHelper
         ActionType_Fill,
         ActionType_Path,
         ActionType_Point,
-        ActionType_SetMarker
+        ActionType_SetMarker,
+        ActionType_Rect
     };
 
     enum
@@ -108,7 +109,8 @@ namespace DMHelper
     enum
     {
         BrushType_Circle = 0,
-        BrushType_Square
+        BrushType_Square,
+        BrushType_Select
     };
 
     enum

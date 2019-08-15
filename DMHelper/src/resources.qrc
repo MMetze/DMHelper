@@ -162,6 +162,9 @@
         <file>data/dmhelper_large.png</file>
         <file>data/movement.png</file>
         <file>data/icon_reload.png</file>
+        <file>data/icon_rotate_ccw.png</file>
+        <file>data/icon_rotate_cw.png</file>
+        <file>data/icon_select.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

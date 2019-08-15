@@ -39,7 +39,6 @@
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
 //#define BATTLE_DIALOG_LOG_MOVEMENT
-//#define TEST_90_DEGREE_ROTATION
 
 const qreal SELECTED_PIXMAP_SIZE = 800.0;
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
@@ -83,6 +82,7 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     _countdownColor(0,0,0),
     _rubberBandRect(),
     _scale(1.0),
+    _rotation(0),
     _moveRadius(0.0),
     _moveStart(),
     _moveTimer(0)
@@ -125,6 +125,9 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
     connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
     connect(ui->graphicsView,SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)),this,SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
+
+    connect(ui->btnRotateCCW,SIGNAL(clicked()),this,SLOT(rotateCCW()));
+    connect(ui->btnRotateCW,SIGNAL(clicked()),this,SLOT(rotateCW()));
 
     connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
@@ -384,6 +387,7 @@ void BattleDialog::next()
 
 void BattleDialog::setTargetSize(const QSize& targetSize)
 {
+    /*
     int newWidth = widthWindowToBackground(targetSize.width());
 
     if((newWidth == _targetSize.width()) && (targetSize.height() == _targetSize.height()))
@@ -391,7 +395,12 @@ void BattleDialog::setTargetSize(const QSize& targetSize)
 
     _targetSize.setHeight(targetSize.height());
     _targetSize.setWidth(newWidth);
+    */
 
+    if(targetSize == _targetSize)
+        return;
+
+    _targetSize = targetSize;
     createPrescaledBackground();
 }
 
@@ -1325,16 +1334,18 @@ void BattleDialog::createPrescaledBackground()
     t.start();
 #endif
 
-#ifdef TEST_90_DEGREE_ROTATION
     QImage battleMap = _model.getMap()->getPublishImage().copy(sourceRect);
-    QTransform rotateTr;
-    rotateTr.rotate(90.0);
-    QImage rotatedMap = battleMap.transformed(rotateTr);
-    _prescaledBackground = rotatedMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-#else
-    QImage battleMap = _model.getMap()->getPublishImage().copy(sourceRect);
-    _prescaledBackground = battleMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-#endif
+
+    QSize imageSize = rotateTargetSize();
+    qreal scaleFactor = static_cast<qreal>(imageSize.width()) / static_cast<qreal>(battleMap.width());
+    if((scaleFactor * static_cast<qreal>(battleMap.height())) > static_cast<qreal>(imageSize.height()))
+        scaleFactor = static_cast<qreal>(imageSize.height()) / static_cast<qreal>(battleMap.height());
+
+    qreal scaledWidth = scaleFactor * static_cast<qreal>(battleMap.width());
+    qreal scaledHeight = scaleFactor * static_cast<qreal>(battleMap.height());
+
+    //_prescaledBackground = battleMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    _prescaledBackground = battleMap.transformed(QTransform().rotate(_rotation).scale(scaleFactor,scaleFactor), Qt::SmoothTransformation);
 
 #ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
     qDebug() << "[Battle Dialog][PROFILE] " << t.elapsed() << "; prescaled background created";
@@ -1379,11 +1390,6 @@ void BattleDialog::setCombatantVisibility(bool aliveVisible, bool deadVisible, b
         }
 
         QGraphicsPixmapItem* item = _combatantIcons.value(_model.getCombatant(i));
-        //UnselectedPixmap* unselectedItem = dynamic_cast<UnselectedPixmap*>(item);
-        //if(unselectedItem)
-        //    unselectedItem->setDraw(vis);
-        //else if(item)
-        //    item->setVisible(vis);
         if(item)
             item->setVisible(vis);
 
@@ -1470,6 +1476,18 @@ void BattleDialog::setScale(qreal s)
     createPrescaledBackground();
     setMapCursor();
     storeViewRect();
+}
+
+void BattleDialog::rotateCCW()
+{
+    _rotation -= 90;
+    createPrescaledBackground();
+}
+
+void BattleDialog::rotateCW()
+{
+    _rotation += 90;
+    createPrescaledBackground();
 }
 
 void BattleDialog::storeViewRect()
@@ -1778,18 +1796,21 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     t.start();
 #endif
 
-    // Set up the target image for publishing
-    QSize publishSize = _targetSize;
-    publishSize.rwidth() = widthBackgroundToWindow(publishSize.width());
-    imageForPublishing = QImage(publishSize, QImage::Format_ARGB32);
+    QSize localTargetSize = rotateTargetSize();
 
-    imageForPublishing.fill(_model.getBackgroundColor());
+    // Set up the target image for publishing
+    QSize publishSize = localTargetSize;
+    publishSize.rwidth() = widthBackgroundToWindow(publishSize.width());
+    QImage drawingImageForPublishing = QImage(publishSize, QImage::Format_ARGB32);
+
+    drawingImageForPublishing.fill(_model.getBackgroundColor());
 
     int imageWidth = widthBackgroundToWindow(_prescaledBackground.width());
     int xOffset = (publishSize.width() - imageWidth) / 2;
     int yOffset = (publishSize.height() - _prescaledBackground.height())/ 2;
 
-    QPainter painter(&imageForPublishing);
+    QPainter painter;
+    painter.begin(&drawingImageForPublishing);
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; rendering prepared";
@@ -1801,10 +1822,6 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn";
 #endif
 
-#ifdef TEST_90_DEGREE_ROTATION
-    ui->graphicsView->rotate(90);
-#endif
-
     // Draw the contents of the battle dialog in publish mode
     if(_background)
         _background->setVisible(false);
@@ -1812,14 +1829,16 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     QRect viewportRect = ui->graphicsView->viewport()->rect();
     QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
     QRect sourceRect = viewportRect.intersected(sceneViewportRect);
-    ui->graphicsView->render(&painter, QRectF(QPointF(xOffset, yOffset),_targetSize), sourceRect);
+    //painter.translate(_targetSize.width() / 2, _targetSize.height() / 2);
+    painter.translate(localTargetSize.width() / 2, localTargetSize.height() / 2);
+    painter.rotate(_rotation);
+    //painter.translate(-_targetSize.width() / 2, -_targetSize.height() / 2);
+    painter.translate(-localTargetSize.width() / 2, -localTargetSize.height() / 2);
+    ui->graphicsView->render(&painter, QRectF(QPointF(xOffset, yOffset),localTargetSize), sourceRect);
+    //painter.resetTransform();
     setPublishVisibility(false);
     if(_background)
         _background->setVisible(true);
-
-#ifdef TEST_90_DEGREE_ROTATION
-    ui->graphicsView->rotate(-90);
-#endif
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; contents drawn";
@@ -1871,6 +1890,14 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
             painter.drawPixmap(_prescaledBackground.width() + dx + xOffset, _combatantFrame.height() + dy + yOffset, nextPmp);
         }
     }
+
+    painter.end();
+
+    //if(_rotation == 0)
+        imageForPublishing = drawingImageForPublishing;
+    //else
+    //    imageForPublishing = drawingImageForPublishing.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; additional contents drawn";
@@ -2006,6 +2033,30 @@ int BattleDialog::widthBackgroundToWindow(int backgroundWidth)
     return backgroundWidth +
            (_showOnDeck ? _combatantFrame.width() : 0) +
            (_showCountdown ? _countdownFrame.width() : 0);
+}
+
+int BattleDialog::getFrameWidth()
+{
+    return (_showOnDeck ? _combatantFrame.width() : 0) +
+           (_showCountdown ? _countdownFrame.width() : 0);
+}
+
+QSize BattleDialog::rotateTargetSize()
+{
+    QSize rotatedSize;
+
+    if(_rotation % 180 == 0)
+    {
+        rotatedSize.setWidth(_targetSize.width() - getFrameWidth());
+        rotatedSize.setHeight(_targetSize.height());
+    }
+    else
+    {
+        rotatedSize.setWidth(_targetSize.height() - getFrameWidth());
+        rotatedSize.setHeight(_targetSize.width());
+    }
+
+    return rotatedSize;
 }
 
 bool BattleDialog::isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect)

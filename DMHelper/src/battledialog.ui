@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1366</width>
-    <height>1040</height>
+    <height>1043</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -93,6 +93,28 @@ color: rgb(85, 85, 85);
         </property>
         <property name="autoDefault">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnRotateCCW">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/img/data/icon_rotate_ccw.png</normaloff>:/img/data/icon_rotate_ccw.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnRotateCW">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/img/data/icon_rotate_cw.png</normaloff>:/img/data/icon_rotate_cw.png</iconset>
         </property>
        </widget>
       </item>
@@ -616,8 +638,8 @@ color: rgb(85, 85, 85);
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>277</width>
-          <height>948</height>
+          <width>272</width>
+          <height>937</height>
          </rect>
         </property>
        </widget>

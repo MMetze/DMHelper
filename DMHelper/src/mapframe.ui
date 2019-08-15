@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1549</width>
+    <width>1744</width>
     <height>632</height>
    </rect>
   </property>
@@ -217,6 +217,24 @@ color: rgb(85, 0, 0);</string>
           </property>
          </widget>
         </item>
+        <item row="0" column="2">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QPushButton" name="btnResetFoW">
+            <property name="text">
+             <string>Reset FoW</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnClearFoW">
+            <property name="text">
+             <string>Clear FoW</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
       </widget>
      </item>
@@ -237,6 +255,19 @@ color: rgb(85, 0, 0);</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
         <item row="0" column="4">
+         <widget class="QLabel" name="label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Size:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
          <widget class="QSpinBox" name="spinBox">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -256,6 +287,35 @@ color: rgb(85, 0, 0);</string>
           <property name="value">
            <number>30</number>
           </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="btnBrushCircle">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Fog of War Circular Brush</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/img/data/circle.png</normaloff>:/img/data/circle.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">grpBrush</string>
+          </attribute>
          </widget>
         </item>
         <item row="0" column="2">
@@ -285,40 +345,15 @@ color: rgb(85, 0, 0);</string>
          </widget>
         </item>
         <item row="0" column="3">
-         <widget class="QLabel" name="label">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>Size:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="btnBrushCircle">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Fog of War Circular Brush</string>
-          </property>
+         <widget class="QPushButton" name="btnBrushSelect">
           <property name="text">
            <string/>
           </property>
           <property name="icon">
            <iconset resource="resources.qrc">
-            <normaloff>:/img/data/circle.png</normaloff>:/img/data/circle.png</iconset>
+            <normaloff>:/img/data/icon_select.png</normaloff>:/img/data/icon_select.png</iconset>
           </property>
           <property name="checkable">
-           <bool>true</bool>
-          </property>
-          <property name="checked">
            <bool>true</bool>
           </property>
           <attribute name="buttonGroup">
@@ -451,6 +486,28 @@ color: rgb(85, 0, 0);</string>
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="btnRotateCCW">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/img/data/icon_rotate_ccw.png</normaloff>:/img/data/icon_rotate_ccw.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnRotateCW">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="resources.qrc">
+            <normaloff>:/img/data/icon_rotate_cw.png</normaloff>:/img/data/icon_rotate_cw.png</iconset>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </item>
@@ -470,7 +527,7 @@ color: rgb(85, 0, 0);</string>
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Track:</string>
+        <string>Audio:</string>
        </property>
       </widget>
      </item>
@@ -496,24 +553,6 @@ color: rgb(85, 0, 0);</string>
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QPushButton" name="btnResetFoW">
-         <property name="text">
-          <string>Reset FoW</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnClearFoW">
-         <property name="text">
-          <string>Clear FoW</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox_3">

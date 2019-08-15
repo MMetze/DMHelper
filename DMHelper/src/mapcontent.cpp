@@ -303,3 +303,43 @@ QList<QPoint> MapDrawPath::points() const
 {
     return _points;
 }
+
+
+
+MapEditShape::MapEditShape(const QRect& rect, bool erase) :
+    MapEdit(),
+    _rect(rect),
+    _erase(erase)
+{
+}
+
+MapEditShape::MapEditShape(const MapEditShape &obj) :
+    MapEdit(obj),
+    _rect(obj._rect),
+    _erase(obj._erase)
+{
+}
+
+MapEditShape::~MapEditShape()
+{
+}
+
+const QRect& MapEditShape::rect() const
+{
+    return _rect;
+}
+
+bool MapEditShape::erase() const
+{
+    return _erase;
+}
+
+void MapEditShape::setRect(const QRect& rect)
+{
+    _rect = rect;
+}
+
+void MapEditShape::setErase(bool erase)
+{
+    _erase = erase;
+}

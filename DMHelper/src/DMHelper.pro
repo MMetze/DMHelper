@@ -102,6 +102,7 @@ SOURCES += main.cpp\
     clockframe.cpp \
     timeanddateframe.cpp \
     basicdate.cpp \
+    undoshape.cpp \
     unselectedpixmap.cpp \
     scrolltabwidget.cpp \
     scrolloverlaywidget.cpp \
@@ -251,6 +252,7 @@ HEADERS  += mainwindow.h \
     clockframe.h \
     timeanddateframe.h \
     basicdate.h \
+    undoshape.h \
     unselectedpixmap.h \
     scrolltabwidget.h \
     scrolloverlaywidget.h \

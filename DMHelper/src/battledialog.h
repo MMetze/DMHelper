@@ -132,6 +132,8 @@ private slots:
 
     void setMapCursor();
     void setScale(qreal s);
+    void rotateCCW();
+    void rotateCW();
     void storeViewRect();
     void setBackgroundColor(QColor color);
 
@@ -166,6 +168,8 @@ private:
     void resizeBattleMap();
     int widthWindowToBackground(int windowWidth);
     int widthBackgroundToWindow(int backgroundWidth);
+    int getFrameWidth();
+    QSize rotateTargetSize();
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
     void removeEffectsFromItem(QGraphicsPixmapItem* item);
@@ -213,6 +217,7 @@ private:
 
     QRect _rubberBandRect;
     qreal _scale;
+    int _rotation;
 
     qreal _moveRadius;
     QPointF _moveStart;

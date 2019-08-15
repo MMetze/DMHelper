@@ -47,6 +47,7 @@ public:
     QImage getFoWImage();
 
     void paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview );
+    void paintFoWRect( QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview );
     void fillFoW( QColor color, QPaintDevice* target );
     void undoPaint();
     QImage getBWFoWImage();

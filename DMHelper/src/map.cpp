@@ -3,6 +3,7 @@
 #include "undofill.h"
 #include "undopath.h"
 #include "undopoint.h"
+#include "undoshape.h"
 #include "undomarker.h"
 #include "mapframe.h"
 #include "dmconstants.h"
@@ -131,6 +132,9 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                     break;
                 case DMHelper::ActionType_Point:
                     newAction = new UndoPoint(*this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, QPoint()));
+                    break;
+                case DMHelper::ActionType_Rect:
+                    newAction = new UndoShape(*this, MapEditShape(QRect(), true));
                     break;
                 case DMHelper::ActionType_SetMarker:
                     {
@@ -400,6 +404,32 @@ void Map::paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* tar
 
         p.drawRect( point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2 );
     }
+}
+
+void Map::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview)
+{
+    if(!target)
+    {
+        target = &_imgFow;
+    }
+
+    QPainter p(target);
+    p.setPen(Qt::NoPen);
+
+    if(mapEditShape.erase())
+    {
+        p.setBrush(QColor(0,0,0,0));
+        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+    }
+    else
+    {
+        int alpha = preview ? 128 : 255;
+        p.setBrush(QColor(0,0,0,alpha));
+        p.setCompositionMode(QPainter::CompositionMode_Source);
+    }
+
+    p.drawRect(rect);
+
 }
 
 void Map::fillFoW( QColor color, QPaintDevice* target )

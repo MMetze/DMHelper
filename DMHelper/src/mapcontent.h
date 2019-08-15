@@ -2,6 +2,7 @@
 #define MAPCONTENT_H
 
 #include <QPoint>
+#include <QRect>
 #include <QString>
 #include <QColor>
 #include <QDomElement>
@@ -139,6 +140,26 @@ protected:
     QList<QPoint> _points;
 
 };
+
+
+class MapEditShape : public MapEdit
+{
+public:
+    MapEditShape(const QRect& rect, bool erase);
+    MapEditShape(const MapEditShape &obj);
+    virtual ~MapEditShape();
+
+    virtual const QRect& rect() const;
+    virtual bool erase() const;
+
+    virtual void setRect(const QRect& rect);
+    virtual void setErase(bool erase);
+
+protected:
+    QRect _rect;
+    bool _erase;
+};
+
 
 
 

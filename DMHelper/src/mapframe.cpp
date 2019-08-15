@@ -4,6 +4,7 @@
 #include "map.h"
 #include "mapmarkergraphicsitem.h"
 #include "undofill.h"
+#include "undoshape.h"
 #include "undomarker.h"
 #include "mapmarkerdialog.h"
 #include "selectzoom.h"
@@ -153,6 +154,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _undoPath(nullptr),
     _rubberBand(nullptr),
     _scale(1.0),
+    _rotation(0),
     _mapSource(nullptr)
 #ifdef ANIMATED_MAPS
     ,
@@ -205,6 +207,7 @@ MapFrame::MapFrame(QWidget *parent) :
     // Set up the brush mode button group
     ui->grpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
     ui->grpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
+    ui->grpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
 
     connect(ui->btnPublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
     connect(ui->btnClearFoW,SIGNAL(clicked()),this,SLOT(clearFoW()));
@@ -220,6 +223,9 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(zoomFit()));
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
     connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
+
+    connect(ui->btnRotateCCW,SIGNAL(clicked()),this,SLOT(rotateCCW()));
+    connect(ui->btnRotateCW,SIGNAL(clicked()),this,SLOT(rotateCW()));
 
     connect(ui->btnPublishVisible,SIGNAL(clicked(bool)),this,SLOT(publishModeVisibleClicked()));
     connect(ui->btnPublishZoom,SIGNAL(clicked(bool)),this,SLOT(publishModeZoomClicked()));
@@ -482,6 +488,11 @@ void MapFrame::publishFoWImage()
             }
         }
 
+        if(_rotation != 0)
+        {
+            pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+        }
+
         emit publishImage(pub, ui->btnColor->getColor());
         emit showPublishWindow();
         emit startTrack(_mapSource->getAudioTrack());
@@ -572,6 +583,7 @@ void MapFrame::cancelSelect()
 {
     delete _rubberBand;
     _rubberBand = nullptr;
+    ui->btnBrushSelect->setChecked(false);
     ui->btnZoomSelect->setChecked(false);
     setMapCursor();
 }
@@ -860,35 +872,84 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
     if(!_mapSource)
         return false;
 
-    if(event->type() == QEvent::MouseButtonPress)
+    if(ui->grpBrush->checkedId() == DMHelper::BrushType_Select)
     {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-        _mouseDownPos = mouseEvent->pos();
-        _mouseDown = true;
-
-        _undoPath = new UndoPath(*_mapSource, MapDrawPath(ui->spinBox->value(), ui->grpBrush->checkedId(), ui->btnFoWErase->isChecked(), ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
-        _mapSource->getUndoStack()->push(_undoPath);
-
-        return true;
-    }
-    else if(event->type() == QEvent::MouseButtonRelease)
-    {
-        if(_undoPath)
-        {
-            _undoPath = nullptr;
-            emit dirty();
-        }
-        return true;
-    }
-    else if(event->type() == QEvent::MouseMove)
-    {
-        if(_undoPath)
+        if(event->type() == QEvent::MouseButtonPress)
         {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-            QPoint localPos =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
-            _undoPath->addPoint(localPos);
+            _mouseDownPos = mouseEvent->pos();
+            if(!_rubberBand)
+            {
+                _rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->graphicsView);
+            }
+            _rubberBand->setGeometry(QRect(_mouseDownPos, QSize()));
+            _rubberBand->show();
+
+            return true;
         }
-        return true;
+        else if(event->type() == QEvent::MouseButtonRelease)
+        {
+            if(_rubberBand)
+            {
+                QRect bandRect = _rubberBand->rect();
+                bandRect.moveTo(_rubberBand->pos());
+                QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
+                                ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
+                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, ui->btnFoWErase->isChecked()));
+                _mapSource->getUndoStack()->push(undoShape);
+                emit dirty();
+            }
+            cancelSelect();
+            return true;
+        }
+        else if(event->type() == QEvent::MouseMove)
+        {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            _rubberBand->setGeometry(QRect(_mouseDownPos, mouseEvent->pos()).normalized());
+            return true;
+        }
+        else if(event->type() == QEvent::KeyPress)
+        {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            if(keyEvent->key() == Qt::Key_Escape)
+            {
+                cancelSelect();
+                return true;
+            }
+        }
+    }
+    else
+    {
+        if(event->type() == QEvent::MouseButtonPress)
+        {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            _mouseDownPos = mouseEvent->pos();
+            _mouseDown = true;
+
+            _undoPath = new UndoPath(*_mapSource, MapDrawPath(ui->spinBox->value(), ui->grpBrush->checkedId(), ui->btnFoWErase->isChecked(), ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
+            _mapSource->getUndoStack()->push(_undoPath);
+
+            return true;
+        }
+        else if(event->type() == QEvent::MouseButtonRelease)
+        {
+            if(_undoPath)
+            {
+                _undoPath = nullptr;
+                emit dirty();
+            }
+            return true;
+        }
+        else if(event->type() == QEvent::MouseMove)
+        {
+            if(_undoPath)
+            {
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+                QPoint localPos =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
+                _undoPath->addPoint(localPos);
+            }
+            return true;
+        }
     }
 
     return false;
@@ -974,9 +1035,13 @@ void MapFrame::setMapCursor()
                 {
                     ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
                 }
-                else
+                else if(ui->grpBrush->checkedId() == DMHelper::BrushType_Square)
                 {
                     ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                }
+                else
+                {
+                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
                 }
                 break;
             case DMHelper::EditMode_Edit:
@@ -1011,6 +1076,16 @@ void MapFrame::setScale(qreal s)
     _scale = s;
     ui->graphicsView->setTransform(QTransform::fromScale(_scale,_scale));
     setMapCursor();
+}
+
+void MapFrame::rotateCCW()
+{
+    _rotation -= 90;
+}
+
+void MapFrame::rotateCW()
+{
+    _rotation += 90;
 }
 
 #ifdef ANIMATED_MAPS
