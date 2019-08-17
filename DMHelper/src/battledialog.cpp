@@ -1481,12 +1481,16 @@ void BattleDialog::setScale(qreal s)
 void BattleDialog::rotateCCW()
 {
     _rotation -= 90;
+    if(_rotation < 0)
+        _rotation += 360;
     createPrescaledBackground();
 }
 
 void BattleDialog::rotateCW()
 {
     _rotation += 90;
+    if(_rotation >= 360)
+        _rotation-= 360;
     createPrescaledBackground();
 }
 
@@ -1814,6 +1818,7 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
         imageWidth = widthBackgroundToWindow(_prescaledBackground.width());
     else
         imageHeight = widthBackgroundToWindow(_prescaledBackground.height());
+
     int xOffset = (publishSize.width() - imageWidth) / 2;
     int yOffset = (publishSize.height() - imageHeight)/ 2;
 
@@ -1825,7 +1830,9 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 #endif
 
     // Draw the background image
-    painter.drawImage(xOffset, yOffset, _prescaledBackground);
+    painter.drawImage(xOffset + (_rotation == 180 ? getFrameWidth() : 0),
+                      yOffset + (_rotation == 270 ? getFrameWidth() : 0),
+                      _prescaledBackground);
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn";
 #endif
@@ -1837,13 +1844,14 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     QRect viewportRect = ui->graphicsView->viewport()->rect();
     QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
     QRect sourceRect = viewportRect.intersected(sceneViewportRect);
-    //painter.translate(_targetSize.width() / 2, _targetSize.height() / 2);
     painter.translate(localTargetSize.width() / 2, localTargetSize.height() / 2);
     painter.rotate(_rotation);
-    //painter.translate(-_targetSize.width() / 2, -_targetSize.height() / 2);
     painter.translate(-localTargetSize.width() / 2, -localTargetSize.height() / 2);
-    ui->graphicsView->render(&painter, QRectF(QPointF(xOffset, yOffset),localTargetSize), sourceRect);
-    //painter.resetTransform();
+    ui->graphicsView->render(&painter,
+                             QRectF(QPointF(xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
+                                            yOffset),
+                                    localTargetSize),
+                             sourceRect);
     setPublishVisibility(false);
     if(_background)
         _background->setVisible(true);
@@ -1865,10 +1873,14 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
             else
                 pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate);
 
-            painter.drawImage(_prescaledBackground.width() + xOffset, yOffset, _combatantFrame);
+            painter.drawImage(_prescaledBackground.width() + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
+                              yOffset,
+                              _combatantFrame);
             int dx = qMax(5, (_combatantFrame.width()-pmp.width())/2);
             int dy = qMax(5, (_combatantFrame.height()-pmp.height())/2);
-            painter.drawPixmap(_prescaledBackground.width() + dx + xOffset, dy + yOffset, pmp);
+            painter.drawPixmap(_prescaledBackground.width() + dx + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
+                               dy + yOffset,
+                               pmp);
             nextCombatant = getNextCombatant(_model.getActiveCombatant());
         }
 
@@ -1880,9 +1892,14 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
             if(_countdown > 0)
             {
                 painter.setBrush(QBrush(_countdownColor));
-                painter.drawRect(xPos + 5 + xOffset, _countdownFrame.height() - _countdown - 5, 10 + yOffset, _countdown);
+                painter.drawRect(xPos + 5 + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
+                                 _countdownFrame.height() - _countdown - 5,
+                                 10 + yOffset,
+                                 _countdown);
             }
-            painter.drawImage(xPos + xOffset, yOffset, _countdownFrame);
+            painter.drawImage(xPos + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
+                              yOffset,
+                              _countdownFrame);
         }
 
         if((_showOnDeck) && (nextCombatant))
@@ -1892,10 +1909,14 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
                 nextPmp = nextCombatant->getIconPixmap(DMHelper::PixmapSize_Animate);
             else
                 nextPmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate);
-            painter.drawImage(_prescaledBackground.width() + xOffset, DMHelper::PixmapSizes[DMHelper::PixmapSize_Animate][1] + 10 + yOffset, _combatantFrame);
+            painter.drawImage(_prescaledBackground.width() + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
+                              DMHelper::PixmapSizes[DMHelper::PixmapSize_Animate][1] + 10 + yOffset,
+                              _combatantFrame);
             int dx = qMax(5, (_combatantFrame.width()-nextPmp.width())/2);
             int dy = qMax(5, (_combatantFrame.height()-nextPmp.height())/2);
-            painter.drawPixmap(_prescaledBackground.width() + dx + xOffset, _combatantFrame.height() + dy + yOffset, nextPmp);
+            painter.drawPixmap(_prescaledBackground.width() + dx + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
+                               _combatantFrame.height() + dy + yOffset,
+                               nextPmp);
         }
     }
 

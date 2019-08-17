@@ -1,28 +1,28 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign partyExpanded="1" calendar="Gregorian" minorVersion="0" adventuresExpanded="1" date="21/06/1492" _baseID="{8ab9b0fe-096f-4e81-a81b-79e76adb1f7e}" name="Sample Campaign" worldSettingsExpanded="1" worldExpanded="1" time="25200000" majorVersion="1" worldNPCsExpanded="1">
+ <campaign worldSettingsExpanded="1" time="25200000" date="21/06/1492" adventuresExpanded="1" majorVersion="1" worldNPCsExpanded="1" name="Sample Campaign" minorVersion="0" _baseID="{8ab9b0fe-096f-4e81-a81b-79e76adb1f7e}" partyExpanded="1" calendar="Gregorian" worldExpanded="1">
   <notes>
-   <encounter type="1" _baseID="{8f41a886-f87e-45cf-aba1-0241d8d617d4}" name=""><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+   <encounter name="" _baseID="{8f41a886-f87e-45cf-aba1-0241d8d617d4}" type="1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
 <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">In the last session, the party successfully defeated what they assumed was the BBEG... wait until they find the truth!</p></body></html>]]></encounter>
   </notes>
   <characters>
-   <combatant experience="8500" intelligence="18" race="Half-orc" arcana="1" armorClass="13" dexterity="13" level2="0" silver="0" nature="0" charismaSave="0" speed="30" level3="0" charisma="8" investigation="0" background="Sage" height="" dexteritySave="0" dndBeyondID="-1" hitPoints="24" eyes="" _baseID="{c2548b9b-e287-4416-ba92-bed18ebe3299}" medicine="0" intelligenceSave="1" copper="0" subrace="N/A" name="Jiminy Arg" weight="" strength="12" equipment="" spells="" class="Wizard" perception="1" performance="0" acrobatics="0" notes="" player="Jack" level="5" intimidation="0" icon="Images/Aroc-the-grey.png" alignment="CG" active="1" constitution="15" proficiencies="" gold="0" insight="1" hair="" deception="0" animalHandling="0" constitutionSave="1" persuasion="0" class3="N/A" wisdom="14" athletics="1" sleightOfHand="0" hitDice="1d0" history="0" strengthSave="0" size="medium" sex="Male" survival="0" stealth="1" type="1" platinum="0" age="" class2="N/A" religion="0" wisdomSave="0">
+   <combatant dexterity="13" perception="1" hair="" silver="0" survival="0" level3="0" class="Wizard" icon="Images/Aroc-the-grey.png" sleightOfHand="0" dexteritySave="0" medicine="0" background="Sage" copper="0" acrobatics="0" size="medium" nature="0" deception="0" race="Half-orc" stealth="1" notes="" level="5" eyes="" insight="1" weight="" dndBeyondID="-1" class2="N/A" spells="" hitPoints="24" animalHandling="0" investigation="0" history="0" class3="N/A" player="Jack" alignment="CG" wisdom="14" strength="12" charismaSave="0" name="Jiminy Arg" platinum="0" persuasion="0" speed="30" athletics="1" strengthSave="0" constitution="15" sex="Male" proficiencies="" intelligenceSave="1" level2="0" intimidation="0" intelligence="18" armorClass="13" charisma="8" hitDice="1d0" gold="0" type="1" arcana="1" subrace="N/A" constitutionSave="1" wisdomSave="0" active="1" religion="0" equipment="" experience="8500" performance="0" age="" height="" _baseID="{c2548b9b-e287-4416-ba92-bed18ebe3299}">
     <attacks/>
    </combatant>
-   <combatant experience="0" intelligence="10" race="" arcana="0" armorClass="14" dexterity="10" level2="0" silver="0" nature="0" charismaSave="0" speed="30" level3="0" charisma="10" investigation="0" background="N/A" height="" dexteritySave="0" dndBeyondID="-1" hitPoints="58" eyes="" _baseID="{d36c18f7-f794-4cc9-9b83-fd36b2c9d45c}" medicine="0" intelligenceSave="0" copper="0" subrace="N/A" name="Kraxas" weight="" strength="10" equipment="" spells="" class="" perception="0" performance="0" acrobatics="0" notes="" player="N/A" level="3" intimidation="0" icon="Images/Possessed-torgun.png" alignment="" active="1" constitution="10" proficiencies="" gold="0" insight="0" hair="" deception="0" animalHandling="0" constitutionSave="0" persuasion="0" class3="N/A" wisdom="10" athletics="0" sleightOfHand="0" hitDice="1d0" history="0" strengthSave="0" size="medium" sex="" survival="0" stealth="0" type="1" platinum="0" age="" class2="N/A" religion="0" wisdomSave="0">
+   <combatant dexterity="10" perception="0" hair="" silver="0" survival="0" level3="0" class="" icon="Images/Possessed-torgun.png" sleightOfHand="0" dexteritySave="0" medicine="0" background="N/A" copper="0" acrobatics="0" size="medium" nature="0" deception="0" race="" stealth="0" notes="" level="3" eyes="" insight="0" weight="" dndBeyondID="-1" class2="N/A" spells="" hitPoints="58" animalHandling="0" investigation="0" history="0" class3="N/A" player="N/A" alignment="" wisdom="10" strength="10" charismaSave="0" name="Kraxas" platinum="0" persuasion="0" speed="30" athletics="0" strengthSave="0" constitution="10" sex="" proficiencies="" intelligenceSave="0" level2="0" intimidation="0" intelligence="10" armorClass="14" charisma="10" hitDice="1d0" gold="0" type="1" arcana="0" subrace="N/A" constitutionSave="0" wisdomSave="0" active="1" religion="0" equipment="" experience="0" performance="0" age="" height="" _baseID="{d36c18f7-f794-4cc9-9b83-fd36b2c9d45c}">
     <attacks/>
    </combatant>
-   <combatant experience="0" intelligence="10" race="" arcana="0" armorClass="14" dexterity="10" level2="0" silver="0" nature="0" charismaSave="0" speed="30" level3="0" charisma="10" investigation="0" background="N/A" height="" dexteritySave="0" dndBeyondID="-1" hitPoints="22" eyes="" _baseID="{65da814e-9f9f-46a4-a640-1a7f933d8e61}" medicine="0" intelligenceSave="0" copper="0" subrace="N/A" name="Iulian O'Nally" weight="" strength="10" equipment="" spells="" class="" perception="0" performance="0" acrobatics="0" notes="" player="N/A" level="5" intimidation="0" icon="Images/Immarel-the-magnificent.png" alignment="" active="1" constitution="10" proficiencies="" gold="0" insight="0" hair="" deception="0" animalHandling="0" constitutionSave="0" persuasion="0" class3="N/A" wisdom="10" athletics="0" sleightOfHand="0" hitDice="1d0" history="0" strengthSave="0" size="medium" sex="" survival="0" stealth="0" type="1" platinum="0" age="" class2="N/A" religion="0" wisdomSave="0">
+   <combatant dexterity="10" perception="0" hair="" silver="0" survival="0" level3="0" class="" icon="Images/Immarel-the-magnificent.png" sleightOfHand="0" dexteritySave="0" medicine="0" background="N/A" copper="0" acrobatics="0" size="medium" nature="0" deception="0" race="" stealth="0" notes="" level="5" eyes="" insight="0" weight="" dndBeyondID="-1" class2="N/A" spells="" hitPoints="22" animalHandling="0" investigation="0" history="0" class3="N/A" player="N/A" alignment="" wisdom="10" strength="10" charismaSave="0" name="Iulian O'Nally" platinum="0" persuasion="0" speed="30" athletics="0" strengthSave="0" constitution="10" sex="" proficiencies="" intelligenceSave="0" level2="0" intimidation="0" intelligence="10" armorClass="14" charisma="10" hitDice="1d0" gold="0" type="1" arcana="0" subrace="N/A" constitutionSave="0" wisdomSave="0" active="1" religion="0" equipment="" experience="0" performance="0" age="" height="" _baseID="{65da814e-9f9f-46a4-a640-1a7f933d8e61}">
     <attacks/>
    </combatant>
   </characters>
   <adventures>
-   <adventure expanded="1" _baseID="{46264d28-5dd0-474c-afad-9096e22e33c8}" name="First Adventure">
+   <adventure name="First Adventure" _baseID="{46264d28-5dd0-474c-afad-9096e22e33c8}" expanded="1">
     <encounters>
-     <encounter type="2" _baseID="{8da79703-0b93-4a87-9c51-7c5b3e0b5ad5}" name="Hydra Battle" audiotrack="{b1a301d6-20e3-4a3b-a67b-38800f56b920}"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+     <encounter audiotrack="{b1a301d6-20e3-4a3b-a67b-38800f56b920}" name="Hydra Battle" _baseID="{8da79703-0b93-4a87-9c51-7c5b3e0b5ad5}" type="2"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
 </style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
@@ -36,7 +36,7 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="5">
-          <combatant notes="" monsterClass="Goblin" type="2" active="1" hitPoints="0" _baseID="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" name="" icon="" passivePerception="10" armorClass="15" hitDice="3d6+4">
+          <combatant passivePerception="10" hitPoints="0" monsterClass="Goblin" name="" armorClass="15" _baseID="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" icon="" hitDice="3d6+4" active="1" notes="" type="2">
            <attacks/>
           </combatant>
          </combatantPair>
@@ -45,34 +45,34 @@ p, li { white-space: pre-wrap; }
        <wave>
         <combatants>
          <combatantPair count="1">
-          <combatant notes="" monsterClass="Hydra" type="2" active="1" hitPoints="0" _baseID="{b34f8d81-f351-4914-8ed0-ba6c1e381364}" name="" icon="" passivePerception="10" armorClass="15" hitDice="15d12+75">
+          <combatant passivePerception="10" hitPoints="0" monsterClass="Hydra" name="" armorClass="15" _baseID="{b34f8d81-f351-4914-8ed0-ba6c1e381364}" icon="" hitDice="15d12+75" active="1" notes="" type="2">
            <attacks/>
           </combatant>
          </combatantPair>
         </combatants>
        </wave>
       </waves>
-      <battle mapRectX="18" showDead="0" showGrid="0" activeId="{fc50a06a-01bc-47c8-8208-ea86b7f94b3d}" gridOffsetX="0" backgroundColorB="0" showCompass="0" mapRectWidth="1542" mapRectY="319" background="1101" showEffects="1" mapRectHeight="1101" gridScale="72" showAlive="1" backgroundColorR="0" backgroundColorG="0" gridOffsetY="0" mapID="{2f7a100d-d446-43cc-a296-30b82049ca37}">
+      <battle mapRectY="319" background="1101" gridOffsetX="0" mapRectX="18" gridOffsetY="0" showAlive="1" showDead="0" activeId="{fc50a06a-01bc-47c8-8208-ea86b7f94b3d}" backgroundColorB="0" mapID="{2f7a100d-d446-43cc-a296-30b82049ca37}" showCompass="0" backgroundColorR="0" mapRectWidth="1542" backgroundColorG="0" showGrid="0" gridScale="72" mapRectHeight="1101" showEffects="1">
        <combatants>
-        <battlecombatant monsterSize="-1" initiative="21" monsterName="Goblin#4" positionX="746.6964113969667" monsterType="1" monsterHP="16" type="2" _baseID="{54b6cfcb-65cc-4eae-b09a-f34113011a01}" isShown="1" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" positionY="623.0344705691922" legendaryCount="-1" isKnown="1"/>
-        <battlecombatant monsterSize="-1" initiative="20" monsterName="Hydra" positionX="325.7891421487404" monsterType="1" monsterHP="138" type="2" _baseID="{fc50a06a-01bc-47c8-8208-ea86b7f94b3d}" isShown="1" combatantId="{b34f8d81-f351-4914-8ed0-ba6c1e381364}" positionY="906.3049971727962" legendaryCount="-1" isKnown="1"/>
-        <battlecombatant initiative="19" positionX="822.2231738506074" type="1" _baseID="{e6700542-550b-4ccd-911a-d05e5669360f}" combatantId="{65da814e-9f9f-46a4-a640-1a7f933d8e61}" positionY="963.3648074712548"/>
-        <battlecombatant monsterSize="-1" initiative="18" monsterName="Goblin#5" positionX="678.9369479236735" monsterType="1" monsterHP="9" type="2" _baseID="{181a34c7-166b-4f40-954e-5b46c8194438}" isShown="1" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" positionY="757.5313844920494" legendaryCount="-1" isKnown="1"/>
-        <battlecombatant initiative="17" positionX="750.6822621895135" type="1" _baseID="{529fbd48-09b0-4191-b08c-f4cc03cd3acf}" combatantId="{d36c18f7-f794-4cc9-9b83-fd36b2c9d45c}" positionY="825.3930492677162"/>
-        <battlecombatant initiative="16" monsterName="Goblin#1" positionX="1116.642795169415" monsterType="2" monsterClass="Goblin" monsterHP="14" type="2" _baseID="{abc08475-cd7e-4b66-802b-644344dc7f43}" isShown="1" combatantId="{00000000-0000-0000-0000-000000000000}" positionY="1045.126416012332" legendaryCount="-1" isKnown="1"/>
-        <battlecombatant monsterSize="-1" initiative="13" monsterName="Goblin#2" positionX="473.7167327587054" monsterType="1" monsterHP="9" type="2" _baseID="{409b0e3b-99c4-4422-aa2a-9393ef20b9cd}" isShown="1" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" positionY="756.9181766778113" legendaryCount="-1" isKnown="1"/>
-        <battlecombatant initiative="13" monsterName="Goblin#2" positionX="1117.581282794511" monsterType="2" monsterClass="Goblin" monsterHP="13" type="2" _baseID="{d754f1f1-c296-40f6-87bf-98bc494e0e4a}" isShown="1" combatantId="{00000000-0000-0000-0000-000000000000}" positionY="753.2567646073692" legendaryCount="-1" isKnown="1"/>
-        <battlecombatant initiative="12" positionX="612.7105039859744" type="1" _baseID="{06725203-9b7c-4ad4-b428-8b902d5fe52b}" combatantId="{c2548b9b-e287-4416-ba92-bed18ebe3299}" positionY="1120.754813125662"/>
-        <battlecombatant monsterSize="-1" initiative="11" monsterName="Goblin#1" positionX="759.8803794030828" monsterType="1" monsterHP="19" type="2" _baseID="{a2a25993-8ca1-4651-b202-0bb08f271eff}" isShown="1" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" positionY="763.0502548201911" legendaryCount="-1" isKnown="1"/>
-        <battlecombatant monsterSize="-1" initiative="3" monsterName="Goblin#3" positionX="481.8928369485448" monsterType="1" monsterHP="16" type="2" _baseID="{5a291369-d539-4218-86dc-c6849e9559df}" isShown="1" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" positionY="687.421291064177" legendaryCount="-1" isKnown="1"/>
+        <battlecombatant monsterName="Goblin#4" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" initiative="21" monsterType="1" monsterSize="-1" isKnown="1" legendaryCount="-1" _baseID="{54b6cfcb-65cc-4eae-b09a-f34113011a01}" monsterHP="16" positionX="746.6964113969667" isShown="1" type="2" positionY="623.0344705691922"/>
+        <battlecombatant monsterName="Hydra" combatantId="{b34f8d81-f351-4914-8ed0-ba6c1e381364}" initiative="20" monsterType="1" monsterSize="-1" isKnown="1" legendaryCount="-1" _baseID="{fc50a06a-01bc-47c8-8208-ea86b7f94b3d}" monsterHP="138" positionX="325.7891421487404" isShown="1" type="2" positionY="906.3049971727962"/>
+        <battlecombatant combatantId="{65da814e-9f9f-46a4-a640-1a7f933d8e61}" initiative="19" _baseID="{e6700542-550b-4ccd-911a-d05e5669360f}" positionX="822.2231738506074" type="1" positionY="963.3648074712548"/>
+        <battlecombatant monsterName="Goblin#5" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" initiative="18" monsterType="1" monsterSize="-1" isKnown="1" legendaryCount="-1" _baseID="{181a34c7-166b-4f40-954e-5b46c8194438}" monsterHP="9" positionX="678.9369479236735" isShown="1" type="2" positionY="757.5313844920494"/>
+        <battlecombatant combatantId="{d36c18f7-f794-4cc9-9b83-fd36b2c9d45c}" initiative="17" _baseID="{529fbd48-09b0-4191-b08c-f4cc03cd3acf}" positionX="750.6822621895135" type="1" positionY="825.3930492677162"/>
+        <battlecombatant monsterName="Goblin#1" combatantId="{00000000-0000-0000-0000-000000000000}" initiative="16" monsterType="2" isKnown="1" monsterClass="Goblin" legendaryCount="-1" _baseID="{abc08475-cd7e-4b66-802b-644344dc7f43}" monsterHP="14" positionX="1116.642795169415" isShown="1" type="2" positionY="1045.126416012332"/>
+        <battlecombatant monsterName="Goblin#2" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" initiative="13" monsterType="1" monsterSize="-1" isKnown="1" legendaryCount="-1" _baseID="{409b0e3b-99c4-4422-aa2a-9393ef20b9cd}" monsterHP="9" positionX="473.7167327587054" isShown="1" type="2" positionY="756.9181766778113"/>
+        <battlecombatant monsterName="Goblin#2" combatantId="{00000000-0000-0000-0000-000000000000}" initiative="13" monsterType="2" isKnown="1" monsterClass="Goblin" legendaryCount="-1" _baseID="{d754f1f1-c296-40f6-87bf-98bc494e0e4a}" monsterHP="13" positionX="1117.581282794511" isShown="1" type="2" positionY="753.2567646073692"/>
+        <battlecombatant combatantId="{c2548b9b-e287-4416-ba92-bed18ebe3299}" initiative="12" _baseID="{06725203-9b7c-4ad4-b428-8b902d5fe52b}" positionX="612.7105039859744" type="1" positionY="1120.754813125662"/>
+        <battlecombatant monsterName="Goblin#1" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" initiative="11" monsterType="1" monsterSize="-1" isKnown="1" legendaryCount="-1" _baseID="{a2a25993-8ca1-4651-b202-0bb08f271eff}" monsterHP="19" positionX="759.8803794030828" isShown="1" type="2" positionY="763.0502548201911"/>
+        <battlecombatant monsterName="Goblin#3" combatantId="{92f8f29c-4bef-42de-9e9c-eb63075080a5}" initiative="3" monsterType="1" monsterSize="-1" isKnown="1" legendaryCount="-1" _baseID="{5a291369-d539-4218-86dc-c6849e9559df}" monsterHP="16" positionX="481.8928369485448" isShown="1" type="2" positionY="687.421291064177"/>
        </combatants>
        <effects>
-        <battleeffect size="40" positionX="31.786240081546" colorR="192" type="1" _baseID="{830a5118-b10e-430e-80cd-1b56c60f22bf}" rotation="0" colorA="64" positionY="626.5978198923583" colorG="192" colorB="192" tip=""/>
-        <battleeffect size="15" positionX="786.8078597736144" colorR="203" type="2" _baseID="{7b8b3d2e-65c9-4442-99d5-e2649d48542b}" rotation="149.7801256018078" colorA="64" positionY="838.9164917684112" colorG="0" colorB="0" tip=""/>
+        <battleeffect colorG="192" colorA="64" size="40" colorB="192" _baseID="{830a5118-b10e-430e-80cd-1b56c60f22bf}" rotation="0" positionX="31.786240081546" colorR="192" tip="" type="1" positionY="626.5978198923583"/>
+        <battleeffect colorG="0" colorA="64" size="15" colorB="0" _baseID="{7b8b3d2e-65c9-4442-99d5-e2649d48542b}" rotation="149.7801256018078" positionX="786.8078597736144" colorR="203" tip="" type="2" positionY="838.9164917684112"/>
        </effects>
       </battle>
      </encounter>
-     <encounter fontItalics="0" type="5" fontBold="0" alignment="4" _baseID="{06bec915-9389-415c-911f-b3a791017612}" name="Mountain View" fontColor="#50004b" scrollSpeed="50" fontFamily="Calibri" imageFile="Images/rixt-heerschop-view-of-gorges-du-tarn-2.jpg" fontSize="14" imageWidth="80"><![CDATA[The world is a busy place. Loud and industrial, it is in perpetual motion and constant change. It is also a place of contradiction and conflict. The wealthy upper class, with their noble arcane machinery of gem-encrusted polished brass, live in a practically utopian society sharing their time between leisure pursuits of the arts or academia and the obligations of high society. The generally ignored truth is that this world of wonders is built on layers and layers of lower classes who live in a much darker and dirtier reality. The common folk are surrounded by steam-driven machines, their hydraulic pistons grinding endlessly as the coal fires fueling them belch out their thick, black smoke. Factories, stream-driven vehicles from trains to ships to aeroships, gadgets and personal physical improvements, magical devices, arcane flying vessels small and large; all of these are common-place parts of daily life in Londarem.
+     <encounter fontBold="0" imageWidth="80" fontSize="14" fontFamily="Calibri" name="Mountain View" imageFile="Images/rixt-heerschop-view-of-gorges-du-tarn-2.jpg" _baseID="{06bec915-9389-415c-911f-b3a791017612}" scrollSpeed="50" alignment="4" type="5" fontItalics="0" fontColor="#50004b"><![CDATA[The world is a busy place. Loud and industrial, it is in perpetual motion and constant change. It is also a place of contradiction and conflict. The wealthy upper class, with their noble arcane machinery of gem-encrusted polished brass, live in a practically utopian society sharing their time between leisure pursuits of the arts or academia and the obligations of high society. The generally ignored truth is that this world of wonders is built on layers and layers of lower classes who live in a much darker and dirtier reality. The common folk are surrounded by steam-driven machines, their hydraulic pistons grinding endlessly as the coal fires fueling them belch out their thick, black smoke. Factories, stream-driven vehicles from trains to ships to aeroships, gadgets and personal physical improvements, magical devices, arcane flying vessels small and large; all of these are common-place parts of daily life in Londarem.
 
 The dominant force of this world is the Brettanux Empire which has grown over the past 300 years and subsumed, overrun and conquered all of the civilized parts of the world and many of the lesser civilized regions as well. Across the reaches of the Empire there is an continuous if somewhat uneasy peace, with the Royal Army holding back wild frontiersmen and quelling occassional local uprisings while the Royal Guard keeps the rabble under control closer to home.
 
@@ -90,23 +90,23 @@ To handle more complicated investigations, these private security companies keep
 
 You have just been hired by Mech Security Incorporated, to join one of these freelance teams. Good luck!
 ]]></encounter>
-     <encounter type="2" _baseID="{b9431892-9f3f-407d-87b0-7bb7ce178525}" name="Battle Fork" audiotrack="{00000000-0000-0000-0000-000000000000}"><![CDATA[]]><waves/>
-      <battle mapRectX="0" showDead="0" showGrid="1" activeId="{7cecff02-2e19-4f55-94a9-48b295c2d45e}" gridOffsetX="29" backgroundColorB="0" showCompass="0" mapRectWidth="823" mapRectY="0" background="559" showEffects="1" mapRectHeight="559" gridScale="80" showAlive="1" backgroundColorR="0" backgroundColorG="0" gridOffsetY="76" mapID="{06048b1a-78e6-45cd-9b79-fc009f74ea03}">
+     <encounter audiotrack="{00000000-0000-0000-0000-000000000000}" name="Battle Fork" _baseID="{b9431892-9f3f-407d-87b0-7bb7ce178525}" type="2"><![CDATA[]]><waves/>
+      <battle mapRectY="0" background="2963" gridOffsetX="29" mapRectX="-1485" gridOffsetY="76" showAlive="1" showDead="0" activeId="{7cecff02-2e19-4f55-94a9-48b295c2d45e}" backgroundColorB="0" mapID="{06048b1a-78e6-45cd-9b79-fc009f74ea03}" showCompass="0" backgroundColorR="0" mapRectWidth="4327" backgroundColorG="0" showGrid="1" gridScale="80" mapRectHeight="2963" showEffects="1">
        <combatants>
-        <battlecombatant initiative="0" positionX="616.304347826087" type="1" _baseID="{7cecff02-2e19-4f55-94a9-48b295c2d45e}" combatantId="{c2548b9b-e287-4416-ba92-bed18ebe3299}" positionY="549.8855835240275"/>
-        <battlecombatant initiative="0" positionX="573.0549199084671" type="1" _baseID="{7114113a-c7cc-4f28-a004-821814113b2b}" combatantId="{d36c18f7-f794-4cc9-9b83-fd36b2c9d45c}" positionY="793.9359267734557"/>
-        <battlecombatant initiative="0" positionX="831.0068649885583" type="1" _baseID="{7550be31-466b-40af-85f0-de80de8cbac0}" combatantId="{65da814e-9f9f-46a4-a640-1a7f933d8e61}" positionY="715.1601830663614"/>
+        <battlecombatant combatantId="{c2548b9b-e287-4416-ba92-bed18ebe3299}" initiative="0" _baseID="{7cecff02-2e19-4f55-94a9-48b295c2d45e}" positionX="616.304347826087" type="1" positionY="549.8855835240275"/>
+        <battlecombatant combatantId="{d36c18f7-f794-4cc9-9b83-fd36b2c9d45c}" initiative="0" _baseID="{7114113a-c7cc-4f28-a004-821814113b2b}" positionX="573.0549199084671" type="1" positionY="793.9359267734557"/>
+        <battlecombatant combatantId="{65da814e-9f9f-46a4-a640-1a7f933d8e61}" initiative="0" _baseID="{7550be31-466b-40af-85f0-de80de8cbac0}" positionX="831.0068649885583" type="1" positionY="715.1601830663614"/>
        </combatants>
        <effects>
-        <battleeffect size="20" positionX="5.077814382516323" colorR="115" type="3" _baseID="{a1ccfb76-5983-4b80-962a-c9015fb5232a}" rotation="0" colorA="64" positionY="5.077814382516308" colorG="18" colorB="0" tip=""/>
+        <battleeffect colorG="18" colorA="64" size="20" colorB="0" _baseID="{a1ccfb76-5983-4b80-962a-c9015fb5232a}" rotation="0" positionX="5.077814382516323" colorR="115" tip="" type="3" positionY="5.077814382516308"/>
        </effects>
       </battle>
      </encounter>
     </encounters>
     <maps>
-     <map filename="images/Ancient Catacombs.jpg" _baseID="{2f7a100d-d446-43cc-a296-30b82049ca37}" name="Ancient Catacombs" audiotrack="{00000000-0000-0000-0000-000000000000}">
+     <map filename="images/Ancient Catacombs.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Ancient Catacombs" _baseID="{2f7a100d-d446-43cc-a296-30b82049ca37}">
       <actions>
-       <action erase="1" brushtype="0" type="1" radius="80">
+       <action brushtype="0" erase="1" radius="80" type="1">
         <points>
          <point y="906" x="918"/>
          <point y="906" x="916"/>
@@ -378,7 +378,7 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="901" x="701"/>
         </points>
        </action>
-       <action erase="1" brushtype="0" type="1" radius="80">
+       <action brushtype="0" erase="1" radius="80" type="1">
         <points>
          <point y="903" x="832"/>
          <point y="899" x="843"/>
@@ -551,17 +551,17 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
        </action>
       </actions>
      </map>
-     <map filename="images/Big Hilltop Camp.jpg" _baseID="{cbc4207e-ff17-4016-8e9b-461e38a44b5d}" name="Big Hilltop Camp" audiotrack="{00000000-0000-0000-0000-000000000000}">
+     <map filename="images/Big Hilltop Camp.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Big Hilltop Camp" _baseID="{cbc4207e-ff17-4016-8e9b-461e38a44b5d}">
       <actions>
-       <action type="0" r="0" g="0" b="0" a="0"/>
+       <action r="0" b="0" a="0" g="0" type="0"/>
       </actions>
      </map>
-     <map filename="images/Crumbling Facility.jpg" _baseID="{542dbc2a-237f-4ac8-afdd-3e815d07fdb8}" name="Crumbling Facility" audiotrack="{00000000-0000-0000-0000-000000000000}">
+     <map filename="images/Crumbling Facility.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Crumbling Facility" _baseID="{542dbc2a-237f-4ac8-afdd-3e815d07fdb8}">
       <actions/>
      </map>
-     <map filename="images/Cultist Lair.jpg" _baseID="{960350ab-b648-4081-8224-aeba4d03360e}" name="Cultist Lair" audiotrack="{00000000-0000-0000-0000-000000000000}">
+     <map filename="images/Cultist Lair.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Cultist Lair" _baseID="{960350ab-b648-4081-8224-aeba4d03360e}">
       <actions>
-       <action erase="1" brushtype="0" type="1" radius="200">
+       <action brushtype="0" erase="1" radius="200" type="1">
         <points>
          <point y="112" x="1687"/>
          <point y="114" x="1672"/>
@@ -732,7 +732,7 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="883" x="1878"/>
         </points>
        </action>
-       <action erase="1" brushtype="0" type="1" radius="200">
+       <action brushtype="0" erase="1" radius="200" type="1">
         <points>
          <point y="1154" x="1267"/>
          <point y="1154" x="1268"/>
@@ -771,7 +771,7 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1255" x="1684"/>
         </points>
        </action>
-       <action erase="0" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="0" radius="50" type="1">
         <points>
          <point y="1127" x="247"/>
          <point y="1126" x="247"/>
@@ -885,7 +885,7 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="989" x="334"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1021" x="824"/>
          <point y="1022" x="824"/>
@@ -983,20 +983,20 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1060" x="975"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1427" x="1327"/>
          <point y="1427" x="1329"/>
          <point y="1427" x="1330"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1426" x="1370"/>
          <point y="1426" x="1371"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1288" x="1270"/>
          <point y="1291" x="1270"/>
@@ -1041,7 +1041,7 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1227" x="1139"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="957" x="705"/>
          <point y="954" x="707"/>
@@ -1146,28 +1146,28 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1291" x="355"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1305" x="323"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1306" x="408"/>
          <point y="1306" x="410"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1311" x="491"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1308" x="593"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1302" x="634"/>
          <point y="1300" x="634"/>
@@ -1254,14 +1254,14 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="962" x="546"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="962" x="546"/>
          <point y="962" x="534"/>
          <point y="972" x="449"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="972" x="373"/>
          <point y="972" x="372"/>
@@ -1380,7 +1380,7 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1116" x="551"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1384" x="490"/>
          <point y="1385" x="490"/>
@@ -1433,17 +1433,17 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1538" x="489"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1460" x="438"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1620" x="554"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1686" x="552"/>
          <point y="1687" x="552"/>
@@ -1471,28 +1471,28 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1745" x="552"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1823" x="486"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1740" x="427"/>
          <point y="1741" x="427"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1671" x="420"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1617" x="421"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1626" x="498"/>
          <point y="1626" x="499"/>
@@ -1514,47 +1514,47 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
          <point y="1724" x="491"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1691" x="649"/>
          <point y="1691" x="650"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1691" x="697"/>
          <point y="1691" x="698"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1689" x="785"/>
          <point y="1688" x="785"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1688" x="864"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1692" x="935"/>
          <point y="1691" x="935"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1688" x="1002"/>
          <point y="1688" x="1003"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1622" x="1015"/>
         </points>
        </action>
-       <action erase="1" brushtype="1" type="1" radius="50">
+       <action brushtype="1" erase="1" radius="50" type="1">
         <points>
          <point y="1777" x="1019"/>
          <point y="1776" x="1019"/>
@@ -1614,60 +1614,60 @@ You have just been hired by Mech Security Incorporated, to join one of these fre
        </action>
       </actions>
      </map>
-     <map filename="images/Forked Road.jpg" _baseID="{06048b1a-78e6-45cd-9b79-fc009f74ea03}" name="Forked Road" audiotrack="{00000000-0000-0000-0000-000000000000}">
+     <map filename="images/Forked Road.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Forked Road" _baseID="{06048b1a-78e6-45cd-9b79-fc009f74ea03}">
       <actions>
-       <action erase="1" brushtype="0" type="1" radius="30">
+       <action brushtype="0" erase="1" radius="30" type="1">
         <points>
          <point y="400" x="304"/>
          <point y="400" x="304"/>
         </points>
        </action>
-       <action erase="1" brushtype="0" type="1" radius="30">
+       <action brushtype="0" erase="1" radius="30" type="1">
         <points>
          <point y="497" x="1070"/>
         </points>
        </action>
-       <action erase="1" brushtype="0" type="1" radius="30">
+       <action brushtype="0" erase="1" radius="30" type="1">
         <points>
          <point y="800" x="1005"/>
         </points>
        </action>
-       <action erase="1" brushtype="0" type="1" radius="30">
+       <action brushtype="0" erase="1" radius="30" type="1">
         <points>
          <point y="808" x="505"/>
         </points>
        </action>
-       <action erase="1" type="4" y="236" x="179" width="965" height="390"/>
-       <action type="0" r="0" g="0" b="0" a="0"/>
+       <action erase="1" width="965" y="236" height="390" type="4" x="179"/>
+       <action r="0" b="0" a="0" g="0" type="0"/>
       </actions>
      </map>
     </maps>
    </adventure>
   </adventures>
   <settings>
-   <map filename="images/Lost Library 1.jpg" _baseID="{0c0dfce0-13d5-4f30-8ab3-bc3bc3850356}" name="World View" audiotrack="{00000000-0000-0000-0000-000000000000}">
+   <map filename="images/Lost Library 1.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="World View" _baseID="{0c0dfce0-13d5-4f30-8ab3-bc3bc3850356}">
     <actions/>
    </map>
-   <map filename="images/Forked Road.jpg" _baseID="{edb55eda-666d-42ec-b6b3-2935586e8272}" name="Sankt Stefs" audiotrack="{00000000-0000-0000-0000-000000000000}">
+   <map filename="images/Forked Road.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Sankt Stefs" _baseID="{edb55eda-666d-42ec-b6b3-2935586e8272}">
     <actions/>
    </map>
   </settings>
   <npcs>
-   <combatant experience="0" intelligence="10" race="" arcana="0" armorClass="10" dexterity="10" level2="0" silver="0" nature="0" charismaSave="0" speed="30" level3="0" charisma="10" investigation="0" background="N/A" height="" dexteritySave="0" dndBeyondID="-1" hitPoints="1" eyes="" _baseID="{4bfd268b-f8af-48ff-9fd0-4ad11eddabe1}" medicine="0" intelligenceSave="0" copper="0" subrace="N/A" name="Elm D'Zurth" weight="" strength="10" equipment="" spells="" class="" perception="0" performance="0" acrobatics="0" notes="" player="N/A" level="1" intimidation="0" icon="" alignment="" active="1" constitution="10" proficiencies="" gold="0" insight="0" hair="" deception="0" animalHandling="0" constitutionSave="0" persuasion="0" class3="N/A" wisdom="10" athletics="0" sleightOfHand="0" hitDice="1d0" history="0" strengthSave="0" size="medium" sex="" survival="0" stealth="0" type="1" platinum="0" age="" class2="N/A" religion="0" wisdomSave="0">
+   <combatant dexterity="10" perception="0" hair="" silver="0" survival="0" level3="0" class="" icon="" sleightOfHand="0" dexteritySave="0" medicine="0" background="N/A" copper="0" acrobatics="0" size="medium" nature="0" deception="0" race="" stealth="0" notes="" level="1" eyes="" insight="0" weight="" dndBeyondID="-1" class2="N/A" spells="" hitPoints="1" animalHandling="0" investigation="0" history="0" class3="N/A" player="N/A" alignment="" wisdom="10" strength="10" charismaSave="0" name="Elm D'Zurth" platinum="0" persuasion="0" speed="30" athletics="0" strengthSave="0" constitution="10" sex="" proficiencies="" intelligenceSave="0" level2="0" intimidation="0" intelligence="10" armorClass="10" charisma="10" hitDice="1d0" gold="0" type="1" arcana="0" subrace="N/A" constitutionSave="0" wisdomSave="0" active="1" religion="0" equipment="" experience="0" performance="0" age="" height="" _baseID="{4bfd268b-f8af-48ff-9fd0-4ad11eddabe1}">
     <attacks/>
    </combatant>
-   <combatant experience="0" intelligence="10" race="" arcana="0" armorClass="10" dexterity="10" level2="0" silver="0" nature="0" charismaSave="0" speed="30" level3="0" charisma="10" investigation="0" background="N/A" height="" dexteritySave="0" dndBeyondID="-1" hitPoints="1" eyes="" _baseID="{72b0ab5a-5a84-49d2-919a-e707f50cd0c0}" medicine="0" intelligenceSave="0" copper="0" subrace="N/A" name="Eva Devengelo" weight="" strength="10" equipment="" spells="" class="" perception="0" performance="0" acrobatics="0" notes="" player="N/A" level="1" intimidation="0" icon="" alignment="" active="1" constitution="10" proficiencies="" gold="0" insight="0" hair="" deception="0" animalHandling="0" constitutionSave="0" persuasion="0" class3="N/A" wisdom="10" athletics="0" sleightOfHand="0" hitDice="1d0" history="0" strengthSave="0" size="medium" sex="" survival="0" stealth="0" type="1" platinum="0" age="" class2="N/A" religion="0" wisdomSave="0">
+   <combatant dexterity="10" perception="0" hair="" silver="0" survival="0" level3="0" class="" icon="" sleightOfHand="0" dexteritySave="0" medicine="0" background="N/A" copper="0" acrobatics="0" size="medium" nature="0" deception="0" race="" stealth="0" notes="" level="1" eyes="" insight="0" weight="" dndBeyondID="-1" class2="N/A" spells="" hitPoints="1" animalHandling="0" investigation="0" history="0" class3="N/A" player="N/A" alignment="" wisdom="10" strength="10" charismaSave="0" name="Eva Devengelo" platinum="0" persuasion="0" speed="30" athletics="0" strengthSave="0" constitution="10" sex="" proficiencies="" intelligenceSave="0" level2="0" intimidation="0" intelligence="10" armorClass="10" charisma="10" hitDice="1d0" gold="0" type="1" arcana="0" subrace="N/A" constitutionSave="0" wisdomSave="0" active="1" religion="0" equipment="" experience="0" performance="0" age="" height="" _baseID="{72b0ab5a-5a84-49d2-919a-e707f50cd0c0}">
     <attacks/>
    </combatant>
   </npcs>
   <tracks>
-   <track _baseID="{b1a301d6-20e3-4a3b-a67b-38800f56b920}" name="Battle" md5="">
+   <track name="Battle" _baseID="{b1a301d6-20e3-4a3b-a67b-38800f56b920}" md5="">
     <url><![CDATA[../DMHelper/working/music/79_Medieval_Battle.mp3]]></url>
    </track>
-   <track _baseID="{c11e930c-5676-4be5-86fe-2e118d8f66e3}" name="Mellow Mood" md5="">
+   <track name="Mellow Mood" _baseID="{c11e930c-5676-4be5-86fe-2e118d8f66e3}" md5="">
     <url><![CDATA[../DMHelper/working/music/131_The_Bog_Standard.mp3]]></url>
    </track>
-   <track _baseID="{84927b47-f688-491e-93c3-0f76164e43bc}" name="Festival" md5="">
+   <track name="Festival" _baseID="{84927b47-f688-491e-93c3-0f76164e43bc}" md5="">
     <url><![CDATA[../DMHelper/working/music/133_Halfling_Festival.mp3]]></url>
    </track>
   </tracks>
