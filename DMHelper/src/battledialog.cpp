@@ -1433,7 +1433,8 @@ void BattleDialog::setPublishVisibility(bool publish)
                         {
                             for(QGraphicsItem* child : item->childItems())
                             {
-                                child->setVisible(!publish);
+                                if((child) && (child->data(BattleDialogItemChild_Index).toInt() != BattleDialogItemChild_Area))
+                                    child->setVisible(!publish);
                             }
                         }
                     }
