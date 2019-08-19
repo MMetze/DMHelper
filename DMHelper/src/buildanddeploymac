@@ -16,6 +16,7 @@ cp -R DMHelper.app/ ../release/DMHelper.app/
 cp -R ../src/binsrc/ ../release/
 cp -R ../src/bestiary/ ../release/bestiary/
 cp -R ../src/doc/ ../release/doc/
+cp ../src/binsrcmac/Info.plist ../release/DMHelper.app/Contents/
 
 macdeployqt ../release/DMHelper.app/
 
