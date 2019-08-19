@@ -375,6 +375,9 @@ color: rgb(85, 85, 85);
           <property name="text">
            <string/>
           </property>
+          <property name="autoDefault">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
         <item>
@@ -639,7 +642,7 @@ color: rgb(85, 85, 85);
           <x>0</x>
           <y>0</y>
           <width>272</width>
-          <height>937</height>
+          <height>935</height>
          </rect>
         </property>
        </widget>
