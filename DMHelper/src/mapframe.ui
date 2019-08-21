@@ -486,28 +486,6 @@ color: rgb(85, 0, 0);</string>
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QPushButton" name="btnRotateCCW">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="resources.qrc">
-            <normaloff>:/img/data/icon_rotate_ccw.png</normaloff>:/img/data/icon_rotate_ccw.png</iconset>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnRotateCW">
-          <property name="text">
-           <string/>
-          </property>
-          <property name="icon">
-           <iconset resource="resources.qrc">
-            <normaloff>:/img/data/icon_rotate_cw.png</normaloff>:/img/data/icon_rotate_cw.png</iconset>
-          </property>
-         </widget>
-        </item>
        </layout>
       </widget>
      </item>
@@ -614,34 +592,30 @@ color: rgb(85, 0, 0);</string>
       </widget>
      </item>
      <item>
-      <widget class="ColorPushButton" name="btnColor">
+      <widget class="PublishButtonFrame" name="framePublish">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>39</width>
-         <height>35</height>
+         <width>200</width>
+         <height>100</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>39</width>
-         <height>35</height>
+         <width>16777215</width>
+         <height>100</height>
         </size>
        </property>
-       <property name="text">
-        <string/>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnPublish">
-       <property name="text">
-        <string>Publish</string>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
        </property>
       </widget>
      </item>
@@ -651,9 +625,10 @@ color: rgb(85, 0, 0);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorPushButton</class>
-   <extends>QPushButton</extends>
-   <header>colorpushbutton.h</header>
+   <class>PublishButtonFrame</class>
+   <extends>QFrame</extends>
+   <header>publishbuttonframe.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
@@ -661,7 +636,7 @@ color: rgb(85, 0, 0);</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="grpEditMode"/>
   <buttongroup name="grpBrush"/>
+  <buttongroup name="grpEditMode"/>
  </buttongroups>
 </ui>

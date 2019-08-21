@@ -7,15 +7,15 @@
     <x>0</x>
     <y>0</y>
     <width>1136</width>
-    <height>779</height>
+    <height>810</height>
    </rect>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_12">
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_26">
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout_24">
      <item>
       <widget class="QLabel" name="lblIcon">
        <property name="sizePolicy">
@@ -57,15 +57,18 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnPublish">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
+      <widget class="PublishButtonFrame" name="framePublish">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>100</height>
+        </size>
        </property>
-       <property name="text">
-        <string>Publish</string>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
        </property>
       </widget>
      </item>
@@ -84,7 +87,7 @@
      </item>
     </layout>
    </item>
-   <item>
+   <item row="0" column="1">
     <layout class="QVBoxLayout" name="verticalLayout_12">
      <item>
       <layout class="QGridLayout" name="gridLayout">
@@ -1475,8 +1478,15 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PublishButtonFrame</class>
+   <extends>QFrame</extends>
+   <header>publishbuttonframe.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
-  <tabstop>btnPublish</tabstop>
   <tabstop>edtName</tabstop>
   <tabstop>edtClass</tabstop>
   <tabstop>edtHitPoints</tabstop>

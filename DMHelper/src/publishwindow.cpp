@@ -1,6 +1,7 @@
 #include "publishwindow.h"
 #include "publishframe.h"
 #include <QKeyEvent>
+#include <QDebug>
 
 PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     QMainWindow(parent),
@@ -9,11 +10,13 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     setWindowTitle(title);
     // Not this: setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
 
+    //setAutoFillBackground(true);
     setStyleSheet("background-color: rgba(0,0,0,255);");
 
     _publishFrame = new PublishFrame(this);
     setCentralWidget(_publishFrame);
     resize(600, 400);
+    //_publishFrame->setAutoFillBackground(true);
 
     connect(_publishFrame,SIGNAL(visibleChanged(bool)),this,SIGNAL(visibleChanged(bool)));
     connect(_publishFrame, SIGNAL(positionChanged(QPointF)),this,SIGNAL(positionChanged(QPointF)));
@@ -49,8 +52,12 @@ void PublishWindow::setBackgroundColor(QColor color)
     styleString += QString::number(color.green());
     styleString += QString(",");
     styleString += QString::number(color.blue());
-    styleString += QString(");");
-    setStyleSheet(styleString);
+    styleString += QString(",255);");
+
+    qDebug() << "[PublishWindow] changing background color to: " << color << ", string: " << styleString;
+
+    //setStyleSheet(styleString);
+    _publishFrame->setStyleSheet(styleString);
 }
 
 void PublishWindow::keyPressEvent(QKeyEvent * event)

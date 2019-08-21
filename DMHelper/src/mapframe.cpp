@@ -154,7 +154,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _undoPath(nullptr),
     _rubberBand(nullptr),
     _scale(1.0),
-    _rotation(0),
+    //_rotation(0),
     _mapSource(nullptr)
 #ifdef ANIMATED_MAPS
     ,
@@ -209,7 +209,8 @@ MapFrame::MapFrame(QWidget *parent) :
     ui->grpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
     ui->grpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
 
-    connect(ui->btnPublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
+    //connect(ui->btnPublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
+    connect(ui->framePublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
     connect(ui->btnClearFoW,SIGNAL(clicked()),this,SLOT(clearFoW()));
     connect(ui->btnResetFoW,SIGNAL(clicked()),this,SLOT(resetFoW()));
     //TODO Markers: connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
@@ -224,8 +225,8 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
     connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
 
-    connect(ui->btnRotateCCW,SIGNAL(clicked()),this,SLOT(rotateCCW()));
-    connect(ui->btnRotateCW,SIGNAL(clicked()),this,SLOT(rotateCW()));
+    //connect(ui->btnRotateCCW,SIGNAL(clicked()),this,SLOT(rotateCCW()));
+    //connect(ui->btnRotateCW,SIGNAL(clicked()),this,SLOT(rotateCW()));
 
     connect(ui->btnPublishVisible,SIGNAL(clicked(bool)),this,SLOT(publishModeVisibleClicked()));
     connect(ui->btnPublishZoom,SIGNAL(clicked(bool)),this,SLOT(publishModeZoomClicked()));
@@ -462,7 +463,8 @@ void MapFrame::publishFoWImage()
     if(!_mapSource)
         return;
 
-    if(!ui->btnPublish->isCheckable())
+    //if(!ui->btnPublish->isCheckable())
+    if(!ui->framePublish->isCheckable())
     {
         QImage pub;
         if(ui->btnPublishZoom->isChecked())
@@ -488,25 +490,26 @@ void MapFrame::publishFoWImage()
             }
         }
 
-        if(_rotation != 0)
+        if(ui->framePublish->getRotation() != 0)
         {
-            pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+            pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
         }
 
-        emit publishImage(pub, ui->btnColor->getColor());
+        emit publishImage(pub, ui->framePublish->getColor());
         emit showPublishWindow();
         emit startTrack(_mapSource->getAudioTrack());
     }
 #ifdef ANIMATED_MAPS
     else
     {
-        if(ui->btnPublish->isChecked())
+        //if(ui->btnPublish->isChecked())
+        if(ui->framePublish->isChecked())
         {
             killTimer(_timerId);
             _timerId = 0;
             _bwFoWImage = _mapSource->getBWFoWImage(_loadImage);
             _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
-            emit animationStarted(ui->btnColor->getColor());
+            emit animationStarted(ui->framePublish->getColor());
             emit showPublishWindow();
             emit startTrack(_mapSource->getAudioTrack());
         }
@@ -625,7 +628,8 @@ void MapFrame::initializeFoW()
         _fow->setEnabled(false);
         _fow->setZValue(-1);
 
-        ui->btnPublish->setCheckable(false);
+        //ui->btnPublish->setCheckable(false);
+        ui->framePublish->setCheckable(false);
     }
 
 #ifdef ANIMATED_MAPS
@@ -705,7 +709,8 @@ void MapFrame::initializeFoW()
         libvlc_media_list_player_play(vlcListPlayer);
         _timerId = startTimer(0);
 
-        ui->btnPublish->setCheckable(true);
+        //ui->btnPublish->setCheckable(true);
+        ui->framePublish->setCheckable(true);
     }
 #endif
 }
@@ -1078,6 +1083,7 @@ void MapFrame::setScale(qreal s)
     setMapCursor();
 }
 
+/*
 void MapFrame::rotateCCW()
 {
     _rotation -= 90;
@@ -1087,6 +1093,7 @@ void MapFrame::rotateCW()
 {
     _rotation += 90;
 }
+*/
 
 #ifdef ANIMATED_MAPS
 void MapFrame::executeAnimateImage()

@@ -126,8 +126,8 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
     connect(ui->graphicsView,SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)),this,SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
 
-    connect(ui->btnRotateCCW,SIGNAL(clicked()),this,SLOT(rotateCCW()));
-    connect(ui->btnRotateCW,SIGNAL(clicked()),this,SLOT(rotateCW()));
+    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotateCW()));
+    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotateCCW()));
 
     connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
@@ -147,8 +147,10 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     connect(ui->btnDistance, SIGNAL(clicked(bool)), _scene, SLOT(setShowDistance(bool)));
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(selectNewMap()));
     connect(ui->btnReloadMap, SIGNAL(clicked(bool)),this,SLOT(updateMap()));
-    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
-    connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SLOT(togglePublishing(bool)));
+    connect(ui->framePublish, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
+    ui->framePublish->setColor(_model.getBackgroundColor());
+    ui->framePublish->setCheckable(true);
+    connect(ui->framePublish, SIGNAL(toggled(bool)), this, SLOT(togglePublishing(bool)));
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -528,7 +530,7 @@ void BattleDialog::cancelSelect()
 
 void BattleDialog::cancelPublish()
 {
-    ui->btnPublish->setChecked(false);
+    ui->framePublish->cancelPublish();
 }
 
 void BattleDialog::keyPressEvent(QKeyEvent * e)
@@ -1200,15 +1202,11 @@ void BattleDialog::togglePublishing(bool publishing)
     _publishing = publishing;
     if(_publishing)
     {
-        ui->btnPublish->setStyleSheet(QString("QPushButton {color: red; font-weight: bold; }"));
-        ui->btnPublish->setText(QString("Publishing!"));
         createPrescaledBackground();
         publishImage();
     }
     else
     {
-        ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
-        ui->btnPublish->setText(QString("Publish"));
         _publishTimer->stop();
     }
 }
@@ -1320,7 +1318,7 @@ void BattleDialog::updateCountdownText()
 
 void BattleDialog::createPrescaledBackground()
 {
-    if((!_model.getMap()) || (!ui->btnPublish->isEnabled()) || (!ui->btnPublish->isChecked()))
+    if((!_model.getMap()) || (!ui->framePublish->isEnabled()) || (!ui->framePublish->isChecked()))
         return;
 
     QRect sourceRect;
@@ -1341,8 +1339,8 @@ void BattleDialog::createPrescaledBackground()
     if((scaleFactor * static_cast<qreal>(battleMap.height())) > static_cast<qreal>(imageSize.height()))
         scaleFactor = static_cast<qreal>(imageSize.height()) / static_cast<qreal>(battleMap.height());
 
-    qreal scaledWidth = scaleFactor * static_cast<qreal>(battleMap.width());
-    qreal scaledHeight = scaleFactor * static_cast<qreal>(battleMap.height());
+    //qreal scaledWidth = scaleFactor * static_cast<qreal>(battleMap.width());
+    //qreal scaledHeight = scaleFactor * static_cast<qreal>(battleMap.height());
 
     //_prescaledBackground = battleMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     _prescaledBackground = battleMap.transformed(QTransform().rotate(_rotation).scale(scaleFactor,scaleFactor), Qt::SmoothTransformation);
@@ -1952,7 +1950,7 @@ void BattleDialog::replaceBattleMap()
     _combatantIcons.clear();
 
     ui->btnReloadMap->setEnabled(_model.getMap() != nullptr);
-    ui->btnPublish->setEnabled(_model.getMap() != nullptr);
+    ui->framePublish->setEnabled(_model.getMap() != nullptr);
 
     if(!_model.getMap())
         return;
@@ -2027,7 +2025,7 @@ void BattleDialog::resizeBattleMap()
     qDebug() << "[Battle Dialog] Update of same map detected";
 
     ui->btnReloadMap->setEnabled(_model.getMap() != nullptr);
-    ui->btnPublish->setEnabled(_model.getMap() != nullptr);
+    ui->framePublish->setEnabled(_model.getMap() != nullptr);
 
     updateMap();
 

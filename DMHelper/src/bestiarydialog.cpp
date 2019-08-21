@@ -32,7 +32,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->btnNewMonster,SIGNAL(clicked()),this,SLOT(createNewMonster()));
     connect(ui->btnDeleteMonster,SIGNAL(clicked()),this,SLOT(deleteCurrentMonster()));
     connect(ui->cmbSearch,SIGNAL(activated(QString)),this,SLOT(setMonster(QString)));
-    connect(ui->btnPublish,SIGNAL(clicked()),this,SLOT(handlePublishButton()));
+    connect(ui->framePublish,SIGNAL(clicked()),this,SLOT(handlePublishButton()));
     connect(ui->btnReload, SIGNAL(clicked()), this, SLOT(handleReloadImage()));
     connect(ui->btnClear, SIGNAL(clicked()), this, SLOT(handleClearImage()));
 
@@ -361,7 +361,12 @@ void BestiaryDialog::handlePublishButton()
     QString iconPath = Bestiary::Instance()->getDirectory().filePath(iconFile);
     if((!iconPath.isEmpty()) && (iconImg.load(iconPath) == true))
     {
-        emit publishMonsterImage(iconImg, Qt::white);
+        if(ui->framePublish->getRotation() != 0)
+        {
+            iconImg = iconImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+        }
+
+        emit publishMonsterImage(iconImg, ui->framePublish->getColor());
     }
 }
 

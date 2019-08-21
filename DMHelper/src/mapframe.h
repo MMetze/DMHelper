@@ -107,8 +107,8 @@ protected slots:
     void trackSelected(int index);
     void setScale(qreal s);
 
-    void rotateCCW();
-    void rotateCW();
+    //void rotateCCW();
+    //void rotateCW();
 
 #ifdef ANIMATED_MAPS
     void executeAnimateImage();
@@ -127,7 +127,7 @@ private:
 
     QRubberBand* _rubberBand;
     qreal _scale;
-    int _rotation;
+    //int _rotation;
 
     Map* _mapSource;
 

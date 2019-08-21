@@ -231,21 +231,18 @@ color: rgb(50, 50, 50);</string>
       </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="btnPublish">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
+      <widget class="PublishButtonFrame" name="framePublish">
+       <property name="minimumSize">
         <size>
-         <width>250</width>
-         <height>16777215</height>
+         <width>200</width>
+         <height>100</height>
         </size>
        </property>
-       <property name="text">
-        <string>&amp;Publish</string>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
        </property>
       </widget>
      </item>
@@ -1538,11 +1535,18 @@ color: rgb(50, 50, 50);</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PublishButtonFrame</class>
+   <extends>QFrame</extends>
+   <header>publishbuttonframe.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>cmbSearch</tabstop>
   <tabstop>btnLeft</tabstop>
   <tabstop>btnRight</tabstop>
-  <tabstop>btnPublish</tabstop>
   <tabstop>btnNewMonster</tabstop>
   <tabstop>btnDeleteMonster</tabstop>
   <tabstop>scrollArea</tabstop>

@@ -18,7 +18,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
+    connect(ui->framePublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
 
     ui->edtArmorClass->setValidator(new QIntValidator(0,100,this));
     ui->edtInitiative->setValidator(new QIntValidator(-10,100,this));
@@ -440,7 +440,13 @@ void CharacterFrame::handlePublishClicked()
     //QString iconPath = Bestiary::Instance()->getDirectory().filePath(iconFile);
     if(iconImg.load(iconFile) == true)
     {
-        emit publishCharacterImage(iconImg, Qt::white);
+        if(ui->framePublish->getRotation() != 0)
+        {
+            iconImg = iconImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+        }
+
+
+        emit publishCharacterImage(iconImg, ui->framePublish->getColor());
     }
 }
 

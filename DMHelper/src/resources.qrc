@@ -165,6 +165,7 @@
         <file>data/icon_rotate_ccw.png</file>
         <file>data/icon_rotate_cw.png</file>
         <file>data/icon_select.png</file>
+        <file>data/icon_arrow_xor.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

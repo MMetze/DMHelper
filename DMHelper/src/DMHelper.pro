@@ -40,6 +40,7 @@ SOURCES += main.cpp\
     equipmentserver.cpp \
     mainwindow.cpp \
     objectimporter.cpp \
+    publishbuttonframe.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     undopoint.cpp \
@@ -189,6 +190,7 @@ HEADERS  += mainwindow.h \
     colorpushbutton.h \
     equipmentserver.h \
     objectimporter.h \
+    publishbuttonframe.h \
     publishwindow.h \
     randommarketdialog.h \
     undopoint.h \
@@ -325,6 +327,7 @@ FORMS    += mainwindow.ui \
     battledialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    publishbuttonframe.ui \
     randommarketdialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \
