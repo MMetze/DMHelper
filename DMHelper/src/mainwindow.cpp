@@ -1501,6 +1501,8 @@ void MainWindow::writeBestiary()
         return;
     }
 
+    QString xmlString = doc.toString();
+
     QFile file(bestiaryFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
@@ -1511,7 +1513,7 @@ void MainWindow::writeBestiary()
 
     QTextStream ts( &file );
     ts.setCodec("UTF-8");
-    ts << doc.toString();
+    ts << xmlString;
 
     file.close();
 
