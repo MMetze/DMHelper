@@ -1,7 +1,7 @@
 #ifndef WIDGETCHARACTER_H
 #define WIDGETCHARACTER_H
 
-#include <QFrame>
+#include "combatantwidget.h"
 
 namespace Ui {
 class WidgetCharacter;
@@ -10,36 +10,42 @@ class WidgetCharacter;
 class WidgetCharacterInternal;
 class BattleDialogModelCombatant;
 
-class WidgetCharacter : public QFrame
+class WidgetCharacter : public CombatantWidget //QFrame
 {
     Q_OBJECT
 
 public:
     explicit WidgetCharacter(QWidget *parent = nullptr);
-    ~WidgetCharacter();
+    virtual ~WidgetCharacter() override;
 
     // From CombatantWidget
-    virtual BattleDialogModelCombatant* getCombatant();
+    virtual BattleDialogModelCombatant* getCombatant() override;
 
     void setInternals(WidgetCharacterInternal* internals);
+    virtual bool isShown() override;
+    virtual bool isKnown() override;
 
 public slots:
-    virtual void updateData();
+    virtual void updateData() override;
+
+    // From CombatantWidget
+    virtual void setActive(bool active) override;
 
 protected:
     // From QWidget
-    virtual void leaveEvent(QEvent * event);
-    virtual void mousePressEvent(QMouseEvent * event);
-    virtual void mouseReleaseEvent(QMouseEvent * event);
-    virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    virtual void leaveEvent(QEvent * event) override;
+    virtual void mousePressEvent(QMouseEvent * event) override;
+    virtual void mouseReleaseEvent(QMouseEvent * event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
 
 private slots:
-    void edtInitiativeChanged(const QString &text);
-    void edtHPChanged(const QString &text);
+    void edtInitiativeChanged();
+    void edtHPChanged();
 
 private:
 
-    virtual void loadImage();
+    void readInternals();
+    virtual void loadImage() override;
 
     Ui::WidgetCharacter *ui;
 

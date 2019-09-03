@@ -6,7 +6,9 @@ BattleDialogModelCombatant::BattleDialogModelCombatant() :
     CampaignObjectBase(),
     _combatant(nullptr),
     _initiative(0),
-    _position(0,0)
+    _position(0,0),
+    _isShown(true),
+    _isKnown(true)
 {
 }
 
@@ -14,7 +16,9 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
     CampaignObjectBase(),
     _combatant(combatant),
     _initiative(0),
-    _position(0,0)
+    _position(0,0),
+    _isShown(true),
+    _isKnown(true)
 {
 }
 
@@ -22,7 +26,9 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int
     CampaignObjectBase(),
     _combatant(combatant),
     _initiative(initiative),
-    _position(position)
+    _position(position),
+    _isShown(true),
+    _isKnown(true)
 {
 }
 
@@ -30,7 +36,9 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(const BattleDialogModelCo
     CampaignObjectBase(),
     _combatant(other._combatant),
     _initiative(other._initiative),
-    _position(other._position)
+    _position(other._position),
+    _isShown(other._isShown),
+    _isKnown(other._isKnown)
 {
 }
 
@@ -49,6 +57,8 @@ void BattleDialogModelCombatant::outputXML(QDomDocument &doc, QDomElement &paren
     element.setAttribute("initiative", _initiative);
     element.setAttribute("positionX", _position.x());
     element.setAttribute("positionY", _position.y());
+    element.setAttribute("isShown", _isShown);
+    element.setAttribute("isKnown", _isKnown);
 
     internalOutputXML(doc, element, targetDirectory, isExport);
 
@@ -62,16 +72,18 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
     _initiative = element.attribute("initiative",QString::number(0)).toInt();
     _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
                         element.attribute("positionY",QString::number(0)).toDouble());
+    _isShown = static_cast<bool>(element.attribute("isShown",QString::number(1)).toInt());
+    _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(1)).toInt());
 }
 
 bool BattleDialogModelCombatant::getShown() const
 {
-    return true;
+    return _isShown;
 }
 
 bool BattleDialogModelCombatant::getKnown() const
 {
-    return true;
+    return _isKnown;
 }
 
 int BattleDialogModelCombatant::getInitiative() const
@@ -119,6 +131,16 @@ int BattleDialogModelCombatant::getAbilityValue(Combatant::Ability ability) cons
         default:
             return -1;
     }
+}
+
+void BattleDialogModelCombatant::setShown(bool isShown)
+{
+    _isShown = isShown;
+}
+
+void BattleDialogModelCombatant::setKnown(bool isKnown)
+{
+    _isKnown = isKnown;
 }
 
 void BattleDialogModelCombatant::setCombatant(Combatant* combatant)

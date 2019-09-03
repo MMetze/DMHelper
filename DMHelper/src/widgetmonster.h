@@ -1,7 +1,6 @@
 #ifndef WIDGETMONSTER_H
 #define WIDGETMONSTER_H
 
-//#include <QFrame>
 #include "combatantwidget.h"
 
 namespace Ui {

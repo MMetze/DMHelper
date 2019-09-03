@@ -32,15 +32,15 @@ public:
     virtual int getMonsterType() const = 0;
     virtual MonsterClass* getMonsterClass() const = 0;
 
-    virtual bool getShown() const override;
-    virtual bool getKnown() const override;
+    //virtual bool getShown() const override;
+    //virtual bool getKnown() const override;
     virtual int getSkillModifier(Combatant::Skills skill) const override;
 
     virtual int getLegendaryCount() const;
 
 public slots:
-    virtual void setShown(bool isShown);
-    virtual void setKnown(bool isKnown);
+    //virtual void setShown(bool isShown);
+    //virtual void setKnown(bool isKnown);
     virtual void setLegendaryCount(int legendaryCount);
 
 protected:
@@ -49,8 +49,8 @@ protected:
 
     //int convertSizeToFactor(const QString& monsterSize) const;
 
-    bool _isShown;
-    bool _isKnown;
+    //bool _isShown;
+    //bool _isKnown;
     int _legendaryCount;
 };
 

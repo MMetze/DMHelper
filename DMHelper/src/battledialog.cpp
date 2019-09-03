@@ -1,10 +1,10 @@
 #include "battledialog.h"
 #include "ui_battledialog.h"
-#include "characterwidget.h"
 #include "monster.h"
-#include "monsterwidget.h"
 #include "widgetmonster.h"
 #include "widgetmonsterinternal.h"
+#include "widgetcharacter.h"
+#include "widgetcharacterinternal.h"
 #include "monsterclass.h"
 #include "dmconstants.h"
 #include "bestiary.h"
@@ -35,6 +35,7 @@
 #include <QScrollBar>
 #include <QInputDialog>
 #include <QtMath>
+#include <QUuid>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
@@ -1534,10 +1535,15 @@ CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant*
             if(character)
             {
                 qDebug() << "[Battle Dialog] creating character widget for " << character->getName();
-                newWidget = new CharacterWidget(character, ui->scrollAreaWidgetContents);
-                connect(dynamic_cast<CharacterWidget*>(newWidget), SIGNAL(clicked(QUuid)), this, SIGNAL(characterSelected(QUuid)));
+                newWidget = new WidgetCharacter(ui->scrollAreaWidgetContents);
+                WidgetCharacterInternal* widgetInternals = new WidgetCharacterInternal(character, dynamic_cast<WidgetCharacter*>(newWidget));
+                connect(widgetInternals, SIGNAL(clicked(QUuid)),this,SIGNAL(characterSelected(QUuid)));
+                connect(widgetInternals, SIGNAL(contextMenu(BattleDialogModelCombatant*,QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*,QPoint)));
+                connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*,int)), this, SLOT(updateCombatantVisibility()));
+                connect(widgetInternals, SIGNAL(hitPointsChanged(BattleDialogModelCombatant*,int)), this, SLOT(registerCombatantDamage(BattleDialogModelCombatant*, int)));
+                connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isShownChanged(bool)), character, SLOT(setShown(bool)));
+                connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isKnownChanged(bool)), character, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
-                connect(newWidget, SIGNAL(contextMenu(BattleDialogModelCombatant*,QPoint)), this, SLOT(handleContextMenu(BattleDialogModelCombatant*,QPoint)));
             }
             break;
         }

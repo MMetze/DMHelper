@@ -3,17 +3,23 @@
 #include "widgetcharacterinternal.h"
 #include "dmconstants.h"
 #include "battledialogmodel.h"
+#include "battledialogmodelcharacter.h"
+#include "character.h"
 #include <QIntValidator>
+#include <QDebug>
 
 WidgetCharacter::WidgetCharacter(QWidget *parent) :
-    QFrame(parent),
+    CombatantWidget(parent),
     ui(new Ui::WidgetCharacter),
     _internals(nullptr)
 {
     ui->setupUi(this);
 
-    connect(ui->edtInit,SIGNAL(editingFinished()),this,SLOT(edtInitiativeChanged(QString)));
-    connect(ui->edtHP,SIGNAL(editingFinished()),this,SLOT(edtHPChanged(QString)));
+    connect(ui->edtInit,SIGNAL(editingFinished()),this,SLOT(edtInitiativeChanged()));
+    connect(ui->edtHP,SIGNAL(editingFinished()),this,SLOT(edtHPChanged()));
+
+    connect(ui->chkKnown, SIGNAL(clicked(bool)), this, SIGNAL(isKnownChanged(bool)));
+    connect(ui->chkVisible, SIGNAL(clicked(bool)), this, SIGNAL(isShownChanged(bool)));
 
     QValidator* valInit = new QIntValidator(-99, 99, this);
     ui->edtInit->setValidator(valInit);
@@ -44,6 +50,30 @@ void WidgetCharacter::setInternals(WidgetCharacterInternal* internals)
         delete _internals;
 
     _internals = internals;
+
+    BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(_internals->getCombatant());
+    if(characterCombatant)
+    {
+        connect(ui->chkKnown,SIGNAL(clicked(bool)),characterCombatant,SLOT(setKnown(bool)));
+        connect(ui->chkVisible,SIGNAL(clicked(bool)),characterCombatant,SLOT(setShown(bool)));
+
+        if(characterCombatant->getCombatant())
+            connect(characterCombatant->getCombatant(),SIGNAL(dirty()),this,SLOT(updateData()));
+        else
+            qDebug() << "[Character Widget] a valid combatant could not be found!";
+    }
+
+    readInternals();
+}
+
+bool WidgetCharacter::isShown()
+{
+    return ui->chkVisible->isChecked();
+}
+
+bool WidgetCharacter::isKnown()
+{
+    return ui->chkKnown->isChecked();
 }
 
 void WidgetCharacter::updateData()
@@ -51,48 +81,64 @@ void WidgetCharacter::updateData()
     if((!_internals) || (!_internals->getCombatant()))
         return;
 
-    //updatePairData(pairName, _character->getName());
-    //updatePairData(pairArmorClass, QString::number(_character->getArmorClass()));
-
-    ui->edtName->setText(_internals->getCombatant()->getName());
-    ui->edtHP->setText(QString::number(_internals->getCombatant()->getHitPoints()));
-    ui->edtInit->setText(QString::number(_internals->getCombatant()->getInitiative()));
-
-    loadImage();
-
+    readInternals();
     update();
+}
+
+void WidgetCharacter::setActive(bool active)
+{
+    CombatantWidget::setActive(active);
 }
 
 void WidgetCharacter::leaveEvent(QEvent * event)
 {
-    _internals->leaveEvent(event);
+    if(_internals)
+        _internals->leaveEvent(event);
 }
 
 void WidgetCharacter::mousePressEvent(QMouseEvent * event)
 {
-    _internals->mousePressEvent(event);
+    if(_internals)
+        _internals->mousePressEvent(event);
 }
 
 void WidgetCharacter::mouseReleaseEvent(QMouseEvent * event)
 {
-    _internals->mouseReleaseEvent(event);
+    if(_internals)
+        _internals->mouseReleaseEvent(event);
 }
 
 void WidgetCharacter::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    _internals->mouseDoubleClickEvent(event);
+    if(_internals)
+        _internals->mouseDoubleClickEvent(event);
 }
 
-void WidgetCharacter::edtInitiativeChanged(const QString &text)
+void WidgetCharacter::edtInitiativeChanged()
 {
     if(_internals)
-        _internals->initiativeChanged(text.toInt());
+        _internals->initiativeChanged(ui->edtInit->text().toInt());
 }
 
-void WidgetCharacter::edtHPChanged(const QString &text)
+void WidgetCharacter::edtHPChanged()
 {
     if(_internals)
-        _internals->handleHitPointsChanged(text.toInt());
+        _internals->handleHitPointsChanged(ui->edtHP->text().toInt());
+}
+
+void WidgetCharacter::readInternals()
+{
+    if((!_internals) || (!_internals->getCombatant()))
+        return;
+
+    loadImage();
+
+    ui->edtName->setText(_internals->getCombatant()->getName());
+    ui->edtAC->setText(QString::number(_internals->getCombatant()->getArmorClass()));
+    ui->edtHP->setText(QString::number(_internals->getCombatant()->getHitPoints()));
+    ui->edtInit->setText(QString::number(_internals->getCombatant()->getInitiative()));
+    ui->chkKnown->setChecked(_internals->getCombatant()->getKnown());
+    ui->chkVisible->setChecked(_internals->getCombatant()->getShown());
 }
 
 void WidgetCharacter::loadImage()
@@ -102,22 +148,4 @@ void WidgetCharacter::loadImage()
         ui->lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
         ui->lblIcon->setPixmap(_internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
     }
-
-    /*
-    if((_lblIcon)&&(getCombatant()))
-    {
-        _lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
-        _lblIcon->setPixmap(getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
-    }
-    */
 }
-
-// TODO: check highlighting
-/*
-    setWidgetHighlighted(_lblIcon, highlighted);
-    setWidgetHighlighted(_lblInitName, highlighted);
-    setWidgetHighlighted(_edtInit, highlighted);
-
-    setPairHighlighted(pairName, highlighted);
-    setPairHighlighted(pairArmorClass, highlighted);
-*/

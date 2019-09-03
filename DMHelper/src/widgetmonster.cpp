@@ -172,22 +172,4 @@ void WidgetMonster::loadImage()
         ui->lblIcon->setPixmap(_internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
         emit imageChanged(_internals->getCombatant());
     }
-
-    /*
-    if((_lblIcon)&&(getCombatant()))
-    {
-        _lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
-        _lblIcon->setPixmap(getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
-    }
-    */
 }
-
-// TODO: check highlighting
-/*
-    setWidgetHighlighted(_lblIcon, highlighted);
-    setWidgetHighlighted(_lblInitName, highlighted);
-    setWidgetHighlighted(_edtInit, highlighted);
-
-    setPairHighlighted(pairName, highlighted);
-    setPairHighlighted(pairArmorClass, highlighted);
-*/

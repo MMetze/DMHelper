@@ -54,6 +54,10 @@ public:
     virtual QString getName() const = 0;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const = 0;
 
+public slots:
+    virtual void setShown(bool isShown);
+    virtual void setKnown(bool isKnown);
+
 signals:
     void combatantMoved(BattleDialogModelCombatant* combatant);
 
@@ -66,6 +70,8 @@ protected:
     Combatant* _combatant;
     int _initiative;
     QPointF _position;
+    bool _isShown;
+    bool _isKnown;
 };
 
 #endif // BATTLEDIALOGMODELCOMBATANT_H

@@ -12,18 +12,13 @@ WidgetCombatantBase::WidgetCombatantBase(QWidget *parent) :
     _mouseDown(Qt::NoButton),
     _active(false),
     _selected(false),
-//    _lblIcon(0),
-//    _lblInitName(0),
-//    _edtInit(0),
     _angle(0),
     _timer(nullptr)
 {
-    //setAutoFillBackground(true);
 }
 
 int WidgetCombatantBase::getInitiative() const
 {
-    //return _edtInit ? _edtInit->text().toInt() : 0;
     return 0;
 }
 
@@ -95,18 +90,6 @@ void WidgetCombatantBase::updateData()
 {
 }
 
-    /*
-void WidgetCombatantBase::setInitiative(int initiative)
-{
-    Q_UNUSED(initiative);
-    if(_edtInit)
-    {
-        _edtInit->setText(QString::number(initiative));
-        update();
-    }
-}
-    */
-
 void WidgetCombatantBase::initiativeChanged(int initiative)
 {
     if(getCombatant() && (getCombatant()->getInitiative() != initiative))
@@ -160,10 +143,6 @@ void WidgetCombatantBase::setHighlighted(bool highlighted)
     }
 
     getFrame()->setStyleSheet(getStyleString());
-
-//    setWidgetHighlighted(_lblIcon, highlighted);
-//    setWidgetHighlighted(_lblInitName, highlighted);
-//    setWidgetHighlighted(_edtInit, highlighted);
 }
 
 void WidgetCombatantBase::timerExpired()
@@ -175,61 +154,6 @@ void WidgetCombatantBase::timerExpired()
 void WidgetCombatantBase::executeDoubleClick()
 {
 }
-
-/*
-void WidgetCombatantBase::loadImage()
-{
-    if((_lblIcon)&&(getCombatant()))
-    {
-        _lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
-        _lblIcon->setPixmap(getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
-    }
-}
-*/
-
-/*
-QHBoxLayout* WidgetCombatantBase::createPairLayout(const QString& pairName, const QString& pairValue)
-{
-    QHBoxLayout* pairLayout = new QHBoxLayout();
-
-    QLabel* nameLabel = new QLabel(pairName + QString(":"), getFrame());
-    nameLabel->resize( nameLabel->fontMetrics().width(nameLabel->text()), nameLabel->height());
-    nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    QLabel* valueLabel = new QLabel(pairValue, getFrame());
-    valueLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-
-    pairLayout->addWidget(nameLabel);
-    pairLayout->addWidget(valueLabel);
-
-    return pairLayout;
-}
-
-void WidgetCombatantBase::updatePairData(QHBoxLayout* pair, const QString& pairValue)
-{
-    if((!pair) || (pair->itemAt(1) == 0))
-        return;
-
-    QLabel* lbl = dynamic_cast<QLabel*>(pair->itemAt(1)->widget());
-    if( lbl )
-    {
-        lbl->setText( pairValue );
-    }
-}
-
-void WidgetCombatantBase::setPairHighlighted(QHBoxLayout* pair, bool highlighted)
-{
-    if(!pair)
-        return;
-
-    for (int i = 0; i < pair->count(); ++i)
-    {
-        if(pair->itemAt(i))
-        {
-            setWidgetHighlighted(pair->itemAt(i)->widget(), highlighted);
-        }
-    }
-}
-*/
 
 void WidgetCombatantBase::setWidgetHighlighted(QWidget* widget, bool highlighted)
 {

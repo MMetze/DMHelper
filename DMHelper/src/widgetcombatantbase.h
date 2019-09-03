@@ -53,10 +53,6 @@ protected:
 
     // local
     virtual void executeDoubleClick();
-    //virtual void loadImage();
-    //virtual QHBoxLayout* createPairLayout(const QString& pairName, const QString& pairValue);
-    //virtual void updatePairData(QHBoxLayout* pair, const QString& pairValue);
-    //virtual void setPairHighlighted(QHBoxLayout* pair, bool highlighted);
     virtual void setWidgetHighlighted(QWidget* widget, bool highlighted);
     virtual QString getStyleString();
 
@@ -64,11 +60,6 @@ protected:
     Qt::MouseButton _mouseDown;
     bool _active;
     bool _selected;
-
-    // UI elements
-    //QLabel* _lblIcon;
-    //QLabel* _lblInitName;
-    //QLineEdit* _edtInit;
 
     // Highlight animation
     int _angle;
