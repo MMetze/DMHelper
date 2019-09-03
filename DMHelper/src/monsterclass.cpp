@@ -349,21 +349,9 @@ QString MonsterClass::getChallenge() const
     return _challenge;
 }
 
-float MonsterClass::getChallengeNumber() const
-{
-    QStringList challengeParts = _challenge.split('/');
-    if(challengeParts.count() == 1)
-        return challengeParts.at(0).toFloat();
-
-    if((challengeParts.count() == 2) && (challengeParts.at(1).toFloat() > 0.f))
-        return challengeParts.at(0).toFloat() / challengeParts.at(1).toFloat();
-
-    return 0;
-}
-
 int MonsterClass::getXP() const
 {
-    return convertCRtoXP(getChallengeNumber());
+    return getExperienceByCR(getChallenge());
 }
 
 int MonsterClass::getStrength() const
@@ -928,74 +916,83 @@ void MonsterClass::writeActionList(QDomDocument &doc, QDomElement& element, cons
     element.appendChild(actionListElement);
 }
 
-int MonsterClass::convertCRtoXP(float challengeRating)
+int MonsterClass::getExperienceByCR(const QString& inputCR)
 {
-    if(challengeRating >= 30.f)
-        return 155000;
-    else if(challengeRating >= 29.f)
-        return 135000;
-    else if(challengeRating >= 28.f)
-        return 120000;
-    else if(challengeRating >= 27.f)
-        return 105000;
-    else if(challengeRating >= 26.f)
-        return 90000;
-    else if(challengeRating >= 25.f)
-        return 75000;
-    else if(challengeRating >= 24.f)
-        return 62000;
-    else if(challengeRating >= 23.f)
-        return 50000;
-    else if(challengeRating >= 22.f)
-        return 31000;
-    else if(challengeRating >= 21.f)
-        return 33000;
-    else if(challengeRating >= 20.f)
-        return 25000;
-    else if(challengeRating >= 19.f)
-        return 22000;
-    else if(challengeRating >= 18.f)
-        return 20000;
-    else if(challengeRating >= 17.f)
-        return 18000;
-    else if(challengeRating >= 16.f)
-        return 15000;
-    else if(challengeRating >= 15.f)
-        return 13000;
-    else if(challengeRating >= 14.f)
-        return 11500;
-    else if(challengeRating >= 13.f)
-        return 10000;
-    else if(challengeRating >= 12.f)
-        return 8400;
-    else if(challengeRating >= 11.f)
-        return 7200;
-    else if(challengeRating >= 10.f)
-        return 5900;
-    else if(challengeRating >= 9.f)
-        return 5000;
-    else if(challengeRating >= 8.f)
-        return 3900;
-    else if(challengeRating >= 7.f)
-        return 2900;
-    else if(challengeRating >= 6.f)
-        return 2300;
-    else if(challengeRating >= 5.f)
-        return 1800;
-    else if(challengeRating >= 4.f)
-        return 1100;
-    else if(challengeRating >= 3.f)
-        return 700;
-    else if(challengeRating >= 2.f)
-        return 450;
-    else if(challengeRating >= 1.f)
-        return 200;
-    else if(challengeRating >= 0.5f)
-        return 100;
-    else if(challengeRating >= 0.25f)
-        return 50;
-    else if(challengeRating >= 0.125f)
-        return 25;
-    else
-        return 10;
+    if(inputCR == QString("0")) return 0;
+    if((inputCR == QString("0.125")) || (inputCR == QString("1/8"))) return 25;
+    if((inputCR == QString("0.25")) || (inputCR == QString("1/4"))) return 50;
+    if((inputCR == QString("0.5")) || (inputCR == QString("1/2"))) return 100;
+    if(inputCR == QString("1")) return 200;
+    if(inputCR == QString("2")) return 450;
+    if(inputCR == QString("3")) return 700;
+    if(inputCR == QString("4")) return 1100;
+    if(inputCR == QString("5")) return 1800;
+    if(inputCR == QString("6")) return 2300;
+    if(inputCR == QString("7")) return 2900;
+    if(inputCR == QString("8")) return 3900;
+    if(inputCR == QString("9")) return 5000;
+    if(inputCR == QString("10")) return 5900;
+    if(inputCR == QString("11")) return 7200;
+    if(inputCR == QString("12")) return 8400;
+    if(inputCR == QString("13")) return 10000;
+    if(inputCR == QString("14")) return 11500;
+    if(inputCR == QString("15")) return 13000;
+    if(inputCR == QString("16")) return 15000;
+    if(inputCR == QString("17")) return 18000;
+    if(inputCR == QString("18")) return 20000;
+    if(inputCR == QString("19")) return 22000;
+    if(inputCR == QString("20")) return 25000;
+    if(inputCR == QString("21")) return 33000;
+    if(inputCR == QString("22")) return 41000;
+    if(inputCR == QString("23")) return 50000;
+    if(inputCR == QString("24")) return 62000;
+    if(inputCR == QString("25")) return 75000;
+    if(inputCR == QString("26")) return 90000;
+    if(inputCR == QString("27")) return 105000;
+    if(inputCR == QString("28")) return 120000;
+    if(inputCR == QString("29")) return 135000;
+    if(inputCR == QString("30")) return 155000;
+
+    return -1;
 }
+
+int MonsterClass::getProficiencyByCR(const QString& inputCR)
+{
+    if(inputCR == QString("0")) return 2;
+    if((inputCR == QString("0.125")) || (inputCR == QString("1/8"))) return 2;
+    if((inputCR == QString("0.25")) || (inputCR == QString("1/4"))) return 2;
+    if((inputCR == QString("0.5")) || (inputCR == QString("1/2"))) return 2;
+    if(inputCR == QString("1")) return 2;
+    if(inputCR == QString("2")) return 2;
+    if(inputCR == QString("3")) return 2;
+    if(inputCR == QString("4")) return 2;
+    if(inputCR == QString("5")) return 3;
+    if(inputCR == QString("6")) return 3;
+    if(inputCR == QString("7")) return 3;
+    if(inputCR == QString("8")) return 3;
+    if(inputCR == QString("9")) return 4;
+    if(inputCR == QString("10")) return 4;
+    if(inputCR == QString("11")) return 4;
+    if(inputCR == QString("12")) return 4;
+    if(inputCR == QString("13")) return 5;
+    if(inputCR == QString("14")) return 5;
+    if(inputCR == QString("15")) return 5;
+    if(inputCR == QString("16")) return 5;
+    if(inputCR == QString("17")) return 6;
+    if(inputCR == QString("18")) return 6;
+    if(inputCR == QString("19")) return 6;
+    if(inputCR == QString("20")) return 6;
+    if(inputCR == QString("21")) return 7;
+    if(inputCR == QString("22")) return 7;
+    if(inputCR == QString("23")) return 7;
+    if(inputCR == QString("24")) return 7;
+    if(inputCR == QString("25")) return 8;
+    if(inputCR == QString("26")) return 8;
+    if(inputCR == QString("27")) return 8;
+    if(inputCR == QString("28")) return 8;
+    if(inputCR == QString("29")) return 9;
+    if(inputCR == QString("30")) return 9;
+
+    return 0;
+}
+

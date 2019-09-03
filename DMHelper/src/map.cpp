@@ -345,6 +345,9 @@ void Map::initialize()
         return;
     }
 
+    if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
+        _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
+
     _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 

@@ -35,6 +35,7 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
     basicdateserver.cpp \
+    bestiaryexportdialog.cpp \
     campaignexporter.cpp \
     colorpushbutton.cpp \
     equipmentserver.cpp \
@@ -186,6 +187,7 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
     basicdateserver.h \
+    bestiaryexportdialog.h \
     campaignexporter.h \
     colorpushbutton.h \
     equipmentserver.h \
@@ -321,6 +323,7 @@ HEADERS  += mainwindow.h \
     texttranslatedialog.h
 
 FORMS    += mainwindow.ui \
+    bestiaryexportdialog.ui \
     dicerolldialog.ui \
     characterdialog.ui \
     combatantdialog.ui \

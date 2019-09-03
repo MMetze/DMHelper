@@ -45,7 +45,7 @@ BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
 
 void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool isImport)
 {
-    BattleDialogModelCombatant::inputXML(element, isImport);
+    BattleDialogModelMonsterBase::inputXML(element, isImport);
 
     _monsterName = element.attribute("monsterName");
     _monsterHP = element.attribute("monsterHP",QString::number(0)).toInt();

@@ -13,9 +13,10 @@ class PublishButtonFrame : public QFrame
 
 public:
     explicit PublishButtonFrame(QWidget *parent = nullptr);
-    ~PublishButtonFrame();
+    virtual ~PublishButtonFrame();
 
-public:
+    void setDefaults();
+
     bool isChecked();
     bool isCheckable();
     void setCheckable(bool checkable);

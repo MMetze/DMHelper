@@ -28,6 +28,8 @@ public:
     void inputXML(const QDomElement &element, bool isImport);
 
     QString getVersion() const;
+    int getMajorVersion() const;
+    int getMinorVersion() const;
     bool isVersionCompatible() const;
     bool isVersionIdentical() const;
     static QString getExpectedVersion();

@@ -170,6 +170,8 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <string>&amp;Tools</string>
     </property>
     <addaction name="action_Open_Bestiary"/>
+    <addaction name="actionExport_Bestiary"/>
+    <addaction name="actionImport_Bestiary"/>
     <addaction name="separator"/>
     <addaction name="actionDice"/>
     <addaction name="actionPublish_Text"/>
@@ -371,6 +373,16 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="action_Getting_Started">
    <property name="text">
     <string>Open &amp;Getting Started</string>
+   </property>
+  </action>
+  <action name="actionExport_Bestiary">
+   <property name="text">
+    <string>Export Bestiary...</string>
+   </property>
+  </action>
+  <action name="actionImport_Bestiary">
+   <property name="text">
+    <string>Import Bestiary...</string>
    </property>
   </action>
  </widget>

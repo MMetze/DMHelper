@@ -1,6 +1,8 @@
 #include "publishbuttonframe.h"
 #include "colorpushbutton.h"
 #include "ui_publishbuttonframe.h"
+#include <QKeyEvent>
+#include <QMessageBox>
 
 PublishButtonFrame::PublishButtonFrame(QWidget *parent) :
     QFrame(parent),
@@ -18,11 +20,26 @@ PublishButtonFrame::PublishButtonFrame(QWidget *parent) :
     connect(ui->btnCCW, SIGNAL(clicked()), this, SIGNAL(rotateCCW()));
 
     connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
+
+    setDefaults();
 }
 
 PublishButtonFrame::~PublishButtonFrame()
 {
     delete ui;
+}
+
+void PublishButtonFrame::setDefaults()
+{
+    ui->btnPublish->setAutoDefault(false);
+    ui->btnCW->setAutoDefault(false);
+    ui->btnCCW->setAutoDefault(false);
+    ui->btnColor->setAutoDefault(false);
+
+    ui->btnPublish->setDefault(false);
+    ui->btnCW->setDefault(false);
+    ui->btnCCW->setDefault(false);
+    ui->btnColor->setDefault(false);
 }
 
 bool PublishButtonFrame::isChecked()

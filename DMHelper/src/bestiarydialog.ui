@@ -564,6 +564,9 @@ color: rgb(50, 50, 50);</string>
          </item>
          <item>
           <widget class="QLineEdit" name="edtAverageHitPoints">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximumSize">
             <size>
              <width>50</width>
@@ -1132,6 +1135,9 @@ color: rgb(50, 50, 50);</string>
          </item>
          <item>
           <widget class="QLineEdit" name="edtXP">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
            <property name="maximumSize">
             <size>
              <width>100</width>
@@ -1151,6 +1157,9 @@ color: rgb(50, 50, 50);</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
            </property>
           </widget>
          </item>

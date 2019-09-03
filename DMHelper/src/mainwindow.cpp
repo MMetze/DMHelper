@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "publishwindow.h"
 #include "publishframe.h"
@@ -28,6 +28,7 @@
 #include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
+#include "bestiaryexportdialog.h"
 #include "equipmentserver.h"
 #include "textpublishdialog.h"
 #include "texttranslatedialog.h"
@@ -232,12 +233,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionNew_Map,SIGNAL(triggered()),this,SLOT(newMap()));
     connect(ui->actionExport_Item,SIGNAL(triggered()),this,SLOT(exportCurrentItem()));
     connect(ui->actionImport_Item,SIGNAL(triggered()),this,SLOT(importItem()));
-    // TODO: reenable Import Character (?)
-    //connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
-    ui->action_Import_Character->setVisible(false);
     connect(ui->actionStart_Battle,SIGNAL(triggered()),this,SLOT(handleStartNewBattle()));
 
+    // TODO: enable/disable Import Character
+    connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    //ui->action_Import_Character->setVisible(false);
+
     connect(ui->action_Open_Bestiary,SIGNAL(triggered()),this,SLOT(openBestiary()));
+    connect(ui->actionExport_Bestiary,SIGNAL(triggered()),this,SLOT(exportBestiary()));
+    connect(ui->actionImport_Bestiary,SIGNAL(triggered()),this,SLOT(importBestiary()));
     connect(ui->action_New_Monster,SIGNAL(triggered()),&bestiaryDlg,SLOT(createNewMonster()));
     connect(ui->actionOpen_Players_Window,SIGNAL(triggered()),this,SLOT(showPublishWindow()));
     connect(ui->actionPublish_Text,SIGNAL(triggered()),this,SLOT(openTextPublisher()));
@@ -1025,24 +1029,6 @@ void MainWindow::readBestiary()
 
     if(bestiaryFileName.isEmpty())
     {
-        /*
-        QMessageBox::StandardButton result = QMessageBox::question(this, QString("Select Bestiary"),QString("A current bestiary could not be found. Would you like to open an existing bestiary?"));
-
-        if(result == QMessageBox::Yes)
-        {
-            bestiaryFileName = QFileDialog::getOpenFileName(this,QString("Select Bestiary File"),QString(),QString("XML files (*.xml)"));
-        }
-        else
-        {
-            bestiaryFileName = QFileDialog::getSaveFileName(this,QString("Select New Bestiary File"),QString(),QString("XML files (*.xml)"));
-        }
-
-        if(bestiaryFileName.isEmpty())
-            return;
-
-        _options->setBestiaryFileName(bestiaryFileName);
-        */
-
         qDebug() << "[Main] No known bestiary found, attempting to load default bestiary";
 #ifdef Q_OS_MAC
         QDir fileDirPath(QCoreApplication::applicationDirPath());
@@ -2286,6 +2272,66 @@ void MainWindow::openBestiary()
         bestiaryDlg.setFocus();
         bestiaryDlg.show();
         bestiaryDlg.activateWindow();
+    }
+}
+
+void MainWindow::exportBestiary()
+{
+    qDebug() << "[Main] Exporting Bestiary...";
+    if(!Bestiary::Instance())
+        return;
+
+    BestiaryExportDialog dlg;
+    dlg.exec();
+}
+
+void MainWindow::importBestiary()
+{
+    qDebug() << "[Main] Importing Bestiary...";
+
+    if(!Bestiary::Instance())
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select exported file for import"));
+    if((!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)))
+    {
+        qDebug() << "[Main] Importing bestiary: " << filename;
+
+        QDomDocument doc("DMHelperBestiaryXML");
+        QFile file(filename);
+        if(!file.open(QIODevice::ReadOnly))
+        {
+            qDebug() << "[Main] Opening bestiary import file failed.";
+            return;
+        }
+
+        QTextStream in(&file);
+        in.setCodec("UTF-8");
+        QString errMsg;
+        int errRow;
+        int errColumn;
+        bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+
+        file.close();
+
+        if(contentResult == false)
+        {
+            qDebug() << "[Main] Error reading bestiary import XML content.";
+            qDebug() << errMsg << errRow << errColumn;
+            return;
+        }
+
+        QDomElement root = doc.documentElement();
+        if((root.isNull()) || (root.tagName() != "root"))
+        {
+            qDebug() << "[Main] Bestiary import file missing root item";
+            return;
+        }
+
+        Bestiary::Instance()->inputXML(root, true);
+        openBestiary();
+
+        qDebug() << "[Main] Bestiary import complete.";
     }
 }
 

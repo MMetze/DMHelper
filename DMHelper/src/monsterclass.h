@@ -48,7 +48,6 @@ public:
     QString getDamageVulnerabilities() const;
     QString getSenses() const;
     QString getChallenge() const;
-    float getChallengeNumber() const;
     int getXP() const;
     int getStrength() const;
     int getDexterity() const;
@@ -123,8 +122,6 @@ protected:
     void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport);
     void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const;
 
-    static int convertCRtoXP(float challengeRating);
-
     bool _private;
     // bool _legendary; Removed
 
@@ -176,6 +173,11 @@ protected:
     bool _iconChanged;
 
     ScaledPixmap _scaledPixmap;
+
+public:
+
+    static int getExperienceByCR(const QString& inputCR);
+    static int getProficiencyByCR(const QString& inputCR);
 
 };
 

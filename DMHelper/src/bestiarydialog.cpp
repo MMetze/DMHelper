@@ -54,8 +54,8 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 
     ui->edtArmorClass->setValidator(new QIntValidator(0,100));
     ui->edtAverageHitPoints->setValidator(new QIntValidator(0,10000));
-    ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
-    ui->edtXP->setValidator(new QIntValidator(0,1000000));
+    //ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
+    //ui->edtXP->setValidator(new QIntValidator(0,1000000));
 
     connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtMonsterSize, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -77,8 +77,9 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->edtDamageVulnerabilities, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtSenses, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtLanguages, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtXP, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    //connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    //connect(ui->edtXP, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleChallengeEdited()));
 
     ui->chkPrivate->hide();
 }
@@ -141,8 +142,9 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     {
         ui->edtLanguages->setText("---");
     }
-    ui->edtChallenge->setText(_monster->getChallenge());
-    ui->edtXP->setText(QString::number(_monster->getXP()));
+    //ui->edtChallenge->setText(_monster->getChallenge());
+    //ui->edtXP->setText(QString::number(_monster->getXP()));
+    interpretChallengeRating(_monster->getChallenge());
 
     clearActionWidgets();
 
@@ -249,7 +251,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtSenses->setReadOnly(!_edit);
     ui->edtLanguages->setReadOnly(!_edit);
     ui->edtChallenge->setReadOnly(!_edit);
-    ui->edtXP->setReadOnly(!_edit);
+    //ui->edtXP->setReadOnly(!_edit);
 }
 
 void BestiaryDialog::setMonster(const QString& monsterName, bool edit)
@@ -508,6 +510,12 @@ void BestiaryDialog::deleteReaction(const MonsterAction& action)
     }
 }
 
+void BestiaryDialog::handleChallengeEdited()
+{
+    interpretChallengeRating(ui->edtChallenge->text());
+    handleEditedData();
+}
+
 void BestiaryDialog::handleEditedData()
 {
     qDebug() << "[Bestiary Dialog] Bestiary Dialog edit detected... storing data";
@@ -713,4 +721,32 @@ void BestiaryDialog::clearWidget(QWidget* widget)
     QLayoutItem *child;
     while ((child = layout->takeAt(0)) != nullptr)
         delete child;
+}
+
+void BestiaryDialog::interpretChallengeRating(const QString& inputCR)
+{
+    if(inputCR.isEmpty())
+        return;
+
+    QString resultCR;
+
+    if((inputCR == QString("0.125")) || (inputCR == QString("1/8")))
+        resultCR = QString("1/8");
+    else if((inputCR == QString("0.25")) || (inputCR == QString("1/4")))
+        resultCR = QString("1/4");
+    else if((inputCR == QString("0.5")) || (inputCR == QString("1/2")))
+        resultCR = QString("1/2");
+    else
+    {
+        bool convertResult = false;
+        int intCR = inputCR.toInt(&convertResult);
+        if((convertResult) && (intCR >= 0) && (intCR <= 30))
+        {
+            resultCR = QString::number(intCR);
+        }
+    }
+
+    if(resultCR != ui->edtChallenge->text())
+        ui->edtChallenge->setText(resultCR);
+    ui->edtXP->setText(QString::number(MonsterClass::getExperienceByCR(resultCR)));
 }

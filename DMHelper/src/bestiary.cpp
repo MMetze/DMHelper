@@ -108,33 +108,70 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
     if (!isVersionIdentical())
         qDebug() << "[Bestiary]    WARNING: Bestiary version is not the same as expected version: " << getExpectedVersion();
 
-    if(_bestiaryMap.count() > 0)
+    if(isImport)
     {
-        qDebug() << "[Bestiary]    Unloading previous bestiary";
-        qDeleteAll(_bestiaryMap);
-        _bestiaryMap.clear();
-    }
+        int importCount = 0;
+        QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
+        while( !monsterElement.isNull() )
+        {
+            bool importOK = true;
+            QString monsterName = monsterElement.firstChildElement(QString("name")).text();
+            if(Bestiary::Instance()->exists(monsterName))
+            {
+                QMessageBox::StandardButton result = QMessageBox::question(nullptr,
+                                                                           QString("Import Monster Conflict"),
+                                                                           QString("The monster '") + monsterName + QString("' already exists in the Bestiary. Would you like to overwrite the existing entry?"),
+                                                                           QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel );
+                if(result == QMessageBox::Cancel)
+                {
+                    qDebug() << "[Main] Import monsters cancelled";
+                    return;
+                }
 
-    QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
-    while( !monsterElement.isNull() )
+                importOK = (result == QMessageBox::Yes);
+            }
+
+            if(importOK)
+            {
+                MonsterClass* monster = new MonsterClass(monsterElement, isImport);
+                insertMonsterClass(monster);
+            }
+
+            monsterElement = monsterElement.nextSiblingElement( QString("element") );
+        }
+
+        qDebug() << "[Bestiary] Importing bestiary completed. " << importCount << " creatures imported.";
+    }
+    else
     {
-        MonsterClass* monster = new MonsterClass(monsterElement, isImport);
-        insertMonsterClass(monster);
-        monsterElement = monsterElement.nextSiblingElement( QString("element") );
+        if(_bestiaryMap.count() > 0)
+        {
+            qDebug() << "[Bestiary]    Unloading previous bestiary";
+            qDeleteAll(_bestiaryMap);
+            _bestiaryMap.clear();
+        }
+
+        QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
+        while( !monsterElement.isNull() )
+        {
+            MonsterClass* monster = new MonsterClass(monsterElement, isImport);
+            insertMonsterClass(monster);
+            monsterElement = monsterElement.nextSiblingElement( QString("element") );
+        }
+
+        QDomElement licenseElement = bestiaryElement.firstChildElement( QString("license") );
+        if(licenseElement.isNull())
+            qDebug() << "[Bestiary] ERROR: not able to find the license text in the bestiary!";
+
+        QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
+        while(!licenseText.isNull())
+        {
+            _licenseText.append(licenseText.text());
+            licenseText = licenseText.nextSiblingElement(QString("element"));
+        }
+
+        qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
     }
-
-    QDomElement licenseElement = bestiaryElement.firstChildElement( QString("license") );
-    if(licenseElement.isNull())
-        qDebug() << "[Bestiary] ERROR: not able to find the license text in the bestiary!";
-
-    QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
-    while(!licenseText.isNull())
-    {
-        _licenseText.append(licenseText.text());
-        licenseText = licenseText.nextSiblingElement(QString("element"));
-    }
-
-    qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
 
     emit changed();
 }
@@ -142,6 +179,16 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
 QString Bestiary::getVersion() const
 {
     return QString::number(_majorVersion) + "." + QString::number(_minorVersion);
+}
+
+int Bestiary::getMajorVersion() const
+{
+    return _majorVersion;
+}
+
+int Bestiary::getMinorVersion() const
+{
+    return _minorVersion;
 }
 
 bool Bestiary::isVersionCompatible() const

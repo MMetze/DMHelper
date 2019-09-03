@@ -50,7 +50,7 @@ BattleDialogModelMonsterCombatant::~BattleDialogModelMonsterCombatant()
 
 void BattleDialogModelMonsterCombatant::inputXML(const QDomElement &element, bool isImport)
 {
-    BattleDialogModelCombatant::inputXML(element, isImport);
+    BattleDialogModelMonsterBase::inputXML(element, isImport);
 
     _monsterSize = element.attribute("monsterSize",QString::number(DMHelper::CombatantSize_Medium)).toInt();
     _monsterName = element.attribute("monsterName");

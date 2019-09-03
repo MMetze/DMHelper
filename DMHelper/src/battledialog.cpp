@@ -1107,6 +1107,7 @@ void BattleDialog::damageCombatant()
     {
         _contextMenuCombatant->setHitPoints(_contextMenuCombatant->getHitPoints() - damage);
         updateCombatantWidget(_contextMenuCombatant);
+        updateCombatantVisibility();
     }
 
     registerCombatantDamage(_contextMenuCombatant, -damage);

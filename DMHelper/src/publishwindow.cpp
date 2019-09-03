@@ -56,7 +56,7 @@ void PublishWindow::setBackgroundColor(QColor color)
 
     qDebug() << "[PublishWindow] changing background color to: " << color << ", string: " << styleString;
 
-    //setStyleSheet(styleString);
+    setStyleSheet(styleString);
     _publishFrame->setStyleSheet(styleString);
 }
 

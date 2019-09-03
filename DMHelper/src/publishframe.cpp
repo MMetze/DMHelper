@@ -33,6 +33,8 @@ PublishFrame::PublishFrame(QWidget *parent) :
     _scrollArea->setAttribute(Qt::WA_TransparentForMouseEvents);
     _scrollArea->resize(size());
 
+    _label->setStyleSheet("background-color: rgba(255,0,0,0);");
+
     setMouseTracking(true);
 }
 

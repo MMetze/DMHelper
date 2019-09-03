@@ -148,6 +148,9 @@ protected slots:
 
     // Bestiary
     void openBestiary();
+    void exportBestiary();
+    void importBestiary();
+
     void openAboutDialog();
 
     void openTextPublisher();

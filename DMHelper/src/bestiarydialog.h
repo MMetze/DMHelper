@@ -56,6 +56,7 @@ protected slots:
     void addReaction();
     void deleteReaction(const MonsterAction& action);
 
+    void handleChallengeEdited();
     void handleEditedData();
 
 protected:
@@ -73,6 +74,8 @@ private:
 
     void clearActionWidgets();
     void clearWidget(QWidget* widget);
+
+    void interpretChallengeRating(const QString& inputCR);
 
     Ui::BestiaryDialog *ui;
     QWidget* _actionsWidget;
