@@ -131,10 +131,10 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                     newAction = new UndoPath(*this, MapDrawPath());
                     break;
                 case DMHelper::ActionType_Point:
-                    newAction = new UndoPoint(*this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, QPoint()));
+                    newAction = new UndoPoint(*this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
                     break;
                 case DMHelper::ActionType_Rect:
-                    newAction = new UndoShape(*this, MapEditShape(QRect(), true));
+                    newAction = new UndoShape(*this, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
                     {
@@ -375,12 +375,19 @@ void Map::paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* tar
     {
         if(mapDraw.erase())
         {
-            QRadialGradient grad(point, mapDraw.radius());
-            grad.setColorAt(0,QColor(0,0,0,0));
-            grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())),QColor(0,0,0,0));
-            grad.setColorAt(1,QColor(255,255,255));
+            if(mapDraw.smooth())
+            {
+                QRadialGradient grad(point, mapDraw.radius());
+                grad.setColorAt(0,QColor(0,0,0,0));
+                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())),QColor(0,0,0,0));
+                grad.setColorAt(1,QColor(255,255,255));
+                p.setBrush(grad);
+            }
+            else
+            {
+                p.setBrush(QColor(0,0,0,0));
+            }
             p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-            p.setBrush(grad);
         }
         else
         {
@@ -395,17 +402,39 @@ void Map::paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* tar
     {
         if(mapDraw.erase())
         {
-            p.setBrush(QColor(0,0,0,0));
             p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+            if(mapDraw.smooth())
+            {
+                qreal border = static_cast<qreal>(mapDraw.radius()) / 20.0;
+                qreal radius = static_cast<qreal>(mapDraw.radius()) - (border * 4);
+                p.setBrush(QColor(0,0,0,0));
+                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
+                radius += border;
+                p.setBrush(QColor(0,0,0,50));
+                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
+                radius += border;
+                p.setBrush(QColor(0,0,0,100));
+                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
+                radius += border;
+                p.setBrush(QColor(0,0,0,150));
+                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
+                radius += border;
+                p.setBrush(QColor(0,0,0,200));
+                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
+            }
+            else
+            {
+                p.setBrush(QColor(0,0,0,0));
+                p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
+            }
         }
         else
         {
             int alpha = preview ? 128 : 255;
             p.setBrush(QColor(0,0,0,alpha));
             p.setCompositionMode(QPainter::CompositionMode_Source);
+            p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
         }
-
-        p.drawRect( point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2 );
     }
 }
 
@@ -421,18 +450,51 @@ void Map::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevic
 
     if(mapEditShape.erase())
     {
-        p.setBrush(QColor(0,0,0,0));
         p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+        if(mapEditShape.smooth())
+        {
+            qreal rectWidth = rect.width() / 80;
+            qreal rectHeight = rect.height() / 80;
+            QRectF baseRect(static_cast<qreal>(rect.x()) + rectWidth * 4,
+                            static_cast<qreal>(rect.y()) + rectHeight * 4,
+                            static_cast<qreal>(rect.width()) - rectWidth * 4 * 2,
+                            static_cast<qreal>(rect.height()) - rectHeight * 4 * 2 );
+            p.setBrush(QColor(0,0,0,0));
+            p.drawRect(baseRect);
+            baseRect.translate(-rectWidth, -rectHeight);
+            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
+            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
+            p.setBrush(QColor(0,0,0,50));
+            p.drawRect(baseRect);
+            baseRect.translate(-rectWidth, -rectHeight);
+            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
+            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
+            p.setBrush(QColor(0,0,0,100));
+            p.drawRect(baseRect);
+            baseRect.translate(-rectWidth, -rectHeight);
+            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
+            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
+            p.setBrush(QColor(0,0,0,150));
+            p.drawRect(baseRect);
+            baseRect.translate(-rectWidth, -rectHeight);
+            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
+            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
+            p.setBrush(QColor(0,0,0,200));
+            p.drawRect(baseRect);
+        }
+        else
+        {
+            p.setBrush(QColor(0,0,0,0));
+            p.drawRect(rect);
+        }
     }
     else
     {
         int alpha = preview ? 128 : 255;
         p.setBrush(QColor(0,0,0,alpha));
         p.setCompositionMode(QPainter::CompositionMode_Source);
+        p.drawRect(rect);
     }
-
-    p.drawRect(rect);
-
 }
 
 void Map::fillFoW( QColor color, QPaintDevice* target )

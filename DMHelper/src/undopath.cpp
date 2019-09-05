@@ -42,6 +42,7 @@ void UndoPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDi
     element.setAttribute( "radius", _mapDrawPath.radius() );
     element.setAttribute( "brushtype", _mapDrawPath.brushType() );
     element.setAttribute( "erase", static_cast<int>(_mapDrawPath.erase()) );
+    element.setAttribute( "smooth", static_cast<int>(_mapDrawPath.smooth()) );
     QDomElement pointsElement = doc.createElement( "points" );
     for( int i = 0; i < _mapDrawPath.points().count(); ++i )
     {
@@ -60,6 +61,7 @@ void UndoPath::inputXML(const QDomElement &element, bool isImport)
     _mapDrawPath.setRadius(element.attribute( QString("radius") ).toInt());
     _mapDrawPath.setBrushType(element.attribute( QString("brushtype") ).toInt());
     _mapDrawPath.setErase(static_cast<bool>(element.attribute("erase",QString::number(1)).toInt()));
+    _mapDrawPath.setSmooth(static_cast<bool>(element.attribute("smooth",QString::number(1)).toInt()));
 
     QDomElement pointsElement = element.firstChildElement( QString("points") );
     if( !pointsElement.isNull() )

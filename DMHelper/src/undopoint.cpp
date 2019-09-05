@@ -41,6 +41,7 @@ void UndoPoint::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetD
     element.setAttribute( "radius", _mapDrawPoint.radius() );
     element.setAttribute( "brushtype", _mapDrawPoint.brushType() );
     element.setAttribute( "erase", static_cast<int>(_mapDrawPoint.erase()) );
+    element.setAttribute( "smooth", static_cast<int>(_mapDrawPoint.smooth()) );
 }
 
 void UndoPoint::inputXML(const QDomElement &element, bool isImport)
@@ -52,6 +53,7 @@ void UndoPoint::inputXML(const QDomElement &element, bool isImport)
     _mapDrawPoint.setRadius(element.attribute( QString("radius") ).toInt());
     _mapDrawPoint.setBrushType(element.attribute( QString("brushtype") ).toInt());
     _mapDrawPoint.setErase(static_cast<bool>(element.attribute("erase",QString::number(1)).toInt()));
+    _mapDrawPoint.setSmooth(static_cast<bool>(element.attribute("smooth",QString::number(1)).toInt()));
 }
 
 int UndoPoint::getType() const

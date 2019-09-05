@@ -177,11 +177,12 @@ void MapEditFill::setAlpha(int alpha)
 }
 
 
-MapDraw::MapDraw(int radius, int brushType, bool erase) :
+MapDraw::MapDraw(int radius, int brushType, bool erase, bool smooth) :
     MapEdit(),
     _radius(radius),
     _brushType(brushType),
-    _erase(erase)
+    _erase(erase),
+    _smooth(smooth)
 {
 }
 
@@ -189,7 +190,8 @@ MapDraw::MapDraw(const MapDraw &obj) :
     MapEdit(obj),
     _radius(obj.radius()),
     _brushType(obj.brushType()),
-    _erase(obj.erase())
+    _erase(obj.erase()),
+    _smooth(obj.smooth())
 {
 }
 
@@ -212,6 +214,11 @@ bool MapDraw::erase() const
     return _erase;
 }
 
+bool MapDraw::smooth() const
+{
+    return _smooth;
+}
+
 void MapDraw::setRadius(int radius)
 {
     _radius = radius;
@@ -224,15 +231,20 @@ void MapDraw::setBrushType(int brushType)
 
 void MapDraw::setErase(bool erase)
 {
-    _erase= erase;
+    _erase = erase;
+}
+
+void MapDraw::setSmooth(bool smooth)
+{
+    _smooth = smooth;
 }
 
 
 
 
 
-MapDrawPoint::MapDrawPoint(int radius, int brushType, bool erase, const QPoint& point) :
-    MapDraw(radius, brushType, erase),
+MapDrawPoint::MapDrawPoint(int radius, int brushType, bool erase, bool smooth, const QPoint& point) :
+    MapDraw(radius, brushType, erase, smooth),
     _point(point)
 {
 }
@@ -276,8 +288,8 @@ MapDrawPath::MapDrawPath() :
 {
 }
 
-MapDrawPath::MapDrawPath(int radius, int brushType, bool erase, const QPoint& point) :
-    MapDraw(radius, brushType, erase),
+MapDrawPath::MapDrawPath(int radius, int brushType, bool erase, bool smooth, const QPoint& point) :
+    MapDraw(radius, brushType, erase, smooth),
     _points()
 {
     _points.append(point);
@@ -306,17 +318,19 @@ QList<QPoint> MapDrawPath::points() const
 
 
 
-MapEditShape::MapEditShape(const QRect& rect, bool erase) :
+MapEditShape::MapEditShape(const QRect& rect, bool erase, bool smooth) :
     MapEdit(),
     _rect(rect),
-    _erase(erase)
+    _erase(erase),
+    _smooth(smooth)
 {
 }
 
 MapEditShape::MapEditShape(const MapEditShape &obj) :
     MapEdit(obj),
     _rect(obj._rect),
-    _erase(obj._erase)
+    _erase(obj._erase),
+    _smooth(obj._smooth)
 {
 }
 
@@ -334,6 +348,11 @@ bool MapEditShape::erase() const
     return _erase;
 }
 
+bool MapEditShape::smooth() const
+{
+    return _smooth;
+}
+
 void MapEditShape::setRect(const QRect& rect)
 {
     _rect = rect;
@@ -342,4 +361,9 @@ void MapEditShape::setRect(const QRect& rect)
 void MapEditShape::setErase(bool erase)
 {
     _erase = erase;
+}
+
+void MapEditShape::setSmooth(bool smooth)
+{
+    _smooth = smooth;
 }

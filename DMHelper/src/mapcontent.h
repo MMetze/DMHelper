@@ -87,29 +87,32 @@ protected:
 class MapDraw : public MapEdit
 {
 public:
-    MapDraw(int radius = 0, int brushType = DMHelper::BrushType_Circle, bool erase = true);
+    MapDraw(int radius = 0, int brushType = DMHelper::BrushType_Circle, bool erase = true, bool smooth = true);
     MapDraw(const MapDraw &obj);
     virtual ~MapDraw();
 
     virtual int radius() const;
     virtual int brushType() const;
     virtual bool erase() const;
+    virtual bool smooth() const;
 
     virtual void setRadius(int radius);
     virtual void setBrushType(int brushType);
     virtual void setErase(bool erase);
+    virtual void setSmooth(bool smooth);
 
 protected:
     int _radius;
     int _brushType;
     bool _erase;
+    bool _smooth;
 };
 
 
 class MapDrawPoint : public MapDraw
 {
 public:
-    MapDrawPoint(int radius, int brushType, bool erase, const QPoint& point);
+    MapDrawPoint(int radius, int brushType, bool erase, bool smooth, const QPoint& point);
     MapDrawPoint(const MapDrawPoint &obj);
     virtual ~MapDrawPoint();
 
@@ -128,7 +131,7 @@ class MapDrawPath : public MapDraw
 {
 public:
     MapDrawPath();
-    MapDrawPath(int radius, int brushType, bool erase, const QPoint& point);
+    MapDrawPath(int radius, int brushType, bool erase, bool smooth, const QPoint& point);
     MapDrawPath(const MapDrawPath &obj);
     virtual ~MapDrawPath();
 
@@ -145,19 +148,22 @@ protected:
 class MapEditShape : public MapEdit
 {
 public:
-    MapEditShape(const QRect& rect, bool erase);
+    MapEditShape(const QRect& rect, bool erase, bool smooth);
     MapEditShape(const MapEditShape &obj);
     virtual ~MapEditShape();
 
     virtual const QRect& rect() const;
     virtual bool erase() const;
+    virtual bool smooth() const;
 
     virtual void setRect(const QRect& rect);
     virtual void setErase(bool erase);
+    virtual void setSmooth(bool smooth);
 
 protected:
     QRect _rect;
     bool _erase;
+    bool _smooth;
 };
 
 
