@@ -64,6 +64,7 @@ void WidgetBattleCombatant::applyDamage(int damage)
 
     emit combatantChanged(_combatant);
     setCombatantValues();
+    emit hitPointsChanged(_combatant, damage);
 }
 
 void WidgetBattleCombatant::mousePressEvent(QMouseEvent *event)

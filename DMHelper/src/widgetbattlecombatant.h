@@ -30,6 +30,7 @@ signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);
     void combatantChanged(BattleDialogModelCombatant* combatant);
     void rerollNeeded(WidgetBattleCombatant* widget);
+    void hitPointsChanged(BattleDialogModelCombatant* combatant, int change);
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event);
