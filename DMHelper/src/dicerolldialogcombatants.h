@@ -27,6 +27,7 @@ public:
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);
     void combatantChanged(BattleDialogModelCombatant* combatant);
+    void hitPointsChanged(BattleDialogModelCombatant* combatant, int change);
 
 public slots:
     void rollDice();

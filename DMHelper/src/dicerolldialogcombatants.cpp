@@ -243,6 +243,7 @@ void DiceRollDialogCombatants::createCombatantWidgets()
         connect(newWidget,SIGNAL(selectCombatant(BattleDialogModelCombatant*)),this,SIGNAL(selectCombatant(BattleDialogModelCombatant*)));
         connect(newWidget,SIGNAL(combatantChanged(BattleDialogModelCombatant*)),this,SIGNAL(combatantChanged(BattleDialogModelCombatant*)));
         connect(newWidget,SIGNAL(rerollNeeded(WidgetBattleCombatant*)),this,SLOT(rerollWidget(WidgetBattleCombatant*)));
+        connect(newWidget,SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)),this,SIGNAL(hitPointsChanged(BattleDialogModelCombatant*, int)));
         newWidget->setVisible(ui->chkIncludeDead->isChecked() || combatant->getHitPoints() > 0);
     }
 }
