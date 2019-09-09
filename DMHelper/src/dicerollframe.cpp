@@ -41,7 +41,6 @@ void DiceRollFrame::rollDice()
     int diceType = ui->editDiceType->text().toInt();
     int target = ui->editTarget->text().toInt();
     int bonus = ui->editBonus->text().toInt();
-    //int randNum;
     int total = 0;
 
     for(int rc = 0; rc < rcEnd; ++rc)
@@ -92,7 +91,7 @@ void DiceRollFrame::rollDice()
         ui->editResult->append(resultStr);
     }
 
-    ui->edtTotal->setText(QString::number(total));
+    ui->editResult->append(QString("<b><font color=""#000000"">Total: ") + QString::number(total) + QString("</font></b>\n"));
 }
 
 void DiceRollFrame::init()

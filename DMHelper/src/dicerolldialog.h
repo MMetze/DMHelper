@@ -17,36 +17,20 @@ class DiceRollDialog : public QDialog
 public:
     explicit DiceRollDialog(QWidget *parent = nullptr);
     explicit DiceRollDialog(const Dice& dice, QWidget *parent = nullptr);
-    //explicit DiceRollDialog(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, int rollDC = 10, QWidget *parent = 0);
-    //explicit DiceRollDialog(const Dice& dice, const QList<BattleDialogModelCombatant*>& combatants, const QList<int>& modifiers, int rollDC = 10, QWidget *parent = 0);
     ~DiceRollDialog();
 
     void fireAndForget();
-
-/*
-signals:
-    void selectCombatant(BattleDialogModelCombatant*);
-*/
 
 public slots:
     void rollDice();
 
 protected:
     virtual void hideEvent(QHideEvent * event);
-    //virtual bool eventFilter(QObject *obj, QEvent *event);
-
-/*
-private slots:
-    void diceTypeChanged();
-    void modifierTypeChanged();
-*/
 
 private:
     void init();
 
     Ui::DiceRollDialog *ui;
-    //QList<BattleDialogModelCombatant*> _combatants;
-    //QList<int> _modifiers;
     bool _fireAndForget;
 
     bool _mouseDown;
