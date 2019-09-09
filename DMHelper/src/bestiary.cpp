@@ -111,6 +111,7 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
     if(isImport)
     {
         int importCount = 0;
+        QMessageBox::StandardButton challengeResult = QMessageBox::NoButton;
         QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
         while( !monsterElement.isNull() )
         {
@@ -118,17 +119,20 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
             QString monsterName = monsterElement.firstChildElement(QString("name")).text();
             if(Bestiary::Instance()->exists(monsterName))
             {
-                QMessageBox::StandardButton result = QMessageBox::question(nullptr,
-                                                                           QString("Import Monster Conflict"),
-                                                                           QString("The monster '") + monsterName + QString("' already exists in the Bestiary. Would you like to overwrite the existing entry?"),
-                                                                           QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel );
-                if(result == QMessageBox::Cancel)
+                if((challengeResult != QMessageBox::YesToAll) && (challengeResult != QMessageBox::NoToAll))
                 {
-                    qDebug() << "[Main] Import monsters cancelled";
-                    return;
+                    challengeResult = QMessageBox::question(nullptr,
+                                                            QString("Import Monster Conflict"),
+                                                            QString("The monster '") + monsterName + QString("' already exists in the Bestiary. Would you like to overwrite the existing entry?"),
+                                                            QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel );
+                    if(challengeResult == QMessageBox::Cancel)
+                    {
+                        qDebug() << "[Main] Import monsters cancelled";
+                        return;
+                    }
                 }
 
-                importOK = (result == QMessageBox::Yes);
+                importOK = ((challengeResult == QMessageBox::Yes) || (challengeResult == QMessageBox::YesToAll));
             }
 
             if(importOK)
