@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QImage>
 #include <QRubberBand>
+#include <QMutex>
 #include "undopath.h"
 
 //#define ANIMATED_MAPS
@@ -50,6 +51,7 @@ public:
     void displayCallback(void *picture);
     unsigned formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines);
     void cleanupCallback();
+    void exitEventCallback();
 #endif
 
 
@@ -82,6 +84,10 @@ public slots:
     void zoomFit();
     void zoomSelect();
     void cancelSelect();
+
+#ifdef ANIMATED_MAPS
+    void targetResized(const QSize& newSize);
+#endif
 
 protected:
     void initializeFoW();
@@ -138,11 +144,13 @@ private:
     unsigned int _nativeHeight;
     uchar* _nativeBufferNotAligned;
     uchar* _nativeBuffer;
+    QMutex* _mutex;
     QImage _loadImage;
     bool _newImage;
     int _timerId;
     QTimer* _publishTimer;
     QImage _bwFoWImage;
+    QSize _targetSize;
 #endif
 
 };

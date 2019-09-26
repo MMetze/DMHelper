@@ -205,7 +205,8 @@ private:
     bool _publishing;
     QTimer* _publishTimer;
 
-    QImage _prescaledBackground;
+    //QImage _prescaledBackground;
+    QPixmap _prescaledBackground;
     QImage _combatantFrame;
     QImage _countdownFrame;
     QSize _targetSize;

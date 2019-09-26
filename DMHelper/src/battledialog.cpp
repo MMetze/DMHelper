@@ -1348,7 +1348,7 @@ void BattleDialog::createPrescaledBackground()
     //qreal scaledHeight = scaleFactor * static_cast<qreal>(battleMap.height());
 
     //_prescaledBackground = battleMap.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    _prescaledBackground = battleMap.transformed(QTransform().rotate(_rotation).scale(scaleFactor,scaleFactor), Qt::SmoothTransformation);
+    _prescaledBackground = QPixmap::fromImage(battleMap.transformed(QTransform().rotate(_rotation).scale(scaleFactor,scaleFactor), Qt::SmoothTransformation));
 
 #ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
     qDebug() << "[Battle Dialog][PROFILE] " << t.elapsed() << "; prescaled background created";
@@ -1370,6 +1370,8 @@ void BattleDialog::handleRubberBandChanged(QRect rubberBandRect, QPointF fromSce
     {
         ui->graphicsView->fitInView(ui->graphicsView->mapToScene(_rubberBandRect).boundingRect(), Qt::KeepAspectRatio);
         _scale = ui->graphicsView->transform().m11();
+        if(_scene)
+            _scene->clearSelection();
     }
     else
     {
@@ -1839,9 +1841,9 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 #endif
 
     // Draw the background image
-    painter.drawImage(xOffset + (_rotation == 180 ? getFrameWidth() : 0),
-                      yOffset + (_rotation == 270 ? getFrameWidth() : 0),
-                      _prescaledBackground);
+    painter.drawPixmap(xOffset + (_rotation == 180 ? getFrameWidth() : 0),
+                       yOffset + (_rotation == 270 ? getFrameWidth() : 0),
+                       _prescaledBackground);
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn";
 #endif

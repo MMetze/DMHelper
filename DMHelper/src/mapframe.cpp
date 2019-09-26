@@ -14,6 +14,7 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QTimer>
+#include <QMutexLocker>
 #include <QDebug>
 
 #ifdef ANIMATED_MAPS
@@ -139,6 +140,41 @@ void mapFrameCleanupCallback(void *opaque)
     mapFrame->cleanupCallback();
 }
 
+/**
+ * Registers a callback for the LibVLC exit event. This is mostly useful if
+ * the VLC playlist and/or at least one interface are started with
+ * libvlc_playlist_play() or libvlc_add_intf() respectively.
+ * Typically, this function will wake up your application main loop (from
+ * another thread).
+ *
+ * \note This function should be called before the playlist or interface are
+ * started. Otherwise, there is a small race condition: the exit event could
+ * be raised before the handler is registered.
+ *
+ * \param p_instance LibVLC instance
+ * \param cb callback to invoke when LibVLC wants to exit,
+ *           or NULL to disable the exit handler (as by default)
+ * \param opaque data pointer for the callback
+ * \warning This function and libvlc_wait() cannot be used at the same time.
+ */
+void mapFrameExitEventCallback(void *opaque)
+{
+    if(!opaque)
+        return;
+
+    MapFrame* mapFrame = static_cast<MapFrame*>(opaque);
+    mapFrame->exitEventCallback();
+}
+
+
+void mapFrameLogCallback(void *data, int level, const libvlc_log_t *ctx, const char *fmt, va_list args)
+{
+    Q_UNUSED(data);
+    Q_UNUSED(level);
+    Q_UNUSED(ctx);
+    //qDebug() << "[vlc] " << QString::vasprintf(fmt, args);
+}
+
 #endif
 
 // MapFrame definitions
@@ -164,10 +200,12 @@ MapFrame::MapFrame(QWidget *parent) :
     _nativeHeight(0),
     _nativeBufferNotAligned(nullptr),
     _nativeBuffer(nullptr),
+    _mutex(nullptr),
     _loadImage(),
     _newImage(false),
     _timerId(0),
-    _publishTimer(nullptr)
+    _publishTimer(nullptr),
+    _targetSize()
 #endif
 {
     ui->setupUi(this);
@@ -235,6 +273,8 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(setMapCursor()));
 
 #ifdef ANIMATED_MAPS
+    _mutex = new QMutex(QMutex::Recursive);
+
     _publishTimer = new QTimer(this);
     _publishTimer->setSingleShot(false);
     connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
@@ -247,7 +287,19 @@ MapFrame::MapFrame(QWidget *parent) :
 MapFrame::~MapFrame()
 {
 #ifdef ANIMATED_MAPS
-    killTimer(_timerId);
+
+    qDebug() << "[MapFrame] MapFrame destructor called";
+
+    if(_timerId)
+    {
+        killTimer(_timerId);
+        _timerId = 0;
+    }
+
+    if((_publishTimer) && (_publishTimer->isActive()))
+    {
+        _publishTimer->stop();
+    }
 
     if(vlcListPlayer)
     {
@@ -255,10 +307,12 @@ MapFrame::~MapFrame()
         libvlc_media_list_player_release(vlcListPlayer);
     }
 
+    cleanupBuffers();
+
     if(vlcInstance)
         libvlc_release(vlcInstance);
 
-    cleanupBuffers();
+    delete _mutex;
 #endif
 
     cancelSelect();
@@ -348,9 +402,19 @@ QAction* MapFrame::getRedoAction(QObject* parent)
 
 void* MapFrame::lockCallback(void **planes)
 {
+    _mutex->lock();
+
     if((planes) && (_nativeBuffer))
     {
         *planes = _nativeBuffer;
+    }
+
+    //qDebug() << "[MapFrame] Lock callback";
+    const char * errmsg = libvlc_errmsg();
+    if(errmsg)
+    {
+        qDebug() << "[MapFrame] VLC ERROR: " << errmsg;
+        libvlc_clearerr();
     }
 
     return nullptr;
@@ -358,20 +422,35 @@ void* MapFrame::lockCallback(void **planes)
 
 void MapFrame::unlockCallback(void *picture, void *const *planes)
 {
-    return;
+    Q_UNUSED(picture);
+    Q_UNUSED(planes);
+
+    //qDebug() << "[MapFrame] Unlock callback with width: " << _nativeWidth << ", height: " << _nativeHeight;
+
+    if((!_nativeBuffer)  || (_nativeWidth == 0) || (_nativeHeight == 0) || (!_mutex))
+        return;
+
+    //QMutexLocker locker(_mutex);
+    //_mutex->lock();
+
+    if(!_newImage)
+    {
+        _loadImage = QImage(_nativeBuffer, _nativeWidth, _nativeHeight, QImage::Format_RGB32); // QImage::Format_RGB32 works fine as well and it's much faster
+
+        //QImage image(_nativeBuffer, _nativeWidth, _nativeHeight, QImage::Format_RGB32); // QImage::Format_RGB32 works fine as well and it's much faster
+        //_background->setPixmap(QPixmap::fromImage(image));
+        //update();
+        _newImage = true;
+    }
+
+    _mutex->unlock();
 }
 
 void MapFrame::displayCallback(void *picture)
 {
-    if((!_nativeBuffer)  || (_nativeWidth == 0) || (_nativeHeight == 0))
-        return;
+    Q_UNUSED(picture);
 
-    _loadImage = QImage(_nativeBuffer, _nativeWidth, _nativeHeight, QImage::Format_RGB32); // QImage::Format_RGB32 works fine as well and it's much faster
-
-    //QImage image(_nativeBuffer, _nativeWidth, _nativeHeight, QImage::Format_RGB32); // QImage::Format_RGB32 works fine as well and it's much faster
-    //_background->setPixmap(QPixmap::fromImage(image));
-    //update();
-    _newImage = true;
+    //qDebug() << "[MapFrame] Display Callback with width: " << _nativeWidth << ", height: " << _nativeHeight;
 }
 
 unsigned MapFrame::formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines)
@@ -386,6 +465,15 @@ unsigned MapFrame::formatCallback(char *chroma, unsigned *width, unsigned *heigh
 
     memcpy(chroma, "RV32", sizeof("RV32") - 1);
 
+    QSize scaledTarget(*width, *height);
+
+    if((_targetSize.width() > 0) && (_targetSize.height() > 0))
+    {
+        scaledTarget.scale(_targetSize, Qt::KeepAspectRatio);
+        *width = scaledTarget.width();
+        *height = scaledTarget.height();
+    }
+
     _nativeWidth = *width;
     _nativeHeight = *height;
     *pitches = (*width) * 4;
@@ -393,6 +481,7 @@ unsigned MapFrame::formatCallback(char *chroma, unsigned *width, unsigned *heigh
 
     _nativeBufferNotAligned = (uchar*)malloc((_nativeWidth * _nativeHeight * 4) + 31);
     _nativeBuffer = (uchar*)((size_t(_nativeBufferNotAligned)+31) & (~31));
+
     //loadImage = QImage(QSize(_nativeWidth, _nativeHeight), QImage::Format_ARGB32);
 
     /*
@@ -415,8 +504,27 @@ unsigned MapFrame::formatCallback(char *chroma, unsigned *width, unsigned *heigh
 void MapFrame::cleanupCallback()
 {
     qDebug() << "[MapFrame] Cleanup Callback";
+    const char * errmsg = libvlc_errmsg();
+    if(errmsg)
+    {
+        qDebug() << "[MapFrame] VLC ERROR: " << errmsg;
+        libvlc_clearerr();
+    }
     cleanupBuffers();
 }
+
+void MapFrame::exitEventCallback()
+{
+    qDebug() << "[MapFrame] Exit Event Callback";
+    const char * errmsg = libvlc_errmsg();
+    if(errmsg)
+    {
+        qDebug() << "[MapFrame] VLC ERROR: " << errmsg;
+        libvlc_clearerr();
+    }
+}
+
+
 
 #endif
 
@@ -424,7 +532,8 @@ void MapFrame::updateFoW()
 {
     if((_fow)&&(_mapSource))
     {
-       _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+        qDebug() << "[MapFrame] Updating ";
+        _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
     }
 }
 
@@ -505,18 +614,37 @@ void MapFrame::publishFoWImage()
         //if(ui->btnPublish->isChecked())
         if(ui->framePublish->isChecked())
         {
-            killTimer(_timerId);
-            _timerId = 0;
+            qDebug() << "[MapFrame] Publish FoW Player animation started";
+            if(_timerId)
+            {
+                killTimer(_timerId);
+                _timerId = 0;
+            }
+
             _bwFoWImage = _mapSource->getBWFoWImage(_loadImage);
-            _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
+
+            if((_publishTimer) && (!_publishTimer->isActive()))
+            {
+                _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
+            }
+
             emit animationStarted(ui->framePublish->getColor());
             emit showPublishWindow();
             emit startTrack(_mapSource->getAudioTrack());
         }
         else
         {
-            _publishTimer->stop();
-            _timerId = startTimer(0);
+            qDebug() << "[MapFrame] Publish FoW DM animation started";
+
+            if((_publishTimer) && (_publishTimer->isActive()))
+            {
+                _publishTimer->stop();
+            }
+
+            if(_timerId == 0)
+            {
+                _timerId = startTimer(0);
+            }
         }
     }
 #endif
@@ -591,6 +719,14 @@ void MapFrame::cancelSelect()
     setMapCursor();
 }
 
+#ifdef ANIMATED_MAPS
+void MapFrame::targetResized(const QSize& newSize)
+{
+    qDebug() << "[MapFrame] Target window resized: " << newSize;
+    _targetSize = newSize;
+}
+#endif
+
 void MapFrame::initializeFoW()
 {
     if(_background)
@@ -636,17 +772,26 @@ void MapFrame::initializeFoW()
 
     else
     {
+        qDebug() << "[MapFrame] Initializing map frame";
+
         if(!vlcInstance)
+        {
+            qDebug() << "[MapFrame] Initializing VLC!";
             vlcInstance = libvlc_new(0, nullptr);
+        }
 
         if(!vlcInstance)
             return;
+
+        libvlc_log_set(vlcInstance, mapFrameLogCallback, nullptr);
 
         QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
 
         // Stop if something is playing
         if (vlcListPlayer && libvlc_media_list_player_is_playing(vlcListPlayer))
             return;
+
+        libvlc_set_exit_handler(vlcInstance, mapFrameExitEventCallback, this);
 
         // Create a new Media List and add the media to it
         libvlc_media_list_t *vlcMediaList = libvlc_media_list_new(vlcInstance);
@@ -666,9 +811,10 @@ void MapFrame::initializeFoW()
         libvlc_media_player_t *player = libvlc_media_player_new(vlcInstance);
 
         libvlc_media_list_player_set_media_list(vlcListPlayer, vlcMediaList);
-        libvlc_media_list_player_set_playback_mode(vlcListPlayer, libvlc_playback_mode_loop);
-
         libvlc_media_list_player_set_media_player(vlcListPlayer, player);
+        libvlc_media_list_player_set_playback_mode(vlcListPlayer, libvlc_playback_mode_loop);
+        libvlc_audio_set_track(player, -1);
+        libvlc_video_set_scale(player, 0.25f );
 
         unsigned x = 0;
         unsigned y = 0;
@@ -707,6 +853,8 @@ void MapFrame::initializeFoW()
 
         // And start playback
         libvlc_media_list_player_play(vlcListPlayer);
+
+        qDebug() << "[MapFrame] Map frame initialized, starting timer...";
         _timerId = startTimer(0);
 
         //ui->btnPublish->setCheckable(true);
@@ -718,17 +866,38 @@ void MapFrame::initializeFoW()
 void MapFrame::uninitializeFoW()
 {
 #ifdef ANIMATED_MAPS
-    killTimer(_timerId);
-    _timerId = 0;
+    qDebug() << "[MapFrame] Uninitializing MapFrame...";
+
+    if(_timerId)
+    {
+        qDebug() << "[MapFrame] ... stopping timer";
+        killTimer(_timerId);
+        _timerId = 0;
+    }
+
+    if((_publishTimer) && (_publishTimer->isActive()))
+    {
+        qDebug() << "[MapFrame] ... stopping publish timer";
+        _publishTimer->stop();
+    }
 
     if(vlcListPlayer)
     {
+        qDebug() << "[MapFrame] ... stopping playback";
         libvlc_media_list_player_stop(vlcListPlayer);
         libvlc_media_list_player_release(vlcListPlayer);
         vlcListPlayer = nullptr;
     }
 
     cleanupBuffers();
+
+    if(vlcInstance)
+    {
+        qDebug() << "[MapFrame] ...deleting VLC instance";
+
+        libvlc_release(vlcInstance);
+        vlcInstance = nullptr;
+    }
 #endif
 }
 
@@ -775,8 +944,13 @@ void MapFrame::timerEvent(QTimerEvent *event)
     Q_UNUSED(event);
 
 #ifdef ANIMATED_MAPS
-    if(!_mapSource)
+    if((!_mapSource) || (!_mutex))
         return;
+
+    //qDebug() << "[MapFrame] Timer event...";
+
+    QMutexLocker locker(_mutex);
+    //_mutex->lock();
 
     if(_newImage)
     {
@@ -792,15 +966,23 @@ void MapFrame::timerEvent(QTimerEvent *event)
             _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
             _fow->setEnabled(false);
             _fow->setZValue(1);
+
+            qDebug() << "[MapFrame] Timer event - new background added";
+
         }
         else
         {
-            _background->setPixmap(QPixmap::fromImage(_loadImage));
+            //QPixmap pmp = QPixmap::fromImage(_loadImage);
+            //_background->setPixmap(pmp);
+
+            //qDebug() << "[MapFrame] Timer event - image used";
         }
 
         update();
         _newImage = false;
     }
+
+    //_mutex->unlock();
 #endif
 }
 
@@ -1010,17 +1192,27 @@ bool MapFrame::execEventFilterEditModeMove(QObject *obj, QEvent *event)
 
 void MapFrame::cleanupBuffers()
 {
-    delete _background;
+#ifdef ANIMATED_MAPS
+    _newImage = false;
+#endif
+
+    QGraphicsItem* tempItem;
+
+    tempItem = _background;
     _background = nullptr;
-    delete _fow;
+    delete tempItem;
+
+    tempItem = _fow;
     _fow = nullptr;
+    delete tempItem;
 
 #ifdef ANIMATED_MAPS
     if(_nativeBufferNotAligned)
     {
-        free(_nativeBufferNotAligned);
+        unsigned char* tempChar = _nativeBufferNotAligned;
         _nativeBufferNotAligned = nullptr;
         _nativeBuffer = nullptr;
+        free(tempChar);
     }
 #endif
 }
@@ -1098,16 +1290,34 @@ void MapFrame::rotateCW()
 #ifdef ANIMATED_MAPS
 void MapFrame::executeAnimateImage()
 {
-    if(!_mapSource)
+    if((!_mapSource) || (!_mutex))
         return;
 
-    QImage result(_loadImage);
-    QPainter p;
-    p.begin(&result);
-        p.drawImage(0, 0, _bwFoWImage);
-    p.end();
+    //qDebug() << "[MapFrame] Animate image...";
 
-    emit animateImage(result);
+    QMutexLocker locker(_mutex);
+
+    if(_newImage)
+    {
+        // QImage scaledImg = _publishImg.scaled(size(),Qt::KeepAspectRatio,Qt::SmoothTransformation);
+        QImage result = _loadImage.copy();
+        //QImage result = _loadImage.scaled(_targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        QPainter p;
+        p.begin(&result);
+            p.drawImage(0, 0, _bwFoWImage);
+        p.end();
+
+        //qDebug() << "[MapFrame] ... publishing image";
+
+        if(ui->framePublish->getRotation() != 0)
+        {
+            result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+        }
+
+        emit animateImage(result);
+
+        _newImage = false;
+    }
 }
 #endif
 
