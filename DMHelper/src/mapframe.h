@@ -6,17 +6,8 @@
 #include <QFileInfo>
 #include <QImage>
 #include <QRubberBand>
-#include <QMutex>
 #include "undopath.h"
-
-//#define ANIMATED_MAPS
-
-
-#ifdef ANIMATED_MAPS
-    #include <BaseTsd.h>
-    typedef SSIZE_T ssize_t;
-    #include <vlc/vlc.h>
-#endif
+#include "videoplayer.h"
 
 namespace Ui {
 class MapFrame;
@@ -45,16 +36,6 @@ public:
     QAction* getUndoAction(QObject* parent);
     QAction* getRedoAction(QObject* parent);
 
-#ifdef ANIMATED_MAPS
-    void* lockCallback(void **planes);
-    void unlockCallback(void *picture, void *const *planes);
-    void displayCallback(void *picture);
-    unsigned formatCallback(char *chroma, unsigned *width, unsigned *height, unsigned *pitches, unsigned *lines);
-    void cleanupCallback();
-    void exitEventCallback();
-#endif
-
-
 signals:
     void publishImage(QImage img, QColor color);
     void openPreview();
@@ -63,10 +44,8 @@ signals:
     void startTrack(AudioTrack* track);
     void showPublishWindow();
 
-#ifdef ANIMATED_MAPS
     void animationStarted(QColor color);
     void animateImage(QImage img);
-#endif
 
 public slots:
     void updateFoW();
@@ -85,9 +64,7 @@ public slots:
     void zoomSelect();
     void cancelSelect();
 
-#ifdef ANIMATED_MAPS
     void targetResized(const QSize& newSize);
-#endif
 
 protected:
     void initializeFoW();
@@ -104,6 +81,10 @@ protected:
     bool execEventFilterEditModeEdit(QObject *obj, QEvent *event);
     bool execEventFilterEditModeMove(QObject *obj, QEvent *event);
 
+    void startPublishTimer();
+    void stopPublishTimer();
+
+    void createVideoPlayer(bool dmPlayer);
     void cleanupBuffers();
 
 protected slots:
@@ -113,12 +94,8 @@ protected slots:
     void trackSelected(int index);
     void setScale(qreal s);
 
-    //void rotateCCW();
-    //void rotateCW();
-
-#ifdef ANIMATED_MAPS
-    void executeAnimateImage();
-#endif
+    void createDMPlayer();
+    void createPlayerPlayer();
 
 private:
     Ui::MapFrame *ui;
@@ -133,25 +110,13 @@ private:
 
     QRubberBand* _rubberBand;
     qreal _scale;
-    //int _rotation;
 
     Map* _mapSource;
 
-#ifdef ANIMATED_MAPS
-    libvlc_instance_t *vlcInstance;
-    libvlc_media_list_player_t *vlcListPlayer;
-    unsigned int _nativeWidth;
-    unsigned int _nativeHeight;
-    uchar* _nativeBufferNotAligned;
-    uchar* _nativeBuffer;
-    QMutex* _mutex;
-    QImage _loadImage;
-    bool _newImage;
     int _timerId;
-    QTimer* _publishTimer;
-    QImage _bwFoWImage;
+    VideoPlayer* _videoPlayer;
     QSize _targetSize;
-#endif
+    QImage _bwFoWImage;
 
 };
 
