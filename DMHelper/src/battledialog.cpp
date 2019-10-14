@@ -70,7 +70,7 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     _compassPixmap(nullptr),
     _movementPixmap(nullptr),
     _countdownTimer(nullptr),
-    _countdown(0),
+    _countdown(0.0),
     _publishing(false),
     _publishTimer(nullptr),
     _prescaledBackground(),
@@ -1285,12 +1285,12 @@ void BattleDialog::updateHighlights()
 
 void BattleDialog::countdownTimerExpired()
 {
-    if(_countdown > 0)
+    if(_countdown > 0.0)
     {
         _countdown -= (static_cast<qreal>(_countdownFrame.height() - 10) / static_cast<qreal>(_countdownDuration)) * COUNTDOWN_TIMER;
-        if(_countdown <= 0)
+        if(_countdown <= 0.0)
         {
-            _countdown = 0;
+            _countdown = 0.0;
             _countdownTimer->stop();
         }
     }
@@ -1300,21 +1300,22 @@ void BattleDialog::countdownTimerExpired()
 
 void BattleDialog::updateCountdownText()
 {
-    ui->edtCountdown->setText(QString::number(_countdown));
+    int countdownInt = static_cast<int>(_countdown);
+    ui->edtCountdown->setText(QString::number(countdownInt));
 
     int halfMaxVal = (_countdownFrame.height() - 10) / 2;
     if(halfMaxVal <= 0)
         return;
 
-    if(_countdown > halfMaxVal)
+    if(countdownInt > halfMaxVal)
     {
-        _countdownColor.setRed(196 - (196 * (_countdown - halfMaxVal) / halfMaxVal));
+        _countdownColor.setRed(196 - (196 * (countdownInt - halfMaxVal) / halfMaxVal));
         _countdownColor.setGreen(196);
     }
     else
     {
         _countdownColor.setRed(196);
-        _countdownColor.setGreen(196 * _countdown / halfMaxVal);
+        _countdownColor.setGreen(196 * countdownInt / halfMaxVal);
     }
 
     QString style = "color: " + _countdownColor.name() + ";";
@@ -1663,7 +1664,7 @@ void BattleDialog::setActiveCombatant(BattleDialogModelCombatant* active)
             _activePixmap->setVisible(item->isVisible());
 
             _countdownTimer->start(static_cast<int>(COUNTDOWN_TIMER * 1000));
-            _countdown = _countdownFrame.height() - 10;
+            _countdown = static_cast<qreal>(_countdownFrame.height() - 10);
             updateCountdownText();
         }
         else
@@ -1900,13 +1901,14 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
             int xPos = _prescaledBackground.width();
             if(_showOnDeck)
                 xPos += _combatantFrame.width();
-            if(_countdown > 0)
+            if(_countdown > 0.0)
             {
+                int countdownInt = static_cast<int>(_countdown);
                 painter.setBrush(QBrush(_countdownColor));
                 painter.drawRect(xPos + 5 + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
-                                 _countdownFrame.height() - _countdown - 5,
+                                 _countdownFrame.height() - countdownInt - 5,
                                  10 + yOffset,
-                                 _countdown);
+                                 countdownInt);
             }
             painter.drawImage(xPos + xOffset - ((_rotation == 180)||(_rotation == 270) ? getFrameWidth() : 0),
                               yOffset,

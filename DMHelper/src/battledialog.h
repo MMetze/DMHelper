@@ -200,7 +200,7 @@ private:
     QGraphicsEllipseItem* _movementPixmap;
 
     QTimer* _countdownTimer;
-    int _countdown;
+    qreal _countdown;
 
     bool _publishing;
     QTimer* _publishTimer;
