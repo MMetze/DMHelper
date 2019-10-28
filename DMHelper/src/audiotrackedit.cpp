@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QFileDialog>
 
+
+
 AudioTrackEdit::AudioTrackEdit(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::AudioTrackEdit),
@@ -16,8 +18,13 @@ AudioTrackEdit::AudioTrackEdit(QWidget *parent) :
 
     connect(ui->btnAddLocal, SIGNAL(clicked(bool)), this, SLOT(addLocalFile()));
     connect(ui->btnAddURL, SIGNAL(clicked(bool)), this, SLOT(addGlobalUrl()));
+    connect(ui->btnAddSyrinscape, SIGNAL(clicked(bool)), this, SLOT(addSyrinscape()));
     connect(ui->btnRemove, SIGNAL(clicked(bool)), this, SLOT(removeTrack()));
     connect(ui->lstTracks, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(itemSelected(QListWidgetItem *)));
+
+#ifdef Q_OS_MAC
+    ui->btnAddSyrinscape->hide();
+#endif
 }
 
 AudioTrackEdit::~AudioTrackEdit()
@@ -91,6 +98,21 @@ void AudioTrackEdit::addGlobalUrl()
     QUrl url = QFileDialog::getOpenFileUrl(this,QString("Select music file.."));
     if(!url.isEmpty())
         addTrack(url);
+}
+
+void AudioTrackEdit::addSyrinscape()
+{
+    if(!_campaign)
+        return;
+
+    QString syrinscapeInstructions("To add a link to a Syrinscape sound:\n\n1) Hit the '+' key or select ""3rd party app integration"" ENABLE in the settings menu\n2) Little pluses will appear next to all the MOODs and OneShots\n3) Click one of these pluses to copy a URI shortcut to the clipboard\n4) Paste this URI into the text box here:\n");
+
+    bool ok;
+    QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addTrack(QUrl(urlName));
 }
 
 void AudioTrackEdit::itemSelected(QListWidgetItem *item)

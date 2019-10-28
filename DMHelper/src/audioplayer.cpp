@@ -1,5 +1,8 @@
 #include "audioplayer.h"
 #include "audiotrack.h"
+#include "dmconstants.h"
+#include <QDesktopServices>
+#include <QMessageBox>
 #include <QDebug>
 
 //track changed, volume, position, duration signals, show them in the control frame
@@ -71,7 +74,18 @@ void AudioPlayer::playTrack(AudioTrack* track)
     _playlist->clear();
     _currentTrack = track;
 
-    if(track)
+    if(!track)
+        return;
+
+    if(track->getType() == DMHelper::AudioType_Syrinscape)
+    {
+#ifdef Q_OS_MAC
+        QMessageBox::information(nullptr, QString("Syrinscape integration"), QString("Syrinscape 3rd party integration is unfortunately only supported on Windows at this time. Audio playback of Syrinscape audio will be integrated into the DM Helper as soon as this is supported!"));
+#else
+        QDesktopServices::openUrl(track->getUrl());
+#endif
+    }
+    else
     {
         _playlist->addMedia(track->getUrl());
         _player->setPlaylist(_playlist);

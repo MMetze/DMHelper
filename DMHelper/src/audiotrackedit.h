@@ -31,6 +31,7 @@ public slots:
 private slots:
     void addLocalFile();
     void addGlobalUrl();
+    void addSyrinscape();
     void itemSelected(QListWidgetItem *item);
 
 private:

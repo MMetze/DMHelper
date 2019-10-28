@@ -74,3 +74,19 @@ Zoom big battle maps
 DONE remove icons from removed characters or don't show dead creatures
 DONE   ==> leads to crash!!
 Treasure generator --> no opensource tables
+
+
+
+syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpCdXN5IG1hcmtldCBkYXk/play/
+
+syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpCYXJkJ3MgZGF5IG9mZg/play/
+
+syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpTZXR0aW5nIHVwIGZvciBNb3JuaW5nIFRyYWRl/play/
+
+syrinscape-fantasy:elements/YnJpbmRvbC10b3duOjo2LWhvcnNl/play/
+
+syrinscape-fantasy:elements/YnJpbmRvbC10b3duOjo2LUNvdw/play/
+
+syrinscape-fantasy:elements/YnJpbmRvbC10b3duOjo2LVJvb3N0ZXI/play/
+
+syrinscape-fantasy:stop/

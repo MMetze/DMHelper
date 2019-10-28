@@ -124,6 +124,12 @@ namespace DMHelper
         BattleDialog_Z_Overlay = 3
     };
 
+    enum
+    {
+        AudioType_File = 0,
+        AudioType_Syrinscape
+    };
+
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
 

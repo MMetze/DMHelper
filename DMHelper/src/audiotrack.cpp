@@ -1,4 +1,5 @@
 #include "audiotrack.h"
+#include "dmconstants.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDir>
@@ -108,4 +109,13 @@ QString AudioTrack::getMD5() const
 void AudioTrack::setMD5(const QString& md5)
 {
     _md5 = md5;
+}
+
+int AudioTrack::getType()
+{
+    QString urlScheme = _url.scheme();
+    if((!urlScheme.isEmpty()) && (urlScheme.left(10) == QString("syrinscape")))
+        return DMHelper::AudioType_Syrinscape;
+    else
+        return DMHelper::AudioType_File;
 }

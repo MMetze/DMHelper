@@ -28,6 +28,8 @@ public:
     virtual QString getMD5() const;
     virtual void setMD5(const QString& md5);
 
+    virtual int getType();
+
 signals:
     void changed();
     void dirty();
