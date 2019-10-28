@@ -11,6 +11,8 @@ rmdir /s /q ..\bin64
 mkdir ..\bin64
 mkdir ..\bin64\bestiary
 mkdir ..\bin64\doc
+mkdir ..\bin64\pkgconfig
+mkdir ..\bin64\plugins
 
 cd ..
 
@@ -37,6 +39,9 @@ xcopy C:\Qt\5.13.0\msvc2017_64\bin\Qt5Xml.dll ..\bin64\
 xcopy ..\src\binsrc\* ..\bin64\*
 xcopy /s ..\src\bestiary\* ..\bin64\bestiary\*
 xcopy /s ..\src\doc\* ..\bin64\doc\*
+xcopy /s ..\src\binsrc\pkgconfig\* ..\bin64\pkgconfig\*
+xcopy /s ..\src\binsrc\plugins\* ..\bin64\plugins\*
+
 
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64
 

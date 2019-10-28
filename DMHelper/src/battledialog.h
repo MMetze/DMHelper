@@ -15,6 +15,7 @@ class BattleDialogLogger;
 class Grid;
 class Map;
 class QTimer;
+class VideoPlayer;
 
 namespace Ui {
 class BattleDialog;
@@ -97,6 +98,7 @@ private slots:
     void updateCombatantVisibility();
     void updateEffectLayerVisibility();
     void updateMap();
+    void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleBattleComplete();
     void handleSelectionChanged();
@@ -163,8 +165,10 @@ private:
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
 
     void getImageForPublishing(QImage& imageForPublishing);
+    void createVideoPlayer(bool dmPlayer);
 
     void replaceBattleMap();
+    void createSceneContents();
     void resizeBattleMap();
     int widthWindowToBackground(int windowWidth);
     int widthBackgroundToWindow(int backgroundWidth);
@@ -223,6 +227,9 @@ private:
     qreal _moveRadius;
     QPointF _moveStart;
     int _moveTimer;
+
+    VideoPlayer* _videoPlayer;
+    QImage _bwFoWImage;
 };
 
 #endif // BATTLEDIALOG_H

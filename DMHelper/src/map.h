@@ -45,6 +45,7 @@ public:
     void setExternalFoWImage(QImage externalImage);
     QImage getBackgroundImage();
     QImage getFoWImage();
+    bool isCleared();
 
     void paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview );
     void paintFoWRect( QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview );

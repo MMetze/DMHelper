@@ -93,15 +93,14 @@ protected slots:
     void publishModeZoomClicked();
     void trackSelected(int index);
     void setScale(qreal s);
-
-    void createDMPlayer();
-    void createPlayerPlayer();
+    void resetPublishFoW();
 
 private:
     Ui::MapFrame *ui;
 
     QGraphicsScene* _scene;
-    QGraphicsPixmapItem* _background;
+    QGraphicsPixmapItem* _backgroundImage;
+    QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
 
     bool _mouseDown;

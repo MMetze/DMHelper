@@ -14,12 +14,14 @@ class VideoPlayer : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlayer(QSize targetSize, QObject *parent = nullptr);
+    VideoPlayer(const QString& videoFile, QSize targetSize, QObject *parent = nullptr);
     virtual ~VideoPlayer();
 
+    virtual const QString& getFileName() const;
     virtual bool isError() const;
     virtual QMutex* getMutex() const;
     virtual QImage* getImage() const;
+    virtual QSize getOriginalSize() const;
     virtual bool isNewImage() const;
     virtual void clearNewImage();
 
@@ -31,14 +33,35 @@ public:
     virtual void exitEventCallback();
     virtual void eventCallback(const struct libvlc_event_t *p_event);
 
+signals:
+    void videoOpening();
+    void videoPlaying();
+    void videoBuffering();
+    void videoPaused();
+    void videoStopped();
+
+    void screenShotAvailable();
+
 public slots:
     virtual void targetResized(const QSize& newSize);
+    virtual void stopThenDelete();
 
 protected:
 
     virtual bool initializeVLC();
+    virtual bool startPlayer();
+    virtual bool stopPlayer();
+    virtual bool restartPlayer();
     virtual void cleanupBuffers();
 
+    virtual void internalStopCheck(int status);
+
+    virtual bool isPlaying() const;
+    virtual bool isPaused() const;
+    virtual bool isProcessing() const;
+    virtual bool isStatusValid() const;
+
+    QString _videoFile;
     bool _vlcError;
     libvlc_instance_t *_vlcInstance;
     libvlc_media_list_player_t *_vlcListPlayer;
@@ -49,8 +72,13 @@ protected:
     QMutex* _mutex;
     QImage* _loadImage;
     bool _newImage;
+    QSize _originalSize;
     QSize _targetSize;
     int _status;
+    bool _selfRestart;
+    bool _deleteOnStop;
+    int _stopStatus;
+    bool _firstImage;
 };
 
 #endif // VIDEOPLAYER_H

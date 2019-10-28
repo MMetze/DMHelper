@@ -303,6 +303,24 @@ QImage Map::getFoWImage()
     return _imgFow;
 }
 
+bool Map::isCleared()
+{
+    if((_undoStack) && (_undoStack->count() > 0))
+    {
+        const QUndoCommand* latestCommand = _undoStack->command(_undoStack->index());
+        if(latestCommand)
+        {
+            const UndoFill* fillObj = dynamic_cast<const UndoFill*>(latestCommand);
+            if((fillObj) && (fillObj->mapEditFill().color().alpha() == 0))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void Map::registerWindow(MapFrame* mapFrame)
 {
     _mapFrame = mapFrame;

@@ -127,6 +127,7 @@ SOURCES += main.cpp\
     battledialoggraphicsview.cpp \
     battledialoggraphicsscene.cpp \
     battledialogeffectsettings.cpp \
+    videoplayer.cpp \
     welcomeframe.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
@@ -279,6 +280,7 @@ HEADERS  += mainwindow.h \
     battledialoggraphicsview.h \
     battledialoggraphicsscene.h \
     battledialogeffectsettings.h \
+    videoplayer.h \
     welcomeframe.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \

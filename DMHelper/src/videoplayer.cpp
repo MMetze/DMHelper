@@ -3,6 +3,10 @@
 
 //#define VIDEO_DEBUG_MESSAGES
 
+const int stopCallComplete = 0x01;
+const int stopConfirmed = 0x02;
+const int stopComplete = stopCallComplete | stopConfirmed;
+
 // libvlc callback static functions
 void * playerLockCallback(void *opaque, void **planes);
 void playerUnlockCallback(void *opaque, void *picture, void *const *planes);
@@ -17,8 +21,9 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
 void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
 
 
-VideoPlayer::VideoPlayer(QSize targetSize, QObject *parent) :
+VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, QObject *parent) :
     QObject(parent),
+    _videoFile(videoFile),
     _vlcError(false),
     _vlcInstance(nullptr),
     _vlcListPlayer(nullptr),
@@ -29,27 +34,39 @@ VideoPlayer::VideoPlayer(QSize targetSize, QObject *parent) :
     _mutex(new QMutex(QMutex::Recursive)),
     _loadImage(nullptr),
     _newImage(false),
+    _originalSize(),
     _targetSize(targetSize),
-    _status(-1)
+    _status(-1),
+    _selfRestart(false),
+    _deleteOnStop(false),
+    _stopStatus(0),
+    _firstImage(false)
 {
+    _videoFile.replace("/","\\\\");
     _vlcError = !initializeVLC();
 }
 
 VideoPlayer::~VideoPlayer()
 {
-    if(_vlcListPlayer)
-    {
-        libvlc_media_list_player_stop(_vlcListPlayer);
-        libvlc_media_list_player_release(_vlcListPlayer);
-    }
+    _selfRestart = false;
+    stopPlayer();
 
     cleanupBuffers();
 
     if(_vlcInstance)
+    {
         libvlc_release(_vlcInstance);
+        _vlcInstance = nullptr;
+    }
 
     delete _mutex;
 }
+
+const QString& VideoPlayer::getFileName() const
+{
+    return _videoFile;
+}
+
 
 bool VideoPlayer::isError() const
 {
@@ -63,10 +80,15 @@ QMutex* VideoPlayer::getMutex() const
 
 QImage* VideoPlayer::getImage() const
 {
-    if((_status == libvlc_MediaPlayerBuffering) || (_status == libvlc_MediaPlayerPlaying))
+    if(isPlaying())
         return _loadImage;
     else
         return nullptr;
+}
+
+QSize VideoPlayer::getOriginalSize() const
+{
+    return _originalSize;
 }
 
 bool VideoPlayer::isNewImage() const
@@ -125,6 +147,12 @@ void VideoPlayer::unlockCallback(void *picture, void *const *planes)
     _newImage = true;
 
     _mutex->unlock();
+
+    if(!_firstImage)
+    {
+        _firstImage = true;
+        emit screenShotAvailable();
+    }
 }
 
 void VideoPlayer::displayCallback(void *picture)
@@ -148,7 +176,8 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
 
     memcpy(chroma, "RV32", sizeof("RV32") - 1);
 
-    QSize scaledTarget(static_cast<int>(*width), static_cast<int>(*height));
+    _originalSize = QSize(static_cast<int>(*width), static_cast<int>(*height));
+    QSize scaledTarget = _originalSize;
 
     if((_targetSize.width() > 0) && (_targetSize.height() > 0))
     {
@@ -196,6 +225,37 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
 {
     if(p_event)
     {
+        switch(p_event->type)
+        {
+            case libvlc_MediaPlayerOpening:
+                qDebug() << "[vlc] Video event received: OPENING = " << p_event->type;
+                emit videoOpening();
+                break;
+            case libvlc_MediaPlayerBuffering:
+                qDebug() << "[vlc] Video event received: BUFFERING = " << p_event->type;
+                emit videoBuffering();
+                break;
+            case libvlc_MediaPlayerPlaying:
+                qDebug() << "[vlc] Video event received: PLAYING = " << p_event->type;
+                emit videoPlaying();
+                break;
+            case libvlc_MediaPlayerPaused:
+                qDebug() << "[vlc] Video event received: PAUSED = " << p_event->type;
+                emit videoPaused();
+                break;
+            case libvlc_MediaPlayerStopped:
+                qDebug() << "[vlc] Video event received: STOPPED = " << p_event->type;
+                internalStopCheck(stopConfirmed);
+                emit videoStopped();
+                break;
+            default:
+                qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
+                break;
+        };
+
+        _status = p_event->type;
+
+        /*
         if((p_event->type == libvlc_MediaPlayerOpening) ||
            (p_event->type == libvlc_MediaPlayerBuffering) ||
            (p_event->type == libvlc_MediaPlayerPlaying) ||
@@ -210,6 +270,7 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
             qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
             _status = -1;
         }
+        */
     }
 }
 
@@ -217,6 +278,7 @@ void VideoPlayer::targetResized(const QSize& newSize)
 {
     qDebug() << "[VideoPlayer] Target window resized: " << newSize;
     _targetSize = newSize;
+    restartPlayer();
     /*
     if((_vlcInstance) && (_vlcListPlayer) && (!_vlcError))
     {
@@ -231,8 +293,27 @@ void VideoPlayer::targetResized(const QSize& newSize)
     */
 }
 
+void VideoPlayer::stopThenDelete()
+{
+    if(isProcessing())
+    {
+        _deleteOnStop = true;
+        stopPlayer();
+    }
+    else
+    {
+        delete this;
+    }
+}
+
 bool VideoPlayer::initializeVLC()
 {
+    if(_videoFile.isEmpty())
+    {
+        qDebug() << "[VideoPlayer] Playback file empty - not initializing VLC!";
+        return false;
+    }
+
     qDebug() << "[VideoPlayer] Initializing VLC!";
     _vlcInstance = libvlc_new(0, nullptr);
 
@@ -241,7 +322,7 @@ bool VideoPlayer::initializeVLC()
 
     libvlc_log_set(_vlcInstance, playerLogCallback, nullptr);
 
-    QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
+//    QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
 
     // Stop if something is playing
     //if(_vlcListPlayer && libvlc_media_list_player_is_playing(vlcListPlayer))
@@ -249,13 +330,41 @@ bool VideoPlayer::initializeVLC()
 
     libvlc_set_exit_handler(_vlcInstance, playerExitEventCallback, this);
 
+    return startPlayer();
+}
+
+bool VideoPlayer::startPlayer()
+{
+    if(!_vlcInstance)
+    {
+        qDebug() << "[VideoPlayer] VLC not instantiated - not able to start player!";
+        return false;
+    }
+
+    if(_vlcListPlayer)
+    {
+        qDebug() << "[VideoPlayer] Player already running - not able to start player!";
+        return false;
+    }
+
+    if(_videoFile.isEmpty())
+    {
+        qDebug() << "[VideoPlayer] Playback file empty - not able to start player!";
+        return false;
+    }
+
+    qDebug() << "[VideoPlayer] Starting video player with " << _videoFile.toUtf8().constData();
+
     // Create a new Media List and add the media to it
     libvlc_media_list_t *vlcMediaList = libvlc_media_list_new(_vlcInstance);
     if (!vlcMediaList)
         return false;
 
     // Create a new Media
-    libvlc_media_t *vlcMedia = libvlc_media_new_path(_vlcInstance, fileOpen.toUtf8().constData());
+    //QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
+    //qDebug() << "[VideoPlayer] Starting video player with " << fileOpen.toUtf8().constData();
+    //libvlc_media_t *vlcMedia = libvlc_media_new_path(_vlcInstance, fileOpen.toUtf8().constData());
+    libvlc_media_t *vlcMedia = libvlc_media_new_path(_vlcInstance, _videoFile.toUtf8().constData());
     if (!vlcMedia)
         return false;
 
@@ -284,7 +393,7 @@ bool VideoPlayer::initializeVLC()
     unsigned x = 0;
     unsigned y = 0;
     int result = libvlc_video_get_size(player, 0, &x, &y);
-    qDebug() << "[VideoPlayer] Video size (result: " << result << "): " << x << " x " << y << ". File: " << fileOpen;
+    qDebug() << "[VideoPlayer] Video size (result: " << result << "): " << x << " x " << y << ". File: " << _videoFile;
 
     libvlc_video_set_callbacks(player, playerLockCallback, playerUnlockCallback, playerDisplayCallback, this);
     libvlc_video_set_format_callbacks(player, playerFormatCallback, playerCleanupCallback);
@@ -296,15 +405,43 @@ bool VideoPlayer::initializeVLC()
     return true;
 }
 
+bool VideoPlayer::stopPlayer()
+{
+    if(_vlcListPlayer)
+    {
+        _stopStatus = 0;
+        libvlc_media_list_player_stop(_vlcListPlayer);
+        internalStopCheck(stopCallComplete);
+    }
+
+    return true;
+}
+
+bool VideoPlayer::restartPlayer()
+{
+    if(_vlcListPlayer)
+    {
+        _selfRestart = true;
+        return stopPlayer();
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void VideoPlayer::cleanupBuffers()
 {
     _newImage = false;
+    _originalSize = QSize();
 
     if(_loadImage)
     {
         QImage* tempImage = _loadImage;
         _loadImage = nullptr;
         delete tempImage;
+
+        _firstImage = false;
     }
 
     if(_nativeBufferNotAligned)
@@ -315,6 +452,58 @@ void VideoPlayer::cleanupBuffers()
         free(tempChar);
     }
 }
+
+void VideoPlayer::internalStopCheck(int status)
+{
+    _stopStatus |= status;
+    if(_stopStatus != stopComplete)
+        return;
+
+    if(_vlcListPlayer)
+    {
+        libvlc_media_list_player_release(_vlcListPlayer);
+        _vlcListPlayer = nullptr;
+    }
+    if(_selfRestart)
+    {
+        _selfRestart = false;
+        startPlayer();
+    }
+    if(_deleteOnStop)
+    {
+        delete this;
+        return;
+    }
+}
+
+bool VideoPlayer::isPlaying() const
+{
+    return ((_status == libvlc_MediaPlayerBuffering) ||
+            (_status == libvlc_MediaPlayerPlaying));
+}
+
+bool VideoPlayer::isPaused() const
+{
+    return (_status == libvlc_MediaPlayerPaused);
+}
+
+bool VideoPlayer::isProcessing() const
+{
+    return ((_status == libvlc_MediaPlayerOpening) ||
+            (_status == libvlc_MediaPlayerBuffering) ||
+            (_status == libvlc_MediaPlayerPlaying) ||
+            (_status == libvlc_MediaPlayerPaused));
+}
+
+bool VideoPlayer::isStatusValid() const
+{
+    return ((_status == libvlc_MediaPlayerOpening) ||
+            (_status == libvlc_MediaPlayerBuffering) ||
+            (_status == libvlc_MediaPlayerPlaying) ||
+            (_status == libvlc_MediaPlayerPaused) ||
+            (_status == libvlc_MediaPlayerStopped));
+}
+
 
 
 // libvlc callback static functions

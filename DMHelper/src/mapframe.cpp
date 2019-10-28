@@ -23,7 +23,8 @@ MapFrame::MapFrame(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MapFrame),
     _scene(nullptr),
-    _background(nullptr),
+    _backgroundImage(nullptr),
+    _backgroundVideo(nullptr),
     _fow(nullptr),
     _mouseDown(false),
     _mouseDownPos(),
@@ -81,6 +82,8 @@ MapFrame::MapFrame(QWidget *parent) :
 
     connect(ui->grpBrush,SIGNAL(buttonClicked(int)),this,SLOT(setMapCursor()));
     connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(setMapCursor()));
+
+    connect(this, SIGNAL(dirty()), this, SLOT(resetPublishFoW()));
 
     //_publishTimer = new QTimer(this);
     //_publishTimer->setSingleShot(false);
@@ -229,10 +232,10 @@ void MapFrame::publishFoWImage()
         QImage pub;
         if(ui->btnPublishZoom->isChecked())
         {
-            QRect imgRect(ui->graphicsView->horizontalScrollBar()->value() / _scale,
-                          ui->graphicsView->verticalScrollBar()->value() / _scale,
-                          ui->graphicsView->viewport()->width() / _scale,
-                          ui->graphicsView->viewport()->height() / _scale);
+            QRect imgRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
+                          static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
+                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
+                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
 
             // TODO: Consider zoom factor...
 
@@ -263,6 +266,13 @@ void MapFrame::publishFoWImage()
     {
         stopPublishTimer();
         createVideoPlayer(!ui->framePublish->isChecked());
+        if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
+        {
+            emit animationStarted(ui->framePublish->getColor());
+            emit showPublishWindow();
+            emit startTrack(_mapSource->getAudioTrack());
+        }
+
         startPublishTimer();
     }
 }
@@ -270,7 +280,8 @@ void MapFrame::publishFoWImage()
 void MapFrame::clear()
 {
     _mapSource = nullptr;
-    delete _background; _background = nullptr;
+    delete _backgroundImage; _backgroundImage = nullptr;
+    delete _backgroundVideo; _backgroundVideo = nullptr;
     delete _fow; _fow = nullptr;
     delete _undoPath; _undoPath = nullptr;
 }
@@ -343,12 +354,16 @@ void MapFrame::targetResized(const QSize& newSize)
     {
         _videoPlayer->targetResized(newSize);
     }
+
+    resetPublishFoW();
 }
 
 void MapFrame::initializeFoW()
 {
-    delete _background;
-    _background = nullptr;
+    delete _backgroundImage;
+    _backgroundImage = nullptr;
+    delete _backgroundVideo;
+    _backgroundVideo = nullptr;
     delete _fow;
     _fow = nullptr;
 
@@ -365,9 +380,9 @@ void MapFrame::initializeFoW()
     if(_mapSource->isInitialized())
     {
         qDebug() << "[MapFrame] Initializing map frame image";
-        _background = _scene->addPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
-        _background->setEnabled(false);
-        _background->setZValue(-2);
+        _backgroundImage = _scene->addPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
+        _backgroundImage->setEnabled(false);
+        _backgroundImage->setZValue(-2);
 
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         _fow->setEnabled(false);
@@ -377,12 +392,7 @@ void MapFrame::initializeFoW()
     {
         qDebug() << "[MapFrame] Initializing map frame video";
         createVideoPlayer(true);
-        /*
-        if((_videoPlayer) &&!_videoPlayer->isError())
-        {
-            startPublishTimer();
-        }
-        */
+        startPublishTimer();
     }
 
     ui->framePublish->setCheckable(!_mapSource->isInitialized());
@@ -393,13 +403,12 @@ void MapFrame::uninitializeFoW()
     qDebug() << "[MapFrame] Uninitializing MapFrame...";
 
     stopPublishTimer();
+    cleanupBuffers();
     if(_videoPlayer)
     {
-        delete _videoPlayer;
+        _videoPlayer->stopThenDelete();
         _videoPlayer = nullptr;
     }
-
-    cleanupBuffers();
 }
 
 void MapFrame::loadTracks()
@@ -453,38 +462,74 @@ void MapFrame::timerEvent(QTimerEvent *event)
 
         if(ui->framePublish->isChecked())
         {
-            if((_bwFoWImage.isNull()) && (!_videoPlayer->getImage()->isNull()))
-                _bwFoWImage = _mapSource->getBWFoWImage(*(_videoPlayer->getImage()));
-
-            QImage result = _videoPlayer->getImage()->copy();
-            QPainter p;
-            p.begin(&result);
-                p.drawImage(0, 0, _bwFoWImage);
-            p.end();
-
-            if(ui->framePublish->getRotation() != 0)
+            if(!_videoPlayer->getImage()->isNull())
             {
-                result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
-            }
+                if((_bwFoWImage.isNull()) && (!_mapSource->isCleared()))
+                {
+                    QSize originalSize = _videoPlayer->getOriginalSize();
+                    if(!originalSize.isEmpty())
+                    {
+                        QImage bwImg = _mapSource->getBWFoWImage(originalSize);
+                        QSize imgSize = _videoPlayer->getImage()->size();
+                        _bwFoWImage = bwImg.scaled(imgSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                    }
+                }
 
-            emit animateImage(result);
+                QImage result = _videoPlayer->getImage()->copy();
+                if(!_bwFoWImage.isNull())
+                {
+                    QPainter p;
+                    p.begin(&result);
+                        p.drawImage(0, 0, _bwFoWImage);
+                    p.end();
+                }
+
+                if(ui->framePublish->getRotation() != 0)
+                {
+                    result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+                }
+
+                emit animateImage(result);
+            }
         }
         else
         {
-            if((!_background) && (!_videoPlayer->getImage()->isNull()))
+            if(((!_backgroundVideo) ||(!_backgroundVideo->isVisible())) && (!_videoPlayer->getImage()->isNull()))
             {
-                //QImage testImage = _videoPlayer->getImage()->copy();
-                //_background = _scene->addPixmap(QPixmap::fromImage(testImage));
-                _background = _scene->addPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
-                _background->setEnabled(false);
-                _background->setZValue(-2);
+                if(_backgroundImage)
+                {
+                    _backgroundImage->hide();
+                }
 
-                QImage fowImage = QImage(_videoPlayer->getImage()->size(), QImage::Format_ARGB32);
-                fowImage.fill(QColor(0,0,0,128));
-                _mapSource->setExternalFoWImage(fowImage);
-                _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-                _fow->setEnabled(false);
-                _fow->setZValue(1);
+                QPixmap pmpCopy = QPixmap::fromImage(*(_videoPlayer->getImage())).copy();
+                if(_backgroundVideo)
+                {
+                    //_backgroundVideo->setPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
+                    // TODO: update the graphics view/scene to work with the mutex on drawforeground/background
+                    _backgroundVideo->setPixmap(pmpCopy);
+                    _backgroundVideo->show();
+                }
+                else
+                {
+                    //_backgroundVideo = _scene->addPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
+                    _backgroundVideo = _scene->addPixmap(pmpCopy);
+                    _backgroundVideo->setEnabled(false);
+                    _backgroundVideo->setZValue(-2);
+                }
+
+                if(_fow)
+                {
+                    _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+                }
+                else
+                {
+                    QImage fowImage = QImage(_videoPlayer->getImage()->size(), QImage::Format_ARGB32);
+                    fowImage.fill(QColor(0,0,0,128));
+                    _mapSource->setExternalFoWImage(fowImage);
+                    _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+                    _fow->setEnabled(false);
+                    _fow->setZValue(1);
+                }
             }
 
             update();
@@ -716,35 +761,53 @@ void MapFrame::stopPublishTimer()
 
 void MapFrame::createVideoPlayer(bool dmPlayer)
 {
-    cleanupBuffers();
+    if(!_mapSource)
+        return;
 
-    delete _videoPlayer;
-    _videoPlayer = nullptr;
+    if((!dmPlayer) && (_backgroundVideo))
+    {
+        QPixmap pmpCopy = _backgroundVideo->pixmap().copy();
+        if(!_backgroundImage)
+        {
+            _backgroundImage = _scene->addPixmap(pmpCopy);
+            _backgroundImage->setEnabled(false);
+            _backgroundImage->setZValue(-2);
+        }
+        else
+        {
+            _backgroundImage->setPixmap(pmpCopy);
+            _backgroundImage->show();
+        }
+
+        _backgroundVideo->hide();
+    }
+
+    if(_videoPlayer)
+    {
+        _videoPlayer->stopThenDelete();
+        _videoPlayer = nullptr;
+    }
 
     if(dmPlayer)
     {
         qDebug() << "[MapFrame] Publish FoW DM animation started";
-        _videoPlayer = new VideoPlayer(QSize(0, 0));
+        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0));
+        /*
         if((_videoPlayer) && (!_videoPlayer->isError()))
         {
             startPublishTimer();
         }
-        //QTimer::singleShot(30, this, SLOT(createDMPlayer()));
+        */
     }
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
-        _videoPlayer = new VideoPlayer(_targetSize);
+        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), _targetSize);
         _videoPlayer->targetResized(_targetSize);
         if(!_videoPlayer->isError())
         {
             _bwFoWImage = QImage();
-
-            emit animationStarted(ui->framePublish->getColor());
-            emit showPublishWindow();
-            emit startTrack(_mapSource->getAudioTrack());
         }
-        //QTimer::singleShot(30, this, SLOT(createPlayerPlayer()));
     }
 }
 
@@ -752,11 +815,19 @@ void MapFrame::cleanupBuffers()
 {
     QGraphicsItem* tempItem;
 
-    if(_background)
+    if(_backgroundImage)
     {
-        _scene->removeItem(_background);
-        tempItem = _background;
-        _background = nullptr;
+        _scene->removeItem(_backgroundImage);
+        tempItem = _backgroundImage;
+        _backgroundImage = nullptr;
+        delete tempItem;
+    }
+
+    if(_backgroundVideo)
+    {
+        _scene->removeItem(_backgroundVideo);
+        tempItem = _backgroundVideo;
+        _backgroundVideo = nullptr;
         delete tempItem;
     }
 
@@ -823,13 +894,6 @@ void MapFrame::publishModeZoomClicked()
     }
 }
 
-void MapFrame::setScale(qreal s)
-{
-    _scale = s;
-    ui->graphicsView->setTransform(QTransform::fromScale(_scale,_scale));
-    setMapCursor();
-}
-
 void MapFrame::trackSelected(int index)
 {
     if(!_mapSource)
@@ -839,27 +903,17 @@ void MapFrame::trackSelected(int index)
     _mapSource->setAudioTrack(track);
 }
 
-void MapFrame::createDMPlayer()
+void MapFrame::setScale(qreal s)
 {
-    qDebug() << "[MapFrame] Publish FoW DM animation started";
-    _videoPlayer = new VideoPlayer(QSize(0, 0));
-    if((_videoPlayer) && (!_videoPlayer->isError()))
-    {
-        startPublishTimer();
-    }
+    _scale = s;
+    ui->graphicsView->setTransform(QTransform::fromScale(_scale,_scale));
+    setMapCursor();
 }
 
-void MapFrame::createPlayerPlayer()
+void MapFrame::resetPublishFoW()
 {
-    qDebug() << "[MapFrame] Publish FoW Player animation started";
-    _videoPlayer = new VideoPlayer(_targetSize);
-    _videoPlayer->targetResized(_targetSize);
-    if(!_videoPlayer->isError())
+    if(!_bwFoWImage.isNull())
     {
         _bwFoWImage = QImage();
-
-        emit animationStarted(ui->framePublish->getColor());
-        emit showPublishWindow();
-        emit startTrack(_mapSource->getAudioTrack());
     }
 }
