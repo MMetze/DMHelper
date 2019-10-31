@@ -32,7 +32,7 @@ QStatusBar{background-image: url(:/img/data/parchment.jpg);}
 QWidget{background-image: url(:/img/data/parchment.jpg);}
 QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2">
+  <layout class="QVBoxLayout" name="verticalLayout_4">
    <item>
     <widget class="QFrame" name="frame">
      <property name="sizePolicy">
@@ -71,7 +71,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_6">
      <item>
       <widget class="QGroupBox" name="grpMode">
        <property name="sizePolicy">
@@ -554,21 +554,48 @@ color: rgb(85, 0, 0);</string>
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Audio:</string>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>9</number>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="cmbTracks">
-       <property name="minimumSize">
-        <size>
-         <width>150</width>
-         <height>0</height>
-        </size>
+       <property name="topMargin">
+        <number>5</number>
        </property>
-      </widget>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Audio:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="cmbTracks">
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="chkAudio">
+         <property name="text">
+          <string>Audio Enabled</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
       <spacer name="horizontalSpacer_3">

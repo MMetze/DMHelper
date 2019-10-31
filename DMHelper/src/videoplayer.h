@@ -14,10 +14,16 @@ class VideoPlayer : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlayer(const QString& videoFile, QSize targetSize, QObject *parent = nullptr);
+    VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo = true, bool playAudio = true, QObject *parent = nullptr);
     virtual ~VideoPlayer();
 
     virtual const QString& getFileName() const;
+
+    virtual bool isPlayingVideo() const;
+    virtual void setPlayingVideo(bool playVideo);
+    virtual bool isPlayingAudio() const;
+    virtual void setPlayingAudio(bool playAudio);
+
     virtual bool isError() const;
     virtual QMutex* getMutex() const;
     virtual QImage* getImage() const;
@@ -55,6 +61,7 @@ protected:
     virtual void cleanupBuffers();
 
     virtual void internalStopCheck(int status);
+    virtual void internalAudioCheck(int newStatus);
 
     virtual bool isPlaying() const;
     virtual bool isPaused() const;
@@ -62,6 +69,9 @@ protected:
     virtual bool isStatusValid() const;
 
     QString _videoFile;
+    bool _playVideo;
+    bool _playAudio;
+
     bool _vlcError;
     libvlc_instance_t *_vlcInstance;
     libvlc_media_list_player_t *_vlcListPlayer;
@@ -79,6 +89,7 @@ protected:
     bool _deleteOnStop;
     int _stopStatus;
     bool _firstImage;
+    int _originalTrack;
 };
 
 #endif // VIDEOPLAYER_H

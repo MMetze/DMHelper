@@ -35,6 +35,9 @@ public:
     QUuid getAudioTrackId();
     void setAudioTrack(AudioTrack* track);
 
+    bool getPlayAudio() const;
+    void setPlayAudio(bool playAudio);
+
     QUndoStack* getUndoStack() const;
     void applyPaintTo(QImage* target, QColor clearColor, int index);
     MapFrame* getRegisteredWindow() const;
@@ -79,6 +82,7 @@ private:
     MapFrame* _mapFrame;
     QList<MapMarker> _markerList;
     QUuid _audioTrackId;
+    bool _playAudio;
 
     bool _initialized;
     QImage _imgBackground;

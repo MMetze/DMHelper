@@ -2057,7 +2057,7 @@ void BattleDialog::createVideoPlayer(bool dmPlayer)
     if(dmPlayer)
     {
         qDebug() << "[MapFrame] Publish FoW DM animation started";
-        _videoPlayer = new VideoPlayer(_model.getMap()->getFileName(), QSize(0, 0));
+        _videoPlayer = new VideoPlayer(_model.getMap()->getFileName(), QSize(0, 0), true, false);
         if(_videoPlayer->isNewImage())
             updateVideoBackground();
         else
@@ -2066,7 +2066,7 @@ void BattleDialog::createVideoPlayer(bool dmPlayer)
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
-        _videoPlayer = new VideoPlayer(_model.getMap()->getFileName(), _targetSize);
+        _videoPlayer = new VideoPlayer(_model.getMap()->getFileName(), _targetSize, true, _model.getMap()->getPlayAudio());
         _videoPlayer->targetResized(_targetSize);
         if(!_videoPlayer->isError())
         {

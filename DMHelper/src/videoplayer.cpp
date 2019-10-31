@@ -6,6 +6,7 @@
 const int stopCallComplete = 0x01;
 const int stopConfirmed = 0x02;
 const int stopComplete = stopCallComplete | stopConfirmed;
+const int INVALID_TRACK_ID = -99999;
 
 // libvlc callback static functions
 void * playerLockCallback(void *opaque, void **planes);
@@ -21,9 +22,11 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
 void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
 
 
-VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, QObject *parent) :
+VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo, bool playAudio, QObject *parent) :
     QObject(parent),
     _videoFile(videoFile),
+    _playVideo(playVideo),
+    _playAudio(playAudio),
     _vlcError(false),
     _vlcInstance(nullptr),
     _vlcListPlayer(nullptr),
@@ -40,7 +43,8 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, QObject *pa
     _selfRestart(false),
     _deleteOnStop(false),
     _stopStatus(0),
-    _firstImage(false)
+    _firstImage(false),
+    _originalTrack(INVALID_TRACK_ID)
 {
     _videoFile.replace("/","\\\\");
     _vlcError = !initializeVLC();
@@ -67,6 +71,44 @@ const QString& VideoPlayer::getFileName() const
     return _videoFile;
 }
 
+bool VideoPlayer::isPlayingVideo() const
+{
+    return _playVideo;
+}
+
+void VideoPlayer::setPlayingVideo(bool playVideo)
+{
+    _playVideo = playVideo;
+}
+
+bool VideoPlayer::isPlayingAudio() const
+{
+    return _playAudio;
+}
+
+void VideoPlayer::setPlayingAudio(bool playAudio)
+{
+    _playAudio = playAudio;
+
+    if(!_vlcListPlayer)
+        return;
+
+    libvlc_media_player_t * player = libvlc_media_list_player_get_media_player(_vlcListPlayer);
+    if(!player)
+        return;
+
+    if(_playAudio)
+    {
+        if((_originalTrack != INVALID_TRACK_ID) && (_originalTrack != -1))
+            libvlc_audio_set_track(player, _originalTrack);
+    }
+    else
+    {
+        _originalTrack = libvlc_audio_get_track(player);
+        if(_originalTrack != -1)
+            libvlc_audio_set_track(player, -1);
+    }
+}
 
 bool VideoPlayer::isError() const
 {
@@ -237,6 +279,7 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
                 break;
             case libvlc_MediaPlayerPlaying:
                 qDebug() << "[vlc] Video event received: PLAYING = " << p_event->type;
+                internalAudioCheck(p_event->type);
                 emit videoPlaying();
                 break;
             case libvlc_MediaPlayerPaused:
@@ -378,7 +421,6 @@ bool VideoPlayer::startPlayer()
     libvlc_media_list_player_set_media_list(_vlcListPlayer, vlcMediaList);
     libvlc_media_list_player_set_media_player(_vlcListPlayer, player);
     libvlc_media_list_player_set_playback_mode(_vlcListPlayer, libvlc_playback_mode_loop);
-    libvlc_audio_set_track(player, -1);
     libvlc_video_set_scale(player, 0.25f );
     libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(player);
     if(eventManager)
@@ -475,6 +517,24 @@ void VideoPlayer::internalStopCheck(int status)
         return;
     }
 }
+
+void VideoPlayer::internalAudioCheck(int newStatus)
+{
+    if((_playAudio) ||
+       (_originalTrack != INVALID_TRACK_ID) ||
+       (newStatus != libvlc_MediaPlayerPlaying) ||
+       (!_vlcListPlayer))
+        return;
+
+    libvlc_media_player_t * player = libvlc_media_list_player_get_media_player(_vlcListPlayer);
+    if(player)
+    {
+        _originalTrack = libvlc_audio_get_track(player);
+        if(_originalTrack != -1)
+            libvlc_audio_set_track(player, -1);
+    }
+}
+
 
 bool VideoPlayer::isPlaying() const
 {

@@ -25,6 +25,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _mapFrame(nullptr),
     _markerList(),
     _audioTrackId(),
+    _playAudio(false),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -40,6 +41,7 @@ Map::Map(const QDomElement& element, bool isImport, QObject *parent) :
     _mapFrame(nullptr),
     _markerList(),
     _audioTrackId(),
+    _playAudio(false),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -56,6 +58,7 @@ Map::Map(const Map &obj) :
     _mapFrame(nullptr),
     _markerList(obj._markerList),
     _audioTrackId(obj._audioTrackId),
+    _playAudio(obj._playAudio),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -81,6 +84,8 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
     element.setAttribute( "name", getName() );
     element.setAttribute( "filename", targetDirectory.relativeFilePath(getFileName()) );
     element.setAttribute( "audiotrack", _audioTrackId.toString() );
+    element.setAttribute( "playaudio", _playAudio);
+
 
     QDomElement actionsElement = doc.createElement( "actions" );
     int i;
@@ -163,6 +168,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
 void Map::postProcessXML(const QDomElement &element, bool isImport)
 {
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
+    _playAudio = static_cast<bool>(element.attribute("playaudio",QString::number(1)).toInt());
     AdventureItem::postProcessXML(element, isImport);
 }
 
@@ -210,6 +216,16 @@ void Map::setAudioTrack(AudioTrack* track)
         _audioTrackId = newTrackId;
         emit dirty();
     }
+}
+
+bool Map::getPlayAudio() const
+{
+    return _playAudio;
+}
+
+void Map::setPlayAudio(bool playAudio)
+{
+    _playAudio = playAudio;
 }
 
 QUndoStack* Map::getUndoStack() const

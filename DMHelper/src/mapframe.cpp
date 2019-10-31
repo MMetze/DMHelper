@@ -85,6 +85,8 @@ MapFrame::MapFrame(QWidget *parent) :
 
     connect(this, SIGNAL(dirty()), this, SLOT(resetPublishFoW()));
 
+    connect(ui->chkAudio, SIGNAL(clicked()), this, SLOT(audioPlaybackChecked()));
+
     //_publishTimer = new QTimer(this);
     //_publishTimer->setSingleShot(false);
     //connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
@@ -260,7 +262,7 @@ void MapFrame::publishFoWImage()
 
         emit publishImage(pub, ui->framePublish->getColor());
         emit showPublishWindow();
-        emit startTrack(_mapSource->getAudioTrack());
+        startAudioTrack();
     }
     else
     {
@@ -270,7 +272,7 @@ void MapFrame::publishFoWImage()
         {
             emit animationStarted(ui->framePublish->getColor());
             emit showPublishWindow();
-            emit startTrack(_mapSource->getAudioTrack());
+            startAudioTrack();
         }
 
         startPublishTimer();
@@ -791,7 +793,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     if(dmPlayer)
     {
         qDebug() << "[MapFrame] Publish FoW DM animation started";
-        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0));
+        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
         /*
         if((_videoPlayer) && (!_videoPlayer->isError()))
         {
@@ -802,7 +804,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
-        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), _targetSize);
+        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), _targetSize, true, _mapSource->getPlayAudio());
         _videoPlayer->targetResized(_targetSize);
         if(!_videoPlayer->isError())
         {
@@ -841,6 +843,12 @@ void MapFrame::cleanupBuffers()
 
     _scene->clear();
     _scene->update();
+}
+
+void MapFrame::startAudioTrack()
+{
+    if((_mapSource) && (_mapSource->getPlayAudio()))
+        emit startTrack(_mapSource->getAudioTrack());
 }
 
 void MapFrame::setMapCursor()
@@ -917,3 +925,13 @@ void MapFrame::resetPublishFoW()
         _bwFoWImage = QImage();
     }
 }
+
+void MapFrame::audioPlaybackChecked()
+{
+    if(_mapSource)
+        _mapSource->setPlayAudio(ui->chkAudio->isChecked());
+
+    if((ui->framePublish->isChecked()) && (_videoPlayer))
+        _videoPlayer->setPlayingAudio(ui->chkAudio->isChecked());
+}
+

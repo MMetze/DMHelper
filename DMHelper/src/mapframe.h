@@ -87,6 +87,8 @@ protected:
     void createVideoPlayer(bool dmPlayer);
     void cleanupBuffers();
 
+    void startAudioTrack();
+
 protected slots:
     void setMapCursor();
     void publishModeVisibleClicked();
@@ -94,6 +96,7 @@ protected slots:
     void trackSelected(int index);
     void setScale(qreal s);
     void resetPublishFoW();
+    void audioPlaybackChecked();
 
 private:
     Ui::MapFrame *ui;
