@@ -2,6 +2,7 @@
 #include "ui_encounterscrollingtextedit.h"
 #include "encounterscrollingtext.h"
 #include "scrollingtextwindow.h"
+#include "dmconstants.h"
 #include <QFontDatabase>
 #include <QFile>
 #include <QFileDialog>
@@ -19,7 +20,14 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     _scrollingText(nullptr),
     _textScene(nullptr),
     _textItem(nullptr),
-    _backgroundWidth(0)
+    _backgroundWidth(0),
+    _backgroundImg(),
+    _prescaledImg(),
+    _textImg(),
+    _textPos(),
+    _targetSize(),
+    _elapsed(),
+    _timerId(0)
 {
     ui->setupUi(this);
 
@@ -60,11 +68,16 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     connect(this,SIGNAL(textChanged(const QString&)),this,SLOT(updatePreviewText(QString)));
     connect(this,SIGNAL(imgFileChanged(const QString&)),this,SLOT(createScene()));
 
-    connect(ui->btnAnimate,SIGNAL(clicked(bool)),this,SLOT(runAnimation()));
+    connect(ui->framePublish, SIGNAL(clicked()), this, SLOT(runAnimation()));
+    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(prepareImages()));
+    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(prepareImages()));
+
+    ui->framePublish->setCheckable(true);
 }
 
 EncounterScrollingTextEdit::~EncounterScrollingTextEdit()
 {
+    stopPublishTimer();
     delete ui;
 }
 
@@ -106,6 +119,15 @@ void EncounterScrollingTextEdit::unsetScrollingText(EncounterScrollingText* scro
     _scrollingText = nullptr;
 }
 
+void EncounterScrollingTextEdit::targetResized(const QSize& newSize)
+{
+    if(newSize != _targetSize)
+    {
+        _targetSize = newSize;
+        prepareImages();
+    }
+}
+
 void EncounterScrollingTextEdit::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
@@ -113,6 +135,35 @@ void EncounterScrollingTextEdit::resizeEvent(QResizeEvent *event)
     {
         ui->graphicsView->fitInView(_textScene->sceneRect(), Qt::KeepAspectRatio);
     }
+}
+
+void EncounterScrollingTextEdit::timerEvent(QTimerEvent *event)
+{
+    Q_UNUSED(event);
+
+    if(!_scrollingText)
+        return;
+
+    qreal elapsedtime = _elapsed.restart();
+    _textPos.ry() -= _scrollingText->getScrollSpeed() * elapsedtime / 1000.0;
+
+    QImage targetImg = _prescaledImg;
+    QPainter painter(&targetImg);
+    QPointF drawPoint = _textPos.toPoint();
+    if(ui->framePublish->getRotation() == 90)
+    {
+        drawPoint = QPointF(-drawPoint.y(), drawPoint.x());
+    }
+    else if(ui->framePublish->getRotation() == 180)
+    {
+        drawPoint.setY(-drawPoint.y());
+    }
+    else if(ui->framePublish->getRotation() == 270)
+    {
+        drawPoint = QPointF(drawPoint.y(), drawPoint.x());
+    }
+    painter.drawImage(drawPoint, _textImg, _textImg.rect());
+    emit animateImage(targetImg);
 }
 
 void EncounterScrollingTextEdit::setPlainText()
@@ -201,6 +252,7 @@ void EncounterScrollingTextEdit::createScene()
         delete _textScene;
         _textScene = nullptr;
         _textItem = nullptr;
+        _backgroundImg = QImage();
     }
     _textScene = new QGraphicsScene(this);
     ui->graphicsView->setScene(_textScene);
@@ -208,18 +260,17 @@ void EncounterScrollingTextEdit::createScene()
     QString imageFileName = ui->edtImageFile->text();
     if(!imageFileName.isEmpty())
     {
-        QImage backgroundImg;
-        if(!backgroundImg.load(ui->edtImageFile->text()))
+        if(!_backgroundImg.load(ui->edtImageFile->text()))
         {
             QMessageBox::critical(this, QString("Invalid image file"), QString("[ScrollingText] Selected image file could not be loaded"), QMessageBox::Ok);
             qDebug() << "[ScrollingText] Selected image file could not be loaded";
         }
         else
         {
-            QGraphicsPixmapItem* background = _textScene->addPixmap(QPixmap::fromImage(backgroundImg));
+            QGraphicsPixmapItem* background = _textScene->addPixmap(QPixmap::fromImage(_backgroundImg));
             background->setEnabled(false);
             background->setZValue(-2);
-            _backgroundWidth = background->boundingRect().width();
+            _backgroundWidth = static_cast<int>(background->boundingRect().width());
             ui->graphicsView->fitInView(background);
         }
     }
@@ -281,10 +332,88 @@ void EncounterScrollingTextEdit::updatePreviewFont()
 
 void EncounterScrollingTextEdit::runAnimation()
 {
-    if(_scrollingText)
+    if(ui->framePublish->isChecked())
     {
-        ScrollingTextWindow *wnd = new ScrollingTextWindow(*_scrollingText, this);
-        wnd->show();
+        if(!_backgroundImg.isNull())
+        {
+            prepareImages();
+
+            emit animationStarted(ui->framePublish->getColor());
+            emit showPublishWindow();
+            // TODO: add music
+
+            startPublishTimer();
+        }
+    }
+    else
+    {
+        stopPublishTimer();
+    }
+}
+
+void EncounterScrollingTextEdit::startPublishTimer()
+{
+    if(!_timerId)
+    {
+        _elapsed.start();
+        _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
+    }
+}
+
+void EncounterScrollingTextEdit::stopPublishTimer()
+{
+    if(_timerId)
+    {
+        killTimer(_timerId);
+        _timerId = 0;
+    }
+}
+
+void EncounterScrollingTextEdit::prepareImages()
+{
+    if((!_scrollingText) || (_backgroundImg.isNull()))
+        return;
+
+    QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize : _targetSize.transposed();
+
+    _prescaledImg = _backgroundImg.scaled(rotatedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QSize scaledSize = _prescaledImg.size();
+    if(ui->framePublish->getRotation() != 0)
+    {
+        _prescaledImg = _prescaledImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+    }
+
+    QFont font(_scrollingText->getFontFamily(),
+               _scrollingText->getFontSize(),
+               _scrollingText->getFontBold() ? QFont::Bold : QFont::Normal,
+               _scrollingText->getFontItalics());
+
+    QRect targetRect(0, 0, scaledSize.width(), scaledSize.height());
+
+    int textWidth = targetRect.width() * _scrollingText->getImageWidth() / 100;
+    targetRect.setWidth(textWidth);
+    _textPos.setX(static_cast<qreal>(scaledSize.width() - textWidth) / 2.0);
+
+    QFontMetrics fontMetrics(font);
+    QRect boundingRect = fontMetrics.boundingRect(targetRect, static_cast<Qt::AlignmentFlag>(_scrollingText->getAlignment()) | Qt::TextWordWrap, _scrollingText->getText());
+    targetRect.setHeight(boundingRect.height());
+
+    if((ui->framePublish->getRotation() == 0) || (ui->framePublish->getRotation() == 270))
+        _textPos.setY(static_cast<qreal>(scaledSize.height()));
+    else
+        _textPos.setY(static_cast<qreal>(boundingRect.height()));
+
+    _textImg = QImage(targetRect.size(), QImage::Format_ARGB32);
+    _textImg.fill(Qt::transparent);
+    {
+        QPainter painter(&_textImg);
+        painter.setFont(font);
+        painter.setPen(_scrollingText->getFontColor());
+        painter.drawText(targetRect, static_cast<Qt::AlignmentFlag>(_scrollingText->getAlignment()) | Qt::TextWordWrap, _scrollingText->getText());
+    }
+    if(ui->framePublish->getRotation() != 0)
+    {
+        _textImg = _textImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
     }
 }
 

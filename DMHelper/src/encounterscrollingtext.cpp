@@ -10,7 +10,7 @@
 
 EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QObject *parent) :
     Encounter(encounterName, parent),
-    _scrollSpeed(5.0),
+    _scrollSpeed(15.0),
     _imgFile(),
     _text(),
     _fontFamily(QGuiApplication::font().family()),

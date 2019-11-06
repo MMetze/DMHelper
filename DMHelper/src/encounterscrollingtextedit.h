@@ -2,6 +2,7 @@
 #define ENCOUNTERSCROLLINGTEXTEDIT_H
 
 #include <QFrame>
+#include <QElapsedTimer>
 
 namespace Ui {
 class EncounterScrollingTextEdit;
@@ -17,7 +18,7 @@ class EncounterScrollingTextEdit : public QFrame
 
 public:
     explicit EncounterScrollingTextEdit(QWidget *parent = nullptr);
-    ~EncounterScrollingTextEdit();
+    virtual ~EncounterScrollingTextEdit() override;
 
     EncounterScrollingText* getScrollingText() const;
     void setScrollingText(EncounterScrollingText* scrollingText);
@@ -35,8 +36,16 @@ signals:
     void imageWidthChanged(int imageWidth);
     void colorChanged(QColor color);
 
+    void animationStarted(QColor color);
+    void animateImage(QImage img);
+    void showPublishWindow();
+
+public slots:
+    void targetResized(const QSize& newSize);
+
 protected:
-    void resizeEvent(QResizeEvent *event);
+    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void timerEvent(QTimerEvent *event) override;
 
 private slots:
     void setPlainText();
@@ -51,6 +60,10 @@ private slots:
     void updatePreviewFont();
 
     void runAnimation();
+    void startPublishTimer();
+    void stopPublishTimer();
+
+    void prepareImages();
 
 private:
 
@@ -62,6 +75,13 @@ private:
     QGraphicsScene* _textScene;
     QGraphicsTextItem* _textItem;
     int _backgroundWidth;
+    QImage _backgroundImg;
+    QImage _prescaledImg;
+    QImage _textImg;
+    QPointF _textPos;
+    QSize _targetSize;
+    QElapsedTimer _elapsed;
+    int _timerId;
 };
 
 #endif // ENCOUNTERSCROLLINGTEXTEDIT_H
