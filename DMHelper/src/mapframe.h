@@ -93,6 +93,7 @@ protected slots:
     void setMapCursor();
     void publishModeVisibleClicked();
     void publishModeZoomClicked();
+    void rotatePublish();
     void trackSelected(int index);
     void setScale(qreal s);
     void resetPublishFoW();

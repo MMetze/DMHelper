@@ -63,6 +63,8 @@ MapFrame::MapFrame(QWidget *parent) :
     ui->grpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
 
     connect(ui->framePublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
+    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotatePublish()));
+    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotatePublish()));
     connect(ui->btnClearFoW,SIGNAL(clicked()),this,SLOT(clearFoW()));
     connect(ui->btnResetFoW,SIGNAL(clicked()),this,SLOT(resetFoW()));
     //TODO Markers: connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
@@ -804,8 +806,9 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
-        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), _targetSize, true, _mapSource->getPlayAudio());
-        _videoPlayer->targetResized(_targetSize);
+        QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize :  _targetSize.transposed();
+        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), rotatedSize, true, _mapSource->getPlayAudio());
+        //_videoPlayer->targetResized(rotatedSize);
         if(!_videoPlayer->isError())
         {
             _bwFoWImage = QImage();
@@ -899,6 +902,15 @@ void MapFrame::publishModeZoomClicked()
     if(ui->btnPublishZoom->isChecked())
     {
         ui->btnPublishVisible->setChecked(false);
+    }
+}
+
+void MapFrame::rotatePublish()
+{
+    resetPublishFoW();
+    if((_videoPlayer) && (ui->framePublish->isChecked()))
+    {
+        createVideoPlayer(!ui->framePublish->isChecked());
     }
 }
 
