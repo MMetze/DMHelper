@@ -3,6 +3,7 @@
 
 #include <QFrame>
 #include <QElapsedTimer>
+#include "videoplayer.h"
 
 namespace Ui {
 class EncounterScrollingTextEdit;
@@ -44,8 +45,11 @@ public slots:
     void targetResized(const QSize& newSize);
 
 protected:
-    virtual void resizeEvent(QResizeEvent *event) override;
     virtual void timerEvent(QTimerEvent *event) override;
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
+
+    void createVideoPlayer(bool dmPlayer);
+    void cleanupPlayer();
 
 private slots:
     void setPlainText();
@@ -53,27 +57,27 @@ private slots:
     void setAlignment();
     void setColor();
     void setTextFont();
+    void setTextWidth();
     void browseImageFile();
 
-    void createScene();
-    void updatePreviewText(const QString& newText);
-    void updatePreviewFont();
-
     void runAnimation();
+    void rotatePublish();
     void startPublishTimer();
     void stopPublishTimer();
 
     void prepareImages();
+    void prepareTextImage();
+    void loadImage();
+    void updateVideoBackground();
 
 private:
 
     Qt::AlignmentFlag getAlignment();
+    QSize getRotatedTargetSize();
 
     Ui::EncounterScrollingTextEdit *ui;
 
     EncounterScrollingText* _scrollingText;
-    QGraphicsScene* _textScene;
-    QGraphicsTextItem* _textItem;
     int _backgroundWidth;
     QImage _backgroundImg;
     QImage _prescaledImg;
@@ -82,6 +86,10 @@ private:
     QSize _targetSize;
     QElapsedTimer _elapsed;
     int _timerId;
+
+    VideoPlayer* _videoPlayer;
+    bool _isDMPlayer;
+    QImage _backgroundVideo;
 };
 
 #endif // ENCOUNTERSCROLLINGTEXTEDIT_H

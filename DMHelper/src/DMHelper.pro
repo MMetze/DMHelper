@@ -44,6 +44,7 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
+    texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
     undofill.cpp \
@@ -196,6 +197,7 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishwindow.h \
     randommarketdialog.h \
+    texteditmargins.h \
     undopoint.h \
     undopath.h \
     undofill.h \

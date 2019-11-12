@@ -51,13 +51,13 @@ signals:
 public slots:
     virtual void targetResized(const QSize& newSize);
     virtual void stopThenDelete();
+    virtual bool restartPlayer();
 
 protected:
 
     virtual bool initializeVLC();
     virtual bool startPlayer();
     virtual bool stopPlayer();
-    virtual bool restartPlayer();
     virtual void cleanupBuffers();
 
     virtual void internalStopCheck(int status);

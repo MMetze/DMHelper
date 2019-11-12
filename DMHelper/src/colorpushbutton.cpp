@@ -48,6 +48,15 @@ void ColorPushButton::setRotation(int rotation)
     }
 }
 
+void ColorPushButton::setRotationVisible(bool rotationVisible)
+{
+    if(_rotationVisible != rotationVisible)
+    {
+        _rotationVisible = rotationVisible;
+        update();
+    }
+}
+
 void ColorPushButton::setColor(QColor color)
 {
     if(color != _color)
@@ -68,14 +77,17 @@ void ColorPushButton::paintEvent(QPaintEvent *event)
     painter.setPen(Qt::black);
     painter.drawRect(rect);
 
-    QImage arrowImg(":/img/data/icon_arrow_xor.png");
-    painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    if(_rotation != 0)
+    if(_rotationVisible)
     {
-        arrowImg = arrowImg.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
-    }
+        QImage arrowImg(":/img/data/icon_arrow_xor.png");
+        painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
+        if(_rotation != 0)
+        {
+            arrowImg = arrowImg.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+        }
 
-    painter.drawImage(rect, arrowImg);
+        painter.drawImage(rect, arrowImg);
+    }
 }
 
 void ColorPushButton::selectColor()

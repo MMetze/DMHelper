@@ -349,6 +349,19 @@ void VideoPlayer::stopThenDelete()
     }
 }
 
+bool VideoPlayer::restartPlayer()
+{
+    if(_vlcListPlayer)
+    {
+        _selfRestart = true;
+        return stopPlayer();
+    }
+    else
+    {
+        return false;
+    }
+}
+
 bool VideoPlayer::initializeVLC()
 {
     if(_videoFile.isEmpty())
@@ -457,19 +470,6 @@ bool VideoPlayer::stopPlayer()
     }
 
     return true;
-}
-
-bool VideoPlayer::restartPlayer()
-{
-    if(_vlcListPlayer)
-    {
-        _selfRestart = true;
-        return stopPlayer();
-    }
-    else
-    {
-        return false;
-    }
 }
 
 void VideoPlayer::cleanupBuffers()

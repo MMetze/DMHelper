@@ -3,12 +3,11 @@
 #include "encounterscrollingtext.h"
 #include "scrollingtextwindow.h"
 #include "dmconstants.h"
+#include "texteditmargins.h"
 #include <QFontDatabase>
 #include <QFile>
 #include <QFileDialog>
-#include <QGraphicsScene>
-#include <QGraphicsPixmapItem>
-#include <QGraphicsTextItem>
+#include <QPainter>
 #include <QTextCursor>
 #include <QTextBlockFormat>
 #include <QMessageBox>
@@ -18,8 +17,6 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::EncounterScrollingTextEdit),
     _scrollingText(nullptr),
-    _textScene(nullptr),
-    _textItem(nullptr),
     _backgroundWidth(0),
     _backgroundImg(),
     _prescaledImg(),
@@ -27,7 +24,10 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     _textPos(),
     _targetSize(),
     _elapsed(),
-    _timerId(0)
+    _timerId(0),
+    _videoPlayer(nullptr),
+    _isDMPlayer(false),
+    _backgroundVideo()
 {
     ui->setupUi(this);
 
@@ -38,7 +38,7 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
 
     connect(ui->spinSpeed,SIGNAL(valueChanged(double)),this,SIGNAL(scrollSpeedChanged(double)));
     connect(ui->sliderWidth,SIGNAL(valueChanged(int)),this,SIGNAL(imageWidthChanged(int)));
-    connect(ui->sliderWidth,SIGNAL(valueChanged(int)),this,SLOT(updatePreviewFont()));
+    connect(ui->sliderWidth,SIGNAL(valueChanged(int)),this,SLOT(setTextWidth()));
     connect(ui->edtImageFile,SIGNAL(textChanged(QString)),this,SIGNAL(imgFileChanged(QString)));
     connect(ui->edtText,SIGNAL(textChanged()),this,SLOT(setPlainText()));
     connect(ui->cmbFont,SIGNAL(currentIndexChanged(QString)),this,SIGNAL(fontFamilyChanged(QString)));
@@ -57,27 +57,28 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     ui->buttonGroup->setId(ui->btnRightText,Qt::AlignRight);
     connect(ui->buttonGroup,SIGNAL(buttonClicked(int)),this,SLOT(setAlignment()));
 
-    ui->edtR->setValidator(new QIntValidator(0,255,this));
-    ui->edtG->setValidator(new QIntValidator(0,255,this));
-    ui->edtB->setValidator(new QIntValidator(0,255,this));
+    connect(ui->btnColor,SIGNAL(colorChanged(QColor)),this,SLOT(setColor()));
+    ui->btnColor->setRotationVisible(false);
 
-    connect(ui->edtR,SIGNAL(textChanged(QString)),this,SLOT(setColor()));
-    connect(ui->edtG,SIGNAL(textChanged(QString)),this,SLOT(setColor()));
-    connect(ui->edtB,SIGNAL(textChanged(QString)),this,SLOT(setColor()));
+    connect(this,SIGNAL(imgFileChanged(const QString&)),this,SLOT(loadImage()));
 
-    connect(this,SIGNAL(textChanged(const QString&)),this,SLOT(updatePreviewText(QString)));
-    connect(this,SIGNAL(imgFileChanged(const QString&)),this,SLOT(createScene()));
-
-    connect(ui->framePublish, SIGNAL(clicked()), this, SLOT(runAnimation()));
-    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(prepareImages()));
-    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(prepareImages()));
+    connect(ui->framePublish, SIGNAL(toggled(bool)), this, SLOT(runAnimation()));
+    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotatePublish()));
+    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotatePublish()));
 
     ui->framePublish->setCheckable(true);
+
+    ui->edtText->installEventFilter(this);
 }
 
 EncounterScrollingTextEdit::~EncounterScrollingTextEdit()
 {
     stopPublishTimer();
+
+    VideoPlayer* deletePlayer = _videoPlayer;
+    _videoPlayer = nullptr;
+    delete deletePlayer;
+
     delete ui;
 }
 
@@ -88,12 +89,18 @@ EncounterScrollingText* EncounterScrollingTextEdit::getScrollingText() const
 
 void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scrollingText)
 {
+    qDebug() << "[Scrolling Text] Setting scrolling text to: " << scrollingText;
+
+    if(_videoPlayer)
+        cleanupPlayer();
+
     if(!scrollingText)
         return;
 
     _scrollingText = scrollingText;
     ui->spinSpeed->setValue(_scrollingText->getScrollSpeed()); // TODO: what if invalid?
     ui->sliderWidth->setValue(_scrollingText->getImageWidth());
+    setTextWidth();
     ui->edtImageFile->setText(_scrollingText->getImgFile());
     ui->edtText->setPlainText(_scrollingText->getText());
     ui->cmbFont->setCurrentIndex(ui->cmbFont->findText(_scrollingText->getFontFamily()));
@@ -107,15 +114,20 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
 
     setAlignment();
 
-    ui->edtR->setText(QString::number(_scrollingText->getFontColor().red()));
-    ui->edtG->setText(QString::number(_scrollingText->getFontColor().green()));
-    ui->edtB->setText(QString::number(_scrollingText->getFontColor().blue()));
+    ui->btnColor->setColor(_scrollingText->getFontColor());
+
     setColor();
 }
 
 void EncounterScrollingTextEdit::unsetScrollingText(EncounterScrollingText* scrollingText)
 {
     Q_UNUSED(scrollingText);
+
+    qDebug() << "[Scrolling Text] Unsetting scrolling text...";
+
+    ui->framePublish->setChecked(false);
+    cleanupPlayer();
+
     _scrollingText = nullptr;
 }
 
@@ -125,15 +137,10 @@ void EncounterScrollingTextEdit::targetResized(const QSize& newSize)
     {
         _targetSize = newSize;
         prepareImages();
-    }
-}
-
-void EncounterScrollingTextEdit::resizeEvent(QResizeEvent *event)
-{
-    Q_UNUSED(event);
-    if(_textScene)
-    {
-        ui->graphicsView->fitInView(_textScene->sceneRect(), Qt::KeepAspectRatio);
+        if((_videoPlayer) && (ui->framePublish->isChecked()))
+        {
+            _videoPlayer->targetResized(newSize);
+        }
     }
 }
 
@@ -147,7 +154,33 @@ void EncounterScrollingTextEdit::timerEvent(QTimerEvent *event)
     qreal elapsedtime = _elapsed.restart();
     _textPos.ry() -= _scrollingText->getScrollSpeed() * elapsedtime / 1000.0;
 
-    QImage targetImg = _prescaledImg;
+    if(_textImg.isNull())
+        prepareTextImage();
+
+    QImage targetImg;
+    if(_videoPlayer)
+    {
+        if((!ui->framePublish->isChecked()) ||
+           (!_videoPlayer->isNewImage()) ||
+           (!_videoPlayer->getImage()) || (_videoPlayer->getImage()->isNull()) ||
+           (_videoPlayer->isError()) ||
+           (!_videoPlayer->getMutex()))
+            return;
+
+        QMutexLocker locker(_videoPlayer->getMutex());
+        if(ui->framePublish->getRotation() != 0)
+        {
+            targetImg = _videoPlayer->getImage()->transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+        }
+        else
+        {
+            targetImg = *(_videoPlayer->getImage());
+        }
+    }
+    else
+    {
+        targetImg = _prescaledImg;
+    }
     QPainter painter(&targetImg);
     QPointF drawPoint = _textPos.toPoint();
     if(ui->framePublish->getRotation() == 90)
@@ -164,6 +197,72 @@ void EncounterScrollingTextEdit::timerEvent(QTimerEvent *event)
     }
     painter.drawImage(drawPoint, _textImg, _textImg.rect());
     emit animateImage(targetImg);
+}
+
+bool EncounterScrollingTextEdit::eventFilter(QObject *watched, QEvent *event)
+{
+    if((ui->edtText) && (watched == ui->edtText))
+    {
+        if(event->type() == QEvent::Paint)
+        {
+            if(!_backgroundImg.isNull())
+            {
+                QPainter paint(ui->edtText);
+                paint.drawImage(0, 0, _backgroundImg);
+            }
+            else if(!_backgroundVideo.isNull())
+            {
+                QPainter paint(ui->edtText);
+                paint.drawImage(0, 0, _backgroundVideo);
+            }
+        }
+    }
+
+    return QFrame::eventFilter(watched, event);
+}
+
+void EncounterScrollingTextEdit::createVideoPlayer(bool dmPlayer)
+{
+    if(!_scrollingText)
+        return;
+
+    if(_videoPlayer)
+    {
+        _videoPlayer->stopThenDelete();
+        _videoPlayer = nullptr;
+    }
+
+    _isDMPlayer = dmPlayer;
+
+    if(dmPlayer)
+    {
+        qDebug() << "[ScrollingText] Publish FoW DM animation started";
+        _videoPlayer = new VideoPlayer(_scrollingText->getImgFile(), QSize(0, 0), true, false);
+        if(_videoPlayer->isNewImage())
+            updateVideoBackground();
+        else
+            connect(_videoPlayer, SIGNAL(screenShotAvailable()), this, SLOT(updateVideoBackground()));
+
+    }
+    else
+    {
+        qDebug() << "[ScrollingText] Publish FoW Player animation started";
+
+        // TODO: consider audio in the scrolling text
+        QSize rotatedSize = getRotatedTargetSize();
+        _videoPlayer = new VideoPlayer(_scrollingText->getImgFile(), rotatedSize, true, false);
+        //_videoPlayer->targetResized(rotatedSize);
+    }
+}
+
+void EncounterScrollingTextEdit::cleanupPlayer()
+{
+    stopPublishTimer();
+    if(_videoPlayer)
+    {
+        _videoPlayer->stopThenDelete();
+        _videoPlayer = nullptr;
+    }
 }
 
 void EncounterScrollingTextEdit::setPlainText()
@@ -187,22 +286,12 @@ void EncounterScrollingTextEdit::setAlignment()
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     ui->edtText->setTextCursor(cursor);
 
-    updatePreviewFont();
     emit alignmentChanged(newAlignment);
 }
 
 void EncounterScrollingTextEdit::setColor()
 {
-    QString colorString = "background-image: url(); background-color: rgb(";
-    colorString.append(ui->edtR->text());
-    colorString.append(",");
-    colorString.append(ui->edtG->text());
-    colorString.append(",");
-    colorString.append(ui->edtB->text());
-    colorString.append(");");
-    ui->frameColor->setStyleSheet(colorString);
-
-    QColor newColor(ui->edtR->text().toInt(), ui->edtG->text().toInt(), ui->edtB->text().toInt());
+    QColor newColor = ui->btnColor->getColor();
     emit colorChanged(newColor);
 
     // Set the text color for all text then move the cursor to the end
@@ -211,8 +300,6 @@ void EncounterScrollingTextEdit::setColor()
     QTextCursor cursor(ui->edtText->textCursor());
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     ui->edtText->setTextCursor(cursor);
-
-    updatePreviewFont();
 }
 
 void EncounterScrollingTextEdit::setTextFont()
@@ -227,8 +314,11 @@ void EncounterScrollingTextEdit::setTextFont()
     QTextCursor cursor(ui->edtText->textCursor());
     cursor.movePosition(QTextCursor::End, QTextCursor::MoveAnchor);
     ui->edtText->setTextCursor(cursor);
+}
 
-    updatePreviewFont();
+void EncounterScrollingTextEdit::setTextWidth()
+{
+    ui->edtText->setTextWidth(ui->sliderWidth->value());
 }
 
 void EncounterScrollingTextEdit::browseImageFile()
@@ -245,96 +335,11 @@ void EncounterScrollingTextEdit::browseImageFile()
     emit imgFileChanged(imageFileName);
 }
 
-void EncounterScrollingTextEdit::createScene()
-{
-    if(_textScene)
-    {
-        delete _textScene;
-        _textScene = nullptr;
-        _textItem = nullptr;
-        _backgroundImg = QImage();
-    }
-    _textScene = new QGraphicsScene(this);
-    ui->graphicsView->setScene(_textScene);
-
-    QString imageFileName = ui->edtImageFile->text();
-    if(!imageFileName.isEmpty())
-    {
-        if(!_backgroundImg.load(ui->edtImageFile->text()))
-        {
-            QMessageBox::critical(this, QString("Invalid image file"), QString("[ScrollingText] Selected image file could not be loaded"), QMessageBox::Ok);
-            qDebug() << "[ScrollingText] Selected image file could not be loaded";
-        }
-        else
-        {
-            QGraphicsPixmapItem* background = _textScene->addPixmap(QPixmap::fromImage(_backgroundImg));
-            background->setEnabled(false);
-            background->setZValue(-2);
-            _backgroundWidth = static_cast<int>(background->boundingRect().width());
-            ui->graphicsView->fitInView(background);
-        }
-    }
-
-    _textItem = _textScene->addText(ui->edtText->toPlainText(), ui->edtText->currentFont());
-    int itemWidth = _backgroundWidth * ui->sliderWidth->value() / 100;
-    _textItem->setTextWidth(itemWidth);
-    _textItem->setPos((_backgroundWidth - itemWidth) / 2, 0);
-}
-
-void EncounterScrollingTextEdit::updatePreviewText(const QString& newText)
-{
-    if(!_textScene)
-    {
-        createScene();
-    }
-    else if(_textItem)
-    {
-        _textItem->setPlainText(newText);
-        _textItem->update();
-        ui->graphicsView->update();
-    }
-}
-
-void EncounterScrollingTextEdit::updatePreviewFont()
-{
-    if(!_textScene)
-    {
-        createScene();
-    }
-    else if(_textItem)
-    {
-        // Set the preview font
-        _textItem->setFont(ui->edtText->currentFont());
-
-        // Set the preview text color
-        _textItem->setDefaultTextColor(ui->edtText->textColor());
-
-        // Set the preview alignment
-        QTextBlockFormat format;
-        format.setAlignment(getAlignment());
-        QTextCursor cursor = _textItem->textCursor();
-        cursor.select(QTextCursor::Document);
-        cursor.mergeBlockFormat(format);
-        cursor.clearSelection();
-        _textItem->setTextCursor(cursor);
-
-        // Set the preview position and width
-        int itemWidth = _backgroundWidth * ui->sliderWidth->value() / 100;
-        _textItem->setTextWidth(itemWidth);
-        _textItem->setPos((_backgroundWidth - itemWidth) / 2, 0);
-
-        // Update the scene
-        _textItem->update();
-        _textScene->update();
-        ui->graphicsView->update();
-    }
-}
-
 void EncounterScrollingTextEdit::runAnimation()
 {
-    if(ui->framePublish->isChecked())
+    if(!_backgroundImg.isNull())
     {
-        if(!_backgroundImg.isNull())
+        if(ui->framePublish->isChecked())
         {
             prepareImages();
 
@@ -344,10 +349,40 @@ void EncounterScrollingTextEdit::runAnimation()
 
             startPublishTimer();
         }
+        else
+        {
+            stopPublishTimer();
+        }
     }
-    else
+    else if(!_scrollingText->getImgFile().isEmpty())
     {
         stopPublishTimer();
+        if(ui->framePublish->isChecked())
+        {
+            prepareImages();
+            createVideoPlayer(false);
+
+            emit animationStarted(ui->framePublish->getColor());
+            emit showPublishWindow();
+            // TODO: add music
+        }
+        else
+        {
+            if(!_backgroundVideo.isNull())
+                return;
+
+            createVideoPlayer(true);
+        }
+        startPublishTimer();
+    }
+}
+
+void EncounterScrollingTextEdit::rotatePublish()
+{
+    prepareImages();
+    if((_videoPlayer) && (!_isDMPlayer))
+    {
+        createVideoPlayer(_isDMPlayer);
     }
 }
 
@@ -371,17 +406,29 @@ void EncounterScrollingTextEdit::stopPublishTimer()
 
 void EncounterScrollingTextEdit::prepareImages()
 {
-    if((!_scrollingText) || (_backgroundImg.isNull()))
+    if(!_scrollingText)
         return;
 
-    QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize : _targetSize.transposed();
+    QSize rotatedSize = getRotatedTargetSize();
 
-    _prescaledImg = _backgroundImg.scaled(rotatedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    QSize scaledSize = _prescaledImg.size();
+    if(!_backgroundImg.isNull())
+        _prescaledImg = _backgroundImg.scaled(rotatedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    else
+        _prescaledImg = _backgroundVideo.scaled(rotatedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
     if(ui->framePublish->getRotation() != 0)
     {
         _prescaledImg = _prescaledImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
     }
+
+    _textImg = QImage();
+}
+
+void EncounterScrollingTextEdit::prepareTextImage()
+{
+    QSize scaledSize = _prescaledImg.size();
+    if((ui->framePublish->getRotation() == 90) || (ui->framePublish->getRotation() == 270))
+        scaledSize.transpose();
 
     QFont font(_scrollingText->getFontFamily(),
                _scrollingText->getFontSize(),
@@ -403,7 +450,7 @@ void EncounterScrollingTextEdit::prepareImages()
     else
         _textPos.setY(static_cast<qreal>(boundingRect.height()));
 
-    _textImg = QImage(targetRect.size(), QImage::Format_ARGB32);
+    _textImg = QImage(targetRect.size(), QImage::Format_ARGB32_Premultiplied);
     _textImg.fill(Qt::transparent);
     {
         QPainter painter(&_textImg);
@@ -417,6 +464,34 @@ void EncounterScrollingTextEdit::prepareImages()
     }
 }
 
+void EncounterScrollingTextEdit::loadImage()
+{
+    _backgroundImg = QImage();
+
+    QString imageFileName = ui->edtImageFile->text();
+    if(!imageFileName.isEmpty())
+    {
+        if(!_backgroundImg.load(ui->edtImageFile->text()))
+        {
+            createVideoPlayer(true);
+            startPublishTimer();
+        }
+    }
+}
+
+void EncounterScrollingTextEdit::updateVideoBackground()
+{
+    if((!_videoPlayer) && (_videoPlayer->getImage()))
+        return;
+
+    qDebug() << "[Battle Dialog] Initializing battle map video background image";
+    _backgroundVideo = _videoPlayer->getImage()->copy();
+    ui->edtText->update();
+
+    _videoPlayer->stopThenDelete();
+    _videoPlayer = nullptr;
+}
+
 Qt::AlignmentFlag EncounterScrollingTextEdit::getAlignment()
 {
     switch(ui->buttonGroup->checkedId())
@@ -428,4 +503,20 @@ Qt::AlignmentFlag EncounterScrollingTextEdit::getAlignment()
     default:
         return Qt::AlignHCenter;
     }
+}
+
+QSize EncounterScrollingTextEdit::getRotatedTargetSize()
+{
+    QSize result;
+
+    if(ui->framePublish->getRotation() % 180 == 0)
+    {
+        result = _targetSize;
+    }
+    else
+    {
+        result = _targetSize.transposed(); //_targetSize.transposed().scaled(_targetSize, Qt::KeepAspectRatio).transposed();
+    }
+
+    return result;
 }

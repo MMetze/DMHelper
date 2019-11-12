@@ -17,6 +17,7 @@ public slots:
     void rotateCW();
     void rotateCCW();
     void setRotation(int rotation);
+    void setRotationVisible(bool rotationVisible);
     void setColor(QColor color);
 
 signals:
@@ -31,6 +32,7 @@ protected:
 
     QColor _color;
     int _rotation;
+    bool _rotationVisible;
 };
 
 #endif // COLORPUSHBUTTON_H
