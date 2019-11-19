@@ -1,3 +1,0 @@
-1. Save the markdown preview as HTML
-2. Open the HTML in Microsoft Edge
-3. Print the HTML using Microsoft Print to PDF, setting the borders to Narrow

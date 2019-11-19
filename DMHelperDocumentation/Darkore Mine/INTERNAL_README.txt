@@ -1,2 +1,0 @@
-The file "Cavern Crossroads.mp4" is too big (224 MB) for Github and is available separately. Please contact the module owner for access.
-You will need to download that file separately to properly run the module. 
