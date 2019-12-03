@@ -39,6 +39,7 @@
 #include <QUuid>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
+//#define BATTLE_DIALOG_PROFILE_RENDER_TEXT
 //#define BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
 //#define BATTLE_DIALOG_LOG_MOVEMENT
 
@@ -48,6 +49,17 @@ const qreal COUNTDOWN_TIMER = 0.05;
 const qreal COMPASS_SCALE = 0.4;
 const int ROTATION_TIMER = 50;
 const qreal ROTATION_DELTA = 10.0;
+
+#ifdef BATTLE_DIALOG_PROFILE_RENDER
+    QTime tProfile;
+    int tBasicPrep = 0;
+    int tVideoPrep = 0;
+    int tVideoRender = 0;
+    int tPrescaledPrep = 0;
+    int tPrescaledRender = 0;
+    int tContent = 0;
+    int tAdditionalContent = 0;
+#endif
 
 BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     QDialog(parent),
@@ -1863,9 +1875,10 @@ BattleDialogModelCombatant* BattleDialog::getNextCombatant(BattleDialogModelComb
 void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 {
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Dialog][PROFILE] Starting Render";
-    QTime t;
-    t.start();
+    tProfile.start();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] Starting Render";
+    #endif
 #endif
 
     QSize backgroundImageSize = (_videoPlayer && _videoPlayer->getImage()) ? _sourceRect.size() : _prescaledBackground.size();
@@ -1891,6 +1904,13 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 
     QPainter painter;
     painter.begin(&drawingImageForPublishing);
+
+#ifdef BATTLE_DIALOG_PROFILE_RENDER
+    tBasicPrep = tProfile.restart();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] " << tProfile.restart() << "; basic preparation complete";
+    #endif
+#endif
 
     // For a static image, the pre-rendered background image is pre-rotated, so we should render it now before setting a rotation in the painter
     if(!_videoPlayer)
@@ -1925,7 +1945,10 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     setPublishVisibility(false);
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; contents drawn";
+    tContent = tProfile.restart();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] " << tProfile.restart() << "; contents drawn";
+    #endif
 #endif
 
     // Draw the active combatant image on top
@@ -1994,9 +2017,15 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
     imageForPublishing = drawingImageForPublishing;
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; additional contents drawn";
+    tAdditionalContent = tProfile.restart();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] " << tProfile.restart() << "; additional contents drawn";
+    #endif
 #endif
 
+#ifdef BATTLE_DIALOG_PROFILE_RENDER
+    qDebug() << "[Battle Dialog][PROFILE] " << tBasicPrep << " ; " << tVideoPrep << " ; " << tVideoRender << " ; " << tPrescaledPrep << " ; " << tPrescaledRender << " ; " << tContent << " ; " << tAdditionalContent;
+#endif
 }
 
 void BattleDialog::createVideoPlayer(bool dmPlayer)
@@ -2258,13 +2287,19 @@ void BattleDialog::renderPrescaledBackground(QPainter& painter, QSize targetSize
     QPoint renderImagePosition = getPrescaledRenderPos(targetSize);
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; rendering prepared (image background)";
+    tPrescaledPrep = tProfile.restart();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] " << tProfile.restart() << "; rendering prepared (image background)";
+    #endif
 #endif
 
     // Draw the background image
     painter.drawPixmap(renderImagePosition, _prescaledBackground);
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn (image background)";
+    tPrescaledRender = tProfile.restart();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] " << tProfile.restart() << "; background drawn (image background)";
+    #endif
 #endif
 }
 
@@ -2272,10 +2307,6 @@ void BattleDialog::renderVideoBackground(QPainter& painter, QSize targetSize)
 {
     if((!_videoPlayer) || (!_videoPlayer->getImage()) || (_videoPlayer->getImage()->isNull()) || (_videoPlayer->isError()) || (!_videoPlayer->getMutex()) || (!_model.getMap()) || (!painter.device()))
         return;
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; rendering prepared (video background)";
-#endif
 
     QMutexLocker locker(_videoPlayer->getMutex());
 
@@ -2292,12 +2323,22 @@ void BattleDialog::renderVideoBackground(QPainter& painter, QSize targetSize)
         }
     }
 
+#ifdef BATTLE_DIALOG_PROFILE_RENDER
+    tVideoPrep = tProfile.restart();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] " << tProfile.restart() << "; rendering prepared (video background)";
+    #endif
+#endif
+
     painter.drawImage(QPoint(0,0), *_videoPlayer->getImage(), _sourceRect);
     if(!_bwFoWImage.isNull())
         painter.drawImage(QPoint(0,0), _bwFoWImage);
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Dialog][PROFILE] " << t.restart() << "; background drawn (image background)";
+    tVideoRender = tProfile.restart();
+    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
+        qDebug() << "[Battle Dialog][PROFILE] " << tProfile.restart() << "; background drawn (video background)";
+    #endif
 #endif
 }
 
