@@ -166,14 +166,25 @@ private:
 
     void getImageForPublishing(QImage& imageForPublishing);
     void createVideoPlayer(bool dmPlayer);
+    void resetVideoSizes();
 
     void replaceBattleMap();
     void createSceneContents();
     void resizeBattleMap();
-    int widthWindowToBackground(int windowWidth);
-    int widthBackgroundToWindow(int backgroundWidth);
+    int widthFrameToBackground(int frameWidth);
+    int widthBackgroundToFrame(int backgroundWidth);
+    QSize sizeFrameToBackground(const QSize& frameSize);
+    QSize sizeBackgroundToFrame(const QSize& backgroundSize);
     int getFrameWidth();
-    QSize rotateTargetSize();
+    int getFrameHeight();
+    QSize getTargetBackgroundSize(const QSize& originalBackgroundSize, const QSize& targetSize);
+    QSize getRotatedTargetBackgroundSize(const QSize& originalBackgroundSize);
+    QSize getRotatedTargetFrameSize(const QSize& originalBackgroundSize);
+    QPoint getPrescaledRenderPos(QSize targetSize);
+
+    // Helper functions to simplify rendering
+    void renderPrescaledBackground(QPainter& painter, QSize targetSize);
+    void renderVideoBackground(QPainter& painter, QSize targetSize);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
     void removeEffectsFromItem(QGraphicsPixmapItem* item);
@@ -209,7 +220,6 @@ private:
     bool _publishing;
     QTimer* _publishTimer;
 
-    //QImage _prescaledBackground;
     QPixmap _prescaledBackground;
     QImage _combatantFrame;
     QImage _countdownFrame;
@@ -230,6 +240,8 @@ private:
 
     VideoPlayer* _videoPlayer;
     QImage _bwFoWImage;
+    QRect _sourceRect;
+    QSize _videoSize;
 };
 
 #endif // BATTLEDIALOG_H
