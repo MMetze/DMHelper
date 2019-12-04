@@ -2054,6 +2054,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     {
         ui->stackedWidgetEncounter->setEnabled(false);
         MapFrame* mapFrame = dynamic_cast<MapFrame*>(ui->stackedWidgetEncounter->widget(DMHelper::EncounterType_Map));
+        mapFrame->setMap(nullptr);
         map->unregisterWindow(mapFrame);
         delete undoAction; undoAction = nullptr;
         delete redoAction; redoAction = nullptr;

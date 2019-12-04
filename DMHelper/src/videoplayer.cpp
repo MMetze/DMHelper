@@ -297,23 +297,6 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
         };
 
         _status = p_event->type;
-
-        /*
-        if((p_event->type == libvlc_MediaPlayerOpening) ||
-           (p_event->type == libvlc_MediaPlayerBuffering) ||
-           (p_event->type == libvlc_MediaPlayerPlaying) ||
-           (p_event->type == libvlc_MediaPlayerPaused) ||
-           (p_event->type == libvlc_MediaPlayerStopped))
-        {
-            qDebug() << "[vlc] Video event received:  " << p_event->type;
-            _status = p_event->type;
-        }
-        else
-        {
-            qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
-            _status = -1;
-        }
-        */
     }
 }
 
@@ -322,29 +305,19 @@ void VideoPlayer::targetResized(const QSize& newSize)
     qDebug() << "[VideoPlayer] Target window resized: " << newSize;
     _targetSize = newSize;
     restartPlayer();
-    /*
-    if((_vlcInstance) && (_vlcListPlayer) && (!_vlcError))
-    {
-        libvlc_media_player_t* player = libvlc_media_list_player_get_media_player(_vlcListPlayer);
-        if(player)
-        {
-            //libvlc_media_list_player_pause(_vlcListPlayer);
-            libvlc_video_set_format_callbacks(player, playerFormatCallback, playerCleanupCallback);
-            //libvlc_media_list_player_pause(_vlcListPlayer);
-        }
-    }
-    */
 }
 
 void VideoPlayer::stopThenDelete()
 {
     if(isProcessing())
     {
+        qDebug() << "[VideoPlayer] Stop Then Delete triggered, stop called...";
         _deleteOnStop = true;
         stopPlayer();
     }
     else
     {
+        qDebug() << "[VideoPlayer] Stop Then Delete triggered, immediate delete possible.";
         delete this;
     }
 }
@@ -353,11 +326,13 @@ bool VideoPlayer::restartPlayer()
 {
     if(_vlcListPlayer)
     {
+        qDebug() << "[VideoPlayer] Restart Player called, stop called...";
         _selfRestart = true;
         return stopPlayer();
     }
     else
     {
+        qDebug() << "[VideoPlayer] Restart Player called, but no player running!";
         return false;
     }
 }
@@ -377,12 +352,6 @@ bool VideoPlayer::initializeVLC()
         return false;
 
     libvlc_log_set(_vlcInstance, playerLogCallback, nullptr);
-
-//    QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
-
-    // Stop if something is playing
-    //if(_vlcListPlayer && libvlc_media_list_player_is_playing(vlcListPlayer))
-    //    return;
 
     libvlc_set_exit_handler(_vlcInstance, playerExitEventCallback, this);
 
@@ -417,9 +386,6 @@ bool VideoPlayer::startPlayer()
         return false;
 
     // Create a new Media
-    //QString fileOpen = QString("C:\\Users\\Craig\\Documents\\Dnd\\Animated Maps\\Airship_gridLN.m4v");
-    //qDebug() << "[VideoPlayer] Starting video player with " << fileOpen.toUtf8().constData();
-    //libvlc_media_t *vlcMedia = libvlc_media_new_path(_vlcInstance, fileOpen.toUtf8().constData());
     libvlc_media_t *vlcMedia = libvlc_media_new_path(_vlcInstance, _videoFile.toUtf8().constData());
     if (!vlcMedia)
         return false;
@@ -452,7 +418,6 @@ bool VideoPlayer::startPlayer()
 
     libvlc_video_set_callbacks(player, playerLockCallback, playerUnlockCallback, playerDisplayCallback, this);
     libvlc_video_set_format_callbacks(player, playerFormatCallback, playerCleanupCallback);
-    //libvlc_video_set_format(player, "RV32", _nativeWidth, _nativeHeight, _nativeWidth*4);
 
     // And start playback
     libvlc_media_list_player_play(_vlcListPlayer);
@@ -464,6 +429,7 @@ bool VideoPlayer::stopPlayer()
 {
     if(_vlcListPlayer)
     {
+        qDebug() << "[VideoPlayer] Stop Player called";
         _stopStatus = 0;
         libvlc_media_list_player_stop(_vlcListPlayer);
         internalStopCheck(stopCallComplete);
@@ -496,8 +462,11 @@ void VideoPlayer::cleanupBuffers()
 }
 
 void VideoPlayer::internalStopCheck(int status)
-{
+{    
     _stopStatus |= status;
+
+    qDebug() << "[VideoPlayer] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
+
     if(_stopStatus != stopComplete)
         return;
 
@@ -505,14 +474,17 @@ void VideoPlayer::internalStopCheck(int status)
     {
         libvlc_media_list_player_release(_vlcListPlayer);
         _vlcListPlayer = nullptr;
+        qDebug() << "[VideoPlayer] Internal Stop Check: vlc player destroyed.";
     }
     if(_selfRestart)
     {
         _selfRestart = false;
         startPlayer();
+        qDebug() << "[VideoPlayer] Internal Stop Check: player restarted.";
     }
     if(_deleteOnStop)
     {
+        qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed.";
         delete this;
         return;
     }
@@ -526,6 +498,8 @@ void VideoPlayer::internalAudioCheck(int newStatus)
        (!_vlcListPlayer))
         return;
 
+    qDebug() << "[VideoPlayer] Internal Audio Check identified audio, shall be turned off";
+
     libvlc_media_player_t * player = libvlc_media_list_player_get_media_player(_vlcListPlayer);
     if(player)
     {
@@ -534,7 +508,6 @@ void VideoPlayer::internalAudioCheck(int newStatus)
             libvlc_audio_set_track(player, -1);
     }
 }
-
 
 bool VideoPlayer::isPlaying() const
 {

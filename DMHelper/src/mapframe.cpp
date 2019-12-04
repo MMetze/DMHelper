@@ -376,6 +376,7 @@ void MapFrame::initializeFoW()
     ui->graphicsView->setScene(_scene);
 
     cancelSelect();
+    ui->framePublish->cancelPublish();
 
     if(!_mapSource)
         return;
@@ -455,7 +456,13 @@ void MapFrame::resizeEvent(QResizeEvent *event)
 
 void MapFrame::timerEvent(QTimerEvent *event)
 {
-    Q_UNUSED(event);
+    if((event) && (_timerId == 0) && (_videoPlayer))
+    {
+        killTimer(event->timerId());
+        _videoPlayer->stopThenDelete();
+        _videoPlayer = nullptr;
+        return;
+    }
 
     if((!_mapSource) || (!_videoPlayer)|| (!_videoPlayer->getImage()) || (_videoPlayer->isError()) || (!_videoPlayer->getMutex()))
         return;
@@ -498,47 +505,55 @@ void MapFrame::timerEvent(QTimerEvent *event)
         }
         else
         {
-            if(((!_backgroundVideo) ||(!_backgroundVideo->isVisible())) && (!_videoPlayer->getImage()->isNull()))
+            if(!_videoPlayer->getImage()->isNull())
             {
-                if(_backgroundImage)
+                if((!_backgroundVideo) ||(!_backgroundVideo->isVisible()))
                 {
-                    _backgroundImage->hide();
-                }
+                    if(_backgroundImage)
+                    {
+                        _backgroundImage->hide();
+                    }
 
-                QPixmap pmpCopy = QPixmap::fromImage(*(_videoPlayer->getImage())).copy();
-                if(_backgroundVideo)
-                {
-                    //_backgroundVideo->setPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
-                    // TODO: update the graphics view/scene to work with the mutex on drawforeground/background
-                    _backgroundVideo->setPixmap(pmpCopy);
-                    _backgroundVideo->show();
-                }
-                else
-                {
-                    //_backgroundVideo = _scene->addPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
-                    _backgroundVideo = _scene->addPixmap(pmpCopy);
-                    _backgroundVideo->setEnabled(false);
-                    _backgroundVideo->setZValue(-2);
-                }
+                    QPixmap pmpCopy = QPixmap::fromImage(*(_videoPlayer->getImage())).copy();
+                    if(_backgroundVideo)
+                    {
+                        //_backgroundVideo->setPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
+                        // TODO: update the graphics view/scene to work with the mutex on drawforeground/background
+                        _backgroundVideo->setPixmap(pmpCopy);
+                        _backgroundVideo->show();
+                    }
+                    else
+                    {
+                        //_backgroundVideo = _scene->addPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
+                        _backgroundVideo = _scene->addPixmap(pmpCopy);
+                        _backgroundVideo->setEnabled(false);
+                        _backgroundVideo->setZValue(-2);
+                    }
 
-                if(_fow)
-                {
-                    _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-                }
-                else
-                {
-                    QImage fowImage = QImage(_videoPlayer->getImage()->size(), QImage::Format_ARGB32);
-                    fowImage.fill(QColor(0,0,0,128));
-                    _mapSource->setExternalFoWImage(fowImage);
-                    _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-                    _fow->setEnabled(false);
-                    _fow->setZValue(1);
+                    if(_fow)
+                    {
+                        _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+                    }
+                    else
+                    {
+                        QImage fowImage = QImage(_videoPlayer->getImage()->size(), QImage::Format_ARGB32);
+                        fowImage.fill(QColor(0,0,0,128));
+                        _mapSource->setExternalFoWImage(fowImage);
+                        _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+                        _fow->setEnabled(false);
+                        _fow->setZValue(1);
+                    }
+
+                    stopPublishTimer();
+                    startTimer(500); // Clean up the initial image after a brief period (determined by trial and error)
                 }
             }
 
             update();
         }
-        _videoPlayer->clearNewImage();
+
+        if(_videoPlayer)
+            _videoPlayer->clearNewImage();
     }
 }
 

@@ -1568,7 +1568,10 @@ void BattleDialog::setGridOnlyVisibility(bool gridOnly)
         _movementPixmap->setVisible(false);
     }
 
-    setCombatantVisibility(_model.getShowAlive(), _model.getShowDead(), true);
+    if(gridOnly)
+        setCombatantVisibility(false, false, true);
+    else
+        setCombatantVisibility(_model.getShowAlive(), _model.getShowDead(), true);
 }
 
 void BattleDialog::setMapCursor()
