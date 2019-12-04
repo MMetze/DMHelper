@@ -120,7 +120,7 @@ void BattleDialogGraphicsScene::clearBattleContents()
 
 void BattleDialogGraphicsScene::setEffectVisibility(bool visible)
 {
-    qDebug() << "[Battle Dialog Scene] Setting effect visibility to " << visible;
+    //qDebug() << "[Battle Dialog Scene] Setting effect visibility to " << visible;
 
     for(QGraphicsItem* item : _itemList)
     {
@@ -130,7 +130,7 @@ void BattleDialogGraphicsScene::setEffectVisibility(bool visible)
 
 void BattleDialogGraphicsScene::setGridVisibility(bool visible)
 {
-    qDebug() << "[Battle Dialog Scene] Setting grid visibility to " << visible;
+    //qDebug() << "[Battle Dialog Scene] Setting grid visibility to " << visible;
 
     if(_grid)
     {
