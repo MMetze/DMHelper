@@ -131,6 +131,7 @@ private slots:
     void setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded);
     void setEffectLayerVisibility(bool visibility);
     void setPublishVisibility(bool publish);
+    void setGridOnlyVisibility(bool gridOnly);
 
     void setMapCursor();
     void setScale(qreal s);
@@ -184,7 +185,7 @@ private:
 
     // Helper functions to simplify rendering
     void renderPrescaledBackground(QPainter& painter, QSize targetSize);
-    void renderVideoBackground(QPainter& painter, QSize targetSize);
+    void renderVideoBackground(QPainter& painter);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
     void removeEffectsFromItem(QGraphicsPixmapItem* item);

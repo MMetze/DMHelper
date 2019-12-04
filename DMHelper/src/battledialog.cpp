@@ -1385,10 +1385,12 @@ void BattleDialog::createPrescaledBackground()
     if((!_model.getMap()) || (!ui->framePublish->isEnabled()) || (!ui->framePublish->isChecked()))
         return;
 
-    if(!_model.getMap()->isInitialized())
+    //if(!_model.getMap()->isInitialized())
+    if(_videoPlayer)
     {
         //_bwFoWImage = QImage();
         resetVideoSizes();
+        _videoPlayer->restartPlayer();
         return;
     }
 
@@ -1413,6 +1415,18 @@ void BattleDialog::createPrescaledBackground()
         scaleFactor = static_cast<qreal>(imageSize.height()) / static_cast<qreal>(battleMap.height());
 
     _prescaledBackground = QPixmap::fromImage(battleMap.transformed(QTransform().rotate(_rotation).scale(scaleFactor,scaleFactor), Qt::SmoothTransformation));
+
+    /*
+     * TODO: optimize non-video backgrounds by turning off the grid...
+    setGridOnlyVisibility(true);
+    QPainter painter;
+    painter.begin(&_prescaledBackground);
+    ui->graphicsView->render(&painter,
+                             QRectF(),
+                             sourceRect);
+    painter.end();
+    setGridOnlyVisibility(false);
+    */
 
 #ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
     qDebug() << "[Battle Dialog][PROFILE] " << t.elapsed() << "; prescaled background created";
@@ -1473,6 +1487,7 @@ void BattleDialog::setCombatantVisibility(bool aliveVisible, bool deadVisible, b
 
 void BattleDialog::setEffectLayerVisibility(bool visibility)
 {
+    // NOTE: if effect layer visibility is used, need to sync with setGridVisibility usage
     if(_scene)
     {
         _scene->setEffectVisibility(visibility);
@@ -1485,6 +1500,10 @@ void BattleDialog::setPublishVisibility(bool publish)
     // The background will be rendered separately for the publish image
     if(_background)
         _background->setVisible(!publish);
+
+    // The grid is rendered separately for videos
+    if((_model.getGridOn()) && (_videoPlayer) && (_scene))
+        _scene->setGridVisibility(!publish);
 
     // Iterate through the combatants and set those combatants to invisible which are not to be shown
     QList<BattleDialogModelCombatant*> combatantList = _model.getCombatantList();
@@ -1532,6 +1551,24 @@ void BattleDialog::setPublishVisibility(bool publish)
             }
         }
     }
+}
+
+void BattleDialog::setGridOnlyVisibility(bool gridOnly)
+{
+    if(!_model.getGridOn())
+        return;
+
+    _background->setVisible(!gridOnly);
+    setEffectLayerVisibility(!gridOnly);
+
+    if(gridOnly)
+    {
+        _selectedPixmap->setVisible(false);
+        _activePixmap->setVisible(false);
+        _movementPixmap->setVisible(false);
+    }
+
+    setCombatantVisibility(_model.getShowAlive(), _model.getShowDead(), true);
 }
 
 void BattleDialog::setMapCursor()
@@ -1932,7 +1969,7 @@ void BattleDialog::getImageForPublishing(QImage& imageForPublishing)
 
     // For a video image, the image is not pre-rotated, so we should render it now after setting the rotation in the painter
     if(_videoPlayer)
-        renderVideoBackground(painter, tempRotFrameSize);
+        renderVideoBackground(painter);
 
     // Draw the contents of the battle dialog in publish mode
     QRect viewportRect = ui->graphicsView->viewport()->rect();
@@ -2071,8 +2108,8 @@ void BattleDialog::resetVideoSizes()
                                static_cast<int>(static_cast<qreal>(visibleSceneRect.top()) / heightScale)),
                         rotatedTargetBackground);
 
-    _videoSize = QSize(static_cast<qreal>(rotatedTargetBackground.width()) * widthScale,
-                       static_cast<qreal>(rotatedTargetBackground.height()) * heightScale);
+    _videoSize = QSize(static_cast<int>(static_cast<qreal>(rotatedTargetBackground.width()) * widthScale),
+                       static_cast<int>(static_cast<qreal>(rotatedTargetBackground.height()) * heightScale));
 
     _bwFoWImage = QImage();
 }
@@ -2303,7 +2340,7 @@ void BattleDialog::renderPrescaledBackground(QPainter& painter, QSize targetSize
 #endif
 }
 
-void BattleDialog::renderVideoBackground(QPainter& painter, QSize targetSize)
+void BattleDialog::renderVideoBackground(QPainter& painter)
 {
     if((!_videoPlayer) || (!_videoPlayer->getImage()) || (_videoPlayer->getImage()->isNull()) || (_videoPlayer->isError()) || (!_videoPlayer->getMutex()) || (!_model.getMap()) || (!painter.device()))
         return;
@@ -2320,6 +2357,19 @@ void BattleDialog::renderVideoBackground(QPainter& painter, QSize targetSize)
             QImage bwImg = _model.getMap()->getBWFoWImage(originalSize).scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             _bwFoWImage = bwImg.copy(_sourceRect);
             _bwFoWImage.convertTo(QImage::Format_ARGB32_Premultiplied);
+
+            QRect viewportRect = ui->graphicsView->viewport()->rect();
+            QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
+            QRect sourceRect = viewportRect.intersected(sceneViewportRect);
+
+            setGridOnlyVisibility(true);
+            QPainter painter;
+            painter.begin(&_bwFoWImage);
+            ui->graphicsView->render(&painter,
+                                     QRectF(),
+                                     sourceRect);
+            painter.end();
+            setGridOnlyVisibility(false);
         }
     }
 
