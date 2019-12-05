@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml multimedia multimediawidgets opengl
+QT       += core gui xml multimedia multimediawidgets opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -37,6 +37,7 @@ SOURCES += main.cpp\
     basicdateserver.cpp \
     bestiaryexportdialog.cpp \
     campaignexporter.cpp \
+    characterimportdialog.cpp \
     colorpushbutton.cpp \
     equipmentserver.cpp \
     mainwindow.cpp \
@@ -191,6 +192,7 @@ HEADERS  += mainwindow.h \
     basicdateserver.h \
     bestiaryexportdialog.h \
     campaignexporter.h \
+    characterimportdialog.h \
     colorpushbutton.h \
     equipmentserver.h \
     objectimporter.h \
@@ -328,6 +330,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     bestiaryexportdialog.ui \
+    characterimportdialog.ui \
     dicerolldialog.ui \
     characterdialog.ui \
     combatantdialog.ui \

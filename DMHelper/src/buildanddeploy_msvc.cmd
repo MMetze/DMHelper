@@ -48,8 +48,8 @@ windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64
 cd ..\bin64
 copy NUL DMHelper.log
 
-del libeay32.dll
-del ssleay32.dll
+rem del libeay32.dll
+rem del ssleay32.dll
 del vc_redist.x64.exe
 
 "C:\Program Files\7-Zip\7z" a -tzip archive.zip *

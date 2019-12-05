@@ -666,8 +666,10 @@ void MainWindow::importCharacter()
     if(!campaign)
         return;
 
-    CharacterImporter importer;
-    openCharacter(importer.importCharacter(*campaign));
+    CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
+    connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
+    importer->importCharacter(campaign);
 }
 
 void MainWindow::importItem()
