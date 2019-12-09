@@ -1500,19 +1500,19 @@
  </customwidgets>
  <tabstops>
   <tabstop>edtName</tabstop>
-  <tabstop>edtClass</tabstop>
-  <tabstop>edtHitPoints</tabstop>
   <tabstop>edtAlignment</tabstop>
-  <tabstop>edtLevel</tabstop>
-  <tabstop>edtArmorClass</tabstop>
   <tabstop>edtRace</tabstop>
-  <tabstop>edtBackground</tabstop>
-  <tabstop>edtInitiative</tabstop>
   <tabstop>edtSex</tabstop>
-  <tabstop>edtExperience</tabstop>
-  <tabstop>edtSpeed</tabstop>
   <tabstop>edtSize</tabstop>
+  <tabstop>edtClass</tabstop>
+  <tabstop>edtLevel</tabstop>
+  <tabstop>edtBackground</tabstop>
+  <tabstop>edtExperience</tabstop>
   <tabstop>edtNextLevel</tabstop>
+  <tabstop>edtHitPoints</tabstop>
+  <tabstop>edtArmorClass</tabstop>
+  <tabstop>edtInitiative</tabstop>
+  <tabstop>edtSpeed</tabstop>
   <tabstop>edtProficiencyBonus</tabstop>
   <tabstop>edtStr</tabstop>
   <tabstop>chkStrSave</tabstop>
@@ -1545,6 +1545,11 @@
   <tabstop>chkIntimidation</tabstop>
   <tabstop>chkPerformance</tabstop>
   <tabstop>chkPersuasion</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>edtFeatures</tabstop>
+  <tabstop>edtEquipment</tabstop>
+  <tabstop>edtSpells</tabstop>
+  <tabstop>edtNotes</tabstop>
  </tabstops>
  <resources/>
  <connections/>
