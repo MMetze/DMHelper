@@ -27,6 +27,7 @@ public slots:
 
 protected:
     void scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character);
+    QString getNotesString(QJsonObject notesParent, const QString& key, const QString& title);
     bool interpretReply(QNetworkReply* reply);
     bool interpretImageReply(QNetworkReply* reply);
 
