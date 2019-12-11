@@ -477,6 +477,7 @@ void BattleDialog::setGridScale(int gridScale)
         _scene->updateBattleContents();
 
         ui->graphicsView->update();
+        createPrescaledBackground();
     }
 }
 
@@ -487,6 +488,7 @@ void BattleDialog::setXOffset(int xOffset)
         _model.setGridOffsetX(xOffset);
         _scene->updateBattleContents();
         ui->graphicsView->update();
+        createPrescaledBackground();
     }
 }
 
@@ -497,6 +499,7 @@ void BattleDialog::setYOffset(int yOffset)
         _model.setGridOffsetY(yOffset);
         _scene->updateBattleContents();
         ui->graphicsView->update();
+        createPrescaledBackground();
     }
 }
 
@@ -507,6 +510,7 @@ void BattleDialog::setGridVisible(bool gridVisible)
         _model.setGridOn(gridVisible);
         _scene->setGridVisibility(gridVisible);
         ui->graphicsView->invalidateScene();
+        createPrescaledBackground();
     }
 }
 
@@ -2361,18 +2365,21 @@ void BattleDialog::renderVideoBackground(QPainter& painter)
             _bwFoWImage = bwImg.copy(_sourceRect);
             _bwFoWImage.convertTo(QImage::Format_ARGB32_Premultiplied);
 
-            QRect viewportRect = ui->graphicsView->viewport()->rect();
-            QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
-            QRect sourceRect = viewportRect.intersected(sceneViewportRect);
+            if(_model.getGridOn())
+            {
+                QRect viewportRect = ui->graphicsView->viewport()->rect();
+                QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
+                QRect sourceRect = viewportRect.intersected(sceneViewportRect);
 
-            setGridOnlyVisibility(true);
-            QPainter painter;
-            painter.begin(&_bwFoWImage);
-            ui->graphicsView->render(&painter,
-                                     QRectF(),
-                                     sourceRect);
-            painter.end();
-            setGridOnlyVisibility(false);
+                setGridOnlyVisibility(true);
+                QPainter painter;
+                painter.begin(&_bwFoWImage);
+                ui->graphicsView->render(&painter,
+                                         QRectF(),
+                                         sourceRect);
+                painter.end();
+                setGridOnlyVisibility(false);
+            }
         }
     }
 

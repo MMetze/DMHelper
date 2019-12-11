@@ -237,6 +237,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // TODO: enable/disable Import Character
     connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    connect(ui->actionImport_NPC,SIGNAL(triggered()),this,SLOT(importNPC()));
     //ui->action_Import_Character->setVisible(false);
 
     connect(ui->action_Open_Bestiary,SIGNAL(triggered()),this,SLOT(openBestiary()));
@@ -535,6 +536,11 @@ bool MainWindow::saveCampaign()
     QFile file(campaignFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
+        qDebug() << "[Main] Unable to open campaign file for writing: " << campaignFileName;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
+
         campaignFileName.clear();
         return false;
     }
@@ -669,7 +675,7 @@ void MainWindow::importCharacter()
     CharacterImporter* importer = new CharacterImporter();
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
     connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
-    importer->importCharacter(campaign);
+    importer->importCharacter(campaign, true);
 }
 
 void MainWindow::importItem()
@@ -693,6 +699,18 @@ void MainWindow::newNPC()
     campaign->addNPC(newNPC);
     openCharacter(newNPC->getID());
 }
+
+void MainWindow::importNPC()
+{
+    if(!campaign)
+        return;
+
+    CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
+    connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
+    importer->importCharacter(campaign, false);
+}
+
 
 /*
 void MainWindow::removeCurrentCharacter()
@@ -1500,6 +1518,9 @@ void MainWindow::writeBestiary()
     if( !file.open( QIODevice::WriteOnly ) )
     {
         qDebug() << "[Main] Unable to open Bestiary file for writing: " << bestiaryFileName;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
         bestiaryFileName.clear();
         return;
     }

@@ -403,6 +403,23 @@ Character* Campaign::getCharacterByDndBeyondId(int id)
     return nullptr;
 }
 
+Character* Campaign::getCharacterOrNPCByDndBeyondId(int id)
+{
+    for(int i = 0; i < characters.count(); ++i)
+    {
+        if(characters.at(i)->getDndBeyondID() == id)
+            return characters.at(i);
+    }
+
+    for(int j = 0; j < npcs.count(); ++j)
+    {
+        if(npcs.at(j)->getDndBeyondID() == id)
+            return npcs.at(j);
+    }
+
+    return nullptr;
+}
+
 Character* Campaign::getCharacterByIndex(int index)
 {
     if((index < 0)||(index >= characters.size()))

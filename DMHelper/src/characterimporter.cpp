@@ -20,7 +20,8 @@ CharacterImporter::CharacterImporter(QObject *parent) :
     QObject(parent),
     _manager(nullptr),
     _campaign(nullptr),
-    _character(nullptr)
+    _character(nullptr),
+    _isCharacter(true)
 {
 }
 
@@ -29,8 +30,11 @@ CharacterImporter::~CharacterImporter()
     delete _manager;
 }
 
-void CharacterImporter::importCharacter(Campaign* campaign)
+void CharacterImporter::importCharacter(Campaign* campaign, bool isCharacter)
 {
+    if(!campaign)
+        return;
+
     CharacterImportDialog dlg;
     int result = dlg.exec();
     QString characterId = dlg.getCharacterId();
@@ -40,6 +44,8 @@ void CharacterImporter::importCharacter(Campaign* campaign)
         return;
     }
 
+    _character = nullptr;
+    _isCharacter = isCharacter;
     _manager = new QNetworkAccessManager(this);
     connect(_manager, &QNetworkAccessManager::finished, this, &CharacterImporter::replyFinished);
 
@@ -48,6 +54,23 @@ void CharacterImporter::importCharacter(Campaign* campaign)
     _manager->get(QNetworkRequest(QUrl(urlString)));
 }
 
+void CharacterImporter::updateCharacter(Character* character)
+{
+    if((!character) || (character->getDndBeyondID() == -1))
+        return;
+
+    _character = character;
+    _manager = new QNetworkAccessManager(this);
+    connect(_manager, &QNetworkAccessManager::finished, this, &CharacterImporter::replyFinished);
+
+    _campaign = _character->getCampaign();
+    QString characterId = QString::number(_character->getDndBeyondID());
+    QString urlString = QString("https://www.dndbeyond.com/character/") + characterId + QString("/json");
+    _manager->get(QNetworkRequest(QUrl(urlString)));
+}
+
+
+/*
 QUuid CharacterImporter::oldImportCharacter(Campaign& campaign)
 {
     int i;
@@ -158,6 +181,7 @@ QUuid CharacterImporter::oldImportCharacter(Campaign& campaign)
 
     return _character->getID();
 }
+*/
 
 void CharacterImporter::campaignChanged()
 {
@@ -202,7 +226,7 @@ QString CharacterImporter::getNotesString(QJsonObject notesParent, const QString
 bool CharacterImporter::interpretReply(QNetworkReply* reply)
 {
 #ifndef LOCAL_IMPORTER_TEST
-    if((!_campaign) || (reply->error() != QNetworkReply::NoError))
+    if(reply->error() != QNetworkReply::NoError)
         return false;
 
     QByteArray bytes = reply->readAll();
@@ -227,13 +251,23 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     QJsonObject rootObject = doc.object();
     qDebug() << "[Character Importer] Importing Character: " << rootObject["name"].toString();
 
-    int dndBeyondId = rootObject["id"].toInt(DMH_GLOBAL_INVALID_ID);
-    _character = _campaign->getCharacterByDndBeyondId(dndBeyondId);
-    if(!_character)
+    bool isUpdate = _character != nullptr;
+    if(!isUpdate)
     {
-        _character = new Character();
-        _character->setDndBeyondID(dndBeyondId);
-        _campaign->addCharacter(_character);
+        if(!_campaign)
+            return false;
+
+        int dndBeyondId = rootObject["id"].toInt(DMH_GLOBAL_INVALID_ID);
+        _character = _campaign->getCharacterOrNPCByDndBeyondId(dndBeyondId);
+        if(!_character)
+        {
+            _character = new Character();
+            _character->setDndBeyondID(dndBeyondId);
+            if(_isCharacter)
+                _campaign->addCharacter(_character);
+            else
+                _campaign->addNPC(_character);
+        }
     }
 
     _character->beginBatchChanges();
@@ -457,6 +491,15 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 
 
     QString avatarUrl = rootObject["avatarUrl"].toString();
+    if((isUpdate) && (!avatarUrl.isEmpty()))
+    {
+        QMessageBox::StandardButton result = QMessageBox::question(nullptr,
+                                                                   QString("Confirm avatar download"),
+                                                                   QString("The updated character has an avatar image. Do you want to update the image?"));
+        if(result != QMessageBox::Yes)
+            avatarUrl = QString();
+    }
+
     if(!avatarUrl.isEmpty())
     {
         disconnect(_manager, &QNetworkAccessManager::finished, this, &CharacterImporter::replyFinished);

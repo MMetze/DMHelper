@@ -65,6 +65,7 @@ public slots:
     void importCharacter();
     void importItem();
     void newNPC();
+    void importNPC();
     //void removeCurrentCharacter();
     void newAdventure();
     void newTextEncounter();

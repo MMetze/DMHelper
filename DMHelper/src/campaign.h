@@ -41,6 +41,7 @@ public:
     Character* getCharacterById(QUuid id);
     const Character* getCharacterById(QUuid id) const;
     Character* getCharacterByDndBeyondId(int id);
+    Character* getCharacterOrNPCByDndBeyondId(int id);
     Character* getCharacterByIndex(int index);
     QUuid addCharacter(Character* character);
     Character* removeCharacter(QUuid id);

@@ -159,7 +159,9 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <addaction name="separator"/>
     <addaction name="actionExport_Item"/>
     <addaction name="actionImport_Item"/>
+    <addaction name="separator"/>
     <addaction name="action_Import_Character"/>
+    <addaction name="actionImport_NPC"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Players_Window"/>
     <addaction name="actionBattle_Dialog"/>
@@ -332,7 +334,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   </action>
   <action name="action_Import_Character">
    <property name="text">
-    <string>I&amp;mport External Character</string>
+    <string>I&amp;mport DnD Beyond Character...</string>
    </property>
   </action>
   <action name="actionAbout">
@@ -383,6 +385,11 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionImport_Bestiary">
    <property name="text">
     <string>Import Bestiary...</string>
+   </property>
+  </action>
+  <action name="actionImport_NPC">
+   <property name="text">
+    <string>Import DnD Beyond NPC...</string>
    </property>
   </action>
  </widget>

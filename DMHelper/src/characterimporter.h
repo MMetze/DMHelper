@@ -20,8 +20,9 @@ signals:
     void characterImported(QUuid characterId);
 
 public slots:
-    void importCharacter(Campaign* campaign);
-    QUuid oldImportCharacter(Campaign& campaign);
+    void importCharacter(Campaign* campaign, bool isCharacter = true);
+    void updateCharacter(Character* character);
+    //QUuid oldImportCharacter(Campaign& campaign);
 
     void campaignChanged();
 
@@ -39,6 +40,7 @@ private:
     QNetworkAccessManager *_manager;
     Campaign* _campaign;
     Character* _character;
+    bool _isCharacter;
 };
 
 #endif // CHARACTERIMPORTER_H

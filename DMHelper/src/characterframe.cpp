@@ -1,6 +1,7 @@
 #include "characterframe.h"
 #include "ui_characterframe.h"
 #include "character.h"
+#include "characterimporter.h"
 #include "scaledpixmap.h"
 #include <QCheckBox>
 #include <QMouseEvent>
@@ -33,6 +34,9 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     ui->edtSpeed->setValidator(new QIntValidator(0,1000,this));
     ui->edtProficiencyBonus->setValidator(new QIntValidator(-10,100,this));
     ui->edtLevel->setValidator(new QIntValidator(0,100,this));
+
+    connect(ui->btnSync, &QAbstractButton::clicked, this, &CharacterFrame::syncDndBeyond);
+    ui->btnSync->setVisible(false);
 
     connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
     connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
@@ -127,6 +131,7 @@ void CharacterFrame::setCharacter(Character* character)
     {
         _character = character;
         readCharacterData();
+        emit characterChanged();
     }
 }
 
@@ -268,6 +273,8 @@ void CharacterFrame::clear()
     updateCheckboxName(ui->chkPersuasion, 0, 0);
     updateCheckboxName(ui->chkIntimidation, 0, 0);
 
+    ui->btnSync->setVisible(false);
+
     _reading = false;
 }
 
@@ -362,6 +369,8 @@ void CharacterFrame::readCharacterData()
 
     calculateMods();
 
+    ui->btnSync->setVisible(_character->getDndBeyondID() != -1);
+
     _reading = false;
 
 }
@@ -448,6 +457,18 @@ void CharacterFrame::handlePublishClicked()
 
         emit publishCharacterImage(iconImg, ui->framePublish->getColor());
     }
+}
+
+void CharacterFrame::syncDndBeyond()
+{
+    if(!_character)
+        return;
+
+    CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &CharacterFrame::readCharacterData);
+    connect(this, &CharacterFrame::characterChanged, importer, &CharacterImporter::campaignChanged);
+    importer->updateCharacter(_character);
+
 }
 
 void CharacterFrame::loadCharacterImage()

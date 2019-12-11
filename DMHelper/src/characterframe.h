@@ -22,6 +22,7 @@ public:
 
 signals:
     void publishCharacterImage(QImage img, QColor color);
+    void characterChanged();
 
 public slots:
     void calculateMods();
@@ -35,6 +36,7 @@ private slots:
     void readCharacterData();
     void writeCharacterData();
     void handlePublishClicked();
+    void syncDndBeyond();
 
 private:
     void loadCharacterImage();
