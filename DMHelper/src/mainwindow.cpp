@@ -53,6 +53,7 @@
 #include "campaignexporter.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
+#include "customtableframe.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -74,6 +75,7 @@
 #include <QDebug>
 #include <QLibraryInfo>
 #include <QCoreApplication>
+#include <QStandardPaths>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
@@ -196,6 +198,15 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main]     ExamplesPath: " << QLibraryInfo::location(QLibraryInfo::ExamplesPath);
     qDebug() << "[Main]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
     qDebug() << "[Main]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
+
+    qDebug() << "[Main] Standard Path Information";
+    qDebug() << "[Main]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
+    qDebug() << "[Main]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first());
+    qDebug() << "[Main]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).first());
+    qDebug() << "[Main]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first());
+    qDebug() << "[Main]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+    qDebug() << "[Main]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
+
 
     // TODO: cleanup this constructor and mainwindow in general
     ui->setupUi(this);
@@ -385,6 +396,10 @@ MainWindow::MainWindow(QWidget *parent) :
     CountdownFrame* countdownFrame = new CountdownFrame(this);
     countdownFrame->setToolTip(QString("Countdown Timer"));
     ui->scrollWidget->addTab(new ScrollTabWidget(countdownFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_countdown.png")));
+    // Add the custom tableframe
+    CustomTableFrame* customTableFrame = new CustomTableFrame(this);
+    customTableFrame->setToolTip(QString("Used-defined Tables"));
+    ui->scrollWidget->addTab(new ScrollTabWidget(customTableFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_table.png")));
     // Add the audio playback frame
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
     audioPlaybackFrame->setToolTip(QString("Audio Playback"));
@@ -1054,7 +1069,7 @@ void MainWindow::readBestiary()
 
     if(bestiaryFileName.isEmpty())
     {
-        qDebug() << "[Main] No known bestiary found, attempting to load default bestiary";
+        qDebug() << "[Main] ERROR! No known bestiary found, attempting to load default bestiary";
 #ifdef Q_OS_MAC
         QDir fileDirPath(QCoreApplication::applicationDirPath());
         fileDirPath.cdUp();
@@ -1062,7 +1077,8 @@ void MainWindow::readBestiary()
         fileDirPath.cdUp();
         bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
 #else
-        bestiaryFileName = QString("./bestiary/DMHelperBestiary.xml");
+        QDir fileDirPath(QCoreApplication::applicationDirPath());
+        bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
 #endif
     }
 

@@ -39,6 +39,7 @@ SOURCES += main.cpp\
     campaignexporter.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
+    customtableframe.cpp \
     equipmentserver.cpp \
     mainwindow.cpp \
     objectimporter.cpp \
@@ -194,6 +195,7 @@ HEADERS  += mainwindow.h \
     campaignexporter.h \
     characterimportdialog.h \
     colorpushbutton.h \
+    customtableframe.h \
     equipmentserver.h \
     objectimporter.h \
     publishbuttonframe.h \
@@ -331,6 +333,7 @@ HEADERS  += mainwindow.h \
 FORMS    += mainwindow.ui \
     bestiaryexportdialog.ui \
     characterimportdialog.ui \
+    customtableframe.ui \
     dicerolldialog.ui \
     characterdialog.ui \
     combatantdialog.ui \
