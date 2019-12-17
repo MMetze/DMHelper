@@ -28,6 +28,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(BattleDialogModel& model, Q
     _mouseDownPos(),
     _mouseDownItem(nullptr),
     _distanceShown(false),
+    _heightDelta(0.0),
     _distanceLine(nullptr),
     _distanceText(nullptr)
 {
@@ -143,9 +144,10 @@ QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
     return _itemList;
 }
 
-void BattleDialogGraphicsScene::setShowDistance(bool showDistance)
+void BattleDialogGraphicsScene::setShowDistance(bool showDistance, qreal heightDelta)
 {
     _distanceShown = showDistance;
+    _heightDelta = heightDelta;
 }
 
 void BattleDialogGraphicsScene::editItem()
@@ -315,7 +317,17 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
         QLineF line = _distanceLine->line();
         line.setP2(mouseEvent->scenePos());
         _distanceLine->setLine(line);
-        QString distanceText = QString::number(5.0 * line.length() / _model.getGridScale(), 'f', 1);
+        qreal lineDistance = 5.0 * line.length() / _model.getGridScale();
+        QString distanceText;
+        if(_heightDelta == 0.0)
+        {
+            distanceText = QString::number(lineDistance, 'f', 1);
+        }
+        else
+        {
+            qreal diagonal = qSqrt((lineDistance*lineDistance) + (_heightDelta*_heightDelta));
+            distanceText = QString::number(diagonal, 'f', 1) + QChar::LineFeed + QString("(") + QString::number(lineDistance, 'f', 1) + QString (")");
+        }
         _distanceText->setText(distanceText);
         _distanceText->setPos(line.center());
         emit distanceChanged(distanceText);

@@ -139,6 +139,7 @@ private slots:
     void rotateCW();
     void storeViewRect();
     void setBackgroundColor(QColor color);
+    void setDistanceText();
 
 private:
 

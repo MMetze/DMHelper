@@ -26,7 +26,7 @@ public:
     QList<QGraphicsItem*> getEffectItems() const;
 
 public slots:
-    void setShowDistance(bool showDistance);
+    void setShowDistance(bool showDistance, qreal heightDelta);
 
 signals:
     void effectChanged(QAbstractGraphicsShapeItem* effect);
@@ -70,6 +70,7 @@ protected:
     qreal _previousRotation;
 
     bool _distanceShown;
+    qreal _heightDelta;
     QGraphicsLineItem* _distanceLine;
     QGraphicsSimpleTextItem* _distanceText;
 

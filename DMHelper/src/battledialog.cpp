@@ -126,6 +126,9 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     _countdownTimer->setSingleShot(false);
     connect(_countdownTimer, SIGNAL(timeout()),this,SLOT(countdownTimerExpired()));
 
+    ui->edtHeightDiff->setValidator(new QDoubleValidator(-9999, 9999, 2, this));
+    ui->edtHeightDiff->setText(QString::number(0.0));
+
     ui->chkShowGrid->setChecked(_model.getGridOn());
     ui->sliderX->setValue(_model.getGridOffsetX());
     ui->sliderY->setValue(_model.getGridOffsetY());
@@ -162,7 +165,9 @@ BattleDialog::BattleDialog(BattleDialogModel& model, QWidget *parent) :
     connect(ui->chkShowLiving, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
     connect(ui->chkShowDead, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
 
-    connect(ui->btnDistance, SIGNAL(clicked(bool)), _scene, SLOT(setShowDistance(bool)));
+    connect(ui->btnDistance, SIGNAL(clicked(bool)), this, SLOT(setDistanceText()));
+    connect(ui->chkPitch, SIGNAL(stateChanged(int)), this, SLOT(setDistanceText()));
+    connect(ui->edtHeightDiff, SIGNAL(editingFinished()), this, SLOT(setDistanceText()));
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(selectNewMap()));
     connect(ui->btnReloadMap, SIGNAL(clicked(bool)),this,SLOT(updateMap()));
     connect(ui->framePublish, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
@@ -1633,6 +1638,22 @@ void BattleDialog::setBackgroundColor(QColor color)
     _model.setBackgroundColor(color);
 }
 
+void BattleDialog::setDistanceText()
+{
+    if(!_scene)
+        return;
+
+    qreal heightDiff = 0.0;
+    if(ui->btnDistance->isChecked())
+    {
+        bool ok = false;
+        heightDiff = ui->edtHeightDiff->text().toDouble(&ok);
+        if(!ok)
+            heightDiff = 0.0;
+    }
+
+    _scene->setShowDistance(ui->btnDistance->isChecked(), heightDiff);
+}
 
 CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant* combatant)
 {
