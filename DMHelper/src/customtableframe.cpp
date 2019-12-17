@@ -152,4 +152,5 @@ void CustomTableFrame::readXMLFile(const QString& fileName)
 
     _tableList.insert(tableName, entryList);
     ui->listWidget->addItem(tableName);
+    ui->listWidget->sortItems();
 }
