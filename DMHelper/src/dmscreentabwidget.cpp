@@ -146,7 +146,7 @@ void DMScreenTabWidget::readEquipment()
             qDebug() << "[DMScreen] Not all adventuring gear elements were added to the DM Screen!";
     }
 
-    readSimpleSection(root, QString("containers"), QString("container"), QString(), *ui->layoutContainerName, QString("name"), *ui->layoutContainerCapacity, QString("capacity"));
+    readSimpleSection(root, nullptr, QString("containers"), QString("container"), QString(), *ui->layoutContainerName, QString("name"), *ui->layoutContainerCapacity, QString("capacity"));
 
     QDomElement toolSection = root.firstChildElement(QString("tools"));
     if(toolSection.isNull())
@@ -167,17 +167,17 @@ void DMScreenTabWidget::readEquipment()
             qDebug() << "[DMScreen] Not all tool elements were added to the DM Screen!";
     }
 
-    readSimpleSection(root, QString("tradegoods"), QString("tradegood"), QString(), *ui->layoutGoodName, QString("name"), *ui->layoutGoodCost, QString("cost"));
+    readSimpleSection(root, nullptr, QString("tradegoods"), QString("tradegood"), QString(), *ui->layoutGoodName, QString("name"), *ui->layoutGoodCost, QString("cost"));
 
-    readSimpleSection(root, QString("animals"), QString("animal"), QString(), *ui->layoutAnimalsName, QString("name"), *ui->layoutAnimalsCost, QString("cost"), *ui->layoutAnimalsSpeed, QString("speed"), *ui->layoutAnimalsCapacity, QString("capacity"));
+    readSimpleSection(root, nullptr, QString("animals"), QString("animal"), QString(), *ui->layoutAnimalsName, QString("name"), *ui->layoutAnimalsCost, QString("cost"), *ui->layoutAnimalsSpeed, QString("speed"), *ui->layoutAnimalsCapacity, QString("capacity"));
 
-    readSimpleSection(root, QString("vehicles"), QString("vehicle"), QString(), *ui->layoutVehiclesName, QString("name"), *ui->layoutVehiclesCost, QString("cost"), *ui->layoutVehiclesSpeed, QString("speed"));
+    readSimpleSection(root, nullptr, QString("vehicles"), QString("vehicle"), QString(), *ui->layoutVehiclesName, QString("name"), *ui->layoutVehiclesCost, QString("cost"), *ui->layoutVehiclesSpeed, QString("speed"));
 
-    readSimpleSection(root, QString("tacks"), QString("tack"), QString(), *ui->layoutTackName, QString("name"), *ui->layoutTackCost, QString("cost"), *ui->layoutTackWeight, QString("weight"));
+    readSimpleSection(root, ui->lblTack, QString("tacks"), QString("tack"), QString(), *ui->layoutTackName, QString("name"), *ui->layoutTackCost, QString("cost"), *ui->layoutTackWeight, QString("weight"));
 
-    readSimpleSection(root, QString("food"), QString("fooditem"), QString("foodsubitem"), *ui->layoutFoodName, QString("name"), *ui->layoutFoodCost, QString("cost"));
+    readSimpleSection(root, ui->lblFood, QString("food"), QString("fooditem"), QString("foodsubitem"), *ui->layoutFoodName, QString("name"), *ui->layoutFoodCost, QString("cost"));
 
-    readSimpleSection(root, QString("service"), QString("serviceitem"), QString("servicesubitem"), *ui->layoutServiceName, QString("name"), *ui->layoutServicePay, QString("cost"));
+    readSimpleSection(root, ui->lblServices, QString("service"), QString("serviceitem"), QString("servicesubitem"), *ui->layoutServiceName, QString("name"), *ui->layoutServicePay, QString("cost"));
 
     QDomElement magicSection = root.firstChildElement(QString("magicitems"));
     if(magicSection.isNull())
@@ -274,7 +274,7 @@ int DMScreenTabWidget::countAllEquipment(const QDomElement& section, QString ite
     return result;
 }
 
-void DMScreenTabWidget::readSimpleSection(QDomElement& root, QString sectionName, QString itemLabel, QString subitemLabel, QLayout& layout1, QString name1, QLayout& layout2, QString name2)
+void DMScreenTabWidget::readSimpleSection(QDomElement& root, QLabel* sectionLabel, QString sectionName, QString itemLabel, QString subitemLabel, QLayout& layout1, QString name1, QLayout& layout2, QString name2)
 {
     QDomElement section = root.firstChildElement(sectionName);
     if(section.isNull())
@@ -283,12 +283,16 @@ void DMScreenTabWidget::readSimpleSection(QDomElement& root, QString sectionName
     }
     else
     {
+        readSectionTitle(section, sectionLabel);
+        readColumnTitle(section, QString("firstcolumn"), layout1);
+        readColumnTitle(section, QString("secondcolumn"), layout2);
+
         QDomElement element = section.firstChildElement(itemLabel);
         readEquipmentSection(element, 9999, itemLabel, subitemLabel, layout1, name1, layout2, name2);
     }
 }
 
-void DMScreenTabWidget::readSimpleSection(QDomElement& root, QString sectionName, QString itemLabel, QString subitemLabel, QLayout& layout1, QString name1, QLayout& layout2, QString name2, QLayout& layout3, QString name3)
+void DMScreenTabWidget::readSimpleSection(QDomElement& root, QLabel* sectionLabel, QString sectionName, QString itemLabel, QString subitemLabel, QLayout& layout1, QString name1, QLayout& layout2, QString name2, QLayout& layout3, QString name3)
 {
     QDomElement section = root.firstChildElement(sectionName);
     if(section.isNull())
@@ -297,12 +301,17 @@ void DMScreenTabWidget::readSimpleSection(QDomElement& root, QString sectionName
     }
     else
     {
+        readSectionTitle(section, sectionLabel);
+        readColumnTitle(section, QString("firstcolumn"), layout1);
+        readColumnTitle(section, QString("secondcolumn"), layout2);
+        readColumnTitle(section, QString("thirdcolumn"), layout3);
+
         QDomElement element = section.firstChildElement(itemLabel);
         readEquipmentSection(element, 9999, itemLabel, subitemLabel, layout1, name1, layout2, name2, layout3, name3);
     }
 }
 
-void DMScreenTabWidget::readSimpleSection(QDomElement& root, QString sectionName, QString itemLabel, QString subitemLabel, QLayout& layout1, QString name1, QLayout& layout2, QString name2, QLayout& layout3, QString name3, QLayout& layout4, QString name4)
+void DMScreenTabWidget::readSimpleSection(QDomElement& root, QLabel* sectionLabel, QString sectionName, QString itemLabel, QString subitemLabel, QLayout& layout1, QString name1, QLayout& layout2, QString name2, QLayout& layout3, QString name3, QLayout& layout4, QString name4)
 {
     QDomElement section = root.firstChildElement(sectionName);
     if(section.isNull())
@@ -311,6 +320,12 @@ void DMScreenTabWidget::readSimpleSection(QDomElement& root, QString sectionName
     }
     else
     {
+        readSectionTitle(section, sectionLabel);
+        readColumnTitle(section, QString("firstcolumn"), layout1);
+        readColumnTitle(section, QString("secondcolumn"), layout2);
+        readColumnTitle(section, QString("thirdcolumn"), layout3);
+        readColumnTitle(section, QString("fourthcolumn"), layout4);
+
         QDomElement element = section.firstChildElement(itemLabel);
         readEquipmentSection(element, 9999, itemLabel, subitemLabel, layout1, name1, layout2, name2, layout3, name3, layout4, name4);
     }
@@ -422,4 +437,25 @@ QLabel* DMScreenTabWidget::createLabel(const QString& label, bool centered, bool
     }
 
     return result;
+}
+
+void DMScreenTabWidget::readSectionTitle(QDomElement& element, QLabel* sectionTitle)
+{
+    if(!sectionTitle)
+        return;
+
+    QString newLabel = element.attribute(QString("sectionlabel"));
+    if(!newLabel.isEmpty())
+        sectionTitle->setText(newLabel);
+}
+
+void DMScreenTabWidget::readColumnTitle(QDomElement& element, QString columnName, QLayout& sectionLayout)
+{
+    QString columnHeader = element.attribute(columnName);
+    if((!columnHeader.isEmpty()) && (sectionLayout.itemAt(0)))
+    {
+         QLabel* layoutLabel = dynamic_cast<QLabel*>(sectionLayout.itemAt(0)->widget());
+         if(layoutLabel)
+             layoutLabel->setText(columnHeader);
+    }
 }
