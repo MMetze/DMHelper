@@ -80,56 +80,27 @@
 #include <QSplashScreen>
 #endif
 
-// Next Todos:
-// DONE: Add empty DMHelper.log as part of the deploy procedure
-
-// Duplicate monsters in bestiary
-// Update bestiary to have proficiencies, etc separately stored
-
-//  1. Finish settings (publish and other interactions) - DONE
-//  2. Add NPCs in the world
-        // Check remove/drag settings and NPCs
-        // Check NPC adding to chases and battles
-        // track tree collapsing
-//  4. Add NPCs and monsters to the party
-//
-//  Refactor mainwindow, make it smaller
-//  Avoid redrawing the tree every time a change is made
-//  Add maps to Settings
-//  Add NPCs - first just to the tree, then to battles, chases or party
-//  Add non-characters to the party (monsters or NPCs)
-//  Spell reference
-// Equipment tables as XML
 
 /*
  * TODO:
+ * Add copyright notice to all files
+ * Remove commented code
+ * Refactor mainwindow, make it smaller
+ * Avoid redrawing the tree every time a change is made
+ * Add maps to Settings
+ * Add NPCs - first just to the tree, then to battles, chases or party
+ * Add non-characters to the party (monsters or NPCs) --> create a chracter from a monster class
+ * Spell reference
  * More editing ability for UI elements (campaign, adventure, encounter, maps - rename, remap, etc)
- * Open PDF: D:\Data\Personal\Documents\Dnd\Regeln>"C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\acrord32" /A "page=100&view=Fit" "dnd 5e players handbook.pdf"
- *          <a href="file://DnD 5e Players Handbook.pdf#page=100&view=FitBV">OPEN FILE</a>
- * Subclass for windows: Ctrl-M for main window or so
- * Finish chase
- * Options for re-selecting Bestiary or Chase data, DM Guide, MM, PHB
-    //QDesktopServices::openUrl(QUrl::fromLocalFile("C:\\Users\\deincrtu\\Documents\\Personal\\Documents\\Dnd\\Regeln\\DnD 5e Players Handbook.pdf"));
- * Quick links for external references
+ * Remove chase and other duplicate classes (dialogs instead of frames, old monster/character widgets)
  * Cross-populate preview screens
  * Image publisher
- * Drag and drop for publishing images
- * More DM Screen data
- * Battle-type encounters - improve
- * Add People
- * Add Places
- * Drag and Drop to add maps and places
- * Check member varaible naming convention
+ * Items in the campaign
+ * Drag and Drop to add maps and images
+ * Check member variable naming convention
  * Maps - Tokens and DM layers, clickable?
- * Links between map edges
  * different brushes for FOW clearing
  * Full character sheet
- * Drag and Drop reorder of characters
- *
- * DONE - Drag and drop for publishing text (pre-supported)
- * DONE - Text publishing
- * DONE - DM Screen data
- * DONE - Drag and Drop reorder of enounters/maps
  */
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -174,10 +145,15 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main] Initializing Main";
 
     qDebug() << "[Main] DMHelper version information";
-    qDebug() << "[Main]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION);
+    qDebug() << "[Main]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION);
     qDebug() << "[Main]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
     qDebug() << "[Main]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
     qDebug() << "[Main]     Build: " << __DATE__ << " " << __TIME__;
+#ifdef Q_OS_MAC
+    qDebug() << "[Main]     OS: MacOS";
+#else
+    qDebug() << "[Main]     OS: Windows";
+#endif
     qDebug() << "[Main]     Working Directory: " << QDir::currentPath();
 
     qDebug() << "[Main] Qt Information";
