@@ -58,6 +58,7 @@ public:
         IntValue_silver,
         IntValue_copper,
         IntValue_experience,
+        IntValue_jackofalltrades,
 
         INTVALUE_COUNT
     };
@@ -91,10 +92,13 @@ public:
     QString getStringValue(StringValue key) const;
     int getIntValue(IntValue key) const;
     bool getSkillValue(Skills key) const;
+    bool getSkillExpertise(Skills key) const;
 
     void setStringValue(StringValue key, const QString& value);
     void setIntValue(IntValue key, int value);
     void setSkillValue(Skills key, bool value);
+    void setSkillValue(Skills key, int value);
+    void setSkillExpertise(Skills key, bool value);
 
     bool getActive() const;
     void setActive(bool active);
@@ -124,7 +128,7 @@ private:
     int _dndBeyondID;
     QVector<QString> _stringValues;
     QVector<int> _intValues;
-    QVector<bool> _skillValues;
+    QVector<int> _skillValues;
 
     bool _active;
     bool _iconChanged;

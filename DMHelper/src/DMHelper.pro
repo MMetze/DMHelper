@@ -41,6 +41,7 @@ SOURCES += main.cpp\
     colorpushbutton.cpp \
     customtableframe.cpp \
     equipmentserver.cpp \
+    expertisedialog.cpp \
     mainwindow.cpp \
     objectimporter.cpp \
     publishbuttonframe.cpp \
@@ -197,6 +198,7 @@ HEADERS  += mainwindow.h \
     colorpushbutton.h \
     customtableframe.h \
     equipmentserver.h \
+    expertisedialog.h \
     objectimporter.h \
     publishbuttonframe.h \
     publishwindow.h \
@@ -340,6 +342,7 @@ FORMS    += mainwindow.ui \
     battledialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    expertisedialog.ui \
     publishbuttonframe.ui \
     randommarketdialog.ui \
     textpublishdialog.ui \

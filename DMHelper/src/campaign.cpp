@@ -433,6 +433,7 @@ QUuid Campaign::addCharacter(Character* character)
     if(!character)
         return QUuid();
 
+    character->setParent(this);
     characters.append(character);
     connect(character,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
     connect(character,SIGNAL(changed()),this,SLOT(handleInteralChange()));
@@ -632,6 +633,7 @@ QUuid Campaign::addNPC(Character* npc)
     if(!npc)
         return QUuid();
 
+    npc->setParent(this);
     npcs.append(npc);
     connect(npc,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
     connect(npc,SIGNAL(changed()),this,SLOT(handleInteralChange()));
