@@ -1555,15 +1555,17 @@ void MainWindow::newEncounter(int encounterType)
 
 void MainWindow::openFile(const QString& filename)
 {
-    if( !closeCampaign() )
+    if(!closeCampaign())
         return;
 
     qDebug() << "[Main] Loading Campaign: " << filename;
 
-    QDomDocument doc( "DMHelperXML" );
-    QFile file( filename );
-    if( !file.open( QIODevice::ReadOnly ) )
+    QDomDocument doc("DMHelperXML");
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly))
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Unable to open the campaign file: ") + filename);
         qDebug() << "[Main] Loading Failed: Unable to open campaign file";
         return;
     }
@@ -1577,22 +1579,28 @@ void MainWindow::openFile(const QString& filename)
 
     file.close();
 
-    if( contentResult == false )
+    if(contentResult == false)
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Error reading the campaign file: (line ") + QString::number(contentErrorLine) + QString(", column ") + QString::number(contentErrorColumn) + QString("): ") + contentError);
         qDebug() << "[Main] Loading Failed: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
         return;
     }
 
     QDomElement root = doc.documentElement();
-    if( (root.isNull()) || (root.tagName() != "root") )
+    if((root.isNull()) || (root.tagName() != "root"))
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Unable to find the root entry in the campaign file: ") + filename);
         qDebug() << "[Main] Loading Failed: Error reading XML - unable to find root entry";
         return;
     }
 
-    QDomElement campaignElement = root.firstChildElement( QString("campaign") );
-    if( campaignElement.isNull() )
+    QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+    if(campaignElement.isNull())
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Unable to find the campaign entry in the campaign file: ") + filename);
         qDebug() << "[Main] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
     }
@@ -1621,8 +1629,6 @@ void MainWindow::openFile(const QString& filename)
 
     emit campaignLoaded(campaign);
     selectItem(DMHelper::TreeType_Campaign, QUuid());
-
-    //_battleDlgMgr->loadBattle(campaign, root);
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(filename);
