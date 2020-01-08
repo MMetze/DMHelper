@@ -86,7 +86,7 @@ const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
     "gold", // IntValue_gold
     "silver", // IntValue_silver
     "copper", // IntValue_copper
-    "experience" // IntValue_experience
+    "experience", // IntValue_experience
     "jackofalltrades" // IntValue_experience
 };
 
