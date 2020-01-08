@@ -346,6 +346,14 @@ bool VideoPlayer::initializeVLC()
     }
 
     qDebug() << "[VideoPlayer] Initializing VLC!";
+/*
+#ifdef QT_DEBUG
+    const char *verbose_args = "-vvv";
+    _vlcInstance = libvlc_new(1, &verbose_args);
+#else
+    _vlcInstance = libvlc_new(0, nullptr);
+#endif
+*/
     _vlcInstance = libvlc_new(0, nullptr);
 
     if(!_vlcInstance)
