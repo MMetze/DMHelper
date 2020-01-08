@@ -484,7 +484,7 @@ void EncounterScrollingTextEdit::updateVideoBackground()
     if((!_videoPlayer) && (_videoPlayer->getImage()))
         return;
 
-    qDebug() << "[Battle Dialog] Initializing battle map video background image";
+    qDebug() << "[ScrollingText] Initializing battle map video background image";
     _backgroundVideo = _videoPlayer->getImage()->copy();
     ui->edtText->update();
 
