@@ -408,3 +408,5 @@ DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
 
 win32: LIBS += -L$$PWD/vlc -llibvlc
+macx: LIBS += -F$$PWD/vlc/ -framework VLCKit
+

@@ -46,7 +46,9 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _firstImage(false),
     _originalTrack(INVALID_TRACK_ID)
 {
+#ifdef Q_OS_WIN
     _videoFile.replace("/","\\\\");
+#endif
     _vlcError = !initializeVLC();
 }
 
