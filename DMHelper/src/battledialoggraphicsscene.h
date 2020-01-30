@@ -13,8 +13,10 @@ class BattleDialogGraphicsScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    explicit BattleDialogGraphicsScene(BattleDialogModel& model, QObject *parent = nullptr);
+    explicit BattleDialogGraphicsScene(QObject *parent = nullptr);
     virtual ~BattleDialogGraphicsScene();
+
+    void setModel(BattleDialogModel* model);
 
     void createBattleContents(const QRect& rect);
     void resizeBattleContents(const QRect& rect);
@@ -61,7 +63,7 @@ protected:
 
     QGraphicsItem* _contextMenuItem;
     Grid* _grid;
-    BattleDialogModel& _model;
+    BattleDialogModel* _model;
     QList<QGraphicsItem*> _itemList;
 
     bool _mouseDown;

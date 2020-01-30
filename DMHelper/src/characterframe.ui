@@ -99,6 +99,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="btnSync">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
        <property name="text">
         <string>  Sync from DnD Beyond</string>
        </property>
@@ -1002,6 +1005,9 @@
                  <height>20</height>
                 </size>
                </property>
+               <property name="focusPolicy">
+                <enum>Qt::NoFocus</enum>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1551,20 +1557,21 @@
  </customwidgets>
  <tabstops>
   <tabstop>edtName</tabstop>
-  <tabstop>edtAlignment</tabstop>
   <tabstop>edtRace</tabstop>
+  <tabstop>edtAlignment</tabstop>
   <tabstop>edtSex</tabstop>
   <tabstop>edtSize</tabstop>
-  <tabstop>edtClass</tabstop>
-  <tabstop>edtLevel</tabstop>
-  <tabstop>edtBackground</tabstop>
   <tabstop>edtExperience</tabstop>
   <tabstop>edtNextLevel</tabstop>
+  <tabstop>edtClass</tabstop>
+  <tabstop>edtBackground</tabstop>
+  <tabstop>edtLevel</tabstop>
+  <tabstop>edtSpeed</tabstop>
+  <tabstop>edtProficiencyBonus</tabstop>
   <tabstop>edtHitPoints</tabstop>
   <tabstop>edtArmorClass</tabstop>
   <tabstop>edtInitiative</tabstop>
-  <tabstop>edtSpeed</tabstop>
-  <tabstop>edtProficiencyBonus</tabstop>
+  <tabstop>btnExpertise</tabstop>
   <tabstop>edtStr</tabstop>
   <tabstop>chkStrSave</tabstop>
   <tabstop>chkAthletics</tabstop>
@@ -1583,7 +1590,6 @@
   <tabstop>chkNature</tabstop>
   <tabstop>chkReligion</tabstop>
   <tabstop>edtWis</tabstop>
-  <tabstop>edtPassivePerception</tabstop>
   <tabstop>chkWisSave</tabstop>
   <tabstop>chkAnimalHandling</tabstop>
   <tabstop>chkInsight</tabstop>
@@ -1601,6 +1607,8 @@
   <tabstop>edtEquipment</tabstop>
   <tabstop>edtSpells</tabstop>
   <tabstop>edtNotes</tabstop>
+  <tabstop>btnSync</tabstop>
+  <tabstop>edtPassivePerception</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

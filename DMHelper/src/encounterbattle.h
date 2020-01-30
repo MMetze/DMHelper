@@ -62,6 +62,10 @@ protected slots:
 
 protected:
     void inputXMLBattle(const QDomElement &element, bool isImport);
+    BattleDialogModel* createNewBattle(QPointF combatantPos);
+
+    void connectFrameToModel();
+    void disconnectFrameFromModel();
 
     QString _text;
     QUuid _audioTrackId;

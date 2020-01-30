@@ -38,6 +38,7 @@ public:
     BattleDialogModelCombatant* removeCombatant(int index);
     void appendCombatant(BattleDialogModelCombatant* combatant);
     void appendCombatants(QList<BattleDialogModelCombatant*> combatants);
+    bool isCombatantInList(Combatant* combatant) const;
 
     QList<BattleDialogModelEffect*> getEffectList() const;
     int getEffectCount() const;
@@ -88,6 +89,9 @@ public:
     BattleDialogModelCombatant* getActiveCombatant() const;
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
 
+    void setBackgroundImage(QImage backgroundImage);
+    QImage getBackgroundImage() const;
+
     void sortCombatants();
 
 private:
@@ -118,6 +122,8 @@ private:
     bool _showEffects;
 
     BattleDialogModelCombatant* _activeCombatant;
+
+    QImage _backgroundImage;
 };
 
 #endif // BATTLEDIALOGMODEL_H

@@ -293,6 +293,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     QJsonObject weightSpeedObj = raceObject["weightSpeeds"].toObject();
     QJsonObject normalSpeedObj = weightSpeedObj["normal"].toObject();
     _character->setIntValue(Character::IntValue_speed, normalSpeedObj["walk"].toInt(30));
+    QString sizeString = raceObject["size"].toString();
+    _character->setStringValue(Character::StringValue_size, sizeString);
     QString raceFeatureString;
     int i;
     QJsonArray raceFeatureArray = raceObject["racialTraits"].toArray();

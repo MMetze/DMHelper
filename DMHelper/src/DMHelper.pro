@@ -35,6 +35,7 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
     basicdateserver.cpp \
+    battleframe.cpp \
     bestiaryexportdialog.cpp \
     campaignexporter.cpp \
     characterimportdialog.cpp \
@@ -192,6 +193,7 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
     basicdateserver.h \
+    battleframe.h \
     bestiaryexportdialog.h \
     campaignexporter.h \
     characterimportdialog.h \
@@ -333,6 +335,7 @@ HEADERS  += mainwindow.h \
     texttranslatedialog.h
 
 FORMS    += mainwindow.ui \
+    battleframe.ui \
     bestiaryexportdialog.ui \
     characterimportdialog.ui \
     customtableframe.ui \

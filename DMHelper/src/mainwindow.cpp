@@ -17,13 +17,14 @@
 #include "mruhandler.h"
 #include "encounterfactory.h"
 #include "encountertextedit.h"
-#include "encounterbattleedit.h"
+//#include "encounterbattleedit.h"
 #include "encounterbattle.h"
 #include "encounterscrollingtext.h"
 #include "encounterscrollingtextedit.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
-#include "battledialogmanager.h"
+//#include "battledialogmanager.h"
+#include "battleframe.h"
 #include "audioplaybackframe.h"
 #include "monster.h"
 #include "monsterclass.h"
@@ -295,9 +296,26 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
     ui->stackedWidgetEncounter->addWidget(encounterTextEdit);
     // EncounterType_Battle
+    /*
     EncounterBattleEdit* encounterBattleEdit = new EncounterBattleEdit;
     connect(encounterBattleEdit, SIGNAL(openMonster(QString)), this, SLOT(openMonster(QString)));
     ui->stackedWidgetEncounter->addWidget(encounterBattleEdit);
+    */
+    BattleFrame* battleFrame = new BattleFrame;
+    battleFrame->setShowOnDeck(_options->getShowOnDeck());
+    battleFrame->setShowCountdown(_options->getShowCountdown());
+    battleFrame->setCountdownDuration(_options->getCountdownDuration());
+    connect(_options, SIGNAL(showOnDeckChanged(bool)), battleFrame, SLOT(setShowOnDeck(bool)));
+    connect(_options, SIGNAL(showCountdownChanged(bool)), battleFrame, SLOT(setShowCountdown(bool)));
+    connect(_options, SIGNAL(countdownDurationChanged(int)), battleFrame, SLOT(setCountdownDuration(int)));
+    connect(pubWindow, SIGNAL(frameResized(QSize)), battleFrame, SLOT(setTargetSize(QSize)));
+    connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
+    connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
+    connect(battleFrame, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+    connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(battleFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
+    connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    ui->stackedWidgetEncounter->addWidget(battleFrame);
     // EncounterType_Character
     /*
     QScrollArea* scrollArea = new QScrollArea;
@@ -389,30 +407,32 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qApp->processEvents();
 
+    /*
     qDebug() << "[Main] Initializing Battle Dialog Manager";
     _battleDlgMgr = new BattleDialogManager(this);
     connect(ui->actionBattle_Dialog, SIGNAL(triggered()), _battleDlgMgr, SLOT(showBattleDialog()));
     connect(_battleDlgMgr, SIGNAL(battleActive(bool)), ui->actionBattle_Dialog, SLOT(setEnabled(bool)));
-    connect(_battleDlgMgr, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
-    connect(_battleDlgMgr, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
-    connect(_battleDlgMgr, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
-    connect(_battleDlgMgr, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(_battleDlgMgr, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
-    connect(_battleDlgMgr, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    DONE connect(_battleDlgMgr, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
+    DONE connect(_battleDlgMgr, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
+    DONE connect(_battleDlgMgr, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+    DONE connect(_battleDlgMgr, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    DONE connect(_battleDlgMgr, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
+    DONE connect(_battleDlgMgr, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_battleDlgMgr, SIGNAL(dirty()), this, SLOT(setDirty()));
-    connect(pubWindow, SIGNAL(frameResized(QSize)), _battleDlgMgr, SLOT(targetResized(QSize)));
+    DONE connect(pubWindow, SIGNAL(frameResized(QSize)), _battleDlgMgr, SLOT(targetResized(QSize)));
     connect(this, SIGNAL(campaignLoaded(Campaign*)), _battleDlgMgr, SLOT(setCampaign(Campaign*)));
     connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _battleDlgMgr, SLOT(cancelPublish()));
-    _battleDlgMgr->setShowOnDeck(_options->getShowOnDeck());
-    _battleDlgMgr->setShowCountdown(_options->getShowCountdown());
-    _battleDlgMgr->setCountdownDuration(_options->getCountdownDuration());
-    connect(_options, SIGNAL(showOnDeckChanged(bool)), _battleDlgMgr, SLOT(setShowOnDeck(bool)));
-    connect(_options, SIGNAL(showCountdownChanged(bool)), _battleDlgMgr, SLOT(setShowCountdown(bool)));
-    connect(_options, SIGNAL(countdownDurationChanged(int)), _battleDlgMgr, SLOT(setCountdownDuration(int)));
+    DONE _battleDlgMgr->setShowOnDeck(_options->getShowOnDeck());
+    DONE _battleDlgMgr->setShowCountdown(_options->getShowCountdown());
+    DONE _battleDlgMgr->setCountdownDuration(_options->getCountdownDuration());
+    DONE connect(_options, SIGNAL(showOnDeckChanged(bool)), _battleDlgMgr, SLOT(setShowOnDeck(bool)));
+    DONE connect(_options, SIGNAL(showCountdownChanged(bool)), _battleDlgMgr, SLOT(setShowCountdown(bool)));
+    DONE connect(_options, SIGNAL(countdownDurationChanged(int)), _battleDlgMgr, SLOT(setCountdownDuration(int)));
     connect(encounterBattleEdit, SIGNAL(startBattle(EncounterBattle*)), _battleDlgMgr, SLOT(startNewBattle(EncounterBattle*)));
     connect(encounterBattleEdit, SIGNAL(loadBattle(EncounterBattle*)), _battleDlgMgr, SLOT(loadBattle(EncounterBattle*)));
     connect(encounterBattleEdit, SIGNAL(deleteBattle(EncounterBattle*)), _battleDlgMgr, SLOT(deleteBattle(EncounterBattle*)));
     qDebug() << "[Main] Battle Dialog Manager Initialized.";
+    */
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
@@ -428,7 +448,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _audioPlayer, SLOT(setVolume(int)));
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _options, SLOT(setAudioVolume(int)));
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
-    connect(encounterBattleEdit, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
+    //connect(encounterBattleEdit, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
@@ -452,7 +472,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete _battleDlgMgr;
+    //delete _battleDlgMgr;
 
     deleteCampaign();
 
@@ -2137,9 +2157,14 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         }
         else if(encounter->getType() == DMHelper::EncounterType_Battle)
         {
+            /*
             EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(ui->stackedWidgetEncounter->currentWidget());
             if(battleEdit)
                 connect(encounter,SIGNAL(destroyed(QObject*)),battleEdit,SLOT(clear()));
+            */
+            BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->currentWidget());
+            if(battleFrame)
+                connect(encounter,SIGNAL(destroyed(QObject*)),battleFrame,SLOT(clear()));
         }
         return;
     }
@@ -2246,7 +2271,8 @@ void MainWindow::handleStartNewBattle()
     if((!campaign)||(!_battleDlgMgr))
         return;
 
-    _battleDlgMgr->startNewBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
+    // TODO: HANDLE THIS!
+    //_battleDlgMgr->startNewBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
 }
 
 void MainWindow::handleLoadBattle()
@@ -2254,7 +2280,8 @@ void MainWindow::handleLoadBattle()
     if((!campaign)||(!_battleDlgMgr))
         return;
 
-    _battleDlgMgr->loadBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
+    // TODO: HANDLE THIS!
+    //_battleDlgMgr->loadBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
 }
 
 void MainWindow::handleDeleteBattle()
@@ -2262,7 +2289,8 @@ void MainWindow::handleDeleteBattle()
     if((!campaign)||(!_battleDlgMgr))
         return;
 
-    _battleDlgMgr->deleteBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
+    // TODO: HANDLE THIS!
+    //_battleDlgMgr->deleteBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
 }
 
 void MainWindow::handleAnimationStarted(QColor color)

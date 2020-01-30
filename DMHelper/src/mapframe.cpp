@@ -191,7 +191,6 @@ void MapFrame::updateFoW()
 {
     if((_fow)&&(_mapSource))
     {
-        qDebug() << "[MapFrame] Updating ";
         _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
     }
 }

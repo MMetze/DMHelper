@@ -23,7 +23,8 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _showAlive(true),
     _showDead(false),
     _showEffects(true),
-    _activeCombatant(nullptr)
+    _activeCombatant(nullptr),
+    _backgroundImage()
 {
 }
 
@@ -45,7 +46,8 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
     _showAlive(other._showAlive),
     _showDead(other._showDead),
     _showEffects(other._showEffects),
-    _activeCombatant(nullptr)
+    _activeCombatant(nullptr),
+    _backgroundImage(other._backgroundImage)
 {
     for(int i = 0; i < other._combatants.count(); ++i)
     {
@@ -205,6 +207,25 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
 void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
 {
     _combatants.append(combatants);
+}
+
+bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
+{
+    if(!combatant)
+        return false;
+
+    if(_combatants.isEmpty())
+        return false;
+
+    QListIterator<BattleDialogModelCombatant*> it(_combatants);
+    while(it.hasNext())
+    {
+        BattleDialogModelCombatant* listCombatant = it.next();
+        if((listCombatant) && (listCombatant->getCombatant()) && (listCombatant->getCombatant()->getID() == combatant->getID()))
+            return true;
+    }
+
+    return false;
 }
 
 QList<BattleDialogModelEffect*> BattleDialogModel::getEffectList() const
@@ -421,6 +442,16 @@ BattleDialogModelCombatant* BattleDialogModel::getActiveCombatant() const
 void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCombatant)
 {
     _activeCombatant = activeCombatant;
+}
+
+void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
+{
+    _backgroundImage = backgroundImage;
+}
+
+QImage BattleDialogModel::getBackgroundImage() const
+{
+    return _backgroundImage;
 }
 
 void BattleDialogModel::sortCombatants()
