@@ -46,10 +46,9 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _firstImage(false),
     _originalTrack(INVALID_TRACK_ID)
 {
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Initializing player object: " << this;
-#endif
+#ifdef Q_OS_WIN
     _videoFile.replace("/","\\\\");
+#endif
     _vlcError = !initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Player object initialized: " << this;
@@ -583,7 +582,7 @@ void VideoPlayer::cleanupBuffers()
 }
 
 void VideoPlayer::internalStopCheck(int status)
-{    
+{
     _stopStatus |= status;
 
     qDebug() << "[VideoPlayer] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;

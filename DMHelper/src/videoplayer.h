@@ -5,9 +5,10 @@
 #include <QMutex>
 #include <QImage>
 
-
-#include <BaseTsd.h>
-typedef SSIZE_T ssize_t;
+#ifdef Q_OS_WIN
+    #include <BaseTsd.h>
+    typedef SSIZE_T ssize_t;
+#endif
 #include <vlc/vlc.h>
 
 class VideoPlayer : public QObject
