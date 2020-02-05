@@ -10,28 +10,29 @@
 
 BasicDateServer* BasicDateServer::_instance = nullptr;
 
-BasicDateServer::BasicDateServer() :
+BasicDateServer::BasicDateServer(const QString& calendarFile, QObject *parent) :
+    QObject(parent),
     _calendars(),
     _activeIndex(-1)
 {
-    readDateInformation();
+    readDateInformation(calendarFile);
 }
 
 BasicDateServer* BasicDateServer::Instance()
 {
-    if(!_instance)
-        Initialize();
+//    if(!_instance)
+//        Initialize();
 
     return _instance;
 }
 
-void BasicDateServer::Initialize()
+void BasicDateServer::Initialize(const QString& calendarFile)
 {
     if(_instance)
         return;
 
     qDebug() << "[BasicDateServer] Initializing BasicDateServer";
-    _instance = new BasicDateServer();
+    _instance = new BasicDateServer(calendarFile);
 }
 
 void BasicDateServer::Shutdown()
@@ -239,10 +240,14 @@ QStringList BasicDateServer::getMonthNamesWithAlternatives() const
     return names;
 }
 
-void BasicDateServer::readDateInformation()
+void BasicDateServer::readDateInformation(const QString& calendarFile)
 {
     qDebug() << "[BasicDateServer] Reading calendar information";
 
+    _activeIndex = -1;
+    _calendars.clear();
+
+    /*
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
@@ -252,13 +257,14 @@ void BasicDateServer::readDateInformation()
 #else
     QString calendarFileName("calendar.xml");
 #endif
+*/
 
     QDomDocument doc("DMHelperDataXML");
-    QFile file(calendarFileName);
+    QFile file(calendarFile);
     qDebug() << "[BasicDateServer] Calendar file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[BasicDateServer] Unable to read calendar file: " << calendarFileName;
+        qDebug() << "[BasicDateServer] Unable to read calendar file: " << calendarFile;
         return;
     }
 

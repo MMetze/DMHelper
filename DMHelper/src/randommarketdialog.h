@@ -13,11 +13,11 @@ class RandomMarketDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit RandomMarketDialog(QWidget *parent = nullptr);
+    explicit RandomMarketDialog(const QString& shopFile, QWidget *parent = nullptr);
     ~RandomMarketDialog();
 
 private slots:
-    void loadMarkets();
+    void loadMarkets(const QString& shopFile);
     void randomizeMarket();
     void locationSelected(int index);
 

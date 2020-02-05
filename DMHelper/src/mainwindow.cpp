@@ -156,6 +156,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main]     OS: Windows";
 #endif
     qDebug() << "[Main]     Working Directory: " << QDir::currentPath();
+    qDebug() << "[Main]     Executable Directory: " << QCoreApplication::applicationDirPath();
 
     qDebug() << "[Main] Qt Information";
     qDebug() << "[Main]     Qt Version: " << QLibraryInfo::version().toString();
@@ -188,18 +189,29 @@ MainWindow::MainWindow(QWidget *parent) :
     // TODO: cleanup this constructor and mainwindow in general
     ui->setupUi(this);
 
-    //qsrand(static_cast<unsigned int>(QTime::currentTime().msec()));
+    qDebug() << "[Main] Reading Settings";
+    _options = new OptionsContainer(this);
+    MRUHandler* mruHandler = new MRUHandler(ui->menuRecent_Campaigns, DEFAULT_MRU_FILE_COUNT, this);
+    connect(mruHandler,SIGNAL(triggerMRU(QString)),this,SLOT(openFile(QString)));
+    _options->setMRUHandler(mruHandler);
+    _options->readSettings();
+    qDebug() << "[Main] Settings Read";
 
     qDebug() << "[Main] Initializing Bestiary";
     Bestiary::Initialize();
     qDebug() << "[Main] Bestiary Initialized";
 
     qDebug() << "[Main] Initializing BasicDateServer";
-    BasicDateServer::Initialize();
+    BasicDateServer::Initialize(_options->getCalendarFileName());
+    BasicDateServer* dateServer = BasicDateServer::Instance();
+    connect(_options, &OptionsContainer::calendarFileNameChanged, dateServer, &BasicDateServer::readDateInformation);
+    //connect(_options, SIGNAL(calendarFileNameChanged(const QString&)), dateServer, SLOT(readDateInformation(const QString&)));
     qDebug() << "[Main] BasicDateServer Initialized";
 
     qDebug() << "[Main] Initializing EquipmentServer";
-    EquipmentServer::Initialize();
+    EquipmentServer::Initialize(_options->getEquipmentFileName());
+    EquipmentServer* equipmentServer = EquipmentServer::Instance();
+    connect(_options, &OptionsContainer::equipmentFileNameChanged, equipmentServer, &EquipmentServer::readEquipment);
     qDebug() << "[Main] BasicDateServer Initialized";
 
     connect(ui->action_NewCampaign,SIGNAL(triggered()),this,SLOT(newCampaign()));
@@ -261,14 +273,6 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main] Tree Model Created";
 
     connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
-
-    qDebug() << "[Main] Reading Settings";
-    _options = new OptionsContainer(this);
-    MRUHandler* mruHandler = new MRUHandler(ui->menuRecent_Campaigns, DEFAULT_MRU_FILE_COUNT, this);
-    connect(mruHandler,SIGNAL(triggerMRU(QString)),this,SLOT(openFile(QString)));
-    _options->setMRUHandler(mruHandler);
-    _options->readSettings();
-    qDebug() << "[Main] Settings Read";
 
     connect(ui->actionOptions,SIGNAL(triggered()),_options,SLOT(editSettings()));
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
@@ -375,11 +379,13 @@ MainWindow::MainWindow(QWidget *parent) :
     timeAndDateFrame->setToolTip(QString("Time & Date"));
     ui->scrollWidget->addTab(new ScrollTabWidget(timeAndDateFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_clock.png")));
     // Add the quick reference frame
-    ScrollTabWidget* w2 = new ScrollTabWidget(new QuickRefFrame(this), QSizeF(0,0), this);
+    QuickRefFrame* quickRefFrame = new QuickRefFrame(_options->getQuickReferenceFileName(), this);
+    connect(_options, &OptionsContainer::quickReferenceFileNameChanged, quickRefFrame, &QuickRefFrame::readQuickRef);
+    ScrollTabWidget* w2 = new ScrollTabWidget(quickRefFrame, QSizeF(0,0), this);
     w2->setToolTip(QString("Quick Reference"));
     ui->scrollWidget->addTab(w2, QIcon(QPixmap(":/img/data/icon_reference.png")));
     // Add the DM screen widget
-    DMScreenTabWidget* dmScreen = new DMScreenTabWidget(this);
+    DMScreenTabWidget* dmScreen = new DMScreenTabWidget(_options->getEquipmentFileName(), this);
     dmScreen->setToolTip(QString("DM reference"));
     ui->scrollWidget->addTab(new ScrollTabWidget(dmScreen, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_screen.png")));
     // Add the dice frame
@@ -391,7 +397,7 @@ MainWindow::MainWindow(QWidget *parent) :
     countdownFrame->setToolTip(QString("Countdown Timer"));
     ui->scrollWidget->addTab(new ScrollTabWidget(countdownFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_countdown.png")));
     // Add the custom tableframe
-    CustomTableFrame* customTableFrame = new CustomTableFrame(this);
+    CustomTableFrame* customTableFrame = new CustomTableFrame(_options->getTablesDirectory(), this);
     customTableFrame->setToolTip(QString("Used-defined Tables"));
     ui->scrollWidget->addTab(new ScrollTabWidget(customTableFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_table.png")));
     // Add the audio playback frame
@@ -2418,7 +2424,7 @@ void MainWindow::openTextTranslator()
 
 void MainWindow::openRandomMarkets()
 {
-    RandomMarketDialog* dlg = new RandomMarketDialog(this);
+    RandomMarketDialog* dlg = new RandomMarketDialog(_options->getShopsFileName(), this);
 
     dlg->show();
     dlg->activateWindow();

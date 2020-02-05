@@ -6,9 +6,10 @@
 #include <QDomDocument>
 #include <QDebug>
 
-CustomTableFrame::CustomTableFrame(QWidget *parent) :
+CustomTableFrame::CustomTableFrame(const QString& tableDirectory, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::CustomTableFrame),
+    _tableDirectory(tableDirectory),
     _timerId(0),
     _index(-1),
     _readTriggered(false),
@@ -44,7 +45,8 @@ void CustomTableFrame::showEvent(QShowEvent *event)
     if(_readTriggered)
         return;
 
-    QDir tableDir(QString("./tables"));
+    //QDir tableDir(QString("./tables"));
+    QDir tableDir(_tableDirectory);
     QStringList filters("*.xml");
     _directoryList = tableDir.entryList(QStringList("*.xml"));
 

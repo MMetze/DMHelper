@@ -12,13 +12,13 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-DMScreenTabWidget::DMScreenTabWidget(QWidget *parent) :
+DMScreenTabWidget::DMScreenTabWidget(const QString& equipmentFile, QWidget *parent) :
     QTabWidget(parent),
     ui(new Ui::DMScreenTabWidget)
 {
     ui->setupUi(this);
 
-    readEquipment();
+    readEquipment(equipmentFile);
 }
 
 DMScreenTabWidget::~DMScreenTabWidget()
@@ -26,10 +26,11 @@ DMScreenTabWidget::~DMScreenTabWidget()
     delete ui;
 }
 
-void DMScreenTabWidget::readEquipment()
+void DMScreenTabWidget::readEquipment(const QString& equipmentFile)
 {
     qDebug() << "[DMScreen] Reading equipment for DM Screen";
 
+    /*
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
@@ -39,13 +40,14 @@ void DMScreenTabWidget::readEquipment()
 #else
     QString equipmentFileName("equipment.xml");
 #endif
+*/
 
     QDomDocument doc("DMHelperDataXML");
-    QFile file(equipmentFileName);
+    QFile file(equipmentFile);
     qDebug() << "[DMScreen] Equipment file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[DMScreen] Unable to read equipment file: " << equipmentFileName;
+        qDebug() << "[DMScreen] Unable to read equipment file: " << equipmentFile;
         return;
     }
 

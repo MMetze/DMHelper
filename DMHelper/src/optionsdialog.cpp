@@ -15,12 +15,13 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
     if(_options)
     {
         ui->edtBestiary->setText(_options->getBestiaryFileName());
+        ui->edtQuickReference->setText(_options->getQuickReferenceFileName());
+        ui->edtCalendar->setText(_options->getCalendarFileName());
+        ui->edtEquipment->setText(_options->getEquipmentFileName());
+        ui->edtShops->setText(_options->getShopsFileName());
+        ui->edtTables->setText(_options->getTablesDirectory());
 #ifdef INCLUDE_CHASE_SUPPORT
         ui->edtChase->setText(_options->getChaseFileName());
-#else
-        ui->lblChase->hide();
-        ui->edtChase->hide();
-        ui->btnChase->hide();
 #endif
         ui->chkShowAnimations->setChecked(_options->getShowAnimations());
         ui->chkShowOnDeck->setChecked(_options->getShowOnDeck());
@@ -49,7 +50,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtInviteID->setEnabled(_options->getNetworkEnabled());
         ui->btnGenerateInvite->setEnabled(_options->getNetworkEnabled());
 #else
-        ui->grpNetwork->hide();
+        ui->tabWidget->removeTab(2);
 #endif
 
         connect(ui->btnBestiary,SIGNAL(clicked()),this,SLOT(browseBestiary()));
@@ -103,6 +104,61 @@ void OptionsDialog::browseBestiary()
 
     ui->edtBestiary->setText(bestiaryFileName);
     _options->setBestiaryFileName(bestiaryFileName);
+}
+
+void OptionsDialog::browseQuickReference()
+{
+    QString quickRefFileName = QFileDialog::getOpenFileName(this,QString("Select Quick Reference File"),QString(),QString("XML files (*.xml)"));
+
+    if((quickRefFileName.isEmpty()) || (!QFile::exists(quickRefFileName)))
+        return;
+
+    ui->edtQuickReference->setText(quickRefFileName);
+    _options->setQuickReferenceFileName(quickRefFileName);
+}
+
+void OptionsDialog::browseCalendar()
+{
+    QString calendarFileName = QFileDialog::getOpenFileName(this,QString("Select Calendar File"),QString(),QString("XML files (*.xml)"));
+
+    if((calendarFileName.isEmpty()) || (!QFile::exists(calendarFileName)))
+        return;
+
+    ui->edtCalendar->setText(calendarFileName);
+    _options->setCalendarFileName(calendarFileName);
+}
+
+void OptionsDialog::browseEquipment()
+{
+    QString equipmentFileName = QFileDialog::getOpenFileName(this,QString("Select Equipment File"),QString(),QString("XML files (*.xml)"));
+
+    if((equipmentFileName.isEmpty()) || (!QFile::exists(equipmentFileName)))
+        return;
+
+    ui->edtEquipment->setText(equipmentFileName);
+    _options->setEquipmentFileName(equipmentFileName);
+}
+
+void OptionsDialog::browseShops()
+{
+    QString shopsFileName = QFileDialog::getOpenFileName(this,QString("Select Shops File"),QString(),QString("XML files (*.xml)"));
+
+    if((shopsFileName.isEmpty()) || (!QFile::exists(shopsFileName)))
+        return;
+
+    ui->edtShops->setText(shopsFileName);
+    _options->setShopsFileName(shopsFileName);
+}
+
+void OptionsDialog::browseTables()
+{
+    QString tablesDirectory = QFileDialog::getExistingDirectory(this,QString("Select Tables Directory"),QString());
+
+    if(tablesDirectory.isEmpty())
+        return;
+
+    ui->edtTables->setText(tablesDirectory);
+    _options->setTablesDirectory(tablesDirectory);
 }
 
 #ifdef INCLUDE_CHASE_SUPPORT

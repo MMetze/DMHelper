@@ -21,6 +21,11 @@ public:
 
 private slots:
     void browseBestiary();
+    void browseQuickReference();
+    void browseCalendar();
+    void browseEquipment();
+    void browseShops();
+    void browseTables();
 #ifdef INCLUDE_CHASE_SUPPORT
     void browseChase();
 #endif

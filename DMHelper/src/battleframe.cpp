@@ -947,7 +947,7 @@ void BattleFrame::updateVideoBackground()
     }
 
     qDebug() << "[Battle Frame] Initializing battle map video background image";
-    if((!_videoPlayer) && (_videoPlayer->getImage()))
+    if((!_videoPlayer) || (!_videoPlayer->getImage()))
         return;
 
     QImage battleImage = _videoPlayer->getImage()->copy();
@@ -2806,6 +2806,8 @@ void BattleFrame::replaceBattleMap()
 
 void BattleFrame::createSceneContents()
 {
+    qDebug() << "[Battle Frame] Creating Battle Scene contents.";
+
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible to create scene contents, no battle model is set!";

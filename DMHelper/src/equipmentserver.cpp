@@ -7,7 +7,8 @@
 
 EquipmentServer* EquipmentServer::_instance = nullptr;
 
-EquipmentServer::EquipmentServer() :
+EquipmentServer::EquipmentServer(const QString& equipmentFile, QObject *parent) :
+    QObject(parent),
     _magicItems(),
     _gearItems(),
     _weaponItems(),
@@ -15,24 +16,24 @@ EquipmentServer::EquipmentServer() :
     _goodsItems(),
     _toolItems()
 {
-    readEquipment();
+    readEquipment(equipmentFile);
 }
 
 EquipmentServer* EquipmentServer::Instance()
 {
-    if(!_instance)
-        Initialize();
+//    if(!_instance)
+//        Initialize();
 
     return _instance;
 }
 
-void EquipmentServer::Initialize()
+void EquipmentServer::Initialize(const QString& equipmentFile)
 {
     if(_instance)
         return;
 
     qDebug() << "[EquipmentServer] Initializing EquipmentServer";
-    _instance = new EquipmentServer();
+    _instance = new EquipmentServer(equipmentFile);
 }
 
 void EquipmentServer::Shutdown()
@@ -71,10 +72,18 @@ QList<EquipmentServer::ToolItem> EquipmentServer::getToolItems() const
     return _toolItems;
 }
 
-void EquipmentServer::readEquipment()
+void EquipmentServer::readEquipment(const QString& equipmentFile)
 {
     qDebug() << "[EquipmentServer] Reading equipment...";
 
+    _magicItems.clear();
+    _gearItems.clear();
+    _weaponItems.clear();
+    _armorItems.clear();
+    _goodsItems.clear();
+    _toolItems.clear();
+
+/*
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
@@ -84,13 +93,14 @@ void EquipmentServer::readEquipment()
 #else
     QString equipmentFileName("equipment.xml");
 #endif
+*/
 
     QDomDocument doc("DMHelperDataXML");
-    QFile file(equipmentFileName);
+    QFile file(equipmentFile);
     qDebug() << "[EquipmentServer] Equipment file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[EquipmentServer] Unable to read equipment file: " << equipmentFileName;
+        qDebug() << "[EquipmentServer] Unable to read equipment file: " << equipmentFile;
         return;
     }
 

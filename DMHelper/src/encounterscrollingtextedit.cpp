@@ -481,7 +481,7 @@ void EncounterScrollingTextEdit::loadImage()
 
 void EncounterScrollingTextEdit::updateVideoBackground()
 {
-    if((!_videoPlayer) && (_videoPlayer->getImage()))
+    if((!_videoPlayer) || (!_videoPlayer->getImage()))
         return;
 
     qDebug() << "[ScrollingText] Initializing battle map video background image";

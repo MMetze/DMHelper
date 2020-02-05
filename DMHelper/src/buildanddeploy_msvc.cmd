@@ -13,7 +13,8 @@ mkdir ..\bin64\bestiary
 mkdir ..\bin64\doc
 mkdir ..\bin64\pkgconfig
 mkdir ..\bin64\plugins
-mkdir ..\bin64\tables
+mkdir ..\bin64\resources
+mkdir ..\bin64\resources\tables
 
 cd ..
 
@@ -42,7 +43,7 @@ xcopy /s ..\src\bestiary\* ..\bin64\bestiary\*
 xcopy /s ..\src\doc\* ..\bin64\doc\*
 xcopy /s ..\src\binsrc\pkgconfig\* ..\bin64\pkgconfig\*
 xcopy /s ..\src\binsrc\plugins\* ..\bin64\plugins\*
-xcopy /s ..\src\binsrc\tables\* ..\bin64\tables\*
+xcopy /s ..\src\resources\* ..\bin64\resources\*
 
 
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64

@@ -1,18 +1,20 @@
 #ifndef BASICDATESERVER_H
 #define BASICDATESERVER_H
 
+#include <QObject>
 #include <QString>
 #include <QList>
 
 class BasicDateServer;
 
-class BasicDateServer
+class BasicDateServer : public QObject
 {
+    Q_OBJECT
 public:
-    BasicDateServer();
+    explicit BasicDateServer(const QString& calendarFile, QObject *parent = nullptr);
 
     static BasicDateServer* Instance();
-    static void Initialize();
+    static void Initialize(const QString& calendarFile);
     static void Shutdown();
 
     void setActiveCalendar(const QString& calendarName);
@@ -37,9 +39,10 @@ public:
     class BasicDateServer_Day;
     class BasicDateServer_LeapYear;
 
-private:
-    void readDateInformation();
+public slots:
+    void readDateInformation(const QString& calendarFile);
 
+private:
     static BasicDateServer* _instance;
     QList<BasicDateServer::BasicDateServer_Calendar> _calendars;
     int _activeIndex;

@@ -15,6 +15,11 @@ public:
 
     // General settings
     QString getBestiaryFileName() const;
+    QString getQuickReferenceFileName() const;
+    QString getCalendarFileName() const;
+    QString getEquipmentFileName() const;
+    QString getShopsFileName() const;
+    QString getTablesDirectory() const;
 #ifdef INCLUDE_CHASE_SUPPORT
     QString getChaseFileName() const;
 #endif
@@ -46,6 +51,11 @@ public:
 signals:
     // General settings
     void bestiaryFileNameChanged();
+    void quickReferenceFileNameChanged(const QString& filename);
+    void calendarFileNameChanged(const QString& filename);
+    void equipmentFileNameChanged(const QString& filename);
+    void shopsFileNameChanged(const QString& filename);
+    void tablesDirectoryChanged();
 #ifdef INCLUDE_CHASE_SUPPORT
     void chaseFileNameChanged();
 #endif
@@ -78,6 +88,14 @@ public slots:
 
     // General settings
     void setBestiaryFileName(const QString& filename);
+    void setQuickReferenceFileName(const QString& filename);
+    void setCalendarFileName(const QString& filename);
+    void setEquipmentFileName(const QString& filename);
+    void setShopsFileName(const QString& filename);
+    QString getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename);
+    void setTablesDirectory(const QString& directory);
+    QString getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir);
+
 #ifdef INCLUDE_CHASE_SUPPORT
     void setChaseFileName(const QString& filename);
 #endif
@@ -110,6 +128,11 @@ private:
     // General settings
     QString _bestiaryFileName;
     QString _lastMonster;
+    QString _quickReferenceFileName;
+    QString _calendarFileName;
+    QString _equipmentFileName;
+    QString _shopsFileName;
+    QString _tablesDirectory;
 #ifdef INCLUDE_CHASE_SUPPORT
     QString _chaseFileName;
 #endif
