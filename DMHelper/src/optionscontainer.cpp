@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QDir>
 #include <QCoreApplication>
+#include <QStandardPaths>
 #include <QDebug>
 
 // TODO: consider copy of MRU functionality
@@ -11,9 +12,11 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     QObject(parent),
     _bestiaryFileName(),
     _lastMonster(),
-#ifdef INCLUDE_CHASE_SUPPORT
-    _chaseFileName(),
-#endif
+    _quickReferenceFileName(),
+    _calendarFileName(),
+    _equipmentFileName(),
+    _shopsFileName(),
+    _tablesDirectory(),
     _showAnimations(false),
     _audioVolume(100),
     _showOnDeck(true),
@@ -41,12 +44,30 @@ QString OptionsContainer::getBestiaryFileName() const
     return _bestiaryFileName;
 }
 
-#ifdef INCLUDE_CHASE_SUPPORT
-QString OptionsContainer::getChaseFileName() const
+QString OptionsContainer::getQuickReferenceFileName() const
 {
-    return _chaseFileName;
+    return _quickReferenceFileName;
 }
-#endif
+
+QString OptionsContainer::getCalendarFileName() const
+{
+    return _calendarFileName;
+}
+
+QString OptionsContainer::getEquipmentFileName() const
+{
+    return _equipmentFileName;
+}
+
+QString OptionsContainer::getShopsFileName() const
+{
+    return _shopsFileName;
+}
+
+QString OptionsContainer::getTablesDirectory() const
+{
+    return _tablesDirectory;
+}
 
 QString OptionsContainer::getLastMonster() const
 {
@@ -152,21 +173,19 @@ void OptionsContainer::readSettings()
 #endif
 
     // Note: password will not be stored in settings
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    QString bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
-#endif
-    setBestiaryFileName(settings.value("bestiary",bestiaryFileName).toString());
+    setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml")));
+    if(!settings.contains(QString("bestiary")))
+        getStandardDirectory(QString("Images"));
     setLastMonster(settings.value("lastMonster","").toString());
-#ifdef INCLUDE_CHASE_SUPPORT
-    setChaseFileName(settings.value("chase data","").toString());
-#endif
+
+    setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
+    setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
+    setEquipmentFileName(getSettingsFile(settings, QString("equipment"), QString("equipment.xml")));
+    setShopsFileName(getSettingsFile(settings, QString("shops"), QString("shops.xml")));
+
+    //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
+    setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
+
     setShowAnimations(settings.value("showAnimations",QVariant(false)).toBool());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
@@ -203,9 +222,11 @@ void OptionsContainer::writeSettings()
     // Note: password will not be stored in settings
     settings.setValue("bestiary", getBestiaryFileName());
     settings.setValue("lastMonster", getLastMonster());
-#ifdef INCLUDE_CHASE_SUPPORT
-    settings.setValue("chase data", getChaseFileName());
-#endif
+    settings.setValue("quickReference", getQuickReferenceFileName());
+    settings.setValue("calendar", getCalendarFileName());
+    settings.setValue("equipment", getEquipmentFileName());
+    settings.setValue("shops", getShopsFileName());
+    settings.setValue("tables", getTablesDirectory());
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("showOnDeck", getShowOnDeck());
@@ -242,16 +263,148 @@ void OptionsContainer::setBestiaryFileName(const QString& filename)
     }
 }
 
-#ifdef INCLUDE_CHASE_SUPPORT
-void OptionsContainer::setChaseFileName(const QString& filename)
+void OptionsContainer::setQuickReferenceFileName(const QString& filename)
 {
-    if(_chaseFileName != filename)
+    if(_quickReferenceFileName!= filename)
     {
-        _chaseFileName = filename;
-        emit chaseFileNameChanged();
+        _quickReferenceFileName = filename;
+        qDebug() << "[OptionsContainer] Quick Reference filename set to: " << filename;
+        emit quickReferenceFileNameChanged(filename);
     }
 }
+
+void OptionsContainer::setCalendarFileName(const QString& filename)
+{
+    if(_calendarFileName != filename)
+    {
+        _calendarFileName = filename;
+        qDebug() << "[OptionsContainer] Calendar filename set to: " << filename;
+        emit calendarFileNameChanged(filename);
+    }
+}
+
+void OptionsContainer::setEquipmentFileName(const QString& filename)
+{
+    if(_equipmentFileName != filename)
+    {
+        _equipmentFileName = filename;
+        qDebug() << "[OptionsContainer] Equipment filename set to: " << filename;
+        emit equipmentFileNameChanged(filename);
+    }
+}
+
+void OptionsContainer::setShopsFileName(const QString& filename)
+{
+    if(_shopsFileName != filename)
+    {
+        _shopsFileName = filename;
+        qDebug() << "[OptionsContainer] Shops filename set to: " << filename;
+        emit shopsFileNameChanged(filename);
+    }
+}
+
+QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename)
+{
+    QString result = settings.value(key, QVariant()).toString();
+    if(!result.isEmpty())
+        return result;
+    else
+        return getStandardFile(defaultFilename);
+}
+
+QString OptionsContainer::getStandardFile(const QString& defaultFilename)
+{
+    QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString standardFile = standardPath + QString("/") + defaultFilename;
+    if(QFile::exists(standardFile))
+        return standardFile;
+
+    QString appFile;
+#ifdef Q_OS_MAC
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    fileDirPath.cdUp();
+    appFile = fileDirPath.path() + QString("/Resources/") + defaultFilename;
+#else
+    QDir fileDirPath(QCoreApplication::applicationDirPath());
+    appFile = fileDirPath.path() + QString("/resources/") + defaultFilename;
 #endif
+
+    QDir standardDir;
+    standardDir.mkpath(standardPath);
+
+    if(QFile::copy(appFile, standardFile))
+        return standardFile;
+    else
+        return QString();
+}
+
+void OptionsContainer::setTablesDirectory(const QString& directory)
+{
+    if(_tablesDirectory != directory)
+    {
+        _tablesDirectory = directory;
+        qDebug() << "[OptionsContainer] Tables directory set to: " << directory;
+        emit tablesDirectoryChanged();
+    }
+}
+
+QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir)
+{
+    QString result = settings.value(key, QVariant()).toString();
+    if(!result.isEmpty())
+        return result;
+    else
+        return getStandardDirectory(defaultDir);
+}
+
+QString OptionsContainer::getStandardDirectory(const QString& defaultDir)
+{
+    QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString result = standardPath + QString("/") + defaultDir;
+    QDir standardDir(result);
+    if(standardDir.exists())
+        return result;
+
+    QString applicationPath = QCoreApplication::applicationDirPath();
+    QDir fileDirPath(applicationPath);
+#ifdef Q_OS_MAC
+    fileDirPath.cdUp();
+    if(!fileDirPath.cd(QString("Resources/") + defaultDir))
+        return QString();
+#else
+    if(!fileDirPath.cd(QString("resources/") + defaultDir))
+        return QString();
+#endif
+    QString resourcePath = fileDirPath.absolutePath();
+
+    QDir rootDir(standardPath);
+    rootDir.mkdir(defaultDir);
+
+    if(!standardDir.exists())
+        return QString();
+
+    QStringList filters;
+    filters << "*.xml" << "*.png" << "*.jpg";
+    QStringList fileEntries = fileDirPath.entryList(filters);
+    for(int i = 0; i < fileEntries.size(); ++i)
+    {
+        QFile::copy(fileDirPath.filePath(fileEntries.at(i)), standardDir.filePath(fileEntries.at(i)));
+    }
+
+    return result;
+}
+
+void OptionsContainer::resetFileSettings()
+{
+    setBestiaryFileName(getStandardFile(QString("DMHelperBestiary.xml")));
+    getStandardDirectory(QString("Images"));
+
+    setQuickReferenceFileName(getStandardFile(QString("quickref_data.xml")));
+    setCalendarFileName(getStandardFile(QString("calendar.xml")));
+    setEquipmentFileName(getStandardFile(QString("equipment.xml")));
+    setShopsFileName(getStandardFile(QString("shops.xml")));
+    setTablesDirectory(getStandardDirectory(QString("tables")));
+}
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)
 {
@@ -396,10 +549,12 @@ void OptionsContainer::copy(OptionsContainer* other)
     if(other)
     {
         setBestiaryFileName(other->_bestiaryFileName);
+        setQuickReferenceFileName(other->_quickReferenceFileName);
+        setCalendarFileName(other->_calendarFileName);
+        setEquipmentFileName(other->_equipmentFileName);
+        setShopsFileName(other->_shopsFileName);
+        setTablesDirectory(other->_tablesDirectory);
         setLastMonster(other->_lastMonster);
-#ifdef INCLUDE_CHASE_SUPPORT
-        setChaseFileName(other->_chaseFileName);
-#endif
         setShowAnimations(other->_showAnimations);
         setShowOnDeck(other->_showOnDeck);
         setShowCountdown(other->_showCountdown);

@@ -15,9 +15,11 @@ public:
 
     // General settings
     QString getBestiaryFileName() const;
-#ifdef INCLUDE_CHASE_SUPPORT
-    QString getChaseFileName() const;
-#endif
+    QString getQuickReferenceFileName() const;
+    QString getCalendarFileName() const;
+    QString getEquipmentFileName() const;
+    QString getShopsFileName() const;
+    QString getTablesDirectory() const;
     QString getLastMonster() const;
     bool getShowAnimations() const;
 
@@ -46,9 +48,11 @@ public:
 signals:
     // General settings
     void bestiaryFileNameChanged();
-#ifdef INCLUDE_CHASE_SUPPORT
-    void chaseFileNameChanged();
-#endif
+    void quickReferenceFileNameChanged(const QString& filename);
+    void calendarFileNameChanged(const QString& filename);
+    void equipmentFileNameChanged(const QString& filename);
+    void shopsFileNameChanged(const QString& filename);
+    void tablesDirectoryChanged();
     void showAnimationsChanged(bool showAnimations);
 
     // Audio settings
@@ -78,9 +82,17 @@ public slots:
 
     // General settings
     void setBestiaryFileName(const QString& filename);
-#ifdef INCLUDE_CHASE_SUPPORT
-    void setChaseFileName(const QString& filename);
-#endif
+    void setQuickReferenceFileName(const QString& filename);
+    void setCalendarFileName(const QString& filename);
+    void setEquipmentFileName(const QString& filename);
+    void setShopsFileName(const QString& filename);
+    QString getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename);
+    QString getStandardFile(const QString& defaultFilename);
+    void setTablesDirectory(const QString& directory);
+    QString getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir);
+    QString getStandardDirectory(const QString& defaultDir);
+    void resetFileSettings();
+
     void setLastMonster(const QString& lastMonster);
     void setShowAnimations(bool showAnimations);
 
@@ -110,9 +122,11 @@ private:
     // General settings
     QString _bestiaryFileName;
     QString _lastMonster;
-#ifdef INCLUDE_CHASE_SUPPORT
-    QString _chaseFileName;
-#endif
+    QString _quickReferenceFileName;
+    QString _calendarFileName;
+    QString _equipmentFileName;
+    QString _shopsFileName;
+    QString _tablesDirectory;
     bool _showAnimations;
 
     // Audio settings

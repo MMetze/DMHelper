@@ -201,6 +201,7 @@ HEADERS  += mainwindow.h \
     customtableframe.h \
     equipmentserver.h \
     expertisedialog.h \
+    mapmarker.h \
     objectimporter.h \
     publishbuttonframe.h \
     publishwindow.h \
@@ -396,15 +397,17 @@ OTHER_FILES += \
     bugs.txt
 
 DISTFILES += \
-    binsrc/calendar.xml \
-    binsrc/equipment.xml \
-    deploy.cmd \
-    deploy.cmd \
-    binsrc/quickref_data.xml \
+    buildanddeploy_msvc.cmd \
+    buildanddeploymac \
     bugs.txt \
-    buildanddeploy.cmd \
     release_notes.txt \
-    buildanddeploymac
+    resources/calendar.xml \
+    resources/equipment.xml \
+    resources/quickref_data.xml \
+    resources/shops.xml \
+    resources/tables/Indefinite Madness.xml \
+    resources/tables/Long Term Madness.xml \
+    resources/tables/Short Term Madness.xml
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc

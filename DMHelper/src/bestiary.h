@@ -39,7 +39,7 @@ public:
     QList<QString> getMonsterList() const;
     QStringList getLicenseText() const;
 
-    MonsterClass* getMonsterClass(const QString& name) const;
+    MonsterClass* getMonsterClass(const QString& name);
     MonsterClass* getFirstMonsterClass() const;
     MonsterClass* getLastMonsterClass() const;
     MonsterClass* getNextMonsterClass(MonsterClass* monsterClass) const;
@@ -52,8 +52,8 @@ public:
     void setDirectory(const QDir& directory);
     const QDir& getDirectory() const;
 
-    Monster* createMonster(const QString& name) const;
-    Monster* createMonster(const QDomElement& element, bool isImport) const;
+    Monster* createMonster(const QString& name);
+    Monster* createMonster(const QDomElement& element, bool isImport);
 
     QString findMonsterImage(const QString& monsterName, const QString& iconFile);
 
@@ -61,8 +61,12 @@ signals:
     void changed();
 
 public slots:
+    void startBatchProcessing();
+    void finishBatchProcessing();
 
 private:
+    void showMonsterClassWarning(const QString& monsterClass);
+
     static Bestiary* _instance;
 
     BestiaryMap _bestiaryMap;
@@ -70,6 +74,9 @@ private:
     int _majorVersion;
     int _minorVersion;
     QStringList _licenseText;
+
+    bool _batchProcessing;
+    bool _batchAcknowledge;
 };
 
 #endif // BESTIARY_H

@@ -829,7 +829,7 @@ void BattleDialog::updateMap()
 void BattleDialog::updateVideoBackground()
 {
     qDebug() << "[Battle Dialog] Initializing battle map video background image";
-    if((!_videoPlayer) && (_videoPlayer->getImage()))
+    if((!_videoPlayer) || (!_videoPlayer->getImage()))
         return;
 
     QImage battleMap = _videoPlayer->getImage()->copy();

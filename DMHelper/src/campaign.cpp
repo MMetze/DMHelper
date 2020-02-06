@@ -6,6 +6,7 @@
 #include "map.h"
 #include "audiotrack.h"
 #include "dmconstants.h"
+#include "bestiary.h"
 #include "basicdateserver.h"
 #include <QDomDocument>
 #include <QDomElement>
@@ -141,6 +142,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
         return;
     }
 
+    Bestiary::Instance()->startBatchProcessing();
+
     CampaignObjectBase::inputXML(element, isImport);
 
     int encounterCount = 0;
@@ -226,6 +229,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
             trackElement = trackElement.nextSiblingElement( QString("track") );
         }
     }
+
+    Bestiary::Instance()->finishBatchProcessing();
 
     // Sum up all the elements loaded. The +2 is for the campaign object itself and the notes object
     int totalElements = characters.count() + settings.count() + npcs.count() + adventures.count() + tracks.count() + encounterCount + mapCount + 2;

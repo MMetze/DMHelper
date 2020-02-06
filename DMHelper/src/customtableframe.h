@@ -15,10 +15,13 @@ class CustomTableFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit CustomTableFrame(QWidget *parent = nullptr);
+    explicit CustomTableFrame(const QString& tableDirectory, QWidget *parent = nullptr);
     ~CustomTableFrame();
 
     virtual QSize sizeHint() const;
+
+public slots:
+    void setTableDirectory(const QString& tableDir);
 
 protected:
     virtual void showEvent(QShowEvent *event);
@@ -34,6 +37,7 @@ private:
 
     Ui::CustomTableFrame *ui;
 
+    QString _tableDirectory;
     int _timerId;
     int _index;
     bool _readTriggered;

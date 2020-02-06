@@ -16,11 +16,11 @@ class DMScreenTabWidget : public QTabWidget
     Q_OBJECT
 
 public:
-    explicit DMScreenTabWidget(QWidget *parent = nullptr);
+    explicit DMScreenTabWidget(const QString& equipmentFile, QWidget *parent = nullptr);
     ~DMScreenTabWidget();
 
 private:
-    void readEquipment();
+    void readEquipment(const QString& equipmentFile);
     void readWeaponSection(const QDomElement& section, QLayout& layoutName, QLayout& layoutCost, QLayout& layoutDamage, QLayout& layoutWeight, QLayout& layoutProperties);
     void readArmorSection(const QDomElement& section, int& position);
     int countAllEquipment(const QDomElement& section, QString itemLabel, QString subitemLabel);

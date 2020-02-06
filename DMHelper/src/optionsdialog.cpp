@@ -14,14 +14,23 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
 
     if(_options)
     {
-        ui->edtBestiary->setText(_options->getBestiaryFileName());
-#ifdef INCLUDE_CHASE_SUPPORT
-        ui->edtChase->setText(_options->getChaseFileName());
-#else
-        ui->lblChase->hide();
-        ui->edtChase->hide();
-        ui->btnChase->hide();
-#endif
+        updateFileLocations();
+
+        connect(ui->btnBestiary, &QAbstractButton::clicked, this, &OptionsDialog::browseBestiary);
+        connect(ui->edtBestiary, &QLineEdit::editingFinished, this, &OptionsDialog::editBestiary);
+        connect(ui->btnQuickReference, &QAbstractButton::clicked, this, &OptionsDialog::browseQuickReference);
+        connect(ui->edtQuickReference, &QLineEdit::editingFinished, this, &OptionsDialog::editQuickReference);
+        connect(ui->btnCalendar, &QAbstractButton::clicked, this, &OptionsDialog::browseCalendar);
+        connect(ui->edtCalendar, &QLineEdit::editingFinished, this, &OptionsDialog::editCalendar);
+        connect(ui->btnEquipment, &QAbstractButton::clicked, this, &OptionsDialog::browseEquipment);
+        connect(ui->edtEquipment, &QLineEdit::editingFinished, this, &OptionsDialog::editEquipment);
+        connect(ui->btnShops, &QAbstractButton::clicked, this, &OptionsDialog::browseShops);
+        connect(ui->edtShops, &QLineEdit::editingFinished, this, &OptionsDialog::editShops);
+        connect(ui->btnTables, &QAbstractButton::clicked, this, &OptionsDialog::browseTables);
+        connect(ui->edtTables, &QLineEdit::editingFinished, this, &OptionsDialog::editTables);
+
+        connect(ui->btnResetFileLocations, &QAbstractButton::clicked, this, &OptionsDialog::resetFileLocations);
+
         ui->chkShowAnimations->setChecked(_options->getShowAnimations());
         ui->chkShowOnDeck->setChecked(_options->getShowOnDeck());
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
@@ -49,13 +58,9 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtInviteID->setEnabled(_options->getNetworkEnabled());
         ui->btnGenerateInvite->setEnabled(_options->getNetworkEnabled());
 #else
-        ui->grpNetwork->hide();
+        ui->tabWidget->removeTab(2);
 #endif
 
-        connect(ui->btnBestiary,SIGNAL(clicked()),this,SLOT(browseBestiary()));
-#ifdef INCLUDE_CHASE_SUPPORT
-        connect(ui->btnChase,SIGNAL(clicked()),this,SLOT(browseChase()));
-#endif
         connect(ui->chkShowAnimations,SIGNAL(clicked(bool)),_options,SLOT(setShowAnimations(bool)));
         connect(ui->chkShowOnDeck,SIGNAL(clicked(bool)),_options,SLOT(setShowOnDeck(bool)));
         connect(ui->chkShowCountdown,SIGNAL(clicked(bool)),_options,SLOT(setShowCountdown(bool)));
@@ -96,24 +101,181 @@ OptionsContainer* OptionsDialog::getOptions() const
 
 void OptionsDialog::browseBestiary()
 {
-    QString bestiaryFileName = QFileDialog::getOpenFileName(this,QString("Select Bestiary File"),QString(),QString("XML files (*.xml)"));
-
-    if((bestiaryFileName.isEmpty()) || (!QFile::exists(bestiaryFileName)))
-        return;
-
-    ui->edtBestiary->setText(bestiaryFileName);
-    _options->setBestiaryFileName(bestiaryFileName);
+    setBestiary(QFileDialog::getOpenFileName(this,QString("Select Bestiary File"),QString(),QString("XML files (*.xml)")));
 }
 
-#ifdef INCLUDE_CHASE_SUPPORT
-void OptionsDialog::browseChase()
+void OptionsDialog::editBestiary()
 {
-    QString chaseFileName = QFileDialog::getOpenFileName(this,QString("Select Chase File"),QString(),QString("XML files (*.xml)"));
+    setBestiary(ui->edtBestiary->text());
+}
 
-    if((chaseFileName.isEmpty()) || (!QFile::exists(chaseFileName)))
+void OptionsDialog::setBestiary(const QString& bestiaryFile)
+{
+    if(bestiaryFile.isEmpty())
         return;
 
-    ui->edtChase->setText(chaseFileName);
-    _options->setChaseFileName(chaseFileName);
+    if(!QFile::exists(bestiaryFile))
+    {
+        QMessageBox::critical(this, QString("Bestiary file not found"), QString("The selected bestiary file could not be found!") + QChar::LineFeed + bestiaryFile);
+        return;
+    }
+
+    ui->edtBestiary->setText(bestiaryFile);
+    _options->setBestiaryFileName(bestiaryFile);
 }
-#endif
+
+void OptionsDialog::browseQuickReference()
+{
+    setQuickReference(QFileDialog::getOpenFileName(this,QString("Select Quick Reference File"),QString(),QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editQuickReference()
+{
+    setQuickReference(ui->edtQuickReference->text());
+}
+
+void OptionsDialog::setQuickReference(const QString& quickRefFile)
+{
+    if(quickRefFile.isEmpty())
+        return;
+
+    if(!QFile::exists(quickRefFile))
+    {
+        QMessageBox::critical(this, QString("Quick Reference file not found"), QString("The selected quick reference file could not be found!") + QChar::LineFeed + quickRefFile);
+        return;
+    }
+
+    ui->edtQuickReference->setText(quickRefFile);
+    _options->setQuickReferenceFileName(quickRefFile);
+}
+
+void OptionsDialog::browseCalendar()
+{
+    setCalendar(QFileDialog::getOpenFileName(this,QString("Select Calendar File"),QString(),QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editCalendar()
+{
+    setCalendar(ui->edtCalendar->text());
+}
+
+void OptionsDialog::setCalendar(const QString& calendarFile)
+{
+    if(calendarFile.isEmpty())
+        return;
+
+    if(!QFile::exists(calendarFile))
+    {
+        QMessageBox::critical(this, QString("Calendar file not found"), QString("The selected calendar file could not be found!") + QChar::LineFeed + calendarFile);
+        return;
+    }
+
+    ui->edtCalendar->setText(calendarFile);
+    _options->setCalendarFileName(calendarFile);
+}
+
+void OptionsDialog::browseEquipment()
+{
+    setEquipment(QFileDialog::getOpenFileName(this,QString("Select Equipment File"),QString(),QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editEquipment()
+{
+    setEquipment(ui->edtEquipment->text());
+}
+
+void OptionsDialog::setEquipment(const QString& equipmentFile)
+{
+    if(equipmentFile.isEmpty())
+        return;
+
+    if(!QFile::exists(equipmentFile))
+    {
+        QMessageBox::critical(this, QString("Equipment file not found"), QString("The selected equipment file could not be found!") + QChar::LineFeed + equipmentFile);
+        return;
+    }
+
+    ui->edtEquipment->setText(equipmentFile);
+    _options->setEquipmentFileName(equipmentFile);
+}
+
+void OptionsDialog::browseShops()
+{
+    setShops(QFileDialog::getOpenFileName(this,QString("Select Shops File"),QString(),QString("XML files (*.xml)")));
+
+}
+
+void OptionsDialog::editShops()
+{
+    setShops(ui->edtShops->text());
+}
+
+void OptionsDialog::setShops(const QString& shopsFile)
+{
+    if(shopsFile.isEmpty())
+        return;
+
+    if(!QFile::exists(shopsFile))
+    {
+        QMessageBox::critical(this, QString("Shops file not found"), QString("The selected shops file could not be found!") + QChar::LineFeed + shopsFile);
+        return;
+    }
+
+    ui->edtShops->setText(shopsFile);
+    _options->setShopsFileName(shopsFile);
+}
+
+void OptionsDialog::browseTables()
+{
+    setTables(QFileDialog::getExistingDirectory(this,QString("Select Tables Directory"),QString()));
+}
+
+void OptionsDialog::editTables()
+{
+    setTables(ui->edtTables->text());
+}
+
+void OptionsDialog::setTables(const QString& tablesDirectory)
+{
+    if(tablesDirectory.isEmpty())
+        return;
+
+    if(!QDir(tablesDirectory).exists())
+    {
+        QMessageBox::critical(this, QString("Tables directory not found"), QString("The selected tables directory could not be found!") + QChar::LineFeed + tablesDirectory);
+        return;
+    }
+
+    ui->edtTables->setText(tablesDirectory);
+    _options->setTablesDirectory(tablesDirectory);
+}
+
+void OptionsDialog::updateFileLocations()
+{
+    if(!_options)
+        return;
+
+    ui->edtBestiary->setText(_options->getBestiaryFileName());
+    ui->edtQuickReference->setText(_options->getQuickReferenceFileName());
+    ui->edtCalendar->setText(_options->getCalendarFileName());
+    ui->edtEquipment->setText(_options->getEquipmentFileName());
+    ui->edtShops->setText(_options->getShopsFileName());
+    ui->edtTables->setText(_options->getTablesDirectory());
+}
+
+void OptionsDialog::resetFileLocations()
+{
+    if(!_options)
+        return;
+
+    QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                               QString("Confirm File Location Reset"),
+                                                               QString("All file paths will be reset to their default locations. None of your current files will be deleted, but if default files do not exist, they will be created.") + QChar::LineFeed + QString("Are you sure you want to do this?"),
+                                                               QMessageBox::Yes | QMessageBox::No);
+
+    if(result != QMessageBox::Yes)
+        return;
+
+    _options->resetFileSettings();
+    updateFileLocations();
+}

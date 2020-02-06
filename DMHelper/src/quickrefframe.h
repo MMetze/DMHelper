@@ -15,11 +15,11 @@ class QuickRefFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit QuickRefFrame(QWidget *parent = nullptr);
+    explicit QuickRefFrame(const QString& quickRefFile, QWidget *parent = nullptr);
     ~QuickRefFrame();
 
-protected:
-    void readQuickRef();
+public slots:
+    void readQuickRef(const QString& quickRefFile);
 
 protected slots:
     void handleQuickRefChange(int selection);
