@@ -39,7 +39,7 @@ cd build-64_bit-release
 xcopy .\release\DMHelper.exe ..\bin64\
 xcopy C:\Qt\5.13.0\msvc2017_64\bin\Qt5Xml.dll ..\bin64\
 xcopy ..\src\binsrc\* ..\bin64\*
-xcopy /s ..\src\bestiary\* ..\bin64\bestiary\*
+xcopy /s ..\src\bestiary\* ..\bin64\resources\*
 xcopy /s ..\src\doc\* ..\bin64\doc\*
 xcopy /s ..\src\binsrc\pkgconfig\* ..\bin64\pkgconfig\*
 xcopy /s ..\src\binsrc\plugins\* ..\bin64\plugins\*

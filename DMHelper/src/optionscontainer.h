@@ -20,9 +20,6 @@ public:
     QString getEquipmentFileName() const;
     QString getShopsFileName() const;
     QString getTablesDirectory() const;
-#ifdef INCLUDE_CHASE_SUPPORT
-    QString getChaseFileName() const;
-#endif
     QString getLastMonster() const;
     bool getShowAnimations() const;
 
@@ -56,9 +53,6 @@ signals:
     void equipmentFileNameChanged(const QString& filename);
     void shopsFileNameChanged(const QString& filename);
     void tablesDirectoryChanged();
-#ifdef INCLUDE_CHASE_SUPPORT
-    void chaseFileNameChanged();
-#endif
     void showAnimationsChanged(bool showAnimations);
 
     // Audio settings
@@ -93,12 +87,12 @@ public slots:
     void setEquipmentFileName(const QString& filename);
     void setShopsFileName(const QString& filename);
     QString getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename);
+    QString getStandardFile(const QString& defaultFilename);
     void setTablesDirectory(const QString& directory);
     QString getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir);
+    QString getStandardDirectory(const QString& defaultDir);
+    void resetFileSettings();
 
-#ifdef INCLUDE_CHASE_SUPPORT
-    void setChaseFileName(const QString& filename);
-#endif
     void setLastMonster(const QString& lastMonster);
     void setShowAnimations(bool showAnimations);
 
@@ -133,9 +127,6 @@ private:
     QString _equipmentFileName;
     QString _shopsFileName;
     QString _tablesDirectory;
-#ifdef INCLUDE_CHASE_SUPPORT
-    QString _chaseFileName;
-#endif
     bool _showAnimations;
 
     // Audio settings

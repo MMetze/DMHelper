@@ -38,6 +38,31 @@ QSize CustomTableFrame::sizeHint() const
     return QSize(800, 600);
 }
 
+void CustomTableFrame::setTableDirectory(const QString& tableDir)
+{
+    if(tableDir == _tableDirectory)
+        return;
+
+    if(_timerId)
+    {
+        killTimer(_timerId);
+        _timerId = 0;
+    }
+
+    ui->listWidget->clear();
+    ui->listEntries->clear();
+    ui->edtResult->clear();
+    _directoryList.clear();
+    _tableList.clear();
+
+    _tableDirectory = tableDir;
+
+    _index = -1;
+    _readTriggered = false;
+    if(isVisible())
+        showEvent(nullptr);
+}
+
 void CustomTableFrame::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
@@ -103,7 +128,8 @@ void CustomTableFrame::selectItem()
 
 void CustomTableFrame::readXMLFile(const QString& fileName)
 {
-    QString fullFileName = QString("./tables/") + fileName;
+    // QString fullFileName = QString("./tables/") + fileName;
+    QString fullFileName = _tableDirectory + QString("/") + fileName;
     qDebug() << "[CustomTableFrame] Reading custom table file name: " << fullFileName;
 
     QDomDocument doc("DMHelperDataXML");

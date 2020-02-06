@@ -21,14 +21,31 @@ public:
 
 private slots:
     void browseBestiary();
+    void editBestiary();
+    void setBestiary(const QString& bestiaryFile);
+
     void browseQuickReference();
+    void editQuickReference();
+    void setQuickReference(const QString& quickRefFile);
+
     void browseCalendar();
+    void editCalendar();
+    void setCalendar(const QString& calendarFile);
+
     void browseEquipment();
+    void editEquipment();
+    void setEquipment(const QString& equipmentFile);
+
     void browseShops();
+    void editShops();
+    void setShops(const QString& shopsFile);
+
     void browseTables();
-#ifdef INCLUDE_CHASE_SUPPORT
-    void browseChase();
-#endif
+    void editTables();
+    void setTables(const QString& tablesDirectory);
+
+    void updateFileLocations();
+    void resetFileLocations();
 
 private:
     Ui::OptionsDialog *ui;

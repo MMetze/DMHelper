@@ -17,9 +17,6 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     _equipmentFileName(),
     _shopsFileName(),
     _tablesDirectory(),
-#ifdef INCLUDE_CHASE_SUPPORT
-    _chaseFileName(),
-#endif
     _showAnimations(false),
     _audioVolume(100),
     _showOnDeck(true),
@@ -71,13 +68,6 @@ QString OptionsContainer::getTablesDirectory() const
 {
     return _tablesDirectory;
 }
-
-#ifdef INCLUDE_CHASE_SUPPORT
-QString OptionsContainer::getChaseFileName() const
-{
-    return _chaseFileName;
-}
-#endif
 
 QString OptionsContainer::getLastMonster() const
 {
@@ -184,20 +174,18 @@ void OptionsContainer::readSettings()
 
     // Note: password will not be stored in settings
     setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml")));
+    if(!settings.contains(QString("bestiary")))
+        getStandardDirectory(QString("Images"));
     setLastMonster(settings.value("lastMonster","").toString());
 
-    //TODO: add signal handlers then test on MAC!
-        setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
-        setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
-        setEquipmentFileName(getSettingsFile(settings, QString("equipment"), QString("equipment.xml")));
-        setShopsFileName(getSettingsFile(settings, QString("shops"), QString("shops.xml")));
+    setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
+    setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
+    setEquipmentFileName(getSettingsFile(settings, QString("equipment"), QString("equipment.xml")));
+    setShopsFileName(getSettingsFile(settings, QString("shops"), QString("shops.xml")));
 
     //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
-#ifdef INCLUDE_CHASE_SUPPORT
-    setChaseFileName(settings.value("chase data","").toString());
-#endif
     setShowAnimations(settings.value("showAnimations",QVariant(false)).toBool());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
@@ -239,9 +227,6 @@ void OptionsContainer::writeSettings()
     settings.setValue("equipment", getEquipmentFileName());
     settings.setValue("shops", getShopsFileName());
     settings.setValue("tables", getTablesDirectory());
-#ifdef INCLUDE_CHASE_SUPPORT
-    settings.setValue("chase data", getChaseFileName());
-#endif
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("showOnDeck", getShowOnDeck());
@@ -323,32 +308,16 @@ QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& ke
     QString result = settings.value(key, QVariant()).toString();
     if(!result.isEmpty())
         return result;
-/*
-[Main] Standard Path Information
-[Main]     DocumentsLocation:  "C:/Users/Craig/Documents"
-[Main]     ApplicationsLocation:  "C:/Users/Craig/AppData/Roaming/Microsoft/Windows/Start Menu/Programs"
-[Main]     RuntimeLocation:  "C:/Users/Craig"
-[Main]     ConfigLocation:  "C:/Users/Craig/AppData/Local/DMHelper"
-[Main]     AppDataLocation:  "C:/Users/Craig/AppData/Roaming/DMHelper"
-[Main]     AppLocalDataLocation:  "C:/Users/Craig/AppData/Local/DMHelper"
-*/
+    else
+        return getStandardFile(defaultFilename);
+}
 
-/*
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    QString bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
-#else
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    QString bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
-#endif
-*/
+QString OptionsContainer::getStandardFile(const QString& defaultFilename)
+{
     QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    result = standardPath + QString("/") + defaultFilename;
-    if(QFile::exists(result))
-        return result;
+    QString standardFile = standardPath + QString("/") + defaultFilename;
+    if(QFile::exists(standardFile))
+        return standardFile;
 
     QString appFile;
 #ifdef Q_OS_MAC
@@ -363,8 +332,8 @@ QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& ke
     QDir standardDir;
     standardDir.mkpath(standardPath);
 
-    if(QFile::copy(appFile, result))
-        return result;
+    if(QFile::copy(appFile, standardFile))
+        return standardFile;
     else
         return QString();
 }
@@ -384,9 +353,14 @@ QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QStrin
     QString result = settings.value(key, QVariant()).toString();
     if(!result.isEmpty())
         return result;
+    else
+        return getStandardDirectory(defaultDir);
+}
 
+QString OptionsContainer::getStandardDirectory(const QString& defaultDir)
+{
     QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    result = standardPath + QString("/") + defaultDir;
+    QString result = standardPath + QString("/") + defaultDir;
     QDir standardDir(result);
     if(standardDir.exists())
         return result;
@@ -410,7 +384,7 @@ QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QStrin
         return QString();
 
     QStringList filters;
-    filters << "*.xml";
+    filters << "*.xml" << "*.png" << "*.jpg";
     QStringList fileEntries = fileDirPath.entryList(filters);
     for(int i = 0; i < fileEntries.size(); ++i)
     {
@@ -420,17 +394,17 @@ QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QStrin
     return result;
 }
 
-
-#ifdef INCLUDE_CHASE_SUPPORT
-void OptionsContainer::setChaseFileName(const QString& filename)
+void OptionsContainer::resetFileSettings()
 {
-    if(_chaseFileName != filename)
-    {
-        _chaseFileName = filename;
-        emit chaseFileNameChanged();
-    }
+    setBestiaryFileName(getStandardFile(QString("DMHelperBestiary.xml")));
+    getStandardDirectory(QString("Images"));
+
+    setQuickReferenceFileName(getStandardFile(QString("quickref_data.xml")));
+    setCalendarFileName(getStandardFile(QString("calendar.xml")));
+    setEquipmentFileName(getStandardFile(QString("equipment.xml")));
+    setShopsFileName(getStandardFile(QString("shops.xml")));
+    setTablesDirectory(getStandardDirectory(QString("tables")));
 }
-#endif
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)
 {
@@ -581,9 +555,6 @@ void OptionsContainer::copy(OptionsContainer* other)
         setShopsFileName(other->_shopsFileName);
         setTablesDirectory(other->_tablesDirectory);
         setLastMonster(other->_lastMonster);
-#ifdef INCLUDE_CHASE_SUPPORT
-        setChaseFileName(other->_chaseFileName);
-#endif
         setShowAnimations(other->_showAnimations);
         setShowOnDeck(other->_showOnDeck);
         setShowCountdown(other->_showCountdown);

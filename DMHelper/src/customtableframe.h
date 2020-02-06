@@ -20,6 +20,9 @@ public:
 
     virtual QSize sizeHint() const;
 
+public slots:
+    void setTableDirectory(const QString& tableDir);
+
 protected:
     virtual void showEvent(QShowEvent *event);
     virtual void timerEvent(QTimerEvent *event);
