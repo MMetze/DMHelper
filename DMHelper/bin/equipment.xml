@@ -1,0 +1,737 @@
+<!DOCTYPE DMHelperDataXML>
+<root>
+    <magicitems>
+        <magicitem name="Adamantine Armor" category="Armor (medium or heavy, but not hide)" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Ammunition, +1" category="Weapon (any ammunition)" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Ammunition, +2" category="Weapon (any ammunition)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Ammunition, +3" category="Weapon (any ammunition)" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Amulet of Health" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Amulet of the Planes" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Animated Shield" category="Armor (shield)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Apparatus of the Crab" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Armor, +1" category="Armor (light, medium, or heavy)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Armor, +2" category="Armor (light, medium, or heavy)" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Armor, +3" category="Armor (light, medium, or heavy)" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Armor of Invulnerability" category="Armor (plate)" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Armor of Resistance" category="Armor (light, medium, or heavy)" probability="rare" attunement="y">
+	    <subcategory name="Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Force" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Necrotic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Psychic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Radiant" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Thunder" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Armor of Vulnerability" category="Armor (plate)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Arrow-Catching Shield" category="Armor (shield)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Arrow of Slaying" category="Weapon (arrow)" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Bag of Beans" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Bag of Devouring" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Bag of Holding" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Bag of Tricks" category="Wondrous item" probability="uncommon" attunement="">
+	    <subcategory name="Gray Bag of Tricks" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Rust Bag of Tricks" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Tan Bag of Tricks" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Bead of Force" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Belt of Dwarvenkind" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Belt of Giant Strength" category="Wondrous item" probability="" attunement="y">
+	    <subcategory name="Hill giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Stone giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Frost giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Fire giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Cloud giant" category="" probability="legendary" attunement=""></subcategory>
+	    <subcategory name="Storm giant" category="" probability="legendary" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Berserker Axe" category="Weapon (any axe)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Boots of Elvenkind" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Boots of Levitation" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Boots of Speed" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Boots of Striding and Springing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Boots of the Winterlands" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Bowl of Commanding Water Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Bracers of Archery" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Bracers of Defense" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Brazier of Commanding Fire Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Brooch of Shielding" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Broom of Flying" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Candle of Invocation" category="Wondrous item" probability="very rare" attunement="y">
+	    <subcategory name="Chaotic evil" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Chaotic neutral" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Chaotic good" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Neutral evil" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Neutral" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Neutral good" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lawful evil" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lawful neutral" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lawful good" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Cape of the Mountebank" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Carpet of Flying" category="Wondrous item" probability="very rare" attunement="">
+	    <subcategory name="3ft. x 5 ft." category="" probability="" attunement=""></subcategory>
+	    <subcategory name="4ft. x 6ft." category="" probability="" attunement=""></subcategory>
+	    <subcategory name="5ft. x 7 ft." category="" probability="" attunement=""></subcategory>
+	    <subcategory name="6ft. x 9 ft." category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Censer of Controlling Air Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Censer of Controlling Earth Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Censer of Controlling Fire Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Censer of Controlling Water Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Chime of Opening" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Circlet of Blasting" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Cloak of Arachnida" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Cloak of Displacement" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Cloak of Elvenkind" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Cloak of Protection" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Cloak of the Bat" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Cloak of the Manta Ray" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Crystal Ball" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Crystal Ball of Mind Reading" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Crystal Ball of Telepathy" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Crystal Ball of True Seeing" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Cube of Force" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Cubic Gate" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Dagger of Venom" category="Weapon (dagger)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Dancing Sword" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Decanter of Endless Water" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Deck of Illusions" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Deck of many things" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Defender" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Demon armor" category="Armor (plate)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Dimensional shackles" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Dragon Scale Mail" category="Armor (scale mail)" probability="very rare" attunement="y">
+	    <subcategory name="Black - Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Gold - Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Blue - Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Green - Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Brass - Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Red - Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Bronze - Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Silver - Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Copper - Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="White - Cold" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Dragon Slayer" category="Weapon (any sword)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Dust of Disappearance" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Dust of Dryness" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Dust of Sneezing and Choking" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Dwarven Thrower" category="Weapon (warhammer)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Efficient Quiver" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Efreeti Bottle" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Elemental Gem" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Eversmoking Bottle" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Eyes of Charming" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Eyes of Minute Seeing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Eyes of the Eagle" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Feather Token" category="Wondrous item" probability="rare" attunement="">
+	    <subcategory name="Anchor" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Swan boat" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Bird" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Tree" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fan" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Whip" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Figurine of Wondrous Power" category="Wondrous item" probability="" attunement="">
+	    <subcategory name="Bronze Griffon" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Ebony Fly" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Golden Lions" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Ivory Goats" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Marble Elephant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Obsidian Steed" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Onyx Dog" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Serpentine Owl" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Silver Raven" category="" probability="uncommon" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Flame Tongue" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Folding Boat" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Frost Brand" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Gauntlets of Ogre Power" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Gem of Brightness" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Gem of Seeing" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Giant Slayer" category="Weapon (any axe or sword)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Glamoured Studded Leather" category="Armor (studded leather)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Gloves of Missile Snaring" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Gloves of Swimming and Climbing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Goggles of Night" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Hammer of Thunderbolts" category="Weapon (maul)" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Handy Haversack" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Hat of Disguise" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Headband of Intellect" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Helm of Brilliance" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Helm of Comprehending Languages" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Helm of Telepathy" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Helm of Teleportation" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Holy Avenger" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Horn of Blasting" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Horn of Valhalla" category="Wondrous item" probability="" attunement="">
+	    <subcategory name="Silver" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Brass" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Bronze" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Iron" category="" probability="legendary" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Horseshoes of a Zephyr" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Horseshoes of Speed" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Immovable Rod" category="Rod" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Instant Fortress" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Ioun Stone" category="Wondrous item" probability="" attunement="y">
+	    <subcategory name="Absorption" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Agility" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Awareness" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Fortitude" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Greater Absorption" category="" probability="legendary" attunement=""></subcategory>
+	    <subcategory name="Insight" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Intellect" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Leadership" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Mastery" category="" probability="legendary" attunement=""></subcategory>
+	    <subcategory name="Protection" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Reserve" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Strength" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Sustenance" category="" probability="rare" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Iron Bands of Binding" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Iron Flask" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Javelin of Lightning" category="Weapon (javelin)" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Lantern of Revealing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Luck Blade" category="Weapon (any sword)" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Mace of Disruption" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Mace of Smiting" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Mace of Terror" category="Weapon (mace)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Mantle of Spell Resistance" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Manual of Bodily Health" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Manual of Gainful Exercise" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Manual of Golems" category="Wondrous item" probability="very rare" attunement="">
+	    <subcategory name="Clay" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Flesh" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Iron" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Stone" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Manual of Quickness of Action" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Marvelous Pigments" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Medallion of Thoughts" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Mirror of Life Trapping" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Mithral Armor" category="Armor (medium or heavy, but not hide)" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Necklace of Adaptation" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Necklace of Fireballs" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Necklace of Prayer Beads" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Nine Lives Stealer" category="Weapon (any sword)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Oathbow" category="Weapon (longbow)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Oil of Etherealness" category="Potion" probability="rare" attunement=""></magicitem>
+	<magicitem name="Oil of Sharpness" category="Potion" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Oil of Slipperiness" category="Potion" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Pearl of Power" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Periapt of Health" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Periapt of Proof against Poison" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Periapt of Wound Closure" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Philter of Love" category="Potion" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Pipes of Haunting" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Pipes of the Sewers" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Plate Armor of Etherealness" category="Armor (plate)" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Portable Hole" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Potion of Animal Friendship" category="Potion" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Potion of Clairvoyance" category="Potion" probability="rare" attunement=""></magicitem>
+	<magicitem name="Potion of Climbing" category="Potion" probability="common" attunement=""></magicitem>
+	<magicitem name="Potion of Diminution" category="Potion" probability="rare" attunement=""></magicitem>
+	<magicitem name="Potion of Flying" category="Potion" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Potion of Gaseous Form" category="Potion" probability="rare" attunement=""></magicitem>
+	<magicitem name="Potion of Giant Strength" category="Potion" probability="" attunement="">
+	    <subcategory name="Hill giant" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="Frost giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Stone giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Fire giant" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Cloud giant" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="Storm giant" category="" probability="legendary" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Potion of Growth" category="Potion" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Potion of Healing" category="Potion" probability="" attunement="">
+	    <subcategory name="Healing" category="" probability="common" attunement=""></subcategory>
+	    <subcategory name="Greater healing" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="Superior healing" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="Supreme healing" category="" probability="very rare" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Potion of Heroism" category="Potion" probability="rare" attunement=""></magicitem>
+	<magicitem name="Potion of Invisibility" category="Potion" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Potion of Mind Reading" category="Potion" probability="rare" attunement=""></magicitem>
+	<magicitem name="Potion of Poison" category="Potion" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Potion of Resistance" category="Potion" probability="uncommon" attunement="">
+	    <subcategory name="Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Necrotic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Psychic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Force" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Radiant" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Thunder" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Potion of Speed" category="Potion" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Potion of Water Breathing" category="Potion" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Restorative Ointment" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Ring of Animal Influence" category="Ring" probability="rare" attunement=""></magicitem>
+	<magicitem name="Ring of Djinni Summoning" category="Ring" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Ring of Elemental Command" category="Ring" probability="legendary" attunement="y">
+	    <subcategory name="Ring of Air Elemental Command" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Ring of Earth Elemental Command" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Ring of Fire Elemental Command" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Ring of Water Elemental Command" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Ring of Evasion" category="Ring" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Feather Falling" category="Ring" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Free Action" category="Ring" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Invisibility" category="Ring" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Ring of Jumping" category="Ring" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Ring of Mind Shielding" category="Ring" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Ring of Protection" category="Ring" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Regeneration" category="Ring" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Resistance" category="Ring" probability="rare" attunement="y">
+	    <subcategory name="Acid" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Cold" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Fire" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Force" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Lightning" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Necrotic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Poison" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Psychic" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Radiant" category="" probability="" attunement=""></subcategory>
+	    <subcategory name="Thunder" category="" probability="" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Ring of Shooting Stars" category="Ring" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Spell Storing" category="Ring" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Spell Turning" category="Ring" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Ring of Swimming" category="Ring" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Ring of Telekinesis" category="Ring" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Ring of the Ram" category="Ring" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Ring of Three Wishes" category="Ring" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Ring of Warmth" category="Ring" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Ring of Water Walking" category="Ring" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Ring of X-ray Vision" category="Ring" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Robe of Eyes" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Robe of Scintillating Colors" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Robe of Stars" category="Wondrous item" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Robe of the Archmagi" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Robe of Useful Items" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Rod of Absorption" category="Rod" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Rod of Alertness" category="Rod" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Rod of Lordly Might" category="Rod" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Rod of Rulership" category="Rod" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Rod of Security" category="Rod" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Rope of Climbing" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Rope of Entanglement" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Scarab of Protection" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Scimitar of Speed" category="Weapon (scimitar)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Shield, +1" category="Armor (shield)" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Shield, +2" category="Armor (shield)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Shield, +3" category="Armor (shield)" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Shield of Missile Attraction" category="Armor (shield)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Slippers of Spider Climbing" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Sovereign Glue" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Spell Scroll" category="Scroll" probability="" attunement="">
+	    <subcategory name="Cantrip" category="" probability="common" attunement=""></subcategory>
+	    <subcategory name="1st level" category="" probability="common" attunement=""></subcategory>
+	    <subcategory name="2nd level" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="3rd level" category="" probability="uncommon" attunement=""></subcategory>
+	    <subcategory name="4th level" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="5th level" category="" probability="rare" attunement=""></subcategory>
+	    <subcategory name="6th level" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="7th level" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="8th level" category="" probability="very rare" attunement=""></subcategory>
+	    <subcategory name="9th level" category="" probability="legendary" attunement=""></subcategory>
+	</magicitem>
+	<magicitem name="Spellguard Shield" category="Armor (shield)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Sphere of Annihilation" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Staff of Charming" category="Staff" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Fire" category="Staff" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Frost" category="Staff" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Healing" category="Staff" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Power" category="Staff" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Striking" category="Staff" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Swarming Insects" category="Staff" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Staff of the Magi" category="Staff" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Staff of the Python" category="Staff" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Staff of the Woodlands" category="Staff" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Thunder and Lightning" category="Staff" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Staff of Withering" category="Staff" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Stone of Controlling Earth Elementals" category="Wondrous item" probability="rare" attunement=""></magicitem>
+	<magicitem name="Stone of Good Luck (Luckstone)" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Sun Blade" category="Weapon (longsword)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Sword of Life Stealing" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Sword of Sharpness" category="Weapon (any sword that deals slashing damage)" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Sword of Wounding" category="Weapon (any sword)" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Talisman of Pure Good" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Talisman of the Sphere" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Talisman of Ultimate Evil" category="Wondrous item" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Tome of Clear Thought" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Tome of Leadership and Influence" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Tome of Understanding" category="Wondrous item" probability="very rare" attunement=""></magicitem>
+	<magicitem name="Trident of Fish Command" category="Weapon (trident)" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Universal Solvent" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Vicious Weapon" category="Weapon (any)" probability="rare" attunement=""></magicitem>
+	<magicitem name="Vorpal Sword" category="Weapon (any sword that deals slashing damage)" probability="legendary" attunement="y"></magicitem>
+	<magicitem name="Wand of Binding" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Enemy Detection" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Fear" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Fireballs" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Lightning Bolts" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Magic Detection" category="Wand" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Wand of Magic Missiles" category="Wand" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Wand of Paralysis" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Polymorph" category="Wand" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Secrets" category="Wand" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Wand of the War Mage, +1" category="Wand" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Wand of the War Mage, +2" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Wand of the War Mage, +3" category="Wand" probability="very rare" attunement="y"></magicitem>
+	<magicitem name="Wand of Web" category="Wand" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Wand of Wonder" category="Wand" probability="rare" attunement="y"></magicitem>
+	<magicitem name="Well of Many Worlds" category="Wondrous item" probability="legendary" attunement=""></magicitem>
+	<magicitem name="Wind Fan" category="Wondrous item" probability="uncommon" attunement=""></magicitem>
+	<magicitem name="Winged Boots" category="Wondrous item" probability="uncommon" attunement="y"></magicitem>
+	<magicitem name="Wings of Flying" category="Wondrous item" probability="rare" attunement="y"></magicitem>
+    </magicitems>
+    <armor>
+        <lightarmor>
+            <armor type="Padded" cost="5 gp" ac="11 + Dex modifier" strength="---" stealth="Disadvantage" weight="8 lb." probability="always"></armor>
+            <armor type="Leather" cost="10 gp" ac="11 + Dex modifier" strength="---" stealth="---" weight="10 lb." probability="always"></armor>
+            <armor type="Studded leather" cost="45 gp" ac="12 + Dex modifier" strength="---" stealth="---" weight="13 lb." probability="common"></armor>
+        </lightarmor>
+        <mediumarmor>
+            <armor type="Hide" cost="10 gp" ac="12 + Dex modifier (max 2)" strength="---" stealth="---" weight="12 lb." probability="always"></armor>
+            <armor type="Chain shirt" cost="50 gp" ac="13 + Dex modifier (max 2)" strength="---" stealth="---" weight="20 lb." probability="common"></armor>
+            <armor type="Scale mail" cost="50 gp" ac="14 + Dex modifier (max 2)" strength="---" stealth="Disadvantage" weight="45 lb." probability="uncommon"></armor>
+            <armor type="Breastplate" cost="400 gp" ac="14 + Dex modifier (max 2)" strength="---" stealth="---" weight="20 lb." probability="uncommon"></armor>
+            <armor type="Half plate" cost="750 gp" ac="15 + Dex modifier (max 2)" strength="---" stealth="Disadvantage" weight="40 lb." probability="rare"></armor>
+        </mediumarmor>
+        <heavyarmor>
+            <armor type="Ring mail" cost="30 gp" ac="14" strength="---" stealth="Disadvantage" weight="40 lb." probability="uncommon"></armor>
+            <armor type="Chain mail" cost="75 gp" ac="16" strength="Str 13" stealth="Disadvantage" weight="55 lb." probability="uncommon"></armor>
+            <armor type="Splint" cost="200 gp" ac="17" strength="Str 15" stealth="Disadvantage" weight="60 lb." probability="rare"></armor>
+            <armor type="Plate" cost="1500 gp" ac="18" strength="Str 15" stealth="Disadvantage" weight="65 lb." probability="very rare"></armor>
+        </heavyarmor>
+        <shield>
+            <armor type="Shield" cost="10 gp" ac="2" strength="---" stealth="---" weight="6 lb." probability="common"></armor>
+        </shield>
+    </armor>
+    <weapons>
+        <simplemeleeweapons>
+            <weapon name="Club" cost="1 sp" damage="1d4 B" weight="2 lb." properties="Light" probability="always"></weapon>
+            <weapon name="Dagger" cost="2 gp" damage="1d4 P" weight="1 lb." properties="Finesse, light, thrown (range 20/60)" probability="always"></weapon>
+            <weapon name="Greatclub" cost="2 sp" damage="1d8 B" weight="10 lb." properties="Two-handed" probability="common"></weapon>
+            <weapon name="Handaxe" cost="5 gp" damage="1d6 S" weight="2 lb." properties="Light, thrown (range 20/60)" probability="common"></weapon>
+            <weapon name="Javelin" cost="5 sp" damage="1d6 P" weight="2 lb." properties="Thrown (range 30/120)" probability="uncommon"></weapon>
+            <weapon name="Light Hammer" cost="2 gp" damage="1d4 B" weight="2 lb." properties="Light, thrown (range 20/60)" probability="common"></weapon>
+            <weapon name="Mace" cost="5 gp" damage="1d6 B" weight="4 lb." properties="---" probability="uncommon"></weapon>
+            <weapon name="Quarterstaff" cost="2 sp" damage="1d6 B" weight="4 lb." properties="Versatile (1d8)" probability="always"></weapon>
+            <weapon name="Sickle" cost="1 gp" damage="1d4 S" weight="2 lb." properties="Light" probability="common"></weapon>
+            <weapon name="Spear" cost="1 gp" damage="1d6 P" weight="3 lb." properties="Thrown (range 20/60), versatile (1d8)" probability="common"></weapon>
+        </simplemeleeweapons>
+        <simplerangedweapons>
+            <weapon name="Crossbow, light" cost="25 gp" damage="1d8 P" weight="5 lb." properties="Ammunition (range 80/320), loading, two-handed" probability="uncommon"></weapon>
+            <weapon name="Dart" cost="5 cp" damage="1d4 P" weight="1/4 lb." properties="Finesse, thrown (range 20/60)" probability="uncommon"></weapon>
+            <weapon name="Shortbow" cost="25 gp" damage="1d6 P" weight="2 lb." properties="Ammunition (range 80/320), two-handed" probability="common"></weapon>
+            <weapon name="Sling" cost="1 sp" damage="1d4 B" weight="---" properties="Ammunition (range 30/120)" probability="always"></weapon>
+        </simplerangedweapons>
+        <martialmeleeweapons>
+            <weapon name="Battleaxe" cost="10 gp" damage="1d8 S" weight="4 lb." properties="Versatile (1d10)" probability="uncommon"></weapon>
+            <weapon name="Flail" cost="10 gp" damage="1d8 B" weight="2 lb." properties="---" probability="common"></weapon>
+            <weapon name="Glaive" cost="20 gp" damage="1d10 S" weight="6 lb." properties="Heavy, reach, two-handed" probability="rare"></weapon>
+            <weapon name="Greataxe" cost="30 gp" damage="1d12 S" weight="7 lb." properties="Heavy, two-handed" probability="rare"></weapon>
+            <weapon name="Greatsword" cost="50 gp" damage="2d6 S" weight="6 lb." properties="Heavy, two-handed" probability="rare"></weapon>
+            <weapon name="Halberd" cost="20 gp" damage="1d10 S" weight="6 lb." properties="Heavy, reach, two-handed" probability="rare"></weapon>
+            <weapon name="Lance" cost="10 gp" damage="1d12 P" weight="6 lb." properties="Reach, special" probability="rare"></weapon>
+            <weapon name="Longsword" cost="15 gp" damage="1d8 S" weight="3 lb." properties="Versatile (1d10)" probability="uncommon"></weapon>
+            <weapon name="Maul" cost="10 gp" damage="2d6 B" weight="10 lb." properties="Heavy, two-handed" probability="common"></weapon>
+            <weapon name="Morningstar" cost="15 gp" damage="1d8 P" weight="4 lb." properties="---" probability="uncommon"></weapon>
+            <weapon name="Pike" cost="5 gp" damage="1d10 P" weight="18 lb." properties="Heavy, reach, two-handed" probability="common"></weapon>
+            <weapon name="Rapier" cost="25 gp" damage="1d8 P" weight="2 lb." properties="Finesse" probability="rare"></weapon>
+            <weapon name="Scimitar" cost="25 gp" damage="1d6 S" weight="3 lb." properties="Finesse, light" probability="rare"></weapon>
+            <weapon name="Shortsword" cost="10 gp" damage="1d6 P" weight="2 lb." properties="Finesse, light" probability="common"></weapon>
+            <weapon name="Trident" cost="5 gp" damage="1d6 P" weight="4 lb." properties="Thrown (range 20/60), versatile (1d8)" probability="rare"></weapon>
+            <weapon name="War Pick" cost="5 gp" damage="1d8 P" weight="2 lb." properties="---" probability="uncommon"></weapon>
+            <weapon name="Warhammer" cost="15 gp" damage="1d8 B" weight="2 lb." properties="Versatile (1d10)" probability="uncommon"></weapon>
+            <weapon name="Whip" cost="2 gp" damage="1d4 S" weight="3 lb." properties="Finesse, reach" probability="uncommon"></weapon>
+        </martialmeleeweapons>    
+        <martialrangedweapons>    
+            <weapon name="Blowgun" cost="10 gp" damage="1 P" weight="1 lb." properties="Ammunition (range 25/100), loading" probability="uncommon"></weapon>
+            <weapon name="Crossbow, hand" cost="75 gp" damage="1d6 P" weight="3 lb." properties="Ammunition (range 30/120), light, loading" probability="rare"></weapon>
+            <weapon name="Crossbow, heavy" cost="50 gp" damage="1d10 P" weight="18 lb." properties="Ammunition (range 100/400), heavy, loading, two-handed" probability="rare"></weapon>
+            <weapon name="Longbow" cost="50 gp" damage="1d8 P" weight="2 lb." properties="Ammunition (range 150/600), heavy, two-handed" probability="uncommon"></weapon>
+            <weapon name="Net" cost="1 gp" damage="---" weight="3 lb." properties="Special, thrown (range 5/15)" probability="common"></weapon>
+        </martialrangedweapons>
+    </weapons>
+    <animals>
+        <animal name="Camel" cost="50 gp" speed="50 ft." capacity="480 lb." probability="rare"></animal>
+        <animal name="Donkey or mule" cost="8 gp" speed="40 ft." capacity="420 lb." probability="common"></animal>
+        <animal name="Elephant" cost="200 gp" speed="40 ft." capacity="1320 lb." probability="very rare"></animal>
+        <animal name="Horse, draft" cost="50 gp" speed="40 ft." capacity="540 lb." probability="common"></animal>
+        <animal name="Horse, riding" cost="75 gp" speed="60 ft." capacity="480 lb." probability="common"></animal>
+        <animal name="Mastiff" cost="25 gp" speed="40 ft." capacity="195 lb." probability="uncommon"></animal>
+        <animal name="Pony" cost="30 gp" speed="40 ft." capacity="225 lb." probability="common"></animal>
+        <animal name="Warhorse" cost="400 gp" speed="60 ft." capacity="540 lb." probability="rare"></animal>
+        <animal name="1 chicken" cost="2 cp" speed="30 ft." capacity="---" probability="common"></animal>    
+        <animal name="1 goat" cost="1 gp" speed="40 ft." capacity="---" probability="common"></animal>    
+        <animal name="1 sheep" cost="2 gp" speed="40 ft." capacity="---" probability="common"></animal>    
+        <animal name="1 pig" cost="3 gp" speed="40 ft." capacity="100 lb." probability="common"></animal>    
+        <animal name="1 cow" cost="10 gp" speed="40 ft." capacity="480 lb." probability="common"></animal>    
+        <animal name="1 ox" cost="15 gp" speed="40 ft." capacity="540 lb." probability="uncommon"></animal>    
+    </animals>
+    <tacks>
+        <tack name="Barding" cost="x4" weight="x2" probability="common"></tack>
+        <tack name="Bit and bridle" cost="2 gp" weight="1 lb." probability="common"></tack>
+        <tack name="Carriage" cost="100 gp" weight="600 lb." probability="rare"></tack>
+        <tack name="Cart" cost="15 gp" weight="200 lb." probability="always"></tack>
+        <tack name="Chariot" cost="250 gp" weight="100 lb." probability="rare"></tack>
+        <tack name="Animal Feed (per day)" cost="5 cp" weight="10 lb." probability="always"></tack>
+        <tack name="Saddle, Exotic" cost="60 gp" weight="40 lb." probability="very rare"></tack>
+        <tack name="Saddle, Military" cost="20 gp" weight="30 lb." probability="rare"></tack>
+        <tack name="Saddle, Pack" cost="5 gp" weight="15 lb." probability="common"></tack>
+        <tack name="Saddle, Riding" cost="10 gp" weight="25 lb." probability="common"></tack>
+        <tack name="Saddlebags" cost="4 gp" weight="8 lb." probability="common"></tack>
+        <tack name="Sled" cost="20 gp" weight="300 lb." probability="uncommon"></tack>
+        <tack name="Stabling (per day)" cost="5 sp" weight="---" probability="common"></tack>
+        <tack name="Wagon" cost="35 gp" weight="400 lb." probability="common"></tack>
+    </tacks>
+    <vehicles>
+        <vehicle name="Galley" cost="30000 gp" speed="4 mph" probability="very rare"></vehicle>    
+        <vehicle name="Keelboat" cost="3000 gp" speed="1 mph" probability="uncommon"></vehicle>    
+        <vehicle name="Longship" cost="10000 gp" speed="3 mph" probability="rare"></vehicle>    
+        <vehicle name="Rowboat" cost="50 gp" speed="1 1/2 mph" probability="common"></vehicle>    
+        <vehicle name="Sailing ship" cost="10000 gp" speed="2 mph" probability="uncommon"></vehicle>    
+        <vehicle name="Warship" cost="25000 gp" speed="2 1/2 mph" probability="very rare"></vehicle>    
+    </vehicles>
+    <tradegoods>
+        <tradegood name="1 lb. of wheat" cost="1 cp" probability="common"></tradegood>    
+        <tradegood name="1 lb. of flour" cost="2 cp" probability="common"></tradegood>    
+        <tradegood name="1 lb. of salt" cost="5 cp" probability="uncommon"></tradegood>    
+        <tradegood name="1 lb. of iron" cost="1 sp" probability="common"></tradegood>    
+        <tradegood name="1 sq. yd. of canvas" cost="1 sp" probability="common"></tradegood>    
+        <tradegood name="1 lb. of copper" cost="5 sp" probability="uncommon"></tradegood>    
+        <tradegood name="1 sq. yd. of cotton cloth" cost="5 sp" probability="common"></tradegood>    
+        <tradegood name="1 lb. of ginger" cost="1 gp" probability="common"></tradegood>    
+        <tradegood name="1 lb. of cinnamon" cost="2 gp" probability="uncommon"></tradegood>    
+        <tradegood name="1 lb. of pepper" cost="2 gp" probability="uncommon"></tradegood>    
+        <tradegood name="1 lb. of cloves" cost="3 gp" probability="common"></tradegood>    
+        <tradegood name="1 lb. of silver" cost="5 gp" probability="rare"></tradegood>    
+        <tradegood name="1 sq. yd. of linen" cost="5 gp" probability="rare"></tradegood>    
+        <tradegood name="1 sq. yd. of silk" cost="10 gp" probability="very rare"></tradegood>    
+        <tradegood name="1 lb. of saffron" cost="15 gp" probability="very rare"></tradegood>    
+        <tradegood name="1 lb. of gold" cost="50 gp" probability="rare"></tradegood>    
+        <tradegood name="1 lb. of platinum" cost="500 gp" probability="very rare"></tradegood>    
+    </tradegoods>
+    <lifestyleexpenses>
+        <lifestyle name="Wretched" cost="---" probability="always"></lifestyle>    
+        <lifestyle name="Squalid" cost="1 sp" probability="always"></lifestyle>    
+        <lifestyle name="Poor" cost="2 sp" probability="common"></lifestyle>    
+        <lifestyle name="Modest" cost="1 gp" probability="common"></lifestyle>    
+        <lifestyle name="Comfortable" cost="2 gp" probability="uncommon"></lifestyle>    
+        <lifestyle name="Wealthy" cost="4 gp" probability="rare"></lifestyle>    
+        <lifestyle name="Aristocratic" cost="10 gp minimum" probability="very rare"></lifestyle>    
+    </lifestyleexpenses>
+    <food>
+        <fooditem name="Ale" cost="">
+            <foodsubitem name="Gallon" cost="2 sp" probability="common"></foodsubitem>
+            <foodsubitem name="Mug" cost="4 cp" probability="common"></foodsubitem>
+        </fooditem>
+        <fooditem name="Banquet (per person)" cost="10 gp" probability="rare"></fooditem>
+        <fooditem name="Bread, loaf" cost="2 cp" probability="always"></fooditem>
+        <fooditem name="Cheese, hunk" cost="1 sp" probability="uncommon"></fooditem>
+        <fooditem name="Inn stay (per day)" cost="">
+            <foodsubitem name="Squalid" cost="7 cp" probability="always"></foodsubitem>
+            <foodsubitem name="Poor" cost="1 sp" probability="common"></foodsubitem>
+            <foodsubitem name="Modest" cost="5 sp" probability="common"></foodsubitem>
+            <foodsubitem name="Comfortable" cost="8 sp" probability="uncommon"></foodsubitem>
+            <foodsubitem name="Wealthy" cost="2 gp" probability="rare"></foodsubitem>
+            <foodsubitem name="Aristocratic" cost="4 gp" probability="very rare"></foodsubitem>
+        </fooditem>
+        <fooditem name="Meals (per day)" cost="">
+            <foodsubitem name="Squalid" cost="3 cp" probability="always"></foodsubitem>
+            <foodsubitem name="Poor" cost="6 cp" probability="common"></foodsubitem>
+            <foodsubitem name="Modest" cost="3 sp" probability="common"></foodsubitem>
+            <foodsubitem name="Comfortable" cost="5 sp" probability="uncommon"></foodsubitem>
+            <foodsubitem name="Wealthy" cost="8 sp" probability="rare"></foodsubitem>
+            <foodsubitem name="Aristocratic" cost="2 gp" probability="very rare"></foodsubitem>
+        </fooditem>
+        <fooditem name="Meat, chunk" cost="3 sp" probability="common"></fooditem>
+        <fooditem name="Wine" cost="">
+            <foodsubitem name="Common (pitcher)" cost="2 sp" probability="uncommon"></foodsubitem>
+            <foodsubitem name="Fine (bottle)" cost="10 gp" probability="rare"></foodsubitem>
+        </fooditem>
+    </food>
+    <service>
+        <serviceitem name="Coach cab" cost="">
+            <servicesubitem name="Between towns" cost="3 cp per mile" probability="uncommon"></servicesubitem>
+            <servicesubitem name="Within a city" cost="1 cp" probability="uncommon"></servicesubitem>
+        </serviceitem>
+        <serviceitem name="Hireling" cost="">
+            <servicesubitem name="Skilled" cost="2 gp per day" probability="uncommon"></servicesubitem>
+            <servicesubitem name="Untrained" cost="2 sp per day" probability="always"></servicesubitem>
+        </serviceitem>
+        <serviceitem name="Messenger" cost="2 cp per mile" probability="common"></serviceitem>
+        <serviceitem name="Road or gate toll" cost="1 cp" probability="common"></serviceitem>
+        <serviceitem name="Ship's passage" cost="1 sp per mile" probability="common"></serviceitem>
+    </service>
+    <tools>
+        <tool name="Artisan's tools" cost="" weight="">
+            <subtool name="Alchemist's supplies" cost="50 gp" weight="8 lb." probability="rare"></subtool>
+            <subtool name="Brewer's supplies" cost="20 gp" weight="9 lb." probability="rare"></subtool>
+            <subtool name="Calligrapher's Supplies" cost="10 gp" weight="5 lb." probability="rare"></subtool>
+            <subtool name="Carpenter's tools" cost="8 gp" weight="6 lb." probability="common"></subtool>
+            <subtool name="Cartographer's tools" cost="15 gp" weight="6 lb." probability="rare"></subtool>
+            <subtool name="Cobbler's tools" cost="5 gp" weight="5 lb." probability="uncommon"></subtool>
+            <subtool name="Cook's utensils" cost="1 gp" weight="8 lb." probability="common"></subtool>
+            <subtool name="Glassblower's tools" cost="30 gp" weight="5 lb." probability="rare"></subtool>
+            <subtool name="Jeweler's tools" cost="25 gp" weight="2 lb." probability="rare"></subtool>
+            <subtool name="Leatherworker's tools" cost="5 gp" weight="5 lb." probability="common"></subtool>
+            <subtool name="Mason's tools" cost="10 gp" weight="8 lb." probability="common"></subtool>
+            <subtool name="Painter's supplies" cost="10 gp" weight="5 lb." probability="uncommon"></subtool>
+            <subtool name="Potter's tools" cost="10 gp" weight="3 lb." probability="common"></subtool>
+            <subtool name="Smith's tools" cost="20 gp" weight="8 lb." probability="uncommon"></subtool>
+            <subtool name="Tinker's tools" cost="50 gp" weight="10 lb." probability="rare"></subtool>
+            <subtool name="Weaver's tools" cost="1 gp" weight="5 lb." probability="common"></subtool>
+            <subtool name="Woodcarver's tools" cost="1 gp" weight="5 lb." probability="common"></subtool>
+            <subtool name="Disguise kit" cost="25 gp" weight="3 lb." probability="very rare"></subtool>
+            <subtool name="Forgery kit" cost="15 gp" weight="5 lb." probability="very rare"></subtool>
+        </tool>
+        <tool name="Gaming sets" cost="" weight="">
+            <subtool name="Dice Set" cost="1 sp" weight="---" probability="common"></subtool>
+            <subtool name="Playing Card Set" cost="5 sp" weight="---" probability="common"></subtool>
+        </tool>
+        <tool name="Herbalism kit" cost="5 gp" weight="3 lb." probability="uncommon"></tool>
+        <tool name="Musical Instruments" cost="" weight="">
+            <subtool name="Bagpipes" cost="30 gp" weight="6 lb." probability="uncommon"></subtool>
+            <subtool name="Drum" cost="6 gp" weight="3 lb." probability="common"></subtool>
+            <subtool name="Dulcimer" cost="25 gp" weight="10 lb." probability="rare"></subtool>
+            <subtool name="Flute" cost="2 gp" weight="1 lb." probability="common"></subtool>
+            <subtool name="Lute" cost="35 gp" weight="2 lb." probability="uncommon"></subtool>
+            <subtool name="Lyre" cost="30 gp" weight="2 lb." probability="rare"></subtool>
+            <subtool name="Horn" cost="3 gp" weight="2 lb." probability="uncommon"></subtool>
+            <subtool name="Pan flute" cost="12 gp" weight="2 lb." probability="uncommon"></subtool>
+            <subtool name="Shawm" cost="2 gp" weight="1 lb." probability="uncommon"></subtool>
+            <subtool name="Viol" cost="30 gp" weight="1 lb." probability="rare"></subtool>
+        </tool>
+        <tool name="Navigator's tools" cost="25 gp" weight="2 lb." probability="rare"></tool>
+        <tool name="Poisoner's kit" cost="50 gp" weight="2 lb." probability="very rare"></tool>
+        <tool name="Thieves' tools" cost="25 gp" weight="1 lb." probability="rare"></tool>
+    </tools>
+    <adventuringgear>
+        <gear name="Abacus" cost="2 gp" weight="2 lb." probability="rare"></gear>
+        <gear name="Acid (vial)" cost="25 gp" weight="1 lb." probability="very rare"></gear>
+        <gear name="Alchemist's fire (flask)" cost="50 gp" weight="1 lb." probability="very rare"></gear>
+        <gear name="Ammunition" cost="" weight="">
+            <subgear name="Arrows (20)" cost="1 gp" weight="1 lb." probability="common"></subgear>
+            <subgear name="Blowgun Needles (50)" cost="1 gp" weight="1 lb." probability="uncommon"></subgear>
+            <subgear name="Crossbow bolts (20)" cost="1 gp" weight="1 1/2 lb." probability="uncommon"></subgear>
+            <subgear name="Sling bullets (20)" cost="4 cp" weight="1 1/2 lb." probability="always"></subgear>
+        </gear>
+        <gear name="Antitoxin (vial)" cost="50 gp" weight="---" probability="very rare"></gear>
+        <gear name="Arcane focus" cost="" weight="">
+            <subgear name="Crystal" cost="10 gp" weight="1 lb." probability="very rare"></subgear>
+            <subgear name="Orb" cost="20 gp" weight="3 lb." probability="very rare"></subgear>
+            <subgear name="Rod" cost="10 gp" weight="2 lb." probability="very rare"></subgear>
+            <subgear name="Staff" cost="5 gp" weight="4 lb." probability="very rare"></subgear>
+            <subgear name="Wand" cost="10 gp" weight="1 lb." probability="very rare"></subgear>
+        </gear>
+        <gear name="Backpack" cost="2 gp" weight="5 lb." probability="always"></gear>
+        <gear name="Ball bearings (bag of 1,000)" cost="1 gp" weight="2 lb." probability="common"></gear>
+        <gear name="Barrel" cost="2 gp" weight="70 lb." probability="always"></gear>
+        <gear name="Basket" cost="4 sp" weight="2 lb." probability="always"></gear>
+        <gear name="Bedroll" cost="1 gp" weight="7 lb." probability="common"></gear>
+        <gear name="Bell" cost="1 gp" weight="---" probability="uncommon"></gear>
+        <gear name="Blanket" cost="5 sp" weight="3 lb." probability="always"></gear>
+        <gear name="Block and tackle" cost="1 gp" weight="5 lb." probability="common"></gear>
+        <gear name="Book" cost="25 gp" weight="5 lb." probability="rare"></gear>
+        <gear name="Bottle, glass" cost="2 gp" weight="2 lb." probability="uncommon"></gear>
+        <gear name="Bucket" cost="5 cp" weight="2 lb." probability="always"></gear>
+        <gear name="Caltrops (bag of 20)" cost="1 gp" weight="2 lb." probability="rare"></gear>
+        <gear name="Candle" cost="1 cp" weight="---" probability="always"></gear>
+        <gear name="Case, crossbow bolt" cost="1 gp" weight="1 lb." probability="uncommon"></gear>
+        <gear name="Case, map or scroll" cost="1 gp" weight="1 lb." probability="uncommon"></gear>
+        <gear name="Chain (10 feet)" cost="5 gp" weight="10 lb." probability="uncommon"></gear>
+        <gear name="Chalk (1 piece)" cost="1 cp" weight="---" probability="uncommon"></gear>
+        <gear name="Chest" cost="5 gp" weight="25 lb." probability="uncommon"></gear>
+        <gear name="Clothes, Common" cost="5 sp" weight="3 lb." probability="always"></gear>
+        <gear name="Clothes, costume" cost="5 gp" weight="4 lb." probability="very rare"></gear>
+        <gear name="Clothes, fine" cost="15 gp" weight="6 lb." probability="very rare"></gear>
+        <gear name="Clothes, traveler's" cost="2 gp" weight="4 lb." probability="uncommon"></gear>
+        <gear name="Component pouch" cost="25 gp" weight="2 lb." probability="very rare"></gear>
+        <gear name="Crowbar" cost="2 gp" weight="5 lb." probability="uncommon"></gear>
+        <gear name="Druidic focus" cost="" weight="">
+            <subgear name="Sprig of mistletoe" cost="1 gp" weight="---" probability="very rare"></subgear>
+            <subgear name="Totem" cost="1 gp" weight="---" probability="very rare"></subgear>
+            <subgear name="Wooden staff" cost="5 gp" weight="4 lb." probability="very rare"></subgear>
+            <subgear name="Yew wand" cost="10 gp" weight="1 lb." probability="very rare"></subgear>
+        </gear>
+        <gear name="Fishing tackle" cost="1 gp" weight="4 lb." probability="common"></gear>
+        <gear name="Flask or Tankard" cost="2 cp" weight="1 lb." probability="common"></gear>
+        <gear name="Grappling hook" cost="2 gp" weight="4 lb." probability="uncommon"></gear>
+        <gear name="Hammer" cost="1 gp" weight="3 lb." probability="common"></gear>
+        <gear name="Hammer, sledge" cost="2 gp" weight="10 lb." probability="uncommon"></gear>
+        <gear name="Holy Symbol" cost="" weight="">
+            <subgear name="Amulet" cost="5 gp" weight="1 lb." probability="very rare"></subgear>
+            <subgear name="Emblem" cost="5 gp" weight="---" probability="very rare"></subgear>
+            <subgear name="Reliquary" cost="5 gp" weight="2 lb." probability="very rare"></subgear>
+        </gear>
+        <gear name="Holy Water (flask)" cost="25 gp" weight="1 lb." probability="very rare"></gear>
+        <gear name="Hourglass" cost="25 gp" weight="1 lb." probability="very rare"></gear>
+        <gear name="Hunting trap" cost="5 gp" weight="25 lb." probability="common"></gear>
+        <gear name="Ink (1 ounce bottle)" cost="10 gp" weight="---" probability="very rare"></gear>
+        <gear name="Ink pen" cost="2 cp" weight="---" probability="very rare"></gear>
+        <gear name="Jug or Pitcher" cost="2 cp" weight="4 lb." probability="always"></gear>
+        <gear name="Ladder (10-foot)" cost="1 sp" weight="25 lb." probability="always"></gear>
+        <gear name="Lamp" cost="5 sp" weight="1 lb." probability="common"></gear>
+        <gear name="Lantern, bullseye" cost="10 gp" weight="2 lb." probability="uncommon"></gear>
+        <gear name="Lantern, hooded" cost="5 gp" weight="2 lb." probability="common"></gear>
+        <gear name="Lock" cost="10 gp" weight="1 lb." probability="rare"></gear>
+        <gear name="Magnifying glass" cost="100 gp" weight="---" probability="very rare"></gear>
+        <gear name="Manacles" cost="2 gp" weight="6 lb." probability="uncommon"></gear>
+        <gear name="Mirror, steel" cost="5 gp" weight="1/2 lb." probability="rare"></gear>
+        <gear name="Oil (flask)" cost="1 sp" weight="1 lb." probability="common"></gear>
+        <gear name="Paper (one sheet)" cost="2 sp" weight="---" probability="rare"></gear>
+        <gear name="Parchment (one sheet)" cost="1 sp" weight="---" probability="uncommon"></gear>
+        <gear name="Perfume (vial)" cost="5 gp" weight="---" probability="very rare"></gear>
+        <gear name="Pick, miner's" cost="2 gp" weight="10 lb." probability="uncommon"></gear>
+        <gear name="Piton" cost="5 cp" weight="1/4 lb." probability="uncommon"></gear>
+        <gear name="Poison, basic (vial)" cost="100 gp" weight="---" probability="very rare"></gear>
+        <gear name="Pole (10-foot)" cost="5 cp" weight="7 lb." probability="always"></gear>
+        <gear name="Pot, iron" cost="2 gp" weight="10 lb." probability="common"></gear>
+        <gear name="Pouch" cost="5 sp" weight="1 lb." probability="common"></gear>
+        <gear name="Quiver" cost="1 gp" weight="1 lb." probability="uncommon"></gear>
+        <gear name="Ram, portable" cost="4 gp" weight="35 lb." probability="very rare"></gear>
+        <gear name="Rations (1 day)" cost="5 sp" weight="2 lb." probability="always"></gear>
+        <gear name="Robes" cost="1 gp" weight="4 lb." probability="rare"></gear>
+        <gear name="Rope, hempen (50 feet)" cost="1 gp" weight="10 lb." probability="common"></gear>
+        <gear name="Rope, silk (50 feet)" cost="10 gp" weight="5 lb." probability="uncommon"></gear>
+        <gear name="Sack" cost="1 cp" weight="1/2 lb." probability="always"></gear>
+        <gear name="Scale, merchant's" cost="5 gp" weight="3 lb." probability="very rare"></gear>
+        <gear name="Sealing wax" cost="5 sp" weight="---" probability="very rare"></gear>
+        <gear name="Shovel" cost="2 gp" weight="5 lb." probability="always"></gear>
+        <gear name="Signal whistle" cost="5 cp" weight="---" probability="rare"></gear>
+        <gear name="Signet ring" cost="5 gp" weight="---" probability="very rare"></gear>
+        <gear name="Soap" cost="2 cp" weight="---" probability="rare"></gear>
+        <gear name="Spellbook" cost="50 gp" weight="3 lb." probability="very rare"></gear>
+        <gear name="Spikes, iron (10)" cost="1 gp" weight="5 lb." probability="common"></gear>
+        <gear name="Spyglass" cost="1000 gp" weight="1 lb." probability="very rare"></gear>
+        <gear name="Tent, two-person" cost="2 gp" weight="20 lb." probability="uncommon"></gear>
+        <gear name="Tinderbox" cost="5 sp" weight="1 lb." probability="always"></gear>
+        <gear name="Torch" cost="1 cp" weight="1 lb." probability="always"></gear>
+        <gear name="Vial" cost="1 gp" weight="---" probability="uncommon"></gear>
+        <gear name="Waterskin" cost="2 sp" weight="5 lb. (full)" probability="always"></gear>
+        <gear name="Whetstone" cost="1 cp" weight="1 lb." probability="common"></gear>
+    </adventuringgear>
+    <containers>
+        <container name="Backpack*" capacity="1 cubic foot/30 pounds of gear" probability="always"></container>
+        <container name="Barrel" capacity="40 gallons liquid, 4 cubic feet solid" probability="always"></container>
+        <container name="Basket" capacity="2 cubic feet/40 pounds of gear" probability="always"></container>
+        <container name="Bottle" capacity="1 1/2 pints liquid" probability="uncommon"></container>
+        <container name="Bucket" capacity="3 gallons liquid, 1/2 cubic foot solid" probability="always"></container>
+        <container name="Chest" capacity="12 cubic feet/300 pounds of gear" probability="uncommon"></container>
+        <container name="Flask or Tankard" capacity="1 pint liquid" probability="common"></container>
+        <container name="Jug or Pitcher" capacity="1 gallon liquid" probability="always"></container>
+        <container name="Pot, iron" capacity="1 gallon liquid" probability="common"></container>
+        <container name="Pouch" capacity="1/5 cubic foot/6 pounds of gear" probability="always"></container>
+        <container name="Sack" capacity="1 cubic foot/30 pounds of gear" probability="always"></container>
+        <container name="Vial" capacity="4 ounces liquid" probability="uncommon"></container>
+        <container name="Waterskin" capacity="4 pints liquid" probability="always"></container>
+    </containers>
+</root>

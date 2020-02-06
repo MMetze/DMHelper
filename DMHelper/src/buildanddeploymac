@@ -4,26 +4,41 @@ export PATH=$PATH:/Users/test/Qt/5.13.0/clang_64/bin
 
 cd ..
 rm -R build-clang_64bit-Release
-rm -R release
+rm -R bin
 rm "DM Helper macOS release.zip"
 mkdir build-clang_64bit-Release
-mkdir release
+mkdir bin
 cd build-clang_64bit-Release
 qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
 make -j4
 
-cp -R DMHelper.app/ ../release/DMHelper.app/
-cp -R ../src/binsrc/ ../release/
-cp -R ../src/bestiary/ ../release/bestiary/
-cp -R ../src/doc/ ../release/doc/
-cp ../src/binsrcmac/Info.plist ../release/DMHelper.app/Contents/
+cp -R DMHelper.app/ ../bin/DMHelper.app/
+cp ../src/binsrcmac/Info.plist ../bin/DMHelper.app/Contents/
 
-macdeployqt ../release/DMHelper.app/
+cd ../bin
+mkdir DMHelper.app/Contents/Frameworks
+cp -R ../src/vlc/VLCKit.framework DMHelper.app/Contents/Frameworks/VLCKit.framework
+otool -L DMHelper.app/Contents/MacOS/DMHelper
+install_name_tool -id @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelper.app/Contents/Frameworks/VLCKit.framework/Versions/A/VLCKit
+install_name_tool -change @loader_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelper.app/Contents/MacOS/DMHelper
+otool -L DMHelper.app/Contents/MacOS/DMHelper
 
-cd ../release
+cd ../build-clang_64bit-Release
 
-rm libeay32.dll
-rm ssleay32.dll
+macdeployqt ../bin/DMHelper.app/
+
+cp -R ../src/bestiary/ ../bin/DMHelper.app/Contents/Resources
+cp -R ../src/resources/ ../bin/DMHelper.app/Contents/Resources
+cp -R ../src/doc/ ../bin/DMHelper.app/Contents/Resources
+
+cd ../bin
+
+rm libcrypto-1_1-x64.dll
+rm libssl-1_1-x64.dll
+rm libvlc.dll
+rm libvlccore.dll
+rm -R pkgconfig
+rm -R plugins
 
 zip -r "DM Helper macOS release.zip" *
 
