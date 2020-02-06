@@ -13,9 +13,6 @@ qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompile
 make -j4
 
 cp -R DMHelper.app/ ../bin/DMHelper.app/
-cp -R ../src/binsrc/ ../bin/
-cp -R ../src/bestiary/ ../bin/bestiary/
-cp -R ../src/doc/ ../bin/doc/
 cp ../src/binsrcmac/Info.plist ../bin/DMHelper.app/Contents/
 
 cd ../bin
@@ -26,10 +23,13 @@ install_name_tool -id @executable_path/../Frameworks/VLCKit.framework/Versions/A
 install_name_tool -change @loader_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelper.app/Contents/MacOS/DMHelper
 otool -L DMHelper.app/Contents/MacOS/DMHelper
 
-
 cd ../build-clang_64bit-Release
 
 macdeployqt ../bin/DMHelper.app/
+
+cp -R ../src/bestiary/ ../bin/DMHelper.app/Contents/Resources
+cp -R ../src/resources/ ../bin/DMHelper.app/Contents/Resources
+cp -R ../src/doc/ ../bin/DMHelper.app/Contents/Resources
 
 cd ../bin
 
