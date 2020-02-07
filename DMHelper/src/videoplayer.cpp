@@ -1,7 +1,7 @@
 #include "videoplayer.h"
 #include <QDebug>
 
-#define VIDEO_DEBUG_MESSAGES
+//#define VIDEO_DEBUG_MESSAGES
 
 const int stopCallComplete = 0x01;
 const int stopConfirmed = 0x02;
