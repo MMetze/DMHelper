@@ -27,6 +27,8 @@ public:
 
     QList<QGraphicsItem*> getEffectItems() const;
 
+    bool isSceneEmpty() const;
+
 public slots:
     void setShowDistance(bool showDistance, qreal heightDelta);
 

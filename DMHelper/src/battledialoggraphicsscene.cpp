@@ -52,7 +52,7 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
         return;
     }
 
-    if((_grid) || (_itemList.count() > 0))
+    if(!isSceneEmpty())
     {
         qDebug() << "[Battle Dialog Scene] ERROR: unable to create scene contents: " << rect << ". Contents already exist!";
         return;
@@ -167,6 +167,11 @@ void BattleDialogGraphicsScene::setGridVisibility(bool visible)
 QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
 {
     return _itemList;
+}
+
+bool BattleDialogGraphicsScene::isSceneEmpty() const
+{
+    return((_grid == nullptr) && (_itemList.count() == 0));
 }
 
 void BattleDialogGraphicsScene::setShowDistance(bool showDistance, qreal heightDelta)

@@ -959,7 +959,8 @@ void BattleFrame::updateVideoBackground()
     _model->setBackgroundImage(battleImage);
     _background->setPixmap((QPixmap::fromImage(battleImage)));
 
-    createSceneContents();
+    if(!doSceneContentsExist())
+        createSceneContents();
     qDebug() << "[Battle Frame] Battle map video background image initialized.";
 }
 
@@ -1869,8 +1870,11 @@ void BattleFrame::setDistanceText()
 
 void BattleFrame::setModel(BattleDialogModel* model)
 {
-    if((_publishing) && (_publishTimer))
-        _publishTimer->stop();
+    qDebug() << "[Battle Frame] Setting battle model to: " << model;
+
+    //if((_publishing) && (_publishTimer))
+    //    _publishTimer->stop();
+    cancelPublish();
 
     _model = model;
 
@@ -1910,9 +1914,9 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
     if(!_model)
     {
+        clearBattleFrame();
         cleanupBattleMap();
         clearCombatantWidgets();
-        clearBattleFrame();
     }
     else
     {
@@ -2713,14 +2717,17 @@ void BattleFrame::resetVideoSizes()
 
 void BattleFrame::clearBattleFrame()
 {
+    qDebug() << "[Battle Frame] Clearing Battle Frame.";
+
     if(_videoPlayer)
     {
         _videoPlayer->stopThenDelete();
         _videoPlayer = nullptr;
     }
 
-    if((_publishing) && (_publishTimer))
-        _publishTimer->stop();
+    //if((_publishing) && (_publishTimer))
+    //    _publishTimer->stop();
+    cancelPublish();
 
     BattleDialogLogger* tempLogger = _logger;
     _logger = nullptr;
@@ -2802,6 +2809,16 @@ void BattleFrame::replaceBattleMap()
         createSceneContents();
 
     qDebug() << "[Battle Frame] map set to new image (" << _model->getMap()->getFileName() << ")";
+}
+
+bool BattleFrame::doSceneContentsExist()
+{
+    return((_activePixmap != nullptr) ||
+           (_selectedPixmap != nullptr) ||
+           (_compassPixmap != nullptr) ||
+           (_movementPixmap != nullptr) ||
+           (_combatantIcons.count() > 0) ||
+           ((_scene) && (!_scene->isSceneEmpty())));
 }
 
 void BattleFrame::createSceneContents()

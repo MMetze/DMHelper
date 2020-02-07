@@ -186,6 +186,7 @@ private:
     void clearBattleFrame();
     void cleanupBattleMap();
     void replaceBattleMap();
+    bool doSceneContentsExist();
     void createSceneContents();
     void resizeBattleMap();
     int widthFrameToBackground(int frameWidth);
