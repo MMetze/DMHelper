@@ -28,6 +28,7 @@ public:
     QList<QGraphicsItem*> getEffectItems() const;
 
     bool isSceneEmpty() const;
+    void handleItemChanged(QGraphicsItem* item);
 
 public slots:
     void setShowDistance(bool showDistance, qreal heightDelta);
@@ -40,6 +41,7 @@ signals:
     void itemMouseDown(QGraphicsPixmapItem* item);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
+    void itemChanged(QGraphicsItem* item);
 
 protected slots:
     void editItem();

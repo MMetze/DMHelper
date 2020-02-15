@@ -14,6 +14,7 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _mapRect(),
     _previousMap(nullptr),
     _previousMapRect(),
+    _cameraRect(),
     _background(Qt::black),
     _gridOn(true),
     _gridScale(DMHelper::STARTING_GRID_SCALE),
@@ -37,6 +38,7 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
     _mapRect(other._mapRect),
     _previousMap(other._previousMap),
     _previousMapRect(other._previousMapRect),
+    _cameraRect(other._cameraRect),
     _background(other._background),
     _gridOn(other._gridOn),
     _gridScale(other._gridScale),
@@ -88,6 +90,10 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
     battleElement.setAttribute("mapRectY", _mapRect.y());
     battleElement.setAttribute("mapRectWidth", _mapRect.width());
     battleElement.setAttribute("mapRectHeight", _mapRect.height());
+    battleElement.setAttribute("cameraRectX", _cameraRect.x());
+    battleElement.setAttribute("cameraRectY", _cameraRect.y());
+    battleElement.setAttribute("cameraRectWidth", _cameraRect.width());
+    battleElement.setAttribute("cameraRectHeight", _cameraRect.height());
     battleElement.setAttribute("backgroundColorR", _background.red());
     battleElement.setAttribute("backgroundColorG", _background.green());
     battleElement.setAttribute("backgroundColorB", _background.blue());
@@ -131,9 +137,13 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     // TODO: Manager needs to add combatants
     // TODO: Manager needs to set active combatant
 
-    _background= QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
-                        element.attribute("backgroundColorG",QString::number(0)).toInt(),
-                        element.attribute("backgroundColorB",QString::number(0)).toInt());
+    _background = QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
+                         element.attribute("backgroundColorG",QString::number(0)).toInt(),
+                         element.attribute("backgroundColorB",QString::number(0)).toInt());
+    _cameraRect = QRect(element.attribute("cameraRectX",QString::number(0.0)).toDouble(),
+                        element.attribute("cameraRectY",QString::number(0.0)).toDouble(),
+                        element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
+                        element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
     _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
     _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
@@ -342,6 +352,16 @@ const QRect& BattleDialogModel::getPreviousMapRect() const
 Map* BattleDialogModel::getPreviousMap() const
 {
     return _previousMap;
+}
+
+QRectF BattleDialogModel::getCameraRect() const
+{
+    return _cameraRect;
+}
+
+void BattleDialogModel::setCameraRect(const QRectF& rect)
+{
+    _cameraRect = rect;
 }
 
 QColor BattleDialogModel::getBackgroundColor() const

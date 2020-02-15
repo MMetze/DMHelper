@@ -4,6 +4,8 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
+#include <QMessageBox>
+#include <QFileDialog>
 #include <QDebug>
 
 // TODO: consider copy of MRU functionality
@@ -306,6 +308,26 @@ void OptionsContainer::setShopsFileName(const QString& filename)
 QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename)
 {
     QString result = settings.value(key, QVariant()).toString();
+
+    if(result == QString("./bestiary/DMHelperBestiary.xml"))
+    {
+        qDebug() << "[OptionsContainer] WARNING: old style relative path found for bestiary. Asking user for how to proceed...";
+        QMessageBox::StandardButton response = QMessageBox::warning(nullptr,
+                                                                    QString("Invalid bestiary path"),
+                                                                    QString("Older versions of the DM Helper had a bad choice of location for the bestiary. The file itself is fine, but sometimes the application would get confused where the file is actually located.") + QChar::LineFeed + QChar::LineFeed + QString("Would you like to point the DM Helper at the right location of your Bestiary file now?") + QChar::LineFeed + QChar::LineFeed + QString("If you answer No, it will create a new default bestiary in the ""right"" location for your system."),
+                                                                    QMessageBox::Yes | QMessageBox::No);
+        if(response == QMessageBox::Yes)
+        {
+            result = QFileDialog::getOpenFileName(nullptr, QString("Select Bestiary File..."), QString(), QString("XML files (*.xml)"));
+            qDebug() << "[OptionsContainer] WARNING: ... user selected file: " << result;
+        }
+        else
+        {
+            result = QString();
+            qDebug() << "[OptionsContainer] WARNING: ... user does not want to locate their Bestiary, default bestiary will be created";
+        }
+    }
+
     if(!result.isEmpty())
         return result;
     else
@@ -317,7 +339,10 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename)
     QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QString standardFile = standardPath + QString("/") + defaultFilename;
     if(QFile::exists(standardFile))
+    {
+        qDebug() << "[OptionsContainer] Standard File found: " << standardFile;
         return standardFile;
+    }
 
     QString appFile;
 #ifdef Q_OS_MAC
@@ -333,9 +358,15 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename)
     standardDir.mkpath(standardPath);
 
     if(QFile::copy(appFile, standardFile))
+    {
+        qDebug() << "[OptionsContainer] Standard default file copied from " << appFile << QString(" to ") << standardFile;
         return standardFile;
+    }
     else
+    {
+        qDebug() << "[OptionsContainer] ERROR: Standard default file copy failed from " << appFile << QString(" to ") << standardFile;
         return QString();
+    }
 }
 
 void OptionsContainer::setTablesDirectory(const QString& directory)
@@ -363,7 +394,10 @@ QString OptionsContainer::getStandardDirectory(const QString& defaultDir)
     QString result = standardPath + QString("/") + defaultDir;
     QDir standardDir(result);
     if(standardDir.exists())
+    {
+        qDebug() << "[OptionsContainer] Standard Directory found: " << result;
         return result;
+    }
 
     QString applicationPath = QCoreApplication::applicationDirPath();
     QDir fileDirPath(applicationPath);
@@ -390,6 +424,8 @@ QString OptionsContainer::getStandardDirectory(const QString& defaultDir)
     {
         QFile::copy(fileDirPath.filePath(fileEntries.at(i)), standardDir.filePath(fileEntries.at(i)));
     }
+
+    qDebug() << "[OptionsContainer] Standard default files copied to directory: " << result;
 
     return result;
 }

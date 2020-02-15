@@ -59,6 +59,9 @@ public:
     const QRect& getPreviousMapRect() const;
     Map* getPreviousMap() const;
 
+    QRectF getCameraRect() const;
+    void setCameraRect(const QRectF& rect);
+
     QColor getBackgroundColor() const;
     void setBackgroundColor(QColor color);
 
@@ -108,6 +111,8 @@ private:
     QRect _mapRect;
     Map* _previousMap;
     QRect _previousMapRect;
+
+    QRectF _cameraRect;
 
     QColor _background;
 

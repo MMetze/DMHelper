@@ -17,6 +17,7 @@ class Character;
 class Map;
 class QTimer;
 class VideoPlayer;
+class CameraRect;
 
 namespace Ui {
 class BattleFrame;
@@ -114,6 +115,7 @@ private slots:
     void handleItemMouseDown(QGraphicsPixmapItem* item);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
     void handleItemMouseUp(QGraphicsPixmapItem* item);
+    void handleItemChanged(QGraphicsItem* item);
 
     void removeCombatant();
     void activateCombatant();
@@ -153,6 +155,10 @@ private slots:
     void addCharacter();
     void addNPC();
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
+
+    void setCameraCouple();
+    void cancelCameraCouple();
+    void setCameraMap();
 
 private:
 
@@ -199,6 +205,10 @@ private:
     QSize getRotatedTargetBackgroundSize(const QSize& originalBackgroundSize);
     QSize getRotatedTargetFrameSize(const QSize& originalBackgroundSize);
     QPoint getPrescaledRenderPos(QSize targetSize);
+    void setCameraRect(bool cameraOn);
+    void updateCameraRect();
+    QRectF getCameraRect();
+    void setCameraToView();
 
     // Helper functions to simplify rendering
     void renderPrescaledBackground(QPainter& painter, QSize targetSize);
@@ -231,6 +241,8 @@ private:
     int _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
+    CameraRect* _publishRect;
+    QRectF _publishRectValue;
 
     QTimer* _countdownTimer;
     qreal _countdown;
