@@ -10,7 +10,7 @@ namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 1;
     const int DMHELPER_MINOR_VERSION = 6;
-    const int DMHELPER_ENGINEERING_VERSION = 0;
+    const int DMHELPER_ENGINEERING_VERSION = 7;
 
     const int CAMPAIGN_MAJOR_VERSION = 1;
     const int CAMPAIGN_MINOR_VERSION = 0;
@@ -18,7 +18,7 @@ namespace DMHelper
     const int BESTIARY_MAJOR_VERSION = 2;
     const int BESTIARY_MINOR_VERSION = 1;
 
-    enum
+    enum EncounterType
     {
         EncounterType_Blank = 0,
         EncounterType_Text,
@@ -30,21 +30,21 @@ namespace DMHelper
         EncounterType_WelcomeScreen
     };
 
-    enum
+    enum BattleEvent
     {
         BattleEvent_Blank = 0,
         BattleEvent_NewRound,
         BattleEvent_Damage
     };
 
-    enum
+    enum ChaseContent
     {
         ChaseContent_Blank = 0,
         ChaseContent_Complication,
         ChaseContent_Character
     };
 
-    enum
+    enum ActionType
     {
         ActionType_Base = -1,
         ActionType_Fill,
@@ -54,7 +54,7 @@ namespace DMHelper
         ActionType_Rect
     };
 
-    enum
+    enum CombatantType
     {
         CombatantType_Base = 0,
         CombatantType_Character,
@@ -62,7 +62,7 @@ namespace DMHelper
         CombatantType_Reference     // In-battle reference to an NPC/Character
     };
 
-    enum
+    enum CombatantSize
     {
         CombatantSize_Unknown = 0,
         CombatantSize_Tiny,
@@ -73,7 +73,7 @@ namespace DMHelper
         CombatantSize_Gargantuan
     };
 
-    enum
+    enum XPThreshold
     {
         XPThreshold_Easy = 0,
         XPThreshold_Medium,
@@ -81,7 +81,7 @@ namespace DMHelper
         XPThreshold_Deadly
     };
 
-    enum
+    enum TreeType
     {
         TreeType_Campaign = 0,
         TreeType_Notes,
@@ -100,24 +100,29 @@ namespace DMHelper
         TreeType_AudioTrack
     };
 
-    enum
+    enum EditMode
     {
         EditMode_FoW = 0,
         EditMode_Edit,
-        EditMode_Move
+        EditMode_Move,
+
+        EditMode_Count
     };
 
-    enum
+    enum BrushType
     {
         BrushType_Circle = 0,
         BrushType_Square,
-        BrushType_Select
+        BrushType_Select,
+
+        BrushType_Count
     };
 
-    enum
+    enum BattleDialog_Z
     {
-        BattleDialog_Z_Background = -3,
-        BattleDialog_Z_Grid = -2,
+        BattleDialog_Z_Background = -4,
+        BattleDialog_Z_Grid = -3,
+        BattleDialog_Z_Camera = -2,
         BattleDialog_Z_BackHighlight = -1,
         BattleDialog_Z_Combatant = 0,
         BattleDialog_Z_SelectedCombatant = 1,
@@ -125,7 +130,7 @@ namespace DMHelper
         BattleDialog_Z_Overlay = 3
     };
 
-    enum
+    enum AudioType
     {
         AudioType_File = 0,
         AudioType_Syrinscape
