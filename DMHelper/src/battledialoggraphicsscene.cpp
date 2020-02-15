@@ -174,6 +174,11 @@ bool BattleDialogGraphicsScene::isSceneEmpty() const
     return((_grid == nullptr) && (_itemList.count() == 0));
 }
 
+void BattleDialogGraphicsScene::handleItemChanged(QGraphicsItem* item)
+{
+    emit itemChanged(item);
+}
+
 void BattleDialogGraphicsScene::setShowDistance(bool showDistance, qreal heightDelta)
 {
     _distanceShown = showDistance;
