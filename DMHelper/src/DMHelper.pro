@@ -37,6 +37,7 @@ SOURCES += main.cpp\
     basicdateserver.cpp \
     battleframe.cpp \
     bestiaryexportdialog.cpp \
+    camerarect.cpp \
     campaignexporter.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
@@ -44,6 +45,7 @@ SOURCES += main.cpp\
     equipmentserver.cpp \
     expertisedialog.cpp \
     mainwindow.cpp \
+    mapeditframe.cpp \
     objectimporter.cpp \
     publishbuttonframe.cpp \
     publishwindow.cpp \
@@ -195,12 +197,14 @@ HEADERS  += mainwindow.h \
     basicdateserver.h \
     battleframe.h \
     bestiaryexportdialog.h \
+    camerarect.h \
     campaignexporter.h \
     characterimportdialog.h \
     colorpushbutton.h \
     customtableframe.h \
     equipmentserver.h \
     expertisedialog.h \
+    mapeditframe.h \
     mapmarker.h \
     objectimporter.h \
     publishbuttonframe.h \
@@ -347,6 +351,7 @@ FORMS    += mainwindow.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
     expertisedialog.ui \
+    mapeditframe.ui \
     publishbuttonframe.ui \
     randommarketdialog.ui \
     textpublishdialog.ui \
