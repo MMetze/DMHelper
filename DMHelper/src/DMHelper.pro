@@ -18,6 +18,7 @@ INSTALLS += \
     install_it
 
 win32:RC_ICONS += dmhelper.ico
+macx:ICON=data/macimg/DMHelper.icns
 
 SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhlogon.cpp \

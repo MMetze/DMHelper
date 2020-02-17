@@ -1,21 +1,21 @@
 echo Building DM Helper for MAC
 
-export PATH=$PATH:/Users/test/Qt/5.13.0/clang_64/bin
+export PATH=$PATH:$HOME/Qt/5.13.2/clang_64/bin
 
 cd ..
 rm -R build-clang_64bit-Release
-rm -R bin
+rm -R bin64
 rm "DM Helper macOS release.zip"
 mkdir build-clang_64bit-Release
-mkdir bin
+mkdir bin64
 cd build-clang_64bit-Release
 qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
 make -j4
 
-cp -R DMHelper.app/ ../bin/DMHelper.app/
-cp ../src/binsrcmac/Info.plist ../bin/DMHelper.app/Contents/
+cp -R DMHelper.app/ ../bin64/DMHelper.app/
+cp ../src/binsrcmac/Info.plist ../bin64/DMHelper.app/Contents/
 
-cd ../bin
+cd ../bin64
 mkdir DMHelper.app/Contents/Frameworks
 cp -R ../src/vlc/VLCKit.framework DMHelper.app/Contents/Frameworks/VLCKit.framework
 otool -L DMHelper.app/Contents/MacOS/DMHelper
@@ -25,20 +25,14 @@ otool -L DMHelper.app/Contents/MacOS/DMHelper
 
 cd ../build-clang_64bit-Release
 
-macdeployqt ../bin/DMHelper.app/
+macdeployqt ../bin64/DMHelper.app/
 
-cp -R ../src/bestiary/ ../bin/DMHelper.app/Contents/Resources
-cp -R ../src/resources/ ../bin/DMHelper.app/Contents/Resources
-cp -R ../src/doc/ ../bin/DMHelper.app/Contents/Resources
+cp -R ../src/bestiary/ ../bin64/DMHelper.app/Contents/Resources
+cp -R ../src/resources/ ../bin64/DMHelper.app/Contents/Resources
+cp -R ../src/doc/ ../bin64/DMHelper.app/Contents/Resources
+cp ../src/binsrcmac/DMHelper.icns ../bin64/DMHelper.app/Contents/Resources
 
-cd ../bin
-
-rm libcrypto-1_1-x64.dll
-rm libssl-1_1-x64.dll
-rm libvlc.dll
-rm libvlccore.dll
-rm -R pkgconfig
-rm -R plugins
+cd ../bin64
 
 zip -r "DM Helper macOS release.zip" *
 
