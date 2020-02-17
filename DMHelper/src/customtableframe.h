@@ -3,6 +3,7 @@
 
 #include <QFrame>
 #include <QMap>
+#include "customtableentry.h"
 
 class QListWidgetItem;
 
@@ -32,8 +33,9 @@ protected slots:
     void selectItem();
 
 private:
-
     void readXMLFile(const QString& fileName);
+    CustomTableEntry getEntry(QList<CustomTableEntry> entryList, int value);
+    QString getEntryText(const QString& tableName);
 
     Ui::CustomTableFrame *ui;
 
@@ -42,7 +44,9 @@ private:
     int _index;
     bool _readTriggered;
     QStringList _directoryList;
-    QMap<QString, QStringList> _tableList;
+    QMap<QString, QList<CustomTableEntry>> _tableList;
+    QMap<QString, int> _tableWeights;
+    QStringList _usedTables;
 };
 
 #endif // CUSTOMTABLEFRAME_H

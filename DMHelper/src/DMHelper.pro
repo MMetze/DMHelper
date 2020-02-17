@@ -41,6 +41,7 @@ SOURCES += main.cpp\
     campaignexporter.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
+    customtableentry.cpp \
     customtableframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
@@ -201,6 +202,7 @@ HEADERS  += mainwindow.h \
     campaignexporter.h \
     characterimportdialog.h \
     colorpushbutton.h \
+    customtableentry.h \
     customtableframe.h \
     equipmentserver.h \
     expertisedialog.h \
