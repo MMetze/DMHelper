@@ -16,7 +16,7 @@ const int CAMERA_SHADOW_SIZE = 3;
  * changes to dialog need to impact camera when coupled
  * for videos, only restart the player when the camera changes, not when the view changes
  * decent icons and layout
- * add camera rect to map view
+ * DON'T DO: add camera rect to map view
  */
 CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene) :
     QGraphicsRectItem (0.0, 0.0, width, height, nullptr),
@@ -45,15 +45,6 @@ void CameraRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     Q_UNUSED(widget);
 
     return;
-
-    /*
-    if(_draw)
-    {
-        QStyleOptionGraphicsItem myoption = (*option);
-        myoption.state &= ~QStyle::State_Selected;
-        QGraphicsRectItem::paint(painter, &myoption, widget);
-    }*/
-
 }
 
 void CameraRect::setCameraRect(const QRectF& rect)
@@ -122,7 +113,8 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
         case RectSection_BottomLeft:
             setCursor(QCursor(Qt::SizeBDiagCursor)); break;
         case RectSection_Middle:
-            setCursor(QCursor(Qt::SizeAllCursor)); break;
+            //setCursor(QCursor(Qt::SizeAllCursor)); break;
+            unsetCursor(); break;
         default:
             break;
     }
@@ -169,12 +161,6 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     _drawItem->setRect(0.0, 0.0, w, h);
 
     _mouseLastPos = event->pos();
-
-    /*
-    BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
-    if(battleScene)
-        battleScene->handleItemChanged(this);
-        */
 }
 
 void CameraRect::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -229,7 +215,6 @@ void CameraRect::initialize(QGraphicsScene& scene)
 
     _shadowItem = new QGraphicsRectItem(_drawItem);
     _shadowItem->setRect(CAMERA_SHADOW_OFFSET, CAMERA_SHADOW_OFFSET, rect().width(), rect().height());
-    //_shadowItem->setPen(QPen(QColor(0,0,0,128), 2));
     _shadowItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
 
     _drawTextRect = new QGraphicsRectItem(_drawItem);
@@ -238,7 +223,6 @@ void CameraRect::initialize(QGraphicsScene& scene)
     textFont.setPointSize(5);
     _drawText->setFont(textFont);
     _drawTextRect->setRect(_drawText->boundingRect().toRect());
-    //_drawText->setPen(QPen(Qt::black));
 
     setPublishing(false);
 }
