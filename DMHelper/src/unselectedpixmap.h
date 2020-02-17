@@ -15,6 +15,7 @@ public:
     void setDraw(bool draw);
 
 protected:
+//    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 //    virtual bool sceneEvent(QEvent *event);
 
