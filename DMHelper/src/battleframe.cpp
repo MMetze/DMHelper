@@ -119,7 +119,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _videoSize()
 {
     ui->setupUi(this);
-    //setWindowFlags(Qt::Window);
 
     _scene = new BattleDialogGraphicsScene(this);
     ui->graphicsView->setScene(_scene);
@@ -164,11 +163,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
-    //connect(ui->btnAddMonsters, SIGNAL(clicked()), this, SIGNAL(addMonsters()));
     connect(ui->btnAddMonsters, SIGNAL(clicked()), this, SLOT(addMonsters()));
     connect(ui->btnAddCharacter, SIGNAL(clicked()), this, SLOT(addCharacter()));
     connect(ui->btnAddNPC, SIGNAL(clicked()), this, SLOT(addNPC()));
-    //connect(ui->btnHideBattle, SIGNAL(clicked()), this, SLOT(hide()));
     connect(ui->btnEndBattle, SIGNAL(clicked()), this, SLOT(handleBattleComplete()));
 
     connect(ui->chkShowCompass, SIGNAL(clicked(bool)), this, SLOT(setCompassVisibility(bool)));
@@ -180,7 +177,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->btnDistance, SIGNAL(clicked(bool)), this, SLOT(setDistanceText()));
     connect(ui->chkPitch, SIGNAL(stateChanged(int)), this, SLOT(setDistanceText()));
     connect(ui->edtHeightDiff, SIGNAL(editingFinished()), this, SLOT(setDistanceText()));
-    //connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(selectNewMap()));
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SLOT(selectBattleMap()));
     connect(ui->btnReloadMap, SIGNAL(clicked(bool)),this,SLOT(reloadMap()));
     connect(ui->framePublish, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
@@ -493,14 +489,6 @@ void BattleFrame::setTargetSize(const QSize& targetSize)
     {
         resetVideoSizes();
         _videoPlayer->targetResized(_videoSize);
-        // Calling getRotatedTargetBackgroundSize() this way should return the maximum possible background size for this target size
-        //_videoPlayer->targetResized(getRotatedTargetBackgroundSize(_targetSize));//getRotatedTargetBackgroundSize());
-        /*
-        if(!_bwFoWImage.isNull())
-        {
-            _bwFoWImage = QImage();
-        }
-        */
     }
     else
     {
@@ -532,7 +520,6 @@ void BattleFrame::setGridScale(int gridScale)
                 if(_combatantIcons.key(i.value(), nullptr))
                     combatantScaleFactor = _combatantIcons.key(i.value(), nullptr)->getSizeFactor();
                 scaleFactor = (static_cast<qreal>(gridScale-2)) * combatantScaleFactor / static_cast<qreal>(qMax(i.value()->pixmap().width(),i.value()->pixmap().height()));
-//                oldScaleFactor = i.value()->scale();
                 i.value()->setScale(scaleFactor);
             }
         }
@@ -640,15 +627,12 @@ void BattleFrame::zoomOut()
 
 void BattleFrame::zoomFit()
 {
-    // NEW qreal widthFactor = ((qreal)ui->graphicsView->viewport()->width()) / _scene->width();
-    // NEW qreal heightFactor = ((qreal)ui->graphicsView->viewport()->height()) / _scene->height();
     ui->graphicsView->fitInView(_background, Qt::KeepAspectRatio);
     setScale(1.0);
 }
 
 void BattleFrame::zoomSelect()
 {
-    //ui->btnZoomSelect->setChecked(true);
     setMapCursor();
 }
 
@@ -761,8 +745,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                 QDragMoveEvent* dragMoveEvent = dynamic_cast<QDragMoveEvent*>(event);
                 if(dragMoveEvent)
                 {
-                    //qDebug() << "[Battle Frame] combatant widget drag moved (" << dragMoveEvent->pos().x() << "," << dragMoveEvent->pos().y() << ")";
-
                     const QMimeData* mimeData = dragMoveEvent->mimeData();
                     if((mimeData)&&(mimeData->hasFormat(QString("application/vnd.dmhelper.combatant"))))
                     {
@@ -779,7 +761,6 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         if((draggedWidget)&&(targetWidget)&&(draggedWidget != targetWidget))
                         {
                             int targetIndex = _combatantLayout->indexOf(targetWidget);
-                            //qDebug() << "[Battle Frame] combatant widget drag move: index " << index << ": " << _model.getCombatant(index)->getName() << " (" << reinterpret_cast<std::uintptr_t>(draggedWidget) << "), from pos " << currentIndex << " to pos " << targetIndex << " (" << reinterpret_cast<std::uintptr_t>(targetWidget) << ")";
                             QLayoutItem* item = _combatantLayout->takeAt(currentIndex);
                             _combatantLayout->insertItem(targetIndex, item);
                         }
@@ -841,8 +822,6 @@ void BattleFrame::resizeEvent(QResizeEvent *event)
     qDebug() << "[Battle Frame] resized: " << event->size().width() << "x" << event->size().height();
     if((_model) && (_background))
     {
-        // CHANGE _scene->setSceneRect(_scene->itemsBoundingRect());
-        // NEW ui->graphicsView->fitInView(_background, Qt::KeepAspectRatio);
         ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
     }
     QFrame::resizeEvent(event);
@@ -854,8 +833,6 @@ void BattleFrame::showEvent(QShowEvent *event)
     qDebug() << "[Battle Frame]shown (" << isVisible() << ")";
     if((_model) && (_background))
     {
-        // CHANGE _scene->setSceneRect(_scene->itemsBoundingRect());
-        // NEW ui->graphicsView->fitInView(_background, Qt::KeepAspectRatio);
         ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
     }
 }
@@ -933,7 +910,6 @@ void BattleFrame::updateMap()
         if(_model->getBackgroundImage().isNull())
             _model->setBackgroundImage(_model->getMap()->getPublishImage());
         _background->setPixmap((QPixmap::fromImage(_model->getBackgroundImage())));
-        // NEW ui->graphicsView->fitInView(_model.getMapRect(), Qt::KeepAspectRatio);
         createPrescaledBackground();
     }
     else
@@ -1149,25 +1125,20 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
     if(!ui->chkLimitMovement->isChecked())
         return;
 
-    BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
+    //BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
 
-    if((!_movementPixmap) || (!activeCombatant))
+    //if((!_movementPixmap) || (!activeCombatant))
+    if(!_movementPixmap)
         return;
 
-    //QGraphicsPixmapItem* selectedItem = _combatantIcons.value(_model.getActiveCombatant(), nullptr);
-    QGraphicsPixmapItem* selectedItem = _combatantIcons.value(activeCombatant, nullptr);
-    if(selectedItem == item)
+    //QGraphicsPixmapItem* selectedItem = _combatantIcons.value(activeCombatant, nullptr);
+    //if(selectedItem == item)
+    BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
+    if(combatant)
     {
-        //int speedSquares = 2 * ((_selectedCombatant->getSpeed() / 5) + _selectedScale) + 1;
-        //int speedSquares = 2 * ((activeCombatant->getSpeed() / 5) + _selectedScale) + 1;
-        int speedSquares = 2 * (activeCombatant->getSpeed() / 5) + 1;
+        int speedSquares = 2 * (combatant->getSpeed() / 5) + 1;
         _moveRadius = _model->getGridScale() * speedSquares;
-        //_moveRadius = _model.getGridScale() * speedSquares / SELECTED_PIXMAP_SIZE;
-        //_moveStart = _combatantIcons.value(_selectedCombatant)->pos();
-        _moveStart = _combatantIcons.value(activeCombatant)->pos();
-        //qDebug() << "[Battle Frame] setting selected pixmap to size " << _moveRadius;
-        //_movementPixmap->setScale(_moveRadius);
-        //moveRectToPixmap(_movementPixmap, item);
+        _moveStart = _combatantIcons.value(combatant)->pos();
         _movementPixmap->setPos(_moveStart);
         _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
         _movementPixmap->setVisible(true);
@@ -1177,6 +1148,8 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
 
 void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
 {
+    Q_UNUSED(result);
+
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible handle the item movement, no battle model is set!";
@@ -1186,41 +1159,43 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
     if(!ui->chkLimitMovement->isChecked())
         return;
 
-    BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
+    //BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
 
-    if((!_movementPixmap) || (!activeCombatant))
+    //if((!_movementPixmap) || (!activeCombatant))
+    if(!_movementPixmap)
         return;
 
+    /*
     QGraphicsPixmapItem* selectedItem = _combatantIcons.value(_model->getActiveCombatant(), nullptr);
     if(selectedItem != item)
         return;
+    */
 
-    QPointF combatantPos = _combatantIcons.value(activeCombatant)->pos();
+    //QPointF combatantPos = _combatantIcons.value(activeCombatant)->pos();
 
-    //if(_moveRadius > _model.getGridScale() / SELECTED_PIXMAP_SIZE)
+    if(!item)
+        return;
+
+    QPointF combatantPos = item->pos();
+
     if(_moveRadius > _model->getGridScale())
     {
         QPointF diff = _moveStart - combatantPos;
         qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
-        //_moveRadius -= 2 * delta / SELECTED_PIXMAP_SIZE;
         _moveRadius -= 2 * delta;
     }
 
-    //if(_moveRadius <= _model.getGridScale() / SELECTED_PIXMAP_SIZE)
     if(_moveRadius <= _model->getGridScale())
     {
-        //_moveRadius = _model.getGridScale() / SELECTED_PIXMAP_SIZE;
         _moveRadius = _model->getGridScale();
-        //_movementPixmap->setScale(_model.getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE);
-        //moveRectToPixmap(_movementPixmap, item);
-        if(result)
-            *result = false;
+        _movementPixmap->setRotation(0.0);
+        _movementPixmap->setVisible(false);
+        //if(result)
+        //    *result = false;
     }
     else
     {
-        //_movementPixmap->setScale(_moveRadius);
         _moveStart = combatantPos;
-        //qDebug() << "[Battle Frame] setting selected pixmap to size " << _moveRadius << " and position to " << _moveStart;
     }
 
     _movementPixmap->setPos(combatantPos);
@@ -1233,9 +1208,6 @@ void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
 
     if(_movementPixmap)
     {
-        //qDebug() << "[Battle Frame] setting selected pixmap to size " << _model.getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE;
-        //_movementPixmap->setScale(_model.getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE);
-        //moveRectToPixmap(_movementPixmap, item);
         _movementPixmap->setRotation(0.0);
         _movementPixmap->setVisible(false);
     }
@@ -1471,7 +1443,7 @@ void BattleFrame::publishImage()
             {
                 createVideoPlayer(false);
             }
-            //executePublishImage();
+
             // OPTIMIZE: optimize this to be faster, doing only changes?
             _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
             emit animationStarted(_model->getBackgroundColor());
@@ -1530,16 +1502,7 @@ void BattleFrame::updateHighlights()
     {
         item = _combatantIcons.value(_selectedCombatant, nullptr);
         if(item)
-        {
             moveRectToPixmap(_selectedPixmap, item);
-            /*
-            if((_selectedCombatant)&&(_selectedCombatant->getCombatant()))
-            {
-
-                _selectedPixmap->setScale(_model.getGridScale() * _selectedCombatant->get / SELECTED_PIXMAP_SIZE);
-            }
-            */
-        }
     }
 }
 
@@ -1595,17 +1558,16 @@ void BattleFrame::createPrescaledBackground()
     if((!_model->getMap()) || (!ui->framePublish->isEnabled()) || (!ui->framePublish->isChecked()))
         return;
 
-    //if(!_model.getMap()->isInitialized())
     if(_videoPlayer)
     {
-        //_bwFoWImage = QImage();
+        QSize oldVideoSize = _videoSize;
         resetVideoSizes();
-        _videoPlayer->restartPlayer();
+        if(_videoSize != oldVideoSize)
+            _videoPlayer->restartPlayer();
         return;
     }
 
     QRect sourceRect;
-    //QRect viewportScene = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
     QRect viewportScene = _publishRectValue.isValid() ? getCameraRect().toRect() : ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
     QRect sceneRect = ui->graphicsView->sceneRect().toRect();
     sourceRect = viewportScene.intersected(sceneRect);
@@ -1620,24 +1582,12 @@ void BattleFrame::createPrescaledBackground()
     QImage battleMap = _model->getMap()->getPublishImage().copy(sourceRect);
     battleMap.convertTo(QImage::Format_ARGB32_Premultiplied);
 
-    QSize imageSize = getRotatedTargetBackgroundSize(battleMap.size());//getRotatedTargetBackgroundSize();
+    QSize imageSize = getRotatedTargetBackgroundSize(battleMap.size());
     qreal scaleFactor = static_cast<qreal>(imageSize.width()) / static_cast<qreal>(battleMap.width());
     if((scaleFactor * static_cast<qreal>(battleMap.height())) > static_cast<qreal>(imageSize.height()))
         scaleFactor = static_cast<qreal>(imageSize.height()) / static_cast<qreal>(battleMap.height());
 
     _prescaledBackground = QPixmap::fromImage(battleMap.transformed(QTransform().rotate(_rotation).scale(scaleFactor,scaleFactor), Qt::SmoothTransformation));
-
-    /*
-     * TODO: optimize non-video backgrounds by turning off the grid...
-    setGridOnlyVisibility(true);
-    QPainter painter;
-    painter.begin(&_prescaledBackground);
-    ui->graphicsView->render(&painter,
-                             QRectF(),
-                             sourceRect);
-    painter.end();
-    setGridOnlyVisibility(false);
-    */
 
 #ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
     qDebug() << "[Battle Frame][PROFILE] " << t.elapsed() << "; prescaled background created";
@@ -1650,8 +1600,6 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
 {
     Q_UNUSED(fromScenePoint);
     Q_UNUSED(toScenePoint);
-
-    //qDebug() << "[Battle Frame] Rubber band changed to " << rubberBandRect;
 
     if((!ui->btnZoomSelect->isChecked()) && (!ui->btnCameraSelect->isChecked()))
         return;
@@ -1761,7 +1709,7 @@ void BattleFrame::setPublishVisibility(bool publish)
                     if(unselectedItem)
                     {
                         unselectedItem->setDraw(!publish);
-                        //Since we aren't making the item invisible, we have to manually make it's children invisible
+                        // Since we aren't making the item invisible, we have to manually make it's children invisible
                         if(item->childItems().count() > 0)
                         {
                             for(QGraphicsItem* child : item->childItems())
@@ -1926,8 +1874,6 @@ void BattleFrame::setModel(BattleDialogModel* model)
 {
     qDebug() << "[Battle Frame] Setting battle model to: " << model;
 
-    //if((_publishing) && (_publishTimer))
-    //    _publishTimer->stop();
     cancelPublish();
 
     _model = model;
@@ -1962,7 +1908,6 @@ void BattleFrame::setModel(BattleDialogModel* model)
     ui->chkShowLiving->setEnabled(_model != nullptr);
     ui->chkShowDead->setEnabled(_model != nullptr);
     ui->framePublish->setEnabled(_model != nullptr);
-    //ui->btnHideBattle->setEnabled(_model != nullptr);
     ui->btnEndBattle->setEnabled(_model != nullptr);
     ui->graphicsView->setEnabled(_model != nullptr);
 
@@ -2625,7 +2570,6 @@ void BattleFrame::getImageForPublishing(QImage& imageForPublishing)
         renderVideoBackground(painter);
 
     // Draw the contents of the battle frame in publish mode
-    //QRect viewportRect = ui->graphicsView->viewport()->rect();
     QRect viewportRect = _publishRectValue.isValid() ? ui->graphicsView->mapFromScene(getCameraRect()).boundingRect() : ui->graphicsView->viewport()->rect();
     QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
     QRect sourceRect = viewportRect.intersected(sceneViewportRect);
@@ -2772,7 +2716,6 @@ void BattleFrame::resetVideoSizes()
     qDebug() << "[Battle Frame] Resetting video sizes";
 #endif
 
-    //QRect viewportScene = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
     QRect viewportScene = _publishRectValue.isValid() ? getCameraRect().toRect() : ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
     QRect sceneRect = ui->graphicsView->sceneRect().toRect();
     QRect visibleSceneRect = viewportScene.intersected(sceneRect);
@@ -2781,12 +2724,6 @@ void BattleFrame::resetVideoSizes()
     qreal heightScale = static_cast<qreal>(sceneRect.height()) / static_cast<qreal>(visibleSceneRect.height());
 
     QSize rotatedTargetBackground = getRotatedTargetBackgroundSize(visibleSceneRect.size());
-
-    /*
-    _sourceRect = QRect(QPoint(static_cast<int>(static_cast<qreal>(visibleSceneRect.left()) / widthScale),
-                               static_cast<int>(static_cast<qreal>(visibleSceneRect.top()) / heightScale)),
-                        rotatedTargetBackground);
-    */
 
     _videoSize = QSize(static_cast<int>(static_cast<qreal>(rotatedTargetBackground.width()) * widthScale),
                        static_cast<int>(static_cast<qreal>(rotatedTargetBackground.height()) * heightScale));
@@ -2812,8 +2749,6 @@ void BattleFrame::clearBattleFrame()
         _videoPlayer = nullptr;
     }
 
-    //if((_publishing) && (_publishTimer))
-    //    _publishTimer->stop();
     cancelPublish();
 
     BattleDialogLogger* tempLogger = _logger;
@@ -2936,7 +2871,6 @@ void BattleFrame::createSceneContents()
     selectPmp.load(":/img/data/selected.png");
     _selectedPixmap = _scene->addPixmap(selectPmp);
     _selectedPixmap->setTransformationMode(Qt::SmoothTransformation);
-    //_selectedPixmap->setTransformOriginPoint(_selectedPixmap->boundingRect().center());
     _selectedPixmap->setScale(_model->getGridScale() * _selectedScale / ACTIVE_PIXMAP_SIZE);
     _selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _selectedPixmap->hide();
@@ -2951,13 +2885,8 @@ void BattleFrame::createSceneContents()
     _compassPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _compassPixmap->setVisible(_model->getShowCompass());
 
-    //QPixmap movementPmp;
-    //movementPmp.load(":/img/data/movement.png");
     QPen movementPen(QColor(23,23,23,200), 3, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
     _movementPixmap = _scene->addEllipse(0, 0, 100, 100, movementPen, QBrush(QColor(255,255,255,25)));
-    //_movementPixmap->setTransformationMode(Qt::SmoothTransformation);
-    //_movementPixmap->setTransformOriginPoint(_movementPixmap->boundingRect().center());
-    //_movementPixmap->setScale(_model.getGridScale() * _activeScale / ACTIVE_PIXMAP_SIZE);
     _movementPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _movementPixmap->setVisible(false);
 
@@ -2990,10 +2919,8 @@ void BattleFrame::resizeBattleMap()
 
     updateMap();
 
-    //_scene->updateBattleContents();
     _scene->resizeBattleContents(_background->boundingRect().toRect());
     _scene->setSceneRect(_scene->itemsBoundingRect());
-    // NEW ui->graphicsView->fitInView(_background, Qt::KeepAspectRatio);
     ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
 
     // try to move the icons with the map
@@ -3106,13 +3033,6 @@ void BattleFrame::setCameraRect(bool cameraOn)
 
     if(!_publishRect)
     {
-        /*
-        QPen publishPen(QColor(255,0,0,255), 1);
-        _publishRect = _scene->addRect(0,0,_targetSize.width(),_targetSize.height(),publishPen);
-        _publishRect->setZValue(DMHelper::BattleDialog_Z_Camera);
-        _publishRect->setFlag(QGraphicsItem::ItemIsMovable, true);
-        _publishRect->setFlag(QGraphicsItem::ItemIsSelectable, true);
-        */
         if((!_model) || (_model->getCameraRect().isValid()))
         {
             _publishRect = new CameraRect(_model->getCameraRect().width(), _model->getCameraRect().height(), *_scene);
@@ -3123,10 +3043,6 @@ void BattleFrame::setCameraRect(bool cameraOn)
             _publishRect = new CameraRect(_scene->width(), _scene->height(), *_scene);
             _publishRect->setPos(0,0);
         }
-    }
-    else
-    {
-        //_publishRect->setRect(QRect(_publishRect->pos().toPoint(), targetSize));
     }
 
     updateCameraRect();

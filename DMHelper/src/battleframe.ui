@@ -708,10 +708,10 @@ color: rgb(85, 85, 85);
         <item>
          <widget class="QCheckBox" name="chkLimitMovement">
           <property name="toolTip">
-           <string>Limits the movement of a combatant to its known movement maximum. The remaining available movement radius is shown. Movement is only limited to a single drag and starts again with the next one</string>
+           <string>Shows the movement of a combatant to its known movement maximum. The remaining available movement radius is shown. Movement is only limited to a single drag and starts again with the next one</string>
           </property>
           <property name="text">
-           <string>Limit Movement</string>
+           <string>Show Movement</string>
           </property>
           <property name="checked">
            <bool>true</bool>
