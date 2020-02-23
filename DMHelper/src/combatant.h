@@ -55,6 +55,10 @@ public:
         SKILLS_COUNT
     };
 
+    const int SKILLS_UNSKILLED = 0;
+    const int SKILLS_SKILLED = 1;
+    const int SKILLS_EXPERT = 2;
+
     explicit Combatant(QObject *parent = nullptr);
     explicit Combatant(const Combatant &obj);  // copy constructor
     virtual ~Combatant() override;

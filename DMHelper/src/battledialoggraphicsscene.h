@@ -13,8 +13,10 @@ class BattleDialogGraphicsScene : public QGraphicsScene
     Q_OBJECT
 
 public:
-    explicit BattleDialogGraphicsScene(BattleDialogModel& model, QObject *parent = nullptr);
+    explicit BattleDialogGraphicsScene(QObject *parent = nullptr);
     virtual ~BattleDialogGraphicsScene();
+
+    void setModel(BattleDialogModel* model);
 
     void createBattleContents(const QRect& rect);
     void resizeBattleContents(const QRect& rect);
@@ -25,8 +27,11 @@ public:
 
     QList<QGraphicsItem*> getEffectItems() const;
 
+    bool isSceneEmpty() const;
+    void handleItemChanged(QGraphicsItem* item);
+
 public slots:
-    void setShowDistance(bool showDistance);
+    void setShowDistance(bool showDistance, qreal heightDelta);
 
 signals:
     void effectChanged(QAbstractGraphicsShapeItem* effect);
@@ -36,6 +41,7 @@ signals:
     void itemMouseDown(QGraphicsPixmapItem* item);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
+    void itemChanged(QGraphicsItem* item);
 
 protected slots:
     void editItem();
@@ -61,7 +67,7 @@ protected:
 
     QGraphicsItem* _contextMenuItem;
     Grid* _grid;
-    BattleDialogModel& _model;
+    BattleDialogModel* _model;
     QList<QGraphicsItem*> _itemList;
 
     bool _mouseDown;
@@ -70,6 +76,7 @@ protected:
     qreal _previousRotation;
 
     bool _distanceShown;
+    qreal _heightDelta;
     QGraphicsLineItem* _distanceLine;
     QGraphicsSimpleTextItem* _distanceText;
 

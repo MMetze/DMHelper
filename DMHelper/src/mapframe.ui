@@ -97,7 +97,7 @@ color: rgb(85, 0, 0);</string>
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Marker Edit Mode</string>
+           <string>Marker edit mode</string>
           </property>
           <property name="text">
            <string/>
@@ -129,7 +129,7 @@ color: rgb(85, 0, 0);</string>
            </size>
           </property>
           <property name="toolTip">
-           <string>Fog of War Mode</string>
+           <string>Fog of War edit mode</string>
           </property>
           <property name="text">
            <string/>
@@ -158,7 +158,7 @@ color: rgb(85, 0, 0);</string>
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Marker Move Mode</string>
+           <string>Marker move mode</string>
           </property>
           <property name="text">
            <string/>
@@ -221,6 +221,9 @@ color: rgb(85, 0, 0);</string>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QPushButton" name="btnResetFoW">
+            <property name="toolTip">
+             <string>Resets the Fog of War to all black</string>
+            </property>
             <property name="text">
              <string>Reset FoW</string>
             </property>
@@ -228,6 +231,9 @@ color: rgb(85, 0, 0);</string>
           </item>
           <item>
            <widget class="QPushButton" name="btnClearFoW">
+            <property name="toolTip">
+             <string>Clears the Fog of War</string>
+            </property>
             <property name="text">
              <string>Clear FoW</string>
             </property>
@@ -263,7 +269,7 @@ color: rgb(85, 0, 0);</string>
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Fog of War Circular Brush</string>
+           <string>Fog of War circular brush</string>
           </property>
           <property name="text">
            <string/>
@@ -292,7 +298,7 @@ color: rgb(85, 0, 0);</string>
            </sizepolicy>
           </property>
           <property name="toolTip">
-           <string>Fog of War Square Brush</string>
+           <string>Fog of War square brush</string>
           </property>
           <property name="text">
            <string/>
@@ -311,6 +317,9 @@ color: rgb(85, 0, 0);</string>
         </item>
         <item>
          <widget class="QPushButton" name="btnBrushSelect">
+          <property name="toolTip">
+           <string>Drag a rectangle across the map and clears/sets the Fog of War for that rectangle</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -388,7 +397,7 @@ color: rgb(85, 0, 0);</string>
                </size>
               </property>
               <property name="toolTip">
-               <string>Fog of War Brush Size</string>
+               <string>Fog of War brush size</string>
               </property>
               <property name="minimum">
                <number>1</number>
@@ -405,6 +414,9 @@ color: rgb(85, 0, 0);</string>
           </item>
           <item>
            <widget class="QCheckBox" name="chkSmooth">
+            <property name="toolTip">
+             <string>Set to have smoothed edges on the brush for editing Fog of War</string>
+            </property>
             <property name="text">
              <string>Smooth</string>
             </property>
@@ -424,7 +436,7 @@ color: rgb(85, 0, 0);</string>
         </sizepolicy>
        </property>
        <property name="toolTip">
-        <string>Show Markers</string>
+        <string>Hide/Show markers</string>
        </property>
        <property name="text">
         <string/>
@@ -467,7 +479,7 @@ color: rgb(85, 0, 0);</string>
         <item>
          <widget class="QPushButton" name="btnZoomIn">
           <property name="toolTip">
-           <string>Zoom In</string>
+           <string>Zoom in</string>
           </property>
           <property name="text">
            <string/>
@@ -481,7 +493,7 @@ color: rgb(85, 0, 0);</string>
         <item>
          <widget class="QPushButton" name="btnZoomOut">
           <property name="toolTip">
-           <string>ZoomOut</string>
+           <string>Zoom out</string>
           </property>
           <property name="text">
            <string/>
@@ -509,7 +521,7 @@ color: rgb(85, 0, 0);</string>
         <item>
          <widget class="QPushButton" name="btnZoomFit">
           <property name="toolTip">
-           <string>Fit Zoom to Window</string>
+           <string>Zoom to fit the whole map in the window</string>
           </property>
           <property name="text">
            <string/>
@@ -523,7 +535,7 @@ color: rgb(85, 0, 0);</string>
         <item>
          <widget class="QPushButton" name="btnZoomSelect">
           <property name="toolTip">
-           <string>Zoom to Selection</string>
+           <string>Drag a rectangle across the map and zoom to that selection</string>
           </property>
           <property name="text">
            <string/>
@@ -581,12 +593,18 @@ color: rgb(85, 0, 0);</string>
              <height>0</height>
             </size>
            </property>
+           <property name="toolTip">
+            <string>Select an audio track which will be automatically played when this map is published</string>
+           </property>
           </widget>
          </item>
         </layout>
        </item>
        <item>
         <widget class="QCheckBox" name="chkAudio">
+         <property name="toolTip">
+          <string>Enable or disable automatic audio playback for this map</string>
+         </property>
          <property name="text">
           <string>Audio Enabled</string>
          </property>

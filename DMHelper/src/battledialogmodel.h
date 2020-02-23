@@ -38,6 +38,7 @@ public:
     BattleDialogModelCombatant* removeCombatant(int index);
     void appendCombatant(BattleDialogModelCombatant* combatant);
     void appendCombatants(QList<BattleDialogModelCombatant*> combatants);
+    bool isCombatantInList(Combatant* combatant) const;
 
     QList<BattleDialogModelEffect*> getEffectList() const;
     int getEffectCount() const;
@@ -57,6 +58,9 @@ public:
     bool isMapChanged() const;
     const QRect& getPreviousMapRect() const;
     Map* getPreviousMap() const;
+
+    QRectF getCameraRect() const;
+    void setCameraRect(const QRectF& rect);
 
     QColor getBackgroundColor() const;
     void setBackgroundColor(QColor color);
@@ -88,6 +92,9 @@ public:
     BattleDialogModelCombatant* getActiveCombatant() const;
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
 
+    void setBackgroundImage(QImage backgroundImage);
+    QImage getBackgroundImage() const;
+
     void sortCombatants();
 
 private:
@@ -105,6 +112,8 @@ private:
     Map* _previousMap;
     QRect _previousMapRect;
 
+    QRectF _cameraRect;
+
     QColor _background;
 
     bool _gridOn;
@@ -118,6 +127,8 @@ private:
     bool _showEffects;
 
     BattleDialogModelCombatant* _activeCombatant;
+
+    QImage _backgroundImage;
 };
 
 #endif // BATTLEDIALOGMODEL_H

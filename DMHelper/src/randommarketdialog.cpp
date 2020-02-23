@@ -11,7 +11,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-RandomMarketDialog::RandomMarketDialog(QWidget *parent) :
+RandomMarketDialog::RandomMarketDialog(const QString& shopFile, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::RandomMarketDialog),
     _locations()
@@ -21,7 +21,7 @@ RandomMarketDialog::RandomMarketDialog(QWidget *parent) :
     connect(ui->btnRandomize, SIGNAL(clicked()), this, SLOT(randomizeMarket()));
     connect(ui->cmbLocation, SIGNAL(currentIndexChanged(int)), this, SLOT(locationSelected(int)));
 
-    loadMarkets();
+    loadMarkets(shopFile);
 
     randomizeMarket();
 }
@@ -31,10 +31,11 @@ RandomMarketDialog::~RandomMarketDialog()
     delete ui;
 }
 
-void RandomMarketDialog::loadMarkets()
+void RandomMarketDialog::loadMarkets(const QString& shopFile)
 {
     qDebug() << "[RandomMarketDialog] Reading markets...";
 
+    /*
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
@@ -44,13 +45,14 @@ void RandomMarketDialog::loadMarkets()
 #else
     QString shopFileName("shops.xml");
 #endif
+*/
 
     QDomDocument doc("DMHelperDataXML");
-    QFile file(shopFileName);
+    QFile file(shopFile);
     qDebug() << "[RandomMarketDialog] Market file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[RandomMarketDialog] Unable to read market file: " << shopFileName;
+        qDebug() << "[RandomMarketDialog] Unable to read market file: " << shopFile;
         return;
     }
 

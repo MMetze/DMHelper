@@ -6,6 +6,7 @@
 #include "map.h"
 #include "audiotrack.h"
 #include "dmconstants.h"
+#include "bestiary.h"
 #include "basicdateserver.h"
 #include <QDomDocument>
 #include <QDomElement>
@@ -141,6 +142,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
         return;
     }
 
+    Bestiary::Instance()->startBatchProcessing();
+
     CampaignObjectBase::inputXML(element, isImport);
 
     int encounterCount = 0;
@@ -226,6 +229,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
             trackElement = trackElement.nextSiblingElement( QString("track") );
         }
     }
+
+    Bestiary::Instance()->finishBatchProcessing();
 
     // Sum up all the elements loaded. The +2 is for the campaign object itself and the notes object
     int totalElements = characters.count() + settings.count() + npcs.count() + adventures.count() + tracks.count() + encounterCount + mapCount + 2;
@@ -403,6 +408,23 @@ Character* Campaign::getCharacterByDndBeyondId(int id)
     return nullptr;
 }
 
+Character* Campaign::getCharacterOrNPCByDndBeyondId(int id)
+{
+    for(int i = 0; i < characters.count(); ++i)
+    {
+        if(characters.at(i)->getDndBeyondID() == id)
+            return characters.at(i);
+    }
+
+    for(int j = 0; j < npcs.count(); ++j)
+    {
+        if(npcs.at(j)->getDndBeyondID() == id)
+            return npcs.at(j);
+    }
+
+    return nullptr;
+}
+
 Character* Campaign::getCharacterByIndex(int index)
 {
     if((index < 0)||(index >= characters.size()))
@@ -416,6 +438,7 @@ QUuid Campaign::addCharacter(Character* character)
     if(!character)
         return QUuid();
 
+    character->setParent(this);
     characters.append(character);
     connect(character,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
     connect(character,SIGNAL(changed()),this,SLOT(handleInteralChange()));
@@ -615,6 +638,7 @@ QUuid Campaign::addNPC(Character* npc)
     if(!npc)
         return QUuid();
 
+    npc->setParent(this);
     npcs.append(npc);
     connect(npc,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
     connect(npc,SIGNAL(changed()),this,SLOT(handleInteralChange()));

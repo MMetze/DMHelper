@@ -1,0 +1,38 @@
+Release process
+1. Finish SW changes
+2. Update documentation and screenshots
+3. Build and test Win64-msvc version
+4. Build and test MacOS version
+5. Github create and publish a release with the appropriate version
+6. Draft the release message
+7. Update files on DriveThruRPG, including update message
+8. Update description on DriveThruRPG with feature list
+9. Update files and description on itch
+10. Write a new DevLog post describing the release on itch
+11. Update the feature roadmap on itch
+12. Update Patreon page with feature list
+13. Post to discord
+14. Post the release to Reddit r/dnd and r/dmhelper
+15. Post the release to Twitter
+
+
+J.websterdesigns@gmail.com
+contact@michaelghelfi.com
+Neutral.Party.Art@gmail.com
+
+Midnyght
+https://www.dndbeyond.com/character/19574959/json
+
+Cyrus
+ddb.ac/characters/2868850/lr6xfH
+
+https://ddb.ac/characters/3294604/OF4OSD
+
+https://ddb.ac/characters/13143172/MEU3HY
+
+Alignment
+Sex
+Initiative
+Speed
+Spell Slots
+Pact Magic

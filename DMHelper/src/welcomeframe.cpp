@@ -4,6 +4,7 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QDir>
+#include <QMessageBox>
 #include <QtDebug>
 
 WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
@@ -55,12 +56,18 @@ void WelcomeFrame::openSampleCampaign()
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    QString filePath = fileDirPath.path() + QString("/doc/DMHelper Realm.xml");
+    QString filePath = fileDirPath.path() + QString("/Resources/DMHelper Realm.xml");
 #else
     QString filePath = QCoreApplication::applicationDirPath() + QString("/doc/DMHelper Realm.xml");
 #endif
+
+    if(!QFile::exists(filePath))
+    {
+        qDebug() << "[WelcomeFrame]: unable to open the sample campaign: " << filePath;
+        QMessageBox::critical(this, QString("File Open Error"), QString("The sample campaign file could not be found: ") + filePath);
+        return;
+    }
+
     emit openCampaignFile(filePath);
 }
 
@@ -112,12 +119,18 @@ void WelcomeFrame::openDoc(const QString& docName)
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    QString filePath = fileDirPath.path() + QString("/doc/") + docName;
+    QString filePath = fileDirPath.path() + QString("/Resources/") + docName;
 #else
     QString filePath = QCoreApplication::applicationDirPath() + QString("/doc/") + docName;
 #endif
+
+    if(!QFile::exists(filePath))
+    {
+        qDebug() << "[WelcomeFrame]: unable to open document: " << filePath;
+        QMessageBox::critical(this, QString("File Open Error"), QString("The requested document could not be found: ") + filePath);
+        return;
+    }
+
     QUrl fileUrl = QUrl::fromLocalFile(filePath);
     qDebug() << "[WelcomeFrame]: opening URL: " << fileUrl;
     QDesktopServices::openUrl(fileUrl);

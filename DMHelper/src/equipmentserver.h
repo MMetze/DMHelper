@@ -1,14 +1,16 @@
 #ifndef EQUIPMENTSERVER_H
 #define EQUIPMENTSERVER_H
 
+#include <QObject>
 #include <QString>
 #include <QList>
 #include <QDomElement>
 
 class EquipmentServer;
 
-class EquipmentServer
+class EquipmentServer : public QObject
 {
+    Q_OBJECT
 public:
     enum ItemProbability
     {
@@ -39,10 +41,10 @@ public:
         Category_Armor
     };
 
-    EquipmentServer();
+    explicit EquipmentServer(const QString& equipmentFile, QObject *parent = nullptr);
 
     static EquipmentServer* Instance();
-    static void Initialize();
+    static void Initialize(const QString& equipmentFile);
     static void Shutdown();
 
     class MagicItem;
@@ -62,6 +64,9 @@ public:
     QList<GoodsItem> getGoodsItems() const;
     QList<ToolItem> getToolItems() const;
 
+public slots:
+    void readEquipment(const QString& equipmentFile);
+
 private:
     static EquipmentServer* _instance;
 
@@ -72,7 +77,6 @@ private:
     QList<GoodsItem> _goodsItems;
     QList<ToolItem> _toolItems;
 
-    void readEquipment();
     ItemProbability probabilityFromString(QString probability);
     ItemCategory categoryFromString(QString category, bool isMagic);
 

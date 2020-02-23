@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QPixmap>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QDebug>
 
 Bestiary* Bestiary::_instance = nullptr;
@@ -17,7 +18,9 @@ Bestiary::Bestiary(QObject *parent) :
     _bestiaryDirectory(),
     _majorVersion(0),
     _minorVersion(0),
-    _licenseText()
+    _licenseText(),
+    _batchProcessing(false),
+    _batchAcknowledge(false)
 {
 }
 
@@ -230,13 +233,10 @@ QStringList Bestiary::getLicenseText() const
     return _licenseText;
 }
 
-MonsterClass* Bestiary::getMonsterClass(const QString& name) const
+MonsterClass* Bestiary::getMonsterClass(const QString& name)
 {
     if(!_bestiaryMap.contains(name))
-    {
-        qDebug() << "[Bestiary] ERROR: Requested monster class not found: " << name;
-        QMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + name + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
-    }
+        showMonsterClassWarning(name);
 
     return _bestiaryMap.value(name, nullptr);
 }
@@ -327,26 +327,24 @@ const QDir& Bestiary::getDirectory() const
     return _bestiaryDirectory;
 }
 
-Monster* Bestiary::createMonster(const QString& name) const
+Monster* Bestiary::createMonster(const QString& name)
 {
     if(!_bestiaryMap.contains(name))
     {
-        qDebug() << "[Bestiary] ERROR: Requested monster class not found: " << name;
-        QMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + name + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
+        showMonsterClassWarning(name);
         return nullptr;
     }
 
     return new Monster(getMonsterClass(name));
 }
 
-Monster* Bestiary::createMonster(const QDomElement& element, bool isImport) const
+Monster* Bestiary::createMonster(const QDomElement& element, bool isImport)
 {
     QString monsterName = element.attribute(QString("monsterClass"));
 
     if(!_bestiaryMap.contains(monsterName))
     {
-        qDebug() << "[Bestiary] ERROR: Requested monster class not found: " << monsterName;
-        QMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + monsterName + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
+        showMonsterClassWarning(monsterName);
         return nullptr;
     }
 
@@ -380,4 +378,44 @@ QString Bestiary::findMonsterImage(const QString& monsterName, const QString& ic
     }
 
     return fileName;
+}
+
+void Bestiary::startBatchProcessing()
+{
+    _batchProcessing = true;
+    _batchAcknowledge = false;
+}
+
+void Bestiary::finishBatchProcessing()
+{
+    _batchProcessing = false;
+    _batchAcknowledge = false;
+}
+
+void Bestiary::showMonsterClassWarning(const QString& monsterClass)
+{
+    qDebug() << "[Bestiary] ERROR: Requested monster class not found: " << monsterClass;
+
+    if(_batchProcessing)
+    {
+        if(!_batchAcknowledge)
+        {
+            QMessageBox msgBox;
+            msgBox.setWindowTitle(QString("Unknown monster"));
+            msgBox.setText(QString("WARNING: The monster """) + monsterClass + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
+            QPushButton* pButtonOK = msgBox.addButton(QString("OK"), QMessageBox::YesRole);
+            QPushButton* pButtonOKAll = msgBox.addButton(QString("OK to All"), QMessageBox::NoRole);
+            msgBox.setDefaultButton(pButtonOK);
+            msgBox.setEscapeButton(pButtonOK);
+            msgBox.exec();
+            if (msgBox.clickedButton()==pButtonOKAll)
+            {
+                _batchAcknowledge = true;
+            }
+        }
+    }
+    else
+    {
+        QMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + monsterClass + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
+    }
 }

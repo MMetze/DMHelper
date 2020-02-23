@@ -18,16 +18,18 @@
 // Uncomment this to log all mouse movement actions
 //#define BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
 
-BattleDialogGraphicsScene::BattleDialogGraphicsScene(BattleDialogModel& model, QObject *parent) :
+BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     QGraphicsScene(parent),
     _contextMenuItem(nullptr),
     _grid(nullptr),
-    _model(model),
+    _model(nullptr),
     _itemList(),
     _mouseDown(false),
     _mouseDownPos(),
     _mouseDownItem(nullptr),
+    _previousRotation(0.0),
     _distanceShown(false),
+    _heightDelta(0.0),
     _distanceLine(nullptr),
     _distanceText(nullptr)
 {
@@ -37,9 +39,20 @@ BattleDialogGraphicsScene::~BattleDialogGraphicsScene()
 {
 }
 
+void BattleDialogGraphicsScene::setModel(BattleDialogModel* model)
+{
+    _model = model;
+}
+
 void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
 {
-    if((_grid) || (_itemList.count() > 0))
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create scene contents, no model exists.";
+        return;
+    }
+
+    if(!isSceneEmpty())
     {
         qDebug() << "[Battle Dialog Scene] ERROR: unable to create scene contents: " << rect << ". Contents already exist!";
         return;
@@ -47,9 +60,9 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
 
     qDebug() << "[Battle Dialog Scene] Creating scene contents: " << rect;
     _grid = new Grid(*this, rect);
-    _grid->rebuildGrid(_model);
+    _grid->rebuildGrid(*_model);
 
-    QList<BattleDialogModelEffect*> effects = _model.getEffectList();
+    QList<BattleDialogModelEffect*> effects = _model->getEffectList();
     for(BattleDialogModelEffect* effect : effects)
     {
         if(effect)
@@ -61,20 +74,27 @@ void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
 {
     qDebug() << "[Battle Dialog Scene] Resizing scene contents";
 
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to resize scene contents, no model exists.";
+        return;
+    }
+
+
     if(_grid)
     {
         qDebug() << "[Battle Dialog Scene]     Resizing grid, grid shape = " << rect;
         _grid->setGridShape(rect);
-        _grid->rebuildGrid(_model);
+        _grid->rebuildGrid(*_model);
     }
 
     for(QGraphicsItem* item : _itemList)
     {
         if(item)
         {
-            QPoint mapPos = item->pos().toPoint() + _model.getPreviousMapRect().topLeft();
-            item->setPos(mapPos - _model.getMapRect().topLeft());
-            _model.getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
+            QPoint mapPos = item->pos().toPoint() + _model->getPreviousMapRect().topLeft();
+            item->setPos(mapPos - _model->getMapRect().topLeft());
+            _model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
             qDebug() << "[Battle Dialog Scene]     Setting position for item " << item << " to " << item->pos();
         }
     }
@@ -84,22 +104,28 @@ void BattleDialogGraphicsScene::updateBattleContents()
 {
     qDebug() << "[Battle Dialog Scene] Updating scene contents";
 
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to update scene contents, no model exists.";
+        return;
+    }
+
     if(_grid)
     {
-        qDebug() << "[Battle Dialog Scene]     Rebuilding grid, grid scale = " << _model.getGridScale();
-        _grid->rebuildGrid(_model);
+        qDebug() << "[Battle Dialog Scene]     Rebuilding grid, grid scale = " << _model->getGridScale();
+        _grid->rebuildGrid(*_model);
     }
 
     for(QGraphicsItem* item : _itemList)
     {
         if(item)
         {
-            qreal newScale = static_cast<qreal>(_model.getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->getSize()) * static_cast<qreal>(_model.getGridScale()) / 500.0;
+            qreal newScale = static_cast<qreal>(_model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->getSize()) * static_cast<qreal>(_model->getGridScale()) / 500.0;
             qDebug() << "[Battle Dialog Scene]     Setting scale for item " << item << " to " << newScale;
             qreal oldScale = item->scale();
             item->setScale(newScale);
             item->setPos(item->pos() * newScale/oldScale);
-            _model.getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
+            _model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
         }
     }
 }
@@ -120,7 +146,7 @@ void BattleDialogGraphicsScene::clearBattleContents()
 
 void BattleDialogGraphicsScene::setEffectVisibility(bool visible)
 {
-    qDebug() << "[Battle Dialog Scene] Setting effect visibility to " << visible;
+    //qDebug() << "[Battle Dialog Scene] Setting effect visibility to " << visible;
 
     for(QGraphicsItem* item : _itemList)
     {
@@ -130,7 +156,7 @@ void BattleDialogGraphicsScene::setEffectVisibility(bool visible)
 
 void BattleDialogGraphicsScene::setGridVisibility(bool visible)
 {
-    qDebug() << "[Battle Dialog Scene] Setting grid visibility to " << visible;
+    //qDebug() << "[Battle Dialog Scene] Setting grid visibility to " << visible;
 
     if(_grid)
     {
@@ -143,13 +169,30 @@ QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
     return _itemList;
 }
 
-void BattleDialogGraphicsScene::setShowDistance(bool showDistance)
+bool BattleDialogGraphicsScene::isSceneEmpty() const
+{
+    return((_grid == nullptr) && (_itemList.count() == 0));
+}
+
+void BattleDialogGraphicsScene::handleItemChanged(QGraphicsItem* item)
+{
+    emit itemChanged(item);
+}
+
+void BattleDialogGraphicsScene::setShowDistance(bool showDistance, qreal heightDelta)
 {
     _distanceShown = showDistance;
+    _heightDelta = heightDelta;
 }
 
 void BattleDialogGraphicsScene::editItem()
 {
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to edit item, no model exists!";
+        return;
+    }
+
     if(!_contextMenuItem)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no context menu item known! ";
@@ -163,7 +206,7 @@ void BattleDialogGraphicsScene::editItem()
         return;
     }
 
-    BattleDialogModelEffect* effect = _model.getEffectById(QUuid(abstractShape->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+    BattleDialogModelEffect* effect = _model->getEffectById(QUuid(abstractShape->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
     if(!effect)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << abstractShape;
@@ -177,7 +220,7 @@ void BattleDialogGraphicsScene::editItem()
         qDebug() << "[Battle Dialog Scene] Applying effect settings for effect " << abstractShape;
 
         settings.copyValues(*effect);
-        effect->applyEffectValues(*abstractShape, _model.getGridScale());
+        effect->applyEffectValues(*abstractShape, _model->getGridScale());
         //applyEffectValues(*abstractShape, *effect);
         emit effectChanged(abstractShape);
     }
@@ -196,13 +239,19 @@ void BattleDialogGraphicsScene::rollItem()
 
 void BattleDialogGraphicsScene::deleteItem()
 {
-    if(!_contextMenuItem)
+    if(!_model)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no context menu item known! ";
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to delete item, no model exists!";
         return;
     }
 
-    BattleDialogModelEffect* effect = _model.getEffectById(QUuid(_contextMenuItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+    if(!_contextMenuItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no context menu item known!";
+        return;
+    }
+
+    BattleDialogModelEffect* effect = _model->getEffectById(QUuid(_contextMenuItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
     if(!effect)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << _contextMenuItem;
@@ -213,7 +262,7 @@ void BattleDialogGraphicsScene::deleteItem()
     if(result == QMessageBox::Yes)
     {
         qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << effect;
-        _model.removeEffect(effect);
+        _model->removeEffect(effect);
         _itemList.removeOne(_contextMenuItem);
         if(_mouseDownItem == _contextMenuItem)
         {
@@ -229,11 +278,18 @@ void BattleDialogGraphicsScene::deleteItem()
 
 void BattleDialogGraphicsScene::addEffectRadius()
 {
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create radius effect, no model exists.";
+        return;
+    }
+
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius);
     if(!effect)
         return;
 
-    qreal scaledSize = static_cast<qreal>(effect->getSize()) * _model.getGridScale() / 5.0;
+    // Note: The size doubled to convert radius to diameter
+    qreal scaledSize = static_cast<qreal>(effect->getSize()) * 2.0 * _model->getGridScale() / 5.0;
     effect->setPosition(_mouseDownPos.x() - (scaledSize / 2.0),_mouseDownPos.y() - (scaledSize / 2.0));
 
     addEffect(effect);
@@ -241,6 +297,12 @@ void BattleDialogGraphicsScene::addEffectRadius()
 
 void BattleDialogGraphicsScene::addEffectCone()
 {
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create cone effect, no model exists.";
+        return;
+    }
+
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone);
     if(!effect)
         return;
@@ -252,11 +314,17 @@ void BattleDialogGraphicsScene::addEffectCone()
 
 void BattleDialogGraphicsScene::addEffectCube()
 {
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create cube effect, no model exists.";
+        return;
+    }
+
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube);
     if(!effect)
         return;
 
-    qreal scaledSize = static_cast<qreal>(effect->getSize()) * _model.getGridScale() / 5.0;
+    qreal scaledSize = static_cast<qreal>(effect->getSize()) * _model->getGridScale() / 5.0;
     effect->setPosition(_mouseDownPos.x() - (scaledSize / 2.0), _mouseDownPos.y() - (scaledSize / 2.0));
 
     addEffect(effect);
@@ -264,6 +332,12 @@ void BattleDialogGraphicsScene::addEffectCube()
 
 void BattleDialogGraphicsScene::addEffectLine()
 {
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create a line effect, no model exists.";
+        return;
+    }
+
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line);
     if(!effect)
         return;
@@ -304,6 +378,12 @@ void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *
 
 void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to handle mouse move event, no model exists.";
+        return;
+    }
+
     if(!mouseEvent)
         return;
 
@@ -315,7 +395,17 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
         QLineF line = _distanceLine->line();
         line.setP2(mouseEvent->scenePos());
         _distanceLine->setLine(line);
-        QString distanceText = QString::number(5.0 * line.length() / _model.getGridScale(), 'f', 1);
+        qreal lineDistance = 5.0 * line.length() / _model->getGridScale();
+        QString distanceText;
+        if(_heightDelta == 0.0)
+        {
+            distanceText = QString::number(lineDistance, 'f', 1);
+        }
+        else
+        {
+            qreal diagonal = qSqrt((lineDistance*lineDistance) + (_heightDelta*_heightDelta));
+            distanceText = QString::number(diagonal, 'f', 1) + QChar::LineFeed + QString("(") + QString::number(lineDistance, 'f', 1) + QString (")");
+        }
         _distanceText->setText(distanceText);
         _distanceText->setPos(line.center());
         emit distanceChanged(distanceText);
@@ -343,7 +433,7 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
             qreal dot = _mouseDownPos.x()*eventPos.x()+_mouseDownPos.y()*eventPos.y();
             qreal angle = qRadiansToDegrees(qAtan2(cross,dot));
             _mouseDownItem->setRotation(_previousRotation + angle);
-            BattleDialogModelEffect* effect = _model.getEffectById(QUuid(_mouseDownItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+            BattleDialogModelEffect* effect = _model->getEffectById(QUuid(_mouseDownItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
             if(effect)
                 effect->setRotation(_previousRotation + angle);
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
@@ -363,7 +453,7 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
             qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
 #endif
-            BattleDialogModelEffect* effect = _model.getEffectById(QUuid(abstractShape->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+            BattleDialogModelEffect* effect = _model->getEffectById(QUuid(abstractShape->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
             if(effect)
             {
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
@@ -575,19 +665,31 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
 
 void BattleDialogGraphicsScene::addEffect(BattleDialogModelEffect* effect)
 {
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to add new scene effect, no model exists.";
+        return;
+    }
+
     if(!effect)
         return;
 
-    _model.appendEffect(effect);
+    _model->appendEffect(effect);
 
-    _contextMenuItem =addEffectShape(*effect);
+    _contextMenuItem = addEffectShape(*effect);
     editItem();
     _contextMenuItem = nullptr;
 }
 
 QAbstractGraphicsShapeItem* BattleDialogGraphicsScene::addEffectShape(BattleDialogModelEffect& effect)
 {
-    QAbstractGraphicsShapeItem* shape = effect.createEffectShape(_model.getGridScale());
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to add a new effect shape, no model exists.";
+        return nullptr;
+    }
+
+    QAbstractGraphicsShapeItem* shape = effect.createEffectShape(_model->getGridScale());
     if(shape)
     {
         addItem(shape);
@@ -597,7 +699,6 @@ QAbstractGraphicsShapeItem* BattleDialogGraphicsScene::addEffectShape(BattleDial
     return shape;
 }
 
-//QAbstractGraphicsShapeItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
 QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
 {
     QGraphicsItem* result = nullptr;

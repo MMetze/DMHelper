@@ -66,7 +66,8 @@ const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
     0, // IntValue_gold
     0, // IntValue_silver
     0, // IntValue_copper
-    0  // IntValue_experience
+    0, // IntValue_experience
+    0  // IntValue_jackofalltrades
 };
 
 const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
@@ -85,39 +86,9 @@ const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
     "gold", // IntValue_gold
     "silver", // IntValue_silver
     "copper", // IntValue_copper
-    "experience" // IntValue_experience
+    "experience", // IntValue_experience
+    "jackofalltrades" // IntValue_experience
 };
-
-/*
-const bool BOOLVALUE_DEFAULTS[Character::BOOLVALUE_COUNT] =
-{
-    false, // BoolValue_strengthSave
-    false, // BoolValue_athletics
-    false, // BoolValue_dexteritySave
-    false, // BoolValue_stealth
-    false, // BoolValue_acrobatics
-    false, // BoolValue_sleightOfHand
-    false, // BoolValue_constitutionSave
-    false, // BoolValue_intelligenceSave
-    false, // BoolValue_investigation
-    false, // BoolValue_arcana
-    false, // BoolValue_nature
-    false, // BoolValue_history
-    false, // BoolValue_religion
-    false, // BoolValue_wisdomSave
-    false, // BoolValue_medicine
-    false, // BoolValue_animalHandling
-    false, // BoolValue_perception
-    false, // BoolValue_insight
-    false, // BoolValue_survival
-    false, // BoolValue_charismaSave
-    false, // BoolValue_performance
-    false, // BoolValue_deception
-    false, // BoolValue_persuasion
-    false // BoolValue_intimidation
-//    true // BoolValue_active
-};
-*/
 
 const char* SKILLVALUE_NAMES[Combatant::SKILLS_COUNT] =
 {
@@ -145,7 +116,6 @@ const char* SKILLVALUE_NAMES[Combatant::SKILLS_COUNT] =
     "deception",        // Skills_deception
     "persuasion",       // Skills_persuasion
     "intimidation"      // Skills_intimidation
-//    "active"            // BoolValue_active
 };
 
 const char* SKILLVALUE_WRITTENNAMES[Combatant::SKILLS_COUNT] =
@@ -174,7 +144,6 @@ const char* SKILLVALUE_WRITTENNAMES[Combatant::SKILLS_COUNT] =
     "Deception",        // Skills_deception
     "Persuasion",       // Skills_persuasion
     "Intimidation"      // Skills_intimidation
-//    "Active"            // BoolValue_active
 };
 
 Character::Character(QObject *parent) :
@@ -237,8 +206,7 @@ void Character::inputXML(const QDomElement &element, bool isImport)
 
     for(i = 0; i < SKILLS_COUNT; ++i)
     {
-        //setBoolValue((BoolValue)i, (bool)element.attribute(BOOLVALUE_NAMES[i],QString::number((int)BOOLVALUE_DEFAULTS[i])).toInt() );
-        setSkillValue(static_cast<Skills>(i), static_cast<bool>(element.attribute(SKILLVALUE_NAMES[i],QString::number(static_cast<int>(false))).toInt()));
+        setSkillValue(static_cast<Skills>(i), element.attribute(SKILLVALUE_NAMES[i],QString::number(0)).toInt());
     }
 
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
@@ -370,7 +338,18 @@ bool Character::getSkillValue(Skills key) const
         return false;
     }
 
-    return _skillValues[key];
+    return (_skillValues[key] > 0);
+}
+
+bool Character::getSkillExpertise(Skills key) const
+{
+    if((key < 0)||(key >= SKILLS_COUNT))
+    {
+        qWarning() << "[Character] Illegal skill expertise value requested from character. Id: " << key;
+        return false;
+    }
+
+    return (_skillValues[key] > 1);
 }
 
 void Character::setStringValue(StringValue key, const QString& value)
@@ -411,9 +390,49 @@ void Character::setSkillValue(Skills key, bool value)
         return;
     }
 
-    if(_skillValues[key] != value)
+    if(((value) && (_skillValues[key] == Combatant::SKILLS_UNSKILLED)) ||
+       ((!value) && (_skillValues[key] > Combatant::SKILLS_UNSKILLED)))
+    {
+        _skillValues[key] = (value ? Combatant::SKILLS_SKILLED : Combatant::SKILLS_UNSKILLED);
+        registerChange();
+    }
+}
+
+void Character::setSkillValue(Skills key, int value)
+{
+    if((key < 0)||(key >= SKILLS_COUNT))
+    {
+        qWarning() << "[Character] Tried to set illegal skill value from character. Id: " << key;
+        return;
+    }
+
+    if((value != _skillValues[key]))
     {
         _skillValues[key] = value;
+        registerChange();
+    }
+}
+
+void Character::setSkillExpertise(Skills key, bool value)
+{
+    if((key < 0)||(key >= SKILLS_COUNT))
+    {
+        qWarning() << "[Character] Tried to set illegal skill value from character. Id: " << key;
+        return;
+    }
+
+    if(_skillValues[key] == Combatant::SKILLS_UNSKILLED)
+        return;
+
+    if((value) && (_skillValues[key] == Combatant::SKILLS_SKILLED))
+    {
+        _skillValues[key] = Combatant::SKILLS_EXPERT;
+        registerChange();
+    }
+
+    if((!value) && (_skillValues[key] == Combatant::SKILLS_EXPERT))
+    {
+        _skillValues[key] = Combatant::SKILLS_SKILLED;
         registerChange();
     }
 }
@@ -435,7 +454,6 @@ void Character::setActive(bool active)
 int Character::getTotalLevel() const
 {
     // Only supporting a single level currently
-    // return getIntValue(IntValue_level) + getIntValue(IntValue_level2) + getIntValue(IntValue_level3);
     return getIntValue(IntValue_level);
 }
 
@@ -515,7 +533,7 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
 
     for(i = 0; i < SKILLS_COUNT; ++i)
     {
-        element.setAttribute( SKILLVALUE_NAMES[i], static_cast<int>(getSkillValue(static_cast<Skills>(i))) );
+        element.setAttribute( SKILLVALUE_NAMES[i], _skillValues[static_cast<Skills>(i)] );
     }
 
     element.setAttribute("active", static_cast<int>(getActive()));
@@ -537,8 +555,7 @@ void Character::setDefaultValues()
 
     for(i = 0; i < _skillValues.size(); ++i)
     {
-        //_boolValues[i] = BOOLVALUE_DEFAULTS[i];
-        _skillValues[i] = false;
+        _skillValues[i] = 0;
     }
 
     _active = true;

@@ -9,7 +9,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-QuickRefFrame::QuickRefFrame(QWidget *parent) :
+QuickRefFrame::QuickRefFrame(const QString& quickRefFile, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::QuickRefFrame),
     _quickRef(),
@@ -26,7 +26,7 @@ QuickRefFrame::QuickRefFrame(QWidget *parent) :
     //ui->scrollQuickRefWidgetContents->setContentsMargins(1,1,1,1);
     //ui->scrollQuickRef->setContentsMargins(1,1,1,1);
     connect(ui->cmbQuickRef, SIGNAL(currentIndexChanged(int)), this, SLOT(handleQuickRefChange(int)));
-    readQuickRef();
+    readQuickRef(quickRefFile);
 }
 
 QuickRefFrame::~QuickRefFrame()
@@ -35,13 +35,14 @@ QuickRefFrame::~QuickRefFrame()
     delete ui;
 }
 
-void QuickRefFrame::readQuickRef()
+void QuickRefFrame::readQuickRef(const QString& quickRefFile)
 {
     if(!_quickRef.empty())
         return;
 
     ui->cmbQuickRef->clear();
 
+/*
 #ifdef Q_OS_MAC
     QDir fileDirPath(QCoreApplication::applicationDirPath());
     fileDirPath.cdUp();
@@ -51,13 +52,14 @@ void QuickRefFrame::readQuickRef()
 #else
     QString quickRefFileName("quickref_data.xml");
 #endif
+*/
 
     QDomDocument doc("DMHelperDataXML");
-    QFile file(quickRefFileName);
+    QFile file(quickRefFile);
     qDebug() << "[QuickRef] Quickref data file: " << QFileInfo(file).filePath();
     if(!file.open(QIODevice::ReadOnly))
     {
-        qDebug() << "[QuickRef] Unable to read quickref file: " << quickRefFileName;
+        qDebug() << "[QuickRef] Unable to read quickref file: " << quickRefFile;
         return;
     }
 

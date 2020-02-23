@@ -79,17 +79,23 @@ int main(int argc, char *argv[]) {
     int result = 0;
 
     try {
-        qInfo() << "DM Helper started.";
+        qInfo() << "[Main] #########################################################################################";
+        qInfo() << "[Main]                                  DM HELPER STARTED";
+        qInfo() << "[Main] #########################################################################################";
 
         MainWindow* w = new MainWindow;
         w->show();
 
         result = a.exec();
 
-        qInfo() << "DM Helper exiting.";
+        qInfo() << "[Main] DM Helper exiting...";
 
         delete w;
         w = nullptr;
+
+        qInfo() << "[Main] #########################################################################################";
+        qInfo() << "[Main]                                 DM HELPER SHUT DOWN";
+        qInfo() << "[Main] #########################################################################################";
 
         if(log){
             qInstallMessageHandler(nullptr);

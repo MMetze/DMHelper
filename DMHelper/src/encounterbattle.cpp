@@ -1,6 +1,7 @@
 #include "encounterbattle.h"
 #include "dmconstants.h"
 #include "encounterbattleedit.h"
+#include "battleframe.h"
 #include "combatant.h"
 #include "combatantfactory.h"
 #include "campaign.h"
@@ -157,6 +158,26 @@ void EncounterBattle::resolveReferences()
 
 void EncounterBattle::widgetActivated(QWidget* widget)
 {
+    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(widget);
+    if(!battleFrame)
+        return;
+
+    if(battleFrame->getBattle() != nullptr)
+    {
+        qDebug() << "[EncounterBattle] WARNING: Battle not deactivated: " << battleFrame->getBattle()->getID();
+        qDebug() << "[EncounterBattle] WARNING: Previous battle will now be deactivated. This should happen previously!";
+        battleFrame->setBattle(nullptr);
+    }
+
+    qDebug() << "[EncounterBattle] Activating battle: " << getID() << " """ << _name << """";
+
+    if(!_battleModel)
+        _battleModel = createNewBattle(battleFrame->viewportCenter());
+
+    _widget = widget;
+    connectFrameToModel();
+
+    /*
     EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(widget);
     if(!battleEdit)
         return;
@@ -173,10 +194,22 @@ void EncounterBattle::widgetActivated(QWidget* widget)
     battleEdit->setBattle(this);
 
     _widget = widget;
+    */
 }
 
 void EncounterBattle::widgetDeactivated(QWidget* widget)
 {
+    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(widget);
+    if(!battleFrame)
+        return;
+
+    qDebug() << "[EncounterBattle] Widget Deactivated " << getID() << " """ << _name;
+
+    disconnectFrameFromModel();
+
+    _widget = nullptr;
+
+    /*
     EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(widget);
     if(!battleEdit)
         return;
@@ -186,6 +219,7 @@ void EncounterBattle::widgetDeactivated(QWidget* widget)
     battleEdit->unsetBattle(this);
 
     _widget = nullptr;
+    */
 }
 
 int EncounterBattle::getType() const
@@ -581,3 +615,85 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
         }
     }
 }
+
+BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
+{
+    Campaign* campaign = getCampaign();
+    if(!campaign)
+        return nullptr;
+
+    BattleDialogModel* battleModel = new BattleDialogModel();
+
+    // Add the active characters
+    QList<Character*> activeCharacters = campaign->getActiveCharacters();
+    for(int i = 0; i < activeCharacters.count(); ++i)
+    {
+        BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
+        newCharacter->setPosition(combatantPos);
+        battleModel->appendCombatant(newCharacter);
+    }
+
+    /*
+    if(battleEncounter)
+    {
+        connect(battleEncounter,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
+
+        // Add wave zero of monsters
+        battleModel->appendCombatants( createWaveMonsters(battleEncounter, 0) );
+
+        // Register the model with the encounter
+        battleEncounter->setBattleDialogModel(battleModel);
+    }
+
+    _encounterBattle = battleEncounter;
+    _dlg = createBattleDialog(battleModel);
+    if(!_dlg)
+        return;
+    */
+
+    connect(battleModel,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
+
+    return battleModel;
+}
+
+void EncounterBattle::connectFrameToModel()
+{
+    if(!_battleModel)
+        return;
+
+    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(_widget);
+    if(!battleFrame)
+        return;
+
+    battleFrame->setBattle(this);
+}
+
+void EncounterBattle::disconnectFrameFromModel()
+{
+    if(!_battleModel)
+        return;
+
+    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(_widget);
+    if(!battleFrame)
+        return;
+
+    battleFrame->setBattle(nullptr);
+}
+
+
+// Needs
+//   Roll Initiative
+//   Complete battle
+//   Audio tracks
+//   Preset Waves of monsters
+//   Battle logger
+/*
+connect(dlg, SIGNAL(battleComplete()), this, SLOT(completeBattle()));
+
+
+
+connect(dlg, SIGNAL(addMonsters()), this, SLOT(addMonsters()));
+connect(dlg, SIGNAL(addWave()), this, SLOT(addWave()));
+connect(dlg, SIGNAL(addCharacter()), this, SLOT(addCharacter()));
+connect(dlg, SIGNAL(addNPC()), this, SLOT(addNPC()));
+*/

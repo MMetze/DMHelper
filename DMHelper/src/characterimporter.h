@@ -3,23 +3,60 @@
 
 #include <QObject>
 #include <QUuid>
+#include <QMessageBox>
+#include <QMap>
 
 class Campaign;
 class Character;
+class QNetworkReply;
+class QNetworkAccessManager;
 
 class CharacterImporter : public QObject
 {
     Q_OBJECT
 public:
     explicit CharacterImporter(QObject *parent = nullptr);
+    ~CharacterImporter();
 
 signals:
+    void characterImported(QUuid characterId);
 
 public slots:
-    QUuid importCharacter(Campaign& campaign);
+    void importCharacter(Campaign* campaign, bool isCharacter = true);
+    void updateCharacter(Character* character);
+
+    void campaignChanged();
 
 protected:
     void scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character);
+    void scanChoices(QJsonObject choicesObject, Character& character);
+    QString getNotesString(QJsonObject notesParent, const QString& key, const QString& title);
+    bool interpretReply(QNetworkReply* reply);
+    bool interpretImageReply(QNetworkReply* reply);
+
+    void startImport(const QString& characterId);
+    void finishImport();
+
+protected slots:
+    void initializeValues();
+
+    void replyFinished(QNetworkReply *reply);
+    void imageReplyFinished(QNetworkReply *reply);
+    void messageBoxCancelled();
+
+private:
+    QNetworkAccessManager *_manager;
+    QNetworkReply* _reply;
+    Campaign* _campaign;
+    Character* _character;
+    bool _isCharacter;
+    QMessageBox* _msgBox;
+
+    QMap<int, int> _attributeSetValues;
+    int _levelCount;
+    int _totalArmor;
+    int _totalHP;
+    bool _halfProficiency;
 };
 
 #endif // CHARACTERIMPORTER_H

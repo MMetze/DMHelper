@@ -22,6 +22,7 @@ public:
 
 signals:
     void publishCharacterImage(QImage img, QColor color);
+    void characterChanged();
 
 public slots:
     void calculateMods();
@@ -35,10 +36,12 @@ private slots:
     void readCharacterData();
     void writeCharacterData();
     void handlePublishClicked();
+    void syncDndBeyond();
+    void openExpertiseDialog();
 
 private:
     void loadCharacterImage();
-    void updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus);
+    void updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency);
 
     Ui::CharacterFrame *ui;
     Character* _character;

@@ -62,9 +62,15 @@ void PublishWindow::setBackgroundColor(QColor color)
 
 void PublishWindow::keyPressEvent(QKeyEvent * event)
 {
+    /*
     if(event->key() == Qt::Key_Escape)
     {
         hide();
+    }
+    */
+    if(event->key() == Qt::Key_Escape)
+    {
+        setWindowState(windowState() & ~Qt::WindowFullScreen);
     }
     else if(event->key() == Qt::Key_F)
     {

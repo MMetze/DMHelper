@@ -150,6 +150,7 @@ void WidgetMonster::readInternals()
     loadImage();
 
     ui->edtName->setText(_internals->getCombatant()->getName());
+    ui->edtName->home(false);
     ui->edtAC->setText(QString::number(_internals->getCombatant()->getArmorClass()));
     ui->edtHP->setText(QString::number(_internals->getCombatant()->getHitPoints()));
     ui->edtInit->setText(QString::number(_internals->getCombatant()->getInitiative()));

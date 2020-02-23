@@ -14,6 +14,7 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _mapRect(),
     _previousMap(nullptr),
     _previousMapRect(),
+    _cameraRect(),
     _background(Qt::black),
     _gridOn(true),
     _gridScale(DMHelper::STARTING_GRID_SCALE),
@@ -23,7 +24,8 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _showAlive(true),
     _showDead(false),
     _showEffects(true),
-    _activeCombatant(nullptr)
+    _activeCombatant(nullptr),
+    _backgroundImage()
 {
 }
 
@@ -36,6 +38,7 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
     _mapRect(other._mapRect),
     _previousMap(other._previousMap),
     _previousMapRect(other._previousMapRect),
+    _cameraRect(other._cameraRect),
     _background(other._background),
     _gridOn(other._gridOn),
     _gridScale(other._gridScale),
@@ -45,7 +48,8 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
     _showAlive(other._showAlive),
     _showDead(other._showDead),
     _showEffects(other._showEffects),
-    _activeCombatant(nullptr)
+    _activeCombatant(nullptr),
+    _backgroundImage(other._backgroundImage)
 {
     for(int i = 0; i < other._combatants.count(); ++i)
     {
@@ -86,6 +90,10 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
     battleElement.setAttribute("mapRectY", _mapRect.y());
     battleElement.setAttribute("mapRectWidth", _mapRect.width());
     battleElement.setAttribute("mapRectHeight", _mapRect.height());
+    battleElement.setAttribute("cameraRectX", _cameraRect.x());
+    battleElement.setAttribute("cameraRectY", _cameraRect.y());
+    battleElement.setAttribute("cameraRectWidth", _cameraRect.width());
+    battleElement.setAttribute("cameraRectHeight", _cameraRect.height());
     battleElement.setAttribute("backgroundColorR", _background.red());
     battleElement.setAttribute("backgroundColorG", _background.green());
     battleElement.setAttribute("backgroundColorB", _background.blue());
@@ -129,9 +137,13 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     // TODO: Manager needs to add combatants
     // TODO: Manager needs to set active combatant
 
-    _background= QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
-                        element.attribute("backgroundColorG",QString::number(0)).toInt(),
-                        element.attribute("backgroundColorB",QString::number(0)).toInt());
+    _background = QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
+                         element.attribute("backgroundColorG",QString::number(0)).toInt(),
+                         element.attribute("backgroundColorB",QString::number(0)).toInt());
+    _cameraRect = QRect(element.attribute("cameraRectX",QString::number(0.0)).toDouble(),
+                        element.attribute("cameraRectY",QString::number(0.0)).toDouble(),
+                        element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
+                        element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
     _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
     _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
@@ -205,6 +217,25 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
 void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
 {
     _combatants.append(combatants);
+}
+
+bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
+{
+    if(!combatant)
+        return false;
+
+    if(_combatants.isEmpty())
+        return false;
+
+    QListIterator<BattleDialogModelCombatant*> it(_combatants);
+    while(it.hasNext())
+    {
+        BattleDialogModelCombatant* listCombatant = it.next();
+        if((listCombatant) && (listCombatant->getCombatant()) && (listCombatant->getCombatant()->getID() == combatant->getID()))
+            return true;
+    }
+
+    return false;
 }
 
 QList<BattleDialogModelEffect*> BattleDialogModel::getEffectList() const
@@ -323,6 +354,16 @@ Map* BattleDialogModel::getPreviousMap() const
     return _previousMap;
 }
 
+QRectF BattleDialogModel::getCameraRect() const
+{
+    return _cameraRect;
+}
+
+void BattleDialogModel::setCameraRect(const QRectF& rect)
+{
+    _cameraRect = rect;
+}
+
 QColor BattleDialogModel::getBackgroundColor() const
 {
     return _background;
@@ -421,6 +462,16 @@ BattleDialogModelCombatant* BattleDialogModel::getActiveCombatant() const
 void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCombatant)
 {
     _activeCombatant = activeCombatant;
+}
+
+void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
+{
+    _backgroundImage = backgroundImage;
+}
+
+QImage BattleDialogModel::getBackgroundImage() const
+{
+    return _backgroundImage;
 }
 
 void BattleDialogModel::sortCombatants()

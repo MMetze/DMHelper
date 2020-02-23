@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml multimedia multimediawidgets opengl
+QT       += core gui xml multimedia multimediawidgets opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -18,6 +18,7 @@ INSTALLS += \
     install_it
 
 win32:RC_ICONS += dmhelper.ico
+macx:ICON=data/macimg/DMHelper.icns
 
 SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhlogon.cpp \
@@ -35,11 +36,18 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
     basicdateserver.cpp \
+    battleframe.cpp \
     bestiaryexportdialog.cpp \
+    camerarect.cpp \
     campaignexporter.cpp \
+    characterimportdialog.cpp \
     colorpushbutton.cpp \
+    customtableentry.cpp \
+    customtableframe.cpp \
     equipmentserver.cpp \
+    expertisedialog.cpp \
     mainwindow.cpp \
+    mapeditframe.cpp \
     objectimporter.cpp \
     publishbuttonframe.cpp \
     publishwindow.cpp \
@@ -189,10 +197,18 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
     basicdateserver.h \
+    battleframe.h \
     bestiaryexportdialog.h \
+    camerarect.h \
     campaignexporter.h \
+    characterimportdialog.h \
     colorpushbutton.h \
+    customtableentry.h \
+    customtableframe.h \
     equipmentserver.h \
+    expertisedialog.h \
+    mapeditframe.h \
+    mapmarker.h \
     objectimporter.h \
     publishbuttonframe.h \
     publishwindow.h \
@@ -327,13 +343,18 @@ HEADERS  += mainwindow.h \
     texttranslatedialog.h
 
 FORMS    += mainwindow.ui \
+    battleframe.ui \
     bestiaryexportdialog.ui \
+    characterimportdialog.ui \
+    customtableframe.ui \
     dicerolldialog.ui \
     characterdialog.ui \
     combatantdialog.ui \
     battledialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    expertisedialog.ui \
+    mapeditframe.ui \
     publishbuttonframe.ui \
     randommarketdialog.ui \
     textpublishdialog.ui \
@@ -384,18 +405,22 @@ OTHER_FILES += \
     bugs.txt
 
 DISTFILES += \
-    binsrc/calendar.xml \
-    binsrc/equipment.xml \
-    deploy.cmd \
-    deploy.cmd \
-    binsrc/quickref_data.xml \
+    buildanddeploy_msvc.cmd \
+    buildanddeploymac \
     bugs.txt \
-    buildanddeploy.cmd \
     release_notes.txt \
-    buildanddeploymac
+    resources/calendar.xml \
+    resources/equipment.xml \
+    resources/quickref_data.xml \
+    resources/shops.xml \
+    resources/tables/Indefinite Madness.xml \
+    resources/tables/Long Term Madness.xml \
+    resources/tables/Short Term Madness.xml
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
 
 win32: LIBS += -L$$PWD/vlc -llibvlc
+macx: LIBS += -F$$PWD/vlc/ -framework VLCKit
+

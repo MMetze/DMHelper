@@ -17,13 +17,14 @@
 #include "mruhandler.h"
 #include "encounterfactory.h"
 #include "encountertextedit.h"
-#include "encounterbattleedit.h"
+//#include "encounterbattleedit.h"
 #include "encounterbattle.h"
 #include "encounterscrollingtext.h"
 #include "encounterscrollingtextedit.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
-#include "battledialogmanager.h"
+//#include "battledialogmanager.h"
+#include "battleframe.h"
 #include "audioplaybackframe.h"
 #include "monster.h"
 #include "monsterclass.h"
@@ -53,6 +54,7 @@
 #include "campaignexporter.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
+#include "customtableframe.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -74,60 +76,32 @@
 #include <QDebug>
 #include <QLibraryInfo>
 #include <QCoreApplication>
+#include <QStandardPaths>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
 
-// Next Todos:
-// DONE: Add empty DMHelper.log as part of the deploy procedure
-
-// Duplicate monsters in bestiary
-// Update bestiary to have proficiencies, etc separately stored
-
-//  1. Finish settings (publish and other interactions) - DONE
-//  2. Add NPCs in the world
-        // Check remove/drag settings and NPCs
-        // Check NPC adding to chases and battles
-        // track tree collapsing
-//  4. Add NPCs and monsters to the party
-//
-//  Refactor mainwindow, make it smaller
-//  Avoid redrawing the tree every time a change is made
-//  Add maps to Settings
-//  Add NPCs - first just to the tree, then to battles, chases or party
-//  Add non-characters to the party (monsters or NPCs)
-//  Spell reference
-// Equipment tables as XML
 
 /*
  * TODO:
+ * Add copyright notice to all files
+ * Remove commented code
+ * Refactor mainwindow, make it smaller
+ * Avoid redrawing the tree every time a change is made
+ * Add maps to Settings
+ * Add NPCs - first just to the tree, then to battles, chases or party
+ * Add non-characters to the party (monsters or NPCs) --> create a chracter from a monster class
+ * Spell reference
  * More editing ability for UI elements (campaign, adventure, encounter, maps - rename, remap, etc)
- * Open PDF: D:\Data\Personal\Documents\Dnd\Regeln>"C:\Program Files (x86)\Adobe\Acrobat Reader DC\Reader\acrord32" /A "page=100&view=Fit" "dnd 5e players handbook.pdf"
- *          <a href="file://DnD 5e Players Handbook.pdf#page=100&view=FitBV">OPEN FILE</a>
- * Subclass for windows: Ctrl-M for main window or so
- * Finish chase
- * Options for re-selecting Bestiary or Chase data, DM Guide, MM, PHB
-    //QDesktopServices::openUrl(QUrl::fromLocalFile("C:\\Users\\deincrtu\\Documents\\Personal\\Documents\\Dnd\\Regeln\\DnD 5e Players Handbook.pdf"));
- * Quick links for external references
+ * Remove chase and other duplicate classes (dialogs instead of frames, old monster/character widgets)
  * Cross-populate preview screens
  * Image publisher
- * Drag and drop for publishing images
- * More DM Screen data
- * Battle-type encounters - improve
- * Add People
- * Add Places
- * Drag and Drop to add maps and places
- * Check member varaible naming convention
+ * Items in the campaign
+ * Drag and Drop to add maps and images
+ * Check member variable naming convention
  * Maps - Tokens and DM layers, clickable?
- * Links between map edges
  * different brushes for FOW clearing
  * Full character sheet
- * Drag and Drop reorder of characters
- *
- * DONE - Drag and drop for publishing text (pre-supported)
- * DONE - Text publishing
- * DONE - DM Screen data
- * DONE - Drag and Drop reorder of enounters/maps
  */
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -172,11 +146,17 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main] Initializing Main";
 
     qDebug() << "[Main] DMHelper version information";
-    qDebug() << "[Main]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION);
+    qDebug() << "[Main]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION);
     qDebug() << "[Main]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
     qDebug() << "[Main]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
     qDebug() << "[Main]     Build: " << __DATE__ << " " << __TIME__;
+#ifdef Q_OS_MAC
+    qDebug() << "[Main]     OS: MacOS";
+#else
+    qDebug() << "[Main]     OS: Windows";
+#endif
     qDebug() << "[Main]     Working Directory: " << QDir::currentPath();
+    qDebug() << "[Main]     Executable Directory: " << QCoreApplication::applicationDirPath();
 
     qDebug() << "[Main] Qt Information";
     qDebug() << "[Main]     Qt Version: " << QLibraryInfo::version().toString();
@@ -197,21 +177,41 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[Main]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
     qDebug() << "[Main]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
 
+    qDebug() << "[Main] Standard Path Information";
+    qDebug() << "[Main]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
+    qDebug() << "[Main]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first());
+    qDebug() << "[Main]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).first());
+    qDebug() << "[Main]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first());
+    qDebug() << "[Main]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+    qDebug() << "[Main]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
+
+
     // TODO: cleanup this constructor and mainwindow in general
     ui->setupUi(this);
 
-    //qsrand(static_cast<unsigned int>(QTime::currentTime().msec()));
+    qDebug() << "[Main] Reading Settings";
+    _options = new OptionsContainer(this);
+    MRUHandler* mruHandler = new MRUHandler(ui->menuRecent_Campaigns, DEFAULT_MRU_FILE_COUNT, this);
+    connect(mruHandler,SIGNAL(triggerMRU(QString)),this,SLOT(openFile(QString)));
+    _options->setMRUHandler(mruHandler);
+    _options->readSettings();
+    qDebug() << "[Main] Settings Read";
 
     qDebug() << "[Main] Initializing Bestiary";
     Bestiary::Initialize();
     qDebug() << "[Main] Bestiary Initialized";
 
     qDebug() << "[Main] Initializing BasicDateServer";
-    BasicDateServer::Initialize();
+    BasicDateServer::Initialize(_options->getCalendarFileName());
+    BasicDateServer* dateServer = BasicDateServer::Instance();
+    connect(_options, &OptionsContainer::calendarFileNameChanged, dateServer, &BasicDateServer::readDateInformation);
+    //connect(_options, SIGNAL(calendarFileNameChanged(const QString&)), dateServer, SLOT(readDateInformation(const QString&)));
     qDebug() << "[Main] BasicDateServer Initialized";
 
     qDebug() << "[Main] Initializing EquipmentServer";
-    EquipmentServer::Initialize();
+    EquipmentServer::Initialize(_options->getEquipmentFileName());
+    EquipmentServer* equipmentServer = EquipmentServer::Instance();
+    connect(_options, &OptionsContainer::equipmentFileNameChanged, equipmentServer, &EquipmentServer::readEquipment);
     qDebug() << "[Main] BasicDateServer Initialized";
 
     connect(ui->action_NewCampaign,SIGNAL(triggered()),this,SLOT(newCampaign()));
@@ -237,6 +237,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // TODO: enable/disable Import Character
     connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    connect(ui->actionImport_NPC,SIGNAL(triggered()),this,SLOT(importNPC()));
     //ui->action_Import_Character->setVisible(false);
 
     connect(ui->action_Open_Bestiary,SIGNAL(triggered()),this,SLOT(openBestiary()));
@@ -273,14 +274,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
 
-    qDebug() << "[Main] Reading Settings";
-    _options = new OptionsContainer(this);
-    MRUHandler* mruHandler = new MRUHandler(ui->menuRecent_Campaigns, DEFAULT_MRU_FILE_COUNT, this);
-    connect(mruHandler,SIGNAL(triggerMRU(QString)),this,SLOT(openFile(QString)));
-    _options->setMRUHandler(mruHandler);
-    _options->readSettings();
-    qDebug() << "[Main] Settings Read";
-
     connect(ui->actionOptions,SIGNAL(triggered()),_options,SLOT(editSettings()));
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
     connect(_options,SIGNAL(showAnimationsChanged(bool)),ui->scrollWidget,SLOT(setAnimatedTransitions(bool)));
@@ -307,9 +300,26 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
     ui->stackedWidgetEncounter->addWidget(encounterTextEdit);
     // EncounterType_Battle
+    /*
     EncounterBattleEdit* encounterBattleEdit = new EncounterBattleEdit;
     connect(encounterBattleEdit, SIGNAL(openMonster(QString)), this, SLOT(openMonster(QString)));
     ui->stackedWidgetEncounter->addWidget(encounterBattleEdit);
+    */
+    BattleFrame* battleFrame = new BattleFrame;
+    battleFrame->setShowOnDeck(_options->getShowOnDeck());
+    battleFrame->setShowCountdown(_options->getShowCountdown());
+    battleFrame->setCountdownDuration(_options->getCountdownDuration());
+    connect(_options, SIGNAL(showOnDeckChanged(bool)), battleFrame, SLOT(setShowOnDeck(bool)));
+    connect(_options, SIGNAL(showCountdownChanged(bool)), battleFrame, SLOT(setShowCountdown(bool)));
+    connect(_options, SIGNAL(countdownDurationChanged(int)), battleFrame, SLOT(setCountdownDuration(int)));
+    connect(pubWindow, SIGNAL(frameResized(QSize)), battleFrame, SLOT(setTargetSize(QSize)));
+    connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
+    connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
+    connect(battleFrame, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+    connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(battleFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
+    connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    ui->stackedWidgetEncounter->addWidget(battleFrame);
     // EncounterType_Character
     /*
     QScrollArea* scrollArea = new QScrollArea;
@@ -369,11 +379,13 @@ MainWindow::MainWindow(QWidget *parent) :
     timeAndDateFrame->setToolTip(QString("Time & Date"));
     ui->scrollWidget->addTab(new ScrollTabWidget(timeAndDateFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_clock.png")));
     // Add the quick reference frame
-    ScrollTabWidget* w2 = new ScrollTabWidget(new QuickRefFrame(this), QSizeF(0,0), this);
+    QuickRefFrame* quickRefFrame = new QuickRefFrame(_options->getQuickReferenceFileName(), this);
+    connect(_options, &OptionsContainer::quickReferenceFileNameChanged, quickRefFrame, &QuickRefFrame::readQuickRef);
+    ScrollTabWidget* w2 = new ScrollTabWidget(quickRefFrame, QSizeF(0,0), this);
     w2->setToolTip(QString("Quick Reference"));
     ui->scrollWidget->addTab(w2, QIcon(QPixmap(":/img/data/icon_reference.png")));
     // Add the DM screen widget
-    DMScreenTabWidget* dmScreen = new DMScreenTabWidget(this);
+    DMScreenTabWidget* dmScreen = new DMScreenTabWidget(_options->getEquipmentFileName(), this);
     dmScreen->setToolTip(QString("DM reference"));
     ui->scrollWidget->addTab(new ScrollTabWidget(dmScreen, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_screen.png")));
     // Add the dice frame
@@ -384,6 +396,10 @@ MainWindow::MainWindow(QWidget *parent) :
     CountdownFrame* countdownFrame = new CountdownFrame(this);
     countdownFrame->setToolTip(QString("Countdown Timer"));
     ui->scrollWidget->addTab(new ScrollTabWidget(countdownFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_countdown.png")));
+    // Add the custom tableframe
+    CustomTableFrame* customTableFrame = new CustomTableFrame(_options->getTablesDirectory(), this);
+    customTableFrame->setToolTip(QString("Used-defined Tables"));
+    ui->scrollWidget->addTab(new ScrollTabWidget(customTableFrame, QSizeF(0,0), this), QIcon(QPixmap(":/img/data/icon_table.png")));
     // Add the audio playback frame
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
     audioPlaybackFrame->setToolTip(QString("Audio Playback"));
@@ -397,30 +413,32 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qApp->processEvents();
 
+    /*
     qDebug() << "[Main] Initializing Battle Dialog Manager";
     _battleDlgMgr = new BattleDialogManager(this);
     connect(ui->actionBattle_Dialog, SIGNAL(triggered()), _battleDlgMgr, SLOT(showBattleDialog()));
     connect(_battleDlgMgr, SIGNAL(battleActive(bool)), ui->actionBattle_Dialog, SLOT(setEnabled(bool)));
-    connect(_battleDlgMgr, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
-    connect(_battleDlgMgr, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
-    connect(_battleDlgMgr, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
-    connect(_battleDlgMgr, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(_battleDlgMgr, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
-    connect(_battleDlgMgr, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    DONE connect(_battleDlgMgr, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
+    DONE connect(_battleDlgMgr, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
+    DONE connect(_battleDlgMgr, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+    DONE connect(_battleDlgMgr, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    DONE connect(_battleDlgMgr, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
+    DONE connect(_battleDlgMgr, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_battleDlgMgr, SIGNAL(dirty()), this, SLOT(setDirty()));
-    connect(pubWindow, SIGNAL(frameResized(QSize)), _battleDlgMgr, SLOT(targetResized(QSize)));
+    DONE connect(pubWindow, SIGNAL(frameResized(QSize)), _battleDlgMgr, SLOT(targetResized(QSize)));
     connect(this, SIGNAL(campaignLoaded(Campaign*)), _battleDlgMgr, SLOT(setCampaign(Campaign*)));
     connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _battleDlgMgr, SLOT(cancelPublish()));
-    _battleDlgMgr->setShowOnDeck(_options->getShowOnDeck());
-    _battleDlgMgr->setShowCountdown(_options->getShowCountdown());
-    _battleDlgMgr->setCountdownDuration(_options->getCountdownDuration());
-    connect(_options, SIGNAL(showOnDeckChanged(bool)), _battleDlgMgr, SLOT(setShowOnDeck(bool)));
-    connect(_options, SIGNAL(showCountdownChanged(bool)), _battleDlgMgr, SLOT(setShowCountdown(bool)));
-    connect(_options, SIGNAL(countdownDurationChanged(int)), _battleDlgMgr, SLOT(setCountdownDuration(int)));
+    DONE _battleDlgMgr->setShowOnDeck(_options->getShowOnDeck());
+    DONE _battleDlgMgr->setShowCountdown(_options->getShowCountdown());
+    DONE _battleDlgMgr->setCountdownDuration(_options->getCountdownDuration());
+    DONE connect(_options, SIGNAL(showOnDeckChanged(bool)), _battleDlgMgr, SLOT(setShowOnDeck(bool)));
+    DONE connect(_options, SIGNAL(showCountdownChanged(bool)), _battleDlgMgr, SLOT(setShowCountdown(bool)));
+    DONE connect(_options, SIGNAL(countdownDurationChanged(int)), _battleDlgMgr, SLOT(setCountdownDuration(int)));
     connect(encounterBattleEdit, SIGNAL(startBattle(EncounterBattle*)), _battleDlgMgr, SLOT(startNewBattle(EncounterBattle*)));
     connect(encounterBattleEdit, SIGNAL(loadBattle(EncounterBattle*)), _battleDlgMgr, SLOT(loadBattle(EncounterBattle*)));
     connect(encounterBattleEdit, SIGNAL(deleteBattle(EncounterBattle*)), _battleDlgMgr, SLOT(deleteBattle(EncounterBattle*)));
     qDebug() << "[Main] Battle Dialog Manager Initialized.";
+    */
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
@@ -436,7 +454,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _audioPlayer, SLOT(setVolume(int)));
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _options, SLOT(setAudioVolume(int)));
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
-    connect(encounterBattleEdit, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
+    //connect(encounterBattleEdit, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
@@ -460,7 +478,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete _battleDlgMgr;
+    //delete _battleDlgMgr;
 
     deleteCampaign();
 
@@ -535,6 +553,11 @@ bool MainWindow::saveCampaign()
     QFile file(campaignFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
+        qDebug() << "[Main] Unable to open campaign file for writing: " << campaignFileName;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
+
         campaignFileName.clear();
         return false;
     }
@@ -666,8 +689,10 @@ void MainWindow::importCharacter()
     if(!campaign)
         return;
 
-    CharacterImporter importer;
-    openCharacter(importer.importCharacter(*campaign));
+    CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
+    connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
+    importer->importCharacter(campaign, true);
 }
 
 void MainWindow::importItem()
@@ -691,6 +716,18 @@ void MainWindow::newNPC()
     campaign->addNPC(newNPC);
     openCharacter(newNPC->getID());
 }
+
+void MainWindow::importNPC()
+{
+    if(!campaign)
+        return;
+
+    CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
+    connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
+    importer->importCharacter(campaign, false);
+}
+
 
 /*
 void MainWindow::removeCurrentCharacter()
@@ -1034,7 +1071,7 @@ void MainWindow::readBestiary()
 
     if(bestiaryFileName.isEmpty())
     {
-        qDebug() << "[Main] No known bestiary found, attempting to load default bestiary";
+        qDebug() << "[Main] ERROR! No known bestiary found, attempting to load default bestiary";
 #ifdef Q_OS_MAC
         QDir fileDirPath(QCoreApplication::applicationDirPath());
         fileDirPath.cdUp();
@@ -1042,7 +1079,8 @@ void MainWindow::readBestiary()
         fileDirPath.cdUp();
         bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
 #else
-        bestiaryFileName = QString("./bestiary/DMHelperBestiary.xml");
+        QDir fileDirPath(QCoreApplication::applicationDirPath());
+        bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
 #endif
     }
 
@@ -1498,6 +1536,9 @@ void MainWindow::writeBestiary()
     if( !file.open( QIODevice::WriteOnly ) )
     {
         qDebug() << "[Main] Unable to open Bestiary file for writing: " << bestiaryFileName;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
         bestiaryFileName.clear();
         return;
     }
@@ -1540,15 +1581,17 @@ void MainWindow::newEncounter(int encounterType)
 
 void MainWindow::openFile(const QString& filename)
 {
-    if( !closeCampaign() )
+    if(!closeCampaign())
         return;
 
     qDebug() << "[Main] Loading Campaign: " << filename;
 
-    QDomDocument doc( "DMHelperXML" );
-    QFile file( filename );
-    if( !file.open( QIODevice::ReadOnly ) )
+    QDomDocument doc("DMHelperXML");
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly))
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Unable to open the campaign file: ") + filename);
         qDebug() << "[Main] Loading Failed: Unable to open campaign file";
         return;
     }
@@ -1562,22 +1605,28 @@ void MainWindow::openFile(const QString& filename)
 
     file.close();
 
-    if( contentResult == false )
+    if(contentResult == false)
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Error reading the campaign file: (line ") + QString::number(contentErrorLine) + QString(", column ") + QString::number(contentErrorColumn) + QString("): ") + contentError);
         qDebug() << "[Main] Loading Failed: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
         return;
     }
 
     QDomElement root = doc.documentElement();
-    if( (root.isNull()) || (root.tagName() != "root") )
+    if((root.isNull()) || (root.tagName() != "root"))
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Unable to find the root entry in the campaign file: ") + filename);
         qDebug() << "[Main] Loading Failed: Error reading XML - unable to find root entry";
         return;
     }
 
-    QDomElement campaignElement = root.firstChildElement( QString("campaign") );
-    if( campaignElement.isNull() )
+    QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+    if(campaignElement.isNull())
     {
+        QMessageBox::critical(this, QString("Campaign file open failed"),
+                              QString("Unable to find the campaign entry in the campaign file: ") + filename);
         qDebug() << "[Main] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
     }
@@ -1606,8 +1655,6 @@ void MainWindow::openFile(const QString& filename)
 
     emit campaignLoaded(campaign);
     selectItem(DMHelper::TreeType_Campaign, QUuid());
-
-    //_battleDlgMgr->loadBattle(campaign, root);
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(filename);
@@ -2054,6 +2101,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     {
         ui->stackedWidgetEncounter->setEnabled(false);
         MapFrame* mapFrame = dynamic_cast<MapFrame*>(ui->stackedWidgetEncounter->widget(DMHelper::EncounterType_Map));
+        mapFrame->setMap(nullptr);
         map->unregisterWindow(mapFrame);
         delete undoAction; undoAction = nullptr;
         delete redoAction; redoAction = nullptr;
@@ -2115,9 +2163,14 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         }
         else if(encounter->getType() == DMHelper::EncounterType_Battle)
         {
+            /*
             EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(ui->stackedWidgetEncounter->currentWidget());
             if(battleEdit)
                 connect(encounter,SIGNAL(destroyed(QObject*)),battleEdit,SLOT(clear()));
+            */
+            BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->currentWidget());
+            if(battleFrame)
+                connect(encounter,SIGNAL(destroyed(QObject*)),battleFrame,SLOT(clear()));
         }
         return;
     }
@@ -2224,7 +2277,8 @@ void MainWindow::handleStartNewBattle()
     if((!campaign)||(!_battleDlgMgr))
         return;
 
-    _battleDlgMgr->startNewBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
+    // TODO: HANDLE THIS!
+    //_battleDlgMgr->startNewBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
 }
 
 void MainWindow::handleLoadBattle()
@@ -2232,7 +2286,8 @@ void MainWindow::handleLoadBattle()
     if((!campaign)||(!_battleDlgMgr))
         return;
 
-    _battleDlgMgr->loadBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
+    // TODO: HANDLE THIS!
+    //_battleDlgMgr->loadBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
 }
 
 void MainWindow::handleDeleteBattle()
@@ -2240,7 +2295,8 @@ void MainWindow::handleDeleteBattle()
     if((!campaign)||(!_battleDlgMgr))
         return;
 
-    _battleDlgMgr->deleteBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
+    // TODO: HANDLE THIS!
+    //_battleDlgMgr->deleteBattle(qobject_cast<EncounterBattle*>(encounterFromIndex(ui->treeView->currentIndex())));
 }
 
 void MainWindow::handleAnimationStarted(QColor color)
@@ -2368,7 +2424,7 @@ void MainWindow::openTextTranslator()
 
 void MainWindow::openRandomMarkets()
 {
-    RandomMarketDialog* dlg = new RandomMarketDialog(this);
+    RandomMarketDialog* dlg = new RandomMarketDialog(_options->getShopsFileName(), this);
 
     dlg->show();
     dlg->activateWindow();

@@ -7,9 +7,9 @@
 	<key>CFBundleGetInfoString</key>
 	<string>Created by Qt/QMake</string>
 	<key>CFBundleIconFile</key>
-	<string></string>
+	<string>DMHelper.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.yourcompany.DMHelper</string>
+	<string>com.glacialsoftware.DMHelper</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleSignature</key>

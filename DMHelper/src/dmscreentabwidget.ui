@@ -17,7 +17,7 @@
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <property name="currentIndex">
-   <number>0</number>
+   <number>4</number>
   </property>
   <widget class="QWidget" name="tab">
    <attribute name="title">
@@ -2209,7 +2209,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_149">
           <item>
-           <widget class="QLabel" name="label_2179">
+           <widget class="QLabel" name="lblTack">
             <property name="font">
              <font>
               <pointsize>14</pointsize>
@@ -2320,7 +2320,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_153">
           <item>
-           <widget class="QLabel" name="label_2228">
+           <widget class="QLabel" name="lblFood">
             <property name="font">
              <font>
               <pointsize>14</pointsize>
@@ -2407,7 +2407,7 @@
         <item>
          <layout class="QVBoxLayout" name="verticalLayout_156">
           <item>
-           <widget class="QLabel" name="label_2279">
+           <widget class="QLabel" name="lblServices">
             <property name="font">
              <font>
               <pointsize>14</pointsize>
