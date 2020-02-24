@@ -56,7 +56,7 @@ $v162->version= "1.6.2";
 $v162->notes= '<a href="https://dmh.wwpd.de">Update Notes</a>';
 
 # set latest version
-$latest= &$v160;
+$latest= &$v162;
 
 $challengev= isset($_POST["version"])?$_POST["version"]:NULL;
 
