@@ -6,8 +6,7 @@ include_once "src/ext_UUID.php";
 
 #create class for data
 class version {
-  public $major;
-  public $minor;
+  public $version;
   public $notes;
 
   public $uuid;
@@ -37,17 +36,26 @@ class version {
 }
 
 # instanciate class version
-$query= new version();
+$v160= new version();
 
 # set members to version values
-$query->major= "1.6";
-$query->minor= "1.6.4";
-$query->notes= "Initial Release of DMHelper v 1.6\\nMARKUP";
+$v160->version= "1.6.0";
+$v160->notes= "<ul><li>full MacOS support (and a commitment to keep this going!)<li>the battle dialog now integrated in the main window<li>a new camera tool inside the battle view giving you full control over publishing<li>and even better DnD Beyond import integration!";
 
-# call create_answer to generate xml
-$query->create_answer();
+$latest= &$v160;
 
-# log version check to file
-$query->log();
+$challengev= isset($_POST["version"])?$_POST["version"]:NULL;
+
+switch ( $challengev ) {
+  case "v1.6.0":
+    $v160->create_answer();
+    $v160->log();
+    break;
+
+  default:
+    $latest->create_answer();
+    $latest->log();
+    break;
+}
 
 ?>
