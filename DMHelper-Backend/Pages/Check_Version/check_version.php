@@ -9,7 +9,9 @@ class version {
   public $version;
   public $notes;
 
-  public $uuid;
+  public $update;
+
+  private $uuid;
 
 # constructor, fetches UUID from POST and checks for validity
   public function __construct() {
@@ -21,7 +23,7 @@ class version {
 
 # Returns public data as XML
   public function create_answer() {
-    echo XMLSerializer::generateValidXmlFromArray( (array)$this );
+    echo XMLSerializer::generateValidXmlFromArray( array( "version" => $this->version, "notes" => $this->notes , "update" => $this->update ) ). PHP_EOL;
     return;
   }
 
@@ -37,11 +39,23 @@ class version {
 
 # instanciate class version
 $v160= new version();
+$v161= new version();
+$v162= new version();
+
 
 # set members to version values
 $v160->version= "1.6.0";
 $v160->notes= "<ul><li>full MacOS support (and a commitment to keep this going!)<li>the battle dialog now integrated in the main window<li>a new camera tool inside the battle view giving you full control over publishing<li>and even better DnD Beyond import integration!";
 
+$v160->update= &$v161;
+$v161->version= "1.6.1";
+$v161->notes= "Engineering Release";
+
+$v161->update= &$v162;
+$v162->version= "1.6.2";
+$v162->notes= '<a href="https://dmh.wwpd.de">Update Notes</a>';
+
+# set latest version
 $latest= &$v160;
 
 $challengev= isset($_POST["version"])?$_POST["version"]:NULL;
