@@ -31,6 +31,11 @@ public:
     bool getShowCountdown() const;
     int getCountdownDuration() const;
 
+    // Data settings
+    bool doDataSettingsExist() const;
+    bool isUpdatesEnabled() const;
+    bool isStatisticsAccepted() const;
+
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
     bool getNetworkEnabled() const;
@@ -105,6 +110,10 @@ public slots:
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
 
+    // Data settings
+    void setUpdatesEnabled(bool updatesEnabled);
+    void setStatisticsAccepted(bool statisticsAccepted);
+
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
     void setNetworkEnabled(bool enabled);
@@ -136,6 +145,11 @@ private:
     bool _showOnDeck;
     bool _showCountdown;
     int _countdownDuration;
+
+    // Data settings
+    bool _dataSettingsExist;
+    bool _updatesEnabled;
+    bool _statisticsAccepted;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings

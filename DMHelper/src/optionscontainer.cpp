@@ -24,6 +24,9 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     _showOnDeck(true),
     _showCountdown(true),
     _countdownDuration(15),
+    _dataSettingsExist(false),
+    _updatesEnabled(false),
+    _statisticsAccepted(false),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
@@ -100,6 +103,22 @@ int OptionsContainer::getCountdownDuration() const
 {
     return _countdownDuration;
 }
+
+bool OptionsContainer::doDataSettingsExist() const
+{
+    return false;
+}
+
+bool OptionsContainer::isUpdatesEnabled() const
+{
+    return _updatesEnabled;
+}
+
+bool OptionsContainer::isStatisticsAccepted() const
+{
+    return _statisticsAccepted;
+}
+
 
 #ifdef INCLUDE_NETWORK_SUPPORT
 
@@ -193,6 +212,14 @@ void OptionsContainer::readSettings()
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
+
+    _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
+    if(_dataSettingsExist)
+    {
+        setUpdatesEnabled(settings.value("updatesEnabled",QVariant(false)).toBool());
+        setStatisticsAccepted(settings.value("statisticsAccepted",QVariant(false)).toBool());
+    }
+
 #ifdef INCLUDE_NETWORK_SUPPORT
     setNetworkEnabled(settings.value("networkEnabled",QVariant(false)).toBool());
     setURLString(settings.value("url","").toString());
@@ -234,6 +261,11 @@ void OptionsContainer::writeSettings()
     settings.setValue("showOnDeck", getShowOnDeck());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
+    if(_dataSettingsExist)
+    {
+        settings.setValue("updatesEnabled", isUpdatesEnabled());
+        settings.setValue("statisticsAccepted", isStatisticsAccepted());
+    }
 #ifdef INCLUDE_NETWORK_SUPPORT
     settings.setValue("networkEnabled", getNetworkEnabled());
     settings.setValue("url", getURLString());
@@ -508,6 +540,18 @@ void OptionsContainer::setCountdownDuration(const QString& countdownDuration)
     }
 }
 
+void OptionsContainer::setUpdatesEnabled(bool updatesEnabled)
+{
+    _updatesEnabled = updatesEnabled;
+    _dataSettingsExist = true;
+}
+
+void OptionsContainer::setStatisticsAccepted(bool statisticsAccepted)
+{
+    _statisticsAccepted = statisticsAccepted;
+    _dataSettingsExist = true;
+}
+
 #ifdef INCLUDE_NETWORK_SUPPORT
 
 void OptionsContainer::setNetworkEnabled(bool enabled)
@@ -595,6 +639,9 @@ void OptionsContainer::copy(OptionsContainer* other)
         setShowOnDeck(other->_showOnDeck);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
+        _dataSettingsExist = other->_dataSettingsExist;
+        _updatesEnabled = other->_updatesEnabled;
+        _statisticsAccepted = other->_statisticsAccepted;
 #ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);
