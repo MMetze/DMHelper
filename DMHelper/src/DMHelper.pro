@@ -44,8 +44,10 @@ SOURCES += main.cpp\
     colorpushbutton.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
+    discordposter.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
+    legaldialog.cpp \
     mainwindow.cpp \
     mapeditframe.cpp \
     objectimporter.cpp \
@@ -205,8 +207,10 @@ HEADERS  += mainwindow.h \
     colorpushbutton.h \
     customtableentry.h \
     customtableframe.h \
+    discordposter.h \
     equipmentserver.h \
     expertisedialog.h \
+    legaldialog.h \
     mapeditframe.h \
     mapmarker.h \
     objectimporter.h \
@@ -354,6 +358,7 @@ FORMS    += mainwindow.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
     expertisedialog.ui \
+    legaldialog.ui \
     mapeditframe.ui \
     publishbuttonframe.ui \
     randommarketdialog.ui \
