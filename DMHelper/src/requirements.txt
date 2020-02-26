@@ -90,3 +90,29 @@ syrinscape-fantasy:elements/YnJpbmRvbC10b3duOjo2LUNvdw/play/
 syrinscape-fantasy:elements/YnJpbmRvbC10b3duOjo2LVJvb3N0ZXI/play/
 
 syrinscape-fantasy:stop/
+
+
+
+
+Nutzungsbedingungen
+Die nachfolgenden Nutzungsbedingungen gelten in ihrer jeweils aktuellen Fassung und werden, mit und ohne Registrierung, gültig bei Aufruf des Angebots durch den Nutzer.
+1. Nutzungsberechtigung digitale Inhalte
+Sie können die zum Download angebotenen digitalen Datendateien, Hörbücher und Musik (nachfolgend: „digitale Inhalte“) sowohl mit als auch ohne Nutzung des tiptoi® Managers herunterladen.
+Die digitalen Inhalte sind unter urheber-, marken-, namens- und gegebenenfalls weiteren rechtlichen Gesichtspunkten geschützt.
+Durch den Erwerb der digitalen Inhalte bzw. durch den im Anschluss an den Erwerb des dazugehörigen haptischen Produkts erfolgten Download der digitalen Inhalte über den Ravensburger Onlineshop erhalten Sie ein einfaches und nicht übertragbares Nutzungsrecht, die digitalen Inhalte für den persönlichen Gebrauch auf Ihren tiptoi® Stift zu laden. Sofern es sich um Hörbücher und Lieder handelt, ist eine parallele Nutzung auf mehreren tiptoi®-Stiften nicht möglich.
+Sie sind nicht berechtigt, die digitalen Inhalte über die in dieser Rechteeinräumung gestattete Nutzung hinaus zu verwerten. Es ist Ihnen insbesondere untersagt, die digitalen Inhalte ganz oder teilweise
+zu vermieten, zu verkaufen, zu tauschen, entgeltlich oder unentgeltlich weiterzugeben, zur Verfügung zu stellen, Unterlizenzen zu erteilen oder in irgendeiner Weise zum Gegenstand einer eigenen kommerziellen Verwertung zu machen,
+zu bearbeiten, abzuändern,
+weiterzuentwickeln oder als Grundlage für andere Produkte zu verwenden, den überlassenen Programmcode in andere Codeformen rückzuübersetzen (Dekompilierung, Disassemblierung) sowie auf sonstige Weise die verschiedenen Herstellungsstufen der digitalen Inhalte rückzuerschließen (Reverse-Engineering);
+Urhebervermerke, Marken, Logos, Kennzeichnungen sonstiger gewerblicher Schutzrechte oder Seriennummern und andere Merkmale, die einer Identifikation digitalen Inhalte dienen, zu entfernen oder zu verändern;
+die digitalen Inhalte sonst in einer Weise und zu Zwecken nutzen, die gesetzliche Bestimmungen oder Rechte Dritter verletzen.
+Für etwaige unbefugte Nutzungen Dritter der Ihnen hiernach eingeräumten Nutzungsrechte aus Gründen, die Sie zu vertreten haben, sind Sie verpflichtet, gegenüber uns und den sonstigen Rechtinhabern etwaige hierdurch entstehende Kosten zu erstatten und/oder Schadensersatzforderungen nachzukommen.
+2. Besondere Nutzungsbedingungen tiptoi® Manager/ Download digitale Inhalte
+Der tiptoi® Manager ist ebenfalls durch (geistige Eigentums-)Rechte geschützt; hinsichtlich der Nutzungsbefugnis gelten die in Ziff. 6 beschriebenen Rechte und Beschränkungen entsprechend.
+Sie haben sich vor Installation des tiptoi® Managers sowie vor Download der digitalen Inhalte auf Ihren Rechner sowie deren Übertragung auf Ihren tiptoi® Stift darüber zu versichern, dass Ihr System über die für den ordnungsgemäßen Betrieb erforderliche Hard- und Software verfügt. Die Systemanforderungen entnehmen Sie bitte den Hinweisen unter www.ravensburger.de. Ravensburger erbringt die Leistungen nur für die nach dem jeweiligen Stand der Technik üblichen Hard- und Softwarevoraussetzungen.
+Sichern Sie Ihre Daten vor Installation des tiptoi® Managers bzw. Download/Übertragung der digitalen Inhalte und auch danach in regelmäßigen Abständen.
+Nutzen Sie bitte immer die aktuelle Version des tiptoi® Managers. Ravensburger behält sich das Recht vor, veraltete oder nicht aktualisierte Software-Versionen nicht mehr zu unterstützen. Sie werden automatisch über Aktualisierungen des tiptoi® Managers informiert. Wenn Sie die Option gewählt haben, werden Aktualisierungen automatisch im Hintergrund ausgeführt, so dass Sie immer die neueste Version nutzen können. Sie finden alle Informationen zu Updates auch unter www.ravensburger.de.
+3. Anzuwendendes Recht und Gerichtsstand
+Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts.
+Für Verbraucher gilt die vorstehende Rechtswahl nur, sofern zwingendes Recht, insb. internationales oder europäisches Verbraucherschutzrecht, dem nicht entgegensteht.
+Sofern beide Parteien Vollkaufleute, juristische Personen des öffentlichen Rechts oder öffentlich-rechtliche Sondervermögen sind, wird als Gerichtsstand Ravensburg vereinbart.

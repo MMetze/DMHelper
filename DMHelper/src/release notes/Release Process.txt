@@ -13,6 +13,11 @@ Release process
 12. Update Patreon page with feature list
 13. Post to discord
 14. Post the release to Reddit r/dnd and r/dmhelper
+r/battlemaps
+r/DMToolkit
+r/DnD
+r/DMHelper
+
 15. Post the release to Twitter
 
 
