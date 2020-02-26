@@ -17,7 +17,7 @@
 #include "campaign.h"
 #include "character.h"
 #include "mapselectdialog.h"
-#include "addmonstersdialog.h"
+#include "combatantdialog.h"
 #include "selectzoom.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelcharacter.h"
@@ -28,6 +28,7 @@
 #include "itemselectdialog.h"
 #include "videoplayer.h"
 #include "camerarect.h"
+#include "undopath.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -85,8 +86,12 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _contextMenuCombatant(nullptr),
     _mouseDown(false),
     _mouseDownPos(),
+    _MAPTESTmouseDown(false),
+    _MAPTESTmouseDownPos(),
+    _MAPTESTundoPath(nullptr),
     _scene(nullptr),
     _background(nullptr),
+    _fow(nullptr),
     _activePixmap(nullptr),
     _activeScale(1),
     _selectedPixmap(nullptr),
@@ -899,7 +904,7 @@ void BattleFrame::updateMap()
         return;
     }
 
-    if((!_background) || (!_model->getMap()))
+    if((!_background) || (!_fow) || (!_model->getMap()))
         return;
 
     qDebug() << "[Battle Frame] Updating map " << _model->getMap()->getFileName() << " rect=" << _model->getMapRect().left() << "," << _model->getMapRect().top() << ", " << _model->getMapRect().width() << "x" << _model->getMapRect().height();
@@ -908,8 +913,11 @@ void BattleFrame::updateMap()
     {
         qDebug() << "[Battle Frame] Initializing battle map image";
         if(_model->getBackgroundImage().isNull())
-            _model->setBackgroundImage(_model->getMap()->getPublishImage());
+            //_model->setBackgroundImage(_model->getMap()->getPublishImage());
+            _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         _background->setPixmap((QPixmap::fromImage(_model->getBackgroundImage())));
+        _fow->setPixmap(QPixmap::fromImage(_model->getMap()->getFoWImage()));
+
         createPrescaledBackground();
     }
     else
@@ -947,6 +955,7 @@ void BattleFrame::updateVideoBackground()
     p.end();
     _model->setBackgroundImage(battleImage);
     _background->setPixmap((QPixmap::fromImage(battleImage)));
+    //_fow
 
     if(!doSceneContentsExist())
         createSceneContents();
@@ -1143,6 +1152,20 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
         _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
         _movementPixmap->setVisible(true);
         _moveTimer = startTimer(ROTATION_TIMER);
+
+
+        if(_model->getMap())
+        {
+            //TEST MAP EDIT
+            _MAPTESTmouseDownPos = _moveStart;
+            _MAPTESTmouseDown = true;
+
+            _MAPTESTundoPath = new UndoPath(*_model->getMap(), MapDrawPath(30, DMHelper::BrushType_Circle, true, true, _MAPTESTmouseDownPos.toPoint()));
+            _model->getMap()->getUndoStack()->push(_MAPTESTundoPath);
+            reloadMap();
+        }
+
+
     }
 }
 
@@ -1200,6 +1223,14 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
 
     _movementPixmap->setPos(combatantPos);
     _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+
+    //TEST MAP EDIT
+    if(_MAPTESTundoPath)
+    {
+        _MAPTESTundoPath->addPoint(combatantPos.toPoint());
+        reloadMap();
+    }
+
 }
 
 void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
@@ -1217,6 +1248,14 @@ void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
         killTimer(_moveTimer);
         _moveTimer = 0;
     }
+
+
+//TEST MAP EDIT
+        if(_MAPTESTundoPath)
+        {
+            _MAPTESTundoPath = nullptr;
+        }
+
 }
 
 void BattleFrame::handleItemChanged(QGraphicsItem* item)
@@ -1578,7 +1617,6 @@ void BattleFrame::createPrescaledBackground()
     t.start();
 #endif
 
-    // TODO: pre-multiplied
     QImage battleMap = _model->getMap()->getPublishImage().copy(sourceRect);
     battleMap.convertTo(QImage::Format_ARGB32_Premultiplied);
 
@@ -2002,26 +2040,30 @@ void BattleFrame::addMonsters()
 
     QPointF combatantPos = viewportCenter();
 
-    AddMonstersDialog monsterDlg(this);
-    int result = monsterDlg.exec();
+    //AddMonstersDialog monsterDlg(this);
+    CombatantDialog combatantDlg(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(&combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
+
+    int result = combatantDlg.exec();
     if(result == QDialog::Accepted)
     {
-        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterDlg.getMonsterType());
-        int monsterCount = monsterDlg.getMonsterCount();
-        if(!monsterClass)
+        MonsterClass* monsterClass = combatantDlg.getMonsterClass();
+        if(monsterClass == nullptr)
         {
-            qDebug() << "[Battle Frame] ... not able to find the selected monster class: " << monsterDlg.getMonsterType();
+            qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
             return;
         }
 
-        QString baseName = monsterDlg.getMonsterName().isEmpty() ? monsterClass->getName() : monsterDlg.getMonsterName();
+        QString baseName = combatantDlg.getName();
+        int monsterCount = combatantDlg.getCount();
+        int localHP = combatantDlg.getLocalHitPoints().isEmpty() ? 0 : combatantDlg.getLocalHitPoints().toInt();
 
-        qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of type " << baseName;
+        qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
 
         for(int i = 0; i < monsterCount; ++i)
         {
             BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
-            if( monsterCount == 1)
+            if(monsterCount == 1)
             {
                 monster->setMonsterName(baseName);
             }
@@ -2029,7 +2071,7 @@ void BattleFrame::addMonsters()
             {
                 monster->setMonsterName(baseName + QString("#") + QString::number(i+1));
             }
-            monster->setHitPoints(monsterClass->getHitDice().roll());
+            monster->setHitPoints(localHP == 0 ? monsterClass->getHitDice().roll() : localHP);
             monster->setInitiative(Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()));
             monster->setPosition(combatantPos);
             addCombatant(monster);
@@ -2790,7 +2832,7 @@ void BattleFrame::cleanupBattleMap()
 {
     // Clean up the old map
     _scene->clearBattleContents();
-    delete _background; _background = nullptr;
+    delete _background; _background = nullptr; _fow = nullptr;
     delete _activePixmap; _activePixmap = nullptr;
     delete _selectedPixmap; _selectedPixmap = nullptr;
     delete _compassPixmap; _compassPixmap = nullptr;
@@ -2821,12 +2863,16 @@ void BattleFrame::replaceBattleMap()
         return;
 
     _background = new UnselectedPixmap();
+    _fow = new UnselectedPixmap();
 
     updateMap();
 
     _scene->addItem(_background);
+    _fow->setParentItem(_background);
     _background->setEnabled(false);
     _background->setZValue(DMHelper::BattleDialog_Z_Background);
+
+    //_fow = new value (_background)
 
     if(!_videoPlayer)
         createSceneContents();

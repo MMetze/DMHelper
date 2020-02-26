@@ -18,6 +18,7 @@ class Map;
 class QTimer;
 class VideoPlayer;
 class CameraRect;
+class UndoPath;
 
 namespace Ui {
 class BattleFrame;
@@ -233,8 +234,13 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
 
+    bool _MAPTESTmouseDown;
+    QPointF _MAPTESTmouseDownPos;
+    UndoPath* _MAPTESTundoPath;
+
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _background;
+    QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
     int _activeScale;
     QGraphicsPixmapItem* _selectedPixmap;
