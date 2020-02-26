@@ -29,6 +29,9 @@ WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
     ui->lblMRU3->installEventFilter(this);
     ui->lblMRU4->setCursor(Qt::PointingHandCursor);
     ui->lblMRU4->installEventFilter(this);
+
+    ui->lblDiscord->setCursor(Qt::PointingHandCursor);
+    ui->lblDiscord->installEventFilter(this);
 }
 
 WelcomeFrame::~WelcomeFrame()
@@ -89,6 +92,8 @@ bool WelcomeFrame::eventFilter(QObject *watched, QEvent *event)
             openCampaign(ui->lblMRU3->text());
         else if(watched == ui->lblMRU4)
             openCampaign(ui->lblMRU4->text());
+        else if(watched == ui->lblDiscord)
+            openLink(ui->lblDiscord->text());
     }
 
     return QFrame::eventFilter(watched, event);
@@ -134,4 +139,11 @@ void WelcomeFrame::openDoc(const QString& docName)
     QUrl fileUrl = QUrl::fromLocalFile(filePath);
     qDebug() << "[WelcomeFrame]: opening URL: " << fileUrl;
     QDesktopServices::openUrl(fileUrl);
+}
+
+void WelcomeFrame::openLink(const QString& linkText)
+{
+    QUrl linkUrl = QUrl::fromUserInput(linkText);
+    qDebug() << "[WelcomeFrame]: opening link: " << linkUrl;
+    QDesktopServices::openUrl(linkUrl);
 }

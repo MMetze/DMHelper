@@ -36,6 +36,7 @@ private slots:
 
 private:
     void openDoc(const QString& docName);
+    void openLink(const QString& linkText);
 
     Ui::WelcomeFrame *ui;
 
