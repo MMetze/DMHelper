@@ -21,6 +21,8 @@ public:
 
     void setCombatant(int combatantCount, Combatant* combatant);
     int getCount() const;
+    QString getName() const;
+    QString getLocalHitPoints() const;
     MonsterClass* getMonsterClass() const;
 
     void writeCombatant(Combatant* combatant);

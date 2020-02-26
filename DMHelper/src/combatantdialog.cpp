@@ -57,12 +57,30 @@ void CombatantDialog::setCombatant(int combatantCount, Combatant* combatant)
 
 int CombatantDialog::getCount() const
 {
-    return _count;
+    //return _count;
+    return ui->edtCount->text().toInt();
+}
+
+QString CombatantDialog::getName() const
+{
+    if(!ui->edtNameLocal->text().isEmpty())
+        return ui->edtNameLocal->text();
+    else
+        return ui->edtName->text();
+}
+
+QString CombatantDialog::getLocalHitPoints() const
+{
+    return ui->edtHitPointsLocal->text();
 }
 
 MonsterClass* CombatantDialog::getMonsterClass() const
 {
-    return Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+    if(!monsterClass)
+        qDebug() << "[Combatant Dialog] Unable to find monster class: " << ui->cmbMonsterClass->currentText();
+
+    return monsterClass;
 }
 
 void CombatantDialog::writeCombatant(Combatant* combatant)
