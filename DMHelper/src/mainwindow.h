@@ -63,6 +63,7 @@ public slots:
 
     void newCharacter();
     void importCharacter();
+    //void TEST_DISCORD();
     void importItem();
     void newNPC();
     void importNPC();

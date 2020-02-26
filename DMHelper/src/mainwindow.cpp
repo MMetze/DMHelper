@@ -55,6 +55,8 @@
 #include "basicdateserver.h"
 #include "welcomeframe.h"
 #include "customtableframe.h"
+#include "discordposter.h"
+#include "legaldialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -237,6 +239,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // TODO: enable/disable Import Character
     connect(ui->action_Import_Character,SIGNAL(triggered()),this,SLOT(importCharacter()));
+    //connect(ui->actionPing_Discord,SIGNAL(triggered()),this,SLOT(TEST_DISCORD()));
     connect(ui->actionImport_NPC,SIGNAL(triggered()),this,SLOT(importNPC()));
     //ui->action_Import_Character->setVisible(false);
 
@@ -695,6 +698,14 @@ void MainWindow::importCharacter()
     importer->importCharacter(campaign, true);
 }
 
+/*
+void MainWindow::TEST_DISCORD()
+{
+    DiscordPoster* poster = new DiscordPoster();
+    poster->post();
+}
+*/
+
 void MainWindow::importItem()
 {
     if(!campaign)
@@ -1136,6 +1147,13 @@ void MainWindow::showEvent(QShowEvent * event)
     if(!initialized)
     {
         // Implement any one-time initialization here
+        if((_options) && (!_options->doDataSettingsExist()))
+        {
+            LegalDialog dlg;
+            dlg.exec();
+            _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
+            _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
+        }
         initialized = true;
     }
 
