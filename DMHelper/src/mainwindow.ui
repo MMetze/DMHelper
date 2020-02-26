@@ -190,6 +190,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
     <addaction name="separator"/>
     <addaction name="action_Import_Character"/>
     <addaction name="actionImport_NPC"/>
+    <addaction name="actionPing_Discord"/>
     <addaction name="separator"/>
     <addaction name="actionOpen_Players_Window"/>
     <addaction name="actionBattle_Dialog"/>
@@ -418,6 +419,11 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionImport_NPC">
    <property name="text">
     <string>Import DnD Beyond NPC...</string>
+   </property>
+  </action>
+  <action name="actionPing_Discord">
+   <property name="text">
+    <string>Ping Discord</string>
    </property>
   </action>
  </widget>
