@@ -498,7 +498,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             }
 
             int remainingSlots = (usedSlots > spellSlots[i]) ? 0 : spellSlots[i] - usedSlots;
-            spellString += QString("Level ") + QString::number(i) + QString(": ");
+            spellString += QString("Level ") + QString::number(i + 1) + QString(": ");
             spellString += QString::number(remainingSlots) + QString("/") + QString::number(spellSlots[i]);
             spellString += QChar::LineFeed;
         }
