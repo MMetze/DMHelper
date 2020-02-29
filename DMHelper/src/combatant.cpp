@@ -292,6 +292,7 @@ void Combatant::setName(const QString& combatantName)
         _name = combatantName;
         //registerChange();
         emit changed();
+        emit dirty();
     }
 }
 

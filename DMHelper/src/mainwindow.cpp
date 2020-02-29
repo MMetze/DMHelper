@@ -2092,7 +2092,7 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
         if(character)
         {
             character->setActive(item->checkState() == Qt::Checked);
-            return;
+            //return;
 
             // Todo: what if the name of the character is changed?
         }
