@@ -27,6 +27,8 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     _dataSettingsExist(false),
     _updatesEnabled(false),
     _statisticsAccepted(false),
+    _instanceUuid(),
+    _lastUpdateDate(),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
@@ -106,7 +108,7 @@ int OptionsContainer::getCountdownDuration() const
 
 bool OptionsContainer::doDataSettingsExist() const
 {
-    return false;
+    return _dataSettingsExist;
 }
 
 bool OptionsContainer::isUpdatesEnabled() const
@@ -117,6 +119,27 @@ bool OptionsContainer::isUpdatesEnabled() const
 bool OptionsContainer::isStatisticsAccepted() const
 {
     return _statisticsAccepted;
+}
+
+QUuid OptionsContainer::getInstanceUuid()
+{
+    if(!_statisticsAccepted)
+        return QUuid();
+
+    if(_instanceUuid.isNull())
+        _instanceUuid = QUuid::createUuid();
+
+    return _instanceUuid;
+}
+
+QString OptionsContainer::getInstanceUuidStr()
+{
+    return getInstanceUuid().toString();
+}
+
+QDate OptionsContainer::getLastUpdateCheck() const
+{
+    return _lastUpdateDate;
 }
 
 
@@ -218,7 +241,14 @@ void OptionsContainer::readSettings()
     {
         setUpdatesEnabled(settings.value("updatesEnabled",QVariant(false)).toBool());
         setStatisticsAccepted(settings.value("statisticsAccepted",QVariant(false)).toBool());
+        setLastUpdateDate(settings.value("lastUpdateCheck","").toDate());
     }
+
+    QString uuidString = settings.value("instanceUuid").toString();
+    if(uuidString.isEmpty())
+        _instanceUuid = QUuid();
+    else
+        _instanceUuid = QUuid::fromString(uuidString);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     setNetworkEnabled(settings.value("networkEnabled",QVariant(false)).toBool());
@@ -265,7 +295,15 @@ void OptionsContainer::writeSettings()
     {
         settings.setValue("updatesEnabled", isUpdatesEnabled());
         settings.setValue("statisticsAccepted", isStatisticsAccepted());
+        if((!_instanceUuid.isNull()) && (_statisticsAccepted))
+            settings.setValue("instanceUuid", _instanceUuid.toString());
+        else
+            settings.setValue("instanceUuid", QUuid().toString());
+
+        if(isUpdatesEnabled())
+            settings.setValue("lastUpdateCheck", _lastUpdateDate);
     }
+
 #ifdef INCLUDE_NETWORK_SUPPORT
     settings.setValue("networkEnabled", getNetworkEnabled());
     settings.setValue("url", getURLString());
@@ -552,6 +590,11 @@ void OptionsContainer::setStatisticsAccepted(bool statisticsAccepted)
     _dataSettingsExist = true;
 }
 
+void OptionsContainer::setLastUpdateDate(const QDate& date)
+{
+    _lastUpdateDate = date;
+}
+
 #ifdef INCLUDE_NETWORK_SUPPORT
 
 void OptionsContainer::setNetworkEnabled(bool enabled)
@@ -642,6 +685,8 @@ void OptionsContainer::copy(OptionsContainer* other)
         _dataSettingsExist = other->_dataSettingsExist;
         _updatesEnabled = other->_updatesEnabled;
         _statisticsAccepted = other->_statisticsAccepted;
+        _instanceUuid = QUuid::fromString(other->_instanceUuid.toString());
+        _lastUpdateDate = other->_lastUpdateDate;
 #ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);

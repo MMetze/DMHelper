@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <QUuid>
+#include <QDate>
 #include "mruhandler.h"
 #include "dmconstants.h"
 
@@ -35,6 +37,9 @@ public:
     bool doDataSettingsExist() const;
     bool isUpdatesEnabled() const;
     bool isStatisticsAccepted() const;
+    QUuid getInstanceUuid();
+    QString getInstanceUuidStr();
+    QDate getLastUpdateCheck() const;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -113,6 +118,7 @@ public slots:
     // Data settings
     void setUpdatesEnabled(bool updatesEnabled);
     void setStatisticsAccepted(bool statisticsAccepted);
+    void setLastUpdateDate(const QDate& date);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -150,6 +156,8 @@ private:
     bool _dataSettingsExist;
     bool _updatesEnabled;
     bool _statisticsAccepted;
+    QUuid _instanceUuid;
+    QDate _lastUpdateDate;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings

@@ -81,6 +81,8 @@ public slots:
     void clearDirty();
     void setDirty();
 
+    void checkForUpdates(bool silentUpdate = false);
+
     void showPublishWindow();
 
     void linkActivated(const QUrl & link);

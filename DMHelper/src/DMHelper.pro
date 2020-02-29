@@ -51,6 +51,7 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     mapeditframe.cpp \
     objectimporter.cpp \
+    presentupdatedialog.cpp \
     publishbuttonframe.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
@@ -138,6 +139,7 @@ SOURCES += main.cpp\
     battledialoggraphicsview.cpp \
     battledialoggraphicsscene.cpp \
     battledialogeffectsettings.cpp \
+    updatechecker.cpp \
     videoplayer.cpp \
     welcomeframe.cpp \
     widgetbattlecombatant.cpp \
@@ -214,6 +216,7 @@ HEADERS  += mainwindow.h \
     mapeditframe.h \
     mapmarker.h \
     objectimporter.h \
+    presentupdatedialog.h \
     publishbuttonframe.h \
     publishwindow.h \
     randommarketdialog.h \
@@ -302,6 +305,7 @@ HEADERS  += mainwindow.h \
     battledialoggraphicsview.h \
     battledialoggraphicsscene.h \
     battledialogeffectsettings.h \
+    updatechecker.h \
     videoplayer.h \
     welcomeframe.h \
     widgetbattlecombatant.h \
@@ -360,6 +364,7 @@ FORMS    += mainwindow.ui \
     expertisedialog.ui \
     legaldialog.ui \
     mapeditframe.ui \
+    presentupdatedialog.ui \
     publishbuttonframe.ui \
     randommarketdialog.ui \
     textpublishdialog.ui \

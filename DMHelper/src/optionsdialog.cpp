@@ -86,6 +86,11 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), ui->edtInviteID, SLOT(setEnabled(bool)));
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), ui->btnGenerateInvite, SLOT(setEnabled(bool)));
 #endif
+
+        ui->chkEnableUpdates->setChecked(_options->isUpdatesEnabled());
+        connect(ui->chkEnableUpdates, SIGNAL(clicked(bool)), _options, SLOT(setUpdatesEnabled(bool)));
+        ui->chkAllowStatistics->setChecked(_options->isStatisticsAccepted());
+        connect(ui->chkAllowStatistics, SIGNAL(clicked(bool)), _options, SLOT(setStatisticsAccepted(bool)));
     }
 }
 

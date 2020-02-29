@@ -216,6 +216,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout"/>
+    <addaction name="actionCheck_For_Updates"/>
     <addaction name="separator"/>
     <addaction name="action_Users_Guide"/>
     <addaction name="action_Getting_Started"/>
@@ -424,6 +425,11 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
   <action name="actionPing_Discord">
    <property name="text">
     <string>Ping Discord</string>
+   </property>
+  </action>
+  <action name="actionCheck_For_Updates">
+   <property name="text">
+    <string>Check For Updates...</string>
    </property>
   </action>
  </widget>

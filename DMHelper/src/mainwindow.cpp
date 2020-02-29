@@ -57,6 +57,7 @@
 #include "customtableframe.h"
 #include "discordposter.h"
 #include "legaldialog.h"
+#include "updatechecker.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -255,6 +256,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->action_Chase_Dialog,SIGNAL(triggered()),this,SLOT(startChase()));
 #endif
     connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(openAboutDialog()));
+    connect(ui->actionCheck_For_Updates, SIGNAL(triggered()), this, SLOT(checkForUpdates()));
 
     connect(ui->treeView,SIGNAL(expanded(QModelIndex)),this,SLOT(handleTreeItemExpanded(QModelIndex)));
     connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
@@ -1044,6 +1046,12 @@ void MainWindow::setDirty()
     setWindowModified(dirty);
 }
 
+void MainWindow::checkForUpdates(bool silentUpdate)
+{
+    UpdateChecker* checker = new UpdateChecker(*_options, silentUpdate, true, this);
+    checker->checkForUpdates();
+}
+
 void MainWindow::showPublishWindow()
 {
     if(!pubWindow->isVisible())
@@ -1154,6 +1162,12 @@ void MainWindow::showEvent(QShowEvent * event)
             _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
             _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
         }
+
+        if(_options)
+        {
+            checkForUpdates(true);
+        }
+
         initialized = true;
     }
 
