@@ -1,6 +1,8 @@
 #include "quickref.h"
+#include <QFile>
+#include <QDebug>
 
-QuickRefSection::QuickRefSection(QDomElement &element) :
+QuickRefSection::QuickRefSection(QDomElement &element, const QString& iconDir) :
     _name(element.firstChildElement(QString("name")).text()),
     _limitation(element.firstChildElement(QString("limitation")).text()),
     _subSections()
@@ -8,7 +10,7 @@ QuickRefSection::QuickRefSection(QDomElement &element) :
     QDomElement subSectionElement = element.firstChildElement( QString("subsection") );
     while( !subSectionElement.isNull() )
     {
-        _subSections.append(QuickRefSubsection(subSectionElement));
+        _subSections.append(QuickRefSubsection(subSectionElement, iconDir));
         subSectionElement = subSectionElement.nextSiblingElement( QString("subsection") );
     }
 }
@@ -29,14 +31,14 @@ QList<QuickRefSubsection> QuickRefSection::getSubsections() const
 }
 
 
-QuickRefSubsection::QuickRefSubsection(QDomElement &element) :
+QuickRefSubsection::QuickRefSubsection(QDomElement &element, const QString& iconDir) :
     _description(element.firstChildElement(QString("description")).text()),
     _data()
 {
     QDomElement dataElement = element.firstChildElement( QString("data") );
     while( !dataElement.isNull() )
     {
-        _data.append(QuickRefData(dataElement));
+        _data.append(QuickRefData(dataElement, iconDir));
         dataElement = dataElement.nextSiblingElement( QString("data") );
     }
 }
@@ -51,14 +53,29 @@ QList<QuickRefData> QuickRefSubsection::getData() const
     return _data;
 }
 
-QuickRefData::QuickRefData(QDomElement &element) :
+QuickRefData::QuickRefData(QDomElement &element, const QString& iconDir) :
     _title(element.attribute("title")),
-    _icon(element.firstChildElement(QString("icon")).text()),
+    _icon(),
     _subtitle(element.firstChildElement(QString("subtitle")).text()),
     _description(element.firstChildElement(QString("description")).text()),
     _reference(element.firstChildElement(QString("reference")).text()),
     _bullets()
 {
+    QString iconName = element.firstChildElement(QString("icon")).text();
+    QString resourceIcon = QString(":/img/data/img/") + iconName + QString(".png");
+    if(QFile::exists(resourceIcon))
+    {
+        _icon = resourceIcon;
+    }
+    else
+    {
+        QString fileIcon = iconDir + iconName + QString(".png");
+        if(QFile::exists(fileIcon))
+            _icon = fileIcon;
+        else
+            qDebug() << "[QuickRefData] ERROR: Unable to find icon '" << iconName << "' in path: " << fileIcon;
+    }
+
     QDomElement bulletsElement = element.firstChildElement( QString("bullets") );
     if( !bulletsElement.isNull() )
     {

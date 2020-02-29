@@ -30,8 +30,8 @@ QSize QuickRefDataWidget::sizeHint() const
 
 void QuickRefDataWidget::setIcon(const QString& icon)
 {
-    QString iconName;
-    iconName = QString(":/img/data/img/") + icon + QString(".png");
+    QString iconName = icon;
+    //iconName = QString(":/img/data/img/") + icon + QString(".png");
 
     QPixmap iconPix;
     if(!iconPix.load(iconName))
@@ -115,9 +115,9 @@ void QuickRefDataWidget::showQuickRefDetails()
     infoBox.setText(output);
     infoBox.setStandardButtons(QMessageBox::Ok);
 
-    QString iconName;
+    QString iconName = _data.getIcon();
     QPixmap iconPix;
-    iconName = QString(":/img/data/img/") + _data.getIcon() + QString(".png");
+    //iconName = QString(":/img/data/img/") + _data.getIcon() + QString(".png");
     if(iconPix.load(iconName))
     {
         iconPix = iconPix.scaled(60,60,Qt::IgnoreAspectRatio, Qt::SmoothTransformation);

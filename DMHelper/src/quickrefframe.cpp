@@ -14,7 +14,6 @@ QuickRefFrame::QuickRefFrame(const QString& quickRefFile, QWidget *parent) :
     ui(new Ui::QuickRefFrame),
     _quickRef(),
     _quickRefLayout(nullptr)
-
 {
     ui->setupUi(this);
 
@@ -63,6 +62,9 @@ void QuickRefFrame::readQuickRef(const QString& quickRefFile)
         return;
     }
 
+    QFileInfo quickRefInfo(quickRefFile);
+    QString quickRefIconDir = quickRefInfo.dir().absolutePath() + QString("/icons/");
+
     QTextStream in(&file);
     in.setCodec("UTF-8");
     QString errMsg;
@@ -89,7 +91,7 @@ void QuickRefFrame::readQuickRef(const QString& quickRefFile)
     QDomElement sectionElement = root.firstChildElement(QString("section"));
     while(!sectionElement.isNull())
     {
-        QuickRefSection* newSection = new QuickRefSection(sectionElement);
+        QuickRefSection* newSection = new QuickRefSection(sectionElement, quickRefIconDir);
         _quickRef.append(newSection);
         ui->cmbQuickRef->addItem(newSection->getName());
         sectionElement = sectionElement.nextSiblingElement(QString("section"));
