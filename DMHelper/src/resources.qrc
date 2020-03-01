@@ -167,6 +167,7 @@
         <file>data/icon_select.png</file>
         <file>data/icon_arrow_xor.png</file>
         <file>data/icon_table.png</file>
+        <file>data/icon_camera.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

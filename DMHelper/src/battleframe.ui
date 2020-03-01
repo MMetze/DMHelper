@@ -863,7 +863,11 @@ color: rgb(85, 85, 85);
               <string>Snaps the Player's Window camera to the dialog view. If you zoom or move this view, the Player's Window will automatically follow</string>
              </property>
              <property name="text">
-              <string>C</string>
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/img/data/icon_camera.png</normaloff>:/img/data/icon_camera.png</iconset>
              </property>
              <property name="checkable">
               <bool>true</bool>
