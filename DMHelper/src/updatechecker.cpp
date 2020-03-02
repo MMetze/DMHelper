@@ -103,10 +103,15 @@ bool UpdateChecker::runUpdateCheck()
     QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
                                                .arg(DMHelper::DMHELPER_MINOR_VERSION)
                                                .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+
+    if(DMHelper::DMHELPER_ENGINEERING_VERSION > 0)
+    {
+        postData.addQueryItem("debug", QString("1"));
+    }
+
 #ifdef QT_DEBUG
     QUuid debugUuid(0xffffffff, 0xffff, 0xffff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff);
     postData.addQueryItem("UUID", debugUuid.toString());
-    postData.addQueryItem("debug", QString("1"));
 #else
     postData.addQueryItem("UUID", _options.getInstanceUuid().toString());
 #endif
