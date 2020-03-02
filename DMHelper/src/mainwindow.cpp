@@ -140,7 +140,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _animationFrameCount(DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES)
 {
 #ifndef Q_OS_MAC
-    QPixmap pixmap(":/img/data/dmhelper_large.png");
+    QPixmap pixmap(":/img/data/dmhelper_opaque.png");
     QSplashScreen splash(pixmap.scaled(500, 500, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     splash.show();
     splash.showMessage(QString("Initializing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);

@@ -168,6 +168,9 @@
         <file>data/icon_arrow_xor.png</file>
         <file>data/icon_table.png</file>
         <file>data/icon_camera.png</file>
+        <file>data/icon_battle.png</file>
+        <file>data/dmhelper_opaque.png</file>
+        <file>data/icon_grid.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

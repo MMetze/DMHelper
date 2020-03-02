@@ -31,7 +31,9 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _distanceShown(false),
     _heightDelta(0.0),
     _distanceLine(nullptr),
-    _distanceText(nullptr)
+    _distanceText(nullptr),
+    _pointerPixmap(nullptr),
+    _pointerVisible(false)
 {
 }
 
@@ -68,6 +70,23 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
         if(effect)
             addEffectShape(*effect);
     }
+
+    QList<QGraphicsView*> viewList = views();
+    if((viewList.count() > 0) && (viewList.at(0)))
+    {
+        QGraphicsView* view = viewList.at(0);
+        QPixmap pointerPmp;
+        pointerPmp.load(":/img/data/arrow.png");
+        _pointerPixmap = addPixmap(pointerPmp.scaled(70, 70, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        _pointerPixmap->setTransformationMode(Qt::SmoothTransformation);
+        QRectF sizeInScene = view->mapToScene(0, 0, 70, 70).boundingRect();
+        _pointerPixmap->setScale(sizeInScene.width() / 70.0);
+        //scaleW = static_cast<qreal>(_background->pixmap().width()) / static_cast<qreal>(pointerPmp.width());
+        //scaleH = static_cast<qreal>(_background->pixmap().height()) / static_cast<qreal>(pointerPmp.height());
+        //_pointerPixmap->setScale(COMPASS_SCALE * qMin(scaleW, scaleH));
+        _pointerPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        _pointerPixmap->setVisible(_pointerVisible);
+    }
 }
 
 void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
@@ -79,7 +98,6 @@ void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
         qDebug() << "[Battle Dialog Scene] ERROR: unable to resize scene contents, no model exists.";
         return;
     }
-
 
     if(_grid)
     {
@@ -130,6 +148,20 @@ void BattleDialogGraphicsScene::updateBattleContents()
     }
 }
 
+void BattleDialogGraphicsScene::scaleBattleContents()
+{
+    if(_pointerPixmap)
+    {
+        QList<QGraphicsView*> viewList = views();
+        if((viewList.count() > 0) && (viewList.at(0)))
+        {
+            QGraphicsView* view = viewList.at(0);
+            QRectF sizeInScene = view->mapToScene(0, 0, 70, 70).boundingRect();
+            _pointerPixmap->setScale(sizeInScene.width() / 70.0);
+        }
+    }
+}
+
 void BattleDialogGraphicsScene::clearBattleContents()
 {
     qDebug() << "[Battle Dialog Scene] Clearing battle contents.";
@@ -142,6 +174,8 @@ void BattleDialogGraphicsScene::clearBattleContents()
 
     qDeleteAll(_itemList);
     _itemList.clear();
+
+    delete _pointerPixmap; _pointerPixmap = nullptr;
 }
 
 void BattleDialogGraphicsScene::setEffectVisibility(bool visible)
@@ -162,6 +196,12 @@ void BattleDialogGraphicsScene::setGridVisibility(bool visible)
     {
         _grid->setGridVisible(visible);
     }
+}
+
+void BattleDialogGraphicsScene::setPointerVisibility(bool visible)
+{
+    _pointerVisible = visible;
+    _pointerPixmap->setVisible(_pointerVisible);
 }
 
 QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
@@ -386,6 +426,9 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
 
     if(!mouseEvent)
         return;
+
+    if((_pointerPixmap) && (_pointerVisible))
+        _pointerPixmap->setPos(mouseEvent->scenePos());
 
     if(_distanceShown)
     {

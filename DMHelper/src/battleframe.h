@@ -101,6 +101,7 @@ protected:
 
 private slots:
     void setCompassVisibility(bool visible);
+    void setPointerVisibility(bool visible);
     void updateCombatantVisibility();
     void updateEffectLayerVisibility();
     void updateMap();
@@ -161,14 +162,25 @@ private slots:
     void cancelCameraCouple();
     void setCameraMap();
 
+    void setRibbonPage(int id);
+
 private:
 
-    enum
+    enum BattleDialogItemChild
     {
         BattleDialogItemChild_Base = 0,
         BattleDialogItemChild_AreaEffect,
         BattleDialogItemChild_Area,
         BattleDialogItemChild_PersonalEffect
+    };
+
+    enum BattleFrameMode
+    {
+        BattleFrameMode_Battle = 0,
+        BattleFrameMode_Combatants,
+        BattleFrameMode_Map,
+        BattleFrameMode_Grid,
+        BattleFrameMode_Markers
     };
 
     const int BattleDialogItemChild_Index = 0;

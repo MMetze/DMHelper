@@ -24,7 +24,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
-    <normaloff>:/img/data/dmhelper.png</normaloff>:/img/data/dmhelper.png</iconset>
+    <normaloff>:/img/data/dmhelper_opaque.png</normaloff>:/img/data/dmhelper_opaque.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">QMenuBar{background-image: url(:/img/data/parchment.jpg);}

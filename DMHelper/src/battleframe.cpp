@@ -135,6 +135,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     ui->scrollArea->setAcceptDrops(true);
     ui->scrollArea->installEventFilter(this);
 
+    ui->graphicsView->installEventFilter(this);
+
     _publishTimer = new QTimer(this);
     _publishTimer->setSingleShot(false);
     connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
@@ -145,6 +147,18 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     ui->edtHeightDiff->setValidator(new QDoubleValidator(-9999, 9999, 2, this));
     ui->edtHeightDiff->setText(QString::number(0.0));
+
+    ui->btnSelectBattle->setChecked(true);
+    ui->stackMode->setCurrentIndex(BattleFrameMode_Battle);
+    ui->btnGrpMode->setId(ui->btnSelectBattle, BattleFrameMode_Battle);
+    ui->btnGrpMode->setId(ui->btnSelectCombatants, BattleFrameMode_Combatants);
+    ui->btnGrpMode->setId(ui->btnSelectMap, BattleFrameMode_Map);
+    ui->btnGrpMode->setId(ui->btnSelectGrid, BattleFrameMode_Grid);
+    //ui->btnGrpMode->setId(ui->btnSelectMarkers, BattleFrameMode_Markers);
+    //ui->btnSelectMarkers->setVisible(false);
+    connect(ui->btnGrpMode, SIGNAL(buttonClicked(int)), this, SLOT(setRibbonPage(int)));
+
+    connect(ui->btnPointer, SIGNAL(clicked(bool)), this, SLOT(setPointerVisibility(bool)));
 
     connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(zoomIn()));
     connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(cancelSelect()));
@@ -173,7 +187,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->btnAddNPC, SIGNAL(clicked()), this, SLOT(addNPC()));
     connect(ui->btnEndBattle, SIGNAL(clicked()), this, SLOT(handleBattleComplete()));
 
-    connect(ui->chkShowCompass, SIGNAL(clicked(bool)), this, SLOT(setCompassVisibility(bool)));
+    //connect(ui->chkShowCompass, SIGNAL(clicked(bool)), this, SLOT(setCompassVisibility(bool)));
     connect(ui->chkShowEffects, SIGNAL(clicked()), this, SLOT(updateEffectLayerVisibility()));
     connect(ui->chkShowGrid, SIGNAL(clicked(bool)), this, SLOT(setGridVisible(bool)));
     connect(ui->chkShowLiving, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
@@ -867,6 +881,13 @@ void BattleFrame::setCompassVisibility(bool visible)
     qDebug() << "[Battle Frame] show compass checked changed: Visibility=" << visible;
     if(_compassPixmap)
         _compassPixmap->setVisible(visible);
+}
+
+void BattleFrame::setPointerVisibility(bool visible)
+{
+    qDebug() << "[Battle Frame] show pointer checked changed: Visibility=" << visible;
+    if(_scene)
+        _scene->setPointerVisibility(visible);
 }
 
 void BattleFrame::updateCombatantVisibility()
@@ -1838,6 +1859,9 @@ void BattleFrame::setScale(qreal s)
     createPrescaledBackground();
     setMapCursor();
     storeViewRect();
+
+    if(_scene)
+        _scene->scaleBattleContents();
 }
 
 void BattleFrame::rotateCCW()
@@ -1940,7 +1964,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
     ui->btnAddNPC->setEnabled(_model != nullptr);
     ui->chkLair->setEnabled(_model != nullptr);
     ui->chkLimitMovement->setEnabled(_model != nullptr);
-    ui->chkShowCompass->setEnabled(_model != nullptr);
+    //ui->chkShowCompass->setEnabled(_model != nullptr);
     ui->chkShowEffects->setEnabled(_model != nullptr);
     ui->chkShowGrid->setEnabled(_model != nullptr);
     ui->chkShowLiving->setEnabled(_model != nullptr);
@@ -1961,7 +1985,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         ui->sliderX->setValue(_model->getGridOffsetX());
         ui->sliderY->setValue(_model->getGridOffsetY());
         ui->spinGridScale->setValue(_model->getGridScale());
-        ui->chkShowCompass->setChecked(_model->getShowCompass());
+        //ui->chkShowCompass->setChecked(_model->getShowCompass());
         ui->chkShowDead->setChecked(_model->getShowDead());
         ui->chkShowLiving->setChecked(_model->getShowAlive());
         ui->chkShowEffects->setChecked(_model->getShowEffects());
@@ -2204,6 +2228,14 @@ void BattleFrame::setCameraMap()
 
     QRectF sceneRect = _scene->sceneRect();
     _publishRect->setCameraRect(sceneRect);
+}
+
+void BattleFrame::setRibbonPage(int id)
+{
+    if((id < 0) || (id >= ui->stackMode->count()))
+        return;
+
+    ui->stackMode->setCurrentIndex(id);
 }
 
 CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* combatant)

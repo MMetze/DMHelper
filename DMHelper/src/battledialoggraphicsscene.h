@@ -21,9 +21,11 @@ public:
     void createBattleContents(const QRect& rect);
     void resizeBattleContents(const QRect& rect);
     void updateBattleContents();
+    void scaleBattleContents();
     void clearBattleContents();
     void setEffectVisibility(bool visible);
     void setGridVisibility(bool visible);
+    void setPointerVisibility(bool visible);
 
     QList<QGraphicsItem*> getEffectItems() const;
 
@@ -79,6 +81,9 @@ protected:
     qreal _heightDelta;
     QGraphicsLineItem* _distanceLine;
     QGraphicsSimpleTextItem* _distanceText;
+
+    QGraphicsPixmapItem* _pointerPixmap;
+    bool _pointerVisible;
 
 };
 
