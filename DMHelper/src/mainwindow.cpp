@@ -141,7 +141,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 #ifndef Q_OS_MAC
     QPixmap pixmap(":/img/data/dmhelper_large.png");
-    QSplashScreen splash(pixmap);
+    QSplashScreen splash(pixmap.scaled(500, 500, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     splash.show();
     splash.showMessage(QString("Initializing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
