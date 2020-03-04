@@ -1784,16 +1784,14 @@ void BattleFrame::setPublishVisibility(bool publish)
                     }
 
                     if((_selectedPixmap) && (combatant == _selectedCombatant))
-                        _selectedPixmap->setVisible(!publish);
-
-                    if(combatant == _model->getActiveCombatant())
                     {
-                        if(_activePixmap)
-                            _activePixmap->setVisible(!publish);
-
+                        _selectedPixmap->setVisible(!publish);
                         if(_movementPixmap)
                             _movementPixmap->setVisible((!publish) && (_moveTimer > 0));
                     }
+
+                    if((_activePixmap) && (combatant == _model->getActiveCombatant()))
+                        _activePixmap->setVisible(!publish);
                 }
             }
         }
