@@ -395,7 +395,7 @@ void Map::uninitialize()
     _initialized = false;
 }
 
-void Map::paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview )
+void Map::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview)
 {
     if(!target)
     {

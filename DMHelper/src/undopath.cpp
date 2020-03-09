@@ -25,11 +25,11 @@ void UndoPath::redo()
     }
 }
 
-void UndoPath::apply( bool preview, QPaintDevice* target ) const
+void UndoPath::apply(bool preview, QPaintDevice* target) const
 {
     for( int i = 0; i < _mapDrawPath.points().count(); ++i )
     {
-        _map.paintFoWPoint( _mapDrawPath.points().at(i), _mapDrawPath, target, preview );
+        _map.paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath, target, preview);
     }
 }
 
@@ -91,9 +91,9 @@ UndoBase* UndoPath::clone() const
 void UndoPath::addPoint(QPoint aPoint)
 {
     _mapDrawPath.addPoint(aPoint);
-    if( _map.getRegisteredWindow() )
+    _map.paintFoWPoint(aPoint, _mapDrawPath, nullptr, true);
+    if(_map.getRegisteredWindow())
     {
-        _map.paintFoWPoint( aPoint, _mapDrawPath, nullptr, true );
         _map.getRegisteredWindow()->updateFoW();
     }
 }

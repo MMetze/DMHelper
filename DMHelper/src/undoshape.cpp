@@ -26,7 +26,6 @@ void UndoShape::redo()
 void UndoShape::apply( bool preview, QPaintDevice* target ) const
 {
     _map.paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview );
-
 }
 
 void UndoShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
