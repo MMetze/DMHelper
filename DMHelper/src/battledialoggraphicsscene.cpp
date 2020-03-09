@@ -28,6 +28,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mouseDownPos(),
     _mouseDownItem(nullptr),
     _previousRotation(0.0),
+    _rawMouse(false),
     _distanceShown(false),
     _heightDelta(0.0),
     _distanceLine(nullptr),
@@ -223,6 +224,11 @@ void BattleDialogGraphicsScene::setShowDistance(bool showDistance, qreal heightD
 {
     _distanceShown = showDistance;
     _heightDelta = heightDelta;
+}
+
+void BattleDialogGraphicsScene::setRawMouse(bool rawMouse)
+{
+    _rawMouse = rawMouse;
 }
 
 void BattleDialogGraphicsScene::editItem()
@@ -430,6 +436,13 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
     if((_pointerPixmap) && (_pointerVisible))
         _pointerPixmap->setPos(mouseEvent->scenePos());
 
+    if(_rawMouse)
+    {
+        emit battleMouseMove(mouseEvent->scenePos());
+        mouseEvent->accept();
+        return;
+    }
+
     if(_distanceShown)
     {
         if((!_distanceLine) || (!_distanceText))
@@ -534,6 +547,13 @@ void BattleDialogGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseE
     if(!mouseEvent)
         return;
 
+    if(_rawMouse)
+    {
+        emit battleMousePress(mouseEvent->scenePos());
+        mouseEvent->accept();
+        return;
+    }
+
     if(_distanceShown)
     {
         if(_distanceLine)
@@ -609,6 +629,13 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
 {
     if(!mouseEvent)
         return;
+
+    if(_rawMouse)
+    {
+        emit battleMouseRelease(mouseEvent->scenePos());
+        mouseEvent->accept();
+        return;
+    }
 
     if(_distanceShown)
     {

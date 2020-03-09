@@ -34,11 +34,16 @@ public:
 
 public slots:
     void setShowDistance(bool showDistance, qreal heightDelta);
+    void setRawMouse(bool rawMouse);
 
 signals:
     void effectChanged(QAbstractGraphicsShapeItem* effect);
     void applyEffect(QAbstractGraphicsShapeItem* effect);
     void distanceChanged(const QString& distance);
+
+    void battleMousePress(const QPointF& pos);
+    void battleMouseMove(const QPointF& pos);
+    void battleMouseRelease(const QPointF& pos);
 
     void itemMouseDown(QGraphicsPixmapItem* item);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
@@ -76,6 +81,8 @@ protected:
     QPointF _mouseDownPos;
     QGraphicsItem* _mouseDownItem;
     qreal _previousRotation;
+
+    bool _rawMouse;
 
     bool _distanceShown;
     qreal _heightDelta;

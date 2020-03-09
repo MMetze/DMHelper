@@ -82,6 +82,7 @@ void CombatantWidget::setSelected(bool selected)
 
 void CombatantWidget::setHighlighted(bool highlighted)
 {
+    /*
     if(highlighted)
     {
         _angle = 0;
@@ -99,6 +100,7 @@ void CombatantWidget::setHighlighted(bool highlighted)
             _timer->stop();
         }
     }
+    */
 
     setStyleSheet(getStyleString());
 

@@ -29,6 +29,7 @@
 #include "videoplayer.h"
 #include "camerarect.h"
 #include "undopath.h"
+#include "battleframemapdrawer.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -86,9 +87,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _contextMenuCombatant(nullptr),
     _mouseDown(false),
     _mouseDownPos(),
-    _MAPTESTmouseDown(false),
-    _MAPTESTmouseDownPos(),
-    _MAPTESTundoPath(nullptr),
     _scene(nullptr),
     _background(nullptr),
     _fow(nullptr),
@@ -105,9 +103,11 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _publishing(false),
     _publishTimer(nullptr),
     _prescaledBackground(),
+    _fowImage(),
     _combatantFrame(),
     _countdownFrame(),
     _targetSize(),
+    _mapDrawer(nullptr),
     _showOnDeck(true),
     _showCountdown(true),
     _countdownDuration(15),
@@ -145,6 +145,14 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdownTimer->setSingleShot(false);
     connect(_countdownTimer, SIGNAL(timeout()),this,SLOT(countdownTimerExpired()));
 
+    _mapDrawer = new BattleFrameMapDrawer(this);
+    connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, this, &BattleFrame::updateFowImage);
+    connect(ui->btnResetFoW, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::resetFoW);
+    connect(ui->btnClearFoW, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::clearFoW);
+    connect(ui->spinSize, SIGNAL(valueChanged(int)), _mapDrawer, SLOT(setSize(int)));
+    connect(ui->chkSmooth, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::setSmooth);
+    connect(ui->btnFoWErase, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::setErase);
+
     ui->edtHeightDiff->setValidator(new QDoubleValidator(-9999, 9999, 2, this));
     ui->edtHeightDiff->setText(QString::number(0.0));
 
@@ -157,6 +165,12 @@ BattleFrame::BattleFrame(QWidget *parent) :
     //ui->btnGrpMode->setId(ui->btnSelectMarkers, BattleFrameMode_Markers);
     //ui->btnSelectMarkers->setVisible(false);
     connect(ui->btnGrpMode, SIGNAL(buttonClicked(int)), this, SLOT(setRibbonPage(int)));
+
+    // Set up the brush mode button group
+    ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
+    ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
+    ui->btnGrpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
+    connect(ui->btnGrpBrush, SIGNAL(buttonClicked(int)), _mapDrawer, SLOT(setBrushMode(int)));
 
     connect(ui->btnPointer, SIGNAL(clicked(bool)), this, SLOT(setPointerVisibility(bool)));
 
@@ -211,10 +225,10 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(applyEffect(QAbstractGraphicsShapeItem*)), this, SLOT(handleApplyEffect(QAbstractGraphicsShapeItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), ui->edtDistance, SLOT(setText(const QString&)));
 
-    connect(_scene, SIGNAL(itemMouseDown(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDown(QGraphicsPixmapItem*)));
-    connect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
-    connect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
     connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
+    connect(ui->btnMapEdit, &QAbstractButton::clicked, this, &BattleFrame::setEditMode);
+    connect(ui->btnMapEdit, &QAbstractButton::clicked, _scene, &BattleDialogGraphicsScene::setRawMouse);
+    setEditMode();
 
     connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(setGridScale(int)));
     connect(ui->sliderX, SIGNAL(valueChanged(int)), this, SLOT(setXOffset(int)));
@@ -937,7 +951,8 @@ void BattleFrame::updateMap()
             //_model->setBackgroundImage(_model->getMap()->getPublishImage());
             _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         _background->setPixmap((QPixmap::fromImage(_model->getBackgroundImage())));
-        _fow->setPixmap(QPixmap::fromImage(_model->getMap()->getFoWImage()));
+        _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
+        _mapDrawer->setMap(_model->getMap(), &_fowImage);
 
         createPrescaledBackground();
     }
@@ -976,7 +991,6 @@ void BattleFrame::updateVideoBackground()
     p.end();
     _model->setBackgroundImage(battleImage);
     _background->setPixmap((QPixmap::fromImage(battleImage)));
-    //_fow
 
     if(!doSceneContentsExist())
         createSceneContents();
@@ -1173,20 +1187,6 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
         _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
         _movementPixmap->setVisible(true);
         _moveTimer = startTimer(ROTATION_TIMER);
-
-
-        if(_model->getMap())
-        {
-            //TEST MAP EDIT
-            _MAPTESTmouseDownPos = _moveStart;
-            _MAPTESTmouseDown = true;
-
-            _MAPTESTundoPath = new UndoPath(*_model->getMap(), MapDrawPath(30, DMHelper::BrushType_Circle, true, true, _MAPTESTmouseDownPos.toPoint()));
-            _model->getMap()->getUndoStack()->push(_MAPTESTundoPath);
-            reloadMap();
-        }
-
-
     }
 }
 
@@ -1244,14 +1244,6 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
 
     _movementPixmap->setPos(combatantPos);
     _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
-
-    //TEST MAP EDIT
-    if(_MAPTESTundoPath)
-    {
-        _MAPTESTundoPath->addPoint(combatantPos.toPoint());
-        reloadMap();
-    }
-
 }
 
 void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
@@ -1269,14 +1261,6 @@ void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
         killTimer(_moveTimer);
         _moveTimer = 0;
     }
-
-
-//TEST MAP EDIT
-        if(_MAPTESTundoPath)
-        {
-            _MAPTESTundoPath = nullptr;
-        }
-
 }
 
 void BattleFrame::handleItemChanged(QGraphicsItem* item)
@@ -2236,6 +2220,47 @@ void BattleFrame::setRibbonPage(int id)
     ui->stackMode->setCurrentIndex(id);
 }
 
+void BattleFrame::setEditMode()
+{
+    if(ui->btnMapEdit->isChecked())
+    {
+        disconnect(_scene, SIGNAL(itemMouseDown(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDown(QGraphicsPixmapItem*)));
+        disconnect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
+        disconnect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
+
+        connect(_scene, SIGNAL(battleMousePress(const QPointF&)), _mapDrawer, SLOT(handleMouseDown(const QPointF&)));
+        connect(_scene, SIGNAL(battleMouseMove(const QPointF&)), _mapDrawer, SLOT(handleMouseMoved(const QPointF&)));
+        connect(_scene, SIGNAL(battleMouseRelease(const QPointF&)), _mapDrawer, SLOT(handleMouseUp(const QPointF&)));
+
+        if(_model)
+        {
+            QRect viewSize = ui->graphicsView->mapFromScene(QRect(0, 0, _model->getGridScale(), _model->getGridScale())).boundingRect();
+            _mapDrawer->setScale(_model->getGridScale(), viewSize.width());
+            _mapDrawer->setSize(ui->spinSize->value());
+        }
+
+        ui->graphicsView->viewport()->setCursor(_mapDrawer->getCursor());
+    }
+    else
+    {
+        disconnect(_scene, SIGNAL(battleMousePress(const QPointF&)), _mapDrawer, SLOT(handleMouseDown(const QPointF&)));
+        disconnect(_scene, SIGNAL(battleMouseMove(const QPointF&)), _mapDrawer, SLOT(handleMouseMoved(const QPointF&)));
+        disconnect(_scene, SIGNAL(battleMouseRelease(const QPointF&)), _mapDrawer, SLOT(handleMouseUp(const QPointF&)));
+
+        connect(_scene, SIGNAL(itemMouseDown(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDown(QGraphicsPixmapItem*)));
+        connect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
+        connect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
+
+        ui->graphicsView->viewport()->unsetCursor();
+    }
+}
+
+void BattleFrame::updateFowImage(const QPixmap& fow)
+{
+    if(_fow)
+        _fow->setPixmap(fow);
+}
+
 CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* combatant)
 {
     CombatantWidget* newWidget = nullptr;
@@ -2860,6 +2885,8 @@ void BattleFrame::clearBattleFrame()
 
 void BattleFrame::cleanupBattleMap()
 {
+    _mapDrawer->setMap(nullptr, nullptr);
+
     // Clean up the old map
     _scene->clearBattleContents();
     delete _background; _background = nullptr; _fow = nullptr;

@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QUuid>
 #include "battledialoggraphicsscene.h"
+#include "battleframemapdrawer.h"
 
 class BattleDialogModelCombatant;
 class CombatantWidget;
@@ -164,6 +165,9 @@ private slots:
 
     void setRibbonPage(int id);
 
+    void setEditMode();
+    void updateFowImage(const QPixmap& fow);
+
 private:
 
     enum BattleDialogItemChild
@@ -246,10 +250,6 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
 
-    bool _MAPTESTmouseDown;
-    QPointF _MAPTESTmouseDownPos;
-    UndoPath* _MAPTESTundoPath;
-
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _background;
     QGraphicsPixmapItem* _fow;
@@ -269,9 +269,12 @@ private:
     QTimer* _publishTimer;
 
     QPixmap _prescaledBackground;
+    QPixmap _fowImage;
     QImage _combatantFrame;
     QImage _countdownFrame;
     QSize _targetSize;
+
+    BattleFrameMapDrawer* _mapDrawer;
 
     bool _showOnDeck;
     bool _showCountdown;

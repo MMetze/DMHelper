@@ -37,6 +37,7 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhshared.cpp \
     basicdateserver.cpp \
     battleframe.cpp \
+    battleframemapdrawer.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     campaignexporter.cpp \
@@ -202,6 +203,7 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhshared.h \
     basicdateserver.h \
     battleframe.h \
+    battleframemapdrawer.h \
     bestiaryexportdialog.h \
     camerarect.h \
     campaignexporter.h \

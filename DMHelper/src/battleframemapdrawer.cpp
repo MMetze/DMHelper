@@ -1,0 +1,151 @@
+#include "battleframemapdrawer.h"
+#include "undopath.h"
+#include "undofill.h"
+#include "map.h"
+#include <QPixmap>
+#include <QPainter>
+#include <QDebug>
+
+BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
+    QObject(parent),
+    _mouseDown(false),
+    _mouseDownPos(),
+    _undoPath(nullptr),
+    _map(nullptr),
+    _fow(nullptr),
+    _cursor(),
+    _gridScale(10),
+    _viewScale(10),
+    _size(10),
+    _erase(true),
+    _smooth(true),
+    _brushMode(DMHelper::BrushType_Circle)
+
+{
+    createCursor();
+}
+
+void BattleFrameMapDrawer::setMap(Map* map, QPixmap* fow)
+{
+    _map = map;
+    _fow = fow;
+
+    if((_map) && (_fow))
+        emit fowChanged(*_fow);
+}
+
+const QCursor& BattleFrameMapDrawer::getCursor() const
+{
+    return _cursor;
+}
+
+void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
+{
+    if((!_map) || (!_fow))
+        return;
+
+    _mouseDownPos = pos;
+    _mouseDown = true;
+
+    // Math says divide by 10: radius of 5 to adjust scale to "one square"
+    _undoPath = new UndoPath(*_map, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
+    _map->getUndoStack()->push(_undoPath);
+    _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
+    emit fowChanged(*_fow);
+}
+
+void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos)
+{
+    if((!_map) || (!_undoPath) || (!_fow))
+        return;
+
+    _undoPath->addPoint(pos.toPoint());
+    _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
+    emit fowChanged(*_fow);
+}
+
+void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos)
+{
+    Q_UNUSED(pos);
+    endPath();
+}
+
+void BattleFrameMapDrawer::setSize(int size)
+{
+    _size = size;
+    endPath();
+    createCursor();
+}
+
+void BattleFrameMapDrawer::setScale(int gridScale, int viewScale)
+{
+    _gridScale = gridScale;
+    _viewScale = viewScale;
+    endPath();
+    createCursor();
+}
+
+void BattleFrameMapDrawer::resetFoW()
+{
+    if(!_map)
+        return;
+
+    UndoFill* undoFill = new UndoFill(*_map, MapEditFill(QColor(0,0,0,255)));
+    _map->getUndoStack()->push(undoFill);
+    _map->fillFoW(QColor(0,0,0,128), _fow);
+    endPath();
+    emit fowChanged(*_fow);
+}
+
+void BattleFrameMapDrawer::clearFoW()
+{
+    if(!_map)
+        return;
+
+    UndoFill* undoFill = new UndoFill(*_map, MapEditFill(QColor(0,0,0,0)));
+    _map->getUndoStack()->push(undoFill);
+    _map->fillFoW(QColor(0,0,0,0), _fow);
+    endPath();
+    emit fowChanged(*_fow);
+}
+
+void BattleFrameMapDrawer::setErase(bool erase)
+{
+    _erase = erase;
+}
+
+void BattleFrameMapDrawer::setSmooth(bool smooth)
+{
+    _smooth = smooth;
+}
+
+void BattleFrameMapDrawer::setBrushMode(int brushMode)
+{
+    _brushMode = brushMode;
+    endPath();
+    createCursor();
+}
+
+void BattleFrameMapDrawer::endPath()
+{
+    _undoPath = nullptr;
+    _mouseDown = false;
+}
+
+void BattleFrameMapDrawer::createCursor()
+{
+    int cursorSize = _viewScale * _size / 5;
+    QPixmap cursorPixmap(QSize(cursorSize, cursorSize));
+    cursorPixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&cursorPixmap);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(QBrush(Qt::black), 4));
+        if(_brushMode == DMHelper::BrushType_Circle)
+            painter.drawEllipse(0, 0, cursorSize, cursorSize);
+        else
+            painter.drawRect(0, 0, cursorSize, cursorSize);
+    painter.end();
+
+    _cursor = QCursor(cursorPixmap);
+}
