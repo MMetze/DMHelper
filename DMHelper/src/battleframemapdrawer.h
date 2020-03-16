@@ -18,11 +18,14 @@ public:
 
 signals:
     void fowChanged(const QPixmap& fow);
+    void cursorChanged(const QCursor& cursor);
 
 public slots:
     void handleMouseDown(const QPointF& pos);
     void handleMouseMoved(const QPointF& pos);
     void handleMouseUp(const QPointF& pos);
+
+    void drawRect(const QRect& rect);
 
     void setSize(int size);
     void setScale(int gridScale, int viewScale);

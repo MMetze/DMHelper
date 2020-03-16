@@ -1,6 +1,7 @@
 #include "battleframemapdrawer.h"
 #include "undopath.h"
 #include "undofill.h"
+#include "undoshape.h"
 #include "map.h"
 #include <QPixmap>
 #include <QPainter>
@@ -70,8 +71,23 @@ void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos)
     endPath();
 }
 
+void BattleFrameMapDrawer::drawRect(const QRect& rect)
+{
+    if((!_map) || (!_fow))
+        return;
+
+    UndoShape* undoShape = new UndoShape(*_map, MapEditShape(rect, _erase, _smooth));
+    _map->getUndoStack()->push(undoShape);
+    _map->paintFoWRect(rect, undoShape->mapEditShape(), _fow, true);
+    emit fowChanged(*_fow);
+    endPath();
+}
+
 void BattleFrameMapDrawer::setSize(int size)
 {
+    if(_size == size)
+        return;
+
     _size = size;
     endPath();
     createCursor();
@@ -79,6 +95,9 @@ void BattleFrameMapDrawer::setSize(int size)
 
 void BattleFrameMapDrawer::setScale(int gridScale, int viewScale)
 {
+    if((_gridScale == gridScale) && (_viewScale == viewScale))
+        return;
+
     _gridScale = gridScale;
     _viewScale = viewScale;
     endPath();
@@ -111,16 +130,25 @@ void BattleFrameMapDrawer::clearFoW()
 
 void BattleFrameMapDrawer::setErase(bool erase)
 {
+    if(_erase == erase)
+        return;
+
     _erase = erase;
 }
 
 void BattleFrameMapDrawer::setSmooth(bool smooth)
 {
+    if(_smooth == smooth)
+        return;
+
     _smooth = smooth;
 }
 
 void BattleFrameMapDrawer::setBrushMode(int brushMode)
 {
+    if(_brushMode == brushMode)
+        return;
+
     _brushMode = brushMode;
     endPath();
     createCursor();
@@ -148,4 +176,5 @@ void BattleFrameMapDrawer::createCursor()
     painter.end();
 
     _cursor = QCursor(cursorPixmap);
+    emit cursorChanged(_cursor);
 }

@@ -18,7 +18,7 @@ const int CAMERA_SHADOW_SIZE = 3;
  * decent icons and layout
  * DON'T DO: add camera rect to map view
  */
-CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene) :
+CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport) :
     QGraphicsRectItem (0.0, 0.0, width, height, nullptr),
     _draw(true),
     _mouseDown(false),
@@ -28,7 +28,8 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene) :
     _shadowItem(nullptr),
     _drawItem(nullptr),
     _drawText(nullptr),
-    _drawTextRect(nullptr)
+    _drawTextRect(nullptr),
+    _viewport(viewport)
 {
     initialize(scene);
 }
@@ -63,6 +64,10 @@ void CameraRect::setCameraSelectable(bool selectable)
 {
     setFlag(QGraphicsItem::ItemIsMovable, selectable);
     setFlag(QGraphicsItem::ItemIsSelectable, selectable);
+
+    setZValue(selectable ? DMHelper::BattleDialog_Z_Overlay : DMHelper::BattleDialog_Z_Camera);
+    if((!selectable) && (_viewport))
+        _viewport->unsetCursor();
 }
 
 void CameraRect::setDraw(bool draw)
@@ -91,9 +96,9 @@ void CameraRect::setPublishing(bool publishing)
 
 void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
-    if((!event) || ((flags() & QGraphicsItem::ItemIsSelectable) == 0))
+    if((!event) || ((flags() & QGraphicsItem::ItemIsSelectable) == 0) || (!_viewport))
     {
-        unsetCursor();
+        //unsetCursor();
         return;
     }
 
@@ -102,20 +107,21 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
     {
         case RectSection_Top:
         case RectSection_Bottom:
-            setCursor(QCursor(Qt::SizeVerCursor)); break;
+            _viewport->setCursor(QCursor(Qt::SizeVerCursor)); break;
         case RectSection_Left:
         case RectSection_Right:
-            setCursor(QCursor(Qt::SizeHorCursor)); break;
+            _viewport->setCursor(QCursor(Qt::SizeHorCursor)); break;
         case RectSection_TopLeft:
         case RectSection_BottomRight:
-            setCursor(QCursor(Qt::SizeFDiagCursor)); break;
+            _viewport->setCursor(QCursor(Qt::SizeFDiagCursor)); break;
         case RectSection_TopRight:
         case RectSection_BottomLeft:
-            setCursor(QCursor(Qt::SizeBDiagCursor)); break;
+            _viewport->setCursor(QCursor(Qt::SizeBDiagCursor)); break;
         case RectSection_Middle:
-            //setCursor(QCursor(Qt::SizeAllCursor)); break;
-            unsetCursor(); break;
+            _viewport->setCursor(QCursor(Qt::SizeAllCursor)); break;
+            //unsetCursor(); break;
         default:
+            _viewport->unsetCursor();
             break;
     }
 }
@@ -200,8 +206,6 @@ QVariant CameraRect::itemChange(GraphicsItemChange change, const QVariant &value
 void CameraRect::initialize(QGraphicsScene& scene)
 {
     setZValue(DMHelper::BattleDialog_Z_Camera);
-    setFlag(QGraphicsItem::ItemIsMovable, true);
-    setFlag(QGraphicsItem::ItemIsSelectable, true);
 
     setAcceptHoverEvents(true);
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);

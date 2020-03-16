@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1267</width>
+    <width>1445</width>
     <height>651</height>
    </rect>
   </property>
@@ -116,7 +116,7 @@ color: rgb(85, 85, 85);
                </size>
               </property>
               <property name="toolTip">
-               <string>Zoom the view in</string>
+               <string>Zoom in</string>
               </property>
               <property name="text">
                <string/>
@@ -157,7 +157,7 @@ color: rgb(85, 85, 85);
                </size>
               </property>
               <property name="toolTip">
-               <string>Zoom the view out</string>
+               <string>Zoom out</string>
               </property>
               <property name="text">
                <string/>
@@ -198,7 +198,7 @@ color: rgb(85, 85, 85);
                </size>
               </property>
               <property name="toolTip">
-               <string>Zoom the view to fit the entire battle scene</string>
+               <string>Zoom to fit the entire battle</string>
               </property>
               <property name="text">
                <string/>
@@ -239,7 +239,7 @@ color: rgb(85, 85, 85);
                </size>
               </property>
               <property name="toolTip">
-               <string>Drag a rectangle across the scene and zoom to that rectangle</string>
+               <string>Select an area to zoom into</string>
               </property>
               <property name="text">
                <string/>
@@ -524,7 +524,7 @@ color: rgb(85, 85, 85);}
 </string>
              </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="pageBattle">
               <layout class="QHBoxLayout" name="horizontalLayout_13">
@@ -562,7 +562,7 @@ color: rgb(85, 85, 85);
                  <property name="title">
                   <string/>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_4">
+                 <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0">
                   <property name="spacing">
                    <number>3</number>
                   </property>
@@ -580,6 +580,12 @@ color: rgb(85, 85, 85);
                   </property>
                   <item>
                    <widget class="QLabel" name="label_5">
+                    <property name="minimumSize">
+                     <size>
+                      <width>120</width>
+                      <height>0</height>
+                     </size>
+                    </property>
                     <property name="maximumSize">
                      <size>
                       <width>16777215</width>
@@ -611,18 +617,21 @@ color: rgb(85, 85, 85);
                        </size>
                       </property>
                       <property name="toolTip">
-                       <string>Snaps the Player's Window camera to the dialog view. If you zoom or move this view, the Player's Window will automatically follow</string>
+                       <string>Snap the Player's Window camera to the Battle View</string>
                       </property>
                       <property name="text">
                        <string/>
                       </property>
                       <property name="icon">
                        <iconset resource="resources.qrc">
-                        <normaloff>:/img/data/icon_camera.png</normaloff>:/img/data/icon_camera.png</iconset>
+                        <normaloff>:/img/data/icon_couplecamera.png</normaloff>:/img/data/icon_couplecamera.png</iconset>
                       </property>
                       <property name="checkable">
                        <bool>true</bool>
                       </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">btnGrpCamera</string>
+                      </attribute>
                      </widget>
                     </item>
                     <item>
@@ -640,7 +649,7 @@ color: rgb(85, 85, 85);
                        </size>
                       </property>
                       <property name="toolTip">
-                       <string>Sets the Player's Window camera to cover the full battle scene</string>
+                       <string>Set the Player's Window camera to cover the whole battle</string>
                       </property>
                       <property name="text">
                        <string/>
@@ -649,6 +658,9 @@ color: rgb(85, 85, 85);
                        <iconset resource="resources.qrc">
                         <normaloff>:/img/data/icon_zoomfit.png</normaloff>:/img/data/icon_zoomfit.png</iconset>
                       </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">btnGrpCamera</string>
+                      </attribute>
                      </widget>
                     </item>
                     <item>
@@ -666,7 +678,7 @@ color: rgb(85, 85, 85);
                        </size>
                       </property>
                       <property name="toolTip">
-                       <string>Drag a rectangle across the scene and sets the Player's Window camera to that rectangle</string>
+                       <string>Select an area for Player's Window camera</string>
                       </property>
                       <property name="text">
                        <string/>
@@ -674,6 +686,41 @@ color: rgb(85, 85, 85);
                       <property name="icon">
                        <iconset resource="resources.qrc">
                         <normaloff>:/img/data/icon_select.png</normaloff>:/img/data/icon_select.png</iconset>
+                      </property>
+                      <property name="checkable">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="btnEditCamera">
+                      <property name="minimumSize">
+                       <size>
+                        <width>32</width>
+                        <height>32</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>32</width>
+                        <height>32</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Edit the Player's Window camera directly</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/img/data/icon_camera.png</normaloff>:/img/data/icon_camera.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>24</width>
+                        <height>24</height>
+                       </size>
                       </property>
                       <property name="checkable">
                        <bool>true</bool>
@@ -717,7 +764,7 @@ color: rgb(85, 85, 85);
                   <item>
                    <widget class="QCheckBox" name="chkLimitMovement">
                     <property name="toolTip">
-                     <string>Shows the movement of a combatant to its known movement maximum. The remaining available movement radius is shown. Movement is only limited to a single drag and starts again with the next one</string>
+                     <string>Show the remaining movement of a combatant</string>
                     </property>
                     <property name="text">
                      <string>Show Movement</string>
@@ -730,7 +777,7 @@ color: rgb(85, 85, 85);
                   <item>
                    <widget class="QCheckBox" name="chkShowEffects">
                     <property name="toolTip">
-                     <string>Show or hide all effects in the battle</string>
+                     <string>Show/hide all effects</string>
                     </property>
                     <property name="text">
                      <string>Show Effects</string>
@@ -804,7 +851,7 @@ color: rgb(85, 85, 85);
                        </size>
                       </property>
                       <property name="toolTip">
-                       <string>Drag to show the distance between two points in the battle</string>
+                       <string>Drag to show the distance between two points</string>
                       </property>
                       <property name="text">
                        <string/>
@@ -827,7 +874,7 @@ color: rgb(85, 85, 85);
                        <bool>true</bool>
                       </property>
                       <property name="sizePolicy">
-                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
@@ -850,6 +897,9 @@ color: rgb(85, 85, 85);
                         <bold>true</bold>
                        </font>
                       </property>
+                      <property name="toolTip">
+                       <string>The distance between two points</string>
+                      </property>
                       <property name="styleSheet">
                        <string notr="true"/>
                       </property>
@@ -868,7 +918,7 @@ color: rgb(85, 85, 85);
                     <item>
                      <widget class="QCheckBox" name="chkPitch">
                       <property name="toolTip">
-                       <string>Set this checkbox to include a vertical distance (entered in the text box) in the distance measurement</string>
+                       <string>Include a vertical distance</string>
                       </property>
                       <property name="text">
                        <string>Height Difference</string>
@@ -877,8 +927,14 @@ color: rgb(85, 85, 85);
                     </item>
                     <item>
                      <widget class="QLineEdit" name="edtHeightDiff">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
                       <property name="toolTip">
-                       <string>Set the checkbox to include a vertical distance (entered in this text box) in the distance measurement</string>
+                       <string>The vertical distance included</string>
                       </property>
                      </widget>
                     </item>
@@ -886,6 +942,19 @@ color: rgb(85, 85, 85);
                   </item>
                  </layout>
                 </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
                <item>
                 <widget class="QPushButton" name="btnPointer">
@@ -900,6 +969,9 @@ color: rgb(85, 85, 85);
                    <width>80</width>
                    <height>80</height>
                   </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>Show a pointer on the Player's Window</string>
                  </property>
                  <property name="text">
                   <string/>
@@ -918,6 +990,19 @@ color: rgb(85, 85, 85);
                   <bool>true</bool>
                  </property>
                 </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_8">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>
@@ -982,7 +1067,7 @@ color: rgb(85, 85, 85);
                      </size>
                     </property>
                     <property name="toolTip">
-                     <string>Add a new monster or grou pof monsters to the battle</string>
+                     <string>Add monsters to the battle</string>
                     </property>
                     <property name="text">
                      <string>Add Monsters</string>
@@ -1007,7 +1092,7 @@ color: rgb(85, 85, 85);
                      </size>
                     </property>
                     <property name="toolTip">
-                     <string>Add a character from the party to the battle</string>
+                     <string>Add a character to the battle</string>
                     </property>
                     <property name="text">
                      <string>Add Character</string>
@@ -1083,7 +1168,7 @@ color: rgb(85, 85, 85);
                   <item row="0" column="0">
                    <widget class="QCheckBox" name="chkLair">
                     <property name="toolTip">
-                     <string>If checked, you will be reminded whenever initiative passes 20 and a lair action can happen</string>
+                     <string>Show lair actions at initiative 20</string>
                     </property>
                     <property name="text">
                      <string>Lair Actions</string>
@@ -1093,7 +1178,7 @@ color: rgb(85, 85, 85);
                   <item row="0" column="1">
                    <widget class="QCheckBox" name="chkShowLiving">
                     <property name="toolTip">
-                     <string>Show or hide all living combatants in the battle</string>
+                     <string>Show living combatants</string>
                     </property>
                     <property name="text">
                      <string>Show Living Combatants</string>
@@ -1106,7 +1191,7 @@ color: rgb(85, 85, 85);
                   <item row="1" column="1">
                    <widget class="QCheckBox" name="chkShowDead">
                     <property name="toolTip">
-                     <string>Show or hide all dead (&lt;= 0 HP) combatants in the battle</string>
+                     <string>Show dead combatants</string>
                     </property>
                     <property name="text">
                      <string>Show Dead Combatants</string>
@@ -1119,7 +1204,7 @@ color: rgb(85, 85, 85);
               </layout>
              </widget>
              <widget class="QWidget" name="pageMap">
-              <layout class="QHBoxLayout" name="horizontalLayout_17">
+              <layout class="QHBoxLayout" name="horizontalLayout_18">
                <property name="spacing">
                 <number>3</number>
                </property>
@@ -1148,154 +1233,6 @@ color: rgb(85, 85, 85);
                  <property name="title">
                   <string/>
                  </property>
-                 <layout class="QGridLayout" name="gridLayout_3">
-                  <property name="leftMargin">
-                   <number>3</number>
-                  </property>
-                  <property name="topMargin">
-                   <number>3</number>
-                  </property>
-                  <property name="rightMargin">
-                   <number>3</number>
-                  </property>
-                  <property name="bottomMargin">
-                   <number>3</number>
-                  </property>
-                  <property name="spacing">
-                   <number>3</number>
-                  </property>
-                  <item row="0" column="0">
-                   <widget class="QPushButton" name="btnNewMap">
-                    <property name="minimumSize">
-                     <size>
-                      <width>0</width>
-                      <height>35</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>16777215</width>
-                      <height>35</height>
-                     </size>
-                    </property>
-                    <property name="text">
-                     <string>New Map...</string>
-                    </property>
-                    <property name="autoDefault">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_15">
-                    <item>
-                     <spacer name="horizontalSpacer_2">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Minimum</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="btnReloadMap">
-                      <property name="enabled">
-                       <bool>false</bool>
-                      </property>
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>35</width>
-                        <height>35</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>35</width>
-                        <height>35</height>
-                       </size>
-                      </property>
-                      <property name="toolTip">
-                       <string>Refresh the existing map and its Fog of War</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                      <property name="icon">
-                       <iconset resource="resources.qrc">
-                        <normaloff>:/img/data/icon_reload.png</normaloff>:/img/data/icon_reload.png</iconset>
-                      </property>
-                      <property name="autoDefault">
-                       <bool>false</bool>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <spacer name="horizontalSpacer_3">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
-                      </property>
-                      <property name="sizeType">
-                       <enum>QSizePolicy::Minimum</enum>
-                      </property>
-                      <property name="sizeHint" stdset="0">
-                       <size>
-                        <width>40</width>
-                        <height>20</height>
-                       </size>
-                      </property>
-                     </spacer>
-                    </item>
-                   </layout>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QPushButton" name="btnResetFoW">
-                    <property name="toolTip">
-                     <string>Resets the Fog of War to all black</string>
-                    </property>
-                    <property name="text">
-                     <string>Reset FoW</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QPushButton" name="btnClearFoW">
-                    <property name="toolTip">
-                     <string>Clears the Fog of War</string>
-                    </property>
-                    <property name="text">
-                     <string>Clear FoW</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-               </item>
-               <item>
-                <widget class="QGroupBox" name="groupBox_9">
-                 <property name="styleSheet">
-                  <string notr="true">QGroupBox { 
-border: 2px solid gray; 
-border-radius: 3px; 
-border-color: rgb(85, 85, 85);
-color: rgb(85, 85, 85);
- } </string>
-                 </property>
-                 <property name="title">
-                  <string/>
-                 </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_14">
                   <property name="spacing">
                    <number>3</number>
@@ -1313,7 +1250,41 @@ color: rgb(85, 85, 85);
                    <number>3</number>
                   </property>
                   <item>
-                   <widget class="QPushButton" name="btnFoWErase">
+                   <widget class="QPushButton" name="btnNewMap">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>35</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>35</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Select a map for the battle</string>
+                    </property>
+                    <property name="text">
+                     <string>New Map...</string>
+                    </property>
+                    <property name="autoDefault">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btnReloadMap">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
                     <property name="minimumSize">
                      <size>
                       <width>35</width>
@@ -1327,23 +1298,103 @@ color: rgb(85, 85, 85);
                      </size>
                     </property>
                     <property name="toolTip">
-                     <string>Toggle Fog of War erase/draw</string>
+                     <string>Refresh the map</string>
                     </property>
                     <property name="text">
                      <string/>
                     </property>
                     <property name="icon">
                      <iconset resource="resources.qrc">
-                      <normaloff>:/img/data/icon_fowerase.png</normaloff>:/img/data/icon_fowerase.png</iconset>
+                      <normaloff>:/img/data/icon_reload.png</normaloff>:/img/data/icon_reload.png</iconset>
+                    </property>
+                    <property name="autoDefault">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_5">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="groupBox_9">
+                 <property name="styleSheet">
+                  <string notr="true">QGroupBox { 
+border: 2px solid gray; 
+border-radius: 3px; 
+border-color: rgb(85, 85, 85);
+color: rgb(85, 85, 85);
+ } </string>
+                 </property>
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_17">
+                  <property name="spacing">
+                   <number>3</number>
+                  </property>
+                  <property name="leftMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>3</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>3</number>
+                  </property>
+                  <item>
+                   <widget class="QPushButton" name="btnMapEdit">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>80</width>
+                      <height>80</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>80</width>
+                      <height>80</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Edit the Fog of War</string>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/img/data/icon_fow2.png</normaloff>:/img/data/icon_fow2.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>60</width>
+                      <height>60</height>
+                     </size>
                     </property>
                     <property name="checkable">
                      <bool>true</bool>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                    <property name="autoRepeat">
-                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -1354,72 +1405,79 @@ color: rgb(85, 85, 85);
                     </property>
                     <item>
                      <layout class="QHBoxLayout" name="horizontalLayout_7">
-                      <property name="spacing">
-                       <number>3</number>
-                      </property>
                       <item>
-                       <widget class="QLabel" name="label_6">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
+                       <layout class="QHBoxLayout" name="horizontalLayout_3">
+                        <property name="spacing">
+                         <number>0</number>
                         </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>25</height>
-                         </size>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>16777215</width>
-                          <height>25</height>
-                         </size>
-                        </property>
-                        <property name="text">
-                         <string>Size:</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QSpinBox" name="spinSize">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>0</width>
-                          <height>25</height>
-                         </size>
-                        </property>
-                        <property name="maximumSize">
-                         <size>
-                          <width>16777215</width>
-                          <height>25</height>
-                         </size>
-                        </property>
-                        <property name="toolTip">
-                         <string>Fog of War brush size</string>
-                        </property>
-                        <property name="minimum">
-                         <number>1</number>
-                        </property>
-                        <property name="maximum">
-                         <number>999</number>
-                        </property>
-                        <property name="value">
-                         <number>10</number>
-                        </property>
-                       </widget>
+                        <item>
+                         <widget class="QLabel" name="label_6">
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="minimumSize">
+                           <size>
+                            <width>0</width>
+                            <height>25</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>16777215</width>
+                            <height>25</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>Size:</string>
+                          </property>
+                          <property name="alignment">
+                           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QSpinBox" name="spinSize">
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="minimumSize">
+                           <size>
+                            <width>0</width>
+                            <height>25</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>16777215</width>
+                            <height>25</height>
+                           </size>
+                          </property>
+                          <property name="toolTip">
+                           <string>Fog of War brush size</string>
+                          </property>
+                          <property name="minimum">
+                           <number>1</number>
+                          </property>
+                          <property name="maximum">
+                           <number>999</number>
+                          </property>
+                          <property name="value">
+                           <number>10</number>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
                       </item>
                       <item>
                        <widget class="QCheckBox" name="chkSmooth">
                         <property name="toolTip">
-                         <string>Set to have smoothed edges on the brush for editing Fog of War</string>
+                         <string>Smooth the Fog of War brush edges</string>
                         </property>
                         <property name="text">
                          <string>Smooth</string>
@@ -1432,7 +1490,7 @@ color: rgb(85, 85, 85);
                      </layout>
                     </item>
                     <item>
-                     <layout class="QHBoxLayout" name="horizontalLayout_3">
+                     <layout class="QHBoxLayout" name="horizontalLayout_15">
                       <property name="spacing">
                        <number>3</number>
                       </property>
@@ -1516,7 +1574,20 @@ color: rgb(85, 85, 85);
                        </widget>
                       </item>
                       <item>
-                       <widget class="QPushButton" name="btnBrushSelect">
+                       <spacer name="horizontalSpacer_3">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="btnFoWErase">
                         <property name="minimumSize">
                          <size>
                           <width>35</width>
@@ -1530,22 +1601,38 @@ color: rgb(85, 85, 85);
                          </size>
                         </property>
                         <property name="toolTip">
-                         <string>Drag a rectangle across the map and clears/sets the Fog of War for that rectangle</string>
+                         <string>Toggle Fog of War erase/draw</string>
                         </property>
                         <property name="text">
                          <string/>
                         </property>
                         <property name="icon">
                          <iconset resource="resources.qrc">
-                          <normaloff>:/img/data/icon_select.png</normaloff>:/img/data/icon_select.png</iconset>
+                          <normaloff>:/img/data/icon_fowerase.png</normaloff>:/img/data/icon_fowerase.png</iconset>
                         </property>
                         <property name="checkable">
                          <bool>true</bool>
                         </property>
-                        <attribute name="buttonGroup">
-                         <string notr="true">btnGrpBrush</string>
-                        </attribute>
+                        <property name="checked">
+                         <bool>true</bool>
+                        </property>
+                        <property name="autoRepeat">
+                         <bool>false</bool>
+                        </property>
                        </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_4">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
                       </item>
                      </layout>
                     </item>
@@ -1555,22 +1642,9 @@ color: rgb(85, 85, 85);
                 </widget>
                </item>
                <item>
-                <spacer name="horizontalSpacer_5">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>40</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item>
-                <widget class="QPushButton" name="btnMapEdit">
+                <widget class="QPushButton" name="btnBrushSelect">
                  <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
@@ -1587,17 +1661,20 @@ color: rgb(85, 85, 85);
                    <height>80</height>
                   </size>
                  </property>
+                 <property name="toolTip">
+                  <string>Select an area to edit Fog of War</string>
+                 </property>
                  <property name="text">
                   <string/>
                  </property>
                  <property name="icon">
                   <iconset resource="resources.qrc">
-                   <normaloff>:/img/data/icon_fow2.png</normaloff>:/img/data/icon_fow2.png</iconset>
+                   <normaloff>:/img/data/icon_select.png</normaloff>:/img/data/icon_select.png</iconset>
                  </property>
                  <property name="iconSize">
                   <size>
-                   <width>60</width>
-                   <height>60</height>
+                   <width>70</width>
+                   <height>70</height>
                   </size>
                  </property>
                  <property name="checkable">
@@ -1606,7 +1683,34 @@ color: rgb(85, 85, 85);
                 </widget>
                </item>
                <item>
-                <spacer name="horizontalSpacer_4">
+                <layout class="QVBoxLayout" name="verticalLayout_10">
+                 <property name="spacing">
+                  <number>3</number>
+                 </property>
+                 <item>
+                  <widget class="QPushButton" name="btnResetFoW">
+                   <property name="toolTip">
+                    <string>Reset the Fog of War</string>
+                   </property>
+                   <property name="text">
+                    <string>Reset FoW</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="btnClearFoW">
+                   <property name="toolTip">
+                    <string>Clear the Fog of War</string>
+                   </property>
+                   <property name="text">
+                    <string>Clear FoW</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
@@ -1645,7 +1749,7 @@ color: rgb(85, 85, 85);
                  <item>
                   <widget class="QCheckBox" name="chkShowGrid">
                    <property name="toolTip">
-                    <string>Show or hide the grid in the battle</string>
+                    <string>Show the map grid</string>
                    </property>
                    <property name="text">
                     <string>Show Grid</string>
@@ -1673,7 +1777,7 @@ color: rgb(85, 85, 85);
                    <item>
                     <widget class="QSpinBox" name="spinGridScale">
                      <property name="toolTip">
-                      <string>Set the scale of the grid. The larger the number, the larger the grid squares</string>
+                      <string>The size of the map grid</string>
                      </property>
                      <property name="minimum">
                       <number>5</number>
@@ -1700,7 +1804,7 @@ color: rgb(85, 85, 85);
                    <item>
                     <widget class="QLabel" name="label">
                      <property name="toolTip">
-                      <string>Shifts the grid horizontally</string>
+                      <string/>
                      </property>
                      <property name="text">
                       <string>X Offset:</string>
@@ -1716,7 +1820,7 @@ color: rgb(85, 85, 85);
                       </sizepolicy>
                      </property>
                      <property name="toolTip">
-                      <string>Shifts the grid horizontally</string>
+                      <string>Shift the grid horizontally</string>
                      </property>
                      <property name="minimum">
                       <number>0</number>
@@ -1736,7 +1840,7 @@ color: rgb(85, 85, 85);
                    <item>
                     <widget class="QLabel" name="label_2">
                      <property name="toolTip">
-                      <string>Shifts the grid vertically</string>
+                      <string/>
                      </property>
                      <property name="text">
                       <string>Y Offset:</string>
@@ -1752,7 +1856,7 @@ color: rgb(85, 85, 85);
                       </sizepolicy>
                      </property>
                      <property name="toolTip">
-                      <string>Shifts the grid vertically</string>
+                      <string>Shift the grid vertically</string>
                      </property>
                      <property name="minimum">
                       <number>0</number>
@@ -1841,7 +1945,7 @@ color: rgb(85, 85, 85);
          <item row="0" column="0">
           <widget class="QPushButton" name="btnNext">
            <property name="toolTip">
-            <string>Activate the next combatant in initiative order, ignoring &quot;unknown&quot; combatants</string>
+            <string>Set the next combatant to active</string>
            </property>
            <property name="text">
             <string>Next</string>
@@ -1862,7 +1966,7 @@ color: rgb(85, 85, 85);
               </sizepolicy>
              </property>
              <property name="toolTip">
-              <string>Countdown timer of time left in the move timer</string>
+              <string/>
              </property>
              <property name="text">
               <string>Countdown:</string>
@@ -1890,7 +1994,7 @@ color: rgb(85, 85, 85);
               </font>
              </property>
              <property name="toolTip">
-              <string>Countdown timer of time left in the move timer</string>
+              <string>Time left for the active combatant</string>
              </property>
              <property name="styleSheet">
               <string notr="true">color: #ff0000;</string>
@@ -1908,7 +2012,7 @@ color: rgb(85, 85, 85);
          <item row="1" column="0">
           <widget class="QPushButton" name="btnSort">
            <property name="toolTip">
-            <string>Sorts all combatants by initiative</string>
+            <string>Sort combatants by initiative</string>
            </property>
            <property name="text">
             <string>Sort</string>
@@ -1927,7 +2031,7 @@ color: rgb(85, 85, 85);
             </font>
            </property>
            <property name="toolTip">
-            <string>Ends the battle</string>
+            <string>End the battle</string>
            </property>
            <property name="text">
             <string>END BATTLE</string>
@@ -1989,6 +2093,7 @@ color: rgb(85, 85, 85);
  <connections/>
  <buttongroups>
   <buttongroup name="btnGrpMode"/>
+  <buttongroup name="btnGrpCamera"/>
   <buttongroup name="btnGrpBrush"/>
  </buttongroups>
 </ui>

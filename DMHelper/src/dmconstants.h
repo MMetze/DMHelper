@@ -130,6 +130,18 @@ namespace DMHelper
         BattleDialog_Z_Overlay = 3
     };
 
+    enum BattleFrameStates
+    {
+        BattleFrameState_CombatantEdit = 0,
+        BattleFrameState_ZoomSelect,
+        BattleFrameState_CameraSelect,
+        BattleFrameState_CameraEdit,
+        BattleFrameState_Distance,
+        BattleFrameState_Pointer,
+        BattleFrameState_FoWSelect,
+        BattleFrameState_FoWEdit,
+    };
+
     enum AudioType
     {
         AudioType_File = 0,
@@ -148,7 +160,7 @@ namespace DMHelper
 
     const int STARTING_GRID_SCALE = 25;
 
-    const int CURSOR_SIZE = 30;
+    const int CURSOR_SIZE = 70; // increased, was 30
 
     const int ANIMATION_TIMER_DURATION = 25;
     const int ANIMATION_TIMER_PREVIEW = 5000;

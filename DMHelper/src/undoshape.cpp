@@ -16,9 +16,13 @@ void UndoShape::undo()
 
 void UndoShape::redo()
 {
+    /*
     if(_map.getRegisteredWindow())
     {
-        apply(true, nullptr);
+    */
+    apply(true, nullptr);
+    if(_map.getRegisteredWindow())
+    {
         _map.getRegisteredWindow()->updateFoW();
     }
 }

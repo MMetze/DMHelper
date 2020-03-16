@@ -1,15 +1,13 @@
 #include "customtableentry.h"
 
-CustomTableEntry::CustomTableEntry(const QString& text, int weight, const QString& subtable, QObject *parent) :
-    QObject(parent),
+CustomTableEntry::CustomTableEntry(const QString& text, int weight, const QString& subtable) :
     _text(text),
     _weight(weight),
     _subtable(subtable)
 {
 }
 
-CustomTableEntry::CustomTableEntry(const QDomElement& element, QObject *parent) :
-    QObject(parent),
+CustomTableEntry::CustomTableEntry(const QDomElement& element) :
     _text(element.text()),
     _weight(1),
     _subtable(element.attribute(QString("subtable"),QString()))
@@ -21,7 +19,6 @@ CustomTableEntry::CustomTableEntry(const QDomElement& element, QObject *parent) 
 }
 
 CustomTableEntry::CustomTableEntry(const CustomTableEntry& other) :
-    QObject(other.parent()),
     _text(other._text),
     _weight(other._weight),
     _subtable(other._subtable)

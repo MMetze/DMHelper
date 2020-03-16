@@ -1,5 +1,5 @@
 #include "battledialogmodeleffectcube.h"
-#include <QGraphicsRectItem>
+#include "unselectedrect.h"
 
 BattleDialogModelEffectCube::BattleDialogModelEffectCube() :
     BattleDialogModelEffect()
@@ -31,7 +31,7 @@ int BattleDialogModelEffectCube::getType() const
 
 QAbstractGraphicsShapeItem* BattleDialogModelEffectCube::createEffectShape(qreal gridScale) const
 {
-    QGraphicsRectItem* rectItem = new QGraphicsRectItem(0,0,100,100);
+    QGraphicsRectItem* rectItem = new UnselectedRect(0,0,100,100);
 
     rectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
     //qreal scaledSize = (qreal)effect->getSize() * _model.getGridScale() / 5.f;

@@ -1,5 +1,5 @@
 #include "battledialogmodeleffectradius.h"
-#include <QGraphicsEllipseItem>
+#include "unselectedellipse.h"
 
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius() :
     BattleDialogModelEffect()
@@ -7,7 +7,7 @@ BattleDialogModelEffectRadius::BattleDialogModelEffectRadius() :
 }
 
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
-    BattleDialogModelEffect(size, position, rotation, color, tip)
+    BattleDialogModelEffect(size * 2, position, rotation, color, tip)
 {
 }
 
@@ -32,7 +32,7 @@ int BattleDialogModelEffectRadius::getType() const
 
 QAbstractGraphicsShapeItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale) const
 {
-    QGraphicsEllipseItem* circleItem = new QGraphicsEllipseItem(0,0,100,100);
+    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(0,0,100,100);
 
     circleItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
     prepareItem(*circleItem);

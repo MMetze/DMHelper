@@ -36,13 +36,17 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
     basicdateserver.cpp \
+    battledialoggraphicsscenemousehandler.cpp \
     battleframe.cpp \
     battleframemapdrawer.cpp \
+    battleframestate.cpp \
+    battleframestatemachine.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     campaignexporter.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
+    customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
     discordposter.cpp \
@@ -118,6 +122,7 @@ SOURCES += main.cpp\
     timeanddateframe.cpp \
     basicdate.cpp \
     undoshape.cpp \
+    unselectedellipse.cpp \
     unselectedpixmap.cpp \
     scrolltabwidget.cpp \
     scrolloverlaywidget.cpp \
@@ -140,6 +145,8 @@ SOURCES += main.cpp\
     battledialoggraphicsview.cpp \
     battledialoggraphicsscene.cpp \
     battledialogeffectsettings.cpp \
+    unselectedpolygon.cpp \
+    unselectedrect.cpp \
     updatechecker.cpp \
     videoplayer.cpp \
     welcomeframe.cpp \
@@ -202,13 +209,17 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
     basicdateserver.h \
+    battledialoggraphicsscenemousehandler.h \
     battleframe.h \
     battleframemapdrawer.h \
+    battleframestate.h \
+    battleframestatemachine.h \
     bestiaryexportdialog.h \
     camerarect.h \
     campaignexporter.h \
     characterimportdialog.h \
     colorpushbutton.h \
+    customtable.h \
     customtableentry.h \
     customtableframe.h \
     discordposter.h \
@@ -285,6 +296,7 @@ HEADERS  += mainwindow.h \
     timeanddateframe.h \
     basicdate.h \
     undoshape.h \
+    unselectedellipse.h \
     unselectedpixmap.h \
     scrolltabwidget.h \
     scrolloverlaywidget.h \
@@ -307,6 +319,8 @@ HEADERS  += mainwindow.h \
     battledialoggraphicsview.h \
     battledialoggraphicsscene.h \
     battledialogeffectsettings.h \
+    unselectedpolygon.h \
+    unselectedrect.h \
     updatechecker.h \
     videoplayer.h \
     welcomeframe.h \

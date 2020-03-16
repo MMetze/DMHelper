@@ -171,6 +171,10 @@
         <file>data/icon_battle.png</file>
         <file>data/dmhelper_opaque.png</file>
         <file>data/icon_grid.png</file>
+        <file>data/icon_couplecamera.png</file>
+        <file>data/distanceSelect.png</file>
+        <file>data/icon_selectcursor.png</file>
+        <file>data/icon_zoomselectcursor.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -1,5 +1,4 @@
 #include "customtableframe.h"
-#include "dice.h"
 #include "ui_customtableframe.h"
 #include <QDir>
 #include <QStringList>
@@ -16,7 +15,6 @@ CustomTableFrame::CustomTableFrame(const QString& tableDirectory, QWidget *paren
     _readTriggered(false),
     _directoryList(),
     _tableList(),
-    _tableWeights(),
     _usedTables()
 {
     ui->setupUi(this);
@@ -59,7 +57,6 @@ void CustomTableFrame::setTableDirectory(const QString& tableDir)
     ui->edtResult->clear();
     _directoryList.clear();
     _tableList.clear();
-    _tableWeights.clear();
 
     _tableDirectory = tableDir;
 
@@ -115,17 +112,17 @@ void CustomTableFrame::tableItemChanged(QListWidgetItem *current, QListWidgetIte
     QString tableName = current->text();
     qDebug() << "[CustomTableFrame] Opening custom table name: " << tableName;
 
-    if((!_tableList.contains(tableName)) || (!_tableWeights.contains(tableName)))
+    if(!_tableList.contains(tableName))
     {
-        qDebug() << "[CustomTableFrame] Table or weight counting missing for table name: " << tableName;
+        qDebug() << "[CustomTableFrame] ERROR: Table or weight counting missing for table name: " << tableName;
         return;
     }
 
-    QList<CustomTableEntry> tableEntries = _tableList.value(tableName);
+    CustomTable table = _tableList.value(tableName);
     ui->listEntries->clear();
     int weightCount = 0;
-    int weightTotal = _tableWeights.value(tableName);
-    int digitCount = QString::number(weightTotal).size();
+    int digitCount = QString::number(table.getTotalWeights()).size();
+    QList<CustomTableEntry> tableEntries = table.getEntryList();
     for(int i = 0; i < tableEntries.count(); ++i)
     {
         int startingWeight = weightCount + 1;
@@ -192,44 +189,14 @@ void CustomTableFrame::readXMLFile(const QString& fileName)
         return;
     }
 
-    QString tableName = root.attribute(QString("name"));
-    if(tableName.isEmpty())
+    CustomTable newTable(root, fullFileName);
+
+    _tableList.insert(newTable.getName(), newTable);
+    if(newTable.isVisible())
     {
-        qDebug() << "[CustomTableFrame] Custom table file dmhelperlist item missing name attribute";
-        return;
+        ui->listWidget->addItem(newTable.getName());
+        ui->listWidget->sortItems();
     }
-
-    QList<CustomTableEntry> entryList;
-    QDomElement element = root.firstChildElement(QString("entry"));
-    int totalWeight = 0;
-    while(!element.isNull())
-    {
-        CustomTableEntry entry(element);
-        entryList.append(CustomTableEntry(element));
-        totalWeight += entry.getWeight();
-        element = element.nextSiblingElement(QString("entry"));
-    }
-
-    _tableList.insert(tableName, entryList);
-    _tableWeights.insert(tableName, totalWeight);
-    ui->listWidget->addItem(tableName);
-    ui->listWidget->sortItems();
-}
-
-CustomTableEntry CustomTableFrame::getEntry(QList<CustomTableEntry> entryList, int value)
-{
-    if(value < 0)
-        return CustomTableEntry(QString());
-
-    for(int i = 0; i < entryList.count(); ++i)
-    {
-        if(value < entryList.at(i).getWeight())
-            return entryList.at(i);
-
-        value -= entryList.at(i).getWeight();
-    }
-
-    return CustomTableEntry(QString());
 }
 
 QString CustomTableFrame::getEntryText(const QString& tableName)
@@ -242,17 +209,14 @@ QString CustomTableFrame::getEntryText(const QString& tableName)
         return result;
     }
 
-    if((!_tableList.contains(tableName)) || (!_tableWeights.contains(tableName)))
+    if(!_tableList.contains(tableName))
     {
         qDebug() << "[CustomTableFrame] Table or weight counting missing for table name: " << tableName;
         return result;
     }
 
-    QList<CustomTableEntry> tableEntries = _tableList.value(tableName);
-    int weightTotal = _tableWeights.value(tableName);
-
-    int rollIndex = Dice::dX(weightTotal) - 1;
-    CustomTableEntry entry = getEntry(tableEntries, rollIndex);
+    CustomTable table = _tableList.value(tableName);
+    CustomTableEntry entry = table.getRandomEntry();
 
     result = entry.getText();
     if(!entry.getSubtable().isEmpty())

@@ -6,6 +6,7 @@
 #include <QUuid>
 #include "battledialoggraphicsscene.h"
 #include "battleframemapdrawer.h"
+#include "battleframestatemachine.h"
 
 class BattleDialogModelCombatant;
 class CombatantWidget;
@@ -144,6 +145,7 @@ private slots:
     void setGridOnlyVisibility(bool gridOnly);
 
     void setMapCursor();
+    void setCameraSelectable(bool selectable);
     void setScale(qreal s);
     void rotateCCW();
     void rotateCW();
@@ -167,6 +169,10 @@ private slots:
 
     void setEditMode();
     void updateFowImage(const QPixmap& fow);
+    void setItemsInert(bool inert);
+
+    // State Machine
+    void stateUpdated();
 
 private:
 
@@ -236,6 +242,9 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
+    // State Machine
+    void prepareStateMachine();
+
     Ui::BattleFrame *ui;
     EncounterBattle* _battle;
     BattleDialogModel* _model;
@@ -244,6 +253,8 @@ private:
 
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
     QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
+
+    BattleFrameStateMachine _stateMachine;
 
     BattleDialogModelCombatant* _selectedCombatant;
     BattleDialogModelCombatant* _contextMenuCombatant;

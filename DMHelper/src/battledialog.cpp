@@ -1668,7 +1668,7 @@ void BattleDialog::setDistanceText()
             heightDiff = 0.0;
     }
 
-    _scene->setShowDistance(ui->btnDistance->isChecked(), heightDiff);
+    _scene->setDistanceHeight(heightDiff);
 }
 
 CombatantWidget* BattleDialog::createCombatantWidget(BattleDialogModelCombatant* combatant)

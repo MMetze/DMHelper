@@ -1,5 +1,5 @@
 #include "battledialogmodeleffectline.h"
-#include <QGraphicsRectItem>
+#include <unselectedrect.h>
 #include <QDebug>
 #include <QPen>
 
@@ -34,7 +34,7 @@ int BattleDialogModelEffectLine::getType() const
 
 QAbstractGraphicsShapeItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale) const
 {
-    QGraphicsRectItem* rectItem = new QGraphicsRectItem(-250.0, 0.0, 500.0, (qreal)getSize() * 100.f);
+    QGraphicsRectItem* rectItem = new UnselectedRect(-250.0, 0.0, 500.0, (qreal)getSize() * 100.f);
 
     rectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
     //qreal scaledSize = _model.getGridScale() / 500.f;

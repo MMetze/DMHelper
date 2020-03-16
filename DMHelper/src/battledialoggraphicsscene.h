@@ -2,6 +2,7 @@
 #define BATTLEDIALOGGRAPHICSSCENE_H
 
 #include <QGraphicsScene>
+#include "battledialoggraphicsscenemousehandler.h"
 
 class BattleDialogModel;
 class BattleDialogModelEffect;
@@ -17,6 +18,7 @@ public:
     virtual ~BattleDialogGraphicsScene();
 
     void setModel(BattleDialogModel* model);
+    BattleDialogModel* getModel() const;
 
     void createBattleContents(const QRect& rect);
     void resizeBattleContents(const QRect& rect);
@@ -25,16 +27,26 @@ public:
     void clearBattleContents();
     void setEffectVisibility(bool visible);
     void setGridVisibility(bool visible);
+
     void setPointerVisibility(bool visible);
+    void setPointerPos(const QPointF& pos);
 
     QList<QGraphicsItem*> getEffectItems() const;
 
     bool isSceneEmpty() const;
     void handleItemChanged(QGraphicsItem* item);
 
+    QGraphicsItem* findTopObject(const QPointF &pos);
+
+    bool handleMouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    bool handleMouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    bool handleMousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    bool handleMouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
+
 public slots:
-    void setShowDistance(bool showDistance, qreal heightDelta);
-    void setRawMouse(bool rawMouse);
+    void setDistanceHeight(qreal heightDelta);
+    //void setRawMouse(bool rawMouse);
+    void setInputMode(int inputMode);
 
 signals:
     void effectChanged(QAbstractGraphicsShapeItem* effect);
@@ -61,7 +73,6 @@ protected slots:
     void addEffectLine();
 
 protected:
-
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -70,7 +81,7 @@ protected:
     void addEffect(BattleDialogModelEffect* effect);
     QAbstractGraphicsShapeItem* addEffectShape(BattleDialogModelEffect& effect);
 
-    QGraphicsItem* findTopObject(const QPointF &pos);
+    BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler();
 
     QGraphicsItem* _contextMenuItem;
     Grid* _grid;
@@ -82,16 +93,18 @@ protected:
     QGraphicsItem* _mouseDownItem;
     qreal _previousRotation;
 
-    bool _rawMouse;
-
-    bool _distanceShown;
-    qreal _heightDelta;
-    QGraphicsLineItem* _distanceLine;
-    QGraphicsSimpleTextItem* _distanceText;
+    //bool _rawMouse;
+    int _inputMode;
 
     QGraphicsPixmapItem* _pointerPixmap;
     bool _pointerVisible;
 
+    BattleDialogGraphicsSceneMouseHandlerDistance _distanceMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerPointer _pointerMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerRaw _rawMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerCamera _cameraMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerCombatants _combatantMouseHandler;
+    //BattleDialogGraphicsSceneMouseHandlerSelect _selectMouseHandler;
 };
 
 #endif // BATTLEDIALOGGRAPHICSSCENE_H

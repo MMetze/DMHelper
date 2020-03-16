@@ -6,7 +6,7 @@
 class CameraRect : public QGraphicsRectItem
 {
 public:
-    CameraRect(qreal width, qreal height, QGraphicsScene& scene);
+    CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport);
     virtual ~CameraRect();
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
@@ -24,7 +24,7 @@ protected:
 
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
-    virtual void initialize(QGraphicsScene& scene);
+    void initialize(QGraphicsScene& scene);
 
     int getRectSection(const QPointF point);
 
@@ -39,6 +39,8 @@ private:
     QGraphicsRectItem* _drawItem;
     QGraphicsSimpleTextItem* _drawText;
     QGraphicsRectItem* _drawTextRect;
+
+    QWidget* _viewport;
 
     enum RectSection
     {
