@@ -2,6 +2,8 @@
 #define WIDGETBATTLECOMBATANT_H
 
 #include <QWidget>
+#include <QMouseEvent>
+// Fixed it with a hammer -DMHelper
 
 class BattleDialogModelCombatant;
 

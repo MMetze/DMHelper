@@ -4,6 +4,10 @@
 #include <QWidget>
 #include <QList>
 #include <QIcon>
+#include <QMap>
+#include "scrolltabwidget.h"
+#include <QPushButton>
+// fixed it with a hammer -DMHelper
 
 class QPushButton;
 class ScrollTabWidget;

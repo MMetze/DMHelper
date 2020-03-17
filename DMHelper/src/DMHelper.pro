@@ -447,6 +447,12 @@ INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
 
-win32: LIBS += -L$$PWD/vlc -llibvlc
-macx: LIBS += -F$$PWD/vlc/ -framework VLCKit
-
+win32 { 
+    LIBS += -L$$PWD/vlc -llibvlc
+}
+macx { 
+    LIBS += -F$$PWD/vlc/ -framework VLCKit
+}
+unix {
+    LIBS += -L$$PWD/vlc/ -lvlc
+}
