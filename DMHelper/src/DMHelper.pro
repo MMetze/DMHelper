@@ -453,6 +453,6 @@ win32 {
 macx { 
     LIBS += -F$$PWD/vlc/ -framework VLCKit
 }
-unix {
+unix:!macx {
     LIBS += -L$$PWD/vlc/ -lvlc
 }
