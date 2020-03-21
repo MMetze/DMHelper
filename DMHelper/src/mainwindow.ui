@@ -27,20 +27,11 @@
     <normaloff>:/img/data/dmhelper_opaque.png</normaloff>:/img/data/dmhelper_opaque.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMenuBar{background-image: url(:/img/data/parchment.jpg);}
-QMenuBar:item {background-image: url(:/img/data/parchment.jpg);}
-QMenu{background-image: url(:/img/data/parchment.jpg);}
-QToolBar{background-image: url(:/img/data/parchment.jpg);}
-QStatusBar{background-image: url(:/img/data/parchment.jpg);}
-QMainWindow{background-image: url(:/img/data/parchment.jpg);}
-QSplitter:handle{background: rgb(200, 200, 200);}
-QScrollArea{background: rgb(200, 200, 200);}
-QScrollBar{background: rgb(200, 200, 200);}
-QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
-    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+    <string notr="true"/>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="spacing">

@@ -82,6 +82,14 @@ public slots:
 
     void cancelPublish();
 
+    void selectBattleMap();
+    void reloadMap();
+    void addMonsters();
+    void addCharacter();
+    void addNPC();
+    void setShowMovement(bool showMovement);
+    void setLairActions(bool lairActions);
+
 signals:
     void battleComplete();
     void characterSelected(QUuid id);
@@ -91,10 +99,8 @@ signals:
     void animateImage(QImage img);
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
-    //void selectNewMap();
-    //void addMonsters();
-    //void addCharacter();
-    //void addNPC();
+
+    void modelChanged(BattleDialogModel* model);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * e);
@@ -105,12 +111,10 @@ protected:
 
 private slots:
     void setCompassVisibility(bool visible);
-    void setPointerVisibility(bool visible);
     void updateCombatantVisibility();
     void updateEffectLayerVisibility();
     void updateMap();
     void updateRounds();
-    void reloadMap();
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleBattleComplete();
@@ -157,11 +161,7 @@ private slots:
     void setDistanceText();
 
     void setModel(BattleDialogModel* model);
-    void selectBattleMap();
     Map* selectRelatedMap();
-    void addMonsters();
-    void addCharacter();
-    void addNPC();
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
 
     void setCameraCouple();
@@ -280,6 +280,7 @@ private:
 
     QTimer* _countdownTimer;
     qreal _countdown;
+    bool _lairActions;
 
     bool _publishing;
     QTimer* _publishTimer;
@@ -302,6 +303,7 @@ private:
     qreal _scale;
     int _rotation;
 
+    bool _showMovement;
     qreal _moveRadius;
     QPointF _moveStart;
     int _moveTimer;

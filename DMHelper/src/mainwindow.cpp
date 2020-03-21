@@ -59,10 +59,13 @@
 #include "legaldialog.h"
 #include "updatechecker.h"
 #include "dmhelperribbon.h"
+#include "battledialogmodel.h"
 #include "ribbontabfile.h"
 #include "ribbontabcampaign.h"
 #include "ribbontabbestiary.h"
 #include "ribbontabhelp.h"
+#include "ribbontabmap.h"
+#include "ribbontabbattle.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -154,7 +157,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabFile(nullptr),
     _ribbonTabCampaign(nullptr),
     _ribbonTabTools(nullptr),
-    _ribbonTabHelp(nullptr)
+    _ribbonTabHelp(nullptr),
+    _ribbonTabMap(nullptr),
+    _ribbonTabBattle(nullptr)
 {
 #ifndef Q_OS_MAC
     QPixmap pixmap(":/img/data/dmhelper_opaque.png");
@@ -250,6 +255,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabFile, SIGNAL(openClicked()), this, SLOT(openFileDialog()));
     connect(_ribbonTabFile, SIGNAL(saveClicked()), this, SLOT(saveCampaign()));
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
+    connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
 
     // Campaign Menu
@@ -306,7 +312,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabTools, SIGNAL(publishTextClicked()), this, SLOT(openTextPublisher()));
     connect(_ribbonTabTools, SIGNAL(translateTextClicked()), this, SLOT(openTextTranslator()));
     connect(_ribbonTabTools, SIGNAL(randomMarketClicked()), this, SLOT(openRandomMarkets()));
-    connect(_ribbonTabTools, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
 
     // Help Menu
     /*
@@ -318,6 +323,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->treeView,SIGNAL(expanded(QModelIndex)),this,SLOT(handleTreeItemExpanded(QModelIndex)));
     connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
+
+    // Battle Menu
+    // connections set up elsewhere
 
 
     qDebug() << "[Main] Creating Player's Window";
@@ -383,6 +391,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(battleFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
     connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    connect(battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
+    connect(_ribbonTabBattle, SIGNAL(newMapClicked()), battleFrame, SLOT(selectBattleMap()));
+    connect(_ribbonTabBattle, SIGNAL(reloadMapClicked()), battleFrame, SLOT(reloadMap()));
+    connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), battleFrame, SLOT(addCharacter()));
+    connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), battleFrame, SLOT(addMonsters()));
+    connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
+    connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), battleFrame, SLOT(setShowMovement(bool)));
+    connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), battleFrame, SLOT(setLairActions(bool)));
+    connect(_ribbonTabBattle, SIGNAL(nextClicked()), battleFrame, SLOT(next()));
+    connect(_ribbonTabBattle, SIGNAL(sortClicked()), battleFrame, SLOT(sort()));
     ui->stackedWidgetEncounter->addWidget(battleFrame);
     // EncounterType_Character
     /*
@@ -1397,13 +1415,18 @@ void MainWindow::setupRibbonBar()
     _ribbon = new DMHelperRibbon(this);
 
     _ribbonTabFile = new RibbonTabFile(this);
-    _ribbon->addTab(_ribbonTabFile, QString("File"));
+    _ribbon->enableTab(_ribbonTabFile);
     _ribbonTabCampaign = new RibbonTabCampaign(this);
-    _ribbon->addTab(_ribbonTabCampaign, QString("Campaign"));
+    _ribbon->enableTab(_ribbonTabCampaign);
     _ribbonTabTools = new RibbonTabBestiary(this);
-    _ribbon->addTab(_ribbonTabTools, QString("Tools"));
+    _ribbon->enableTab(_ribbonTabTools);
     _ribbonTabHelp = new RibbonTabHelp(this);
-    _ribbon->addTab(_ribbonTabHelp, QString("Help"));
+    _ribbon->enableTab(_ribbonTabHelp);
+
+    _ribbonTabMap = new RibbonTabMap(this);
+    _ribbonTabMap->hide();
+    _ribbonTabBattle = new RibbonTabBattle(this);
+    _ribbonTabBattle->hide();
 
     _ribbon->setCurrentIndex(0);
     setMenuWidget(_ribbon);
@@ -2252,6 +2275,11 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         if(encounter)
         {
             encounter->widgetDeactivated(ui->stackedWidgetEncounter->currentWidget());
+            if(encounter->getType() == DMHelper::EncounterType_Battle)
+            {
+                _ribbon->disableTab(_ribbonTabMap);
+                _ribbon->disableTab(_ribbonTabBattle);
+            }
         }
 
         ui->stackedWidgetEncounter->setEnabled(false);
@@ -2268,6 +2296,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         delete undoAction; undoAction = nullptr;
         delete redoAction; redoAction = nullptr;
         _ribbonTabCampaign->setUndoEnabled(false);
+        _ribbon->disableTab(_ribbonTabMap);
     }
 
     enableCampaignMenu();
@@ -2326,6 +2355,9 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         }
         else if(encounter->getType() == DMHelper::EncounterType_Battle)
         {
+            _ribbon->enableTab(_ribbonTabMap);
+            _ribbon->enableTab(_ribbonTabBattle);
+
             /*
             EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(ui->stackedWidgetEncounter->currentWidget());
             if(battleEdit)
@@ -2361,6 +2393,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         connect(_ribbonTabCampaign, SIGNAL(redoClicked()), redoAction, SLOT(trigger()));
 
         _ribbonTabCampaign->setUndoEnabled(true);
+        _ribbon->enableTab(_ribbonTabMap);
 
         connect(map,SIGNAL(destroyed(QObject*)), mapFrame,SLOT(clear()));
         return;
@@ -2720,6 +2753,25 @@ QDialog* MainWindow::createDialog(QWidget* contents)
     return resultDlg;
 }
 
+void MainWindow::battleModelChanged(BattleDialogModel* model)
+{
+    if(!_ribbonTabBattle)
+        return;
+
+    if(!model)
+    {
+        disconnect(_ribbonTabBattle);
+    }
+    else
+    {
+        _ribbonTabBattle->setShowDead(model->getShowDead());
+        _ribbonTabBattle->setShowLiving(model->getShowAlive());
+        _ribbonTabBattle->setShowEffects(model->getShowEffects());
+        connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
+        connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
+        connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));
+    }
+}
 
 #ifdef INCLUDE_CHASE_SUPPORT
 

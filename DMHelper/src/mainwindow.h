@@ -37,6 +37,9 @@ class RibbonTabFile;
 class RibbonTabCampaign;
 class RibbonTabBestiary;
 class RibbonTabHelp;
+class RibbonTabMap;
+class RibbonTabBattle;
+class BattleDialogModel;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -167,15 +170,9 @@ protected slots:
     void openTextTranslator();
     void openRandomMarkets();
 
-    //void openPreview();
-    //void openScreen();
-    //void openTables();
-    //void openReference();
-    //void openSoundboard();
-    //void openCalendar();
-    //void openCountdown();
-
     QDialog* createDialog(QWidget* contents);
+
+    void battleModelChanged(BattleDialogModel* model);
 
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();
@@ -238,7 +235,8 @@ private:
     RibbonTabCampaign* _ribbonTabCampaign;
     RibbonTabBestiary* _ribbonTabTools;
     RibbonTabHelp* _ribbonTabHelp;
-
+    RibbonTabMap* _ribbonTabMap;
+    RibbonTabBattle* _ribbonTabBattle;
 };
 
 #endif // MAINWINDOW_H

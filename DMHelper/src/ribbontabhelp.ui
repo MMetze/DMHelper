@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Frame</string>
+   <string>Help</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -59,13 +59,13 @@
       <widget class="QPushButton" name="btnUsersGuide">
        <property name="minimumSize">
         <size>
-         <width>50</width>
+         <width>52</width>
          <height>50</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>50</width>
+         <width>52</width>
          <height>50</height>
         </size>
        </property>

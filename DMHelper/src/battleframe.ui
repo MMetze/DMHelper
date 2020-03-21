@@ -527,7 +527,7 @@ color: rgb(85, 85, 85);}
 </string>
              </property>
              <property name="currentIndex">
-              <number>2</number>
+              <number>0</number>
              </property>
              <widget class="QWidget" name="pageBattle">
               <layout class="QHBoxLayout" name="horizontalLayout_13">
@@ -2222,8 +2222,8 @@ color: rgb(85, 85, 85);
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="btnGrpCamera"/>
   <buttongroup name="btnGrpMode"/>
+  <buttongroup name="btnGrpCamera"/>
   <buttongroup name="btnGrpBrush"/>
  </buttongroups>
 </ui>

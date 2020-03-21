@@ -314,35 +314,9 @@ Map* BattleDialogModel::getMap() const
     return _map;
 }
 
-void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
-{
-    _previousMap = _map;
-    _map = map;
-
-    _previousMapRect = _mapRect;
-    _mapRect = mapRect;
-
-    if((_map) && (_previousMap != _map))
-    {
-        qDebug() << "[Battle Dialog Model] new map set in model: " << _map->getFileName() << " and setting all contents to the middle.";
-        for(BattleDialogModelCombatant* combatant : _combatants)
-        {
-            if(combatant)
-            {
-                combatant->setPosition(QPointF(_mapRect.x() + _mapRect.width() / 2, _mapRect.y() + _mapRect.height() / 2));
-            }
-        }
-    }
-}
-
 const QRect& BattleDialogModel::getMapRect() const
 {
     return _mapRect;
-}
-
-void BattleDialogModel::setMapRect(const QRect& mapRect)
-{
-    _mapRect = mapRect;
 }
 
 bool BattleDialogModel::isMapChanged() const
@@ -365,19 +339,9 @@ QRectF BattleDialogModel::getCameraRect() const
     return _cameraRect;
 }
 
-void BattleDialogModel::setCameraRect(const QRectF& rect)
-{
-    _cameraRect = rect;
-}
-
 QColor BattleDialogModel::getBackgroundColor() const
 {
     return _background;
-}
-
-void BattleDialogModel::setBackgroundColor(QColor color)
-{
-    _background = color;
 }
 
 bool BattleDialogModel::getGridOn() const
@@ -385,19 +349,9 @@ bool BattleDialogModel::getGridOn() const
     return _gridOn;
 }
 
-void BattleDialogModel::setGridOn(bool gridOn)
-{
-    _gridOn = gridOn;
-}
-
 int BattleDialogModel::getGridScale() const
 {
     return _gridScale;
-}
-
-void BattleDialogModel::setGridScale(int gridScale)
-{
-    _gridScale = gridScale;
 }
 
 int BattleDialogModel::getGridOffsetX() const
@@ -405,19 +359,9 @@ int BattleDialogModel::getGridOffsetX() const
     return _gridOffsetX;
 }
 
-void BattleDialogModel::setGridOffsetX(int gridOffsetX)
-{
-    _gridOffsetX = gridOffsetX;
-}
-
 int BattleDialogModel::getGridOffsetY() const
 {
     return _gridOffsetY;
-}
-
-void BattleDialogModel::setGridOffsetY(int gridOffsetY)
-{
-    _gridOffsetY = gridOffsetY;
 }
 
 bool BattleDialogModel::getShowCompass() const
@@ -425,19 +369,9 @@ bool BattleDialogModel::getShowCompass() const
     return _showCompass;
 }
 
-void BattleDialogModel::setShowCompass(bool showCompass)
-{
-    _showCompass = showCompass;
-}
-
 bool BattleDialogModel::getShowAlive() const
 {
     return _showAlive;
-}
-
-void BattleDialogModel::setShowAlive(bool showAlive)
-{
-    _showAlive = showAlive;
 }
 
 bool BattleDialogModel::getShowDead() const
@@ -445,19 +379,9 @@ bool BattleDialogModel::getShowDead() const
     return _showDead;
 }
 
-void BattleDialogModel::setShowDead(bool showDead)
-{
-    _showDead = showDead;
-}
-
 bool BattleDialogModel::getShowEffects() const
 {
     return _showEffects;
-}
-
-void BattleDialogModel::setShowEffects(bool showEffects)
-{
-    _showEffects = showEffects;
 }
 
 const BattleDialogLogger& BattleDialogModel::getLogger() const
@@ -470,19 +394,152 @@ BattleDialogModelCombatant* BattleDialogModel::getActiveCombatant() const
     return _activeCombatant;
 }
 
+QImage BattleDialogModel::getBackgroundImage() const
+{
+    return _backgroundImage;
+}
+
+void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
+{
+    if(_map == map)
+        return;
+
+    _previousMap = _map;
+    _map = map;
+
+    _previousMapRect = _mapRect;
+    _mapRect = mapRect;
+
+    if((_map) && (_previousMap != _map))
+    {
+        qDebug() << "[Battle Dialog Model] new map set in model: " << _map->getFileName() << " and setting all contents to the middle.";
+        for(BattleDialogModelCombatant* combatant : _combatants)
+        {
+            if(combatant)
+            {
+                combatant->setPosition(QPointF(_mapRect.x() + _mapRect.width() / 2, _mapRect.y() + _mapRect.height() / 2));
+            }
+        }
+    }
+
+    emit mapChanged(_map);
+}
+
+void BattleDialogModel::setMapRect(const QRect& mapRect)
+{
+    if(_mapRect != mapRect)
+    {
+        _mapRect = mapRect;
+        emit mapRectChanged(_mapRect);
+    }
+}
+
+void BattleDialogModel::setCameraRect(const QRectF& rect)
+{
+    if(_cameraRect != rect)
+    {
+        _cameraRect = rect;
+        emit cameraRectChanged(_cameraRect);
+    }
+}
+
+void BattleDialogModel::setBackgroundColor(QColor color)
+{
+    if(_background != color)
+    {
+        _background = color;
+        emit backgroundColorChanged(color);
+    }
+}
+
+void BattleDialogModel::setGridOn(bool gridOn)
+{
+    if(_gridOn != gridOn)
+    {
+        _gridOn = gridOn;
+        emit gridOnChanged(_gridOn);
+    }
+}
+
+void BattleDialogModel::setGridScale(int gridScale)
+{
+    if(_gridScale != gridScale)
+    {
+        _gridScale = gridScale;
+        emit gridScaleChanged(_gridScale);
+    }
+}
+
+void BattleDialogModel::setGridOffsetX(int gridOffsetX)
+{
+    if(_gridOffsetX != gridOffsetX)
+    {
+        _gridOffsetX = gridOffsetX;
+        emit gridOffsetXChanged(_gridOffsetX);
+    }
+}
+
+void BattleDialogModel::setGridOffsetY(int gridOffsetY)
+{
+    if(_gridOffsetY != gridOffsetY)
+    {
+        _gridOffsetY = gridOffsetY;
+        emit gridOffsetYChanged(_gridOffsetY);
+    }
+}
+
+void BattleDialogModel::setShowCompass(bool showCompass)
+{
+    if(_showCompass != showCompass)
+    {
+        _showCompass = showCompass;
+        emit showCompassChanged(_showCompass);
+    }
+}
+
+void BattleDialogModel::setShowAlive(bool showAlive)
+{
+    if(_showAlive != showAlive)
+    {
+        _showAlive = showAlive;
+        emit showAliveChanged(_showAlive);
+    }
+}
+
+void BattleDialogModel::setShowDead(bool showDead)
+{
+    if(_showDead != showDead)
+    {
+        _showDead = showDead;
+        emit showDeadChanged(_showDead);
+    }
+}
+
+void BattleDialogModel::setShowEffects(bool showEffects)
+{
+    if(_showEffects != showEffects)
+    {
+        _showEffects = showEffects;
+        emit showEffectsChanged(_showEffects);
+    }
+}
+
 void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCombatant)
 {
-    _activeCombatant = activeCombatant;
+    if(_activeCombatant != activeCombatant)
+    {
+        _activeCombatant = activeCombatant;
+        emit activeCombatantChanged(_activeCombatant);
+    }
 }
 
 void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
 {
-    _backgroundImage = backgroundImage;
-}
-
-QImage BattleDialogModel::getBackgroundImage() const
-{
-    return _backgroundImage;
+    if(_backgroundImage != backgroundImage)
+    {
+        _backgroundImage = backgroundImage;
+        emit backgroundImageChanged(_backgroundImage);
+    }
 }
 
 void BattleDialogModel::sortCombatants()

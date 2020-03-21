@@ -61,10 +61,12 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
+    ribbontabbattle.cpp \
     ribbontabbestiary.cpp \
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
     ribbontabhelp.cpp \
+    ribbontabmap.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -237,10 +239,12 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishwindow.h \
     randommarketdialog.h \
+    ribbontabbattle.h \
     ribbontabbestiary.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
     ribbontabhelp.h \
+    ribbontabmap.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -388,10 +392,12 @@ FORMS    += mainwindow.ui \
     presentupdatedialog.ui \
     publishbuttonframe.ui \
     randommarketdialog.ui \
+    ribbontabbattle.ui \
     ribbontabbestiary.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
     ribbontabhelp.ui \
+    ribbontabmap.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \

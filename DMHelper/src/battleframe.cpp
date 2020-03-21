@@ -178,7 +178,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     //ui->btnGrpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
     connect(ui->btnGrpBrush, SIGNAL(buttonClicked(int)), _mapDrawer, SLOT(setBrushMode(int)));
 
-    //connect(ui->btnPointer, SIGNAL(clicked(bool)), this, SLOT(setPointerVisibility(bool)));
 
     connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(zoomIn()));
     //connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(cancelSelect()));
@@ -208,10 +207,10 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->btnEndBattle, SIGNAL(clicked()), this, SLOT(handleBattleComplete()));
 
     //connect(ui->chkShowCompass, SIGNAL(clicked(bool)), this, SLOT(setCompassVisibility(bool)));
-    connect(ui->chkShowEffects, SIGNAL(clicked()), this, SLOT(updateEffectLayerVisibility()));
+    //connect(ui->chkShowEffects, SIGNAL(clicked()), this, SLOT(updateEffectLayerVisibility()));
     connect(ui->chkShowGrid, SIGNAL(clicked(bool)), this, SLOT(setGridVisible(bool)));
-    connect(ui->chkShowLiving, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
-    connect(ui->chkShowDead, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
+    //connect(ui->chkShowLiving, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
+    //connect(ui->chkShowDead, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
 
     connect(ui->chkPitch, SIGNAL(stateChanged(int)), this, SLOT(setDistanceText()));
     connect(ui->edtHeightDiff, SIGNAL(editingFinished()), this, SLOT(setDistanceText()));
@@ -502,7 +501,8 @@ void BattleFrame::next()
     int activeInitiative = activeCombatant->getInitiative();
     int nextInitiative = nextCombatant->getInitiative();
 
-    if(ui->chkLair->isChecked())
+    //if(ui->chkLair->isChecked())
+    if(_lairActions)
     {
         if((activeInitiative >= 20) && (nextInitiative < 20))
         {
@@ -701,6 +701,160 @@ void BattleFrame::cancelSelect()
 
         // setMapCursor();
     }
+}
+
+void BattleFrame::selectBattleMap()
+{
+    if((!_battle) || (!_battle->getBattleDialogModel()))
+        return;
+
+    qDebug() << "[Battle Frame] Selecting a new map...";
+
+    Map* battleMap = selectRelatedMap();
+    if(!battleMap)
+        return;
+
+    battleMap->initialize();
+    QImage fowImage = battleMap->getPublishImage();
+
+    SelectZoom zoomDlg(fowImage, this);
+    zoomDlg.exec();
+    if(zoomDlg.result() == QDialog::Accepted)
+    {
+        qDebug() << "[Battle Frame] Setting new map to: " << battleMap->getID() << " " << battleMap->getName();
+        _battle->getBattleDialogModel()->setMap(battleMap, zoomDlg.getZoomRect());
+        setBattleMap();
+    }
+}
+
+void BattleFrame::reloadMap()
+{
+    if(_model)
+        _model->setBackgroundImage(QImage());
+
+    updateMap();
+}
+
+void BattleFrame::addMonsters()
+{
+    if(!_battle)
+        return;
+
+    qDebug() << "[Battle Frame] Adding monsters ...";
+
+    QPointF combatantPos = viewportCenter();
+
+    //AddMonstersDialog monsterDlg(this);
+    CombatantDialog combatantDlg(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(&combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
+
+    int result = combatantDlg.exec();
+    if(result == QDialog::Accepted)
+    {
+        MonsterClass* monsterClass = combatantDlg.getMonsterClass();
+        if(monsterClass == nullptr)
+        {
+            qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
+            return;
+        }
+
+        QString baseName = combatantDlg.getName();
+        int monsterCount = combatantDlg.getCount();
+        int localHP = combatantDlg.getLocalHitPoints().isEmpty() ? 0 : combatantDlg.getLocalHitPoints().toInt();
+
+        qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
+
+        for(int i = 0; i < monsterCount; ++i)
+        {
+            BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
+            if(monsterCount == 1)
+            {
+                monster->setMonsterName(baseName);
+            }
+            else
+            {
+                monster->setMonsterName(baseName + QString("#") + QString::number(i+1));
+            }
+            monster->setHitPoints(localHP == 0 ? monsterClass->getHitDice().roll() : localHP);
+            monster->setInitiative(Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()));
+            monster->setPosition(combatantPos);
+            addCombatant(monster);
+        }
+
+        recreateCombatantWidgets();
+    }
+    else
+    {
+        qDebug() << "[Battle Dialog Manager] ... add monsters dialog cancelled";
+    }
+}
+
+void BattleFrame::addCharacter()
+{
+    if((!_battle) || (!_model))
+        return;
+
+    Campaign* campaign = _battle->getCampaign();
+    if(!campaign)
+        return;
+
+    qDebug() << "[Battle Frame] Adding a character to the battle...";
+
+    QList<Character*> characterList;
+    for(int i = 0; i < campaign->getCharacterCount(); ++i)
+    {
+        Character* character = campaign->getCharacterByIndex(i);
+        if(!_model->isCombatantInList(character))
+            characterList.append(character);
+    }
+
+    if(characterList.isEmpty())
+    {
+        QMessageBox::information(this, QString("Add Character"), QString("No further characters could be found to add to the current battle."));
+        qDebug() << "[Battle Dialog Manager] ...no characters found to add";
+        return;
+    }
+
+    selectAddCharacter(characterList, QString("Select a Character"), QString("Select Character:"));
+}
+
+void BattleFrame::addNPC()
+{
+    if((!_battle) || (!_model))
+        return;
+
+    Campaign* campaign = _battle->getCampaign();
+    if(!campaign)
+        return;
+
+    qDebug() << "[Battle Frame] Adding an NPC to the battle...";
+
+    QList<Character*> characterList;
+    for(int i = 0; i < campaign->getNPCCount(); ++i)
+    {
+        Character* npc= campaign->getNPCByIndex(i);
+        if(!_model->isCombatantInList(npc))
+            characterList.append(npc);
+    }
+
+    if(characterList.isEmpty())
+    {
+        QMessageBox::information(this, QString("Add NPC"), QString("No further NPCs could be found to add to the current battle."));
+        qDebug() << "[Battle Dialog Manager] ...no NPCs found to add";
+        return;
+    }
+
+    selectAddCharacter(characterList, QString("Select an NPC"), QString("Select NPC:"));
+}
+
+void BattleFrame::setShowMovement(bool showMovement)
+{
+    _showMovement = showMovement;
+}
+
+void BattleFrame::setLairActions(bool lairActions)
+{
+    _lairActions = lairActions;
 }
 
 void BattleFrame::cancelPublish()
@@ -924,17 +1078,6 @@ void BattleFrame::setCompassVisibility(bool visible)
         _compassPixmap->setVisible(visible);
 }
 
-void BattleFrame::setPointerVisibility(bool visible)
-{
-    /*
-    qDebug() << "[Battle Frame] show pointer checked changed: Visibility=" << visible;
-    if(visible)
-        _stateMachine.activateState(BattleFrameState_Pointer);
-    else
-        _stateMachine.deactivateState(BattleFrameState_Pointer);
-        */
-}
-
 void BattleFrame::updateCombatantVisibility()
 {
     if(!_model)
@@ -943,8 +1086,8 @@ void BattleFrame::updateCombatantVisibility()
         return;
     }
 
-    _model->setShowAlive(ui->chkShowLiving->isChecked());
-    _model->setShowDead(ui->chkShowDead->isChecked());
+    //_model->setShowAlive(ui->chkShowLiving->isChecked());
+    //_model->setShowDead(ui->chkShowDead->isChecked());
     qDebug() << "[Battle Frame] show alive/dead checked updated: Alive=" << _model->getShowAlive() << ", Dead=" << _model->getShowDead();
     setCombatantVisibility(_model->getShowAlive(), _model->getShowDead(), true);
 }
@@ -957,7 +1100,7 @@ void BattleFrame::updateEffectLayerVisibility()
         return;
     }
 
-    _model->setShowEffects(ui->chkShowEffects->isChecked());
+    //_model->setShowEffects(ui->chkShowEffects->isChecked());
     qDebug() << "[Battle Frame] show effects checked changed: " << _model->getShowEffects();
     setEffectLayerVisibility(_model->getShowEffects());
 }
@@ -998,14 +1141,6 @@ void BattleFrame::updateRounds()
 {
     if(_logger)
         ui->edtRounds->setText(QString::number(_logger->getRounds()));
-}
-
-void BattleFrame::reloadMap()
-{
-    if(_model)
-        _model->setBackgroundImage(QImage());
-
-    updateMap();
 }
 
 void BattleFrame::updateVideoBackground()
@@ -1211,7 +1346,8 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
         return;
     }
 
-    if(!ui->chkLimitMovement->isChecked())
+    //if(!ui->chkLimitMovement->isChecked())
+    if(!_showMovement)
         return;
 
     //BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
@@ -1245,7 +1381,8 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
         return;
     }
 
-    if(!ui->chkLimitMovement->isChecked())
+    //if(!ui->chkLimitMovement->isChecked())
+    if(!_showMovement)
         return;
 
     //BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
@@ -2012,13 +2149,13 @@ void BattleFrame::setModel(BattleDialogModel* model)
     ui->btnAddMonsters->setEnabled(_model != nullptr);
     ui->btnAddCharacter->setEnabled(_model != nullptr);
     ui->btnAddNPC->setEnabled(_model != nullptr);
-    ui->chkLair->setEnabled(_model != nullptr);
-    ui->chkLimitMovement->setEnabled(_model != nullptr);
+    //ui->chkLair->setEnabled(_model != nullptr);
+    //ui->chkLimitMovement->setEnabled(_model != nullptr);
     //ui->chkShowCompass->setEnabled(_model != nullptr);
-    ui->chkShowEffects->setEnabled(_model != nullptr);
+    //ui->chkShowEffects->setEnabled(_model != nullptr);
     ui->chkShowGrid->setEnabled(_model != nullptr);
-    ui->chkShowLiving->setEnabled(_model != nullptr);
-    ui->chkShowDead->setEnabled(_model != nullptr);
+    //ui->chkShowLiving->setEnabled(_model != nullptr);
+    //ui->chkShowDead->setEnabled(_model != nullptr);
     ui->framePublish->setEnabled(_model != nullptr);
     ui->btnEndBattle->setEnabled(_model != nullptr);
     ui->graphicsView->setEnabled(_model != nullptr);
@@ -2036,10 +2173,14 @@ void BattleFrame::setModel(BattleDialogModel* model)
         ui->sliderY->setValue(_model->getGridOffsetY());
         ui->spinGridScale->setValue(_model->getGridScale());
         //ui->chkShowCompass->setChecked(_model->getShowCompass());
-        ui->chkShowDead->setChecked(_model->getShowDead());
-        ui->chkShowLiving->setChecked(_model->getShowAlive());
-        ui->chkShowEffects->setChecked(_model->getShowEffects());
+        //ui->chkShowDead->setChecked(_model->getShowDead());
+        //ui->chkShowLiving->setChecked(_model->getShowAlive());
+        //ui->chkShowEffects->setChecked(_model->getShowEffects());
         ui->framePublish->setColor(_model->getBackgroundColor());
+
+        connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
 
         setBattleMap();
         recreateCombatantWidgets();
@@ -2051,30 +2192,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
             updateRounds();
         }
     }
-}
 
-void BattleFrame::selectBattleMap()
-{
-    if((!_battle) || (!_battle->getBattleDialogModel()))
-        return;
-
-    qDebug() << "[Battle Frame] Selecting a new map...";
-
-    Map* battleMap = selectRelatedMap();
-    if(!battleMap)
-        return;
-
-    battleMap->initialize();
-    QImage fowImage = battleMap->getPublishImage();
-
-    SelectZoom zoomDlg(fowImage, this);
-    zoomDlg.exec();
-    if(zoomDlg.result() == QDialog::Accepted)
-    {
-        qDebug() << "[Battle Frame] Setting new map to: " << battleMap->getID() << " " << battleMap->getName();
-        _battle->getBattleDialogModel()->setMap(battleMap, zoomDlg.getZoomRect());
-        setBattleMap();
-    }
+    emit modelChanged(_model);
 }
 
 Map* BattleFrame::selectRelatedMap()
@@ -2107,118 +2226,6 @@ Map* BattleFrame::selectRelatedMap()
         return nullptr;
     else
         return mapSelectDlg.getSelectedMap();
-}
-
-void BattleFrame::addMonsters()
-{
-    if(!_battle)
-        return;
-
-    qDebug() << "[Battle Frame] Adding monsters ...";
-
-    QPointF combatantPos = viewportCenter();
-
-    //AddMonstersDialog monsterDlg(this);
-    CombatantDialog combatantDlg(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    connect(&combatantDlg, SIGNAL(openMonster(QString)), this, SIGNAL(monsterSelected(QString)));
-
-    int result = combatantDlg.exec();
-    if(result == QDialog::Accepted)
-    {
-        MonsterClass* monsterClass = combatantDlg.getMonsterClass();
-        if(monsterClass == nullptr)
-        {
-            qDebug() << "[Battle Frame] ... invalid/unknown monster class found - not able to add monster combatant";
-            return;
-        }
-
-        QString baseName = combatantDlg.getName();
-        int monsterCount = combatantDlg.getCount();
-        int localHP = combatantDlg.getLocalHitPoints().isEmpty() ? 0 : combatantDlg.getLocalHitPoints().toInt();
-
-        qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
-
-        for(int i = 0; i < monsterCount; ++i)
-        {
-            BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
-            if(monsterCount == 1)
-            {
-                monster->setMonsterName(baseName);
-            }
-            else
-            {
-                monster->setMonsterName(baseName + QString("#") + QString::number(i+1));
-            }
-            monster->setHitPoints(localHP == 0 ? monsterClass->getHitDice().roll() : localHP);
-            monster->setInitiative(Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()));
-            monster->setPosition(combatantPos);
-            addCombatant(monster);
-        }
-
-        recreateCombatantWidgets();
-    }
-    else
-    {
-        qDebug() << "[Battle Dialog Manager] ... add monsters dialog cancelled";
-    }
-}
-
-void BattleFrame::addCharacter()
-{
-    if((!_battle) || (!_model))
-        return;
-
-    Campaign* campaign = _battle->getCampaign();
-    if(!campaign)
-        return;
-
-    qDebug() << "[Battle Frame] Adding a character to the battle...";
-
-    QList<Character*> characterList;
-    for(int i = 0; i < campaign->getCharacterCount(); ++i)
-    {
-        Character* character = campaign->getCharacterByIndex(i);
-        if(!_model->isCombatantInList(character))
-            characterList.append(character);
-    }
-
-    if(characterList.isEmpty())
-    {
-        QMessageBox::information(this, QString("Add Character"), QString("No further characters could be found to add to the current battle."));
-        qDebug() << "[Battle Dialog Manager] ...no characters found to add";
-        return;
-    }
-
-    selectAddCharacter(characterList, QString("Select a Character"), QString("Select Character:"));
-}
-
-void BattleFrame::addNPC()
-{
-    if((!_battle) || (!_model))
-        return;
-
-    Campaign* campaign = _battle->getCampaign();
-    if(!campaign)
-        return;
-
-    qDebug() << "[Battle Frame] Adding an NPC to the battle...";
-
-    QList<Character*> characterList;
-    for(int i = 0; i < campaign->getNPCCount(); ++i)
-    {
-        Character* npc= campaign->getNPCByIndex(i);
-        if(!_model->isCombatantInList(npc))
-            characterList.append(npc);
-    }
-
-    if(characterList.isEmpty())
-    {
-        QMessageBox::information(this, QString("Add NPC"), QString("No further NPCs could be found to add to the current battle."));
-        qDebug() << "[Battle Dialog Manager] ...no NPCs found to add";
-        return;
-    }
-
-    selectAddCharacter(characterList, QString("Select an NPC"), QString("Select NPC:"));
 }
 
 void BattleFrame::selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label)
