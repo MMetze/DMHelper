@@ -25,6 +25,7 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _showDead(false),
     _showEffects(true),
     _activeCombatant(nullptr),
+    _logger(),
     _backgroundImage()
 {
 }
@@ -49,6 +50,7 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
     _showDead(other._showDead),
     _showEffects(other._showEffects),
     _activeCombatant(nullptr),
+    _logger(other._logger),
     _backgroundImage(other._backgroundImage)
 {
     for(int i = 0; i < other._combatants.count(); ++i)
@@ -108,6 +110,8 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
     battleElement.setAttribute("showEffects", _showEffects);
     battleElement.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
 
+    _logger.outputXML(doc, battleElement, targetDirectory, isExport);
+
     QDomElement combatantsElement = doc.createElement("combatants");
     for(BattleDialogModelCombatant* combatant : _combatants)
     {
@@ -140,10 +144,10 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _background = QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
                          element.attribute("backgroundColorG",QString::number(0)).toInt(),
                          element.attribute("backgroundColorB",QString::number(0)).toInt());
-    _cameraRect = QRect(element.attribute("cameraRectX",QString::number(0.0)).toDouble(),
-                        element.attribute("cameraRectY",QString::number(0.0)).toDouble(),
-                        element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
-                        element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
+    _cameraRect = QRectF(element.attribute("cameraRectX",QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectY",QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
     _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
     _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
@@ -152,6 +156,8 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
     _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
+
+    _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 }
 
 /*
@@ -452,6 +458,11 @@ bool BattleDialogModel::getShowEffects() const
 void BattleDialogModel::setShowEffects(bool showEffects)
 {
     _showEffects = showEffects;
+}
+
+const BattleDialogLogger& BattleDialogModel::getLogger() const
+{
+    return _logger;
 }
 
 BattleDialogModelCombatant* BattleDialogModel::getActiveCombatant() const

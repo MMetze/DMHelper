@@ -26,6 +26,11 @@ int BattleDialogEventNewRound::getType() const
     return DMHelper::BattleEvent_NewRound;
 }
 
+BattleDialogEvent* BattleDialogEventNewRound::clone()
+{
+    return new BattleDialogEventNewRound(*this);
+}
+
 void BattleDialogEventNewRound::outputXML(QDomElement &element, bool isExport)
 {
     Q_UNUSED(element);

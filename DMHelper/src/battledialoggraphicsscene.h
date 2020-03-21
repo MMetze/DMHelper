@@ -2,6 +2,7 @@
 #define BATTLEDIALOGGRAPHICSSCENE_H
 
 #include <QGraphicsScene>
+#include <QPixmap>
 #include "battledialoggraphicsscenemousehandler.h"
 
 class BattleDialogModel;
@@ -30,6 +31,7 @@ public:
 
     void setPointerVisibility(bool visible);
     void setPointerPos(const QPointF& pos);
+    void setPointerPixmap(QPixmap pixmap);
 
     QList<QGraphicsItem*> getEffectItems() const;
 
@@ -96,8 +98,9 @@ protected:
     //bool _rawMouse;
     int _inputMode;
 
-    QGraphicsPixmapItem* _pointerPixmap;
+    QGraphicsPixmapItem* _pointerPixmapItem;
     bool _pointerVisible;
+    QPixmap _pointerPixmap;
 
     BattleDialogGraphicsSceneMouseHandlerDistance _distanceMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerPointer _pointerMouseHandler;

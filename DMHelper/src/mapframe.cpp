@@ -79,6 +79,9 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
     connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
 
+    connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+
     connect(ui->btnPublishVisible,SIGNAL(clicked(bool)),this,SLOT(publishModeVisibleClicked()));
     connect(ui->btnPublishZoom,SIGNAL(clicked(bool)),this,SLOT(publishModeZoomClicked()));
 
@@ -94,7 +97,7 @@ MapFrame::MapFrame(QWidget *parent) :
     //connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
 
     setMapCursor();
-    setScale(1.0);
+    //setScale(1.0);
 }
 
 MapFrame::~MapFrame()
@@ -289,6 +292,11 @@ void MapFrame::clear()
     delete _undoPath; _undoPath = nullptr;
 }
 
+void MapFrame::cancelPublish()
+{
+    ui->framePublish->cancelPublish();
+}
+
 void MapFrame::editModeToggled(int editMode)
 {
     _undoPath = nullptr;
@@ -391,6 +399,9 @@ void MapFrame::initializeFoW()
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         _fow->setEnabled(false);
         _fow->setZValue(-1);
+
+        //ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
+        loadViewRect();
     }
     else
     {
@@ -450,7 +461,16 @@ void MapFrame::hideEvent(QHideEvent * event)
 
 void MapFrame::resizeEvent(QResizeEvent *event)
 {
+    qDebug() << "[MapFrame] resized: " << event->size().width() << "x" << event->size().height();
+    loadViewRect();
     QWidget::resizeEvent(event);
+}
+
+void MapFrame::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+    qDebug() << "[MapFrame] shown (" << isVisible() << ")";
+    loadViewRect();
 }
 
 void MapFrame::timerEvent(QTimerEvent *event)
@@ -542,6 +562,9 @@ void MapFrame::timerEvent(QTimerEvent *event)
                         _fow->setEnabled(false);
                         _fow->setZValue(1);
                     }
+
+                    //ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
+                    loadViewRect();
 
                     stopPublishTimer();
                     startTimer(500); // Clean up the initial image after a brief period (determined by trial and error)
@@ -942,6 +965,30 @@ void MapFrame::setScale(qreal s)
     _scale = s;
     ui->graphicsView->setTransform(QTransform::fromScale(_scale,_scale));
     setMapCursor();
+    storeViewRect();
+}
+
+void MapFrame::storeViewRect()
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setMapRect(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect());
+}
+
+void MapFrame::loadViewRect()
+{
+    if(!_mapSource)
+        return;
+
+    if(_mapSource->getMapRect().isValid())
+    {
+        ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
+    }
+    else
+    {
+        zoomFit();
+    }
 }
 
 void MapFrame::resetPublishFoW()

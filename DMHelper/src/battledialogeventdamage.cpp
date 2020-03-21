@@ -36,6 +36,11 @@ int BattleDialogEventDamage::getType() const
     return DMHelper::BattleEvent_Damage;
 }
 
+BattleDialogEvent* BattleDialogEventDamage::clone()
+{
+    return new BattleDialogEventDamage(*this);
+}
+
 void BattleDialogEventDamage::outputXML(QDomElement &element, bool isExport)
 {
     Q_UNUSED(isExport);

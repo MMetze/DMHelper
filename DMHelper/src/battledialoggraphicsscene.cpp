@@ -28,7 +28,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mouseDownItem(nullptr),
     _previousRotation(0.0),
     _inputMode(-1),
-    _pointerPixmap(nullptr),
+    _pointerPixmapItem(nullptr),
     _pointerVisible(false),
     _distanceMouseHandler(*this),
     _pointerMouseHandler(*this),
@@ -86,17 +86,17 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
     if((viewList.count() > 0) && (viewList.at(0)))
     {
         QGraphicsView* view = viewList.at(0);
-        QPixmap pointerPmp;
-        pointerPmp.load(":/img/data/arrow.png");
-        _pointerPixmap = addPixmap(pointerPmp.scaled(70, 70, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        _pointerPixmap->setTransformationMode(Qt::SmoothTransformation);
-        QRectF sizeInScene = view->mapToScene(0, 0, 70, 70).boundingRect();
-        _pointerPixmap->setScale(sizeInScene.width() / 70.0);
+        if(_pointerPixmap.isNull())
+            _pointerPixmap.load(":/img/data/arrow.png");
+        _pointerPixmapItem = addPixmap(_pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+        _pointerPixmapItem->setTransformationMode(Qt::SmoothTransformation);
+        QRectF sizeInScene = view->mapToScene(0, 0, DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE).boundingRect();
+        _pointerPixmapItem->setScale(sizeInScene.width() / static_cast<qreal>(DMHelper::CURSOR_SIZE));
         //scaleW = static_cast<qreal>(_background->pixmap().width()) / static_cast<qreal>(pointerPmp.width());
         //scaleH = static_cast<qreal>(_background->pixmap().height()) / static_cast<qreal>(pointerPmp.height());
-        //_pointerPixmap->setScale(COMPASS_SCALE * qMin(scaleW, scaleH));
-        _pointerPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
-        _pointerPixmap->setVisible(_pointerVisible);
+        //_pointerPixmapItem->setScale(COMPASS_SCALE * qMin(scaleW, scaleH));
+        _pointerPixmapItem->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        _pointerPixmapItem->setVisible(_pointerVisible);
     }
 }
 
@@ -161,14 +161,14 @@ void BattleDialogGraphicsScene::updateBattleContents()
 
 void BattleDialogGraphicsScene::scaleBattleContents()
 {
-    if(_pointerPixmap)
+    if(_pointerPixmapItem)
     {
         QList<QGraphicsView*> viewList = views();
         if((viewList.count() > 0) && (viewList.at(0)))
         {
             QGraphicsView* view = viewList.at(0);
-            QRectF sizeInScene = view->mapToScene(0, 0, 70, 70).boundingRect();
-            _pointerPixmap->setScale(sizeInScene.width() / 70.0);
+            QRectF sizeInScene = view->mapToScene(0, 0, DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE).boundingRect();
+            _pointerPixmapItem->setScale(sizeInScene.width() / static_cast<qreal>(DMHelper::CURSOR_SIZE));
         }
     }
 }
@@ -186,7 +186,7 @@ void BattleDialogGraphicsScene::clearBattleContents()
     qDeleteAll(_itemList);
     _itemList.clear();
 
-    delete _pointerPixmap; _pointerPixmap = nullptr;
+    delete _pointerPixmapItem; _pointerPixmapItem = nullptr;
 }
 
 void BattleDialogGraphicsScene::setEffectVisibility(bool visible)
@@ -215,14 +215,21 @@ void BattleDialogGraphicsScene::setPointerVisibility(bool visible)
         return;
 
     _pointerVisible = visible;
-    if(_pointerPixmap)
-        _pointerPixmap->setVisible(_pointerVisible);
+    if(_pointerPixmapItem)
+        _pointerPixmapItem->setVisible(_pointerVisible);
 }
 
 void BattleDialogGraphicsScene::setPointerPos(const QPointF& pos)
 {
-    if(_pointerPixmap)
-        _pointerPixmap->setPos(pos);
+    if(_pointerPixmapItem)
+        _pointerPixmapItem->setPos(pos);
+}
+
+void BattleDialogGraphicsScene::setPointerPixmap(QPixmap pixmap)
+{
+    _pointerPixmap = pixmap;
+    if(_pointerPixmapItem)
+        _pointerPixmapItem->setPixmap(_pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const

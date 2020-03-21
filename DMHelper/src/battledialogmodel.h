@@ -3,6 +3,7 @@
 
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodeleffect.h"
+#include "battledialoglogger.h"
 //#include "combatant.h"
 #include <QList>
 #include <QRect>
@@ -89,6 +90,8 @@ public:
     bool getShowEffects() const;
     void setShowEffects(bool showEffects);
 
+    const BattleDialogLogger& getLogger() const;
+
     BattleDialogModelCombatant* getActiveCombatant() const;
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
 
@@ -127,6 +130,8 @@ private:
     bool _showEffects;
 
     BattleDialogModelCombatant* _activeCombatant;
+
+    BattleDialogLogger _logger;
 
     QImage _backgroundImage;
 };

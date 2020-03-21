@@ -72,6 +72,7 @@ public slots:
     void setShowOnDeck(bool showOnDeck);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
+    void setPointerFile(const QString& filename);
 
     void zoomIn();
     void zoomOut();
@@ -89,6 +90,7 @@ signals:
     void animationStarted(QColor color);
     void animateImage(QImage img);
     void showPublishWindow();
+    void pointerChanged(const QCursor& cursor);
     //void selectNewMap();
     //void addMonsters();
     //void addCharacter();
@@ -107,6 +109,7 @@ private slots:
     void updateCombatantVisibility();
     void updateEffectLayerVisibility();
     void updateMap();
+    void updateRounds();
     void reloadMap();
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
@@ -242,6 +245,8 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
+    QPixmap getPointerPixmap();
+
     // State Machine
     void prepareStateMachine();
 
@@ -291,6 +296,7 @@ private:
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;
+    QString _pointerFile;
 
     QRect _rubberBandRect;
     qreal _scale;

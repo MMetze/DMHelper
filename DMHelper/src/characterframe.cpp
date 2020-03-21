@@ -8,6 +8,7 @@
 #include <QMouseEvent>
 #include <QFileDialog>
 #include <QIntValidator>
+#include <QDebug>
 
 // TODO: automate character level, next level exp, proficiency bonus
 
@@ -37,7 +38,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     ui->edtLevel->setValidator(new QIntValidator(0,100,this));
 
     connect(ui->btnSync, &QAbstractButton::clicked, this, &CharacterFrame::syncDndBeyond);
-    ui->btnSync->setVisible(false);
+    enableDndBeyondSync(false);
 
     connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
     connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
@@ -277,7 +278,7 @@ void CharacterFrame::clear()
     updateCheckboxName(ui->chkPersuasion, 0, 0, false, false);
     updateCheckboxName(ui->chkIntimidation, 0, 0, false, false);
 
-    ui->btnSync->setVisible(false);
+    enableDndBeyondSync(false);
 
     _reading = false;
 }
@@ -388,7 +389,7 @@ void CharacterFrame::readCharacterData()
 
     calculateMods();
 
-    ui->btnSync->setVisible(_character->getDndBeyondID() != -1);
+    enableDndBeyondSync(_character->getDndBeyondID() != -1);
 
     _reading = false;
 
@@ -465,7 +466,6 @@ void CharacterFrame::handlePublishClicked()
 
     QImage iconImg;
     QString iconFile = _character->getIcon();
-    //QString iconPath = Bestiary::Instance()->getDirectory().filePath(iconFile);
     if(iconImg.load(iconFile) == true)
     {
         if(ui->framePublish->getRotation() != 0)
@@ -487,7 +487,6 @@ void CharacterFrame::syncDndBeyond()
     connect(importer, &CharacterImporter::characterImported, this, &CharacterFrame::readCharacterData);
     connect(this, &CharacterFrame::characterChanged, importer, &CharacterImporter::campaignChanged);
     importer->updateCharacter(_character);
-
 }
 
 void CharacterFrame::openExpertiseDialog()
@@ -522,4 +521,18 @@ void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int prof
         chkName.append("+");
     chkName.append(QString::number(skillBonus));
     chk->setText(chkName);
+}
+
+void CharacterFrame::enableDndBeyondSync(bool enabled)
+{
+    ui->btnSync->setVisible(enabled);
+    ui->lblDndBeyondLink->setVisible(enabled);
+
+    if(_character)
+    {
+        QString characterUrl = QString("https://www.dndbeyond.com/characters/") + QString::number(_character->getDndBeyondID());
+        QString fullLink = QString("<a href=\"") + characterUrl + QString("\">") + characterUrl + QString("</a>");
+        qDebug() << "[CharacterFrame] Setting Dnd Beyond link for character to: " << fullLink;
+        ui->lblDndBeyondLink->setText(fullLink);
+    }
 }

@@ -175,6 +175,36 @@
         <file>data/distanceSelect.png</file>
         <file>data/icon_selectcursor.png</file>
         <file>data/icon_zoomselectcursor.png</file>
+        <file>data/icon_close.png</file>
+        <file>data/icon_downarrow.png</file>
+        <file>data/icon_new.png</file>
+        <file>data/icon_newadventure.png</file>
+        <file>data/icon_newbattle.png</file>
+        <file>data/icon_newcharacter.png</file>
+        <file>data/icon_newnpc.png</file>
+        <file>data/icon_newscrollingtext.png</file>
+        <file>data/icon_newtextencounter.png</file>
+        <file>data/icon_open.png</file>
+        <file>data/icon_save.png</file>
+        <file>data/icon_saveas.png</file>
+        <file>data/icon_newmap.png</file>
+        <file>data/icon_playerswindow.png</file>
+        <file>data/icon_exportitem.png</file>
+        <file>data/icon_importcharacter.png</file>
+        <file>data/icon_importitem.png</file>
+        <file>data/icon_importnpc.png</file>
+        <file>data/icon_update.png</file>
+        <file>data/dmhelper_small.png</file>
+        <file>data/icon_pdf.png</file>
+        <file>data/icon_bestiary.png</file>
+        <file>data/icon_options.png</file>
+        <file>data/icon_publishtext.png</file>
+        <file>data/icon_translatetext.png</file>
+        <file>data/icon_exportbestiary.png</file>
+        <file>data/icon_importbestiary.png</file>
+        <file>data/icon_randommarket.png</file>
+        <file>data/icon_redo.png</file>
+        <file>data/icon_undo.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

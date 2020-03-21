@@ -42,6 +42,7 @@ private slots:
 private:
     void loadCharacterImage();
     void updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency);
+    void enableDndBeyondSync(bool enabled);
 
     Ui::CharacterFrame *ui;
     Character* _character;

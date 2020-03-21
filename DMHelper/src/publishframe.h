@@ -1,12 +1,12 @@
 #ifndef PUBLISHFRAME_H
 #define PUBLISHFRAME_H
 
-#include <QWidget>
+#include <QFrame>
 
 class QLabel;
 class QScrollArea;
 
-class PublishFrame : public QWidget
+class PublishFrame : public QFrame
 {
     Q_OBJECT
 
@@ -17,7 +17,7 @@ public:
     virtual QSize sizeHint() const;
 
 signals:
-    void visibleChanged(bool visible);
+    void arrowVisibleChanged(bool visible);
     void positionChanged(const QPointF& position);
     void frameResized(const QSize& newSize);
 

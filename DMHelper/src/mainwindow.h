@@ -32,6 +32,11 @@ class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
 class PublishFrame;
+class DMHelperRibbon;
+class RibbonTabFile;
+class RibbonTabCampaign;
+class RibbonTabBestiary;
+class RibbonTabHelp;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -83,7 +88,7 @@ public slots:
 
     void checkForUpdates(bool silentUpdate = false);
 
-    void showPublishWindow();
+    void showPublishWindow(bool visible = true);
 
     void linkActivated(const QUrl & link);
 
@@ -91,7 +96,6 @@ public slots:
     void readBestiary();
 
 signals:
-    void openPreview();
     void campaignLoaded(Campaign* campaign);
     void dispatchPublishImage(QImage img, QColor color);
     void dispatchAnimateImage(QImage img);
@@ -109,6 +113,8 @@ protected:
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
+
+    void setupRibbonBar();
 
     void deleteCampaign();
     void enableCampaignMenu();
@@ -161,6 +167,16 @@ protected slots:
     void openTextTranslator();
     void openRandomMarkets();
 
+    //void openPreview();
+    //void openScreen();
+    //void openTables();
+    //void openReference();
+    //void openSoundboard();
+    //void openCalendar();
+    //void openCountdown();
+
+    QDialog* createDialog(QWidget* contents);
+
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();
     void handleChaseComplete();
@@ -171,8 +187,15 @@ private:
 
     PublishWindow* pubWindow;
     ScrollTabWidget* previewTab;
-    TimeAndDateFrame* timeAndDateFrame;
     PublishFrame* previewFrame;
+    QDialog* previewDlg;
+    QDialog* dmScreenDlg;
+    QDialog* tableDlg;
+    QDialog* quickRefDlg;
+    QDialog* soundDlg;
+    TimeAndDateFrame* timeAndDateFrame;
+    QDialog* calendarDlg;
+    QDialog* countdownDlg;
 
     EncounterTextEdit* encounterTextEdit;
 
@@ -209,6 +232,13 @@ private:
     bool initialized;
     bool dirty;
     int _animationFrameCount;
+
+    DMHelperRibbon* _ribbon;
+    RibbonTabFile* _ribbonTabFile;
+    RibbonTabCampaign* _ribbonTabCampaign;
+    RibbonTabBestiary* _ribbonTabTools;
+    RibbonTabHelp* _ribbonTabHelp;
+
 };
 
 #endif // MAINWINDOW_H

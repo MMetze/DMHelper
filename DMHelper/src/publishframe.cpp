@@ -9,7 +9,7 @@
 #include <QDebug>
 
 PublishFrame::PublishFrame(QWidget *parent) :
-    QWidget(parent),
+    QFrame(parent),
     _scrollArea(nullptr),
     _label(nullptr),
     _arrow(nullptr),
@@ -21,6 +21,8 @@ PublishFrame::PublishFrame(QWidget *parent) :
     _scrollArea = new QScrollArea(this);
     _scrollArea->setFrameShape(QFrame::NoFrame);
     _label = new QLabel(_scrollArea);
+
+    // NOTE: New approach does not draw the arrow on the publish frame - this can be removed!
     _arrow = new QLabel(_scrollArea);
     _arrow->setStyleSheet("background-image: url(); background-color: rgba(0,0,0,0);");
     QImage arrowImg;
@@ -110,7 +112,7 @@ void PublishFrame::keyPressEvent(QKeyEvent * event)
     if( event->key() == Qt::Key_Space )
     {
         _arrowVisible = !_arrowVisible;
-        emit visibleChanged(_arrowVisible);
+        emit arrowVisibleChanged(_arrowVisible);
         if(_arrowVisible)
             emit positionChanged(_arrowPosition);
     }

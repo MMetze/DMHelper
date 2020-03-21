@@ -12,7 +12,8 @@ public:
     explicit PublishWindow(const QString& title, QWidget *parent = nullptr);
 
 signals:
-    void visibleChanged(bool visible);
+    void windowVisible(bool visible);
+    void arrowVisibleChanged(bool visible);
     void positionChanged(const QPointF& position);
     void frameResized(const QSize& newSize);
 
@@ -25,6 +26,8 @@ public slots:
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event);
+    virtual void showEvent(QShowEvent *event);
+    virtual void hideEvent(QHideEvent *event);
 
 private:
     PublishFrame* _publishFrame;

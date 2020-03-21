@@ -115,6 +115,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _showCountdown(true),
     _countdownDuration(15),
     _countdownColor(0,0,0),
+    _pointerFile(),
     _rubberBandRect(),
     _scale(1.0),
     _rotation(0),
@@ -127,6 +128,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _videoSize()
 {
     ui->setupUi(this);
+    ui->splitter->setStretchFactor(0,1);
+    ui->splitter->setStretchFactor(1,0);
 
     _scene = new BattleDialogGraphicsScene(this);
     ui->graphicsView->setScene(_scene);
@@ -217,8 +220,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->framePublish, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
     connect(ui->framePublish, SIGNAL(toggled(bool)), this, SLOT(togglePublishing(bool)));
     ui->framePublish->setCheckable(true);
-    connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
-    connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+    //connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+    //connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
@@ -297,13 +300,13 @@ void BattleFrame::setBattleMap()
 
     if(_model->isMapChanged())
     {
-        disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
-        disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        //disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        //disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
         disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         replaceBattleMap();
-        connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
-        connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        //connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
+        //connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
         connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     }
@@ -654,6 +657,15 @@ void BattleFrame::setCountdownDuration(int countdownDuration)
     _countdownDuration = countdownDuration;
 }
 
+void BattleFrame::setPointerFile(const QString& filename)
+{
+    _pointerFile = filename;
+    QPixmap pointerPixmap = getPointerPixmap();
+    _scene->setPointerPixmap(pointerPixmap);
+    ui->btnPointer->setIcon(pointerPixmap);
+    emit pointerChanged(QCursor(pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation), 0, 0));
+}
+
 void BattleFrame::zoomIn()
 {
     setScale(1.1);
@@ -980,6 +992,12 @@ void BattleFrame::updateMap()
         qDebug() << "[Battle Frame] Initializing battle map video";
         createVideoPlayer(true);
     }
+}
+
+void BattleFrame::updateRounds()
+{
+    if(_logger)
+        ui->edtRounds->setText(QString::number(_logger->getRounds()));
 }
 
 void BattleFrame::reloadMap()
@@ -2027,7 +2045,11 @@ void BattleFrame::setModel(BattleDialogModel* model)
         recreateCombatantWidgets();
 
         if(!_logger)
+        {
             _logger = new BattleDialogLogger(this);
+            connect(_logger, SIGNAL(roundsChanged()), this, SLOT(updateRounds()));
+            updateRounds();
+        }
     }
 }
 
@@ -3445,6 +3467,18 @@ void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
     // TODO: Add personal effects
 }
 
+QPixmap BattleFrame::getPointerPixmap()
+{
+    if(!_pointerFile.isEmpty())
+    {
+        QPixmap result;
+        if(result.load(_pointerFile))
+            return result;
+    }
+
+    return QPixmap(":/img/data/arrow.png");
+}
+
 void BattleFrame::prepareStateMachine()
 {
     _stateMachine.addState(new BattleFrameState(DMHelper::BattleFrameState_CombatantEdit, BattleFrameState::BattleFrameStateType_Base));
@@ -3474,9 +3508,11 @@ void BattleFrame::prepareStateMachine()
     //connect(distanceState, &BattleFrameState::stateChanged, this, &BattleFrame::setDistanceText);
     _stateMachine.addState(distanceState);
 
-    BattleFrameState* pointerState = new BattleFrameState(DMHelper::BattleFrameState_Pointer, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/arrow.png"), 0, 0);
+    BattleFrameState* pointerState = new BattleFrameState(DMHelper::BattleFrameState_Pointer, BattleFrameState::BattleFrameStateType_Persistent, getPointerPixmap(), 0, 0);
     connect(ui->btnPointer, &QAbstractButton::clicked, pointerState, &BattleFrameState::toggle);
     connect(pointerState, &BattleFrameState::stateChanged, ui->btnPointer, &QAbstractButton::setChecked);
+    connect(this, SIGNAL(pointerChanged(const QCursor&)), pointerState, SLOT(setCursor(const QCursor&)));
+    connect(pointerState, SIGNAL(cursorChanged(const QCursor&)), this, SLOT(stateUpdated()));
     _stateMachine.addState(pointerState);
 
     BattleFrameState* fowSelectState = new BattleFrameState(DMHelper::BattleFrameState_FoWSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_selectcursor.png"), 45, 45);

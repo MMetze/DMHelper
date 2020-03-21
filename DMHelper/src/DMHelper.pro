@@ -50,6 +50,7 @@ SOURCES += main.cpp\
     customtableentry.cpp \
     customtableframe.cpp \
     discordposter.cpp \
+    dmhelperribbon.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
     legaldialog.cpp \
@@ -60,6 +61,10 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
+    ribbontabbestiary.cpp \
+    ribbontabcampaign.cpp \
+    ribbontabfile.cpp \
+    ribbontabhelp.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -84,7 +89,6 @@ SOURCES += main.cpp\
     dice.cpp \
     attack.cpp \
     combatantdialog.cpp \
-    battledialog.cpp \
     monster.cpp \
     monsterwidget.cpp \
     combatantfactory.cpp \
@@ -141,7 +145,6 @@ SOURCES += main.cpp\
     scrollingtextwindow.cpp \
     dicerollframe.cpp \
     battledialogmodel.cpp \
-    battledialogmanager.cpp \
     battledialoggraphicsview.cpp \
     battledialoggraphicsscene.cpp \
     battledialogeffectsettings.cpp \
@@ -223,6 +226,7 @@ HEADERS  += mainwindow.h \
     customtableentry.h \
     customtableframe.h \
     discordposter.h \
+    dmhelperribbon.h \
     equipmentserver.h \
     expertisedialog.h \
     legaldialog.h \
@@ -233,6 +237,10 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishwindow.h \
     randommarketdialog.h \
+    ribbontabbestiary.h \
+    ribbontabcampaign.h \
+    ribbontabfile.h \
+    ribbontabhelp.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -258,7 +266,6 @@ HEADERS  += mainwindow.h \
     dice.h \
     attack.h \
     combatantdialog.h \
-    battledialog.h \
     monster.h \
     monsterwidget.h \
     combatantfactory.h \
@@ -315,7 +322,6 @@ HEADERS  += mainwindow.h \
     scrollingtextwindow.h \
     dicerollframe.h \
     battledialogmodel.h \
-    battledialogmanager.h \
     battledialoggraphicsview.h \
     battledialoggraphicsscene.h \
     battledialogeffectsettings.h \
@@ -374,7 +380,6 @@ FORMS    += mainwindow.ui \
     dicerolldialog.ui \
     characterdialog.ui \
     combatantdialog.ui \
-    battledialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
     expertisedialog.ui \
@@ -383,6 +388,10 @@ FORMS    += mainwindow.ui \
     presentupdatedialog.ui \
     publishbuttonframe.ui \
     randommarketdialog.ui \
+    ribbontabbestiary.ui \
+    ribbontabcampaign.ui \
+    ribbontabfile.ui \
+    ribbontabhelp.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \

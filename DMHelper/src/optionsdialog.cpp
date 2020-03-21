@@ -36,6 +36,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
         ui->edtCountdownDuration->setValidator(new QIntValidator(1,1000,this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
+        ui->edtPointerFile->setText(_options->getPointerFile());
 #ifdef INCLUDE_NETWORK_SUPPORT
         ui->chkEnableNetworkClient->setChecked(_options->getNetworkEnabled());
         ui->edtUserName->setText(_options->getUserName());
@@ -65,6 +66,9 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->chkShowOnDeck,SIGNAL(clicked(bool)),_options,SLOT(setShowOnDeck(bool)));
         connect(ui->chkShowCountdown,SIGNAL(clicked(bool)),_options,SLOT(setShowCountdown(bool)));
         connect(ui->edtCountdownDuration,SIGNAL(textChanged(QString)),_options,SLOT(setCountdownDuration(QString)));
+        connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);
+        connect(ui->edtPointerFile, &QLineEdit::editingFinished, this, &OptionsDialog::editPointerFile);
+
 #ifdef INCLUDE_NETWORK_SUPPORT
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
         connect(ui->edtURL, SIGNAL(textChanged(QString)), _options, SLOT(setURLString(QString)));
@@ -106,7 +110,7 @@ OptionsContainer* OptionsDialog::getOptions() const
 
 void OptionsDialog::browseBestiary()
 {
-    setBestiary(QFileDialog::getOpenFileName(this,QString("Select Bestiary File"),QString(),QString("XML files (*.xml)")));
+    setBestiary(QFileDialog::getOpenFileName(this, QString("Select Bestiary File"), QString(), QString("XML files (*.xml)")));
 }
 
 void OptionsDialog::editBestiary()
@@ -131,7 +135,7 @@ void OptionsDialog::setBestiary(const QString& bestiaryFile)
 
 void OptionsDialog::browseQuickReference()
 {
-    setQuickReference(QFileDialog::getOpenFileName(this,QString("Select Quick Reference File"),QString(),QString("XML files (*.xml)")));
+    setQuickReference(QFileDialog::getOpenFileName(this, QString("Select Quick Reference File"), QString(), QString("XML files (*.xml)")));
 }
 
 void OptionsDialog::editQuickReference()
@@ -156,7 +160,7 @@ void OptionsDialog::setQuickReference(const QString& quickRefFile)
 
 void OptionsDialog::browseCalendar()
 {
-    setCalendar(QFileDialog::getOpenFileName(this,QString("Select Calendar File"),QString(),QString("XML files (*.xml)")));
+    setCalendar(QFileDialog::getOpenFileName(this, QString("Select Calendar File"), QString(), QString("XML files (*.xml)")));
 }
 
 void OptionsDialog::editCalendar()
@@ -181,7 +185,7 @@ void OptionsDialog::setCalendar(const QString& calendarFile)
 
 void OptionsDialog::browseEquipment()
 {
-    setEquipment(QFileDialog::getOpenFileName(this,QString("Select Equipment File"),QString(),QString("XML files (*.xml)")));
+    setEquipment(QFileDialog::getOpenFileName(this, QString("Select Equipment File"), QString(), QString("XML files (*.xml)")));
 }
 
 void OptionsDialog::editEquipment()
@@ -206,7 +210,7 @@ void OptionsDialog::setEquipment(const QString& equipmentFile)
 
 void OptionsDialog::browseShops()
 {
-    setShops(QFileDialog::getOpenFileName(this,QString("Select Shops File"),QString(),QString("XML files (*.xml)")));
+    setShops(QFileDialog::getOpenFileName(this, QString("Select Shops File"), QString(), QString("XML files (*.xml)")));
 
 }
 
@@ -232,7 +236,7 @@ void OptionsDialog::setShops(const QString& shopsFile)
 
 void OptionsDialog::browseTables()
 {
-    setTables(QFileDialog::getExistingDirectory(this,QString("Select Tables Directory"),QString()));
+    setTables(QFileDialog::getExistingDirectory(this, QString("Select Tables Directory"), QString()));
 }
 
 void OptionsDialog::editTables()
@@ -253,6 +257,22 @@ void OptionsDialog::setTables(const QString& tablesDirectory)
 
     ui->edtTables->setText(tablesDirectory);
     _options->setTablesDirectory(tablesDirectory);
+}
+
+void OptionsDialog::browsePointerFile()
+{
+    setPointerFile(QFileDialog::getOpenFileName(this, QString("Select Pointer File"), QString(), QString("Image files (*.png *.jpg)")));
+}
+
+void OptionsDialog::editPointerFile()
+{
+    setPointerFile(ui->edtPointerFile->text());
+}
+
+void OptionsDialog::setPointerFile(const QString& pointerFile)
+{
+    ui->edtPointerFile->setText(pointerFile);
+    _options->setPointerFileName(pointerFile);
 }
 
 void OptionsDialog::updateFileLocations()

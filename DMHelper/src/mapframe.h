@@ -55,6 +55,8 @@ public slots:
     void publishFoWImage();
     void clear();
 
+    void cancelPublish();
+
     void editModeToggled(int editMode);
 
     void zoomIn();
@@ -73,7 +75,7 @@ protected:
 
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
-
+    virtual void showEvent(QShowEvent *event) override;
     virtual void timerEvent(QTimerEvent *event) override;
 
     bool execEventFilterSelectZoom(QObject *obj, QEvent *event);
@@ -96,6 +98,8 @@ protected slots:
     void rotatePublish();
     void trackSelected(int index);
     void setScale(qreal s);
+    void storeViewRect();
+    void loadViewRect();
     void resetPublishFoW();
     void audioPlaybackChecked();
 

@@ -18,7 +18,7 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     resize(600, 400);
     //_publishFrame->setAutoFillBackground(true);
 
-    connect(_publishFrame,SIGNAL(visibleChanged(bool)),this,SIGNAL(visibleChanged(bool)));
+    connect(_publishFrame,SIGNAL(arrowVisibleChanged(bool)),this,SIGNAL(arrowVisibleChanged(bool)));
     connect(_publishFrame, SIGNAL(positionChanged(QPointF)),this,SIGNAL(positionChanged(QPointF)));
     connect(_publishFrame,SIGNAL(frameResized(QSize)),this,SIGNAL(frameResized(QSize)));
 }
@@ -80,5 +80,17 @@ void PublishWindow::keyPressEvent(QKeyEvent * event)
     {
         QMainWindow::keyPressEvent(event);
     }
+}
+
+void PublishWindow::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+    emit windowVisible(true);
+}
+
+void PublishWindow::hideEvent(QHideEvent *event)
+{
+    Q_UNUSED(event);
+    emit windowVisible(false);
 }
 
