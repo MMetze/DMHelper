@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1087</width>
+    <width>1274</width>
     <height>67</height>
    </rect>
   </property>
@@ -44,6 +44,242 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_15">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnZoomIn">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Zoom in</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_zoomin.png</normaloff>:/img/data/icon_zoomin.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_22">
+       <property name="text">
+        <string>Zoom In</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_20">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnZoomOut">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Zoom out</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_zoomout.png</normaloff>:/img/data/icon_zoomout.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_26">
+       <property name="text">
+        <string>Zoom Out</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_19">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnZoomFull">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Zoom to fit the entire battle</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_zoomfit.png</normaloff>:/img/data/icon_zoomfit.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_25">
+       <property name="text">
+        <string>Zoom Full</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_18">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnZoomSelect">
+       <property name="minimumSize">
+        <size>
+         <width>58</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>58</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Select an area to zoom into</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_zoomselect.png</normaloff>:/img/data/icon_zoomselect.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_23">
+       <property name="text">
+        <string>Zoom Select</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_6">
+     <property name="minimumSize">
+      <size>
+       <width>10</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>10</width>
+       <height>55</height>
+      </size>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
@@ -126,7 +362,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_zoomfit.png</normaloff>:/img/data/icon_zoomfit.png</iconset>
+         <normaloff>:/img/data/icon_camerafull.png</normaloff>:/img/data/icon_camerafull.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -178,7 +414,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_select.png</normaloff>:/img/data/icon_select.png</iconset>
+         <normaloff>:/img/data/icon_zoomcamera.png</normaloff>:/img/data/icon_zoomcamera.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -921,7 +1157,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Edit the Fog of War</string>
+        <string>Smooth the edges of the Fog of War brush</string>
        </property>
        <property name="text">
         <string/>
@@ -1014,6 +1250,9 @@
          <property name="flat">
           <bool>true</bool>
          </property>
+         <attribute name="buttonGroup">
+          <string notr="true">btnGrpBrush</string>
+         </attribute>
         </widget>
        </item>
        <item>
@@ -1058,6 +1297,9 @@
          <property name="flat">
           <bool>true</bool>
          </property>
+         <attribute name="buttonGroup">
+          <string notr="true">btnGrpBrush</string>
+         </attribute>
         </widget>
        </item>
       </layout>
@@ -1166,7 +1408,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Edit the Fog of War</string>
+        <string>Remove a selected area of Fog of War</string>
        </property>
        <property name="text">
         <string/>
@@ -1224,7 +1466,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Reset the Fog of War</string>
+        <string>Fill the Fog of War</string>
        </property>
        <property name="text">
         <string/>
@@ -1245,7 +1487,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_23">
+      <widget class="QLabel" name="lblFillFoW">
        <property name="text">
         <string>Fill</string>
        </property>
@@ -1349,4 +1591,7 @@
   <include location="resources.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="btnGrpBrush"/>
+ </buttongroups>
 </ui>

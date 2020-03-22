@@ -14,6 +14,7 @@
 #include "encounter.h"
 #include "map.h"
 #include "mapframe.h"
+#include "battleframemapdrawer.h"
 #include "mruhandler.h"
 #include "encounterfactory.h"
 #include "encountertextedit.h"
@@ -325,6 +326,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
 
     // Battle Menu
+    // Map Menu
     // connections set up elsewhere
 
 
@@ -401,7 +403,52 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), battleFrame, SLOT(setLairActions(bool)));
     connect(_ribbonTabBattle, SIGNAL(nextClicked()), battleFrame, SLOT(next()));
     connect(_ribbonTabBattle, SIGNAL(sortClicked()), battleFrame, SLOT(sort()));
+    connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), battleFrame, SLOT(showStatistics()));
+
+    connect(_ribbonTabMap, SIGNAL(zoomInClicked()), battleFrame, SLOT(zoomIn()));
+    connect(_ribbonTabMap, SIGNAL(zoomOutClicked()), battleFrame, SLOT(zoomOut()));
+    connect(_ribbonTabMap, SIGNAL(zoomFullClicked()), battleFrame, SLOT(zoomFit()));
+    connect(_ribbonTabMap, SIGNAL(zoomSelectClicked(bool)), battleFrame, SLOT(zoomSelect(bool)));
+    connect(battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabMap, SLOT(setZoomSelect(bool)));
+
+    connect(_ribbonTabMap, SIGNAL(cameraCoupleClicked(bool)), battleFrame, SLOT(setCameraCouple(bool)));
+    connect(_ribbonTabMap, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(setCameraMap()));
+    connect(_ribbonTabMap, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(cancelCameraCouple()));
+    connect(_ribbonTabMap, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(setCameraSelect(bool)));
+    connect(_ribbonTabMap, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(cancelCameraCouple()));
+    connect(battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabMap, SLOT(setCameraSelect(bool)));
+    connect(_ribbonTabMap, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(setCameraEdit(bool)));
+    connect(_ribbonTabMap, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(cancelCameraCouple()));
+    connect(battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabMap, SLOT(setCameraEdit(bool)));
+
+    connect(_ribbonTabMap, SIGNAL(distanceClicked(bool)), battleFrame, SLOT(setDistance(bool)));
+    connect(_ribbonTabMap, SIGNAL(heightChanged(bool, qreal)), battleFrame, SLOT(setDistanceHeight(bool, qreal)));
+    connect(battleFrame, SIGNAL(distanceToggled(bool)), _ribbonTabMap, SLOT(setDistanceOn(bool)));
+    connect(battleFrame, SIGNAL(distanceChanged(const QString&)), _ribbonTabMap, SLOT(setDistance(const QString&)));
+
+    connect(_ribbonTabMap, SIGNAL(gridClicked(bool)), battleFrame, SLOT(setGridVisible(bool)));
+    connect(_ribbonTabMap, SIGNAL(gridScaleChanged(int)), battleFrame, SLOT(setGridScale(int)));
+    connect(_ribbonTabMap, SIGNAL(gridXOffsetChanged(int)), battleFrame, SLOT(setXOffset(int)));
+    connect(_ribbonTabMap, SIGNAL(gridYOffsetChanged(int)), battleFrame, SLOT(setYOffset(int)));
+
+    connect(_ribbonTabMap, SIGNAL(editFoWClicked(bool)), battleFrame, SLOT(setFoWEdit(bool)));
+    connect(battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabMap, SLOT(setEditFoW(bool)));
+    connect(_ribbonTabMap, SIGNAL(selectFoWClicked(bool)), battleFrame, SLOT(setFoWSelect(bool)));
+    connect(battleFrame, SIGNAL(foWSelectToggled(bool)), _ribbonTabMap, SLOT(setSelectFoW(bool)));
+    BattleFrameMapDrawer* mapDrawer = battleFrame->getMapDrawer();
+    connect(_ribbonTabMap, SIGNAL(drawEraseClicked(bool)), mapDrawer, SLOT(setErase(bool)));
+    connect(_ribbonTabMap, SIGNAL(smoothClicked(bool)), mapDrawer, SLOT(setSmooth(bool)));
+    connect(_ribbonTabMap, SIGNAL(brushSizeChanged(int)), mapDrawer, SLOT(setSize(int)));
+    connect(_ribbonTabMap, SIGNAL(fillFoWClicked()), mapDrawer, SLOT(fillFoW()));
+    connect(_ribbonTabMap, SIGNAL(brushModeChanged(int)), mapDrawer, SLOT(setBrushMode(int)));
+
+    connect(_ribbonTabMap, SIGNAL(pointerClicked(bool)), battleFrame, SLOT(setPointerOn(bool)));
+    connect(battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabMap, SLOT(setPointerOn(bool)));
+
+    connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
+
     ui->stackedWidgetEncounter->addWidget(battleFrame);
+
     // EncounterType_Character
     /*
     QScrollArea* scrollArea = new QScrollArea;
@@ -1348,6 +1395,20 @@ void MainWindow::mouseReleaseEvent(QMouseEvent * event)
 void MainWindow::mouseMoveEvent(QMouseEvent * event)
 {
     QMainWindow::mouseMoveEvent(event);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    switch(event->key())
+    {
+        case Qt::Key_Escape:
+            emit cancelSelect();
+            return;
+        default:
+            break;
+    }
+
+    QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -2770,6 +2831,11 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
         connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
         connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));
+
+        _ribbonTabMap->setGridOn(model->getGridOn());
+        _ribbonTabMap->setGridScale(model->getGridScale());
+        _ribbonTabMap->setGridXOffset(model->getGridOffsetX());
+        _ribbonTabMap->setGridYOffset(model->getGridOffsetY());
     }
 }
 

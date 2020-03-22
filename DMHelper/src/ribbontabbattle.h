@@ -35,6 +35,7 @@ signals:
     void lairActionsClicked(bool checked);
     void nextClicked();
     void sortClicked();
+    void statisticsClicked();
 
 private:
     Ui::RibbonTabBattle *ui;

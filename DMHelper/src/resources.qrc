@@ -216,6 +216,9 @@
         <file>data/icon_sort.png</file>
         <file>data/height.png</file>
         <file>data/icon_smooth.png</file>
+        <file>data/icon_zoomcamera.png</file>
+        <file>data/icon_camerafull.png</file>
+        <file>data/icon_statistics.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

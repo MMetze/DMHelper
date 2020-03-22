@@ -76,7 +76,9 @@ void BattleFrameMapDrawer::drawRect(const QRect& rect)
     if((!_map) || (!_fow))
         return;
 
-    UndoShape* undoShape = new UndoShape(*_map, MapEditShape(rect, _erase, _smooth));
+    // Changed to ignore smoothing on an area
+    // UndoShape* undoShape = new UndoShape(*_map, MapEditShape(rect, _erase, _smooth));
+    UndoShape* undoShape = new UndoShape(*_map, MapEditShape(rect, _erase, false));
     _map->getUndoStack()->push(undoShape);
     _map->paintFoWRect(rect, undoShape->mapEditShape(), _fow, true);
     emit fowChanged(*_fow);
@@ -102,6 +104,14 @@ void BattleFrameMapDrawer::setScale(int gridScale, int viewScale)
     _viewScale = viewScale;
     endPath();
     createCursor();
+}
+
+void BattleFrameMapDrawer::fillFoW()
+{
+    if(_erase)
+        clearFoW();
+    else
+        resetFoW();
 }
 
 void BattleFrameMapDrawer::resetFoW()

@@ -103,6 +103,8 @@ signals:
     void dispatchPublishImage(QImage img, QColor color);
     void dispatchAnimateImage(QImage img);
 
+    void cancelSelect();
+
 protected:
     virtual void showEvent(QShowEvent * event);
     virtual void closeEvent(QCloseEvent * event);
@@ -111,6 +113,8 @@ protected:
     virtual void mousePressEvent(QMouseEvent * event);
     virtual void mouseReleaseEvent(QMouseEvent * event);
     virtual void mouseMoveEvent(QMouseEvent * event);
+
+    virtual void keyPressEvent(QKeyEvent *event);
 
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);

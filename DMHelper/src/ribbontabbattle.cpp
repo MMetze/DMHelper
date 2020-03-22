@@ -19,6 +19,7 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnLairActions, SIGNAL(clicked(bool)), this, SIGNAL(lairActionsClicked(bool)));
     connect(ui->btnNext, SIGNAL(clicked(bool)), this, SIGNAL(nextClicked()));
     connect(ui->btnSort, SIGNAL(clicked(bool)), this, SIGNAL(sortClicked()));
+    connect(ui->btnStatistics, SIGNAL(clicked(bool)), this, SIGNAL(statisticsClicked()));
 }
 
 RibbonTabBattle::~RibbonTabBattle()

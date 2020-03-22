@@ -29,6 +29,7 @@ public slots:
 
     void setSize(int size);
     void setScale(int gridScale, int viewScale);
+    void fillFoW();
     void resetFoW();
     void clearFoW();
     void setErase(bool erase);
