@@ -1,12 +1,12 @@
-#include "publishbuttonframe.h"
+#include "publishbuttonribbon.h"
 #include "colorpushbutton.h"
-#include "ui_publishbuttonframe.h"
+#include "ui_publishbuttonribbon.h"
 #include <QKeyEvent>
 #include <QMessageBox>
 
-PublishButtonFrame::PublishButtonFrame(QWidget *parent) :
+PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
     QFrame(parent),
-    ui(new Ui::PublishButtonFrame)
+    ui(new Ui::PublishButtonRibbon)
 {
     ui->setupUi(this);
 
@@ -22,59 +22,61 @@ PublishButtonFrame::PublishButtonFrame(QWidget *parent) :
     connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
 
     setDefaults();
+
+    setCheckable(true);
 }
 
-PublishButtonFrame::~PublishButtonFrame()
+PublishButtonRibbon::~PublishButtonRibbon()
 {
     delete ui;
 }
 
-bool PublishButtonFrame::isChecked()
+bool PublishButtonRibbon::isChecked()
 {
     return ui->btnPublish->isChecked();
 }
 
-bool PublishButtonFrame::isCheckable()
+bool PublishButtonRibbon::isCheckable()
 {
     return ui->btnPublish->isCheckable();
 }
 
-void PublishButtonFrame::setCheckable(bool checkable)
+void PublishButtonRibbon::setCheckable(bool checkable)
 {
     ui->btnPublish->setCheckable(checkable);
 }
 
-QColor PublishButtonFrame::getColor() const
+QColor PublishButtonRibbon::getColor() const
 {
     return ui->btnColor->getColor();
 }
 
-int PublishButtonFrame::getRotation()
+int PublishButtonRibbon::getRotation()
 {
     return ui->btnColor->getRotation();
 }
 
-void PublishButtonFrame::setChecked(bool checked)
+void PublishButtonRibbon::setChecked(bool checked)
 {
     ui->btnPublish->setChecked(checked);
 }
 
-void PublishButtonFrame::setRotation(int rotation)
+void PublishButtonRibbon::setRotation(int rotation)
 {
     ui->btnColor->setRotation(rotation);
 }
 
-void PublishButtonFrame::setColor(QColor color)
+void PublishButtonRibbon::setColor(QColor color)
 {
     ui->btnColor->setColor(color);
 }
 
-void PublishButtonFrame::cancelPublish()
+void PublishButtonRibbon::cancelPublish()
 {
     setChecked(false);
 }
 
-void PublishButtonFrame::handleToggle(bool checked)
+void PublishButtonRibbon::handleToggle(bool checked)
 {
     if(checked)
     {
@@ -88,7 +90,7 @@ void PublishButtonFrame::handleToggle(bool checked)
     }
 }
 
-void PublishButtonFrame::setDefaults()
+void PublishButtonRibbon::setDefaults()
 {
     ui->btnPublish->setAutoDefault(false);
     ui->btnCW->setAutoDefault(false);

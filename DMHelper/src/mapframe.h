@@ -47,8 +47,12 @@ signals:
     void animationStarted(QColor color);
     void animateImage(QImage img);
 
+    void zoomSelectChanged(bool enabled);
+    void brushModeSet(int brushMode);
+
 public slots:
     void updateFoW();
+    void fillFoW();
     void resetFoW();
     void clearFoW();
     void undoPaint();
@@ -58,13 +62,21 @@ public slots:
     void cancelPublish();
 
     void editModeToggled(int editMode);
+    void setBrushMode(int brushMode);
+    void brushSizeChanged(int size);
 
     void zoomIn();
     void zoomOut();
     void zoomOne();
     void zoomFit();
-    void zoomSelect();
+    void zoomSelect(bool enabled);
     void cancelSelect();
+
+    void setErase(bool enabled);
+    void setSmooth(bool enabled);
+
+    void setPublishZoom(bool enabled);
+    void setPublishVisible(bool enabled);
 
     void targetResized(const QSize& newSize);
 
@@ -93,8 +105,8 @@ protected:
 
 protected slots:
     void setMapCursor();
-    void publishModeVisibleClicked();
-    void publishModeZoomClicked();
+//    void publishModeVisibleClicked();
+//    void publishModeZoomClicked();
     void rotatePublish();
     void trackSelected(int index);
     void setScale(qreal s);
@@ -111,10 +123,18 @@ private:
     QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
 
+    bool _erase;
+    bool _smooth;
+    int _brushMode;
+    int _brushSize;
+    bool _publishZoom;
+    bool _publishVisible;
+
     bool _mouseDown;
     QPoint _mouseDownPos;
     UndoPath* _undoPath;
 
+    bool _zoomSelect;
     QRubberBand* _rubberBand;
     qreal _scale;
 

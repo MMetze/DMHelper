@@ -1,19 +1,19 @@
-#ifndef PUBLISHBUTTONFRAME_H
-#define PUBLISHBUTTONFRAME_H
+#ifndef PUBLISHBUTTONRIBBON_H
+#define PUBLISHBUTTONRIBBON_H
 
 #include <QFrame>
 
 namespace Ui {
-class PublishButtonFrame;
+class PublishButtonRibbon;
 }
 
-class PublishButtonFrame : public QFrame
+class PublishButtonRibbon : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit PublishButtonFrame(QWidget *parent = nullptr);
-    virtual ~PublishButtonFrame();
+    explicit PublishButtonRibbon(QWidget *parent = nullptr);
+    virtual ~PublishButtonRibbon();
 
     bool isChecked();
     bool isCheckable();
@@ -40,7 +40,7 @@ private slots:
 private:
     void setDefaults();
 
-    Ui::PublishButtonFrame *ui;
+    Ui::PublishButtonRibbon *ui;
 };
 
-#endif // PUBLISHBUTTONFRAME_H
+#endif // PUBLISHBUTTONRIBBON_H

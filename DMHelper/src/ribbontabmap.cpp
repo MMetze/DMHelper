@@ -57,6 +57,11 @@ RibbonTabMap::~RibbonTabMap()
     delete ui;
 }
 
+PublishButtonRibbon* RibbonTabMap::getPublishRibbon() const
+{
+    return ui->publishFrame;
+}
+
 void RibbonTabMap::setZoomSelect(bool checked)
 {
     ui->btnZoomSelect->setChecked(checked);
@@ -136,6 +141,19 @@ void RibbonTabMap::setSelectFoW(bool checked)
 void RibbonTabMap::setPointerOn(bool checked)
 {
     ui->btnPointer->setChecked(checked);
+}
+
+void RibbonTabMap::setPointerFile(const QString& filename)
+{
+    QPixmap pointerImage;
+    if((filename.isEmpty()) ||
+       (!pointerImage.load(filename)))
+    {
+        pointerImage = QPixmap(":/img/data/arrow.png");
+    }
+
+    QPixmap scaledPointer = pointerImage.scaled(40, 40, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    ui->btnPointer->setIcon(QIcon(scaledPointer));
 }
 
 void RibbonTabMap::setEraseMode()

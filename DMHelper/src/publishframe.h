@@ -26,6 +26,7 @@ public slots:
     void setImageNoScale(QImage img);
     void setArrowVisible(bool visible);
     void setArrowPosition(const QPointF& position);
+    void setPointerFile(const QString& filename);
 
 protected:
     virtual void resizeEvent(QResizeEvent * event);

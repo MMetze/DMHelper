@@ -112,6 +112,12 @@ public slots:
     void setPointerOn(bool enabled);
     void showStatistics();
 
+    // Publish slots
+    void rotateCCW();
+    void rotateCW();
+    void togglePublishing(bool publishing);
+    void setBackgroundColor(QColor color);
+
 signals:
     //void battleComplete();
     void characterSelected(QUuid id);
@@ -137,6 +143,11 @@ signals:
     void foWSelectToggled(bool enabled);
 
     void pointerToggled(bool enabled);
+
+    // Publish signals
+    void publishCancelled();
+    void setPublishEnabled(bool enabled);
+    void setPublishColor(QColor color);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * e);
@@ -171,7 +182,6 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
-    void togglePublishing(bool publishing);
     void publishImage();
     void executePublishImage();
     void executeAnimateImage();
@@ -189,10 +199,7 @@ private slots:
     void setMapCursor();
     void setCameraSelectable(bool selectable);
     void setScale(qreal s);
-    void rotateCCW();
-    void rotateCW();
     void storeViewRect();
-    void setBackgroundColor(QColor color);
 
     void setModel(BattleDialogModel* model);
     Map* selectRelatedMap();
@@ -316,6 +323,7 @@ private:
     bool _lairActions;
 
     bool _publishing;
+    bool _publishingEnabled;
     QTimer* _publishTimer;
 
     QPixmap _prescaledBackground;

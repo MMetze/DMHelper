@@ -107,6 +107,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdownTimer(nullptr),
     _countdown(0.0),
     _publishing(false),
+    _publishingEnabled(false),
     _publishTimer(nullptr),
     _prescaledBackground(),
     _fowImage(),
@@ -1347,6 +1348,52 @@ void BattleFrame::showStatistics()
     }
 }
 
+void BattleFrame::rotateCCW()
+{
+    _rotation -= 90;
+    if(_rotation < 0)
+        _rotation += 360;
+    createPrescaledBackground();
+}
+
+void BattleFrame::rotateCW()
+{
+    _rotation += 90;
+    if(_rotation >= 360)
+        _rotation-= 360;
+    createPrescaledBackground();
+}
+
+void BattleFrame::togglePublishing(bool publishing)
+{
+    qDebug() << "[Battle Frame] publishing toggled (" << publishing << ")";
+    _publishing = publishing;
+
+    if(_publishRect)
+        _publishRect->setPublishing(publishing);
+
+    if(_publishing)
+    {
+        createPrescaledBackground();
+        publishImage();
+    }
+    else
+    {
+        _publishTimer->stop();
+    }
+}
+
+void BattleFrame::setBackgroundColor(QColor color)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the background color, no battle model is set!";
+        return;
+    }
+
+    _model->setBackgroundColor(color);
+}
+
 void BattleFrame::handleSelectionChanged()
 {
     if(!_scene)
@@ -1760,25 +1807,6 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
     _logger->damageDone(_model->getActiveCombatant()->getID(), combatant->getID(), damage);
 }
 
-void BattleFrame::togglePublishing(bool publishing)
-{
-    qDebug() << "[Battle Frame] publishing toggled (" << publishing << ")";
-    _publishing = publishing;
-
-    if(_publishRect)
-        _publishRect->setPublishing(publishing);
-
-    if(_publishing)
-    {
-        createPrescaledBackground();
-        publishImage();
-    }
-    else
-    {
-        _publishTimer->stop();
-    }
-}
-
 void BattleFrame::publishImage()
 {
     if((_model) && (_publishing))
@@ -1902,7 +1930,8 @@ void BattleFrame::createPrescaledBackground()
         return;
     }
 
-    if((!_model->getMap()) || (!ui->framePublish->isEnabled()) || (!ui->framePublish->isChecked()))
+    //if((!_model->getMap()) || (!ui->framePublish->isEnabled()) || (!ui->framePublish->isChecked()))
+    if((!_model->getMap()) || (!ui->framePublish->isEnabled()) || (!_publishing))
         return;
 
     if(_videoPlayer)
@@ -2172,22 +2201,6 @@ void BattleFrame::setScale(qreal s)
         _scene->scaleBattleContents();
 }
 
-void BattleFrame::rotateCCW()
-{
-    _rotation -= 90;
-    if(_rotation < 0)
-        _rotation += 360;
-    createPrescaledBackground();
-}
-
-void BattleFrame::rotateCW()
-{
-    _rotation += 90;
-    if(_rotation >= 360)
-        _rotation-= 360;
-    createPrescaledBackground();
-}
-
 void BattleFrame::storeViewRect()
 {
     if(!_model)
@@ -2210,17 +2223,6 @@ void BattleFrame::storeViewRect()
             _compassPixmap->setScale(COMPASS_SCALE/ui->graphicsView->transform().m11());
         }
     }
-}
-
-void BattleFrame::setBackgroundColor(QColor color)
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to set the background color, no battle model is set!";
-        return;
-    }
-
-    _model->setBackgroundColor(color);
 }
 
 void BattleFrame::setModel(BattleDialogModel* model)
@@ -2261,6 +2263,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
     //ui->chkShowLiving->setEnabled(_model != nullptr);
     //ui->chkShowDead->setEnabled(_model != nullptr);
     ui->framePublish->setEnabled(_model != nullptr);
+    emit setPublishEnabled(_model != nullptr);
+    _publishingEnabled = _model != nullptr;
     ui->btnEndBattle->setEnabled(_model != nullptr);
     ui->graphicsView->setEnabled(_model != nullptr);
 
@@ -2281,6 +2285,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         //ui->chkShowLiving->setChecked(_model->getShowAlive());
         //ui->chkShowEffects->setChecked(_model->getShowEffects());
         ui->framePublish->setColor(_model->getBackgroundColor());
+        emit setPublishColor(_model->getBackgroundColor());
 
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
@@ -3120,6 +3125,8 @@ void BattleFrame::replaceBattleMap()
 
     ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
     ui->framePublish->setEnabled(_model->getMap() != nullptr);
+    emit setPublishEnabled(_model->getMap() != nullptr);
+    _publishingEnabled = _model->getMap() != nullptr;
 
     if(!_model->getMap())
         return;
@@ -3224,6 +3231,8 @@ void BattleFrame::resizeBattleMap()
 
     ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
     ui->framePublish->setEnabled(_model->getMap() != nullptr);
+    emit setPublishEnabled(_model->getMap() != nullptr);
+    _publishingEnabled = _model->getMap() != nullptr;
 
     updateMap();
 
@@ -3569,14 +3578,14 @@ void BattleFrame::prepareStateMachine()
 {
     _stateMachine.addState(new BattleFrameState(DMHelper::BattleFrameState_CombatantEdit, BattleFrameState::BattleFrameStateType_Base));
 
-    BattleFrameState* zoomSelectState = new BattleFrameState(DMHelper::BattleFrameState_ZoomSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_zoomselectcursor.png"), 45, 45);
+    BattleFrameState* zoomSelectState = new BattleFrameState(DMHelper::BattleFrameState_ZoomSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_zoomselectcursor.png"), 32, 32);
     connect(ui->btnZoomSelect, &QAbstractButton::clicked, zoomSelectState, &BattleFrameState::toggle);
     connect(zoomSelectState, &BattleFrameState::stateChanged, ui->btnZoomSelect, &QAbstractButton::setChecked);
     connect(zoomSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::zoomSelectToggled);
     connect(zoomSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::setItemsInert);
     _stateMachine.addState(zoomSelectState);
 
-    BattleFrameState* cameraSelectState = new BattleFrameState(DMHelper::BattleFrameState_CameraSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_selectcursor.png"), 45, 45);
+    BattleFrameState* cameraSelectState = new BattleFrameState(DMHelper::BattleFrameState_CameraSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_cameraselectcursor.png"), 32, 32);
     connect(ui->btnCameraSelect, &QAbstractButton::clicked, cameraSelectState, &BattleFrameState::toggle);
     connect(cameraSelectState, &BattleFrameState::stateChanged, ui->btnCameraSelect, &QAbstractButton::setChecked);
     connect(cameraSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::cameraSelectToggled);
@@ -3590,7 +3599,7 @@ void BattleFrame::prepareStateMachine()
     connect(cameraEditState, &BattleFrameState::stateChanged, this, &BattleFrame::setCameraSelectable);
     _stateMachine.addState(cameraEditState);
 
-    BattleFrameState* distanceState = new BattleFrameState(DMHelper::BattleFrameState_Distance, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/distanceSelect.png"), 37, 37);
+    BattleFrameState* distanceState = new BattleFrameState(DMHelper::BattleFrameState_Distance, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/icon_distancecursor.png"), 32, 32);
     connect(ui->btnDistance, &QAbstractButton::clicked, distanceState, &BattleFrameState::toggle);
     connect(distanceState, &BattleFrameState::stateChanged, ui->btnDistance, &QAbstractButton::setChecked);
     connect(distanceState, &BattleFrameState::stateChanged, this, &BattleFrame::distanceToggled);
@@ -3606,7 +3615,7 @@ void BattleFrame::prepareStateMachine()
     connect(pointerState, SIGNAL(cursorChanged(const QCursor&)), this, SLOT(stateUpdated()));
     _stateMachine.addState(pointerState);
 
-    BattleFrameState* fowSelectState = new BattleFrameState(DMHelper::BattleFrameState_FoWSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_selectcursor.png"), 45, 45);
+    BattleFrameState* fowSelectState = new BattleFrameState(DMHelper::BattleFrameState_FoWSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_selectcursor.png"), 32, 32);
     connect(ui->btnBrushSelect, &QAbstractButton::clicked, fowSelectState, &BattleFrameState::toggle);
     connect(fowSelectState, &BattleFrameState::stateChanged, ui->btnBrushSelect, &QAbstractButton::setChecked);
     connect(fowSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::foWSelectToggled);

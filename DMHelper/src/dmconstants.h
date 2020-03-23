@@ -10,7 +10,7 @@ namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 1;
     const int DMHELPER_MINOR_VERSION = 7;
-    const int DMHELPER_ENGINEERING_VERSION = 8;
+    const int DMHELPER_ENGINEERING_VERSION = 9;
 
     const int CAMPAIGN_MAJOR_VERSION = 1;
     const int CAMPAIGN_MINOR_VERSION = 0;
@@ -180,7 +180,6 @@ namespace DMHelper
     const int ProficiencyProgression[20] = {
         2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6
     };
-
 }
 
 #endif // DMCONSTANTS_H

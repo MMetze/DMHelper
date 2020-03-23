@@ -59,6 +59,7 @@ SOURCES += main.cpp\
     objectimporter.cpp \
     presentupdatedialog.cpp \
     publishbuttonframe.cpp \
+    publishbuttonribbon.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbontabbattle.cpp \
@@ -237,6 +238,7 @@ HEADERS  += mainwindow.h \
     objectimporter.h \
     presentupdatedialog.h \
     publishbuttonframe.h \
+    publishbuttonribbon.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbontabbattle.h \
@@ -391,6 +393,7 @@ FORMS    += mainwindow.ui \
     mapeditframe.ui \
     presentupdatedialog.ui \
     publishbuttonframe.ui \
+    publishbuttonribbon.ui \
     randommarketdialog.ui \
     ribbontabbattle.ui \
     ribbontabbestiary.ui \

@@ -158,7 +158,6 @@
         <file>data/icon_countdown.png</file>
         <file>data/icon_music.png</file>
         <file>data/compass.png</file>
-        <file>data/distance.png</file>
         <file>data/dmhelper_large.png</file>
         <file>data/movement.png</file>
         <file>data/icon_reload.png</file>
@@ -172,7 +171,6 @@
         <file>data/dmhelper_opaque.png</file>
         <file>data/icon_grid.png</file>
         <file>data/icon_couplecamera.png</file>
-        <file>data/distanceSelect.png</file>
         <file>data/icon_selectcursor.png</file>
         <file>data/icon_zoomselectcursor.png</file>
         <file>data/icon_close.png</file>
@@ -214,11 +212,17 @@
         <file>data/icon_movement.png</file>
         <file>data/icon_next.png</file>
         <file>data/icon_sort.png</file>
-        <file>data/height.png</file>
         <file>data/icon_smooth.png</file>
         <file>data/icon_zoomcamera.png</file>
-        <file>data/icon_camerafull.png</file>
         <file>data/icon_statistics.png</file>
+        <file>data/icon_camerafit.png</file>
+        <file>data/icon_cameraselect.png</file>
+        <file>data/icon_cameraselectcursor.png</file>
+        <file>data/icon_distance.png</file>
+        <file>data/icon_distancecursor.png</file>
+        <file>data/icon_height.png</file>
+        <file>data/icon_dmscreen.png</file>
+        <file>data/icon_soundboard.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

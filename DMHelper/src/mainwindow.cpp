@@ -67,6 +67,8 @@
 #include "ribbontabhelp.h"
 #include "ribbontabmap.h"
 #include "ribbontabbattle.h"
+#include "mapeditframe.h"
+#include "publishbuttonribbon.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -160,7 +162,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabTools(nullptr),
     _ribbonTabHelp(nullptr),
     _ribbonTabMap(nullptr),
-    _ribbonTabBattle(nullptr)
+    _ribbonTabBattle(nullptr),
+    _ribbonTabMiniMap(nullptr)
 {
 #ifndef Q_OS_MAC
     QPixmap pixmap(":/img/data/dmhelper_opaque.png");
@@ -326,12 +329,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
 
     // Battle Menu
-    // Map Menu
     // connections set up elsewhere
+
+    // Map Menu
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabMap, SLOT(setPointerFile(const QString&)));
+    _ribbonTabMap->setPointerFile(_options->getPointerFile());
+
+    // Mini Map Menu
+    // connections set up elsewhere
+
 
 
     qDebug() << "[Main] Creating Player's Window";
     pubWindow = new PublishWindow(QString("DM Helper Player's Window"));
+    pubWindow->setPointerFile(_options->getPointerFile());
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), pubWindow, SLOT(setPointerFile(const QString&)));
     connect(pubWindow, SIGNAL(windowVisible(bool)), _ribbonTabCampaign, SLOT(setPlayersWindow(bool)));
     qDebug() << "[Main] Player's Window Created";
 
@@ -445,6 +457,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabMap, SIGNAL(pointerClicked(bool)), battleFrame, SLOT(setPointerOn(bool)));
     connect(battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabMap, SLOT(setPointerOn(bool)));
 
+    PublishButtonRibbon* publishButtonRibbon = _ribbonTabMap->getPublishRibbon();
+    connect(publishButtonRibbon, SIGNAL(rotateCW()), battleFrame, SLOT(rotateCW()));
+    connect(publishButtonRibbon, SIGNAL(rotateCCW()), battleFrame, SLOT(rotateCCW()));
+    connect(publishButtonRibbon, SIGNAL(colorChanged(QColor)), battleFrame, SLOT(setBackgroundColor(QColor)));
+    connect(publishButtonRibbon, SIGNAL(toggled(bool)), battleFrame, SLOT(togglePublishing(bool)));
+    connect(battleFrame, SIGNAL(publishCancelled()), publishButtonRibbon, SLOT(cancelPublish()));
+    connect(battleFrame, SIGNAL(setPublishEnabled(bool)), publishButtonRibbon, SLOT(setEnabled(bool)));
+    connect(battleFrame, SIGNAL(setPublishColor(QColor)), publishButtonRibbon, SLOT(setColor(QColor)));
+
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
     ui->stackedWidgetEncounter->addWidget(battleFrame);
@@ -460,6 +481,7 @@ MainWindow::MainWindow(QWidget *parent) :
     CharacterFrame* charFrame = new CharacterFrame;
     ui->stackedWidgetEncounter->addWidget(charFrame);
     connect(charFrame, SIGNAL(publishCharacterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addWidget(mapFrame);
@@ -468,6 +490,26 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
+
+    connect(_ribbonTabMiniMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
+    connect(_ribbonTabMiniMap, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
+    connect(_ribbonTabMiniMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
+    connect(_ribbonTabMiniMap, SIGNAL(zoomFullClicked()), mapFrame, SLOT(zoomFit()));
+    connect(_ribbonTabMiniMap, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
+    connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabMiniMap, SLOT(setZoomSelect(bool)));
+
+    connect(_ribbonTabMiniMap, SIGNAL(drawEraseClicked(bool)), mapFrame, SLOT(setErase(bool)));
+    connect(_ribbonTabMiniMap, SIGNAL(smoothClicked(bool)), mapFrame, SLOT(setSmooth(bool)));
+    connect(_ribbonTabMiniMap, SIGNAL(brushSizeChanged(int)), mapFrame, SLOT(brushSizeChanged(int)));
+    connect(_ribbonTabMiniMap, SIGNAL(fillFoWClicked()), mapFrame, SLOT(fillFoW()));
+    connect(_ribbonTabMiniMap, SIGNAL(brushModeChanged(int)), mapFrame, SLOT(setBrushMode(int)));
+    connect(mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMiniMap, SLOT(setBrushMode(int)));
+
+    connect(_ribbonTabMiniMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
+    connect(_ribbonTabMiniMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
+
+    connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
+
     // EncounterType_ScrollingText
     EncounterScrollingTextEdit* scrollingTextEdit = new EncounterScrollingTextEdit;
     ui->stackedWidgetEncounter->addWidget(scrollingTextEdit);
@@ -475,10 +517,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(scrollingTextEdit, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
     connect(scrollingTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), scrollingTextEdit, SLOT(targetResized(QSize)));
+
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
     connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addWidget(audioTrackEdit);
+
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
     connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openFile(QString)));
@@ -509,6 +553,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(previewFrame,SIGNAL(positionChanged(QPointF)),previewFrame,SLOT(setArrowPosition(QPointF)));
     connect(previewFrame,SIGNAL(positionChanged(QPointF)),pubWindow,SLOT(setArrowPosition(QPointF)));
     connect(this,SIGNAL(dispatchPublishImage(QImage,QColor)),previewFrame,SLOT(setImage(QImage)));
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), previewFrame, SLOT(setPointerFile(const QString&)));
+    previewFrame->setPointerFile(_options->getPointerFile());
     previewDlg = createDialog(previewFrame);
     connect(_ribbonTabCampaign, SIGNAL(previewClicked()), previewDlg, SLOT(exec()));
 
@@ -1488,6 +1534,8 @@ void MainWindow::setupRibbonBar()
     _ribbonTabMap->hide();
     _ribbonTabBattle = new RibbonTabBattle(this);
     _ribbonTabBattle->hide();
+    _ribbonTabMiniMap = new MapEditFrame(this);
+    _ribbonTabMiniMap->hide();
 
     _ribbon->setCurrentIndex(0);
     setMenuWidget(_ribbon);
@@ -2357,7 +2405,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         delete undoAction; undoAction = nullptr;
         delete redoAction; redoAction = nullptr;
         _ribbonTabCampaign->setUndoEnabled(false);
-        _ribbon->disableTab(_ribbonTabMap);
+        _ribbon->disableTab(_ribbonTabMiniMap);
     }
 
     enableCampaignMenu();
@@ -2454,7 +2502,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         connect(_ribbonTabCampaign, SIGNAL(redoClicked()), redoAction, SLOT(trigger()));
 
         _ribbonTabCampaign->setUndoEnabled(true);
-        _ribbon->enableTab(_ribbonTabMap);
+        _ribbon->enableTab(_ribbonTabMiniMap);
 
         connect(map,SIGNAL(destroyed(QObject*)), mapFrame,SLOT(clear()));
         return;

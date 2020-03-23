@@ -732,7 +732,7 @@ color: rgb(85, 0, 0);</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="grpBrush"/>
   <buttongroup name="grpEditMode"/>
+  <buttongroup name="grpBrush"/>
  </buttongroups>
 </ui>

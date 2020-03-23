@@ -255,7 +255,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_screen.png</normaloff>:/img/data/icon_screen.png</iconset>
+         <normaloff>:/img/data/icon_dmscreen.png</normaloff>:/img/data/icon_dmscreen.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -417,7 +417,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_music.png</normaloff>:/img/data/icon_music.png</iconset>
+         <normaloff>:/img/data/icon_soundboard.png</normaloff>:/img/data/icon_soundboard.png</iconset>
        </property>
        <property name="iconSize">
         <size>

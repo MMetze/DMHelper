@@ -186,10 +186,16 @@
         <string notr="true">color: rgb(0, 0, 255);</string>
        </property>
        <property name="text">
-        <string>https://dm-helper.itch.io/dm-helper</string>
+        <string>&lt;a href=&quot;https://dm-helper.itch.io/dm-helper&quot;&gt;https://dm-helper.itch.io/dm-helper&lt;/a&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
        </property>
        <property name="openExternalLinks">
         <bool>true</bool>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::TextBrowserInteraction</set>
        </property>
       </widget>
      </item>
@@ -236,8 +242,8 @@
     </widget>
    </item>
    <item>
-    <widget class="QTextEdit" name="txtReleaseNotes">
-     <property name="readOnly">
+    <widget class="QTextBrowser" name="textBrowser">
+     <property name="openExternalLinks">
       <bool>true</bool>
      </property>
     </widget>

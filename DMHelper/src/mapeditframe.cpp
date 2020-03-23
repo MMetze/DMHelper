@@ -1,37 +1,39 @@
 #include "mapeditframe.h"
 #include "ui_mapeditframe.h"
 
-MapEditFrame::MapEditFrame(DMHelper::BrushType brushType, int brushSize, bool gridVisible, int gridScale, int gridOffsetX, int gridOffsetY, QWidget *parent) :
+MapEditFrame::MapEditFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::MapEditFrame)
 {
     ui->setupUi(this);
 
-    setBrushType(brushType);
-    setBrushSize(brushSize);
-    setGridVisible(gridVisible);
-    setGridScale(gridScale);
-    setGridOffsetX(gridOffsetX);
-    setGridOffsetY(gridOffsetY);
+    connect(ui->btnZoomIn, SIGNAL(clicked()), this, SIGNAL(zoomInClicked()));
+    connect(ui->btnZoomOut, SIGNAL(clicked()), this, SIGNAL(zoomOutClicked()));
+    connect(ui->btnZoomOne, SIGNAL(clicked()), this, SIGNAL(zoomOneClicked()));
+    connect(ui->btnZoomFull, SIGNAL(clicked()), this, SIGNAL(zoomFullClicked()));
+    connect(ui->btnZoomSelect, SIGNAL(clicked(bool)), this, SIGNAL(zoomSelectClicked(bool)));
+
+    connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SIGNAL(drawEraseClicked(bool)));
+    connect(ui->btnSmooth, SIGNAL(clicked(bool)), this, SIGNAL(smoothClicked(bool)));
+    connect(ui->spinSize, SIGNAL(valueChanged(int)), this, SIGNAL(brushSizeChanged(int)));
+    connect(ui->btnFillFoW, SIGNAL(clicked(bool)), this, SIGNAL(fillFoWClicked()));
+
+    connect(ui->btnPublishZoom, SIGNAL(clicked(bool)), this, SIGNAL(publishZoomChanged(bool)));
+    connect(ui->btnPublishVisible, SIGNAL(clicked(bool)), this, SIGNAL(publishVisibleChanged(bool)));
 
     // Set up the brush mode button group
-    ui->grpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
-    ui->grpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
-    ui->grpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
-    connect(ui->grpBrush,SIGNAL(buttonClicked(int)),this,SLOT(setMapCursor()));
+    ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
+    ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
+    ui->btnGrpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
+    connect(ui->btnGrpBrush, SIGNAL(buttonClicked(int)), this, SIGNAL(brushModeChanged(int)));
 
-    connect(ui->btnClearFoW,SIGNAL(clicked()),this,SIGNAL(clearFoW()));
-    connect(ui->btnResetFoW,SIGNAL(clicked()),this,SIGNAL(resetFoW()));
+    // Set up the extra slot to configure the erase button
+    connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SLOT(setEraseMode()));
 
-//    connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(setMapCursor()));
+    connect(ui->btnPublishVisible, SIGNAL(clicked(bool)), this, SLOT(publishModeVisibleClicked()));
+    connect(ui->btnPublishZoom, SIGNAL(clicked(bool)), this, SLOT(publishModeZoomClicked()));
 
-    connect(ui->chkShowGrid, SIGNAL(clicked(bool)), this, SLOT(setGridVisible(bool)));
-
-    connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(setGridScale(int)));
-//    connect(ui->sliderX, SIGNAL(valueChanged(int)), this, SLOT(setXOffset(int)));
-//    connect(ui->sliderY, SIGNAL(valueChanged(int)), this, SLOT(setYOffset(int)));
-
-
+    setEraseMode();
 }
 
 MapEditFrame::~MapEditFrame()
@@ -39,108 +41,52 @@ MapEditFrame::~MapEditFrame()
     delete ui;
 }
 
-DMHelper::BrushType MapEditFrame::getBrushType() const
+void MapEditFrame::setZoomSelect(bool checked)
 {
-    int checkedId = ui->grpBrush->checkedId();
-    if((checkedId < 0) || (checkedId >= DMHelper::BrushType_Count))
-        return DMHelper::BrushType_Circle;
-    else
-        return static_cast<DMHelper::BrushType>(checkedId);
+    ui->btnZoomSelect->setChecked(checked);
 }
 
-int MapEditFrame::getBrushSize() const
+void MapEditFrame::setBrushMode(int brushMode)
 {
-    return ui->spinBrushSize->value();
+    QAbstractButton* button = ui->btnGrpBrush->button(brushMode);
+    if(button)
+        button->click();
 }
 
-bool MapEditFrame::isGridVisible() const
+void MapEditFrame::setDrawErase(bool checked)
 {
-    return ui->chkShowGrid->isChecked();
+    ui->btnFoWErase->setChecked(checked);
+    setEraseMode();
 }
 
-int MapEditFrame::getGridScale() const
+void MapEditFrame::setEraseMode()
 {
-    return ui->spinGridScale->value();
-}
-
-int MapEditFrame::getGridOffsetX() const
-{
-    return ui->gridOffsetX->value();
-}
-
-int MapEditFrame::getGridOffsetY() const
-{
-    return ui->gridOffsetY->value();
-}
-
-void MapEditFrame::setBrushType(DMHelper::BrushType brushType)
-{
-    QPushButton* brushTypeButton = nullptr;
-
-    switch(brushType)
+    if(ui->btnFoWErase->isChecked())
     {
-        case DMHelper::BrushType_Circle:
-            brushTypeButton = ui->btnBrushCircle;
-            break;
-        case DMHelper::BrushType_Square:
-            brushTypeButton = ui->btnBrushSquare;
-            break;
-        case DMHelper::BrushType_Select:
-            brushTypeButton = ui->btnBrushSelect;
-            break;
-        default:
-            return;
+        ui->btnFillFoW->setIcon(QPixmap(":/img/data/icon_square.png"));
+        ui->lblFillFoW->setText(QString("Clear"));
     }
-
-    if((!brushTypeButton) || (brushTypeButton->isChecked()))
-        return;
-
-    brushTypeButton->setChecked(true);
-    emit brushTypeChanged(brushType);
-    return;
+    else
+    {
+        ui->btnFillFoW->setIcon(QPixmap(":/img/data/square.png"));
+        ui->lblFillFoW->setText(QString("Fill"));
+    }
 }
 
-void MapEditFrame::setBrushSize(int brushSize)
+void MapEditFrame::publishModeVisibleClicked()
 {
-    if(brushSize == ui->spinBrushSize->value())
-        return;
-
-    ui->spinBrushSize->setValue(brushSize);
-    emit brushSizeChanged(brushSize);
+    if((ui->btnPublishVisible->isChecked()) &&
+       (ui->btnPublishZoom->isChecked()))
+    {
+        ui->btnPublishZoom->click();
+    }
 }
 
-void MapEditFrame::setGridVisible(bool gridVisible)
+void MapEditFrame::publishModeZoomClicked()
 {
-    if(gridVisible == ui->chkShowGrid->isChecked())
-        return;
-
-    ui->chkShowGrid->setChecked(gridVisible);
-    emit gridVisibleChanged(gridVisible);
-}
-
-void MapEditFrame::setGridScale(int gridScale)
-{
-    if(gridScale == ui->spinGridScale->value())
-        return;
-
-    ui->spinGridScale->setValue(gridScale);
-    emit gridScaleChanged(gridScale);
-}
-
-void MapEditFrame::setGridOffsetX(int gridOffsetX)
-{
-    if(gridOffsetX == ui->gridOffsetX->value())
-        return;
-
-    ui->gridOffsetX->setValue(gridOffsetX);
-    emit gridOffsetXChanged(gridOffsetX);
-}
-
-void MapEditFrame::setGridOffsetY(int gridOffsetY)
-{
-    if(gridOffsetY == ui->gridOffsetY->value())
-        return;
-
-    ui->gridOffsetY->setValue(gridOffsetY);
-    emit gridOffsetYChanged(gridOffsetY);
+    if((ui->btnPublishVisible->isChecked()) &&
+       (ui->btnPublishZoom->isChecked()))
+    {
+        ui->btnPublishVisible->click();
+    }
 }

@@ -7,6 +7,8 @@ namespace Ui {
 class RibbonTabMap;
 }
 
+class PublishButtonRibbon;
+
 class RibbonTabMap : public QFrame
 {
     Q_OBJECT
@@ -14,6 +16,8 @@ class RibbonTabMap : public QFrame
 public:
     explicit RibbonTabMap(QWidget *parent = nullptr);
     ~RibbonTabMap();
+
+    PublishButtonRibbon* getPublishRibbon() const;
 
 public slots:
     void setZoomSelect(bool checked);
@@ -36,6 +40,7 @@ public slots:
     void setSelectFoW(bool checked);
 
     void setPointerOn(bool checked);
+    void setPointerFile(const QString& filename);
 
 signals:
     void zoomInClicked();

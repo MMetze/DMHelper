@@ -60,6 +60,11 @@ void PublishWindow::setBackgroundColor(QColor color)
     _publishFrame->setStyleSheet(styleString);
 }
 
+void PublishWindow::setPointerFile(const QString& filename)
+{
+    _publishFrame->setPointerFile(filename);
+}
+
 void PublishWindow::keyPressEvent(QKeyEvent * event)
 {
     /*

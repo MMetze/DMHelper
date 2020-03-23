@@ -15,27 +15,15 @@ PresentUpdateDialog::PresentUpdateDialog(const QString& newVersion, const QStrin
                                                 .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
     ui->lblCurrentVersion->setText(currentVersion);
     ui->lblNewVersion->setText(newVersion);
-    ui->txtReleaseNotes->setHtml(releaseNotes);
+    ui->textBrowser->setHtml(releaseNotes);
 
     ui->lblWebsiteLink->setCursor(Qt::PointingHandCursor);
-    ui->lblWebsiteLink->installEventFilter(this);
 
+    qDebug() << "[PresentUpdateDialog]: Current version: " << currentVersion << ", new version: " << newVersion;
+    qDebug() << "[PresentUpdateDialog]: Release notes: " << releaseNotes;
 }
 
 PresentUpdateDialog::~PresentUpdateDialog()
 {
     delete ui;
-}
-
-bool PresentUpdateDialog::eventFilter(QObject *watched, QEvent *event)
-{
-    if((event->type() == QEvent::MouseButtonRelease) &&
-       (watched == ui->lblWebsiteLink))
-    {
-        QUrl linkUrl = QUrl::fromUserInput(ui->lblWebsiteLink->text());
-        qDebug() << "[PresentUpdateDialog]: opening link: " << linkUrl;
-        QDesktopServices::openUrl(linkUrl);
-    }
-
-    return QDialog::eventFilter(watched, event);
 }

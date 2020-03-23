@@ -15,9 +15,6 @@ public:
     explicit PresentUpdateDialog(const QString& newVersion, const QString& releaseNotes, QWidget *parent = nullptr);
     ~PresentUpdateDialog();
 
-protected:
-    virtual bool eventFilter(QObject *watched, QEvent *event) override;
-
 private:
     Ui::PresentUpdateDialog *ui;
 };

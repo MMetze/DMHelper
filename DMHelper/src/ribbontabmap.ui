@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1274</width>
+    <width>1493</width>
     <height>67</height>
    </rect>
   </property>
@@ -281,59 +281,52 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout">
-     <property name="spacing">
-      <number>0</number>
+    <widget class="QLabel" name="label_11">
+     <property name="text">
+      <string>Couple</string>
      </property>
-     <item>
-      <widget class="QPushButton" name="btnCameraCouple">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Snap the Player's Window camera to the Battle View</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_couplecamera.png</normaloff>:/img/data/icon_couplecamera.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>40</width>
-         <height>40</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>Couple</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="btnCameraCouple">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>50</width>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Snap the Player's Window camera to the Battle View</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="resources.qrc">
+       <normaloff>:/img/data/icon_couplecamera.png</normaloff>:/img/data/icon_couplecamera.png</iconset>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>40</width>
+       <height>40</height>
+      </size>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -362,7 +355,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_camerafull.png</normaloff>:/img/data/icon_camerafull.png</iconset>
+         <normaloff>:/img/data/icon_camerafit.png</normaloff>:/img/data/icon_camerafit.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -414,7 +407,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_zoomcamera.png</normaloff>:/img/data/icon_zoomcamera.png</iconset>
+         <normaloff>:/img/data/icon_cameraselect.png</normaloff>:/img/data/icon_cameraselect.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -549,7 +542,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/distance.png</normaloff>:/img/data/distance.png</iconset>
+         <normaloff>:/img/data/icon_distance.png</normaloff>:/img/data/icon_distance.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -666,7 +659,7 @@
            </property>
            <property name="icon">
             <iconset resource="resources.qrc">
-             <normaloff>:/img/data/height.png</normaloff>:/img/data/height.png</iconset>
+             <normaloff>:/img/data/icon_height.png</normaloff>:/img/data/icon_height.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -1573,6 +1566,47 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line_7">
+     <property name="minimumSize">
+      <size>
+       <width>10</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>10</width>
+       <height>55</height>
+      </size>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="PublishButtonRibbon" name="publishFrame">
+     <property name="minimumSize">
+      <size>
+       <width>178</width>
+       <height>67</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>178</width>
+       <height>67</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -1587,6 +1621,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PublishButtonRibbon</class>
+   <extends>QFrame</extends>
+   <header>publishbuttonribbon.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

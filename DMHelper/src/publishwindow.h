@@ -23,6 +23,7 @@ public slots:
     void setArrowVisible(bool visible);
     void setArrowPosition(const QPointF& position);
     void setBackgroundColor(QColor color);
+    void setPointerFile(const QString& filename);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event);

@@ -861,7 +861,7 @@ color: rgb(85, 85, 85);
                       </property>
                       <property name="icon">
                        <iconset resource="resources.qrc">
-                        <normaloff>:/img/data/distance.png</normaloff>:/img/data/distance.png</iconset>
+                        <normaloff>:/img/data/icon_distance.png</normaloff>:/img/data/icon_distance.png</iconset>
                       </property>
                       <property name="checkable">
                        <bool>true</bool>

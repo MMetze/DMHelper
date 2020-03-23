@@ -40,6 +40,7 @@ class RibbonTabHelp;
 class RibbonTabMap;
 class RibbonTabBattle;
 class BattleDialogModel;
+class MapEditFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -241,6 +242,7 @@ private:
     RibbonTabHelp* _ribbonTabHelp;
     RibbonTabMap* _ribbonTabMap;
     RibbonTabBattle* _ribbonTabBattle;
+    MapEditFrame* _ribbonTabMiniMap;
 };
 
 #endif // MAINWINDOW_H
