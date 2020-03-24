@@ -43,6 +43,7 @@
 
 
 int main(int argc, char *argv[]) {
+    QApplication::setDesktopSettingsAware(false);
     QApplication a(argc, argv);
 
 #ifndef QT_NO_DEBUG_OUTPUT
