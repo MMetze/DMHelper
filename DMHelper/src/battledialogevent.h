@@ -15,6 +15,7 @@ public:
     virtual ~BattleDialogEvent();
 
     virtual int getType() const = 0;
+    virtual BattleDialogEvent* clone() = 0;
 
     virtual void outputXML(QDomElement &element, bool isExport);
 

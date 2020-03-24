@@ -11,6 +11,16 @@ BattleDialogLogger::BattleDialogLogger(QObject *parent) :
 {
 }
 
+BattleDialogLogger::BattleDialogLogger(const BattleDialogLogger& other) :
+    DMHObjectBase(other.parent()),
+    _battleEvents()
+{
+    for(BattleDialogEvent* i : other._battleEvents)
+    {
+        _battleEvents.append(i->clone());
+    }
+}
+
 BattleDialogLogger::~BattleDialogLogger()
 {
     qDeleteAll(_battleEvents);
@@ -36,6 +46,9 @@ void BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir&
 void BattleDialogLogger::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
+
+    if(element.isNull())
+        return;
 
     qDeleteAll(_battleEvents);
     _battleEvents.clear();
@@ -70,6 +83,17 @@ QList<BattleDialogEvent*> BattleDialogLogger::getEvents() const
     return _battleEvents;
 }
 
+int BattleDialogLogger::getRounds() const
+{
+    int rounds = 1;
+    for(BattleDialogEvent* event : _battleEvents)
+    {
+        if(event->getType() == DMHelper::BattleEvent_NewRound)
+            ++rounds;
+    }
+    return rounds;
+}
+
 void BattleDialogLogger::damageDone(QUuid combatantID, QUuid targetID, int damage)
 {
     _battleEvents.append(new BattleDialogEventDamage(combatantID, targetID, damage));
@@ -78,4 +102,5 @@ void BattleDialogLogger::damageDone(QUuid combatantID, QUuid targetID, int damag
 void BattleDialogLogger::newRound()
 {
     _battleEvents.append(new BattleDialogEventNewRound());
+    emit roundsChanged();
 }

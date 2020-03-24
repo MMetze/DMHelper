@@ -47,24 +47,44 @@ signals:
     void animationStarted(QColor color);
     void animateImage(QImage img);
 
+    void zoomSelectChanged(bool enabled);
+    void brushModeSet(int brushMode);
+
+    void publishCancelled();
+    void publishCheckable(bool checkable);
+
 public slots:
     void updateFoW();
+    void fillFoW();
     void resetFoW();
     void clearFoW();
     void undoPaint();
-    void publishFoWImage();
+    void publishFoWImage(bool publishing = false);
     void clear();
 
+    void cancelPublish();
+
     void editModeToggled(int editMode);
+    void setBrushMode(int brushMode);
+    void brushSizeChanged(int size);
 
     void zoomIn();
     void zoomOut();
     void zoomOne();
     void zoomFit();
-    void zoomSelect();
+    void zoomSelect(bool enabled);
     void cancelSelect();
 
+    void setErase(bool enabled);
+    void setSmooth(bool enabled);
+
+    void setPublishZoom(bool enabled);
+    void setPublishVisible(bool enabled);
+
     void targetResized(const QSize& newSize);
+
+    void setRotation(int rotation);
+    void setColor(QColor color);
 
 protected:
     void initializeFoW();
@@ -73,7 +93,7 @@ protected:
 
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
-
+    virtual void showEvent(QShowEvent *event) override;
     virtual void timerEvent(QTimerEvent *event) override;
 
     bool execEventFilterSelectZoom(QObject *obj, QEvent *event);
@@ -91,11 +111,13 @@ protected:
 
 protected slots:
     void setMapCursor();
-    void publishModeVisibleClicked();
-    void publishModeZoomClicked();
+//    void publishModeVisibleClicked();
+//    void publishModeZoomClicked();
     void rotatePublish();
     void trackSelected(int index);
     void setScale(qreal s);
+    void storeViewRect();
+    void loadViewRect();
     void resetPublishFoW();
     void audioPlaybackChecked();
 
@@ -107,10 +129,23 @@ private:
     QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
 
+    bool _erase;
+    bool _smooth;
+    int _brushMode;
+    int _brushSize;
+    bool _publishZoom;
+    bool _publishVisible;
+    bool _isPublishing;
+    bool _isVideo;
+
+    int _rotation;
+    QColor _color;
+
     bool _mouseDown;
     QPoint _mouseDownPos;
     UndoPath* _undoPath;
 
+    bool _zoomSelect;
     QRubberBand* _rubberBand;
     qreal _scale;
 

@@ -29,19 +29,6 @@ PublishButtonFrame::~PublishButtonFrame()
     delete ui;
 }
 
-void PublishButtonFrame::setDefaults()
-{
-    ui->btnPublish->setAutoDefault(false);
-    ui->btnCW->setAutoDefault(false);
-    ui->btnCCW->setAutoDefault(false);
-    ui->btnColor->setAutoDefault(false);
-
-    ui->btnPublish->setDefault(false);
-    ui->btnCW->setDefault(false);
-    ui->btnCCW->setDefault(false);
-    ui->btnColor->setDefault(false);
-}
-
 bool PublishButtonFrame::isChecked()
 {
     return ui->btnPublish->isChecked();
@@ -99,4 +86,17 @@ void PublishButtonFrame::handleToggle(bool checked)
         ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
         ui->btnPublish->setText(QString("Publish"));
     }
+}
+
+void PublishButtonFrame::setDefaults()
+{
+    ui->btnPublish->setAutoDefault(false);
+    ui->btnCW->setAutoDefault(false);
+    ui->btnCCW->setAutoDefault(false);
+    ui->btnColor->setAutoDefault(false);
+
+    ui->btnPublish->setDefault(false);
+    ui->btnCW->setDefault(false);
+    ui->btnCCW->setDefault(false);
+    ui->btnColor->setDefault(false);
 }

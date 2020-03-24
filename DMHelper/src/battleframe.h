@@ -57,6 +57,8 @@ public:
     QRect viewportRect();
     QPoint viewportCenter();
 
+    BattleFrameMapDrawer* getMapDrawer() const;
+
 public slots:
     void clear();
     void sort();
@@ -72,27 +74,80 @@ public slots:
     void setShowOnDeck(bool showOnDeck);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
+    void setPointerFile(const QString& filename);
 
     void zoomIn();
     void zoomOut();
     void zoomFit();
-    void zoomSelect();
+    void zoomSelect(bool enabled);
     void cancelSelect();
 
     void cancelPublish();
 
+    // Public for connection to battle ribbon
+    void selectBattleMap();
+    void reloadMap();
+    void addMonsters();
+    void addCharacter();
+    void addNPC();
+    void setShowMovement(bool showMovement);
+    void setLairActions(bool lairActions);
+
+    // Public for connection to map ribbon
+    void setCameraCouple(bool couple);
+    void cancelCameraCouple();
+    void setCameraMap();
+    void setCameraSelect(bool enabled);
+    void setCameraEdit(bool enabled);
+
+    void setDistance(bool enabled);
+    void setDistanceHeight(bool heightEnabled, qreal height);
+
+    void setShowHeight(bool showHeight);
+    void setHeight(qreal height);
+
+    void setFoWEdit(bool enabled);
+    void setFoWSelect(bool enabled);
+
+    void setPointerOn(bool enabled);
+    void showStatistics();
+
+    // Publish slots
+    void rotateCCW();
+    void rotateCW();
+    void togglePublishing(bool publishing);
+    void setBackgroundColor(QColor color);
+
 signals:
-    void battleComplete();
+    //void battleComplete();
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
     void publishImage(QImage img, QColor color);
     void animationStarted(QColor color);
     void animateImage(QImage img);
     void showPublishWindow();
-    //void selectNewMap();
-    //void addMonsters();
-    //void addCharacter();
-    //void addNPC();
+    void pointerChanged(const QCursor& cursor);
+
+    void modelChanged(BattleDialogModel* model);
+
+    void zoomSelectToggled(bool enabled);
+
+    void cameraCoupleChanged(bool coupled);
+    void cameraSelectToggled(bool enabled);
+    void cameraEditToggled(bool enabled);
+
+    void distanceToggled(bool enabled);
+    void distanceChanged(const QString&);
+
+    void foWEditToggled(bool enabled);
+    void foWSelectToggled(bool enabled);
+
+    void pointerToggled(bool enabled);
+
+    // Publish signals
+    void publishCancelled();
+    void setPublishEnabled(bool enabled);
+    void setPublishColor(QColor color);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * e);
@@ -103,14 +158,12 @@ protected:
 
 private slots:
     void setCompassVisibility(bool visible);
-    void setPointerVisibility(bool visible);
     void updateCombatantVisibility();
     void updateEffectLayerVisibility();
     void updateMap();
-    void reloadMap();
+    void updateRounds();
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
-    void handleBattleComplete();
     void handleSelectionChanged();
     void handleEffectChanged(QAbstractGraphicsShapeItem* effect);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
@@ -129,7 +182,6 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
-    void togglePublishing(bool publishing);
     void publishImage();
     void executePublishImage();
     void executeAnimateImage();
@@ -147,23 +199,11 @@ private slots:
     void setMapCursor();
     void setCameraSelectable(bool selectable);
     void setScale(qreal s);
-    void rotateCCW();
-    void rotateCW();
     void storeViewRect();
-    void setBackgroundColor(QColor color);
-    void setDistanceText();
 
     void setModel(BattleDialogModel* model);
-    void selectBattleMap();
     Map* selectRelatedMap();
-    void addMonsters();
-    void addCharacter();
-    void addNPC();
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
-
-    void setCameraCouple();
-    void cancelCameraCouple();
-    void setCameraMap();
 
     void setRibbonPage(int id);
 
@@ -242,6 +282,8 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
+    QPixmap getPointerPixmap();
+
     // State Machine
     void prepareStateMachine();
 
@@ -272,11 +314,16 @@ private:
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _publishRect;
     QRectF _publishRectValue;
+    bool _cameraCoupled;
+    bool _includeHeight;
+    qreal _pitchHeight;
 
     QTimer* _countdownTimer;
     qreal _countdown;
+    bool _lairActions;
 
     bool _publishing;
+    bool _publishingEnabled;
     QTimer* _publishTimer;
 
     QPixmap _prescaledBackground;
@@ -291,11 +338,13 @@ private:
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;
+    QString _pointerFile;
 
     QRect _rubberBandRect;
     qreal _scale;
     int _rotation;
 
+    bool _showMovement;
     qreal _moveRadius;
     QPointF _moveStart;
     int _moveTimer;

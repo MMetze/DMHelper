@@ -1,4 +1,5 @@
 #include "publishframe.h"
+#include "dmconstants.h"
 #include <QGridLayout>
 #include <QScrollArea>
 #include <QLabel>
@@ -9,7 +10,7 @@
 #include <QDebug>
 
 PublishFrame::PublishFrame(QWidget *parent) :
-    QWidget(parent),
+    QFrame(parent),
     _scrollArea(nullptr),
     _label(nullptr),
     _arrow(nullptr),
@@ -21,13 +22,16 @@ PublishFrame::PublishFrame(QWidget *parent) :
     _scrollArea = new QScrollArea(this);
     _scrollArea->setFrameShape(QFrame::NoFrame);
     _label = new QLabel(_scrollArea);
+
+    // NOTE: New approach does not draw the arrow on the publish frame - this can be removed if the MapFrame is removed
     _arrow = new QLabel(_scrollArea);
     _arrow->setStyleSheet("background-image: url(); background-color: rgba(0,0,0,0);");
-    QImage arrowImg;
-    arrowImg.load(":/img/data/arrow.png");
-    QImage arrowScaled = arrowImg.scaled(75,75,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
-    _arrow->resize(arrowScaled.size());
-    _arrow->setPixmap(QPixmap::fromImage(arrowScaled));
+    setPointerFile(QString());
+    //QImage arrowImg;
+    //arrowImg.load(":/img/data/arrow.png");
+    //QImage arrowScaled = arrowImg.scaled(DMHelper::CURSOR_SIZE,DMHelper::CURSOR_SIZE,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+    //_arrow->resize(arrowScaled.size());
+    //_arrow->setPixmap(QPixmap::fromImage(arrowScaled));
     _arrow->hide();
 
     _scrollArea->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -84,6 +88,20 @@ void PublishFrame::setArrowPosition(const QPointF& position)
     update();
 }
 
+void PublishFrame::setPointerFile(const QString& filename)
+{
+    QPixmap pointerImage;
+    if((filename.isEmpty()) ||
+       (!pointerImage.load(filename)))
+    {
+        pointerImage = QPixmap(":/img/data/arrow.png");
+    }
+
+    QPixmap scaledPointer = pointerImage.scaled(DMHelper::CURSOR_SIZE,DMHelper::CURSOR_SIZE,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+    _arrow->resize(scaledPointer.size());
+    _arrow->setPixmap(scaledPointer);
+}
+
 void PublishFrame::resizeEvent(QResizeEvent * event)
 {
     Q_UNUSED(event);
@@ -110,7 +128,7 @@ void PublishFrame::keyPressEvent(QKeyEvent * event)
     if( event->key() == Qt::Key_Space )
     {
         _arrowVisible = !_arrowVisible;
-        emit visibleChanged(_arrowVisible);
+        emit arrowVisibleChanged(_arrowVisible);
         if(_arrowVisible)
             emit positionChanged(_arrowPosition);
     }

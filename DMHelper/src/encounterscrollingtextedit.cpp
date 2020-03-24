@@ -144,6 +144,11 @@ void EncounterScrollingTextEdit::targetResized(const QSize& newSize)
     }
 }
 
+void EncounterScrollingTextEdit::cancelPublish()
+{
+    ui->framePublish->cancelPublish();
+}
+
 void EncounterScrollingTextEdit::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);

@@ -158,7 +158,6 @@
         <file>data/icon_countdown.png</file>
         <file>data/icon_music.png</file>
         <file>data/compass.png</file>
-        <file>data/distance.png</file>
         <file>data/dmhelper_large.png</file>
         <file>data/movement.png</file>
         <file>data/icon_reload.png</file>
@@ -172,9 +171,59 @@
         <file>data/dmhelper_opaque.png</file>
         <file>data/icon_grid.png</file>
         <file>data/icon_couplecamera.png</file>
-        <file>data/distanceSelect.png</file>
         <file>data/icon_selectcursor.png</file>
         <file>data/icon_zoomselectcursor.png</file>
+        <file>data/icon_close.png</file>
+        <file>data/icon_downarrow.png</file>
+        <file>data/icon_new.png</file>
+        <file>data/icon_newadventure.png</file>
+        <file>data/icon_newbattle.png</file>
+        <file>data/icon_newcharacter.png</file>
+        <file>data/icon_newnpc.png</file>
+        <file>data/icon_newscrollingtext.png</file>
+        <file>data/icon_newtextencounter.png</file>
+        <file>data/icon_open.png</file>
+        <file>data/icon_save.png</file>
+        <file>data/icon_saveas.png</file>
+        <file>data/icon_newmap.png</file>
+        <file>data/icon_playerswindow.png</file>
+        <file>data/icon_exportitem.png</file>
+        <file>data/icon_importcharacter.png</file>
+        <file>data/icon_importitem.png</file>
+        <file>data/icon_importnpc.png</file>
+        <file>data/icon_update.png</file>
+        <file>data/dmhelper_small.png</file>
+        <file>data/icon_pdf.png</file>
+        <file>data/icon_bestiary.png</file>
+        <file>data/icon_options.png</file>
+        <file>data/icon_publishtext.png</file>
+        <file>data/icon_translatetext.png</file>
+        <file>data/icon_exportbestiary.png</file>
+        <file>data/icon_importbestiary.png</file>
+        <file>data/icon_randommarket.png</file>
+        <file>data/icon_redo.png</file>
+        <file>data/icon_undo.png</file>
+        <file>data/icon_newmonster.png</file>
+        <file>data/icon_map.png</file>
+        <file>data/icon_lair.png</file>
+        <file>data/icon_dead.png</file>
+        <file>data/icon_living.png</file>
+        <file>data/icon_effects.png</file>
+        <file>data/icon_movement.png</file>
+        <file>data/icon_next.png</file>
+        <file>data/icon_sort.png</file>
+        <file>data/icon_smooth.png</file>
+        <file>data/icon_zoomcamera.png</file>
+        <file>data/icon_statistics.png</file>
+        <file>data/icon_camerafit.png</file>
+        <file>data/icon_cameraselect.png</file>
+        <file>data/icon_cameraselectcursor.png</file>
+        <file>data/icon_distance.png</file>
+        <file>data/icon_distancecursor.png</file>
+        <file>data/icon_height.png</file>
+        <file>data/icon_dmscreen.png</file>
+        <file>data/icon_soundboard.png</file>
+        <file>data/icon_publishon.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

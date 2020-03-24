@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1082</width>
-    <height>715</height>
+    <height>507</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,6 +23,9 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <property name="spacing">
+    <number>3</number>
+   </property>
    <item>
     <widget class="TextEditMargins" name="edtText">
      <property name="sizePolicy">
@@ -60,6 +63,9 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_6">
+     <property name="spacing">
+      <number>3</number>
+     </property>
      <item>
       <widget class="ColorPushButton" name="btnColor">
        <property name="minimumSize">
@@ -91,8 +97,26 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item>
            <widget class="QLabel" name="label_6">
             <property name="text">
@@ -114,6 +138,9 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item>
            <widget class="QLabel" name="label_8">
             <property name="text">
@@ -171,8 +198,26 @@
         <enum>QFrame::Sunken</enum>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <property name="spacing">
+         <number>3</number>
+        </property>
+        <property name="leftMargin">
+         <number>3</number>
+        </property>
+        <property name="topMargin">
+         <number>3</number>
+        </property>
+        <property name="rightMargin">
+         <number>3</number>
+        </property>
+        <property name="bottomMargin">
+         <number>3</number>
+        </property>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item>
            <widget class="QLabel" name="label">
             <property name="text">
@@ -203,6 +248,9 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <property name="spacing">
+           <number>3</number>
+          </property>
           <item>
            <widget class="QLabel" name="label_9">
             <property name="text">
@@ -247,19 +295,19 @@
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_8">
         <property name="spacing">
-         <number>5</number>
+         <number>3</number>
         </property>
         <property name="leftMargin">
-         <number>5</number>
+         <number>3</number>
         </property>
         <property name="topMargin">
-         <number>5</number>
+         <number>3</number>
         </property>
         <property name="rightMargin">
-         <number>5</number>
+         <number>3</number>
         </property>
         <property name="bottomMargin">
-         <number>5</number>
+         <number>3</number>
         </property>
         <item>
          <widget class="QPushButton" name="btnLeftText">

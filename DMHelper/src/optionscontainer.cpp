@@ -24,6 +24,7 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     _showOnDeck(true),
     _showCountdown(true),
     _countdownDuration(15),
+    _pointerFile(),
     _dataSettingsExist(false),
     _updatesEnabled(false),
     _statisticsAccepted(false),
@@ -104,6 +105,11 @@ bool OptionsContainer::getShowCountdown() const
 int OptionsContainer::getCountdownDuration() const
 {
     return _countdownDuration;
+}
+
+QString OptionsContainer::getPointerFile() const
+{
+    return _pointerFile;
 }
 
 bool OptionsContainer::doDataSettingsExist() const
@@ -235,6 +241,7 @@ void OptionsContainer::readSettings()
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
+    setPointerFileName(settings.value("pointerFile").toString());
 
     _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
     if(_dataSettingsExist)
@@ -291,6 +298,8 @@ void OptionsContainer::writeSettings()
     settings.setValue("showOnDeck", getShowOnDeck());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
+    settings.setValue("pointerFile", getPointerFile());
+
     if(_dataSettingsExist)
     {
         settings.setValue("updatesEnabled", isUpdatesEnabled());
@@ -568,6 +577,16 @@ void OptionsContainer::setCountdownDuration(int countdownDuration)
     }
 }
 
+void OptionsContainer::setPointerFileName(const QString& filename)
+{
+    if(_pointerFile != filename)
+    {
+        _pointerFile = filename;
+        qDebug() << "[OptionsContainer] Pointer filename set to: " << _pointerFile;
+        emit pointerFileNameChanged(_pointerFile);
+    }
+}
+
 void OptionsContainer::setCountdownDuration(const QString& countdownDuration)
 {
     bool ok;
@@ -682,6 +701,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setShowOnDeck(other->_showOnDeck);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
+        setPointerFileName(other->_pointerFile);
         _dataSettingsExist = other->_dataSettingsExist;
         _updatesEnabled = other->_updatesEnabled;
         _statisticsAccepted = other->_statisticsAccepted;

@@ -26,9 +26,20 @@ MapFrame::MapFrame(QWidget *parent) :
     _backgroundImage(nullptr),
     _backgroundVideo(nullptr),
     _fow(nullptr),
+    _erase(true),
+    _smooth(false),
+    _brushMode(DMHelper::BrushType_Circle),
+    _brushSize(30),
+    _publishZoom(false),
+    _publishVisible(false),
+    _isPublishing(false),
+    _isVideo(false),
+    _rotation(0),
+    _color(Qt::black),
     _mouseDown(false),
     _mouseDownPos(),
     _undoPath(nullptr),
+    _zoomSelect(false),
     _rubberBand(nullptr),
     _scale(1.0),
     _mapSource(nullptr),
@@ -77,10 +88,13 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(ui->btnZoomOne,SIGNAL(clicked()),this,SLOT(cancelSelect()));
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(zoomFit()));
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
+    //connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
 
-    connect(ui->btnPublishVisible,SIGNAL(clicked(bool)),this,SLOT(publishModeVisibleClicked()));
-    connect(ui->btnPublishZoom,SIGNAL(clicked(bool)),this,SLOT(publishModeZoomClicked()));
+    connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+
+    //connect(ui->btnPublishVisible,SIGNAL(clicked(bool)),this,SLOT(publishModeVisibleClicked()));
+    //connect(ui->btnPublishZoom,SIGNAL(clicked(bool)),this,SLOT(publishModeZoomClicked()));
 
     connect(ui->grpBrush,SIGNAL(buttonClicked(int)),this,SLOT(setMapCursor()));
     connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(setMapCursor()));
@@ -94,7 +108,19 @@ MapFrame::MapFrame(QWidget *parent) :
     //connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
 
     setMapCursor();
-    setScale(1.0);
+    //setScale(1.0);
+
+    /***** TODO: Remove this when finalized ****/
+    ui->grpMode->hide();
+    ui->groupBox_5->hide();
+    ui->groupBox_2->hide();
+    ui->btnShowMarkers->hide();
+    ui->groupBox_4->hide();
+    ui->chkAudio->hide();
+    ui->label_2->hide();
+    ui->cmbTracks->hide();
+    ui->groupBox_3->hide();
+    ui->framePublish->hide();
 }
 
 MapFrame::~MapFrame()
@@ -148,7 +174,8 @@ void MapFrame::editMapMarker(int markerId)
 
 bool MapFrame::eventFilter(QObject *obj, QEvent *event)
 {
-    if(ui->btnZoomSelect->isChecked())
+    //if(ui->btnZoomSelect->isChecked())
+    if(_zoomSelect)
     {
         if(execEventFilterSelectZoom(obj, event))
             return true;
@@ -195,6 +222,14 @@ void MapFrame::updateFoW()
     }
 }
 
+void MapFrame::fillFoW()
+{
+    if(_erase)
+        clearFoW();
+    else
+        resetFoW();
+}
+
 void MapFrame::resetFoW()
 {
     if(!_mapSource)
@@ -225,15 +260,20 @@ void MapFrame::undoPaint()
     updateFoW();
 }
 
-void MapFrame::publishFoWImage()
+void MapFrame::publishFoWImage(bool publishing)
 {
     if(!_mapSource)
         return;
 
-    if(!ui->framePublish->isCheckable())
+    _isPublishing = publishing;
+
+    //if(!ui->framePublish->isCheckable())
+    if(!_isVideo)
     {
+        // Still Image
         QImage pub;
-        if(ui->btnPublishZoom->isChecked())
+        //if(ui->btnPublishZoom->isChecked())
+        if(_publishZoom)
         {
             QRect imgRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
                           static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
@@ -246,7 +286,8 @@ void MapFrame::publishFoWImage()
         }
         else
         {
-            if(ui->btnPublishVisible->isChecked())
+            //if(ui->btnPublishVisible->isChecked())
+            if(_publishVisible)
             {
                 pub = _mapSource->getShrunkPublishImage();
             }
@@ -256,22 +297,29 @@ void MapFrame::publishFoWImage()
             }
         }
 
-        if(ui->framePublish->getRotation() != 0)
+        //if(ui->framePublish->getRotation() != 0)
+        if(_rotation != 0)
         {
-            pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+            //pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+            pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
         }
 
-        emit publishImage(pub, ui->framePublish->getColor());
+        //emit publishImage(pub, ui->framePublish->getColor());
+        emit publishImage(pub, _color);
         emit showPublishWindow();
         startAudioTrack();
     }
     else
     {
+        //Video
         stopPublishTimer();
-        createVideoPlayer(!ui->framePublish->isChecked());
-        if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
+        //createVideoPlayer(!ui->framePublish->isChecked());
+        createVideoPlayer(!_isPublishing);
+        //if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
+        if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
         {
-            emit animationStarted(ui->framePublish->getColor());
+            //emit animationStarted(ui->framePublish->getColor());
+            emit animationStarted(_color);
             emit showPublishWindow();
             startAudioTrack();
         }
@@ -287,6 +335,13 @@ void MapFrame::clear()
     delete _backgroundVideo; _backgroundVideo = nullptr;
     delete _fow; _fow = nullptr;
     delete _undoPath; _undoPath = nullptr;
+}
+
+void MapFrame::cancelPublish()
+{
+    ui->framePublish->cancelPublish();
+    emit publishCancelled();
+    _isPublishing = false;
 }
 
 void MapFrame::editModeToggled(int editMode)
@@ -313,6 +368,25 @@ void MapFrame::editModeToggled(int editMode)
     setMapCursor();
 }
 
+void MapFrame::setBrushMode(int brushMode)
+{
+    if(_brushMode != brushMode)
+    {
+        _brushMode = brushMode;
+        setMapCursor();
+        emit brushModeSet(_brushMode);
+    }
+}
+
+void MapFrame::brushSizeChanged(int size)
+{
+    if(_brushSize != size)
+    {
+        _brushSize = size;
+        setMapCursor();
+    }
+}
+
 void MapFrame::zoomIn()
 {
     setScale(_scale * 1.1);
@@ -335,30 +409,70 @@ void MapFrame::zoomFit()
     setScale(qMin(widthFactor, heightFactor));
 }
 
-void MapFrame::zoomSelect()
+void MapFrame::zoomSelect(bool enabled)
 {
-    ui->btnZoomSelect->setChecked(true);
-    setMapCursor();
+    //ui->btnZoomSelect->setChecked(true);
+    if(_zoomSelect != enabled)
+    {
+        _zoomSelect = enabled;
+        setMapCursor();
+        emit zoomSelectChanged(_zoomSelect);
+    }
 }
 
 void MapFrame::cancelSelect()
 {
     delete _rubberBand;
     _rubberBand = nullptr;
-    ui->btnBrushSelect->setChecked(false);
-    ui->btnZoomSelect->setChecked(false);
-    setMapCursor();
+    //ui->btnBrushSelect->setChecked(false);
+    //ui->btnZoomSelect->setChecked(false);
+    //_zoomSelect = false;
+    //setMapCursor();
+    zoomSelect(false);
+    setBrushMode(DMHelper::BrushType_Circle);
+}
+
+void MapFrame::setErase(bool enabled)
+{
+    _erase = enabled;
+}
+
+void MapFrame::setSmooth(bool enabled)
+{
+    _smooth = enabled;
+}
+
+void MapFrame::setPublishZoom(bool enabled)
+{
+    _publishZoom = enabled;
+}
+
+void MapFrame::setPublishVisible(bool enabled)
+{
+    _publishVisible = enabled;
 }
 
 void MapFrame::targetResized(const QSize& newSize)
 {
     _targetSize = newSize;
-    if((_videoPlayer) && (ui->framePublish->isChecked()))
+    //if((_videoPlayer) && (ui->framePublish->isChecked()))
+    if((_videoPlayer) && (_isPublishing))
     {
         _videoPlayer->targetResized(newSize);
     }
 
     resetPublishFoW();
+}
+
+void MapFrame::setRotation(int rotation)
+{
+    _rotation = rotation;
+    rotatePublish();
+}
+
+void MapFrame::setColor(QColor color)
+{
+    _color = color;
 }
 
 void MapFrame::initializeFoW()
@@ -391,6 +505,9 @@ void MapFrame::initializeFoW()
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         _fow->setEnabled(false);
         _fow->setZValue(-1);
+
+        //ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
+        loadViewRect();
     }
     else
     {
@@ -399,7 +516,9 @@ void MapFrame::initializeFoW()
         startPublishTimer();
     }
 
-    ui->framePublish->setCheckable(!_mapSource->isInitialized());
+    _isVideo = !_mapSource->isInitialized();
+    ui->framePublish->setCheckable(_isVideo);
+    emit publishCheckable(_isVideo);
 }
 
 void MapFrame::uninitializeFoW()
@@ -450,7 +569,16 @@ void MapFrame::hideEvent(QHideEvent * event)
 
 void MapFrame::resizeEvent(QResizeEvent *event)
 {
+    qDebug() << "[MapFrame] resized: " << event->size().width() << "x" << event->size().height();
+    loadViewRect();
     QWidget::resizeEvent(event);
+}
+
+void MapFrame::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+    qDebug() << "[MapFrame] shown (" << isVisible() << ")";
+    loadViewRect();
 }
 
 void MapFrame::timerEvent(QTimerEvent *event)
@@ -470,7 +598,8 @@ void MapFrame::timerEvent(QTimerEvent *event)
     {
         QMutexLocker locker(_videoPlayer->getMutex());
 
-        if(ui->framePublish->isChecked())
+        //if(ui->framePublish->isChecked())
+        if(_isPublishing)
         {
             if(!_videoPlayer->getImage()->isNull())
             {
@@ -494,9 +623,11 @@ void MapFrame::timerEvent(QTimerEvent *event)
                     p.end();
                 }
 
-                if(ui->framePublish->getRotation() != 0)
+                //if(ui->framePublish->getRotation() != 0)
+                if(_rotation != 0)
                 {
-                    result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+                    //result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+                    result = result.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
                 }
 
                 emit animateImage(result);
@@ -542,6 +673,9 @@ void MapFrame::timerEvent(QTimerEvent *event)
                         _fow->setEnabled(false);
                         _fow->setZValue(1);
                     }
+
+                    //ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
+                    loadViewRect();
 
                     stopPublishTimer();
                     startTimer(500); // Clean up the initial image after a brief period (determined by trial and error)
@@ -629,7 +763,8 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
     if(!_mapSource)
         return false;
 
-    if(ui->grpBrush->checkedId() == DMHelper::BrushType_Select)
+    //if(ui->grpBrush->checkedId() == DMHelper::BrushType_Select)
+    if(_brushMode == DMHelper::BrushType_Select)
     {
         if(event->type() == QEvent::MouseButtonPress)
         {
@@ -652,11 +787,11 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, ui->btnFoWErase->isChecked(), ui->chkSmooth->isChecked()));
+                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, _erase, _smooth));
                 _mapSource->getUndoStack()->push(undoShape);
                 emit dirty();
             }
-            cancelSelect();
+            //cancelSelect();
             return true;
         }
         else if(event->type() == QEvent::MouseMove)
@@ -683,7 +818,8 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDownPos = mouseEvent->pos();
             _mouseDown = true;
 
-            _undoPath = new UndoPath(*_mapSource, MapDrawPath(ui->spinBox->value(), ui->grpBrush->checkedId(), ui->btnFoWErase->isChecked(), ui->chkSmooth->isChecked(), ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
+            //_undoPath = new UndoPath(*_mapSource, MapDrawPath(ui->spinBox->value(), ui->grpBrush->checkedId(), _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
+            _undoPath = new UndoPath(*_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
             _mapSource->getUndoStack()->push(_undoPath);
 
             return true;
@@ -820,7 +956,8 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
-        QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize :  _targetSize.transposed();
+        //QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize :  _targetSize.transposed();
+        QSize rotatedSize = (_rotation % 180 == 0) ? _targetSize :  _targetSize.transposed();
         _videoPlayer = new VideoPlayer(_mapSource->getFileName(), rotatedSize, true, _mapSource->getPlayAudio());
         //_videoPlayer->targetResized(rotatedSize);
         if(!_videoPlayer->isError())
@@ -870,7 +1007,8 @@ void MapFrame::startAudioTrack()
 
 void MapFrame::setMapCursor()
 {
-    if(ui->btnZoomSelect->isChecked())
+    //if(ui->btnZoomSelect->isChecked())
+    if(_zoomSelect)
     {
         ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
     }
@@ -879,13 +1017,17 @@ void MapFrame::setMapCursor()
         switch(ui->grpEditMode->checkedId())
         {
             case DMHelper::EditMode_FoW:
-                if(ui->grpBrush->checkedId() == DMHelper::BrushType_Circle)
+                //if(ui->grpBrush->checkedId() == DMHelper::BrushType_Circle)
+                if(_brushMode == DMHelper::BrushType_Circle)
                 {
-                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
                 }
-                else if(ui->grpBrush->checkedId() == DMHelper::BrushType_Square)
+                //else if(ui->grpBrush->checkedId() == DMHelper::BrushType_Square)
+                else if(_brushMode == DMHelper::BrushType_Square)
                 {
-                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
                 }
                 else
                 {
@@ -903,6 +1045,7 @@ void MapFrame::setMapCursor()
     }
 }
 
+/*
 void MapFrame::publishModeVisibleClicked()
 {
     if(ui->btnPublishVisible->isChecked())
@@ -918,13 +1061,16 @@ void MapFrame::publishModeZoomClicked()
         ui->btnPublishVisible->setChecked(false);
     }
 }
+*/
 
 void MapFrame::rotatePublish()
 {
     resetPublishFoW();
-    if((_videoPlayer) && (ui->framePublish->isChecked()))
+    //if((_videoPlayer) && (ui->framePublish->isChecked()))
+    if((_videoPlayer) && (_isPublishing))
     {
-        createVideoPlayer(!ui->framePublish->isChecked());
+        //createVideoPlayer(!ui->framePublish->isChecked());
+        createVideoPlayer(!_isPublishing);
     }
 }
 
@@ -942,6 +1088,30 @@ void MapFrame::setScale(qreal s)
     _scale = s;
     ui->graphicsView->setTransform(QTransform::fromScale(_scale,_scale));
     setMapCursor();
+    storeViewRect();
+}
+
+void MapFrame::storeViewRect()
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setMapRect(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect());
+}
+
+void MapFrame::loadViewRect()
+{
+    if(!_mapSource)
+        return;
+
+    if(_mapSource->getMapRect().isValid())
+    {
+        ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
+    }
+    else
+    {
+        zoomFit();
+    }
 }
 
 void MapFrame::resetPublishFoW()
@@ -957,7 +1127,8 @@ void MapFrame::audioPlaybackChecked()
     if(_mapSource)
         _mapSource->setPlayAudio(ui->chkAudio->isChecked());
 
-    if((ui->framePublish->isChecked()) && (_videoPlayer))
+    //if((ui->framePublish->isChecked()) && (_videoPlayer))
+    if((_isPublishing) && (_videoPlayer))
         _videoPlayer->setPlayingAudio(ui->chkAudio->isChecked());
 }
 

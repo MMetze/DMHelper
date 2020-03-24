@@ -38,6 +38,9 @@ public:
     bool getPlayAudio() const;
     void setPlayAudio(bool playAudio);
 
+    const QRect& getMapRect() const;
+    void setMapRect(const QRect& mapRect);
+
     QUndoStack* getUndoStack() const;
     void applyPaintTo(QImage* target, QColor clearColor, int index);
     MapFrame* getRegisteredWindow() const;
@@ -83,6 +86,7 @@ private:
     QList<MapMarker> _markerList;
     QUuid _audioTrackId;
     bool _playAudio;
+    QRect _mapRect;
 
     bool _initialized;
     QImage _imgBackground;

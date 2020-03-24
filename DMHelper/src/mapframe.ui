@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1744</width>
-    <height>632</height>
+    <height>537</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -732,7 +732,7 @@ color: rgb(85, 0, 0);</string>
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="grpBrush"/>
   <buttongroup name="grpEditMode"/>
+  <buttongroup name="grpBrush"/>
  </buttongroups>
 </ui>

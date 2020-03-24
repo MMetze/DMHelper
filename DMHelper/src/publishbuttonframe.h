@@ -15,8 +15,6 @@ public:
     explicit PublishButtonFrame(QWidget *parent = nullptr);
     virtual ~PublishButtonFrame();
 
-    void setDefaults();
-
     bool isChecked();
     bool isCheckable();
     void setCheckable(bool checkable);
@@ -40,6 +38,8 @@ private slots:
     void handleToggle(bool checked);
 
 private:
+    void setDefaults();
+
     Ui::PublishButtonFrame *ui;
 };
 

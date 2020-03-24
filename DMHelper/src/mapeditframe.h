@@ -8,48 +8,43 @@ namespace Ui {
 class MapEditFrame;
 }
 
+class PublishButtonRibbon;
+
 class MapEditFrame : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit MapEditFrame(DMHelper::BrushType brushType = DMHelper::BrushType_Circle,
-                          int brushSize = 30,
-                          bool gridVisible = true,
-                          int gridScale = 25,
-                          int gridOffsetX = 0,
-                          int gridOffsetY = 0,
-                          QWidget *parent = nullptr);
+    explicit MapEditFrame(QWidget *parent = nullptr);
     ~MapEditFrame();
 
-    DMHelper::BrushType getBrushType() const;
-    int getBrushSize() const;
-
-    bool isGridVisible() const;
-    int getGridScale() const;
-    int getGridOffsetX() const;
-    int getGridOffsetY() const;
+    PublishButtonRibbon* getPublishRibbon() const;
 
 public slots:
-    void setBrushType(DMHelper::BrushType brushType);
-    void setBrushSize(int brushSize);
-
-    void setGridVisible(bool gridVisible);
-    void setGridScale(int gridScale);
-    void setGridOffsetX(int gridOffsetX);
-    void setGridOffsetY(int gridOffsetY);
+    void setZoomSelect(bool checked);
+    void setBrushMode(int brushMode);
+    void setDrawErase(bool checked);
 
 signals:
-    void clearFoW();
-    void resetFoW();
+    void zoomInClicked();
+    void zoomOutClicked();
+    void zoomOneClicked();
+    void zoomFullClicked();
+    void zoomSelectClicked(bool checked);
 
-    void brushTypeChanged(DMHelper::BrushType brushType);
-    void brushSizeChanged(int brushSize);
+    void drawEraseClicked(bool checked);
+    void smoothClicked(bool checked);
+    void brushModeChanged(int brushMode);
+    void brushSizeChanged(int size);
+    void fillFoWClicked();
 
-    void gridVisibleChanged(bool gridVisible);
-    void gridScaleChanged(int gridScale);
-    void gridOffsetXChanged(int gridOffsetX);
-    void gridOffsetYChanged(int gridOffsetY);
+    void publishZoomChanged(bool checked);
+    void publishVisibleChanged(bool checked);
+
+private slots:
+    void setEraseMode();
+    void publishModeVisibleClicked();
+    void publishModeZoomClicked();
 
 private:
     Ui::MapEditFrame *ui;

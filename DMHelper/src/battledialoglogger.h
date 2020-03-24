@@ -11,9 +11,9 @@ class BattleDialogLogger : public DMHObjectBase
     Q_OBJECT
 public:
     explicit BattleDialogLogger(QObject *parent = nullptr);
+    explicit BattleDialogLogger(const BattleDialogLogger& other);
     virtual ~BattleDialogLogger();
 
-    BattleDialogLogger(const BattleDialogLogger& other) = delete;
     BattleDialogLogger& operator=(const BattleDialogLogger& other) = delete;
 
     virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
@@ -22,7 +22,10 @@ public:
 
     virtual QList<BattleDialogEvent*> getEvents() const;
 
+    int getRounds() const;
+
 signals:
+    void roundsChanged();
 
 public slots:
     void damageDone(QUuid combatantID, QUuid targetID, int damage);

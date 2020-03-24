@@ -3,6 +3,7 @@
 
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodeleffect.h"
+#include "battledialoglogger.h"
 //#include "combatant.h"
 #include <QList>
 #include <QRect>
@@ -50,52 +51,56 @@ public:
     void appendEffect(BattleDialogModelEffect* effect);
 
     Map* getMap() const;
-    void setMap(Map* map, const QRect& mapRect);
-
     const QRect& getMapRect() const;
-    void setMapRect(const QRect& mapRect);
-
     bool isMapChanged() const;
     const QRect& getPreviousMapRect() const;
     Map* getPreviousMap() const;
-
     QRectF getCameraRect() const;
-    void setCameraRect(const QRectF& rect);
-
     QColor getBackgroundColor() const;
-    void setBackgroundColor(QColor color);
-
     bool getGridOn() const;
-    void setGridOn(bool gridOn);
-
     int getGridScale() const;
-    void setGridScale(int gridScale);
-
     int getGridOffsetX() const;
-    void setGridOffsetX(int gridOffsetX);
-
     int getGridOffsetY() const;
-    void setGridOffsetY(int gridOffsetY);
-
     bool getShowCompass() const;
-    void setShowCompass(bool showCompass);
-
     bool getShowAlive() const;
-    void setShowAlive(bool showAlive);
-
     bool getShowDead() const;
-    void setShowDead(bool showDead);
-
     bool getShowEffects() const;
-    void setShowEffects(bool showEffects);
-
+    const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
-    void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
-
-    void setBackgroundImage(QImage backgroundImage);
     QImage getBackgroundImage() const;
 
+public slots:
+    void setMap(Map* map, const QRect& mapRect);
+    void setMapRect(const QRect& mapRect);
+    void setCameraRect(const QRectF& rect);
+    void setBackgroundColor(QColor color);
+    void setGridOn(bool gridOn);
+    void setGridScale(int gridScale);
+    void setGridOffsetX(int gridOffsetX);
+    void setGridOffsetY(int gridOffsetY);
+    void setShowCompass(bool showCompass);
+    void setShowAlive(bool showAlive);
+    void setShowDead(bool showDead);
+    void setShowEffects(bool showEffects);
+    void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
+    void setBackgroundImage(QImage backgroundImage);
     void sortCombatants();
+
+signals:
+    void mapChanged(Map* map);
+    void mapRectChanged(const QRect& mapRect);
+    void cameraRectChanged(const QRectF& rect);
+    void backgroundColorChanged(QColor color);
+    void gridOnChanged(bool gridOn);
+    void gridScaleChanged(int gridScale);
+    void gridOffsetXChanged(int gridOffsetX);
+    void gridOffsetYChanged(int gridOffsetY);
+    void showCompassChanged(bool showCompass);
+    void showAliveChanged(bool showAlive);
+    void showDeadChanged(bool showDead);
+    void showEffectsChanged(bool showEffects);
+    void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
+    void backgroundImageChanged(QImage backgroundImage);
 
 private:
     static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
@@ -127,6 +132,8 @@ private:
     bool _showEffects;
 
     BattleDialogModelCombatant* _activeCombatant;
+
+    BattleDialogLogger _logger;
 
     QImage _backgroundImage;
 };

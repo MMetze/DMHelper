@@ -32,6 +32,15 @@ class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
 class PublishFrame;
+class DMHelperRibbon;
+class RibbonTabFile;
+class RibbonTabCampaign;
+class RibbonTabBestiary;
+class RibbonTabHelp;
+class RibbonTabMap;
+class RibbonTabBattle;
+class BattleDialogModel;
+class MapEditFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -83,7 +92,7 @@ public slots:
 
     void checkForUpdates(bool silentUpdate = false);
 
-    void showPublishWindow();
+    void showPublishWindow(bool visible = true);
 
     void linkActivated(const QUrl & link);
 
@@ -91,10 +100,11 @@ public slots:
     void readBestiary();
 
 signals:
-    void openPreview();
     void campaignLoaded(Campaign* campaign);
     void dispatchPublishImage(QImage img, QColor color);
     void dispatchAnimateImage(QImage img);
+
+    void cancelSelect();
 
 protected:
     virtual void showEvent(QShowEvent * event);
@@ -105,10 +115,14 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent * event);
     virtual void mouseMoveEvent(QMouseEvent * event);
 
+    virtual void keyPressEvent(QKeyEvent *event);
+
     void dragEnterEvent(QDragEnterEvent *event);
     void dragMoveEvent(QDragMoveEvent *event);
     void dragLeaveEvent(QDragLeaveEvent *event);
     void dropEvent(QDropEvent *event);
+
+    void setupRibbonBar();
 
     void deleteCampaign();
     void enableCampaignMenu();
@@ -161,6 +175,10 @@ protected slots:
     void openTextTranslator();
     void openRandomMarkets();
 
+    QDialog* createDialog(QWidget* contents);
+
+    void battleModelChanged(BattleDialogModel* model);
+
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();
     void handleChaseComplete();
@@ -171,8 +189,15 @@ private:
 
     PublishWindow* pubWindow;
     ScrollTabWidget* previewTab;
-    TimeAndDateFrame* timeAndDateFrame;
     PublishFrame* previewFrame;
+    QDialog* previewDlg;
+    QDialog* dmScreenDlg;
+    QDialog* tableDlg;
+    QDialog* quickRefDlg;
+    QDialog* soundDlg;
+    TimeAndDateFrame* timeAndDateFrame;
+    QDialog* calendarDlg;
+    QDialog* countdownDlg;
 
     EncounterTextEdit* encounterTextEdit;
 
@@ -209,6 +234,15 @@ private:
     bool initialized;
     bool dirty;
     int _animationFrameCount;
+
+    DMHelperRibbon* _ribbon;
+    RibbonTabFile* _ribbonTabFile;
+    RibbonTabCampaign* _ribbonTabCampaign;
+    RibbonTabBestiary* _ribbonTabTools;
+    RibbonTabHelp* _ribbonTabHelp;
+    RibbonTabMap* _ribbonTabMap;
+    RibbonTabBattle* _ribbonTabBattle;
+    MapEditFrame* _ribbonTabMiniMap;
 };
 
 #endif // MAINWINDOW_H

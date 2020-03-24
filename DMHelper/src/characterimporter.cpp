@@ -430,20 +430,6 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
                     hasArmor = true;
                 _totalArmor += armorClass;
             }
-
-            /*
-            QJsonArray grantedModArray = invDescription["grantedModifiers"].toArray();
-            for(int j = 0; j < grantedModArray.count(); ++j)
-            {
-                QJsonObject modObject = grantedModArray.at(j).toObject();
-                if((modObject["type"].toString() == QString("bonus")) && (modObject["subType"].toString() == QString("armor-class")))
-                {
-                    _totalArmor += modObject["value"].toInt();
-                }
-            }
-            */
-            //void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character)
-            //scanModifiers(modifiersObject, QString("class"), *_character);
             scanModifiers(invDefinition, QString("grantedModifiers"), *_character);
         }
 

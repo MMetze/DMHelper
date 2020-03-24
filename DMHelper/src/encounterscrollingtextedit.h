@@ -43,6 +43,7 @@ signals:
 
 public slots:
     void targetResized(const QSize& newSize);
+    void cancelPublish();
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;

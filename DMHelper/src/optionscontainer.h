@@ -32,6 +32,7 @@ public:
     bool getShowOnDeck() const;
     bool getShowCountdown() const;
     int getCountdownDuration() const;
+    QString getPointerFile() const;
 
     // Data settings
     bool doDataSettingsExist() const;
@@ -72,6 +73,7 @@ signals:
     void showOnDeckChanged(bool showOnDeck);
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
+    void pointerFileNameChanged(const QString& filename);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -114,6 +116,7 @@ public slots:
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
+    void setPointerFileName(const QString& filename);
 
     // Data settings
     void setUpdatesEnabled(bool updatesEnabled);
@@ -151,6 +154,7 @@ private:
     bool _showOnDeck;
     bool _showCountdown;
     int _countdownDuration;
+    QString _pointerFile;
 
     // Data settings
     bool _dataSettingsExist;

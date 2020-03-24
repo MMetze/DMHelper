@@ -17,7 +17,7 @@
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <property name="currentIndex">
-   <number>4</number>
+   <number>0</number>
   </property>
   <widget class="QWidget" name="tab">
    <attribute name="title">
@@ -41,7 +41,7 @@
          <x>0</x>
          <y>0</y>
          <width>1766</width>
-         <height>802</height>
+         <height>808</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -611,8 +611,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1766</width>
-         <height>802</height>
+         <width>367</width>
+         <height>475</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
@@ -1126,8 +1126,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1766</width>
-         <height>802</height>
+         <width>559</width>
+         <height>89</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
@@ -1550,8 +1550,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1766</width>
-         <height>802</height>
+         <width>614</width>
+         <height>174</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -1916,7 +1916,7 @@
          <x>0</x>
          <y>0</y>
          <width>1766</width>
-         <height>802</height>
+         <height>808</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -2499,8 +2499,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1766</width>
-         <height>802</height>
+         <width>742</width>
+         <height>89</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">

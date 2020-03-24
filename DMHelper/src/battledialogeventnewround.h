@@ -13,6 +13,7 @@ public:
     virtual ~BattleDialogEventNewRound() override;
 
     virtual int getType() const override;
+    virtual BattleDialogEvent* clone() override;
 
     virtual void outputXML(QDomElement &element, bool isExport) override;
 

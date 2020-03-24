@@ -26,6 +26,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _markerList(),
     _audioTrackId(),
     _playAudio(false),
+    _mapRect(),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -42,6 +43,7 @@ Map::Map(const QDomElement& element, bool isImport, QObject *parent) :
     _markerList(),
     _audioTrackId(),
     _playAudio(false),
+    _mapRect(),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -59,6 +61,7 @@ Map::Map(const Map &obj) :
     _markerList(obj._markerList),
     _audioTrackId(obj._audioTrackId),
     _playAudio(obj._playAudio),
+    _mapRect(obj._mapRect),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -81,11 +84,14 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
 
     AdventureItem::outputXML(doc, element, targetDirectory, isExport);
 
-    element.setAttribute( "name", getName() );
-    element.setAttribute( "filename", targetDirectory.relativeFilePath(getFileName()) );
-    element.setAttribute( "audiotrack", _audioTrackId.toString() );
-    element.setAttribute( "playaudio", _playAudio);
-
+    element.setAttribute("name", getName());
+    element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
+    element.setAttribute("audiotrack", _audioTrackId.toString());
+    element.setAttribute("playaudio", _playAudio);
+    element.setAttribute("mapRectX", _mapRect.x());
+    element.setAttribute("mapRectY", _mapRect.y());
+    element.setAttribute("mapRectWidth", _mapRect.width());
+    element.setAttribute("mapRectHeight", _mapRect.height());
 
     QDomElement actionsElement = doc.createElement( "actions" );
     int i;
@@ -119,6 +125,10 @@ void Map::inputXML(const QDomElement &element, bool isImport)
 
     setName(element.attribute("name"));
     setFileName(element.attribute("filename"));
+    _mapRect = QRect(element.attribute("mapRectX",QString::number(0)).toInt(),
+                     element.attribute("mapRectY",QString::number(0)).toInt(),
+                     element.attribute("mapRectWidth",QString::number(0)).toInt(),
+                     element.attribute("mapRectHeight",QString::number(0)).toInt());
 
     QDomElement actionsElement = element.firstChildElement( QString("actions") );
     if( !actionsElement.isNull() )
@@ -225,7 +235,25 @@ bool Map::getPlayAudio() const
 
 void Map::setPlayAudio(bool playAudio)
 {
-    _playAudio = playAudio;
+    if(_playAudio != playAudio)
+    {
+        _playAudio = playAudio;
+        emit dirty();
+    }
+}
+
+const QRect& Map::getMapRect() const
+{
+    return _mapRect;
+}
+
+void Map::setMapRect(const QRect& mapRect)
+{
+    if(_mapRect != mapRect)
+    {
+        _mapRect = mapRect;
+        emit dirty();
+    }
 }
 
 QUndoStack* Map::getUndoStack() const
