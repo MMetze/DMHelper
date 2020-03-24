@@ -50,13 +50,16 @@ signals:
     void zoomSelectChanged(bool enabled);
     void brushModeSet(int brushMode);
 
+    void publishCancelled();
+    void publishCheckable(bool checkable);
+
 public slots:
     void updateFoW();
     void fillFoW();
     void resetFoW();
     void clearFoW();
     void undoPaint();
-    void publishFoWImage();
+    void publishFoWImage(bool publishing = false);
     void clear();
 
     void cancelPublish();
@@ -79,6 +82,9 @@ public slots:
     void setPublishVisible(bool enabled);
 
     void targetResized(const QSize& newSize);
+
+    void setRotation(int rotation);
+    void setColor(QColor color);
 
 protected:
     void initializeFoW();
@@ -129,6 +135,11 @@ private:
     int _brushSize;
     bool _publishZoom;
     bool _publishVisible;
+    bool _isPublishing;
+    bool _isVideo;
+
+    int _rotation;
+    QColor _color;
 
     bool _mouseDown;
     QPoint _mouseDownPos;

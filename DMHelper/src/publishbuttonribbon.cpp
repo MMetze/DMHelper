@@ -16,9 +16,12 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
 
     connect(ui->btnCW, SIGNAL(clicked()), ui->btnColor, SLOT(rotateCW()));
     connect(ui->btnCW, SIGNAL(clicked()), this, SIGNAL(rotateCW()));
+    connect(ui->btnCW, SIGNAL(clicked()), this, SLOT(handleRotation()));
     connect(ui->btnCCW, SIGNAL(clicked()), ui->btnColor, SLOT(rotateCCW()));
     connect(ui->btnCCW, SIGNAL(clicked()), this, SIGNAL(rotateCCW()));
+    connect(ui->btnCCW, SIGNAL(clicked()), this, SLOT(handleRotation()));
 
+    connect(ui->btnColor, SIGNAL(rotationChanged(int)), this, SIGNAL(rotationChanged(int)));
     connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
 
     setDefaults();
@@ -41,11 +44,6 @@ bool PublishButtonRibbon::isCheckable()
     return ui->btnPublish->isCheckable();
 }
 
-void PublishButtonRibbon::setCheckable(bool checkable)
-{
-    ui->btnPublish->setCheckable(checkable);
-}
-
 QColor PublishButtonRibbon::getColor() const
 {
     return ui->btnColor->getColor();
@@ -59,6 +57,11 @@ int PublishButtonRibbon::getRotation()
 void PublishButtonRibbon::setChecked(bool checked)
 {
     ui->btnPublish->setChecked(checked);
+}
+
+void PublishButtonRibbon::setCheckable(bool checkable)
+{
+    ui->btnPublish->setCheckable(checkable);
 }
 
 void PublishButtonRibbon::setRotation(int rotation)
@@ -80,14 +83,21 @@ void PublishButtonRibbon::handleToggle(bool checked)
 {
     if(checked)
     {
-        ui->btnPublish->setStyleSheet(QString("QPushButton {color: red; font-weight: bold; }"));
-        ui->btnPublish->setText(QString("Publishing!"));
+        //ui->btnPublish->setStyleSheet(QString("QPushButton {color: red; font-weight: bold; }"));
+        //ui->btnPublish->setText(QString("Publishing!"));
+        ui->btnPublish->setIcon(QIcon(QPixmap(":/img/data/icon_publishon.png")));
     }
     else
     {
-        ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
-        ui->btnPublish->setText(QString("Publish"));
+        //ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
+        //ui->btnPublish->setText(QString("Publish"));
+        ui->btnPublish->setIcon(QIcon(QPixmap(":/img/data/icon_publish.png")));
     }
+}
+
+void PublishButtonRibbon::handleRotation()
+{
+    emit rotationChanged(ui->btnColor->getRotation());
 }
 
 void PublishButtonRibbon::setDefaults()

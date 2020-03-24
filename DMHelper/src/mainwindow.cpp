@@ -508,6 +508,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabMiniMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
     connect(_ribbonTabMiniMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
 
+    publishButtonRibbon = _ribbonTabMiniMap->getPublishRibbon();
+    connect(publishButtonRibbon, SIGNAL(rotationChanged(int)), mapFrame, SLOT(setRotation(int)));
+    connect(publishButtonRibbon, SIGNAL(colorChanged(QColor)), mapFrame, SLOT(setColor(QColor)));
+    connect(publishButtonRibbon, SIGNAL(clicked(bool)), mapFrame, SLOT(publishFoWImage(bool)));
+    connect(mapFrame, SIGNAL(publishCancelled()), publishButtonRibbon, SLOT(cancelPublish()));
+    connect(mapFrame, SIGNAL(publishCheckable(bool)), publishButtonRibbon, SLOT(setCheckable(bool)));
+    mapFrame->setRotation(publishButtonRibbon->getRotation());
+    mapFrame->setColor(publishButtonRibbon->getColor());
+
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
     // EncounterType_ScrollingText

@@ -261,6 +261,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     ui->groupBox->hide();
     ui->groupBox_5->hide();
     ui->stackMode->hide();
+    ui->framePublish->hide();
 
     qDebug() << "[Battle Frame] created";
 }

@@ -8,6 +8,8 @@ namespace Ui {
 class MapEditFrame;
 }
 
+class PublishButtonRibbon;
+
 class MapEditFrame : public QFrame
 {
     Q_OBJECT
@@ -16,6 +18,7 @@ public:
     explicit MapEditFrame(QWidget *parent = nullptr);
     ~MapEditFrame();
 
+    PublishButtonRibbon* getPublishRibbon() const;
 
 public slots:
     void setZoomSelect(bool checked);

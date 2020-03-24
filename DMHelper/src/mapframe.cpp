@@ -32,6 +32,10 @@ MapFrame::MapFrame(QWidget *parent) :
     _brushSize(30),
     _publishZoom(false),
     _publishVisible(false),
+    _isPublishing(false),
+    _isVideo(false),
+    _rotation(0),
+    _color(Qt::black),
     _mouseDown(false),
     _mouseDownPos(),
     _undoPath(nullptr),
@@ -116,6 +120,7 @@ MapFrame::MapFrame(QWidget *parent) :
     ui->label_2->hide();
     ui->cmbTracks->hide();
     ui->groupBox_3->hide();
+    ui->framePublish->hide();
 }
 
 MapFrame::~MapFrame()
@@ -255,12 +260,15 @@ void MapFrame::undoPaint()
     updateFoW();
 }
 
-void MapFrame::publishFoWImage()
+void MapFrame::publishFoWImage(bool publishing)
 {
     if(!_mapSource)
         return;
 
-    if(!ui->framePublish->isCheckable())
+    _isPublishing = publishing;
+
+    //if(!ui->framePublish->isCheckable())
+    if(!_isVideo)
     {
         // Still Image
         QImage pub;
@@ -289,12 +297,15 @@ void MapFrame::publishFoWImage()
             }
         }
 
-        if(ui->framePublish->getRotation() != 0)
+        //if(ui->framePublish->getRotation() != 0)
+        if(_rotation != 0)
         {
-            pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+            //pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+            pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
         }
 
-        emit publishImage(pub, ui->framePublish->getColor());
+        //emit publishImage(pub, ui->framePublish->getColor());
+        emit publishImage(pub, _color);
         emit showPublishWindow();
         startAudioTrack();
     }
@@ -302,10 +313,13 @@ void MapFrame::publishFoWImage()
     {
         //Video
         stopPublishTimer();
-        createVideoPlayer(!ui->framePublish->isChecked());
-        if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
+        //createVideoPlayer(!ui->framePublish->isChecked());
+        createVideoPlayer(!_isPublishing);
+        //if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
+        if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
         {
-            emit animationStarted(ui->framePublish->getColor());
+            //emit animationStarted(ui->framePublish->getColor());
+            emit animationStarted(_color);
             emit showPublishWindow();
             startAudioTrack();
         }
@@ -326,6 +340,8 @@ void MapFrame::clear()
 void MapFrame::cancelPublish()
 {
     ui->framePublish->cancelPublish();
+    emit publishCancelled();
+    _isPublishing = false;
 }
 
 void MapFrame::editModeToggled(int editMode)
@@ -439,12 +455,24 @@ void MapFrame::setPublishVisible(bool enabled)
 void MapFrame::targetResized(const QSize& newSize)
 {
     _targetSize = newSize;
-    if((_videoPlayer) && (ui->framePublish->isChecked()))
+    //if((_videoPlayer) && (ui->framePublish->isChecked()))
+    if((_videoPlayer) && (_isPublishing))
     {
         _videoPlayer->targetResized(newSize);
     }
 
     resetPublishFoW();
+}
+
+void MapFrame::setRotation(int rotation)
+{
+    _rotation = rotation;
+    rotatePublish();
+}
+
+void MapFrame::setColor(QColor color)
+{
+    _color = color;
 }
 
 void MapFrame::initializeFoW()
@@ -488,7 +516,9 @@ void MapFrame::initializeFoW()
         startPublishTimer();
     }
 
-    ui->framePublish->setCheckable(!_mapSource->isInitialized());
+    _isVideo = !_mapSource->isInitialized();
+    ui->framePublish->setCheckable(_isVideo);
+    emit publishCheckable(_isVideo);
 }
 
 void MapFrame::uninitializeFoW()
@@ -568,7 +598,8 @@ void MapFrame::timerEvent(QTimerEvent *event)
     {
         QMutexLocker locker(_videoPlayer->getMutex());
 
-        if(ui->framePublish->isChecked())
+        //if(ui->framePublish->isChecked())
+        if(_isPublishing)
         {
             if(!_videoPlayer->getImage()->isNull())
             {
@@ -592,9 +623,11 @@ void MapFrame::timerEvent(QTimerEvent *event)
                     p.end();
                 }
 
-                if(ui->framePublish->getRotation() != 0)
+                //if(ui->framePublish->getRotation() != 0)
+                if(_rotation != 0)
                 {
-                    result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+                    //result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+                    result = result.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
                 }
 
                 emit animateImage(result);
@@ -923,7 +956,8 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
-        QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize :  _targetSize.transposed();
+        //QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize :  _targetSize.transposed();
+        QSize rotatedSize = (_rotation % 180 == 0) ? _targetSize :  _targetSize.transposed();
         _videoPlayer = new VideoPlayer(_mapSource->getFileName(), rotatedSize, true, _mapSource->getPlayAudio());
         //_videoPlayer->targetResized(rotatedSize);
         if(!_videoPlayer->isError())
@@ -1032,9 +1066,11 @@ void MapFrame::publishModeZoomClicked()
 void MapFrame::rotatePublish()
 {
     resetPublishFoW();
-    if((_videoPlayer) && (ui->framePublish->isChecked()))
+    //if((_videoPlayer) && (ui->framePublish->isChecked()))
+    if((_videoPlayer) && (_isPublishing))
     {
-        createVideoPlayer(!ui->framePublish->isChecked());
+        //createVideoPlayer(!ui->framePublish->isChecked());
+        createVideoPlayer(!_isPublishing);
     }
 }
 
@@ -1091,7 +1127,8 @@ void MapFrame::audioPlaybackChecked()
     if(_mapSource)
         _mapSource->setPlayAudio(ui->chkAudio->isChecked());
 
-    if((ui->framePublish->isChecked()) && (_videoPlayer))
+    //if((ui->framePublish->isChecked()) && (_videoPlayer))
+    if((_isPublishing) && (_videoPlayer))
         _videoPlayer->setPlayingAudio(ui->chkAudio->isChecked());
 }
 

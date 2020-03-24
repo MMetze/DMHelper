@@ -41,6 +41,11 @@ MapEditFrame::~MapEditFrame()
     delete ui;
 }
 
+PublishButtonRibbon* MapEditFrame::getPublishRibbon() const
+{
+    return ui->publishFrame;
+}
+
 void MapEditFrame::setZoomSelect(bool checked)
 {
     ui->btnZoomSelect->setChecked(checked);

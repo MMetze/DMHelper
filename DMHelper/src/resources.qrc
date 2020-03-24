@@ -223,6 +223,7 @@
         <file>data/icon_height.png</file>
         <file>data/icon_dmscreen.png</file>
         <file>data/icon_soundboard.png</file>
+        <file>data/icon_publishon.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
