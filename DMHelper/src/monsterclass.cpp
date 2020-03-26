@@ -278,7 +278,7 @@ int MonsterClass::getMonsterSizeCategory() const
     return _monsterSizeCategory;
 }
 
-int MonsterClass::getMonsterSizeFactor() const
+qreal MonsterClass::getMonsterSizeFactor() const
 {
     return convertSizeCategoryToScaleFactor(getMonsterSizeCategory());
 }
@@ -562,28 +562,28 @@ int MonsterClass::convertSizeToCategory(const QString& monsterSize)
         return DMHelper::CombatantSize_Unknown;
 }
 
-int MonsterClass::convertSizeCategoryToScaleFactor(int category)
+qreal MonsterClass::convertSizeCategoryToScaleFactor(int category)
 {
     switch(category)
     {
         case DMHelper::CombatantSize_Tiny:
-            return 1;
+            return 0.5;
         case DMHelper::CombatantSize_Small:
-            return 1;
+            return 0.75;
         case DMHelper::CombatantSize_Medium:
-            return 1;
+            return 1.0;
         case DMHelper::CombatantSize_Large:
-            return 2;
+            return 2.0;
         case DMHelper::CombatantSize_Huge:
-            return 3;
+            return 3.0;
         case DMHelper::CombatantSize_Gargantuan:
-            return 4;
+            return 4.0;
         default:
-            return 1;
+            return 1.0;
     }
 }
 
-int MonsterClass::convertSizeToScaleFactor(const QString& monsterSize)
+qreal MonsterClass::convertSizeToScaleFactor(const QString& monsterSize)
 {
     return convertSizeCategoryToScaleFactor(convertSizeToCategory(monsterSize));
 }

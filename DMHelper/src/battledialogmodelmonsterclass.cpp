@@ -56,7 +56,7 @@ BattleDialogModelMonsterClass* BattleDialogModelMonsterClass::clone() const
     return new BattleDialogModelMonsterClass(*this);
 }
 
-int BattleDialogModelMonsterClass::getSizeFactor() const
+qreal BattleDialogModelMonsterClass::getSizeFactor() const
 {
     // TODO: should this just be impossible?
     if(_monsterClass)

@@ -33,7 +33,7 @@ public:
 
     const QPointF& getPosition() const;
     void setPosition(const QPointF& position);
-    virtual int getSizeFactor() const = 0;
+    virtual qreal getSizeFactor() const = 0;
     virtual int getSizeCategory() const = 0;
 
     Combatant* getCombatant() const;

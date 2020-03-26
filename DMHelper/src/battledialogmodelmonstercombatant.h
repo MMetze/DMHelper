@@ -27,7 +27,7 @@ public:
 
     // Local
     virtual BattleDialogModelCombatant* clone() const override;
-    virtual int getSizeFactor() const override;
+    virtual qreal getSizeFactor() const override;
     virtual int getSizeCategory() const override;
 
     virtual int getStrength() const override;

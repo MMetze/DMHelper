@@ -34,7 +34,7 @@ public:
     QString getMonsterSubType() const;
     QString getMonsterSize() const;
     int getMonsterSizeCategory() const;
-    int getMonsterSizeFactor() const;
+    qreal getMonsterSizeFactor() const;
     QString getSpeed() const;
     int getSpeedValue() const;
     QString getAlignment() const;
@@ -78,8 +78,8 @@ public:
     int removeReaction(const MonsterAction& action);
 
     static int convertSizeToCategory(const QString& monsterSize);
-    static int convertSizeCategoryToScaleFactor(int category);
-    static int convertSizeToScaleFactor(const QString& monsterSize);
+    static qreal convertSizeCategoryToScaleFactor(int category);
+    static qreal convertSizeToScaleFactor(const QString& monsterSize);
     static void outputValue(QDomDocument &doc, QDomElement &element, bool isExport, const QString& valueName, const QString& valueText);
 
 public slots:

@@ -43,7 +43,7 @@ BattleDialogModelCombatant* BattleDialogModelCharacter::clone() const
     return new BattleDialogModelCharacter(*this);
 }
 
-int BattleDialogModelCharacter::getSizeFactor() const
+qreal BattleDialogModelCharacter::getSizeFactor() const
 {
     Character* character = getCharacter();
     if(!character)

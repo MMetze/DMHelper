@@ -94,9 +94,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _background(nullptr),
     _fow(nullptr),
     _activePixmap(nullptr),
-    _activeScale(1),
+    _activeScale(1.0),
     _selectedPixmap(nullptr),
-    _selectedScale(1),
+    _selectedScale(1.0),
     _compassPixmap(nullptr),
     _movementPixmap(nullptr),
     _publishRect(nullptr),
@@ -587,7 +587,7 @@ void BattleFrame::setGridScale(int gridScale)
 
         if(_selectedPixmap)
         {
-            scaleFactor = static_cast<qreal>((gridScale)/SELECTED_PIXMAP_SIZE);
+            scaleFactor = static_cast<qreal>(gridScale) / SELECTED_PIXMAP_SIZE;
             qreal oldScaleFactor = _selectedPixmap->scale();
             _selectedPixmap->setScale(scaleFactor);
             _selectedPixmap->setPos(_selectedPixmap->pos() * scaleFactor/oldScaleFactor);
@@ -595,7 +595,7 @@ void BattleFrame::setGridScale(int gridScale)
 
         if(_activePixmap)
         {
-            scaleFactor = static_cast<qreal>((gridScale * _activeScale)/ACTIVE_PIXMAP_SIZE);
+            scaleFactor = static_cast<qreal>(gridScale) * _activeScale / ACTIVE_PIXMAP_SIZE;
             qreal oldScaleFactor = _activePixmap->scale();
             _activePixmap->setScale(scaleFactor);
             _activePixmap->setPos(_activePixmap->pos() * scaleFactor/oldScaleFactor);
@@ -1754,7 +1754,7 @@ void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
             if(selected)
             {
                 _selectedScale = selected->getSizeFactor();
-                _selectedPixmap->setScale(_model->getGridScale() * _selectedScale / SELECTED_PIXMAP_SIZE);
+                _selectedPixmap->setScale(static_cast<qreal>(_model->getGridScale()) * _selectedScale / SELECTED_PIXMAP_SIZE);
             }
             moveRectToPixmap(_selectedPixmap, selectedItem);
             _selectedPixmap->show();
@@ -2671,15 +2671,15 @@ void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
         pixmapItem->setZValue(DMHelper::BattleDialog_Z_Combatant);
         pixmapItem->setPos(combatant->getPosition());
         pixmapItem->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
-        int sizeFactor = combatant->getSizeFactor();
-        qreal scaleFactor = (static_cast<qreal>(_model->getGridScale()-2)) * static_cast<qreal>(sizeFactor) / static_cast<qreal>(qMax(pix.width(),pix.height()));
+        qreal sizeFactor = combatant->getSizeFactor();
+        qreal scaleFactor = (static_cast<qreal>(_model->getGridScale()-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(),pix.height()));
         pixmapItem->setScale(scaleFactor);
 
         qDebug() << "[Battle Frame] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
 
         qreal gridSize = (static_cast<qreal>(_model->getGridScale())) / scaleFactor;
         qreal gridOffset = gridSize * static_cast<qreal>(sizeFactor) / 2.0;
-        QGraphicsRectItem* rect = new QGraphicsRectItem(0, 0, gridSize * static_cast<qreal>(sizeFactor), gridSize * static_cast<qreal>(sizeFactor));
+        QGraphicsRectItem* rect = new QGraphicsRectItem(0, 0, gridSize * sizeFactor, gridSize * static_cast<qreal>(sizeFactor));
         rect->setPos(-gridOffset, -gridOffset);
         rect->setData(BattleDialogItemChild_Index, BattleDialogItemChild_Area);
         rect->setParentItem(pixmapItem);
@@ -3077,8 +3077,8 @@ void BattleFrame::clearBattleFrame()
     _mouseDown = false;
     _mouseDownPos = QPoint();
 
-    _activeScale = 1;
-    _selectedScale = 1;
+    _activeScale = 1.0;
+    _selectedScale = 1.0;
 
     if(_countdownTimer)
         _countdownTimer->stop();
@@ -3179,7 +3179,7 @@ void BattleFrame::createSceneContents()
     activePmp.load(":/img/data/active.png");
     _activePixmap = _scene->addPixmap(activePmp);
     _activePixmap->setTransformationMode(Qt::SmoothTransformation);
-    _activePixmap->setScale(_model->getGridScale() * _activeScale / ACTIVE_PIXMAP_SIZE);
+    _activePixmap->setScale(static_cast<qreal>(_model->getGridScale()) * _activeScale / ACTIVE_PIXMAP_SIZE);
     _activePixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _activePixmap->hide();
 
@@ -3187,7 +3187,7 @@ void BattleFrame::createSceneContents()
     selectPmp.load(":/img/data/selected.png");
     _selectedPixmap = _scene->addPixmap(selectPmp);
     _selectedPixmap->setTransformationMode(Qt::SmoothTransformation);
-    _selectedPixmap->setScale(_model->getGridScale() * _selectedScale / ACTIVE_PIXMAP_SIZE);
+    _selectedPixmap->setScale(static_cast<qreal>(_model->getGridScale()) * _selectedScale / ACTIVE_PIXMAP_SIZE);
     _selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _selectedPixmap->hide();
 

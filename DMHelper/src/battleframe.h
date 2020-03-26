@@ -307,9 +307,9 @@ private:
     QGraphicsPixmapItem* _background;
     QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
-    int _activeScale;
+    qreal _activeScale;
     QGraphicsPixmapItem* _selectedPixmap;
-    int _selectedScale;
+    qreal _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _publishRect;
