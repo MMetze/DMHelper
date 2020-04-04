@@ -3,9 +3,9 @@
 
 #include "encountertext.h"
 #include "combatant.h"
+#include <QDomElement>
 
 class QDomDocument;
-class QDomElement;
 class BattleDialogModel;
 class AudioTrack;
 

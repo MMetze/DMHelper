@@ -245,7 +245,7 @@ void EncounterScrollingText::widgetChanged()
 }
 */
 
-QDomElement EncounterText::createOutputXML(QDomDocument &doc)
+QDomElement EncounterScrollingText::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("scrolling-object");
 }

@@ -2,9 +2,9 @@
 #define ENCOUNTERTEXT_H
 
 #include "campaignobjectbase.h"
+#include <QDomElement>
 
 class QDomDocument;
-class QDomElement;
 
 class EncounterText : public CampaignObjectBase
 {

@@ -3,9 +3,9 @@
 
 #include "encountertext.h"
 #include <QColor>
+#include <QDomElement>
 
 class QDomDocument;
-class QDomElement;
 
 class EncounterScrollingText : public EncounterText
 {
