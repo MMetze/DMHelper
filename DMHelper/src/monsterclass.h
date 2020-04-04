@@ -18,7 +18,7 @@ public:
     explicit MonsterClass(const QDomElement &element, bool isImport, QObject *parent = nullptr);
 
     void inputXML(const QDomElement &element, bool isImport);
-    void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
+    QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
 
     void beginBatchChanges();
     void endBatchChanges();

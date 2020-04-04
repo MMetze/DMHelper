@@ -41,13 +41,15 @@ BattleDialogEvent* BattleDialogEventDamage::clone()
     return new BattleDialogEventDamage(*this);
 }
 
-void BattleDialogEventDamage::outputXML(QDomElement &element, bool isExport)
+QDomElement BattleDialogEventDamage::outputXML(QDomElement &element, bool isExport)
 {
     Q_UNUSED(isExport);
 
     element.setAttribute( "combatant", _combatant.toString() );
     element.setAttribute( "target", _target.toString() );
     element.setAttribute( "damage", _damage );
+
+    return element;
 }
 
 QUuid BattleDialogEventDamage::getCombatant() const

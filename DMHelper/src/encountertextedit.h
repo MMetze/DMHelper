@@ -17,7 +17,7 @@ public:
     explicit EncounterTextEdit(QWidget *parent = nullptr);
     ~EncounterTextEdit();
 
-    void setKeys(QList<QString> keys);
+    void setKeys(const QList<QString>& keys);
     QList<QString> keys();
 
     EncounterText* getEncounter() const;
@@ -29,13 +29,17 @@ public:
     virtual bool eventFilter(QObject *watched, QEvent *event);
 
 signals:
-    void textChanged();
+//    void textChanged();
     void anchorClicked(const QUrl &link);
 
 public slots:
     void clear();
     void setHtml(const QString &text);
     void setPlainText(const QString &text);
+
+protected slots:
+    void storeEncounter();
+    void readEncounter();
 
 protected:
     Ui::EncounterTextEdit *ui;

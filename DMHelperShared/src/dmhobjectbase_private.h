@@ -20,11 +20,11 @@ public:
 
     explicit DMHObjectBase_Private();
     DMHObjectBase_Private(const DMHObjectBase_Private& other);
-    virtual ~DMHObjectBase_Private();
+    ~DMHObjectBase_Private();
 
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
-    virtual void postProcessXML(const QDomElement &element, bool isImport);
+    QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    void inputXML(const QDomElement &element, bool isImport);
+    void postProcessXML(const QDomElement &element, bool isImport);
 
     QUuid getID() const;
     int getIntID() const;
@@ -36,6 +36,8 @@ public:
     //static void resetBaseId();
     //static int createId();
     //static int _id_global;
+
+    void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
 
 private:
     QUuid _id;

@@ -10,24 +10,29 @@ namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 1;
     const int DMHELPER_MINOR_VERSION = 7;
-    const int DMHELPER_ENGINEERING_VERSION = 9;
+    const int DMHELPER_ENGINEERING_VERSION = 10;
 
-    const int CAMPAIGN_MAJOR_VERSION = 1;
+    const int CAMPAIGN_MAJOR_VERSION = 2;
     const int CAMPAIGN_MINOR_VERSION = 0;
 
     const int BESTIARY_MAJOR_VERSION = 2;
     const int BESTIARY_MINOR_VERSION = 1;
 
-    enum EncounterType
+    enum CampaignType
     {
-        EncounterType_Blank = 0,
-        EncounterType_Text,
-        EncounterType_Battle,
-        EncounterType_Character,
-        EncounterType_Map,
-        EncounterType_ScrollingText,
-        EncounterType_AudioTrack,
-        EncounterType_WelcomeScreen
+        CampaignType_Base = 0,
+        CampaignType_Campaign,
+        CampaignType_Party,
+        CampaignType_Combatant,
+        CampaignType_Map,
+        CampaignType_Text,
+        CampaignType_Battle,
+        CampaignType_BattleContent,
+        CampaignType_ScrollingText,
+        CampaignType_AudioTrack,
+        CampaignType_WelcomeScreen,
+
+        CampaignType_Placeholder = 0xffff
     };
 
     enum BattleEvent
@@ -70,7 +75,8 @@ namespace DMHelper
         CombatantSize_Medium,
         CombatantSize_Large,
         CombatantSize_Huge,
-        CombatantSize_Gargantuan
+        CombatantSize_Gargantuan,
+        CombatantSize_Colossal
     };
 
     enum XPThreshold

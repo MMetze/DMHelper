@@ -21,13 +21,15 @@ DMHObjectBase_Private::~DMHObjectBase_Private()
 {
 }
 
-void DMHObjectBase_Private::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
+QDomElement DMHObjectBase_Private::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
+    Q_UNUSED(parent);
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
-    parent.setAttribute( "_baseID", getID().toString() );
+    //parent.setAttribute( "_baseID", getID().toString() );
+    return QDomElement();
 }
 
 void DMHObjectBase_Private::inputXML(const QDomElement &element, bool isImport)
@@ -93,3 +95,12 @@ int DMHObjectBase_Private::createId()
     return _id_global++;
 }
 */
+
+void DMHObjectBase_Private::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    Q_UNUSED(doc);
+    Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
+
+    element.setAttribute( "_baseID", getID().toString() );
+}

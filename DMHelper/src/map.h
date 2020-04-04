@@ -1,7 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include "adventureitem.h"
+#include "campaignobjectbase.h"
 #include "mapcontent.h"
 #include <QList>
 #include <QImage>
@@ -12,21 +12,21 @@ class QUndoStack;
 class MapFrame;
 class AudioTrack;
 
-class Map : public AdventureItem
+class Map : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit Map(const QString& mapName, const QString& fileName, QObject *parent = nullptr);
-    explicit Map(const QDomElement& element, bool isImport, QObject *parent = nullptr);
-    explicit Map(const Map &obj);  // copy constructor
+    explicit Map(const QString& mapName = QString(), const QString& fileName = QString(), QObject *parent = nullptr);
+    //explicit Map(const QDomElement& element, bool isImport, QObject *parent = nullptr);
+    //explicit Map(const Map &obj);  // copy constructor
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void postProcessXML(const QDomElement &element, bool isImport) override;
 
-    QString getName() const;
-    void setName(const QString& newName);
+    //QString getName() const;
+    //void setName(const QString& newName);
 
     QString getFileName() const;
     void setFileName(const QString& newFileName);
@@ -66,20 +66,23 @@ public:
 
     QImage getPreviewImage();
 
-signals:
-    void dirty();
-    void changed();
+//signals:
+//    void dirty();
+//    void changed();
 
 public slots:
-    void registerWindow(MapFrame* mapFrame);
-    void unregisterWindow(MapFrame* mapFrame);
+    //void registerWindow(MapFrame* mapFrame);
+    //void unregisterWindow(MapFrame* mapFrame);
 
     void initialize();
     void uninitialize();
 
-private:
+protected:
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
-    QString _name;
+    //QString _name;
     QString _filename;
     QUndoStack* _undoStack;
     MapFrame* _mapFrame;

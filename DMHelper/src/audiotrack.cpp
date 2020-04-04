@@ -5,13 +5,13 @@
 #include <QDir>
 
 AudioTrack::AudioTrack(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
-    CampaignObjectBase(parent),
-    _name(trackName),
+    CampaignObjectBase(trackName, parent),
     _url(trackUrl),
     _md5()
 {
 }
 
+/*
 AudioTrack::AudioTrack(QDomElement &element, bool isImport, QObject *parent) :
     CampaignObjectBase(parent),
     _name(),
@@ -28,11 +28,13 @@ AudioTrack::AudioTrack(const AudioTrack &obj) :
     _md5(obj._md5)
 {
 }
+*/
 
 AudioTrack::~AudioTrack()
 {
 }
 
+/*
 void AudioTrack::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "track" );
@@ -53,24 +55,28 @@ void AudioTrack::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetD
 
     parent.appendChild(element);
 }
+*/
 
 void AudioTrack::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element, isImport);
-
-    setName(element.attribute("name"));
+//    setName(element.attribute("name"));
     setMD5(element.attribute("md5"));
 
-    QDomElement urlElement = element.firstChildElement( QString("url") );
+    QDomElement urlElement = element.firstChildElement(QString("url"));
     QDomCDATASection urlData = urlElement.firstChild().toCDATASection();
     setUrl(QUrl(urlData.data()));
+
+    CampaignObjectBase::inputXML(element, isImport);
 }
 
+/*
 void AudioTrack::postProcessXML(const QDomElement &element, bool isImport)
 {
     CampaignObjectBase::postProcessXML(element, isImport);
 }
+*/
 
+/*
 QString AudioTrack::getName() const
 {
     return _name;
@@ -85,6 +91,7 @@ void AudioTrack::setName(const QString& trackName)
         emit dirty();
     }
 }
+*/
 
 QUrl AudioTrack::getUrl() const
 {
@@ -111,11 +118,45 @@ void AudioTrack::setMD5(const QString& md5)
     _md5 = md5;
 }
 
-int AudioTrack::getType()
+int AudioTrack::getObjectType() const
+{
+    return DMHelper::CampaignType_AudioTrack;
+}
+
+int AudioTrack::getAudioType() const
 {
     QString urlScheme = _url.scheme();
     if((!urlScheme.isEmpty()) && (urlScheme.left(10) == QString("syrinscape")))
         return DMHelper::AudioType_Syrinscape;
     else
         return DMHelper::AudioType_File;
+}
+
+QDomElement AudioTrack::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("track");
+}
+
+void AudioTrack::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute( "md5", getMD5() );
+
+    QString urlString = targetDirectory.relativeFilePath(_url.toString());
+    if(urlString.isEmpty())
+        urlString = _url.toString();
+
+    QDomElement urlElement = doc.createElement( "url" );
+    QDomCDATASection urlData = doc.createCDATASection(urlString);
+    urlElement.appendChild(urlData);
+    element.appendChild(urlElement);
+
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool AudioTrack::belongsToObject(QDomElement& element)
+{
+    if(element.tagName() == QString("url"))
+        return true;
+    else
+        return CampaignObjectBase::belongsToObject(element);
 }

@@ -17,6 +17,7 @@ public:
     // From CampaignObjectBase
     virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual int getObjectType() const override;
 
     // Base functions to handle UI widgets
     virtual void widgetActivated(QWidget* widget) = 0;

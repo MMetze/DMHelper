@@ -35,7 +35,7 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
     }
 
     if(result)
-        qDebug() << "[Battle Dialog Model Effect Factor] created model effect " << result << " of type " << result->getType();
+        qDebug() << "[Battle Dialog Model Effect Factor] created model effect " << result << " of type " << result->getEffectType();
 
     return result;
 }
@@ -48,7 +48,7 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDom
     if(result)
     {
         result->inputXML(element, isImport);
-        qDebug() << "[Battle Dialog Model Effect Factor] read model effect " << result << " of type " << result->getType();
+        qDebug() << "[Battle Dialog Model Effect Factor] read model effect " << result << " of type " << result->getEffectType();
     }
 
     return result;

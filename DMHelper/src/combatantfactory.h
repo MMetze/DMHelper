@@ -1,13 +1,13 @@
 #ifndef COMBATANTFACTORY_H
 #define COMBATANTFACTORY_H
 
-#include <QObject>
+#include "objectfactory.h"
 
 class Combatant;
 class QDomElement;
 class QString;
 
-class CombatantFactory : public QObject
+class CombatantFactory : public ObjectFactory
 {
     Q_OBJECT
 public:
@@ -18,6 +18,8 @@ public:
 signals:
 
 public slots:
+    virtual CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport) override;
+    virtual CampaignObjectBase* createObject(const QDomElement& element, bool isImport) override;
 
 };
 

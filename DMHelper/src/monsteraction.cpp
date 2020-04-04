@@ -3,7 +3,7 @@
 #include <QDomDocument>
 #include <QDomElement>
 
-MonsterAction::MonsterAction(int attackBonus, QString description, QString name, Dice damageDice) :
+MonsterAction::MonsterAction(int attackBonus, const QString& description, const QString& name, Dice damageDice) :
     _attackBonus(attackBonus),
     _description(description),
     _name(name),
@@ -34,7 +34,7 @@ MonsterAction::MonsterAction(const MonsterAction& other) :
 {
 }
 
-void MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const
+QDomElement MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const
 {
     MonsterClass::outputValue(doc, element, isExport, QString("attack_bonus"), QString::number(getAttackBonus()));
     MonsterClass::outputValue(doc, element, isExport, QString("desc"), getDescription());
@@ -42,6 +42,8 @@ void MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bool isEx
     MonsterClass::outputValue(doc, element, isExport, QString("damage_bonus"), QString::number(getDamageDice().getBonus()));
     Dice outputDice = Dice(getDamageDice().getCount(), getDamageDice().getType(), 0);
     MonsterClass::outputValue(doc, element, isExport, QString("damage_dice"), outputDice.toString());
+
+    return element;
 }
 
 QString MonsterAction::summaryString() const

@@ -135,6 +135,7 @@ protected:
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
     QStandardItem* findItem(QStandardItem* parent, int itemType, QUuid itemId);
+    QStandardItem* findItem(QStandardItem* parent, QUuid itemId);
     QStandardItem* findParentbyType(QStandardItem* child, int parentType);
     void setIndexExpanded(bool expanded, const QModelIndex& index);
 
@@ -178,6 +179,7 @@ protected slots:
     QDialog* createDialog(QWidget* contents);
 
     void battleModelChanged(BattleDialogModel* model);
+    void activateWidget(int objectType);
 
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();

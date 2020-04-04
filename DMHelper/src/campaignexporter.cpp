@@ -1,5 +1,4 @@
 #include "campaignexporter.h"
-#include "adventure.h"
 #include "character.h"
 #include "map.h"
 #include "audiotrack.h"
@@ -12,7 +11,7 @@ CampaignExporter::CampaignExporter(Campaign& originalCampaign, QUuid exportId, Q
     _exportDirectory(exportDirectory),
     _exportCampaign(new Campaign("Export")),
     _exportDocument(new QDomDocument("DMHelperXML")),
-    _shellAdventures(),
+    _exportedIds(),
     _valid(false)
 {
     _exportCampaign->cleanupCampaign(false);
@@ -22,12 +21,6 @@ CampaignExporter::CampaignExporter(Campaign& originalCampaign, QUuid exportId, Q
 CampaignExporter::~CampaignExporter()
 {
     _exportCampaign->cleanupCampaign(false);
-
-    for(Adventure* shell : _shellAdventures)
-    {
-        shell->clear();
-        delete shell;
-    }
 
     delete _exportCampaign;
     delete _exportDocument;
@@ -50,6 +43,7 @@ bool CampaignExporter::isValid() const
 
 bool CampaignExporter::populateExport()
 {
+    /*
     bool result = addObjectForExport(_exportId);
 
     if(result)
@@ -58,16 +52,126 @@ bool CampaignExporter::populateExport()
         _exportDocument->appendChild(rootObject);
         _exportCampaign->outputXML(*_exportDocument, rootObject, _exportDirectory, true);
     }
+    */
 
-    return result;
+    QDomElement rootObject = _exportDocument->createElement("root");
+    _exportDocument->appendChild(rootObject);
+    QDomElement campaignElement = _exportCampaign->outputXML(*_exportDocument, rootObject, _exportDirectory, true);
+
+    return addObjectTree(_exportId, *_exportDocument, campaignElement, _exportDirectory);
 }
+
+bool CampaignExporter::addObjectTree(QUuid exportId, QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+{
+    if(_exportedIds.contains(exportId))
+        return false;
+
+    // Get the object to export
+    CampaignObjectBase* exportObject = _originalCampaign.getObjectById(exportId);
+    if(!exportObject)
+        return false;
+
+    // Export the object
+    QDomElement exportElement = exportObject->outputXML(doc, parent, targetDirectory, true);
+
+    // Check for any further dependencies and export them as well
+    addObjectAndChildrenIds(exportObject);
+    return checkObjectTreeReferences(exportObject, doc, exportElement, targetDirectory);
+}
+
+bool CampaignExporter::checkObjectTreeReferences(CampaignObjectBase* exportObject, QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+{
+    if(!exportObject)
+        return false;
+
+    if(!checkObjectReferences(exportObject, doc, parent, targetDirectory))
+        return false;
+
+    QList<CampaignObjectBase*> childList = exportObject->getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        checkObjectTreeReferences(childList.at(i), doc, parent, targetDirectory);
+    }
+
+    return true;
+}
+
+bool CampaignExporter::checkObjectReferences(CampaignObjectBase* exportObject, QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
+{
+    if(!exportObject)
+        return false;
+
+    if(exportObject->getObjectType() == DMHelper::CampaignType_Battle)
+    {
+        EncounterBattle* battle = dynamic_cast<EncounterBattle*>(exportObject);
+        if(battle)
+        {
+            addObjectTree(battle->getAudioTrackId(), doc, parent, targetDirectory);
+            CombatantGroupList combatants = battle->getCombatantsAllWaves();
+            for(int i = 0; i < combatants.count(); ++i)
+            {
+                Combatant* combatant = combatants.at(i).second;
+                if(combatant->getCombatantType() == DMHelper::CombatantType_Reference)
+                {
+                    CombatantReference* reference = dynamic_cast<CombatantReference*>(combatant);
+                    if(reference)
+                        addObjectTree(reference->getReferenceId(), doc, parent, targetDirectory);
+                }
+            }
+        }
+    }
+    else if(exportObject->getObjectType() == DMHelper::CampaignType_Map)
+    {
+        Map* map = dynamic_cast<Map*>(exportObject);
+        if(map)
+            addObjectTree(map->getAudioTrackId(), doc, parent, targetDirectory);
+    }
+
+    return true;
+}
+
+/*
+void CampaignExporter::addEncounterScrollingText(Adventure& adventure, EncounterScrollingText& encounter)
+{
+    adventure.addEncounter(&encounter);
+}
+
+void CampaignExporter::addMap(Adventure& adventure, Map& map)
+{
+    QObject* oldParent = map.parent();
+    adventure.addMap(&map);
+    map.setParent(oldParent);
+    addObjectForExport(map.getAudioTrackId());    }
+}
+*/
+
+void CampaignExporter::addObjectAndChildrenIds(CampaignObjectBase* object)
+{
+    if(_exportedIds.contains(object->getID()))
+        return;
+
+    _exportedIds.append(object->getID());
+
+    QList<CampaignObjectBase*> childList = object->getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        addObjectAndChildrenIds(childList.at(i));
+    }
+}
+
+/*
 
 bool CampaignExporter::addObjectForExport(QUuid exportId)
 {
     if(exportId.isNull())
         return false;
 
-    if(_exportCampaign->getObjectbyId(exportId) != nullptr)
+    if(_exportCampaign->getObjectById(exportId) != nullptr)
+        return false;
+
+    // Get the object to export
+    CampaignObjectBase* exportObject = _originalCampaign.getObjectById(exportId);
+    if(!exportObject)
         return false;
 
     // Check the party
@@ -242,3 +346,4 @@ void CampaignExporter::addMap(Adventure& adventure, Map& map)
     map.setParent(oldParent);
     addObjectForExport(map.getAudioTrackId());
 }
+*/

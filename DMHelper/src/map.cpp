@@ -18,8 +18,8 @@
 #include <QDebug>
 
 Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
-    AdventureItem(parent),
-    _name(mapName),
+    CampaignObjectBase(mapName, parent),
+    //_name(mapName),
     _filename(fileName),
     _undoStack(nullptr),
     _mapFrame(nullptr),
@@ -34,6 +34,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _undoStack = new QUndoStack(this);
 }
 
+/*
 Map::Map(const QDomElement& element, bool isImport, QObject *parent) :
     AdventureItem(parent),
     _name(),
@@ -77,7 +78,9 @@ Map::Map(const Map &obj) :
         }
     }
 }
+*/
 
+/*
 void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "map" );
@@ -118,26 +121,25 @@ void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirector
 
     parent.appendChild(element);
 }
+*/
 
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
-    AdventureItem::inputXML(element, isImport);
-
-    setName(element.attribute("name"));
+//    setName(element.attribute("name"));
     setFileName(element.attribute("filename"));
     _mapRect = QRect(element.attribute("mapRectX",QString::number(0)).toInt(),
                      element.attribute("mapRectY",QString::number(0)).toInt(),
                      element.attribute("mapRectWidth",QString::number(0)).toInt(),
                      element.attribute("mapRectHeight",QString::number(0)).toInt());
 
-    QDomElement actionsElement = element.firstChildElement( QString("actions") );
-    if( !actionsElement.isNull() )
+    QDomElement actionsElement = element.firstChildElement(QString("actions"));
+    if(!actionsElement.isNull())
     {
-        QDomElement actionElement = actionsElement.firstChildElement( QString("action") );
-        while( !actionElement.isNull() )
+        QDomElement actionElement = actionsElement.firstChildElement(QString("action"));
+        while(!actionElement.isNull())
         {
             UndoBase* newAction = nullptr;
-            switch( actionElement.attribute( QString("type") ).toInt() )
+            switch( actionElement.attribute(QString("type")).toInt())
             {
                 case DMHelper::ActionType_Fill:
                     newAction = new UndoFill(*this, MapEditFill(QColor()));
@@ -169,19 +171,21 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                 _undoStack->push(newAction);
             }
 
-            actionElement = actionElement.nextSiblingElement( QString("action") );
+            actionElement = actionElement.nextSiblingElement(QString("action"));
         }
     }
 
+    CampaignObjectBase::inputXML(element, isImport);
 }
 
 void Map::postProcessXML(const QDomElement &element, bool isImport)
 {
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
     _playAudio = static_cast<bool>(element.attribute("playaudio",QString::number(1)).toInt());
-    AdventureItem::postProcessXML(element, isImport);
+    CampaignObjectBase::postProcessXML(element, isImport);
 }
 
+/*
 QString Map::getName() const
 {
     return _name;
@@ -192,6 +196,7 @@ void Map::setName(const QString& newName)
     _name = newName;
     emit changed();
 }
+*/
 
 QString Map::getFileName() const
 {
@@ -206,7 +211,7 @@ void Map::setFileName(const QString& newFileName)
 
 AudioTrack* Map::getAudioTrack()
 {
-    Campaign* campaign = getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return nullptr;
 
@@ -365,6 +370,7 @@ bool Map::isCleared()
     return false;
 }
 
+/*
 void Map::registerWindow(MapFrame* mapFrame)
 {
     _mapFrame = mapFrame;
@@ -386,42 +392,7 @@ void Map::unregisterWindow(MapFrame* mapFrame)
         registerWindow(nullptr);
     }
 }
-
-void Map::initialize()
-{
-    if(_initialized)
-        return;
-
-    if((_filename.isNull()) || (_filename.isEmpty()))
-        return;
-
-    QImageReader reader(_filename);
-    _imgBackground = reader.read();
-
-    // _imgBackground.load(_filename);
-
-    if(_imgBackground.isNull())
-    {
-        qDebug() << "[Map] Error reading map file " << _filename;
-        qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
-        return;
-    }
-
-    if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
-        _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
-
-    _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
-    applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
-
-    _initialized = true;
-}
-
-void Map::uninitialize()
-{
-    _imgBackground = QImage();
-    _imgFow = QImage();
-    _initialized = false;
-}
+*/
 
 void Map::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview)
 {
@@ -706,4 +677,89 @@ QImage Map::getPreviewImage()
     QImage previewImage;
     previewImage.load(_filename);
     return previewImage;
+}
+
+void Map::initialize()
+{
+    if(_initialized)
+        return;
+
+    if((_filename.isNull()) || (_filename.isEmpty()))
+        return;
+
+    QImageReader reader(_filename);
+    _imgBackground = reader.read();
+
+    // _imgBackground.load(_filename);
+
+    if(_imgBackground.isNull())
+    {
+        qDebug() << "[Map] Error reading map file " << _filename;
+        qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
+        return;
+    }
+
+    if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
+        _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
+
+    _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
+    applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
+
+    _initialized = true;
+}
+
+void Map::uninitialize()
+{
+    _imgBackground = QImage();
+    _imgFow = QImage();
+    _initialized = false;
+}
+
+QDomElement Map::createOutputXML(QDomDocument &doc)
+{
+   return doc.createElement("map");
+}
+
+void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
+    element.setAttribute("audiotrack", _audioTrackId.toString());
+    element.setAttribute("playaudio", _playAudio);
+    element.setAttribute("mapRectX", _mapRect.x());
+    element.setAttribute("mapRectY", _mapRect.y());
+    element.setAttribute("mapRectWidth", _mapRect.width());
+    element.setAttribute("mapRectHeight", _mapRect.height());
+
+    QDomElement actionsElement = doc.createElement("actions");
+    int i;
+    for(i = 0; i < _markerList.count(); ++i)
+    {
+        QDomElement actionElement = doc.createElement("action");
+        actionElement.setAttribute("type", DMHelper::ActionType_SetMarker);
+        _markerList.at(i).outputXML(actionElement, isExport);
+        actionsElement.appendChild(actionElement);
+    }
+
+    for(i = 0; i < _undoStack->index(); ++i )
+    {
+        const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
+        if(action)
+        {
+            QDomElement actionElement = doc.createElement("action");
+            actionElement.setAttribute("type", action->getType());
+            action->outputXML(doc, actionElement, targetDirectory, isExport);
+            actionsElement.appendChild(actionElement);
+        }
+    }
+    element.appendChild(actionsElement);
+
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool Map::belongsToObject(QDomElement& element)
+{
+    if(element.tagName() == QString("actions"))
+        return true;
+    else
+        return CampaignObjectBase::belongsToObject(element);
 }

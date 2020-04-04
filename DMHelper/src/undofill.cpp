@@ -12,20 +12,20 @@ UndoFill::UndoFill(Map& map, const MapEditFill& mapEditFill) :
 
 void UndoFill::undo()
 {
-    if( _map.getRegisteredWindow() )
+    if(_map.getRegisteredWindow())
         _map.getRegisteredWindow()->undoPaint();
 }
 
 void UndoFill::redo()
 {
-    if( _map.getRegisteredWindow() )
+    if(_map.getRegisteredWindow())
     {
         apply(true, nullptr);
         _map.getRegisteredWindow()->updateFoW();
     }
 }
 
-void UndoFill::apply( bool preview, QPaintDevice* target ) const
+void UndoFill::apply(bool preview, QPaintDevice* target) const
 {
     QColor applyColor = _mapEditFill.color();
     if(preview)
@@ -36,7 +36,7 @@ void UndoFill::apply( bool preview, QPaintDevice* target ) const
     _map.fillFoW(applyColor,target);
 }
 
-void UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
@@ -46,16 +46,18 @@ void UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDi
     element.setAttribute( "g", _mapEditFill.color().green() );
     element.setAttribute( "b", _mapEditFill.color().blue() );
     element.setAttribute( "a", _mapEditFill.color().alpha() );
+
+    return element;
 }
 
 void UndoFill::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    _mapEditFill.setRed(element.attribute( QString("r") ).toInt());
-    _mapEditFill.setGreen(element.attribute( QString("g") ).toInt());
-    _mapEditFill.setBlue(element.attribute( QString("b") ).toInt());
-    _mapEditFill.setAlpha(element.attribute( QString("a") ).toInt());
+    _mapEditFill.setRed(element.attribute( QString("r")).toInt());
+    _mapEditFill.setGreen(element.attribute( QString("g")).toInt());
+    _mapEditFill.setBlue(element.attribute( QString("b")).toInt());
+    _mapEditFill.setAlpha(element.attribute( QString("a")).toInt());
 }
 
 int UndoFill::getType() const

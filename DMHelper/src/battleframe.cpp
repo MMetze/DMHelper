@@ -13,7 +13,6 @@
 #include "battledialoglogview.h"
 #include "unselectedpixmap.h"
 #include "map.h"
-#include "adventure.h"
 #include "campaign.h"
 #include "character.h"
 #include "mapselectdialog.h"
@@ -331,7 +330,7 @@ void BattleFrame::setBattleMap()
 
 void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant)
 {
-    qDebug() << "[Battle Frame] combatant added, type " << combatant->getType() << ", init " << combatant->getInitiative() << ", pos " << combatant->getPosition();
+    qDebug() << "[Battle Frame] combatant added, type " << combatant->getCombatantType() << ", init " << combatant->getInitiative() << ", pos " << combatant->getPosition();
 
     if(!_model)
     {
@@ -418,7 +417,7 @@ QList<BattleDialogModelCombatant*> BattleFrame::getMonsters() const
     QList<BattleDialogModelCombatant*> result;
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
-        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getType() == DMHelper::CombatantType_Monster))
+        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getCombatantType() == DMHelper::CombatantType_Monster))
         {
             result.append(_model->getCombatant(i));
         }
@@ -440,7 +439,7 @@ QList<BattleDialogModelCombatant*> BattleFrame::getLivingMonsters() const
     QList<BattleDialogModelCombatant*> result;
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
-        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getType() == DMHelper::CombatantType_Monster) && (_model->getCombatant(i)->getHitPoints() > 0))
+        if((_model->getCombatant(i)) && (_model->getCombatant(i)->getCombatantType() == DMHelper::CombatantType_Monster) && (_model->getCombatant(i)->getHitPoints() > 0))
         {
             result.append(_model->getCombatant(i));
         }
@@ -515,7 +514,10 @@ void BattleFrame::next()
     BattleDialogModelCombatant* nextCombatant = getNextCombatant(activeCombatant);
 
     if(!nextCombatant)
+    {
+        qDebug() << "[Battle Frame] ... no next combatant found.";
         return;
+    }
 
     int activeInitiative = activeCombatant->getInitiative();
     int nextInitiative = nextCombatant->getInitiative();
@@ -814,17 +816,21 @@ void BattleFrame::addCharacter()
     if((!_battle) || (!_model))
         return;
 
-    Campaign* campaign = _battle->getCampaign();
+    //Campaign* campaign = _battle->getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return;
 
     qDebug() << "[Battle Frame] Adding a character to the battle...";
 
     QList<Character*> characterList;
-    for(int i = 0; i < campaign->getCharacterCount(); ++i)
+    QList<Character*> allCharacters = campaign->findChildren<Character*>();
+    //for(int i = 0; i < campaign->getCharacterCount(); ++i)
+    for(Character* character : allCharacters)
     {
-        Character* character = campaign->getCharacterByIndex(i);
-        if(!_model->isCombatantInList(character))
+        //Character* character = campaign->getCharacterByIndex(i);
+        if((!_model->isCombatantInList(character)) &&
+           (character->isInParty()))
             characterList.append(character);
     }
 
@@ -843,18 +849,22 @@ void BattleFrame::addNPC()
     if((!_battle) || (!_model))
         return;
 
-    Campaign* campaign = _battle->getCampaign();
+    //Campaign* campaign = _battle->getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return;
 
     qDebug() << "[Battle Frame] Adding an NPC to the battle...";
 
     QList<Character*> characterList;
-    for(int i = 0; i < campaign->getNPCCount(); ++i)
+    QList<Character*> allCharacters = campaign->findChildren<Character*>();
+    for(Character* character : allCharacters)
+//    for(int i = 0; i < campaign->getNPCCount(); ++i)
     {
-        Character* npc= campaign->getNPCByIndex(i);
-        if(!_model->isCombatantInList(npc))
-            characterList.append(npc);
+//        Character* npc= campaign->getNPCByIndex(i);
+        if((!_model->isCombatantInList(character)) &&
+           (!character->isInParty()))
+            characterList.append(character);
     }
 
     if(characterList.isEmpty())
@@ -1702,7 +1712,7 @@ void BattleFrame::damageCombatant()
 {
     int damage = QInputDialog::getInt(this, QString("Damage Combatant"), QString("Please enter the amount of damage to be done: "));
 
-    if(_contextMenuCombatant->getType() != DMHelper::CombatantType_Character)
+    if(_contextMenuCombatant->getCombatantType() != DMHelper::CombatantType_Character)
     {
         _contextMenuCombatant->setHitPoints(_contextMenuCombatant->getHitPoints() - damage);
         updateCombatantWidget(_contextMenuCombatant);
@@ -2311,9 +2321,30 @@ Map* BattleFrame::selectRelatedMap()
     if(!_battle)
         return nullptr;
 
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return nullptr;
+
+    CampaignObjectBase* parentObject = dynamic_cast<CampaignObjectBase*>(_battle->parent());
+    if(!parentObject)
+        return nullptr;
+
     // TODO: Check what happens if separator is selected
     MapSelectDialog mapSelectDlg;
 
+    QList<Map*> allMaps = campaign->findChildren<Map*>();
+    for(Map* map : allMaps)
+    {
+        if(map)
+        {
+            if(map->getParentById(parentObject->getID()) != nullptr)
+                mapSelectDlg.prependMap(map);
+            else
+                mapSelectDlg.appendMap(map);
+        }
+    }
+
+    /*
     Adventure* adventure = _battle->getAdventure();
     if(adventure)
     {
@@ -2331,6 +2362,7 @@ Map* BattleFrame::selectRelatedMap()
             mapSelectDlg.addMap(campaign->getSettingByIndex(i));
         }
     }
+    */
 
     if(mapSelectDlg.exec() != QDialog::Accepted)
         return nullptr;
@@ -2483,7 +2515,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
         return newWidget;
     }
 
-    switch(combatant->getType())
+    switch(combatant->getCombatantType())
     {
         case DMHelper::CombatantType_Character:
         {
@@ -2522,7 +2554,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
             break;
         }
         default:
-            qDebug() << "[Battle Frame] Unknown combatant type found in battle! Type: " << combatant->getType() << " Name: " << combatant->getName();
+            qDebug() << "[Battle Frame] Unknown combatant type found in battle! Type: " << combatant->getCombatantType() << " Name: " << combatant->getName();
             break;
     }
 
@@ -2787,10 +2819,7 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     int nextHighlight = _model->getCombatantList().indexOf(combatant);
 
     if(_combatantLayout->count() <= 1)
-    {
-        qDebug() << "[Battle Frame] No next combatant possible, at most one combatant widgets found.";
         return nullptr;
-    }
 
     do
     {

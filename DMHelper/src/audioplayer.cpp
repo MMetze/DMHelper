@@ -77,7 +77,7 @@ void AudioPlayer::playTrack(AudioTrack* track)
     if(!track)
         return;
 
-    if(track->getType() == DMHelper::AudioType_Syrinscape)
+    if(track->getAudioType() == DMHelper::AudioType_Syrinscape)
     {
 #ifdef Q_OS_MAC
         QMessageBox::information(nullptr, QString("Syrinscape integration"), QString("Syrinscape 3rd party integration is unfortunately only supported on Windows at this time. Audio playback of Syrinscape audio will be integrated into the DM Helper as soon as this is supported!"));

@@ -51,7 +51,7 @@ ChaserCombatant::ChaserCombatant(QGraphicsTextItem* textItem, QGraphicsPixmapIte
     {
         _dashCount = 3 + Combatant::getAbilityMod(combatant->getConstitution());
         _speed = _combatant->getSpeed();
-        if(_combatant->getType() == DMHelper::CombatantType_Monster)
+        if(_combatant->getCombatantType() == DMHelper::CombatantType_Monster)
         {
             _combatant->setInitiative(Dice::d20() + Combatant::getAbilityMod(_combatant->getDexterity()));
         }

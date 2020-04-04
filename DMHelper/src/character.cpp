@@ -146,8 +146,8 @@ const char* SKILLVALUE_WRITTENNAMES[Combatant::SKILLS_COUNT] =
     "Intimidation"      // Skills_intimidation
 };
 
-Character::Character(QObject *parent) :
-    Combatant(parent),
+Character::Character(const QString& name, QObject *parent) :
+    Combatant(name, parent),
     _dndBeyondID(-1),
     _stringValues(STRINGVALUE_COUNT),
     _intValues(INTVALUE_COUNT),
@@ -161,6 +161,7 @@ Character::Character(QObject *parent) :
     setDefaultValues();
 }
 
+/*
 Character::Character(QDomElement &element, bool isImport, QObject *parent) :
     Combatant(parent),
     _dndBeyondID(-1),
@@ -184,12 +185,11 @@ Character::Character(const Character &obj) :
 {
     qDebug("[Character] WARNING: Character copied - this is a highly questionable action!");
 }
+*/
 
 void Character::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
-
-    Combatant::inputXML(element, isImport);
 
     setDndBeyondID(element.attribute(QString("dndBeyondID"),QString::number(-1)).toInt());
 
@@ -210,6 +210,8 @@ void Character::inputXML(const QDomElement &element, bool isImport)
     }
 
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
+
+    Combatant::inputXML(element, isImport);
 
     endBatchChanges();
 }
@@ -237,10 +239,22 @@ void Character::endBatchChanges()
 Combatant* Character::clone() const
 {
     qDebug("[Character] WARNING: Character cloned - this is a highly questionable action!");
-    return new Character(*this);
+
+    Character* newCharacter = new Character(getName());
+
+    newCharacter->copyValues(*this);
+
+    newCharacter->_dndBeyondID = _dndBeyondID;
+    newCharacter->_stringValues = _stringValues;
+    newCharacter->_intValues = _intValues;
+    newCharacter->_skillValues = _skillValues;
+    newCharacter->_active = true;
+    newCharacter->_iconChanged = _iconChanged;
+
+    return newCharacter;
 }
 
-int Character::getType() const
+int Character::getCombatantType() const
 {
     return DMHelper::CombatantType_Character;
 }
@@ -253,6 +267,11 @@ int Character::getDndBeyondID() const
 void Character::setDndBeyondID(int id)
 {
     _dndBeyondID = id;
+}
+
+bool Character::isInParty() const
+{
+    return (getParentByType(DMHelper::CampaignType_Party) != nullptr);
 }
 
 void Character::setIcon(const QString &newIcon)
@@ -514,10 +533,6 @@ QString Character::getWrittenSkillName(int skill)
 
 void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
-
     element.setAttribute( "dndBeyondID", getDndBeyondID() );
 
     int i;
@@ -537,6 +552,8 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     }
 
     element.setAttribute("active", static_cast<int>(getActive()));
+
+    Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void Character::setDefaultValues()

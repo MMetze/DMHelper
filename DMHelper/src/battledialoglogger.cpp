@@ -26,7 +26,7 @@ BattleDialogLogger::~BattleDialogLogger()
     qDeleteAll(_battleEvents);
 }
 
-void BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
+QDomElement BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement loggerElement = doc.createElement( "battlelogger" );
 
@@ -41,6 +41,8 @@ void BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir&
     }
 
     parent.appendChild(loggerElement);
+
+    return loggerElement;
 }
 
 void BattleDialogLogger::inputXML(const QDomElement &element, bool isImport)

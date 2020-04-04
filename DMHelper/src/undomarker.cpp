@@ -25,7 +25,7 @@ void UndoMarker::undo()
 
 void UndoMarker::redo()
 {
-    if( _map.getRegisteredWindow() )
+    if(_map.getRegisteredWindow())
     {
         delete _markerGraphicsItem;
         _markerGraphicsItem = _map.getRegisteredWindow()->addMapMarker(_marker);
@@ -38,16 +38,18 @@ void UndoMarker::apply(bool preview, QPaintDevice* target) const
     Q_UNUSED(target);
 }
 
-void UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
-    element.setAttribute( "x", _marker.position().x() );
-    element.setAttribute( "y", _marker.position().y() );
-    element.setAttribute( "title", _marker.title() );
-    element.setAttribute( "description", _marker.description() );
+    element.setAttribute("x", _marker.position().x());
+    element.setAttribute("y", _marker.position().y());
+    element.setAttribute("title", _marker.title());
+    element.setAttribute("description", _marker.description());
+
+    return element;
 }
 
 void UndoMarker::inputXML(const QDomElement &element, bool isImport)

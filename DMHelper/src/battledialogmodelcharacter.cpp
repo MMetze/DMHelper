@@ -4,8 +4,8 @@
 #include <QDomElement>
 #include <QDebug>
 
-BattleDialogModelCharacter::BattleDialogModelCharacter() :
-    BattleDialogModelCombatant()
+BattleDialogModelCharacter::BattleDialogModelCharacter(const QString& name, QObject *parent) :
+    BattleDialogModelCombatant(name, parent)
 {
 }
 
@@ -19,10 +19,12 @@ BattleDialogModelCharacter::BattleDialogModelCharacter(Character* character, int
 {
 }
 
+/*
 BattleDialogModelCharacter::BattleDialogModelCharacter(const BattleDialogModelCharacter& other) :
     BattleDialogModelCombatant(other)
 {
 }
+*/
 
 BattleDialogModelCharacter::~BattleDialogModelCharacter()
 {
@@ -33,14 +35,16 @@ void BattleDialogModelCharacter::inputXML(const QDomElement &element, bool isImp
     BattleDialogModelCombatant::inputXML(element, isImport);
 }
 
-int BattleDialogModelCharacter::getType() const
+int BattleDialogModelCharacter::getCombatantType() const
 {
     return DMHelper::CombatantType_Character;
 }
 
 BattleDialogModelCombatant* BattleDialogModelCharacter::clone() const
 {
-    return new BattleDialogModelCharacter(*this);
+    BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(getName());
+    newCharacter->copyValues(*this);
+    return newCharacter;
 }
 
 qreal BattleDialogModelCharacter::getSizeFactor() const
@@ -235,7 +239,7 @@ QPixmap BattleDialogModelCharacter::getIconPixmap(DMHelper::PixmapSize iconSize)
 
 Character* BattleDialogModelCharacter::getCharacter() const
 {
-    if((!_combatant) || (_combatant->getType() != DMHelper::CombatantType_Character))
+    if((!_combatant) || (_combatant->getCombatantType() != DMHelper::CombatantType_Character))
         return nullptr;
 
     return dynamic_cast<Character*>(_combatant);
@@ -244,12 +248,4 @@ Character* BattleDialogModelCharacter::getCharacter() const
 void BattleDialogModelCharacter::setCharacter(Character* character)
 {
     setCombatant(character);
-}
-
-void BattleDialogModelCharacter::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
-{
-    Q_UNUSED(doc);
-    Q_UNUSED(element);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
 }

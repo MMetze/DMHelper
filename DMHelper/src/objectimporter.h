@@ -3,10 +3,12 @@
 
 #include <QObject>
 #include <QUuid>
+#include <QStringList>
 
 class Campaign;
 class QStandardItem;
 class QDomElement;
+class CampaignObjectBase;
 
 class ObjectImporter : public QObject
 {
@@ -20,6 +22,7 @@ public slots:
     bool importObject(Campaign& campaign);
 
 protected:
+    bool checkObjectDuplicates(CampaignObjectBase* object, Campaign& targetCampaign, Campaign& importCampaign);
     /*
     QUuid importCombatant(Campaign& campaign, QStandardItem* item, QDomElement& element);
     QUuid importEncounter(Campaign& campaign, QStandardItem* item, QDomElement& element);
@@ -29,6 +32,8 @@ protected:
     bool isWorldEntry(QStandardItem* item);
     QStandardItem* findParentbyType(QStandardItem* child, int parentType);
     */
+
+    QStringList _duplicateObjects;
 };
 
 #endif // OBJECTIMPORTER_H

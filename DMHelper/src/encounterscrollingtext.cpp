@@ -9,10 +9,9 @@
 #include <QDebug>
 
 EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QObject *parent) :
-    Encounter(encounterName, parent),
+    EncounterText(encounterName, parent),
     _scrollSpeed(15.0),
     _imgFile(),
-    _text(),
     _fontFamily(QGuiApplication::font().family()),
     _fontSize(12),
     _fontBold(false),
@@ -23,6 +22,7 @@ EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QOb
 {
 }
 
+/*
 EncounterScrollingText::EncounterScrollingText(const EncounterScrollingText& obj) :
     Encounter(obj),
     _scrollSpeed(obj._scrollSpeed),
@@ -37,20 +37,12 @@ EncounterScrollingText::EncounterScrollingText(const EncounterScrollingText& obj
     _fontColor(obj._fontColor)
 {
 }
+*/
 
 void EncounterScrollingText::inputXML(const QDomElement &element, bool isImport)
 {
-    Encounter::inputXML(element, isImport);
-
     setScrollSpeed(element.attribute("scrollSpeed").toDouble());
     setImgFile(element.attribute("imageFile"));
-
-    if( ( !element.firstChild().isNull() ) && ( element.firstChild().isCDATASection() ) )
-    {
-        QDomCDATASection cdata = element.firstChild().toCDATASection();
-        setText(cdata.data());
-    }
-
     setFontFamily(element.attribute("fontFamily"));
     setFontSize(element.attribute("fontSize").toInt());
     setFontBold(element.attribute("fontBold",QString::number(0)).toInt());
@@ -64,8 +56,11 @@ void EncounterScrollingText::inputXML(const QDomElement &element, bool isImport)
         QColor newColor(colorName);
         setFontColor(newColor);
     }
+
+    EncounterText::inputXML(element, isImport);
 }
 
+/*
 void EncounterScrollingText::widgetActivated(QWidget* widget)
 {
     EncounterScrollingTextEdit* textEdit = dynamic_cast<EncounterScrollingTextEdit*>(widget);
@@ -105,10 +100,11 @@ void EncounterScrollingText::widgetDeactivated(QWidget* widget)
     disconnect(textEdit, nullptr, this, nullptr);
     _widget = nullptr;
 }
+*/
 
-int EncounterScrollingText::getType() const
+int EncounterScrollingText::getObjectType() const
 {
-    return DMHelper::EncounterType_ScrollingText;
+    return DMHelper::CampaignType_ScrollingText;
 }
 
 qreal EncounterScrollingText::getScrollSpeed() const
@@ -119,11 +115,6 @@ qreal EncounterScrollingText::getScrollSpeed() const
 QString EncounterScrollingText::getImgFile() const
 {
     return _imgFile;
-}
-
-QString EncounterScrollingText::getText() const
-{
-    return _text;
 }
 
 QString EncounterScrollingText::getFontFamily() const
@@ -175,15 +166,6 @@ void EncounterScrollingText::setImgFile(const QString& imgFile)
     if(_imgFile != imgFile)
     {
         _imgFile = imgFile;
-        emit dirty();
-    }
-}
-
-void EncounterScrollingText::setText(const QString& newText)
-{
-    if(_text != newText)
-    {
-        _text = newText;
         emit dirty();
     }
 }
@@ -251,6 +233,7 @@ void EncounterScrollingText::setFontColor(QColor fontColor)
     }
 }
 
+/*
 void EncounterScrollingText::widgetChanged()
 {
     if(!_widget)
@@ -260,17 +243,19 @@ void EncounterScrollingText::widgetChanged()
     if(!textEdit)
         return;
 }
+*/
+
+QDomElement EncounterText::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("scrolling-object");
+}
 
 void EncounterScrollingText::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(isExport);
+    EncounterText::internalOutputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute( "scrollSpeed", getScrollSpeed());
     element.setAttribute( "imageFile", targetDirectory.relativeFilePath(getImgFile()) );
-
-    QDomCDATASection cdata = doc.createCDATASection(getText());
-    element.appendChild(cdata);
-
     element.setAttribute( "fontFamily", getFontFamily());
     element.setAttribute( "fontSize", getFontSize());
     element.setAttribute( "fontBold", static_cast<int>(getFontBold()));

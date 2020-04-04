@@ -238,7 +238,7 @@ void Adventure::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDi
     QDomElement encountersElement = doc.createElement( "encounters" );
     adventureElement.appendChild(encountersElement);
     for( int encIt = 0; encIt < encounters.size(); ++encIt )
-    {
+    {.
         encounters.at(encIt)->outputXML(doc, encountersElement, targetDirectory, isExport);
     }
 
@@ -334,6 +334,7 @@ void Adventure::resolveReferences()
     }
 }
 
+/*
 QString Adventure::getName() const
 {
     return _name;
@@ -361,6 +362,7 @@ void Adventure::setExpanded(bool expanded)
         emit dirty();
     }
 }
+*/
 
 void Adventure::clear()
 {

@@ -44,12 +44,15 @@ void AudioTrackEdit::addTrack(const QUrl& url)
         return;
 
     AudioTrack* newTrack = new AudioTrack(trackName, url);
-    _campaign->addTrack(newTrack);
+    //_campaign->addTrack(newTrack);
+    _campaign->addObject(newTrack);
     addTrackToList(newTrack);
 }
 
 void AudioTrackEdit::removeTrack()
 {
+    // TODO: is this even needed?
+    /*
     if(!_campaign)
         return;
 
@@ -61,9 +64,11 @@ void AudioTrackEdit::removeTrack()
     if(!removeTrack)
         return;
 
-    _campaign->removeTrack(removeTrack->getID());
+    //_campaign->removeTrack(removeTrack->getID());
+
     delete removeTrack;
     delete currentItem;
+    */
 }
 
 void AudioTrackEdit::setCampaign(Campaign* campaign)
@@ -76,8 +81,13 @@ void AudioTrackEdit::setCampaign(Campaign* campaign)
     if(!_campaign)
         return;
 
-    for(int i = 0; i < _campaign->getTrackCount(); ++i)
-        addTrackToList(_campaign->getTrackByIndex(i));
+    QList<AudioTrack*> trackList = _campaign->findChildren<AudioTrack*>();
+//    for(int i = 0; i < _campaign->getTrackCount(); ++i)
+//        addTrackToList(_campaign->getTrackByIndex(i));
+    for(AudioTrack* track : trackList)
+    {
+        addTrackToList(track);
+    }
 }
 
 void AudioTrackEdit::addLocalFile()
@@ -144,6 +154,9 @@ AudioTrack* AudioTrackEdit::getCurrentTrack()
 
 void AudioTrackEdit::addTrackToList(AudioTrack* track)
 {
+    if(!track)
+        return;
+
     QListWidgetItem* newListItem = new QListWidgetItem(track->getName());
     newListItem->setData(Qt::UserRole, QVariant::fromValue(track));
     ui->lstTracks->addItem(newListItem);

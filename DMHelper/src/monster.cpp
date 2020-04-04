@@ -5,8 +5,8 @@
 #include <QDir>
 #include <QDebug>
 
-Monster::Monster(MonsterClass* monsterClass, QObject *parent) :
-    Combatant(parent),
+Monster::Monster(MonsterClass* monsterClass, const QString& name, QObject *parent) :
+    Combatant(name, parent),
     _monsterClass(monsterClass),
     _passivePerception(10),
     _active(true),
@@ -16,6 +16,7 @@ Monster::Monster(MonsterClass* monsterClass, QObject *parent) :
 //    setHitPoints(getHitDice().roll());
 }
 
+/*
 Monster::Monster(MonsterClass* monsterClass, const QDomElement &element, bool isImport, QObject *parent) :
     Combatant(parent),
     _monsterClass(monsterClass),
@@ -36,16 +37,17 @@ Monster::Monster(const Monster &obj) :
     _iconChanged(obj._iconChanged)
 {
 }
+*/
 
 void Monster::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
 
-    Combatant::inputXML(element, isImport);
-
     setPassivePerception(element.attribute("passivePerception").toInt());
     setActive(static_cast<bool>(element.attribute("active").toInt()));
     setNotes(element.attribute("notes"));
+
+    Combatant::inputXML(element, isImport);
 
     endBatchChanges();
 }
@@ -76,10 +78,21 @@ Combatant* Monster::clone() const
     {
         _monsterClass->searchForIcon(QString());
     }
-    return new Monster(*this);
+
+    Monster* newMonster = new Monster(_monsterClass, getName());
+
+    newMonster->copyValues(*this);
+
+    newMonster->_monsterClass = _monsterClass;
+    newMonster->_passivePerception = _passivePerception;
+    newMonster->_active = _active;
+    newMonster->_notes = _notes;
+    newMonster->_iconChanged = _iconChanged;
+
+    return newMonster;
 }
 
-int Monster::getType() const
+int Monster::getCombatantType() const
 {
     return DMHelper::CombatantType_Monster;
 }
@@ -205,7 +218,7 @@ void Monster::setIcon(const QString& newIcon)
 
     _icon = newIcon;
     _iconPixmap.setBasePixmap(_icon);
-    qWarning() << "Monster has a local icon:" << _name << _icon;
+    qWarning() << "Monster has a local icon:" << getName() << ": " << _icon;
     registerChange();
     if(_batchChanges)
     {
@@ -246,12 +259,10 @@ void Monster::setNotes(const QString& newNotes)
 
 void Monster::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
-
     element.setAttribute( "monsterClass", getMonsterClass() != nullptr ? getMonsterClass()->getName() : QString("") );
     element.setAttribute( "passivePerception", getPassivePerception() );
     element.setAttribute( "active", static_cast<int>(getActive()));
     element.setAttribute( "notes", getNotes() );
+
+    Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }

@@ -2,6 +2,7 @@
 #include "campaign.h"
 #include "character.h"
 #include "characterimportdialog.h"
+#include "combatantfactory.h"
 #include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -69,7 +70,7 @@ void CharacterImporter::updateCharacter(Character* character)
 
     _character = character;
     QString characterId = QString::number(_character->getDndBeyondID());
-    _campaign = _character->getCampaign();
+    _campaign = dynamic_cast<Campaign*>(_character->getParentByType(DMHelper::CampaignType_Campaign));
 
     startImport(characterId);
 }
@@ -250,12 +251,16 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         _character = _campaign->getCharacterOrNPCByDndBeyondId(dndBeyondId);
         if(!_character)
         {
-            _character = new Character();
+            //_character = new Character();
+            _character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, QString(), false));
             _character->setDndBeyondID(dndBeyondId);
+            /*
             if(_isCharacter)
                 _campaign->addCharacter(_character);
             else
                 _campaign->addNPC(_character);
+                */
+            _campaign->addObject(_character);
         }
     }
 

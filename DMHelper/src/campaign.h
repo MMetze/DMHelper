@@ -3,7 +3,6 @@
 
 #include "campaignobjectbase.h"
 #include "basicdate.h"
-#include <QList>
 #include <QTime>
 
 class Character;
@@ -19,67 +18,69 @@ class Campaign : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit Campaign(const QString& campaignName, QObject *parent = nullptr);
-    explicit Campaign(const QDomElement& element, bool isImport, QObject *parent = nullptr);
+    explicit Campaign(const QString& campaignName = QString(), QObject *parent = nullptr);
+    //explicit Campaign(const QDomElement& element, bool isImport, QObject *parent = nullptr);
     virtual ~Campaign() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
-    virtual void resolveReferences() override;
+    virtual int getObjectType() const override;
+//    virtual void resolveReferences() override;
+
+    //virtual void widgetActivated(QWidget* widget) override;
+    //virtual void widgetDeactivated(QWidget* widget) override;
 
     virtual void beginBatchChanges();
     virtual void endBatchChanges();
 
-    QString getName() const;
-    void setName(const QString& campaignName);
+//    QString getName() const;
+//    void setName(const QString& campaignName);
 
-    Encounter* getNotes() const;
+    //Encounter* getNotes() const;
 
-    int getCharacterCount();
+//    int getCharacterCount();
     Character* getCharacterById(QUuid id);
     const Character* getCharacterById(QUuid id) const;
     Character* getCharacterByDndBeyondId(int id);
     Character* getCharacterOrNPCByDndBeyondId(int id);
-    Character* getCharacterByIndex(int index);
-    QUuid addCharacter(Character* character);
-    Character* removeCharacter(QUuid id);
+//    Character* getCharacterByIndex(int index);
+//    QUuid addCharacter(Character* character);
+//    Character* removeCharacter(QUuid id);
     QList<Character*> getActiveCharacters();
-    QList<Combatant*> getActiveCombatants();
+//    QList<Combatant*> getActiveCombatants();
 
-    int getAdventureCount();
-    Adventure* getAdventureById(QUuid id);
-    Adventure* getAdventureByIndex(int index);
-    QUuid addAdventure(Adventure* adventure);
-    Adventure* removeAdventure(QUuid id);
+//    int getAdventureCount();
+//    Adventure* getAdventureById(QUuid id);
+//    Adventure* getAdventureByIndex(int index);
+//    QUuid addAdventure(Adventure* adventure);
+//    Adventure* removeAdventure(QUuid id);
 
-    int getSettingCount();
-    Map* getSettingById(QUuid id);
-    Map* getSettingByIndex(int index);
-    QUuid addSetting(Map* setting);
-    Map* removeSetting(QUuid id);
+//    int getSettingCount();
+//    Map* getSettingById(QUuid id);
+//    Map* getSettingByIndex(int index);
+//    QUuid addSetting(Map* setting);
+//    Map* removeSetting(QUuid id);
 
-    int getNPCCount();
+//    int getNPCCount();
     Character* getNPCById(QUuid id);
     const Character* getNPCById(QUuid id) const;
-    Character* getNPCByIndex(int index);
-    QUuid addNPC(Character* npc);
-    Character* removeNPC(QUuid id);
+//    Character* getNPCByIndex(int index);
+//    QUuid addNPC(Character* npc);
+//    Character* removeNPC(QUuid id);
 
-    int getTrackCount();
+//    int getTrackCount();
     AudioTrack* getTrackById(QUuid id);
-    AudioTrack* getTrackByIndex(int index);
-    QUuid addTrack(AudioTrack* track);
-    AudioTrack* removeTrack(QUuid id);
+//    AudioTrack* getTrackByIndex(int index);
+//    QUuid addTrack(AudioTrack* track);
+//    AudioTrack* removeTrack(QUuid id);
 
-    CampaignObjectBase* getObjectbyId(QUuid id);
-    QUuid getUuidFromIntId(int intId) const;
+    //QList<CampaignObjectBase*> getObjectsByType(int campaignType);
 
+    /*
     bool getPartyExpanded() const;
     void setPartyExpanded(bool expanded);
 
-    bool getAdventuresExpanded() const;
+    bool getContentsExpanded() const;
     void setAdventuresExpanded(bool expanded);
 
     bool getWorldExpanded() const;
@@ -90,6 +91,7 @@ public:
 
     bool getWorldNPCsExpanded() const;
     void setWorldNPCsExpanded(bool expanded);
+*/
 
     BasicDate getDate() const;
     QTime getTime() const;
@@ -98,9 +100,6 @@ public:
     void cleanupCampaign(bool deleteAll);
 
 signals:
-    void changed();
-    void dirty();
-
     void dateChanged(const BasicDate& date);
     void timeChanged(const QTime& time);
 
@@ -109,28 +108,22 @@ public slots:
     void setTime(const QTime& time);
     bool validateCampaignIds();
 
-private slots:
-    void handleInteralChange();
-    void handleInternalDirty();
+protected slots:
+    virtual void handleInternalChange() override;
+    virtual void handleInternalDirty() override;
 
-private:
+protected:
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     bool validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject);
     bool isVersionCompatible(int majorVersion, int minorVersion) const;
 
-    QString _name;
-    Encounter* _notes;
-    QList<Character*> characters;
-    QList<Adventure*> adventures;
-    QList<Map*> settings;
-    QList<Character*> npcs;
-    QList<AudioTrack*> tracks;
+    //QString _name;
+    //Encounter* _notes;
 
-    bool _partyExpanded;
-    bool _adventuresExpanded;
-    bool _worldExpanded;
-    bool _worldSettingsExpanded;
-    bool _worldNPCsExpanded;
+    //bool _partyExpanded;
+    //bool _contentsExpanded;
 
     BasicDate _date;
     QTime _time;

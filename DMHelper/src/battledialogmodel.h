@@ -17,12 +17,12 @@ class BattleDialogModel : public CampaignObjectBase
     Q_OBJECT
 
 public:
-    explicit BattleDialogModel(QObject *parent = nullptr);
-    BattleDialogModel(const BattleDialogModel& other, QObject *parent = nullptr);
+    explicit BattleDialogModel(const QString& name = QString(), QObject *parent = nullptr);
+    //BattleDialogModel(const BattleDialogModel& other, QObject *parent = nullptr);
     virtual ~BattleDialogModel() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     /*
@@ -101,6 +101,11 @@ signals:
     void showEffectsChanged(bool showEffects);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void backgroundImageChanged(QImage backgroundImage);
+
+protected:
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
 private:
     static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);

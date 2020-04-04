@@ -43,11 +43,11 @@ public:
     virtual void postProcessXML(const QDomElement &element, bool isImport) override;
     virtual void resolveReferences() override;
 
-    QString getName() const;
-    void setName(const QString& adventureName);
+    //QString getName() const;
+    //void setName(const QString& adventureName);
 
-    bool getExpanded() const;
-    void setExpanded(bool expanded);
+    //bool getExpanded() const;
+    //void setExpanded(bool expanded);
 
     void clear();
 

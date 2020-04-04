@@ -9,28 +9,18 @@
 #include <QDebug>
 
 EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
-    Encounter(encounterName, parent),
+    CampaignObjectBase(encounterName, parent),
     _text()
-{
-}
-
-EncounterText::EncounterText(const EncounterText& obj) :
-    Encounter(obj),
-    _text(obj._text)
 {
 }
 
 void EncounterText::inputXML(const QDomElement &element, bool isImport)
 {
-    Encounter::inputXML(element, isImport);
-
-    if( ( !element.firstChild().isNull() ) && ( element.firstChild().isCDATASection() ) )
-    {
-        QDomCDATASection cdata = element.firstChild().toCDATASection();
-        setText(cdata.data());
-    }
+    extractTextNode(element, isImport);
+    CampaignObjectBase::inputXML(element, isImport);
 }
 
+/*
 void EncounterText::widgetActivated(QWidget* widget)
 {
     EncounterTextEdit* textEdit = dynamic_cast<EncounterTextEdit*>(widget);
@@ -89,10 +79,11 @@ void EncounterText::widgetDeactivated(QWidget* widget)
     disconnect(textEdit, nullptr, this, nullptr);
     _widget = nullptr;
 }
+*/
 
-int EncounterText::getType() const
+int EncounterText::getObjectType() const
 {
-    return DMHelper::EncounterType_Text;
+    return DMHelper::CampaignType_Text;
 }
 
 QString EncounterText::getText() const
@@ -118,6 +109,7 @@ void EncounterText::setText(const QString& newText)
     }
 }
 
+/*
 void EncounterText::widgetChanged()
 {
     if(!_widget)
@@ -131,12 +123,34 @@ void EncounterText::widgetChanged()
 
     setText(textEdit->toHtml());
 }
+*/
+
+QDomElement EncounterText::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("text-object");
+}
 
 void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 
     QDomCDATASection cdata = doc.createCDATASection(getText());
     element.appendChild(cdata);
+}
+
+void EncounterText::extractTextNode(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    QDomNode childNode = element.firstChild();
+    while(!childNode.isNull())
+    {
+        if(childNode.isCDATASection())
+        {
+            QDomCDATASection cdata = childNode.toCDATASection();
+            setText(cdata.data());
+            return;
+        }
+        childNode = childNode.nextSibling();
+    }
 }

@@ -150,7 +150,7 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
     endBatchChanges();
 }
 
-void MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     element.setAttribute( "private", static_cast<int>(getPrivate()) );
 
@@ -198,6 +198,7 @@ void MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
     writeActionList(doc, element, QString("special_abilities"), _specialAbilities, isExport);
     writeActionList(doc, element, QString("reactions"), _reactions, isExport);
 
+    return element;
 }
 
 void MonsterClass::beginBatchChanges()
@@ -558,6 +559,8 @@ int MonsterClass::convertSizeToCategory(const QString& monsterSize)
         return DMHelper::CombatantSize_Huge;
     else if(QString::compare(monsterSize, QString("Gargantuan"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Gargantuan;
+    else if(QString::compare(monsterSize, QString("Colossal"),Qt::CaseInsensitive) == 0)
+        return DMHelper::CombatantSize_Colossal;
     else
         return DMHelper::CombatantSize_Unknown;
 }
@@ -578,6 +581,8 @@ qreal MonsterClass::convertSizeCategoryToScaleFactor(int category)
             return 3.0;
         case DMHelper::CombatantSize_Gargantuan:
             return 4.0;
+        case DMHelper::CombatantSize_Colossal:
+            return 8.0;
         default:
             return 1.0;
     }

@@ -2,10 +2,8 @@
 #include "campaign.h"
 #include "dmconstants.h"
 #include "character.h"
-#include "encounter.h"
 #include "encounterfactory.h"
 #include "map.h"
-#include "adventure.h"
 #include "audiotrack.h"
 #include <QDomDocument>
 #include <QFileDialog>
@@ -16,12 +14,15 @@
 #include <QDebug>
 
 ObjectImporter::ObjectImporter(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    _duplicateObjects()
 {
 }
 
 bool ObjectImporter::importObject(Campaign& campaign)
 {
+    _duplicateObjects.clear();
+
     QString filename = QFileDialog::getOpenFileName(nullptr,QString("Select Campaign"));
     if((filename.isNull()) || (filename.isEmpty()) || (!QFile::exists(filename)))
     {
@@ -68,7 +69,8 @@ bool ObjectImporter::importObject(Campaign& campaign)
 
     QFileInfo fileInfo(filename);
     QDir::setCurrent(fileInfo.absolutePath());
-    QScopedPointer<Campaign> importCampaign(new Campaign(campaignElement, true));
+    QScopedPointer<Campaign> importCampaign(new Campaign());
+    importCampaign->inputXML(campaignElement, true);
     if(!importCampaign->isValid())
     {
         QMessageBox::critical(nullptr,
@@ -77,6 +79,36 @@ bool ObjectImporter::importObject(Campaign& campaign)
         return false;
     }
 
+    int i;
+    bool duplicateFree = true;
+    QList<CampaignObjectBase*> childList = importCampaign->getChildObjects();
+    for(i = 0; i < childList.count(); ++i)
+    {
+        duplicateFree = duplicateFree && checkObjectDuplicates(childList.at(i), campaign, *importCampaign);
+    }
+
+    if(!duplicateFree)
+    {
+        QString duplicateString("The imported campaign contains the following items with IDs that are already in the current campaign. These items will not be imported to avoid duplicate IDs in the campaign.");
+        duplicateString += QChar::LineFeed + QChar::LineFeed;
+
+        for(QString duplicate : _duplicateObjects)
+        {
+            duplicateString += duplicate + QChar::LineFeed;
+        }
+
+        QMessageBox::critical(nullptr, QString("Duplicate import IDs"), duplicateString);
+    }
+
+    childList = importCampaign->getChildObjects();
+    for(i = 0; i < childList.count(); ++i)
+    {
+        campaign.addObject(childList.at(i));
+    }
+
+    return true;
+
+    /*
     int i;
 
     // Check the party
@@ -161,7 +193,7 @@ bool ObjectImporter::importObject(Campaign& campaign)
     }
 
     return true;
-
+*/
     /*
     QDomElement baseElement = rootObject.firstChildElement();
     if(baseElement.tagName() == QString("combatant"))
@@ -185,6 +217,27 @@ bool ObjectImporter::importObject(Campaign& campaign)
     return false;
     */
 }
+
+bool ObjectImporter::checkObjectDuplicates(CampaignObjectBase* object, Campaign& targetCampaign, Campaign& importCampaign)
+{
+    if(targetCampaign.getObjectById(object->getID()) != nullptr)
+    {
+        _duplicateObjects.append(object->getName() + QString(": ") + object->getID().toString());
+        importCampaign.removeObject(object->getID());
+        object->deleteLater();
+        return false;
+    }
+
+    QList<CampaignObjectBase*> childList = object->getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        if(!checkObjectDuplicates(childList.at(i), targetCampaign, importCampaign))
+            return false;
+    }
+
+    return true;
+}
+
 
 /*
 QUuid ObjectImporter::importCombatant(Campaign& campaign, QStandardItem* item, QDomElement& element)

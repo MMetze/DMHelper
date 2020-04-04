@@ -348,7 +348,10 @@ Monster* Bestiary::createMonster(const QDomElement& element, bool isImport)
         return nullptr;
     }
 
-    return new Monster(getMonsterClass(monsterName), element, isImport);
+    //return new Monster(getMonsterClass(monsterName), element, isImport);
+    Monster* newMonster = new Monster(getMonsterClass(monsterName));
+    newMonster->inputXML(element, isImport);
+    return newMonster;
 }
 
 QString Bestiary::findMonsterImage(const QString& monsterName, const QString& iconFile)

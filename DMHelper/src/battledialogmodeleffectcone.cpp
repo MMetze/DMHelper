@@ -1,8 +1,8 @@
 #include "battledialogmodeleffectcone.h"
 #include "unselectedpolygon.h"
 
-BattleDialogModelEffectCone::BattleDialogModelEffectCone() :
-    BattleDialogModelEffect()
+BattleDialogModelEffectCone::BattleDialogModelEffectCone(const QString& name, QObject *parent) :
+    BattleDialogModelEffect(name, parent)
 {
 }
 
@@ -11,10 +11,12 @@ BattleDialogModelEffectCone::BattleDialogModelEffectCone(int size, const QPointF
 {
 }
 
+/*
 BattleDialogModelEffectCone::BattleDialogModelEffectCone(const BattleDialogModelEffectCone& other) :
     BattleDialogModelEffect(other)
 {
 }
+*/
 
 BattleDialogModelEffectCone::~BattleDialogModelEffectCone()
 {
@@ -22,10 +24,12 @@ BattleDialogModelEffectCone::~BattleDialogModelEffectCone()
 
 BattleDialogModelEffect* BattleDialogModelEffectCone::clone() const
 {
-    return new BattleDialogModelEffectCone(*this);
+    BattleDialogModelEffectCone* newEffect = new BattleDialogModelEffectCone(getName());
+    newEffect->copyValues(*this);
+    return newEffect;
 }
 
-int BattleDialogModelEffectCone::getType() const
+int BattleDialogModelEffectCone::getEffectType() const
 {
     return BattleDialogModelEffect_Cone;
 }

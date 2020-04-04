@@ -16,7 +16,7 @@ public:
     virtual int getType() const override;
     virtual BattleDialogEvent* clone() override;
 
-    virtual void outputXML(QDomElement &element, bool isExport) override;
+    virtual QDomElement outputXML(QDomElement &element, bool isExport) override;
 
     virtual QUuid getCombatant() const;
     virtual QUuid getTarget() const;

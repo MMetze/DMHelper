@@ -1,8 +1,8 @@
 #include "battledialogmodeleffectcube.h"
 #include "unselectedrect.h"
 
-BattleDialogModelEffectCube::BattleDialogModelEffectCube() :
-    BattleDialogModelEffect()
+BattleDialogModelEffectCube::BattleDialogModelEffectCube(const QString& name, QObject *parent) :
+    BattleDialogModelEffect(name, parent)
 {
 }
 BattleDialogModelEffectCube::BattleDialogModelEffectCube(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
@@ -10,10 +10,12 @@ BattleDialogModelEffectCube::BattleDialogModelEffectCube(int size, const QPointF
 {
 }
 
+/*
 BattleDialogModelEffectCube::BattleDialogModelEffectCube(const BattleDialogModelEffectCube& other) :
     BattleDialogModelEffect(other)
 {
 }
+*/
 
 BattleDialogModelEffectCube::~BattleDialogModelEffectCube()
 {
@@ -21,10 +23,12 @@ BattleDialogModelEffectCube::~BattleDialogModelEffectCube()
 
 BattleDialogModelEffect* BattleDialogModelEffectCube::clone() const
 {
-    return new BattleDialogModelEffectCube(*this);
+    BattleDialogModelEffectCube* newEffect = new BattleDialogModelEffectCube(getName());
+    newEffect->copyValues(*this);
+    return newEffect;
 }
 
-int BattleDialogModelEffectCube::getType() const
+int BattleDialogModelEffectCube::getEffectType() const
 {
     return BattleDialogModelEffect_Cube;
 }

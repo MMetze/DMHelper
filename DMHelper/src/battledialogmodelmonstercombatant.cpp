@@ -4,8 +4,8 @@
 #include <QDomElement>
 #include <QDebug>
 
-BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant() :
-    BattleDialogModelMonsterBase(),
+BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(const QString& name, QObject *parent) :
+    BattleDialogModelMonsterBase(name, parent),
     _monsterSize(DMHelper::CombatantSize_Unknown),
     _monsterName(),
     _monsterHP(-1)
@@ -36,6 +36,7 @@ BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(Monster* mo
 {
 }
 
+/*
 BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(const BattleDialogModelMonsterCombatant& other) :
     BattleDialogModelMonsterBase(other),
     _monsterSize(other._monsterSize),
@@ -43,6 +44,7 @@ BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(const Battl
     _monsterHP(other._monsterHP)
 {
 }
+*/
 
 BattleDialogModelMonsterCombatant::~BattleDialogModelMonsterCombatant()
 {
@@ -59,7 +61,15 @@ void BattleDialogModelMonsterCombatant::inputXML(const QDomElement &element, boo
 
 BattleDialogModelCombatant* BattleDialogModelMonsterCombatant::clone() const
 {
-    return new BattleDialogModelMonsterCombatant(*this);
+    BattleDialogModelMonsterCombatant* newMonster = new BattleDialogModelMonsterCombatant(getName());
+
+    newMonster->copyValues(*this);
+    newMonster->_legendaryCount = _legendaryCount;
+    newMonster->_monsterSize = _monsterSize;
+    newMonster->_monsterName = _monsterName;
+    newMonster->_monsterHP = _monsterHP;
+
+    return newMonster;
 }
 
 qreal BattleDialogModelMonsterCombatant::getSizeFactor() const
@@ -266,9 +276,9 @@ void BattleDialogModelMonsterCombatant::setMonster(Monster* monster)
 
 void BattleDialogModelMonsterCombatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
-
     element.setAttribute("monsterSize", _monsterSize);
     element.setAttribute("monsterName", _monsterName);
     element.setAttribute("monsterHP", _monsterHP);
+
+    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

@@ -41,6 +41,11 @@ void Encounter::inputXML(const QDomElement &element, bool isImport)
     setName(element.attribute("name"));
 }
 
+int Encounter::getObjectType() const
+{
+    return DMHelper::CampaignType_Encounter;
+}
+
 int Encounter::getType() const
 {
     return DMHelper::EncounterType_Blank;

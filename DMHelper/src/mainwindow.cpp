@@ -10,9 +10,9 @@
 #include "objectimporter.h"
 #include "characterframe.h"
 #include "campaign.h"
-#include "adventure.h"
-#include "encounter.h"
+#include "combatantfactory.h"
 #include "map.h"
+#include "mapfactory.h"
 #include "mapframe.h"
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
@@ -907,9 +907,10 @@ void MainWindow::newCharacter()
     if((!ok) || (characterName.isEmpty()))
         return;
 
-    Character* newCharacter = new Character();
-    newCharacter->setName(characterName);
-    campaign->addCharacter(newCharacter);
+    Character* newCharacter = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
+    //newCharacter->setName(characterName);
+    //campaign->addCharacter(newCharacter);
+    campaign->addObject(newCharacter);
     openCharacter(newCharacter->getID());
 }
 
@@ -948,9 +949,10 @@ void MainWindow::newNPC()
     if((!ok) || (npcName.isEmpty()))
         return;
 
-    Character* newNPC = new Character();
-    newNPC->setName(npcName);
-    campaign->addNPC(newNPC);
+    Character* newNPC = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, npcName, false));
+//    newNPC->setName(npcName);
+    //campaign->addNPC(newNPC);
+    campaign->addObject(newNPC);
     openCharacter(newNPC->getID());
 }
 
@@ -985,6 +987,8 @@ void MainWindow::removeCurrentCharacter()
 
 void MainWindow::newAdventure()
 {
+    // TODO: remove this completely
+    /*
     if(!campaign)
         return;
 
@@ -996,28 +1000,34 @@ void MainWindow::newAdventure()
         campaign->addAdventure(newAdventure);
         selectItem(DMHelper::TreeType_Adventure, newAdventure->getID());
     }
+    */
 }
 
 void MainWindow::newTextEncounter()
 {
-    newEncounter(DMHelper::EncounterType_Text);
+    //newEncounter(DMHelper::EncounterType_Text);
+    newEncounter(DMHelper::CampaignType_Text);
 }
 
 void MainWindow::newBattleEncounter()
 {
-    newEncounter(DMHelper::EncounterType_Battle);
+    //newEncounter(DMHelper::EncounterType_Battle);
+    newEncounter(DMHelper::CampaignType_Battle);
 }
 
 void MainWindow::newScrollingTextEncounter()
 {
-    newEncounter(DMHelper::EncounterType_ScrollingText);
+    //newEncounter(DMHelper::EncounterType_ScrollingText);
+    newEncounter(DMHelper::CampaignType_ScrollingText);
 }
 
 void MainWindow::newMap()
 {
+    // TODO: throw a message box when it doesn't work.
     if((!campaign)||(!treeModel))
         return;
 
+    /*
     QStandardItem* parentItem = findParentbyType(treeModel->itemFromIndex(ui->treeView->currentIndex()), DMHelper::TreeType_Adventure);
     if(!parentItem)
     {
@@ -1027,19 +1037,30 @@ void MainWindow::newMap()
             return;
         }
     }
-
+    */
+    QStandardItem* parentItem = treeModel->itemFromIndex(ui->treeView->currentIndex());
     QUuid id = QUuid(parentItem->data(DMHelper::TreeItemData_ID).toString());
+    CampaignObjectBase* parentObject = campaign->getObjectById(id);
+    if(!parentObject)
+        return;
+
     bool ok = false;
-    QString mapName = QInputDialog::getText(this, QString("Enter Map Name"),QString("New Map"),QLineEdit::Normal,QString(),&ok);
+    QString mapName = QInputDialog::getText(this, QString("Enter Map Name"), QString("New Map"), QLineEdit::Normal, QString(), &ok);
     if(!ok)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select Map Image..."));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
     if(filename.isEmpty())
         return;
 
-    Map* newMap = new Map(mapName, filename);
+    //Map* newMap = new Map(mapName, filename);
+    Map* newMap = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mapName, false));
+    if(!newMap)
+        return;
 
+    newMap->setFileName(filename);
+
+    /*
     Adventure* adventure = campaign->getAdventureById(id);
     if(adventure)
     {
@@ -1049,12 +1070,15 @@ void MainWindow::newMap()
     {
         campaign->addSetting(newMap);
     }
+    */
+    parentObject->addObject(newMap);
 
     selectItem(DMHelper::TreeType_Map, newMap->getID(), id);
 }
 
 void MainWindow::editCurrentMap()
 {
+    //TODO: describe why returning
     if((!campaign)||(!treeModel))
         return;
 
@@ -1062,6 +1086,8 @@ void MainWindow::editCurrentMap()
     int type = mapItem->data(DMHelper::TreeItemData_Type).toInt();
     if(type == DMHelper::TreeType_Map)
     {
+        Map* map = dynamic_cast<Map*>(campaign->getObjectById(QUuid(mapItem->data(DMHelper::TreeItemData_ID).toString())));
+        /*
         Adventure* adventure = nullptr;
         QStandardItem* adventureItem = findParentbyType(mapItem, DMHelper::TreeType_Adventure);
         if(adventureItem)
@@ -1078,8 +1104,12 @@ void MainWindow::editCurrentMap()
         {
             map = campaign->getSettingById(QUuid(mapItem->data(DMHelper::TreeItemData_ID).toString()));
         }
+        */
 
-        QString filename = QFileDialog::getOpenFileName(this,QString("Select Map Image..."));
+        if(!map)
+            return;
+
+        QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
         if(!filename.isEmpty())
         {
             map->setFileName(filename);
@@ -1094,7 +1124,29 @@ void MainWindow::removeCurrentItem()
         return;
 
     QStandardItem* removeItem = treeModel->itemFromIndex(ui->treeView->currentIndex());
-    int type = removeItem->data(DMHelper::TreeItemData_Type).toInt();
+//    int type = removeItem->data(DMHelper::TreeItemData_Type).toInt();
+
+    CampaignObjectBase* removeObject = campaign->getObjectById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
+    if(!removeObject)
+        return;
+
+    if(QMessageBox::question(this,
+                             QString("Confirm Delete"),
+                             QString("Are you sure you would like to delete the item ") + removeObject->getName() + QString("?")) != QMessageBox::Yes)
+        return;
+
+    QUuid parentId;
+    if(removeItem->parent())
+            parentId = QUuid(removeItem->parent()->data(DMHelper::TreeItemData_ID).toString());
+    campaign->removeObject(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
+    if(!parentId.isNull())
+    {
+        QStandardItem* parentItem = findItem(treeModel->invisibleRootItem(), parentId);
+        if(parentItem)
+            ui->treeView->setCurrentIndex(parentItem->index());
+    }
+
+    /*
     QStandardItem* adventureItem = findParentbyType(removeItem, DMHelper::TreeType_Adventure);
     if(adventureItem)
     {
@@ -1162,6 +1214,7 @@ void MainWindow::removeCurrentItem()
             }
         }
     }
+    */
 }
 
 void MainWindow::editCurrentItem()
@@ -1179,7 +1232,8 @@ void MainWindow::editCurrentItem()
     }
     else if(type == DMHelper::TreeType_Map)
     {
-        Map* map = nullptr;
+        Map* map = dynamic_cast<Map*>(campaign->getObjectById(QUuid(editItem->data(DMHelper::TreeItemData_ID).toString())));
+        /*
         QStandardItem* adventureItem = findParentbyType(editItem, DMHelper::TreeType_Adventure);
         if(adventureItem)
         {
@@ -1194,16 +1248,17 @@ void MainWindow::editCurrentItem()
         {
             map = campaign->getSettingById(QUuid(editItem->data(DMHelper::TreeItemData_ID).toString()));
         }
+        */
 
         if(map)
         {
             bool ok = false;
-            QString mapName = QInputDialog::getText(this, QString("Enter Map Name"),QString("New Map"),QLineEdit::Normal,QString(),&ok);
+            QString mapName = QInputDialog::getText(this, QString("Enter Map Name"), QString("New Map"), QLineEdit::Normal, QString(), &ok);
             if(ok)
-            {
-                map->setName(mapName); // TODO: Why doesn't this emit changed?
-                updateCampaignTree();
-            }
+            //{
+                map->setName(mapName); // TODO: Why doesn't this emit changed? Fixed, should now be ok
+                //updateCampaignTree();
+            //}
         }
     }
 }
@@ -1601,8 +1656,12 @@ void MainWindow::enableCampaignMenu()
     */
 }
 
+
 Encounter* MainWindow::notesFromIndex(const QModelIndex & index)
 {
+    // TODO: Remove completely
+    return nullptr;
+    /*
     if( (!treeModel) || (!index.isValid()) )
         return nullptr;
 
@@ -1615,6 +1674,7 @@ Encounter* MainWindow::notesFromIndex(const QModelIndex & index)
         return nullptr;
 
     return campaign->getNotes();
+    */
 }
 
 Character* MainWindow::characterFromIndex(const QModelIndex & index)
@@ -1639,6 +1699,9 @@ Character* MainWindow::characterFromIndex(const QModelIndex & index)
 
 Adventure* MainWindow::adventureFromIndex(const QModelIndex & index)
 {
+    // TODO: remove completely
+    return nullptr;
+    /*
     // TODO: much repetition in these FromIndex functions - must be able to be simplified and generalized
     if( (!treeModel) || (!index.isValid()) )
         return nullptr;
@@ -1651,10 +1714,14 @@ Adventure* MainWindow::adventureFromIndex(const QModelIndex & index)
         return nullptr;
     else
         return campaign->getAdventureById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
+        */
 }
 
 Encounter* MainWindow::encounterFromIndex(const QModelIndex & index)
 {
+    // TODO: remove completely
+    return nullptr;
+    /*
     if( (!treeModel) || (!index.isValid()) )
         return nullptr;
 
@@ -1671,17 +1738,21 @@ Encounter* MainWindow::encounterFromIndex(const QModelIndex & index)
         return nullptr;
 
     return adventure->getEncounterById(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
+    */
 }
 
 Map* MainWindow::mapFromIndex(const QModelIndex & index)
 {
-    if( (!treeModel) || (!index.isValid()) )
+    if((!campaign) || (!treeModel) || (!index.isValid()))
         return nullptr;
 
     QStandardItem* item = treeModel->itemFromIndex(index);
     if(!item)
         return nullptr;
 
+    return dynamic_cast<Map*>(campaign->getObjectById(QUuid(item->data(DMHelper::TreeItemData_ID).toString())));
+
+    /*
     int type = item->data(DMHelper::TreeItemData_Type).toInt();
     if(type != DMHelper::TreeType_Map)
         return nullptr;
@@ -1711,6 +1782,7 @@ Map* MainWindow::mapFromIndex(const QModelIndex & index)
     {
         return nullptr;
     }
+    */
 }
 
 bool MainWindow::selectItem(int itemType, QUuid itemId)
@@ -1761,6 +1833,27 @@ QStandardItem* MainWindow::findItem(QStandardItem* parent, int itemType, QUuid i
         }
 
         QStandardItem* childResult = findItem(child, itemType, itemId);
+        if(childResult != nullptr)
+            return childResult;
+    }
+
+    return nullptr;
+}
+
+QStandardItem* MainWindow::findItem(QStandardItem* parent, QUuid itemId)
+{
+    if(!parent)
+        return nullptr;
+
+    for(int i = 0; i < parent->rowCount(); ++i)
+    {
+        QStandardItem* child = parent->child(i);
+        if(QUuid(child->data(DMHelper::TreeItemData_ID).toString()) == itemId)
+        {
+            return child;
+        }
+
+        QStandardItem* childResult = findItem(child, itemId);
         if(childResult != nullptr)
             return childResult;
     }
@@ -1860,6 +1953,30 @@ void MainWindow::newEncounter(int encounterType)
     if((!campaign)||(!treeModel))
         return;
 
+    QStandardItem* item = treeModel->itemFromIndex(ui->treeView->currentIndex());
+    if(!item)
+        return;
+
+    QUuid id = QUuid(item->data(DMHelper::TreeItemData_ID).toString());
+    bool ok;
+    QString encounterName = QInputDialog::getText(this, QString("Enter Encounter Name"), QString("New Encounter"), QLineEdit::Normal, QString(), &ok);
+    if(ok)
+    {
+        CampaignObjectBase* parentObject = campaign->getObjectById(id);
+        if(parentObject)
+        {
+            //Encounter* encounter = EncounterFactory::createEncounter(encounterType, encounterName, adventure);
+            CampaignObjectBase* encounter = EncounterFactory().createObject(encounterType, -1, encounterName, false);
+            if(encounter)
+            {
+                //adventure->addEncounter(encounter);
+                parentObject->addObject(encounter);
+                selectItem(DMHelper::TreeType_Encounter, encounter->getID(), id);
+            }
+        }
+    }
+
+    /*
     QStandardItem* adventureItem = findParentbyType(treeModel->itemFromIndex(ui->treeView->currentIndex()), DMHelper::TreeType_Adventure);
     if(!adventureItem)
         return;
@@ -1880,6 +1997,7 @@ void MainWindow::newEncounter(int encounterType)
             }
         }
     }
+    */
 }
 
 void MainWindow::openFile(const QString& filename)
@@ -1937,7 +2055,8 @@ void MainWindow::openFile(const QString& filename)
     campaignFileName = filename;
     QFileInfo fileInfo(campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
-    campaign = new Campaign(campaignElement, false);
+    campaign = new Campaign();
+    campaign->inputXML(campaignElement, false);
     if(!campaign->isValid())
     {
         QMessageBox::StandardButton result = QMessageBox::critical(this,
@@ -1967,7 +2086,9 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 {
     qDebug() << "[Main] Campaign Loaded: " << campaignFileName;
 
-    ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Blank);
+    //ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Blank);
+    // TODO: select the first entry in the campaign tree
+    activateWidget(DMHelper::CampaignType_Base);
 
     updateCampaignTree();
     updateMapFiles();
@@ -1983,13 +2104,14 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     {
         setWindowTitle(QString("DM Helper [*]"));
         ui->stackedWidgetEncounter->setEnabled(true);
-        ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
+        activateWidget(DMHelper::CampaignType_WelcomeScreen);// ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
     }
 }
 
 void MainWindow::updateCampaignTree()
 {
     qDebug() << "[Main] Updating Campaign Tree";
+    /*
     enableCampaignMenu();
 
     if(treeModel)
@@ -2159,6 +2281,7 @@ void MainWindow::updateCampaignTree()
     }
 
     encounterTextEdit->setKeys(treeIndexMap.uniqueKeys());
+    */
 }
 
 void MainWindow::updateMapFiles()
@@ -2169,6 +2292,14 @@ void MainWindow::updateMapFiles()
     QFileInfo fileInfo(campaignFileName);
     QDir sourceDir(fileInfo.absoluteDir());
 
+    QList<Map*> mapList = campaign->findChildren<Map*>();
+    for(Map* map : mapList)
+    {
+        if(map)
+            map->setFileName(QDir::cleanPath(sourceDir.absoluteFilePath(map->getFileName())));
+    }
+
+    /*
     for(int i = 0; i < campaign->getAdventureCount(); ++i)
     {
         Adventure* adventure = campaign->getAdventureByIndex(i);
@@ -2184,6 +2315,7 @@ void MainWindow::updateMapFiles()
             }
         }
     }
+    */
 }
 
 void MainWindow::updateClock()
@@ -2291,6 +2423,7 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
 
     qDebug() << "[Main] Tree Item Changed: " << item;
 
+    /*
     campaign->beginBatchChanges();
 
     int type = item->data(DMHelper::TreeItemData_Type).toInt();
@@ -2370,7 +2503,7 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
     }
 
     campaign->endBatchChanges();
-
+    */
 }
 
 void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QModelIndex & previous)
@@ -2380,6 +2513,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
 
     qDebug() << "[Main] Tree Item Selected. Current: " << current << " Previous: " << previous;
 
+    /*
     // If the previous index is an encounter disable the widget
     // TODO: this isn't relevant any more with the frame, can be removed???
     if(ui->stackedWidgetEncounter->isEnabled() == true)
@@ -2476,11 +2610,11 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
             _ribbon->enableTab(_ribbonTabMap);
             _ribbon->enableTab(_ribbonTabBattle);
 
-            /*
-            EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(ui->stackedWidgetEncounter->currentWidget());
-            if(battleEdit)
-                connect(encounter,SIGNAL(destroyed(QObject*)),battleEdit,SLOT(clear()));
-            */
+
+            //EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(ui->stackedWidgetEncounter->currentWidget());
+            //if(battleEdit)
+            //    connect(encounter,SIGNAL(destroyed(QObject*)),battleEdit,SLOT(clear()));
+
             BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->currentWidget());
             if(battleFrame)
                 connect(encounter,SIGNAL(destroyed(QObject*)),battleFrame,SLOT(clear()));
@@ -2525,6 +2659,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_AudioTrack);
         return;
     }
+    */
 }
 
 void MainWindow::handleTreeItemDoubleClicked(const QModelIndex & index)
@@ -2552,6 +2687,7 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
     int itemType = item->data(DMHelper::TreeItemData_Type).toInt();
     QUuid itemId = QUuid(item->data(DMHelper::TreeItemData_ID).toString());
 
+    /*
     switch(itemType)
     {
         case DMHelper::TreeType_Party_Title:
@@ -2580,6 +2716,7 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
         default:
             break; // do nothing
     }
+    */
 }
 
 void MainWindow::handleEncounterTextChanged()
@@ -2893,6 +3030,50 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabMap->setGridScale(model->getGridScale());
         _ribbonTabMap->setGridXOffset(model->getGridOffsetX());
         _ribbonTabMap->setGridYOffset(model->getGridOffsetY());
+    }
+}
+
+void MainWindow::activateWidget(int objectType)
+{
+    switch(objectType)
+    {
+        //ui->stackedWidgetEncounter->addWidget(encounterTextEdit);
+        case DMHelper::CampaignType_Base:
+        case DMHelper::CampaignType_Campaign:
+        case DMHelper::CampaignType_Party:
+        case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_Placeholder:
+            ui->stackedWidgetEncounter->setCurrentIndex(0);
+            break;
+        //ui->stackedWidgetEncounter->addWidget(battleFrame);
+        case DMHelper::CampaignType_Battle:
+        case DMHelper::CampaignType_BattleContent:
+            ui->stackedWidgetEncounter->setCurrentIndex(1);
+            break;
+        //ui->stackedWidgetEncounter->addWidget(charFrame);
+        case DMHelper::CampaignType_Combatant:
+            ui->stackedWidgetEncounter->setCurrentIndex(2);
+            break;
+        //ui->stackedWidgetEncounter->addWidget(mapFrame);
+        case DMHelper::CampaignType_Map:
+            ui->stackedWidgetEncounter->setCurrentIndex(3);
+            break;
+        //ui->stackedWidgetEncounter->addWidget(scrollingTextEdit);
+        case DMHelper::CampaignType_ScrollingText:
+            ui->stackedWidgetEncounter->setCurrentIndex(4);
+            break;
+        //ui->stackedWidgetEncounter->addWidget(audioTrackEdit);
+        case DMHelper::CampaignType_AudioTrack:
+            ui->stackedWidgetEncounter->setCurrentIndex(5);
+            break;
+        //ui->stackedWidgetEncounter->addWidget(welcomeFrame);
+        case DMHelper::CampaignType_WelcomeScreen:
+            ui->stackedWidgetEncounter->setCurrentIndex(6);
+            break;
+        default:
+            qDebug() << "[MainWindow] ERROR: activate widget called with unexpected type: " << objectType;
+            ui->stackedWidgetEncounter->setCurrentIndex(0);
+            break;
     }
 }
 

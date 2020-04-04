@@ -1,5 +1,6 @@
 #include "battledialogeventnewround.h"
 #include "dmconstants.h"
+#include <QDomElement>
 #include <QDebug>
 
 BattleDialogEventNewRound::BattleDialogEventNewRound() :
@@ -31,8 +32,8 @@ BattleDialogEvent* BattleDialogEventNewRound::clone()
     return new BattleDialogEventNewRound(*this);
 }
 
-void BattleDialogEventNewRound::outputXML(QDomElement &element, bool isExport)
+QDomElement BattleDialogEventNewRound::outputXML(QDomElement &element, bool isExport)
 {
-    Q_UNUSED(element);
     Q_UNUSED(isExport);
+    return element;
 }

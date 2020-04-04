@@ -1,32 +1,31 @@
 #ifndef ENCOUNTERSCROLLINGTEXT_H
 #define ENCOUNTERSCROLLINGTEXT_H
 
-#include "encounter.h"
+#include "encountertext.h"
 #include <QColor>
 
 class QDomDocument;
 class QDomElement;
 
-class EncounterScrollingText : public Encounter
+class EncounterScrollingText : public EncounterText
 {
     Q_OBJECT
 public:
 
-    explicit EncounterScrollingText(const QString& encounterName, QObject *parent);
-    explicit EncounterScrollingText(const EncounterScrollingText& obj);
+    explicit EncounterScrollingText(const QString& encounterName = QString(), QObject *parent = nullptr);
+    //explicit EncounterScrollingText(const EncounterScrollingText& obj);
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // Base functions to handle UI widgets
-    virtual void widgetActivated(QWidget* widget) override;
-    virtual void widgetDeactivated(QWidget* widget) override;
+    //virtual void widgetActivated(QWidget* widget) override;
+    //virtual void widgetDeactivated(QWidget* widget) override;
 
-    virtual int getType() const override;
+    virtual int getObjectType() const override;
 
     virtual qreal getScrollSpeed() const;
     virtual QString getImgFile() const;
-    virtual QString getText() const;
     virtual QString getFontFamily() const;
     virtual int getFontSize() const;
     virtual bool getFontBold() const;
@@ -38,7 +37,6 @@ public:
 public slots:
     virtual void setScrollSpeed(double scrollSpeed);
     virtual void setImgFile(const QString& imgFile);
-    virtual void setText(const QString& newText);
     virtual void setFontFamily(const QString& fontFamily);
     virtual void setFontSize(int fontSize);
     virtual void setFontBold(bool fontBold);
@@ -48,14 +46,14 @@ public slots:
     virtual void setFontColor(QColor fontColor);
 
 protected slots:
-    virtual void widgetChanged() override;
+    //virtual void widgetChanged() override;
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
 protected:
 
     qreal _scrollSpeed;
     QString _imgFile;
-    QString _text;
     QString _fontFamily;
     int _fontSize;
     bool _fontBold;

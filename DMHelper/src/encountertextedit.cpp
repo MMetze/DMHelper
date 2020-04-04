@@ -1,4 +1,5 @@
 #include "encountertextedit.h"
+#include "encountertext.h"
 #include "ui_encountertextedit.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
@@ -13,7 +14,8 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
 
     ui->textBrowser->viewport()->setCursor(Qt::IBeamCursor);
 
-    connect(ui->textBrowser, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
+    //    connect(ui->textBrowser, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
     connect(ui->textBrowser, SIGNAL(anchorClicked(QUrl)), this, SIGNAL(anchorClicked(QUrl)));
 
     ui->textBrowser->installEventFilter(this);
@@ -25,7 +27,7 @@ EncounterTextEdit::~EncounterTextEdit()
     delete ui;
 }
 
-void EncounterTextEdit::setKeys(QList<QString> keys)
+void EncounterTextEdit::setKeys(const QList<QString>& keys)
 {
     _keys = keys;
 }
@@ -42,7 +44,12 @@ EncounterText* EncounterTextEdit::getEncounter() const
 
 void EncounterTextEdit::setEncounter(EncounterText* encounter)
 {
-    _encounter = encounter;
+    if(_encounter != encounter)
+    {
+        storeEncounter();
+        _encounter = encounter;
+        readEncounter();
+    }
 }
 
 QString EncounterTextEdit::toHtml() const
@@ -114,4 +121,18 @@ void EncounterTextEdit::setHtml(const QString &text)
 void EncounterTextEdit::setPlainText(const QString &text)
 {
     ui->textBrowser->setPlainText(text);
+}
+
+void EncounterTextEdit::storeEncounter()
+{
+    if(_encounter)
+        _encounter->setText(toHtml());
+}
+
+void EncounterTextEdit::readEncounter()
+{
+    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+    if(_encounter)
+        setHtml(_encounter->getText());
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
 }

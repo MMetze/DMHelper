@@ -6,8 +6,8 @@
 #include <QPen>
 #include <QBrush>
 
-BattleDialogModelEffect::BattleDialogModelEffect() :
-    CampaignObjectBase(),
+BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *parent) :
+    CampaignObjectBase(name, parent),
     _size(20),
     _position(0,0),
     _rotation(0),
@@ -26,6 +26,7 @@ BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& positi
 {
 }
 
+/*
 BattleDialogModelEffect::BattleDialogModelEffect(const BattleDialogModelEffect& other) :
     CampaignObjectBase(other),
     _size(other._size),
@@ -35,11 +36,13 @@ BattleDialogModelEffect::BattleDialogModelEffect(const BattleDialogModelEffect& 
     _tip(other._tip)
 {
 }
+*/
 
 BattleDialogModelEffect::~BattleDialogModelEffect()
 {
 }
 
+/*
 void BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "battleeffect" );
@@ -59,11 +62,10 @@ void BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, 
 
     parent.appendChild(element);
 }
+*/
 
 void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element, isImport);
-
     _size = element.attribute("size",QString::number(20)).toInt();
     _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
                         element.attribute("positionY",QString::number(0)).toDouble());
@@ -73,6 +75,8 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
                     element.attribute("colorB",QString::number(255)).toInt(),
                     element.attribute("colorA",QString::number(64)).toInt());
     _tip = element.attribute("tip");
+
+    CampaignObjectBase::inputXML(element, isImport);
 }
 
 void BattleDialogModelEffect::applyEffectValues(QAbstractGraphicsShapeItem& item, qreal gridScale) const
@@ -84,7 +88,7 @@ void BattleDialogModelEffect::applyEffectValues(QAbstractGraphicsShapeItem& item
     item.setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
     item.setToolTip(getTip());
 
-    item.setScale((qreal)getSize() * gridScale / 500.0);
+    item.setScale(static_cast<qreal>(getSize()) * gridScale / 500.0);
 }
 
 int BattleDialogModelEffect::getSize() const
@@ -142,9 +146,47 @@ void BattleDialogModelEffect::setTip(const QString& tip)
     _tip = tip;
 }
 
+QDomElement BattleDialogModelEffect::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement( "battleeffect" );
+}
+
+void BattleDialogModelEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("type", getEffectType());
+    element.setAttribute("size", _size);
+    element.setAttribute("positionX", _position.x());
+    element.setAttribute("positionY", _position.y());
+    element.setAttribute("rotation", _rotation );
+    element.setAttribute("colorR", _color.red());
+    element.setAttribute("colorG", _color.green());
+    element.setAttribute("colorB", _color.blue());
+    element.setAttribute("colorA", _color.alpha());
+    element.setAttribute("tip", _tip);
+
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool BattleDialogModelEffect::belongsToObject(QDomElement& element)
+{
+    Q_UNUSED(element);
+
+    // Don't auto-input any child objects of the battle. The battle will handle this itself.
+    return true;
+}
+
 void BattleDialogModelEffect::prepareItem(QAbstractGraphicsShapeItem& item) const
 {
     item.setFlag(QGraphicsItem::ItemIsMovable, true);
     item.setFlag(QGraphicsItem::ItemIsSelectable, true);
     item.setZValue(DMHelper::BattleDialog_Z_BackHighlight);
+}
+
+void BattleDialogModelEffect::copyValues(const BattleDialogModelEffect &other)
+{
+    _size = other._size;
+    _position = other._position;
+    _rotation = other._rotation;
+    _color = other._color;
+    _tip = other._tip;
 }

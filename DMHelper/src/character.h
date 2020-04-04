@@ -63,9 +63,9 @@ public:
         INTVALUE_COUNT
     };
 
-    explicit Character(QObject *parent = nullptr);
-    explicit Character(QDomElement &element, bool isImport, QObject *parent = nullptr);
-    explicit Character(const Character &obj);  // copy constructor
+    explicit Character(const QString& name = QString(), QObject *parent = nullptr);
+    //explicit Character(QDomElement &element, bool isImport, QObject *parent = nullptr);
+    //explicit Character(const Character &obj);  // copy constructor
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -76,9 +76,11 @@ public:
 
     virtual Combatant* clone() const override;
 
-    virtual int getType() const override;
+    virtual int getCombatantType() const override;
     virtual int getDndBeyondID() const;
     virtual void setDndBeyondID(int id);
+
+    virtual bool isInParty() const;
 
     virtual int getSpeed() const override;
 

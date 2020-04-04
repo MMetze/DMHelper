@@ -1,8 +1,8 @@
 #include "battledialogmodeleffectradius.h"
 #include "unselectedellipse.h"
 
-BattleDialogModelEffectRadius::BattleDialogModelEffectRadius() :
-    BattleDialogModelEffect()
+BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const QString& name, QObject *parent) :
+    BattleDialogModelEffect(name, parent)
 {
 }
 
@@ -11,10 +11,12 @@ BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(int size, const QPo
 {
 }
 
+/*
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const BattleDialogModelEffectRadius& other) :
     BattleDialogModelEffect(other)
 {
 }
+*/
 
 BattleDialogModelEffectRadius::~BattleDialogModelEffectRadius()
 {
@@ -22,10 +24,12 @@ BattleDialogModelEffectRadius::~BattleDialogModelEffectRadius()
 
 BattleDialogModelEffect* BattleDialogModelEffectRadius::clone() const
 {
-    return new BattleDialogModelEffectRadius(*this);
+    BattleDialogModelEffectRadius* newEffect = new BattleDialogModelEffectRadius(getName());
+    newEffect->copyValues(*this);
+    return newEffect;
 }
 
-int BattleDialogModelEffectRadius::getType() const
+int BattleDialogModelEffectRadius::getEffectType() const
 {
     return BattleDialogModelEffect_Radius;
 }

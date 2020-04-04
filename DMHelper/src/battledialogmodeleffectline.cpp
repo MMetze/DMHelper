@@ -3,8 +3,8 @@
 #include <QDebug>
 #include <QPen>
 
-BattleDialogModelEffectLine::BattleDialogModelEffectLine() :
-    BattleDialogModelEffect()
+BattleDialogModelEffectLine::BattleDialogModelEffectLine(const QString& name, QObject *parent) :
+    BattleDialogModelEffect(name, parent)
 {
 }
 
@@ -13,10 +13,12 @@ BattleDialogModelEffectLine::BattleDialogModelEffectLine(int size, const QPointF
 {
 }
 
+/*
 BattleDialogModelEffectLine::BattleDialogModelEffectLine(const BattleDialogModelEffectLine& other) :
     BattleDialogModelEffect(other)
 {
 }
+*/
 
 BattleDialogModelEffectLine::~BattleDialogModelEffectLine()
 {
@@ -24,17 +26,19 @@ BattleDialogModelEffectLine::~BattleDialogModelEffectLine()
 
 BattleDialogModelEffect* BattleDialogModelEffectLine::clone() const
 {
-    return new BattleDialogModelEffectLine(*this);
+    BattleDialogModelEffectLine* newEffect = new BattleDialogModelEffectLine(getName());
+    newEffect->copyValues(*this);
+    return newEffect;
 }
 
-int BattleDialogModelEffectLine::getType() const
+int BattleDialogModelEffectLine::getEffectType() const
 {
     return BattleDialogModelEffect_Line;
 }
 
 QAbstractGraphicsShapeItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale) const
 {
-    QGraphicsRectItem* rectItem = new UnselectedRect(-250.0, 0.0, 500.0, (qreal)getSize() * 100.f);
+    QGraphicsRectItem* rectItem = new UnselectedRect(-250.0, 0.0, 500.0, static_cast<qreal>(getSize()) * 100.0);
 
     rectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
     //qreal scaledSize = _model.getGridScale() / 500.f;
@@ -55,7 +59,7 @@ void BattleDialogModelEffectLine::applyEffectValues(QAbstractGraphicsShapeItem& 
     // Now correct the special case information for the line effect
     QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(&item);
     if(rectItem)
-        rectItem->setRect(-250.0, 0.0, 500.0, (qreal)getSize() * 100.0);
+        rectItem->setRect(-250.0, 0.0, 500.0, static_cast<qreal>(getSize()) * 100.0);
     else
         qDebug() << "[Battle Dialog Model Effect Line] ERROR: Line Effect found without QGraphicsRectItem!";
 

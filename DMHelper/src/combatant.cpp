@@ -7,9 +7,9 @@
 #include <QDir>
 #include <QPixmap>
 
-Combatant::Combatant(QObject *parent) :
-    CampaignObjectBase(parent),
-    _name(""),
+Combatant::Combatant(const QString& name, QObject *parent) :
+    CampaignObjectBase(name, parent),
+//    _name(""),
     _initiative(0),
     _armorClass(10),
     _attacks(),
@@ -22,6 +22,7 @@ Combatant::Combatant(QObject *parent) :
 {
 }
 
+/*
 Combatant::Combatant(const Combatant &obj) :
     CampaignObjectBase(obj.parent()),
     _name(obj._name),
@@ -39,18 +40,20 @@ Combatant::Combatant(const Combatant &obj) :
         _attacks.append(obj._attacks.at(i));
     }
 }
+*/
 
 Combatant::~Combatant()
 {
 }
 
+/*
 void Combatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement element = doc.createElement( "combatant" );
 
     CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
 
-    element.setAttribute( "name", getName() );
+    //element.setAttribute( "name", getName() );
     element.setAttribute( "type", getType() );
     element.setAttribute( "armorClass", getArmorClass() );
     element.setAttribute( "hitPoints", getHitPoints() );
@@ -80,12 +83,11 @@ void Combatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDi
 
     parent.appendChild(element);
 }
+*/
 
 void Combatant::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element, isImport);
-
-    setName(element.attribute("name"));
+    //setName(element.attribute("name"));
     setArmorClass(element.attribute("armorClass").toInt());
     setHitPoints(element.attribute("hitPoints").toInt());
     setHitDice(Dice(element.attribute("hitDice")));
@@ -101,6 +103,13 @@ void Combatant::inputXML(const QDomElement &element, bool isImport)
             attackElement = attackElement.nextSiblingElement( QString("attack") );
         }
     }
+
+    CampaignObjectBase::inputXML(element, isImport);
+}
+
+int Combatant::getObjectType() const
+{
+    return DMHelper::CampaignType_Combatant;
 }
 
 void Combatant::beginBatchChanges()
@@ -121,12 +130,14 @@ void Combatant::endBatchChanges()
     }
 }
 
+/*
 QString Combatant::getName() const
 {
     return _name;
 }
+*/
 
-int Combatant::getType() const
+int Combatant::getCombatantType() const
 {
     return DMHelper::CombatantType_Base;
 }
@@ -285,6 +296,7 @@ QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup
     return result;
 }
 
+/*
 void Combatant::setName(const QString& combatantName)
 {
     if(combatantName != _name)
@@ -295,6 +307,7 @@ void Combatant::setName(const QString& combatantName)
         emit dirty();
     }
 }
+*/
 
 void Combatant::setInitiative(int initiative)
 {
@@ -369,12 +382,48 @@ void Combatant::setIcon(const QString &newIcon)
     }
 }
 
+QDomElement Combatant::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement( "combatant" );
+}
+
 void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(element);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport)
+    //element.setAttribute( "name", getName() );
+    element.setAttribute( "type", getCombatantType() );
+    element.setAttribute( "armorClass", getArmorClass() );
+    element.setAttribute( "hitPoints", getHitPoints() );
+    element.setAttribute( "hitDice", getHitDice().toString() );
+
+    QString iconPath = getIcon(true);
+    if(iconPath.isEmpty())
+    {
+        element.setAttribute( "icon", QString("") );
+    }
+    else
+    {
+        element.setAttribute( "icon", targetDirectory.relativeFilePath(iconPath));
+    }
+
+    QDomElement attacksElement = doc.createElement( "attacks" );
+    for(int i = 0; i < getAttacks().count(); ++i)
+    {
+        QDomElement attackElement = doc.createElement( "attack" );
+        attackElement.setAttribute( "name", getAttacks().at(i).getName() );
+        attackElement.setAttribute( "dice", getAttacks().at(i).getDice().toString() );
+        attacksElement.appendChild(attackElement);
+    }
+    element.appendChild(attacksElement);
+
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool Combatant::belongsToObject(QDomElement& element)
+{
+    if(element.tagName() == QString("attack"))
+        return true;
+    else
+        return CampaignObjectBase::belongsToObject(element);
 }
 
 void Combatant::registerChange()
@@ -386,5 +435,22 @@ void Combatant::registerChange()
     else
     {
         emit dirty();
+    }
+}
+
+void Combatant::copyValues(const Combatant &other)
+{
+    _initiative = other._initiative;
+    _armorClass = other._armorClass;
+    _hitPoints = other._hitPoints;
+    _hitDice = other._hitDice;
+    _icon = other._icon;
+    _iconPixmap = other._iconPixmap;
+    _batchChanges = other._batchChanges;
+    _changesMade = other._changesMade;
+
+    for(int i = 0; i < other._attacks.count(); ++i)
+    {
+        _attacks.append(other._attacks.at(i));
     }
 }

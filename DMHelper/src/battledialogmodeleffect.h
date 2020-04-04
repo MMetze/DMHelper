@@ -23,18 +23,18 @@ public:
         BattleDialogModelEffect_Line
     };
 
-    BattleDialogModelEffect();
+    BattleDialogModelEffect(const QString& name = QString(), QObject *parent = nullptr);
     BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
-    BattleDialogModelEffect(const BattleDialogModelEffect& other);
+    //BattleDialogModelEffect(const BattleDialogModelEffect& other);
     virtual ~BattleDialogModelEffect() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
 
-    virtual int getType() const = 0;
+    virtual int getEffectType() const = 0;
 
     virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const = 0;
     virtual void applyEffectValues(QAbstractGraphicsShapeItem& item, qreal gridScale) const;
@@ -56,15 +56,18 @@ public:
     virtual void setTip(const QString& tip);
 
 protected:
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
     void prepareItem(QAbstractGraphicsShapeItem& item) const;
+    void copyValues(const BattleDialogModelEffect &other);
 
     int _size;
     QPointF _position;
     qreal _rotation;
     QColor _color;
     QString _tip;
-
 };
 
 

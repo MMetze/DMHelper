@@ -35,6 +35,7 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload.cpp \
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
+    audiofactory.cpp \
     basicdateserver.cpp \
     battledialoggraphicsscenemousehandler.cpp \
     battleframe.cpp \
@@ -44,8 +45,10 @@ SOURCES += main.cpp\
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     campaignexporter.cpp \
+    campaignobjectfactory.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
+    combatantwidget.cpp \
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
@@ -56,7 +59,11 @@ SOURCES += main.cpp\
     legaldialog.cpp \
     mainwindow.cpp \
     mapeditframe.cpp \
+    mapfactory.cpp \
+    objectfactory.cpp \
     objectimporter.cpp \
+    party.cpp \
+    placeholder.cpp \
     presentupdatedialog.cpp \
     publishbuttonframe.cpp \
     publishbuttonribbon.cpp \
@@ -74,14 +81,10 @@ SOURCES += main.cpp\
     undofill.cpp \
     undobase.cpp \
     dicerolldialog.cpp \
-    adventure.cpp \
     map.cpp \
-    encounter.cpp \
     character.cpp \
-    characterwidget.cpp \
     characterdialog.cpp \
     campaign.cpp \
-    adventureitem.cpp \
     mruhandler.cpp \
     mruaction.cpp \
     campaignobjectbase.cpp \
@@ -93,13 +96,11 @@ SOURCES += main.cpp\
     attack.cpp \
     combatantdialog.cpp \
     monster.cpp \
-    monsterwidget.cpp \
     combatantfactory.cpp \
     bestiarydialog.cpp \
     monsterclass.cpp \
     bestiary.cpp \
     addmonstersdialog.cpp \
-    combatantwidget.cpp \
     campaigntree.cpp \
     campaigntreemodel.cpp \
     textpublishdialog.cpp \
@@ -214,6 +215,7 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhobjectbase_private.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
+    audiofactory.h \
     basicdateserver.h \
     battledialoggraphicsscenemousehandler.h \
     battleframe.h \
@@ -223,8 +225,10 @@ HEADERS  += mainwindow.h \
     bestiaryexportdialog.h \
     camerarect.h \
     campaignexporter.h \
+    campaignobjectfactory.h \
     characterimportdialog.h \
     colorpushbutton.h \
+    combatantwidget.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
@@ -234,8 +238,12 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     legaldialog.h \
     mapeditframe.h \
+    mapfactory.h \
     mapmarker.h \
+    objectfactory.h \
     objectimporter.h \
+    party.h \
+    placeholder.h \
     presentupdatedialog.h \
     publishbuttonframe.h \
     publishbuttonribbon.h \
@@ -253,15 +261,11 @@ HEADERS  += mainwindow.h \
     undofill.h \
     undobase.h \
     dicerolldialog.h \
-    adventure.h \
     map.h \
-    encounter.h \
     character.h \
-    characterwidget.h \
     characterdialog.h \
     campaign.h \
     dmconstants.h \
-    adventureitem.h \
     mruhandler.h \
     mruaction.h \
     campaignobjectbase.h \
@@ -273,13 +277,11 @@ HEADERS  += mainwindow.h \
     attack.h \
     combatantdialog.h \
     monster.h \
-    monsterwidget.h \
     combatantfactory.h \
     bestiarydialog.h \
     monsterclass.h \
     bestiary.h \
     addmonstersdialog.h \
-    combatantwidget.h \
     campaigntree.h \
     campaigntreemodel.h \
     textpublishdialog.h \

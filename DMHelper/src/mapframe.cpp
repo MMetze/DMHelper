@@ -544,11 +544,14 @@ void MapFrame::loadTracks()
     ui->cmbTracks->clear();
     ui->cmbTracks->addItem(QString("---"), QVariant::fromValue(0));
 
-    Campaign* campaign = _mapSource->getCampaign();
+    //Campaign* campaign = _mapSource->getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(_mapSource->getParentByType(DMHelper::CampaignType_Campaign));
     int currentIndex = 0;
-    for(int i = 0; i < campaign->getTrackCount(); ++i)
+    QList<AudioTrack*> trackList = campaign->findChildren<AudioTrack*>();
+    //for(int i = 0; i < campaign->getTrackCount(); ++i)
+    for(AudioTrack* track : trackList)
     {
-        AudioTrack* track = campaign->getTrackByIndex(i);
+        //AudioTrack* track = campaign->getTrackByIndex(i);
         ui->cmbTracks->addItem(track->getName(), QVariant::fromValue(track));
         if(_mapSource->getAudioTrackId() == track->getID())
             currentIndex = ui->cmbTracks->count() - 1;
