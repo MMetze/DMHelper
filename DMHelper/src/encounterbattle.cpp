@@ -108,7 +108,7 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
                             int combatantType = combatantElement.attribute("type").toInt(&ok);
                             if(ok)
                             {
-                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, isImport, this);
+                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, isImport, nullptr);
                                 if(newCombatant)
                                 {
                                     addCombatant(wave, combatantCount, newCombatant);

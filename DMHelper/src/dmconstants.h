@@ -156,6 +156,7 @@ namespace DMHelper
 
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
+    const int TreeItemData_Object = Qt::UserRole + 3;
 
     const int ChaserContent_Type = Qt::UserRole + 1;
     const int ChaserContent_Pointer = Qt::UserRole + 2;

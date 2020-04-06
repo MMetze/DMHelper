@@ -20,7 +20,7 @@
 // MapFrame definitions
 
 MapFrame::MapFrame(QWidget *parent) :
-    QWidget(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::MapFrame),
     _scene(nullptr),
     _backgroundImage(nullptr),

@@ -1,7 +1,7 @@
 #ifndef AUDIOTRACKEDIT_H
 #define AUDIOTRACKEDIT_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 
 namespace Ui {
 class AudioTrackEdit;
@@ -11,7 +11,7 @@ class Campaign;
 class AudioTrack;
 class QListWidgetItem;
 
-class AudioTrackEdit : public QFrame
+class AudioTrackEdit : public CampaignObjectFrame
 {
     Q_OBJECT
 

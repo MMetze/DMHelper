@@ -26,7 +26,7 @@ class TimeAndDateFrame;
 class Map;
 class MRUHandler;
 class QStandardItem;
-class QStandardItemModel;
+class CampaignTreeModel;
 class QVBoxLayout;
 class QItemSelection;
 class BattleDialogManager;
@@ -179,7 +179,9 @@ protected slots:
     QDialog* createDialog(QWidget* contents);
 
     void battleModelChanged(BattleDialogModel* model);
-    void activateWidget(int objectType);
+    void activateObject(CampaignObjectBase* object);
+    void activateWidget(int widgetId);
+    int getWidgetFromType(int objectType);
 
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();
@@ -203,7 +205,7 @@ private:
 
     EncounterTextEdit* encounterTextEdit;
 
-    QStandardItemModel* treeModel;
+    CampaignTreeModel* treeModel;
     QMap<QString, QModelIndex> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;

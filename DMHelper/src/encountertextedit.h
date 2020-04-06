@@ -1,7 +1,7 @@
 #ifndef ENCOUNTERTEXTEDIT_H
 #define ENCOUNTERTEXTEDIT_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 
 namespace Ui {
 class EncounterTextEdit;
@@ -9,13 +9,16 @@ class EncounterTextEdit;
 
 class EncounterText;
 
-class EncounterTextEdit : public QFrame
+class EncounterTextEdit : public CampaignObjectFrame
 {
     Q_OBJECT
 
 public:
     explicit EncounterTextEdit(QWidget *parent = nullptr);
-    ~EncounterTextEdit();
+    virtual ~EncounterTextEdit() override;
+
+    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void deactivateObject() override;
 
     void setKeys(const QList<QString>& keys);
     QList<QString> keys();
@@ -26,7 +29,7 @@ public:
     QString toHtml() const;
     QString toPlainText() const;
 
-    virtual bool eventFilter(QObject *watched, QEvent *event);
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
 signals:
 //    void textChanged();

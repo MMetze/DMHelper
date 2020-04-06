@@ -31,7 +31,7 @@ public:
     virtual bool getExpanded() const;
     virtual QString getName() const;
 
-    QList<CampaignObjectBase*> getChildObjects() const;
+    const QList<CampaignObjectBase*> getChildObjects() const;
     QList<CampaignObjectBase*> getChildObjects();
     CampaignObjectBase* getChildById(QUuid id);
 

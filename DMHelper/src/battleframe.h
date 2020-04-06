@@ -1,7 +1,7 @@
 #ifndef BATTLEFRAME_H
 #define BATTLEFRAME_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 #include <QMap>
 #include <QUuid>
 #include "battledialoggraphicsscene.h"
@@ -26,7 +26,7 @@ namespace Ui {
 class BattleFrame;
 }
 
-class BattleFrame : public QFrame
+class BattleFrame : public CampaignObjectFrame
 {
     Q_OBJECT
 

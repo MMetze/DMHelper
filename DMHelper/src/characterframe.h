@@ -1,7 +1,7 @@
 #ifndef CHARACTERFRAME_H
 #define CHARACTERFRAME_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 
 namespace Ui {
 class CharacterFrame;
@@ -10,13 +10,16 @@ class CharacterFrame;
 class Character;
 class QCheckBox;
 
-class CharacterFrame : public QFrame
+class CharacterFrame : public CampaignObjectFrame
 {
     Q_OBJECT
 
 public:
     explicit CharacterFrame(QWidget *parent = nullptr);
     ~CharacterFrame();
+
+    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void deactivateObject() override;
 
     void setCharacter(Character* character);
 

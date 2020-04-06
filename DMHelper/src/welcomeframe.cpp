@@ -8,7 +8,7 @@
 #include <QtDebug>
 
 WelcomeFrame::WelcomeFrame(MRUHandler* mruHandler, QWidget *parent) :
-    QFrame(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::WelcomeFrame),
     _mruHandler(mruHandler)
 {
@@ -102,15 +102,16 @@ bool WelcomeFrame::eventFilter(QObject *watched, QEvent *event)
 void WelcomeFrame::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
+    setMRUTexts();
+}
 
-    if(_mruHandler)
-    {
-        QStringList mruItems = _mruHandler->getMRUList();
-        ui->lblMRU1->setText(mruItems.count() > 0 ? mruItems.at(0) : QString(""));
-        ui->lblMRU2->setText(mruItems.count() > 1 ? mruItems.at(1) : QString(""));
-        ui->lblMRU3->setText(mruItems.count() > 2 ? mruItems.at(2) : QString(""));
-        ui->lblMRU4->setText(mruItems.count() > 3 ? mruItems.at(3) : QString(""));
-    }
+void WelcomeFrame::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    setMRUTexts();
+
+//    QPixmap p(":/img/data/dmhelper_large.png");
+//    ui->lblIcon->setPixmap(p.scaled(ui->lblIcon->width(), ui->lblIcon->height(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
 }
 
 void WelcomeFrame::openCampaign(const QString& campaignText)
@@ -146,4 +147,22 @@ void WelcomeFrame::openLink(const QString& linkText)
     QUrl linkUrl = QUrl::fromUserInput(linkText);
     qDebug() << "[WelcomeFrame]: opening link: " << linkUrl;
     QDesktopServices::openUrl(linkUrl);
+}
+
+void WelcomeFrame::setMRUTexts()
+{
+    if(!_mruHandler)
+        return;
+
+    QFontMetrics metrics = ui->lblMRU1->fontMetrics();
+
+    QStringList mruItems = _mruHandler->getMRUList();
+    ui->lblMRU1->setText(mruItems.count() > 0 ? metrics.elidedText(mruItems.at(0), Qt::ElideMiddle, ui->lblMRU1->width()) : QString(""));
+    ui->lblMRU1->setToolTip(mruItems.count() > 0 ? mruItems.at(0) : QString(""));
+    ui->lblMRU2->setText(mruItems.count() > 1 ? metrics.elidedText(mruItems.at(1), Qt::ElideMiddle, ui->lblMRU2->width()) : QString(""));
+    ui->lblMRU2->setToolTip(mruItems.count() > 1 ? mruItems.at(1) : QString(""));
+    ui->lblMRU3->setText(mruItems.count() > 2 ? metrics.elidedText(mruItems.at(2), Qt::ElideMiddle, ui->lblMRU3->width()) : QString(""));
+    ui->lblMRU3->setToolTip(mruItems.count() > 2 ? mruItems.at(2) : QString(""));
+    ui->lblMRU4->setText(mruItems.count() > 3 ? metrics.elidedText(mruItems.at(3), Qt::ElideMiddle, ui->lblMRU4->width()) : QString(""));
+    ui->lblMRU4->setToolTip(mruItems.count() > 3 ? mruItems.at(3) : QString(""));
 }

@@ -76,7 +76,7 @@ const qreal ROTATION_DELTA = 10.0;
 #endif
 
 BattleFrame::BattleFrame(QWidget *parent) :
-    QFrame(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::BattleFrame),
     _battle(nullptr),
     _model(nullptr),

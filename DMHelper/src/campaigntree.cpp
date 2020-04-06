@@ -1,5 +1,6 @@
 #include "campaigntree.h"
 #include "dmconstants.h"
+#include "campaigntreemodel.h"
 #include <QDropEvent>
 #include <QStandardItemModel>
 #include <QMimeData>
@@ -7,6 +8,20 @@
 CampaignTree::CampaignTree(QWidget *parent) :
     QTreeView(parent)
 {
+}
+
+void CampaignTree::campaignChanged()
+{
+    CampaignTreeModel* campaignModel = dynamic_cast<CampaignTreeModel*>(model());
+
+    QStandardItem* rootItem = campaignModel->invisibleRootItem();
+    if(!rootItem)
+        return;
+
+    for(int i = 0; i < rootItem->rowCount(); ++i)
+    {
+        iterateItemExpanded(rootItem->child(i));
+    }
 }
 
 void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
@@ -52,4 +67,24 @@ void CampaignTree::dropEvent(QDropEvent * event)
         return;
 
     QTreeView::dropEvent(event);
+}
+
+void CampaignTree::iterateItemExpanded(QStandardItem* item)
+{
+    if(!item)
+        return;
+
+    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
+    if(!itemObject)
+        return;
+
+    setExpanded(item->index(), itemObject->getExpanded());
+
+    if(itemObject->getExpanded())
+    {
+        for(int i = 0; i < item->rowCount(); ++i)
+        {
+            iterateItemExpanded(item->child(i));
+        }
+    }
 }

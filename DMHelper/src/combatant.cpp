@@ -420,7 +420,7 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
 
 bool Combatant::belongsToObject(QDomElement& element)
 {
-    if(element.tagName() == QString("attack"))
+    if(element.tagName() == QString("attacks"))
         return true;
     else
         return CampaignObjectBase::belongsToObject(element);

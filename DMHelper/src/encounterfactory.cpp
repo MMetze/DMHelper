@@ -73,7 +73,7 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
     else if((element.tagName() == QString("characters")) ||
             (element.tagName() == QString("party")))
     {
-        return new Party();
+        return new Party(QString("Party"));
     }
     else if((element.tagName() == QString("notes")) ||
             (element.tagName() == QString("adventures")) ||
@@ -85,7 +85,9 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
             (element.tagName() == QString("tracks")))
     {
         // Compatibility mode
-        return new EncounterText(element.tagName());
+        QString encounterName = element.tagName();
+        encounterName.replace(0, 1, encounterName.at(0).toUpper());
+        return new EncounterText(encounterName);
     }
 
     return nullptr;

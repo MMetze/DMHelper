@@ -4,8 +4,14 @@
 #include <QUuid>
 
 CampaignTreeModel::CampaignTreeModel(QObject *parent) :
-    QStandardItemModel(parent)
+    QStandardItemModel(parent),
+    _campaign(nullptr)
 {
+}
+
+Campaign* CampaignTreeModel::getCampaign() const
+{
+    return _campaign;
 }
 
 QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
@@ -33,3 +39,58 @@ QStringList	CampaignTreeModel::mimeTypes() const
 {
     return QStandardItemModel::mimeTypes() <<  QLatin1String("application/vnd.dmhelper.text");
 }
+
+void CampaignTreeModel::setCampaign(Campaign* campaign)
+{
+    if(_campaign != campaign)
+    {
+        _campaign = campaign;
+
+        updateCampaignEntries();
+
+        emit campaignChanged(_campaign);
+    }
+}
+
+void CampaignTreeModel::updateCampaignEntries()
+{
+    if(!_campaign)
+        return;
+
+    clear();
+
+    QList<CampaignObjectBase*> childObjects = _campaign->getChildObjects();
+    for(CampaignObjectBase* childObject : childObjects)
+    {
+        QStandardItem* objectEntry = createTreeEntry(childObject);
+        if(objectEntry)
+            appendRow(objectEntry);
+    }
+}
+
+QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object)
+{
+    if(!object)
+        return nullptr;
+
+    QStandardItem* treeEntry = new QStandardItem(object->getName());
+    treeEntry->setEditable(true);
+
+    treeEntry->setData(QVariant::fromValue(static_cast<void*>(object)),DMHelper::TreeItemData_Object);
+    //campaignItem->setData(QVariant(DMHelper::TreeType_Campaign),DMHelper::TreeItemData_Type);
+    //campaignItem->setData(QVariant(QString()),DMHelper::TreeItemData_ID);
+    //treeModel->appendRow(campaignItem);
+    //ui->treeView->expand(campaignItem->index());
+
+    QList<CampaignObjectBase*> childObjects = object->getChildObjects();
+    for(CampaignObjectBase* childObject : childObjects)
+    {
+        QStandardItem* objectEntry = createTreeEntry(childObject);
+        if(objectEntry)
+            treeEntry->appendRow(objectEntry);
+    }
+
+    return treeEntry;
+}
+
+

@@ -5,7 +5,7 @@
 #include <QTextCharFormat>
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
-    QFrame(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::EncounterTextEdit),
     _keys(),
     _encounter(nullptr)
@@ -25,6 +25,20 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
 EncounterTextEdit::~EncounterTextEdit()
 {
     delete ui;
+}
+
+void EncounterTextEdit::activateObject(CampaignObjectBase* object)
+{
+    EncounterText* encounter = dynamic_cast<EncounterText*>(object);
+    if(!encounter)
+        return;
+
+    setEncounter(encounter);
+}
+
+void EncounterTextEdit::deactivateObject()
+{
+    storeEncounter();
 }
 
 void EncounterTextEdit::setKeys(const QList<QString>& keys)

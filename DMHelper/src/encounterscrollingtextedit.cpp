@@ -14,7 +14,7 @@
 #include <QDebug>
 
 EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
-    QFrame(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::EncounterScrollingTextEdit),
     _scrollingText(nullptr),
     _backgroundWidth(0),

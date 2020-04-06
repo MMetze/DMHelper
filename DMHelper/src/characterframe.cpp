@@ -13,7 +13,7 @@
 // TODO: automate character level, next level exp, proficiency bonus
 
 CharacterFrame::CharacterFrame(QWidget *parent) :
-    QFrame(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::CharacterFrame),
     _character(nullptr),
     _mouseDown(false),
@@ -127,6 +127,20 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
 CharacterFrame::~CharacterFrame()
 {
     delete ui;
+}
+
+void CharacterFrame::activateObject(CampaignObjectBase* object)
+{
+    Character* character = dynamic_cast<Character*>(object);
+    if(!character)
+        return;
+
+    setCharacter(character);
+}
+
+void CharacterFrame::deactivateObject()
+{
+    writeCharacterData();
 }
 
 void CharacterFrame::setCharacter(Character* character)

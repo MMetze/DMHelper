@@ -46,6 +46,8 @@
  * define position to add a track (audiotrackedit.cpp line 47)
  *
  * Mainwindow: updatecampaigntree, contextmenu, handletreeitemchanged, handletreeitemselected, handletreestatechanged
+ *
+ * logging limits
  */
 
 Campaign::Campaign(const QString& campaignName, QObject *parent) :
@@ -124,6 +126,37 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     //qDebug() << "           Audio Tracks: " << tracks.count();
 
     validateCampaignIds();
+}
+
+void Campaign::postProcessXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    // Compatibility mode for global expansion flags
+    if(element.hasAttribute("partyExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Party", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("partyExpanded",QString::number(0)).toInt()));
+    }
+    if(element.hasAttribute("adventuresExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Adventures", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded",QString::number(0)).toInt()));
+    }
+    if(element.hasAttribute("worldSettingsExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Settings", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded",QString::number(0)).toInt()));
+    }
+    if(element.hasAttribute("worldNPCsExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Npcs", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded",QString::number(0)).toInt()));
+    }
 }
 
 int Campaign::getObjectType() const
@@ -955,7 +988,7 @@ bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* base
         result = true;
     }
 
-    QList<CampaignObjectBase*> childList = getChildObjects();
+    QList<CampaignObjectBase*> childList = baseObject->getChildObjects();
     for(int i = 0; i < childList.count(); ++i)
     {
         if(!validateSingleId(knownIds, childList.at(i)))

@@ -24,6 +24,8 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
+
     virtual int getObjectType() const override;
 //    virtual void resolveReferences() override;
 

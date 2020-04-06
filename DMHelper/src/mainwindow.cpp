@@ -22,6 +22,7 @@
 #include "encounterbattle.h"
 #include "encounterscrollingtext.h"
 #include "encounterscrollingtextedit.h"
+#include "campaignobjectframe.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
 //#include "battledialogmanager.h"
@@ -356,6 +357,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(handleCustomContextMenu(QPoint)));
     connect(ui->treeView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(handleTreeItemSelected(QModelIndex,QModelIndex)));
     connect(ui->treeView,SIGNAL(activated(QModelIndex)),this,SLOT(handleTreeItemDoubleClicked(QModelIndex)));
+    connect(treeModel, &CampaignTreeModel::campaignChanged, ui->treeView, &CampaignTree::campaignChanged);
     connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[Main] Tree Model Created";
 
@@ -383,6 +385,7 @@ MainWindow::MainWindow(QWidget *parent) :
     encounterTextEdit = new EncounterTextEdit;
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
     ui->stackedWidgetEncounter->addWidget(encounterTextEdit);
+    qDebug() << "[Main]     Adding Text Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     // EncounterType_Battle
     /*
     EncounterBattleEdit* encounterBattleEdit = new EncounterBattleEdit;
@@ -469,6 +472,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
     ui->stackedWidgetEncounter->addWidget(battleFrame);
+    qDebug() << "[Main]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
     /*
@@ -480,11 +484,13 @@ MainWindow::MainWindow(QWidget *parent) :
     */
     CharacterFrame* charFrame = new CharacterFrame;
     ui->stackedWidgetEncounter->addWidget(charFrame);
+    qDebug() << "[Main]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(charFrame, SIGNAL(publishCharacterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
 
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addWidget(mapFrame);
+    qDebug() << "[Main]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(mapFrame,SIGNAL(publishImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
     connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(mapFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
@@ -522,6 +528,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_ScrollingText
     EncounterScrollingTextEdit* scrollingTextEdit = new EncounterScrollingTextEdit;
     ui->stackedWidgetEncounter->addWidget(scrollingTextEdit);
+    qDebug() << "[Main]     Adding Scrolling Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(scrollingTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(scrollingTextEdit, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
     connect(scrollingTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
@@ -531,6 +538,7 @@ MainWindow::MainWindow(QWidget *parent) :
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
     connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addWidget(audioTrackEdit);
+    qDebug() << "[Main]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -543,6 +551,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabHelp, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
 
     ui->stackedWidgetEncounter->addWidget(welcomeFrame);
+    qDebug() << "[Main]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+
     qDebug() << "[Main] Encounter Pages Created";
 
     // Ensure publishing a single image stops any running animations
@@ -2057,6 +2067,7 @@ void MainWindow::openFile(const QString& filename)
     QDir::setCurrent(fileInfo.absolutePath());
     campaign = new Campaign();
     campaign->inputXML(campaignElement, false);
+    campaign->postProcessXML(campaignElement, false);
     if(!campaign->isValid())
     {
         QMessageBox::StandardButton result = QMessageBox::critical(this,
@@ -2088,11 +2099,13 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     //ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Blank);
     // TODO: select the first entry in the campaign tree
-    activateWidget(DMHelper::CampaignType_Base);
+    activateWidget(getWidgetFromType(DMHelper::CampaignType_Base));
 
     updateCampaignTree();
     updateMapFiles();
     updateClock();
+
+    treeModel->setCampaign(campaign);
 
     if(campaign)
     {
@@ -2104,7 +2117,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     {
         setWindowTitle(QString("DM Helper [*]"));
         ui->stackedWidgetEncounter->setEnabled(true);
-        activateWidget(DMHelper::CampaignType_WelcomeScreen);// ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
+        activateWidget(getWidgetFromType(DMHelper::CampaignType_WelcomeScreen));// ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
     }
 }
 
@@ -2512,6 +2525,17 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     Q_UNUSED(previous);
 
     qDebug() << "[Main] Tree Item Selected. Current: " << current << " Previous: " << previous;
+
+    QStandardItem* item = treeModel->itemFromIndex(current);
+    if(!item)
+        return;
+
+    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
+    if(!itemObject)
+        return;
+
+    activateObject(itemObject);
+
 
     /*
     // If the previous index is an encounter disable the widget
@@ -3033,49 +3057,67 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
     }
 }
 
-void MainWindow::activateWidget(int objectType)
+void MainWindow::activateObject(CampaignObjectBase* object)
+{
+    if(!object)
+        return;
+
+    CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
+    if(objectFrame)
+        objectFrame->deactivateObject();
+
+    int selectedWidget = getWidgetFromType(object->getObjectType());
+
+    qDebug() << "[MainWindow] Activating stacked widget from " << ui->stackedWidgetEncounter->currentIndex() << " to " << selectedWidget << " for type " << object->getObjectType();
+
+    activateWidget(selectedWidget);
+
+    objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
+    if(objectFrame)
+        objectFrame->activateObject(object);
+}
+
+void MainWindow::activateWidget(int widgetId)
+{
+    ui->stackedWidgetEncounter->setCurrentIndex(widgetId);
+}
+
+int MainWindow::getWidgetFromType(int objectType)
 {
     switch(objectType)
     {
         //ui->stackedWidgetEncounter->addWidget(encounterTextEdit);
-        case DMHelper::CampaignType_Base:
         case DMHelper::CampaignType_Campaign:
         case DMHelper::CampaignType_Party:
         case DMHelper::CampaignType_Text:
         case DMHelper::CampaignType_Placeholder:
-            ui->stackedWidgetEncounter->setCurrentIndex(0);
-            break;
+            return 1;
         //ui->stackedWidgetEncounter->addWidget(battleFrame);
         case DMHelper::CampaignType_Battle:
         case DMHelper::CampaignType_BattleContent:
-            ui->stackedWidgetEncounter->setCurrentIndex(1);
-            break;
+            return 2;
         //ui->stackedWidgetEncounter->addWidget(charFrame);
         case DMHelper::CampaignType_Combatant:
-            ui->stackedWidgetEncounter->setCurrentIndex(2);
-            break;
+            return 3;
         //ui->stackedWidgetEncounter->addWidget(mapFrame);
         case DMHelper::CampaignType_Map:
-            ui->stackedWidgetEncounter->setCurrentIndex(3);
-            break;
+            return 4;
         //ui->stackedWidgetEncounter->addWidget(scrollingTextEdit);
         case DMHelper::CampaignType_ScrollingText:
-            ui->stackedWidgetEncounter->setCurrentIndex(4);
-            break;
+            return 5;
         //ui->stackedWidgetEncounter->addWidget(audioTrackEdit);
         case DMHelper::CampaignType_AudioTrack:
-            ui->stackedWidgetEncounter->setCurrentIndex(5);
-            break;
+            return 6;
         //ui->stackedWidgetEncounter->addWidget(welcomeFrame);
         case DMHelper::CampaignType_WelcomeScreen:
-            ui->stackedWidgetEncounter->setCurrentIndex(6);
-            break;
+            return 7;
+        case DMHelper::CampaignType_Base:
         default:
             qDebug() << "[MainWindow] ERROR: activate widget called with unexpected type: " << objectType;
-            ui->stackedWidgetEncounter->setCurrentIndex(0);
-            break;
+            return 0;
     }
 }
+
 
 #ifdef INCLUDE_CHASE_SUPPORT
 

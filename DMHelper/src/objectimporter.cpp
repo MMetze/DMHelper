@@ -71,6 +71,7 @@ bool ObjectImporter::importObject(Campaign& campaign)
     QDir::setCurrent(fileInfo.absolutePath());
     QScopedPointer<Campaign> importCampaign(new Campaign());
     importCampaign->inputXML(campaignElement, true);
+    importCampaign->postProcessXML(campaignElement, true);
     if(!importCampaign->isValid())
     {
         QMessageBox::critical(nullptr,

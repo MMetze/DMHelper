@@ -1,7 +1,7 @@
 #ifndef ENCOUNTERSCROLLINGTEXTEDIT_H
 #define ENCOUNTERSCROLLINGTEXTEDIT_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 #include <QElapsedTimer>
 #include "videoplayer.h"
 
@@ -13,7 +13,7 @@ class EncounterScrollingText;
 class QGraphicsScene;
 class QGraphicsTextItem;
 
-class EncounterScrollingTextEdit : public QFrame
+class EncounterScrollingTextEdit : public CampaignObjectFrame
 {
     Q_OBJECT
 

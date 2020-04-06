@@ -47,7 +47,16 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
     DMHObjectBase::inputXML(element, isImport);
 
     _expanded = static_cast<bool>(element.attribute("expanded",QString::number(0)).toInt());
-    setObjectName(element.attribute("name", QString("unknown")));
+    QString importName = element.attribute("name");
+    if(importName.isEmpty())
+    {
+        if(getName().isEmpty())
+            setObjectName(QString("unknown"));
+    }
+    else
+    {
+        setObjectName(importName);
+    }
 
 #ifdef CAMPAIGN_OBJECT_LOGGING
     qDebug() << "[CampaignBaseObject] Inputting object started: " << getName() << ", id: " << getID();
@@ -80,6 +89,8 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
 #ifdef CAMPAIGN_OBJECT_LOGGING
     qDebug() << "[CampaignBaseObject] Post-processing object started: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
 #endif
+
+    DMHObjectBase::postProcessXML(element, isImport);
 
     QDomElement childElement = element.firstChildElement();
     while( !childElement.isNull() )
@@ -117,7 +128,7 @@ QString CampaignObjectBase::getName() const
     return objectName();
 }
 
-QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
+const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
 {
     return findChildren<CampaignObjectBase *>(QString(), Qt::FindDirectChildrenOnly);
 }

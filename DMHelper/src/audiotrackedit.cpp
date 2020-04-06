@@ -9,7 +9,7 @@
 
 
 AudioTrackEdit::AudioTrackEdit(QWidget *parent) :
-    QFrame(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::AudioTrackEdit),
     _campaign(nullptr)
 {

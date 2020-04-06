@@ -1,7 +1,7 @@
 #ifndef MAPFRAME_H
 #define MAPFRAME_H
 
-#include <QWidget>
+#include "campaignobjectframe.h"
 #include <QGraphicsScene>
 #include <QFileInfo>
 #include <QImage>
@@ -17,7 +17,7 @@ class Map;
 class MapMarkerGraphicsItem;
 class AudioTrack;
 
-class MapFrame : public QWidget
+class MapFrame : public CampaignObjectFrame
 {
     Q_OBJECT
 
