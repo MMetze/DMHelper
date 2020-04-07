@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QList>
 #include <QIcon>
+#include "scrolltabwidget.h"
+#include <QPushButton>
+#include <QMap>
 
 class QPushButton;
 class ScrollTabWidget;
