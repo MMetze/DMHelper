@@ -39,6 +39,7 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object)
 void EncounterTextEdit::deactivateObject()
 {
     storeEncounter();
+    setEncounter(nullptr);
 }
 
 void EncounterTextEdit::setKeys(const QList<QString>& keys)

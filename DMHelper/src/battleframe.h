@@ -32,7 +32,10 @@ class BattleFrame : public CampaignObjectFrame
 
 public:
     explicit BattleFrame(QWidget *parent = nullptr);
-    ~BattleFrame();
+    virtual ~BattleFrame() override;
+
+    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void deactivateObject() override;
 
     void setBattle(EncounterBattle* battle);
     EncounterBattle* getBattle();

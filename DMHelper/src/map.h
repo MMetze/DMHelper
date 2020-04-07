@@ -28,6 +28,8 @@ public:
     //QString getName() const;
     //void setName(const QString& newName);
 
+    virtual int getObjectType() const override;
+
     QString getFileName() const;
     void setFileName(const QString& newFileName);
 

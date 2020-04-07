@@ -25,6 +25,9 @@ public:
     explicit MapFrame(QWidget *parent = nullptr);
     virtual ~MapFrame() override;
 
+    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void deactivateObject() override;
+
     void setMap(Map* map);
 
     MapMarkerGraphicsItem* addMapMarker(MapMarker& marker);

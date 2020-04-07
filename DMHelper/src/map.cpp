@@ -198,6 +198,11 @@ void Map::setName(const QString& newName)
 }
 */
 
+int Map::getObjectType() const
+{
+    return DMHelper::CampaignType_Map;
+}
+
 QString Map::getFileName() const
 {
     return _filename;

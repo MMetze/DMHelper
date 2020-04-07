@@ -182,6 +182,7 @@ protected slots:
     void activateObject(CampaignObjectBase* object);
     void activateWidget(int widgetId);
     int getWidgetFromType(int objectType);
+    void setRibbonToType(int objectType);
 
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();

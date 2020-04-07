@@ -291,6 +291,20 @@ BattleFrame::~BattleFrame()
     qDebug() << "[Battle Frame] destroyed.";
 }
 
+void BattleFrame::activateObject(CampaignObjectBase* object)
+{
+    EncounterBattle* battle = dynamic_cast<EncounterBattle*>(object);
+    if(!battle)
+        return;
+
+    setBattle(battle);
+}
+
+void BattleFrame::deactivateObject()
+{
+    setBattle(nullptr);
+}
+
 void BattleFrame::setBattle(EncounterBattle* battle)
 {
     _battle = battle;

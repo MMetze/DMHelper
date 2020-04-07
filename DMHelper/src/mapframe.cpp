@@ -135,6 +135,20 @@ MapFrame::~MapFrame()
     delete ui;
 }
 
+void MapFrame::activateObject(CampaignObjectBase* object)
+{
+    Map* map = dynamic_cast<Map*>(object);
+    if(!map)
+        return;
+
+    setMap(map);
+}
+
+void MapFrame::deactivateObject()
+{
+    setMap(nullptr);
+}
+
 void MapFrame::setMap(Map* map)
 {
     if(_mapSource)

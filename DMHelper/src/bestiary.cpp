@@ -130,7 +130,7 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
                                                             QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel );
                     if(challengeResult == QMessageBox::Cancel)
                     {
-                        qDebug() << "[Main] Import monsters cancelled";
+                        qDebug() << "[Bestiary] Import monsters cancelled";
                         return;
                     }
                 }

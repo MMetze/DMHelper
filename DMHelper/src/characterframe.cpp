@@ -141,6 +141,7 @@ void CharacterFrame::activateObject(CampaignObjectBase* object)
 void CharacterFrame::deactivateObject()
 {
     writeCharacterData();
+    setCharacter(nullptr);
 }
 
 void CharacterFrame::setCharacter(Character* character)

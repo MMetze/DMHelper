@@ -173,54 +173,54 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.showMessage(QString("Initializing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
 
-    qDebug() << "[Main] Initializing Main";
+    qDebug() << "[MainWindow] Initializing Main";
 
-    qDebug() << "[Main] DMHelper version information";
-    qDebug() << "[Main]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION);
-    qDebug() << "[Main]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
-    qDebug() << "[Main]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
-    qDebug() << "[Main]     Build: " << __DATE__ << " " << __TIME__;
+    qDebug() << "[MainWindow] DMHelper version information";
+    qDebug() << "[MainWindow]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION);
+    qDebug() << "[MainWindow]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
+    qDebug() << "[MainWindow]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
+    qDebug() << "[MainWindow]     Build: " << __DATE__ << " " << __TIME__;
 #ifdef Q_OS_MAC
-    qDebug() << "[Main]     OS: MacOS";
+    qDebug() << "[MainWindow]     OS: MacOS";
 #else
-    qDebug() << "[Main]     OS: Windows";
+    qDebug() << "[MainWindow]     OS: Windows";
 #endif
-    qDebug() << "[Main]     Working Directory: " << QDir::currentPath();
-    qDebug() << "[Main]     Executable Directory: " << QCoreApplication::applicationDirPath();
+    qDebug() << "[MainWindow]     Working Directory: " << QDir::currentPath();
+    qDebug() << "[MainWindow]     Executable Directory: " << QCoreApplication::applicationDirPath();
 
-    qDebug() << "[Main] Qt Information";
-    qDebug() << "[Main]     Qt Version: " << QLibraryInfo::version().toString();
-    qDebug() << "[Main]     Is Debug? " << QLibraryInfo::isDebugBuild();
-    qDebug() << "[Main]     PrefixPath: " << QLibraryInfo::location(QLibraryInfo::PrefixPath);
-    qDebug() << "[Main]     DocumentationPath: " << QLibraryInfo::location(QLibraryInfo::DocumentationPath);
-    qDebug() << "[Main]     HeadersPath: " << QLibraryInfo::location(QLibraryInfo::HeadersPath);
-    qDebug() << "[Main]     LibrariesPath: " << QLibraryInfo::location(QLibraryInfo::LibrariesPath);
-    qDebug() << "[Main]     LibraryExecutablesPath: " << QLibraryInfo::location(QLibraryInfo::LibraryExecutablesPath);
-    qDebug() << "[Main]     BinariesPath: " << QLibraryInfo::location(QLibraryInfo::BinariesPath);
-    qDebug() << "[Main]     PluginsPath: " << QLibraryInfo::location(QLibraryInfo::PluginsPath);
-    qDebug() << "[Main]     ImportsPath: " << QLibraryInfo::location(QLibraryInfo::ImportsPath);
-    qDebug() << "[Main]     Qml2ImportsPath: " << QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
-    qDebug() << "[Main]     ArchDataPath: " << QLibraryInfo::location(QLibraryInfo::ArchDataPath);
-    qDebug() << "[Main]     DataPath: " << QLibraryInfo::location(QLibraryInfo::DataPath);
-    qDebug() << "[Main]     TranslationsPath: " << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
-    qDebug() << "[Main]     ExamplesPath: " << QLibraryInfo::location(QLibraryInfo::ExamplesPath);
-    qDebug() << "[Main]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
-    qDebug() << "[Main]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
+    qDebug() << "[MainWindow] Qt Information";
+    qDebug() << "[MainWindow]     Qt Version: " << QLibraryInfo::version().toString();
+    qDebug() << "[MainWindow]     Is Debug? " << QLibraryInfo::isDebugBuild();
+    qDebug() << "[MainWindow]     PrefixPath: " << QLibraryInfo::location(QLibraryInfo::PrefixPath);
+    qDebug() << "[MainWindow]     DocumentationPath: " << QLibraryInfo::location(QLibraryInfo::DocumentationPath);
+    qDebug() << "[MainWindow]     HeadersPath: " << QLibraryInfo::location(QLibraryInfo::HeadersPath);
+    qDebug() << "[MainWindow]     LibrariesPath: " << QLibraryInfo::location(QLibraryInfo::LibrariesPath);
+    qDebug() << "[MainWindow]     LibraryExecutablesPath: " << QLibraryInfo::location(QLibraryInfo::LibraryExecutablesPath);
+    qDebug() << "[MainWindow]     BinariesPath: " << QLibraryInfo::location(QLibraryInfo::BinariesPath);
+    qDebug() << "[MainWindow]     PluginsPath: " << QLibraryInfo::location(QLibraryInfo::PluginsPath);
+    qDebug() << "[MainWindow]     ImportsPath: " << QLibraryInfo::location(QLibraryInfo::ImportsPath);
+    qDebug() << "[MainWindow]     Qml2ImportsPath: " << QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath);
+    qDebug() << "[MainWindow]     ArchDataPath: " << QLibraryInfo::location(QLibraryInfo::ArchDataPath);
+    qDebug() << "[MainWindow]     DataPath: " << QLibraryInfo::location(QLibraryInfo::DataPath);
+    qDebug() << "[MainWindow]     TranslationsPath: " << QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+    qDebug() << "[MainWindow]     ExamplesPath: " << QLibraryInfo::location(QLibraryInfo::ExamplesPath);
+    qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
+    qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
 
-    qDebug() << "[Main] Standard Path Information";
-    qDebug() << "[Main]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
-    qDebug() << "[Main]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first());
-    qDebug() << "[Main]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).first());
-    qDebug() << "[Main]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first());
-    qDebug() << "[Main]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
-    qDebug() << "[Main]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
+    qDebug() << "[MainWindow] Standard Path Information";
+    qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
+    qDebug() << "[MainWindow]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first());
+    qDebug() << "[MainWindow]     RuntimeLocation: " << (QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::RuntimeLocation).first());
+    qDebug() << "[MainWindow]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first());
+    qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
+    qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
 
 
     // TODO: cleanup this constructor and mainwindow in general
     ui->setupUi(this);
     setupRibbonBar();
 
-    qDebug() << "[Main] Reading Settings";
+    qDebug() << "[MainWindow] Reading Settings";
     _options = new OptionsContainer(this);
     MRUHandler* mruHandler = new MRUHandler(_ribbonTabFile->getMRUMenu(), DEFAULT_MRU_FILE_COUNT, this);
     connect(mruHandler,SIGNAL(triggerMRU(QString)),this,SLOT(openFile(QString)));
@@ -228,24 +228,24 @@ MainWindow::MainWindow(QWidget *parent) :
     _options->readSettings();
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
     //connect(_options,SIGNAL(showAnimationsChanged(bool)),ui->scrollWidget,SLOT(setAnimatedTransitions(bool)));
-    qDebug() << "[Main] Settings Read";
+    qDebug() << "[MainWindow] Settings Read";
 
-    qDebug() << "[Main] Initializing Bestiary";
+    qDebug() << "[MainWindow] Initializing Bestiary";
     Bestiary::Initialize();
-    qDebug() << "[Main] Bestiary Initialized";
+    qDebug() << "[MainWindow] Bestiary Initialized";
 
-    qDebug() << "[Main] Initializing BasicDateServer";
+    qDebug() << "[MainWindow] Initializing BasicDateServer";
     BasicDateServer::Initialize(_options->getCalendarFileName());
     BasicDateServer* dateServer = BasicDateServer::Instance();
     connect(_options, &OptionsContainer::calendarFileNameChanged, dateServer, &BasicDateServer::readDateInformation);
     //connect(_options, SIGNAL(calendarFileNameChanged(const QString&)), dateServer, SLOT(readDateInformation(const QString&)));
-    qDebug() << "[Main] BasicDateServer Initialized";
+    qDebug() << "[MainWindow] BasicDateServer Initialized";
 
-    qDebug() << "[Main] Initializing EquipmentServer";
+    qDebug() << "[MainWindow] Initializing EquipmentServer";
     EquipmentServer::Initialize(_options->getEquipmentFileName());
     EquipmentServer* equipmentServer = EquipmentServer::Instance();
     connect(_options, &OptionsContainer::equipmentFileNameChanged, equipmentServer, &EquipmentServer::readEquipment);
-    qDebug() << "[Main] BasicDateServer Initialized";
+    qDebug() << "[MainWindow] BasicDateServer Initialized";
 
     // File Menu
     /*
@@ -341,14 +341,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    qDebug() << "[Main] Creating Player's Window";
+    qDebug() << "[MainWindow] Creating Player's Window";
     pubWindow = new PublishWindow(QString("DM Helper Player's Window"));
     pubWindow->setPointerFile(_options->getPointerFile());
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), pubWindow, SLOT(setPointerFile(const QString&)));
     connect(pubWindow, SIGNAL(windowVisible(bool)), _ribbonTabCampaign, SLOT(setPlayersWindow(bool)));
-    qDebug() << "[Main] Player's Window Created";
+    qDebug() << "[MainWindow] Player's Window Created";
 
-    qDebug() << "[Main] Creating Tree Model";
+    qDebug() << "[MainWindow] Creating Tree Model";
     ui->treeView->setHeaderHidden(true);
     treeModel = new CampaignTreeModel(ui->treeView);
     ui->treeView->setModel(treeModel);
@@ -359,17 +359,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->treeView,SIGNAL(activated(QModelIndex)),this,SLOT(handleTreeItemDoubleClicked(QModelIndex)));
     connect(treeModel, &CampaignTreeModel::campaignChanged, ui->treeView, &CampaignTree::campaignChanged);
     connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(handleTreeItemChanged(QStandardItem*)));
-    qDebug() << "[Main] Tree Model Created";
+    qDebug() << "[MainWindow] Tree Model Created";
 
     connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
 
-    qDebug() << "[Main] Loading Bestiary";
+    qDebug() << "[MainWindow] Loading Bestiary";
 #ifndef Q_OS_MAC
     splash.showMessage(QString("Initializing Bestiary...\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
     readBestiary();
-    qDebug() << "[Main] Bestiary Loaded";
+    qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), this, SLOT(showPublishWindow()));
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), pubWindow, SLOT(setImage(QImage, QColor)));
@@ -380,12 +380,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     // TODO: insert a MAP in between to be explicit about this mapping
-    qDebug() << "[Main] Creating Encounter Pages";
+    qDebug() << "[MainWindow] Creating Encounter Pages";
     // EncounterType_Text
     encounterTextEdit = new EncounterTextEdit;
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
     ui->stackedWidgetEncounter->addWidget(encounterTextEdit);
-    qDebug() << "[Main]     Adding Text Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    qDebug() << "[MainWindow]     Adding Text Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     // EncounterType_Battle
     /*
     EncounterBattleEdit* encounterBattleEdit = new EncounterBattleEdit;
@@ -472,7 +472,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
     ui->stackedWidgetEncounter->addWidget(battleFrame);
-    qDebug() << "[Main]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
     /*
@@ -484,13 +484,13 @@ MainWindow::MainWindow(QWidget *parent) :
     */
     CharacterFrame* charFrame = new CharacterFrame;
     ui->stackedWidgetEncounter->addWidget(charFrame);
-    qDebug() << "[Main]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(charFrame, SIGNAL(publishCharacterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
 
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addWidget(mapFrame);
-    qDebug() << "[Main]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(mapFrame,SIGNAL(publishImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
     connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(mapFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
@@ -528,7 +528,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_ScrollingText
     EncounterScrollingTextEdit* scrollingTextEdit = new EncounterScrollingTextEdit;
     ui->stackedWidgetEncounter->addWidget(scrollingTextEdit);
-    qDebug() << "[Main]     Adding Scrolling Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    qDebug() << "[MainWindow]     Adding Scrolling Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(scrollingTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(scrollingTextEdit, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
     connect(scrollingTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
@@ -538,7 +538,7 @@ MainWindow::MainWindow(QWidget *parent) :
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
     connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addWidget(audioTrackEdit);
-    qDebug() << "[Main]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -551,9 +551,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabHelp, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
 
     ui->stackedWidgetEncounter->addWidget(welcomeFrame);
-    qDebug() << "[Main]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    qDebug() << "[MainWindow]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
-    qDebug() << "[Main] Encounter Pages Created";
+    qDebug() << "[MainWindow] Encounter Pages Created";
 
     // Ensure publishing a single image stops any running animations
     connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), battleFrame, SLOT(cancelPublish()));
@@ -565,7 +565,7 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.showMessage(QString("Initializing Quick Reference tabs...\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
-    qDebug() << "[Main] Creating Reference Tabs";
+    qDebug() << "[MainWindow] Creating Reference Tabs";
     previewFrame = new PublishFrame(this);
     connect(previewFrame,SIGNAL(arrowVisibleChanged(bool)),pubWindow,SLOT(setArrowVisible(bool)));
     connect(previewFrame,SIGNAL(arrowVisibleChanged(bool)),previewFrame,SLOT(setArrowVisible(bool)));
@@ -645,7 +645,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //Initialize animation settings
     ui->scrollWidget->setAnimatedTransitions(_options->getShowAnimations());
     */
-    qDebug() << "[Main] Reference Tabs Created";
+    qDebug() << "[MainWindow] Reference Tabs Created";
 
 #ifndef Q_OS_MAC
     splash.showMessage(QString("Preparing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
@@ -653,7 +653,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->processEvents();
 
     /*
-    qDebug() << "[Main] Initializing Battle Dialog Manager";
+    qDebug() << "[MainWindow] Initializing Battle Dialog Manager";
     _battleDlgMgr = new BattleDialogManager(this);
     connect(ui->actionBattle_Dialog, SIGNAL(triggered()), _battleDlgMgr, SLOT(showBattleDialog()));
     connect(_battleDlgMgr, SIGNAL(battleActive(bool)), ui->actionBattle_Dialog, SLOT(setEnabled(bool)));
@@ -676,7 +676,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterBattleEdit, SIGNAL(startBattle(EncounterBattle*)), _battleDlgMgr, SLOT(startNewBattle(EncounterBattle*)));
     connect(encounterBattleEdit, SIGNAL(loadBattle(EncounterBattle*)), _battleDlgMgr, SLOT(loadBattle(EncounterBattle*)));
     connect(encounterBattleEdit, SIGNAL(deleteBattle(EncounterBattle*)), _battleDlgMgr, SLOT(deleteBattle(EncounterBattle*)));
-    qDebug() << "[Main] Battle Dialog Manager Initialized.";
+    qDebug() << "[MainWindow] Battle Dialog Manager Initialized.";
     */
 
     _audioPlayer = new AudioPlayer(this);
@@ -712,7 +712,7 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.finish(this);
 #endif
 
-    qDebug() << "[Main] Main Initialization complete";
+    qDebug() << "[MainWindow] Main Initialization complete";
 }
 
 MainWindow::~MainWindow()
@@ -741,7 +741,7 @@ void MainWindow::newCampaign()
             campaignName = QString("Campaign");
 
         campaign = new Campaign(campaignName);
-        qDebug() << "[Main] Campaign created: " << campaignName;
+        qDebug() << "[MainWindow] Campaign created: " << campaignName;
         emit campaignLoaded(campaign);
         selectItem(DMHelper::TreeType_Campaign, QUuid());
         setDirty();
@@ -762,12 +762,12 @@ bool MainWindow::saveCampaign()
                                                                    QMessageBox::Yes | QMessageBox::No );
         if(result == QMessageBox::No)
         {
-            qDebug() << "[Main] Invalid campaign not saved";
+            qDebug() << "[MainWindow] Invalid campaign not saved";
             return false;
         }
         else
         {
-            qDebug() << "[Main] Invalid campaign saved despite warning!";
+            qDebug() << "[MainWindow] Invalid campaign saved despite warning!";
         }
     }
 
@@ -778,7 +778,7 @@ bool MainWindow::saveCampaign()
             return false;
     }
 
-    qDebug() << "[Main] Saving Campaign: " << campaignFileName;
+    qDebug() << "[MainWindow] Saving Campaign: " << campaignFileName;
 
     QDomDocument doc( "DMHelperXML" );
 
@@ -792,7 +792,7 @@ bool MainWindow::saveCampaign()
     QFile file(campaignFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
-        qDebug() << "[Main] Unable to open campaign file for writing: " << campaignFileName;
+        qDebug() << "[MainWindow] Unable to open campaign file for writing: " << campaignFileName;
         qDebug() << "       Error " << file.error() << ": " << file.errorString();
         QFileInfo info(file);
         qDebug() << "       Full filename: " << info.absoluteFilePath();
@@ -809,7 +809,7 @@ bool MainWindow::saveCampaign()
 
     clearDirty();
 
-    qDebug() << "[Main] Campaign saved: " << campaignFileName;
+    qDebug() << "[MainWindow] Campaign saved: " << campaignFileName;
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(campaignFileName);
@@ -838,7 +838,7 @@ void MainWindow::openFileDialog()
 
 bool MainWindow::closeCampaign()
 {
-    qDebug() << "[Main] Closing Campaign: " << campaignFileName;
+    qDebug() << "[MainWindow] Closing Campaign: " << campaignFileName;
 
     if(dirty)
     {
@@ -848,7 +848,7 @@ bool MainWindow::closeCampaign()
                                                                    QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel );
         if(result == QMessageBox::Cancel)
         {
-            qDebug() << "[Main] Closíng Campaign cancelled";
+            qDebug() << "[MainWindow] Closíng Campaign cancelled";
             return false;
         }
 
@@ -858,14 +858,14 @@ bool MainWindow::closeCampaign()
         }
         else
         {
-            qDebug() << "[Main] User decided not to save Campaign: " << campaignFileName;
+            qDebug() << "[MainWindow] User decided not to save Campaign: " << campaignFileName;
         }
     }
 
     deleteCampaign();
     clearDirty();
 
-    qDebug() << "[Main] Campaign closed";
+    qDebug() << "[MainWindow] Campaign closed";
 
     return true;
 }
@@ -1292,26 +1292,26 @@ void MainWindow::exportCurrentItem()
 
     QUuid exportId(exportItem->data(DMHelper::TreeItemData_ID).toString());
 
-    qDebug() << "[Main] Exporting object with ID " << exportId << " to " << exportFileName;
+    qDebug() << "[MainWindow] Exporting object with ID " << exportId << " to " << exportFileName;
 
     CampaignExporter exporter(*campaign, exportId, targetDir);
     if(!exporter.isValid())
     {
-        qDebug() << "[Main] Error - invalid export created!";
+        qDebug() << "[MainWindow] Error - invalid export created!";
         return;
     }
 
     QString exportString = exporter.getExportDocument().toString();
     if(exportString.isEmpty())
     {
-        qDebug() << "[Main] Error - export null string found, no export created!";
+        qDebug() << "[MainWindow] Error - export null string found, no export created!";
         return;
     }
 
     QFile file(exportFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
-        qDebug() << "[Main] Not able to open export file " << exportFileName;
+        qDebug() << "[MainWindow] Not able to open export file " << exportFileName;
         return;
     }
 
@@ -1320,7 +1320,7 @@ void MainWindow::exportCurrentItem()
     ts << exportString;
     file.close();
 
-    qDebug() << "[Main] Export complete";
+    qDebug() << "[MainWindow] Export complete";
 }
 
 void MainWindow::clearDirty()
@@ -1373,20 +1373,20 @@ void MainWindow::linkActivated(const QUrl & link)
 
 void MainWindow::readBestiary()
 {
-    qDebug() << "[Main] Requested to read Bestiary.";
+    qDebug() << "[MainWindow] Requested to read Bestiary.";
 
     if(!Bestiary::Instance())
     {
-        qDebug() << "[Main] Bestiary instance not found, reading stopped";
+        qDebug() << "[MainWindow] Bestiary instance not found, reading stopped";
         return;
     }
 
     QString bestiaryFileName = _options->getBestiaryFileName();
-    qDebug() << "[Main] Bestiary file from options: " << bestiaryFileName;
+    qDebug() << "[MainWindow] Bestiary file from options: " << bestiaryFileName;
 
     if(bestiaryFileName.isEmpty())
     {
-        qDebug() << "[Main] ERROR! No known bestiary found, attempting to load default bestiary";
+        qDebug() << "[MainWindow] ERROR! No known bestiary found, attempting to load default bestiary";
 #ifdef Q_OS_MAC
         QDir fileDirPath(QCoreApplication::applicationDirPath());
         fileDirPath.cdUp();
@@ -1399,13 +1399,13 @@ void MainWindow::readBestiary()
 #endif
     }
 
-    qDebug() << "[Main] Reading bestiary: " << bestiaryFileName;
+    qDebug() << "[MainWindow] Reading bestiary: " << bestiaryFileName;
 
     QDomDocument doc( "DMHelperBestiaryXML" );
     QFile file( bestiaryFileName );
     if( !file.open( QIODevice::ReadOnly ) )
     {
-        qDebug() << "[Main] Reading bestiary file open failed.";
+        qDebug() << "[MainWindow] Reading bestiary file open failed.";
         return;
     }
 
@@ -1420,7 +1420,7 @@ void MainWindow::readBestiary()
 
     if( contentResult == false )
     {
-        qDebug() << "[Main] Reading bestiary reading XML content.";
+        qDebug() << "[MainWindow] Reading bestiary reading XML content.";
         qDebug() << errMsg << errRow << errColumn;
         return;
     }
@@ -1428,7 +1428,7 @@ void MainWindow::readBestiary()
     QDomElement root = doc.documentElement();
     if( (root.isNull()) || (root.tagName() != "root") )
     {
-        qDebug() << "[Main] Bestiary file missing root item";
+        qDebug() << "[MainWindow] Bestiary file missing root item";
         return;
     }
 
@@ -1441,13 +1441,13 @@ void MainWindow::readBestiary()
     else
         bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
 
-    qDebug() << "[Main] Bestiary reading complete.";
+    qDebug() << "[MainWindow] Bestiary reading complete.";
 
 }
 
 void MainWindow::showEvent(QShowEvent * event)
 {
-    qDebug() << "[Main] Main window Show event.";
+    qDebug() << "[MainWindow] Main window Show event.";
     if(!initialized)
     {
         // Implement any one-time initialization here
@@ -1476,7 +1476,7 @@ void MainWindow::closeEvent(QCloseEvent * event)
 {
     Q_UNUSED(event);
 
-    qDebug() << "[Main] Close event received.";
+    qDebug() << "[MainWindow] Close event received.";
 
     if(!closeCampaign())
     {
@@ -1897,22 +1897,22 @@ void MainWindow::setIndexExpanded(bool expanded, const QModelIndex& index)
 
 void MainWindow::writeBestiary()
 {
-    qDebug() << "[Main] Bestiary now to be written to file";
+    qDebug() << "[MainWindow] Bestiary now to be written to file";
 
     if(!Bestiary::Instance())
     {
-        qDebug() << "[Main] Bestiary instance not found, no file written.";
+        qDebug() << "[MainWindow] Bestiary instance not found, no file written.";
         return;
     }
 
     if(Bestiary::Instance()->count() <= 0)
     {
-        qDebug() << "[Main] Bestiary is empty, no file will be written";
+        qDebug() << "[MainWindow] Bestiary is empty, no file will be written";
         return;
     }
 
     QString bestiaryFileName = _options->getBestiaryFileName();
-    qDebug() << "[Main] Writing Bestiary to " << bestiaryFileName;
+    qDebug() << "[MainWindow] Writing Bestiary to " << bestiaryFileName;
 
     if(bestiaryFileName.isEmpty())
     {
@@ -1932,7 +1932,7 @@ void MainWindow::writeBestiary()
     QDir targetDirectory(fileInfo.absoluteDir());
     if( Bestiary::Instance()->outputXML(doc, root, targetDirectory, false) <= 0)
     {
-        qDebug() << "[Main] Bestiary output did not find any monsters. Aborting writing to file";
+        qDebug() << "[MainWindow] Bestiary output did not find any monsters. Aborting writing to file";
         return;
     }
 
@@ -1941,7 +1941,7 @@ void MainWindow::writeBestiary()
     QFile file(bestiaryFileName);
     if( !file.open( QIODevice::WriteOnly ) )
     {
-        qDebug() << "[Main] Unable to open Bestiary file for writing: " << bestiaryFileName;
+        qDebug() << "[MainWindow] Unable to open Bestiary file for writing: " << bestiaryFileName;
         qDebug() << "       Error " << file.error() << ": " << file.errorString();
         QFileInfo info(file);
         qDebug() << "       Full filename: " << info.absoluteFilePath();
@@ -1955,7 +1955,7 @@ void MainWindow::writeBestiary()
 
     file.close();
 
-    qDebug() << "[Main] Bestiary file writing complete: " << bestiaryFileName;
+    qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
 }
 
 void MainWindow::newEncounter(int encounterType)
@@ -2015,7 +2015,7 @@ void MainWindow::openFile(const QString& filename)
     if(!closeCampaign())
         return;
 
-    qDebug() << "[Main] Loading Campaign: " << filename;
+    qDebug() << "[MainWindow] Loading Campaign: " << filename;
 
     QDomDocument doc("DMHelperXML");
     QFile file(filename);
@@ -2023,7 +2023,7 @@ void MainWindow::openFile(const QString& filename)
     {
         QMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Unable to open the campaign file: ") + filename);
-        qDebug() << "[Main] Loading Failed: Unable to open campaign file";
+        qDebug() << "[MainWindow] Loading Failed: Unable to open campaign file";
         return;
     }
 
@@ -2040,7 +2040,7 @@ void MainWindow::openFile(const QString& filename)
     {
         QMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Error reading the campaign file: (line ") + QString::number(contentErrorLine) + QString(", column ") + QString::number(contentErrorColumn) + QString("): ") + contentError);
-        qDebug() << "[Main] Loading Failed: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
+        qDebug() << "[MainWindow] Loading Failed: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
         return;
     }
 
@@ -2049,7 +2049,7 @@ void MainWindow::openFile(const QString& filename)
     {
         QMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Unable to find the root entry in the campaign file: ") + filename);
-        qDebug() << "[Main] Loading Failed: Error reading XML - unable to find root entry";
+        qDebug() << "[MainWindow] Loading Failed: Error reading XML - unable to find root entry";
         return;
     }
 
@@ -2058,7 +2058,7 @@ void MainWindow::openFile(const QString& filename)
     {
         QMessageBox::critical(this, QString("Campaign file open failed"),
                               QString("Unable to find the campaign entry in the campaign file: ") + filename);
-        qDebug() << "[Main] Loading Failed: Error reading XML - unable to find campaign entry";
+        qDebug() << "[MainWindow] Loading Failed: Error reading XML - unable to find campaign entry";
         return;
     }
 
@@ -2079,7 +2079,7 @@ void MainWindow::openFile(const QString& filename)
             QMessageBox::information(this,
                                      QString("Invalid Campaign"),
                                      QString("The campaign has not been opened."));
-            qDebug() << "[Main] Invalid campaign discarded";
+            qDebug() << "[MainWindow] Invalid campaign discarded";
             delete campaign;
             campaign = nullptr;
             return;
@@ -2095,11 +2095,11 @@ void MainWindow::openFile(const QString& filename)
 
 void MainWindow::handleCampaignLoaded(Campaign* campaign)
 {
-    qDebug() << "[Main] Campaign Loaded: " << campaignFileName;
+    qDebug() << "[MainWindow] Campaign Loaded: " << campaignFileName;
 
     //ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Blank);
     // TODO: select the first entry in the campaign tree
-    activateWidget(getWidgetFromType(DMHelper::CampaignType_Base));
+    //activateWidget(getWidgetFromType(DMHelper::CampaignType_Base));
 
     updateCampaignTree();
     updateMapFiles();
@@ -2118,12 +2118,13 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         setWindowTitle(QString("DM Helper [*]"));
         ui->stackedWidgetEncounter->setEnabled(true);
         activateWidget(getWidgetFromType(DMHelper::CampaignType_WelcomeScreen));// ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
+        setRibbonToType(DMHelper::CampaignType_WelcomeScreen);
     }
 }
 
 void MainWindow::updateCampaignTree()
 {
-    qDebug() << "[Main] Updating Campaign Tree";
+    qDebug() << "[MainWindow] Updating Campaign Tree";
     /*
     enableCampaignMenu();
 
@@ -2434,7 +2435,7 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
     if((!item) || (!campaign))
         return;
 
-    qDebug() << "[Main] Tree Item Changed: " << item;
+    qDebug() << "[MainWindow] Tree Item Changed: " << item;
 
     /*
     campaign->beginBatchChanges();
@@ -2524,7 +2525,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     // TODO: refactor and abstract (make a deselect and select)
     Q_UNUSED(previous);
 
-    qDebug() << "[Main] Tree Item Selected. Current: " << current << " Previous: " << previous;
+    qDebug() << "[MainWindow] Tree Item Selected. Current: " << current << " Previous: " << previous;
 
     QStandardItem* item = treeModel->itemFromIndex(current);
     if(!item)
@@ -2801,13 +2802,13 @@ void MainWindow::handleAnimationPreview(QImage img)
 
 void MainWindow::openBestiary()
 {
-    qDebug() << "[Main] Opening Bestiary";
+    qDebug() << "[MainWindow] Opening Bestiary";
     if(!Bestiary::Instance())
         return;
 
     if(Bestiary::Instance()->count() == 0)
     {
-        qDebug() << "[Main]    ...Bestiary is empty, creating a first monster";
+        qDebug() << "[MainWindow]    ...Bestiary is empty, creating a first monster";
         bestiaryDlg.createNewMonster();
     }
     else
@@ -2820,7 +2821,7 @@ void MainWindow::openBestiary()
 
 void MainWindow::exportBestiary()
 {
-    qDebug() << "[Main] Exporting Bestiary...";
+    qDebug() << "[MainWindow] Exporting Bestiary...";
     if(!Bestiary::Instance())
         return;
 
@@ -2830,7 +2831,7 @@ void MainWindow::exportBestiary()
 
 void MainWindow::importBestiary()
 {
-    qDebug() << "[Main] Importing Bestiary...";
+    qDebug() << "[MainWindow] Importing Bestiary...";
 
     if(!Bestiary::Instance())
         return;
@@ -2838,13 +2839,13 @@ void MainWindow::importBestiary()
     QString filename = QFileDialog::getOpenFileName(this,QString("Select exported file for import"));
     if((!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)))
     {
-        qDebug() << "[Main] Importing bestiary: " << filename;
+        qDebug() << "[MainWindow] Importing bestiary: " << filename;
 
         QDomDocument doc("DMHelperBestiaryXML");
         QFile file(filename);
         if(!file.open(QIODevice::ReadOnly))
         {
-            qDebug() << "[Main] Opening bestiary import file failed.";
+            qDebug() << "[MainWindow] Opening bestiary import file failed.";
             return;
         }
 
@@ -2859,7 +2860,7 @@ void MainWindow::importBestiary()
 
         if(contentResult == false)
         {
-            qDebug() << "[Main] Error reading bestiary import XML content.";
+            qDebug() << "[MainWindow] Error reading bestiary import XML content.";
             qDebug() << errMsg << errRow << errColumn;
             return;
         }
@@ -2867,20 +2868,20 @@ void MainWindow::importBestiary()
         QDomElement root = doc.documentElement();
         if((root.isNull()) || (root.tagName() != "root"))
         {
-            qDebug() << "[Main] Bestiary import file missing root item";
+            qDebug() << "[MainWindow] Bestiary import file missing root item";
             return;
         }
 
         Bestiary::Instance()->inputXML(root, true);
         openBestiary();
 
-        qDebug() << "[Main] Bestiary import complete.";
+        qDebug() << "[MainWindow] Bestiary import complete.";
     }
 }
 
 void MainWindow::openAboutDialog()
 {
-    qDebug() << "[Main] Opening About Box";
+    qDebug() << "[MainWindow] Opening About Box";
 
     AboutDialog dlg;
     dlg.exec();
@@ -3071,6 +3072,7 @@ void MainWindow::activateObject(CampaignObjectBase* object)
     qDebug() << "[MainWindow] Activating stacked widget from " << ui->stackedWidgetEncounter->currentIndex() << " to " << selectedWidget << " for type " << object->getObjectType();
 
     activateWidget(selectedWidget);
+    setRibbonToType(object->getObjectType());
 
     objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
     if(objectFrame)
@@ -3115,6 +3117,36 @@ int MainWindow::getWidgetFromType(int objectType)
         default:
             qDebug() << "[MainWindow] ERROR: activate widget called with unexpected type: " << objectType;
             return 0;
+    }
+}
+
+void MainWindow::setRibbonToType(int objectType)
+{
+    _ribbon->disableTab(_ribbonTabMap);
+    _ribbon->disableTab(_ribbonTabBattle);
+    _ribbon->disableTab(_ribbonTabMiniMap);
+
+    switch(objectType)
+    {
+        case DMHelper::CampaignType_Battle:
+        case DMHelper::CampaignType_BattleContent:
+            _ribbon->enableTab(_ribbonTabMap);
+            _ribbon->enableTab(_ribbonTabBattle);
+            break;
+        case DMHelper::CampaignType_Map:
+            _ribbon->enableTab(_ribbonTabMiniMap);
+            break;
+        case DMHelper::CampaignType_Campaign:
+        case DMHelper::CampaignType_Party:
+        case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_Placeholder:
+        case DMHelper::CampaignType_Base:
+        case DMHelper::CampaignType_WelcomeScreen:
+        case DMHelper::CampaignType_Combatant:
+        case DMHelper::CampaignType_ScrollingText:
+        case DMHelper::CampaignType_AudioTrack:
+        default:
+            break;
     }
 }
 
