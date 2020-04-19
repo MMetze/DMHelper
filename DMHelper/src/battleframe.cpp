@@ -155,72 +155,72 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     _mapDrawer = new BattleFrameMapDrawer(this);
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, this, &BattleFrame::updateFowImage);
-    connect(ui->btnResetFoW, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::resetFoW);
-    connect(ui->btnClearFoW, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::clearFoW);
-    connect(ui->spinSize, SIGNAL(valueChanged(int)), _mapDrawer, SLOT(setSize(int)));
-    connect(ui->chkSmooth, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::setSmooth);
-    connect(ui->btnFoWErase, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::setErase);
+    //connect(ui->btnResetFoW, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::resetFoW);
+    //connect(ui->btnClearFoW, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::clearFoW);
+    //connect(ui->spinSize, SIGNAL(valueChanged(int)), _mapDrawer, SLOT(setSize(int)));
+    //connect(ui->chkSmooth, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::setSmooth);
+    //connect(ui->btnFoWErase, &QAbstractButton::clicked, _mapDrawer, &BattleFrameMapDrawer::setErase);
 
-    ui->edtHeightDiff->setValidator(new QDoubleValidator(-9999, 9999, 2, this));
-    ui->edtHeightDiff->setText(QString::number(0.0));
+    //ui->edtHeightDiff->setValidator(new QDoubleValidator(-9999, 9999, 2, this));
+    //ui->edtHeightDiff->setText(QString::number(0.0));
 
-    ui->btnSelectBattle->setChecked(true);
-    ui->stackMode->setCurrentIndex(BattleFrameMode_Battle);
-    ui->btnGrpMode->setId(ui->btnSelectBattle, BattleFrameMode_Battle);
-    ui->btnGrpMode->setId(ui->btnSelectCombatants, BattleFrameMode_Combatants);
-    ui->btnGrpMode->setId(ui->btnSelectMap, BattleFrameMode_Map);
-    ui->btnGrpMode->setId(ui->btnSelectGrid, BattleFrameMode_Grid);
+    //ui->btnSelectBattle->setChecked(true);
+    //ui->stackMode->setCurrentIndex(BattleFrameMode_Battle);
+    //ui->btnGrpMode->setId(ui->btnSelectBattle, BattleFrameMode_Battle);
+    //ui->btnGrpMode->setId(ui->btnSelectCombatants, BattleFrameMode_Combatants);
+    //ui->btnGrpMode->setId(ui->btnSelectMap, BattleFrameMode_Map);
+    //ui->btnGrpMode->setId(ui->btnSelectGrid, BattleFrameMode_Grid);
     //ui->btnGrpMode->setId(ui->btnSelectMarkers, BattleFrameMode_Markers);
     //ui->btnSelectMarkers->setVisible(false);
-    connect(ui->btnGrpMode, SIGNAL(buttonClicked(int)), this, SLOT(setRibbonPage(int)));
+    //connect(ui->btnGrpMode, SIGNAL(buttonClicked(int)), this, SLOT(setRibbonPage(int)));
 
     // Set up the brush mode button group
-    ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
-    ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
+    //ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
+    //ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
     //ui->btnGrpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
-    connect(ui->btnGrpBrush, SIGNAL(buttonClicked(int)), _mapDrawer, SLOT(setBrushMode(int)));
+    //connect(ui->btnGrpBrush, SIGNAL(buttonClicked(int)), _mapDrawer, SLOT(setBrushMode(int)));
 
 
-    connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(zoomIn()));
+    //connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(zoomIn()));
     //connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnZoomOut,SIGNAL(clicked()),this,SLOT(zoomOut()));
+    //connect(ui->btnZoomOut,SIGNAL(clicked()),this,SLOT(zoomOut()));
     //connect(ui->btnZoomOut,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(zoomFit()));
+    //connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(zoomFit()));
     //connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
     //connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
     connect(ui->graphicsView,SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)),this,SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
 
     //connect(ui->btnCameraCouple,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnCameraCouple,SIGNAL(clicked(bool)),this,SLOT(setCameraCouple(bool)));
-    connect(ui->btnCameraSelect,SIGNAL(clicked()),this,SLOT(cancelCameraCouple()));
+    //connect(ui->btnCameraCouple,SIGNAL(clicked(bool)),this,SLOT(setCameraCouple(bool)));
+    //connect(ui->btnCameraSelect,SIGNAL(clicked()),this,SLOT(cancelCameraCouple()));
     //connect(ui->btnCameraSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
-    connect(ui->btnCameraFullMap,SIGNAL(clicked()),this,SLOT(cancelCameraCouple()));
+    //connect(ui->btnCameraFullMap,SIGNAL(clicked()),this,SLOT(cancelCameraCouple()));
     //connect(ui->btnCameraFullMap,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnCameraFullMap,SIGNAL(clicked()),this,SLOT(setCameraMap()));
+    //connect(ui->btnCameraFullMap,SIGNAL(clicked()),this,SLOT(setCameraMap()));
 
-    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotateCW()));
-    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotateCCW()));
+    //connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotateCW()));
+    //connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotateCCW()));
 
-    connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
+    //connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
-    connect(ui->btnAddMonsters, SIGNAL(clicked()), this, SLOT(addMonsters()));
-    connect(ui->btnAddCharacter, SIGNAL(clicked()), this, SLOT(addCharacter()));
-    connect(ui->btnAddNPC, SIGNAL(clicked()), this, SLOT(addNPC()));
+    //connect(ui->btnAddMonsters, SIGNAL(clicked()), this, SLOT(addMonsters()));
+    //connect(ui->btnAddCharacter, SIGNAL(clicked()), this, SLOT(addCharacter()));
+    //connect(ui->btnAddNPC, SIGNAL(clicked()), this, SLOT(addNPC()));
     //connect(ui->btnEndBattle, SIGNAL(clicked()), this, SLOT(handleBattleComplete()));
 
     //connect(ui->chkShowCompass, SIGNAL(clicked(bool)), this, SLOT(setCompassVisibility(bool)));
     //connect(ui->chkShowEffects, SIGNAL(clicked()), this, SLOT(updateEffectLayerVisibility()));
-    connect(ui->chkShowGrid, SIGNAL(clicked(bool)), this, SLOT(setGridVisible(bool)));
+    //connect(ui->chkShowGrid, SIGNAL(clicked(bool)), this, SLOT(setGridVisible(bool)));
     //connect(ui->chkShowLiving, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
     //connect(ui->chkShowDead, SIGNAL(clicked()), this, SLOT(updateCombatantVisibility()));
 
     //connect(ui->chkPitch, SIGNAL(stateChanged(int)), this, SLOT(setDistanceText()));
     //connect(ui->edtHeightDiff, SIGNAL(editingFinished()), this, SLOT(setDistanceText()));
-    connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SLOT(selectBattleMap()));
-    connect(ui->btnReloadMap, SIGNAL(clicked(bool)),this,SLOT(reloadMap()));
-    connect(ui->framePublish, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
-    connect(ui->framePublish, SIGNAL(toggled(bool)), this, SLOT(togglePublishing(bool)));
-    ui->framePublish->setCheckable(true);
+    //connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SLOT(selectBattleMap()));
+    //connect(ui->btnReloadMap, SIGNAL(clicked(bool)),this,SLOT(reloadMap()));
+    //connect(ui->framePublish, SIGNAL(colorChanged(QColor)), this, SLOT(setBackgroundColor(QColor)));
+    //connect(ui->framePublish, SIGNAL(toggled(bool)), this, SLOT(togglePublishing(bool)));
+    //ui->framePublish->setCheckable(true);
     //connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
     //connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(createPrescaledBackground()));
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -229,7 +229,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(selectionChanged()),this,SLOT(handleSelectionChanged()));
     connect(_scene, SIGNAL(effectChanged(QAbstractGraphicsShapeItem*)), this, SLOT(handleEffectChanged(QAbstractGraphicsShapeItem*)));
     connect(_scene, SIGNAL(applyEffect(QAbstractGraphicsShapeItem*)), this, SLOT(handleApplyEffect(QAbstractGraphicsShapeItem*)));
-    connect(_scene, SIGNAL(distanceChanged(const QString&)), ui->edtDistance, SLOT(setText(const QString&)));
+    //connect(_scene, SIGNAL(distanceChanged(const QString&)), ui->edtDistance, SLOT(setText(const QString&)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
 
     connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
@@ -237,9 +237,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
     //connect(ui->btnMapEdit, &QAbstractButton::clicked, _scene, &BattleDialogGraphicsScene::setRawMouse);
     setEditMode();
 
-    connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(setGridScale(int)));
-    connect(ui->sliderX, SIGNAL(valueChanged(int)), this, SLOT(setXOffset(int)));
-    connect(ui->sliderY, SIGNAL(valueChanged(int)), this, SLOT(setYOffset(int)));
+    //connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(setGridScale(int)));
+    //connect(ui->sliderX, SIGNAL(valueChanged(int)), this, SLOT(setXOffset(int)));
+    //connect(ui->sliderY, SIGNAL(valueChanged(int)), this, SLOT(setYOffset(int)));
 
     // State Machine
     connect(&_stateMachine, SIGNAL(enterState(BattleFrameState*)), this, SLOT(stateUpdated()));
@@ -251,15 +251,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     setBattle(nullptr);
     setMapCursor();
-
-    /*** TODO - this can be deleted when the contents are deleted ***/
-    ui->btnNext->hide();
-    ui->btnSort->hide();
-    ui->btnEndBattle->hide();
-    ui->groupBox->hide();
-    ui->groupBox_5->hide();
-    ui->stackMode->hide();
-    ui->framePublish->hide();
 
     qDebug() << "[Battle Frame] created";
 }
@@ -536,7 +527,7 @@ void BattleFrame::next()
     int nextInitiative = nextCombatant->getInitiative();
 
     //if(ui->chkLair->isChecked())
-    if(_lairActions)
+    if(_model->getShowLairActions())
     {
         if((activeInitiative >= 20) && (nextInitiative < 20))
         {
@@ -545,7 +536,7 @@ void BattleFrame::next()
         }
     }
 
-    if((_logger) && (activeInitiative > nextInitiative))
+    if((_logger) && (activeInitiative < nextInitiative))
         _logger->newRound();
 
     setActiveCombatant(nextCombatant);
@@ -696,7 +687,7 @@ void BattleFrame::setPointerFile(const QString& filename)
     _pointerFile = filename;
     QPixmap pointerPixmap = getPointerPixmap();
     _scene->setPointerPixmap(pointerPixmap);
-    ui->btnPointer->setIcon(pointerPixmap);
+    //ui->btnPointer->setIcon(pointerPixmap);
     emit pointerChanged(QCursor(pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation), 0, 0));
 }
 
@@ -890,6 +881,7 @@ void BattleFrame::addNPC()
     selectAddCharacter(characterList, QString("Select an NPC"), QString("Select NPC:"));
 }
 
+/*
 void BattleFrame::setShowMovement(bool showMovement)
 {
     _showMovement = showMovement;
@@ -899,6 +891,7 @@ void BattleFrame::setLairActions(bool lairActions)
 {
     _lairActions = lairActions;
 }
+*/
 
 void BattleFrame::setCameraCouple(bool couple)
 {
@@ -996,10 +989,12 @@ void BattleFrame::setPointerOn(bool enabled)
     _stateMachine.toggleState(DMHelper::BattleFrameState_Pointer);
 }
 
+/*
 void BattleFrame::cancelPublish()
 {
     ui->framePublish->cancelPublish();
 }
+*/
 
 void BattleFrame::keyPressEvent(QKeyEvent * e)
 {
@@ -1541,7 +1536,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
     }
 
     //if(!ui->chkLimitMovement->isChecked())
-    if(!_showMovement)
+    if(!_model->getShowMovement())
         return;
 
     //BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
@@ -1576,7 +1571,7 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
     }
 
     //if(!ui->chkLimitMovement->isChecked())
-    if(!_showMovement)
+    if(!_model->getShowMovement())
         return;
 
     //BattleDialogModelCombatant* activeCombatant = _model->getActiveCombatant();
@@ -1958,7 +1953,8 @@ void BattleFrame::createPrescaledBackground()
     }
 
     //if((!_model->getMap()) || (!ui->framePublish->isEnabled()) || (!ui->framePublish->isChecked()))
-    if((!_model->getMap()) || (!ui->framePublish->isEnabled()) || (!_publishing))
+    //if((!_model->getMap()) || (!ui->framePublish->isEnabled()) || (!_publishing))
+    if((!_model->getMap()) || (!_publishing))
         return;
 
     if(_videoPlayer)
@@ -2256,43 +2252,44 @@ void BattleFrame::setModel(BattleDialogModel* model)
 {
     qDebug() << "[Battle Frame] Setting battle model to: " << model;
 
-    cancelPublish();
+    //cancelPublish();
 
     _model = model;
 
     if(_scene)
         _scene->setModel(model);
 
-    ui->btnZoomIn->setEnabled(_model != nullptr);
-    ui->btnZoomOut->setEnabled(_model != nullptr);
-    ui->btnZoomFit->setEnabled(_model != nullptr);
-    ui->btnZoomSelect->setEnabled(_model != nullptr);
-    ui->btnDistance->setEnabled(_model != nullptr);
-    ui->edtDistance->setEnabled(_model != nullptr);
-    ui->chkPitch->setEnabled(_model != nullptr);
-    ui->edtHeightDiff->setEnabled(_model != nullptr);
-    ui->sliderX->setEnabled(_model != nullptr);
-    ui->sliderY->setEnabled(_model != nullptr);
-    ui->btnNewMap->setEnabled(_model != nullptr);
-    ui->btnReloadMap->setEnabled(_model != nullptr);
-    ui->spinGridScale->setEnabled(_model != nullptr);
-    ui->btnSort->setEnabled(_model != nullptr);
+    //ui->btnZoomIn->setEnabled(_model != nullptr);
+    //ui->btnZoomOut->setEnabled(_model != nullptr);
+    //ui->btnZoomFit->setEnabled(_model != nullptr);
+    //ui->btnZoomSelect->setEnabled(_model != nullptr);
+    //ui->btnDistance->setEnabled(_model != nullptr);
+    //ui->edtDistance->setEnabled(_model != nullptr);
+    //ui->chkPitch->setEnabled(_model != nullptr);
+    //ui->edtHeightDiff->setEnabled(_model != nullptr);
+    //ui->sliderX->setEnabled(_model != nullptr);
+    //ui->sliderY->setEnabled(_model != nullptr);
+    //ui->btnNewMap->setEnabled(_model != nullptr);
+    //ui->btnReloadMap->setEnabled(_model != nullptr);
+    //ui->spinGridScale->setEnabled(_model != nullptr);
+    //ui->btnSort->setEnabled(_model != nullptr);
     ui->btnNext->setEnabled(_model != nullptr);
+    ui->edtRounds->setEnabled(_model != nullptr);
     ui->edtCountdown->setEnabled(_model != nullptr);
-    ui->btnAddMonsters->setEnabled(_model != nullptr);
-    ui->btnAddCharacter->setEnabled(_model != nullptr);
-    ui->btnAddNPC->setEnabled(_model != nullptr);
+    //ui->btnAddMonsters->setEnabled(_model != nullptr);
+    //ui->btnAddCharacter->setEnabled(_model != nullptr);
+    //ui->btnAddNPC->setEnabled(_model != nullptr);
     //ui->chkLair->setEnabled(_model != nullptr);
     //ui->chkLimitMovement->setEnabled(_model != nullptr);
     //ui->chkShowCompass->setEnabled(_model != nullptr);
     //ui->chkShowEffects->setEnabled(_model != nullptr);
-    ui->chkShowGrid->setEnabled(_model != nullptr);
+    //ui->chkShowGrid->setEnabled(_model != nullptr);
     //ui->chkShowLiving->setEnabled(_model != nullptr);
     //ui->chkShowDead->setEnabled(_model != nullptr);
-    ui->framePublish->setEnabled(_model != nullptr);
+    //ui->framePublish->setEnabled(_model != nullptr);
     emit setPublishEnabled(_model != nullptr);
     _publishingEnabled = _model != nullptr;
-    ui->btnEndBattle->setEnabled(_model != nullptr);
+    //ui->btnEndBattle->setEnabled(_model != nullptr);
     ui->graphicsView->setEnabled(_model != nullptr);
 
     if(!_model)
@@ -2303,15 +2300,15 @@ void BattleFrame::setModel(BattleDialogModel* model)
     }
     else
     {
-        ui->chkShowGrid->setChecked(_model->getGridOn());
-        ui->sliderX->setValue(_model->getGridOffsetX());
-        ui->sliderY->setValue(_model->getGridOffsetY());
-        ui->spinGridScale->setValue(_model->getGridScale());
+        //ui->chkShowGrid->setChecked(_model->getGridOn());
+        //ui->sliderX->setValue(_model->getGridOffsetX());
+        //ui->sliderY->setValue(_model->getGridOffsetY());
+        //ui->spinGridScale->setValue(_model->getGridScale());
         //ui->chkShowCompass->setChecked(_model->getShowCompass());
         //ui->chkShowDead->setChecked(_model->getShowDead());
         //ui->chkShowLiving->setChecked(_model->getShowAlive());
         //ui->chkShowEffects->setChecked(_model->getShowEffects());
-        ui->framePublish->setColor(_model->getBackgroundColor());
+        //ui->framePublish->setColor(_model->getBackgroundColor());
         emit setPublishColor(_model->getBackgroundColor());
 
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
@@ -2424,6 +2421,7 @@ void BattleFrame::selectAddCharacter(QList<Character*> characters, const QString
     }
 }
 
+/*
 void BattleFrame::setRibbonPage(int id)
 {
     if((id < 0) || (id >= ui->stackMode->count()))
@@ -2431,6 +2429,7 @@ void BattleFrame::setRibbonPage(int id)
 
     ui->stackMode->setCurrentIndex(id);
 }
+*/
 
 void BattleFrame::setEditMode()
 {
@@ -2450,7 +2449,7 @@ void BattleFrame::setEditMode()
         {
             QRect viewSize = ui->graphicsView->mapFromScene(QRect(0, 0, _model->getGridScale(), _model->getGridScale())).boundingRect();
             _mapDrawer->setScale(_model->getGridScale(), viewSize.width());
-            _mapDrawer->setSize(ui->spinSize->value());
+//            TODO _mapDrawer->setSize(ui->spinSize->value());
         }
 
         //ui->graphicsView->viewport()->setCursor(_mapDrawer->getCursor());
@@ -3102,7 +3101,7 @@ void BattleFrame::clearBattleFrame()
         _videoPlayer = nullptr;
     }
 
-    cancelPublish();
+    //cancelPublish();
 
     BattleDialogLogger* tempLogger = _logger;
     _logger = nullptr;
@@ -3169,8 +3168,8 @@ void BattleFrame::replaceBattleMap()
 
     cleanupBattleMap();
 
-    ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
-    ui->framePublish->setEnabled(_model->getMap() != nullptr);
+    //ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
+    //ui->framePublish->setEnabled(_model->getMap() != nullptr);
     emit setPublishEnabled(_model->getMap() != nullptr);
     _publishingEnabled = _model->getMap() != nullptr;
 
@@ -3275,8 +3274,8 @@ void BattleFrame::resizeBattleMap()
 
     qDebug() << "[Battle Frame] Update of same map detected";
 
-    ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
-    ui->framePublish->setEnabled(_model->getMap() != nullptr);
+    //ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
+    //ui->framePublish->setEnabled(_model->getMap() != nullptr);
     emit setPublishEnabled(_model->getMap() != nullptr);
     _publishingEnabled = _model->getMap() != nullptr;
 
@@ -3625,52 +3624,52 @@ void BattleFrame::prepareStateMachine()
     _stateMachine.addState(new BattleFrameState(DMHelper::BattleFrameState_CombatantEdit, BattleFrameState::BattleFrameStateType_Base));
 
     BattleFrameState* zoomSelectState = new BattleFrameState(DMHelper::BattleFrameState_ZoomSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_zoomselectcursor.png"), 32, 32);
-    connect(ui->btnZoomSelect, &QAbstractButton::clicked, zoomSelectState, &BattleFrameState::toggle);
-    connect(zoomSelectState, &BattleFrameState::stateChanged, ui->btnZoomSelect, &QAbstractButton::setChecked);
+    //connect(ui->btnZoomSelect, &QAbstractButton::clicked, zoomSelectState, &BattleFrameState::toggle);
+    //connect(zoomSelectState, &BattleFrameState::stateChanged, ui->btnZoomSelect, &QAbstractButton::setChecked);
     connect(zoomSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::zoomSelectToggled);
     connect(zoomSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::setItemsInert);
     _stateMachine.addState(zoomSelectState);
 
     BattleFrameState* cameraSelectState = new BattleFrameState(DMHelper::BattleFrameState_CameraSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_cameraselectcursor.png"), 32, 32);
-    connect(ui->btnCameraSelect, &QAbstractButton::clicked, cameraSelectState, &BattleFrameState::toggle);
-    connect(cameraSelectState, &BattleFrameState::stateChanged, ui->btnCameraSelect, &QAbstractButton::setChecked);
+    //connect(ui->btnCameraSelect, &QAbstractButton::clicked, cameraSelectState, &BattleFrameState::toggle);
+    //connect(cameraSelectState, &BattleFrameState::stateChanged, ui->btnCameraSelect, &QAbstractButton::setChecked);
     connect(cameraSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::cameraSelectToggled);
     connect(cameraSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::setItemsInert);
     _stateMachine.addState(cameraSelectState);
 
     BattleFrameState* cameraEditState = new BattleFrameState(DMHelper::BattleFrameState_CameraEdit, BattleFrameState::BattleFrameStateType_Persistent);
-    connect(ui->btnEditCamera, &QAbstractButton::clicked, cameraEditState, &BattleFrameState::toggle);
+    //connect(ui->btnEditCamera, &QAbstractButton::clicked, cameraEditState, &BattleFrameState::toggle);
+    //connect(cameraEditState, &BattleFrameState::stateChanged, ui->btnEditCamera, &QAbstractButton::setChecked);
     connect(cameraEditState, &BattleFrameState::stateChanged, this, &BattleFrame::cameraEditToggled);
-    connect(cameraEditState, &BattleFrameState::stateChanged, ui->btnEditCamera, &QAbstractButton::setChecked);
     connect(cameraEditState, &BattleFrameState::stateChanged, this, &BattleFrame::setCameraSelectable);
     _stateMachine.addState(cameraEditState);
 
     BattleFrameState* distanceState = new BattleFrameState(DMHelper::BattleFrameState_Distance, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/icon_distancecursor.png"), 32, 32);
-    connect(ui->btnDistance, &QAbstractButton::clicked, distanceState, &BattleFrameState::toggle);
-    connect(distanceState, &BattleFrameState::stateChanged, ui->btnDistance, &QAbstractButton::setChecked);
+    //connect(ui->btnDistance, &QAbstractButton::clicked, distanceState, &BattleFrameState::toggle);
+    //connect(distanceState, &BattleFrameState::stateChanged, ui->btnDistance, &QAbstractButton::setChecked);
     connect(distanceState, &BattleFrameState::stateChanged, this, &BattleFrame::distanceToggled);
     //connect(distanceState, SIGNAL(stateChanged(bool)), this, SLOT(setDistanceText()));
     //connect(distanceState, &BattleFrameState::stateChanged, this, &BattleFrame::setDistanceText);
     _stateMachine.addState(distanceState);
 
     BattleFrameState* pointerState = new BattleFrameState(DMHelper::BattleFrameState_Pointer, BattleFrameState::BattleFrameStateType_Persistent, getPointerPixmap(), 0, 0);
-    connect(ui->btnPointer, &QAbstractButton::clicked, pointerState, &BattleFrameState::toggle);
-    connect(pointerState, &BattleFrameState::stateChanged, ui->btnPointer, &QAbstractButton::setChecked);
+    //connect(ui->btnPointer, &QAbstractButton::clicked, pointerState, &BattleFrameState::toggle);
+    //connect(pointerState, &BattleFrameState::stateChanged, ui->btnPointer, &QAbstractButton::setChecked);
     connect(pointerState, &BattleFrameState::stateChanged, this, &BattleFrame::pointerToggled);
     connect(this, SIGNAL(pointerChanged(const QCursor&)), pointerState, SLOT(setCursor(const QCursor&)));
     connect(pointerState, SIGNAL(cursorChanged(const QCursor&)), this, SLOT(stateUpdated()));
     _stateMachine.addState(pointerState);
 
     BattleFrameState* fowSelectState = new BattleFrameState(DMHelper::BattleFrameState_FoWSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_selectcursor.png"), 32, 32);
-    connect(ui->btnBrushSelect, &QAbstractButton::clicked, fowSelectState, &BattleFrameState::toggle);
-    connect(fowSelectState, &BattleFrameState::stateChanged, ui->btnBrushSelect, &QAbstractButton::setChecked);
+    //connect(ui->btnBrushSelect, &QAbstractButton::clicked, fowSelectState, &BattleFrameState::toggle);
+    //connect(fowSelectState, &BattleFrameState::stateChanged, ui->btnBrushSelect, &QAbstractButton::setChecked);
     connect(fowSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::foWSelectToggled);
     connect(fowSelectState, &BattleFrameState::stateChanged, this, &BattleFrame::setItemsInert);
     _stateMachine.addState(fowSelectState);
 
     BattleFrameState* fowEditState = new BattleFrameState(DMHelper::BattleFrameState_FoWEdit, BattleFrameState::BattleFrameStateType_Persistent);
-    connect(ui->btnMapEdit, &QAbstractButton::clicked, fowEditState, &BattleFrameState::toggle);
-    connect(fowEditState, &BattleFrameState::stateChanged, ui->btnMapEdit, &QAbstractButton::setChecked);
+    //connect(ui->btnMapEdit, &QAbstractButton::clicked, fowEditState, &BattleFrameState::toggle);
+    //connect(fowEditState, &BattleFrameState::stateChanged, ui->btnMapEdit, &QAbstractButton::setChecked);
     connect(fowEditState, &BattleFrameState::stateChanged, this, &BattleFrame::foWEditToggled);
     //connect(fowEditState, &BattleFrameState::stateChanged, _scene, &BattleDialogGraphicsScene::setRawMouse);
     connect(fowEditState, SIGNAL(stateChanged(bool)), this, SLOT(setEditMode()));

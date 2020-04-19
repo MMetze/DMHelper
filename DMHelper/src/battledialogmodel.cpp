@@ -24,6 +24,8 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     _showAlive(true),
     _showDead(false),
     _showEffects(true),
+    _showMovement(true),
+    _showLairActions(false),
     _activeCombatant(nullptr),
     _logger(),
     _backgroundImage()
@@ -160,6 +162,8 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
     _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
+    _showMovement = static_cast<bool>(element.attribute("showMovement",QString::number(1)).toInt());
+    _showLairActions = static_cast<bool>(element.attribute("showLairActions",QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 }
@@ -388,6 +392,16 @@ bool BattleDialogModel::getShowEffects() const
     return _showEffects;
 }
 
+bool BattleDialogModel::getShowMovement() const
+{
+    return _showMovement;
+}
+
+bool BattleDialogModel::getShowLairActions() const
+{
+    return _showLairActions;
+}
+
 const BattleDialogLogger& BattleDialogModel::getLogger() const
 {
     return _logger;
@@ -528,6 +542,24 @@ void BattleDialogModel::setShowEffects(bool showEffects)
     }
 }
 
+void BattleDialogModel::setShowMovement(bool showMovement)
+{
+    if(_showMovement != showMovement)
+    {
+        _showMovement = showMovement;
+        emit showMovementChanged(_showMovement);
+    }
+}
+
+void BattleDialogModel::setShowLairActions(bool showLairActions)
+{
+    if(_showLairActions != showLairActions)
+    {
+        _showLairActions = showLairActions;
+        emit showLairActionsChanged(_showLairActions);
+    }
+}
+
 void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCombatant)
 {
     if(_activeCombatant != activeCombatant)
@@ -579,6 +611,8 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("showAlive", _showAlive);
     element.setAttribute("showDead", _showDead);
     element.setAttribute("showEffects", _showEffects);
+    element.setAttribute("showMovement", _showMovement);
+    element.setAttribute("showLairActions", _showLairActions);
     element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
 
     _logger.outputXML(doc, element, targetDirectory, isExport);

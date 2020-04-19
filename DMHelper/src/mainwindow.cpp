@@ -444,8 +444,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), battleFrame, SLOT(addCharacter()));
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
-    connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), battleFrame, SLOT(setShowMovement(bool)));
-    connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), battleFrame, SLOT(setLairActions(bool)));
+    //connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), battleFrame, SLOT(setShowMovement(bool)));
+    //connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), battleFrame, SLOT(setLairActions(bool)));
     connect(_ribbonTabBattle, SIGNAL(nextClicked()), battleFrame, SLOT(next()));
     connect(_ribbonTabBattle, SIGNAL(sortClicked()), battleFrame, SLOT(sort()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), battleFrame, SLOT(showStatistics()));
@@ -607,7 +607,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Encounter Pages Created";
 
     // Ensure publishing a single image stops any running animations
-    connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), battleFrame, SLOT(cancelPublish()));
+    //connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), battleFrame, SLOT(cancelPublish()));
     connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), mapFrame, SLOT(cancelPublish()));
     connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _scrollingTextEdit, SLOT(stopAnimation()));
 
@@ -3133,9 +3133,13 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowDead(model->getShowDead());
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
+        _ribbonTabBattle->setShowMovement(model->getShowMovement());
+        _ribbonTabBattle->setLairActions(model->getShowLairActions());
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
         connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
         connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));
+        connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
+        connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
         _ribbonTabMap->setGridOn(model->getGridOn());
         _ribbonTabMap->setGridScale(model->getGridScale());

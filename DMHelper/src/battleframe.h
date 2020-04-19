@@ -84,7 +84,7 @@ public slots:
     void zoomSelect(bool enabled);
     void cancelSelect();
 
-    void cancelPublish();
+    //void cancelPublish();
 
     // Public for connection to battle ribbon
     void selectBattleMap();
@@ -92,8 +92,8 @@ public slots:
     void addMonsters();
     void addCharacter();
     void addNPC();
-    void setShowMovement(bool showMovement);
-    void setLairActions(bool lairActions);
+    //void setShowMovement(bool showMovement);
+    //void setLairActions(bool lairActions);
 
     // Public for connection to map ribbon
     void setCameraCouple(bool couple);
@@ -207,7 +207,7 @@ private slots:
     Map* selectRelatedMap();
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
 
-    void setRibbonPage(int id);
+    //void setRibbonPage(int id);
 
     void setEditMode();
     void updateFowImage(const QPixmap& fow);
@@ -322,7 +322,7 @@ private:
 
     QTimer* _countdownTimer;
     qreal _countdown;
-    bool _lairActions;
+    //bool _lairActions;
 
     bool _publishing;
     bool _publishingEnabled;
@@ -346,7 +346,7 @@ private:
     qreal _scale;
     int _rotation;
 
-    bool _showMovement;
+    //bool _showMovement;
     qreal _moveRadius;
     QPointF _moveStart;
     int _moveTimer;

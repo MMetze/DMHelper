@@ -35,6 +35,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
 
     ui->textBrowser->installEventFilter(this);
     //ui->textFormatter->setTextEdit(ui->textBrowser);
+    ui->textFormatter->hide();
     _formatter->setTextEdit(ui->textBrowser);
 }
 

@@ -65,6 +65,8 @@ public:
     bool getShowAlive() const;
     bool getShowDead() const;
     bool getShowEffects() const;
+    bool getShowMovement() const;
+    bool getShowLairActions() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
     QImage getBackgroundImage() const;
@@ -82,6 +84,8 @@ public slots:
     void setShowAlive(bool showAlive);
     void setShowDead(bool showDead);
     void setShowEffects(bool showEffects);
+    void setShowMovement(bool showMovement);
+    void setShowLairActions(bool showLairActions);
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
     void setBackgroundImage(QImage backgroundImage);
     void sortCombatants();
@@ -99,6 +103,8 @@ signals:
     void showAliveChanged(bool showAlive);
     void showDeadChanged(bool showDead);
     void showEffectsChanged(bool showEffects);
+    void showMovementChanged(bool showMovement);
+    void showLairActionsChanged(bool showLairActions);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void backgroundImageChanged(QImage backgroundImage);
 
@@ -135,6 +141,8 @@ private:
     bool _showAlive;
     bool _showDead;
     bool _showEffects;
+    bool _showMovement;
+    bool _showLairActions;
 
     BattleDialogModelCombatant* _activeCombatant;
 

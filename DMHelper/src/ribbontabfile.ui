@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>File</string>
+   <string>DM Helper</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>

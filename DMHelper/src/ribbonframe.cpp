@@ -4,18 +4,18 @@
 #include <QGuiApplication>
 #include <QScreen>
 
-// Text ribbon needed - replace both scrolling and text encounter
-// Hide text encounter buttons
-// Publish frame and preview button in ALL ribbons
-// Connect scrolling text
-// Connect all the buttons
-// Player window button under FILE
-// Combine HELP in FILE, Rename to ???
+// DONE - Text ribbon needed - replace both scrolling and text encounter
+// DONE - Hide text encounter buttons
+// DONE - Publish frame and preview button in ALL ribbons
+// DONE - Connect scrolling text
+// DONE - Connect all the buttons
+// DONE - Player window button under FILE --> NO, moved it to publish frame
+// DONE - Combine HELP in FILE, Rename to ???
+// DONE - Move Next back to initiative list, fix round counter
+// DONE - Scroll name --> Animation
 // Make the TOOLS not modal, but rather hidden when losing focus, with checkable button and escape to close
-// Scroll name --> Animation
+//      make battle statistics (AND ALL OTHER DIALOGS) dlg wider
 // Change MAP and BATTLE layouts to BUILD and RUN
-// make battle statistics dlg wider
-// Move Next back to initiative list, fix round counter
 
 RibbonFrame::RibbonFrame(QWidget *parent) :
     QFrame(parent)
