@@ -12,17 +12,21 @@ UndoFill::UndoFill(Map& map, const MapEditFill& mapEditFill) :
 
 void UndoFill::undo()
 {
-    if(_map.getRegisteredWindow())
-        _map.getRegisteredWindow()->undoPaint();
+    _map.undoPaint();
+    //if(_map.getRegisteredWindow())
+    //    _map.getRegisteredWindow()->undoPaint();
 }
 
 void UndoFill::redo()
 {
+    apply(true, nullptr);
+    _map.updateFoW();
+    /*
     if(_map.getRegisteredWindow())
     {
-        apply(true, nullptr);
         _map.getRegisteredWindow()->updateFoW();
     }
+    */
 }
 
 void UndoFill::apply(bool preview, QPaintDevice* target) const

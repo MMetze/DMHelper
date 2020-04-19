@@ -39,7 +39,7 @@
     <number>3</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>3</number>
    </property>
    <property name="topMargin">
     <number>0</number>
@@ -94,7 +94,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="lblUsersGuide">
        <property name="text">
         <string>User Guide</string>
        </property>
@@ -149,7 +149,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_9">
+      <widget class="QLabel" name="lblGettingStarted">
        <property name="text">
         <string>Get Started</string>
        </property>
@@ -223,7 +223,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="lblCheckForUpdates">
        <property name="text">
         <string>Updates</string>
        </property>
@@ -278,7 +278,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_11">
+      <widget class="QLabel" name="lblAbout">
        <property name="text">
         <string>About</string>
        </property>
@@ -302,8 +302,32 @@
      </property>
     </spacer>
    </item>
+   <item>
+    <widget class="PublishButtonRibbon" name="framePublish">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PublishButtonRibbon</class>
+   <extends>QFrame</extends>
+   <header>publishbuttonribbon.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

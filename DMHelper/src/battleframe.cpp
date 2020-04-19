@@ -27,7 +27,6 @@
 #include "itemselectdialog.h"
 #include "videoplayer.h"
 #include "camerarect.h"
-#include "undopath.h"
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
 #include <QDebug>
@@ -1196,11 +1195,13 @@ void BattleFrame::timerEvent(QTimerEvent *event)
     Q_UNUSED(event);
     if(_movementPixmap)
     {
+        /*
         qreal angle = _movementPixmap->rotation();
         angle += ROTATION_DELTA;
         if(angle > 360.0)
             angle -= 360.0;
         _movementPixmap->setRotation(angle);
+        */
     }
 }
 
@@ -1846,7 +1847,8 @@ void BattleFrame::publishImage()
 
             // OPTIMIZE: optimize this to be faster, doing only changes?
             _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
-            emit animationStarted(_model->getBackgroundColor());
+            //emit animationStarted(_model->getBackgroundColor());
+            emit animationStarted();
             qDebug() << "[Battle Frame] publish timer activated";
         }
     }

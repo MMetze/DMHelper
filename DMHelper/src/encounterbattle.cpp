@@ -128,16 +128,6 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
     EncounterText::inputXML(element, isImport);
 }
 
-void EncounterBattle::postProcessXML(const QDomElement &element, bool isImport)
-{
-    _audioTrackId = parseIdString(element.attribute("audiotrack"));
-
-    // Read the battle
-    inputXMLBattle(element, isImport);
-
-    EncounterText::postProcessXML(element, isImport);
-}
-
 /*
 void EncounterBattle::resolveReferences()
 {
@@ -467,6 +457,16 @@ bool EncounterBattle::belongsToObject(QDomElement& element)
     else {
         return EncounterText::belongsToObject(element);
     }
+}
+
+void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    _audioTrackId = parseIdString(element.attribute("audiotrack"));
+
+    // Read the battle
+    inputXMLBattle(element, isImport);
+
+    EncounterText::internalPostProcessXML(element, isImport);
 }
 
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)

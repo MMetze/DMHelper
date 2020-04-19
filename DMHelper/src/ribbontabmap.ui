@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1493</width>
+    <width>1457</width>
     <height>67</height>
    </rect>
   </property>
@@ -30,10 +30,10 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_3">
    <property name="spacing">
-    <number>3</number>
+    <number>1</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>3</number>
    </property>
    <property name="topMargin">
     <number>0</number>
@@ -88,7 +88,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_22">
+      <widget class="QLabel" name="lblZoomIn">
        <property name="text">
         <string>Zoom In</string>
        </property>
@@ -140,7 +140,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_26">
+      <widget class="QLabel" name="lblZoomOut">
        <property name="text">
         <string>Zoom Out</string>
        </property>
@@ -195,7 +195,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_25">
+      <widget class="QLabel" name="lblZoomFull">
        <property name="text">
         <string>Zoom Full</string>
        </property>
@@ -250,7 +250,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_23">
+      <widget class="QLabel" name="lblZoomSelect">
        <property name="text">
         <string>Zoom Select</string>
        </property>
@@ -281,52 +281,59 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label_11">
-     <property name="text">
-      <string>Couple</string>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>0</number>
      </property>
-     <property name="alignment">
-      <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="btnCameraCouple">
-     <property name="minimumSize">
-      <size>
-       <width>50</width>
-       <height>50</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>50</width>
-       <height>50</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string>Snap the Player's Window camera to the Battle View</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/img/data/icon_couplecamera.png</normaloff>:/img/data/icon_couplecamera.png</iconset>
-     </property>
-     <property name="iconSize">
-      <size>
-       <width>40</width>
-       <height>40</height>
-      </size>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-    </widget>
+     <item>
+      <widget class="QPushButton" name="btnCameraCouple">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Snap the Player's Window camera to the Battle View</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_couplecamera.png</normaloff>:/img/data/icon_couplecamera.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblCameraCouple">
+       <property name="text">
+        <string>Couple</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -369,7 +376,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_12">
+      <widget class="QLabel" name="lblCameraFullMap">
        <property name="text">
         <string>Zoom Full</string>
        </property>
@@ -424,7 +431,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_13">
+      <widget class="QLabel" name="lblCameraSelect">
        <property name="text">
         <string>Select</string>
        </property>
@@ -479,7 +486,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_14">
+      <widget class="QLabel" name="lblEditCamera">
        <property name="text">
         <string>Edit</string>
        </property>
@@ -562,7 +569,10 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_15">
+      <widget class="QLabel" name="lblDistance">
+       <property name="lineWidth">
+        <number>0</number>
+       </property>
        <property name="text">
         <string>Distance</string>
        </property>
@@ -589,7 +599,7 @@
           <bool>true</bool>
          </property>
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -681,7 +691,7 @@
          <item>
           <widget class="QLineEdit" name="edtHeightDiff">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -702,7 +712,13 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="label_16">
+      <widget class="QLabel" name="lblDistance2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maximumSize">
         <size>
          <width>77</width>
@@ -785,7 +801,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_17">
+      <widget class="QLabel" name="lblGrid">
        <property name="text">
         <string>Grid</string>
        </property>
@@ -807,7 +823,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="lblGridScale">
          <property name="minimumSize">
           <size>
            <width>45</width>
@@ -830,6 +846,12 @@
        </item>
        <item>
         <widget class="QSpinBox" name="spinGridScale">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>75</width>
@@ -864,7 +886,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="lblSliderX">
          <property name="minimumSize">
           <size>
            <width>45</width>
@@ -881,7 +903,7 @@
           <string/>
          </property>
          <property name="text">
-          <string>H-Shift:</string>
+          <string>H-Shift</string>
          </property>
         </widget>
        </item>
@@ -927,7 +949,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="lblSliderY">
          <property name="minimumSize">
           <size>
            <width>45</width>
@@ -1055,7 +1077,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_18">
+      <widget class="QLabel" name="lblMapEdit">
        <property name="text">
         <string>Fog of War</string>
        </property>
@@ -1113,7 +1135,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_19">
+      <widget class="QLabel" name="lblFoWErase">
        <property name="text">
         <string>Draw/Erase</string>
        </property>
@@ -1177,7 +1199,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_21">
+      <widget class="QLabel" name="lblSmooth">
        <property name="text">
         <string>Smooth</string>
        </property>
@@ -1198,6 +1220,22 @@
        <property name="spacing">
         <number>0</number>
        </property>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>2</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item>
         <widget class="QPushButton" name="btnBrushCircle">
          <property name="sizePolicy">
@@ -1295,14 +1333,33 @@
          </attribute>
         </widget>
        </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>2</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
       </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="lblSize">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -1320,10 +1377,10 @@
           </size>
          </property>
          <property name="text">
-          <string>Size:</string>
+          <string>Size </string>
          </property>
          <property name="alignment">
-          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -1364,7 +1421,13 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="label_20">
+      <widget class="QLabel" name="lblBrush">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="text">
         <string>Brush</string>
        </property>
@@ -1428,7 +1491,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_24">
+      <widget class="QLabel" name="lblBrushSelect">
        <property name="text">
         <string>FoW Area</string>
        </property>
@@ -1554,7 +1617,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="lblPointer">
        <property name="text">
         <string>Pointer</string>
        </property>
@@ -1585,17 +1648,27 @@
     </widget>
    </item>
    <item>
-    <widget class="PublishButtonRibbon" name="publishFrame">
-     <property name="minimumSize">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::MinimumExpanding</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
       <size>
-       <width>178</width>
-       <height>67</height>
+       <width>0</width>
+       <height>20</height>
       </size>
      </property>
-     <property name="maximumSize">
+    </spacer>
+   </item>
+   <item>
+    <widget class="PublishButtonRibbon" name="framePublish">
+     <property name="minimumSize">
       <size>
-       <width>178</width>
-       <height>67</height>
+       <width>50</width>
+       <height>0</height>
       </size>
      </property>
      <property name="frameShape">
@@ -1605,19 +1678,6 @@
       <enum>QFrame::Raised</enum>
      </property>
     </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>69</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

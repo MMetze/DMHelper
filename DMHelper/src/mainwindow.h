@@ -22,6 +22,7 @@ class Character;
 class Adventure;
 class Encounter;
 class EncounterTextEdit;
+class EncounterScrollingTextEdit;
 class TimeAndDateFrame;
 class Map;
 class MRUHandler;
@@ -32,13 +33,15 @@ class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
 class PublishFrame;
-class DMHelperRibbon;
+class RibbonMain;
 class RibbonTabFile;
 class RibbonTabCampaign;
 class RibbonTabBestiary;
-class RibbonTabHelp;
+//class RibbonTabHelp;
 class RibbonTabMap;
 class RibbonTabBattle;
+class RibbonTabScrolling;
+class RibbonTabText;
 class BattleDialogModel;
 class MapEditFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -162,7 +165,8 @@ protected slots:
     void handleLoadBattle();
     void handleDeleteBattle();
 
-    void handleAnimationStarted(QColor color);
+    //void handleAnimationStarted(QColor color);
+    void handleAnimationStarted();
     void handleAnimationPreview(QImage img);
 
     // Bestiary
@@ -177,6 +181,9 @@ protected slots:
     void openRandomMarkets();
 
     QDialog* createDialog(QWidget* contents);
+
+    void connectTextToText();
+    void connectTextToScroll();
 
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);
@@ -205,6 +212,7 @@ private:
     QDialog* countdownDlg;
 
     EncounterTextEdit* encounterTextEdit;
+    EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* treeModel;
     QMap<QString, QModelIndex> treeIndexMap;
@@ -240,13 +248,15 @@ private:
     bool dirty;
     int _animationFrameCount;
 
-    DMHelperRibbon* _ribbon;
+    RibbonMain* _ribbon;
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
     RibbonTabBestiary* _ribbonTabTools;
-    RibbonTabHelp* _ribbonTabHelp;
+//    RibbonTabHelp* _ribbonTabHelp;
     RibbonTabMap* _ribbonTabMap;
     RibbonTabBattle* _ribbonTabBattle;
+    RibbonTabScrolling* _ribbonTabScrolling;
+    RibbonTabText* _ribbonTabText;
     MapEditFrame* _ribbonTabMiniMap;
 };
 

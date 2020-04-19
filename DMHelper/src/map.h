@@ -9,7 +9,7 @@
 class QDomDocument;
 class QDomElement;
 class QUndoStack;
-class MapFrame;
+//class MapFrame;
 class AudioTrack;
 
 class Map : public CampaignObjectBase
@@ -23,7 +23,6 @@ public:
     // From CampaignObjectBase
     //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
 
     //QString getName() const;
     //void setName(const QString& newName);
@@ -45,7 +44,7 @@ public:
 
     QUndoStack* getUndoStack() const;
     void applyPaintTo(QImage* target, QColor clearColor, int index);
-    MapFrame* getRegisteredWindow() const;
+    //MapFrame* getRegisteredWindow() const;
 
     MapMarker* getMapMarker(int id);
 
@@ -58,7 +57,7 @@ public:
     void paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview );
     void paintFoWRect( QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview );
     void fillFoW( QColor color, QPaintDevice* target );
-    void undoPaint();
+    //void undoPaint();
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
@@ -68,9 +67,11 @@ public:
 
     QImage getPreviewImage();
 
-//signals:
+signals:
 //    void dirty();
 //    void changed();
+    void executeUndo();
+    void requestFoWUpdate();
 
 public slots:
     //void registerWindow(MapFrame* mapFrame);
@@ -79,15 +80,20 @@ public slots:
     void initialize();
     void uninitialize();
 
+    //
+    void undoPaint();
+    void updateFoW();
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
     //QString _name;
     QString _filename;
     QUndoStack* _undoStack;
-    MapFrame* _mapFrame;
+    //MapFrame* _mapFrame;
     QList<MapMarker> _markerList;
     QUuid _audioTrackId;
     bool _playAudio;

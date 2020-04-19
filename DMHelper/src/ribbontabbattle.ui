@@ -33,7 +33,7 @@
     <number>3</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>3</number>
    </property>
    <property name="topMargin">
     <number>0</number>
@@ -88,7 +88,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="lblNewMap">
        <property name="text">
         <string>New Map</string>
        </property>
@@ -152,7 +152,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_9">
+      <widget class="QLabel" name="lblReloadMap">
        <property name="text">
         <string>Refresh</string>
        </property>
@@ -226,7 +226,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_11">
+      <widget class="QLabel" name="lblAddCharacter">
        <property name="text">
         <string>Add PC</string>
        </property>
@@ -281,7 +281,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="lblAddMonsters">
        <property name="text">
         <string>Add Monster</string>
        </property>
@@ -342,7 +342,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_12">
+      <widget class="QLabel" name="lblAddNPC">
        <property name="text">
         <string>Add NPC</string>
        </property>
@@ -428,7 +428,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_14">
+      <widget class="QLabel" name="lblShowLiving">
        <property name="text">
         <string>Show Living</string>
        </property>
@@ -492,7 +492,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_13">
+      <widget class="QLabel" name="lblShowDead">
        <property name="text">
         <string>Show Dead</string>
        </property>
@@ -559,7 +559,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_15">
+      <widget class="QLabel" name="lblShowEffects">
        <property name="text">
         <string>Show Effects</string>
        </property>
@@ -626,7 +626,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_16">
+      <widget class="QLabel" name="lblShowMovement">
        <property name="text">
         <string>Movement</string>
        </property>
@@ -690,7 +690,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_17">
+      <widget class="QLabel" name="lblLairActions">
        <property name="text">
         <string>Lair Actions</string>
        </property>
@@ -761,7 +761,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_18">
+      <widget class="QLabel" name="lblNext">
        <property name="text">
         <string>Next</string>
        </property>
@@ -816,7 +816,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_19">
+      <widget class="QLabel" name="lblSort">
        <property name="text">
         <string>Sort</string>
        </property>
@@ -871,7 +871,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_20">
+      <widget class="QLabel" name="lblStatistics">
        <property name="text">
         <string>Statistics</string>
        </property>
@@ -895,8 +895,32 @@
      </property>
     </spacer>
    </item>
+   <item>
+    <widget class="PublishButtonRibbon" name="framePublish">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PublishButtonRibbon</class>
+   <extends>QFrame</extends>
+   <header>publishbuttonribbon.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

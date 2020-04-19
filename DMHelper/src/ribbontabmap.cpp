@@ -1,9 +1,10 @@
 #include "ribbontabmap.h"
 #include "ui_ribbontabmap.h"
 #include "dmconstants.h"
+#include <QDebug>
 
 RibbonTabMap::RibbonTabMap(QWidget *parent) :
-    QFrame(parent),
+    RibbonFrame(parent),
     ui(new Ui::RibbonTabMap)
 {
     ui->setupUi(this);
@@ -57,9 +58,9 @@ RibbonTabMap::~RibbonTabMap()
     delete ui;
 }
 
-PublishButtonRibbon* RibbonTabMap::getPublishRibbon() const
+PublishButtonRibbon* RibbonTabMap::getPublishRibbon()
 {
-    return ui->publishFrame;
+    return ui->framePublish;
 }
 
 void RibbonTabMap::setZoomSelect(bool checked)
@@ -154,6 +155,87 @@ void RibbonTabMap::setPointerFile(const QString& filename)
 
     QPixmap scaledPointer = pointerImage.scaled(40, 40, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     ui->btnPointer->setIcon(QIcon(scaledPointer));
+}
+
+void RibbonTabMap::paintEvent(QPaintEvent *event)
+{
+    QFontMetrics metrics = ui->lblDistance->fontMetrics();
+    int textWidth = metrics.maxWidth();
+    QRect sizeWidth = metrics.boundingRect(ui->lblSize->text());
+    int oldWidth = metrics.width(ui->lblSize->text());
+    int adv = metrics.horizontalAdvance(ui->lblSize->text());
+
+    QFontMetrics localMetrics = fontMetrics();
+    int textWidthLocal = localMetrics.maxWidth();
+    QRect sizeWidthLocal = localMetrics.boundingRect(ui->lblSize->text());
+    int oldWidthLocal = localMetrics.width(ui->lblSize->text());
+    int advLocal = localMetrics.horizontalAdvance(ui->lblSize->text());
+
+    qDebug() << ui->lblSize->text() << ": " << sizeWidth << ", " << textWidth;
+}
+
+void RibbonTabMap::showEvent(QShowEvent *event)
+{
+    RibbonFrame::showEvent(event);
+
+    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn);
+    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut);
+    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull);
+    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect);
+    setStandardButtonSize(*ui->lblCameraCouple, *ui->btnCameraCouple);
+    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap);
+    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap);
+    setStandardButtonSize(*ui->lblCameraSelect, *ui->btnCameraSelect);
+    setStandardButtonSize(*ui->lblEditCamera, *ui->btnEditCamera);
+    setStandardButtonSize(*ui->lblDistance, *ui->btnDistance);
+
+    setStandardButtonSize(*ui->lblGrid, *ui->btnGrid);
+
+    setStandardButtonSize(*ui->lblMapEdit, *ui->btnMapEdit);
+    setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase);
+    setStandardButtonSize(*ui->lblSmooth, *ui->btnSmooth);
+
+    setStandardButtonSize(*ui->lblBrushSelect, *ui->btnBrushSelect);
+    setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW);
+    setStandardButtonSize(*ui->lblPointer, *ui->btnPointer);
+
+    setLineHeight(*ui->line_2);
+    setLineHeight(*ui->line_3);
+    setLineHeight(*ui->line_4);
+    setLineHeight(*ui->line_5);
+    setLineHeight(*ui->line_6);
+    setLineHeight(*ui->line_7);
+
+    int labelHeight = getLabelHeight(*ui->lblDistance2);
+    int iconDim = height() - labelHeight;
+    QFontMetrics metrics = ui->lblDistance->fontMetrics();
+    int textWidth = metrics.maxWidth();
+
+    // Distance cluster
+    setWidgetSize(*ui->edtDistance, (iconDim / 2) + (textWidth * 4), iconDim / 2);
+    setButtonSize(*ui->btnHeight, iconDim / 2, iconDim / 2);
+    setWidgetSize(*ui->edtHeightDiff, (textWidth * 4), iconDim / 2);
+    setWidgetSize(*ui->lblDistance2, (iconDim / 2) + (textWidth * 4), labelHeight);
+
+    // Grid size cluster
+    int labelWidth = qMax(metrics.horizontalAdvance(ui->lblGridScale->text()),
+                          qMax(metrics.horizontalAdvance(ui->lblSliderX->text()),
+                               metrics.horizontalAdvance(ui->lblSliderY->text())));
+    int sliderWidth = ui->btnGrid->width() * 3 / 2;
+    setWidgetSize(*ui->lblGridScale, labelWidth, height() / 3);
+    setWidgetSize(*ui->spinGridScale, sliderWidth, height() / 3);
+    setWidgetSize(*ui->lblSliderX, labelWidth, height() / 3);
+    setWidgetSize(*ui->sliderX, sliderWidth, height() / 3);
+    setWidgetSize(*ui->lblSliderY, labelWidth, height() / 3);
+    setWidgetSize(*ui->sliderY, sliderWidth, height() / 3);
+
+    // Brush cluster
+    setButtonSize(*ui->btnBrushCircle, iconDim / 2, iconDim / 2);
+    setButtonSize(*ui->btnBrushSquare, iconDim / 2, iconDim / 2);
+    int sizeWidth = metrics.horizontalAdvance(ui->lblSize->text());
+    setWidgetSize(*ui->lblSize, sizeWidth, iconDim / 2);
+    setWidgetSize(*ui->spinSize, sizeWidth, iconDim / 2);
+    setWidgetSize(*ui->lblBrush, qMax(iconDim, 2 * sizeWidth), labelHeight);
 }
 
 void RibbonTabMap::setEraseMode()

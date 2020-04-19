@@ -2,7 +2,7 @@
 #include "ui_ribbontabbattle.h"
 
 RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
-    QFrame(parent),
+    RibbonFrame(parent),
     ui(new Ui::RibbonTabBattle)
 {
     ui->setupUi(this);
@@ -25,6 +25,11 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
 RibbonTabBattle::~RibbonTabBattle()
 {
     delete ui;
+}
+
+PublishButtonRibbon* RibbonTabBattle::getPublishRibbon()
+{
+    return ui->framePublish;
 }
 
 void RibbonTabBattle::setShowLiving(bool checked)
@@ -50,4 +55,26 @@ void RibbonTabBattle::setShowMovement(bool checked)
 void RibbonTabBattle::setLairActions(bool checked)
 {
     ui->btnLairActions->setChecked(checked);
+}
+
+void RibbonTabBattle::showEvent(QShowEvent *event)
+{
+    RibbonFrame::showEvent(event);
+
+    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap);
+    setStandardButtonSize(*ui->lblReloadMap, *ui->btnReloadMap);
+    setLineHeight(*ui->line);
+    setStandardButtonSize(*ui->lblAddCharacter, *ui->btnAddCharacter);
+    setStandardButtonSize(*ui->lblAddMonsters, *ui->btnAddMonsters);
+    setStandardButtonSize(*ui->lblAddNPC, *ui->btnAddNPC);
+    setLineHeight(*ui->line_2);
+    setStandardButtonSize(*ui->lblShowLiving, *ui->btnShowLiving);
+    setStandardButtonSize(*ui->lblShowDead, *ui->btnShowDead);
+    setStandardButtonSize(*ui->lblShowEffects, *ui->btnShowEffects);
+    setStandardButtonSize(*ui->lblShowMovement, *ui->btnShowMovement);
+    setStandardButtonSize(*ui->lblLairActions, *ui->btnLairActions);
+    setLineHeight(*ui->line_3);
+    setStandardButtonSize(*ui->lblNext, *ui->btnNext);
+    setStandardButtonSize(*ui->lblSort, *ui->btnSort);
+    setStandardButtonSize(*ui->lblStatistics, *ui->btnStatistics);
 }

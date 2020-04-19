@@ -13,6 +13,8 @@ public:
 
     virtual void activateObject(CampaignObjectBase* object);
     virtual void deactivateObject();
+
+    virtual bool isAnimated();
 };
 
 #endif // CAMPAIGNOBJECTFRAME_H

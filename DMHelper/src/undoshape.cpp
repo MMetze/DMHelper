@@ -10,8 +10,9 @@ UndoShape::UndoShape(Map& map, const MapEditShape& mapEditShape) :
 
 void UndoShape::undo()
 {
-    if(_map.getRegisteredWindow())
-        _map.getRegisteredWindow()->undoPaint();
+    _map.undoPaint();
+    //if(_map.getRegisteredWindow())
+    //    _map.getRegisteredWindow()->undoPaint();
 }
 
 void UndoShape::redo()
@@ -21,10 +22,13 @@ void UndoShape::redo()
     {
     */
     apply(true, nullptr);
+    _map.updateFoW();
+    /*
     if(_map.getRegisteredWindow())
     {
         _map.getRegisteredWindow()->updateFoW();
     }
+    */
 }
 
 void UndoShape::apply(bool preview, QPaintDevice* target) const

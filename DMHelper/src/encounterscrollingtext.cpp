@@ -42,12 +42,12 @@ EncounterScrollingText::EncounterScrollingText(const EncounterScrollingText& obj
 void EncounterScrollingText::inputXML(const QDomElement &element, bool isImport)
 {
     setScrollSpeed(element.attribute("scrollSpeed").toDouble());
-    setImgFile(element.attribute("imageFile"));
+    setImageFile(element.attribute("imageFile"));
     setFontFamily(element.attribute("fontFamily"));
     setFontSize(element.attribute("fontSize").toInt());
     setFontBold(element.attribute("fontBold",QString::number(0)).toInt());
     setFontItalics(element.attribute("fontItalics",QString::number(0)).toInt());
-    setAlignment(element.attribute("alignment", "4").toInt());
+    setAlignment(static_cast<Qt::Alignment>(element.attribute("alignment", "4").toInt()));
     setImageWidth(element.attribute("imageWidth", "80").toInt());
 
     QString colorName = element.attribute("fontColor");
@@ -78,7 +78,7 @@ void EncounterScrollingText::widgetActivated(QWidget* widget)
 
     _widget = widget;
     connect(textEdit, SIGNAL(scrollSpeedChanged(double)), this, SLOT(setScrollSpeed(double)));
-    connect(textEdit, SIGNAL(imgFileChanged(const QString&)), this, SLOT(setImgFile(QString)));
+    connect(textEdit, SIGNAL(imgFileChanged(const QString&)), this, SLOT(setImageFile(QString)));
     connect(textEdit, SIGNAL(textChanged(const QString&)), this, SLOT(setText(QString)));
     connect(textEdit, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(setFontFamily(QString)));
     connect(textEdit, SIGNAL(fontSizeChanged(int)), this, SLOT(setFontSize(int)));
@@ -112,7 +112,7 @@ qreal EncounterScrollingText::getScrollSpeed() const
     return _scrollSpeed;
 }
 
-QString EncounterScrollingText::getImgFile() const
+QString EncounterScrollingText::getImageFile() const
 {
     return _imgFile;
 }
@@ -137,7 +137,7 @@ bool EncounterScrollingText::getFontItalics() const
     return _fontItalics;
 }
 
-int EncounterScrollingText::getAlignment() const
+Qt::Alignment EncounterScrollingText::getAlignment() const
 {
     return _alignment;
 }
@@ -157,15 +157,17 @@ void EncounterScrollingText::setScrollSpeed(double scrollSpeed)
     if(_scrollSpeed != scrollSpeed)
     {
         _scrollSpeed = scrollSpeed;
+        emit scrollSpeedChanged(_scrollSpeed);
         emit dirty();
     }
 }
 
-void EncounterScrollingText::setImgFile(const QString& imgFile)
+void EncounterScrollingText::setImageFile(const QString& imgFile)
 {
     if(_imgFile != imgFile)
     {
         _imgFile = imgFile;
+        emit imageFileChanged(_imgFile);
         emit dirty();
     }
 }
@@ -175,6 +177,7 @@ void EncounterScrollingText::setFontFamily(const QString& fontFamily)
     if(_fontFamily != fontFamily)
     {
         _fontFamily = fontFamily;
+        emit fontFamilyChanged(_fontFamily);
         emit dirty();
     }
 }
@@ -184,6 +187,7 @@ void EncounterScrollingText::setFontSize(int fontSize)
     if(_fontSize != fontSize)
     {
         _fontSize = fontSize;
+        emit fontSizeChanged(_fontSize);
         emit dirty();
     }
 }
@@ -193,6 +197,7 @@ void EncounterScrollingText::setFontBold(bool fontBold)
     if(_fontBold != fontBold)
     {
         _fontBold = fontBold;
+        emit fontBoldChanged(_fontBold);
         emit dirty();
     }
 }
@@ -202,15 +207,17 @@ void EncounterScrollingText::setFontItalics(bool fontItalics)
     if(_fontItalics != fontItalics)
     {
         _fontItalics = fontItalics;
+        emit fontItalicsChanged(_fontItalics);
         emit dirty();
     }
 }
 
-void EncounterScrollingText::setAlignment(int alignment)
+void EncounterScrollingText::setAlignment(Qt::Alignment alignment)
 {
     if(_alignment != alignment)
     {
         _alignment = alignment;
+        emit alignmentChanged(_alignment);
         emit dirty();
     }
 }
@@ -220,6 +227,7 @@ void EncounterScrollingText::setImageWidth(int imageWidth)
     if((_imageWidth != imageWidth) && (_imageWidth >= 10) && (_imageWidth <= 100))
     {
         _imageWidth = imageWidth;
+        emit imageWidthChanged(_imageWidth);
         emit dirty();
     }
 }
@@ -229,6 +237,7 @@ void EncounterScrollingText::setFontColor(QColor fontColor)
     if(_fontColor != fontColor)
     {
         _fontColor = fontColor;
+        emit fontColorChanged(_fontColor);
         emit dirty();
     }
 }
@@ -255,12 +264,12 @@ void EncounterScrollingText::internalOutputXML(QDomDocument &doc, QDomElement &e
     EncounterText::internalOutputXML(doc, element, targetDirectory, isExport);
 
     element.setAttribute( "scrollSpeed", getScrollSpeed());
-    element.setAttribute( "imageFile", targetDirectory.relativeFilePath(getImgFile()) );
+    element.setAttribute( "imageFile", targetDirectory.relativeFilePath(getImageFile()) );
     element.setAttribute( "fontFamily", getFontFamily());
     element.setAttribute( "fontSize", getFontSize());
     element.setAttribute( "fontBold", static_cast<int>(getFontBold()));
     element.setAttribute( "fontItalics", static_cast<int>(getFontItalics()));
-    element.setAttribute( "alignment", getAlignment());
+    element.setAttribute( "alignment", static_cast<int>(getAlignment()));
     element.setAttribute( "imageWidth", getImageWidth());
     element.setAttribute( "fontColor", getFontColor().name());
 }

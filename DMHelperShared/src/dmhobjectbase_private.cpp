@@ -53,12 +53,6 @@ void DMHObjectBase_Private::inputXML(const QDomElement &element, bool isImport)
     }
 }
 
-void DMHObjectBase_Private::postProcessXML(const QDomElement &element, bool isImport)
-{
-    Q_UNUSED(element);
-    Q_UNUSED(isImport);
-}
-
 QUuid DMHObjectBase_Private::getID() const
 {
     return _id;

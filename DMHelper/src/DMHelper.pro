@@ -67,15 +67,21 @@ SOURCES += main.cpp\
     placeholder.cpp \
     presentupdatedialog.cpp \
     publishbuttonframe.cpp \
+    publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
+    ribbonframe.cpp \
+    ribbonframetext.cpp \
+    ribbonmain.cpp \
     ribbontabbattle.cpp \
     ribbontabbestiary.cpp \
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
     ribbontabhelp.cpp \
     ribbontabmap.cpp \
+    ribbontabscrolling.cpp \
+    ribbontabtext.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -248,15 +254,21 @@ HEADERS  += mainwindow.h \
     placeholder.h \
     presentupdatedialog.h \
     publishbuttonframe.h \
+    publishbuttonproxy.h \
     publishbuttonribbon.h \
     publishwindow.h \
     randommarketdialog.h \
+    ribbonframe.h \
+    ribbonframetext.h \
+    ribbonmain.h \
     ribbontabbattle.h \
     ribbontabbestiary.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
     ribbontabhelp.h \
     ribbontabmap.h \
+    ribbontabscrolling.h \
+    ribbontabtext.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -399,12 +411,15 @@ FORMS    += mainwindow.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    ribbonframetext.ui \
     ribbontabbattle.ui \
     ribbontabbestiary.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
     ribbontabhelp.ui \
     ribbontabmap.ui \
+    ribbontabscrolling.ui \
+    ribbontabtext.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \
@@ -431,7 +446,6 @@ FORMS    += mainwindow.ui \
     dicerolldialogcombatants.ui \
     widgetcharacter.ui \
     widgetmonster.ui \
-    texteditformatterframe.ui \
     encountertextedit.ui \
     mapselectdialog.ui \
     countdownframe.ui \

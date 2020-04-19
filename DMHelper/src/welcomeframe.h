@@ -8,6 +8,7 @@ class WelcomeFrame;
 }
 
 class MRUHandler;
+class QLabel;
 
 class WelcomeFrame : public CampaignObjectFrame
 {
@@ -40,6 +41,7 @@ private:
     void openDoc(const QString& docName);
     void openLink(const QString& linkText);
     void setMRUTexts();
+    void setMRUText(QLabel* mruLabel, int index);
 
     Ui::WelcomeFrame *ui;
 

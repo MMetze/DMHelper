@@ -20,7 +20,7 @@ public:
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(const QDomElement &element, bool isImport);
     //virtual void resolveReferences();
 
     // Base functions to handle UI widgets
@@ -34,6 +34,7 @@ public:
     const QList<CampaignObjectBase*> getChildObjects() const;
     QList<CampaignObjectBase*> getChildObjects();
     CampaignObjectBase* getChildById(QUuid id);
+    CampaignObjectBase* searchChildrenById(QUuid id);
 
     const CampaignObjectBase* getParentByType(int parentType) const;
     CampaignObjectBase* getParentByType(int parentType);
@@ -65,6 +66,7 @@ protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) = 0;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element);
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport);
 
     QUuid parseIdString(QString idString, int* intId = nullptr, bool isLocal = false);
     QUuid findUuid(int intId) const;

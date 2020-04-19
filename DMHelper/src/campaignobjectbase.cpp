@@ -90,14 +90,21 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
     qDebug() << "[CampaignBaseObject] Post-processing object started: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
 #endif
 
-    DMHObjectBase::postProcessXML(element, isImport);
-
     QDomElement childElement = element.firstChildElement();
-    while( !childElement.isNull() )
+    while(!childElement.isNull())
     {
-        CampaignObjectBase* childObject = getChildById(childElement.attribute(QString("_baseID")));
-        if(childObject)
-            childObject->postProcessXML(childElement, isImport);
+//        if(!belongsToObject(childElement))
+        {
+            QString elTagName = childElement.tagName();
+            QString elName = childElement.attribute(QString("name"));
+            int chCount = childElement.childNodes().count();
+
+            CampaignObjectBase* childObject = searchChildrenById(QUuid(childElement.attribute(QString("_baseID"))));
+            if(childObject)
+                childObject->internalPostProcessXML(childElement, isImport);
+
+            postProcessXML(childElement, isImport);
+        }
 
         childElement = childElement.nextSiblingElement();
     }
@@ -145,6 +152,22 @@ CampaignObjectBase* CampaignObjectBase::getChildById(QUuid id)
     {
         if(childList.at(i)->getID() == id)
             return childList.at(i);
+    }
+
+    return nullptr;
+}
+
+CampaignObjectBase* CampaignObjectBase::searchChildrenById(QUuid id)
+{
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        if(childList.at(i)->getID() == id)
+            return childList.at(i);
+
+        CampaignObjectBase* childResult = childList.at(i)->searchChildrenById(id);
+        if(childResult != nullptr)
+            return childResult;
     }
 
     return nullptr;
@@ -310,6 +333,12 @@ bool CampaignObjectBase::belongsToObject(QDomElement& element)
 {
     Q_UNUSED(element);
     return false;
+}
+
+void CampaignObjectBase::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(element);
+    Q_UNUSED(isImport);
 }
 
 QUuid CampaignObjectBase::parseIdString(QString idString, int* intId, bool isLocal)

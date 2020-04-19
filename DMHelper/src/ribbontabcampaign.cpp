@@ -2,7 +2,7 @@
 #include "ui_ribbontabcampaign.h"
 
 RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
-    QFrame(parent),
+    RibbonFrame(parent),
     ui(new Ui::RibbonTabCampaign)
 {
     ui->setupUi(this);
@@ -21,8 +21,8 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
 
     connect(ui->btnUndo, SIGNAL(clicked(bool)), this, SIGNAL(undoClicked()));
     connect(ui->btnRedo, SIGNAL(clicked(bool)), this, SIGNAL(redoClicked()));
-    connect(ui->btnPlayersWindow, SIGNAL(clicked(bool)), this, SIGNAL(playersWindowClicked(bool)));
-    connect(ui->btnPreview, SIGNAL(clicked(bool)), this, SIGNAL(previewClicked()));
+    //connect(ui->btnPlayersWindow, SIGNAL(clicked(bool)), this, SIGNAL(playersWindowClicked(bool)));
+    //connect(ui->btnPreview, SIGNAL(clicked(bool)), this, SIGNAL(previewClicked()));
 
     ui->btnUndo->setEnabled(false);
     ui->btnRedo->setEnabled(false);
@@ -33,10 +33,17 @@ RibbonTabCampaign::~RibbonTabCampaign()
     delete ui;
 }
 
+PublishButtonRibbon* RibbonTabCampaign::getPublishRibbon()
+{
+    return ui->framePublish;
+}
+
+/*
 void RibbonTabCampaign::setPlayersWindow(bool checked)
 {
     ui->btnPlayersWindow->setChecked(checked);
 }
+*/
 
 void RibbonTabCampaign::setCampaignEnabled(bool enabled)
 {
@@ -59,6 +66,30 @@ void RibbonTabCampaign::setUndoEnabled(bool enabled)
     ui->btnRedo->setEnabled(enabled);
 }
 
+void RibbonTabCampaign::showEvent(QShowEvent *event)
+{
+    RibbonFrame::showEvent(event);
+
+    setStandardButtonSize(*ui->lblNewAdventure, *ui->btnNewAdventure);
+    setStandardButtonSize(*ui->lblNewCharacter, *ui->btnNewCharacter);
+    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap);
+    setStandardButtonSize(*ui->lblNewNPC, *ui->btnNewNPC);
+    setLineHeight(*ui->line_3);
+    setStandardButtonSize(*ui->lblNewText, *ui->btnNewText);
+    setStandardButtonSize(*ui->lblNewBattle, *ui->btnNewBattle);
+    setStandardButtonSize(*ui->lblNewScrollingText, *ui->btnNewScrollingText);
+    setLineHeight(*ui->line);
+    setStandardButtonSize(*ui->lblExportItem, *ui->btnExportItem);
+    setStandardButtonSize(*ui->lblImportItem, *ui->btnImportItem);
+    setStandardButtonSize(*ui->lblImportCharacter, *ui->btnImportCharacter);
+    setStandardButtonSize(*ui->lblImportNPC, *ui->btnImportNPC);
+    setLineHeight(*ui->line_2);
+    setStandardButtonSize(*ui->lblUndo, *ui->btnUndo);
+    setStandardButtonSize(*ui->lblRedo, *ui->btnRedo);
+    //setLineHeight(*ui->line_4);
+    //setStandardButtonSize(*ui->lblPlayersWindow, *ui->btnPlayersWindow);
+    //setStandardButtonSize(*ui->lblPreview, *ui->btnPreview);
+}
 
 /*
  * <widget class="QMenu" name="menu_Campaign">

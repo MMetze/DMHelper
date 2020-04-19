@@ -12,8 +12,9 @@ UndoPoint::UndoPoint(Map& map, const MapDrawPoint& mapDrawPoint) :
 
 void UndoPoint::undo()
 {
-    if(_map.getRegisteredWindow())
-        _map.getRegisteredWindow()->undoPaint();
+    _map.undoPaint();
+    //if(_map.getRegisteredWindow())
+    //    _map.getRegisteredWindow()->undoPaint();
 }
 
 void UndoPoint::redo()
@@ -23,10 +24,13 @@ void UndoPoint::redo()
     {
     */
     apply(true, nullptr);
+    _map.updateFoW();
+    /*
     if(_map.getRegisteredWindow())
     {
         _map.getRegisteredWindow()->updateFoW();
     }
+    */
 }
 
 void UndoPoint::apply( bool preview, QPaintDevice* target ) const

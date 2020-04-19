@@ -29,11 +29,6 @@ void DMHObjectBase::inputXML(const QDomElement &element, bool isImport)
     d->inputXML(element, isImport);
 }
 
-void DMHObjectBase::postProcessXML(const QDomElement &element, bool isImport)
-{
-    d->postProcessXML(element, isImport);
-}
-
 void DMHObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     d->internalOutputXML(doc, element, targetDirectory, isExport);

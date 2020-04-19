@@ -20,7 +20,6 @@ class Map;
 class QTimer;
 class VideoPlayer;
 class CameraRect;
-class UndoPath;
 
 namespace Ui {
 class BattleFrame;
@@ -126,7 +125,7 @@ signals:
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
     void publishImage(QImage img, QColor color);
-    void animationStarted(QColor color);
+    void animationStarted();
     void animateImage(QImage img);
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);

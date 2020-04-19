@@ -2,7 +2,7 @@
 #include "ui_ribbontabhelp.h"
 
 RibbonTabHelp::RibbonTabHelp(QWidget *parent) :
-    QFrame(parent),
+    RibbonFrame(parent),
     ui(new Ui::RibbonTabHelp)
 {
     ui->setupUi(this);
@@ -17,6 +17,23 @@ RibbonTabHelp::~RibbonTabHelp()
 {
     delete ui;
 }
+
+PublishButtonRibbon* RibbonTabHelp::getPublishRibbon()
+{
+    return ui->framePublish;
+}
+
+void RibbonTabHelp::showEvent(QShowEvent *event)
+{
+    RibbonFrame::showEvent(event);
+
+    setStandardButtonSize(*ui->lblUsersGuide, *ui->btnUsersGuide);
+    setStandardButtonSize(*ui->lblGettingStarted, *ui->btnGettingStarted);
+    setLineHeight(*ui->line);
+    setStandardButtonSize(*ui->lblCheckForUpdates, *ui->btnCheckForUpdates);
+    setStandardButtonSize(*ui->lblAbout, *ui->btnAbout);
+}
+
 
 /*
  *

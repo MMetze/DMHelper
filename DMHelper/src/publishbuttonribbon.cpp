@@ -5,14 +5,14 @@
 #include <QMessageBox>
 
 PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
-    QFrame(parent),
+    RibbonFrame(parent),
     ui(new Ui::PublishButtonRibbon)
 {
     ui->setupUi(this);
 
     connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SIGNAL(clicked(bool)));
     connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SLOT(handleToggle(bool)));
-    connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
+//    connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
 
     connect(ui->btnCW, SIGNAL(clicked()), ui->btnColor, SLOT(rotateCW()));
     connect(ui->btnCW, SIGNAL(clicked()), this, SIGNAL(rotateCW()));
@@ -24,6 +24,9 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
     connect(ui->btnColor, SIGNAL(rotationChanged(int)), this, SIGNAL(rotationChanged(int)));
     connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
 
+    connect(ui->btnPreview, SIGNAL(clicked()), this, SIGNAL(previewClicked()));
+    connect(ui->btnPlayersWindow, SIGNAL(clicked(bool)), this, SIGNAL(playersWindowClicked(bool)));
+
     setDefaults();
 
     setCheckable(true);
@@ -34,6 +37,7 @@ PublishButtonRibbon::~PublishButtonRibbon()
     delete ui;
 }
 
+/*
 bool PublishButtonRibbon::isChecked()
 {
     return ui->btnPublish->isChecked();
@@ -52,6 +56,12 @@ QColor PublishButtonRibbon::getColor() const
 int PublishButtonRibbon::getRotation()
 {
     return ui->btnColor->getRotation();
+}
+*/
+
+PublishButtonRibbon* PublishButtonRibbon::getPublishRibbon()
+{
+    return this;
 }
 
 void PublishButtonRibbon::setChecked(bool checked)
@@ -77,6 +87,30 @@ void PublishButtonRibbon::setColor(QColor color)
 void PublishButtonRibbon::cancelPublish()
 {
     setChecked(false);
+}
+
+void PublishButtonRibbon::setPlayersWindow(bool checked)
+{
+    ui->btnPlayersWindow->setChecked(checked);
+}
+
+void PublishButtonRibbon::showEvent(QShowEvent *event)
+{
+    RibbonFrame::showEvent(event);
+
+    setStandardButtonSize(*ui->lblPublish, *ui->btnPublish);
+    setStandardButtonSize(*ui->lblPreview, *ui->btnPreview);
+
+    setLineHeight(*ui->line_2);
+
+    int labelHeight = getLabelHeight(*ui->lblPublish);
+    int buttonSize = height() - labelHeight;
+    setButtonSize(*ui->btnPlayersWindow, buttonSize, buttonSize);
+    setLineHeight(*ui->line_3, buttonSize);
+    setButtonSize(*ui->btnCW, buttonSize, buttonSize);
+    setButtonSize(*ui->btnColor, buttonSize, buttonSize);
+    setButtonSize(*ui->btnCCW, buttonSize, buttonSize);
+    setWidgetSize(*ui->lblPlayersWindow, buttonSize * 4 + 10, labelHeight);
 }
 
 void PublishButtonRibbon::handleToggle(bool checked)

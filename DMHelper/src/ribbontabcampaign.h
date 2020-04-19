@@ -1,13 +1,13 @@
 #ifndef RIBBONTABCAMPAIGN_H
 #define RIBBONTABCAMPAIGN_H
 
-#include <QFrame>
+#include "ribbonframe.h"
 
 namespace Ui {
 class RibbonTabCampaign;
 }
 
-class RibbonTabCampaign : public QFrame
+class RibbonTabCampaign : public RibbonFrame
 {
     Q_OBJECT
 
@@ -15,8 +15,10 @@ public:
     explicit RibbonTabCampaign(QWidget *parent = nullptr);
     ~RibbonTabCampaign();
 
+    virtual PublishButtonRibbon* getPublishRibbon() override;
+
 public slots:
-    void setPlayersWindow(bool checked);
+    //void setPlayersWindow(bool checked);
     void setCampaignEnabled(bool enabled);
     void setUndoEnabled(bool enabled);
 
@@ -35,8 +37,11 @@ signals:
 
     void undoClicked();
     void redoClicked();
-    void playersWindowClicked(bool checked);
-    void previewClicked();
+    //void playersWindowClicked(bool checked);
+    //void previewClicked();
+
+protected:
+    virtual void showEvent(QShowEvent *event) override;
 
 private:
     Ui::RibbonTabCampaign *ui;

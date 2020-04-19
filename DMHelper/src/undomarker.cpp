@@ -25,11 +25,14 @@ void UndoMarker::undo()
 
 void UndoMarker::redo()
 {
+    // TODO: fix this to get markers working...
+    /*
+    delete _markerGraphicsItem;
     if(_map.getRegisteredWindow())
     {
-        delete _markerGraphicsItem;
         _markerGraphicsItem = _map.getRegisteredWindow()->addMapMarker(_marker);
     }
+    */
 }
 
 void UndoMarker::apply(bool preview, QPaintDevice* target) const

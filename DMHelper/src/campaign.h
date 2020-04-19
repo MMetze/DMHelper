@@ -117,6 +117,7 @@ protected slots:
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
     bool validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject);
     bool isVersionCompatible(int majorVersion, int minorVersion) const;

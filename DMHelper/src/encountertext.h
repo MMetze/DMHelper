@@ -27,6 +27,9 @@ public:
 public slots:
     virtual void setText(const QString& newText);
 
+signals:
+    void textChanged(const QString& text);
+
 protected slots:
     //virtual void widgetChanged() override;
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

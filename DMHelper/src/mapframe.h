@@ -47,7 +47,7 @@ signals:
     void startTrack(AudioTrack* track);
     void showPublishWindow();
 
-    void animationStarted(QColor color);
+    void animationStarted();
     void animateImage(QImage img);
 
     void zoomSelectChanged(bool enabled);

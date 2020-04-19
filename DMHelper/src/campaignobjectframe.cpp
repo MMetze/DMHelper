@@ -17,3 +17,8 @@ void CampaignObjectFrame::activateObject(CampaignObjectBase* object)
 void CampaignObjectFrame::deactivateObject()
 {
 }
+
+bool CampaignObjectFrame::isAnimated()
+{
+    return false;
+}

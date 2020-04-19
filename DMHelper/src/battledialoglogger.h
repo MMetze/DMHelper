@@ -18,7 +18,7 @@ public:
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
     virtual void inputXML(const QDomElement &element, bool isImport);
-    virtual void postProcessXML(const QDomElement &element, bool isImport);
+    //virtual void postProcessXML(const QDomElement &element, bool isImport);
 
     virtual QList<BattleDialogEvent*> getEvents() const;
 

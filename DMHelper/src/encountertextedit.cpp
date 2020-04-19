@@ -8,7 +8,8 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::EncounterTextEdit),
     _keys(),
-    _encounter(nullptr)
+    _encounter(nullptr),
+    _formatter(new TextEditFormatterFrame(this))
 {
     ui->setupUi(this);
 
@@ -18,8 +19,23 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
     connect(ui->textBrowser, SIGNAL(anchorClicked(QUrl)), this, SIGNAL(anchorClicked(QUrl)));
 
+    connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SIGNAL(fontFamilyChanged(const QString&)));
+    connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SIGNAL(fontSizeChanged(int)));
+    connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SIGNAL(fontBoldChanged(bool)));
+    connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SIGNAL(fontItalicsChanged(bool)));
+    connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SIGNAL(alignmentChanged(Qt::Alignment)));
+    connect(_formatter, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
+
+    connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(colorChanged(QColor)), this, SLOT(takeFocus()));
+
     ui->textBrowser->installEventFilter(this);
-    ui->textFormatter->setTextEdit(ui->textBrowser);
+    //ui->textFormatter->setTextEdit(ui->textBrowser);
+    _formatter->setTextEdit(ui->textBrowser);
 }
 
 EncounterTextEdit::~EncounterTextEdit()
@@ -138,6 +154,36 @@ void EncounterTextEdit::setPlainText(const QString &text)
     ui->textBrowser->setPlainText(text);
 }
 
+void EncounterTextEdit::setFont(const QString& fontFamily)
+{
+    _formatter->setFont(fontFamily);
+}
+
+void EncounterTextEdit::setFontSize(int fontSize)
+{
+    _formatter->setFontSize(fontSize);
+}
+
+void EncounterTextEdit::setBold(bool bold)
+{
+    _formatter->setBold(bold);
+}
+
+void EncounterTextEdit::setItalics(bool italics)
+{
+    _formatter->setItalics(italics);
+}
+
+void EncounterTextEdit::setColor(QColor color)
+{
+    _formatter->setColor(color);
+}
+
+void EncounterTextEdit::setAlignment(Qt::Alignment alignment)
+{
+    _formatter->setAlignment(alignment);
+}
+
 void EncounterTextEdit::storeEncounter()
 {
     if(_encounter)
@@ -150,4 +196,11 @@ void EncounterTextEdit::readEncounter()
     if(_encounter)
         setHtml(_encounter->getText());
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+}
+
+void EncounterTextEdit::takeFocus()
+{
+    update();
+    ui->textBrowser->update();
+    ui->textBrowser->setFocus();
 }

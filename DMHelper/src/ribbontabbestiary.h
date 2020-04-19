@@ -1,19 +1,21 @@
 #ifndef RIBBONTABBESTIARY_H
 #define RIBBONTABBESTIARY_H
 
-#include <QFrame>
+#include "ribbonframe.h"
 
 namespace Ui {
 class RibbonTabBestiary;
 }
 
-class RibbonTabBestiary : public QFrame
+class RibbonTabBestiary : public RibbonFrame
 {
     Q_OBJECT
 
 public:
     explicit RibbonTabBestiary(QWidget *parent = nullptr);
     ~RibbonTabBestiary();
+
+    virtual PublishButtonRibbon* getPublishRibbon() override;
 
 signals:
     void bestiaryClicked();
@@ -31,6 +33,9 @@ signals:
     void randomMarketClicked();
     void calendarClicked();
     void countdownClicked();
+
+protected:
+    virtual void showEvent(QShowEvent *event) override;
 
 private:
     Ui::RibbonTabBestiary *ui;

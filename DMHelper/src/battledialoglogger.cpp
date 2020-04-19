@@ -75,10 +75,12 @@ void BattleDialogLogger::inputXML(const QDomElement &element, bool isImport)
     }
 }
 
+/*
 void BattleDialogLogger::postProcessXML(const QDomElement &element, bool isImport)
 {
     DMHObjectBase::postProcessXML(element, isImport);
 }
+*/
 
 QList<BattleDialogEvent*> BattleDialogLogger::getEvents() const
 {

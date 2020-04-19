@@ -2,7 +2,7 @@
 #define MAPEDITFRAME_H
 
 #include "dmconstants.h"
-#include <QFrame>
+#include "ribbonframe.h"
 
 namespace Ui {
 class MapEditFrame;
@@ -10,7 +10,7 @@ class MapEditFrame;
 
 class PublishButtonRibbon;
 
-class MapEditFrame : public QFrame
+class MapEditFrame : public RibbonFrame
 {
     Q_OBJECT
 
@@ -18,7 +18,7 @@ public:
     explicit MapEditFrame(QWidget *parent = nullptr);
     ~MapEditFrame();
 
-    PublishButtonRibbon* getPublishRibbon() const;
+    PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
     void setZoomSelect(bool checked);
@@ -40,6 +40,9 @@ signals:
 
     void publishZoomChanged(bool checked);
     void publishVisibleChanged(bool checked);
+
+protected:
+    virtual void showEvent(QShowEvent *event) override;
 
 private slots:
     void setEraseMode();

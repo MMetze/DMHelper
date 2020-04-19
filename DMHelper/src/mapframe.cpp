@@ -142,10 +142,19 @@ void MapFrame::activateObject(CampaignObjectBase* object)
         return;
 
     setMap(map);
+    connect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
+    connect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
+    connect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
 }
 
 void MapFrame::deactivateObject()
 {
+    if(!_mapSource)
+        return;
+
+    disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
+    disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
+    disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
     setMap(nullptr);
 }
 
@@ -333,7 +342,8 @@ void MapFrame::publishFoWImage(bool publishing)
         if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
         {
             //emit animationStarted(ui->framePublish->getColor());
-            emit animationStarted(_color);
+            //emit animationStarted(_color);
+            emit animationStarted();
             emit showPublishWindow();
             startAudioTrack();
         }

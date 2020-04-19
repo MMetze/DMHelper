@@ -25,25 +25,36 @@ public:
     virtual int getObjectType() const override;
 
     virtual qreal getScrollSpeed() const;
-    virtual QString getImgFile() const;
+    virtual QString getImageFile() const;
     virtual QString getFontFamily() const;
     virtual int getFontSize() const;
     virtual bool getFontBold() const;
     virtual bool getFontItalics() const;
-    virtual int getAlignment() const;
+    virtual Qt::Alignment getAlignment() const;
     virtual int getImageWidth() const;
     virtual QColor getFontColor() const;
 
 public slots:
     virtual void setScrollSpeed(double scrollSpeed);
-    virtual void setImgFile(const QString& imgFile);
+    virtual void setImageFile(const QString& imgFile);
     virtual void setFontFamily(const QString& fontFamily);
     virtual void setFontSize(int fontSize);
     virtual void setFontBold(bool fontBold);
     virtual void setFontItalics(bool fontItalics);
-    virtual void setAlignment(int alignment);
+    virtual void setAlignment(Qt::Alignment alignment);
     virtual void setImageWidth(int imageWidth);
     virtual void setFontColor(QColor fontColor);
+
+signals:
+    void scrollSpeedChanged(double scrollSpeed);
+    void imageFileChanged(const QString& imgFile);
+    void fontFamilyChanged(const QString& fontFamily);
+    void fontSizeChanged(int fontSize);
+    void fontBoldChanged(bool fontBold);
+    void fontItalicsChanged(bool fontItalics);
+    void alignmentChanged(Qt::Alignment alignment);
+    void imageWidthChanged(int imageWidth);
+    void fontColorChanged(QColor fontColor);
 
 protected slots:
     //virtual void widgetChanged() override;
@@ -58,7 +69,7 @@ protected:
     int _fontSize;
     bool _fontBold;
     bool _fontItalics;
-    int _alignment;
+    Qt::Alignment _alignment;
     int _imageWidth;
     QColor _fontColor;
 };

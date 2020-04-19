@@ -20,7 +20,6 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
     //virtual void resolveReferences() override;
 
     // Base functions to handle UI widgets
@@ -56,13 +55,13 @@ public:
 public slots:
 //    virtual void setText(const QString& newText);
 
-protected slots:
+protected:
 //    virtual void widgetChanged() override;
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
-protected:
     void inputXMLBattle(const QDomElement &element, bool isImport);
     BattleDialogModel* createNewBattle(QPointF combatantPos);
 

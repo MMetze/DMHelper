@@ -33,7 +33,7 @@
     <number>3</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>3</number>
    </property>
    <property name="topMargin">
     <number>0</number>
@@ -88,7 +88,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_22">
+      <widget class="QLabel" name="lblZoomIn">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -146,7 +146,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_26">
+      <widget class="QLabel" name="lblZoomOut">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -204,7 +204,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_27">
+      <widget class="QLabel" name="lblZoomOne">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -265,7 +265,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_25">
+      <widget class="QLabel" name="lblZoomFull">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -326,7 +326,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_23">
+      <widget class="QLabel" name="lblZoomSelect">
        <property name="maximumSize">
         <size>
          <width>58</width>
@@ -409,7 +409,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_19">
+      <widget class="QLabel" name="lblFoWErase">
        <property name="maximumSize">
         <size>
          <width>57</width>
@@ -479,7 +479,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_21">
+      <widget class="QLabel" name="lblSmooth">
        <property name="maximumSize">
         <size>
          <width>50</width>
@@ -658,7 +658,7 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_6">
        <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="lblSize">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -678,7 +678,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Size:</string>
+          <string>Size</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -722,7 +722,7 @@
       </layout>
      </item>
      <item>
-      <widget class="QLabel" name="label_20">
+      <widget class="QLabel" name="lblBrush">
        <property name="text">
         <string>Brush</string>
        </property>
@@ -863,7 +863,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_18">
+      <widget class="QLabel" name="lblPublishVisible">
        <property name="maximumSize">
         <size>
          <width>65</width>
@@ -927,7 +927,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_28">
+      <widget class="QLabel" name="lblPublishZoom">
        <property name="maximumSize">
         <size>
          <width>62</width>
@@ -945,47 +945,6 @@
     </layout>
    </item>
    <item>
-    <widget class="Line" name="line_7">
-     <property name="minimumSize">
-      <size>
-       <width>10</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>10</width>
-       <height>55</height>
-      </size>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="PublishButtonRibbon" name="publishFrame">
-     <property name="minimumSize">
-      <size>
-       <width>178</width>
-       <height>67</height>
-      </size>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>178</width>
-       <height>67</height>
-      </size>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -997,6 +956,22 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <widget class="PublishButtonRibbon" name="framePublish">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

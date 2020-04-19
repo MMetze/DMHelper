@@ -1,7 +1,7 @@
 #ifndef RIBBONTABMAP_H
 #define RIBBONTABMAP_H
 
-#include <QFrame>
+#include "ribbonframe.h"
 
 namespace Ui {
 class RibbonTabMap;
@@ -9,7 +9,7 @@ class RibbonTabMap;
 
 class PublishButtonRibbon;
 
-class RibbonTabMap : public QFrame
+class RibbonTabMap : public RibbonFrame
 {
     Q_OBJECT
 
@@ -17,7 +17,7 @@ public:
     explicit RibbonTabMap(QWidget *parent = nullptr);
     ~RibbonTabMap();
 
-    PublishButtonRibbon* getPublishRibbon() const;
+    virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
     void setZoomSelect(bool checked);
@@ -72,6 +72,10 @@ signals:
     void fillFoWClicked();
 
     void pointerClicked(bool checked);
+
+protected:
+    virtual void paintEvent(QPaintEvent *event) override;
+    virtual void showEvent(QShowEvent *event) override;
 
 private slots:
     void setEraseMode();

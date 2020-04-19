@@ -224,6 +224,9 @@
         <file>data/icon_dmscreen.png</file>
         <file>data/icon_soundboard.png</file>
         <file>data/icon_publishon.png</file>
+        <file>data/icon_background.png</file>
+        <file>data/icon_bold.png</file>
+        <file>data/icon_italics.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

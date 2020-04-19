@@ -44,6 +44,8 @@
  * Define location for importing things, especially dnd beyond characters
  * Widget activating...
  * define position to add a track (audiotrackedit.cpp line 47)
+ * add/remove objects
+ * open/close campaigns crashes
  *
  * Mainwindow: updatecampaigntree, contextmenu, handletreeitemchanged, handletreeitemselected, handletreestatechanged
  *
@@ -130,33 +132,8 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
 
 void Campaign::postProcessXML(const QDomElement &element, bool isImport)
 {
-    Q_UNUSED(isImport);
-
-    // Compatibility mode for global expansion flags
-    if(element.hasAttribute("partyExpanded"))
-    {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Party", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("partyExpanded",QString::number(0)).toInt()));
-    }
-    if(element.hasAttribute("adventuresExpanded"))
-    {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Adventures", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded",QString::number(0)).toInt()));
-    }
-    if(element.hasAttribute("worldSettingsExpanded"))
-    {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Settings", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded",QString::number(0)).toInt()));
-    }
-    if(element.hasAttribute("worldNPCsExpanded"))
-    {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Npcs", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded",QString::number(0)).toInt()));
-    }
+    internalPostProcessXML(element, isImport);
+    CampaignObjectBase::postProcessXML(element, isImport);
 }
 
 int Campaign::getObjectType() const
@@ -966,6 +943,39 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
     element.setAttribute("calendar", BasicDateServer::Instance() ? BasicDateServer::Instance()->getActiveCalendarName() : QString());
     element.setAttribute("date", getDate().toStringDDMMYYYY());
     element.setAttribute("time", getTime().msecsSinceStartOfDay());
+}
+
+void Campaign::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    // Compatibility mode for global expansion flags
+    if(element.hasAttribute("partyExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Party", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("partyExpanded",QString::number(0)).toInt()));
+    }
+    if(element.hasAttribute("adventuresExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Adventures", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded",QString::number(0)).toInt()));
+    }
+    if(element.hasAttribute("worldSettingsExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Settings", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded",QString::number(0)).toInt()));
+    }
+    if(element.hasAttribute("worldNPCsExpanded"))
+    {
+        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Npcs", Qt::FindDirectChildrenOnly);
+        if(partyChild)
+            partyChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded",QString::number(0)).toInt()));
+    }
+
+    CampaignObjectBase::internalPostProcessXML(element, isImport);
 }
 
 bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject)

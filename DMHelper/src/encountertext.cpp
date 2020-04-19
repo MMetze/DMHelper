@@ -98,13 +98,14 @@ void EncounterText::setText(const QString& newText)
         qDebug() << "[EncounterText] ERROR: Attempting to set encounter text to nothing! This is assumed to be an error and needs to be further investigated!";
     }
 
-    QTextDocument doc;
-    doc.setHtml(newText);
-    // qDebug() << "[EncounterText] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
-
     if(_text != newText)
     {
         _text = newText;
+        QTextDocument doc;
+        doc.setHtml(newText);
+        // qDebug() << "[EncounterText] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
+
+        emit textChanged(_text);
         emit dirty();
     }
 }

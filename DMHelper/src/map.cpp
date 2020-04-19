@@ -5,7 +5,7 @@
 #include "undopoint.h"
 #include "undoshape.h"
 #include "undomarker.h"
-#include "mapframe.h"
+//#include "mapframe.h"
 #include "dmconstants.h"
 #include "campaign.h"
 #include "audiotrack.h"
@@ -22,7 +22,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     //_name(mapName),
     _filename(fileName),
     _undoStack(nullptr),
-    _mapFrame(nullptr),
+//    _mapFrame(nullptr),
     _markerList(),
     _audioTrackId(),
     _playAudio(false),
@@ -178,13 +178,6 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
-void Map::postProcessXML(const QDomElement &element, bool isImport)
-{
-    _audioTrackId = parseIdString(element.attribute("audiotrack"));
-    _playAudio = static_cast<bool>(element.attribute("playaudio",QString::number(1)).toInt());
-    CampaignObjectBase::postProcessXML(element, isImport);
-}
-
 /*
 QString Map::getName() const
 {
@@ -299,10 +292,12 @@ void Map::applyPaintTo(QImage* target, QColor clearColor, int index)
     }
 }
 
+/*
 MapFrame* Map::getRegisteredWindow() const
 {
     return _mapFrame;
 }
+*/
 
 MapMarker* Map::getMapMarker(int id)
 {
@@ -720,6 +715,16 @@ void Map::uninitialize()
     _initialized = false;
 }
 
+void Map::undoPaint()
+{
+    emit executeUndo();
+}
+
+void Map::updateFoW()
+{
+    emit requestFoWUpdate();
+}
+
 QDomElement Map::createOutputXML(QDomDocument &doc)
 {
    return doc.createElement("map");
@@ -768,3 +773,11 @@ bool Map::belongsToObject(QDomElement& element)
     else
         return CampaignObjectBase::belongsToObject(element);
 }
+
+void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    _audioTrackId = parseIdString(element.attribute("audiotrack"));
+    _playAudio = static_cast<bool>(element.attribute("playaudio",QString::number(1)).toInt());
+    CampaignObjectBase::internalPostProcessXML(element, isImport);
+}
+

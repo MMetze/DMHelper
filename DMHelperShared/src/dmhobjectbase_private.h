@@ -24,7 +24,6 @@ public:
 
     QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
     void inputXML(const QDomElement &element, bool isImport);
-    void postProcessXML(const QDomElement &element, bool isImport);
 
     QUuid getID() const;
     int getIntID() const;
