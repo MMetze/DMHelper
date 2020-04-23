@@ -114,17 +114,21 @@ public slots:
     void setPointerOn(bool enabled);
     void showStatistics();
 
-    // Publish slots
-    void rotateCCW();
-    void rotateCW();
-    void togglePublishing(bool publishing);
-    void setBackgroundColor(QColor color);
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+    virtual void setBackgroundColor(QColor color) override;
+
+    //void rotateCCW();
+    //void rotateCW();
+    //void togglePublishing(bool publishing);
+    //void setBackgroundColor(QColor color);
 
 signals:
     //void battleComplete();
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
-    void publishImage(QImage img, QColor color);
+    //void publishImage(QImage img, QColor color);
     void animationStarted();
     void animateImage(QImage img);
     void showPublishWindow();
@@ -147,9 +151,8 @@ signals:
     void pointerToggled(bool enabled);
 
     // Publish signals
-    void publishCancelled();
-    void setPublishEnabled(bool enabled);
-    void setPublishColor(QColor color);
+    //void publishCancelled();
+    //void setPublishColor(QColor color);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * e);
@@ -185,7 +188,7 @@ private slots:
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
     void publishImage();
-    void executePublishImage();
+    //void executePublishImage();
     void executeAnimateImage();
     void updateHighlights();
     void countdownTimerExpired();
@@ -251,6 +254,7 @@ private:
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
 
     void getImageForPublishing(QImage& imageForPublishing);
+    void updatePublishEnable();
     void createVideoPlayer(bool dmPlayer);
     void resetVideoSizes();
 
@@ -325,7 +329,6 @@ private:
     //bool _lairActions;
 
     bool _publishing;
-    bool _publishingEnabled;
     QTimer* _publishTimer;
 
     QPixmap _prescaledBackground;

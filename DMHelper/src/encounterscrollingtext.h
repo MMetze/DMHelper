@@ -24,7 +24,7 @@ public:
 
     virtual int getObjectType() const override;
 
-    virtual qreal getScrollSpeed() const;
+    virtual int getScrollSpeed() const;
     virtual QString getImageFile() const;
     virtual QString getFontFamily() const;
     virtual int getFontSize() const;
@@ -35,7 +35,7 @@ public:
     virtual QColor getFontColor() const;
 
 public slots:
-    virtual void setScrollSpeed(double scrollSpeed);
+    virtual void setScrollSpeed(int scrollSpeed);
     virtual void setImageFile(const QString& imgFile);
     virtual void setFontFamily(const QString& fontFamily);
     virtual void setFontSize(int fontSize);
@@ -46,7 +46,7 @@ public slots:
     virtual void setFontColor(QColor fontColor);
 
 signals:
-    void scrollSpeedChanged(double scrollSpeed);
+    void scrollSpeedChanged(int scrollSpeed);
     void imageFileChanged(const QString& imgFile);
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
@@ -63,7 +63,7 @@ protected slots:
 
 protected:
 
-    qreal _scrollSpeed;
+    int _scrollSpeed;
     QString _imgFile;
     QString _fontFamily;
     int _fontSize;

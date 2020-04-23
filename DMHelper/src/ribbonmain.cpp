@@ -1,5 +1,6 @@
 #include "ribbonmain.h"
 #include "ribbonframe.h"
+#include "publishbuttonribbon.h"
 #include <QDebug>
 
 RibbonMain::RibbonMain(QWidget *parent) :
@@ -20,11 +21,23 @@ PublishButtonProxy* RibbonMain::getPublishRibbon()
 
 void RibbonMain::enableTab(RibbonFrame* page)
 {
+    if(!page)
+        return;
+
     if(indexOf(page) == -1)
     {
-        addTab(page, page->windowTitle());
-        if(page)
-            _publishProxy.addPublishButton(page->getPublishRibbon());
+        int index = addTab(page, page->windowTitle());
+        if(index > 1)
+        {
+            // Set the publishbutton of the new page to match the state of the Campaign Tab publish button
+            RibbonFrame* campaignFrame = dynamic_cast<RibbonFrame*>(widget(1));
+            if(campaignFrame)
+            {
+                page->getPublishRibbon()->setColor(campaignFrame->getPublishRibbon()->getColor());
+                page->getPublishRibbon()->setRotation(campaignFrame->getPublishRibbon()->getRotation());
+            }
+        }
+        _publishProxy.addPublishButton(page->getPublishRibbon());
     }
 
     setCurrentWidget(page);
@@ -32,15 +45,15 @@ void RibbonMain::enableTab(RibbonFrame* page)
 
 void RibbonMain::disableTab(RibbonFrame* page)
 {
+    if(!page)
+        return;
+
     int pageIndex = indexOf(page);
     if(pageIndex != -1)
     {
         removeTab(pageIndex);
-        if(page)
-        {
-            page->hide();
-            _publishProxy.removePublishButton(page->getPublishRibbon());
-        }
+        page->hide();
+        _publishProxy.removePublishButton(page->getPublishRibbon());
     }
 }
 

@@ -134,6 +134,32 @@ void Campaign::postProcessXML(const QDomElement &element, bool isImport)
 {
     internalPostProcessXML(element, isImport);
     CampaignObjectBase::postProcessXML(element, isImport);
+
+    // DEPRECATED v2.0
+    // This is compatibility mode only to avoid an "unknown" node when importing an old-style campaign
+    EncounterText* notesObject = dynamic_cast<EncounterText*>(searchDirectChildrenByName("Notes"));
+    if(!notesObject)
+        return;
+
+    QDomElement notesElement = element.firstChildElement("notes");
+    if(notesElement.isNull())
+        return;
+
+    QDomElement childElement = notesElement.firstChildElement("encounter");
+    if((childElement.isNull()) || (childElement.attribute("name") != QString("")))
+        return;
+
+    QDomNode childNode = childElement.firstChild();
+    while(!childNode.isNull())
+    {
+        if(childNode.isCDATASection())
+        {
+            QDomCDATASection cdata = childNode.toCDATASection();
+            notesObject->setText(cdata.data());
+            return;
+        }
+        childNode = childNode.nextSibling();
+    }
 }
 
 int Campaign::getObjectType() const

@@ -95,7 +95,8 @@ bool UpdateChecker::runUpdateCheck()
     _manager = new QNetworkAccessManager(this);
     connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
 
-    QUrl serviceUrl = QUrl("https://www.dm-helper.net/check_version/check_version.php");
+    //QUrl serviceUrl = QUrl("https://www.dm-helper.net/check_version/check_version.php");
+    QUrl serviceUrl = QUrl("https://update.dm-helper.com/");
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 

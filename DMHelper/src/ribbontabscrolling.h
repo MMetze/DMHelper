@@ -19,7 +19,7 @@ public:
 
 public slots:
     // Animation
-    void setSpeed(double speed);
+    void setSpeed(int speed);
     void setWidth(int width);
 
     // Text Frame
@@ -33,8 +33,9 @@ public slots:
 signals:
     // Animation
     void backgroundClicked();
-    void speedChanged(double speed);
+    void speedChanged(int speed);
     void widthChanged(int width);
+    void rewindClicked();
 
     // Text Frame
     void colorChanged(QColor color);

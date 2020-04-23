@@ -388,7 +388,9 @@ MainWindow::MainWindow(QWidget *parent) :
     readBestiary();
     qDebug() << "[MainWindow] Bestiary Loaded";
 
+    connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), this, SLOT(showPublishWindow()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage)), pubWindow, SLOT(setImage(QImage)));
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), pubWindow, SLOT(setImage(QImage, QColor)));
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), pubWindow, SLOT(setImageNoScale(QImage)));
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), this, SLOT(handleAnimationPreview(QImage)));
@@ -434,8 +436,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(pubWindow, SIGNAL(frameResized(QSize)), battleFrame, SLOT(setTargetSize(QSize)));
     connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
     connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
-    connect(battleFrame, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+//    connect(battleFrame, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(battleFrame, SIGNAL(animateImage(QImage)), pubWindow, SLOT(setBackgroundColor()));
     connect(battleFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
     connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
@@ -490,15 +493,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabMap, SIGNAL(pointerClicked(bool)), battleFrame, SLOT(setPointerOn(bool)));
     connect(battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabMap, SLOT(setPointerOn(bool)));
 
-    PublishButtonRibbon* publishButtonRibbon = _ribbonTabMap->getPublishRibbon();
-    connect(publishButtonRibbon, SIGNAL(rotateCW()), battleFrame, SLOT(rotateCW()));
-    connect(publishButtonRibbon, SIGNAL(rotateCCW()), battleFrame, SLOT(rotateCCW()));
-    connect(publishButtonRibbon, SIGNAL(colorChanged(QColor)), battleFrame, SLOT(setBackgroundColor(QColor)));
+    //PublishButtonRibbon* publishButtonRibbon = _ribbonTabMap->getPublishRibbon();
+    //connect(publishButtonRibbon, SIGNAL(rotateCW()), battleFrame, SLOT(rotateCW()));
+    //connect(publishButtonRibbon, SIGNAL(rotateCCW()), battleFrame, SLOT(rotateCCW()));
+    //connect(publishButtonRibbon, SIGNAL(rotateChanged(int)), battleFrame, SLOT(setRotation(int)));
+    //connect(publishButtonRibbon, SIGNAL(colorChanged(QColor)), battleFrame, SLOT(setBackgroundColor(QColor)));
     //connect(publishButtonRibbon, SIGNAL(toggled(bool)), battleFrame, SLOT(togglePublishing(bool)));
-    connect(publishButtonRibbon, SIGNAL(clicked(bool)), battleFrame, SLOT(togglePublishing(bool)));
-    connect(battleFrame, SIGNAL(publishCancelled()), publishButtonRibbon, SLOT(cancelPublish()));
-    connect(battleFrame, SIGNAL(setPublishEnabled(bool)), publishButtonRibbon, SLOT(setEnabled(bool)));
-    connect(battleFrame, SIGNAL(setPublishColor(QColor)), publishButtonRibbon, SLOT(setColor(QColor)));
+    //connect(publishButtonRibbon, SIGNAL(clicked(bool)), battleFrame, SLOT(publishClicked(bool)));
+    //connect(battleFrame, SIGNAL(publishCancelled()), publishButtonRibbon, SLOT(cancelPublish()));
+    //connect(battleFrame, SIGNAL(setPublishEnabled(bool)), publishButtonRibbon, SLOT(setEnabled(bool)));
+    //connect(battleFrame, SIGNAL(setPublishColor(QColor)), publishButtonRibbon, SLOT(setColor(QColor))); backgroundColorChanged
 
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
@@ -516,13 +520,13 @@ MainWindow::MainWindow(QWidget *parent) :
     CharacterFrame* charFrame = new CharacterFrame;
     ui->stackedWidgetEncounter->addWidget(charFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(charFrame, SIGNAL(publishCharacterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
 
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addWidget(mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(mapFrame,SIGNAL(publishImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
+    connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
     connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     //connect(mapFrame, SIGNAL(animationStarted(QColor)), this, SLOT(handleAnimationStarted(QColor)));
     connect(mapFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
@@ -546,12 +550,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabMiniMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
     connect(_ribbonTabMiniMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
 
-    publishButtonRibbon = _ribbonTabMiniMap->getPublishRibbon();
-    connect(publishButtonRibbon, SIGNAL(rotationChanged(int)), mapFrame, SLOT(setRotation(int)));
-    connect(publishButtonRibbon, SIGNAL(colorChanged(QColor)), mapFrame, SLOT(setColor(QColor)));
-    connect(publishButtonRibbon, SIGNAL(clicked(bool)), mapFrame, SLOT(publishFoWImage(bool)));
-    connect(mapFrame, SIGNAL(publishCancelled()), publishButtonRibbon, SLOT(cancelPublish()));
-    connect(mapFrame, SIGNAL(publishCheckable(bool)), publishButtonRibbon, SLOT(setCheckable(bool)));
+    //publishButtonRibbon = _ribbonTabMiniMap->getPublishRibbon();
+    //connect(publishButtonRibbon, SIGNAL(rotationChanged(int)), mapFrame, SLOT(setRotation(int)));
+    //connect(publishButtonRibbon, SIGNAL(colorChanged(QColor)), mapFrame, SLOT(setColor(QColor)));
+    //connect(publishButtonRibbon, SIGNAL(clicked(bool)), mapFrame, SLOT(publishFoWImage(bool)));
+    //connect(mapFrame, SIGNAL(publishCancelled()), publishButtonRibbon, SLOT(cancelPublish()));
+    //connect(mapFrame, SIGNAL(publishCheckable(bool)), publishButtonRibbon, SLOT(setCheckable(bool)));
     //mapFrame->setRotation(publishButtonRibbon->getRotation());
     //mapFrame->setColor(publishButtonRibbon->getColor());
 
@@ -566,9 +570,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_scrollingTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), _scrollingTextEdit, SLOT(targetResized(QSize)));
     connect(_ribbonTabScrolling, SIGNAL(backgroundClicked()), _scrollingTextEdit, SLOT(browseImageFile()));
-    connect(_ribbonTabScrolling, SIGNAL(speedChanged(double)), _scrollingTextEdit, SLOT(setScrollSpeed(double)));
+    connect(_ribbonTabScrolling, SIGNAL(speedChanged(int)), _scrollingTextEdit, SLOT(setScrollSpeed(int)));
     connect(_ribbonTabScrolling, SIGNAL(widthChanged(int)), _scrollingTextEdit, SLOT(setImageWidth(int)));
-    connect(_scrollingTextEdit, SIGNAL(scrollSpeedChanged(double)), _ribbonTabScrolling, SLOT(setSpeed(double)));
+    connect(_ribbonTabScrolling, SIGNAL(rewindClicked()), _scrollingTextEdit, SLOT(rewind()));
+    connect(_scrollingTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabScrolling, SLOT(setSpeed(int)));
     connect(_scrollingTextEdit, SIGNAL(imageWidthChanged(int)), _ribbonTabScrolling, SLOT(setWidth(int)));
     connect(_ribbonTabScrolling, SIGNAL(colorChanged(QColor)), _scrollingTextEdit, SLOT(setColor(QColor)));
     connect(_ribbonTabScrolling, SIGNAL(fontFamilyChanged(const QString&)), _scrollingTextEdit, SLOT(setFontFamily(const QString&)));
@@ -600,7 +605,6 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(_ribbonTabHelp, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     connect(_ribbonTabFile, SIGNAL(userGuideClicked()), welcomeFrame, SLOT(openUsersGuide()));
     connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
-
     ui->stackedWidgetEncounter->addWidget(welcomeFrame);
     qDebug() << "[MainWindow]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
@@ -608,8 +612,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Ensure publishing a single image stops any running animations
     //connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), battleFrame, SLOT(cancelPublish()));
-    connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), mapFrame, SLOT(cancelPublish()));
-    connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _scrollingTextEdit, SLOT(stopAnimation()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
+    //connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _scrollingTextEdit, SLOT(stopAnimation()));
 
     // Load the quick reference tabs
 #ifndef Q_OS_MAC
@@ -1682,12 +1686,15 @@ void MainWindow::deleteCampaign()
         treeModel->clear();
     }
 
-    Campaign* oldCampaign = campaign;
-    campaign = nullptr;
-    emit campaignLoaded(campaign);
+    if(campaign)
+    {
+        Campaign* oldCampaign = campaign;
+        campaign = nullptr;
+        emit campaignLoaded(campaign);
 
-    // Clear the campaign itself
-    delete oldCampaign;
+        // Clear the campaign itself
+        delete oldCampaign;
+    }
 
     // Ensure the file name is removed
     campaignFileName.clear();
@@ -2166,6 +2173,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     if(campaign)
     {
+        ui->treeView->setCurrentIndex(treeModel->index(0,0));
         connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
         connect(campaign,SIGNAL(changed()),this,SLOT(updateCampaignTree()));
         setWindowTitle(QString("DM Helper - ") + campaign->getName() + QString("[*]"));
@@ -2586,6 +2594,10 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
 
     qDebug() << "[MainWindow] Tree Item Selected. Current: " << current << " Previous: " << previous;
 
+    // Deactivate the currently selected object
+    deactivateObject();
+
+    // Look for the next object to activate it
     QStandardItem* item = treeModel->itemFromIndex(current);
     if(!item)
         return;
@@ -2851,6 +2863,8 @@ void MainWindow::handleAnimationStarted(QColor color)
 
 void MainWindow::handleAnimationStarted()
 {
+    if(pubWindow)
+        pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
 }
 
@@ -3153,13 +3167,6 @@ void MainWindow::activateObject(CampaignObjectBase* object)
     if(!object)
         return;
 
-    CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
-    if(objectFrame)
-    {
-        disconnect(_ribbon->getPublishRibbon(), nullptr, objectFrame, nullptr);
-        objectFrame->deactivateObject();
-    }
-
     int selectedWidget = getWidgetFromType(object->getObjectType());
 
     qDebug() << "[MainWindow] Activating stacked widget from " << ui->stackedWidgetEncounter->currentIndex() << " to " << selectedWidget << " for type " << object->getObjectType();
@@ -3167,13 +3174,41 @@ void MainWindow::activateObject(CampaignObjectBase* object)
     activateWidget(selectedWidget);
     setRibbonToType(object->getObjectType());
 
-    objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
+    CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
     if(objectFrame)
     {
+        connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
+        connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), objectFrame, SLOT(setRotation(int)));
+        connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(QColor)), objectFrame, SLOT(setBackgroundColor(QColor)));
+
+        connect(objectFrame, SIGNAL(setPublishEnabled(bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool)));
+        connect(objectFrame, SIGNAL(checkedChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setChecked(bool)));
+        connect(objectFrame, SIGNAL(checkableChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setCheckable(bool)));
+        connect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
+        connect(objectFrame, SIGNAL(backgroundColorChanged(QColor)), _ribbon->getPublishRibbon(), SLOT(setColor(QColor)));
+
         objectFrame->activateObject(object);
-        if(_ribbon)
-            _ribbon->getPublishRibbon()->setCheckable(objectFrame->isAnimated());
+        if(_ribbon && _ribbon->getPublishRibbon())
+        {
+            //_ribbon->getPublishRibbon()->setCheckable(objectFrame->isAnimated());
+            objectFrame->setRotation(_ribbon->getPublishRibbon()->getRotation());
+        }
     }
+}
+
+void MainWindow::deactivateObject()
+{
+    if(_ribbon->getPublishRibbon())
+        _ribbon->getPublishRibbon()->cancelPublish();
+
+    CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
+    if(objectFrame)
+    {
+        disconnect(_ribbon->getPublishRibbon(), nullptr, objectFrame, nullptr);
+        disconnect(objectFrame, nullptr, _ribbon->getPublishRibbon(), nullptr);
+        objectFrame->deactivateObject();
+    }
+
 }
 
 void MainWindow::activateWidget(int widgetId)
@@ -3238,8 +3273,8 @@ void MainWindow::setRibbonToType(int objectType)
         case DMHelper::CampaignType_ScrollingText:
             _ribbon->enableTab(_ribbonTabScrolling);
             //_ribbon->enableTab(_ribbonTabText);
-            connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), _scrollingTextEdit, SLOT(runAnimation(bool)));
-            connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), _scrollingTextEdit, SLOT(rotatePublish(int)));
+            connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), _scrollingTextEdit, SLOT(publishClicked(bool)));
+            connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), _scrollingTextEdit, SLOT(setRotation(int)));
             break;
         case DMHelper::CampaignType_Campaign:
         case DMHelper::CampaignType_Party:

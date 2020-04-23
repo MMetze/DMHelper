@@ -104,6 +104,7 @@ public slots:
 
 signals:
     void campaignLoaded(Campaign* campaign);
+    void dispatchPublishImage(QImage img);
     void dispatchPublishImage(QImage img, QColor color);
     void dispatchAnimateImage(QImage img);
 
@@ -187,6 +188,7 @@ protected slots:
 
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);
+    void deactivateObject();
     void activateWidget(int widgetId);
     int getWidgetFromType(int objectType);
     void setRibbonToType(int objectType);

@@ -139,6 +139,43 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
     element.appendChild(cdata);
 }
 
+bool EncounterText::belongsToObject(QDomElement& element)
+{
+    if((getName() == "Notes") &&
+       (element.tagName() == "encounter") &&
+       (element.attribute(QString("name")) == QString("")))
+    {
+        // DEPRECATED v2.0
+        // This is compatibility mode only to avoid an "unknown" node when importing an old-style campaign
+        return true;
+    }
+    else
+    {
+        return CampaignObjectBase::belongsToObject(element);
+    }
+}
+
+void EncounterText::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    // DEPRECATED v2.0
+    // This is compatibility mode only to avoid an "unknown" node when importing an old-style campaign
+    if(getName() != QString("Notes"))
+        return;
+
+    CampaignObjectBase* parentObject = qobject_cast<CampaignObjectBase*>(parent());
+    if((!parentObject) || (parentObject->getObjectType() != DMHelper::CampaignType_Campaign))
+        return;
+
+    QDomElement childElement = element.firstChildElement("encounter");
+    if((childElement.isNull()) || (childElement.attribute("name") != QString("")))
+        return;
+
+    // Grab the text from the child node for this node
+    extractTextNode(childElement, isImport);
+
+    CampaignObjectBase::internalPostProcessXML(element, isImport);
+}
+
 void EncounterText::extractTextNode(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);

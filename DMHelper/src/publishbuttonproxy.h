@@ -15,7 +15,10 @@ public:
     void addPublishButton(PublishButtonRibbon* publishButton);
     void removePublishButton(PublishButtonRibbon* publishButton);
 
+    int getRotation() const;
+
 public slots:
+    void setPublishEnabled(bool enabled);
     void setChecked(bool checked);
     void setCheckable(bool checkable);
     void setRotation(int rotation);
@@ -33,6 +36,7 @@ signals:
     void previewClicked();
     void playersWindowClicked(bool checked);
 
+    void sharePublishEnabled(bool enabled);
     void shareSetChecked(bool checked);
     void shareSetCheckable(bool checkable);
     void shareSetRotation(int rotation);
@@ -40,6 +44,11 @@ signals:
     void shareCancelPublish();
     void shareSetPlayersWindow(bool checked);
 
+protected slots:
+    void internalSetRotation(int rotation);
+
+protected:
+    int _rotation;
 };
 
 #endif // PUBLISHBUTTONPROXY_H

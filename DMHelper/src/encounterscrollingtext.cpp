@@ -10,7 +10,7 @@
 
 EncounterScrollingText::EncounterScrollingText(const QString& encounterName, QObject *parent) :
     EncounterText(encounterName, parent),
-    _scrollSpeed(15.0),
+    _scrollSpeed(25),
     _imgFile(),
     _fontFamily(QGuiApplication::font().family()),
     _fontSize(12),
@@ -41,7 +41,8 @@ EncounterScrollingText::EncounterScrollingText(const EncounterScrollingText& obj
 
 void EncounterScrollingText::inputXML(const QDomElement &element, bool isImport)
 {
-    setScrollSpeed(element.attribute("scrollSpeed").toDouble());
+    int scrollSpeed = element.attribute("scrollSpeed").toInt();
+    setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);
     setImageFile(element.attribute("imageFile"));
     setFontFamily(element.attribute("fontFamily"));
     setFontSize(element.attribute("fontSize").toInt());
@@ -107,7 +108,7 @@ int EncounterScrollingText::getObjectType() const
     return DMHelper::CampaignType_ScrollingText;
 }
 
-qreal EncounterScrollingText::getScrollSpeed() const
+int EncounterScrollingText::getScrollSpeed() const
 {
     return _scrollSpeed;
 }
@@ -152,7 +153,7 @@ QColor EncounterScrollingText::getFontColor() const
     return _fontColor;
 }
 
-void EncounterScrollingText::setScrollSpeed(double scrollSpeed)
+void EncounterScrollingText::setScrollSpeed(int scrollSpeed)
 {
     if(_scrollSpeed != scrollSpeed)
     {

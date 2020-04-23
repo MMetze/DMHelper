@@ -40,7 +40,7 @@ public:
     QAction* getRedoAction(QObject* parent);
 
 signals:
-    void publishImage(QImage img, QColor color);
+    void publishImage(QImage image);
     void openPreview();
     void windowClosed(MapFrame* mapFrame);
     void dirty();
@@ -54,7 +54,7 @@ signals:
     void brushModeSet(int brushMode);
 
     void publishCancelled();
-    void publishCheckable(bool checkable);
+    //void publishCheckable(bool checkable);
 
 public slots:
     void updateFoW();
@@ -62,7 +62,7 @@ public slots:
     void resetFoW();
     void clearFoW();
     void undoPaint();
-    void publishFoWImage(bool publishing = false);
+//    void publishFoWImage(bool publishing = false);
     void clear();
 
     void cancelPublish();
@@ -86,8 +86,12 @@ public slots:
 
     void targetResized(const QSize& newSize);
 
-    void setRotation(int rotation);
-    void setColor(QColor color);
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+    //virtual void setBackgroundColor(QColor color) override;
+    //void setRotation(int rotation);
+    //void setColor(QColor color);
 
 protected:
     void initializeFoW();
@@ -142,7 +146,7 @@ private:
     bool _isVideo;
 
     int _rotation;
-    QColor _color;
+    //QColor _color;
 
     bool _mouseDown;
     QPoint _mouseDownPos;

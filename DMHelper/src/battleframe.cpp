@@ -105,7 +105,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdownTimer(nullptr),
     _countdown(0.0),
     _publishing(false),
-    _publishingEnabled(false),
     _publishTimer(nullptr),
     _prescaledBackground(),
     _fowImage(),
@@ -287,11 +286,25 @@ void BattleFrame::activateObject(CampaignObjectBase* object)
     if(!battle)
         return;
 
+    if(_battle != nullptr)
+    {
+        qDebug() << "[BattleFrame] ERROR: New battle object activated without deactivating the existing battle object first!";
+        deactivateObject();
+    }
+
     setBattle(battle);
+
+    emit checkableChanged(true);
 }
 
 void BattleFrame::deactivateObject()
 {
+    if(!_battle)
+    {
+        qDebug() << "[BattleFrame] WARNING: Invalid (nullptr) battle object deactivated!";
+        return;
+    }
+
     setBattle(nullptr);
 }
 
@@ -1369,6 +1382,38 @@ void BattleFrame::showStatistics()
     }
 }
 
+void BattleFrame::publishClicked(bool checked)
+{
+    if(_publishing == checked)
+        return;
+
+    qDebug() << "[Battle Frame] publishing toggled (" << checked << ")";
+    _publishing = checked;
+
+    if(_publishRect)
+        _publishRect->setPublishing(checked);
+
+    if(_publishing)
+    {
+        createPrescaledBackground();
+        publishImage();
+    }
+    else
+    {
+        _publishTimer->stop();
+    }
+}
+
+void BattleFrame::setRotation(int rotation)
+{
+    if(_rotation == rotation)
+        return;
+
+    _rotation = rotation;
+    createPrescaledBackground();
+}
+
+/*
 void BattleFrame::rotateCCW()
 {
     _rotation -= 90;
@@ -1384,25 +1429,7 @@ void BattleFrame::rotateCW()
         _rotation-= 360;
     createPrescaledBackground();
 }
-
-void BattleFrame::togglePublishing(bool publishing)
-{
-    qDebug() << "[Battle Frame] publishing toggled (" << publishing << ")";
-    _publishing = publishing;
-
-    if(_publishRect)
-        _publishRect->setPublishing(publishing);
-
-    if(_publishing)
-    {
-        createPrescaledBackground();
-        publishImage();
-    }
-    else
-    {
-        _publishTimer->stop();
-    }
-}
+*/
 
 void BattleFrame::setBackgroundColor(QColor color)
 {
@@ -1849,6 +1876,7 @@ void BattleFrame::publishImage()
     }
 }
 
+/*
 void BattleFrame::executePublishImage()
 {
     qDebug() << "[Battle Frame] Publishing image";
@@ -1863,6 +1891,7 @@ void BattleFrame::executePublishImage()
     getImageForPublishing(pub);
     emit publishImage(pub, _model->getBackgroundColor());
 }
+*/
 
 void BattleFrame::executeAnimateImage()
 {
@@ -2287,8 +2316,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
     //ui->chkShowLiving->setEnabled(_model != nullptr);
     //ui->chkShowDead->setEnabled(_model != nullptr);
     //ui->framePublish->setEnabled(_model != nullptr);
-    emit setPublishEnabled(_model != nullptr);
-    _publishingEnabled = _model != nullptr;
+    updatePublishEnable();
     //ui->btnEndBattle->setEnabled(_model != nullptr);
     ui->graphicsView->setEnabled(_model != nullptr);
 
@@ -2309,7 +2337,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         //ui->chkShowLiving->setChecked(_model->getShowAlive());
         //ui->chkShowEffects->setChecked(_model->getShowEffects());
         //ui->framePublish->setColor(_model->getBackgroundColor());
-        emit setPublishColor(_model->getBackgroundColor());
+        emit backgroundColorChanged(_model->getBackgroundColor());
 
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
@@ -3019,6 +3047,11 @@ void BattleFrame::getImageForPublishing(QImage& imageForPublishing)
 #endif
 }
 
+void BattleFrame::updatePublishEnable()
+{
+    emit setPublishEnabled((_model) && (_model->getMap()));
+}
+
 void BattleFrame::createVideoPlayer(bool dmPlayer)
 {
 #ifdef BATTLE_DIALOG_LOG_VIDEO
@@ -3170,8 +3203,7 @@ void BattleFrame::replaceBattleMap()
 
     //ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
     //ui->framePublish->setEnabled(_model->getMap() != nullptr);
-    emit setPublishEnabled(_model->getMap() != nullptr);
-    _publishingEnabled = _model->getMap() != nullptr;
+    updatePublishEnable();
 
     if(!_model->getMap())
         return;
@@ -3276,8 +3308,7 @@ void BattleFrame::resizeBattleMap()
 
     //ui->btnReloadMap->setEnabled(_model->getMap() != nullptr);
     //ui->framePublish->setEnabled(_model->getMap() != nullptr);
-    emit setPublishEnabled(_model->getMap() != nullptr);
-    _publishingEnabled = _model->getMap() != nullptr;
+    updatePublishEnable();
 
     updateMap();
 

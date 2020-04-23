@@ -34,6 +34,8 @@ protected slots:
     //virtual void widgetChanged() override;
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
 protected:
     void extractTextNode(const QDomElement &element, bool isImport);

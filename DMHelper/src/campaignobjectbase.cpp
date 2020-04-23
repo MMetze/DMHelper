@@ -87,7 +87,7 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
 void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImport)
 {
 #ifdef CAMPAIGN_OBJECT_LOGGING
-    qDebug() << "[CampaignBaseObject] Post-processing object started: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+    qDebug() << "[CampaignBaseObject] Post-processing object started: " << element.tagName();
 #endif
 
     QDomElement childElement = element.firstChildElement();
@@ -110,7 +110,7 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
     }
 
 #ifdef CAMPAIGN_OBJECT_LOGGING
-    qDebug() << "[CampaignBaseObject] Post-processing object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+    qDebug() << "[CampaignBaseObject] Post-processing object done: " << element.tagName();
 #endif
 }
 
@@ -166,6 +166,22 @@ CampaignObjectBase* CampaignObjectBase::searchChildrenById(QUuid id)
             return childList.at(i);
 
         CampaignObjectBase* childResult = childList.at(i)->searchChildrenById(id);
+        if(childResult != nullptr)
+            return childResult;
+    }
+
+    return nullptr;
+}
+
+CampaignObjectBase* CampaignObjectBase::searchDirectChildrenByName(const QString& childName)
+{
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        if(childList.at(i)->getName() == childName)
+            return childList.at(i);
+
+        CampaignObjectBase* childResult = childList.at(i)->searchDirectChildrenByName(childName);
         if(childResult != nullptr)
             return childResult;
     }
@@ -321,12 +337,10 @@ void CampaignObjectBase::handleInternalDirty()
 
 void CampaignObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
-
     element.setAttribute("expanded", getExpanded());
     element.setAttribute("name", getName());
+
+    DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool CampaignObjectBase::belongsToObject(QDomElement& element)

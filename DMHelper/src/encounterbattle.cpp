@@ -454,9 +454,8 @@ bool EncounterBattle::belongsToObject(QDomElement& element)
 {
     if((element.tagName() == QString("combatants")) || (element.tagName() == QString("waves")) || (element.tagName() == QString("battle")))
         return true;
-    else {
+    else
         return EncounterText::belongsToObject(element);
-    }
 }
 
 void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool isImport)

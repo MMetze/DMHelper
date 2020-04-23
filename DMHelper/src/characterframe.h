@@ -24,16 +24,20 @@ public:
     void setCharacter(Character* character);
 
 signals:
-    void publishCharacterImage(QImage img, QColor color);
+    void publishCharacterImage(QImage img);
     void characterChanged();
 
 public slots:
     void calculateMods();
     void clear();
 
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+
 protected:
-    void mousePressEvent(QMouseEvent * event);
-    void mouseReleaseEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event) override;
+    void mouseReleaseEvent(QMouseEvent * event) override;
 
 private slots:
     void readCharacterData();
@@ -51,6 +55,7 @@ private:
     Character* _character;
     bool _mouseDown;
     bool _reading;
+    int _rotation;
 };
 
 #endif // CHARACTERFRAME_H

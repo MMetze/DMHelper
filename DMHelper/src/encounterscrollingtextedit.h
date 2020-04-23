@@ -24,14 +24,12 @@ public:
     virtual void activateObject(CampaignObjectBase* object) override;
     virtual void deactivateObject() override;
 
-    virtual bool isAnimated() override;
-
     EncounterScrollingText* getScrollingText() const;
     void setScrollingText(EncounterScrollingText* scrollingText);
     void unsetScrollingText(EncounterScrollingText* scrollingText);
 
 public slots:
-    void setScrollSpeed(double scrollSpeed);
+    void setScrollSpeed(int scrollSpeed);
     void setImageFile(const QString& imgFile);
     void browseImageFile();
     void setText(const QString& newText);
@@ -45,13 +43,18 @@ public slots:
 
     void targetResized(const QSize& newSize);
 
-    void runAnimation(bool animate);
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+    //void runAnimation(bool animate);
+    //void rotatePublish(int rotation);
+
     void stopAnimation();
-    void rotatePublish(int rotation);
+    void rewind();
 
 signals:
     void textChanged(const QString& text);
-    void scrollSpeedChanged(double scrollSpeed);
+    void scrollSpeedChanged(int scrollSpeed);
     void imageFileChanged(const QString& imgFile);
 //    void textChanged(const QString& newText);
     void fontFamilyChanged(const QString& fontFamily);
@@ -108,6 +111,7 @@ private:
     QImage _prescaledImg;
     QImage _textImg;
     QPointF _textPos;
+    qreal _startPos;
     QSize _targetSize;
     QElapsedTimer _elapsed;
     int _timerId;
@@ -117,6 +121,7 @@ private:
     QImage _backgroundVideo;
 
     bool _animationRunning;
+    bool _firstTime;
     int _rotation;
 };
 

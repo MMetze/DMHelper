@@ -35,6 +35,7 @@ public:
     QList<CampaignObjectBase*> getChildObjects();
     CampaignObjectBase* getChildById(QUuid id);
     CampaignObjectBase* searchChildrenById(QUuid id);
+    CampaignObjectBase* searchDirectChildrenByName(const QString& childName);
 
     const CampaignObjectBase* getParentByType(int parentType) const;
     CampaignObjectBase* getParentByType(int parentType);

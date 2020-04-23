@@ -19,9 +19,6 @@ public:
     explicit AudioTrackEdit(QWidget *parent = nullptr);
     virtual ~AudioTrackEdit() override;
 
-    virtual void activateObject(CampaignObjectBase* object) override;
-    virtual void deactivateObject() override;
-
 signals:
     void trackSelected(AudioTrack* track);
 

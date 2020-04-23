@@ -35,7 +35,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _isPublishing(false),
     _isVideo(false),
     _rotation(0),
-    _color(Qt::black),
+    //_color(Qt::black),
     _mouseDown(false),
     _mouseDownPos(),
     _undoPath(nullptr),
@@ -73,7 +73,7 @@ MapFrame::MapFrame(QWidget *parent) :
     ui->grpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
     ui->grpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
 
-    connect(ui->framePublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
+    //connect(ui->framePublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
     connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotatePublish()));
     connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotatePublish()));
     connect(ui->btnClearFoW,SIGNAL(clicked()),this,SLOT(clearFoW()));
@@ -141,16 +141,28 @@ void MapFrame::activateObject(CampaignObjectBase* object)
     if(!map)
         return;
 
+    if(_mapSource != nullptr)
+    {
+        qDebug() << "[MapFrame] ERROR: New map object activated without deactivating the existing map object first!";
+        deactivateObject();
+    }
+
     setMap(map);
     connect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     connect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     connect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
+
+    emit checkableChanged(_isVideo);
+    emit setPublishEnabled(true);
 }
 
 void MapFrame::deactivateObject()
 {
     if(!_mapSource)
+    {
+        qDebug() << "[MapFrame] WARNING: Invalid (nullptr) map object deactivated!";
         return;
+    }
 
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
@@ -283,6 +295,7 @@ void MapFrame::undoPaint()
     updateFoW();
 }
 
+/*
 void MapFrame::publishFoWImage(bool publishing)
 {
     if(!_mapSource)
@@ -351,6 +364,7 @@ void MapFrame::publishFoWImage(bool publishing)
         startPublishTimer();
     }
 }
+*/
 
 void MapFrame::clear()
 {
@@ -363,7 +377,7 @@ void MapFrame::clear()
 
 void MapFrame::cancelPublish()
 {
-    ui->framePublish->cancelPublish();
+    //ui->framePublish->cancelPublish();
     emit publishCancelled();
     _isPublishing = false;
 }
@@ -488,16 +502,88 @@ void MapFrame::targetResized(const QSize& newSize)
     resetPublishFoW();
 }
 
+void MapFrame::publishClicked(bool checked)
+{
+    if(!_mapSource)
+        return;
+
+    _isPublishing = checked;
+
+    //if(!ui->framePublish->isCheckable())
+    if(!_isVideo)
+    {
+        // Still Image
+        QImage pub;
+        //if(ui->btnPublishZoom->isChecked())
+        if(_publishZoom)
+        {
+            QRect imgRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
+                          static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
+                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
+                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
+
+            // TODO: Consider zoom factor...
+
+            pub = _mapSource->getPublishImage(imgRect);
+        }
+        else
+        {
+            //if(ui->btnPublishVisible->isChecked())
+            if(_publishVisible)
+            {
+                pub = _mapSource->getShrunkPublishImage();
+            }
+            else
+            {
+                pub = _mapSource->getPublishImage();
+            }
+        }
+
+        //if(ui->framePublish->getRotation() != 0)
+        if(_rotation != 0)
+        {
+            //pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+            pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+        }
+
+        //emit publishImage(pub, ui->framePublish->getColor());
+        //emit publishImage(pub, _color);
+        emit publishImage(pub);
+        emit showPublishWindow();
+        startAudioTrack();
+    }
+    else
+    {
+        //Video
+        stopPublishTimer();
+        //createVideoPlayer(!ui->framePublish->isChecked());
+        createVideoPlayer(!_isPublishing);
+        //if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
+        if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
+        {
+            //emit animationStarted(ui->framePublish->getColor());
+            //emit animationStarted(_color);
+            emit animationStarted();
+            emit showPublishWindow();
+            startAudioTrack();
+        }
+
+        startPublishTimer();
+    }
+}
+
 void MapFrame::setRotation(int rotation)
 {
     _rotation = rotation;
     rotatePublish();
 }
 
-void MapFrame::setColor(QColor color)
+/*
+void MapFrame::setBackgroundColor(QColor color)
 {
     _color = color;
 }
+*/
 
 void MapFrame::initializeFoW()
 {
@@ -513,7 +599,7 @@ void MapFrame::initializeFoW()
     ui->graphicsView->setScene(_scene);
 
     cancelSelect();
-    ui->framePublish->cancelPublish();
+    //ui->framePublish->cancelPublish();
 
     if(!_mapSource)
         return;
@@ -541,8 +627,6 @@ void MapFrame::initializeFoW()
     }
 
     _isVideo = !_mapSource->isInitialized();
-    ui->framePublish->setCheckable(_isVideo);
-    emit publishCheckable(_isVideo);
 }
 
 void MapFrame::uninitializeFoW()
@@ -1028,8 +1112,9 @@ void MapFrame::cleanupBuffers()
 
 void MapFrame::startAudioTrack()
 {
-    if((_mapSource) && (_mapSource->getPlayAudio()))
-        emit startTrack(_mapSource->getAudioTrack());
+    // TODO: FIX THIS!
+//    if((_mapSource) && (_mapSource->getPlayAudio()))
+//        emit startTrack(_mapSource->getAudioTrack());
 }
 
 void MapFrame::setMapCursor()

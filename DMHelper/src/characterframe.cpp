@@ -17,11 +17,12 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     ui(new Ui::CharacterFrame),
     _character(nullptr),
     _mouseDown(false),
-    _reading(false)
+    _reading(false),
+    _rotation(0)
 {
     ui->setupUi(this);
 
-    connect(ui->framePublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
+    //connect(ui->framePublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
 
     ui->edtArmorClass->setValidator(new QIntValidator(0,100,this));
     ui->edtInitiative->setValidator(new QIntValidator(-10,100,this));
@@ -135,11 +136,26 @@ void CharacterFrame::activateObject(CampaignObjectBase* object)
     if(!character)
         return;
 
+    if(_character != nullptr)
+    {
+        qDebug() << "[CharacterFrame] ERROR: New character object activated without deactivating the existing character object first!";
+        deactivateObject();
+    }
+
     setCharacter(character);
+
+    emit checkableChanged(false);
+    emit setPublishEnabled(true);
 }
 
 void CharacterFrame::deactivateObject()
 {
+    if(!_character)
+    {
+        qDebug() << "[CharacterFrame] WARNING: Invalid (nullptr) character object deactivated!";
+        return;
+    }
+
     writeCharacterData();
     setCharacter(nullptr);
 }
@@ -296,6 +312,21 @@ void CharacterFrame::clear()
     enableDndBeyondSync(false);
 
     _reading = false;
+}
+
+void CharacterFrame::publishClicked(bool checked)
+{
+    Q_UNUSED(checked);
+    handlePublishClicked();
+}
+
+void CharacterFrame::setRotation(int rotation)
+{
+    if(_rotation != rotation)
+    {
+        _rotation = rotation;
+        emit rotationChanged(rotation);
+    }
 }
 
 void CharacterFrame::mousePressEvent(QMouseEvent * event)
@@ -483,13 +514,13 @@ void CharacterFrame::handlePublishClicked()
     QString iconFile = _character->getIcon();
     if(iconImg.load(iconFile) == true)
     {
-        if(ui->framePublish->getRotation() != 0)
+        //if(ui->framePublish->getRotation() != 0)
+        if(_rotation != 0)
         {
-            iconImg = iconImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
+            iconImg = iconImg.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
         }
 
-
-        emit publishCharacterImage(iconImg, ui->framePublish->getColor());
+        emit publishCharacterImage(iconImg); //, ui->framePublish->getColor());
     }
 }
 

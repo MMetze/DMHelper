@@ -24,6 +24,11 @@ public:
 
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
+    virtual bool isChecked() const;
+    virtual bool isCheckable() const;
+    virtual int getRotation() const;
+    virtual QColor getColor() const;
+
 public slots:
     void setChecked(bool checked);
     void setCheckable(bool checkable);
@@ -39,6 +44,7 @@ signals:
     void rotateCCW();
     void rotationChanged(int rotation);
     void colorChanged(QColor color);
+    void buttonColorChanged(QColor color);
     void previewClicked();
     void playersWindowClicked(bool checked);
 
@@ -47,7 +53,9 @@ protected:
 
 private slots:
     void handleToggle(bool checked);
+    void handleClicked(bool checked);
     void handleRotation();
+    void handleColorChanged(QColor color);
 
 private:
     void setDefaults();

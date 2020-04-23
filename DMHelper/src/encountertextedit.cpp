@@ -3,6 +3,7 @@
 #include "ui_encountertextedit.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
+#include <QDebug>
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -50,11 +51,26 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object)
     if(!encounter)
         return;
 
+    if(_encounter != nullptr)
+    {
+        qDebug() << "[EncounterTextEdit] ERROR: New text encounter object activated without deactivating the existing text encounter object first!";
+        deactivateObject();
+    }
+
     setEncounter(encounter);
+
+    emit checkableChanged(false);
+    emit setPublishEnabled(false);
 }
 
 void EncounterTextEdit::deactivateObject()
 {
+    if(!_encounter)
+    {
+        qDebug() << "[EncounterTextEdit] WARNING: Invalid (nullptr) text encounter object deactivated!";
+        return;
+    }
+
     storeEncounter();
     setEncounter(nullptr);
 }

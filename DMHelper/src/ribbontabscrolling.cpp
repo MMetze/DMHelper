@@ -9,8 +9,9 @@ RibbonTabScrolling::RibbonTabScrolling(QWidget *parent) :
 
     // Animation
     connect(ui->btnBackground, SIGNAL(clicked()), this, SIGNAL(backgroundClicked()));
-    connect(ui->spinSpeed, SIGNAL(valueChanged(double)), this, SIGNAL(speedChanged(double)));
+    connect(ui->spinSpeed, SIGNAL(valueChanged(int)), this, SIGNAL(speedChanged(int)));
     connect(ui->sliderWidth, SIGNAL(valueChanged(int)), this, SIGNAL(widthChanged(int)));
+    connect(ui->btnRewind, SIGNAL(clicked()), this, SIGNAL(rewindClicked()));
 
     // Text Frame
     connect(ui->frameText, &RibbonFrameText::colorChanged, this, &RibbonTabScrolling::colorChanged);
@@ -31,7 +32,7 @@ PublishButtonRibbon* RibbonTabScrolling::getPublishRibbon()
     return ui->framePublish;
 }
 
-void RibbonTabScrolling::setSpeed(double speed)
+void RibbonTabScrolling::setSpeed(int speed)
 {
     if((speed != ui->spinSpeed->value()) &&
        (speed >= ui->spinSpeed->minimum()) &&
@@ -86,6 +87,7 @@ void RibbonTabScrolling::showEvent(QShowEvent *event)
     RibbonFrame::showEvent(event);
 
     setStandardButtonSize(*ui->lblBackground, *ui->btnBackground);
+    setStandardButtonSize(*ui->lblRewind, *ui->btnRewind);
     setLineHeight(*ui->line_6);
 
     QFontMetrics metrics = ui->lblBackground->fontMetrics();

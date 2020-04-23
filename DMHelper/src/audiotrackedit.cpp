@@ -32,15 +32,6 @@ AudioTrackEdit::~AudioTrackEdit()
     delete ui;
 }
 
-void AudioTrackEdit::activateObject(CampaignObjectBase* object)
-{
-    Q_UNUSED(object);
-}
-
-void AudioTrackEdit::deactivateObject()
-{
-}
-
 void AudioTrackEdit::addTrack(const QUrl& url)
 {
     if((!_campaign) || (!url.isValid()))

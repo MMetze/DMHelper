@@ -13,9 +13,53 @@
 // DONE - Combine HELP in FILE, Rename to ???
 // DONE - Move Next back to initiative list, fix round counter
 // DONE - Scroll name --> Animation
+// DONE - Notes don't have an extra unknown node underneath
 // Make the TOOLS not modal, but rather hidden when losing focus, with checkable button and escape to close
 //      make battle statistics (AND ALL OTHER DIALOGS) dlg wider
 // Change MAP and BATTLE layouts to BUILD and RUN
+// Add Undo/Redo to text edit
+
+/*
+ *
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::begin: Paint device returned engine == 0, type: 3
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::setPen: Painter not active
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::setBrush: Painter not active
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::setCompositionMode: Painter not active
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::begin: Paint device returned engine == 0, type: 3
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::setPen: Painter not active
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::setBrush: Painter not active
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::setCompositionMode: Painter not active
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::begin: Paint device returned engine == 0, type: 3
+2020.04.20 12:47:44 Warning: [:0, ] QPainter::setPen: Painter not active
+DMHelperToday at 22:45
+Yeah, I need to find the cause for that nonsense
+BrianToday at 22:45
+Yes, I tried expanding all the way. Window is 2560x1440
+DMHelperToday at 22:45
+Wow, big. OK
+thx
+BrianToday at 22:45
+The map still does the thing where it shrinks if you make the window smaller but doesn't regrow if you make it bigger, so it eventually vanishes away to nothing
+With a lot of
+2020.04.22 08:40:27 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:27 Debug: [:0, ] [Battle Frame] resized:  1762 x 1098
+2020.04.22 08:40:27 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:27 Debug: [:0, ] [Battle Frame] resized:  1753 x 1098
+2020.04.22 08:40:27 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:27 Debug: [:0, ] [Battle Frame] resized:  1725 x 1098
+2020.04.22 08:40:27 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:27 Debug: [:0, ] [Battle Frame] resized:  1724 x 1098
+2020.04.22 08:40:27 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:27 Debug: [:0, ] [Battle Frame] resized:  1720 x 1098
+2020.04.22 08:40:27 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:27 Debug: [:0, ] [Battle Frame] resized:  1716 x 1098
+2020.04.22 08:40:27 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:27 Debug: [:0, ] [Battle Frame] resized:  1699 x 1098
+2020.04.22 08:40:28 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:28 Debug: [:0, ] [Battle Frame] resized:  1698 x 1098
+2020.04.22 08:40:28 Debug: [:0, ] "Size " :  QRect(0,-11 20x13) ,  27
+2020.04.22 08:40:28 Debug: [:0, ] [Battle Frame] resized:  1697 x 1098
+*/
 
 RibbonFrame::RibbonFrame(QWidget *parent) :
     QFrame(parent)

@@ -18,10 +18,12 @@ signals:
     void frameResized(const QSize& newSize);
 
 public slots:
+    void setImage(QImage img);
     void setImage(QImage img, QColor color);
     void setImageNoScale(QImage img);
     void setArrowVisible(bool visible);
     void setArrowPosition(const QPointF& position);
+    void setBackgroundColor();
     void setBackgroundColor(QColor color);
     void setPointerFile(const QString& filename);
 
@@ -30,8 +32,12 @@ protected:
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);
 
+    void setBackgroundColorStyle(QColor color);
+
 private:
     PublishFrame* _publishFrame;
+    QColor _globalColor;
+    bool _globalColorSet;
 };
 
 #endif // PUBLISHWINDOW_H

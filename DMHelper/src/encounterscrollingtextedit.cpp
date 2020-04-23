@@ -23,6 +23,7 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     _prescaledImg(),
     _textImg(),
     _textPos(),
+    _startPos(0),
     _targetSize(),
     _elapsed(),
     _timerId(0),
@@ -30,6 +31,7 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     _isDMPlayer(false),
     _backgroundVideo(),
     _animationRunning(false),
+    _firstTime(true),
     _rotation(0)
 {
     ui->setupUi(this);
@@ -97,18 +99,27 @@ void EncounterScrollingTextEdit::activateObject(CampaignObjectBase* object)
     if(!scrollingText)
         return;
 
+    if(_scrollingText != nullptr)
+    {
+        qDebug() << "[EncounterScrollingTextEdit] ERROR: New scrolling text object activated without deactivating the existing scrolling text object first!";
+        deactivateObject();
+    }
+
     setScrollingText(scrollingText);
+
+    emit checkableChanged(true);
+    emit setPublishEnabled(true);
 }
 
 void EncounterScrollingTextEdit::deactivateObject()
 {
-    if(_scrollingText)
-        unsetScrollingText(_scrollingText);
-}
+    if(!_scrollingText)
+    {
+        qDebug() << "[EncounterScrollingTextEdit] WARNING: Invalid (nullptr) scrolling text object deactivated!";
+        return;
+    }
 
-bool EncounterScrollingTextEdit::isAnimated()
-{
-    return true;
+    unsetScrollingText(_scrollingText);
 }
 
 EncounterScrollingText* EncounterScrollingTextEdit::getScrollingText() const
@@ -157,11 +168,13 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
     setTextColor();
     loadImage();
 
+    _firstTime = true;
+
     connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SIGNAL(textChanged(const QString&)));
     connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextFont()));
     connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextAlignment()));
     connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextColor()));
-    connect(scrollingText, SIGNAL(scrollSpeedChanged(double)), this, SIGNAL(scrollSpeedChanged(double)));
+    connect(scrollingText, SIGNAL(scrollSpeedChanged(int)), this, SIGNAL(scrollSpeedChanged(int)));
     connect(scrollingText, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
     connect(scrollingText, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
     connect(scrollingText, SIGNAL(fontFamilyChanged(const QString&)), this, SIGNAL(fontFamilyChanged(const QString&)));
@@ -199,7 +212,7 @@ void EncounterScrollingTextEdit::unsetScrollingText(EncounterScrollingText* scro
     _scrollingText = nullptr;
 }
 
-void EncounterScrollingTextEdit::setScrollSpeed(double scrollSpeed)
+void EncounterScrollingTextEdit::setScrollSpeed(int scrollSpeed)
 {
     if(_scrollingText)
         _scrollingText->setScrollSpeed(scrollSpeed);
@@ -502,9 +515,12 @@ void EncounterScrollingTextEdit::setTextColor()
     moveCursorToEnd();
 }
 
-void EncounterScrollingTextEdit::runAnimation(bool animate)
+void EncounterScrollingTextEdit::publishClicked(bool checked)
 {
-    _animationRunning = animate;
+    if(_animationRunning == checked)
+        return;
+
+    _animationRunning = checked;
 
     if(!_backgroundImg.isNull())
     {
@@ -548,19 +564,27 @@ void EncounterScrollingTextEdit::runAnimation(bool animate)
     }
 }
 
-void EncounterScrollingTextEdit::stopAnimation()
+void EncounterScrollingTextEdit::setRotation(int rotation)
 {
-    runAnimation(false);
-}
+    if(_rotation == rotation)
+        return;
 
-void EncounterScrollingTextEdit::rotatePublish(int rotation)
-{
     _rotation = rotation;
     prepareImages();
     if((_videoPlayer) && (!_isDMPlayer))
     {
         createVideoPlayer(_isDMPlayer);
     }
+}
+
+void EncounterScrollingTextEdit::stopAnimation()
+{
+    publishClicked(false);
+}
+
+void EncounterScrollingTextEdit::rewind()
+{
+    _textPos.setY(_startPos);
 }
 
 void EncounterScrollingTextEdit::startPublishTimer()
@@ -622,12 +646,15 @@ void EncounterScrollingTextEdit::prepareTextImage()
     QRect boundingRect = fontMetrics.boundingRect(targetRect, _scrollingText->getAlignment() | Qt::TextWordWrap, _scrollingText->getText());
     targetRect.setHeight(boundingRect.height());
 
-    if(!_animationRunning)
+    if((_rotation == 0) || (_rotation == 270))
+        _startPos = static_cast<qreal>(scaledSize.height());
+    else
+        _startPos = static_cast<qreal>(boundingRect.height());
+
+    if((!_animationRunning) || (_firstTime))
     {
-        if((_rotation == 0) || (_rotation == 270))
-            _textPos.setY(static_cast<qreal>(scaledSize.height()));
-        else
-            _textPos.setY(static_cast<qreal>(boundingRect.height()));
+        _textPos.setY(_startPos);
+        _firstTime = false;
     }
 
     _textImg = QImage(targetRect.size(), QImage::Format_ARGB32_Premultiplied);
