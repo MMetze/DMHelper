@@ -223,7 +223,6 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
     qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
 
-
     // TODO: cleanup this constructor and mainwindow in general
     ui->setupUi(this);
     if(screen)
@@ -292,7 +291,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionImport_NPC,SIGNAL(triggered()),this,SLOT(importNPC()));
     connect(ui->actionOpen_Players_Window,SIGNAL(triggered()),this,SLOT(showPublishWindow()));
     */
-    connect(_ribbonTabCampaign, SIGNAL(newAdventureClicked()), this, SLOT(newAdventure()));
+    connect(_ribbonTabCampaign, SIGNAL(newPartyClicked()), this, SLOT(newParty()));
     connect(_ribbonTabCampaign, SIGNAL(newCharacterClicked()), this, SLOT(newCharacter()));
     connect(_ribbonTabCampaign, SIGNAL(newMapClicked()), this, SLOT(newMap()));
     connect(_ribbonTabCampaign, SIGNAL(newNPCClicked()), this, SLOT(newNPC()));
@@ -933,9 +932,11 @@ void MainWindow::openDiceDialog()
 
 void MainWindow::openCharacter(QUuid id)
 {
-    if((!campaign) || (id.isNull()))
+//    if((!campaign) || (id.isNull()))
+    if((!treeModel) || (id.isNull()))
         return;
 
+    /*
     Character* selectedChar = campaign->getCharacterById(id);
     if(!selectedChar)
     {
@@ -949,6 +950,11 @@ void MainWindow::openCharacter(QUuid id)
         QModelIndex index = treeIndexMap.value(selectedChar->getName());
         ui->treeView->setCurrentIndex(index);
     }
+    */
+
+    QModelIndex index = treeModel->getObject(id);
+    if(index.isValid())
+        ui->treeView->setCurrentIndex(index);
 
     activateWindow();
 }
@@ -975,7 +981,14 @@ void MainWindow::newCharacter()
     Character* newCharacter = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
     //newCharacter->setName(characterName);
     //campaign->addCharacter(newCharacter);
-    campaign->addObject(newCharacter);
+    //campaign->addObject(newCharacter);
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        currentObject = campaign;
+
+    currentObject->setExpanded(true);
+    currentObject->addObject(newCharacter);
+
     openCharacter(newCharacter->getID());
 }
 
@@ -1050,7 +1063,7 @@ void MainWindow::removeCurrentCharacter()
 }
 */
 
-void MainWindow::newAdventure()
+void MainWindow::newParty()
 {
     // TODO: remove this completely
     /*
@@ -2161,10 +2174,6 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 {
     qDebug() << "[MainWindow] Campaign Loaded: " << campaignFileName;
 
-    //ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_Blank);
-    // TODO: select the first entry in the campaign tree
-    //activateWidget(getWidgetFromType(DMHelper::CampaignType_Base));
-
     updateCampaignTree();
     updateMapFiles();
     updateClock();
@@ -2173,7 +2182,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     if(campaign)
     {
-        ui->treeView->setCurrentIndex(treeModel->index(0,0));
+        ui->treeView->setCurrentIndex(treeModel->index(0,0)); // Activate the first entry in the tree
         connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
         connect(campaign,SIGNAL(changed()),this,SLOT(updateCampaignTree()));
         setWindowTitle(QString("DM Helper - ") + campaign->getName() + QString("[*]"));
@@ -2192,8 +2201,11 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 void MainWindow::updateCampaignTree()
 {
     qDebug() << "[MainWindow] Updating Campaign Tree";
-    /*
     enableCampaignMenu();
+    if(treeModel)
+        treeModel->refresh();
+
+    /*
 
     if(treeModel)
     {
@@ -2420,6 +2432,7 @@ void MainWindow::updateClock()
 
 void MainWindow::handleCustomContextMenu(const QPoint& point)
 {
+    // TODO: PROPERLY!
     if(!treeModel)
         return;
 
@@ -2602,7 +2615,8 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     if(!item)
         return;
 
-    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
+//    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
+    CampaignObjectBase* itemObject = reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
     if(!itemObject)
         return;
 
@@ -3171,8 +3185,28 @@ void MainWindow::activateObject(CampaignObjectBase* object)
 
     qDebug() << "[MainWindow] Activating stacked widget from " << ui->stackedWidgetEncounter->currentIndex() << " to " << selectedWidget << " for type " << object->getObjectType();
 
-    activateWidget(selectedWidget);
     setRibbonToType(object->getObjectType());
+    activateWidget(selectedWidget, object);
+}
+
+void MainWindow::deactivateObject()
+{
+    if(_ribbon->getPublishRibbon())
+        _ribbon->getPublishRibbon()->cancelPublish();
+
+    CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
+    if(objectFrame)
+    {
+        disconnect(_ribbon->getPublishRibbon(), nullptr, objectFrame, nullptr);
+        disconnect(objectFrame, nullptr, _ribbon->getPublishRibbon(), nullptr);
+        objectFrame->deactivateObject();
+    }
+
+}
+
+void MainWindow::activateWidget(int widgetId, CampaignObjectBase* object)
+{
+    ui->stackedWidgetEncounter->setCurrentIndex(widgetId);
 
     CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
     if(objectFrame)
@@ -3194,26 +3228,6 @@ void MainWindow::activateObject(CampaignObjectBase* object)
             objectFrame->setRotation(_ribbon->getPublishRibbon()->getRotation());
         }
     }
-}
-
-void MainWindow::deactivateObject()
-{
-    if(_ribbon->getPublishRibbon())
-        _ribbon->getPublishRibbon()->cancelPublish();
-
-    CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
-    if(objectFrame)
-    {
-        disconnect(_ribbon->getPublishRibbon(), nullptr, objectFrame, nullptr);
-        disconnect(objectFrame, nullptr, _ribbon->getPublishRibbon(), nullptr);
-        objectFrame->deactivateObject();
-    }
-
-}
-
-void MainWindow::activateWidget(int widgetId)
-{
-    ui->stackedWidgetEncounter->setCurrentIndex(widgetId);
 }
 
 int MainWindow::getWidgetFromType(int objectType)

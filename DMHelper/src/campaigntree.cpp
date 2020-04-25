@@ -1,6 +1,7 @@
 #include "campaigntree.h"
 #include "dmconstants.h"
 #include "campaigntreemodel.h"
+#include "campaignobjectbase.h"
 #include <QDropEvent>
 #include <QStandardItemModel>
 #include <QMimeData>
@@ -10,9 +11,25 @@ CampaignTree::CampaignTree(QWidget *parent) :
 {
 }
 
+CampaignObjectBase* CampaignTree::currentCampaignObject()
+{
+    CampaignTreeModel* campaignModel = dynamic_cast<CampaignTreeModel*>(model());
+    if(!campaignModel)
+        return nullptr;
+
+    QStandardItem* item = campaignModel->itemFromIndex(currentIndex());
+    if(!item)
+        return nullptr;
+
+//    return static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
+    return reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+}
+
 void CampaignTree::campaignChanged()
 {
     CampaignTreeModel* campaignModel = dynamic_cast<CampaignTreeModel*>(model());
+    if(!campaignModel)
+        return;
 
     QStandardItem* rootItem = campaignModel->invisibleRootItem();
     if(!rootItem)
@@ -31,10 +48,13 @@ void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
     if (!event->isAccepted())
         return;
 
+    /*
     if((dropIndicatorPosition() == AboveItem) || (dropIndicatorPosition() == BelowItem))
         event->accept();
     else
         event->ignore(); //Show 'forbidden' cursor.
+        */
+    event->accept();
 }
 
 void CampaignTree::dropEvent(QDropEvent * event)
@@ -60,12 +80,13 @@ void CampaignTree::dropEvent(QDropEvent * event)
     if(!item)
         return;
 
+    /*
     int itemType = item->data(DMHelper::TreeItemData_Type).toInt();
     if( (itemType != treeItemDataType) ||
         ( ( itemType != DMHelper::TreeType_Encounter ) &&
           ( itemType != DMHelper::TreeType_Map ) ) )
         return;
-
+*/
     QTreeView::dropEvent(event);
 }
 
@@ -74,7 +95,8 @@ void CampaignTree::iterateItemExpanded(QStandardItem* item)
     if(!item)
         return;
 
-    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
+//    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
+    CampaignObjectBase* itemObject = reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
     if(!itemObject)
         return;
 

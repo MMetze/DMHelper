@@ -4,12 +4,15 @@
 #include <QTreeView>
 
 class QStandardItem;
+class CampaignObjectBase;
 
 class CampaignTree : public QTreeView
 {
     Q_OBJECT
 public:
     explicit CampaignTree(QWidget *parent = nullptr);
+
+    CampaignObjectBase* currentCampaignObject();
 
 signals:
 

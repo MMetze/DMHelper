@@ -18,6 +18,8 @@
 //      make battle statistics (AND ALL OTHER DIALOGS) dlg wider
 // Change MAP and BATTLE layouts to BUILD and RUN
 // Add Undo/Redo to text edit
+// Add Character View
+// Add Party View
 
 /*
  *

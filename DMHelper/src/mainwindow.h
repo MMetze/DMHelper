@@ -80,7 +80,7 @@ public slots:
     void newNPC();
     void importNPC();
     //void removeCurrentCharacter();
-    void newAdventure();
+    void newParty();
     void newTextEncounter();
     void newBattleEncounter();
     void newScrollingTextEncounter();
@@ -189,7 +189,7 @@ protected slots:
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);
     void deactivateObject();
-    void activateWidget(int widgetId);
+    void activateWidget(int widgetId, CampaignObjectBase* object = nullptr);
     int getWidgetFromType(int objectType);
     void setRibbonToType(int objectType);
 

@@ -7,7 +7,7 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnNewAdventure, SIGNAL(clicked(bool)), this, SIGNAL(newAdventureClicked()));
+    connect(ui->btnNewParty, SIGNAL(clicked(bool)), this, SIGNAL(newPartyClicked()));
     connect(ui->btnNewCharacter, SIGNAL(clicked(bool)), this, SIGNAL(newCharacterClicked()));
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(newMapClicked()));
     connect(ui->btnNewNPC, SIGNAL(clicked(bool)), this, SIGNAL(newNPCClicked()));
@@ -47,7 +47,7 @@ void RibbonTabCampaign::setPlayersWindow(bool checked)
 
 void RibbonTabCampaign::setCampaignEnabled(bool enabled)
 {
-    ui->btnNewAdventure->setEnabled(enabled);
+    ui->btnNewParty->setEnabled(enabled);
     ui->btnNewCharacter->setEnabled(enabled);
     ui->btnNewMap->setEnabled(enabled);
     ui->btnNewNPC->setEnabled(enabled);
@@ -70,12 +70,13 @@ void RibbonTabCampaign::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblNewAdventure, *ui->btnNewAdventure);
-    setStandardButtonSize(*ui->lblNewCharacter, *ui->btnNewCharacter);
-    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap);
-    setStandardButtonSize(*ui->lblNewNPC, *ui->btnNewNPC);
-    setLineHeight(*ui->line_3);
     setStandardButtonSize(*ui->lblNewText, *ui->btnNewText);
+    setLineHeight(*ui->line_3);
+    setStandardButtonSize(*ui->lblNewParty, *ui->btnNewParty);
+    setStandardButtonSize(*ui->lblNewCharacter, *ui->btnNewCharacter);
+    setStandardButtonSize(*ui->lblNewNPC, *ui->btnNewNPC);
+    setLineHeight(*ui->line_4);
+    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap);
     setStandardButtonSize(*ui->lblNewBattle, *ui->btnNewBattle);
     setStandardButtonSize(*ui->lblNewScrollingText, *ui->btnNewScrollingText);
     setLineHeight(*ui->line);

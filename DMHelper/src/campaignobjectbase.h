@@ -3,6 +3,7 @@
 
 #include "dmhobjectbase.h"
 #include <QList>
+#include <QDataStream>
 
 class Campaign;
 

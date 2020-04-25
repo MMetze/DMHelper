@@ -50,7 +50,7 @@ CampaignObjectBase* CombatantFactory::createObject(int objectType, int subType, 
         return nullptr;
     }
 
-    switch(objectType)
+    switch(subType)
     {
         case DMHelper::CombatantType_Character:
             return new Character(objectName);

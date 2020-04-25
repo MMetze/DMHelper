@@ -24,10 +24,10 @@ CampaignObjectBase* EncounterFactory::createObject(int objectType, int subType, 
             return new EncounterText(objectName);
         case DMHelper::CampaignType_Battle:
             return new EncounterBattle(objectName);
-    case DMHelper::CampaignType_ScrollingText:
-        return new EncounterScrollingText(objectName);
-    case DMHelper::CampaignType_Party:
-        return new Party(objectName);
+        case DMHelper::CampaignType_ScrollingText:
+            return new EncounterScrollingText(objectName);
+        case DMHelper::CampaignType_Party:
+            return new Party(objectName);
         default:
             return nullptr;
     }

@@ -23,7 +23,7 @@ public slots:
     void setUndoEnabled(bool enabled);
 
 signals:
-    void newAdventureClicked();
+    void newPartyClicked();
     void newCharacterClicked();
     void newMapClicked();
     void newNPCClicked();

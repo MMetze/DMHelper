@@ -15,6 +15,9 @@ public:
 
     Campaign* getCampaign() const;
 
+    bool containsObject(const QUuid& objectId) const;
+    QModelIndex getObject(const QUuid& objectId) const;
+
 signals:
     void campaignChanged(Campaign* campaign);
 
@@ -25,12 +28,15 @@ public slots:
     virtual QStringList	mimeTypes() const;
 
     void setCampaign(Campaign* campaign);
+    void refresh();
 
 protected:
     void updateCampaignEntries();
-    QStandardItem* createTreeEntry(CampaignObjectBase* object);
+    QStandardItem* createTreeEntry(CampaignObjectBase* object, QStandardItem* parentEntry);
+    void appendTreeEntry(QStandardItem* objectEntry, QStandardItem* parentEntry);
 
     Campaign* _campaign;
+    QMap<QUuid, QModelIndex> _objectIndexMap;
 };
 
 #endif // CAMPAIGNTREEMODEL_H
