@@ -26,14 +26,14 @@ signals:
     void newPartyClicked();
     void newCharacterClicked();
     void newMapClicked();
-    void newNPCClicked();
+    //void newNPCClicked();
     void newTextClicked();
     void newBattleClicked();
     void newScrollingTextClicked();
     void exportItemClicked();
     void importItemClicked();
     void importCharacterClicked();
-    void importNPCClicked();
+    //void importNPCClicked();
 
     void undoClicked();
     void redoClicked();

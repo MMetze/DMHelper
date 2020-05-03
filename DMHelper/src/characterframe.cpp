@@ -162,12 +162,12 @@ void CharacterFrame::deactivateObject()
 
 void CharacterFrame::setCharacter(Character* character)
 {
-    if(character)
-    {
-        _character = character;
-        readCharacterData();
-        emit characterChanged();
-    }
+    if(_character == character)
+        return;
+
+    _character = character;
+    readCharacterData();
+    emit characterChanged();
 }
 
 void CharacterFrame::calculateMods()

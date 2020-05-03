@@ -129,15 +129,19 @@ EncounterScrollingText* EncounterScrollingTextEdit::getScrollingText() const
 
 void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scrollingText)
 {
+    if(_scrollingText == scrollingText)
+        return;
+
     qDebug() << "[Scrolling Text] Setting scrolling text to: " << scrollingText;
 
     if(_videoPlayer)
         cleanupPlayer();
 
+    _scrollingText = scrollingText;
+
     if(!scrollingText)
         return;
 
-    _scrollingText = scrollingText;
     //ui->spinSpeed->setValue(_scrollingText->getScrollSpeed()); // TODO: what if invalid?
     emit scrollSpeedChanged(_scrollingText->getScrollSpeed());
     //ui->sliderWidth->setValue(_scrollingText->getImageWidth());

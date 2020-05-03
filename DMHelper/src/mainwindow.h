@@ -77,8 +77,8 @@ public slots:
     void importCharacter();
     //void TEST_DISCORD();
     void importItem();
-    void newNPC();
-    void importNPC();
+    //void newNPC();
+    //void importNPC();
     //void removeCurrentCharacter();
     void newParty();
     void newTextEncounter();
@@ -136,6 +136,7 @@ protected:
     Adventure* adventureFromIndex(const QModelIndex & index);
     Encounter* encounterFromIndex(const QModelIndex & index);
     Map* mapFromIndex(const QModelIndex & index);
+    bool selectItem(QUuid itemId);
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
     QStandardItem* findItem(QStandardItem* parent, int itemType, QUuid itemId);
@@ -146,7 +147,7 @@ protected:
     // Bestiary
     void writeBestiary();
 
-    void newEncounter(int encounterType);
+    CampaignObjectBase* newEncounter(int encounterType);
 
 protected slots:
     void openFile(const QString& filename);

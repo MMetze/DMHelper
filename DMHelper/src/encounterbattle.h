@@ -48,6 +48,7 @@ public:
     void removeCombatant(int wave, int index);
     Combatant* getCombatantById(QUuid combatantId, int combatantIntId) const;
 
+    void createBattleDialogModel();
     void setBattleDialogModel(BattleDialogModel* model);
     BattleDialogModel* getBattleDialogModel() const;
     void removeBattleDialogModel();

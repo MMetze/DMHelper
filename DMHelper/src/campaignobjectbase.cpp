@@ -242,8 +242,11 @@ QUuid CampaignObjectBase::addObject(CampaignObjectBase* object)
     if(!object)
         return QUuid();
 
-    if(parent())
-        disconnect(object, nullptr, parent(), nullptr);
+    if(object->parent() == this)
+        return object->getID();
+
+    if(object->parent())
+        disconnect(object, nullptr, object->parent(), nullptr);
 
     object->setParent(this);
 

@@ -45,7 +45,13 @@
  * Widget activating...
  * define position to add a track (audiotrackedit.cpp line 47)
  * add/remove objects
- * open/close campaigns crashes
+ * DONE open/close campaigns crashes
+ * Update tree icons
+ * Add conditions
+ * Add create character from monster
+ * CRASH at end of video
+ * Main window context menus
+ * Fix trace spam
  *
  * Mainwindow: updatecampaigntree, contextmenu, handletreeitemchanged, handletreeitemselected, handletreestatechanged
  *

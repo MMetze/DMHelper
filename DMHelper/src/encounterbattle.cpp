@@ -347,6 +347,12 @@ Combatant* EncounterBattle::getCombatantById(QUuid combatantId, int combatantInt
     return nullptr;
 }
 
+void EncounterBattle::createBattleDialogModel()
+{
+    qDebug() << "[EncounterBattle] Creating new battle model for encounter " << getID();
+    setBattleDialogModel(createNewBattle(QPointF(0.0, 0.0)));
+}
+
 void EncounterBattle::setBattleDialogModel(BattleDialogModel* model)
 {
     qDebug() << "[EncounterBattle] Setting new battle model to " << model->getID() << " for encounter " << getID();
@@ -479,7 +485,10 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 
     QDomElement rootBattleElement = element.firstChildElement("battle");
     if(rootBattleElement.isNull())
+    {
+        _battleModel = createNewBattle(QPointF(0.0, 0.0));
         return;
+    }
 
     /*
     int battleId = rootBattleElement.attribute("battleID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();

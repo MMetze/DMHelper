@@ -47,6 +47,7 @@ SOURCES += main.cpp\
     campaignexporter.cpp \
     campaignobjectfactory.cpp \
     campaignobjectframe.cpp \
+    campaigntreeitem.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
     combatantwidget.cpp \
@@ -234,6 +235,7 @@ HEADERS  += mainwindow.h \
     campaignexporter.h \
     campaignobjectfactory.h \
     campaignobjectframe.h \
+    campaigntreeitem.h \
     characterimportdialog.h \
     colorpushbutton.h \
     combatantwidget.h \

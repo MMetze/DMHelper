@@ -40,7 +40,7 @@ void RibbonMain::enableTab(RibbonFrame* page)
         _publishProxy.addPublishButton(page->getPublishRibbon());
     }
 
-    setCurrentWidget(page);
+    //setCurrentWidget(page);
 }
 
 void RibbonMain::disableTab(RibbonFrame* page)

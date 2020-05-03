@@ -18,11 +18,14 @@ signals:
 
 public slots:
     void campaignChanged();
+    void handleItemMoved(QStandardItem* parentItem, int row);
 
 protected:
-    virtual void dragMoveEvent(QDragMoveEvent * event);
-    virtual void dropEvent(QDropEvent * event);
+    virtual void dragMoveEvent(QDragMoveEvent * event) override;
+    virtual void dropEvent(QDropEvent * event) override;
+    virtual void rowsInserted(const QModelIndex &parent, int start, int end) override;
 
+    void updateExpandedState();
     void iterateItemExpanded(QStandardItem* item);
 };
 

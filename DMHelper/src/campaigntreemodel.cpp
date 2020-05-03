@@ -1,15 +1,21 @@
 #include "campaigntreemodel.h"
 #include "combatant.h"
+#include "character.h"
+#include "campaigntreeitem.h"
 #include "dmconstants.h"
 #include <QMimeData>
 #include <QUuid>
+#include <QTimer>
 #include <QDebug>
 
 CampaignTreeModel::CampaignTreeModel(QObject *parent) :
     QStandardItemModel(parent),
     _campaign(nullptr),
-    _objectIndexMap()
+    _objectIndexMap(),
+    _updateParent(nullptr),
+    _updateRow(-1)
 {
+    setItemPrototype(new CampaignTreeItem());
 }
 
 Campaign* CampaignTreeModel::getCampaign() const
@@ -30,6 +36,16 @@ QModelIndex CampaignTreeModel::getObject(const QUuid& objectId) const
     return result;
 }
 
+CampaignTreeItem *CampaignTreeModel::campaignItem(int row, int column) const
+{
+    return dynamic_cast<CampaignTreeItem*>(item(row, column));
+}
+
+CampaignTreeItem *CampaignTreeModel::campaignItemFromIndex(const QModelIndex &index) const
+{
+    return dynamic_cast<CampaignTreeItem*>(itemFromIndex(index));
+}
+
 QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
 {
     QMimeData *data = QStandardItemModel::mimeData(indexes);
@@ -38,12 +54,14 @@ QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
 
     if(indexes.count() == 1)
     {
-        QStandardItem* item = itemFromIndex(indexes.at(0));
+        CampaignTreeItem* item = campaignItemFromIndex(indexes.at(0));
         if(item)
         {
             QByteArray encodedData;
             QDataStream stream(&encodedData, QIODevice::WriteOnly);
-            stream << item->data(DMHelper::TreeItemData_Type).toInt() << QUuid(item->data(DMHelper::TreeItemData_ID).toString());
+            //stream << item->data(DMHelper::TreeItemData_Type).toInt() << QUuid(item->data(DMHelper::TreeItemData_ID).toString());
+            uintptr_t ptr = reinterpret_cast<uintptr_t>(item->getCampaignItemObject());
+            stream << item->getCampaignItemType() << item->getCampaignItemId() << ptr;
             data->setData(QString("application/vnd.dmhelper.text"), encodedData);
         }
     }
@@ -58,12 +76,15 @@ QStringList	CampaignTreeModel::mimeTypes() const
 
 void CampaignTreeModel::setCampaign(Campaign* campaign)
 {
-    if(_campaign != campaign)
+    if(!campaign)
+    {
+        _campaign = nullptr;
+        clear();
+    }
+    else if(_campaign != campaign)
     {
         _campaign = campaign;
-
         updateCampaignEntries();
-
         emit campaignChanged(_campaign);
     }
 }
@@ -77,12 +98,54 @@ void CampaignTreeModel::refresh()
     emit campaignChanged(_campaign);
 }
 
+void CampaignTreeModel::handleRowsInserted(const QModelIndex &parent, int first, int last)
+{
+    Q_UNUSED(last);
+    //QModelIndex insertedIndex = index(first, 0, parent);
+    //QStandardItem* insertedItem = itemFromIndex(insertedIndex);
+    QStandardItem* parentItem = itemFromIndex(parent);
+    //QStandardItem* insertedItem = parentItem->child(first);
+    //qDebug() << "[CampaignTreeModel] Row inserted: " << parent << "=" << (parentItem ? parentItem->text() : QString("null")) << ", first: " << first << ", last: " << last << ": " << (insertedItem ? insertedItem->text() : QString("null"));
+
+    /*
+    QModelIndex insertedIndex = index(first, 0, parent);
+    CampaignObjectBase* insertedObject = reinterpret_cast<CampaignObjectBase*>(data(insertedIndex, DMHelper::TreeItemData_Object).value<uintptr_t>());
+    QUuid insertedId = data(insertedIndex, DMHelper::TreeItemData_ID).toString();
+    QVariant displayRole = data(insertedIndex);
+    */
+
+    _updateParent = parentItem;
+    _updateRow = first;
+    QTimer::singleShot(0, this, SLOT(handleTimer()));
+}
+
+/*
+void CampaignTreeModel::handleRowsRemoved(const QModelIndex &parent, int first, int last)
+{
+    QModelIndex insertedIndex = index(first, 0, parent);
+    QStandardItem* insertedItem = itemFromIndex(insertedIndex);
+    QStandardItem* parentItem = itemFromIndex(parent);
+    qDebug() << "[CampaignTreeModel] Row removed: " << parent << "=" << (parentItem ? parentItem->text() : QString("null")) << ", first: " << first << ", last: " << last << ": " << insertedIndex << "=" << (insertedItem ? insertedItem->text() : QString("null"));
+}
+*/
+
+void CampaignTreeModel::handleTimer()
+{
+    validateIndividualChild(_updateParent, _updateRow);
+    emit itemMoved(_updateParent, _updateRow);
+    _updateParent = nullptr;
+    _updateRow = -1;
+}
+
 void CampaignTreeModel::updateCampaignEntries()
 {
     if(!_campaign)
         return;
 
     qDebug() << "[CampaignTreeModel] Campaign update detected, recreating campaign model.";
+
+    disconnect(this, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(handleRowsInserted(const QModelIndex &, int, int)));
+    // disconnect(this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)), this, SLOT(handleRowsRemoved(const QModelIndex &, int, int)));
 
     _objectIndexMap.clear();
     clear();
@@ -99,6 +162,9 @@ void CampaignTreeModel::updateCampaignEntries()
         }
         */
     }
+
+    connect(this, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(handleRowsInserted(const QModelIndex &, int, int)));
+    //connect(this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)), this, SLOT(handleRowsRemoved(const QModelIndex &, int, int)));
 }
 
 QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QStandardItem* parentEntry)
@@ -106,7 +172,8 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     if(!object)
         return nullptr;
 
-    QStandardItem* treeEntry = new QStandardItem(object->getName());
+    //QStandardItem* treeEntry = new QStandardItem(object->getName());
+    QStandardItem* treeEntry = new CampaignTreeItem(object->getName());
     treeEntry->setEditable(true);
 
 //    treeEntry->setData(QVariant::fromValue(static_cast<void*>(object)),DMHelper::TreeItemData_Object);
@@ -127,10 +194,16 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
                 Combatant* combatant = dynamic_cast<Combatant*>(object);
                 if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Character))
                 {
-                    treeEntry->setCheckable(true);
+                    Character* character = dynamic_cast<Character*>(combatant);
+                    if((character) && (character->isInParty()))
+                    {
+                        treeEntry->setCheckable(true);
+                        treeEntry->setIcon(QIcon(":/img/data/icon_newcharacter.png"));
+                        break;
+                    }
                 }
             }
-            treeEntry->setIcon(QIcon(":/img/data/icon_newcharacter.png"));
+            treeEntry->setIcon(QIcon(":/img/data/icon_newnpc.png"));
             break;
         case DMHelper::CampaignType_Map:
             treeEntry->setIcon(QIcon(":/img/data/icon_newmap.png"));
@@ -184,4 +257,59 @@ void CampaignTreeModel::appendTreeEntry(QStandardItem* objectEntry, QStandardIte
     _objectIndexMap.insert(objectId, objectEntry->index());
 
     qDebug() << "[CampaignTreeModel] Added object: " << objectEntry->text() << ", ID: " << objectId << ", Index: " << objectEntry->index();
+}
+
+void CampaignTreeModel::validateChildStructure(QStandardItem* parentItem)
+{
+    if(!parentItem)
+        return;
+
+    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
+    if((!parentObject) || (parentId.isNull()))
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: Not possible to validate child structure - parent ID: " << parentId << ", object: " << parentObject;
+        return;
+    }
+
+    for(int i = 0; i < parentItem->rowCount(); ++i)
+    {
+        QStandardItem* childItem = parentItem->child(i);
+        if(childItem)
+        {
+            CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+            if(childObject)
+            {
+                const CampaignObjectBase* currentParentObject = qobject_cast<const CampaignObjectBase*>(childObject->parent());
+                if((!currentParentObject) || (currentParentObject->getID() != parentId))
+                    childObject->setParent(parentObject);
+            }
+        }
+    }
+}
+
+void CampaignTreeModel::validateIndividualChild(QStandardItem* parentItem, int row)
+{
+    if((!parentItem) || (row < 0) || (row >= parentItem->rowCount()))
+        return;
+
+    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
+    if((!parentObject) || (parentId.isNull()))
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: Not possible to validate child  - parent ID: " << parentId << ", object: " << parentObject;
+        return;
+    }
+
+    QStandardItem* childItem = parentItem->child(row);
+    if(childItem)
+    {
+        CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+        if(childObject)
+        {
+            const CampaignObjectBase* currentParentObject = qobject_cast<const CampaignObjectBase*>(childObject->parent());
+            if((!currentParentObject) || (currentParentObject->getID() != parentId))
+                childObject->setParent(parentObject);
+        }
+    }
 }
