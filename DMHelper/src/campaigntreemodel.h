@@ -22,15 +22,17 @@ public:
     CampaignTreeItem *campaignItem(int row, int column = 0) const;
     CampaignTreeItem *campaignItemFromIndex(const QModelIndex &index) const;
 
-signals:
-    void campaignChanged(Campaign* campaign);
-    void itemMoved(QStandardItem* parentItem, int row);
-
-public slots:
-
     // From QAbstractItemModel
     virtual QMimeData *	mimeData(const QModelIndexList & indexes) const override;
     virtual QStringList	mimeTypes() const override;
+    virtual bool dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent) override;
+
+signals:
+    void campaignChanged(Campaign* campaign);
+    //void itemMoved(QStandardItem* parentItem, int row);
+    void itemMoved(QStandardItem* movedItem);
+
+public slots:
 
     void setCampaign(Campaign* campaign);
     void refresh();
@@ -47,7 +49,11 @@ protected:
     void appendTreeEntry(QStandardItem* objectEntry, QStandardItem* parentEntry);
     void validateChildStructure(QStandardItem* parentItem);
     void validateIndividualChild(QStandardItem* parentItem, int row);
+    void validateIndividualChild(QStandardItem* parentItem, QStandardItem* childItem);
     void resetItemExpansion(QStandardItem* item);
+
+    void iterateTreeEntryVisualization(CampaignTreeItem* entry);
+    void setTreeEntryVisualization(CampaignTreeItem* entry);
 
     Campaign* _campaign;
     QMap<QUuid, QModelIndex> _objectIndexMap;

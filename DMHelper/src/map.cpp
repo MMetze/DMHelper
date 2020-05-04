@@ -270,6 +270,9 @@ void Map::applyPaintTo(QImage* target, QColor clearColor, int index)
 
     if(!target)
     {
+        if(_imgFow.isNull())
+            return;
+
         target = &_imgFow;
         preview = true;
     }
@@ -398,6 +401,9 @@ void Map::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* targ
 {
     if(!target)
     {
+        if(_imgFow.isNull())
+            return;
+
         target = &_imgFow;
     }
 
@@ -475,6 +481,9 @@ void Map::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevic
 {
     if(!target)
     {
+        if(_imgFow.isNull())
+            return;
+
         target = &_imgFow;
     }
 
@@ -534,6 +543,9 @@ void Map::fillFoW( QColor color, QPaintDevice* target )
 {
     if(!target)
     {
+        if(_imgFow.isNull())
+            return;
+
         target = &_imgFow;
     }
 

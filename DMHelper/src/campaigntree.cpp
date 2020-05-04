@@ -32,6 +32,7 @@ void CampaignTree::campaignChanged()
     updateExpandedState();
 }
 
+/*
 void CampaignTree::handleItemMoved(QStandardItem* parentItem, int row)
 {
     if(!parentItem)
@@ -54,6 +55,26 @@ void CampaignTree::handleItemMoved(QStandardItem* parentItem, int row)
     // Select the moved item
     setCurrentIndex(childItem->index());
 }
+*/
+
+void CampaignTree::handleItemMoved(QStandardItem* movedItem)
+{
+    if(!movedItem)
+        return;
+
+    QModelIndex movedIndex = movedItem->index();
+
+    // Open the item's new parent
+    QModelIndex parentIndex = movedIndex.parent();
+    if(parentIndex.isValid())
+        setExpanded(parentIndex, true);
+
+    // Set the expanded state of the item's children appropriately
+    iterateItemExpanded(movedItem);
+
+    // Select the moved item --> this really messes with the model, I assume the movement causes other items to get selected afterwards. If required to select the moved item, it needs to use a 0-duration timer
+    //setCurrentIndex(movedIndex);
+}
 
 void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
 {
@@ -73,6 +94,7 @@ void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
 
 void CampaignTree::dropEvent(QDropEvent * event)
 {
+    /*
     event->ignore();
 
     const QMimeData* data = event->mimeData();
@@ -123,6 +145,7 @@ void CampaignTree::dropEvent(QDropEvent * event)
     // Open the item's new parent
     targetObject->setExpanded(true);
     setExpanded(targetIndex, true);
+    */
 
     QTreeView::dropEvent(event);
 

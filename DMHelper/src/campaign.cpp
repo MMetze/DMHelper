@@ -52,6 +52,13 @@
  * CRASH at end of video
  * Main window context menus
  * Fix trace spam
+ * Shortcuts
+ * Add party view, rework character view, add party icon to battles/maps
+ * Thin lines for brian
+ *
+ * BUGS
+ *      Drag encounter to top level - crash
+ *      Remove encounter
  *
  * Mainwindow: updatecampaigntree, contextmenu, handletreeitemchanged, handletreeitemselected, handletreestatechanged
  *

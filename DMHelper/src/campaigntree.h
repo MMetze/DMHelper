@@ -18,7 +18,8 @@ signals:
 
 public slots:
     void campaignChanged();
-    void handleItemMoved(QStandardItem* parentItem, int row);
+    //void handleItemMoved(QStandardItem* parentItem, int row);
+    void handleItemMoved(QStandardItem* movedItem);
 
 protected:
     virtual void dragMoveEvent(QDragMoveEvent * event) override;

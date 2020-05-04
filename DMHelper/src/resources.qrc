@@ -176,7 +176,6 @@
         <file>data/icon_close.png</file>
         <file>data/icon_downarrow.png</file>
         <file>data/icon_new.png</file>
-        <file>data/icon_newadventure.png</file>
         <file>data/icon_newbattle.png</file>
         <file>data/icon_newcharacter.png</file>
         <file>data/icon_newnpc.png</file>
@@ -227,6 +226,14 @@
         <file>data/icon_background.png</file>
         <file>data/icon_bold.png</file>
         <file>data/icon_italics.png</file>
+        <file>data/icon_contentbattle.png</file>
+        <file>data/icon_contentcharacter.png</file>
+        <file>data/icon_contentmap.png</file>
+        <file>data/icon_contentnpc.png</file>
+        <file>data/icon_contentparty.png</file>
+        <file>data/icon_contentscrollingtext.png</file>
+        <file>data/icon_contenttextencounter.png</file>
+        <file>data/icon_newparty.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

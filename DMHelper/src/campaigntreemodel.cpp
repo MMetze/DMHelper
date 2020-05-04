@@ -8,6 +8,9 @@
 #include <QTimer>
 #include <QDebug>
 
+// Uncomment the next line to log in detail all of the additions to the campaign model
+//#define CAMPAIGN_MODEL_LOGGING
+
 CampaignTreeModel::CampaignTreeModel(QObject *parent) :
     QStandardItemModel(parent),
     _campaign(nullptr),
@@ -74,6 +77,52 @@ QStringList	CampaignTreeModel::mimeTypes() const
     return QStandardItemModel::mimeTypes() <<  QLatin1String("application/vnd.dmhelper.text");
 }
 
+bool CampaignTreeModel::dropMimeData(const QMimeData *data, Qt::DropAction action, int row, int column, const QModelIndex &parent)
+{
+    bool result = QStandardItemModel::dropMimeData(data, action, row, column, parent);
+
+    if((!data) || (!parent.isValid()))
+        return result;
+
+    QByteArray encodedData = data->data(QString("application/vnd.dmhelper.text"));
+    QDataStream stream(&encodedData, QIODevice::ReadOnly);
+    int treeItemDataType;
+    QUuid treeItemDataID;
+    uintptr_t treeItemObjectPtr;
+    stream >> treeItemDataType >> treeItemDataID >> treeItemObjectPtr;
+
+    // TODO: Clean up, probably don't even need the MimeData!
+    CampaignObjectBase* movedObject = reinterpret_cast<CampaignObjectBase*>(treeItemObjectPtr);
+    CampaignTreeItem* parentItem = campaignItemFromIndex(parent);
+    CampaignObjectBase* parentObject = nullptr;
+    if(parentItem)
+        parentObject = parentItem->getCampaignItemObject();
+    //QModelIndex insertedIndex = index(row, column, parent);
+    //CampaignTreeItem* insertedItem = campaignItemFromIndex(insertedIndex);
+    if((row < 0) || (row > rowCount(parent)))
+        row = rowCount(parent);
+    QStandardItem* insertedStandardItem = parentItem->child(row - 1, 0);
+    CampaignTreeItem* insertedItem = dynamic_cast<CampaignTreeItem*>(insertedStandardItem);
+    CampaignObjectBase* insertedObject = nullptr;
+    if(insertedItem)
+        insertedObject = insertedItem->getCampaignItemObject();
+
+    // Open the item's new parent
+    if(parentObject)
+        parentObject->setExpanded(true);
+
+    // Set the campaign parent for the item
+    validateIndividualChild(parentItem, insertedItem);
+
+    // Update the moved object's icon if needed
+    iterateTreeEntryVisualization(insertedItem);
+
+    emit itemMoved(insertedItem);
+
+    return result;
+}
+
+
 void CampaignTreeModel::setCampaign(Campaign* campaign)
 {
     if(!campaign)
@@ -116,7 +165,7 @@ void CampaignTreeModel::handleRowsInserted(const QModelIndex &parent, int first,
 
     _updateParent = parentItem;
     _updateRow = first;
-    QTimer::singleShot(0, this, SLOT(handleTimer()));
+    //QTimer::singleShot(0, this, SLOT(handleTimer()));
 }
 
 /*
@@ -132,7 +181,7 @@ void CampaignTreeModel::handleRowsRemoved(const QModelIndex &parent, int first, 
 void CampaignTreeModel::handleTimer()
 {
     validateIndividualChild(_updateParent, _updateRow);
-    emit itemMoved(_updateParent, _updateRow);
+    //emit itemMoved(_updateParent, _updateRow);
     _updateParent = nullptr;
     _updateRow = -1;
 }
@@ -173,7 +222,7 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
         return nullptr;
 
     //QStandardItem* treeEntry = new QStandardItem(object->getName());
-    QStandardItem* treeEntry = new CampaignTreeItem(object->getName());
+    CampaignTreeItem* treeEntry = new CampaignTreeItem(object->getName());
     treeEntry->setEditable(true);
 
 //    treeEntry->setData(QVariant::fromValue(static_cast<void*>(object)),DMHelper::TreeItemData_Object);
@@ -184,43 +233,7 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     //treeModel->appendRow(campaignItem);
     //ui->treeView->expand(campaignItem->index());
 
-    switch(object->getObjectType())
-    {
-        case DMHelper::CampaignType_Party:
-            treeEntry->setIcon(QIcon(":/img/data/icon_newadventure.png"));
-            break;
-        case DMHelper::CampaignType_Combatant:
-            {
-                Combatant* combatant = dynamic_cast<Combatant*>(object);
-                if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Character))
-                {
-                    Character* character = dynamic_cast<Character*>(combatant);
-                    if((character) && (character->isInParty()))
-                    {
-                        treeEntry->setCheckable(true);
-                        treeEntry->setIcon(QIcon(":/img/data/icon_newcharacter.png"));
-                        break;
-                    }
-                }
-            }
-            treeEntry->setIcon(QIcon(":/img/data/icon_newnpc.png"));
-            break;
-        case DMHelper::CampaignType_Map:
-            treeEntry->setIcon(QIcon(":/img/data/icon_newmap.png"));
-            break;
-        case DMHelper::CampaignType_Text:
-            treeEntry->setIcon(QIcon(":/img/data/icon_newtextencounter.png"));
-            break;
-        case DMHelper::CampaignType_Battle:
-            treeEntry->setIcon(QIcon(":/img/data/icon_newbattle.png"));
-            break;
-        case DMHelper::CampaignType_ScrollingText:
-            treeEntry->setIcon(QIcon(":/img/data/icon_newscrollingtext.png"));
-            break;
-        case DMHelper::CampaignType_AudioTrack:
-            treeEntry->setIcon(QIcon(":/img/data/icon_music.png"));
-            break;
-    }
+    setTreeEntryVisualization(treeEntry);
 
     appendTreeEntry(treeEntry, parentEntry);
 
@@ -256,7 +269,9 @@ void CampaignTreeModel::appendTreeEntry(QStandardItem* objectEntry, QStandardIte
     parentEntry->appendRow(objectEntry);
     _objectIndexMap.insert(objectId, objectEntry->index());
 
+#ifdef CAMPAIGN_MODEL_LOGGING
     qDebug() << "[CampaignTreeModel] Added object: " << objectEntry->text() << ", ID: " << objectId << ", Index: " << objectEntry->index();
+#endif
 }
 
 void CampaignTreeModel::validateChildStructure(QStandardItem* parentItem)
@@ -293,6 +308,14 @@ void CampaignTreeModel::validateIndividualChild(QStandardItem* parentItem, int r
     if((!parentItem) || (row < 0) || (row >= parentItem->rowCount()))
         return;
 
+    validateIndividualChild(parentItem, parentItem->child(row));
+}
+
+void CampaignTreeModel::validateIndividualChild(QStandardItem* parentItem, QStandardItem* childItem)
+{
+    if((!parentItem) || (!childItem))
+        return;
+
     CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
     QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
     if((!parentObject) || (parentId.isNull()))
@@ -301,15 +324,82 @@ void CampaignTreeModel::validateIndividualChild(QStandardItem* parentItem, int r
         return;
     }
 
-    QStandardItem* childItem = parentItem->child(row);
-    if(childItem)
+    CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    if(childObject)
     {
-        CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
-        if(childObject)
-        {
-            const CampaignObjectBase* currentParentObject = qobject_cast<const CampaignObjectBase*>(childObject->parent());
-            if((!currentParentObject) || (currentParentObject->getID() != parentId))
-                childObject->setParent(parentObject);
-        }
+        const CampaignObjectBase* currentParentObject = qobject_cast<const CampaignObjectBase*>(childObject->parent());
+        if((!currentParentObject) || (currentParentObject->getID() != parentId))
+            childObject->setParent(parentObject);
     }
+}
+
+void CampaignTreeModel::iterateTreeEntryVisualization(CampaignTreeItem* entry)
+{
+    if(!entry)
+        return;
+
+    setTreeEntryVisualization(entry);
+
+    for(int i = 0; i < entry->rowCount(); ++i)
+    {
+        iterateTreeEntryVisualization(dynamic_cast<CampaignTreeItem*>(entry->child(i)));
+    }
+}
+
+void CampaignTreeModel::setTreeEntryVisualization(CampaignTreeItem* entry)
+{
+    if(!entry)
+        return;
+
+    CampaignObjectBase* object = entry->getCampaignItemObject();
+    if(!object)
+        return;
+
+    switch(object->getObjectType())
+    {
+        case DMHelper::CampaignType_Party:
+            entry->setIcon(QIcon(":/img/data/icon_contentparty.png"));
+            break;
+        case DMHelper::CampaignType_Combatant:
+            {
+                Character* character = dynamic_cast<Character*>(object);
+                bool isPC = ((character) && (character->isInParty()));
+                entry->setCheckable(isPC);
+                entry->setIcon(isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
+            }
+            break;
+        /*
+            {
+                Combatant* combatant = dynamic_cast<Combatant*>(object);
+                if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Character))
+                {
+                    Character* character = dynamic_cast<Character*>(combatant);
+                    if((character) && (character->isInParty()))
+                    {
+                        treeEntry->setCheckable(true);
+                        treeEntry->setIcon(QIcon(":/img/data/icon_character.png"));
+                        break;
+                    }
+                }
+            }
+            treeEntry->setIcon(QIcon(":/img/data/icon_contentnpc.png"));
+            break;
+        */
+        case DMHelper::CampaignType_Map:
+            entry->setIcon(QIcon(":/img/data/icon_contentmap.png"));
+            break;
+        case DMHelper::CampaignType_Text:
+            entry->setIcon(QIcon(":/img/data/icon_contenttextencounter.png"));
+            break;
+        case DMHelper::CampaignType_Battle:
+            entry->setIcon(QIcon(":/img/data/icon_contentbattle.png"));
+            break;
+        case DMHelper::CampaignType_ScrollingText:
+            entry->setIcon(QIcon(":/img/data/icon_contentscrollingtext.png"));
+            break;
+        case DMHelper::CampaignType_AudioTrack:
+            entry->setIcon(QIcon(":/img/data/icon_music.png"));
+            break;
+    }
+
 }
