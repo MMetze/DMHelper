@@ -364,8 +364,10 @@ void CampaignTreeModel::setTreeEntryVisualization(CampaignTreeItem* entry)
             {
                 Character* character = dynamic_cast<Character*>(object);
                 bool isPC = ((character) && (character->isInParty()));
-                entry->setCheckable(isPC);
                 entry->setIcon(isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
+                entry->setCheckable(isPC);
+                if(!isPC)
+                    entry->setData(QVariant(), Qt::CheckStateRole); // Needed to actively remove the checkbox on the entry
             }
             break;
         /*

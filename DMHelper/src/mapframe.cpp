@@ -90,9 +90,6 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
     //connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
 
-    connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
-    connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
-
     //connect(ui->btnPublishVisible,SIGNAL(clicked(bool)),this,SLOT(publishModeVisibleClicked()));
     //connect(ui->btnPublishZoom,SIGNAL(clicked(bool)),this,SLOT(publishModeZoomClicked()));
 
@@ -587,18 +584,13 @@ void MapFrame::setBackgroundColor(QColor color)
 
 void MapFrame::initializeFoW()
 {
-    delete _backgroundImage;
-    _backgroundImage = nullptr;
-    delete _backgroundVideo;
-    _backgroundVideo = nullptr;
-    delete _fow;
-    _fow = nullptr;
+    if((_backgroundImage) || (_backgroundVideo) || (_fow) || (_scene))
+        qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame contents NOT done. Undefined behavior!";
 
-    delete _scene;
     _scene = new QGraphicsScene(this);
     ui->graphicsView->setScene(_scene);
 
-    cancelSelect();
+    //cancelSelect();
     //ui->framePublish->cancelPublish();
 
     if(!_mapSource)
@@ -626,12 +618,18 @@ void MapFrame::initializeFoW()
         startPublishTimer();
     }
 
+    connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+
     _isVideo = !_mapSource->isInitialized();
 }
 
 void MapFrame::uninitializeFoW()
 {
     qDebug() << "[MapFrame] Uninitializing MapFrame...";
+
+    disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
     stopPublishTimer();
     cleanupBuffers();
@@ -640,6 +638,16 @@ void MapFrame::uninitializeFoW()
         _videoPlayer->stopThenDelete();
         _videoPlayer = nullptr;
     }
+
+    delete _backgroundImage;
+    _backgroundImage = nullptr;
+    delete _backgroundVideo;
+    _backgroundVideo = nullptr;
+    delete _fow;
+    _fow = nullptr;
+
+    delete _scene;
+    _scene = nullptr;
 }
 
 void MapFrame::loadTracks()
@@ -1084,7 +1092,8 @@ void MapFrame::cleanupBuffers()
 
     if(_backgroundImage)
     {
-        _scene->removeItem(_backgroundImage);
+        if(_scene)
+            _scene->removeItem(_backgroundImage);
         tempItem = _backgroundImage;
         _backgroundImage = nullptr;
         delete tempItem;
@@ -1092,7 +1101,8 @@ void MapFrame::cleanupBuffers()
 
     if(_backgroundVideo)
     {
-        _scene->removeItem(_backgroundVideo);
+        if(_scene)
+            _scene->removeItem(_backgroundVideo);
         tempItem = _backgroundVideo;
         _backgroundVideo = nullptr;
         delete tempItem;
@@ -1100,14 +1110,18 @@ void MapFrame::cleanupBuffers()
 
     if(_fow)
     {
-        _scene->removeItem(_fow);
+        if(_scene)
+            _scene->removeItem(_fow);
         tempItem = _fow;
         _fow = nullptr;
         delete tempItem;
     }
 
-    _scene->clear();
-    _scene->update();
+    if(_scene)
+    {
+        _scene->clear();
+        _scene->update();
+    }
 }
 
 void MapFrame::startAudioTrack()
@@ -1133,13 +1147,15 @@ void MapFrame::setMapCursor()
                 if(_brushMode == DMHelper::BrushType_Circle)
                 {
                     //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    drawEditCursor();
                 }
                 //else if(ui->grpBrush->checkedId() == DMHelper::BrushType_Square)
                 else if(_brushMode == DMHelper::BrushType_Square)
                 {
                     //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                    drawEditCursor();
                 }
                 else
                 {
@@ -1155,6 +1171,24 @@ void MapFrame::setMapCursor()
                 break;
         }
     }
+}
+
+void MapFrame::drawEditCursor()
+{
+    int cursorSize = _scale * _brushSize * 2;
+    QPixmap cursorPixmap(QSize(cursorSize, cursorSize));
+    cursorPixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&cursorPixmap);
+        painter.setBrush(Qt::NoBrush);
+        painter.setPen(QPen(QBrush(Qt::black), 4));
+        if(_brushMode == DMHelper::BrushType_Circle)
+            painter.drawEllipse(0, 0, cursorSize, cursorSize);
+        else
+            painter.drawRect(0, 0, cursorSize, cursorSize);
+    painter.end();
+
+    ui->graphicsView->viewport()->setCursor(QCursor(cursorPixmap));
 }
 
 /*
@@ -1218,7 +1252,15 @@ void MapFrame::loadViewRect()
 
     if(_mapSource->getMapRect().isValid())
     {
+        disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+        disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+
         ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
+        QTransform t = ui->graphicsView->transform();
+        _scale = t.m11();
+
+        connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+        connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     }
     else
     {

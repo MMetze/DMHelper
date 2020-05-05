@@ -118,6 +118,7 @@ protected:
 
 protected slots:
     void setMapCursor();
+    void drawEditCursor();
 //    void publishModeVisibleClicked();
 //    void publishModeZoomClicked();
     void rotatePublish();

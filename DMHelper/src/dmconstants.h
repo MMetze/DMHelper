@@ -10,7 +10,7 @@ namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 1;
     const int DMHELPER_MINOR_VERSION = 7;
-    const int DMHELPER_ENGINEERING_VERSION = 12;
+    const int DMHELPER_ENGINEERING_VERSION = 13;
 
     const int CAMPAIGN_MAJOR_VERSION = 2;
     const int CAMPAIGN_MINOR_VERSION = 0;
