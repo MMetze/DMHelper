@@ -59,10 +59,10 @@ void CampaignTreeItem::setCampaignItemId(const QUuid& itemId)
 
 CampaignObjectBase* CampaignTreeItem::getCampaignItemObject() const
 {
-    return reinterpret_cast<CampaignObjectBase*>(data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    return reinterpret_cast<CampaignObjectBase*>(data(DMHelper::TreeItemData_Object).value<quint64>());
 }
 
 void CampaignTreeItem::setCampaignItemObject(CampaignObjectBase* itemObject)
 {
-    setData(QVariant::fromValue(reinterpret_cast<uintptr_t>(itemObject)), DMHelper::TreeItemData_Object);
+    setData(QVariant::fromValue(reinterpret_cast<quint64>(itemObject)), DMHelper::TreeItemData_Object);
 }

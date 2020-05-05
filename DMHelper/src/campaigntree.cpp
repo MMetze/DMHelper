@@ -24,7 +24,7 @@ CampaignObjectBase* CampaignTree::currentCampaignObject()
         return nullptr;
 
 //    return static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
-    return reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    return reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<quint64>());
 }
 
 void CampaignTree::campaignChanged()
@@ -38,7 +38,7 @@ void CampaignTree::handleItemMoved(QStandardItem* parentItem, int row)
     if(!parentItem)
         return;
 
-    //CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    //CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
     //if(parentObject)
     //    parentObject->setExpanded(true);
 
@@ -102,7 +102,7 @@ void CampaignTree::dropEvent(QDropEvent * event)
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     int treeItemDataType;
     QUuid treeItemDataID;
-    uintptr_t treeItemObjectPtr;
+    quint64 treeItemObjectPtr;
     stream >> treeItemDataType >> treeItemDataID >> treeItemObjectPtr;
 
     CampaignObjectBase* movedObject = reinterpret_cast<CampaignObjectBase*>(treeItemObjectPtr);
@@ -280,18 +280,18 @@ void CampaignTree::rowsInserted(const QModelIndex &parent, int start, int end)
     if(!parentItem)
         return;
 
-    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
     parentObject->setExpanded(true);
     setExpanded(parent, true);
     */
     /*
     iterateItemExpanded(parentItem);
 
-    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
     QStandardItem* movedItem = parentItem->child(start);
     if(movedItem)
     {
-        CampaignObjectBase* movedObject = reinterpret_cast<CampaignObjectBase*>(movedItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+        CampaignObjectBase* movedObject = reinterpret_cast<CampaignObjectBase*>(movedItem->data(DMHelper::TreeItemData_Object).value<quint64>());
         if((movedObject)&&(parentObject))
         {
             qDebug() << "[CampaignTree] Row Inserted" << movedObject->getName() << "(" << ((void*)movedObject) << "), ID " << movedObject->getID() << " to parent object " << parentObject->getName() << "(" << ((void*)parentObject) << "), ID " << parentObject->getID();
@@ -306,7 +306,7 @@ void CampaignTree::rowsInserted(const QModelIndex &parent, int start, int end)
         QStandardItem* movedItem = campaignModel->itemFromIndex(newEntry);
         if(movedItem)
         {
-            CampaignObjectBase* movedObject = reinterpret_cast<CampaignObjectBase*>(movedItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+            CampaignObjectBase* movedObject = reinterpret_cast<CampaignObjectBase*>(movedItem->data(DMHelper::TreeItemData_Object).value<quint64>());
             if((movedObject)&&(parentObject))
             {
                 qDebug() << "[CampaignTree] Row Inserted" << movedObject->getName() << "(" << ((void*)movedObject) << "), ID " << movedObject->getID() << " to parent object " << parentObject->getName() << "(" << ((void*)parentObject) << "), ID " << parentObject->getID();
@@ -338,7 +338,7 @@ void CampaignTree::iterateItemExpanded(QStandardItem* item)
         return;
 
 //    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
-    CampaignObjectBase* itemObject = reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* itemObject = reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<quint64>());
     if(!itemObject)
         return;
 

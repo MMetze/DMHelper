@@ -155,11 +155,11 @@ signals:
     //void setPublishColor(QColor color);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent * e);
-    virtual bool eventFilter(QObject *obj, QEvent *event);
-    virtual void resizeEvent(QResizeEvent *event);
-    virtual void showEvent(QShowEvent *event);
-    virtual void timerEvent(QTimerEvent *event);
+    virtual void keyPressEvent(QKeyEvent * e) override;
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void showEvent(QShowEvent *event) override;
+    virtual void timerEvent(QTimerEvent *event) override;
 
 private slots:
     void setCompassVisibility(bool visible);

@@ -61,7 +61,7 @@ const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
 const qreal COMPASS_SCALE = 0.4;
 const int ROTATION_TIMER = 50;
-const qreal ROTATION_DELTA = 10.0;
+//const qreal ROTATION_DELTA = 10.0;
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     QTime tProfile;
@@ -1054,7 +1054,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                             int index = _model->getCombatantList().indexOf(combatant);
                             if(index >= 0)
                             {
-                                qDebug() << "[Battle Frame] starting combatant widget drag: index " << index << ": " << combatant->getName() << ", (" << reinterpret_cast<std::uintptr_t>(widget) << ") " << mouseEvent->pos().x() << "," << mouseEvent->pos().y();
+                                qDebug() << "[Battle Frame] starting combatant widget drag: index " << index << ": " << combatant->getName() << ", (" << reinterpret_cast<quint64>(widget) << ") " << mouseEvent->pos().x() << "," << mouseEvent->pos().y();
                                 QDrag *drag = new QDrag(this);
                                 QMimeData *mimeData = new QMimeData;
 
@@ -1155,7 +1155,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                         {
                             BattleDialogModelCombatant* combatant = _model->removeCombatant(index);
                             _model->insertCombatant(currentIndex, combatant);
-                            qDebug() << "[Battle Frame] combatant widget drag dropped: index " << index << ": " << combatant->getName() << " (" << reinterpret_cast<std::uintptr_t>(draggedWidget) << "), from pos " << index << " to pos " << currentIndex;
+                            qDebug() << "[Battle Frame] combatant widget drag dropped: index " << index << ": " << combatant->getName() << " (" << reinterpret_cast<quint64>(draggedWidget) << "), from pos " << index << " to pos " << currentIndex;
                         }
                     }
                 }
@@ -1710,7 +1710,7 @@ void BattleFrame::removeCombatant()
     QLayoutItem *child = _combatantLayout->takeAt(i);
     if(child != nullptr)
     {
-        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<std::uintptr_t>(child->widget());
+        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
         child->widget()->deleteLater();
         delete child;
     }
@@ -1773,7 +1773,7 @@ void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
     CombatantWidget* combatantWidget = getWidgetFromCombatant(_selectedCombatant);
     if(combatantWidget)
     {
-        qDebug() << "[Battle Frame] removing selected flag from widget " << reinterpret_cast<std::uintptr_t>(combatantWidget);
+        qDebug() << "[Battle Frame] removing selected flag from widget " << reinterpret_cast<quint64>(combatantWidget);
         combatantWidget->setSelected(false);
         if(_combatantIcons.value(_selectedCombatant, nullptr))
             _combatantIcons.value(_selectedCombatant, nullptr)->setZValue(DMHelper::BattleDialog_Z_Combatant);
@@ -1786,7 +1786,7 @@ void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
         selectedItem = _combatantIcons.value(selected, nullptr);
         if(combatantWidget)
         {
-            qDebug() << "[Battle Frame] adding selected flag to widget " << reinterpret_cast<std::uintptr_t>(combatantWidget);
+            qDebug() << "[Battle Frame] adding selected flag to widget " << reinterpret_cast<quint64>(combatantWidget);
             combatantWidget->setSelected(true);
             ui->scrollArea->ensureWidgetVisible(combatantWidget);
             if(selectedItem)
@@ -2554,7 +2554,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
     if(_combatantWidgets.contains(combatant))
     {
         newWidget = _combatantWidgets.value(combatant);
-        qDebug() << "[Battle Frame] found widget for combatant " << combatant->getName() << ": " << reinterpret_cast<std::uintptr_t>(newWidget);
+        qDebug() << "[Battle Frame] found widget for combatant " << combatant->getName() << ": " << reinterpret_cast<quint64>(newWidget);
         return newWidget;
     }
 
@@ -2605,7 +2605,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
     {
         newWidget->installEventFilter(this);
         _combatantWidgets.insert(combatant, newWidget);
-        qDebug() << "[Battle Frame] new widget inserted and event filter established: " << reinterpret_cast<std::uintptr_t>(newWidget);
+        qDebug() << "[Battle Frame] new widget inserted and event filter established: " << reinterpret_cast<quint64>(newWidget);
     }
 
     return newWidget;
@@ -2690,14 +2690,14 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
     CombatantWidget* combatantWidget = getWidgetFromCombatant(_model->getActiveCombatant());
     if(combatantWidget)
     {
-        qDebug() << "[Battle Frame] removing active flag from widget " << reinterpret_cast<std::uintptr_t>(combatantWidget);
+        qDebug() << "[Battle Frame] removing active flag from widget " << reinterpret_cast<quint64>(combatantWidget);
         combatantWidget->setActive(false);
     }
 
     combatantWidget = getWidgetFromCombatant(active);
     if(combatantWidget)
     {
-        qDebug() << "[Battle Frame] adding active flag to widget " << reinterpret_cast<std::uintptr_t>(combatantWidget);
+        qDebug() << "[Battle Frame] adding active flag to widget " << reinterpret_cast<quint64>(combatantWidget);
         combatantWidget->setActive(true);
         ui->scrollArea->ensureWidgetVisible(combatantWidget);
     }
@@ -2811,7 +2811,7 @@ QWidget* BattleFrame::findCombatantWidgetFromPosition(const QPoint& position) co
         }
     }
 
-    qDebug() << "[Battle Frame] ...widget found: " << reinterpret_cast<std::uintptr_t>(widget);
+    qDebug() << "[Battle Frame] ...widget found: " << reinterpret_cast<quint64>(widget);
     return widget;
 }
 

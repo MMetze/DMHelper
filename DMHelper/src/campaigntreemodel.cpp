@@ -63,7 +63,7 @@ QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
             QByteArray encodedData;
             QDataStream stream(&encodedData, QIODevice::WriteOnly);
             //stream << item->data(DMHelper::TreeItemData_Type).toInt() << QUuid(item->data(DMHelper::TreeItemData_ID).toString());
-            uintptr_t ptr = reinterpret_cast<uintptr_t>(item->getCampaignItemObject());
+            quint64 ptr = reinterpret_cast<quint64>(item->getCampaignItemObject());
             stream << item->getCampaignItemType() << item->getCampaignItemId() << ptr;
             data->setData(QString("application/vnd.dmhelper.text"), encodedData);
         }
@@ -88,7 +88,7 @@ bool CampaignTreeModel::dropMimeData(const QMimeData *data, Qt::DropAction actio
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     int treeItemDataType;
     QUuid treeItemDataID;
-    uintptr_t treeItemObjectPtr;
+    quint64 treeItemObjectPtr;
     stream >> treeItemDataType >> treeItemDataID >> treeItemObjectPtr;
 
     // TODO: Clean up, probably don't even need the MimeData!
@@ -158,7 +158,7 @@ void CampaignTreeModel::handleRowsInserted(const QModelIndex &parent, int first,
 
     /*
     QModelIndex insertedIndex = index(first, 0, parent);
-    CampaignObjectBase* insertedObject = reinterpret_cast<CampaignObjectBase*>(data(insertedIndex, DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* insertedObject = reinterpret_cast<CampaignObjectBase*>(data(insertedIndex, DMHelper::TreeItemData_Object).value<quint64>());
     QUuid insertedId = data(insertedIndex, DMHelper::TreeItemData_ID).toString();
     QVariant displayRole = data(insertedIndex);
     */
@@ -226,7 +226,7 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     treeEntry->setEditable(true);
 
 //    treeEntry->setData(QVariant::fromValue(static_cast<void*>(object)),DMHelper::TreeItemData_Object);
-    treeEntry->setData(QVariant::fromValue(reinterpret_cast<uintptr_t>(object)),DMHelper::TreeItemData_Object);
+    treeEntry->setData(QVariant::fromValue(reinterpret_cast<quint64>(object)),DMHelper::TreeItemData_Object);
     //campaignItem->setData(QVariant(DMHelper::TreeType_Campaign),DMHelper::TreeItemData_Type);
     //campaignItem->setData(QVariant(QString()),DMHelper::TreeItemData_ID);
     treeEntry->setData(QVariant(object->getID().toString()),DMHelper::TreeItemData_ID);
@@ -279,7 +279,7 @@ void CampaignTreeModel::validateChildStructure(QStandardItem* parentItem)
     if(!parentItem)
         return;
 
-    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
     QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
     if((!parentObject) || (parentId.isNull()))
     {
@@ -292,7 +292,7 @@ void CampaignTreeModel::validateChildStructure(QStandardItem* parentItem)
         QStandardItem* childItem = parentItem->child(i);
         if(childItem)
         {
-            CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+            CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<quint64>());
             if(childObject)
             {
                 const CampaignObjectBase* currentParentObject = qobject_cast<const CampaignObjectBase*>(childObject->parent());
@@ -316,7 +316,7 @@ void CampaignTreeModel::validateIndividualChild(QStandardItem* parentItem, QStan
     if((!parentItem) || (!childItem))
         return;
 
-    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
     QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
     if((!parentObject) || (parentId.isNull()))
     {
@@ -324,7 +324,7 @@ void CampaignTreeModel::validateIndividualChild(QStandardItem* parentItem, QStan
         return;
     }
 
-    CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* childObject = reinterpret_cast<CampaignObjectBase*>(childItem->data(DMHelper::TreeItemData_Object).value<quint64>());
     if(childObject)
     {
         const CampaignObjectBase* currentParentObject = qobject_cast<const CampaignObjectBase*>(childObject->parent());

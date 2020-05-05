@@ -2665,7 +2665,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
         return;
 
 //    CampaignObjectBase* itemObject = static_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<void*>());
-    CampaignObjectBase* itemObject = reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<uintptr_t>());
+    CampaignObjectBase* itemObject = reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<quint64>());
     if(!itemObject)
         return;
 
