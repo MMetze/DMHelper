@@ -234,6 +234,8 @@
         <file>data/icon_contentscrollingtext.png</file>
         <file>data/icon_contenttextencounter.png</file>
         <file>data/icon_newparty.png</file>
+        <file>data/icon_remove.png</file>
+        <file>data/icon_party.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

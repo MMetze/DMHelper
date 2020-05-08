@@ -364,7 +364,7 @@ void EncounterBattle::setBattleDialogModel(BattleDialogModel* model)
     }
 
     _battleModel = model;
-    _battleModel->setParent(this);
+    //_battleModel->setParent(this);
 
     emit changed();
     emit dirty();

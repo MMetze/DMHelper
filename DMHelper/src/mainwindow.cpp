@@ -9,6 +9,7 @@
 #include "character.h"
 #include "characterimporter.h"
 #include "objectimporter.h"
+#include "partyframe.h"
 #include "characterframe.h"
 #include "campaign.h"
 #include "combatantfactory.h"
@@ -18,6 +19,7 @@
 #include "battleframemapdrawer.h"
 #include "mruhandler.h"
 #include "encounterfactory.h"
+#include "emptycampaignframe.h"
 #include "encountertextedit.h"
 //#include "encounterbattleedit.h"
 #include "encounterbattle.h"
@@ -233,6 +235,10 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     setupRibbonBar();
 
+    // TODO: find out why the following has no effect! There must be something in the frames that has "minimumexpanding" size policy
+    ui->splitter->setStretchFactor(0,1);
+    ui->splitter->setStretchFactor(1,4);
+
     qDebug() << "[MainWindow] Reading Settings";
     _options = new OptionsContainer(this);
     MRUHandler* mruHandler = new MRUHandler(_ribbonTabFile->getMRUMenu(), DEFAULT_MRU_FILE_COUNT, this);
@@ -300,6 +306,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newTextClicked()), this, SLOT(newTextEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newScrollingTextClicked()), this, SLOT(newScrollingTextEncounter()));
+    connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(importItemClicked()), this, SLOT(importItem()));
     connect(_ribbonTabCampaign, SIGNAL(importCharacterClicked()), this, SLOT(importCharacter()));
@@ -402,6 +409,11 @@ MainWindow::MainWindow(QWidget *parent) :
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     // TODO: insert a MAP in between to be explicit about this mapping
     qDebug() << "[MainWindow] Creating Encounter Pages";
+    // Empty Campaign Page
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Base, new EmptyCampaignFrame);
+
+    //ui->stackedWidgetEncounter->removeWidget(ui->stackedWidgetEncounter->widget(0));
+
     // EncounterType_Text
     encounterTextEdit = new EncounterTextEdit;
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
@@ -417,7 +429,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabText, SLOT(setFontBold(bool)));
     connect(encounterTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabText, SLOT(setFontItalics(bool)));
     connect(encounterTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabText, SLOT(setAlignment(Qt::Alignment)));
-    ui->stackedWidgetEncounter->addWidget(encounterTextEdit);
+    ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
+                                                      DMHelper::CampaignType_Text,
+                                                      DMHelper::CampaignType_Placeholder}), encounterTextEdit);
     qDebug() << "[MainWindow]     Adding Text Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Battle
@@ -508,7 +522,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
-    ui->stackedWidgetEncounter->addWidget(battleFrame);
+    ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Battle,
+                                                      DMHelper::CampaignType_BattleContent}), battleFrame);
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
@@ -516,17 +531,23 @@ MainWindow::MainWindow(QWidget *parent) :
     QScrollArea* scrollArea = new QScrollArea;
     CharacterFrame* charFrame = new CharacterFrame;
     scrollArea->setWidget(charFrame);
-    ui->stackedWidgetEncounter->addWidget(scrollArea);
+    ui->stackedWidgetEncounter->addFrame(scrollArea);
     connect(charFrame, SIGNAL(publishCharacterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
     */
     CharacterFrame* charFrame = new CharacterFrame;
-    ui->stackedWidgetEncounter->addWidget(charFrame);
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
 
+    PartyFrame* partyFrame = new PartyFrame;
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
+    qDebug() << "[MainWindow]     Adding Party Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    connect(partyFrame, SIGNAL(publishPartyImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),partyFrame,SLOT(loadCharacters()));
+
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
-    ui->stackedWidgetEncounter->addWidget(mapFrame);
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
     connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
@@ -565,7 +586,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_ScrollingText
     _scrollingTextEdit = new EncounterScrollingTextEdit;
-    ui->stackedWidgetEncounter->addWidget(_scrollingTextEdit);
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_ScrollingText, _scrollingTextEdit);
     qDebug() << "[MainWindow]     Adding Scrolling Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(_scrollingTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(_scrollingTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
@@ -593,7 +614,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
     connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
-    ui->stackedWidgetEncounter->addWidget(audioTrackEdit);
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_WelcomeScreen
@@ -607,7 +628,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(_ribbonTabHelp, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     connect(_ribbonTabFile, SIGNAL(userGuideClicked()), welcomeFrame, SLOT(openUsersGuide()));
     connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
-    ui->stackedWidgetEncounter->addWidget(welcomeFrame);
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_WelcomeScreen, welcomeFrame);
     qDebug() << "[MainWindow]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     qDebug() << "[MainWindow] Encounter Pages Created";
@@ -798,6 +819,10 @@ void MainWindow::newCampaign()
             campaignName = QString("Campaign");
 
         campaign = new Campaign(campaignName);
+        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
+        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
+        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
+        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("World"), false));
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
         emit campaignLoaded(campaign);
@@ -979,7 +1004,12 @@ void MainWindow::newCharacter()
         return;
 
     bool ok;
-    QString characterName = QInputDialog::getText(this, QString("Enter New Character Name"),QString("Character"),QLineEdit::Normal,QString(),&ok);
+    QString characterName = QInputDialog::getText(this,
+                                                  QString("New Character"),
+                                                  QString("Characters added without a party are treated as NPCs. To add a PC, either create the character directly in a party or drag an NPC into a party.") + QChar::LineFeed + QChar::LineFeed + QString("Enter character name:"),
+                                                  QLineEdit::Normal,
+                                                  QString(),
+                                                  &ok);
     if((!ok) || (characterName.isEmpty()))
         return;
 
@@ -1073,19 +1103,19 @@ void MainWindow::removeCurrentCharacter()
 
 void MainWindow::newParty()
 {
-    newEncounter(DMHelper::CampaignType_Party);
+    newEncounter(DMHelper::CampaignType_Party, QString("New Party"), QString("Enter new party name:"));
 }
 
 void MainWindow::newTextEncounter()
 {
     //newEncounter(DMHelper::EncounterType_Text);
-    newEncounter(DMHelper::CampaignType_Text);
+    newEncounter(DMHelper::CampaignType_Text, QString("New Text Entry"), QString("Enter new entry name:"));
 }
 
 void MainWindow::newBattleEncounter()
 {
     //newEncounter(DMHelper::EncounterType_Battle);
-    CampaignObjectBase* encounter = newEncounter(DMHelper::CampaignType_Battle);
+    CampaignObjectBase* encounter = newEncounter(DMHelper::CampaignType_Battle, QString("New Battle"), QString("Enter new battle name:"));
     if(!encounter)
         return;
 
@@ -1097,7 +1127,7 @@ void MainWindow::newBattleEncounter()
 void MainWindow::newScrollingTextEncounter()
 {
     //newEncounter(DMHelper::EncounterType_ScrollingText);
-    newEncounter(DMHelper::CampaignType_ScrollingText);
+    newEncounter(DMHelper::CampaignType_ScrollingText, QString("New Scrolling Text"), QString("Enter new scrolling text entry name:"));
 }
 
 void MainWindow::newMap()
@@ -1218,20 +1248,57 @@ void MainWindow::removeCurrentItem()
     if((!campaign)||(!treeModel))
         return;
 
-    QStandardItem* removeItem = treeModel->itemFromIndex(ui->treeView->currentIndex());
+//    QStandardItem* removeItem = treeModel->itemFromIndex(ui->treeView->currentIndex());
 //    int type = removeItem->data(DMHelper::TreeItemData_Type).toInt();
 
-    CampaignObjectBase* removeObject = campaign->getObjectById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
+//    CampaignObjectBase* removeObject = campaign->getObjectById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
+    CampaignObjectBase* removeObject = ui->treeView->currentCampaignObject();
     if(!removeObject)
+    {
+        qDebug() << "[MainWindow] ERROR: cannot remove object because not able to find current campaign object.";
         return;
+    }
+
+    CampaignObjectBase* parentObject = dynamic_cast<CampaignObjectBase*>(removeObject->parent());
+    if(!parentObject)
+    {
+        qDebug() << "[MainWindow] ERROR: cannot remove object because not able to find current object's parent. Current object: " << removeObject->getName() << ", ID: " << removeObject->getID();
+        return;
+    }
 
     if(QMessageBox::question(this,
                              QString("Confirm Delete"),
-                             QString("Are you sure you would like to delete the item ") + removeObject->getName() + QString("?")) != QMessageBox::Yes)
+                             QString("Are you sure you would like to delete the entry ") + removeObject->getName() + QString("?")) != QMessageBox::Yes)
         return;
 
+    QUuid nextObjectId;
+    if(parentObject->getObjectType() != DMHelper::CampaignType_Campaign)
+    {
+        nextObjectId = parentObject->getID();
+    }
+    else
+    {
+        const QList<CampaignObjectBase*> campaignChildren = campaign->getChildObjects();
+        int i = 0;
+        while((nextObjectId.isNull()) && (i < campaignChildren.count()))
+        {
+            if((campaignChildren.at(i)) && (campaignChildren.at(i)->getID() != removeObject->getID()))
+                nextObjectId = campaignChildren.at(i)->getID();
+            ++i;
+        }
+    }
+
+    if(!nextObjectId.isNull())
+        selectItem(nextObjectId);
+    else
+        ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); //ui->stackedWidgetEncounter->setCurrentIndex(0);
+
+    delete campaign->removeObject(removeObject->getID());
+    updateCampaignTree();
+
+    /*
     QUuid parentId;
-    if(removeItem->parent())
+    if(removeObject->parent())
             parentId = QUuid(removeItem->parent()->data(DMHelper::TreeItemData_ID).toString());
     campaign->removeObject(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
     if(!parentId.isNull())
@@ -1240,6 +1307,7 @@ void MainWindow::removeCurrentItem()
         if(parentItem)
             ui->treeView->setCurrentIndex(parentItem->index());
     }
+    */
 
     /*
     QStandardItem* adventureItem = findParentbyType(removeItem, DMHelper::TreeType_Adventure);
@@ -1261,7 +1329,7 @@ void MainWindow::removeCurrentItem()
             Encounter* encounter = adventure->getEncounterById(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             if(QMessageBox::question(this,QString("Confirm Delete Encounter"),QString("Are you sure you would like to delete the encounter ") + encounter->getName() + QString("?")) == QMessageBox::Yes)
             {
-                encounter->widgetDeactivated(ui->stackedWidgetEncounter->currentWidget());
+                encounter->widgetDeactivated(Hiui->stackedWidgetEncounter->currentWidget());
                 delete adventure->removeEncounter(QUuid(removeItem->data(DMHelper::TreeItemData_ID).toString()));
             }
         }
@@ -2078,7 +2146,7 @@ void MainWindow::writeBestiary()
     qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
 }
 
-CampaignObjectBase* MainWindow::newEncounter(int encounterType)
+CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText)
 {
     if((!campaign)||(!treeModel))
         return nullptr;
@@ -2227,7 +2295,11 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     if(campaign)
     {
-        ui->treeView->setCurrentIndex(treeModel->index(0,0)); // Activate the first entry in the tree
+        QModelIndex firstIndex = treeModel->index(0,0);
+        if(firstIndex.isValid())
+            ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
+        else
+            ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
         connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
         //connect(campaign,SIGNAL(changed()),this,SLOT(updateCampaignTree()));
         setWindowTitle(QString("DM Helper - ") + campaign->getName() + QString("[*]"));
@@ -2239,9 +2311,10 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         ui->stackedWidgetEncounter->setEnabled(true);
         // Deactivate the currently selected object
         deactivateObject();
-        activateWidget(getWidgetFromType(DMHelper::CampaignType_WelcomeScreen));// ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
+        activateWidget(DMHelper::CampaignType_WelcomeScreen);// ui->stackedWidgetEncounter->setCurrentIndex(DMHelper::EncounterType_WelcomeScreen);
         setRibbonToType(DMHelper::CampaignType_WelcomeScreen);
         _ribbon->setCurrentIndex(0); // Shift to the File tab
+        _ribbonTabCampaign->setAddPCButton(false);
     }
 
     enableCampaignMenu();
@@ -2486,77 +2559,92 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
         return;
 
     QModelIndex index = ui->treeView->indexAt(point);
-    if( index.isValid() )
+    if(!index.isValid())
+        return;
+
+    //QStandardItem* item = treeModel->itemFromIndex(index);
+    CampaignTreeItem* campaignItem = treeModel->campaignItemFromIndex(index);
+    if(!campaignItem)
+        return;
+
+    CampaignObjectBase* campaignObject = campaignItem->getCampaignItemObject();
+    if(!campaignObject)
+        return;
+
+    QMenu* contextMenu = new QMenu(ui->treeView);
+
+    // New text entry
+    QAction* addTextEntry = new QAction(QIcon(":/img/data/icon_newtextencounter.png"), QString("New Text Entry"), contextMenu);
+    connect(addTextEntry, SIGNAL(triggered()), this, SLOT(newTextEncounter()));
+    contextMenu->addAction(addTextEntry);
+
+    contextMenu->addSeparator();
+
+    // New party
+    QAction* addParty = new QAction(QIcon(":/img/data/icon_newparty.png"), QString("New Party"), contextMenu);
+    connect(addParty, SIGNAL(triggered()), this, SLOT(newParty()));
+    contextMenu->addAction(addParty);
+
+    // Add a new character
+    QAction* addNewCharacter = nullptr;
+    if((campaignObject->getObjectType() == DMHelper::CampaignType_Party) || (campaignObject->getParentByType(DMHelper::CampaignType_Party) != nullptr))
+        addNewCharacter = new QAction(QIcon(":/img/data/icon_newcharacter.png"), QString("New PC"), contextMenu);
+    else
+        addNewCharacter = new QAction(QIcon(":/img/data/icon_newnpc.png"), QString("New NPC"), contextMenu);
+    connect(addNewCharacter, SIGNAL(triggered()), this, SLOT(newCharacter()));
+    contextMenu->addAction(addNewCharacter);
+
+    contextMenu->addSeparator();
+
+    // New map
+    QAction* addMap = new QAction(QIcon(":/img/data/icon_newmap.png"), QString("New Map"), contextMenu);
+    connect(addMap, SIGNAL(triggered()), this, SLOT(newMap()));
+    contextMenu->addAction(addMap);
+
+    // New battle
+    QAction* addBattle = new QAction(QIcon(":/img/data/icon_newbattle.png"), QString("New Battle"), contextMenu);
+    connect(addBattle, SIGNAL(triggered()), this, SLOT(newBattle()));
+    contextMenu->addAction(addBattle);
+
+    // New scroll text
+    QAction* addScrollingText = new QAction(QIcon(":/img/data/icon_newscrollingtext.png"), QString("New Scrolling Text"), contextMenu);
+    connect(addScrollingText, SIGNAL(triggered()), this, SLOT(newScrollingTextEncounter()));
+    contextMenu->addAction(addScrollingText);
+
+    // Remove item
+    QAction* removeItem = new QAction(QIcon(":/img/data/icon_remove.png"), QString("Remove Item"), contextMenu);
+    connect(removeItem, SIGNAL(triggered()), this, SLOT(removeCurrentItem()));
+    contextMenu->addAction(removeItem);
+
+    contextMenu->addSeparator();
+
+    /*
+    // TODO: do we want a separate "Edit Map File" option or is the way to just remove the map and add another one?
+    if(type == DMHelper::TreeType_Map)
     {
-        QStandardItem* item = treeModel->itemFromIndex(index);
-        if(item)
-        {
-            QMenu* contextMenu = new QMenu(ui->treeView);
-            int type = item->data(DMHelper::TreeItemData_Type).toInt();
-
-            QAction* addCampgainAdventure = new QAction(QString("Add Adventure"), contextMenu);
-            connect(addCampgainAdventure,SIGNAL(triggered()),this,SLOT(newAdventure()));
-            contextMenu->addAction(addCampgainAdventure);
-            QAction* addCampgainCharacter = new QAction(QString("Add Character"), contextMenu);
-            connect(addCampgainCharacter,SIGNAL(triggered()),this,SLOT(newCharacter()));
-            contextMenu->addAction(addCampgainCharacter);
-            QMenu* addEncounterMenu = new QMenu(QString("Add Encounter"), contextMenu);
-                QAction* addTextEncounter = new QAction(QString("Add Text Encounter"), addEncounterMenu);
-                connect(addTextEncounter,SIGNAL(triggered()),this,SLOT(newTextEncounter()));
-                addEncounterMenu->addAction(addTextEncounter);
-                QAction* addBattleEncounter = new QAction(QString("Add Battle Encounter"), addEncounterMenu);
-                connect(addBattleEncounter,SIGNAL(triggered()),this,SLOT(newBattleEncounter()));
-                addEncounterMenu->addAction(addBattleEncounter);
-                QAction* addScrollingTextEncounter = new QAction(QString("Add Scrolling Text Encounter"), addEncounterMenu);
-                connect(addScrollingTextEncounter,SIGNAL(triggered()),this,SLOT(newScrollingTextEncounter()));
-                addEncounterMenu->addAction(addScrollingTextEncounter);
-            contextMenu->addMenu(addEncounterMenu);
-            QAction* addMap = new QAction(QString("Add Map"), contextMenu);
-            connect(addMap,SIGNAL(triggered()),this,SLOT(newMap()));
-            contextMenu->addAction(addMap);
-            //QAction* addNPC = new QAction(QString("Add NPC"), contextMenu);
-            //connect(addNPC,SIGNAL(triggered()),this,SLOT(newNPC()));
-            //contextMenu->addAction(addNPC);
-
-            if((type == DMHelper::TreeType_Map)||(type == DMHelper::TreeType_Encounter))
-            {
-                QAction* startBattleItem = new QAction(QString("Start Battle"), contextMenu);
-                connect(startBattleItem,SIGNAL(triggered()),this,SLOT(handleStartNewBattle()));
-                contextMenu->addAction(startBattleItem);
-            }
-
-            if(type == DMHelper::TreeType_Map)
-            {
-                QAction* editMapItem = new QAction(QString("Edit Map File"), contextMenu);
-                connect(editMapItem,SIGNAL(triggered()),this,SLOT(editCurrentMap()));
-                contextMenu->addAction(editMapItem);
-            }
-
-            if((item->isEditable())||(type == DMHelper::TreeType_Map))
-            {
-                QAction* editItem = new QAction(QString("Edit Item"), contextMenu);
-                connect(editItem,SIGNAL(triggered()),this,SLOT(editCurrentItem()));
-                contextMenu->addAction(editItem);
-            }
-
-            if((type == DMHelper::TreeType_Adventure)||(type == DMHelper::TreeType_Encounter)||(type == DMHelper::TreeType_Map)||(type == DMHelper::TreeType_Character))
-            {
-                QAction* removeItem = new QAction(QString("Remove Item"), contextMenu);
-                connect(removeItem,SIGNAL(triggered()),this,SLOT(removeCurrentItem()));
-                contextMenu->addAction(removeItem);
-            }
-
-            contextMenu->addSeparator();
-
-            QAction* exportItem = new QAction(QString("Export Item..."));
-            connect(exportItem, SIGNAL(triggered()), this, SLOT(exportCurrentItem()));
-            contextMenu->addAction(exportItem);
-
-            if(contextMenu->actions().count() > 0)
-                contextMenu->exec(ui->treeView->mapToGlobal(point));
-            delete contextMenu;
-        }
+        QAction* editMapItem = new QAction(QString("Edit Map File"), contextMenu);
+        connect(editMapItem,SIGNAL(triggered()),this,SLOT(editCurrentMap()));
+        contextMenu->addAction(editMapItem);
     }
+    */
+
+    if(campaignItem->isEditable())
+    {
+        QAction* editItem = new QAction(QIcon(":/img/data/icon_edit.png"), QString("Edit Item"), contextMenu);
+        connect(editItem,SIGNAL(triggered()),this,SLOT(editCurrentItem()));
+        contextMenu->addAction(editItem);
+
+        contextMenu->addSeparator();
+    }
+
+    QAction* exportItem = new QAction(QIcon(":/img/data/icon_exportitem.png"), QString("Export Item..."));
+    connect(exportItem, SIGNAL(triggered()), this, SLOT(exportCurrentItem()));
+    contextMenu->addAction(exportItem);
+
+    if(contextMenu->actions().count() > 0)
+        contextMenu->exec(ui->treeView->mapToGlobal(point));
+
+    delete contextMenu;
 }
 
 void MainWindow::handleTreeItemChanged(QStandardItem * item)
@@ -2565,6 +2653,8 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
         return;
 
     qDebug() << "[MainWindow] Tree Item Changed: " << item;
+
+
 
     /*
     campaign->beginBatchChanges();
@@ -2660,6 +2750,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     deactivateObject();
 
     // Look for the next object to activate it
+    /*
     QStandardItem* item = treeModel->itemFromIndex(current);
     if(!item)
         return;
@@ -2668,8 +2759,23 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     CampaignObjectBase* itemObject = reinterpret_cast<CampaignObjectBase*>(item->data(DMHelper::TreeItemData_Object).value<quint64>());
     if(!itemObject)
         return;
+        */
 
-    activateObject(itemObject);
+    CampaignTreeItem* item = treeModel->campaignItemFromIndex(current);
+    CampaignObjectBase* itemObject = nullptr;
+
+    if(item)
+        itemObject = item->getCampaignItemObject();
+
+    if(itemObject)
+    {
+        activateObject(itemObject);
+        _ribbonTabCampaign->setAddPCButton(((itemObject->getObjectType() == DMHelper::CampaignType_Party) || (itemObject->getParentByType(DMHelper::CampaignType_Party) != nullptr)));
+    }
+    else
+    {
+        _ribbonTabCampaign->setAddPCButton(false);
+    }
 
 
     /*
@@ -3235,12 +3341,12 @@ void MainWindow::activateObject(CampaignObjectBase* object)
     if(!object)
         return;
 
-    int selectedWidget = getWidgetFromType(object->getObjectType());
+    //int selectedWidget = getWidgetFromType(object->getObjectType());
 
-    qDebug() << "[MainWindow] Activating stacked widget from " << ui->stackedWidgetEncounter->currentIndex() << " to " << selectedWidget << " for type " << object->getObjectType();
+    qDebug() << "[MainWindow] Activating stacked widget for type " << object->getObjectType();
 
     setRibbonToType(object->getObjectType());
-    activateWidget(selectedWidget, object);
+    activateWidget(object->getObjectType(), object);
 }
 
 void MainWindow::deactivateObject()
@@ -3255,14 +3361,11 @@ void MainWindow::deactivateObject()
         disconnect(objectFrame, nullptr, _ribbon->getPublishRibbon(), nullptr);
         objectFrame->deactivateObject();
     }
-
 }
 
-void MainWindow::activateWidget(int widgetId, CampaignObjectBase* object)
+void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
 {
-    ui->stackedWidgetEncounter->setCurrentIndex(widgetId);
-
-    CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
+    CampaignObjectFrame* objectFrame = ui->stackedWidgetEncounter->setCurrentFrame(objectType); //ui->stackedWidgetEncounter->setCurrentIndex(widgetId);
     if(objectFrame)
     {
         connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
@@ -3284,6 +3387,7 @@ void MainWindow::activateWidget(int widgetId, CampaignObjectBase* object)
     }
 }
 
+/*
 int MainWindow::getWidgetFromType(int objectType)
 {
     switch(objectType)
@@ -3319,6 +3423,7 @@ int MainWindow::getWidgetFromType(int objectType)
             return 0;
     }
 }
+*/
 
 void MainWindow::setRibbonToType(int objectType)
 {

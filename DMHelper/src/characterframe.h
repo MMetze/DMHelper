@@ -36,8 +36,8 @@ public slots:
     virtual void setRotation(int rotation) override;
 
 protected:
-    void mousePressEvent(QMouseEvent * event) override;
-    void mouseReleaseEvent(QMouseEvent * event) override;
+    virtual void mousePressEvent(QMouseEvent * event) override;
+    virtual void mouseReleaseEvent(QMouseEvent * event) override;
 
 private slots:
     void readCharacterData();

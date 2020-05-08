@@ -235,7 +235,7 @@ void RibbonTabMap::showEvent(QShowEvent *event)
     int sizeWidth = metrics.horizontalAdvance(ui->lblSize->text());
     setWidgetSize(*ui->lblSize, sizeWidth, iconDim / 2);
     setWidgetSize(*ui->spinSize, sizeWidth, iconDim / 2);
-    setWidgetSize(*ui->lblBrush, qMax(iconDim, 2 * sizeWidth), labelHeight);
+    setWidgetSize(*ui->lblBrush, qMax((textWidth * 4), 2 * sizeWidth), labelHeight);
 }
 
 void RibbonTabMap::setEraseMode()

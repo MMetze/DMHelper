@@ -81,6 +81,7 @@ void MapEditFrame::showEvent(QShowEvent *event)
     int labelHeight = getLabelHeight(*ui->lblSmooth);
     int iconDim = height() - labelHeight;
     QFontMetrics metrics = ui->lblSmooth->fontMetrics();
+    int textWidth = metrics.maxWidth();
 
     setButtonSize(*ui->btnBrushCircle, iconDim / 2, iconDim / 2);
     setButtonSize(*ui->btnBrushSquare, iconDim / 2, iconDim / 2);
@@ -88,7 +89,7 @@ void MapEditFrame::showEvent(QShowEvent *event)
     int sizeWidth = metrics.horizontalAdvance(ui->lblSize->text());
     setWidgetSize(*ui->lblSize, sizeWidth, iconDim / 2);
     setWidgetSize(*ui->spinSize, sizeWidth, iconDim / 2);
-    setWidgetSize(*ui->lblBrush, qMax(iconDim, 2 * sizeWidth), labelHeight);
+    setWidgetSize(*ui->lblBrush, qMax((textWidth * 4), 2 * sizeWidth), labelHeight);
 
     setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW);
     setLineHeight(*ui->line_5);

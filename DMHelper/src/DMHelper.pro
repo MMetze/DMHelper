@@ -47,6 +47,7 @@ SOURCES += main.cpp\
     campaignexporter.cpp \
     campaignobjectfactory.cpp \
     campaignobjectframe.cpp \
+    campaignobjectframestack.cpp \
     campaigntreeitem.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
@@ -56,6 +57,7 @@ SOURCES += main.cpp\
     customtableframe.cpp \
     discordposter.cpp \
     dmhelperribbon.cpp \
+    emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
     legaldialog.cpp \
@@ -65,6 +67,8 @@ SOURCES += main.cpp\
     objectfactory.cpp \
     objectimporter.cpp \
     party.cpp \
+    partyframe.cpp \
+    partyframecharacter.cpp \
     placeholder.cpp \
     presentupdatedialog.cpp \
     publishbuttonframe.cpp \
@@ -235,6 +239,7 @@ HEADERS  += mainwindow.h \
     campaignexporter.h \
     campaignobjectfactory.h \
     campaignobjectframe.h \
+    campaignobjectframestack.h \
     campaigntreeitem.h \
     characterimportdialog.h \
     colorpushbutton.h \
@@ -244,6 +249,7 @@ HEADERS  += mainwindow.h \
     customtableframe.h \
     discordposter.h \
     dmhelperribbon.h \
+    emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
     legaldialog.h \
@@ -253,6 +259,8 @@ HEADERS  += mainwindow.h \
     objectfactory.h \
     objectimporter.h \
     party.h \
+    partyframe.h \
+    partyframecharacter.h \
     placeholder.h \
     presentupdatedialog.h \
     publishbuttonframe.h \
@@ -406,9 +414,12 @@ FORMS    += mainwindow.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
     mapeditframe.ui \
+    partyframe.ui \
+    partyframecharacter.ui \
     presentupdatedialog.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \

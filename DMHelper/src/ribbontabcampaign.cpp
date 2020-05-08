@@ -14,6 +14,7 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
     connect(ui->btnNewText, SIGNAL(clicked(bool)), this, SIGNAL(newTextClicked()));
     connect(ui->btnNewBattle, SIGNAL(clicked(bool)), this, SIGNAL(newBattleClicked()));
     connect(ui->btnNewScrollingText, SIGNAL(clicked(bool)), this, SIGNAL(newScrollingTextClicked()));
+    connect(ui->btnRemove, SIGNAL(clicked(bool)), this, SIGNAL(removeItemClicked()));
     connect(ui->btnExportItem, SIGNAL(clicked(bool)), this, SIGNAL(exportItemClicked()));
     connect(ui->btnImportItem, SIGNAL(clicked(bool)), this, SIGNAL(importItemClicked()));
     connect(ui->btnImportCharacter, SIGNAL(clicked(bool)), this, SIGNAL(importCharacterClicked()));
@@ -54,6 +55,7 @@ void RibbonTabCampaign::setCampaignEnabled(bool enabled)
     ui->btnNewText->setEnabled(enabled);
     ui->btnNewBattle->setEnabled(enabled);
     ui->btnNewScrollingText->setEnabled(enabled);
+    ui->btnRemove->setEnabled(enabled);
     ui->btnExportItem->setEnabled(enabled);
     ui->btnImportItem->setEnabled(enabled);
     ui->btnImportCharacter->setEnabled(enabled);
@@ -64,6 +66,12 @@ void RibbonTabCampaign::setUndoEnabled(bool enabled)
 {
     ui->btnUndo->setEnabled(enabled);
     ui->btnRedo->setEnabled(enabled);
+}
+
+void RibbonTabCampaign::setAddPCButton(bool isPC)
+{
+    ui->lblNewCharacter->setText(isPC ? QString("PC") : QString("NPC"));
+    ui->btnNewCharacter->setIcon(isPC ? QIcon(":/img/data/icon_newcharacter.png") : QIcon(":/img/data/icon_newnpc.png"));
 }
 
 void RibbonTabCampaign::showEvent(QShowEvent *event)
@@ -79,6 +87,7 @@ void RibbonTabCampaign::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap);
     setStandardButtonSize(*ui->lblNewBattle, *ui->btnNewBattle);
     setStandardButtonSize(*ui->lblNewScrollingText, *ui->btnNewScrollingText);
+    setStandardButtonSize(*ui->lblRemove, *ui->btnRemove);
     setLineHeight(*ui->line);
     setStandardButtonSize(*ui->lblExportItem, *ui->btnExportItem);
     setStandardButtonSize(*ui->lblImportItem, *ui->btnImportItem);

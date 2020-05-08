@@ -19,8 +19,8 @@ public:
     bool containsObject(const QUuid& objectId) const;
     QModelIndex getObject(const QUuid& objectId) const;
 
-    CampaignTreeItem *campaignItem(int row, int column = 0) const;
-    CampaignTreeItem *campaignItemFromIndex(const QModelIndex &index) const;
+    CampaignTreeItem* campaignItem(int row, int column = 0) const;
+    CampaignTreeItem* campaignItemFromIndex(const QModelIndex &index) const;
 
     // From QAbstractItemModel
     virtual QMimeData *	mimeData(const QModelIndexList & indexes) const override;
@@ -41,6 +41,7 @@ protected slots:
     void handleRowsInserted(const QModelIndex &parent, int first, int last);
 //    void handleRowsRemoved(const QModelIndex &parent, int first, int last);
     void handleTimer();
+    void handleItemChanged(QStandardItem *item);
 
 protected:
 

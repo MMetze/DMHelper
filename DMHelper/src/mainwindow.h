@@ -147,7 +147,7 @@ protected:
     // Bestiary
     void writeBestiary();
 
-    CampaignObjectBase* newEncounter(int encounterType);
+    CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
 
 protected slots:
     void openFile(const QString& filename);
@@ -190,8 +190,8 @@ protected slots:
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);
     void deactivateObject();
-    void activateWidget(int widgetId, CampaignObjectBase* object = nullptr);
-    int getWidgetFromType(int objectType);
+    void activateWidget(int objectType, CampaignObjectBase* object = nullptr);
+    //int getWidgetFromType(int objectType);
     void setRibbonToType(int objectType);
 
 #ifdef INCLUDE_CHASE_SUPPORT

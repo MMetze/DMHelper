@@ -19,6 +19,7 @@ CampaignTreeModel::CampaignTreeModel(QObject *parent) :
     _updateRow(-1)
 {
     setItemPrototype(new CampaignTreeItem());
+    connect(this, &QStandardItemModel::itemChanged, this, &CampaignTreeModel::handleItemChanged);
 }
 
 Campaign* CampaignTreeModel::getCampaign() const
@@ -186,6 +187,17 @@ void CampaignTreeModel::handleTimer()
     _updateRow = -1;
 }
 
+void CampaignTreeModel::handleItemChanged(QStandardItem *item)
+{
+    CampaignTreeItem* campaignItem = dynamic_cast<CampaignTreeItem*>(item);
+    if((campaignItem) && (campaignItem->getCampaignItemType() == DMHelper::CampaignType_Combatant))
+    {
+        Character* character = dynamic_cast<Character*>(campaignItem->getCampaignItemObject());
+        if(character)
+            character->setActive(item->checkState() == Qt::Checked);
+    }
+}
+
 void CampaignTreeModel::updateCampaignEntries()
 {
     if(!_campaign)
@@ -226,10 +238,11 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     treeEntry->setEditable(true);
 
 //    treeEntry->setData(QVariant::fromValue(static_cast<void*>(object)),DMHelper::TreeItemData_Object);
-    treeEntry->setData(QVariant::fromValue(reinterpret_cast<quint64>(object)),DMHelper::TreeItemData_Object);
+    treeEntry->setData(QVariant::fromValue(reinterpret_cast<quint64>(object)), DMHelper::TreeItemData_Object);
     //campaignItem->setData(QVariant(DMHelper::TreeType_Campaign),DMHelper::TreeItemData_Type);
+    treeEntry->setData(QVariant(object->getObjectType()), DMHelper::TreeItemData_Type);
     //campaignItem->setData(QVariant(QString()),DMHelper::TreeItemData_ID);
-    treeEntry->setData(QVariant(object->getID().toString()),DMHelper::TreeItemData_ID);
+    treeEntry->setData(QVariant(object->getID().toString()), DMHelper::TreeItemData_ID);
     //treeModel->appendRow(campaignItem);
     //ui->treeView->expand(campaignItem->index());
 
@@ -365,8 +378,11 @@ void CampaignTreeModel::setTreeEntryVisualization(CampaignTreeItem* entry)
                 Character* character = dynamic_cast<Character*>(object);
                 bool isPC = ((character) && (character->isInParty()));
                 entry->setIcon(isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
+                entry->setEditable(false);
                 entry->setCheckable(isPC);
-                if(!isPC)
+                if(isPC)
+                    entry->setCheckState(character->getActive() ? Qt::Checked : Qt::Unchecked);
+                else
                     entry->setData(QVariant(), Qt::CheckStateRole); // Needed to actively remove the checkbox on the entry
             }
             break;

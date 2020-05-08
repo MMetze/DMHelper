@@ -32,8 +32,8 @@ public:
     virtual int getAudioType() const;
 
 signals:
-    void changed();
-    void dirty();
+    //void changed();
+    //void dirty();
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

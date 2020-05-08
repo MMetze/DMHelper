@@ -99,8 +99,8 @@ public:
     static QList<Combatant*> instantiateCombatants(CombatantGroup combatantGroup);
 
 signals:
-    void dirty();
-    void changed();
+    //void dirty();
+    //void changed();
 
 public slots:
     //virtual void setName(const QString& combatantName);

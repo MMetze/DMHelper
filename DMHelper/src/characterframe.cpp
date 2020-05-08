@@ -338,20 +338,21 @@ void CharacterFrame::mousePressEvent(QMouseEvent * event)
 
 void CharacterFrame::mouseReleaseEvent(QMouseEvent * event)
 {
-    if(_mouseDown)
-    {
-        ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        _mouseDown = false;
-        if(ui->lblIcon->frameGeometry().contains(event->pos()))
-        {
-            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
-            if(!filename.isEmpty())
-            {
-                _character->setIcon(filename);
-                loadCharacterImage();
-            }
-        }
-    }
+    if(!_mouseDown)
+        return;
+
+    ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    _mouseDown = false;
+
+    if((!_character) || (!ui->lblIcon->frameGeometry().contains(event->pos())))
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+    if(filename.isEmpty())
+        return;
+
+    _character->setIcon(filename);
+    loadCharacterImage();
 }
 
 void CharacterFrame::readCharacterData()
@@ -512,16 +513,16 @@ void CharacterFrame::handlePublishClicked()
 
     QImage iconImg;
     QString iconFile = _character->getIcon();
-    if(iconImg.load(iconFile) == true)
-    {
-        //if(ui->framePublish->getRotation() != 0)
-        if(_rotation != 0)
-        {
-            iconImg = iconImg.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
-        }
+    if(!iconImg.load(iconFile))
+        iconImg = _character->getIconPixmap(DMHelper::PixmapSize_Full).toImage(); // .load(QString(":/img/data/portrait.png"));
 
-        emit publishCharacterImage(iconImg); //, ui->framePublish->getColor());
-    }
+    if(iconImg.isNull())
+        return;
+
+    if(_rotation != 0)
+        iconImg = iconImg.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+
+    emit publishCharacterImage(iconImg);
 }
 
 void CharacterFrame::syncDndBeyond()
@@ -549,7 +550,8 @@ void CharacterFrame::openExpertiseDialog()
 
 void CharacterFrame::loadCharacterImage()
 {
-    ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
+    if(_character)
+        ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
 }
 
 void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency)

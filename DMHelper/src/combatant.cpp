@@ -175,9 +175,8 @@ QString Combatant::getIcon(bool localOnly) const
 
 QPixmap Combatant::getIconPixmap(DMHelper::PixmapSize iconSize)
 {
-    QPixmap result = _iconPixmap.getPixmap(iconSize);
-    if(!result.isNull())
-        return result;
+    if(_iconPixmap.isValid())
+        return _iconPixmap.getPixmap(iconSize);
     else
         return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
 }

@@ -21,6 +21,7 @@ public slots:
     //void setPlayersWindow(bool checked);
     void setCampaignEnabled(bool enabled);
     void setUndoEnabled(bool enabled);
+    void setAddPCButton(bool isPC);
 
 signals:
     void newPartyClicked();
@@ -30,6 +31,7 @@ signals:
     void newTextClicked();
     void newBattleClicked();
     void newScrollingTextClicked();
+    void removeItemClicked();
     void exportItemClicked();
     void importItemClicked();
     void importCharacterClicked();
