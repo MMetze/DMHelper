@@ -15,7 +15,7 @@ class PartyFrameCharacter : public QFrame
 
 public:
     explicit PartyFrameCharacter(Character& character, QWidget *parent = nullptr);
-    ~PartyFrameCharacter();
+    virtual ~PartyFrameCharacter();
 
 private:
     Ui::PartyFrameCharacter *ui;

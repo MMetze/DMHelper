@@ -13,6 +13,8 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     licenseText += QString("The DM Helper is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.\n\n\n");
 
+    licenseText += QString("Vectorized dragon logo provided by Mike Rickard from ""I Cast Pod!"" (a great DnD podcast)\n\n\n");
+
     licenseText += QString("Quick reference icons provided by http://game-icons.net/\n\n\n");
 
     licenseText += QString("Quick reference source originally from https://github.com/crobi/dnd5e-quickref provided under the following license:\n\n");

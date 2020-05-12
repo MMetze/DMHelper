@@ -2,36 +2,49 @@
 #include "ui_partyframe.h"
 #include "party.h"
 #include "character.h"
-#include "partyframecharacter.h"
+//#include "partyframecharacter.h"
+#include "partycharactergridframe.h"
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QDebug>
 
+const int PARTY_FRAME_SPACING = 20;
+
 PartyFrame::PartyFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::PartyFrame),
-    _characterLayout(nullptr),
+    //_characterLayout(nullptr),
+    _characterGrid(nullptr),
+    _characterFrames(),
     _party(nullptr),
     _mouseDown(false),
-    _rotation(0)
+    _rotation(0),
+    _layoutColumns(-1)
 {
     ui->setupUi(this);
 
-    _characterLayout = new QVBoxLayout;
-    _characterLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    _characterLayout->setContentsMargins(3,3,3,3);
-    ui->scrollAreaWidgetContents->setLayout(_characterLayout);
+//    _characterLayout = new QVBoxLayout;
+//    _characterLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+//    _characterLayout->setContentsMargins(3,3,3,3);
+//    ui->scrollAreaWidgetContents->setLayout(_characterLayout);
 
 }
 
 PartyFrame::~PartyFrame()
 {
-    qDebug() << "[PartyFrame] being destroyed: " << _characterLayout->count() << " layouts and " << _characterLayout->count() << " widgets";
+    //qDebug() << "[PartyFrame] being destroyed: " << _characterLayout->count() << " widgets";
+    qDebug() << "[PartyFrame] being destroyed: " << _characterGrid->count() << " widgets";
 
+    /*
     QLayoutItem *child;
-    while ((child = _characterLayout->takeAt(0)) != nullptr) {
+    //while ((child = _characterLayout->takeAt(0)) != nullptr)
+    while ((child = _characterGrid->takeAt(0)) != nullptr)
+    {
         delete child;
     }
+    */
+
+    clearList();
 
     delete ui;
 }
@@ -90,17 +103,19 @@ void PartyFrame::setRotation(int rotation)
     }
 }
 
-void PartyFrame::loadCharacters()
+void PartyFrame::handleCharacterChanged(QUuid id)
 {
     if(!_party)
         return;
 
-    clearList();
+    Character* character = dynamic_cast<Character*>(_party->searchChildrenById(id));
+    if(!character)
+        return;
 
-    QList<Character*> allCharacters = _party->findChildren<Character*>();
-    for(Character* character : allCharacters)
+    for(PartyCharacterGridFrame* frame : _characterFrames)
     {
-        addCharacter(character);
+        if((frame) && (frame->getId() == id))
+            frame->readCharacter();
     }
 }
 
@@ -134,6 +149,49 @@ void PartyFrame::mouseReleaseEvent(QMouseEvent * event)
     loadPartyImage();
 }
 
+void PartyFrame::resizeEvent(QResizeEvent *event)
+{
+    int newColumnCount = getColumnCount();
+    if(newColumnCount == -1)
+        return;
+
+    qDebug() << "[PartyFrame] Frame resized: " << event->oldSize() << " to " << event->size() << ", columns: " << _layoutColumns << " to " << newColumnCount;
+    qDebug() << "[PartyFrame]         character list: " << ui->characterList->size() << ", contents: " << ui->scrollAreaWidgetContents->size();
+
+    if((_layoutColumns == -1) ||(_layoutColumns != newColumnCount))
+        updateLayout();
+}
+
+void PartyFrame::clearGrid()
+{
+    if(!_characterGrid)
+        return;
+
+    qDebug() << "[PartyFrame] Clearing the grid";
+
+    _characterGrid->invalidate();
+
+    // Delete the grid entries
+    QLayoutItem *child = nullptr;
+    while ((child = _characterGrid->takeAt(0)) != nullptr)
+    {
+        delete child;
+    }
+
+    _layoutColumns = -1;
+    delete _characterGrid;
+    _characterGrid = nullptr;
+}
+
+void PartyFrame::clearList()
+{
+    // Make sure the grid is cleaned up before deleting the frames
+    clearGrid();
+
+    qDeleteAll(_characterFrames);
+    _characterFrames.clear();
+}
+
 void PartyFrame::readPartyData()
 {
     loadPartyImage();
@@ -144,6 +202,63 @@ void PartyFrame::loadPartyImage()
 {
     if(_party)
         ui->lblIcon->setPixmap(_party->getIconPixmap(DMHelper::PixmapSize_Battle).scaled(ui->lblIcon->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+}
+
+void PartyFrame::loadCharacters()
+{
+    if(!_party)
+        return;
+
+    clearList();
+
+    QList<Character*> allCharacters = _party->findChildren<Character*>();
+    for(Character* character : allCharacters)
+    {
+        _characterFrames.append(new PartyCharacterGridFrame(*character));
+    }
+
+    updateLayout();
+}
+
+void PartyFrame::updateLayout()
+{
+    int columnCount = getColumnCount();
+    qDebug() << "[PartyFrame] Updating frame layout. Previous columns " << _layoutColumns << ", new columns: " << columnCount;
+
+    clearGrid();
+
+    _characterGrid = new QGridLayout;
+    _characterGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    _characterGrid->setContentsMargins(PARTY_FRAME_SPACING, PARTY_FRAME_SPACING, PARTY_FRAME_SPACING, PARTY_FRAME_SPACING);
+    _characterGrid->setSpacing(PARTY_FRAME_SPACING);
+    ui->scrollAreaWidgetContents->setLayout(_characterGrid);
+
+    for(PartyCharacterGridFrame* frame : _characterFrames)
+    {
+        int row = _characterGrid->count() / columnCount;
+        int column = _characterGrid->count() % columnCount;
+
+        _characterGrid->addWidget(frame, row, column);
+    }
+
+    _layoutColumns = columnCount;
+    int spacingColumn = _characterGrid->columnCount();
+
+    _characterGrid->addItem(new QSpacerItem(20, 40, QSizePolicy::Expanding), 0, spacingColumn);
+
+    for(int i = 0; i < spacingColumn; ++i)
+        _characterGrid->setColumnStretch(i, 1);
+
+    _characterGrid->setColumnStretch(spacingColumn, 10);
+}
+
+int PartyFrame::getColumnCount()
+{
+    if(_characterFrames.count() == 0)
+        return -1;
+
+    // (Width of the scroll area minus the left margin) / (width of a frame plus spacing between frames)
+    return (ui->characterList->width() - PARTY_FRAME_SPACING) / (_characterFrames.at(0)->width() + PARTY_FRAME_SPACING);
 }
 
 void PartyFrame::handlePublishClicked()
@@ -164,22 +279,3 @@ void PartyFrame::handlePublishClicked()
 
     emit publishPartyImage(iconImg);
 }
-
-void PartyFrame::clearList()
-{
-    // Delete the widget for the combatant
-    QLayoutItem *child = nullptr;
-    while ((child = _characterLayout->takeAt(0)) != nullptr)
-    {
-        child->widget()->deleteLater();
-        delete child;
-    }
-
-}
-
-void PartyFrame::addCharacter(Character* character)
-{
-    if(character)
-        _characterLayout->addWidget(new PartyFrameCharacter(*character));
-}
-

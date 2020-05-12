@@ -543,7 +543,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
     qDebug() << "[MainWindow]     Adding Party Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(partyFrame, SIGNAL(publishPartyImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
-    connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),partyFrame,SLOT(loadCharacters()));
+    //connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),partyFrame,SLOT(loadCharacters()));
+    connect(this, SIGNAL(characterChanged(QUuid)), partyFrame, SLOT(handleCharacterChanged(QUuid)));
 
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
@@ -2654,7 +2655,10 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
 
     qDebug() << "[MainWindow] Tree Item Changed: " << item;
 
-
+    if(item->data(DMHelper::TreeItemData_Type).toInt() == DMHelper::TreeType_Character)
+    {
+        emit characterChanged(QUuid(item->data(DMHelper::TreeItemData_ID).toString()));
+    }
 
     /*
     campaign->beginBatchChanges();

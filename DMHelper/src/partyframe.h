@@ -2,6 +2,8 @@
 #define PARTYFRAME_H
 
 #include "campaignobjectframe.h"
+#include "partycharactergridframe.h"
+#include <QList>
 
 namespace Ui {
 class PartyFrame;
@@ -9,7 +11,9 @@ class PartyFrame;
 
 class Party;
 class Character;
-class QVBoxLayout;
+//class QVBoxLayout;
+class QGridLayout;
+class PartyCharacterGridFrame;
 
 class PartyFrame : public CampaignObjectFrame
 {
@@ -33,26 +37,33 @@ public slots:
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
 
-    void loadCharacters();
+    void handleCharacterChanged(QUuid id);
 
 protected:
     virtual void mousePressEvent(QMouseEvent * event) override;
     virtual void mouseReleaseEvent(QMouseEvent * event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void clearGrid();
+    void clearList();
     void readPartyData();
     void loadPartyImage();
+    void loadCharacters();
+    void updateLayout();
+    int getColumnCount();
+
     void handlePublishClicked();
 
-    void clearList();
-    void addCharacter(Character* character);
-
     Ui::PartyFrame *ui;
-    QVBoxLayout* _characterLayout;
+    //QVBoxLayout* _characterLayout;
+    QGridLayout* _characterGrid;
+    QList<PartyCharacterGridFrame* > _characterFrames;
 
     Party* _party;
     bool _mouseDown;
     int _rotation;
+    int _layoutColumns;
 };
 
 #endif // PARTYFRAME_H

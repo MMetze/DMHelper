@@ -236,6 +236,31 @@
         <file>data/icon_newparty.png</file>
         <file>data/icon_remove.png</file>
         <file>data/icon_party.png</file>
+        <file>data/character_name.png</file>
+        <file>data/character_frame_bottom.png</file>
+        <file>data/character_frame_bottomleft.png</file>
+        <file>data/character_frame_left.png</file>
+        <file>data/character_frame_top.png</file>
+        <file>data/character_frame_topleft.png</file>
+        <file>data/character_details_bottom.png</file>
+        <file>data/character_details_bottomleft.png</file>
+        <file>data/character_details_bottomright.png</file>
+        <file>data/character_details_left.png</file>
+        <file>data/character_details_right.png</file>
+        <file>data/character_details_tailbottom.png</file>
+        <file>data/character_details_tailmiddle.png</file>
+        <file>data/character_details_tailtop.png</file>
+        <file>data/character_details_top.png</file>
+        <file>data/character_details_topleft.png</file>
+        <file>data/character_details_topright.png</file>
+        <file>data/character_stat_bottom.png</file>
+        <file>data/character_stat_bottomleft.png</file>
+        <file>data/character_stat_bottomright.png</file>
+        <file>data/character_stat_left.png</file>
+        <file>data/character_stat_right.png</file>
+        <file>data/character_stat_top.png</file>
+        <file>data/character_stat_topleft.png</file>
+        <file>data/character_stat_topright.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

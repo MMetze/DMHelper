@@ -110,6 +110,8 @@ signals:
 
     void cancelSelect();
 
+    void characterChanged(QUuid id);
+
 protected:
     virtual void showEvent(QShowEvent * event);
     virtual void closeEvent(QCloseEvent * event);

@@ -51,6 +51,8 @@ private:
     void updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency);
     void enableDndBeyondSync(bool enabled);
 
+    void connectChanged(bool makeConnection);
+
     Ui::CharacterFrame *ui;
     Character* _character;
     bool _mouseDown;

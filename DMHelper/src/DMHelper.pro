@@ -67,6 +67,7 @@ SOURCES += main.cpp\
     objectfactory.cpp \
     objectimporter.cpp \
     party.cpp \
+    partycharactergridframe.cpp \
     partyframe.cpp \
     partyframecharacter.cpp \
     placeholder.cpp \
@@ -259,6 +260,7 @@ HEADERS  += mainwindow.h \
     objectfactory.h \
     objectimporter.h \
     party.h \
+    partycharactergridframe.h \
     partyframe.h \
     partyframecharacter.h \
     placeholder.h \
@@ -418,6 +420,7 @@ FORMS    += mainwindow.ui \
     expertisedialog.ui \
     legaldialog.ui \
     mapeditframe.ui \
+    partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \
     presentupdatedialog.ui \
