@@ -57,6 +57,20 @@ void RibbonMain::disableTab(RibbonFrame* page)
     }
 }
 
+void RibbonMain::clickPublish()
+{
+    // Set the publishbutton of the new page to match the state of the Campaign Tab publish button
+    RibbonFrame* campaignFrame = dynamic_cast<RibbonFrame*>(widget(1));
+    if(!campaignFrame)
+        return;
+
+    PublishButtonRibbon* publishRibbon = campaignFrame->getPublishRibbon();
+    if(!publishRibbon)
+        return;
+
+    publishRibbon->clickPublish();
+}
+
 void RibbonMain::handleIndexChanged(int index)
 {
     qDebug() << "[RibbonMain] Ribbon index changed to " << index;

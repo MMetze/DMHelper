@@ -31,6 +31,7 @@ public:
     virtual int getObjectType() const;
     virtual bool getExpanded() const;
     virtual QString getName() const;
+    virtual int getRow() const;
 
     const QList<CampaignObjectBase*> getChildObjects() const;
     QList<CampaignObjectBase*> getChildObjects();
@@ -59,6 +60,7 @@ signals:
 public slots:
     void setExpanded(bool expanded);
     void setName(const QString& name);
+    void setRow(int row);
 
 protected slots:
     virtual void handleInternalChange();
@@ -75,6 +77,7 @@ protected:
     QUuid findChildUuid(int intId) const;
 
     bool _expanded;
+    int _row;
 };
 
 #endif // CAMPAIGNOBJECTBASE_H

@@ -129,7 +129,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _videoSize()
 {
     ui->setupUi(this);
-    ui->splitter->setStretchFactor(0,1);
+    ui->splitter->setStretchFactor(0,5);
     ui->splitter->setStretchFactor(1,0);
 
     _scene = new BattleDialogGraphicsScene(this);
@@ -200,7 +200,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     //connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotateCW()));
     //connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotateCCW()));
 
-    //connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
+    connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
     //connect(ui->btnAddMonsters, SIGNAL(clicked()), this, SLOT(addMonsters()));
     //connect(ui->btnAddCharacter, SIGNAL(clicked()), this, SLOT(addCharacter()));
@@ -2301,7 +2301,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
     //ui->btnNewMap->setEnabled(_model != nullptr);
     //ui->btnReloadMap->setEnabled(_model != nullptr);
     //ui->spinGridScale->setEnabled(_model != nullptr);
-    //ui->btnSort->setEnabled(_model != nullptr);
+    ui->btnSort->setEnabled(_model != nullptr);
     ui->btnNext->setEnabled(_model != nullptr);
     ui->edtRounds->setEnabled(_model != nullptr);
     ui->edtCountdown->setEnabled(_model != nullptr);

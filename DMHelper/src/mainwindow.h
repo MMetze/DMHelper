@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "characterdialog.h"
+#include "campaignobjectbase.h"
 #include "bestiarydialog.h"
 #include "dmconstants.h"
 #ifdef INCLUDE_CHASE_SUPPORT
@@ -37,7 +37,6 @@ class RibbonMain;
 class RibbonTabFile;
 class RibbonTabCampaign;
 class RibbonTabBestiary;
-//class RibbonTabHelp;
 class RibbonTabMap;
 class RibbonTabBattle;
 class RibbonTabScrolling;
@@ -75,11 +74,7 @@ public slots:
 
     void newCharacter();
     void importCharacter();
-    //void TEST_DISCORD();
     void importItem();
-    //void newNPC();
-    //void importNPC();
-    //void removeCurrentCharacter();
     void newParty();
     void newTextEncounter();
     void newBattleEncounter();
@@ -133,11 +128,6 @@ protected:
     void deleteCampaign();
     void enableCampaignMenu();
 
-    Encounter* notesFromIndex(const QModelIndex & index);
-    Character* characterFromIndex(const QModelIndex & index);
-    Adventure* adventureFromIndex(const QModelIndex & index);
-    Encounter* encounterFromIndex(const QModelIndex & index);
-    Map* mapFromIndex(const QModelIndex & index);
     bool selectItem(QUuid itemId);
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
@@ -164,12 +154,7 @@ protected slots:
     void handleTreeItemExpanded(const QModelIndex & index);
     void handleTreeItemCollapsed(const QModelIndex & index);
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
-    void handleEncounterTextChanged();
-    void handleStartNewBattle();
-    void handleLoadBattle();
-    void handleDeleteBattle();
 
-    //void handleAnimationStarted(QColor color);
     void handleAnimationStarted();
     void handleAnimationPreview(QImage img);
 
@@ -184,7 +169,7 @@ protected slots:
     void openTextTranslator();
     void openRandomMarkets();
 
-    QDialog* createDialog(QWidget* contents);
+    QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
 
     void connectTextToText();
     void connectTextToScroll();
@@ -193,7 +178,6 @@ protected slots:
     void activateObject(CampaignObjectBase* object);
     void deactivateObject();
     void activateWidget(int objectType, CampaignObjectBase* object = nullptr);
-    //int getWidgetFromType(int objectType);
     void setRibbonToType(int objectType);
 
 #ifdef INCLUDE_CHASE_SUPPORT
@@ -225,8 +209,6 @@ private:
     Campaign* campaign;
     QString campaignFileName;
 
-    //QUuid currentCharacter;
-
     OptionsContainer* _options;
 
     BestiaryDialog bestiaryDlg;
@@ -257,7 +239,6 @@ private:
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
     RibbonTabBestiary* _ribbonTabTools;
-//    RibbonTabHelp* _ribbonTabHelp;
     RibbonTabMap* _ribbonTabMap;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabScrolling* _ribbonTabScrolling;

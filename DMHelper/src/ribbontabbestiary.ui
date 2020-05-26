@@ -70,7 +70,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the Bestiary</string>
+        <string>Open the Bestiary (Ctrl+B)</string>
        </property>
        <property name="text">
         <string/>
@@ -248,7 +248,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the DM Screen</string>
+        <string>Open the DM Screen (Ctrl+M)</string>
        </property>
        <property name="text">
         <string/>
@@ -303,7 +303,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the custom table dialog</string>
+        <string>Open the custom table dialog (Ctrl+T)</string>
        </property>
        <property name="text">
         <string/>
@@ -358,7 +358,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the quick reference list</string>
+        <string>Open the quick reference list (Ctrl+R)</string>
        </property>
        <property name="text">
         <string/>
@@ -490,7 +490,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the dice rolling dialog</string>
+        <string>Open the dice rolling dialog (Ctrl+D)</string>
        </property>
        <property name="text">
         <string/>
@@ -710,7 +710,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the time &amp; date calendar</string>
+        <string>Open the time &amp; date calendar (Ctrl+C)</string>
        </property>
        <property name="text">
         <string/>

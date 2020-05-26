@@ -44,6 +44,9 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
 
+private slots:
+    void updateAll();
+
 private:
     void clearGrid();
     void clearList();
@@ -53,6 +56,7 @@ private:
     void updateLayout();
     int getColumnCount();
 
+    void calculateThresholds();
     void handlePublishClicked();
 
     Ui::PartyFrame *ui;

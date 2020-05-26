@@ -88,6 +88,11 @@ void PublishButtonRibbon::setColor(QColor color)
     ui->btnColor->setColor(color);
 }
 
+void PublishButtonRibbon::clickPublish()
+{
+    ui->btnPublish->click();
+}
+
 void PublishButtonRibbon::cancelPublish()
 {
     if((ui->btnPublish->isCheckable()) && (ui->btnPublish->isChecked()))

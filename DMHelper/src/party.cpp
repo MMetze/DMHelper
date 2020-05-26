@@ -1,5 +1,6 @@
 #include "party.h"
 #include "dmconstants.h"
+#include "character.h"
 #include <QDir>
 #include <QDomElement>
 
@@ -38,6 +39,20 @@ QPixmap Party::getIconPixmap(DMHelper::PixmapSize iconSize)
         _iconPixmap.setBasePixmap(QString(":/img/data/icon_party.png"));
 
     return _iconPixmap.getPixmap(iconSize);
+}
+
+QList<Character*> Party::getActiveCharacters()
+{
+    QList<Character*> actives;
+
+    QList<Character*> characterList = findChildren<Character*>();
+    for(int i = 0; i < characterList.count(); ++i)
+    {
+        if(characterList.at(i)->getActive())
+            actives.append(characterList.at(i));
+    }
+
+    return actives;
 }
 
 void Party::setIcon(const QString &newIcon)

@@ -82,8 +82,12 @@ bool CampaignTreeModel::dropMimeData(const QMimeData *data, Qt::DropAction actio
 {
     bool result = QStandardItemModel::dropMimeData(data, action, row, column, parent);
 
-    if((!data) || (!parent.isValid()))
+    //if((!data) || (!parent.isValid()))
+    if(!data)
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: drop not properly completed, empty mime data: " << data; // << " or invalid parent index: " << parent;
         return result;
+    }
 
     QByteArray encodedData = data->data(QString("application/vnd.dmhelper.text"));
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
@@ -92,31 +96,40 @@ bool CampaignTreeModel::dropMimeData(const QMimeData *data, Qt::DropAction actio
     quint64 treeItemObjectPtr;
     stream >> treeItemDataType >> treeItemDataID >> treeItemObjectPtr;
 
-    // TODO: Clean up, probably don't even need the MimeData!
-    CampaignObjectBase* movedObject = reinterpret_cast<CampaignObjectBase*>(treeItemObjectPtr);
-    CampaignTreeItem* parentItem = campaignItemFromIndex(parent);
-    CampaignObjectBase* parentObject = nullptr;
-    if(parentItem)
-        parentObject = parentItem->getCampaignItemObject();
-    //QModelIndex insertedIndex = index(row, column, parent);
-    //CampaignTreeItem* insertedItem = campaignItemFromIndex(insertedIndex);
-    if((row < 0) || (row > rowCount(parent)))
-        row = rowCount(parent);
-    QStandardItem* insertedStandardItem = parentItem->child(row - 1, 0);
-    CampaignTreeItem* insertedItem = dynamic_cast<CampaignTreeItem*>(insertedStandardItem);
-    CampaignObjectBase* insertedObject = nullptr;
-    if(insertedItem)
-        insertedObject = insertedItem->getCampaignItemObject();
+    //CampaignTreeItem* parentItem = campaignItemFromIndex(parent);
+    QStandardItem* parentItem = parent.isValid() ? itemFromIndex(parent) : invisibleRootItem();
+    if(!parentItem)
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: drop not properly completed, unable to find parent item for index: " << parent;
+        return result;
+    }
 
-    // Open the item's new parent
-    if(parentObject)
-        parentObject->setExpanded(true);
+    // This will only happen if the parent is not the root item
+    CampaignTreeItem* parentCampaignItem = dynamic_cast<CampaignTreeItem*>(parentItem);
+    if(parentCampaignItem)
+    {
+        CampaignObjectBase* parentObject = parentCampaignItem->getCampaignItemObject();
+        // Open the item's new parent
+        if(parentObject)
+            parentObject->setExpanded(true);
+    }
+
+    qDebug() << "[CampaignTreeModel] object ID " << treeItemDataID << " dropped on parent item: " << parentItem->text() << " with rows: " << parentItem->rowCount() << " in row = " << row;
+    CampaignTreeItem* insertedItem = getChildById(parentItem, treeItemDataID);
+    if(!insertedItem)
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: drop not properly completed, unable to find child item for id: " << treeItemDataID << " within parent item " << parentItem << " from parent index " << parent;
+        return result;
+    }
 
     // Set the campaign parent for the item
     validateIndividualChild(parentItem, insertedItem);
 
     // Update the moved object's icon if needed
     iterateTreeEntryVisualization(insertedItem);
+
+    // Update the row IDs in the children
+    updateChildRows(parentItem);
 
     emit itemMoved(insertedItem);
 
@@ -155,7 +168,8 @@ void CampaignTreeModel::handleRowsInserted(const QModelIndex &parent, int first,
     //QStandardItem* insertedItem = itemFromIndex(insertedIndex);
     QStandardItem* parentItem = itemFromIndex(parent);
     //QStandardItem* insertedItem = parentItem->child(first);
-    //qDebug() << "[CampaignTreeModel] Row inserted: " << parent << "=" << (parentItem ? parentItem->text() : QString("null")) << ", first: " << first << ", last: " << last << ": " << (insertedItem ? insertedItem->text() : QString("null"));
+    qDebug() << "[CampaignTreeModel] Row inserted: " << parent << "=" << (parentItem ? parentItem->text() : QString("null")) << ", first: " << first << ", last: " << last; // << ": " << (insertedItem ? insertedItem->text() : QString("null"));
+    updateChildRows(parentItem ? parentItem : invisibleRootItem());
 
     /*
     QModelIndex insertedIndex = index(first, 0, parent);
@@ -169,15 +183,24 @@ void CampaignTreeModel::handleRowsInserted(const QModelIndex &parent, int first,
     //QTimer::singleShot(0, this, SLOT(handleTimer()));
 }
 
-/*
 void CampaignTreeModel::handleRowsRemoved(const QModelIndex &parent, int first, int last)
 {
+    /*
     QModelIndex insertedIndex = index(first, 0, parent);
     QStandardItem* insertedItem = itemFromIndex(insertedIndex);
+    */
     QStandardItem* parentItem = itemFromIndex(parent);
-    qDebug() << "[CampaignTreeModel] Row removed: " << parent << "=" << (parentItem ? parentItem->text() : QString("null")) << ", first: " << first << ", last: " << last << ": " << insertedIndex << "=" << (insertedItem ? insertedItem->text() : QString("null"));
+    qDebug() << "[CampaignTreeModel] Row removed: " << parent << "=" << (parentItem ? parentItem->text() : QString("null")) << ", first: " << first << ", last: " << last; // << ": " << insertedIndex << "=" << (insertedItem ? insertedItem->text() : QString("null"));
+    updateChildRows(parentItem ? parentItem : invisibleRootItem());
 }
-*/
+
+void CampaignTreeModel::handleRowsMoved(const QModelIndex &parent, int start, int end, const QModelIndex &destination, int row)
+{
+    QStandardItem* parentItem = itemFromIndex(parent);
+    QStandardItem* destinationItem = itemFromIndex(destination);
+    qDebug() << "[CampaignTreeModel] Row moved from: " << parent << "=" << (parentItem ? parentItem->text() : QString("null")) << ", start: " << start << ", end: " << end << " to: " << destination << "=" << (destinationItem ? destinationItem->text() : QString("null")) << ", row: " << row; // << ": " << insertedIndex << "=" << (insertedItem ? insertedItem->text() : QString("null"));
+    updateChildRows(parentItem ? parentItem : invisibleRootItem());
+}
 
 void CampaignTreeModel::handleTimer()
 {
@@ -206,7 +229,9 @@ void CampaignTreeModel::updateCampaignEntries()
     qDebug() << "[CampaignTreeModel] Campaign update detected, recreating campaign model.";
 
     disconnect(this, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(handleRowsInserted(const QModelIndex &, int, int)));
-    // disconnect(this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)), this, SLOT(handleRowsRemoved(const QModelIndex &, int, int)));
+    //disconnect(this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)), this, SLOT(handleRowsRemoved(const QModelIndex &, int, int)));
+    disconnect(this, SIGNAL(rowsRemoved(const QModelIndex &, int, int)), this, SLOT(handleRowsRemoved(const QModelIndex &, int, int)));
+    disconnect(this, SIGNAL(rowsMoved(const QModelIndex &, int, int, const QModelIndex &, int)), this, SLOT(handleRowsMoved(const QModelIndex &, int, int, const QModelIndex &, int)));
 
     _objectIndexMap.clear();
     clear();
@@ -224,8 +249,12 @@ void CampaignTreeModel::updateCampaignEntries()
         */
     }
 
+    updateChildRows(invisibleRootItem());
+
     connect(this, SIGNAL(rowsInserted(const QModelIndex &, int, int)), this, SLOT(handleRowsInserted(const QModelIndex &, int, int)));
     //connect(this, SIGNAL(rowsAboutToBeRemoved(const QModelIndex &, int, int)), this, SLOT(handleRowsRemoved(const QModelIndex &, int, int)));
+    connect(this, SIGNAL(rowsRemoved(const QModelIndex &, int, int)), this, SLOT(handleRowsRemoved(const QModelIndex &, int, int)));
+    connect(this, SIGNAL(rowsMoved(const QModelIndex &, int, int, const QModelIndex &, int)), this, SLOT(handleRowsMoved(const QModelIndex &, int, int, const QModelIndex &, int)));
 }
 
 QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QStandardItem* parentEntry)
@@ -248,7 +277,7 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
 
     setTreeEntryVisualization(treeEntry);
 
-    appendTreeEntry(treeEntry, parentEntry);
+    addTreeEntry(treeEntry, parentEntry);
 
     QList<CampaignObjectBase*> childObjects = object->getChildObjects();
     for(CampaignObjectBase* childObject : childObjects)
@@ -261,10 +290,12 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
             */
     }
 
+    updateChildRows(treeEntry);
+
     return treeEntry;
 }
 
-void CampaignTreeModel::appendTreeEntry(QStandardItem* objectEntry, QStandardItem* parentEntry)
+void CampaignTreeModel::addTreeEntry(CampaignTreeItem* objectEntry, QStandardItem* parentEntry)
 {
     if((!objectEntry) || (!parentEntry))
     {
@@ -279,7 +310,27 @@ void CampaignTreeModel::appendTreeEntry(QStandardItem* objectEntry, QStandardIte
         return;
     }
 
-    parentEntry->appendRow(objectEntry);
+    int targetRow = 0;
+    int objectEntryRow;
+    int childEntryRow;
+    CampaignTreeItem* childEntry = nullptr;
+    if(objectEntry->getCampaignItemRow() != -1)
+    {
+        objectEntryRow = objectEntry->getCampaignItemRow();
+        childEntry = dynamic_cast<CampaignTreeItem*>(parentEntry->child(targetRow));
+        if(childEntry)
+            childEntryRow = childEntry->getCampaignItemRow();
+        while((childEntry != nullptr) && (childEntry->getCampaignItemRow() <= objectEntry->getCampaignItemRow()))
+        {
+            childEntry = dynamic_cast<CampaignTreeItem*>(parentEntry->child(++targetRow));
+        }
+    }
+
+    if(childEntry == nullptr)
+        parentEntry->appendRow(objectEntry);
+    else
+        parentEntry->insertRow(targetRow, objectEntry);
+
     _objectIndexMap.insert(objectId, objectEntry->index());
 
 #ifdef CAMPAIGN_MODEL_LOGGING
@@ -329,11 +380,29 @@ void CampaignTreeModel::validateIndividualChild(QStandardItem* parentItem, QStan
     if((!parentItem) || (!childItem))
         return;
 
+//    QUuid parentId;
     CampaignObjectBase* parentObject = reinterpret_cast<CampaignObjectBase*>(parentItem->data(DMHelper::TreeItemData_Object).value<quint64>());
-    QUuid parentId = parentItem->data(DMHelper::TreeItemData_ID).toString();
-    if((!parentObject) || (parentId.isNull()))
+    if(!parentObject)
     {
-        qDebug() << "[CampaignTreeModel] ERROR: Not possible to validate child  - parent ID: " << parentId << ", object: " << parentObject;
+        parentObject = _campaign;
+//        parentId = QUuid(parentItem->data(DMHelper::TreeItemData_ID).toString());
+    }
+//    else
+//    {
+//        parentId = QUuid(parentItem->data(DMHelper::TreeItemData_ID).toString());
+//    }
+
+    if(!parentObject)
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: Not possible to validate child  - parent object: " << parentObject;
+        return;
+    }
+
+    QUuid parentId = parentObject->getID();
+
+    if(parentId.isNull())
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: Not possible to validate child  - parent ID: " << parentId;
         return;
     }
 
@@ -420,4 +489,36 @@ void CampaignTreeModel::setTreeEntryVisualization(CampaignTreeItem* entry)
             break;
     }
 
+}
+
+void CampaignTreeModel::updateChildRows(QStandardItem* parentItem)
+{
+    for(int i = 0; i < parentItem->rowCount(); ++i)
+    {
+        CampaignTreeItem* childItem = dynamic_cast<CampaignTreeItem*>(parentItem->child(i));
+        if(childItem)
+            childItem->setCampaignItemRow(i);
+    }
+}
+
+CampaignTreeItem* CampaignTreeModel::getChildById(QStandardItem* parentItem, const QUuid& itemId) const
+{
+    if(!parentItem)
+        return nullptr;
+
+    for(int i = 0; i < rowCount(); ++i)
+    {
+        CampaignTreeItem* item = dynamic_cast<CampaignTreeItem*>(parentItem->child(i));
+        if(item)
+        {
+            if(item->getCampaignItemId() == itemId)
+                return item;
+
+            CampaignTreeItem* childItem = item->getChildById(itemId);
+            if(childItem)
+                return childItem;
+        }
+    }
+
+    return nullptr;
 }

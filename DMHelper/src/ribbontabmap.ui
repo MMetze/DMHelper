@@ -1522,7 +1522,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Fill the Fog of War</string>
+        <string>Fill or Clear the Fog of War</string>
        </property>
        <property name="text">
         <string/>

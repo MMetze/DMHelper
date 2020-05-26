@@ -74,7 +74,6 @@ signals:
     void pointerClicked(bool checked);
 
 protected:
-    virtual void paintEvent(QPaintEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
 
 private slots:

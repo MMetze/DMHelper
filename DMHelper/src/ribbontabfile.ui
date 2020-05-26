@@ -236,7 +236,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Save the campaign</string>
+        <string>Save the campaign (Ctrl+S)</string>
        </property>
        <property name="text">
         <string/>
@@ -681,6 +681,9 @@
          <width>40</width>
          <height>40</height>
         </size>
+       </property>
+       <property name="shortcut">
+        <string>Ctrl+S</string>
        </property>
        <property name="checkable">
         <bool>false</bool>

@@ -11,7 +11,8 @@
 
 CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
     DMHObjectBase(parent),
-    _expanded(true)
+    _expanded(true),
+    _row(-1)
 {
     if(!name.isEmpty())
         setObjectName(name);
@@ -47,7 +48,9 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
 {
     DMHObjectBase::inputXML(element, isImport);
 
-    _expanded = static_cast<bool>(element.attribute("expanded",QString::number(0)).toInt());
+    _expanded = static_cast<bool>(element.attribute("expanded", QString::number(0)).toInt());
+    _row = element.attribute("row", QString::number(-1)).toInt();
+
     QString importName = element.attribute("name");
     if(importName.isEmpty())
     {
@@ -133,6 +136,11 @@ bool CampaignObjectBase::getExpanded() const
 QString CampaignObjectBase::getName() const
 {
     return objectName();
+}
+
+int CampaignObjectBase::getRow() const
+{
+    return _row;
 }
 
 const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
@@ -327,6 +335,15 @@ void CampaignObjectBase::setName(const QString& name)
     }
 }
 
+void CampaignObjectBase::setRow(int row)
+{
+    if(_row != row)
+    {
+        _row = row;
+        handleInternalDirty();
+    }
+}
+
 void CampaignObjectBase::handleInternalChange()
 {
     emit changed();
@@ -341,6 +358,7 @@ void CampaignObjectBase::handleInternalDirty()
 void CampaignObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("expanded", getExpanded());
+    element.setAttribute("row", getRow());
     element.setAttribute("name", getName());
 
     DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);

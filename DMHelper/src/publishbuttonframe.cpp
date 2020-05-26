@@ -69,6 +69,11 @@ void PublishButtonFrame::setColor(QColor color)
     ui->btnColor->setColor(color);
 }
 
+void PublishButtonFrame::clickPublish()
+{
+    ui->btnPublish->click();
+}
+
 void PublishButtonFrame::cancelPublish()
 {
     if((ui->btnPublish->isCheckable()) && (ui->btnPublish->isChecked()))

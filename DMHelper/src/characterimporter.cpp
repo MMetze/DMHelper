@@ -25,6 +25,7 @@ CharacterImporter::CharacterImporter(QObject *parent) :
     _reply(nullptr),
     _campaign(nullptr),
     _character(nullptr),
+    _characterList(),
     _isCharacter(true),
     _msgBox(nullptr),
     _attributeSetValues(),
@@ -45,18 +46,27 @@ CharacterImporter::~CharacterImporter()
 void CharacterImporter::importCharacter(Campaign* campaign, bool isCharacter)
 {
     if(!campaign)
+    {
+        qDebug() << "[CharacterImporter] ERROR: no valid campaign found for import!";
         return;
+    }
+
+    if((_character) || (!_characterList.isEmpty()))
+    {
+        qDebug() << "[CharacterImporter] ERROR: character import aborted because update is ongoing!";
+        return;
+    }
 
     CharacterImportDialog dlg;
     int result = dlg.exec();
     QString characterId = dlg.getCharacterId();
     if((result == QDialog::Rejected) || (characterId.isEmpty()))
     {
+        qDebug() << "[CharacterImporter] Character import cancelled by user.";
         deleteLater();
         return;
     }
 
-    _character = nullptr;
     _isCharacter = isCharacter;
     _campaign = campaign;
 
@@ -66,13 +76,45 @@ void CharacterImporter::importCharacter(Campaign* campaign, bool isCharacter)
 void CharacterImporter::updateCharacter(Character* character)
 {
     if((!character) || (character->getDndBeyondID() == -1))
+    {
+        qDebug() << "[CharacterImporter] ERROR: no valid character provided for update: " << character;
         return;
+    }
 
-    _character = character;
-    QString characterId = QString::number(_character->getDndBeyondID());
-    _campaign = dynamic_cast<Campaign*>(_character->getParentByType(DMHelper::CampaignType_Campaign));
+    //_character = character;
+    _characterList.append(character);
+    //QString characterId = QString::number(_character->getDndBeyondID());
+    _campaign = dynamic_cast<Campaign*>(character->getParentByType(DMHelper::CampaignType_Campaign));
 
-    startImport(characterId);
+    startImport();
+}
+
+void CharacterImporter::updateCharacters(QList<Character*> characters)
+{
+    if(characters.isEmpty())
+    {
+        qDebug() << "[CharacterImporter] ERROR: no characters provided for update!";
+        return;
+    }
+
+    for(Character* character : characters)
+    {
+        if((character) && (character->getDndBeyondID() != -1))
+            _characterList.append(character);
+    }
+
+    if(_characterList.isEmpty())
+    {
+        qDebug() << "[CharacterImporter] ERROR: no valid characters or DnD Beyond characters provided for update!";
+        return;
+    }
+
+    //_character = character;
+    //QString characterId = QString::number(_character->getDndBeyondID());
+    if(_characterList.at(0))
+        _campaign = dynamic_cast<Campaign*>(_characterList.at(0)->getParentByType(DMHelper::CampaignType_Campaign));
+
+    startImport();
 }
 
 void CharacterImporter::campaignChanged()
@@ -170,7 +212,7 @@ void CharacterImporter::scanChoices(QJsonObject choicesObject, Character& charac
                     if(optionId == optionValue)
                     {
                         QString optionLabel = optionObject["label"].toString();
-                        //qDebug() << "[Character Importer]           Proficiency found: " << optionLabel;
+                        //qDebug() << "[CharacterImporter]           Proficiency found: " << optionLabel;
                         int skillId = Character::findKeyForSkillName(optionLabel);
                         if(skillId >= 0)
                         {
@@ -206,7 +248,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     if(!reply)
     {
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An unexpected error occured connecting to Dnd Beyond."));
-        qDebug() << "[Character Importer] ERROR: unexpected null pointer in network reply";
+        qDebug() << "[CharacterImporter] ERROR: unexpected null pointer in network reply";
         return false;
     }
 
@@ -214,8 +256,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     if(reply->error() != QNetworkReply::NoError)
     {
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString());
-        qDebug() << "[Character Importer] ERROR: network reply not ok: " << reply->error();
-        qDebug() << "[Character Importer] ERROR: " << reply->errorString();
+        qDebug() << "[CharacterImporter] ERROR: network reply not ok: " << reply->error();
+        qDebug() << "[CharacterImporter] ERROR: " << reply->errorString();
         return false;
     }
 
@@ -233,13 +275,13 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     if(doc.isNull())
     {
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("Unable to parse the input string\n") + err.errorString());
-        qDebug() << "[Character Importer] ERROR: " << err.error << " in column " << err.offset;
-        qDebug() << "[Character Importer] ERROR: " << err.errorString();
+        qDebug() << "[CharacterImporter] ERROR: " << err.error << " in column " << err.offset;
+        qDebug() << "[CharacterImporter] ERROR: " << err.errorString();
         return false;
     }
 
     QJsonObject rootObject = doc.object();
-    qDebug() << "[Character Importer] Reply from DnD Beyond received, parsing character: " << rootObject["name"].toString();
+    qDebug() << "[CharacterImporter] Reply from DnD Beyond received, parsing character: " << rootObject["name"].toString();
 
     bool isUpdate = _character != nullptr;
     if(!isUpdate)
@@ -548,7 +590,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 
     if(!avatarUrl.isEmpty())
     {
-        qDebug() << "[Character Importer] Parsing character completed, requesting image from: " << avatarUrl;
+        qDebug() << "[CharacterImporter] Parsing character completed, requesting image from: " << avatarUrl;
         disconnect(_manager, &QNetworkAccessManager::finished, this, &CharacterImporter::replyFinished);
         connect(_manager, &QNetworkAccessManager::finished, this, &CharacterImporter::imageReplyFinished);
         _reply = _manager->get(QNetworkRequest(QUrl(avatarUrl)));
@@ -559,7 +601,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     }
     else
     {
-        qDebug() << "[Character Importer] Parsing character completed, no image download requested";
+        qDebug() << "[CharacterImporter] Parsing character completed, no image download requested";
         _character->endBatchChanges();
         emit characterImported(_character->getID());
 
@@ -579,15 +621,15 @@ bool CharacterImporter::interpretImageReply(QNetworkReply* reply)
     if((!_character) || (!reply))
     {
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An unexpected error occured connecting to Dnd Beyond."));
-        qDebug() << "[Character Importer] ERROR: unexpected null pointer in network image reply";
+        qDebug() << "[CharacterImporter] ERROR: unexpected null pointer in network image reply";
         return false;
     }
 
     if(reply->error() != QNetworkReply::NoError)
     {
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString());
-        qDebug() << "[Character Importer] ERROR: network image reply not ok: " << reply->error();
-        qDebug() << "[Character Importer] ERROR: " << reply->errorString();
+        qDebug() << "[CharacterImporter] ERROR: network image reply not ok: " << reply->error();
+        qDebug() << "[CharacterImporter] ERROR: " << reply->errorString();
         return false;
     }
 
@@ -612,12 +654,12 @@ bool CharacterImporter::interpretImageReply(QNetworkReply* reply)
         }
     }
 
-    qDebug() << "[Character Importer] Importing character image completed.";
+    qDebug() << "[CharacterImporter] Importing character image completed.";
 
     return true;
 }
 
-void CharacterImporter::startImport(const QString& characterId)
+void CharacterImporter::startImport(QString characterId)
 {
     if(!_manager)
     {
@@ -628,9 +670,13 @@ void CharacterImporter::startImport(const QString& characterId)
     if(_msgBox)
         delete _msgBox;
 
+    if((!_character) && (!_characterList.isEmpty()))
+        _character = _characterList.takeFirst();
+
     QString messageStr;
     if(_character)
     {
+        characterId = QString::number(_character->getDndBeyondID());
         messageStr = QString("Updating character ") + _character->getName() + QString(" with ID: ") + characterId;
     }
     else
@@ -641,7 +687,7 @@ void CharacterImporter::startImport(const QString& characterId)
             messageStr = QString("Importing NPC ID: ") + characterId;
     }
 
-    qDebug() << "[Character Importer] " << messageStr;
+    qDebug() << "[CharacterImporter] " << messageStr;
 
     initializeValues();
 
@@ -661,7 +707,15 @@ void CharacterImporter::finishImport()
         _msgBox = nullptr;
     }
 
-    deleteLater();
+    if(!_characterList.isEmpty())
+    {
+        _character = nullptr;
+        startImport();
+    }
+    else
+    {
+        deleteLater();
+    }
 }
 
 void CharacterImporter::initializeValues()

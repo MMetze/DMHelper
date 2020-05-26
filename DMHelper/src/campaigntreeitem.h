@@ -26,6 +26,12 @@ public:
 
     virtual CampaignObjectBase* getCampaignItemObject() const;
     virtual void setCampaignItemObject(CampaignObjectBase* itemObject);
+
+    virtual int getCampaignItemRow() const;
+    virtual void setCampaignItemRow(int itemRow);
+
+    virtual CampaignTreeItem* getChildById(const QUuid& itemId) const;
+    virtual CampaignTreeItem* getChildCampaignItem(int childRow) const;
 };
 
 #endif // CAMPAIGNTREEITEM_H

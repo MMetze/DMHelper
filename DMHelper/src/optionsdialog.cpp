@@ -32,6 +32,10 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->btnResetFileLocations, &QAbstractButton::clicked, this, &OptionsDialog::resetFileLocations);
 
         ui->chkShowAnimations->setChecked(_options->getShowAnimations());
+        QFont font = qApp->font();
+        font.setFamily(_options->getFontFamily());
+        ui->fontComboBox->setCurrentFont(font);
+        ui->spinBoxFontSize->setValue(_options->getFontSize());
         ui->chkShowOnDeck->setChecked(_options->getShowOnDeck());
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
         ui->edtCountdownDuration->setValidator(new QIntValidator(1,1000,this));
@@ -62,10 +66,12 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->tabWidget->removeTab(2);
 #endif
 
-        connect(ui->chkShowAnimations,SIGNAL(clicked(bool)),_options,SLOT(setShowAnimations(bool)));
-        connect(ui->chkShowOnDeck,SIGNAL(clicked(bool)),_options,SLOT(setShowOnDeck(bool)));
-        connect(ui->chkShowCountdown,SIGNAL(clicked(bool)),_options,SLOT(setShowCountdown(bool)));
-        connect(ui->edtCountdownDuration,SIGNAL(textChanged(QString)),_options,SLOT(setCountdownDuration(QString)));
+        connect(ui->chkShowAnimations, SIGNAL(clicked(bool)), _options, SLOT(setShowAnimations(bool)));
+        connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
+        connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), _options, SLOT(setFontSize(int)));
+        connect(ui->chkShowOnDeck, SIGNAL(clicked(bool)), _options, SLOT(setShowOnDeck(bool)));
+        connect(ui->chkShowCountdown, SIGNAL(clicked(bool)), _options, SLOT(setShowCountdown(bool)));
+        connect(ui->edtCountdownDuration, SIGNAL(textChanged(QString)), _options, SLOT(setCountdownDuration(QString)));
         connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);
         connect(ui->edtPointerFile, &QLineEdit::editingFinished, this, &OptionsDialog::editPointerFile);
 

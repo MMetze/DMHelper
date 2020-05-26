@@ -84,7 +84,6 @@ SOURCES += main.cpp\
     ribbontabbestiary.cpp \
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
-    ribbontabhelp.cpp \
     ribbontabmap.cpp \
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
@@ -96,7 +95,6 @@ SOURCES += main.cpp\
     dicerolldialog.cpp \
     map.cpp \
     character.cpp \
-    characterdialog.cpp \
     campaign.cpp \
     mruhandler.cpp \
     mruaction.cpp \
@@ -277,7 +275,6 @@ HEADERS  += mainwindow.h \
     ribbontabbestiary.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
-    ribbontabhelp.h \
     ribbontabmap.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
@@ -289,7 +286,6 @@ HEADERS  += mainwindow.h \
     dicerolldialog.h \
     map.h \
     character.h \
-    characterdialog.h \
     campaign.h \
     dmconstants.h \
     mruhandler.h \
@@ -412,7 +408,6 @@ FORMS    += mainwindow.ui \
     characterimportdialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \
-    characterdialog.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
@@ -432,7 +427,6 @@ FORMS    += mainwindow.ui \
     ribbontabbestiary.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
-    ribbontabhelp.ui \
     ribbontabmap.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \

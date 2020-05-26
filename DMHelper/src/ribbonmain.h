@@ -21,6 +21,8 @@ public slots:
     void enableTab(RibbonFrame* page);
     void disableTab(RibbonFrame* page);
 
+    void clickPublish();
+
 private slots:
     void handleIndexChanged(int index);
 

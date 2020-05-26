@@ -20,6 +20,9 @@ public:
     int getMRUCount() const;
     QStringList getMRUList() const;
 
+    QMenu* getActionsMenu() const;
+    void setActionsMenu(QMenu* actionsMenu);
+
     void readMRUFromSettings(QSettings& settings);
     void writeMRUToSettings(QSettings& settings);
 

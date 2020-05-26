@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>267</width>
-    <height>78</height>
+    <width>212</width>
+    <height>56</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,7 +29,7 @@
    <enum>QFrame::Raised</enum>
   </property>
   <property name="lineWidth">
-   <number>2</number>
+   <number>1</number>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <property name="spacing">
@@ -148,6 +148,12 @@
        </item>
        <item>
         <widget class="QCheckBox" name="chkVisible">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
          </property>
@@ -217,6 +223,12 @@
        </item>
        <item>
         <widget class="QCheckBox" name="chkKnown">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="toolTip">
           <string>Is this character known? If the this isn't checked, the character will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the character takes any actions.</string>
          </property>
@@ -235,28 +247,20 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <property name="spacing">
-      <number>2</number>
+      <number>0</number>
      </property>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,1,1">
+       <property name="spacing">
+        <number>2</number>
+       </property>
        <item>
         <widget class="QLineEdit" name="edtName">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>50</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
          </property>
          <property name="toolTip">
           <string>The character's name. To edit this, double click to go to the character's full view.</string>
@@ -273,15 +277,10 @@ background-color: rgba(0, 0, 0, 0);</string>
        <item>
         <widget class="QLabel" name="label_5">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
          </property>
          <property name="toolTip">
           <string>The character's armor class. To edit this, double click to go to the character's full view.</string>
@@ -292,34 +291,18 @@ background-color: rgba(0, 0, 0, 0);</string>
          <property name="text">
           <string>AC:</string>
          </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
         </widget>
        </item>
        <item>
         <widget class="QLineEdit" name="edtAC">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>40</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>40</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
          </property>
          <property name="toolTip">
           <string>The character's armor class. To edit this, double click to go to the character's full view.</string>
@@ -342,14 +325,14 @@ background-color: rgba(0, 0, 0, 0);</string>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2">
        <property name="spacing">
-        <number>2</number>
+        <number>0</number>
        </property>
        <item>
         <widget class="QLabel" name="label">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -366,11 +349,6 @@ background-color: rgba(0, 0, 0, 0);</string>
            <height>22</height>
           </size>
          </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
          <property name="toolTip">
           <string>The character's initiative value.</string>
          </property>
@@ -382,7 +360,7 @@ background-color: rgba(0, 0, 0, 0);</string>
        <item>
         <widget class="QLineEdit" name="edtInit">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -398,13 +376,6 @@ background-color: rgba(0, 0, 0, 0);</string>
            <width>60</width>
            <height>30</height>
           </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
          </property>
          <property name="toolTip">
           <string>The character's initiative value.</string>
@@ -427,12 +398,12 @@ background-color: rgba(0, 0, 0, 0);</string>
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::MinimumExpanding</enum>
+          <enum>QSizePolicy::Preferred</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>0</width>
-           <height>20</height>
+           <height>5</height>
           </size>
          </property>
         </spacer>
@@ -440,7 +411,7 @@ background-color: rgba(0, 0, 0, 0);</string>
        <item>
         <widget class="QLabel" name="label_2">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -457,11 +428,6 @@ background-color: rgba(0, 0, 0, 0);</string>
            <height>22</height>
           </size>
          </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-          </font>
-         </property>
          <property name="toolTip">
           <string>The character's remaining hit points</string>
          </property>
@@ -473,7 +439,7 @@ background-color: rgba(0, 0, 0, 0);</string>
        <item>
         <widget class="QLineEdit" name="edtHP">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -489,13 +455,6 @@ background-color: rgba(0, 0, 0, 0);</string>
            <width>60</width>
            <height>30</height>
           </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>9</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
          </property>
          <property name="toolTip">
           <string>The character's remaining hit points</string>

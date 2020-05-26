@@ -10,7 +10,7 @@
 
 // TODO: consider copy of MRU functionality
 
-OptionsContainer::OptionsContainer(QObject *parent) :
+OptionsContainer::OptionsContainer(QMainWindow *parent) :
     QObject(parent),
     _bestiaryFileName(),
     _lastMonster(),
@@ -20,6 +20,9 @@ OptionsContainer::OptionsContainer(QObject *parent) :
     _shopsFileName(),
     _tablesDirectory(),
     _showAnimations(false),
+    _fontFamily("Trebuchet MS"),
+    _fontSize(12),
+    _logicalDPI(0.0),
     _audioVolume(100),
     _showOnDeck(true),
     _showCountdown(true),
@@ -85,6 +88,21 @@ QString OptionsContainer::getLastMonster() const
 bool OptionsContainer::getShowAnimations() const
 {
     return _showAnimations;
+}
+
+QString OptionsContainer::getFontFamily() const
+{
+    return _fontFamily;
+}
+
+int OptionsContainer::getFontSize() const
+{
+    return _fontSize;
+}
+
+qreal OptionsContainer::getLogicalDPI() const
+{
+    return _logicalDPI;
 }
 
 int OptionsContainer::getAudioVolume() const
@@ -201,13 +219,20 @@ void OptionsContainer::setMRUHandler(MRUHandler* mruHandler)
 
 void OptionsContainer::editSettings()
 {
-    OptionsContainer* editCopyContainer = new OptionsContainer(this);
+    OptionsContainer* editCopyContainer = new OptionsContainer(getMainWindow());
     editCopyContainer->copy(this);
+
+    _fontChanged = false;
+    connect(editCopyContainer, &OptionsContainer::fontFamilyChanged, this, &OptionsContainer::registerFontChange);
+    connect(editCopyContainer, &OptionsContainer::fontSizeChanged, this, &OptionsContainer::registerFontChange);
 
     OptionsDialog dlg(editCopyContainer);
 
     if(dlg.exec() == QDialog::Accepted)
     {
+        if(_fontChanged)
+            QMessageBox::information(nullptr, QString("Font Changed"), QString("Changes made in the font used by the DM Helper will only be applied when then application is restarted."));
+
         copy(editCopyContainer);
     }
 
@@ -221,6 +246,13 @@ void OptionsContainer::readSettings()
 #ifdef QT_DEBUG
     settings.beginGroup("DEBUG");
 #endif
+
+    QMainWindow* mainWindow = getMainWindow();
+    if(mainWindow)
+    {
+        mainWindow->restoreGeometry(settings.value("geometry").toByteArray());
+        mainWindow->restoreState(settings.value("windowState").toByteArray());
+    }
 
     // Note: password will not be stored in settings
     setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml")));
@@ -237,6 +269,15 @@ void OptionsContainer::readSettings()
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
     setShowAnimations(settings.value("showAnimations",QVariant(false)).toBool());
+    setFontFamily(settings.value("fontFamily","Trebuchet MS").toString());
+
+    //12*96/72 = 16 Pixels
+    //10*96/72 = 13 Pixels
+    // 8*96/72 = 10 Pixels
+    int defaultFontSize = 10;
+    if(_logicalDPI > 0)
+        defaultFontSize = (20*72)/_logicalDPI;
+    setFontSize(settings.value("fontSize",QVariant(defaultFontSize)).toInt());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
@@ -285,6 +326,13 @@ void OptionsContainer::writeSettings()
     settings.beginGroup("DEBUG");
 #endif
 
+    QMainWindow* mainWindow = getMainWindow();
+    if(mainWindow)
+    {
+        settings.setValue("geometry", mainWindow->saveGeometry());
+        settings.setValue("windowState", mainWindow->saveState());
+    }
+
     // Note: password will not be stored in settings
     settings.setValue("bestiary", getBestiaryFileName());
     settings.setValue("lastMonster", getLastMonster());
@@ -294,6 +342,8 @@ void OptionsContainer::writeSettings()
     settings.setValue("shops", getShopsFileName());
     settings.setValue("tables", getTablesDirectory());
     settings.setValue("showAnimations", getShowAnimations());
+    settings.setValue("fontFamily", getFontFamily());
+    settings.setValue("fontSize", getFontSize());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("showOnDeck", getShowOnDeck());
     settings.setValue("showCountdown", getShowCountdown());
@@ -538,6 +588,38 @@ void OptionsContainer::setShowAnimations(bool showAnimations)
     }
 }
 
+void OptionsContainer::setFontFamily(const QString& fontFamily)
+{
+    if(_fontFamily != fontFamily)
+    {
+        _fontFamily = fontFamily;
+        emit fontFamilyChanged(_fontFamily);
+    }
+}
+
+void OptionsContainer::setFontFamilyFromFont(const QFont& font)
+{
+    setFontFamily(font.family());
+}
+
+
+void OptionsContainer::setFontSize(int fontSize)
+{
+    if(_fontSize != fontSize)
+    {
+        _fontSize = fontSize;
+        emit fontSizeChanged(_fontSize);
+    }
+}
+
+void OptionsContainer::setLogicalDPI(qreal logicalDPI)
+{
+    if(logicalDPI != _logicalDPI)
+    {
+        _logicalDPI = logicalDPI;
+    }
+}
+
 void OptionsContainer::setAudioVolume(int volume)
 {
     if(volume < 0) volume = 0;
@@ -686,6 +768,11 @@ void OptionsContainer::setInviteID(const QString& inviteID)
 
 #endif //INCLUDE_NETWORK_SUPPORT
 
+void OptionsContainer::registerFontChange()
+{
+    _fontChanged = true;
+}
+
 void OptionsContainer::copy(OptionsContainer* other)
 {
     if(other)
@@ -698,6 +785,8 @@ void OptionsContainer::copy(OptionsContainer* other)
         setTablesDirectory(other->_tablesDirectory);
         setLastMonster(other->_lastMonster);
         setShowAnimations(other->_showAnimations);
+        setFontFamily(other->_fontFamily);
+        setFontSize(other->_fontSize);
         setShowOnDeck(other->_showOnDeck);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
@@ -717,4 +806,9 @@ void OptionsContainer::copy(OptionsContainer* other)
         setInviteID(other->_inviteID);
 #endif
     }
+}
+
+QMainWindow* OptionsContainer::getMainWindow()
+{
+    return dynamic_cast<QMainWindow*>(parent());
 }

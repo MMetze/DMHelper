@@ -36,7 +36,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
    <item>
     <widget class="QFrame" name="frame">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -53,6 +53,12 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
        <widget class="QGraphicsView" name="graphicsView">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="mouseTracking">
          <bool>false</bool>
         </property>
@@ -75,7 +81,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
      <item>
       <widget class="QGroupBox" name="grpMode">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -181,7 +187,7 @@ color: rgb(85, 0, 0);</string>
      <item>
       <widget class="QGroupBox" name="groupBox_5">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -196,6 +202,12 @@ color: rgb(85, 0, 0);</string>
        <layout class="QGridLayout" name="gridLayout_5">
         <item row="0" column="1">
          <widget class="QPushButton" name="btnFoWErase">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>Toggle Fog of War erase/draw</string>
           </property>
@@ -221,6 +233,12 @@ color: rgb(85, 0, 0);</string>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
            <widget class="QPushButton" name="btnResetFoW">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="toolTip">
              <string>Resets the Fog of War to all black</string>
             </property>
@@ -231,6 +249,12 @@ color: rgb(85, 0, 0);</string>
           </item>
           <item>
            <widget class="QPushButton" name="btnClearFoW">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="toolTip">
              <string>Clears the Fog of War</string>
             </property>
@@ -247,7 +271,7 @@ color: rgb(85, 0, 0);</string>
      <item>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -317,6 +341,12 @@ color: rgb(85, 0, 0);</string>
         </item>
         <item>
          <widget class="QPushButton" name="btnBrushSelect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>Drag a rectangle across the map and clears/sets the Fog of War for that rectangle</string>
           </property>
@@ -354,7 +384,7 @@ color: rgb(85, 0, 0);</string>
             <item>
              <widget class="QLabel" name="label">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -414,6 +444,12 @@ color: rgb(85, 0, 0);</string>
           </item>
           <item>
            <widget class="QCheckBox" name="chkSmooth">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="toolTip">
              <string>Set to have smoothed edges on the brush for editing Fog of War</string>
             </property>
@@ -458,6 +494,9 @@ color: rgb(85, 0, 0);</string>
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
+       </property>
        <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
@@ -478,6 +517,12 @@ color: rgb(85, 0, 0);</string>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QPushButton" name="btnZoomIn">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>Zoom in</string>
           </property>
@@ -492,6 +537,12 @@ color: rgb(85, 0, 0);</string>
         </item>
         <item>
          <widget class="QPushButton" name="btnZoomOut">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>Zoom out</string>
           </property>
@@ -506,6 +557,12 @@ color: rgb(85, 0, 0);</string>
         </item>
         <item>
          <widget class="QPushButton" name="btnZoomOne">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>1:1 Zoom</string>
           </property>
@@ -520,6 +577,12 @@ color: rgb(85, 0, 0);</string>
         </item>
         <item>
          <widget class="QPushButton" name="btnZoomFit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>Zoom to fit the whole map in the window</string>
           </property>
@@ -534,6 +597,12 @@ color: rgb(85, 0, 0);</string>
         </item>
         <item>
          <widget class="QPushButton" name="btnZoomSelect">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>Drag a rectangle across the map and zoom to that selection</string>
           </property>
@@ -556,6 +625,9 @@ color: rgb(85, 0, 0);</string>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -602,6 +674,12 @@ color: rgb(85, 0, 0);</string>
        </item>
        <item>
         <widget class="QCheckBox" name="chkAudio">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="toolTip">
           <string>Enable or disable automatic audio playback for this map</string>
          </property>
@@ -619,6 +697,9 @@ color: rgb(85, 0, 0);</string>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Preferred</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -669,6 +750,12 @@ color: rgb(85, 0, 0);</string>
         </item>
         <item>
          <widget class="QPushButton" name="btnPublishZoom">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="toolTip">
            <string>Publish only zoomed map parts</string>
           </property>

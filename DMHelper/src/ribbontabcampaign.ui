@@ -666,7 +666,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the Player's Window</string>
+        <string>Undo</string>
        </property>
        <property name="text">
         <string/>
@@ -721,7 +721,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the Player's Window</string>
+        <string>Redo</string>
        </property>
        <property name="text">
         <string/>

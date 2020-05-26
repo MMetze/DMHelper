@@ -25,6 +25,7 @@ public slots:
     void setChecked(bool checked);
     void setRotation(int rotation);
     void setColor(QColor color);
+    void clickPublish();
     void cancelPublish();
 
 signals:

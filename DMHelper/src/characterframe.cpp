@@ -531,7 +531,8 @@ void CharacterFrame::loadCharacterImage()
 
 void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency)
 {
-    QString chkName("  ");
+    //QString chkName("  ");
+    QString chkName;
 
     int skillBonus = abilityMod;
     if(chk->isChecked())

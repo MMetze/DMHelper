@@ -4,6 +4,8 @@
 #include "encountertext.h"
 #include "scaledpixmap.h"
 
+class Character;
+
 class Party : public EncounterText
 {
     Q_OBJECT
@@ -16,6 +18,8 @@ public:
 
     virtual QString getIcon(bool localOnly = false) const;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
+
+    QList<Character*> getActiveCharacters();
 
 signals:
     void iconChanged();

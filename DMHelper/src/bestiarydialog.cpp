@@ -6,14 +6,24 @@
 #include "monsteraction.h"
 #include "monsteractionframe.h"
 #include "monsteractioneditdialog.h"
+#include "publishbuttonframe.h"
 #include <QIntValidator>
 #include <QDoubleValidator>
 #include <QInputDialog>
 #include <QMouseEvent>
 #include <QFileDialog>
+#include <QAbstractItemView>
+#include <QShortcut>
 #include <QDebug>
 #include "ui_bestiarydialog.h"
 
+/*
+Publihs shortcut Ctrl+P
+center QImage
+center buttons
+better dialog default sizes
+
+*/
 BestiaryDialog::BestiaryDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BestiaryDialog),
@@ -27,24 +37,25 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnLeft,SIGNAL(clicked()),this,SLOT(previousMonster()));
-    connect(ui->btnRight,SIGNAL(clicked()),this,SLOT(nextMonster()));
-    connect(ui->btnNewMonster,SIGNAL(clicked()),this,SLOT(createNewMonster()));
-    connect(ui->btnDeleteMonster,SIGNAL(clicked()),this,SLOT(deleteCurrentMonster()));
-    connect(ui->cmbSearch,SIGNAL(activated(QString)),this,SLOT(setMonster(QString)));
-    connect(ui->framePublish,SIGNAL(clicked()),this,SLOT(handlePublishButton()));
+    connect(ui->btnLeft, SIGNAL(clicked()), this, SLOT(previousMonster()));
+    connect(ui->btnRight, SIGNAL(clicked()), this, SLOT(nextMonster()));
+    connect(ui->btnNewMonster, SIGNAL(clicked()), this, SLOT(createNewMonster()));
+    connect(ui->btnDeleteMonster, SIGNAL(clicked()), this, SLOT(deleteCurrentMonster()));
+    connect(ui->cmbSearch, SIGNAL(activated(QString)), this, SLOT(setMonster(QString)));
+    connect(ui->framePublish, SIGNAL(clicked()), this, SLOT(handlePublishButton()));
+    QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
+    connect(publishShortcut, SIGNAL(activated()), ui->framePublish, SLOT(clickPublish()));
     connect(ui->btnReload, SIGNAL(clicked()), this, SLOT(handleReloadImage()));
     connect(ui->btnClear, SIGNAL(clicked()), this, SLOT(handleClearImage()));
 
-    connect(ui->edtStrength,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
-    connect(ui->edtDexterity,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
-    connect(ui->edtConstitution,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
-    connect(ui->edtIntelligence,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
-    connect(ui->edtWisdom,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
-    connect(ui->edtCharisma,SIGNAL(editingFinished()),this,SLOT(abilityChanged()));
+    connect(ui->edtStrength, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
+    connect(ui->edtDexterity, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
+    connect(ui->edtConstitution, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
+    connect(ui->edtIntelligence, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
+    connect(ui->edtWisdom, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
+    connect(ui->edtCharisma, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
 
-    connect(ui->edtName,SIGNAL(editingFinished()),this,SLOT(monsterRenamed()));
-
+    connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(monsterRenamed()));
     connect(ui->edtHitDice, SIGNAL(editingFinished()), this, SLOT(hitDiceChanged()));
 
     connect(ui->btnAddAction, SIGNAL(clicked()), this, SLOT(addAction()));
@@ -80,6 +91,8 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     //connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     //connect(ui->edtXP, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleChallengeEdited()));
+
+    ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
     ui->chkPrivate->hide();
 }

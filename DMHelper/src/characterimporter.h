@@ -24,6 +24,7 @@ signals:
 public slots:
     void importCharacter(Campaign* campaign, bool isCharacter = true);
     void updateCharacter(Character* character);
+    void updateCharacters(QList<Character*> characters);
 
     void campaignChanged();
 
@@ -34,7 +35,7 @@ protected:
     bool interpretReply(QNetworkReply* reply);
     bool interpretImageReply(QNetworkReply* reply);
 
-    void startImport(const QString& characterId);
+    void startImport(QString characterId = QString());
     void finishImport();
 
 protected slots:
@@ -49,6 +50,7 @@ private:
     QNetworkReply* _reply;
     Campaign* _campaign;
     Character* _character;
+    QList<Character*> _characterList;
     bool _isCharacter;
     QMessageBox* _msgBox;
 

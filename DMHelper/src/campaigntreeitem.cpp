@@ -1,4 +1,5 @@
 #include "campaigntreeitem.h"
+#include "campaignobjectbase.h"
 #include "dmconstants.h"
 #include <QUuid>
 
@@ -49,7 +50,11 @@ void CampaignTreeItem::setCampaignItemType(int itemType)
 
 QUuid CampaignTreeItem::getCampaignItemId() const
 {
-    return QUuid(data(DMHelper::TreeItemData_ID).toString());
+    QVariant v = data(DMHelper::TreeItemData_ID);
+    QString s = v.toString();
+    QUuid u(s);
+    return u;
+    //return QUuid(data(DMHelper::TreeItemData_ID).toString());
 }
 
 void CampaignTreeItem::setCampaignItemId(const QUuid& itemId)
@@ -65,4 +70,41 @@ CampaignObjectBase* CampaignTreeItem::getCampaignItemObject() const
 void CampaignTreeItem::setCampaignItemObject(CampaignObjectBase* itemObject)
 {
     setData(QVariant::fromValue(reinterpret_cast<quint64>(itemObject)), DMHelper::TreeItemData_Object);
+}
+
+int CampaignTreeItem::getCampaignItemRow() const
+{
+    CampaignObjectBase* campaignObject = getCampaignItemObject();
+    return (campaignObject == nullptr) ? -1 : campaignObject->getRow();
+}
+
+void CampaignTreeItem::setCampaignItemRow(int itemRow)
+{
+    CampaignObjectBase* campaignObject = getCampaignItemObject();
+    if(campaignObject)
+        campaignObject->setRow(itemRow);
+}
+
+CampaignTreeItem* CampaignTreeItem::getChildById(const QUuid& itemId) const
+{
+    for(int i = 0; i < rowCount(); ++i)
+    {
+        CampaignTreeItem* item = dynamic_cast<CampaignTreeItem*>(child(i));
+        if(item)
+        {
+            if(item->getCampaignItemId() == itemId)
+                return item;
+
+            CampaignTreeItem* childItem = item->getChildById(itemId);
+            if(childItem)
+                return childItem;
+        }
+    }
+
+    return nullptr;
+}
+
+CampaignTreeItem* CampaignTreeItem::getChildCampaignItem(int childRow) const
+{
+    return dynamic_cast<CampaignTreeItem*>(child(childRow));
 }

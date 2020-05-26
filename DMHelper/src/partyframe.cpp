@@ -4,6 +4,7 @@
 #include "character.h"
 //#include "partyframecharacter.h"
 #include "partycharactergridframe.h"
+#include "characterimporter.h"
 #include <QFileDialog>
 #include <QMouseEvent>
 #include <QDebug>
@@ -28,12 +29,14 @@ PartyFrame::PartyFrame(QWidget *parent) :
 //    _characterLayout->setContentsMargins(3,3,3,3);
 //    ui->scrollAreaWidgetContents->setLayout(_characterLayout);
 
+    connect(ui->btnUpdateAll, &QAbstractButton::clicked, this, &PartyFrame::updateAll);
+
 }
 
 PartyFrame::~PartyFrame()
 {
     //qDebug() << "[PartyFrame] being destroyed: " << _characterLayout->count() << " widgets";
-    qDebug() << "[PartyFrame] being destroyed: " << _characterGrid->count() << " widgets";
+    qDebug() << "[PartyFrame] being destroyed: " << (_characterGrid ? _characterGrid->count() : 0) << " widgets";
 
     /*
     QLayoutItem *child;
@@ -85,6 +88,7 @@ void PartyFrame::setParty(Party* party)
 
     _party = party;
     readPartyData();
+    calculateThresholds();
     emit partyChanged();
 }
 
@@ -117,6 +121,8 @@ void PartyFrame::handleCharacterChanged(QUuid id)
         if((frame) && (frame->getId() == id))
             frame->readCharacter();
     }
+
+    calculateThresholds();
 }
 
 void PartyFrame::mousePressEvent(QMouseEvent * event)
@@ -160,6 +166,27 @@ void PartyFrame::resizeEvent(QResizeEvent *event)
 
     if((_layoutColumns == -1) ||(_layoutColumns != newColumnCount))
         updateLayout();
+}
+
+void PartyFrame::updateAll()
+{
+    if(!_party)
+        return;
+
+    QList<Character*> updateCharacters;
+    QList<Character*> allCharacters = _party->findChildren<Character*>();
+    for(Character* character : allCharacters)
+    {
+        if((character) &&(character->getDndBeyondID() != -1))
+            updateCharacters.append(character);
+    }
+
+    if(updateCharacters.isEmpty())
+        return;
+
+    CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &PartyFrame::handleCharacterChanged);
+    importer->updateCharacters(updateCharacters);
 }
 
 void PartyFrame::clearGrid()
@@ -211,11 +238,19 @@ void PartyFrame::loadCharacters()
 
     clearList();
 
+    bool canUpdate = false;
     QList<Character*> allCharacters = _party->findChildren<Character*>();
     for(Character* character : allCharacters)
     {
-        _characterFrames.append(new PartyCharacterGridFrame(*character));
+        if(character)
+        {
+            _characterFrames.append(new PartyCharacterGridFrame(*character));
+            if(character->getDndBeyondID() != -1)
+                canUpdate = true;
+        }
     }
+
+    ui->btnUpdateAll->setEnabled(canUpdate);
 
     updateLayout();
 }
@@ -259,6 +294,38 @@ int PartyFrame::getColumnCount()
 
     // (Width of the scroll area minus the left margin) / (width of a frame plus spacing between frames)
     return (ui->characterList->width() - PARTY_FRAME_SPACING) / (_characterFrames.at(0)->width() + PARTY_FRAME_SPACING);
+}
+
+void PartyFrame::calculateThresholds()
+{
+    if(!_party)
+    {
+        ui->lblEasy->setText(QString("---"));
+        ui->lblMedium->setText(QString("---"));
+        ui->lblHard->setText(QString("---"));
+        ui->lblDeadly->setText(QString("---"));
+        return;
+    }
+
+    int thresholds[4] = {0,0,0,0};
+
+    QList<Character*> activeCharacters = _party->getActiveCharacters();
+    for(int i = 0; i < activeCharacters.count(); ++i)
+    {
+        Character* character = activeCharacters.at(i);
+        if(character)
+        {
+            for(int j = 0; j < 4; ++j)
+            {
+                thresholds[j] += character->getXPThreshold(j);
+            }
+        }
+    }
+
+    ui->lblEasy->setText(QString::number(thresholds[DMHelper::XPThreshold_Easy]));
+    ui->lblMedium->setText(QString::number(thresholds[DMHelper::XPThreshold_Medium]));
+    ui->lblHard->setText(QString::number(thresholds[DMHelper::XPThreshold_Hard]));
+    ui->lblDeadly->setText(QString::number(thresholds[DMHelper::XPThreshold_Deadly]));
 }
 
 void PartyFrame::handlePublishClicked()

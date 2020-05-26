@@ -157,23 +157,6 @@ void RibbonTabMap::setPointerFile(const QString& filename)
     ui->btnPointer->setIcon(QIcon(scaledPointer));
 }
 
-void RibbonTabMap::paintEvent(QPaintEvent *event)
-{
-    QFontMetrics metrics = ui->lblDistance->fontMetrics();
-    int textWidth = metrics.maxWidth();
-    QRect sizeWidth = metrics.boundingRect(ui->lblSize->text());
-    int oldWidth = metrics.width(ui->lblSize->text());
-    int adv = metrics.horizontalAdvance(ui->lblSize->text());
-
-    QFontMetrics localMetrics = fontMetrics();
-    int textWidthLocal = localMetrics.maxWidth();
-    QRect sizeWidthLocal = localMetrics.boundingRect(ui->lblSize->text());
-    int oldWidthLocal = localMetrics.width(ui->lblSize->text());
-    int advLocal = localMetrics.horizontalAdvance(ui->lblSize->text());
-
-    qDebug() << ui->lblSize->text() << ": " << sizeWidth << ", " << textWidth;
-}
-
 void RibbonTabMap::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);

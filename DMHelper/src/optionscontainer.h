@@ -1,7 +1,7 @@
 #ifndef OPTIONSCONTAINER_H
 #define OPTIONSCONTAINER_H
 
-#include <QObject>
+#include <QMainWindow>
 #include <QString>
 #include <QUuid>
 #include <QDate>
@@ -12,7 +12,7 @@ class OptionsContainer : public QObject
 {
     Q_OBJECT
 public:
-    explicit OptionsContainer(QObject *parent = nullptr);
+    explicit OptionsContainer(QMainWindow *parent = nullptr);
     ~OptionsContainer();
 
     // General settings
@@ -24,6 +24,11 @@ public:
     QString getTablesDirectory() const;
     QString getLastMonster() const;
     bool getShowAnimations() const;
+
+    // Font settings
+    QString getFontFamily() const;
+    int getFontSize() const;
+    qreal getLogicalDPI() const;
 
     // Audio settings
     int getAudioVolume() const;
@@ -65,6 +70,10 @@ signals:
     void shopsFileNameChanged(const QString& filename);
     void tablesDirectoryChanged();
     void showAnimationsChanged(bool showAnimations);
+
+    // Font settings
+    void fontFamilyChanged(const QString& fontFamily);
+    void fontSizeChanged(int fontSize);
 
     // Audio settings
     void audioVolumeChanged(int volume);
@@ -108,6 +117,12 @@ public slots:
     void setLastMonster(const QString& lastMonster);
     void setShowAnimations(bool showAnimations);
 
+    // Font settings
+    void setFontFamily(const QString& fontFamily);
+    void setFontFamilyFromFont(const QFont& font);
+    void setFontSize(int fontSize);
+    void setLogicalDPI(qreal logicalDPI);
+
     // Audio settings
     void setAudioVolume(int volume);
 
@@ -134,8 +149,12 @@ public slots:
     void setInviteID(const QString& inviteID);
 #endif
 
+private slots:
+    void registerFontChange();
+
 private:
     void copy(OptionsContainer* other);
+    QMainWindow* getMainWindow();
 
     // General settings
     QString _bestiaryFileName;
@@ -146,6 +165,12 @@ private:
     QString _shopsFileName;
     QString _tablesDirectory;
     bool _showAnimations;
+
+    // Font settings
+    QString _fontFamily;
+    int _fontSize;
+    qreal _logicalDPI;
+    bool _fontChanged;
 
     // Audio settings
     int _audioVolume;

@@ -39,7 +39,8 @@ public slots:
 
 protected slots:
     void handleRowsInserted(const QModelIndex &parent, int first, int last);
-//    void handleRowsRemoved(const QModelIndex &parent, int first, int last);
+    void handleRowsRemoved(const QModelIndex &parent, int first, int last);
+    void handleRowsMoved(const QModelIndex &parent, int start, int end, const QModelIndex &destination, int row);
     void handleTimer();
     void handleItemChanged(QStandardItem *item);
 
@@ -47,7 +48,7 @@ protected:
 
     void updateCampaignEntries();
     QStandardItem* createTreeEntry(CampaignObjectBase* object, QStandardItem* parentEntry);
-    void appendTreeEntry(QStandardItem* objectEntry, QStandardItem* parentEntry);
+    void addTreeEntry(CampaignTreeItem* objectEntry, QStandardItem* parentEntry);
     void validateChildStructure(QStandardItem* parentItem);
     void validateIndividualChild(QStandardItem* parentItem, int row);
     void validateIndividualChild(QStandardItem* parentItem, QStandardItem* childItem);
@@ -55,6 +56,8 @@ protected:
 
     void iterateTreeEntryVisualization(CampaignTreeItem* entry);
     void setTreeEntryVisualization(CampaignTreeItem* entry);
+    void updateChildRows(QStandardItem* parentItem);
+    CampaignTreeItem* getChildById(QStandardItem* parentItem, const QUuid& itemId) const;
 
     Campaign* _campaign;
     QMap<QUuid, QModelIndex> _objectIndexMap;

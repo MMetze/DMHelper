@@ -34,6 +34,7 @@ public slots:
     void setCheckable(bool checkable);
     void setRotation(int rotation);
     void setColor(QColor color);
+    void clickPublish();
     void cancelPublish();
     void setPlayersWindow(bool checked);
 
