@@ -85,9 +85,15 @@ bool UpdateChecker::runUpdateCheck()
             return false;
         }
 
-        if((lastUpdate.isValid()) && (lastUpdate.daysTo(QDate::currentDate()) < 7))
+#ifdef QT_DEBUG
+        const int UPDATECHECKER_PERIOD = 1;
+#else
+        const int UPDATECHECKER_PERIOD = 7;
+#endif
+
+        if((lastUpdate.isValid()) && (lastUpdate.daysTo(QDate::currentDate()) < UPDATECHECKER_PERIOD))
         {
-             qDebug() << "[UpdateChecker] Last check less than 7 days ago, not checking.";
+             qDebug() << "[UpdateChecker] Last check less than " << UPDATECHECKER_PERIOD << " days ago, not checking.";
              return false;
         }
     }
