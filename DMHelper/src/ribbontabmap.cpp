@@ -217,7 +217,7 @@ void RibbonTabMap::showEvent(QShowEvent *event)
     setButtonSize(*ui->btnBrushSquare, iconDim / 2, iconDim / 2);
     int sizeWidth = metrics.horizontalAdvance(ui->lblSize->text());
     setWidgetSize(*ui->lblSize, sizeWidth, iconDim / 2);
-    setWidgetSize(*ui->spinSize, sizeWidth, iconDim / 2);
+    setWidgetSize(*ui->spinSize, sizeWidth*3, iconDim / 2);
     setWidgetSize(*ui->lblBrush, qMax((textWidth * 4), 2 * sizeWidth), labelHeight);
 }
 

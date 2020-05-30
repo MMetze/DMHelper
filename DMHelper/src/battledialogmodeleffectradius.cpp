@@ -1,4 +1,5 @@
 #include "battledialogmodeleffectradius.h"
+#include "battledialogeffectsettings.h"
 #include "unselectedellipse.h"
 
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const QString& name, QObject *parent) :
@@ -7,16 +8,9 @@ BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const QString& name
 }
 
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
-    BattleDialogModelEffect(size * 2, position, rotation, color, tip)
+    BattleDialogModelEffect(size, position, rotation, color, tip)
 {
 }
-
-/*
-BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const BattleDialogModelEffectRadius& other) :
-    BattleDialogModelEffect(other)
-{
-}
-*/
 
 BattleDialogModelEffectRadius::~BattleDialogModelEffectRadius()
 {
@@ -34,11 +28,19 @@ int BattleDialogModelEffectRadius::getEffectType() const
     return BattleDialogModelEffect_Radius;
 }
 
+BattleDialogEffectSettings* BattleDialogModelEffectRadius::getEffectEditor() const
+{
+    BattleDialogEffectSettings* result = new BattleDialogEffectSettings(*this);
+    result->setSizeLabel(QString("Radius"));
+    return result;
+}
+
 QAbstractGraphicsShapeItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale) const
 {
-    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(0,0,100,100);
+    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(0, 0, 200, 200);
 
-    circleItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
+    setEffectItemData(circleItem);
+
     prepareItem(*circleItem);
     applyEffectValues(*circleItem, gridScale);
 

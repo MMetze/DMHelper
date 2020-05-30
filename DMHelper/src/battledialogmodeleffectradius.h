@@ -16,6 +16,7 @@ public:
     virtual BattleDialogModelEffect* clone() const override;
 
     virtual int getEffectType() const override;
+    virtual BattleDialogEffectSettings* getEffectEditor() const override;
 
     virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const override;
 };

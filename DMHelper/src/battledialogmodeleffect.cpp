@@ -1,13 +1,17 @@
 #include "battledialogmodeleffect.h"
+#include "battledialogeffectsettings.h"
 #include "dmconstants.h"
 #include <QDebug>
 #include <QDomElement>
 #include <QAbstractGraphicsShapeItem>
+#include <QVariant>
 #include <QPen>
 #include <QBrush>
 
 BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
+    _active(true),
+    _visible(true),
     _size(20),
     _position(0,0),
     _rotation(0),
@@ -18,6 +22,8 @@ BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *p
 
 BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
     CampaignObjectBase(),
+    _active(true),
+    _visible(true),
     _size(size),
     _position(position),
     _rotation(rotation),
@@ -26,46 +32,14 @@ BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& positi
 {
 }
 
-/*
-BattleDialogModelEffect::BattleDialogModelEffect(const BattleDialogModelEffect& other) :
-    CampaignObjectBase(other),
-    _size(other._size),
-    _position(other._position),
-    _rotation(other._rotation),
-    _color(other._color),
-    _tip(other._tip)
-{
-}
-*/
-
 BattleDialogModelEffect::~BattleDialogModelEffect()
 {
 }
 
-/*
-void BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
-{
-    QDomElement element = doc.createElement( "battleeffect" );
-
-    CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
-
-    element.setAttribute("type", getType());
-    element.setAttribute("size", _size);
-    element.setAttribute("positionX", _position.x());
-    element.setAttribute("positionY", _position.y());
-    element.setAttribute("rotation", _rotation );
-    element.setAttribute("colorR", _color.red());
-    element.setAttribute("colorG", _color.green());
-    element.setAttribute("colorB", _color.blue());
-    element.setAttribute("colorA", _color.alpha());
-    element.setAttribute("tip", _tip);
-
-    parent.appendChild(element);
-}
-*/
-
 void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport)
 {
+    _active = static_cast<bool>(element.attribute("active",QString::number(1)).toInt());
+    _visible = static_cast<bool>(element.attribute("visible",QString::number(1)).toInt());
     _size = element.attribute("size",QString::number(20)).toInt();
     _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
                         element.attribute("positionY",QString::number(0)).toDouble());
@@ -77,6 +51,11 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
     _tip = element.attribute("tip");
 
     CampaignObjectBase::inputXML(element, isImport);
+}
+
+BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
+{
+    return new BattleDialogEffectSettings(*this);
 }
 
 void BattleDialogModelEffect::applyEffectValues(QAbstractGraphicsShapeItem& item, qreal gridScale) const
@@ -91,6 +70,26 @@ void BattleDialogModelEffect::applyEffectValues(QAbstractGraphicsShapeItem& item
     item.setScale(static_cast<qreal>(getSize()) * gridScale / 500.0);
 }
 
+bool BattleDialogModelEffect::getEffectActive() const
+{
+    return _active;
+}
+
+void BattleDialogModelEffect::setEffectActive(bool active)
+{
+    _active = active;
+}
+
+bool BattleDialogModelEffect::getEffectVisible() const
+{
+    return _visible;
+}
+
+void BattleDialogModelEffect::setEffectVisible(bool visible)
+{
+    _visible = visible;
+}
+
 int BattleDialogModelEffect::getSize() const
 {
     return _size;
@@ -99,6 +98,16 @@ int BattleDialogModelEffect::getSize() const
 void BattleDialogModelEffect::setSize(int size)
 {
     _size = size;
+}
+
+int BattleDialogModelEffect::getWidth() const
+{
+    return -1;
+}
+
+void BattleDialogModelEffect::setWidth(int width)
+{
+    Q_UNUSED(width);
 }
 
 QPointF BattleDialogModelEffect::getPosition() const
@@ -146,6 +155,43 @@ void BattleDialogModelEffect::setTip(const QString& tip)
     _tip = tip;
 }
 
+void BattleDialogModelEffect::setEffectItemData(QGraphicsItem* item) const
+{
+    if(!item)
+        return;
+
+    item->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
+    item->setData(BATTLE_DIALOG_MODEL_EFFECT_OBJECT, QVariant::fromValue(reinterpret_cast<quint64>(this)));
+}
+
+QUuid BattleDialogModelEffect::getEffectIdFromItem(QGraphicsItem* item)
+{
+    if(!item)
+        return QUuid();
+
+    return QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString());
+}
+
+BattleDialogModelEffect* BattleDialogModelEffect::getEffectFromItem(QGraphicsItem* item)
+{
+    if(!item)
+        return nullptr;
+
+    return reinterpret_cast<BattleDialogModelEffect*>(item->data(BATTLE_DIALOG_MODEL_EFFECT_OBJECT).value<quint64>());
+}
+
+bool BattleDialogModelEffect::getEffectActiveFromItem(QGraphicsItem* item)
+{
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+    return (effect ? effect->getEffectActive() : false);
+}
+
+bool BattleDialogModelEffect::getEffectVisibleFromItem(QGraphicsItem* item)
+{
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+    return (effect ? effect->getEffectVisible() : false);
+}
+
 QDomElement BattleDialogModelEffect::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement( "battleeffect" );
@@ -154,6 +200,8 @@ QDomElement BattleDialogModelEffect::createOutputXML(QDomDocument &doc)
 void BattleDialogModelEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("type", getEffectType());
+    element.setAttribute("active", _active);
+    element.setAttribute("visible", _visible);
     element.setAttribute("size", _size);
     element.setAttribute("positionX", _position.x());
     element.setAttribute("positionY", _position.y());
@@ -184,7 +232,10 @@ void BattleDialogModelEffect::prepareItem(QAbstractGraphicsShapeItem& item) cons
 
 void BattleDialogModelEffect::copyValues(const BattleDialogModelEffect &other)
 {
+    _active = other._active;
+    _visible = other._visible;
     _size = other._size;
+    setWidth(other.getWidth());
     _position = other._position;
     _rotation = other._rotation;
     _color = other._color;

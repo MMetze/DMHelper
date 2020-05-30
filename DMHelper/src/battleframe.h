@@ -170,7 +170,7 @@ private slots:
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleSelectionChanged();
-    void handleEffectChanged(QAbstractGraphicsShapeItem* effect);
+    void handleEffectChanged(QAbstractGraphicsShapeItem* effectItem);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
     void handleApplyEffect(QAbstractGraphicsShapeItem* effect);
 
@@ -239,6 +239,7 @@ private:
     };
 
     const int BattleDialogItemChild_Index = 0;
+    const int BattleDialogItemChild_EffectId = 0;
 
     CombatantWidget* createCombatantWidget(BattleDialogModelCombatant* combatant);
     void clearCombatantWidgets();

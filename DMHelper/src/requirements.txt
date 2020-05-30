@@ -12,7 +12,7 @@ Ctrl+D = Dice Roll Dialog
 Ctrl+M = DM Screen
 Ctrl+R = Quick Reference
 Ctrl+T = Tables
-Ctrl+C = Calendar
+Ctrl+K = Calendar
 Ctrl+P = Publish
 Ctrl+N = Next Combatant
 

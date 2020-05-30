@@ -1463,18 +1463,28 @@ void BattleFrame::handleSelectionChanged()
     else
     {
         QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(selectedList.first());
-        if((shapeItem)&&(!(QUuid(shapeItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()).isNull())))
+        if((shapeItem)&&(!BattleDialogModelEffect::getEffectIdFromItem(shapeItem).isNull()))
         {
             handleEffectChanged(shapeItem);
         }
     }
 }
 
-void BattleFrame::handleEffectChanged(QAbstractGraphicsShapeItem* effect)
+void BattleFrame::handleEffectChanged(QAbstractGraphicsShapeItem* effectItem)
 {
 #ifdef BATTLE_DIALOG_LOG_MOVEMENT
-    qDebug() << "[Battle Frame] Handle effect changed for " << effect;
+    qDebug() << "[Battle Frame] Handle effect changed for " << effectItem;
 #endif
+
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(effectItem);
+    //if((!effect) || (!effect->getEffectActive()) || (!effect->getEffectVisible()))
+    if((!effect) || (!effect->getEffectActive()))
+    {
+#ifdef BATTLE_DIALOG_LOG_MOVEMENT
+        qDebug() << "[Battle Frame] Not iterating on handling of effect changed for " << effectItem;
+#endif
+        return;
+    }
 
     for(QGraphicsPixmapItem* item : _combatantIcons.values())
     {
@@ -1483,9 +1493,9 @@ void BattleFrame::handleEffectChanged(QAbstractGraphicsShapeItem* effect)
             // OPTIMIZE: Optimize to only remove effects if not still relevant
             removeEffectsFromItem(item);
 
-            if(isItemInEffect(item, effect))
+            if(isItemInEffect(item, effectItem))
             {
-                applyEffectToItem(item, effect);
+                applyEffectToItem(item, effectItem);
             }
         }
     }
@@ -1504,19 +1514,24 @@ void BattleFrame::handleCombatantMoved(BattleDialogModelCombatant* combatant)
     if(!item)
         return;
 
+    // Todo: optimize this to only make changes when needed
     removeEffectsFromItem(item);
 
-    QList<QGraphicsItem*> effects = _scene->getEffectItems();
+    QList<QGraphicsItem*> effectItems = _scene->getEffectItems();
 
-    for(QGraphicsItem* effect : effects)
+    for(QGraphicsItem* effectItem : effectItems)
     {
-        if(effect)
+        if(effectItem)
         {
-            QAbstractGraphicsShapeItem* abstractEffect = dynamic_cast<QAbstractGraphicsShapeItem*>(effect);
-            if(isItemInEffect(item, abstractEffect))
+            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(effectItem);
+            if((effect) && (effect->getEffectActive()) && (effect->getEffectVisible()))
             {
-                applyEffectToItem(item, abstractEffect);
-                return;
+                QAbstractGraphicsShapeItem* abstractEffect = dynamic_cast<QAbstractGraphicsShapeItem*>(effectItem);
+                if(isItemInEffect(item, abstractEffect))
+                {
+                    applyEffectToItem(item, abstractEffect);
+                    return;
+                }
             }
         }
     }
@@ -2127,6 +2142,10 @@ void BattleFrame::setPublishVisibility(bool publish)
     if(_publishRect)
         _publishRect->setDraw(!publish);
 
+    // Don't render invisible individual effects
+    if((_scene) && (_model->getShowEffects()))
+        _scene->setEffectVisibility(true, !publish);
+
     // The grid is rendered separately for videos
     if((_model->getGridOn()) && (_videoPlayer) && (_scene))
         _scene->setGridVisibility(!publish);
@@ -2204,7 +2223,7 @@ void BattleFrame::setGridOnlyVisibility(bool gridOnly)
     if(_publishRect)
         _publishRect->setDraw(!gridOnly);
 
-    setEffectLayerVisibility(!gridOnly);
+    setEffectLayerVisibility((!gridOnly) && (_model->getShowEffects()));
 
     if(gridOnly)
     {
@@ -3652,6 +3671,18 @@ QPixmap BattleFrame::getPointerPixmap()
 
 void BattleFrame::prepareStateMachine()
 {
+    /* BUG:
+     * so this is the actual 3.
+1 - select a player view area
+2- turn edit mode on.
+3 - click the FoW area clear button
+4 - realize you still have edit mode on
+5 - turn edit mode off.
+    => in the top ribbon the only icon lighted up now is FoW Area
+6 - try to clear fog of war inside player view
+instead move the player view
+*/
+
     _stateMachine.addState(new BattleFrameState(DMHelper::BattleFrameState_CombatantEdit, BattleFrameState::BattleFrameStateType_Base));
 
     BattleFrameState* zoomSelectState = new BattleFrameState(DMHelper::BattleFrameState_ZoomSelect, BattleFrameState::BattleFrameStateType_Transient, QPixmap(":/img/data/icon_zoomselectcursor.png"), 32, 32);

@@ -26,7 +26,7 @@ public:
     void updateBattleContents();
     void scaleBattleContents();
     void clearBattleContents();
-    void setEffectVisibility(bool visible);
+    void setEffectVisibility(bool visible, bool allEffects = true);
     void setGridVisibility(bool visible);
 
     void setPointerVisibility(bool visible);

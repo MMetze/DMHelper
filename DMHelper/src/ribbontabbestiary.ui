@@ -710,7 +710,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the time &amp; date calendar (Ctrl+C)</string>
+        <string>Open the time &amp; date calendar (Ctrl+K)</string>
        </property>
        <property name="text">
         <string/>

@@ -40,7 +40,8 @@ QAbstractGraphicsShapeItem* BattleDialogModelEffectCone::createEffectShape(qreal
     poly << QPointF(0,0) << QPointF(-50,100) << QPoint(50,100) << QPoint(0,0);
 
     QGraphicsPolygonItem* triangleItem = new UnselectedPolygon(poly);
-    triangleItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
+    setEffectItemData(triangleItem);
+
     prepareItem(*triangleItem);
     applyEffectValues(*triangleItem, gridScale);
 

@@ -123,7 +123,10 @@ void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
         {
             QPoint mapPos = item->pos().toPoint() + _model->getPreviousMapRect().topLeft();
             item->setPos(mapPos - _model->getMapRect().topLeft());
-            _model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
+            //_model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
+            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+            if(effect)
+                effect->setPosition(item->pos());
             qDebug() << "[Battle Dialog Scene]     Setting position for item " << item << " to " << item->pos();
         }
     }
@@ -149,12 +152,16 @@ void BattleDialogGraphicsScene::updateBattleContents()
     {
         if(item)
         {
-            qreal newScale = static_cast<qreal>(_model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->getSize()) * static_cast<qreal>(_model->getGridScale()) / 500.0;
-            qDebug() << "[Battle Dialog Scene]     Setting scale for item " << item << " to " << newScale;
-            qreal oldScale = item->scale();
-            item->setScale(newScale);
-            item->setPos(item->pos() * newScale/oldScale);
-            _model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
+            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+            if(effect)
+            {
+                qreal newScale = static_cast<qreal>(effect->getSize()) * static_cast<qreal>(_model->getGridScale()) / 500.0;
+                qDebug() << "[Battle Dialog Scene]     Setting scale for item " << item << " to " << newScale;
+                qreal oldScale = item->scale();
+                item->setScale(newScale);
+                item->setPos(item->pos() * newScale/oldScale);
+                effect->setPosition(item->pos());
+            }
         }
     }
 }
@@ -189,13 +196,22 @@ void BattleDialogGraphicsScene::clearBattleContents()
     delete _pointerPixmapItem; _pointerPixmapItem = nullptr;
 }
 
-void BattleDialogGraphicsScene::setEffectVisibility(bool visible)
+void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffects)
 {
     //qDebug() << "[Battle Dialog Scene] Setting effect visibility to " << visible;
 
+    bool newVisible = visible;
+
     for(QGraphicsItem* item : _itemList)
     {
-        item->setVisible(visible);
+        if(item)
+        {
+            if(!allEffects)
+                newVisible = visible && BattleDialogModelEffect::getEffectVisibleFromItem(item);
+
+            if(item->isVisible() != newVisible)
+                item->setVisible(newVisible);
+        }
     }
 }
 
@@ -288,10 +304,10 @@ bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseE
     if(mouseEvent->button() == Qt::LeftButton)
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-
-        if((item)&&(!(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()).isNull())))
+        QUuid itemId = BattleDialogModelEffect::getEffectIdFromItem(item);
+        if((item)&&(!(itemId.isNull())))
         {
-            qDebug() << "[Battle Dialog Scene] doubleclick identified on item " << QUuid(item->data(0).toString());
+            qDebug() << "[Battle Dialog Scene] doubleclick identified on item " << itemId;
             _contextMenuItem = item;
             editItem();
             _contextMenuItem = nullptr;
@@ -325,7 +341,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
             qreal dot = _mouseDownPos.x()*eventPos.x()+_mouseDownPos.y()*eventPos.y();
             qreal angle = qRadiansToDegrees(qAtan2(cross,dot));
             _mouseDownItem->setRotation(_previousRotation + angle);
-            BattleDialogModelEffect* effect = _model->getEffectById(QUuid(_mouseDownItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
             if(effect)
                 effect->setRotation(_previousRotation + angle);
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
@@ -345,7 +361,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
             qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
 #endif
-            BattleDialogModelEffect* effect = _model->getEffectById(QUuid(abstractShape->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(abstractShape);
             if(effect)
             {
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
@@ -387,7 +403,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
 
     if(item)
     {
-        if(!(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()).isNull()))
+        if(!BattleDialogModelEffect::getEffectIdFromItem(item).isNull())
         {
             _mouseDown = true;
             _mouseDownPos = mouseEvent->scenePos() - item->scenePos();
@@ -446,7 +462,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         if(views().count() > 0 )
             parentWidget = views().first();
         QMenu menu(parentWidget);
-        if((item)&&(!(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()).isNull())))
+        if((item)&&(!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
         {
             qDebug() << "[Battle Dialog Scene] right click identified on effect " << item;
             if(_mouseDownPos == mouseEvent->scenePos() - item->scenePos())
@@ -556,24 +572,30 @@ void BattleDialogGraphicsScene::editItem()
         return;
     }
 
-    BattleDialogModelEffect* effect = _model->getEffectById(QUuid(abstractShape->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(abstractShape);
     if(!effect)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << abstractShape;
         return;
     }
 
-    BattleDialogEffectSettings settings(*effect);
-    settings.exec();
-    if(settings.result() == QDialog::Accepted)
+    BattleDialogEffectSettings* settings = effect->getEffectEditor();
+    if(!settings)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << abstractShape;
+        return;
+    }
+
+    settings->exec();
+    if(settings->result() == QDialog::Accepted)
     {
         qDebug() << "[Battle Dialog Scene] Applying effect settings for effect " << abstractShape;
 
-        settings.copyValues(*effect);
+        settings->copyValues(*effect);
         effect->applyEffectValues(*abstractShape, _model->getGridScale());
-        //applyEffectValues(*abstractShape, *effect);
         emit effectChanged(abstractShape);
     }
+    settings->deleteLater();
 }
 
 void BattleDialogGraphicsScene::rollItem()
@@ -601,7 +623,7 @@ void BattleDialogGraphicsScene::deleteItem()
         return;
     }
 
-    BattleDialogModelEffect* effect = _model->getEffectById(QUuid(_contextMenuItem->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()));
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
     if(!effect)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << _contextMenuItem;

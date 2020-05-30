@@ -616,7 +616,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(referenceShortcut, SIGNAL(activated()), quickRefDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(soundboardClicked()), soundDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(calendarClicked()), calendarDlg, SLOT(exec()));
-    QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+C", "Calendar")), this);
+    QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+K", "Calendar")), this);
     connect(calendarShortcut, SIGNAL(activated()), calendarDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(countdownClicked()), countdownDlg, SLOT(exec()));
 

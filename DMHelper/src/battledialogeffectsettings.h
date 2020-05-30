@@ -18,13 +18,20 @@ public:
     explicit BattleDialogEffectSettings(const BattleDialogModelEffect& effect, QWidget *parent = nullptr);
     ~BattleDialogEffectSettings();
 
+    bool isEffectActive() const;
+    bool isEffectVisible() const;
     QString getTip() const;
     int getSizeValue() const;
+    int getWidthValue() const;
     qreal getRotation() const;
     QColor getColor() const;
     int getAlpha() const;
 
     void copyValues(BattleDialogModelEffect& effect);
+
+public slots:
+    void setSizeLabel(const QString& sizeLabel);
+    void setShowWidth(bool show);
 
 private slots:
     void selectNewColor();
