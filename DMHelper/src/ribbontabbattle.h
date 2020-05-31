@@ -30,6 +30,11 @@ signals:
     void addCharacterClicked();
     void addMonsterClicked();
     void addNPCClicked();
+    void addObjectClicked();
+    void addEffectRadiusClicked();
+    void addEffectCubeClicked();
+    void addEffectConeClicked();
+    void addEffectLineClicked();
     void showLivingClicked(bool checked);
     void showDeadClicked(bool checked);
     void showEffectsClicked(bool checked);

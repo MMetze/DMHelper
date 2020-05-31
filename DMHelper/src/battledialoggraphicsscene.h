@@ -50,9 +50,15 @@ public slots:
     //void setRawMouse(bool rawMouse);
     void setInputMode(int inputMode);
 
+    void addEffectObject();
+    void addEffectRadius();
+    void addEffectCone();
+    void addEffectCube();
+    void addEffectLine();
+
 signals:
-    void effectChanged(QAbstractGraphicsShapeItem* effect);
-    void applyEffect(QAbstractGraphicsShapeItem* effect);
+    void effectChanged(QGraphicsItem* effect);
+    void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
 
     void battleMousePress(const QPointF& pos);
@@ -69,11 +75,6 @@ protected slots:
     void rollItem();
     void deleteItem();
 
-    void addEffectRadius();
-    void addEffectCone();
-    void addEffectCube();
-    void addEffectLine();
-
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -81,7 +82,7 @@ protected:
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
     void addEffect(BattleDialogModelEffect* effect);
-    QAbstractGraphicsShapeItem* addEffectShape(BattleDialogModelEffect& effect);
+    QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler();
 

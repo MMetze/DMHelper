@@ -3,10 +3,8 @@
 #include "dmconstants.h"
 #include <QDebug>
 #include <QDomElement>
-#include <QAbstractGraphicsShapeItem>
+#include <QGraphicsItem>
 #include <QVariant>
-#include <QPen>
-#include <QBrush>
 
 BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
@@ -15,19 +13,17 @@ BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *p
     _size(20),
     _position(0,0),
     _rotation(0),
-    _color(115,18,0,64),
     _tip()
 {
 }
 
-BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
+BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QString& tip) :
     CampaignObjectBase(),
     _active(true),
     _visible(true),
     _size(size),
     _position(position),
     _rotation(rotation),
-    _color(color),
     _tip(tip)
 {
 }
@@ -44,10 +40,6 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
     _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
                         element.attribute("positionY",QString::number(0)).toDouble());
     _rotation = element.attribute("rotation",QString::number(0)).toDouble();
-    _color = QColor(element.attribute("colorR",QString::number(255)).toInt(),
-                    element.attribute("colorG",QString::number(255)).toInt(),
-                    element.attribute("colorB",QString::number(255)).toInt(),
-                    element.attribute("colorA",QString::number(64)).toInt());
     _tip = element.attribute("tip");
 
     CampaignObjectBase::inputXML(element, isImport);
@@ -58,13 +50,11 @@ BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
     return new BattleDialogEffectSettings(*this);
 }
 
-void BattleDialogModelEffect::applyEffectValues(QAbstractGraphicsShapeItem& item, qreal gridScale) const
+void BattleDialogModelEffect::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
 {
     qDebug() << "[Battle Dialog Model Effect] applying effect values for " << this << " to " << &item;
     item.setPos(getPosition());
     item.setRotation(getRotation());
-    item.setPen(QPen(getColor(), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    item.setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
     item.setToolTip(getTip());
 
     item.setScale(static_cast<qreal>(getSize()) * gridScale / 500.0);
@@ -137,12 +127,22 @@ void BattleDialogModelEffect::setRotation(qreal rotation)
 
 QColor BattleDialogModelEffect::getColor() const
 {
-    return _color;
+    return QColor();
 }
 
 void BattleDialogModelEffect::setColor(const QColor& color)
 {
-    _color = color;
+    Q_UNUSED(color);
+}
+
+QString BattleDialogModelEffect::getImageFile() const
+{
+    return QString();
+}
+
+void BattleDialogModelEffect::setImageFile(const QString& imageFile)
+{
+    Q_UNUSED(imageFile);
 }
 
 QString BattleDialogModelEffect::getTip() const
@@ -206,10 +206,6 @@ void BattleDialogModelEffect::internalOutputXML(QDomDocument &doc, QDomElement &
     element.setAttribute("positionX", _position.x());
     element.setAttribute("positionY", _position.y());
     element.setAttribute("rotation", _rotation );
-    element.setAttribute("colorR", _color.red());
-    element.setAttribute("colorG", _color.green());
-    element.setAttribute("colorB", _color.blue());
-    element.setAttribute("colorA", _color.alpha());
     element.setAttribute("tip", _tip);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
@@ -223,7 +219,7 @@ bool BattleDialogModelEffect::belongsToObject(QDomElement& element)
     return true;
 }
 
-void BattleDialogModelEffect::prepareItem(QAbstractGraphicsShapeItem& item) const
+void BattleDialogModelEffect::prepareItem(QGraphicsItem& item) const
 {
     item.setFlag(QGraphicsItem::ItemIsMovable, true);
     item.setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -238,6 +234,6 @@ void BattleDialogModelEffect::copyValues(const BattleDialogModelEffect &other)
     setWidth(other.getWidth());
     _position = other._position;
     _rotation = other._rotation;
-    _color = other._color;
+    setImageFile(other.getImageFile());
     _tip = other._tip;
 }

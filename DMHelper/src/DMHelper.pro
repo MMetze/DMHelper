@@ -38,6 +38,8 @@ SOURCES += main.cpp\
     audiofactory.cpp \
     basicdateserver.cpp \
     battledialoggraphicsscenemousehandler.cpp \
+    battledialogmodeleffectobject.cpp \
+    battledialogmodeleffectshape.cpp \
     battleframe.cpp \
     battleframemapdrawer.cpp \
     battleframestate.cpp \
@@ -229,6 +231,8 @@ HEADERS  += mainwindow.h \
     audiofactory.h \
     basicdateserver.h \
     battledialoggraphicsscenemousehandler.h \
+    battledialogmodeleffectobject.h \
+    battledialogmodeleffectshape.h \
     battleframe.h \
     battleframemapdrawer.h \
     battleframestate.h \

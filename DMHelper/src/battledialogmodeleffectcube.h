@@ -1,9 +1,9 @@
 #ifndef BATTLEDIALOGMODELEFFECTCUBE_H
 #define BATTLEDIALOGMODELEFFECTCUBE_H
 
-#include "battledialogmodeleffect.h"
+#include "battledialogmodeleffectshape.h"
 
-class BattleDialogModelEffectCube : public BattleDialogModelEffect
+class BattleDialogModelEffectCube : public BattleDialogModelEffectShape
 {
     Q_OBJECT
 
@@ -17,7 +17,7 @@ public:
 
     virtual int getEffectType() const override;
 
-    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const override;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) const override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTCUBE_H

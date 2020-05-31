@@ -425,6 +425,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), battleFrame, SLOT(addCharacter()));
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
+    connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), battleFrame, SLOT(addObject()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(addEffectRadius()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), battleFrame, SLOT(addEffectCone()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), battleFrame, SLOT(addEffectCube()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), battleFrame, SLOT(addEffectLine()));
     connect(_ribbonTabBattle, SIGNAL(nextClicked()), battleFrame, SLOT(next()));
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "Next Combatant")), this);
     connect(nextShortcut, SIGNAL(activated()), battleFrame, SLOT(next()));
@@ -1851,7 +1856,17 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
     if((!item) || (!campaign))
         return;
 
+    CampaignTreeItem* campaignItem = dynamic_cast<CampaignTreeItem*>(item);
+    if(!campaignItem)
+        return;
+
     qDebug() << "[MainWindow] Tree Item Changed: " << item;
+
+    CampaignObjectBase* itemObject = campaignItem->getCampaignItemObject();
+    if(campaignItem->text() != itemObject->getName())
+    {
+        itemObject->setName(campaignItem->text());
+    }
 
     if(item->data(DMHelper::TreeItemData_Type).toInt() == DMHelper::TreeType_Character)
     {

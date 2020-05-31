@@ -92,6 +92,13 @@ public slots:
     void addMonsters();
     void addCharacter();
     void addNPC();
+    void addObject();
+
+    void addEffectRadius();
+    void addEffectCone();
+    void addEffectCube();
+    void addEffectLine();
+
     //void setShowMovement(bool showMovement);
     //void setLairActions(bool lairActions);
 
@@ -170,9 +177,9 @@ private slots:
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleSelectionChanged();
-    void handleEffectChanged(QAbstractGraphicsShapeItem* effectItem);
+    void handleEffectChanged(QGraphicsItem* effectItem);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
-    void handleApplyEffect(QAbstractGraphicsShapeItem* effect);
+    void handleApplyEffect(QGraphicsItem* effect);
 
     void handleItemMouseDown(QGraphicsPixmapItem* item);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
@@ -284,9 +291,9 @@ private:
     void renderPrescaledBackground(QPainter& painter, QSize targetSize);
     void renderVideoBackground(QPainter& painter);
 
-    bool isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
+    bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
     void removeEffectsFromItem(QGraphicsPixmapItem* item);
-    void applyEffectToItem(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
+    void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
     QPixmap getPointerPixmap();

@@ -3,12 +3,12 @@
 #include "unselectedellipse.h"
 
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const QString& name, QObject *parent) :
-    BattleDialogModelEffect(name, parent)
+    BattleDialogModelEffectShape(name, parent)
 {
 }
 
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
-    BattleDialogModelEffect(size, position, rotation, color, tip)
+    BattleDialogModelEffectShape(size, position, rotation, color, tip)
 {
 }
 
@@ -35,7 +35,7 @@ BattleDialogEffectSettings* BattleDialogModelEffectRadius::getEffectEditor() con
     return result;
 }
 
-QAbstractGraphicsShapeItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale) const
+QGraphicsItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale) const
 {
     QGraphicsEllipseItem* circleItem = new UnselectedEllipse(0, 0, 200, 200);
 

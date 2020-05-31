@@ -10,6 +10,7 @@
 #include <QGraphicsView>
 #include <QtMath>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QDebug>
 
 // TODO: adjust grid offsets to really match resized battle contents.
@@ -324,7 +325,9 @@ bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseE
 
 bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_mouseDownItem);
+    //QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_mouseDownItem);
+    QGraphicsItem* abstractShape = _mouseDownItem;
+    QUuid effectId = BattleDialogModelEffect::getEffectIdFromItem(_mouseDownItem);
 
     if(mouseEvent->buttons() & Qt::RightButton)
     {
@@ -332,7 +335,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
         qDebug() << "[Battle Dialog Scene] right button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
 #endif
 
-        if((_mouseDown) && (abstractShape))
+        if((_mouseDown) && (abstractShape) && (!effectId.isNull()))
         {
             // |A·B| = |A| |B| COS(θ)
             // |A×B| = |A| |B| SIN(θ)
@@ -356,7 +359,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
     }
     else if(mouseEvent->buttons() & Qt::LeftButton)
     {
-        if(abstractShape)
+        if((abstractShape) && (!effectId.isNull()))
         {
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
             qDebug() << "[Battle Dialog Scene] left button mouse move detected on " << abstractShape << " at " << mouseEvent->scenePos() << " mousedown=" << _mouseDown;
@@ -397,7 +400,8 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
 bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-    QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
+    //QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
+    QGraphicsItem* abstractShape = item;
 
     qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
 
@@ -551,101 +555,46 @@ void BattleDialogGraphicsScene::setInputMode(int inputMode)
     _inputMode = inputMode;
 }
 
-void BattleDialogGraphicsScene::editItem()
+void BattleDialogGraphicsScene::addEffectObject()
 {
     if(!_model)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to edit item, no model exists!";
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create object effect, no model exists.";
         return;
     }
 
-    if(!_contextMenuItem)
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file.."));
+    if(filename.isEmpty())
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no context menu item known! ";
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create object effect, invalid image file selected.";
         return;
     }
 
-    QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_contextMenuItem);
-    if(!abstractShape)
+    QPixmap objectPixmap(filename);
+    if(objectPixmap.isNull())
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit an item that is not an effect! ";
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create object effect, invalid image file selected: " << filename;
         return;
     }
 
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(abstractShape);
+    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object);
     if(!effect)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << abstractShape;
         return;
-    }
 
-    BattleDialogEffectSettings* settings = effect->getEffectEditor();
-    if(!settings)
+    if(objectPixmap.width() >= objectPixmap.height())
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << abstractShape;
-        return;
+        effect->setWidth(10);
+        effect->setSize(10 * objectPixmap.height() / objectPixmap.width());
     }
-
-    settings->exec();
-    if(settings->result() == QDialog::Accepted)
+    else
     {
-        qDebug() << "[Battle Dialog Scene] Applying effect settings for effect " << abstractShape;
-
-        settings->copyValues(*effect);
-        effect->applyEffectValues(*abstractShape, _model->getGridScale());
-        emit effectChanged(abstractShape);
+        effect->setSize(10);
+        effect->setWidth(10 * objectPixmap.width() / objectPixmap.height());
     }
-    settings->deleteLater();
-}
+    effect->setPosition(_mouseDownPos.x(), _mouseDownPos.y());
+    effect->setImageFile(filename);
 
-void BattleDialogGraphicsScene::rollItem()
-{
-    qDebug() << "[Battle Dialog Scene] Roll Item triggered for " << _contextMenuItem;
-    if(_contextMenuItem)
-    {
-        QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_contextMenuItem);
-        if(abstractShape)
-            emit applyEffect(abstractShape);
-    }
-}
-
-void BattleDialogGraphicsScene::deleteItem()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to delete item, no model exists!";
-        return;
-    }
-
-    if(!_contextMenuItem)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no context menu item known!";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
-    if(!effect)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << _contextMenuItem;
-        return;
-    }
-
-    QMessageBox::StandardButton result = QMessageBox::critical(nullptr, QString("Confirm Delete Effect"), QString("Are you sure you wish to delete this effect?"), QMessageBox::Yes | QMessageBox::No);
-    if(result == QMessageBox::Yes)
-    {
-        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << effect;
-        _model->removeEffect(effect);
-        _itemList.removeOne(_contextMenuItem);
-        if(_mouseDownItem == _contextMenuItem)
-        {
-            _mouseDown = false;
-            _mouseDownItem = nullptr;
-        }
-        delete _contextMenuItem;
-        _contextMenuItem = nullptr;
-
-        emit effectChanged(nullptr);
-    }
+    addEffect(effect);
 }
 
 void BattleDialogGraphicsScene::addEffectRadius()
@@ -717,6 +666,107 @@ void BattleDialogGraphicsScene::addEffectLine()
     effect->setPosition(_mouseDownPos.x(), _mouseDownPos.y());
 
     addEffect(effect);
+}
+
+void BattleDialogGraphicsScene::editItem()
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to edit item, no model exists!";
+        return;
+    }
+
+    if(!_contextMenuItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no context menu item known! ";
+        return;
+    }
+
+    //QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_contextMenuItem);
+    QGraphicsItem* abstractShape = _contextMenuItem;
+    if(!abstractShape)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit an item that is not an effect! ";
+        return;
+    }
+
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(abstractShape);
+    if(!effect)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << abstractShape;
+        return;
+    }
+
+    BattleDialogEffectSettings* settings = effect->getEffectEditor();
+    if(!settings)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << abstractShape;
+        return;
+    }
+
+    settings->exec();
+    if(settings->result() == QDialog::Accepted)
+    {
+        qDebug() << "[Battle Dialog Scene] Applying effect settings for effect " << abstractShape;
+
+        settings->copyValues(*effect);
+        effect->applyEffectValues(*abstractShape, _model->getGridScale());
+        emit effectChanged(abstractShape);
+    }
+    settings->deleteLater();
+}
+
+void BattleDialogGraphicsScene::rollItem()
+{
+    qDebug() << "[Battle Dialog Scene] Roll Item triggered for " << _contextMenuItem;
+    if(_contextMenuItem)
+    {
+        /*
+        QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_contextMenuItem);
+        if(abstractShape)
+            emit applyEffect(abstractShape);
+            */
+        emit applyEffect(_contextMenuItem);
+    }
+}
+
+void BattleDialogGraphicsScene::deleteItem()
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to delete item, no model exists!";
+        return;
+    }
+
+    if(!_contextMenuItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no context menu item known!";
+        return;
+    }
+
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
+    if(!effect)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << _contextMenuItem;
+        return;
+    }
+
+    QMessageBox::StandardButton result = QMessageBox::critical(nullptr, QString("Confirm Delete Effect"), QString("Are you sure you wish to delete this effect?"), QMessageBox::Yes | QMessageBox::No);
+    if(result == QMessageBox::Yes)
+    {
+        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << effect;
+        _model->removeEffect(effect);
+        _itemList.removeOne(_contextMenuItem);
+        if(_mouseDownItem == _contextMenuItem)
+        {
+            _mouseDown = false;
+            _mouseDownItem = nullptr;
+        }
+        delete _contextMenuItem;
+        _contextMenuItem = nullptr;
+
+        emit effectChanged(nullptr);
+    }
 }
 
 void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -808,7 +858,7 @@ void BattleDialogGraphicsScene::addEffect(BattleDialogModelEffect* effect)
     _contextMenuItem = nullptr;
 }
 
-QAbstractGraphicsShapeItem* BattleDialogGraphicsScene::addEffectShape(BattleDialogModelEffect& effect)
+QGraphicsItem* BattleDialogGraphicsScene::addEffectShape(BattleDialogModelEffect& effect)
 {
     if(!_model)
     {
@@ -816,7 +866,7 @@ QAbstractGraphicsShapeItem* BattleDialogGraphicsScene::addEffectShape(BattleDial
         return nullptr;
     }
 
-    QAbstractGraphicsShapeItem* shape = effect.createEffectShape(_model->getGridScale());
+    QGraphicsItem* shape = effect.createEffectShape(_model->getGridScale());
     if(shape)
     {
         addItem(shape);

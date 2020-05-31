@@ -1,9 +1,9 @@
 #ifndef BATTLEDIALOGMODELEFFECTRADIUS_H
 #define BATTLEDIALOGMODELEFFECTRADIUS_H
 
-#include "battledialogmodeleffect.h"
+#include "battledialogmodeleffectshape.h"
 
-class BattleDialogModelEffectRadius : public BattleDialogModelEffect
+class BattleDialogModelEffectRadius : public BattleDialogModelEffectShape
 {
     Q_OBJECT
 
@@ -18,7 +18,7 @@ public:
     virtual int getEffectType() const override;
     virtual BattleDialogEffectSettings* getEffectEditor() const override;
 
-    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const override;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) const override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTRADIUS_H

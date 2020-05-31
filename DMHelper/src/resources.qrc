@@ -261,6 +261,11 @@
         <file>data/character_stat_top.png</file>
         <file>data/character_stat_topleft.png</file>
         <file>data/character_stat_topright.png</file>
+        <file>data/icon_neweffectcone.png</file>
+        <file>data/icon_neweffectcube.png</file>
+        <file>data/icon_neweffectline.png</file>
+        <file>data/icon_neweffectradius.png</file>
+        <file>data/icon_newobject.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

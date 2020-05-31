@@ -23,11 +23,12 @@ public:
         BattleDialogModelEffect_Radius,
         BattleDialogModelEffect_Cone,
         BattleDialogModelEffect_Cube,
-        BattleDialogModelEffect_Line
+        BattleDialogModelEffect_Line,
+        BattleDialogModelEffect_Object
     };
 
     BattleDialogModelEffect(const QString& name = QString(), QObject *parent = nullptr);
-    BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
+    BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QString& tip);
     virtual ~BattleDialogModelEffect() override;
 
     // From CampaignObjectBase
@@ -38,8 +39,8 @@ public:
     virtual int getEffectType() const = 0;
     virtual BattleDialogEffectSettings* getEffectEditor() const;
 
-    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const = 0;
-    virtual void applyEffectValues(QAbstractGraphicsShapeItem& item, qreal gridScale) const;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) const = 0;
+    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const;
 
     virtual bool getEffectActive() const;
     virtual void setEffectActive(bool active);
@@ -63,6 +64,9 @@ public:
     virtual QColor getColor() const;
     virtual void setColor(const QColor& color);
 
+    virtual QString getImageFile() const;
+    virtual void setImageFile(const QString& imageFile);
+
     virtual QString getTip() const;
     virtual void setTip(const QString& tip);
 
@@ -77,7 +81,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
 
-    void prepareItem(QAbstractGraphicsShapeItem& item) const;
+    virtual void prepareItem(QGraphicsItem& item) const;
     void copyValues(const BattleDialogModelEffect &other);
 
     bool _active;
@@ -85,7 +89,6 @@ protected:
     int _size;
     QPointF _position;
     qreal _rotation;
-    QColor _color;
     QString _tip;
 };
 

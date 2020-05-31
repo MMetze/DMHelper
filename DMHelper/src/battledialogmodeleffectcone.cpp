@@ -2,12 +2,12 @@
 #include "unselectedpolygon.h"
 
 BattleDialogModelEffectCone::BattleDialogModelEffectCone(const QString& name, QObject *parent) :
-    BattleDialogModelEffect(name, parent)
+    BattleDialogModelEffectShape(name, parent)
 {
 }
 
 BattleDialogModelEffectCone::BattleDialogModelEffectCone(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
-    BattleDialogModelEffect(size, position, rotation, color, tip)
+    BattleDialogModelEffectShape(size, position, rotation, color, tip)
 {
 }
 
@@ -34,7 +34,7 @@ int BattleDialogModelEffectCone::getEffectType() const
     return BattleDialogModelEffect_Cone;
 }
 
-QAbstractGraphicsShapeItem* BattleDialogModelEffectCone::createEffectShape(qreal gridScale) const
+QGraphicsItem* BattleDialogModelEffectCone::createEffectShape(qreal gridScale) const
 {
     QPolygonF poly;
     poly << QPointF(0,0) << QPointF(-50,100) << QPoint(50,100) << QPoint(0,0);

@@ -1,16 +1,16 @@
-#ifndef BATTLEDIALOGMODELEFFECTLINE_H
-#define BATTLEDIALOGMODELEFFECTLINE_H
+#ifndef BATTLEDIALOGMODELEFFECTOBJECT_H
+#define BATTLEDIALOGMODELEFFECTOBJECT_H
 
-#include "battledialogmodeleffectshape.h"
+#include "battledialogmodeleffect.h"
 
-class BattleDialogModelEffectLine : public BattleDialogModelEffectShape
+class BattleDialogModelEffectObject : public BattleDialogModelEffect
 {
     Q_OBJECT
 
 public:
-    BattleDialogModelEffectLine(const QString& name = QString(), QObject *parent = nullptr);
-    explicit BattleDialogModelEffectLine(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
-    virtual ~BattleDialogModelEffectLine() override;
+    BattleDialogModelEffectObject(const QString& name = QString(), QObject *parent = nullptr);
+    explicit BattleDialogModelEffectObject(int size, int width, const QPointF& position, qreal rotation, const QString& imageFile, const QString& tip);
+    virtual ~BattleDialogModelEffectObject() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -26,11 +26,17 @@ public:
     virtual int getWidth() const override;
     virtual void setWidth(int width) override;
 
+    virtual QString getImageFile() const override;
+    virtual void setImageFile(const QString& imageFile) override;
+
 protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+    virtual void prepareItem(QGraphicsItem& item) const override;
+
     int _width;
+    QString _imageFile;
 
 };
 
-#endif // BATTLEDIALOGMODELEFFECTLINE_H
+#endif // BATTLEDIALOGMODELEFFECTOBJECT_H

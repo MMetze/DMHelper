@@ -122,10 +122,21 @@ void BattleDialogEffectSettings::setSizeLabel(const QString& sizeLabel)
     ui->lblSize->setText(sizeLabel);
 }
 
+void BattleDialogEffectSettings::setShowActive(bool show)
+{
+    ui->chkActive->setVisible(show);
+}
+
 void BattleDialogEffectSettings::setShowWidth(bool show)
 {
     ui->edtWidth->setVisible(show);
     ui->lblWidth->setVisible(show);
+}
+
+void BattleDialogEffectSettings::setShowColor(bool show)
+{
+    ui->btnColor->setVisible(show);
+    ui->lblColor->setVisible(show);
 }
 
 void BattleDialogEffectSettings::selectNewColor()

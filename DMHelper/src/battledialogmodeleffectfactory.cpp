@@ -4,6 +4,7 @@
 #include "battledialogmodeleffectcube.h"
 #include "battledialogmodeleffectradius.h"
 #include "battledialogmodeleffectline.h"
+#include "battledialogmodeleffectobject.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -29,6 +30,9 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Line:
             result = new BattleDialogModelEffectLine();
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+            result = new BattleDialogModelEffectObject();
             break;
         default:
             break;

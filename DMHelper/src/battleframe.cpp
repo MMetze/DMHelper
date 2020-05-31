@@ -226,8 +226,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
     connect(_scene, SIGNAL(selectionChanged()),this,SLOT(handleSelectionChanged()));
-    connect(_scene, SIGNAL(effectChanged(QAbstractGraphicsShapeItem*)), this, SLOT(handleEffectChanged(QAbstractGraphicsShapeItem*)));
-    connect(_scene, SIGNAL(applyEffect(QAbstractGraphicsShapeItem*)), this, SLOT(handleApplyEffect(QAbstractGraphicsShapeItem*)));
+    connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
+    connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     //connect(_scene, SIGNAL(distanceChanged(const QString&)), ui->edtDistance, SLOT(setText(const QString&)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
 
@@ -894,6 +894,37 @@ void BattleFrame::addNPC()
     selectAddCharacter(characterList, QString("Select an NPC"), QString("Select NPC:"));
 }
 
+void BattleFrame::addObject()
+{
+    if(_scene)
+        _scene->addEffectObject();
+}
+
+void BattleFrame::addEffectRadius()
+{
+    if(_scene)
+        _scene->addEffectRadius();
+}
+
+void BattleFrame::addEffectCone()
+{
+    if(_scene)
+        _scene->addEffectCone();
+}
+
+void BattleFrame::addEffectCube()
+{
+    if(_scene)
+        _scene->addEffectCube();
+}
+
+void BattleFrame::addEffectLine()
+{
+    if(_scene)
+        _scene->addEffectLine();
+}
+
+
 /*
 void BattleFrame::setShowMovement(bool showMovement)
 {
@@ -1470,7 +1501,7 @@ void BattleFrame::handleSelectionChanged()
     }
 }
 
-void BattleFrame::handleEffectChanged(QAbstractGraphicsShapeItem* effectItem)
+void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
 {
 #ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Frame] Handle effect changed for " << effectItem;
@@ -1495,7 +1526,7 @@ void BattleFrame::handleEffectChanged(QAbstractGraphicsShapeItem* effectItem)
 
             if(isItemInEffect(item, effectItem))
             {
-                applyEffectToItem(item, effectItem);
+                applyEffectToItem(item, effect);
             }
         }
     }
@@ -1529,7 +1560,7 @@ void BattleFrame::handleCombatantMoved(BattleDialogModelCombatant* combatant)
                 QAbstractGraphicsShapeItem* abstractEffect = dynamic_cast<QAbstractGraphicsShapeItem*>(effectItem);
                 if(isItemInEffect(item, abstractEffect))
                 {
-                    applyEffectToItem(item, abstractEffect);
+                    applyEffectToItem(item, effect);
                     return;
                 }
             }
@@ -1537,7 +1568,7 @@ void BattleFrame::handleCombatantMoved(BattleDialogModelCombatant* combatant)
     }
 }
 
-void BattleFrame::handleApplyEffect(QAbstractGraphicsShapeItem* effect)
+void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
     QList<BattleDialogModelCombatant*> combatantList;
 
@@ -3584,7 +3615,7 @@ void BattleFrame::renderVideoBackground(QPainter& painter)
 #endif
 }
 
-bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect)
+bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect)
 {
     if((!item) || (!effect))
         return false;
@@ -3626,16 +3657,20 @@ void BattleFrame::removeEffectsFromItem(QGraphicsPixmapItem* item)
     }
 }
 
-void BattleFrame::applyEffectToItem(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect)
+void BattleFrame::applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect)
 {
     if((!item) || (!effect))
+        return;
+
+    QColor ellipseColor = effect->getColor();
+    if(!ellipseColor.isValid())
         return;
 
     QRect itemRect = item->boundingRect().toRect();
     int maxSize = qMax(itemRect.width(), itemRect.height());
 
     QGraphicsEllipseItem* effectItem = new QGraphicsEllipseItem(-maxSize/2, -maxSize/2, maxSize, maxSize);
-    QColor ellipseColor = effect->pen().color();
+    //QColor ellipseColor = effect->pen().color();
     effectItem->setPen(QPen(ellipseColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipseColor.setAlpha(128);
     effectItem->setBrush(QBrush(ellipseColor));

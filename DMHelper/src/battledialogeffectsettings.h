@@ -31,7 +31,9 @@ public:
 
 public slots:
     void setSizeLabel(const QString& sizeLabel);
+    void setShowActive(bool show);
     void setShowWidth(bool show);
+    void setShowColor(bool show);
 
 private slots:
     void selectNewColor();
