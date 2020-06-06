@@ -59,6 +59,7 @@ public:
     int getAbilityValue(Combatant::Ability ability) const;
     int getSkillValue(Combatant::Skills skill) const;
     QString getSkillString() const;
+    bool isSkillKnown(Combatant::Skills skill) const;
 
     QList<MonsterAction> getActions() const;
     void addAction(const MonsterAction& action);
@@ -76,6 +77,8 @@ public:
     void addReaction(const MonsterAction& action);
     void setReaction(int index, const MonsterAction& action);
     int removeReaction(const MonsterAction& action);
+
+    void cloneMonster(MonsterClass& other);
 
     static int convertSizeToCategory(const QString& monsterSize);
     static qreal convertSizeCategoryToScaleFactor(int category);

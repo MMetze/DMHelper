@@ -257,7 +257,7 @@ void OptionsContainer::readSettings()
     // Note: password will not be stored in settings
     setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml")));
     if(!settings.contains(QString("bestiary")))
-        getStandardDirectory(QString("Images"));
+        getDataDirectory(QString("Images"));
     setLastMonster(settings.value("lastMonster","").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
@@ -514,18 +514,24 @@ QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QStrin
     if(!result.isEmpty())
         return result;
     else
-        return getStandardDirectory(defaultDir);
+        return getDataDirectory(defaultDir);
 }
 
-QString OptionsContainer::getStandardDirectory(const QString& defaultDir)
+QString OptionsContainer::getDataDirectory(const QString& defaultDir)
 {
-    QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QString result = standardPath + QString("/") + defaultDir;
-    QDir standardDir(result);
-    if(standardDir.exists())
+    bool created = false;
+    QString standardPath = getStandardDirectory(defaultDir, &created);
+    QDir standardDir(standardPath);
+    if(!standardDir.exists())
     {
-        qDebug() << "[OptionsContainer] Standard Directory found: " << result;
-        return result;
+        qDebug() << "[OptionsContainer] ERROR: Data directory NOT FOUND: " << standardPath;
+        return QString();
+    }
+
+    if(!created)
+    {
+        qDebug() << "[OptionsContainer] Data Directory found: " << standardPath;
+        return standardPath;
     }
 
     QString applicationPath = QCoreApplication::applicationDirPath();
@@ -538,13 +544,6 @@ QString OptionsContainer::getStandardDirectory(const QString& defaultDir)
     if(!fileDirPath.cd(QString("resources/") + defaultDir))
         return QString();
 #endif
-    QString resourcePath = fileDirPath.absolutePath();
-
-    QDir rootDir(standardPath);
-    rootDir.mkdir(defaultDir);
-
-    if(!standardDir.exists())
-        return QString();
 
     QStringList filters;
     filters << "*.xml" << "*.png" << "*.jpg";
@@ -554,21 +553,77 @@ QString OptionsContainer::getStandardDirectory(const QString& defaultDir)
         QFile::copy(fileDirPath.filePath(fileEntries.at(i)), standardDir.filePath(fileEntries.at(i)));
     }
 
-    qDebug() << "[OptionsContainer] Standard default files copied to directory: " << result;
+    qDebug() << "[OptionsContainer] Data default files copied to directory: " << standardPath;
+    return standardPath;
+}
 
+QString OptionsContainer::getStandardDirectory(const QString& defaultDir, bool* created)
+{
+    QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString result = standardPath + QString("/") + defaultDir;
+    QDir standardDir(result);
+    if(standardDir.exists())
+    {
+        qDebug() << "[OptionsContainer] Standard directory found: " << result;
+        if(created)
+            *created = false;
+        return result;
+    }
+
+    qDebug() << "[OptionsContainer] Creating standard directory: " << result;
+    QDir rootDir(standardPath);
+    rootDir.mkdir(defaultDir);
+
+    if(!standardDir.exists())
+    {
+        qDebug() << "[OptionsContainer] ERROR: Standard directory creation failed!";
+        if(created)
+            *created = false;
+        return QString();
+    }
+
+    qDebug() << "[OptionsContainer] Standard directory created";
+    if(created)
+        *created = true;
     return result;
+}
+
+void OptionsContainer::backupFile(const QString& filename)
+{
+    QFileInfo fileInfo(filename);
+
+    QString backupPath = getStandardDirectory("backup");
+    if(!backupPath.isEmpty())
+    {
+        QDir backupDir(backupPath);
+        QFile previousBackup(backupDir.filePath(fileInfo.fileName()));
+        QFileInfo backupFileInfo(previousBackup);
+        qDebug() << "[OptionsContainer] Checking backup file: " << previousBackup << " exists: " << backupFileInfo.exists() << ", size: " << backupFileInfo.size() << ", current file size: " << fileInfo.size();
+        if((!backupFileInfo.exists()) || (backupFileInfo.size() != fileInfo.size()))
+        {
+            if(backupFileInfo.exists())
+            {
+                qDebug() << "[OptionsContainer] Replacing file backup, removing current backup.";
+                previousBackup.remove();
+            }
+
+            qDebug() << "[OptionsContainer] Backing up file to: " << backupDir.filePath(fileInfo.fileName());
+            QFile file(filename);
+            file.copy(backupDir.filePath(fileInfo.fileName()));
+        }
+    }
 }
 
 void OptionsContainer::resetFileSettings()
 {
     setBestiaryFileName(getStandardFile(QString("DMHelperBestiary.xml")));
-    getStandardDirectory(QString("Images"));
+    getDataDirectory(QString("Images"));
 
     setQuickReferenceFileName(getStandardFile(QString("quickref_data.xml")));
     setCalendarFileName(getStandardFile(QString("calendar.xml")));
     setEquipmentFileName(getStandardFile(QString("equipment.xml")));
     setShopsFileName(getStandardFile(QString("shops.xml")));
-    setTablesDirectory(getStandardDirectory(QString("tables")));
+    setTablesDirectory(getDataDirectory(QString("tables")));
 }
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)

@@ -1,5 +1,7 @@
 #include "character.h"
 #include "dmconstants.h"
+#include "monsterclass.h"
+#include "bestiary.h"
 #include <QDomElement>
 #include <QDir>
 #include <QtDebug>
@@ -506,6 +508,85 @@ int Character::getPassivePerception() const
     }
 
     return result;
+}
+
+void Character::copyMonsterValues(MonsterClass& monster)
+{
+    beginBatchChanges();
+
+    setIcon(Bestiary::Instance()->getDirectory().filePath(Bestiary::Instance()->findMonsterImage(monster.getName(), monster.getIcon())));
+    setStringValue(StringValue_race, monster.getName());
+    setStringValue(StringValue_size, monster.getMonsterSize());
+    setIntValue(IntValue_speed, monster.getSpeedValue());
+    setStringValue(StringValue_alignment, monster.getAlignment());
+    setArmorClass(monster.getArmorClass());
+    setHitDice(monster.getHitDice());
+    setHitPoints(monster.getAverageHitPoints());
+
+    setIntValue(IntValue_strength, monster.getStrength());
+    setIntValue(IntValue_dexterity, monster.getDexterity());
+    setIntValue(IntValue_constitution, monster.getConstitution());
+    setIntValue(IntValue_intelligence, monster.getIntelligence());
+    setIntValue(IntValue_wisdom, monster.getWisdom());
+    setIntValue(IntValue_charisma, monster.getCharisma());
+
+    // Check skills
+    for(int skillIt = 0; skillIt < SKILLS_COUNT; ++skillIt)
+    {
+        Skills skill = static_cast<Skills>(skillIt);
+        if(monster.isSkillKnown(skill))
+            setSkillValue(skill, monster.getSkillValue(skill));
+    }
+
+    // Proficiencies
+    QString proficiencyString;
+    if(!monster.getSenses().isEmpty())
+        proficiencyString += QString("Senses:") + QChar::LineFeed + monster.getSenses() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getLanguages().isEmpty())
+        proficiencyString += QString("Languages:") + QChar::LineFeed + monster.getLanguages() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getConditionImmunities().isEmpty())
+        proficiencyString += QString("Condition Immunities:") + QChar::LineFeed + monster.getConditionImmunities() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getDamageImmunities().isEmpty())
+        proficiencyString += QString("Damage Immunities:") + QChar::LineFeed + monster.getDamageImmunities() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getDamageResistances().isEmpty())
+        proficiencyString += QString("Damage Resistances:") + QChar::LineFeed + monster.getDamageResistances() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getDamageVulnerabilities().isEmpty())
+        proficiencyString += QString("Damage Vulnerabilities:") + QChar::LineFeed + monster.getDamageVulnerabilities() + QChar::LineFeed + QChar::LineFeed;
+    setStringValue(StringValue_proficiencies, proficiencyString);
+
+    // Notes
+    QString notesString;
+    if(monster.getActions().count() > 0)
+    {
+        notesString += QString("Actions:") + QChar::LineFeed;
+        for(MonsterAction monsterAction : monster.getActions())
+            notesString += monsterAction.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    if(monster.getLegendaryActions().count() > 0)
+    {
+        notesString += QString("Legendary Actions:") + QChar::LineFeed;
+        for(MonsterAction legendaryAction : monster.getLegendaryActions())
+            notesString += legendaryAction.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    if(monster.getSpecialAbilities().count() > 0)
+    {
+        notesString += QString("Special Abilities:") + QChar::LineFeed;
+        for(MonsterAction specialAbility : monster.getSpecialAbilities())
+            notesString += specialAbility.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    if(monster.getReactions().count() > 0)
+    {
+        notesString += QString("Reactions:") + QChar::LineFeed;
+        for(MonsterAction monsterReaction : monster.getReactions())
+            notesString += monsterReaction.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    setStringValue(StringValue_notes, notesString);
+
+    endBatchChanges();
 }
 
 int Character::findKeyForSkillName(const QString& skillName)

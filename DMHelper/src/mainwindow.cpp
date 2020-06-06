@@ -836,8 +836,13 @@ void MainWindow::openMonster(const QString& monsterClass)
 
 void MainWindow::newCharacter()
 {
+    qDebug() << "[MainWindow] Creating a new character...";
+
     if(!campaign)
+    {
+        qDebug() << "[MainWindow] New character cannot be created without a valid campaign open.";
         return;
+    }
 
     bool ok;
     QString characterName = QInputDialog::getText(this,
@@ -847,12 +852,47 @@ void MainWindow::newCharacter()
                                                   QString(),
                                                   &ok);
     if((!ok) || (characterName.isEmpty()))
+    {
+        qDebug() << "[MainWindow] New character not created because the character name dialog was cancelled";
         return;
+    }
 
     Character* character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
     CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
     if(!currentObject)
         currentObject = campaign;
+
+    if(Bestiary::Instance()->count() > 0)
+    {
+        QMessageBox::StandardButton monsterQuestion = QMessageBox::question(this,
+                                                                            QString("New Character"),
+                                                                            QString("Do you want to base this character on a monster from the bestiary?"));
+
+        if(monsterQuestion == QMessageBox::Yes)
+        {
+            QString monsterName = QInputDialog::getItem(this,
+                                                        QString("New Character Monster Selection"),
+                                                        QString("Select the monster you would like to base the new chararacter on:"),
+                                                        Bestiary::Instance()->getMonsterList(),
+                                                        0,
+                                                        false,
+                                                        &ok);
+            if((!ok) || (monsterName.isEmpty()))
+            {
+                qDebug() << "[MainWindow] New character not created because the select monster dialog was cancelled";
+                return;
+            }
+
+            MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterName);
+            if(!monsterClass)
+            {
+                qDebug() << "[MainWindow] New character not created because not able to find selected monster: " << monsterName;
+                return;
+            }
+
+            character->copyMonsterValues(*monsterClass);
+        }
+    }
 
     currentObject->setExpanded(true);
     currentObject->addObject(character);
@@ -1151,28 +1191,17 @@ void MainWindow::readBestiary()
     }
 
     QString bestiaryFileName = _options->getBestiaryFileName();
-    qDebug() << "[MainWindow] Bestiary file from options: " << bestiaryFileName;
-
     if(bestiaryFileName.isEmpty())
     {
-        qDebug() << "[MainWindow] ERROR! No known bestiary found, attempting to load default bestiary";
-#ifdef Q_OS_MAC
-        QDir fileDirPath(QCoreApplication::applicationDirPath());
-        fileDirPath.cdUp();
-        fileDirPath.cdUp();
-        fileDirPath.cdUp();
-        bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
-#else
-        QDir fileDirPath(QCoreApplication::applicationDirPath());
-        bestiaryFileName = fileDirPath.path() + QString("/bestiary/DMHelperBestiary.xml");
-#endif
+        qDebug() << "[MainWindow] ERROR! No known bestiary found, unable to load bestiary";
+        return;
     }
 
     qDebug() << "[MainWindow] Reading bestiary: " << bestiaryFileName;
 
-    QDomDocument doc( "DMHelperBestiaryXML" );
-    QFile file( bestiaryFileName );
-    if( !file.open( QIODevice::ReadOnly ) )
+    QDomDocument doc("DMHelperBestiaryXML");
+    QFile file(bestiaryFileName);
+    if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[MainWindow] Reading bestiary file open failed.";
         return;
@@ -1183,11 +1212,11 @@ void MainWindow::readBestiary()
     QString errMsg;
     int errRow;
     int errColumn;
-    bool contentResult = doc.setContent( in.readAll(), &errMsg, &errRow, &errColumn);
+    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
 
     file.close();
 
-    if( contentResult == false )
+    if(contentResult == false)
     {
         qDebug() << "[MainWindow] Reading bestiary reading XML content.";
         qDebug() << errMsg << errRow << errColumn;
@@ -1195,11 +1224,14 @@ void MainWindow::readBestiary()
     }
 
     QDomElement root = doc.documentElement();
-    if( (root.isNull()) || (root.tagName() != "root") )
+    if((root.isNull()) || (root.tagName() != "root"))
     {
         qDebug() << "[MainWindow] Bestiary file missing root item";
         return;
     }
+
+    // Bestiary file seems ok, make a backup
+    _options->backupFile(bestiaryFileName);
 
     QFileInfo fileInfo(bestiaryFileName);
     Bestiary::Instance()->setDirectory(fileInfo.absoluteDir());
@@ -1681,6 +1713,9 @@ void MainWindow::openFile(const QString& filename)
             return;
         }
     }
+
+    // The campaign file seems good, back it up!
+    _options->backupFile(campaignFileName);
 
     selectItem(DMHelper::TreeType_Campaign, QUuid());
     emit campaignLoaded(campaign);

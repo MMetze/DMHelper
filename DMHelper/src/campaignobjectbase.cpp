@@ -7,7 +7,7 @@
 #include <QDebug>
 
 // Uncomment the next line to log in detail all of the campaign item input, output and postprocessing
-#define CAMPAIGN_OBJECT_LOGGING
+// #define CAMPAIGN_OBJECT_LOGGING
 
 CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
     DMHObjectBase(parent),

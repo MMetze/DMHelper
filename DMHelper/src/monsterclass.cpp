@@ -437,6 +437,11 @@ QString MonsterClass::getSkillString() const
     return result;
 }
 
+bool MonsterClass::isSkillKnown(Combatant::Skills skill) const
+{
+    return _skillValues.contains(skill);
+}
+
 QList<MonsterAction> MonsterClass::getActions() const
 {
     return _actions;
@@ -543,6 +548,55 @@ int MonsterClass::removeReaction(const MonsterAction& action)
 {
     _reactions.removeAll(action);
     return _reactions.count();
+}
+
+void MonsterClass::cloneMonster(MonsterClass& other)
+{
+    beginBatchChanges();
+
+    _private = other._private;
+    _monsterType = other._monsterType;
+    _monsterSubType = other._monsterSubType;
+    _monsterSize = other._monsterSize;
+    _monsterSizeCategory = other._monsterSizeCategory;
+    _speed = other._speed;
+    _alignment = other._alignment;
+    _languages = other._languages;
+    _armorClass = other._armorClass;
+    _hitDice = other._hitDice;
+    _averageHitPoints = other._averageHitPoints;
+    _conditionImmunities = other._conditionImmunities;
+    _damageImmunities = other._damageImmunities;
+    _damageResistances = other._damageResistances;
+    _damageVulnerabilities = other._damageVulnerabilities;
+    _senses = other._senses;
+    _challenge = other._challenge;
+
+    _skillValues.clear(); // just in case we're cloning onto something that exists
+    for(int skill : other._skillValues.keys())
+        _skillValues[skill] = other._skillValues.value(skill);
+
+    _strength = other._strength;
+    _dexterity = other._dexterity;
+    _constitution = other._constitution;
+    _intelligence = other._intelligence;
+    _wisdom = other._wisdom;
+    _charisma = other._charisma;
+
+    _actions.clear();
+    for(MonsterAction action : other._actions)
+        addAction(action);
+    _legendaryActions.clear();
+    for(MonsterAction legendaryAction : other._legendaryActions)
+        addLegendaryAction(legendaryAction);
+    _specialAbilities.clear();
+    for(MonsterAction specialAbility : other._specialAbilities)
+        addSpecialAbility(specialAbility);
+    _reactions.clear();
+    for(MonsterAction reaction : other._reactions)
+        addReaction(reaction);
+
+    endBatchChanges();
 }
 
 int MonsterClass::convertSizeToCategory(const QString& monsterSize)

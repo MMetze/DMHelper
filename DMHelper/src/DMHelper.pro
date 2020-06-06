@@ -59,6 +59,7 @@ SOURCES += main.cpp\
     customtableframe.cpp \
     discordposter.cpp \
     dmhelperribbon.cpp \
+    dmhlogger.cpp \
     emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
@@ -252,6 +253,7 @@ HEADERS  += mainwindow.h \
     customtableframe.h \
     discordposter.h \
     dmhelperribbon.h \
+    dmhlogger.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \

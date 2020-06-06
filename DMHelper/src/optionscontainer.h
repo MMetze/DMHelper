@@ -111,7 +111,9 @@ public slots:
     QString getStandardFile(const QString& defaultFilename);
     void setTablesDirectory(const QString& directory);
     QString getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir);
-    QString getStandardDirectory(const QString& defaultDir);
+    QString getDataDirectory(const QString& defaultDir);
+    QString getStandardDirectory(const QString& defaultDir, bool* created = nullptr);
+    void backupFile(const QString& filename);
     void resetFileSettings();
 
     void setLastMonster(const QString& lastMonster);

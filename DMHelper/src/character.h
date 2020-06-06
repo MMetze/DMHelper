@@ -7,6 +7,7 @@
 #include <QPair>
 
 class QDomElement;
+class MonsterClass;
 
 typedef QPair<int,int> AbilitySkillPair;
 Q_DECLARE_METATYPE(AbilitySkillPair);
@@ -110,6 +111,8 @@ public:
     int getNextLevelXP() const;
     int getProficiencyBonus() const;
     int getPassivePerception() const;
+
+    virtual void copyMonsterValues(MonsterClass& monster);
 
     static int findKeyForSkillName(const QString& skillName);
     static QString getWrittenSkillName(int skill);

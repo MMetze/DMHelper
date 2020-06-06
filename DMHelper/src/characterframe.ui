@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>782</width>
-    <height>707</height>
+    <width>1010</width>
+    <height>725</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -5081,7 +5081,7 @@
                  <item row="4" column="3">
                   <widget class="QLabel" name="label_28">
                    <property name="text">
-                    <string>Nature (Wis)</string>
+                    <string>Nature (Int)</string>
                    </property>
                   </widget>
                  </item>
@@ -6611,7 +6611,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabFeatures">
       <attribute name="title">
