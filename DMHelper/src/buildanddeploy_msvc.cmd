@@ -47,7 +47,7 @@ xcopy /s ..\src\resources\* ..\bin64\resources\*
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64
 
 cd ..\bin64
-copy NUL DMHelper.log
+rem NO LONGER NEEDED as this is now done in the appdata directory: copy NUL DMHelper.log
 
 rem del vc_redist.x64.exe
 

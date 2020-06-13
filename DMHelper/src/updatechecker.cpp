@@ -5,6 +5,9 @@
 #include <QMessageBox>
 #include <QDebug>
 
+const int UPDATECHECKER_PERIOD_RELEASE = 7;
+const int UPDATECHECKER_PERIOD_DEBUG = 1;
+
 UpdateChecker::UpdateChecker(OptionsContainer& options, bool silentUpdate, bool selfDestruct, QObject *parent) :
     QObject(parent),
     _manager(nullptr),
@@ -85,11 +88,7 @@ bool UpdateChecker::runUpdateCheck()
             return false;
         }
 
-#ifdef QT_DEBUG
-        const int UPDATECHECKER_PERIOD = 1;
-#else
-        const int UPDATECHECKER_PERIOD = 7;
-#endif
+        const int UPDATECHECKER_PERIOD = (DMHelper::DMHELPER_ENGINEERING_VERSION > 0) ? UPDATECHECKER_PERIOD_DEBUG : UPDATECHECKER_PERIOD_RELEASE;
 
         if((lastUpdate.isValid()) && (lastUpdate.daysTo(QDate::currentDate()) < UPDATECHECKER_PERIOD))
         {
