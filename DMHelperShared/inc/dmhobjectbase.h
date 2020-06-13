@@ -23,9 +23,8 @@ public:
     DMHObjectBase(const DMHObjectBase& other);
     virtual ~DMHObjectBase();
 
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
+    virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport);
     virtual void inputXML(const QDomElement &element, bool isImport);
-    virtual void postProcessXML(const QDomElement &element, bool isImport);
 
     QUuid getID() const;
     int getIntID() const;
@@ -41,6 +40,8 @@ signals:
 public slots:
 
 protected:
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+
     void setID(QUuid id);
     void setIntID(int id);
 

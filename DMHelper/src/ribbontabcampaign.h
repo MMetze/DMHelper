@@ -1,13 +1,13 @@
 #ifndef RIBBONTABCAMPAIGN_H
 #define RIBBONTABCAMPAIGN_H
 
-#include <QFrame>
+#include "ribbonframe.h"
 
 namespace Ui {
 class RibbonTabCampaign;
 }
 
-class RibbonTabCampaign : public QFrame
+class RibbonTabCampaign : public RibbonFrame
 {
     Q_OBJECT
 
@@ -15,28 +15,35 @@ public:
     explicit RibbonTabCampaign(QWidget *parent = nullptr);
     ~RibbonTabCampaign();
 
+    virtual PublishButtonRibbon* getPublishRibbon() override;
+
 public slots:
-    void setPlayersWindow(bool checked);
+    //void setPlayersWindow(bool checked);
     void setCampaignEnabled(bool enabled);
     void setUndoEnabled(bool enabled);
+    void setAddPCButton(bool isPC);
 
 signals:
-    void newAdventureClicked();
+    void newPartyClicked();
     void newCharacterClicked();
     void newMapClicked();
-    void newNPCClicked();
+    //void newNPCClicked();
     void newTextClicked();
     void newBattleClicked();
     void newScrollingTextClicked();
+    void removeItemClicked();
     void exportItemClicked();
     void importItemClicked();
     void importCharacterClicked();
-    void importNPCClicked();
+    //void importNPCClicked();
 
     void undoClicked();
     void redoClicked();
-    void playersWindowClicked(bool checked);
-    void previewClicked();
+    //void playersWindowClicked(bool checked);
+    //void previewClicked();
+
+protected:
+    virtual void showEvent(QShowEvent *event) override;
 
 private:
     Ui::RibbonTabCampaign *ui;

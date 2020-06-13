@@ -1,7 +1,7 @@
 #ifndef BATTLEFRAME_H
 #define BATTLEFRAME_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 #include <QMap>
 #include <QUuid>
 #include "battledialoggraphicsscene.h"
@@ -20,19 +20,21 @@ class Map;
 class QTimer;
 class VideoPlayer;
 class CameraRect;
-class UndoPath;
 
 namespace Ui {
 class BattleFrame;
 }
 
-class BattleFrame : public QFrame
+class BattleFrame : public CampaignObjectFrame
 {
     Q_OBJECT
 
 public:
     explicit BattleFrame(QWidget *parent = nullptr);
-    ~BattleFrame();
+    virtual ~BattleFrame() override;
+
+    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void deactivateObject() override;
 
     void setBattle(EncounterBattle* battle);
     EncounterBattle* getBattle();
@@ -82,7 +84,7 @@ public slots:
     void zoomSelect(bool enabled);
     void cancelSelect();
 
-    void cancelPublish();
+    //void cancelPublish();
 
     // Public for connection to battle ribbon
     void selectBattleMap();
@@ -90,8 +92,15 @@ public slots:
     void addMonsters();
     void addCharacter();
     void addNPC();
-    void setShowMovement(bool showMovement);
-    void setLairActions(bool lairActions);
+    void addObject();
+
+    void addEffectRadius();
+    void addEffectCone();
+    void addEffectCube();
+    void addEffectLine();
+
+    //void setShowMovement(bool showMovement);
+    //void setLairActions(bool lairActions);
 
     // Public for connection to map ribbon
     void setCameraCouple(bool couple);
@@ -112,18 +121,22 @@ public slots:
     void setPointerOn(bool enabled);
     void showStatistics();
 
-    // Publish slots
-    void rotateCCW();
-    void rotateCW();
-    void togglePublishing(bool publishing);
-    void setBackgroundColor(QColor color);
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+    virtual void setBackgroundColor(QColor color) override;
+
+    //void rotateCCW();
+    //void rotateCW();
+    //void togglePublishing(bool publishing);
+    //void setBackgroundColor(QColor color);
 
 signals:
     //void battleComplete();
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
-    void publishImage(QImage img, QColor color);
-    void animationStarted(QColor color);
+    //void publishImage(QImage img, QColor color);
+    void animationStarted();
     void animateImage(QImage img);
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
@@ -145,16 +158,15 @@ signals:
     void pointerToggled(bool enabled);
 
     // Publish signals
-    void publishCancelled();
-    void setPublishEnabled(bool enabled);
-    void setPublishColor(QColor color);
+    //void publishCancelled();
+    //void setPublishColor(QColor color);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent * e);
-    virtual bool eventFilter(QObject *obj, QEvent *event);
-    virtual void resizeEvent(QResizeEvent *event);
-    virtual void showEvent(QShowEvent *event);
-    virtual void timerEvent(QTimerEvent *event);
+    virtual void keyPressEvent(QKeyEvent * e) override;
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void showEvent(QShowEvent *event) override;
+    virtual void timerEvent(QTimerEvent *event) override;
 
 private slots:
     void setCompassVisibility(bool visible);
@@ -165,9 +177,9 @@ private slots:
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleSelectionChanged();
-    void handleEffectChanged(QAbstractGraphicsShapeItem* effect);
+    void handleEffectChanged(QGraphicsItem* effectItem);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
-    void handleApplyEffect(QAbstractGraphicsShapeItem* effect);
+    void handleApplyEffect(QGraphicsItem* effect);
 
     void handleItemMouseDown(QGraphicsPixmapItem* item);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
@@ -183,7 +195,7 @@ private slots:
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
     void publishImage();
-    void executePublishImage();
+    //void executePublishImage();
     void executeAnimateImage();
     void updateHighlights();
     void countdownTimerExpired();
@@ -205,7 +217,7 @@ private slots:
     Map* selectRelatedMap();
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
 
-    void setRibbonPage(int id);
+    //void setRibbonPage(int id);
 
     void setEditMode();
     void updateFowImage(const QPixmap& fow);
@@ -234,6 +246,7 @@ private:
     };
 
     const int BattleDialogItemChild_Index = 0;
+    const int BattleDialogItemChild_EffectId = 0;
 
     CombatantWidget* createCombatantWidget(BattleDialogModelCombatant* combatant);
     void clearCombatantWidgets();
@@ -249,6 +262,7 @@ private:
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
 
     void getImageForPublishing(QImage& imageForPublishing);
+    void updatePublishEnable();
     void createVideoPlayer(bool dmPlayer);
     void resetVideoSizes();
 
@@ -277,9 +291,9 @@ private:
     void renderPrescaledBackground(QPainter& painter, QSize targetSize);
     void renderVideoBackground(QPainter& painter);
 
-    bool isItemInEffect(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
+    bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
     void removeEffectsFromItem(QGraphicsPixmapItem* item);
-    void applyEffectToItem(QGraphicsPixmapItem* item, QAbstractGraphicsShapeItem* effect);
+    void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
     QPixmap getPointerPixmap();
@@ -307,9 +321,9 @@ private:
     QGraphicsPixmapItem* _background;
     QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
-    int _activeScale;
+    qreal _activeScale;
     QGraphicsPixmapItem* _selectedPixmap;
-    int _selectedScale;
+    qreal _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _publishRect;
@@ -320,10 +334,9 @@ private:
 
     QTimer* _countdownTimer;
     qreal _countdown;
-    bool _lairActions;
+    //bool _lairActions;
 
     bool _publishing;
-    bool _publishingEnabled;
     QTimer* _publishTimer;
 
     QPixmap _prescaledBackground;
@@ -344,7 +357,7 @@ private:
     qreal _scale;
     int _rotation;
 
-    bool _showMovement;
+    //bool _showMovement;
     qreal _moveRadius;
     QPointF _moveStart;
     int _moveTimer;

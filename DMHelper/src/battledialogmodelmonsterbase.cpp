@@ -3,8 +3,8 @@
 #include <QDomElement>
 #include <QDebug>
 
-BattleDialogModelMonsterBase::BattleDialogModelMonsterBase() :
-    BattleDialogModelCombatant(),
+BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, QObject *parent) :
+    BattleDialogModelCombatant(name, parent),
     //_isShown(true),
     //_isKnown(true),
     _legendaryCount(-1)
@@ -27,6 +27,7 @@ BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant,
 {
 }
 
+/*
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const BattleDialogModelMonsterBase& other) :
     BattleDialogModelCombatant(other),
     //_isShown(other._isShown),
@@ -34,6 +35,7 @@ BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const BattleDialogMod
     _legendaryCount(other._legendaryCount)
 {
 }
+*/
 
 BattleDialogModelMonsterBase::~BattleDialogModelMonsterBase()
 {
@@ -48,7 +50,7 @@ void BattleDialogModelMonsterBase::inputXML(const QDomElement &element, bool isI
     _legendaryCount = element.attribute("legendaryCount",QString::number(-1)).toInt();
 }
 
-int BattleDialogModelMonsterBase::getType() const
+int BattleDialogModelMonsterBase::getCombatantType() const
 {
     return DMHelper::CombatantType_Monster;
 }
@@ -98,14 +100,12 @@ void BattleDialogModelMonsterBase::setLegendaryCount(int legendaryCount)
 
 void BattleDialogModelMonsterBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
-
     element.setAttribute("monsterType", getMonsterType());
     //element.setAttribute("isShown", _isShown);
     //element.setAttribute("isKnown", _isKnown);
     element.setAttribute("legendaryCount", _legendaryCount);
+
+    BattleDialogModelCombatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 /*

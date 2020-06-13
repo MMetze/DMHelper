@@ -1,19 +1,21 @@
 #ifndef RIBBONTABBATTLE_H
 #define RIBBONTABBATTLE_H
 
-#include <QFrame>
+#include "ribbonframe.h"
 
 namespace Ui {
 class RibbonTabBattle;
 }
 
-class RibbonTabBattle : public QFrame
+class RibbonTabBattle : public RibbonFrame
 {
     Q_OBJECT
 
 public:
     explicit RibbonTabBattle(QWidget *parent = nullptr);
     ~RibbonTabBattle();
+
+    virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
     void setShowLiving(bool checked);
@@ -28,6 +30,11 @@ signals:
     void addCharacterClicked();
     void addMonsterClicked();
     void addNPCClicked();
+    void addObjectClicked();
+    void addEffectRadiusClicked();
+    void addEffectCubeClicked();
+    void addEffectConeClicked();
+    void addEffectLineClicked();
     void showLivingClicked(bool checked);
     void showDeadClicked(bool checked);
     void showEffectsClicked(bool checked);
@@ -36,6 +43,9 @@ signals:
     void nextClicked();
     void sortClicked();
     void statisticsClicked();
+
+protected:
+    virtual void showEvent(QShowEvent *event) override;
 
 private:
     Ui::RibbonTabBattle *ui;

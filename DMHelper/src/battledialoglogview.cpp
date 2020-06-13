@@ -54,7 +54,7 @@ BattleDialogLogView::BattleDialogLogView(const BattleDialogModel& model, const B
         QTableWidgetItem* itemPerRnd = new QTableWidgetItem();
         itemPerRnd->setData(Qt::EditRole, static_cast<qreal>(dealt) / static_cast<qreal>(rounds));
 
-        if(combatant->getType() == DMHelper::CombatantType_Character)
+        if(combatant->getCombatantType() == DMHelper::CombatantType_Character)
         {
             ui->tblParty->setRowCount(ui->tblParty->rowCount() + 1);
             ui->tblParty->setItem(ui->tblParty->rowCount() - 1, 0, itemCombatant);

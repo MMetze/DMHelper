@@ -1,23 +1,23 @@
 #ifndef BATTLEDIALOGMODELEFFECTCUBE_H
 #define BATTLEDIALOGMODELEFFECTCUBE_H
 
-#include "battledialogmodeleffect.h"
+#include "battledialogmodeleffectshape.h"
 
-class BattleDialogModelEffectCube : public BattleDialogModelEffect
+class BattleDialogModelEffectCube : public BattleDialogModelEffectShape
 {
     Q_OBJECT
 
 public:
-    BattleDialogModelEffectCube();
+    BattleDialogModelEffectCube(const QString& name = QString(), QObject *parent = nullptr);
     explicit BattleDialogModelEffectCube(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
-    BattleDialogModelEffectCube(const BattleDialogModelEffectCube& other);
+    //BattleDialogModelEffectCube(const BattleDialogModelEffectCube& other);
     virtual ~BattleDialogModelEffectCube() override;
 
     virtual BattleDialogModelEffect* clone() const override;
 
-    virtual int getType() const override;
+    virtual int getEffectType() const override;
 
-    virtual QAbstractGraphicsShapeItem* createEffectShape(qreal gridScale) const override;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) const override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTCUBE_H

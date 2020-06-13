@@ -1,7 +1,7 @@
 #ifndef ENCOUNTERSCROLLINGTEXTEDIT_H
 #define ENCOUNTERSCROLLINGTEXTEDIT_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 #include <QElapsedTimer>
 #include "videoplayer.h"
 
@@ -13,7 +13,7 @@ class EncounterScrollingText;
 class QGraphicsScene;
 class QGraphicsTextItem;
 
-class EncounterScrollingTextEdit : public QFrame
+class EncounterScrollingTextEdit : public CampaignObjectFrame
 {
     Q_OBJECT
 
@@ -21,48 +21,72 @@ public:
     explicit EncounterScrollingTextEdit(QWidget *parent = nullptr);
     virtual ~EncounterScrollingTextEdit() override;
 
+    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void deactivateObject() override;
+
     EncounterScrollingText* getScrollingText() const;
     void setScrollingText(EncounterScrollingText* scrollingText);
     void unsetScrollingText(EncounterScrollingText* scrollingText);
 
+public slots:
+    void setScrollSpeed(int scrollSpeed);
+    void setImageFile(const QString& imgFile);
+    void browseImageFile();
+    void setText(const QString& newText);
+    void setFontFamily(const QString& fontFamily);
+    void setFontSize(int fontSize);
+    void setFontBold(bool fontBold);
+    void setFontItalics(bool fontItalics);
+    void setAlignment(Qt::Alignment alignment);
+    void setImageWidth(int imageWidth);
+    void setColor(QColor color);
+
+    void targetResized(const QSize& newSize);
+
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+    //void runAnimation(bool animate);
+    //void rotatePublish(int rotation);
+
+    void stopAnimation();
+    void rewind();
+
 signals:
-    void scrollSpeedChanged(double scrollSpeed);
-    void imgFileChanged(const QString& imgFile);
-    void textChanged(const QString& newText);
+    void textChanged(const QString& text);
+    void scrollSpeedChanged(int scrollSpeed);
+    void imageFileChanged(const QString& imgFile);
+//    void textChanged(const QString& newText);
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);
     void fontItalicsChanged(bool fontItalics);
-    void alignmentChanged(int alignment);
+    void alignmentChanged(Qt::Alignment alignment);
     void imageWidthChanged(int imageWidth);
     void colorChanged(QColor color);
 
-    void animationStarted(QColor color);
+    void animationStarted();
     void animateImage(QImage img);
     void showPublishWindow();
-
-public slots:
-    void targetResized(const QSize& newSize);
-    void cancelPublish();
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
 
     void createVideoPlayer(bool dmPlayer);
     void cleanupPlayer();
 
 private slots:
+    /*
     void setPlainText();
     void setFontSize();
-    void setAlignment();
-    void setColor();
+    */
     void setTextFont();
-    void setTextWidth();
-    void browseImageFile();
+    //void setTextWidth();
+    void setTextAlignment();
+    void setTextColor();
 
-    void runAnimation();
-    void rotatePublish();
     void startPublishTimer();
     void stopPublishTimer();
 
@@ -71,9 +95,11 @@ private slots:
     void loadImage();
     void updateVideoBackground();
 
+    void moveCursorToEnd();
+
 private:
 
-    Qt::AlignmentFlag getAlignment();
+    Qt::Alignment getAlignment();
     QSize getRotatedTargetSize();
 
     Ui::EncounterScrollingTextEdit *ui;
@@ -81,9 +107,11 @@ private:
     EncounterScrollingText* _scrollingText;
     int _backgroundWidth;
     QImage _backgroundImg;
+    QImage _backgroundImgScaled;
     QImage _prescaledImg;
     QImage _textImg;
     QPointF _textPos;
+    qreal _startPos;
     QSize _targetSize;
     QElapsedTimer _elapsed;
     int _timerId;
@@ -91,6 +119,10 @@ private:
     VideoPlayer* _videoPlayer;
     bool _isDMPlayer;
     QImage _backgroundVideo;
+
+    bool _animationRunning;
+    bool _firstTime;
+    int _rotation;
 };
 
 #endif // ENCOUNTERSCROLLINGTEXTEDIT_H

@@ -13,15 +13,16 @@
 // TODO: automate character level, next level exp, proficiency bonus
 
 CharacterFrame::CharacterFrame(QWidget *parent) :
-    QFrame(parent),
+    CampaignObjectFrame(parent),
     ui(new Ui::CharacterFrame),
     _character(nullptr),
     _mouseDown(false),
-    _reading(false)
+    _reading(false),
+    _rotation(0)
 {
     ui->setupUi(this);
 
-    connect(ui->framePublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
+    //connect(ui->framePublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
 
     ui->edtArmorClass->setValidator(new QIntValidator(0,100,this));
     ui->edtInitiative->setValidator(new QIntValidator(-10,100,this));
@@ -40,36 +41,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->btnSync, &QAbstractButton::clicked, this, &CharacterFrame::syncDndBeyond);
     enableDndBeyondSync(false);
 
-    connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
-    connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
-    connect(ui->edtCon,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
-    connect(ui->edtInt,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
-    connect(ui->edtWis,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
-    connect(ui->edtCha,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
-    connect(ui->chkStrSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkAthletics,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkDexSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkStealth,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkAcrobatics,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkSleightOfHand,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkConSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkIntSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkInvestigation,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkArcana,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkNature,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkHistory,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkReligion,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkWisSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkMedicine,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkAnimalHandling,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkPerception,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkInsight,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkSurvival,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkChaSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkPerformance,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(calculateMods()));
-    connect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    connectChanged(true);
 
     connect(ui->btnExpertise,SIGNAL(clicked()),this,SLOT(openExpertiseDialog()));
 
@@ -81,8 +53,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->edtHitPoints,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtArmorClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtInitiative,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtSex,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    connect(ui->edtSize,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    //connect(ui->edtSex,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    //connect(ui->edtSize,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtSpeed,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtAlignment,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtBackground,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
@@ -129,14 +101,44 @@ CharacterFrame::~CharacterFrame()
     delete ui;
 }
 
+void CharacterFrame::activateObject(CampaignObjectBase* object)
+{
+    Character* character = dynamic_cast<Character*>(object);
+    if(!character)
+        return;
+
+    if(_character != nullptr)
+    {
+        qDebug() << "[CharacterFrame] ERROR: New character object activated without deactivating the existing character object first!";
+        deactivateObject();
+    }
+
+    setCharacter(character);
+
+    emit checkableChanged(false);
+    emit setPublishEnabled(true);
+}
+
+void CharacterFrame::deactivateObject()
+{
+    if(!_character)
+    {
+        qDebug() << "[CharacterFrame] WARNING: Invalid (nullptr) character object deactivated!";
+        return;
+    }
+
+    writeCharacterData();
+    setCharacter(nullptr);
+}
+
 void CharacterFrame::setCharacter(Character* character)
 {
-    if(character)
-    {
-        _character = character;
-        readCharacterData();
-        emit characterChanged();
-    }
+    if(_character == character)
+        return;
+
+    _character = character;
+    readCharacterData();
+    emit characterChanged();
 }
 
 void CharacterFrame::calculateMods()
@@ -199,12 +201,12 @@ void CharacterFrame::clear()
     ui->edtHitPoints->setText(QString(""));
     ui->edtArmorClass->setText(QString(""));
     ui->edtInitiative->setText(QString(""));
-    ui->edtSex->setText(QString(""));
-    ui->edtSize->setText(QString(""));
+    //ui->edtSex->setText(QString(""));
+    //ui->edtSize->setText(QString(""));
     ui->edtSpeed->setText(QString(""));
     ui->edtAlignment->setText(QString(""));
     ui->edtBackground->setText(QString(""));
-    ui->edtNextLevel->setText(QString(""));
+    //ui->edtNextLevel->setText(QString(""));
 
     ui->edtStr->setText(QString(""));
     ui->edtDex->setText(QString(""));
@@ -283,6 +285,21 @@ void CharacterFrame::clear()
     _reading = false;
 }
 
+void CharacterFrame::publishClicked(bool checked)
+{
+    Q_UNUSED(checked);
+    handlePublishClicked();
+}
+
+void CharacterFrame::setRotation(int rotation)
+{
+    if(_rotation != rotation)
+    {
+        _rotation = rotation;
+        emit rotationChanged(rotation);
+    }
+}
+
 void CharacterFrame::mousePressEvent(QMouseEvent * event)
 {
     Q_UNUSED(event);
@@ -292,20 +309,21 @@ void CharacterFrame::mousePressEvent(QMouseEvent * event)
 
 void CharacterFrame::mouseReleaseEvent(QMouseEvent * event)
 {
-    if(_mouseDown)
-    {
-        ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
-        _mouseDown = false;
-        if(ui->lblIcon->frameGeometry().contains(event->pos()))
-        {
-            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
-            if(!filename.isEmpty())
-            {
-                _character->setIcon(filename);
-                loadCharacterImage();
-            }
-        }
-    }
+    if(!_mouseDown)
+        return;
+
+    ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
+    _mouseDown = false;
+
+    if((!_character) || (!ui->lblIcon->frameGeometry().contains(event->pos())))
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+    if(filename.isEmpty())
+        return;
+
+    _character->setIcon(filename);
+    loadCharacterImage();
 }
 
 void CharacterFrame::readCharacterData()
@@ -315,6 +333,8 @@ void CharacterFrame::readCharacterData()
 
     QSignalBlocker blocker(this);
     _reading = true;
+
+    connectChanged(false);
 
     loadCharacterImage();
 
@@ -334,10 +354,10 @@ void CharacterFrame::readCharacterData()
     ui->edtArmorClass->home(false);
     ui->edtInitiative->setText(QString::number(_character->getInitiative()));
     ui->edtInitiative->home(false);
-    ui->edtSex->setText(_character->getStringValue(Character::StringValue_sex));
-    ui->edtSex->home(false);
-    ui->edtSize->setText(_character->getStringValue(Character::StringValue_size));
-    ui->edtSize->home(false);
+    //ui->edtSex->setText(_character->getStringValue(Character::StringValue_sex));
+    //ui->edtSex->home(false);
+    //ui->edtSize->setText(_character->getStringValue(Character::StringValue_size));
+    //ui->edtSize->home(false);
     ui->edtSpeed->setText(QString::number(_character->getIntValue(Character::IntValue_speed)));
     ui->edtSpeed->home(false);
     ui->edtAlignment->setText(_character->getStringValue(Character::StringValue_alignment));
@@ -345,8 +365,8 @@ void CharacterFrame::readCharacterData()
     ui->edtBackground->setText(_character->getStringValue(Character::StringValue_background));
     ui->edtBackground->home(false);
 
-    ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
-    ui->edtNextLevel->home(false);
+    //ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
+    //ui->edtNextLevel->home(false);
 
     ui->edtStr->setText(QString::number(_character->getIntValue(Character::IntValue_strength)));
     ui->edtDex->setText(QString::number(_character->getIntValue(Character::IntValue_dexterity)));
@@ -387,6 +407,8 @@ void CharacterFrame::readCharacterData()
     ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
+    connectChanged(true);
+
     calculateMods();
 
     enableDndBeyondSync(_character->getDndBeyondID() != -1);
@@ -409,8 +431,8 @@ void CharacterFrame::writeCharacterData()
         _character->setHitPoints(ui->edtHitPoints->text().toInt());
         _character->setArmorClass(ui->edtArmorClass->text().toInt());
         _character->setInitiative(ui->edtInitiative->text().toInt());
-        _character->setStringValue(Character::StringValue_sex, ui->edtSex->text());
-        _character->setStringValue(Character::StringValue_size, ui->edtSize->text());
+        //_character->setStringValue(Character::StringValue_sex, ui->edtSex->text());
+        //_character->setStringValue(Character::StringValue_size, ui->edtSize->text());
         _character->setIntValue(Character::IntValue_speed, ui->edtSpeed->text().toInt());
         _character->setStringValue(Character::StringValue_alignment, ui->edtAlignment->text());
         _character->setStringValue(Character::StringValue_background, ui->edtBackground->text());
@@ -455,7 +477,7 @@ void CharacterFrame::writeCharacterData()
         _character->endBatchChanges();
 
         calculateMods();
-        ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
+        //ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
     }
 }
 
@@ -466,16 +488,16 @@ void CharacterFrame::handlePublishClicked()
 
     QImage iconImg;
     QString iconFile = _character->getIcon();
-    if(iconImg.load(iconFile) == true)
-    {
-        if(ui->framePublish->getRotation() != 0)
-        {
-            iconImg = iconImg.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
-        }
+    if(!iconImg.load(iconFile))
+        iconImg = _character->getIconPixmap(DMHelper::PixmapSize_Full).toImage(); // .load(QString(":/img/data/portrait.png"));
 
+    if(iconImg.isNull())
+        return;
 
-        emit publishCharacterImage(iconImg, ui->framePublish->getColor());
-    }
+    if(_rotation != 0)
+        iconImg = iconImg.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+
+    emit publishCharacterImage(iconImg);
 }
 
 void CharacterFrame::syncDndBeyond()
@@ -503,11 +525,27 @@ void CharacterFrame::openExpertiseDialog()
 
 void CharacterFrame::loadCharacterImage()
 {
-    ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
+    if(_character)
+        ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
 }
 
 void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency)
 {
+    //QString chkName("  ");
+    QString chkName;
+
+    int skillBonus = abilityMod;
+    if(chk->isChecked())
+        skillBonus += expertise ? proficiencyBonus * 2 : proficiencyBonus;
+    else
+        skillBonus += halfProficiency ? proficiencyBonus / 2 : 0;
+
+    if(skillBonus >= 0)
+        chkName.append("+");
+    chkName.append(QString::number(skillBonus));
+    chk->setText(chkName);
+
+    /*
     QString chkName = chk->text();
     chkName.truncate(chkName.indexOf(":") + 1);
 
@@ -521,6 +559,7 @@ void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int prof
         chkName.append("+");
     chkName.append(QString::number(skillBonus));
     chk->setText(chkName);
+    */
 }
 
 void CharacterFrame::enableDndBeyondSync(bool enabled)
@@ -534,5 +573,75 @@ void CharacterFrame::enableDndBeyondSync(bool enabled)
         QString fullLink = QString("<a href=\"") + characterUrl + QString("\">") + characterUrl + QString("</a>");
         qDebug() << "[CharacterFrame] Setting Dnd Beyond link for character to: " << fullLink;
         ui->lblDndBeyondLink->setText(fullLink);
+    }
+}
+
+void CharacterFrame::connectChanged(bool makeConnection)
+{
+    if(makeConnection)
+    {
+        connect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        connect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        connect(ui->edtCon,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        connect(ui->edtInt,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        connect(ui->edtWis,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        connect(ui->edtCha,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        connect(ui->chkStrSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkAthletics,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkDexSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkStealth,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkAcrobatics,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkSleightOfHand,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkConSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkIntSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkInvestigation,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkArcana,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkNature,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkHistory,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkReligion,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkWisSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkMedicine,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkAnimalHandling,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkPerception,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkInsight,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkSurvival,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkChaSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkPerformance,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        connect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    }
+    else
+    {
+        disconnect(ui->edtStr,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        disconnect(ui->edtDex,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        disconnect(ui->edtCon,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        disconnect(ui->edtInt,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        disconnect(ui->edtWis,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        disconnect(ui->edtCha,SIGNAL(textChanged(QString)),this,SLOT(calculateMods()));
+        disconnect(ui->chkStrSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkAthletics,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkDexSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkStealth,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkAcrobatics,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkSleightOfHand,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkConSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkIntSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkInvestigation,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkArcana,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkNature,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkHistory,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkReligion,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkWisSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkMedicine,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkAnimalHandling,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkPerception,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkInsight,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkSurvival,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkChaSave,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkPerformance,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(calculateMods()));
+        disconnect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(calculateMods()));
     }
 }

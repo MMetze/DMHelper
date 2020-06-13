@@ -5,8 +5,8 @@
 //#include "encounterbattle.h"
 #include <QDebug>
 
-BattleDialogModel::BattleDialogModel(QObject *parent) :
-    CampaignObjectBase(parent),
+BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
+    CampaignObjectBase(name, parent),
     //_battle(0),
     _combatants(),
     _effects(),
@@ -24,12 +24,15 @@ BattleDialogModel::BattleDialogModel(QObject *parent) :
     _showAlive(true),
     _showDead(false),
     _showEffects(true),
+    _showMovement(true),
+    _showLairActions(false),
     _activeCombatant(nullptr),
     _logger(),
     _backgroundImage()
 {
 }
 
+/*
 BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *parent) :
     CampaignObjectBase(parent),
     //_battle(other._battle),
@@ -75,6 +78,7 @@ BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *pa
         }
     }
 }
+*/
 
 BattleDialogModel::~BattleDialogModel()
 {
@@ -82,6 +86,7 @@ BattleDialogModel::~BattleDialogModel()
     qDeleteAll(_effects);
 }
 
+/*
 void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement battleElement = doc.createElement( "battle" );
@@ -131,6 +136,7 @@ void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& 
     parent.appendChild(battleElement);
 
 }
+*/
 
 void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 {
@@ -156,6 +162,8 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
     _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
+    _showMovement = static_cast<bool>(element.attribute("showMovement",QString::number(1)).toInt());
+    _showLairActions = static_cast<bool>(element.attribute("showLairActions",QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 }
@@ -384,6 +392,16 @@ bool BattleDialogModel::getShowEffects() const
     return _showEffects;
 }
 
+bool BattleDialogModel::getShowMovement() const
+{
+    return _showMovement;
+}
+
+bool BattleDialogModel::getShowLairActions() const
+{
+    return _showLairActions;
+}
+
 const BattleDialogLogger& BattleDialogModel::getLogger() const
 {
     return _logger;
@@ -524,6 +542,24 @@ void BattleDialogModel::setShowEffects(bool showEffects)
     }
 }
 
+void BattleDialogModel::setShowMovement(bool showMovement)
+{
+    if(_showMovement != showMovement)
+    {
+        _showMovement = showMovement;
+        emit showMovementChanged(_showMovement);
+    }
+}
+
+void BattleDialogModel::setShowLairActions(bool showLairActions)
+{
+    if(_showLairActions != showLairActions)
+    {
+        _showLairActions = showLairActions;
+        emit showLairActionsChanged(_showLairActions);
+    }
+}
+
 void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCombatant)
 {
     if(_activeCombatant != activeCombatant)
@@ -545,6 +581,65 @@ void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
 void BattleDialogModel::sortCombatants()
 {
     std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
+}
+
+QDomElement BattleDialogModel::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("battle");
+}
+
+void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("mapID", _map ? _map->getID().toString() : QUuid().toString());
+    element.setAttribute("mapRectX", _mapRect.x());
+    element.setAttribute("mapRectY", _mapRect.y());
+    element.setAttribute("mapRectWidth", _mapRect.width());
+    element.setAttribute("mapRectHeight", _mapRect.height());
+    element.setAttribute("cameraRectX", _cameraRect.x());
+    element.setAttribute("cameraRectY", _cameraRect.y());
+    element.setAttribute("cameraRectWidth", _cameraRect.width());
+    element.setAttribute("cameraRectHeight", _cameraRect.height());
+    element.setAttribute("backgroundColorR", _background.red());
+    element.setAttribute("backgroundColorG", _background.green());
+    element.setAttribute("backgroundColorB", _background.blue());
+    element.setAttribute("background", _mapRect.height());
+    element.setAttribute("showGrid", _gridOn);
+    element.setAttribute("gridScale", _gridScale);
+    element.setAttribute("gridOffsetX", _gridOffsetX);
+    element.setAttribute("gridOffsetY", _gridOffsetY);
+    element.setAttribute("showCompass", _showCompass);
+    element.setAttribute("showAlive", _showAlive);
+    element.setAttribute("showDead", _showDead);
+    element.setAttribute("showEffects", _showEffects);
+    element.setAttribute("showMovement", _showMovement);
+    element.setAttribute("showLairActions", _showLairActions);
+    element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
+
+    _logger.outputXML(doc, element, targetDirectory, isExport);
+
+    QDomElement combatantsElement = doc.createElement("combatants");
+    for(BattleDialogModelCombatant* combatant : _combatants)
+    {
+        if(combatant)
+            combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
+    }
+    element.appendChild(combatantsElement);
+
+    QDomElement effectsElement = doc.createElement("effects");
+    for(BattleDialogModelEffect* effect : _effects)
+    {
+        if(effect)
+            effect->outputXML(doc, effectsElement, targetDirectory, isExport);
+    }
+    element.appendChild(effectsElement);
+}
+
+bool BattleDialogModel::belongsToObject(QDomElement& element)
+{
+    Q_UNUSED(element);
+
+    // Don't auto-input any child objects of the battle. The battle will handle this itself.
+    return true;
 }
 
 bool BattleDialogModel::CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b)

@@ -19,16 +19,16 @@ public:
         BattleMonsterType_Class,
     };
 
-    BattleDialogModelMonsterBase();
+    BattleDialogModelMonsterBase(const QString& name = QString(), QObject *parent = nullptr);
     explicit BattleDialogModelMonsterBase(Combatant* combatant);
     explicit BattleDialogModelMonsterBase(Combatant* combatant, int initiative, const QPointF& position);
-    BattleDialogModelMonsterBase(const BattleDialogModelMonsterBase& other);
+    //BattleDialogModelMonsterBase(const BattleDialogModelMonsterBase& other);
     virtual ~BattleDialogModelMonsterBase() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
-    virtual int getType() const override;
+    virtual int getCombatantType() const override;
     virtual int getMonsterType() const = 0;
     virtual MonsterClass* getMonsterClass() const = 0;
 

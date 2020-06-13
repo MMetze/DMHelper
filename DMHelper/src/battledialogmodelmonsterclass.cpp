@@ -3,8 +3,8 @@
 #include <QDomElement>
 #include <QDebug>
 
-BattleDialogModelMonsterClass::BattleDialogModelMonsterClass() :
-    BattleDialogModelMonsterBase(),
+BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const QString& name, QObject *parent) :
+    BattleDialogModelMonsterBase(name, parent),
     _monsterClass(nullptr),
     _monsterName(),
     _monsterHP(-1)
@@ -31,6 +31,7 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monst
         _monsterHP = _monsterClass->getHitDice().roll();
 }
 
+/*
 BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const BattleDialogModelMonsterClass& other) :
     BattleDialogModelMonsterBase(other),
     _monsterClass(other._monsterClass),
@@ -38,6 +39,7 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const BattleDialogM
     _monsterHP(other._monsterHP)
 {
 }
+*/
 
 BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
 {
@@ -45,18 +47,26 @@ BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
 
 void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool isImport)
 {
-    BattleDialogModelMonsterBase::inputXML(element, isImport);
-
     _monsterName = element.attribute("monsterName");
     _monsterHP = element.attribute("monsterHP",QString::number(0)).toInt();
+
+    BattleDialogModelMonsterBase::inputXML(element, isImport);
 }
 
-BattleDialogModelMonsterClass* BattleDialogModelMonsterClass::clone() const
+BattleDialogModelCombatant* BattleDialogModelMonsterClass::clone() const
 {
-    return new BattleDialogModelMonsterClass(*this);
+    BattleDialogModelMonsterClass* newMonster = new BattleDialogModelMonsterClass(getName());
+
+    newMonster->copyValues(*this);
+    newMonster->_legendaryCount = _legendaryCount;
+    newMonster->_monsterClass = _monsterClass;
+    newMonster->_monsterName = _monsterName;
+    newMonster->_monsterHP = _monsterHP;
+
+    return newMonster;
 }
 
-int BattleDialogModelMonsterClass::getSizeFactor() const
+qreal BattleDialogModelMonsterClass::getSizeFactor() const
 {
     // TODO: should this just be impossible?
     if(_monsterClass)
@@ -263,9 +273,9 @@ void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
 
 void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
-
     element.setAttribute("monsterClass", _monsterClass->getName());
     element.setAttribute("monsterName", _monsterName);
     element.setAttribute("monsterHP", _monsterHP);
+
+    BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

@@ -4,6 +4,7 @@
 #include "battledialogmodeleffectcube.h"
 #include "battledialogmodeleffectradius.h"
 #include "battledialogmodeleffectline.h"
+#include "battledialogmodeleffectobject.h"
 #include <QDomElement>
 #include <QDebug>
 
@@ -30,12 +31,15 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
         case BattleDialogModelEffect::BattleDialogModelEffect_Line:
             result = new BattleDialogModelEffectLine();
             break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+            result = new BattleDialogModelEffectObject();
+            break;
         default:
             break;
     }
 
     if(result)
-        qDebug() << "[Battle Dialog Model Effect Factor] created model effect " << result << " of type " << result->getType();
+        qDebug() << "[Battle Dialog Model Effect Factor] created model effect " << result << " of type " << result->getEffectType();
 
     return result;
 }
@@ -48,7 +52,7 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDom
     if(result)
     {
         result->inputXML(element, isImport);
-        qDebug() << "[Battle Dialog Model Effect Factor] read model effect " << result << " of type " << result->getType();
+        qDebug() << "[Battle Dialog Model Effect Factor] read model effect " << result << " of type " << result->getEffectType();
     }
 
     return result;

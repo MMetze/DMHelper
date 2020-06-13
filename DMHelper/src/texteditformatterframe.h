@@ -1,15 +1,20 @@
 #ifndef TEXTEDITFORMATTERFRAME_H
 #define TEXTEDITFORMATTERFRAME_H
 
+#include <QObject>
+#include <QColor>
+
+/*
 #include <QFrame>
 
 namespace Ui {
 class TextEditFormatterFrame;
 }
+*/
 
 class QTextEdit;
 
-class TextEditFormatterFrame : public QFrame
+class TextEditFormatterFrame : public QObject
 {
     Q_OBJECT
 
@@ -19,18 +24,27 @@ public:
 
     void setTextEdit(QTextEdit* textEdit);
 
-protected slots:
+public slots:
     void loadCurrentFormat();
-    void setFont();
-    void setFontSize();
+    void setFont(const QString& fontFamily);
+    void setFontSize(int fontSize);
     void setBold(bool bold);
     void setItalics(bool italics);
     void setUnterline(bool underline);
-    void setColor();
-    void setAlignment(int id);
+    void setColor(QColor color);
+    void setAlignment(Qt::Alignment alignment);
+
+signals:
+    void fontFamilyChanged(const QString& fontFamily);
+    void fontSizeChanged(int fontSize);
+    void fontBoldChanged(bool fontBold);
+    void fontItalicsChanged(bool fontItalics);
+    void fontUnderlineChanged(bool fontItalics);
+    void alignmentChanged(Qt::Alignment alignment);
+    void colorChanged(QColor color);
 
 protected:
-    Ui::TextEditFormatterFrame *ui;
+//    Ui::TextEditFormatterFrame *ui;
 
     QTextEdit* _textEdit;
 };

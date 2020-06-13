@@ -1,4 +1,5 @@
 #include "battledialogevent.h"
+#include <QDomElement>
 
 BattleDialogEvent::BattleDialogEvent(QObject *parent) :
     QObject(parent)
@@ -20,8 +21,10 @@ BattleDialogEvent::~BattleDialogEvent()
 {
 }
 
-void BattleDialogEvent::outputXML(QDomElement &element, bool isExport)
+QDomElement BattleDialogEvent::outputXML(QDomElement &element, bool isExport)
 {
     Q_UNUSED(element);
     Q_UNUSED(isExport);
+
+    return QDomElement();
 }

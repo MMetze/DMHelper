@@ -5,13 +5,16 @@
 
 PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     QMainWindow(parent),
-    _publishFrame(nullptr)
+    _publishFrame(nullptr),
+    _globalColor(0, 0, 0, 255),
+    _globalColorSet(false)
 {
     setWindowTitle(title);
     // Not this: setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
 
     //setAutoFillBackground(true);
-    setStyleSheet("background-color: rgba(0,0,0,255);");
+    //setStyleSheet("background-color: rgba(0,0,0,255);");
+    setBackgroundColor();
 
     _publishFrame = new PublishFrame(this);
     setCentralWidget(_publishFrame);
@@ -23,14 +26,21 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     connect(_publishFrame,SIGNAL(frameResized(QSize)),this,SIGNAL(frameResized(QSize)));
 }
 
+void PublishWindow::setImage(QImage img)
+{
+    _publishFrame->setImage(img);
+}
+
 void PublishWindow::setImage(QImage img, QColor color)
 {
-    setBackgroundColor(color);
-    _publishFrame->setImage(img);
+    setBackgroundColorStyle(color);
+    setImage(img);
+    _globalColorSet = false;
 }
 
 void PublishWindow::setImageNoScale(QImage img)
 {
+    setBackgroundColor();
     _publishFrame->setImageNoScale(img);
 }
 
@@ -44,20 +54,23 @@ void PublishWindow::setArrowPosition(const QPointF& position)
     _publishFrame->setArrowPosition(position);
 }
 
+void PublishWindow::setBackgroundColor()
+{
+    if(!_globalColorSet)
+    {
+        setBackgroundColorStyle(_globalColor);
+        _globalColorSet = true;
+    }
+}
+
 void PublishWindow::setBackgroundColor(QColor color)
 {
-    QString styleString("background-color: rgba(");
-    styleString += QString::number(color.red());
-    styleString += QString(",");
-    styleString += QString::number(color.green());
-    styleString += QString(",");
-    styleString += QString::number(color.blue());
-    styleString += QString(",255);");
-
-    qDebug() << "[PublishWindow] changing background color to: " << color << ", string: " << styleString;
-
-    setStyleSheet(styleString);
-    _publishFrame->setStyleSheet(styleString);
+    if(_globalColor != color)
+    {
+        _globalColor = color;
+        _globalColorSet = false;
+        setBackgroundColor();
+    }
 }
 
 void PublishWindow::setPointerFile(const QString& filename)
@@ -99,3 +112,21 @@ void PublishWindow::hideEvent(QHideEvent *event)
     emit windowVisible(false);
 }
 
+void PublishWindow::setBackgroundColorStyle(QColor color)
+{
+    if(!_publishFrame)
+        return;
+
+    QString styleString("background-color: rgba(");
+    styleString += QString::number(color.red());
+    styleString += QString(",");
+    styleString += QString::number(color.green());
+    styleString += QString(",");
+    styleString += QString::number(color.blue());
+    styleString += QString(",255);");
+
+    qDebug() << "[PublishWindow] changing background color to: " << color << ", string: " << styleString;
+
+    setStyleSheet(styleString);
+    _publishFrame->setStyleSheet(styleString);
+}

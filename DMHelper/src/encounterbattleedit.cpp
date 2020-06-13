@@ -65,7 +65,7 @@ void EncounterBattleEdit::setBattle(EncounterBattle* battle)
     calculateThresholds();
     connect(battle,SIGNAL(changed()),this,SLOT(updateStatus()));
 
-    Campaign* campaign = battle->getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(battle->getParentByType(DMHelper::CampaignType_Campaign));
     if(campaign)
         connect(campaign,SIGNAL(dirty()),this,SLOT(calculateThresholds()));
 
@@ -79,7 +79,7 @@ void EncounterBattleEdit::unsetBattle(EncounterBattle* battle)
     if(battle)
     {
         disconnect(battle, nullptr, this, nullptr);
-        Campaign* campaign = battle->getCampaign();
+        Campaign* campaign = dynamic_cast<Campaign*>(battle->getParentByType(DMHelper::CampaignType_Campaign));
         if(campaign)
             disconnect(campaign, nullptr, this, nullptr);
     }
@@ -175,7 +175,7 @@ void EncounterBattleEdit::addNPC()
     if(!selection)
         return;
 
-    Campaign* campaign = _battle->getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return;
 
@@ -183,6 +183,17 @@ void EncounterBattleEdit::addNPC()
     characterSelectDlg.setWindowTitle(QString("Select an NPC"));
     characterSelectDlg.setLabel(QString("Select NPC:"));
 
+    QList<Character*> characterList = campaign->findChildren<Character *>();
+    for(Character* character : characterList)
+    {
+        if((character) &&
+           (!character->isInParty()) &&
+           (_battle->getCombatantById(character->getID(), character->getIntID()) == nullptr))
+        {
+            characterSelectDlg.addItem(character->getName(), QVariant::fromValue(character));
+        }
+    }
+    /*
     for(int i = 0; i < campaign->getNPCCount(); ++i)
     {
         Character* character = campaign->getNPCByIndex(i);
@@ -191,6 +202,7 @@ void EncounterBattleEdit::addNPC()
             characterSelectDlg.addItem(character->getName(), QVariant::fromValue(character));
         }
     }
+    */
 
     if(characterSelectDlg.getItemCount() > 0)
     {
@@ -238,7 +250,7 @@ void EncounterBattleEdit::editCombatant(QTreeWidgetItem * item, int column)
     if((index < 0) || (index >= combatants.count()))
         return;
 
-    if(combatants.at(index).second->getType() == DMHelper::CombatantType_Monster)
+    if(combatants.at(index).second->getCombatantType() == DMHelper::CombatantType_Monster)
     {
         CombatantDialog dlg(QDialogButtonBox::Save);
         connect(&dlg, SIGNAL(openMonster(QString)), this, SIGNAL(openMonster(QString)));
@@ -317,7 +329,7 @@ void EncounterBattleEdit::selectionChanged()
 
         ui->btnAddMonster->setEnabled(selection);
         ui->btnAddNPC->setEnabled(selection);
-        ui->btnEditMonster->setEnabled((index >= 0) && (index < combatants.count()) && (combatants.at(index).second->getType() == DMHelper::CombatantType_Monster));
+        ui->btnEditMonster->setEnabled((index >= 0) && (index < combatants.count()) && (combatants.at(index).second->getCombatantType() == DMHelper::CombatantType_Monster));
         ui->btnDeleteMonster->setEnabled(index != EncounterBattleEdit_CombatantIndexWave);
         ui->btnAddWave->setEnabled(true);
         ui->btnDeleteWave->setEnabled(_battle->getWaveCount() > 1);
@@ -359,7 +371,8 @@ void EncounterBattleEdit::updateStatus()
 
 void EncounterBattleEdit::calculateThresholds()
 {
-    Campaign* campaign = _battle ? _battle->getCampaign() : nullptr;
+    //Campaign* campaign = _battle ? _battle->getCampaign() : nullptr;
+    Campaign* campaign = _battle ? dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign)) : nullptr;
     if(!campaign)
     {
         ui->lblEasy->setText(QString("---"));
@@ -509,11 +522,14 @@ void EncounterBattleEdit::loadTracks()
     ui->cmbTracks->clear();
     ui->cmbTracks->addItem(QString("---"), QVariant::fromValue(0));
 
-    Campaign* campaign = _battle->getCampaign();
+    //Campaign* campaign = _battle->getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    QList<AudioTrack*> trackList = campaign->findChildren<AudioTrack*>();
     int currentIndex = 0;
-    for(int i = 0; i < campaign->getTrackCount(); ++i)
+    //for(int i = 0; i < campaign->getTrackCount(); ++i)
+    for(AudioTrack* track : trackList)
     {
-        AudioTrack* track = campaign->getTrackByIndex(i);
+        //AudioTrack* track = campaign->getTrackByIndex(i);
         ui->cmbTracks->addItem(track->getName(), QVariant::fromValue(track));
         if(_battle->getAudioTrackId() == track->getID())
             currentIndex = ui->cmbTracks->count() - 1;

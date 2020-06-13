@@ -1,61 +1,379 @@
 #include "campaignobjectbase.h"
 #include "campaign.h"
+#include "campaignobjectfactory.h"
+#include "dmconstants.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDebug>
 
-CampaignObjectBase::CampaignObjectBase(QObject *parent) :
-    DMHObjectBase(parent)
-{
-}
+// Uncomment the next line to log in detail all of the campaign item input, output and postprocessing
+// #define CAMPAIGN_OBJECT_LOGGING
 
-CampaignObjectBase::CampaignObjectBase(const CampaignObjectBase &obj) :
-    DMHObjectBase(obj)
+CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
+    DMHObjectBase(parent),
+    _expanded(true),
+    _row(-1)
 {
+    if(!name.isEmpty())
+        setObjectName(name);
 }
 
 CampaignObjectBase::~CampaignObjectBase()
 {
 }
 
+QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
+{
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    qDebug() << "[CampaignBaseObject] Outputting object started: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+#endif
+    QDomElement newElement = createOutputXML(doc);
+    internalOutputXML(doc, newElement, targetDirectory, isExport);
+
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+    }
+
+    parent.appendChild(newElement);
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+#endif
+
+    return newElement;
+}
+
 void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
 {
     DMHObjectBase::inputXML(element, isImport);
+
+    _expanded = static_cast<bool>(element.attribute("expanded", QString::number(0)).toInt());
+    _row = element.attribute("row", QString::number(-1)).toInt();
+
+    QString importName = element.attribute("name");
+    if(importName.isEmpty())
+    {
+        if(getName().isEmpty())
+            setObjectName(QString("unknown"));
+    }
+    else
+    {
+        setObjectName(importName);
+    }
+
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    qDebug() << "[CampaignBaseObject] Inputting object started: " << getName() << ", id: " << getID();
+#endif
 
     if(getID().isNull())
     {
         setID(findUuid(getIntID()));
     }
+
+    QDomElement contentElement = element.firstChildElement();
+    while(!contentElement.isNull())
+    {
+        if(!belongsToObject(contentElement))
+        {
+            CampaignObjectBase* newObject = CampaignObjectFactory::createObject(contentElement, isImport);
+            if(newObject)
+                addObject(newObject);
+        }
+        contentElement = contentElement.nextSiblingElement();
+    }
+
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    qDebug() << "[CampaignBaseObject] Inputting object done: " << getName() << ", id: " << getID();
+#endif
 }
 
+void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImport)
+{
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    qDebug() << "[CampaignBaseObject] Post-processing object started: " << element.tagName();
+#endif
+
+    QDomElement childElement = element.firstChildElement();
+    while(!childElement.isNull())
+    {
+//        if(!belongsToObject(childElement))
+        {
+            QString elTagName = childElement.tagName();
+            QString elName = childElement.attribute(QString("name"));
+
+            CampaignObjectBase* childObject = searchChildrenById(QUuid(childElement.attribute(QString("_baseID"))));
+            if(childObject)
+                childObject->internalPostProcessXML(childElement, isImport);
+
+            postProcessXML(childElement, isImport);
+        }
+
+        childElement = childElement.nextSiblingElement();
+    }
+
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    qDebug() << "[CampaignBaseObject] Post-processing object done: " << element.tagName();
+#endif
+}
+
+/*
 void CampaignObjectBase::resolveReferences()
 {
 }
+*/
 
-const Campaign* CampaignObjectBase::getCampaign() const
+int CampaignObjectBase::getObjectType() const
 {
-    const Campaign* result = qobject_cast<const Campaign*>(this);
-    if(result)
-        return result;
-
-    const CampaignObjectBase* parentObject = qobject_cast<const CampaignObjectBase*>(parent());
-    if(parentObject)
-        return parentObject->getCampaign();
-    else
-        return nullptr;
+    return DMHelper::CampaignType_Base;
 }
 
-Campaign* CampaignObjectBase::getCampaign()
+bool CampaignObjectBase::getExpanded() const
 {
-    Campaign* result = qobject_cast<Campaign*>(this);
-    if(result)
-        return result;
+    return _expanded;
+}
 
-    CampaignObjectBase* parentObject = qobject_cast<CampaignObjectBase*>(parent());
-    if(parentObject)
-        return parentObject->getCampaign();
-    else
+QString CampaignObjectBase::getName() const
+{
+    return objectName();
+}
+
+int CampaignObjectBase::getRow() const
+{
+    return _row;
+}
+
+const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
+{
+    return findChildren<CampaignObjectBase *>(QString(), Qt::FindDirectChildrenOnly);
+}
+
+QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects()
+{
+    return findChildren<CampaignObjectBase *>(QString(), Qt::FindDirectChildrenOnly);
+}
+
+CampaignObjectBase* CampaignObjectBase::getChildById(QUuid id)
+{
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        if(childList.at(i)->getID() == id)
+            return childList.at(i);
+    }
+
+    return nullptr;
+}
+
+CampaignObjectBase* CampaignObjectBase::searchChildrenById(QUuid id)
+{
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        if(childList.at(i)->getID() == id)
+            return childList.at(i);
+
+        CampaignObjectBase* childResult = childList.at(i)->searchChildrenById(id);
+        if(childResult != nullptr)
+            return childResult;
+    }
+
+    return nullptr;
+}
+
+CampaignObjectBase* CampaignObjectBase::searchDirectChildrenByName(const QString& childName)
+{
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        if(childList.at(i)->getName() == childName)
+            return childList.at(i);
+
+        CampaignObjectBase* childResult = childList.at(i)->searchDirectChildrenByName(childName);
+        if(childResult != nullptr)
+            return childResult;
+    }
+
+    return nullptr;
+}
+
+const CampaignObjectBase* CampaignObjectBase::getParentByType(int parentType) const
+{
+    const CampaignObjectBase* parentObject = qobject_cast<const CampaignObjectBase*>(parent());
+    if(!parentObject)
         return nullptr;
+
+    if(parentObject->getObjectType() == parentType)
+        return parentObject;
+    else
+        return parentObject->getParentByType(parentType);
+}
+
+CampaignObjectBase* CampaignObjectBase::getParentByType(int parentType)
+{
+    CampaignObjectBase* parentObject = qobject_cast<CampaignObjectBase*>(parent());
+    if(!parentObject)
+        return nullptr;
+
+    if(parentObject->getObjectType() == parentType)
+        return parentObject;
+    else
+        return parentObject->getParentByType(parentType);
+}
+
+const CampaignObjectBase* CampaignObjectBase::getParentById(const QUuid& id) const
+{
+    const CampaignObjectBase* parentObject = qobject_cast<const CampaignObjectBase*>(parent());
+    if(!parentObject)
+        return nullptr;
+
+    if(parentObject->getID() == id)
+        return parentObject;
+    else
+        return parentObject->getParentById(id);
+}
+
+CampaignObjectBase* CampaignObjectBase::getParentById(const QUuid& id)
+{
+    CampaignObjectBase* parentObject = qobject_cast<CampaignObjectBase*>(parent());
+    if(!parentObject)
+        return nullptr;
+
+    if(parentObject->getID() == id)
+        return parentObject;
+    else
+        return parentObject->getParentById(id);
+}
+
+QUuid CampaignObjectBase::addObject(CampaignObjectBase* object)
+{
+    if(!object)
+        return QUuid();
+
+    if(object->parent() == this)
+        return object->getID();
+
+    if(object->parent())
+        disconnect(object, nullptr, object->parent(), nullptr);
+
+    object->setParent(this);
+
+    connect(object, &CampaignObjectBase::dirty, this, &CampaignObjectBase::handleInternalDirty);
+    connect(object, &CampaignObjectBase::changed, this, &CampaignObjectBase::handleInternalChange);
+    handleInternalChange();
+    handleInternalDirty();
+
+    return object->getID();
+}
+
+CampaignObjectBase* CampaignObjectBase::removeObject(QUuid id)
+{
+    CampaignObjectBase* removed = getObjectById(id);
+    if(!removed)
+    {
+        qDebug() << "[CampaignBaseObject] Not able to find removed object: " << id;
+        return nullptr;
+    }
+
+    removed->setParent(nullptr);
+    handleInternalChange();
+    handleInternalDirty();
+
+    return removed;
+}
+
+CampaignObjectBase* CampaignObjectBase::getObjectById(QUuid id)
+{
+    if(getID() == id)
+        return this;
+
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        CampaignObjectBase* childObject = childList.at(i)->getObjectById(id);
+        if(childObject)
+            return childObject;
+    }
+
+    return nullptr;
+}
+
+const CampaignObjectBase* CampaignObjectBase::getObjectById(QUuid id) const
+{
+    if(getID() == id)
+        return this;
+
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        CampaignObjectBase* childObject = childList.at(i)->getObjectById(id);
+        if(childObject)
+            return childObject;
+    }
+
+    return nullptr;
+}
+
+void CampaignObjectBase::setExpanded(bool expanded)
+{
+    if(_expanded != expanded)
+    {
+        _expanded = expanded;
+        emit expandedChanged(_expanded);
+        handleInternalDirty();
+    }
+}
+
+void CampaignObjectBase::setName(const QString& name)
+{
+    if(objectName() != name)
+    {
+        setObjectName(name);
+        //emit nameChanged(objectName());
+        //handleInternalDirty();
+        handleInternalChange();
+    }
+}
+
+void CampaignObjectBase::setRow(int row)
+{
+    if(_row != row)
+    {
+        _row = row;
+        handleInternalDirty();
+    }
+}
+
+void CampaignObjectBase::handleInternalChange()
+{
+    emit changed();
+    emit dirty();
+}
+
+void CampaignObjectBase::handleInternalDirty()
+{
+    emit dirty();
+}
+
+void CampaignObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("expanded", getExpanded());
+    element.setAttribute("row", getRow());
+    element.setAttribute("name", getName());
+
+    DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool CampaignObjectBase::belongsToObject(QDomElement& element)
+{
+    Q_UNUSED(element);
+    return false;
+}
+
+void CampaignObjectBase::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(element);
+    Q_UNUSED(isImport);
 }
 
 QUuid CampaignObjectBase::parseIdString(QString idString, int* intId, bool isLocal)
@@ -80,9 +398,32 @@ QUuid CampaignObjectBase::parseIdString(QString idString, int* intId, bool isLoc
 
 QUuid CampaignObjectBase::findUuid(int intId) const
 {
-    const Campaign* campaign = getCampaign();
+    if(intId == DMH_GLOBAL_INVALID_ID)
+        return QUuid();
+
+    const Campaign* campaign = dynamic_cast<const Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return QUuid();
 
-    return campaign->getUuidFromIntId(intId);
+    QUuid result = campaign->findChildUuid(intId);
+    if(result.isNull())
+        qDebug() << "[Campaign] WARNING: unable to find matching object for Integer ID " << intId;
+
+    return result;
+}
+
+QUuid CampaignObjectBase::findChildUuid(int intId) const
+{
+    if(getIntID() == intId)
+        return getID();
+
+    QList<CampaignObjectBase*> childList = getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+    {
+        QUuid result = childList.at(i)->findChildUuid(intId);
+        if(!result.isNull())
+            return result;
+    }
+
+    return QUuid();
 }

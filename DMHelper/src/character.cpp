@@ -1,5 +1,7 @@
 #include "character.h"
 #include "dmconstants.h"
+#include "monsterclass.h"
+#include "bestiary.h"
 #include <QDomElement>
 #include <QDir>
 #include <QtDebug>
@@ -146,8 +148,8 @@ const char* SKILLVALUE_WRITTENNAMES[Combatant::SKILLS_COUNT] =
     "Intimidation"      // Skills_intimidation
 };
 
-Character::Character(QObject *parent) :
-    Combatant(parent),
+Character::Character(const QString& name, QObject *parent) :
+    Combatant(name, parent),
     _dndBeyondID(-1),
     _stringValues(STRINGVALUE_COUNT),
     _intValues(INTVALUE_COUNT),
@@ -161,6 +163,7 @@ Character::Character(QObject *parent) :
     setDefaultValues();
 }
 
+/*
 Character::Character(QDomElement &element, bool isImport, QObject *parent) :
     Combatant(parent),
     _dndBeyondID(-1),
@@ -184,12 +187,11 @@ Character::Character(const Character &obj) :
 {
     qDebug("[Character] WARNING: Character copied - this is a highly questionable action!");
 }
+*/
 
 void Character::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
-
-    Combatant::inputXML(element, isImport);
 
     setDndBeyondID(element.attribute(QString("dndBeyondID"),QString::number(-1)).toInt());
 
@@ -210,6 +212,8 @@ void Character::inputXML(const QDomElement &element, bool isImport)
     }
 
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
+
+    Combatant::inputXML(element, isImport);
 
     endBatchChanges();
 }
@@ -237,10 +241,22 @@ void Character::endBatchChanges()
 Combatant* Character::clone() const
 {
     qDebug("[Character] WARNING: Character cloned - this is a highly questionable action!");
-    return new Character(*this);
+
+    Character* newCharacter = new Character(getName());
+
+    newCharacter->copyValues(*this);
+
+    newCharacter->_dndBeyondID = _dndBeyondID;
+    newCharacter->_stringValues = _stringValues;
+    newCharacter->_intValues = _intValues;
+    newCharacter->_skillValues = _skillValues;
+    newCharacter->_active = true;
+    newCharacter->_iconChanged = _iconChanged;
+
+    return newCharacter;
 }
 
-int Character::getType() const
+int Character::getCombatantType() const
 {
     return DMHelper::CombatantType_Character;
 }
@@ -253,6 +269,11 @@ int Character::getDndBeyondID() const
 void Character::setDndBeyondID(int id)
 {
     _dndBeyondID = id;
+}
+
+bool Character::isInParty() const
+{
+    return (getParentByType(DMHelper::CampaignType_Party) != nullptr);
 }
 
 void Character::setIcon(const QString &newIcon)
@@ -489,6 +510,85 @@ int Character::getPassivePerception() const
     return result;
 }
 
+void Character::copyMonsterValues(MonsterClass& monster)
+{
+    beginBatchChanges();
+
+    setIcon(Bestiary::Instance()->getDirectory().filePath(Bestiary::Instance()->findMonsterImage(monster.getName(), monster.getIcon())));
+    setStringValue(StringValue_race, monster.getName());
+    setStringValue(StringValue_size, monster.getMonsterSize());
+    setIntValue(IntValue_speed, monster.getSpeedValue());
+    setStringValue(StringValue_alignment, monster.getAlignment());
+    setArmorClass(monster.getArmorClass());
+    setHitDice(monster.getHitDice());
+    setHitPoints(monster.getAverageHitPoints());
+
+    setIntValue(IntValue_strength, monster.getStrength());
+    setIntValue(IntValue_dexterity, monster.getDexterity());
+    setIntValue(IntValue_constitution, monster.getConstitution());
+    setIntValue(IntValue_intelligence, monster.getIntelligence());
+    setIntValue(IntValue_wisdom, monster.getWisdom());
+    setIntValue(IntValue_charisma, monster.getCharisma());
+
+    // Check skills
+    for(int skillIt = 0; skillIt < SKILLS_COUNT; ++skillIt)
+    {
+        Skills skill = static_cast<Skills>(skillIt);
+        if(monster.isSkillKnown(skill))
+            setSkillValue(skill, monster.getSkillValue(skill));
+    }
+
+    // Proficiencies
+    QString proficiencyString;
+    if(!monster.getSenses().isEmpty())
+        proficiencyString += QString("Senses:") + QChar::LineFeed + monster.getSenses() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getLanguages().isEmpty())
+        proficiencyString += QString("Languages:") + QChar::LineFeed + monster.getLanguages() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getConditionImmunities().isEmpty())
+        proficiencyString += QString("Condition Immunities:") + QChar::LineFeed + monster.getConditionImmunities() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getDamageImmunities().isEmpty())
+        proficiencyString += QString("Damage Immunities:") + QChar::LineFeed + monster.getDamageImmunities() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getDamageResistances().isEmpty())
+        proficiencyString += QString("Damage Resistances:") + QChar::LineFeed + monster.getDamageResistances() + QChar::LineFeed + QChar::LineFeed;
+    if(!monster.getDamageVulnerabilities().isEmpty())
+        proficiencyString += QString("Damage Vulnerabilities:") + QChar::LineFeed + monster.getDamageVulnerabilities() + QChar::LineFeed + QChar::LineFeed;
+    setStringValue(StringValue_proficiencies, proficiencyString);
+
+    // Notes
+    QString notesString;
+    if(monster.getActions().count() > 0)
+    {
+        notesString += QString("Actions:") + QChar::LineFeed;
+        for(MonsterAction monsterAction : monster.getActions())
+            notesString += monsterAction.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    if(monster.getLegendaryActions().count() > 0)
+    {
+        notesString += QString("Legendary Actions:") + QChar::LineFeed;
+        for(MonsterAction legendaryAction : monster.getLegendaryActions())
+            notesString += legendaryAction.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    if(monster.getSpecialAbilities().count() > 0)
+    {
+        notesString += QString("Special Abilities:") + QChar::LineFeed;
+        for(MonsterAction specialAbility : monster.getSpecialAbilities())
+            notesString += specialAbility.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    if(monster.getReactions().count() > 0)
+    {
+        notesString += QString("Reactions:") + QChar::LineFeed;
+        for(MonsterAction monsterReaction : monster.getReactions())
+            notesString += monsterReaction.summaryString() + QChar::LineFeed;
+        notesString += QChar::LineFeed;
+    }
+    setStringValue(StringValue_notes, notesString);
+
+    endBatchChanges();
+}
+
 int Character::findKeyForSkillName(const QString& skillName)
 {
     for(int i = 0; i < SKILLS_COUNT; ++i)
@@ -514,10 +614,6 @@ QString Character::getWrittenSkillName(int skill)
 
 void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
-
     element.setAttribute( "dndBeyondID", getDndBeyondID() );
 
     int i;
@@ -537,6 +633,8 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     }
 
     element.setAttribute("active", static_cast<int>(getActive()));
+
+    Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void Character::setDefaultValues()

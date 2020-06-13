@@ -2,7 +2,7 @@
 #include "ui_ribbontabbestiary.h"
 
 RibbonTabBestiary::RibbonTabBestiary(QWidget *parent) :
-    QFrame(parent),
+    RibbonFrame(parent),
     ui(new Ui::RibbonTabBestiary)
 {
     ui->setupUi(this);
@@ -28,6 +28,33 @@ RibbonTabBestiary::~RibbonTabBestiary()
 {
     delete ui;
 }
+
+PublishButtonRibbon* RibbonTabBestiary::getPublishRibbon()
+{
+    return ui->framePublish;
+}
+
+void RibbonTabBestiary::showEvent(QShowEvent *event)
+{
+    RibbonFrame::showEvent(event);
+
+    setStandardButtonSize(*ui->lblBestiary, *ui->btnBestiary);
+    setStandardButtonSize(*ui->lblExportBestiary, *ui->btnExportBestiary);
+    setStandardButtonSize(*ui->lblImportBestiary, *ui->btnImportBestiary);
+    setLineHeight(*ui->line);
+    setStandardButtonSize(*ui->lblScreen, *ui->btnScreen);
+    setStandardButtonSize(*ui->lblTables, *ui->btnTables);
+    setStandardButtonSize(*ui->lblQuickRef, *ui->btnQuickRef);
+    setStandardButtonSize(*ui->lblSoundboard, *ui->btnSoundboard);
+    setLineHeight(*ui->line_2);
+    setStandardButtonSize(*ui->lblRollDice, *ui->btnRollDice);
+    setStandardButtonSize(*ui->lblPublishText, *ui->btnPublishText);
+    setStandardButtonSize(*ui->lblTranslateText, *ui->btnTranslateText);
+    setStandardButtonSize(*ui->lblRandomMarket, *ui->btnRandomMarket);
+    setStandardButtonSize(*ui->lblTimeDate, *ui->btnTimeDate);
+    setStandardButtonSize(*ui->lblCountdown, *ui->btnCountdown);
+}
+
 
 /*
  *

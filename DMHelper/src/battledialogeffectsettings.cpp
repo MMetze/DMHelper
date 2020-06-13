@@ -15,6 +15,11 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(int sizeval, qreal rotati
     ui->edtSize->setValidator(new QIntValidator(1,999,this));
     ui->edtSize->setText(QString::number(sizeval));
     ui->edtSize->selectAll();
+    ui->edtWidth->setValidator(new QIntValidator(1,999,this));
+    ui->edtWidth->setText(QString::number(5));
+    ui->edtWidth->selectAll();
+    ui->edtWidth->hide();
+    ui->lblWidth->hide();
     ui->edtRotation->setValidator(new QDoubleValidator(0, 360, 5, this));
     ui->edtRotation->setText(QString::number(rotation));
     ui->sliderTransparency->setSliderPosition(color.alpha());
@@ -33,9 +38,16 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(const BattleDialogModelEf
     ui->setupUi(this);
 
     ui->edtName->setText(effect.getTip());
+    ui->chkActive->setChecked(effect.getEffectActive());
+    ui->chkVisible->setChecked(effect.getEffectVisible());
     ui->edtSize->setValidator(new QIntValidator(1,999,this));
     ui->edtSize->setText(QString::number(effect.getSize()));
     ui->edtSize->selectAll();
+    ui->edtWidth->setValidator(new QIntValidator(1,999,this));
+    ui->edtWidth->setText(QString::number(effect.getWidth()));
+    ui->edtWidth->selectAll();
+    ui->edtWidth->hide();
+    ui->lblWidth->hide();
     ui->edtRotation->setValidator(new QDoubleValidator(0, 360, 5, this));
     ui->edtRotation->setText(QString::number(effect.getRotation()));
     ui->sliderTransparency->setSliderPosition(effect.getColor().alpha());
@@ -51,6 +63,16 @@ BattleDialogEffectSettings::~BattleDialogEffectSettings()
     delete ui;
 }
 
+bool BattleDialogEffectSettings::isEffectActive() const
+{
+    return ui->chkActive->isChecked();
+}
+
+bool BattleDialogEffectSettings::isEffectVisible() const
+{
+    return ui->chkVisible->isChecked();
+}
+
 QString BattleDialogEffectSettings::getTip() const
 {
     return ui->edtName->text();
@@ -59,6 +81,11 @@ QString BattleDialogEffectSettings::getTip() const
 int BattleDialogEffectSettings::getSizeValue() const
 {
     return ui->edtSize->text().toInt();
+}
+
+int BattleDialogEffectSettings::getWidthValue() const
+{
+    return ui->edtWidth->text().toInt();
 }
 
 qreal BattleDialogEffectSettings::getRotation() const
@@ -78,13 +105,38 @@ int BattleDialogEffectSettings::getAlpha() const
 
 void BattleDialogEffectSettings::copyValues(BattleDialogModelEffect& effect)
 {
+    effect.setEffectActive(isEffectActive());
+    effect.setEffectVisible(isEffectVisible());
     effect.setRotation(getRotation());
     effect.setSize(getSizeValue());
+    effect.setWidth(getWidthValue());
     effect.setTip(getTip());
 
     QColor effectColor = getColor();
     effectColor.setAlpha(getAlpha());
     effect.setColor(effectColor);
+}
+
+void BattleDialogEffectSettings::setSizeLabel(const QString& sizeLabel)
+{
+    ui->lblSize->setText(sizeLabel);
+}
+
+void BattleDialogEffectSettings::setShowActive(bool show)
+{
+    ui->chkActive->setVisible(show);
+}
+
+void BattleDialogEffectSettings::setShowWidth(bool show)
+{
+    ui->edtWidth->setVisible(show);
+    ui->lblWidth->setVisible(show);
+}
+
+void BattleDialogEffectSettings::setShowColor(bool show)
+{
+    ui->btnColor->setVisible(show);
+    ui->lblColor->setVisible(show);
 }
 
 void BattleDialogEffectSettings::selectNewColor()

@@ -11,18 +11,18 @@ class BattleDialogModelCombatant : public CampaignObjectBase
     Q_OBJECT
 
 public:
-    BattleDialogModelCombatant();
+    BattleDialogModelCombatant(const QString& name = QString(), QObject *parent = nullptr);
     explicit BattleDialogModelCombatant(Combatant* combatant);
     explicit BattleDialogModelCombatant(Combatant* combatant, int initiative, const QPointF& position);
-    BattleDialogModelCombatant(const BattleDialogModelCombatant& other);
+    //BattleDialogModelCombatant(const BattleDialogModelCombatant& other);
     virtual ~BattleDialogModelCombatant() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // Local
-    virtual int getType() const = 0;
+    virtual int getCombatantType() const = 0;
     virtual BattleDialogModelCombatant* clone() const = 0;
 
     virtual bool getShown() const;
@@ -33,7 +33,7 @@ public:
 
     const QPointF& getPosition() const;
     void setPosition(const QPointF& position);
-    virtual int getSizeFactor() const = 0;
+    virtual qreal getSizeFactor() const = 0;
     virtual int getSizeCategory() const = 0;
 
     Combatant* getCombatant() const;
@@ -51,7 +51,6 @@ public:
     virtual int getArmorClass() const = 0;
     virtual int getHitPoints() const = 0;
     virtual void setHitPoints(int hitPoints) = 0;
-    virtual QString getName() const = 0;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const = 0;
 
 public slots:
@@ -63,9 +62,12 @@ signals:
 
 protected:
     // From BattleDialogModelCombatant
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) = 0;
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
     void setCombatant(Combatant* combatant);
+    void copyValues(const BattleDialogModelCombatant &other);
 
     Combatant* _combatant;
     int _initiative;

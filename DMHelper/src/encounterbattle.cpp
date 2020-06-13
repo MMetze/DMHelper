@@ -22,22 +22,23 @@
 #include <QDebug>
 
 EncounterBattle::EncounterBattle(const QString& encounterName, QObject *parent) :
-    Encounter(encounterName, parent),
-    _text(),
+    EncounterText(encounterName, parent),
     _audioTrackId(),
     _combatantWaves(),
     _battleModel(nullptr)
 {
 }
 
+/*
 EncounterBattle::EncounterBattle(const EncounterBattle& obj) :
-    Encounter(obj),
+    EncounterText(obj),
     _text(obj._text),
     _audioTrackId(obj._audioTrackId),
     _combatantWaves(obj._combatantWaves),
     _battleModel(new BattleDialogModel(*(obj._battleModel)))
 {
 }
+*/
 
 EncounterBattle::~EncounterBattle()
 {
@@ -54,14 +55,6 @@ EncounterBattle::~EncounterBattle()
 
 void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 {
-    Encounter::inputXML(element, isImport);
-
-    if( ( !element.firstChild().isNull() ) && ( element.firstChild().isCDATASection() ) )
-    {
-        QDomCDATASection cdata = element.firstChild().toCDATASection();
-        setText(cdata.data());
-    }
-
     // Backwards compatibility; TODO: can be removed eventually
     QDomElement rootCombatantsElement = element.firstChildElement( "combatants" );
     if(!rootCombatantsElement.isNull())
@@ -115,7 +108,7 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
                             int combatantType = combatantElement.attribute("type").toInt(&ok);
                             if(ok)
                             {
-                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, isImport, this);
+                                Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, isImport, nullptr);
                                 if(newCombatant)
                                 {
                                     addCombatant(wave, combatantCount, newCombatant);
@@ -131,18 +124,11 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
             }
         }
     }
+
+    EncounterText::inputXML(element, isImport);
 }
 
-void EncounterBattle::postProcessXML(const QDomElement &element, bool isImport)
-{
-    _audioTrackId = parseIdString(element.attribute("audiotrack"));
-
-    // Read the battle
-    inputXMLBattle(element, isImport);
-
-    Encounter::postProcessXML(element, isImport);
-}
-
+/*
 void EncounterBattle::resolveReferences()
 {
     for( int wave = 0; wave < _combatantWaves.count(); ++wave )
@@ -155,7 +141,9 @@ void EncounterBattle::resolveReferences()
         }
     }
 }
+*/
 
+/*
 void EncounterBattle::widgetActivated(QWidget* widget)
 {
     BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(widget);
@@ -176,25 +164,6 @@ void EncounterBattle::widgetActivated(QWidget* widget)
 
     _widget = widget;
     connectFrameToModel();
-
-    /*
-    EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(widget);
-    if(!battleEdit)
-        return;
-
-    if(battleEdit->getBattle() != nullptr)
-    {
-        qDebug() << "[EncounterBattle] ERROR: Battle not deactivated: " << battleEdit->getBattle()->getID() << " """ << battleEdit->getBattle()->getName();
-        qDebug() << "[EncounterBattle] ERROR: Previous battle will now be deactivated. This should happen previously!";
-        battleEdit->getBattle()->widgetDeactivated(widget);
-    }
-
-    qDebug() << "[EncounterBattle] Widget Activated " << getID() << " """ << _name;
-
-    battleEdit->setBattle(this);
-
-    _widget = widget;
-    */
 }
 
 void EncounterBattle::widgetDeactivated(QWidget* widget)
@@ -208,23 +177,12 @@ void EncounterBattle::widgetDeactivated(QWidget* widget)
     disconnectFrameFromModel();
 
     _widget = nullptr;
-
-    /*
-    EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(widget);
-    if(!battleEdit)
-        return;
-
-    qDebug() << "[EncounterBattle] Widget Deactivated " << getID() << " """ << _name;
-
-    battleEdit->unsetBattle(this);
-
-    _widget = nullptr;
-    */
 }
+*/
 
-int EncounterBattle::getType() const
+int EncounterBattle::getObjectType() const
 {
-    return DMHelper::EncounterType_Battle;
+    return DMHelper::CampaignType_Battle;
 }
 
 bool EncounterBattle::hasData() const
@@ -232,14 +190,9 @@ bool EncounterBattle::hasData() const
     return _battleModel != nullptr;
 }
 
-QString EncounterBattle::getText() const
-{
-    return _text;
-}
-
 AudioTrack* EncounterBattle::getAudioTrack()
 {
-    Campaign* campaign = getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return nullptr;
 
@@ -394,6 +347,12 @@ Combatant* EncounterBattle::getCombatantById(QUuid combatantId, int combatantInt
     return nullptr;
 }
 
+void EncounterBattle::createBattleDialogModel()
+{
+    qDebug() << "[EncounterBattle] Creating new battle model for encounter " << getID();
+    setBattleDialogModel(createNewBattle(QPointF(0.0, 0.0)));
+}
+
 void EncounterBattle::setBattleDialogModel(BattleDialogModel* model)
 {
     qDebug() << "[EncounterBattle] Setting new battle model to " << model->getID() << " for encounter " << getID();
@@ -405,7 +364,7 @@ void EncounterBattle::setBattleDialogModel(BattleDialogModel* model)
     }
 
     _battleModel = model;
-    _battleModel->setParent(this);
+    //_battleModel->setParent(this);
 
     emit changed();
     emit dirty();
@@ -430,6 +389,7 @@ void EncounterBattle::removeBattleDialogModel()
     emit dirty();
 }
 
+/*
 void EncounterBattle::setText(const QString& newText)
 {
     QTextDocument doc;
@@ -442,7 +402,9 @@ void EncounterBattle::setText(const QString& newText)
         emit dirty();
     }
 }
+*/
 
+/*
 void EncounterBattle::widgetChanged()
 {
     if(!_widget)
@@ -456,14 +418,15 @@ void EncounterBattle::widgetChanged()
 
     battleEdit->setBattle(this);
 }
+*/
+
+QDomElement EncounterBattle::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("battle-object");
+}
 
 void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(targetDirectory);
-
-    QDomCDATASection cdata = doc.createCDATASection(getText());
-    element.appendChild(cdata);
-
     element.setAttribute( "audiotrack", _audioTrackId.toString() );
 
     QDomElement wavesElement = doc.createElement( "waves" );
@@ -489,6 +452,26 @@ void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element,
 
     if(_battleModel && !isExport)
         _battleModel->outputXML(doc, element, targetDirectory, isExport);
+
+    EncounterText::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool EncounterBattle::belongsToObject(QDomElement& element)
+{
+    if((element.tagName() == QString("combatants")) || (element.tagName() == QString("waves")) || (element.tagName() == QString("battle")))
+        return true;
+    else
+        return EncounterText::belongsToObject(element);
+}
+
+void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    _audioTrackId = parseIdString(element.attribute("audiotrack"));
+
+    // Read the battle
+    inputXMLBattle(element, isImport);
+
+    EncounterText::internalPostProcessXML(element, isImport);
 }
 
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
@@ -496,13 +479,16 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
     if((_battleModel)||(isImport))
         return;
 
-    Campaign* campaign = getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return;
 
-    QDomElement rootBattleElement = element.firstChildElement( "battle" );
+    QDomElement rootBattleElement = element.firstChildElement("battle");
     if(rootBattleElement.isNull())
+    {
+        _battleModel = createNewBattle(QPointF(0.0, 0.0));
         return;
+    }
 
     /*
     int battleId = rootBattleElement.attribute("battleID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
@@ -517,7 +503,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
     //int mapId = rootBattleElement.attribute("mapID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
     int mapIdInt = DMH_GLOBAL_INVALID_ID;
     QUuid mapId = parseIdString(rootBattleElement.attribute("mapID"), &mapIdInt);
-    Map* battleMap = dynamic_cast<Map*>(campaign->getObjectbyId(mapId));
+    Map* battleMap = dynamic_cast<Map*>(campaign->getObjectById(mapId));
     if(battleMap)
     {
         QRect mapRect(rootBattleElement.attribute("mapRectX",QString::number(0)).toInt(),
@@ -618,7 +604,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 
 BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
 {
-    Campaign* campaign = getCampaign();
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return nullptr;
 
@@ -656,6 +642,7 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
     return battleModel;
 }
 
+/*
 void EncounterBattle::connectFrameToModel()
 {
     if(!_battleModel)
@@ -679,6 +666,7 @@ void EncounterBattle::disconnectFrameFromModel()
 
     battleFrame->setBattle(nullptr);
 }
+*/
 
 
 // Needs

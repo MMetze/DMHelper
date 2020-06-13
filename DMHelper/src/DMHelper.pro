@@ -35,8 +35,11 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload.cpp \
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
+    audiofactory.cpp \
     basicdateserver.cpp \
     battledialoggraphicsscenemousehandler.cpp \
+    battledialogmodeleffectobject.cpp \
+    battledialogmodeleffectshape.cpp \
     battleframe.cpp \
     battleframemapdrawer.cpp \
     battleframestate.cpp \
@@ -44,44 +47,58 @@ SOURCES += main.cpp\
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     campaignexporter.cpp \
+    campaignobjectfactory.cpp \
+    campaignobjectframe.cpp \
+    campaignobjectframestack.cpp \
+    campaigntreeitem.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
+    combatantwidget.cpp \
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
     discordposter.cpp \
     dmhelperribbon.cpp \
+    dmhlogger.cpp \
+    emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapeditframe.cpp \
+    mapfactory.cpp \
+    objectfactory.cpp \
     objectimporter.cpp \
+    party.cpp \
+    partycharactergridframe.cpp \
+    partyframe.cpp \
+    partyframecharacter.cpp \
+    placeholder.cpp \
     presentupdatedialog.cpp \
     publishbuttonframe.cpp \
+    publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
+    ribbonframe.cpp \
+    ribbonframetext.cpp \
+    ribbonmain.cpp \
     ribbontabbattle.cpp \
     ribbontabbestiary.cpp \
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
-    ribbontabhelp.cpp \
     ribbontabmap.cpp \
+    ribbontabscrolling.cpp \
+    ribbontabtext.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
     undofill.cpp \
     undobase.cpp \
     dicerolldialog.cpp \
-    adventure.cpp \
     map.cpp \
-    encounter.cpp \
     character.cpp \
-    characterwidget.cpp \
-    characterdialog.cpp \
     campaign.cpp \
-    adventureitem.cpp \
     mruhandler.cpp \
     mruaction.cpp \
     campaignobjectbase.cpp \
@@ -93,13 +110,11 @@ SOURCES += main.cpp\
     attack.cpp \
     combatantdialog.cpp \
     monster.cpp \
-    monsterwidget.cpp \
     combatantfactory.cpp \
     bestiarydialog.cpp \
     monsterclass.cpp \
     bestiary.cpp \
     addmonstersdialog.cpp \
-    combatantwidget.cpp \
     campaigntree.cpp \
     campaigntreemodel.cpp \
     textpublishdialog.cpp \
@@ -214,8 +229,11 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhobjectbase_private.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
+    audiofactory.h \
     basicdateserver.h \
     battledialoggraphicsscenemousehandler.h \
+    battledialogmodeleffectobject.h \
+    battledialogmodeleffectshape.h \
     battleframe.h \
     battleframemapdrawer.h \
     battleframestate.h \
@@ -223,45 +241,59 @@ HEADERS  += mainwindow.h \
     bestiaryexportdialog.h \
     camerarect.h \
     campaignexporter.h \
+    campaignobjectfactory.h \
+    campaignobjectframe.h \
+    campaignobjectframestack.h \
+    campaigntreeitem.h \
     characterimportdialog.h \
     colorpushbutton.h \
+    combatantwidget.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
     discordposter.h \
     dmhelperribbon.h \
+    dmhlogger.h \
+    emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
     legaldialog.h \
     mapeditframe.h \
+    mapfactory.h \
     mapmarker.h \
+    objectfactory.h \
     objectimporter.h \
+    party.h \
+    partycharactergridframe.h \
+    partyframe.h \
+    partyframecharacter.h \
+    placeholder.h \
     presentupdatedialog.h \
     publishbuttonframe.h \
+    publishbuttonproxy.h \
     publishbuttonribbon.h \
     publishwindow.h \
     randommarketdialog.h \
+    ribbonframe.h \
+    ribbonframetext.h \
+    ribbonmain.h \
     ribbontabbattle.h \
     ribbontabbestiary.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
-    ribbontabhelp.h \
     ribbontabmap.h \
+    ribbontabscrolling.h \
+    ribbontabtext.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
     undofill.h \
     undobase.h \
     dicerolldialog.h \
-    adventure.h \
     map.h \
-    encounter.h \
     character.h \
-    characterwidget.h \
-    characterdialog.h \
     campaign.h \
     dmconstants.h \
-    adventureitem.h \
     mruhandler.h \
     mruaction.h \
     campaignobjectbase.h \
@@ -273,13 +305,11 @@ HEADERS  += mainwindow.h \
     attack.h \
     combatantdialog.h \
     monster.h \
-    monsterwidget.h \
     combatantfactory.h \
     bestiarydialog.h \
     monsterclass.h \
     bestiary.h \
     addmonstersdialog.h \
-    combatantwidget.h \
     campaigntree.h \
     campaigntreemodel.h \
     textpublishdialog.h \
@@ -384,23 +414,28 @@ FORMS    += mainwindow.ui \
     characterimportdialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \
-    characterdialog.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
     mapeditframe.ui \
+    partycharactergridframe.ui \
+    partyframe.ui \
+    partyframecharacter.ui \
     presentupdatedialog.ui \
     publishbuttonframe.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
+    ribbonframetext.ui \
     ribbontabbattle.ui \
     ribbontabbestiary.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
-    ribbontabhelp.ui \
     ribbontabmap.ui \
+    ribbontabscrolling.ui \
+    ribbontabtext.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \
@@ -427,7 +462,6 @@ FORMS    += mainwindow.ui \
     dicerolldialogcombatants.ui \
     widgetcharacter.ui \
     widgetmonster.ui \
-    texteditformatterframe.ui \
     encountertextedit.ui \
     mapselectdialog.ui \
     countdownframe.ui \

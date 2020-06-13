@@ -1,15 +1,16 @@
 #ifndef WELCOMEFRAME_H
 #define WELCOMEFRAME_H
 
-#include <QFrame>
+#include "campaignobjectframe.h"
 
 namespace Ui {
 class WelcomeFrame;
 }
 
 class MRUHandler;
+class QLabel;
 
-class WelcomeFrame : public QFrame
+class WelcomeFrame : public CampaignObjectFrame
 {
     Q_OBJECT
 
@@ -30,6 +31,8 @@ signals:
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+
 
 private slots:
     void openCampaign(const QString& campaignText);
@@ -37,6 +40,8 @@ private slots:
 private:
     void openDoc(const QString& docName);
     void openLink(const QString& linkText);
+    void setMRUTexts();
+    void setMRUText(QLabel* mruLabel, int index);
 
     Ui::WelcomeFrame *ui;
 

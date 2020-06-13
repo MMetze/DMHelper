@@ -1,18 +1,14 @@
 #include "battledialogmodeleffectradius.h"
+#include "battledialogeffectsettings.h"
 #include "unselectedellipse.h"
 
-BattleDialogModelEffectRadius::BattleDialogModelEffectRadius() :
-    BattleDialogModelEffect()
+BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const QString& name, QObject *parent) :
+    BattleDialogModelEffectShape(name, parent)
 {
 }
 
 BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip) :
-    BattleDialogModelEffect(size * 2, position, rotation, color, tip)
-{
-}
-
-BattleDialogModelEffectRadius::BattleDialogModelEffectRadius(const BattleDialogModelEffectRadius& other) :
-    BattleDialogModelEffect(other)
+    BattleDialogModelEffectShape(size, position, rotation, color, tip)
 {
 }
 
@@ -22,19 +18,29 @@ BattleDialogModelEffectRadius::~BattleDialogModelEffectRadius()
 
 BattleDialogModelEffect* BattleDialogModelEffectRadius::clone() const
 {
-    return new BattleDialogModelEffectRadius(*this);
+    BattleDialogModelEffectRadius* newEffect = new BattleDialogModelEffectRadius(getName());
+    newEffect->copyValues(*this);
+    return newEffect;
 }
 
-int BattleDialogModelEffectRadius::getType() const
+int BattleDialogModelEffectRadius::getEffectType() const
 {
     return BattleDialogModelEffect_Radius;
 }
 
-QAbstractGraphicsShapeItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale) const
+BattleDialogEffectSettings* BattleDialogModelEffectRadius::getEffectEditor() const
 {
-    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(0,0,100,100);
+    BattleDialogEffectSettings* result = new BattleDialogEffectSettings(*this);
+    result->setSizeLabel(QString("Radius"));
+    return result;
+}
 
-    circleItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ID, getID().toString());
+QGraphicsItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale) const
+{
+    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(0, 0, 200, 200);
+
+    setEffectItemData(circleItem);
+
     prepareItem(*circleItem);
     applyEffectValues(*circleItem, gridScale);
 

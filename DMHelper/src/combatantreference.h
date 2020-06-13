@@ -9,10 +9,10 @@ class CombatantReference : public Combatant
 {
     Q_OBJECT
 public:
-    explicit CombatantReference(QObject *parent = nullptr);
+    explicit CombatantReference(const QString& name = QString(), QObject *parent = nullptr);
     explicit CombatantReference(const Combatant &combatant, QObject *parent = nullptr);
     explicit CombatantReference(QUuid combatantId, QObject *parent = nullptr);
-    explicit CombatantReference(const CombatantReference &obj);  // copy constructor
+    //explicit CombatantReference(const CombatantReference &obj);  // copy constructor
 
     Combatant* getReference();
     const Combatant* getReference() const;
@@ -32,11 +32,14 @@ public:
     // From Combatant - additional
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual QString getName() const override;
-    virtual int getType() const override;
+    virtual int getCombatantType() const override;
 
 signals:
+    void referenceChanged();
 
 public slots:
+    void setReference(const Combatant& combatant);
+    void setReference(const QUuid& combatantId);
 
 protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;

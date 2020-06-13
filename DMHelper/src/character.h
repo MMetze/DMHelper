@@ -7,6 +7,7 @@
 #include <QPair>
 
 class QDomElement;
+class MonsterClass;
 
 typedef QPair<int,int> AbilitySkillPair;
 Q_DECLARE_METATYPE(AbilitySkillPair);
@@ -63,9 +64,9 @@ public:
         INTVALUE_COUNT
     };
 
-    explicit Character(QObject *parent = nullptr);
-    explicit Character(QDomElement &element, bool isImport, QObject *parent = nullptr);
-    explicit Character(const Character &obj);  // copy constructor
+    explicit Character(const QString& name = QString(), QObject *parent = nullptr);
+    //explicit Character(QDomElement &element, bool isImport, QObject *parent = nullptr);
+    //explicit Character(const Character &obj);  // copy constructor
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -76,9 +77,11 @@ public:
 
     virtual Combatant* clone() const override;
 
-    virtual int getType() const override;
+    virtual int getCombatantType() const override;
     virtual int getDndBeyondID() const;
     virtual void setDndBeyondID(int id);
+
+    virtual bool isInParty() const;
 
     virtual int getSpeed() const override;
 
@@ -108,6 +111,8 @@ public:
     int getNextLevelXP() const;
     int getProficiencyBonus() const;
     int getPassivePerception() const;
+
+    virtual void copyMonsterValues(MonsterClass& monster);
 
     static int findKeyForSkillName(const QString& skillName);
     static QString getWrittenSkillName(int skill);

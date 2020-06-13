@@ -1,28 +1,30 @@
 #ifndef ENCOUNTERFACTORY_H
 #define ENCOUNTERFACTORY_H
 
-#include <QObject>
+#include "objectfactory.h"
 
-class Encounter;
+class CampaignObjectBase;
 class QDomElement;
 class QString;
 
-class EncounterFactory : public QObject
+class EncounterFactory : public ObjectFactory
 {
     Q_OBJECT
 public:
     explicit EncounterFactory(QObject *parent = nullptr);
 
-    static Encounter* createEncounter(int encounterType, const QString& encounterName, QObject *parent);
-    static Encounter* createEncounter(int encounterType, const QDomElement& element, bool isImport, QObject *parent);
-    static Encounter* cloneEncounter(Encounter& encounter);
+    //static CampaignObjectBase* createEncounter(int objectType, const QString& objectName);
+    //static CampaignObjectBase* createEncounter(const QDomElement& element, bool isImport);
+
+    //static Encounter* cloneEncounter(Encounter& encounter);
 
 signals:
 
 public slots:
+    virtual CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport) override;
+    virtual CampaignObjectBase* createObject(const QDomElement& element, bool isImport) override;
 
 private:
-
 };
 
 #endif // ENCOUNTERFACTORY_H

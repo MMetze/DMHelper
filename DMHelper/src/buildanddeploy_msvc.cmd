@@ -4,8 +4,7 @@
 if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
-set PATH=C:\Qt\5.13.0\msvc2017_64\bin;C:\Qt\Tools\QtCreator\bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build;%PATH%
-@rem set PATH=C:\Qt\5.13.0\msvc2017_64\bin;C:\Qt\Tools\QtCreator\bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX64\x64;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCPackages;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\bin\Roslyn;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Performance Tools\x64;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Performance Tools;C:\Program Files (x86)\Microsoft Visual Studio\Shared\Common\VSPerfCollectionTools\x64;C:\Program Files (x86)\Microsoft Visual Studio\Shared\Common\VSPerfCollectionTools\;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja;%PATH%
+set PATH=C:\Qt\5.14.2\msvc2017_64\bin;C:\Qt\Tools\QtCreator\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%
 
 rmdir /s /q ..\bin64
 mkdir ..\bin64
@@ -37,7 +36,7 @@ cd build-64_bit-release
 :build_done
 
 xcopy .\release\DMHelper.exe ..\bin64\
-xcopy C:\Qt\5.13.0\msvc2017_64\bin\Qt5Xml.dll ..\bin64\
+xcopy C:\Qt\5.14.2\msvc2017_64\bin\Qt5Xml.dll ..\bin64\
 xcopy ..\src\binsrc\* ..\bin64\*
 xcopy /s ..\src\bestiary\* ..\bin64\resources\*
 xcopy /s ..\src\doc\* ..\bin64\doc\*
@@ -45,15 +44,12 @@ xcopy /s ..\src\binsrc\pkgconfig\* ..\bin64\pkgconfig\*
 xcopy /s ..\src\binsrc\plugins\* ..\bin64\plugins\*
 xcopy /s ..\src\resources\* ..\bin64\resources\*
 
-
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64
 
 cd ..\bin64
-copy NUL DMHelper.log
+rem NO LONGER NEEDED as this is now done in the appdata directory: copy NUL DMHelper.log
 
-rem del libeay32.dll
-rem del ssleay32.dll
-del vc_redist.x64.exe
+rem del vc_redist.x64.exe
 
 "C:\Program Files\7-Zip\7z" a -tzip archive.zip *
 cd ..

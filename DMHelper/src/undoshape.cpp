@@ -10,8 +10,9 @@ UndoShape::UndoShape(Map& map, const MapEditShape& mapEditShape) :
 
 void UndoShape::undo()
 {
-    if(_map.getRegisteredWindow())
-        _map.getRegisteredWindow()->undoPaint();
+    _map.undoPaint();
+    //if(_map.getRegisteredWindow())
+    //    _map.getRegisteredWindow()->undoPaint();
 }
 
 void UndoShape::redo()
@@ -21,28 +22,33 @@ void UndoShape::redo()
     {
     */
     apply(true, nullptr);
+    _map.updateFoW();
+    /*
     if(_map.getRegisteredWindow())
     {
         _map.getRegisteredWindow()->updateFoW();
     }
+    */
 }
 
-void UndoShape::apply( bool preview, QPaintDevice* target ) const
+void UndoShape::apply(bool preview, QPaintDevice* target) const
 {
-    _map.paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview );
+    _map.paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview);
 }
 
-void UndoShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement UndoShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
-    element.setAttribute( "x", _mapEditShape.rect().x() );
-    element.setAttribute( "y", _mapEditShape.rect().y() );
-    element.setAttribute( "width", _mapEditShape.rect().width() );
-    element.setAttribute( "height", _mapEditShape.rect().height() );
-    element.setAttribute( "erase", static_cast<int>(_mapEditShape.erase()) );
+    element.setAttribute("x", _mapEditShape.rect().x());
+    element.setAttribute("y", _mapEditShape.rect().y());
+    element.setAttribute("width", _mapEditShape.rect().width());
+    element.setAttribute("height", _mapEditShape.rect().height());
+    element.setAttribute("erase", static_cast<int>(_mapEditShape.erase()));
+
+    return element;
 }
 
 void UndoShape::inputXML(const QDomElement &element, bool isImport)
@@ -50,10 +56,10 @@ void UndoShape::inputXML(const QDomElement &element, bool isImport)
     Q_UNUSED(isImport);
 
     QRect inputRect;
-    inputRect.setX(element.attribute( QString("x") ).toInt());
-    inputRect.setY(element.attribute( QString("y") ).toInt());
-    inputRect.setWidth(element.attribute( QString("width") ).toInt());
-    inputRect.setHeight(element.attribute( QString("height") ).toInt());
+    inputRect.setX(element.attribute(QString("x")).toInt());
+    inputRect.setY(element.attribute(QString("y")).toInt());
+    inputRect.setWidth(element.attribute(QString("width")).toInt());
+    inputRect.setHeight(element.attribute(QString("height")).toInt());
     _mapEditShape.setRect(inputRect);
     _mapEditShape.setErase(static_cast<bool>(element.attribute("erase",QString::number(1)).toInt()));
 }

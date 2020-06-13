@@ -1,3 +1,29 @@
+But looking at my list, there's 5 more things to do for v2.0:
+1) DONE - Create a character based on a monster (e.g. for animal companions)
+2) DONE - Clone a monster (use an existing monster as the basis for a new one)
+3) DONE - Improve logfile usage to avoid huge files
+4) DONE - Automatically create backups of campaign and Bestiary files
+5) Serious rework of the documentation, since it's no longer even remotely relevant.
+6) Add an installer
+
+Add thin lines
+Conditions
+Rollover info
+Party icon
+Other objects to the battle scene).
+Logging fix
+
+Shortcuts:
+Ctrl+B = Bestiary
+Ctrl+S = Save Campaign
+Ctrl+D = Dice Roll Dialog
+Ctrl+M = DM Screen
+Ctrl+R = Quick Reference
+Ctrl+T = Tables
+Ctrl+K = Calendar
+Ctrl+P = Publish
+Ctrl+N = Next Combatant
+
 white grid or black screen at button click
 Import/Export bestiary
 

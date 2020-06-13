@@ -150,7 +150,7 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
     endBatchChanges();
 }
 
-void MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     element.setAttribute( "private", static_cast<int>(getPrivate()) );
 
@@ -198,6 +198,7 @@ void MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
     writeActionList(doc, element, QString("special_abilities"), _specialAbilities, isExport);
     writeActionList(doc, element, QString("reactions"), _reactions, isExport);
 
+    return element;
 }
 
 void MonsterClass::beginBatchChanges()
@@ -278,7 +279,7 @@ int MonsterClass::getMonsterSizeCategory() const
     return _monsterSizeCategory;
 }
 
-int MonsterClass::getMonsterSizeFactor() const
+qreal MonsterClass::getMonsterSizeFactor() const
 {
     return convertSizeCategoryToScaleFactor(getMonsterSizeCategory());
 }
@@ -436,6 +437,11 @@ QString MonsterClass::getSkillString() const
     return result;
 }
 
+bool MonsterClass::isSkillKnown(Combatant::Skills skill) const
+{
+    return _skillValues.contains(skill);
+}
+
 QList<MonsterAction> MonsterClass::getActions() const
 {
     return _actions;
@@ -544,6 +550,55 @@ int MonsterClass::removeReaction(const MonsterAction& action)
     return _reactions.count();
 }
 
+void MonsterClass::cloneMonster(MonsterClass& other)
+{
+    beginBatchChanges();
+
+    _private = other._private;
+    _monsterType = other._monsterType;
+    _monsterSubType = other._monsterSubType;
+    _monsterSize = other._monsterSize;
+    _monsterSizeCategory = other._monsterSizeCategory;
+    _speed = other._speed;
+    _alignment = other._alignment;
+    _languages = other._languages;
+    _armorClass = other._armorClass;
+    _hitDice = other._hitDice;
+    _averageHitPoints = other._averageHitPoints;
+    _conditionImmunities = other._conditionImmunities;
+    _damageImmunities = other._damageImmunities;
+    _damageResistances = other._damageResistances;
+    _damageVulnerabilities = other._damageVulnerabilities;
+    _senses = other._senses;
+    _challenge = other._challenge;
+
+    _skillValues.clear(); // just in case we're cloning onto something that exists
+    for(int skill : other._skillValues.keys())
+        _skillValues[skill] = other._skillValues.value(skill);
+
+    _strength = other._strength;
+    _dexterity = other._dexterity;
+    _constitution = other._constitution;
+    _intelligence = other._intelligence;
+    _wisdom = other._wisdom;
+    _charisma = other._charisma;
+
+    _actions.clear();
+    for(MonsterAction action : other._actions)
+        addAction(action);
+    _legendaryActions.clear();
+    for(MonsterAction legendaryAction : other._legendaryActions)
+        addLegendaryAction(legendaryAction);
+    _specialAbilities.clear();
+    for(MonsterAction specialAbility : other._specialAbilities)
+        addSpecialAbility(specialAbility);
+    _reactions.clear();
+    for(MonsterAction reaction : other._reactions)
+        addReaction(reaction);
+
+    endBatchChanges();
+}
+
 int MonsterClass::convertSizeToCategory(const QString& monsterSize)
 {
     if(QString::compare(monsterSize, QString("Tiny"),Qt::CaseInsensitive) == 0)
@@ -558,32 +613,36 @@ int MonsterClass::convertSizeToCategory(const QString& monsterSize)
         return DMHelper::CombatantSize_Huge;
     else if(QString::compare(monsterSize, QString("Gargantuan"),Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Gargantuan;
+    else if(QString::compare(monsterSize, QString("Colossal"),Qt::CaseInsensitive) == 0)
+        return DMHelper::CombatantSize_Colossal;
     else
         return DMHelper::CombatantSize_Unknown;
 }
 
-int MonsterClass::convertSizeCategoryToScaleFactor(int category)
+qreal MonsterClass::convertSizeCategoryToScaleFactor(int category)
 {
     switch(category)
     {
         case DMHelper::CombatantSize_Tiny:
-            return 1;
+            return 0.5;
         case DMHelper::CombatantSize_Small:
-            return 1;
+            return 0.75;
         case DMHelper::CombatantSize_Medium:
-            return 1;
+            return 1.0;
         case DMHelper::CombatantSize_Large:
-            return 2;
+            return 2.0;
         case DMHelper::CombatantSize_Huge:
-            return 3;
+            return 3.0;
         case DMHelper::CombatantSize_Gargantuan:
-            return 4;
+            return 4.0;
+        case DMHelper::CombatantSize_Colossal:
+            return 8.0;
         default:
-            return 1;
+            return 1.0;
     }
 }
 
-int MonsterClass::convertSizeToScaleFactor(const QString& monsterSize)
+qreal MonsterClass::convertSizeToScaleFactor(const QString& monsterSize)
 {
     return convertSizeCategoryToScaleFactor(convertSizeToCategory(monsterSize));
 }

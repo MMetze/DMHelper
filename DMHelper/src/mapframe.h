@@ -1,7 +1,7 @@
 #ifndef MAPFRAME_H
 #define MAPFRAME_H
 
-#include <QWidget>
+#include "campaignobjectframe.h"
 #include <QGraphicsScene>
 #include <QFileInfo>
 #include <QImage>
@@ -17,13 +17,16 @@ class Map;
 class MapMarkerGraphicsItem;
 class AudioTrack;
 
-class MapFrame : public QWidget
+class MapFrame : public CampaignObjectFrame
 {
     Q_OBJECT
 
 public:
     explicit MapFrame(QWidget *parent = nullptr);
     virtual ~MapFrame() override;
+
+    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void deactivateObject() override;
 
     void setMap(Map* map);
 
@@ -37,21 +40,21 @@ public:
     QAction* getRedoAction(QObject* parent);
 
 signals:
-    void publishImage(QImage img, QColor color);
+    void publishImage(QImage image);
     void openPreview();
     void windowClosed(MapFrame* mapFrame);
     void dirty();
     void startTrack(AudioTrack* track);
     void showPublishWindow();
 
-    void animationStarted(QColor color);
+    void animationStarted();
     void animateImage(QImage img);
 
     void zoomSelectChanged(bool enabled);
     void brushModeSet(int brushMode);
 
     void publishCancelled();
-    void publishCheckable(bool checkable);
+    //void publishCheckable(bool checkable);
 
 public slots:
     void updateFoW();
@@ -59,7 +62,7 @@ public slots:
     void resetFoW();
     void clearFoW();
     void undoPaint();
-    void publishFoWImage(bool publishing = false);
+//    void publishFoWImage(bool publishing = false);
     void clear();
 
     void cancelPublish();
@@ -83,8 +86,12 @@ public slots:
 
     void targetResized(const QSize& newSize);
 
-    void setRotation(int rotation);
-    void setColor(QColor color);
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+    //virtual void setBackgroundColor(QColor color) override;
+    //void setRotation(int rotation);
+    //void setColor(QColor color);
 
 protected:
     void initializeFoW();
@@ -111,6 +118,7 @@ protected:
 
 protected slots:
     void setMapCursor();
+    void drawEditCursor();
 //    void publishModeVisibleClicked();
 //    void publishModeZoomClicked();
     void rotatePublish();
@@ -139,7 +147,7 @@ private:
     bool _isVideo;
 
     int _rotation;
-    QColor _color;
+    //QColor _color;
 
     bool _mouseDown;
     QPoint _mouseDownPos;

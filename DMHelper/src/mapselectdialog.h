@@ -18,7 +18,8 @@ public:
     explicit MapSelectDialog(QWidget *parent = nullptr);
     ~MapSelectDialog();
 
-    void addMap(Map* newMap);
+    void prependMap(Map* newMap);
+    void appendMap(Map* newMap);
     //void addSeparator(int index);
 
     Map* getSelectedMap() const;

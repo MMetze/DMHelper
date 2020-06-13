@@ -18,7 +18,7 @@ public:
     explicit MonsterClass(const QDomElement &element, bool isImport, QObject *parent = nullptr);
 
     void inputXML(const QDomElement &element, bool isImport);
-    void outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
+    QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
 
     void beginBatchChanges();
     void endBatchChanges();
@@ -34,7 +34,7 @@ public:
     QString getMonsterSubType() const;
     QString getMonsterSize() const;
     int getMonsterSizeCategory() const;
-    int getMonsterSizeFactor() const;
+    qreal getMonsterSizeFactor() const;
     QString getSpeed() const;
     int getSpeedValue() const;
     QString getAlignment() const;
@@ -59,6 +59,7 @@ public:
     int getAbilityValue(Combatant::Ability ability) const;
     int getSkillValue(Combatant::Skills skill) const;
     QString getSkillString() const;
+    bool isSkillKnown(Combatant::Skills skill) const;
 
     QList<MonsterAction> getActions() const;
     void addAction(const MonsterAction& action);
@@ -77,9 +78,11 @@ public:
     void setReaction(int index, const MonsterAction& action);
     int removeReaction(const MonsterAction& action);
 
+    void cloneMonster(MonsterClass& other);
+
     static int convertSizeToCategory(const QString& monsterSize);
-    static int convertSizeCategoryToScaleFactor(int category);
-    static int convertSizeToScaleFactor(const QString& monsterSize);
+    static qreal convertSizeCategoryToScaleFactor(int category);
+    static qreal convertSizeToScaleFactor(const QString& monsterSize);
     static void outputValue(QDomDocument &doc, QDomElement &element, bool isExport, const QString& valueName, const QString& valueText);
 
 public slots:

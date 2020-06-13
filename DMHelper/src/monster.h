@@ -11,9 +11,9 @@ class Monster : public Combatant
 {
     Q_OBJECT
 public:
-    explicit Monster(MonsterClass* monsterClass, QObject *parent = nullptr);
-    explicit Monster(MonsterClass* monsterClass, const QDomElement &element, bool isImport, QObject *parent = nullptr);
-    explicit Monster(const Monster &obj);  // copy constructor
+    explicit Monster(MonsterClass* monsterClass, const QString& name = QString(), QObject *parent = nullptr);
+//    explicit Monster(MonsterClass* monsterClass, const QDomElement &element, bool isImport, QObject *parent = nullptr);
+//    explicit Monster(const Monster &obj);  // copy constructor
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -24,7 +24,7 @@ public:
 
     virtual Combatant* clone() const override;
 
-    virtual int getType() const override;
+    virtual int getCombatantType() const override;
     virtual int getSpeed() const override;
     virtual int getArmorClass() const override;
     virtual Dice getHitDice() const override;

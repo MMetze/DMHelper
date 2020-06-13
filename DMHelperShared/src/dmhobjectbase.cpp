@@ -19,9 +19,9 @@ DMHObjectBase::~DMHObjectBase()
 {
 }
 
-void DMHObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
+QDomElement DMHObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
-    d->outputXML(doc, parent, targetDirectory, isExport);
+    return d->outputXML(doc, parent, targetDirectory, isExport);
 }
 
 void DMHObjectBase::inputXML(const QDomElement &element, bool isImport)
@@ -29,9 +29,9 @@ void DMHObjectBase::inputXML(const QDomElement &element, bool isImport)
     d->inputXML(element, isImport);
 }
 
-void DMHObjectBase::postProcessXML(const QDomElement &element, bool isImport)
+void DMHObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    d->postProcessXML(element, isImport);
+    d->internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 QUuid DMHObjectBase::getID() const

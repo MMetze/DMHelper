@@ -16,7 +16,18 @@ MapSelectDialog::~MapSelectDialog()
     delete ui;
 }
 
-void MapSelectDialog::addMap(Map* newMap)
+void MapSelectDialog::prependMap(Map* newMap)
+{
+    if(!newMap)
+        return;
+
+    QListWidgetItem* newItem = new QListWidgetItem();
+    newItem->setText(newMap->getName());
+    newItem->setData(Qt::UserRole, QVariant::fromValue(newMap));
+    ui->lstMaps->insertItem(0, newItem);
+}
+
+void MapSelectDialog::appendMap(Map* newMap)
 {
     if(!newMap)
         return;

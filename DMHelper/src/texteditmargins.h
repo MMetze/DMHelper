@@ -8,6 +8,7 @@ class TextEditMargins : public QTextEdit
 public:
     explicit TextEditMargins(QWidget *parent = nullptr);
 
+public slots:
     void setTextWidth(int textWidth);
 
 protected:

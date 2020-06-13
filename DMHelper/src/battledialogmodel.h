@@ -17,12 +17,12 @@ class BattleDialogModel : public CampaignObjectBase
     Q_OBJECT
 
 public:
-    explicit BattleDialogModel(QObject *parent = nullptr);
-    BattleDialogModel(const BattleDialogModel& other, QObject *parent = nullptr);
+    explicit BattleDialogModel(const QString& name = QString(), QObject *parent = nullptr);
+    //BattleDialogModel(const BattleDialogModel& other, QObject *parent = nullptr);
     virtual ~BattleDialogModel() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     /*
@@ -65,6 +65,8 @@ public:
     bool getShowAlive() const;
     bool getShowDead() const;
     bool getShowEffects() const;
+    bool getShowMovement() const;
+    bool getShowLairActions() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
     QImage getBackgroundImage() const;
@@ -82,6 +84,8 @@ public slots:
     void setShowAlive(bool showAlive);
     void setShowDead(bool showDead);
     void setShowEffects(bool showEffects);
+    void setShowMovement(bool showMovement);
+    void setShowLairActions(bool showLairActions);
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
     void setBackgroundImage(QImage backgroundImage);
     void sortCombatants();
@@ -99,8 +103,15 @@ signals:
     void showAliveChanged(bool showAlive);
     void showDeadChanged(bool showDead);
     void showEffectsChanged(bool showEffects);
+    void showMovementChanged(bool showMovement);
+    void showLairActionsChanged(bool showLairActions);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void backgroundImageChanged(QImage backgroundImage);
+
+protected:
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
 private:
     static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
@@ -130,6 +141,8 @@ private:
     bool _showAlive;
     bool _showDead;
     bool _showEffects;
+    bool _showMovement;
+    bool _showLairActions;
 
     BattleDialogModelCombatant* _activeCombatant;
 

@@ -1,40 +1,46 @@
 #ifndef ENCOUNTERTEXT_H
 #define ENCOUNTERTEXT_H
 
-#include "encounter.h"
+#include "campaignobjectbase.h"
+#include <QDomElement>
 
 class QDomDocument;
-class QDomElement;
 
-class EncounterText : public Encounter
+class EncounterText : public CampaignObjectBase
 {
     Q_OBJECT
 public:
 
-    explicit EncounterText(const QString& encounterName, QObject *parent);
-    explicit EncounterText(const EncounterText& obj);
+    explicit EncounterText(const QString& encounterName = QString(), QObject *parent = nullptr);
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // Base functions to handle UI widgets
-    virtual void widgetActivated(QWidget* widget) override;
-    virtual void widgetDeactivated(QWidget* widget) override;
+    //virtual void widgetActivated(QWidget* widget) override;
+    //virtual void widgetDeactivated(QWidget* widget) override;
 
-    virtual int getType() const override;
+    virtual int getObjectType() const override;
 
     virtual QString getText() const;
 
 public slots:
     virtual void setText(const QString& newText);
 
+signals:
+    void textChanged(const QString& text);
+
 protected slots:
-    virtual void widgetChanged() override;
+    //virtual void widgetChanged() override;
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
 protected:
-    QString _text;
+    void extractTextNode(const QDomElement &element, bool isImport);
 
+    QString _text;
 };
 
 #endif // ENCOUNTERTEXT_H

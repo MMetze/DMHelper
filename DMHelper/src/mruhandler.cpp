@@ -38,6 +38,23 @@ QStringList MRUHandler::getMRUList() const
     return _mruFiles;
 }
 
+QMenu* MRUHandler::getActionsMenu() const
+{
+    return _actionsMenu;
+}
+
+void MRUHandler::setActionsMenu(QMenu* actionsMenu)
+{
+    if(actionsMenu != _actionsMenu)
+    {
+        if(_actionsMenu)
+            _actionsMenu->clear();
+
+        _actionsMenu = actionsMenu;
+        updateMRUActions();
+    }
+}
+
 void MRUHandler::readMRUFromSettings(QSettings& settings)
 {
     QStringList fileList;

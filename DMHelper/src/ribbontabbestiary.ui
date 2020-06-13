@@ -39,7 +39,7 @@
     <number>3</number>
    </property>
    <property name="leftMargin">
-    <number>0</number>
+    <number>3</number>
    </property>
    <property name="topMargin">
     <number>0</number>
@@ -70,7 +70,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the Bestiary</string>
+        <string>Open the Bestiary (Ctrl+B)</string>
        </property>
        <property name="text">
         <string/>
@@ -94,7 +94,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="lblBestiary">
        <property name="text">
         <string>Bestiary</string>
        </property>
@@ -146,7 +146,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_9">
+      <widget class="QLabel" name="lblImportBestiary">
        <property name="text">
         <string>Import</string>
        </property>
@@ -198,7 +198,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_10">
+      <widget class="QLabel" name="lblExportBestiary">
        <property name="text">
         <string>Export</string>
        </property>
@@ -248,7 +248,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the DM Screen</string>
+        <string>Open the DM Screen (Ctrl+M)</string>
        </property>
        <property name="text">
         <string/>
@@ -272,7 +272,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_13">
+      <widget class="QLabel" name="lblScreen">
        <property name="text">
         <string>DM Screen</string>
        </property>
@@ -303,7 +303,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the custom table dialog</string>
+        <string>Open the custom table dialog (Ctrl+T)</string>
        </property>
        <property name="text">
         <string/>
@@ -327,7 +327,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_15">
+      <widget class="QLabel" name="lblTables">
        <property name="text">
         <string>Tables</string>
        </property>
@@ -358,7 +358,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the quick reference list</string>
+        <string>Open the quick reference list (Ctrl+R)</string>
        </property>
        <property name="text">
         <string/>
@@ -382,7 +382,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_12">
+      <widget class="QLabel" name="lblQuickRef">
        <property name="text">
         <string>Reference</string>
        </property>
@@ -434,7 +434,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_16">
+      <widget class="QLabel" name="lblSoundboard">
        <property name="maximumSize">
         <size>
          <width>58</width>
@@ -490,7 +490,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the dice rolling dialog</string>
+        <string>Open the dice rolling dialog (Ctrl+D)</string>
        </property>
        <property name="text">
         <string/>
@@ -514,7 +514,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="lblRollDice">
        <property name="text">
         <string>Roll Dice</string>
        </property>
@@ -569,7 +569,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_5">
+      <widget class="QLabel" name="lblPublishText">
        <property name="text">
         <string>Show Text</string>
        </property>
@@ -624,7 +624,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="lblTranslateText">
        <property name="text">
         <string>Translate</string>
        </property>
@@ -679,7 +679,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_7">
+      <widget class="QLabel" name="lblRandomMarket">
        <property name="text">
         <string>Market Gen</string>
        </property>
@@ -710,7 +710,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the time &amp; date calendar</string>
+        <string>Open the time &amp; date calendar (Ctrl+K)</string>
        </property>
        <property name="text">
         <string/>
@@ -734,7 +734,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_11">
+      <widget class="QLabel" name="lblTimeDate">
        <property name="text">
         <string>Calendar</string>
        </property>
@@ -789,7 +789,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="label_14">
+      <widget class="QLabel" name="lblCountdown">
        <property name="text">
         <string>Countdown</string>
        </property>
@@ -813,8 +813,32 @@
      </property>
     </spacer>
    </item>
+   <item>
+    <widget class="PublishButtonRibbon" name="framePublish">
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PublishButtonRibbon</class>
+   <extends>QFrame</extends>
+   <header>publishbuttonribbon.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

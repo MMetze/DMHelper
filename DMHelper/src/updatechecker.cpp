@@ -5,6 +5,9 @@
 #include <QMessageBox>
 #include <QDebug>
 
+const int UPDATECHECKER_PERIOD_RELEASE = 7;
+const int UPDATECHECKER_PERIOD_DEBUG = 1;
+
 UpdateChecker::UpdateChecker(OptionsContainer& options, bool silentUpdate, bool selfDestruct, QObject *parent) :
     QObject(parent),
     _manager(nullptr),
@@ -85,9 +88,11 @@ bool UpdateChecker::runUpdateCheck()
             return false;
         }
 
-        if((lastUpdate.isValid()) && (lastUpdate.daysTo(QDate::currentDate()) < 7))
+        const int UPDATECHECKER_PERIOD = (DMHelper::DMHELPER_ENGINEERING_VERSION > 0) ? UPDATECHECKER_PERIOD_DEBUG : UPDATECHECKER_PERIOD_RELEASE;
+
+        if((lastUpdate.isValid()) && (lastUpdate.daysTo(QDate::currentDate()) < UPDATECHECKER_PERIOD))
         {
-             qDebug() << "[UpdateChecker] Last check less than 7 days ago, not checking.";
+             qDebug() << "[UpdateChecker] Last check less than " << UPDATECHECKER_PERIOD << " days ago, not checking.";
              return false;
         }
     }
@@ -95,7 +100,8 @@ bool UpdateChecker::runUpdateCheck()
     _manager = new QNetworkAccessManager(this);
     connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
 
-    QUrl serviceUrl = QUrl("https://www.dm-helper.net/check_version/check_version.php");
+    //QUrl serviceUrl = QUrl("https://www.dm-helper.net/check_version/check_version.php");
+    QUrl serviceUrl = QUrl("https://update.dm-helper.com/");
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 

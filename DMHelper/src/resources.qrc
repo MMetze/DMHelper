@@ -176,7 +176,6 @@
         <file>data/icon_close.png</file>
         <file>data/icon_downarrow.png</file>
         <file>data/icon_new.png</file>
-        <file>data/icon_newadventure.png</file>
         <file>data/icon_newbattle.png</file>
         <file>data/icon_newcharacter.png</file>
         <file>data/icon_newnpc.png</file>
@@ -224,6 +223,49 @@
         <file>data/icon_dmscreen.png</file>
         <file>data/icon_soundboard.png</file>
         <file>data/icon_publishon.png</file>
+        <file>data/icon_background.png</file>
+        <file>data/icon_bold.png</file>
+        <file>data/icon_italics.png</file>
+        <file>data/icon_contentbattle.png</file>
+        <file>data/icon_contentcharacter.png</file>
+        <file>data/icon_contentmap.png</file>
+        <file>data/icon_contentnpc.png</file>
+        <file>data/icon_contentparty.png</file>
+        <file>data/icon_contentscrollingtext.png</file>
+        <file>data/icon_contenttextencounter.png</file>
+        <file>data/icon_newparty.png</file>
+        <file>data/icon_remove.png</file>
+        <file>data/icon_party.png</file>
+        <file>data/character_name.png</file>
+        <file>data/character_frame_bottom.png</file>
+        <file>data/character_frame_bottomleft.png</file>
+        <file>data/character_frame_left.png</file>
+        <file>data/character_frame_top.png</file>
+        <file>data/character_frame_topleft.png</file>
+        <file>data/character_details_bottom.png</file>
+        <file>data/character_details_bottomleft.png</file>
+        <file>data/character_details_bottomright.png</file>
+        <file>data/character_details_left.png</file>
+        <file>data/character_details_right.png</file>
+        <file>data/character_details_tailbottom.png</file>
+        <file>data/character_details_tailmiddle.png</file>
+        <file>data/character_details_tailtop.png</file>
+        <file>data/character_details_top.png</file>
+        <file>data/character_details_topleft.png</file>
+        <file>data/character_details_topright.png</file>
+        <file>data/character_stat_bottom.png</file>
+        <file>data/character_stat_bottomleft.png</file>
+        <file>data/character_stat_bottomright.png</file>
+        <file>data/character_stat_left.png</file>
+        <file>data/character_stat_right.png</file>
+        <file>data/character_stat_top.png</file>
+        <file>data/character_stat_topleft.png</file>
+        <file>data/character_stat_topright.png</file>
+        <file>data/icon_neweffectcone.png</file>
+        <file>data/icon_neweffectcube.png</file>
+        <file>data/icon_neweffectline.png</file>
+        <file>data/icon_neweffectradius.png</file>
+        <file>data/icon_newobject.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

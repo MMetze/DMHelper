@@ -15,11 +15,11 @@ class BattleDialogModelMonsterCombatant : public BattleDialogModelMonsterBase
     Q_OBJECT
 
 public:
-    BattleDialogModelMonsterCombatant();
+    BattleDialogModelMonsterCombatant(const QString& name = QString(), QObject *parent = nullptr);
     explicit BattleDialogModelMonsterCombatant(Monster* monster);
     BattleDialogModelMonsterCombatant(Monster* monster, const QString& monsterName, int monsterSize, int monsterHP);
     BattleDialogModelMonsterCombatant(Monster* monster, const QString& monsterName, int monsterSize, int monsterHP, int initiative, const QPointF& position);
-    BattleDialogModelMonsterCombatant(const BattleDialogModelMonsterCombatant& other);
+//    BattleDialogModelMonsterCombatant(const BattleDialogModelMonsterCombatant& other);
     virtual ~BattleDialogModelMonsterCombatant() override;
 
     // From CampaignObjectBase
@@ -27,7 +27,7 @@ public:
 
     // Local
     virtual BattleDialogModelCombatant* clone() const override;
-    virtual int getSizeFactor() const override;
+    virtual qreal getSizeFactor() const override;
     virtual int getSizeCategory() const override;
 
     virtual int getStrength() const override;

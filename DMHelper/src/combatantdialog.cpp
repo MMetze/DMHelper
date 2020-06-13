@@ -37,7 +37,7 @@ CombatantDialog::~CombatantDialog()
 
 void CombatantDialog::setCombatant(int combatantCount, Combatant* combatant)
 {
-    if((!combatant)||(combatant->getType() != DMHelper::CombatantType_Monster))
+    if((!combatant)||(combatant->getCombatantType() != DMHelper::CombatantType_Monster))
         return;
 
     Monster* monster = dynamic_cast<Monster*>(combatant);
@@ -87,7 +87,7 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
 {
 // TODO: Change to a reference
 
-    if((!combatant)||(combatant->getType() != DMHelper::CombatantType_Monster))
+    if((!combatant)||(combatant->getCombatantType() != DMHelper::CombatantType_Monster))
         return;
 
     Monster* monster = dynamic_cast<Monster*>(combatant);

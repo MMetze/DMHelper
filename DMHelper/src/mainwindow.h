@@ -1,7 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "characterdialog.h"
+#include "campaignobjectbase.h"
 #include "bestiarydialog.h"
 #include "dmconstants.h"
 #ifdef INCLUDE_CHASE_SUPPORT
@@ -22,23 +22,25 @@ class Character;
 class Adventure;
 class Encounter;
 class EncounterTextEdit;
+class EncounterScrollingTextEdit;
 class TimeAndDateFrame;
 class Map;
 class MRUHandler;
 class QStandardItem;
-class QStandardItemModel;
+class CampaignTreeModel;
 class QVBoxLayout;
 class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
 class PublishFrame;
-class DMHelperRibbon;
+class RibbonMain;
 class RibbonTabFile;
 class RibbonTabCampaign;
 class RibbonTabBestiary;
-class RibbonTabHelp;
 class RibbonTabMap;
 class RibbonTabBattle;
+class RibbonTabScrolling;
+class RibbonTabText;
 class BattleDialogModel;
 class MapEditFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -72,12 +74,8 @@ public slots:
 
     void newCharacter();
     void importCharacter();
-    //void TEST_DISCORD();
     void importItem();
-    void newNPC();
-    void importNPC();
-    //void removeCurrentCharacter();
-    void newAdventure();
+    void newParty();
     void newTextEncounter();
     void newBattleEncounter();
     void newScrollingTextEncounter();
@@ -101,10 +99,13 @@ public slots:
 
 signals:
     void campaignLoaded(Campaign* campaign);
+    void dispatchPublishImage(QImage img);
     void dispatchPublishImage(QImage img, QColor color);
     void dispatchAnimateImage(QImage img);
 
     void cancelSelect();
+
+    void characterChanged(QUuid id);
 
 protected:
     virtual void showEvent(QShowEvent * event);
@@ -127,21 +128,18 @@ protected:
     void deleteCampaign();
     void enableCampaignMenu();
 
-    Encounter* notesFromIndex(const QModelIndex & index);
-    Character* characterFromIndex(const QModelIndex & index);
-    Adventure* adventureFromIndex(const QModelIndex & index);
-    Encounter* encounterFromIndex(const QModelIndex & index);
-    Map* mapFromIndex(const QModelIndex & index);
+    bool selectItem(QUuid itemId);
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
     QStandardItem* findItem(QStandardItem* parent, int itemType, QUuid itemId);
+    QStandardItem* findItem(QStandardItem* parent, QUuid itemId);
     QStandardItem* findParentbyType(QStandardItem* child, int parentType);
     void setIndexExpanded(bool expanded, const QModelIndex& index);
 
     // Bestiary
     void writeBestiary();
 
-    void newEncounter(int encounterType);
+    CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
 
 protected slots:
     void openFile(const QString& filename);
@@ -156,12 +154,8 @@ protected slots:
     void handleTreeItemExpanded(const QModelIndex & index);
     void handleTreeItemCollapsed(const QModelIndex & index);
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
-    void handleEncounterTextChanged();
-    void handleStartNewBattle();
-    void handleLoadBattle();
-    void handleDeleteBattle();
 
-    void handleAnimationStarted(QColor color);
+    void handleAnimationStarted();
     void handleAnimationPreview(QImage img);
 
     // Bestiary
@@ -175,9 +169,16 @@ protected slots:
     void openTextTranslator();
     void openRandomMarkets();
 
-    QDialog* createDialog(QWidget* contents);
+    QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
+
+    void connectTextToText();
+    void connectTextToScroll();
 
     void battleModelChanged(BattleDialogModel* model);
+    void activateObject(CampaignObjectBase* object);
+    void deactivateObject();
+    void activateWidget(int objectType, CampaignObjectBase* object = nullptr);
+    void setRibbonToType(int objectType);
 
 #ifdef INCLUDE_CHASE_SUPPORT
     void startChase();
@@ -200,14 +201,13 @@ private:
     QDialog* countdownDlg;
 
     EncounterTextEdit* encounterTextEdit;
+    EncounterScrollingTextEdit* _scrollingTextEdit;
 
-    QStandardItemModel* treeModel;
+    CampaignTreeModel* treeModel;
     QMap<QString, QModelIndex> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;
     QString campaignFileName;
-
-    //QUuid currentCharacter;
 
     OptionsContainer* _options;
 
@@ -235,13 +235,14 @@ private:
     bool dirty;
     int _animationFrameCount;
 
-    DMHelperRibbon* _ribbon;
+    RibbonMain* _ribbon;
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
     RibbonTabBestiary* _ribbonTabTools;
-    RibbonTabHelp* _ribbonTabHelp;
     RibbonTabMap* _ribbonTabMap;
     RibbonTabBattle* _ribbonTabBattle;
+    RibbonTabScrolling* _ribbonTabScrolling;
+    RibbonTabText* _ribbonTabText;
     MapEditFrame* _ribbonTabMiniMap;
 };
 

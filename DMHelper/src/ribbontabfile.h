@@ -1,14 +1,14 @@
 #ifndef RIBBONTABFILE_H
 #define RIBBONTABFILE_H
 
-#include <QFrame>
+#include "ribbonframe.h"
 #include <QMenu>
 
 namespace Ui {
 class RibbonTabFile;
 }
 
-class RibbonTabFile : public QFrame
+class RibbonTabFile : public RibbonFrame
 {
     Q_OBJECT
 
@@ -18,6 +18,8 @@ public:
 
     QMenu* getMRUMenu() const;
 
+    virtual PublishButtonRibbon* getPublishRibbon() override;
+
 signals:
     void newClicked();
     void openClicked();
@@ -26,6 +28,14 @@ signals:
 
     void optionsClicked();
     void closeClicked();
+
+    void userGuideClicked();
+    void gettingStartedClicked();
+    void checkForUpdatesClicked();
+    void aboutClicked();
+
+protected:
+    virtual void showEvent(QShowEvent *event) override;
 
 private slots:
     void showMRUMenu();

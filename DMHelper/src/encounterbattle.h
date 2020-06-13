@@ -1,37 +1,36 @@
 #ifndef ENCOUNTERBATTLE_H
 #define ENCOUNTERBATTLE_H
 
-#include "encounter.h"
+#include "encountertext.h"
 #include "combatant.h"
+#include <QDomElement>
 
 class QDomDocument;
-class QDomElement;
 class BattleDialogModel;
 class AudioTrack;
 
-class EncounterBattle : public Encounter
+class EncounterBattle : public EncounterText
 {
     Q_OBJECT
 public:
 
-    explicit EncounterBattle(const QString& encounterName, QObject *parent);
-    explicit EncounterBattle(const EncounterBattle& obj);
+    explicit EncounterBattle(const QString& encounterName = QString(), QObject *parent = nullptr);
+    //explicit EncounterBattle(const EncounterBattle& obj);
     virtual ~EncounterBattle() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
-    virtual void resolveReferences() override;
+    //virtual void resolveReferences() override;
 
     // Base functions to handle UI widgets
-    virtual void widgetActivated(QWidget* widget) override;
-    virtual void widgetDeactivated(QWidget* widget) override;
+    //virtual void widgetActivated(QWidget* widget) override;
+    //virtual void widgetDeactivated(QWidget* widget) override;
 
-    virtual int getType() const override;
+    virtual int getObjectType() const override;
 
-    virtual bool hasData() const override;
+    virtual bool hasData() const;
 
-    virtual QString getText() const;
+//    virtual QString getText() const;
 
     AudioTrack* getAudioTrack();
     QUuid getAudioTrackId();
@@ -49,25 +48,28 @@ public:
     void removeCombatant(int wave, int index);
     Combatant* getCombatantById(QUuid combatantId, int combatantIntId) const;
 
+    void createBattleDialogModel();
     void setBattleDialogModel(BattleDialogModel* model);
     BattleDialogModel* getBattleDialogModel() const;
     void removeBattleDialogModel();
 
 public slots:
-    virtual void setText(const QString& newText);
-
-protected slots:
-    virtual void widgetChanged() override;
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+//    virtual void setText(const QString& newText);
 
 protected:
+//    virtual void widgetChanged() override;
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
+
     void inputXMLBattle(const QDomElement &element, bool isImport);
     BattleDialogModel* createNewBattle(QPointF combatantPos);
 
     void connectFrameToModel();
     void disconnectFrameFromModel();
 
-    QString _text;
+//    QString _text;
     QUuid _audioTrackId;
     QList<CombatantGroupList> _combatantWaves;
     BattleDialogModel* _battleModel;

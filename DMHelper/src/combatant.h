@@ -59,21 +59,22 @@ public:
     const int SKILLS_SKILLED = 1;
     const int SKILLS_EXPERT = 2;
 
-    explicit Combatant(QObject *parent = nullptr);
-    explicit Combatant(const Combatant &obj);  // copy constructor
+    explicit Combatant(const QString& name = QString(), QObject *parent = nullptr);
+    //explicit Combatant(const Combatant &obj);  // copy constructor
     virtual ~Combatant() override;
 
     // From CampaignObjectBase
-    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual int getObjectType() const override;
 
     virtual void beginBatchChanges();
     virtual void endBatchChanges();
 
     virtual Combatant* clone() const = 0;
 
-    virtual QString getName() const;
-    virtual int getType() const;
+    //virtual QString getName() const;
+    virtual int getCombatantType() const;
     virtual int getInitiative() const;
     virtual int getSpeed() const = 0;
     virtual int getArmorClass() const;
@@ -98,11 +99,11 @@ public:
     static QList<Combatant*> instantiateCombatants(CombatantGroup combatantGroup);
 
 signals:
-    void dirty();
-    void changed();
+    //void dirty();
+    //void changed();
 
 public slots:
-    virtual void setName(const QString& combatantName);
+    //virtual void setName(const QString& combatantName);
     virtual void setInitiative(int initiative);
     virtual void setArmorClass(int armorClass);
     virtual void addAttack(const Attack& attack);
@@ -113,11 +114,14 @@ public slots:
     virtual void setIcon(const QString &newIcon);
 
 protected:
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
     void registerChange();
+    void copyValues(const Combatant &other);
 
-    QString _name;
+    //QString _name;
     int _initiative;
     int _armorClass;
     QList<Attack> _attacks;
