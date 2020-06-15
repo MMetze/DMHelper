@@ -506,7 +506,7 @@ CampaignTreeItem* CampaignTreeModel::getChildById(QStandardItem* parentItem, con
     if(!parentItem)
         return nullptr;
 
-    for(int i = 0; i < rowCount(); ++i)
+    for(int i = 0; i < parentItem->rowCount(); ++i)
     {
         CampaignTreeItem* item = dynamic_cast<CampaignTreeItem*>(parentItem->child(i));
         if(item)
