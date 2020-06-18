@@ -48,6 +48,7 @@
 #include <QtMath>
 #include <QUuid>
 #include <QPixmap>
+#include <QScreen>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_RENDER_TEXT
@@ -1227,6 +1228,104 @@ void BattleFrame::showEvent(QShowEvent *event)
     {
         ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
     }
+
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(!primary)
+        return;
+
+    int ribbonHeight = primary->availableSize().height() / 15;
+    QFontMetrics metrics = ui->lblNext->fontMetrics();
+
+    int labelHeight = metrics.height() + (ribbonHeight / 10);
+    int iconDim = ribbonHeight - labelHeight;
+    int newWidth = qMax(metrics.horizontalAdvance(ui->lblCountdown->text()), iconDim);
+
+    ui->lblNext->setMinimumWidth(newWidth);
+    ui->lblNext->setMaximumWidth(newWidth);
+    ui->lblNext->setMinimumHeight(labelHeight);
+    ui->lblNext->setMaximumHeight(labelHeight);
+
+    ui->lblSort->setMinimumWidth(newWidth);
+    ui->lblSort->setMaximumWidth(newWidth);
+    ui->lblSort->setMinimumHeight(labelHeight);
+    ui->lblSort->setMaximumHeight(labelHeight);
+
+    ui->lblRound->setMinimumWidth(newWidth);
+    ui->lblRound->setMaximumWidth(newWidth);
+    ui->lblRound->setMinimumHeight(labelHeight);
+    ui->lblRound->setMaximumHeight(labelHeight);
+
+    ui->edtRounds->setMinimumWidth(newWidth);
+    ui->edtRounds->setMaximumWidth(newWidth);
+    ui->edtRounds->setMinimumHeight(iconDim);
+    ui->edtRounds->setMaximumHeight(iconDim);
+
+    ui->lblCountdown->setMinimumWidth(newWidth);
+    ui->lblCountdown->setMaximumWidth(newWidth);
+    ui->lblCountdown->setMinimumHeight(labelHeight);
+    ui->lblCountdown->setMaximumHeight(labelHeight);
+
+    ui->edtCountdown->setMinimumWidth(newWidth);
+    ui->edtCountdown->setMaximumWidth(newWidth);
+    ui->edtCountdown->setMinimumHeight(iconDim);
+    ui->edtCountdown->setMaximumHeight(iconDim);
+
+    ui->btnNext->setMinimumWidth(newWidth);
+    ui->btnNext->setMaximumWidth(newWidth);
+    ui->btnNext->setMinimumHeight(iconDim);
+    ui->btnNext->setMaximumHeight(iconDim);
+
+    ui->btnSort->setMinimumWidth(newWidth);
+    ui->btnSort->setMaximumWidth(newWidth);
+    ui->btnSort->setMinimumHeight(iconDim);
+    ui->btnSort->setMaximumHeight(iconDim);
+
+    int iconSize = qMin(newWidth, iconDim) * 4 / 5;
+    ui->btnNext->setIconSize(QSize(iconSize, iconSize));
+    ui->btnSort->setIconSize(QSize(iconSize, iconSize));
+
+    /*
+    QFontMetrics metrics = label.fontMetrics();
+    int labelHeight = getLabelHeight(metrics);
+    int iconDim = height() - labelHeight;
+    int newWidth = qMax(metrics.horizontalAdvance(label.text()), iconDim);
+
+    setWidgetSize(label, newWidth, labelHeight);
+    setButtonSize(button, newWidth, iconDim);
+    //setWidgetSize(button, newWidth, iconDim);
+    //button.setIconSize(QSize(iconDim * 4 / 5, iconDim * 4 / 5));
+}
+
+void RibbonFrame::setLineHeight(QFrame& line)
+{
+    setLineHeight(line, height());
+}
+
+void RibbonFrame::setLineHeight(QFrame& line, int fullHeight)
+{
+    int lineHeight = fullHeight * 9 / 10;
+    line.setMinimumHeight(lineHeight);
+    line.setMaximumHeight(lineHeight);
+}
+
+int RibbonFrame::getLabelHeight(QLabel& label) const
+{
+    return getLabelHeight(label.fontMetrics());
+}
+
+int RibbonFrame::getLabelHeight(const QFontMetrics& metrics) const
+{
+    return metrics.height() + (height() / 10);
+}
+
+void RibbonFrame::setWidgetSize(QWidget& widget, int w, int h) const
+{
+    widget.setMinimumWidth(w);
+    widget.setMaximumWidth(w);
+    widget.setMinimumHeight(h);
+    widget.setMaximumHeight(h);
+}
+*/
 }
 
 void BattleFrame::timerEvent(QTimerEvent *event)
