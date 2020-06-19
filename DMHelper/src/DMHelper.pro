@@ -486,6 +486,16 @@ DISTFILES += \
     buildanddeploy_msvc.cmd \
     buildanddeploymac \
     bugs.txt \
+    installer/config/config.xml \
+    installer/config/dmhelper.ico \
+    installer/config/dmhelper_background.png \
+    installer/config/dmhelper_banner.png \
+    installer/config/dmhelper_icon.png \
+    installer/config/parchment.jpg \
+    installer/config/style.qss \
+    installer/packages/com.dmhelper.app/meta/installscript.qs \
+    installer/packages/com.dmhelper.app/meta/license.txt \
+    installer/packages/com.dmhelper.app/meta/package.xml \
     release_notes.txt \
     resources/calendar.xml \
     resources/equipment.xml \

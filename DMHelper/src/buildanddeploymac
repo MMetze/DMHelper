@@ -1,6 +1,12 @@
-echo Building DM Helper for MAC
+echo .
+echo Building DM Helper for MacOS
+echo .
 
-export PATH=$PATH:$HOME/Qt/5.13.2/clang_64/bin
+export QT_DIR=$HOME/Qt
+export QT_VERSION=5.14.2
+
+export PATH=$PATH:$QT_DIR/$QT_VERSION/clang_64/bin:$QT_DIR/Tools/QtInstallerFramework/3.2/bin
+echo $PATH
 
 cd ..
 rm -R build-clang_64bit-Release
@@ -8,34 +14,50 @@ rm -R bin64
 rm "DM Helper macOS release.zip"
 mkdir build-clang_64bit-Release
 mkdir bin64
+mkdir bin64/config
+mkdir bin64/packages
+mkdir bin64/packages/com.dmhelper.app
+mkdir bin64/packages/com.dmhelper.app/meta
+mkdir bin64/packages/com.dmhelper.app/data
+cp -R src/installer/ bin64/
+
 cd build-clang_64bit-Release
 qmake ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
 make -j4
 
-cp -R DMHelper.app/ ../bin64/DMHelper.app/
-cp ../src/binsrcmac/Info.plist ../bin64/DMHelper.app/Contents/
+cp -R DMHelper.app/ ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
+cp ../src/binsrcmac/Info.plist ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/
 
-cd ../bin64
+cd ../bin64/packages/com.dmhelper.app/data
 mkdir DMHelper.app/Contents/Frameworks
-cp -R ../src/vlc/VLCKit.framework DMHelper.app/Contents/Frameworks/VLCKit.framework
+cp -R ../../../../src/vlc/VLCKit.framework DMHelper.app/Contents/Frameworks/VLCKit.framework
 otool -L DMHelper.app/Contents/MacOS/DMHelper
 install_name_tool -id @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelper.app/Contents/Frameworks/VLCKit.framework/Versions/A/VLCKit
 install_name_tool -change @loader_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelper.app/Contents/MacOS/DMHelper
 otool -L DMHelper.app/Contents/MacOS/DMHelper
 
-cd ../build-clang_64bit-Release
+cd ../../../../build-clang_64bit-Release
 
-macdeployqt ../bin64/DMHelper.app/
+macdeployqt ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
 
-cp -R ../src/bestiary/ ../bin64/DMHelper.app/Contents/Resources
-cp -R ../src/resources/ ../bin64/DMHelper.app/Contents/Resources
-cp -R ../src/doc/ ../bin64/DMHelper.app/Contents/Resources
-cp ../src/binsrcmac/DMHelper.icns ../bin64/DMHelper.app/Contents/Resources
+cp -R ../src/bestiary/ ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
+cp -R ../src/resources/ ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
+cp -R ../src/doc/ ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
+cp ../src/binsrcmac/DMHelper.icns ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
 
 cd ../bin64
 
+echo .
+echo Create the installer
+echo .
+cd ../bin64
+binarycreator -c ./config/config.xml -p ./packages "DM-Helper-macOS-release-Installer"
+mv "./DM-Helper-macOS-release-Installer.app" "../DM Helper macOS release Installer.app"
+
+echo .
+echo Create the zip-file distribution
+echo .
+cd packages/com.dmhelper.app/data
 zip -r "DM Helper macOS release.zip" *
-
-mv "DM Helper macOS release.zip" ../
-
-
+mv "DM Helper macOS release.zip" ../../../../
+cd ../../../..
