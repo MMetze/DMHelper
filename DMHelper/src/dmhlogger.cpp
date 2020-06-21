@@ -6,6 +6,10 @@
 #include <QStandardPaths>
 #include <QDebug>
 
+#ifndef QT_DEBUG
+#define DMH_LOG_TO_FILE
+#endif
+
 DMHLogger* DMHLogger::_instance = nullptr;
 
 const int MAX_NUMBER_OF_LOGFILES = 5;
@@ -20,7 +24,7 @@ DMHLogger::DMHLogger() :
     _out(nullptr),
     _log(nullptr)
 {
-#ifndef QT_DEBUG
+#ifdef DMH_LOG_TO_FILE
     if(!_instance)
     {
         initialize();
@@ -32,7 +36,7 @@ DMHLogger::DMHLogger() :
 
 DMHLogger::~DMHLogger()
 {
-#ifndef QT_DEBUG
+#ifdef DMH_LOG_TO_FILE
     if(_instance)
     {
         qDebug() << "[DMHLogger] Logger shutting down";
@@ -52,12 +56,17 @@ void DMHLogger::initialize()
     if(_instance)
         return;
 
-    QString logDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + QString("/log");
+    QString logDirBasePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString logDirPath = logDirBasePath + QString("/log");
     QDir logDir(logDirPath);
     if(!logDir.exists())
     {
-        qDebug() << "Log directory not found '" << logDirPath << "'. All debug output directed to console.";
-        return;
+        QDir().mkpath(logDirPath);
+        if(!logDir.exists())
+        {
+            qDebug() << "Log directory not found '" << logDirPath << "'. All debug output directed to console.";
+            return;
+        }
     }
 
     QStringList logFileList = logDir.entryList(QStringList(QString("*.log")),

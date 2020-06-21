@@ -29,7 +29,7 @@ xcopy /s .\installer\* ..\bin64\*
 cd ..
 
 rem Uncomment the following line to skip actually building the SW
-goto skip_build
+rem goto skip_build
 
 rmdir /s /q .\build-64_bit-release
 mkdir build-64_bit-release
