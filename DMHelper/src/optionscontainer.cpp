@@ -483,8 +483,7 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename)
     appFile = fileDirPath.path() + QString("/resources/") + defaultFilename;
 #endif
 
-    QDir standardDir;
-    standardDir.mkpath(standardPath);
+    QDir().mkpath(standardPath);
 
     if(QFile::copy(appFile, standardFile))
     {
@@ -571,8 +570,7 @@ QString OptionsContainer::getStandardDirectory(const QString& defaultDir, bool* 
     }
 
     qDebug() << "[OptionsContainer] Creating standard directory: " << result;
-    QDir rootDir(standardPath);
-    rootDir.mkdir(defaultDir);
+    QDir().mkpath(result);
 
     if(!standardDir.exists())
     {

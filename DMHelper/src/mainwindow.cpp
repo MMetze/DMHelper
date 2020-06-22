@@ -303,7 +303,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     */
     connect(_ribbonTabTools, SIGNAL(bestiaryClicked()), this, SLOT(openBestiary()));
-    QShortcut* bestiaryShortcut = new QShortcut(QKeySequence(tr("Ctrl+B", "Open Bestiary")), this);
+    QShortcut* bestiaryShortcut = new QShortcut(QKeySequence(tr("Ctrl+M", "Open Bestiary")), this);
     connect(bestiaryShortcut, SIGNAL(activated()), this, SLOT(openBestiary()));
     connect(_ribbonTabTools, SIGNAL(exportBestiaryClicked()), this, SLOT(exportBestiary()));
     connect(_ribbonTabTools, SIGNAL(importBestiaryClicked()), this, SLOT(importBestiary()));
