@@ -14,7 +14,7 @@ Other objects to the battle scene).
 Logging fix
 
 Shortcuts:
-Ctrl+B = Bestiary
+Ctrl+M = Bestiary
 Ctrl+S = Save Campaign
 Ctrl+D = Dice Roll Dialog
 Ctrl+M = DM Screen
