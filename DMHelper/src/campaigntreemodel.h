@@ -43,6 +43,7 @@ protected slots:
     void handleRowsMoved(const QModelIndex &parent, int start, int end, const QModelIndex &destination, int row);
     void handleTimer();
     void handleItemChanged(QStandardItem *item);
+    void handleObjectNameChanged(CampaignObjectBase* object, const QString& name);
 
 protected:
 

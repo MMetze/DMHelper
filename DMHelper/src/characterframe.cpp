@@ -114,6 +114,7 @@ void CharacterFrame::activateObject(CampaignObjectBase* object)
     }
 
     setCharacter(character);
+    connect(_character, &Character::nameChanged, this, &CharacterFrame::updateCharacterName);
 
     emit checkableChanged(false);
     emit setPublishEnabled(true);
@@ -127,6 +128,7 @@ void CharacterFrame::deactivateObject()
         return;
     }
 
+    disconnect(_character, &Character::nameChanged, this, &CharacterFrame::updateCharacterName);
     writeCharacterData();
     setCharacter(nullptr);
 }
@@ -479,6 +481,14 @@ void CharacterFrame::writeCharacterData()
         calculateMods();
         //ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
     }
+}
+
+void CharacterFrame::updateCharacterName()
+{
+    if(!_character)
+        return;
+
+    ui->edtName->setText(_character->getName());
 }
 
 void CharacterFrame::handlePublishClicked()
