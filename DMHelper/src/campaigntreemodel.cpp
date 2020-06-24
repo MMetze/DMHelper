@@ -221,6 +221,24 @@ void CampaignTreeModel::handleItemChanged(QStandardItem *item)
     }
 }
 
+void CampaignTreeModel::handleObjectNameChanged(CampaignObjectBase* object, const QString& name)
+{
+    if(!object)
+        return;
+
+    qDebug() << "[CampaignTreeModel] Object " << object << " has a new name " << name;
+
+    CampaignTreeItem* item = campaignItemFromIndex(getObject(object->getID()));
+    if(!item)
+    {
+        qDebug() << "[CampaignTreeModel] Unable to find tree item for object " << object;
+        return;
+    }
+
+    if(item->text() != name)
+        item->setText(name);
+}
+
 void CampaignTreeModel::updateCampaignEntries()
 {
     if(!_campaign)
@@ -274,6 +292,8 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     treeEntry->setData(QVariant(object->getID().toString()), DMHelper::TreeItemData_ID);
     //treeModel->appendRow(campaignItem);
     //ui->treeView->expand(campaignItem->index());
+
+    connect(object, &CampaignObjectBase::nameChanged, this, &CampaignTreeModel::handleObjectNameChanged);
 
     setTreeEntryVisualization(treeEntry);
 
@@ -447,7 +467,7 @@ void CampaignTreeModel::setTreeEntryVisualization(CampaignTreeItem* entry)
                 Character* character = dynamic_cast<Character*>(object);
                 bool isPC = ((character) && (character->isInParty()));
                 entry->setIcon(isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
-                entry->setEditable(false);
+                //entry->setEditable(false);
                 entry->setCheckable(isPC);
                 if(isPC)
                     entry->setCheckState(character->getActive() ? Qt::Checked : Qt::Unchecked);

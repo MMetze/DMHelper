@@ -329,7 +329,7 @@ void CampaignObjectBase::setName(const QString& name)
     if(objectName() != name)
     {
         setObjectName(name);
-        //emit nameChanged(objectName());
+        emit nameChanged(this, objectName());
         //handleInternalDirty();
         handleInternalChange();
     }

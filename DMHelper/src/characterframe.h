@@ -42,6 +42,7 @@ protected:
 private slots:
     void readCharacterData();
     void writeCharacterData();
+    void updateCharacterName();
     void handlePublishClicked();
     void syncDndBeyond();
     void openExpertiseDialog();
