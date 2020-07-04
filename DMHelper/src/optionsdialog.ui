@@ -101,13 +101,6 @@
             </item>
            </layout>
           </item>
-          <item>
-           <widget class="QCheckBox" name="chkShowAnimations">
-            <property name="text">
-             <string>Show Quick Reference Animations</string>
-            </property>
-           </widget>
-          </item>
          </layout>
         </widget>
        </item>

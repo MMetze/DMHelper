@@ -27,6 +27,10 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
 
     ui->btnUndo->setEnabled(false);
     ui->btnRedo->setEnabled(false);
+
+    // Todo: add a proper undo/redo behavior
+    ui->btnUndo->hide();
+    ui->btnRedo->hide();
 }
 
 RibbonTabCampaign::~RibbonTabCampaign()
