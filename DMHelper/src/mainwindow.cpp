@@ -348,6 +348,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView->setModel(treeModel);
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    if(ui->treeView->header())
+    {
+        ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        ui->treeView->header()->setStretchLastSection(false);
+    }
+
     connect(ui->treeView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(handleCustomContextMenu(QPoint)));
     connect(ui->treeView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(handleTreeItemSelected(QModelIndex,QModelIndex)));
     connect(ui->treeView,SIGNAL(activated(QModelIndex)),this,SLOT(handleTreeItemDoubleClicked(QModelIndex)));
@@ -1158,7 +1165,8 @@ void MainWindow::showPublishWindow(bool visible)
         {
             pubWindow->show();
         }
-        pubWindow->activateWindow();
+        // TODO: do we need this at all?
+        // pubWindow->activateWindow();
     }
     else
     {
@@ -1733,6 +1741,8 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     updateClock();
 
     treeModel->setCampaign(campaign);
+
+    ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
 
     if(campaign)
     {

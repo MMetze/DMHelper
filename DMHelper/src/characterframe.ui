@@ -121,7 +121,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_frame_topleft.png</pixmap>
+             <pixmap>:/img/data/character_frame_topleft.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -149,7 +149,7 @@
              </size>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_frame_top.png</pixmap>
+             <pixmap>:/img/data/character_frame_top.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -177,7 +177,7 @@
              </size>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_frame_left.png</pixmap>
+             <pixmap>:/img/data/character_frame_left.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -236,7 +236,7 @@
              </size>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_frame_bottomleft.png</pixmap>
+             <pixmap>:/img/data/character_frame_bottomleft.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -264,7 +264,7 @@
              </size>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_frame_bottom.png</pixmap>
+             <pixmap>:/img/data/character_frame_bottom.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -377,7 +377,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_topleft.png</pixmap>
+           <pixmap>:/img/data/character_details_topleft.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -405,7 +405,7 @@
            </size>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_top.png</pixmap>
+           <pixmap>:/img/data/character_details_top.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -458,7 +458,7 @@
            </size>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_left.png</pixmap>
+           <pixmap>:/img/data/character_details_left.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -486,7 +486,7 @@
            </size>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_bottom.png</pixmap>
+           <pixmap>:/img/data/character_details_bottom.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -514,7 +514,7 @@
            </size>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_right.png</pixmap>
+           <pixmap>:/img/data/character_details_right.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -578,7 +578,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_details_tailtop.png</pixmap>
+             <pixmap>:/img/data/character_details_tailtop.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -606,7 +606,7 @@
              </size>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_details_tailmiddle.png</pixmap>
+             <pixmap>:/img/data/character_details_tailmiddle.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -634,7 +634,7 @@
              </size>
             </property>
             <property name="pixmap">
-             <pixmap resource="resources.qrc">:/img/data/character_details_tailbottom.png</pixmap>
+             <pixmap>:/img/data/character_details_tailbottom.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -692,7 +692,7 @@
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_topright.png</pixmap>
+           <pixmap>:/img/data/character_details_topright.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -720,7 +720,7 @@
            </size>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_bottomleft.png</pixmap>
+           <pixmap>:/img/data/character_details_bottomleft.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -748,7 +748,7 @@
            </size>
           </property>
           <property name="pixmap">
-           <pixmap resource="resources.qrc">:/img/data/character_details_bottomright.png</pixmap>
+           <pixmap>:/img/data/character_details_bottomright.png</pixmap>
           </property>
           <property name="scaledContents">
            <bool>true</bool>
@@ -1065,7 +1065,7 @@
             <string>  D&amp;&amp;D Beyond Sync</string>
            </property>
            <property name="icon">
-            <iconset resource="resources.qrc">
+            <iconset>
              <normaloff>:/img/data/icon_reload.png</normaloff>:/img/data/icon_reload.png</iconset>
            </property>
           </widget>
@@ -1214,7 +1214,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1242,7 +1242,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1273,7 +1273,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1301,7 +1301,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1329,7 +1329,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1360,7 +1360,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1466,7 +1466,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1494,7 +1494,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1552,7 +1552,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1580,7 +1580,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1608,7 +1608,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1714,7 +1714,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1745,7 +1745,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1773,7 +1773,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1801,7 +1801,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1829,7 +1829,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1884,7 +1884,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1912,7 +1912,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1943,7 +1943,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1971,7 +1971,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -1999,7 +1999,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2030,7 +2030,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2136,7 +2136,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2164,7 +2164,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2219,7 +2219,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2247,7 +2247,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2278,7 +2278,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2306,7 +2306,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2334,7 +2334,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2365,7 +2365,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2471,7 +2471,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2499,7 +2499,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2638,7 +2638,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2669,7 +2669,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2697,7 +2697,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2725,7 +2725,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2756,7 +2756,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2784,7 +2784,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2812,7 +2812,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2840,7 +2840,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2895,7 +2895,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2923,7 +2923,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2954,7 +2954,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -2982,7 +2982,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3010,7 +3010,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3041,7 +3041,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3153,7 +3153,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3181,7 +3181,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3243,7 +3243,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3271,7 +3271,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3302,7 +3302,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3330,7 +3330,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3358,7 +3358,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3389,7 +3389,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3508,7 +3508,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3536,7 +3536,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3591,7 +3591,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3619,7 +3619,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3650,7 +3650,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3678,7 +3678,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3706,7 +3706,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3737,7 +3737,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3856,7 +3856,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3884,7 +3884,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -3948,7 +3948,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+               <pixmap>:/img/data/character_stat_left.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -3976,7 +3976,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+               <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4007,7 +4007,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+               <pixmap>:/img/data/character_stat_topleft.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4035,7 +4035,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+               <pixmap>:/img/data/character_stat_right.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4063,7 +4063,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+               <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4094,7 +4094,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+               <pixmap>:/img/data/character_stat_topright.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4397,7 +4397,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+               <pixmap>:/img/data/character_stat_top.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4425,7 +4425,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+               <pixmap>:/img/data/character_stat_bottom.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4483,7 +4483,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+               <pixmap>:/img/data/character_stat_topleft.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4514,7 +4514,7 @@
                <string/>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+               <pixmap>:/img/data/character_stat_topright.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4542,7 +4542,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+               <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4570,7 +4570,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+               <pixmap>:/img/data/character_stat_bottom.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4598,7 +4598,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+               <pixmap>:/img/data/character_stat_left.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4626,7 +4626,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+               <pixmap>:/img/data/character_stat_right.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4654,7 +4654,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+               <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -4682,7 +4682,7 @@
                </size>
               </property>
               <property name="pixmap">
-               <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+               <pixmap>:/img/data/character_stat_top.png</pixmap>
               </property>
               <property name="scaledContents">
                <bool>true</bool>
@@ -5317,7 +5317,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                   <pixmap>:/img/data/character_stat_left.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5345,7 +5345,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                   <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5376,7 +5376,7 @@
                    <string/>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                   <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5404,7 +5404,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                   <pixmap>:/img/data/character_stat_right.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5432,7 +5432,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                   <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5463,7 +5463,7 @@
                    <string/>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                   <pixmap>:/img/data/character_stat_topright.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5576,7 +5576,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                   <pixmap>:/img/data/character_stat_top.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5604,7 +5604,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                   <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5659,7 +5659,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                   <pixmap>:/img/data/character_stat_left.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5687,7 +5687,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                   <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5718,7 +5718,7 @@
                    <string/>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                   <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5746,7 +5746,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                   <pixmap>:/img/data/character_stat_right.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5774,7 +5774,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                   <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5805,7 +5805,7 @@
                    <string/>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                   <pixmap>:/img/data/character_stat_topright.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5921,7 +5921,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                   <pixmap>:/img/data/character_stat_top.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -5949,7 +5949,7 @@
                    </size>
                   </property>
                   <property name="pixmap">
-                   <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                   <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                   </property>
                   <property name="scaledContents">
                    <bool>true</bool>
@@ -6006,7 +6006,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6034,7 +6034,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6065,7 +6065,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6093,7 +6093,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6121,7 +6121,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6152,7 +6152,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6233,7 +6233,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6261,7 +6261,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6316,7 +6316,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_left.png</pixmap>
+                 <pixmap>:/img/data/character_stat_left.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6344,7 +6344,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6375,7 +6375,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topleft.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topleft.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6403,7 +6403,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_right.png</pixmap>
+                 <pixmap>:/img/data/character_stat_right.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6431,7 +6431,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottomright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottomright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6462,7 +6462,7 @@
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_topright.png</pixmap>
+                 <pixmap>:/img/data/character_stat_topright.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6543,7 +6543,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_top.png</pixmap>
+                 <pixmap>:/img/data/character_stat_top.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6571,7 +6571,7 @@
                  </size>
                 </property>
                 <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/img/data/character_stat_bottom.png</pixmap>
+                 <pixmap>:/img/data/character_stat_bottom.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -6611,7 +6611,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tabFeatures">
       <attribute name="title">
@@ -6736,8 +6736,6 @@
   <tabstop>edtNotes</tabstop>
   <tabstop>edtSpells</tabstop>
  </tabstops>
- <resources>
-  <include location="resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>
