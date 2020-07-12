@@ -15,13 +15,15 @@ Logging fix
 
 Shortcuts:
 Ctrl+M = Bestiary
+Ctrl+O = Open Campaign
 Ctrl+S = Save Campaign
 Ctrl+D = Dice Roll Dialog
-Ctrl+M = DM Screen
+Ctrl+E = DM Screen
 Ctrl+R = Quick Reference
 Ctrl+T = Tables
 Ctrl+K = Calendar
 Ctrl+P = Publish
+Ctrl+W = Preview
 Ctrl+N = Next Combatant
 
 white grid or black screen at button click

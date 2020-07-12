@@ -274,6 +274,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // File Menu
     connect(_ribbonTabFile, SIGNAL(newClicked()), this, SLOT(newCampaign()));
     connect(_ribbonTabFile, SIGNAL(openClicked()), this, SLOT(openFileDialog()));
+    QShortcut* openShortcut = new QShortcut(QKeySequence(tr("Ctrl+O", "Open")), this);
+    connect(openShortcut, SIGNAL(activated()), this, SLOT(openFileDialog()));
     connect(_ribbonTabFile, SIGNAL(saveClicked()), this, SLOT(saveCampaign()));
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
     connect(saveShortcut, SIGNAL(activated()), this, SLOT(saveCampaign()));
@@ -593,7 +595,7 @@ MainWindow::MainWindow(QWidget *parent) :
     previewFrame->setPointerFile(_options->getPointerFile());
     previewDlg = createDialog(previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
     connect(_ribbon->getPublishRibbon(), SIGNAL(previewClicked()), previewDlg, SLOT(exec()));
-    QShortcut* previewShortcut = new QShortcut(QKeySequence(tr("Ctrl+I", "Preview")), this);
+    QShortcut* previewShortcut = new QShortcut(QKeySequence(tr("Ctrl+L", "Preview")), this);
     connect(previewShortcut, SIGNAL(activated()), previewDlg, SLOT(exec()));
 
     dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
@@ -618,7 +620,7 @@ MainWindow::MainWindow(QWidget *parent) :
     countdownDlg = createDialog(new CountdownFrame(this));
 
     connect(_ribbonTabTools, SIGNAL(screenClicked()), dmScreenDlg, SLOT(exec()));
-    QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+M", "DM Screen")), this);
+    QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+E", "DM Screen")), this);
     connect(dmScreenShortcut, SIGNAL(activated()), dmScreenDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(tablesClicked()), tableDlg, SLOT(show()));
     QShortcut* tablesShortcut = new QShortcut(QKeySequence(tr("Ctrl+T", "Tables")), this);
