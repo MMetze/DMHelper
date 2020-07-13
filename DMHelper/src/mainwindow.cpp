@@ -949,7 +949,12 @@ void MainWindow::newBattleEncounter()
 
     EncounterBattle* battle = dynamic_cast<EncounterBattle*>(encounter);
     if(battle)
+    {
         battle->createBattleDialogModel();
+        BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
+        if(battleFrame)
+            battleFrame->setBattle(battle);
+    }
 }
 
 void MainWindow::newScrollingTextEncounter()
@@ -1936,17 +1941,15 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     CampaignObjectBase* itemObject = nullptr;
 
     if(item)
+    {
         itemObject = item->getCampaignItemObject();
+        if(itemObject)
+            activateObject(itemObject);
+    }
 
-    if(itemObject)
-    {
-        activateObject(itemObject);
-        _ribbonTabCampaign->setAddPCButton(((itemObject->getObjectType() == DMHelper::CampaignType_Party) || (itemObject->getParentByType(DMHelper::CampaignType_Party) != nullptr)));
-    }
-    else
-    {
-        _ribbonTabCampaign->setAddPCButton(false);
-    }
+    _ribbonTabCampaign->setAddPCButton((itemObject) &&
+                                       ((itemObject->getObjectType() == DMHelper::CampaignType_Party) ||
+                                       (itemObject->getParentByType(DMHelper::CampaignType_Party) != nullptr)));
 }
 
 void MainWindow::handleTreeItemDoubleClicked(const QModelIndex & index)
