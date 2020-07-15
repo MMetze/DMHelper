@@ -2084,6 +2084,7 @@ void MainWindow::openAboutDialog()
     qDebug() << "[MainWindow] Opening About Box";
 
     AboutDialog dlg;
+    dlg.resize(qMax(dlg.width(), width() * 3 / 4), qMax(dlg.height(), height() * 3 / 4));
     dlg.exec();
 }
 

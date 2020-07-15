@@ -158,7 +158,9 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
     _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
-    _showCompass = static_cast<bool>(element.attribute("showCompass",QString::number(0)).toInt());
+    // TODO: possibly re-enable compass at some point
+    //_showCompass = static_cast<bool>(element.attribute("showCompass",QString::number(0)).toInt());
+    _showCompass = false;
     _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
     _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
