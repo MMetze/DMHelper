@@ -488,7 +488,7 @@
      <item>
       <widget class="QLabel" name="lblEditCamera">
        <property name="text">
-        <string>Edit</string>
+        <string>Resize</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>
@@ -662,7 +662,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Drag to show the distance between two points</string>
+            <string>Activate to include a height in the distance</string>
            </property>
            <property name="text">
             <string/>
