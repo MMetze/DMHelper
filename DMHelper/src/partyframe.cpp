@@ -292,8 +292,13 @@ int PartyFrame::getColumnCount()
     if(_characterFrames.count() == 0)
         return -1;
 
+    qDebug() << "[PartyFrame] character list width: " << ui->characterList->width() << ", viewport: " << ui->characterList->viewport()->width();
+    qDebug() << "[PartyFrame] single grid count: " << _characterFrames.at(0)->width() << ", hint: " << _characterFrames.at(0)->sizeHint();
+    qDebug() << "[PartyFrame] calculated columns: " << (ui->characterList->width() - PARTY_FRAME_SPACING) / (_characterFrames.at(0)->width() + PARTY_FRAME_SPACING);
+
     // (Width of the scroll area minus the left margin) / (width of a frame plus spacing between frames)
-    return (ui->characterList->width() - PARTY_FRAME_SPACING) / (_characterFrames.at(0)->width() + PARTY_FRAME_SPACING);
+    //return (ui->characterList->width() - PARTY_FRAME_SPACING) / (_characterFrames.at(0)->width() + PARTY_FRAME_SPACING);
+    return (ui->characterList->width() - PARTY_FRAME_SPACING) / (320 + PARTY_FRAME_SPACING);
 }
 
 void PartyFrame::calculateThresholds()

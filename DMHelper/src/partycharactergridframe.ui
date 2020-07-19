@@ -2,14 +2,6 @@
 <ui version="4.0">
  <class>PartyCharacterGridFrame</class>
  <widget class="QFrame" name="PartyCharacterGridFrame">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>284</width>
-    <height>295</height>
-   </rect>
-  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
     <horstretch>0</horstretch>
@@ -17,7 +9,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Frame</string>
+   <string/>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -31,24 +23,27 @@
   <property name="lineWidth">
    <number>1</number>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_5">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1,1">
    <property name="spacing">
     <number>3</number>
    </property>
    <property name="leftMargin">
-    <number>2</number>
+    <number>3</number>
    </property>
    <property name="topMargin">
-    <number>2</number>
+    <number>3</number>
    </property>
    <property name="rightMargin">
-    <number>2</number>
+    <number>3</number>
    </property>
    <property name="bottomMargin">
-    <number>2</number>
+    <number>3</number>
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>3</number>
+     </property>
      <item>
       <widget class="QLabel" name="lblIcon">
        <property name="sizePolicy">
@@ -59,14 +54,14 @@
        </property>
        <property name="minimumSize">
         <size>
-         <width>55</width>
-         <height>75</height>
+         <width>88</width>
+         <height>120</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>55</width>
-         <height>75</height>
+         <width>88</width>
+         <height>120</height>
         </size>
        </property>
        <property name="frameShape">
@@ -86,7 +81,7 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <property name="spacing">
-        <number>2</number>
+        <number>0</number>
        </property>
        <item>
         <widget class="QLineEdit" name="edtName">
@@ -98,6 +93,18 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
          </property>
          <property name="font">
           <font>
@@ -119,7 +126,7 @@
        <item>
         <widget class="QTextEdit" name="edtRace">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -127,7 +134,13 @@
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>50</height>
+           <height>90</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>60</height>
           </size>
          </property>
          <property name="frameShape">
@@ -142,19 +155,15 @@
          <property name="readOnly">
           <bool>true</bool>
          </property>
-         <property name="html">
-          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:4.125pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:12pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
         </widget>
        </item>
       </layout>
      </item>
      <item>
       <layout class="QVBoxLayout" name="updateLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QPushButton" name="btnUpdate">
          <property name="sizePolicy">
@@ -188,8 +197,8 @@ p, li { white-space: pre-wrap; }
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>40</height>
+           <width>5</width>
+           <height>0</height>
           </size>
          </property>
         </spacer>

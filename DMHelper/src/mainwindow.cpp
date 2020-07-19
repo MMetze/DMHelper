@@ -917,6 +917,7 @@ void MainWindow::importCharacter()
         return;
 
     CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &MainWindow::updateCampaignTree);
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
     connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
     importer->importCharacter(campaign, true);

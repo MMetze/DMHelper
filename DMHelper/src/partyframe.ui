@@ -428,8 +428,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Update
-Characters</string>
+                <string>Update All</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
