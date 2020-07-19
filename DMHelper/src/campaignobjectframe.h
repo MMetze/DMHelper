@@ -27,8 +27,7 @@ public slots:
     virtual void publishClicked(bool checked);
     virtual void setRotation(int rotation);
     virtual void setBackgroundColor(QColor color);
-    //virtual void cancelPublish();
-
+    virtual void reloadObject();
 };
 
 #endif // CAMPAIGNOBJECTFRAME_H

@@ -274,6 +274,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // File Menu
     connect(_ribbonTabFile, SIGNAL(newClicked()), this, SLOT(newCampaign()));
     connect(_ribbonTabFile, SIGNAL(openClicked()), this, SLOT(openFileDialog()));
+    QShortcut* openShortcut = new QShortcut(QKeySequence(tr("Ctrl+O", "Open")), this);
+    connect(openShortcut, SIGNAL(activated()), this, SLOT(openFileDialog()));
     connect(_ribbonTabFile, SIGNAL(saveClicked()), this, SLOT(saveCampaign()));
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
     connect(saveShortcut, SIGNAL(activated()), this, SLOT(saveCampaign()));
@@ -348,6 +350,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeView->setModel(treeModel);
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    if(ui->treeView->header())
+    {
+        ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+        ui->treeView->header()->setStretchLastSection(false);
+    }
+
     connect(ui->treeView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(handleCustomContextMenu(QPoint)));
     connect(ui->treeView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(handleTreeItemSelected(QModelIndex,QModelIndex)));
     connect(ui->treeView,SIGNAL(activated(QModelIndex)),this,SLOT(handleTreeItemDoubleClicked(QModelIndex)));
@@ -586,7 +595,7 @@ MainWindow::MainWindow(QWidget *parent) :
     previewFrame->setPointerFile(_options->getPointerFile());
     previewDlg = createDialog(previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
     connect(_ribbon->getPublishRibbon(), SIGNAL(previewClicked()), previewDlg, SLOT(exec()));
-    QShortcut* previewShortcut = new QShortcut(QKeySequence(tr("Ctrl+I", "Preview")), this);
+    QShortcut* previewShortcut = new QShortcut(QKeySequence(tr("Ctrl+L", "Preview")), this);
     connect(previewShortcut, SIGNAL(activated()), previewDlg, SLOT(exec()));
 
     dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
@@ -611,7 +620,7 @@ MainWindow::MainWindow(QWidget *parent) :
     countdownDlg = createDialog(new CountdownFrame(this));
 
     connect(_ribbonTabTools, SIGNAL(screenClicked()), dmScreenDlg, SLOT(exec()));
-    QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+M", "DM Screen")), this);
+    QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+E", "DM Screen")), this);
     connect(dmScreenShortcut, SIGNAL(activated()), dmScreenDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(tablesClicked()), tableDlg, SLOT(show()));
     QShortcut* tablesShortcut = new QShortcut(QKeySequence(tr("Ctrl+T", "Tables")), this);
@@ -908,6 +917,7 @@ void MainWindow::importCharacter()
         return;
 
     CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterImported, this, &MainWindow::updateCampaignTree);
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
     connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
     importer->importCharacter(campaign, true);
@@ -940,7 +950,12 @@ void MainWindow::newBattleEncounter()
 
     EncounterBattle* battle = dynamic_cast<EncounterBattle*>(encounter);
     if(battle)
+    {
         battle->createBattleDialogModel();
+        BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
+        if(battleFrame)
+            battleFrame->setBattle(battle);
+    }
 }
 
 void MainWindow::newScrollingTextEncounter()
@@ -1158,7 +1173,8 @@ void MainWindow::showPublishWindow(bool visible)
         {
             pubWindow->show();
         }
-        pubWindow->activateWindow();
+        // TODO: do we need this at all?
+        // pubWindow->activateWindow();
     }
     else
     {
@@ -1734,6 +1750,8 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     treeModel->setCampaign(campaign);
 
+    ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
+
     if(campaign)
     {
         QModelIndex firstIndex = treeModel->index(0,0);
@@ -1924,17 +1942,15 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     CampaignObjectBase* itemObject = nullptr;
 
     if(item)
+    {
         itemObject = item->getCampaignItemObject();
+        if(itemObject)
+            activateObject(itemObject);
+    }
 
-    if(itemObject)
-    {
-        activateObject(itemObject);
-        _ribbonTabCampaign->setAddPCButton(((itemObject->getObjectType() == DMHelper::CampaignType_Party) || (itemObject->getParentByType(DMHelper::CampaignType_Party) != nullptr)));
-    }
-    else
-    {
-        _ribbonTabCampaign->setAddPCButton(false);
-    }
+    _ribbonTabCampaign->setAddPCButton((itemObject) &&
+                                       ((itemObject->getObjectType() == DMHelper::CampaignType_Party) ||
+                                       (itemObject->getParentByType(DMHelper::CampaignType_Party) != nullptr)));
 }
 
 void MainWindow::handleTreeItemDoubleClicked(const QModelIndex & index)
@@ -2069,6 +2085,7 @@ void MainWindow::openAboutDialog()
     qDebug() << "[MainWindow] Opening About Box";
 
     AboutDialog dlg;
+    dlg.resize(qMax(dlg.width(), width() * 3 / 4), qMax(dlg.height(), height() * 3 / 4));
     dlg.exec();
 }
 

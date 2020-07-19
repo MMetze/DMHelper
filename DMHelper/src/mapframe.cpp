@@ -27,7 +27,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _backgroundVideo(nullptr),
     _fow(nullptr),
     _erase(true),
-    _smooth(false),
+    _smooth(true),
     _brushMode(DMHelper::BrushType_Circle),
     _brushSize(30),
     _publishZoom(false),
@@ -104,7 +104,7 @@ MapFrame::MapFrame(QWidget *parent) :
     //_publishTimer->setSingleShot(false);
     //connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
 
-    setMapCursor();
+    //setMapCursor();
     //setScale(1.0);
 
     /***** TODO: Remove this when finalized ****/
@@ -180,6 +180,7 @@ void MapFrame::setMap(Map* map)
         return;
 
     initializeFoW();
+    setMapCursor();
     loadTracks();
 }
 

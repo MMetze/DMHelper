@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>428</width>
+    <width>480</width>
     <height>331</height>
    </rect>
   </property>
@@ -428,8 +428,7 @@
                 </font>
                </property>
                <property name="text">
-                <string>Update
-Characters</string>
+                <string>Update All</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -882,7 +881,7 @@ Characters</string>
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeType">
-        <enum>QSizePolicy::Preferred</enum>
+        <enum>QSizePolicy::Expanding</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -913,7 +912,7 @@ Characters</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>426</width>
+        <width>478</width>
         <height>100</height>
        </rect>
       </property>

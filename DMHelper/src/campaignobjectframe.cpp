@@ -34,3 +34,7 @@ void CampaignObjectFrame::setBackgroundColor(QColor color)
 {
     Q_UNUSED(color);
 }
+
+void CampaignObjectFrame::reloadObject()
+{
+}

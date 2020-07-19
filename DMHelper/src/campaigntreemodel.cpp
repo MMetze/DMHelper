@@ -1,6 +1,7 @@
 #include "campaigntreemodel.h"
 #include "combatant.h"
 #include "character.h"
+#include "map.h"
 #include "campaigntreeitem.h"
 #include "dmconstants.h"
 #include <QMimeData>
@@ -292,6 +293,12 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     treeEntry->setData(QVariant(object->getID().toString()), DMHelper::TreeItemData_ID);
     //treeModel->appendRow(campaignItem);
     //ui->treeView->expand(campaignItem->index());
+
+    if(object->getObjectType() == DMHelper::CampaignType_Map)
+    {
+        Map* mapObject = dynamic_cast<Map*>(object);
+        treeEntry->setToolTip(mapObject->getFileName());
+    }
 
     connect(object, &CampaignObjectBase::nameChanged, this, &CampaignTreeModel::handleObjectNameChanged);
 

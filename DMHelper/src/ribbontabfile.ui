@@ -134,7 +134,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open an existing campaign</string>
+        <string>Open an existing campaign (Ctrl+O)</string>
        </property>
        <property name="text">
         <string/>

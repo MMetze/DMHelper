@@ -125,6 +125,7 @@ public slots:
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
     virtual void setBackgroundColor(QColor color) override;
+    virtual void reloadObject() override;
 
     //void rotateCCW();
     //void rotateCW();

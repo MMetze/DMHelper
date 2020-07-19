@@ -3,6 +3,9 @@
 #include "character.h"
 #include "dmconstants.h"
 #include "characterimporter.h"
+#include <QDebug>
+
+// TODO: make this scalable with screen size
 
 PartyCharacterGridFrame::PartyCharacterGridFrame(Character& character, QWidget *parent) :
     QFrame(parent),
@@ -23,8 +26,6 @@ PartyCharacterGridFrame::~PartyCharacterGridFrame()
 
 void PartyCharacterGridFrame::readCharacter()
 {
-    ui->lblIcon->setPixmap(_character.getIconPixmap(DMHelper::PixmapSize_Animate).scaled(55, 75, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    ui->lblIcon->setEnabled(_character.getActive());
     ui->edtName->setText(_character.getName());
 //    ui->edtRace->setText(character.getStringValue(Character::StringValue_race));
 //    ui->edtClass->setText(character.getStringValue(Character::StringValue_class));
@@ -41,6 +42,9 @@ void PartyCharacterGridFrame::readCharacter()
     ui->edtInt->setText(QString::number(_character.getIntelligence()) + " (" + Character::getAbilityModStr(_character.getIntelligence()) + ")");
     ui->edtWis->setText(QString::number(_character.getWisdom()) + " (" + Character::getAbilityModStr(_character.getWisdom()) + ")");
     ui->edtCha->setText(QString::number(_character.getCharisma()) + " (" + Character::getAbilityModStr(_character.getCharisma()) + ")");
+
+    ui->lblIcon->setPixmap(_character.getIconPixmap(DMHelper::PixmapSize_Animate).scaled(88, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    ui->lblIcon->setEnabled(_character.getActive());
 
     ui->btnUpdate->setVisible(_character.getDndBeyondID() > 0);
     ui->edtName->setCursorPosition(0);

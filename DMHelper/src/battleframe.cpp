@@ -1393,7 +1393,10 @@ void BattleFrame::updateMap()
     }
 
     if((!_background) || (!_fow) || (!_model->getMap()))
+    {
+        qDebug() << "[Battle Frame] No map found to be updated for the current battle model";
         return;
+    }
 
     qDebug() << "[Battle Frame] Updating map " << _model->getMap()->getFileName() << " rect=" << _model->getMapRect().left() << "," << _model->getMapRect().top() << ", " << _model->getMapRect().width() << "x" << _model->getMapRect().height();
     _model->getMap()->initialize();
@@ -1570,6 +1573,12 @@ void BattleFrame::setBackgroundColor(QColor color)
     }
 
     _model->setBackgroundColor(color);
+}
+
+void BattleFrame::reloadObject()
+{
+    recreateCombatantWidgets();
+    reloadMap();
 }
 
 void BattleFrame::handleSelectionChanged()
