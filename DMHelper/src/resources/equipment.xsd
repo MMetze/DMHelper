@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="magicitems"/>
+                <xs:element name="armor">
+                    <xs:complexType>
+                        <xs:choice maxOccurs="unbounded">
+                            <xs:element ref="heavyarmor"/>
+                            <xs:element ref="lightarmor"/>
+                            <xs:element ref="mediumarmor"/>
+                            <xs:element ref="shield"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element ref="weapons"/>
+                <xs:element ref="animals"/>
+                <xs:element ref="tacks"/>
+                <xs:element ref="vehicles"/>
+                <xs:element ref="tradegoods"/>
+                <xs:element ref="lifestyleexpenses"/>
+                <xs:element ref="food"/>
+                <xs:element ref="service"/>
+                <xs:element ref="tools"/>
+                <xs:element ref="adventuringgear"/>
+                <xs:element ref="containers"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="magicitems">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="magicitem"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="magicitem">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="subcategory"/>
+            </xs:sequence>
+            <xs:attribute name="attunement"/>
+            <xs:attribute name="category" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="subcategory">
+        <xs:complexType>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability"/>
+            <xs:attribute name="category"/><!-- never used -->
+            <xs:attribute name="attunement"/><!-- never used -->
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="weapons">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="simplemeleeweapons"/>
+                <xs:element ref="simplerangedweapons"/>
+                <xs:element ref="martialmeleeweapons"/>
+                <xs:element ref="martialrangedweapons"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="simplemeleeweapons">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="weapon"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="simplerangedweapons">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="weapon"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="martialmeleeweapons">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="weapon"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="martialrangedweapons">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="weapon"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="animals">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="animal"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="animal">
+        <xs:complexType>
+            <xs:attribute name="capacity" use="required"/>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required"/>
+            <xs:attribute name="speed" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tacks">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="tack"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tack">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required"/>
+            <xs:attribute name="weight" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="vehicles">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="vehicle"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="vehicle">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required"/>
+            <xs:attribute name="speed" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tradegoods">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="tradegood"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tradegood">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="lifestyleexpenses">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="lifestyle"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="lifestyle">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required" type="xs:NCName"/>
+            <xs:attribute name="probability" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="food">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="fooditem"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="fooditem">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="foodsubitem"/>
+            </xs:sequence>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="foodsubitem">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="service">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="serviceitem"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="serviceitem">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="servicesubitem"/>
+            </xs:sequence>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="servicesubitem">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tools">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="tool"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="tool">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="subtool"/>
+            </xs:sequence>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability"/>
+            <xs:attribute name="weight" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="subtool">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required"/>
+            <xs:attribute name="weight" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="adventuringgear">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="gear"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="gear">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="subgear"/>
+            </xs:sequence>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability"/>
+            <xs:attribute name="weight" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="subgear">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required"/>
+            <xs:attribute name="weight" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="containers">
+        <xs:complexType>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element maxOccurs="unbounded" ref="container"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="container">
+        <xs:complexType>
+            <xs:attribute name="capacity" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required" type="xs:NCName"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="heavyarmor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="armor" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="ac"/>
+                        <xs:attribute name="cost"/>
+                        <xs:attribute name="probability"/>
+                        <xs:attribute name="stealth" type="xs:NMTOKEN"/>
+                        <xs:attribute name="strength"/>
+                        <xs:attribute name="type"/>
+                        <xs:attribute name="weight"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="lightarmor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="armor" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="ac"/>
+                        <xs:attribute name="cost"/>
+                        <xs:attribute name="probability"/>
+                        <xs:attribute name="stealth" type="xs:NMTOKEN"/>
+                        <xs:attribute name="strength"/>
+                        <xs:attribute name="type"/>
+                        <xs:attribute name="weight"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="mediumarmor">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="armor" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="ac"/>
+                        <xs:attribute name="cost"/>
+                        <xs:attribute name="probability"/>
+                        <xs:attribute name="stealth" type="xs:NMTOKEN"/>
+                        <xs:attribute name="strength"/>
+                        <xs:attribute name="type"/>
+                        <xs:attribute name="weight"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="shield">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="armor" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="ac"/>
+                        <xs:attribute name="cost"/>
+                        <xs:attribute name="probability"/>
+                        <xs:attribute name="stealth" type="xs:NMTOKEN"/>
+                        <xs:attribute name="strength"/>
+                        <xs:attribute name="type"/>
+                        <xs:attribute name="weight"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="weapon">
+        <xs:complexType>
+            <xs:attribute name="cost" use="required"/>
+            <xs:attribute name="damage" use="required"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="probability" use="required" type="xs:NCName"/>
+            <xs:attribute name="properties" use="required"/>
+            <xs:attribute name="weight" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

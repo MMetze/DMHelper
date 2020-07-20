@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="section"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="section">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="name"/>
+                <xs:element ref="limitation"/>
+                <xs:element maxOccurs="unbounded" ref="subsection"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="limitation" type="xs:string"/>
+    <xs:element name="subsection">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="description"/>
+                <xs:element maxOccurs="unbounded" ref="data"/>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="data">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="icon"/>
+                <xs:element ref="subtitle"/>
+                <xs:element ref="description"/>
+                <xs:element minOccurs="0" ref="reference"/>
+                <xs:element ref="bullets"/>
+            </xs:choice>
+            <xs:attribute name="title" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="icon" type="xs:NCName"/>
+    <xs:element name="subtitle" type="xs:string"/>
+    <xs:element name="reference" type="xs:string"/>
+    <xs:element name="bullets">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element minOccurs="0" maxOccurs="unbounded" ref="bullet"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="bullet" type="xs:string"/>
+    <xs:element name="description" type="xs:string"/>
+</xs:schema>
