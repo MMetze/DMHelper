@@ -1,6 +1,5 @@
-<!DOCTYPE DMHelperDataXML>
-<root>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="quickref_data.xsd">
 <section>
   <name>Action</name>
   <limitation>1/turn</limitation>
@@ -125,7 +124,7 @@
     </data>
     <data title="Hide">
         <icon>hood</icon>
-        <subtitle></subtitle>
+        <subtitle/>
         <description>Attempt to hide</description>
         <reference>PHB, pg. 192.</reference>
         <bullets>
@@ -138,7 +137,7 @@
     </data>
     <data title="Search">
         <icon>magnifying-glass</icon>
-        <subtitle></subtitle>
+        <subtitle/>
         <description>Devote your attention to finding something</description>
         <reference>PHB, pg. 193.</reference>
         <bullets>
@@ -215,7 +214,7 @@
 </section>
 <section>
   <name>Condition</name>
-  <limitation></limitation>
+    <limitation/>
   <subsection>
     <description>Conditions alter your capabilities in a variety of ways, and can arise as a result of a spell, a class feature, a monster's attack, or other effect.</description>
     <data title="Blinded">
@@ -385,7 +384,7 @@
 </section>
 <section>
   <name>Environmental Effects</name>
-  <limitation></limitation>
+    <limitation/>
   <subsection>
     <description>Effects that obscure vision can prove a significant hindrance to most adventuring tasks.</description>
     <data title="Lightly obscured">

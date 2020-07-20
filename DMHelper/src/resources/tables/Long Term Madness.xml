@@ -1,5 +1,5 @@
-<!DOCTYPE DMHelperDataXML>
-<dmhelperlist name="Long Term Madness">
+<?xml version="1.0" encoding="UTF-8"?>
+<dmhelperlist name="Long Term Madness" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="table.xsd">
     <entry weight="10">The character feels compelled to repeat a specific activity over and over, such as washing hands, touching things, praying, or counting coins.</entry>
     <entry weight="10">The character experiences vivid hallucinations and has disadvantage on ability checks.</entry>
     <entry weight="10">The character suffers extreme paranoia. The character has disadvantage on Wisdom and Charisma checks.</entry>

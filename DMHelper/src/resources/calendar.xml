@@ -1,57 +1,57 @@
-<!DOCTYPE DMHelperDataXML>
-<root>
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="calendar.xsd">
     <calendar name="Gregorian" weeklength="7">
-        <month name="January" alternatename="" days="31"></month>
+        <month name="January" alternatename="" days="31"/>
         <month name="February" alternatename="" days="28">
-            <leapyear name="Leap Day" day="29" period="4"></leapyear>
+            <leapyear name="Leap Day" day="29" period="4"/>
         </month>
         <month name="March" alternatename="" days="31">
-            <specialday name="Spring Equinox" day="20"></specialday>
+            <specialday name="Spring Equinox" day="20"/>
         </month>
-        <month name="April" alternatename="" days="30"></month>
-        <month name="May" alternatename="" days="31"></month>
+        <month name="April" alternatename="" days="30"/>
+        <month name="May" alternatename="" days="31"/>
         <month name="June" alternatename="" days="30">
-            <specialday name="Midsummer" day="21"></specialday>
+            <specialday name="Midsummer" day="21"/>
         </month>
-        <month name="July" alternatename="" days="31"></month>
-        <month name="August" alternatename="" days="31"></month>
+        <month name="July" alternatename="" days="31"/>
+        <month name="August" alternatename="" days="31"/>
         <month name="September" alternatename="" days="30">
-            <specialday name="Autumn Equinox" day="23"></specialday>
+            <specialday name="Autumn Equinox" day="23"/>
         </month>
-        <month name="October" alternatename="" days="31"></month>
-        <month name="November" alternatename="" days="30"></month>
+        <month name="October" alternatename="" days="31"/>
+        <month name="November" alternatename="" days="30"/>
         <month name="December" alternatename="" days="31">
-            <specialday name="Midwinter" day="21"></specialday>
+            <specialday name="Midwinter" day="21"/>
         </month>
     </calendar>
     <calendar name="Harptos" weeklength="10">
-        <month name="Hammer" alternatename="Deepwinter" days="30"></month>
-        <month name="Midwinter" alternatename="" days="1"></month>
-        <month name="Alturiak" alternatename="The Claw of Winter" days="30"></month>
+        <month name="Hammer" alternatename="Deepwinter" days="30"/>
+        <month name="Midwinter" alternatename="" days="1"/>
+        <month name="Alturiak" alternatename="The Claw of Winter" days="30"/>
         <month name="Ches" alternatename="The Claw of Sunsets" days="30">
-            <specialday name="Spring Equinox" day="19"></specialday>
+            <specialday name="Spring Equinox" day="19"/>
         </month>
-        <month name="Tarsakh" alternatename="The Claw of Storms" days="30"></month>
-        <month name="Greengrass" alternatename="" days="1"></month>
-        <month name="Mirtul" alternatename="The Melting" days="30"></month>
+        <month name="Tarsakh" alternatename="The Claw of Storms" days="30"/>
+        <month name="Greengrass" alternatename="" days="1"/>
+        <month name="Mirtul" alternatename="The Melting" days="30"/>
         <month name="Kythorn" alternatename="The Time of Flowers" days="30">
-            <specialday name="Summer Solstice" day="20"></specialday>
+            <specialday name="Summer Solstice" day="20"/>
         </month>
-        <month name="Flamerule" alternatename="Summertide" days="30"></month>
-        <month name="Midsummer" alternatename="" days="1"></month>
+        <month name="Flamerule" alternatename="Summertide" days="30"/>
+        <month name="Midsummer" alternatename="" days="1"/>
         <month name="Shieldmeet" alternatename="" days="0">
-            <leapyear name="Shieldmeet" day="1" period="4"></leapyear>
+            <leapyear name="Shieldmeet" day="1" period="4"/>
         </month>
-        <month name="Eleasis" alternatename="Highsun" days="30"></month>
+        <month name="Eleasis" alternatename="Highsun" days="30"/>
         <month name="Eleint" alternatename="The Fading" days="30">
-            <specialday name="Autumn Equinox" day="21"></specialday>
+            <specialday name="Autumn Equinox" day="21"/>
         </month>
-        <month name="Highharvesttide" alternatename="" days="1"></month>
-        <month name="Marpenoth" alternatename="Leaffall" days="30"></month>
-        <month name="Uktar" alternatename="The Rotting" days="30"></month>
-        <month name="The Feast of the Moon" alternatename="" days="1"></month>
+        <month name="Highharvesttide" alternatename="" days="1"/>
+        <month name="Marpenoth" alternatename="Leaffall" days="30"/>
+        <month name="Uktar" alternatename="The Rotting" days="30"/>
+        <month name="The Feast of the Moon" alternatename="" days="1"/>
         <month name="Nightal" alternatename="The Drawing Down" days="30">
-            <specialday name="Winter Solstice" day="20"></specialday>
+            <specialday name="Winter Solstice" day="20"/>
         </month>
     </calendar>
 </root>
