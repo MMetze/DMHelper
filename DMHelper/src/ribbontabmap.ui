@@ -574,7 +574,7 @@
         <number>0</number>
        </property>
        <property name="text">
-        <string>Distance</string>
+        <string>Ruler</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>
@@ -840,7 +840,7 @@
           <string>Set the scale of the grid. The larger the number, the larger the grid squares</string>
          </property>
          <property name="text">
-          <string>Scale</string>
+          <string>Size</string>
          </property>
         </widget>
        </item>

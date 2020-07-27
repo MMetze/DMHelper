@@ -25,6 +25,7 @@ Ctrl+K = Calendar
 Ctrl+P = Publish
 Ctrl+W = Preview
 Ctrl+N = Next Combatant
+Ctrl+Q = Quit
 
 white grid or black screen at button click
 Import/Export bestiary

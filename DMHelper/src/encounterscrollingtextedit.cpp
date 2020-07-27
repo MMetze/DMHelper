@@ -41,6 +41,8 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
     //QFontDatabase fontDB;
     //ui->cmbFont->addItems(fontDB.families());
 
+    connect(ui->edtText,SIGNAL(textChanged()),this,SLOT(setPlainText()));
+
     /*
     connect(ui->spinSpeed,SIGNAL(valueChanged(double)),this,SIGNAL(scrollSpeedChanged(double)));
     connect(ui->sliderWidth,SIGNAL(valueChanged(int)),this,SIGNAL(imageWidthChanged(int)));
@@ -451,12 +453,13 @@ void EncounterScrollingTextEdit::cleanupPlayer()
     }
 }
 
-/*
 void EncounterScrollingTextEdit::setPlainText()
 {
-    emit textChanged(ui->edtText->toPlainText());
+    //emit textChanged(ui->edtText->toPlainText());
+    setText(ui->edtText->toPlainText());
 }
 
+/*
 void EncounterScrollingTextEdit::setFontSize()
 {
     emit fontSizeChanged(ui->edtSize->text().toInt());

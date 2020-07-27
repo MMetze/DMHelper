@@ -339,7 +339,7 @@
      <item>
       <widget class="QLabel" name="lblNewBattle">
        <property name="text">
-        <string>Battle</string>
+        <string>Combat</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>

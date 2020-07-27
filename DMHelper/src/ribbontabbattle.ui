@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Battle</string>
+   <string>Combat</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -479,7 +479,7 @@
      <item>
       <widget class="QLabel" name="lblAddRadius">
        <property name="text">
-        <string>Radius</string>
+        <string>Sphere</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>

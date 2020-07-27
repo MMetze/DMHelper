@@ -282,6 +282,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
     connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
+    QShortcut* quitShortcut = new QShortcut(QKeySequence(tr("Ctrl+Q", "Quit")), this);
+    connect(quitShortcut, SIGNAL(activated()), this, SLOT(close()));
 
     // Campaign Menu
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(handleCampaignLoaded(Campaign*)));
@@ -1869,7 +1871,7 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     contextMenu->addAction(addMap);
 
     // New battle
-    QAction* addBattle = new QAction(QIcon(":/img/data/icon_newbattle.png"), QString("New Battle"), contextMenu);
+    QAction* addBattle = new QAction(QIcon(":/img/data/icon_newbattle.png"), QString("New Combat"), contextMenu);
     connect(addBattle, SIGNAL(triggered()), this, SLOT(newBattleEncounter()));
     contextMenu->addAction(addBattle);
 
