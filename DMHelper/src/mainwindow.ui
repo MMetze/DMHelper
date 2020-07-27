@@ -195,7 +195,7 @@
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionE_xit">
    <property name="text">
-    <string>E&amp;xit</string>
+    <string>Exit</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>

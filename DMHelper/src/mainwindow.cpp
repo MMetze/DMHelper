@@ -284,6 +284,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
     QShortcut* quitShortcut = new QShortcut(QKeySequence(tr("Ctrl+Q", "Quit")), this);
     connect(quitShortcut, SIGNAL(activated()), this, SLOT(close()));
+    connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
 
     // Campaign Menu
     connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(handleCampaignLoaded(Campaign*)));
