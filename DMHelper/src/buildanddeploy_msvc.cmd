@@ -59,7 +59,7 @@ windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64\packa
 
 rem Create the installer
 cd ..\bin64
-binarycreator -c config\config.xml -p packages "DM Helper 64-bit release Installer"
+binarycreator -c config\config_win64.xml -p packages "DM Helper 64-bit release Installer"
 cd ..
 move ".\bin64\DM Helper 64-bit release Installer.exe" ".\DM Helper 64-bit release Installer.exe"
 
