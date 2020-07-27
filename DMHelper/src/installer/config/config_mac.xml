@@ -11,5 +11,5 @@
     <StartMenuDir>DM Helper</StartMenuDir>
     <TargetDir>@ApplicationsDirX64@/DMHelper</TargetDir>
     <StyleSheet>style.qss</StyleSheet>
-    <RunProgram>@TargetDir@/DMHelper.exe</RunProgram>
+    <RunProgram>@TargetDir@/DMHelper.app/Contents/MacOS/DMHelper</RunProgram>
 </Installer>
