@@ -22,8 +22,6 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnShowEffects, SIGNAL(clicked(bool)), this, SIGNAL(showEffectsClicked(bool)));
     connect(ui->btnShowMovement, SIGNAL(clicked(bool)), this, SIGNAL(showMovementClicked(bool)));
     connect(ui->btnLairActions, SIGNAL(clicked(bool)), this, SIGNAL(lairActionsClicked(bool)));
-    connect(ui->btnNext, SIGNAL(clicked(bool)), this, SIGNAL(nextClicked()));
-    connect(ui->btnSort, SIGNAL(clicked(bool)), this, SIGNAL(sortClicked()));
     connect(ui->btnStatistics, SIGNAL(clicked(bool)), this, SIGNAL(statisticsClicked()));
 }
 
@@ -85,7 +83,5 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblShowMovement, *ui->btnShowMovement);
     setStandardButtonSize(*ui->lblLairActions, *ui->btnLairActions);
     setLineHeight(*ui->line_3);
-    setStandardButtonSize(*ui->lblNext, *ui->btnNext);
-    setStandardButtonSize(*ui->lblSort, *ui->btnSort);
     setStandardButtonSize(*ui->lblStatistics, *ui->btnStatistics);
 }

@@ -40,8 +40,6 @@ signals:
     void showEffectsClicked(bool checked);
     void showMovementClicked(bool checked);
     void lairActionsClicked(bool checked);
-    void nextClicked();
-    void sortClicked();
     void statisticsClicked();
 
 protected:
