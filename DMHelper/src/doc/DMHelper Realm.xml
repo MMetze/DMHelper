@@ -1,717 +1,102 @@
 <!DOCTYPE DMHelperXML>
 <root>
- <campaign _baseID="{64b5ffe3-53d2-49e7-8742-985c464020ae}" worldSettingsExpanded="0" date="01/01/0000" minorVersion="0" adventuresExpanded="1" calendar="Gregorian" worldExpanded="1" partyExpanded="1" time="0" name="DMHelper Realm" majorVersion="1" worldNPCsExpanded="0">
-  <notes>
-   <encounter _baseID="{c5ba9f7c-8d15-4e06-bb09-dcea3c86b444}" type="1" name=""><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+ <campaign majorVersion="2" row="-1" date="01/01/0000" calendar="Gregorian" _baseID="{05505a84-851a-40a3-8cb3-31acdb1f2369}" expanded="1" time="0" name="DMHelper Realm" minorVersion="0">
+  <text-object row="0" _baseID="{92a827ef-4552-4708-8765-0e8cfb8c38f9}" expanded="1" name="Notes"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
-</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]></encounter>
-  </notes>
-  <characters>
-   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/Aroc-the-grey.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="John" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{05371e24-d5aa-456f-96b1-347f4a00f4b8}" hair="" wisdom="10" intelligenceSave="0">
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:8pt; font-weight:400; font-style:normal;">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;"><br /></p></body></html>]]></text-object>
+  <party icon="" row="1" _baseID="{55cd78bf-2dbb-4df1-b398-5161fada1207}" expanded="1" name="Party">
+   <combatant performance="0" alignment="" size="medium" active="1" investigation="0" strength="10" wisdom="10" wisdomSave="0" copper="0" _baseID="{2c0bcc7a-01e4-4c12-a1dc-4411711aa54e}" gold="0" equipment="" sex="" persuasion="0" nature="0" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="10" spells="" silver="0" weight="" dexterity="10" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/Immarel-the-magnificent.png" speed="30" perception="0" jackofalltrades="0" deception="0" charisma="10" class="" armorClass="10" athletics="0" acrobatics="0" arcana="0" survival="0" eyes="" row="0" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="1" proficiencies="" history="0" level="1" stealth="0" race="" sleightOfHand="0" name="John" intimidation="0" level3="0" strengthSave="0" background="N/A" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
     <attacks/>
    </combatant>
-   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/Possessed-torgun.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="Viol" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{a64c8ad3-b4f8-4f17-b68e-6dac55b26354}" hair="" wisdom="10" intelligenceSave="0">
+   <combatant performance="0" alignment="" size="medium" active="1" investigation="0" strength="10" wisdom="10" wisdomSave="0" copper="0" _baseID="{36a4ca4b-910b-4ded-b455-e793dfd37eaf}" gold="0" equipment="" sex="" persuasion="0" nature="0" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="10" spells="" silver="0" weight="" dexterity="10" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/Possessed-torgun.png" speed="30" perception="0" jackofalltrades="0" deception="0" charisma="10" class="" armorClass="10" athletics="0" acrobatics="0" arcana="0" survival="0" eyes="" row="1" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="1" proficiencies="" history="0" level="1" stealth="0" race="" sleightOfHand="0" name="Viol" intimidation="0" level3="0" strengthSave="0" background="N/A" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
     <attacks/>
    </combatant>
-   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/Immarel-the-magnificent.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="Tick" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{78a2dfea-56f8-4e27-be34-77d52d801afd}" hair="" wisdom="10" intelligenceSave="0">
+   <combatant performance="0" alignment="Chaotic Good" size="medium" active="1" investigation="0" strength="9" wisdom="14" wisdomSave="0" copper="0" _baseID="{54d82383-efe1-4885-931a-967634c7fa06}" gold="0" equipment="Staff of Fire&#xa;" sex="" persuasion="0" nature="1" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="18" spells="" silver="0" weight="" dexterity="12" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/The-archmage.png" speed="30" perception="1" jackofalltrades="0" deception="0" charisma="11" class="Wizard" armorClass="13" athletics="0" acrobatics="0" arcana="1" survival="0" eyes="" row="2" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="45" proficiencies="" history="1" level="5" stealth="0" race="Elf" sleightOfHand="0" name="Tick" intimidation="0" level3="0" strengthSave="0" background="Sage" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
     <attacks/>
    </combatant>
-   <combatant constitutionSave="0" arcana="0" constitution="10" type="1" player="N/A" armorClass="10" icon="Images/The-archmage.png" size="medium" level3="0" hitPoints="1" dexteritySave="0" persuasion="0" race="" hitDice="1d0" level="1" acrobatics="0" active="1" background="N/A" class2="N/A" history="0" weight="" subrace="N/A" silver="0" dexterity="10" insight="0" strengthSave="0" class="" spells="" proficiencies="" experience="0" religion="0" wisdomSave="0" survival="0" eyes="" class3="N/A" notes="" platinum="0" age="" speed="30" deception="0" intimidation="0" level2="0" height="" equipment="" athletics="0" charisma="10" sleightOfHand="0" investigation="0" dndBeyondID="-1" name="Grog" stealth="0" nature="0" performance="0" charismaSave="0" animalHandling="0" intelligence="10" perception="0" gold="0" copper="0" medicine="0" sex="" strength="10" alignment="" _baseID="{7a147c2a-68ce-4d7d-84b0-54b767465b44}" hair="" wisdom="10" intelligenceSave="0">
+   <combatant performance="0" alignment="" size="medium" active="1" investigation="0" strength="10" wisdom="10" wisdomSave="0" copper="0" _baseID="{2a026847-13f0-4bee-81ec-669742ebc734}" gold="0" equipment="" sex="" persuasion="0" nature="0" constitutionSave="0" age="" level2="0" notes="" expanded="1" intelligence="10" spells="" silver="0" weight="" dexterity="10" religion="0" constitution="10" hair="" animalHandling="0" charismaSave="0" type="1" icon="Images/Aroc-the-grey.png" speed="30" perception="0" jackofalltrades="0" deception="0" charisma="10" class="" armorClass="10" athletics="0" acrobatics="0" arcana="0" survival="0" eyes="" row="3" class2="N/A" dndBeyondID="-1" player="N/A" intelligenceSave="0" experience="0" medicine="0" hitPoints="1" proficiencies="" history="0" level="1" stealth="0" race="" sleightOfHand="0" name="Grog" intimidation="0" level3="0" strengthSave="0" background="N/A" hitDice="1d0" class3="N/A" platinum="0" subrace="N/A" insight="0" dexteritySave="0" height="">
     <attacks/>
    </combatant>
-  </characters>
-  <adventures>
-   <adventure _baseID="{ea9484c3-ad3e-4809-83e0-b26c57b29e98}" name="Lair of the Necromancer" expanded="1">
-    <encounters>
-     <encounter _baseID="{dba68e8f-8e9d-423d-997d-0a9049885a99}" type="1" name="Room 1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+  </party>
+  <text-object row="2" _baseID="{6ab1a185-0948-4417-b19d-6e3120b614fa}" expanded="1" name="Adventures"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
-</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8.25pt;">The room is mostly dark. Only lightened by the bit of moonlight, shining through the hole in the ceiling through which you dropped into here. You can see that the ceiling was braced by some wooden planks and one broke, creating an instability which caused the cavein and you dropping down. At first glance this is an mostly empty room, just some broken furniture, some empty barrels and shit, left by rats who long wandered away. </span></p>
-<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8.25pt;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8.25pt;">There are two wooden doors to the east and one in the south.</span></p></body></html>]]></encounter>
-     <encounter _baseID="{9a4c93b1-511b-4d6e-8721-5f60bcbc785b}" type="1" name="Room 19"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><text-object row="0" _baseID="{3772df3d-510c-4529-b0eb-864453484748}" expanded="1" name="Lair of the Necromancer"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
-</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The old, wooden door opens to your pushing it, the hinges creaking loudly. After a few inches the door gets stuck, just wide enough opened for you and your companions to push through, one by one. The following room is dark. Really dark. The little light spilling over from the room before does not help, even a little</p>
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><text-object row="0" _baseID="{5048b84e-67e1-47f0-8253-3f6c01b3da1d}" expanded="1" name="Encounters"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><text-object row="0" _baseID="{98b5e1c5-5b4a-4ebb-82df-75ea3ea5b474}" expanded="1" name="Room 1"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The room is mostly dark. Only lightened by the bit of moonlight, shining through the hole in the ceiling through which you dropped into here. You can see that the ceiling was braced by some wooden planks and one broke, creating an instability which caused the cavein and you dropping down. At first glance this is a mostly empty room, just some broken furniture, some empty barrels and stuff, left by rats who long wandered away.</p>
 <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If the players have a torch or darkvision: The room is mostly empty. Here and there are some little clusters of rubble. The door got stuck on a rock, embedded in the muddy ground. On the other corner of the room, there are two, halfling sized holes, right next to each other. (perception check) You think you saw a reflection off an eye. Just before two large rats emerge from the holes.</p></body></html>]]></encounter>
-     <encounter _baseID="{adc4a7d4-3c12-43ad-b622-1f83bbbed98b}" type="2" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Room 19 Battle"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">There are two wooden doors to the east and one in the south.</p></body></html>]]></text-object>
+     <text-object row="1" _baseID="{8b0c5fa7-e664-4583-9af3-f261d4b6132d}" expanded="1" name="Room 19"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 <html><head><meta name="qrichtext" content="1" /><style type="text/css">
 p, li { white-space: pre-wrap; }
-</style></head><body style=" font-family:'MS Shell Dlg 2'; font-size:8pt; font-weight:400; font-style:normal;">
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The two Rats attack immediately. If the PC have light or darkvision, they are not surprised. </p>
-<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">After two rounds of fighting, four more Rats join the fight.</p></body></html>]]><waves>
-       <wave>
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">The old, wooden door opens to your pushing it, the hinges creaking loudly. After a few inches the door gets stuck, just wide enough opened for you and your companions to push through, one by one. The following room is dark. Really dark. The little light spilling over from the room before does not help, even a little.</p>
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
+<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If the players have a torch or darkvision: The room is mostly empty. Here and there are some little clusters of rubble. The door got stuck on a rock, embedded in the muddy ground. On the other corner of the room, there are two, halfling sized holes, right next to each other. (perception check) You think you saw a reflection off an eye. Just before two large rats emerge from the holes.</p></body></html>]]><battle-object row="0" _baseID="{bd47156b-b2f7-4f56-9897-2bfc35e9e8e9}" expanded="1" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Room 19 Battle">
+       <waves/>
+       <battle cameraRectHeight="236.67358349523681" cameraRectX="357.68581575193184" showCompass="0" showLairActions="0" cameraRectY="732.65909325482016" gridOffsetX="0" showGrid="0" activeId="{d7810c1d-ef8b-42c2-8c2f-d0e5eca3febb}" gridScale="14" cameraRectWidth="283.59669396211859" gridOffsetY="0" mapRectX="431" showAlive="1" showDead="0" backgroundColorG="0" mapRectY="783" mapRectWidth="141" showMovement="1" background="109" backgroundColorR="0" mapRectHeight="109" mapID="{1482558c-86c5-4a17-bd81-3f83698df11a}" backgroundColorB="0" showEffects="1">
+        <battlelogger/>
         <combatants>
-         <combatantPair count="2">
-          <combatant _baseID="{e43c7fb8-4db2-4c55-8c37-5c191e57c045}" passivePerception="10" active="1" type="2" hitDice="2d6" monsterClass="Giant Rat" notes="" name="" hitPoints="0" armorClass="12" icon="">
-           <attacks/>
-          </combatant>
-         </combatantPair>
+         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{54d82383-efe1-4885-931a-967634c7fa06}" initiative="9" positionY="856.12393553742697" _baseID="{b7c060ee-20c1-4997-922d-6acd01c367fc}" expanded="1" positionX="468.79384078382787" name="Tick" isShown="1"/>
+         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{36a4ca4b-910b-4ded-b455-e793dfd37eaf}" initiative="8" positionY="857.26694238722814" _baseID="{d7810c1d-ef8b-42c2-8c2f-d0e5eca3febb}" expanded="1" positionX="495.41049925025209" name="Viol" isShown="1"/>
+         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{2c0bcc7a-01e4-4c12-a1dc-4411711aa54e}" initiative="7" positionY="873.35223173514953" _baseID="{cf222a85-7ae3-426e-a15a-8e1dc9599fc3}" expanded="1" positionX="483.98913423572014" name="John" isShown="1"/>
+         <battlecombatant type="1" isKnown="1" row="-1" combatantId="{2a026847-13f0-4bee-81ec-669742ebc734}" initiative="6" positionY="881.2088357190828" _baseID="{0e23ee81-c0cc-4d2c-b674-0d1372b0f549}" expanded="1" positionX="500.47155237249751" name="Grog" isShown="1"/>
+         <battlecombatant type="2" monsterType="2" isKnown="1" row="-1" monsterHP="10" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="10" positionY="817.31018631291261" _baseID="{0bcf5118-e32e-482f-b0a3-76f0dc6750dd}" legendaryCount="3" expanded="1" positionX="509.18138104283531" name="Giant Rat#1" monsterName="Giant Rat#1" isShown="1"/>
+         <battlecombatant type="2" monsterType="2" isKnown="1" row="-1" monsterHP="8" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="22" positionY="833.43794763266351" _baseID="{38a68e3d-95ab-4fa7-a9bd-1949e45bb40a}" legendaryCount="3" expanded="1" positionX="520.96029073291095" name="Giant Rat#2" monsterName="Giant Rat#2" isShown="1"/>
+         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="10" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="8" positionY="820.15811131557996" _baseID="{4c0bf9a1-c99b-4701-8d88-0c0521a10bf7}" legendaryCount="3" expanded="1" positionX="455.22789779991092" name="Giant Rat#1" monsterName="Giant Rat#1" isShown="1"/>
+         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="5" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="21" positionY="819.66738048903858" _baseID="{621edf03-5831-4ae4-ad4c-97b9273f678a}" legendaryCount="3" expanded="1" positionX="442.95962713638261" name="Giant Rat#2" monsterName="Giant Rat#2" isShown="1"/>
+         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="8" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="17" positionY="806.17228275915772" _baseID="{c4d6842b-1a7b-4ba4-8274-67f4704dd8b6}" legendaryCount="3" expanded="1" positionX="455.22789779991092" name="Giant Rat#3" monsterName="Giant Rat#3" isShown="1"/>
+         <battlecombatant type="2" monsterType="2" isKnown="0" row="-1" monsterHP="4" combatantId="{00000000-0000-0000-0000-000000000000}" monsterClass="Giant Rat" initiative="11" positionY="806.66301358569876" _baseID="{8ba67bd9-ea8f-483c-82a5-e8145d70f6a5}" legendaryCount="3" expanded="1" positionX="442.95962713638266" name="Giant Rat#4" monsterName="Giant Rat#4" isShown="1"/>
         </combatants>
-       </wave>
-       <wave>
-        <combatants>
-         <combatantPair count="4">
-          <combatant _baseID="{0a95e757-a08e-4e96-9053-faad016036f1}" passivePerception="10" active="1" type="2" hitDice="2d6" monsterClass="Giant Rat" notes="" name="" hitPoints="0" armorClass="12" icon="">
-           <attacks/>
-          </combatant>
-         </combatantPair>
-        </combatants>
-       </wave>
-      </waves>
-      <battle showEffects="0" background="301" gridOffsetY="11" showAlive="1" showCompass="0" gridScale="14" backgroundColorB="0" activeId="{da7e94ca-64cc-47b1-a76d-08e5dc853078}" mapRectWidth="421" mapRectX="344" backgroundColorG="0" showGrid="1" mapID="{5514b407-1167-482f-abc3-76c1a9983338}" mapRectY="618" mapRectHeight="301" gridOffsetX="0" backgroundColorR="0" showDead="0">
-       <combatants>
-        <battlecombatant _baseID="{7cd5b7b0-609c-446a-846c-6107b1e6a736}" type="1" positionX="611.1380175658723" positionY="808.5382685069009" combatantId="{05371e24-d5aa-456f-96b1-347f4a00f4b8}" initiative="0"/>
-        <battlecombatant _baseID="{da7e94ca-64cc-47b1-a76d-08e5dc853078}" type="1" positionX="639.120451693852" positionY="778.3350062735258" combatantId="{a64c8ad3-b4f8-4f17-b68e-6dac55b26354}" initiative="0"/>
-        <battlecombatant _baseID="{19c4f461-cd0a-4147-8aea-ce89e8c4dc85}" type="1" positionX="621.7979924717693" positionY="825.6386449184442" combatantId="{78a2dfea-56f8-4e27-be34-77d52d801afd}" initiative="0"/>
-        <battlecombatant _baseID="{34b0ff39-fe82-4c2b-8b53-cb7b593db60b}" type="1" positionX="582.9335006273524" positionY="814.0903387703889" combatantId="{7a147c2a-68ce-4d7d-84b0-54b767465b44}" initiative="0"/>
-        <battlecombatant _baseID="{f1f46c40-2e3b-4d14-895b-876748b92ca1}" type="2" positionX="663.771643663739" positionY="721.5743104857147" combatantId="{e43c7fb8-4db2-4c55-8c37-5c191e57c045}" monsterName="Giant Rat#1" monsterHP="9" initiative="15" monsterType="1" legendaryCount="3" isKnown="1" isShown="1" monsterSize="-1"/>
-        <battlecombatant _baseID="{b00ebffd-ee98-4876-a017-6ef033f58385}" type="2" positionX="643.9137698154141" positionY="721.9259723964868" combatantId="{e43c7fb8-4db2-4c55-8c37-5c191e57c045}" monsterName="Giant Rat#2" monsterHP="10" initiative="21" monsterType="1" legendaryCount="3" isKnown="1" isShown="1" monsterSize="-1"/>
-       </combatants>
-       <effects>
-        <battleeffect _baseID="{f9ef7209-37ee-48ad-b0cd-54871a01aacd}" rotation="191.2553339693965" colorB="0" type="2" positionX="641.5972396486825" positionY="770.405269761606" colorR="115" tip="Test" size="20" colorG="18" colorA="64"/>
-       </effects>
-      </battle>
-     </encounter>
-    </encounters>
-    <maps>
-     <map _baseID="{5514b407-1167-482f-abc3-76c1a9983338}" filename="Images/LairoftheNecromancer.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" name="Lair of the Necromancer">
+        <effects>
+         <battleeffect size="20" type="2" active="1" rotation="-142.02141701436756" colorR="115" tip="Burning Hands" row="-1" visible="1" colorG="18" colorB="0" colorA="92" positionY="849.59241968706874" _baseID="{3c2950d8-dd47-4fbf-afac-fbb0e87ee322}" expanded="1" positionX="498.41574068398825" name="unknown"/>
+        </effects>
+       </battle><![CDATA[]]></battle-object>
+     </text-object>
+    </text-object>
+    <text-object row="1" _baseID="{41f68819-1f96-4643-b236-f5c4f6837203}" expanded="1" name="Maps"><![CDATA[<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+<html><head><meta name="qrichtext" content="1" /><style type="text/css">
+p, li { white-space: pre-wrap; }
+</style></head><body style=" font-family:'Trebuchet MS'; font-size:10pt; font-weight:400; font-style:normal;">
+<p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p></body></html>]]><map playaudio="0" mapRectHeight="192" mapRectX="329" row="0" mapRectY="775" _baseID="{1482558c-86c5-4a17-bd81-3f83698df11a}" expanded="1" filename="Images/LairoftheNecromancer.jpg" audiotrack="{00000000-0000-0000-0000-000000000000}" mapRectWidth="329" name="Lair Map">
       <actions>
-       <action type="1" radius="30" erase="1" brushtype="0">
+       <action type="4" y="795" erase="1" x="432" width="135" height="135"/>
+       <action r="0" g="0" type="0" a="255" b="0"/>
+       <action type="4" y="828" erase="1" x="462" width="1" height="1"/>
+       <action type="4" y="796" erase="1" x="432" width="135" height="135"/>
+       <action type="1" smooth="1" erase="0" radius="30" brushtype="0">
         <points>
-         <point x="460" y="822"/>
-         <point x="461" y="822"/>
-         <point x="462" y="821"/>
-         <point x="463" y="821"/>
-         <point x="464" y="821"/>
-         <point x="467" y="821"/>
-         <point x="469" y="821"/>
-         <point x="470" y="821"/>
-         <point x="472" y="821"/>
-         <point x="474" y="821"/>
-         <point x="476" y="821"/>
-         <point x="479" y="821"/>
-         <point x="481" y="821"/>
-         <point x="483" y="821"/>
-         <point x="484" y="821"/>
-         <point x="485" y="821"/>
-         <point x="486" y="821"/>
-         <point x="487" y="821"/>
-         <point x="488" y="821"/>
-         <point x="489" y="821"/>
-         <point x="490" y="821"/>
-         <point x="491" y="821"/>
-         <point x="492" y="821"/>
-         <point x="494" y="821"/>
-         <point x="496" y="821"/>
-         <point x="497" y="821"/>
-         <point x="499" y="821"/>
-         <point x="501" y="821"/>
-         <point x="503" y="821"/>
-         <point x="505" y="821"/>
-         <point x="508" y="821"/>
-         <point x="510" y="821"/>
-         <point x="512" y="821"/>
-         <point x="514" y="821"/>
-         <point x="515" y="821"/>
-         <point x="516" y="821"/>
-         <point x="517" y="821"/>
-         <point x="518" y="821"/>
-         <point x="519" y="821"/>
-         <point x="520" y="821"/>
-         <point x="521" y="821"/>
-         <point x="522" y="821"/>
-         <point x="523" y="821"/>
-         <point x="525" y="821"/>
-         <point x="527" y="821"/>
-         <point x="528" y="821"/>
-         <point x="530" y="822"/>
-         <point x="531" y="822"/>
-         <point x="532" y="822"/>
-         <point x="533" y="823"/>
-         <point x="534" y="823"/>
-         <point x="535" y="824"/>
-         <point x="536" y="824"/>
-         <point x="536" y="825"/>
-         <point x="537" y="825"/>
-         <point x="538" y="825"/>
-         <point x="538" y="826"/>
-         <point x="538" y="827"/>
-         <point x="539" y="827"/>
-         <point x="539" y="828"/>
-         <point x="540" y="830"/>
-         <point x="541" y="832"/>
-         <point x="541" y="833"/>
-         <point x="541" y="835"/>
-         <point x="541" y="837"/>
-         <point x="541" y="838"/>
-         <point x="542" y="839"/>
-         <point x="542" y="842"/>
-         <point x="542" y="844"/>
-         <point x="542" y="845"/>
-         <point x="542" y="847"/>
-         <point x="542" y="848"/>
-         <point x="542" y="851"/>
-         <point x="542" y="852"/>
-         <point x="542" y="854"/>
-         <point x="542" y="856"/>
-         <point x="542" y="858"/>
-         <point x="542" y="860"/>
-         <point x="542" y="862"/>
-         <point x="542" y="864"/>
-         <point x="542" y="866"/>
-         <point x="542" y="867"/>
-         <point x="542" y="868"/>
-         <point x="542" y="870"/>
-         <point x="542" y="871"/>
-         <point x="542" y="873"/>
-         <point x="542" y="875"/>
-         <point x="542" y="876"/>
-         <point x="542" y="877"/>
-         <point x="542" y="879"/>
-         <point x="542" y="880"/>
-         <point x="542" y="882"/>
-         <point x="542" y="883"/>
-         <point x="542" y="884"/>
-         <point x="542" y="885"/>
-         <point x="542" y="886"/>
-         <point x="542" y="887"/>
-         <point x="542" y="888"/>
-         <point x="542" y="889"/>
-         <point x="542" y="891"/>
-         <point x="542" y="892"/>
-         <point x="542" y="893"/>
-         <point x="542" y="894"/>
-         <point x="542" y="895"/>
-         <point x="542" y="896"/>
-         <point x="542" y="897"/>
-         <point x="542" y="898"/>
-         <point x="542" y="899"/>
-         <point x="542" y="900"/>
-         <point x="542" y="901"/>
-         <point x="541" y="902"/>
-         <point x="540" y="903"/>
-         <point x="539" y="903"/>
-         <point x="538" y="903"/>
-         <point x="537" y="903"/>
-         <point x="536" y="903"/>
-         <point x="535" y="903"/>
-         <point x="534" y="903"/>
-         <point x="533" y="903"/>
-         <point x="531" y="903"/>
-         <point x="530" y="903"/>
-         <point x="528" y="903"/>
-         <point x="527" y="903"/>
-         <point x="525" y="903"/>
-         <point x="524" y="903"/>
-         <point x="522" y="903"/>
-         <point x="521" y="903"/>
-         <point x="519" y="903"/>
-         <point x="518" y="903"/>
-         <point x="516" y="903"/>
-         <point x="515" y="903"/>
-         <point x="513" y="902"/>
-         <point x="512" y="902"/>
-         <point x="511" y="902"/>
-         <point x="510" y="902"/>
-         <point x="509" y="901"/>
-         <point x="508" y="901"/>
-         <point x="507" y="901"/>
-         <point x="506" y="901"/>
-         <point x="504" y="901"/>
-         <point x="503" y="901"/>
-         <point x="502" y="901"/>
-         <point x="501" y="901"/>
-         <point x="500" y="901"/>
-         <point x="499" y="901"/>
-         <point x="498" y="901"/>
-         <point x="497" y="901"/>
-         <point x="496" y="900"/>
-         <point x="495" y="900"/>
-         <point x="494" y="900"/>
-         <point x="493" y="900"/>
-         <point x="492" y="900"/>
-         <point x="491" y="899"/>
-         <point x="490" y="899"/>
-         <point x="489" y="899"/>
-         <point x="487" y="899"/>
-         <point x="486" y="899"/>
-         <point x="485" y="899"/>
-         <point x="484" y="899"/>
-         <point x="483" y="899"/>
-         <point x="481" y="899"/>
-         <point x="481" y="898"/>
-         <point x="480" y="898"/>
-         <point x="479" y="898"/>
-         <point x="478" y="898"/>
-         <point x="477" y="898"/>
-         <point x="476" y="898"/>
-         <point x="475" y="898"/>
-         <point x="474" y="898"/>
-         <point x="473" y="898"/>
-         <point x="472" y="897"/>
-         <point x="470" y="897"/>
-         <point x="469" y="897"/>
-         <point x="468" y="897"/>
-         <point x="467" y="897"/>
-         <point x="466" y="897"/>
-         <point x="465" y="897"/>
-         <point x="464" y="897"/>
-         <point x="463" y="897"/>
-         <point x="462" y="897"/>
-         <point x="461" y="897"/>
-         <point x="460" y="897"/>
-         <point x="459" y="897"/>
-         <point x="458" y="897"/>
-         <point x="458" y="896"/>
-         <point x="457" y="896"/>
-         <point x="457" y="895"/>
-         <point x="455" y="895"/>
-         <point x="455" y="894"/>
-         <point x="454" y="893"/>
-         <point x="453" y="890"/>
-         <point x="451" y="887"/>
-         <point x="449" y="883"/>
-         <point x="446" y="878"/>
-         <point x="442" y="873"/>
-         <point x="441" y="869"/>
-         <point x="438" y="865"/>
-         <point x="435" y="862"/>
-         <point x="434" y="860"/>
-         <point x="433" y="856"/>
-         <point x="432" y="854"/>
-         <point x="431" y="852"/>
-         <point x="429" y="850"/>
-         <point x="429" y="848"/>
-         <point x="429" y="846"/>
-         <point x="429" y="845"/>
-         <point x="429" y="844"/>
-         <point x="429" y="843"/>
-         <point x="429" y="841"/>
-         <point x="429" y="840"/>
-         <point x="429" y="839"/>
-         <point x="429" y="837"/>
-         <point x="429" y="835"/>
-         <point x="429" y="834"/>
-         <point x="429" y="833"/>
-         <point x="430" y="832"/>
-         <point x="430" y="831"/>
-         <point x="431" y="831"/>
-         <point x="431" y="830"/>
-         <point x="432" y="829"/>
-         <point x="433" y="829"/>
-         <point x="434" y="828"/>
-         <point x="435" y="828"/>
-         <point x="436" y="828"/>
-         <point x="438" y="827"/>
-         <point x="439" y="827"/>
-         <point x="441" y="827"/>
-         <point x="443" y="827"/>
-         <point x="446" y="827"/>
-         <point x="449" y="827"/>
-         <point x="452" y="827"/>
-         <point x="453" y="827"/>
-         <point x="456" y="828"/>
-         <point x="457" y="829"/>
-         <point x="461" y="830"/>
-         <point x="463" y="831"/>
-         <point x="465" y="832"/>
-         <point x="467" y="833"/>
-         <point x="469" y="834"/>
-         <point x="470" y="835"/>
-         <point x="471" y="836"/>
-         <point x="472" y="837"/>
-         <point x="473" y="839"/>
-         <point x="473" y="840"/>
-         <point x="473" y="841"/>
-         <point x="474" y="842"/>
-         <point x="474" y="843"/>
-         <point x="474" y="844"/>
-         <point x="474" y="845"/>
-         <point x="475" y="846"/>
-         <point x="475" y="848"/>
-         <point x="475" y="849"/>
-         <point x="476" y="850"/>
-         <point x="477" y="852"/>
-         <point x="477" y="853"/>
-         <point x="478" y="854"/>
-         <point x="479" y="855"/>
-         <point x="480" y="856"/>
-         <point x="481" y="856"/>
-         <point x="482" y="857"/>
-         <point x="485" y="858"/>
-         <point x="488" y="859"/>
-         <point x="491" y="860"/>
-         <point x="493" y="861"/>
-         <point x="497" y="862"/>
-         <point x="500" y="862"/>
-         <point x="503" y="862"/>
-         <point x="506" y="863"/>
-         <point x="508" y="864"/>
-         <point x="510" y="864"/>
-         <point x="510" y="863"/>
+         <point y="821" x="464"/>
         </points>
        </action>
-       <action type="1" radius="30" erase="1" brushtype="0">
+       <action type="1" smooth="1" erase="1" radius="30" brushtype="1">
         <points>
-         <point x="596" y="738"/>
-         <point x="596" y="737"/>
-         <point x="597" y="737"/>
-         <point x="599" y="737"/>
-         <point x="601" y="736"/>
-         <point x="606" y="735"/>
-         <point x="610" y="734"/>
-         <point x="614" y="734"/>
-         <point x="618" y="734"/>
-         <point x="622" y="734"/>
-         <point x="627" y="733"/>
-         <point x="631" y="733"/>
-         <point x="635" y="733"/>
-         <point x="639" y="733"/>
-         <point x="642" y="733"/>
-         <point x="645" y="733"/>
-         <point x="647" y="733"/>
-         <point x="649" y="733"/>
-         <point x="651" y="733"/>
-         <point x="653" y="733"/>
-         <point x="655" y="733"/>
-         <point x="656" y="734"/>
-         <point x="657" y="734"/>
-         <point x="660" y="734"/>
-         <point x="661" y="734"/>
-         <point x="663" y="734"/>
-         <point x="664" y="735"/>
-         <point x="666" y="735"/>
-         <point x="667" y="735"/>
-         <point x="668" y="736"/>
-         <point x="669" y="736"/>
-         <point x="671" y="736"/>
-         <point x="672" y="736"/>
-         <point x="674" y="737"/>
-         <point x="676" y="738"/>
-         <point x="678" y="738"/>
-         <point x="680" y="738"/>
-         <point x="681" y="738"/>
-         <point x="684" y="738"/>
-         <point x="685" y="738"/>
-         <point x="686" y="739"/>
-         <point x="688" y="739"/>
-         <point x="689" y="740"/>
-         <point x="691" y="740"/>
-         <point x="692" y="740"/>
-         <point x="693" y="741"/>
-         <point x="694" y="741"/>
-         <point x="695" y="742"/>
-         <point x="697" y="742"/>
-         <point x="698" y="742"/>
-         <point x="700" y="743"/>
-         <point x="701" y="743"/>
-         <point x="703" y="744"/>
-         <point x="704" y="744"/>
-         <point x="705" y="744"/>
-         <point x="705" y="745"/>
-         <point x="706" y="746"/>
-         <point x="707" y="747"/>
-         <point x="707" y="748"/>
-         <point x="708" y="750"/>
-         <point x="708" y="751"/>
-         <point x="710" y="753"/>
-         <point x="710" y="754"/>
-         <point x="711" y="756"/>
-         <point x="711" y="758"/>
-         <point x="712" y="759"/>
-         <point x="713" y="761"/>
-         <point x="713" y="763"/>
-         <point x="713" y="766"/>
-         <point x="714" y="768"/>
-         <point x="714" y="771"/>
-         <point x="714" y="773"/>
-         <point x="714" y="775"/>
-         <point x="714" y="777"/>
-         <point x="714" y="779"/>
-         <point x="714" y="781"/>
-         <point x="714" y="784"/>
-         <point x="714" y="786"/>
-         <point x="714" y="787"/>
-         <point x="713" y="788"/>
-         <point x="713" y="789"/>
-         <point x="713" y="790"/>
-         <point x="712" y="790"/>
-         <point x="711" y="790"/>
-         <point x="710" y="790"/>
-         <point x="709" y="789"/>
-         <point x="707" y="788"/>
-         <point x="704" y="786"/>
-         <point x="701" y="783"/>
-         <point x="698" y="780"/>
-         <point x="693" y="777"/>
-         <point x="687" y="775"/>
-         <point x="681" y="773"/>
-         <point x="677" y="771"/>
-         <point x="671" y="769"/>
-         <point x="664" y="767"/>
-         <point x="658" y="766"/>
-         <point x="653" y="765"/>
-         <point x="647" y="764"/>
-         <point x="641" y="763"/>
-         <point x="637" y="762"/>
-         <point x="633" y="762"/>
-         <point x="628" y="762"/>
-         <point x="625" y="762"/>
-         <point x="622" y="762"/>
-         <point x="619" y="762"/>
-         <point x="616" y="762"/>
-         <point x="613" y="762"/>
-         <point x="611" y="762"/>
-         <point x="609" y="762"/>
-         <point x="609" y="763"/>
-         <point x="607" y="763"/>
-         <point x="606" y="763"/>
-         <point x="605" y="763"/>
-         <point x="605" y="764"/>
-         <point x="604" y="764"/>
-         <point x="602" y="765"/>
-         <point x="601" y="765"/>
-         <point x="601" y="766"/>
-         <point x="600" y="766"/>
-         <point x="599" y="767"/>
-         <point x="598" y="768"/>
-         <point x="598" y="769"/>
-         <point x="598" y="770"/>
-         <point x="597" y="771"/>
-         <point x="597" y="772"/>
-         <point x="597" y="773"/>
-         <point x="597" y="774"/>
-         <point x="597" y="775"/>
-         <point x="598" y="776"/>
-         <point x="600" y="778"/>
-         <point x="602" y="779"/>
-         <point x="605" y="779"/>
-         <point x="607" y="780"/>
-         <point x="611" y="780"/>
-         <point x="614" y="781"/>
-         <point x="619" y="782"/>
-         <point x="625" y="783"/>
-         <point x="629" y="784"/>
-         <point x="636" y="784"/>
-         <point x="643" y="785"/>
-         <point x="648" y="785"/>
-         <point x="655" y="786"/>
-         <point x="661" y="786"/>
-         <point x="666" y="787"/>
-         <point x="671" y="787"/>
-         <point x="675" y="788"/>
-         <point x="679" y="789"/>
-         <point x="684" y="790"/>
-         <point x="687" y="792"/>
-         <point x="690" y="792"/>
-         <point x="692" y="793"/>
-         <point x="695" y="794"/>
-         <point x="696" y="795"/>
-         <point x="697" y="795"/>
-         <point x="698" y="795"/>
-         <point x="698" y="796"/>
-         <point x="699" y="796"/>
-         <point x="699" y="797"/>
-         <point x="700" y="798"/>
-         <point x="700" y="799"/>
-         <point x="701" y="799"/>
-         <point x="701" y="800"/>
-         <point x="701" y="801"/>
-         <point x="701" y="803"/>
-         <point x="701" y="804"/>
-         <point x="701" y="805"/>
-         <point x="701" y="806"/>
-         <point x="701" y="807"/>
-         <point x="701" y="808"/>
-         <point x="701" y="809"/>
-         <point x="700" y="810"/>
-         <point x="699" y="811"/>
-         <point x="698" y="811"/>
-         <point x="696" y="811"/>
-         <point x="693" y="811"/>
-         <point x="689" y="811"/>
-         <point x="686" y="811"/>
-         <point x="682" y="811"/>
-         <point x="676" y="811"/>
-         <point x="672" y="811"/>
-         <point x="667" y="811"/>
-         <point x="662" y="811"/>
-         <point x="657" y="811"/>
-         <point x="652" y="811"/>
-         <point x="646" y="811"/>
-         <point x="640" y="810"/>
-         <point x="635" y="810"/>
-         <point x="631" y="810"/>
-         <point x="626" y="809"/>
-         <point x="623" y="809"/>
-         <point x="619" y="808"/>
-         <point x="617" y="808"/>
-         <point x="614" y="807"/>
-         <point x="612" y="807"/>
-         <point x="611" y="807"/>
-         <point x="608" y="807"/>
-         <point x="607" y="807"/>
-         <point x="606" y="807"/>
-         <point x="605" y="807"/>
-         <point x="603" y="807"/>
-         <point x="602" y="807"/>
-         <point x="600" y="807"/>
-         <point x="598" y="807"/>
-         <point x="597" y="807"/>
-         <point x="594" y="807"/>
-         <point x="592" y="807"/>
-         <point x="590" y="807"/>
-         <point x="588" y="807"/>
-         <point x="586" y="807"/>
-         <point x="584" y="807"/>
-         <point x="582" y="807"/>
-         <point x="581" y="807"/>
-         <point x="580" y="807"/>
-         <point x="579" y="807"/>
-         <point x="578" y="807"/>
-         <point x="577" y="807"/>
-         <point x="576" y="807"/>
-         <point x="575" y="807"/>
-         <point x="575" y="808"/>
-         <point x="574" y="808"/>
-         <point x="573" y="808"/>
-         <point x="573" y="809"/>
-         <point x="572" y="809"/>
-         <point x="571" y="809"/>
-         <point x="571" y="810"/>
-         <point x="572" y="811"/>
-         <point x="574" y="813"/>
-         <point x="576" y="813"/>
-         <point x="579" y="815"/>
-         <point x="582" y="817"/>
-         <point x="586" y="817"/>
-         <point x="590" y="817"/>
-         <point x="594" y="818"/>
-         <point x="598" y="818"/>
-         <point x="602" y="818"/>
-         <point x="606" y="818"/>
-         <point x="609" y="819"/>
-         <point x="614" y="819"/>
-         <point x="617" y="819"/>
-         <point x="619" y="819"/>
-         <point x="622" y="819"/>
-         <point x="624" y="819"/>
-         <point x="626" y="819"/>
-         <point x="628" y="818"/>
-         <point x="630" y="817"/>
-         <point x="631" y="817"/>
-         <point x="632" y="817"/>
-         <point x="634" y="815"/>
-         <point x="635" y="814"/>
-         <point x="636" y="814"/>
-         <point x="637" y="813"/>
-         <point x="638" y="812"/>
-         <point x="639" y="811"/>
-         <point x="640" y="811"/>
-         <point x="640" y="810"/>
-         <point x="640" y="809"/>
-         <point x="640" y="808"/>
-         <point x="640" y="807"/>
-         <point x="641" y="807"/>
-         <point x="642" y="807"/>
-         <point x="643" y="807"/>
-         <point x="645" y="807"/>
-         <point x="646" y="807"/>
-         <point x="647" y="807"/>
-         <point x="648" y="806"/>
-         <point x="649" y="806"/>
-         <point x="650" y="806"/>
-         <point x="651" y="806"/>
-         <point x="652" y="806"/>
-         <point x="653" y="806"/>
-         <point x="654" y="806"/>
-         <point x="655" y="806"/>
-         <point x="656" y="806"/>
-         <point x="657" y="806"/>
-         <point x="658" y="806"/>
-         <point x="659" y="806"/>
-         <point x="660" y="806"/>
-         <point x="661" y="806"/>
-         <point x="662" y="806"/>
-         <point x="663" y="806"/>
-         <point x="664" y="806"/>
-         <point x="665" y="806"/>
-         <point x="666" y="806"/>
-         <point x="667" y="806"/>
-         <point x="668" y="806"/>
-         <point x="669" y="806"/>
-         <point x="670" y="806"/>
-         <point x="671" y="806"/>
-         <point x="672" y="806"/>
-         <point x="673" y="806"/>
-         <point x="674" y="806"/>
-         <point x="675" y="806"/>
-         <point x="676" y="806"/>
-         <point x="677" y="807"/>
-         <point x="678" y="807"/>
-         <point x="679" y="807"/>
-         <point x="679" y="808"/>
-         <point x="679" y="809"/>
-         <point x="680" y="809"/>
-         <point x="681" y="809"/>
-         <point x="681" y="810"/>
-         <point x="682" y="810"/>
-         <point x="684" y="810"/>
-         <point x="685" y="810"/>
-         <point x="687" y="810"/>
-         <point x="688" y="810"/>
-         <point x="689" y="810"/>
-         <point x="690" y="810"/>
-         <point x="691" y="810"/>
-         <point x="691" y="809"/>
-         <point x="692" y="808"/>
-         <point x="692" y="807"/>
-         <point x="693" y="806"/>
-         <point x="693" y="805"/>
-         <point x="693" y="804"/>
-         <point x="693" y="803"/>
-         <point x="693" y="801"/>
-         <point x="693" y="799"/>
-         <point x="693" y="798"/>
-         <point x="693" y="796"/>
-         <point x="693" y="794"/>
-         <point x="693" y="792"/>
-         <point x="693" y="789"/>
-         <point x="693" y="788"/>
-         <point x="693" y="786"/>
-         <point x="693" y="784"/>
-         <point x="693" y="782"/>
-         <point x="692" y="780"/>
-         <point x="692" y="779"/>
-         <point x="692" y="778"/>
-         <point x="691" y="775"/>
-         <point x="691" y="773"/>
-         <point x="691" y="772"/>
-         <point x="691" y="770"/>
-         <point x="691" y="768"/>
-         <point x="691" y="766"/>
-         <point x="691" y="765"/>
-         <point x="691" y="764"/>
-         <point x="691" y="763"/>
-         <point x="691" y="762"/>
-         <point x="691" y="761"/>
-         <point x="692" y="761"/>
-         <point x="692" y="760"/>
+         <point y="829" x="465"/>
+        </points>
+       </action>
+       <action type="1" smooth="0" erase="1" radius="30" brushtype="1">
+        <points>
+         <point y="827" x="464"/>
         </points>
        </action>
       </actions>
      </map>
-    </maps>
-   </adventure>
-  </adventures>
-  <settings/>
-  <npcs/>
-  <tracks/>
+    </text-object>
+   </text-object>
+  </text-object>
+  <text-object row="3" _baseID="{d083c244-f7f3-47aa-9c26-7725da3787d3}" expanded="1" name="World"><![CDATA[]]></text-object>
  </campaign>
 </root>
