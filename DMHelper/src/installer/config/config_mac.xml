@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>DM Helper</Name>
+    <Version>2.0.0</Version>
+    <Title>DM Helper</Title>
+    <Publisher>DM Helper</Publisher>
+    <WizardStyle>Modern</WizardStyle>
+    <InstallerApplicationIcon>dmhelper</InstallerApplicationIcon>
+    <InstallerWindowIcon>dmhelper_icon.png</InstallerWindowIcon>
+    <Banner>dmhelper_banner.png</Banner>
+    <StartMenuDir>DM Helper</StartMenuDir>
+    <TargetDir>@ApplicationsDirX64@/DMHelper</TargetDir>
+    <StyleSheet>style.qss</StyleSheet>
+    <RunProgram>@TargetDir@/DMHelper.app/Contents/MacOS/DMHelper</RunProgram>
+</Installer>

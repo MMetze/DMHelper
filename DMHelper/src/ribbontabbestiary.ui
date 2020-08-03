@@ -248,7 +248,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the DM Screen (Ctrl+M)</string>
+        <string>Open the DM Screen (Ctrl+E)</string>
        </property>
        <property name="text">
         <string/>

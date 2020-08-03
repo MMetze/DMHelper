@@ -17,7 +17,7 @@
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <property name="currentIndex">
-   <number>0</number>
+   <number>1</number>
   </property>
   <widget class="QWidget" name="tab">
    <attribute name="title">
@@ -40,8 +40,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1766</width>
-         <height>808</height>
+         <width>1776</width>
+         <height>815</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -611,8 +611,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>367</width>
-         <height>475</height>
+         <width>1776</width>
+         <height>815</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout">
@@ -644,7 +644,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Light Armour</string>
+               <string>Light Armor</string>
               </property>
              </widget>
             </item>
@@ -658,7 +658,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Medium Armour</string>
+               <string>Medium Armor</string>
               </property>
              </widget>
             </item>
@@ -672,7 +672,7 @@
                </font>
               </property>
               <property name="text">
-               <string>Heavy Armour</string>
+               <string>Heavy Armor</string>
               </property>
              </widget>
             </item>
@@ -1126,8 +1126,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>559</width>
-         <height>89</height>
+         <width>1776</width>
+         <height>815</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="gridLayout_4">
@@ -1550,8 +1550,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>614</width>
-         <height>174</height>
+         <width>1776</width>
+         <height>815</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -1915,8 +1915,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1766</width>
-         <height>808</height>
+         <width>1776</width>
+         <height>815</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -2499,8 +2499,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>742</width>
-         <height>89</height>
+         <width>1776</width>
+         <height>815</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">

@@ -31,7 +31,6 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
 
         connect(ui->btnResetFileLocations, &QAbstractButton::clicked, this, &OptionsDialog::resetFileLocations);
 
-        ui->chkShowAnimations->setChecked(_options->getShowAnimations());
         QFont font = qApp->font();
         font.setFamily(_options->getFontFamily());
         ui->fontComboBox->setCurrentFont(font);
@@ -66,7 +65,6 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->tabWidget->removeTab(2);
 #endif
 
-        connect(ui->chkShowAnimations, SIGNAL(clicked(bool)), _options, SLOT(setShowAnimations(bool)));
         connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
         connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), _options, SLOT(setFontSize(int)));
         connect(ui->chkShowOnDeck, SIGNAL(clicked(bool)), _options, SLOT(setShowOnDeck(bool)));

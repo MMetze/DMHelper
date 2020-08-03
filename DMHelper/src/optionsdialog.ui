@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>918</width>
-    <height>598</height>
+    <width>626</width>
+    <height>404</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -100,13 +100,6 @@
              </spacer>
             </item>
            </layout>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="chkShowAnimations">
-            <property name="text">
-             <string>Show Quick Reference Animations</string>
-            </property>
-           </widget>
           </item>
          </layout>
         </widget>

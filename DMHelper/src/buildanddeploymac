@@ -12,6 +12,7 @@ cd ..
 rm -R build-clang_64bit-Release
 rm -R bin64
 rm "DM Helper macOS release.zip"
+rm -Rf "DM Helper macOS release Installer.app"
 mkdir build-clang_64bit-Release
 mkdir bin64
 mkdir bin64/config
@@ -51,7 +52,7 @@ echo .
 echo Create the installer
 echo .
 cd ../bin64
-binarycreator -c ./config/config.xml -p ./packages "DM-Helper-macOS-release-Installer"
+binarycreator -c ./config/config_mac.xml -p ./packages "DM-Helper-macOS-release-Installer"
 mv "./DM-Helper-macOS-release-Installer.app" "../DM Helper macOS release Installer.app"
 
 echo .

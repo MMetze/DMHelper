@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Battle</string>
+   <string>Combat</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -479,7 +479,7 @@
      <item>
       <widget class="QLabel" name="lblAddRadius">
        <property name="text">
-        <string>Radius</string>
+        <string>Sphere</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>
@@ -1019,113 +1019,6 @@
       <enum>Qt::Vertical</enum>
      </property>
     </widget>
-   </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_11">
-     <item>
-      <widget class="QPushButton" name="btnNext">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Set the next combatant to active (Ctrl+N)</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_next.png</normaloff>:/img/data/icon_next.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>40</width>
-         <height>40</height>
-        </size>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblNext">
-       <property name="text">
-        <string>Next</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QVBoxLayout" name="verticalLayout_12">
-     <property name="spacing">
-      <number>0</number>
-     </property>
-     <item>
-      <widget class="QPushButton" name="btnSort">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>50</width>
-         <height>50</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Sort combatants by initiative</string>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_sort.png</normaloff>:/img/data/icon_sort.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>40</width>
-         <height>40</height>
-        </size>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-       <property name="flat">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="lblSort">
-       <property name="text">
-        <string>Sort</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-       </property>
-      </widget>
-     </item>
-    </layout>
    </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_13">
