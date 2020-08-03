@@ -488,7 +488,7 @@
      <item>
       <widget class="QLabel" name="lblEditCamera">
        <property name="text">
-        <string>Edit</string>
+        <string>Resize</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>
@@ -574,7 +574,7 @@
         <number>0</number>
        </property>
        <property name="text">
-        <string>Distance</string>
+        <string>Ruler</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>
@@ -662,7 +662,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Drag to show the distance between two points</string>
+            <string>Activate to include a height in the distance</string>
            </property>
            <property name="text">
             <string/>
@@ -840,7 +840,7 @@
           <string>Set the scale of the grid. The larger the number, the larger the grid squares</string>
          </property>
          <property name="text">
-          <string>Scale</string>
+          <string>Size</string>
          </property>
         </widget>
        </item>

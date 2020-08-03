@@ -22,6 +22,11 @@ RibbonTabBestiary::RibbonTabBestiary(QWidget *parent) :
     connect(ui->btnRandomMarket, SIGNAL(clicked(bool)), this, SIGNAL(randomMarketClicked()));
     connect(ui->btnTimeDate, SIGNAL(clicked(bool)), this, SIGNAL(calendarClicked()));
     connect(ui->btnCountdown, SIGNAL(clicked(bool)), this, SIGNAL(countdownClicked()));
+
+    // Todo: add a soundboard
+    ui->btnSoundboard->hide();
+    ui->lblSoundboard->hide();
+
 }
 
 RibbonTabBestiary::~RibbonTabBestiary()

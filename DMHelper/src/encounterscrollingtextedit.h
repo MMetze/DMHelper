@@ -78,8 +78,8 @@ protected:
     void cleanupPlayer();
 
 private slots:
-    /*
     void setPlainText();
+    /*
     void setFontSize();
     */
     void setTextFont();
