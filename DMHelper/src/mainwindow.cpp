@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "dmversion.h"
 #include "publishwindow.h"
 #include "publishframe.h"
 #include "dicerolldialog.h"

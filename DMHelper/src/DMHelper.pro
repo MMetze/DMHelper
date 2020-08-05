@@ -254,6 +254,7 @@ HEADERS  += mainwindow.h \
     discordposter.h \
     dmhelperribbon.h \
     dmhlogger.h \
+    dmversion.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \

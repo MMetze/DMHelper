@@ -1,5 +1,6 @@
 #include "updatechecker.h"
 #include "presentupdatedialog.h"
+#include "dmversion.h"
 #include <QUrlQuery>
 #include <QDomDocument>
 #include <QMessageBox>

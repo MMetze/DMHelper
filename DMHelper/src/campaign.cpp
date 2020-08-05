@@ -5,6 +5,7 @@
 #include "party.h"
 #include "audiotrack.h"
 #include "dmconstants.h"
+#include "dmversion.h"
 #include "bestiary.h"
 #include "basicdateserver.h"
 #include <QDomDocument>
