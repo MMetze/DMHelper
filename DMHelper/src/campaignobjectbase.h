@@ -56,6 +56,7 @@ signals:
     void dirty();
     void expandedChanged(bool expanded);
     void nameChanged(CampaignObjectBase* object, const QString& name);
+    void campaignObjectDestroyed(const QUuid& id);
 
 public slots:
     void setExpanded(bool expanded);

@@ -110,7 +110,7 @@ signals:
 
 protected slots:
     void mapDestroyed(QObject *obj);
-    void characterDestroyed(QObject *obj);
+    void characterDestroyed(const QUuid& destroyedId);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

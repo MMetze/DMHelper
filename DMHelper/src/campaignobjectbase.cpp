@@ -20,6 +20,7 @@ CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
 
 CampaignObjectBase::~CampaignObjectBase()
 {
+    emit campaignObjectDestroyed(getID());
 }
 
 QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)

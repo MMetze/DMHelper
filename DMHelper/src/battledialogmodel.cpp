@@ -222,10 +222,15 @@ void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* c
 
 BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
 {
-    if((index < 0) || (index >= _combatants.count()))
-        return nullptr;
-    else
-        return _combatants.takeAt(index);
+    BattleDialogModelCombatant* removedCombatant = nullptr;
+    if((index >= 0) && (index < _combatants.count()))
+    {
+        removedCombatant = _combatants.takeAt(index);
+        if(_activeCombatant == removedCombatant)
+            _activeCombatant = nullptr;
+    }
+
+    return removedCombatant;
 }
 
 void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
@@ -237,7 +242,7 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
 
     // For a character addition, connect to the destroyed signal
     if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
-        connect(combatant->getCombatant(), &QObject::destroyed, this, &BattleDialogModel::characterDestroyed);
+        connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
 }
 
 void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
@@ -610,14 +615,8 @@ void BattleDialogModel::mapDestroyed(QObject *obj)
     setMap(nullptr, QRect());
 }
 
-void BattleDialogModel::characterDestroyed(QObject *obj)
+void BattleDialogModel::characterDestroyed(const QUuid& destroyedId)
 {
-    Combatant* destroyedCharacter = dynamic_cast<Combatant*>(obj);
-    if(!destroyedCharacter)
-        return;
-
-    QUuid destroyedId = destroyedCharacter->getID();
-
     for(int i = 0; i < _combatants.count(); ++i)
     {
         BattleDialogModelCombatant* combatant = _combatants.at(i);
