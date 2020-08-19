@@ -90,6 +90,9 @@ SOURCES += main.cpp\
     ribbontabmap.cpp \
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
+    spell.cpp \
+    spellbook.cpp \
+    spellbookdialog.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -285,6 +288,9 @@ HEADERS  += mainwindow.h \
     ribbontabmap.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
+    spell.h \
+    spellbook.h \
+    spellbookdialog.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -437,6 +443,7 @@ FORMS    += mainwindow.ui \
     ribbontabmap.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \
+    spellbookdialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \

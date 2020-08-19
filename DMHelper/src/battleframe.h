@@ -179,6 +179,7 @@ private slots:
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleSelectionChanged();
     void handleEffectChanged(QGraphicsItem* effectItem);
+    void handleEffectRemoved(QGraphicsItem* effectItem);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
     void handleApplyEffect(QGraphicsItem* effect);
 

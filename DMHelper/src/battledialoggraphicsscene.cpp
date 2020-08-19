@@ -762,10 +762,9 @@ void BattleDialogGraphicsScene::deleteItem()
             _mouseDown = false;
             _mouseDownItem = nullptr;
         }
+        emit effectRemoved(_contextMenuItem);
         delete _contextMenuItem;
         _contextMenuItem = nullptr;
-
-        emit effectChanged(nullptr);
     }
 }
 

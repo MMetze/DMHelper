@@ -11,6 +11,8 @@ RibbonTabBestiary::RibbonTabBestiary(QWidget *parent) :
     connect(ui->btnExportBestiary, SIGNAL(clicked(bool)), this, SIGNAL(exportBestiaryClicked()));
     connect(ui->btnImportBestiary, SIGNAL(clicked(bool)), this, SIGNAL(importBestiaryClicked()));
 
+    connect(ui->btnSpellbook, SIGNAL(clicked(bool)), this, SIGNAL(spellbookClicked()));
+
     connect(ui->btnScreen, SIGNAL(clicked(bool)), this, SIGNAL(screenClicked()));
     connect(ui->btnTables, SIGNAL(clicked(bool)), this, SIGNAL(tablesClicked()));
     connect(ui->btnQuickRef, SIGNAL(clicked(bool)), this, SIGNAL(referenceClicked()));
@@ -47,6 +49,8 @@ void RibbonTabBestiary::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblExportBestiary, *ui->btnExportBestiary);
     setStandardButtonSize(*ui->lblImportBestiary, *ui->btnImportBestiary);
     setLineHeight(*ui->line);
+    setStandardButtonSize(*ui->lblSpellbook, *ui->btnSpellbook);
+    setLineHeight(*ui->line_3);
     setStandardButtonSize(*ui->lblScreen, *ui->btnScreen);
     setStandardButtonSize(*ui->lblTables, *ui->btnTables);
     setStandardButtonSize(*ui->lblQuickRef, *ui->btnQuickRef);

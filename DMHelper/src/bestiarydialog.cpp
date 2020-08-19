@@ -18,13 +18,6 @@
 #include <QDebug>
 #include "ui_bestiarydialog.h"
 
-/*
-Publihs shortcut Ctrl+P
-center QImage
-center buttons
-better dialog default sizes
-
-*/
 BestiaryDialog::BestiaryDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BestiaryDialog),
@@ -283,7 +276,7 @@ void BestiaryDialog::createNewMonster()
     QString monsterName = QInputDialog::getText(this, QString("Enter New Monster Name"),QString("New Monster"),QLineEdit::Normal,QString(),&ok);
     if((!ok)||(monsterName.isEmpty()))
     {
-        qDebug() << "[MainWindow] New monster not created because the monster name dialog was cancelled";
+        qDebug() << "[Bestiary Dialog] New monster not created because the monster name dialog was cancelled";
         return;
     }
 
@@ -314,14 +307,14 @@ void BestiaryDialog::createNewMonster()
                                                              &ok);
                 if((!ok) || (templateName.isEmpty()))
                 {
-                    qDebug() << "[MainWindow] New monster not created because the select template monster dialog was cancelled";
+                    qDebug() << "[Bestiary Dialog] New monster not created because the select template monster dialog was cancelled";
                     return;
                 }
 
                 MonsterClass* templateClass = Bestiary::Instance()->getMonsterClass(templateName);
                 if(!templateClass)
                 {
-                    qDebug() << "[MainWindow] New monster not created because not able to find selected template monster: " << templateName;
+                    qDebug() << "[Bestiary Dialog] New monster not created because not able to find selected template monster: " << templateName;
                     return;
                 }
 

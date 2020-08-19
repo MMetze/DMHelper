@@ -420,7 +420,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a scrolling text entry to the campaign</string>
+        <string>Remove the current item from the campaign</string>
        </property>
        <property name="text">
         <string/>

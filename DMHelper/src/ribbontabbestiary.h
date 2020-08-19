@@ -22,6 +22,8 @@ signals:
     void exportBestiaryClicked();
     void importBestiaryClicked();
 
+    void spellbookClicked();
+
     void screenClicked();
     void tablesClicked();
     void referenceClicked();

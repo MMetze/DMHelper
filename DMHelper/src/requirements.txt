@@ -1,108 +1,38 @@
-But looking at my list, there's 5 more things to do for v2.0:
-1) DONE - Create a character based on a monster (e.g. for animal companions)
-2) DONE - Clone a monster (use an existing monster as the basis for a new one)
-3) DONE - Improve logfile usage to avoid huge files
-4) DONE - Automatically create backups of campaign and Bestiary files
-5) Serious rework of the documentation, since it's no longer even remotely relevant.
-6) Add an installer
+General Todos:
+Update roadmap github
+Update website
+Create generic Bestiary imports - some sort of contribution mechanism?
+Online docs
+Marketing Videos
+Make truly opensource
 
-Add thin lines
-Conditions
-Rollover info
-Party icon
-Other objects to the battle scene).
-Logging fix
+v2.1 Features:
+1) Syrinscape integration
+2) Youtube Audio (vlc)
+3) Youtube Vidoes?
+4) Conditions, battle upgrades in general
+5) Spell DB
+6) OpenGL based battles?
 
-Shortcuts:
-Ctrl+M = Bestiary
-Ctrl+O = Open Campaign
-Ctrl+S = Save Campaign
-Ctrl+D = Dice Roll Dialog
-Ctrl+E = DM Screen
-Ctrl+R = Quick Reference
-Ctrl+T = Tables
-Ctrl+K = Calendar
-Ctrl+P = Publish
-Ctrl+W = Preview
-Ctrl+N = Next Combatant
-Ctrl+Q = Quit
+v2.1 Todos:
+1) Update Documentation
 
+
+Reload tables
+add opensource comments on all files
 white grid or black screen at button click
 Import/Export bestiary
-
-DONE: crash, grid ein/aus, animations ein/aus, selected killed leaves selection onm select in list then move without reselect
-
 House rules bucket
-Split Bestiary into Generic Bestiary and Custom Bestiary, merged into a single list
+Split Bestiary into Generic Bestiary and Custom Bestiary, merged into a single list / multiple bestiary files
 Text encounters need font and color management
 Markers for maps
 
-NPC/Monster generic additions
-Rapid NPC creation?
-
-Scrolling text (encounter)
-Save battle
-Change map in battle
-    --> change zoom (only show visible, etc)
 Multiselect
 Draw things on battle map
 Correct XP calculations - calculate to reflect multiple monsters
-    Calculate XP
 Export/Import of individual adventures, party, characters, encounters
-Only write the bestiary if something is actually changed, but then push it after changing monster/losing focus
-Auto-load the last campaign, if feasible.
-Battle: Saving throw for all monsters (or draw a radius and then save!!)
-Battle: Add a character
-Battle: Add an NPC
 Item cards like in Critical Role
 
-Tree Types
-* Campaign
-    * General Notes
-    * Party
-        * Characters
-    * Adventures
-        * Encounters
-            * with automated links to everything mentioned elsewhere
-            * explicit link to maps somehow
-    * Enviroment
-        * Settings
-            * Locations
-            * Maps (with and without FOW)
-        * People
-            * NPCs
-
-Be able to reorder adventures
-Be able to reorder party members
-NPCs and Monsters as party members
-
-
-Test:
-1. New Character
-
-Battle Map:
-Select
-w/ names
-scale image down not up
-performance enhancement, only publish on drop
-
-DONE Timeline tracker (start with day and NEXT DAY button, then time of day, then hours)
-Remove items from settings
-Add to settings should select directly
-Add chaser
-Chase visualization disappears
-
-Save battle
-Multiple battles
-
-DONE Zoom not working
-DONE Zoom in DM view of map
-Notes all over?
-Paint Window with joint painting (client server)
-Zoom big battle maps
-DONE remove icons from removed characters or don't show dead creatures
-DONE   ==> leads to crash!!
-Treasure generator --> no opensource tables
 
 
 
@@ -123,25 +53,3 @@ syrinscape-fantasy:stop/
 
 
 
-Nutzungsbedingungen
-Die nachfolgenden Nutzungsbedingungen gelten in ihrer jeweils aktuellen Fassung und werden, mit und ohne Registrierung, gültig bei Aufruf des Angebots durch den Nutzer.
-1. Nutzungsberechtigung digitale Inhalte
-Sie können die zum Download angebotenen digitalen Datendateien, Hörbücher und Musik (nachfolgend: „digitale Inhalte“) sowohl mit als auch ohne Nutzung des tiptoi® Managers herunterladen.
-Die digitalen Inhalte sind unter urheber-, marken-, namens- und gegebenenfalls weiteren rechtlichen Gesichtspunkten geschützt.
-Durch den Erwerb der digitalen Inhalte bzw. durch den im Anschluss an den Erwerb des dazugehörigen haptischen Produkts erfolgten Download der digitalen Inhalte über den Ravensburger Onlineshop erhalten Sie ein einfaches und nicht übertragbares Nutzungsrecht, die digitalen Inhalte für den persönlichen Gebrauch auf Ihren tiptoi® Stift zu laden. Sofern es sich um Hörbücher und Lieder handelt, ist eine parallele Nutzung auf mehreren tiptoi®-Stiften nicht möglich.
-Sie sind nicht berechtigt, die digitalen Inhalte über die in dieser Rechteeinräumung gestattete Nutzung hinaus zu verwerten. Es ist Ihnen insbesondere untersagt, die digitalen Inhalte ganz oder teilweise
-zu vermieten, zu verkaufen, zu tauschen, entgeltlich oder unentgeltlich weiterzugeben, zur Verfügung zu stellen, Unterlizenzen zu erteilen oder in irgendeiner Weise zum Gegenstand einer eigenen kommerziellen Verwertung zu machen,
-zu bearbeiten, abzuändern,
-weiterzuentwickeln oder als Grundlage für andere Produkte zu verwenden, den überlassenen Programmcode in andere Codeformen rückzuübersetzen (Dekompilierung, Disassemblierung) sowie auf sonstige Weise die verschiedenen Herstellungsstufen der digitalen Inhalte rückzuerschließen (Reverse-Engineering);
-Urhebervermerke, Marken, Logos, Kennzeichnungen sonstiger gewerblicher Schutzrechte oder Seriennummern und andere Merkmale, die einer Identifikation digitalen Inhalte dienen, zu entfernen oder zu verändern;
-die digitalen Inhalte sonst in einer Weise und zu Zwecken nutzen, die gesetzliche Bestimmungen oder Rechte Dritter verletzen.
-Für etwaige unbefugte Nutzungen Dritter der Ihnen hiernach eingeräumten Nutzungsrechte aus Gründen, die Sie zu vertreten haben, sind Sie verpflichtet, gegenüber uns und den sonstigen Rechtinhabern etwaige hierdurch entstehende Kosten zu erstatten und/oder Schadensersatzforderungen nachzukommen.
-2. Besondere Nutzungsbedingungen tiptoi® Manager/ Download digitale Inhalte
-Der tiptoi® Manager ist ebenfalls durch (geistige Eigentums-)Rechte geschützt; hinsichtlich der Nutzungsbefugnis gelten die in Ziff. 6 beschriebenen Rechte und Beschränkungen entsprechend.
-Sie haben sich vor Installation des tiptoi® Managers sowie vor Download der digitalen Inhalte auf Ihren Rechner sowie deren Übertragung auf Ihren tiptoi® Stift darüber zu versichern, dass Ihr System über die für den ordnungsgemäßen Betrieb erforderliche Hard- und Software verfügt. Die Systemanforderungen entnehmen Sie bitte den Hinweisen unter www.ravensburger.de. Ravensburger erbringt die Leistungen nur für die nach dem jeweiligen Stand der Technik üblichen Hard- und Softwarevoraussetzungen.
-Sichern Sie Ihre Daten vor Installation des tiptoi® Managers bzw. Download/Übertragung der digitalen Inhalte und auch danach in regelmäßigen Abständen.
-Nutzen Sie bitte immer die aktuelle Version des tiptoi® Managers. Ravensburger behält sich das Recht vor, veraltete oder nicht aktualisierte Software-Versionen nicht mehr zu unterstützen. Sie werden automatisch über Aktualisierungen des tiptoi® Managers informiert. Wenn Sie die Option gewählt haben, werden Aktualisierungen automatisch im Hintergrund ausgeführt, so dass Sie immer die neueste Version nutzen können. Sie finden alle Informationen zu Updates auch unter www.ravensburger.de.
-3. Anzuwendendes Recht und Gerichtsstand
-Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts.
-Für Verbraucher gilt die vorstehende Rechtswahl nur, sofern zwingendes Recht, insb. internationales oder europäisches Verbraucherschutzrecht, dem nicht entgegensteht.
-Sofern beide Parteien Vollkaufleute, juristische Personen des öffentlichen Rechts oder öffentlich-rechtliche Sondervermögen sind, wird als Gerichtsstand Ravensburg vereinbart.

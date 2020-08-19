@@ -55,9 +55,9 @@ int Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDire
     int monsterCount = 0;
 
     qDebug() << "[Bestiary] Saving bestiary...";
-    QDomElement bestiaryElement = doc.createElement( "bestiary" );
-    bestiaryElement.setAttribute( "majorversion", _majorVersion );
-    bestiaryElement.setAttribute( "minorversion", _minorVersion );
+    QDomElement bestiaryElement = doc.createElement("bestiary");
+    bestiaryElement.setAttribute("majorversion", DMHelper::BESTIARY_MAJOR_VERSION);
+    bestiaryElement.setAttribute("minorversion", DMHelper::BESTIARY_MINOR_VERSION);
 
     qDebug() << "[Bestiary]    Storing " << _bestiaryMap.count() << " creatures.";
     BestiaryMap::const_iterator i = _bestiaryMap.constBegin();
@@ -96,16 +96,16 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
     QDomElement bestiaryElement = element.firstChildElement( QString("bestiary") );
     if(bestiaryElement.isNull())
     {
-        qDebug() << "[Bestiary]    ERROR: invalid bestiary file";
+        qDebug() << "[Bestiary]    ERROR: invalid bestiary file, unable to find base element";
         return;
     }
 
-    _majorVersion = bestiaryElement.attribute("majorversion",QString::number(1)).toInt();
+    _majorVersion = bestiaryElement.attribute("majorversion",QString::number(0)).toInt();
     _minorVersion = bestiaryElement.attribute("minorversion",QString::number(0)).toInt();
     qDebug() << "[Bestiary]    Bestiary version: " << getVersion();
     if(!isVersionCompatible())
     {
-        qDebug() << "[Bestiary]    ERROR: New Bestiary version is not compatible with expected version: " << getExpectedVersion();
+        qDebug() << "[Bestiary]    ERROR: Bestiary version is not compatible with expected version: " << getExpectedVersion();
         return;
     }
 
@@ -142,7 +142,8 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
             if(importOK)
             {
                 MonsterClass* monster = new MonsterClass(monsterElement, isImport);
-                insertMonsterClass(monster);
+                if(insertMonsterClass(monster))
+                    ++importCount;
             }
 
             monsterElement = monsterElement.nextSiblingElement( QString("element") );
@@ -290,6 +291,9 @@ MonsterClass* Bestiary::getPreviousMonsterClass(MonsterClass* monsterClass) cons
 
 bool Bestiary::insertMonsterClass(MonsterClass* monsterClass)
 {
+    if(!monsterClass)
+        return false;
+
     if(_bestiaryMap.contains(monsterClass->getName()))
         return false;
 
@@ -300,6 +304,9 @@ bool Bestiary::insertMonsterClass(MonsterClass* monsterClass)
 
 void Bestiary::removeMonsterClass(MonsterClass* monsterClass)
 {
+    if(!monsterClass)
+        return;
+
     if(!_bestiaryMap.contains(monsterClass->getName()))
         return;
 
@@ -310,6 +317,9 @@ void Bestiary::removeMonsterClass(MonsterClass* monsterClass)
 
 void Bestiary::renameMonster(MonsterClass* monsterClass, const QString& newName)
 {
+    if(!monsterClass)
+        return;
+
     if(!_bestiaryMap.contains(monsterClass->getName()))
         return;
 

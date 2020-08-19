@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "bestiarydialog.h"
+#include "spellbookdialog.h"
 #include "dmconstants.h"
 #ifdef INCLUDE_CHASE_SUPPORT
 #include "chasedialog.h"
@@ -96,6 +97,7 @@ public slots:
 
     // Bestiary
     void readBestiary();
+    void readSpellbook();
 
 signals:
     void campaignLoaded(Campaign* campaign);
@@ -138,6 +140,7 @@ protected:
 
     // Bestiary
     void writeBestiary();
+    void writeSpellbook();
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
 
@@ -162,6 +165,10 @@ protected slots:
     void openBestiary();
     void exportBestiary();
     void importBestiary();
+
+    void openSpellbook();
+    void exportSpellbook();
+    void importSpellbook();
 
     void openAboutDialog();
 
@@ -212,6 +219,7 @@ private:
     OptionsContainer* _options;
 
     BestiaryDialog bestiaryDlg;
+    SpellbookDialog spellDlg;
 
 #ifdef INCLUDE_CHASE_SUPPORT
     ChaseDialog* chaseDlg;

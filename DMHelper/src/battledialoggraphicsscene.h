@@ -58,6 +58,7 @@ public slots:
 
 signals:
     void effectChanged(QGraphicsItem* effect);
+    void effectRemoved(QGraphicsItem* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
 

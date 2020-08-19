@@ -12,6 +12,9 @@ namespace DMHelper
 
     const int BESTIARY_MAJOR_VERSION = 2;
     const int BESTIARY_MINOR_VERSION = 1;
+
+    const int SPELLBOOK_MAJOR_VERSION = 1;
+    const int SPELLBOOK_MINOR_VERSION = 0;
 }
 
 #endif // DMVERSION_H
