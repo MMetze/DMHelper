@@ -46,8 +46,6 @@ public slots:
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
-    //void runAnimation(bool animate);
-    //void rotatePublish(int rotation);
 
     void stopAnimation();
     void rewind();
@@ -56,7 +54,6 @@ signals:
     void textChanged(const QString& text);
     void scrollSpeedChanged(int scrollSpeed);
     void imageFileChanged(const QString& imgFile);
-//    void textChanged(const QString& newText);
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);
@@ -79,13 +76,13 @@ protected:
 
 private slots:
     void setPlainText();
-    /*
-    void setFontSize();
-    */
+    void setAllFormats();
     void setTextFont();
-    //void setTextWidth();
     void setTextAlignment();
     void setTextColor();
+    void setTextFontFormat();
+    void setTextAlignmentFormat();
+    void setTextColorFormat();
 
     void startPublishTimer();
     void stopPublishTimer();

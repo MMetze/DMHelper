@@ -2,11 +2,10 @@
 #include "ui_audiotrackedit.h"
 #include "audiotrack.h"
 #include "campaign.h"
+#include "audiofactory.h"
 #include <QInputDialog>
 #include <QFileInfo>
 #include <QFileDialog>
-
-
 
 AudioTrackEdit::AudioTrackEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
@@ -43,8 +42,8 @@ void AudioTrackEdit::addTrack(const QUrl& url)
     if((!ok)||(trackName.isEmpty()))
         return;
 
-    AudioTrack* newTrack = new AudioTrack(trackName, url);
-    //_campaign->addTrack(newTrack);
+    AudioTrack* newTrack = AudioFactory().createTrackFromUrl(url, trackName);
+
     _campaign->addObject(newTrack);
     addTrackToList(newTrack);
 }

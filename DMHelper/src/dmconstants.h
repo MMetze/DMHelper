@@ -141,7 +141,8 @@ namespace DMHelper
     enum AudioType
     {
         AudioType_File = 0,
-        AudioType_Syrinscape
+        AudioType_Syrinscape,
+        AudioType_Youtube
     };
 
     const int TreeItemData_Type = Qt::UserRole + 1;

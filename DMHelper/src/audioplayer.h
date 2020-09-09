@@ -43,6 +43,9 @@ public slots:
     void setVolume(int volume);
     void setPosition(qint64 position);
 
+    void playerPlayUrl(QUrl url);
+    void playerStop();
+
 private slots:
     void playerStatusChanged(QMediaPlayer::MediaStatus status);
     void handleCurrentMediaChanged(const QMediaContent &media);

@@ -16,17 +16,18 @@ public:
 
     virtual PublishButtonRibbon* getPublishRibbon() = 0;
 
+    static void setStandardButtonSize(QLabel& label, QPushButton& button, int frameHeight);
+    static void setLineHeight(QFrame& line, int frameHeight);
+    static int getRibbonHeight(int defaultHeight = 0);
+    static int getLabelHeight(QLabel& label, int frameHeight);
+    static int getLabelHeight(const QFontMetrics& metrics, int frameHeight);
+    static void setWidgetSize(QWidget& widget, int w, int h);
+    static void setButtonSize(QPushButton& button, int w, int h);
+    static int getIconSize(int buttonWidth, int buttonHeight);
+
 protected:
     virtual void showEvent(QShowEvent *event) override;
 
-    void setStandardButtonSize(QLabel& label, QPushButton& button);
-    void setLineHeight(QFrame& line);
-    void setLineHeight(QFrame& line, int fullHeight);
-    int getLabelHeight(QLabel& label) const;
-    int getLabelHeight(const QFontMetrics& metrics) const;
-    void setWidgetSize(QWidget& widget, int w, int h) const;
-    void setButtonSize(QPushButton& button, int w, int h) const;
-    int getIconSize(int buttonWidth, int buttonHeight) const;
 };
 
 #endif // RIBBONFRAME_H

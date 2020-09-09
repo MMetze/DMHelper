@@ -24,11 +24,6 @@ RibbonTabBestiary::RibbonTabBestiary(QWidget *parent) :
     connect(ui->btnRandomMarket, SIGNAL(clicked(bool)), this, SIGNAL(randomMarketClicked()));
     connect(ui->btnTimeDate, SIGNAL(clicked(bool)), this, SIGNAL(calendarClicked()));
     connect(ui->btnCountdown, SIGNAL(clicked(bool)), this, SIGNAL(countdownClicked()));
-
-    // Todo: add a soundboard
-    ui->btnSoundboard->hide();
-    ui->lblSoundboard->hide();
-
 }
 
 RibbonTabBestiary::~RibbonTabBestiary()
@@ -45,23 +40,26 @@ void RibbonTabBestiary::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblBestiary, *ui->btnBestiary);
-    setStandardButtonSize(*ui->lblExportBestiary, *ui->btnExportBestiary);
-    setStandardButtonSize(*ui->lblImportBestiary, *ui->btnImportBestiary);
-    setLineHeight(*ui->line);
-    setStandardButtonSize(*ui->lblSpellbook, *ui->btnSpellbook);
-    setLineHeight(*ui->line_3);
-    setStandardButtonSize(*ui->lblScreen, *ui->btnScreen);
-    setStandardButtonSize(*ui->lblTables, *ui->btnTables);
-    setStandardButtonSize(*ui->lblQuickRef, *ui->btnQuickRef);
-    setStandardButtonSize(*ui->lblSoundboard, *ui->btnSoundboard);
-    setLineHeight(*ui->line_2);
-    setStandardButtonSize(*ui->lblRollDice, *ui->btnRollDice);
-    setStandardButtonSize(*ui->lblPublishText, *ui->btnPublishText);
-    setStandardButtonSize(*ui->lblTranslateText, *ui->btnTranslateText);
-    setStandardButtonSize(*ui->lblRandomMarket, *ui->btnRandomMarket);
-    setStandardButtonSize(*ui->lblTimeDate, *ui->btnTimeDate);
-    setStandardButtonSize(*ui->lblCountdown, *ui->btnCountdown);
+    int frameHeight = height();
+
+    setStandardButtonSize(*ui->lblBestiary, *ui->btnBestiary, frameHeight);
+    setStandardButtonSize(*ui->lblExportBestiary, *ui->btnExportBestiary, frameHeight);
+    setStandardButtonSize(*ui->lblImportBestiary, *ui->btnImportBestiary, frameHeight);
+    setLineHeight(*ui->line, frameHeight);
+    setStandardButtonSize(*ui->lblSpellbook, *ui->btnSpellbook, frameHeight);
+    setLineHeight(*ui->line_3, frameHeight);
+    setStandardButtonSize(*ui->lblSoundboard, *ui->btnSoundboard, frameHeight);
+    setLineHeight(*ui->line_4, frameHeight);
+    setStandardButtonSize(*ui->lblScreen, *ui->btnScreen, frameHeight);
+    setStandardButtonSize(*ui->lblTables, *ui->btnTables, frameHeight);
+    setStandardButtonSize(*ui->lblQuickRef, *ui->btnQuickRef, frameHeight);
+    setLineHeight(*ui->line_2, frameHeight);
+    setStandardButtonSize(*ui->lblRollDice, *ui->btnRollDice, frameHeight);
+    setStandardButtonSize(*ui->lblPublishText, *ui->btnPublishText, frameHeight);
+    setStandardButtonSize(*ui->lblTranslateText, *ui->btnTranslateText, frameHeight);
+    setStandardButtonSize(*ui->lblRandomMarket, *ui->btnRandomMarket, frameHeight);
+    setStandardButtonSize(*ui->lblTimeDate, *ui->btnTimeDate, frameHeight);
+    setStandardButtonSize(*ui->lblCountdown, *ui->btnCountdown, frameHeight);
 }
 
 

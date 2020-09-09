@@ -86,12 +86,14 @@ void RibbonTabScrolling::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblBackground, *ui->btnBackground);
-    setStandardButtonSize(*ui->lblRewind, *ui->btnRewind);
-    setLineHeight(*ui->line_6);
+    int frameHeight = height();
+
+    setStandardButtonSize(*ui->lblBackground, *ui->btnBackground, frameHeight);
+    setStandardButtonSize(*ui->lblRewind, *ui->btnRewind, frameHeight);
+    setLineHeight(*ui->line_6, frameHeight);
 
     QFontMetrics metrics = ui->lblBackground->fontMetrics();
-    int labelHeight = getLabelHeight(metrics);
+    int labelHeight = getLabelHeight(metrics, frameHeight);
     int halfHeight = (height() - labelHeight - ui->layoutAnimation->spacing()) / 2;
 
     // Animation cluster
@@ -107,5 +109,5 @@ void RibbonTabScrolling::showEvent(QShowEvent *event)
     setWidgetSize(*ui->sliderWidth, controlWidth, halfHeight);
     setWidgetSize(*ui->lblAnimation, labelWidth + ui->layoutSlider->spacing() + controlWidth, labelHeight);
 
-    setLineHeight(*ui->line_3);
+    setLineHeight(*ui->line_3, frameHeight);
 }

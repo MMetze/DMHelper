@@ -30,7 +30,8 @@
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
 #include "battleframe.h"
-#include "audioplaybackframe.h"
+//#include "audioplaybackframe.h"
+#include "soundboardframe.h"
 #include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
@@ -625,6 +626,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QuickRefFrame* quickRefFrame = new QuickRefFrame(_options->getQuickReferenceFileName(), this);
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, quickRefFrame, &QuickRefFrame::readQuickRef);
     quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+
+    /*
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
     audioPlaybackFrame->setVolume(_options->getAudioVolume());
     connect(_audioPlayer, SIGNAL(positionChanged(qint64)), audioPlaybackFrame, SLOT(setPosition(qint64)));
@@ -637,6 +640,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _audioPlayer, SLOT(setVolume(int)));
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _options, SLOT(setAudioVolume(int)));
     soundDlg = createDialog(audioPlaybackFrame);
+    */
+    SoundboardFrame* soundboard = new SoundboardFrame(this);
+    connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
+    soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+
     timeAndDateFrame = new TimeAndDateFrame(this);
     calendarDlg = createDialog(timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
     countdownDlg = createDialog(new CountdownFrame(this));
@@ -651,6 +659,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
     connect(referenceShortcut, SIGNAL(activated()), quickRefDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(soundboardClicked()), soundDlg, SLOT(exec()));
+    QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
+    connect(soundboardShortcut, SIGNAL(activated()), soundDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(calendarClicked()), calendarDlg, SLOT(exec()));
     QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+K", "Calendar")), this);
     connect(calendarShortcut, SIGNAL(activated()), calendarDlg, SLOT(exec()));

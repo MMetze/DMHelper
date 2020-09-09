@@ -154,6 +154,22 @@ QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects()
     return findChildren<CampaignObjectBase *>(QString(), Qt::FindDirectChildrenOnly);
 }
 
+QList<CampaignObjectBase*> CampaignObjectBase::getChildObjectsByType(int childType)
+{
+    QList<CampaignObjectBase*> objects;
+
+    if(getObjectType() == childType)
+        objects.append(this);
+
+    for(CampaignObjectBase* child : getChildObjects())
+    {
+        if(child)
+            objects.append(child->getChildObjectsByType(childType));
+    }
+
+    return objects;
+}
+
 CampaignObjectBase* CampaignObjectBase::getChildById(QUuid id)
 {
     QList<CampaignObjectBase*> childList = getChildObjects();

@@ -33,7 +33,33 @@ Correct XP calculations - calculate to reflect multiple monsters
 Export/Import of individual adventures, party, characters, encounters
 Item cards like in Critical Role
 
-
+Shortcuts
+Ctrl+Q: Quit DM Helper
+Ctrl+W:     (Close Window)
+Ctrl+E: Opens the DM ScrEEn
+Ctrl+R: Opens the Quick Reference Guide
+Ctrl+T: Tables Tables Tables
+Ctrl+Z: Undo
+Ctrl+U: Underline
+Ctrl+I: Italics
+Ctrl+O: Open a campaign
+Ctrl+P: Publish the current image or toggle Publishing
+Ctrl+A:
+Ctrl+S: Save the current campaign
+Ctrl+D: Dice roll Dialog
+Ctrl+F: Find
+Ctrl+G: Go to the Soundboard
+Ctrl+H:
+Ctrl+J:
+Ctrl+K: Opens the Kalendar
+Ctrl+L: Open the Preview Window
+Ctrl+Y: Redo
+Ctrl+X: Cut
+Ctrl+C: Copy
+Ctrl+V: Paste
+Ctrl+B: Bold
+Ctrl+N: Move to the Next combatant (in Combats only)
+Ctrl+M: Open the Bestiary to search for Monsters
 
 
 syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpCdXN5IG1hcmtldCBkYXk/play/

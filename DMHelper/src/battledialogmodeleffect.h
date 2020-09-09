@@ -9,8 +9,8 @@ class QAbstractGraphicsShapeItem;
 class BattleDialogEffectSettings;
 class QGraphicsItem;
 
-const int BATTLE_DIALOG_MODEL_EFFECT_ID = 0;
-const int BATTLE_DIALOG_MODEL_EFFECT_OBJECT = 1;
+const int BATTLE_DIALOG_MODEL_EFFECT_ID = Qt::UserRole;
+const int BATTLE_DIALOG_MODEL_EFFECT_OBJECT = Qt::UserRole + 1;
 
 class BattleDialogModelEffect : public CampaignObjectBase
 {
