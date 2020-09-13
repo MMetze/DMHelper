@@ -265,7 +265,8 @@ BattleFrame::~BattleFrame()
     delete deletePlayer;
 
     QLayoutItem *child;
-    while ((child = _combatantLayout->takeAt(0)) != nullptr) {
+    while ((child = _combatantLayout->takeAt(0)) != nullptr)
+    {
         delete child;
     }
 

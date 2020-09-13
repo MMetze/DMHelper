@@ -16,6 +16,7 @@ class AudioTrackYoutube : public AudioTrackUrl
     Q_OBJECT
 public:
     explicit AudioTrackYoutube(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
+    virtual ~AudioTrackYoutube() override;
 
     virtual int getAudioType() const override;
 

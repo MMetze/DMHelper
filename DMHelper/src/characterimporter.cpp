@@ -1,6 +1,5 @@
 #include "characterimporter.h"
 #include "campaign.h"
-#include "character.h"
 #include "characterimportdialog.h"
 #include "combatantfactory.h"
 #include <QInputDialog>
@@ -32,7 +31,9 @@ CharacterImporter::CharacterImporter(QObject *parent) :
     _levelCount(0),
     _totalArmor(0),
     _totalHP(0),
-    _halfProficiency(false)
+    _halfProficiency(false),
+    _overrideList(),
+    _overrideHP(false)
 {
     initializeValues();
 }
@@ -122,6 +123,39 @@ void CharacterImporter::campaignChanged()
     _campaign = nullptr;
 }
 
+void CharacterImporter::scanStats(QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Character& character)
+{
+    for(int stat = Character::IntValue_strength; stat < Character::IntValue_charisma; ++stat)
+    {
+        Character::IntValue statIntValue = static_cast<Character::IntValue>(stat);
+        int statValue = getStatValue(statsArray, statIntValue);
+        int bonusValue = getStatValue(bonusStatsArray, statIntValue);
+        int overrideValue = getStatValue(overrideStatsArray, statIntValue);
+        if(overrideValue > 0)
+        {
+            _overrideList.append(statIntValue);
+            character.setIntValue(statIntValue, overrideValue);
+        }
+        else
+        {
+            character.setIntValue(statIntValue, statValue + bonusValue);
+        }
+    }
+}
+
+int CharacterImporter::getStatValue(QJsonArray statValueArray, Character::IntValue statIdValue)
+{
+    for(int i = 0; i < statValueArray.count(); ++i)
+    {
+        QJsonObject statObject = statValueArray.at(i).toObject();
+        Character::IntValue statId = static_cast<Character::IntValue>(statObject["id"].toInt(0) + 2); // adjustment by 2 to fit the IntValue enum
+        if(statId == statIdValue)
+            return statObject["value"].toInt(0);
+    }
+
+    return 0;
+}
+
 void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character)
 {
     QJsonArray modifiersArray = modifiersObject.value(key).toArray();
@@ -134,7 +168,7 @@ void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString
         if(modObject["entityTypeId"].toInt() == 1472902489) // attribute
         {
             Character::IntValue statId = static_cast<Character::IntValue>(modObject["entityId"].toInt(0) + 2); // adjustment to fit the IntValue enum
-            if((statId >= Character::IntValue_strength) && (statId <= Character::IntValue_charisma))
+            if((statId >= Character::IntValue_strength) && (statId <= Character::IntValue_charisma) && (!_overrideList.contains(statId)))
             {
                 if(modType == QString("set"))
                 {
@@ -185,7 +219,7 @@ void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString
                 _totalArmor++;
             else if((modType == QString("half-proficiency")) && (modSubType == QString("Initiative")))
                 _halfProficiency = true;
-            else if((modType == QString("bonus")) && (modSubType == QString("Hit Points per Level")))
+            else if((modType == QString("bonus")) && (modSubType == QString("Hit Points per Level")) && (!_overrideHP))
                 _totalHP += modValue * _levelCount;
         }
     }
@@ -379,16 +413,9 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 
     // TODO stats - "entityTypeId":1472902489, bonus stats & override stats?
     QJsonArray statsArray = rootObject["stats"].toArray();
-    for(i = 0; i < statsArray.count(); ++i)
-    {
-        QJsonObject statObject = statsArray.at(i).toObject();
-        Character::IntValue statId = static_cast<Character::IntValue>(statObject["id"].toInt(0) + 2); // adjustment by 2 to fit the IntValue enum
-        int statValue = statObject["value"].toInt(0);
-        if((statId >= Character::IntValue_strength) && (statId <= Character::IntValue_charisma))
-        {
-            _character->setIntValue(statId, statValue);
-        }
-    }
+    QJsonArray bonusStatsArray = rootObject["bonusStats"].toArray();
+    QJsonArray overrideStatsArray = rootObject["overrideStats"].toArray();
+    scanStats(statsArray, bonusStatsArray, overrideStatsArray, *_character);
 
     // Read the classes and levels
     QString classString;
@@ -556,14 +583,22 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     _character->setStringValue(Character::StringValue_proficiencies, featuresString);
 
     // Calculate the final Hit points
-    _totalHP += rootObject["baseHitPoints"].toInt(0);
-    _totalHP += rootObject["bonusHitPoints"].toInt(0);
-    _totalHP += rootObject["overrideHitPoints"].toInt(0);
-    _totalHP += rootObject["temporaryHitPoints"].toInt(0);
-    _totalHP -= rootObject["removedHitPoints"].toInt(0);
-    _totalHP += _levelCount * Combatant::getAbilityMod(_character->getAbilityValue(Combatant::Ability_Constitution));
-    if(_totalHP == 0)
-        _totalHP = 1;
+    int overrideHPValue = rootObject["overrideHitPoints"].toInt(0);
+    if(overrideHPValue > 0)
+    {
+        _totalHP = overrideHPValue;
+        _overrideHP = true;
+    }
+    else
+    {
+        _totalHP += rootObject["baseHitPoints"].toInt(0);
+        _totalHP += rootObject["bonusHitPoints"].toInt(0);
+        _totalHP += rootObject["temporaryHitPoints"].toInt(0);
+        _totalHP -= rootObject["removedHitPoints"].toInt(0);
+        _totalHP += _levelCount * Combatant::getAbilityMod(_character->getAbilityValue(Combatant::Ability_Constitution));
+        if(_totalHP == 0)
+            _totalHP = 1;
+    }
     _character->setHitPoints(_totalHP);
 
     // Notes
@@ -725,6 +760,8 @@ void CharacterImporter::initializeValues()
     _totalArmor = 0;
     _totalHP = 0;
     _halfProficiency = false;
+    _overrideList.clear();
+    _overrideHP = false;
 }
 
 void CharacterImporter::replyFinished(QNetworkReply *reply)

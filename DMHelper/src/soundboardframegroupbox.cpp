@@ -28,10 +28,6 @@ SoundBoardFrameGroupBox::SoundBoardFrameGroupBox(const QString& groupName, Campa
     _groupLayout->setHorizontalSpacing(20);
     _groupLayout->setVerticalSpacing(20);
 
-    QSizePolicy policy = sizePolicy();
-    policy.setHorizontalPolicy(QSizePolicy::MinimumExpanding);
-    setSizePolicy(policy);
-
     ui->btnExpand->setIcon(QIcon(QPixmap(":/img/data/icon_downarrow.png").transformed(QTransform().rotate(180))));
 
     connect(ui->btnExpand, &QPushButton::clicked, this, &SoundBoardFrameGroupBox::toggleContents);

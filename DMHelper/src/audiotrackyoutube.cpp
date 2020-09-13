@@ -24,6 +24,11 @@ AudioTrackYoutube::AudioTrackYoutube(const QString& trackName, const QUrl& track
 {
 }
 
+AudioTrackYoutube::~AudioTrackYoutube()
+{
+    stop();
+}
+
 int AudioTrackYoutube::getAudioType() const
 {
     return DMHelper::AudioType_Youtube;

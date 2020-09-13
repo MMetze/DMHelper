@@ -61,6 +61,17 @@ SoundboardFrame::~SoundboardFrame()
 
 void SoundboardFrame::setCampaign(Campaign* campaign)
 {
+    ui->treeWidget->clear();
+
+    QLayoutItem *child;
+    while((child = _layout->takeAt(0)) != nullptr)
+    {
+        QWidget* layoutWidget = child->widget();
+        if(layoutWidget)
+            layoutWidget->deleteLater();
+        delete child;
+    }
+
     if(!campaign)
         return;
 
