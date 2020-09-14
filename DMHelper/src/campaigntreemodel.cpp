@@ -51,7 +51,7 @@ CampaignTreeItem *CampaignTreeModel::campaignItemFromIndex(const QModelIndex &in
     return dynamic_cast<CampaignTreeItem*>(itemFromIndex(index));
 }
 
-QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
+QMimeData* CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
 {
     QMimeData *data = QStandardItemModel::mimeData(indexes);
     if(!data)
@@ -74,7 +74,7 @@ QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
     return data;
 }
 
-QStringList	CampaignTreeModel::mimeTypes() const
+QStringList CampaignTreeModel::mimeTypes() const
 {
     return QStandardItemModel::mimeTypes() <<  QLatin1String("application/vnd.dmhelper.text");
 }

@@ -13,7 +13,9 @@
 OptionsContainer::OptionsContainer(QMainWindow *parent) :
     QObject(parent),
     _bestiaryFileName(),
+    _spellbookFileName(),
     _lastMonster(),
+    _lastSpell(),
     _quickReferenceFileName(),
     _calendarFileName(),
     _equipmentFileName(),
@@ -55,6 +57,11 @@ QString OptionsContainer::getBestiaryFileName() const
     return _bestiaryFileName;
 }
 
+QString OptionsContainer::getSpellbookFileName() const
+{
+    return _spellbookFileName;
+}
+
 QString OptionsContainer::getQuickReferenceFileName() const
 {
     return _quickReferenceFileName;
@@ -83,6 +90,11 @@ QString OptionsContainer::getTablesDirectory() const
 QString OptionsContainer::getLastMonster() const
 {
     return _lastMonster;
+}
+
+QString OptionsContainer::getLastSpell() const
+{
+    return _lastSpell;
 }
 
 bool OptionsContainer::getShowAnimations() const
@@ -260,6 +272,9 @@ void OptionsContainer::readSettings()
         getDataDirectory(QString("Images"));
     setLastMonster(settings.value("lastMonster","").toString());
 
+    setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml")));
+    setLastSpell(settings.value("lastSpell","").toString());
+
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
     setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
     setEquipmentFileName(getSettingsFile(settings, QString("equipment"), QString("equipment.xml")));
@@ -336,6 +351,8 @@ void OptionsContainer::writeSettings()
     // Note: password will not be stored in settings
     settings.setValue("bestiary", getBestiaryFileName());
     settings.setValue("lastMonster", getLastMonster());
+    settings.setValue("spellbook", getSpellbookFileName());
+    settings.setValue("lastSpell", getLastSpell());
     settings.setValue("quickReference", getQuickReferenceFileName());
     settings.setValue("calendar", getCalendarFileName());
     settings.setValue("equipment", getEquipmentFileName());
@@ -391,6 +408,16 @@ void OptionsContainer::setBestiaryFileName(const QString& filename)
         _bestiaryFileName = filename;
         qDebug() << "[OptionsContainer] Bestiary filename set to: " << filename;
         emit bestiaryFileNameChanged();
+    }
+}
+
+void OptionsContainer::setSpellbookFileName(const QString& filename)
+{
+    if(_spellbookFileName != filename)
+    {
+        _spellbookFileName = filename;
+        qDebug() << "[OptionsContainer] Spellbook filename set to: " << filename;
+        emit spellbookFileNameChanged();
     }
 }
 
@@ -617,6 +644,7 @@ void OptionsContainer::resetFileSettings()
     setBestiaryFileName(getStandardFile(QString("DMHelperBestiary.xml")));
     getDataDirectory(QString("Images"));
 
+    setSpellbookFileName(getStandardFile(QString("spellbook.xml")));
     setQuickReferenceFileName(getStandardFile(QString("quickref_data.xml")));
     setCalendarFileName(getStandardFile(QString("calendar.xml")));
     setEquipmentFileName(getStandardFile(QString("equipment.xml")));
@@ -629,6 +657,14 @@ void OptionsContainer::setLastMonster(const QString& lastMonster)
     if(_lastMonster != lastMonster)
     {
         _lastMonster = lastMonster;
+    }
+}
+
+void OptionsContainer::setLastSpell(const QString& lastSpell)
+{
+    if(_lastSpell!= lastSpell)
+    {
+        _lastSpell = lastSpell;
     }
 }
 
@@ -831,12 +867,14 @@ void OptionsContainer::copy(OptionsContainer* other)
     if(other)
     {
         setBestiaryFileName(other->_bestiaryFileName);
+        setSpellbookFileName(other->_spellbookFileName);
         setQuickReferenceFileName(other->_quickReferenceFileName);
         setCalendarFileName(other->_calendarFileName);
         setEquipmentFileName(other->_equipmentFileName);
         setShopsFileName(other->_shopsFileName);
         setTablesDirectory(other->_tablesDirectory);
         setLastMonster(other->_lastMonster);
+        setLastSpell(other->_lastSpell);
         setShowAnimations(other->_showAnimations);
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);

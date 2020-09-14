@@ -108,6 +108,10 @@ signals:
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void backgroundImageChanged(QImage backgroundImage);
 
+protected slots:
+    void mapDestroyed(QObject *obj);
+    void characterDestroyed(const QUuid& destroyedId);
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;

@@ -161,35 +161,37 @@ void RibbonTabMap::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn);
-    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut);
-    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull);
-    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect);
-    setStandardButtonSize(*ui->lblCameraCouple, *ui->btnCameraCouple);
-    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap);
-    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap);
-    setStandardButtonSize(*ui->lblCameraSelect, *ui->btnCameraSelect);
-    setStandardButtonSize(*ui->lblEditCamera, *ui->btnEditCamera);
-    setStandardButtonSize(*ui->lblDistance, *ui->btnDistance);
+    int frameHeight = height();
 
-    setStandardButtonSize(*ui->lblGrid, *ui->btnGrid);
+    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn, frameHeight);
+    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut, frameHeight);
+    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull, frameHeight);
+    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect, frameHeight);
+    setStandardButtonSize(*ui->lblCameraCouple, *ui->btnCameraCouple, frameHeight);
+    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap, frameHeight);
+    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap, frameHeight);
+    setStandardButtonSize(*ui->lblCameraSelect, *ui->btnCameraSelect, frameHeight);
+    setStandardButtonSize(*ui->lblEditCamera, *ui->btnEditCamera, frameHeight);
+    setStandardButtonSize(*ui->lblDistance, *ui->btnDistance, frameHeight);
 
-    setStandardButtonSize(*ui->lblMapEdit, *ui->btnMapEdit);
-    setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase);
-    setStandardButtonSize(*ui->lblSmooth, *ui->btnSmooth);
+    setStandardButtonSize(*ui->lblGrid, *ui->btnGrid, frameHeight);
 
-    setStandardButtonSize(*ui->lblBrushSelect, *ui->btnBrushSelect);
-    setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW);
-    setStandardButtonSize(*ui->lblPointer, *ui->btnPointer);
+    setStandardButtonSize(*ui->lblMapEdit, *ui->btnMapEdit, frameHeight);
+    setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase, frameHeight);
+    setStandardButtonSize(*ui->lblSmooth, *ui->btnSmooth, frameHeight);
 
-    setLineHeight(*ui->line_2);
-    setLineHeight(*ui->line_3);
-    setLineHeight(*ui->line_4);
-    setLineHeight(*ui->line_5);
-    setLineHeight(*ui->line_6);
-    setLineHeight(*ui->line_7);
+    setStandardButtonSize(*ui->lblBrushSelect, *ui->btnBrushSelect, frameHeight);
+    setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW, frameHeight);
+    setStandardButtonSize(*ui->lblPointer, *ui->btnPointer, frameHeight);
 
-    int labelHeight = getLabelHeight(*ui->lblDistance2);
+    setLineHeight(*ui->line_2, frameHeight);
+    setLineHeight(*ui->line_3, frameHeight);
+    setLineHeight(*ui->line_4, frameHeight);
+    setLineHeight(*ui->line_5, frameHeight);
+    setLineHeight(*ui->line_6, frameHeight);
+    setLineHeight(*ui->line_7, frameHeight);
+
+    int labelHeight = getLabelHeight(*ui->lblDistance2, frameHeight);
     int iconDim = height() - labelHeight;
     QFontMetrics metrics = ui->lblDistance->fontMetrics();
     int textWidth = metrics.maxWidth();

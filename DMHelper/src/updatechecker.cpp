@@ -1,5 +1,6 @@
 #include "updatechecker.h"
 #include "presentupdatedialog.h"
+#include "dmversion.h"
 #include <QUrlQuery>
 #include <QDomDocument>
 #include <QMessageBox>
@@ -61,7 +62,7 @@ void UpdateChecker::requestFinished(QNetworkReply *reply)
 
     QByteArray bytes = reply->readAll();
     qDebug() << "[UpdateChecker] Request received; payload " << bytes.size() << " bytes";
-    qDebug() << "[UpdateChecker] Payload contents: " << QString(bytes.left(2000));
+    //qDebug() << "[UpdateChecker] Payload contents: " << QString(bytes.left(2000));
 
     _options.setLastUpdateDate(QDate::currentDate());
 

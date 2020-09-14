@@ -84,24 +84,26 @@ void RibbonTabCampaign::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblNewText, *ui->btnNewText);
-    setLineHeight(*ui->line_3);
-    setStandardButtonSize(*ui->lblNewParty, *ui->btnNewParty);
-    setStandardButtonSize(*ui->lblNewCharacter, *ui->btnNewCharacter);
-    //setStandardButtonSize(*ui->lblNewNPC, *ui->btnNewNPC);
-    setLineHeight(*ui->line_4);
-    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap);
-    setStandardButtonSize(*ui->lblNewBattle, *ui->btnNewBattle);
-    setStandardButtonSize(*ui->lblNewScrollingText, *ui->btnNewScrollingText);
-    setStandardButtonSize(*ui->lblRemove, *ui->btnRemove);
-    setLineHeight(*ui->line);
-    setStandardButtonSize(*ui->lblExportItem, *ui->btnExportItem);
-    setStandardButtonSize(*ui->lblImportItem, *ui->btnImportItem);
-    setStandardButtonSize(*ui->lblImportCharacter, *ui->btnImportCharacter);
-    //setStandardButtonSize(*ui->lblImportNPC, *ui->btnImportNPC);
-    setLineHeight(*ui->line_2);
-    setStandardButtonSize(*ui->lblUndo, *ui->btnUndo);
-    setStandardButtonSize(*ui->lblRedo, *ui->btnRedo);
+    int frameHeight = height();
+
+    setStandardButtonSize(*ui->lblNewText, *ui->btnNewText, frameHeight);
+    setLineHeight(*ui->line_3, frameHeight);
+    setStandardButtonSize(*ui->lblNewParty, *ui->btnNewParty, frameHeight);
+    setStandardButtonSize(*ui->lblNewCharacter, *ui->btnNewCharacter, frameHeight);
+    //setStandardButtonSize(*ui->lblNewNPC, *ui->btnNewNPC, frameHeight);
+    setLineHeight(*ui->line_4, frameHeight);
+    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap, frameHeight);
+    setStandardButtonSize(*ui->lblNewBattle, *ui->btnNewBattle, frameHeight);
+    setStandardButtonSize(*ui->lblNewScrollingText, *ui->btnNewScrollingText, frameHeight);
+    setStandardButtonSize(*ui->lblRemove, *ui->btnRemove, frameHeight);
+    setLineHeight(*ui->line, frameHeight);
+    setStandardButtonSize(*ui->lblExportItem, *ui->btnExportItem, frameHeight);
+    setStandardButtonSize(*ui->lblImportItem, *ui->btnImportItem, frameHeight);
+    setStandardButtonSize(*ui->lblImportCharacter, *ui->btnImportCharacter, frameHeight);
+    //setStandardButtonSize(*ui->lblImportNPC, *ui->btnImportNPC, frameHeight);
+    setLineHeight(*ui->line_2, frameHeight);
+    setStandardButtonSize(*ui->lblUndo, *ui->btnUndo, frameHeight);
+    setStandardButtonSize(*ui->lblRedo, *ui->btnRedo, frameHeight);
     //setLineHeight(*ui->line_4);
     //setStandardButtonSize(*ui->lblPlayersWindow, *ui->btnPlayersWindow);
     //setStandardButtonSize(*ui->lblPreview, *ui->btnPreview);

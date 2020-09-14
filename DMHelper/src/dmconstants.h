@@ -8,16 +8,6 @@
 
 namespace DMHelper
 {
-    const int DMHELPER_MAJOR_VERSION = 2;
-    const int DMHELPER_MINOR_VERSION = 0;
-    const int DMHELPER_ENGINEERING_VERSION = 0;
-
-    const int CAMPAIGN_MAJOR_VERSION = 2;
-    const int CAMPAIGN_MINOR_VERSION = 0;
-
-    const int BESTIARY_MAJOR_VERSION = 2;
-    const int BESTIARY_MINOR_VERSION = 1;
-
     enum CampaignType
     {
         CampaignType_Base = 0,
@@ -151,7 +141,8 @@ namespace DMHelper
     enum AudioType
     {
         AudioType_File = 0,
-        AudioType_Syrinscape
+        AudioType_Syrinscape,
+        AudioType_Youtube
     };
 
     const int TreeItemData_Type = Qt::UserRole + 1;

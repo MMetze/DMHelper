@@ -36,6 +36,10 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
     audiofactory.cpp \
+    audiotrackfile.cpp \
+    audiotracksyrinscape.cpp \
+    audiotrackurl.cpp \
+    audiotrackyoutube.cpp \
     basicdateserver.cpp \
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
@@ -90,6 +94,12 @@ SOURCES += main.cpp\
     ribbontabmap.cpp \
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
+    soundboardframe.cpp \
+    soundboardframegroupbox.cpp \
+    soundboardtrack.cpp \
+    spell.cpp \
+    spellbook.cpp \
+    spellbookdialog.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -230,6 +240,10 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
     audiofactory.h \
+    audiotrackfile.h \
+    audiotracksyrinscape.h \
+    audiotrackurl.h \
+    audiotrackyoutube.h \
     basicdateserver.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
@@ -254,6 +268,7 @@ HEADERS  += mainwindow.h \
     discordposter.h \
     dmhelperribbon.h \
     dmhlogger.h \
+    dmversion.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
@@ -284,6 +299,12 @@ HEADERS  += mainwindow.h \
     ribbontabmap.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
+    soundboardframe.h \
+    soundboardframegroupbox.h \
+    soundboardtrack.h \
+    spell.h \
+    spellbook.h \
+    spellbookdialog.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -436,6 +457,10 @@ FORMS    += mainwindow.ui \
     ribbontabmap.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \
+    soundboardframe.ui \
+    soundboardframegroupbox.ui \
+    soundboardtrack.ui \
+    spellbookdialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \

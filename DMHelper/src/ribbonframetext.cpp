@@ -129,7 +129,7 @@ void RibbonFrameText::showEvent(QShowEvent *event)
     RibbonFrame::showEvent(event);
 
     QFontMetrics metrics = ui->lblFont->fontMetrics();
-    int labelHeight = getLabelHeight(metrics);
+    int labelHeight = getLabelHeight(metrics, height());
     int iconSize = height() - labelHeight;
     int halfHeight = (iconSize - ui->layoutFont->spacing()) / 2;
 

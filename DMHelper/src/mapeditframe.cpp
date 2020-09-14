@@ -68,17 +68,19 @@ void MapEditFrame::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn);
-    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut);
-    setStandardButtonSize(*ui->lblZoomOne, *ui->btnZoomOne);
-    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull);
-    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect);
-    setLineHeight(*ui->line_6);
-    setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase);
-    setStandardButtonSize(*ui->lblSmooth, *ui->btnSmooth);
+    int frameHeight = height();
+
+    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn, frameHeight);
+    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut, frameHeight);
+    setStandardButtonSize(*ui->lblZoomOne, *ui->btnZoomOne, frameHeight);
+    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull, frameHeight);
+    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect, frameHeight);
+    setLineHeight(*ui->line_6, frameHeight);
+    setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase, frameHeight);
+    setStandardButtonSize(*ui->lblSmooth, *ui->btnSmooth, frameHeight);
 
     // Brush cluster
-    int labelHeight = getLabelHeight(*ui->lblSmooth);
+    int labelHeight = getLabelHeight(*ui->lblSmooth, frameHeight);
     int iconDim = height() - labelHeight;
     QFontMetrics metrics = ui->lblSmooth->fontMetrics();
     int textWidth = metrics.maxWidth();
@@ -91,10 +93,10 @@ void MapEditFrame::showEvent(QShowEvent *event)
     setWidgetSize(*ui->spinSize, sizeWidth*3, iconDim / 2);
     setWidgetSize(*ui->lblBrush, qMax((textWidth * 4), 2 * sizeWidth), labelHeight);
 
-    setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW);
-    setLineHeight(*ui->line_5);
-    setStandardButtonSize(*ui->lblPublishVisible, *ui->btnPublishVisible);
-    setStandardButtonSize(*ui->lblPublishZoom, *ui->btnPublishZoom);
+    setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW, frameHeight);
+    setLineHeight(*ui->line_5, frameHeight);
+    setStandardButtonSize(*ui->lblPublishVisible, *ui->btnPublishVisible, frameHeight);
+    setStandardButtonSize(*ui->lblPublishZoom, *ui->btnPublishZoom, frameHeight);
 }
 
 void MapEditFrame::setEraseMode()

@@ -85,14 +85,17 @@ void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal
             return;
         }
 
-        pixmapItem->setPixmap(itemPixmap.scaled(getWidth() * 100, getSize() * 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        //pixmapItem->setPixmap(itemPixmap.scaled(getWidth() * 100, getSize() * 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        int pixmapWidth = getWidth() >= getSize() ? 100 : static_cast<int>(100.0 * getWidth() / getSize());
+        int pixmapHeight = getSize() >= getWidth() ? 100 : static_cast<int>(100.0 * getSize() / getWidth());
+        pixmapItem->setPixmap(itemPixmap.scaled(pixmapWidth, pixmapHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
     }
     else
     {
         qDebug() << "[Battle Dialog Model Effect Object] ERROR: Object Effect found without QGraphicsPixmapItem!";
     }
 
-    item.setScale(gridScale / 500.0);
+    //item.setScale(gridScale / 500.0);
 }
 
 int BattleDialogModelEffectObject::getWidth() const

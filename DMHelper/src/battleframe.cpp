@@ -228,6 +228,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     connect(_scene, SIGNAL(selectionChanged()),this,SLOT(handleSelectionChanged()));
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
+    connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     //connect(_scene, SIGNAL(distanceChanged(const QString&)), ui->edtDistance, SLOT(setText(const QString&)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
@@ -264,7 +265,8 @@ BattleFrame::~BattleFrame()
     delete deletePlayer;
 
     QLayoutItem *child;
-    while ((child = _combatantLayout->takeAt(0)) != nullptr) {
+    while ((child = _combatantLayout->takeAt(0)) != nullptr)
+    {
         delete child;
     }
 
@@ -1640,6 +1642,18 @@ void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
     }
 }
 
+void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
+{
+    for(QGraphicsPixmapItem* item : _combatantIcons.values())
+    {
+        if(item)
+        {
+            // OPTIMIZE: Optimize to only remove effects if not still relevant
+            removeEffectsFromItem(item);
+        }
+    }
+}
+
 void BattleFrame::handleCombatantMoved(BattleDialogModelCombatant* combatant)
 {
     if((!_scene) || (!combatant))
@@ -2593,7 +2607,7 @@ void BattleFrame::selectAddCharacter(QList<Character*> characters, const QString
             Character* selectedCharacter = characterSelectDlg.getSelectedData().value<Character*>();
             if(selectedCharacter)
             {
-                BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(characterSelectDlg.getSelectedData().value<Character*>());
+                BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(selectedCharacter);
                 newCharacter->setPosition(viewportCenter());
                 addCombatant(newCharacter);
                 recreateCombatantWidgets();

@@ -1,6 +1,7 @@
 #include "aboutdialog.h"
 #include "ui_aboutdialog.h"
 #include "dmconstants.h"
+#include "dmversion.h"
 #include "bestiary.h"
 
 AboutDialog::AboutDialog(QWidget *parent) :

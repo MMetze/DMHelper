@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "dmversion.h"
 #include "publishwindow.h"
 #include "publishframe.h"
 #include "dicerolldialog.h"
@@ -29,10 +30,13 @@
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
 #include "battleframe.h"
-#include "audioplaybackframe.h"
+//#include "audioplaybackframe.h"
+#include "soundboardframe.h"
 #include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
+#include "spell.h"
+#include "spellbook.h"
 #include "bestiaryexportdialog.h"
 #include "equipmentserver.h"
 #include "textpublishdialog.h"
@@ -147,6 +151,7 @@ MainWindow::MainWindow(QWidget *parent) :
     campaignFileName(),
     _options(nullptr),
     bestiaryDlg(),
+    spellDlg(),
 #ifdef INCLUDE_CHASE_SUPPORT
     chaseDlg(nullptr),
 #endif
@@ -188,6 +193,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] DMHelper version information";
     qDebug() << "[MainWindow]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION);
     qDebug() << "[MainWindow]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
+    qDebug() << "[MainWindow]     Expected Spellbook Version: " << QString::number(DMHelper::SPELLBOOK_MAJOR_VERSION) + "." + QString::number(DMHelper::SPELLBOOK_MINOR_VERSION);
     qDebug() << "[MainWindow]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
     qDebug() << "[MainWindow]     Build: " << __DATE__ << " " << __TIME__;
 #ifdef Q_OS_MAC
@@ -232,6 +238,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _options->setMRUHandler(mruHandler);
     _options->readSettings();
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
+    connect(_options,SIGNAL(spellbookFileNameChanged()),this,SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
 
     // Set the global font
@@ -258,6 +265,10 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Initializing Bestiary";
     Bestiary::Initialize();
     qDebug() << "[MainWindow] Bestiary Initialized";
+
+    qDebug() << "[MainWindow] Initializing Spellbook";
+    Spellbook::Initialize();
+    qDebug() << "[MainWindow] Spellbook Initialized";
 
     qDebug() << "[MainWindow] Initializing BasicDateServer";
     BasicDateServer::Initialize(_options->getCalendarFileName());
@@ -312,6 +323,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(bestiaryShortcut, SIGNAL(activated()), this, SLOT(openBestiary()));
     connect(_ribbonTabTools, SIGNAL(exportBestiaryClicked()), this, SLOT(exportBestiary()));
     connect(_ribbonTabTools, SIGNAL(importBestiaryClicked()), this, SLOT(importBestiary()));
+    connect(_ribbonTabTools, SIGNAL(spellbookClicked()), this, SLOT(openSpellbook()));
     connect(_ribbonTabTools, SIGNAL(rollDiceClicked()), this, SLOT(openDiceDialog()));
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
@@ -369,10 +381,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Tree Model Created";
 
     connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
+    connect(Spellbook::Instance(),SIGNAL(changed()),&spellDlg,SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Loading Bestiary";
 #ifndef Q_OS_MAC
-    splash.showMessage(QString("Initializing Bestiary...\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Initializing Bestiary...\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
     readBestiary();
@@ -387,6 +400,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), this, SLOT(handleAnimationPreview(QImage)));
 
     connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
+
+    qDebug() << "[MainWindow] Loading Spellbook";
+#ifndef Q_OS_MAC
+    splash.showMessage(QString("Initializing Spellbook...\n"), Qt::AlignBottom | Qt::AlignHCenter);
+#endif
+    qApp->processEvents();
+    readSpellbook();
+    spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
+    qDebug() << "[MainWindow] Spellbook Loaded";
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     qDebug() << "[MainWindow] Creating Encounter Pages";
@@ -604,6 +626,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QuickRefFrame* quickRefFrame = new QuickRefFrame(_options->getQuickReferenceFileName(), this);
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, quickRefFrame, &QuickRefFrame::readQuickRef);
     quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+
+    /*
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
     audioPlaybackFrame->setVolume(_options->getAudioVolume());
     connect(_audioPlayer, SIGNAL(positionChanged(qint64)), audioPlaybackFrame, SLOT(setPosition(qint64)));
@@ -616,6 +640,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _audioPlayer, SLOT(setVolume(int)));
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _options, SLOT(setAudioVolume(int)));
     soundDlg = createDialog(audioPlaybackFrame);
+    */
+    SoundboardFrame* soundboard = new SoundboardFrame(this);
+    connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
+    soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+
     timeAndDateFrame = new TimeAndDateFrame(this);
     calendarDlg = createDialog(timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
     countdownDlg = createDialog(new CountdownFrame(this));
@@ -630,6 +659,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
     connect(referenceShortcut, SIGNAL(activated()), quickRefDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(soundboardClicked()), soundDlg, SLOT(exec()));
+    QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
+    connect(soundboardShortcut, SIGNAL(activated()), soundDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(calendarClicked()), calendarDlg, SLOT(exec()));
     QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+K", "Calendar")), this);
     connect(calendarShortcut, SIGNAL(activated()), calendarDlg, SLOT(exec()));
@@ -1067,6 +1098,8 @@ void MainWindow::removeCurrentItem()
     else
         ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); //ui->stackedWidgetEncounter->setCurrentIndex(0);
 
+    qDebug() << "[MainWindow] Removed object from the campaign tree: " << removeObject->getName() << ", ID: " << removeObject->getID();
+
     delete campaign->removeObject(removeObject->getID());
     updateCampaignTree();
 }
@@ -1221,6 +1254,8 @@ void MainWindow::readBestiary()
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[MainWindow] Reading bestiary file open failed.";
+        QMessageBox::critical(this, QString("Bestiary file open failed"),
+                              QString("Unable to open the bestiary file: ") + bestiaryFileName);
         return;
     }
 
@@ -1235,8 +1270,10 @@ void MainWindow::readBestiary()
 
     if(contentResult == false)
     {
-        qDebug() << "[MainWindow] Reading bestiary reading XML content.";
+        qDebug() << "[MainWindow] Error reading bestiary XML content. The XML is probably not valid.";
         qDebug() << errMsg << errRow << errColumn;
+        QMessageBox::critical(this, QString("Bestiary file invalid"),
+                              QString("Unable to read the bestiary file: ") + bestiaryFileName + QString(", the XML is invalid"));
         return;
     }
 
@@ -1244,6 +1281,8 @@ void MainWindow::readBestiary()
     if((root.isNull()) || (root.tagName() != "root"))
     {
         qDebug() << "[MainWindow] Bestiary file missing root item";
+        QMessageBox::critical(this, QString("Bestiary file invalid"),
+                              QString("Unable to read the bestiary file: ") + bestiaryFileName + QString(", the XML does not have the expected root item."));
         return;
     }
 
@@ -1260,7 +1299,77 @@ void MainWindow::readBestiary()
         bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
 
     qDebug() << "[MainWindow] Bestiary reading complete.";
+}
 
+void MainWindow::readSpellbook()
+{
+    qDebug() << "[MainWindow] Requested to read Spellbook";
+
+    if(!Spellbook::Instance())
+    {
+        qDebug() << "[MainWindow] Spellbook instance not found, reading stopped";
+        return;
+    }
+
+    QString spellbookFileName = _options->getSpellbookFileName();
+    if(spellbookFileName.isEmpty())
+    {
+        qDebug() << "[MainWindow] ERROR! No known spellbook found, unable to load spellbook";
+        return;
+    }
+
+    qDebug() << "[MainWindow] Reading spellbook: " << spellbookFileName;
+
+    QDomDocument doc("DMHelperSpellbookXML");
+    QFile file(spellbookFileName);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[MainWindow] Reading spellbook file open failed.";
+        QMessageBox::critical(this, QString("Spellbook file open failed"),
+                              QString("Unable to open the spellbook file: ") + spellbookFileName);
+        return;
+    }
+
+    QTextStream in(&file);
+    in.setCodec("UTF-8");
+    QString errMsg;
+    int errRow;
+    int errColumn;
+    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+
+    file.close();
+
+    if(contentResult == false)
+    {
+        qDebug() << "[MainWindow] Error reading spellbook XML content. The XML is probably not valid.";
+        qDebug() << errMsg << errRow << errColumn;
+        QMessageBox::critical(this, QString("Spellbook file invalid"),
+                              QString("Unable to read the spellbook file: ") + spellbookFileName + QString(", the XML is invalid"));
+        return;
+    }
+
+    QDomElement root = doc.documentElement();
+    if((root.isNull()) || (root.tagName() != "root"))
+    {
+        qDebug() << "[MainWindow] Spellbook file missing root item";
+        QMessageBox::critical(this, QString("Spellbook file invalid"),
+                              QString("Unable to read the spellbook file: ") + spellbookFileName + QString(", the XML does not have the expected root item."));
+        return;
+    }
+
+    // Spellbook file seems ok, make a backup
+    _options->backupFile(spellbookFileName);
+
+    QFileInfo fileInfo(spellbookFileName);
+    Spellbook::Instance()->setDirectory(fileInfo.absoluteDir());
+    Spellbook::Instance()->inputXML(root, false);
+
+    if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
+        spellDlg.setSpell(_options->getLastSpell());
+    else
+        spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
+
+    qDebug() << "[MainWindow] Spellbook reading complete.";
 }
 
 void MainWindow::showEvent(QShowEvent * event)
@@ -1302,9 +1411,11 @@ void MainWindow::closeEvent(QCloseEvent * event)
         return;
     }
 
+    writeSpellbook();
     writeBestiary();
 
     _options->setLastMonster(bestiaryDlg.getMonster() ? bestiaryDlg.getMonster()->getName() : "");
+    _options->setLastSpell(spellDlg.getSpell() ? spellDlg.getSpell()->getName() : "");
     _options->writeSettings();
 
     qApp->quit();
@@ -1625,6 +1736,11 @@ void MainWindow::writeBestiary()
     file.close();
 
     qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
+}
+
+void MainWindow::writeSpellbook()
+{
+    // TODO: add write spellbook
 }
 
 CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText)
@@ -2079,6 +2195,35 @@ void MainWindow::importBestiary()
 
         qDebug() << "[MainWindow] Bestiary import complete.";
     }
+}
+
+void MainWindow::openSpellbook()
+{
+    qDebug() << "[MainWindow] Opening Spellbook";
+    if(!Spellbook::Instance())
+        return;
+
+    if(Spellbook::Instance()->count() == 0)
+    {
+        qDebug() << "[MainWindow]    ...Spellbook is empty, creating a first spell";
+        spellDlg.createNewSpell();
+    }
+    else
+    {
+        spellDlg.setFocus();
+        spellDlg.show();
+        spellDlg.activateWindow();
+    }
+}
+
+void MainWindow::exportSpellbook()
+{
+    // TODO: add import/export for spells
+}
+
+void MainWindow::importSpellbook()
+{
+    // TODO: add import/export for spells
 }
 
 void MainWindow::openAboutDialog()

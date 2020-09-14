@@ -214,20 +214,35 @@ BattleDialogModelCombatant* BattleDialogModel::getCombatantById(QUuid combatantI
 
 void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* combatant)
 {
+    if(!combatant)
+        return;
+
     _combatants.insert(index, combatant);
 }
 
 BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
 {
-    if((index < 0) || (index >= _combatants.count()))
-        return nullptr;
-    else
-        return _combatants.takeAt(index);
+    BattleDialogModelCombatant* removedCombatant = nullptr;
+    if((index >= 0) && (index < _combatants.count()))
+    {
+        removedCombatant = _combatants.takeAt(index);
+        if(_activeCombatant == removedCombatant)
+            _activeCombatant = nullptr;
+    }
+
+    return removedCombatant;
 }
 
 void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
 {
+    if(!combatant)
+        return;
+
     _combatants.append(combatant);
+
+    // For a character addition, connect to the destroyed signal
+    if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
+        connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
 }
 
 void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
@@ -285,6 +300,9 @@ BattleDialogModelEffect* BattleDialogModel::getEffectById(QUuid effectId) const
 
 void BattleDialogModel::insertEffect(int index, BattleDialogModelEffect* effect)
 {
+    if(!effect)
+        return;
+
     _effects.insert(index, effect);
 }
 
@@ -316,6 +334,9 @@ bool BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
 
 void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
 {
+    if(!effect)
+        return;
+
     _effects.append(effect);
 }
 
@@ -426,6 +447,9 @@ void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
 
     _previousMap = _map;
     _map = map;
+
+    disconnect(_previousMap, &QObject::destroyed, this, &BattleDialogModel::mapDestroyed);
+    connect(_map, &QObject::destroyed, this, &BattleDialogModel::mapDestroyed);
 
     _previousMapRect = _mapRect;
     _mapRect = mapRect;
@@ -583,6 +607,28 @@ void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
 void BattleDialogModel::sortCombatants()
 {
     std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
+}
+
+void BattleDialogModel::mapDestroyed(QObject *obj)
+{
+    Q_UNUSED(obj);
+    setMap(nullptr, QRect());
+}
+
+void BattleDialogModel::characterDestroyed(const QUuid& destroyedId)
+{
+    for(int i = 0; i < _combatants.count(); ++i)
+    {
+        BattleDialogModelCombatant* combatant = _combatants.at(i);
+        if((combatant) &&
+           (combatant->getCombatantType() == DMHelper::CombatantType_Character) &&
+           (combatant->getCombatant()) &&
+           (combatant->getCombatant()->getID() == destroyedId))
+        {
+            removeCombatant(i);
+            return;
+        }
+    }
 }
 
 QDomElement BattleDialogModel::createOutputXML(QDomDocument &doc)
