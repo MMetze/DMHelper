@@ -35,3 +35,8 @@ void AudioTrackSyrinscape::setVolume(int volume)
 {
     Q_UNUSED(volume);
 }
+
+void AudioTrackSyrinscape::setRepeat(bool repeat)
+{
+    Q_UNUSED(repeat);
+}

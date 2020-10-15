@@ -6,7 +6,8 @@
 AudioTrackFile::AudioTrackFile(const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackUrl(trackName, trackUrl, parent),
     _player(nullptr),
-    _playlist(nullptr)
+    _playlist(nullptr),
+    _repeat(false)
 {
 }
 
@@ -22,7 +23,10 @@ void AudioTrackFile::play()
 
     _player = new QMediaPlayer(this);
     _playlist = new QMediaPlaylist(this);
-    //_playlist->setPlaybackMode(QMediaPlaylist::Loop);
+    _playlist->setPlaybackMode(_repeat ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
+
+    connect(_player, &QMediaPlayer::durationChanged, this, &AudioTrackFile::handleDurationChanged);
+    connect(_player, &QMediaPlayer::positionChanged, this, &AudioTrackFile::handlePositionChanged);
 
     _playlist->addMedia(getUrl());
     _player->setPlaylist(_playlist);
@@ -53,3 +57,25 @@ void AudioTrackFile::setVolume(int volume)
     if(_player)
         _player->setVolume(volume);
 }
+
+void AudioTrackFile::setRepeat(bool repeat)
+{
+    if(_repeat != repeat)
+        return;
+
+    if(!_playlist)
+        return;
+
+    _playlist->setPlaybackMode(_repeat ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
+}
+
+void AudioTrackFile::handleDurationChanged(qint64 position)
+{
+    emit trackLengthChanged(position / 1000);
+}
+
+void AudioTrackFile::handlePositionChanged(qint64 position)
+{
+    emit trackPositionChanged(position / 1000);
+}
+

@@ -22,7 +22,7 @@ public:
         Ability_Constitution,
         Ability_Intelligence,
         Ability_Wisdom,
-        Ability_Charisma,
+        Ability_Charisma
     };
 
     enum Skills
@@ -59,12 +59,61 @@ public:
     const int SKILLS_SKILLED = 1;
     const int SKILLS_EXPERT = 2;
 
+    enum Condition
+    {
+        Condition_None          = 0x00000000,
+        Condition_Blinded       = 0x00000001,
+        Condition_Charmed       = 0x00000002,
+        Condition_Deafened      = 0x00000004,
+        Condition_Exhaustion_1  = 0x00000008,
+        Condition_Exhaustion_2  = 0x00000010,
+        Condition_Exhaustion_3  = 0x00000020,
+        Condition_Exhaustion_4  = 0x00000040,
+        Condition_Exhaustion_5  = 0x00000080,
+        Condition_Frightened    = 0x00000100,
+        Condition_Grappled      = 0x00000200,
+        Condition_Incapacitated = 0x00000400,
+        Condition_Invisible     = 0x00000800,
+        Condition_Paralyzed     = 0x00001000,
+        Condition_Petrified     = 0x00002000,
+        Condition_Poisoned      = 0x00004000,
+        Condition_Prone         = 0x00008000,
+        Condition_Restrained    = 0x00010000,
+        Condition_Stunned       = 0x00020000,
+        Condition_Unconscious   = 0x00040000
+    };
+
+    enum Condition_Iterator
+    {
+        Condition_Iterator_None,
+        Condition_Iterator_Blinded,
+        Condition_Iterator_Charmed,
+        Condition_Iterator_Deafened,
+        Condition_Iterator_Exhaustion_1,
+        Condition_Iterator_Exhaustion_2,
+        Condition_Iterator_Exhaustion_3,
+        Condition_Iterator_Exhaustion_4,
+        Condition_Iterator_Exhaustion_5,
+        Condition_Iterator_Frightened,
+        Condition_Iterator_Grappled,
+        Condition_Iterator_Incapacitated,
+        Condition_Iterator_Invisible,
+        Condition_Iterator_Paralyzed,
+        Condition_Iterator_Petrified,
+        Condition_Iterator_Poisoned,
+        Condition_Iterator_Prone,
+        Condition_Iterator_Restrained,
+        Condition_Iterator_Stunned,
+        Condition_Iterator_Unconscious,
+
+        Condition_Iterator_Count
+    };
+
+
     explicit Combatant(const QString& name = QString(), QObject *parent = nullptr);
-    //explicit Combatant(const Combatant &obj);  // copy constructor
     virtual ~Combatant() override;
 
     // From CampaignObjectBase
-    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual int getObjectType() const override;
 
@@ -73,7 +122,6 @@ public:
 
     virtual Combatant* clone() const = 0;
 
-    //virtual QString getName() const;
     virtual int getCombatantType() const;
     virtual int getInitiative() const;
     virtual int getSpeed() const = 0;
@@ -95,15 +143,21 @@ public:
     virtual int getAbilityValue(Ability ability) const;
     static int getAbilityMod(int ability);
     static QString getAbilityModStr(int ability);
+    static QString convertModToStr(int modifier);
     static Ability getSkillAbility(Skills skill);
     static QList<Combatant*> instantiateCombatants(CombatantGroup combatantGroup);
 
+    static int getConditionCount();
+    static Condition getConditionByIndex(int index);
+    static QString getConditionIcon(int condition);
+    static QString getConditionDescription(int condition);
+
+    virtual int getConditions() const;
+    virtual bool hasCondition(Condition condition) const;
+
 signals:
-    //void dirty();
-    //void changed();
 
 public slots:
-    //virtual void setName(const QString& combatantName);
     virtual void setInitiative(int initiative);
     virtual void setArmorClass(int armorClass);
     virtual void addAttack(const Attack& attack);
@@ -111,9 +165,15 @@ public slots:
     virtual void setHitPoints(int hitPoints);
     virtual void applyDamage(int damage);
     virtual void setHitDice(const Dice& hitDice);
+    virtual void setConditions(int conditions);
+    virtual void applyConditions(int conditions);
+    virtual void addCondition(Condition condition);
+    virtual void removeCondition(Condition condition);
+    virtual void clearConditions();
     virtual void setIcon(const QString &newIcon);
 
 protected:
+
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
@@ -121,12 +181,12 @@ protected:
     void registerChange();
     void copyValues(const Combatant &other);
 
-    //QString _name;
     int _initiative;
     int _armorClass;
     QList<Attack> _attacks;
     int _hitPoints;
     Dice _hitDice;
+    int _conditions;
     QString _icon;
     ScaledPixmap _iconPixmap;
 

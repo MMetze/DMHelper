@@ -2,6 +2,7 @@
 #include "ui_dicerolldialogcombatants.h"
 #include "widgetbattlecombatant.h"
 #include "character.h"
+#include "conditionseditdialog.h"
 #include <QtGlobal>
 #include <QMouseEvent>
 
@@ -13,11 +14,13 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
     _combatants(combatants),
     _modifiers(),
     _fireAndForget(false),
+    _conditions(0),
     _mouseDown(false),
     _mouseDownPos()
 {
     ui->setupUi(this);
     init();
+    resize(800, 600);
 
     _combatantLayout = new QVBoxLayout;
     _combatantLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -51,6 +54,11 @@ DiceRollDialogCombatants::~DiceRollDialogCombatants()
     delete ui;
 }
 
+QSize DiceRollDialogCombatants::sizeHint() const
+{
+    return QSize(800, 600);
+}
+
 void DiceRollDialogCombatants::fireAndForget()
 {
     show();
@@ -67,9 +75,11 @@ void DiceRollDialogCombatants::rollDice()
         QLayoutItem* layoutItem = _combatantLayout->itemAt(rc);
         if(layoutItem)
         {
-            rollForWidget(qobject_cast<WidgetBattleCombatant*>(layoutItem->widget()),
-                          readDice(),
-                          (_modifiers.count() > 0) ? (_modifiers.at(rc)) : 0);
+            WidgetBattleCombatant* combatant = qobject_cast<WidgetBattleCombatant*>(layoutItem->widget());
+            if((combatant) && (combatant->isActive()))
+            {
+                rollForWidget(combatant, readDice(), (_modifiers.count() > 0) ? (_modifiers.at(rc)) : 0);
+            }
         }
     }
 }
@@ -88,7 +98,7 @@ void DiceRollDialogCombatants::applyDamage()
         if(layoutItem)
         {
             WidgetBattleCombatant* combatantWidget = qobject_cast<WidgetBattleCombatant*>(layoutItem->widget());
-            if((combatantWidget) && (combatantWidget->isVisible()))
+            if((combatantWidget) && (combatantWidget->isActive()) && (combatantWidget->isVisible()))
             {
                 if(combatantWidget->getResult() >= target)
                 {
@@ -100,6 +110,10 @@ void DiceRollDialogCombatants::applyDamage()
                 else
                 {
                     combatantWidget->applyDamage(damage);
+                    if(_conditions != 0)
+                    {
+                        combatantWidget->applyConditions(_conditions);
+                    }
                 }
             }
         }
@@ -173,6 +187,17 @@ void DiceRollDialogCombatants::modifierTypeChanged()
     }
 }
 
+void DiceRollDialogCombatants::editConditions()
+{
+    ConditionsEditDialog dlg;
+    dlg.setConditions(_conditions);
+    int result = dlg.exec();
+    if(result == QDialog::Accepted)
+    {
+        _conditions = dlg.getConditions();
+    }
+}
+
 void DiceRollDialogCombatants::init()
 {
     QValidator *valDiceCount = new QIntValidator(1, 100, this);
@@ -188,6 +213,7 @@ void DiceRollDialogCombatants::init()
     connect(ui->editDiceType, SIGNAL(textChanged(QString)), this, SLOT(diceTypeChanged()));
     connect(ui->cmbType, SIGNAL(currentIndexChanged(int)), this, SLOT(modifierTypeChanged()));
     connect(ui->btnDamage, SIGNAL(clicked()), this, SLOT(applyDamage()));
+    connect(ui->btnApplyConditions, SIGNAL(clicked()), this, SLOT(editConditions()));
 
     ui->cmbType->addItem(QString("None"), QVariant());
     ui->cmbType->addItem(QString("Strength Check"), QVariant::fromValue(AbilitySkillPair(Combatant::Ability_Strength, -1)));

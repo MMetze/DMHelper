@@ -1,4 +1,4 @@
-    #include "soundboardtrack.h"
+#include "soundboardtrack.h"
 #include "ui_soundboardtrack.h"
 #include "audiotrack.h"
 #include "audioplayer.h"
@@ -12,7 +12,9 @@ SoundboardTrack::SoundboardTrack(AudioTrack* track, QWidget *parent) :
     ui(new Ui::SoundboardTrack),
     _track(nullptr),
     _localMute(false),
-    _currentMute(false)
+    _currentMute(false),
+    _trackLength("0:00"),
+    _trackPosition("0:00")
 {
     ui->setupUi(this);
     setTrack(track);
@@ -48,6 +50,9 @@ SoundboardTrack::SoundboardTrack(AudioTrack* track, QWidget *parent) :
 
     connect(ui->btnMute, &QAbstractButton::clicked, this, &SoundboardTrack::toggleMute);
     connect(ui->btnPlay, &QAbstractButton::toggled, this, &SoundboardTrack::togglePlay);
+    connect(ui->btnRepeat, &QAbstractButton::toggled, this, &SoundboardTrack::repeatChanged);
+    connect(track, &AudioTrack::trackLengthChanged, this, &SoundboardTrack::setTrackLength);
+    connect(track, &AudioTrack::trackPositionChanged, this, &SoundboardTrack::setTrackPosition);
 }
 
 SoundboardTrack::~SoundboardTrack()
@@ -102,6 +107,23 @@ void SoundboardTrack::parentMuteChanged(bool mute)
         setCurrentMute(_localMute);
     }
     */
+}
+
+void SoundboardTrack::setTrackLength(int trackLength)
+{
+    _trackLength = QString("%1:%2").arg(QString::number(trackLength / 60), 2, QChar('0')).arg(QString::number(trackLength % 60), 2, QChar('0'));
+    updateProgress();
+}
+
+void SoundboardTrack::setTrackPosition(int trackPosition)
+{
+    _trackPosition = QString("%1:%2").arg(QString::number(trackPosition / 60), 2, QChar('0')).arg(QString::number(trackPosition % 60), 2, QChar('0'));
+    updateProgress();
+}
+
+void SoundboardTrack::setRepeat(bool repeat)
+{
+    ui->btnRepeat->setChecked(repeat);
 }
 
 void SoundboardTrack::togglePlay(bool checked)
@@ -168,4 +190,9 @@ void SoundboardTrack::setCurrentMute(bool mute)
             ui->slideVolume->setEnabled(!mute);
         ui->btnMute->setChecked(mute);
     }
+}
+
+void SoundboardTrack::updateProgress()
+{
+    ui->lblProgress->setText(_trackPosition +  QString(" / ") + _trackLength);
 }

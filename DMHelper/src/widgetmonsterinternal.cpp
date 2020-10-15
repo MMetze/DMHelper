@@ -11,8 +11,6 @@
 #include <QTimer>
 #include <QDebug>
 
-// Todo: USE THESE NEW WIDGETS IN THE BATTLE DIALOG!
-
 WidgetMonsterInternal::WidgetMonsterInternal(BattleDialogModelMonsterBase* monster, WidgetMonster* parent) :
     WidgetCombatantBase(parent),
     _widgetParent(parent),
@@ -117,11 +115,6 @@ void WidgetMonsterInternal::resetLegendary()
 {
     _monster->setLegendaryCount(_legendaryMaximum);
     updateData();
-}
-
-void WidgetMonsterInternal::setHighlighted(bool highlighted)
-{
-    WidgetCombatantBase::setHighlighted(highlighted);
 }
 
 void WidgetMonsterInternal::executeDoubleClick()

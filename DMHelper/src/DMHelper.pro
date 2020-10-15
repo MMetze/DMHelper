@@ -41,6 +41,7 @@ SOURCES += main.cpp\
     audiotrackurl.cpp \
     audiotrackyoutube.cpp \
     basicdateserver.cpp \
+    battlecombatantframe.cpp \
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
     battledialogmodeleffectshape.cpp \
@@ -58,6 +59,7 @@ SOURCES += main.cpp\
     characterimportdialog.cpp \
     colorpushbutton.cpp \
     combatantwidget.cpp \
+    conditionseditdialog.cpp \
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
@@ -245,6 +247,7 @@ HEADERS  += mainwindow.h \
     audiotrackurl.h \
     audiotrackyoutube.h \
     basicdateserver.h \
+    battlecombatantframe.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
     battledialogmodeleffectshape.h \
@@ -262,6 +265,7 @@ HEADERS  += mainwindow.h \
     characterimportdialog.h \
     colorpushbutton.h \
     combatantwidget.h \
+    conditionseditdialog.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
@@ -430,9 +434,11 @@ HEADERS  += mainwindow.h \
     texttranslatedialog.h
 
 FORMS    += mainwindow.ui \
+    battlecombatantframe.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     characterimportdialog.ui \
+    conditionseditdialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \
     combatantdialog.ui \

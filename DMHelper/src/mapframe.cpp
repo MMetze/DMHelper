@@ -735,6 +735,8 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 }
 
                 QImage result = _videoPlayer->getImage()->copy();
+                uchar* b = result.bits();
+                memset(b, 0, 100);
                 if(!_bwFoWImage.isNull())
                 {
                     QPainter p;

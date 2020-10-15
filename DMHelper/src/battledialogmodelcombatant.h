@@ -27,6 +27,7 @@ public:
 
     virtual bool getShown() const;
     virtual bool getKnown() const;
+    virtual bool getSelected() const;
 
     int getInitiative() const;
     void setInitiative(int initiative);
@@ -34,7 +35,7 @@ public:
     const QPointF& getPosition() const;
     void setPosition(const QPointF& position);
     virtual qreal getSizeFactor() const = 0;
-    virtual int getSizeCategory() const = 0;
+    virtual int getSizeCategory() const = 0;    
 
     Combatant* getCombatant() const;
 
@@ -46,6 +47,7 @@ public:
     virtual int getCharisma() const = 0;
     virtual int getAbilityValue(Combatant::Ability ability) const;
     virtual int getSkillModifier(Combatant::Skills skill) const = 0;
+    virtual int getConditions() const = 0;
 
     virtual int getSpeed() const = 0;
     virtual int getArmorClass() const = 0;
@@ -56,9 +58,13 @@ public:
 public slots:
     virtual void setShown(bool isShown);
     virtual void setKnown(bool isKnown);
+    virtual void setSelected(bool isSelected);
+    virtual void setConditions(int conditions) = 0;
+    virtual void applyConditions(int conditions) = 0;
 
 signals:
     void combatantMoved(BattleDialogModelCombatant* combatant);
+    void combatantSelected(BattleDialogModelCombatant* combatant);
 
 protected:
     // From BattleDialogModelCombatant
@@ -74,6 +80,7 @@ protected:
     QPointF _position;
     bool _isShown;
     bool _isKnown;
+    bool _isSelected;
 };
 
 #endif // BATTLEDIALOGMODELCOMBATANT_H

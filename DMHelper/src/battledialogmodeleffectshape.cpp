@@ -38,8 +38,10 @@ void BattleDialogModelEffectShape::applyEffectValues(QGraphicsItem& item, qreal 
     QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
     if(shapeItem)
     {
-        shapeItem->setPen(QPen(getColor(), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        shapeItem->setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
+        //shapeItem->setPen(QPen(getColor(), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        shapeItem->setPen(QPen(QColor(getColor().red(),getColor().green(),getColor().blue(),255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        //shapeItem->setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
+        shapeItem->setBrush(QBrush(getColor()));
     }
 }
 

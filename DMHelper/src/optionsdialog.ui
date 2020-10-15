@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>626</width>
-    <height>404</height>
+    <height>528</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -178,6 +178,90 @@
             </item>
             <item>
              <widget class="QPushButton" name="btnPointer">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Selection Icon:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtSelectedIcon"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnSelectedIcon">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Active Icon:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtActiveIcon"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnActiveIcon">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Combatant Frame:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtCombatantFrame"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnCombatantFrame">
+              <property name="text">
+               <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_12">
+            <item>
+             <widget class="QLabel" name="label_9">
+              <property name="text">
+               <string>Countdown Frame:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtCountdownFrame"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnCountdownFrame">
               <property name="text">
                <string>Browse...</string>
               </property>

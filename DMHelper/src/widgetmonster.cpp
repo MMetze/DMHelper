@@ -110,24 +110,32 @@ void WidgetMonster::leaveEvent(QEvent * event)
 {
     if(_internals)
         _internals->leaveEvent(event);
+
+    CombatantWidget::leaveEvent(event);
 }
 
 void WidgetMonster::mousePressEvent(QMouseEvent * event)
 {
     if(_internals)
         _internals->mousePressEvent(event);
+
+    CombatantWidget::mousePressEvent(event);
 }
 
 void WidgetMonster::mouseReleaseEvent(QMouseEvent * event)
 {
     if(_internals)
         _internals->mouseReleaseEvent(event);
+
+    CombatantWidget::mouseReleaseEvent(event);
 }
 
 void WidgetMonster::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if(_internals)
         _internals->mouseDoubleClickEvent(event);
+
+    CombatantWidget::mouseDoubleClickEvent(event);
 }
 
 void WidgetMonster::edtInitiativeChanged()

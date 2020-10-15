@@ -24,12 +24,16 @@ public:
     virtual QString getMD5() const;
     virtual void setMD5(const QString& md5);
 
+public slots:
     virtual void play() = 0;
     virtual void stop() = 0;
     virtual void setMute(bool mute) = 0;
     virtual void setVolume(int volume) = 0;
+    virtual void setRepeat(bool repeat) = 0;
 
 signals:
+    void trackLengthChanged(int length);
+    void trackPositionChanged(int length);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

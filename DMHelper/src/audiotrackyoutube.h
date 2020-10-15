@@ -19,13 +19,14 @@ public:
     virtual ~AudioTrackYoutube() override;
 
     virtual int getAudioType() const override;
+    virtual void eventCallback(const struct libvlc_event_t *p_event);
 
+public slots:
     virtual void play() override;
     virtual void stop() override;
     virtual void setMute(bool mute) override;
     virtual void setVolume(int volume) override;
-
-    virtual void eventCallback(const struct libvlc_event_t *p_event);
+    virtual void setRepeat(bool repeat) override;
 
 signals:
 
@@ -33,6 +34,8 @@ protected slots:
     void urlRequestFinished(QNetworkReply *reply);
 
 protected:
+    virtual void timerEvent(QTimerEvent *event) override;
+
     virtual void findDirectUrl(const QString& youtubeId);
     bool handleReplyDirect(const QByteArray& data);
     void playDirectUrl();
@@ -46,6 +49,8 @@ protected:
     libvlc_media_player_t *_vlcPlayer;
     int _stopStatus;
     int _lastVolume;
+    int _timerId;
+    bool _repeat;
 };
 
 #endif // AUDIOTRACKYOUTUBE_H

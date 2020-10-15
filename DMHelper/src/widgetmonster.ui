@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>223</width>
+    <width>260</width>
     <height>57</height>
    </rect>
   </property>
@@ -164,7 +164,8 @@
           <string>Is this monster visible? If the this isn't checked, the monster will not be shown in the Player's Window, but will still be visible in the initiative order</string>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-image: url();</string>
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="text">
           <string/>
@@ -242,7 +243,8 @@
           <string>Is this monster known? If the this isn't checked, the monster will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the monster takes any actions.</string>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-image: url();</string>
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="text">
           <string/>

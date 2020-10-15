@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>WidgetCharacter</class>
- <widget class="QFrame" name="WidgetCharacter">
+ <widget class="CombatantWidget" name="WidgetCharacter">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>212</width>
+    <width>229</width>
     <height>56</height>
    </rect>
   </property>
@@ -68,7 +68,7 @@
       </size>
      </property>
      <property name="styleSheet">
-      <string notr="true"/>
+      <string notr="true">background-image: url();</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Panel</enum>
@@ -155,7 +155,8 @@
           </sizepolicy>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-image: url();</string>
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="text">
           <string/>
@@ -233,7 +234,8 @@
           <string>Is this character known? If the this isn't checked, the character will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the character takes any actions.</string>
          </property>
          <property name="styleSheet">
-          <string notr="true">background-image: url();</string>
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="text">
           <string/>
@@ -352,6 +354,9 @@ background-color: rgba(0, 0, 0, 0);</string>
          <property name="toolTip">
           <string>The character's initiative value.</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
          <property name="text">
           <string>Init:</string>
          </property>
@@ -431,6 +436,9 @@ background-color: rgba(0, 0, 0, 0);</string>
          <property name="toolTip">
           <string>The character's remaining hit points</string>
          </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
          <property name="text">
           <string>HP:</string>
          </property>
@@ -477,6 +485,14 @@ background-color: rgba(0, 0, 0, 0);</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CombatantWidget</class>
+   <extends>QFrame</extends>
+   <header>combatantwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

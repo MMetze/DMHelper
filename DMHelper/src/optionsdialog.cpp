@@ -40,6 +40,10 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtCountdownDuration->setValidator(new QIntValidator(1,1000,this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
         ui->edtPointerFile->setText(_options->getPointerFile());
+        ui->edtSelectedIcon->setText(_options->getSelectedIcon());
+        ui->edtActiveIcon->setText(_options->getActiveIcon());
+        ui->edtCombatantFrame->setText(_options->getCombatantFrame());
+        ui->edtCountdownFrame->setText(_options->getCountdownFrame());
 #ifdef INCLUDE_NETWORK_SUPPORT
         ui->chkEnableNetworkClient->setChecked(_options->getNetworkEnabled());
         ui->edtUserName->setText(_options->getUserName());
@@ -72,6 +76,14 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->edtCountdownDuration, SIGNAL(textChanged(QString)), _options, SLOT(setCountdownDuration(QString)));
         connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);
         connect(ui->edtPointerFile, &QLineEdit::editingFinished, this, &OptionsDialog::editPointerFile);
+        connect(ui->btnSelectedIcon, &QAbstractButton::clicked, this, &OptionsDialog::browseSelectedIcon);
+        connect(ui->edtSelectedIcon, &QLineEdit::editingFinished, this, &OptionsDialog::editSelectedIcon);
+        connect(ui->btnActiveIcon, &QAbstractButton::clicked, this, &OptionsDialog::browseActiveIcon);
+        connect(ui->edtActiveIcon, &QLineEdit::editingFinished, this, &OptionsDialog::editActiveIcon);
+        connect(ui->btnCombatantFrame, &QAbstractButton::clicked, this, &OptionsDialog::browseCombatantFrame);
+        connect(ui->edtCombatantFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editCombatantFrame);
+        connect(ui->btnCountdownFrame, &QAbstractButton::clicked, this, &OptionsDialog::browseCountdownFrame);
+        connect(ui->edtCountdownFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editCountdownFrame);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
@@ -277,6 +289,70 @@ void OptionsDialog::setPointerFile(const QString& pointerFile)
 {
     ui->edtPointerFile->setText(pointerFile);
     _options->setPointerFileName(pointerFile);
+}
+
+void OptionsDialog::browseSelectedIcon()
+{
+    setSelectedIcon(QFileDialog::getOpenFileName(this, QString("Select Icon for Selected Tokens"), QString(), QString("Image files (*.png *.jpg)")));
+}
+
+void OptionsDialog::editSelectedIcon()
+{
+    setSelectedIcon(ui->edtSelectedIcon->text());
+}
+
+void OptionsDialog::setSelectedIcon(const QString& selectedIcon)
+{
+    ui->edtSelectedIcon->setText(selectedIcon);
+    _options->setSelectedIcon(selectedIcon);
+}
+
+void OptionsDialog::browseActiveIcon()
+{
+    setActiveIcon(QFileDialog::getOpenFileName(this, QString("Select Icon for Active Combatants"), QString(), QString("Image files (*.png *.jpg)")));
+}
+
+void OptionsDialog::editActiveIcon()
+{
+    setActiveIcon(ui->edtActiveIcon->text());
+}
+
+void OptionsDialog::setActiveIcon(const QString& activeIcon)
+{
+    ui->edtActiveIcon->setText(activeIcon);
+    _options->setActiveIcon(activeIcon);
+}
+
+void OptionsDialog::browseCombatantFrame()
+{
+    setCombatantFrame(QFileDialog::getOpenFileName(this, QString("Select Image for the Combatant Frame"), QString(), QString("Image files (*.png *.jpg)")));
+}
+
+void OptionsDialog::editCombatantFrame()
+{
+    setCombatantFrame(ui->edtCombatantFrame->text());
+}
+
+void OptionsDialog::setCombatantFrame(const QString& combatantFrame)
+{
+    ui->edtCombatantFrame->setText(combatantFrame);
+    _options->setCombatantFrame(combatantFrame);
+}
+
+void OptionsDialog::browseCountdownFrame()
+{
+    setCountdownFrame(QFileDialog::getOpenFileName(this, QString("Select Image for the Countdown Frame"), QString(), QString("Image files (*.png *.jpg)")));
+}
+
+void OptionsDialog::editCountdownFrame()
+{
+    setCountdownFrame(ui->edtCountdownFrame->text());
+}
+
+void OptionsDialog::setCountdownFrame(const QString& countdownFrame)
+{
+    ui->edtCountdownFrame->setText(countdownFrame);
+    _options->setCountdownFrame(countdownFrame);
 }
 
 void OptionsDialog::updateFileLocations()

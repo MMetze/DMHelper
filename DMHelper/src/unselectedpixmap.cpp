@@ -1,5 +1,6 @@
 #include "unselectedpixmap.h"
 #include "battledialogmodel.h"
+#include "battleframe.h"
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
@@ -27,7 +28,7 @@ void UnselectedPixmap::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     if(_draw)
     {
         QStyleOptionGraphicsItem myoption = (*option);
-        myoption.state &= ~QStyle::State_Selected;
+        //myoption.state &= ~QStyle::State_Selected;
         QGraphicsPixmapItem::paint(painter, &myoption, widget);
     }
 }
@@ -36,6 +37,13 @@ void UnselectedPixmap::setDraw(bool draw)
 {
     _draw = draw;
 }
+
+BattleDialogModelCombatant* UnselectedPixmap::getCombatant()
+{
+    return _combatant;
+}
+
+
 
 /*
 void UnselectedPixmap::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
@@ -72,6 +80,59 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
             _combatant->setPosition(newPos);
         }
     }
+    else if(change == ItemSelectedHasChanged)
+    {
+        selectionChanged();
+    }
 
     return QGraphicsItem::itemChange(change, value);
+}
+
+void UnselectedPixmap::selectionChanged()
+{
+    if(!scene())
+        return;
+
+    if(isSelected())
+    {
+        BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
+        if(!battleScene)
+            return;
+
+        QPixmap pmp = battleScene->getSelectedIcon();
+        //QPixmap pmp(":/img/data/selected.png");
+        //QPixmap pmp(":/img/data/icon_square.png");
+        QGraphicsPixmapItem* selectedPixmap = scene()->addPixmap(pmp.scaled(boundingRect().size().toSize(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation));
+        if(!selectedPixmap)
+            return;
+
+        selectedPixmap->setTransformationMode(Qt::SmoothTransformation);
+        //selectedPixmap->setScale(scale()); //(static_cast<qreal>(_model->getGridScale()) * _selectedScale / ACTIVE_PIXMAP_SIZE);
+        selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+
+        // QRect itemRect = item->boundingRect().toRect();
+        // int maxSize = qMax(itemRect.width(), itemRect.height());
+
+        QSizeF pixmapSize = selectedPixmap->boundingRect().size();
+        selectedPixmap->setPos(-pixmapSize.width() / 2.0, -pixmapSize.height() / 2.0);
+
+        selectedPixmap->setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent);
+        selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        selectedPixmap->setData(BattleDialogItemChild_Index, BattleFrame::BattleDialogItemChild_Selection);
+        selectedPixmap->setParentItem(this);
+    }
+    else
+    {
+        for(QGraphicsItem* childItem : childItems())
+        {
+            if((childItem) && (childItem->data(BattleDialogItemChild_Index).toInt() == BattleFrame::BattleDialogItemChild_Selection))
+            {
+                childItem->setParentItem(nullptr);
+                delete childItem;
+            }
+        }
+    }
+
+    if(_combatant)
+        _combatant->setSelected(isSelected());
 }

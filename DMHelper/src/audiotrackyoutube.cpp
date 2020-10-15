@@ -20,18 +20,39 @@ AudioTrackYoutube::AudioTrackYoutube(const QString& trackName, const QUrl& track
     _vlcListPlayer(nullptr),
     _vlcPlayer(nullptr),
     _stopStatus(0),
-    _lastVolume(100)
+    _lastVolume(100),
+    _timerId(0),
+    _repeat(false)
 {
 }
 
 AudioTrackYoutube::~AudioTrackYoutube()
 {
+    if(_timerId)
+        killTimer(_timerId);
+
     stop();
 }
 
 int AudioTrackYoutube::getAudioType() const
 {
     return DMHelper::AudioType_Youtube;
+}
+
+void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
+{
+    if(!p_event)
+        return;
+
+    if(p_event->type == libvlc_MediaPlayerStopped)
+    {
+        internalStopCheck(stopConfirmed);
+    }
+    if(p_event->type == libvlc_MediaPlayerPlaying)
+    {
+        libvlc_time_t length_full = libvlc_media_player_get_length(_vlcPlayer);
+        emit trackLengthChanged(length_full / 1000);
+    }
 }
 
 void AudioTrackYoutube::play()
@@ -94,10 +115,17 @@ void AudioTrackYoutube::setVolume(int volume)
     libvlc_audio_set_volume(_vlcPlayer, volume);
 }
 
-void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
+void AudioTrackYoutube::setRepeat(bool repeat)
 {
-    if((p_event) && (p_event->type == libvlc_MediaPlayerStopped))
-        internalStopCheck(stopConfirmed);
+    if(repeat == _repeat)
+        return;
+
+    _repeat = repeat;
+
+    if(!_vlcListPlayer)
+        return;
+
+    libvlc_media_list_player_set_playback_mode(_vlcListPlayer, _repeat ? libvlc_playback_mode_loop : libvlc_playback_mode_default);
 }
 
 void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
@@ -169,6 +197,17 @@ void AudioTrackYoutube::findDirectUrl(const QString& youtubeId)
     _manager->get(request);
 }
 
+void AudioTrackYoutube::timerEvent(QTimerEvent *event)
+{
+    Q_UNUSED(event);
+
+    if(!_vlcPlayer)
+        return;
+
+    libvlc_time_t currentTime = libvlc_media_player_get_time(_vlcPlayer);
+    emit trackPositionChanged(currentTime / 1000);
+}
+
 bool AudioTrackYoutube::handleReplyDirect(const QByteArray& data)
 {
     if((_vlcInstance) || (_vlcListPlayer) || (_vlcPlayer))
@@ -233,23 +272,31 @@ void AudioTrackYoutube::playDirectUrl()
     libvlc_media_release(vlcMedia);
 
     _vlcListPlayer = libvlc_media_list_player_new(_vlcInstance);
+    if(!_vlcListPlayer)
+        return;
+
     _vlcPlayer = libvlc_media_player_new(_vlcInstance);
+    if(!_vlcPlayer)
+        return;
 
     libvlc_media_list_player_set_media_list(_vlcListPlayer, vlcMediaList);
     libvlc_media_list_player_set_media_player(_vlcListPlayer, _vlcPlayer);
-    libvlc_media_list_player_set_playback_mode(_vlcListPlayer, libvlc_playback_mode_loop);
+    libvlc_media_list_player_set_playback_mode(_vlcListPlayer, _repeat ? libvlc_playback_mode_loop : libvlc_playback_mode_default);
 
     libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
     if(eventManager)
     {
         //libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, this);
         //libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, this);
-        //libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, this);
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, youtubeEventCallback, this);
         //libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, this);
         libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, youtubeEventCallback, this);
     }
 
     libvlc_media_list_player_play(_vlcListPlayer);
+
+    if(_timerId == 0)
+        _timerId = startTimer(500);
 }
 
 void AudioTrackYoutube::internalStopCheck(int status)

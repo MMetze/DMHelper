@@ -14,8 +14,12 @@ public:
 signals:
     void windowVisible(bool visible);
     void arrowVisibleChanged(bool visible);
+    void publishMouseDown(const QPointF& position);
+    void publishMouseMove(const QPointF& position);
+    void publishMouseRelease(const QPointF& position);
     void positionChanged(const QPointF& position);
     void frameResized(const QSize& newSize);
+    void labelResized(const QSize& newSize);
 
 public slots:
     void setImage(QImage img);

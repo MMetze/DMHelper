@@ -19,8 +19,6 @@ public:
     virtual QFrame* getFrame() = 0;
 
     virtual int getInitiative() const;
-    virtual bool isActive();
-    virtual bool isSelected();
     virtual bool isShown();
     virtual bool isKnown();
 
@@ -42,28 +40,14 @@ public slots:
     virtual void initiativeChanged(int initiative);
     virtual void setHitPoints(int hp) = 0;
     virtual void handleHitPointsChanged(int hp);
-    virtual void setActive(bool active);
-    virtual void setSelected(bool selected);
-
-protected slots:
-    virtual void setHighlighted(bool highlighted);
-    virtual void timerExpired();
 
 protected:
 
     // local
     virtual void executeDoubleClick();
-    virtual void setWidgetHighlighted(QWidget* widget, bool highlighted);
-    virtual QString getStyleString();
 
     // Data
     Qt::MouseButton _mouseDown;
-    bool _active;
-    bool _selected;
-
-    // Highlight animation
-    int _angle;
-    QTimer* _timer;
 
 };
 

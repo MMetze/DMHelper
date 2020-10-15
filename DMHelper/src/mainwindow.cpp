@@ -442,11 +442,23 @@ MainWindow::MainWindow(QWidget *parent) :
     battleFrame->setShowCountdown(_options->getShowCountdown());
     battleFrame->setCountdownDuration(_options->getCountdownDuration());
     battleFrame->setPointerFile(_options->getPointerFile());
+    battleFrame->setSelectedIcon(_options->getSelectedIcon());
+    battleFrame->setActiveIcon(_options->getActiveIcon());
+    battleFrame->setCombatantFrame(_options->getCombatantFrame());
+    battleFrame->setCountdownFrame(_options->getCountdownFrame());
     connect(_options, SIGNAL(showOnDeckChanged(bool)), battleFrame, SLOT(setShowOnDeck(bool)));
     connect(_options, SIGNAL(showCountdownChanged(bool)), battleFrame, SLOT(setShowCountdown(bool)));
     connect(_options, SIGNAL(countdownDurationChanged(int)), battleFrame, SLOT(setCountdownDuration(int)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), battleFrame, SLOT(setPointerFile(const QString&)));
+    connect(_options, SIGNAL(selectedIconChanged(const QString&)), battleFrame, SLOT(setSelectedIcon(const QString&)));
+    connect(_options, SIGNAL(activeIconChanged(const QString&)), battleFrame, SLOT(setActiveIcon(const QString&)));
+    connect(_options, SIGNAL(combatantFrameChanged(const QString&)), battleFrame, SLOT(setCombatantFrame(const QString&)));
+    connect(_options, SIGNAL(countdownFrameChanged(const QString&)), battleFrame, SLOT(setCountdownFrame(const QString&)));
     connect(pubWindow, SIGNAL(frameResized(QSize)), battleFrame, SLOT(setTargetSize(QSize)));
+    connect(pubWindow, SIGNAL(labelResized(QSize)), battleFrame, SLOT(setTargetLabelSize(QSize)));
+    connect(pubWindow, SIGNAL(publishMouseDown(const QPointF&)), battleFrame, SLOT(publishWindowMouseDown(const QPointF&)));
+    connect(pubWindow, SIGNAL(publishMouseMove(const QPointF&)), battleFrame, SLOT(publishWindowMouseMove(const QPointF&)));
+    connect(pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), battleFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
     connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
     connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
     connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
@@ -1583,7 +1595,7 @@ bool MainWindow::selectItem(QUuid itemId)
 {
     if((treeModel) && (!itemId.isNull()))
     {
-        QModelIndex index = treeModel->getObject(itemId);
+        QModelIndex index = treeModel->getObjectIndex(itemId);
         if(index.isValid())
         {
             ui->treeView->setCurrentIndex(index);
@@ -2030,9 +2042,12 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
     if(!campaignItem)
         return;
 
-    qDebug() << "[MainWindow] Tree Item Changed: " << item;
-
     CampaignObjectBase* itemObject = campaignItem->getCampaignItemObject();
+    if(!itemObject)
+        return;
+
+    qDebug() << "[MainWindow] Tree Item Changed: " << item << ", item name: " << campaignItem->text() << ", object name: " << itemObject->getName();
+
     if(campaignItem->text() != itemObject->getName())
     {
         itemObject->setName(campaignItem->text());

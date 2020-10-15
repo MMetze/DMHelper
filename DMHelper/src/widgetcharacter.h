@@ -10,7 +10,7 @@ class WidgetCharacter;
 class WidgetCharacterInternal;
 class BattleDialogModelCombatant;
 
-class WidgetCharacter : public CombatantWidget //QFrame
+class WidgetCharacter : public CombatantWidget
 {
     Q_OBJECT
 
@@ -27,9 +27,6 @@ public:
 
 public slots:
     virtual void updateData() override;
-
-    // From CombatantWidget
-    virtual void setActive(bool active) override;
 
 protected:
     // From QWidget

@@ -5,18 +5,17 @@
 #include <QMouseEvent>
 #include <QLabel>
 #include <QHBoxLayout>
-#include <QTimer>
+#include <QDebug>
 
 CombatantWidget::CombatantWidget(QWidget *parent) :
     QFrame(parent),
     _mouseDown(Qt::NoButton),
     _active(false),
     _selected(false),
+    _hover(false),
     _lblIcon(nullptr),
     _lblInitName(nullptr),
-    _edtInit(nullptr),
-    _angle(0),
-    _timer(nullptr)
+    _edtInit(nullptr)
 {
     setAutoFillBackground(true);
 }
@@ -34,6 +33,11 @@ bool CombatantWidget::isActive()
 bool CombatantWidget::isSelected()
 {
     return _selected;
+}
+
+bool CombatantWidget::isHover()
+{
+    return _hover;
 }
 
 bool CombatantWidget::isShown()
@@ -70,56 +74,53 @@ void CombatantWidget::initiativeChanged()
 
 void CombatantWidget::setActive(bool active)
 {
-    _active = active;
-    setStyleSheet(getStyleString());
+    if(_active != active)
+    {
+        _active = active;
+        setStyleSheet(getStyleString());
+    }
 }
 
 void CombatantWidget::setSelected(bool selected)
 {
-    _selected = selected;
-    setHighlighted(_selected);
+    if(_selected != selected)
+    {
+        _selected = selected;
+        setStyleSheet(getStyleString());
+    }
 }
 
-void CombatantWidget::setHighlighted(bool highlighted)
+void CombatantWidget::setHover(bool hover)
 {
-    /*
-    if(highlighted)
+    if(_hover != hover)
     {
-        _angle = 0;
-        if(!_timer)
-        {
-            _timer = new QTimer(this);
-            connect(_timer,SIGNAL(timeout()),this,SLOT(timerExpired()));
-        }
-        _timer->start(50);
+        _hover = hover;
+        setStyleSheet(getStyleString());
     }
-    else
-    {
-        if(_timer)
-        {
-            _timer->stop();
-        }
-    }
-    */
+}
 
+void CombatantWidget::showEvent(QShowEvent *event)
+{
     setStyleSheet(getStyleString());
-
-    setWidgetHighlighted(_lblIcon, highlighted);
-    setWidgetHighlighted(_lblInitName, highlighted);
-    setWidgetHighlighted(_edtInit, highlighted);
+    QFrame::showEvent(event);
 }
 
-void CombatantWidget::timerExpired()
+void CombatantWidget::enterEvent(QEvent * event)
 {
-    _angle += 20;
+    Q_UNUSED(event);
+
+    _hover = true;
     setStyleSheet(getStyleString());
 }
 
 void CombatantWidget::leaveEvent(QEvent * event)
 {
     Q_UNUSED(event);
+
     setFrameStyle(QFrame::Panel | QFrame::Raised);
     _mouseDown = Qt::NoButton;
+    _hover = false;
+    setStyleSheet(getStyleString());
 }
 
 void CombatantWidget::mousePressEvent(QMouseEvent * event)
@@ -139,28 +140,8 @@ void CombatantWidget::mouseReleaseEvent(QMouseEvent * event)
         {
             setFrameStyle(QFrame::Panel | QFrame::Raised);
         }
-        else if(event->button() == Qt::RightButton)
-        {
-            if(getCombatant())
-            {
-                emit contextMenu(getCombatant(), event->globalPos());
-            }
-        }
         _mouseDown = Qt::NoButton;
     }
-}
-
-void CombatantWidget::mouseDoubleClickEvent(QMouseEvent *event)
-{
-    if(event->button() == Qt::LeftButton)
-    {
-        if(rect().contains(event->pos()))
-            executeDoubleClick();
-    }
-}
-
-void CombatantWidget::executeDoubleClick()
-{
 }
 
 void CombatantWidget::loadImage()
@@ -178,7 +159,7 @@ QHBoxLayout* CombatantWidget::createPairLayout(const QString& pairName, const QS
     QHBoxLayout* pairLayout = new QHBoxLayout();
 
     QLabel* nameLabel = new QLabel(pairName + QString(":"), this);
-    nameLabel->resize( nameLabel->fontMetrics().width(nameLabel->text()), nameLabel->height());
+    nameLabel->resize(nameLabel->fontMetrics().boundingRect(nameLabel->text()).width(), nameLabel->height());
     nameLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     QLabel* valueLabel = new QLabel(pairValue, this);
     valueLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
@@ -201,67 +182,23 @@ void CombatantWidget::updatePairData(QHBoxLayout* pair, const QString& pairValue
     }
 }
 
-void CombatantWidget::setPairHighlighted(QHBoxLayout* pair, bool highlighted)
-{
-    if(!pair)
-        return;
-
-    for (int i = 0; i < pair->count(); ++i)
-    {
-        if(pair->itemAt(i))
-        {
-            setWidgetHighlighted(pair->itemAt(i)->widget(), highlighted);
-        }
-    }
-}
-
-void CombatantWidget::setWidgetHighlighted(QWidget* widget, bool highlighted)
-{
-    if(widget)
-    {
-        if(highlighted)
-        {
-            widget->setStyleSheet("background-image: url(); background-color: rgba(0,0,0,0);");
-        }
-        else
-        {
-            widget->setStyleSheet("");
-        }
-    }
-}
-
 QString CombatantWidget::getStyleString()
 {
-    QString styleStr("CombatantWidget{");
-
-    if(_active)
-    {
-        setLineWidth(2); // 7
-        styleStr.append("color: rgb(242, 236, 226); background-color: rgb(115, 18, 0); ");
-    }
-    else
-    {
-        setLineWidth(2); // 1
-    }
+    setLineWidth(5);
 
     if(_selected)
     {
-        styleStr.append("background-color: rgb(115, 18, 0); background: qconicalgradient(cx:0.5, cy:0.5, angle: ");
-        styleStr.append(QString::number(_angle));
-        styleStr.append(", stop:0   rgba(255, 255, 255, 192), \
-                   stop:0.1 rgba(186, 231, 241, 128), \
-                   stop:0.2 rgba(255, 255, 255, 0), \
-                   stop:0.3 rgba(255, 255, 255, 0), \
-                   stop:0.4 rgba(186, 231, 241, 128), \
-                   stop:0.5 rgba(255, 255, 255, 192), \
-                   stop:0.6 rgba(186, 231, 241, 128), \
-                   stop:0.7 rgba(255, 255, 255, 0), \
-                   stop:0.8 rgba(255, 255, 255, 0), \
-                   stop:0.9 rgba(186, 231, 241, 128), \
-                   stop:1   rgba(255, 255, 255, 192));");
+        return QString("CombatantWidget{ background-image: url(); background-color: rgb(196, 196, 196); }");
+    }
+    else if(_active)
+    {
+        return QString("CombatantWidget{ background-color: rgb(115, 18, 0); }");
+    }
+    else if(_hover)
+    {
+        //return QString("CombatantWidget{ background-color: rgb(128, 128, 128); }");
+        return QString("CombatantWidget{ background-color: rgb(64, 64, 64); }");
     }
 
-    styleStr.append("}");
-
-    return styleStr;
+    return QString("CombatantWidget{ background-color: none; }");
 }

@@ -15,6 +15,7 @@
 #include "battledialogmodelmonstercombatant.h"
 #include "battledialogmodeleffectfactory.h"
 #include "audiotrack.h"
+#include "encounterfactory.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomCDATASection>
@@ -55,34 +56,8 @@ EncounterBattle::~EncounterBattle()
 
 void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 {
-    // Backwards compatibility; TODO: can be removed eventually
     QDomElement rootCombatantsElement = element.firstChildElement( "combatants" );
-    if(!rootCombatantsElement.isNull())
-    {
-        insertWave(0); // By default, put everything in a single wave
-
-        QDomElement combatantPairElement = rootCombatantsElement.firstChildElement( QString("combatantPair") );
-        while( !combatantPairElement.isNull() )
-        {
-            int combatantCount = combatantPairElement.attribute("count").toInt();
-            QDomElement combatantElement = combatantPairElement.firstChildElement( QString("combatant") );
-            if( !combatantElement.isNull() )
-            {
-                bool ok = false;
-                int combatantType = combatantElement.attribute("type").toInt(&ok);
-                if(ok)
-                {
-                    Combatant* newCombatant = CombatantFactory::createCombatant(combatantType, combatantElement, isImport);
-                    if(newCombatant)
-                    {
-                        addCombatant(0, combatantCount, newCombatant);
-                    }
-                }
-            }
-            combatantPairElement = combatantPairElement.nextSiblingElement( QString("combatantPair") );
-        }
-    }
-    else
+    if(rootCombatantsElement.isNull())
     {
         QDomElement wavesElement = element.firstChildElement( "waves" );
         if( !wavesElement.isNull() )
@@ -125,7 +100,31 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
         }
     }
 
-    EncounterText::inputXML(element, isImport);
+//    EncounterText::inputXML(element, isImport);
+
+    extractTextNode(element, isImport);
+    if(!getText().isEmpty())
+    {
+        QString battleName = element.attribute(QString("name"), QString("Battle Text"));
+        CampaignObjectBase* encounter = EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, battleName, isImport);
+        if(encounter)
+        {
+            EncounterText* textEncounter = dynamic_cast<EncounterText*>(encounter);
+            if(textEncounter)
+            {
+                textEncounter->setText(getText());
+                addObject(textEncounter);
+                setText(QString());
+            }
+            else
+            {
+                delete encounter;
+            }
+        }
+    }
+
+    CampaignObjectBase::inputXML(element, isImport);
+
 }
 
 /*

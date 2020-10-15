@@ -30,6 +30,10 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
+    _selectedIcon(),
+    _activeIcon(),
+    _combatantFrame(),
+    _countdownFrame(),
     _dataSettingsExist(false),
     _updatesEnabled(false),
     _statisticsAccepted(false),
@@ -140,6 +144,26 @@ int OptionsContainer::getCountdownDuration() const
 QString OptionsContainer::getPointerFile() const
 {
     return _pointerFile;
+}
+
+QString OptionsContainer::getSelectedIcon() const
+{
+    return _selectedIcon;
+}
+
+QString OptionsContainer::getActiveIcon() const
+{
+    return _activeIcon;
+}
+
+QString OptionsContainer::getCombatantFrame() const
+{
+    return _combatantFrame;
+}
+
+QString OptionsContainer::getCountdownFrame() const
+{
+    return _countdownFrame;
 }
 
 bool OptionsContainer::doDataSettingsExist() const
@@ -298,6 +322,10 @@ void OptionsContainer::readSettings()
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
+    setSelectedIcon(settings.value("selectedIcon").toString());
+    setActiveIcon(settings.value("activeIcon").toString());
+    setCombatantFrame(settings.value("combatantFrame").toString());
+    setCountdownFrame(settings.value("countdownFrame").toString());
 
     _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
     if(_dataSettingsExist)
@@ -366,6 +394,10 @@ void OptionsContainer::writeSettings()
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
+    settings.setValue("selectedIcon", getSelectedIcon());
+    settings.setValue("activeIcon", getActiveIcon());
+    settings.setValue("combatantFrame", getCombatantFrame());
+    settings.setValue("countdownFrame", getCountdownFrame());
 
     if(_dataSettingsExist)
     {
@@ -758,6 +790,46 @@ void OptionsContainer::setPointerFileName(const QString& filename)
     }
 }
 
+void OptionsContainer::setSelectedIcon(const QString& selectedIcon)
+{
+    if(_selectedIcon != selectedIcon)
+    {
+        _selectedIcon = selectedIcon;
+        qDebug() << "[OptionsContainer] Selected icon set to: " << _selectedIcon;
+        emit selectedIconChanged(_selectedIcon);
+    }
+}
+
+void OptionsContainer::setActiveIcon(const QString& activeIcon)
+{
+    if(_activeIcon != activeIcon)
+    {
+        _activeIcon = activeIcon;
+        qDebug() << "[OptionsContainer] Active icon set to: " << _activeIcon;
+        emit activeIconChanged(_activeIcon);
+    }
+}
+
+void OptionsContainer::setCombatantFrame(const QString& combatantFrame)
+{
+    if(_combatantFrame != combatantFrame)
+    {
+        _combatantFrame = combatantFrame;
+        qDebug() << "[OptionsContainer] Combatant frame set to: " << _combatantFrame;
+        emit combatantFrameChanged(_combatantFrame);
+    }
+}
+
+void OptionsContainer::setCountdownFrame(const QString& countdownFrame)
+{
+    if(_countdownFrame != countdownFrame)
+    {
+        _countdownFrame = countdownFrame;
+        qDebug() << "[OptionsContainer] Countdown frame set to: " << _countdownFrame;
+        emit countdownFrameChanged(_countdownFrame);
+    }
+}
+
 void OptionsContainer::setCountdownDuration(const QString& countdownDuration)
 {
     bool ok;
@@ -882,6 +954,10 @@ void OptionsContainer::copy(OptionsContainer* other)
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);
+        setSelectedIcon(other->_selectedIcon);
+        setActiveIcon(other->_activeIcon);
+        setCombatantFrame(other->_combatantFrame);
+        setCountdownFrame(other->_countdownFrame);
         _dataSettingsExist = other->_dataSettingsExist;
         _updatesEnabled = other->_updatesEnabled;
         _statisticsAccepted = other->_statisticsAccepted;

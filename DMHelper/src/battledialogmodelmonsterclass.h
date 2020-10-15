@@ -16,7 +16,6 @@ public:
     BattleDialogModelMonsterClass(const QString& name = QString(), QObject *parent = nullptr);
     explicit BattleDialogModelMonsterClass(MonsterClass* monsterClass);
     explicit BattleDialogModelMonsterClass(MonsterClass* monsterClass, const QString& monsterName, int initiative, const QPointF& position);
-    //BattleDialogModelMonsterClass(const BattleDialogModelMonsterClass& other);
     virtual ~BattleDialogModelMonsterClass() override;
 
     // From CampaignObjectBase

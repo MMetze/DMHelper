@@ -8,7 +8,6 @@ class SoundboardFrame;
 }
 
 class Campaign;
-class SoundboardTrack;
 class QVBoxLayout;
 class SoundBoardFrameGroupBox;
 class AudioTrack;

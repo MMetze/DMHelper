@@ -17,7 +17,8 @@ public:
     Campaign* getCampaign() const;
 
     bool containsObject(const QUuid& objectId) const;
-    QModelIndex getObject(const QUuid& objectId) const;
+    QModelIndex getObjectIndex(const QUuid& objectId) const;
+    CampaignTreeItem* getObjectItem(const QUuid& objectId) const;
 
     CampaignTreeItem* campaignItem(int row, int column = 0) const;
     CampaignTreeItem* campaignItemFromIndex(const QModelIndex &index) const;
@@ -60,8 +61,10 @@ protected:
     void updateChildRows(QStandardItem* parentItem);
     CampaignTreeItem* getChildById(QStandardItem* parentItem, const QUuid& itemId) const;
 
+    //void rebuildIndexMap();
+
     Campaign* _campaign;
-    QMap<QUuid, QModelIndex> _objectIndexMap;
+    QMap<QUuid, QPersistentModelIndex> _objectIndexMap;
     QStandardItem* _updateParent;
     int _updateRow;
 };

@@ -18,12 +18,18 @@ public:
     virtual void stop() override;
     virtual void setMute(bool mute) override;
     virtual void setVolume(int volume) override;
+    virtual void setRepeat(bool repeat) override;
 
 signals:
+
+protected slots:
+    void handleDurationChanged(qint64 position);
+    void handlePositionChanged(qint64 position);
 
 protected:
     QMediaPlayer* _player;
     QMediaPlaylist* _playlist;
+    bool _repeat;
 
 };
 

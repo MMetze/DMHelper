@@ -7,14 +7,38 @@
 #include <QDir>
 #include <QPixmap>
 
+const Combatant::Condition CONDITION_ITERATOR_VALUES[Combatant::Condition_Iterator_Count] =
+{
+    Combatant::Condition_None,          // Condition_Iterator_None
+    Combatant::Condition_Blinded,       // Condition_Iterator_Blinded
+    Combatant::Condition_Charmed,       // Condition_Iterator_Charmed
+    Combatant::Condition_Deafened,      // Condition_Iterator_Deafened
+    Combatant::Condition_Exhaustion_1,  // Condition_Iterator_Exhaustion_1
+    Combatant::Condition_Exhaustion_2,  // Condition_Iterator_Exhaustion_2
+    Combatant::Condition_Exhaustion_3,  // Condition_Iterator_Exhaustion_3
+    Combatant::Condition_Exhaustion_4,  // Condition_Iterator_Exhaustion_4
+    Combatant::Condition_Exhaustion_5,  // Condition_Iterator_Exhaustion_5
+    Combatant::Condition_Frightened,    // Condition_Iterator_Frightened
+    Combatant::Condition_Grappled,      // Condition_Iterator_Grappled
+    Combatant::Condition_Incapacitated, // Condition_Iterator_Incapacitated
+    Combatant::Condition_Invisible,     // Condition_Iterator_Invisible
+    Combatant::Condition_Paralyzed,     // Condition_Iterator_Paralyzed
+    Combatant::Condition_Petrified,     // Condition_Iterator_Petrified
+    Combatant::Condition_Poisoned,      // Condition_Iterator_Poisoned
+    Combatant::Condition_Prone,         // Condition_Iterator_Prone
+    Combatant::Condition_Restrained,    // Condition_Iterator_Restrained
+    Combatant::Condition_Stunned,       // Condition_Iterator_Stunned
+    Combatant::Condition_Unconscious    // Condition_Iterator_Unconscious
+};
+
 Combatant::Combatant(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
-//    _name(""),
     _initiative(0),
     _armorClass(10),
     _attacks(),
     _hitPoints(0),
     _hitDice(),
+    _conditions(Condition_None),
     _icon(""),
     _iconPixmap(),
     _batchChanges(false),
@@ -22,75 +46,16 @@ Combatant::Combatant(const QString& name, QObject *parent) :
 {
 }
 
-/*
-Combatant::Combatant(const Combatant &obj) :
-    CampaignObjectBase(obj.parent()),
-    _name(obj._name),
-    _initiative(obj._initiative),
-    _armorClass(obj._armorClass),
-    _hitPoints(obj._hitPoints),
-    _hitDice(obj._hitDice.toString()),
-    _icon(obj._icon),
-    _iconPixmap(obj._iconPixmap),
-    _batchChanges(obj._batchChanges),
-    _changesMade(obj._changesMade)
-{
-    for(int i = 0; i < obj._attacks.count(); ++i)
-    {
-        _attacks.append(obj._attacks.at(i));
-    }
-}
-*/
-
 Combatant::~Combatant()
 {
 }
 
-/*
-void Combatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
-{
-    QDomElement element = doc.createElement( "combatant" );
-
-    CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
-
-    //element.setAttribute( "name", getName() );
-    element.setAttribute( "type", getType() );
-    element.setAttribute( "armorClass", getArmorClass() );
-    element.setAttribute( "hitPoints", getHitPoints() );
-    element.setAttribute( "hitDice", getHitDice().toString() );
-
-    QString iconPath = getIcon(true);
-    if(iconPath.isEmpty())
-    {
-        element.setAttribute( "icon", QString("") );
-    }
-    else
-    {
-        element.setAttribute( "icon", targetDirectory.relativeFilePath(iconPath));
-    }
-
-    QDomElement attacksElement = doc.createElement( "attacks" );
-    for(int i = 0; i < getAttacks().count(); ++i)
-    {
-        QDomElement attackElement = doc.createElement( "attack" );
-        attackElement.setAttribute( "name", getAttacks().at(i).getName() );
-        attackElement.setAttribute( "dice", getAttacks().at(i).getDice().toString() );
-        attacksElement.appendChild(attackElement);
-    }
-    element.appendChild(attacksElement);
-
-    internalOutputXML(doc, element, targetDirectory, isExport);
-
-    parent.appendChild(element);
-}
-*/
-
 void Combatant::inputXML(const QDomElement &element, bool isImport)
 {
-    //setName(element.attribute("name"));
     setArmorClass(element.attribute("armorClass").toInt());
     setHitPoints(element.attribute("hitPoints").toInt());
     setHitDice(Dice(element.attribute("hitDice")));
+    setConditions(element.attribute("conditions", QString("0")).toInt());
     setIcon(element.attribute("icon"));
 
     QDomElement attacksElement = element.firstChildElement( QString("attacks") );
@@ -129,13 +94,6 @@ void Combatant::endBatchChanges()
         }
     }
 }
-
-/*
-QString Combatant::getName() const
-{
-    return _name;
-}
-*/
 
 int Combatant::getCombatantType() const
 {
@@ -227,13 +185,16 @@ int Combatant::getAbilityMod(int ability)
 
 QString Combatant::getAbilityModStr(int ability)
 {
-    int abilityMod = getAbilityMod(ability);
+    return convertModToStr(getAbilityMod(ability));
+}
 
-    QString abilityModStr = QString::number(abilityMod);
-    if( abilityMod >= 0 )
-        abilityModStr.prepend("+");
+QString Combatant::convertModToStr(int modifier)
+{
+    QString modifierStr = QString::number(modifier);
+    if( modifier >= 0 )
+        modifierStr.prepend("+");
 
-    return abilityModStr;
+    return modifierStr;
 }
 
 Combatant::Ability Combatant::getSkillAbility(Skills skill)
@@ -295,18 +256,82 @@ QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup
     return result;
 }
 
-/*
-void Combatant::setName(const QString& combatantName)
+int Combatant::getConditionCount()
 {
-    if(combatantName != _name)
+    return Combatant::Condition_Iterator_Count;
+}
+
+Combatant::Condition Combatant::getConditionByIndex(int index)
+{
+    if((index < 0) || (index >= Condition_Iterator_Count))
+        return Condition_None;
+    else
+        return CONDITION_ITERATOR_VALUES[index];
+}
+
+QString Combatant::getConditionIcon(int condition)
+{
+    switch(condition)
     {
-        _name = combatantName;
-        //registerChange();
-        emit changed();
-        emit dirty();
+        case Condition_Blinded: return QString("one-eyed");
+        case Condition_Charmed: return QString("smitten");
+        case Condition_Deafened: return QString("elf-ear");
+        case Condition_Exhaustion_1: return QString("crawl");
+        case Condition_Exhaustion_2: return QString("crawl");
+        case Condition_Exhaustion_3: return QString("crawl");
+        case Condition_Exhaustion_4: return QString("crawl");
+        case Condition_Exhaustion_5: return QString("crawl");
+        case Condition_Frightened: return QString("sharp-smile");
+        case Condition_Grappled: return QString("grab");
+        case Condition_Incapacitated: return QString("internal-injury");
+        case Condition_Invisible: return QString("invisible");
+        case Condition_Paralyzed: return QString("aura");
+        case Condition_Petrified: return QString("stone-pile");
+        case Condition_Poisoned: return QString("deathcab");
+        case Condition_Prone: return QString("falling");
+        case Condition_Restrained: return QString("imprisoned");
+        case Condition_Stunned: return QString("embrassed-energy");
+        case Condition_Unconscious: return QString("coma");
+        default: return QString();
     }
 }
-*/
+
+QString Combatant::getConditionDescription(int condition)
+{
+    switch(condition)
+    {
+        case Condition_Blinded: return QString("Blinded");
+        case Condition_Charmed: return QString("Charmed");
+        case Condition_Deafened: return QString("Deafened");
+        case Condition_Exhaustion_1: return QString("Exhaustion - Level 1");
+        case Condition_Exhaustion_2: return QString("Exhaustion - Level 2");
+        case Condition_Exhaustion_3: return QString("Exhaustion - Level 3");
+        case Condition_Exhaustion_4: return QString("Exhaustion - Level 4");
+        case Condition_Exhaustion_5: return QString("Exhaustion - Level 5");
+        case Condition_Frightened: return QString("Frightened");
+        case Condition_Grappled: return QString("Grappled");
+        case Condition_Incapacitated: return QString("Incapacitated");
+        case Condition_Invisible: return QString("Invisible");
+        case Condition_Paralyzed: return QString("Paralyzed");
+        case Condition_Petrified: return QString("Petrified");
+        case Condition_Poisoned: return QString("Poisoned");
+        case Condition_Prone: return QString("Prone");
+        case Condition_Restrained: return QString("Restrained");
+        case Condition_Stunned: return QString("Stunned");
+        case Condition_Unconscious: return QString("Unconscious");
+        default: return QString();
+    }
+}
+
+int Combatant::getConditions() const
+{
+    return _conditions;
+}
+
+bool Combatant::hasCondition(Condition condition) const
+{
+    return ((_conditions & condition) != 0);
+}
 
 void Combatant::setInitiative(int initiative)
 {
@@ -349,6 +374,47 @@ void Combatant::setHitPoints(int hitPoints)
     }
 }
 
+void Combatant::setConditions(int conditions)
+{
+    if(_conditions != conditions)
+    {
+        _conditions = conditions;
+        registerChange();
+    }
+}
+
+void Combatant::applyConditions(int conditions)
+{
+    if((_conditions & conditions) != conditions)
+    {
+        _conditions |= conditions;
+        registerChange();
+    }
+}
+
+void Combatant::addCondition(Condition condition)
+{
+    if(!hasCondition(condition))
+    {
+        _conditions |= condition;
+        registerChange();
+    }
+}
+
+void Combatant::removeCondition(Condition condition)
+{
+    if(hasCondition(condition))
+    {
+        _conditions &= ~condition;
+        registerChange();
+    }
+}
+
+void Combatant::clearConditions()
+{
+    setConditions(Condition_None);
+}
+
 void Combatant::applyDamage(int damage)
 {
     if(damage <= 0)
@@ -388,28 +454,28 @@ QDomElement Combatant::createOutputXML(QDomDocument &doc)
 
 void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    //element.setAttribute( "name", getName() );
-    element.setAttribute( "type", getCombatantType() );
-    element.setAttribute( "armorClass", getArmorClass() );
-    element.setAttribute( "hitPoints", getHitPoints() );
-    element.setAttribute( "hitDice", getHitDice().toString() );
+    element.setAttribute("type", getCombatantType());
+    element.setAttribute("armorClass", getArmorClass());
+    element.setAttribute("hitPoints", getHitPoints());
+    element.setAttribute("hitDice", getHitDice().toString());
+    element.setAttribute("conditions", getConditions());
 
     QString iconPath = getIcon(true);
     if(iconPath.isEmpty())
     {
-        element.setAttribute( "icon", QString("") );
+        element.setAttribute("icon", QString(""));
     }
     else
     {
-        element.setAttribute( "icon", targetDirectory.relativeFilePath(iconPath));
+        element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
     }
 
-    QDomElement attacksElement = doc.createElement( "attacks" );
+    QDomElement attacksElement = doc.createElement("attacks");
     for(int i = 0; i < getAttacks().count(); ++i)
     {
-        QDomElement attackElement = doc.createElement( "attack" );
-        attackElement.setAttribute( "name", getAttacks().at(i).getName() );
-        attackElement.setAttribute( "dice", getAttacks().at(i).getDice().toString() );
+        QDomElement attackElement = doc.createElement("attack");
+        attackElement.setAttribute("name", getAttacks().at(i).getName());
+        attackElement.setAttribute("dice", getAttacks().at(i).getDice().toString());
         attacksElement.appendChild(attackElement);
     }
     element.appendChild(attacksElement);
@@ -443,6 +509,7 @@ void Combatant::copyValues(const Combatant &other)
     _armorClass = other._armorClass;
     _hitPoints = other._hitPoints;
     _hitDice = other._hitDice;
+    _conditions = other._conditions;
     _icon = other._icon;
     _iconPixmap = other._iconPixmap;
     _batchChanges = other._batchChanges;

@@ -158,6 +158,20 @@ int BattleDialogModelCharacter::getSkillModifier(Combatant::Skills skill) const
     return modifier;
 }
 
+int BattleDialogModelCharacter::getConditions() const
+{
+    // TODO: should this just be impossible?
+    if(_combatant)
+    {
+        return _combatant->getConditions();
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getConditions!";
+        return 0;
+    }
+}
+
 int BattleDialogModelCharacter::getSpeed() const
 {
     // TODO: should this just be impossible?
@@ -248,4 +262,16 @@ Character* BattleDialogModelCharacter::getCharacter() const
 void BattleDialogModelCharacter::setCharacter(Character* character)
 {
     setCombatant(character);
+}
+
+void BattleDialogModelCharacter::setConditions(int conditions)
+{
+    if(_combatant)
+        _combatant->setConditions(conditions);
+}
+
+void BattleDialogModelCharacter::applyConditions(int conditions)
+{
+    if(_combatant)
+        _combatant->applyConditions(conditions);
 }

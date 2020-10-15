@@ -7,6 +7,7 @@
 
 class BattleDialogModel;
 class BattleDialogModelEffect;
+class BattleDialogModelCombatant;
 class Grid;
 class QAbstractGraphicsShapeItem;
 
@@ -33,6 +34,8 @@ public:
     void setPointerPos(const QPointF& pos);
     void setPointerPixmap(QPixmap pixmap);
 
+    QPixmap getSelectedIcon() const;
+
     QList<QGraphicsItem*> getEffectItems() const;
 
     bool isSceneEmpty() const;
@@ -56,6 +59,8 @@ public slots:
     void addEffectCube();
     void addEffectLine();
 
+    void setSelectedIcon(const QString& selectedIcon);
+
 signals:
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);
@@ -70,6 +75,8 @@ signals:
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
     void itemChanged(QGraphicsItem* item);
+
+    void combatantHover(BattleDialogModelCombatant* combatant, bool hover);
 
 protected slots:
     void editItem();
@@ -95,6 +102,7 @@ protected:
     bool _mouseDown;
     QPointF _mouseDownPos;
     QGraphicsItem* _mouseDownItem;
+    BattleDialogModelCombatant* _mouseHoverItem;
     qreal _previousRotation;
 
     //bool _rawMouse;
@@ -103,6 +111,8 @@ protected:
     QGraphicsPixmapItem* _pointerPixmapItem;
     bool _pointerVisible;
     QPixmap _pointerPixmap;
+
+    QString _selectedIcon;
 
     BattleDialogGraphicsSceneMouseHandlerDistance _distanceMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerPointer _pointerMouseHandler;

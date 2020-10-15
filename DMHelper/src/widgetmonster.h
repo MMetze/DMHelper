@@ -10,7 +10,7 @@ class WidgetMonster;
 class WidgetMonsterInternal;
 class BattleDialogModelCombatant;
 
-class WidgetMonster : public CombatantWidget //QFrame
+class WidgetMonster : public CombatantWidget
 {
     Q_OBJECT
 

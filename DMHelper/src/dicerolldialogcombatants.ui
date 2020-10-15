@@ -6,18 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>678</width>
-    <height>545</height>
+    <width>650</width>
+    <height>480</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>640</width>
+    <height>480</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>Dice Rolling</string>
+   <string>Apply Effects</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLineEdit" name="editDiceCount">
@@ -126,8 +132,8 @@
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QScrollArea" name="scrollArea">
        <property name="widgetResizable">
@@ -138,86 +144,97 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>452</width>
-          <height>479</height>
+          <width>447</width>
+          <height>428</height>
          </rect>
         </property>
        </widget>
       </widget>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Target DC</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="edtTarget">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="toolTip">
-          <string>The target DC to evaluate the dice roll as a saving throw or ability check</string>
-         </property>
-         <property name="text">
-          <string>15</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Check Type</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QComboBox" name="cmbType">
-         <property name="toolTip">
-          <string>The specific check or saving throw to be used. Modifiers for all combatants will be taken from their descriptions</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="chkIncludeDead">
-         <property name="toolTip">
-          <string>Determines whether dead combatants are shown and included or not</string>
-         </property>
-         <property name="text">
-          <string>Include Dead</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnRoll">
-         <property name="toolTip">
-          <string>Roll and evaluate the saving throw or ability check</string>
-         </property>
-         <property name="text">
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
           <string>Roll</string>
          </property>
-         <property name="default">
-          <bool>true</bool>
-         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Target DC</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtTarget">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>The target DC to evaluate the dice roll as a saving throw or ability check</string>
+              </property>
+              <property name="text">
+               <string>15</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Check Type</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cmbType">
+              <property name="toolTip">
+               <string>The specific check or saving throw to be used. Modifiers for all combatants will be taken from their descriptions</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkIncludeDead">
+            <property name="toolTip">
+             <string>Determines whether dead combatants are shown and included or not</string>
+            </property>
+            <property name="text">
+             <string>Include Dead</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnRoll">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Roll and evaluate the saving throw or ability check</string>
+            </property>
+            <property name="text">
+             <string>Roll</string>
+            </property>
+            <property name="default">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -234,50 +251,93 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Damage</string>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Effects</string>
          </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Damage:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtDamage">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>The total damage to apply to those failing their saving throw or ability check</string>
+              </property>
+              <property name="text">
+               <string>0</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="chkHalfDamage">
+            <property name="toolTip">
+             <string>Whether combatants receive half damage or no damage on a successful saving throw or ability check</string>
+            </property>
+            <property name="text">
+             <string>Half Damage on Save</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnApplyConditions">
+            <property name="toolTip">
+             <string>Apply the damage to those combatants who failed their saving throw or ability check</string>
+            </property>
+            <property name="text">
+             <string>Apply Conditions...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btnDamage">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Apply the damage to those combatants who failed their saving throw or ability check</string>
+            </property>
+            <property name="text">
+             <string>Apply Effects</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <widget class="QLineEdit" name="edtDamage">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-         <property name="toolTip">
-          <string>The total damage to apply to those failing their saving throw or ability check</string>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
          </property>
-         <property name="text">
-          <string>0</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="chkHalfDamage">
-         <property name="toolTip">
-          <string>Whether combatants receive half damage or no damage on a successful saving throw or ability check</string>
-         </property>
-         <property name="text">
-          <string>Half Damage on Save</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnDamage">
-         <property name="toolTip">
-          <string>Apply the damage to those combatants who failed their saving throw or ability check</string>
-         </property>
-         <property name="text">
-          <string>Apply Damage</string>
-         </property>
-        </widget>
+        </spacer>
        </item>
       </layout>
      </item>

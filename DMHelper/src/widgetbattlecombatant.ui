@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>420</width>
-    <height>55</height>
+    <width>563</width>
+    <height>75</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>55</height>
+    <height>75</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>16777215</width>
-    <height>55</height>
+    <height>75</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -60,20 +60,30 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <property name="spacing">
-       <number>0</number>
+       <number>3</number>
       </property>
       <property name="leftMargin">
        <number>0</number>
       </property>
       <property name="topMargin">
-       <number>0</number>
+       <number>3</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
       </property>
       <property name="bottomMargin">
-       <number>0</number>
+       <number>3</number>
       </property>
+      <item>
+       <widget class="QCheckBox" name="chkActive">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QLabel" name="lblIcon">
         <property name="sizePolicy">
@@ -84,14 +94,14 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>32</width>
-          <height>50</height>
+          <width>50</width>
+          <height>65</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>32</width>
-          <height>50</height>
+          <width>50</width>
+          <height>65</height>
          </size>
         </property>
         <property name="styleSheet">
