@@ -30,17 +30,6 @@ EncounterBattle::EncounterBattle(const QString& encounterName, QObject *parent) 
 {
 }
 
-/*
-EncounterBattle::EncounterBattle(const EncounterBattle& obj) :
-    EncounterText(obj),
-    _text(obj._text),
-    _audioTrackId(obj._audioTrackId),
-    _combatantWaves(obj._combatantWaves),
-    _battleModel(new BattleDialogModel(*(obj._battleModel)))
-{
-}
-*/
-
 EncounterBattle::~EncounterBattle()
 {
     while(_combatantWaves.count() > 0)
@@ -100,8 +89,6 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
         }
     }
 
-//    EncounterText::inputXML(element, isImport);
-
     extractTextNode(element, isImport);
     if(!getText().isEmpty())
     {
@@ -126,58 +113,6 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 
 }
-
-/*
-void EncounterBattle::resolveReferences()
-{
-    for( int wave = 0; wave < _combatantWaves.count(); ++wave )
-    {
-        for( int i = 0; i < _combatantWaves.at(wave).count(); ++i )
-        {
-            CombatantGroup combatantPair = _combatantWaves.at(wave).at(i);
-            if(combatantPair.second)
-                combatantPair.second->resolveReferences();
-        }
-    }
-}
-*/
-
-/*
-void EncounterBattle::widgetActivated(QWidget* widget)
-{
-    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(widget);
-    if(!battleFrame)
-        return;
-
-    if(battleFrame->getBattle() != nullptr)
-    {
-        qDebug() << "[EncounterBattle] WARNING: Battle not deactivated: " << battleFrame->getBattle()->getID();
-        qDebug() << "[EncounterBattle] WARNING: Previous battle will now be deactivated. This should happen previously!";
-        battleFrame->setBattle(nullptr);
-    }
-
-    qDebug() << "[EncounterBattle] Activating battle: " << getID() << " """ << _name << """";
-
-    if(!_battleModel)
-        _battleModel = createNewBattle(battleFrame->viewportCenter());
-
-    _widget = widget;
-    connectFrameToModel();
-}
-
-void EncounterBattle::widgetDeactivated(QWidget* widget)
-{
-    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(widget);
-    if(!battleFrame)
-        return;
-
-    qDebug() << "[EncounterBattle] Widget Deactivated " << getID() << " """ << _name;
-
-    disconnectFrameFromModel();
-
-    _widget = nullptr;
-}
-*/
 
 int EncounterBattle::getObjectType() const
 {
@@ -363,7 +298,6 @@ void EncounterBattle::setBattleDialogModel(BattleDialogModel* model)
     }
 
     _battleModel = model;
-    //_battleModel->setParent(this);
 
     emit changed();
     emit dirty();
@@ -387,37 +321,6 @@ void EncounterBattle::removeBattleDialogModel()
     emit changed();
     emit dirty();
 }
-
-/*
-void EncounterBattle::setText(const QString& newText)
-{
-    QTextDocument doc;
-    doc.setHtml(newText);
-    // qDebug() << "[EncounterBattle] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
-
-    if(_text != newText)
-    {
-        _text = newText;
-        emit dirty();
-    }
-}
-*/
-
-/*
-void EncounterBattle::widgetChanged()
-{
-    if(!_widget)
-        return;
-
-    qDebug() << "[EncounterBattle] Widget Changed " << getID() << " """ << _name;
-
-    EncounterBattleEdit* battleEdit = dynamic_cast<EncounterBattleEdit*>(_widget);
-    if(!battleEdit)
-        return;
-
-    battleEdit->setBattle(this);
-}
-*/
 
 QDomElement EncounterBattle::createOutputXML(QDomDocument &doc)
 {
@@ -489,17 +392,9 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
         return;
     }
 
-    /*
-    int battleId = rootBattleElement.attribute("battleID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
-    if(battleId != getID())
-        return;
-    */
-
     _battleModel = new BattleDialogModel();
     _battleModel->inputXML(rootBattleElement, isImport);
-    //_battleModel->setBattle(this);
 
-    //int mapId = rootBattleElement.attribute("mapID",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
     int mapIdInt = DMH_GLOBAL_INVALID_ID;
     QUuid mapId = parseIdString(rootBattleElement.attribute("mapID"), &mapIdInt);
     Map* battleMap = dynamic_cast<Map*>(campaign->getObjectById(mapId));
@@ -513,7 +408,6 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
         _battleModel->setMap(battleMap, mapRect);
     }
 
-    //int activeId = rootBattleElement.attribute("activeId",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
     int activeIdInt = DMH_GLOBAL_INVALID_ID;
     QUuid activeId = parseIdString(rootBattleElement.attribute("activeId"), &activeIdInt, true);
 
@@ -524,7 +418,6 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
         while(!combatantElement.isNull())
         {
             BattleDialogModelCombatant* combatant = nullptr;
-            //int combatantId = combatantElement.attribute("combatantId",QString::number(DMH_GLOBAL_INVALID_ID)).toInt();
             int combatantIntId = DMH_GLOBAL_INVALID_ID;
             QUuid combatantId;
             int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
@@ -618,69 +511,7 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
         battleModel->appendCombatant(newCharacter);
     }
 
-    /*
-    if(battleEncounter)
-    {
-        connect(battleEncounter,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
-
-        // Add wave zero of monsters
-        battleModel->appendCombatants( createWaveMonsters(battleEncounter, 0) );
-
-        // Register the model with the encounter
-        battleEncounter->setBattleDialogModel(battleModel);
-    }
-
-    _encounterBattle = battleEncounter;
-    _dlg = createBattleDialog(battleModel);
-    if(!_dlg)
-        return;
-    */
-
     connect(battleModel,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
 
     return battleModel;
 }
-
-/*
-void EncounterBattle::connectFrameToModel()
-{
-    if(!_battleModel)
-        return;
-
-    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(_widget);
-    if(!battleFrame)
-        return;
-
-    battleFrame->setBattle(this);
-}
-
-void EncounterBattle::disconnectFrameFromModel()
-{
-    if(!_battleModel)
-        return;
-
-    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(_widget);
-    if(!battleFrame)
-        return;
-
-    battleFrame->setBattle(nullptr);
-}
-*/
-
-
-// Needs
-//   Roll Initiative
-//   Complete battle
-//   Audio tracks
-//   Preset Waves of monsters
-//   Battle logger
-/*
-connect(dlg, SIGNAL(battleComplete()), this, SLOT(completeBattle()));
-
-
-
-connect(dlg, SIGNAL(addMonsters()), this, SLOT(addMonsters()));
-connect(dlg, SIGNAL(addWave()), this, SLOT(addWave()));
-connect(dlg, SIGNAL(addCharacter()), this, SLOT(addCharacter()));
-connect(dlg, SIGNAL(addNPC()), this, SLOT(addNPC()));
-*/

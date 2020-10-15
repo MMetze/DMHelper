@@ -15,22 +15,14 @@ class EncounterBattle : public EncounterText
 public:
 
     explicit EncounterBattle(const QString& encounterName = QString(), QObject *parent = nullptr);
-    //explicit EncounterBattle(const EncounterBattle& obj);
     virtual ~EncounterBattle() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    //virtual void resolveReferences() override;
-
-    // Base functions to handle UI widgets
-    //virtual void widgetActivated(QWidget* widget) override;
-    //virtual void widgetDeactivated(QWidget* widget) override;
 
     virtual int getObjectType() const override;
 
     virtual bool hasData() const;
-
-//    virtual QString getText() const;
 
     AudioTrack* getAudioTrack();
     QUuid getAudioTrackId();
@@ -53,11 +45,7 @@ public:
     BattleDialogModel* getBattleDialogModel() const;
     void removeBattleDialogModel();
 
-public slots:
-//    virtual void setText(const QString& newText);
-
 protected:
-//    virtual void widgetChanged() override;
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
@@ -69,7 +57,6 @@ protected:
     void connectFrameToModel();
     void disconnectFrameFromModel();
 
-//    QString _text;
     QUuid _audioTrackId;
     QList<CombatantGroupList> _combatantWaves;
     BattleDialogModel* _battleModel;
