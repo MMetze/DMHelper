@@ -24,7 +24,9 @@ public:
         BattleDialogModelEffect_Cone,
         BattleDialogModelEffect_Cube,
         BattleDialogModelEffect_Line,
-        BattleDialogModelEffect_Object
+        BattleDialogModelEffect_Object,
+
+        BattleDialogModelEffect_Count
     };
 
     BattleDialogModelEffect(const QString& name = QString(), QObject *parent = nullptr);

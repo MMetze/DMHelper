@@ -152,17 +152,13 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
 
 QDomElement MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
-    element.setAttribute( "private", static_cast<int>(getPrivate()) );
+    element.setAttribute("private", static_cast<int>(getPrivate()));
 
     QString iconPath = getIcon();
     if(iconPath.isEmpty())
-    {
-        element.setAttribute( "icon", QString("") );
-    }
+        element.setAttribute("icon", QString(""));
     else
-    {
-        element.setAttribute( "icon", targetDirectory.relativeFilePath(iconPath));
-    }
+        element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
 
     outputValue(doc, element, isExport, QString("name"), getName());
     outputValue(doc, element, isExport, QString("type"), getMonsterType());

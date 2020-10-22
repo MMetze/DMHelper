@@ -30,6 +30,7 @@
 #include "camerarect.h"
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
+#include "combatantrolloverframe.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -89,6 +90,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _contextMenuCombatant(nullptr),
     _mouseDown(false),
     _mouseDownPos(),
+    _hoverFrame(nullptr),
     //_combatantSummary(nullptr),
     _publishSelected(nullptr),
     _publishMouseDown(false),
@@ -1090,6 +1092,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             {
                 if(_mouseDown)
                 {
+                    // Mouse moved with button down on a combatant widget --> drag the widget order
                     QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                     if((mouseEvent->pos() - _mouseDownPos).manhattanLength() > QApplication::startDragDistance())
                     {
@@ -1130,6 +1133,25 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                 else
                     setUniqueSelection(selected);
                 _mouseDown = false;
+            }
+            else if(event->type() == QEvent::HoverEnter)
+            {
+                if((!_mouseDown) && (!_hoverFrame))
+                {
+                    // Mouse moved without button down on a combatant widget --> roll-over popup for this widget
+                    _hoverFrame = new CombatantRolloverFrame(widget->getCombatant(), this);
+                    QPoint framePos(ui->splitter->widget(1)->x() - _hoverFrame->width(), ui->scrollArea->y() + widget->y());
+                    _hoverFrame->move(framePos);
+                    _hoverFrame->show();
+                }
+            }
+            else if(event->type() == QEvent::HoverLeave)
+            {
+                if(_hoverFrame)
+                {
+                    _hoverFrame->deleteLater();
+                    _hoverFrame = nullptr;
+                }
             }
         }
         else
@@ -3269,6 +3291,11 @@ void BattleFrame::clearBattleFrame()
     _contextMenuCombatant = nullptr;
     _mouseDown = false;
     _mouseDownPos = QPoint();
+    if(_hoverFrame)
+    {
+        _hoverFrame->deleteLater();
+        _hoverFrame = nullptr;
+    }
 
     _activeScale = 1.0;
     _selectedScale = 1.0;

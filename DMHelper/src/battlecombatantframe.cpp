@@ -22,6 +22,23 @@ BattleCombatantFrame::BattleCombatantFrame(QWidget *parent) :
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &BattleCombatantFrame::editConditions);
 }
 
+BattleCombatantFrame::BattleCombatantFrame(BattleDialogModelCombatant* combatant, QWidget *parent) :
+    QFrame(parent),
+    ui(new Ui::BattleCombatantFrame),
+    _combatant(nullptr),
+    _conditionGrid(nullptr)
+{
+    ui->setupUi(this);
+
+    ui->edtName->setEnabled(false);
+    ui->frameInfoContents->setEnabled(false);
+    ui->frameStatsContents->setEnabled(false);
+
+    connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &BattleCombatantFrame::editConditions);
+
+    setCombatant(combatant);
+}
+
 BattleCombatantFrame::~BattleCombatantFrame()
 {
     delete ui;

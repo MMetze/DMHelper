@@ -1,9 +1,11 @@
 #include "spellbookdialog.h"
 #include "spell.h"
 #include "spellbook.h"
+#include "battledialogmodeleffect.h"
 #include "ui_spellbookdialog.h"
 #include <QAbstractItemView>
 #include <QInputDialog>
+#include <QComboBox>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -21,21 +23,28 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->cmbSearch, SIGNAL(activated(QString)), this, SLOT(setSpell(QString)));
 
     ui->edtLevel->setValidator(new QIntValidator(0,100));
-    connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtLevel, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtSchool, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtClasses, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtCastingTime, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtDuration, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtRange, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    connect(ui->edtComponents, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-
-    connect(ui->chkRitual, SIGNAL(stateChanged(int)), this, SLOT(handleEditedData()));
-
-    connect(ui->edtDescription, SIGNAL(textChanged()), this, SLOT(handleEditedData()));
-    connect(ui->edtRoll, SIGNAL(textChanged()), this, SLOT(handleEditedData()));
+    connect(ui->edtName, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtLevel, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtSchool, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtClasses, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtCastingTime, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtDuration, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtRange, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtComponents, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
+    connect(ui->chkRitual, SIGNAL(stateChanged(int)), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtDescription, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtRoll, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
+    connect(this, SIGNAL(spellDataEdit()), this, SLOT(handleEditedData()));
 
     ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
+    ui->btnEffectColor->setRotationVisible(false);
+    ui->edtEffectWidth->setValidator(new QIntValidator(0,1000));
+    ui->edtEffectWidth->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
+    ui->edtEffectHeight->setValidator(new QIntValidator(0,1000));
+    ui->edtEffectHeight->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
+    ui->edtEffectToken->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
+    ui->btnEffectTokenBrowse->setStyleSheet(QString("QPushButton:disabled {color: rgb(196, 196, 196);}"));
+    connect(ui->cmbEffectType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleEffectChanged(int)));
 }
 
 SpellbookDialog::~SpellbookDialog()
@@ -63,6 +72,8 @@ void SpellbookDialog::setSpell(Spell* spell)
     if(ui->cmbSearch->currentText() != _spell->getName())
         ui->cmbSearch->setCurrentText(_spell->getName());
 
+    disconnect(this, SIGNAL(spellDataEdit()), this, SLOT(handleEditedData()));
+
     ui->edtName->setText(_spell->getName());
     ui->edtLevel->setText(QString::number(_spell->getLevel()));
     ui->edtSchool->setText(_spell->getSchool());
@@ -79,6 +90,15 @@ void SpellbookDialog::setSpell(Spell* spell)
 
     ui->btnLeft->setEnabled(_spell != Spellbook::Instance()->getFirstSpell());
     ui->btnRight->setEnabled(_spell != Spellbook::Instance()->getLastSpell());
+
+    ui->btnEffectColor->setColor(_spell->getEffectColor());
+    ui->edtEffectWidth->setText(QString::number(_spell->getEffectSize().width()));
+    ui->edtEffectHeight->setText(QString::number(_spell->getEffectSize().height()));
+    ui->edtEffectToken->setText(_spell->getEffectToken());
+    ui->cmbEffectType->setCurrentIndex(_spell->getEffectType());
+    handleEffectChanged(_spell->getEffectType());
+
+    connect(this, SIGNAL(spellDataEdit()), this, SLOT(handleEditedData()));
 }
 
 void SpellbookDialog::setSpell(const QString& spellName)
@@ -205,6 +225,22 @@ void SpellbookDialog::handleEditedData()
 {
     qDebug() << "[Spellbook Dialog] Spellbook Dialog edit detected... storing data";
     storeSpellData();
+}
+
+void SpellbookDialog::handleEffectChanged(int index)
+{
+    if((index < 0) || (index >= BattleDialogModelEffect::BattleDialogModelEffect_Count))
+        return;
+
+    ui->btnEffectColor->setEnabled((index != BattleDialogModelEffect::BattleDialogModelEffect_Base) &&
+                                   (index != BattleDialogModelEffect::BattleDialogModelEffect_Object));
+    ui->edtEffectWidth->setEnabled(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+    ui->lblSizeX->setEnabled((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
+                             (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
+    ui->edtEffectHeight->setEnabled((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
+                                    (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
+    ui->edtEffectToken->setEnabled(index == BattleDialogModelEffect::BattleDialogModelEffect_Object);
+    ui->btnEffectTokenBrowse->setEnabled(index == BattleDialogModelEffect::BattleDialogModelEffect_Object);
 }
 
 void SpellbookDialog::closeEvent(QCloseEvent * event)

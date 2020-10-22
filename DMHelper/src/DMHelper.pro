@@ -58,6 +58,7 @@ SOURCES += main.cpp\
     campaigntreeitem.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
+    combatantrolloverframe.cpp \
     combatantwidget.cpp \
     conditionseditdialog.cpp \
     customtable.cpp \
@@ -264,6 +265,7 @@ HEADERS  += mainwindow.h \
     campaigntreeitem.h \
     characterimportdialog.h \
     colorpushbutton.h \
+    combatantrolloverframe.h \
     combatantwidget.h \
     conditionseditdialog.h \
     customtable.h \
@@ -438,6 +440,7 @@ FORMS    += mainwindow.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     characterimportdialog.ui \
+    combatantrolloverframe.ui \
     conditionseditdialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \

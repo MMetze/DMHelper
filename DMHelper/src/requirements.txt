@@ -1,7 +1,7 @@
 IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FROM PREVIOUS
 1. Soundboard
     DONE - First draft done with local files, youtube and syrinscape playback.
-    Some detailed functionality such as track duration and playback time
+    DONE - Some detailed functionality such as track duration and playback time
     Online Syrinscape (beta)
 2. Spellbook
     DONE - Engineering version with PHB (WotC IP) data
@@ -25,6 +25,8 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
 7. Other
     DONE - old-school (v1.5 or earlier) notes from battles are shown as child text elements
     DONE - Crashes after moving items around
+
+Red color:  _color(115,18,0,64)
 
 General Todos:
 Update roadmap github

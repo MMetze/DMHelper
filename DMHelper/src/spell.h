@@ -5,7 +5,8 @@
 #include <QList>
 #include <QDomElement>
 #include <QDir>
-//#include "dice.h"
+#include <QSize>
+#include <QColor>
 
 class Spell : public QObject
 {
@@ -34,8 +35,11 @@ public:
     QString getClasses() const;
     QString getDescription() const;
     bool isRitual() const;
-    //QList<Dice> getRolls() const;
     QStringList getRolls() const;
+    int getEffectType() const;
+    QSize getEffectSize() const;
+    QColor getEffectColor() const;
+    QString getEffectToken() const;
 
 signals:
     void iconChanged();
@@ -52,10 +56,13 @@ public slots:
     void setClasses(const QString& classes);
     void setDescription(const QString& description);
     void setRitual(bool ritual);
-    //void setRolls(const QList<Dice>& rolls);
-    //void addRoll(const Dice& roll);
     void setRolls(const QStringList& rolls);
     void addRoll(const QString& roll);
+    void setEffectType(int effectType);
+    void setEffectSize(QSize effectSize);
+    void setEffectColor(QColor effectColor);
+    void setEffectToken(QString effectToken);
+
     void clearRolls();
 
 private:
@@ -71,8 +78,12 @@ private:
     QString _classes;
     QString _description;
     bool _ritual;
-    //QList<Dice> _rolls;
     QStringList _rolls;
+
+    int _effectType;
+    QSize _effectSize;
+    QColor _effectColor;
+    QString _effectToken;
 
     bool _batchChanges;
     bool _changesMade;

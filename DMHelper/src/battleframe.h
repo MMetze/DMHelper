@@ -313,6 +313,7 @@ private:
     BattleDialogModelCombatant* _contextMenuCombatant;
     bool _mouseDown;
     QPoint _mouseDownPos;
+    QWidget* _hoverFrame;
 //    BattleCombatantFrame* _combatantSummary;
 
     QGraphicsItem* _publishSelected;

@@ -121,7 +121,12 @@ void BattleDialogModelEffectObject::setImageFile(const QString& imageFile)
 void BattleDialogModelEffectObject::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("width", getWidth());
-    element.setAttribute("filename", targetDirectory.relativeFilePath(getImageFile()));
+
+    QString objectImage = getImageFile();
+    if(objectImage.isEmpty())
+        element.setAttribute("filename", QString(""));
+    else
+        element.setAttribute("filename", targetDirectory.relativeFilePath(objectImage));
 
     BattleDialogModelEffect::internalOutputXML(doc, element, targetDirectory, isExport);
 }

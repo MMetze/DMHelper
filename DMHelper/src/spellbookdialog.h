@@ -22,6 +22,7 @@ public:
 
 signals:
     void spellChanged(); // todo connect this
+    void spellDataEdit(); // used internally
 
 public slots:
     void setSpell(Spell* spell);
@@ -36,6 +37,7 @@ public slots:
 
 protected slots:
     void handleEditedData();
+    void handleEffectChanged(int index);
 
 protected:
     // From QWidget

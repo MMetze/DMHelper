@@ -17,6 +17,7 @@ CombatantWidget::CombatantWidget(QWidget *parent) :
     _lblInitName(nullptr),
     _edtInit(nullptr)
 {
+    setAttribute(Qt::WA_Hover);
     setAutoFillBackground(true);
 }
 

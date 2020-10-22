@@ -17,6 +17,7 @@ class BattleCombatantFrame : public QFrame
 
 public:
     explicit BattleCombatantFrame(QWidget *parent = nullptr);
+    explicit BattleCombatantFrame(BattleDialogModelCombatant* combatant, QWidget *parent = nullptr);
     ~BattleCombatantFrame();
 
     void setCombatant(BattleDialogModelCombatant* combatant);
