@@ -2,17 +2,23 @@
 #include "spell.h"
 #include "spellbook.h"
 #include "battledialogmodeleffect.h"
+#include "conditionseditdialog.h"
 #include "ui_spellbookdialog.h"
 #include <QAbstractItemView>
 #include <QInputDialog>
+#include <QFileDialog>
 #include <QComboBox>
 #include <QMessageBox>
+#include <QHBoxLayout>
 #include <QDebug>
+
+const int CONDITION_FRAME_SPACING = 8;
 
 SpellbookDialog::SpellbookDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SpellbookDialog),
-    _spell(nullptr)
+    _spell(nullptr),
+    _conditionLayout(nullptr)
 {
     ui->setupUi(this);
 
@@ -44,7 +50,16 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     ui->edtEffectHeight->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->edtEffectToken->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->btnEffectTokenBrowse->setStyleSheet(QString("QPushButton:disabled {color: rgb(196, 196, 196);}"));
+    connect(ui->edtEffectWidth, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtEffectHeight, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
+    connect(ui->btnEffectColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtEffectToken, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
     connect(ui->cmbEffectType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleEffectChanged(int)));
+    connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &SpellbookDialog::editConditions);
+    connect(ui->btnEffectTokenBrowse, &QAbstractButton::clicked, this, &SpellbookDialog::selectToken);
+
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 }
 
 SpellbookDialog::~SpellbookDialog()
@@ -86,7 +101,7 @@ void SpellbookDialog::setSpell(Spell* spell)
     ui->chkRitual->setChecked(_spell->isRitual());
 
     ui->edtDescription->setPlainText(_spell->getDescription());
-    ui->edtRoll->setPlainText(_spell->getRolls().join(QChar::LineFeed));
+    ui->edtRoll->setPlainText(_spell->getRollsString());
 
     ui->btnLeft->setEnabled(_spell != Spellbook::Instance()->getFirstSpell());
     ui->btnRight->setEnabled(_spell != Spellbook::Instance()->getLastSpell());
@@ -97,6 +112,7 @@ void SpellbookDialog::setSpell(Spell* spell)
     ui->edtEffectToken->setText(_spell->getEffectToken());
     ui->cmbEffectType->setCurrentIndex(_spell->getEffectType());
     handleEffectChanged(_spell->getEffectType());
+    updateLayout();
 
     connect(this, SIGNAL(spellDataEdit()), this, SLOT(handleEditedData()));
 }
@@ -243,6 +259,108 @@ void SpellbookDialog::handleEffectChanged(int index)
     ui->btnEffectTokenBrowse->setEnabled(index == BattleDialogModelEffect::BattleDialogModelEffect_Object);
 }
 
+void SpellbookDialog::editConditions()
+{
+    if(!_spell)
+        return;
+
+    ConditionsEditDialog dlg;
+    dlg.setConditions(_spell->getEffectConditions());
+    int result = dlg.exec();
+    if(result == QDialog::Accepted)
+    {
+        _spell->setEffectConditions(dlg.getConditions());
+        updateLayout();
+    }
+}
+
+void SpellbookDialog::selectToken()
+{
+    if(!_spell)
+        return;
+
+    QString searchDir;
+    QFileInfo currentToken(_spell->getEffectToken());
+    if(currentToken.exists())
+        searchDir = currentToken.absolutePath();
+
+    QString tokenFile = QFileDialog::getOpenFileName(nullptr,
+                                                     QString("Select a token file for the spell"),
+                                                     searchDir);
+    if(tokenFile.isEmpty())
+    {
+        qDebug() << "[SpellbookDialog] Not able to select a token file; selection dialog cancelled.";
+        return;
+    }
+
+    ui->edtEffectToken->setText(tokenFile);
+}
+
+void SpellbookDialog::updateLayout()
+{
+    clearGrid();
+
+    if(!_spell)
+        return;
+
+    qDebug() << "[SpellbookDialog] Creating a new condition layout";
+
+    _conditionLayout = new QHBoxLayout;
+    _conditionLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    _conditionLayout->setContentsMargins(CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING);
+    _conditionLayout->setSpacing(CONDITION_FRAME_SPACING);
+    ui->frameConditions->setLayout(_conditionLayout);
+
+    int conditions = _spell->getEffectConditions();
+
+    qDebug() << "[SpellbookDialog] Adding conditions: " << conditions;
+
+    for(int i = 0; i < Combatant::getConditionCount(); ++i)
+    {
+        Combatant::Condition condition = Combatant::getConditionByIndex(i);
+        if(conditions & condition)
+            addCondition(condition);
+    }
+
+    _conditionLayout->addStretch();
+
+    update();
+}
+
+void SpellbookDialog::clearGrid()
+{
+    if(!_conditionLayout)
+        return;
+
+    qDebug() << "[SpellbookDialog] Clearing the condition layout";
+
+    // Delete the grid entries
+    QLayoutItem *child = nullptr;
+    while((child = _conditionLayout->takeAt(0)) != nullptr)
+    {
+        delete child->widget();
+        delete child;
+    }
+
+    delete _conditionLayout;
+    _conditionLayout = nullptr;
+
+    ui->frameConditions->update();
+}
+
+void SpellbookDialog::addCondition(Combatant::Condition condition)
+{
+    if(!_conditionLayout)
+        return;
+
+    QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
+    QLabel* conditionLabel = new QLabel(this);
+    conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
+    conditionLabel->setToolTip(Combatant::getConditionDescription(condition));
+
+    _conditionLayout->addWidget(conditionLabel);
+}
+
 void SpellbookDialog::closeEvent(QCloseEvent * event)
 {
     Q_UNUSED(event);
@@ -293,8 +411,15 @@ void SpellbookDialog::storeSpellData()
     _spell->setRange(ui->edtRange->text());
     _spell->setComponents(ui->edtComponents->text());
     _spell->setRitual(ui->chkRitual->isChecked());
+    _spell->setDescription(ui->edtDescription->toPlainText());
 
-    // TODO: description & rolls
+    // TODO: rolls
+
+    _spell->setEffectType(ui->cmbEffectType->currentIndex());
+    _spell->setEffectSize(QSize(ui->edtEffectWidth->text().toInt(), ui->edtEffectHeight->text().toInt()));
+    _spell->setEffectColor(ui->btnEffectColor->getColor());
+    _spell->setEffectToken(ui->edtEffectToken->text());
+    // Conditions are set directly
 
     _spell->endBatchChanges();
 }

@@ -1,6 +1,8 @@
 #ifndef SPELL_H
 #define SPELL_H
 
+#include "dice.h"
+#include "combatant.h"
 #include <QObject>
 #include <QList>
 #include <QDomElement>
@@ -35,11 +37,15 @@ public:
     QString getClasses() const;
     QString getDescription() const;
     bool isRitual() const;
-    QStringList getRolls() const;
+    //QStringList getRolls() const;
+    QList<Dice> getRolls() const;
+    QString getRollsString() const;
     int getEffectType() const;
     QSize getEffectSize() const;
     QColor getEffectColor() const;
     QString getEffectToken() const;
+    int getEffectConditions() const;
+    bool hasEffectCondition(Combatant::Condition condition) const;
 
 signals:
     void iconChanged();
@@ -56,12 +62,17 @@ public slots:
     void setClasses(const QString& classes);
     void setDescription(const QString& description);
     void setRitual(bool ritual);
-    void setRolls(const QStringList& rolls);
+    void setRolls(const QList<Dice>& rolls);
+    void addRoll(const Dice& roll);
     void addRoll(const QString& roll);
     void setEffectType(int effectType);
     void setEffectSize(QSize effectSize);
     void setEffectColor(QColor effectColor);
     void setEffectToken(QString effectToken);
+    void setEffectConditions(int conditions);
+    void applyEffectConditions(int conditions);
+    void addEffectCondition(Combatant::Condition condition);
+    void removeEffectCondition(Combatant::Condition condition);
 
     void clearRolls();
 
@@ -78,12 +89,14 @@ private:
     QString _classes;
     QString _description;
     bool _ritual;
-    QStringList _rolls;
+    //QStringList _rolls;
+    QList<Dice> _rolls;
 
     int _effectType;
     QSize _effectSize;
     QColor _effectColor;
     QString _effectToken;
+    int _effectConditions;
 
     bool _batchChanges;
     bool _changesMade;

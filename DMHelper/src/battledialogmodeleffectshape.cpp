@@ -23,9 +23,9 @@ BattleDialogModelEffectShape::~BattleDialogModelEffectShape()
 // From CampaignObjectBase
 void BattleDialogModelEffectShape::inputXML(const QDomElement &element, bool isImport)
 {
-    _color = QColor(element.attribute("colorR",QString::number(255)).toInt(),
-                    element.attribute("colorG",QString::number(255)).toInt(),
-                    element.attribute("colorB",QString::number(255)).toInt(),
+    _color = QColor(element.attribute("colorR",QString::number(115)).toInt(),
+                    element.attribute("colorG",QString::number(18)).toInt(),
+                    element.attribute("colorB",QString::number(0)).toInt(),
                     element.attribute("colorA",QString::number(64)).toInt());
 
     BattleDialogModelEffect::inputXML(element, isImport);

@@ -8,6 +8,7 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     SRD data xml
     Potential need for xml reading performance improvement
     Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
+    Images to be possible "on top" of real effects to consider radius, etc.
 3. Conditions
     DONE - Can be set in battles
     Visual reminders in DM view
@@ -22,6 +23,7 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     Add an additional frame for the whole Player's Window
 6. Player's Window control of battle contents
     DONE
+    Movement circle for movement from the Player's Window
 7. Other
     DONE - old-school (v1.5 or earlier) notes from battles are shown as child text elements
     DONE - Crashes after moving items around

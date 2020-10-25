@@ -1689,7 +1689,7 @@ void MainWindow::setIndexExpanded(bool expanded, const QModelIndex& index)
 
 void MainWindow::writeBestiary()
 {
-    qDebug() << "[MainWindow] Bestiary now to be written to file";
+    qDebug() << "[MainWindow] Writing Bestiary...";
 
     if(!Bestiary::Instance())
     {
@@ -1752,7 +1752,65 @@ void MainWindow::writeBestiary()
 
 void MainWindow::writeSpellbook()
 {
-    // TODO: add write spellbook
+    qDebug() << "[MainWindow] Writing Spellbook...";
+
+    if(!Spellbook::Instance())
+    {
+        qDebug() << "[MainWindow] Spellbook instance not found, no file written.";
+        return;
+    }
+
+    if(Spellbook::Instance()->count() <= 0)
+    {
+        qDebug() << "[MainWindow] Spellbook is empty, no file will be written";
+        return;
+    }
+
+    QString spellbookFileName = _options->getSpellbookFileName();
+    qDebug() << "[MainWindow] Writing Spellbook to " << spellbookFileName;
+
+    if(spellbookFileName.isEmpty())
+    {
+        spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
+        if(spellbookFileName.isEmpty())
+            return;
+
+        _options->setSpellbookFileName(spellbookFileName);
+    }
+
+    QDomDocument doc("DMHelperSpellbookXML");
+
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
+
+    QFileInfo fileInfo(spellbookFileName);
+    QDir targetDirectory(fileInfo.absoluteDir());
+    if(Spellbook::Instance()->outputXML(doc, root, targetDirectory, false) <= 0)
+    {
+        qDebug() << "[MainWindow] Spellbook output did not find any spells. Aborting writing to file";
+        return;
+    }
+
+    QString xmlString = doc.toString();
+
+    QFile file(spellbookFileName);
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "[MainWindow] Unable to open Spellbook file for writing: " << spellbookFileName;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
+        spellbookFileName.clear();
+        return;
+    }
+
+    QTextStream ts(&file);
+    ts.setCodec("UTF-8");
+    ts << xmlString;
+
+    file.close();
+
+    qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
 }
 
 CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText)

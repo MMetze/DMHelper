@@ -5,6 +5,8 @@
 #include "battledialogmodeleffectfactory.h"
 #include "unselectedpixmap.h"
 #include "grid.h"
+#include "spellbook.h"
+#include "spell.h"
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsItem>
@@ -12,6 +14,7 @@
 #include <QtMath>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QDebug>
 
 // TODO: adjust grid offsets to really match resized battle contents.
@@ -549,6 +552,12 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
             connect(addLineItem,SIGNAL(triggered()),this,SLOT(addEffectLine()));
             menu.addAction(addLineItem);
+
+            menu.addSeparator();
+
+            QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
+            connect(castItem,SIGNAL(triggered()),this,SLOT(castSpell()));
+            menu.addAction(castItem);
         }
 
 
@@ -607,37 +616,17 @@ void BattleDialogGraphicsScene::addEffectObject()
     }
 
     QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file.."));
-    if(filename.isEmpty())
+    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename);
+    
+    if(effect)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create object effect, invalid image file selected.";
-        return;
+        _contextMenuItem = addEffect(effect);
+        if(_contextMenuItem)
+        {
+            editItem();
+            _contextMenuItem = nullptr;
+        }
     }
-
-    QPixmap objectPixmap(filename);
-    if(objectPixmap.isNull())
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create object effect, invalid image file selected: " << filename;
-        return;
-    }
-
-    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object);
-    if(!effect)
-        return;
-
-    if(objectPixmap.width() >= objectPixmap.height())
-    {
-        effect->setWidth(10);
-        effect->setSize(10 * objectPixmap.height() / objectPixmap.width());
-    }
-    else
-    {
-        effect->setSize(10);
-        effect->setWidth(10 * objectPixmap.width() / objectPixmap.height());
-    }
-    effect->setPosition(_mouseDownPos.x(), _mouseDownPos.y());
-    effect->setImageFile(filename);
-
-    addEffect(effect);
 }
 
 void BattleDialogGraphicsScene::addEffectRadius()
@@ -648,6 +637,7 @@ void BattleDialogGraphicsScene::addEffectRadius()
         return;
     }
 
+    /*
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius);
     if(!effect)
         return;
@@ -655,8 +645,22 @@ void BattleDialogGraphicsScene::addEffectRadius()
     // Note: The size doubled to convert radius to diameter
     qreal scaledSize = static_cast<qreal>(effect->getSize()) * 2.0 * _model->getGridScale() / 5.0;
     effect->setPosition(_mouseDownPos.x() - (scaledSize / 2.0),_mouseDownPos.y() - (scaledSize / 2.0));
+    */
 
-    addEffect(effect);
+    // Note: The size doubled to convert radius to diameter
+    /*
+    qreal scaledHalfSize = 20.0 * 2.0 * _model->getGridScale() / (5.0 * 2.0);
+    QPointF effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
+    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectRadius(effectPosition, 20, QColor(115,18,0,64));
+    */
+    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115,18,0,64), QString());
+
+    _contextMenuItem = addEffect(effect);
+    if(_contextMenuItem)
+    {
+        editItem();
+        _contextMenuItem = nullptr;
+    }
 }
 
 void BattleDialogGraphicsScene::addEffectCone()
@@ -667,13 +671,22 @@ void BattleDialogGraphicsScene::addEffectCone()
         return;
     }
 
+    /*
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone);
     if(!effect)
         return;
 
     effect->setPosition(_mouseDownPos.x(), _mouseDownPos.y());
+    */
+    // BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectCone(_mouseDownPos, 20, QColor(115,18,0,64));
+    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone, 20, 0, QColor(115,18,0,64), QString());
 
-    addEffect(effect);
+    _contextMenuItem = addEffect(effect);
+    if(_contextMenuItem)
+    {
+        editItem();
+        _contextMenuItem = nullptr;
+    }
 }
 
 void BattleDialogGraphicsScene::addEffectCube()
@@ -684,14 +697,28 @@ void BattleDialogGraphicsScene::addEffectCube()
         return;
     }
 
+    /*
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube);
     if(!effect)
         return;
 
     qreal scaledSize = static_cast<qreal>(effect->getSize()) * _model->getGridScale() / 5.0;
     effect->setPosition(_mouseDownPos.x() - (scaledSize / 2.0), _mouseDownPos.y() - (scaledSize / 2.0));
+    */
 
-    addEffect(effect);
+    /*
+    qreal scaledHalfSize = 20.0 * _model->getGridScale() / (5.0 * 2.0);
+    QPointF effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
+    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectCube(effectPosition, 20, QColor(115,18,0,64));
+    */
+    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube, 20, 0, QColor(115,18,0,64), QString());
+
+    _contextMenuItem = addEffect(effect);
+    if(_contextMenuItem)
+    {
+        editItem();
+        _contextMenuItem = nullptr;
+    }
 }
 
 void BattleDialogGraphicsScene::addEffectLine()
@@ -702,13 +729,68 @@ void BattleDialogGraphicsScene::addEffectLine()
         return;
     }
 
+    /*
     BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line);
     if(!effect)
         return;
 
     effect->setPosition(_mouseDownPos.x(), _mouseDownPos.y());
+    */
 
-    addEffect(effect);
+    // BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectLine(_mouseDownPos, 20, 5, QColor(115,18,0,64));
+    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115,18,0,64), QString());
+
+    _contextMenuItem = addEffect(effect);
+    if(_contextMenuItem)
+    {
+        editItem();
+        _contextMenuItem = nullptr;
+    }
+}
+
+void BattleDialogGraphicsScene::castSpell()
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to cast a spell, no model exists.";
+        return;
+    }
+
+    bool ok = false;
+    QString selectedSpell = QInputDialog::getItem(nullptr,
+                                                  QString("Select Spell"),
+                                                  QString("Select the spell to cast:"),
+                                                  Spellbook::Instance()->getSpellList(),
+                                                  0,
+                                                  false,
+                                                  &ok);
+    if(!ok)
+    {
+        qDebug() << "[Battle Dialog Scene] Spell cast aborted: spell selection dialog cancelled.";
+        return;
+    }
+
+    Spell* spell = Spellbook::Instance()->getSpell(selectedSpell);
+    if(!spell)
+    {
+        qDebug() << "[Battle Dialog Scene] Spell cast aborted: not able to find selected spell in the Spellbook.";
+        return;
+    }
+
+    BattleDialogModelEffect* effect = createEffect(spell->getEffectType(),
+                                                   spell->getEffectSize().height(),
+                                                   spell->getEffectSize().width(),
+                                                   spell->getEffectColor(),
+                                                   spell->getEffectToken());
+    if(!effect)
+        return;
+
+    _contextMenuItem = addEffect(effect);
+    if(_contextMenuItem)
+    {
+        editItem();
+        _contextMenuItem = nullptr;
+    }
 }
 
 void BattleDialogGraphicsScene::setSelectedIcon(const QString& selectedIcon)
@@ -887,22 +969,53 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
-void BattleDialogGraphicsScene::addEffect(BattleDialogModelEffect* effect)
+BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int size, int width, const QColor& color, const QString& filename)
+{
+    BattleDialogModelEffect* result = nullptr;
+    qreal scaledHalfSize;
+    QPointF effectPosition;
+    switch(type)
+    {
+        case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
+            scaledHalfSize = static_cast<qreal>(size) * 2.0 * _model->getGridScale() / (5.0 * 2.0);
+            effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
+            result = BattleDialogModelEffectFactory::createEffectRadius(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Cone:
+            result = BattleDialogModelEffectFactory::createEffectCone(_mouseDownPos, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Cube:
+            scaledHalfSize = static_cast<qreal>(size) * _model->getGridScale() / (5.0 * 2.0);
+            effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
+            result = BattleDialogModelEffectFactory::createEffectCube(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Line:
+            result = BattleDialogModelEffectFactory::createEffectLine(_mouseDownPos, size, width, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+            result = BattleDialogModelEffectFactory::createEffectObject(_mouseDownPos, QSize(size, width), filename);
+            break;
+        default:
+            break;
+    }
+
+    return result;
+}
+
+QGraphicsItem* BattleDialogGraphicsScene::addEffect(BattleDialogModelEffect* effect)
 {
     if(!_model)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: unable to add new scene effect, no model exists.";
-        return;
+        return nullptr;
     }
 
     if(!effect)
-        return;
+        return nullptr;
 
     _model->appendEffect(effect);
 
-    _contextMenuItem = addEffectShape(*effect);
-    editItem();
-    _contextMenuItem = nullptr;
+    return addEffectShape(*effect);
 }
 
 QGraphicsItem* BattleDialogGraphicsScene::addEffectShape(BattleDialogModelEffect& effect)

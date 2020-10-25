@@ -59,6 +59,8 @@ public slots:
     void addEffectCube();
     void addEffectLine();
 
+    void castSpell();
+
     void setSelectedIcon(const QString& selectedIcon);
 
 signals:
@@ -89,7 +91,8 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
-    void addEffect(BattleDialogModelEffect* effect);
+    BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
+    QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler();

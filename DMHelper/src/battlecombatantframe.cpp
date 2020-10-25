@@ -127,28 +127,6 @@ void BattleCombatantFrame::updateLayout()
             addCondition(condition);
     }
 
-    /*
-    addCondition(Combatant::Condition_Blinded, conditions);
-    addCondition(Combatant::Condition_Charmed, conditions);
-    addCondition(Combatant::Condition_Deafened, conditions);
-    addCondition(Combatant::Condition_Exhaustion_1, conditions);
-    addCondition(Combatant::Condition_Exhaustion_2, conditions);
-    addCondition(Combatant::Condition_Exhaustion_3, conditions);
-    addCondition(Combatant::Condition_Exhaustion_4, conditions);
-    addCondition(Combatant::Condition_Exhaustion_5, conditions);
-    addCondition(Combatant::Condition_Frightened, conditions);
-    addCondition(Combatant::Condition_Grappled, conditions);
-    addCondition(Combatant::Condition_Incapacitated, conditions);
-    addCondition(Combatant::Condition_Invisible, conditions);
-    addCondition(Combatant::Condition_Paralyzed, conditions);
-    addCondition(Combatant::Condition_Petrified, conditions);
-    addCondition(Combatant::Condition_Poisoned, conditions);
-    addCondition(Combatant::Condition_Prone, conditions);
-    addCondition(Combatant::Condition_Restrained, conditions);
-    addCondition(Combatant::Condition_Stunned, conditions);
-    addCondition(Combatant::Condition_Unconscious, conditions);
-    */
-
     qDebug() << "[BattleCombatantFrame] Total grid entries created: " << _conditionGrid->count();
 
     int spacingColumn = _conditionGrid->columnCount();
@@ -168,8 +146,6 @@ void BattleCombatantFrame::clearGrid()
     if(!_conditionGrid)
         return;
 
-//    _conditionGrid->invalidate();
-
     qDebug() << "[BattleCombatantFrame] Clearing the condition grid";
 
     // Delete the grid entries
@@ -188,6 +164,9 @@ void BattleCombatantFrame::clearGrid()
 
 void BattleCombatantFrame::addCondition(Combatant::Condition condition)
 {
+    if(!_conditionGrid)
+        return;
+
     QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
     QLabel* conditionLabel = new QLabel(this);
     conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
@@ -198,7 +177,6 @@ void BattleCombatantFrame::addCondition(Combatant::Condition condition)
     int column = _conditionGrid->count() % columnCount;
 
     _conditionGrid->addWidget(conditionLabel, row, column);
-
 }
 
 void BattleCombatantFrame::resizeEvent(QResizeEvent *event)
