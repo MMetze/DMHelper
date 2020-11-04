@@ -3,6 +3,9 @@
 #include "ui_encountertextedit.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
+#include <QUrl>
+#include <QInputDialog>
+#include <QMessageBox>
 #include <QDebug>
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
@@ -199,6 +202,38 @@ void EncounterTextEdit::setColor(QColor color)
 void EncounterTextEdit::setAlignment(Qt::Alignment alignment)
 {
     _formatter->setAlignment(alignment);
+}
+
+void EncounterTextEdit::hyperlinkClicked()
+{
+    QTextCursor cursor = ui->textBrowser->textCursor();
+    QTextCharFormat format = cursor.charFormat();
+
+    bool result = false;
+    QString newHRef = QInputDialog::getText(nullptr,
+                                            QString("Edit Hyperlink"),
+                                            QString("Enter the Hyperlink for the selected text: "),
+                                            QLineEdit::Normal,
+                                            format.anchorHref(),
+                                            &result);
+    if(!result)
+        return;
+
+    if(!newHRef.isEmpty())
+    {
+        if(!(QUrl(newHRef).isValid()))
+        {
+            qDebug() << "[EncounterTextEdit] Invalid URL detected: " << newHRef;
+            QMessageBox::critical(nullptr,
+                                  QString("Hyperlink Error"),
+                                  QString("The provided hyperlink is not valid: ") + newHRef);
+        }
+    }
+
+    format.setAnchor(!newHRef.isEmpty());
+    format.setAnchorHref(newHRef);
+    cursor.mergeCharFormat(format);
+    ui->textBrowser->setHtml(ui->textBrowser->toHtml());
 }
 
 void EncounterTextEdit::storeEncounter()

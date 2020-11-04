@@ -211,7 +211,7 @@ private:
     EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* treeModel;
-    QMap<QString, QModelIndex> treeIndexMap;
+    QMap<QString, QUuid> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;
     QString campaignFileName;

@@ -518,17 +518,17 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 _contextMenuItem = item;
 
                 QAction* rollItem = new QAction(QString("Apply Effect..."), &menu);
-                connect(rollItem,SIGNAL(triggered()),this,SLOT(rollItem()));
+                connect(rollItem, SIGNAL(triggered()), this, SLOT(rollItem()));
                 menu.addAction(rollItem);
 
                 menu.addSeparator();
 
                 QAction* edtItem = new QAction(QString("Edit Effect..."), &menu);
-                connect(edtItem,SIGNAL(triggered()),this,SLOT(editItem()));
+                connect(edtItem, SIGNAL(triggered()), this, SLOT(editItem()));
                 menu.addAction(edtItem);
 
                 QAction* deleteItem = new QAction(QString("Delete Effect..."), &menu);
-                connect(deleteItem,SIGNAL(triggered()),this,SLOT(deleteItem()));
+                connect(deleteItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
                 menu.addAction(deleteItem);
             }
         }
@@ -538,25 +538,25 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             _mouseDownPos = mouseEvent->scenePos();
 
             QAction* addRadiusItem = new QAction(QString("Create Radius Effect"), &menu);
-            connect(addRadiusItem,SIGNAL(triggered()),this,SLOT(addEffectRadius()));
+            connect(addRadiusItem, SIGNAL(triggered()), this, SLOT(addEffectRadius()));
             menu.addAction(addRadiusItem);
 
             QAction* addConeItem = new QAction(QString("Create Cone Effect"), &menu);
-            connect(addConeItem,SIGNAL(triggered()),this,SLOT(addEffectCone()));
+            connect(addConeItem, SIGNAL(triggered()), this, SLOT(addEffectCone()));
             menu.addAction(addConeItem);
 
             QAction* addCubeItem = new QAction(QString("Create Cube Effect"), &menu);
-            connect(addCubeItem,SIGNAL(triggered()),this,SLOT(addEffectCube()));
+            connect(addCubeItem, SIGNAL(triggered()), this, SLOT(addEffectCube()));
             menu.addAction(addCubeItem);
 
             QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
-            connect(addLineItem,SIGNAL(triggered()),this,SLOT(addEffectLine()));
+            connect(addLineItem, SIGNAL(triggered()), this, SLOT(addEffectLine()));
             menu.addAction(addLineItem);
 
             menu.addSeparator();
 
             QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
-            connect(castItem,SIGNAL(triggered()),this,SLOT(castSpell()));
+            connect(castItem, SIGNAL(triggered()), this, SLOT(castSpell()));
             menu.addAction(castItem);
         }
 
@@ -782,14 +782,77 @@ void BattleDialogGraphicsScene::castSpell()
                                                    spell->getEffectSize().width(),
                                                    spell->getEffectColor(),
                                                    spell->getEffectToken());
-    if(!effect)
-        return;
 
-    _contextMenuItem = addEffect(effect);
-    if(_contextMenuItem)
+    if(!effect)
     {
-        editItem();
-        _contextMenuItem = nullptr;
+        qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect object.";
+        return;
+    }
+
+    if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
+    {
+        // Either an Object or a basic shape without a token
+        addEffect(effect);
+    }
+    else
+    {
+        // A basic shape with a token image as well
+        int tokenHeight = spell->getEffectSize().height();
+        int tokenWidth = spell->getEffectSize().height();
+        if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+        {
+            tokenHeight *= 2;
+            tokenWidth *= 2;
+        }
+        else if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
+        {
+            tokenWidth = spell->getEffectSize().width();
+        }
+
+        BattleDialogModelEffect* tokenEffect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
+                                                            tokenHeight,
+                                                            tokenWidth,
+                                                            spell->getEffectColor(),
+                                                            spell->getEffectToken());
+        if(!tokenEffect)
+        {
+            qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect's token object!";
+            delete effect;
+            return;
+        }
+
+        tokenEffect->setEffectActive(true);
+
+        QGraphicsItem* tokenItem = addEffect(tokenEffect);
+        if(!tokenItem)
+        {
+            qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to add the effect's token object to the scene!";
+            delete tokenEffect;
+            delete effect;
+            return;
+        }
+
+        //QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
+        QGraphicsItem* shape = effect->createEffectShape(500.0 / static_cast<qreal>(tokenHeight));
+        if(!shape)
+        {
+            qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect's basic shape!";
+            delete tokenItem;
+            delete tokenEffect;
+            delete effect;
+            return;
+        }
+
+        shape->setParentItem(tokenItem);
+//        shape->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
+        shape->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        shape->setFlag(QGraphicsItem::ItemIsMovable, false);
+        shape->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
+        if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone)
+            shape->setPos(QPointF(50.0, 0.0));
+        else
+            shape->setPos(QPointF(0.0, 0.0));
+//        shape->setVisible(false);
     }
 }
 
@@ -993,7 +1056,7 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
             result = BattleDialogModelEffectFactory::createEffectLine(_mouseDownPos, size, width, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
-            result = BattleDialogModelEffectFactory::createEffectObject(_mouseDownPos, QSize(size, width), filename);
+            result = BattleDialogModelEffectFactory::createEffectObject(_mouseDownPos, QSize(size, width), color, filename);
             break;
         default:
             break;

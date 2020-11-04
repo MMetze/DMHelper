@@ -15,9 +15,13 @@ Spell::Spell(const QString& name, QObject *parent) :
     _ritual(false),
     _rolls(),
     _effectType(BattleDialogModelEffect::BattleDialogModelEffect_Base),
+    _effectShapeActive(true),
     _effectSize(20, 20),
     _effectColor(115,18,0,64),
+    _effectRotation(0),
+    _effectTokenActive(true),
     _effectToken(),
+    _effectTokenRotation(0),
     _effectConditions(Combatant::Condition_None),
     _batchChanges(false),
     _changesMade(false)
@@ -38,9 +42,13 @@ Spell::Spell(const QDomElement &element, bool isImport, QObject *parent) :
     _ritual(false),
     _rolls(),
     _effectType(BattleDialogModelEffect::BattleDialogModelEffect_Base),
+    _effectShapeActive(true),
     _effectSize(20, 20),
     _effectColor(115,18,0,64),
+    _effectRotation(0),
+    _effectTokenActive(true),
     _effectToken(),
+    _effectTokenRotation(0),
     _effectConditions(Combatant::Condition_None),
     _batchChanges(false),
     _changesMade(false)
@@ -87,15 +95,18 @@ void Spell::inputXML(const QDomElement &element, bool isImport)
     if(!effectElement.isNull())
     {
         setEffectType(effectElement.attribute("type", QString::number(0)).toInt());
+        setEffectShapeActive(static_cast<bool>(element.attribute("shapeActive", QString::number(1)).toInt()));
         setEffectSize(QSize(effectElement.attribute("sizeX", QString::number(20)).toInt(),
                             effectElement.attribute("sizeY", QString::number(20)).toInt()));
         setEffectColor(QColor(effectElement.attribute("colorR", QString::number(115)).toInt(),
                               effectElement.attribute("colorG", QString::number(18)).toInt(),
                               effectElement.attribute("colorB", QString::number(0)).toInt(),
                               effectElement.attribute("colorA", QString::number(64)).toInt()));
+        setEffectRotation(effectElement.attribute("rotation", QString("0")).toInt());
         setEffectConditions(effectElement.attribute("conditions", QString("0")).toInt());
-
+        setEffectTokenActive(static_cast<bool>(element.attribute("tokenActive", QString::number(1)).toInt()));
         setEffectToken(effectElement.firstChildElement(QString("token")).text());
+        setEffectTokenRotation(effectElement.attribute("tokenRotation", QString("0")).toInt());
     }
 
     endBatchChanges();
@@ -130,13 +141,17 @@ QDomElement Spell::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
 
     QDomElement effectElement = doc.createElement(QString("effect"));
     effectElement.setAttribute("type", getEffectType());
+    effectElement.setAttribute("shapeActive", getEffectShapeActive());
     effectElement.setAttribute("sizeX", getEffectSize().width());
     effectElement.setAttribute("sizeY", getEffectSize().height());
     effectElement.setAttribute("colorR", getEffectColor().red());
     effectElement.setAttribute("colorG", getEffectColor().green());
     effectElement.setAttribute("colorB", getEffectColor().blue());
     effectElement.setAttribute("colorA", getEffectColor().alpha());
+    effectElement.setAttribute("rotation", getEffectRotation());
     effectElement.setAttribute("conditions", getEffectConditions());
+    effectElement.setAttribute("tokenActive", getEffectTokenActive());
+    effectElement.setAttribute("tokenRotation", getEffectTokenRotation());
     outputValue(doc, effectElement, isExport, QString("token"), getEffectToken().isEmpty() ? QString("") : getEffectToken());
     element.appendChild(effectElement);
 
@@ -181,9 +196,14 @@ void Spell::cloneSpell(Spell& other)
         _rolls.append(roll);
 
     _effectType = other._effectType;
+    _effectShapeActive = other._effectShapeActive;
     _effectSize = other._effectSize;
     _effectColor = other._effectColor;
+    _effectRotation = other._effectRotation;
+    _effectTokenActive = other._effectTokenActive;
     _effectToken = other._effectToken;
+    _effectTokenRotation = other._effectTokenRotation;
+    _effectConditions = other._effectConditions;
 
     endBatchChanges();
 }
@@ -269,6 +289,11 @@ int Spell::getEffectType() const
     return _effectType;
 }
 
+bool Spell::getEffectShapeActive() const
+{
+    return _effectShapeActive;
+}
+
 QSize Spell::getEffectSize() const
 {
     return _effectSize;
@@ -279,9 +304,24 @@ QColor Spell::getEffectColor() const
     return _effectColor;
 }
 
+int Spell::getEffectRotation() const
+{
+    return _effectRotation;
+}
+
+bool Spell::getEffectTokenActive() const
+{
+    return _effectTokenActive;
+}
+
 QString Spell::getEffectToken() const
 {
     return _effectToken;
+}
+
+int Spell::getEffectTokenRotation() const
+{
+    return _effectTokenRotation;
 }
 
 int Spell::getEffectConditions() const
@@ -415,6 +455,15 @@ void Spell::setEffectType(int effectType)
     registerChange();
 }
 
+void Spell::setEffectShapeActive(bool effectShapeActive)
+{
+    if(_effectShapeActive == effectShapeActive)
+        return;
+
+    _effectShapeActive = effectShapeActive;
+    registerChange();
+}
+
 void Spell::setEffectSize(QSize effectSize)
 {
     if(_effectSize == effectSize)
@@ -429,8 +478,25 @@ void Spell::setEffectColor(QColor effectColor)
     if(_effectColor == effectColor)
         return;
 
-
     _effectColor = effectColor;
+    registerChange();
+}
+
+void Spell::setEffectRotation(int effectRotation)
+{
+    if(_effectRotation == effectRotation)
+        return;
+
+    _effectRotation = effectRotation;
+    registerChange();
+}
+
+void Spell::setEffectTokenActive(bool effectTokenActive)
+{
+    if(_effectTokenActive == effectTokenActive)
+        return;
+
+    _effectTokenActive = effectTokenActive;
     registerChange();
 }
 
@@ -440,6 +506,15 @@ void Spell::setEffectToken(QString effectToken)
         return;
 
     _effectToken = effectToken;
+    registerChange();
+}
+
+void Spell::setEffectTokenRotation(int effectTokenRotation)
+{
+    if(_effectTokenRotation == effectTokenRotation)
+        return;
+
+    _effectTokenRotation = effectTokenRotation;
     registerChange();
 }
 
@@ -492,4 +567,3 @@ void Spell::registerChange()
     else
         emit dirty();
 }
-

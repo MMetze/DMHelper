@@ -12,19 +12,10 @@ public:
     virtual ~BattleDialogModelEffectShape() override;
 
     // From CampaignObjectBase
-    virtual void inputXML(const QDomElement &element, bool isImport) override;
-
     virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const override;
 
-    virtual QColor getColor() const override;
-    virtual void setColor(const QColor& color) override;
-
 protected:
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
-    void copyValues(const BattleDialogModelEffectShape &other);
-
-    QColor _color;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTSHAPE_H

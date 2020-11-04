@@ -10,6 +10,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QHBoxLayout>
+#include <QPainter>
 #include <QDebug>
 
 const int CONDITION_FRAME_SPACING = 8;
@@ -18,6 +19,8 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SpellbookDialog),
     _spell(nullptr),
+    _shapeRotation(0),
+    _tokenRotation(0),
     _conditionLayout(nullptr)
 {
     ui->setupUi(this);
@@ -50,13 +53,20 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     ui->edtEffectHeight->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->edtEffectToken->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->btnEffectTokenBrowse->setStyleSheet(QString("QPushButton:disabled {color: rgb(196, 196, 196);}"));
-    connect(ui->edtEffectWidth, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
-    connect(ui->edtEffectHeight, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtEffectWidth, SIGNAL(textEdited()), this, SLOT(handleWidthChanged()));
+    connect(ui->edtEffectHeight, SIGNAL(textEdited()), this, SLOT(handleHeightChanged()));
     connect(ui->btnEffectColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(spellDataEdit()));
+    connect(ui->sliderOpacity, &QAbstractSlider::valueChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->edtEffectToken, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
     connect(ui->cmbEffectType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleEffectChanged(int)));
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &SpellbookDialog::editConditions);
     connect(ui->btnEffectTokenBrowse, &QAbstractButton::clicked, this, &SpellbookDialog::selectToken);
+    connect(ui->grpToken, &QGroupBox::clicked, this, &SpellbookDialog::spellDataEdit);
+    connect(ui->grpShape, &QGroupBox::clicked, this, &SpellbookDialog::spellDataEdit);
+    connect(ui->btnShapeCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleShapeRotateCW);
+    connect(ui->btnShapeCCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleShapeRotateCCW);
+    connect(ui->btnTokenCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleTokenRotateCW);
+    connect(ui->btnTokenCCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleTokenRotateCCW);
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -106,15 +116,34 @@ void SpellbookDialog::setSpell(Spell* spell)
     ui->btnLeft->setEnabled(_spell != Spellbook::Instance()->getFirstSpell());
     ui->btnRight->setEnabled(_spell != Spellbook::Instance()->getLastSpell());
 
-    ui->btnEffectColor->setColor(_spell->getEffectColor());
-    ui->edtEffectWidth->setText(QString::number(_spell->getEffectSize().width()));
+    ui->grpShape->setChecked(_spell->getEffectShapeActive());
+    QColor shapeColor = _spell->getEffectColor();
+    ui->sliderOpacity->setValue(shapeColor.alpha());
+    shapeColor.setAlpha(255);
+    ui->btnEffectColor->setColor(shapeColor);
     ui->edtEffectHeight->setText(QString::number(_spell->getEffectSize().height()));
+    if((ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Radius) ||
+       (ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+       (ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Cube))
+    {
+        ui->edtEffectWidth->setText(QString::number(_spell->getEffectSize().height()));
+    }
+    else
+    {
+        ui->edtEffectWidth->setText(QString::number(_spell->getEffectSize().width()));
+    }
+    _shapeRotation = _spell->getEffectRotation();
+
+    ui->grpToken->setChecked(_spell->getEffectTokenActive());
     ui->edtEffectToken->setText(_spell->getEffectToken());
     ui->cmbEffectType->setCurrentIndex(_spell->getEffectType());
+    _tokenRotation = _spell->getEffectTokenRotation();
     handleEffectChanged(_spell->getEffectType());
     updateLayout();
 
     connect(this, SIGNAL(spellDataEdit()), this, SLOT(handleEditedData()));
+
+    updateImage();
 }
 
 void SpellbookDialog::setSpell(const QString& spellName)
@@ -241,6 +270,7 @@ void SpellbookDialog::handleEditedData()
 {
     qDebug() << "[Spellbook Dialog] Spellbook Dialog edit detected... storing data";
     storeSpellData();
+    updateImage();
 }
 
 void SpellbookDialog::handleEffectChanged(int index)
@@ -248,15 +278,82 @@ void SpellbookDialog::handleEffectChanged(int index)
     if((index < 0) || (index >= BattleDialogModelEffect::BattleDialogModelEffect_Count))
         return;
 
-    ui->btnEffectColor->setEnabled((index != BattleDialogModelEffect::BattleDialogModelEffect_Base) &&
-                                   (index != BattleDialogModelEffect::BattleDialogModelEffect_Object));
-    ui->edtEffectWidth->setEnabled(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
-    ui->lblSizeX->setEnabled((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
-                             (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
-    ui->edtEffectHeight->setEnabled((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
-                                    (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
-    ui->edtEffectToken->setEnabled(index == BattleDialogModelEffect::BattleDialogModelEffect_Object);
-    ui->btnEffectTokenBrowse->setEnabled(index == BattleDialogModelEffect::BattleDialogModelEffect_Object);
+//    ui->btnEffectColor->setVisible((index != BattleDialogModelEffect::BattleDialogModelEffect_Base) &&
+//                                   (index != BattleDialogModelEffect::BattleDialogModelEffect_Object));
+//    ui->lblSize->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+    ui->lblSize->setText(index == BattleDialogModelEffect::BattleDialogModelEffect_Radius ? QString("Radius") : QString("Size"));
+//    ui->edtEffectWidth->setVisible((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
+//                                   (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
+//    ui->lblSizeX->setVisible((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
+//                             (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
+//    ui->edtEffectHeight->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+
+//    ui->edtEffectToken->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+//    ui->btnEffectTokenBrowse->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+
+    emit spellDataEdit();
+}
+
+void SpellbookDialog::handleWidthChanged()
+{
+    if((ui->edtEffectWidth->text() != ui->edtEffectHeight->text()) &&
+       ((ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Radius) ||
+        (ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+        (ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)))
+    {
+        ui->edtEffectHeight->setText(ui->edtEffectWidth->text());
+    }
+
+    emit spellDataEdit();
+}
+
+void SpellbookDialog::handleHeightChanged()
+{
+    if((ui->edtEffectWidth->text() != ui->edtEffectHeight->text()) &&
+       ((ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Radius) ||
+        (ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+        (ui->cmbEffectType->currentIndex() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)))
+    {
+        ui->edtEffectWidth->setText(ui->edtEffectHeight->text());
+    }
+
+    emit spellDataEdit();
+}
+
+void SpellbookDialog::handleShapeRotateCW()
+{
+    _shapeRotation += 90;
+    if(_shapeRotation >= 360)
+        _shapeRotation = 0;
+
+    emit spellDataEdit();
+}
+
+void SpellbookDialog::handleShapeRotateCCW()
+{
+    _shapeRotation -= 90;
+    if(_shapeRotation <= 0)
+        _shapeRotation = 270;
+
+    emit spellDataEdit();
+}
+
+void SpellbookDialog::handleTokenRotateCW()
+{
+    _tokenRotation += 90;
+    if(_tokenRotation >= 360)
+        _tokenRotation = 0;
+
+    emit spellDataEdit();
+}
+
+void SpellbookDialog::handleTokenRotateCCW()
+{
+    _tokenRotation -= 90;
+    if(_tokenRotation <= 0)
+        _tokenRotation = 270;
+
+    emit spellDataEdit();
 }
 
 void SpellbookDialog::editConditions()
@@ -413,13 +510,118 @@ void SpellbookDialog::storeSpellData()
     _spell->setRitual(ui->chkRitual->isChecked());
     _spell->setDescription(ui->edtDescription->toPlainText());
 
-    // TODO: rolls
+    // TODO: rolls,
 
     _spell->setEffectType(ui->cmbEffectType->currentIndex());
+    _spell->setEffectShapeActive(ui->grpShape->isChecked());
     _spell->setEffectSize(QSize(ui->edtEffectWidth->text().toInt(), ui->edtEffectHeight->text().toInt()));
-    _spell->setEffectColor(ui->btnEffectColor->getColor());
+    QColor newColor = ui->btnEffectColor->getColor();
+    newColor.setAlpha(ui->sliderOpacity->value());
+    _spell->setEffectColor(newColor);
+    _spell->setEffectRotation(_shapeRotation);
+    _spell->setEffectTokenActive(ui->grpToken->isChecked());
     _spell->setEffectToken(ui->edtEffectToken->text());
+    _spell->setEffectTokenRotation(_tokenRotation);
     // Conditions are set directly
 
     _spell->endBatchChanges();
+}
+
+void SpellbookDialog::updateImage()
+{
+    QPixmap result(ui->lblEffectImage->size());
+
+    int x = result.width() / 10;
+    int y = result.height() / 10;
+    int w = 8 * result.width() / 10;
+    int h = 8 * result.height() / 10;
+
+    QPainter painter;
+    painter.begin(&result);
+
+    painter.drawPixmap(0, 0, result.width(), result.height(), QPixmap(":/img/data/parchment.jpg"));
+
+    if(ui->cmbEffectType->currentIndex() != BattleDialogModelEffect::BattleDialogModelEffect_Base)
+    {
+        if(ui->grpShape->isChecked())
+        {
+            QColor shapeColor = ui->btnEffectColor->getColor();
+            painter.setPen(QPen(shapeColor, 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            shapeColor.setAlpha(ui->sliderOpacity->value());
+            painter.setBrush(QBrush(shapeColor));
+
+            if(_shapeRotation != 0)
+            {
+                int rotatePoint = qMax(result.width(),result.height()) / 2;
+
+                QTransform shapeTransform;
+                shapeTransform.translate(rotatePoint, rotatePoint);
+                shapeTransform.rotate(_shapeRotation);
+                shapeTransform.translate(-rotatePoint, -rotatePoint);
+                painter.setTransform(shapeTransform);
+            }
+
+            switch(ui->cmbEffectType->currentIndex())
+            {
+                case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
+                    painter.drawEllipse(x, y, w, h);
+                    break;
+                case BattleDialogModelEffect::BattleDialogModelEffect_Cone:
+                {
+                    QPolygonF poly;
+                    poly << QPointF(x + (w/2), y) << QPointF(x, y + h) << QPoint(x + w, y + h) << QPoint(x + (w/2), y);
+                    painter.drawPolygon(poly);
+                    break;
+                }
+                case BattleDialogModelEffect::BattleDialogModelEffect_Cube:
+                    painter.drawRect(x, y, w, h);
+                    break;
+                case BattleDialogModelEffect::BattleDialogModelEffect_Line:
+                {
+                    QSize lineSize = QSize(ui->edtEffectWidth->text().toInt(),
+                                           ui->edtEffectHeight->text().toInt()).scaled(w, h, Qt::KeepAspectRatio);
+                    x = (result.width() / 2) - (lineSize.width() / 2);
+                    y = (result.height() / 2) - (lineSize.height() / 2);
+                    w = lineSize.width();
+                    h = lineSize.height();
+                    painter.drawRect(x, y, w, h);
+                    break;
+                }
+                case BattleDialogModelEffect::BattleDialogModelEffect_Base:
+                case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+                default:
+                    break;
+            }
+
+            if(_shapeRotation != 0)
+            {
+                painter.resetTransform();
+            }
+        }
+
+        if(ui->grpToken->isChecked())
+        {
+            QPixmap imagePmp;
+            if(imagePmp.load(ui->edtEffectToken->text()))
+            {
+                if(_tokenRotation != 0)
+                {
+                    int rotatePoint = qMax(result.width(),result.height()) / 2;
+
+                    QTransform tokenTransform;
+                    tokenTransform.translate(rotatePoint, rotatePoint);
+                    tokenTransform.rotate(_tokenRotation);
+                    tokenTransform.translate(-rotatePoint, -rotatePoint);
+                    qDebug() << "[Spellbook Dialog] Image transform set: " << tokenTransform;
+                    painter.setTransform(tokenTransform);
+                }
+
+                painter.drawPixmap(x, y, w, h, imagePmp);
+            }
+        }
+    }
+
+    painter.end();
+
+    ui->lblEffectImage->setPixmap(result);
 }

@@ -41,9 +41,13 @@ public:
     QList<Dice> getRolls() const;
     QString getRollsString() const;
     int getEffectType() const;
+    bool getEffectShapeActive() const;
     QSize getEffectSize() const;
     QColor getEffectColor() const;
+    int getEffectRotation() const;
+    bool getEffectTokenActive() const;
     QString getEffectToken() const;
+    int getEffectTokenRotation() const;
     int getEffectConditions() const;
     bool hasEffectCondition(Combatant::Condition condition) const;
 
@@ -66,9 +70,13 @@ public slots:
     void addRoll(const Dice& roll);
     void addRoll(const QString& roll);
     void setEffectType(int effectType);
+    void setEffectShapeActive(bool effectShapeActive);
     void setEffectSize(QSize effectSize);
     void setEffectColor(QColor effectColor);
+    void setEffectRotation(int effectRotation);
+    void setEffectTokenActive(bool effectTokenActive);
     void setEffectToken(QString effectToken);
+    void setEffectTokenRotation(int effectTokenRotation);
     void setEffectConditions(int conditions);
     void applyEffectConditions(int conditions);
     void addEffectCondition(Combatant::Condition condition);
@@ -93,9 +101,13 @@ private:
     QList<Dice> _rolls;
 
     int _effectType;
+    bool _effectShapeActive;
     QSize _effectSize;
     QColor _effectColor;
+    int _effectRotation;
+    bool _effectTokenActive;
     QString _effectToken;
+    int _effectTokenRotation;
     int _effectConditions;
 
     bool _batchChanges;

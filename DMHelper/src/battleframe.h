@@ -293,6 +293,10 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
+    void startMovement(QGraphicsPixmapItem* item, int speed);
+    void updateMovement(QGraphicsPixmapItem* item);
+    void endMovement();
+
     QPixmap getPointerPixmap();
 
     // State Machine
@@ -316,7 +320,7 @@ private:
     QWidget* _hoverFrame;
 //    BattleCombatantFrame* _combatantSummary;
 
-    QGraphicsItem* _publishSelected;
+//    QGraphicsItem* _publishSelected;
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
 

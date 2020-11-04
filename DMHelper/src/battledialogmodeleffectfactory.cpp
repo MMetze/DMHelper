@@ -59,7 +59,7 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDom
     return result;
 }
 
-BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectObject(const QPointF& position, const QSize& size, const QString& imageFile)
+BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectObject(const QPointF& position, const QSize& size, const QColor& color, const QString& imageFile)
 {
     if(imageFile.isEmpty())
     {
@@ -94,6 +94,7 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffectObject(cons
 
     effect->setSize(size.height());
     effect->setWidth(size.width());
+    effect->setColor(color);
     effect->setPosition(position);//_mouseDownPos.x(), _mouseDownPos.y());
     effect->setImageFile(imageFile);
 

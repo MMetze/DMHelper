@@ -23,6 +23,8 @@ public:
     CampaignTreeItem* campaignItem(int row, int column = 0) const;
     CampaignTreeItem* campaignItemFromIndex(const QModelIndex &index) const;
 
+    QMap<QString, QUuid> getTreeEntryMap();
+
     // From QAbstractItemModel
     virtual QMimeData *	mimeData(const QModelIndexList & indexes) const override;
     virtual QStringList	mimeTypes() const override;

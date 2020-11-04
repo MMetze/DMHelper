@@ -40,6 +40,12 @@ public slots:
 protected slots:
     void handleEditedData();
     void handleEffectChanged(int index);
+    void handleWidthChanged();
+    void handleHeightChanged();
+    void handleShapeRotateCW();
+    void handleShapeRotateCCW();
+    void handleTokenRotateCW();
+    void handleTokenRotateCCW();
     void editConditions();
     void selectToken();
     void updateLayout();
@@ -55,9 +61,12 @@ protected:
 
 private:
     void storeSpellData();
+    void updateImage();
 
     Ui::SpellbookDialog *ui;
     Spell* _spell;
+    int _shapeRotation;
+    int _tokenRotation;
     QHBoxLayout* _conditionLayout;
 };
 

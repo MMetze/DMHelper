@@ -71,6 +71,25 @@ CampaignTreeItem *CampaignTreeModel::campaignItemFromIndex(const QModelIndex &in
     return dynamic_cast<CampaignTreeItem*>(itemFromIndex(index));
 }
 
+QMap<QString, QUuid> CampaignTreeModel::getTreeEntryMap()
+{
+    QMap<QString, QUuid> result;
+
+    if(!_campaign)
+        return result;
+
+    QList<CampaignObjectBase*> campaignObjects = _campaign->findChildren<CampaignObjectBase*>();
+    for(CampaignObjectBase* object : campaignObjects)
+    {
+        if((object) && (!result.contains(object->getName())))
+        {
+            result.insert(object->getName(), object->getID());
+        }
+    }
+
+    return result;
+}
+
 QMimeData* CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
 {
     QMimeData *data = QStandardItemModel::mimeData(indexes);

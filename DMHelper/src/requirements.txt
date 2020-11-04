@@ -23,10 +23,14 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     Add an additional frame for the whole Player's Window
 6. Player's Window control of battle contents
     DONE
-    Movement circle for movement from the Player's Window
+    DONE - Movement circle for movement from the Player's Window
 7. Other
+    DONE - position of objects in battle correctly saved
     DONE - old-school (v1.5 or earlier) notes from battles are shown as child text elements
     DONE - Crashes after moving items around
+    DONE - Crash on Zoom to Fit without a map
+    DONE - External links
+    Delete key in battle
 
 Red color:  _color(115,18,0,64)
 

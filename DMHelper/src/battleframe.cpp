@@ -92,7 +92,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _mouseDownPos(),
     _hoverFrame(nullptr),
     //_combatantSummary(nullptr),
-    _publishSelected(nullptr),
+    //_publishSelected(nullptr),
     _publishMouseDown(false),
     _publishMouseDownPos(),
     _scene(nullptr),
@@ -531,15 +531,18 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
         QList<QGraphicsItem *> itemList = _scene->items(newPosition);
         for(QGraphicsItem* graphicsItem : itemList)
         {
-            if((graphicsItem) && ((graphicsItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+            QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
+            if((pixmapItem) && ((pixmapItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
             {
-                BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(dynamic_cast<QGraphicsPixmapItem*>(graphicsItem), nullptr);
+                BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
                 if(selectedCombatant)
                 {
                     setUniqueSelection(selectedCombatant);
-                    _publishSelected = graphicsItem;
+                    _selectedCombatant = selectedCombatant;
+                    //_publishSelected = graphicsItem;
                     _publishMouseDown = true;
                     _publishMouseDownPos = newPosition;
+                    startMovement(pixmapItem, selectedCombatant->getSpeed());
                 }
             }
         }
@@ -548,7 +551,8 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
 
 void BattleFrame::publishWindowMouseMove(const QPointF& position)
 {
-    if((!_publishSelected) || (!_publishMouseDown))
+    //if((!_publishSelected) || (!_publishMouseDown))
+    if((!_selectedCombatant) || (!_publishMouseDown))
         return;
 
     QPointF newPosition;
@@ -558,14 +562,19 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
     if(newPosition == _publishMouseDownPos)
         return;
 
-    _publishSelected->setPos(newPosition);
+    QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
+    pixmapItem->setPos(newPosition);
+    //_selectedCombatant->setPosition(newPosition);
+    updateMovement(pixmapItem);
 }
 
 void BattleFrame::publishWindowMouseRelease(const QPointF& position)
 {
     Q_UNUSED(position);
 
-    _publishSelected = nullptr;
+    endMovement();
+    //_publishSelected = nullptr;
+    _selectedCombatant = nullptr;
     _publishMouseDown = false;
 }
 
@@ -776,16 +785,25 @@ void BattleFrame::createCountdownFrame()
 
 void BattleFrame::zoomIn()
 {
+    if(!_background)
+        return;
+
     setScale(1.1);
 }
 
 void BattleFrame::zoomOut()
 {
+    if(!_background)
+        return;
+
     setScale(0.9);
 }
 
 void BattleFrame::zoomFit()
 {
+    if(!_background)
+        return;
+
     ui->graphicsView->fitInView(_background, Qt::KeepAspectRatio);
     setScale(1.0);
 }
@@ -793,6 +811,10 @@ void BattleFrame::zoomFit()
 void BattleFrame::zoomSelect(bool enabled)
 {
     Q_UNUSED(enabled);
+
+    if(!_background)
+        return;
+
     _stateMachine.toggleState(DMHelper::BattleFrameState_ZoomSelect);
 }
 
@@ -1708,21 +1730,10 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
         return;
     }
 
-    if(!_model->getShowMovement())
-        return;
-
-    if(!_movementPixmap)
-        return;
-
     BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
     if(combatant)
     {
-        int speedSquares = 2 * (combatant->getSpeed() / 5) + 1;
-        _moveRadius = _model->getGridScale() * speedSquares;
-        _moveStart = _combatantIcons.value(combatant)->pos();
-        _movementPixmap->setPos(_moveStart);
-        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
-        _movementPixmap->setVisible(true);
+        startMovement(_combatantIcons.value(combatant), combatant->getSpeed());
         _selectedCombatant = combatant;
     }
 }
@@ -1737,49 +1748,15 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
         return;
     }
 
-    if(!_model->getShowMovement())
-        return;
-
-    if(!_movementPixmap)
-        return;
-
-    if(!item)
-        return;
-
-    QPointF combatantPos = item->pos();
-
-    if(_moveRadius > _model->getGridScale())
-    {
-        QPointF diff = _moveStart - combatantPos;
-        qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
-        _moveRadius -= 2 * delta;
-    }
-
-    if(_moveRadius <= _model->getGridScale())
-    {
-        _moveRadius = _model->getGridScale();
-        _movementPixmap->setRotation(0.0);
-        _movementPixmap->setVisible(false);
-    }
-    else
-    {
-        _moveStart = combatantPos;
-    }
-
-    _movementPixmap->setPos(combatantPos);
-    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+    updateMovement(item);
 }
 
 void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
 {
     Q_UNUSED(item);
 
-    if(_movementPixmap)
-    {
-        _movementPixmap->setRotation(0.0);
-        _movementPixmap->setVisible(false);
-        _selectedCombatant = nullptr;
-    }
+    endMovement();
+    _selectedCombatant = nullptr;
 }
 
 void BattleFrame::handleItemChanged(QGraphicsItem* item)
@@ -3753,18 +3730,23 @@ bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effec
     if((!item) || (!effect))
         return false;
 
+    QGraphicsItem* collisionEffect = effect;
+    for(QGraphicsItem* childEffect : effect->childItems())
+    {
+        if(childEffect->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area)
+            collisionEffect = childEffect;
+    }
+
     if(item->childItems().count() > 0)
     {
         for(QGraphicsItem* childItem : item->childItems())
         {
             if((childItem) && (childItem->data(BattleDialogItemChild_Index).toInt() == BattleDialogItemChild_Area))
-            {
-                return childItem->collidesWithItem(effect);
-            }
+                return childItem->collidesWithItem(collisionEffect);
         }
     }
 
-    return item->collidesWithItem(effect);
+    return item->collidesWithItem(collisionEffect);
 }
 
 void BattleFrame::removeEffectsFromItem(QGraphicsPixmapItem* item)
@@ -3822,6 +3804,57 @@ void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
         return;
 
     // TODO: Add personal effects
+}
+
+void BattleFrame::startMovement(QGraphicsPixmapItem* item, int speed)
+{
+    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+        return;
+
+    int speedSquares = 2 * (speed / 5) + 1;
+    _moveRadius = _model->getGridScale() * speedSquares;
+    _moveStart = item->pos();
+    _movementPixmap->setPos(_moveStart);
+    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+    _movementPixmap->setVisible(true);
+}
+
+void BattleFrame::updateMovement(QGraphicsPixmapItem* item)
+{
+    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+        return;
+
+    QPointF combatantPos = item->pos();
+
+    if(_moveRadius > _model->getGridScale())
+    {
+        QPointF diff = _moveStart - combatantPos;
+        qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
+        _moveRadius -= 2 * delta;
+    }
+
+    if(_moveRadius <= _model->getGridScale())
+    {
+        _moveRadius = _model->getGridScale();
+        _movementPixmap->setRotation(0.0);
+        _movementPixmap->setVisible(false);
+    }
+    else
+    {
+        _moveStart = combatantPos;
+    }
+
+    _movementPixmap->setPos(combatantPos);
+    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+}
+
+void BattleFrame::endMovement()
+{
+    if(!_movementPixmap)
+        return;
+
+    _movementPixmap->setRotation(0.0);
+    _movementPixmap->setVisible(false);
 }
 
 QPixmap BattleFrame::getPointerPixmap()

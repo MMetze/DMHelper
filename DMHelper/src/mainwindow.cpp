@@ -425,12 +425,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), encounterTextEdit, SLOT(setBold(bool)));
     connect(_ribbonTabText, SIGNAL(fontItalicsChanged(bool)), encounterTextEdit, SLOT(setItalics(bool)));
     connect(_ribbonTabText, SIGNAL(alignmentChanged(Qt::Alignment)), encounterTextEdit, SLOT(setAlignment(Qt::Alignment)));
+    connect(_ribbonTabText, SIGNAL(hyperlinkClicked()), encounterTextEdit, SLOT(hyperlinkClicked()));
     connect(encounterTextEdit, SIGNAL(colorChanged(QColor)), _ribbonTabText, SLOT(setColor(QColor)));
     connect(encounterTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabText, SLOT(setFontFamily(const QString&)));
     connect(encounterTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabText, SLOT(setFontSize(int)));
     connect(encounterTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabText, SLOT(setFontBold(bool)));
     connect(encounterTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabText, SLOT(setFontItalics(bool)));
     connect(encounterTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabText, SLOT(setAlignment(Qt::Alignment)));
+    connect(encounterTextEdit, SIGNAL(setHyperlinkActive(bool)), _ribbonTabText, SLOT(setHyperlinkActive(bool)));
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
                                                       DMHelper::CampaignType_Text,
                                                       DMHelper::CampaignType_Placeholder}), encounterTextEdit);
@@ -1236,9 +1238,14 @@ void MainWindow::linkActivated(const QUrl & link)
         QString linkName = path.remove(0, 9);
         if(treeIndexMap.contains(linkName))
         {
-            QModelIndex index = treeIndexMap.value(linkName);
-            ui->treeView->setCurrentIndex(index);
+            //QModelIndex index = treeIndexMap.value(linkName);
+            //ui->treeView->setCurrentIndex(index);
+            selectItem(treeIndexMap.value(linkName));
         }
+    }
+    else
+    {
+        QDesktopServices::openUrl(link);
     }
 }
 
@@ -1970,6 +1977,10 @@ void MainWindow::updateCampaignTree()
     qDebug() << "[MainWindow] Updating Campaign Tree";
     if(treeModel)
         treeModel->refresh();
+
+    treeIndexMap.clear();
+    treeIndexMap = treeModel->getTreeEntryMap();
+    encounterTextEdit->setKeys(treeIndexMap.uniqueKeys());
 }
 
 void MainWindow::updateMapFiles()

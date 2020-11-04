@@ -11,6 +11,7 @@ class QGraphicsItem;
 
 const int BATTLE_DIALOG_MODEL_EFFECT_ID = Qt::UserRole;
 const int BATTLE_DIALOG_MODEL_EFFECT_OBJECT = Qt::UserRole + 1;
+const int BATTLE_DIALOG_MODEL_EFFECT_ROLE = Qt::UserRole + 2;
 
 class BattleDialogModelEffect : public CampaignObjectBase
 {
@@ -29,8 +30,14 @@ public:
         BattleDialogModelEffect_Count
     };
 
+    enum
+    {
+        BattleDialogModelEffectRole_None = 0,
+        BattleDialogModelEffectRole_Area,
+    };
+
     BattleDialogModelEffect(const QString& name = QString(), QObject *parent = nullptr);
-    BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QString& tip);
+    BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
     virtual ~BattleDialogModelEffect() override;
 
     // From CampaignObjectBase
@@ -91,6 +98,7 @@ protected:
     int _size;
     QPointF _position;
     qreal _rotation;
+    QColor _color;
     QString _tip;
 };
 

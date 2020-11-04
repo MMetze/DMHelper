@@ -288,6 +288,7 @@ void OptionsContainer::readSettings()
     {
         mainWindow->restoreGeometry(settings.value("geometry").toByteArray());
         mainWindow->restoreState(settings.value("windowState").toByteArray());
+        qDebug() << "[OptionsContainer] Restoring window geometry and state to: " << mainWindow->frameGeometry();
     }
 
     // Note: password will not be stored in settings
@@ -372,6 +373,7 @@ void OptionsContainer::writeSettings()
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
     {
+        qDebug() << "[OptionsContainer] Storing window geometry and state: " << mainWindow->frameGeometry();
         settings.setValue("geometry", mainWindow->saveGeometry());
         settings.setValue("windowState", mainWindow->saveState());
     }

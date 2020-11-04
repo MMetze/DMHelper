@@ -15,7 +15,7 @@ BattleDialogModelEffectObject::BattleDialogModelEffectObject(const QString& name
 }
 
 BattleDialogModelEffectObject::BattleDialogModelEffectObject(int size, int width, const QPointF& position, qreal rotation, const QString& imageFile, const QString& tip) :
-    BattleDialogModelEffect(size, position, rotation, tip),
+    BattleDialogModelEffect(size, position, rotation, QColor(), tip),
     _width(width),
     _imageFile(imageFile)
 {
