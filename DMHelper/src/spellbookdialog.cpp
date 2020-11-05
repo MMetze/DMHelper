@@ -19,7 +19,6 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SpellbookDialog),
     _spell(nullptr),
-    _shapeRotation(0),
     _tokenRotation(0),
     _conditionLayout(nullptr)
 {
@@ -63,8 +62,6 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->btnEffectTokenBrowse, &QAbstractButton::clicked, this, &SpellbookDialog::selectToken);
     connect(ui->grpToken, &QGroupBox::clicked, this, &SpellbookDialog::spellDataEdit);
     connect(ui->grpShape, &QGroupBox::clicked, this, &SpellbookDialog::spellDataEdit);
-    connect(ui->btnShapeCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleShapeRotateCW);
-    connect(ui->btnShapeCCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleShapeRotateCCW);
     connect(ui->btnTokenCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleTokenRotateCW);
     connect(ui->btnTokenCCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleTokenRotateCCW);
 
@@ -132,7 +129,6 @@ void SpellbookDialog::setSpell(Spell* spell)
     {
         ui->edtEffectWidth->setText(QString::number(_spell->getEffectSize().width()));
     }
-    _shapeRotation = _spell->getEffectRotation();
 
     ui->grpToken->setChecked(_spell->getEffectTokenActive());
     ui->edtEffectToken->setText(_spell->getEffectToken());
@@ -320,24 +316,6 @@ void SpellbookDialog::handleHeightChanged()
     emit spellDataEdit();
 }
 
-void SpellbookDialog::handleShapeRotateCW()
-{
-    _shapeRotation += 90;
-    if(_shapeRotation >= 360)
-        _shapeRotation = 0;
-
-    emit spellDataEdit();
-}
-
-void SpellbookDialog::handleShapeRotateCCW()
-{
-    _shapeRotation -= 90;
-    if(_shapeRotation <= 0)
-        _shapeRotation = 270;
-
-    emit spellDataEdit();
-}
-
 void SpellbookDialog::handleTokenRotateCW()
 {
     _tokenRotation += 90;
@@ -518,7 +496,6 @@ void SpellbookDialog::storeSpellData()
     QColor newColor = ui->btnEffectColor->getColor();
     newColor.setAlpha(ui->sliderOpacity->value());
     _spell->setEffectColor(newColor);
-    _spell->setEffectRotation(_shapeRotation);
     _spell->setEffectTokenActive(ui->grpToken->isChecked());
     _spell->setEffectToken(ui->edtEffectToken->text());
     _spell->setEffectTokenRotation(_tokenRotation);
@@ -550,17 +527,6 @@ void SpellbookDialog::updateImage()
             shapeColor.setAlpha(ui->sliderOpacity->value());
             painter.setBrush(QBrush(shapeColor));
 
-            if(_shapeRotation != 0)
-            {
-                int rotatePoint = qMax(result.width(),result.height()) / 2;
-
-                QTransform shapeTransform;
-                shapeTransform.translate(rotatePoint, rotatePoint);
-                shapeTransform.rotate(_shapeRotation);
-                shapeTransform.translate(-rotatePoint, -rotatePoint);
-                painter.setTransform(shapeTransform);
-            }
-
             switch(ui->cmbEffectType->currentIndex())
             {
                 case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
@@ -591,11 +557,6 @@ void SpellbookDialog::updateImage()
                 case BattleDialogModelEffect::BattleDialogModelEffect_Object:
                 default:
                     break;
-            }
-
-            if(_shapeRotation != 0)
-            {
-                painter.resetTransform();
             }
         }
 

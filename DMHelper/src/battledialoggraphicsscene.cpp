@@ -1040,8 +1040,8 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
     switch(type)
     {
         case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
-            scaledHalfSize = static_cast<qreal>(size) * 2.0 * _model->getGridScale() / (5.0 * 2.0);
-            effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
+            //scaledHalfSize = static_cast<qreal>(size) * 2.0 * _model->getGridScale() / (5.0 * 2.0);
+            effectPosition = _mouseDownPos;// - QPointF(scaledHalfSize, scaledHalfSize);
             result = BattleDialogModelEffectFactory::createEffectRadius(effectPosition, size, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Cone:

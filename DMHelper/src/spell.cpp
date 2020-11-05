@@ -18,7 +18,6 @@ Spell::Spell(const QString& name, QObject *parent) :
     _effectShapeActive(true),
     _effectSize(20, 20),
     _effectColor(115,18,0,64),
-    _effectRotation(0),
     _effectTokenActive(true),
     _effectToken(),
     _effectTokenRotation(0),
@@ -45,7 +44,6 @@ Spell::Spell(const QDomElement &element, bool isImport, QObject *parent) :
     _effectShapeActive(true),
     _effectSize(20, 20),
     _effectColor(115,18,0,64),
-    _effectRotation(0),
     _effectTokenActive(true),
     _effectToken(),
     _effectTokenRotation(0),
@@ -102,7 +100,6 @@ void Spell::inputXML(const QDomElement &element, bool isImport)
                               effectElement.attribute("colorG", QString::number(18)).toInt(),
                               effectElement.attribute("colorB", QString::number(0)).toInt(),
                               effectElement.attribute("colorA", QString::number(64)).toInt()));
-        setEffectRotation(effectElement.attribute("rotation", QString("0")).toInt());
         setEffectConditions(effectElement.attribute("conditions", QString("0")).toInt());
         setEffectTokenActive(static_cast<bool>(element.attribute("tokenActive", QString::number(1)).toInt()));
         setEffectToken(effectElement.firstChildElement(QString("token")).text());
@@ -148,7 +145,6 @@ QDomElement Spell::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
     effectElement.setAttribute("colorG", getEffectColor().green());
     effectElement.setAttribute("colorB", getEffectColor().blue());
     effectElement.setAttribute("colorA", getEffectColor().alpha());
-    effectElement.setAttribute("rotation", getEffectRotation());
     effectElement.setAttribute("conditions", getEffectConditions());
     effectElement.setAttribute("tokenActive", getEffectTokenActive());
     effectElement.setAttribute("tokenRotation", getEffectTokenRotation());
@@ -199,7 +195,6 @@ void Spell::cloneSpell(Spell& other)
     _effectShapeActive = other._effectShapeActive;
     _effectSize = other._effectSize;
     _effectColor = other._effectColor;
-    _effectRotation = other._effectRotation;
     _effectTokenActive = other._effectTokenActive;
     _effectToken = other._effectToken;
     _effectTokenRotation = other._effectTokenRotation;
@@ -302,11 +297,6 @@ QSize Spell::getEffectSize() const
 QColor Spell::getEffectColor() const
 {
     return _effectColor;
-}
-
-int Spell::getEffectRotation() const
-{
-    return _effectRotation;
 }
 
 bool Spell::getEffectTokenActive() const
@@ -479,15 +469,6 @@ void Spell::setEffectColor(QColor effectColor)
         return;
 
     _effectColor = effectColor;
-    registerChange();
-}
-
-void Spell::setEffectRotation(int effectRotation)
-{
-    if(_effectRotation == effectRotation)
-        return;
-
-    _effectRotation = effectRotation;
     registerChange();
 }
 

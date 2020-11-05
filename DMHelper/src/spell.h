@@ -44,7 +44,6 @@ public:
     bool getEffectShapeActive() const;
     QSize getEffectSize() const;
     QColor getEffectColor() const;
-    int getEffectRotation() const;
     bool getEffectTokenActive() const;
     QString getEffectToken() const;
     int getEffectTokenRotation() const;
@@ -73,7 +72,6 @@ public slots:
     void setEffectShapeActive(bool effectShapeActive);
     void setEffectSize(QSize effectSize);
     void setEffectColor(QColor effectColor);
-    void setEffectRotation(int effectRotation);
     void setEffectTokenActive(bool effectTokenActive);
     void setEffectToken(QString effectToken);
     void setEffectTokenRotation(int effectTokenRotation);
@@ -104,7 +102,6 @@ private:
     bool _effectShapeActive;
     QSize _effectSize;
     QColor _effectColor;
-    int _effectRotation;
     bool _effectTokenActive;
     QString _effectToken;
     int _effectTokenRotation;
