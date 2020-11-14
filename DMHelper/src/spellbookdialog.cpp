@@ -52,8 +52,8 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     ui->edtEffectHeight->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->edtEffectToken->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->btnEffectTokenBrowse->setStyleSheet(QString("QPushButton:disabled {color: rgb(196, 196, 196);}"));
-    connect(ui->edtEffectWidth, SIGNAL(textEdited()), this, SLOT(handleWidthChanged()));
-    connect(ui->edtEffectHeight, SIGNAL(textEdited()), this, SLOT(handleHeightChanged()));
+    connect(ui->edtEffectWidth, &QLineEdit::textEdited, this, &SpellbookDialog::handleWidthChanged);
+    connect(ui->edtEffectHeight, &QLineEdit::textEdited, this, &SpellbookDialog::handleHeightChanged);
     connect(ui->btnEffectColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(spellDataEdit()));
     connect(ui->sliderOpacity, &QAbstractSlider::valueChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->edtEffectToken, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
@@ -97,13 +97,21 @@ void SpellbookDialog::setSpell(Spell* spell)
     disconnect(this, SIGNAL(spellDataEdit()), this, SLOT(handleEditedData()));
 
     ui->edtName->setText(_spell->getName());
+    ui->edtName->setCursorPosition(0);
     ui->edtLevel->setText(QString::number(_spell->getLevel()));
+    ui->edtLevel->setCursorPosition(0);
     ui->edtSchool->setText(_spell->getSchool());
+    ui->edtSchool->setCursorPosition(0);
     ui->edtClasses->setText(_spell->getClasses());
+    ui->edtClasses->setCursorPosition(0);
     ui->edtCastingTime->setText(_spell->getTime());
+    ui->edtCastingTime->setCursorPosition(0);
     ui->edtDuration->setText(_spell->getDuration());
+    ui->edtDuration->setCursorPosition(0);
     ui->edtRange->setText(_spell->getRange());
+    ui->edtRange->setCursorPosition(0);
     ui->edtComponents->setText(_spell->getComponents());
+    ui->edtComponents->setCursorPosition(0);
 
     ui->chkRitual->setChecked(_spell->isRitual());
 
@@ -328,7 +336,7 @@ void SpellbookDialog::handleTokenRotateCW()
 void SpellbookDialog::handleTokenRotateCCW()
 {
     _tokenRotation -= 90;
-    if(_tokenRotation <= 0)
+    if(_tokenRotation < 0)
         _tokenRotation = 270;
 
     emit spellDataEdit();
@@ -345,6 +353,7 @@ void SpellbookDialog::editConditions()
     if(result == QDialog::Accepted)
     {
         _spell->setEffectConditions(dlg.getConditions());
+        emit spellDataEdit();
         updateLayout();
     }
 }
@@ -369,6 +378,8 @@ void SpellbookDialog::selectToken()
     }
 
     ui->edtEffectToken->setText(tokenFile);
+
+    emit spellDataEdit();
 }
 
 void SpellbookDialog::updateLayout()
@@ -575,6 +586,12 @@ void SpellbookDialog::updateImage()
                     tokenTransform.translate(-rotatePoint, -rotatePoint);
                     qDebug() << "[Spellbook Dialog] Image transform set: " << tokenTransform;
                     painter.setTransform(tokenTransform);
+
+                    if(_tokenRotation != 180)
+                    {
+                        std::swap(w, h);
+                        std::swap(x, y);
+                    }
                 }
 
                 painter.drawPixmap(x, y, w, h, imagePmp);

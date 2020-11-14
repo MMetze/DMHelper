@@ -31,6 +31,9 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Crash on Zoom to Fit without a map
     DONE - External links
     Delete key in battle
+    Import Character puts it in the selected tree items
+    Add progress indications to loading campaigns and importing characters (and maybe maps?), new bestiary/spellbook, etc
+    Check importer AC calculations
 
 Red color:  _color(115,18,0,64)
 
@@ -113,5 +116,12 @@ syrinscape-fantasy:elements/YnJpbmRvbC10b3duOjo2LVJvb3N0ZXI/play/
 syrinscape-fantasy:stop/
 
 
+
+Install
+Install Qt
+Install MS Visual Studio community version
+    MSVC v142 VS 2019 C++ x64/x86 build tools
+    Windows 10 SDK
+Copy binsrc to debug build directory
 
 

@@ -26,6 +26,9 @@ public:
     virtual int getWidth() const override;
     virtual void setWidth(int width) override;
 
+    virtual int getImageRotation() const override;
+    virtual void setImageRotation(int imageRotation) override;
+
     virtual QString getImageFile() const override;
     virtual void setImageFile(const QString& imageFile) override;
 
@@ -35,6 +38,7 @@ protected:
     virtual void prepareItem(QGraphicsItem& item) const override;
 
     int _width;
+    int _imageRotation;
     QString _imageFile;
 
 };

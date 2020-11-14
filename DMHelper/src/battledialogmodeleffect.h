@@ -73,6 +73,9 @@ public:
     virtual QColor getColor() const;
     virtual void setColor(const QColor& color);
 
+    virtual int getImageRotation() const;
+    virtual void setImageRotation(int imageRotation);
+
     virtual QString getImageFile() const;
     virtual void setImageFile(const QString& imageFile);
 

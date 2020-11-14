@@ -433,6 +433,38 @@ QString MonsterClass::getSkillString() const
     return result;
 }
 
+void MonsterClass::setSkillString(const QString& skills)
+{
+    if(skills.isEmpty())
+        return;
+
+    if(skills == getSkillString())
+        return;
+
+    QStringList skillList = skills.split(", ");
+    if(skillList.count() <= 0)
+        return;
+
+    _skillValues.clear();
+
+    for(QString skillInfo : skillList)
+    {
+        int spaceIndex = skillInfo.lastIndexOf(" ");
+        QString skillName = skillInfo.left(spaceIndex);
+        QString skillValueString = skillInfo.right(skillInfo.length() - spaceIndex);
+        bool convertSuccess = false;
+        int skillValue = skillValueString.toUInt(&convertSuccess);
+        if(convertSuccess)
+        {
+            int skillKey = Character::findKeyForSkillName(skillName);
+            if(skillKey >= 0)
+            {
+                _skillValues[skillKey] = skillValue;
+            }
+        }
+    }
+}
+
 bool MonsterClass::isSkillKnown(Combatant::Skills skill) const
 {
     return _skillValues.contains(skill);

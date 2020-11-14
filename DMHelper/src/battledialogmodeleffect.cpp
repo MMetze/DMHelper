@@ -141,6 +141,16 @@ void BattleDialogModelEffect::setColor(const QColor& color)
     _color = color;
 }
 
+int BattleDialogModelEffect::getImageRotation() const
+{
+    return 0;
+}
+
+void BattleDialogModelEffect::setImageRotation(int imageRotation)
+{
+    Q_UNUSED(imageRotation);
+}
+
 QString BattleDialogModelEffect::getImageFile() const
 {
     return QString();
@@ -245,6 +255,7 @@ void BattleDialogModelEffect::copyValues(const BattleDialogModelEffect &other)
     _position = other._position;
     _rotation = other._rotation;
     _color = other._color;
+    setImageRotation(other.getImageRotation());
     setImageFile(other.getImageFile());
     _tip = other._tip;
 }

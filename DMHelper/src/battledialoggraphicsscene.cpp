@@ -809,11 +809,11 @@ void BattleDialogGraphicsScene::castSpell()
             tokenWidth = spell->getEffectSize().width();
         }
 
-        BattleDialogModelEffect* tokenEffect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
-                                                            tokenHeight,
-                                                            tokenWidth,
-                                                            spell->getEffectColor(),
-                                                            spell->getEffectToken());
+        BattleDialogModelEffect* tokenEffect =  createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
+                                                             tokenHeight,
+                                                             tokenWidth,
+                                                             spell->getEffectColor(),
+                                                             spell->getEffectToken());
         if(!tokenEffect)
         {
             qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect's token object!";
@@ -822,8 +822,9 @@ void BattleDialogGraphicsScene::castSpell()
         }
 
         tokenEffect->setEffectActive(true);
+        tokenEffect->setImageRotation(spell->getEffectTokenRotation());
 
-        QGraphicsItem* tokenItem = addEffect(tokenEffect);
+        QGraphicsPixmapItem* tokenItem = dynamic_cast<QGraphicsPixmapItem*>(addEffect(tokenEffect));
         if(!tokenItem)
         {
             qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to add the effect's token object to the scene!";
@@ -843,14 +844,33 @@ void BattleDialogGraphicsScene::castSpell()
             return;
         }
 
+        if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+           (spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+        {
+            //qreal r = qDegreesToRadians(static_cast<qreal>(spell->getEffectTokenRotation()));
+            //qreal w = -tokenItem->boundingRect().width() / 2.0;
+            //tokenItem->setOffset(QPointF(w * std::cos(r), -w * std::sin(r)));
+            // 0: -w/2, 0
+            // 90: 0, -h/2
+            // 180:
+            tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0, 0.0));
+        }
+        //tokenItem->setRotation(spell->getEffectTokenRotation());
+        //shape->setRotation(-spell->getEffectTokenRotation());
+        if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+        {
+            tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0,
+                                         -tokenItem->boundingRect().height() / 2.0));
+        }
+
         shape->setParentItem(tokenItem);
 //        shape->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
         shape->setFlag(QGraphicsItem::ItemIsSelectable, false);
         shape->setFlag(QGraphicsItem::ItemIsMovable, false);
         shape->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
-        if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone)
-            shape->setPos(QPointF(50.0, 0.0));
-        else
+        //if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone)
+        //    shape->setPos(QPointF(50.0, 0.0));
+        //else
             shape->setPos(QPointF(0.0, 0.0));
 //        shape->setVisible(false);
     }
@@ -1056,7 +1076,7 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
             result = BattleDialogModelEffectFactory::createEffectLine(_mouseDownPos, size, width, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
-            result = BattleDialogModelEffectFactory::createEffectObject(_mouseDownPos, QSize(size, width), color, filename);
+            result = BattleDialogModelEffectFactory::createEffectObject(_mouseDownPos, QSize(width, size), color, filename);
             break;
         default:
             break;

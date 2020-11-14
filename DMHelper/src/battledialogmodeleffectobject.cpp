@@ -9,6 +9,7 @@
 BattleDialogModelEffectObject::BattleDialogModelEffectObject(const QString& name, QObject *parent) :
     BattleDialogModelEffect(name, parent),
     _width(5),
+    _imageRotation(0),
     _imageFile()
 {
     setEffectActive(false);
@@ -17,6 +18,7 @@ BattleDialogModelEffectObject::BattleDialogModelEffectObject(const QString& name
 BattleDialogModelEffectObject::BattleDialogModelEffectObject(int size, int width, const QPointF& position, qreal rotation, const QString& imageFile, const QString& tip) :
     BattleDialogModelEffect(size, position, rotation, QColor(), tip),
     _width(width),
+    _imageRotation(0),
     _imageFile(imageFile)
 {
     setEffectActive(false);
@@ -29,6 +31,7 @@ BattleDialogModelEffectObject::~BattleDialogModelEffectObject()
 void BattleDialogModelEffectObject::inputXML(const QDomElement &element, bool isImport)
 {
     _width = element.attribute("width", QString::number(5)).toInt();
+    _imageRotation = element.attribute("imageRotation", QString::number(0)).toInt();
     _imageFile = element.attribute("filename");
 
     BattleDialogModelEffect::inputXML(element, isImport);
@@ -70,7 +73,11 @@ QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
 void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
 {
     // First apply the base information
-    BattleDialogModelEffect::applyEffectValues(item, gridScale);
+    //BattleDialogModelEffect::applyEffectValues(item, gridScale);
+
+    item.setPos(getPosition());
+    item.setRotation(getRotation());
+    item.setToolTip(getTip());
 
     qDebug() << "[Battle Dialog Model Effect Object] applying extra object effect values...";
 
@@ -86,9 +93,15 @@ void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal
         }
 
         //pixmapItem->setPixmap(itemPixmap.scaled(getWidth() * 100, getSize() * 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-        int pixmapWidth = getWidth() >= getSize() ? 100 : static_cast<int>(100.0 * getWidth() / getSize());
-        int pixmapHeight = getSize() >= getWidth() ? 100 : static_cast<int>(100.0 * getSize() / getWidth());
-        pixmapItem->setPixmap(itemPixmap.scaled(pixmapWidth, pixmapHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+        int pixmapWidth = getWidth() >= getSize() ? 500 : static_cast<int>(500.0 * getWidth() / getSize());
+        int pixmapHeight = getSize() >= getWidth() ? 500 : static_cast<int>(500.0 * getSize() / getWidth());
+        if(_imageRotation != 0)
+        {
+            itemPixmap = itemPixmap.transformed(QTransform().rotate(_imageRotation));
+        }
+        QPixmap scaledPixmap = itemPixmap.scaled(pixmapWidth, pixmapHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        pixmapItem->setPixmap(scaledPixmap);
+        //pixmapItem->setPixmap(itemPixmap);
     }
     else
     {
@@ -96,6 +109,8 @@ void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal
     }
 
     //item.setScale(gridScale / 500.0);
+    item.setScale(static_cast<qreal>(getSize()) * gridScale / 2500.0);
+
 }
 
 int BattleDialogModelEffectObject::getWidth() const
@@ -106,6 +121,16 @@ int BattleDialogModelEffectObject::getWidth() const
 void BattleDialogModelEffectObject::setWidth(int width)
 {
     _width = width;
+}
+
+int BattleDialogModelEffectObject::getImageRotation() const
+{
+    return _imageRotation;
+}
+
+void BattleDialogModelEffectObject::setImageRotation(int imageRotation)
+{
+    _imageRotation = imageRotation;
 }
 
 QString BattleDialogModelEffectObject::getImageFile() const
@@ -121,6 +146,7 @@ void BattleDialogModelEffectObject::setImageFile(const QString& imageFile)
 void BattleDialogModelEffectObject::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("width", getWidth());
+    element.setAttribute("imageRotation", getImageRotation());
 
     QString objectImage = getImageFile();
     if(objectImage.isEmpty())
