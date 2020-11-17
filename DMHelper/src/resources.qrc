@@ -281,6 +281,7 @@
         <file>data/character_stat_topleft_grey.png</file>
         <file>data/character_stat_topright_grey.png</file>
         <file>data/icon_link.png</file>
+        <file>data/icon_castspell.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

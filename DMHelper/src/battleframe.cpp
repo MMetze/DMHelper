@@ -975,6 +975,12 @@ void BattleFrame::addObject()
         _scene->addEffectObject();
 }
 
+void BattleFrame::castSpell()
+{
+    if(_scene)
+        _scene->castSpell();
+}
+
 void BattleFrame::addEffectRadius()
 {
     if(_scene)

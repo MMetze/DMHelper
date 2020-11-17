@@ -48,7 +48,7 @@ public:
     virtual int getEffectType() const = 0;
     virtual BattleDialogEffectSettings* getEffectEditor() const;
 
-    virtual QGraphicsItem* createEffectShape(qreal gridScale) const = 0;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) = 0;
     virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const;
 
     virtual bool getEffectActive() const;
@@ -62,6 +62,8 @@ public:
 
     virtual int getWidth() const;
     virtual void setWidth(int width);
+
+    virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor) const;
 
     virtual QPointF getPosition() const;
     virtual void setPosition(const QPointF& position);

@@ -575,6 +575,92 @@ color: rgb(50, 50, 50);</string>
         </widget>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Speed</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="edtSpeed">
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>Speed</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_15">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Size</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="edtSize">
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <italic>false</italic>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true"/>
+           </property>
+           <property name="text">
+            <string>Size</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_14">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QLabel" name="label">
@@ -605,7 +691,7 @@ color: rgb(50, 50, 50);</string>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_8">
+          <spacer name="horizontalSpacer_13">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -617,10 +703,6 @@ color: rgb(50, 50, 50);</string>
            </property>
           </spacer>
          </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
@@ -657,6 +739,12 @@ color: rgb(50, 50, 50);</string>
          </item>
          <item>
           <widget class="QLineEdit" name="edtHitDice">
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="font">
             <font>
              <italic>false</italic>
@@ -670,31 +758,18 @@ color: rgb(50, 50, 50);</string>
            </property>
           </widget>
          </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Speed</string>
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="edtSpeed">
-           <property name="font">
-            <font>
-             <italic>false</italic>
-            </font>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
            </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string>Speed</string>
-           </property>
-          </widget>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -1361,7 +1436,7 @@ color: rgb(50, 50, 50);</string>
             <x>0</x>
             <y>0</y>
             <width>494</width>
-            <height>70</height>
+            <height>75</height>
            </rect>
           </property>
          </widget>
@@ -1440,7 +1515,7 @@ color: rgb(50, 50, 50);</string>
             <x>0</x>
             <y>0</y>
             <width>494</width>
-            <height>69</height>
+            <height>75</height>
            </rect>
           </property>
          </widget>
@@ -1519,7 +1594,7 @@ color: rgb(50, 50, 50);</string>
             <x>0</x>
             <y>0</y>
             <width>494</width>
-            <height>70</height>
+            <height>74</height>
            </rect>
           </property>
          </widget>
@@ -1598,7 +1673,7 @@ color: rgb(50, 50, 50);</string>
             <x>0</x>
             <y>0</y>
             <width>494</width>
-            <height>69</height>
+            <height>75</height>
            </rect>
           </property>
          </widget>
@@ -1633,8 +1708,6 @@ color: rgb(50, 50, 50);</string>
   <tabstop>chkLegendary</tabstop>
   <tabstop>chkPrivate</tabstop>
   <tabstop>edtArmorClass</tabstop>
-  <tabstop>edtAverageHitPoints</tabstop>
-  <tabstop>edtHitDice</tabstop>
   <tabstop>edtSpeed</tabstop>
   <tabstop>edtStrength</tabstop>
   <tabstop>edtDexterity</tabstop>

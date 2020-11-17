@@ -2,12 +2,12 @@
 #define CHARACTERFRAME_H
 
 #include "campaignobjectframe.h"
+#include "character.h"
 
 namespace Ui {
 class CharacterFrame;
 }
 
-class Character;
 class QCheckBox;
 
 class CharacterFrame : public CampaignObjectFrame
@@ -49,7 +49,8 @@ private slots:
 
 private:
     void loadCharacterImage();
-    void updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency);
+    //void updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency);
+    void updateCheckboxName(QCheckBox* chk, Combatant::Skills skill);
     void enableDndBeyondSync(bool enabled);
 
     void connectChanged(bool makeConnection);

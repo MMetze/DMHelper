@@ -120,6 +120,7 @@ public slots:
     void addCharacter();
     void addNPC();
     void addObject();
+    void castSpell();
 
     void addEffectRadius();
     void addEffectCone();

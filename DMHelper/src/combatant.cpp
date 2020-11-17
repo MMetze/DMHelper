@@ -218,6 +218,16 @@ Combatant::Ability Combatant::getSkillAbility(Skills skill)
     }
 }
 
+bool Combatant::isSkillSavingThrow(Skills skill)
+{
+    return ((skill == Skills_strengthSave) ||
+            (skill == Skills_dexteritySave) ||
+            (skill == Skills_constitutionSave) ||
+            (skill == Skills_intelligenceSave) ||
+            (skill == Skills_wisdomSave) ||
+            (skill == Skills_charismaSave));
+}
+
 QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup)
 {
     // TODO: Will be obsolete

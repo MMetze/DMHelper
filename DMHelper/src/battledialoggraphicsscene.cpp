@@ -2,6 +2,7 @@
 #include "battledialogeffectsettings.h"
 #include "battledialogmodel.h"
 #include "battledialogmodeleffect.h"
+#include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectfactory.h"
 #include "unselectedpixmap.h"
 #include "grid.h"
@@ -166,8 +167,8 @@ void BattleDialogGraphicsScene::updateBattleContents()
                 qreal newScale = static_cast<qreal>(effect->getSize()) * static_cast<qreal>(_model->getGridScale()) / 500.0;
                 qDebug() << "[Battle Dialog Scene]     Setting scale for item " << item << " to " << newScale;
                 qreal oldScale = item->scale();
-                item->setScale(newScale);
-                item->setPos(item->pos() * newScale/oldScale);
+                effect->setItemScale(item, newScale);
+                item->setPos(item->pos() * item->scale()/oldScale);
                 effect->setPosition(item->pos());
             }
         }
@@ -809,11 +810,12 @@ void BattleDialogGraphicsScene::castSpell()
             tokenWidth = spell->getEffectSize().width();
         }
 
-        BattleDialogModelEffect* tokenEffect =  createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
-                                                             tokenHeight,
-                                                             tokenWidth,
-                                                             spell->getEffectColor(),
-                                                             spell->getEffectToken());
+        BattleDialogModelEffectObject* tokenEffect =  dynamic_cast<BattleDialogModelEffectObject*>(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
+                                                                                                                tokenHeight,
+                                                                                                                tokenWidth,
+                                                                                                                spell->getEffectColor(),
+                                                                                                                spell->getEffectToken()));
+
         if(!tokenEffect)
         {
             qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect's token object!";
@@ -834,7 +836,9 @@ void BattleDialogGraphicsScene::castSpell()
         }
 
         //QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
-        QGraphicsItem* shape = effect->createEffectShape(500.0 / static_cast<qreal>(tokenHeight));
+        //QGraphicsItem* shape = effect->createEffectShape(500.0 / static_cast<qreal>(tokenHeight));
+        // getSize() * gridScale * _imageScaleFactor / 500.0
+        QGraphicsItem* shape = effect->createEffectShape(1.0);
         if(!shape)
         {
             qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect's basic shape!";
@@ -855,14 +859,24 @@ void BattleDialogGraphicsScene::castSpell()
             // 180:
             tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0, 0.0));
         }
+        else if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)
+        {
+            tokenItem->setOffset(QPointF(0.0, 0.0));
+        }
         //tokenItem->setRotation(spell->getEffectTokenRotation());
         //shape->setRotation(-spell->getEffectTokenRotation());
         if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
         {
             tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0,
                                          -tokenItem->boundingRect().height() / 2.0));
+            shape->setScale(1.0 / (2.0 * tokenEffect->getImageScaleFactor()));
+        }
+        else
+        {
+            shape->setScale(1.0 / tokenEffect->getImageScaleFactor());
         }
 
+        //shape->setScale(shape->scale() / tokenItem->scale()); set the right scale
         shape->setParentItem(tokenItem);
 //        shape->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
         shape->setFlag(QGraphicsItem::ItemIsSelectable, false);

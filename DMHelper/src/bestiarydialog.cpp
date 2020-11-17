@@ -69,6 +69,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->edtArmorClass, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtHitDice, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtSpeed, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtSize, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtStrength, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtDexterity, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtConstitution, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -130,6 +131,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtHitDice->setText(_monster->getHitDice().toString());
     ui->edtAverageHitPoints->setText(QString::number(_monster->getAverageHitPoints()));
     ui->edtSpeed->setText(_monster->getSpeed());
+    ui->edtSize->setText(_monster->getMonsterSize());
     ui->edtStrength->setText(QString::number(_monster->getStrength()));
     ui->edtDexterity->setText(QString::number(_monster->getDexterity()));
     ui->edtConstitution->setText(QString::number(_monster->getConstitution()));
@@ -242,6 +244,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtArmorClass->setReadOnly(!_edit);
     ui->edtHitDice->setReadOnly(!_edit);
     ui->edtSpeed->setReadOnly(!_edit);
+    ui->edtSize->setReadOnly(!_edit);
     ui->edtStrength->setReadOnly(!_edit);
     ui->edtDexterity->setReadOnly(!_edit);
     ui->edtConstitution->setReadOnly(!_edit);
@@ -676,6 +679,7 @@ void BestiaryDialog::storeMonsterData()
     _monster->setArmorClass(ui->edtArmorClass->text().toInt());
     _monster->setHitDice(Dice(ui->edtHitDice->text()));
     _monster->setSpeed(ui->edtSpeed->text());
+    _monster->setMonsterSize(ui->edtSize->text());
     _monster->setConditionImmunities(ui->edtConditionImmunities->text());
     _monster->setDamageImmunities(ui->edtDamageImmunities->text());
     _monster->setDamageResistances(ui->edtDamageResistances->text());

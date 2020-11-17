@@ -48,7 +48,7 @@ BattleDialogEffectSettings* BattleDialogModelEffectLine::getEffectEditor() const
     return result;
 }
 
-QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale) const
+QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale)
 {
     qreal effectWidth = static_cast<qreal>(getWidth());
     qreal effectHeight = static_cast<qreal>(getSize());

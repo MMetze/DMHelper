@@ -106,6 +106,12 @@ void BattleDialogModelEffect::setWidth(int width)
     Q_UNUSED(width);
 }
 
+void BattleDialogModelEffect::setItemScale(QGraphicsItem* item, qreal scaleFactor) const
+{
+    if(item)
+        item->setScale(scaleFactor);
+}
+
 QPointF BattleDialogModelEffect::getPosition() const
 {
     return _position;

@@ -30,10 +30,15 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Crashes after moving items around
     DONE - Crash on Zoom to Fit without a map
     DONE - External links
+    DONE - Editing/Saving of monster skills enabled
+    DONE - Editing/Saving of character and monster size enabled
+    Improve Objects and Effects editing
+        Object editing should allow editing width or height...
     Delete key in battle
     Import Character puts it in the selected tree items
     Add progress indications to loading campaigns and importing characters (and maybe maps?), new bestiary/spellbook, etc
     Check importer AC calculations
+    Way to change path to a map
 
 Red color:  _color(115,18,0,64)
 

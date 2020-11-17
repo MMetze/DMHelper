@@ -20,7 +20,7 @@ public:
     virtual int getEffectType() const override;
     virtual BattleDialogEffectSettings* getEffectEditor() const override;
 
-    virtual QGraphicsItem* createEffectShape(qreal gridScale) const override;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
     virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const override;
 
     virtual int getWidth() const override;

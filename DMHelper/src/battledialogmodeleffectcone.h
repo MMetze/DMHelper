@@ -17,7 +17,7 @@ public:
 
     virtual int getEffectType() const override;
 
-    virtual QGraphicsItem* createEffectShape(qreal gridScale) const override;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTCONE_H

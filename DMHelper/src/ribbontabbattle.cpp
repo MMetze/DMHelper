@@ -13,6 +13,7 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnAddMonsters, SIGNAL(clicked(bool)), this, SIGNAL(addMonsterClicked()));
     connect(ui->btnAddNPC, SIGNAL(clicked(bool)), this, SIGNAL(addNPCClicked()));
     connect(ui->btnAddObject, SIGNAL(clicked(bool)), this, SIGNAL(addObjectClicked()));
+    connect(ui->btnCastSpell, SIGNAL(clicked(bool)), this, SIGNAL(castSpellClicked()));
     connect(ui->btnAddRadius, SIGNAL(clicked(bool)), this, SIGNAL(addEffectRadiusClicked()));
     connect(ui->btnAddCube, SIGNAL(clicked(bool)), this, SIGNAL(addEffectCubeClicked()));
     connect(ui->btnAddCone, SIGNAL(clicked(bool)), this, SIGNAL(addEffectConeClicked()));
@@ -74,6 +75,8 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblAddNPC, *ui->btnAddNPC, frameHeight);
     setStandardButtonSize(*ui->lblAddObject, *ui->btnAddObject, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);
+    setStandardButtonSize(*ui->lblCastSpell, *ui->btnCastSpell, frameHeight);
+    setLineHeight(*ui->line_5, frameHeight);
     setStandardButtonSize(*ui->lblAddRadius, *ui->btnAddRadius, frameHeight);
     setStandardButtonSize(*ui->lblAddCube, *ui->btnAddCube, frameHeight);
     setStandardButtonSize(*ui->lblAddCone, *ui->btnAddCone, frameHeight);

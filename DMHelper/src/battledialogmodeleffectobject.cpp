@@ -59,12 +59,35 @@ BattleDialogEffectSettings* BattleDialogModelEffectObject::getEffectEditor() con
     return result;
 }
 
-QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale) const
+QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
 {
     QGraphicsPixmapItem* pixmapItem = new QGraphicsPixmapItem();
     setEffectItemData(pixmapItem);
-
     prepareItem(*pixmapItem);
+
+    qDebug() << "[Battle Dialog Model Effect Object] applying extra object effect values...";
+
+    // Now correct the special case information for the object effect
+    QPixmap itemPixmap(_imageFile);
+    if(itemPixmap.isNull())
+    {
+        qDebug() << "[Battle Dialog Model Effect Object] ERROR: unable to load image file: " << _imageFile;
+        delete pixmapItem;
+        return nullptr;
+    }
+
+    //_imageScaleFactor = 100.0 / (getWidth() >= getSize() ? getWidth() : getSize());
+    _imageScaleFactor = 100.0 / itemPixmap.width();
+    //int pixmapWidth = getWidth() >= getSize() ? 500 : static_cast<int>(500.0 * getWidth() / getSize());
+    //int pixmapHeight = getSize() >= getWidth() ? 500 : static_cast<int>(500.0 * getSize() / getWidth());
+    if(_imageRotation != 0)
+    {
+        itemPixmap = itemPixmap.transformed(QTransform().rotate(_imageRotation));
+    }
+    //QPixmap scaledPixmap = itemPixmap.scaled(pixmapWidth, pixmapHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    pixmapItem->setPixmap(itemPixmap);
+    pixmapItem->setOffset(-itemPixmap.width() / 2, -itemPixmap.height() / 2);
+
     applyEffectValues(*pixmapItem, gridScale);
 
     return pixmapItem;
@@ -79,38 +102,7 @@ void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal
     item.setRotation(getRotation());
     item.setToolTip(getTip());
 
-    qDebug() << "[Battle Dialog Model Effect Object] applying extra object effect values...";
-
-    // Now correct the special case information for the object effect
-    QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(&item);
-    if(pixmapItem)
-    {
-        QPixmap itemPixmap(_imageFile);
-        if(itemPixmap.isNull())
-        {
-            qDebug() << "[Battle Dialog Model Effect Object] ERROR: unable to load image file: " << _imageFile;
-            return;
-        }
-
-        //pixmapItem->setPixmap(itemPixmap.scaled(getWidth() * 100, getSize() * 100, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-        int pixmapWidth = getWidth() >= getSize() ? 500 : static_cast<int>(500.0 * getWidth() / getSize());
-        int pixmapHeight = getSize() >= getWidth() ? 500 : static_cast<int>(500.0 * getSize() / getWidth());
-        if(_imageRotation != 0)
-        {
-            itemPixmap = itemPixmap.transformed(QTransform().rotate(_imageRotation));
-        }
-        QPixmap scaledPixmap = itemPixmap.scaled(pixmapWidth, pixmapHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        pixmapItem->setPixmap(scaledPixmap);
-        //pixmapItem->setPixmap(itemPixmap);
-    }
-    else
-    {
-        qDebug() << "[Battle Dialog Model Effect Object] ERROR: Object Effect found without QGraphicsPixmapItem!";
-    }
-
-    //item.setScale(gridScale / 500.0);
-    item.setScale(static_cast<qreal>(getSize()) * gridScale / 2500.0);
-
+    setItemScale(&item, static_cast<qreal>(getSize()) * gridScale / 500.0);
 }
 
 int BattleDialogModelEffectObject::getWidth() const
@@ -121,6 +113,12 @@ int BattleDialogModelEffectObject::getWidth() const
 void BattleDialogModelEffectObject::setWidth(int width)
 {
     _width = width;
+}
+
+void BattleDialogModelEffectObject::setItemScale(QGraphicsItem* item, qreal scaleFactor) const
+{
+    if(item)
+        item->setScale(scaleFactor * _imageScaleFactor);
 }
 
 int BattleDialogModelEffectObject::getImageRotation() const
@@ -141,6 +139,11 @@ QString BattleDialogModelEffectObject::getImageFile() const
 void BattleDialogModelEffectObject::setImageFile(const QString& imageFile)
 {
     _imageFile = imageFile;
+}
+
+qreal BattleDialogModelEffectObject::getImageScaleFactor() const
+{
+    return _imageScaleFactor;
 }
 
 void BattleDialogModelEffectObject::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

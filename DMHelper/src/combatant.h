@@ -145,6 +145,7 @@ public:
     static QString getAbilityModStr(int ability);
     static QString convertModToStr(int modifier);
     static Ability getSkillAbility(Skills skill);
+    static bool isSkillSavingThrow(Skills skill);
     static QList<Combatant*> instantiateCombatants(CombatantGroup combatantGroup);
 
     static int getConditionCount();
