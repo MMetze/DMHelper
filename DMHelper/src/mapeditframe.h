@@ -26,6 +26,7 @@ public slots:
     void setDrawErase(bool checked);
 
 signals:
+    void editFileClicked();
     void zoomInClicked();
     void zoomOutClicked();
     void zoomOneClicked();

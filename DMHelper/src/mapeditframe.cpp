@@ -7,6 +7,7 @@ MapEditFrame::MapEditFrame(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    connect(ui->btnEditFile, SIGNAL(clicked()), this, SIGNAL(editFileClicked()));
     connect(ui->btnZoomIn, SIGNAL(clicked()), this, SIGNAL(zoomInClicked()));
     connect(ui->btnZoomOut, SIGNAL(clicked()), this, SIGNAL(zoomOutClicked()));
     connect(ui->btnZoomOne, SIGNAL(clicked()), this, SIGNAL(zoomOneClicked()));
@@ -70,6 +71,8 @@ void MapEditFrame::showEvent(QShowEvent *event)
 
     int frameHeight = height();
 
+    setStandardButtonSize(*ui->lblEditFile, *ui->btnEditFile, frameHeight);
+    setLineHeight(*ui->line_7, frameHeight);
     setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn, frameHeight);
     setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut, frameHeight);
     setStandardButtonSize(*ui->lblZoomOne, *ui->btnZoomOne, frameHeight);

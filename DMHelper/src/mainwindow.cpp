@@ -551,6 +551,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
 
+    connect(_ribbonTabMiniMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
     connect(_ribbonTabMiniMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
     connect(_ribbonTabMiniMap, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
     connect(_ribbonTabMiniMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
@@ -1041,30 +1042,6 @@ void MainWindow::newMap()
     updateCampaignTree();
 
     selectItem(map->getID());
-}
-
-void MainWindow::editCurrentMap()
-{
-    //TODO: describe why returning
-    if((!campaign)||(!treeModel))
-        return;
-
-    QStandardItem* mapItem = treeModel->itemFromIndex(ui->treeView->currentIndex());
-    int type = mapItem->data(DMHelper::TreeItemData_Type).toInt();
-    if(type == DMHelper::TreeType_Map)
-    {
-        Map* map = dynamic_cast<Map*>(campaign->getObjectById(QUuid(mapItem->data(DMHelper::TreeItemData_ID).toString())));
-
-        if(!map)
-            return;
-
-        QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
-        if(!filename.isEmpty())
-        {
-            map->setFileName(filename);
-            statusBar()->showMessage(map->getFileName()); // TODO: Can this not automatically happen?
-        }
-    }
 }
 
 void MainWindow::removeCurrentItem()

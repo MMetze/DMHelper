@@ -71,6 +71,7 @@ public slots:
     void setBrushMode(int brushMode);
     void brushSizeChanged(int size);
 
+    void editMapFile();
     void zoomIn();
     void zoomOut();
     void zoomOne();

@@ -81,7 +81,6 @@ public slots:
     void newBattleEncounter();
     void newScrollingTextEncounter();
     void newMap();
-    void editCurrentMap();
     void removeCurrentItem();
     void editCurrentItem();
     void exportCurrentItem();

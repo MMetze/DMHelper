@@ -15,6 +15,7 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QMutexLocker>
+#include <QFileDialog>
 #include <QDebug>
 
 // MapFrame definitions
@@ -420,6 +421,21 @@ void MapFrame::brushSizeChanged(int size)
     {
         _brushSize = size;
         setMapCursor();
+    }
+}
+
+void MapFrame::editMapFile()
+{
+    if(!_mapSource)
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
+    if(!filename.isEmpty())
+    {
+        uninitializeFoW();
+        _mapSource->uninitialize();
+        _mapSource->setFileName(filename);
+        initializeFoW();
     }
 }
 
