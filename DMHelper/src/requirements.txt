@@ -2,18 +2,19 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
 1. Soundboard
     DONE - First draft done with local files, youtube and syrinscape playback.
     DONE - Some detailed functionality such as track duration and playback time
-    Save the Soundboard state
+    DONE - Save the Soundboard
     Online Syrinscape (beta)
 2. Spellbook
     DONE - Engineering version with PHB (WotC IP) data
+    DONE - Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
     SRD data xml
     Potential need for xml reading performance improvement
-    Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
     Images to be possible "on top" of real effects to consider radius, etc.
+    Images and shapes need to be saved
 3. Conditions
     DONE - Can be set in battles
-    Visual reminders in DM view
-    Visual reminders in Player's Window
+    DONE - Visual reminders in DM view
+    DONE - Visual reminders in Player's Window
     Impact on e.g. movement or other
     Action roll-over
     DONE - Improved selection of the effects on the screen

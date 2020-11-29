@@ -1,9 +1,9 @@
-#include "ribbontabbestiary.h"
-#include "ui_ribbontabbestiary.h"
+#include "ribbontabtools.h"
+#include "ui_ribbontabtools.h"
 
-RibbonTabBestiary::RibbonTabBestiary(QWidget *parent) :
+RibbonTabTools::RibbonTabTools(QWidget *parent) :
     RibbonFrame(parent),
-    ui(new Ui::RibbonTabBestiary)
+    ui(new Ui::RibbonTabTools)
 {
     ui->setupUi(this);
 
@@ -26,17 +26,17 @@ RibbonTabBestiary::RibbonTabBestiary(QWidget *parent) :
     connect(ui->btnCountdown, SIGNAL(clicked(bool)), this, SIGNAL(countdownClicked()));
 }
 
-RibbonTabBestiary::~RibbonTabBestiary()
+RibbonTabTools::~RibbonTabTools()
 {
     delete ui;
 }
 
-PublishButtonRibbon* RibbonTabBestiary::getPublishRibbon()
+PublishButtonRibbon* RibbonTabTools::getPublishRibbon()
 {
     return ui->framePublish;
 }
 
-void RibbonTabBestiary::showEvent(QShowEvent *event)
+void RibbonTabTools::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 

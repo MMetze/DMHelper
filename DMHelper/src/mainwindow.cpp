@@ -32,6 +32,7 @@
 #include "battleframe.h"
 //#include "audioplaybackframe.h"
 #include "soundboardframe.h"
+#include "audiofactory.h"
 #include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
@@ -70,12 +71,13 @@
 #include "battledialogmodel.h"
 #include "ribbontabfile.h"
 #include "ribbontabcampaign.h"
-#include "ribbontabbestiary.h"
-#include "ribbontabmap.h"
+#include "ribbontabtools.h"
+#include "ribbontabbattlemap.h"
 #include "ribbontabbattle.h"
 #include "ribbontabscrolling.h"
 #include "ribbontabtext.h"
-#include "mapeditframe.h"
+#include "ribbontabmap.h"
+#include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
 #include <QResizeEvent>
 #include <QFileDialog>
@@ -175,7 +177,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabBattle(nullptr),
     _ribbonTabScrolling(nullptr),
     _ribbonTabText(nullptr),
-    _ribbonTabMiniMap(nullptr)
+    _ribbonTabMiniMap(nullptr),
+    _ribbonTabAudio(nullptr)
 {
 
     QScreen* screen = QGuiApplication::primaryScreen();
@@ -306,6 +309,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newTextClicked()), this, SLOT(newTextEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newScrollingTextClicked()), this, SLOT(newScrollingTextEncounter()));
+    connect(_ribbonTabCampaign, SIGNAL(newSoundClicked()), this, SLOT(newAudioEntry()));
+    connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
+    connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(importItemClicked()), this, SLOT(importItem()));
@@ -414,6 +420,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Creating Encounter Pages";
 
     // Empty Campaign Page
+    //ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Base,
+    //                                                  DMHelper::CampaignType_AudioTrack}), new EmptyCampaignFrame);
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Base, new EmptyCampaignFrame);
 
     // EncounterType_Text
@@ -603,6 +611,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    connect(audioTrackEdit, SIGNAL(trackTypeChanged(int)), _ribbonTabAudio, SLOT(setTrackType(int)));
+    connect(_ribbonTabAudio, SIGNAL(playClicked(bool)), audioTrackEdit, SLOT(setPlay(bool)));
+    connect(audioTrackEdit, SIGNAL(playChanged(bool)), _ribbonTabAudio, SLOT(setPlay(bool)));
+    connect(_ribbonTabAudio, SIGNAL(repeatClicked(bool)), audioTrackEdit, SLOT(setRepeat(bool)));
+    connect(audioTrackEdit, SIGNAL(repeatChanged(bool)), _ribbonTabAudio, SLOT(setRepeat(bool)));
+    connect(_ribbonTabAudio, SIGNAL(muteClicked(bool)), audioTrackEdit, SLOT(setMute(bool)));
+    connect(audioTrackEdit, SIGNAL(muteChanged(bool)), _ribbonTabAudio, SLOT(setMute(bool)));
+    connect(_ribbonTabAudio, SIGNAL(volumeChanged(int)), audioTrackEdit, SLOT(setVolume(int)));
+    connect(audioTrackEdit, SIGNAL(volumeChanged(int)), _ribbonTabAudio, SLOT(setVolume(int)));
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -659,6 +676,7 @@ MainWindow::MainWindow(QWidget *parent) :
     */
     SoundboardFrame* soundboard = new SoundboardFrame(this);
     connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
+    connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
     soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
     timeAndDateFrame = new TimeAndDateFrame(this);
@@ -691,7 +709,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
-    connect(audioTrackEdit, SIGNAL(trackSelected(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
+    //connect(audioTrackEdit, SIGNAL(trackSelected(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -915,9 +933,6 @@ void MainWindow::newCharacter()
     }
 
     Character* character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = campaign;
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -951,12 +966,7 @@ void MainWindow::newCharacter()
         }
     }
 
-    currentObject->setExpanded(true);
-    currentObject->addObject(character);
-
-    updateCampaignTree();
-
-    openCharacter(character->getID());
+    addNewObject(character);
 }
 
 void MainWindow::importCharacter()
@@ -1026,22 +1036,51 @@ void MainWindow::newMap()
     if(filename.isEmpty())
         return;
 
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = campaign;
-
     Map* map = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mapName, false));
     if(!map)
         return;
 
     map->setFileName(filename);
 
-    currentObject->setExpanded(true);
-    currentObject->addObject(map);
+    addNewObject(map);
+}
 
-    updateCampaignTree();
+void MainWindow::newAudioEntry()
+{
+    if(!campaign)
+        return;
 
-    selectItem(map->getID());
+    addNewAudioObject(QFileDialog::getOpenFileName(this, QString("Select local audio file")));
+}
+
+void MainWindow::newSyrinscapeEntry()
+{
+    if(!campaign)
+        return;
+
+    QString syrinscapeInstructions("To add a link to a Syrinscape sound:\n\n1) Hit the '+' key or select ""3rd party app integration"" ENABLE in the settings menu\n2) Little pluses will appear next to all the MOODs and OneShots\n3) Click one of these pluses to copy a URI shortcut to the clipboard\n4) Paste this URI into the text box here:\n");
+
+    bool ok = false;
+    QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addNewAudioObject(urlName);
+}
+
+void MainWindow::newYoutubeEntry()
+{
+    if(!campaign)
+        return;
+
+    QString youtubeInstructions("To add a YouTube video as an audio file, paste the link/URL into the text box here:\n");
+
+    bool ok = false;
+    QString urlName = QInputDialog::getText(this, QString("Enter Youtube URL"), youtubeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addNewAudioObject(urlName);
 }
 
 void MainWindow::removeCurrentItem()
@@ -1524,10 +1563,10 @@ void MainWindow::setupRibbonBar()
     _ribbon->enableTab(_ribbonTabFile);
     _ribbonTabCampaign = new RibbonTabCampaign(this);
     _ribbon->enableTab(_ribbonTabCampaign);
-    _ribbonTabTools = new RibbonTabBestiary(this);
+    _ribbonTabTools = new RibbonTabTools(this);
     _ribbon->enableTab(_ribbonTabTools);
 
-    _ribbonTabMap = new RibbonTabMap(this);
+    _ribbonTabMap = new RibbonTabBattleMap(this);
     _ribbonTabMap->hide();
     _ribbonTabBattle = new RibbonTabBattle(this);
     _ribbonTabBattle->hide();
@@ -1535,8 +1574,10 @@ void MainWindow::setupRibbonBar()
     _ribbonTabScrolling->hide();
     _ribbonTabText = new RibbonTabText(this);
     _ribbonTabText->hide();
-    _ribbonTabMiniMap = new MapEditFrame(this);
+    _ribbonTabMiniMap = new RibbonTabMap(this);
     _ribbonTabMiniMap->hide();
+    _ribbonTabAudio = new RibbonTabAudio(this);
+    _ribbonTabAudio->hide();
 
     connect(_ribbon->getPublishRibbon(), SIGNAL(playersWindowClicked(bool)), this, SLOT(showPublishWindow(bool)));
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
@@ -1803,10 +1844,6 @@ CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& d
     if((!campaign)||(!treeModel))
         return nullptr;
 
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = campaign;
-
     bool ok;
     QString encounterName = QInputDialog::getText(this, dialogTitle, dialogText, QLineEdit::Normal, QString(), &ok);
     if(!ok)
@@ -1816,14 +1853,48 @@ CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& d
     if(!encounter)
         return nullptr;
 
+    addNewObject(encounter);
+
+    return encounter;
+}
+
+void MainWindow::addNewAudioObject(const QString& audioFile)
+{
+    if(!campaign || audioFile.isEmpty())
+        return;
+
+    QUrl url(audioFile);
+    QFileInfo fileInfo(url.path());
+    bool ok = false;
+    QString trackName = QInputDialog::getText(this, QString("Enter track name"), QString("New Track Name"), QLineEdit::Normal, fileInfo.baseName(), &ok);
+    if((!ok)||(trackName.isEmpty()))
+        return;
+
+    AudioTrack* track = AudioFactory().createTrackFromUrl(url, trackName);
+    if(!track)
+        return;
+
+    addNewObject(track);
+    emit audioTrackAdded(track);
+}
+
+void MainWindow::addNewObject(CampaignObjectBase* newObject)
+{
+    if(!campaign || !treeModel || !newObject)
+        return;
+
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        currentObject = campaign;
+
+    qDebug() << "[MainWindow] Adding object " << newObject->getName() << " (" << newObject->getID() << "), to object " << currentObject->getName() << " (" << currentObject->getID() << ")";
+
     currentObject->setExpanded(true);
-    currentObject->addObject(encounter);
+    currentObject->addObject(newObject);
 
     updateCampaignTree();
 
-    selectItem(encounter->getID());
-
-    return encounter;
+    selectItem(newObject->getID());
 }
 
 void MainWindow::openFile(const QString& filename)
@@ -2053,6 +2124,25 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     QAction* addScrollingText = new QAction(QIcon(":/img/data/icon_newscrollingtext.png"), QString("New Scrolling Text"), contextMenu);
     connect(addScrollingText, SIGNAL(triggered()), this, SLOT(newScrollingTextEncounter()));
     contextMenu->addAction(addScrollingText);
+
+    contextMenu->addSeparator();
+
+    // New audio file
+    QAction* addAudioFile = new QAction(QIcon(":/img/data/icon_newsound.png"), QString("New Sound"), contextMenu);
+    connect(addAudioFile, SIGNAL(triggered()), this, SLOT(newAudioEntry()));
+    contextMenu->addAction(addAudioFile);
+
+    // New Syrinscape sound
+    QAction* addSyrinscape = new QAction(QIcon(":/img/data/icon_newsyrinscape.png"), QString("New Syrinscape Sound"), contextMenu);
+    connect(addSyrinscape, SIGNAL(triggered()), this, SLOT(newSyrinscapeEntry()));
+    contextMenu->addAction(addSyrinscape);
+
+    // New Youtube sound
+    QAction* addYoutube = new QAction(QIcon(":/img/data/icon_newyoutube.png"), QString("New Youtube Sound"), contextMenu);
+    connect(addYoutube, SIGNAL(triggered()), this, SLOT(newYoutubeEntry()));
+    contextMenu->addAction(addYoutube);
+
+    contextMenu->addSeparator();
 
     // Remove item
     QAction* removeItem = new QAction(QIcon(":/img/data/icon_remove.png"), QString("Remove Item"), contextMenu);
@@ -2439,6 +2529,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_Map:
             _ribbon->enableTab(_ribbonTabMiniMap);
@@ -2446,6 +2537,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_ScrollingText:
             _ribbon->enableTab(_ribbonTabScrolling);
@@ -2453,6 +2545,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), _scrollingTextEdit, SLOT(publishClicked(bool)));
             connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), _scrollingTextEdit, SLOT(setRotation(int)));
             break;
@@ -2463,19 +2556,28 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabScrolling);
+            _ribbon->disableTab(_ribbonTabAudio);
+            break;
+        case DMHelper::CampaignType_AudioTrack:
+            _ribbon->enableTab(_ribbonTabAudio);
+            _ribbon->disableTab(_ribbonTabMap);
+            _ribbon->disableTab(_ribbonTabBattle);
+            _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabScrolling);
+            _ribbon->disableTab(_ribbonTabText);
             break;
         case DMHelper::CampaignType_Party:
         case DMHelper::CampaignType_Placeholder:
         case DMHelper::CampaignType_Base:
         case DMHelper::CampaignType_WelcomeScreen:
         case DMHelper::CampaignType_Combatant:
-        case DMHelper::CampaignType_AudioTrack:
         default:
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             break;
     }
 }

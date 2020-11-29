@@ -1,19 +1,19 @@
-#ifndef RIBBONTABBESTIARY_H
-#define RIBBONTABBESTIARY_H
+#ifndef RIBBONTABTOOLS_H
+#define RIBBONTABTOOLS_H
 
 #include "ribbonframe.h"
 
 namespace Ui {
-class RibbonTabBestiary;
+class RibbonTabTools;
 }
 
-class RibbonTabBestiary : public RibbonFrame
+class RibbonTabTools : public RibbonFrame
 {
     Q_OBJECT
 
 public:
-    explicit RibbonTabBestiary(QWidget *parent = nullptr);
-    ~RibbonTabBestiary();
+    explicit RibbonTabTools(QWidget *parent = nullptr);
+    ~RibbonTabTools();
 
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
@@ -40,7 +40,7 @@ protected:
     virtual void showEvent(QShowEvent *event) override;
 
 private:
-    Ui::RibbonTabBestiary *ui;
+    Ui::RibbonTabTools *ui;
 };
 
-#endif // RIBBONTABBESTIARY_H
+#endif // RIBBONTABTOOLS_H

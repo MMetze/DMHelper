@@ -10,6 +10,7 @@ class SoundboardFrame;
 class Campaign;
 class QVBoxLayout;
 class SoundBoardFrameGroupBox;
+class SoundboardGroup;
 class AudioTrack;
 
 class SoundboardFrame : public QFrame
@@ -22,6 +23,7 @@ public:
 
 public slots:
     void setCampaign(Campaign* campaign);
+    void addTrackToTree(AudioTrack* track);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -39,9 +41,10 @@ protected slots:
     void removeSound();
 
     void addTrack(const QUrl& url);
-    void addTrackToTree(AudioTrack* track);
 
 private:
+    void addGroupToLayout(SoundboardGroup* group);
+
     Ui::SoundboardFrame *ui;
 
     QVBoxLayout* _layout;
