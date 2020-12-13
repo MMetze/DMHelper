@@ -479,18 +479,34 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
         }
     }
 
-    QDomElement effectsElement = rootBattleElement.firstChildElement("effects");
-    if(!effectsElement.isNull())
-    {
-        QDomElement effectElement = effectsElement.firstChildElement();
-        while(!effectElement.isNull())
-        {
-            BattleDialogModelEffect* newEffect = BattleDialogModelEffectFactory::createEffect(effectElement, isImport);
-            if(newEffect)
-                _battleModel->appendEffect(newEffect);
+    inputXMLEffects(rootBattleElement.firstChildElement("effects"), isImport);
+}
 
-            effectElement = effectElement.nextSiblingElement();
+void EncounterBattle::inputXMLEffects(const QDomElement &parentElement, bool isImport)
+{
+    if((!_battleModel)||(isImport))
+        return;
+
+    if(parentElement.isNull())
+        return;
+
+    QDomElement effectElement = parentElement.firstChildElement();
+    while(!effectElement.isNull())
+    {
+        BattleDialogModelEffect* newEffect = BattleDialogModelEffectFactory::createEffect(effectElement, isImport);
+        if(newEffect)
+        {
+            QDomElement effectChildElement = effectElement.firstChildElement();
+            if(!effectChildElement.isNull())
+            {
+                BattleDialogModelEffect* childEffect = BattleDialogModelEffectFactory::createEffect(effectChildElement, isImport);
+                if(childEffect)
+                    newEffect->addObject(childEffect);
+            }
+            _battleModel->appendEffect(newEffect);
         }
+
+        effectElement = effectElement.nextSiblingElement();
     }
 }
 

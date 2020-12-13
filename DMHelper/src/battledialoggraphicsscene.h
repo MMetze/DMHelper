@@ -94,6 +94,7 @@ protected:
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
     QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
+    QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler();
 

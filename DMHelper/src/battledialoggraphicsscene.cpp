@@ -88,7 +88,13 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
     for(BattleDialogModelEffect* effect : effects)
     {
         if(effect)
-            addEffectShape(*effect);
+        {
+            if((effect->children().count() != 1) ||
+               (addSpellEffect(*effect) == nullptr))
+            {
+                addEffectShape(*effect);
+            }
+        }
     }
 
     QList<QGraphicsView*> viewList = views();
@@ -101,9 +107,6 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
         _pointerPixmapItem->setTransformationMode(Qt::SmoothTransformation);
         QRectF sizeInScene = view->mapToScene(0, 0, DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE).boundingRect();
         _pointerPixmapItem->setScale(sizeInScene.width() / static_cast<qreal>(DMHelper::CURSOR_SIZE));
-        //scaleW = static_cast<qreal>(_background->pixmap().width()) / static_cast<qreal>(pointerPmp.width());
-        //scaleH = static_cast<qreal>(_background->pixmap().height()) / static_cast<qreal>(pointerPmp.height());
-        //_pointerPixmapItem->setScale(COMPASS_SCALE * qMin(scaleW, scaleH));
         _pointerPixmapItem->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
         _pointerPixmapItem->setVisible(_pointerVisible);
     }
@@ -207,8 +210,6 @@ void BattleDialogGraphicsScene::clearBattleContents()
 
 void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffects)
 {
-    //qDebug() << "[Battle Dialog Scene] Setting effect visibility to " << visible;
-
     bool newVisible = visible;
 
     for(QGraphicsItem* item : _itemList)
@@ -226,12 +227,8 @@ void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffect
 
 void BattleDialogGraphicsScene::setGridVisibility(bool visible)
 {
-    //qDebug() << "[Battle Dialog Scene] Setting grid visibility to " << visible;
-
     if(_grid)
-    {
         _grid->setGridVisible(visible);
-    }
 }
 
 void BattleDialogGraphicsScene::setPointerVisibility(bool visible)
@@ -299,8 +296,6 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
     {
         if((item)&&((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
         {
-            //return dynamic_cast<QAbstractGraphicsShapeItem*>(item);
-            //return dynamic_cast<QGraphicsItem*>(item);
             result = dynamic_cast<QGraphicsItem*>(item);
             //qDebug() << "[Battle Dialog Scene] find top object found selectable object: " << result;
             return result;
@@ -308,8 +303,6 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
     }
 
     // If we get here, nothing selectable was found, so return the top-most item
-    //return dynamic_cast<QAbstractGraphicsShapeItem*>(itemList.first());
-    //result = dynamic_cast<QGraphicsItem*>(itemList.first());
     // WRONG - return no item - the callers assume a returned item is selectable!
     result = nullptr;
     //qDebug() << "[Battle Dialog Scene] find top object found, but not selectable: " << result;
@@ -439,7 +432,6 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
 bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-    //QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
     QGraphicsItem* abstractShape = item;
 
     qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
@@ -561,21 +553,10 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             menu.addAction(castItem);
         }
 
-
         menu.exec(mouseEvent->screenPos());
-
-        //_contextMenuItem = nullptr;
-        //_mouseDown = false;
-        //_mouseDownItem = nullptr;
-
-        // Check: These two lines removed to avoid weird rubber band when cancelling context menu
-        // mouseEvent->accept();
-        // return;
     }
     else if(mouseEvent->button() == Qt::LeftButton)
     {
-        //QGraphicsView* localView = views().first();
-        //QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(itemAt(mouseEvent->scenePos(),localView->transform()));
         QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(_mouseDownItem);
 
         if(pixItem)
@@ -638,22 +619,6 @@ void BattleDialogGraphicsScene::addEffectRadius()
         return;
     }
 
-    /*
-    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius);
-    if(!effect)
-        return;
-
-    // Note: The size doubled to convert radius to diameter
-    qreal scaledSize = static_cast<qreal>(effect->getSize()) * 2.0 * _model->getGridScale() / 5.0;
-    effect->setPosition(_mouseDownPos.x() - (scaledSize / 2.0),_mouseDownPos.y() - (scaledSize / 2.0));
-    */
-
-    // Note: The size doubled to convert radius to diameter
-    /*
-    qreal scaledHalfSize = 20.0 * 2.0 * _model->getGridScale() / (5.0 * 2.0);
-    QPointF effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
-    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectRadius(effectPosition, 20, QColor(115,18,0,64));
-    */
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115,18,0,64), QString());
 
     _contextMenuItem = addEffect(effect);
@@ -672,14 +637,6 @@ void BattleDialogGraphicsScene::addEffectCone()
         return;
     }
 
-    /*
-    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone);
-    if(!effect)
-        return;
-
-    effect->setPosition(_mouseDownPos.x(), _mouseDownPos.y());
-    */
-    // BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectCone(_mouseDownPos, 20, QColor(115,18,0,64));
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone, 20, 0, QColor(115,18,0,64), QString());
 
     _contextMenuItem = addEffect(effect);
@@ -698,20 +655,6 @@ void BattleDialogGraphicsScene::addEffectCube()
         return;
     }
 
-    /*
-    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube);
-    if(!effect)
-        return;
-
-    qreal scaledSize = static_cast<qreal>(effect->getSize()) * _model->getGridScale() / 5.0;
-    effect->setPosition(_mouseDownPos.x() - (scaledSize / 2.0), _mouseDownPos.y() - (scaledSize / 2.0));
-    */
-
-    /*
-    qreal scaledHalfSize = 20.0 * _model->getGridScale() / (5.0 * 2.0);
-    QPointF effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
-    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectCube(effectPosition, 20, QColor(115,18,0,64));
-    */
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube, 20, 0, QColor(115,18,0,64), QString());
 
     _contextMenuItem = addEffect(effect);
@@ -730,15 +673,6 @@ void BattleDialogGraphicsScene::addEffectLine()
         return;
     }
 
-    /*
-    BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line);
-    if(!effect)
-        return;
-
-    effect->setPosition(_mouseDownPos.x(), _mouseDownPos.y());
-    */
-
-    // BattleDialogModelEffect* effect = BattleDialogModelEffectFactory::createEffectLine(_mouseDownPos, 20, 5, QColor(115,18,0,64));
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115,18,0,64), QString());
 
     _contextMenuItem = addEffect(effect);
@@ -771,6 +705,8 @@ void BattleDialogGraphicsScene::castSpell()
         return;
     }
 
+    qDebug() << "[Battle Dialog Scene] Casting spell: " << selectedSpell;
+
     Spell* spell = Spellbook::Instance()->getSpell(selectedSpell);
     if(!spell)
     {
@@ -789,6 +725,8 @@ void BattleDialogGraphicsScene::castSpell()
         qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect object.";
         return;
     }
+
+    effect->setName(spell->getName());
 
     if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
     {
@@ -823,70 +761,13 @@ void BattleDialogGraphicsScene::castSpell()
             return;
         }
 
+        tokenEffect->setName(spell->getName());
         tokenEffect->setEffectActive(true);
         tokenEffect->setImageRotation(spell->getEffectTokenRotation());
 
-        QGraphicsPixmapItem* tokenItem = dynamic_cast<QGraphicsPixmapItem*>(addEffect(tokenEffect));
-        if(!tokenItem)
-        {
-            qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to add the effect's token object to the scene!";
-            delete tokenEffect;
-            delete effect;
-            return;
-        }
-
-        //QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
-        //QGraphicsItem* shape = effect->createEffectShape(500.0 / static_cast<qreal>(tokenHeight));
-        // getSize() * gridScale * _imageScaleFactor / 500.0
-        QGraphicsItem* shape = effect->createEffectShape(1.0);
-        if(!shape)
-        {
-            qDebug() << "[Battle Dialog Scene] Spell cast aborted: unable to create the effect's basic shape!";
-            delete tokenItem;
-            delete tokenEffect;
-            delete effect;
-            return;
-        }
-
-        if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
-           (spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
-        {
-            //qreal r = qDegreesToRadians(static_cast<qreal>(spell->getEffectTokenRotation()));
-            //qreal w = -tokenItem->boundingRect().width() / 2.0;
-            //tokenItem->setOffset(QPointF(w * std::cos(r), -w * std::sin(r)));
-            // 0: -w/2, 0
-            // 90: 0, -h/2
-            // 180:
-            tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0, 0.0));
-        }
-        else if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)
-        {
-            tokenItem->setOffset(QPointF(0.0, 0.0));
-        }
-        //tokenItem->setRotation(spell->getEffectTokenRotation());
-        //shape->setRotation(-spell->getEffectTokenRotation());
-        if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
-        {
-            tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0,
-                                         -tokenItem->boundingRect().height() / 2.0));
-            shape->setScale(1.0 / (2.0 * tokenEffect->getImageScaleFactor()));
-        }
-        else
-        {
-            shape->setScale(1.0 / tokenEffect->getImageScaleFactor());
-        }
-
-        //shape->setScale(shape->scale() / tokenItem->scale()); set the right scale
-        shape->setParentItem(tokenItem);
-//        shape->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
-        shape->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        shape->setFlag(QGraphicsItem::ItemIsMovable, false);
-        shape->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
-        //if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone)
-        //    shape->setPos(QPointF(50.0, 0.0));
-        //else
-            shape->setPos(QPointF(0.0, 0.0));
-//        shape->setVisible(false);
+        effect->addObject(tokenEffect);
+        _model->appendEffect(effect);
+        addSpellEffect(*effect);
     }
 }
 
@@ -909,7 +790,6 @@ void BattleDialogGraphicsScene::editItem()
         return;
     }
 
-    //QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_contextMenuItem);
     QGraphicsItem* abstractShape = _contextMenuItem;
     if(!abstractShape)
     {
@@ -947,14 +827,7 @@ void BattleDialogGraphicsScene::rollItem()
 {
     qDebug() << "[Battle Dialog Scene] Roll Item triggered for " << _contextMenuItem;
     if(_contextMenuItem)
-    {
-        /*
-        QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_contextMenuItem);
-        if(abstractShape)
-            emit applyEffect(abstractShape);
-            */
         emit applyEffect(_contextMenuItem);
-    }
 }
 
 void BattleDialogGraphicsScene::deleteItem()
@@ -1133,6 +1006,72 @@ QGraphicsItem* BattleDialogGraphicsScene::addEffectShape(BattleDialogModelEffect
     return shape;
 }
 
+QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect& effect)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to add new spell effect, no model exists.";
+        return nullptr;
+    }
+
+    QList<CampaignObjectBase*> childEffects = effect.getChildObjects();
+    if(childEffects.count() != 1)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it does not have exactly one child object!";
+        return nullptr;
+    }
+
+    BattleDialogModelEffectObject* tokenEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
+    if(!tokenEffect)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it's child is not an effect!";
+        return nullptr;
+    }
+
+    QGraphicsPixmapItem* tokenItem = dynamic_cast<QGraphicsPixmapItem*>(addEffectShape(*tokenEffect));
+    if(!tokenItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to add the spell effect's token object to the scene!";
+        return nullptr;
+    }
+
+    QGraphicsItem* effectItem = effect.createEffectShape(1.0);
+    if(!effectItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create the spell effect's basic shape!";
+        return nullptr;
+    }
+
+    if((effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+       (effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+    {
+        tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0, 0.0));
+    }
+    else if(effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)
+    {
+        tokenItem->setOffset(QPointF(0.0, 0.0));
+    }
+
+    if(effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+    {
+        tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0,
+                                     -tokenItem->boundingRect().height() / 2.0));
+        effectItem->setScale(1.0 / (2.0 * tokenEffect->getImageScaleFactor()));
+    }
+    else
+    {
+        effectItem->setScale(1.0 / tokenEffect->getImageScaleFactor());
+    }
+
+    effectItem->setParentItem(tokenItem);
+    effectItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    effectItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+    effectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
+    effectItem->setPos(QPointF(0.0, 0.0));
+
+    return effectItem;
+}
+
 BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler()
 {
     switch(_inputMode)
@@ -1150,7 +1089,6 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
         case DMHelper::BattleFrameState_ZoomSelect:
         case DMHelper::BattleFrameState_CameraSelect:
         case DMHelper::BattleFrameState_FoWSelect:
-//            return &_selectMouseHandler;
             return &_combatantMouseHandler;
         default:
             return nullptr;

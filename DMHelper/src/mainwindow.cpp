@@ -1226,8 +1226,12 @@ void MainWindow::setDirty()
 
 void MainWindow::checkForUpdates(bool silentUpdate)
 {
+    qDebug() << "[MainWindow] Check for updates starting.";
+
     UpdateChecker* checker = new UpdateChecker(*_options, silentUpdate, true, this);
     checker->checkForUpdates();
+
+    qDebug() << "[MainWindow] Check for updates started.";
 }
 
 void MainWindow::showPublishWindow(bool visible)

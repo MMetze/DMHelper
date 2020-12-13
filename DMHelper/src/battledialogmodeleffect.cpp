@@ -216,7 +216,7 @@ bool BattleDialogModelEffect::getEffectVisibleFromItem(QGraphicsItem* item)
 
 QDomElement BattleDialogModelEffect::createOutputXML(QDomDocument &doc)
 {
-    return doc.createElement( "battleeffect" );
+    return doc.createElement("battleeffect");
 }
 
 void BattleDialogModelEffect::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

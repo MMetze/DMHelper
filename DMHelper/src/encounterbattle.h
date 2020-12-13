@@ -52,6 +52,7 @@ protected:
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
     void inputXMLBattle(const QDomElement &element, bool isImport);
+    void inputXMLEffects(const QDomElement &parentElement, bool isImport);
     BattleDialogModel* createNewBattle(QPointF combatantPos);
 
     void connectFrameToModel();
