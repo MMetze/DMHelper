@@ -10,7 +10,7 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     SRD data xml
     Potential need for xml reading performance improvement
     Images to be possible "on top" of real effects to consider radius, etc.
-    Images and shapes need to be saved
+    DONE - Images and shapes need to be saved
 3. Conditions
     DONE - Can be set in battles
     DONE - Visual reminders in DM view
@@ -35,6 +35,7 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Editing/Saving of monster skills enabled
     DONE - Editing/Saving of character and monster size enabled
     DONE - Edit map file possible
+    Split Max HP and Current HP
     Improve Objects and Effects editing
     Object editing should allow editing width or height...
     Delete key in battle

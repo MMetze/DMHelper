@@ -1,9 +1,12 @@
 #include "combatantrolloverframe.h"
 #include "battledialogmodelcombatant.h"
+#include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterbase.h"
+#include "character.h"
 #include "monsterclass.h"
 #include "monsteraction.h"
 #include "ui_combatantrolloverframe.h"
+#include <QStringList>
 
 CombatantRolloverFrame::CombatantRolloverFrame(BattleDialogModelCombatant* combatant, QWidget *parent) :
     QFrame(parent),
@@ -52,14 +55,43 @@ void CombatantRolloverFrame::readCombatant(BattleDialogModelCombatant* combatant
 {
     ui->listActions->clear();
 
-    if(combatant->getCombatantType() != DMHelper::CombatantType_Monster)
+    switch(combatant->getCombatantType())
+    {
+        case DMHelper::CombatantType_Character:
+            readCharacter(dynamic_cast<BattleDialogModelCharacter*>(combatant));
+            break;
+        case DMHelper::CombatantType_Monster:
+            readMonster(dynamic_cast<BattleDialogModelMonsterBase*>(combatant));
+            break;
+        default:
+            return;
+    }
+}
+
+void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character)
+{
+    if(!character)
         return;
 
-    BattleDialogModelMonsterBase* monsterBase = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
-    if(!monsterBase)
+    Character* characterBase = character->getCharacter();
+    if(!characterBase)
         return;
 
-    MonsterClass* monsterClass = monsterBase->getMonsterClass();
+    QString proficiencyString = characterBase->getStringValue(Character::StringValue_proficiencies);
+    QStringList proficiencyList = proficiencyString.split(QChar::LineFeed);
+    for(QString oneItem : proficiencyList)
+    {
+        ui->listActions->addItem(oneItem);
+    }
+
+}
+
+void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)
+{
+    if(!monster)
+        return;
+
+    MonsterClass* monsterClass = monster->getMonsterClass();
     if(!monsterClass)
         return;
 

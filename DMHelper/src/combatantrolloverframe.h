@@ -9,6 +9,8 @@ class CombatantRolloverFrame;
 }
 
 class BattleDialogModelCombatant;
+class BattleDialogModelCharacter;
+class BattleDialogModelMonsterBase;
 
 class CombatantRolloverFrame : public QFrame
 {
@@ -20,6 +22,8 @@ public:
 
 private:
     void readCombatant(BattleDialogModelCombatant* combatant);
+    void readCharacter(BattleDialogModelCharacter* character);
+    void readMonster(BattleDialogModelMonsterBase* monster);
     void addActionList(const QList<MonsterAction>& actionList, const QString& listTitle);
 
     Ui::CombatantRolloverFrame *ui;
