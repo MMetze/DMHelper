@@ -4,11 +4,9 @@
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodeleffect.h"
 #include "battledialoglogger.h"
-//#include "combatant.h"
 #include <QList>
 #include <QRect>
 
-//class EncounterBattle;
 class Map;
 
 
@@ -18,18 +16,10 @@ class BattleDialogModel : public CampaignObjectBase
 
 public:
     explicit BattleDialogModel(const QString& name = QString(), QObject *parent = nullptr);
-    //BattleDialogModel(const BattleDialogModel& other, QObject *parent = nullptr);
     virtual ~BattleDialogModel() override;
 
     // From CampaignObjectBase
-    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-
-    /*
-    // Local
-    EncounterBattle* getBattle() const;
-    void setBattle(EncounterBattle* battle);
-    */
 
     QList<BattleDialogModelCombatant*> getCombatantList() const;
     int getCombatantCount() const;
@@ -121,8 +111,6 @@ private:
     static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
 
     // Battle content values
-    //EncounterBattle* _battle;
-
     QList<BattleDialogModelCombatant*> _combatants;
     QList<BattleDialogModelEffect*> _effects;
 

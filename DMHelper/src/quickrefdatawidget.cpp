@@ -121,12 +121,15 @@ void QuickRefDataWidget::showQuickRefDetails()
     if(iconPix.load(iconName))
     {
         iconPix = iconPix.scaled(60,60,Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        /*
         QPixmap coloredPix = iconPix;
         QPainter painter(&coloredPix);
         painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
         painter.fillRect(coloredPix.rect(), QColor(85, 85, 85));
         painter.end();
         infoBox.setIconPixmap(coloredPix);
+        */
+        infoBox.setIconPixmap(iconPix);
     }
 
     infoBox.exec();

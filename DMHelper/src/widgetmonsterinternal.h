@@ -36,9 +36,6 @@ public slots:
     void decrementLegendary();
     void resetLegendary();
 
-protected slots:
-    virtual void setHighlighted(bool highlighted) override;
-
 protected:
 
     // local

@@ -1,4 +1,5 @@
 #include "spell.h"
+#include "battledialogmodeleffect.h"
 
 Spell::Spell(const QString& name, QObject *parent) :
     QObject(parent),
@@ -13,6 +14,14 @@ Spell::Spell(const QString& name, QObject *parent) :
     _description(),
     _ritual(false),
     _rolls(),
+    _effectType(BattleDialogModelEffect::BattleDialogModelEffect_Base),
+    _effectShapeActive(true),
+    _effectSize(20, 20),
+    _effectColor(115,18,0,64),
+    _effectTokenActive(true),
+    _effectToken(),
+    _effectTokenRotation(0),
+    _effectConditions(Combatant::Condition_None),
     _batchChanges(false),
     _changesMade(false)
 {
@@ -31,6 +40,14 @@ Spell::Spell(const QDomElement &element, bool isImport, QObject *parent) :
     _description(),
     _ritual(false),
     _rolls(),
+    _effectType(BattleDialogModelEffect::BattleDialogModelEffect_Base),
+    _effectShapeActive(true),
+    _effectSize(20, 20),
+    _effectColor(115,18,0,64),
+    _effectTokenActive(true),
+    _effectToken(),
+    _effectTokenRotation(0),
+    _effectConditions(Combatant::Condition_None),
     _batchChanges(false),
     _changesMade(false)
 {
@@ -68,9 +85,25 @@ void Spell::inputXML(const QDomElement &element, bool isImport)
     QDomElement rollElement = element.firstChildElement(QString("roll"));
     while(!rollElement.isNull())
     {
-        //addRoll(Dice(rollElement.text()));
         addRoll(rollElement.text());
         rollElement = rollElement.nextSiblingElement(QString("roll"));
+    }
+
+    QDomElement effectElement = element.firstChildElement(QString("effect"));
+    if(!effectElement.isNull())
+    {
+        setEffectType(effectElement.attribute("type", QString::number(0)).toInt());
+        setEffectShapeActive(static_cast<bool>(element.attribute("shapeActive", QString::number(1)).toInt()));
+        setEffectSize(QSize(effectElement.attribute("sizeX", QString::number(20)).toInt(),
+                            effectElement.attribute("sizeY", QString::number(20)).toInt()));
+        setEffectColor(QColor(effectElement.attribute("colorR", QString::number(115)).toInt(),
+                              effectElement.attribute("colorG", QString::number(18)).toInt(),
+                              effectElement.attribute("colorB", QString::number(0)).toInt(),
+                              effectElement.attribute("colorA", QString::number(64)).toInt()));
+        setEffectConditions(effectElement.attribute("conditions", QString("0")).toInt());
+        setEffectTokenActive(static_cast<bool>(element.attribute("tokenActive", QString::number(1)).toInt()));
+        setEffectToken(effectElement.firstChildElement(QString("token")).text());
+        setEffectTokenRotation(effectElement.attribute("tokenRotation", QString("0")).toInt());
     }
 
     endBatchChanges();
@@ -98,10 +131,25 @@ QDomElement Spell::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
         outputValue(doc, element, isExport, QString("text"), part);
     }
 
-    for(QString singleRoll : getRolls())
+    for(Dice singleRoll : getRolls())
     {
-        outputValue(doc, element, isExport, QString("roll"), singleRoll);
+        outputValue(doc, element, isExport, QString("roll"), singleRoll.toString());
     }
+
+    QDomElement effectElement = doc.createElement(QString("effect"));
+    effectElement.setAttribute("type", getEffectType());
+    effectElement.setAttribute("shapeActive", getEffectShapeActive());
+    effectElement.setAttribute("sizeX", getEffectSize().width());
+    effectElement.setAttribute("sizeY", getEffectSize().height());
+    effectElement.setAttribute("colorR", getEffectColor().red());
+    effectElement.setAttribute("colorG", getEffectColor().green());
+    effectElement.setAttribute("colorB", getEffectColor().blue());
+    effectElement.setAttribute("colorA", getEffectColor().alpha());
+    effectElement.setAttribute("conditions", getEffectConditions());
+    effectElement.setAttribute("tokenActive", getEffectTokenActive());
+    effectElement.setAttribute("tokenRotation", getEffectTokenRotation());
+    outputValue(doc, effectElement, isExport, QString("token"), getEffectToken().isEmpty() ? QString("") : getEffectToken());
+    element.appendChild(effectElement);
 
     return element;
 }
@@ -140,9 +188,17 @@ void Spell::cloneSpell(Spell& other)
     _ritual = other._ritual;
 
     _rolls.clear(); // just in case we're cloning onto something that exists
-    //for(Dice roll : other._rolls)
-    for(QString roll : other._rolls)
+    for(Dice roll : other._rolls)
         _rolls.append(roll);
+
+    _effectType = other._effectType;
+    _effectShapeActive = other._effectShapeActive;
+    _effectSize = other._effectSize;
+    _effectColor = other._effectColor;
+    _effectTokenActive = other._effectTokenActive;
+    _effectToken = other._effectToken;
+    _effectTokenRotation = other._effectTokenRotation;
+    _effectConditions = other._effectConditions;
 
     endBatchChanges();
 }
@@ -206,10 +262,66 @@ bool Spell::isRitual() const
     return _ritual;
 }
 
-//QList<Dice> Spell::getRolls() const
-QStringList Spell::getRolls() const
+QList<Dice> Spell::getRolls() const
 {
     return _rolls;
+}
+
+QString Spell::getRollsString() const
+{
+    QString result;
+
+    for(Dice singleRoll : getRolls())
+    {
+        result += singleRoll.toString() + QChar::LineFeed;
+    }
+
+    return result;
+}
+
+int Spell::getEffectType() const
+{
+    return _effectType;
+}
+
+bool Spell::getEffectShapeActive() const
+{
+    return _effectShapeActive;
+}
+
+QSize Spell::getEffectSize() const
+{
+    return _effectSize;
+}
+
+QColor Spell::getEffectColor() const
+{
+    return _effectColor;
+}
+
+bool Spell::getEffectTokenActive() const
+{
+    return _effectTokenActive;
+}
+
+QString Spell::getEffectToken() const
+{
+    return _effectToken;
+}
+
+int Spell::getEffectTokenRotation() const
+{
+    return _effectTokenRotation;
+}
+
+int Spell::getEffectConditions() const
+{
+    return _effectConditions;
+}
+
+bool Spell::hasEffectCondition(Combatant::Condition condition) const
+{
+    return ((_effectConditions & condition) != 0);
 }
 
 void Spell::setName(const QString& name)
@@ -302,8 +414,7 @@ void Spell::setRitual(bool ritual)
     registerChange();
 }
 
-//void Spell::setRolls(const QList<Dice>& rolls)
-void Spell::setRolls(const QStringList& rolls)
+void Spell::setRolls(const QList<Dice>& rolls)
 {
     if(rolls == _rolls)
         return;
@@ -312,11 +423,116 @@ void Spell::setRolls(const QStringList& rolls)
     registerChange();
 }
 
-//void Spell::addRoll(const Dice& roll)
-void Spell::addRoll(const QString& roll)
+void Spell::addRoll(const Dice& roll)
 {
     _rolls.append(roll);
     registerChange();
+}
+
+void Spell::addRoll(const QString& roll)
+{
+    Dice newDice(roll);
+    if(newDice.getType() > 0)
+        addRoll(newDice);
+}
+
+void Spell::setEffectType(int effectType)
+{
+    if(_effectType == effectType)
+        return;
+
+    _effectType = effectType;
+    registerChange();
+}
+
+void Spell::setEffectShapeActive(bool effectShapeActive)
+{
+    if(_effectShapeActive == effectShapeActive)
+        return;
+
+    _effectShapeActive = effectShapeActive;
+    registerChange();
+}
+
+void Spell::setEffectSize(QSize effectSize)
+{
+    if(_effectSize == effectSize)
+        return;
+
+    _effectSize = effectSize;
+    registerChange();
+}
+
+void Spell::setEffectColor(QColor effectColor)
+{
+    if(_effectColor == effectColor)
+        return;
+
+    _effectColor = effectColor;
+    registerChange();
+}
+
+void Spell::setEffectTokenActive(bool effectTokenActive)
+{
+    if(_effectTokenActive == effectTokenActive)
+        return;
+
+    _effectTokenActive = effectTokenActive;
+    registerChange();
+}
+
+void Spell::setEffectToken(QString effectToken)
+{
+    if(_effectToken == effectToken)
+        return;
+
+    _effectToken = effectToken;
+    registerChange();
+}
+
+void Spell::setEffectTokenRotation(int effectTokenRotation)
+{
+    if(_effectTokenRotation == effectTokenRotation)
+        return;
+
+    _effectTokenRotation = effectTokenRotation;
+    registerChange();
+}
+
+void Spell::setEffectConditions(int conditions)
+{
+    if(_effectConditions == conditions)
+        return;
+
+    _effectConditions = conditions;
+    registerChange();
+}
+
+void Spell::applyEffectConditions(int conditions)
+{
+    if((_effectConditions & conditions) != conditions)
+    {
+        _effectConditions |= conditions;
+        registerChange();
+    }
+}
+
+void Spell::addEffectCondition(Combatant::Condition condition)
+{
+    if(!hasEffectCondition(condition))
+    {
+        _effectConditions |= condition;
+        registerChange();
+    }
+}
+
+void Spell::removeEffectCondition(Combatant::Condition condition)
+{
+    if(hasEffectCondition(condition))
+    {
+        _effectConditions &= ~condition;
+        registerChange();
+    }
 }
 
 void Spell::clearRolls()
@@ -328,12 +544,7 @@ void Spell::clearRolls()
 void Spell::registerChange()
 {
     if(_batchChanges)
-    {
         _changesMade = true;
-    }
     else
-    {
         emit dirty();
-    }
 }
-

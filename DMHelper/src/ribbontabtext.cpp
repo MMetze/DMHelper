@@ -14,6 +14,8 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->frameText, &RibbonFrameText::fontBoldChanged, this, &RibbonTabText::fontBoldChanged);
     connect(ui->frameText, &RibbonFrameText::fontItalicsChanged, this, &RibbonTabText::fontItalicsChanged);
     connect(ui->frameText, &RibbonFrameText::alignmentChanged, this, &RibbonTabText::alignmentChanged);
+
+    connect(ui->btnHyperlink, SIGNAL(clicked()), this, SIGNAL(hyperlinkClicked()));
 }
 
 RibbonTabText::~RibbonTabText()
@@ -96,6 +98,11 @@ void RibbonTabText::setAlignment(Qt::Alignment alignment)
     ui->frameText->setAlignment(alignment);
 }
 
+void RibbonTabText::setHyperlinkActive(bool active)
+{
+    ui->btnHyperlink->setEnabled(active);
+}
+
 /*
 void RibbonTabText::handleFontSizeChanged()
 {
@@ -112,31 +119,11 @@ void RibbonTabText::handleAlignmentChanged()
 }
 */
 
-/*
+
 void RibbonTabText::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblColor, *ui->btnColor);
-
-    int iconSize = getIconSize(ui->btnColor->width(), ui->btnColor->height());
-    setWidgetSize(*ui->btnColor, iconSize, iconSize);
-
-    int labelHeight = getLabelHeight(*ui->lblColor);
-    int buttonSize = height() - labelHeight;
-    QFontMetrics metrics = ui->lblFont->fontMetrics();
-    int halfHeight = (height() - ui->fontLayout->spacing()) / 2;
-
-    // Font cluster
-    setWidgetSize(*ui->edtSize, metrics.maxWidth() * 4, halfHeight);
-    setButtonSize(*ui->btnBold, halfHeight, halfHeight);
-    setButtonSize(*ui->btnItalics, halfHeight, halfHeight);
-    setWidgetSize(*ui->cmbFont, ui->edtSize->width() + ui->btnBold->width() + ui->btnItalics->width(), halfHeight);
-
-    // Alignment cluster
-    setButtonSize(*ui->btnLeftText, buttonSize, buttonSize);
-    setButtonSize(*ui->btnCenterText, buttonSize, buttonSize);
-    setButtonSize(*ui->btnRightText, buttonSize, buttonSize);
-    setWidgetSize(*ui->lblAlignment, 3*buttonSize, buttonSize);
+    setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, height());
 }
-*/
+

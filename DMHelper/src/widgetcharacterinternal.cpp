@@ -83,15 +83,10 @@ void WidgetCharacterInternal::setHitPoints(int hp)
     updateData();
 }
 
-void WidgetCharacterInternal::setHighlighted(bool highlighted)
-{
-    WidgetCombatantBase::setHighlighted(highlighted);
-}
-
 void WidgetCharacterInternal::executeDoubleClick()
 {
     if((_character) && (_character->getCharacter()))
         emit clicked(_character->getCharacter()->getID());
     else
-        qDebug() << "[Widget Character Internal] no valid monster class found!";
+        qDebug() << "[Widget Character Internal] no valid character found!";
 }

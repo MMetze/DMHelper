@@ -1,13 +1,10 @@
 #include "battledialogmodel.h"
 #include "dmconstants.h"
-//#include "combatant.h"
 #include "map.h"
-//#include "encounterbattle.h"
 #include <QDebug>
 
 BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
-    //_battle(0),
     _combatants(),
     _effects(),
     _map(nullptr),
@@ -32,111 +29,11 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
 {
 }
 
-/*
-BattleDialogModel::BattleDialogModel(const BattleDialogModel& other, QObject *parent) :
-    CampaignObjectBase(parent),
-    //_battle(other._battle),
-    _combatants(),
-    _effects(),
-    _map(other._map),
-    _mapRect(other._mapRect),
-    _previousMap(other._previousMap),
-    _previousMapRect(other._previousMapRect),
-    _cameraRect(other._cameraRect),
-    _background(other._background),
-    _gridOn(other._gridOn),
-    _gridScale(other._gridScale),
-    _gridOffsetX(other._gridOffsetX),
-    _gridOffsetY(other._gridOffsetY),
-    _showCompass(other._showCompass),
-    _showAlive(other._showAlive),
-    _showDead(other._showDead),
-    _showEffects(other._showEffects),
-    _activeCombatant(nullptr),
-    _logger(other._logger),
-    _backgroundImage(other._backgroundImage)
-{
-    for(int i = 0; i < other._combatants.count(); ++i)
-    {
-        if(other._combatants.at(i))
-        {
-            BattleDialogModelCombatant* newCombatant = other._combatants.at(i)->clone();
-            _combatants.append(newCombatant);
-            if(other._combatants.at(i) == other._activeCombatant)
-            {
-                _activeCombatant = newCombatant;
-            }
-        }
-    }
-
-    for(int i = 0; i < other._effects.count(); ++i)
-    {
-        if(other._effects.at(i))
-        {
-            BattleDialogModelEffect* newEffect = other._effects.at(i)->clone();
-            _effects.append(newEffect);
-        }
-    }
-}
-*/
-
 BattleDialogModel::~BattleDialogModel()
 {
     qDeleteAll(_combatants);
     qDeleteAll(_effects);
 }
-
-/*
-void BattleDialogModel::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
-{
-    QDomElement battleElement = doc.createElement( "battle" );
-
-    //battleElement.setAttribute("battleID", _battle->getID());
-    battleElement.setAttribute("mapID", _map ? _map->getID().toString() : QUuid().toString());
-    battleElement.setAttribute("mapRectX", _mapRect.x());
-    battleElement.setAttribute("mapRectY", _mapRect.y());
-    battleElement.setAttribute("mapRectWidth", _mapRect.width());
-    battleElement.setAttribute("mapRectHeight", _mapRect.height());
-    battleElement.setAttribute("cameraRectX", _cameraRect.x());
-    battleElement.setAttribute("cameraRectY", _cameraRect.y());
-    battleElement.setAttribute("cameraRectWidth", _cameraRect.width());
-    battleElement.setAttribute("cameraRectHeight", _cameraRect.height());
-    battleElement.setAttribute("backgroundColorR", _background.red());
-    battleElement.setAttribute("backgroundColorG", _background.green());
-    battleElement.setAttribute("backgroundColorB", _background.blue());
-    battleElement.setAttribute("background", _mapRect.height());
-    battleElement.setAttribute("showGrid", _gridOn);
-    battleElement.setAttribute("gridScale", _gridScale);
-    battleElement.setAttribute("gridOffsetX", _gridOffsetX);
-    battleElement.setAttribute("gridOffsetY", _gridOffsetY);
-    battleElement.setAttribute("showCompass", _showCompass);
-    battleElement.setAttribute("showAlive", _showAlive);
-    battleElement.setAttribute("showDead", _showDead);
-    battleElement.setAttribute("showEffects", _showEffects);
-    battleElement.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
-
-    _logger.outputXML(doc, battleElement, targetDirectory, isExport);
-
-    QDomElement combatantsElement = doc.createElement("combatants");
-    for(BattleDialogModelCombatant* combatant : _combatants)
-    {
-        if(combatant)
-            combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
-    }
-    battleElement.appendChild(combatantsElement);
-
-    QDomElement effectsElement = doc.createElement("effects");
-    for(BattleDialogModelEffect* effect : _effects)
-    {
-        if(effect)
-            effect->outputXML(doc, effectsElement, targetDirectory, isExport);
-    }
-    battleElement.appendChild(effectsElement);
-
-    parent.appendChild(battleElement);
-
-}
-*/
 
 void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 {
@@ -169,19 +66,6 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 }
-
-/*
-EncounterBattle* BattleDialogModel::getBattle() const
-{
-    return _battle;
-}
-
-void BattleDialogModel::setBattle(EncounterBattle* battle)
-{
-    // TODO: Check whether any combatants should be deleted if required??
-    _battle = battle;
-}
-*/
 
 QList<BattleDialogModelCombatant*> BattleDialogModel::getCombatantList() const
 {

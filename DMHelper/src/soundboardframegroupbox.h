@@ -2,6 +2,7 @@
 #define SOUNDBOARDFRAMEGROUPBOX_H
 
 #include <QGroupBox>
+#include "soundboardgroup.h"
 
 namespace Ui {
 class SoundBoardFrameGroupBox;
@@ -16,7 +17,7 @@ class SoundBoardFrameGroupBox : public QGroupBox
     Q_OBJECT
 
 public:
-    explicit SoundBoardFrameGroupBox(const QString& groupName, Campaign* campaign, QWidget *parent = nullptr);
+    explicit SoundBoardFrameGroupBox(SoundboardGroup* group, Campaign* campaign, QWidget *parent = nullptr);
     ~SoundBoardFrameGroupBox();
 
     bool isMuted() const;
@@ -24,8 +25,8 @@ public:
 
 public slots:
     void updateTrackLayout();
-    void clearTracks();
-    void addTrack(SoundboardTrack* track);
+    //void clearTracks();
+    void addTrack(AudioTrack* track);
     void setMute(bool mute);
     void trackMuteChanged(bool mute);
 
@@ -45,12 +46,15 @@ protected slots:
     virtual void toggleMute();
 
 private:
+    void addTrackToLayout(AudioTrack* track);
+
     Ui::SoundBoardFrameGroupBox *ui;
 
     QGridLayout* _groupLayout;
     QList<SoundboardTrack*> _trackWidgets;
     bool _localMute;
 
+    SoundboardGroup* _group;
     Campaign* _campaign;
 };
 

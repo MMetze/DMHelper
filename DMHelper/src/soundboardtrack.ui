@@ -178,7 +178,7 @@
       </size>
      </property>
      <property name="text">
-      <string>00:00 / 00:13</string>
+      <string>00:00 / 00:00</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

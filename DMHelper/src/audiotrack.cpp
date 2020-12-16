@@ -39,6 +39,27 @@ void AudioTrack::setMD5(const QString& md5)
 {
     _md5 = md5;
 }
+
+bool AudioTrack::isPlaying() const
+{
+    return false;
+}
+
+bool AudioTrack::isRepeat() const
+{
+    return false;
+}
+
+bool AudioTrack::isMuted() const
+{
+    return false;
+}
+
+int AudioTrack::getVolume() const
+{
+    return 0;
+}
+
 QDomElement AudioTrack::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("track");

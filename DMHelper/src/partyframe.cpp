@@ -200,7 +200,7 @@ void PartyFrame::clearGrid()
 
     // Delete the grid entries
     QLayoutItem *child = nullptr;
-    while ((child = _characterGrid->takeAt(0)) != nullptr)
+    while((child = _characterGrid->takeAt(0)) != nullptr)
     {
         delete child;
     }

@@ -11,6 +11,7 @@ class QGraphicsItem;
 
 const int BATTLE_DIALOG_MODEL_EFFECT_ID = Qt::UserRole;
 const int BATTLE_DIALOG_MODEL_EFFECT_OBJECT = Qt::UserRole + 1;
+const int BATTLE_DIALOG_MODEL_EFFECT_ROLE = Qt::UserRole + 2;
 
 class BattleDialogModelEffect : public CampaignObjectBase
 {
@@ -24,11 +25,19 @@ public:
         BattleDialogModelEffect_Cone,
         BattleDialogModelEffect_Cube,
         BattleDialogModelEffect_Line,
-        BattleDialogModelEffect_Object
+        BattleDialogModelEffect_Object,
+
+        BattleDialogModelEffect_Count
+    };
+
+    enum
+    {
+        BattleDialogModelEffectRole_None = 0,
+        BattleDialogModelEffectRole_Area,
     };
 
     BattleDialogModelEffect(const QString& name = QString(), QObject *parent = nullptr);
-    BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QString& tip);
+    BattleDialogModelEffect(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
     virtual ~BattleDialogModelEffect() override;
 
     // From CampaignObjectBase
@@ -39,7 +48,7 @@ public:
     virtual int getEffectType() const = 0;
     virtual BattleDialogEffectSettings* getEffectEditor() const;
 
-    virtual QGraphicsItem* createEffectShape(qreal gridScale) const = 0;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) = 0;
     virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const;
 
     virtual bool getEffectActive() const;
@@ -54,6 +63,8 @@ public:
     virtual int getWidth() const;
     virtual void setWidth(int width);
 
+    virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor) const;
+
     virtual QPointF getPosition() const;
     virtual void setPosition(const QPointF& position);
     virtual void setPosition(qreal x, qreal y);
@@ -63,6 +74,9 @@ public:
 
     virtual QColor getColor() const;
     virtual void setColor(const QColor& color);
+
+    virtual int getImageRotation() const;
+    virtual void setImageRotation(int imageRotation);
 
     virtual QString getImageFile() const;
     virtual void setImageFile(const QString& imageFile);
@@ -89,6 +103,7 @@ protected:
     int _size;
     QPointF _position;
     qreal _rotation;
+    QColor _color;
     QString _tip;
 };
 

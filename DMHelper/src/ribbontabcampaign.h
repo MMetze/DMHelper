@@ -18,7 +18,6 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
-    //void setPlayersWindow(bool checked);
     void setCampaignEnabled(bool enabled);
     void setUndoEnabled(bool enabled);
     void setAddPCButton(bool isPC);
@@ -27,20 +26,19 @@ signals:
     void newPartyClicked();
     void newCharacterClicked();
     void newMapClicked();
-    //void newNPCClicked();
     void newTextClicked();
     void newBattleClicked();
     void newScrollingTextClicked();
+    void newSoundClicked();
+    void newSyrinscapeClicked();
+    void newYoutubeClicked();
     void removeItemClicked();
     void exportItemClicked();
     void importItemClicked();
     void importCharacterClicked();
-    //void importNPCClicked();
 
     void undoClicked();
     void redoClicked();
-    //void playersWindowClicked(bool checked);
-    //void previewClicked();
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

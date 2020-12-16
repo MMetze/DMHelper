@@ -25,6 +25,9 @@ public:
     int getResult() const;
 
     void applyDamage(int damage);
+    void applyConditions(int conditions);
+
+    bool isActive();
 
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);
@@ -40,9 +43,9 @@ protected:
 protected slots:
     void handleHitPointsChanged(const QString& text);
     void handleRerollRequest();
-
     void handleAdvantageClicked(bool checked);
     void handleDisadvantageClicked(bool checked);
+    void handleCombatantActive(bool active);
 
 private:
     void setCombatantValues();

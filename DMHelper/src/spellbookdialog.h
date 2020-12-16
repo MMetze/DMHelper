@@ -1,6 +1,7 @@
 #ifndef SPELLBOOKDIALOG_H
 #define SPELLBOOKDIALOG_H
 
+#include "combatant.h"
 #include <QDialog>
 
 namespace Ui {
@@ -9,6 +10,7 @@ class SpellbookDialog;
 
 class Spell;
 class Spellbook;
+class QHBoxLayout;
 
 class SpellbookDialog : public QDialog
 {
@@ -22,6 +24,7 @@ public:
 
 signals:
     void spellChanged(); // todo connect this
+    void spellDataEdit(); // used internally
 
 public slots:
     void setSpell(Spell* spell);
@@ -36,6 +39,16 @@ public slots:
 
 protected slots:
     void handleEditedData();
+    void handleEffectChanged(int index);
+    void handleWidthChanged();
+    void handleHeightChanged();
+    void handleTokenRotateCW();
+    void handleTokenRotateCCW();
+    void editConditions();
+    void selectToken();
+    void updateLayout();
+    void clearGrid();
+    void addCondition(Combatant::Condition condition);
 
 protected:
     // From QWidget
@@ -46,9 +59,12 @@ protected:
 
 private:
     void storeSpellData();
+    void updateImage();
 
     Ui::SpellbookDialog *ui;
     Spell* _spell;
+    int _tokenRotation;
+    QHBoxLayout* _conditionLayout;
 };
 
 #endif // SPELLBOOKDIALOG_H

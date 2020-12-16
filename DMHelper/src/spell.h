@@ -1,11 +1,14 @@
 #ifndef SPELL_H
 #define SPELL_H
 
+#include "dice.h"
+#include "combatant.h"
 #include <QObject>
 #include <QList>
 #include <QDomElement>
 #include <QDir>
-//#include "dice.h"
+#include <QSize>
+#include <QColor>
 
 class Spell : public QObject
 {
@@ -34,8 +37,18 @@ public:
     QString getClasses() const;
     QString getDescription() const;
     bool isRitual() const;
-    //QList<Dice> getRolls() const;
-    QStringList getRolls() const;
+    //QStringList getRolls() const;
+    QList<Dice> getRolls() const;
+    QString getRollsString() const;
+    int getEffectType() const;
+    bool getEffectShapeActive() const;
+    QSize getEffectSize() const;
+    QColor getEffectColor() const;
+    bool getEffectTokenActive() const;
+    QString getEffectToken() const;
+    int getEffectTokenRotation() const;
+    int getEffectConditions() const;
+    bool hasEffectCondition(Combatant::Condition condition) const;
 
 signals:
     void iconChanged();
@@ -52,10 +65,21 @@ public slots:
     void setClasses(const QString& classes);
     void setDescription(const QString& description);
     void setRitual(bool ritual);
-    //void setRolls(const QList<Dice>& rolls);
-    //void addRoll(const Dice& roll);
-    void setRolls(const QStringList& rolls);
+    void setRolls(const QList<Dice>& rolls);
+    void addRoll(const Dice& roll);
     void addRoll(const QString& roll);
+    void setEffectType(int effectType);
+    void setEffectShapeActive(bool effectShapeActive);
+    void setEffectSize(QSize effectSize);
+    void setEffectColor(QColor effectColor);
+    void setEffectTokenActive(bool effectTokenActive);
+    void setEffectToken(QString effectToken);
+    void setEffectTokenRotation(int effectTokenRotation);
+    void setEffectConditions(int conditions);
+    void applyEffectConditions(int conditions);
+    void addEffectCondition(Combatant::Condition condition);
+    void removeEffectCondition(Combatant::Condition condition);
+
     void clearRolls();
 
 private:
@@ -71,8 +95,17 @@ private:
     QString _classes;
     QString _description;
     bool _ritual;
-    //QList<Dice> _rolls;
-    QStringList _rolls;
+    //QStringList _rolls;
+    QList<Dice> _rolls;
+
+    int _effectType;
+    bool _effectShapeActive;
+    QSize _effectSize;
+    QColor _effectColor;
+    bool _effectTokenActive;
+    QString _effectToken;
+    int _effectTokenRotation;
+    int _effectConditions;
 
     bool _batchChanges;
     bool _changesMade;

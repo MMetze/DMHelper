@@ -1,29 +1,33 @@
 #include "audiotrackedit.h"
 #include "ui_audiotrackedit.h"
 #include "audiotrack.h"
-#include "campaign.h"
-#include "audiofactory.h"
-#include <QInputDialog>
-#include <QFileInfo>
-#include <QFileDialog>
+#include "dmconstants.h"
+//#include "campaign.h"
+//#include "audiofactory.h"
+//#include <QInputDialog>
+//#include <QFileInfo>
+//#include <QFileDialog>
+#include <QTimer>
+#include <QDebug>
 
 AudioTrackEdit::AudioTrackEdit(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::AudioTrackEdit),
-    _campaign(nullptr)
+//    _campaign(nullptr)
+    _track(nullptr)
 {
     ui->setupUi(this);
-    enableButtons(false);
+//    enableButtons(false);
 
-    connect(ui->btnAddLocal, SIGNAL(clicked(bool)), this, SLOT(addLocalFile()));
-    connect(ui->btnAddURL, SIGNAL(clicked(bool)), this, SLOT(addGlobalUrl()));
-    connect(ui->btnAddSyrinscape, SIGNAL(clicked(bool)), this, SLOT(addSyrinscape()));
-    connect(ui->btnRemove, SIGNAL(clicked(bool)), this, SLOT(removeTrack()));
-    connect(ui->lstTracks, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(itemSelected(QListWidgetItem *)));
+//    connect(ui->btnAddLocal, SIGNAL(clicked(bool)), this, SLOT(addLocalFile()));
+//    connect(ui->btnAddURL, SIGNAL(clicked(bool)), this, SLOT(addGlobalUrl()));
+//    connect(ui->btnAddSyrinscape, SIGNAL(clicked(bool)), this, SLOT(addSyrinscape()));
+//    connect(ui->btnRemove, SIGNAL(clicked(bool)), this, SLOT(removeTrack()));
+//    connect(ui->lstTracks, SIGNAL(itemDoubleClicked(QListWidgetItem *)), this, SLOT(itemSelected(QListWidgetItem *)));
 
-#ifdef Q_OS_MAC
-    ui->btnAddSyrinscape->hide();
-#endif
+//#ifdef Q_OS_MAC
+//    ui->btnAddSyrinscape->hide();
+//#endif
 }
 
 AudioTrackEdit::~AudioTrackEdit()
@@ -31,6 +35,89 @@ AudioTrackEdit::~AudioTrackEdit()
     delete ui;
 }
 
+void AudioTrackEdit::activateObject(CampaignObjectBase* object)
+{
+    AudioTrack* track = dynamic_cast<AudioTrack*>(object);
+    if(!track)
+        return;
+
+    if(_track != nullptr)
+    {
+        qDebug() << "[AudioTrackEdit] ERROR: New audio track activated without deactivating the previous track object first!";
+        deactivateObject();
+    }
+
+    setTrack(track);
+}
+
+void AudioTrackEdit::deactivateObject()
+{
+    if(!_track)
+    {
+        qDebug() << "[AudioTrackEdit] WARNING: Invalid (nullptr) track object deactivated!";
+        return;
+    }
+
+    setTrack(nullptr);
+}
+
+void AudioTrackEdit::setTrack(AudioTrack* track)
+{
+    _track = track;
+
+    if(_track)
+    {
+        emit trackTypeChanged(_track->getAudioType());
+        emit playChanged(_track->isPlaying());
+        emit repeatChanged(_track->isRepeat());
+        emit muteChanged(_track->isMuted());
+        emit volumeChanged(_track->getVolume());
+    }
+}
+
+void AudioTrackEdit::setPlay(bool checked)
+{
+    if(!_track)
+        return;
+
+    if(checked)
+    {
+        _track->play();
+
+        if(_track->getAudioType() == DMHelper::AudioType_Syrinscape)
+            QTimer::singleShot(500, this, &AudioTrackEdit::unclick);
+    }
+    else
+    {
+        _track->stop();
+    }
+}
+
+void AudioTrackEdit::setRepeat(bool checked)
+{
+    if(_track)
+        _track->setRepeat(checked);
+}
+
+void AudioTrackEdit::setMute(bool checked)
+{
+    if(_track)
+        _track->setMute(checked);
+}
+
+void AudioTrackEdit::setVolume(int volume)
+{
+    if(_track)
+        _track->setVolume(volume);
+}
+
+void AudioTrackEdit::unclick()
+{
+    emit playChanged(false);
+}
+
+
+/*
 void AudioTrackEdit::addTrack(const QUrl& url)
 {
     if((!_campaign) || (!url.isValid()))
@@ -51,23 +138,21 @@ void AudioTrackEdit::addTrack(const QUrl& url)
 void AudioTrackEdit::removeTrack()
 {
     // TODO: is this even needed?
-    /*
-    if(!_campaign)
-        return;
+//    if(!_campaign)
+//        return;
 
-    QListWidgetItem* currentItem = ui->lstTracks->currentItem();
-    if(!currentItem)
-        return;
+//    QListWidgetItem* currentItem = ui->lstTracks->currentItem();
+//    if(!currentItem)
+//        return;
 
-    AudioTrack* removeTrack = getCurrentTrack();
-    if(!removeTrack)
-        return;
+//    AudioTrack* removeTrack = getCurrentTrack();
+//    if(!removeTrack)
+//        return;
 
     //_campaign->removeTrack(removeTrack->getID());
 
-    delete removeTrack;
-    delete currentItem;
-    */
+//    delete removeTrack;
+//    delete currentItem;
 }
 
 void AudioTrackEdit::setCampaign(Campaign* campaign)
@@ -135,14 +220,12 @@ void AudioTrackEdit::itemSelected(QListWidgetItem *item)
 
     emit trackSelected(track);
 
-    /*
-     * TODO: play something...
-    setPlayerEnabled(true);
-    ui->lblCurrent->setText(track->getName());
-    ui->sliderPlayback->setValue(0);
-    ui->btnPlay->setChecked(false);
-    _player->setMedia(QMediaContent(track->getUrl()));
-    */
+    // TODO: play something...
+    //setPlayerEnabled(true);
+    //ui->lblCurrent->setText(track->getName());
+    //ui->sliderPlayback->setValue(0);
+    //ui->btnPlay->setChecked(false);
+    //_player->setMedia(QMediaContent(track->getUrl()));
 }
 
 AudioTrack* AudioTrackEdit::getCurrentTrack()
@@ -167,3 +250,4 @@ void AudioTrackEdit::enableButtons(bool enable)
     ui->btnAddURL->setEnabled(enable);
     ui->btnRemove->setEnabled(enable);
 }
+*/

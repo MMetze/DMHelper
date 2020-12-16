@@ -301,7 +301,7 @@
         </bullets>
     </data>
     <data title="Paralyzed">
-        <icon>internal-injury</icon>
+        <icon>aura</icon>
         <subtitle>You are paralyzed</subtitle>
         <description>You can't do anything</description>
         <bullets>
@@ -358,7 +358,7 @@
         </bullets>
     </data>
     <data title="Stunned">
-        <icon>internal-injury</icon>
+        <icon>embrassed-energy</icon>
         <subtitle>You are stunned</subtitle>
         <description>You are stunned</description>
         <reference>PHB, pg. 292</reference>

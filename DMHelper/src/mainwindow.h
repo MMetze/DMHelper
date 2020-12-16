@@ -13,7 +13,7 @@
 #include <QLabel>
 #include <QFileInfo>
 #include <QList>
-#include <QMap>
+#include <QMultiMap>
 #include <QUuid>
 
 class PublishWindow;
@@ -33,17 +33,19 @@ class QVBoxLayout;
 class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
+class AudioTrack;
 class PublishFrame;
 class RibbonMain;
 class RibbonTabFile;
 class RibbonTabCampaign;
-class RibbonTabBestiary;
-class RibbonTabMap;
+class RibbonTabTools;
+class RibbonTabBattleMap;
 class RibbonTabBattle;
 class RibbonTabScrolling;
 class RibbonTabText;
 class BattleDialogModel;
-class MapEditFrame;
+class RibbonTabMap;
+class RibbonTabAudio;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -81,7 +83,9 @@ public slots:
     void newBattleEncounter();
     void newScrollingTextEncounter();
     void newMap();
-    void editCurrentMap();
+    void newAudioEntry();
+    void newSyrinscapeEntry();
+    void newYoutubeEntry();
     void removeCurrentItem();
     void editCurrentItem();
     void exportCurrentItem();
@@ -108,6 +112,7 @@ signals:
     void cancelSelect();
 
     void characterChanged(QUuid id);
+    void audioTrackAdded(AudioTrack* track);
 
 protected:
     virtual void showEvent(QShowEvent * event);
@@ -143,6 +148,8 @@ protected:
     void writeSpellbook();
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
+    void addNewAudioObject(const QString& audioFile);
+    void addNewObject(CampaignObjectBase* newObject);
 
 protected slots:
     void openFile(const QString& filename);
@@ -211,7 +218,7 @@ private:
     EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* treeModel;
-    QMap<QString, QModelIndex> treeIndexMap;
+    QMultiMap<QString, QUuid> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;
     QString campaignFileName;
@@ -246,12 +253,13 @@ private:
     RibbonMain* _ribbon;
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
-    RibbonTabBestiary* _ribbonTabTools;
-    RibbonTabMap* _ribbonTabMap;
+    RibbonTabTools* _ribbonTabTools;
+    RibbonTabBattleMap* _ribbonTabMap;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
-    MapEditFrame* _ribbonTabMiniMap;
+    RibbonTabMap* _ribbonTabMiniMap;
+    RibbonTabAudio* _ribbonTabAudio;
 };
 
 #endif // MAINWINDOW_H

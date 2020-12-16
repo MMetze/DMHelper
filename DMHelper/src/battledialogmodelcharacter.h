@@ -35,6 +35,7 @@ public:
     virtual int getWisdom() const override;
     virtual int getCharisma() const override;
     virtual int getSkillModifier(Combatant::Skills skill) const override;
+    virtual int getConditions() const override;
 
     virtual int getSpeed() const override;
     virtual int getArmorClass() const override;
@@ -45,6 +46,10 @@ public:
 
     Character* getCharacter() const;
     void setCharacter(Character* character);
+
+public slots:
+    virtual void setConditions(int conditions) override;
+    virtual void applyConditions(int conditions) override;
 
 protected:
 

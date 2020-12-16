@@ -290,7 +290,8 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
 
     qDebug() << "[VideoPlayer] Format Callback with chroma: " << QString(chroma) << ", width: " << *width << ", height: " << *height << ", pitches: " << *pitches << ", lines: " << *lines;
 
-    memcpy(chroma, "RV32", sizeof("RV32") - 1);
+    //memcpy(chroma, "RV32", sizeof("RV32") - 1);
+    memcpy(chroma, "BGRA", sizeof("BGRA") - 1);
 
     _originalSize = QSize(static_cast<int>(*width), static_cast<int>(*height));
     QSize scaledTarget = _originalSize;
@@ -309,7 +310,8 @@ unsigned VideoPlayer::formatCallback(char *chroma, unsigned *width, unsigned *he
 
     _nativeBufferNotAligned = static_cast<uchar*>(malloc((_nativeWidth * _nativeHeight * 4) + 31));
     _nativeBuffer = reinterpret_cast<uchar*>((size_t(_nativeBufferNotAligned)+31) & static_cast<unsigned long long>(~31));
-    _loadImage = new QImage(_nativeBuffer, static_cast<int>(_nativeWidth), static_cast<int>(_nativeHeight), QImage::Format_RGB32);
+//    _loadImage = new QImage(_nativeBuffer, static_cast<int>(_nativeWidth), static_cast<int>(_nativeHeight), QImage::Format_RGB32);
+    _loadImage = new QImage(_nativeBuffer, static_cast<int>(_nativeWidth), static_cast<int>(_nativeHeight), QImage::Format_ARGB32);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Format callback completed";

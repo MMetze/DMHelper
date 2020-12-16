@@ -5,11 +5,13 @@ if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
 set QT_DIR=C:\Qt
-set QT_VERSION=5.14.2
+set QT_VERSION=5.15.1
+set QT_INSTALLER_VERSION=4.0
+set MSVC_VERSION=2019
 set SEVENZIP_APP=C:\Program Files\7-Zip\7z
 
 rem set PATH=C:\Qt\5.14.2\msvc2017_64\bin;C:\Qt\Tools\QtCreator\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%
-set PATH=%QT_DIR%\%QT_VERSION%\msvc2017_64\bin;%QT_DIR%\Tools\QtInstallerFramework\3.2\bin;%QT_DIR%\Tools\QtCreator\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%
+set PATH=%QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%_64\bin;%QT_DIR%\Tools\QtInstallerFramework\%QT_INSTALLER_VERSION%\bin;%QT_DIR%\Tools\QtCreator\bin;C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%
 
 rmdir /s /q ..\bin64
 mkdir ..\bin64

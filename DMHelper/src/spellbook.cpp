@@ -18,6 +18,8 @@
                 <text
                 <text /
                 <roll
+                <effect
+                    <token
         </spell
                 <ritual
 */

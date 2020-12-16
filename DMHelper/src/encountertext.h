@@ -16,10 +16,6 @@ public:
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
-    // Base functions to handle UI widgets
-    //virtual void widgetActivated(QWidget* widget) override;
-    //virtual void widgetDeactivated(QWidget* widget) override;
-
     virtual int getObjectType() const override;
 
     virtual QString getText() const;
@@ -31,7 +27,6 @@ signals:
     void textChanged(const QString& text);
 
 protected slots:
-    //virtual void widgetChanged() override;
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;

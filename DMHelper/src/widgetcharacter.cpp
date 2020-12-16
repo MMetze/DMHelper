@@ -85,33 +85,36 @@ void WidgetCharacter::updateData()
     update();
 }
 
-void WidgetCharacter::setActive(bool active)
-{
-    CombatantWidget::setActive(active);
-}
-
 void WidgetCharacter::leaveEvent(QEvent * event)
 {
     if(_internals)
         _internals->leaveEvent(event);
+
+    CombatantWidget::leaveEvent(event);
 }
 
 void WidgetCharacter::mousePressEvent(QMouseEvent * event)
 {
     if(_internals)
         _internals->mousePressEvent(event);
+
+    CombatantWidget::mousePressEvent(event);
 }
 
 void WidgetCharacter::mouseReleaseEvent(QMouseEvent * event)
 {
     if(_internals)
         _internals->mouseReleaseEvent(event);
+
+    CombatantWidget::mouseReleaseEvent(event);
 }
 
 void WidgetCharacter::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if(_internals)
         _internals->mouseDoubleClickEvent(event);
+
+    CombatantWidget::mouseDoubleClickEvent(event);
 }
 
 void WidgetCharacter::edtInitiativeChanged()

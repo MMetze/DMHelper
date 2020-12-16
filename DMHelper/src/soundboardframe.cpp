@@ -2,7 +2,7 @@
 #include "ui_soundboardframe.h"
 #include "campaign.h"
 #include "dmconstants.h"
-#include "soundboardtrack.h"
+#include "soundboardgroup.h"
 #include "soundboardframegroupbox.h"
 #include "audiotrack.h"
 #include "audiofactory.h"
@@ -72,8 +72,18 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
         delete child;
     }
 
+    _campaign = campaign;
+
     if(!campaign)
         return;
+
+    for(SoundboardGroup* group : campaign->getSoundboardGroups())
+    {
+        if(group)
+        {
+            addGroupToLayout(group);
+        }
+    }
 
     QList<CampaignObjectBase*> tracks = campaign->getChildObjectsByType(DMHelper::CampaignType_AudioTrack);
     for(CampaignObjectBase* trackObject : tracks)
@@ -84,8 +94,30 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
     updateTrackLayout();
 
     ui->treeWidget->setMinimumWidth(ui->treeWidget->sizeHint().width());
+}
 
-    _campaign = campaign;
+void SoundboardFrame::addTrackToTree(AudioTrack* track)
+{
+    if(!track)
+        return;
+
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(track->getName()));
+    item->setData(0, Qt::UserRole, track->getID().toString());
+    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+    switch(track->getAudioType())
+    {
+        case DMHelper::AudioType_Syrinscape:
+            item->setIcon(0, QIcon(QString(":/img/data/icon_syrinscape.png")));
+            break;
+        case DMHelper::AudioType_Youtube:
+            item->setIcon(0, QIcon(QString(":/img/data/icon_playerswindow.png")));
+            break;
+        default:
+            item->setIcon(0, QIcon(QString(":/img/data/icon_soundboard.png")));
+            break;
+    };
+
+    ui->treeWidget->addTopLevelItem(item);
 }
 
 void SoundboardFrame::resizeEvent(QResizeEvent *event)
@@ -134,8 +166,22 @@ void SoundboardFrame::updateTrackLayout()
 
 void SoundboardFrame::addGroup()
 {
-    QString groupName = QInputDialog::getText(this, QString("Enter Group Name"), QString("Please enter a name for the new group"), QLineEdit::Normal, QString("Sound Effects"));
-    _layout->insertWidget(_layout->count() - 1, new SoundBoardFrameGroupBox(groupName, _campaign));
+    if(!_campaign)
+        return;
+
+    bool ok = false;
+    QString groupName = QInputDialog::getText(this,
+                                              QString("Enter Group Name"),
+                                              QString("Please enter a name for the new group"),
+                                              QLineEdit::Normal,
+                                              QString("Sound Effects"),
+                                              &ok);
+    if((!ok) || (groupName.isEmpty()))
+        return;
+
+    SoundboardGroup* newGroup = new SoundboardGroup(groupName);
+    _campaign->addSoundboardGroup(newGroup);
+    addGroupToLayout(newGroup);
 }
 
 void SoundboardFrame::addSound()
@@ -200,26 +246,10 @@ void SoundboardFrame::addTrack(const QUrl& url)
     addTrackToTree(newTrack);
 }
 
-void SoundboardFrame::addTrackToTree(AudioTrack* track)
+void SoundboardFrame::addGroupToLayout(SoundboardGroup* group)
 {
-    if(!track)
+    if((!_campaign) || (!_layout))
         return;
 
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList(track->getName()));
-    item->setData(0, Qt::UserRole, track->getID().toString());
-    item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-    switch(track->getAudioType())
-    {
-        case DMHelper::AudioType_Syrinscape:
-            item->setIcon(0, QIcon(QString(":/img/data/icon_syrinscape.png")));
-            break;
-        case DMHelper::AudioType_Youtube:
-            item->setIcon(0, QIcon(QString(":/img/data/icon_playerswindow.png")));
-            break;
-        default:
-            item->setIcon(0, QIcon(QString(":/img/data/icon_soundboard.png")));
-            break;
-    };
-
-    ui->treeWidget->addTopLevelItem(item);
+    _layout->insertWidget(_layout->count() - 1, new SoundBoardFrameGroupBox(group, _campaign));
 }

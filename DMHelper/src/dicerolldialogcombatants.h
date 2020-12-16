@@ -24,6 +24,8 @@ public:
 
     void fireAndForget();
 
+    virtual QSize sizeHint() const;
+
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);
     void combatantChanged(BattleDialogModelCombatant* combatant);
@@ -41,6 +43,7 @@ protected:
 private slots:
     void diceTypeChanged();
     void modifierTypeChanged();
+    void editConditions();
 
 private:
     void init();
@@ -56,6 +59,7 @@ private:
     QList<BattleDialogModelCombatant*> _combatants;
     QList<int> _modifiers;
     bool _fireAndForget;
+    int _conditions;
 
     bool _mouseDown;
     QPoint _mouseDownPos;

@@ -59,6 +59,7 @@ public:
     int getAbilityValue(Combatant::Ability ability) const;
     int getSkillValue(Combatant::Skills skill) const;
     QString getSkillString() const;
+    void setSkillString(const QString& skills);
     bool isSkillKnown(Combatant::Skills skill) const;
 
     QList<MonsterAction> getActions() const;

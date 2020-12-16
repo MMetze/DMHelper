@@ -25,6 +25,8 @@ public slots:
     void setFontItalics(bool fontItalics);
     void setAlignment(Qt::Alignment alignment);
 
+    void setHyperlinkActive(bool active);
+
 signals:
     void colorChanged(QColor color);
     void fontFamilyChanged(const QString& fontFamily);
@@ -32,6 +34,10 @@ signals:
     void fontBoldChanged(bool fontBold);
     void fontItalicsChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
+    void hyperlinkClicked();
+
+protected:
+    virtual void showEvent(QShowEvent *event) override;
 
 private:
     Ui::RibbonTabText *ui;

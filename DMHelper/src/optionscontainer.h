@@ -40,6 +40,10 @@ public:
     bool getShowCountdown() const;
     int getCountdownDuration() const;
     QString getPointerFile() const;
+    QString getSelectedIcon() const;
+    QString getActiveIcon() const;
+    QString getCombatantFrame() const;
+    QString getCountdownFrame() const;
 
     // Data settings
     bool doDataSettingsExist() const;
@@ -86,6 +90,10 @@ signals:
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
     void pointerFileNameChanged(const QString& filename);
+    void selectedIconChanged(const QString& selectedIcon);
+    void activeIconChanged(const QString& activeIcon);
+    void combatantFrameChanged(const QString& combatantFrame);
+    void countdownFrameChanged(const QString& countdownFrame);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -139,6 +147,10 @@ public slots:
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
     void setPointerFileName(const QString& filename);
+    void setSelectedIcon(const QString& selectedIcon);
+    void setActiveIcon(const QString& activeIcon);
+    void setCombatantFrame(const QString& combatantFrame);
+    void setCountdownFrame(const QString& countdownFrame);
 
     // Data settings
     void setUpdatesEnabled(bool updatesEnabled);
@@ -189,6 +201,10 @@ private:
     bool _showCountdown;
     int _countdownDuration;
     QString _pointerFile;
+    QString _selectedIcon;
+    QString _activeIcon;
+    QString _combatantFrame;
+    QString _countdownFrame;
 
     // Data settings
     bool _dataSettingsExist;

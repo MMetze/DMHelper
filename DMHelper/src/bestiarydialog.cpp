@@ -60,7 +60,6 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     ui->edtArmorClass->setValidator(new QIntValidator(0,100));
     ui->edtAverageHitPoints->setValidator(new QIntValidator(0,10000));
     //ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
-    //ui->edtXP->setValidator(new QIntValidator(0,1000000));
 
     connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtMonsterSize, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -70,20 +69,20 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->edtArmorClass, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtHitDice, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtSpeed, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtSize, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtStrength, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtDexterity, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtConstitution, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtIntelligence, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtWisdom, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtCharisma, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
+    connect(ui->edtSkills, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtConditionImmunities, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtDamageImmunities, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtDamageResistances, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtDamageVulnerabilities, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtSenses, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtLanguages, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    //connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
-    //connect(ui->edtXP, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
     connect(ui->edtChallenge, SIGNAL(editingFinished()), this, SLOT(handleChallengeEdited()));
 
     ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
@@ -132,6 +131,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtHitDice->setText(_monster->getHitDice().toString());
     ui->edtAverageHitPoints->setText(QString::number(_monster->getAverageHitPoints()));
     ui->edtSpeed->setText(_monster->getSpeed());
+    ui->edtSize->setText(_monster->getMonsterSize());
     ui->edtStrength->setText(QString::number(_monster->getStrength()));
     ui->edtDexterity->setText(QString::number(_monster->getDexterity()));
     ui->edtConstitution->setText(QString::number(_monster->getConstitution()));
@@ -244,6 +244,7 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtArmorClass->setReadOnly(!_edit);
     ui->edtHitDice->setReadOnly(!_edit);
     ui->edtSpeed->setReadOnly(!_edit);
+    ui->edtSize->setReadOnly(!_edit);
     ui->edtStrength->setReadOnly(!_edit);
     ui->edtDexterity->setReadOnly(!_edit);
     ui->edtConstitution->setReadOnly(!_edit);
@@ -678,6 +679,7 @@ void BestiaryDialog::storeMonsterData()
     _monster->setArmorClass(ui->edtArmorClass->text().toInt());
     _monster->setHitDice(Dice(ui->edtHitDice->text()));
     _monster->setSpeed(ui->edtSpeed->text());
+    _monster->setMonsterSize(ui->edtSize->text());
     _monster->setConditionImmunities(ui->edtConditionImmunities->text());
     _monster->setDamageImmunities(ui->edtDamageImmunities->text());
     _monster->setDamageResistances(ui->edtDamageResistances->text());
@@ -685,6 +687,7 @@ void BestiaryDialog::storeMonsterData()
     _monster->setSenses(ui->edtSenses->text());
     _monster->setLanguages(ui->edtLanguages->text());
     _monster->setChallenge(ui->edtChallenge->text());
+    _monster->setSkillString(ui->edtSkills->text());
 
     if((ui->scrollActions->widget()) && (ui->scrollActions->widget()->layout()))
     {

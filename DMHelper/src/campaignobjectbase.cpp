@@ -398,6 +398,7 @@ QUuid CampaignObjectBase::parseIdString(QString idString, int* intId, bool isLoc
     QUuid result(idString);
     if(result.isNull())
     {
+        // Integer ID support is needed for backwards compatibility to v1.5 or earlier
         bool ok = false;
         int tempIntId = idString.toInt(&ok);
         if(ok)

@@ -35,9 +35,9 @@ BattleDialogEffectSettings* BattleDialogModelEffectRadius::getEffectEditor() con
     return result;
 }
 
-QGraphicsItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale) const
+QGraphicsItem* BattleDialogModelEffectRadius::createEffectShape(qreal gridScale)
 {
-    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(0, 0, 200, 200);
+    QGraphicsEllipseItem* circleItem = new UnselectedEllipse(-100, -100, 200, 200);
 
     setEffectItemData(circleItem);
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>RibbonTabBestiary</class>
- <widget class="QFrame" name="RibbonTabBestiary">
+ <class>RibbonTabTools</class>
+ <widget class="QFrame" name="RibbonTabTools">
   <property name="geometry">
    <rect>
     <x>0</x>

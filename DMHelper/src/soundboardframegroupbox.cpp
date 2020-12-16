@@ -1,6 +1,7 @@
 #include "soundboardframegroupbox.h"
 #include "ui_soundboardframegroupbox.h"
 #include "soundboardtrack.h"
+#include "soundboardgroup.h"
 #include "campaign.h"
 #include <QGridLayout>
 #include <QDragEnterEvent>
@@ -9,19 +10,20 @@
 #include <QUuid>
 #include <QDebug>
 
-SoundBoardFrameGroupBox::SoundBoardFrameGroupBox(const QString& groupName, Campaign* campaign, QWidget *parent) :
+SoundBoardFrameGroupBox::SoundBoardFrameGroupBox(SoundboardGroup* group, Campaign* campaign, QWidget *parent) :
     QGroupBox(parent),
     ui(new Ui::SoundBoardFrameGroupBox),
     _groupLayout(nullptr),
     _trackWidgets(),
     _localMute(false),
+    _group(group),
     _campaign(campaign)
 {
     ui->setupUi(this);
 
     setAcceptDrops(true);
 
-    setTitle(groupName);
+    setTitle(group->getGroupName());
     _groupLayout = new QGridLayout();
     setLayout(_groupLayout);
     _groupLayout->setSpacing(20);
@@ -32,6 +34,15 @@ SoundBoardFrameGroupBox::SoundBoardFrameGroupBox(const QString& groupName, Campa
 
     connect(ui->btnExpand, &QPushButton::clicked, this, &SoundBoardFrameGroupBox::toggleContents);
     connect(ui->btnVolume, &QPushButton::clicked, this, &SoundBoardFrameGroupBox::toggleMute);
+
+    if(_group)
+    {
+        for(AudioTrack* track : _group->getTracks())
+        {
+            if(track)
+                addTrackToLayout(track);
+        }
+    }
 }
 
 SoundBoardFrameGroupBox::~SoundBoardFrameGroupBox()
@@ -84,6 +95,7 @@ void SoundBoardFrameGroupBox::updateTrackLayout()
     _groupLayout->setColumnStretch(xCount,1);
 }
 
+/*
 void SoundBoardFrameGroupBox::clearTracks()
 {
     while(_groupLayout->count() > 0)
@@ -94,17 +106,15 @@ void SoundBoardFrameGroupBox::clearTracks()
     qDeleteAll(_trackWidgets);
     _trackWidgets.clear();
 }
+*/
 
-void SoundBoardFrameGroupBox::addTrack(SoundboardTrack* track)
+void SoundBoardFrameGroupBox::addTrack(AudioTrack* track)
 {
-    if(track)
-    {
-        connect(this, &SoundBoardFrameGroupBox::muteChanged, track, &SoundboardTrack::parentMuteChanged);
-        connect(this, &SoundBoardFrameGroupBox::overrideChildMute, track, &SoundboardTrack::setMute);
-        connect(track, &SoundboardTrack::muteChanged, this, &SoundBoardFrameGroupBox::trackMuteChanged);
-        _trackWidgets.append(track);
-        updateTrackLayout();
-    }
+    if((!_group) || (!track))
+        return;
+
+    _group->addTrack(track);
+    addTrackToLayout(track);
 }
 
 void SoundBoardFrameGroupBox::setMute(bool mute)
@@ -170,7 +180,7 @@ void SoundBoardFrameGroupBox::dropEvent(QDropEvent *event)
             QUuid trackId(roleDataMap.value(Qt::UserRole).toString());
             AudioTrack* track = _campaign->getTrackById(trackId);
             if(track)
-                addTrack(new SoundboardTrack(track));
+                addTrack(track);
         }
     }
 
@@ -205,4 +215,14 @@ void SoundBoardFrameGroupBox::toggleMute()
     setMute(newMute);
     _localMute = newMute;
     emit muteChanged(newMute);
+}
+
+void SoundBoardFrameGroupBox::addTrackToLayout(AudioTrack* track)
+{
+    SoundboardTrack* trackFrame = new SoundboardTrack(track);
+    connect(this, &SoundBoardFrameGroupBox::muteChanged, trackFrame, &SoundboardTrack::parentMuteChanged);
+    connect(this, &SoundBoardFrameGroupBox::overrideChildMute, trackFrame, &SoundboardTrack::setMute);
+    connect(trackFrame, &SoundboardTrack::muteChanged, this, &SoundBoardFrameGroupBox::trackMuteChanged);
+    _trackWidgets.append(trackFrame);
+    updateTrackLayout();
 }
