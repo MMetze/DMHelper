@@ -1080,6 +1080,7 @@ QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect
     effectItem->setParentItem(tokenItem);
     effectItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
     effectItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+    effectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
     effectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
     effectItem->setPos(QPointF(0.0, 0.0));
 
