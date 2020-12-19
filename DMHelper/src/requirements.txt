@@ -34,8 +34,9 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Editing/Saving of monster skills enabled
     DONE - Editing/Saving of character and monster size enabled
     DONE - Edit map file possible
-    Split Max HP and Current HP
-    Import Character puts it in the selected tree items
+    DONE - Split Max HP and Current HP
+    DONE - Improved importer AC and HP calculations
+    DONE - Import Character puts it in the selected tree items
     Background color default to black, not transparent
     Drag a character to top doesn't make it an NPC
 
@@ -43,7 +44,6 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     Object editing should allow editing width or height...
     Delete key in battle
     Add progress indications to loading campaigns and importing characters (and maybe maps?), new bestiary/spellbook, etc
-    Check importer AC calculations
     Delete entry in the tree move selection to parent item
     Pointer on maps
 

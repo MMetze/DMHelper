@@ -89,6 +89,7 @@ public slots:
     void removeCurrentItem();
     void editCurrentItem();
     void exportCurrentItem();
+    void addNewObject(CampaignObjectBase* newObject);
 
     void clearDirty();
     void setDirty();
@@ -149,7 +150,6 @@ protected:
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
     void addNewAudioObject(const QString& audioFile);
-    void addNewObject(CampaignObjectBase* newObject);
 
 protected slots:
     void openFile(const QString& filename);

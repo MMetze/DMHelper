@@ -20,6 +20,7 @@ public:
 
 signals:
     void characterImported(QUuid characterId);
+    void characterCreated(CampaignObjectBase* character);
 
 public slots:
     void importCharacter(Campaign* campaign, bool isCharacter = true);

@@ -371,7 +371,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             else
                 _campaign->addNPC(_character);
                 */
-            _campaign->addObject(_character);
+            //_campaign->addObject(_character);
+            //emit characterCreated(_character);
         }
     }
 
@@ -747,6 +748,9 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     notesStr += getNotesString(notesObject, QString("backstory"), QString("Backstory"));
     notesStr += getNotesString(notesObject, QString("otherNotes"), QString("Other Notes"));
     _character->setStringValue(Character::StringValue_notes, notesStr);
+
+    if(!isUpdate)
+        emit characterCreated(_character);
 
     QString avatarUrl = rootObject["avatarUrl"].toString();
     if((isUpdate) && (!avatarUrl.isEmpty()))
