@@ -60,6 +60,7 @@ public:
         IntValue_copper,
         IntValue_experience,
         IntValue_jackofalltrades,
+        IntValue_maximumHP,
 
         INTVALUE_COUNT
     };

@@ -59,6 +59,7 @@ private:
     QMap<int, int> _attributeSetValues;
     int _levelCount;
     int _totalArmor;
+    int _unarmored;
     int _totalHP;
     bool _halfProficiency;
     QList<Character::IntValue> _overrideList;

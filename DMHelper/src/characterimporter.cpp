@@ -16,7 +16,9 @@
 #include <QAbstractButton>
 #include <QDebug>
 
-//#define LOCAL_IMPORTER_TEST
+//#define IMPORTER_LOCAL_TEST
+#define IMPORTER_LOG_AC
+#define IMPORTER_LOG_HP
 
 CharacterImporter::CharacterImporter(QObject *parent) :
     QObject(parent),
@@ -30,6 +32,7 @@ CharacterImporter::CharacterImporter(QObject *parent) :
     _attributeSetValues(),
     _levelCount(0),
     _totalArmor(0),
+    _unarmored(0),
     _totalHP(0),
     _halfProficiency(false),
     _overrideList(),
@@ -211,16 +214,48 @@ void CharacterImporter::scanModifiers(QJsonObject modifiersObject, const QString
                 character.setSkillValue(static_cast<Combatant::Skills>(skillId), 2);
             }
         }
+        else if(modType == QString("set"))
+        {
+            if(modSubType == QString("Unarmored Armor Class"))
+            {
+                int statValue = modObject["statId"].toInt(0);
+                if(statValue > 0)
+                    _unarmored = Combatant::getAbilityMod(_character->getAbilityValue(static_cast<Combatant::Ability>(statValue - 1)));
+                else
+                    _unarmored = modValue;
+
+#ifdef IMPORTER_LOG_AC
+                qDebug() << "[CharacterImporter] AC LOG: Unarmored Armor Class: " << _unarmored;
+#endif
+            }
+        }
         else
         {
             if((modType == QString("bonus")) && (modSubType == QString("Armor Class")))
+            {
                 _totalArmor += modValue;
+#ifdef IMPORTER_LOG_AC
+                qDebug() << "[CharacterImporter] AC LOG: Armor class bonus: " << modValue << ", total AC: " << _totalArmor;
+#endif
+            }
             else if((modType == QString("bonus")) && (modSubType == QString("Armored Armor Class")))
+            {
                 _totalArmor++;
+#ifdef IMPORTER_LOG_AC
+                qDebug() << "[CharacterImporter] AC LOG: Armored Armor class bonus: +1, total AC: " << _totalArmor;
+#endif
+            }
             else if((modType == QString("half-proficiency")) && (modSubType == QString("Initiative")))
+            {
                 _halfProficiency = true;
+            }
             else if((modType == QString("bonus")) && (modSubType == QString("Hit Points per Level")) && (!_overrideHP))
+            {
                 _totalHP += modValue * _levelCount;
+#ifdef IMPORTER_LOG_HP
+                qDebug() << "[CharacterImporter] HP LOG: Bonus mod HP per Level: " << modValue << " * " << _levelCount << " levels, total HP: " << _totalHP;
+#endif
+            }
         }
     }
 }
@@ -286,7 +321,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         return false;
     }
 
-#ifndef LOCAL_IMPORTER_TEST
+#ifndef IMPORTER_LOCAL_TEST
     if(reply->error() != QNetworkReply::NoError)
     {
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString());
@@ -421,6 +456,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     QString classString;
     QString classFeatureString;
     QVector<int> spellSlots(9,0);
+    int fixedHP = 0;
     QJsonArray classesArray = rootObject["classes"].toArray();
     for(i = 0; i < classesArray.count(); ++i)
     {
@@ -438,6 +474,19 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 
         int classLevel = classObject["level"].toInt();
         _levelCount += classLevel;
+
+        bool startingClass = classObject["isStartingClass"].toBool();
+        int classHitDice = classDefnObj["hitDice"].toInt(0);
+        int classHP = 0;
+        if(startingClass)
+            classHP = classHitDice + ((classLevel - 1) * ((classHitDice / 2) + 1));
+        else
+            classHP = classLevel * ((classHitDice / 2) + 1);
+
+        fixedHP += classHP;
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Class " << classString << ", starting: " << startingClass << ", hitdice: " << classHitDice << ", level: " << classLevel << ", total class HP: " << classHP << ", total fixed HP: " << fixedHP;
+#endif
 
         QJsonArray featureArray = classObject["classFeatures"].toArray();
         for(int j = 0; j < featureArray.count(); ++j)
@@ -485,7 +534,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
 
     // TODO AC - 10 or inventory/definition/armorClass for equipped:true, grantedModifiers, "entityTypeId":112130694 for
     // Scan the inventory
-    bool hasArmor = false;
+    QString armorType;
     QString equipmentStr;
     QJsonArray inventoryArray = rootObject["inventory"].toArray();
     for(i = 0; i < inventoryArray.count(); ++i)
@@ -501,8 +550,14 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             if(armorClass > 0)
             {
                 if(armorClass >= 10)
-                    hasArmor = true;
+                    armorType = invDefinition["type"].toString();
                 _totalArmor += armorClass;
+#ifdef IMPORTER_LOG_AC
+                qDebug() << "[CharacterImporter] AC LOG: " << invDefinition["name"].toString() << ", equipped: " << inventoryObj["equipped"].toBool()
+                         << ", canAttune: " << inventoryObj["canAttune"].toBool() << ", attunementDescription: " << inventoryObj["attunementDescription"].toString()
+                         << ", isAttuned: " << inventoryObj["isAttuned"].toBool() << ", armorClass: " << invDefinition["armorClass"].toInt()
+                         << ", total AC: " << _totalArmor;
+#endif
             }
             scanModifiers(invDefinition, QString("grantedModifiers"), *_character);
         }
@@ -524,9 +579,41 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     }
 
     // Calculate the final armor class
-    if(!hasArmor)
-        _totalArmor += 10;
-    _totalArmor += Combatant::getAbilityMod(_character->getDexterity());
+    if(armorType == QString("Heavy Armor"))
+    {
+#ifdef IMPORTER_LOG_AC
+        qDebug() << "[CharacterImporter] AC LOG: Heavy armor, no dexterity bonus, total AC: " << _totalArmor;
+#endif
+    }
+    else if(armorType == QString("Medium Armor"))
+    {
+        _totalArmor += qMin(2, Combatant::getAbilityMod(_character->getDexterity()));
+#ifdef IMPORTER_LOG_AC
+        qDebug() << "[CharacterImporter] AC LOG: Medium armor, Dexterity armor class adjustment (max 2): " << qMin(2, Combatant::getAbilityMod(_character->getDexterity())) << ", total AC: " << _totalArmor;
+#endif
+    }
+    else if(armorType == QString("Light Armor"))
+    {
+        _totalArmor += Combatant::getAbilityMod(_character->getDexterity());
+#ifdef IMPORTER_LOG_AC
+        qDebug() << "[CharacterImporter] AC LOG: Light armor, Dexterity armor class adjustment: " << Combatant::getAbilityMod(_character->getDexterity()) << ", total AC: " << _totalArmor;
+#endif
+    }
+    else
+    {
+        _totalArmor += 10 + Combatant::getAbilityMod(_character->getDexterity());
+#ifdef IMPORTER_LOG_AC
+        qDebug() << "[CharacterImporter] AC LOG: No armor, based AC only +10 plus Dexterity: " << Combatant::getAbilityMod(_character->getDexterity()) << ", total AC: " << _totalArmor;
+#endif
+        if(_unarmored != 0)
+        {
+            _totalArmor += _unarmored;
+#ifdef IMPORTER_LOG_AC
+            qDebug() << "[CharacterImporter] AC LOG: Unarmored bonus: " << _unarmored << ", total AC: " << _totalArmor;
+#endif
+        }
+    }
+
     _character->setArmorClass(_totalArmor);
     _character->setStringValue(Character::StringValue_equipment, equipmentStr);
 
@@ -583,23 +670,71 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     _character->setStringValue(Character::StringValue_proficiencies, featuresString);
 
     // Calculate the final Hit points
+    int currentHP;
     int overrideHPValue = rootObject["overrideHitPoints"].toInt(0);
     if(overrideHPValue > 0)
     {
         _totalHP = overrideHPValue;
+        currentHP = _totalHP;
         _overrideHP = true;
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Override hit points: " << overrideHPValue;
+#endif
     }
     else
     {
-        _totalHP += rootObject["baseHitPoints"].toInt(0);
+        QJsonObject preferencesObject = rootObject["preferences"].toObject();
+        int hpMode = preferencesObject["hitPointType"].toInt(0);
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Hit point mode: " << hpMode;
+#endif
+
+        int baseHitPoints = rootObject["baseHitPoints"].toInt(0);
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Base hit points: " << rootObject["baseHitPoints"].toInt(0);
+#endif
+        if(hpMode == 1)
+        {
+            _totalHP += fixedHP;
+#ifdef IMPORTER_LOG_HP
+            qDebug() << "[CharacterImporter] HP LOG: FIXED hit points used: " << fixedHP << ", total HP: " << _totalHP;
+#endif
+        }
+        else
+        {
+            _totalHP += baseHitPoints;
+#ifdef IMPORTER_LOG_HP
+            qDebug() << "[CharacterImporter] HP LOG: Base hit points total HP: " << _totalHP;
+#endif
+        }
+
         _totalHP += rootObject["bonusHitPoints"].toInt(0);
-        _totalHP += rootObject["temporaryHitPoints"].toInt(0);
-        _totalHP -= rootObject["removedHitPoints"].toInt(0);
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Bonus hit points: " << rootObject["bonusHitPoints"].toInt(0) << ", total HP: " << _totalHP;
+#endif
+
         _totalHP += _levelCount * Combatant::getAbilityMod(_character->getAbilityValue(Combatant::Ability_Constitution));
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Constitution bonus: " << Combatant::getAbilityMod(_character->getAbilityValue(Combatant::Ability_Constitution)) << " * " << _levelCount << " levels, total HP: " << _totalHP;
+#endif
         if(_totalHP == 0)
             _totalHP = 1;
+
+        currentHP = _totalHP;
+        currentHP += rootObject["temporaryHitPoints"].toInt(0);
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Temporary hit points: " << rootObject["temporaryHitPoints"].toInt(0) << ", current HP: " << currentHP;
+#endif
+
+        currentHP -= rootObject["removedHitPoints"].toInt(0);
+#ifdef IMPORTER_LOG_HP
+        qDebug() << "[CharacterImporter] HP LOG: Removed hit points: " << rootObject["removedHitPoints"].toInt(0) << ", current HP: " << currentHP;
+#endif
+        if(currentHP == 0)
+            currentHP = 1;
     }
-    _character->setHitPoints(_totalHP);
+    _character->setHitPoints(currentHP);
+    _character->setIntValue(Character::IntValue_maximumHP, _totalHP);
 
     // Notes
     QString notesStr;
@@ -630,7 +765,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         connect(_manager, &QNetworkAccessManager::finished, this, &CharacterImporter::imageReplyFinished);
         _reply = _manager->get(QNetworkRequest(QUrl(avatarUrl)));
 
-        #ifndef LOCAL_IMPORTER_TEST
+        #ifndef IMPORTER_LOCAL_TEST
             return true;
         #endif
     }
@@ -640,12 +775,12 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         _character->endBatchChanges();
         emit characterImported(_character->getID());
 
-        #ifndef LOCAL_IMPORTER_TEST
+        #ifndef IMPORTER_LOCAL_TEST
             return false;
         #endif
     }
 
-#ifdef LOCAL_IMPORTER_TEST
+#ifdef IMPORTER_LOCAL_TEST
     TEMPFILE.close();
     return false;
 #endif
@@ -758,6 +893,7 @@ void CharacterImporter::initializeValues()
     _attributeSetValues.clear();
     _levelCount = 0;
     _totalArmor = 0;
+    _unarmored = 0;
     _totalHP = 0;
     _halfProficiency = false;
     _overrideList.clear();

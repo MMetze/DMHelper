@@ -7,10 +7,9 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
 2. Spellbook
     DONE - Engineering version with PHB (WotC IP) data
     DONE - Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
+    DONE - Images and shapes need to be saved
     SRD data xml
     Potential need for xml reading performance improvement
-    Images to be possible "on top" of real effects to consider radius, etc.
-    DONE - Images and shapes need to be saved
 3. Conditions
     DONE - Can be set in battles
     DONE - Visual reminders in DM view
@@ -36,10 +35,13 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Editing/Saving of character and monster size enabled
     DONE - Edit map file possible
     Split Max HP and Current HP
+    Import Character puts it in the selected tree items
+    Background color default to black, not transparent
+    Drag a character to top doesn't make it an NPC
+
     Improve Objects and Effects editing
     Object editing should allow editing width or height...
     Delete key in battle
-    Import Character puts it in the selected tree items
     Add progress indications to loading campaigns and importing characters (and maybe maps?), new bestiary/spellbook, etc
     Check importer AC calculations
     Delete entry in the tree move selection to parent item
