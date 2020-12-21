@@ -718,7 +718,7 @@ void BattleDialogGraphicsScene::castSpell()
                                                    spell->getEffectSize().height(),
                                                    spell->getEffectSize().width(),
                                                    spell->getEffectColor(),
-                                                   spell->getEffectToken());
+                                                   spell->getEffectTokenPath());
 
     if(!effect)
     {
@@ -752,7 +752,7 @@ void BattleDialogGraphicsScene::castSpell()
                                                                                                                 tokenHeight,
                                                                                                                 tokenWidth,
                                                                                                                 spell->getEffectColor(),
-                                                                                                                spell->getEffectToken()));
+                                                                                                                spell->getEffectTokenPath()));
 
         if(!tokenEffect)
         {
