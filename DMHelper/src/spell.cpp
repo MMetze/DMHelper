@@ -1,4 +1,5 @@
 #include "spell.h"
+#include "spellbook.h"
 #include "battledialogmodeleffect.h"
 
 Spell::Spell(const QString& name, QObject *parent) :
@@ -18,7 +19,6 @@ Spell::Spell(const QString& name, QObject *parent) :
     _effectShapeActive(true),
     _effectSize(20, 20),
     _effectColor(115,18,0,64),
-    _effectTokenActive(true),
     _effectToken(),
     _effectTokenRotation(0),
     _effectConditions(Combatant::Condition_None),
@@ -44,7 +44,6 @@ Spell::Spell(const QDomElement &element, bool isImport, QObject *parent) :
     _effectShapeActive(true),
     _effectSize(20, 20),
     _effectColor(115,18,0,64),
-    _effectTokenActive(true),
     _effectToken(),
     _effectTokenRotation(0),
     _effectConditions(Combatant::Condition_None),
@@ -78,6 +77,7 @@ void Spell::inputXML(const QDomElement &element, bool isImport)
     {
         descriptionText.append(descriptionElement.text());
         descriptionText.append(QChar::LineFeed);
+        descriptionText.append(QChar::LineFeed);
         descriptionElement = descriptionElement.nextSiblingElement(QString("text"));
     }
     setDescription(descriptionText);
@@ -101,10 +101,50 @@ void Spell::inputXML(const QDomElement &element, bool isImport)
                               effectElement.attribute("colorB", QString::number(0)).toInt(),
                               effectElement.attribute("colorA", QString::number(64)).toInt()));
         setEffectConditions(effectElement.attribute("conditions", QString("0")).toInt());
-        setEffectTokenActive(static_cast<bool>(element.attribute("tokenActive", QString::number(1)).toInt()));
         setEffectToken(effectElement.firstChildElement(QString("token")).text());
         setEffectTokenRotation(effectElement.attribute("tokenRotation", QString("0")).toInt());
     }
+
+    endBatchChanges();
+}
+
+void Spell::inputXML_CONVERT(const QDomElement &element)
+{
+    beginBatchChanges();
+
+    setName(element.firstChildElement(QString("name")).text());
+    setLevel(element.firstChildElement(QString("level")).text().toInt());
+    QString schoolText = element.firstChildElement(QString("school")).text();
+    schoolText.replace(0, 1, schoolText.at(0).toUpper());
+    setSchool(schoolText);
+    setTime(element.firstChildElement(QString("casting_time")).text());
+    setRange(element.firstChildElement(QString("range")).text());
+    setDuration(element.firstChildElement(QString("duration")).text());
+
+    QString ritualText = element.firstChildElement(QString("ritual")).text();
+    setRitual(ritualText == QString("true"));
+
+    setDescription(element.firstChildElement(QString("description")).text());
+
+    QString classesString;
+    QDomElement classesElement = element.firstChildElement(QString("classes"));
+    QDomElement classElement = classesElement.firstChildElement(QString("element"));
+    while(!classElement.isNull())
+    {
+        if(!classesString.isEmpty())
+            classesString += QString(", ");
+
+        QString classString = classElement.text();
+        classString.replace(0, 1, classString.at(0).toUpper());
+        classesString += classString;
+
+        classElement = classElement.nextSiblingElement(QString("element"));
+    }
+    setClasses(classesString);
+
+    QDomElement componentsElement = element.firstChildElement(QString("components"));
+    if(!componentsElement.isNull())
+        setComponents(componentsElement.firstChildElement(QString("raw")).text());
 
     endBatchChanges();
 }
@@ -126,12 +166,13 @@ QDomElement Spell::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
         outputValue(doc, element, isExport, QString("ritual"), QString("YES"));
 
     QStringList descriptionParts = getDescription().split(QChar::LineFeed);
-    for(QString part : descriptionParts)
+    for(QString& part : descriptionParts)
     {
-        outputValue(doc, element, isExport, QString("text"), part);
+        if(!part.isEmpty())
+            outputValue(doc, element, isExport, QString("text"), part);
     }
 
-    for(Dice singleRoll : getRolls())
+    for(Dice& singleRoll : getRolls())
     {
         outputValue(doc, element, isExport, QString("roll"), singleRoll.toString());
     }
@@ -146,9 +187,9 @@ QDomElement Spell::outputXML(QDomDocument &doc, QDomElement &element, QDir& targ
     effectElement.setAttribute("colorB", getEffectColor().blue());
     effectElement.setAttribute("colorA", getEffectColor().alpha());
     effectElement.setAttribute("conditions", getEffectConditions());
-    effectElement.setAttribute("tokenActive", getEffectTokenActive());
     effectElement.setAttribute("tokenRotation", getEffectTokenRotation());
-    outputValue(doc, effectElement, isExport, QString("token"), getEffectToken().isEmpty() ? QString("") : getEffectToken());
+    //outputValue(doc, effectElement, isExport, QString("token"), getEffectToken().isEmpty() ? QString("") : getEffectToken());
+    outputValue(doc, effectElement, isExport, QString("token"), getEffectToken().isEmpty() ? QString("") : targetDirectory.relativeFilePath(getEffectToken()));
     element.appendChild(effectElement);
 
     return element;
@@ -195,7 +236,6 @@ void Spell::cloneSpell(Spell& other)
     _effectShapeActive = other._effectShapeActive;
     _effectSize = other._effectSize;
     _effectColor = other._effectColor;
-    _effectTokenActive = other._effectTokenActive;
     _effectToken = other._effectToken;
     _effectTokenRotation = other._effectTokenRotation;
     _effectConditions = other._effectConditions;
@@ -298,15 +338,14 @@ QColor Spell::getEffectColor() const
 {
     return _effectColor;
 }
-
-bool Spell::getEffectTokenActive() const
-{
-    return _effectTokenActive;
-}
-
 QString Spell::getEffectToken() const
 {
     return _effectToken;
+}
+
+QString Spell::getEffectTokenPath() const
+{
+    return Spellbook::Instance()->getDirectory().filePath(getEffectToken());
 }
 
 int Spell::getEffectTokenRotation() const
@@ -469,15 +508,6 @@ void Spell::setEffectColor(QColor effectColor)
         return;
 
     _effectColor = effectColor;
-    registerChange();
-}
-
-void Spell::setEffectTokenActive(bool effectTokenActive)
-{
-    if(_effectTokenActive == effectTokenActive)
-        return;
-
-    _effectTokenActive = effectTokenActive;
     registerChange();
 }
 
