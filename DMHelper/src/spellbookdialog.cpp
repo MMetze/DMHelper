@@ -55,7 +55,7 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->edtEffectHeight, &QLineEdit::textEdited, this, &SpellbookDialog::handleHeightChanged);
     connect(ui->btnEffectColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(spellDataEdit()));
     connect(ui->sliderOpacity, &QAbstractSlider::valueChanged, this, &SpellbookDialog::spellDataEdit);
-    connect(ui->edtEffectToken, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtEffectToken, &QLineEdit::textChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->cmbEffectType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleEffectChanged(int)));
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &SpellbookDialog::editConditions);
     connect(ui->btnEffectTokenBrowse, &QAbstractButton::clicked, this, &SpellbookDialog::selectToken);

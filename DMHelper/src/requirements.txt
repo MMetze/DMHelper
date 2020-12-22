@@ -8,7 +8,7 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Engineering version with PHB (WotC IP) data
     DONE - Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
     DONE - Images and shapes need to be saved
-    SRD data xml
+    DONE - SRD data xml
     Potential need for xml reading performance improvement
 3. Conditions
     DONE - Can be set in battles
@@ -37,6 +37,8 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Split Max HP and Current HP
     DONE - Improved importer AC and HP calculations
     DONE - Import Character puts it in the selected tree items
+
+
     Background color default to black, not transparent
     Background color on maps defaults weird
 
