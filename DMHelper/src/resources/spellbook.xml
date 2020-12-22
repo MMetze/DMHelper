@@ -556,7 +556,7 @@
    <text>As you hold your hands with thumbs touching and fingers spread, a thin sheet of flames shoots forth from your outstretched fingertips. Each creature in a 15-foot cone must make a Dexterity saving throw. A creature takes 3d6 fire damage on a failed save, or half as much damage on a successful one.</text>
    <text>The fire ignites any flammable objects in the area that aren't being worn or carried.</text>
    <effect shapeActive="1" colorG="170" conditions="0" colorR="255" colorB="0" sizeX="15" type="2" colorA="114" sizeY="15" tokenRotation="90">
-    <token>Images/Burning Hands.png</token>
+    <token>Images/2-Minute Tabletop Burning Hands.png</token>
    </effect>
   </spell>
   <spell>
@@ -813,7 +813,7 @@
    <text>A blast of cold air erupts from your hands. Each creature in a 60-foot cone must make a Constitution saving throw. A creature takes 8d8 cold damage on a failed save, or half as much damage on a successful one.</text>
    <text>A creature killed by this spell becomes a frozen statue until it thaws.</text>
    <effect shapeActive="1" colorG="255" conditions="0" colorR="0" colorB="255" sizeX="60" type="2" colorA="45" sizeY="60" tokenRotation="90">
-    <token>Images/Cone of Cold.png</token>
+    <token>Images/2-Minute Tabletop Cone of Cold.png</token>
    </effect>
   </spell>
   <spell>
@@ -1265,7 +1265,7 @@
    <text>If the glowing bead is touched before the interval has expired, the creature touching it must make a Dexterity saving throw. On a failed save, the spell ends immediately, causing the bead to erupt in flame. On a successful save, the creature can throw the bead up to 40 feet. When it strikes a creature or a solid object, the spell ends, and the bead explodes.</text>
    <text>The fire damages objects in the area dn ignites flammable objects that aren't being worn or carried.</text>
    <effect shapeActive="1" colorG="170" conditions="0" colorR="255" colorB="0" sizeX="20" type="1" colorA="105" sizeY="20" tokenRotation="0">
-    <token>Images/Fireball.png</token>
+    <token>Images/2-Minute Tabletop Fireball.png</token>
    </effect>
   </spell>
   <spell>
@@ -1936,7 +1936,7 @@
    <text>A storm made up of sheets of roaring flame appears in a location you choose within range. The area of the storm consists of up to ten 10-foot-cubes, which you can arrange as you wish. Each cube must have at least one face adjacent to the face of another cube. Each creature in the area must make a Dexterity saving throw. It takes 7d10 fire damage on a failed save, or half as much damage on a successful one.</text>
    <text>The fire damages objects in the area and ignites flammable objects that aren't being worn or carried. If you choose, plant life in the area is unaffected by this spell.</text>
    <effect shapeActive="1" colorG="170" conditions="0" colorR="255" colorB="0" sizeX="10" type="3" colorA="64" sizeY="10" tokenRotation="0">
-    <token>Images/Fire Storm.png</token>
+    <token>Images/2-Minute Tabletop Fire Storm.png</token>
    </effect>
   </spell>
   <spell>
@@ -1951,7 +1951,7 @@
    <text>A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame. Each creature in a 20-foot-radius sphere centered on that point must make a Dexterity saving throw. A target takes 8d6 fire damage on a failed save, or half as much damage on a successful one.</text>
    <text>The fire spreads around corners. It ignites flammable objects in the area that aren't being worn or carried.</text>
    <effect shapeActive="1" colorG="170" conditions="0" colorR="255" colorB="0" sizeX="20" type="1" colorA="104" sizeY="20" tokenRotation="0">
-    <token>Images/Fireball.png</token>
+    <token>Images/2-Minute Tabletop Fireball.png</token>
    </effect>
   </spell>
   <spell>
@@ -1981,7 +1981,7 @@
    <classes>Cleric</classes>
    <text>A vertical column of divine fire roars down from the heavens in a location you specify. Each creature in a 10-foot radius, 40-foot-high cylinder centered on a point within range must make a Dexterity saving throw. A creature takes 4d6 fire damage and 4d6 radiant damage on a failed save, or half as much damage on a successful one.</text>
    <effect shapeActive="1" colorG="170" conditions="0" colorR="255" colorB="0" sizeX="10" type="1" colorA="140" sizeY="10" tokenRotation="0">
-    <token>Images/Fire Storm.png</token>
+    <token>Images/2-Minute Tabletop Fire Storm.png</token>
    </effect>
   </spell>
   <spell>
@@ -1997,7 +1997,7 @@
    <text>As a bonus action, you can move the sphere up to 30 feet. If you ram the sphere into a creature, that creature must make the saving throw against the sphere's damage, and the sphere stops moving this turn.</text>
    <text>When you move the sphere, you can direct it over barriers up to 5 feet tall and jump it across pits up to 10 feet wide. The sphere ignites flammable objects not being worn or carried, and it sheds bright light in a 20-foot radius and dim light for an additional 20 feet.</text>
    <effect shapeActive="1" colorG="170" conditions="0" colorR="255" colorB="0" sizeX="5" type="3" colorA="178" sizeY="5" tokenRotation="0">
-    <token>Images/Fire Storm.png</token>
+    <token>Images/2-Minute Tabletop Fire Storm.png</token>
    </effect>
   </spell>
   <spell>
@@ -2143,7 +2143,7 @@
    <text>At Higher Levels: When you cast this spell using a spell slot of 7th level or higher, the damage increases by 1d6 for each slot level above 6th</text>
    <roll>10d6</roll>
    <effect shapeActive="1" colorG="255" conditions="0" colorR="170" colorB="255" sizeX="60" type="1" colorA="155" sizeY="60" tokenRotation="0">
-    <token>Images/Freezing Sphere.png</token>
+    <token>Images/2-Minute Tabletop Freezing Sphere.png</token>
    </effect>
   </spell>
   <spell>
@@ -2638,7 +2638,7 @@
    <text>You create a twisting pattern of colors that weaves through the air inside a 30-foot cube within range. The pattern appears for a moment and vanishes. Each creature in the area who sees the pattern must make a Wisdom saving throw. On a failed save, the creature becomes charmed for the duration. While charmed by this spell, the creature is incapacitated and has a speed of 0.</text>
    <text>The spell ends for an affected creature if it takes any damage or if someone else uses an action to shake the creature out of its stupor.</text>
    <effect shapeActive="1" colorG="255" conditions="2" colorR="255" colorB="127" sizeX="30" type="3" colorA="73" sizeY="30" tokenRotation="0">
-    <token>Images/Hypnotic Pattern.png</token>
+    <token>Images/2-Minute Tabletop Hypnotic Pattern.png</token>
    </effect>
   </spell>
   <spell>
@@ -2653,7 +2653,7 @@
    <text>A hail of rock-hard ice pounds to the ground in a 20-foot-radius, 40-foot-high cylinder centered on a point within range. Each creature in the cylinder must make a Dexterity saving throw. A creature takes 2d8 bludgeoning damage and 4d6 cold damage on a failed save, or half as much damage on a successful one.</text>
    <text>Hailstones turn the storm's area of effect into difficult terrain until the end of your next turn.</text>
    <effect shapeActive="1" colorG="255" conditions="0" colorR="85" colorB="255" sizeX="20" type="1" colorA="64" sizeY="20" tokenRotation="0">
-    <token>Images/Hypnotic Pattern.png</token>
+    <token>Images/2-Minute Tabletop Hypnotic Pattern.png</token>
    </effect>
   </spell>
   <spell>
@@ -2724,7 +2724,7 @@
    <text>When the cloud appears, each creature in it must make a Dexterity saving throw. A creature takes 10d8 fire damage on a failed save, or half as much damage on a successful one. A creature must also make this saving throw when it enters the spell's area for the first time on a turn or ends its turn there.</text>
    <text>The cloud moves 10 feet directly away from you in a direction that you choose at the start of each of your turns.</text>
    <effect shapeActive="1" colorG="170" conditions="0" colorR="170" colorB="170" sizeX="20" type="1" colorA="130" sizeY="20" tokenRotation="0">
-    <token>Images/Fire Embers - 5x5.png</token>
+    <token>Images/2-Minute Tabletop Fire Embers.png</token>
    </effect>
   </spell>
   <spell>
@@ -2907,7 +2907,7 @@
    <text>A stroke of lightning forming a line 100 feet long and 5 feet wide blasts out from you in a direction you choose. Each creature in the line must make a Dexterity saving throw. A creature takes 8d6 lightning damage on a failed save, or half as much damage on a successful one.</text>
    <text>The lightning ignites flammable objects in the area that aren't being worn or carried.</text>
    <effect shapeActive="1" colorG="255" conditions="0" colorR="170" colorB="255" sizeX="100" type="4" colorA="64" sizeY="100" tokenRotation="90">
-    <token>Images/Lightning Bolt.png</token>
+    <token>Images/2-Minute Tabletop Lightning Bolt.png</token>
    </effect>
   </spell>
   <spell>
@@ -3253,7 +3253,7 @@
    <text>Blazing orbs of fire plummet to the ground at four different points you can see within range. Each creature in a 40-foot-radius sphere centered on each point you choose must make a Dexterity saving throw. The sphere spreads around corners. A creature takes 20d6 fire damage and 20d6 bludgeoning damage on a failed save, or half as much damage on a successful one. A creature in the area of more than one fiery burst is affected only once.</text>
    <text>The spell damages objects in the area and ignites flammable objects that aren't being worn or carried.</text>
    <effect shapeActive="1" colorG="0" conditions="0" colorR="180" colorB="0" sizeX="40" type="1" colorA="110" sizeY="40" tokenRotation="0">
-    <token>Images/Fireball.png</token>
+    <token>Images/2-Minute Tabletop Fireball.png</token>
    </effect>
   </spell>
   <spell>
@@ -4334,7 +4334,7 @@
    <text>The ground in the area is covered with slick ice, making it difficult terrain. When a creature enters the spell's area for the first time on a turn or starts its turn there, it must make a Dexterity saving throw. On a failed save, it falls prone.</text>
    <text>If a creature is concentrating in the spell's area, the creature must make a successful Constitution saving throw against your spell save DC or lose concentration.</text>
    <effect shapeActive="1" colorG="255" conditions="0" colorR="85" colorB="255" sizeX="40" type="1" colorA="64" sizeY="40" tokenRotation="0">
-    <token>Images/Hypnotic Pattern.png</token>
+    <token>Images/2-Minute Tabletop Hypnotic Pattern.png</token>
    </effect>
   </spell>
   <spell>
@@ -4714,7 +4714,7 @@
    <text>A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube originating from you must make a Constitution saving throw. On a failed save, a creature takes 2d8 thunder damage and is pushed 10 feet away from you. On a successful save, the creature takes half as much damage and isn't pushed. In addition, unsecured objects that are completely within the area of effect are automatically pushed 10 feet away from you by the spell's effect, and the spell emits a thunderous boom audible out to 300 feet.</text>
    <text>At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d8 for each slot level above 1st.</text>
    <effect shapeActive="1" colorG="0" conditions="0" colorR="127" colorB="191" sizeX="15" type="3" colorA="44" sizeY="15" tokenRotation="0">
-    <token>Images/Thunderwave.png</token>
+    <token>Images/2-Minute Tabletop Thunderwave.png</token>
    </effect>
   </spell>
   <spell>

@@ -138,6 +138,8 @@ void SpellbookDialog::setSpell(Spell* spell)
     }
 
     ui->edtEffectToken->setText(_spell->getEffectToken());
+    ui->lblTwoMinute->setVisible(ui->edtEffectToken->text().contains(QString("2-Minute Tabletop")));
+    ui->lblTwoMinuteBlank->setVisible(ui->lblTwoMinute->isHidden());
     ui->cmbEffectType->setCurrentIndex(_spell->getEffectType());
     _tokenRotation = _spell->getEffectTokenRotation();
     handleEffectChanged(_spell->getEffectType());
@@ -370,6 +372,8 @@ void SpellbookDialog::selectToken()
     }
 
     ui->edtEffectToken->setText(tokenFile);
+    ui->lblTwoMinute->setVisible(ui->edtEffectToken->text().contains(QString("2-Minute Tabletop")));
+    ui->lblTwoMinuteBlank->setVisible(ui->lblTwoMinute->isHidden());
 
     emit spellDataEdit();
 }
@@ -527,6 +531,8 @@ void SpellbookDialog::storeSpellData()
     newColor.setAlpha(ui->sliderOpacity->value());
     _spell->setEffectColor(newColor);
     _spell->setEffectToken(ui->edtEffectToken->text());
+    ui->lblTwoMinute->setVisible(ui->edtEffectToken->text().contains(QString("2-Minute Tabletop")));
+    ui->lblTwoMinuteBlank->setVisible(ui->lblTwoMinute->isHidden());
     _spell->setEffectTokenRotation(_tokenRotation);
     // Conditions are set directly
 
