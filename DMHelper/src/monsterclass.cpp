@@ -152,17 +152,13 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
 
 QDomElement MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
-    element.setAttribute( "private", static_cast<int>(getPrivate()) );
+    element.setAttribute("private", static_cast<int>(getPrivate()));
 
     QString iconPath = getIcon();
     if(iconPath.isEmpty())
-    {
-        element.setAttribute( "icon", QString("") );
-    }
+        element.setAttribute("icon", QString(""));
     else
-    {
-        element.setAttribute( "icon", targetDirectory.relativeFilePath(iconPath));
-    }
+        element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
 
     outputValue(doc, element, isExport, QString("name"), getName());
     outputValue(doc, element, isExport, QString("type"), getMonsterType());
@@ -435,6 +431,38 @@ QString MonsterClass::getSkillString() const
     }
 
     return result;
+}
+
+void MonsterClass::setSkillString(const QString& skills)
+{
+    if(skills.isEmpty())
+        return;
+
+    if(skills == getSkillString())
+        return;
+
+    QStringList skillList = skills.split(", ");
+    if(skillList.count() <= 0)
+        return;
+
+    _skillValues.clear();
+
+    for(QString skillInfo : skillList)
+    {
+        int spaceIndex = skillInfo.lastIndexOf(" ");
+        QString skillName = skillInfo.left(spaceIndex);
+        QString skillValueString = skillInfo.right(skillInfo.length() - spaceIndex);
+        bool convertSuccess = false;
+        int skillValue = skillValueString.toUInt(&convertSuccess);
+        if(convertSuccess)
+        {
+            int skillKey = Character::findKeyForSkillName(skillName);
+            if(skillKey >= 0)
+            {
+                _skillValues[skillKey] = skillValue;
+            }
+        }
+    }
 }
 
 bool MonsterClass::isSkillKnown(Combatant::Skills skill) const

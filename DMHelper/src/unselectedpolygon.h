@@ -10,6 +10,9 @@ public:
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
 
+protected:
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
 };
 
 #endif // UNSELECTEDPOLYGON_H

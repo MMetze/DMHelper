@@ -31,6 +31,7 @@ signals:
     void addMonsterClicked();
     void addNPCClicked();
     void addObjectClicked();
+    void castSpellClicked();
     void addEffectRadiusClicked();
     void addEffectCubeClicked();
     void addEffectConeClicked();

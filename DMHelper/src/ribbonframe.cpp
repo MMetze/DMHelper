@@ -76,54 +76,56 @@ void RibbonFrame::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
 
-    QScreen* primary = QGuiApplication::primaryScreen();
-    if(!primary)
-        return;
-
-    QSize screenSize = primary->availableSize();
-
-    int ribbonHeight = screenSize.height() / 15;
-    setMinimumHeight(ribbonHeight);
-    setMaximumHeight(ribbonHeight);
-    resize(width(), ribbonHeight);
+    int ribbonHeight = getRibbonHeight();
+    if(ribbonHeight > 0)
+    {
+        setMinimumHeight(ribbonHeight);
+        setMaximumHeight(ribbonHeight);
+        resize(width(), ribbonHeight);
+    }
 }
 
-void RibbonFrame::setStandardButtonSize(QLabel& label, QPushButton& button)
+void RibbonFrame::setStandardButtonSize(QLabel& label, QPushButton& button, int frameHeight)
 {
     QFontMetrics metrics = label.fontMetrics();
-    int labelHeight = getLabelHeight(metrics);
-    int iconDim = height() - labelHeight;
+    int labelHeight = getLabelHeight(metrics, frameHeight);
+    int iconDim = frameHeight - labelHeight;
     int newWidth = qMax(metrics.horizontalAdvance(label.text()), iconDim);
 
     setWidgetSize(label, newWidth, labelHeight);
     setButtonSize(button, newWidth, iconDim);
-    //setWidgetSize(button, newWidth, iconDim);
-    //button.setIconSize(QSize(iconDim * 4 / 5, iconDim * 4 / 5));
 }
 
-void RibbonFrame::setLineHeight(QFrame& line)
+void RibbonFrame::setLineHeight(QFrame& line, int frameHeight)
 {
-    setLineHeight(line, height());
-}
-
-void RibbonFrame::setLineHeight(QFrame& line, int fullHeight)
-{
-    int lineHeight = fullHeight * 9 / 10;
+    int lineHeight = frameHeight * 9 / 10;
     line.setMinimumHeight(lineHeight);
     line.setMaximumHeight(lineHeight);
 }
 
-int RibbonFrame::getLabelHeight(QLabel& label) const
+int RibbonFrame::getRibbonHeight(int defaultHeight)
 {
-    return getLabelHeight(label.fontMetrics());
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(!primary)
+        return defaultHeight;
+
+    QSize screenSize = primary->availableSize();
+
+    return screenSize.height() / 15;
 }
 
-int RibbonFrame::getLabelHeight(const QFontMetrics& metrics) const
+int RibbonFrame::getLabelHeight(QLabel& label, int frameHeight)
 {
-    return metrics.height() + (height() / 10);
+    return getLabelHeight(label.fontMetrics(), frameHeight);
 }
 
-void RibbonFrame::setWidgetSize(QWidget& widget, int w, int h) const
+int RibbonFrame::getLabelHeight(const QFontMetrics& metrics, int frameHeight)
+{
+    return metrics.height() + (frameHeight / 10);
+    //    return metrics.height() + (height() / 10);
+}
+
+void RibbonFrame::setWidgetSize(QWidget& widget, int w, int h)
 {
     widget.setMinimumWidth(w);
     widget.setMaximumWidth(w);
@@ -131,14 +133,14 @@ void RibbonFrame::setWidgetSize(QWidget& widget, int w, int h) const
     widget.setMaximumHeight(h);
 }
 
-void RibbonFrame::setButtonSize(QPushButton& button, int w, int h) const
+void RibbonFrame::setButtonSize(QPushButton& button, int w, int h)
 {
     setWidgetSize(button, w, h);
     int iconSize = getIconSize(w, h);
     button.setIconSize(QSize(iconSize, iconSize));
 }
 
-int RibbonFrame::getIconSize(int buttonWidth, int buttonHeight) const
+int RibbonFrame::getIconSize(int buttonWidth, int buttonHeight)
 {
     return qMin(buttonWidth, buttonHeight) * 4 / 5;
 }

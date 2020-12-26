@@ -20,6 +20,7 @@ CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
 
 CampaignObjectBase::~CampaignObjectBase()
 {
+    emit campaignObjectDestroyed(getID());
 }
 
 QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
@@ -151,6 +152,22 @@ const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
 QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects()
 {
     return findChildren<CampaignObjectBase *>(QString(), Qt::FindDirectChildrenOnly);
+}
+
+QList<CampaignObjectBase*> CampaignObjectBase::getChildObjectsByType(int childType)
+{
+    QList<CampaignObjectBase*> objects;
+
+    if(getObjectType() == childType)
+        objects.append(this);
+
+    for(CampaignObjectBase* child : getChildObjects())
+    {
+        if(child)
+            objects.append(child->getChildObjectsByType(childType));
+    }
+
+    return objects;
 }
 
 CampaignObjectBase* CampaignObjectBase::getChildById(QUuid id)
@@ -381,6 +398,7 @@ QUuid CampaignObjectBase::parseIdString(QString idString, int* intId, bool isLoc
     QUuid result(idString);
     if(result.isNull())
     {
+        // Integer ID support is needed for backwards compatibility to v1.5 or earlier
         bool ok = false;
         int tempIntId = idString.toInt(&ok);
         if(ok)

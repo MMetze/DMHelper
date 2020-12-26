@@ -36,49 +36,7 @@ EncounterScrollingTextEdit::EncounterScrollingTextEdit(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //connect(ui->btnBrowse,SIGNAL(clicked(bool)),this,SLOT(browseImageFile()));
-
-    //QFontDatabase fontDB;
-    //ui->cmbFont->addItems(fontDB.families());
-
     connect(ui->edtText,SIGNAL(textChanged()),this,SLOT(setPlainText()));
-
-    /*
-    connect(ui->spinSpeed,SIGNAL(valueChanged(double)),this,SIGNAL(scrollSpeedChanged(double)));
-    connect(ui->sliderWidth,SIGNAL(valueChanged(int)),this,SIGNAL(imageWidthChanged(int)));
-    connect(ui->sliderWidth,SIGNAL(valueChanged(int)),this,SLOT(setTextWidth()));
-    connect(ui->edtImageFile,SIGNAL(textChanged(QString)),this,SIGNAL(imgFileChanged(QString)));
-    connect(ui->edtText,SIGNAL(textChanged()),this,SLOT(setPlainText()));
-    connect(ui->cmbFont,SIGNAL(currentIndexChanged(QString)),this,SIGNAL(fontFamilyChanged(QString)));
-    connect(ui->cmbFont,SIGNAL(currentIndexChanged(QString)),this,SLOT(setTextFont()));
-
-    ui->edtSize->setValidator(new QIntValidator(1,999,this));
-    connect(ui->edtSize,SIGNAL(textChanged(QString)),this,SLOT(setFontSize()));
-
-    connect(ui->chkBold,SIGNAL(clicked(bool)),this,SIGNAL(fontBoldChanged(bool)));
-    connect(ui->chkBold,SIGNAL(clicked(bool)),this,SLOT(setTextFont()));
-    connect(ui->chkItalics,SIGNAL(clicked(bool)),this,SIGNAL(fontItalicsChanged(bool)));
-    connect(ui->chkItalics,SIGNAL(clicked(bool)),this,SLOT(setTextFont()));
-
-    ui->buttonGroup->setId(ui->btnLeftText,Qt::AlignLeft);
-    ui->buttonGroup->setId(ui->btnCenterText,Qt::AlignHCenter);
-    ui->buttonGroup->setId(ui->btnRightText,Qt::AlignRight);
-    connect(ui->buttonGroup,SIGNAL(buttonClicked(int)),this,SLOT(setAlignment()));
-
-    connect(ui->btnColor,SIGNAL(colorChanged(QColor)),this,SLOT(setColor()));
-    ui->btnColor->setRotationVisible(false);
-    */
-
-
-    //connect(this,SIGNAL(imgFileChanged(const QString&)),this,SLOT(loadImage()));
-
-    /*
-    connect(ui->framePublish, SIGNAL(toggled(bool)), this, SLOT(runAnimation()));
-    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotatePublish()));
-    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotatePublish()));
-
-    ui->framePublish->setCheckable(true);
-    */
 
     ui->edtText->installEventFilter(this);
 
@@ -144,31 +102,19 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
     if(!scrollingText)
         return;
 
-    //ui->spinSpeed->setValue(_scrollingText->getScrollSpeed()); // TODO: what if invalid?
     emit scrollSpeedChanged(_scrollingText->getScrollSpeed());
-    //ui->sliderWidth->setValue(_scrollingText->getImageWidth());
     emit imageWidthChanged(_scrollingText->getImageWidth());
-    //ui->edtImageFile->setText(_scrollingText->getImageFile());
     emit imageFileChanged(_scrollingText->getImageFile());
-    //ui->cmbFont->setCurrentIndex(ui->cmbFont->findText(_scrollingText->getFontFamily()));
     emit fontFamilyChanged(_scrollingText->getFontFamily());
-    //ui->edtSize->setText(QString::number(_scrollingText->getFontSize()));
     emit fontSizeChanged(_scrollingText->getFontSize());
-    //ui->chkBold->setChecked(_scrollingText->getFontBold());
     emit fontBoldChanged(_scrollingText->getFontBold());
-    //ui->chkItalics->setChecked(_scrollingText->getFontItalics());
     emit fontItalicsChanged(_scrollingText->getFontItalics());
-    //ui->btnLeftText->setChecked(scrollingText->getAlignment() == Qt::AlignLeft);
-    //ui->btnCenterText->setChecked(scrollingText->getAlignment() == Qt::AlignHCenter);
-    //ui->btnRightText->setChecked(scrollingText->getAlignment() == Qt::AlignRight);
     emit alignmentChanged(_scrollingText->getAlignment());
-    //ui->btnColor->setColor(_scrollingText->getFontColor());
     emit colorChanged(_scrollingText->getFontColor());
 
     ui->edtText->setPlainText(_scrollingText->getText());
     ui->edtText->setTextWidth(_scrollingText->getImageWidth());
 
-    //setTextWidth();
     setTextFont();
     setTextAlignment();
     setTextColor();
@@ -177,9 +123,10 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
     _firstTime = true;
 
     connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SIGNAL(textChanged(const QString&)));
-    connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextFont()));
-    connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextAlignment()));
-    connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextColor()));
+    //connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextFont()));
+    //connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextAlignment()));
+    //connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setTextColor()));
+    connect(scrollingText, SIGNAL(textChanged(const QString&)), this, SLOT(setAllFormats()));
     connect(scrollingText, SIGNAL(scrollSpeedChanged(int)), this, SIGNAL(scrollSpeedChanged(int)));
     connect(scrollingText, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
     connect(scrollingText, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
@@ -194,7 +141,6 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
     connect(scrollingText, SIGNAL(alignmentChanged(Qt::Alignment)), this, SIGNAL(alignmentChanged(Qt::Alignment)));
     connect(scrollingText, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(setTextAlignment()));
     connect(scrollingText, SIGNAL(imageWidthChanged(int)), this, SIGNAL(imageWidthChanged(int)));
-    //connect(scrollingText, SIGNAL(imageWidthChanged(int)), dynamic_cast<TextEditMargins*>(ui->edtText), SLOT(setTextWidth(int)));
     connect(scrollingText, &EncounterScrollingText::imageWidthChanged, ui->edtText, &TextEditMargins::setTextWidth);
     connect(scrollingText, SIGNAL(fontColorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
     connect(scrollingText, SIGNAL(fontColorChanged(QColor)), this, SLOT(setTextColor()));
@@ -216,6 +162,10 @@ void EncounterScrollingTextEdit::unsetScrollingText(EncounterScrollingText* scro
         disconnect(_scrollingText, nullptr, this, nullptr);
 
     _scrollingText = nullptr;
+
+    _backgroundImg = QImage();
+    _backgroundImgScaled = QImage();
+    ui->edtText->clear();
 }
 
 void EncounterScrollingTextEdit::setScrollSpeed(int scrollSpeed)
@@ -304,13 +254,6 @@ void EncounterScrollingTextEdit::targetResized(const QSize& newSize)
     }
 }
 
-/*
-void EncounterScrollingTextEdit::cancelPublish()
-{
-    ui->framePublish->cancelPublish();
-}
-*/
-
 void EncounterScrollingTextEdit::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
@@ -377,18 +320,6 @@ bool EncounterScrollingTextEdit::eventFilter(QObject *watched, QEvent *event)
                 QPainter paint(ui->edtText);
                 paint.drawImage(0, 0, _backgroundImgScaled);
             }
-            /*
-            if(!_backgroundImg.isNull())
-            {
-                QPainter paint(ui->edtText);
-                paint.drawImage(0, 0, _backgroundImg);
-            }
-            else if(!_backgroundVideo.isNull())
-            {
-                QPainter paint(ui->edtText);
-                paint.drawImage(0, 0, _backgroundVideo);
-            }
-            */
         }
     }
 
@@ -439,7 +370,6 @@ void EncounterScrollingTextEdit::createVideoPlayer(bool dmPlayer)
         // TODO: consider audio in the scrolling text
         QSize rotatedSize = getRotatedTargetSize();
         _videoPlayer = new VideoPlayer(_scrollingText->getImageFile(), rotatedSize, true, false);
-        //_videoPlayer->targetResized(rotatedSize);
     }
 }
 
@@ -455,17 +385,24 @@ void EncounterScrollingTextEdit::cleanupPlayer()
 
 void EncounterScrollingTextEdit::setPlainText()
 {
-    //emit textChanged(ui->edtText->toPlainText());
     setText(ui->edtText->toPlainText());
 }
 
-/*
-void EncounterScrollingTextEdit::setFontSize()
+void EncounterScrollingTextEdit::setAllFormats()
 {
-    emit fontSizeChanged(ui->edtSize->text().toInt());
-    setTextFont();
+    if(!_scrollingText)
+        return;
+
+    QTextCursor cursor(ui->edtText->textCursor());
+
+    ui->edtText->selectAll();
+
+    setTextFontFormat();
+    setTextAlignmentFormat();
+    setTextColorFormat();
+
+    ui->edtText->setTextCursor(cursor);
 }
-*/
 
 void EncounterScrollingTextEdit::setTextFont()
 {
@@ -473,38 +410,20 @@ void EncounterScrollingTextEdit::setTextFont()
         return;
 
     ui->edtText->selectAll();
-    ui->edtText->setFontFamily(_scrollingText->getFontFamily());
-    ui->edtText->setFontItalic(_scrollingText->getFontItalics());
-    ui->edtText->setFontWeight(_scrollingText->getFontBold() ? QFont::Bold : QFont::Normal);
-    ui->edtText->setFontPointSize(_scrollingText->getFontSize());
-    //ui->edtText->setFontFamily(ui->cmbFont->currentText());
-    //ui->edtText->setFontItalic(ui->chkItalics->isChecked());
-    //ui->edtText->setFontWeight(ui->chkBold->isChecked() ? QFont::Bold : QFont::Normal);
-    //ui->edtText->setFontPointSize(ui->edtSize->text().toInt());
-
-    // Move the cursor to the end of the text
+    setTextFontFormat();
     moveCursorToEnd();
 }
-
-/*
-void EncounterScrollingTextEdit::setTextWidth()
-{
-    ui->edtText->setTextWidth(ui->sliderWidth->value());
-}
-*/
 
 void EncounterScrollingTextEdit::setTextAlignment()
 {
     if(!_scrollingText)
         return;
 
-    Qt::Alignment newAlignment = getAlignment();
-
     ui->edtText->selectAll();
-    ui->edtText->setAlignment(newAlignment);
+    setTextAlignmentFormat();
     moveCursorToEnd();
 
-    emit alignmentChanged(newAlignment);
+    emit alignmentChanged(getAlignment());
 }
 
 void EncounterScrollingTextEdit::setTextColor()
@@ -512,14 +431,39 @@ void EncounterScrollingTextEdit::setTextColor()
     if(!_scrollingText)
         return;
 
-    //QColor newColor = ui->btnColor->getColor();
-    QColor newColor = _scrollingText->getFontColor();
-    emit colorChanged(newColor);
-
     // Set the text color for all text then move the cursor to the end
     ui->edtText->selectAll();
-    ui->edtText->setTextColor(newColor);
+    setTextColorFormat();
     moveCursorToEnd();
+
+    emit colorChanged(_scrollingText->getFontColor());
+}
+
+void EncounterScrollingTextEdit::setTextFontFormat()
+{
+    if(!_scrollingText)
+        return;
+
+    ui->edtText->setFontFamily(_scrollingText->getFontFamily());
+    ui->edtText->setFontItalic(_scrollingText->getFontItalics());
+    ui->edtText->setFontWeight(_scrollingText->getFontBold() ? QFont::Bold : QFont::Normal);
+    ui->edtText->setFontPointSize(_scrollingText->getFontSize());
+}
+
+void EncounterScrollingTextEdit::setTextAlignmentFormat()
+{
+    if(!_scrollingText)
+        return;
+
+    ui->edtText->setAlignment(getAlignment());
+}
+
+void EncounterScrollingTextEdit::setTextColorFormat()
+{
+    if(!_scrollingText)
+        return;
+
+    ui->edtText->setTextColor(_scrollingText->getFontColor());
 }
 
 void EncounterScrollingTextEdit::publishClicked(bool checked)
@@ -535,7 +479,6 @@ void EncounterScrollingTextEdit::publishClicked(bool checked)
         {
             prepareImages();
 
-            //emit animationStarted(ui->framePublish->getColor());
             emit animationStarted();
             emit showPublishWindow();
             // TODO: add music
@@ -684,12 +627,11 @@ void EncounterScrollingTextEdit::loadImage()
         return;
 
     _backgroundImg = QImage();
+    _backgroundImgScaled = QImage();
 
-    //QString imageFileName = ui->edtImageFile->text();
     QString imageFileName = _scrollingText->getImageFile();
     if(!imageFileName.isEmpty())
     {
-        //if(!_backgroundImg.load(ui->edtImageFile->text()))
         if(_backgroundImg.load(imageFileName))
         {
             _backgroundImgScaled = _backgroundImg.scaled(ui->edtText->size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
@@ -729,7 +671,6 @@ Qt::Alignment EncounterScrollingTextEdit::getAlignment()
         return Qt::AlignHCenter;
 
     switch(_scrollingText->getAlignment())
-    //switch(ui->buttonGroup->checkedId())
     {
         case Qt::AlignLeft:
         case Qt::AlignHCenter:
@@ -750,7 +691,7 @@ QSize EncounterScrollingTextEdit::getRotatedTargetSize()
     }
     else
     {
-        result = _targetSize.transposed(); //_targetSize.transposed().scaled(_targetSize, Qt::KeepAspectRatio).transposed();
+        result = _targetSize.transposed();
     }
 
     return result;

@@ -5,8 +5,10 @@
 #include "party.h"
 #include "audiotrack.h"
 #include "dmconstants.h"
+#include "dmversion.h"
 #include "bestiary.h"
 #include "basicdateserver.h"
+#include "soundboardgroup.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QHash>
@@ -72,28 +74,14 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     _batchChanges(false),
     _changesMade(false),
     _dirtyMade(false),
-    _isValid(true)
+    _isValid(true),
+    _soundboardGroups()
 {
 }
-
-/*
-Campaign::Campaign(const QDomElement& element, bool isImport, QObject *parent) :
-    CampaignObjectBase(QString(), parent),
-    _date(1,1,0),
-    _time(0,0),
-    _batchChanges(false),
-    _changesMade(false),
-    _dirtyMade(false),
-    _isValid(false)
-{
-    inputXML(element, isImport);
-//    postProcessXML(element, isImport);
-}
-*/
 
 Campaign::~Campaign()
 {
-    //cleanupCampaign(true);
+    qDeleteAll(_soundboardGroups);
 }
 
 void Campaign::inputXML(const QDomElement &element, bool isImport)
@@ -110,17 +98,12 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     // TODO: WHY IS THIS NECESSARY?
     Bestiary::Instance()->startBatchProcessing();
 
-    // int encounterCount = 0;
-    // int mapCount = 0;
-
     QString calendarName = element.attribute("calendar", QString("Gregorian"));
     if(BasicDateServer::Instance())
         BasicDateServer::Instance()->setActiveCalendar(calendarName);
     BasicDate inputDate(element.attribute("date",QString("")));
     setDate(inputDate);
     setTime(QTime::fromMSecsSinceStartOfDay(element.attribute("time",QString::number(0)).toInt()));
-
-    //inputCampaignChildren(element, isImport);
 
     CampaignObjectBase::inputXML(element, isImport);
     Bestiary::Instance()->finishBatchProcessing();
@@ -180,50 +163,6 @@ int Campaign::getObjectType() const
     return DMHelper::CampaignType_Campaign;
 }
 
-/*
-void Campaign::resolveReferences()
-{
-    for( int charIt = 0; charIt < characters.size(); ++charIt )
-    {
-        characters.at(charIt)->resolveReferences();
-    }
-
-    for( int advIt = 0; advIt < adventures.size(); ++advIt )
-    {
-        adventures.at(advIt)->resolveReferences();
-    }
-
-    for( int settingIt = 0; settingIt < settings.size(); ++settingIt )
-    {
-        settings.at(settingIt)->resolveReferences();
-    }
-
-    for( int npcIt = 0; npcIt < npcs.size(); ++npcIt )
-    {
-        npcs.at(npcIt)->resolveReferences();
-    }
-
-    for( int trackIt = 0; trackIt < tracks.size(); ++trackIt )
-    {
-        tracks.at(trackIt)->resolveReferences();
-    }
-}
-*/
-
-/*
-void Campaign::widgetActivated(QWidget* widget)
-{
-    Q_UNUSED(widget);
-    qDebug() << "[Campaign]: ERROR widget activated on Campaign object. This should never happen!";
-}
-
-void Campaign::widgetDeactivated(QWidget* widget)
-{
-    Q_UNUSED(widget);
-    qDebug() << "[Campaign]: ERROR widget deactivated on Campaign object. This should never happen!";
-}
-*/
-
 void Campaign::beginBatchChanges()
 {
     _batchChanges = true;
@@ -240,34 +179,6 @@ void Campaign::endBatchChanges()
     if((_dirtyMade) || (_changesMade))
         emit dirty();
 }
-
-/*
-QString Campaign::getName() const
-{
-    return _name;
-}
-
-void Campaign::setName(const QString& campaignName)
-{
-    if(_name != campaignName)
-    {
-        _name = campaignName;
-        emit dirty();
-    }
-}
-*/
-
-/*
-Encounter* Campaign::getNotes() const
-{
-    return _notes;
-}
-
-int Campaign::getCharacterCount()
-{
-    return characters.count();
-}
-*/
 
 Character* Campaign::getCharacterById(QUuid id)
 {
@@ -323,46 +234,6 @@ Character* Campaign::getCharacterOrNPCByDndBeyondId(int id)
     return nullptr;
 }
 
-/*
-Character* Campaign::getCharacterByIndex(int index)
-{
-    if((index < 0)||(index >= characters.size()))
-        return nullptr;
-
-    return characters.at(index);
-}
-
-QUuid Campaign::addCharacter(Character* character)
-{
-    if(!character)
-        return QUuid();
-
-    character->setParent(this);
-    characters.append(character);
-    connect(character,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
-    connect(character,SIGNAL(changed()),this,SLOT(handleInteralChange()));
-    handleInteralChange();
-    handleInternalDirty();
-    return character->getID();
-}
-
-Character* Campaign::removeCharacter(QUuid id)
-{
-    Character* character = getCharacterById(id);
-    if(character)
-    {
-        if(characters.removeOne(character))
-        {
-            handleInteralChange();
-            handleInternalDirty();
-            return character;
-        }
-    }
-
-    return nullptr;
-}
-*/
-
 QList<Character*> Campaign::getActiveCharacters()
 {
     QList<Character*> actives;
@@ -380,133 +251,6 @@ QList<Character*> Campaign::getActiveCharacters()
 
     return actives;
 }
-
-/*
-QList<Combatant*> Campaign::getActiveCombatants()
-{
-    QList<Combatant*> actives;
-
-    for(int i = 0; i < characters.count(); ++i)
-    {
-        if(characters.at(i)->getActive())
-            actives.append(characters.at(i));
-    }
-
-    return actives;
-}
-
-int Campaign::getAdventureCount()
-{
-    return adventures.count();
-}
-*/
-
-/*
-Adventure* Campaign::getAdventureById(QUuid id)
-{
-    return dynamic_cast<Adventure*>(getObjectById(id));
-}
-*/
-
-/*
-Adventure* Campaign::getAdventureByIndex(int index)
-{
-    if((index < 0)||(index >= adventures.size()))
-        return nullptr;
-
-    return adventures.at(index);
-}
-
-
-QUuid Campaign::addAdventure(Adventure* adventure)
-{
-    if(!adventure)
-        return QUuid();
-
-    adventure->setParent(this);
-    adventures.append(adventure);
-    connect(adventure,SIGNAL(changed()),this,SLOT(handleInteralChange()));
-    connect(adventure,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
-    handleInteralChange();
-    handleInternalDirty();
-    return adventure->getID();
-}
-
-Adventure* Campaign::removeAdventure(QUuid id)
-{
-    Adventure* adventure = getAdventureById(id);
-    if(adventure)
-    {
-        if(adventures.removeOne(adventure))
-        {
-            handleInteralChange();
-            handleInternalDirty();
-            return adventure;
-        }
-    }
-
-    return nullptr;
-}
-
-int Campaign::getSettingCount()
-{
-    return settings.count();
-}
-
-Map* Campaign::getSettingById(QUuid id)
-{
-    for(int i = 0; i < settings.count(); ++i)
-    {
-        if(settings.at(i)->getID() == id)
-            return settings.at(i);
-    }
-
-    return nullptr;
-}
-
-Map* Campaign::getSettingByIndex(int index)
-{
-    if((index < 0)||(index >= settings.size()))
-        return nullptr;
-
-    return settings.at(index);
-}
-
-QUuid Campaign::addSetting(Map* setting)
-{
-    if(!setting)
-        return QUuid();
-
-    setting->setParent(this);
-    settings.append(setting);
-    connect(setting,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
-    connect(setting,SIGNAL(changed()),this,SLOT(handleInteralChange()));
-    handleInteralChange();
-    handleInternalDirty();
-    return setting->getID();
-}
-
-Map* Campaign::removeSetting(QUuid id)
-{
-    Map* setting = getSettingById(id);
-    if(setting)
-    {
-        if(settings.removeOne(setting))
-        {
-            handleInteralChange();
-            handleInternalDirty();
-            return setting;
-        }
-    }
-
-    return nullptr;
-}
-
-int Campaign::getNPCCount()
-{
-    return npcs.count();
-}
-*/
 
 Character* Campaign::getNPCById(QUuid id)
 {
@@ -532,310 +276,32 @@ const Character* Campaign::getNPCById(QUuid id) const
         return character;
 }
 
-/*
-Character* Campaign::getNPCByIndex(int index)
-{
-    if((index < 0)||(index >= npcs.size()))
-        return nullptr;
-
-    return npcs.at(index);
-}
-
-QUuid Campaign::addNPC(Character* npc)
-{
-    if(!npc)
-        return QUuid();
-
-    npc->setParent(this);
-    npcs.append(npc);
-    connect(npc,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
-    connect(npc,SIGNAL(changed()),this,SLOT(handleInteralChange()));
-    handleInteralChange();
-    handleInternalDirty();
-    return npc->getID();
-}
-
-Character* Campaign::removeNPC(QUuid id)
-{
-    Character* npc = getNPCById(id);
-    if(npc)
-    {
-        if(npcs.removeOne(npc))
-        {
-            handleInteralChange();
-            handleInternalDirty();
-            return npc;
-        }
-    }
-
-    return nullptr;
-}
-
-int Campaign::getTrackCount()
-{
-    return tracks.count();
-}
-*/
-
 AudioTrack* Campaign::getTrackById(QUuid id)
 {
     return dynamic_cast<AudioTrack*>(getObjectById(id));
 }
 
-/*
-AudioTrack* Campaign::getTrackByIndex(int index)
+QList<SoundboardGroup*> Campaign::getSoundboardGroups() const
 {
-    if((index < 0)||(index >= tracks.size()))
-        return nullptr;
-
-    return tracks.at(index);
+    return _soundboardGroups;
 }
 
-QUuid Campaign::addTrack(AudioTrack* track)
+void Campaign::addSoundboardGroup(SoundboardGroup* soundboardGroup)
 {
-    if(!track)
-        return QUuid();
+    if(!soundboardGroup)
+        return;
 
-    tracks.append(track);
-    connect(track,SIGNAL(dirty()),this,SLOT(handleInternalDirty()));
-    connect(track,SIGNAL(changed()),this,SLOT(handleInteralChange()));
-    handleInteralChange();
-    handleInternalDirty();
-    return track->getID();
+    _soundboardGroups.append(soundboardGroup);
 }
 
-AudioTrack* Campaign::removeTrack(QUuid id)
+void Campaign::removeSoundboardGroup(SoundboardGroup* soundboardGroup)
 {
-    AudioTrack* track = getTrackById(id);
-    if(track)
-    {
-        if(tracks.removeOne(track))
-        {
-            handleInteralChange();
-            handleInternalDirty();
-            return track;
-        }
-    }
+    if(!soundboardGroup)
+        return;
 
-    return nullptr;
+    _soundboardGroups.removeOne(soundboardGroup);
+    delete soundboardGroup;
 }
-*/
-
-/*
-CampaignObjectBase* Campaign::getObjectbyId(QUuid id)
-{
-    if(id.isNull())
-        return nullptr;
-
-    CampaignObjectBase* result;
-
-    result = getCharacterById(id);
-    if(result)
-        return result;
-
-    for(int i = 0; i < adventures.count(); ++i)
-    {
-        if(adventures.at(i)->getID() == id)
-            return adventures.at(i);
-
-        result = adventures.at(i)->getEncounterById(id);
-        if(result)
-            return result;
-
-        result = adventures.at(i)->getMapById(id);
-        if(result)
-            return result;
-    }
-
-    result = getSettingById(id);
-    if(result)
-        return result;
-
-    result = getNPCById(id);
-    if(result)
-        return result;
-
-    result = getTrackById(id);
-    if(result)
-        return result;
-
-    return nullptr;
-}
-*/
-
-/*
-QUuid Campaign::getUuidFromIntId(int intId) const
-{
-    if(intId == DMH_GLOBAL_INVALID_ID)
-        return QUuid();
-
-    int i, j;
-    for(i = 0; i < characters.count(); ++i)
-    {
-        if(characters.at(i)->getIntID() == intId)
-            return characters.at(i)->getID();
-    }
-
-    for(i = 0; i < adventures.count(); ++i)
-    {
-        Adventure* adventure = adventures.at(i);
-        if(adventure->getIntID() == intId)
-            return adventure->getID();
-
-        for(j = 0; j < adventure->getEncounterCount(); ++j)
-        {
-            if(adventure->getEncounterByIndex(j)->getIntID() == intId)
-                return adventure->getEncounterByIndex(j)->getID();
-        }
-
-        for(j = 0; j < adventure->getMapCount(); ++j)
-        {
-            if(adventure->getMapByIndex(j)->getIntID() == intId)
-                return adventure->getMapByIndex(j)->getID();
-        }
-    }
-
-    for(i = 0; i < settings.count(); ++i)
-    {
-        if(settings.at(i)->getIntID() == intId)
-            return settings.at(i)->getID();
-    }
-
-    for(i = 0; i < npcs.count(); ++i)
-    {
-        if(npcs.at(i)->getIntID() == intId)
-            return npcs.at(i)->getID();
-    }
-
-    for(i = 0; i < tracks.count(); ++i)
-    {
-        if(tracks.at(i)->getIntID() == intId)
-            return tracks.at(i)->getID();
-    }
-
-    qDebug() << "[Campaign] WARNING: unable to find matching object for Integer ID " << intId;
-    return QUuid();
-}
-*/
-
-/*
-QList<CampaignObjectBase*> Campaign::getObjectsByType(int campaignType)
-{
-    QList<CampaignObjectBase*> result;
-    switch(campaignType)
-    {
-        case DMHelper::CampaignType_Party:
-            {
-                QList<Party*> partyList = findChildren<Party*>();
-                for(int i = 0; i < partyList.count(); ++i)
-                    result.append(partyList.at(i));
-                break;
-            }
-        case DMHelper::CampaignType_Encounter:
-            {
-                QList<Encounter*> encounterList = findChildren<Encounter*>();
-                for(int i = 0; i < encounterList.count(); ++i)
-                    result.append(encounterList.at(i));
-                break;
-            }
-        case DMHelper::CampaignType_Combatant:
-            {
-                QList<Combatant*> combatantList = findChildren<Combatant*>();
-                for(int i = 0; i < combatantList.count(); ++i)
-                    result.append(combatantList.at(i));
-                break;
-            }
-        case DMHelper::CampaignType_Map:
-            {
-                QList<Map*> mapList = findChildren<Map*>();
-                for(int i = 0; i < mapList.count(); ++i)
-                    result.append(mapList.at(i));
-                break;
-            }
-        case DMHelper::CampaignType_Battle:
-        case DMHelper::CampaignType_BattleContent:
-        case DMHelper::CampaignType_Campaign:
-        case DMHelper::CampaignType_Base:
-        case DMHelper::CampaignType_Placeholder:
-        default:
-            break;
-    }
-
-    return result;
-}
-*/
-
-/*
-bool Campaign::getPartyExpanded() const
-{
-    return _partyExpanded;
-}
-
-void Campaign::setPartyExpanded(bool expanded)
-{
-    if(_partyExpanded != expanded)
-    {
-        _partyExpanded = expanded;
-        emit dirty();
-    }
-}
-
-bool Campaign::getAdventuresExpanded() const
-{
-    return _adventuresExpanded;
-}
-
-void Campaign::setAdventuresExpanded(bool expanded)
-{
-    if(_adventuresExpanded != expanded)
-    {
-        _adventuresExpanded = expanded;
-        emit dirty();
-    }
-}
-
-bool Campaign::getWorldExpanded() const
-{
-    return _worldExpanded;
-}
-
-void Campaign::setWorldExpanded(bool expanded)
-{
-    if(_worldExpanded != expanded)
-    {
-        _worldExpanded = expanded;
-        emit dirty();
-    }
-}
-
-bool Campaign::getWorldSettingsExpanded() const
-{
-    return _worldSettingsExpanded;
-}
-
-void Campaign::setWorldSettingsExpanded(bool expanded)
-{
-    if(_worldSettingsExpanded != expanded)
-    {
-        _worldSettingsExpanded = expanded;
-        emit dirty();
-    }
-}
-
-bool Campaign::getWorldNPCsExpanded() const
-{
-    return _worldNPCsExpanded;
-}
-
-void Campaign::setWorldNPCsExpanded(bool expanded)
-{
-    if(_worldNPCsExpanded != expanded)
-    {
-        _worldNPCsExpanded = expanded;
-        emit dirty();
-    }
-}
-*/
 
 BasicDate Campaign::getDate() const
 {
@@ -857,17 +323,8 @@ void Campaign::cleanupCampaign(bool deleteAll)
     if(_batchChanges)
         endBatchChanges();
 
-//    delete _notes;
-//    _notes = nullptr;
-
     if(deleteAll)
     {
-//        qDeleteAll(characters);
-//        qDeleteAll(adventures);
-//        qDeleteAll(settings);
-//        qDeleteAll(npcs);
-//        qDeleteAll(tracks);
-//        qDeleteAll(_contents);
         CampaignObjectBase* child = findChild<CampaignObjectBase *>(QString(), Qt::FindDirectChildrenOnly);
         while(child)
         {
@@ -875,16 +332,11 @@ void Campaign::cleanupCampaign(bool deleteAll)
             child->deleteLater();
             child = findChild<CampaignObjectBase *>(QString(), Qt::FindDirectChildrenOnly);
         }
+
+        qDeleteAll(_soundboardGroups);
     }
     else
     {
-//        characters.clear();
-//        adventures.clear();
-//        settings.clear();
-//        npcs.clear();
-//        tracks.clear();
-
-        //_contents.clear();
         qDebug() << "[Campaign] TODO";
     }
 }
@@ -914,37 +366,6 @@ bool Campaign::validateCampaignIds()
     QList<QUuid> knownIds;
 
     _isValid = validateSingleId(knownIds, this);
-
-    /*validResult = validResult && validateSingleId(knownIds, _notes);
-
-    int i;
-    for(i = 0; i < characters.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, characters.at(i));
-
-    for(i = 0; i < adventures.count(); ++i)
-    {
-        validResult = validResult && validateSingleId(knownIds, adventures.at(i));
-
-        if(adventures.at(i))
-        {
-            int j;
-            for(j = 0; j < adventures.at(i)->getEncounterCount(); ++j)
-                validResult = validResult && validateSingleId(knownIds, adventures.at(i)->getEncounterByIndex(j));
-
-            for(j = 0; j < adventures.at(i)->getMapCount(); ++j)
-                validResult = validResult && validateSingleId(knownIds, adventures.at(i)->getMapByIndex(j));
-        }
-    }
-
-    for(i = 0; i < settings.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, settings.at(i));
-
-    for(i = 0; i < npcs.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, npcs.at(i));
-
-    for(i = 0; i < tracks.count(); ++i)
-        validResult = validResult && validateSingleId(knownIds, tracks.at(i));
-        */
 
     qDebug() << "[Campaign] IDs validated result = " << _isValid << ",  " << knownIds.count() << " unique IDs";
 
@@ -976,18 +397,44 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
 {
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 
-    //element.setAttribute("name", getName());
     element.setAttribute("majorVersion", DMHelper::CAMPAIGN_MAJOR_VERSION);
     element.setAttribute("minorVersion", DMHelper::CAMPAIGN_MINOR_VERSION);
     element.setAttribute("calendar", BasicDateServer::Instance() ? BasicDateServer::Instance()->getActiveCalendarName() : QString());
     element.setAttribute("date", getDate().toStringDDMMYYYY());
     element.setAttribute("time", getTime().msecsSinceStartOfDay());
+
+    QDomElement soundboardElement = doc.createElement("soundboard");
+    for(SoundboardGroup* group : _soundboardGroups)
+    {
+        if(group)
+        {
+            QDomElement groupElement = doc.createElement("soundboardgroup");
+            groupElement.setAttribute("groupname", group->getGroupName());
+            for(AudioTrack* track : group->getTracks())
+            {
+                QDomElement trackElement = doc.createElement("soundboardtrack");
+                trackElement.setAttribute("trackID", track->getID().toString());
+                groupElement.appendChild(trackElement);
+            }
+            soundboardElement.appendChild(groupElement);
+        }
+    }
+    element.appendChild(soundboardElement);
+}
+
+bool Campaign::belongsToObject(QDomElement& element)
+{
+    if(element.tagName() == QString("soundboard"))
+        return true;
+    else
+        return CampaignObjectBase::belongsToObject(element);
 }
 
 void Campaign::internalPostProcessXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
+    /*
     // Compatibility mode for global expansion flags
     if(element.hasAttribute("partyExpanded"))
     {
@@ -997,21 +444,45 @@ void Campaign::internalPostProcessXML(const QDomElement &element, bool isImport)
     }
     if(element.hasAttribute("adventuresExpanded"))
     {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Adventures", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded",QString::number(0)).toInt()));
+        CampaignObjectBase* adventuresChild = findChild<CampaignObjectBase*>("Adventures", Qt::FindDirectChildrenOnly);
+        if(adventuresChild)
+            adventuresChild->setExpanded(static_cast<bool>(element.attribute("adventuresExpanded",QString::number(0)).toInt()));
     }
     if(element.hasAttribute("worldSettingsExpanded"))
     {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Settings", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded",QString::number(0)).toInt()));
+        CampaignObjectBase* worldChild = findChild<CampaignObjectBase*>("Settings", Qt::FindDirectChildrenOnly);
+        if(worldChild)
+            worldChild->setExpanded(static_cast<bool>(element.attribute("worldSettingsExpanded",QString::number(0)).toInt()));
     }
     if(element.hasAttribute("worldNPCsExpanded"))
     {
-        CampaignObjectBase* partyChild = findChild<CampaignObjectBase*>("Npcs", Qt::FindDirectChildrenOnly);
-        if(partyChild)
-            partyChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded",QString::number(0)).toInt()));
+        CampaignObjectBase* npcChild = findChild<CampaignObjectBase*>("Npcs", Qt::FindDirectChildrenOnly);
+        if(npcChild)
+            npcChild->setExpanded(static_cast<bool>(element.attribute("worldNPCsExpanded",QString::number(0)).toInt()));
+    }
+    */
+
+    QDomElement soundboardElement = element.firstChildElement("soundboard");
+    if(!soundboardElement.isNull())
+    {
+        QDomElement groupElement = soundboardElement.firstChildElement("soundboardgroup");
+        while(!groupElement.isNull())
+        {
+            SoundboardGroup* group = new SoundboardGroup(groupElement.attribute("groupname"));
+            QDomElement trackElement = groupElement.firstChildElement("soundboardtrack");
+            while(!trackElement.isNull())
+            {
+                int trackIdInt = DMH_GLOBAL_INVALID_ID;
+                QUuid trackId = parseIdString(trackElement.attribute("trackID"), &trackIdInt);
+                AudioTrack* track = dynamic_cast<AudioTrack*>(getObjectById(trackId));
+                if(track)
+                    group->addTrack(track);
+
+                trackElement = trackElement.nextSiblingElement("soundboardtrack");
+            }
+            addSoundboardGroup(group);
+            groupElement = groupElement.nextSiblingElement("soundboardgroup");
+        }
     }
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);

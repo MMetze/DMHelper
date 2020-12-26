@@ -44,6 +44,8 @@ public slots:
     void setColor(QColor color);
     void setAlignment(Qt::Alignment alignment);
 
+    void hyperlinkClicked();
+
 signals:
 //    void textChanged();
     void anchorClicked(const QUrl &link);
@@ -54,6 +56,8 @@ signals:
     void fontItalicsChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
     void colorChanged(QColor color);
+
+    void setHyperlinkActive(bool active);
 
 protected slots:
     void storeEncounter();

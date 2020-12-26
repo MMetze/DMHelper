@@ -266,6 +266,22 @@
         <file>data/icon_neweffectline.png</file>
         <file>data/icon_neweffectradius.png</file>
         <file>data/icon_newobject.png</file>
+        <file>data/icon_volumeoff.png</file>
+        <file>data/icon_volumeon.png</file>
+        <file>data/icon_syrinscape.png</file>
+        <file>data/icon_newsound.png</file>
+        <file>data/icon_newsyrinscape.png</file>
+        <file>data/icon_newyoutube.png</file>
+        <file>data/character_stat_bottom_grey.png</file>
+        <file>data/character_stat_bottomleft_grey.png</file>
+        <file>data/character_stat_bottomright_grey.png</file>
+        <file>data/character_stat_left_grey.png</file>
+        <file>data/character_stat_right_grey.png</file>
+        <file>data/character_stat_top_grey.png</file>
+        <file>data/character_stat_topleft_grey.png</file>
+        <file>data/character_stat_topright_grey.png</file>
+        <file>data/icon_link.png</file>
+        <file>data/icon_castspell.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

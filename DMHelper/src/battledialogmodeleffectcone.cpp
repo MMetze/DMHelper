@@ -34,7 +34,7 @@ int BattleDialogModelEffectCone::getEffectType() const
     return BattleDialogModelEffect_Cone;
 }
 
-QGraphicsItem* BattleDialogModelEffectCone::createEffectShape(qreal gridScale) const
+QGraphicsItem* BattleDialogModelEffectCone::createEffectShape(qreal gridScale)
 {
     QPolygonF poly;
     poly << QPointF(0,0) << QPointF(-50,100) << QPoint(50,100) << QPoint(0,0);

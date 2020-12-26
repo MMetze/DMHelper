@@ -15,6 +15,7 @@
 #include <QScrollBar>
 #include <QTimer>
 #include <QMutexLocker>
+#include <QFileDialog>
 #include <QDebug>
 
 // MapFrame definitions
@@ -423,6 +424,21 @@ void MapFrame::brushSizeChanged(int size)
     }
 }
 
+void MapFrame::editMapFile()
+{
+    if(!_mapSource)
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
+    if(!filename.isEmpty())
+    {
+        uninitializeFoW();
+        _mapSource->uninitialize();
+        _mapSource->setFileName(filename);
+        initializeFoW();
+    }
+}
+
 void MapFrame::zoomIn()
 {
     setScale(_scale * 1.1);
@@ -735,6 +751,8 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 }
 
                 QImage result = _videoPlayer->getImage()->copy();
+                uchar* b = result.bits();
+                memset(b, 0, 100);
                 if(!_bwFoWImage.isNull())
                 {
                     QPainter p;

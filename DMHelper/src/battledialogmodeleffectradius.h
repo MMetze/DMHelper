@@ -18,7 +18,7 @@ public:
     virtual int getEffectType() const override;
     virtual BattleDialogEffectSettings* getEffectEditor() const override;
 
-    virtual QGraphicsItem* createEffectShape(qreal gridScale) const override;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
 };
 
 #endif // BATTLEDIALOGMODELEFFECTRADIUS_H

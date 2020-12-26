@@ -48,7 +48,7 @@ BattleDialogEffectSettings* BattleDialogModelEffectLine::getEffectEditor() const
     return result;
 }
 
-QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale) const
+QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale)
 {
     qreal effectWidth = static_cast<qreal>(getWidth());
     qreal effectHeight = static_cast<qreal>(getSize());
@@ -93,8 +93,10 @@ void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal g
     QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
     if(shapeItem)
     {
-        shapeItem->setPen(QPen(getColor(), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        shapeItem->setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
+        //shapeItem->setPen(QPen(getColor(), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        //shapeItem->setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
+        shapeItem->setPen(QPen(QColor(getColor().red(),getColor().green(),getColor().blue(),255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        shapeItem->setBrush(QBrush(getColor()));
     }
 }
 

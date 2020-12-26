@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "bestiarydialog.h"
+#include "spellbookdialog.h"
 #include "dmconstants.h"
 #ifdef INCLUDE_CHASE_SUPPORT
 #include "chasedialog.h"
@@ -12,7 +13,7 @@
 #include <QLabel>
 #include <QFileInfo>
 #include <QList>
-#include <QMap>
+#include <QMultiMap>
 #include <QUuid>
 
 class PublishWindow;
@@ -32,17 +33,19 @@ class QVBoxLayout;
 class QItemSelection;
 class BattleDialogManager;
 class AudioPlayer;
+class AudioTrack;
 class PublishFrame;
 class RibbonMain;
 class RibbonTabFile;
 class RibbonTabCampaign;
-class RibbonTabBestiary;
-class RibbonTabMap;
+class RibbonTabTools;
+class RibbonTabBattleMap;
 class RibbonTabBattle;
 class RibbonTabScrolling;
 class RibbonTabText;
 class BattleDialogModel;
-class MapEditFrame;
+class RibbonTabMap;
+class RibbonTabAudio;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -80,7 +83,9 @@ public slots:
     void newBattleEncounter();
     void newScrollingTextEncounter();
     void newMap();
-    void editCurrentMap();
+    void newAudioEntry();
+    void newSyrinscapeEntry();
+    void newYoutubeEntry();
     void removeCurrentItem();
     void editCurrentItem();
     void exportCurrentItem();
@@ -96,6 +101,7 @@ public slots:
 
     // Bestiary
     void readBestiary();
+    void readSpellbook();
 
 signals:
     void campaignLoaded(Campaign* campaign);
@@ -106,6 +112,7 @@ signals:
     void cancelSelect();
 
     void characterChanged(QUuid id);
+    void audioTrackAdded(AudioTrack* track);
 
 protected:
     virtual void showEvent(QShowEvent * event);
@@ -138,8 +145,11 @@ protected:
 
     // Bestiary
     void writeBestiary();
+    void writeSpellbook();
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
+    void addNewAudioObject(const QString& audioFile);
+    void addNewObject(CampaignObjectBase* newObject);
 
 protected slots:
     void openFile(const QString& filename);
@@ -162,6 +172,10 @@ protected slots:
     void openBestiary();
     void exportBestiary();
     void importBestiary();
+
+    void openSpellbook();
+    void exportSpellbook();
+    void importSpellbook();
 
     void openAboutDialog();
 
@@ -204,7 +218,7 @@ private:
     EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* treeModel;
-    QMap<QString, QModelIndex> treeIndexMap;
+    QMultiMap<QString, QUuid> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;
     QString campaignFileName;
@@ -212,6 +226,7 @@ private:
     OptionsContainer* _options;
 
     BestiaryDialog bestiaryDlg;
+    SpellbookDialog spellDlg;
 
 #ifdef INCLUDE_CHASE_SUPPORT
     ChaseDialog* chaseDlg;
@@ -238,12 +253,13 @@ private:
     RibbonMain* _ribbon;
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
-    RibbonTabBestiary* _ribbonTabTools;
-    RibbonTabMap* _ribbonTabMap;
+    RibbonTabTools* _ribbonTabTools;
+    RibbonTabBattleMap* _ribbonTabMap;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
-    MapEditFrame* _ribbonTabMiniMap;
+    RibbonTabMap* _ribbonTabMiniMap;
+    RibbonTabAudio* _ribbonTabAudio;
 };
 
 #endif // MAINWINDOW_H

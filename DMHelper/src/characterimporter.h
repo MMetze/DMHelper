@@ -1,13 +1,13 @@
 #ifndef CHARACTERIMPORTER_H
 #define CHARACTERIMPORTER_H
 
+#include "character.h"
 #include <QObject>
 #include <QUuid>
 #include <QMessageBox>
 #include <QMap>
 
 class Campaign;
-class Character;
 class QNetworkReply;
 class QNetworkAccessManager;
 
@@ -29,6 +29,8 @@ public slots:
     void campaignChanged();
 
 protected:
+    void scanStats(QJsonArray statsArray, QJsonArray bonusStatsArray, QJsonArray overrideStatsArray, Character& character);
+    int getStatValue(QJsonArray statValueArray, Character::IntValue statIdValue);
     void scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character);
     void scanChoices(QJsonObject choicesObject, Character& character);
     QString getNotesString(QJsonObject notesParent, const QString& key, const QString& title);
@@ -59,6 +61,8 @@ private:
     int _totalArmor;
     int _totalHP;
     bool _halfProficiency;
+    QList<Character::IntValue> _overrideList;
+    bool _overrideHP;
 };
 
 #endif // CHARACTERIMPORTER_H

@@ -19,7 +19,6 @@ public:
     explicit BattleDialogModelMonsterCombatant(Monster* monster);
     BattleDialogModelMonsterCombatant(Monster* monster, const QString& monsterName, int monsterSize, int monsterHP);
     BattleDialogModelMonsterCombatant(Monster* monster, const QString& monsterName, int monsterSize, int monsterHP, int initiative, const QPointF& position);
-//    BattleDialogModelMonsterCombatant(const BattleDialogModelMonsterCombatant& other);
     virtual ~BattleDialogModelMonsterCombatant() override;
 
     // From CampaignObjectBase

@@ -108,12 +108,14 @@ void PublishButtonRibbon::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblPublish, *ui->btnPublish);
-    setStandardButtonSize(*ui->lblPreview, *ui->btnPreview);
+    int frameHeight = height();
 
-    setLineHeight(*ui->line_2);
+    setStandardButtonSize(*ui->lblPublish, *ui->btnPublish, frameHeight);
+    setStandardButtonSize(*ui->lblPreview, *ui->btnPreview, frameHeight);
 
-    int labelHeight = getLabelHeight(*ui->lblPublish);
+    setLineHeight(*ui->line_2, frameHeight);
+
+    int labelHeight = getLabelHeight(*ui->lblPublish, frameHeight);
     int buttonSize = height() - labelHeight;
     setButtonSize(*ui->btnPlayersWindow, buttonSize, buttonSize);
     setLineHeight(*ui->line_3, buttonSize);

@@ -17,12 +17,14 @@ public:
 
     // General settings
     QString getBestiaryFileName() const;
+    QString getSpellbookFileName() const;
     QString getQuickReferenceFileName() const;
     QString getCalendarFileName() const;
     QString getEquipmentFileName() const;
     QString getShopsFileName() const;
     QString getTablesDirectory() const;
     QString getLastMonster() const;
+    QString getLastSpell() const;
     bool getShowAnimations() const;
 
     // Font settings
@@ -38,6 +40,10 @@ public:
     bool getShowCountdown() const;
     int getCountdownDuration() const;
     QString getPointerFile() const;
+    QString getSelectedIcon() const;
+    QString getActiveIcon() const;
+    QString getCombatantFrame() const;
+    QString getCountdownFrame() const;
 
     // Data settings
     bool doDataSettingsExist() const;
@@ -64,6 +70,7 @@ public:
 signals:
     // General settings
     void bestiaryFileNameChanged();
+    void spellbookFileNameChanged();
     void quickReferenceFileNameChanged(const QString& filename);
     void calendarFileNameChanged(const QString& filename);
     void equipmentFileNameChanged(const QString& filename);
@@ -83,6 +90,10 @@ signals:
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
     void pointerFileNameChanged(const QString& filename);
+    void selectedIconChanged(const QString& selectedIcon);
+    void activeIconChanged(const QString& activeIcon);
+    void combatantFrameChanged(const QString& combatantFrame);
+    void countdownFrameChanged(const QString& countdownFrame);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -103,6 +114,7 @@ public slots:
 
     // General settings
     void setBestiaryFileName(const QString& filename);
+    void setSpellbookFileName(const QString& filename);
     void setQuickReferenceFileName(const QString& filename);
     void setCalendarFileName(const QString& filename);
     void setEquipmentFileName(const QString& filename);
@@ -117,6 +129,7 @@ public slots:
     void resetFileSettings();
 
     void setLastMonster(const QString& lastMonster);
+    void setLastSpell(const QString& lastSpell);
     void setShowAnimations(bool showAnimations);
 
     // Font settings
@@ -134,6 +147,10 @@ public slots:
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
     void setPointerFileName(const QString& filename);
+    void setSelectedIcon(const QString& selectedIcon);
+    void setActiveIcon(const QString& activeIcon);
+    void setCombatantFrame(const QString& combatantFrame);
+    void setCountdownFrame(const QString& countdownFrame);
 
     // Data settings
     void setUpdatesEnabled(bool updatesEnabled);
@@ -160,7 +177,9 @@ private:
 
     // General settings
     QString _bestiaryFileName;
+    QString _spellbookFileName;
     QString _lastMonster;
+    QString _lastSpell;
     QString _quickReferenceFileName;
     QString _calendarFileName;
     QString _equipmentFileName;
@@ -182,6 +201,10 @@ private:
     bool _showCountdown;
     int _countdownDuration;
     QString _pointerFile;
+    QString _selectedIcon;
+    QString _activeIcon;
+    QString _combatantFrame;
+    QString _countdownFrame;
 
     // Data settings
     bool _dataSettingsExist;

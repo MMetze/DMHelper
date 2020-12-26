@@ -30,9 +30,6 @@ public slots:
     virtual void setInitiative(int initiative) override;
     virtual void setHitPoints(int hp) override;
 
-protected slots:
-    virtual void setHighlighted(bool highlighted) override;
-
 protected:
 
     // local

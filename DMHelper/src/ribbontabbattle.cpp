@@ -13,6 +13,7 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnAddMonsters, SIGNAL(clicked(bool)), this, SIGNAL(addMonsterClicked()));
     connect(ui->btnAddNPC, SIGNAL(clicked(bool)), this, SIGNAL(addNPCClicked()));
     connect(ui->btnAddObject, SIGNAL(clicked(bool)), this, SIGNAL(addObjectClicked()));
+    connect(ui->btnCastSpell, SIGNAL(clicked(bool)), this, SIGNAL(castSpellClicked()));
     connect(ui->btnAddRadius, SIGNAL(clicked(bool)), this, SIGNAL(addEffectRadiusClicked()));
     connect(ui->btnAddCube, SIGNAL(clicked(bool)), this, SIGNAL(addEffectCubeClicked()));
     connect(ui->btnAddCone, SIGNAL(clicked(bool)), this, SIGNAL(addEffectConeClicked()));
@@ -64,24 +65,28 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap);
-    setStandardButtonSize(*ui->lblReloadMap, *ui->btnReloadMap);
-    setLineHeight(*ui->line);
-    setStandardButtonSize(*ui->lblAddCharacter, *ui->btnAddCharacter);
-    setStandardButtonSize(*ui->lblAddMonsters, *ui->btnAddMonsters);
-    setStandardButtonSize(*ui->lblAddNPC, *ui->btnAddNPC);
-    setStandardButtonSize(*ui->lblAddObject, *ui->btnAddObject);
-    setLineHeight(*ui->line_2);
-    setStandardButtonSize(*ui->lblAddRadius, *ui->btnAddRadius);
-    setStandardButtonSize(*ui->lblAddCube, *ui->btnAddCube);
-    setStandardButtonSize(*ui->lblAddCone, *ui->btnAddCone);
-    setStandardButtonSize(*ui->lblAddLine, *ui->btnAddLine);
-    setLineHeight(*ui->line_4);
-    setStandardButtonSize(*ui->lblShowLiving, *ui->btnShowLiving);
-    setStandardButtonSize(*ui->lblShowDead, *ui->btnShowDead);
-    setStandardButtonSize(*ui->lblShowEffects, *ui->btnShowEffects);
-    setStandardButtonSize(*ui->lblShowMovement, *ui->btnShowMovement);
-    setStandardButtonSize(*ui->lblLairActions, *ui->btnLairActions);
-    setLineHeight(*ui->line_3);
-    setStandardButtonSize(*ui->lblStatistics, *ui->btnStatistics);
+    int frameHeight = height();
+
+    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap, frameHeight);
+    setStandardButtonSize(*ui->lblReloadMap, *ui->btnReloadMap, frameHeight);
+    setLineHeight(*ui->line, frameHeight);
+    setStandardButtonSize(*ui->lblAddCharacter, *ui->btnAddCharacter, frameHeight);
+    setStandardButtonSize(*ui->lblAddMonsters, *ui->btnAddMonsters, frameHeight);
+    setStandardButtonSize(*ui->lblAddNPC, *ui->btnAddNPC, frameHeight);
+    setStandardButtonSize(*ui->lblAddObject, *ui->btnAddObject, frameHeight);
+    setLineHeight(*ui->line_2, frameHeight);
+    setStandardButtonSize(*ui->lblCastSpell, *ui->btnCastSpell, frameHeight);
+    setLineHeight(*ui->line_5, frameHeight);
+    setStandardButtonSize(*ui->lblAddRadius, *ui->btnAddRadius, frameHeight);
+    setStandardButtonSize(*ui->lblAddCube, *ui->btnAddCube, frameHeight);
+    setStandardButtonSize(*ui->lblAddCone, *ui->btnAddCone, frameHeight);
+    setStandardButtonSize(*ui->lblAddLine, *ui->btnAddLine, frameHeight);
+    setLineHeight(*ui->line_4, frameHeight);
+    setStandardButtonSize(*ui->lblShowLiving, *ui->btnShowLiving, frameHeight);
+    setStandardButtonSize(*ui->lblShowDead, *ui->btnShowDead, frameHeight);
+    setStandardButtonSize(*ui->lblShowEffects, *ui->btnShowEffects, frameHeight);
+    setStandardButtonSize(*ui->lblShowMovement, *ui->btnShowMovement, frameHeight);
+    setStandardButtonSize(*ui->lblLairActions, *ui->btnLairActions, frameHeight);
+    setLineHeight(*ui->line_3, frameHeight);
+    setStandardButtonSize(*ui->lblStatistics, *ui->btnStatistics, frameHeight);
 }

@@ -33,12 +33,32 @@ bool CampaignTreeModel::containsObject(const QUuid& objectId) const
     return _objectIndexMap.contains(objectId);
 }
 
-QModelIndex CampaignTreeModel::getObject(const QUuid& objectId) const
+QModelIndex CampaignTreeModel::getObjectIndex(const QUuid& objectId) const
 {
-    qDebug() << "[CampaignTreeModel] Searching for object id: " << objectId;
+    qDebug() << "[CampaignTreeModel] Searching for index for object id: " << objectId;
     QModelIndex result = _objectIndexMap.value(objectId);
-    qDebug() << "[CampaignTreeModel]     result: " << result;
+    if(!result.isValid())
+        qDebug() << "[CampaignTreeModel] ERROR: Not able to find a valid index for object id: " << objectId;
+
+    qDebug() << "[CampaignTreeModel]     result: " << result << ", valid: " << result.isValid();
     return result;
+}
+
+CampaignTreeItem* CampaignTreeModel::getObjectItem(const QUuid& objectId) const
+{
+    qDebug() << "[CampaignTreeModel] Searching for item for object id: " << objectId;
+    QModelIndex index = getObjectIndex(objectId);
+    if(!index.isValid())
+        return nullptr;
+
+    CampaignTreeItem* item = campaignItemFromIndex(index);
+    if((item) && (item->getCampaignItemId() != objectId))
+    {
+        qDebug() << "[CampaignTreeModel] ERROR: Found item ID does not match: no object found!";
+        return nullptr;
+    }
+
+    return item;
 }
 
 CampaignTreeItem *CampaignTreeModel::campaignItem(int row, int column) const
@@ -51,7 +71,26 @@ CampaignTreeItem *CampaignTreeModel::campaignItemFromIndex(const QModelIndex &in
     return dynamic_cast<CampaignTreeItem*>(itemFromIndex(index));
 }
 
-QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
+QMap<QString, QUuid> CampaignTreeModel::getTreeEntryMap()
+{
+    QMap<QString, QUuid> result;
+
+    if(!_campaign)
+        return result;
+
+    QList<CampaignObjectBase*> campaignObjects = _campaign->findChildren<CampaignObjectBase*>();
+    for(CampaignObjectBase* object : campaignObjects)
+    {
+        if((object) && (!result.contains(object->getName())))
+        {
+            result.insert(object->getName(), object->getID());
+        }
+    }
+
+    return result;
+}
+
+QMimeData* CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
 {
     QMimeData *data = QStandardItemModel::mimeData(indexes);
     if(!data)
@@ -74,7 +113,7 @@ QMimeData *	CampaignTreeModel::mimeData(const QModelIndexList & indexes) const
     return data;
 }
 
-QStringList	CampaignTreeModel::mimeTypes() const
+QStringList CampaignTreeModel::mimeTypes() const
 {
     return QStandardItemModel::mimeTypes() <<  QLatin1String("application/vnd.dmhelper.text");
 }
@@ -229,15 +268,22 @@ void CampaignTreeModel::handleObjectNameChanged(CampaignObjectBase* object, cons
 
     qDebug() << "[CampaignTreeModel] Object " << object << " has a new name " << name;
 
-    CampaignTreeItem* item = campaignItemFromIndex(getObject(object->getID()));
+    QUuid objId = object->getID();
+    CampaignTreeItem* item = getObjectItem(objId);
+    //CampaignTreeItem* item = campaignItemFromIndex(getObject(object->getID()));
+    qDebug() << "[CampaignTreeModel] ObjId: " << objId << ", item: " << item;
     if(!item)
     {
         qDebug() << "[CampaignTreeModel] Unable to find tree item for object " << object;
         return;
     }
 
+    qDebug() << "[CampaignTreeModel] Item " << item << ", item ID: " << item->getCampaignItemId() << " object ID: " << object->getID() << ", name: " << item->text();
+
     if(item->text() != name)
+    {
         item->setText(name);
+    }
 }
 
 void CampaignTreeModel::updateCampaignEntries()
@@ -358,7 +404,7 @@ void CampaignTreeModel::addTreeEntry(CampaignTreeItem* objectEntry, QStandardIte
     else
         parentEntry->insertRow(targetRow, objectEntry);
 
-    _objectIndexMap.insert(objectId, objectEntry->index());
+    _objectIndexMap.insert(objectId, QPersistentModelIndex(objectEntry->index()));
 
 #ifdef CAMPAIGN_MODEL_LOGGING
     qDebug() << "[CampaignTreeModel] Added object: " << objectEntry->text() << ", ID: " << objectId << ", Index: " << objectEntry->index();
@@ -549,3 +595,20 @@ CampaignTreeItem* CampaignTreeModel::getChildById(QStandardItem* parentItem, con
 
     return nullptr;
 }
+
+/*
+void CampaignTreeModel::rebuildIndexMap()
+{
+    if(!_campaign)
+        return;
+
+    _objectIndexMap.clear();
+    clear();
+
+    QList<CampaignObjectBase*> childObjects = _campaign->getChildObjects();
+    for(CampaignObjectBase* childObject : childObjects)
+    {
+        _objectIndexMap.insert(objectId, objectEntry->index());
+    }
+}
+*/

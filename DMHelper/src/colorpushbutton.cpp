@@ -71,10 +71,18 @@ void ColorPushButton::paintEvent(QPaintEvent *event)
 {
     QPushButton::paintEvent(event);
 
-    QRect rect(2, 2, width()-4, height()-4);
+    QRect rect(2, 2, width()-5, height()-5);
     QPainter painter(this);
-    painter.setBrush(_color);
-    painter.setPen(Qt::black);
+    if(isEnabled())
+    {
+        painter.setBrush(_color);
+        painter.setPen(Qt::black);
+    }
+    else
+    {
+        painter.setBrush(QColor(196, 196, 196));
+        painter.setPen(Qt::darkGray);
+    }
     painter.drawRect(rect);
 
     if(_rotationVisible)

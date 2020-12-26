@@ -13,7 +13,9 @@
 OptionsContainer::OptionsContainer(QMainWindow *parent) :
     QObject(parent),
     _bestiaryFileName(),
+    _spellbookFileName(),
     _lastMonster(),
+    _lastSpell(),
     _quickReferenceFileName(),
     _calendarFileName(),
     _equipmentFileName(),
@@ -28,6 +30,10 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
+    _selectedIcon(),
+    _activeIcon(),
+    _combatantFrame(),
+    _countdownFrame(),
     _dataSettingsExist(false),
     _updatesEnabled(false),
     _statisticsAccepted(false),
@@ -53,6 +59,11 @@ OptionsContainer::~OptionsContainer()
 QString OptionsContainer::getBestiaryFileName() const
 {
     return _bestiaryFileName;
+}
+
+QString OptionsContainer::getSpellbookFileName() const
+{
+    return _spellbookFileName;
 }
 
 QString OptionsContainer::getQuickReferenceFileName() const
@@ -83,6 +94,11 @@ QString OptionsContainer::getTablesDirectory() const
 QString OptionsContainer::getLastMonster() const
 {
     return _lastMonster;
+}
+
+QString OptionsContainer::getLastSpell() const
+{
+    return _lastSpell;
 }
 
 bool OptionsContainer::getShowAnimations() const
@@ -128,6 +144,26 @@ int OptionsContainer::getCountdownDuration() const
 QString OptionsContainer::getPointerFile() const
 {
     return _pointerFile;
+}
+
+QString OptionsContainer::getSelectedIcon() const
+{
+    return _selectedIcon;
+}
+
+QString OptionsContainer::getActiveIcon() const
+{
+    return _activeIcon;
+}
+
+QString OptionsContainer::getCombatantFrame() const
+{
+    return _combatantFrame;
+}
+
+QString OptionsContainer::getCountdownFrame() const
+{
+    return _countdownFrame;
 }
 
 bool OptionsContainer::doDataSettingsExist() const
@@ -252,6 +288,7 @@ void OptionsContainer::readSettings()
     {
         mainWindow->restoreGeometry(settings.value("geometry").toByteArray());
         mainWindow->restoreState(settings.value("windowState").toByteArray());
+        qDebug() << "[OptionsContainer] Restoring window geometry and state to: " << mainWindow->frameGeometry();
     }
 
     // Note: password will not be stored in settings
@@ -259,6 +296,9 @@ void OptionsContainer::readSettings()
     if(!settings.contains(QString("bestiary")))
         getDataDirectory(QString("Images"));
     setLastMonster(settings.value("lastMonster","").toString());
+
+    setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml")));
+    setLastSpell(settings.value("lastSpell","").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
     setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
@@ -283,6 +323,10 @@ void OptionsContainer::readSettings()
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
+    setSelectedIcon(settings.value("selectedIcon").toString());
+    setActiveIcon(settings.value("activeIcon").toString());
+    setCombatantFrame(settings.value("combatantFrame").toString());
+    setCountdownFrame(settings.value("countdownFrame").toString());
 
     _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
     if(_dataSettingsExist)
@@ -329,6 +373,7 @@ void OptionsContainer::writeSettings()
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
     {
+        qDebug() << "[OptionsContainer] Storing window geometry and state: " << mainWindow->frameGeometry();
         settings.setValue("geometry", mainWindow->saveGeometry());
         settings.setValue("windowState", mainWindow->saveState());
     }
@@ -336,6 +381,8 @@ void OptionsContainer::writeSettings()
     // Note: password will not be stored in settings
     settings.setValue("bestiary", getBestiaryFileName());
     settings.setValue("lastMonster", getLastMonster());
+    settings.setValue("spellbook", getSpellbookFileName());
+    settings.setValue("lastSpell", getLastSpell());
     settings.setValue("quickReference", getQuickReferenceFileName());
     settings.setValue("calendar", getCalendarFileName());
     settings.setValue("equipment", getEquipmentFileName());
@@ -349,6 +396,10 @@ void OptionsContainer::writeSettings()
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
+    settings.setValue("selectedIcon", getSelectedIcon());
+    settings.setValue("activeIcon", getActiveIcon());
+    settings.setValue("combatantFrame", getCombatantFrame());
+    settings.setValue("countdownFrame", getCountdownFrame());
 
     if(_dataSettingsExist)
     {
@@ -391,6 +442,16 @@ void OptionsContainer::setBestiaryFileName(const QString& filename)
         _bestiaryFileName = filename;
         qDebug() << "[OptionsContainer] Bestiary filename set to: " << filename;
         emit bestiaryFileNameChanged();
+    }
+}
+
+void OptionsContainer::setSpellbookFileName(const QString& filename)
+{
+    if(_spellbookFileName != filename)
+    {
+        _spellbookFileName = filename;
+        qDebug() << "[OptionsContainer] Spellbook filename set to: " << filename;
+        emit spellbookFileNameChanged();
     }
 }
 
@@ -617,6 +678,7 @@ void OptionsContainer::resetFileSettings()
     setBestiaryFileName(getStandardFile(QString("DMHelperBestiary.xml")));
     getDataDirectory(QString("Images"));
 
+    setSpellbookFileName(getStandardFile(QString("spellbook.xml")));
     setQuickReferenceFileName(getStandardFile(QString("quickref_data.xml")));
     setCalendarFileName(getStandardFile(QString("calendar.xml")));
     setEquipmentFileName(getStandardFile(QString("equipment.xml")));
@@ -629,6 +691,14 @@ void OptionsContainer::setLastMonster(const QString& lastMonster)
     if(_lastMonster != lastMonster)
     {
         _lastMonster = lastMonster;
+    }
+}
+
+void OptionsContainer::setLastSpell(const QString& lastSpell)
+{
+    if(_lastSpell!= lastSpell)
+    {
+        _lastSpell = lastSpell;
     }
 }
 
@@ -719,6 +789,46 @@ void OptionsContainer::setPointerFileName(const QString& filename)
         _pointerFile = filename;
         qDebug() << "[OptionsContainer] Pointer filename set to: " << _pointerFile;
         emit pointerFileNameChanged(_pointerFile);
+    }
+}
+
+void OptionsContainer::setSelectedIcon(const QString& selectedIcon)
+{
+    if(_selectedIcon != selectedIcon)
+    {
+        _selectedIcon = selectedIcon;
+        qDebug() << "[OptionsContainer] Selected icon set to: " << _selectedIcon;
+        emit selectedIconChanged(_selectedIcon);
+    }
+}
+
+void OptionsContainer::setActiveIcon(const QString& activeIcon)
+{
+    if(_activeIcon != activeIcon)
+    {
+        _activeIcon = activeIcon;
+        qDebug() << "[OptionsContainer] Active icon set to: " << _activeIcon;
+        emit activeIconChanged(_activeIcon);
+    }
+}
+
+void OptionsContainer::setCombatantFrame(const QString& combatantFrame)
+{
+    if(_combatantFrame != combatantFrame)
+    {
+        _combatantFrame = combatantFrame;
+        qDebug() << "[OptionsContainer] Combatant frame set to: " << _combatantFrame;
+        emit combatantFrameChanged(_combatantFrame);
+    }
+}
+
+void OptionsContainer::setCountdownFrame(const QString& countdownFrame)
+{
+    if(_countdownFrame != countdownFrame)
+    {
+        _countdownFrame = countdownFrame;
+        qDebug() << "[OptionsContainer] Countdown frame set to: " << _countdownFrame;
+        emit countdownFrameChanged(_countdownFrame);
     }
 }
 
@@ -831,12 +941,14 @@ void OptionsContainer::copy(OptionsContainer* other)
     if(other)
     {
         setBestiaryFileName(other->_bestiaryFileName);
+        setSpellbookFileName(other->_spellbookFileName);
         setQuickReferenceFileName(other->_quickReferenceFileName);
         setCalendarFileName(other->_calendarFileName);
         setEquipmentFileName(other->_equipmentFileName);
         setShopsFileName(other->_shopsFileName);
         setTablesDirectory(other->_tablesDirectory);
         setLastMonster(other->_lastMonster);
+        setLastSpell(other->_lastSpell);
         setShowAnimations(other->_showAnimations);
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
@@ -844,6 +956,10 @@ void OptionsContainer::copy(OptionsContainer* other)
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);
+        setSelectedIcon(other->_selectedIcon);
+        setActiveIcon(other->_activeIcon);
+        setCombatantFrame(other->_combatantFrame);
+        setCountdownFrame(other->_countdownFrame);
         _dataSettingsExist = other->_dataSettingsExist;
         _updatesEnabled = other->_updatesEnabled;
         _statisticsAccepted = other->_statisticsAccepted;

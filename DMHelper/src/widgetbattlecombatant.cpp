@@ -18,9 +18,10 @@ WidgetBattleCombatant::WidgetBattleCombatant(BattleDialogModelCombatant* combata
     ui->edtHP->setValidator(valHitPoints);
     setCombatantValues();
 
-    connect(ui->edtHP,SIGNAL(textEdited(QString)),this,SLOT(handleHitPointsChanged(QString)));
-    connect(ui->btnAdvantage,SIGNAL(clicked(bool)),this,SLOT(handleAdvantageClicked(bool)));
-    connect(ui->btnDisadvantage,SIGNAL(clicked(bool)),this,SLOT(handleDisadvantageClicked(bool)));
+    connect(ui->edtHP, SIGNAL(textEdited(QString)), this, SLOT(handleHitPointsChanged(QString)));
+    connect(ui->btnAdvantage, SIGNAL(clicked(bool)), this, SLOT(handleAdvantageClicked(bool)));
+    connect(ui->btnDisadvantage, SIGNAL(clicked(bool)), this, SLOT(handleDisadvantageClicked(bool)));
+    connect(ui->chkActive, SIGNAL(toggled(bool)), this, SLOT(handleCombatantActive(bool)));
 }
 
 WidgetBattleCombatant::~WidgetBattleCombatant()
@@ -66,6 +67,20 @@ void WidgetBattleCombatant::applyDamage(int damage)
     emit combatantChanged(_combatant);
     setCombatantValues();
     emit hitPointsChanged(_combatant, damage);
+}
+
+void WidgetBattleCombatant::applyConditions(int conditions)
+{
+    if((!_combatant) || (conditions == 0))
+        return;
+
+    _combatant->applyConditions(conditions);
+    emit combatantChanged(_combatant);
+}
+
+bool WidgetBattleCombatant::isActive()
+{
+    return ui->chkActive->isChecked();
 }
 
 void WidgetBattleCombatant::mousePressEvent(QMouseEvent *event)
@@ -131,6 +146,17 @@ void WidgetBattleCombatant::handleDisadvantageClicked(bool checked)
         ui->btnAdvantage->setChecked(false);
 
     handleRerollRequest();
+}
+
+void WidgetBattleCombatant::handleCombatantActive(bool active)
+{
+    ui->lblIcon->setEnabled(active);
+    ui->edtName->setEnabled(active);
+    ui->edtHP->setEnabled(active);
+    ui->label->setEnabled(active);
+    ui->edtResult->setEnabled(active);
+    ui->btnAdvantage->setEnabled(active);
+    ui->btnDisadvantage->setEnabled(active);
 }
 
 void WidgetBattleCombatant::setCombatantValues()

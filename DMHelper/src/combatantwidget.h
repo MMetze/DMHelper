@@ -20,6 +20,7 @@ public:
     virtual int getInitiative() const;
     virtual bool isActive();
     virtual bool isSelected();
+    virtual bool isHover();
     virtual bool isShown();
     virtual bool isKnown();
 
@@ -37,41 +38,33 @@ public slots:
     virtual void initiativeChanged();
     virtual void setActive(bool active);
     virtual void setSelected(bool selected);
-
-protected slots:
-    virtual void setHighlighted(bool highlighted);
-    virtual void timerExpired();
+    virtual void setHover(bool hover);
 
 protected:
 
     // From QWidget
-    virtual void leaveEvent(QEvent * event);
-    virtual void mousePressEvent(QMouseEvent * event);
-    virtual void mouseReleaseEvent(QMouseEvent * event);
-    virtual void mouseDoubleClickEvent(QMouseEvent *event);
+    virtual void showEvent(QShowEvent *event) override;
+    virtual void enterEvent(QEvent * event) override;
+    virtual void leaveEvent(QEvent * event) override;
+    virtual void mousePressEvent(QMouseEvent * event) override;
+    virtual void mouseReleaseEvent(QMouseEvent * event) override;
 
     // local
-    virtual void executeDoubleClick();
     virtual void loadImage();
     virtual QHBoxLayout* createPairLayout(const QString& pairName, const QString& pairValue);
     virtual void updatePairData(QHBoxLayout* pair, const QString& pairValue);
-    virtual void setPairHighlighted(QHBoxLayout* pair, bool highlighted);
-    virtual void setWidgetHighlighted(QWidget* widget, bool highlighted);
     virtual QString getStyleString();
 
     // Data
     Qt::MouseButton _mouseDown;
     bool _active;
     bool _selected;
+    bool _hover;
 
     // UI elements
     QLabel* _lblIcon;
     QLabel* _lblInitName;
     QLineEdit* _edtInit;
-
-    // Highlight animation
-    int _angle;
-    QTimer* _timer;
 
 };
 

@@ -96,5 +96,5 @@ void DMHObjectBase_Private::internalOutputXML(QDomDocument &doc, QDomElement &el
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
-    element.setAttribute( "_baseID", getID().toString() );
+    element.setAttribute("_baseID", getID().toString());
 }

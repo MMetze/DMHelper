@@ -5,37 +5,24 @@
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, QObject *parent) :
     BattleDialogModelCombatant(name, parent),
-    //_isShown(true),
-    //_isKnown(true),
-    _legendaryCount(-1)
+    _legendaryCount(-1),
+    _conditions(0)
 {
 }
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant) :
     BattleDialogModelCombatant(combatant),
-    //_isShown(true),
-    //_isKnown(true),
-    _legendaryCount(-1)
+    _legendaryCount(-1),
+    _conditions(0)
 {
 }
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(Combatant* combatant, int initiative, const QPointF& position) :
     BattleDialogModelCombatant(combatant, initiative, position),
-    //_isShown(true),
-    //_isKnown(true),
-    _legendaryCount(-1)
+    _legendaryCount(-1),
+    _conditions(0)
 {
 }
-
-/*
-BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const BattleDialogModelMonsterBase& other) :
-    BattleDialogModelCombatant(other),
-    //_isShown(other._isShown),
-    //_isKnown(other._isKnown),
-    _legendaryCount(other._legendaryCount)
-{
-}
-*/
 
 BattleDialogModelMonsterBase::~BattleDialogModelMonsterBase()
 {
@@ -45,27 +32,14 @@ void BattleDialogModelMonsterBase::inputXML(const QDomElement &element, bool isI
 {
     BattleDialogModelCombatant::inputXML(element, isImport);
 
-    //_isShown = static_cast<bool>(element.attribute("isShown",QString::number(0)).toInt());
-    //_isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(0)).toInt());
     _legendaryCount = element.attribute("legendaryCount",QString::number(-1)).toInt();
+    _conditions = element.attribute("conditions",QString::number(0)).toInt();
 }
 
 int BattleDialogModelMonsterBase::getCombatantType() const
 {
     return DMHelper::CombatantType_Monster;
 }
-
-/*
-bool BattleDialogModelMonsterBase::getShown() const
-{
-    return _isShown;
-}
-
-bool BattleDialogModelMonsterBase::getKnown() const
-{
-    return _isKnown;
-}
-*/
 
 int BattleDialogModelMonsterBase::getSkillModifier(Combatant::Skills skill) const
 {
@@ -76,22 +50,25 @@ int BattleDialogModelMonsterBase::getSkillModifier(Combatant::Skills skill) cons
         return 0;
 }
 
+int BattleDialogModelMonsterBase::getConditions() const
+{
+    return _conditions;
+}
+
 int BattleDialogModelMonsterBase::getLegendaryCount() const
 {
     return _legendaryCount;
 }
 
-/*
-void BattleDialogModelMonsterBase::setShown(bool isShown)
+void BattleDialogModelMonsterBase::setConditions(int conditions)
 {
-    _isShown = isShown;
+    _conditions = conditions;
 }
 
-void BattleDialogModelMonsterBase::setKnown(bool isKnown)
+void BattleDialogModelMonsterBase::applyConditions(int conditions)
 {
-    _isKnown = isKnown;
+    _conditions |= conditions;
 }
-*/
 
 void BattleDialogModelMonsterBase::setLegendaryCount(int legendaryCount)
 {
@@ -101,29 +78,8 @@ void BattleDialogModelMonsterBase::setLegendaryCount(int legendaryCount)
 void BattleDialogModelMonsterBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("monsterType", getMonsterType());
-    //element.setAttribute("isShown", _isShown);
-    //element.setAttribute("isKnown", _isKnown);
     element.setAttribute("legendaryCount", _legendaryCount);
+    element.setAttribute("conditions", _conditions);
 
     BattleDialogModelCombatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }
-
-/*
-int BattleDialogModelMonsterBase::convertSizeToFactor(const QString& monsterSize) const
-{
-    if(monsterSize == QString("Tiny"))
-        return 1;
-    else if(monsterSize == QString("Small"))
-        return 1;
-    else if(monsterSize == QString("Medium"))
-        return 1;
-    else if(monsterSize == QString("Large"))
-        return 2;
-    else if(monsterSize == QString("Huge"))
-        return 3;
-    else if(monsterSize == QString("Gargantuan"))
-        return 4;
-    else
-        return 1;
-}
-*/

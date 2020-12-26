@@ -8,7 +8,8 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObj
     _initiative(0),
     _position(0,0),
     _isShown(true),
-    _isKnown(true)
+    _isKnown(true),
+    _isSelected(false)
 {
 }
 
@@ -18,7 +19,8 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
     _initiative(0),
     _position(0,0),
     _isShown(true),
-    _isKnown(true)
+    _isKnown(true),
+    _isSelected(false)
 {
 }
 
@@ -28,7 +30,8 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int
     _initiative(initiative),
     _position(position),
     _isShown(true),
-    _isKnown(true)
+    _isKnown(true),
+    _isSelected(false)
 {
 }
 
@@ -90,6 +93,11 @@ bool BattleDialogModelCombatant::getKnown() const
     return _isKnown;
 }
 
+bool BattleDialogModelCombatant::getSelected() const
+{
+    return _isSelected;
+}
+
 int BattleDialogModelCombatant::getInitiative() const
 {
     return _initiative;
@@ -107,8 +115,11 @@ const QPointF& BattleDialogModelCombatant::getPosition() const
 
 void BattleDialogModelCombatant::setPosition(const QPointF& position)
 {
-    _position = position;
-    emit combatantMoved(this);
+    if(_position != position)
+    {
+        _position = position;
+        emit combatantMoved(this);
+    }
 }
 
 Combatant* BattleDialogModelCombatant::getCombatant() const
@@ -145,6 +156,15 @@ void BattleDialogModelCombatant::setShown(bool isShown)
 void BattleDialogModelCombatant::setKnown(bool isKnown)
 {
     _isKnown = isKnown;
+}
+
+void BattleDialogModelCombatant::setSelected(bool isSelected)
+{
+    if(_isSelected != isSelected)
+    {
+        _isSelected = isSelected;
+        emit combatantSelected(this);
+    }
 }
 
 QDomElement BattleDialogModelCombatant::createOutputXML(QDomDocument &doc)
@@ -185,4 +205,5 @@ void BattleDialogModelCombatant::copyValues(const BattleDialogModelCombatant &ot
     _position = other._position;
     _isShown = other._isShown;
     _isKnown = other._isKnown;
+    _isSelected = other._isSelected;
 }

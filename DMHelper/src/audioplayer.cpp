@@ -1,7 +1,6 @@
 #include "audioplayer.h"
 #include "audiotrack.h"
 #include "dmconstants.h"
-#include <QDesktopServices>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -71,36 +70,16 @@ void AudioPlayer::playTrack(AudioTrack* track)
     }
 
     stop();
-    _playlist->clear();
+
     _currentTrack = track;
-
-    if(!track)
-        return;
-
-    if(track->getAudioType() == DMHelper::AudioType_Syrinscape)
-    {
-#ifdef Q_OS_MAC
-        QMessageBox::information(nullptr, QString("Syrinscape integration"), QString("Syrinscape 3rd party integration is unfortunately only supported on Windows at this time. Audio playback of Syrinscape audio will be integrated into the DM Helper as soon as this is supported!"));
-#else
-        QDesktopServices::openUrl(track->getUrl());
-#endif
-    }
-    else
-    {
-        _playlist->addMedia(track->getUrl());
-        _player->setPlaylist(_playlist);
-
-       // ui->lblCurrent->setText(track->getName());
-       // ui->sliderPlayback->setValue(0);
-       // ui->btnPlay->setChecked(false);
-        //_player->setMedia(QMediaContent(track.getUrl()));
-        play();
-    }
+    play();
 }
 
 void AudioPlayer::play()
 {
-    _player->play();
+    if(_currentTrack)
+        //_currentTrack->play(this);
+        _currentTrack->play();
 }
 
 void AudioPlayer::pause()
@@ -110,7 +89,8 @@ void AudioPlayer::pause()
 
 void AudioPlayer::stop()
 {
-    _player->stop();
+    if(_currentTrack)
+        _currentTrack->stop();
 }
 
 void AudioPlayer::setVolume(int volume)
@@ -123,6 +103,19 @@ void AudioPlayer::setPosition(qint64 position)
 {
     if(position != _player->position())
         _player->setPosition(position);
+}
+
+void AudioPlayer::playerPlayUrl(QUrl url)
+{
+    _playlist->clear();
+    _playlist->addMedia(url);
+    _player->setPlaylist(_playlist);
+    _player->play();
+}
+
+void AudioPlayer::playerStop()
+{
+    _player->stop();
 }
 
 void AudioPlayer::playerStatusChanged(QMediaPlayer::MediaStatus status)

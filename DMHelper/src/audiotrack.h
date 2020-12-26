@@ -8,40 +8,43 @@ class AudioTrack : public CampaignObjectBase
 {
     Q_OBJECT
 public:
-    explicit AudioTrack(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
-//    explicit AudioTrack(QDomElement &element, bool isImport, QObject *parent = nullptr);
-//    explicit AudioTrack(const AudioTrack &obj);  // copy constructor
+    explicit AudioTrack(const QString& trackName = QString(), QObject *parent = nullptr);
     virtual ~AudioTrack() override;
 
     // From CampaignObjectBase
-//    virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-//    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
+    virtual int getObjectType() const override;
 
     // Local
-//    virtual QString getName() const;
-//    virtual void setName(const QString& trackName);
+    virtual int getAudioType() const = 0;
 
-    virtual QUrl getUrl() const;
-    virtual void setUrl(const QUrl& trackUrl);
+    virtual QUrl getUrl() const = 0;
+    virtual void setUrl(const QUrl& trackUrl) = 0;
 
     virtual QString getMD5() const;
     virtual void setMD5(const QString& md5);
 
-    virtual int getObjectType() const override;
-    virtual int getAudioType() const;
+    virtual bool isPlaying() const;
+    virtual bool isRepeat() const;
+    virtual bool isMuted() const;
+    virtual int getVolume() const;
+
+public slots:
+    virtual void play() = 0;
+    virtual void stop() = 0;
+    virtual void setMute(bool mute) = 0;
+    virtual void setVolume(int volume) = 0;
+    virtual void setRepeat(bool repeat) = 0;
 
 signals:
-    //void changed();
-    //void dirty();
+    void trackLengthChanged(int length);
+    void trackPositionChanged(int length);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
 
-//    QString _name;
-    QUrl _url;
     QString _md5;
 };
 

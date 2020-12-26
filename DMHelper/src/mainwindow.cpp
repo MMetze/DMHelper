@@ -1,5 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "dmversion.h"
 #include "publishwindow.h"
 #include "publishframe.h"
 #include "dicerolldialog.h"
@@ -29,10 +30,14 @@
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
 #include "battleframe.h"
-#include "audioplaybackframe.h"
+//#include "audioplaybackframe.h"
+#include "soundboardframe.h"
+#include "audiofactory.h"
 #include "monster.h"
 #include "monsterclass.h"
 #include "bestiary.h"
+#include "spell.h"
+#include "spellbook.h"
 #include "bestiaryexportdialog.h"
 #include "equipmentserver.h"
 #include "textpublishdialog.h"
@@ -66,12 +71,13 @@
 #include "battledialogmodel.h"
 #include "ribbontabfile.h"
 #include "ribbontabcampaign.h"
-#include "ribbontabbestiary.h"
-#include "ribbontabmap.h"
+#include "ribbontabtools.h"
+#include "ribbontabbattlemap.h"
 #include "ribbontabbattle.h"
 #include "ribbontabscrolling.h"
 #include "ribbontabtext.h"
-#include "mapeditframe.h"
+#include "ribbontabmap.h"
+#include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
 #include <QResizeEvent>
 #include <QFileDialog>
@@ -147,6 +153,7 @@ MainWindow::MainWindow(QWidget *parent) :
     campaignFileName(),
     _options(nullptr),
     bestiaryDlg(),
+    spellDlg(),
 #ifdef INCLUDE_CHASE_SUPPORT
     chaseDlg(nullptr),
 #endif
@@ -170,7 +177,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabBattle(nullptr),
     _ribbonTabScrolling(nullptr),
     _ribbonTabText(nullptr),
-    _ribbonTabMiniMap(nullptr)
+    _ribbonTabMiniMap(nullptr),
+    _ribbonTabAudio(nullptr)
 {
 
     QScreen* screen = QGuiApplication::primaryScreen();
@@ -188,6 +196,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] DMHelper version information";
     qDebug() << "[MainWindow]     DMHelper Version: " << QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION);
     qDebug() << "[MainWindow]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
+    qDebug() << "[MainWindow]     Expected Spellbook Version: " << QString::number(DMHelper::SPELLBOOK_MAJOR_VERSION) + "." + QString::number(DMHelper::SPELLBOOK_MINOR_VERSION);
     qDebug() << "[MainWindow]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
     qDebug() << "[MainWindow]     Build: " << __DATE__ << " " << __TIME__;
 #ifdef Q_OS_MAC
@@ -232,6 +241,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _options->setMRUHandler(mruHandler);
     _options->readSettings();
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
+    connect(_options,SIGNAL(spellbookFileNameChanged()),this,SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
 
     // Set the global font
@@ -258,6 +268,10 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Initializing Bestiary";
     Bestiary::Initialize();
     qDebug() << "[MainWindow] Bestiary Initialized";
+
+    qDebug() << "[MainWindow] Initializing Spellbook";
+    Spellbook::Initialize();
+    qDebug() << "[MainWindow] Spellbook Initialized";
 
     qDebug() << "[MainWindow] Initializing BasicDateServer";
     BasicDateServer::Initialize(_options->getCalendarFileName());
@@ -295,6 +309,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newTextClicked()), this, SLOT(newTextEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newScrollingTextClicked()), this, SLOT(newScrollingTextEncounter()));
+    connect(_ribbonTabCampaign, SIGNAL(newSoundClicked()), this, SLOT(newAudioEntry()));
+    connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
+    connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(importItemClicked()), this, SLOT(importItem()));
@@ -312,6 +329,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(bestiaryShortcut, SIGNAL(activated()), this, SLOT(openBestiary()));
     connect(_ribbonTabTools, SIGNAL(exportBestiaryClicked()), this, SLOT(exportBestiary()));
     connect(_ribbonTabTools, SIGNAL(importBestiaryClicked()), this, SLOT(importBestiary()));
+    connect(_ribbonTabTools, SIGNAL(spellbookClicked()), this, SLOT(openSpellbook()));
     connect(_ribbonTabTools, SIGNAL(rollDiceClicked()), this, SLOT(openDiceDialog()));
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
@@ -369,10 +387,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Tree Model Created";
 
     connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
+    connect(Spellbook::Instance(),SIGNAL(changed()),&spellDlg,SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Loading Bestiary";
 #ifndef Q_OS_MAC
-    splash.showMessage(QString("Initializing Bestiary...\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Initializing Bestiary...\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
     readBestiary();
@@ -388,10 +407,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
 
+    qDebug() << "[MainWindow] Loading Spellbook";
+#ifndef Q_OS_MAC
+    splash.showMessage(QString("Initializing Spellbook...\n"), Qt::AlignBottom | Qt::AlignHCenter);
+#endif
+    qApp->processEvents();
+    readSpellbook();
+    spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
+    qDebug() << "[MainWindow] Spellbook Loaded";
+
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     qDebug() << "[MainWindow] Creating Encounter Pages";
 
     // Empty Campaign Page
+    //ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Base,
+    //                                                  DMHelper::CampaignType_AudioTrack}), new EmptyCampaignFrame);
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Base, new EmptyCampaignFrame);
 
     // EncounterType_Text
@@ -403,12 +433,14 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), encounterTextEdit, SLOT(setBold(bool)));
     connect(_ribbonTabText, SIGNAL(fontItalicsChanged(bool)), encounterTextEdit, SLOT(setItalics(bool)));
     connect(_ribbonTabText, SIGNAL(alignmentChanged(Qt::Alignment)), encounterTextEdit, SLOT(setAlignment(Qt::Alignment)));
+    connect(_ribbonTabText, SIGNAL(hyperlinkClicked()), encounterTextEdit, SLOT(hyperlinkClicked()));
     connect(encounterTextEdit, SIGNAL(colorChanged(QColor)), _ribbonTabText, SLOT(setColor(QColor)));
     connect(encounterTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabText, SLOT(setFontFamily(const QString&)));
     connect(encounterTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabText, SLOT(setFontSize(int)));
     connect(encounterTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabText, SLOT(setFontBold(bool)));
     connect(encounterTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabText, SLOT(setFontItalics(bool)));
     connect(encounterTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabText, SLOT(setAlignment(Qt::Alignment)));
+    connect(encounterTextEdit, SIGNAL(setHyperlinkActive(bool)), _ribbonTabText, SLOT(setHyperlinkActive(bool)));
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
                                                       DMHelper::CampaignType_Text,
                                                       DMHelper::CampaignType_Placeholder}), encounterTextEdit);
@@ -420,11 +452,23 @@ MainWindow::MainWindow(QWidget *parent) :
     battleFrame->setShowCountdown(_options->getShowCountdown());
     battleFrame->setCountdownDuration(_options->getCountdownDuration());
     battleFrame->setPointerFile(_options->getPointerFile());
+    battleFrame->setSelectedIcon(_options->getSelectedIcon());
+    battleFrame->setActiveIcon(_options->getActiveIcon());
+    battleFrame->setCombatantFrame(_options->getCombatantFrame());
+    battleFrame->setCountdownFrame(_options->getCountdownFrame());
     connect(_options, SIGNAL(showOnDeckChanged(bool)), battleFrame, SLOT(setShowOnDeck(bool)));
     connect(_options, SIGNAL(showCountdownChanged(bool)), battleFrame, SLOT(setShowCountdown(bool)));
     connect(_options, SIGNAL(countdownDurationChanged(int)), battleFrame, SLOT(setCountdownDuration(int)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), battleFrame, SLOT(setPointerFile(const QString&)));
+    connect(_options, SIGNAL(selectedIconChanged(const QString&)), battleFrame, SLOT(setSelectedIcon(const QString&)));
+    connect(_options, SIGNAL(activeIconChanged(const QString&)), battleFrame, SLOT(setActiveIcon(const QString&)));
+    connect(_options, SIGNAL(combatantFrameChanged(const QString&)), battleFrame, SLOT(setCombatantFrame(const QString&)));
+    connect(_options, SIGNAL(countdownFrameChanged(const QString&)), battleFrame, SLOT(setCountdownFrame(const QString&)));
     connect(pubWindow, SIGNAL(frameResized(QSize)), battleFrame, SLOT(setTargetSize(QSize)));
+    connect(pubWindow, SIGNAL(labelResized(QSize)), battleFrame, SLOT(setTargetLabelSize(QSize)));
+    connect(pubWindow, SIGNAL(publishMouseDown(const QPointF&)), battleFrame, SLOT(publishWindowMouseDown(const QPointF&)));
+    connect(pubWindow, SIGNAL(publishMouseMove(const QPointF&)), battleFrame, SLOT(publishWindowMouseMove(const QPointF&)));
+    connect(pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), battleFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
     connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
     connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
     connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
@@ -438,7 +482,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
     connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), battleFrame, SLOT(addObject()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(addEffectRadius()));
+    connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), battleFrame, SLOT(castSpell()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(castSpell()));
     connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), battleFrame, SLOT(addEffectCone()));
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), battleFrame, SLOT(addEffectCube()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), battleFrame, SLOT(addEffectLine()));
@@ -514,6 +559,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
 
+    connect(_ribbonTabMiniMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
     connect(_ribbonTabMiniMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
     connect(_ribbonTabMiniMap, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
     connect(_ribbonTabMiniMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
@@ -565,6 +611,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    connect(audioTrackEdit, SIGNAL(trackTypeChanged(int)), _ribbonTabAudio, SLOT(setTrackType(int)));
+    connect(_ribbonTabAudio, SIGNAL(playClicked(bool)), audioTrackEdit, SLOT(setPlay(bool)));
+    connect(audioTrackEdit, SIGNAL(playChanged(bool)), _ribbonTabAudio, SLOT(setPlay(bool)));
+    connect(_ribbonTabAudio, SIGNAL(repeatClicked(bool)), audioTrackEdit, SLOT(setRepeat(bool)));
+    connect(audioTrackEdit, SIGNAL(repeatChanged(bool)), _ribbonTabAudio, SLOT(setRepeat(bool)));
+    connect(_ribbonTabAudio, SIGNAL(muteClicked(bool)), audioTrackEdit, SLOT(setMute(bool)));
+    connect(audioTrackEdit, SIGNAL(muteChanged(bool)), _ribbonTabAudio, SLOT(setMute(bool)));
+    connect(_ribbonTabAudio, SIGNAL(volumeChanged(int)), audioTrackEdit, SLOT(setVolume(int)));
+    connect(audioTrackEdit, SIGNAL(volumeChanged(int)), _ribbonTabAudio, SLOT(setVolume(int)));
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
@@ -604,6 +659,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QuickRefFrame* quickRefFrame = new QuickRefFrame(_options->getQuickReferenceFileName(), this);
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, quickRefFrame, &QuickRefFrame::readQuickRef);
     quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+
+    /*
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
     audioPlaybackFrame->setVolume(_options->getAudioVolume());
     connect(_audioPlayer, SIGNAL(positionChanged(qint64)), audioPlaybackFrame, SLOT(setPosition(qint64)));
@@ -616,6 +673,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _audioPlayer, SLOT(setVolume(int)));
     connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _options, SLOT(setAudioVolume(int)));
     soundDlg = createDialog(audioPlaybackFrame);
+    */
+    SoundboardFrame* soundboard = new SoundboardFrame(this);
+    connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
+    connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
+    soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+
     timeAndDateFrame = new TimeAndDateFrame(this);
     calendarDlg = createDialog(timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
     countdownDlg = createDialog(new CountdownFrame(this));
@@ -630,6 +693,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
     connect(referenceShortcut, SIGNAL(activated()), quickRefDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(soundboardClicked()), soundDlg, SLOT(exec()));
+    QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
+    connect(soundboardShortcut, SIGNAL(activated()), soundDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(calendarClicked()), calendarDlg, SLOT(exec()));
     QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+K", "Calendar")), this);
     connect(calendarShortcut, SIGNAL(activated()), calendarDlg, SLOT(exec()));
@@ -644,7 +709,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
-    connect(audioTrackEdit, SIGNAL(trackSelected(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
+    //connect(audioTrackEdit, SIGNAL(trackSelected(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -868,9 +933,6 @@ void MainWindow::newCharacter()
     }
 
     Character* character = dynamic_cast<Character*>(CombatantFactory().createObject(DMHelper::CampaignType_Combatant, DMHelper::CombatantType_Character, characterName, false));
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = campaign;
 
     if(Bestiary::Instance()->count() > 0)
     {
@@ -904,12 +966,7 @@ void MainWindow::newCharacter()
         }
     }
 
-    currentObject->setExpanded(true);
-    currentObject->addObject(character);
-
-    updateCampaignTree();
-
-    openCharacter(character->getID());
+    addNewObject(character);
 }
 
 void MainWindow::importCharacter()
@@ -979,46 +1036,51 @@ void MainWindow::newMap()
     if(filename.isEmpty())
         return;
 
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = campaign;
-
     Map* map = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mapName, false));
     if(!map)
         return;
 
     map->setFileName(filename);
 
-    currentObject->setExpanded(true);
-    currentObject->addObject(map);
-
-    updateCampaignTree();
-
-    selectItem(map->getID());
+    addNewObject(map);
 }
 
-void MainWindow::editCurrentMap()
+void MainWindow::newAudioEntry()
 {
-    //TODO: describe why returning
-    if((!campaign)||(!treeModel))
+    if(!campaign)
         return;
 
-    QStandardItem* mapItem = treeModel->itemFromIndex(ui->treeView->currentIndex());
-    int type = mapItem->data(DMHelper::TreeItemData_Type).toInt();
-    if(type == DMHelper::TreeType_Map)
-    {
-        Map* map = dynamic_cast<Map*>(campaign->getObjectById(QUuid(mapItem->data(DMHelper::TreeItemData_ID).toString())));
+    addNewAudioObject(QFileDialog::getOpenFileName(this, QString("Select local audio file")));
+}
 
-        if(!map)
-            return;
+void MainWindow::newSyrinscapeEntry()
+{
+    if(!campaign)
+        return;
 
-        QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
-        if(!filename.isEmpty())
-        {
-            map->setFileName(filename);
-            statusBar()->showMessage(map->getFileName()); // TODO: Can this not automatically happen?
-        }
-    }
+    QString syrinscapeInstructions("To add a link to a Syrinscape sound:\n\n1) Hit the '+' key or select ""3rd party app integration"" ENABLE in the settings menu\n2) Little pluses will appear next to all the MOODs and OneShots\n3) Click one of these pluses to copy a URI shortcut to the clipboard\n4) Paste this URI into the text box here:\n");
+
+    bool ok = false;
+    QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addNewAudioObject(urlName);
+}
+
+void MainWindow::newYoutubeEntry()
+{
+    if(!campaign)
+        return;
+
+    QString youtubeInstructions("To add a YouTube video as an audio file, paste the link/URL into the text box here:\n");
+
+    bool ok = false;
+    QString urlName = QInputDialog::getText(this, QString("Enter Youtube URL"), youtubeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addNewAudioObject(urlName);
 }
 
 void MainWindow::removeCurrentItem()
@@ -1066,6 +1128,8 @@ void MainWindow::removeCurrentItem()
         selectItem(nextObjectId);
     else
         ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); //ui->stackedWidgetEncounter->setCurrentIndex(0);
+
+    qDebug() << "[MainWindow] Removed object from the campaign tree: " << removeObject->getName() << ", ID: " << removeObject->getID();
 
     delete campaign->removeObject(removeObject->getID());
     updateCampaignTree();
@@ -1162,8 +1226,12 @@ void MainWindow::setDirty()
 
 void MainWindow::checkForUpdates(bool silentUpdate)
 {
+    qDebug() << "[MainWindow] Check for updates starting.";
+
     UpdateChecker* checker = new UpdateChecker(*_options, silentUpdate, true, this);
     checker->checkForUpdates();
+
+    qDebug() << "[MainWindow] Check for updates started.";
 }
 
 void MainWindow::showPublishWindow(bool visible)
@@ -1191,9 +1259,14 @@ void MainWindow::linkActivated(const QUrl & link)
         QString linkName = path.remove(0, 9);
         if(treeIndexMap.contains(linkName))
         {
-            QModelIndex index = treeIndexMap.value(linkName);
-            ui->treeView->setCurrentIndex(index);
+            //QModelIndex index = treeIndexMap.value(linkName);
+            //ui->treeView->setCurrentIndex(index);
+            selectItem(treeIndexMap.value(linkName));
         }
+    }
+    else
+    {
+        QDesktopServices::openUrl(link);
     }
 }
 
@@ -1221,6 +1294,8 @@ void MainWindow::readBestiary()
     if(!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "[MainWindow] Reading bestiary file open failed.";
+        QMessageBox::critical(this, QString("Bestiary file open failed"),
+                              QString("Unable to open the bestiary file: ") + bestiaryFileName);
         return;
     }
 
@@ -1235,8 +1310,10 @@ void MainWindow::readBestiary()
 
     if(contentResult == false)
     {
-        qDebug() << "[MainWindow] Reading bestiary reading XML content.";
+        qDebug() << "[MainWindow] Error reading bestiary XML content. The XML is probably not valid.";
         qDebug() << errMsg << errRow << errColumn;
+        QMessageBox::critical(this, QString("Bestiary file invalid"),
+                              QString("Unable to read the bestiary file: ") + bestiaryFileName + QString(", the XML is invalid"));
         return;
     }
 
@@ -1244,6 +1321,8 @@ void MainWindow::readBestiary()
     if((root.isNull()) || (root.tagName() != "root"))
     {
         qDebug() << "[MainWindow] Bestiary file missing root item";
+        QMessageBox::critical(this, QString("Bestiary file invalid"),
+                              QString("Unable to read the bestiary file: ") + bestiaryFileName + QString(", the XML does not have the expected root item."));
         return;
     }
 
@@ -1260,7 +1339,77 @@ void MainWindow::readBestiary()
         bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
 
     qDebug() << "[MainWindow] Bestiary reading complete.";
+}
 
+void MainWindow::readSpellbook()
+{
+    qDebug() << "[MainWindow] Requested to read Spellbook";
+
+    if(!Spellbook::Instance())
+    {
+        qDebug() << "[MainWindow] Spellbook instance not found, reading stopped";
+        return;
+    }
+
+    QString spellbookFileName = _options->getSpellbookFileName();
+    if(spellbookFileName.isEmpty())
+    {
+        qDebug() << "[MainWindow] ERROR! No known spellbook found, unable to load spellbook";
+        return;
+    }
+
+    qDebug() << "[MainWindow] Reading spellbook: " << spellbookFileName;
+
+    QDomDocument doc("DMHelperSpellbookXML");
+    QFile file(spellbookFileName);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[MainWindow] Reading spellbook file open failed.";
+        QMessageBox::critical(this, QString("Spellbook file open failed"),
+                              QString("Unable to open the spellbook file: ") + spellbookFileName);
+        return;
+    }
+
+    QTextStream in(&file);
+    in.setCodec("UTF-8");
+    QString errMsg;
+    int errRow;
+    int errColumn;
+    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+
+    file.close();
+
+    if(contentResult == false)
+    {
+        qDebug() << "[MainWindow] Error reading spellbook XML content. The XML is probably not valid.";
+        qDebug() << errMsg << errRow << errColumn;
+        QMessageBox::critical(this, QString("Spellbook file invalid"),
+                              QString("Unable to read the spellbook file: ") + spellbookFileName + QString(", the XML is invalid"));
+        return;
+    }
+
+    QDomElement root = doc.documentElement();
+    if((root.isNull()) || (root.tagName() != "root"))
+    {
+        qDebug() << "[MainWindow] Spellbook file missing root item";
+        QMessageBox::critical(this, QString("Spellbook file invalid"),
+                              QString("Unable to read the spellbook file: ") + spellbookFileName + QString(", the XML does not have the expected root item."));
+        return;
+    }
+
+    // Spellbook file seems ok, make a backup
+    _options->backupFile(spellbookFileName);
+
+    QFileInfo fileInfo(spellbookFileName);
+    Spellbook::Instance()->setDirectory(fileInfo.absoluteDir());
+    Spellbook::Instance()->inputXML(root, false);
+
+    if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
+        spellDlg.setSpell(_options->getLastSpell());
+    else
+        spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
+
+    qDebug() << "[MainWindow] Spellbook reading complete.";
 }
 
 void MainWindow::showEvent(QShowEvent * event)
@@ -1302,9 +1451,11 @@ void MainWindow::closeEvent(QCloseEvent * event)
         return;
     }
 
+    writeSpellbook();
     writeBestiary();
 
     _options->setLastMonster(bestiaryDlg.getMonster() ? bestiaryDlg.getMonster()->getName() : "");
+    _options->setLastSpell(spellDlg.getSpell() ? spellDlg.getSpell()->getName() : "");
     _options->writeSettings();
 
     qApp->quit();
@@ -1416,10 +1567,10 @@ void MainWindow::setupRibbonBar()
     _ribbon->enableTab(_ribbonTabFile);
     _ribbonTabCampaign = new RibbonTabCampaign(this);
     _ribbon->enableTab(_ribbonTabCampaign);
-    _ribbonTabTools = new RibbonTabBestiary(this);
+    _ribbonTabTools = new RibbonTabTools(this);
     _ribbon->enableTab(_ribbonTabTools);
 
-    _ribbonTabMap = new RibbonTabMap(this);
+    _ribbonTabMap = new RibbonTabBattleMap(this);
     _ribbonTabMap->hide();
     _ribbonTabBattle = new RibbonTabBattle(this);
     _ribbonTabBattle->hide();
@@ -1427,8 +1578,10 @@ void MainWindow::setupRibbonBar()
     _ribbonTabScrolling->hide();
     _ribbonTabText = new RibbonTabText(this);
     _ribbonTabText->hide();
-    _ribbonTabMiniMap = new MapEditFrame(this);
+    _ribbonTabMiniMap = new RibbonTabMap(this);
     _ribbonTabMiniMap->hide();
+    _ribbonTabAudio = new RibbonTabAudio(this);
+    _ribbonTabAudio->hide();
 
     connect(_ribbon->getPublishRibbon(), SIGNAL(playersWindowClicked(bool)), this, SLOT(showPublishWindow(bool)));
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
@@ -1472,7 +1625,7 @@ bool MainWindow::selectItem(QUuid itemId)
 {
     if((treeModel) && (!itemId.isNull()))
     {
-        QModelIndex index = treeModel->getObject(itemId);
+        QModelIndex index = treeModel->getObjectIndex(itemId);
         if(index.isValid())
         {
             ui->treeView->setCurrentIndex(index);
@@ -1566,7 +1719,7 @@ void MainWindow::setIndexExpanded(bool expanded, const QModelIndex& index)
 
 void MainWindow::writeBestiary()
 {
-    qDebug() << "[MainWindow] Bestiary now to be written to file";
+    qDebug() << "[MainWindow] Writing Bestiary...";
 
     if(!Bestiary::Instance())
     {
@@ -1627,14 +1780,73 @@ void MainWindow::writeBestiary()
     qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
 }
 
+void MainWindow::writeSpellbook()
+{
+    qDebug() << "[MainWindow] Writing Spellbook...";
+
+    if(!Spellbook::Instance())
+    {
+        qDebug() << "[MainWindow] Spellbook instance not found, no file written.";
+        return;
+    }
+
+    if(Spellbook::Instance()->count() <= 0)
+    {
+        qDebug() << "[MainWindow] Spellbook is empty, no file will be written";
+        return;
+    }
+
+    QString spellbookFileName = _options->getSpellbookFileName();
+    qDebug() << "[MainWindow] Writing Spellbook to " << spellbookFileName;
+
+    if(spellbookFileName.isEmpty())
+    {
+        spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
+        if(spellbookFileName.isEmpty())
+            return;
+
+        _options->setSpellbookFileName(spellbookFileName);
+    }
+
+    QDomDocument doc("DMHelperSpellbookXML");
+
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
+
+    QFileInfo fileInfo(spellbookFileName);
+    QDir targetDirectory(fileInfo.absoluteDir());
+    if(Spellbook::Instance()->outputXML(doc, root, targetDirectory, false) <= 0)
+    {
+        qDebug() << "[MainWindow] Spellbook output did not find any spells. Aborting writing to file";
+        return;
+    }
+
+    QString xmlString = doc.toString();
+
+    QFile file(spellbookFileName);
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "[MainWindow] Unable to open Spellbook file for writing: " << spellbookFileName;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
+        spellbookFileName.clear();
+        return;
+    }
+
+    QTextStream ts(&file);
+    ts.setCodec("UTF-8");
+    ts << xmlString;
+
+    file.close();
+
+    qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
+}
+
 CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText)
 {
     if((!campaign)||(!treeModel))
         return nullptr;
-
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = campaign;
 
     bool ok;
     QString encounterName = QInputDialog::getText(this, dialogTitle, dialogText, QLineEdit::Normal, QString(), &ok);
@@ -1645,14 +1857,48 @@ CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& d
     if(!encounter)
         return nullptr;
 
+    addNewObject(encounter);
+
+    return encounter;
+}
+
+void MainWindow::addNewAudioObject(const QString& audioFile)
+{
+    if(!campaign || audioFile.isEmpty())
+        return;
+
+    QUrl url(audioFile);
+    QFileInfo fileInfo(url.path());
+    bool ok = false;
+    QString trackName = QInputDialog::getText(this, QString("Enter track name"), QString("New Track Name"), QLineEdit::Normal, fileInfo.baseName(), &ok);
+    if((!ok)||(trackName.isEmpty()))
+        return;
+
+    AudioTrack* track = AudioFactory().createTrackFromUrl(url, trackName);
+    if(!track)
+        return;
+
+    addNewObject(track);
+    emit audioTrackAdded(track);
+}
+
+void MainWindow::addNewObject(CampaignObjectBase* newObject)
+{
+    if(!campaign || !treeModel || !newObject)
+        return;
+
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        currentObject = campaign;
+
+    qDebug() << "[MainWindow] Adding object " << newObject->getName() << " (" << newObject->getID() << "), to object " << currentObject->getName() << " (" << currentObject->getID() << ")";
+
     currentObject->setExpanded(true);
-    currentObject->addObject(encounter);
+    currentObject->addObject(newObject);
 
     updateCampaignTree();
 
-    selectItem(encounter->getID());
-
-    return encounter;
+    selectItem(newObject->getID());
 }
 
 void MainWindow::openFile(const QString& filename)
@@ -1784,6 +2030,10 @@ void MainWindow::updateCampaignTree()
     qDebug() << "[MainWindow] Updating Campaign Tree";
     if(treeModel)
         treeModel->refresh();
+
+    treeIndexMap.clear();
+    treeIndexMap = treeModel->getTreeEntryMap();
+    encounterTextEdit->setKeys(treeIndexMap.uniqueKeys());
 }
 
 void MainWindow::updateMapFiles()
@@ -1879,6 +2129,25 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     connect(addScrollingText, SIGNAL(triggered()), this, SLOT(newScrollingTextEncounter()));
     contextMenu->addAction(addScrollingText);
 
+    contextMenu->addSeparator();
+
+    // New audio file
+    QAction* addAudioFile = new QAction(QIcon(":/img/data/icon_newsound.png"), QString("New Sound"), contextMenu);
+    connect(addAudioFile, SIGNAL(triggered()), this, SLOT(newAudioEntry()));
+    contextMenu->addAction(addAudioFile);
+
+    // New Syrinscape sound
+    QAction* addSyrinscape = new QAction(QIcon(":/img/data/icon_newsyrinscape.png"), QString("New Syrinscape Sound"), contextMenu);
+    connect(addSyrinscape, SIGNAL(triggered()), this, SLOT(newSyrinscapeEntry()));
+    contextMenu->addAction(addSyrinscape);
+
+    // New Youtube sound
+    QAction* addYoutube = new QAction(QIcon(":/img/data/icon_newyoutube.png"), QString("New Youtube Sound"), contextMenu);
+    connect(addYoutube, SIGNAL(triggered()), this, SLOT(newYoutubeEntry()));
+    contextMenu->addAction(addYoutube);
+
+    contextMenu->addSeparator();
+
     // Remove item
     QAction* removeItem = new QAction(QIcon(":/img/data/icon_remove.png"), QString("Remove Item"), contextMenu);
     connect(removeItem, SIGNAL(triggered()), this, SLOT(removeCurrentItem()));
@@ -1914,9 +2183,12 @@ void MainWindow::handleTreeItemChanged(QStandardItem * item)
     if(!campaignItem)
         return;
 
-    qDebug() << "[MainWindow] Tree Item Changed: " << item;
-
     CampaignObjectBase* itemObject = campaignItem->getCampaignItemObject();
+    if(!itemObject)
+        return;
+
+    qDebug() << "[MainWindow] Tree Item Changed: " << item << ", item name: " << campaignItem->text() << ", object name: " << itemObject->getName();
+
     if(campaignItem->text() != itemObject->getName())
     {
         itemObject->setName(campaignItem->text());
@@ -2081,6 +2353,35 @@ void MainWindow::importBestiary()
     }
 }
 
+void MainWindow::openSpellbook()
+{
+    qDebug() << "[MainWindow] Opening Spellbook";
+    if(!Spellbook::Instance())
+        return;
+
+    if(Spellbook::Instance()->count() == 0)
+    {
+        qDebug() << "[MainWindow]    ...Spellbook is empty, creating a first spell";
+        spellDlg.createNewSpell();
+    }
+    else
+    {
+        spellDlg.setFocus();
+        spellDlg.show();
+        spellDlg.activateWindow();
+    }
+}
+
+void MainWindow::exportSpellbook()
+{
+    // TODO: add import/export for spells
+}
+
+void MainWindow::importSpellbook()
+{
+    // TODO: add import/export for spells
+}
+
 void MainWindow::openAboutDialog()
 {
     qDebug() << "[MainWindow] Opening About Box";
@@ -2232,6 +2533,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_Map:
             _ribbon->enableTab(_ribbonTabMiniMap);
@@ -2239,6 +2541,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_ScrollingText:
             _ribbon->enableTab(_ribbonTabScrolling);
@@ -2246,6 +2549,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), _scrollingTextEdit, SLOT(publishClicked(bool)));
             connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), _scrollingTextEdit, SLOT(setRotation(int)));
             break;
@@ -2256,19 +2560,28 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabScrolling);
+            _ribbon->disableTab(_ribbonTabAudio);
+            break;
+        case DMHelper::CampaignType_AudioTrack:
+            _ribbon->enableTab(_ribbonTabAudio);
+            _ribbon->disableTab(_ribbonTabMap);
+            _ribbon->disableTab(_ribbonTabBattle);
+            _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabScrolling);
+            _ribbon->disableTab(_ribbonTabText);
             break;
         case DMHelper::CampaignType_Party:
         case DMHelper::CampaignType_Placeholder:
         case DMHelper::CampaignType_Base:
         case DMHelper::CampaignType_WelcomeScreen:
         case DMHelper::CampaignType_Combatant:
-        case DMHelper::CampaignType_AudioTrack:
         default:
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
+            _ribbon->disableTab(_ribbonTabAudio);
             break;
     }
 }

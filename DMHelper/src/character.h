@@ -96,6 +96,7 @@ public:
     int getIntValue(IntValue key) const;
     bool getSkillValue(Skills key) const;
     bool getSkillExpertise(Skills key) const;
+    int getSkillBonus(Skills key) const;
 
     void setStringValue(StringValue key, const QString& value);
     void setIntValue(IntValue key, int value);

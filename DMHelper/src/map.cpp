@@ -15,6 +15,7 @@
 #include <QDir>
 #include <QPainter>
 #include <QImageReader>
+#include <QMessageBox>
 #include <QDebug>
 
 Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
@@ -203,6 +204,24 @@ QString Map::getFileName() const
 
 void Map::setFileName(const QString& newFileName)
 {
+    if((_filename == newFileName) || (newFileName.isEmpty()))
+        return;
+
+    if(!QFile::exists(newFileName))
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DM Helper Map File Not Found"),
+                              QString("The selected map file could not be found: ") + newFileName);
+        qDebug() << "[Map] New map file not found: " << newFileName;
+        return;
+    }
+
+    if(_initialized)
+    {
+        qDebug() << "[Map] Cannot set new map file, map is initialized and in use! Old: " << _filename << ", New: " << newFileName;
+        return;
+    }
+
     _filename = newFileName;
     emit dirty();
 }
@@ -698,6 +717,15 @@ void Map::initialize()
 
     if((_filename.isNull()) || (_filename.isEmpty()))
         return;
+
+    if(!QFile::exists(_filename))
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DM Helper Map File Not Found"),
+                              QString("The map file could not be found: ") + _filename);
+        qDebug() << "[Map] Map file not found: " << _filename;
+        return;
+    }
 
     QImageReader reader(_filename);
     _imgBackground = reader.read();

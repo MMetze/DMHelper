@@ -1,6 +1,5 @@
 #include "characterframe.h"
 #include "ui_characterframe.h"
-#include "character.h"
 #include "characterimporter.h"
 #include "scaledpixmap.h"
 #include "expertisedialog.h"
@@ -49,6 +48,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->edtLevel,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtRace,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtExperience,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtSize,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtHitPoints,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtArmorClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
@@ -155,10 +155,10 @@ void CharacterFrame::calculateMods()
     ui->lblWisMod->setText(Character::getAbilityModStr(ui->edtWis->text().toInt()));
     ui->lblChaMod->setText(Character::getAbilityModStr(ui->edtCha->text().toInt()));
 
-    int proficiencyBonus = ui->edtProficiencyBonus->text().toInt();
-
     ui->edtPassivePerception->setText(QString::number(_character->getPassivePerception()));
 
+    /*
+    int proficiencyBonus = ui->edtProficiencyBonus->text().toInt();
     bool halfProficiency = static_cast<bool>(_character->getIntValue(Character::IntValue_jackofalltrades));
     updateCheckboxName(ui->chkStrSave, Character::getAbilityMod(ui->edtStr->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_strengthSave), halfProficiency);
     updateCheckboxName(ui->chkAthletics, Character::getAbilityMod(ui->edtStr->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_athletics), halfProficiency);
@@ -184,6 +184,31 @@ void CharacterFrame::calculateMods()
     updateCheckboxName(ui->chkDeception, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_deception), halfProficiency);
     updateCheckboxName(ui->chkPersuasion, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_persuasion), halfProficiency);
     updateCheckboxName(ui->chkIntimidation, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_intimidation), halfProficiency);
+    */
+    updateCheckboxName(ui->chkStrSave, Combatant::Skills_strengthSave);
+    updateCheckboxName(ui->chkAthletics, Combatant::Skills_athletics);
+    updateCheckboxName(ui->chkDexSave, Combatant::Skills_dexteritySave);
+    updateCheckboxName(ui->chkStealth, Combatant::Skills_stealth);
+    updateCheckboxName(ui->chkAcrobatics, Combatant::Skills_acrobatics);
+    updateCheckboxName(ui->chkSleightOfHand, Combatant::Skills_sleightOfHand);
+    updateCheckboxName(ui->chkConSave, Combatant::Skills_constitutionSave);
+    updateCheckboxName(ui->chkIntSave, Combatant::Skills_intelligenceSave);
+    updateCheckboxName(ui->chkInvestigation, Combatant::Skills_investigation);
+    updateCheckboxName(ui->chkArcana, Combatant::Skills_arcana);
+    updateCheckboxName(ui->chkNature, Combatant::Skills_nature);
+    updateCheckboxName(ui->chkHistory, Combatant::Skills_history);
+    updateCheckboxName(ui->chkReligion, Combatant::Skills_religion);
+    updateCheckboxName(ui->chkWisSave, Combatant::Skills_wisdomSave);
+    updateCheckboxName(ui->chkMedicine, Combatant::Skills_medicine);
+    updateCheckboxName(ui->chkAnimalHandling, Combatant::Skills_animalHandling);
+    updateCheckboxName(ui->chkPerception, Combatant::Skills_perception);
+    updateCheckboxName(ui->chkInsight, Combatant::Skills_insight);
+    updateCheckboxName(ui->chkSurvival, Combatant::Skills_survival);
+    updateCheckboxName(ui->chkChaSave, Combatant::Skills_charismaSave);
+    updateCheckboxName(ui->chkPerformance, Combatant::Skills_performance);
+    updateCheckboxName(ui->chkDeception, Combatant::Skills_deception);
+    updateCheckboxName(ui->chkPersuasion, Combatant::Skills_persuasion);
+    updateCheckboxName(ui->chkIntimidation, Combatant::Skills_intimidation);
 }
 
 void CharacterFrame::clear()
@@ -199,6 +224,7 @@ void CharacterFrame::clear()
     ui->edtLevel->setText(QString(""));
     ui->edtRace->setText(QString(""));
     ui->edtExperience->setText(QString(""));
+    ui->edtSize->setText(QString(""));
     ui->edtClass->setText(QString(""));
     ui->edtHitPoints->setText(QString(""));
     ui->edtArmorClass->setText(QString(""));
@@ -257,30 +283,30 @@ void CharacterFrame::clear()
 
     ui->edtPassivePerception->setText(QString(""));
 
-    updateCheckboxName(ui->chkStrSave, 0, 0, false, false);
-    updateCheckboxName(ui->chkAthletics, 0, 0, false, false);
-    updateCheckboxName(ui->chkDexSave, 0, 0, false, false);
-    updateCheckboxName(ui->chkStealth, 0, 0, false, false);
-    updateCheckboxName(ui->chkAcrobatics, 0, 0, false, false);
-    updateCheckboxName(ui->chkSleightOfHand, 0, 0, false, false);
-    updateCheckboxName(ui->chkConSave, 0, 0, false, false);
-    updateCheckboxName(ui->chkIntSave, 0, 0, false, false);
-    updateCheckboxName(ui->chkInvestigation, 0, 0, false, false);
-    updateCheckboxName(ui->chkArcana, 0, 0, false, false);
-    updateCheckboxName(ui->chkNature, 0, 0, false, false);
-    updateCheckboxName(ui->chkHistory, 0, 0, false, false);
-    updateCheckboxName(ui->chkReligion, 0, 0, false, false);
-    updateCheckboxName(ui->chkWisSave, 0, 0, false, false);
-    updateCheckboxName(ui->chkMedicine, 0, 0, false, false);
-    updateCheckboxName(ui->chkAnimalHandling, 0, 0, false, false);
-    updateCheckboxName(ui->chkPerception, 0, 0, false, false);
-    updateCheckboxName(ui->chkInsight, 0, 0, false, false);
-    updateCheckboxName(ui->chkSurvival, 0, 0, false, false);
-    updateCheckboxName(ui->chkChaSave, 0, 0, false, false);
-    updateCheckboxName(ui->chkPerformance, 0, 0, false, false);
-    updateCheckboxName(ui->chkDeception, 0, 0, false, false);
-    updateCheckboxName(ui->chkPersuasion, 0, 0, false, false);
-    updateCheckboxName(ui->chkIntimidation, 0, 0, false, false);
+    ui->chkStrSave->setText(QString(""));
+    ui->chkAthletics->setText(QString(""));
+    ui->chkDexSave->setText(QString(""));
+    ui->chkStealth->setText(QString(""));
+    ui->chkAcrobatics->setText(QString(""));
+    ui->chkSleightOfHand->setText(QString(""));
+    ui->chkConSave->setText(QString(""));
+    ui->chkIntSave->setText(QString(""));
+    ui->chkInvestigation->setText(QString(""));
+    ui->chkArcana->setText(QString(""));
+    ui->chkNature->setText(QString(""));
+    ui->chkHistory->setText(QString(""));
+    ui->chkReligion->setText(QString(""));
+    ui->chkWisSave->setText(QString(""));
+    ui->chkMedicine->setText(QString(""));
+    ui->chkAnimalHandling->setText(QString(""));
+    ui->chkPerception->setText(QString(""));
+    ui->chkInsight->setText(QString(""));
+    ui->chkSurvival->setText(QString(""));
+    ui->chkChaSave->setText(QString(""));
+    ui->chkPerformance->setText(QString(""));
+    ui->chkDeception->setText(QString(""));
+    ui->chkPersuasion->setText(QString(""));
+    ui->chkIntimidation->setText(QString(""));
 
     enableDndBeyondSync(false);
 
@@ -346,6 +372,8 @@ void CharacterFrame::readCharacterData()
     ui->edtLevel->home(false);
     ui->edtRace->setText(_character->getStringValue(Character::StringValue_race));
     ui->edtRace->home(false);
+    ui->edtSize->setText(_character->getStringValue(Character::StringValue_size));
+    ui->edtSize->home(false);
     ui->edtExperience->setText(QString::number(_character->getIntValue(Character::IntValue_experience)));
     ui->edtExperience->home(false);
     ui->edtClass->setText(_character->getStringValue(Character::StringValue_class));
@@ -428,6 +456,7 @@ void CharacterFrame::writeCharacterData()
         _character->setName(ui->edtName->text());
         _character->setIntValue(Character::IntValue_level, ui->edtLevel->text().toInt());
         _character->setStringValue(Character::StringValue_race, ui->edtRace->text());
+        _character->setStringValue(Character::StringValue_size, ui->edtSize->text());
         _character->setIntValue(Character::IntValue_experience, ui->edtExperience->text().toInt());
         _character->setStringValue(Character::StringValue_class, ui->edtClass->text());
         _character->setHitPoints(ui->edtHitPoints->text().toInt());
@@ -539,37 +568,27 @@ void CharacterFrame::loadCharacterImage()
         ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
 }
 
-void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency)
+//void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency)
+void CharacterFrame::updateCheckboxName(QCheckBox* chk, Combatant::Skills skill)
 {
-    //QString chkName("  ");
-    QString chkName;
+    if(!_character)
+        return;
 
-    int skillBonus = abilityMod;
-    if(chk->isChecked())
-        skillBonus += expertise ? proficiencyBonus * 2 : proficiencyBonus;
-    else
-        skillBonus += halfProficiency ? proficiencyBonus / 2 : 0;
-
-    if(skillBonus >= 0)
-        chkName.append("+");
-    chkName.append(QString::number(skillBonus));
-    chk->setText(chkName);
+    int skillBonus = _character->getSkillBonus(skill);
 
     /*
-    QString chkName = chk->text();
-    chkName.truncate(chkName.indexOf(":") + 1);
-
     int skillBonus = abilityMod;
     if(chk->isChecked())
         skillBonus += expertise ? proficiencyBonus * 2 : proficiencyBonus;
     else
         skillBonus += halfProficiency ? proficiencyBonus / 2 : 0;
+    */
 
+    QString chkName;
     if(skillBonus >= 0)
         chkName.append("+");
     chkName.append(QString::number(skillBonus));
     chk->setText(chkName);
-    */
 }
 
 void CharacterFrame::enableDndBeyondSync(bool enabled)

@@ -20,14 +20,21 @@ public:
     virtual int getEffectType() const override;
     virtual BattleDialogEffectSettings* getEffectEditor() const override;
 
-    virtual QGraphicsItem* createEffectShape(qreal gridScale) const override;
+    virtual QGraphicsItem* createEffectShape(qreal gridScale) override;
     virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const override;
 
     virtual int getWidth() const override;
     virtual void setWidth(int width) override;
 
+    virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor) const override;
+
+    virtual int getImageRotation() const override;
+    virtual void setImageRotation(int imageRotation) override;
+
     virtual QString getImageFile() const override;
     virtual void setImageFile(const QString& imageFile) override;
+
+    qreal getImageScaleFactor() const;
 
 protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
@@ -35,6 +42,8 @@ protected:
     virtual void prepareItem(QGraphicsItem& item) const override;
 
     int _width;
+    int _imageRotation;
+    qreal _imageScaleFactor;
     QString _imageFile;
 
 };

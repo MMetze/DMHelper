@@ -45,13 +45,15 @@ void RibbonTabFile::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblNew, *ui->btnNew);
-    setStandardButtonSize(*ui->lblOpen, *ui->btnOpen);
-    setStandardButtonSize(*ui->lblSave, *ui->btnSave);
-    setStandardButtonSize(*ui->lblSaveAs, *ui->btnSaveAs);
-    setLineHeight(*ui->line);
-    setStandardButtonSize(*ui->lblPreferences, *ui->btnPreferences);
-    setStandardButtonSize(*ui->lblClose, *ui->btnClose);
+    int frameHeight = height();
+
+    setStandardButtonSize(*ui->lblNew, *ui->btnNew, frameHeight);
+    setStandardButtonSize(*ui->lblOpen, *ui->btnOpen, frameHeight);
+    setStandardButtonSize(*ui->lblSave, *ui->btnSave, frameHeight);
+    setStandardButtonSize(*ui->lblSaveAs, *ui->btnSaveAs, frameHeight);
+    setLineHeight(*ui->line, frameHeight);
+    setStandardButtonSize(*ui->lblPreferences, *ui->btnPreferences, frameHeight);
+    setStandardButtonSize(*ui->lblClose, *ui->btnClose, frameHeight);
 
     int openIconHeight = ui->btnOpen->iconSize().height();
     int mruHeight = height() - ui->lblOpen->height() - openIconHeight;
@@ -62,10 +64,10 @@ void RibbonTabFile::showEvent(QShowEvent *event)
     ui->btnOpen->setMinimumHeight(openIconHeight);
     ui->btnOpen->setMaximumHeight(openIconHeight);
 
-    setStandardButtonSize(*ui->lblUsersGuide, *ui->btnUsersGuide);
-    setStandardButtonSize(*ui->lblGettingStarted, *ui->btnGettingStarted);
-    setStandardButtonSize(*ui->lblCheckForUpdates, *ui->btnCheckForUpdates);
-    setStandardButtonSize(*ui->lblAbout, *ui->btnAbout);
+    setStandardButtonSize(*ui->lblUsersGuide, *ui->btnUsersGuide, frameHeight);
+    setStandardButtonSize(*ui->lblGettingStarted, *ui->btnGettingStarted, frameHeight);
+    setStandardButtonSize(*ui->lblCheckForUpdates, *ui->btnCheckForUpdates, frameHeight);
+    setStandardButtonSize(*ui->lblAbout, *ui->btnAbout, frameHeight);
 }
 
 void RibbonTabFile::showMRUMenu()

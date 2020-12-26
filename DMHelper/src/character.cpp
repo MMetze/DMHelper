@@ -373,6 +373,26 @@ bool Character::getSkillExpertise(Skills key) const
     return (_skillValues[key] > 1);
 }
 
+int Character::getSkillBonus(Skills key) const
+{
+    if((key < 0) && (key >= SKILLS_COUNT))
+    {
+        qWarning() << "[Character] Illegal skill bonus requested from character. Id: " << key;
+        return 0;
+    }
+
+    int skillBonus = getAbilityMod(getAbilityValue(getSkillAbility(key)));
+    if(getSkillExpertise(key))
+        skillBonus += getProficiencyBonus() * 2;
+    else if(getSkillValue(key))
+        skillBonus += getProficiencyBonus();
+    else if((getIntValue(Character::IntValue_jackofalltrades) > 0) &&
+            (!isSkillSavingThrow(key)))
+        skillBonus += getProficiencyBonus() / 2;
+
+    return skillBonus;
+}
+
 void Character::setStringValue(StringValue key, const QString& value)
 {
     if((key < 0)||(key >= STRINGVALUE_COUNT))
@@ -498,6 +518,8 @@ int Character::getProficiencyBonus() const
 
 int Character::getPassivePerception() const
 {
+    return 10 + getSkillBonus(Skills_perception);
+    /*
     int result = 10;
 
     result += Combatant::getAbilityMod(getIntValue(IntValue_wisdom));
@@ -508,6 +530,7 @@ int Character::getPassivePerception() const
     }
 
     return result;
+    */
 }
 
 void Character::copyMonsterValues(MonsterClass& monster)

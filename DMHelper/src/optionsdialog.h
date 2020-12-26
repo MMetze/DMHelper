@@ -48,6 +48,22 @@ private slots:
     void editPointerFile();
     void setPointerFile(const QString& pointerFile);
 
+    void browseSelectedIcon();
+    void editSelectedIcon();
+    void setSelectedIcon(const QString& selectedIcon);
+
+    void browseActiveIcon();
+    void editActiveIcon();
+    void setActiveIcon(const QString& activeIcon);
+
+    void browseCombatantFrame();
+    void editCombatantFrame();
+    void setCombatantFrame(const QString& combatantFrame);
+
+    void browseCountdownFrame();
+    void editCountdownFrame();
+    void setCountdownFrame(const QString& countdownFrame);
+
     void updateFileLocations();
     void resetFileLocations();
 

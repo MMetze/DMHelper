@@ -36,7 +36,12 @@ SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhpayload_private.cpp \
     ../../DMHelperShared/src/dmhshared.cpp \
     audiofactory.cpp \
+    audiotrackfile.cpp \
+    audiotracksyrinscape.cpp \
+    audiotrackurl.cpp \
+    audiotrackyoutube.cpp \
     basicdateserver.cpp \
+    battlecombatantframe.cpp \
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
     battledialogmodeleffectshape.cpp \
@@ -53,7 +58,9 @@ SOURCES += main.cpp\
     campaigntreeitem.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
+    combatantrolloverframe.cpp \
     combatantwidget.cpp \
+    conditionseditdialog.cpp \
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
@@ -65,7 +72,6 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
-    mapeditframe.cpp \
     mapfactory.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
@@ -83,13 +89,22 @@ SOURCES += main.cpp\
     ribbonframe.cpp \
     ribbonframetext.cpp \
     ribbonmain.cpp \
+    ribbontabaudio.cpp \
     ribbontabbattle.cpp \
-    ribbontabbestiary.cpp \
+    ribbontabbattlemap.cpp \
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
     ribbontabmap.cpp \
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
+    ribbontabtools.cpp \
+    soundboardframe.cpp \
+    soundboardframegroupbox.cpp \
+    soundboardgroup.cpp \
+    soundboardtrack.cpp \
+    spell.cpp \
+    spellbook.cpp \
+    spellbookdialog.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -230,7 +245,12 @@ HEADERS  += mainwindow.h \
     ../../DMHelperShared/src/dmhpayload_private.h \
     ../../DMHelperShared/src/dmhshared.h \
     audiofactory.h \
+    audiotrackfile.h \
+    audiotracksyrinscape.h \
+    audiotrackurl.h \
+    audiotrackyoutube.h \
     basicdateserver.h \
+    battlecombatantframe.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
     battledialogmodeleffectshape.h \
@@ -247,18 +267,20 @@ HEADERS  += mainwindow.h \
     campaigntreeitem.h \
     characterimportdialog.h \
     colorpushbutton.h \
+    combatantrolloverframe.h \
     combatantwidget.h \
+    conditionseditdialog.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
     discordposter.h \
     dmhelperribbon.h \
     dmhlogger.h \
+    dmversion.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
     legaldialog.h \
-    mapeditframe.h \
     mapfactory.h \
     mapmarker.h \
     objectfactory.h \
@@ -277,13 +299,22 @@ HEADERS  += mainwindow.h \
     ribbonframe.h \
     ribbonframetext.h \
     ribbonmain.h \
+    ribbontabaudio.h \
     ribbontabbattle.h \
-    ribbontabbestiary.h \
+    ribbontabbattlemap.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
     ribbontabmap.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
+    ribbontabtools.h \
+    soundboardframe.h \
+    soundboardframegroupbox.h \
+    soundboardgroup.h \
+    soundboardtrack.h \
+    spell.h \
+    spellbook.h \
+    spellbookdialog.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -409,9 +440,12 @@ HEADERS  += mainwindow.h \
     texttranslatedialog.h
 
 FORMS    += mainwindow.ui \
+    battlecombatantframe.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
     characterimportdialog.ui \
+    combatantrolloverframe.ui \
+    conditionseditdialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \
     combatantdialog.ui \
@@ -420,7 +454,6 @@ FORMS    += mainwindow.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
-    mapeditframe.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \
@@ -429,13 +462,19 @@ FORMS    += mainwindow.ui \
     publishbuttonribbon.ui \
     randommarketdialog.ui \
     ribbonframetext.ui \
+    ribbontabaudio.ui \
     ribbontabbattle.ui \
-    ribbontabbestiary.ui \
+    ribbontabbattlemap.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
     ribbontabmap.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \
+    ribbontabtools.ui \
+    soundboardframe.ui \
+    soundboardframegroupbox.ui \
+    soundboardtrack.ui \
+    spellbookdialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \
     combatantselectdialog.ui \

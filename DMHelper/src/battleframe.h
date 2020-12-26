@@ -20,10 +20,15 @@ class Map;
 class QTimer;
 class VideoPlayer;
 class CameraRect;
+class BattleCombatantFrame;
+class UnselectedPixmap;
 
 namespace Ui {
 class BattleFrame;
 }
+
+const int BattleDialogItemChild_Index = 0;
+const int BattleDialogItemChild_EffectId = 0;
 
 class BattleFrame : public CampaignObjectFrame
 {
@@ -38,11 +43,6 @@ public:
 
     void setBattle(EncounterBattle* battle);
     EncounterBattle* getBattle();
-
-//    BattleDialogModel& getModel();
-//    const BattleDialogModel& getModel() const;
-
-    //EncounterBattle* battle() const;
 
     void setBattleMap();
 
@@ -61,12 +61,34 @@ public:
 
     BattleFrameMapDrawer* getMapDrawer() const;
 
+    enum BattleDialogItemChild
+    {
+        BattleDialogItemChild_Base = 0,
+        BattleDialogItemChild_Selection,
+        BattleDialogItemChild_AreaEffect,
+        BattleDialogItemChild_Area,
+        BattleDialogItemChild_PersonalEffect
+    };
+
+    enum BattleFrameMode
+    {
+        BattleFrameMode_Battle = 0,
+        BattleFrameMode_Combatants,
+        BattleFrameMode_Map,
+        BattleFrameMode_Grid,
+        BattleFrameMode_Markers
+    };
+
 public slots:
     void clear();
     void sort();
     void next();
 
     void setTargetSize(const QSize& targetSize);
+    void setTargetLabelSize(const QSize& targetSize);
+    void publishWindowMouseDown(const QPointF& position);
+    void publishWindowMouseMove(const QPointF& position);
+    void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
     void setXOffset(int xOffset);
@@ -77,14 +99,19 @@ public slots:
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
+    void setSelectedIcon(const QString& selectedIcon);
+    void setActiveIcon(const QString& activeIcon);
+    void createActiveIcon();
+    void setCombatantFrame(const QString& combatantFrame);
+    void createCombatantFrame();
+    void setCountdownFrame(const QString& countdownFrame);
+    void createCountdownFrame();
 
     void zoomIn();
     void zoomOut();
     void zoomFit();
     void zoomSelect(bool enabled);
     void cancelSelect();
-
-    //void cancelPublish();
 
     // Public for connection to battle ribbon
     void selectBattleMap();
@@ -93,14 +120,12 @@ public slots:
     void addCharacter();
     void addNPC();
     void addObject();
+    void castSpell();
 
     void addEffectRadius();
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
-
-    //void setShowMovement(bool showMovement);
-    //void setLairActions(bool lairActions);
 
     // Public for connection to map ribbon
     void setCameraCouple(bool couple);
@@ -127,16 +152,9 @@ public slots:
     virtual void setBackgroundColor(QColor color) override;
     virtual void reloadObject() override;
 
-    //void rotateCCW();
-    //void rotateCW();
-    //void togglePublishing(bool publishing);
-    //void setBackgroundColor(QColor color);
-
 signals:
-    //void battleComplete();
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
-    //void publishImage(QImage img, QColor color);
     void animationStarted();
     void animateImage(QImage img);
     void showPublishWindow();
@@ -158,16 +176,11 @@ signals:
 
     void pointerToggled(bool enabled);
 
-    // Publish signals
-    //void publishCancelled();
-    //void setPublishColor(QColor color);
-
 protected:
     virtual void keyPressEvent(QKeyEvent * e) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
-    virtual void timerEvent(QTimerEvent *event) override;
 
 private slots:
     void setCompassVisibility(bool visible);
@@ -177,9 +190,12 @@ private slots:
     void updateRounds();
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
-    void handleSelectionChanged();
+//    void handleSelectionChanged();
     void handleEffectChanged(QGraphicsItem* effectItem);
+    void handleEffectRemoved(QGraphicsItem* effectItem);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
+    void handleCombatantSelected(BattleDialogModelCombatant* combatant);
+    void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleApplyEffect(QGraphicsItem* effect);
 
     void handleItemMouseDown(QGraphicsPixmapItem* item);
@@ -191,12 +207,12 @@ private slots:
     void activateCombatant();
     void damageCombatant();
     void setSelectedCombatant(BattleDialogModelCombatant* selected);
+    void setUniqueSelection(BattleDialogModelCombatant* selected);
     void updateCombatantWidget(BattleDialogModelCombatant* combatant);
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
     void publishImage();
-    //void executePublishImage();
     void executeAnimateImage();
     void updateHighlights();
     void countdownTimerExpired();
@@ -218,8 +234,6 @@ private slots:
     Map* selectRelatedMap();
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
 
-    //void setRibbonPage(int id);
-
     void setEditMode();
     void updateFowImage(const QPixmap& fow);
     void setItemsInert(bool inert);
@@ -228,26 +242,6 @@ private slots:
     void stateUpdated();
 
 private:
-
-    enum BattleDialogItemChild
-    {
-        BattleDialogItemChild_Base = 0,
-        BattleDialogItemChild_AreaEffect,
-        BattleDialogItemChild_Area,
-        BattleDialogItemChild_PersonalEffect
-    };
-
-    enum BattleFrameMode
-    {
-        BattleFrameMode_Battle = 0,
-        BattleFrameMode_Combatants,
-        BattleFrameMode_Map,
-        BattleFrameMode_Grid,
-        BattleFrameMode_Markers
-    };
-
-    const int BattleDialogItemChild_Index = 0;
-    const int BattleDialogItemChild_EffectId = 0;
 
     CombatantWidget* createCombatantWidget(BattleDialogModelCombatant* combatant);
     void clearCombatantWidgets();
@@ -283,6 +277,9 @@ private:
     QSize getRotatedTargetBackgroundSize(const QSize& originalBackgroundSize);
     QSize getRotatedTargetFrameSize(const QSize& originalBackgroundSize);
     QPoint getPrescaledRenderPos(QSize targetSize);
+
+    bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
+
     void setCameraRect(bool cameraOn);
     void updateCameraRect();
     QRectF getCameraRect();
@@ -296,6 +293,10 @@ private:
     void removeEffectsFromItem(QGraphicsPixmapItem* item);
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
+
+    void startMovement(QGraphicsPixmapItem* item, int speed);
+    void updateMovement(QGraphicsPixmapItem* item);
+    void endMovement();
 
     QPixmap getPointerPixmap();
 
@@ -317,13 +318,19 @@ private:
     BattleDialogModelCombatant* _contextMenuCombatant;
     bool _mouseDown;
     QPoint _mouseDownPos;
+    QWidget* _hoverFrame;
+//    BattleCombatantFrame* _combatantSummary;
+
+//    QGraphicsItem* _publishSelected;
+    bool _publishMouseDown;
+    QPointF _publishMouseDownPos;
 
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _background;
     QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
     qreal _activeScale;
-    QGraphicsPixmapItem* _selectedPixmap;
+//    QGraphicsPixmapItem* _selectedPixmap;
     qreal _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
@@ -335,7 +342,6 @@ private:
 
     QTimer* _countdownTimer;
     qreal _countdown;
-    //bool _lairActions;
 
     bool _publishing;
     QTimer* _publishTimer;
@@ -345,6 +351,7 @@ private:
     QImage _combatantFrame;
     QImage _countdownFrame;
     QSize _targetSize;
+    QSize _targetLabelSize;
 
     BattleFrameMapDrawer* _mapDrawer;
 
@@ -353,15 +360,16 @@ private:
     int _countdownDuration;
     QColor _countdownColor;
     QString _pointerFile;
+    QString _activeFile;
+    QString _combatantFile;
+    QString _countdownFile;
 
     QRect _rubberBandRect;
     qreal _scale;
     int _rotation;
 
-    //bool _showMovement;
     qreal _moveRadius;
     QPointF _moveStart;
-    int _moveTimer;
 
     VideoPlayer* _videoPlayer;
     QImage _bwFoWImage;
