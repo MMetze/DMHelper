@@ -150,6 +150,15 @@ void WidgetCharacter::loadImage()
     if((_internals) && (_internals->getCombatant()))
     {
         ui->lblIcon->resize(DMHelper::CHARACTER_ICON_WIDTH, DMHelper::CHARACTER_ICON_HEIGHT);
-        ui->lblIcon->setPixmap(_internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
+        //ui->lblIcon->setPixmap(_internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb));
+        QPixmap iconPixmap = _internals->getCombatant()->getIconPixmap(DMHelper::PixmapSize_Thumb);
+        //if(_internals->getCombatant()->getHitPoints() <= 0)
+        if(_internals->getCombatant()->getConditions() & Combatant::Condition_Unconscious)
+        {
+            QImage originalImage = iconPixmap.toImage();
+            QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
+            iconPixmap = QPixmap::fromImage(grayscaleImage);
+        }
+        ui->lblIcon->setPixmap(iconPixmap);
     }
 }

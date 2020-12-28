@@ -51,6 +51,7 @@ SoundboardTrack::SoundboardTrack(AudioTrack* track, QWidget *parent) :
     connect(ui->btnMute, &QAbstractButton::clicked, this, &SoundboardTrack::toggleMute);
     connect(ui->btnPlay, &QAbstractButton::toggled, this, &SoundboardTrack::togglePlay);
     connect(ui->btnRepeat, &QAbstractButton::toggled, this, &SoundboardTrack::repeatChanged);
+    connect(ui->btnRemove, &QAbstractButton::clicked, this, &SoundboardTrack::handleRemove);
     connect(track, &AudioTrack::trackLengthChanged, this, &SoundboardTrack::setTrackLength);
     connect(track, &AudioTrack::trackPositionChanged, this, &SoundboardTrack::setTrackPosition);
 }
@@ -195,4 +196,10 @@ void SoundboardTrack::setCurrentMute(bool mute)
 void SoundboardTrack::updateProgress()
 {
     ui->lblProgress->setText(_trackPosition +  QString(" / ") + _trackLength);
+}
+
+void SoundboardTrack::handleRemove()
+{
+    if(_track)
+        emit removeTrack(_track);
 }

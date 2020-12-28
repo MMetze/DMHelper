@@ -248,7 +248,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the Bestiary (Ctrl+M)</string>
+        <string>Open the Spellbook (Ctrl+H)</string>
        </property>
        <property name="text">
         <string/>
@@ -319,7 +319,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the soundboard</string>
+        <string>Open the Soundboard (Ctrl+G)</string>
        </property>
        <property name="text">
         <string/>

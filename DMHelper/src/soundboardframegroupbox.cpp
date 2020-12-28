@@ -93,20 +93,9 @@ void SoundBoardFrameGroupBox::updateTrackLayout()
 
     _groupLayout->setRowStretch(y+1,1);
     _groupLayout->setColumnStretch(xCount,1);
-}
 
-/*
-void SoundBoardFrameGroupBox::clearTracks()
-{
-    while(_groupLayout->count() > 0)
-    {
-        _groupLayout->takeAt(0);
-    }
-
-    qDeleteAll(_trackWidgets);
-    _trackWidgets.clear();
+    update();
 }
-*/
 
 void SoundBoardFrameGroupBox::addTrack(AudioTrack* track)
 {
@@ -115,6 +104,27 @@ void SoundBoardFrameGroupBox::addTrack(AudioTrack* track)
 
     _group->addTrack(track);
     addTrackToLayout(track);
+    emit dirty();
+}
+
+void SoundBoardFrameGroupBox::removeTrack(AudioTrack* track)
+{
+    if((!_group) || (!track))
+        return;
+
+    for(int i = 0; i < _trackWidgets.count(); ++i)
+    {
+        SoundboardTrack* trackWidget = _trackWidgets.at(i);
+        if(trackWidget->getTrack() == track)
+        {
+            if(_trackWidgets.removeOne(trackWidget))
+                trackWidget->deleteLater();
+        }
+    }
+
+    _group->removeTrack(track);
+    updateTrackLayout();
+    emit dirty();
 }
 
 void SoundBoardFrameGroupBox::setMute(bool mute)
@@ -190,7 +200,7 @@ void SoundBoardFrameGroupBox::dropEvent(QDropEvent *event)
 
 void SoundBoardFrameGroupBox::toggleContents()
 {
-    if((_groupLayout->count() > 0) ||
+    if((_groupLayout->count() <= 0) ||
        (_groupLayout->itemAt(0) == nullptr) ||
        (_groupLayout->itemAt(0)->widget() == nullptr))
         return;
@@ -215,6 +225,7 @@ void SoundBoardFrameGroupBox::toggleMute()
     setMute(newMute);
     _localMute = newMute;
     emit muteChanged(newMute);
+    emit dirty();
 }
 
 void SoundBoardFrameGroupBox::addTrackToLayout(AudioTrack* track)
@@ -223,6 +234,7 @@ void SoundBoardFrameGroupBox::addTrackToLayout(AudioTrack* track)
     connect(this, &SoundBoardFrameGroupBox::muteChanged, trackFrame, &SoundboardTrack::parentMuteChanged);
     connect(this, &SoundBoardFrameGroupBox::overrideChildMute, trackFrame, &SoundboardTrack::setMute);
     connect(trackFrame, &SoundboardTrack::muteChanged, this, &SoundBoardFrameGroupBox::trackMuteChanged);
+    connect(trackFrame, &SoundboardTrack::removeTrack, this, &SoundBoardFrameGroupBox::removeTrack);
     _trackWidgets.append(trackFrame);
     updateTrackLayout();
 }

@@ -453,7 +453,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a character to the battle</string>
+        <string>Add a spell effect to the battle</string>
        </property>
        <property name="text">
         <string/>

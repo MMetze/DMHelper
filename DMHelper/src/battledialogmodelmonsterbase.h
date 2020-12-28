@@ -33,12 +33,17 @@ public:
 
     virtual int getSkillModifier(Combatant::Skills skill) const override;
     virtual int getConditions() const override;
+    virtual bool hasCondition(Combatant::Condition condition) const override;
 
     virtual int getLegendaryCount() const;
+
+signals:
+    void dataChanged(BattleDialogModelMonsterBase* monsterBase);
 
 public slots:
     virtual void setConditions(int conditions) override;
     virtual void applyConditions(int conditions) override;
+    virtual void removeConditions(int conditions) override;
     virtual void setLegendaryCount(int legendaryCount);
 
 protected:

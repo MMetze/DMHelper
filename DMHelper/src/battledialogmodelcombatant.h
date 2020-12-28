@@ -48,6 +48,7 @@ public:
     virtual int getAbilityValue(Combatant::Ability ability) const;
     virtual int getSkillModifier(Combatant::Skills skill) const = 0;
     virtual int getConditions() const = 0;
+    virtual bool hasCondition(Combatant::Condition condition) const = 0;
 
     virtual int getSpeed() const = 0;
     virtual int getArmorClass() const = 0;
@@ -61,8 +62,10 @@ public slots:
     virtual void setSelected(bool isSelected);
     virtual void setConditions(int conditions) = 0;
     virtual void applyConditions(int conditions) = 0;
+    virtual void removeConditions(int conditions) = 0;
 
 signals:
+    void initiativeChanged(BattleDialogModelCombatant* combatant);
     void combatantMoved(BattleDialogModelCombatant* combatant);
     void combatantSelected(BattleDialogModelCombatant* combatant);
 

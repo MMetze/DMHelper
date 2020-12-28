@@ -34,12 +34,14 @@ signals:
     void muteChanged(bool mute);
     void volumeChanged(int volume);
     void repeatChanged(bool repeat);
+    void removeTrack(AudioTrack* track);
 
 protected slots:
     void togglePlay(bool checked);
     void toggleMute();
     void setCurrentMute(bool mute);
     void updateProgress();
+    void handleRemove();
 
 private:
     Ui::SoundboardTrack *ui;

@@ -677,6 +677,8 @@ MainWindow::MainWindow(QWidget *parent) :
     SoundboardFrame* soundboard = new SoundboardFrame(this);
     connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
     connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
+    connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
+    connect(soundboard, SIGNAL(dirty()), this, SLOT(setDirty()));
     soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
     timeAndDateFrame = new TimeAndDateFrame(this);

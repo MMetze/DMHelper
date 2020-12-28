@@ -25,8 +25,8 @@ public:
 
 public slots:
     void updateTrackLayout();
-    //void clearTracks();
     void addTrack(AudioTrack* track);
+    void removeTrack(AudioTrack* track);
     void setMute(bool mute);
     void trackMuteChanged(bool mute);
 
@@ -34,6 +34,7 @@ signals:
     void muteChanged(bool mute);
     void overrideChildMute(bool mute);
     void volumeChanged(int volume);
+    void dirty();
 
 protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;

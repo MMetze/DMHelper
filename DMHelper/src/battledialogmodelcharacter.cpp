@@ -172,6 +172,19 @@ int BattleDialogModelCharacter::getConditions() const
     }
 }
 
+bool BattleDialogModelCharacter::hasCondition(Combatant::Condition condition) const
+{
+    if(_combatant)
+    {
+        return _combatant->hasCondition(condition);
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in hasCondition!";
+        return false;
+    }
+}
+
 int BattleDialogModelCharacter::getSpeed() const
 {
     // TODO: should this just be impossible?
@@ -274,4 +287,10 @@ void BattleDialogModelCharacter::applyConditions(int conditions)
 {
     if(_combatant)
         _combatant->applyConditions(conditions);
+}
+
+void BattleDialogModelCharacter::removeConditions(int conditions)
+{
+    if(_combatant)
+        _combatant->removeConditions(conditions);
 }

@@ -1853,9 +1853,12 @@ void BattleFrame::activateCombatant()
 
 void BattleFrame::damageCombatant()
 {
+    if(!_contextMenuCombatant)
+        return;
+
     int damage = QInputDialog::getInt(this, QString("Damage Combatant"), QString("Please enter the amount of damage to be done: "));
 
-    if(_contextMenuCombatant->getCombatantType() != DMHelper::CombatantType_Character)
+    //if(_contextMenuCombatant->getCombatantType() == DMHelper::CombatantType_Character)
     {
         _contextMenuCombatant->setHitPoints(_contextMenuCombatant->getHitPoints() - damage);
         updateCombatantWidget(_contextMenuCombatant);
@@ -2000,10 +2003,48 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
         return;
     }
 
-    if((!_logger) || (!combatant) || (!_model->getActiveCombatant()))
+    if((!combatant) || (!_model->getActiveCombatant()))
         return;
 
-    _logger->damageDone(_model->getActiveCombatant()->getID(), combatant->getID(), damage);
+    if((combatant->getHitPoints() <= 0) && (!combatant->hasCondition(Combatant::Condition_Unconscious)))
+    {
+        combatant->applyConditions(Combatant::Condition_Unconscious);
+        QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
+        if(item)
+        {
+            QImage originalImage = item->pixmap().toImage();
+            QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
+            item->setPixmap(QPixmap::fromImage(grayscaleImage));
+        }
+    }
+    else if((combatant->getHitPoints() > 0) && (combatant->hasCondition(Combatant::Condition_Unconscious)))
+    {
+        combatant->removeConditions(Combatant::Condition_Unconscious);
+        QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
+        if(item)
+        {
+            item->setPixmap(combatant->getIconPixmap(DMHelper::PixmapSize_Battle));
+        }
+    }
+/*
+    int previousHP = _contextMenuCombatant->getHitPoints();
+    _contextMenuCombatant->setHitPoints(previousHP - damage);
+    if(damage >= previousHP)
+    {
+        QGraphicsPixmapItem* item = _combatantIcons.value(_contextMenuCombatant);
+        if(item)
+            //if(_internals->getCombatant()->getHitPoints() <= 0)
+            if(_internals->getCombatant()->getConditions() & Combatant::Condition_Unconscious)
+        {
+            QImage originalImage = item->pixmap().toImage();
+            QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
+            item->setPixmap(QPixmap::fromImage(grayscaleImage)); update the widet, set gray when entering the battle
+        }
+    }
+  */
+
+    if(_logger)
+        _logger->damageDone(_model->getActiveCombatant()->getID(), combatant->getID(), damage);
 }
 
 void BattleFrame::publishImage()
@@ -2206,29 +2247,28 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible, bo
 
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
-        bool vis = (_model->getCombatant(i)->getHitPoints() > 0) ? aliveVisible : deadVisible;
-
-        if(widgetsIncluded)
+        BattleDialogModelCombatant* combatant = _model->getCombatant(i);
+        if(combatant)
         {
-            QWidget* widget = _combatantLayout->itemAt(i)->widget();
-            if(widget)
+            bool vis = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+
+            if(widgetsIncluded)
             {
-                widget->setVisible(vis);
+                QWidget* widget = _combatantLayout->itemAt(i)->widget();
+                if(widget)
+                {
+                    widget->setVisible(vis);
+                }
             }
+
+            QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
+            if(item)
+                item->setVisible(vis);
+
+            // Set the visibility of the active rect
+            if((_activePixmap) && (combatant == _model->getActiveCombatant()))
+                _activePixmap->setVisible(vis);
         }
-
-        QGraphicsPixmapItem* item = _combatantIcons.value(_model->getCombatant(i));
-        if(item)
-            item->setVisible(vis);
-
-        /*
-        if((!vis) && (_model->getCombatant(i) == _selectedCombatant))
-            setSelectedCombatant(nullptr);
-        */
-
-        // Set the visibility of the active rect
-        if((_activePixmap) && (_model->getCombatant(i) == _model->getActiveCombatant()))
-            _activePixmap->setVisible(vis);
     }
 }
 
@@ -2796,6 +2836,13 @@ void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
     if((combatant) && (_scene) && (_background))
     {
         QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
+        //if(combatant->getHitPoints() <= 0)
+        if(combatant->hasCondition(Combatant::Condition_Unconscious))
+        {
+            QImage originalImage = pix.toImage();
+            QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
+            pix = QPixmap::fromImage(grayscaleImage);
+        }
         QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(pix, combatant);
         _scene->addItem(pixmapItem);
         pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
