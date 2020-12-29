@@ -48,37 +48,58 @@ void BattleCombatantFrame::setCombatant(BattleDialogModelCombatant* combatant)
 {
     qDebug() << "[BattleCombatantFrame] Reading combatant: " << combatant;
 
-    disconnect(_combatant, &BattleDialogModelCombatant::campaignObjectDestroyed, this, &BattleCombatantFrame::clearCombatant);
-    clearGrid();
+    if(_combatant)
+    {
+        disconnect(_combatant, &BattleDialogModelCombatant::campaignObjectDestroyed, this, &BattleCombatantFrame::clearCombatant);
+        if(_combatant->getCombatant())
+            disconnect(_combatant->getCombatant(), &Combatant::dirty, this, &BattleCombatantFrame::readCombatant);
+    }
 
     ui->edtName->setEnabled(combatant != nullptr);
     ui->frameInfoContents->setEnabled(combatant != nullptr);
     ui->frameStatsContents->setEnabled(combatant != nullptr);
 
-    _combatant = combatant;
-
     if(!combatant)
     {
         ui->edtName->setText(QString());
+        clearGrid();
+        ui->edtStr->setText(QString());
+        ui->edtDex->setText(QString());
+        ui->edtCon->setText(QString());
+        ui->edtInt->setText(QString());
+        ui->edtWis->setText(QString());
+        ui->edtCha->setText(QString());
         return;
     }
 
+    _combatant = combatant;
+
     connect(_combatant, &BattleDialogModelCombatant::campaignObjectDestroyed, this, &BattleCombatantFrame::clearCombatant);
+    if(_combatant->getCombatant())
+        connect(_combatant->getCombatant(), &Combatant::dirty, this, &BattleCombatantFrame::readCombatant);
 
-    ui->edtName->setText(combatant->getName());
-    updateLayout();
-
-    ui->edtStr->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_strengthSave)));
-    ui->edtDex->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_dexteritySave)));
-    ui->edtCon->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_constitutionSave)));
-    ui->edtInt->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_intelligenceSave)));
-    ui->edtWis->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_wisdomSave)));
-    ui->edtCha->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_charismaSave)));
+    readCombatant();
 }
 
 BattleDialogModelCombatant* BattleCombatantFrame::getCombatant() const
 {
     return _combatant;
+}
+
+void BattleCombatantFrame::readCombatant()
+{
+    if(!_combatant)
+        return;
+
+    ui->edtName->setText(_combatant->getName());
+    updateLayout();
+
+    ui->edtStr->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_strengthSave)));
+    ui->edtDex->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_dexteritySave)));
+    ui->edtCon->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_constitutionSave)));
+    ui->edtInt->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_intelligenceSave)));
+    ui->edtWis->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_wisdomSave)));
+    ui->edtCha->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_charismaSave)));
 }
 
 void BattleCombatantFrame::clearCombatant()

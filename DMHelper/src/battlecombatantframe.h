@@ -25,6 +25,7 @@ public:
 
 protected slots:
     void editConditions();
+    void readCombatant();
     void clearCombatant();
     void updateLayout();
     void clearGrid();
