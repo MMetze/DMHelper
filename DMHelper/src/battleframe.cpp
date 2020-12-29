@@ -1164,11 +1164,12 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
             }
             else if(event->type() == QEvent::HoverEnter)
             {
-                if((!_mouseDown) && (!_hoverFrame))
+                if((!_mouseDown) && (!_hoverFrame) && (_combatantLayout) && (widget->getCombatant()) && (widget->getCombatant()->getCombatantType() == DMHelper::CombatantType_Monster))
                 {
                     // Mouse moved without button down on a combatant widget --> roll-over popup for this widget
                     _hoverFrame = new CombatantRolloverFrame(widget->getCombatant(), this);
-                    QPoint framePos(ui->splitter->widget(1)->x() - _hoverFrame->width(), ui->scrollArea->y() + widget->y());
+                    QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() - _hoverFrame->width(),
+                                    ui->scrollArea->y() + widget->y());
                     _hoverFrame->move(framePos);
                     _hoverFrame->show();
                 }
