@@ -11,14 +11,26 @@ class CombatantRolloverFrame;
 class BattleDialogModelCombatant;
 class BattleDialogModelCharacter;
 class BattleDialogModelMonsterBase;
+class CombatantWidget;
 
 class CombatantRolloverFrame : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit CombatantRolloverFrame(BattleDialogModelCombatant* combatant, QWidget *parent = nullptr);
+    explicit CombatantRolloverFrame(CombatantWidget* combatantWidget, QWidget *parent = nullptr);
     ~CombatantRolloverFrame();
+
+signals:
+    void hoverEnded();
+
+public slots:
+    void triggerClose();
+    void cancelClose();
+
+protected:
+    virtual void leaveEvent(QEvent *event) override;
+    virtual void timerEvent(QTimerEvent *event) override;
 
 private:
     void readCombatant(BattleDialogModelCombatant* combatant);
@@ -27,6 +39,8 @@ private:
     void addActionList(const QList<MonsterAction>& actionList, const QString& listTitle);
 
     Ui::CombatantRolloverFrame *ui;
+    CombatantWidget* _widget;
+    int _closeTimer;
 };
 
 #endif // COMBATANTROLLOVERFRAME_H
