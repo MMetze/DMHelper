@@ -402,6 +402,15 @@ void Combatant::applyConditions(int conditions)
     }
 }
 
+void Combatant::removeConditions(int conditions)
+{
+    if((_conditions & ~conditions) != _conditions)
+    {
+        _conditions &= ~conditions;
+        registerChange();
+    }
+}
+
 void Combatant::addCondition(Condition condition)
 {
     if(!hasCondition(condition))

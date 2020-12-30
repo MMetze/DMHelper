@@ -26,6 +26,7 @@ public:
 
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
     void inputXML(const QDomElement &element, bool isImport);
+    void input_START_CONVERSION(const QDomElement &element);
 
     QString getVersion() const;
     int getMajorVersion() const;

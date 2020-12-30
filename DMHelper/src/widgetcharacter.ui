@@ -129,6 +129,9 @@
            <height>20</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Is this character visible?</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
          </property>
@@ -153,6 +156,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Is this character visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -203,7 +209,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Is this character known? If the this isn't checked, the character will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the character takes any actions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>Is this character known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -231,7 +237,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this character known? If the this isn't checked, the character will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the character takes any actions.</string>
+          <string>Is this character known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -265,7 +271,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The character's name. To edit this, double click to go to the character's full view.</string>
+          <string>The character's name</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -285,7 +291,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The character's armor class. To edit this, double click to go to the character's full view.</string>
+          <string>The character's armor class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -307,7 +313,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The character's armor class. To edit this, double click to go to the character's full view.</string>
+          <string>The character's armor class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -352,7 +358,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's initiative value.</string>
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -383,7 +389,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's initiative value.</string>
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -434,7 +440,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's remaining hit points</string>
+          <string>The character's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -465,7 +471,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's remaining hit points</string>
+          <string>The character's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();

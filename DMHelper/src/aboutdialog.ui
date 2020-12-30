@@ -208,7 +208,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Licenses</string>
+      <string>Acknowledgements and Licenses</string>
      </property>
     </widget>
    </item>

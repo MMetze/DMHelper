@@ -35,42 +35,9 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int
 {
 }
 
-/*
-BattleDialogModelCombatant::BattleDialogModelCombatant(const BattleDialogModelCombatant& other) :
-    CampaignObjectBase(),
-    _combatant(other._combatant),
-    _initiative(other._initiative),
-    _position(other._position),
-    _isShown(other._isShown),
-    _isKnown(other._isKnown)
-{
-}
-*/
-
 BattleDialogModelCombatant::~BattleDialogModelCombatant()
 {
 }
-
-/*
-void BattleDialogModelCombatant::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
-{
-    QDomElement element = doc.createElement("battlecombatant");
-
-    CampaignObjectBase::outputXML(doc, element, targetDirectory, isExport);
-
-    element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
-    element.setAttribute("type", getType() );
-    element.setAttribute("initiative", _initiative);
-    element.setAttribute("positionX", _position.x());
-    element.setAttribute("positionY", _position.y());
-    element.setAttribute("isShown", _isShown);
-    element.setAttribute("isKnown", _isKnown);
-
-    internalOutputXML(doc, element, targetDirectory, isExport);
-
-    parent.appendChild(element);
-}
-*/
 
 void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImport)
 {
@@ -105,7 +72,11 @@ int BattleDialogModelCombatant::getInitiative() const
 
 void BattleDialogModelCombatant::setInitiative(int initiative)
 {
-    _initiative = initiative;
+    if(_initiative != initiative)
+    {
+        _initiative = initiative;
+        emit initiativeChanged(this);
+    }
 }
 
 const QPointF& BattleDialogModelCombatant::getPosition() const

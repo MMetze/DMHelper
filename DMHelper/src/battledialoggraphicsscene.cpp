@@ -718,7 +718,7 @@ void BattleDialogGraphicsScene::castSpell()
                                                    spell->getEffectSize().height(),
                                                    spell->getEffectSize().width(),
                                                    spell->getEffectColor(),
-                                                   spell->getEffectToken());
+                                                   spell->getEffectTokenPath());
 
     if(!effect)
     {
@@ -726,11 +726,11 @@ void BattleDialogGraphicsScene::castSpell()
         return;
     }
 
-    effect->setName(spell->getName());
-
     if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
     {
         // Either an Object or a basic shape without a token
+        effect->setName(spell->getName());
+        effect->setTip(spell->getName());
         addEffect(effect);
     }
     else
@@ -752,7 +752,7 @@ void BattleDialogGraphicsScene::castSpell()
                                                                                                                 tokenHeight,
                                                                                                                 tokenWidth,
                                                                                                                 spell->getEffectColor(),
-                                                                                                                spell->getEffectToken()));
+                                                                                                                spell->getEffectTokenPath()));
 
         if(!tokenEffect)
         {
@@ -762,6 +762,7 @@ void BattleDialogGraphicsScene::castSpell()
         }
 
         tokenEffect->setName(spell->getName());
+        tokenEffect->setTip(spell->getName());
         tokenEffect->setEffectActive(true);
         tokenEffect->setImageRotation(spell->getEffectTokenRotation());
 
@@ -844,18 +845,31 @@ void BattleDialogGraphicsScene::deleteItem()
         return;
     }
 
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
-    if(!effect)
+    QGraphicsItem* deleteItem = _contextMenuItem;
+    for(QGraphicsItem* childItem : deleteItem->childItems())
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << _contextMenuItem;
+        if(childItem->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area)
+            deleteItem = childItem;
+    }
+
+    if(!deleteItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, unexpected error finding the right item to delete!";
+        return;
+    }
+
+    BattleDialogModelEffect* deleteEffect = BattleDialogModelEffect::getEffectFromItem(deleteItem);
+    if(!deleteEffect)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << deleteItem;
         return;
     }
 
     QMessageBox::StandardButton result = QMessageBox::critical(nullptr, QString("Confirm Delete Effect"), QString("Are you sure you wish to delete this effect?"), QMessageBox::Yes | QMessageBox::No);
     if(result == QMessageBox::Yes)
     {
-        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << effect;
-        _model->removeEffect(effect);
+        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << deleteEffect;
+        _model->removeEffect(deleteEffect);
         _itemList.removeOne(_contextMenuItem);
         if(_mouseDownItem == _contextMenuItem)
         {
@@ -1066,6 +1080,7 @@ QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect
     effectItem->setParentItem(tokenItem);
     effectItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
     effectItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+    effectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
     effectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
     effectItem->setPos(QPointF(0.0, 0.0));
 

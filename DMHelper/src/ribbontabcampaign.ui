@@ -439,7 +439,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a scrolling text entry to the campaign</string>
+        <string>Add a local sound file to the campaign</string>
        </property>
        <property name="text">
         <string/>
@@ -491,7 +491,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a scrolling text entry to the campaign</string>
+        <string>Add a Syrinscape sound to the campaign</string>
        </property>
        <property name="text">
         <string/>
@@ -543,7 +543,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a scrolling text entry to the campaign</string>
+        <string>Add a YouTube sound file to the campaign</string>
        </property>
        <property name="text">
         <string/>

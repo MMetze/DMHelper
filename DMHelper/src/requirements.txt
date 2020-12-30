@@ -7,10 +7,9 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
 2. Spellbook
     DONE - Engineering version with PHB (WotC IP) data
     DONE - Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
-    SRD data xml
-    Potential need for xml reading performance improvement
-    Images to be possible "on top" of real effects to consider radius, etc.
     DONE - Images and shapes need to be saved
+    DONE - SRD data xml
+    Potential need for xml reading performance improvement
 3. Conditions
     DONE - Can be set in battles
     DONE - Visual reminders in DM view
@@ -35,13 +34,22 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Editing/Saving of monster skills enabled
     DONE - Editing/Saving of character and monster size enabled
     DONE - Edit map file possible
-    Split Max HP and Current HP
+    DONE - Split Max HP and Current HP
+    DONE - Improved importer AC and HP calculations
+    DONE - Import Character puts it in the selected tree items
+
+
+    Background color default to black, not transparent
+    Background color on maps defaults weird
+
+    Conditions
+    Other effects, tie things to individuals
+
     Improve Objects and Effects editing
     Object editing should allow editing width or height...
     Delete key in battle
-    Import Character puts it in the selected tree items
+    Drag a character to top doesn't make it an NPC
     Add progress indications to loading campaigns and importing characters (and maybe maps?), new bestiary/spellbook, etc
-    Check importer AC calculations
     Delete entry in the tree move selection to parent item
     Pointer on maps
 
@@ -99,7 +107,7 @@ Ctrl+S: Save the current campaign
 Ctrl+D: Dice roll Dialog
 Ctrl+F: Find
 Ctrl+G: Go to the Soundboard
-Ctrl+H:
+Ctrl+H: Go to the Spellbook
 Ctrl+J:
 Ctrl+K: Opens the Kalendar
 Ctrl+L: Open the Preview Window

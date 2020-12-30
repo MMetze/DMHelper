@@ -18,6 +18,7 @@ public:
     explicit Spell(const QDomElement &element, bool isImport, QObject *parent = nullptr);
 
     void inputXML(const QDomElement &element, bool isImport);
+    void inputXML_CONVERT(const QDomElement &element);
     QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const;
 
     void beginBatchChanges();
@@ -37,15 +38,14 @@ public:
     QString getClasses() const;
     QString getDescription() const;
     bool isRitual() const;
-    //QStringList getRolls() const;
     QList<Dice> getRolls() const;
     QString getRollsString() const;
     int getEffectType() const;
     bool getEffectShapeActive() const;
     QSize getEffectSize() const;
     QColor getEffectColor() const;
-    bool getEffectTokenActive() const;
     QString getEffectToken() const;
+    QString getEffectTokenPath() const;
     int getEffectTokenRotation() const;
     int getEffectConditions() const;
     bool hasEffectCondition(Combatant::Condition condition) const;
@@ -72,7 +72,6 @@ public slots:
     void setEffectShapeActive(bool effectShapeActive);
     void setEffectSize(QSize effectSize);
     void setEffectColor(QColor effectColor);
-    void setEffectTokenActive(bool effectTokenActive);
     void setEffectToken(QString effectToken);
     void setEffectTokenRotation(int effectTokenRotation);
     void setEffectConditions(int conditions);
@@ -95,14 +94,12 @@ private:
     QString _classes;
     QString _description;
     bool _ritual;
-    //QStringList _rolls;
     QList<Dice> _rolls;
 
     int _effectType;
     bool _effectShapeActive;
     QSize _effectSize;
     QColor _effectColor;
-    bool _effectTokenActive;
     QString _effectToken;
     int _effectTokenRotation;
     int _effectConditions;

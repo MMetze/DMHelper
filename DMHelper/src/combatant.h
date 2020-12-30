@@ -168,6 +168,7 @@ public slots:
     virtual void setHitDice(const Dice& hitDice);
     virtual void setConditions(int conditions);
     virtual void applyConditions(int conditions);
+    virtual void removeConditions(int conditions);
     virtual void addCondition(Condition condition);
     virtual void removeCondition(Condition condition);
     virtual void clearConditions();

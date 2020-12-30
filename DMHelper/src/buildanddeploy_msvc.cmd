@@ -5,7 +5,7 @@ if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
 set QT_DIR=C:\Qt
-set QT_VERSION=5.15.1
+set QT_VERSION=5.15.2
 set QT_INSTALLER_VERSION=4.0
 set MSVC_VERSION=2019
 set SEVENZIP_APP=C:\Program Files\7-Zip\7z
@@ -49,7 +49,7 @@ cd build-64_bit-release
 :build_done
 
 xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
-xcopy %QT_DIR%\%QT_VERSION%\msvc2017_64\bin\Qt5Xml.dll ..\bin64\packages\com.dmhelper.app\data\
+xcopy %QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%_64\bin\Qt5Xml.dll ..\bin64\packages\com.dmhelper.app\data\
 xcopy ..\src\binsrc\* ..\bin64\packages\com.dmhelper.app\data\*
 xcopy /s ..\src\bestiary\* ..\bin64\packages\com.dmhelper.app\data\resources\*
 xcopy /s ..\src\doc\* ..\bin64\packages\com.dmhelper.app\data\doc\*

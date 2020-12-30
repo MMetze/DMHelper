@@ -36,16 +36,6 @@ BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(Monster* mo
 {
 }
 
-/*
-BattleDialogModelMonsterCombatant::BattleDialogModelMonsterCombatant(const BattleDialogModelMonsterCombatant& other) :
-    BattleDialogModelMonsterBase(other),
-    _monsterSize(other._monsterSize),
-    _monsterName(other._monsterName),
-    _monsterHP(other._monsterHP)
-{
-}
-*/
-
 BattleDialogModelMonsterCombatant::~BattleDialogModelMonsterCombatant()
 {
 }
@@ -75,17 +65,6 @@ BattleDialogModelCombatant* BattleDialogModelMonsterCombatant::clone() const
 qreal BattleDialogModelMonsterCombatant::getSizeFactor() const
 {
     return MonsterClass::convertSizeCategoryToScaleFactor(getSizeCategory());
-    /*
-    if(_monsterSize != DMHelper::CombatantSize_Unknown)
-        return _monsterSize;
-
-    MonsterClass* monsterClass = getMonsterClass();
-    if(!monsterClass)
-        return 1;
-
-    //return convertSizeToFactor(monsterClass->getMonsterSize());
-    return monsterClass->getMonsterSizeFactor();
-    */
 }
 
 int BattleDialogModelMonsterCombatant::getSizeCategory() const
@@ -219,7 +198,11 @@ int BattleDialogModelMonsterCombatant::getHitPoints() const
 
 void BattleDialogModelMonsterCombatant::setHitPoints(int hitPoints)
 {
-    _monsterHP = hitPoints;
+    if(_monsterHP != hitPoints)
+    {
+        _monsterHP = hitPoints;
+        emit dataChanged(this);
+    }
 }
 
 QString BattleDialogModelMonsterCombatant::getName() const
@@ -261,7 +244,11 @@ MonsterClass* BattleDialogModelMonsterCombatant::getMonsterClass() const
 
 void BattleDialogModelMonsterCombatant::setMonsterName(const QString& monsterName)
 {
-    _monsterName = monsterName;
+    if(_monsterName != monsterName)
+    {
+        _monsterName = monsterName;
+        emit dataChanged(this);
+    }
 }
 
 Monster* BattleDialogModelMonsterCombatant::getMonster() const

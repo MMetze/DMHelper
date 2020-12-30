@@ -30,7 +30,6 @@ SoundboardFrame::SoundboardFrame(QWidget *parent) :
     ui->setupUi(this);
     _layout = new QVBoxLayout();
     ui->scrollAreaWidgetContents->setLayout(_layout);
-    _layout->addStretch(1);
 
     ui->treeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeWidget->setDragEnabled(true);
@@ -50,8 +49,7 @@ SoundboardFrame::SoundboardFrame(QWidget *parent) :
     connect(ui->btnAddGroup, &QAbstractButton::clicked, this, &SoundboardFrame::addGroup);
     connect(ui->btnAddSound, &QAbstractButton::clicked, this, &SoundboardFrame::addSound);
     connect(ui->btnAddYoutube, &QAbstractButton::clicked, this, &SoundboardFrame::addYoutube);
-    connect(ui->btnAddSound, &QAbstractButton::clicked, this, &SoundboardFrame::addSyrinscape);
-    connect(ui->btnRemoveSound, &QAbstractButton::clicked, this, &SoundboardFrame::removeSound);
+    connect(ui->btnAddSyrinscape, &QAbstractButton::clicked, this, &SoundboardFrame::addSyrinscape);
 }
 
 SoundboardFrame::~SoundboardFrame()
@@ -77,6 +75,7 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
     if(!campaign)
         return;
 
+    _layout->addStretch(10);
     for(SoundboardGroup* group : campaign->getSoundboardGroups())
     {
         if(group)
@@ -144,7 +143,6 @@ void SoundboardFrame::showEvent(QShowEvent *event)
     RibbonFrame::setStandardButtonSize(*ui->lblAddSound, *ui->btnAddSound, ribbonHeight);
     RibbonFrame::setStandardButtonSize(*ui->lblAddYoutube, *ui->btnAddYoutube, ribbonHeight);
     RibbonFrame::setStandardButtonSize(*ui->lblAddSyrinscape, *ui->btnAddSyrinscape, ribbonHeight);
-    RibbonFrame::setStandardButtonSize(*ui->lblRemoveSound, *ui->btnRemoveSound, ribbonHeight);
 
 }
 
@@ -224,11 +222,6 @@ void SoundboardFrame::addSyrinscape()
     addTrack(QUrl(urlName));
 }
 
-void SoundboardFrame::removeSound()
-{
-
-}
-
 void SoundboardFrame::addTrack(const QUrl& url)
 {
     if((!_campaign) || (!url.isValid()))
@@ -242,7 +235,7 @@ void SoundboardFrame::addTrack(const QUrl& url)
 
     AudioTrack* newTrack = AudioFactory().createTrackFromUrl(url, trackName);
 
-    _campaign->addObject(newTrack);
+    emit trackCreated(newTrack);
     addTrackToTree(newTrack);
 }
 
@@ -251,5 +244,7 @@ void SoundboardFrame::addGroupToLayout(SoundboardGroup* group)
     if((!_campaign) || (!_layout))
         return;
 
-    _layout->insertWidget(_layout->count() - 1, new SoundBoardFrameGroupBox(group, _campaign));
+    SoundBoardFrameGroupBox* newGroupBox = new SoundBoardFrameGroupBox(group, _campaign);
+    connect(newGroupBox, &SoundBoardFrameGroupBox::dirty, this, &SoundboardFrame::dirty);
+    _layout->insertWidget(_layout->count() - 1, newGroupBox);
 }

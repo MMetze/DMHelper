@@ -288,7 +288,7 @@ QString MonsterClass::getSpeed() const
 int MonsterClass::getSpeedValue() const
 {
     QString speedStr = getSpeed();
-    return speedStr.left(speedStr.indexOf(" ")).toInt();
+    return speedStr.leftRef(speedStr.indexOf(" ")).toInt();
 }
 
 QString MonsterClass::getAlignment() const
@@ -412,7 +412,7 @@ QString MonsterClass::getSkillString() const
     QString result;
 
     QList<int> keyList = _skillValues.keys();
-    for(int s : keyList)
+    for(int& s : keyList)
     {
         if(_skillValues.contains(s))
         {
@@ -447,7 +447,7 @@ void MonsterClass::setSkillString(const QString& skills)
 
     _skillValues.clear();
 
-    for(QString skillInfo : skillList)
+    for(QString& skillInfo : skillList)
     {
         int spaceIndex = skillInfo.lastIndexOf(" ");
         QString skillName = skillInfo.left(spaceIndex);
@@ -477,8 +477,6 @@ QList<MonsterAction> MonsterClass::getActions() const
 
 void MonsterClass::addAction(const MonsterAction& action)
 {
-    //MonsterAction newAction(action);
-    //_actions.append(newAction);
     _actions.append(action);
 }
 
@@ -504,8 +502,6 @@ QList<MonsterAction> MonsterClass::getLegendaryActions() const
 
 void MonsterClass::addLegendaryAction(const MonsterAction& action)
 {
-    //MonsterAction newAction(action);
-    //_legendaryActions.append(newAction);
     _legendaryActions.append(action);
 }
 
@@ -531,8 +527,6 @@ QList<MonsterAction> MonsterClass::getSpecialAbilities() const
 
 void MonsterClass::addSpecialAbility(const MonsterAction& action)
 {
-    //MonsterAction newAction(action);
-    //_specialAbilities.append(newAction);
     _specialAbilities.append(action);
 }
 
@@ -558,8 +552,6 @@ QList<MonsterAction> MonsterClass::getReactions() const
 
 void MonsterClass::addReaction(const MonsterAction& action)
 {
-    //MonsterAction newAction(action);
-    //_reactions.append(newAction);
     _reactions.append(action);
 }
 
@@ -601,7 +593,7 @@ void MonsterClass::cloneMonster(MonsterClass& other)
     _challenge = other._challenge;
 
     _skillValues.clear(); // just in case we're cloning onto something that exists
-    for(int skill : other._skillValues.keys())
+    for(int& skill : other._skillValues.keys())
         _skillValues[skill] = other._skillValues.value(skill);
 
     _strength = other._strength;
@@ -612,16 +604,16 @@ void MonsterClass::cloneMonster(MonsterClass& other)
     _charisma = other._charisma;
 
     _actions.clear();
-    for(MonsterAction action : other._actions)
+    for(MonsterAction& action : other._actions)
         addAction(action);
     _legendaryActions.clear();
-    for(MonsterAction legendaryAction : other._legendaryActions)
+    for(MonsterAction& legendaryAction : other._legendaryActions)
         addLegendaryAction(legendaryAction);
     _specialAbilities.clear();
-    for(MonsterAction specialAbility : other._specialAbilities)
+    for(MonsterAction& specialAbility : other._specialAbilities)
         addSpecialAbility(specialAbility);
     _reactions.clear();
-    for(MonsterAction reaction : other._reactions)
+    for(MonsterAction& reaction : other._reactions)
         addReaction(reaction);
 
     endBatchChanges();

@@ -8,88 +8,90 @@
 
 const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
 {
-    "N/A", // StringValue_player
-    "", // StringValue_race
-    "N/A", // StringValue_subrace
-    "", // StringValue_sex
-    "", // StringValue_alignment
-    "N/A", // StringValue_background
-    "", // StringValue_class
-    "N/A", // StringValue_class2
-    "N/A", // StringValue_class3
-    "", // StringValue_age
-    "", // StringValue_height
-    "", // StringValue_weight
-    "", // StringValue_eyes
-    "", // StringValue_hair
-    "", // StringValue_equipment
-    "", // StringValue_proficiencies
-    "", // StringValue_spells
-    "",  // StringValue_notes
-    "medium"  // StringValue_size
+    "N/A",      // StringValue_player
+    "",         // StringValue_race
+    "N/A",      // StringValue_subrace
+    "",         // StringValue_sex
+    "",         // StringValue_alignment
+    "N/A",      // StringValue_background
+    "",         // StringValue_class
+    "N/A",      // StringValue_class2
+    "N/A",      // StringValue_class3
+    "",         // StringValue_age
+    "",         // StringValue_height
+    "",         // StringValue_weight
+    "",         // StringValue_eyes
+    "",         // StringValue_hair
+    "",         // StringValue_equipment
+    "",         // StringValue_proficiencies
+    "",         // StringValue_spells
+    "",         // StringValue_notes
+    "medium"    // StringValue_size
 };
 
 const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
 {
-    "player", // StringValue_player
-    "race", // StringValue_race
-    "subrace", // StringValue_subrace
-    "sex", // StringValue_sex
-    "alignment", // StringValue_alignment
-    "background", // StringValue_background
-    "class", // StringValue_class
-    "class2", // StringValue_class2
-    "class3", // StringValue_class3
-    "age", // StringValue_age
-    "height", // StringValue_height
-    "weight", // StringValue_weight
-    "eyes", // StringValue_eyes
-    "hair", // StringValue_hair
-    "equipment", // StringValue_equipment
-    "proficiencies", // StringValue_proficiencies
-    "spells", // StringValue_spells
-    "notes",  // StringValue_notes
-    "size"  // StringValue_size
+    "player",           // StringValue_player
+    "race",             // StringValue_race
+    "subrace",          // StringValue_subrace
+    "sex",              // StringValue_sex
+    "alignment",        // StringValue_alignment
+    "background",       // StringValue_background
+    "class",            // StringValue_class
+    "class2",           // StringValue_class2
+    "class3",           // StringValue_class3
+    "age",              // StringValue_age
+    "height",           // StringValue_height
+    "weight",           // StringValue_weight
+    "eyes",             // StringValue_eyes
+    "hair",             // StringValue_hair
+    "equipment",        // StringValue_equipment
+    "proficiencies",    // StringValue_proficiencies
+    "spells",           // StringValue_spells
+    "notes",            // StringValue_notes
+    "size"              // StringValue_size
 };
 
 const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
 {
-    1, // IntValue_level
-    0, // IntValue_level2
-    0, // IntValue_level3
-    10, // IntValue_strength
-    10, // IntValue_dexterity
-    10, // IntValue_constitution
-    10, // IntValue_intelligence
-    10, // IntValue_wisdom
-    10, // IntValue_charisma
-    30, // IntValue_speed
-    0, // IntValue_platinum
-    0, // IntValue_gold
-    0, // IntValue_silver
-    0, // IntValue_copper
-    0, // IntValue_experience
-    0  // IntValue_jackofalltrades
+    1,      // IntValue_level
+    0,      // IntValue_level2
+    0,      // IntValue_level3
+    10,     // IntValue_strength
+    10,     // IntValue_dexterity
+    10,     // IntValue_constitution
+    10,     // IntValue_intelligence
+    10,     // IntValue_wisdom
+    10,     // IntValue_charisma
+    30,     // IntValue_speed
+    0,      // IntValue_platinum
+    0,      // IntValue_gold
+    0,      // IntValue_silver
+    0,      // IntValue_copper
+    0,      // IntValue_experience
+    0,      // IntValue_jackofalltrades
+    1       // IntValue_maximumHP
 };
 
 const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
 {
-    "level", // IntValue_level
-    "level2", // IntValue_level2
-    "level3", // IntValue_level3
-    "strength", // IntValue_strength
-    "dexterity", // IntValue_dexterity
-    "constitution", // IntValue_constitution
-    "intelligence", // IntValue_intelligence
-    "wisdom", // IntValue_wisdom
-    "charisma", // IntValue_charisma
-    "speed", // IntValue_speed
-    "platinum", // IntValue_platinum
-    "gold", // IntValue_gold
-    "silver", // IntValue_silver
-    "copper", // IntValue_copper
-    "experience", // IntValue_experience
-    "jackofalltrades" // IntValue_experience
+    "level",            // IntValue_level
+    "level2",           // IntValue_level2
+    "level3",           // IntValue_level3
+    "strength",         // IntValue_strength
+    "dexterity",        // IntValue_dexterity
+    "constitution",     // IntValue_constitution
+    "intelligence",     // IntValue_intelligence
+    "wisdom",           // IntValue_wisdom
+    "charisma",         // IntValue_charisma
+    "speed",            // IntValue_speed
+    "platinum",         // IntValue_platinum
+    "gold",             // IntValue_gold
+    "silver",           // IntValue_silver
+    "copper",           // IntValue_copper
+    "experience",       // IntValue_experience
+    "jackofalltrades",  // IntValue_jackofalltrades
+    "maximumhp"         // IntValue_maximumHP
 };
 
 const char* SKILLVALUE_NAMES[Combatant::SKILLS_COUNT] =
@@ -163,32 +165,6 @@ Character::Character(const QString& name, QObject *parent) :
     setDefaultValues();
 }
 
-/*
-Character::Character(QDomElement &element, bool isImport, QObject *parent) :
-    Combatant(parent),
-    _dndBeyondID(-1),
-    _stringValues(STRINGVALUE_COUNT),
-    _intValues(INTVALUE_COUNT),
-    _skillValues(SKILLS_COUNT),
-    _active(true),
-    _iconChanged(false)
-{
-    inputXML(element, isImport);
-}
-
-Character::Character(const Character &obj) :
-    Combatant(obj),
-    _dndBeyondID(obj._dndBeyondID),
-    _stringValues(obj._stringValues),
-    _intValues(obj._intValues),
-    _skillValues(obj._skillValues),
-    _active(true),
-    _iconChanged(obj._iconChanged)
-{
-    qDebug("[Character] WARNING: Character copied - this is a highly questionable action!");
-}
-*/
-
 void Character::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
@@ -214,6 +190,11 @@ void Character::inputXML(const QDomElement &element, bool isImport)
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
 
     Combatant::inputXML(element, isImport);
+
+    if(!element.hasAttribute(INTVALUE_NAMES[IntValue_maximumHP]))
+    {
+        setIntValue(IntValue_maximumHP, getHitPoints());
+    }
 
     endBatchChanges();
 }
@@ -519,18 +500,6 @@ int Character::getProficiencyBonus() const
 int Character::getPassivePerception() const
 {
     return 10 + getSkillBonus(Skills_perception);
-    /*
-    int result = 10;
-
-    result += Combatant::getAbilityMod(getIntValue(IntValue_wisdom));
-
-    if(getSkillValue(Skills_perception))
-    {
-        result += getProficiencyBonus();
-    }
-
-    return result;
-    */
 }
 
 void Character::copyMonsterValues(MonsterClass& monster)

@@ -677,6 +677,8 @@ MainWindow::MainWindow(QWidget *parent) :
     SoundboardFrame* soundboard = new SoundboardFrame(this);
     connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
     connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
+    connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
+    connect(soundboard, SIGNAL(dirty()), this, SLOT(setDirty()));
     soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
     timeAndDateFrame = new TimeAndDateFrame(this);
@@ -975,6 +977,7 @@ void MainWindow::importCharacter()
         return;
 
     CharacterImporter* importer = new CharacterImporter();
+    connect(importer, &CharacterImporter::characterCreated, this, &MainWindow::addNewObject);
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::updateCampaignTree);
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
     connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
@@ -1210,6 +1213,25 @@ void MainWindow::exportCurrentItem()
     file.close();
 
     qDebug() << "[MainWindow] Export complete";
+}
+
+void MainWindow::addNewObject(CampaignObjectBase* newObject)
+{
+    if(!campaign || !treeModel || !newObject)
+        return;
+
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        currentObject = campaign;
+
+    qDebug() << "[MainWindow] Adding object " << newObject->getName() << " (" << newObject->getID() << "), to object " << currentObject->getName() << " (" << currentObject->getID() << ")";
+
+    currentObject->setExpanded(true);
+    currentObject->addObject(newObject);
+
+    updateCampaignTree();
+
+    selectItem(newObject->getID());
 }
 
 void MainWindow::clearDirty()
@@ -1880,25 +1902,6 @@ void MainWindow::addNewAudioObject(const QString& audioFile)
 
     addNewObject(track);
     emit audioTrackAdded(track);
-}
-
-void MainWindow::addNewObject(CampaignObjectBase* newObject)
-{
-    if(!campaign || !treeModel || !newObject)
-        return;
-
-    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
-    if(!currentObject)
-        currentObject = campaign;
-
-    qDebug() << "[MainWindow] Adding object " << newObject->getName() << " (" << newObject->getID() << "), to object " << currentObject->getName() << " (" << currentObject->getID() << ")";
-
-    currentObject->setExpanded(true);
-    currentObject->addObject(newObject);
-
-    updateCampaignTree();
-
-    selectItem(newObject->getID());
 }
 
 void MainWindow::openFile(const QString& filename)

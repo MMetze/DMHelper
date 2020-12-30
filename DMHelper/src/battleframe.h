@@ -22,6 +22,7 @@ class VideoPlayer;
 class CameraRect;
 class BattleCombatantFrame;
 class UnselectedPixmap;
+class CombatantRolloverFrame;
 
 namespace Ui {
 class BattleFrame;
@@ -190,7 +191,6 @@ private slots:
     void updateRounds();
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
-//    void handleSelectionChanged();
     void handleEffectChanged(QGraphicsItem* effectItem);
     void handleEffectRemoved(QGraphicsItem* effectItem);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
@@ -237,6 +237,8 @@ private slots:
     void setEditMode();
     void updateFowImage(const QPixmap& fow);
     void setItemsInert(bool inert);
+
+    void removeRollover();
 
     // State Machine
     void stateUpdated();
@@ -318,10 +320,8 @@ private:
     BattleDialogModelCombatant* _contextMenuCombatant;
     bool _mouseDown;
     QPoint _mouseDownPos;
-    QWidget* _hoverFrame;
-//    BattleCombatantFrame* _combatantSummary;
+    CombatantRolloverFrame* _hoverFrame;
 
-//    QGraphicsItem* _publishSelected;
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
 
@@ -330,7 +330,6 @@ private:
     QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
     qreal _activeScale;
-//    QGraphicsPixmapItem* _selectedPixmap;
     qreal _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;

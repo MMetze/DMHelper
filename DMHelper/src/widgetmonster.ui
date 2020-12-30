@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
+    <width>268</width>
     <height>57</height>
    </rect>
   </property>
@@ -133,7 +133,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Is this monster visible? If the this isn't checked, the monster will not be shown in the Player's Window, but will still be visible in the initiative order</string>
+          <string>Is this monster visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -161,7 +161,7 @@
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this monster visible? If the this isn't checked, the monster will not be shown in the Player's Window, but will still be visible in the initiative order</string>
+          <string>Is this monster visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -212,7 +212,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>Is this monster known? If the this isn't checked, the monster will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the monster takes any actions.</string>
+          <string>Is this monster known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -240,7 +240,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this monster known? If the this isn't checked, the monster will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the monster takes any actions.</string>
+          <string>Is this monster known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -294,7 +294,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's Armor Class. To edit this, double click to go to the monster's full view in the Bestiary.</string>
+          <string>The monster's Armor Class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -316,7 +316,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's Armor Class. To edit this, double click to go to the monster's full view in the Bestiary.</string>
+          <string>The monster's Armor Class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -349,7 +349,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's initiative value.</string>
+          <string>The monster's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -368,7 +368,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's initiative value.</string>
+          <string>The monster's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -407,7 +407,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's remaining hit points</string>
+          <string>The monster's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -426,7 +426,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's remaining hit points</string>
+          <string>The monster's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -455,7 +455,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </font>
          </property>
          <property name="toolTip">
-          <string>The number of Legendary Actions remaining for this monster. Click here to reduce by one, these are automatically reset at the start of the creature's turn.</string>
+          <string>Remaining Legendary Actions</string>
          </property>
          <property name="styleSheet">
           <string notr="true"/>
