@@ -9,7 +9,7 @@
     <InstallerWindowIcon>dmhelper_icon.png</InstallerWindowIcon>
     <Banner>dmhelper_banner.png</Banner>
     <StartMenuDir>DM Helper</StartMenuDir>
-    <TargetDir>@ApplicationsDirX64@/DMHelper</TargetDir>
+    <TargetDir>@ApplicationsDirX64@/DMHelperClient</TargetDir>
     <StyleSheet>style.qss</StyleSheet>
     <RunProgram>@TargetDir@/DMHelperClient.app/Contents/MacOS/DMHelperClient</RunProgram>
 </Installer>
