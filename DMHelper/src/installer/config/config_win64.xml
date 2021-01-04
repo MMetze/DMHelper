@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
     <Name>DM Helper</Name>
-    <Version>2.0.0</Version>
+    <Version>2.1.0</Version>
     <Title>DM Helper</Title>
     <Publisher>DM Helper</Publisher>
     <WizardStyle>Modern</WizardStyle>
