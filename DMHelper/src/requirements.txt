@@ -53,6 +53,12 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     Delete entry in the tree move selection to parent item
     Pointer on maps
 
+
+Sample payloads
+<image></image><audio></audio><command></command><payload></payload>
+<image></image><audio>https://www.youtube.com/watch?v=9bMTK0ml9ZI</audio><command></command><payload></payload>
+<image></image><audio>https://www.youtube.com/watch?v=IA0_cxItj9s</audio><command></command><payload></payload>
+
 Red color:  _color(115,18,0,64)
 
 AoE hitting the middle of creatures rather than the edge

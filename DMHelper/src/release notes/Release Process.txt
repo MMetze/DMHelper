@@ -1,5 +1,8 @@
 Release process
 1. Finish SW changes
+
+1a) Update version # in source, plus in installer scripts.
+
 2. Update documentation and screenshots
 3. Build and test Win64-msvc version
 4. Build and test MacOS version
@@ -8,6 +11,9 @@ Release process
 7. Update files on DriveThruRPG, including update message
 8. Update description on DriveThruRPG with feature list
 9. Update files and description on itch
+
+9a) Post tnhe update to the update checker backend wiht the new version
+
 10. Write a new DevLog post describing the release on itch
 11. Update the feature roadmap on itch
 12. Update Patreon page with feature list
