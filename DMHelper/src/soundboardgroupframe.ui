@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SoundBoardFrameGroupBox</class>
- <widget class="QGroupBox" name="SoundBoardFrameGroupBox">
+ <class>SoundBoardGroupFrame</class>
+ <widget class="QGroupBox" name="SoundBoardGroupFrame">
   <property name="geometry">
    <rect>
     <x>0</x>

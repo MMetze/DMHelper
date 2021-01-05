@@ -1,5 +1,5 @@
-#include "soundboardtrack.h"
-#include "ui_soundboardtrack.h"
+#include "soundboardtrackframe.h"
+#include "ui_soundboardtrackframe.h"
 #include "audiotrack.h"
 #include "audioplayer.h"
 #include "dmconstants.h"
@@ -7,9 +7,9 @@
 #include <QTimer>
 #include <QDebug>
 
-SoundboardTrack::SoundboardTrack(AudioTrack* track, QWidget *parent) :
+SoundboardTrackFrame::SoundboardTrackFrame(AudioTrack* track, QWidget *parent) :
     QFrame(parent),
-    ui(new Ui::SoundboardTrack),
+    ui(new Ui::SoundboardTrackFrame),
     _track(nullptr),
     _localMute(false),
     _currentMute(false),
@@ -48,27 +48,28 @@ SoundboardTrack::SoundboardTrack(AudioTrack* track, QWidget *parent) :
         ui->btnPlay->setIcon(finalPix);
     }*/
 
-    connect(ui->btnMute, &QAbstractButton::clicked, this, &SoundboardTrack::toggleMute);
-    connect(ui->btnPlay, &QAbstractButton::toggled, this, &SoundboardTrack::togglePlay);
-    connect(ui->btnRepeat, &QAbstractButton::toggled, this, &SoundboardTrack::repeatChanged);
-    connect(ui->btnRemove, &QAbstractButton::clicked, this, &SoundboardTrack::handleRemove);
-    connect(track, &AudioTrack::trackLengthChanged, this, &SoundboardTrack::setTrackLength);
-    connect(track, &AudioTrack::trackPositionChanged, this, &SoundboardTrack::setTrackPosition);
+    connect(ui->btnMute, &QAbstractButton::clicked, this, &SoundboardTrackFrame::toggleMute);
+    connect(ui->btnPlay, &QAbstractButton::toggled, this, &SoundboardTrackFrame::togglePlay);
+    connect(ui->btnRepeat, &QAbstractButton::toggled, this, &SoundboardTrackFrame::repeatChanged);
+    connect(ui->btnRemove, &QAbstractButton::clicked, this, &SoundboardTrackFrame::handleRemove);
+    connect(track, &AudioTrack::trackLengthChanged, this, &SoundboardTrackFrame::setTrackLength);
+    connect(track, &AudioTrack::trackPositionChanged, this, &SoundboardTrackFrame::setTrackPosition);
 }
 
-SoundboardTrack::~SoundboardTrack()
+SoundboardTrackFrame::~SoundboardTrackFrame()
 {
     delete ui;
 }
 
-void SoundboardTrack::setTrack(AudioTrack* track)
+void SoundboardTrackFrame::setTrack(AudioTrack* track)
 {
     if(_track)
     {
-        disconnect(this, &SoundboardTrack::play, _track, &AudioTrack::play);
-        disconnect(this, &SoundboardTrack::stop, _track, &AudioTrack::stop);
-        disconnect(this, &SoundboardTrack::muteChanged, _track, &AudioTrack::setMute);
+        disconnect(this, &SoundboardTrackFrame::play, _track, &AudioTrack::play);
+        disconnect(this, &SoundboardTrackFrame::stop, _track, &AudioTrack::stop);
+        disconnect(this, &SoundboardTrackFrame::muteChanged, _track, &AudioTrack::setMute);
         disconnect(ui->slideVolume, &QAbstractSlider::valueChanged, _track, &AudioTrack::setVolume);
+        disconnect(_track, &AudioTrack::destroyed, this, &SoundboardTrackFrame::handleRemove);
     }
 
     if((track) && (_track != track))
@@ -76,25 +77,26 @@ void SoundboardTrack::setTrack(AudioTrack* track)
         _track = track;
         ui->lblName->setText(_track->getName());
         setToolTip(_track->getUrl().toDisplayString());
-        connect(this, &SoundboardTrack::play, _track, &AudioTrack::play);
-        connect(this, &SoundboardTrack::stop, _track, &AudioTrack::stop);
-        connect(this, &SoundboardTrack::muteChanged, _track, &AudioTrack::setMute);
+        connect(this, &SoundboardTrackFrame::play, _track, &AudioTrack::play);
+        connect(this, &SoundboardTrackFrame::stop, _track, &AudioTrack::stop);
+        connect(this, &SoundboardTrackFrame::muteChanged, _track, &AudioTrack::setMute);
         connect(ui->slideVolume, &QAbstractSlider::valueChanged, _track, &AudioTrack::setVolume);
+        connect(_track, &AudioTrack::destroyed, this, &SoundboardTrackFrame::handleRemove);
     }
 }
 
-AudioTrack* SoundboardTrack::getTrack() const
+AudioTrack* SoundboardTrackFrame::getTrack() const
 {
     return _track;
 }
 
-void SoundboardTrack::setMute(bool mute)
+void SoundboardTrackFrame::setMute(bool mute)
 {
     setCurrentMute(mute);
     _localMute = mute;
 }
 
-void SoundboardTrack::parentMuteChanged(bool mute)
+void SoundboardTrackFrame::parentMuteChanged(bool mute)
 {
     setCurrentMute(mute || _localMute);
 
@@ -110,24 +112,24 @@ void SoundboardTrack::parentMuteChanged(bool mute)
     */
 }
 
-void SoundboardTrack::setTrackLength(int trackLength)
+void SoundboardTrackFrame::setTrackLength(int trackLength)
 {
     _trackLength = QString("%1:%2").arg(QString::number(trackLength / 60), 2, QChar('0')).arg(QString::number(trackLength % 60), 2, QChar('0'));
     updateProgress();
 }
 
-void SoundboardTrack::setTrackPosition(int trackPosition)
+void SoundboardTrackFrame::setTrackPosition(int trackPosition)
 {
     _trackPosition = QString("%1:%2").arg(QString::number(trackPosition / 60), 2, QChar('0')).arg(QString::number(trackPosition % 60), 2, QChar('0'));
     updateProgress();
 }
 
-void SoundboardTrack::setRepeat(bool repeat)
+void SoundboardTrackFrame::setRepeat(bool repeat)
 {
     ui->btnRepeat->setChecked(repeat);
 }
 
-void SoundboardTrack::togglePlay(bool checked)
+void SoundboardTrackFrame::togglePlay(bool checked)
 {
     if(checked)
     {
@@ -172,7 +174,7 @@ void SoundboardTrack::togglePlay(bool checked)
     }
 }
 
-void SoundboardTrack::toggleMute()
+void SoundboardTrackFrame::toggleMute()
 {
     bool newMute = ui->btnMute->isChecked();
 //    emit muteChanged(newMute);
@@ -180,7 +182,7 @@ void SoundboardTrack::toggleMute()
     _localMute = newMute;
 }
 
-void SoundboardTrack::setCurrentMute(bool mute)
+void SoundboardTrackFrame::setCurrentMute(bool mute)
 {
     if(_currentMute != mute)
     {
@@ -193,12 +195,12 @@ void SoundboardTrack::setCurrentMute(bool mute)
     }
 }
 
-void SoundboardTrack::updateProgress()
+void SoundboardTrackFrame::updateProgress()
 {
     ui->lblProgress->setText(_trackPosition +  QString(" / ") + _trackLength);
 }
 
-void SoundboardTrack::handleRemove()
+void SoundboardTrackFrame::handleRemove()
 {
     if(_track)
         emit removeTrack(_track);

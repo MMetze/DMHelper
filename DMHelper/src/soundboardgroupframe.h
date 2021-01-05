@@ -1,27 +1,28 @@
-#ifndef SOUNDBOARDFRAMEGROUPBOX_H
-#define SOUNDBOARDFRAMEGROUPBOX_H
+#ifndef SOUNDBOARDGROUPFRAME_H
+#define SOUNDBOARDGROUPFRAME_H
 
 #include <QGroupBox>
 #include "soundboardgroup.h"
 
 namespace Ui {
-class SoundBoardFrameGroupBox;
+class SoundBoardGroupFrame;
 }
 
-class SoundboardTrack;
+class SoundboardTrackFrame;
 class QGridLayout;
 class Campaign;
 
-class SoundBoardFrameGroupBox : public QGroupBox
+class SoundBoardGroupFrame : public QGroupBox
 {
     Q_OBJECT
 
 public:
-    explicit SoundBoardFrameGroupBox(SoundboardGroup* group, Campaign* campaign, QWidget *parent = nullptr);
-    ~SoundBoardFrameGroupBox();
+    explicit SoundBoardGroupFrame(SoundboardGroup* group, Campaign* campaign, QWidget *parent = nullptr);
+    ~SoundBoardGroupFrame();
 
     bool isMuted() const;
     int getVolume() const;
+    SoundboardGroup* getGroup() const;
 
 public slots:
     void updateTrackLayout();
@@ -29,12 +30,14 @@ public slots:
     void removeTrack(AudioTrack* track);
     void setMute(bool mute);
     void trackMuteChanged(bool mute);
+    void handleRemove();
 
 signals:
     void muteChanged(bool mute);
     void overrideChildMute(bool mute);
     void volumeChanged(int volume);
     void dirty();
+    void removeGroup(SoundboardGroup* group);
 
 protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
@@ -49,14 +52,14 @@ protected slots:
 private:
     void addTrackToLayout(AudioTrack* track);
 
-    Ui::SoundBoardFrameGroupBox *ui;
+    Ui::SoundBoardGroupFrame *ui;
 
     QGridLayout* _groupLayout;
-    QList<SoundboardTrack*> _trackWidgets;
+    QList<SoundboardTrackFrame*> _trackWidgets;
     bool _localMute;
 
     SoundboardGroup* _group;
     Campaign* _campaign;
 };
 
-#endif // SOUNDBOARDFRAMEGROUPBOX_H
+#endif // SOUNDBOARDGROUPFRAME_H

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SoundboardTrack</class>
- <widget class="QFrame" name="SoundboardTrack">
+ <class>SoundboardTrackFrame</class>
+ <widget class="QFrame" name="SoundboardTrackFrame">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -9,7 +9,7 @@ class SoundboardFrame;
 
 class Campaign;
 class QVBoxLayout;
-class SoundBoardFrameGroupBox;
+class SoundBoardGroupFrame;
 class SoundboardGroup;
 class AudioTrack;
 class CampaignObjectBase;
@@ -38,6 +38,7 @@ protected:
 
 protected slots:
     void addGroup();
+    void removeGroup(SoundboardGroup* group);
 
     void addSound();
     void addYoutube();
@@ -51,7 +52,7 @@ private:
     Ui::SoundboardFrame *ui;
 
     QVBoxLayout* _layout;
-    QList<SoundBoardFrameGroupBox*> _groupList;
+    QList<SoundBoardGroupFrame*> _groupList;
     bool _mouseDown;
     QPoint _mouseDownPos;
     Campaign* _campaign;

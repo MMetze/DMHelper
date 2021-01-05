@@ -3,7 +3,7 @@
 #include "campaign.h"
 #include "dmconstants.h"
 #include "soundboardgroup.h"
-#include "soundboardframegroupbox.h"
+#include "soundboardgroupframe.h"
 #include "audiotrack.h"
 #include "audiofactory.h"
 #include "ribbonframe.h"
@@ -64,9 +64,12 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
     QLayoutItem *child;
     while((child = _layout->takeAt(0)) != nullptr)
     {
-        QWidget* layoutWidget = child->widget();
-        if(layoutWidget)
-            layoutWidget->deleteLater();
+        SoundBoardGroupFrame* groupFrame = dynamic_cast<SoundBoardGroupFrame*>(child->widget());
+        if(groupFrame)
+        {
+            disconnect(groupFrame->getGroup(), &SoundboardGroup::destroyed, groupFrame, &SoundBoardGroupFrame::handleRemove);
+            delete groupFrame;
+        }
         delete child;
     }
 
@@ -148,12 +151,15 @@ void SoundboardFrame::showEvent(QShowEvent *event)
 
 void SoundboardFrame::updateTrackLayout()
 {
+    if(!_layout)
+        return;
+
     for(int i = 0; i < _layout->count() - 1; ++i)
     {
         QLayoutItem* item = _layout->itemAt(i);
         if(item)
         {
-            SoundBoardFrameGroupBox* group = dynamic_cast<SoundBoardFrameGroupBox*>(item->widget());
+            SoundBoardGroupFrame* group = dynamic_cast<SoundBoardGroupFrame*>(item->widget());
             if(group)
                 group->updateTrackLayout();
         }
@@ -180,6 +186,29 @@ void SoundboardFrame::addGroup()
     SoundboardGroup* newGroup = new SoundboardGroup(groupName);
     _campaign->addSoundboardGroup(newGroup);
     addGroupToLayout(newGroup);
+}
+
+void SoundboardFrame::removeGroup(SoundboardGroup* group)
+{
+    if((!group) || (!_layout) || (!_campaign))
+        return;
+
+    for(int i = 0; i < _layout->count() - 1; ++i)
+    {
+        QLayoutItem* item = _layout->itemAt(i);
+        if(item)
+        {
+            SoundBoardGroupFrame* groupFrame = dynamic_cast<SoundBoardGroupFrame*>(item->widget());
+            if((groupFrame) && (groupFrame->getGroup() == group))
+            {
+                disconnect(group, &SoundboardGroup::destroyed, groupFrame, &SoundBoardGroupFrame::handleRemove);
+                groupFrame->deleteLater();
+                delete item;
+            }
+        }
+    }
+
+    _campaign->removeSoundboardGroup(group);
 }
 
 void SoundboardFrame::addSound()
@@ -244,7 +273,8 @@ void SoundboardFrame::addGroupToLayout(SoundboardGroup* group)
     if((!_campaign) || (!_layout))
         return;
 
-    SoundBoardFrameGroupBox* newGroupBox = new SoundBoardFrameGroupBox(group, _campaign);
-    connect(newGroupBox, &SoundBoardFrameGroupBox::dirty, this, &SoundboardFrame::dirty);
+    SoundBoardGroupFrame* newGroupBox = new SoundBoardGroupFrame(group, _campaign);
+    connect(newGroupBox, &SoundBoardGroupFrame::dirty, this, &SoundboardFrame::dirty);
+    connect(newGroupBox, &SoundBoardGroupFrame::removeGroup, this, &SoundboardFrame::removeGroup);
     _layout->insertWidget(_layout->count() - 1, newGroupBox);
 }
