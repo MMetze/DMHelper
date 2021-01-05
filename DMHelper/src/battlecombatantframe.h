@@ -23,6 +23,9 @@ public:
     void setCombatant(BattleDialogModelCombatant* combatant);
     BattleDialogModelCombatant* getCombatant() const;
 
+signals:
+    void conditionsChanged(BattleDialogModelCombatant* combatant);
+
 protected slots:
     void editConditions();
     void readCombatant();

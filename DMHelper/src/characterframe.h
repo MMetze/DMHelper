@@ -9,6 +9,7 @@ class CharacterFrame;
 }
 
 class QCheckBox;
+class QGridLayout;
 
 class CharacterFrame : public CampaignObjectFrame
 {
@@ -46,6 +47,10 @@ private slots:
     void handlePublishClicked();
     void syncDndBeyond();
     void openExpertiseDialog();
+    void editConditions();
+    void updateConditionLayout();
+    void clearConditionGrid();
+    void addCondition(Combatant::Condition condition);
 
 private:
     void loadCharacterImage();
@@ -60,6 +65,7 @@ private:
     bool _mouseDown;
     bool _reading;
     int _rotation;
+    QGridLayout* _conditionGrid;
 };
 
 #endif // CHARACTERFRAME_H

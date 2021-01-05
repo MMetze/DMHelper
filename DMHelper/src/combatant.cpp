@@ -6,6 +6,8 @@
 #include <QDomDocument>
 #include <QDir>
 #include <QPixmap>
+#include <QPainter>
+#include <QDebug>
 
 const Combatant::Condition CONDITION_ITERATOR_VALUES[Combatant::Condition_Iterator_Count] =
 {
@@ -358,6 +360,71 @@ QString Combatant::getConditionDescription(int condition)
         case Condition_Unconscious: return QString("Unconscious");
         default: return QString();
     }
+}
+
+void Combatant::drawConditions(QPaintDevice* target, int conditions)
+{
+    if((!target) || (conditions == Condition_None))
+        return;
+
+    int spacing = target->width() / 20;
+    int iconSize = (target->width() / 3) - spacing;
+    if((spacing <= 0) || (iconSize <= 5) || (iconSize + spacing >= target->height()))
+    {
+        qDebug() << "[Combatant] spacing or icon size are not ok to draw conditions. Spacing: " << spacing << ", icon size: " << iconSize << ", target: " << target->width() << " x " << target->height();
+        return;
+    }
+    // {110, 150}, // PixmapSize_Animate = mid-sized icon for animation dialogs (e.g. chase)
+
+    QPainter painter(target);
+    int cx = spacing;
+    int cy = spacing;
+    for(int i = 0; i < Combatant::getConditionCount(); ++i)
+    {
+        int condition = Combatant::getConditionByIndex(i);
+        if((conditions & condition) && (cy <= target->height() - iconSize))
+        {
+            // QPixmap conditionPixmap(QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png"));
+            // painter.drawPixmap(cx, cy, conditionPixmap.scaled(iconSize, iconSize));
+            QPixmap conditionPixmap(QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png"));
+            /*
+            QImage coloredIcon(iconSize, iconSize, QImage::Format_ARGB32);
+            coloredIcon.fill(Qt::yellow);
+            QPainter iconPainter;
+            iconPainter.begin(&coloredIcon);
+                iconPainter.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+                iconPainter.drawPixmap(QPoint(0, 0), conditionPixmap.scaled(iconSize, iconSize));
+            iconPainter.end();
+            painter.drawImage(cx, cy, coloredIcon);
+            */
+            painter.drawPixmap(cx, cy, conditionPixmap.scaled(iconSize, iconSize));
+            cx += iconSize + spacing;
+            if(cx > target->width() - iconSize)
+            {
+                cx = spacing;
+                cy += iconSize;
+            }
+        }
+    }
+}
+
+QStringList Combatant::getConditionString(int conditions)
+{
+    QStringList result;
+
+    if(conditions != Condition_None)
+    {
+        for(int i = 0; i < Combatant::getConditionCount(); ++i)
+        {
+            int condition = Combatant::getConditionByIndex(i);
+            if(conditions & condition)
+            {
+                result.append(Combatant::getConditionDescription(condition));
+            }
+        }
+    }
+
+    return result;
 }
 
 int Combatant::getConditions() const

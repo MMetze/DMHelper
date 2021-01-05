@@ -176,6 +176,10 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
     setEditMode();
 
+    // CombatantFrame
+    connect(ui->frameCombatant, &BattleCombatantFrame::conditionsChanged, this, &BattleFrame::updateCombatantWidget);
+    connect(ui->frameCombatant, &BattleCombatantFrame::conditionsChanged, this, &BattleFrame::updateCombatantIcon);
+
     // State Machine
     connect(&_stateMachine, SIGNAL(enterState(BattleFrameState*)), this, SLOT(stateUpdated()));
     connect(&_stateMachine, &BattleFrameStateMachine::stateChanged, _scene, &BattleDialogGraphicsScene::setInputMode);
@@ -1872,8 +1876,21 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
         return;
 
     QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
+    if(combatant->hasCondition(Combatant::Condition_Unconscious))
+    {
+        QImage originalImage = pix.toImage();
+        QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
+        pix = QPixmap::fromImage(grayscaleImage);
+    }
+    Combatant::drawConditions(&pix, combatant->getConditions());
     item->setPixmap(pix);
     item->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
+
+    QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b>");
+    QStringList conditionString = Combatant::getConditionString(combatant->getConditions());
+    if(conditionString.count() > 0)
+        itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
+    item->setToolTip(itemTooltip);
 }
 
 void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage)
@@ -1890,22 +1907,12 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
     if((combatant->getHitPoints() <= 0) && (!combatant->hasCondition(Combatant::Condition_Unconscious)))
     {
         combatant->applyConditions(Combatant::Condition_Unconscious);
-        QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
-        if(item)
-        {
-            QImage originalImage = item->pixmap().toImage();
-            QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
-            item->setPixmap(QPixmap::fromImage(grayscaleImage));
-        }
+        updateCombatantIcon(combatant);
     }
     else if((combatant->getHitPoints() > 0) && (combatant->hasCondition(Combatant::Condition_Unconscious)))
     {
         combatant->removeConditions(Combatant::Condition_Unconscious);
-        QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
-        if(item)
-        {
-            item->setPixmap(combatant->getIconPixmap(DMHelper::PixmapSize_Battle));
-        }
+        updateCombatantIcon(combatant);
     }
 
     if(_logger)
@@ -2703,6 +2710,8 @@ void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
             QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
             pix = QPixmap::fromImage(grayscaleImage);
         }
+        Combatant::drawConditions(&pix, combatant->getConditions());
+
         QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(pix, combatant);
         _scene->addItem(pixmapItem);
         pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
@@ -2713,6 +2722,12 @@ void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
         qreal sizeFactor = combatant->getSizeFactor();
         qreal scaleFactor = (static_cast<qreal>(_model->getGridScale()-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(),pix.height()));
         pixmapItem->setScale(scaleFactor);
+
+        QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b>");
+        QStringList conditionString = Combatant::getConditionString(combatant->getConditions());
+        if(conditionString.count() > 0)
+            itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
+        pixmapItem->setToolTip(itemTooltip);
 
         qDebug() << "[Battle Frame] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
 

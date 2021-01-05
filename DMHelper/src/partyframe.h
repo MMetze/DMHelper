@@ -31,6 +31,7 @@ public:
 signals:
     void publishPartyImage(QImage img);
     void partyChanged();
+    void characterSelected(const QUuid& characterId);
 
 public slots:
     // Publish slots from CampaignObjectFrame

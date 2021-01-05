@@ -118,8 +118,12 @@ void BattleCombatantFrame::editConditions()
     int result = dlg.exec();
     if(result == QDialog::Accepted)
     {
-        _combatant->setConditions(dlg.getConditions());
-        updateLayout();
+        if(dlg.getConditions() != _combatant->getConditions())
+        {
+            _combatant->setConditions(dlg.getConditions());
+            updateLayout();
+            emit conditionsChanged(_combatant);
+        }
     }
 }
 
@@ -130,8 +134,6 @@ void BattleCombatantFrame::updateLayout()
     if(!_combatant)
         return;
 
-    qDebug() << "[BattleCombatantFrame] Creating a new condition grid";
-
     _conditionGrid = new QGridLayout;
     _conditionGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     _conditionGrid->setContentsMargins(CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING);
@@ -140,16 +142,12 @@ void BattleCombatantFrame::updateLayout()
 
     int conditions = _combatant->getConditions();
 
-    qDebug() << "[BattleCombatantFrame] Adding conditions: " << conditions;
-
     for(int i = 0; i < Combatant::getConditionCount(); ++i)
     {
         Combatant::Condition condition = Combatant::getConditionByIndex(i);
         if(conditions & condition)
             addCondition(condition);
     }
-
-    qDebug() << "[BattleCombatantFrame] Total grid entries created: " << _conditionGrid->count();
 
     int spacingColumn = _conditionGrid->columnCount();
 

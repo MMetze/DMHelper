@@ -82,7 +82,7 @@ void QuickRefDataWidget::showQuickRefDetails()
     QPixmap iconPix;
     if(iconPix.load(iconName))
     {
-        iconPix = iconPix.scaled(60,60,Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        iconPix = iconPix.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         infoBox.setIconPixmap(iconPix);
     }
 
