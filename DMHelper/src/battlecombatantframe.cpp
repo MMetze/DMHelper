@@ -3,6 +3,7 @@
 #include "battledialogmodelcombatant.h"
 #include "character.h"
 #include "conditionseditdialog.h"
+#include "quickref.h"
 #include <QDebug>
 
 const int CONDITION_FRAME_SPACING = 8;
@@ -191,7 +192,15 @@ void BattleCombatantFrame::addCondition(Combatant::Condition condition)
     QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
     QLabel* conditionLabel = new QLabel(this);
     conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
-    conditionLabel->setToolTip(Combatant::getConditionDescription(condition));
+
+    QString conditionText = QString("<b>") + Combatant::getConditionDescription(condition) + QString("</b>");
+    if(QuickRef::Instance())
+    {
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        if(conditionData)
+            conditionText += QString("<p>") + conditionData->getOverview();
+    }
+    conditionLabel->setToolTip(conditionText);
 
     int columnCount = (ui->scrollAreaWidgetContents->width() - CONDITION_FRAME_SPACING) / (40 + CONDITION_FRAME_SPACING);
     int row = _conditionGrid->count() / columnCount;

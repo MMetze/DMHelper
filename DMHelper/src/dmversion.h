@@ -1,6 +1,8 @@
 #ifndef DMVERSION_H
 #define DMVERSION_H
 
+#include <QtGlobal>
+
 namespace DMHelper
 {
     const int DMHELPER_MAJOR_VERSION = 2;
@@ -15,6 +17,9 @@ namespace DMHelper
 
     const int SPELLBOOK_MAJOR_VERSION = 1;
     const int SPELLBOOK_MINOR_VERSION = 0;
+
+    const int QUICKREF_MAJOR_VERSION = 1;
+    const int QUICKREF_MINOR_VERSION = 0;
 }
 
 #endif // DMVERSION_H

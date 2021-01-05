@@ -50,6 +50,7 @@
 #include "optionsdialog.h"
 #include "selectzoom.h"
 #include "scrolltabwidget.h"
+#include "quickref.h"
 #include "quickrefframe.h"
 #include "dmscreentabwidget.h"
 #include "timeanddateframe.h"
@@ -656,9 +657,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
     tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-    QuickRefFrame* quickRefFrame = new QuickRefFrame(_options->getQuickReferenceFileName(), this);
-    connect(_options, &OptionsContainer::quickReferenceFileNameChanged, quickRefFrame, &QuickRefFrame::readQuickRef);
+
+    QuickRef::Initialize();
+    QuickRefFrame* quickRefFrame = new QuickRefFrame(this);
     quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+    connect(_options, &OptionsContainer::quickReferenceFileNameChanged, this, &MainWindow::readQuickRef);
+    connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
+    readQuickRef();
 
     /*
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
@@ -1432,6 +1437,18 @@ void MainWindow::readSpellbook()
         spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
 
     qDebug() << "[MainWindow] Spellbook reading complete.";
+}
+
+void MainWindow::readQuickRef()
+{
+    qDebug() << "[MainWindow] Requested to read Quick Reference";
+
+    if(!QuickRef::Instance())
+        QuickRef::Initialize();
+
+    QuickRef::Instance()->readQuickRef(_options->getQuickReferenceFileName());
+
+    qDebug() << "[MainWindow] Quick Reference reading complete.";
 }
 
 void MainWindow::showEvent(QShowEvent * event)

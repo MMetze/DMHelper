@@ -151,6 +151,7 @@ public:
     static int getConditionCount();
     static Condition getConditionByIndex(int index);
     static QString getConditionIcon(int condition);
+    static QString getConditionTitle(int condition);
     static QString getConditionDescription(int condition);
 
     virtual int getConditions() const;

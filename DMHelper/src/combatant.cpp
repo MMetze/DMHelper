@@ -306,6 +306,33 @@ QString Combatant::getConditionIcon(int condition)
     }
 }
 
+QString Combatant::getConditionTitle(int condition)
+{
+    switch(condition)
+    {
+        case Condition_Blinded: return QString("Blinded");
+        case Condition_Charmed: return QString("Charmed");
+        case Condition_Deafened: return QString("Deafened");
+        case Condition_Exhaustion_1:
+        case Condition_Exhaustion_2:
+        case Condition_Exhaustion_3:
+        case Condition_Exhaustion_4:
+        case Condition_Exhaustion_5: return QString("Exhaustion");
+        case Condition_Frightened: return QString("Frightened");
+        case Condition_Grappled: return QString("Grappled");
+        case Condition_Incapacitated: return QString("Incapacitated");
+        case Condition_Invisible: return QString("Invisible");
+        case Condition_Paralyzed: return QString("Paralyzed");
+        case Condition_Petrified: return QString("Petrified");
+        case Condition_Poisoned: return QString("Poisoned");
+        case Condition_Prone: return QString("Prone");
+        case Condition_Restrained: return QString("Restrained");
+        case Condition_Stunned: return QString("Stunned");
+        case Condition_Unconscious: return QString("Unconscious");
+        default: return QString();
+    }
+}
+
 QString Combatant::getConditionDescription(int condition)
 {
     switch(condition)
