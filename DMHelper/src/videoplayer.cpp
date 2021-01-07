@@ -563,6 +563,8 @@ void VideoPlayer::cleanupBuffers()
     _newImage = false;
     _originalSize = QSize();
 
+    QMutexLocker locker(_mutex);
+
     if(_loadImage)
     {
         QImage* tempImage = _loadImage;
@@ -598,6 +600,7 @@ void VideoPlayer::internalStopCheck(int status)
     if(_vlcListPlayer)
     {
         libvlc_media_list_player_release(_vlcListPlayer);
+        cleanupBuffers();
         _vlcListPlayer = nullptr;
         qDebug() << "[VideoPlayer] Internal Stop Check: vlc player destroyed.";
     }
