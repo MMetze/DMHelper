@@ -1,7 +1,7 @@
 #ifndef SOUNDBOARDGROUPFRAME_H
 #define SOUNDBOARDGROUPFRAME_H
 
-#include <QGroupBox>
+#include <QFrame>
 #include "soundboardgroup.h"
 
 namespace Ui {
@@ -9,10 +9,9 @@ class SoundBoardGroupFrame;
 }
 
 class SoundboardTrackFrame;
-class QGridLayout;
 class Campaign;
 
-class SoundBoardGroupFrame : public QGroupBox
+class SoundBoardGroupFrame : public QFrame
 {
     Q_OBJECT
 
@@ -54,7 +53,6 @@ private:
 
     Ui::SoundBoardGroupFrame *ui;
 
-    QGridLayout* _groupLayout;
     QList<SoundboardTrackFrame*> _trackWidgets;
     bool _localMute;
 

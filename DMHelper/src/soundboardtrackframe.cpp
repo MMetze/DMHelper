@@ -36,18 +36,6 @@ SoundboardTrackFrame::SoundboardTrackFrame(AudioTrack* track, QWidget *parent) :
         }
     }
 
-    /*
-    QPixmap iconScaled(":/img/data/icon_music.png");
-    if(!iconScaled.isNull())
-    {
-        QPixmap finalPix = iconScaled;
-        QPainter painter(&finalPix);
-        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        painter.fillRect(iconScaled.rect(), QColor(115, 18, 0));
-        painter.end();
-        ui->btnPlay->setIcon(finalPix);
-    }*/
-
     connect(ui->btnMute, &QAbstractButton::clicked, this, &SoundboardTrackFrame::toggleMute);
     connect(ui->btnPlay, &QAbstractButton::toggled, this, &SoundboardTrackFrame::togglePlay);
     connect(ui->btnRepeat, &QAbstractButton::toggled, this, &SoundboardTrackFrame::repeatChanged);
@@ -99,17 +87,6 @@ void SoundboardTrackFrame::setMute(bool mute)
 void SoundboardTrackFrame::parentMuteChanged(bool mute)
 {
     setCurrentMute(mute || _localMute);
-
-    /*
-    if(mute)
-    {
-        setCurrentMute(true);
-    }
-    else
-    {
-        setCurrentMute(_localMute);
-    }
-    */
 }
 
 void SoundboardTrackFrame::setTrackLength(int trackLength)
@@ -134,18 +111,6 @@ void SoundboardTrackFrame::togglePlay(bool checked)
     if(checked)
     {
         ui->btnPlay->setStyleSheet("background-color: rgb(115, 18, 0); border: 5px solid rgb(115, 18, 0);");
-        /*
-        QPixmap iconScaled(":/img/data/icon_music.png");
-        if(!iconScaled.isNull())
-        {
-            QPixmap finalPix = iconScaled;
-            QPainter painter(&finalPix);
-            painter.setCompositionMode(QPainter::CompositionMode_SourceOut);
-            painter.fillRect(iconScaled.rect(), QColor(115, 18, 0));
-            painter.end();
-            ui->btnPlay->setIcon(finalPix);
-        }
-        */
 
         if(_currentMute)
             ui->btnMute->click();
@@ -158,18 +123,6 @@ void SoundboardTrackFrame::togglePlay(bool checked)
     else
     {
         ui->btnPlay->setStyleSheet("");
-        /*
-        QPixmap iconScaled(":/img/data/icon_music.png");
-        if(!iconScaled.isNull())
-        {
-            QPixmap finalPix = iconScaled;
-            QPainter painter(&finalPix);
-            painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-            painter.fillRect(iconScaled.rect(), QColor(115, 18, 0));
-            painter.end();
-            ui->btnPlay->setIcon(finalPix);
-        }
-        */
         emit stop();
     }
 }
@@ -177,7 +130,6 @@ void SoundboardTrackFrame::togglePlay(bool checked)
 void SoundboardTrackFrame::toggleMute()
 {
     bool newMute = ui->btnMute->isChecked();
-//    emit muteChanged(newMute);
     setCurrentMute(newMute);
     _localMute = newMute;
 }

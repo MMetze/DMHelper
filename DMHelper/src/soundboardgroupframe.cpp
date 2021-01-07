@@ -3,7 +3,6 @@
 #include "soundboardtrackframe.h"
 #include "soundboardgroup.h"
 #include "campaign.h"
-#include <QGridLayout>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QMimeData>
@@ -11,9 +10,8 @@
 #include <QDebug>
 
 SoundBoardGroupFrame::SoundBoardGroupFrame(SoundboardGroup* group, Campaign* campaign, QWidget *parent) :
-    QGroupBox(parent),
+    QFrame(parent),
     ui(new Ui::SoundBoardGroupFrame),
-    _groupLayout(nullptr),
     _trackWidgets(),
     _localMute(false),
     _group(group),
@@ -23,17 +21,12 @@ SoundBoardGroupFrame::SoundBoardGroupFrame(SoundboardGroup* group, Campaign* cam
 
     setAcceptDrops(true);
 
-    setTitle(group->getGroupName());
-    _groupLayout = new QGridLayout();
-    setLayout(_groupLayout);
-    _groupLayout->setSpacing(20);
-    _groupLayout->setHorizontalSpacing(20);
-    _groupLayout->setVerticalSpacing(20);
-
+    ui->edtName->setText(group->getGroupName());
     ui->btnExpand->setIcon(QIcon(QPixmap(":/img/data/icon_downarrow.png").transformed(QTransform().rotate(180))));
 
     connect(ui->btnExpand, &QPushButton::clicked, this, &SoundBoardGroupFrame::toggleContents);
     connect(ui->btnVolume, &QPushButton::clicked, this, &SoundBoardGroupFrame::toggleMute);
+    connect(ui->btnRemove, &QPushButton::clicked, this, &SoundBoardGroupFrame::handleRemove);
 
     if(_group)
     {
@@ -49,8 +42,7 @@ SoundBoardGroupFrame::SoundBoardGroupFrame(SoundboardGroup* group, Campaign* cam
 
 SoundBoardGroupFrame::~SoundBoardGroupFrame()
 {
-    qDeleteAll(_trackWidgets);
-
+    _trackWidgets.clear();
     delete ui;
 }
 
@@ -74,35 +66,48 @@ void SoundBoardGroupFrame::updateTrackLayout()
     if(_trackWidgets.count() <= 0)
         return;
 
-    if((_trackWidgets.at(0)->width() + _groupLayout->horizontalSpacing()) <= 0)
+    QVBoxLayout* mainLayout = dynamic_cast<QVBoxLayout*>(ui->frameWidgets->layout());
+    if(!mainLayout)
         return;
 
-    while(_groupLayout->count() > 0)
+    QLayoutItem* childLayoutItem;
+    QLayoutItem* childLayoutChildItem;
+    while((childLayoutItem = mainLayout->takeAt(0)) != nullptr)
     {
-        _groupLayout->takeAt(0);
-    }
-
-    int xCount = (width() - _groupLayout->contentsMargins().left() - _groupLayout->contentsMargins().right()) /
-                 (_trackWidgets.at(0)->width() + _groupLayout->horizontalSpacing());
-
-    int x = 0;
-    int y = 0;
-
-    _groupLayout->setRowStretch(0,0);
-    for(SoundboardTrackFrame* trackWidget : _trackWidgets)
-    {
-        _groupLayout->addWidget(trackWidget, y, x);
-        if(++x >= xCount)
+        QLayout* childLayout = childLayoutItem->layout();
+        if(childLayout)
         {
-            x = 0;
-            ++y;
-            _groupLayout->setRowStretch(y,0);
+            while((childLayoutChildItem = childLayout->takeAt(0)) != nullptr)
+            {
+                delete childLayoutChildItem;
+            }
         }
+        delete childLayoutItem;
     }
 
-    _groupLayout->setRowStretch(y+1,1);
-    _groupLayout->setColumnStretch(xCount,1);
+    if(_trackWidgets.count() == 0)
+        return;
 
+    if(_trackWidgets.at(0)->width() + mainLayout->spacing() == 0)
+        return;
+    int xMaximum = ui->frameWidgets->width() / (_trackWidgets.at(0)->width() + mainLayout->spacing());
+    if(xMaximum == 0)
+        return;
+    int yCount = _trackWidgets.count() / xMaximum + (_trackWidgets.count() % xMaximum ? 1 : 0);
+
+    for(int y = 0; y < yCount; ++y)
+    {
+        QHBoxLayout* newLineLayout = new QHBoxLayout();
+        int xCount = y == (yCount - 1) ? (_trackWidgets.count() - (y * xMaximum)) : xMaximum;
+        for(int x = 0; x < xCount; ++x)
+        {
+            newLineLayout->addWidget(_trackWidgets.at(y*xCount + x));
+        }
+        newLineLayout->addStretch();
+        mainLayout->addLayout(newLineLayout);
+    }
+
+    ui->frameWidgets->adjustSize();
     update();
 }
 
@@ -215,18 +220,8 @@ void SoundBoardGroupFrame::dropEvent(QDropEvent *event)
 
 void SoundBoardGroupFrame::toggleContents()
 {
-    if((_groupLayout->count() <= 0) ||
-       (_groupLayout->itemAt(0) == nullptr) ||
-       (_groupLayout->itemAt(0)->widget() == nullptr))
-        return;
-
-    bool newVisible = !_groupLayout->itemAt(0)->widget()->isVisible();
-    for(int i = 0; i < _groupLayout->count(); ++i)
-    {
-        QLayoutItem* item = _groupLayout->itemAt(i);
-        if((item) && (item->widget()))
-            item->widget()->setVisible(newVisible);
-    }
+    bool newVisible = !ui->frameWidgets->isVisible();
+    ui->frameWidgets->setVisible(newVisible);
 
     QPixmap expandIcon(":/img/data/icon_downarrow.png");
     if(newVisible)

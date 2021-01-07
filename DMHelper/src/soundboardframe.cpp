@@ -202,8 +202,7 @@ void SoundboardFrame::removeGroup(SoundboardGroup* group)
             if((groupFrame) && (groupFrame->getGroup() == group))
             {
                 disconnect(group, &SoundboardGroup::destroyed, groupFrame, &SoundBoardGroupFrame::handleRemove);
-                groupFrame->deleteLater();
-                delete item;
+                delete groupFrame;
             }
         }
     }
