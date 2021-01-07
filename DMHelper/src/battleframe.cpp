@@ -1158,7 +1158,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
                     _hoverFrame = new CombatantRolloverFrame(widget, this);
                     connect(_hoverFrame, SIGNAL(hoverEnded()), this, SLOT(removeRollover()));
                     QPoint framePos(ui->splitter->widget(1)->x() + _combatantLayout->contentsMargins().left() + 6 - _hoverFrame->width(),
-                                    ui->scrollArea->y() + widget->y());
+                                    ui->scrollArea->y() + widget->y() - ui->scrollArea->verticalScrollBar()->value());
                     _hoverFrame->move(framePos);
                     _hoverFrame->show();
                 }
