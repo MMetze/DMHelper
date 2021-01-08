@@ -164,4 +164,11 @@ void Dice::readString(const QString& diceString)
             }
         }
     }
+    else
+    {
+        bool ok = false;
+        int diceInt = diceString.toInt(&ok);
+        if(ok)
+            _dieBonus = diceInt;
+    }
 }

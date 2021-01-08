@@ -45,6 +45,8 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     Conditions
     Other effects, tie things to individuals
 
+Remove dicerollframe
+
     Improve Objects and Effects editing
     Object editing should allow editing width or height...
     Delete key in battle

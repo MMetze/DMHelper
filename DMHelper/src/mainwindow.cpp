@@ -4,7 +4,6 @@
 #include "publishwindow.h"
 #include "publishframe.h"
 #include "dicerolldialog.h"
-#include "dicerollframe.h"
 #include "countdownframe.h"
 #include "party.h"
 #include "character.h"
