@@ -52,9 +52,6 @@ void DiceRollDialog::rollDice()
     int target = ui->editTarget->text().toInt();
     int total = 0;
 
-    if(!ui->editResult->toPlainText().isEmpty())
-        ui->editResult->append(QString("\n"));
-
     for(int rc = 0; rc < rcEnd; ++rc)
     {
         int result = 0;
@@ -158,7 +155,9 @@ void DiceRollDialog::rollOnce(const Dice& dice, int& resultValue, QString& resul
     // Add the bonus number, if it exists
     if(dice.getBonus() > 0)
     {
-        resultString.append(QString(" + ") + QString::number(dice.getBonus()));
+        if(dice.getCount() > 0)
+            resultString.append(QString(" + "));
+        resultString.append(QString::number(dice.getBonus()));
         resultValue += dice.getBonus();
     }
 }

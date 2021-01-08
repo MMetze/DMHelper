@@ -821,7 +821,7 @@ void BattleFrame::selectBattleMap()
         return;
 
     battleMap->initialize();
-    QImage fowImage = battleMap->getPublishImage();
+    QImage fowImage = battleMap->getGrayImage();
 
     SelectZoom zoomDlg(fowImage, this);
     zoomDlg.exec();

@@ -901,6 +901,7 @@ bool MainWindow::closeCampaign()
 void MainWindow::openDiceDialog()
 {
     DiceRollDialog *drDlg = new DiceRollDialog(this);
+    drDlg->resize(width() / 2, height() / 2);
     drDlg->exec();
 }
 
