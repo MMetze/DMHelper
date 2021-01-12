@@ -96,7 +96,7 @@ Item cards like in Critical Role
 Shortcuts
 Ctrl+Q: Quit DM Helper
 Ctrl+W:     (Close Window)
-Ctrl+E: Opens the DM ScrEEn
+Ctrl+E: Opens the DM Screen
 Ctrl+R: Opens the Quick Reference Guide
 Ctrl+T: Tables Tables Tables
 Ctrl+Z: Undo
