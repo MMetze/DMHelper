@@ -3,9 +3,9 @@ echo Building DM Helper for MacOS
 echo .
 
 export QT_DIR=$HOME/Qt
-export QT_VERSION=5.14.2
+export QT_VERSION=5.15.2
 
-export PATH=$PATH:$QT_DIR/$QT_VERSION/clang_64/bin:$QT_DIR/Tools/QtInstallerFramework/3.2/bin
+export PATH=$PATH:$QT_DIR/$QT_VERSION/clang_64/bin:$QT_DIR/Tools/QtInstallerFramework/4.0/bin
 echo $PATH
 
 cd ..
