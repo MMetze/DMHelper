@@ -99,9 +99,9 @@ SOURCES += main.cpp\
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     soundboardframe.cpp \
-    soundboardframegroupbox.cpp \
     soundboardgroup.cpp \
-    soundboardtrack.cpp \
+    soundboardgroupframe.cpp \
+    soundboardtrackframe.cpp \
     spell.cpp \
     spellbook.cpp \
     spellbookdialog.cpp \
@@ -309,9 +309,9 @@ HEADERS  += mainwindow.h \
     ribbontabtext.h \
     ribbontabtools.h \
     soundboardframe.h \
-    soundboardframegroupbox.h \
     soundboardgroup.h \
-    soundboardtrack.h \
+    soundboardgroupframe.h \
+    soundboardtrackframe.h \
     spell.h \
     spellbook.h \
     spellbookdialog.h \
@@ -472,8 +472,8 @@ FORMS    += mainwindow.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
     soundboardframe.ui \
-    soundboardframegroupbox.ui \
-    soundboardtrack.ui \
+    soundboardgroupframe.ui \
+    soundboardtrackframe.ui \
     spellbookdialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \

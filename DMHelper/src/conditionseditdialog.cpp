@@ -2,6 +2,7 @@
 #include "ui_conditionseditdialog.h"
 #include "ribbonframe.h"
 #include "combatant.h"
+#include "quickref.h"
 #include <QPainter>
 
 ConditionsEditDialog::ConditionsEditDialog(QWidget *parent) :
@@ -10,6 +11,22 @@ ConditionsEditDialog::ConditionsEditDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->frame->setEnabled(false);
+
+    setConditionTooltip(*ui->btnBlinded, Combatant::Condition_Blinded);
+    setConditionTooltip(*ui->btnCharmed, Combatant::Condition_Charmed);
+    setConditionTooltip(*ui->btnDeafened, Combatant::Condition_Deafened);
+    setConditionTooltip(*ui->btnFrightened, Combatant::Condition_Frightened);
+    setConditionTooltip(*ui->btnGrappled, Combatant::Condition_Grappled);
+    setConditionTooltip(*ui->btnIncapacitated, Combatant::Condition_Incapacitated);
+    setConditionTooltip(*ui->btnInvisible, Combatant::Condition_Invisible);
+    setConditionTooltip(*ui->btnParalyzed, Combatant::Condition_Paralyzed);
+    setConditionTooltip(*ui->btnPetrified, Combatant::Condition_Petrified);
+    setConditionTooltip(*ui->btnPoisoned, Combatant::Condition_Poisoned);
+    setConditionTooltip(*ui->btnProne, Combatant::Condition_Prone);
+    setConditionTooltip(*ui->btnRestrained, Combatant::Condition_Restrained);
+    setConditionTooltip(*ui->btnStunned, Combatant::Condition_Stunned);
+    setConditionTooltip(*ui->btnUnconscious, Combatant::Condition_Unconscious);
+    setConditionTooltip(*ui->btnExhaustion, Combatant::Condition_Exhaustion_1);
 
     connect(ui->btnExhaustion, &QAbstractButton::toggled, this, &ConditionsEditDialog::setExhausted);
 }
@@ -121,5 +138,18 @@ void ConditionsEditDialog::setButtonSize(QLabel& label, QPushButton& button, int
 
     RibbonFrame::setWidgetSize(label, buttonWidth, labelHeight);
     RibbonFrame::setButtonSize(button, buttonWidth, iconDim);
+}
+
+void ConditionsEditDialog::setConditionTooltip(QPushButton& button, Combatant::Condition condition)
+{
+    QString conditionText = QString("<b>") + Combatant::getConditionTitle(condition) + QString("</b>");
+    if(QuickRef::Instance())
+    {
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        if(conditionData)
+            conditionText += QString("<p>") + conditionData->getOverview();
+    }
+
+    button.setToolTip(conditionText);
 }
 

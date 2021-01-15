@@ -1,6 +1,7 @@
 #include "campaigntreemodel.h"
 #include "combatant.h"
 #include "character.h"
+#include "audiotrack.h"
 #include "map.h"
 #include "campaigntreeitem.h"
 #include "dmconstants.h"
@@ -558,7 +559,18 @@ void CampaignTreeModel::setTreeEntryVisualization(CampaignTreeItem* entry)
             entry->setIcon(QIcon(":/img/data/icon_contentscrollingtext.png"));
             break;
         case DMHelper::CampaignType_AudioTrack:
-            entry->setIcon(QIcon(":/img/data/icon_music.png"));
+            {
+                QString audioIcon(":/img/data/icon_soundboard.png");
+                AudioTrack* track = dynamic_cast<AudioTrack*>(object);
+                if(track)
+                {
+                    if(track->getAudioType() == DMHelper::AudioType_Syrinscape)
+                        audioIcon = QString(":/img/data/icon_syrinscape.png");
+                    else if(track->getAudioType() == DMHelper::AudioType_Youtube)
+                        audioIcon = QString(":/img/data/icon_playerswindow.png");
+                }
+                entry->setIcon(QIcon(audioIcon));
+            }
             break;
     }
 

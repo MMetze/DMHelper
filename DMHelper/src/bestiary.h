@@ -18,7 +18,7 @@ class Bestiary : public QObject
     Q_OBJECT
 public:
     explicit Bestiary(QObject *parent = nullptr);
-    ~Bestiary();
+    virtual ~Bestiary();
 
     static Bestiary* Instance();
     static void Initialize();

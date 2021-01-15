@@ -41,7 +41,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -99,7 +99,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -157,7 +157,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -215,7 +215,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -273,7 +273,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -331,7 +331,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -389,7 +389,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -447,7 +447,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -505,7 +505,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -563,7 +563,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -621,7 +621,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -679,7 +679,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -737,7 +737,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -795,7 +795,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Select a map for the battle</string>
+            <string/>
            </property>
            <property name="text">
             <string/>
@@ -879,7 +879,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Select a map for the battle</string>
+               <string/>
               </property>
               <property name="text">
                <string/>

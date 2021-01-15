@@ -29,6 +29,9 @@ protected:
 
 private:
     void init();
+    void rollDiceString(int& resultValue, QString& resultString);
+    void rollDiceSpecified(int& resultValue, QString& resultString);
+    void rollOnce(const Dice& dice, int& resultValue, QString& resultString);
 
     Ui::DiceRollDialog *ui;
     bool _fireAndForget;

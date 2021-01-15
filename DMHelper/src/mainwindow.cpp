@@ -4,7 +4,6 @@
 #include "publishwindow.h"
 #include "publishframe.h"
 #include "dicerolldialog.h"
-#include "dicerollframe.h"
 #include "countdownframe.h"
 #include "party.h"
 #include "character.h"
@@ -50,6 +49,7 @@
 #include "optionsdialog.h"
 #include "selectzoom.h"
 #include "scrolltabwidget.h"
+#include "quickref.h"
 #include "quickrefframe.h"
 #include "dmscreentabwidget.h"
 #include "timeanddateframe.h"
@@ -548,6 +548,8 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Party Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(partyFrame, SIGNAL(publishPartyImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(this, SIGNAL(characterChanged(QUuid)), partyFrame, SLOT(handleCharacterChanged(QUuid)));
+    connect(partyFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
+
 
     // EncounterType_Map
     MapFrame* mapFrame = new MapFrame;
@@ -608,7 +610,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
-    connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
+    //TODO: can this edit frame be completely removed?
+    //connect(this, SIGNAL(campaignLoaded(Campaign*)), audioTrackEdit, SLOT(setCampaign(Campaign*)));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_AudioTrack, audioTrackEdit);
     qDebug() << "[MainWindow]     Adding Audio Track widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(audioTrackEdit, SIGNAL(trackTypeChanged(int)), _ribbonTabAudio, SLOT(setTrackType(int)));
@@ -656,9 +659,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
     tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-    QuickRefFrame* quickRefFrame = new QuickRefFrame(_options->getQuickReferenceFileName(), this);
-    connect(_options, &OptionsContainer::quickReferenceFileNameChanged, quickRefFrame, &QuickRefFrame::readQuickRef);
+
+    QuickRef::Initialize();
+    QuickRefFrame* quickRefFrame = new QuickRefFrame(this);
     quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+    connect(_options, &OptionsContainer::quickReferenceFileNameChanged, this, &MainWindow::readQuickRef);
+    connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
+    readQuickRef();
 
     /*
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
@@ -894,6 +901,7 @@ bool MainWindow::closeCampaign()
 void MainWindow::openDiceDialog()
 {
     DiceRollDialog *drDlg = new DiceRollDialog(this);
+    drDlg->resize(width() / 2, height() / 2);
     drDlg->exec();
 }
 
@@ -1432,6 +1440,18 @@ void MainWindow::readSpellbook()
         spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
 
     qDebug() << "[MainWindow] Spellbook reading complete.";
+}
+
+void MainWindow::readQuickRef()
+{
+    qDebug() << "[MainWindow] Requested to read Quick Reference";
+
+    if(!QuickRef::Instance())
+        QuickRef::Initialize();
+
+    QuickRef::Instance()->readQuickRef(_options->getQuickReferenceFileName());
+
+    qDebug() << "[MainWindow] Quick Reference reading complete.";
 }
 
 void MainWindow::showEvent(QShowEvent * event)

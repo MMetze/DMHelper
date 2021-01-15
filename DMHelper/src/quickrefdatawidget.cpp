@@ -21,17 +21,10 @@ QuickRefDataWidget::~QuickRefDataWidget()
 {
     delete ui;
 }
-/*
-QSize QuickRefDataWidget::sizeHint() const
-{
-
-}
-*/
 
 void QuickRefDataWidget::setIcon(const QString& icon)
 {
     QString iconName = icon;
-    //iconName = QString(":/img/data/img/") + icon + QString(".png");
 
     QPixmap iconPix;
     if(!iconPix.load(iconName))
@@ -47,17 +40,6 @@ void QuickRefDataWidget::setIcon(const QString& icon)
         painter.end();
         ui->lblIcon->setPixmap(finalPix);
     }
-
-    /*
-     * TODO: previous version, can be deleted
-    QImage iconImg;
-    iconImg.load(iconName);
-    QImage iconScaled = iconImg.scaled(30,30,Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    if(!iconScaled.isNull())
-    {
-        ui->lblIcon->setPixmap(QPixmap::fromImage(iconScaled));
-    }
-    */
 }
 
 void QuickRefDataWidget::leaveEvent(QEvent * event)
@@ -89,26 +71,7 @@ void QuickRefDataWidget::mouseReleaseEvent(QMouseEvent * event)
 
 void QuickRefDataWidget::showQuickRefDetails()
 {
-    QString output;
-    if(!_data.getDescription().isEmpty())
-    {
-        output.append(QString("<i>") + _data.getDescription() + QString("</i>"));
-        output.append(QString("<p>"));
-    }
-    output.append(QString("<ul>"));
-    for(int i = 0; i < _data.getBullets().count(); ++i)
-    {
-        output.append(QString("<li>") + _data.getBullets().at(i) + QString("</li>"));
-    }
-    output.append(QString("</ul>"));
-    if(!_data.getReference().isEmpty())
-    {
-        output.append(QString("<p>"));
-        output.append(QString("<i>") + _data.getReference() + QString("</i>"));
-    }
-
-    // TODO: previous version can be deleted
-    // QMessageBox::about(parentWidget(), _data.getTitle(), output);
+    QString output = _data.getOverview();
 
     QMessageBox infoBox(parentWidget());
     infoBox.setWindowTitle(_data.getTitle());
@@ -117,18 +80,9 @@ void QuickRefDataWidget::showQuickRefDetails()
 
     QString iconName = _data.getIcon();
     QPixmap iconPix;
-    //iconName = QString(":/img/data/img/") + _data.getIcon() + QString(".png");
     if(iconPix.load(iconName))
     {
-        iconPix = iconPix.scaled(60,60,Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        /*
-        QPixmap coloredPix = iconPix;
-        QPainter painter(&coloredPix);
-        painter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        painter.fillRect(coloredPix.rect(), QColor(85, 85, 85));
-        painter.end();
-        infoBox.setIconPixmap(coloredPix);
-        */
+        iconPix = iconPix.scaled(60, 60, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         infoBox.setIconPixmap(iconPix);
     }
 

@@ -5,7 +5,6 @@
 #include "undopoint.h"
 #include "undoshape.h"
 #include "undomarker.h"
-//#include "mapframe.h"
 #include "dmconstants.h"
 #include "campaign.h"
 #include "audiotrack.h"
@@ -20,10 +19,8 @@
 
 Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
-    //_name(mapName),
     _filename(fileName),
     _undoStack(nullptr),
-//    _mapFrame(nullptr),
     _markerList(),
     _audioTrackId(),
     _playAudio(false),
@@ -34,99 +31,9 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
 {
     _undoStack = new QUndoStack(this);
 }
-
-/*
-Map::Map(const QDomElement& element, bool isImport, QObject *parent) :
-    AdventureItem(parent),
-    _name(),
-    _filename(),
-    _undoStack(nullptr),
-    _mapFrame(nullptr),
-    _markerList(),
-    _audioTrackId(),
-    _playAudio(false),
-    _mapRect(),
-    _initialized(false),
-    _imgBackground(),
-    _imgFow()
-{
-    _undoStack = new QUndoStack(this);
-    inputXML(element, isImport);
-}
-
-Map::Map(const Map &obj) :
-    AdventureItem(obj),
-    _name(obj._name),
-    _filename(obj._filename),
-    _undoStack(nullptr),
-    _mapFrame(nullptr),
-    _markerList(obj._markerList),
-    _audioTrackId(obj._audioTrackId),
-    _playAudio(obj._playAudio),
-    _mapRect(obj._mapRect),
-    _initialized(false),
-    _imgBackground(),
-    _imgFow()
-{
-    if(obj._undoStack)
-    {
-        _undoStack = new QUndoStack(this);
-        for(int i = 0; i < obj._undoStack->count(); ++i)
-        {
-            const UndoBase* baseObj = dynamic_cast<const UndoBase*>(obj._undoStack->command(i));
-            if(baseObj)
-                _undoStack->push(baseObj->clone());
-        }
-    }
-}
-*/
-
-/*
-void Map::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
-{
-    QDomElement element = doc.createElement( "map" );
-
-    AdventureItem::outputXML(doc, element, targetDirectory, isExport);
-
-    element.setAttribute("name", getName());
-    element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
-    element.setAttribute("audiotrack", _audioTrackId.toString());
-    element.setAttribute("playaudio", _playAudio);
-    element.setAttribute("mapRectX", _mapRect.x());
-    element.setAttribute("mapRectY", _mapRect.y());
-    element.setAttribute("mapRectWidth", _mapRect.width());
-    element.setAttribute("mapRectHeight", _mapRect.height());
-
-    QDomElement actionsElement = doc.createElement( "actions" );
-    int i;
-    for(i = 0; i < _markerList.count(); ++i)
-    {
-        QDomElement actionElement = doc.createElement( "action" );
-        actionElement.setAttribute( "type", DMHelper::ActionType_SetMarker );
-        _markerList.at(i).outputXML(actionElement, isExport);
-        actionsElement.appendChild(actionElement);
-    }
-
-    for(i = 0; i < _undoStack->index(); ++i )
-    {
-        const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
-        if(action)
-        {
-            QDomElement actionElement = doc.createElement( "action" );
-            actionElement.setAttribute( "type", action->getType() );
-            action->outputXML(doc, actionElement, targetDirectory, isExport);
-            actionsElement.appendChild(actionElement);
-        }
-    }
-    element.appendChild(actionsElement);
-
-    parent.appendChild(element);
-}
-*/
 
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
-//    setName(element.attribute("name"));
     setFileName(element.attribute("filename"));
     _mapRect = QRect(element.attribute("mapRectX",QString::number(0)).toInt(),
                      element.attribute("mapRectY",QString::number(0)).toInt(),
@@ -178,19 +85,6 @@ void Map::inputXML(const QDomElement &element, bool isImport)
 
     CampaignObjectBase::inputXML(element, isImport);
 }
-
-/*
-QString Map::getName() const
-{
-    return _name;
-}
-
-void Map::setName(const QString& newName)
-{
-    _name = newName;
-    emit changed();
-}
-*/
 
 int Map::getObjectType() const
 {
@@ -283,9 +177,9 @@ QUndoStack* Map::getUndoStack() const
     return _undoStack;
 }
 
-void Map::applyPaintTo(QImage* target, QColor clearColor, int index)
+void Map::applyPaintTo(QImage* target, QColor clearColor, int index, bool preview)
 {
-    bool preview = false;
+    bool previewNeed = preview;
 
     if(!target)
     {
@@ -293,7 +187,7 @@ void Map::applyPaintTo(QImage* target, QColor clearColor, int index)
             return;
 
         target = &_imgFow;
-        preview = true;
+        previewNeed = true;
     }
 
     if(index < 0)
@@ -309,17 +203,10 @@ void Map::applyPaintTo(QImage* target, QColor clearColor, int index)
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)
         {
-            action->apply(preview, target);
+            action->apply(previewNeed, target);
         }
     }
 }
-
-/*
-MapFrame* Map::getRegisteredWindow() const
-{
-    return _mapFrame;
-}
-*/
 
 MapMarker* Map::getMapMarker(int id)
 {
@@ -391,30 +278,6 @@ bool Map::isCleared()
 
     return false;
 }
-
-/*
-void Map::registerWindow(MapFrame* mapFrame)
-{
-    _mapFrame = mapFrame;
-    if(mapFrame != nullptr)
-    {
-        for(int i = 0; i < _markerList.count(); ++i)
-        {
-            _mapFrame->addMapMarker(_markerList[i]);
-        }
-        connect(_mapFrame, SIGNAL(dirty()), this, SIGNAL(dirty()));
-    }
-}
-
-void Map::unregisterWindow(MapFrame* mapFrame)
-{
-    if(mapFrame == _mapFrame)
-    {
-        disconnect(_mapFrame);
-        registerWindow(nullptr);
-    }
-}
-*/
 
 void Map::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview)
 {
@@ -628,6 +491,21 @@ QImage Map::getPublishImage(const QRect& rect)
     return result;
 }
 
+QImage Map::getGrayImage()
+{
+    QImage result(_imgBackground);
+
+    QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
+    applyPaintTo(&grayFoWImage, QColor(0,0,0,128), _undoStack->index(), true);
+
+    QPainter p;
+    p.begin(&result);
+        p.drawImage(0, 0, grayFoWImage);
+    p.end();
+
+    return result;
+}
+
 QImage Map::getShrunkPublishImage()
 {
     QImage bwFoWImage = getBWFoWImage(_imgBackground);
@@ -729,8 +607,6 @@ void Map::initialize()
 
     QImageReader reader(_filename);
     _imgBackground = reader.read();
-
-    // _imgBackground.load(_filename);
 
     if(_imgBackground.isNull())
     {

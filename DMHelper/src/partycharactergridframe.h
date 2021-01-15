@@ -22,6 +22,13 @@ public:
 
     QUuid getId() const;
 
+signals:
+    void characterSelected(const QUuid& characterId);
+
+protected:
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    virtual bool eventFilter(QObject *obj, QEvent *event) override;
+
 private slots:
     void syncDndBeyond();
 

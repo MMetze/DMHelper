@@ -3,11 +3,16 @@
 #include "characterimporter.h"
 #include "scaledpixmap.h"
 #include "expertisedialog.h"
+#include "conditionseditdialog.h"
+#include "quickref.h"
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QFileDialog>
 #include <QIntValidator>
+#include <QGridLayout>
 #include <QDebug>
+
+const int CONDITION_FRAME_SPACING = 8;
 
 // TODO: automate character level, next level exp, proficiency bonus
 
@@ -17,7 +22,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     _character(nullptr),
     _mouseDown(false),
     _reading(false),
-    _rotation(0)
+    _rotation(0),
+    _conditionGrid(nullptr)
 {
     ui->setupUi(this);
 
@@ -91,6 +97,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->edtEquipment,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
     connect(ui->edtSpells,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
     connect(ui->edtNotes,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+
+    connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &CharacterFrame::editConditions);
 }
 
 CharacterFrame::~CharacterFrame()
@@ -275,6 +283,8 @@ void CharacterFrame::clear()
     ui->chkPersuasion->setText(QString(""));
     ui->chkIntimidation->setText(QString(""));
 
+    clearConditionGrid();
+
     enableDndBeyondSync(false);
 
     _reading = false;
@@ -399,6 +409,8 @@ void CharacterFrame::readCharacterData()
     ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
+    updateConditionLayout();
+
     connectChanged(true);
 
     calculateMods();
@@ -520,6 +532,104 @@ void CharacterFrame::openExpertiseDialog()
 
     calculateMods();
     writeCharacterData();
+}
+
+void CharacterFrame::editConditions()
+{
+    if(!_character)
+        return;
+
+    ConditionsEditDialog dlg;
+    dlg.setConditions(_character->getConditions());
+    int result = dlg.exec();
+    if(result == QDialog::Accepted)
+    {
+        if(dlg.getConditions() != _character->getConditions())
+        {
+            _character->setConditions(dlg.getConditions());
+            updateConditionLayout();
+        }
+    }
+}
+
+void CharacterFrame::updateConditionLayout()
+{
+    clearConditionGrid();
+
+    if(!_character)
+        return;
+
+    _conditionGrid = new QGridLayout;
+    _conditionGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    _conditionGrid->setContentsMargins(CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING);
+    _conditionGrid->setSpacing(CONDITION_FRAME_SPACING);
+    ui->scrollAreaWidgetContents->setLayout(_conditionGrid);
+
+    int conditions = _character->getConditions();
+
+    for(int i = 0; i < Combatant::getConditionCount(); ++i)
+    {
+        Combatant::Condition condition = Combatant::getConditionByIndex(i);
+        if(conditions & condition)
+            addCondition(condition);
+    }
+
+    int spacingColumn = _conditionGrid->columnCount();
+
+    _conditionGrid->addItem(new QSpacerItem(20, 40, QSizePolicy::Expanding), 0, spacingColumn);
+
+    for(int i = 0; i < spacingColumn; ++i)
+        _conditionGrid->setColumnStretch(i, 1);
+
+    _conditionGrid->setColumnStretch(spacingColumn, 10);
+
+    update();
+}
+
+void CharacterFrame::clearConditionGrid()
+{
+    if(!_conditionGrid)
+        return;
+
+    qDebug() << "[BattleCombatantFrame] Clearing the condition grid";
+
+    // Delete the grid entries
+    QLayoutItem *child = nullptr;
+    while((child = _conditionGrid->takeAt(0)) != nullptr)
+    {
+        delete child->widget();
+        delete child;
+    }
+
+    delete _conditionGrid;
+    _conditionGrid = nullptr;
+
+    ui->scrollAreaWidgetContents->update();
+}
+
+void CharacterFrame::addCondition(Combatant::Condition condition)
+{
+    if(!_conditionGrid)
+        return;
+
+    QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
+    QLabel* conditionLabel = new QLabel(this);
+    conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
+
+    QString conditionText = QString("<b>") + Combatant::getConditionDescription(condition) + QString("</b>");
+    if(QuickRef::Instance())
+    {
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        if(conditionData)
+            conditionText += QString("<p>") + conditionData->getOverview();
+    }
+    conditionLabel->setToolTip(conditionText);
+
+    int columnCount = (ui->scrollAreaWidgetContents->width() - CONDITION_FRAME_SPACING) / (40 + CONDITION_FRAME_SPACING);
+    int row = _conditionGrid->count() / columnCount;
+    int column = _conditionGrid->count() % columnCount;
+
+    _conditionGrid->addWidget(conditionLabel, row, column);
 }
 
 void CharacterFrame::loadCharacterImage()

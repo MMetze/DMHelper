@@ -244,7 +244,9 @@ void PartyFrame::loadCharacters()
     {
         if(character)
         {
-            _characterFrames.append(new PartyCharacterGridFrame(*character));
+            PartyCharacterGridFrame* newCharacterFrame = new PartyCharacterGridFrame(*character);
+            connect(newCharacterFrame, &PartyCharacterGridFrame::characterSelected, this, &PartyFrame::characterSelected);
+            _characterFrames.append(newCharacterFrame);
             if(character->getDndBeyondID() != -1)
                 canUpdate = true;
         }

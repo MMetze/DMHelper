@@ -4,15 +4,12 @@
 #include "quickrefdatawidget.h"
 #include <QFile>
 #include <QTextStream>
-#include <QFileInfo>
-#include <QDir>
 #include <QCoreApplication>
 #include <QDebug>
 
-QuickRefFrame::QuickRefFrame(const QString& quickRefFile, QWidget *parent) :
+QuickRefFrame::QuickRefFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::QuickRefFrame),
-    _quickRef(),
     _quickRefLayout(nullptr)
 {
     ui->setupUi(this);
@@ -20,92 +17,39 @@ QuickRefFrame::QuickRefFrame(const QString& quickRefFile, QWidget *parent) :
     // Load the quick-reference guide in the main window
     _quickRefLayout = new QVBoxLayout;
     _quickRefLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    //_quickRefLayout->setContentsMargins(1,1,1,1);
     ui->scrollQuickRefWidgetContents->setLayout(_quickRefLayout);
-    //ui->scrollQuickRefWidgetContents->setContentsMargins(1,1,1,1);
-    //ui->scrollQuickRef->setContentsMargins(1,1,1,1);
+
     connect(ui->cmbQuickRef, SIGNAL(currentIndexChanged(int)), this, SLOT(handleQuickRefChange(int)));
-    readQuickRef(quickRefFile);
 }
 
 QuickRefFrame::~QuickRefFrame()
 {
-    qDeleteAll(_quickRef);
     delete ui;
 }
 
-void QuickRefFrame::readQuickRef(const QString& quickRefFile)
+void QuickRefFrame::refreshQuickRef()
 {
-    if(!_quickRef.empty())
+    if(!QuickRef::Instance())
         return;
 
     ui->cmbQuickRef->clear();
 
-/*
-#ifdef Q_OS_MAC
-    QDir fileDirPath(QCoreApplication::applicationDirPath());
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    fileDirPath.cdUp();
-    QString quickRefFileName = fileDirPath.path() + QString("/quickref_data.xml");
-#else
-    QString quickRefFileName("quickref_data.xml");
-#endif
-*/
-
-    QDomDocument doc("DMHelperDataXML");
-    QFile file(quickRefFile);
-    qDebug() << "[QuickRef] Quickref data file: " << QFileInfo(file).filePath();
-    if(!file.open(QIODevice::ReadOnly))
+    QStringList sectionNames = QuickRef::Instance()->getSectionList();
+    for(const QString& section : qAsConst(sectionNames))
     {
-        qDebug() << "[QuickRef] Unable to read quickref file: " << quickRefFile;
-        return;
+        ui->cmbQuickRef->addItem(section);
     }
 
-    QFileInfo quickRefInfo(quickRefFile);
-    QString quickRefIconDir = quickRefInfo.dir().absolutePath() + QString("/icons/");
-
-    QTextStream in(&file);
-    in.setCodec("UTF-8");
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
-
-    file.close();
-
-    if(contentResult == false)
-    {
-        qDebug() << "[QuickRef] Unable to parse the quickref data file.";
-        qDebug() << errMsg << errRow << errColumn;
-        return;
-    }
-
-    QDomElement root = doc.documentElement();
-    if((root.isNull()) || (root.tagName() != "root"))
-    {
-        qDebug() << "[QuickRef] Unable to find the root element in the quickref data file.";
-        return;
-    }
-
-    QDomElement sectionElement = root.firstChildElement(QString("section"));
-    while(!sectionElement.isNull())
-    {
-        QuickRefSection* newSection = new QuickRefSection(sectionElement, quickRefIconDir);
-        _quickRef.append(newSection);
-        ui->cmbQuickRef->addItem(newSection->getName());
-        sectionElement = sectionElement.nextSiblingElement(QString("section"));
-    }
-
-    if(!_quickRef.empty())
-    {
+    if(QuickRef::Instance()->count() > 0)
         ui->cmbQuickRef->setCurrentIndex(0);
-    }
 }
 
 void QuickRefFrame::handleQuickRefChange(int selection)
 {
-    if((selection < 0) || (selection >= _quickRef.count()))
+    if((!QuickRef::Instance()) || (selection < 0) || (selection >= QuickRef::Instance()->count()))
+        return;
+
+    if(ui->cmbQuickRef->currentText().isEmpty())
         return;
 
     // Delete existing widgets
@@ -117,7 +61,7 @@ void QuickRefFrame::handleQuickRefChange(int selection)
     }
 
     // Add a new widget for each quickref item
-    QuickRefSection* section = _quickRef.at(selection);
+    QuickRefSection* section = QuickRef::Instance()->getSection(ui->cmbQuickRef->currentText());
     if(section->getLimitation().isEmpty())
     {
         ui->lblQuickRefSectionLimitation->hide();
@@ -129,23 +73,31 @@ void QuickRefFrame::handleQuickRefChange(int selection)
     }
 
     //use section name and limitation
-    QList<QuickRefSubsection> subsections = section->getSubsections();
+    QList<QuickRefSubsection*> subsections = section->getSubsections();
     for(int i = 0; i < subsections.count(); ++i)
     {
-        if(!subsections.at(i).getDescription().isEmpty())
+        QuickRefSubsection* subsection = subsections.at(i);
+        if(subsection)
         {
-            QLabel* lblSubSection = new QLabel(subsections.at(i).getDescription(), ui->scrollQuickRefWidgetContents);
-            lblSubSection->setWordWrap(true);
-            lblSubSection->setMargin(6);
-            _quickRefLayout->addWidget(lblSubSection);
-        }
+            if(!subsection->getDescription().isEmpty())
+            {
+                QLabel* lblSubSection = new QLabel(subsection->getDescription(), ui->scrollQuickRefWidgetContents);
+                lblSubSection->setWordWrap(true);
+                lblSubSection->setMargin(6);
+                _quickRefLayout->addWidget(lblSubSection);
+            }
 
-        //use subsection description
-        QList<QuickRefData> data = subsections.at(i).getData();
-        for(int j = 0; j < data.count(); ++j)
-        {
-            QuickRefDataWidget* widget = new QuickRefDataWidget(data.at(j), ui->scrollQuickRefWidgetContents);
-            _quickRefLayout->addWidget(widget);
+            //use subsection description
+            QStringList dataTitles = subsection->getDataTitles();
+            for(const QString& dataTitle : qAsConst(dataTitles))
+            {
+                QuickRefData* data = subsection->getData(dataTitle);
+                if(data)
+                {
+                    QuickRefDataWidget* widget = new QuickRefDataWidget(*data, ui->scrollQuickRefWidgetContents);
+                    _quickRefLayout->addWidget(widget);
+                }
+            }
         }
     }
 

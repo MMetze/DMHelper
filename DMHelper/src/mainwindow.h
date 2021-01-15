@@ -103,6 +103,7 @@ public slots:
     // Bestiary
     void readBestiary();
     void readSpellbook();
+    void readQuickRef();
 
 signals:
     void campaignLoaded(Campaign* campaign);

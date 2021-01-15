@@ -1,5 +1,5 @@
-#ifndef SOUNDBOARDTRACK_H
-#define SOUNDBOARDTRACK_H
+#ifndef SOUNDBOARDTRACKFRAME_H
+#define SOUNDBOARDTRACKFRAME_H
 
 #include <QFrame>
 
@@ -7,16 +7,16 @@ class AudioTrack;
 class AudioPlayer;
 
 namespace Ui {
-class SoundboardTrack;
+class SoundboardTrackFrame;
 }
 
-class SoundboardTrack : public QFrame
+class SoundboardTrackFrame : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit SoundboardTrack(AudioTrack* track, QWidget *parent = nullptr);
-    ~SoundboardTrack();
+    explicit SoundboardTrackFrame(AudioTrack* track, QWidget *parent = nullptr);
+    ~SoundboardTrackFrame();
 
     void setTrack(AudioTrack* track);
     AudioTrack* getTrack() const;
@@ -44,7 +44,7 @@ protected slots:
     void handleRemove();
 
 private:
-    Ui::SoundboardTrack *ui;
+    Ui::SoundboardTrackFrame *ui;
 
     AudioTrack* _track;
     bool _localMute;
@@ -53,4 +53,4 @@ private:
     QString _trackPosition;
 };
 
-#endif // SOUNDBOARDTRACK_H
+#endif // SOUNDBOARDTRACKFRAME_H
