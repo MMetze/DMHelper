@@ -292,14 +292,16 @@ void OptionsContainer::readSettings()
     }
 
     // Note: password will not be stored in settings
-    setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml")));
-    if(!settings.contains(QString("bestiary")))
-        getDataDirectory(QString("Images"));
+    bool bestiaryExists = true;
+    setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml"), &bestiaryExists));
+    if((!settings.contains(QString("bestiary"))) || (!bestiaryExists))
+        getDataDirectory(QString("Images"), true);
     setLastMonster(settings.value("lastMonster","").toString());
 
-    setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml")));
-    if(!settings.contains(QString("spellbook")))
-        getDataDirectory(QString("Images"));
+    bool spellbookExists = true;
+    setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml"), &spellbookExists));
+    if((!settings.contains(QString("spellbook"))) || (!spellbookExists))
+        getDataDirectory(QString("Images"), true);
     setLastSpell(settings.value("lastSpell","").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
@@ -497,7 +499,7 @@ void OptionsContainer::setShopsFileName(const QString& filename)
     }
 }
 
-QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename)
+QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename, bool* exists)
 {
     QString result = settings.value(key, QVariant()).toString();
 
@@ -521,17 +523,25 @@ QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& ke
     }
 
     if(!result.isEmpty())
+    {
+        if(exists)
+            *exists = true;
         return result;
+    }
     else
-        return getStandardFile(defaultFilename);
+    {
+        return getStandardFile(defaultFilename, exists);
+    }
 }
 
-QString OptionsContainer::getStandardFile(const QString& defaultFilename)
+QString OptionsContainer::getStandardFile(const QString& defaultFilename, bool* exists)
 {
     QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QString standardFile = standardPath + QString("/") + defaultFilename;
     if(QFileInfo::exists(standardFile))
     {
+        if(exists)
+            *exists = true;
         qDebug() << "[OptionsContainer] Standard File found: " << standardFile;
         return standardFile;
     }
@@ -547,6 +557,9 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename)
 #endif
 
     QDir().mkpath(standardPath);
+
+    if(exists)
+        *exists = false;
 
     if(QFile::copy(appFile, standardFile))
     {
@@ -579,7 +592,7 @@ QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QStrin
         return getDataDirectory(defaultDir);
 }
 
-QString OptionsContainer::getDataDirectory(const QString& defaultDir)
+QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overwrite)
 {
     bool created = false;
     QString standardPath = getStandardDirectory(defaultDir, &created);
@@ -590,7 +603,7 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir)
         return QString();
     }
 
-    if(!created)
+    if((!created)&&(!overwrite))
     {
         qDebug() << "[OptionsContainer] Data Directory found: " << standardPath;
         return standardPath;
@@ -678,14 +691,13 @@ void OptionsContainer::backupFile(const QString& filename)
 void OptionsContainer::resetFileSettings()
 {
     setBestiaryFileName(getStandardFile(QString("DMHelperBestiary.xml")));
-    getDataDirectory(QString("Images"));
-
     setSpellbookFileName(getStandardFile(QString("spellbook.xml")));
     setQuickReferenceFileName(getStandardFile(QString("quickref_data.xml")));
     setCalendarFileName(getStandardFile(QString("calendar.xml")));
     setEquipmentFileName(getStandardFile(QString("equipment.xml")));
     setShopsFileName(getStandardFile(QString("shops.xml")));
-    setTablesDirectory(getDataDirectory(QString("tables")));
+    setTablesDirectory(getDataDirectory(QString("tables"), true));
+    getDataDirectory(QString("Images"));
 }
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)
