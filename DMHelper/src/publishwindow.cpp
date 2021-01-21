@@ -17,7 +17,7 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
 
     _publishFrame = new PublishFrame(this);
     setCentralWidget(_publishFrame);
-    resize(600, 400);
+    resize(800, 600);
     //_publishFrame->setAutoFillBackground(true);
 
     setBackgroundColor();

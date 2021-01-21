@@ -24,6 +24,10 @@ private slots:
     void editBestiary();
     void setBestiary(const QString& bestiaryFile);
 
+    void browseSpellbook();
+    void editSpellbook();
+    void setSpellbook(const QString& spellbookFile);
+
     void browseQuickReference();
     void editQuickReference();
     void setQuickReference(const QString& quickRefFile);

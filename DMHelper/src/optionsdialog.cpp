@@ -18,6 +18,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
 
         connect(ui->btnBestiary, &QAbstractButton::clicked, this, &OptionsDialog::browseBestiary);
         connect(ui->edtBestiary, &QLineEdit::editingFinished, this, &OptionsDialog::editBestiary);
+        connect(ui->btnSpellbook, &QAbstractButton::clicked, this, &OptionsDialog::browseSpellbook);
+        connect(ui->edtSpellbook, &QLineEdit::editingFinished, this, &OptionsDialog::editSpellbook);
         connect(ui->btnQuickReference, &QAbstractButton::clicked, this, &OptionsDialog::browseQuickReference);
         connect(ui->edtQuickReference, &QLineEdit::editingFinished, this, &OptionsDialog::editQuickReference);
         connect(ui->btnCalendar, &QAbstractButton::clicked, this, &OptionsDialog::browseCalendar);
@@ -147,6 +149,31 @@ void OptionsDialog::setBestiary(const QString& bestiaryFile)
 
     ui->edtBestiary->setText(bestiaryFile);
     _options->setBestiaryFileName(bestiaryFile);
+}
+
+void OptionsDialog::browseSpellbook()
+{
+    setSpellbook(QFileDialog::getOpenFileName(this, QString("Select Spellbook File"), QString(), QString("XML files (*.xml)")));
+}
+
+void OptionsDialog::editSpellbook()
+{
+    setSpellbook(ui->edtSpellbook->text());
+}
+
+void OptionsDialog::setSpellbook(const QString& spellbookFile)
+{
+    if(spellbookFile.isEmpty())
+        return;
+
+    if(!QFile::exists(spellbookFile))
+    {
+        QMessageBox::critical(this, QString("Spellbook file not found"), QString("The selected spellbook file could not be found!") + QChar::LineFeed + spellbookFile);
+        return;
+    }
+
+    ui->edtSpellbook->setText(spellbookFile);
+    _options->setSpellbookFileName(spellbookFile);
 }
 
 void OptionsDialog::browseQuickReference()
@@ -361,6 +388,7 @@ void OptionsDialog::updateFileLocations()
         return;
 
     ui->edtBestiary->setText(_options->getBestiaryFileName());
+    ui->edtSpellbook->setText(_options->getSpellbookFileName());
     ui->edtQuickReference->setText(_options->getQuickReferenceFileName());
     ui->edtCalendar->setText(_options->getCalendarFileName());
     ui->edtEquipment->setText(_options->getEquipmentFileName());

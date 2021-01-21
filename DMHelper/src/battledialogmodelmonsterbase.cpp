@@ -76,7 +76,7 @@ void BattleDialogModelMonsterBase::setConditions(int conditions)
 
 void BattleDialogModelMonsterBase::applyConditions(int conditions)
 {
-    if((_conditions & ~conditions) != _conditions)
+    if((_conditions & conditions) != conditions)
     {
         _conditions |= conditions;
         emit dataChanged(this);

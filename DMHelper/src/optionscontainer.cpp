@@ -298,6 +298,8 @@ void OptionsContainer::readSettings()
     setLastMonster(settings.value("lastMonster","").toString());
 
     setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml")));
+    if(!settings.contains(QString("spellbook")))
+        getDataDirectory(QString("Images"));
     setLastSpell(settings.value("lastSpell","").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
@@ -528,7 +530,7 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename)
 {
     QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QString standardFile = standardPath + QString("/") + defaultFilename;
-    if(QFile::exists(standardFile))
+    if(QFileInfo::exists(standardFile))
     {
         qDebug() << "[OptionsContainer] Standard File found: " << standardFile;
         return standardFile;
