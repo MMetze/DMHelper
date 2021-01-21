@@ -697,7 +697,7 @@ void OptionsContainer::resetFileSettings()
     setEquipmentFileName(getStandardFile(QString("equipment.xml")));
     setShopsFileName(getStandardFile(QString("shops.xml")));
     setTablesDirectory(getDataDirectory(QString("tables"), true));
-    getDataDirectory(QString("Images"));
+    getDataDirectory(QString("Images"), true);
 }
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)
