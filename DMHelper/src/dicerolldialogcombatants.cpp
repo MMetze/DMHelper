@@ -20,7 +20,7 @@ DiceRollDialogCombatants::DiceRollDialogCombatants(const Dice& dice, const QList
 {
     ui->setupUi(this);
     init();
-    resize(800, 600);
+    //resize(800, 600);
 
     _combatantLayout = new QVBoxLayout;
     _combatantLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -54,10 +54,12 @@ DiceRollDialogCombatants::~DiceRollDialogCombatants()
     delete ui;
 }
 
+/*
 QSize DiceRollDialogCombatants::sizeHint() const
 {
     return QSize(800, 600);
 }
+*/
 
 void DiceRollDialogCombatants::fireAndForget()
 {

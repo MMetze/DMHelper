@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
       <attribute name="title">
@@ -357,6 +357,27 @@
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>
         <layout class="QGridLayout" name="gridLayout">
+         <item row="3" column="0">
+          <widget class="QLabel" name="lblCalendar">
+           <property name="text">
+            <string>Calendar File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0">
+          <widget class="QLabel" name="lblShops">
+           <property name="text">
+            <string>Shops File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="lblEquipment">
+           <property name="text">
+            <string>Equipment File</string>
+           </property>
+          </widget>
+         </item>
          <item row="0" column="0">
           <widget class="QLabel" name="lblBestiary">
            <property name="text">
@@ -364,96 +385,92 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="lblCalendar">
-           <property name="text">
-            <string>Calendar File</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="edtBestiary"/>
-         </item>
-         <item row="0" column="2">
+         <item row="0" column="3">
           <widget class="QPushButton" name="btnBestiary">
            <property name="text">
             <string>Browse...</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="edtCalendar"/>
-         </item>
-         <item row="3" column="0">
-          <widget class="QLabel" name="lblEquipment">
-           <property name="text">
-            <string>Equipment File</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="lblShops">
-           <property name="text">
-            <string>Shops File</string>
-           </property>
-          </widget>
-         </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="lblTables">
-           <property name="text">
-            <string>Tables Directory</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="lblQuickReference">
-           <property name="text">
-            <string>Quick Reference File</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="edtQuickReference"/>
-         </item>
-         <item row="3" column="1">
+         <item row="4" column="2">
           <widget class="QLineEdit" name="edtEquipment"/>
          </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="edtShops"/>
-         </item>
-         <item row="5" column="1">
+         <item row="6" column="2">
           <widget class="QLineEdit" name="edtTables"/>
          </item>
-         <item row="5" column="2">
+         <item row="6" column="3">
           <widget class="QPushButton" name="btnTables">
            <property name="text">
             <string>Browse...</string>
            </property>
           </widget>
          </item>
-         <item row="4" column="2">
-          <widget class="QPushButton" name="btnShops">
-           <property name="text">
-            <string>Browse...</string>
-           </property>
-          </widget>
+         <item row="5" column="2">
+          <widget class="QLineEdit" name="edtShops"/>
          </item>
          <item row="3" column="2">
-          <widget class="QPushButton" name="btnEquipment">
+          <widget class="QLineEdit" name="edtCalendar"/>
+         </item>
+         <item row="2" column="3">
+          <widget class="QPushButton" name="btnQuickReference">
            <property name="text">
             <string>Browse...</string>
            </property>
           </widget>
          </item>
          <item row="2" column="2">
+          <widget class="QLineEdit" name="edtQuickReference"/>
+         </item>
+         <item row="4" column="3">
+          <widget class="QPushButton" name="btnEquipment">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QLineEdit" name="edtBestiary"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lblQuickReference">
+           <property name="text">
+            <string>Quick Reference File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="3">
           <widget class="QPushButton" name="btnCalendar">
            <property name="text">
             <string>Browse...</string>
            </property>
           </widget>
          </item>
+         <item row="5" column="3">
+          <widget class="QPushButton" name="btnShops">
+           <property name="text">
+            <string>Browse...</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="lblSpellbook">
+           <property name="text">
+            <string>Spellbook File</string>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="lblTables">
+           <property name="text">
+            <string>Tables Directory</string>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="2">
-          <widget class="QPushButton" name="btnQuickReference">
+          <widget class="QLineEdit" name="edtSpellbook"/>
+         </item>
+         <item row="1" column="3">
+          <widget class="QPushButton" name="btnSpellbook">
            <property name="text">
             <string>Browse...</string>
            </property>
