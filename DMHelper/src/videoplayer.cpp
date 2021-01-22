@@ -509,11 +509,17 @@ bool VideoPlayer::startPlayer()
 
     // Create a new libvlc player
     _vlcListPlayer = libvlc_media_list_player_new(_vlcInstance);
+    if(!_vlcListPlayer)
+        return false;
+
     libvlc_media_player_t *player = libvlc_media_player_new(_vlcInstance);
+    if(!player)
+        return false;
 
     libvlc_media_list_player_set_media_list(_vlcListPlayer, vlcMediaList);
     libvlc_media_list_player_set_media_player(_vlcListPlayer, player);
     libvlc_media_list_player_set_playback_mode(_vlcListPlayer, libvlc_playback_mode_loop);
+    libvlc_audio_set_volume(player, 0);
     libvlc_video_set_scale(player, 0.25f );
     libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(player);
     if(eventManager)
