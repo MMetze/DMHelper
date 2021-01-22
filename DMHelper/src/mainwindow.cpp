@@ -734,6 +734,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
+    /*
     _networkController = new NetworkController(this);
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
     _networkController->enableNetworkController(_options->getNetworkEnabled());
@@ -741,7 +742,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
-    _battleDlgMgr->setNetworkManager(_networkController);
+    // TODO: _battleDlgMgr->setNetworkManager(_networkController);
+    */
 #endif
 
     emit campaignLoaded(nullptr);

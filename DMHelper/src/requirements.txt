@@ -136,6 +136,11 @@ Ctrl+N: Move to the Next combatant (in Combats only)
 Ctrl+M: Open the Bestiary to search for Monsters
 
 
+Localization:
+Italian: Rufus Loacker
+Portugese: texmex42
+
+
 syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpCdXN5IG1hcmtldCBkYXk/play/
 
 syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpCYXJkJ3MgZGF5IG9mZg/play/

@@ -80,7 +80,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Create a new campaign</string>
+        <string>Add a hyperlink</string>
        </property>
        <property name="text">
         <string/>
