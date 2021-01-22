@@ -1,6 +1,6 @@
 #DMHelper ignores
 DMHelper/bin32
-DMHelper/bin64
+DMHelper/bin64*
 DMHelper/build*
 DMHelper/build-32_bit-debug
 DMHelper/build-32_bit-profile
@@ -69,20 +69,20 @@ DMHelper/.DS_Store
 .DS_Store
 DMHelper/DM Helper Release MAC.zip
 DMHelper/src/.qmake.stash
-DMHelper/src/DMHelper.pro.user
-DMHelper/src/DMHelper.pro.user
 DMHelper/src/Makefile
 *.user
 DMHelper/src/DMHelper.pro.user
 DMHelper/DM Helper 64-bit release.zip
-DMHelper/src/DMHelper.pro.user
+DMHelper/DM Helper Client 64-bit release.zip
 DMHelper/DM Helper macOS release.zip
-DMHelper/src/DMHelper.pro.user
+DMHelper/DM Helper Client macOS release.zip
+DMHelper/src/DMHelperClient.pro.user
 DMHelperDocumentation/Darkore Mine/videos/Cavern Crossroad.mp4
 src.zip
 bin64/DMHelper.log
 bin64/Qt5Xml.dll
 DM Helper 64-bit release.zip
 DMHelper/DM Helper 64-bit release Installer.exe
+DMHelper/DM Helper Client 64-bit release Installer.exe
 DMHelper/DM Helper macOS release Installer.app
-
+DMHelper/DM Helper Client macOS release Installer.app
