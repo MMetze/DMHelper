@@ -1733,6 +1733,7 @@ void BattleFrame::removeCombatant()
         return;
 
     qDebug() << "[Battle Frame] removing combatant " << _contextMenuCombatant->getName();
+    removeRollover();
 
     // Check the active combatant highlight
     if(_contextMenuCombatant == _model->getActiveCombatant())
@@ -1746,6 +1747,10 @@ void BattleFrame::removeCombatant()
         {
             next();
         }
+    }
+    else if(_contextMenuCombatant == ui->frameCombatant->getCombatant())
+    {
+        ui->frameCombatant->setCombatant(nullptr);
     }
 
     // Find the index of the removed item
@@ -2489,6 +2494,8 @@ void BattleFrame::removeRollover()
 {
     if(!_hoverFrame)
         return;
+
+    qDebug() << "[Battle Frame] Removing rollover";
 
     _hoverFrame->cancelClose();
     _hoverFrame->deleteLater();
