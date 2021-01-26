@@ -57,28 +57,21 @@ Remove dicerollframe
 
 Red color:  _color(115,18,0,64)
 
-AoE hitting the middle of creatures rather than the edge
 General Todos:
-Update roadmap github
-Update website
 Create generic Bestiary imports - some sort of contribution mechanism?
 Online docs
 Marketing Videos
 Make truly opensource
 
-v2.1 Features:
+v2.2+ Features:
 1) Syrinscape integration
-2) Youtube Audio (vlc)
 3) Youtube Vidoes?
-4) Conditions, battle upgrades in general
-5) Spell DB
 6) OpenGL based battles?
 
-v2.1 Todos:
+v3.0 Todos:
 1) Update Documentation
 
 
-Reload tables
 add opensource comments on all files
 white grid or black screen at button click
 Import/Export bestiary
