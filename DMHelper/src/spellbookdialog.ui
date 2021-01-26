@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Spellbook</string>
+   <string>DMHelper - Spellbook</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);
@@ -2199,7 +2199,7 @@ color: rgb(50, 50, 50);</string>
            <item>
             <widget class="QLabel" name="lblTwoMinuteBlank">
              <property name="text">
-              <string>   </string>
+              <string/>
              </property>
             </widget>
            </item>

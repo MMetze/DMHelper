@@ -61,14 +61,14 @@ windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64\packa
 
 rem Create the installer
 cd ..\bin64
-binarycreator -c config\config_win64.xml -p packages "DM Helper 64-bit release Installer"
+binarycreator -c config\config_win64.xml -p packages "DMHelper 64-bit release Installer"
 cd ..
-move ".\bin64\DM Helper 64-bit release Installer.exe" ".\DM Helper 64-bit release Installer.exe"
+move ".\bin64\DMHelper 64-bit release Installer.exe" ".\DMHelper 64-bit release Installer.exe"
 
 rem Create the zip-file distribution
 "%SEVENZIP_APP%" a -tzip archive.zip .\bin64\packages\com.dmhelper.app\data\*
-del "DM Helper 64-bit release.zip"
-rename archive.zip "DM Helper 64-bit release.zip"
+del "DMHelper 64-bit release.zip"
+rename archive.zip "DMHelper 64-bit release.zip"
 
 rem Create the source distribution
 del src.zip

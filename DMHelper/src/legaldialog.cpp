@@ -32,7 +32,7 @@ void LegalDialog::okClicked()
     {
         if(QMessageBox::warning(this,
                                 QString("Checking for Updates disabled"),
-                                QString("You have chosen that the DM Helper should not check occassionally for new updates. This means you won't be informed when a new version of the DM Helper becomes available. Are you sure?"),
+                                QString("You have chosen that DMHelper should not check occassionally for new updates. This means you won't be informed when a new version of DMHelper becomes available. Are you sure?"),
                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
             return;
     }
@@ -41,7 +41,7 @@ void LegalDialog::okClicked()
     {
         QMessageBox::information(this,
                                  QString("Anonymous statistics disabled"),
-                                 QString("You have chosen that the DM Helper may not gather anonymous usage data. We respect your choice. If you would like to change this setting in the future, you can find it in the menu under Tools --> Options"));
+                                 QString("You have chosen that DMHelper may not gather anonymous usage data. We respect your choice. If you would like to change this setting in the future, you can find it in the menu under Tools --> Options"));
     }
 
     accept();

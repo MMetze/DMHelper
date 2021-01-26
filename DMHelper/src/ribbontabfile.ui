@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>DM Helper</string>
+   <string>DMHelper</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -557,7 +557,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the DM Helper preferences window</string>
+        <string>Open the DMHelper preferences window</string>
        </property>
        <property name="text">
         <string/>
@@ -670,7 +670,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>About the DM Helper</string>
+        <string>About DMHelper</string>
        </property>
        <property name="text">
         <string/>

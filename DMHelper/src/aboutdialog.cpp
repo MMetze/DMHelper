@@ -12,7 +12,7 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     QString licenseText;
 
-    licenseText += QString("The DM Helper is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.\n\n");
+    licenseText += QString("DMHelper is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.\n\n");
 
     licenseText += QString("All menu icons are derived from tokens provided by Ross from 2-Minute Tabletop, an amazing source of RPG resources: www.2minutetabletop.com under the Creative Commons BY-NC 4.0 (www.creativecommons.org/licenses/by-nc/4.0/)\n\n");
 

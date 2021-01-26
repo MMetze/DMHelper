@@ -104,7 +104,7 @@ void Map::setFileName(const QString& newFileName)
     if(!QFile::exists(newFileName))
     {
         QMessageBox::critical(nullptr,
-                              QString("DM Helper Map File Not Found"),
+                              QString("DMHelper Map File Not Found"),
                               QString("The selected map file could not be found: ") + newFileName);
         qDebug() << "[Map] New map file not found: " << newFileName;
         return;
@@ -599,7 +599,7 @@ void Map::initialize()
     if(!QFile::exists(_filename))
     {
         QMessageBox::critical(nullptr,
-                              QString("DM Helper Map File Not Found"),
+                              QString("DMHelper Map File Not Found"),
                               QString("The map file could not be found: ") + _filename);
         qDebug() << "[Map] Map file not found: " << _filename;
         return;

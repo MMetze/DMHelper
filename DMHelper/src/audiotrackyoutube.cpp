@@ -133,7 +133,7 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
     if(!reply)
     {
         QMessageBox::critical(nullptr,
-                              QString("DM Helper Audio Error"),
+                              QString("DMHelper Audio Error"),
                               QString("An unexpected and unknown error was encountered trying to find the requested YouTube video for playback!"));
         qDebug() << "[AudioTrackYoutube] ERROR identified in reply, unexpected null pointer reply received!";
         return;
@@ -146,13 +146,13 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
             if(reply->error() == QNetworkReply::HostNotFoundError)
             {
                 QMessageBox::critical(nullptr,
-                                      QString("DM Helper Audio Error"),
+                                      QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video. It was not possible to reach the server!"));
             }
             else
             {
                 QMessageBox::critical(nullptr,
-                                      QString("DM Helper Audio Error"),
+                                      QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video:") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
             }
 

@@ -94,7 +94,7 @@ Export/Import of individual adventures, party, characters, encounters
 Item cards like in Critical Role
 
 Shortcuts
-Ctrl+Q: Quit DM Helper
+Ctrl+Q: Quit DMHelper
 Ctrl+W:     (Close Window)
 Ctrl+E: Opens the DM Screen
 Ctrl+R: Opens the Quick Reference Guide

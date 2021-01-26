@@ -188,7 +188,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSize screenSize = screen != nullptr ? screen->availableSize() : QSize(1000, 1000);
     QSplashScreen splash(pixmap.scaled(screenSize.width() / 2, screenSize.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     splash.show();
-    splash.showMessage(QString("Initializing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Initializing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
 
     qDebug() << "[MainWindow] Initializing Main";
@@ -360,7 +360,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     qDebug() << "[MainWindow] Creating Player's Window";
-    pubWindow = new PublishWindow(QString("DM Helper Player's Window"));
+    pubWindow = new PublishWindow(QString("DMHelper Player's Window"));
     pubWindow->setPointerFile(_options->getPointerFile());
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), pubWindow, SLOT(setPointerFile(const QString&)));
     connect(pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
@@ -714,7 +714,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Reference Tabs Created";
 
 #ifndef Q_OS_MAC
-    splash.showMessage(QString("Preparing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Preparing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
 
@@ -2032,12 +2032,12 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
         connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
-        setWindowTitle(QString("DM Helper - ") + campaign->getName() + QString("[*]"));
+        setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
     }
     else
     {
-        setWindowTitle(QString("DM Helper [*]"));
+        setWindowTitle(QString("DMHelper [*]"));
         ui->stackedWidgetEncounter->setEnabled(true);
         // Deactivate the currently selected object
         deactivateObject();

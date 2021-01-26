@@ -91,7 +91,7 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
     qDebug() << "[Campaign]    Campaign file version: " << majorVersion << "." << minorVersion;
     if(!isVersionCompatible(majorVersion, minorVersion))
     {
-        qDebug() << "[Campaign]    ERROR: The camapaign file version is not compatible with this version of DM Helper.";
+        qDebug() << "[Campaign]    ERROR: The camapaign file version is not compatible with this version of DMHelper.";
         return;
     }
 
