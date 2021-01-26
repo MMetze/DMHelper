@@ -485,7 +485,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
     connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), battleFrame, SLOT(addObject()));
     connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), battleFrame, SLOT(castSpell()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(castSpell()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(addEffectRadius()));
     connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), battleFrame, SLOT(addEffectCone()));
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), battleFrame, SLOT(addEffectCube()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), battleFrame, SLOT(addEffectLine()));

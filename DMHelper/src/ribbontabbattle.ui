@@ -527,7 +527,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a character to the battle</string>
+        <string>Add a radius effect</string>
        </property>
        <property name="text">
         <string/>
@@ -553,7 +553,7 @@
      <item>
       <widget class="QLabel" name="lblAddRadius">
        <property name="text">
-        <string>Sphere</string>
+        <string>Radius</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>
@@ -582,7 +582,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a character to the battle</string>
+        <string>Add a cube effect</string>
        </property>
        <property name="text">
         <string/>
@@ -637,7 +637,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a character to the battle</string>
+        <string>Add a cone effect</string>
        </property>
        <property name="text">
         <string/>
@@ -692,7 +692,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Add a character to the battle</string>
+        <string>Add a line effect</string>
        </property>
        <property name="text">
         <string/>
