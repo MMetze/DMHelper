@@ -323,7 +323,7 @@ void CharacterFrame::mouseReleaseEvent(QMouseEvent * event)
     if((!_character) || (!ui->lblIcon->frameGeometry().contains(event->pos())))
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."), QString(), QString("Image files (*.png *.jpg)"));
     if(filename.isEmpty())
         return;
 

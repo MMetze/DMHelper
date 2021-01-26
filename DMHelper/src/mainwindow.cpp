@@ -861,7 +861,7 @@ void MainWindow::saveCampaignAs()
 
 void MainWindow::openFileDialog()
 {
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select Campaign"));
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select Campaign"), QString(), QString("XML files (*.xml)"));
     if( (!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)) )
         openFile(filename);
 }
@@ -1045,7 +1045,7 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."), QString(), QString("Image files (*.png *.jpg)"));
     if(filename.isEmpty())
         return;
 
@@ -2335,7 +2335,7 @@ void MainWindow::importBestiary()
     if(!Bestiary::Instance())
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select exported file for import"));
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select exported file for import"), QString(), QString("XML files (*.xml)"));
     if((!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)))
     {
         qDebug() << "[MainWindow] Importing bestiary: " << filename;

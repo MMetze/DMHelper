@@ -597,7 +597,7 @@ void BattleDialogGraphicsScene::addEffectObject()
         return;
     }
 
-    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file.."));
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file.."), QString(), QString("Image files (*.png *.jpg)"));
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename);
     
     if(effect)

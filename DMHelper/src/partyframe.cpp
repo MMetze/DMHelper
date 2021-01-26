@@ -147,7 +147,7 @@ void PartyFrame::mouseReleaseEvent(QMouseEvent * event)
     if((!_party) || (!ui->lblIcon->frameGeometry().contains(event->pos())))
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."), QString(), QString("Image files (*.png *.jpg)"));
     if(filename.isEmpty())
         return;
 

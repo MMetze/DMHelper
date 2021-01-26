@@ -364,7 +364,8 @@ void SpellbookDialog::selectToken()
 
     QString tokenFile = QFileDialog::getOpenFileName(nullptr,
                                                      QString("Select a token file for the spell"),
-                                                     searchDir);
+                                                     searchDir,
+                                                     QString("Image files (*.png *.jpg)"));
     if(tokenFile.isEmpty())
     {
         qDebug() << "[SpellbookDialog] Not able to select a token file; selection dialog cancelled.";
