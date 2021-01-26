@@ -1644,18 +1644,20 @@ void BattleFrame::handleCombatantHover(BattleDialogModelCombatant* combatant, bo
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
+    if(!effect)
+        return;
+
     QList<BattleDialogModelCombatant*> combatantList;
 
-    for(QGraphicsPixmapItem* item : _combatantIcons.values())
+    QList<QGraphicsPixmapItem*> iconPixmaps = _combatantIcons.values();
+    for(int i = 0; i < iconPixmaps.count(); ++i)
     {
-        if(item)
+        QGraphicsPixmapItem* item = iconPixmaps.at(i);
+        if((item) && (isItemInEffect(item, effect)))
         {
-            if((effect) && (effect->contains(effect->mapFromScene(item->pos()))))
-            {
-                BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
-                if(combatant)
-                    combatantList.append(combatant);
-            }
+            BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
+            if(combatant)
+                combatantList.append(combatant);
         }
     }
 

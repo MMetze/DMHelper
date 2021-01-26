@@ -11,12 +11,11 @@ RibbonTabTools::RibbonTabTools(QWidget *parent) :
     connect(ui->btnExportBestiary, SIGNAL(clicked(bool)), this, SIGNAL(exportBestiaryClicked()));
     connect(ui->btnImportBestiary, SIGNAL(clicked(bool)), this, SIGNAL(importBestiaryClicked()));
 
-    connect(ui->btnSpellbook, SIGNAL(clicked(bool)), this, SIGNAL(spellbookClicked()));
-
     connect(ui->btnScreen, SIGNAL(clicked(bool)), this, SIGNAL(screenClicked()));
     connect(ui->btnTables, SIGNAL(clicked(bool)), this, SIGNAL(tablesClicked()));
     connect(ui->btnQuickRef, SIGNAL(clicked(bool)), this, SIGNAL(referenceClicked()));
     connect(ui->btnSoundboard, SIGNAL(clicked(bool)), this, SIGNAL(soundboardClicked()));
+    connect(ui->btnSpellbook, SIGNAL(clicked(bool)), this, SIGNAL(spellbookClicked()));
 
     connect(ui->btnRollDice, SIGNAL(clicked(bool)), this, SIGNAL(rollDiceClicked()));
     connect(ui->btnPublishText, SIGNAL(clicked(bool)), this, SIGNAL(publishTextClicked()));
@@ -61,26 +60,3 @@ void RibbonTabTools::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblTimeDate, *ui->btnTimeDate, frameHeight);
     setStandardButtonSize(*ui->lblCountdown, *ui->btnCountdown, frameHeight);
 }
-
-
-/*
- *
- *
- *         <widget class="QMenu" name="menu_Bestiary">
-         <property name="title">
-          <string>&amp;Tools</string>
-         </property>
-         <addaction name="action_Open_Bestiary"/>
-         <addaction name="actionExport_Bestiary"/>
-         <addaction name="actionImport_Bestiary"/>
-         <addaction name="separator"/>
-         <addaction name="actionDice"/>
-         <addaction name="actionPublish_Text"/>
-         <addaction name="actionTranslate_Text"/>
-         <addaction name="actionRandom_Market"/>
-         <addaction name="separator"/>
-         <addaction name="actionOptions"/>
-        </widget>
-
-
-        */
