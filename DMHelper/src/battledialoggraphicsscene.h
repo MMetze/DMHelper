@@ -50,7 +50,6 @@ public:
 
 public slots:
     void setDistanceHeight(qreal heightDelta);
-    //void setRawMouse(bool rawMouse);
     void setInputMode(int inputMode);
 
     void addEffectObject();
@@ -97,6 +96,7 @@ protected:
     QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler();
+    QPointF getViewportCenter();
 
     QGraphicsItem* _contextMenuItem;
     Grid* _grid;
@@ -108,8 +108,8 @@ protected:
     QGraphicsItem* _mouseDownItem;
     BattleDialogModelCombatant* _mouseHoverItem;
     qreal _previousRotation;
+    QPointF _commandPosition;
 
-    //bool _rawMouse;
     int _inputMode;
 
     QGraphicsPixmapItem* _pointerPixmapItem;
@@ -123,7 +123,6 @@ protected:
     BattleDialogGraphicsSceneMouseHandlerRaw _rawMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCamera _cameraMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCombatants _combatantMouseHandler;
-    //BattleDialogGraphicsSceneMouseHandlerSelect _selectMouseHandler;
 };
 
 #endif // BATTLEDIALOGGRAPHICSSCENE_H
