@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>DM Helper Client Application</DisplayName>
+    <Description>Install the DM Helper Client application.</Description>
+    <Version>2.1.0</Version>
+    <ReleaseDate>2020-01-13</ReleaseDate>
+    <Licenses>
+        <License name="UNDEFINED random License Agreement" file="license.txt" />
+    </Licenses>
+    <Default>true</Default>
+    <Script>installscript.qs</Script>
+</Package>

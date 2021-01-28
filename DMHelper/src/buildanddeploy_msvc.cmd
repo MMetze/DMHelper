@@ -70,9 +70,5 @@ rem Create the zip-file distribution
 del "DMHelper 64-bit release.zip"
 rename archive.zip "DMHelper 64-bit release.zip"
 
-rem Create the source distribution
-del src.zip
-"%SEVENZIP_APP%" a -tzip src.zip .\src\*
-
 :end
 pause

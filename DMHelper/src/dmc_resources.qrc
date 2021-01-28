@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/img">
+        <file>data/dmhelper.png</file>
+        <file>data/parchment.jpg</file>
+        <file>data/icon_zoomfit.png</file>
+        <file>data/icon_zoomin.png</file>
+        <file>data/icon_zoomout.png</file>
+        <file>data/icon_zoomselect.png</file>
+        <file>data/arrow.png</file>
+        <file>data/portrait.png</file>
+        <file>data/selected.png</file>
+        <file>data/icon_volumeon.png</file>
+        <file>data/icon_volumeoff.png</file>
+    </qresource>
+</RCC>

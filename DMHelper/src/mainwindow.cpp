@@ -25,6 +25,11 @@
 #include "encounterscrollingtext.h"
 #include "encounterscrollingtextedit.h"
 #include "campaignobjectframe.h"
+#include "campaignobjectfactory.h"
+#include "encounterfactory.h"
+#include "audiofactory.h"
+#include "combatantfactory.h"
+#include "mapfactory.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
@@ -198,7 +203,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Expected Bestiary Version: " << QString::number(DMHelper::BESTIARY_MAJOR_VERSION) + "." + QString::number(DMHelper::BESTIARY_MINOR_VERSION);
     qDebug() << "[MainWindow]     Expected Spellbook Version: " << QString::number(DMHelper::SPELLBOOK_MAJOR_VERSION) + "." + QString::number(DMHelper::SPELLBOOK_MINOR_VERSION);
     qDebug() << "[MainWindow]     Expected Campaign File Version: " << QString::number(DMHelper::CAMPAIGN_MAJOR_VERSION) + "." + QString::number(DMHelper::CAMPAIGN_MINOR_VERSION);
-    qDebug() << "[MainWindow]     Build: " << __DATE__ << " " << __TIME__;
+    qDebug() << "[MainWindow]     Build from: " << __DATE__ << " " << __TIME__;
 #ifdef Q_OS_MAC
     qDebug() << "[MainWindow]     OS: MacOS";
 #else
@@ -387,6 +392,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(treeModel, &CampaignTreeModel::itemMoved, ui->treeView, &CampaignTree::handleItemMoved);
     connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[MainWindow] Tree Model Created";
+
+    // Initialize the campaign object factory
+    CampaignObjectFactory::addFactory(new EncounterFactory());
+    CampaignObjectFactory::addFactory(new AudioFactory());
+    CampaignObjectFactory::addFactory(new CombatantFactory());
+    CampaignObjectFactory::addFactory(new MapFactory());
+
 
     connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
     connect(Spellbook::Instance(),SIGNAL(changed()),&spellDlg,SLOT(dataChanged()));
@@ -724,6 +736,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
+    /*
     _networkController = new NetworkController(this);
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
     _networkController->enableNetworkController(_options->getNetworkEnabled());
@@ -731,7 +744,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
-    _battleDlgMgr->setNetworkManager(_networkController);
+    // TODO: _battleDlgMgr->setNetworkManager(_networkController);
+    */
 #endif
 
     emit campaignLoaded(nullptr);

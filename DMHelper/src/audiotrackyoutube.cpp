@@ -133,8 +133,8 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
     if(!reply)
     {
         QMessageBox::critical(nullptr,
-                              QString("DMHelper Audio Error"),
-                              QString("An unexpected and unknown error was encountered trying to find the requested YouTube video for playback!"));
+        QString("DMHelper Audio Error"),
+        QString("An unexpected and unknown error was encountered trying to find the requested YouTube video for playback!"));
         qDebug() << "[AudioTrackYoutube] ERROR identified in reply, unexpected null pointer reply received!";
         return;
     }

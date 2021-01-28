@@ -66,6 +66,20 @@ Remove dicerollframe
     Delete entry in the tree move selection to parent item
     Pointer on maps
 
+CLIENT
+Show connection and login status, show current session
+Show server feedback
+If server is known, ask the user if they would like to connect
+If server is not known,
+Default server to www.wwpd.de for now
+Change server to dm-helper.com before release
+Make three always on top pop-out windows
+
+Sample payloads
+<image></image><audio></audio><command></command><payload></payload>
+<image></image><audio>https://www.youtube.com/watch?v=9bMTK0ml9ZI</audio><command></command><payload></payload>
+<image></image><audio>https://www.youtube.com/watch?v=IA0_cxItj9s</audio><command></command><payload></payload>
+
 Red color:  _color(115,18,0,64)
 
 General Todos:
@@ -124,6 +138,11 @@ Ctrl+V: Paste
 Ctrl+B: Bold
 Ctrl+N: Move to the Next combatant (in Combats only)
 Ctrl+M: Open the Bestiary to search for Monsters
+
+
+Localization:
+Italian: Rufus Loacker
+Portugese: texmex42
 
 
 syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpCdXN5IG1hcmtldCBkYXk/play/
