@@ -104,7 +104,7 @@ MonsterClass* BestiaryDialog::getMonster() const
 
 void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
 {
-    if(!monster)
+    if((!monster) || (_monster == monster))
         return;
 
     qDebug() << "[Bestiary Dialog] Set Monster to " << monster->getName();
@@ -608,7 +608,7 @@ void BestiaryDialog::mouseReleaseEvent(QMouseEvent * event)
         {
             ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
             _mouseDown = false;
-            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."), QString(), QString("Image files (*.png *.jpg)"));
             if(!filename.isEmpty())
             {
                 _monster->setIcon(filename);
@@ -623,6 +623,7 @@ void BestiaryDialog::showEvent(QShowEvent * event)
     Q_UNUSED(event);
     qDebug() << "[Bestiary Dialog] Bestiary Dialog shown";
     connect(Bestiary::Instance(),SIGNAL(changed()),this,SLOT(dataChanged()));
+    setMonster(ui->cmbSearch->currentText());
     QDialog::showEvent(event);
 }
 

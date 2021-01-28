@@ -60,6 +60,8 @@ void BattleCombatantFrame::setCombatant(BattleDialogModelCombatant* combatant)
     ui->frameInfoContents->setEnabled(combatant != nullptr);
     ui->frameStatsContents->setEnabled(combatant != nullptr);
 
+    _combatant = combatant;
+
     if(!combatant)
     {
         ui->edtName->setText(QString());
@@ -72,8 +74,6 @@ void BattleCombatantFrame::setCombatant(BattleDialogModelCombatant* combatant)
         ui->edtCha->setText(QString());
         return;
     }
-
-    _combatant = combatant;
 
     connect(_combatant, &BattleDialogModelCombatant::campaignObjectDestroyed, this, &BattleCombatantFrame::clearCombatant);
     if(_combatant->getCombatant())

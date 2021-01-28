@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         DMHLogger logger;
 
         qInfo() << "[Main] #########################################################################################";
-        qInfo() << "[Main]                                  DM HELPER STARTED";
+        qInfo() << "[Main]                                  DMHELPER STARTED";
         qInfo() << "[Main] #########################################################################################";
 
         MainWindow* w = new MainWindow;
@@ -20,19 +20,19 @@ int main(int argc, char *argv[]) {
 
         result = a.exec();
 
-        qInfo() << "[Main] DM Helper exiting...";
+        qInfo() << "[Main] DMHelper exiting...";
 
         delete w;
         w = nullptr;
 
         qInfo() << "[Main] #########################################################################################";
-        qInfo() << "[Main]                                 DM HELPER SHUT DOWN";
+        qInfo() << "[Main]                                 DMHELPER SHUT DOWN";
         qInfo() << "[Main] #########################################################################################";
 
     } catch (const std::exception& e) {
-        qDebug() << "DM Helper threw an exception: " << e.what();
+        qDebug() << "DMHelper threw an exception: " << e.what();
     } catch (...) {
-        qDebug() << "DM Helper threw an unknown exception";
+        qDebug() << "DMHelper threw an unknown exception";
     }
 
     return result;

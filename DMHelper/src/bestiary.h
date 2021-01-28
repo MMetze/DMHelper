@@ -25,7 +25,7 @@ public:
     static void Shutdown();
 
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
-    void inputXML(const QDomElement &element, bool isImport);
+    void inputXML(const QDomElement &element, const QString& importFile = QString());
 
     QString getVersion() const;
     int getMajorVersion() const;
@@ -56,6 +56,7 @@ public:
     Monster* createMonster(const QDomElement& element, bool isImport);
 
     QString findMonsterImage(const QString& monsterName, const QString& iconFile);
+    QString findMonsterImage(const QDir& sourceDir, const QString& monsterName);
 
 signals:
     void changed();
@@ -66,6 +67,9 @@ public slots:
 
 private:
     void showMonsterClassWarning(const QString& monsterClass);
+    void loadBestiary(const QDomElement& bestiaryElement);
+    void importBestiary(const QDomElement& bestiaryElement, const QString& importFile);
+    void importMonsterImage(const QDomElement& monsterElement, const QString& importFile);
 
     static Bestiary* _instance;
 

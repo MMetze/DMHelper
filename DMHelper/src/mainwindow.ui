@@ -20,7 +20,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>DM Helper</string>
+   <string>DMHelper</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">

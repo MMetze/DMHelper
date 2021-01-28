@@ -193,7 +193,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSize screenSize = screen != nullptr ? screen->availableSize() : QSize(1000, 1000);
     QSplashScreen splash(pixmap.scaled(screenSize.width() / 2, screenSize.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     splash.show();
-    splash.showMessage(QString("Initializing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Initializing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
 
     qDebug() << "[MainWindow] Initializing Main";
@@ -335,6 +335,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabTools, SIGNAL(exportBestiaryClicked()), this, SLOT(exportBestiary()));
     connect(_ribbonTabTools, SIGNAL(importBestiaryClicked()), this, SLOT(importBestiary()));
     connect(_ribbonTabTools, SIGNAL(spellbookClicked()), this, SLOT(openSpellbook()));
+    QShortcut* openSpellbookShortcut = new QShortcut(QKeySequence(tr("Ctrl+H", "Open Spellbook")), this);
+    connect(openSpellbookShortcut, SIGNAL(activated()), this, SLOT(openSpellbook()));
     connect(_ribbonTabTools, SIGNAL(rollDiceClicked()), this, SLOT(openDiceDialog()));
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
@@ -363,7 +365,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
     qDebug() << "[MainWindow] Creating Player's Window";
-    pubWindow = new PublishWindow(QString("DM Helper Player's Window"));
+    pubWindow = new PublishWindow(QString("DMHelper Player's Window"));
     pubWindow->setPointerFile(_options->getPointerFile());
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), pubWindow, SLOT(setPointerFile(const QString&)));
     connect(pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
@@ -495,7 +497,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
     connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), battleFrame, SLOT(addObject()));
     connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), battleFrame, SLOT(castSpell()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(castSpell()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(addEffectRadius()));
     connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), battleFrame, SLOT(addEffectCone()));
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), battleFrame, SLOT(addEffectCube()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), battleFrame, SLOT(addEffectLine()));
@@ -724,7 +726,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Reference Tabs Created";
 
 #ifndef Q_OS_MAC
-    splash.showMessage(QString("Preparing DM Helper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Preparing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
 
@@ -873,7 +875,7 @@ void MainWindow::saveCampaignAs()
 
 void MainWindow::openFileDialog()
 {
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select Campaign"));
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select Campaign"), QString(), QString("XML files (*.xml)"));
     if( (!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)) )
         openFile(filename);
 }
@@ -1057,7 +1059,7 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."), QString(), QString("Image files (*.png *.jpg)"));
     if(filename.isEmpty())
         return;
 
@@ -1375,7 +1377,7 @@ void MainWindow::readBestiary()
 
     QFileInfo fileInfo(bestiaryFileName);
     Bestiary::Instance()->setDirectory(fileInfo.absoluteDir());
-    Bestiary::Instance()->inputXML(root, false);
+    Bestiary::Instance()->inputXML(root);
 
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
         bestiaryDlg.setMonster(_options->getLastMonster());
@@ -2044,12 +2046,12 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
         connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
-        setWindowTitle(QString("DM Helper - ") + campaign->getName() + QString("[*]"));
+        setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
     }
     else
     {
-        setWindowTitle(QString("DM Helper [*]"));
+        setWindowTitle(QString("DMHelper [*]"));
         ui->stackedWidgetEncounter->setEnabled(true);
         // Deactivate the currently selected object
         deactivateObject();
@@ -2347,7 +2349,7 @@ void MainWindow::importBestiary()
     if(!Bestiary::Instance())
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select exported file for import"));
+    QString filename = QFileDialog::getOpenFileName(this,QString("Select exported file for import"), QString(), QString("XML files (*.xml)"));
     if((!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)))
     {
         qDebug() << "[MainWindow] Importing bestiary: " << filename;
@@ -2383,7 +2385,7 @@ void MainWindow::importBestiary()
             return;
         }
 
-        Bestiary::Instance()->inputXML(root, true);
+        Bestiary::Instance()->inputXML(root, filename);
         openBestiary();
 
         qDebug() << "[MainWindow] Bestiary import complete.";

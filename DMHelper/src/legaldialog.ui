@@ -24,7 +24,7 @@
       </font>
      </property>
      <property name="text">
-      <string>DM Helper License</string>
+      <string>DMHelper License</string>
      </property>
     </widget>
    </item>
@@ -55,11 +55,11 @@
       <bool>true</bool>
      </property>
      <property name="plainText">
-      <string>The DM Helper is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
+      <string>DMHelper is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.
 
-The DM Helper is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+DMHelper is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GPL v3 along with the DM Helper. If not, see: http://www.gnu.org/licenses/</string>
+You should have received a copy of the GPL v3 along with DMHelper. If not, see: http://www.gnu.org/licenses/</string>
      </property>
     </widget>
    </item>
@@ -120,7 +120,7 @@ You should have received a copy of the GPL v3 along with the DM Helper. If not, 
         </sizepolicy>
        </property>
        <property name="text">
-        <string>DM Helper should check for updates (occasionally at startup) and let me know when a new version is available</string>
+        <string>DMHelper should check for updates (occasionally at startup) and let me know when a new version is available</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -161,7 +161,7 @@ You should have received a copy of the GPL v3 along with the DM Helper. If not, 
           </sizepolicy>
          </property>
          <property name="text">
-          <string>I consent that the DM Helper may gather basic usage data in an anonymous manner.</string>
+          <string>I consent that DMHelper may gather basic usage data in an anonymous manner.</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>
@@ -177,7 +177,7 @@ You should have received a copy of the GPL v3 along with the DM Helper. If not, 
           </sizepolicy>
          </property>
          <property name="text">
-          <string>(We will not use this to track your behavior, only for general statistics and to try to make the DM Helper better where we can)</string>
+          <string>(We will not use this to track your behavior, only for general statistics and to try to make DMHelper better where we can)</string>
          </property>
          <property name="wordWrap">
           <bool>true</bool>

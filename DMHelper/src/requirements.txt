@@ -39,6 +39,17 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Import Character puts it in the selected tree items
 
 
+Long actions that need a loading bar
+- opening a bestiary
+- opening a spellbook
+- opening a campaign
+- reading a map
+- importing a campaign
+- importing a bestiary
+- importing a character
+- updating a character
+- updating a party
+
     Background color default to black, not transparent
     Background color on maps defaults weird
 
@@ -71,28 +82,21 @@ Sample payloads
 
 Red color:  _color(115,18,0,64)
 
-AoE hitting the middle of creatures rather than the edge
 General Todos:
-Update roadmap github
-Update website
 Create generic Bestiary imports - some sort of contribution mechanism?
 Online docs
 Marketing Videos
 Make truly opensource
 
-v2.1 Features:
+v2.2+ Features:
 1) Syrinscape integration
-2) Youtube Audio (vlc)
 3) Youtube Vidoes?
-4) Conditions, battle upgrades in general
-5) Spell DB
 6) OpenGL based battles?
 
-v2.1 Todos:
+v3.0 Todos:
 1) Update Documentation
 
 
-Reload tables
 add opensource comments on all files
 white grid or black screen at button click
 Import/Export bestiary
@@ -108,7 +112,7 @@ Export/Import of individual adventures, party, characters, encounters
 Item cards like in Critical Role
 
 Shortcuts
-Ctrl+Q: Quit DM Helper
+Ctrl+Q: Quit DMHelper
 Ctrl+W:     (Close Window)
 Ctrl+E: Opens the DM Screen
 Ctrl+R: Opens the Quick Reference Guide

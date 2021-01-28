@@ -48,7 +48,7 @@ void AudioTrackFile::play()
     if(!QFile::exists(fileString))
     {
         QMessageBox::critical(nullptr,
-                              QString("DM Helper Audio Track File Not Found"),
+                              QString("DMHelper Audio Track File Not Found"),
                               QString("The audio track could not be found: ") + fileString);
         qDebug() << "[AudioTrackFile] Audio track file not found: " << fileString;
         return;

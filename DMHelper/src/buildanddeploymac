@@ -1,5 +1,5 @@
 echo .
-echo Building DM Helper for MacOS
+echo Building DMHelper for MacOS
 echo .
 
 export QT_DIR=$HOME/Qt
@@ -11,8 +11,8 @@ echo $PATH
 cd ..
 rm -R build-clang_64bit-Release
 rm -R bin64
-rm "DM Helper macOS release.zip"
-rm -Rf "DM Helper macOS release Installer.app"
+rm "DMHelper macOS release.zip"
+rm -Rf "DMHelper macOS release Installer.app"
 mkdir build-clang_64bit-Release
 mkdir bin64
 mkdir bin64/config
@@ -53,12 +53,12 @@ echo Create the installer
 echo .
 cd ../bin64
 binarycreator -c ./config/config_mac.xml -p ./packages "DM-Helper-macOS-release-Installer"
-mv "./DM-Helper-macOS-release-Installer.app" "../DM Helper macOS release Installer.app"
+mv "./DM-Helper-macOS-release-Installer.app" "../DMHelper macOS release Installer.app"
 
 echo .
 echo Create the zip-file distribution
 echo .
 cd packages/com.dmhelper.app/data
-zip -r "DM Helper macOS release.zip" *
-mv "DM Helper macOS release.zip" ../../../../
+zip -r "DMHelper macOS release.zip" *
+mv "DMHelper macOS release.zip" ../../../../
 cd ../../../..

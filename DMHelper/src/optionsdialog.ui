@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>DM Helper Options</string>
+   <string>DMHelper Options</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
       <attribute name="title">
@@ -38,7 +38,7 @@
             <item>
              <widget class="QLabel" name="label_2">
               <property name="text">
-               <string>DM Helper Font:</string>
+               <string>DMHelper Font:</string>
               </property>
              </widget>
             </item>
@@ -281,7 +281,7 @@
           <item>
            <widget class="QCheckBox" name="chkEnableUpdates">
             <property name="text">
-             <string>DM Helper should check for updates (occasionally at startup) and let me know when a new version is available</string>
+             <string>DMHelper should check for updates (occasionally at startup) and let me know when a new version is available</string>
             </property>
            </widget>
           </item>
@@ -305,7 +305,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>I consent that the DM Helper may gather basic usage data in an anonymous manner.</string>
+                 <string>I consent that the DMHelper may gather basic usage data in an anonymous manner.</string>
                 </property>
                 <property name="wordWrap">
                  <bool>true</bool>
@@ -321,7 +321,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>(We will not use this to track your behavior, only for general statistics and to try to make the DM Helper better where we can)</string>
+                 <string>(We will not use this to track your behavior, only for general statistics and to try to make the DMHelper better where we can)</string>
                 </property>
                 <property name="wordWrap">
                  <bool>true</bool>
