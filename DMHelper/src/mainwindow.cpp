@@ -1363,7 +1363,7 @@ void MainWindow::readBestiary()
 
     QFileInfo fileInfo(bestiaryFileName);
     Bestiary::Instance()->setDirectory(fileInfo.absoluteDir());
-    Bestiary::Instance()->inputXML(root, false);
+    Bestiary::Instance()->inputXML(root);
 
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
         bestiaryDlg.setMonster(_options->getLastMonster());
@@ -2371,7 +2371,7 @@ void MainWindow::importBestiary()
             return;
         }
 
-        Bestiary::Instance()->inputXML(root, true);
+        Bestiary::Instance()->inputXML(root, filename);
         openBestiary();
 
         qDebug() << "[MainWindow] Bestiary import complete.";

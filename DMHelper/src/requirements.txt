@@ -39,6 +39,17 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Import Character puts it in the selected tree items
 
 
+Long actions that need a loading bar
+- opening a bestiary
+- opening a spellbook
+- opening a campaign
+- reading a map
+- importing a campaign
+- importing a bestiary
+- importing a character
+- updating a character
+- updating a party
+
     Background color default to black, not transparent
     Background color on maps defaults weird
 
