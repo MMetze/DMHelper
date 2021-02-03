@@ -4,7 +4,6 @@
 #include <QDir>
 #include <QDateTime>
 #include <QStandardPaths>
-#include <QCoreApplication>
 #include <QDebug>
 
 #ifndef QT_DEBUG
@@ -81,8 +80,7 @@ void DMHLogger::initialize()
             logDir.remove(removeLogFile);
     }
 
-    QString appName = (qApp != nullptr) ? qApp->applicationName().split(QChar(' ')).join(QChar('_')) : QString("DMHelper");
-    QString logFileName = appName + QString("-") + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss") + QString(".log");
+    QString logFileName = QString("DMHelper-") + QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss") + QString(".log");
     QString fullLogFile = logDir.filePath(logFileName);
 
     _log = new QFile(fullLogFile);
@@ -144,7 +142,7 @@ void DMHLogger::writeOutput(QtMsgType type, const QMessageLogContext &context, c
             msgContext = QString("Fatal: [%1:%2, %3] ").arg(context.file).arg(context.line).arg(context.function);
             break;
     }
-    (*_out) << debugdate << " " << msgContext << msg << '\n';
+    (*_out) << debugdate << " " << msgContext << msg << endl;
 
     if (QtFatalMsg == type)
     {
