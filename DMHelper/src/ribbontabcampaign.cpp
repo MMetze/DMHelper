@@ -54,6 +54,7 @@ void RibbonTabCampaign::setCampaignEnabled(bool enabled)
     ui->btnNewScrollingText->setEnabled(enabled);
     ui->btnAddSound->setEnabled(enabled);
     ui->btnSyrinscape->setEnabled(enabled);
+    ui->btnYouTube->setEnabled(enabled);
     ui->btnNewScrollingText->setEnabled(enabled);
     ui->btnRemove->setEnabled(enabled);
     ui->btnExportItem->setEnabled(enabled);

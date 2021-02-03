@@ -76,6 +76,7 @@ signals:
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
     void itemChanged(QGraphicsItem* item);
+    void itemMouseDoubleClick(QGraphicsPixmapItem* item);
 
     void combatantHover(BattleDialogModelCombatant* combatant, bool hover);
 

@@ -100,6 +100,14 @@ void WidgetMonsterInternal::setHitPoints(int hp)
         _monster->setHitPoints(hp);
 }
 
+void WidgetMonsterInternal::executeDoubleClick()
+{
+    if((_monster) && (_monster->getMonsterClass()))
+        emit clicked(_monster->getMonsterClass()->getName());
+    else
+        qDebug() << "[Widget Monster Internal] no valid monster class found!";
+}
+
 void WidgetMonsterInternal::decrementLegendary()
 {
     if(!_monster)
@@ -115,12 +123,3 @@ void WidgetMonsterInternal::resetLegendary()
 {
     _monster->setLegendaryCount(_legendaryMaximum);
 }
-
-void WidgetMonsterInternal::executeDoubleClick()
-{
-    if((_monster) && (_monster->getMonsterClass()))
-        emit clicked(_monster->getMonsterClass()->getName());
-    else
-        qDebug() << "[Widget Monster Internal] no valid monster class found!";
-}
-
