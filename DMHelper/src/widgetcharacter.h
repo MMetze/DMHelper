@@ -28,6 +28,9 @@ public:
 public slots:
     virtual void updateData() override;
 
+    // From CombatantWidget
+    virtual void selectCombatant() override;
+
 protected:
     // From QWidget
     virtual void leaveEvent(QEvent * event) override;

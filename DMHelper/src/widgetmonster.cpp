@@ -106,6 +106,12 @@ void WidgetMonster::setActive(bool active)
     CombatantWidget::setActive(active);
 }
 
+void WidgetMonster::selectCombatant()
+{
+    if(_internals)
+        _internals->executeDoubleClick();
+}
+
 void WidgetMonster::leaveEvent(QEvent * event)
 {
     if(_internals)

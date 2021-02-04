@@ -202,6 +202,7 @@ private slots:
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
     void handleItemMouseUp(QGraphicsPixmapItem* item);
     void handleItemChanged(QGraphicsItem* item);
+    void handleItemMouseDoubleClick(QGraphicsPixmapItem* item);
 
     void removeCombatant();
     void activateCombatant();

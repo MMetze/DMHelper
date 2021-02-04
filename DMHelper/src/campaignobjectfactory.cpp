@@ -1,6 +1,10 @@
 #include "campaignobjectfactory.h"
 #include "campaignobjectbase.h"
 #include "objectfactory.h"
+#include "encounterfactory.h"
+#include "audiofactory.h"
+#include "combatantfactory.h"
+#include "mapfactory.h"
 #include "placeholder.h"
 #include <QDomElement>
 #include <QDebug>
@@ -11,20 +15,15 @@ CampaignObjectFactory::CampaignObjectFactory(QObject *parent) :
     QObject(parent),
     _factoryList()
 {
+    _factoryList.append(new EncounterFactory());
+    _factoryList.append(new AudioFactory());
+    _factoryList.append(new CombatantFactory());
+    _factoryList.append(new MapFactory());
 }
 
 CampaignObjectFactory::~CampaignObjectFactory()
 {
     qDeleteAll(_factoryList);
-}
-
-void CampaignObjectFactory::addFactory(ObjectFactory* factory)
-{
-    if(!factory)
-        return;
-
-    CampaignObjectFactory* factoryBase = CampaignObjectFactory::Instance();
-    factoryBase->addFactoryPrivate(factory);
 }
 
 CampaignObjectBase* CampaignObjectFactory::createObject(int objectType, int subType, const QString& objectName, bool isImport)
@@ -63,14 +62,6 @@ CampaignObjectBase* CampaignObjectFactory::createObject(const QDomElement& eleme
 int CampaignObjectFactory::factoryCount() const
 {
     return _factoryList.count();
-}
-
-void CampaignObjectFactory::addFactoryPrivate(ObjectFactory* factory)
-{
-    if(!factory)
-        return;
-
-    _factoryList.append(factory);
 }
 
 ObjectFactory* CampaignObjectFactory::getFactory(int index) const

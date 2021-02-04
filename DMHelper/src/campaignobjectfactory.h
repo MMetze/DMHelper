@@ -15,15 +15,13 @@ public:
     explicit CampaignObjectFactory(QObject *parent = nullptr);
     ~CampaignObjectFactory();
 
-    static void addFactory(ObjectFactory* factory);
     static CampaignObjectBase* createObject(int objectType, int subType, const QString& objectName, bool isImport);
     static CampaignObjectBase* createObject(const QDomElement& element, bool isImport);
 
-private:
     int factoryCount() const;
-    void addFactoryPrivate(ObjectFactory* factory);
     ObjectFactory* getFactory(int index) const;
 
+private:
     static CampaignObjectFactory* Instance();
     static CampaignObjectFactory* _instance;
 
