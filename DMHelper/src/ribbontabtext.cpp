@@ -8,6 +8,8 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    connect(ui->btnBackground, &QAbstractButton::clicked, this, &RibbonTabText::backgroundClicked);
+
     connect(ui->frameText, &RibbonFrameText::colorChanged, this, &RibbonTabText::colorChanged);
     connect(ui->frameText, &RibbonFrameText::fontFamilyChanged, this, &RibbonTabText::fontFamilyChanged);
     connect(ui->frameText, &RibbonFrameText::fontSizeChanged, this, &RibbonTabText::fontSizeChanged);
@@ -15,7 +17,10 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->frameText, &RibbonFrameText::fontItalicsChanged, this, &RibbonTabText::fontItalicsChanged);
     connect(ui->frameText, &RibbonFrameText::alignmentChanged, this, &RibbonTabText::alignmentChanged);
 
-    connect(ui->btnHyperlink, SIGNAL(clicked()), this, SIGNAL(hyperlinkClicked()));
+//    connect(ui->btnHyperlink, SIGNAL(clicked()), this, SIGNAL(hyperlinkClicked()));
+    connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
+
+    connect(ui->btnAnimation, &QAbstractButton::clicked, this, &RibbonTabText::animationClicked);
 }
 
 RibbonTabText::~RibbonTabText()
@@ -28,45 +33,10 @@ PublishButtonRibbon* RibbonTabText::getPublishRibbon()
     return ui->framePublish;
 }
 
-/*
-QColor RibbonTabText::getColor() const
+void RibbonTabText::setAnimation(bool checked)
 {
-    return ui->btnColor->getColor();
+    ui->btnAnimation->setChecked(checked);
 }
-
-QString RibbonTabText::getFontFamily() const
-{
-    return ui->cmbFont->currentText();
-}
-
-int RibbonTabText::getFontSize() const
-{
-    return ui->edtSize->text().toInt();
-}
-
-bool RibbonTabText::isFontBold() const
-{
-    return ui->btnBold->isChecked();
-}
-
-bool RibbonTabText::isFontItalics() const
-{
-    return ui->btnItalics->isChecked();
-}
-
-int RibbonTabText::getAlignment() const
-{
-    switch(ui->btnGrpAlignment->checkedId())
-    {
-        case Qt::AlignLeft:
-        case Qt::AlignHCenter:
-        case Qt::AlignRight:
-            return static_cast<Qt::AlignmentFlag>(ui->btnGrpAlignment->checkedId());
-        default:
-            return Qt::AlignHCenter;
-    }
-}
-*/
 
 void RibbonTabText::setColor(QColor color)
 {
@@ -103,27 +73,20 @@ void RibbonTabText::setHyperlinkActive(bool active)
     ui->btnHyperlink->setEnabled(active);
 }
 
-/*
-void RibbonTabText::handleFontSizeChanged()
-{
-    bool ok = false;
-    int intSize = ui->edtSize->text().toInt(&ok);
-    if(ok)
-        emit fontSizeChanged(intSize);
-
-}
-
-void RibbonTabText::handleAlignmentChanged()
-{
-    emit alignmentChanged(getAlignment());
-}
-*/
-
-
 void RibbonTabText::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
-    setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, height());
+    int frameHeight = height();
+
+    setStandardButtonSize(*ui->lblBackground, *ui->btnBackground, frameHeight);
+    setLineHeight(*ui->line_1, frameHeight);
+    setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, frameHeight);
+    setLineHeight(*ui->line_2, frameHeight);
+    setStandardButtonSize(*ui->lblAnimation, *ui->btnAnimation, frameHeight);
+    setStandardButtonSize(*ui->lblRewind, *ui->btnRewind, frameHeight);
+    setLineHeight(*ui->line_3, frameHeight);
+    setStandardButtonSize(*ui->lblTranslateText, *ui->btnTranslateText, frameHeight);
+    setLineHeight(*ui->line_4, frameHeight);
 }
 

@@ -26,6 +26,7 @@ public:
 
     EncounterText* getEncounter() const;
     void setEncounter(EncounterText* encounter);
+    void unsetEncounter(EncounterText* encounter);
 
     QString toHtml() const;
     QString toPlainText() const;
@@ -37,6 +38,10 @@ public slots:
     void setHtml(const QString &text);
     void setPlainText(const QString &text);
 
+    void setBackgroundImage(bool on);
+    void setImageFile(const QString& imageFile);
+    void browseImageFile();
+
     void setFont(const QString& fontFamily);
     void setFontSize(int fontSize);
     void setBold(bool bold);
@@ -46,9 +51,16 @@ public slots:
 
     void hyperlinkClicked();
 
+    void targetResized(const QSize& newSize);
+
+    // Publish slots from CampaignObjectFrame
+    virtual void publishClicked(bool checked) override;
+    virtual void setRotation(int rotation) override;
+
 signals:
-//    void textChanged();
     void anchorClicked(const QUrl &link);
+
+    void imageFileChanged(const QString&);
 
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
@@ -59,18 +71,38 @@ signals:
 
     void setHyperlinkActive(bool active);
 
+    void publishImage(QImage image);
+    void showPublishWindow();
+
+
 protected slots:
     void storeEncounter();
     void readEncounter();
 
     void takeFocus();
+    void loadImage();
 
 protected:
+    virtual void resizeEvent(QResizeEvent *event) override;
+
+    void scaleBackgroundImage();
+    void prepareImages();
+    void prepareTextImage();
+    QSize getRotatedTargetSize();
+
     Ui::EncounterTextEdit *ui;
 
     QList<QString> _keys;
     EncounterText* _encounter;
     TextEditFormatterFrame* _formatter;
+
+    QImage _backgroundImage;
+    QImage _backgroundImageScaled;
+    QImage _prescaledImage;
+    QImage _textImage;
+
+    QSize _targetSize;
+    int _rotation;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H

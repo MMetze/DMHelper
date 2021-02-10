@@ -4,7 +4,9 @@
 #include <QKeyEvent>
 #include <QTextCharFormat>
 #include <QUrl>
+#include <QPainter>
 #include <QInputDialog>
+#include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -13,13 +15,18 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     ui(new Ui::EncounterTextEdit),
     _keys(),
     _encounter(nullptr),
-    _formatter(new TextEditFormatterFrame(this))
+    _formatter(new TextEditFormatterFrame(this)),
+    _backgroundImage(),
+    _backgroundImageScaled(),
+    _prescaledImage(),
+    _textImage(),
+    _targetSize(),
+    _rotation(0)
 {
     ui->setupUi(this);
 
     ui->textBrowser->viewport()->setCursor(Qt::IBeamCursor);
 
-    //    connect(ui->textBrowser, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
     connect(ui->textBrowser, SIGNAL(anchorClicked(QUrl)), this, SIGNAL(anchorClicked(QUrl)));
 
@@ -38,7 +45,6 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(colorChanged(QColor)), this, SLOT(takeFocus()));
 
     ui->textBrowser->installEventFilter(this);
-    //ui->textFormatter->setTextEdit(ui->textBrowser);
     ui->textFormatter->hide();
     _formatter->setTextEdit(ui->textBrowser);
 }
@@ -63,7 +69,7 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object)
     setEncounter(encounter);
 
     emit checkableChanged(false);
-    emit setPublishEnabled(false);
+    emit setPublishEnabled(true);
 }
 
 void EncounterTextEdit::deactivateObject()
@@ -75,7 +81,7 @@ void EncounterTextEdit::deactivateObject()
     }
 
     storeEncounter();
-    setEncounter(nullptr);
+    unsetEncounter(_encounter);
 }
 
 void EncounterTextEdit::setKeys(const QList<QString>& keys)
@@ -95,12 +101,38 @@ EncounterText* EncounterTextEdit::getEncounter() const
 
 void EncounterTextEdit::setEncounter(EncounterText* encounter)
 {
-    if(_encounter != encounter)
+    if(_encounter == encounter)
+        return;
+
+    if(!encounter)
     {
-        storeEncounter();
-        _encounter = encounter;
-        readEncounter();
+        unsetEncounter(_encounter);
+        return;
     }
+
+    storeEncounter();
+
+    _encounter = encounter;
+
+    readEncounter();
+    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
+    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
+}
+
+void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
+{
+    if(encounter != _encounter)
+        qDebug() << "[EncounterTextEdit] WARNING: unsetting text with a DIFFERENT encounter than currently set! Current: " << QString(_encounter ? _encounter->getID().toString() : "nullptr") << ", Unset: " << QString(encounter ? encounter->getID().toString() : "nullptr");
+
+    if(_encounter)
+    {
+        disconnect(_encounter, nullptr, this, nullptr);
+        _encounter = nullptr;
+    }
+
+    _backgroundImage = QImage();
+    _backgroundImageScaled = QImage();
+    ui->textBrowser->clear();
 }
 
 QString EncounterTextEdit::toHtml() const
@@ -115,44 +147,55 @@ QString EncounterTextEdit::toPlainText() const
 
 bool EncounterTextEdit::eventFilter(QObject *watched, QEvent *event)
 {
-    if((watched != ui->textBrowser) || (event->type() != QEvent::KeyPress))
+    if(watched != ui->textBrowser)
         return false;
 
-    QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-    if(!keyEvent)
-        return false;
-
-    switch(keyEvent->key())
+    if(event->type() == QEvent::KeyPress)
     {
-        case Qt::Key_B:
-            if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-            {
-                QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                format.setFontWeight(format.fontWeight() == QFont::Bold ? QFont::Normal : QFont::Bold);
-                ui->textBrowser->setCurrentCharFormat(format);
-                return true;
-            }
-            break;
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        if(!keyEvent)
+            return false;
 
-        case Qt::Key_I:
-            if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-            {
-                QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                format.setFontItalic(!format.fontItalic());
-                ui->textBrowser->setCurrentCharFormat(format);
-                return true;
-            }
-            break;
+        switch(keyEvent->key())
+        {
+            case Qt::Key_B:
+                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
+                {
+                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
+                    format.setFontWeight(format.fontWeight() == QFont::Bold ? QFont::Normal : QFont::Bold);
+                    ui->textBrowser->setCurrentCharFormat(format);
+                    return true;
+                }
+                break;
 
-        case Qt::Key_U:
-            if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-            {
-                QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                format.setFontUnderline(!format.fontUnderline());
-                ui->textBrowser->setCurrentCharFormat(format);
-                return true;
-            }
-            break;
+            case Qt::Key_I:
+                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
+                {
+                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
+                    format.setFontItalic(!format.fontItalic());
+                    ui->textBrowser->setCurrentCharFormat(format);
+                    return true;
+                }
+                break;
+
+            case Qt::Key_U:
+                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
+                {
+                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
+                    format.setFontUnderline(!format.fontUnderline());
+                    ui->textBrowser->setCurrentCharFormat(format);
+                    return true;
+                }
+                break;
+        }
+    }
+    else if(event->type() == QEvent::Paint)
+    {
+        if(!_backgroundImageScaled.isNull())
+        {
+            QPainter paint(ui->textBrowser);
+            paint.drawImage(0, 0, _backgroundImageScaled);
+        }
     }
 
     return false;
@@ -172,6 +215,48 @@ void EncounterTextEdit::setHtml(const QString &text)
 void EncounterTextEdit::setPlainText(const QString &text)
 {
     ui->textBrowser->setPlainText(text);
+}
+
+void EncounterTextEdit::setBackgroundImage(bool on)
+{
+    if(!_encounter)
+        return;
+
+    if(on)
+    {
+        browseImageFile();
+    }
+    else
+    {
+        setImageFile(QString());
+        ui->textBrowser->update();
+    }
+}
+
+void EncounterTextEdit::setImageFile(const QString& imageFile)
+{
+    if(_encounter)
+        _encounter->setImageFile(imageFile);
+}
+
+void EncounterTextEdit::browseImageFile()
+{
+    QString imageFileName = QFileDialog::getOpenFileName(this, QString("Select Image File"), QString(), QString("Image files (*.png *.jpg)"));
+
+    if(imageFileName.isEmpty())
+    {
+        qDebug() << "[EncounterTextEdit] Select Image File was cancelled";
+        return;
+    }
+
+    if(!QFile::exists(imageFileName))
+    {
+        QMessageBox::critical(this, QString("Invalid Image File"), QString("The selected image could not be found!"));
+        qDebug() << "[EncounterTextEdit] Invalid image file selected for text background";
+        return;
+    }
+
+    setImageFile(imageFileName);
 }
 
 void EncounterTextEdit::setFont(const QString& fontFamily)
@@ -236,6 +321,33 @@ void EncounterTextEdit::hyperlinkClicked()
     ui->textBrowser->setHtml(ui->textBrowser->toHtml());
 }
 
+void EncounterTextEdit::targetResized(const QSize& newSize)
+{
+    if(newSize != _targetSize)
+        _targetSize = newSize;
+}
+
+void EncounterTextEdit::publishClicked(bool checked)
+{
+    Q_UNUSED(checked);
+
+    if(!_encounter)
+        return;
+
+    emit showPublishWindow();
+
+    prepareImages();
+    emit publishImage(_textImage);
+}
+
+void EncounterTextEdit::setRotation(int rotation)
+{
+    if(_rotation == rotation)
+        return;
+
+    _rotation = rotation;
+}
+
 void EncounterTextEdit::storeEncounter()
 {
     if(_encounter)
@@ -255,4 +367,87 @@ void EncounterTextEdit::takeFocus()
     update();
     ui->textBrowser->update();
     ui->textBrowser->setFocus();
+}
+
+void EncounterTextEdit::loadImage()
+{
+    if(!_encounter)
+        return;
+
+    _backgroundImage = QImage();
+    _backgroundImageScaled = QImage();
+
+    if(_encounter->getImageFile().isEmpty())
+        return;
+
+    if(_backgroundImage.load(_encounter->getImageFile()))
+        scaleBackgroundImage();
+}
+
+void EncounterTextEdit::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    scaleBackgroundImage();
+}
+
+void EncounterTextEdit::scaleBackgroundImage()
+{
+    if(_backgroundImage.isNull())
+        return;
+
+    _backgroundImageScaled = _backgroundImage.scaledToWidth(ui->textBrowser->width(), Qt::SmoothTransformation);
+}
+
+void EncounterTextEdit::prepareImages()
+{
+    if(!_encounter)
+        return;
+
+    if(_backgroundImage.isNull())
+        return;
+
+    QSize rotatedSize = getRotatedTargetSize();
+
+    _prescaledImage = _backgroundImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
+    if(_rotation != 0)
+        _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+
+    _textImage = QImage();
+    prepareTextImage();
+}
+
+void EncounterTextEdit::prepareTextImage()
+{
+    //_textImage = QImage(getRotatedTargetSize(), QImage::Format_ARGB32);
+    //ui->textBrowser->viewport()->render(&_textImage);
+    QImage drawImage(ui->textBrowser->document()->size().toSize(), QImage::Format_ARGB32);
+    drawImage.fill(QColor(0, 0, 0, 0));
+    QPainter painter;
+    painter.begin(&drawImage);
+        ui->textBrowser->document()->drawContents(&painter);
+    painter.end();
+
+    QSize rotatedSize = getRotatedTargetSize();
+
+    drawImage = drawImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
+    if(_rotation != 0)
+        drawImage = drawImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+
+    _textImage = _prescaledImage;
+    painter.begin(&_textImage);
+        if((_rotation == 0) || (_rotation == 270))
+            painter.drawImage(0, 0, drawImage);
+        if(_rotation == 90)
+            painter.drawImage(_prescaledImage.width() - drawImage.width(), 0, drawImage);
+        if(_rotation == 180)
+            painter.drawImage(0, _prescaledImage.height() - drawImage.height(), drawImage);
+    painter.end();
+}
+
+QSize EncounterTextEdit::getRotatedTargetSize()
+{
+    if(_rotation % 180 == 0)
+        return _targetSize;
+    else
+        return _targetSize.transposed();
 }

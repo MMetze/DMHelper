@@ -18,6 +18,8 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
+    void setAnimation(bool checked);
+
     void setColor(QColor color);
     void setFontFamily(const QString& fontFamily);
     void setFontSize(int fontSize);
@@ -28,6 +30,15 @@ public slots:
     void setHyperlinkActive(bool active);
 
 signals:
+    void backgroundClicked(bool checked);
+
+    // Animation
+    void animationClicked(bool checked);
+    void speedChanged(int speed);
+    void widthChanged(int width);
+    void rewindClicked();
+
+    // Text
     void colorChanged(QColor color);
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
@@ -35,6 +46,9 @@ signals:
     void fontItalicsChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
     void hyperlinkClicked();
+
+    // Tools
+    void translateTextClicked();
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

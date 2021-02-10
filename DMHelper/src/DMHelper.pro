@@ -543,7 +543,8 @@ DISTFILES += \
     resources/shops.xml \
     resources/tables/Indefinite Madness.xml \
     resources/tables/Long Term Madness.xml \
-    resources/tables/Short Term Madness.xml
+    resources/tables/Short Term Madness.xml \
+    todos
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc

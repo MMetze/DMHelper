@@ -10,7 +10,11 @@
 
 EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
     CampaignObjectBase(encounterName, parent),
-    _text()
+    _text(),
+    _imageFile(),
+    _animated(false),
+    _scrollSpeed(25)
+
 {
 }
 
@@ -30,6 +34,21 @@ QString EncounterText::getText() const
     return _text;
 }
 
+QString EncounterText::getImageFile() const
+{
+    return _imageFile;
+}
+
+bool EncounterText::getAnimated() const
+{
+    return _animated;
+}
+
+int EncounterText::getScrollSpeed() const
+{
+    return _scrollSpeed;
+}
+
 void EncounterText::setText(const QString& newText)
 {
     if(newText.isEmpty())
@@ -42,11 +61,43 @@ void EncounterText::setText(const QString& newText)
         _text = newText;
         QTextDocument doc;
         doc.setHtml(newText);
-        // qDebug() << "[EncounterText] " << getID() << " """ << _name << """ text set to: " << doc.toPlainText();
 
         emit textChanged(_text);
         emit dirty();
     }
+}
+
+void EncounterText::setImageFile(const QString& imageFile)
+{
+    if(_imageFile == imageFile)
+        return;
+
+    _imageFile = imageFile;
+
+    emit imageFileChanged(_imageFile);
+    emit dirty();
+}
+
+void EncounterText::setAnimated(bool animated)
+{
+    if(_animated == animated)
+        return;
+
+    _animated = animated;
+
+    emit animatedChanged(_animated);
+    emit dirty();
+}
+
+void EncounterText::setScrollSpeed(int scrollSpeed)
+{
+    if(_scrollSpeed == scrollSpeed)
+        return;
+
+    _scrollSpeed = scrollSpeed;
+
+    emit scrollSpeedChanged(_scrollSpeed);
+    emit dirty();
 }
 
 QDomElement EncounterText::createOutputXML(QDomDocument &doc)

@@ -18,13 +18,54 @@ public:
 
     virtual int getObjectType() const override;
 
+    // Text
     virtual QString getText() const;
+    virtual QString getImageFile() const;
+
+    // Animation
+    virtual bool getAnimated() const;
+    virtual int getScrollSpeed() const;
+
+    //virtual QString getFontFamily() const;
+    //virtual int getFontSize() const;
+    //virtual bool getFontBold() const;
+    //virtual bool getFontItalics() const;
+    //virtual Qt::Alignment getAlignment() const;
+    //virtual int getImageWidth() const;
+    //virtual QColor getFontColor() const;
 
 public slots:
+    //Text
     virtual void setText(const QString& newText);
+    virtual void setImageFile(const QString& imageFile);
+
+    // Animation
+    virtual void setAnimated(bool animated);
+    virtual void setScrollSpeed(int scrollSpeed);
+
+    //virtual void setFontFamily(const QString& fontFamily);
+    //virtual void setFontSize(int fontSize);
+    //virtual void setFontBold(bool fontBold);
+    //virtual void setFontItalics(bool fontItalics);
+    //virtual void setAlignment(Qt::Alignment alignment);
+    //virtual void setImageWidth(int imageWidth);
+    //virtual void setFontColor(QColor fontColor);
 
 signals:
+    // Text
     void textChanged(const QString& text);
+    void imageFileChanged(const QString& imageFile);
+
+    // Animation
+    void animatedChanged(bool animated);
+    void scrollSpeedChanged(int scrollSpeed);
+    //void fontFamilyChanged(const QString& fontFamily);
+    //void fontSizeChanged(int fontSize);
+    //void fontBoldChanged(bool fontBold);
+    //void fontItalicsChanged(bool fontItalics);
+    //void alignmentChanged(Qt::Alignment alignment);
+    //void imageWidthChanged(int imageWidth);
+    //void fontColorChanged(QColor fontColor);
 
 protected slots:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -35,7 +76,13 @@ protected slots:
 protected:
     void extractTextNode(const QDomElement &element, bool isImport);
 
+    // Text
     QString _text;
+    QString _imageFile;
+
+    // Animation
+    bool _animated;
+    int _scrollSpeed;
 };
 
 #endif // ENCOUNTERTEXT_H

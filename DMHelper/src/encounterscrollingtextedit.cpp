@@ -148,8 +148,6 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
 
 void EncounterScrollingTextEdit::unsetScrollingText(EncounterScrollingText* scrollingText)
 {
-    Q_UNUSED(scrollingText);
-
     qDebug() << "[Scrolling Text] Unsetting scrolling text...";
 
     if(scrollingText != _scrollingText)
@@ -683,16 +681,8 @@ Qt::Alignment EncounterScrollingTextEdit::getAlignment()
 
 QSize EncounterScrollingTextEdit::getRotatedTargetSize()
 {
-    QSize result;
-
     if(_rotation % 180 == 0)
-    {
-        result = _targetSize;
-    }
+        return _targetSize;
     else
-    {
-        result = _targetSize.transposed();
-    }
-
-    return result;
+        return _targetSize.transposed();
 }
