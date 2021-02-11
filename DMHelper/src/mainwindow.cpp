@@ -434,13 +434,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), encounterTextEdit, SLOT(targetResized(QSize)));
-    connect(_ribbonTabText, SIGNAL(backgroundClicked()), encounterTextEdit, SLOT(browseImageFile()));
+    //connect(_ribbonTabText, SIGNAL(backgroundClicked()), encounterTextEdit, SLOT(browseImageFile()));
     connect(_ribbonTabText, &RibbonTabText::backgroundClicked, encounterTextEdit, &EncounterTextEdit::setBackgroundImage);
     //connect(_ribbonTabText, SIGNAL(speedChanged(int)), encounterTextEdit, SLOT(setScrollSpeed(int)));
-    //connect(_ribbonTabText, SIGNAL(widthChanged(int)), encounterTextEdit, SLOT(setImageWidth(int)));
+    connect(_ribbonTabText, SIGNAL(widthChanged(int)), encounterTextEdit, SLOT(setTextWidth(int)));
     //connect(_ribbonTabText, SIGNAL(rewindClicked()), encounterTextEdit, SLOT(rewind()));
     //connect(encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
-    //connect(encounterTextEdit, SIGNAL(imageWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
+    connect(encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
     connect(_ribbonTabText, SIGNAL(colorChanged(QColor)), encounterTextEdit, SLOT(setColor(QColor)));
     connect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), encounterTextEdit, SLOT(setFont(const QString&)));
     connect(_ribbonTabText, SIGNAL(fontSizeChanged(int)), encounterTextEdit, SLOT(setFontSize(int)));

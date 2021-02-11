@@ -31,7 +31,7 @@ public:
     //virtual bool getFontBold() const;
     //virtual bool getFontItalics() const;
     //virtual Qt::Alignment getAlignment() const;
-    //virtual int getImageWidth() const;
+    virtual int getTextWidth() const;
     //virtual QColor getFontColor() const;
 
 public slots:
@@ -48,7 +48,7 @@ public slots:
     //virtual void setFontBold(bool fontBold);
     //virtual void setFontItalics(bool fontItalics);
     //virtual void setAlignment(Qt::Alignment alignment);
-    //virtual void setImageWidth(int imageWidth);
+    virtual void setTextWidth(int textWidth);
     //virtual void setFontColor(QColor fontColor);
 
 signals:
@@ -64,7 +64,7 @@ signals:
     //void fontBoldChanged(bool fontBold);
     //void fontItalicsChanged(bool fontItalics);
     //void alignmentChanged(Qt::Alignment alignment);
-    //void imageWidthChanged(int imageWidth);
+    void textWidthChanged(int textWidth);
     //void fontColorChanged(QColor fontColor);
 
 protected slots:
@@ -79,6 +79,7 @@ protected:
     // Text
     QString _text;
     QString _imageFile;
+    int _textWidth;
 
     // Animation
     bool _animated;

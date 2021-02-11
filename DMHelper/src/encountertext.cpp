@@ -12,9 +12,9 @@ EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
     CampaignObjectBase(encounterName, parent),
     _text(),
     _imageFile(),
+    _textWidth(80),
     _animated(false),
     _scrollSpeed(25)
-
 {
 }
 
@@ -47,6 +47,11 @@ bool EncounterText::getAnimated() const
 int EncounterText::getScrollSpeed() const
 {
     return _scrollSpeed;
+}
+
+int EncounterText::getTextWidth() const
+{
+    return _textWidth;
 }
 
 void EncounterText::setText(const QString& newText)
@@ -97,6 +102,17 @@ void EncounterText::setScrollSpeed(int scrollSpeed)
     _scrollSpeed = scrollSpeed;
 
     emit scrollSpeedChanged(_scrollSpeed);
+    emit dirty();
+}
+
+void EncounterText::setTextWidth(int textWidth)
+{
+    if(_textWidth == textWidth)
+        return;
+
+    _textWidth = textWidth;
+
+    emit textWidthChanged(_textWidth);
     emit dirty();
 }
 

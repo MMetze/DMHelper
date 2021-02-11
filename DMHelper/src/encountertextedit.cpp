@@ -117,6 +117,9 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     readEncounter();
     connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
     connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
+    connect(_encounter, SIGNAL(textWidthChanged(int)), this, SIGNAL(textWidthChanged(int)));
+    connect(_encounter, &EncounterText::textWidthChanged, ui->textBrowser, &TextBrowserMargins::setTextWidth);
+
 }
 
 void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
@@ -321,6 +324,12 @@ void EncounterTextEdit::hyperlinkClicked()
     ui->textBrowser->setHtml(ui->textBrowser->toHtml());
 }
 
+void EncounterTextEdit::setTextWidth(int textWidth)
+{
+    if(_encounter)
+        _encounter->setTextWidth(textWidth);
+}
+
 void EncounterTextEdit::targetResized(const QSize& newSize)
 {
     if(newSize != _targetSize)
@@ -403,14 +412,19 @@ void EncounterTextEdit::prepareImages()
     if(!_encounter)
         return;
 
-    if(_backgroundImage.isNull())
-        return;
-
     QSize rotatedSize = getRotatedTargetSize();
 
-    _prescaledImage = _backgroundImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
-    if(_rotation != 0)
-        _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+    if(_backgroundImage.isNull())
+    {
+        _prescaledImage = QImage(rotatedSize, QImage::Format_ARGB32);
+        _prescaledImage.fill(QColor(0, 0, 0, 0));
+    }
+    else
+    {
+        _prescaledImage = _backgroundImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
+        if(_rotation != 0)
+            _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+    }
 
     _textImage = QImage();
     prepareTextImage();
@@ -418,14 +432,27 @@ void EncounterTextEdit::prepareImages()
 
 void EncounterTextEdit::prepareTextImage()
 {
-    //_textImage = QImage(getRotatedTargetSize(), QImage::Format_ARGB32);
-    //ui->textBrowser->viewport()->render(&_textImage);
+    if(!_encounter)
+        return;
+
     QImage drawImage(ui->textBrowser->document()->size().toSize(), QImage::Format_ARGB32);
     drawImage.fill(QColor(0, 0, 0, 0));
     QPainter painter;
+    QTextDocument* doc = ui->textBrowser->document();
+
+    QRectF rect = drawImage.rect();
+    int absoluteWidth = rect.width() * _encounter->getTextWidth() / 100;
+    int targetMargin = (rect.width() - absoluteWidth) / 2;
+
+    int oldTextWidth = doc->textWidth();
+    doc->setTextWidth(absoluteWidth);
+
     painter.begin(&drawImage);
-        ui->textBrowser->document()->drawContents(&painter);
+        painter.translate(targetMargin, 0);
+        doc->drawContents(&painter);
     painter.end();
+
+    doc->setTextWidth(oldTextWidth);
 
     QSize rotatedSize = getRotatedTargetSize();
 
@@ -435,12 +462,14 @@ void EncounterTextEdit::prepareTextImage()
 
     _textImage = _prescaledImage;
     painter.begin(&_textImage);
-        if((_rotation == 0) || (_rotation == 270))
+        if(_rotation == 0)
             painter.drawImage(0, 0, drawImage);
-        if(_rotation == 90)
+        else if(_rotation == 90)
             painter.drawImage(_prescaledImage.width() - drawImage.width(), 0, drawImage);
-        if(_rotation == 180)
+        else if(_rotation == 180)
             painter.drawImage(0, _prescaledImage.height() - drawImage.height(), drawImage);
+        else if(_rotation == 270)
+            painter.drawImage(0, 0, drawImage);
     painter.end();
 }
 

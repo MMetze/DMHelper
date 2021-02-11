@@ -51,6 +51,8 @@ public slots:
 
     void hyperlinkClicked();
 
+    void setTextWidth(int textWidth);
+
     void targetResized(const QSize& newSize);
 
     // Publish slots from CampaignObjectFrame
@@ -70,6 +72,8 @@ signals:
     void colorChanged(QColor color);
 
     void setHyperlinkActive(bool active);
+
+    void textWidthChanged(int textWidth);
 
     void publishImage(QImage image);
     void showPublishWindow();

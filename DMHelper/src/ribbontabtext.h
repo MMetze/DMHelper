@@ -27,6 +27,8 @@ public slots:
     void setFontItalics(bool fontItalics);
     void setAlignment(Qt::Alignment alignment);
 
+    void setWidth(int width);
+
     void setHyperlinkActive(bool active);
 
 signals:

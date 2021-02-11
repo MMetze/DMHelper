@@ -17,8 +17,9 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->frameText, &RibbonFrameText::fontItalicsChanged, this, &RibbonTabText::fontItalicsChanged);
     connect(ui->frameText, &RibbonFrameText::alignmentChanged, this, &RibbonTabText::alignmentChanged);
 
-//    connect(ui->btnHyperlink, SIGNAL(clicked()), this, SIGNAL(hyperlinkClicked()));
     connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
+
+    connect(ui->sliderWidth, &QAbstractSlider::valueChanged, this, &RibbonTabText::widthChanged);
 
     connect(ui->btnAnimation, &QAbstractButton::clicked, this, &RibbonTabText::animationClicked);
 }
@@ -66,6 +67,16 @@ void RibbonTabText::setFontItalics(bool fontItalics)
 void RibbonTabText::setAlignment(Qt::Alignment alignment)
 {
     ui->frameText->setAlignment(alignment);
+}
+
+void RibbonTabText::setWidth(int width)
+{
+    if((width != ui->sliderWidth->value()) &&
+       (width >= ui->sliderWidth->minimum()) &&
+       (width <= ui->sliderWidth->maximum()))
+    {
+        ui->sliderWidth->setValue(width);
+    }
 }
 
 void RibbonTabText::setHyperlinkActive(bool active)
