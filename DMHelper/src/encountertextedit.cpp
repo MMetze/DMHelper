@@ -421,6 +421,12 @@ void EncounterTextEdit::setRotation(int rotation)
         return;
 
     _rotation = rotation;
+    if(_animationRunning)
+    {
+        stopPublishTimer();
+        prepareImages();
+        startPublishTimer();
+    }
 }
 
 void EncounterTextEdit::storeEncounter()
@@ -591,11 +597,11 @@ void EncounterTextEdit::drawTextImage(QPaintDevice* target)
     if(_rotation == 0)
         painter.drawImage(0, _textPos.y(), _textImage);
     else if(_rotation == 90)
-        painter.drawImage(_prescaledImage.width() - _textImage.width(), 0, _textImage);
+        painter.drawImage(_prescaledImage.width() - _textImage.width() - _textPos.y(), 0, _textImage);
     else if(_rotation == 180)
-        painter.drawImage(0, _prescaledImage.height() - _textImage.height(), _textImage);
+        painter.drawImage(0, _prescaledImage.height() - _textImage.height() - _textPos.y(), _textImage);
     else if(_rotation == 270)
-        painter.drawImage(0, 0, _textImage);
+        painter.drawImage(_textPos.y(), 0, _textImage);
 }
 
 QSize EncounterTextEdit::getRotatedTargetSize()
