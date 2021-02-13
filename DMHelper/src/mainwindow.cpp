@@ -429,17 +429,21 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_Text
     encounterTextEdit = new EncounterTextEdit;
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
-    //connect(encounterTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    //connect(encounterTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(encounterTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(encounterTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(encounterTextEdit, SIGNAL(animationStopped()), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
     connect(encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), encounterTextEdit, SLOT(targetResized(QSize)));
     //connect(_ribbonTabText, SIGNAL(backgroundClicked()), encounterTextEdit, SLOT(browseImageFile()));
     connect(_ribbonTabText, &RibbonTabText::backgroundClicked, encounterTextEdit, &EncounterTextEdit::setBackgroundImage);
-    //connect(_ribbonTabText, SIGNAL(speedChanged(int)), encounterTextEdit, SLOT(setScrollSpeed(int)));
+    connect(encounterTextEdit, &EncounterTextEdit::imageFileChanged, _ribbonTabText, &RibbonTabText::setImageFile);
+    connect(_ribbonTabText, SIGNAL(animationClicked(bool)), encounterTextEdit, SLOT(setAnimated(bool)));
+    connect(_ribbonTabText, SIGNAL(speedChanged(int)), encounterTextEdit, SLOT(setScrollSpeed(int)));
     connect(_ribbonTabText, SIGNAL(widthChanged(int)), encounterTextEdit, SLOT(setTextWidth(int)));
-    //connect(_ribbonTabText, SIGNAL(rewindClicked()), encounterTextEdit, SLOT(rewind()));
-    //connect(encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
+    connect(_ribbonTabText, SIGNAL(rewindClicked()), encounterTextEdit, SLOT(rewind()));
+    connect(encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
+    connect(encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
     connect(encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
     connect(_ribbonTabText, SIGNAL(colorChanged(QColor)), encounterTextEdit, SLOT(setColor(QColor)));
     connect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), encounterTextEdit, SLOT(setFont(const QString&)));

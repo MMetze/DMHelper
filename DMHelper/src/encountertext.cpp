@@ -6,6 +6,7 @@
 #include <QDomCDATASection>
 #include <QTextDocument>
 #include <QTextCursor>
+#include <QDir>
 #include <QDebug>
 
 EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
@@ -21,6 +22,13 @@ EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
 void EncounterText::inputXML(const QDomElement &element, bool isImport)
 {
     extractTextNode(element, isImport);
+
+    setImageFile(element.attribute("imageFile"));
+    setTextWidth(element.attribute("textWidth", "80").toInt());
+    int scrollSpeed = element.attribute("scrollSpeed").toInt();
+    setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);
+    setAnimated(static_cast<bool>(element.attribute("animated", QString::number(0)).toInt()));
+
     CampaignObjectBase::inputXML(element, isImport);
 }
 
@@ -125,6 +133,11 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
 {
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 
+    element.setAttribute("imageFile", targetDirectory.relativeFilePath(getImageFile()));
+    element.setAttribute("textWidth", getTextWidth());
+    element.setAttribute("scrollSpeed", getScrollSpeed());
+    element.setAttribute("animated", getAnimated());
+
     QDomCDATASection cdata = doc.createCDATASection(getText());
     element.appendChild(cdata);
 }
@@ -182,67 +195,3 @@ void EncounterText::extractTextNode(const QDomElement &element, bool isImport)
         childNode = childNode.nextSibling();
     }
 }
-
-/*
-
-
-void EncounterText::widgetActivated(QWidget* widget)
-{
-    EncounterTextEdit* textEdit = dynamic_cast<EncounterTextEdit*>(widget);
-    if(!textEdit)
-        return;
-
-    if(textEdit->getEncounter() != nullptr)
-    {
-        qDebug() << "[EncounterText] ERROR: Encounter not deactivated: " << textEdit->getEncounter()->getID() << " """ << textEdit->getEncounter()->getName();
-        qDebug() << "[EncounterText] ERROR: Previous encounter will now be deactivated. This should happen previously!";
-        textEdit->getEncounter()->widgetDeactivated(widget);
-    }
-
-    qDebug() << "[EncounterText] Widget Activated " << getID() << " """ << _name;
-    textEdit->setEncounter(this);
-
-    QList<QString> keys = textEdit->keys();
-    QString text = getText();
-    QTextDocument doc;
-    doc.setHtml(text);
-
-    QTextCursor cursor;
-    for(int i = 0; i < keys.count(); ++i)
-    {
-        QString currentKey = keys.at(i);
-        cursor = doc.find(currentKey);
-        while(!cursor.isNull())
-        {
-            QTextCharFormat fmt = cursor.charFormat();
-            if(!fmt.isAnchor())
-            {
-                fmt.setAnchor(true);
-                fmt.setAnchorHref(QString("DMHelper@") + currentKey);
-                cursor.setCharFormat(fmt);
-            }
-
-            cursor = doc.find(currentKey, cursor);
-        }
-    }
-
-    textEdit->setHtml(doc.toHtml());
-    _widget = widget;
-    connect(textEdit, SIGNAL(textChanged()),this,SLOT(widgetChanged()));
-}
-
-void EncounterText::widgetDeactivated(QWidget* widget)
-{
-    EncounterTextEdit* textEdit = dynamic_cast<EncounterTextEdit*>(widget);
-    if(!textEdit)
-        return;
-
-    qDebug() << "[EncounterText] Widget Deactivated " << getID() << " """ << _name;
-    textEdit->setEncounter(nullptr);
-
-    _text = textEdit->toHtml();
-    disconnect(textEdit, nullptr, this, nullptr);
-    _widget = nullptr;
-}
-
-*/

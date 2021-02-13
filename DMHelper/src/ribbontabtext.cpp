@@ -20,6 +20,8 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
 
     connect(ui->sliderWidth, &QAbstractSlider::valueChanged, this, &RibbonTabText::widthChanged);
+    connect(ui->spinSpeed, SIGNAL(valueChanged(int)), this, SIGNAL(speedChanged(int)));
+    connect(ui->btnRewind, SIGNAL(clicked()), this, SIGNAL(rewindClicked()));
 
     connect(ui->btnAnimation, &QAbstractButton::clicked, this, &RibbonTabText::animationClicked);
 }
@@ -37,6 +39,13 @@ PublishButtonRibbon* RibbonTabText::getPublishRibbon()
 void RibbonTabText::setAnimation(bool checked)
 {
     ui->btnAnimation->setChecked(checked);
+    ui->spinSpeed->setEnabled(checked);
+    ui->btnRewind->setEnabled(checked);
+}
+
+void RibbonTabText::setImageFile(const QString& imageFile)
+{
+    ui->btnBackground->setChecked(!imageFile.isEmpty());
 }
 
 void RibbonTabText::setColor(QColor color)
@@ -76,6 +85,16 @@ void RibbonTabText::setWidth(int width)
        (width <= ui->sliderWidth->maximum()))
     {
         ui->sliderWidth->setValue(width);
+    }
+}
+
+void RibbonTabText::setSpeed(int speed)
+{
+    if((speed != ui->spinSpeed->value()) &&
+       (speed >= ui->spinSpeed->minimum()) &&
+       (speed <= ui->spinSpeed->maximum()))
+    {
+        ui->spinSpeed->setValue(speed);
     }
 }
 

@@ -19,6 +19,7 @@ public:
 
 public slots:
     void setAnimation(bool checked);
+    void setImageFile(const QString& imageFile);
 
     void setColor(QColor color);
     void setFontFamily(const QString& fontFamily);
@@ -28,6 +29,7 @@ public slots:
     void setAlignment(Qt::Alignment alignment);
 
     void setWidth(int width);
+    void setSpeed(int speed);
 
     void setHyperlinkActive(bool active);
 

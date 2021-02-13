@@ -1,7 +1,6 @@
 ﻿#include "encounterscrollingtextedit.h"
 #include "ui_encounterscrollingtextedit.h"
 #include "encounterscrollingtext.h"
-#include "scrollingtextwindow.h"
 #include "dmconstants.h"
 #include "texteditmargins.h"
 #include <QFontDatabase>

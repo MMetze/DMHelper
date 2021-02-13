@@ -3,6 +3,7 @@
 
 #include "campaignobjectframe.h"
 #include "texteditformatterframe.h"
+#include <QElapsedTimer>
 
 namespace Ui {
 class EncounterTextEdit;
@@ -50,8 +51,11 @@ public slots:
     void setAlignment(Qt::Alignment alignment);
 
     void hyperlinkClicked();
-
     void setTextWidth(int textWidth);
+
+    void setAnimated(bool animated);
+    void setScrollSpeed(int scrollSpeed);
+    void rewind();
 
     void targetResized(const QSize& newSize);
 
@@ -72,10 +76,15 @@ signals:
     void colorChanged(QColor color);
 
     void setHyperlinkActive(bool active);
-
     void textWidthChanged(int textWidth);
 
+    void animatedChanged(bool animated);
+    void scrollSpeedChanged(int scrollSpeed);
+
     void publishImage(QImage image);
+    void animationStarted();
+    void animateImage(QImage image);
+    void animationStopped();
     void showPublishWindow();
 
 
@@ -86,12 +95,17 @@ protected slots:
     void takeFocus();
     void loadImage();
 
+    void startPublishTimer();
+    void stopPublishTimer();
+
 protected:
+    virtual void timerEvent(QTimerEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
 
     void scaleBackgroundImage();
     void prepareImages();
     void prepareTextImage();
+    void drawTextImage(QPaintDevice* target);
     QSize getRotatedTargetSize();
 
     Ui::EncounterTextEdit *ui;
@@ -107,6 +121,11 @@ protected:
 
     QSize _targetSize;
     int _rotation;
+
+    bool _animationRunning;
+    QPointF _textPos;
+    QElapsedTimer _elapsed;
+    int _timerId;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H
