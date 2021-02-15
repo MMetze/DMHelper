@@ -282,6 +282,8 @@
         <file>data/character_stat_topright_grey.png</file>
         <file>data/icon_link.png</file>
         <file>data/icon_castspell.png</file>
+        <file>data/dmhelper_waiting_die.png</file>
+        <file>data/dmhelper_waiting_image.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
