@@ -67,6 +67,7 @@ SOURCES += main.cpp\
     discordposter.cpp \
     dmhelperribbon.cpp \
     dmhlogger.cpp \
+    dmhwaitingdialog.cpp \
     emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
@@ -277,6 +278,7 @@ HEADERS  += mainwindow.h \
     discordposter.h \
     dmhelperribbon.h \
     dmhlogger.h \
+    dmhwaitingdialog.h \
     dmversion.h \
     emptycampaignframe.h \
     equipmentserver.h \
@@ -453,6 +455,7 @@ FORMS    += mainwindow.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
