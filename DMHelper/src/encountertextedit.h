@@ -3,6 +3,7 @@
 
 #include "campaignobjectframe.h"
 #include "texteditformatterframe.h"
+#include "videoplayer.h"
 #include <QElapsedTimer>
 
 namespace Ui {
@@ -55,6 +56,7 @@ public slots:
 
     void setAnimated(bool animated);
     void setScrollSpeed(int scrollSpeed);
+    void stopAnimation();
     void rewind();
 
     void targetResized(const QSize& newSize);
@@ -87,13 +89,13 @@ signals:
     void animationStopped();
     void showPublishWindow();
 
-
 protected slots:
     void storeEncounter();
     void readEncounter();
 
     void takeFocus();
     void loadImage();
+    void updateVideoBackground();
 
     void startPublishTimer();
     void stopPublishTimer();
@@ -106,6 +108,13 @@ protected:
     void prepareImages();
     void prepareTextImage();
     void drawTextImage(QPaintDevice* target);
+
+    void createVideoPlayer(bool dmPlayer);
+    void cleanupPlayer();
+
+    bool isVideo() const;
+    bool isAnimated() const;
+    void setPublishCheckable();
     QSize getRotatedTargetSize();
 
     Ui::EncounterTextEdit *ui;
@@ -118,6 +127,10 @@ protected:
     QImage _backgroundImageScaled;
     QImage _prescaledImage;
     QImage _textImage;
+
+    VideoPlayer* _videoPlayer;
+    bool _isDMPlayer;
+    QImage _backgroundVideo;
 
     QSize _targetSize;
     int _rotation;

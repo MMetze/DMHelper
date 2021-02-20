@@ -15,7 +15,7 @@ class VideoPlayer : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo = true, bool playAudio = true, QObject *parent = nullptr);
+    VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo = true, bool playAudio = true, bool autoStart = true, QObject *parent = nullptr);
     virtual ~VideoPlayer();
 
     virtual const QString& getFileName() const;
@@ -56,7 +56,7 @@ public slots:
 
 protected:
 
-    virtual bool initializeVLC();
+    virtual bool initializeVLC(bool autoStart = true);
     virtual bool startPlayer();
     virtual bool stopPlayer();
     virtual void cleanupBuffers();
