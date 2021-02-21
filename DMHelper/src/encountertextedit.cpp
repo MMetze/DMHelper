@@ -476,7 +476,10 @@ void EncounterTextEdit::publishClicked(bool checked)
             else
             {
                 if(!_backgroundVideo.isNull())
+                {
+                    _animationRunning = checked;
                     return;
+                }
 
                 createVideoPlayer(true);
             }
