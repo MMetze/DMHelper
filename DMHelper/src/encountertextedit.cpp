@@ -374,12 +374,28 @@ void EncounterTextEdit::stopAnimation()
 
 void EncounterTextEdit::rewind()
 {
+    qreal yPos = 0.0;
 //    if((_prescaledImage.height() > 0) && (_targetSize.height() > 0 ))
 //        _textPos.setY(qMin(_prescaledImage.height(), _targetSize.height()));
-    if((_encounter->getAnimated()) && (_prescaledImage.height() > 0))
-        _textPos.setY(_prescaledImage.height());
+    if(_encounter->getAnimated())
+    {
+        if(_rotation % 180 == 0)
+        {
+            if(_prescaledImage.height() > 0)
+                yPos = _prescaledImage.height();
+        }
+        else
+        {
+            if(_prescaledImage.width() > 0)
+                yPos = _prescaledImage.width();
+        }
+    }
     else
+    {
         _textPos.setY(0);
+    }
+
+    _textPos.setY(yPos);
 }
 
 void EncounterTextEdit::targetResized(const QSize& newSize)
