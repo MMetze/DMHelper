@@ -93,7 +93,7 @@
      <item>
       <widget class="QLabel" name="lblNewText">
        <property name="text">
-        <string>Text Entry</string>
+        <string>Entry</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>

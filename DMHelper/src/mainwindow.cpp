@@ -1028,7 +1028,7 @@ void MainWindow::newParty()
 
 void MainWindow::newTextEncounter()
 {
-    newEncounter(DMHelper::CampaignType_Text, QString("New Text Entry"), QString("Enter new entry name:"));
+    newEncounter(DMHelper::CampaignType_Text, QString("New Entry"), QString("Enter new entry name:"));
 }
 
 void MainWindow::newBattleEncounter()
@@ -2135,7 +2135,7 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     QMenu* contextMenu = new QMenu(ui->treeView);
 
     // New text entry
-    QAction* addTextEntry = new QAction(QIcon(":/img/data/icon_newtextencounter.png"), QString("New Text Entry"), contextMenu);
+    QAction* addTextEntry = new QAction(QIcon(":/img/data/icon_newtextencounter.png"), QString("New Entry"), contextMenu);
     connect(addTextEntry, SIGNAL(triggered()), this, SLOT(newTextEncounter()));
     contextMenu->addAction(addTextEntry);
 

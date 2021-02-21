@@ -642,17 +642,15 @@ void EncounterTextEdit::prepareImages()
     if(!_encounter)
         return;
 
-    QSize rotatedSize = getRotatedTargetSize();
-
     if(_backgroundImage.isNull())
     {
-        _prescaledImage = QImage(rotatedSize, QImage::Format_ARGB32);
+        _prescaledImage = QImage(_targetSize, QImage::Format_ARGB32);
         _prescaledImage.fill(QColor(0, 0, 0, 0));
     }
     else
     {
         //_prescaledImage = _backgroundImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
-        _prescaledImage = _backgroundImage.scaled(rotatedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        _prescaledImage = _backgroundImage.scaled(getRotatedTargetSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         if(_rotation != 0)
             _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
     }
@@ -666,18 +664,22 @@ void EncounterTextEdit::prepareTextImage()
     if((!_encounter) || (_prescaledImage.isNull()))
         return;
 
-    _textImage = QImage(ui->textBrowser->document()->size().toSize(), QImage::Format_ARGB32);
-    _textImage.fill(QColor(0, 0, 0, 0));
-    QPainter painter;
     QTextDocument* doc = ui->textBrowser->document();
-
-    QRectF rect = _textImage.rect();
-    int absoluteWidth = rect.width() * _encounter->getTextWidth() / 100;
-    int targetMargin = (rect.width() - absoluteWidth) / 2;
+    if(!doc)
+        return;
 
     int oldTextWidth = doc->textWidth();
+//    QRectF rect = _textImage.rect();
+    //    int absoluteWidth = rect.width() * _encounter->getTextWidth() / 100;
+    //    int targetMargin = (rect.width() - absoluteWidth) / 2;
+    int absoluteWidth = oldTextWidth * _encounter->getTextWidth() / 100;
+    int targetMargin = (oldTextWidth - absoluteWidth) / 2;
+
     doc->setTextWidth(absoluteWidth);
 
+    _textImage = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32);
+    _textImage.fill(QColor(0, 0, 0, 0));
+    QPainter painter;
     painter.begin(&_textImage);
         painter.translate(targetMargin, 0);
         doc->drawContents(&painter);
@@ -685,10 +687,11 @@ void EncounterTextEdit::prepareTextImage()
 
     doc->setTextWidth(oldTextWidth);
 
-    //QSize rotatedSize = getRotatedTargetSize();
+    QSize rotatedSize = getRotatedTargetSize();
 
+    _textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
     //_textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
-    _textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
+    //_textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
     if(_rotation != 0)
         _textImage = _textImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
 }
