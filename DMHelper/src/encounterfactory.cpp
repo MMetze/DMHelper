@@ -52,13 +52,18 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
                 case ObjectFactory::EncounterType_Battle:
                     return new EncounterBattle();
                 case ObjectFactory::EncounterType_ScrollingText:
-                    return new EncounterScrollingText();
+                    //return new EncounterScrollingText();
+                    return new EncounterText();
                 default:
                     break;
             }
         }
     }
-    else if(element.tagName() == QString("text-object"))
+    else if(element.tagName() == QString("text-object")) // for backwards-compatibility only, see entry-object
+    {
+        return new EncounterText();
+    }
+    else if(element.tagName() == QString("entry-object"))
     {
         return new EncounterText();
     }
@@ -66,9 +71,10 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
     {
         return new EncounterBattle();
     }
-    else if(element.tagName() == QString("scrolling-object"))
+    else if(element.tagName() == QString("scrolling-object")) // for backwards-compatibility only, see entry-object
     {
-        return new EncounterScrollingText();
+        //return new EncounterScrollingText();
+        return new EncounterText();
     }
     else if((element.tagName() == QString("characters")) ||
             (element.tagName() == QString("party")))
