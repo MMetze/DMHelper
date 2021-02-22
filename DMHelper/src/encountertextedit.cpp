@@ -654,7 +654,8 @@ void EncounterTextEdit::prepareImages()
 
     if(_backgroundImage.isNull())
     {
-        _prescaledImage = QImage(_targetSize, QImage::Format_ARGB32);
+        //_prescaledImage = QImage(_targetSize, QImage::Format_ARGB32);
+        _prescaledImage = QImage(_targetSize, QImage::Format_ARGB32_Premultiplied);
         _prescaledImage.fill(QColor(0, 0, 0, 0));
     }
     else
@@ -683,8 +684,9 @@ void EncounterTextEdit::prepareTextImage()
 
     doc->setTextWidth(absoluteWidth);
 
-    _textImage = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32);
-    _textImage.fill(QColor(0, 0, 0, 0));
+    _textImage = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+    //_textImage = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+    _textImage.fill(Qt::transparent);
     QPainter painter;
     painter.begin(&_textImage);
         painter.translate(targetMargin, 0);
@@ -694,8 +696,10 @@ void EncounterTextEdit::prepareTextImage()
     doc->setTextWidth(oldTextWidth);
 
     QSize rotatedSize = getRotatedTargetSize();
+    //int rotatedWidth = rotatedSize.width() * _encounter->getTextWidth() / 100;
 
     _textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
+    //_textImage = _textImage.scaledToWidth(rotatedWidth, Qt::SmoothTransformation);
     if(_rotation != 0)
         _textImage = _textImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
 }
@@ -706,15 +710,18 @@ void EncounterTextEdit::drawTextImage(QPaintDevice* target)
         return;
 
     QPainter painter(target);
+    QPointF drawPoint(0.0, 0.0);
 
     if(_rotation == 0)
-        painter.drawImage(0, _textPos.y(), _textImage);
+        drawPoint = QPointF(0.0, _textPos.y()); // painter.drawImage(0, _textPos.y(), _textImage);
     else if(_rotation == 90)
-        painter.drawImage(_prescaledImage.width() - _textImage.width() - _textPos.y(), 0, _textImage);
+        drawPoint = QPointF(_prescaledImage.width() - _textImage.width() - _textPos.y(), 0.0); // painter.drawImage(_prescaledImage.width() - _textImage.width() - _textPos.y(), 0, _textImage);
     else if(_rotation == 180)
-        painter.drawImage(0, _prescaledImage.height() - _textImage.height() - _textPos.y(), _textImage);
+        drawPoint = QPointF(0.0, _prescaledImage.height() - _textImage.height() - _textPos.y()); // painter.drawImage(0, _prescaledImage.height() - _textImage.height() - _textPos.y(), _textImage);
     else if(_rotation == 270)
-        painter.drawImage(_textPos.y(), 0, _textImage);
+        drawPoint = QPointF(_textPos.y(), 0.0); // painter.drawImage(_textPos.y(), 0, _textImage);
+
+    painter.drawImage(drawPoint, _textImage, _textImage.rect());
 }
 
 void EncounterTextEdit::createVideoPlayer(bool dmPlayer)
