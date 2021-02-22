@@ -13,7 +13,6 @@ EncounterFactory::EncounterFactory(QObject *parent) :
 }
 
 CampaignObjectBase* EncounterFactory::createObject(int objectType, int subType, const QString& objectName, bool isImport)
-//Encounter* EncounterFactory::createEncounter(int encounterType, const QString& encounterName, QObject *parent)
 {
     Q_UNUSED(isImport);
     Q_UNUSED(subType);
@@ -34,7 +33,6 @@ CampaignObjectBase* EncounterFactory::createObject(int objectType, int subType, 
 }
 
 CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, bool isImport)
-//Encounter* EncounterFactory::createEncounter(int encounterType, const QDomElement& element, bool isImport, QObject *parent)
 {
     Q_UNUSED(isImport);
 
@@ -52,7 +50,6 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
                 case ObjectFactory::EncounterType_Battle:
                     return new EncounterBattle();
                 case ObjectFactory::EncounterType_ScrollingText:
-                    //return new EncounterScrollingText();
                     return new EncounterText();
                 default:
                     break;
@@ -73,7 +70,6 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
     }
     else if(element.tagName() == QString("scrolling-object")) // for backwards-compatibility only, see entry-object
     {
-        //return new EncounterScrollingText();
         return new EncounterText();
     }
     else if((element.tagName() == QString("characters")) ||
@@ -98,41 +94,3 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
 
     return nullptr;
 }
-
-/*
-Encounter* EncounterFactory::cloneEncounter(Encounter& encounter)
-{
-    Encounter* clone = nullptr;
-
-    switch(encounter.getType())
-    {
-        case DMHelper::EncounterType_Blank:
-            break;
-        case DMHelper::EncounterType_Text:
-            {
-                EncounterText* encounterText = dynamic_cast<EncounterText*>(&encounter);
-                if(encounterText)
-                    clone = new EncounterText(*encounterText);
-            }
-            break;
-        case DMHelper::EncounterType_Battle:
-            {
-                EncounterBattle* encounterBattle = dynamic_cast<EncounterBattle*>(&encounter);
-                if(encounterBattle)
-                    clone = new EncounterBattle(*encounterBattle);
-            }
-            break;
-        case DMHelper::EncounterType_ScrollingText:
-            {
-                EncounterScrollingText* encounterScrollingText = dynamic_cast<EncounterScrollingText*>(&encounter);
-                if(encounterScrollingText)
-                    clone = new EncounterScrollingText(*encounterScrollingText);
-            }
-            break;
-        default:
-            break;
-    }
-
-    return clone;
-}
-*/

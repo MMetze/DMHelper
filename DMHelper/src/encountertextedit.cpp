@@ -375,8 +375,6 @@ void EncounterTextEdit::stopAnimation()
 void EncounterTextEdit::rewind()
 {
     qreal yPos = 0.0;
-//    if((_prescaledImage.height() > 0) && (_targetSize.height() > 0 ))
-//        _textPos.setY(qMin(_prescaledImage.height(), _targetSize.height()));
     if(_encounter->getAnimated())
     {
         if(_rotation % 180 == 0)
@@ -647,13 +645,6 @@ void EncounterTextEdit::scaleBackgroundImage()
         _backgroundImageScaled = _backgroundImage.scaledToWidth(ui->textBrowser->width(), Qt::FastTransformation);
     else if(!_backgroundVideo.isNull())
         _backgroundImageScaled = _backgroundVideo.scaledToWidth(ui->textBrowser->width(), Qt::FastTransformation);
-
-    /*
-    if(!_backgroundImage.isNull())
-        _backgroundImageScaled = _backgroundImage.scaled(ui->textBrowser->size(), Qt::KeepAspectRatio, Qt::FastTransformation);
-    else if(!_backgroundVideo.isNull())
-        _backgroundImageScaled = _backgroundVideo.scaled(ui->textBrowser->size(), Qt::KeepAspectRatio, Qt::FastTransformation);
-    */
 }
 
 void EncounterTextEdit::prepareImages()
@@ -668,7 +659,6 @@ void EncounterTextEdit::prepareImages()
     }
     else
     {
-        //_prescaledImage = _backgroundImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
         _prescaledImage = _backgroundImage.scaled(getRotatedTargetSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
         if(_rotation != 0)
             _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
@@ -688,9 +678,6 @@ void EncounterTextEdit::prepareTextImage()
         return;
 
     int oldTextWidth = doc->textWidth();
-//    QRectF rect = _textImage.rect();
-    //    int absoluteWidth = rect.width() * _encounter->getTextWidth() / 100;
-    //    int targetMargin = (rect.width() - absoluteWidth) / 2;
     int absoluteWidth = oldTextWidth * _encounter->getTextWidth() / 100;
     int targetMargin = (oldTextWidth - absoluteWidth) / 2;
 
@@ -709,8 +696,6 @@ void EncounterTextEdit::prepareTextImage()
     QSize rotatedSize = getRotatedTargetSize();
 
     _textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
-    //_textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
-    //_textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
     if(_rotation != 0)
         _textImage = _textImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
 }

@@ -115,10 +115,6 @@ void EncounterText::setText(const QString& newText)
     if(_text != newText)
     {
         _text = newText;
-        /*
-        QTextDocument doc;
-        doc.setHtml(newText);
-        */
 
         emit textChanged(_text);
         emit dirty();
