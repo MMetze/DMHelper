@@ -78,12 +78,22 @@ signals:
     void itemChanged(QGraphicsItem* item);
     void itemMouseDoubleClick(QGraphicsPixmapItem* item);
 
+    void combatantActivate(BattleDialogModelCombatant* combatant);
+    void combatantRemove(BattleDialogModelCombatant* combatant);
+    void combatantDamage(BattleDialogModelCombatant* combatant);
+    void combatantHeal(BattleDialogModelCombatant* combatant);
+
     void combatantHover(BattleDialogModelCombatant* combatant, bool hover);
 
 protected slots:
     void editItem();
     void rollItem();
     void deleteItem();
+
+    void activateCombatant();
+    void removeCombatant();
+    void damageCombatant();
+    void healCombatant();
 
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
