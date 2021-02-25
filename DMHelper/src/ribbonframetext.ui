@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>152</width>
+    <width>173</width>
     <height>67</height>
    </rect>
   </property>
@@ -171,6 +171,41 @@
            <property name="icon">
             <iconset resource="resources.qrc">
              <normaloff>:/img/data/icon_italics.png</normaloff>:/img/data/icon_italics.png</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="autoExclusive">
+            <bool>false</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="btnUnderline">
+           <property name="minimumSize">
+            <size>
+             <width>21</width>
+             <height>21</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>21</width>
+             <height>21</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Set the text to underlined</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources.qrc">
+             <normaloff>:/img/data/icon_underline.png</normaloff>:/img/data/icon_underline.png</iconset>
            </property>
            <property name="checkable">
             <bool>true</bool>

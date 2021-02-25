@@ -14,9 +14,11 @@ const int ENCOUNTERTYPE_SCROLLINGTEXT = 5;
 EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
     CampaignObjectBase(encounterName, parent),
     _text(),
+    _translatedText(),
     _imageFile(),
     _textWidth(80),
     _animated(false),
+    _translated(false),
     _scrollSpeed(25)
 {
 }
@@ -30,6 +32,7 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
     int scrollSpeed = element.attribute("scrollSpeed").toInt();
     setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);
     setAnimated(static_cast<bool>(element.attribute("animated", QString::number(0)).toInt()));
+    setTranslated(static_cast<bool>(element.attribute("translated", QString::number(0)).toInt()));
 
     int encounterType;
     bool ok = false;
@@ -105,6 +108,19 @@ int EncounterText::getTextWidth() const
     return _textWidth;
 }
 
+bool EncounterText::getTranslated() const
+{
+    return _translated;
+}
+
+QString EncounterText::getTranslatedText() const
+{
+    if(_translatedText.isEmpty())
+        return _text;
+    else
+        return _translatedText;
+}
+
 void EncounterText::setText(const QString& newText)
 {
     if(newText.isEmpty())
@@ -165,6 +181,28 @@ void EncounterText::setTextWidth(int textWidth)
     emit dirty();
 }
 
+void EncounterText::setTranslated(bool translated)
+{
+    if(_translated == translated)
+        return;
+
+    _translated = translated;
+
+    emit translatedChanged(_translated);
+    emit dirty();
+}
+
+void EncounterText::setTranslatedText(const QString& translatedText)
+{
+    if(_translatedText != translatedText)
+    {
+        _translatedText = translatedText;
+
+        emit translatedTextChanged(_translatedText);
+        emit dirty();
+    }
+}
+
 QDomElement EncounterText::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("entry-object");
@@ -178,9 +216,17 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
     element.setAttribute("textWidth", getTextWidth());
     element.setAttribute("scrollSpeed", getScrollSpeed());
     element.setAttribute("animated", getAnimated());
+    element.setAttribute("translated", getTranslated());
 
-    QDomCDATASection cdata = doc.createCDATASection(getText());
-    element.appendChild(cdata);
+    QDomElement textElement = doc.createElement("text-data");
+        QDomCDATASection textData = doc.createCDATASection(getText());
+        textElement.appendChild(textData);
+    element.appendChild(textElement);
+
+    QDomElement translatedTextElement = doc.createElement("translated-text-data");
+        QDomCDATASection translatedTextData = doc.createCDATASection(getTranslatedText());
+        translatedTextElement.appendChild(translatedTextData);
+    element.appendChild(translatedTextElement);
 }
 
 bool EncounterText::belongsToObject(QDomElement& element)
@@ -191,6 +237,11 @@ bool EncounterText::belongsToObject(QDomElement& element)
     {
         // DEPRECATED v2.0
         // This is compatibility mode only to avoid an "unknown" node when importing an old-style campaign
+        return true;
+    }
+    else if((element.tagName() == "text-data") ||
+            (element.tagName() == "translated-text-data"))
+    {
         return true;
     }
     else
@@ -215,7 +266,7 @@ void EncounterText::internalPostProcessXML(const QDomElement &element, bool isIm
         return;
 
     // Grab the text from the child node for this node
-    extractTextNode(childElement, isImport);
+    //extractTextNode(childElement, isImport);
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }
@@ -224,15 +275,39 @@ void EncounterText::extractTextNode(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    QDomNode childNode = element.firstChild();
-    while(!childNode.isNull())
+    QDomElement textElement = element.firstChildElement("text-data");
+    if(!textElement.isNull())
     {
-        if(childNode.isCDATASection())
+        QDomNode textDataChildNode = textElement.firstChild();
+        if((!textDataChildNode.isNull()) && (textDataChildNode.isCDATASection()))
         {
-            QDomCDATASection cdata = childNode.toCDATASection();
-            setText(cdata.data());
-            return;
+            QDomCDATASection textData = textDataChildNode.toCDATASection();
+            setText(textData.data());
         }
-        childNode = childNode.nextSibling();
+
+        QDomElement translatedElement = element.firstChildElement("translated-text-data");
+        if(!translatedElement.isNull())
+        {
+            QDomNode translatedTextDataChildNode = translatedElement.firstChild();
+            if((!translatedTextDataChildNode.isNull()) && (translatedTextDataChildNode.isCDATASection()))
+            {
+                QDomCDATASection translatedTextData = translatedTextDataChildNode.toCDATASection();
+                setTranslatedText(translatedTextData.data());
+            }
+        }
+    }
+    else
+    {
+        QDomNode childNode = element.firstChild();
+        while(!childNode.isNull())
+        {
+            if(childNode.isCDATASection())
+            {
+                QDomCDATASection cdata = childNode.toCDATASection();
+                setText(cdata.data());
+                return;
+            }
+            childNode = childNode.nextSibling();
+        }
     }
 }

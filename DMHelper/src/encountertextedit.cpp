@@ -1,6 +1,7 @@
 #include "encountertextedit.h"
 #include "encountertext.h"
 #include "dmconstants.h"
+#include "texttranslatedialog.h"
 #include "ui_encountertextedit.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
@@ -42,6 +43,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SIGNAL(fontSizeChanged(int)));
     connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SIGNAL(fontBoldChanged(bool)));
     connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SIGNAL(fontItalicsChanged(bool)));
+    connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SIGNAL(alignmentChanged(Qt::Alignment)));
     connect(_formatter, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
 
@@ -49,6 +51,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(fontBoldChanged(bool)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(colorChanged(QColor)), this, SLOT(takeFocus()));
 
@@ -137,6 +140,7 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     connect(_encounter, &EncounterText::textWidthChanged, ui->textBrowser, &TextBrowserMargins::setTextWidth);
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
     connect(_encounter, &EncounterText::animatedChanged, this, &EncounterTextEdit::animatedChanged);
+    connect(_encounter, &EncounterText::translatedChanged, this, &EncounterTextEdit::translatedChanged);
 }
 
 void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
@@ -232,15 +236,26 @@ void EncounterTextEdit::clear()
     ui->textBrowser->setPlainText(QString(""));
 }
 
-void EncounterTextEdit::setHtml(const QString &text)
+void EncounterTextEdit::setHtml()
 {
-    ui->textBrowser->setHtml(text);
+    if(!_encounter)
+    {
+        ui->textBrowser->clear();
+        return;
+    }
+
+    if(_encounter->getTranslated())
+        ui->textBrowser->setHtml(_encounter->getTranslatedText());
+    else
+        ui->textBrowser->setHtml(_encounter->getText());
 }
 
+/*
 void EncounterTextEdit::setPlainText(const QString &text)
 {
     ui->textBrowser->setPlainText(text);
 }
+*/
 
 void EncounterTextEdit::setBackgroundImage(bool on)
 {
@@ -304,6 +319,11 @@ void EncounterTextEdit::setItalics(bool italics)
     _formatter->setItalics(italics);
 }
 
+void EncounterTextEdit::setUnderline(bool underline)
+{
+    _formatter->setUnterline(underline);
+}
+
 void EncounterTextEdit::setColor(QColor color)
 {
     _formatter->setColor(color);
@@ -343,7 +363,7 @@ void EncounterTextEdit::hyperlinkClicked()
     format.setAnchor(!newHRef.isEmpty());
     format.setAnchorHref(newHRef);
     cursor.mergeCharFormat(format);
-    ui->textBrowser->setHtml(ui->textBrowser->toHtml());
+    //ui->textBrowser->setHtml(ui->textBrowser->toHtml());
 }
 
 void EncounterTextEdit::setTextWidth(int textWidth)
@@ -394,6 +414,39 @@ void EncounterTextEdit::rewind()
     }
 
     _textPos.setY(yPos);
+}
+
+void EncounterTextEdit::setTranslated(bool translated)
+{
+    if((!_encounter) || (_encounter->getTranslated() == translated))
+        return;
+
+    if(translated)
+    {
+        TextTranslateDialog dlg(_encounter->getText(), _encounter->getTranslatedText(), _backgroundImage);
+        dlg.resize(width() / 2, height() / 2);
+        if(dlg.exec() == QDialog::Accepted)
+        {
+            qDebug() << "[EncounterTextEdit] Translation result accepted: " << translated;
+            _encounter->setTranslated(true);
+            QString translatedText;
+            dlg.getTranslatedText(translatedText);
+            _encounter->setTranslatedText(translatedText);
+        }
+        else
+        {
+            qDebug() << "[EncounterTextEdit] Translation result rejected: " << translated;
+            //_encounter->setTranslated(false);
+            emit translatedChanged(false);
+        }
+    }
+    else
+    {
+        qDebug() << "[EncounterTextEdit] Translation deactivated" ;
+        _encounter->setTranslated(false);
+    }
+
+    setHtml();
 }
 
 void EncounterTextEdit::targetResized(const QSize& newSize)
@@ -504,7 +557,12 @@ void EncounterTextEdit::setRotation(int rotation)
 
 void EncounterTextEdit::storeEncounter()
 {
-    if(_encounter)
+    if(!_encounter)
+        return;
+
+    if(_encounter->getTranslated())
+        _encounter->setTranslatedText(toHtml());
+    else
         _encounter->setText(toHtml());
 }
 
@@ -513,17 +571,20 @@ void EncounterTextEdit::readEncounter()
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
     if(_encounter)
     {
-        setHtml(_encounter->getText());
+        //setHtml(_encounter->getText());
 
         emit imageFileChanged(_encounter->getImageFile());
         emit textWidthChanged(_encounter->getTextWidth());
         emit animatedChanged(_encounter->getAnimated());
         emit scrollSpeedChanged(_encounter->getScrollSpeed());
+        emit translatedChanged(_encounter->getTranslated());
 
         ui->textBrowser->setTextWidth(_encounter->getTextWidth());
         loadImage();
 
         setAnimated(_encounter->getAnimated());
+        setTranslated(_encounter->getTranslated());
+        setHtml();
     }
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
 }

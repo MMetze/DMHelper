@@ -34,6 +34,9 @@ public:
     virtual int getTextWidth() const;
     //virtual QColor getFontColor() const;
 
+    virtual bool getTranslated() const;
+    virtual QString getTranslatedText() const;
+
 public slots:
     //Text
     virtual void setText(const QString& newText);
@@ -51,6 +54,9 @@ public slots:
     virtual void setTextWidth(int textWidth);
     //virtual void setFontColor(QColor fontColor);
 
+    virtual void setTranslated(bool translated);
+    virtual void setTranslatedText(const QString& translatedText);
+
 signals:
     // Text
     void textChanged(const QString& text);
@@ -67,6 +73,9 @@ signals:
     void textWidthChanged(int textWidth);
     //void fontColorChanged(QColor fontColor);
 
+    void translatedChanged(bool translated);
+    void translatedTextChanged(const QString& translatedText);
+
 protected slots:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
@@ -78,11 +87,13 @@ protected:
 
     // Text
     QString _text;
+    QString _translatedText;
     QString _imageFile;
     int _textWidth;
 
     // Animation
     bool _animated;
+    bool _translated;
     int _scrollSpeed;
 };
 

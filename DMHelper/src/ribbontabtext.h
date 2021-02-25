@@ -26,12 +26,15 @@ public slots:
     void setFontSize(int fontSize);
     void setFontBold(bool fontBold);
     void setFontItalics(bool fontItalics);
+    void setFontUnderline(bool fontUnderline);
     void setAlignment(Qt::Alignment alignment);
 
     void setWidth(int width);
     void setSpeed(int speed);
 
     void setHyperlinkActive(bool active);
+
+    void setTranslationActive(bool active);
 
 signals:
     void backgroundClicked(bool checked);
@@ -48,11 +51,12 @@ signals:
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);
     void fontItalicsChanged(bool fontItalics);
+    void fontUnderlineChanged(bool fontUnderline);
     void alignmentChanged(Qt::Alignment alignment);
     void hyperlinkClicked();
 
     // Tools
-    void translateTextClicked();
+    void translateTextClicked(bool checked);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

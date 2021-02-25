@@ -37,8 +37,9 @@ public:
 
 public slots:
     void clear();
-    void setHtml(const QString &text);
-    void setPlainText(const QString &text);
+    //void setHtml(const QString &text);
+    void setHtml();
+    //void setPlainText(const QString &text);
 
     void setBackgroundImage(bool on);
     void setImageFile(const QString& imageFile);
@@ -48,6 +49,7 @@ public slots:
     void setFontSize(int fontSize);
     void setBold(bool bold);
     void setItalics(bool italics);
+    void setUnderline(bool underline);
     void setColor(QColor color);
     void setAlignment(Qt::Alignment alignment);
 
@@ -58,6 +60,8 @@ public slots:
     void setScrollSpeed(int scrollSpeed);
     void stopAnimation();
     void rewind();
+
+    void setTranslated(bool translated);
 
     void targetResized(const QSize& newSize);
 
@@ -74,6 +78,7 @@ signals:
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);
     void fontItalicsChanged(bool fontItalics);
+    void fontUnderlineChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
     void colorChanged(QColor color);
 
@@ -82,6 +87,7 @@ signals:
 
     void animatedChanged(bool animated);
     void scrollSpeedChanged(int scrollSpeed);
+    void translatedChanged(bool translated);
 
     void publishImage(QImage image);
     void animationStarted();

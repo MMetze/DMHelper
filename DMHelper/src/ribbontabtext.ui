@@ -521,7 +521,7 @@
         </size>
        </property>
        <property name="checkable">
-        <bool>false</bool>
+        <bool>true</bool>
        </property>
        <property name="flat">
         <bool>true</bool>

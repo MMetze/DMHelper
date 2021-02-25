@@ -15,9 +15,11 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->frameText, &RibbonFrameText::fontSizeChanged, this, &RibbonTabText::fontSizeChanged);
     connect(ui->frameText, &RibbonFrameText::fontBoldChanged, this, &RibbonTabText::fontBoldChanged);
     connect(ui->frameText, &RibbonFrameText::fontItalicsChanged, this, &RibbonTabText::fontItalicsChanged);
+    connect(ui->frameText, &RibbonFrameText::fontUnderlineChanged, this, &RibbonTabText::fontUnderlineChanged);
     connect(ui->frameText, &RibbonFrameText::alignmentChanged, this, &RibbonTabText::alignmentChanged);
 
     connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
+    connect(ui->btnTranslateText, &QAbstractButton::clicked, this, &RibbonTabText::translateTextClicked);
 
     connect(ui->sliderWidth, &QAbstractSlider::valueChanged, this, &RibbonTabText::widthChanged);
     connect(ui->spinSpeed, SIGNAL(valueChanged(int)), this, SIGNAL(speedChanged(int)));
@@ -73,6 +75,11 @@ void RibbonTabText::setFontItalics(bool fontItalics)
     ui->frameText->setFontItalics(fontItalics);
 }
 
+void RibbonTabText::setFontUnderline(bool fontUnderline)
+{
+    ui->frameText->setFontUnderline(fontUnderline);
+}
+
 void RibbonTabText::setAlignment(Qt::Alignment alignment)
 {
     ui->frameText->setAlignment(alignment);
@@ -101,6 +108,11 @@ void RibbonTabText::setSpeed(int speed)
 void RibbonTabText::setHyperlinkActive(bool active)
 {
     ui->btnHyperlink->setEnabled(active);
+}
+
+void RibbonTabText::setTranslationActive(bool active)
+{
+    ui->btnTranslateText->setChecked(active);
 }
 
 void RibbonTabText::showEvent(QShowEvent *event)

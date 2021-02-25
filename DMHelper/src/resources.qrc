@@ -284,6 +284,10 @@
         <file>data/icon_castspell.png</file>
         <file>data/dmhelper_waiting_die.png</file>
         <file>data/dmhelper_waiting_image.png</file>
+        <file>data/icon_underline.png</file>
+        <file>data/fonts/Davek-vGXA.ttf</file>
+        <file>data/fonts/Iokharic-dqvK.ttf</file>
+        <file>data/fonts/Rellanic-Agx7.ttf</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
