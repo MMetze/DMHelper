@@ -57,7 +57,7 @@
           <number>3</number>
          </property>
          <item>
-          <widget class="QComboBox" name="cmbFont">
+          <widget class="QFontComboBox" name="cmbFont">
            <property name="minimumSize">
             <size>
              <width>50</width>

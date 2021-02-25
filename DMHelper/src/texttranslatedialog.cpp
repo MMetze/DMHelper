@@ -104,42 +104,6 @@ void TextTranslateDialog::translateText()
     qreal rollValue = ui->edtRoll->text().toDouble();
     qreal probability = difficultyValue > 0 ? rollValue / difficultyValue : 1.0;
 
-    /*
-
-        QTextDocument document(_text);
-        QTextCursor cursor(&document);
-
-        cursor.select(QTextCursor::Document);
-
-        QString fontFamily = element.attribute("fontFamily");
-        QString fontSize = element.attribute("fontSize");
-        QString fontBold = element.attribute("fontBold",QString::number(0));
-        QString fontItalics = element.attribute("fontItalics",QString::number(0));
-
-        QTextCharFormat format = cursor.charFormat();
-        QFont formatFont(fontFamily,
-                         fontSize.toInt(),
-                         fontBold.toInt(),
-                         static_cast<bool>(fontItalics.toInt()));
-        format.setFont(formatFont);
-        QString colorName = element.attribute("fontColor");
-        if(QColor::isValidColor(colorName))
-            format.setForeground(QBrush(QColor(colorName)));
-        cursor.mergeCharFormat(format);
-
-        QTextBlockFormat blockFormat = cursor.blockFormat();
-        blockFormat.setAlignment(static_cast<Qt::Alignment>(element.attribute("alignment", "4").toInt()));
-        cursor.mergeBlockFormat(blockFormat);
-
-        cursor.clearSelection();
-        setText(document.toHtml());
-
-        QTextCharFormat format = ui->textBrowser->currentCharFormat();
-        format.setFontUnderline(!format.fontUnderline());
-        ui->textBrowser->setCurrentCharFormat(format);
-
-      */
-
     QFont originalFont = getSelectedFont(ui->cmbFontOriginal->currentText(),
                                          ui->edtSizeOriginal->text().toInt(),
                                          ui->btnBoldOriginal->isChecked() ? QFont::Bold : QFont::Normal,
@@ -203,80 +167,7 @@ void TextTranslateDialog::translateText()
     }
 
     ui->txtTranslated->setHtml(document.toHtml());
-
-    /*
-    QStringList originalWords = originalText.split(QChar(' '));
-    for(int w = 0; w < originalWords.count(); ++w)
-    {
-        cursor->movePosition(QTextCursor::NextWord, QTextCursor::MoveAnchor);
-        cursor->movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
-        QString word = originalWords.at(w);
-        qreal randomValue = QRandomGenerator::global()->generateDouble();
-        if(randomValue > probability)
-        {
-            for(int i = 0; i < word.length(); ++i)
-            {
-                if(word.at(i).isLetter())
-                {
-                    QChar newChar('a' + static_cast<char>(QRandomGenerator::global()->bounded(26)));
-                    word[i] = word.at(i).isLower() ? newChar : newChar.toUpper();
-                }
-            }
-            QTextDocument document(word);
-            QTextCursor cursor(&document);
-            cursor.select(QTextCursor::Document);
-
-            QTextCharFormat format = cursor.charFormat();
-            QFont formatFont(ui->cmbFontTranslated->currentText(),
-                             ui->edtSizeTranslated->text().toInt(),
-                             ui->btnBoldTranslated->isChecked() ? QFont::Bold : QFont::Normal,
-                             ui->btnItalicsTranslated->isChecked());
-            format.setFont(formatFont);
-            format.setFontUnderline(ui->btnUnderlineTranslated);
-            format.setForeground(QBrush(ui->btnColorTranslated->getColor()));
-            cursor.mergeCharFormat(format);
-
-            word = document.toHtml();
-        }
-        else
-        {
-            QTextDocument document(word);
-            QTextCursor cursor(&document);
-            cursor.select(QTextCursor::Document);
-
-            QTextCharFormat format = cursor.charFormat();
-            QFont formatFont(ui->cmbFontOriginal->currentText(),
-                             ui->edtSizeOriginal->text().toInt(),
-                             ui->btnBoldOriginal->isChecked() ? QFont::Bold : QFont::Normal,
-                             ui->btnItalicsOriginal->isChecked());
-            format.setFont(formatFont);
-            format.setFontUnderline(ui->btnUnderlineOriginal);
-            format.setForeground(QBrush(ui->btnColorOriginal->getColor()));
-            cursor.mergeCharFormat(format);
-
-            word = document.toHtml();
-        }
-        originalWords[w] = word;
-    }
-
-    ui->txtTranslated->setHtml(originalWords.join(QChar(' ')));
-    */
 }
-
-/*
-void TextTranslateDialog::publishTextImage()
-{
-    if(!ui->txtTranslated->document())
-        return;
-
-    QImage pub(ui->txtTranslated->document()->size().toSize(), QImage::Format_ARGB32);
-    pub.fill(Qt::white);
-    QPainter painter(&pub);
-    ui->txtTranslated->document()->drawContents(&painter);
-
-    emit publishImage(pub, Qt::white);
-}
-*/
 
 void TextTranslateDialog::keyPressEvent(QKeyEvent * event)
 {
@@ -296,9 +187,6 @@ void TextTranslateDialog::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    //ui->grpOriginal->setMinimumHeight(ui->btnColorOriginal->height() * 3);
-    //ui->grpTranslated->setMinimumHeight(ui->btnColorOriginal->height() * 3);
-
     if(!_backgroundImage.isNull())
         _backgroundImageScaled = _backgroundImage.scaledToWidth(ui->txtOriginal->width(), Qt::SmoothTransformation);
 }
@@ -310,22 +198,5 @@ void TextTranslateDialog::rolld20()
 
 QFont TextTranslateDialog::getSelectedFont(const QString& fontName, int pointSize, int weight, bool italic)
 {
-    QString fontFamily = fontName;
-    if(fontFamily == "Dwarvish")
-    {
-        int id = QFontDatabase::addApplicationFont(":/img/data/fonts/Davek-vGXA.ttf");
-        fontFamily = QFontDatabase::applicationFontFamilies(id).at(0);
-    }
-    else if(fontFamily == "Draconic")
-    {
-        int id = QFontDatabase::addApplicationFont(":/img/data/fonts/Iokharic-dqvK.ttf");
-        fontFamily = QFontDatabase::applicationFontFamilies(id).at(0);
-    }
-    else if(fontFamily == "Elvish")
-    {
-        int id = QFontDatabase::addApplicationFont(":/img/data/fonts/Rellanic-Agx7.ttf");
-        fontFamily = QFontDatabase::applicationFontFamilies(id).at(0);
-    }
-
-    return QFont(fontFamily, pointSize, weight, italic);
+    return QFont(fontName, pointSize, weight, italic);
 }

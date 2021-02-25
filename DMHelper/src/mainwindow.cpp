@@ -102,10 +102,10 @@
 #include <QStandardPaths>
 #include <QScreen>
 #include <QShortcut>
+#include <QFontDatabase>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
-
 
 /*
  * TODO:
@@ -232,6 +232,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     ConfigLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ConfigLocation).first());
     qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
     qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
+
+    qDebug() << "[MainWindow] Registering application fonts";
+    QFontDatabase::addApplicationFont(":/img/data/fonts/Rellanic-Agx7.ttf");
+    QFontDatabase::addApplicationFont(":/img/data/fonts/Davek-vGXA.ttf");
+    QFontDatabase::addApplicationFont(":/img/data/fonts/Iokharic-dqvK.ttf");
 
     qDebug() << "[MainWindow] Reading Settings";
     _options = new OptionsContainer(this);
