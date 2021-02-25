@@ -81,7 +81,6 @@ public slots:
     void newParty();
     void newTextEncounter();
     void newBattleEncounter();
-    void newScrollingTextEncounter();
     void newMap();
     void newAudioEntry();
     void newSyrinscapeEntry();
@@ -179,15 +178,9 @@ protected slots:
     void importSpellbook();
 
     void openAboutDialog();
-
-    void openTextPublisher();
-    void openTextTranslator();
     void openRandomMarkets();
 
     QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
-
-    void connectTextToText();
-    void connectTextToScroll();
 
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);

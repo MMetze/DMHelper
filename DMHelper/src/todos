@@ -1,0 +1,5 @@
+EncounterText complete import/export of extended text capabilities
+EncounterTextEdit - clear needs to clear background
+Fix image filters to include all images and videos
+
+CRASH: update Bestiary from default to new after opening a battle

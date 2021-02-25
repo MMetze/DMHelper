@@ -35,7 +35,11 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     ui->edtLicenses->setText(licenseText);
 
-    ui->lblVersion->setText(QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION));
+    if(DMHelper::DMHELPER_ENGINEERING_VERSION > 0)
+        ui->lblVersion->setText(QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION) + " (pre-release version)");
+    else
+        ui->lblVersion->setText(QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION));
+
     ui->lblBestiaryVersion->setText(Bestiary::getExpectedVersion());
 }
 

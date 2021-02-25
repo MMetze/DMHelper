@@ -305,7 +305,7 @@ void AudioTrackYoutube::internalStopCheck(int status)
 {
     _stopStatus |= status;
 
-    qDebug() << "[VideoPlayer] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
+    qDebug() << "[AudioTrackYoutube] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
 
     if(_stopStatus != stopComplete)
         return;
