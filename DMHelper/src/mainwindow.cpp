@@ -29,7 +29,6 @@
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
 #include "battleframe.h"
-//#include "audioplaybackframe.h"
 #include "soundboardframe.h"
 #include "audiofactory.h"
 #include "monster.h"
@@ -103,10 +102,10 @@
 #include <QStandardPaths>
 #include <QScreen>
 #include <QShortcut>
+#include <QFontDatabase>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
-
 
 /*
  * TODO:
@@ -234,6 +233,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     AppDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).first());
     qDebug() << "[MainWindow]     AppLocalDataLocation: " << (QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::AppLocalDataLocation).first());
 
+    qDebug() << "[MainWindow] Registering application fonts";
+    QFontDatabase::addApplicationFont(":/img/data/fonts/Rellanic-Agx7.ttf");
+    QFontDatabase::addApplicationFont(":/img/data/fonts/Davek-vGXA.ttf");
+    QFontDatabase::addApplicationFont(":/img/data/fonts/Iokharic-dqvK.ttf");
+
     qDebug() << "[MainWindow] Reading Settings";
     _options = new OptionsContainer(this);
     MRUHandler* mruHandler = new MRUHandler(nullptr, DEFAULT_MRU_FILE_COUNT, this);
@@ -308,7 +312,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newMapClicked()), this, SLOT(newMap()));
     connect(_ribbonTabCampaign, SIGNAL(newTextClicked()), this, SLOT(newTextEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
-    connect(_ribbonTabCampaign, SIGNAL(newScrollingTextClicked()), this, SLOT(newScrollingTextEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newSoundClicked()), this, SLOT(newAudioEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
@@ -335,8 +338,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabTools, SIGNAL(rollDiceClicked()), this, SLOT(openDiceDialog()));
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
-    connect(_ribbonTabTools, SIGNAL(publishTextClicked()), this, SLOT(openTextPublisher()));
-    connect(_ribbonTabTools, SIGNAL(translateTextClicked()), this, SLOT(openTextTranslator()));
     connect(_ribbonTabTools, SIGNAL(randomMarketClicked()), this, SLOT(openRandomMarkets()));
 
     // Help Menu
@@ -429,20 +430,42 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_Text
     encounterTextEdit = new EncounterTextEdit;
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
+    connect(encounterTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
+    connect(encounterTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(encounterTextEdit, SIGNAL(animationStopped()), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
+    connect(encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    connect(pubWindow, SIGNAL(frameResized(QSize)), encounterTextEdit, SLOT(targetResized(QSize)));
+    //connect(_ribbonTabText, SIGNAL(backgroundClicked()), encounterTextEdit, SLOT(browseImageFile()));
+    connect(_ribbonTabText, &RibbonTabText::backgroundClicked, encounterTextEdit, &EncounterTextEdit::setBackgroundImage);
+    connect(encounterTextEdit, &EncounterTextEdit::imageFileChanged, _ribbonTabText, &RibbonTabText::setImageFile);
+    connect(_ribbonTabText, SIGNAL(animationClicked(bool)), encounterTextEdit, SLOT(setAnimated(bool)));
+    connect(_ribbonTabText, SIGNAL(speedChanged(int)), encounterTextEdit, SLOT(setScrollSpeed(int)));
+    connect(_ribbonTabText, SIGNAL(widthChanged(int)), encounterTextEdit, SLOT(setTextWidth(int)));
+    connect(_ribbonTabText, SIGNAL(rewindClicked()), encounterTextEdit, SLOT(rewind()));
+    connect(encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
+    connect(encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
+    connect(encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
     connect(_ribbonTabText, SIGNAL(colorChanged(QColor)), encounterTextEdit, SLOT(setColor(QColor)));
     connect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), encounterTextEdit, SLOT(setFont(const QString&)));
     connect(_ribbonTabText, SIGNAL(fontSizeChanged(int)), encounterTextEdit, SLOT(setFontSize(int)));
     connect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), encounterTextEdit, SLOT(setBold(bool)));
     connect(_ribbonTabText, SIGNAL(fontItalicsChanged(bool)), encounterTextEdit, SLOT(setItalics(bool)));
+    connect(_ribbonTabText, SIGNAL(fontUnderlineChanged(bool)), encounterTextEdit, SLOT(setUnderline(bool)));
     connect(_ribbonTabText, SIGNAL(alignmentChanged(Qt::Alignment)), encounterTextEdit, SLOT(setAlignment(Qt::Alignment)));
     connect(_ribbonTabText, SIGNAL(hyperlinkClicked()), encounterTextEdit, SLOT(hyperlinkClicked()));
+    connect(_ribbonTabText, SIGNAL(translateTextClicked(bool)), encounterTextEdit, SLOT(setTranslated(bool)));
+    //translate - both directions, get rid of previous button & link, make dialog bigger, better, apply, clear
+    // remove text publish dialog
     connect(encounterTextEdit, SIGNAL(colorChanged(QColor)), _ribbonTabText, SLOT(setColor(QColor)));
     connect(encounterTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabText, SLOT(setFontFamily(const QString&)));
     connect(encounterTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabText, SLOT(setFontSize(int)));
     connect(encounterTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabText, SLOT(setFontBold(bool)));
     connect(encounterTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabText, SLOT(setFontItalics(bool)));
+    connect(encounterTextEdit, SIGNAL(fontUnderlineChanged(bool)), _ribbonTabText, SLOT(setFontUnderline(bool)));
     connect(encounterTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabText, SLOT(setAlignment(Qt::Alignment)));
     connect(encounterTextEdit, SIGNAL(setHyperlinkActive(bool)), _ribbonTabText, SLOT(setHyperlinkActive(bool)));
+    connect(encounterTextEdit, SIGNAL(translatedChanged(bool)), _ribbonTabText, SLOT(setTranslationActive(bool)));
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
                                                       DMHelper::CampaignType_Text,
                                                       DMHelper::CampaignType_Placeholder}), encounterTextEdit);
@@ -1012,7 +1035,7 @@ void MainWindow::newParty()
 
 void MainWindow::newTextEncounter()
 {
-    newEncounter(DMHelper::CampaignType_Text, QString("New Text Entry"), QString("Enter new entry name:"));
+    newEncounter(DMHelper::CampaignType_Text, QString("New Entry"), QString("Enter new entry name:"));
 }
 
 void MainWindow::newBattleEncounter()
@@ -1029,11 +1052,6 @@ void MainWindow::newBattleEncounter()
         if(battleFrame)
             battleFrame->setBattle(battle);
     }
-}
-
-void MainWindow::newScrollingTextEncounter()
-{
-    newEncounter(DMHelper::CampaignType_ScrollingText, QString("New Scrolling Text"), QString("Enter new scrolling text entry name:"));
 }
 
 void MainWindow::newMap()
@@ -2119,7 +2137,7 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     QMenu* contextMenu = new QMenu(ui->treeView);
 
     // New text entry
-    QAction* addTextEntry = new QAction(QIcon(":/img/data/icon_newtextencounter.png"), QString("New Text Entry"), contextMenu);
+    QAction* addTextEntry = new QAction(QIcon(":/img/data/icon_newtextencounter.png"), QString("New Entry"), contextMenu);
     connect(addTextEntry, SIGNAL(triggered()), this, SLOT(newTextEncounter()));
     contextMenu->addAction(addTextEntry);
 
@@ -2150,11 +2168,6 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     QAction* addBattle = new QAction(QIcon(":/img/data/icon_newbattle.png"), QString("New Combat"), contextMenu);
     connect(addBattle, SIGNAL(triggered()), this, SLOT(newBattleEncounter()));
     contextMenu->addAction(addBattle);
-
-    // New scroll text
-    QAction* addScrollingText = new QAction(QIcon(":/img/data/icon_newscrollingtext.png"), QString("New Scrolling Text"), contextMenu);
-    connect(addScrollingText, SIGNAL(triggered()), this, SLOT(newScrollingTextEncounter()));
-    contextMenu->addAction(addScrollingText);
 
     contextMenu->addSeparator();
 
@@ -2418,20 +2431,6 @@ void MainWindow::openAboutDialog()
     dlg.exec();
 }
 
-void MainWindow::openTextPublisher()
-{
-    TextPublishDialog dlg;
-    connect(&dlg, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
-    dlg.exec();
-}
-
-void MainWindow::openTextTranslator()
-{
-    TextTranslateDialog dlg;
-    connect(&dlg, SIGNAL(publishImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
-    dlg.exec();
-}
-
 void MainWindow::openRandomMarkets()
 {
     RandomMarketDialog dlg(_options->getShopsFileName());
@@ -2450,26 +2449,6 @@ QDialog* MainWindow::createDialog(QWidget* contents, const QSize& dlgSize)
     resultDlg->setLayout(dlgLayout);
 
     return resultDlg;
-}
-
-void MainWindow::connectTextToText()
-{
-    disconnect(_ribbonTabText, SIGNAL(colorChanged(QColor)), _scrollingTextEdit, SLOT(setColor(QColor)));
-    disconnect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), _scrollingTextEdit, SLOT(setFontFamily(const QString&)));
-    disconnect(_ribbonTabText, SIGNAL(fontSizeChanged(int)), _scrollingTextEdit, SLOT(setFontSize(int)));
-    disconnect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), _scrollingTextEdit, SLOT(setFontBold(bool)));
-    disconnect(_ribbonTabText, SIGNAL(fontItalicsChanged(bool)), _scrollingTextEdit, SLOT(setFontItalics(bool)));
-    disconnect(_ribbonTabText, SIGNAL(alignmentChanged(Qt::Alignment)), _scrollingTextEdit, SLOT(setAlignment(Qt::Alignment)));
-}
-
-void MainWindow::connectTextToScroll()
-{
-    connect(_ribbonTabText, SIGNAL(colorChanged(QColor)), _scrollingTextEdit, SLOT(setColor(QColor)));
-    connect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), _scrollingTextEdit, SLOT(setFontFamily(const QString&)));
-    connect(_ribbonTabText, SIGNAL(fontSizeChanged(int)), _scrollingTextEdit, SLOT(setFontSize(int)));
-    connect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), _scrollingTextEdit, SLOT(setFontBold(bool)));
-    connect(_ribbonTabText, SIGNAL(fontItalicsChanged(bool)), _scrollingTextEdit, SLOT(setFontItalics(bool)));
-    connect(_ribbonTabText, SIGNAL(alignmentChanged(Qt::Alignment)), _scrollingTextEdit, SLOT(setAlignment(Qt::Alignment)));
 }
 
 void MainWindow::battleModelChanged(BattleDialogModel* model)

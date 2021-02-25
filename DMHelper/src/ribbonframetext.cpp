@@ -22,6 +22,7 @@ RibbonFrameText::RibbonFrameText(QWidget *parent) :
 
     connect(ui->btnBold, SIGNAL(toggled(bool)), this, SIGNAL(fontBoldChanged(bool)));
     connect(ui->btnItalics, SIGNAL(toggled(bool)), this, SIGNAL(fontItalicsChanged(bool)));
+    connect(ui->btnUnderline, SIGNAL(toggled(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
 
     ui->btnGrpAlignment->setId(ui->btnLeftText, Qt::AlignLeft);
     ui->btnGrpAlignment->setId(ui->btnCenterText, Qt::AlignHCenter);
@@ -70,6 +71,12 @@ void RibbonFrameText::setFontItalics(bool fontItalics)
 {
     if(fontItalics != ui->btnItalics->isChecked())
         ui->btnItalics->setChecked(fontItalics); // triggers the toggled signal
+}
+
+void RibbonFrameText::setFontUnderline(bool fontUnderline)
+{
+    if(fontUnderline != ui->btnUnderline->isChecked())
+        ui->btnUnderline->setChecked(fontUnderline);
 }
 
 void RibbonFrameText::setAlignment(Qt::Alignment alignment)

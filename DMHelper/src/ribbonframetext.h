@@ -23,6 +23,7 @@ public slots:
     void setFontSize(int fontSize);
     void setFontBold(bool fontBold);
     void setFontItalics(bool fontItalics);
+    void setFontUnderline(bool fontUnderline);
     void setAlignment(Qt::Alignment alignment);
 
 signals:
@@ -31,6 +32,7 @@ signals:
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);
     void fontItalicsChanged(bool fontItalics);
+    void fontUnderlineChanged(bool fontUnderline);
     void alignmentChanged(Qt::Alignment alignment);
 
 protected slots:
