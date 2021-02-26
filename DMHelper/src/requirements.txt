@@ -160,6 +160,12 @@ syrinscape-fantasy:elements/YnJpbmRvbC10b3duOjo2LVJvb3N0ZXI/play/
 syrinscape-fantasy:stop/
 
 
+https://dmh.wwpd.de
+c.turner
+Ente2020 or Ente12345
+7B3AA550-649A-4D51-920E-CAB465616995
+
+
 
 Install
 Install Qt

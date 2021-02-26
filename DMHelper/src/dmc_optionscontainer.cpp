@@ -5,7 +5,7 @@ DMC_OptionsContainer::DMC_OptionsContainer(QObject *parent) :
     QObject(parent),
     _urlString(),
     _userName(),
-    _password(QString("Ente2020")),
+    _password(),
     _session()
 {
 }

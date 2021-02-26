@@ -27,6 +27,8 @@ public:
     void setPassword(const QString& password);
     void setSession(const QString& session);
 
+    friend QDebug operator<<(QDebug d, const DMHLogon &logon);
+
 private:
     std::unique_ptr<DMHLogon_Private> d;
 };

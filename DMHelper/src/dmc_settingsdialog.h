@@ -17,6 +17,9 @@ public:
     explicit DMC_SettingsDialog(DMC_OptionsContainer& settings, QWidget *parent = 0);
     ~DMC_SettingsDialog();
 
+protected slots:
+    void textChanged(const QString& text);
+
 private:
     Ui::DMC_SettingsDialog *ui;
 

@@ -1,5 +1,6 @@
 #include "dmhlogon.h"
 #include "dmhlogon_private.h"
+#include <QDebug>
 
 DMHLogon::DMHLogon() :
     d(new DMHLogon_Private())
@@ -67,4 +68,10 @@ void DMHLogon::setPassword(const QString& password)
 void DMHLogon::setSession(const QString& session)
 {
     d->setSession(session);
+}
+
+QDebug operator<<(QDebug d, const DMHLogon &logon)
+{
+    d << QString("(DMHLogon: URL: ") << logon.getURLString() << QString(", Username: ") << logon.getUserName() << QString(", Session: ") << logon.getSession() << QString(")");
+    return d;
 }

@@ -14,13 +14,22 @@ DMC_SettingsDialog::DMC_SettingsDialog(DMC_OptionsContainer& settings, QWidget *
     ui->edtPassword->setText(settings.getPassword());
     ui->edtSession->setText(settings.getSession());
 
-    connect(ui->edtURL, SIGNAL(textChanged(QString)), &_settings, SLOT(setURLString(QString)));
-    connect(ui->edtUserName, SIGNAL(textChanged(QString)), &_settings, SLOT(setUserName(QString)));
-    connect(ui->edtPassword, SIGNAL(textChanged(QString)), &_settings, SLOT(setPassword(QString)));
-    connect(ui->edtSession, SIGNAL(textChanged(QString)), &_settings, SLOT(setSession(QString)));
+    connect(ui->edtURL, &QLineEdit::textChanged, this, &DMC_SettingsDialog::textChanged);
+    connect(ui->edtUserName, &QLineEdit::textChanged, &_settings, &DMC_OptionsContainer::setUserName);
+    connect(ui->edtPassword, &QLineEdit::textChanged, &_settings, &DMC_OptionsContainer::setPassword);
+    connect(ui->edtSession, &QLineEdit::textChanged, &_settings, &DMC_OptionsContainer::setSession);
 }
 
 DMC_SettingsDialog::~DMC_SettingsDialog()
 {
     delete ui;
+}
+
+void DMC_SettingsDialog::textChanged(const QString& text)
+{
+    QString correctedText = text;
+    if(correctedText.contains("\\"))
+        correctedText.replace("\\", "/");
+
+    _settings.setURLString(correctedText);
 }

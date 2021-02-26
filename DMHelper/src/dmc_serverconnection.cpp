@@ -65,7 +65,7 @@ DMC_ServerConnection::~DMC_ServerConnection()
 
 void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data)
 {
-    qDebug() << "[Main] Download complete " << requestID << ": " << fileMD5 << ", " << data.size() << " bytes";
+    qDebug() << "[DMC_ServerConnection] Download complete " << requestID << ": " << fileMD5 << ", " << data.size() << " bytes";
     if(requestID == _currentImageRequest)
     {
         _currentImageRequest = 0;
@@ -75,11 +75,11 @@ void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD
                 //ui->lblImage->setPixmap(_pmp.scaled(ui->lblImage->size(), Qt::KeepAspectRatio));
                 emit pixmapActive(_pmp);
             else
-                qDebug() << "[Main] Download complete Pixmap loading failed";
+                qDebug() << "[DMC_ServerConnection] Download complete Pixmap loading failed";
         }
         else
         {
-            qDebug() << "[Main] WARNING: Download complete for image download with no data received, no pixmap set";
+            qDebug() << "[DMC_ServerConnection] WARNING: Download complete for image download with no data received, no pixmap set";
         }
     }
     else if(requestID == _currentAudioRequest)
@@ -111,7 +111,7 @@ void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD
             }
             else
             {
-                qDebug() << "[Main] WARNING: Download complete for audio download with no data received, no playback possible";
+                qDebug() << "[DMC_ServerConnection] WARNING: Download complete for audio download with no data received, no playback possible";
             }
         }
         else
@@ -130,12 +130,12 @@ void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD
         }
         else
         {
-            qDebug() << "[Main] WARNING: No track played.";
+            qDebug() << "[DMC_ServerConnection] WARNING: No track played.";
         }
     }
     else
     {
-        qDebug() << "[Main] ERROR: Unexpected request ID received!";
+        qDebug() << "[DMC_ServerConnection] ERROR: Unexpected request ID received!";
     }
 }
 
@@ -192,7 +192,7 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
     {
         if(payload.getImageFile() != _imageMD5client)
         {
-            qDebug() << "[Main] Payload received with new Image file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
+            qDebug() << "[DMC_ServerConnection] Payload received with new Image file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
             _imageMD5client = payload.getImageFile();
             if(_imageMD5client.isEmpty())
                 //ui->lblImage->setPixmap(QPixmap());
@@ -206,7 +206,7 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
     {
         if(payload.getAudioFile() != _audioMD5client)
         {
-            qDebug() << "[Main] Payload received with new Audio file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
+            qDebug() << "[DMC_ServerConnection] Payload received with new Audio file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
             _audioMD5client = payload.getAudioFile();
             if(_audioMD5client.isEmpty())
             {
@@ -233,6 +233,8 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
 
 void DMC_ServerConnection::startServer(const DMHLogon& logon)
 {
+    qDebug() << "[DMC_ServerConnection] Starting server with logon: " << logon;
+
     stopServer();
 
     _networkManager = new DMHNetworkManager(logon, this);
@@ -245,6 +247,8 @@ void DMC_ServerConnection::startServer(const DMHLogon& logon)
 
 void DMC_ServerConnection::stopServer()
 {
+    qDebug() << "[DMC_ServerConnection] Stop server.";
+
     if(_networkManager)
     {
         disconnect(_networkManager, nullptr, this, nullptr);
