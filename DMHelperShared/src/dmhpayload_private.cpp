@@ -2,13 +2,11 @@
 #include <QString>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include <QDebug>
 
 DMHPayload_Private::DMHPayload_Private() :
     _imageFile(),
     _audioFile(),
-    _command(),
-    _payload()
+    _data()
 {
 }
 
@@ -37,43 +35,31 @@ void DMHPayload_Private::setAudioFile(const QString& audioFile)
     _audioFile = audioFile;
 }
 
-QString DMHPayload_Private::getCommand() const
+QString DMHPayload_Private::getData() const
 {
-    return _command;
+    return _data;
 }
 
-void DMHPayload_Private::setCommand(const QString& command)
+void DMHPayload_Private::setData(const QString& data)
 {
-    _command = command;
-}
-
-QString DMHPayload_Private::getPayload() const
-{
-    return _payload;
-}
-
-void DMHPayload_Private::setPayload(const QString& payload)
-{
-    _payload = payload;
+    _data = data;
 }
 
 void DMHPayload_Private::fromString(const QString& data)
 {
-    QRegularExpression reImg("<image>(\\S*)<\\/image>");
+    QRegularExpression reImg("<image>(.*)<\\/image>");
     QRegularExpressionMatch matchImg = reImg.match(data);
-    setImageFile(matchImg.hasMatch() ? matchImg.captured(matchImg.lastCapturedIndex()).remove(QChar('-')) : QString());
+    //setImageFile(matchImg.hasMatch() ? matchImg.captured(matchImg.lastCapturedIndex()).remove(QChar('-')) : QString());
+    setImageFile(matchImg.hasMatch() ? matchImg.captured(matchImg.lastCapturedIndex()) : QString());
 
-    QRegularExpression reAudio("<audio>(\\S*)<\\/audio>");
+    QRegularExpression reAudio("<audio>(.*)<\\/audio>");
     QRegularExpressionMatch matchAudio = reAudio.match(data);
-    setAudioFile(matchAudio.hasMatch() ? matchAudio.captured(matchAudio.lastCapturedIndex()).remove(QChar('-')) : QString());
+    setAudioFile(matchAudio.hasMatch() ? matchAudio.captured(matchAudio.lastCapturedIndex()) : QString());
+    //setAudioFile(matchAudio.hasMatch() ? matchAudio.captured(matchAudio.lastCapturedIndex()).remove(QChar('-')) : QString());
 
-    QRegularExpression reCommand("<command>(\\S*)<\\/command>");
-    QRegularExpressionMatch matchCommand = reCommand.match(data);
-    setCommand(matchCommand.hasMatch() ? matchCommand.captured(matchCommand.lastCapturedIndex()) : QString());
-
-    QRegularExpression rePayload("<payload>(\\S*)<\\/payload>");
-    QRegularExpressionMatch matchPayload = rePayload.match(data);
-    setCommand(matchPayload.hasMatch() ? matchPayload.captured(matchPayload.lastCapturedIndex()) : QString());
+    QRegularExpression reData("<data>(.*)<\\/data>");
+    QRegularExpressionMatch matchData = reData.match(data);
+    setData(matchData.hasMatch() ? matchData.captured(matchData.lastCapturedIndex()) : QString());
 }
 
 QString DMHPayload_Private::toString() const
@@ -82,8 +68,7 @@ QString DMHPayload_Private::toString() const
 
     result += QString("<image>") + _imageFile + QString("</image>");
     result += QString("<audio>") + _audioFile + QString("</audio>");
-    result += QString("<command>") + _command + QString("</command>");
-    result += QString("<payload>") + _payload + QString("</payload>");
+    result += QString("<data>") + _data + QString("</data>");
 
     return result;
 }

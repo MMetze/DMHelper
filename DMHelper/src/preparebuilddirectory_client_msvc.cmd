@@ -1,2 +1,2 @@
-xcopy /s .\binsrc\* %1\*
+xcopy /s .\binsrc\* %1\debug\*
 

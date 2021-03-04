@@ -87,11 +87,13 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
         }
     }
 
+    /*
     QList<CampaignObjectBase*> tracks = campaign->getChildObjectsByType(DMHelper::CampaignType_AudioTrack);
     for(CampaignObjectBase* trackObject : tracks)
     {
         addTrackToTree(dynamic_cast<AudioTrack*>(trackObject));
     }
+    */
 
     updateTrackLayout();
 

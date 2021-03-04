@@ -12,13 +12,17 @@ DMHNetworkDataFactory::DMHNetworkDataFactory(const QByteArray& data) :
     _dataElement(),
     _data(nullptr)
 {
+    QByteArray dataFromPercent = QByteArray::fromPercentEncoding(data);
+    QString dataString;
+    dataString.fromUtf8(dataFromPercent);
+
     QString errorMsg;
     int errorLine;
     int errorColumn;
-    if(!_doc.setContent(data, &errorMsg, &errorLine, &errorColumn))
+    if(!_doc.setContent(dataFromPercent, &errorMsg, &errorLine, &errorColumn))
     {
         qDebug() << "[NetworkDataFactory] ERROR identified reading data: unable to parse network reply XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
-        qDebug() << "[NetworkDataFactory] Data: " << data;
+        qDebug() << "[NetworkDataFactory] Data: " << dataString;
         return;
     }
 

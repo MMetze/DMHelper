@@ -9,6 +9,7 @@ class DMHNetworkManager;
 class DMHPayload;
 class DMHNetworkObserver;
 class AudioTrack;
+class RemoteAudioPlayer;
 
 class DMC_ServerConnection : public QObject
 {
@@ -34,11 +35,13 @@ public slots:
     void stopServer();
 
 private:
+    void parseAudioData(const QString& audioData);
     void loadBattle();
     void stopAudio();
 
     DMHNetworkManager* _networkManager;
     DMHNetworkObserver* _networkObserver;
+    RemoteAudioPlayer* _audioPlayer;
     QString _imageMD5client;
     QString _audioMD5client;
     int _currentImageRequest;

@@ -37,24 +37,14 @@ void DMHPayload::setAudioFile(const QString& audioFile)
     d->setAudioFile(audioFile);
 }
 
-QString DMHPayload::getCommand() const
+QString DMHPayload::getData() const
 {
-    return d->getCommand();
+    return d->getData();
 }
 
-void DMHPayload::setCommand(const QString& command)
+void DMHPayload::setData(const QString& data)
 {
-    d->setCommand(command);
-}
-
-QString DMHPayload::getPayload() const
-{
-    return d->getPayload();
-}
-
-void DMHPayload::setPayload(const QString& payload)
-{
-    d->setPayload(payload);
+    d->setData(data);
 }
 
 void DMHPayload::fromString(const QString& data)

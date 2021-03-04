@@ -24,6 +24,7 @@ public:
     int fileExists(const QString& fileMD5);
     int uploadData(const QByteArray& data);
     int downloadFile(const QString& fileMD5);
+    void abortRequest(int id);
 
     void setLogon(const DMHLogon& logon);
 

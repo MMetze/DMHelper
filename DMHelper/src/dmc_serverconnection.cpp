@@ -1,10 +1,12 @@
 #include "dmc_serverconnection.h"
+#include "dmc_constants.h"
 #include "dmhnetworkmanager.h"
 #include "dmhnetworkobserver.h"
 #include "dmhpayload.h"
 #include "dmhlogon.h"
 #include "dmconstants.h"
 #include "dmversion.h"
+#include "remoteaudioplayer.h"
 #include "audiofactory.h"
 #include "audiotrack.h"
 #include <QFileDialog>
@@ -18,6 +20,7 @@ DMC_ServerConnection::DMC_ServerConnection(QObject *parent) :
     QObject(parent),
     _networkManager(nullptr),
     _networkObserver(nullptr),
+    _audioPlayer(new RemoteAudioPlayer(this)),
     _imageMD5client(),
     _audioMD5client(),
     _currentImageRequest(0),
@@ -32,6 +35,7 @@ DMC_ServerConnection::DMC_ServerConnection(const DMHLogon& logon, QObject *paren
     QObject(parent),
     _networkManager(nullptr),
     _networkObserver(nullptr),
+    _audioPlayer(new RemoteAudioPlayer(this)),
     _imageMD5client(),
     _audioMD5client(),
     _currentImageRequest(0),
@@ -47,6 +51,7 @@ DMC_ServerConnection::DMC_ServerConnection(const QString& urlString, const QStri
     QObject(parent),
     _networkManager(nullptr),
     _networkObserver(nullptr),
+    _audioPlayer(new RemoteAudioPlayer(this)),
     _imageMD5client(),
     _audioMD5client(),
     _currentImageRequest(0),
@@ -207,6 +212,10 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
         if(payload.getAudioFile() != _audioMD5client)
         {
             qDebug() << "[DMC_ServerConnection] Payload received with new Audio file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
+            if(_audioPlayer)
+                _audioPlayer->parseAudioString(payload.getAudioFile());
+
+            /*
             _audioMD5client = payload.getAudioFile();
             if(_audioMD5client.isEmpty())
             {
@@ -225,6 +234,7 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
                     downloadComplete(DUMMY_DOWNLOAD_ID, _audioMD5client, QByteArray());
                 }
             }
+        */
         }
     }
 
@@ -264,6 +274,36 @@ void DMC_ServerConnection::stopServer()
     }
 
     stopAudio();
+}
+
+void DMC_ServerConnection::parseAudioData(const QString& audioData)
+{
+    QDomDocument doc;
+    QString contentError;
+    int contentErrorLine = 0;
+    int contentErrorColumn = 0;
+    bool contentResult = doc.setContent(audioData, &contentError, &contentErrorLine, &contentErrorColumn);
+
+    if(contentResult == false)
+    {
+        qDebug() << "[DMC_ServerConnection] Failure parsing audio data: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
+        return;
+    }
+
+    QDomElement audioElement = doc.firstChildElement("audio-track");
+    while(!audioElement.isNull())
+    {
+        int type = audioElement.attribute("type").toInt();
+        QString md5 = audioElement.attribute("md5");
+        QString id = audioElement.attribute("id");
+        bool repeat = static_cast<bool>(audioElement.attribute("repeat").toInt());
+        bool mute = static_cast<bool>(audioElement.attribute("mute").toInt());
+
+        QDomCDATASection urlData = audioElement.firstChild().toCDATASection();
+        QUrl url(urlData.data());
+
+        audioElement = audioElement.nextSiblingElement("audio-track");
+    }
 }
 
 void DMC_ServerConnection::loadBattle()

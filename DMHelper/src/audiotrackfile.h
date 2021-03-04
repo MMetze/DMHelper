@@ -11,6 +11,7 @@ class AudioTrackFile : public AudioTrackUrl
     Q_OBJECT
 public:
     explicit AudioTrackFile(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
+    virtual ~AudioTrackFile() override;
 
     virtual int getAudioType() const override;
 

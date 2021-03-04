@@ -40,6 +40,13 @@ signals:
     void trackLengthChanged(int length);
     void trackPositionChanged(int length);
 
+    void trackStarted(AudioTrack* track);
+    void trackStopped(AudioTrack* track);
+
+    void muteChanged(bool mute);
+    void volumeChanged(int volume);
+    void repeatChanged(bool repeat);
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;

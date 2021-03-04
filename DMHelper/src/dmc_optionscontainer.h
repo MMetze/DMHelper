@@ -19,14 +19,17 @@ public:
     QString getSession() const;
     DMHLogon getLogon() const;
 
+    // File settings
+    QString getCacheDirectory() const;
+
 signals:
     void urlStringChanged();
     void userNameChanged();
     void passwordChanged();
     void sessionChanged();
+    void cacheDirectoryChanged();
 
 public slots:
-    //void editSettings();
     void readSettings();
     void writeSettings();
 
@@ -35,6 +38,10 @@ public slots:
     void setUserName(const QString& username);
     void setPassword(const QString& password);
     void setSession(const QString& session);
+
+    // File settings
+    void setCacheDirectory(const QString& cacheDirectory);
+    QString getStandardDirectory(const QString& defaultDir);
 
     void copy(DMC_OptionsContainer& other);
 
@@ -45,6 +52,9 @@ private:
     QString _userName;
     QString _password;
     QString _session;
+
+    // File settings
+    QString _cacheDirectory;
 };
 
 #endif // DMC_OPTIONSCONTAINER_H

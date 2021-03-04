@@ -49,6 +49,7 @@ class RibbonTabAudio;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
+class ObjectDispatcher;
 
 namespace Ui {
 class MainWindow;
@@ -114,7 +115,7 @@ signals:
     void cancelSelect();
 
     void characterChanged(QUuid id);
-    void audioTrackAdded(AudioTrack* track);
+    void objectAdded(CampaignObjectBase* object);
 
 protected:
     virtual void showEvent(QShowEvent * event);
@@ -221,6 +222,8 @@ private:
     CampaignTreeModel* treeModel;
     QMultiMap<QString, QUuid> treeIndexMap;
     QVBoxLayout* characterLayout;
+
+    ObjectDispatcher* _objectDispatcher;
     Campaign* campaign;
     QString campaignFileName;
 

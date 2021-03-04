@@ -20,23 +20,29 @@ void AudioTrackSyrinscape::play()
 #else
         QDesktopServices::openUrl(getUrl());
 #endif
+
+    emit trackStarted(this);
 }
 
 void AudioTrackSyrinscape::stop()
 {
+    emit trackStopped(this);
 }
 
 void AudioTrackSyrinscape::setMute(bool mute)
 {
     Q_UNUSED(mute);
+    emit muteChanged(mute);
 }
 
 void AudioTrackSyrinscape::setVolume(int volume)
 {
     Q_UNUSED(volume);
+    emit volumeChanged(volume);
 }
 
 void AudioTrackSyrinscape::setRepeat(bool repeat)
 {
     Q_UNUSED(repeat);
+    emit repeatChanged(repeat);
 }

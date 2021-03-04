@@ -2,8 +2,6 @@
 #include "dmhpayload.h"
 #include "dmhpayload_private.h"
 #include "dmhnetworkdatafactory.h"
-#include <QDomElement>
-#include <QDomDocument>
 #include <QUrlQuery>
 
 DMHNetworkObserver_Private::DMHNetworkObserver_Private(const DMHLogon& logon, QObject *parent) :

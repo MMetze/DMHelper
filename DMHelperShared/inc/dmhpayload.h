@@ -19,10 +19,8 @@ public:
     void setImageFile(const QString& imageFile);
     QString getAudioFile() const;
     void setAudioFile(const QString& audioFile);
-    QString getCommand() const;
-    void setCommand(const QString& command);
-    QString getPayload() const;
-    void setPayload(const QString& payload);
+    QString getData() const;
+    void setData(const QString& data);
 
     void fromString(const QString& data);
     QString toString() const;

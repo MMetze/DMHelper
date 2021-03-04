@@ -60,11 +60,16 @@ DMHNetworkData_Payload_Private::DMHNetworkData_Payload_Private(QDomElement data)
     _timestamp(),
     _valid(true)
 {
+    _payload.fromString(data.text());
+    /*
+    QString dataText = data.text();
+
     QString payloadString;
-    if(readChildElement(data, QString("payload"), payloadString))
+    if(readChildElement(data, QString("data"), payloadString))
         _payload.fromString(payloadString);
     else
         _valid = false;
+        */
 
     if(!readChildElement(data, QString("last"), _timestamp))
         _valid = false;

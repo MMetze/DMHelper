@@ -18,7 +18,8 @@ public:
     ~DMC_SettingsDialog();
 
 protected slots:
-    void textChanged(const QString& text);
+    void urlTextChanged(const QString& text);
+    void browseCache();
 
 private:
     Ui::DMC_SettingsDialog *ui;

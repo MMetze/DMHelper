@@ -1,42 +1,13 @@
-IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FROM PREVIOUS
 1. Soundboard
-    DONE - First draft done with local files, youtube and syrinscape playback.
-    DONE - Some detailed functionality such as track duration and playback time
-    DONE - Save the Soundboard
+    Not remove items from list box on drag/drop
     Online Syrinscape (beta)
-2. Spellbook
-    DONE - Engineering version with PHB (WotC IP) data
-    DONE - Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
-    DONE - Images and shapes need to be saved
-    DONE - SRD data xml
-    Potential need for xml reading performance improvement
 3. Conditions
-    DONE - Can be set in battles
-    DONE - Visual reminders in DM view
-    DONE - Visual reminders in Player's Window
     Impact on e.g. movement or other
-    Action roll-over
-    DONE - Improved selection of the effects on the screen
-4. Layers - not started yet
 5. I would like to make the player's window skinnable
-    DONE - Basic skinning
-    DONE - Full list of next combatants in on-deck list
     Add an additional frame for the whole Player's Window
-6. Player's Window control of battle contents
-    DONE
-    DONE - Movement circle for movement from the Player's Window
 7. Other
-    DONE - position of objects in battle correctly saved
-    DONE - old-school (v1.5 or earlier) notes from battles are shown as child text elements
-    DONE - Crashes after moving items around
-    DONE - Crash on Zoom to Fit without a map
-    DONE - External links
-    DONE - Editing/Saving of monster skills enabled
-    DONE - Editing/Saving of character and monster size enabled
-    DONE - Edit map file possible
-    DONE - Split Max HP and Current HP
-    DONE - Improved importer AC and HP calculations
-    DONE - Import Character puts it in the selected tree items
+    Startup directly to network login / too many warnings
+    Error message when trying to open incompatible campaign file.
 
 
 Long actions that need a loading bar
@@ -163,9 +134,13 @@ syrinscape-fantasy:stop/
 https://dmh.wwpd.de
 c.turner
 Ente2020 or Ente12345
-7B3AA550-649A-4D51-920E-CAB465616995
+session: 7B3AA550-649A-4D51-920E-CAB465616995
+file: 25b939c597a98aa5aba30a09837c7065
 
-
+https://www.youtube.com/watch?v=fIuO3RpMvHg
+<image></image><audio>https://www.youtube.com/watch?v=fIuO3RpMvHg</audio><command></command><payload></payload>
+<image>25b939c597a98aa5aba30a09837c7065</image><audio>https://www.youtube.com/watch?v=fIuO3RpMvHg</audio><command></command><payload></payload>
+<image>25b939c597a98aa5aba30a09837c7065</image><audio></audio><command></command><payload></payload>
 
 Install
 Install Qt

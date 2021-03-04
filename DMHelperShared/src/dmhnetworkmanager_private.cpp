@@ -40,7 +40,6 @@ DMHNetworkObserver* DMHNetworkManager_Private::registerNetworkObserver(QObject *
 
 void DMHNetworkManager_Private::uploadPayload(const DMHPayload& payload)
 {
-    //QUrl serviceUrl = QUrl("https://dmh.wwpd.de/pll_dm.php");
     QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/pll_dm.php"));
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -48,22 +47,21 @@ void DMHNetworkManager_Private::uploadPayload(const DMHPayload& payload)
     qDebug() << "[DMHNetworkManager] Uploading payload. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile();
 
     QUrlQuery postData;
-    //postData.addQueryItem("user", "c.turner");
-    //postData.addQueryItem("password", "Ente12345");
-    //postData.addQueryItem("session", "7B3AA550-649A-4D51-920E-CAB465616995");
     postData.addQueryItem("user", _logon.getUserName());
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
     QString payloadString = payload.toString();
     postData.addQueryItem("payload", payloadString);
 
-    qDebug() << "[DMHNetworkManager] Uploading payload. Request: " << postData.toString(QUrl::FullyEncoded).toUtf8();
+    QString postDataString = postData.toString(QUrl::FullyEncoded);
+    QByteArray postDataArray = postDataString.toUtf8();
+    qDebug() << "[DMHNetworkManager] Uploading payload. Request: " << postDataArray;
 
 #ifdef QT_DEBUG
-    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+    emit DEBUG_message_contents(postDataArray);
 #endif
 
-    _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    _manager->post(request, postDataArray);
 }
 
 int DMHNetworkManager_Private::uploadFile(const QString& filename)
@@ -187,6 +185,13 @@ int DMHNetworkManager_Private::downloadFile(const QString& fileMD5)
     qDebug() << "[DMHNetworkManager] Download request sent for file: " << fileMD5 << " with ID " << replyId;
 
     return replyId;
+}
+
+void DMHNetworkManager_Private::abortRequest(int id)
+{
+    QNetworkReply* reply = _replies.key(id, nullptr);
+    if(reply)
+        reply->abort();
 }
 
 void DMHNetworkManager_Private::setLogon(const DMHLogon& logon)

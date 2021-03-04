@@ -84,6 +84,7 @@
 #include "ribbontabmap.h"
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
+#include "objectdispatcher.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -154,6 +155,7 @@ MainWindow::MainWindow(QWidget *parent) :
     treeModel(nullptr),
     treeIndexMap(),
     characterLayout(nullptr),
+    _objectDispatcher(nullptr),
     campaign(nullptr),
     campaignFileName(),
     _options(nullptr),
@@ -697,7 +699,6 @@ MainWindow::MainWindow(QWidget *parent) :
     */
     SoundboardFrame* soundboard = new SoundboardFrame(this);
     connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
-    connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
     connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
     connect(soundboard, SIGNAL(dirty()), this, SLOT(setDirty()));
     soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
@@ -736,17 +737,22 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
-    /*
     _networkController = new NetworkController(this);
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
     _networkController->enableNetworkController(_options->getNetworkEnabled());
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
     connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
     // TODO: _battleDlgMgr->setNetworkManager(_networkController);
-    */
 #endif
+
+    _objectDispatcher = new ObjectDispatcher(this);
+    _objectDispatcher->setSoundboard(soundboard);
+    _objectDispatcher->setNetworkController(_networkController);
+    connect(this, &MainWindow::objectAdded, _objectDispatcher, &ObjectDispatcher::addObject);
+//    connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
 
     emit campaignLoaded(nullptr);
 
@@ -1937,7 +1943,7 @@ void MainWindow::addNewAudioObject(const QString& audioFile)
         return;
 
     addNewObject(track);
-    emit audioTrackAdded(track);
+    emit objectAdded(track);
 }
 
 void MainWindow::openFile(const QString& filename)
@@ -2035,8 +2041,9 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     updateClock();
 
     treeModel->setCampaign(campaign);
-
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
+
+    _objectDispatcher->setCampaign(campaign);
 
     if(campaign)
     {

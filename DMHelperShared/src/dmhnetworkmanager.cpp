@@ -48,6 +48,11 @@ int DMHNetworkManager::downloadFile(const QString& fileMD5)
     return d->downloadFile(fileMD5);
 }
 
+void DMHNetworkManager::abortRequest(int id)
+{
+    return d->abortRequest(id);
+}
+
 void DMHNetworkManager::setLogon(const DMHLogon& logon)
 {
     d->setLogon(logon);

@@ -1,12 +1,17 @@
 #include "dmc_optionscontainer.h"
 #include <QSettings>
+#include <QDir>
+#include <QStandardPaths>
+#include <QCoreApplication>
+#include <QDebug>
 
 DMC_OptionsContainer::DMC_OptionsContainer(QObject *parent) :
     QObject(parent),
     _urlString(),
     _userName(),
-    _password(),
-    _session()
+    _password("Ente2020"),
+    _session(),
+    _cacheDirectory()
 {
 }
 
@@ -39,6 +44,11 @@ DMHLogon DMC_OptionsContainer::getLogon() const
     return DMHLogon(getURLString(), getUserName(), getPassword(), getSession());
 }
 
+QString DMC_OptionsContainer::getCacheDirectory() const
+{
+    return _cacheDirectory;
+}
+
 void DMC_OptionsContainer::readSettings()
 {
     QSettings settings("Glacial Software", "DMHelperClient");
@@ -50,6 +60,7 @@ void DMC_OptionsContainer::readSettings()
     setURLString(settings.value("url","").toString());
     setUserName(settings.value("username","").toString());
     setSession(settings.value("session","").toString());
+    setCacheDirectory(settings.value("cacheDirectory", "").toString());
 
 #ifdef QT_DEBUG
     settings.endGroup(); // DEBUG
@@ -67,6 +78,7 @@ void DMC_OptionsContainer::writeSettings()
     settings.setValue("url", getURLString());
     settings.setValue("username", getUserName());
     settings.setValue("session", getSession());
+    settings.setValue("cacheDirectory", getCacheDirectory());
 
 #ifdef QT_DEBUG
     settings.endGroup(); // DEBUG
@@ -109,10 +121,50 @@ void DMC_OptionsContainer::setSession(const QString& session)
     }
 }
 
+void DMC_OptionsContainer::setCacheDirectory(const QString& cacheDirectory)
+{
+    QString resolvedDirectory;
+    if(!cacheDirectory.isEmpty())
+        resolvedDirectory = cacheDirectory;
+    else
+        resolvedDirectory = getStandardDirectory("cache");
+
+    if(_cacheDirectory != resolvedDirectory)
+    {
+        _cacheDirectory = resolvedDirectory;
+        emit cacheDirectoryChanged();
+    }
+}
+
 void DMC_OptionsContainer::copy(DMC_OptionsContainer& other)
 {
     setURLString(other._urlString);
     setUserName(other._userName);
     setPassword(other._password);
     setSession(other._session);
+    setCacheDirectory(other._cacheDirectory);
+}
+
+QString DMC_OptionsContainer::getStandardDirectory(const QString& defaultDir)
+{
+    QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QString result = standardPath + QString("/") + defaultDir;
+    QDir standardDir(result);
+    if(standardDir.exists())
+    {
+        qDebug() << "[DMC_OptionsContainer] Standard directory found: " << result;
+        return result;
+    }
+
+    qDebug() << "[DMC_OptionsContainer] Creating standard directory: " << result;
+    QDir().mkpath(result);
+
+    if(!standardDir.exists())
+    {
+        qDebug() << "[DMC_OptionsContainer] ERROR: Standard directory creation failed!";
+        return QString();
+    }
+
+    qDebug() << "[DMC_OptionsContainer] Standard directory created";
+    return result;
 }

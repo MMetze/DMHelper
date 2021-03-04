@@ -51,7 +51,8 @@ SOURCES += \
         dmc_settingsdialog.cpp \
         dmhlogger.cpp \
         objectfactory.cpp \
-        placeholder.cpp
+        placeholder.cpp \
+        remoteaudioplayer.cpp
 
 HEADERS += \
     audiofactory.h \
@@ -63,6 +64,7 @@ HEADERS += \
     audiotrackyoutube.h \
     campaignobjectbase.h \
     campaignobjectfactory.h \
+    dmc_constants.h \
     dmc_mainwindow.h\
     ../../DMHelperShared/inc/dmhglobal.h \
     ../../DMHelperShared/inc/dmhlogon.h \
@@ -86,7 +88,8 @@ HEADERS += \
     dmhlogger.h \
     dmversion.h \
     objectfactory.h \
-    placeholder.h
+    placeholder.h \
+    remoteaudioplayer.h
 
 
 FORMS += \

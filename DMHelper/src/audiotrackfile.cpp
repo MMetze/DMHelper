@@ -14,6 +14,11 @@ AudioTrackFile::AudioTrackFile(const QString& trackName, const QUrl& trackUrl, Q
 {
 }
 
+AudioTrackFile::~AudioTrackFile()
+{
+    stop();
+}
+
 int AudioTrackFile::getAudioType() const
 {
     return DMHelper::AudioType_File;
@@ -64,6 +69,8 @@ void AudioTrackFile::play()
     _playlist->addMedia(getUrl());
     _player->setPlaylist(_playlist);
     _player->play();
+
+    emit trackStarted(this);
 }
 
 void AudioTrackFile::stop()
@@ -71,6 +78,7 @@ void AudioTrackFile::stop()
     if((!_player) || (!_playlist))
         return;
 
+    emit trackStopped(this);
     _player->stop();
 
     _playlist->deleteLater();
@@ -81,25 +89,29 @@ void AudioTrackFile::stop()
 
 void AudioTrackFile::setMute(bool mute)
 {
-    if(_player)
-        _player->setMuted(mute);
+    if((!_player) || (_player->isMuted() == mute))
+        return;
+
+    _player->setMuted(mute);
+    emit muteChanged(mute);
 }
 
 void AudioTrackFile::setVolume(int volume)
 {
-    if(_player)
-        _player->setVolume(volume);
+    if((!_player) && (_player->volume() == volume))
+        return;
+
+    _player->setVolume(volume);
+    emit volumeChanged(volume);
 }
 
 void AudioTrackFile::setRepeat(bool repeat)
 {
-    if(_repeat != repeat)
-        return;
-
-    if(!_playlist)
+    if((!_playlist) || (_repeat != repeat))
         return;
 
     _playlist->setPlaybackMode(_repeat ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
+    emit repeatChanged(repeat);
 }
 
 void AudioTrackFile::handleDurationChanged(qint64 position)

@@ -65,6 +65,8 @@ void AudioTrackYoutube::play()
         findDirectUrl(extractYoutubeIDFromUrl()); //findDirectUrl(QString("9bMTK0ml9ZI"));
     else
         playDirectUrl();
+
+    emit trackStarted(this);
 }
 
 void AudioTrackYoutube::stop()
@@ -72,23 +74,11 @@ void AudioTrackYoutube::stop()
     if((!_vlcInstance) || (!_vlcListPlayer) || (!_vlcPlayer))
         return;
 
+    emit trackStopped(this);
+
     _stopStatus = 0;
     libvlc_media_list_player_stop(_vlcListPlayer);
     internalStopCheck(stopCallComplete);
-
-    /*
-    libvlc_media_list_player_stop(_vlcListPlayer);
-
-
-    libvlc_media_list_player_release(_vlcListPlayer);
-    _vlcListPlayer = nullptr;
-    if(_vlcInstance)
-    {
-        libvlc_release(_vlcInstance);
-        _vlcInstance = nullptr;
-    }
-    */
-
 }
 
 void AudioTrackYoutube::setMute(bool mute)
@@ -105,6 +95,8 @@ void AudioTrackYoutube::setMute(bool mute)
     {
         libvlc_audio_set_volume(_vlcPlayer, _lastVolume);
     }
+
+    emit muteChanged(mute);
 }
 
 void AudioTrackYoutube::setVolume(int volume)
@@ -113,6 +105,7 @@ void AudioTrackYoutube::setVolume(int volume)
         return;
 
     libvlc_audio_set_volume(_vlcPlayer, volume);
+    emit volumeChanged(volume);
 }
 
 void AudioTrackYoutube::setRepeat(bool repeat)
@@ -122,10 +115,10 @@ void AudioTrackYoutube::setRepeat(bool repeat)
 
     _repeat = repeat;
 
-    if(!_vlcListPlayer)
-        return;
+    if(_vlcListPlayer)
+        libvlc_media_list_player_set_playback_mode(_vlcListPlayer, _repeat ? libvlc_playback_mode_loop : libvlc_playback_mode_default);
 
-    libvlc_media_list_player_set_playback_mode(_vlcListPlayer, _repeat ? libvlc_playback_mode_loop : libvlc_playback_mode_default);
+    emit repeatChanged(repeat);
 }
 
 void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
