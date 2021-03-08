@@ -30,6 +30,11 @@ DMHLogon& DMHLogon::operator=(const DMHLogon& other)
     return *this;
 }
 
+bool DMHLogon::isValid() const
+{
+    return d->isValid();
+}
+
 QString DMHLogon::getURLString() const
 {
     return d->getURLString();

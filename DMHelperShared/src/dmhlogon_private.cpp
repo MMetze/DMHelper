@@ -37,6 +37,11 @@ DMHLogon_Private& DMHLogon_Private::operator=(const DMHLogon_Private& other)
     return *this;
 }
 
+bool DMHLogon_Private::isValid() const
+{
+    return !(_urlString.isEmpty() || _userName.isEmpty() || _password.isEmpty() || _session.isEmpty());
+}
+
 QString DMHLogon_Private::getURLString() const
 {
     return _urlString;

@@ -6,6 +6,7 @@
 #ifdef INCLUDE_NETWORK_SUPPORT
 
 #include "dmhpayload.h"
+#include "dmhlogon.h"
 #include <QObject>
 #include <QImage>
 
@@ -22,6 +23,8 @@ public:
     ~NetworkController();
 
 signals:
+    void requestSettings(DMHelper::OptionsTab startTab);
+    void networkEnabledChanged(bool enabled);
 
 public slots:
     void addTrack(AudioTrack* track);
@@ -42,9 +45,12 @@ private slots:
     void uploadPayload();
 
     void removeTrackUUID(const QUuid& id);
-    void uploadTrack(AudioTrackUpload& trackPair);
+    void uploadTrack(AudioTrackUpload* trackPair);
     bool containsTrack(AudioTrack* track);
     void updateAudioPayload();
+    void clearUploadErrors();
+
+    bool validateLogon(const DMHLogon& logon);
 
 private:
     DMHNetworkManager* _networkManager;
@@ -52,7 +58,6 @@ private:
     int _currentImageRequest;
     QList<AudioTrackUpload> _tracks;
     bool _enabled;
-
 };
 
 #endif // INCLUDE_NETWORK_SUPPORT

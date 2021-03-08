@@ -36,6 +36,7 @@ protected slots:
 protected:
     QMediaPlayer* _player;
     QMediaPlaylist* _playlist;
+    bool _mute;
     bool _repeat;
 
 };

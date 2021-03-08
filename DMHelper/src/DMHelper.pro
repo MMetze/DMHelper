@@ -70,6 +70,7 @@ SOURCES += main.cpp\
     emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
+    exportdialog.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapfactory.cpp \
@@ -281,6 +282,7 @@ HEADERS  += mainwindow.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
+    exportdialog.h \
     legaldialog.h \
     mapfactory.h \
     mapmarker.h \
@@ -455,6 +457,7 @@ FORMS    += mainwindow.ui \
     addmonstersdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    exportdialog.ui \
     legaldialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \

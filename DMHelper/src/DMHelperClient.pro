@@ -25,6 +25,7 @@ SOURCES += \
         audioplayer.cpp \
         audiotrack.cpp \
         audiotrackfile.cpp \
+        audiotrackfiledownload.cpp \
         audiotracksyrinscape.cpp \
         audiotrackurl.cpp \
         audiotrackyoutube.cpp \
@@ -59,6 +60,7 @@ HEADERS += \
     audioplayer.h \
     audiotrack.h \
     audiotrackfile.h \
+    audiotrackfiledownload.h \
     audiotracksyrinscape.h \
     audiotrackurl.h \
     audiotrackyoutube.h \

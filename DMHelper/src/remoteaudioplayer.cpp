@@ -4,6 +4,7 @@
 #include "dmconstants.h"
 #include "audiofactory.h"
 #include "audiotrackurl.h"
+#include "audiotrackfiledownload.h"
 #include <QDomDocument>
 #include <QDebug>
 
@@ -40,14 +41,42 @@ void RemoteAudioPlayer::parseAudioString(const QString& audioString)
     {
         RemoteAudioPlayer_FileWrapper* wrapper = findTrack(QUuid(trackElement.attribute(QString("id"))));
         if(wrapper)
+        {
             wrapper->setChecked(true);
+        }
         else
-            _tracks.append(new RemoteAudioPlayer_FileWrapper(trackElement));
+        {
+            RemoteAudioPlayer_FileWrapper* fileWrapper = new RemoteAudioPlayer_FileWrapper(trackElement);
+            connect(fileWrapper, &RemoteAudioPlayer_FileWrapper::requestFile, this, &RemoteAudioPlayer::requestFile);
+            if(fileWrapper->getTrack())
+                fileWrapper->getTrack()->play();
+            _tracks.append(fileWrapper);
+        }
 
         trackElement = trackElement.nextSiblingElement("audio-track");
     }
 
     clearUnchecked();
+}
+
+void RemoteAudioPlayer::fileRequestStarted(int requestId)
+{
+    Q_UNUSED(requestId);
+}
+
+void RemoteAudioPlayer::fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data)
+{
+    for(int i = 0; i < _tracks.count(); ++i)
+    {
+        if((_tracks.at(i)) && (_tracks.at(i)->getTrack()) &&
+           (_tracks.at(i)->getTrack()->getAudioType() == DMHelper::AudioType_File) &&
+           (_tracks.at(i)->getTrack()->getMD5() == fileMD5))
+        {
+            AudioTrackFileDownload* downloadTrack = dynamic_cast<AudioTrackFileDownload*>(_tracks[i]);
+            if(downloadTrack)
+                downloadTrack->fileReceived(fileMD5, data);
+        }
+    }
 }
 
 void RemoteAudioPlayer::setChecked(bool checked)
@@ -97,10 +126,19 @@ RemoteAudioPlayer_FileWrapper::RemoteAudioPlayer_FileWrapper(const QDomElement& 
     if(!ok)
         return;
 
+    QString trackName = element.attribute("trackname");
+
     switch(type)
     {
         case DMHelper::AudioType_File:
+        {
+            QString md5 = element.attribute("md5");
+            qDebug() << "[RemoteAudioPlayer] Creating audio track: " << md5 << " with name: " << trackName;
+            AudioTrackFileDownload* downloadTrack = new AudioTrackFileDownload(md5, trackName);
+            connect(downloadTrack, &AudioTrackFileDownload::requestFile, this, &RemoteAudioPlayer_FileWrapper::requestFile);
+            _track = downloadTrack;
             break;
+        }
         case DMHelper::AudioType_Syrinscape:
         case DMHelper::AudioType_Youtube:
         {
@@ -112,11 +150,11 @@ RemoteAudioPlayer_FileWrapper::RemoteAudioPlayer_FileWrapper(const QDomElement& 
             if(url.isEmpty())
                 return;
 
-            qDebug() << "[RemoteAudioPlayer] Creating audio: " << url.toString() << " with name: " << url.fileName();
+            qDebug() << "[RemoteAudioPlayer] Creating audio track: " << url.toString() << " with name: " << trackName;
             AudioFactory audioFactory;
             CampaignObjectBase* trackObject = audioFactory.createObject(DMHelper::CampaignType_AudioTrack,
                                                                         type,
-                                                                        url.fileName(),
+                                                                        trackName,
                                                                         false);
             AudioTrackUrl* urlTrack = dynamic_cast<AudioTrackUrl*>(trackObject);
             if(urlTrack)
@@ -124,13 +162,18 @@ RemoteAudioPlayer_FileWrapper::RemoteAudioPlayer_FileWrapper(const QDomElement& 
                 if(urlTrack)
                     urlTrack->setUrl(url);
                 _track = urlTrack;
-                qDebug() << "[Main] Playing track: " << _track << " with id: " << _id;
-                _track->play();
             }
             break;
         }
         default:
             return;
+    }
+
+    if(_track)
+    {
+        qDebug() << "[Main] Playing track: " << _track << " with id: " << _id;
+        _track->setMute(static_cast<bool>(element.attribute("mute", QString::number(0)).toInt()));
+        _track->setRepeat(static_cast<bool>(element.attribute("repeat", QString::number(0)).toInt()));
     }
 }
 

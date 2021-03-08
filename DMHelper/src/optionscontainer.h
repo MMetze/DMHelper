@@ -108,7 +108,7 @@ signals:
 #endif
 
 public slots:
-    void editSettings();
+    void editSettings(DMHelper::OptionsTab startTab = DMHelper::OptionsTab_General);
     void readSettings();
     void writeSettings();
 

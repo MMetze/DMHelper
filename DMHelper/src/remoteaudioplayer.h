@@ -18,7 +18,11 @@ public:
 
     void parseAudioString(const QString& audioString);
 
+    void fileRequestStarted(int requestId);
+    void fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data);
+
 signals:
+    void requestFile(const QString& md5String);
 
 private:
     void setChecked(bool checked);
@@ -47,6 +51,9 @@ public:
 
     bool getChecked() const;
     void setChecked(bool checked);
+
+signals:
+    void requestFile(const QString& md5String);
 
 private:
     AudioTrack* _track;

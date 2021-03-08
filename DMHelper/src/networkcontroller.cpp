@@ -6,12 +6,13 @@
 #include "dmhnetworkmanager.h"
 #include "dmhpayload.h"
 #include "dmhlogon.h"
-#include <QDebug>
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
 #include <QMessageBox>
 #include <QDomDocument>
+#include <QPushButton>
+#include <QDebug>
 
 // Uncomment this define to output payload data to a local file "_dmhpayload.txt"
 #define DMH_NETWORK_CONTROLLER_LOCAL_PAYLOAD
@@ -22,13 +23,12 @@ const int DMH_NETWORK_CONTROLLER_UPLOAD_ERROR = -2;
 
 NetworkController::NetworkController(QObject *parent) :
     QObject(parent),
-    _networkManager(nullptr),
+    _networkManager(new DMHNetworkManager(DMHLogon(), this)),
     _payload(),
     _currentImageRequest(DMH_NETWORK_CONTROLLER_UPLOAD_COMPLETE),
     _tracks(),
     _enabled(false)
 {
-    _networkManager = new DMHNetworkManager(DMHLogon(), this);
     connect(_networkManager, SIGNAL(uploadComplete(int, const QString&)), this, SLOT(uploadComplete(int, const QString&)));
     connect(_networkManager, SIGNAL(existsComplete(int, const QString&, const QString&, bool)), this, SLOT(existsComplete(int, const QString&, const QString&, bool)));
     connect(_networkManager, SIGNAL(requestError(int)), this, SLOT(uploadError(int)));
@@ -50,11 +50,16 @@ void NetworkController::addTrack(AudioTrack* track)
     connect(track, &AudioTrack::repeatChanged, this, &NetworkController::updateAudioPayload);
 
     AudioTrackUpload trackPair(DMH_NETWORK_CONTROLLER_UPLOAD_COMPLETE, track);
-    _tracks.append(trackPair);
     if(trackPair.second->getAudioType() == DMHelper::AudioType_File)
     {
         trackPair.first = DMH_NETWORK_CONTROLLER_UPLOAD_NOT_STARTED;
-        uploadTrack(trackPair);
+        uploadTrack(&trackPair);
+        _tracks.append(trackPair);
+    }
+    else
+    {
+        _tracks.append(trackPair);
+        updateAudioPayload();
     }
 }
 
@@ -67,7 +72,9 @@ void NetworkController::removeTrack(AudioTrack* track)
     {
         if(_tracks.at(i).second == track)
         {
-            disconnect(track, nullptr, this, nullptr);
+            disconnect(track, &AudioTrack::campaignObjectDestroyed, this, &NetworkController::removeTrackUUID);
+            disconnect(track, &AudioTrack::muteChanged, this, &NetworkController::updateAudioPayload);
+            disconnect(track, &AudioTrack::repeatChanged, this, &NetworkController::updateAudioPayload);
             _tracks.removeAt(i);
             updateAudioPayload();
             return;
@@ -127,7 +134,7 @@ void NetworkController::clearImage()
     if(!_enabled)
         return;
 
-    if((_networkManager) && (_currentImageRequest > 0))
+    if(_currentImageRequest > 0)
         _networkManager->abortRequest(_currentImageRequest);
 
     _payload.setImageFile(QString());
@@ -145,28 +152,39 @@ void NetworkController::clearPayloadData()
 
 void NetworkController::enableNetworkController(bool enabled)
 {
-    if(enabled != _enabled)
+    if(enabled == _enabled)
+        return;
+
+    _enabled = enabled;
+    if(_enabled)
     {
-        _enabled = enabled;
-        if(_enabled)
-            updateAudioPayload();
+        if(!validateLogon(_networkManager->getLogon()))
+            return;
+
+        clearUploadErrors();
+        updateAudioPayload();
     }
+
+    emit networkEnabledChanged(_enabled);
 }
 
 void NetworkController::setNetworkLogin(const QString& urlString, const QString& username, const QString& password, const QString& sessionID, const QString& inviteID)
 {
     Q_UNUSED(inviteID);
 
-    if(!_networkManager)
+    if(!_enabled)
         return;
 
     qDebug() << "[NetworkController] Network login updated. URL: " << urlString << ", Username: " << username << ", Session: " << sessionID << ", Invite: " << inviteID;
 
-    if((urlString.isEmpty()) || (username.isEmpty()) || (password.isEmpty()) || (sessionID.isEmpty()))
-        QMessageBox::warning(nullptr, QString("DMHelper Network Connection"), QString("Warning: The network client publishing is enabled, but username, password and/or session ID are not set. Network publishing will not work unless these values are correct."));
-
     DMHLogon logon(urlString, username, password, sessionID);
+    if(!validateLogon(logon))
+        return;
+
     _networkManager->setLogon(logon);
+
+    clearUploadErrors();
+    updateAudioPayload();
 }
 
 void NetworkController::uploadComplete(int requestID, const QString& fileMD5)
@@ -194,23 +212,23 @@ void NetworkController::uploadComplete(int requestID, const QString& fileMD5)
     {
         if(_tracks.at(i).first == requestID)
         {
-            AudioTrackUpload& uploadPair = _tracks[i];
+            AudioTrackUpload uploadPair = _tracks.at(i);
             if(fileMD5.isEmpty())
             {
                 uploadPair.first = DMH_NETWORK_CONTROLLER_UPLOAD_ERROR;
                 qDebug() << "[NetworkController] ERROR: Upload complete for Audio with invalid MD5 value: " << requestID;
+                _tracks[i] = uploadPair;
             }
             else
             {
                 uploadPair.first = DMH_NETWORK_CONTROLLER_UPLOAD_COMPLETE;
                 if(uploadPair.second)
-                {
                     uploadPair.second->setMD5(fileMD5);
-                    updateAudioPayload();
-                }
 
                 qDebug() << "[NetworkController] Upload complete for track: " << uploadPair.second << ", MD5: " << fileMD5;
                 uploadPayload();
+                _tracks[i] = uploadPair;
+                updateAudioPayload();
             }
             return;
         }
@@ -229,7 +247,7 @@ void NetworkController::existsComplete(int requestID, const QString& fileMD5, co
     {
         if(_tracks.at(i).first == requestID)
         {
-            AudioTrackUpload& uploadPair = _tracks[i];
+            AudioTrackUpload uploadPair = _tracks.at(i);
             if(exists)
             {
                 qDebug() << "[NetworkController] Audio track already exists, updating payload directly.";
@@ -237,8 +255,9 @@ void NetworkController::existsComplete(int requestID, const QString& fileMD5, co
                 if(uploadPair.second)
                 {
                     uploadPair.second->setMD5(fileMD5);
-                    updateAudioPayload();
                 }
+                _tracks[i] = uploadPair;
+                updateAudioPayload();
             }
             else
             {
@@ -247,8 +266,9 @@ void NetworkController::existsComplete(int requestID, const QString& fileMD5, co
                 if(uploadPair.second)
                 {
                     uploadPair.second->setMD5(QString());
-                    uploadTrack(uploadPair);
+                    uploadTrack(&uploadPair);
                 }
+                _tracks[i] = uploadPair;
             }
             return;
         }
@@ -281,7 +301,7 @@ void NetworkController::uploadError(int requestID)
 
 void NetworkController::uploadPayload()
 {
-    if((!_networkManager) || (!_enabled))
+    if(!_enabled)
         return;
 
 #ifdef DMH_NETWORK_CONTROLLER_LOCAL_PAYLOAD
@@ -310,25 +330,25 @@ void NetworkController::removeTrackUUID(const QUuid& id)
     }
 }
 
-void NetworkController::uploadTrack(AudioTrackUpload& trackPair)
+void NetworkController::uploadTrack(AudioTrackUpload* trackPair)
 {
-    if((!_enabled) || (!trackPair.second) || (trackPair.second->getAudioType() != DMHelper::AudioType_File))
+    if((!trackPair) ||(!_enabled) || (!trackPair->second) || (trackPair->second->getAudioType() != DMHelper::AudioType_File))
         return;
 
-    QString trackFile = trackPair.second->getUrl().toString();
+    QString trackFile = trackPair->second->getUrl().toString();
     if((trackFile.isEmpty()) || (!QFile::exists(trackFile)))
     {
         qDebug() << "[NetworkController] Uploading local file failed! File not found: " << trackFile;
-        trackPair.first = DMH_NETWORK_CONTROLLER_UPLOAD_ERROR;
+        trackPair->first = DMH_NETWORK_CONTROLLER_UPLOAD_ERROR;
         return;
     }
 
-    qDebug() << "[NetworkController] Uploading audio track: " << trackFile << ", MD5: " << trackPair.second->getMD5();
-
-    if(trackPair.second->getMD5().isEmpty())
-        trackPair.first = _networkManager->uploadFile(trackFile);
+    if(trackPair->second->getMD5().isEmpty())
+        trackPair->first = _networkManager->uploadFile(trackFile);
     else
-        trackPair.first = _networkManager->fileExists(trackPair.second->getMD5());
+        trackPair->first = _networkManager->fileExists(trackPair->second->getMD5());
+
+    qDebug() << "[NetworkController] Uploading audio track: " << trackFile << ", MD5: " << trackPair->second->getMD5() << ", Request: " << trackPair->first;
 }
 
 bool NetworkController::containsTrack(AudioTrack* track)
@@ -363,6 +383,7 @@ void NetworkController::updateAudioPayload()
                 trackElement.setAttribute("type", _tracks.at(i).second->getAudioType());
                 trackElement.setAttribute("id", _tracks.at(i).second->getID().toString());
                 trackElement.setAttribute("md5", _tracks.at(i).second->getMD5());
+                trackElement.setAttribute("trackname", _tracks.at(i).second->getName());
                 trackElement.setAttribute("repeat", _tracks.at(i).second->isRepeat());
                 trackElement.setAttribute("mute", _tracks.at(i).second->isMuted());
 
@@ -371,9 +392,11 @@ void NetworkController::updateAudioPayload()
 
                 doc.appendChild(trackElement);
             }
-            else if(_tracks.at(i).first == DMH_NETWORK_CONTROLLER_UPLOAD_COMPLETE)
+            else if(_tracks.at(i).first == DMH_NETWORK_CONTROLLER_UPLOAD_NOT_STARTED)
             {
-                uploadTrack(_tracks[i]);
+                AudioTrackUpload uploadPair = _tracks.at(i);
+                uploadTrack(&uploadPair);
+                _tracks[i] = uploadPair;
             }
         }
     }
@@ -384,6 +407,37 @@ void NetworkController::updateAudioPayload()
     _payload.setAudioFile(audioPayload);
 
     uploadPayload();
+}
+
+void NetworkController::clearUploadErrors()
+{
+    if(!_enabled)
+        return;
+
+    for(int i = 0; i < _tracks.count(); ++i)
+    {
+        if(_tracks.at(i).first == DMH_NETWORK_CONTROLLER_UPLOAD_ERROR)
+            _tracks[i].first = DMH_NETWORK_CONTROLLER_UPLOAD_NOT_STARTED;
+    }
+}
+
+bool NetworkController::validateLogon(const DMHLogon& logon)
+{
+    if(logon.isValid())
+        return true;
+
+    QMessageBox msgBox(QMessageBox::Warning,
+                       QString("DMHelper Network Connection"),
+                       QString("Warning: The network client publishing is enabled, but the network URL, username, password and/or session ID are not properly set. Network publishing will not work unless these values are correct.\n\nWould you like to correct these settings or disable network publishing?"));
+    QAbstractButton* openButton = msgBox.addButton(QString("Open Network Settings"), QMessageBox::AcceptRole);
+    msgBox.addButton(QString("Disable Network Publish"), QMessageBox::RejectRole);
+    msgBox.exec();
+    if(msgBox.clickedButton() == openButton)
+        emit requestSettings(DMHelper::OptionsTab_Network);
+    else
+        enableNetworkController(false);
+
+    return false;
 }
 
 #endif // INCLUDE_NETWORK_SUPPORT

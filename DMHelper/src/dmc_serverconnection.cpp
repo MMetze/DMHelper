@@ -14,21 +14,20 @@
 #include <QDomDocument>
 #include <QDebug>
 
-const int DUMMY_DOWNLOAD_ID = 1;
-
 DMC_ServerConnection::DMC_ServerConnection(QObject *parent) :
     QObject(parent),
     _networkManager(nullptr),
     _networkObserver(nullptr),
     _audioPlayer(new RemoteAudioPlayer(this)),
     _imageMD5client(),
-    _audioMD5client(),
+    //_audioMD5client(),
     _currentImageRequest(0),
-    _currentAudioRequest(0),
-    _track(nullptr),
+    //_currentAudioRequest(0),
+    //_track(nullptr),
     _pmp(),
     _lastPayload()
 {
+    connectAudioPlayer();
 }
 
 DMC_ServerConnection::DMC_ServerConnection(const DMHLogon& logon, QObject *parent) :
@@ -37,13 +36,14 @@ DMC_ServerConnection::DMC_ServerConnection(const DMHLogon& logon, QObject *paren
     _networkObserver(nullptr),
     _audioPlayer(new RemoteAudioPlayer(this)),
     _imageMD5client(),
-    _audioMD5client(),
+    //_audioMD5client(),
     _currentImageRequest(0),
-    _currentAudioRequest(0),
-    _track(nullptr),
+    //_currentAudioRequest(0),
+    //_track(nullptr),
     _pmp(),
     _lastPayload()
 {
+    connectAudioPlayer();
     startServer(logon);
 }
 
@@ -53,13 +53,14 @@ DMC_ServerConnection::DMC_ServerConnection(const QString& urlString, const QStri
     _networkObserver(nullptr),
     _audioPlayer(new RemoteAudioPlayer(this)),
     _imageMD5client(),
-    _audioMD5client(),
+    //_audioMD5client(),
     _currentImageRequest(0),
-    _currentAudioRequest(0),
-    _track(nullptr),
+    //_currentAudioRequest(0),
+    //_track(nullptr),
     _pmp(),
     _lastPayload()
 {
+    connectAudioPlayer();
     startServer(DMHLogon(urlString, username, password, session));
 }
 
@@ -87,6 +88,13 @@ void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD
             qDebug() << "[DMC_ServerConnection] WARNING: Download complete for image download with no data received, no pixmap set";
         }
     }
+    else
+    {
+        emit fileRequestCompleted(requestID, fileMD5, data);
+    }
+
+
+    /*
     else if(requestID == _currentAudioRequest)
     {
         stopAudio();
@@ -142,6 +150,7 @@ void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD
     {
         qDebug() << "[DMC_ServerConnection] ERROR: Unexpected request ID received!";
     }
+    */
 }
 
 /*
@@ -207,15 +216,17 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
         }
     }
 
+    qDebug() << "[DMC_ServerConnection] Payload received with new Audio file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
+    if(_audioPlayer)
+        _audioPlayer->parseAudioString(payload.getAudioFile());
+
+    /*
     if(_currentAudioRequest <= 0)
     {
         if(payload.getAudioFile() != _audioMD5client)
         {
-            qDebug() << "[DMC_ServerConnection] Payload received with new Audio file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
-            if(_audioPlayer)
-                _audioPlayer->parseAudioString(payload.getAudioFile());
 
-            /*
+
             _audioMD5client = payload.getAudioFile();
             if(_audioMD5client.isEmpty())
             {
@@ -234,9 +245,9 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
                     downloadComplete(DUMMY_DOWNLOAD_ID, _audioMD5client, QByteArray());
                 }
             }
-        */
         }
     }
+        */
 
     _lastPayload = timestamp;
 }
@@ -273,9 +284,23 @@ void DMC_ServerConnection::stopServer()
         _networkObserver = nullptr;
     }
 
-    stopAudio();
+    //stopAudio();
 }
 
+void DMC_ServerConnection::fileRequested(const QString& md5String)
+{
+    if(QFile::exists(md5String))
+    {
+        emit fileRequestStarted(-1);
+        emit fileRequestCompleted(-1, md5String, QByteArray());
+    }
+    else
+    {
+        emit fileRequestStarted(_networkManager->downloadFile(md5String));
+    }
+}
+
+/*
 void DMC_ServerConnection::parseAudioData(const QString& audioData)
 {
     QDomDocument doc;
@@ -305,6 +330,17 @@ void DMC_ServerConnection::parseAudioData(const QString& audioData)
         audioElement = audioElement.nextSiblingElement("audio-track");
     }
 }
+*/
+
+void DMC_ServerConnection::connectAudioPlayer()
+{
+    if(!_audioPlayer)
+        return;
+
+    connect(_audioPlayer, &RemoteAudioPlayer::requestFile, this, &DMC_ServerConnection::fileRequested);
+    connect(this, &DMC_ServerConnection::fileRequestStarted, _audioPlayer, &RemoteAudioPlayer::fileRequestStarted);
+    connect(this, &DMC_ServerConnection::fileRequestCompleted, _audioPlayer, &RemoteAudioPlayer::fileRequestCompleted);
+}
 
 void DMC_ServerConnection::loadBattle()
 {
@@ -329,6 +365,7 @@ void DMC_ServerConnection::loadBattle()
     */
 }
 
+/*
 void DMC_ServerConnection::stopAudio()
 {
     if(!_track)
@@ -340,3 +377,4 @@ void DMC_ServerConnection::stopAudio()
 
     emit trackActive(nullptr);
 }
+*/

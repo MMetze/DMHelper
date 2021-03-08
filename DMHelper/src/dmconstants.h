@@ -145,6 +145,13 @@ namespace DMHelper
         AudioType_Youtube
     };
 
+    enum OptionsTab
+    {
+        OptionsTab_General = 0,
+        OptionsTab_FilePaths,
+        OptionsTab_Network
+    };
+
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
     const int TreeItemData_Object = Qt::UserRole + 3;

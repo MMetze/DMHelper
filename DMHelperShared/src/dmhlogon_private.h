@@ -12,6 +12,8 @@ public:
     virtual ~DMHLogon_Private();
     DMHLogon_Private& operator=(const DMHLogon_Private& other);
 
+    bool isValid() const;
+
     QString getURLString() const;
     QString getUserName() const;
     QString getPassword() const;

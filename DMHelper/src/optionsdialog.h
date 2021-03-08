@@ -14,7 +14,7 @@ class OptionsDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit OptionsDialog(OptionsContainer* options, QWidget *parent = nullptr);
+    explicit OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab startTab = DMHelper::OptionsTab_General, QWidget *parent = nullptr);
     ~OptionsDialog();
 
     OptionsContainer* getOptions() const;

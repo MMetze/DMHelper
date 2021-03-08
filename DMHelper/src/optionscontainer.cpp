@@ -253,7 +253,7 @@ void OptionsContainer::setMRUHandler(MRUHandler* mruHandler)
     _mruHandler = mruHandler;
 }
 
-void OptionsContainer::editSettings()
+void OptionsContainer::editSettings(DMHelper::OptionsTab startTab)
 {
     OptionsContainer* editCopyContainer = new OptionsContainer(getMainWindow());
     editCopyContainer->copy(this);
@@ -262,7 +262,7 @@ void OptionsContainer::editSettings()
     connect(editCopyContainer, &OptionsContainer::fontFamilyChanged, this, &OptionsContainer::registerFontChange);
     connect(editCopyContainer, &OptionsContainer::fontSizeChanged, this, &OptionsContainer::registerFontChange);
 
-    OptionsDialog dlg(editCopyContainer);
+    OptionsDialog dlg(editCopyContainer, startTab);
 
     if(dlg.exec() == QDialog::Accepted)
     {
@@ -980,13 +980,13 @@ void OptionsContainer::copy(OptionsContainer* other)
         _instanceUuid = QUuid::fromString(other->_instanceUuid.toString());
         _lastUpdateDate = other->_lastUpdateDate;
 #ifdef INCLUDE_NETWORK_SUPPORT
-        setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);
         setUserName(other->_userName);
         setSavePassword(other->_savePassword);
         setPassword(other->_password);
         setSessionID(other->_sessionID);
         setInviteID(other->_inviteID);
+        setNetworkEnabled(other->_networkEnabled);
 #endif
     }
 }

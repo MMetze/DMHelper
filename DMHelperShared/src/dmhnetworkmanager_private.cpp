@@ -12,6 +12,8 @@
 #include <QDomElement>
 #include <QDebug>
 
+#include <QCryptographicHash>
+
 const int VALID_REQUEST_ID = 100;
 
 DMHNetworkManager_Private::DMHNetworkManager_Private(const DMHLogon& logon, QObject *parent) :
@@ -131,21 +133,36 @@ int DMHNetworkManager_Private::uploadData(const QByteArray& data)
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart userNamePart;
+    //userNamePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
     userNamePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"user\""));
     userNamePart.setBody(_logon.getUserName().toUtf8());
+    multiPart->append(userNamePart);
 
     QHttpPart passwordPart;
+    //passwordPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
     passwordPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"password\""));
     passwordPart.setBody(_logon.getPassword().toUtf8());
+    multiPart->append(passwordPart);
+
+    /*
+#ifdef QT_DEBUG
+    QHttpPart debugPart;
+    debugPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
+    debugPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"debug\""));
+    debugPart.setBody(QString("1").toUtf8());
+    multiPart->append(debugPart);
+#endif
+*/
 
     QHttpPart filePart;
-    filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
+    //filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"myFile[]\"; filename=\"internal\""));
     filePart.setBody(data);
-
-    multiPart->append(userNamePart);
-    multiPart->append(passwordPart);
     multiPart->append(filePart);
+    QByteArray byteHash = QCryptographicHash::hash(data, QCryptographicHash::Md5);
+    qDebug() << "[DMHNetworkManager] Uploading data with MD5 hash bytearray: " << byteHash;
+    qDebug() << "[DMHNetworkManager] Uploading data with MD5 hash UTF8: " << QString::fromUtf8(byteHash);
+    qDebug() << "[DMHNetworkManager] Uploading data with MD5 hash HEX: " << byteHash.toHex(0);
 
 #ifdef QT_DEBUG
     // TODO: String representation in
@@ -194,6 +211,11 @@ void DMHNetworkManager_Private::abortRequest(int id)
         reply->abort();
 }
 
+const DMHLogon& DMHNetworkManager_Private::getLogon() const
+{
+    return _logon;
+}
+
 void DMHNetworkManager_Private::setLogon(const DMHLogon& logon)
 {
     _logon = logon;
@@ -226,7 +248,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
 
     if(reply->error() != QNetworkReply::NoError)
     {
-        registerRequestError(QString("[DMHNetworkManager] ERROR identified in network reply: ") + QString::number(reply->error()) + QString(", Error string ") + reply->errorString(), replyData);
+        registerRequestError(QString("[DMHNetworkManager] ERROR identified in network reply: ") + QString::number(replyData) + QString(", Error: ") + QString::number(reply->error()) + QString(", Error string ") + reply->errorString(), replyData);
         return;
     }
 
@@ -351,7 +373,8 @@ void DMHNetworkManager_Private::registerRequestError(const QString& errorStr, in
         }
         else
         {
-            emit uploadComplete(replyID, QString(""));
+            //emit uploadComplete(replyID, QString(""));
+            emit requestError(replyID);
         }
     }
 }

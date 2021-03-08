@@ -53,6 +53,11 @@ void DMHNetworkManager::abortRequest(int id)
     return d->abortRequest(id);
 }
 
+const DMHLogon& DMHNetworkManager::getLogon() const
+{
+    return d->getLogon();
+}
+
 void DMHNetworkManager::setLogon(const DMHLogon& logon)
 {
     d->setLogon(logon);

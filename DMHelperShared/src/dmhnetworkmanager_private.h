@@ -27,6 +27,7 @@ public:
     int downloadFile(const QString& fileMD5);
     void abortRequest(int id);
 
+    const DMHLogon& getLogon() const;
     void setLogon(const DMHLogon& logon);
 
 signals:

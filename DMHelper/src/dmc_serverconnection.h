@@ -24,29 +24,32 @@ signals:
     void pixmapActive(QPixmap pixmap);
     void trackActive(AudioTrack* track);
 
+    void fileRequestStarted(int requestId);
+    void fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data);
+
 public slots:
     void downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data);
     void payloadReceived(const DMHPayload& payload, const QString& timestamp);
 
-signals:
-
-public slots:
     void startServer(const DMHLogon& logon);
     void stopServer();
 
+    void fileRequested(const QString& md5String);
+
 private:
-    void parseAudioData(const QString& audioData);
+    //void parseAudioData(const QString& audioData);
+    void connectAudioPlayer();
     void loadBattle();
-    void stopAudio();
+    //void stopAudio();
 
     DMHNetworkManager* _networkManager;
     DMHNetworkObserver* _networkObserver;
     RemoteAudioPlayer* _audioPlayer;
     QString _imageMD5client;
-    QString _audioMD5client;
+    //QString _audioMD5client;
     int _currentImageRequest;
-    int _currentAudioRequest;
-    AudioTrack* _track;
+    //int _currentAudioRequest;
+    //AudioTrack* _track;
     QPixmap _pmp;
     QString _lastPayload;
 

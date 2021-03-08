@@ -34,6 +34,7 @@
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
 #include "battleframe.h"
+#include "exportdialog.h"
 //#include "audioplaybackframe.h"
 #include "soundboardframe.h"
 #include "audiofactory.h"
@@ -739,12 +740,14 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
+    connect(_networkController, &NetworkController::requestSettings, _options, &OptionsContainer::editSettings);
+    connect(_networkController, &NetworkController::networkEnabledChanged, _options, &OptionsContainer::setNetworkEnabled);
+    connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
+    connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
     _networkController->enableNetworkController(_options->getNetworkEnabled());
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
-    connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
-    connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
-    connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
+    //connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     // TODO: _battleDlgMgr->setNetworkManager(_networkController);
 #endif
 
@@ -1205,6 +1208,18 @@ void MainWindow::exportCurrentItem()
     if(!exportItem)
         return;
 
+    QUuid exportId(exportItem->data(DMHelper::TreeItemData_ID).toString());
+
+    ExportDialog dlg(*campaign, exportId);
+    dlg.resize(width() * 3 / 4, height() * 9 / 10);
+    dlg.exec();
+
+    /*
+    QModelIndex index = ui->treeView->currentIndex();
+    QStandardItem* exportItem = treeModel->itemFromIndex(index);
+    if(!exportItem)
+        return;
+
     QString exportFileName = QFileDialog::getSaveFileName(this,QString("Export Object"),QString(),QString("XML files (*.xml)"));
     if(exportFileName.isEmpty())
         return;
@@ -1241,6 +1256,7 @@ void MainWindow::exportCurrentItem()
     ts.setCodec("UTF-8");
     ts << exportString;
     file.close();
+    */
 
     qDebug() << "[MainWindow] Export complete";
 }

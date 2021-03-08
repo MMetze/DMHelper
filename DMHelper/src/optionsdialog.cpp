@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QIntValidator>
 
-OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
+OptionsDialog::OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab startTab, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::OptionsDialog),
     _options(options)
@@ -68,7 +68,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtInviteID->setEnabled(_options->getNetworkEnabled());
         ui->btnGenerateInvite->setEnabled(_options->getNetworkEnabled());
 #else
-        ui->tabWidget->removeTab(2);
+        ui->tabWidget->removeTab(DMHelper::OptionsTab_Network);
 #endif
 
         connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
@@ -114,6 +114,9 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->chkAllowStatistics->setChecked(_options->isStatisticsAccepted());
         connect(ui->chkAllowStatistics, SIGNAL(clicked(bool)), _options, SLOT(setStatisticsAccepted(bool)));
     }
+
+    if((startTab >= 0) && (startTab < ui->tabWidget->count()))
+        ui->tabWidget->setCurrentIndex(startTab);
 }
 
 OptionsDialog::~OptionsDialog()

@@ -10,7 +10,8 @@ AudioTrackFile::AudioTrackFile(const QString& trackName, const QUrl& trackUrl, Q
     AudioTrackUrl(trackName, trackUrl, parent),
     _player(nullptr),
     _playlist(nullptr),
-    _repeat(false)
+    _mute(false),
+    _repeat(true)
 {
 }
 
@@ -31,12 +32,14 @@ bool AudioTrackFile::isPlaying() const
 
 bool AudioTrackFile::isRepeat() const
 {
-    return ((_playlist) && (_playlist->playbackMode() == QMediaPlaylist::Loop));
+    return _repeat;
+    //return ((_playlist) && (_playlist->playbackMode() == QMediaPlaylist::Loop));
 }
 
 bool AudioTrackFile::isMuted() const
 {
-    return ((_player) && (_player->isMuted()));
+    return _mute;
+    //return ((_player) && (_player->isMuted()));
 }
 
 int AudioTrackFile::getVolume() const
@@ -70,6 +73,9 @@ void AudioTrackFile::play()
     _player->setPlaylist(_playlist);
     _player->play();
 
+    _playlist->setPlaybackMode(_repeat ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
+    _player->setMuted(_mute);
+
     emit trackStarted(this);
 }
 
@@ -89,16 +95,18 @@ void AudioTrackFile::stop()
 
 void AudioTrackFile::setMute(bool mute)
 {
-    if((!_player) || (_player->isMuted() == mute))
+    if(_mute == mute)
         return;
 
-    _player->setMuted(mute);
-    emit muteChanged(mute);
+    _mute = mute;
+    if(_player)
+        _player->setMuted(_mute);
+    emit muteChanged(_mute);
 }
 
 void AudioTrackFile::setVolume(int volume)
 {
-    if((!_player) && (_player->volume() == volume))
+    if((!_player) || (_player->volume() == volume))
         return;
 
     _player->setVolume(volume);
@@ -107,11 +115,13 @@ void AudioTrackFile::setVolume(int volume)
 
 void AudioTrackFile::setRepeat(bool repeat)
 {
-    if((!_playlist) || (_repeat != repeat))
+    if(_repeat == repeat)
         return;
 
-    _playlist->setPlaybackMode(_repeat ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
-    emit repeatChanged(repeat);
+    _repeat = repeat;
+    if(_playlist)
+        _playlist->setPlaybackMode(_repeat ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
+    emit repeatChanged(_repeat);
 }
 
 void AudioTrackFile::handleDurationChanged(qint64 position)
