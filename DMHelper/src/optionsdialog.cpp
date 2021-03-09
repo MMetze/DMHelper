@@ -116,7 +116,20 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab sta
     }
 
     if((startTab >= 0) && (startTab < ui->tabWidget->count()))
+    {
         ui->tabWidget->setCurrentIndex(startTab);
+        if(startTab == DMHelper::OptionsTab_Network)
+        {
+            if(ui->edtURL->text().isEmpty())
+                ui->edtURL->setFocus();
+            else if(ui->edtUserName->text().isEmpty())
+                ui->edtUserName->setFocus();
+            else if(ui->edtPassword->text().isEmpty())
+                ui->edtPassword->setFocus();
+            else if(ui->edtSessionID->text().isEmpty())
+                ui->edtSessionID->setFocus();
+        }
+    }
 }
 
 OptionsDialog::~OptionsDialog()
