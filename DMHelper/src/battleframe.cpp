@@ -1690,6 +1690,11 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
     {
         startMovement(_combatantIcons.value(combatant), combatant->getSpeed());
         _selectedCombatant = combatant;
+        ui->frameCombatant->setCombatant(combatant);
+
+        CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
+        if(widget)
+            ui->scrollArea->ensureWidgetVisible(widget);
     }
 }
 
@@ -1721,6 +1726,22 @@ void BattleFrame::handleItemChanged(QGraphicsItem* item)
         updateCameraRect();
         createPrescaledBackground();
     }
+}
+
+void BattleFrame::handleItemMouseDoubleClick(QGraphicsPixmapItem* item)
+{
+    if(!item)
+        return;
+
+    BattleDialogModelCombatant* combatant = _combatantIcons.key(item);
+    if(!combatant)
+        return;
+
+    CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
+    if(!widget)
+        return;
+
+    widget->selectCombatant();
 }
 
 void BattleFrame::removeCombatant()
@@ -2433,6 +2454,7 @@ void BattleFrame::setEditMode()
     {
         disconnect(_scene, SIGNAL(itemMouseDown(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDown(QGraphicsPixmapItem*)));
         disconnect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
+        disconnect(_scene, SIGNAL(itemMouseDoubleClick(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDoubleClick(QGraphicsPixmapItem*)));
         disconnect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
 
         connect(_scene, SIGNAL(battleMousePress(const QPointF&)), _mapDrawer, SLOT(handleMouseDown(const QPointF&)));
@@ -2454,6 +2476,7 @@ void BattleFrame::setEditMode()
 
         connect(_scene, SIGNAL(itemMouseDown(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDown(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
+        connect(_scene, SIGNAL(itemMouseDoubleClick(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDoubleClick(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
     }
 }

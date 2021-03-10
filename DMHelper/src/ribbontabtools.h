@@ -29,8 +29,6 @@ signals:
     void spellbookClicked();
 
     void rollDiceClicked();
-    void publishTextClicked();
-    void translateTextClicked();
     void randomMarketClicked();
     void calendarClicked();
     void countdownClicked();

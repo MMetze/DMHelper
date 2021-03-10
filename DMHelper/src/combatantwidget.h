@@ -39,6 +39,7 @@ public slots:
     virtual void setActive(bool active);
     virtual void setSelected(bool selected);
     virtual void setHover(bool hover);
+    virtual void selectCombatant() = 0;
 
 protected:
 

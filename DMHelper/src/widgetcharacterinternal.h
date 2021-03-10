@@ -29,11 +29,9 @@ public slots:
     virtual void updateData() override;
     virtual void setInitiative(int initiative) override;
     virtual void setHitPoints(int hp) override;
+    virtual void executeDoubleClick() override;
 
 protected:
-
-    // local
-    virtual void executeDoubleClick() override;
 
     // Data
     WidgetCharacter* _widgetParent;

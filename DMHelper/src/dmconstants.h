@@ -3,7 +3,7 @@
 
 #include <Qt>
 
-#define INCLUDE_NETWORK_SUPPORT
+//#define INCLUDE_NETWORK_SUPPORT
 //#define INCLUDE_CHASE_SUPPORT
 
 namespace DMHelper

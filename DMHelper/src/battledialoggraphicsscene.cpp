@@ -313,13 +313,25 @@ bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseE
     if(mouseEvent->button() == Qt::LeftButton)
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-        QUuid itemId = BattleDialogModelEffect::getEffectIdFromItem(item);
-        if((item)&&(!(itemId.isNull())))
+        if(item)
         {
-            qDebug() << "[Battle Dialog Scene] doubleclick identified on item " << itemId;
-            _contextMenuItem = item;
-            editItem();
-            _contextMenuItem = nullptr;
+            QUuid itemId = BattleDialogModelEffect::getEffectIdFromItem(item);
+            if(!(itemId.isNull()))
+            {
+                qDebug() << "[Battle Dialog Scene] doubleclick identified on item " << itemId;
+                _contextMenuItem = item;
+                editItem();
+                _contextMenuItem = nullptr;
+            }
+            else if((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
+            {
+                QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+                if(pixItem)
+                {
+                    qDebug() << "[Battle Dialog Scene] doubleclick on combatant " << pixItem;
+                    emit itemMouseDoubleClick(pixItem);
+                }
+            }
         }
 
         _mouseDown = false;

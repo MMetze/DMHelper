@@ -32,14 +32,12 @@ public slots:
     virtual void updateData() override;
     virtual void setInitiative(int initiative) override;
     virtual void setHitPoints(int hp) override;
+    virtual void executeDoubleClick() override;
 
     void decrementLegendary();
     void resetLegendary();
 
 protected:
-
-    // local
-    virtual void executeDoubleClick() override;
 
     // Data
     WidgetMonster* _widgetParent;

@@ -40,11 +40,9 @@ public slots:
     virtual void initiativeChanged(int initiative);
     virtual void setHitPoints(int hp) = 0;
     virtual void handleHitPointsChanged(int hp);
+    virtual void executeDoubleClick();
 
 protected:
-
-    // local
-    virtual void executeDoubleClick();
 
     // Data
     Qt::MouseButton _mouseDown;

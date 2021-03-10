@@ -67,6 +67,7 @@ SOURCES += main.cpp\
     discordposter.cpp \
     dmhelperribbon.cpp \
     dmhlogger.cpp \
+    dmhwaitingdialog.cpp \
     emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
@@ -107,6 +108,7 @@ SOURCES += main.cpp\
     spell.cpp \
     spellbook.cpp \
     spellbookdialog.cpp \
+    textbrowsermargins.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -278,6 +280,7 @@ HEADERS  += mainwindow.h \
     discordposter.h \
     dmhelperribbon.h \
     dmhlogger.h \
+    dmhwaitingdialog.h \
     dmversion.h \
     emptycampaignframe.h \
     equipmentserver.h \
@@ -319,6 +322,7 @@ HEADERS  += mainwindow.h \
     spell.h \
     spellbook.h \
     spellbookdialog.h \
+    textbrowsermargins.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -455,6 +459,7 @@ FORMS    += mainwindow.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     exportdialog.ui \
@@ -548,7 +553,8 @@ DISTFILES += \
     resources/shops.xml \
     resources/tables/Indefinite Madness.xml \
     resources/tables/Long Term Madness.xml \
-    resources/tables/Short Term Madness.xml
+    resources/tables/Short Term Madness.xml \
+    todos
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc

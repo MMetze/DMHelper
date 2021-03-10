@@ -85,6 +85,12 @@ void WidgetCharacter::updateData()
     update();
 }
 
+void WidgetCharacter::selectCombatant()
+{
+    if(_internals)
+        _internals->executeDoubleClick();
+}
+
 void WidgetCharacter::leaveEvent(QEvent * event)
 {
     if(_internals)
