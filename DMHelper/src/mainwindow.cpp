@@ -25,6 +25,11 @@
 #include "encounterscrollingtext.h"
 #include "encounterscrollingtextedit.h"
 #include "campaignobjectframe.h"
+#include "campaignobjectfactory.h"
+#include "encounterfactory.h"
+#include "audiofactory.h"
+#include "combatantfactory.h"
+#include "mapfactory.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
 #include "campaigntreeitem.h"
@@ -392,6 +397,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(treeModel, &CampaignTreeModel::itemMoved, ui->treeView, &CampaignTree::handleItemMoved);
     connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[MainWindow] Tree Model Created";
+
+    // Initialize the campaign object factory
+    CampaignObjectFactory::addFactory(new EncounterFactory());
+    CampaignObjectFactory::addFactory(new AudioFactory());
+    CampaignObjectFactory::addFactory(new CombatantFactory());
+    CampaignObjectFactory::addFactory(new MapFactory());
 
     connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
     connect(Spellbook::Instance(),SIGNAL(changed()),&spellDlg,SLOT(dataChanged()));

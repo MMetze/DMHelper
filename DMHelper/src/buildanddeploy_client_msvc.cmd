@@ -59,14 +59,14 @@ windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64-clien
 
 rem Create the installer
 cd ..\bin64-client
-binarycreator -c config\config_win64.xml -p packages "DM Helper Client 64-bit release Installer"
+binarycreator -c config\config_win64.xml -p packages "DMHelper Client 64-bit release Installer"
 cd ..
-move ".\bin64-client\DM Helper Client 64-bit release Installer.exe" ".\DM Helper Client 64-bit release Installer.exe"
+move ".\bin64-client\DMHelper Client 64-bit release Installer.exe" ".\DMHelper Client 64-bit release Installer.exe"
 
 rem Create the zip-file distribution
 "%SEVENZIP_APP%" a -tzip archive.zip .\bin64\packages\com.dmhelperclient.app\data\*
-del "DM Helper Client 64-bit release.zip"
-rename archive.zip "DM Helper Client 64-bit release.zip"
+del "DMHelper Client 64-bit release.zip"
+rename archive.zip "DMHelper Client 64-bit release.zip"
 
 :end
 pause

@@ -11,6 +11,7 @@
 #include "map.h"
 #include "character.h"
 #include "bestiary.h"
+#include "dmhwaitingdialog.h"
 #include <QUuid>
 #include <QFileDialog>
 #include <QCryptographicHash>
@@ -100,9 +101,12 @@ void ExportDialog::runExport()
 
     qDebug() << "[ExportDialog] Exporting to " << exportDirPath << ": " << (ui->btnFull->isChecked() ? QString("full export") : QString("assets only")) << ", monsters included: " << ui->grpMonsters->isChecked();
 
-    // TODO: Add waiting dialog
+    DMHWaitingDialog dlg(QString("Exporting Selected Items..."), this);
+    dlg.show();
 
     recursiveExport(ui->treeCampaign->invisibleRootItem(), exportDir);
+
+    dlg.hide();
 }
 
 void ExportDialog::setRecursiveChecked(QTreeWidgetItem *item, bool checked)
