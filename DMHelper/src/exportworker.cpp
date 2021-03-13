@@ -177,12 +177,11 @@ void ExportWorker::exportFile(const QString& filename, const QDir& directory)
     if(readData.size() <= 0)
         return;
 
+    file.close();
+
     QString path = directory.filePath(QString());
     QByteArray byteHash = QCryptographicHash::hash(readData, QCryptographicHash::Md5);
     QString hashFileName = byteHash.toHex(0);
-
-    file.close();
-
     QString exportFileName = directory.filePath(hashFileName);
 
     if(!QFile::exists(exportFileName))
