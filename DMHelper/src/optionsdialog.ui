@@ -20,7 +20,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tabGeneral">
       <attribute name="title">
@@ -650,6 +650,49 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>fontComboBox</tabstop>
+  <tabstop>spinBoxFontSize</tabstop>
+  <tabstop>chkShowOnDeck</tabstop>
+  <tabstop>chkShowCountdown</tabstop>
+  <tabstop>edtCountdownDuration</tabstop>
+  <tabstop>edtPointerFile</tabstop>
+  <tabstop>btnPointer</tabstop>
+  <tabstop>edtSelectedIcon</tabstop>
+  <tabstop>btnSelectedIcon</tabstop>
+  <tabstop>edtActiveIcon</tabstop>
+  <tabstop>btnActiveIcon</tabstop>
+  <tabstop>edtCombatantFrame</tabstop>
+  <tabstop>btnCombatantFrame</tabstop>
+  <tabstop>edtCountdownFrame</tabstop>
+  <tabstop>btnCountdownFrame</tabstop>
+  <tabstop>chkEnableUpdates</tabstop>
+  <tabstop>chkAllowStatistics</tabstop>
+  <tabstop>edtBestiary</tabstop>
+  <tabstop>btnBestiary</tabstop>
+  <tabstop>edtSpellbook</tabstop>
+  <tabstop>btnSpellbook</tabstop>
+  <tabstop>edtQuickReference</tabstop>
+  <tabstop>btnQuickReference</tabstop>
+  <tabstop>edtCalendar</tabstop>
+  <tabstop>btnCalendar</tabstop>
+  <tabstop>edtEquipment</tabstop>
+  <tabstop>btnEquipment</tabstop>
+  <tabstop>edtShops</tabstop>
+  <tabstop>btnShops</tabstop>
+  <tabstop>edtTables</tabstop>
+  <tabstop>btnTables</tabstop>
+  <tabstop>btnResetFileLocations</tabstop>
+  <tabstop>chkEnableNetworkClient</tabstop>
+  <tabstop>edtURL</tabstop>
+  <tabstop>edtUserName</tabstop>
+  <tabstop>edtPassword</tabstop>
+  <tabstop>chkSavePassword</tabstop>
+  <tabstop>edtSessionID</tabstop>
+  <tabstop>edtInviteID</tabstop>
+  <tabstop>btnGenerateInvite</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
