@@ -8,13 +8,11 @@
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
 #include "monsterclass.h"
-#include "map.h"
-#include "character.h"
-#include "bestiary.h"
 #include "dmhwaitingdialog.h"
+#include "exportworker.h"
 #include <QUuid>
 #include <QFileDialog>
-#include <QCryptographicHash>
+#include <QThread>
 #include <QDebug>
 
 ExportDialog::ExportDialog(const Campaign& campaign, const QUuid& selectedItem, QWidget *parent) :
@@ -22,7 +20,10 @@ ExportDialog::ExportDialog(const Campaign& campaign, const QUuid& selectedItem, 
     ui(new Ui::ExportDialog),
     _campaign(campaign),
     _selectedItem(selectedItem),
-    _monsters()
+    _monsters(),
+    _workerThread(nullptr),
+    _worker(nullptr),
+    _waitingDlg(nullptr)
 {
     ui->setupUi(this);
     connect(ui->treeCampaign, &QTreeWidget::itemChanged, this, &ExportDialog::handleCampaignItemChanged);
@@ -46,6 +47,22 @@ ExportDialog::ExportDialog(const Campaign& campaign, const QUuid& selectedItem, 
 
 ExportDialog::~ExportDialog()
 {
+    if(_worker)
+        _worker->disconnect();
+
+    if(_workerThread)
+        _workerThread->disconnect();
+
+    if(_workerThread)
+    {
+        _workerThread->quit();
+        _workerThread->wait();
+        delete _workerThread;
+    }
+
+    delete _worker;
+    delete _waitingDlg;
+
     delete ui;
 }
 
@@ -101,12 +118,56 @@ void ExportDialog::runExport()
 
     qDebug() << "[ExportDialog] Exporting to " << exportDirPath << ": " << (ui->btnFull->isChecked() ? QString("full export") : QString("assets only")) << ", monsters included: " << ui->grpMonsters->isChecked();
 
-    DMHWaitingDialog dlg(QString("Exporting Selected Items..."), this);
-    dlg.show();
+    _workerThread = new QThread(this);
+    _worker = new ExportWorker(ui->treeCampaign->invisibleRootItem(), exportDir);
+    _worker->moveToThread(_workerThread);
+    connect(_workerThread, &QThread::finished, this, &ExportDialog::threadFinished);
+    connect(_worker, &ExportWorker::workComplete, this, &ExportDialog::exportFinished);
+    connect(this, &ExportDialog::startWork, _worker, &ExportWorker::doWork);
 
-    recursiveExport(ui->treeCampaign->invisibleRootItem(), exportDir);
+    if(!_waitingDlg)
+        _waitingDlg = new DMHWaitingDialog(QString("Exporting..."), this);
 
-    dlg.hide();
+    _workerThread->start();
+    emit startWork();
+    _waitingDlg->setModal(true);
+    _waitingDlg->show();
+}
+
+void ExportDialog::exportFinished(bool success)
+{
+    Q_UNUSED(success);
+
+    qDebug() << "[ExportDialog] Export completed, stopping dialog and thread.";
+
+    if(_waitingDlg)
+    {
+        _waitingDlg->accept();
+        _waitingDlg->deleteLater();
+        _waitingDlg = nullptr;
+    }
+
+    if(_workerThread)
+    {
+        _workerThread->quit();
+    }
+}
+
+void ExportDialog::threadFinished()
+{
+    qDebug() << "[ExportDialog] Export thread finished.";
+
+    if(_worker)
+    {
+        _worker->deleteLater();
+        _worker = nullptr;
+    }
+
+    if(_workerThread)
+    {
+        _workerThread->deleteLater();
+        _workerThread = nullptr;
+    }
 }
 
 void ExportDialog::setRecursiveChecked(QTreeWidgetItem *item, bool checked)
@@ -221,150 +282,3 @@ void ExportDialog::checkObjectContent(const CampaignObjectBase* object)
     }
 }
 
-void ExportDialog::recursiveExport(QTreeWidgetItem* widgetItem, const QDir& directory)
-{
-    if(!widgetItem)
-        return;
-
-    if(widgetItem->checkState(0) == Qt::Checked)
-        exportObjectAssets(widgetItem->data(0, Qt::UserRole).value<const CampaignObjectBase*>(), directory);
-
-    for(int i = 0; i < widgetItem->childCount(); ++i)
-    {
-        recursiveExport(widgetItem->child(i), directory);
-    }
-}
-
-void ExportDialog::exportObjectAssets(const CampaignObjectBase* object, const QDir& directory)
-{
-    if(!object)
-        return;
-
-    switch(object->getObjectType())
-    {
-        case DMHelper::CampaignType_Map:
-        {
-            const Map* map = dynamic_cast<const Map*>(object);
-            qDebug() << "[ExportDialog] Exporting map: " << map->getName() << ", file: " << map->getFileName();
-            exportFile(map->getFileName(), directory);
-            break;
-        }
-        case DMHelper::CampaignType_Combatant:
-        {
-            const Combatant* combatant = dynamic_cast<const Combatant*>(object);
-            qDebug() << "[ExportDialog] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIcon();
-            exportFile(combatant->getIcon(), directory);
-            break;
-        }
-        case DMHelper::CampaignType_Text:
-        {
-            //TODO : include with newer version and animated text!!!
-            //const EncounterText* textEncounter = dynamic_cast<EncounterText*>(object);
-            //exportFile(textEncounter->get)
-            break;
-        }
-        case DMHelper::CampaignType_AudioTrack:
-        {
-            const AudioTrack* track = dynamic_cast<const AudioTrack*>(object);
-            if(track->getAudioType() == DMHelper::AudioType_File)
-            {
-                qDebug() << "[ExportDialog] Exporting track: " << track->getName() << ", file: " << track->getUrl();
-                exportFile(track->getUrl().toString(), directory);
-            }
-            break;
-        }
-        case DMHelper::CampaignType_Battle:
-            exportBattle(dynamic_cast<const EncounterBattle*>(object), directory);
-            break;
-        default:
-            break;
-    }
-}
-
-void ExportDialog::exportBattle(const EncounterBattle* battle, const QDir& directory)
-{
-    if(!battle)
-        return;
-
-    BattleDialogModel* battleModel = battle->getBattleDialogModel();
-    if(!battleModel)
-        return;
-
-    qDebug() << "[ExportDialog] Exporting battle: " << battle->getName();
-
-    int i;
-    QList<MonsterClass*> monsters;
-    for(i = 0; i < battleModel->getCombatantCount(); ++i)
-    {
-        BattleDialogModelCombatant* combatant = battleModel->getCombatant(i);
-        if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster))
-        {
-            BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
-            MonsterClass* monsterClass = monsterCombatant->getMonsterClass();
-            if((monsterClass) && (!monsters.contains(monsterClass)))
-            {
-                QString monsterIconFile = Bestiary::Instance()->findMonsterImage(monsterClass->getName(), monsterClass->getIcon());
-                if(!monsterIconFile.isEmpty())
-                {
-                    QString fullMonsterFile = Bestiary::Instance()->getDirectory().filePath(monsterIconFile);
-                    qDebug() << "[ExportDialog] Exporting monster: " << monsterClass->getName() << ", icon: " << fullMonsterFile;
-                    exportFile(fullMonsterFile, directory);
-                    monsters.append(monsterClass);
-                }
-            }
-        }
-    }
-
-    for(i = 0; i < battleModel->getEffectCount(); ++i)
-    {
-        BattleDialogModelEffect* effect = battleModel->getEffect(i);
-        if(effect)
-        {
-            if(!effect->getImageFile().isEmpty())
-            {
-                qDebug() << "[ExportDialog] Exporting effect: " << effect->getName() << ", image: " << effect->getImageFile();
-                exportFile(effect->getImageFile(), directory);
-            }
-
-            QList<CampaignObjectBase*> childObjects = effect->getChildObjects();
-            for(CampaignObjectBase* childObject : childObjects)
-            {
-                BattleDialogModelEffect* childEffect = dynamic_cast<BattleDialogModelEffect*>(childObject);
-                if((childEffect) && (!childEffect->getImageFile().isEmpty()))
-                {
-                    qDebug() << "[ExportDialog] Exporting child effect: " << childEffect->getName() << ", image: " << childEffect->getImageFile();
-                    exportFile(childEffect->getImageFile(), directory);
-                }
-            }
-        }
-    }
-
-    exportObjectAssets(battleModel->getMap(), directory);
-}
-
-void ExportDialog::exportFile(const QString& filename, const QDir& directory)
-{
-    if((filename.isEmpty()) || !QFile::exists(filename))
-        return;
-
-    QFile file(filename);
-    if(!file.open(QIODevice::ReadOnly))
-        return;
-
-    QByteArray readData = file.readAll();
-    if(readData.size() <= 0)
-        return;
-
-    file.close();
-
-    QByteArray byteHash = QCryptographicHash::hash(readData, QCryptographicHash::Md5);
-    QString hashFileName = byteHash.toHex(0);
-    QString exportFileName = directory.filePath(hashFileName);
-
-    if(!QFile::exists(exportFileName))
-    {
-        qDebug() << "[ExportDialog]     Copying file: " << filename << " to " << exportFileName;
-        if(!QFile::copy(filename, exportFileName))
-            qDebug() << "[ExportDialog]     ==> Copy FAILED!";
-    }
-}

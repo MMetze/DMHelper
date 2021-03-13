@@ -5,11 +5,11 @@
 
 class Campaign;
 class CampaignObjectBase;
-class EncounterBattle;
-class BattleDialogModelEffect;
 class QUuid;
 class QTreeWidgetItem;
-class QDir;
+class ExportWorker;
+class DMHWaitingDialog;
+class QThread;
 
 namespace Ui {
 class ExportDialog;
@@ -25,9 +25,14 @@ public:
 
     QTreeWidgetItem* createChildObject(const CampaignObjectBase* childObject, const QUuid& selectedItem);
 
+signals:
+    void startWork();
+
 private slots:
     void handleCampaignItemChanged(QTreeWidgetItem *item, int column);
     void runExport();
+    void exportFinished(bool success);
+    void threadFinished();
 
 private:
     void setRecursiveChecked(QTreeWidgetItem *item, bool checked);
@@ -35,16 +40,16 @@ private:
     void checkObjectContent(const CampaignObjectBase* object);
     void refreshMonsters();
     void recursiveRefreshMonsters(QTreeWidgetItem* widgetItem);
-    void recursiveExport(QTreeWidgetItem* widgetItem, const QDir& directory);
-    void exportObjectAssets(const CampaignObjectBase* object, const QDir& directory);
-    void exportBattle(const EncounterBattle* battle, const QDir& directory);
-    void exportFile(const QString& filename, const QDir& directory);
 
     Ui::ExportDialog *ui;
 
     const Campaign& _campaign;
     const QUuid& _selectedItem;
     QStringList _monsters;
+
+    QThread* _workerThread;
+    ExportWorker* _worker;
+    DMHWaitingDialog* _waitingDlg;
 
 };
 
