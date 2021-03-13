@@ -71,6 +71,8 @@ SOURCES += main.cpp\
     emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
+    exportdialog.cpp \
+    exportworker.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapfactory.cpp \
@@ -283,6 +285,8 @@ HEADERS  += mainwindow.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
+    exportdialog.h \
+    exportworker.h \
     legaldialog.h \
     mapfactory.h \
     mapmarker.h \
