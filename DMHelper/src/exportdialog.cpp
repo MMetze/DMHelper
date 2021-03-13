@@ -13,6 +13,7 @@
 #include <QUuid>
 #include <QFileDialog>
 #include <QThread>
+#include <QMessageBox>
 #include <QDebug>
 
 ExportDialog::ExportDialog(const Campaign& campaign, const QUuid& selectedItem, QWidget *parent) :
@@ -150,6 +151,16 @@ void ExportDialog::exportFinished(bool success)
     if(_workerThread)
     {
         _workerThread->quit();
+    }
+
+    if(success)
+    {
+        QMessageBox::information(this, QString("DMHelper - Export Data"), QString("Export Completed!"));
+        accept();
+    }
+    else
+    {
+        QMessageBox::critical(this, QString("DMHelper - Export Data"), QString("Export Failed!"));
     }
 }
 
