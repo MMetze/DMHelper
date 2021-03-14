@@ -102,6 +102,7 @@ SOURCES += main.cpp\
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
     ribbontabtools.cpp \
+    selectstringdialog.cpp \
     soundboardframe.cpp \
     soundboardgroup.cpp \
     soundboardgroupframe.cpp \
@@ -317,6 +318,7 @@ HEADERS  += mainwindow.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
     ribbontabtools.h \
+    selectstringdialog.h \
     soundboardframe.h \
     soundboardgroup.h \
     soundboardgroupframe.h \
@@ -483,6 +485,7 @@ FORMS    += mainwindow.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
+    selectstringdialog.ui \
     soundboardframe.ui \
     soundboardgroupframe.ui \
     soundboardtrackframe.ui \
