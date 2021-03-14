@@ -7,9 +7,13 @@
 #include "encounterbattle.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
-#include "monsterclass.h"
 #include "dmhwaitingdialog.h"
 #include "exportworker.h"
+#include "bestiary.h"
+#include "monsterclass.h"
+#include "spellbook.h"
+#include "spell.h"
+#include "selectstringdialog.h"
 #include <QUuid>
 #include <QFileDialog>
 #include <QThread>
@@ -22,6 +26,7 @@ ExportDialog::ExportDialog(const Campaign& campaign, const QUuid& selectedItem, 
     _campaign(campaign),
     _selectedItem(selectedItem),
     _monsters(),
+    _spells(),
     _workerThread(nullptr),
     _worker(nullptr),
     _waitingDlg(nullptr)
@@ -31,6 +36,12 @@ ExportDialog::ExportDialog(const Campaign& campaign, const QUuid& selectedItem, 
     connect(ui->btnClose, &QAbstractButton::clicked, this, &ExportDialog::close);
     connect(ui->btnExport, &QAbstractButton::clicked, this, &ExportDialog::runExport);
     connect(ui->grpMonsters, &QGroupBox::clicked, ui->grpMonsters, &QGroupBox::setEnabled);
+    connect(ui->grpExportType, &QButtonGroup::idClicked, this, &ExportDialog::handleExportTypeChanged);
+    connect(ui->btnAddMonsters, &QAbstractButton::clicked, this, &ExportDialog::addMonsters);
+    connect(ui->btnAddSpells, &QAbstractButton::clicked, this, &ExportDialog::addSpells);
+
+    ui->grpExportType->setId(ui->btnClient, ExportType_DMClient);
+    ui->grpExportType->setId(ui->btnFull, ExportType_DMHelper);
 
     QList<CampaignObjectBase*> objectList = campaign.getChildObjects();
     for(CampaignObjectBase* rootObject : objectList)
@@ -107,6 +118,61 @@ void ExportDialog::handleCampaignItemChanged(QTreeWidgetItem *item, int column)
     setRecursiveChecked(item, item->checkState(0) == Qt::Checked);
 }
 
+void ExportDialog::handleExportTypeChanged(int id)
+{
+    ui->chkSoundboard->setEnabled(id == ExportType_DMHelper);
+}
+
+void ExportDialog::addMonsters()
+{
+    if(!Bestiary::Instance())
+        return;
+
+    SelectStringDialog dlg;
+    dlg.resize(width() / 2, height() * 9 / 10);
+
+    QList<QString> monsters = Bestiary::Instance()->getMonsterList();
+    for(QString monster : monsters)
+    {
+        dlg.addEntry(monster);
+    }
+
+    int result = dlg.exec();
+    if(result != QDialog::Accepted)
+        return;
+
+    QStringList selectedMonsters = dlg.getSelection();
+    for(QString selected : selectedMonsters)
+    {
+        addMonster(Bestiary::Instance()->getMonsterClass(selected));
+    }
+}
+
+void ExportDialog::addSpells()
+{
+    if(!Spellbook::Instance())
+        return;
+
+    SelectStringDialog dlg;
+    dlg.resize(width() / 2, height() * 9 / 10);
+
+    QList<QString> spells = Spellbook::Instance()->getSpellList();
+    for(QString spellName : spells)
+    {
+        dlg.addEntry(spellName);
+    }
+
+    int result = dlg.exec();
+    if(result != QDialog::Accepted)
+        return;
+
+    QStringList selectedSpells = dlg.getSelection();
+    for(QString selected : selectedSpells)
+    {
+        addSpell(Spellbook::Instance()->getSpell(selected));
+    }
+}
+
 void ExportDialog::runExport()
 {
     QString exportDirPath = QFileDialog::getExistingDirectory(this, QString("Select Export Directory"));
@@ -117,10 +183,12 @@ void ExportDialog::runExport()
     if(!exportDir.exists())
         return;
 
-    qDebug() << "[ExportDialog] Exporting to " << exportDirPath << ": " << (ui->btnFull->isChecked() ? QString("full export") : QString("assets only")) << ", monsters included: " << ui->grpMonsters->isChecked();
+    qDebug() << "[ExportDialog] Exporting to " << exportDirPath << ": " << ((ui->grpExportType->checkedId() == ExportType_DMHelper) ? QString("DMHelper full export") : QString("DMClient assets only")) << ", monsters included: " << ui->grpMonsters->isChecked();
 
     _workerThread = new QThread(this);
-    _worker = new ExportWorker(ui->treeCampaign->invisibleRootItem(), exportDir);
+    _worker = new ExportWorker(ui->treeCampaign->invisibleRootItem(), exportDir, (ui->grpExportType->checkedId() == ExportType_DMHelper));
+    _worker->setSpellExports(_spells);
+    _worker->setMonsterExports(_monsters);
     _worker->moveToThread(_workerThread);
     connect(_workerThread, &QThread::finished, this, &ExportDialog::threadFinished);
     connect(_worker, &ExportWorker::workComplete, this, &ExportDialog::exportFinished);
@@ -281,15 +349,32 @@ void ExportDialog::checkObjectContent(const CampaignObjectBase* object)
             if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster))
             {
                 BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
-                MonsterClass* monsterClass = monsterCombatant->getMonsterClass();
-                if((monsterClass) && (!_monsters.contains(monsterClass->getName())))
-                {
-                    QListWidgetItem* listItem = new QListWidgetItem(QIcon(monsterClass->getIconPixmap(DMHelper::PixmapSize_Full)), monsterClass->getName());
-                    ui->listMonsters->addItem(listItem);
-                    _monsters.append(monsterClass->getName());
-                }
+                addMonster(monsterCombatant->getMonsterClass());
             }
         }
     }
 }
 
+void ExportDialog::addMonster(MonsterClass* monsterClass)
+{
+    if((!monsterClass) || (_monsters.contains(monsterClass->getName())))
+        return;
+
+    QListWidgetItem* listItem = new QListWidgetItem(QIcon(monsterClass->getIconPixmap(DMHelper::PixmapSize_Full)), monsterClass->getName());
+    ui->listMonsters->addItem(listItem);
+    _monsters.append(monsterClass->getName());
+}
+
+void ExportDialog::addSpell(Spell* spell)
+{
+    if((!spell) || (_spells.contains(spell->getName())))
+        return;
+
+    QPixmap spellPixmap;
+    if(!spell->getEffectTokenPath().isEmpty())
+        spellPixmap.load(spell->getEffectTokenPath());
+
+    QListWidgetItem* listItem = new QListWidgetItem(QIcon(spellPixmap), spell->getName());
+    ui->listSpells->addItem(listItem);
+    _spells.append(spell->getName());
+}

@@ -59,7 +59,7 @@
     #include "networkcontroller.h"
 #endif
 #include "aboutdialog.h"
-#include "campaignexporter.h"
+//#include "campaignexporter.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
 #include "customtableframe.h"

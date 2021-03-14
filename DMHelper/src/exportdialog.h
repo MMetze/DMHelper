@@ -9,6 +9,8 @@ class QUuid;
 class QTreeWidgetItem;
 class ExportWorker;
 class DMHWaitingDialog;
+class MonsterClass;
+class Spell;
 class QThread;
 
 namespace Ui {
@@ -30,22 +32,34 @@ signals:
 
 private slots:
     void handleCampaignItemChanged(QTreeWidgetItem *item, int column);
+    void handleExportTypeChanged(int id);
+    void addMonsters();
+    void addSpells();
     void runExport();
     void exportFinished(bool success);
     void threadFinished();
 
 private:
+    enum ExportType
+    {
+        ExportType_DMClient = 0,
+        ExportType_DMHelper,
+    };
+
     void setRecursiveChecked(QTreeWidgetItem *item, bool checked);
     void setObjectIcon(const CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem);
-    void checkObjectContent(const CampaignObjectBase* object);
     void refreshMonsters();
     void recursiveRefreshMonsters(QTreeWidgetItem* widgetItem);
+    void checkObjectContent(const CampaignObjectBase* object);
+    void addMonster(MonsterClass* monsterClass);
+    void addSpell(Spell* spell);
 
     Ui::ExportDialog *ui;
 
     const Campaign& _campaign;
     const QUuid& _selectedItem;
     QStringList _monsters;
+    QStringList _spells;
 
     QThread* _workerThread;
     ExportWorker* _worker;
