@@ -201,6 +201,8 @@ int DMHNetworkManager_Private::downloadFile(const QString& fileMD5)
 
     qDebug() << "[DMHNetworkManager] Download request sent for file: " << fileMD5 << " with ID " << replyId;
 
+    emit downloadStarted(replyId, fileMD5, reply);
+
     return replyId;
 }
 
@@ -219,6 +221,11 @@ const DMHLogon& DMHNetworkManager_Private::getLogon() const
 void DMHNetworkManager_Private::setLogon(const DMHLogon& logon)
 {
     _logon = logon;
+}
+
+QNetworkReply* DMHNetworkManager_Private::getNetworkReply(int requestID)
+{
+    return _replies.key(requestID);
 }
 
 void DMHNetworkManager_Private::requestFinished(QNetworkReply* reply)
@@ -262,7 +269,8 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
 
     if(replyData < VALID_REQUEST_ID)
     {
-        registerRequestError(QString("[DMHNetworkManager] Request with blank ID received: ") + QString::number(replyData), replyData);
+        //registerRequestError(QString("[DMHNetworkManager] Request with blank ID received: ") + QString::number(replyData), replyData);
+        emit otherRequestComplete();
         return;
     }
 

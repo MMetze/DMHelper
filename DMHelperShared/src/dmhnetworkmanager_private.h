@@ -30,10 +30,14 @@ public:
     const DMHLogon& getLogon() const;
     void setLogon(const DMHLogon& logon);
 
+    QNetworkReply* getNetworkReply(int requestID);
+
 signals:
     void uploadComplete(int requestID, const QString& fileMD5);
+    void downloadStarted(int requestID, const QString& fileMD5, QNetworkReply* reply);
     void downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data);
     void existsComplete(int requestID, const QString& fileMD5, const QString& filename, bool exists);
+    void otherRequestComplete();
     void requestError(int requestID);
 
     void DEBUG_message_contents(const QByteArray& data);

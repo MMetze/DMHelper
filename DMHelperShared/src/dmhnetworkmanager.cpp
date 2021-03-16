@@ -7,8 +7,10 @@ DMHNetworkManager::DMHNetworkManager(const DMHLogon& logon, QObject *parent) :
     d(new DMHNetworkManager_Private(logon))
 {
     connect(&(*d), SIGNAL(uploadComplete(int, const QString&)), this, SIGNAL(uploadComplete(int, const QString&)));
+    connect(&(*d), SIGNAL(downloadStarted(int, const QString&, QNetworkReply*)), this, SIGNAL(downloadStarted(int, const QString&, QNetworkReply*)));
     connect(&(*d), SIGNAL(downloadComplete(int, const QString&, const QByteArray&)), this, SIGNAL(downloadComplete(int, const QString&, const QByteArray&)));
     connect(&(*d), SIGNAL(existsComplete(int, const QString&, const QString&, bool)), this, SIGNAL(existsComplete(int, const QString&, const QString&, bool)));
+    connect(&(*d), SIGNAL(otherRequestComplete()), this, SIGNAL(otherRequestComplete()));
     connect(&(*d), SIGNAL(requestError(int)), this, SIGNAL(requestError(int)));
     connect(&(*d), SIGNAL(DEBUG_message_contents(const QByteArray&)), this, SIGNAL(DEBUG_message_contents(const QByteArray&)));
     connect(&(*d), SIGNAL(DEBUG_response_contents(const QByteArray&)), this, SIGNAL(DEBUG_response_contents(const QByteArray&)));
@@ -61,4 +63,9 @@ const DMHLogon& DMHNetworkManager::getLogon() const
 void DMHNetworkManager::setLogon(const DMHLogon& logon)
 {
     d->setLogon(logon);
+}
+
+QNetworkReply* DMHNetworkManager::getNetworkReply(int requestID)
+{
+    return d->getNetworkReply(requestID);
 }

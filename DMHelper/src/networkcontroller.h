@@ -12,6 +12,7 @@
 
 class AudioTrack;
 class DMHNetworkManager;
+class QNetworkReply;
 
 typedef QPair<int, AudioTrack*> AudioTrackUpload;
 
@@ -26,6 +27,14 @@ signals:
     void requestSettings(DMHelper::OptionsTab startTab);
     void networkEnabledChanged(bool enabled);
 
+    void networkError(int error);
+    void networkSuccess();
+
+    void uploadStarted(int requestID, QNetworkReply* reply, const QString& fileName);
+    void uploadComplete(int requestID, const QString& fileMD5);
+    void downloadStarted(int requestID, const QString& fileMD5, QNetworkReply* reply);
+    void downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data);
+
 public slots:
     void addTrack(AudioTrack* track);
     void removeTrack(AudioTrack* track);
@@ -39,8 +48,8 @@ public slots:
     void setNetworkLogin(const QString& urlString, const QString& username, const QString& password, const QString& sessionID, const QString& inviteID);
 
 private slots:
-    void uploadComplete(int requestID, const QString& fileMD5);
-    void existsComplete(int requestID, const QString& fileMD5, const QString& filename, bool exists);
+    void uploadCompleted(int requestID, const QString& fileMD5);
+    void existsCompleted(int requestID, const QString& fileMD5, const QString& filename, bool exists);
     void uploadError(int requestID);
     void uploadPayload();
 

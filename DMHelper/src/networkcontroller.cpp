@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QDomDocument>
 #include <QPushButton>
+#include <QNetworkReply>
 #include <QDebug>
 
 // Uncomment this define to output payload data to a local file "_dmhpayload.txt"
@@ -29,9 +30,14 @@ NetworkController::NetworkController(QObject *parent) :
     _tracks(),
     _enabled(false)
 {
-    connect(_networkManager, SIGNAL(uploadComplete(int, const QString&)), this, SLOT(uploadComplete(int, const QString&)));
-    connect(_networkManager, SIGNAL(existsComplete(int, const QString&, const QString&, bool)), this, SLOT(existsComplete(int, const QString&, const QString&, bool)));
+    connect(_networkManager, SIGNAL(uploadComplete(int, const QString&)), this, SLOT(uploadCompleted(int, const QString&)));
+    connect(_networkManager, SIGNAL(existsComplete(int, const QString&, const QString&, bool)), this, SLOT(existsCompleted(int, const QString&, const QString&, bool)));
     connect(_networkManager, SIGNAL(requestError(int)), this, SLOT(uploadError(int)));
+    connect(_networkManager, SIGNAL(requestError(int)), this, SIGNAL(networkError(int)));
+    connect(_networkManager, SIGNAL(otherRequestComplete()), this, SIGNAL(networkSuccess()));
+    connect(_networkManager, &DMHNetworkManager::uploadComplete, this, &NetworkController::uploadComplete);
+    connect(_networkManager, &DMHNetworkManager::downloadStarted, this, &NetworkController::downloadStarted);
+    connect(_networkManager, &DMHNetworkManager::downloadComplete, this, &NetworkController::downloadComplete);
 }
 
 NetworkController::~NetworkController()
@@ -98,7 +104,13 @@ void NetworkController::uploadImage(QImage img)
         return;
     if(!img.save(&buffer, "PNG"))
         return;
+
+    if(_currentImageRequest > 0)
+        _networkManager->abortRequest(_currentImageRequest);
+
     _currentImageRequest = _networkManager->uploadData(data);
+    if(_currentImageRequest > 0)
+        emit uploadStarted(_currentImageRequest, _networkManager->getNetworkReply(_currentImageRequest), QString("Published Image"));
 }
 
 void NetworkController::uploadImage(QImage img, QColor color)
@@ -187,7 +199,7 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
     updateAudioPayload();
 }
 
-void NetworkController::uploadComplete(int requestID, const QString& fileMD5)
+void NetworkController::uploadCompleted(int requestID, const QString& fileMD5)
 {
     qDebug() << "[NetworkController] Upload complete " << requestID << ": " << fileMD5;
 
@@ -237,7 +249,7 @@ void NetworkController::uploadComplete(int requestID, const QString& fileMD5)
     qDebug() << "[NetworkController] ERROR: Unexpected request ID received: " << requestID;
 }
 
-void NetworkController::existsComplete(int requestID, const QString& fileMD5, const QString& filename, bool exists)
+void NetworkController::existsCompleted(int requestID, const QString& fileMD5, const QString& filename, bool exists)
 {
     Q_UNUSED(filename);
 
@@ -344,9 +356,15 @@ void NetworkController::uploadTrack(AudioTrackUpload* trackPair)
     }
 
     if(trackPair->second->getMD5().isEmpty())
+    {
         trackPair->first = _networkManager->uploadFile(trackFile);
+        if(trackPair->first > 0)
+            emit uploadStarted(trackPair->first, _networkManager->getNetworkReply(trackPair->first), trackPair->second->getName());
+    }
     else
+    {
         trackPair->first = _networkManager->fileExists(trackPair->second->getMD5());
+    }
 
     qDebug() << "[NetworkController] Uploading audio track: " << trackFile << ", MD5: " << trackPair->second->getMD5() << ", Request: " << trackPair->first;
 }

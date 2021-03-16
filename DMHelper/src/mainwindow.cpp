@@ -772,6 +772,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
     //connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     // TODO: _battleDlgMgr->setNetworkManager(_networkController);
+
+    ui->frameNetwork->setOptionsContainer(_options);
+    connect(_networkController, &NetworkController::networkError, ui->frameNetwork, &NetworkStatusFrame::setNetworkError);
+    connect(_networkController, &NetworkController::networkSuccess, ui->frameNetwork, &NetworkStatusFrame::setNetworkSuccess);
+    connect(_networkController, &NetworkController::uploadStarted, ui->frameNetwork, &NetworkStatusFrame::uploadStarted);
 #endif
 
     _objectDispatcher = new ObjectDispatcher(this);

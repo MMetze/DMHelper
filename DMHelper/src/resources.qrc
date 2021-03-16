@@ -288,6 +288,9 @@
         <file>data/fonts/Davek-vGXA.ttf</file>
         <file>data/fonts/Iokharic-dqvK.ttf</file>
         <file>data/fonts/Rellanic-Agx7.ttf</file>
+        <file>data/icon_network_error.png</file>
+        <file>data/icon_network_off.png</file>
+        <file>data/icon_network_ok.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

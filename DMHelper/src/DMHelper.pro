@@ -76,6 +76,8 @@ SOURCES += main.cpp\
     legaldialog.cpp \
     mainwindow.cpp \
     mapfactory.cpp \
+    networksinglestatusframe.cpp \
+    networkstatusframe.cpp \
     objectdispatcher.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
@@ -292,6 +294,8 @@ HEADERS  += mainwindow.h \
     legaldialog.h \
     mapfactory.h \
     mapmarker.h \
+    networksinglestatusframe.h \
+    networkstatusframe.h \
     objectdispatcher.h \
     objectfactory.h \
     objectimporter.h \
@@ -468,6 +472,8 @@ FORMS    += mainwindow.ui \
     expertisedialog.ui \
     exportdialog.ui \
     legaldialog.ui \
+    networksinglestatusframe.ui \
+    networkstatusframe.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \
