@@ -131,7 +131,7 @@ void NetworkStatusFrame::setExpanded(bool expanded)
 
     ui->progressBar->setVisible(!expanded);
     ui->scrollAreaFiles->setVisible(expanded);
-    ui->scrollAreaPlayers->setVisible(expanded);
+    ui->grpPlayers->setVisible(expanded);
 
     int halfHeight = 300;
     QWidget* widget = parentWidget();
