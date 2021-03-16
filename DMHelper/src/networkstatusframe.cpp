@@ -1,8 +1,10 @@
 #include "networkstatusframe.h"
 #include "ui_networkstatusframe.h"
 #include "networksinglestatusframe.h"
+#include "networkplayerframe.h"
 #include "optionscontainer.h"
 #include <QNetworkReply>
+#include <QMainWindow>
 #include <QVBoxLayout>
 
 NetworkStatusFrame::NetworkStatusFrame(QWidget *parent) :
@@ -10,7 +12,8 @@ NetworkStatusFrame::NetworkStatusFrame(QWidget *parent) :
     ui(new Ui::NetworkStatusFrame),
     _statusString(),
     _currentReply(nullptr),
-    _statusLayout(nullptr)
+    _filesLayout(nullptr),
+    _playersLayout(nullptr)
 {
     ui->setupUi(this);
     setStatusString();
@@ -18,9 +21,18 @@ NetworkStatusFrame::NetworkStatusFrame(QWidget *parent) :
     connect(ui->btnExpand, &QAbstractButton::clicked, this, &NetworkStatusFrame::setExpanded);
     setExpanded(false);
 
-    _statusLayout = new QVBoxLayout;
-    _statusLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    ui->scrollAreaWidgetContents->setLayout(_statusLayout);
+    _filesLayout = new QVBoxLayout;
+    _filesLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    ui->scrollAreaFilesWidget->setLayout(_filesLayout);
+
+    _playersLayout = new QVBoxLayout;
+    _playersLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    ui->scrollAreaPlayersWidget->setLayout(_playersLayout);
+
+    _playersLayout->addWidget(new NetworkPlayerFrame(QString("Kiiron")));
+    _playersLayout->addWidget(new NetworkPlayerFrame(QString("Dered")));
+    _playersLayout->addWidget(new NetworkPlayerFrame(QString("ElmoEVL")));
+    _playersLayout->addWidget(new NetworkPlayerFrame(QString("Tim")));
 }
 
 NetworkStatusFrame::~NetworkStatusFrame()
@@ -62,7 +74,7 @@ void NetworkStatusFrame::uploadStarted(int requestID, QNetworkReply* reply, cons
         return;
 
     NetworkSingleStatusFrame* newFrame = new NetworkSingleStatusFrame(reply, filename);
-    _statusLayout->addWidget(newFrame);
+    _filesLayout->addWidget(newFrame);
 
     if(!_currentReply)
         setReply(reply, filename);
@@ -74,11 +86,11 @@ void NetworkStatusFrame::uploadComplete()
 
     NetworkSingleStatusFrame* nextStatus = nullptr;
     int i = 0;
-    while((!nextStatus) && (i < _statusLayout->count()))
+    while((!nextStatus) && (i < _filesLayout->count()))
     {
-        if((_statusLayout->itemAt(i)) && (_statusLayout->itemAt(i)->widget()))
+        if((_filesLayout->itemAt(i)) && (_filesLayout->itemAt(i)->widget()))
         {
-            nextStatus = dynamic_cast<NetworkSingleStatusFrame*>(_statusLayout->itemAt(i)->widget());
+            nextStatus = dynamic_cast<NetworkSingleStatusFrame*>(_filesLayout->itemAt(i)->widget());
             if(nextStatus->getReply() == _currentReply)
                 nextStatus = nullptr;
         }
@@ -118,9 +130,26 @@ void NetworkStatusFrame::setExpanded(bool expanded)
     ui->btnExpand->setIcon(QIcon(expandPmp));
 
     ui->progressBar->setVisible(!expanded);
-    ui->scrollArea->setVisible(expanded);
-    setMinimumHeight(expanded ? 300 : 100);
-    setMaximumHeight(expanded ? 300 : 100);
+    ui->scrollAreaFiles->setVisible(expanded);
+    ui->scrollAreaPlayers->setVisible(expanded);
+
+    int halfHeight = 300;
+    QWidget* widget = parentWidget();
+    while(widget != nullptr)
+    {
+        if(QMainWindow* mainWin = qobject_cast<QMainWindow*>(widget))
+        {
+            halfHeight = mainWin->height() / 2;
+            widget = nullptr;
+        }
+        else
+        {
+            widget = widget->parentWidget();
+        }
+    }
+
+    setMinimumHeight(expanded ? halfHeight : 100);
+    setMaximumHeight(expanded ? halfHeight : 100);
 }
 
 void NetworkStatusFrame::setStatusString(const QString& statusString)

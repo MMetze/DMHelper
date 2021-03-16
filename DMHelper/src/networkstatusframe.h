@@ -43,7 +43,8 @@ private:
     Ui::NetworkStatusFrame *ui;
     QString _statusString;
     QNetworkReply* _currentReply;
-    QVBoxLayout* _statusLayout;
+    QVBoxLayout* _filesLayout;
+    QVBoxLayout* _playersLayout;
 };
 
 #endif // NETWORKSTATUSFRAME_H
