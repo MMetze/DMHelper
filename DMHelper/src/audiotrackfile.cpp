@@ -25,6 +25,16 @@ int AudioTrackFile::getAudioType() const
     return DMHelper::AudioType_File;
 }
 
+QString AudioTrackFile::getFileName() const
+{
+    return getUrl().toString();
+}
+
+void AudioTrackFile::setFileName(const QString& newFileName)
+{
+    setUrl(QUrl(newFileName));
+}
+
 bool AudioTrackFile::isPlaying() const
 {
     return ((_player) && (_player->state() == QMediaPlayer::PlayingState));

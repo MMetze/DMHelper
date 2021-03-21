@@ -7,7 +7,9 @@ NetworkSingleStatusFrame::NetworkSingleStatusFrame(QNetworkReply* reply, const Q
     ui(new Ui::NetworkSingleStatusFrame),
     _filename(fileName),
     _statusString(QString("Uploading ") + fileName),
-    _reply(reply)
+    _reply(reply),
+    _bytesSent(0),
+    _bytesTotal(0)
 {
     ui->setupUi(this);
     ui->lblStatus->setToolTip(_statusString);
@@ -45,9 +47,18 @@ void NetworkSingleStatusFrame::setUploadProgress(qint64 bytesSent, qint64 bytesT
 {
     ui->progressBar->setMaximum(bytesTotal);
     ui->progressBar->setValue(bytesSent);
+
+    _bytesSent = bytesSent;
+    _bytesTotal = bytesTotal;
+
+    setStatusString();
 }
 
 void NetworkSingleStatusFrame::setStatusString()
 {
-    ui->lblStatus->setText(ui->lblStatus->fontMetrics().elidedText(_statusString, Qt::ElideRight, ui->lblStatus->width()));
+    QString status = _statusString;
+    if(_bytesTotal > 0)
+        status += QString(" (") + QString::number(_bytesSent) + QString("/") + QString::number(_bytesTotal) + QString(")");
+
+    ui->lblStatus->setText(ui->lblStatus->fontMetrics().elidedText(status, Qt::ElideRight, ui->lblStatus->width()));
 }

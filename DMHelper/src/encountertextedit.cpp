@@ -490,7 +490,7 @@ void EncounterTextEdit::publishClicked(bool checked)
             if(isVideo())
                 createVideoPlayer(false);
 
-            emit animationStarted();
+            emit animationStarted(_encounter);
             startPublishTimer();
         }
         else
@@ -522,7 +522,7 @@ void EncounterTextEdit::publishClicked(bool checked)
             if(checked)
             {
                 createVideoPlayer(false);
-                emit animationStarted();
+                emit animationStarted(_encounter);
             }
             else
             {

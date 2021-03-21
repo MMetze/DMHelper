@@ -22,8 +22,11 @@ public:
 
     virtual int getObjectType() const override;
 
-    QString getFileName() const;
-    void setFileName(const QString& newFileName);
+    virtual QString getMD5() const override;
+    virtual void setMD5(const QString& md5) override;
+
+    virtual QString getFileName() const override;
+    virtual void setFileName(const QString& newFileName) override;
 
     AudioTrack* getAudioTrack();
     QUuid getAudioTrackId();
@@ -87,6 +90,8 @@ protected:
     bool _initialized;
     QImage _imgBackground;
     QImage _imgFow;
+
+    QString _md5;
 };
 
 #endif // MAP_H

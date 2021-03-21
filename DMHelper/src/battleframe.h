@@ -156,7 +156,7 @@ public slots:
 signals:
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
-    void animationStarted();
+    void animationStarted(CampaignObjectBase* animatedObject);
     void animateImage(QImage img);
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);

@@ -25,6 +25,23 @@ void AudioTrack::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+QDomElement AudioTrack::outputNextworkXML(QDomDocument &doc)
+{
+    QDomElement trackElement = createOutputXML(doc);
+
+    trackElement.setAttribute("type", getAudioType());
+    trackElement.setAttribute("id", getID().toString());
+    trackElement.setAttribute("md5", getMD5());
+    trackElement.setAttribute("trackname", getName());
+    trackElement.setAttribute("repeat", isRepeat());
+    trackElement.setAttribute("mute", isMuted());
+
+    QDomCDATASection urlData = doc.createCDATASection(getUrl().toString());
+    trackElement.appendChild(urlData);
+
+    return trackElement;
+}
+
 int AudioTrack::getObjectType() const
 {
     return DMHelper::CampaignType_AudioTrack;

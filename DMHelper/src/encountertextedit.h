@@ -90,7 +90,7 @@ signals:
     void translatedChanged(bool translated);
 
     void publishImage(QImage image);
-    void animationStarted();
+    void animationStarted(CampaignObjectBase* animatedObject);
     void animateImage(QImage image);
     void animationStopped();
     void showPublishWindow();

@@ -13,6 +13,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual QDomElement outputNextworkXML(QDomDocument &doc) override;
     virtual int getObjectType() const override;
 
     // Local
@@ -21,8 +22,8 @@ public:
     virtual QUrl getUrl() const = 0;
     virtual void setUrl(const QUrl& trackUrl) = 0;
 
-    virtual QString getMD5() const;
-    virtual void setMD5(const QString& md5);
+    virtual QString getMD5() const override;
+    virtual void setMD5(const QString& md5) override;
 
     virtual bool isPlaying() const;
     virtual bool isRepeat() const;

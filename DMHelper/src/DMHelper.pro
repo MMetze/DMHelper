@@ -193,6 +193,7 @@ SOURCES += main.cpp\
     unselectedpolygon.cpp \
     unselectedrect.cpp \
     updatechecker.cpp \
+    uploadobject.cpp \
     videoplayer.cpp \
     welcomeframe.cpp \
     widgetbattlecombatant.cpp \
@@ -413,6 +414,7 @@ HEADERS  += mainwindow.h \
     unselectedpolygon.h \
     unselectedrect.h \
     updatechecker.h \
+    uploadobject.h \
     videoplayer.h \
     welcomeframe.h \
     widgetbattlecombatant.h \

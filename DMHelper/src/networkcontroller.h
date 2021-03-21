@@ -7,14 +7,14 @@
 
 #include "dmhpayload.h"
 #include "dmhlogon.h"
+#include "uploadobject.h"
 #include <QObject>
 #include <QImage>
 
 class AudioTrack;
 class DMHNetworkManager;
 class QNetworkReply;
-
-typedef QPair<int, AudioTrack*> AudioTrackUpload;
+class CampaignObjectBase;
 
 class NetworkController : public QObject
 {
@@ -38,8 +38,10 @@ signals:
 public slots:
     void addTrack(AudioTrack* track);
     void removeTrack(AudioTrack* track);
-    void uploadImage(QImage img);
-    void uploadImage(QImage img, QColor color);
+    void setBackgroundColor(QColor color);
+    void uploadImage(QImage background);
+    void uploadImage(QImage background, QColor color);
+    void uploadObject(CampaignObjectBase* baseObject);
     void setPayloadData(const QString& data);
     void clearTracks();
     void clearImage();
@@ -54,10 +56,13 @@ private slots:
     void uploadPayload();
 
     void removeTrackUUID(const QUuid& id);
-    void uploadTrack(AudioTrackUpload* trackPair);
+    void startObjectUpload(UploadObject* uploadObject);
     bool containsTrack(AudioTrack* track);
     void updateAudioPayload();
     void clearUploadErrors();
+
+    int uploadImage(QImage image, const QString& imageName);
+    void updateImagePayload();
 
     bool validateLogon(const DMHLogon& logon);
 
@@ -65,7 +70,11 @@ private:
     DMHNetworkManager* _networkManager;
     DMHPayload _payload;
     int _currentImageRequest;
-    QList<AudioTrackUpload> _tracks;
+    QList<UploadObject> _tracks;
+    UploadObject _backgroundUpload;
+    qint64 _backgroundCacheKey;
+    UploadObject _fowUpload;
+    QString _backgroundColor;
     bool _enabled;
 };
 

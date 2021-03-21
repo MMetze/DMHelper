@@ -577,7 +577,7 @@ void MapFrame::publishClicked(bool checked)
         {
             //emit animationStarted(ui->framePublish->getColor());
             //emit animationStarted(_color);
-            emit animationStarted();
+            emit animationStarted(_mapSource);
             emit showPublishWindow();
             startAudioTrack();
         }

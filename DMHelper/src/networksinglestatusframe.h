@@ -34,6 +34,8 @@ private:
     QString _filename;
     QString _statusString;
     QNetworkReply* _reply;
+    qint64 _bytesSent;
+    qint64 _bytesTotal;
 };
 
 #endif // NETWORKSINGLESTATUSFRAME_H

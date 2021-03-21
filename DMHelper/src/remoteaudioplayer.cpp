@@ -36,7 +36,7 @@ void RemoteAudioPlayer::parseAudioString(const QString& audioString)
     setChecked(false);
 
     QDomElement rootElement = doc.documentElement();
-    QDomElement trackElement = rootElement.firstChildElement("audio-track");
+    QDomElement trackElement = rootElement.firstChildElement("track");
     while(!trackElement.isNull())
     {
         RemoteAudioPlayer_FileWrapper* wrapper = findTrack(QUuid(trackElement.attribute(QString("id"))));
@@ -53,7 +53,7 @@ void RemoteAudioPlayer::parseAudioString(const QString& audioString)
             _tracks.append(fileWrapper);
         }
 
-        trackElement = trackElement.nextSiblingElement("audio-track");
+        trackElement = trackElement.nextSiblingElement("track");
     }
 
     clearUnchecked();

@@ -27,13 +27,15 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _mapRect(),
     _initialized(false),
     _imgBackground(),
-    _imgFow()
+    _imgFow(),
+    _md5()
 {
     _undoStack = new QUndoStack(this);
 }
 
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
+    setMD5(element.attribute("md5"));
     setFileName(element.attribute("filename"));
     _mapRect = QRect(element.attribute("mapRectX",QString::number(0)).toInt(),
                      element.attribute("mapRectY",QString::number(0)).toInt(),
@@ -89,6 +91,20 @@ void Map::inputXML(const QDomElement &element, bool isImport)
 int Map::getObjectType() const
 {
     return DMHelper::CampaignType_Map;
+}
+
+QString Map::getMD5() const
+{
+    return _md5;
+}
+
+void Map::setMD5(const QString& md5)
+{
+    if(_md5 != md5)
+    {
+        _md5 = md5;
+        emit dirty();
+    }
 }
 
 QString Map::getFileName() const
@@ -649,6 +665,7 @@ QDomElement Map::createOutputXML(QDomDocument &doc)
 void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
+    element.setAttribute("md5", _md5);
     element.setAttribute("audiotrack", _audioTrackId.toString());
     element.setAttribute("playaudio", _playAudio);
     element.setAttribute("mapRectX", _mapRect.x());
@@ -666,7 +683,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
         actionsElement.appendChild(actionElement);
     }
 
-    for(i = 0; i < _undoStack->index(); ++i )
+    for(i = 0; i < _undoStack->index(); ++i)
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)

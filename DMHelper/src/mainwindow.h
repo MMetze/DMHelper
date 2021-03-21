@@ -166,7 +166,7 @@ protected slots:
     void handleTreeItemCollapsed(const QModelIndex & index);
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
 
-    void handleAnimationStarted();
+    void handleAnimationStarted(CampaignObjectBase* animatedObject);
     void handleAnimationPreview(QImage img);
 
     // Bestiary

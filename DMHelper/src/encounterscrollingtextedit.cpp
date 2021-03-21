@@ -476,7 +476,7 @@ void EncounterScrollingTextEdit::publishClicked(bool checked)
         {
             prepareImages();
 
-            emit animationStarted();
+            emit animationStarted(_scrollingText);
             emit showPublishWindow();
             // TODO: add music
 
@@ -496,7 +496,7 @@ void EncounterScrollingTextEdit::publishClicked(bool checked)
             createVideoPlayer(false);
 
             //emit animationStarted(ui->framePublish->getColor());
-            emit animationStarted();
+            emit animationStarted(_scrollingText);
             emit showPublishWindow();
             // TODO: add music
         }

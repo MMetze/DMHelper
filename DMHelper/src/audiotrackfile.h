@@ -15,6 +15,9 @@ public:
 
     virtual int getAudioType() const override;
 
+    virtual QString getFileName() const override;
+    virtual void setFileName(const QString& newFileName) override;
+
     virtual bool isPlaying() const override;
     virtual bool isRepeat() const override;
     virtual bool isMuted() const override;
@@ -38,7 +41,6 @@ protected:
     QMediaPlaylist* _playlist;
     bool _mute;
     bool _repeat;
-
 };
 
 #endif // AUDIOTRACKFILE_H

@@ -4,6 +4,7 @@
 #include "dmconstants.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QDir>
 #include <QDebug>
 
 // Uncomment the next line to log in detail all of the campaign item input, output and postprocessing
@@ -43,6 +44,13 @@ QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent
 #endif
 
     return newElement;
+}
+
+QDomElement CampaignObjectBase::outputNextworkXML(QDomDocument &doc)
+{
+    QDomElement emptyParent;
+    QDir emptyDir;
+    return outputXML(doc, emptyParent, emptyDir, true);
 }
 
 void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
@@ -98,7 +106,6 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
     QDomElement childElement = element.firstChildElement();
     while(!childElement.isNull())
     {
-//        if(!belongsToObject(childElement))
         {
             QString elTagName = childElement.tagName();
             QString elName = childElement.attribute(QString("name"));
@@ -118,12 +125,6 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
 #endif
 }
 
-/*
-void CampaignObjectBase::resolveReferences()
-{
-}
-*/
-
 int CampaignObjectBase::getObjectType() const
 {
     return DMHelper::CampaignType_Base;
@@ -142,6 +143,26 @@ QString CampaignObjectBase::getName() const
 int CampaignObjectBase::getRow() const
 {
     return _row;
+}
+
+QString CampaignObjectBase::getMD5() const
+{
+    return QString();
+}
+
+void CampaignObjectBase::setMD5(const QString& md5)
+{
+    Q_UNUSED(md5);
+}
+
+QString CampaignObjectBase::getFileName() const
+{
+    return QString();
+}
+
+void CampaignObjectBase::setFileName(const QString& newFileName)
+{
+    Q_UNUSED(newFileName);
 }
 
 const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
@@ -347,7 +368,6 @@ void CampaignObjectBase::setName(const QString& name)
     {
         setObjectName(name);
         emit nameChanged(this, objectName());
-        //handleInternalDirty();
         handleInternalChange();
     }
 }

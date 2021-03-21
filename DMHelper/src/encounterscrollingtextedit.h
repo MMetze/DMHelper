@@ -62,7 +62,7 @@ signals:
     void imageWidthChanged(int imageWidth);
     void colorChanged(QColor color);
 
-    void animationStarted();
+    void animationStarted(CampaignObjectBase* animatedObject);
     void animateImage(QImage img);
     void showPublishWindow();
 

@@ -83,7 +83,6 @@
 #include "ribbontabtext.h"
 #include "ribbontabmap.h"
 #include "ribbontabaudio.h"
-#include "publishbuttonribbon.h"
 #include "objectdispatcher.h"
 #include <QResizeEvent>
 #include <QFileDialog>
@@ -446,7 +445,7 @@ MainWindow::MainWindow(QWidget *parent) :
     encounterTextEdit = new EncounterTextEdit;
     connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
     connect(encounterTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(encounterTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(encounterTextEdit, SIGNAL(animationStarted(CampaignObjectBase*)), this, SLOT(handleAnimationStarted(CampaignObjectBase*)));
     connect(encounterTextEdit, SIGNAL(animationStopped()), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
     connect(encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
@@ -513,7 +512,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
     connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(battleFrame, SIGNAL(animateImage(QImage)), pubWindow, SLOT(setBackgroundColor()));
-    connect(battleFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(battleFrame, SIGNAL(animationStarted(CampaignObjectBase*)), this, SLOT(handleAnimationStarted(CampaignObjectBase*)));
     connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
     connect(_ribbonTabBattle, SIGNAL(newMapClicked()), battleFrame, SLOT(selectBattleMap()));
@@ -597,7 +596,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
     connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(mapFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(mapFrame, SIGNAL(animationStarted(CampaignObjectBase*)), this, SLOT(handleAnimationStarted(CampaignObjectBase*)));
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
 
@@ -626,7 +625,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_ScrollingText, _scrollingTextEdit);
     qDebug() << "[MainWindow]     Adding Scrolling Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(_scrollingTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(_scrollingTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    connect(_scrollingTextEdit, SIGNAL(animationStarted(CampaignObjectBase*)), this, SLOT(handleAnimationStarted(CampaignObjectBase*)));
     connect(_scrollingTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), _scrollingTextEdit, SLOT(targetResized(QSize)));
     connect(_ribbonTabScrolling, SIGNAL(backgroundClicked()), _scrollingTextEdit, SLOT(browseImageFile()));
@@ -770,6 +769,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _networkController->enableNetworkController(_options->getNetworkEnabled());
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
+    connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(QColor)), _networkController, SLOT(setBackgroundColor(QColor)));
     //connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     // TODO: _battleDlgMgr->setNetworkManager(_networkController);
 
@@ -1848,10 +1848,10 @@ void MainWindow::writeBestiary()
         _options->setBestiaryFileName(bestiaryFileName);
     }
 
-    QDomDocument doc( "DMHelperBestiaryXML" );
+    QDomDocument doc("DMHelperBestiaryXML");
 
-    QDomElement root = doc.createElement( "root" );
-    doc.appendChild( root );
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
 
     QFileInfo fileInfo(bestiaryFileName);
     QDir targetDirectory(fileInfo.absoluteDir());
@@ -1864,7 +1864,7 @@ void MainWindow::writeBestiary()
     QString xmlString = doc.toString();
 
     QFile file(bestiaryFileName);
-    if( !file.open( QIODevice::WriteOnly ) )
+    if(!file.open(QIODevice::WriteOnly))
     {
         qDebug() << "[MainWindow] Unable to open Bestiary file for writing: " << bestiaryFileName;
         qDebug() << "       Error " << file.error() << ": " << file.errorString();
@@ -1874,7 +1874,7 @@ void MainWindow::writeBestiary()
         return;
     }
 
-    QTextStream ts( &file );
+    QTextStream ts(&file);
     ts.setCodec("UTF-8");
     ts << xmlString;
 
@@ -2335,10 +2335,11 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
     object->setExpanded(expanded);
 }
 
-void MainWindow::handleAnimationStarted()
+void MainWindow::handleAnimationStarted(CampaignObjectBase* animatedObject)
 {
     if(pubWindow)
         pubWindow->setBackgroundColor();
+    _networkController->uploadObject(animatedObject);
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
 }
 

@@ -159,10 +159,6 @@ int DMHNetworkManager_Private::uploadData(const QByteArray& data)
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"myFile[]\"; filename=\"internal\""));
     filePart.setBody(data);
     multiPart->append(filePart);
-    QByteArray byteHash = QCryptographicHash::hash(data, QCryptographicHash::Md5);
-    qDebug() << "[DMHNetworkManager] Uploading data with MD5 hash bytearray: " << byteHash;
-    qDebug() << "[DMHNetworkManager] Uploading data with MD5 hash UTF8: " << QString::fromUtf8(byteHash);
-    qDebug() << "[DMHNetworkManager] Uploading data with MD5 hash HEX: " << byteHash.toHex(0);
 
 #ifdef QT_DEBUG
     // TODO: String representation in

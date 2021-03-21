@@ -1961,7 +1961,7 @@ void BattleFrame::publishImage()
 
             // OPTIMIZE: optimize this to be faster, doing only changes?
             _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
-            emit animationStarted();
+            emit animationStarted(_battle);
             qDebug() << "[Battle Frame] publish timer activated";
         }
     }

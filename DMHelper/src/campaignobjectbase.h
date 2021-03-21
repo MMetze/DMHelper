@@ -20,18 +20,20 @@ public:
     CampaignObjectBase& operator=(const CampaignObjectBase& other) = delete;
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
+    virtual QDomElement outputNextworkXML(QDomDocument &doc);
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void postProcessXML(const QDomElement &element, bool isImport);
-    //virtual void resolveReferences();
-
-    // Base functions to handle UI widgets
-    //virtual void widgetActivated(QWidget* widget) = 0;
-    //virtual void widgetDeactivated(QWidget* widget) = 0;
 
     virtual int getObjectType() const;
     virtual bool getExpanded() const;
     virtual QString getName() const;
     virtual int getRow() const;
+
+    virtual QString getMD5() const;
+    virtual void setMD5(const QString& md5);
+
+    virtual QString getFileName() const;
+    virtual void setFileName(const QString& newFileName);
 
     const QList<CampaignObjectBase*> getChildObjects() const;
     QList<CampaignObjectBase*> getChildObjects();
