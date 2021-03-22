@@ -15,8 +15,15 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual QDomElement outputNetworkXML(QDomDocument &doc) override;
 
     virtual int getObjectType() const override;
+
+    virtual QString getMD5() const override;
+    virtual void setMD5(const QString& md5) override;
+
+    virtual QString getFileName() const override;
+    virtual void setFileName(const QString& newFileName) override;
 
     // Text
     virtual QString getText() const;
@@ -95,6 +102,9 @@ protected:
     bool _animated;
     bool _translated;
     int _scrollSpeed;
+
+    // Background
+    QString _md5;
 };
 
 #endif // ENCOUNTERTEXT_H

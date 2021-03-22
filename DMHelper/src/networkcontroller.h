@@ -15,6 +15,8 @@ class AudioTrack;
 class DMHNetworkManager;
 class QNetworkReply;
 class CampaignObjectBase;
+class Map;
+class EncounterText;
 
 class NetworkController : public QObject
 {
@@ -64,6 +66,9 @@ private slots:
     int uploadImage(QImage image, const QString& imageName);
     void updateImagePayload();
 
+    bool uploadMap(Map* map);
+    bool uploadEncounterText(EncounterText* encounterText);
+
     bool validateLogon(const DMHLogon& logon);
 
 private:
@@ -75,6 +80,7 @@ private:
     qint64 _backgroundCacheKey;
     UploadObject _fowUpload;
     QString _backgroundColor;
+    QList<UploadObject> _dependencies;
     bool _enabled;
 };
 

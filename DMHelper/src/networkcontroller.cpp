@@ -7,6 +7,7 @@
 #include "dmhpayload.h"
 #include "dmhlogon.h"
 #include "map.h"
+#include "encountertext.h"
 #include "undobase.h"
 #include <QFile>
 #include <QFileInfo>
@@ -32,6 +33,7 @@ NetworkController::NetworkController(QObject *parent) :
     _backgroundCacheKey(0),
     _fowUpload(),
     _backgroundColor(),
+    _dependencies(),
     _enabled(false)
 {
     connect(_networkManager, SIGNAL(uploadComplete(int, const QString&)), this, SLOT(uploadCompleted(int, const QString&)));
@@ -155,47 +157,20 @@ void NetworkController::uploadObject(CampaignObjectBase* baseObject)
 
     bool changed = false;
 
-    if(baseObject->getObjectType() == DMHelper::CampaignType_Map)
+    if(baseObject != _backgroundUpload.getObject())
     {
-        if(baseObject != _backgroundUpload.getObject())
-        {
-            if(_backgroundUpload.getStatus() > 0)
-                _networkManager->abortRequest(_backgroundUpload.getStatus());
+        if(_backgroundUpload.getStatus() > 0)
+            _networkManager->abortRequest(_backgroundUpload.getStatus());
 
-            _backgroundUpload = UploadObject(baseObject);
-            _backgroundCacheKey = 0;
-            changed = true;
-        }
-
-        Map* map = dynamic_cast<Map*>(baseObject);
-        QUndoStack* undoStack = map->getUndoStack();
-        if(undoStack)
-        {
-            QDomDocument doc;
-            QDomElement fowElement = doc.createElement("fow");
-            doc.appendChild(fowElement);
-            QDir emptyDir;
-            for(int i = 0; i < undoStack->index(); ++i)
-            {
-                const UndoBase* action = dynamic_cast<const UndoBase*>(undoStack->command(i));
-                if(action)
-                {
-                    QDomElement actionElement = doc.createElement("action");
-                    actionElement.setAttribute("type", action->getType());
-                    action->outputXML(doc, actionElement, emptyDir, true);
-                    fowElement.appendChild(actionElement);
-                }
-            }
-
-            if(_fowUpload.getStatus() > 0)
-                _networkManager->abortRequest(_fowUpload.getStatus());
-
-            _fowUpload = UploadObject();
-            _fowUpload.setData(doc.toString());
-            _fowUpload.setDescription(QString("Fog of War: ") + baseObject->getName());
-            changed = true;
-        }
+        _backgroundUpload = UploadObject(baseObject);
+        _backgroundCacheKey = 0;
+        changed = true;
     }
+
+    if(baseObject->getObjectType() == DMHelper::CampaignType_Map)
+        changed = changed || uploadMap(dynamic_cast<Map*>(baseObject));
+    else if(baseObject->getObjectType() == DMHelper::CampaignType_Text)
+        changed = changed || uploadEncounterText(dynamic_cast<EncounterText*>(baseObject));
 
     if(changed)
         updateImagePayload();
@@ -519,7 +494,7 @@ void NetworkController::updateAudioPayload()
         {
             if(_tracks.at(i).getStatus() == UploadObject::Status_Complete)
             {
-                QDomElement trackElement = _tracks.at(i).getObject()->outputNextworkXML(doc);
+                QDomElement trackElement = _tracks.at(i).getObject()->outputNetworkXML(doc);
                 doc.appendChild(trackElement);
             }
             else if(_tracks.at(i).getStatus() == UploadObject::Status_NotStarted)
@@ -596,9 +571,89 @@ void NetworkController::updateImagePayload()
         }
     }
 
+    for(int i = 0; i < _dependencies.count(); ++i)
+    {
+        if(_dependencies.at(i).getStatus() < UploadObject::Status_Complete)
+        {
+            UploadObject uploadObject = _dependencies.at(i);
+            startObjectUpload(&uploadObject);
+            _dependencies[i] = uploadObject;
+        }
+    }
+
     qDebug() << "[NetworkController] Image payload set to: " << imagePayload;
     _payload.setImageFile(imagePayload);
     uploadPayload();
+}
+
+bool NetworkController::uploadMap(Map* map)
+{
+    if(!map)
+        return false;
+
+    QUndoStack* undoStack = map->getUndoStack();
+    if(!undoStack)
+        return false;
+
+    QDomDocument doc;
+    QDomElement fowElement = doc.createElement("fow");
+    doc.appendChild(fowElement);
+    QDir emptyDir;
+    for(int i = 0; i < undoStack->index(); ++i)
+    {
+        const UndoBase* action = dynamic_cast<const UndoBase*>(undoStack->command(i));
+        if(action)
+        {
+            QDomElement actionElement = doc.createElement("action");
+            actionElement.setAttribute("type", action->getType());
+            action->outputXML(doc, actionElement, emptyDir, true);
+            fowElement.appendChild(actionElement);
+        }
+    }
+
+    if(_fowUpload.getStatus() > 0)
+        _networkManager->abortRequest(_fowUpload.getStatus());
+
+    _fowUpload = UploadObject();
+    _fowUpload.setData(doc.toString());
+    _fowUpload.setDescription(QString("Fog of War: ") + map->getName());
+    return true;
+}
+
+bool NetworkController::uploadEncounterText(EncounterText* encounterText)
+{
+    if(!encounterText)
+        return false;
+
+    QDomDocument doc;
+    QDomElement textElement = encounterText->outputNetworkXML(doc);
+    if(textElement.isNull())
+        return false;
+
+    UploadObject textUpload;
+    textUpload.setData(encounterText->getText());
+    textUpload.setDescription(QString("Text: ") + encounterText->getName());
+    _dependencies.append(textUpload);
+    QByteArray textHash = QCryptographicHash::hash(textUpload.getData().toUtf8(), QCryptographicHash::Md5).toHex(0);
+    textElement.setAttribute(QString("text"), QString::fromUtf8(textHash));
+
+    QByteArray translatedHash;
+    if((encounterText->getTranslated()) && (!encounterText->getTranslatedText().isEmpty()))
+    {
+        UploadObject translateUpload;
+        translateUpload.setData(encounterText->getTranslatedText());
+        translateUpload.setDescription(QString("Translated Text: ") + encounterText->getName());
+        _dependencies.append(translateUpload);
+        translatedHash = QCryptographicHash::hash(translateUpload.getData().toUtf8(), QCryptographicHash::Md5).toHex(0);
+    }
+    textElement.setAttribute(QString("translated-text"), QString::fromUtf8(translatedHash));
+
+    doc.appendChild(textElement);
+    _payload.setData(doc.toString());
+
+    qDebug() << "[NetworkController] Prepared encounter text with text hash: " << textHash << " and translated hash: " << translatedHash;
+
+    return true;
 }
 
 bool NetworkController::validateLogon(const DMHLogon& logon)

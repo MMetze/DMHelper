@@ -16,10 +16,11 @@ EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
     _text(),
     _translatedText(),
     _imageFile(),
-    _textWidth(80),
+    _textWidth(90),
     _animated(false),
     _translated(false),
-    _scrollSpeed(25)
+    _scrollSpeed(25),
+    _md5()
 {
 }
 
@@ -28,11 +29,12 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
     extractTextNode(element, isImport);
 
     setImageFile(element.attribute("imageFile"));
-    setTextWidth(element.attribute("textWidth", "80").toInt());
+    setTextWidth(element.attribute("textWidth", "90").toInt());
     int scrollSpeed = element.attribute("scrollSpeed").toInt();
     setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);
     setAnimated(static_cast<bool>(element.attribute("animated", QString::number(0)).toInt()));
     setTranslated(static_cast<bool>(element.attribute("translated", QString::number(0)).toInt()));
+    setMD5(element.attribute("md5"));
 
     int encounterType;
     bool ok = false;
@@ -71,16 +73,53 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
         cursor.clearSelection();
         setText(document.toHtml());
 
-        setTextWidth(element.attribute("imageWidth", "80").toInt());
+        setTextWidth(element.attribute("imageWidth", "90").toInt());
         setAnimated(true);
     }
 
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+QDomElement EncounterText::outputNetworkXML(QDomDocument &doc)
+{
+    QDomElement element = createOutputXML(doc);
+
+    element.setAttribute("textWidth", getTextWidth());
+    element.setAttribute("scrollSpeed", getScrollSpeed());
+    element.setAttribute("animated", getAnimated());
+    element.setAttribute("translated", getTranslated());
+
+    return element;
+}
+
+
 int EncounterText::getObjectType() const
 {
     return DMHelper::CampaignType_Text;
+}
+
+QString EncounterText::getMD5() const
+{
+    return _md5;
+}
+
+void EncounterText::setMD5(const QString& md5)
+{
+    if(_md5 != md5)
+    {
+        _md5 = md5;
+        emit dirty();
+    }
+}
+
+QString EncounterText::getFileName() const
+{
+    return getImageFile();
+}
+
+void EncounterText::setFileName(const QString& newFileName)
+{
+    setImageFile(newFileName);
 }
 
 QString EncounterText::getText() const
@@ -217,6 +256,7 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
     element.setAttribute("scrollSpeed", getScrollSpeed());
     element.setAttribute("animated", getAnimated());
     element.setAttribute("translated", getTranslated());
+    element.setAttribute("md5", getMD5());
 
     QDomElement textElement = doc.createElement("text-data");
         QDomCDATASection textData = doc.createCDATASection(getText());

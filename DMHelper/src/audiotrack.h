@@ -13,7 +13,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    virtual QDomElement outputNextworkXML(QDomDocument &doc) override;
+    virtual QDomElement outputNetworkXML(QDomDocument &doc) override;
     virtual int getObjectType() const override;
 
     // Local

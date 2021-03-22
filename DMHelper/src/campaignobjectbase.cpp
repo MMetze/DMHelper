@@ -46,7 +46,7 @@ QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent
     return newElement;
 }
 
-QDomElement CampaignObjectBase::outputNextworkXML(QDomDocument &doc)
+QDomElement CampaignObjectBase::outputNetworkXML(QDomDocument &doc)
 {
     QDomElement emptyParent;
     QDir emptyDir;

@@ -20,7 +20,7 @@ public:
     CampaignObjectBase& operator=(const CampaignObjectBase& other) = delete;
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
-    virtual QDomElement outputNextworkXML(QDomDocument &doc);
+    virtual QDomElement outputNetworkXML(QDomDocument &doc);
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void postProcessXML(const QDomElement &element, bool isImport);
 

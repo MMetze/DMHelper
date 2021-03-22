@@ -25,7 +25,7 @@ void AudioTrack::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
-QDomElement AudioTrack::outputNextworkXML(QDomDocument &doc)
+QDomElement AudioTrack::outputNetworkXML(QDomDocument &doc)
 {
     QDomElement trackElement = createOutputXML(doc);
 
