@@ -2,9 +2,10 @@
 #include <QFile>
 #include <QDebug>
 
-AudioTrackFileDownload::AudioTrackFileDownload(const QString& md5String, const QString& trackName, const QUrl& trackUrl, QObject *parent) :
+AudioTrackFileDownload::AudioTrackFileDownload(const QString& md5String, const QString& cacheDirectory, const QString& trackName, const QUrl& trackUrl, QObject *parent) :
     AudioTrackFile(trackName, trackUrl, parent),
-    _md5(md5String)
+    _md5(md5String),
+    _cacheDirectory(cacheDirectory)
 {
 }
 
@@ -14,9 +15,10 @@ AudioTrackFileDownload::~AudioTrackFileDownload()
 
 void AudioTrackFileDownload::play()
 {
-    if(QFile::exists(_md5))
+    QString fullFileName = _cacheDirectory + QString("/") + _md5;
+    if(QFile::exists(fullFileName))
     {
-        setUrl(_md5);
+        setUrl(fullFileName);
         AudioTrackFile::play();
     }
     else
@@ -30,7 +32,8 @@ void AudioTrackFileDownload::fileReceived(const QString& md5String, const QByteA
     if(_md5 != md5String)
         return;
 
-    if(!QFile::exists(_md5))
+    QString fullFileName = _cacheDirectory + QString("/") + _md5;
+    if(!QFile::exists(fullFileName))
     {
         if(data.size() <= 0)
         {
@@ -38,7 +41,7 @@ void AudioTrackFileDownload::fileReceived(const QString& md5String, const QByteA
            return;
         }
 
-        QFile outputFile(_md5);
+        QFile outputFile(fullFileName);
         if(!outputFile.open(QIODevice::WriteOnly))
         {
             qDebug() << "[AudioTrackFileDownload] ERROR: not able to open output file for writing: " << outputFile.error() << ", " << outputFile.errorString();

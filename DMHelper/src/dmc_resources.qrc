@@ -11,5 +11,6 @@
         <file>data/selected.png</file>
         <file>data/icon_volumeon.png</file>
         <file>data/icon_volumeoff.png</file>
+        <file>data/dmc_background.png</file>
     </qresource>
 </RCC>

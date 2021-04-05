@@ -2,6 +2,7 @@
 #include <QString>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
+#include <QDebug>
 
 DMHPayload_Private::DMHPayload_Private() :
     _imageFile(),
@@ -60,6 +61,8 @@ void DMHPayload_Private::fromString(const QString& data)
     QRegularExpression reData("<data>(.*)<\\/data>");
     QRegularExpressionMatch matchData = reData.match(data);
     setData(matchData.hasMatch() ? matchData.captured(matchData.lastCapturedIndex()) : QString());
+
+    //qDebug() << "[DMHPayload_Private] From string: " << data << " ==> data: " << _data;
 }
 
 QString DMHPayload_Private::toString() const

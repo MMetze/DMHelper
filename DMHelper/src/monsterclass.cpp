@@ -67,7 +67,8 @@ MonsterClass::MonsterClass(const QString& name, QObject *parent) :
     _batchChanges(false),
     _changesMade(false),
     _iconChanged(false),
-    _scaledPixmap()
+    _scaledPixmap(),
+    _md5()
 {
 }
 
@@ -102,7 +103,8 @@ MonsterClass::MonsterClass(const QDomElement &element, bool isImport, QObject *p
     _batchChanges(false),
     _changesMade(false),
     _iconChanged(false),
-    _scaledPixmap()
+    _scaledPixmap(),
+    _md5()
 {
     inputXML(element, isImport);
 }
@@ -115,6 +117,7 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
 
     setPrivate(static_cast<bool>(element.attribute("private",QString::number(0)).toInt()));
     setIcon(element.attribute("icon"));
+    setMD5(element.attribute("md5"));
 
     setName(element.firstChildElement(QString("name")).text());
     setMonsterType(element.firstChildElement(QString("type")).text());
@@ -159,6 +162,8 @@ QDomElement MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDi
         element.setAttribute("icon", QString(""));
     else
         element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
+
+    element.setAttribute("icon", getMD5());
 
     outputValue(doc, element, isExport, QString("name"), getName());
     outputValue(doc, element, isExport, QString("type"), getMonsterType());
@@ -570,6 +575,16 @@ int MonsterClass::removeReaction(const MonsterAction& action)
     return _reactions.count();
 }
 
+QString MonsterClass::getMD5() const
+{
+    return _md5;
+}
+
+void MonsterClass::setMD5(const QString& md5)
+{
+    _md5 = md5;
+}
+
 void MonsterClass::cloneMonster(MonsterClass& other)
 {
     beginBatchChanges();
@@ -602,6 +617,8 @@ void MonsterClass::cloneMonster(MonsterClass& other)
     _intelligence = other._intelligence;
     _wisdom = other._wisdom;
     _charisma = other._charisma;
+
+    _md5 = other._md5;
 
     _actions.clear();
     for(MonsterAction& action : other._actions)
@@ -698,6 +715,9 @@ void MonsterClass::searchForIcon(const QString &newIcon)
     QString searchResult = Bestiary::Instance()->findMonsterImage(getName(),newIcon);
     if(!searchResult.isEmpty())
     {
+        if(!_icon.isEmpty())
+            _md5.clear();
+
         _icon = searchResult;
         _scaledPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(_icon));
         registerChange();

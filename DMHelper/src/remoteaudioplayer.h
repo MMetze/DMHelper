@@ -13,12 +13,13 @@ class RemoteAudioPlayer : public QObject
 {
     Q_OBJECT
 public:
-    explicit RemoteAudioPlayer(QObject *parent = nullptr);
+    explicit RemoteAudioPlayer(const QString& cacheDirectory, QObject *parent = nullptr);
     virtual ~RemoteAudioPlayer() override;
 
     void parseAudioString(const QString& audioString);
 
-    void fileRequestStarted(int requestId);
+public slots:
+    void fileRequestStarted(int requestId, const QString& fileMD5);
     void fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data);
 
 signals:
@@ -30,14 +31,14 @@ private:
     RemoteAudioPlayer_FileWrapper* findTrack(const QUuid& id);
 
     QList<RemoteAudioPlayer_FileWrapper*> _tracks;
-
+    QString _cacheDirectory;
 };
 
 class RemoteAudioPlayer_FileWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit RemoteAudioPlayer_FileWrapper(const QDomElement& element);
+    explicit RemoteAudioPlayer_FileWrapper(const QString& cacheDirectory, const QDomElement& element);
     ~RemoteAudioPlayer_FileWrapper();
 
     AudioTrack* getTrack() const;

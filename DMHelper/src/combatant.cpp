@@ -59,6 +59,7 @@ void Combatant::inputXML(const QDomElement &element, bool isImport)
     setHitDice(Dice(element.attribute("hitDice")));
     setConditions(element.attribute("conditions", QString("0")).toInt());
     setIcon(element.attribute("icon"));
+    setMD5(element.attribute("md5"));
 
     QDomElement attacksElement = element.firstChildElement( QString("attacks") );
     if( !attacksElement.isNull() )
@@ -437,6 +438,16 @@ bool Combatant::hasCondition(Condition condition) const
     return ((_conditions & condition) != 0);
 }
 
+QString Combatant::getMD5() const
+{
+    return _md5;
+}
+
+void Combatant::setMD5(const QString& md5)
+{
+    _md5 = md5;
+}
+
 void Combatant::setInitiative(int initiative)
 {
     if(initiative != _initiative)
@@ -554,6 +565,8 @@ void Combatant::setIcon(const QString &newIcon)
 {
     if(newIcon != _icon)
     {
+        if(!_icon.isEmpty())
+            _md5.clear();
         _icon = newIcon;
         _iconPixmap.setBasePixmap(_icon);
         registerChange();
@@ -582,6 +595,7 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     {
         element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
     }
+    element.setAttribute("md5", getMD5());
 
     QDomElement attacksElement = doc.createElement("attacks");
     for(int i = 0; i < getAttacks().count(); ++i)
@@ -625,6 +639,7 @@ void Combatant::copyValues(const Combatant &other)
     _conditions = other._conditions;
     _icon = other._icon;
     _iconPixmap = other._iconPixmap;
+    _md5 = other._md5;
     _batchChanges = other._batchChanges;
     _changesMade = other._changesMade;
 

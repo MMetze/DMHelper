@@ -84,6 +84,7 @@ QDomElement EncounterText::outputNetworkXML(QDomDocument &doc)
 {
     QDomElement element = createOutputXML(doc);
 
+    element.setAttribute("_baseID", getID().toString());
     element.setAttribute("textWidth", getTextWidth());
     element.setAttribute("scrollSpeed", getScrollSpeed());
     element.setAttribute("animated", getAnimated());

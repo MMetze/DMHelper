@@ -8,9 +8,10 @@
 #include <QDomDocument>
 #include <QDebug>
 
-RemoteAudioPlayer::RemoteAudioPlayer(QObject *parent) :
+RemoteAudioPlayer::RemoteAudioPlayer(const QString& cacheDirectory, QObject *parent) :
     QObject(parent),
-    _tracks()
+    _tracks(),
+    _cacheDirectory(cacheDirectory)
 {
 }
 
@@ -21,6 +22,9 @@ RemoteAudioPlayer::~RemoteAudioPlayer()
 
 void RemoteAudioPlayer::parseAudioString(const QString& audioString)
 {
+    if(audioString.isEmpty())
+        return;
+
     QString expandedString = QString("<root>") + audioString + QString("</root>");
     QDomDocument doc;
     QString errorMsg;
@@ -46,7 +50,7 @@ void RemoteAudioPlayer::parseAudioString(const QString& audioString)
         }
         else
         {
-            RemoteAudioPlayer_FileWrapper* fileWrapper = new RemoteAudioPlayer_FileWrapper(trackElement);
+            RemoteAudioPlayer_FileWrapper* fileWrapper = new RemoteAudioPlayer_FileWrapper(_cacheDirectory, trackElement);
             connect(fileWrapper, &RemoteAudioPlayer_FileWrapper::requestFile, this, &RemoteAudioPlayer::requestFile);
             if(fileWrapper->getTrack())
                 fileWrapper->getTrack()->play();
@@ -59,13 +63,16 @@ void RemoteAudioPlayer::parseAudioString(const QString& audioString)
     clearUnchecked();
 }
 
-void RemoteAudioPlayer::fileRequestStarted(int requestId)
+void RemoteAudioPlayer::fileRequestStarted(int requestId, const QString& fileMD5)
 {
     Q_UNUSED(requestId);
+    Q_UNUSED(fileMD5);
 }
 
 void RemoteAudioPlayer::fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data)
 {
+    Q_UNUSED(requestId);
+
     for(int i = 0; i < _tracks.count(); ++i)
     {
         if((_tracks.at(i)) && (_tracks.at(i)->getTrack()) &&
@@ -115,7 +122,7 @@ RemoteAudioPlayer_FileWrapper* RemoteAudioPlayer::findTrack(const QUuid& id)
     return nullptr;
 }
 
-RemoteAudioPlayer_FileWrapper::RemoteAudioPlayer_FileWrapper(const QDomElement& element) :
+RemoteAudioPlayer_FileWrapper::RemoteAudioPlayer_FileWrapper(const QString& cacheDirectory, const QDomElement& element) :
     _track(nullptr),
     _id(element.attribute(QString("id"))),
     _status(DMC_SERVER_CONNECTION_UPLOAD_NOT_STARTED),
@@ -134,7 +141,7 @@ RemoteAudioPlayer_FileWrapper::RemoteAudioPlayer_FileWrapper(const QDomElement& 
         {
             QString md5 = element.attribute("md5");
             qDebug() << "[RemoteAudioPlayer] Creating audio track: " << md5 << " with name: " << trackName;
-            AudioTrackFileDownload* downloadTrack = new AudioTrackFileDownload(md5, trackName);
+            AudioTrackFileDownload* downloadTrack = new AudioTrackFileDownload(md5, cacheDirectory, trackName);
             connect(downloadTrack, &AudioTrackFileDownload::requestFile, this, &RemoteAudioPlayer_FileWrapper::requestFile);
             _track = downloadTrack;
             break;

@@ -8,12 +8,17 @@
 #include "dmhlogon.h"
 #include "map.h"
 #include "encountertext.h"
+#include "encounterbattle.h"
+#include "battledialogmodel.h"
+#include "battledialogmodelmonsterclass.h"
+#include "monsterclass.h"
 #include "undobase.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QBuffer>
 #include <QMessageBox>
 #include <QDomDocument>
+#include <QImageReader>
 #include <QPushButton>
 #include <QNetworkReply>
 #include <QUndoStack>
@@ -34,6 +39,7 @@ NetworkController::NetworkController(QObject *parent) :
     _fowUpload(),
     _backgroundColor(),
     _dependencies(),
+    _uploadedFiles(),
     _enabled(false)
 {
     connect(_networkManager, SIGNAL(uploadComplete(int, const QString&)), this, SLOT(uploadCompleted(int, const QString&)));
@@ -103,7 +109,7 @@ void NetworkController::setBackgroundColor(QColor color)
     if(color.name() != _backgroundColor)
     {
         _backgroundColor = color.name();
-        updateImagePayload();
+        //updateImagePayload();
     }
 }
 
@@ -128,7 +134,8 @@ void NetworkController::uploadImage(QImage background, QColor color)
             _networkManager->abortRequest(_backgroundUpload.getStatus());
 
         _backgroundCacheKey = background.cacheKey();
-        _backgroundUpload = UploadObject(nullptr, uploadImage(background, QString("Published Image")));
+        _backgroundUpload = uploadImage(background, QString("Published Image"));
+        startObjectUpload(&_backgroundUpload);
     }
 
     if(_fowUpload.isValid())
@@ -168,9 +175,34 @@ void NetworkController::uploadObject(CampaignObjectBase* baseObject)
     }
 
     if(baseObject->getObjectType() == DMHelper::CampaignType_Map)
-        changed = changed || uploadMap(dynamic_cast<Map*>(baseObject));
+    {
+        Map* map = dynamic_cast<Map*>(baseObject);
+        if(map)
+        {
+            _backgroundUpload.setFileType(map->isInitialized() ? DMHelper::FileType_Image : DMHelper::FileType_Video);
+            changed = uploadMap(map) ? true : changed;
+        }
+    }
     else if(baseObject->getObjectType() == DMHelper::CampaignType_Text)
-        changed = changed || uploadEncounterText(dynamic_cast<EncounterText*>(baseObject));
+    {
+        EncounterText* encounter = dynamic_cast<EncounterText*>(baseObject);
+        if(encounter)
+        {
+            QImageReader reader(encounter->getFileName());
+            _backgroundUpload.setFileType(reader.canRead() ? DMHelper::FileType_Image : DMHelper::FileType_Video);
+            changed = uploadEncounterText(encounter) ? true : changed;
+        }
+    }
+    else if(baseObject->getObjectType() == DMHelper::CampaignType_Battle)
+    {
+        EncounterBattle* encounter = dynamic_cast<EncounterBattle*>(baseObject);
+        if(encounter)
+        {
+            QImageReader reader(encounter->getFileName());
+            _backgroundUpload.setFileType(reader.canRead() ? DMHelper::FileType_Image : DMHelper::FileType_Video);
+            changed = uploadBattle(encounter) ? true : changed;
+        }
+    }
 
     if(changed)
         updateImagePayload();
@@ -253,12 +285,14 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
     _networkManager->setLogon(logon);
 
     clearUploadErrors();
-    updateAudioPayload();
+    //updateAudioPayload();
 }
 
 void NetworkController::uploadCompleted(int requestID, const QString& fileMD5)
 {
     qDebug() << "[NetworkController] Upload complete " << requestID << ": " << fileMD5;
+
+    registerUpload(fileMD5);
 
     if(_backgroundUpload.getStatus() == requestID)
     {
@@ -347,6 +381,7 @@ void NetworkController::existsCompleted(int requestID, const QString& fileMD5, c
                     uploadObject.getObject()->setMD5(fileMD5);
                 }
                 _tracks[i] = uploadObject;
+                registerUpload(fileMD5);
                 updateAudioPayload();
             }
             else
@@ -461,8 +496,17 @@ void NetworkController::startObjectUpload(UploadObject* uploadObject)
     }
     else
     {
-        uploadObject->setStatus(_networkManager->fileExists(uploadObject->getMD5()));
-        qDebug() << "[NetworkController] Checking if object exists: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
+        if(isAlreadyUploaded(uploadObject->getMD5()))
+        {
+            qDebug() << "[NetworkController] Object known and already uploaded: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
+            uploadObject->setStatus(UploadObject::Status_Exists);
+            existsCompleted(UploadObject::Status_Exists, uploadObject->getMD5(), QString(), true);
+        }
+        else
+        {
+            uploadObject->setStatus(_networkManager->fileExists(uploadObject->getMD5()));
+            qDebug() << "[NetworkController] Checking if object exists: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
+        }
     }
 }
 
@@ -526,27 +570,68 @@ void NetworkController::clearUploadErrors()
     }
 }
 
-int NetworkController::uploadImage(QImage image, const QString& imageName)
+UploadObject NetworkController::uploadImage(QImage image, const QString& imageName)
 {
+    UploadObject result(nullptr, UploadObject::Status_NotStarted);
+
     if((!_enabled) || (image.isNull()))
-        return UploadObject::Status_Error;
+    {
+        result.setStatus(UploadObject::Status_Error);
+        return result;
+    }
 
     QByteArray data;
     QBuffer buffer(&data);
     if(!buffer.open(QIODevice::WriteOnly))
-        return UploadObject::Status_Error;
+    {
+        result.setStatus(UploadObject::Status_Error);
+        return result;
+    }
 
     if(!image.save(&buffer, "PNG"))
-        return UploadObject::Status_Error;
+    {
+        result.setStatus(UploadObject::Status_Error);
+        return result;
+    }
 
-    QByteArray byteHash = QCryptographicHash::hash(data, QCryptographicHash::Md5);
-    qDebug() << "[NetworkController] Uploading image " << image << "data with MD5 hash HEX: " << byteHash.toHex(0);
+    result.setMD5(getDataMD5(data));
+    qDebug() << "[NetworkController] Uploading image " << image << " with name: " << imageName << "data with MD5 hash HEX: " << result.getMD5();
 
-    int requestId = _networkManager->uploadData(data);
-    if(requestId > 0)
-        emit uploadStarted(requestId, _networkManager->getNetworkReply(requestId), imageName);
+    result.setDescription(imageName);
+    result.setFileType(DMHelper::FileType_Image);
+    return result;
+}
 
-    return requestId;
+UploadObject NetworkController::uploadPixmap(QPixmap pixmap, const QString& pixmapName)
+{
+    UploadObject result(nullptr, UploadObject::Status_NotStarted);
+
+    if((!_enabled) || (pixmap.isNull()))
+    {
+        result.setStatus(UploadObject::Status_Error);
+        return result;
+    }
+
+    QByteArray data;
+    QBuffer buffer(&data);
+    if(!buffer.open(QIODevice::WriteOnly))
+    {
+        result.setStatus(UploadObject::Status_Error);
+        return result;
+    }
+
+    if(!pixmap.save(&buffer, "PNG"))
+    {
+        result.setStatus(UploadObject::Status_Error);
+        return result;
+    }
+
+    result.setMD5(getDataMD5(data));
+    qDebug() << "[NetworkController] Uploading pixmap " << pixmap << " with name: " << pixmapName << "data with MD5 hash HEX: " << result.getMD5();
+
+    result.setDescription(pixmapName);
+    result.setFileType(DMHelper::FileType_Image);
+    return result;
 }
 
 void NetworkController::updateImagePayload()
@@ -561,7 +646,11 @@ void NetworkController::updateImagePayload()
 
     if(_backgroundUpload.hasMD5())
     {
-        imagePayload += QString("<background>") + _backgroundUpload.getMD5() + QString("</background>");
+        if(_backgroundUpload.getFileType() == DMHelper::FileType_Other)
+            imagePayload += QString("<background>");
+        else
+            imagePayload += QString("<background ") + QString("type=""") + QString::number(_backgroundUpload.getFileType()) + QString(""">");
+        imagePayload += _backgroundUpload.getMD5() + QString("</background>");
         if(_fowUpload.isValid())
         {
             if(_fowUpload.getStatus() < UploadObject::Status_Complete)
@@ -581,9 +670,12 @@ void NetworkController::updateImagePayload()
         }
     }
 
-    qDebug() << "[NetworkController] Image payload set to: " << imagePayload;
-    _payload.setImageFile(imagePayload);
-    uploadPayload();
+    if((_backgroundUpload.hasMD5()) || (_fowUpload.hasMD5()) || (_dependencies.count() > 0))
+    {
+        qDebug() << "[NetworkController] Image payload set to: " << imagePayload;
+        _payload.setImageFile(imagePayload);
+        uploadPayload();
+    }
 }
 
 bool NetworkController::uploadMap(Map* map)
@@ -616,6 +708,7 @@ bool NetworkController::uploadMap(Map* map)
 
     _fowUpload = UploadObject();
     _fowUpload.setData(doc.toString());
+    _fowUpload.setFileType(DMHelper::FileType_Text);
     _fowUpload.setDescription(QString("Fog of War: ") + map->getName());
     return true;
 }
@@ -633,8 +726,9 @@ bool NetworkController::uploadEncounterText(EncounterText* encounterText)
     UploadObject textUpload;
     textUpload.setData(encounterText->getText());
     textUpload.setDescription(QString("Text: ") + encounterText->getName());
+    textUpload.setFileType(DMHelper::FileType_Text);
     _dependencies.append(textUpload);
-    QByteArray textHash = QCryptographicHash::hash(textUpload.getData().toUtf8(), QCryptographicHash::Md5).toHex(0);
+    QByteArray textHash = getDataMD5(textUpload.getData().toUtf8());
     textElement.setAttribute(QString("text"), QString::fromUtf8(textHash));
 
     QByteArray translatedHash;
@@ -643,15 +737,98 @@ bool NetworkController::uploadEncounterText(EncounterText* encounterText)
         UploadObject translateUpload;
         translateUpload.setData(encounterText->getTranslatedText());
         translateUpload.setDescription(QString("Translated Text: ") + encounterText->getName());
+        textUpload.setFileType(DMHelper::FileType_Text);
         _dependencies.append(translateUpload);
-        translatedHash = QCryptographicHash::hash(translateUpload.getData().toUtf8(), QCryptographicHash::Md5).toHex(0);
+        translatedHash = getDataMD5(translateUpload.getData().toUtf8());
     }
     textElement.setAttribute(QString("translated-text"), QString::fromUtf8(translatedHash));
 
     doc.appendChild(textElement);
-    _payload.setData(doc.toString());
 
+    QString encounterPayload = doc.toString();
+    encounterPayload.remove(QString("\n"));
+    _payload.setData(encounterPayload);
     qDebug() << "[NetworkController] Prepared encounter text with text hash: " << textHash << " and translated hash: " << translatedHash;
+
+    return true;
+}
+
+bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
+{
+    if((!encounterBattle) || (!encounterBattle->getBattleDialogModel()))
+        return false;
+
+    BattleDialogModel* model = encounterBattle->getBattleDialogModel();
+
+    QDomDocument doc;
+    QDomElement battleElement = model->outputNetworkXML(doc);
+    if(battleElement.isNull())
+        return false;
+
+    QStringList monsters;
+    QDomElement combatantsElement = doc.createElement("combatants");
+    for(int i = 0; i < model->getCombatantCount(); ++i)
+    {
+        BattleDialogModelCombatant* combatant = model->getCombatant(i);
+        if((combatant) &&
+           (combatant->getKnown()) &&
+           ((combatant->getHitPoints() > 0) || (model->getShowDead())) &&
+           ((combatant->getHitPoints() <= 0) || (model->getShowAlive())))
+        {
+            QDomElement combatantElement = combatant->outputNetworkXML(doc);
+
+            if(!isAlreadyUploaded(combatant->getMD5()))
+            {
+                UploadObject tokenUpload = uploadPixmap(combatant->getIconPixmap(DMHelper::PixmapSize_Full), QString("Token for ") + combatant->getName());
+                combatant->setMD5(tokenUpload.getMD5());
+                //_dependencies.append(tokenUpload);
+                //startObjectUpload(&tokenUpload);
+            }
+            combatantElement.setAttribute("token", combatant->getMD5());
+
+            combatantsElement.appendChild(combatantElement);
+        }
+    }
+    battleElement.appendChild(combatantsElement);
+
+    if(model->getShowEffects())
+    {
+        QDomElement effectsElement = doc.createElement("effects");
+        for(int i = 0; i < model->getEffectCount(); ++i)
+        {
+            BattleDialogModelEffect* effect = model->getEffect(i);
+            if((effect) && (effect->getEffectVisible()))
+            {
+                QDomElement effectElement = effect->outputNetworkXML(doc);
+
+                if(!effect->getImageFile().isEmpty())
+                {
+                    if(!isAlreadyUploaded(effect->getMD5()))
+                    {
+                        if(effect->getMD5().isEmpty())
+                            effect->setMD5(getFileMD5(effect->getImageFile()));
+
+                        UploadObject effectToken(nullptr, UploadObject::Status_NotStarted);
+                        effectToken.setFilename(effect->getImageFile());
+                        effectToken.setFileType(DMHelper::FileType_Image);
+                        effectToken.setDescription(QString("Effect Token ") + effect->getImageFile());
+                        //_dependencies.append(effectToken);
+                        //startObjectUpload(&effectToken);
+                    }
+                    effectElement.setAttribute("token", effect->getMD5());
+                }
+                effectsElement.appendChild(effectElement);
+            }
+        }
+        battleElement.appendChild(effectsElement);
+    }
+
+    doc.appendChild(battleElement);
+
+    QString battlePayload = doc.toString();
+    battlePayload.remove(QString("\n"));
+    qDebug() << "[NetworkController] Prepared battle for upload: " << battlePayload;
+    _payload.setData(battlePayload);
 
     return true;
 }
@@ -673,6 +850,41 @@ bool NetworkController::validateLogon(const DMHLogon& logon)
         enableNetworkController(false);
 
     return false;
+}
+
+bool NetworkController::isAlreadyUploaded(const QString& md5)
+{
+    if(md5.isEmpty())
+        return false;
+
+    return _uploadedFiles.contains(md5);
+}
+
+void NetworkController::registerUpload(const QString& md5)
+{
+    if((md5.isEmpty()) || (_uploadedFiles.contains(md5)))
+        return;
+
+    _uploadedFiles.append(md5);
+}
+
+QByteArray NetworkController::getFileMD5(const QString& filename)
+{
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly))
+        return QByteArray();
+
+    QByteArray readData = file.readAll();
+    if(readData.size() <= 0)
+        return readData;
+
+    file.close();
+    return getDataMD5(readData);
+}
+
+QByteArray NetworkController::getDataMD5(const QByteArray& data)
+{
+    return QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex(0);
 }
 
 #endif // INCLUDE_NETWORK_SUPPORT

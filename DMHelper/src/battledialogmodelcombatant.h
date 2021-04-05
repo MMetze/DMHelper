@@ -20,6 +20,7 @@ public:
     // From CampaignObjectBase
     //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual QDomElement outputNetworkXML(QDomDocument &doc) override;
 
     // Local
     virtual int getCombatantType() const = 0;

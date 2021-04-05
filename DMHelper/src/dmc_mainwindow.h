@@ -29,11 +29,16 @@ private slots:
     void muteToggled(bool checked);
     void enableAudio(AudioTrack* track);
     void openOptions();
+    void setLabelPixmap(QPixmap pixmap);
+    void setLabelImage(QImage image);
+    void updatePixmap();
 
 private:
     Ui::DMC_MainWindow *ui;
     DMC_OptionsContainer* _settings;
     DMC_ServerConnection* _serverConnection;
+
+    QPixmap _labelPixmap;
 
 };
 

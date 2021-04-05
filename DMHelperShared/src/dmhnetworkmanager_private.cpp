@@ -12,8 +12,6 @@
 #include <QDomElement>
 #include <QDebug>
 
-#include <QCryptographicHash>
-
 const int VALID_REQUEST_ID = 100;
 
 DMHNetworkManager_Private::DMHNetworkManager_Private(const DMHLogon& logon, QObject *parent) :

@@ -16,7 +16,8 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::DMC_MainWindow),
     _settings(nullptr),
-    _serverConnection(nullptr)
+    _serverConnection(nullptr),
+    _labelPixmap()
 {
     qDebug() << "[Main] Initializing Main";
 
@@ -69,8 +70,11 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
     _settings = new DMC_OptionsContainer(this);
     _settings->readSettings();
 
-    _serverConnection = new DMC_ServerConnection(_settings->getLogon(), this);
+    _serverConnection = new DMC_ServerConnection(_settings->getLogon(), _settings->getCacheDirectory(), this);
     connect(_serverConnection, &DMC_ServerConnection::trackActive, this, &DMC_MainWindow::enableAudio);
+    connect(_serverConnection, &DMC_ServerConnection::pixmapActive, this, &DMC_MainWindow::setLabelPixmap);
+    connect(_serverConnection, &DMC_ServerConnection::imageActive, this, &DMC_MainWindow::setLabelImage);
+    connect(_settings, &DMC_OptionsContainer::cacheDirectoryChanged, _serverConnection, &DMC_ServerConnection::setCacheDirectory);
 
     ui->sliderVolume->setValue(50);
     enableAudio(nullptr);
@@ -94,8 +98,8 @@ void DMC_MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-//    if(!_pmp.isNull())
-//        ui->lblImage->setPixmap(_pmp.scaled(ui->lblImage->size(), Qt::KeepAspectRatio));
+    _serverConnection->targetResized(ui->lblImage->size());
+    updatePixmap();
 }
 
 void DMC_MainWindow::muteToggled(bool checked)
@@ -136,4 +140,31 @@ void DMC_MainWindow::openOptions()
         if(_serverConnection)
             _serverConnection->startServer(_settings->getLogon());
     }
+}
+
+void DMC_MainWindow::setLabelPixmap(QPixmap pixmap)
+{
+    _labelPixmap = pixmap;
+    updatePixmap();
+}
+
+void DMC_MainWindow::setLabelImage(QImage image)
+{
+    setLabelPixmap(QPixmap::fromImage(image));
+}
+
+void DMC_MainWindow::updatePixmap()
+{
+/*
+    QPixmap newPixmap;
+    if(_labelPixmap.isNull())
+        newPixmap = QPixmap(QString(":/img/data/dmc_background.png"));
+    else
+        newPixmap = _labelPixmap;
+
+    ui->lblImage->setPixmap(newPixmap.scaled(ui->lblImage->size(), Qt::KeepAspectRatio));
+    */
+
+    if(!_labelPixmap.isNull())
+        ui->lblImage->setPixmap(_labelPixmap);
 }

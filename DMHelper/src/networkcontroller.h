@@ -10,6 +10,7 @@
 #include "uploadobject.h"
 #include <QObject>
 #include <QImage>
+#include <QPixmap>
 
 class AudioTrack;
 class DMHNetworkManager;
@@ -17,6 +18,7 @@ class QNetworkReply;
 class CampaignObjectBase;
 class Map;
 class EncounterText;
+class EncounterBattle;
 
 class NetworkController : public QObject
 {
@@ -63,13 +65,20 @@ private slots:
     void updateAudioPayload();
     void clearUploadErrors();
 
-    int uploadImage(QImage image, const QString& imageName);
+    UploadObject uploadImage(QImage image, const QString& imageName);
+    UploadObject uploadPixmap(QPixmap pixmap, const QString& pixmapName);
     void updateImagePayload();
 
     bool uploadMap(Map* map);
     bool uploadEncounterText(EncounterText* encounterText);
+    bool uploadBattle(EncounterBattle* encounterBattle);
 
     bool validateLogon(const DMHLogon& logon);
+
+    bool isAlreadyUploaded(const QString& md5);
+    void registerUpload(const QString& md5);
+    QByteArray getFileMD5(const QString& filename);
+    QByteArray getDataMD5(const QByteArray& data);
 
 private:
     DMHNetworkManager* _networkManager;
@@ -81,6 +90,7 @@ private:
     UploadObject _fowUpload;
     QString _backgroundColor;
     QList<UploadObject> _dependencies;
+    QStringList _uploadedFiles;
     bool _enabled;
 };
 

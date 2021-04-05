@@ -1,9 +1,11 @@
 #include "uploadobject.h"
 #include "campaignobjectbase.h"
+#include "dmconstants.h"
 
 UploadObject::UploadObject() :
     _object(nullptr),
     _filename(),
+    _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
     _description(),
@@ -14,6 +16,7 @@ UploadObject::UploadObject() :
 UploadObject::UploadObject(CampaignObjectBase* object) :
     _object(object),
     _filename(),
+    _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
     _description(),
@@ -24,6 +27,7 @@ UploadObject::UploadObject(CampaignObjectBase* object) :
 UploadObject::UploadObject(CampaignObjectBase* object, int status) :
     _object(object),
     _filename(),
+    _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
     _description(),
@@ -34,6 +38,7 @@ UploadObject::UploadObject(CampaignObjectBase* object, int status) :
 UploadObject::UploadObject(CampaignObjectBase* object, const QString& filename, int status) :
     _object(object),
     _filename(filename),
+    _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
     _description(),
@@ -52,7 +57,8 @@ bool UploadObject::isValid() const
 
 bool UploadObject::hasMD5() const
 {
-    return((_object != nullptr) || (!_md5.isEmpty()));
+    return((!_md5.isEmpty()) ||
+           ((_object != nullptr) && (!_object->getMD5().isEmpty())));
 }
 
 CampaignObjectBase* UploadObject::getObject() const
@@ -73,6 +79,16 @@ QString UploadObject::getFilename() const
 void UploadObject::setFilename(const QString& filename)
 {
     _filename = filename;
+}
+
+int UploadObject::getFileType() const
+{
+    return _filetype;
+}
+
+void UploadObject::setFileType(int filetype)
+{
+    _filetype = filetype;
 }
 
 QString UploadObject::getData() const

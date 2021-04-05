@@ -90,7 +90,7 @@ void DMC_OptionsContainer::setURLString(const QString& urlString)
     if(_urlString != urlString)
     {
         _urlString = urlString;
-        emit urlStringChanged();
+        emit urlStringChanged(urlString);
     }
 }
 
@@ -99,7 +99,7 @@ void DMC_OptionsContainer::setUserName(const QString& username)
     if(_userName != username)
     {
         _userName = username;
-        emit userNameChanged();
+        emit userNameChanged(username);
     }
 }
 
@@ -108,7 +108,7 @@ void DMC_OptionsContainer::setPassword(const QString& password)
     if(_password != password)
     {
         _password = password;
-        emit passwordChanged();
+        emit passwordChanged(password);
     }
 }
 
@@ -117,7 +117,7 @@ void DMC_OptionsContainer::setSession(const QString& session)
     if(_session != session)
     {
         _session = session;
-        emit sessionChanged();
+        emit sessionChanged(session);
     }
 }
 
@@ -132,7 +132,7 @@ void DMC_OptionsContainer::setCacheDirectory(const QString& cacheDirectory)
     if(_cacheDirectory != resolvedDirectory)
     {
         _cacheDirectory = resolvedDirectory;
-        emit cacheDirectoryChanged();
+        emit cacheDirectoryChanged(cacheDirectory);
     }
 }
 

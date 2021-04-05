@@ -145,6 +145,15 @@ namespace DMHelper
         AudioType_Youtube
     };
 
+    enum FileType
+    {
+        FileType_Other = 0,
+        FileType_Image,
+        FileType_Video,
+        FileType_Text,
+        FileType_Audio
+    };
+
     enum OptionsTab
     {
         OptionsTab_General = 0,

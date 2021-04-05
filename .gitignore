@@ -1,13 +1,8 @@
 #DMHelper ignores
 DMHelper/bin32
 DMHelper/bin64
+DMHelper/bin64-client
 DMHelper/build*
-DMHelper/build-32_bit-debug
-DMHelper/build-32_bit-profile
-DMHelper/build-32_bit-release
-DMHelper/build-64_bit-debug
-DMHelper/build-64_bit-profile
-DMHelper/build-64_bit-release
 DMHelper/rawdata
 DMHelper/testdata
 DMHelper/release
@@ -33,7 +28,7 @@ DMHelperShared/src/DMHelperShared.pro.user*
 DMHelperShared/DM Helper Shared release.__zip
 DMHelperShared/src.zip
 
-#DMHelper Client ignores
+#DMHelper Client ignores
 DMHelperClient/bin32
 DMHelperClient/bin64
 DMHelperClient/build-32_bit-debug
@@ -94,3 +89,5 @@ DMHelper/DMHelper 64-bit release Installer.exe
 DMHelper/DMHelper 64-bit release Installer.exe
 DMHelper/DMHelper 64-bit release.zip
 >>>>>>> v2.3
+DMHelper/DMHelper Client 64-bit release Installer.exe
+DMHelper/DMHelper Client 64-bit release.zip

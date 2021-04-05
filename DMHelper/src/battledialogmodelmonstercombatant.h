@@ -43,6 +43,9 @@ public:
     virtual QString getName() const override;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const override;
 
+    virtual QString getMD5() const override;
+    virtual void setMD5(const QString& md5) override;
+
     virtual int getMonsterType() const override;
     virtual MonsterClass* getMonsterClass() const override;
 

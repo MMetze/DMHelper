@@ -223,6 +223,27 @@ QPixmap BattleDialogModelMonsterCombatant::getIconPixmap(DMHelper::PixmapSize ic
     }
 }
 
+QString BattleDialogModelMonsterCombatant::getMD5() const
+{
+    if(_combatant)
+    {
+        return _combatant->getMD5();
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in getMD5!";
+        return QString();
+    }
+}
+
+void BattleDialogModelMonsterCombatant::setMD5(const QString& md5)
+{
+    if(_combatant)
+        _combatant->setMD5(md5);
+    else
+        qDebug() << "[BattleDialogModelMonsterCombatant] WARNING: No valid monster in setMD5!";
+}
+
 int BattleDialogModelMonsterCombatant::getMonsterType() const
 {
     return BattleMonsterType_Combatant;

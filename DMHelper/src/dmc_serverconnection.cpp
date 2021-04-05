@@ -7,60 +7,51 @@
 #include "dmconstants.h"
 #include "dmversion.h"
 #include "remoteaudioplayer.h"
+#include "remoterenderer.h"
 #include "audiofactory.h"
 #include "audiotrack.h"
 #include <QFileDialog>
 #include <QFile>
-#include <QDomDocument>
 #include <QDebug>
 
-DMC_ServerConnection::DMC_ServerConnection(QObject *parent) :
+DMC_ServerConnection::DMC_ServerConnection(const QString& cacheDirectory, QObject *parent) :
     QObject(parent),
     _networkManager(nullptr),
     _networkObserver(nullptr),
-    _audioPlayer(new RemoteAudioPlayer(this)),
-    _imageMD5client(),
-    //_audioMD5client(),
-    _currentImageRequest(0),
-    //_currentAudioRequest(0),
-    //_track(nullptr),
+    _audioPlayer(new RemoteAudioPlayer(cacheDirectory, this)),
+    _renderer(new RemoteRenderer(cacheDirectory, this)),
     _pmp(),
-    _lastPayload()
+    _lastPayload(),
+    _cacheDirectory(cacheDirectory)
 {
-    connectAudioPlayer();
+    connectRemotePlayers();
 }
 
-DMC_ServerConnection::DMC_ServerConnection(const DMHLogon& logon, QObject *parent) :
+DMC_ServerConnection::DMC_ServerConnection(const DMHLogon& logon, const QString& cacheDirectory, QObject *parent) :
     QObject(parent),
     _networkManager(nullptr),
     _networkObserver(nullptr),
-    _audioPlayer(new RemoteAudioPlayer(this)),
-    _imageMD5client(),
-    //_audioMD5client(),
-    _currentImageRequest(0),
-    //_currentAudioRequest(0),
-    //_track(nullptr),
+    _audioPlayer(new RemoteAudioPlayer(cacheDirectory, this)),
+    _renderer(new RemoteRenderer(cacheDirectory, this)),
     _pmp(),
-    _lastPayload()
+    _lastPayload(),
+    _cacheDirectory(cacheDirectory)
 {
-    connectAudioPlayer();
+    connectRemotePlayers();
     startServer(logon);
 }
 
-DMC_ServerConnection::DMC_ServerConnection(const QString& urlString, const QString& username, const QString& password, const QString& session, QObject *parent) :
+DMC_ServerConnection::DMC_ServerConnection(const QString& urlString, const QString& username, const QString& password, const QString& session, const QString& cacheDirectory, QObject *parent) :
     QObject(parent),
     _networkManager(nullptr),
     _networkObserver(nullptr),
-    _audioPlayer(new RemoteAudioPlayer(this)),
-    _imageMD5client(),
-    //_audioMD5client(),
-    _currentImageRequest(0),
-    //_currentAudioRequest(0),
-    //_track(nullptr),
+    _audioPlayer(new RemoteAudioPlayer(cacheDirectory, this)),
+    _renderer(new RemoteRenderer(cacheDirectory, this)),
     _pmp(),
-    _lastPayload()
+    _lastPayload(),
+    _cacheDirectory(cacheDirectory)
 {
-    connectAudioPlayer();
+    connectRemotePlayers();
     startServer(DMHLogon(urlString, username, password, session));
 }
 
@@ -72,182 +63,20 @@ DMC_ServerConnection::~DMC_ServerConnection()
 void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data)
 {
     qDebug() << "[DMC_ServerConnection] Download complete " << requestID << ": " << fileMD5 << ", " << data.size() << " bytes";
-    if(requestID == _currentImageRequest)
-    {
-        _currentImageRequest = 0;
-        if(data.size() > 0)
-        {
-            if(_pmp.loadFromData(data))
-                //ui->lblImage->setPixmap(_pmp.scaled(ui->lblImage->size(), Qt::KeepAspectRatio));
-                emit pixmapActive(_pmp);
-            else
-                qDebug() << "[DMC_ServerConnection] Download complete Pixmap loading failed";
-        }
-        else
-        {
-            qDebug() << "[DMC_ServerConnection] WARNING: Download complete for image download with no data received, no pixmap set";
-        }
-    }
-    else
-    {
-        emit fileRequestCompleted(requestID, fileMD5, data);
-    }
-
-
-    /*
-    else if(requestID == _currentAudioRequest)
-    {
-        stopAudio();
-        _currentAudioRequest = 0;
-
-        QUrl receivedUrl(fileMD5);
-        AudioFactory audioFactory;
-        if(audioFactory.identifyAudioSubtype(receivedUrl) == DMHelper::AudioType_File)
-        {
-            QFile outputFile(fileMD5 + QString(".mp3"));
-            if(data.size() > 0)
-            {
-                if(!outputFile.exists())
-                {
-                    if(outputFile.open(QIODevice::WriteOnly))
-                    {
-                        outputFile.write(data);
-                        outputFile.close();
-                    }
-                }
-            }
-
-            if(outputFile.exists())
-            {
-                QFileInfo fileInfo(outputFile);
-                _track = audioFactory.createTrackFromUrl(QUrl(fileInfo.filePath()), fileInfo.fileName());
-            }
-            else
-            {
-                qDebug() << "[DMC_ServerConnection] WARNING: Download complete for audio download with no data received, no playback possible";
-            }
-        }
-        else
-        {
-            _track = audioFactory.createTrackFromUrl(receivedUrl, receivedUrl.fileName());
-        }
-
-        if(_track)
-        {
-            qDebug() << "[Main] Playing track: " << _track;
-            //connect(ui->sliderVolume, SIGNAL(valueChanged(int)), _track, SLOT(setVolume(int)));
-            //connect(ui->btnMute, SIGNAL(toggled(bool)), _track, SLOT(setMute(bool)));
-            _track->play();
-            emit trackActive(_track);
-            //enableAudio(true);
-        }
-        else
-        {
-            qDebug() << "[DMC_ServerConnection] WARNING: No track played.";
-        }
-    }
-    else
-    {
-        qDebug() << "[DMC_ServerConnection] ERROR: Unexpected request ID received!";
-    }
-    */
+    emit fileRequestCompleted(requestID, fileMD5, data);
 }
-
-/*
-void DMC_ServerConnection::uploadComplete(int requestID, const QString& fileMD5)
-{
-    qDebug() << "[Main] Upload complete " << requestID << ": " << fileMD5;
-
-    if(requestID == _currentImageRequest)
-    {
-        _currentImageRequest = 0;
-        if(fileMD5.isEmpty())
-        {
-            qDebug() << "[Main] Upload complete for Image with invalid MD5 value, no payload uploaded.";
-        }
-        else
-        {
-            DMHPayload payload;
-            _imageMD5server = fileMD5;
-            payload.setImageFile(_imageMD5server);
-            payload.setAudioFile(_audioMD5server);
-            _networkManager->uploadPayload(payload);
-        }
-    }
-    else if(requestID == _currentAudioRequest)
-    {
-        _currentAudioRequest = 0;
-        if(fileMD5.isEmpty())
-        {
-            qDebug() << "[Main] Upload complete for Audio with invalid MD5 value, no payload uploaded.";
-        }
-        else
-        {
-            DMHPayload payload;
-            _audioMD5server = fileMD5;
-            payload.setImageFile(_imageMD5server);
-            payload.setAudioFile(_audioMD5server);
-            _networkManager->uploadPayload(payload);
-        }
-    }
-    else
-    {
-        qDebug() << "[Main] ERROR: Unexpected request ID received!";
-    }
-}
-*/
 
 void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QString& timestamp)
 {
+    if((!_audioPlayer) || (!_renderer))
+        return;
+
     if(timestamp == _lastPayload)
         return;
 
-    if(_currentImageRequest <= 0)
-    {
-        if(payload.getImageFile() != _imageMD5client)
-        {
-            qDebug() << "[DMC_ServerConnection] Payload received with new Image file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
-            _imageMD5client = payload.getImageFile();
-            if(_imageMD5client.isEmpty())
-                //ui->lblImage->setPixmap(QPixmap());
-                emit pixmapActive(QPixmap());
-            else
-                _currentImageRequest = _networkManager->downloadFile(_imageMD5client);
-        }
-    }
-
-    qDebug() << "[DMC_ServerConnection] Payload received with new Audio file. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile() << ", Timestamp: " << timestamp;
-    if(_audioPlayer)
-        _audioPlayer->parseAudioString(payload.getAudioFile());
-
-    /*
-    if(_currentAudioRequest <= 0)
-    {
-        if(payload.getAudioFile() != _audioMD5client)
-        {
-
-
-            _audioMD5client = payload.getAudioFile();
-            if(_audioMD5client.isEmpty())
-            {
-                stopAudio();
-            }
-            else
-            {
-                QUrl audioUrl = QUrl::fromUserInput(_audioMD5client);
-                if((!audioUrl.isValid()) && (QFile::exists(_audioMD5client + QString(".mp3"))))
-                {
-                    _currentAudioRequest = _networkManager->downloadFile(_audioMD5client);
-                }
-                else
-                {
-                    _currentAudioRequest = DUMMY_DOWNLOAD_ID;
-                    downloadComplete(DUMMY_DOWNLOAD_ID, _audioMD5client, QByteArray());
-                }
-            }
-        }
-    }
-        */
+    qDebug() << "[DMC_ServerConnection] Payload received with new data. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile()<< ", Data: " << payload.getData() << ", Timestamp: " << timestamp;
+    _renderer->parseImageData(payload.getImageFile(), payload.getData());
+    _audioPlayer->parseAudioString(payload.getAudioFile());
 
     _lastPayload = timestamp;
 }
@@ -283,98 +112,52 @@ void DMC_ServerConnection::stopServer()
         _networkObserver->deleteLater();
         _networkObserver = nullptr;
     }
-
-    //stopAudio();
 }
 
 void DMC_ServerConnection::fileRequested(const QString& md5String)
 {
-    if(QFile::exists(md5String))
+    QString cachedFile = _cacheDirectory + QString("/") + md5String;
+    if(QFile::exists(cachedFile))
     {
-        emit fileRequestStarted(-1);
+        emit fileRequestStarted(-1, QString());
         emit fileRequestCompleted(-1, md5String, QByteArray());
     }
     else
     {
-        emit fileRequestStarted(_networkManager->downloadFile(md5String));
+        emit fileRequestStarted(_networkManager->downloadFile(md5String), md5String);
     }
 }
 
-/*
-void DMC_ServerConnection::parseAudioData(const QString& audioData)
+void DMC_ServerConnection::fileAborted(int requestID)
 {
-    QDomDocument doc;
-    QString contentError;
-    int contentErrorLine = 0;
-    int contentErrorColumn = 0;
-    bool contentResult = doc.setContent(audioData, &contentError, &contentErrorLine, &contentErrorColumn);
-
-    if(contentResult == false)
-    {
-        qDebug() << "[DMC_ServerConnection] Failure parsing audio data: Error reading XML (line " << contentErrorLine << ", column " << contentErrorColumn << "): " << contentError;
-        return;
-    }
-
-    QDomElement audioElement = doc.firstChildElement("audio-track");
-    while(!audioElement.isNull())
-    {
-        int type = audioElement.attribute("type").toInt();
-        QString md5 = audioElement.attribute("md5");
-        QString id = audioElement.attribute("id");
-        bool repeat = static_cast<bool>(audioElement.attribute("repeat").toInt());
-        bool mute = static_cast<bool>(audioElement.attribute("mute").toInt());
-
-        QDomCDATASection urlData = audioElement.firstChild().toCDATASection();
-        QUrl url(urlData.data());
-
-        audioElement = audioElement.nextSiblingElement("audio-track");
-    }
+    if(_networkManager)
+        _networkManager->abortRequest(requestID);
 }
-*/
 
-void DMC_ServerConnection::connectAudioPlayer()
+void DMC_ServerConnection::setCacheDirectory(const QString& cacheDirectory)
 {
-    if(!_audioPlayer)
+    _cacheDirectory = cacheDirectory;
+}
+
+void DMC_ServerConnection::targetResized(const QSize& newSize)
+{
+    if(_renderer)
+        _renderer->targetResized(newSize);
+}
+
+void DMC_ServerConnection::connectRemotePlayers()
+{
+    if((!_audioPlayer) || (!_renderer))
         return;
 
     connect(_audioPlayer, &RemoteAudioPlayer::requestFile, this, &DMC_ServerConnection::fileRequested);
     connect(this, &DMC_ServerConnection::fileRequestStarted, _audioPlayer, &RemoteAudioPlayer::fileRequestStarted);
     connect(this, &DMC_ServerConnection::fileRequestCompleted, _audioPlayer, &RemoteAudioPlayer::fileRequestCompleted);
+
+    connect(_renderer, &RemoteRenderer::requestFile, this, &DMC_ServerConnection::fileRequested);
+    connect(_renderer, &RemoteRenderer::abortRequest, this, &DMC_ServerConnection::fileAborted);
+    connect(_renderer, &RemoteRenderer::publishPixmap, this, &DMC_ServerConnection::pixmapActive);
+    connect(_renderer, &RemoteRenderer::publishImage, this, &DMC_ServerConnection::imageActive);
+    connect(this, &DMC_ServerConnection::fileRequestStarted, _renderer, &RemoteRenderer::fileRequestStarted);
+    connect(this, &DMC_ServerConnection::fileRequestCompleted, _renderer, &RemoteRenderer::fileRequestCompleted);
 }
-
-void DMC_ServerConnection::loadBattle()
-{
-    QFile localPayload("_dmhpayload.txt");
-    localPayload.open(QIODevice::ReadOnly);
-    QTextStream in(&localPayload);
-    in.setCodec("UTF-8");
-    QDomDocument doc("DMHelperXML");
-    doc.setContent( in.readAll() );
-    localPayload.close();
-
-    QDomElement root = doc.documentElement();
-    QDomElement battleElement = root.firstChildElement( QString("battle") );
-
-    /*
-    _battleDlgModel = new BattleDialogModel(this);
-    _battleDlgModel->inputXML(battleElement);
-
-    _battleDlg = new BattleDialog(*_battleDlgModel, this);
-    _battleDlg->updateMap();
-    _battleDlg->show();
-    */
-}
-
-/*
-void DMC_ServerConnection::stopAudio()
-{
-    if(!_track)
-        return;
-
-    _track->stop();
-    _track->deleteLater();
-    _track = nullptr;
-
-    emit trackActive(nullptr);
-}
-*/

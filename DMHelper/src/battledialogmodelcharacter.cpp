@@ -264,6 +264,31 @@ QPixmap BattleDialogModelCharacter::getIconPixmap(DMHelper::PixmapSize iconSize)
     }
 }
 
+QString BattleDialogModelCharacter::getMD5() const
+{
+    if(_combatant)
+    {
+        return _combatant->getMD5();
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in getMD5!";
+        return QString();
+    }
+}
+
+void BattleDialogModelCharacter::setMD5(const QString& md5)
+{
+    if(_combatant)
+    {
+        _combatant->setMD5(md5);
+    }
+    else
+    {
+        qDebug() << "[BattleDialogModelCharacter] WARNING: No valid character in setMD5!";
+    }
+}
+
 Character* BattleDialogModelCharacter::getCharacter() const
 {
     if((!_combatant) || (_combatant->getCombatantType() != DMHelper::CombatantType_Character))

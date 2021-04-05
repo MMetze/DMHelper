@@ -50,6 +50,23 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
     _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(1)).toInt());
 }
 
+QDomElement BattleDialogModelCombatant::outputNetworkXML(QDomDocument &doc)
+{
+    QDomElement element = createOutputXML(doc);
+
+    element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
+    element.setAttribute("type", getCombatantType());
+    element.setAttribute("initiative", _initiative);
+    element.setAttribute("positionX", _position.x());
+    element.setAttribute("positionY", _position.y());
+    element.setAttribute("isShown", _isShown);
+    element.setAttribute("sizeFactor", getSizeFactor());
+    element.setAttribute("conditions", getConditions());
+    element.setAttribute("name", getName());
+
+    return element;
+}
+
 bool BattleDialogModelCombatant::getShown() const
 {
     return _isShown;

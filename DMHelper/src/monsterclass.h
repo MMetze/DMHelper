@@ -79,6 +79,9 @@ public:
     void setReaction(int index, const MonsterAction& action);
     int removeReaction(const MonsterAction& action);
 
+    QString getMD5() const;
+    void setMD5(const QString& md5);
+
     void cloneMonster(MonsterClass& other);
 
     static int convertSizeToCategory(const QString& monsterSize);
@@ -177,6 +180,7 @@ protected:
     bool _iconChanged;
 
     ScaledPixmap _scaledPixmap;
+    QString _md5;
 
 public:
 

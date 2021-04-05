@@ -13,7 +13,8 @@ public:
     {
         Status_Complete = 0,
         Status_NotStarted = -1,
-        Status_Error = -2
+        Status_Error = -2,
+        Status_Exists = -3
     };
 
     explicit UploadObject();
@@ -31,6 +32,9 @@ public:
     virtual QString getFilename() const;
     virtual void setFilename(const QString& filename);
 
+    virtual int getFileType() const;
+    virtual void setFileType(int filetype);
+
     virtual QString getData() const;
     virtual void setData(const QString& data);
 
@@ -46,6 +50,7 @@ public:
 protected:
     CampaignObjectBase* _object;
     QString _filename;
+    int _filetype;
     QString _data;
     QString _md5;
     QString _description;

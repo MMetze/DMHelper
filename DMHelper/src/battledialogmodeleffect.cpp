@@ -51,6 +51,24 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+QDomElement BattleDialogModelEffect::outputNetworkXML(QDomDocument &doc)
+{
+    QDomElement element = createOutputXML(doc);
+
+    element.setAttribute("type", getEffectType());
+    element.setAttribute("size", _size);
+    element.setAttribute("positionX", _position.x());
+    element.setAttribute("positionY", _position.y());
+    element.setAttribute("rotation", _rotation );
+    element.setAttribute("colorR", _color.red());
+    element.setAttribute("colorG", _color.green());
+    element.setAttribute("colorB", _color.blue());
+    element.setAttribute("colorA", _color.alpha());
+    element.setAttribute("tip", _tip);
+
+    return element;
+}
+
 BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
 {
     return new BattleDialogEffectSettings(*this);

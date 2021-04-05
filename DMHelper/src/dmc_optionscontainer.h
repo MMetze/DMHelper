@@ -23,11 +23,11 @@ public:
     QString getCacheDirectory() const;
 
 signals:
-    void urlStringChanged();
-    void userNameChanged();
-    void passwordChanged();
-    void sessionChanged();
-    void cacheDirectoryChanged();
+    void urlStringChanged(const QString& urlString);
+    void userNameChanged(const QString& userName);
+    void passwordChanged(const QString& password);
+    void sessionChanged(const QString& session);
+    void cacheDirectoryChanged(const QString& cacheDirectory);
 
 public slots:
     void readSettings();

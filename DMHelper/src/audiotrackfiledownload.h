@@ -7,7 +7,7 @@ class AudioTrackFileDownload : public AudioTrackFile
 {
     Q_OBJECT
 public:
-    explicit AudioTrackFileDownload(const QString& md5String, const QString& trackName, const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
+    explicit AudioTrackFileDownload(const QString& md5String, const QString& cacheDirectory, const QString& trackName, const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
     virtual ~AudioTrackFileDownload() override;
 
 public slots:
@@ -19,6 +19,7 @@ signals:
 
 protected:
     QString _md5;
+    QString _cacheDirectory;
 };
 
 #endif // AUDIOTRACKFILEDOWNLOAD_H

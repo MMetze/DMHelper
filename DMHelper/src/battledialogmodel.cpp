@@ -67,6 +67,25 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 }
 
+QDomElement BattleDialogModel::outputNetworkXML(QDomDocument &doc)
+{
+    QDomElement element = createOutputXML(doc);
+
+    element.setAttribute("showGrid", _gridOn);
+    element.setAttribute("gridScale", _gridScale);
+    element.setAttribute("gridOffsetX", _gridOffsetX);
+    element.setAttribute("gridOffsetY", _gridOffsetY);
+    element.setAttribute("showCompass", _showCompass);
+    element.setAttribute("showAlive", _showAlive);
+    element.setAttribute("showDead", _showDead);
+    element.setAttribute("showEffects", _showEffects);
+    element.setAttribute("showMovement", _showMovement);
+    element.setAttribute("showLairActions", _showLairActions);
+    element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
+
+    return element;
+}
+
 QList<BattleDialogModelCombatant*> BattleDialogModel::getCombatantList() const
 {
     return _combatants;

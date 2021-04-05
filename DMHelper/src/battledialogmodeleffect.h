@@ -42,6 +42,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual QDomElement outputNetworkXML(QDomDocument &doc) override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
 

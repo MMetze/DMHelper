@@ -31,6 +31,7 @@ SOURCES += \
         audiotrackyoutube.cpp \
         campaignobjectbase.cpp \
         campaignobjectfactory.cpp \
+        campaignobjectrenderer.cpp \
         dmc_main.cpp \
         ../../DMHelperShared/src/dmhlogon.cpp \
         ../../DMHelperShared/src/dmhlogon_private.cpp \
@@ -51,9 +52,14 @@ SOURCES += \
         dmc_serverconnection.cpp \
         dmc_settingsdialog.cpp \
         dmhlogger.cpp \
+        encountertext.cpp \
+        encountertextdownload.cpp \
+        encountertextrenderer.cpp \
         objectfactory.cpp \
         placeholder.cpp \
-        remoteaudioplayer.cpp
+        remoteaudioplayer.cpp \
+        remoterenderer.cpp \
+        videoplayer.cpp
 
 HEADERS += \
     audiofactory.h \
@@ -66,6 +72,7 @@ HEADERS += \
     audiotrackyoutube.h \
     campaignobjectbase.h \
     campaignobjectfactory.h \
+    campaignobjectrenderer.h \
     dmc_constants.h \
     dmc_mainwindow.h\
     ../../DMHelperShared/inc/dmhglobal.h \
@@ -89,9 +96,14 @@ HEADERS += \
     dmconstants.h \
     dmhlogger.h \
     dmversion.h \
+    encountertext.h \
+    encountertextdownload.h \
+    encountertextrenderer.h \
     objectfactory.h \
     placeholder.h \
-    remoteaudioplayer.h
+    remoteaudioplayer.h \
+    remoterenderer.h \
+    videoplayer.h
 
 
 FORMS += \
