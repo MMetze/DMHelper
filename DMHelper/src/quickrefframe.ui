@@ -16,9 +16,6 @@
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="windowTitle">
-   <string>Frame</string>
-  </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
@@ -77,8 +74,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>450</width>
-        <height>548</height>
+        <width>444</width>
+        <height>534</height>
        </rect>
       </property>
       <property name="sizePolicy">

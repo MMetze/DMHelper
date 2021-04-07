@@ -74,6 +74,8 @@ SOURCES += main.cpp\
     legaldialog.cpp \
     mainwindow.cpp \
     mapfactory.cpp \
+    mapmanagereditdirectoriesdialog.cpp \
+    mapmanagerframe.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
     party.cpp \
@@ -285,6 +287,8 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     legaldialog.h \
     mapfactory.h \
+    mapmanagereditdirectoriesdialog.h \
+    mapmanagerframe.h \
     mapmarker.h \
     objectfactory.h \
     objectimporter.h \
@@ -459,6 +463,8 @@ FORMS    += mainwindow.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
+    mapmanagereditdirectoriesdialog.ui \
+    mapmanagerframe.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \

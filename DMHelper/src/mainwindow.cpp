@@ -50,6 +50,7 @@
 #include "scrolltabwidget.h"
 #include "quickref.h"
 #include "quickrefframe.h"
+#include "mapmanagerframe.h"
 #include "dmscreentabwidget.h"
 #include "timeanddateframe.h"
 #include "audiotrackedit.h"
@@ -139,6 +140,7 @@ MainWindow::MainWindow(QWidget *parent) :
     dmScreenDlg(nullptr),
     tableDlg(nullptr),
     quickRefDlg(nullptr),
+    mapsDlg(nullptr),
     soundDlg(nullptr),
     timeAndDateFrame(nullptr),
     calendarDlg(nullptr),
@@ -677,20 +679,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,SIGNAL(dispatchPublishImage(QImage,QColor)),previewFrame,SLOT(setImage(QImage)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), previewFrame, SLOT(setPointerFile(const QString&)));
     previewFrame->setPointerFile(_options->getPointerFile());
-    previewDlg = createDialog(previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
+    previewDlg = createDialog(QString("Preview"), previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
     connect(_ribbon->getPublishRibbon(), SIGNAL(previewClicked()), previewDlg, SLOT(exec()));
     QShortcut* previewShortcut = new QShortcut(QKeySequence(tr("Ctrl+L", "Preview")), this);
     connect(previewShortcut, SIGNAL(activated()), previewDlg, SLOT(exec()));
 
-    dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-    tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+    dmScreenDlg = createDialog(QString("Reference Screen"), new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+    tableDlg = createDialog(QString("Tables"), new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
 
     QuickRef::Initialize();
     QuickRefFrame* quickRefFrame = new QuickRefFrame(this);
-    quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+    quickRefDlg = createDialog(QString("Quick Reference"), quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, this, &MainWindow::readQuickRef);
     connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
     readQuickRef();
+
+    MapManagerFrame* mapsFrame = new MapManagerFrame(this);
+    mapsDlg = createDialog(QString("Map Manager"), mapsFrame, QSize(width() * 3 / 4, height() * 9 / 10));
 
     /*
     AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
@@ -711,11 +716,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
     connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
     connect(soundboard, SIGNAL(dirty()), this, SLOT(setDirty()));
-    soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+    soundDlg = createDialog(QString("Soundboard"), soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
     timeAndDateFrame = new TimeAndDateFrame(this);
-    calendarDlg = createDialog(timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
-    countdownDlg = createDialog(new CountdownFrame(this));
+    calendarDlg = createDialog(QString("Calendar"), timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
+    countdownDlg = createDialog(QString("Countdown Timer"), new CountdownFrame(this));
 
     connect(_ribbonTabTools, SIGNAL(screenClicked()), dmScreenDlg, SLOT(exec()));
     QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+E", "DM Screen")), this);
@@ -726,6 +731,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabTools, SIGNAL(referenceClicked()), quickRefDlg, SLOT(exec()));
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
     connect(referenceShortcut, SIGNAL(activated()), quickRefDlg, SLOT(exec()));
+    connect(_ribbonTabTools, SIGNAL(mapsClicked()), mapsDlg, SLOT(exec()));
     connect(_ribbonTabTools, SIGNAL(soundboardClicked()), soundDlg, SLOT(exec()));
     QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
     connect(soundboardShortcut, SIGNAL(activated()), soundDlg, SLOT(exec()));
@@ -2437,7 +2443,7 @@ void MainWindow::openRandomMarkets()
     dlg.exec();
 }
 
-QDialog* MainWindow::createDialog(QWidget* contents, const QSize& dlgSize)
+QDialog* MainWindow::createDialog(const QString& title, QWidget* contents, const QSize& dlgSize)
 {
     QDialog* resultDlg = new QDialog();
     if(!dlgSize.isNull())
@@ -2447,6 +2453,8 @@ QDialog* MainWindow::createDialog(QWidget* contents, const QSize& dlgSize)
     dlgLayout->addWidget(contents);
     dlgLayout->setSpacing(3);
     resultDlg->setLayout(dlgLayout);
+
+    resultDlg->setWindowTitle(QString("DMHelper ") + title);
 
     return resultDlg;
 }

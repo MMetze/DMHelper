@@ -180,7 +180,7 @@ protected slots:
     void openAboutDialog();
     void openRandomMarkets();
 
-    QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
+    QDialog* createDialog(const QString& title, QWidget* contents, const QSize& dlgSize = QSize());
 
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);
@@ -203,6 +203,7 @@ private:
     QDialog* dmScreenDlg;
     QDialog* tableDlg;
     QDialog* quickRefDlg;
+    QDialog* mapsDlg;
     QDialog* soundDlg;
     TimeAndDateFrame* timeAndDateFrame;
     QDialog* calendarDlg;

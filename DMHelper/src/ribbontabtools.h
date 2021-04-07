@@ -27,6 +27,7 @@ signals:
     void referenceClicked();
     void soundboardClicked();
     void spellbookClicked();
+    void mapsClicked();
 
     void rollDiceClicked();
     void randomMarketClicked();
