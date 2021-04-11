@@ -181,6 +181,8 @@ protected slots:
     void openAboutDialog();
     void openRandomMarkets();
 
+    void editNetworkSettings();
+
     QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
 
     void battleModelChanged(BattleDialogModel* model);

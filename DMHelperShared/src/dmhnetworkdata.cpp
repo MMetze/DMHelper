@@ -13,7 +13,6 @@ DMHNetworkData::~DMHNetworkData()
 }
 
 
-
 DMHNetworkData_Payload::DMHNetworkData_Payload(QDomElement data) :
     DMHNetworkData(),
     d(new DMHNetworkData_Payload_Private(data))
@@ -132,3 +131,182 @@ QString DMHNetworkData_Exists::getMD5() const
 {
     return d->getMD5();
 }
+
+
+
+
+DMHNetworkData_IsOwner::DMHNetworkData_IsOwner(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_IsOwner_Private(data))
+{
+}
+
+DMHNetworkData_IsOwner::~DMHNetworkData_IsOwner()
+{
+}
+
+bool DMHNetworkData_IsOwner::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_IsOwner::getSession() const
+{
+    return d->getSession();
+}
+
+QString DMHNetworkData_IsOwner::getUser() const
+{
+    return d->getUser();
+}
+
+QString DMHNetworkData_IsOwner::getSessionName() const
+{
+    return d->getSessionName();
+}
+
+QString DMHNetworkData_IsOwner::getInvite() const
+{
+    return d->getInvite();
+}
+
+bool DMHNetworkData_IsOwner::isOwner() const
+{
+    return d->isOwner();
+}
+
+
+
+
+
+DMHNetworkData_CreateSession::DMHNetworkData_CreateSession(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_CreateSession_Private(data))
+{
+}
+
+DMHNetworkData_CreateSession::~DMHNetworkData_CreateSession()
+{
+}
+
+bool DMHNetworkData_CreateSession::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_CreateSession::getSession() const
+{
+    return d->getSession();
+}
+
+QString DMHNetworkData_CreateSession::getInvite() const
+{
+    return d->getInvite();
+}
+
+
+
+
+DMHNetworkData_RenameSession::DMHNetworkData_RenameSession(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_RenameSession_Private(data))
+{
+}
+
+DMHNetworkData_RenameSession::~DMHNetworkData_RenameSession()
+{
+}
+
+bool DMHNetworkData_RenameSession::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_RenameSession::getName() const
+{
+    return d->getName();
+}
+
+
+
+
+
+
+DMHNetworkData_RenewSession::DMHNetworkData_RenewSession(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_RenewSession_Private(data))
+{
+}
+
+DMHNetworkData_RenewSession::~DMHNetworkData_RenewSession()
+{
+}
+
+bool DMHNetworkData_RenewSession::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_RenewSession::getSession() const
+{
+    return d->getSession();
+}
+
+QString DMHNetworkData_RenewSession::getInvite() const
+{
+    return d->getInvite();
+}
+
+
+
+
+
+
+DMHNetworkData_CloseSession::DMHNetworkData_CloseSession(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_CloseSession_Private(data))
+{
+}
+
+DMHNetworkData_CloseSession::~DMHNetworkData_CloseSession()
+{
+}
+
+bool DMHNetworkData_CloseSession::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_CloseSession::getSession() const
+{
+    return d->getSession();
+}
+
+
+
+
+DMHNetworkData_SessionMembers::DMHNetworkData_SessionMembers(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_SessionMembers_Private(data))
+{
+}
+
+DMHNetworkData_SessionMembers::~DMHNetworkData_SessionMembers()
+{
+}
+
+bool DMHNetworkData_SessionMembers::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_SessionMembers::getSession() const
+{
+    return d->getSession();
+}
+
+QString DMHNetworkData_SessionMembers::getMembers() const
+{
+    return d->getMembers();
+}
+

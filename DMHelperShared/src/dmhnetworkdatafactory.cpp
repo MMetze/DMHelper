@@ -132,6 +132,24 @@ bool DMHNetworkDataFactory::readDataElement()
         case DMHShared::DMH_Message_file_exists:
             _data.reset(new DMHNetworkData_Exists(_dataElement));
             return _data->isValid();
+        case DMHShared::DMH_Message_ssn_create:
+            _data.reset(new DMHNetworkData_CreateSession(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_ssn_isowner:
+            _data.reset(new DMHNetworkData_IsOwner(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_ssn_rename:
+            _data.reset(new DMHNetworkData_RenameSession(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_ssn_renew:
+            _data.reset(new DMHNetworkData_RenewSession(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_ssn_close:
+            _data.reset(new DMHNetworkData_CloseSession(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_ssn_members:
+            _data.reset(new DMHNetworkData_SessionMembers(_dataElement));
+            return _data->isValid();
         default:
             qDebug() << "[NetworkDataFactory] ERROR unsupported mode type: " << _modeValue;
             return false;

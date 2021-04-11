@@ -273,9 +273,6 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
 {
     Q_UNUSED(inviteID);
 
-    if(!_enabled)
-        return;
-
     qDebug() << "[NetworkController] Network login updated. URL: " << urlString << ", Username: " << username << ", Session: " << sessionID << ", Invite: " << inviteID;
 
     DMHLogon logon(urlString, username, password, sessionID);
@@ -838,16 +835,21 @@ bool NetworkController::validateLogon(const DMHLogon& logon)
     if(logon.isValid())
         return true;
 
+    /*
     QMessageBox msgBox(QMessageBox::Warning,
                        QString("DMHelper Network Connection"),
                        QString("Warning: The network client publishing is enabled, but the network URL, username, password and/or session ID are not properly set. Network publishing will not work unless these values are correct.\n\nWould you like to correct these settings or disable network publishing?"));
     QAbstractButton* openButton = msgBox.addButton(QString("Open Network Settings"), QMessageBox::AcceptRole);
     msgBox.addButton(QString("Disable Network Publish"), QMessageBox::RejectRole);
+    */
+    QMessageBox msgBox(QMessageBox::Warning,
+                       QString("DMHelper Network Connection"),
+                       QString("Warning: The network client publishing is enabled, but the network URL, username, password and/or session ID are not properly set. Network publishing will not work unless these values are correct.\n\nWould you like to correct these settings?"));
+    QAbstractButton* openButton = msgBox.addButton(QString("Yes"), QMessageBox::AcceptRole);
+    msgBox.addButton(QString("No"), QMessageBox::RejectRole);
     msgBox.exec();
     if(msgBox.clickedButton() == openButton)
         emit requestSettings(DMHelper::OptionsTab_Network);
-    else
-        enableNetworkController(false);
 
     return false;
 }

@@ -20,11 +20,17 @@ public:
 
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
+public slots:
+    void setNetworkActive(bool checked);
+
 signals:
     void newClicked();
     void openClicked();
     void saveClicked();
     void saveAsClicked();
+
+    void networkActiveClicked(bool checked);
+    void sessionClicked();
 
     void optionsClicked();
     void closeClicked();
@@ -40,6 +46,7 @@ protected:
 private slots:
     void showMRUMenu();
     void hideMRUMenu();
+    void setNetworkActiveImage(bool active);
 
 private:
     Ui::RibbonTabFile *ui;

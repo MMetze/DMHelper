@@ -10,6 +10,12 @@ DMHNetworkManager::DMHNetworkManager(const DMHLogon& logon, QObject *parent) :
     connect(&(*d), SIGNAL(downloadStarted(int, const QString&, QNetworkReply*)), this, SIGNAL(downloadStarted(int, const QString&, QNetworkReply*)));
     connect(&(*d), SIGNAL(downloadComplete(int, const QString&, const QByteArray&)), this, SIGNAL(downloadComplete(int, const QString&, const QByteArray&)));
     connect(&(*d), SIGNAL(existsComplete(int, const QString&, const QString&, bool)), this, SIGNAL(existsComplete(int, const QString&, const QString&, bool)));
+    connect(&(*d), SIGNAL(createSessionComplete(int, const QString&, const QString&)), this, SIGNAL(createSessionComplete(int, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(isOwnerComplete(int, const QString&, const QString&, const QString&, bool)), this, SIGNAL(isOwnerComplete(int, const QString&, const QString&, const QString&, bool)));
+    connect(&(*d), SIGNAL(renameSessionComplete(int, const QString&)), this, SIGNAL(renameSessionComplete(int, const QString&)));
+    connect(&(*d), SIGNAL(renewSessionComplete(int, const QString&, const QString&)), this, SIGNAL(renewSessionComplete(int, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(closeSessionComplete(int, const QString&)), this, SIGNAL(closeSessionComplete(int, const QString&)));
+    connect(&(*d), SIGNAL(sessionMembersComplete(int, const QString&, const QString&)), this, SIGNAL(sessionMembersComplete(int, const QString&, const QString&)));
     connect(&(*d), SIGNAL(otherRequestComplete()), this, SIGNAL(otherRequestComplete()));
     connect(&(*d), SIGNAL(requestError(int)), this, SIGNAL(requestError(int)));
     connect(&(*d), SIGNAL(DEBUG_message_contents(const QByteArray&)), this, SIGNAL(DEBUG_message_contents(const QByteArray&)));
@@ -48,6 +54,41 @@ int DMHNetworkManager::uploadData(const QByteArray& data)
 int DMHNetworkManager::downloadFile(const QString& fileMD5)
 {
     return d->downloadFile(fileMD5);
+}
+
+int DMHNetworkManager::createSession(const QString & sessionName)
+{
+    return d->createSession(sessionName);
+}
+
+int DMHNetworkManager::isSessionOwner(const QString & session)
+{
+    return d->isSessionOwner(session);
+}
+
+int DMHNetworkManager::renameSession(const QString & sessionName, const QString & session)
+{
+    return d->renameSession(sessionName, session);
+}
+
+int DMHNetworkManager::removeSession(const QString & session)
+{
+    return d->removeSession(session);
+}
+
+int DMHNetworkManager::renewSessionInvite(const QString & session)
+{
+    return d->renewSessionInvite(session);
+}
+
+int DMHNetworkManager::closeSession(const QString & session)
+{
+    return d->closeSession(session);
+}
+
+int DMHNetworkManager::getSessionMembers(const QString & session)
+{
+    return d->getSessionMembers(session);
 }
 
 void DMHNetworkManager::abortRequest(int id)

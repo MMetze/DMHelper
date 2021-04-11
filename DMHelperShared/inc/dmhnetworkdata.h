@@ -12,6 +12,12 @@ class DMHNetworkData_Payload_Private;
 class DMHNetworkData_Raw_Private;
 class DMHNetworkData_Upload_Private;
 class DMHNetworkData_Exists_Private;
+class DMHNetworkData_IsOwner_Private;
+class DMHNetworkData_CreateSession_Private;
+class DMHNetworkData_RenameSession_Private;
+class DMHNetworkData_RenewSession_Private;
+class DMHNetworkData_CloseSession_Private;
+class DMHNetworkData_SessionMembers_Private;
 
 
 //class DMHSHARED_EXPORT DMHNetworkData
@@ -124,6 +130,142 @@ private:
 
     std::unique_ptr<DMHNetworkData_Exists_Private> d;
 };
+
+
+
+
+
+
+class DMHNetworkData_IsOwner : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_IsOwner(QDomElement data);
+    virtual ~DMHNetworkData_IsOwner() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getSession() const;
+    QString getUser() const;
+    QString getSessionName() const;
+    QString getInvite() const;
+    bool isOwner() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_IsOwner(const DMHNetworkData_IsOwner& other);
+
+    std::unique_ptr<DMHNetworkData_IsOwner_Private> d;
+};
+
+
+
+
+class DMHNetworkData_CreateSession : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_CreateSession(QDomElement data);
+    virtual ~DMHNetworkData_CreateSession() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getSession() const;
+    QString getInvite() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_CreateSession(const DMHNetworkData_CreateSession& other);
+
+    std::unique_ptr<DMHNetworkData_CreateSession_Private> d;
+};
+
+
+
+
+class DMHNetworkData_RenameSession : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_RenameSession(QDomElement data);
+    virtual ~DMHNetworkData_RenameSession() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getName() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_RenameSession(const DMHNetworkData_RenameSession& other);
+
+    std::unique_ptr<DMHNetworkData_RenameSession_Private> d;
+};
+
+
+
+class DMHNetworkData_RenewSession : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_RenewSession(QDomElement data);
+    virtual ~DMHNetworkData_RenewSession() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getSession() const;
+    QString getInvite() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_RenewSession(const DMHNetworkData_RenewSession& other);
+
+    std::unique_ptr<DMHNetworkData_RenewSession_Private> d;
+};
+
+
+
+
+class DMHNetworkData_CloseSession : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_CloseSession(QDomElement data);
+    virtual ~DMHNetworkData_CloseSession() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getSession() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_CloseSession(const DMHNetworkData_CloseSession& other);
+
+    std::unique_ptr<DMHNetworkData_CloseSession_Private> d;
+};
+
+
+
+
+class DMHNetworkData_SessionMembers : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_SessionMembers(QDomElement data);
+    virtual ~DMHNetworkData_SessionMembers() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getSession() const;
+    QString getMembers() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_SessionMembers(const DMHNetworkData_SessionMembers& other);
+
+    std::unique_ptr<DMHNetworkData_SessionMembers_Private> d;
+};
+
+
 
 
 #endif // DMHNETWORKDATA_H

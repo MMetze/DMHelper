@@ -52,8 +52,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab sta
         ui->edtURL->setText(_options->getURLString());
         ui->chkSavePassword->setChecked(_options->getSavePassword());
         ui->edtPassword->setText(_options->getPassword());
-        ui->edtSessionID->setText(_options->getSessionID());
-        ui->edtInviteID->setText(_options->getInviteID());
+        //ui->edtSessionID->setText(_options->getSessionID());
+        //ui->edtInviteID->setText(_options->getInviteID());
 
         ui->lblURL->setEnabled(_options->getNetworkEnabled());
         ui->edtURL->setEnabled(_options->getNetworkEnabled());

@@ -5,6 +5,7 @@
 #include <QString>
 #include <QUuid>
 #include <QDate>
+#include <QMap>
 #include "mruhandler.h"
 #include "dmconstants.h"
 
@@ -60,8 +61,13 @@ public:
     QString getUserName() const;
     bool getSavePassword() const;
     QString getPassword() const; // note: password will not be stored in settings
-    QString getSessionID() const;
-    QString getInviteID() const;
+    QString getCurrentSession() const;
+    QStringList getSessions() const;
+    bool doesSessionExist(const QString& session) const;
+    QString getSessionName(const QString& session) const;
+    QString getSessionInvite(const QString& session) const;
+    //QString getSessionID() const;
+    //QString getInviteID() const;
 #endif
 
     MRUHandler* getMRUHandler() const;
@@ -102,8 +108,11 @@ signals:
     void userNameChanged(const QString& username);
     void savePasswordChanged(bool savePassword);
     void passwordChanged(const QString& password); // note: password will not be stored in settings
-    void sessionIDChanged(const QString& sessionID);
-    void inviteIDChanged(const QString& inviteID);
+    void currentSessionChanged(const QString& session);
+    void sessionChanged(const QString& session, const QString& sessionName);
+    void inviteChanged(const QString& session, const QString& invite);
+    //void sessionIDChanged(const QString& sessionID);
+    //void inviteIDChanged(const QString& inviteID);
     void networkSettingsChanged(const QString& urlString, const QString& username, const QString& password, const QString& sessionID, const QString& inviteID);
 #endif
 
@@ -164,8 +173,16 @@ public slots:
     void setUserName(const QString& username);
     void setSavePassword(bool savePassword);
     void setPassword(const QString& password); // note: password will not be stored in settings
-    void setSessionID(const QString& sessionID);
-    void setInviteID(const QString& inviteID);
+    //void setSessionID(const QString& sessionID);
+    //void setInviteID(const QString& inviteID);
+    void setCurrentSession(const QString& session);
+    void addSession(const QString& session, const QString& sessionName);
+    void setSessionName(const QString& session, const QString& sessionName);
+    void removeSession(const QString& session);
+    void addInvite(const QString& session, const QString& invite);
+    void setInvite(const QString& session, const QString& invite);
+    void removeInvite(const QString& session);
+
 #endif
 
 private slots:
@@ -220,8 +237,11 @@ private:
     QString _userName;
     bool _savePassword;
     QString _password; // note: password will not be stored in settings
-    QString _sessionID;
-    QString _inviteID;
+    QString _currentSession;
+    QMap<QString, QString> _sessions;
+    QMap<QString, QString> _invites;
+    //QString _sessionID;
+    //QString _inviteID;
 #endif
 
     MRUHandler* _mruHandler;

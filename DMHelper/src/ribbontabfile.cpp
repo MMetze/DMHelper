@@ -17,6 +17,11 @@ RibbonTabFile::RibbonTabFile(QWidget *parent) :
     connect(ui->btnSave, SIGNAL(clicked(bool)), this, SIGNAL(saveClicked()));
     connect(ui->btnSaveAs, SIGNAL(clicked(bool)), this, SIGNAL(saveAsClicked()));
 
+    connect(ui->btnNetworkActive, SIGNAL(toggled(bool)), this, SLOT(setNetworkActiveImage(bool)));
+    connect(ui->btnNetworkActive, SIGNAL(toggled(bool)), ui->btnSession, SLOT(setEnabled(bool)));
+    connect(ui->btnNetworkActive, SIGNAL(toggled(bool)), this, SIGNAL(networkActiveClicked(bool)));
+    connect(ui->btnSession, SIGNAL(clicked(bool)), this, SIGNAL(sessionClicked()));
+
     connect(ui->btnPreferences, SIGNAL(clicked(bool)), this, SIGNAL(optionsClicked()));
     connect(ui->btnClose, SIGNAL(clicked(bool)), this, SIGNAL(closeClicked()));
 
@@ -34,6 +39,12 @@ RibbonTabFile::~RibbonTabFile()
 PublishButtonRibbon* RibbonTabFile::getPublishRibbon()
 {
     return nullptr;
+}
+
+void RibbonTabFile::setNetworkActive(bool checked)
+{
+    if(checked != ui->btnNetworkActive->isChecked())
+        ui->btnNetworkActive->setChecked(checked);
 }
 
 QMenu* RibbonTabFile::getMRUMenu() const
@@ -54,6 +65,9 @@ void RibbonTabFile::showEvent(QShowEvent *event)
     setLineHeight(*ui->line, frameHeight);
     setStandardButtonSize(*ui->lblPreferences, *ui->btnPreferences, frameHeight);
     setStandardButtonSize(*ui->lblClose, *ui->btnClose, frameHeight);
+    setLineHeight(*ui->line_2, frameHeight);
+    setStandardButtonSize(*ui->lblNetworkActive, *ui->btnNetworkActive, frameHeight);
+    setStandardButtonSize(*ui->lblSession, *ui->btnSession, frameHeight);
 
     int openIconHeight = ui->btnOpen->iconSize().height();
     int mruHeight = height() - ui->lblOpen->height() - openIconHeight;
@@ -80,33 +94,7 @@ void RibbonTabFile::hideMRUMenu()
     ui->btnRecent->setChecked(false);
 }
 
-
-
-/*
-<widget class="QMenu" name="menu_File">
- <property name="title">
-  <string>&amp;File</string>
- </property>
- <widget class="QMenu" name="menuRecent_Campaigns">
-  <property name="title">
-   <string>&amp;Recent Campaigns</string>
-  </property>
- </widget>
- <addaction name="action_NewCampaign"/>
- <addaction name="action_OpenCampaign"/>
- <addaction name="menuRecent_Campaigns"/>
- <addaction name="action_SaveCampaign"/>
- <addaction name="actionSave_Campaign_As"/>
- <addaction name="actionClose_Campaign"/>
- <addaction name="separator"/>
- <addaction name="actionE_xit"/>
-</widget>
-
-
-        <widget class="QMenu" name="menu_Edit">
-         <property name="title">
-          <string>&amp;Edit</string>
-         </property>
-        </widget>
-
-*/
+void RibbonTabFile::setNetworkActiveImage(bool active)
+{
+    ui->btnNetworkActive->setIcon(QIcon(active ? QString(":/img/data/icon_networkconnection_on.png") : QString(":/img/data/icon_networkconnection_off.png")));
+}

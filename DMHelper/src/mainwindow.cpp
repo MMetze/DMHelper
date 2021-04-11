@@ -48,10 +48,10 @@
 #include "texttranslatedialog.h"
 #include "randommarketdialog.h"
 #include "combatantselectdialog.h"
+#include "networkoptionsdialog.h"
 #ifdef INCLUDE_CHASE_SUPPORT
     #include "chaserselectiondialog.h"
 #endif
-#include "optionsdialog.h"
 #include "selectzoom.h"
 #include "scrolltabwidget.h"
 #include "quickref.h"
@@ -306,6 +306,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* saveShortcut = new QShortcut(QKeySequence(tr("Ctrl+S", "Save")), this);
     connect(saveShortcut, SIGNAL(activated()), this, SLOT(saveCampaign()));
     connect(_ribbonTabFile, SIGNAL(saveAsClicked()), this, SLOT(saveCampaignAs()));
+    connect(_ribbonTabFile, SIGNAL(networkActiveClicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
+    connect(_ribbonTabFile, SIGNAL(sessionClicked()), this, SLOT(editNetworkSettings()));
     connect(_ribbonTabFile, SIGNAL(optionsClicked()), _options, SLOT(editSettings()));
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
     QShortcut* quitShortcut = new QShortcut(QKeySequence(tr("Ctrl+Q", "Quit")), this);
@@ -761,12 +763,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
-    _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getSessionID(), QString());
-    connect(_networkController, &NetworkController::requestSettings, _options, &OptionsContainer::editSettings);
+    _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getCurrentSession(), QString());
+    //connect(_networkController, &NetworkController::requestSettings, _options, &OptionsContainer::editSettings);
+    connect(_networkController, &NetworkController::requestSettings, this, &MainWindow::editNetworkSettings);
     connect(_networkController, &NetworkController::networkEnabledChanged, _options, &OptionsContainer::setNetworkEnabled);
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
-    _networkController->enableNetworkController(_options->getNetworkEnabled());
+    //_networkController->enableNetworkController(_options->getNetworkEnabled());
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
     connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(QColor)), _networkController, SLOT(setBackgroundColor(QColor)));
@@ -2475,6 +2478,16 @@ void MainWindow::openAboutDialog()
 void MainWindow::openRandomMarkets()
 {
     RandomMarketDialog dlg(_options->getShopsFileName());
+    dlg.exec();
+}
+
+void MainWindow::editNetworkSettings()
+{
+    if(!_options)
+        return;
+
+    NetworkOptionsDialog dlg(*_options);
+    dlg.resize(width() * 3 / 4, height() * 9 / 10);
     dlg.exec();
 }
 

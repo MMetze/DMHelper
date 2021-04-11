@@ -12,6 +12,44 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QDomElement;
 
+/*
+        Management interface for sessions
+
+        ssn_mng.php
+        POST Vars
+        user -> str, req
+        password -> str, req
+        session -> str, UUID, opt
+        action -> str, req
+        name -> str, opt
+
+        returns XML
+        <status> -> tells if last action was successful or not
+        <error> -> in case of error, holds the kind of error
+        - action create (creates new session)
+          <session> -> Session UUID
+            <code> -> invite code for players
+        - action isowner (checks if user is owner of session)
+          <owner> -> true/false (1, NULL)
+        - action rename (renames session)
+          <session> -> Session UUID
+            <renamed> -> new Session namespace
+        - action remove (deletes session)
+            <session> -> Session UUID
+            <removed> -> 'ok' on success
+        - action renew (creates new invite code, invalidates old one)
+            <session> -> Session UUID
+            <code> -> invite code
+        - action close (invalidates invite codes, does not create a new one)
+            <session> -> Session UUID
+        - action member (returns members of session)
+            <session> -> Session UUID
+            <members> -> <data>* -> 	<username>
+                                                            <surname>
+                                                            <forename>
+
+*/
+
 class DMHNetworkManager_Private : public QObject
 {
     Q_OBJECT
@@ -20,23 +58,51 @@ public:
     ~DMHNetworkManager_Private();
 
     DMHNetworkObserver* registerNetworkObserver(QObject *parent = nullptr);
+
+    // Payload Management
     void uploadPayload(const DMHPayload& payload);
+
+    // File Management
     int uploadFile(const QString& filename);
     int fileExists(const QString& fileMD5);
     int uploadData(const QByteArray& data);
     int downloadFile(const QString& fileMD5);
+
+    // Session Management
+    int createSession(const QString & sessionName);
+    int isSessionOwner(const QString & session = QString());
+    int renameSession(const QString & sessionName, const QString & session = QString());
+    int removeSession(const QString & session = QString());
+    int renewSessionInvite(const QString & session = QString());
+    int closeSession(const QString & session = QString());
+    int getSessionMembers(const QString & session = QString());
+
+    // Request controls
     void abortRequest(int id);
 
+    // Access Methods
     const DMHLogon& getLogon() const;
     void setLogon(const DMHLogon& logon);
 
     QNetworkReply* getNetworkReply(int requestID);
 
 signals:
+    // File Management
+    void existsComplete(int requestID, const QString& fileMD5, const QString& filename, bool exists);
     void uploadComplete(int requestID, const QString& fileMD5);
     void downloadStarted(int requestID, const QString& fileMD5, QNetworkReply* reply);
     void downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data);
-    void existsComplete(int requestID, const QString& fileMD5, const QString& filename, bool exists);
+
+    // Session Management
+    void sessionMgmtStarted(int requestID, QNetworkReply* reply, const QString& action, const QString& session, const QString& sessionName);
+    void createSessionComplete(int requestID, const QString& session, const QString& invite);
+    void isOwnerComplete(int requestID, const QString& session, const QString& sessionName, const QString& invite, bool isOwner);
+    void renameSessionComplete(int requestID, const QString& sessionName);
+    void renewSessionComplete(int requestID, const QString& sessionName, const QString& invite);
+    void closeSessionComplete(int requestID, const QString& sessionName);
+    void sessionMembersComplete(int requestID, const QString& sessionName, const QString& members);
+
+    // Request controls
     void otherRequestComplete();
     void requestError(int requestID);
 
@@ -55,6 +121,9 @@ private:
     QString outputElements(const QDomElement& element);
     void iterateElement(QString& output, const QDomElement& element);
     void registerRequestError(const QString& errorStr, int replyID);
+
+    int sendSessionMgmt(const QString& action, const QString& session = QString(), const QString& sessionName = QString());
+
 
     QNetworkAccessManager* _manager;
     DMHLogon _logon;
