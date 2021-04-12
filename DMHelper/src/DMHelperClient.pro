@@ -32,6 +32,8 @@ SOURCES += \
         campaignobjectbase.cpp \
         campaignobjectfactory.cpp \
         campaignobjectrenderer.cpp \
+        dmc_connectioninviteseditdialog.cpp \
+        dmc_connectionsettingsdialog.cpp \
         dmc_main.cpp \
         ../../DMHelperShared/src/dmhlogon.cpp \
         ../../DMHelperShared/src/dmhlogon_private.cpp \
@@ -73,6 +75,8 @@ HEADERS += \
     campaignobjectbase.h \
     campaignobjectfactory.h \
     campaignobjectrenderer.h \
+    dmc_connectioninviteseditdialog.h \
+    dmc_connectionsettingsdialog.h \
     dmc_constants.h \
     dmc_mainwindow.h\
     ../../DMHelperShared/inc/dmhglobal.h \
@@ -107,6 +111,8 @@ HEADERS += \
 
 
 FORMS += \
+    dmc_connectioninviteseditdialog.ui \
+    dmc_connectionsettingsdialog.ui \
     dmc_mainwindow.ui \
     dmc_settingsdialog.ui
 

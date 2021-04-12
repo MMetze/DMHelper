@@ -70,11 +70,10 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
     _settings = new DMC_OptionsContainer(this);
     _settings->readSettings();
 
-    _serverConnection = new DMC_ServerConnection(_settings->getLogon(), _settings->getCacheDirectory(), this);
+    _serverConnection = new DMC_ServerConnection(*_settings, this);
     connect(_serverConnection, &DMC_ServerConnection::trackActive, this, &DMC_MainWindow::enableAudio);
     connect(_serverConnection, &DMC_ServerConnection::pixmapActive, this, &DMC_MainWindow::setLabelPixmap);
     connect(_serverConnection, &DMC_ServerConnection::imageActive, this, &DMC_MainWindow::setLabelImage);
-    connect(_settings, &DMC_OptionsContainer::cacheDirectoryChanged, _serverConnection, &DMC_ServerConnection::setCacheDirectory);
 
     ui->sliderVolume->setValue(50);
     enableAudio(nullptr);
@@ -134,11 +133,12 @@ void DMC_MainWindow::openOptions()
     tempOptions.copy(*_settings);
 
     DMC_SettingsDialog dlg(tempOptions);
+    dlg.resize(width() * 1 / 2, height() * 3 / 4);
     if(dlg.exec() == QDialog::Accepted)
     {
         _settings->copy(tempOptions);
         if(_serverConnection)
-            _serverConnection->startServer(_settings->getLogon());
+            _serverConnection->startServer();
     }
 }
 

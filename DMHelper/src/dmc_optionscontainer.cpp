@@ -9,8 +9,9 @@ DMC_OptionsContainer::DMC_OptionsContainer(QObject *parent) :
     QObject(parent),
     _urlString(),
     _userName(),
-    _password("Ente2020"),
-    _session(),
+    _password(),
+    _currentInvite(),
+    _invites(),
     _cacheDirectory()
 {
 }
@@ -34,14 +35,24 @@ QString DMC_OptionsContainer::getPassword() const
     return _password;
 }
 
-QString DMC_OptionsContainer::getSession() const
+QString DMC_OptionsContainer::getCurrentInvite() const
 {
-    return _session;
+    return _currentInvite;
+}
+
+QStringList DMC_OptionsContainer::getInvites() const
+{
+    return _invites.keys();
+}
+
+QString DMC_OptionsContainer::getInviteName(const QString& invite) const
+{
+    return _invites.value(invite);
 }
 
 DMHLogon DMC_OptionsContainer::getLogon() const
 {
-    return DMHLogon(getURLString(), getUserName(), getPassword(), getSession());
+    return DMHLogon(getURLString(), getUserName(), getPassword(), getCurrentInvite());
 }
 
 QString DMC_OptionsContainer::getCacheDirectory() const
@@ -59,7 +70,21 @@ void DMC_OptionsContainer::readSettings()
 
     setURLString(settings.value("url","").toString());
     setUserName(settings.value("username","").toString());
-    setSession(settings.value("session","").toString());
+
+    settings.beginGroup("Invites");
+        QStringList invites = settings.childGroups();
+        for(QString invite : invites)
+        {
+            QString inviteName = settings.value("name").toString();
+            if(!inviteName.isEmpty())
+                _invites.insert(invite, inviteName);
+        }
+    settings.endGroup(); // Invites
+
+    QString currentInvite = settings.value("currentInvite").toString();
+    if(_invites.contains(currentInvite))
+        setCurrentInvite(currentInvite);
+
     setCacheDirectory(settings.value("cacheDirectory", "").toString());
 
 #ifdef QT_DEBUG
@@ -77,7 +102,19 @@ void DMC_OptionsContainer::writeSettings()
 
     settings.setValue("url", getURLString());
     settings.setValue("username", getUserName());
-    settings.setValue("session", getSession());
+
+    settings.beginGroup("Invites");
+        QStringList invites = _invites.keys();
+        for(QString invite : invites)
+        {
+            settings.beginGroup(invite);
+                settings.setValue("name", _invites.value(invite));
+            settings.endGroup(); // Invite
+        }
+    settings.endGroup(); // Invites
+
+    settings.setValue("currentInvite", getCurrentInvite());
+
     settings.setValue("cacheDirectory", getCacheDirectory());
 
 #ifdef QT_DEBUG
@@ -112,13 +149,40 @@ void DMC_OptionsContainer::setPassword(const QString& password)
     }
 }
 
-void DMC_OptionsContainer::setSession(const QString& session)
+void DMC_OptionsContainer::setCurrentInvite(const QString& invite)
 {
-    if(_session != session)
-    {
-        _session = session;
-        emit sessionChanged(session);
-    }
+    if((invite.isEmpty()) || (_currentInvite == invite) || (!_invites.contains(invite)))
+        return;
+
+    _currentInvite = invite;
+    emit currentInviteChanged(_currentInvite);
+}
+
+void DMC_OptionsContainer::addInvite(const QString& invite, const QString& inviteName)
+{
+    if((invite.isEmpty()) || (inviteName.isEmpty()) || (_invites.contains(invite)))
+        return;
+
+    _invites.insert(invite, inviteName);
+    emit inviteChanged(invite, inviteName);
+}
+
+void DMC_OptionsContainer::setInviteName(const QString& invite, const QString& inviteName)
+{
+    if((invite.isEmpty()) || (inviteName.isEmpty()) || (!_invites.contains(invite)))
+        return;
+
+    _invites[invite] = inviteName;
+    emit inviteChanged(invite, inviteName);
+}
+
+void DMC_OptionsContainer::removeInvite(const QString& invite)
+{
+    if((invite.isEmpty()) || (!_invites.contains(invite)))
+        return;
+
+    emit inviteChanged(invite, _invites.value(invite));
+    _invites.remove(invite);
 }
 
 void DMC_OptionsContainer::setCacheDirectory(const QString& cacheDirectory)
@@ -141,7 +205,12 @@ void DMC_OptionsContainer::copy(DMC_OptionsContainer& other)
     setURLString(other._urlString);
     setUserName(other._userName);
     setPassword(other._password);
-    setSession(other._session);
+    setCurrentInvite(other._currentInvite);
+
+    QStringList invites = other._invites.keys();
+    for(QString invite : invites)
+        _invites.insert(invite, other._invites.value(invite));
+
     setCacheDirectory(other._cacheDirectory);
 }
 

@@ -1,5 +1,7 @@
 #include "dmc_serverconnection.h"
 #include "dmc_constants.h"
+#include "dmc_optionscontainer.h"
+#include "dmc_connectionsettingsdialog.h"
 #include "dmhnetworkmanager.h"
 #include "dmhnetworkobserver.h"
 #include "dmhpayload.h"
@@ -14,6 +16,7 @@
 #include <QFile>
 #include <QDebug>
 
+/*
 DMC_ServerConnection::DMC_ServerConnection(const QString& cacheDirectory, QObject *parent) :
     QObject(parent),
     _networkManager(nullptr),
@@ -26,21 +29,24 @@ DMC_ServerConnection::DMC_ServerConnection(const QString& cacheDirectory, QObjec
 {
     connectRemotePlayers();
 }
+*/
 
-DMC_ServerConnection::DMC_ServerConnection(const DMHLogon& logon, const QString& cacheDirectory, QObject *parent) :
+DMC_ServerConnection::DMC_ServerConnection(DMC_OptionsContainer& options, QObject *parent) :
     QObject(parent),
+    _options(options),
     _networkManager(nullptr),
     _networkObserver(nullptr),
-    _audioPlayer(new RemoteAudioPlayer(cacheDirectory, this)),
-    _renderer(new RemoteRenderer(cacheDirectory, this)),
+    _audioPlayer(new RemoteAudioPlayer(options.getCacheDirectory(), this)),
+    _renderer(new RemoteRenderer(options.getCacheDirectory(), this)),
     _pmp(),
-    _lastPayload(),
-    _cacheDirectory(cacheDirectory)
+    _lastPayload()
 {
     connectRemotePlayers();
-    startServer(logon);
+    //startServer(logon);
+    checkLogon();
 }
 
+/*
 DMC_ServerConnection::DMC_ServerConnection(const QString& urlString, const QString& username, const QString& password, const QString& session, const QString& cacheDirectory, QObject *parent) :
     QObject(parent),
     _networkManager(nullptr),
@@ -54,6 +60,7 @@ DMC_ServerConnection::DMC_ServerConnection(const QString& urlString, const QStri
     connectRemotePlayers();
     startServer(DMHLogon(urlString, username, password, session));
 }
+*/
 
 DMC_ServerConnection::~DMC_ServerConnection()
 {
@@ -81,16 +88,27 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
     _lastPayload = timestamp;
 }
 
-void DMC_ServerConnection::startServer(const DMHLogon& logon)
+void DMC_ServerConnection::checkLogon()
 {
-    qDebug() << "[DMC_ServerConnection] Starting server with logon: " << logon;
+    if(!_options.getLogon().isValid())
+    {
+        DMC_ConnectionSettingsDialog dlg(_options);
+        dlg.exec();
+        if(!_options.getLogon().isValid())
+            return;
+    }
+}
+
+void DMC_ServerConnection::startServer()
+{
+    qDebug() << "[DMC_ServerConnection] Starting server with logon: " << _options.getLogon();
 
     stopServer();
 
-    _networkManager = new DMHNetworkManager(logon, this);
+    _networkManager = new DMHNetworkManager(_options.getLogon(), this);
     connect(_networkManager, SIGNAL(downloadComplete(int, const QString&, const QByteArray&)), this, SLOT(downloadComplete(int, const QString&, const QByteArray&)));
 
-    _networkObserver = new DMHNetworkObserver(logon, this);
+    _networkObserver = new DMHNetworkObserver(_options.getLogon(), this);
     connect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
     _networkObserver->start();
 }
@@ -116,7 +134,7 @@ void DMC_ServerConnection::stopServer()
 
 void DMC_ServerConnection::fileRequested(const QString& md5String)
 {
-    QString cachedFile = _cacheDirectory + QString("/") + md5String;
+    QString cachedFile = _options.getCacheDirectory() + QString("/") + md5String;
     if(QFile::exists(cachedFile))
     {
         emit fileRequestStarted(-1, QString());
@@ -132,11 +150,6 @@ void DMC_ServerConnection::fileAborted(int requestID)
 {
     if(_networkManager)
         _networkManager->abortRequest(requestID);
-}
-
-void DMC_ServerConnection::setCacheDirectory(const QString& cacheDirectory)
-{
-    _cacheDirectory = cacheDirectory;
 }
 
 void DMC_ServerConnection::targetResized(const QSize& newSize)

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QMap>
 #include "dmhlogon.h"
 
 class DMC_OptionsContainer : public QObject
@@ -16,7 +17,11 @@ public:
     QString getURLString() const;
     QString getUserName() const;
     QString getPassword() const;
-    QString getSession() const;
+
+    QString getCurrentInvite() const;
+    QStringList getInvites() const;
+    QString getInviteName(const QString& invite) const;
+
     DMHLogon getLogon() const;
 
     // File settings
@@ -26,7 +31,10 @@ signals:
     void urlStringChanged(const QString& urlString);
     void userNameChanged(const QString& userName);
     void passwordChanged(const QString& password);
-    void sessionChanged(const QString& session);
+
+    void currentInviteChanged(const QString& invite);
+    void inviteChanged(const QString& invite, const QString& inviteName);
+
     void cacheDirectoryChanged(const QString& cacheDirectory);
 
 public slots:
@@ -37,7 +45,11 @@ public slots:
     void setURLString(const QString& urlString);
     void setUserName(const QString& username);
     void setPassword(const QString& password);
-    void setSession(const QString& session);
+
+    void setCurrentInvite(const QString& invite);
+    void addInvite(const QString& invite, const QString& inviteName);
+    void setInviteName(const QString& invite, const QString& inviteName);
+    void removeInvite(const QString& invite);
 
     // File settings
     void setCacheDirectory(const QString& cacheDirectory);
@@ -51,7 +63,10 @@ private:
     QString _urlString;
     QString _userName;
     QString _password;
-    QString _session;
+    //QString _session;
+    QString _currentInvite;
+    QMap<QString, QString> _invites;
+
 
     // File settings
     QString _cacheDirectory;

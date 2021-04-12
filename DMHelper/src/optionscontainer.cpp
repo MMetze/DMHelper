@@ -1021,7 +1021,7 @@ void OptionsContainer::setSessionName(const QString& session, const QString& ses
 
 void OptionsContainer::removeSession(const QString& session)
 {
-    if(!_sessions.contains(session))
+    if((session.isEmpty()) || (!_sessions.contains(session)))
         return;
 
     emit sessionChanged(session, _sessions.value(session));
