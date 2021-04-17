@@ -282,6 +282,7 @@ public:
     virtual bool isValid() override;
 
     QString getUsername() const;
+    QString getUserId() const;
     QString getEmail() const;
 
 private:

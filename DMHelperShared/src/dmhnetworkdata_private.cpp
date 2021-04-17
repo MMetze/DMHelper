@@ -346,9 +346,11 @@ QString DMHNetworkData_SessionMembers_Private::getMembers() const
 DMHNetworkData_CreateUser_Private::DMHNetworkData_CreateUser_Private(QDomElement data) :
     DMHNetworkData_Private_Base(),
     _username(),
+    _userId(),
     _email()
 {
     if((readChildElement(data, QString("username"), _username)) &&
+       (readChildElement(data, QString("user"), _userId)) &&
        (readChildElement(data, QString("email"), _email)))
         _valid = true;
 }
@@ -356,6 +358,11 @@ DMHNetworkData_CreateUser_Private::DMHNetworkData_CreateUser_Private(QDomElement
 QString DMHNetworkData_CreateUser_Private::getUsername() const
 {
     return _username;
+}
+
+QString DMHNetworkData_CreateUser_Private::getUserId() const
+{
+    return _userId;
 }
 
 QString DMHNetworkData_CreateUser_Private::getEmail() const

@@ -7,8 +7,8 @@ DMHLogon::DMHLogon() :
 {
 }
 
-DMHLogon::DMHLogon(const QString& urlString, const QString& username, const QString& password, const QString& session) :
-    d(new DMHLogon_Private(urlString, username, password, session))
+DMHLogon::DMHLogon(const QString& urlString, const QString& username, const QString& userId, const QString& password, const QString& session) :
+    d(new DMHLogon_Private(urlString, username, userId, password, session))
 {
 }
 
@@ -45,6 +45,11 @@ QString DMHLogon::getUserName() const
     return d->getUserName();
 }
 
+QString DMHLogon::getUserId() const
+{
+    return d->getUserId();
+}
+
 QString DMHLogon::getPassword() const
 {
     return d->getPassword();
@@ -63,6 +68,11 @@ void DMHLogon::setURLString(const QString& urlString)
 void DMHLogon::setUserName(const QString& username)
 {
     d->setUserName(username);
+}
+
+void DMHLogon::setUserId(const QString& userId)
+{
+    d->setUserId(userId);
 }
 
 void DMHLogon::setPassword(const QString& password)

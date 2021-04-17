@@ -18,7 +18,9 @@ public:
     QDomElement getMode() const;
     DMHShared::DMH_Message getModeValue() const;
     QDomElement getState() const;
+    DMHShared::DMH_Message_State getStateValue() const;
     QDomElement getError() const;
+    QString getErrorString() const;
     QDomElement getDataElement() const;
     std::unique_ptr<DMHNetworkData>& getData(); // IMPORTANT: survives only as long as the DMHNetworkDataFactory!!!
 

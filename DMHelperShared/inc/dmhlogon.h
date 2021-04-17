@@ -12,7 +12,7 @@ class DMHLogon
 {
 public:
     DMHLogon();
-    DMHLogon(const QString& urlString, const QString& username, const QString& password, const QString& session);
+    DMHLogon(const QString& urlString, const QString& username, const QString& userId, const QString& password, const QString& session);
     DMHLogon(const DMHLogon& other);
     virtual ~DMHLogon();
     DMHLogon& operator=(const DMHLogon& other);
@@ -21,11 +21,13 @@ public:
 
     QString getURLString() const;
     QString getUserName() const;
+    QString getUserId() const;
     QString getPassword() const;
     QString getSession() const;
 
     void setURLString(const QString& urlString);
     void setUserName(const QString& username);
+    void setUserId(const QString& userId);
     void setPassword(const QString& password);
     void setSession(const QString& session);
 

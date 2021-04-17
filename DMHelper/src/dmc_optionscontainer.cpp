@@ -9,6 +9,7 @@ DMC_OptionsContainer::DMC_OptionsContainer(QObject *parent) :
     QObject(parent),
     _urlString(),
     _userName(),
+    _userId(),
     _savePassword(false),
     _password(),
     _currentInvite(),
@@ -29,6 +30,11 @@ QString DMC_OptionsContainer::getURLString() const
 QString DMC_OptionsContainer::getUserName() const
 {
     return _userName;
+}
+
+QString DMC_OptionsContainer::getUserId() const
+{
+    return _userId;
 }
 
 bool DMC_OptionsContainer::getSavePassword() const
@@ -58,7 +64,7 @@ QString DMC_OptionsContainer::getInviteName(const QString& invite) const
 
 DMHLogon DMC_OptionsContainer::getLogon() const
 {
-    return DMHLogon(getURLString(), getUserName(), getPassword(), getCurrentInvite());
+    return DMHLogon(getURLString(), getUserName(), getUserId(), getPassword(), getCurrentInvite());
 }
 
 QString DMC_OptionsContainer::getCacheDirectory() const
@@ -153,6 +159,15 @@ void DMC_OptionsContainer::setUserName(const QString& username)
     }
 }
 
+void DMC_OptionsContainer::setUserId(const QString& userId)
+{
+    if(_userId != userId)
+    {
+        _userId = userId;
+        emit userIdChanged(userId);
+    }
+}
+
 void DMC_OptionsContainer::setSavePassword(bool savePassword)
 {
     if(_savePassword != savePassword)
@@ -226,6 +241,7 @@ void DMC_OptionsContainer::copy(DMC_OptionsContainer& other)
 {
     setURLString(other._urlString);
     setUserName(other._userName);
+    setUserId(other._userId);
     setPassword(other._password);
     setCurrentInvite(other._currentInvite);
 

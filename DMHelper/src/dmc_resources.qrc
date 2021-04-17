@@ -20,5 +20,6 @@
         <file>data/icon_networkconnection_on.png</file>
         <file>data/icon_options.png</file>
         <file>data/icon_close.png</file>
+        <file>data/dmhelper_opaque.png</file>
     </qresource>
 </RCC>

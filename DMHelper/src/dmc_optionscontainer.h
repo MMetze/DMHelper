@@ -16,6 +16,7 @@ public:
     // General settings
     QString getURLString() const;
     QString getUserName() const;
+    QString getUserId() const;
     bool getSavePassword() const;
     QString getPassword() const;
 
@@ -31,6 +32,7 @@ public:
 signals:
     void urlStringChanged(const QString& urlString);
     void userNameChanged(const QString& userName);
+    void userIdChanged(const QString& userId);
     void savePasswordChanged(bool savePassword);
     void passwordChanged(const QString& password);
 
@@ -46,6 +48,7 @@ public slots:
     // General settings
     void setURLString(const QString& urlString);
     void setUserName(const QString& username);
+    void setUserId(const QString& userId);
     void setSavePassword(bool savePassword);
     void setPassword(const QString& password);
 
@@ -65,6 +68,7 @@ private:
     // General settings
     QString _urlString;
     QString _userName;
+    QString _userId;
     bool _savePassword;
     QString _password;
     //QString _session;

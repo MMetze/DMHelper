@@ -138,6 +138,10 @@ session: 7B3AA550-649A-4D51-920E-CAB465616995
 invite: VR1XaH
 file: 25b939c597a98aa5aba30a09837c7065
 
+NewUser
+44C79028-2817-4F60-A0D2-ED88B62D895D
+asdfasdf1
+
 https://www.youtube.com/watch?v=fIuO3RpMvHg
 <image></image><audio>https://www.youtube.com/watch?v=fIuO3RpMvHg</audio><command></command><payload></payload>
 <image>25b939c597a98aa5aba30a09837c7065</image><audio>https://www.youtube.com/watch?v=fIuO3RpMvHg</audio><command></command><payload></payload>

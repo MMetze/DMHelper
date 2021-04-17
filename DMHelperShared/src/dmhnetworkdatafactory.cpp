@@ -18,11 +18,10 @@ DMHNetworkDataFactory::DMHNetworkDataFactory(const QByteArray& data) :
     _dataElement(),
     _data(nullptr)
 {
-    QByteArray dataFromPercent = QByteArray::fromPercentEncoding(data);
-    //QString dataString = QString(dataFromPercent);
-    qDebug() << "[DMHNetworkDataFactory] Data contents: " << dataFromPercent;
-    while((dataFromPercent.length() > 0) && (dataFromPercent.front() == '\n'))
-        dataFromPercent.remove(0, 1);
+    QByteArray dataFromPercent = QByteArray::fromPercentEncoding(data).trimmed();
+    //while((dataFromPercent.length() > 0) &&
+    //      ((dataFromPercent.front() == '\n') || (dataFromPercent.front() == ' ')))
+    //    dataFromPercent.remove(0, 1);
 
     qDebug() << "[DMHNetworkDataFactory] Data contents: " << dataFromPercent;
 
@@ -111,9 +110,19 @@ QDomElement DMHNetworkDataFactory::getState() const
     return _state;
 }
 
+DMHShared::DMH_Message_State DMHNetworkDataFactory::getStateValue() const
+{
+    return static_cast<DMHShared::DMH_Message_State>(_state.text().toInt());
+}
+
 QDomElement DMHNetworkDataFactory::getError() const
 {
     return _error;
+}
+
+QString DMHNetworkDataFactory::getErrorString() const
+{
+    return _error.text();
 }
 
 QDomElement DMHNetworkDataFactory::getDataElement() const
@@ -166,94 +175,11 @@ bool DMHNetworkDataFactory::readDataElement()
         case DMHShared::DMH_Message_usr_create:
             _data.reset(new DMHNetworkData_CreateUser(_dataElement));
             return _data->isValid();
+        case DMHShared::DMH_Message_ERROR:
+            qDebug() << "[NetworkDataFactory] Error message received: " << getErrorString();
+            return true;
         default:
             qDebug() << "[NetworkDataFactory] ERROR unsupported mode type: " << _modeValue;
             return false;
     }
 }
-
-/*
-bool DMHNetworkDataFactory::isPayloadData() const
-{
-    return ((!_data.isNull()) && (!_data.firstChildElement(QString("payload")).isNull()));
-}
-
-QString DMHNetworkDataFactory::getPayloadData() const
-{
-    if(_data.isNull())
-        return QString();
-
-    QDomElement payloadElement = _data.firstChildElement(QString("payload"));
-    if(payloadElement.isNull())
-        return QString();
-
-    return payloadElement.text();
-}
-
-QString DMHNetworkDataFactory::getPayloadTimestamp() const
-{
-    if(_data.isNull())
-        return QString();
-
-    QDomElement timestampElement = _data.firstChildElement(QString("last"));
-    if(timestampElement.isNull())
-        return QString();
-
-    return timestampElement.text();
-}
-
-bool DMHNetworkDataFactory::isRawData() const
-{
-    return ((!_data.isNull()) && (!_data.firstChildElement(QString("node")).isNull()));
-}
-
-QString DMHNetworkDataFactory::getRawName() const
-{
-    if(_data.isNull())
-        return QString();
-
-    QDomElement nodeElement = _data.firstChildElement(QString("node"));
-    if(nodeElement.isNull())
-        return QString();
-
-    QDomElement nameElement = nodeElement.firstChildElement(QString("name"));
-    if(nameElement.isNull())
-        return QString();
-
-    return nameElement.text();
-}
-
-QString DMHNetworkDataFactory::getRawId() const
-{
-    if(_data.isNull())
-        return QString();
-
-    QDomElement nodeElement = _data.firstChildElement(QString("node"));
-    if(nodeElement.isNull())
-        return QString();
-
-    QDomElement IDElement = nodeElement.firstChildElement(QString("ID"));
-    if(IDElement.isNull())
-        return QString();
-
-    return IDElement.text();
-}
-
-QByteArray DMHNetworkDataFactory::getRawData() const
-{
-    if(_data.isNull())
-        return QByteArray();
-
-    QDomElement nodeElement = _data.firstChildElement(QString("node"));
-    if(nodeElement.isNull())
-        return QByteArray();
-
-    QDomElement dataElement = nodeElement.firstChildElement(QString("data"));
-    if(dataElement.isNull())
-        return QByteArray();
-
-    QString datatext = dataElement.text();
-    QByteArray base64data = datatext.toUtf8();
-    return QByteArray::fromBase64(base64data);
-}
-*/

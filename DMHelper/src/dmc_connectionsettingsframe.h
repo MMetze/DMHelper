@@ -23,7 +23,7 @@ public:
 protected slots:
     void resetUrl();
     void createUser();
-    void userCreated(int requestID, const QString& username, const QString& email);
+    void userCreated(int requestID, const QString& username, const QString& userId, const QString& email);
     void urlTextChanged(const QString& text);
     void inviteChanged(const QString& invite);
     void editInvites();

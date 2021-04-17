@@ -308,6 +308,89 @@ int DMHNetworkManager_Private::joinSession(const QString& invite)
     return replyId;
 }
 
+int DMHNetworkManager_Private::sendMessage(const QString& message, const QString& userId)
+{
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/communication.php"));
+    QNetworkRequest request(serviceUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QUrlQuery postData;
+    //postData.addQueryItem("user", _logon.getUserId());
+    // TODO : replace hard-coded string with real userId!!
+    postData.addQueryItem("user", QString("44C79028-2817-4F60-A0D2-ED88B62D895D"));
+    postData.addQueryItem("password", _logon.getPassword());
+    postData.addQueryItem("session", _logon.getSession());
+    postData.addQueryItem("action", "send");
+    postData.addQueryItem("type", (userId.isEmpty() ? QString("session") : QString("user")));
+    postData.addQueryItem("target", userId);
+    postData.addQueryItem("body", message);
+
+#ifdef QT_DEBUG
+    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+#endif
+    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
+
+    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    int replyId = getRequestId(true);
+    _replies.insert(reply, replyId);
+
+    qDebug() << "[DMHNetworkManager] Message sent to: " << userId << " with contents: " << message;
+
+    return replyId;
+}
+
+int DMHNetworkManager_Private::pollMessages()
+{
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/communication.php"));
+    QNetworkRequest request(serviceUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QUrlQuery postData;
+    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("password", _logon.getPassword());
+    postData.addQueryItem("session", _logon.getSession());
+    postData.addQueryItem("action", "poll");
+
+#ifdef QT_DEBUG
+    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+#endif
+    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
+
+    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    int replyId = getRequestId(true);
+    _replies.insert(reply, replyId);
+
+    qDebug() << "[DMHNetworkManager] Poll message request send.";
+
+    return replyId;
+}
+
+int DMHNetworkManager_Private::ackMessages()
+{
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/communication.php"));
+    QNetworkRequest request(serviceUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QUrlQuery postData;
+    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("password", _logon.getPassword());
+    postData.addQueryItem("session", _logon.getSession());
+    postData.addQueryItem("action", "ack");
+
+#ifdef QT_DEBUG
+    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+#endif
+    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
+
+    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    int replyId = getRequestId(true);
+    _replies.insert(reply, replyId);
+
+    qDebug() << "[DMHNetworkManager] Ack message request sent.";
+
+    return replyId;
+}
+
 void DMHNetworkManager_Private::abortRequest(int id)
 {
     QNetworkReply* reply = _replies.key(id, nullptr);
@@ -377,6 +460,13 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
     }
 
     DMHNetworkDataFactory factory(bytes);
+    if(factory.getStateValue() == DMHShared::DMH_Message_State_Error)
+    {
+        qDebug() << "[DMHNetworkManager] Error in server response: " << factory.getErrorString();
+        emit messageError(replyData, factory.getErrorString());
+        return;
+    }
+
     std::unique_ptr<DMHNetworkData>& factoryData = factory.getData();
     if((!factoryData) || ((factory.getModeValue() != DMHShared::DMH_Message_file_exists) && (!factoryData->isValid())))
     {
@@ -448,7 +538,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             {
                 DMHNetworkData_CreateUser& createUserNetworkData = dynamic_cast<DMHNetworkData_CreateUser&>(*factoryData);
                 qDebug() << "[DMHNetworkManager] Create User Received. Session: " << createUserNetworkData.getUsername() << ", Email: " << createUserNetworkData.getEmail();
-                emit createUserComplete(replyData, createUserNetworkData.getUsername(), createUserNetworkData.getEmail());
+                emit createUserComplete(replyData, createUserNetworkData.getUsername(), createUserNetworkData.getUserId(), createUserNetworkData.getEmail());
             }
             else
             {
@@ -518,21 +608,6 @@ void DMHNetworkManager_Private::registerRequestError(const QString& errorStr, in
     }
 }
 
-/*
-        Management interface for sessions
-
-        ssn_mng.php
-        POST Vars
-        user -> str, req
-        password -> str, req
-        session -> str, UUID, opt
-        action -> str, req
-        name -> str, opt
-
-        returns XML
-        <status> -> tells if last action was successful or not
-        <error> -> in case of error, holds the kind of error
-*/
 int DMHNetworkManager_Private::sendSessionMgmt(const QString& action, const QString& session, const QString& sessionName)
 {
     QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/ssn_mng.php"));

@@ -50,6 +50,7 @@ public slots:
 
 private slots:
     void joinSessionComplete(int requestID, const QString& session);
+    void messageError(int requestID, const QString& errorString);
     void requestError(int requestID);
 
 private:

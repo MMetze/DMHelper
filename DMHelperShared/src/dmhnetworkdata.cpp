@@ -334,6 +334,11 @@ QString DMHNetworkData_CreateUser::getUsername() const
     return d->getUsername();
 }
 
+QString DMHNetworkData_CreateUser::getUserId() const
+{
+    return d->getUserId();
+}
+
 QString DMHNetworkData_CreateUser::getEmail() const
 {
     return d->getEmail();

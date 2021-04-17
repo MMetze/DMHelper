@@ -80,10 +80,12 @@ public:
     virtual ~DMHNetworkData_CreateUser_Private() override {}
 
     QString getUsername() const;
+    QString getUserId() const;
     QString getEmail() const;
 
 protected:
     QString _username;
+    QString _userId;
     QString _email;
 };
 

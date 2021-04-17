@@ -43,6 +43,11 @@ public:
     int createUser(const QString& username, const QString& password, const QString& email, const QString& screenName);
     int joinSession(const QString& invite);
 
+    // Communication
+    int sendMessage(const QString& message, const QString& userId = QString());
+    int pollMessages();
+    int ackMessages();
+
     // Request controls
     void abortRequest(int id);
 
@@ -70,12 +75,13 @@ signals:
 
     // User Management
     void createUserStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& email, const QString& screenName);
-    void createUserComplete(int requestID, const QString& username, const QString& email);
+    void createUserComplete(int requestID, const QString& username, const QString& userId, const QString& email);
     void joinSessionStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& invite);
     void joinSessionComplete(int requestID, const QString& session);
 
     // Request controls
     void otherRequestComplete();
+    void messageError(int requestID, const QString& errorString);
     void requestError(int requestID);
 
     void DEBUG_message_contents(const QByteArray& data);

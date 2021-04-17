@@ -20,6 +20,8 @@ DMC_ConnectionSettingsFrame::DMC_ConnectionSettingsFrame(QWidget *parent) :
     connect(ui->btnReset, &QAbstractButton::clicked, this, &DMC_ConnectionSettingsFrame::resetUrl);
     connect(ui->btnCreateUser, &QAbstractButton::clicked, this, &DMC_ConnectionSettingsFrame::createUser);
     connect(ui->btnEditInvites, &QAbstractButton::clicked, this, &DMC_ConnectionSettingsFrame::editInvites);
+
+    connect(_networkManager, &DMHNetworkManager::createUserComplete, this, &DMC_ConnectionSettingsFrame::userCreated);
 }
 
 DMC_ConnectionSettingsFrame::~DMC_ConnectionSettingsFrame()
@@ -44,6 +46,13 @@ void DMC_ConnectionSettingsFrame::setSettings(DMC_OptionsContainer* settings)
     connect(ui->edtUserName, &QLineEdit::textChanged, _settings, &DMC_OptionsContainer::setUserName);
     connect(ui->edtPassword, &QLineEdit::textChanged, _settings, &DMC_OptionsContainer::setPassword);
     connect(ui->chkSavePassword, &QCheckBox::toggled, _settings, &DMC_OptionsContainer::setSavePassword);
+
+    if(ui->edtURL->text().isEmpty())
+        ui->edtURL->setFocus();
+    else if(ui->edtUserName->text().isEmpty())
+        ui->edtUserName->setFocus();
+    else if(ui->edtPassword->text().isEmpty())
+        ui->edtPassword->setFocus();
 }
 
 void DMC_ConnectionSettingsFrame::resetUrl()
@@ -65,18 +74,22 @@ void DMC_ConnectionSettingsFrame::createUser()
     {
         if(dlg.doesPasswordMatch())
         {
-            _networkManager->setLogon(DMHLogon(_settings->getURLString(), QString(), QString(), QString()));
+            _networkManager->setLogon(DMHLogon(_settings->getURLString(), QString(), QString(), QString(), QString()));
             _networkManager->createUser(dlg.getUsername(), dlg.getPassword(), dlg.getEmail(), dlg.getScreenName());
         }
     }
 }
 
-void DMC_ConnectionSettingsFrame::userCreated(int requestID, const QString& username, const QString& email)
+void DMC_ConnectionSettingsFrame::userCreated(int requestID, const QString& username, const QString& userId, const QString& email)
 {
     Q_UNUSED(requestID);
     Q_UNUSED(email);
 
     ui->edtUserName->setText(username);
+    ui->edtPassword->setText(QString());
+
+    if(_settings)
+        _settings->setUserId(userId);
 }
 
 void DMC_ConnectionSettingsFrame::urlTextChanged(const QString& text)

@@ -16,6 +16,7 @@
 #include <QFile>
 #include <QGuiApplication>
 #include <QScreen>
+#include <QMessageBox>
 #include <QDebug>
 
 DMC_ServerConnection::DMC_ServerConnection(DMC_OptionsContainer& options, QObject *parent) :
@@ -117,6 +118,9 @@ void DMC_ServerConnection::startServer()
         emit connectionChanged(true);
         _connected = true;
     }
+
+    if(_networkManager)
+        _networkManager->sendMessage(QString("join"));
 }
 
 void DMC_ServerConnection::stopServer()
@@ -171,6 +175,13 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
     startServer();
 }
 
+void DMC_ServerConnection::messageError(int requestID, const QString& errorString)
+{
+    QMessageBox::critical(nullptr, QString("Server Error"), QString("An error was received from the DMH server:\n\n") + errorString);
+    qDebug() << "[DMC_ServerConnection] Error in message, stopping the server. Request: " << requestID << ", error: " << errorString;
+    stopServer();
+}
+
 void DMC_ServerConnection::requestError(int requestID)
 {
     qDebug() << "[DMC_ServerConnection] Error in connection, stopping the server. Request: " << requestID;
@@ -179,13 +190,20 @@ void DMC_ServerConnection::requestError(int requestID)
 
 void DMC_ServerConnection::startManager()
 {
-    if(!_networkManager)
+    DMHLogon logon = _options.getLogon();
+    logon.setSession(_session);
+
+    if(_networkManager)
     {
-        DMHLogon logon = _options.getLogon();
-        logon.setSession(_session);
+        _networkManager->setLogon(logon);
+    }
+    else
+    {
         _networkManager = new DMHNetworkManager(logon, this);
         connect(_networkManager, &DMHNetworkManager::downloadComplete, this, &DMC_ServerConnection::downloadComplete);
         connect(_networkManager, &DMHNetworkManager::joinSessionComplete, this, &DMC_ServerConnection::joinSessionComplete);
+        connect(_networkManager, &DMHNetworkManager::messageError, this, &DMC_ServerConnection::messageError);
+        connect(_networkManager, &DMHNetworkManager::requestError, this, &DMC_ServerConnection::requestError);
     }
 }
 
