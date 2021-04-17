@@ -18,6 +18,8 @@ class DMHNetworkData_RenameSession_Private;
 class DMHNetworkData_RenewSession_Private;
 class DMHNetworkData_CloseSession_Private;
 class DMHNetworkData_SessionMembers_Private;
+class DMHNetworkData_CreateUser_Private;
+class DMHNetworkData_JoinSession_Private;
 
 
 //class DMHSHARED_EXPORT DMHNetworkData
@@ -267,5 +269,52 @@ private:
 
 
 
+
+
+
+class DMHNetworkData_CreateUser : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_CreateUser(QDomElement data);
+    virtual ~DMHNetworkData_CreateUser() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getUsername() const;
+    QString getEmail() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_CreateUser(const DMHNetworkData_CreateUser& other);
+
+    std::unique_ptr<DMHNetworkData_CreateUser_Private> d;
+};
+
+
+
+
+
+
+
+
+
+class DMHNetworkData_JoinSession : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_JoinSession(QDomElement data);
+    virtual ~DMHNetworkData_JoinSession() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getSession() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_JoinSession(const DMHNetworkData_JoinSession& other);
+
+    std::unique_ptr<DMHNetworkData_JoinSession_Private> d;
+};
 
 #endif // DMHNETWORKDATA_H

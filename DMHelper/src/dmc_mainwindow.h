@@ -12,6 +12,9 @@ class DMC_ServerConnection;
 class QCloseEvent;
 class QResizeEvent;
 class AudioTrack;
+//class QWebEngineView;
+class QLabel;
+class QPushButton;
 
 class DMC_MainWindow : public QMainWindow
 {
@@ -22,10 +25,12 @@ public:
     ~DMC_MainWindow();
 
 protected:
-  void closeEvent(QCloseEvent *event);
-  void resizeEvent(QResizeEvent *event);
+    virtual void showEvent(QShowEvent *event);
+    virtual void closeEvent(QCloseEvent *event);
+    virtual void resizeEvent(QResizeEvent *event);
 
 private slots:
+    void connectToggled(bool checked);
     void muteToggled(bool checked);
     void enableAudio(AudioTrack* track);
     void openOptions();
@@ -34,11 +39,14 @@ private slots:
     void updatePixmap();
 
 private:
+    void setStandardButtonSize(QLabel& label, QPushButton& button, int frameHeight);
+
     Ui::DMC_MainWindow *ui;
     DMC_OptionsContainer* _settings;
     DMC_ServerConnection* _serverConnection;
 
     QPixmap _labelPixmap;
+    //QWebEngineView* _webView;
 
 };
 

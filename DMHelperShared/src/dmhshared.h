@@ -27,7 +27,8 @@ public:
         DMH_Message_file_push,
         DMH_Message_file_pull,
         DMH_Message_file_list,
-        DMH_Message_file_exists
+        DMH_Message_file_exists,
+        DMH_Message_usr_create
     };
 
 

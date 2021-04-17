@@ -310,3 +310,55 @@ QString DMHNetworkData_SessionMembers::getMembers() const
     return d->getMembers();
 }
 
+
+
+
+
+DMHNetworkData_CreateUser::DMHNetworkData_CreateUser(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_CreateUser_Private(data))
+{
+}
+
+DMHNetworkData_CreateUser::~DMHNetworkData_CreateUser()
+{
+}
+
+bool DMHNetworkData_CreateUser::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_CreateUser::getUsername() const
+{
+    return d->getUsername();
+}
+
+QString DMHNetworkData_CreateUser::getEmail() const
+{
+    return d->getEmail();
+}
+
+
+
+
+
+DMHNetworkData_JoinSession::DMHNetworkData_JoinSession(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_JoinSession_Private(data))
+{
+}
+
+DMHNetworkData_JoinSession::~DMHNetworkData_JoinSession()
+{
+}
+
+bool DMHNetworkData_JoinSession::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_JoinSession::getSession() const
+{
+    return d->getSession();
+}

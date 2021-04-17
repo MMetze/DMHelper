@@ -9,6 +9,7 @@ DMC_OptionsContainer::DMC_OptionsContainer(QObject *parent) :
     QObject(parent),
     _urlString(),
     _userName(),
+    _savePassword(false),
     _password(),
     _currentInvite(),
     _invites(),
@@ -28,6 +29,11 @@ QString DMC_OptionsContainer::getURLString() const
 QString DMC_OptionsContainer::getUserName() const
 {
     return _userName;
+}
+
+bool DMC_OptionsContainer::getSavePassword() const
+{
+    return _savePassword;
 }
 
 QString DMC_OptionsContainer::getPassword() const
@@ -70,14 +76,18 @@ void DMC_OptionsContainer::readSettings()
 
     setURLString(settings.value("url","").toString());
     setUserName(settings.value("username","").toString());
+    setSavePassword(settings.value("savePassword",QVariant(false)).toBool());
+    setPassword(settings.value("password","").toString());
 
     settings.beginGroup("Invites");
         QStringList invites = settings.childGroups();
         for(QString invite : invites)
         {
-            QString inviteName = settings.value("name").toString();
-            if(!inviteName.isEmpty())
-                _invites.insert(invite, inviteName);
+            settings.beginGroup(invite);
+                QString inviteName = settings.value("name").toString();
+                if(!inviteName.isEmpty())
+                    _invites.insert(invite, inviteName);
+            settings.endGroup(); // Specific invite
         }
     settings.endGroup(); // Invites
 
@@ -102,6 +112,9 @@ void DMC_OptionsContainer::writeSettings()
 
     settings.setValue("url", getURLString());
     settings.setValue("username", getUserName());
+    settings.setValue("savePassword", getSavePassword());
+    if(getSavePassword())
+        settings.setValue("password", getPassword());
 
     settings.beginGroup("Invites");
         QStringList invites = _invites.keys();
@@ -137,6 +150,15 @@ void DMC_OptionsContainer::setUserName(const QString& username)
     {
         _userName = username;
         emit userNameChanged(username);
+    }
+}
+
+void DMC_OptionsContainer::setSavePassword(bool savePassword)
+{
+    if(_savePassword != savePassword)
+    {
+        _savePassword = savePassword;
+        emit savePasswordChanged(savePassword);
     }
 }
 

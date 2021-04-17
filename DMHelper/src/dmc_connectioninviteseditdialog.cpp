@@ -10,7 +10,9 @@ DMC_ConnectionInvitesEditDialog::DMC_ConnectionInvitesEditDialog(DMC_OptionsCont
 {
     ui->setupUi(this);
 
-
+    connect(ui->btnAddInvite, &QAbstractButton::clicked, this, &DMC_ConnectionInvitesEditDialog::addInvite);
+    connect(ui->btnRenameInvite, &QAbstractButton::clicked, this, &DMC_ConnectionInvitesEditDialog::renameInvite);
+    connect(ui->btnRemoveInvite, &QAbstractButton::clicked, this, &DMC_ConnectionInvitesEditDialog::removeInvite);
 }
 
 DMC_ConnectionInvitesEditDialog::~DMC_ConnectionInvitesEditDialog()

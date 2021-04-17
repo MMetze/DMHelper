@@ -251,6 +251,63 @@ int DMHNetworkManager_Private::getSessionMembers(const QString & session)
     return sendSessionMgmt(QString("member"), session, QString());
 }
 
+int DMHNetworkManager_Private::createUser(const QString& username, const QString& password, const QString& email, const QString& screenName)
+{
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/usr_mng.php"));
+    QNetworkRequest request(serviceUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QUrlQuery postData;
+    postData.addQueryItem("user", username);
+    postData.addQueryItem("password", password);
+    postData.addQueryItem("action", "create");
+    postData.addQueryItem("email", email);
+    postData.addQueryItem("surname", screenName);
+
+#ifdef QT_DEBUG
+    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+#endif
+    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
+
+    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    int replyId = getRequestId(true);
+    _replies.insert(reply, replyId);
+
+    qDebug() << "[DMHNetworkManager] Create user request sent with ID " << replyId << " for username: " << username << " with email: " << email << " and screen name: " << screenName;
+
+    emit createUserStarted(replyId, reply, username, email, screenName);
+
+    return replyId;
+}
+
+int DMHNetworkManager_Private::joinSession(const QString& invite)
+{
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/ssn_ass.php"));
+    QNetworkRequest request(serviceUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QUrlQuery postData;
+    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("password", _logon.getPassword());
+    postData.addQueryItem("action", "join");
+    postData.addQueryItem("code", invite);
+
+#ifdef QT_DEBUG
+    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+#endif
+    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
+
+    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    int replyId = getRequestId(true);
+    _replies.insert(reply, replyId);
+
+    qDebug() << "[DMHNetworkManager] Join session request sent with ID " << replyId << " for username: " << _logon.getUserName()<< " with invite: " << invite;
+
+    emit joinSessionStarted(replyId, reply, _logon.getUserName(), invite);
+
+    return replyId;
+}
+
 void DMHNetworkManager_Private::abortRequest(int id)
 {
     QNetworkReply* reply = _replies.key(id, nullptr);
@@ -332,7 +389,13 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
     {
         if(isDownload(replyData))
         {
-            if(factory.getModeValue() == DMHShared::DMH_Message_file_pull)
+            if(factory.getModeValue() == DMHShared::DMH_Message_ssn_ass)
+            {
+                DMHNetworkData_JoinSession& joinSessionNetworkData = dynamic_cast<DMHNetworkData_JoinSession&>(*factoryData);
+                qDebug() << "[DMHNetworkManager] Join Session Received. Session: " << joinSessionNetworkData.getSession();
+                emit joinSessionComplete(replyData, joinSessionNetworkData.getSession());
+            }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_file_pull)
             {
                 DMHNetworkData_Raw& rawNetworkData = dynamic_cast<DMHNetworkData_Raw&>(*factoryData);
                 QByteArray newdata = rawNetworkData.getData();
@@ -380,6 +443,12 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
                 DMHNetworkData_SessionMembers& sessionMembersNetworkData = dynamic_cast<DMHNetworkData_SessionMembers&>(*factoryData);
                 //qDebug() << "[DMHNetworkManager] Session Members Received. Session: " << sessionMembersNetworkData.getSession() << ", Members: " << sessionMembersNetworkData.getMembers();
                 emit sessionMembersComplete(replyData, sessionMembersNetworkData.getSession(), sessionMembersNetworkData.getMembers());
+            }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_usr_create)
+            {
+                DMHNetworkData_CreateUser& createUserNetworkData = dynamic_cast<DMHNetworkData_CreateUser&>(*factoryData);
+                qDebug() << "[DMHNetworkManager] Create User Received. Session: " << createUserNetworkData.getUsername() << ", Email: " << createUserNetworkData.getEmail();
+                emit createUserComplete(replyData, createUserNetworkData.getUsername(), createUserNetworkData.getEmail());
             }
             else
             {

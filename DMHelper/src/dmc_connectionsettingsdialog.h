@@ -17,11 +17,6 @@ public:
     explicit DMC_ConnectionSettingsDialog(DMC_OptionsContainer& options, QWidget *parent = nullptr);
     ~DMC_ConnectionSettingsDialog();
 
-protected slots:
-    void inviteChanged(const QString& invite);
-    void editInvites();
-    void populateInvites();
-
 private:
     Ui::DMC_ConnectionSettingsDialog *ui;
 

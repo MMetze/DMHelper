@@ -31,13 +31,17 @@ public:
     int downloadFile(const QString& fileMD5);
 
     // Session Management
-    int createSession(const QString & sessionName);
-    int isSessionOwner(const QString & session = QString());
-    int renameSession(const QString & sessionName, const QString & session = QString());
-    int removeSession(const QString & session = QString());
-    int renewSessionInvite(const QString & session = QString());
-    int closeSession(const QString & session = QString());
-    int getSessionMembers(const QString & session = QString());
+    int createSession(const QString& sessionName);
+    int isSessionOwner(const QString& session = QString());
+    int renameSession(const QString& sessionName, const QString & session = QString());
+    int removeSession(const QString& session = QString());
+    int renewSessionInvite(const QString& session = QString());
+    int closeSession(const QString& session = QString());
+    int getSessionMembers(const QString& session = QString());
+
+    // User Management
+    int createUser(const QString& username, const QString& password, const QString& email, const QString& screenName);
+    int joinSession(const QString& invite);
 
     // Request controls
     void abortRequest(int id);
@@ -63,6 +67,12 @@ signals:
     void renewSessionComplete(int requestID, const QString& sessionName, const QString& invite);
     void closeSessionComplete(int requestID, const QString& sessionName);
     void sessionMembersComplete(int requestID, const QString& sessionName, const QString& members);
+
+    // User Management
+    void createUserStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& email, const QString& screenName);
+    void createUserComplete(int requestID, const QString& username, const QString& email);
+    void joinSessionStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& invite);
+    void joinSessionComplete(int requestID, const QString& session);
 
     // Request controls
     void otherRequestComplete();

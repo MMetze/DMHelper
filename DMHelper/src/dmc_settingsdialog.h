@@ -18,16 +18,10 @@ public:
     ~DMC_SettingsDialog();
 
 protected slots:
-    void urlTextChanged(const QString& text);
     void browseCache();
-    void inviteChanged(const QString& invite);
-    void editInvites();
 
 private:
-    void populateInvites();
-
     Ui::DMC_SettingsDialog *ui;
-
     DMC_OptionsContainer& _settings;
 };
 

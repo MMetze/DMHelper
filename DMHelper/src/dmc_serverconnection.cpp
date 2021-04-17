@@ -14,26 +14,15 @@
 #include "audiotrack.h"
 #include <QFileDialog>
 #include <QFile>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QDebug>
-
-/*
-DMC_ServerConnection::DMC_ServerConnection(const QString& cacheDirectory, QObject *parent) :
-    QObject(parent),
-    _networkManager(nullptr),
-    _networkObserver(nullptr),
-    _audioPlayer(new RemoteAudioPlayer(cacheDirectory, this)),
-    _renderer(new RemoteRenderer(cacheDirectory, this)),
-    _pmp(),
-    _lastPayload(),
-    _cacheDirectory(cacheDirectory)
-{
-    connectRemotePlayers();
-}
-*/
 
 DMC_ServerConnection::DMC_ServerConnection(DMC_OptionsContainer& options, QObject *parent) :
     QObject(parent),
+    _connected(false),
     _options(options),
+    _session(),
     _networkManager(nullptr),
     _networkObserver(nullptr),
     _audioPlayer(new RemoteAudioPlayer(options.getCacheDirectory(), this)),
@@ -42,29 +31,16 @@ DMC_ServerConnection::DMC_ServerConnection(DMC_OptionsContainer& options, QObjec
     _lastPayload()
 {
     connectRemotePlayers();
-    //startServer(logon);
-    checkLogon();
 }
-
-/*
-DMC_ServerConnection::DMC_ServerConnection(const QString& urlString, const QString& username, const QString& password, const QString& session, const QString& cacheDirectory, QObject *parent) :
-    QObject(parent),
-    _networkManager(nullptr),
-    _networkObserver(nullptr),
-    _audioPlayer(new RemoteAudioPlayer(cacheDirectory, this)),
-    _renderer(new RemoteRenderer(cacheDirectory, this)),
-    _pmp(),
-    _lastPayload(),
-    _cacheDirectory(cacheDirectory)
-{
-    connectRemotePlayers();
-    startServer(DMHLogon(urlString, username, password, session));
-}
-*/
 
 DMC_ServerConnection::~DMC_ServerConnection()
 {
     stopServer();
+}
+
+bool DMC_ServerConnection::isConnected() const
+{
+    return _connected;
 }
 
 void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data)
@@ -88,47 +64,72 @@ void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QStr
     _lastPayload = timestamp;
 }
 
+void DMC_ServerConnection::connectServer(bool connect)
+{
+    if(_connected == connect)
+        return;
+
+    qDebug() << "[DMC_ServerConnection] Connecting server: " << connect;
+
+    if(connect)
+        checkLogon();
+    else
+        stopServer();
+}
+
 void DMC_ServerConnection::checkLogon()
 {
-    if(!_options.getLogon().isValid())
+    if((!_options.getLogon().isValid()) || (_options.getCurrentInvite().isEmpty()))
     {
+        qDebug() << "[DMC_ServerConnection] Login data not valid, opening connection settings.";
         DMC_ConnectionSettingsDialog dlg(_options);
+        QScreen* primary = QGuiApplication::primaryScreen();
+        if(primary)
+            dlg.resize(primary->availableSize().width() / 3, primary->availableSize().height() / 3);
+
         dlg.exec();
-        if(!_options.getLogon().isValid())
+        if((!_options.getLogon().isValid()) || (_options.getCurrentInvite().isEmpty()))
+        {
+            qDebug() << "[DMC_ServerConnection] Login data not valid, disconnecting.";
+            emit connectionChanged(false);
             return;
+        }
     }
+
+    qDebug() << "[DMC_ServerConnection] Login data valid, attempting to join the session. Invite: " << _options.getCurrentInvite();
+
+    startManager();
+    joinSession();
 }
 
 void DMC_ServerConnection::startServer()
 {
     qDebug() << "[DMC_ServerConnection] Starting server with logon: " << _options.getLogon();
 
-    stopServer();
+    if(_connected)
+        stopServer();
 
-    _networkManager = new DMHNetworkManager(_options.getLogon(), this);
-    connect(_networkManager, SIGNAL(downloadComplete(int, const QString&, const QByteArray&)), this, SLOT(downloadComplete(int, const QString&, const QByteArray&)));
+    startManager();
+    startObserver();
 
-    _networkObserver = new DMHNetworkObserver(_options.getLogon(), this);
-    connect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
-    _networkObserver->start();
+    if(!_connected)
+    {
+        emit connectionChanged(true);
+        _connected = true;
+    }
 }
 
 void DMC_ServerConnection::stopServer()
 {
     qDebug() << "[DMC_ServerConnection] Stop server.";
 
-    if(_networkManager)
-    {
-        disconnect(_networkManager, nullptr, this, nullptr);
-        _networkManager->deleteLater();
-        _networkManager = nullptr;
-    }
+    stopManager();
+    stopObserver();
 
-    if(_networkObserver)
+    if(_connected)
     {
-        disconnect(_networkObserver, nullptr, this, nullptr);
-        _networkObserver->deleteLater();
-        _networkObserver = nullptr;
+        emit connectionChanged(false);
+        _connected = false;
     }
 }
 
@@ -158,6 +159,68 @@ void DMC_ServerConnection::targetResized(const QSize& newSize)
         _renderer->targetResized(newSize);
 }
 
+void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& session)
+{
+    Q_UNUSED(requestID);
+
+    if(session.isEmpty())
+        return;
+
+    qDebug() << "[DMC_ServerConnection] Successfully joined the session. Session ID: " << session;
+    _session = session;
+    startServer();
+}
+
+void DMC_ServerConnection::requestError(int requestID)
+{
+    qDebug() << "[DMC_ServerConnection] Error in connection, stopping the server. Request: " << requestID;
+    stopServer();
+}
+
+void DMC_ServerConnection::startManager()
+{
+    if(!_networkManager)
+    {
+        DMHLogon logon = _options.getLogon();
+        logon.setSession(_session);
+        _networkManager = new DMHNetworkManager(logon, this);
+        connect(_networkManager, &DMHNetworkManager::downloadComplete, this, &DMC_ServerConnection::downloadComplete);
+        connect(_networkManager, &DMHNetworkManager::joinSessionComplete, this, &DMC_ServerConnection::joinSessionComplete);
+    }
+}
+
+void DMC_ServerConnection::stopManager()
+{
+    if(_networkManager)
+    {
+        disconnect(_networkManager, nullptr, this, nullptr);
+        _networkManager->deleteLater();
+        _networkManager = nullptr;
+    }
+}
+
+void DMC_ServerConnection::startObserver()
+{
+    if(!_networkObserver)
+    {
+        DMHLogon logon = _options.getLogon();
+        logon.setSession(_session);
+        _networkObserver = new DMHNetworkObserver(logon, this);
+        connect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
+        _networkObserver->start();
+    }
+}
+
+void DMC_ServerConnection::stopObserver()
+{
+    if(_networkObserver)
+    {
+        disconnect(_networkObserver, nullptr, this, nullptr);
+        _networkObserver->deleteLater();
+        _networkObserver = nullptr;
+    }
+}
+
 void DMC_ServerConnection::connectRemotePlayers()
 {
     if((!_audioPlayer) || (!_renderer))
@@ -173,4 +236,13 @@ void DMC_ServerConnection::connectRemotePlayers()
     connect(_renderer, &RemoteRenderer::publishImage, this, &DMC_ServerConnection::imageActive);
     connect(this, &DMC_ServerConnection::fileRequestStarted, _renderer, &RemoteRenderer::fileRequestStarted);
     connect(this, &DMC_ServerConnection::fileRequestCompleted, _renderer, &RemoteRenderer::fileRequestCompleted);
+}
+
+void DMC_ServerConnection::joinSession()
+{
+    if((!_networkManager) || (!_options.getLogon().isValid()) || (_options.getCurrentInvite().isEmpty()))
+        return;
+
+    qDebug() << "[DMC_ServerConnection] Sending the join session request.";
+    _networkManager->joinSession(_options.getCurrentInvite());
 }

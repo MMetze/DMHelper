@@ -12,5 +12,13 @@
         <file>data/icon_volumeon.png</file>
         <file>data/icon_volumeoff.png</file>
         <file>data/dmc_background.png</file>
+        <file>data/icon_undo.png</file>
+        <file>data/icon_network_error.png</file>
+        <file>data/icon_network_off.png</file>
+        <file>data/icon_network_ok.png</file>
+        <file>data/icon_networkconnection_off.png</file>
+        <file>data/icon_networkconnection_on.png</file>
+        <file>data/icon_options.png</file>
+        <file>data/icon_close.png</file>
     </qresource>
 </RCC>

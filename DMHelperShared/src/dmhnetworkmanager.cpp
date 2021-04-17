@@ -15,6 +15,10 @@ DMHNetworkManager::DMHNetworkManager(const DMHLogon& logon, QObject *parent) :
     connect(&(*d), SIGNAL(renameSessionComplete(int, const QString&)), this, SIGNAL(renameSessionComplete(int, const QString&)));
     connect(&(*d), SIGNAL(renewSessionComplete(int, const QString&, const QString&)), this, SIGNAL(renewSessionComplete(int, const QString&, const QString&)));
     connect(&(*d), SIGNAL(closeSessionComplete(int, const QString&)), this, SIGNAL(closeSessionComplete(int, const QString&)));
+    connect(&(*d), SIGNAL(createUserStarted(int, QNetworkReply*, const QString&, const QString&, const QString&)), this, SIGNAL(createUserStarted(int, QNetworkReply*, const QString&, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(createUserComplete(int, const QString&, const QString&)), this, SIGNAL(createUserComplete(int, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(joinSessionStarted(int, QNetworkReply*, const QString&, const QString&)), this, SIGNAL(joinSessionStarted(int, QNetworkReply*, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(joinSessionComplete(int, const QString&)), this, SIGNAL(joinSessionComplete(int, const QString&)));
     connect(&(*d), SIGNAL(sessionMembersComplete(int, const QString&, const QString&)), this, SIGNAL(sessionMembersComplete(int, const QString&, const QString&)));
     connect(&(*d), SIGNAL(otherRequestComplete()), this, SIGNAL(otherRequestComplete()));
     connect(&(*d), SIGNAL(requestError(int)), this, SIGNAL(requestError(int)));
@@ -89,6 +93,16 @@ int DMHNetworkManager::closeSession(const QString & session)
 int DMHNetworkManager::getSessionMembers(const QString & session)
 {
     return d->getSessionMembers(session);
+}
+
+int DMHNetworkManager::createUser(const QString& username, const QString& password, const QString& email, const QString& screenName)
+{
+    return d->createUser(username, password, email, screenName);
+}
+
+int DMHNetworkManager::joinSession(const QString& invite)
+{
+    return d->joinSession(invite);
 }
 
 void DMHNetworkManager::abortRequest(int id)

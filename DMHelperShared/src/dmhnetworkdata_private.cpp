@@ -338,3 +338,42 @@ QString DMHNetworkData_SessionMembers_Private::getMembers() const
 {
     return _members;
 }
+
+
+
+
+
+DMHNetworkData_CreateUser_Private::DMHNetworkData_CreateUser_Private(QDomElement data) :
+    DMHNetworkData_Private_Base(),
+    _username(),
+    _email()
+{
+    if((readChildElement(data, QString("username"), _username)) &&
+       (readChildElement(data, QString("email"), _email)))
+        _valid = true;
+}
+
+QString DMHNetworkData_CreateUser_Private::getUsername() const
+{
+    return _username;
+}
+
+QString DMHNetworkData_CreateUser_Private::getEmail() const
+{
+    return _email;
+}
+
+
+
+DMHNetworkData_JoinSession_Private::DMHNetworkData_JoinSession_Private(QDomElement data) :
+    DMHNetworkData_Private_Base(),
+    _session()
+{
+    _session = data.text();
+    _valid = !_session.isEmpty();
+}
+
+QString DMHNetworkData_JoinSession_Private::getSession() const
+{
+    return _session;
+}

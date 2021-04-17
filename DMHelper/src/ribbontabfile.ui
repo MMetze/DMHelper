@@ -447,7 +447,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the User's Guide</string>
+        <string>Turn on the the DMHelper connection</string>
        </property>
        <property name="text">
         <string/>
@@ -505,7 +505,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the User's Guide</string>
+        <string>Open the DMHelper connection options</string>
        </property>
        <property name="text">
         <string/>
@@ -692,7 +692,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Open the DMHelper preferences window</string>
+        <string>Open the DMHelper options</string>
        </property>
        <property name="text">
         <string/>

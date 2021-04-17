@@ -73,6 +73,22 @@ protected:
 
 
 
+class DMHNetworkData_CreateUser_Private : public DMHNetworkData_Private_Base
+{
+public:
+    explicit DMHNetworkData_CreateUser_Private(QDomElement data);
+    virtual ~DMHNetworkData_CreateUser_Private() override {}
+
+    QString getUsername() const;
+    QString getEmail() const;
+
+protected:
+    QString _username;
+    QString _email;
+};
+
+
+
 
 
 class DMHNetworkData_Upload_Private : public DMHNetworkData_Private_Base
@@ -210,6 +226,22 @@ public:
 protected:
     QString _session;
     QString _members;
+};
+
+
+
+
+
+class DMHNetworkData_JoinSession_Private : public DMHNetworkData_Private_Base
+{
+public:
+    explicit DMHNetworkData_JoinSession_Private(QDomElement data);
+    virtual ~DMHNetworkData_JoinSession_Private() override {}
+
+    QString getSession() const;
+
+protected:
+    QString _session;
 };
 
 #endif // DMHNETWORKDATA_PRIVATE_H

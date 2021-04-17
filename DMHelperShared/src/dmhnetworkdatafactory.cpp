@@ -2,6 +2,12 @@
 #include "dmhnetworkdata.h"
 #include <QDebug>
 
+
+#include <QFile>
+#include <QTextStream>
+
+
+
 DMHNetworkDataFactory::DMHNetworkDataFactory(const QByteArray& data) :
     _doc(),
     _version(),
@@ -13,8 +19,12 @@ DMHNetworkDataFactory::DMHNetworkDataFactory(const QByteArray& data) :
     _data(nullptr)
 {
     QByteArray dataFromPercent = QByteArray::fromPercentEncoding(data);
-    QString dataString;
-    dataString.fromUtf8(dataFromPercent);
+    //QString dataString = QString(dataFromPercent);
+    qDebug() << "[DMHNetworkDataFactory] Data contents: " << dataFromPercent;
+    while((dataFromPercent.length() > 0) && (dataFromPercent.front() == '\n'))
+        dataFromPercent.remove(0, 1);
+
+    qDebug() << "[DMHNetworkDataFactory] Data contents: " << dataFromPercent;
 
     QString errorMsg;
     int errorLine;
@@ -22,7 +32,7 @@ DMHNetworkDataFactory::DMHNetworkDataFactory(const QByteArray& data) :
     if(!_doc.setContent(dataFromPercent, &errorMsg, &errorLine, &errorColumn))
     {
         qDebug() << "[NetworkDataFactory] ERROR identified reading data: unable to parse network reply XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
-        qDebug() << "[NetworkDataFactory] Data: " << dataString;
+        qDebug() << "[NetworkDataFactory] DataFromPercent: " << dataFromPercent;
         return;
     }
 
@@ -123,6 +133,9 @@ bool DMHNetworkDataFactory::readDataElement()
         case DMHShared::DMH_Message_pl_pull:
             _data.reset(new DMHNetworkData_Payload(_dataElement));
             return _data->isValid();
+        case DMHShared::DMH_Message_ssn_ass:
+            _data.reset(new DMHNetworkData_JoinSession(_dataElement));
+            return _data->isValid();
         case DMHShared::DMH_Message_file_push:
             _data.reset(new DMHNetworkData_Upload(_dataElement));
             return _data->isValid();
@@ -149,6 +162,9 @@ bool DMHNetworkDataFactory::readDataElement()
             return _data->isValid();
         case DMHShared::DMH_Message_ssn_members:
             _data.reset(new DMHNetworkData_SessionMembers(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_usr_create:
+            _data.reset(new DMHNetworkData_CreateUser(_dataElement));
             return _data->isValid();
         default:
             qDebug() << "[NetworkDataFactory] ERROR unsupported mode type: " << _modeValue;

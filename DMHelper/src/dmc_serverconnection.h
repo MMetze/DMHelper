@@ -22,7 +22,11 @@ public:
 //    DMC_ServerConnection(const QString& urlString, const QString& username, const QString& password, const QString& session, const QString& cacheDirectory, QObject *parent = 0);
     virtual ~DMC_ServerConnection();
 
+    bool isConnected() const;
+
 signals:
+    void connectionChanged(bool connected);
+
     void pixmapActive(QPixmap pixmap);
     void imageActive(QImage pixmap);
     void trackActive(AudioTrack* track);
@@ -34,6 +38,8 @@ public slots:
     void downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data);
     void payloadReceived(const DMHPayload& payload, const QString& timestamp);
 
+    void connectServer(bool connect);
+
     void checkLogon();
     void startServer();
     void stopServer();
@@ -42,10 +48,22 @@ public slots:
     void fileAborted(int requestID);
     void targetResized(const QSize& newSize);
 
-private:
-    void connectRemotePlayers();
+private slots:
+    void joinSessionComplete(int requestID, const QString& session);
+    void requestError(int requestID);
 
+private:
+    void startManager();
+    void stopManager();
+    void startObserver();
+    void stopObserver();
+
+    void connectRemotePlayers();
+    void joinSession();
+
+    bool _connected;
     DMC_OptionsContainer& _options;
+    QString _session;
     DMHNetworkManager* _networkManager;
     DMHNetworkObserver* _networkObserver;
     RemoteAudioPlayer* _audioPlayer;

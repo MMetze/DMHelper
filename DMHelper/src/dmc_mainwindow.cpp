@@ -10,6 +10,9 @@
 #include <QCloseEvent>
 #include <QResizeEvent>
 #include <QStandardPaths>
+//#include <QtWebEngineWidgets/QWebEngineView>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QDebug>
 
 DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
@@ -18,6 +21,7 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
     _settings(nullptr),
     _serverConnection(nullptr),
     _labelPixmap()
+    //_webView(nullptr)
 {
     qDebug() << "[Main] Initializing Main";
 
@@ -64,19 +68,36 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
-    connect(ui->actionOptions, SIGNAL(triggered()), this, SLOT(openOptions()));
-    connect(ui->actionExit, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(ui->btnConnect, &QAbstractButton::toggled, this, &DMC_MainWindow::connectToggled);
+    connect(ui->btnOptions, &QAbstractButton::clicked, this, &DMC_MainWindow::openOptions);
+    connect(ui->btnExit, &QAbstractButton::clicked, qApp, &QCoreApplication::quit);
 
     _settings = new DMC_OptionsContainer(this);
     _settings->readSettings();
 
+    /*
+     *     // Set the global font
+        QFont f = qApp->font();
+        f.setFamily(_options->getFontFamily());
+        f.setPointSize(_options->getFontSize());
+        qDebug() << "[MainWindow] Setting application font to: " << _options->getFontFamily() << " size " << _options->getFontSize();
+        qApp->setFont(f);
+    */
+
     _serverConnection = new DMC_ServerConnection(*_settings, this);
+    connect(_serverConnection, &DMC_ServerConnection::connectionChanged, ui->btnConnect, &QAbstractButton::setChecked);
     connect(_serverConnection, &DMC_ServerConnection::trackActive, this, &DMC_MainWindow::enableAudio);
     connect(_serverConnection, &DMC_ServerConnection::pixmapActive, this, &DMC_MainWindow::setLabelPixmap);
     connect(_serverConnection, &DMC_ServerConnection::imageActive, this, &DMC_MainWindow::setLabelImage);
 
     ui->sliderVolume->setValue(50);
     enableAudio(nullptr);
+
+    /*
+    _webView = new QWebEngineView(parent);
+    ui->gridLayout_2->addWidget(_webView);
+    _webView->load(QUrl("https://www.dndbeyond.com/profile/Gyarc2/characters/3294604"));
+    */
 
     qDebug() << "[Main] Main Initialization complete";
 }
@@ -85,6 +106,24 @@ DMC_MainWindow::~DMC_MainWindow()
 {
     disconnect(_serverConnection, &DMC_ServerConnection::trackActive, this, &DMC_MainWindow::enableAudio);
     delete ui;
+}
+
+void DMC_MainWindow::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event);
+
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(!primary)
+        return;
+
+    QSize screenSize = primary->availableSize();
+    int frameHeight = screenSize.height() / 15;
+
+    setStandardButtonSize(*ui->lblConnect, *ui->btnConnect, frameHeight);
+    setStandardButtonSize(*ui->lblOptions, *ui->btnOptions, frameHeight);
+    setStandardButtonSize(*ui->lblExit, *ui->btnExit, frameHeight);
+
+    updatePixmap();
 }
 
 void DMC_MainWindow::closeEvent(QCloseEvent *event)
@@ -97,8 +136,20 @@ void DMC_MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
+    qDebug() << "[Main] Main Window resized to: " << event->size() << ui->frame->size() << ui->lblImage->size();
     _serverConnection->targetResized(ui->lblImage->size());
     updatePixmap();
+}
+
+void DMC_MainWindow::connectToggled(bool checked)
+{
+    if(checked)
+        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon_networkconnection_on.png"))));
+    else
+        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon_networkconnection_off.png"))));
+
+    if(_serverConnection)
+        _serverConnection->connectServer(checked);
 }
 
 void DMC_MainWindow::muteToggled(bool checked)
@@ -133,7 +184,12 @@ void DMC_MainWindow::openOptions()
     tempOptions.copy(*_settings);
 
     DMC_SettingsDialog dlg(tempOptions);
-    dlg.resize(width() * 1 / 2, height() * 3 / 4);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg.resize(primary->availableSize().width() / 3, primary->availableSize().height() / 3);
+    else
+        dlg.resize(width() / 2, height() * 3 / 4);
+
     if(dlg.exec() == QDialog::Accepted)
     {
         _settings->copy(tempOptions);
@@ -166,5 +222,33 @@ void DMC_MainWindow::updatePixmap()
     */
 
     if(!_labelPixmap.isNull())
+    {
         ui->lblImage->setPixmap(_labelPixmap);
+    }
+    else
+    {
+        QPixmap newPixmap = QPixmap(QString(":/img/data/dmc_background.png"));
+        ui->lblImage->setPixmap(newPixmap.scaled(ui->frame->size(), Qt::KeepAspectRatioByExpanding));
+    }
+}
+
+void DMC_MainWindow::setStandardButtonSize(QLabel& label, QPushButton& button, int frameHeight)
+{
+    QFontMetrics metrics = label.fontMetrics();
+    int labelHeight = metrics.height() + (frameHeight / 10);
+    int iconDim = frameHeight - labelHeight;
+    int newWidth = qMax(metrics.horizontalAdvance(label.text()), iconDim);
+
+    label.setMinimumWidth(newWidth);
+    label.setMaximumWidth(newWidth);
+    label.setMinimumHeight(labelHeight);
+    label.setMaximumHeight(labelHeight);
+
+    button.setMinimumWidth(newWidth);
+    button.setMaximumWidth(newWidth);
+    button.setMinimumHeight(iconDim);
+    button.setMaximumHeight(iconDim);
+
+    int iconSize = qMin(newWidth, iconDim) * 4 / 5;
+    button.setIconSize(QSize(iconSize, iconSize));
 }
