@@ -20,6 +20,9 @@ DMHNetworkManager::DMHNetworkManager(const DMHLogon& logon, QObject *parent) :
     connect(&(*d), SIGNAL(joinSessionStarted(int, QNetworkReply*, const QString&, const QString&)), this, SIGNAL(joinSessionStarted(int, QNetworkReply*, const QString&, const QString&)));
     connect(&(*d), SIGNAL(joinSessionComplete(int, const QString&)), this, SIGNAL(joinSessionComplete(int, const QString&)));
     connect(&(*d), SIGNAL(sessionMembersComplete(int, const QString&, const QString&)), this, SIGNAL(sessionMembersComplete(int, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(sendMessageComplete(int, const QString&)), this, SIGNAL(sendMessageComplete(int, const QString&)));
+    connect(&(*d), SIGNAL(pollMessageComplete(int, const QString&)), this, SIGNAL(pollMessageComplete(int, const QString&)));
+    connect(&(*d), SIGNAL(ackMessageComplete(int, const QString&)), this, SIGNAL(ackMessageComplete(int, const QString&)));
     connect(&(*d), SIGNAL(otherRequestComplete()), this, SIGNAL(otherRequestComplete()));
     connect(&(*d), SIGNAL(messageError(int, const QString&)), this, SIGNAL(messageError(int, const QString&)));
     connect(&(*d), SIGNAL(requestError(int)), this, SIGNAL(requestError(int)));

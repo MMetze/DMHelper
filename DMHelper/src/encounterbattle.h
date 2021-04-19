@@ -19,8 +19,12 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual QDomElement outputNetworkXML(QDomDocument &doc) override;
 
     virtual int getObjectType() const override;
+
+    virtual QString getFileName() const override;
+    virtual void setFileName(const QString& newFileName) override;
 
     virtual bool hasData() const;
 
@@ -51,8 +55,8 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
-    void inputXMLBattle(const QDomElement &element, bool isImport);
-    void inputXMLEffects(const QDomElement &parentElement, bool isImport);
+    virtual void inputXMLBattle(const QDomElement &element, bool isImport);
+    virtual void inputXMLEffects(const QDomElement &parentElement, bool isImport);
     BattleDialogModel* createNewBattle(QPointF combatantPos);
 
     void connectFrameToModel();

@@ -198,8 +198,14 @@ void NetworkController::uploadObject(CampaignObjectBase* baseObject)
         EncounterBattle* encounter = dynamic_cast<EncounterBattle*>(baseObject);
         if(encounter)
         {
-            QImageReader reader(encounter->getFileName());
-            _backgroundUpload.setFileType(reader.canRead() ? DMHelper::FileType_Image : DMHelper::FileType_Video);
+            if(!encounter->getFileName().isEmpty())
+            {
+                QImageReader reader(encounter->getFileName());
+                _backgroundUpload.setFileType(reader.canRead() ? DMHelper::FileType_Image : DMHelper::FileType_Video);
+
+                if(encounter->getBattleDialogModel()->getMap())
+                    changed = uploadMap(encounter->getBattleDialogModel()->getMap()) ? true : changed;
+            }
             changed = uploadBattle(encounter) ? true : changed;
         }
     }
@@ -275,7 +281,7 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
 
     qDebug() << "[NetworkController] Network login updated. URL: " << urlString << ", Username: " << username << ", Session: " << sessionID << ", Invite: " << inviteID;
 
-    DMHLogon logon(urlString, username, password, sessionID);
+    DMHLogon logon(urlString, username, QString(), password, sessionID);
     if(!validateLogon(logon))
         return;
 
@@ -758,6 +764,7 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
     BattleDialogModel* model = encounterBattle->getBattleDialogModel();
 
     QDomDocument doc;
+
     QDomElement battleElement = model->outputNetworkXML(doc);
     if(battleElement.isNull())
         return false;
@@ -820,7 +827,9 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
         battleElement.appendChild(effectsElement);
     }
 
-    doc.appendChild(battleElement);
+    QDomElement battleObject = encounterBattle->outputNetworkXML(doc);
+    battleObject.appendChild(battleElement);
+    doc.appendChild(battleObject);
 
     QString battlePayload = doc.toString();
     battlePayload.remove(QString("\n"));

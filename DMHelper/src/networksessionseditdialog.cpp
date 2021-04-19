@@ -33,7 +33,7 @@ NetworkSessionsEditDialog::NetworkSessionsEditDialog(OptionsContainer& options, 
     connect(_networkManager, &DMHNetworkManager::closeSessionComplete, this, &NetworkSessionsEditDialog::closeSessionComplete);
     connect(_networkManager, &DMHNetworkManager::requestError, this, &NetworkSessionsEditDialog::requestError);
 
-    _logon = DMHLogon(_options.getURLString(), _options.getUserName(), _options.getPassword(), QString());
+    _logon = DMHLogon(_options.getURLString(), _options.getUserName(), QString(), _options.getPassword(), QString());
     _networkManager->setLogon(_logon);
 }
 

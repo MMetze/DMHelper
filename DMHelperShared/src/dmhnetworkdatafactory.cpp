@@ -175,6 +175,15 @@ bool DMHNetworkDataFactory::readDataElement()
         case DMHShared::DMH_Message_usr_create:
             _data.reset(new DMHNetworkData_CreateUser(_dataElement));
             return _data->isValid();
+        case DMHShared::DMH_Message_msg_send:
+            _data.reset(new DMHNetworkData_Message(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_msg_poll:
+            _data.reset(new DMHNetworkData_Message(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_msg_ack:
+            _data.reset(new DMHNetworkData_Message(_dataElement));
+            return _data->isValid();
         case DMHShared::DMH_Message_ERROR:
             qDebug() << "[NetworkDataFactory] Error message received: " << getErrorString();
             return true;

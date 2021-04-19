@@ -321,20 +321,27 @@ int DMHNetworkManager_Private::sendMessage(const QString& message, const QString
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
     postData.addQueryItem("action", "send");
-    postData.addQueryItem("type", (userId.isEmpty() ? QString("session") : QString("user")));
-    postData.addQueryItem("target", userId);
+    if(userId.isEmpty())
+    {
+        postData.addQueryItem("type", "session");
+    }
+    else
+    {
+        postData.addQueryItem("type", "user");
+        postData.addQueryItem("target", userId);
+    }
     postData.addQueryItem("body", message);
 
 #ifdef QT_DEBUG
     emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
 #endif
-    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
+    qDebug() << "[DMHNetworkManager] " << postData.toString(QUrl::FullyEncoded).toUtf8();
 
     QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
     int replyId = getRequestId(true);
     _replies.insert(reply, replyId);
 
-    qDebug() << "[DMHNetworkManager] Message sent to: " << userId << " with contents: " << message;
+    qDebug() << "[DMHNetworkManager] Message sent: " << replyId << " to: " << userId << " with contents: " << message;
 
     return replyId;
 }
@@ -539,6 +546,24 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
                 DMHNetworkData_CreateUser& createUserNetworkData = dynamic_cast<DMHNetworkData_CreateUser&>(*factoryData);
                 qDebug() << "[DMHNetworkManager] Create User Received. Session: " << createUserNetworkData.getUsername() << ", Email: " << createUserNetworkData.getEmail();
                 emit createUserComplete(replyData, createUserNetworkData.getUsername(), createUserNetworkData.getUserId(), createUserNetworkData.getEmail());
+            }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_msg_send)
+            {
+                DMHNetworkData_Message& messageNetworkData = dynamic_cast<DMHNetworkData_Message&>(*factoryData);
+                qDebug() << "[DMHNetworkManager] Message Send Received. Session: " << messageNetworkData.getData();
+                emit sendMessageComplete(replyData, messageNetworkData.getData());
+            }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_msg_poll)
+            {
+                DMHNetworkData_Message& messageNetworkData = dynamic_cast<DMHNetworkData_Message&>(*factoryData);
+                qDebug() << "[DMHNetworkManager] Message Poll Received. Session: " << messageNetworkData.getData();
+                emit pollMessageComplete(replyData, messageNetworkData.getData());
+            }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_msg_ack)
+            {
+                DMHNetworkData_Message& messageNetworkData = dynamic_cast<DMHNetworkData_Message&>(*factoryData);
+                qDebug() << "[DMHNetworkManager] Message Ack Received. Session: " << messageNetworkData.getData();
+                emit ackMessageComplete(replyData, messageNetworkData.getData());
             }
             else
             {

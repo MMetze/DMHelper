@@ -22,6 +22,8 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual QDomElement outputNetworkXML(QDomDocument &doc) override;
 
+    virtual int getObjectType() const override;
+
     QList<BattleDialogModelCombatant*> getCombatantList() const;
     int getCombatantCount() const;
     BattleDialogModelCombatant* getCombatant(int index) const;

@@ -54,7 +54,8 @@ namespace DMHelper
         CombatantType_Base = 0,
         CombatantType_Character,
         CombatantType_Monster,
-        CombatantType_Reference     // In-battle reference to an NPC/Character
+        CombatantType_Reference,    // In-battle reference to an NPC/Character
+        CombatantType_Download
     };
 
     enum CombatantSize

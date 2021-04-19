@@ -246,4 +246,21 @@ protected:
     QString _session;
 };
 
+
+
+
+
+
+class DMHNetworkData_Message_Private : public DMHNetworkData_Private_Base
+{
+public:
+    explicit DMHNetworkData_Message_Private(QDomElement data);
+    virtual ~DMHNetworkData_Message_Private() override {}
+
+    QString getData() const;
+
+protected:
+    QString _data;
+};
+
 #endif // DMHNETWORKDATA_PRIVATE_H

@@ -114,9 +114,29 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 
 }
 
+QDomElement EncounterBattle::outputNetworkXML(QDomDocument &doc)
+{
+    return createOutputXML(doc);
+}
+
 int EncounterBattle::getObjectType() const
 {
     return DMHelper::CampaignType_Battle;
+}
+
+QString EncounterBattle::getFileName() const
+{
+    if((_battleModel) && (_battleModel->getMap()))
+        return _battleModel->getMap()->getFileName();
+    else
+        return QString();
+}
+
+void EncounterBattle::setFileName(const QString& newFileName)
+{
+    Q_UNUSED(newFileName);
+
+    qDebug() << "[EncounterBattle] ERROR: Not allowed to set filename for a battle: " << newFileName;
 }
 
 bool EncounterBattle::hasData() const
@@ -379,7 +399,7 @@ void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool is
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 {
     if((_battleModel)||(isImport))
-        return;
+                return;
 
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)

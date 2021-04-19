@@ -3,8 +3,10 @@
 #include "dmconstants.h"
 #include "campaignobjectbase.h"
 #include "encountertextdownload.h"
+#include "encounterbattledownload.h"
 #include "campaignobjectrenderer.h"
 #include "encountertextrenderer.h"
+#include "battlerenderer.h"
 #include <QRegularExpression>
 #include <QFile>
 #include <QUuid>
@@ -237,6 +239,23 @@ void RemoteRenderer::dataComplete()
                 _renderer = new EncounterTextRenderer(*textEncounter, _backgroundPmp.toImage(), this);
             }
         }
+        else if(_activeObject->getObjectType() == DMHelper::CampaignType_Battle)
+        {
+            /*
+            BattleDialogModel* model = dynamic_cast<BattleDialogModel*>(_activeObject);
+            if(model)
+            {
+                //if(_background)
+                //    textEncounter->setImageFile(_cacheDirectory + QString("/") + _background->getMD5());
+                _renderer = new BattleRenderer(*model, this);
+            }
+            */
+            EncounterBattle* battle = dynamic_cast<EncounterBattle*>(_activeObject);
+            if(battle)
+            {
+                _renderer = new BattleRenderer(*battle, this);
+            }
+        }
         else
         {
             qDebug() << "[RemoteRenderer] ERROR: Preparing payload data, unexpected object type found: " << _activeObject->getObjectType();
@@ -299,8 +318,15 @@ void RemoteRenderer::parsePayloadData(const QDomElement& element)
         connect(encounter, &EncounterTextDownload::requestFile, this, &RemoteRenderer::payloadDataRequested);
         connect(this, &RemoteRenderer::payloadDataAvailable, encounter, &EncounterTextDownload::fileReceived);
         connect(encounter, &EncounterTextDownload::encounterComplete, this, &RemoteRenderer::dataComplete);
+        encounter->inputXML(element, false);
         _activeObject = encounter;
-        _activeObject->inputXML(element, true);
+    }
+    else if(tagName == "battle-object")
+    {
+        EncounterBattleDownload* battle = new EncounterBattleDownload(_cacheDirectory, this);
+        //BattleDialogModel* model = new BattleDialogModel(QString(), this);
+        battle->inputXML(element, false);
+        _activeObject = battle;
     }
 }
 

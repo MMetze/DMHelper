@@ -367,3 +367,27 @@ QString DMHNetworkData_JoinSession::getSession() const
 {
     return d->getSession();
 }
+
+
+
+
+
+DMHNetworkData_Message::DMHNetworkData_Message(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_Message_Private(data))
+{
+}
+
+DMHNetworkData_Message::~DMHNetworkData_Message()
+{
+}
+
+bool DMHNetworkData_Message::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_Message::getData() const
+{
+    return d->getData();
+}

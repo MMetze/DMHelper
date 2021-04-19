@@ -86,6 +86,11 @@ QDomElement BattleDialogModel::outputNetworkXML(QDomDocument &doc)
     return element;
 }
 
+int BattleDialogModel::getObjectType() const
+{
+    return DMHelper::CampaignType_BattleContent;
+}
+
 QList<BattleDialogModelCombatant*> BattleDialogModel::getCombatantList() const
 {
     return _combatants;

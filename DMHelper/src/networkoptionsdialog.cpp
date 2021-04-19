@@ -107,7 +107,7 @@ void NetworkOptionsDialog::checkLogon()
     _options.setUserName(ui->edtUserName->text());
     _options.setPassword(ui->edtPassword->text());
 
-    DMHLogon logon(ui->edtURL->text(), ui->edtUserName->text(), ui->edtPassword->text(), ui->cmbSession->currentData().toString());
+    DMHLogon logon(ui->edtURL->text(), ui->edtUserName->text(), QString(), ui->edtPassword->text(), ui->cmbSession->currentData().toString());
     if(logon.isValid())
     {
         if(_memberTimer != INVALID_TIMER_ID)

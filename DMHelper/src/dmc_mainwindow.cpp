@@ -99,6 +99,12 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
     _webView->load(QUrl("https://www.dndbeyond.com/profile/Gyarc2/characters/3294604"));
     */
 
+    QScreen* screen = QGuiApplication::primaryScreen();
+    if(screen)
+    {
+        resize(screen->availableSize().width() * 4 / 5, screen->availableSize().height() * 4 / 5);
+    }
+
     qDebug() << "[Main] Main Initialization complete";
 }
 

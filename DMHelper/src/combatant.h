@@ -159,8 +159,8 @@ public:
     virtual int getConditions() const;
     virtual bool hasCondition(Condition condition) const;
 
-    virtual QString getMD5() const;
-    virtual void setMD5(const QString& md5);
+    virtual QString getMD5() const override;
+    virtual void setMD5(const QString& md5) override;
 
 signals:
 

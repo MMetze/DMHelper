@@ -79,6 +79,11 @@ signals:
     void joinSessionStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& invite);
     void joinSessionComplete(int requestID, const QString& session);
 
+    // Communication
+    void sendMessageComplete(int requestID, const QString& data);
+    void pollMessageComplete(int requestID, const QString& data);
+    void ackMessageComplete(int requestID, const QString& data);
+
     // Request controls
     void otherRequestComplete();
     void messageError(int requestID, const QString& errorString);

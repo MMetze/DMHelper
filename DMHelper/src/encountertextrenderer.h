@@ -15,6 +15,7 @@ public:
     virtual ~EncounterTextRenderer() override;
 
 public slots:
+    // From CampaignObjectRenderer
     virtual void startRendering() override;
     virtual void stopRendering() override;
     virtual void targetResized(const QSize& newSize) override;

@@ -384,3 +384,20 @@ QString DMHNetworkData_JoinSession_Private::getSession() const
 {
     return _session;
 }
+
+
+
+
+
+DMHNetworkData_Message_Private::DMHNetworkData_Message_Private(QDomElement data) :
+    DMHNetworkData_Private_Base(),
+    _data()
+{
+    _data = data.text();
+    _valid = !_data.isEmpty();
+}
+
+QString DMHNetworkData_Message_Private::getData() const
+{
+    return _data;
+}
