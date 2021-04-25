@@ -23,12 +23,15 @@ void AudioTrackFileDownload::play()
     }
     else
     {
-        emit requestFile(_md5);
+        // TODO: UUID
+        emit requestFile(_md5, QString());
     }
 }
 
-void AudioTrackFileDownload::fileReceived(const QString& md5String, const QByteArray& data)
+void AudioTrackFileDownload::fileReceived(const QString& md5String, const QString& uuid, const QByteArray& data)
 {
+    Q_UNUSED(uuid);
+
     if(_md5 != md5String)
         return;
 

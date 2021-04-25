@@ -60,9 +60,14 @@ QString DMHNetworkData_Raw::getName() const
     return d->getName();
 }
 
-QString DMHNetworkData_Raw::getId() const
+QString DMHNetworkData_Raw::getMD5() const
 {
-    return d->getId();
+    return d->getMD5();
+}
+
+QString DMHNetworkData_Raw::getUuid() const
+{
+    return d->getUuid();
 }
 
 QByteArray DMHNetworkData_Raw::getData() const
@@ -94,9 +99,14 @@ QString DMHNetworkData_Upload::getName() const
     return d->getName();
 }
 
-QString DMHNetworkData_Upload::getId() const
+QString DMHNetworkData_Upload::getMD5() const
 {
-    return d->getId();
+    return d->getMD5();
+}
+
+QString DMHNetworkData_Upload::getUuid() const
+{
+    return d->getUuid();
 }
 
 
@@ -130,6 +140,11 @@ QString DMHNetworkData_Exists::getName() const
 QString DMHNetworkData_Exists::getMD5() const
 {
     return d->getMD5();
+}
+
+QString DMHNetworkData_Exists::getUuid() const
+{
+    return d->getUuid();
 }
 
 

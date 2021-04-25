@@ -26,11 +26,12 @@ void EncounterTextDownload::inputXML(const QDomElement &element, bool isImport)
     _md5Text = element.attribute("text");
     _md5TranslatedText = element.attribute("translated-text");
 
+    // TODO: UUID
     if(!_md5TranslatedText.isEmpty())
-        emit requestFile(_md5TranslatedText, DMHelper::FileType_Text);
+        emit requestFile(_md5TranslatedText, QString(), DMHelper::FileType_Text);
 
     if(!_md5Text.isEmpty())
-        emit requestFile(_md5Text, DMHelper::FileType_Text);
+        emit requestFile(_md5Text, QString(), DMHelper::FileType_Text);
 }
 
 bool EncounterTextDownload::isComplete()
@@ -39,11 +40,13 @@ bool EncounterTextDownload::isComplete()
            ((_md5TranslatedText.isEmpty()) || (!_translatedText.isEmpty())));
 }
 
-void EncounterTextDownload::fileReceived(const QString& md5String, const QByteArray& data)
+void EncounterTextDownload::fileReceived(const QString& md5, const QString& uuid, const QByteArray& data)
 {
-    if((!md5String.isEmpty()) && (!data.isEmpty()))
+    Q_UNUSED(uuid);
+
+    if((!md5.isEmpty()) && (!data.isEmpty()))
     {
-        if(md5String == _md5Text)
+        if(md5 == _md5Text)
         {
             QByteArray dataFromPercent = QByteArray::fromPercentEncoding(data);
             QString dataString(dataFromPercent);
@@ -51,7 +54,7 @@ void EncounterTextDownload::fileReceived(const QString& md5String, const QByteAr
             setText(dataString);
         }
 
-        if(md5String == _md5TranslatedText)
+        if(md5 == _md5TranslatedText)
         {
             QByteArray dataFromPercent = QByteArray::fromPercentEncoding(data);
             QString dataString;

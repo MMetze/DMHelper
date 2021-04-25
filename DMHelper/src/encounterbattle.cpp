@@ -1,6 +1,5 @@
 #include "encounterbattle.h"
 #include "dmconstants.h"
-#include "encounterbattleedit.h"
 #include "battleframe.h"
 #include "combatant.h"
 #include "combatantfactory.h"
@@ -399,7 +398,7 @@ void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool is
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 {
     if((_battleModel)||(isImport))
-                return;
+        return;
 
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)

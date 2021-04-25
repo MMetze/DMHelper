@@ -89,14 +89,16 @@ QString DMHNetworkData_Payload_Private::getTimestamp() const
 DMHNetworkData_Raw_Private::DMHNetworkData_Raw_Private(QDomElement data) :
     DMHNetworkData_Private_Base(),
     _name(),
-    _id(),
+    _md5(),
+    _uuid(),
     _data()
 {
     QDomElement nodeElement = data.firstChildElement(QString("node"));
     if(!nodeElement.isNull())
     {
         if((readChildElement(nodeElement, QString("name"), _name)) &&
-           (readChildElement(nodeElement, QString("ID"), _id)) &&
+           (readChildElement(nodeElement, QString("md5"), _md5)) &&
+           (readChildElement(nodeElement, QString("ID"), _uuid)) &&
            (readChildElement(nodeElement, QString("data"), _data)))
             _valid = true;
     }
@@ -107,9 +109,14 @@ QString DMHNetworkData_Raw_Private::getName() const
     return _name;
 }
 
-QString DMHNetworkData_Raw_Private::getId() const
+QString DMHNetworkData_Raw_Private::getMD5() const
 {
-    return _id;
+    return _md5;
+}
+
+QString DMHNetworkData_Raw_Private::getUuid() const
+{
+    return _uuid;
 }
 
 QByteArray DMHNetworkData_Raw_Private::getData() const
@@ -125,13 +132,15 @@ QByteArray DMHNetworkData_Raw_Private::getData() const
 DMHNetworkData_Upload_Private::DMHNetworkData_Upload_Private(QDomElement data) :
     DMHNetworkData_Private_Base(),
     _name(),
-    _id()
+    _md5(),
+    _uuid()
 {
     QDomElement nodeElement = data.firstChildElement(QString("node"));
     if(!nodeElement.isNull())
     {
         if((readChildElement(nodeElement, QString("name"), _name)) &&
-           (readChildElement(nodeElement, QString("id"), _id)))
+           (readChildElement(nodeElement, QString("md5"), _md5)) &&
+           (readChildElement(nodeElement, QString("id"), _uuid)))
             _valid = true;
     }
 }
@@ -141,9 +150,14 @@ QString DMHNetworkData_Upload_Private::getName() const
     return _name;
 }
 
-QString DMHNetworkData_Upload_Private::getId() const
+QString DMHNetworkData_Upload_Private::getMD5() const
 {
-    return _id;
+    return _md5;
+}
+
+QString DMHNetworkData_Upload_Private::getUuid() const
+{
+    return _uuid;
 }
 
 
@@ -152,12 +166,14 @@ QString DMHNetworkData_Upload_Private::getId() const
 DMHNetworkData_Exists_Private::DMHNetworkData_Exists_Private(QDomElement data) :
     DMHNetworkData_Private_Base(),
     _name(),
-    _md5()
+    _md5(),
+    _uuid()
 {
     QDomElement nodeElement = data.firstChildElement(QString("node"));
     if(!nodeElement.isNull())
     {
-        if((readChildElement(nodeElement, QString("ID"), _md5)) &&
+        if((readChildElement(nodeElement, QString("md5"), _md5)) &&
+           (readChildElement(nodeElement, QString("ID"), _uuid)) &&
            (readChildElement(nodeElement, QString("name"), _name)))
             _valid = true;
     }
@@ -165,7 +181,7 @@ DMHNetworkData_Exists_Private::DMHNetworkData_Exists_Private(QDomElement data) :
 
 bool DMHNetworkData_Exists_Private::exists() const
 {
-    return !_md5.isEmpty();
+    return ((!_md5.isEmpty() && (!_uuid.isEmpty())));
 }
 
 QString DMHNetworkData_Exists_Private::getName() const
@@ -176,6 +192,11 @@ QString DMHNetworkData_Exists_Private::getName() const
 QString DMHNetworkData_Exists_Private::getMD5() const
 {
     return _md5;
+}
+
+QString DMHNetworkData_Exists_Private::getUuid() const
+{
+    return _uuid;
 }
 
 

@@ -58,13 +58,14 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
         }
     }
 
-    QRegularExpression reFoW("<fow>(.*)<\\/fow>");
+    QRegularExpression reFoW("<fow>(.*),(.*)<\\/fow>");
     QRegularExpressionMatch matchFoW = reFoW.match(imageData);
-    QString fowString = matchFoW.captured(matchFoW.lastCapturedIndex());
-    if((!_fow) || (_fow->getMD5() != fowString) || (_fow->isNotStarted()))
+    QString fowMD5 = matchFoW.captured(1);
+    QString fowUuid = matchFoW.captured(2);
+    if((!_fow) || (_fow->getMD5() != fowMD5) || (_fow->isNotStarted()))
     {
         _fowPmp = QPixmap();
-        if((_fow) && (_fow->getMD5() != fowString))
+        if((_fow) && (_fow->getMD5() != fowMD5))
         {
             qDebug() << "[RemoteRenderer] Deleting FoW wrapper for md5: " << _fow->getMD5();
             _fow->deleteLater();
@@ -73,27 +74,28 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
 
         if(_fow)
         {
-            qDebug() << "[RemoteRenderer] Restarting download for FoW image: " << fowString;
+            qDebug() << "[RemoteRenderer] Restarting download for FoW image: " << fowMD5;
             _fow->getFile();
         }
-        else if(!fowString.isEmpty())
+        else if((!fowMD5.isEmpty()) && (!fowUuid.isEmpty()))
         {
-            qDebug() << "[RemoteRenderer] New FoW image found: " << fowString;
-            _fow = new RemoteRenderer_FileWrapper(fowString, DMHelper::FileType_Image);
+            qDebug() << "[RemoteRenderer] New FoW image found: " << fowMD5;
+            _fow = new RemoteRenderer_FileWrapper(fowMD5, fowUuid, DMHelper::FileType_Image);
             connect(_fow, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
             connect(_fow, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setFowData);
             _fow->getFile();
         }
     }
 
-    QRegularExpression reBackground("<background(?: type=)?(.*)>(.*)<\\/background>");
+    QRegularExpression reBackground("<background(?: type=)?(.*)>(.*),(.*)<\\/background>");
     QRegularExpressionMatch matchBackground = reBackground.match(imageData);
     QString backgroundTypeString = matchBackground.captured(1);
-    QString backgroundString = matchBackground.captured(2);
-    if((!_background) || (_background->getMD5() != backgroundString) || (_background->isNotStarted()))
+    QString backgroundMD5 = matchBackground.captured(2);
+    QString backgroundUuid = matchBackground.captured(3);
+    if((!_background) || (_background->getMD5() != backgroundMD5) || (_background->isNotStarted()))
     {
         _backgroundPmp = QPixmap();
-        if((_background) && (_background->getMD5() != backgroundString))
+        if((_background) && (_background->getMD5() != backgroundMD5))
         {
             qDebug() << "[RemoteRenderer] Deleting Background wrapper for md5: " << _background->getMD5();
             _background->deleteLater();
@@ -102,13 +104,13 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
 
         if(_background)
         {
-            qDebug() << "[RemoteRenderer] Restarting download for Background image: " << backgroundString;
+            qDebug() << "[RemoteRenderer] Restarting download for Background image: " << backgroundMD5;
             _background->getFile();
         }
-        else if(!backgroundString.isEmpty())
+        else if((!backgroundMD5.isEmpty()) && (!backgroundUuid.isEmpty()))
         {
-            qDebug() << "[RemoteRenderer] New Background image found: " << backgroundString;
-            _background = new RemoteRenderer_FileWrapper(backgroundString, backgroundTypeString.toInt());
+            qDebug() << "[RemoteRenderer] New Background image found: " << backgroundMD5 << ", UUID: " << backgroundUuid;
+            _background = new RemoteRenderer_FileWrapper(backgroundMD5, backgroundUuid, backgroundTypeString.toInt());
             connect(_background, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
             connect(_background, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setBackgroundData);
             _background->getFile();
@@ -169,9 +171,9 @@ bool RemoteRenderer::isComplete() const
     return true;
 }
 
-void RemoteRenderer::fileRequestStarted(int requestId, const QString& fileMD5)
+void RemoteRenderer::fileRequestStarted(int requestId, const QString& fileMD5, const QString& fileUuid)
 {
-    qDebug() << "[RemoteRenderer] File request started for " << fileMD5 << " with request " << requestId;
+    qDebug() << "[RemoteRenderer] File request started for " << fileMD5 << ", " << fileUuid << " with request " << requestId;
 
     if((_fow) && (_fow->getMD5() == fileMD5))
         _fow->setStatus(requestId);
@@ -186,25 +188,26 @@ void RemoteRenderer::fileRequestStarted(int requestId, const QString& fileMD5)
     }
 }
 
-void RemoteRenderer::fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data)
+void RemoteRenderer::fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data)
 {
-    qDebug() << "[RemoteRenderer] File request completed for " << fileMD5 << " with request " << requestId;
+    qDebug() << "[RemoteRenderer] File request completed for " << fileMD5 << ", " << fileUuid << " with request " << requestId;
     if(_fow)
-        _fow->fileReceived(fileMD5, _cacheDirectory, data);
+        _fow->fileReceived(fileMD5, fileUuid, _cacheDirectory, data);
 
     if(_background)
-        _background->fileReceived(fileMD5, _cacheDirectory, data);
+        _background->fileReceived(fileMD5, fileUuid, _cacheDirectory, data);
 
     for(int i = 0; i < _payloadFiles.count(); ++i)
     {
         if(_payloadFiles.at(i))
-            _payloadFiles.at(i)->fileReceived(fileMD5, _cacheDirectory, data);
+            _payloadFiles.at(i)->fileReceived(fileMD5, fileUuid, _cacheDirectory, data);
     }
 }
 
-void RemoteRenderer::setBackgroundData(const QString& md5String, const QByteArray& data)
+void RemoteRenderer::setBackgroundData(const QString& md5, const QString& uuid, const QByteArray& data)
 {
-    Q_UNUSED(md5String);
+    Q_UNUSED(md5);
+    Q_UNUSED(uuid);
 
     if(!data.isEmpty())
         _backgroundPmp.loadFromData(data);
@@ -212,9 +215,10 @@ void RemoteRenderer::setBackgroundData(const QString& md5String, const QByteArra
     dataComplete();
 }
 
-void RemoteRenderer::setFowData(const QString& md5String, const QByteArray& data)
+void RemoteRenderer::setFowData(const QString& md5, const QString& uuid, const QByteArray& data)
 {
-    Q_UNUSED(md5String);
+    Q_UNUSED(md5);
+    Q_UNUSED(uuid);
 
     if(!data.isEmpty())
         _fowPmp.loadFromData(data);
@@ -241,19 +245,12 @@ void RemoteRenderer::dataComplete()
         }
         else if(_activeObject->getObjectType() == DMHelper::CampaignType_Battle)
         {
-            /*
-            BattleDialogModel* model = dynamic_cast<BattleDialogModel*>(_activeObject);
-            if(model)
-            {
-                //if(_background)
-                //    textEncounter->setImageFile(_cacheDirectory + QString("/") + _background->getMD5());
-                _renderer = new BattleRenderer(*model, this);
-            }
-            */
             EncounterBattle* battle = dynamic_cast<EncounterBattle*>(_activeObject);
             if(battle)
             {
-                _renderer = new BattleRenderer(*battle, this);
+                if(_background)
+                    battle->setImageFile(_cacheDirectory + QString("/") + _background->getMD5());
+                _renderer = new BattleRenderer(*battle, _backgroundPmp, this);
             }
         }
         else
@@ -324,7 +321,9 @@ void RemoteRenderer::parsePayloadData(const QDomElement& element)
     else if(tagName == "battle-object")
     {
         EncounterBattleDownload* battle = new EncounterBattleDownload(_cacheDirectory, this);
-        //BattleDialogModel* model = new BattleDialogModel(QString(), this);
+        connect(battle, &EncounterBattleDownload::requestFile, this, &RemoteRenderer::payloadDataRequested);
+        connect(this, &RemoteRenderer::payloadDataAvailable, battle, &EncounterBattleDownload::fileReceived);
+        connect(battle, &EncounterBattleDownload::encounterComplete, this, &RemoteRenderer::dataComplete);
         battle->inputXML(element, false);
         _activeObject = battle;
     }
@@ -339,7 +338,7 @@ void RemoteRenderer::requestPayloadData()
     }
 }
 
-void RemoteRenderer::payloadDataRequested(const QString& md5String, int fileType)
+void RemoteRenderer::payloadDataRequested(const QString& md5String, const QString& uuid, int fileType)
 {
     for(int i = 0; i < _payloadFiles.count(); ++i)
     {
@@ -347,17 +346,18 @@ void RemoteRenderer::payloadDataRequested(const QString& md5String, int fileType
             return;
     }
 
-    RemoteRenderer_FileWrapper* fileWrapper = new RemoteRenderer_FileWrapper(md5String, fileType);
+    // TODO: requested data needs UUIDs too
+    RemoteRenderer_FileWrapper* fileWrapper = new RemoteRenderer_FileWrapper(md5String, uuid, fileType);
     connect(fileWrapper, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
     connect(fileWrapper, &RemoteRenderer_FileWrapper::abortRequest, this, &RemoteRenderer::abortRequest);
     connect(fileWrapper, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::payloadDataAvailable);
     _payloadFiles.append(fileWrapper);
 }
 
-RemoteRenderer_FileWrapper::RemoteRenderer_FileWrapper(const QString& md5, int fileType) :
+RemoteRenderer_FileWrapper::RemoteRenderer_FileWrapper(const QString& md5, const QString& uuid, int fileType) :
     _md5(md5),
     _fileType(fileType),
-    _id(),
+    _uuid(uuid),
     _status(DMC_SERVER_CONNECTION_UPLOAD_NOT_STARTED)
 {
 }
@@ -409,14 +409,14 @@ void RemoteRenderer_FileWrapper::setFileType(int fileType)
     _fileType = fileType;
 }
 
-QUuid RemoteRenderer_FileWrapper::getId() const
+QString RemoteRenderer_FileWrapper::getUuid() const
 {
-    return _id;
+    return _uuid;
 }
 
-void RemoteRenderer_FileWrapper::setId(QUuid id)
+void RemoteRenderer_FileWrapper::setUuid(const QString& uuid)
 {
-    _id = id;
+    _uuid = uuid;
 }
 
 int RemoteRenderer_FileWrapper::getStatus() const
@@ -440,12 +440,12 @@ void RemoteRenderer_FileWrapper::getFile()
     if(_status > 0)
         return;
 
-    emit requestFile(_md5);
+    emit requestFile(_md5, _uuid);
 }
 
-void RemoteRenderer_FileWrapper::fileReceived(const QString& md5String, const QString& cacheDirectory, const QByteArray& data)
+void RemoteRenderer_FileWrapper::fileReceived(const QString& md5, const QString& uuid, const QString& cacheDirectory, const QByteArray& data)
 {
-    if(_md5 != md5String)
+    if(_md5 != md5)
         return;
 
     QString fullFileName = cacheDirectory + QString("/") + _md5;
@@ -455,7 +455,7 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5String, const QS
         {
             qDebug() << "[RemoteRenderer_FileWrapper] File available: " << fullFileName;
             _status = DMC_SERVER_CONNECTION_UPLOAD_COMPLETE;
-            emit dataAvailable(md5String, QByteArray());
+            emit dataAvailable(md5, uuid, QByteArray());
         }
         else
         {
@@ -477,7 +477,7 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5String, const QS
 
             qDebug() << "[RemoteRenderer_FileWrapper] File read: " << fullFileName;
             _status = DMC_SERVER_CONNECTION_UPLOAD_COMPLETE;
-            emit dataAvailable(md5String, readArray);
+            emit dataAvailable(md5, uuid, readArray);
         }
     }
     else
@@ -500,8 +500,8 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5String, const QS
         outputFile.write(data);
         outputFile.close();
 
-        qDebug() << "[RemoteRenderer_FileWrapper] File available: " << md5String;
+        qDebug() << "[RemoteRenderer_FileWrapper] File available: " << md5;
         _status = DMC_SERVER_CONNECTION_UPLOAD_COMPLETE;
-        emit dataAvailable(md5String, ((_fileType == DMHelper::FileType_Video) ? QByteArray() : data));
+        emit dataAvailable(md5, uuid, ((_fileType == DMHelper::FileType_Video) ? QByteArray() : data));
     }
 }

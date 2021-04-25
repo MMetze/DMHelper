@@ -3,6 +3,7 @@
 
 #include "campaignobjectrenderer.h"
 #include "encounterbattle.h"
+#include <QPixmap>
 
 class BattleDialogGraphicsScene;
 
@@ -10,7 +11,7 @@ class BattleRenderer : public CampaignObjectRenderer
 {
     Q_OBJECT
 public:
-    explicit BattleRenderer(EncounterBattle& battle, QObject *parent = nullptr);
+    explicit BattleRenderer(EncounterBattle& battle, QPixmap background, QObject *parent = nullptr);
     virtual ~BattleRenderer() override;
 
 public slots:
@@ -20,9 +21,14 @@ public slots:
     virtual void targetResized(const QSize& newSize) override;
     virtual void setRotation(int rotation) override;
 
-private:
+protected:
+    void getImageForPublishing(QImage& imageForPublishing);
+
     EncounterBattle& _battle;
+    QPixmap _background;
     BattleDialogGraphicsScene* _scene;
+    QSize _targetSize;
+    int _rotation;
 };
 
 #endif // BATTLERENDERER_H

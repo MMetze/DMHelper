@@ -44,10 +44,10 @@ bool DMC_ServerConnection::isConnected() const
     return _connected;
 }
 
-void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data)
+void DMC_ServerConnection::downloadComplete(int requestID, const QString& fileMD5, const QString& fileUuid, const QByteArray& data)
 {
-    qDebug() << "[DMC_ServerConnection] Download complete " << requestID << ": " << fileMD5 << ", " << data.size() << " bytes";
-    emit fileRequestCompleted(requestID, fileMD5, data);
+    qDebug() << "[DMC_ServerConnection] Download complete " << requestID << ": " << fileMD5  << ", " << fileUuid << ", " << data.size() << " bytes";
+    emit fileRequestCompleted(requestID, fileMD5, fileUuid, data);
 }
 
 void DMC_ServerConnection::payloadReceived(const DMHPayload& payload, const QString& timestamp)
@@ -137,17 +137,17 @@ void DMC_ServerConnection::stopServer()
     }
 }
 
-void DMC_ServerConnection::fileRequested(const QString& md5String)
+void DMC_ServerConnection::fileRequested(const QString& md5, const QString& uuid)
 {
-    QString cachedFile = _options.getCacheDirectory() + QString("/") + md5String;
+    QString cachedFile = _options.getCacheDirectory() + QString("/") + md5;
     if(QFile::exists(cachedFile))
     {
-        emit fileRequestStarted(-1, QString());
-        emit fileRequestCompleted(-1, md5String, QByteArray());
+        emit fileRequestStarted(-1, QString(), QString());
+        emit fileRequestCompleted(-1, md5, uuid, QByteArray());
     }
     else
     {
-        emit fileRequestStarted(_networkManager->downloadFile(md5String), md5String);
+        emit fileRequestStarted(_networkManager->downloadFile(md5, uuid), md5, uuid);
     }
 }
 
@@ -262,5 +262,6 @@ void DMC_ServerConnection::joinSession()
         return;
 
     qDebug() << "[DMC_ServerConnection] Sending the join session request.";
-    _networkManager->joinSession(_options.getCurrentInvite());
+    //_networkManager->joinSession(_options.getCurrentInvite());
+    joinSessionComplete(0, QString("7B3AA550-649A-4D51-920E-CAB465616995"));
 }

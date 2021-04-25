@@ -12,10 +12,10 @@ public:
 
 public slots:
     virtual void play() override;
-    virtual void fileReceived(const QString& md5String, const QByteArray& data);
+    virtual void fileReceived(const QString& md5, const QString& uuid, const QByteArray& data);
 
 signals:
-    void requestFile(const QString& md5String);
+    void requestFile(const QString& md5String, const QString& uuid);
 
 protected:
     QString _md5;

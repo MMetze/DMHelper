@@ -96,8 +96,10 @@ int DMHNetworkManager_Private::uploadFile(const QString& filename)
     return replyId;
 }
 
-int DMHNetworkManager_Private::fileExists(const QString& fileMD5)
+int DMHNetworkManager_Private::fileExists(const QString& fileMD5, const QString& fileUuid)
 {
+    Q_UNUSED(fileUuid);
+
     QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/file.php"));
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -171,16 +173,19 @@ int DMHNetworkManager_Private::uploadData(const QByteArray& data)
     return replyId;
 }
 
-int DMHNetworkManager_Private::downloadFile(const QString& fileMD5)
+int DMHNetworkManager_Private::downloadFile(const QString& md5, const QString& uuid)
 {
-    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/file_pull.php"));
+//    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/file_pull.php"));
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/file.php"));
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
     postData.addQueryItem("user", _logon.getUserName());
     postData.addQueryItem("password", _logon.getPassword());
-    postData.addQueryItem("files[][md5]", fileMD5);
+    postData.addQueryItem("action", "pull");
+    //postData.addQueryItem("files[][md5]", md5);
+    postData.addQueryItem("fileids[]", uuid);
 
 #ifdef QT_DEBUG
     emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
@@ -190,9 +195,9 @@ int DMHNetworkManager_Private::downloadFile(const QString& fileMD5)
     int replyId = getRequestId(true);
     _replies.insert(reply, replyId);
 
-    qDebug() << "[DMHNetworkManager] Download request sent for file: " << fileMD5 << " with ID " << replyId;
+    qDebug() << "[DMHNetworkManager] Download request sent for file: " << md5 << ", " << uuid << " with ID " << replyId;
 
-    emit downloadStarted(replyId, fileMD5, reply);
+    emit downloadStarted(replyId, md5, uuid, reply);
 
     return replyId;
 }
@@ -453,7 +458,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
 
     QByteArray bytes = reply->readAll();
     //qDebug() << "[DMHNetworkManager] Request with ID " << replyData << "received; payload " << bytes.size() << " bytes";
-    //qDebug() << "[DMHNetworkManager] Payload contents: " << QString(bytes.left(2000));
+    qDebug() << "[DMHNetworkManager] Payload contents: " << QString(bytes.left(2000));
 
 #ifdef QT_DEBUG
     emit DEBUG_response_contents(bytes.left(2000));
@@ -496,14 +501,14 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             {
                 DMHNetworkData_Raw& rawNetworkData = dynamic_cast<DMHNetworkData_Raw&>(*factoryData);
                 QByteArray newdata = rawNetworkData.getData();
-                qDebug() << "[DMHNetworkManager] Download Complete. Filename: " << rawNetworkData.getName() << ", ID: " << rawNetworkData.getId() << ", Data: " << newdata.size();
-                emit downloadComplete(replyData, rawNetworkData.getId(), newdata);
+                qDebug() << "[DMHNetworkManager] Download Complete. Filename: " << rawNetworkData.getName() << ", md5: " << rawNetworkData.getMD5() << ", UUID: " << rawNetworkData.getUuid() << ", Data: " << newdata.size();
+                emit downloadComplete(replyData, rawNetworkData.getMD5(), rawNetworkData.getUuid(), newdata);
             }
             else if(factory.getModeValue() == DMHShared::DMH_Message_file_exists)
             {
                 DMHNetworkData_Exists& existsNetworkData = dynamic_cast<DMHNetworkData_Exists&>(*factoryData);
                 qDebug() << "[DMHNetworkManager] File Exist Complete. Filename: " << existsNetworkData.getName() << ", MD5: " << existsNetworkData.getMD5() << ", Exists: " << existsNetworkData.exists();
-                emit existsComplete(replyData, existsNetworkData.getMD5(), existsNetworkData.getName(), existsNetworkData.exists());
+                emit existsComplete(replyData, existsNetworkData.getMD5(), existsNetworkData.getUuid(), existsNetworkData.getName(), existsNetworkData.exists());
             }
             else if(factory.getModeValue() == DMHShared::DMH_Message_ssn_create)
             {
@@ -582,8 +587,8 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             }
 
             DMHNetworkData_Upload& uploadNetworkData = dynamic_cast<DMHNetworkData_Upload&>(*factoryData);
-            qDebug() << "[DMHNetworkManager] Upload Complete. Filename: " << uploadNetworkData.getName() << ", ID: " << uploadNetworkData.getId();
-            emit uploadComplete(replyData, uploadNetworkData.getId());
+            qDebug() << "[DMHNetworkManager] Upload Complete. Filename: " << uploadNetworkData.getName() << ", md5: " << uploadNetworkData.getMD5() << ", uuid: " << uploadNetworkData.getUuid();
+            emit uploadComplete(replyData, uploadNetworkData.getMD5(), uploadNetworkData.getUuid());
         }
     }
     catch(const std::bad_cast&)
@@ -623,7 +628,7 @@ void DMHNetworkManager_Private::registerRequestError(const QString& errorStr, in
     {
         if(isDownload(replyID))
         {
-            emit downloadComplete(replyID, QString(""), QByteArray());
+            emit downloadComplete(replyID, QString(""), QString(""), QByteArray());
         }
         else
         {

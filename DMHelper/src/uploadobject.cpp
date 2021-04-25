@@ -8,6 +8,7 @@ UploadObject::UploadObject() :
     _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
+    _uuid(),
     _description(),
     _status(Status_NotStarted)
 {
@@ -19,6 +20,7 @@ UploadObject::UploadObject(CampaignObjectBase* object) :
     _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
+    _uuid(),
     _description(),
     _status(Status_NotStarted)
 {
@@ -30,6 +32,7 @@ UploadObject::UploadObject(CampaignObjectBase* object, int status) :
     _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
+    _uuid(),
     _description(),
     _status(status)
 {
@@ -41,6 +44,7 @@ UploadObject::UploadObject(CampaignObjectBase* object, const QString& filename, 
     _filetype(DMHelper::FileType_Other),
     _data(),
     _md5(),
+    _uuid(),
     _description(),
     _status(status)
 {
@@ -59,6 +63,11 @@ bool UploadObject::hasMD5() const
 {
     return((!_md5.isEmpty()) ||
            ((_object != nullptr) && (!_object->getMD5().isEmpty())));
+}
+
+bool UploadObject::hasUuid() const
+{
+    return(!_uuid.isEmpty());
 }
 
 CampaignObjectBase* UploadObject::getObject() const
@@ -101,6 +110,11 @@ void UploadObject::setData(const QString& data)
     _data = data;
 }
 
+QString UploadObject::getDescriptor() const
+{
+    return getMD5() + QString(",") + getUuid();
+}
+
 QString UploadObject::getMD5() const
 {
     if(_object)
@@ -115,6 +129,16 @@ void UploadObject::setMD5(const QString& md5)
         _object->setMD5(md5);
     else
         _md5 = md5;
+}
+
+QString UploadObject::getUuid() const
+{
+    return _uuid;
+}
+
+void UploadObject::setUuid(const QString& uuid)
+{
+    _uuid = uuid;
 }
 
 QString UploadObject::getDescription() const

@@ -64,9 +64,9 @@ public:
 
     // File Management
     int uploadFile(const QString& filename);
-    int fileExists(const QString& fileMD5);
+    int fileExists(const QString& fileMD5, const QString& fileUuid);
     int uploadData(const QByteArray& data);
-    int downloadFile(const QString& fileMD5);
+    int downloadFile(const QString& md5, const QString& uuid);
 
     // Session Management
     int createSession(const QString& sessionName);
@@ -97,10 +97,10 @@ public:
 
 signals:
     // File Management
-    void existsComplete(int requestID, const QString& fileMD5, const QString& filename, bool exists);
-    void uploadComplete(int requestID, const QString& fileMD5);
-    void downloadStarted(int requestID, const QString& fileMD5, QNetworkReply* reply);
-    void downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data);
+    void existsComplete(int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
+    void uploadComplete(int requestID, const QString& fileMD5, const QString& fileUuid);
+    void downloadStarted(int requestID, const QString& fileMD5, const QString& fileUuid, QNetworkReply* reply);
+    void downloadComplete(int requestID, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
 
     // Session Management
     void sessionMgmtStarted(int requestID, QNetworkReply* reply, const QString& action, const QString& session, const QString& sessionName);

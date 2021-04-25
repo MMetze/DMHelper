@@ -74,7 +74,8 @@ public:
     virtual bool isValid() override;
 
     QString getName() const;
-    QString getId() const;
+    QString getMD5() const;
+    QString getUuid() const;
     QByteArray getData() const;
 
 private:
@@ -99,7 +100,8 @@ public:
     virtual bool isValid() override;
 
     QString getName() const;
-    QString getId() const;
+    QString getMD5() const;
+    QString getUuid() const;
 
 private:
     // No copy constructor allowed
@@ -126,6 +128,7 @@ public:
     bool exists() const;
     QString getName() const;
     QString getMD5() const;
+    QString getUuid() const;
 
 private:
     // No copy constructor allowed

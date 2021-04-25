@@ -62,12 +62,14 @@ public:
     virtual ~DMHNetworkData_Raw_Private() override {}
 
     QString getName() const;
-    QString getId() const;
+    QString getMD5() const;
+    QString getUuid() const;
     QByteArray getData() const;
 
 protected:
     QString _name;
-    QString _id;
+    QString _md5;
+    QString _uuid;
     QByteArray _data;
 };
 
@@ -100,11 +102,13 @@ public:
     virtual ~DMHNetworkData_Upload_Private() override {}
 
     QString getName() const;
-    QString getId() const;
+    QString getMD5() const;
+    QString getUuid() const;
 
 protected:
     QString _name;
-    QString _id;
+    QString _md5;
+    QString _uuid;
 };
 
 
@@ -119,10 +123,12 @@ public:
     bool exists() const;
     QString getName() const;
     QString getMD5() const;
+    QString getUuid() const;
 
 protected:
     QString _name;
     QString _md5;
+    QString _uuid;
 };
 
 

@@ -24,25 +24,25 @@ public:
     bool isComplete() const;
 
 public slots:
-    void fileRequestStarted(int requestId, const QString& fileMD5);
-    void fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data);
+    void fileRequestStarted(int requestId, const QString& fileMD5, const QString& fileUuid);
+    void fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
 
 signals:
-    void requestFile(const QString& md5String);
+    void requestFile(const QString& md5, const QString& uuid);
     void abortRequest(int requestID);
     void publishPixmap(QPixmap pixmap);
     void publishImage(QImage image);
-    void payloadDataAvailable(const QString& md5String, const QByteArray& data);
+    void payloadDataAvailable(const QString& md5, const QString& uuid, const QByteArray& data);
 
 private slots:
-    void setBackgroundData(const QString& md5String, const QByteArray& data);
-    void setFowData(const QString& md5String, const QByteArray& data);
+    void setBackgroundData(const QString& md5, const QString& uuid, const QByteArray& data);
+    void setFowData(const QString& md5, const QString& uuid, const QByteArray& data);
     void dataComplete();
 
 private:
     void parsePayloadData(const QDomElement& element);
     void requestPayloadData();
-    void payloadDataRequested(const QString& md5String, int fileType);
+    void payloadDataRequested(const QString& md5String, const QString& uuid, int fileType);
 
     CampaignObjectBase* _activeObject;
     CampaignObjectRenderer* _renderer;
@@ -61,7 +61,7 @@ class RemoteRenderer_FileWrapper : public QObject
 {
     Q_OBJECT
 public:
-    explicit RemoteRenderer_FileWrapper(const QString& md5, int fileType);
+    explicit RemoteRenderer_FileWrapper(const QString& md5, const QString& uuid, int fileType);
     ~RemoteRenderer_FileWrapper();
 
     QString getMD5() const;
@@ -70,8 +70,8 @@ public:
     int getFileType() const;
     void setFileType(int fileType);
 
-    QUuid getId() const;
-    void setId(QUuid id);
+    QString getUuid() const;
+    void setUuid(const QString& uuid);
 
     int getStatus() const;
     void setStatus(int status);
@@ -79,17 +79,17 @@ public:
 
 public slots:
     void getFile();
-    void fileReceived(const QString& md5String, const QString& cacheDirectory, const QByteArray& data);
+    void fileReceived(const QString& md5, const QString& uuid, const QString& cacheDirectory, const QByteArray& data);
 
 signals:
-    void requestFile(const QString& md5String);
+    void requestFile(const QString& md5, const QString& uuid);
     void abortRequest(int requestID);
-    void dataAvailable(const QString& md5String, const QByteArray& data);
+    void dataAvailable(const QString& md5, const QString& uuid, const QByteArray& data);
 
 private:
     QString _md5;
     int _fileType;
-    QUuid _id;
+    QString _uuid;
     int _status;
 };
 

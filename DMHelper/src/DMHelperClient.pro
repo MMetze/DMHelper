@@ -62,7 +62,6 @@ SOURCES += \
         campaignobjectrenderer.cpp \
         character.cpp \
         combatant.cpp \
-        combatantdownload.cpp \
         combatantfactory.cpp \
         combatantreference.cpp \
         dice.cpp \
@@ -158,7 +157,6 @@ HEADERS += \
     campaignobjectrenderer.h \
     character.h \
     combatant.h \
-    combatantdownload.h \
     combatantfactory.h \
     combatantreference.h \
     dice.h \

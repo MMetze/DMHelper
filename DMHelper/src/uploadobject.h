@@ -25,6 +25,7 @@ public:
 
     virtual bool isValid() const;
     virtual bool hasMD5() const;
+    virtual bool hasUuid() const;
 
     virtual CampaignObjectBase* getObject() const;
     virtual void setObject(CampaignObjectBase* object);
@@ -38,8 +39,13 @@ public:
     virtual QString getData() const;
     virtual void setData(const QString& data);
 
+    virtual QString getDescriptor() const;
+
     virtual QString getMD5() const;
     virtual void setMD5(const QString& md5);
+
+    virtual QString getUuid() const;
+    virtual void setUuid(const QString& uuid);
 
     virtual QString getDescription() const;
     virtual void setDescription(const QString& description);
@@ -53,6 +59,7 @@ protected:
     int _filetype;
     QString _data;
     QString _md5;
+    QString _uuid;
     QString _description;
     int _status;
 };

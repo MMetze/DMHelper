@@ -6,10 +6,10 @@ DMHNetworkManager::DMHNetworkManager(const DMHLogon& logon, QObject *parent) :
     QObject(parent),
     d(new DMHNetworkManager_Private(logon))
 {
-    connect(&(*d), SIGNAL(uploadComplete(int, const QString&)), this, SIGNAL(uploadComplete(int, const QString&)));
-    connect(&(*d), SIGNAL(downloadStarted(int, const QString&, QNetworkReply*)), this, SIGNAL(downloadStarted(int, const QString&, QNetworkReply*)));
-    connect(&(*d), SIGNAL(downloadComplete(int, const QString&, const QByteArray&)), this, SIGNAL(downloadComplete(int, const QString&, const QByteArray&)));
-    connect(&(*d), SIGNAL(existsComplete(int, const QString&, const QString&, bool)), this, SIGNAL(existsComplete(int, const QString&, const QString&, bool)));
+    connect(&(*d), SIGNAL(uploadComplete(int, const QString&, const QString&)), this, SIGNAL(uploadComplete(int, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(downloadStarted(int, const QString&, const QString&, QNetworkReply*)), this, SIGNAL(downloadStarted(int, const QString&, const QString&, QNetworkReply*)));
+    connect(&(*d), SIGNAL(downloadComplete(int, const QString&, const QString&, const QByteArray&)), this, SIGNAL(downloadComplete(int, const QString&, const QString&, const QByteArray&)));
+    connect(&(*d), SIGNAL(existsComplete(int, const QString&, const QString&, const QString&, bool)), this, SIGNAL(existsComplete(int, const QString&, const QString&, const QString&, bool)));
     connect(&(*d), SIGNAL(createSessionComplete(int, const QString&, const QString&)), this, SIGNAL(createSessionComplete(int, const QString&, const QString&)));
     connect(&(*d), SIGNAL(isOwnerComplete(int, const QString&, const QString&, const QString&, bool)), this, SIGNAL(isOwnerComplete(int, const QString&, const QString&, const QString&, bool)));
     connect(&(*d), SIGNAL(renameSessionComplete(int, const QString&)), this, SIGNAL(renameSessionComplete(int, const QString&)));
@@ -49,9 +49,9 @@ int DMHNetworkManager::uploadFile(const QString& filename)
     return d->uploadFile(filename);
 }
 
-int DMHNetworkManager::fileExists(const QString& fileMD5)
+int DMHNetworkManager::fileExists(const QString& fileMD5, const QString& fileUuid)
 {
-    return d->fileExists(fileMD5);
+    return d->fileExists(fileMD5, fileUuid);
 }
 
 int DMHNetworkManager::uploadData(const QByteArray& data)
@@ -59,9 +59,9 @@ int DMHNetworkManager::uploadData(const QByteArray& data)
     return d->uploadData(data);
 }
 
-int DMHNetworkManager::downloadFile(const QString& fileMD5)
+int DMHNetworkManager::downloadFile(const QString& md5, const QString& uuid)
 {
-    return d->downloadFile(fileMD5);
+    return d->downloadFile(md5, uuid);
 }
 
 int DMHNetworkManager::createSession(const QString & sessionName)

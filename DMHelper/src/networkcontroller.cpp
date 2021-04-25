@@ -42,8 +42,8 @@ NetworkController::NetworkController(QObject *parent) :
     _uploadedFiles(),
     _enabled(false)
 {
-    connect(_networkManager, SIGNAL(uploadComplete(int, const QString&)), this, SLOT(uploadCompleted(int, const QString&)));
-    connect(_networkManager, SIGNAL(existsComplete(int, const QString&, const QString&, bool)), this, SLOT(existsCompleted(int, const QString&, const QString&, bool)));
+    connect(_networkManager, SIGNAL(uploadComplete(int, const QString&, const QString&)), this, SLOT(uploadCompleted(int, const QString&, const QString&)));
+    connect(_networkManager, SIGNAL(existsComplete(int, const QString&, const QString&, const QString&, bool)), this, SLOT(existsCompleted(int, const QString&, const QString&, const QString&, bool)));
     connect(_networkManager, SIGNAL(requestError(int)), this, SLOT(uploadError(int)));
     connect(_networkManager, SIGNAL(requestError(int)), this, SIGNAL(networkError(int)));
     connect(_networkManager, SIGNAL(otherRequestComplete()), this, SIGNAL(networkSuccess()));
@@ -291,11 +291,11 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
     //updateAudioPayload();
 }
 
-void NetworkController::uploadCompleted(int requestID, const QString& fileMD5)
+void NetworkController::uploadCompleted(int requestID, const QString& fileMD5, const QString& fileUuid)
 {
     qDebug() << "[NetworkController] Upload complete " << requestID << ": " << fileMD5;
 
-    registerUpload(fileMD5);
+    registerUpload(fileMD5, fileUuid);
 
     if(_backgroundUpload.getStatus() == requestID)
     {
@@ -306,8 +306,9 @@ void NetworkController::uploadCompleted(int requestID, const QString& fileMD5)
         }
         else
         {
-            qDebug() << "[NetworkController] Upload complete for background image: " << fileMD5;
+            qDebug() << "[NetworkController] Upload complete for background image: " << fileMD5 << ", UUID: " << fileUuid;
             _backgroundUpload.setMD5(fileMD5);
+            _backgroundUpload.setUuid(fileUuid);
             _backgroundUpload.setStatus(UploadObject::Status_Complete);
             updateImagePayload();
             uploadPayload();
@@ -325,8 +326,9 @@ void NetworkController::uploadCompleted(int requestID, const QString& fileMD5)
         }
         else
         {
-            qDebug() << "[NetworkController] Upload complete for fow: " << fileMD5;
+            qDebug() << "[NetworkController] Upload complete for fow: " << fileMD5 << ", UUID: " << fileUuid;
             _fowUpload.setMD5(fileMD5);
+            _fowUpload.setUuid(fileUuid);
             _fowUpload.setStatus(UploadObject::Status_Complete);
             updateImagePayload();
             uploadPayload();
@@ -364,7 +366,7 @@ void NetworkController::uploadCompleted(int requestID, const QString& fileMD5)
     qDebug() << "[NetworkController] ERROR: Unexpected request ID received: " << requestID;
 }
 
-void NetworkController::existsCompleted(int requestID, const QString& fileMD5, const QString& filename, bool exists)
+void NetworkController::existsCompleted(int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists)
 {
     Q_UNUSED(filename);
 
@@ -384,7 +386,7 @@ void NetworkController::existsCompleted(int requestID, const QString& fileMD5, c
                     uploadObject.getObject()->setMD5(fileMD5);
                 }
                 _tracks[i] = uploadObject;
-                registerUpload(fileMD5);
+                registerUpload(fileMD5, fileUuid);
                 updateAudioPayload();
             }
             else
@@ -467,6 +469,7 @@ void NetworkController::startObjectUpload(UploadObject* uploadObject)
         return;
     }
 
+    // If the object to be uploaded has a specific file, make sure that file exists
     if(uploadObject->getObject())
     {
         uploadObject->setFilename(uploadObject->getObject()->getFileName());
@@ -478,23 +481,42 @@ void NetworkController::startObjectUpload(UploadObject* uploadObject)
         }
     }
 
+    // Prepare the description for the upload panel
     QString uploadName = uploadObject->getDescription();
     if((!uploadObject->getDescription().isEmpty()) && (uploadObject->getObject() != nullptr))
         uploadName += QString(": ");
     if(uploadObject->getObject())
         uploadName += uploadObject->getObject()->getName();
 
-    if(uploadObject->getMD5().isEmpty())
-    {
-        if(uploadObject->getFilename().isEmpty())
-            uploadObject->setStatus(_networkManager->uploadData(uploadObject->getData().toUtf8()));
-        else
-            uploadObject->setStatus(_networkManager->uploadFile(uploadObject->getFilename()));
 
-        if(uploadObject->getStatus() > 0)
+    /*
+    md5 empty --> upload
+    if id empty --> getexists(md5)
+                if not exists --> upload
+    if both there, done --
+    */
+
+
+    // Check if this file has been uploaded previously
+    if(!uploadObject->hasUuid())
+    {
+        if(uploadObject->hasMD5())
         {
-            qDebug() << "[NetworkController] Uploading object: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
-            emit uploadStarted(uploadObject->getStatus(), _networkManager->getNetworkReply(uploadObject->getStatus()), uploadName);
+            uploadObject->setStatus(_networkManager->fileExists(uploadObject->getMD5(), uploadObject->getUuid()));
+            qDebug() << "[NetworkController] Checking if object exists: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
+        }
+        else
+        {
+            if(uploadObject->getFilename().isEmpty())
+                uploadObject->setStatus(_networkManager->uploadData(uploadObject->getData().toUtf8()));
+            else
+                uploadObject->setStatus(_networkManager->uploadFile(uploadObject->getFilename()));
+
+            if(uploadObject->getStatus() > 0)
+            {
+                qDebug() << "[NetworkController] Uploading object: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
+                emit uploadStarted(uploadObject->getStatus(), _networkManager->getNetworkReply(uploadObject->getStatus()), uploadName);
+            }
         }
     }
     else
@@ -503,11 +525,11 @@ void NetworkController::startObjectUpload(UploadObject* uploadObject)
         {
             qDebug() << "[NetworkController] Object known and already uploaded: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
             uploadObject->setStatus(UploadObject::Status_Exists);
-            existsCompleted(UploadObject::Status_Exists, uploadObject->getMD5(), QString(), true);
+            existsCompleted(UploadObject::Status_Exists, uploadObject->getMD5(), uploadObject->getUuid(), QString(), true);
         }
         else
         {
-            uploadObject->setStatus(_networkManager->fileExists(uploadObject->getMD5()));
+            uploadObject->setStatus(_networkManager->fileExists(uploadObject->getMD5(), uploadObject->getUuid()));
             qDebug() << "[NetworkController] Checking if object exists: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
         }
     }
@@ -642,6 +664,7 @@ void NetworkController::updateImagePayload()
     if(!_enabled)
         return;
 
+    // TODO: dependency upload before sending the payload
     QString imagePayload;
 
     if(_backgroundUpload.getStatus() < UploadObject::Status_Complete)
@@ -653,13 +676,13 @@ void NetworkController::updateImagePayload()
             imagePayload += QString("<background>");
         else
             imagePayload += QString("<background ") + QString("type=""") + QString::number(_backgroundUpload.getFileType()) + QString(""">");
-        imagePayload += _backgroundUpload.getMD5() + QString("</background>");
+        imagePayload += _backgroundUpload.getDescriptor() + QString("</background>");
         if(_fowUpload.isValid())
         {
             if(_fowUpload.getStatus() < UploadObject::Status_Complete)
                 startObjectUpload(&_fowUpload);
 
-            imagePayload += QString("<fow>") + _fowUpload.getMD5() + QString("</fow>");
+            imagePayload += QString("<fow>") + _fowUpload.getDescriptor() + QString("</fow>");
         }
     }
 
@@ -730,28 +753,29 @@ bool NetworkController::uploadEncounterText(EncounterText* encounterText)
     textUpload.setData(encounterText->getText());
     textUpload.setDescription(QString("Text: ") + encounterText->getName());
     textUpload.setFileType(DMHelper::FileType_Text);
-    _dependencies.append(textUpload);
     QByteArray textHash = getDataMD5(textUpload.getData().toUtf8());
-    textElement.setAttribute(QString("text"), QString::fromUtf8(textHash));
+    textUpload.setMD5(QString::fromUtf8(textHash));
+    _dependencies.append(textUpload);
+    textElement.setAttribute(QString("text"), textUpload.getMD5());
 
-    QByteArray translatedHash;
+    UploadObject translateUpload;
     if((encounterText->getTranslated()) && (!encounterText->getTranslatedText().isEmpty()))
     {
-        UploadObject translateUpload;
         translateUpload.setData(encounterText->getTranslatedText());
         translateUpload.setDescription(QString("Translated Text: ") + encounterText->getName());
         textUpload.setFileType(DMHelper::FileType_Text);
+        QByteArray translatedHash = getDataMD5(translateUpload.getData().toUtf8());
+        translateUpload.setMD5(QString::fromUtf8(translatedHash));
         _dependencies.append(translateUpload);
-        translatedHash = getDataMD5(translateUpload.getData().toUtf8());
     }
-    textElement.setAttribute(QString("translated-text"), QString::fromUtf8(translatedHash));
+    textElement.setAttribute(QString("translated-text"), translateUpload.getMD5());
 
     doc.appendChild(textElement);
 
     QString encounterPayload = doc.toString();
     encounterPayload.remove(QString("\n"));
     _payload.setData(encounterPayload);
-    qDebug() << "[NetworkController] Prepared encounter text with text hash: " << textHash << " and translated hash: " << translatedHash;
+    qDebug() << "[NetworkController] Prepared encounter text with text hash: " << textUpload.getMD5() << " and translated hash: " << translateUpload.getMD5();
 
     return true;
 }
@@ -871,12 +895,12 @@ bool NetworkController::isAlreadyUploaded(const QString& md5)
     return _uploadedFiles.contains(md5);
 }
 
-void NetworkController::registerUpload(const QString& md5)
+void NetworkController::registerUpload(const QString& md5, const QString& uuid)
 {
     if((md5.isEmpty()) || (_uploadedFiles.contains(md5)))
         return;
 
-    _uploadedFiles.append(md5);
+    _uploadedFiles.insert(md5, uuid);
 }
 
 QByteArray NetworkController::getFileMD5(const QString& filename)

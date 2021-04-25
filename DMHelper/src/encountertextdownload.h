@@ -14,10 +14,10 @@ public:
     bool isComplete();
 
 public slots:
-    virtual void fileReceived(const QString& md5String, const QByteArray& data);
+    virtual void fileReceived(const QString& md5, const QString& uuid, const QByteArray& data);
 
 signals:
-    void requestFile(const QString& md5String, int fileType);
+    void requestFile(const QString& md5, const QString& uuid, int fileType);
     void encounterComplete();
 
 protected:

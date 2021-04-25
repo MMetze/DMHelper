@@ -1,9 +1,43 @@
 #include "battledialogmodelcombatantdownload.h"
-#include "combatantdownload.h"
+#include <QDomElement>
+#include <QDebug>
 
-BattleDialogModelCombatantDownload::BattleDialogModelCombatantDownload() :
-    BattleDialogModelCombatant()
+BattleDialogModelCombatantDownload::BattleDialogModelCombatantDownload(QObject *parent) :
+    BattleDialogModelCombatant(QString(), parent),
+    _combatantId(),
+    _sizeFactor(1.0),
+    _conditions(0),
+    _speed(30)
 {
+}
+
+void BattleDialogModelCombatantDownload::inputXML(const QDomElement &element, bool isImport)
+{
+    // Ignored
+    // element.setAttribute("type", getCombatantType());
+
+    // element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
+    _combatantId = QUuid(element.attribute("combatantId", QUuid().toString()));
+    // element.setAttribute("sizeFactor", getSizeFactor());
+    _sizeFactor = element.attribute("sizeFactor", QString::number(0)).toInt();
+    // element.setAttribute("conditions", getConditions());
+    setConditions(element.attribute("conditions", QString::number(0)).toInt());
+    // element.setAttribute("name", getName());
+    setName(element.attribute("name"));
+
+    // element.setAttribute("initiative", _initiative);
+    // element.setAttribute("positionX", _position.x());
+    // element.setAttribute("positionY", _position.y());
+    // element.setAttribute("isShown", _isShown);
+    /*
+     Covers
+     _initiative = element.attribute("initiative",QString::number(0)).toInt();
+     _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
+                         element.attribute("positionY",QString::number(0)).toDouble());
+     _isShown = static_cast<bool>(element.attribute("isShown",QString::number(1)).toInt());
+     _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(1)).toInt());
+     */
+    BattleDialogModelCombatant::inputXML(element, true);
 }
 
 int BattleDialogModelCombatantDownload::getCombatantType() const
@@ -18,14 +52,7 @@ BattleDialogModelCombatant* BattleDialogModelCombatantDownload::clone() const
 
 qreal BattleDialogModelCombatantDownload::getSizeFactor() const
 {
-    if(_combatant)
-    {
-        CombatantDownload* combatantDownload = dynamic_cast<CombatantDownload*>(_combatant);
-        if(combatantDownload)
-            return combatantDownload->getSizeFactor();
-    }
-
-    return 1.0;
+    return _sizeFactor;
 }
 
 int BattleDialogModelCombatantDownload::getSizeCategory() const
@@ -35,50 +62,32 @@ int BattleDialogModelCombatantDownload::getSizeCategory() const
 
 int BattleDialogModelCombatantDownload::getStrength() const
 {
-    if(_combatant)
-        return _combatant->getStrength();
-    else
-        return 10;
+    return 10;
 }
 
 int BattleDialogModelCombatantDownload::getDexterity() const
 {
-    if(_combatant)
-        return _combatant->getDexterity();
-    else
-        return 10;
+    return 10;
 }
 
 int BattleDialogModelCombatantDownload::getConstitution() const
 {
-    if(_combatant)
-        return _combatant->getConstitution();
-    else
-        return 10;
+    return 10;
 }
 
 int BattleDialogModelCombatantDownload::getIntelligence() const
 {
-    if(_combatant)
-        return _combatant->getIntelligence();
-    else
-        return 10;
+    return 10;
 }
 
 int BattleDialogModelCombatantDownload::getWisdom() const
 {
-    if(_combatant)
-        return _combatant->getWisdom();
-    else
-        return 10;
+    return 10;
 }
 
 int BattleDialogModelCombatantDownload::getCharisma() const
 {
-    if(_combatant)
-        return _combatant->getCharisma();
-    else
-        return 10;
+    return 10;
 }
 
 int BattleDialogModelCombatantDownload::getSkillModifier(Combatant::Skills skill) const
@@ -87,42 +96,34 @@ int BattleDialogModelCombatantDownload::getSkillModifier(Combatant::Skills skill
     return 0;
 }
 
+int BattleDialogModelCombatantDownload::getConditions() const
+{
+    return _conditions;
+}
+
 bool BattleDialogModelCombatantDownload::hasCondition(Combatant::Condition condition) const
 {
-    if(_combatant)
-        return _combatant->hasCondition(condition);
-    else
-        return false;
+    return ((_conditions & condition) != 0);
 }
 
 int BattleDialogModelCombatantDownload::getSpeed() const
 {
-    if(_combatant)
-        return _combatant->getSpeed();
-    else
-        return 30;
+    return _speed;
 }
 
 int BattleDialogModelCombatantDownload::getArmorClass() const
 {
-    if(_combatant)
-        return _combatant->getArmorClass();
-    else
-        return 10;
+    return 10;
 }
 
 int BattleDialogModelCombatantDownload::getHitPoints() const
 {
-    if(_combatant)
-        return _combatant->getHitPoints();
-    else
-        return 1;
+    return 1;
 }
 
 void BattleDialogModelCombatantDownload::setHitPoints(int hitPoints)
 {
-    if(_combatant)
-        _combatant->setHitPoints(hitPoints);
+    Q_UNUSED(hitPoints);
 }
 
 QPixmap BattleDialogModelCombatantDownload::getIconPixmap(DMHelper::PixmapSize iconSize) const
@@ -134,18 +135,18 @@ QPixmap BattleDialogModelCombatantDownload::getIconPixmap(DMHelper::PixmapSize i
 
 void BattleDialogModelCombatantDownload::setConditions(int conditions)
 {
-    if(_combatant)
-        _combatant->setConditions(conditions);
+    if(_conditions != conditions)
+        _conditions = conditions;
 }
 
 void BattleDialogModelCombatantDownload::applyConditions(int conditions)
 {
-    if(_combatant)
-        _combatant->applyConditions(conditions);
+    if((_conditions & conditions) != conditions)
+        _conditions |= conditions;
 }
 
 void BattleDialogModelCombatantDownload::removeConditions(int conditions)
 {
-    if(_combatant)
-        _combatant->removeConditions(conditions);
+    if((_conditions & ~conditions) != _conditions)
+        _conditions &= ~conditions;
 }

@@ -11,6 +11,7 @@
 #include <QObject>
 #include <QImage>
 #include <QPixmap>
+#include <QMap>
 
 class AudioTrack;
 class DMHNetworkManager;
@@ -54,8 +55,8 @@ public slots:
     void setNetworkLogin(const QString& urlString, const QString& username, const QString& password, const QString& sessionID, const QString& inviteID);
 
 private slots:
-    void uploadCompleted(int requestID, const QString& fileMD5);
-    void existsCompleted(int requestID, const QString& fileMD5, const QString& filename, bool exists);
+    void uploadCompleted(int requestID, const QString& fileMD5, const QString& fileUuid);
+    void existsCompleted(int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
     void uploadError(int requestID);
     void uploadPayload();
 
@@ -76,7 +77,7 @@ private slots:
     bool validateLogon(const DMHLogon& logon);
 
     bool isAlreadyUploaded(const QString& md5);
-    void registerUpload(const QString& md5);
+    void registerUpload(const QString& md5, const QString& uuid);
     QByteArray getFileMD5(const QString& filename);
     QByteArray getDataMD5(const QByteArray& data);
 
@@ -90,7 +91,7 @@ private:
     UploadObject _fowUpload;
     QString _backgroundColor;
     QList<UploadObject> _dependencies;
-    QStringList _uploadedFiles;
+    QMap<QString, QString> _uploadedFiles;
     bool _enabled;
 };
 

@@ -1,5 +1,7 @@
 #include "encounterbattledownload.h"
 #include "battledialogmodel.h"
+#include "battledialogmodeleffectfactory.h"
+#include "battledialogmodelcombatantdownload.h"
 
 EncounterBattleDownload::EncounterBattleDownload(const QString& cacheDirectory, QObject *parent) :
     EncounterBattle(QString(), parent),
@@ -10,20 +12,20 @@ EncounterBattleDownload::EncounterBattleDownload(const QString& cacheDirectory, 
 
 void EncounterBattleDownload::inputXML(const QDomElement &element, bool isImport)
 {
-    EncounterBattle::inputXML(element, false);
-    postProcessXML(element, false);
+    Q_UNUSED(isImport);
 
+    EncounterBattle::inputXML(element, true);
+    postProcessXML(element, false);
     inputXMLBattle(element, false);
 }
 
 bool EncounterBattleDownload::isComplete()
 {
-
+    return true;
 }
 
-void EncounterBattleDownload::fileReceived(const QString& md5String, const QByteArray& data)
+void EncounterBattleDownload::fileReceived(const QString& md5, const QString& uuid, const QByteArray& data)
 {
-
     if(isComplete())
         emit encounterComplete();
 }
@@ -31,7 +33,7 @@ void EncounterBattleDownload::fileReceived(const QString& md5String, const QByte
 void EncounterBattleDownload::inputXMLBattle(const QDomElement &element, bool isImport)
 {
     if((_battleModel)||(isImport))
-                return;
+        return;
 
     /*
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
@@ -41,7 +43,6 @@ void EncounterBattleDownload::inputXMLBattle(const QDomElement &element, bool is
 
     QDomElement rootBattleElement = element.firstChildElement("battle");
     if(rootBattleElement.isNull())
-        return;
     {
         _battleModel = createNewBattle(QPointF(0.0, 0.0));
         return;
@@ -74,62 +75,13 @@ void EncounterBattleDownload::inputXMLBattle(const QDomElement &element, bool is
         QDomElement combatantElement = combatantsElement.firstChildElement();
         while(!combatantElement.isNull())
         {
-            BattleDialogModelCombatant* combatant = nullptr;
-            int combatantIntId = DMH_GLOBAL_INVALID_ID;
-            QUuid combatantId;
-            int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
-            if(combatantType == DMHelper::CombatantType_Character)
+            BattleDialogModelCombatantDownload* combatant = new BattleDialogModelCombatantDownload(this);
+            combatant->inputXML(combatantElement, false);
+            _battleModel->appendCombatant(combatant);
+            if( ((!activeId.isNull()) && (combatant->getID() == activeId)) ||
+                (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
             {
-                combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId);
-                Character* character = campaign->getCharacterById(combatantId);
-                if(!character)
-                    character = campaign->getNPCById(combatantId);
-
-                if(character)
-                    combatant = new BattleDialogModelCharacter(character);
-                else
-                    qDebug() << "[Battle Dialog Manager] Unknown character ID type found: " << combatantId;
-            }
-            else if(combatantType == DMHelper::CombatantType_Monster)
-            {
-                int monsterType = combatantElement.attribute("monsterType",QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
-                if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Combatant)
-                {
-                    combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId, true);
-                    Monster* monster = dynamic_cast<Monster*>(getCombatantById(combatantId, combatantIntId));
-                    if(monster)
-                        combatant = new BattleDialogModelMonsterCombatant(monster);
-                    else
-                        qDebug() << "[Battle Dialog Manager] Unknown monster ID type found: " << combatantId << " for battle";// " << battleId;
-                }
-                else if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Class)
-                {
-                    QString monsterClassName = combatantElement.attribute("monsterClass");
-                    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterClassName);
-                    if(monsterClass)
-                        combatant = new BattleDialogModelMonsterClass(monsterClass);
-                    else
-                        qDebug() << "[Battle Dialog Manager] Unknown monster class type found: " << monsterClassName;
-                }
-                else
-                {
-                    qDebug() << "[Battle Dialog Manager] Invalid monster type found: " << monsterType;
-                }
-            }
-            else
-            {
-                qDebug() << "[Battle Dialog Manager] Invalid combatant type found: " << combatantType;
-            }
-
-            if(combatant)
-            {
-                combatant->inputXML(combatantElement, isImport);
-                _battleModel->appendCombatant(combatant);
-                if( ((!activeId.isNull()) && (combatant->getID() == activeId)) ||
-                    (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
-                {
-                    _battleModel->setActiveCombatant(combatant);
-                }
+                _battleModel->setActiveCombatant(combatant);
             }
 
             combatantElement = combatantElement.nextSiblingElement();
@@ -141,5 +93,25 @@ void EncounterBattleDownload::inputXMLBattle(const QDomElement &element, bool is
 
 void EncounterBattleDownload::inputXMLEffects(const QDomElement &parentElement, bool isImport)
 {
+    if(parentElement.isNull())
+        return;
 
+    QDomElement effectElement = parentElement.firstChildElement();
+    while(!effectElement.isNull())
+    {
+        BattleDialogModelEffect* newEffect = BattleDialogModelEffectFactory::createEffect(effectElement, isImport);
+        if(newEffect)
+        {
+            QDomElement effectChildElement = effectElement.firstChildElement();
+            if(!effectChildElement.isNull())
+            {
+                BattleDialogModelEffect* childEffect = BattleDialogModelEffectFactory::createEffect(effectChildElement, isImport);
+                if(childEffect)
+                    newEffect->addObject(childEffect);
+            }
+            _battleModel->appendEffect(newEffect);
+        }
+
+        effectElement = effectElement.nextSiblingElement();
+    }
 }

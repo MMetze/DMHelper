@@ -31,11 +31,11 @@ signals:
     void imageActive(QImage pixmap);
     void trackActive(AudioTrack* track);
 
-    void fileRequestStarted(int requestId, const QString& fileMD5);
-    void fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data);
+    void fileRequestStarted(int requestId, const QString& fileMD5, const QString& fileUuid);
+    void fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
 
 public slots:
-    void downloadComplete(int requestID, const QString& fileMD5, const QByteArray& data);
+    void downloadComplete(int requestID, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
     void payloadReceived(const DMHPayload& payload, const QString& timestamp);
 
     void connectServer(bool connect);
@@ -44,7 +44,7 @@ public slots:
     void startServer();
     void stopServer();
 
-    void fileRequested(const QString& md5String);
+    void fileRequested(const QString& md5, const QString& uuid);
     void fileAborted(int requestID);
     void targetResized(const QSize& newSize);
 

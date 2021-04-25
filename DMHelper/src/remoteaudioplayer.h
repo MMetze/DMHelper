@@ -19,11 +19,11 @@ public:
     void parseAudioString(const QString& audioString);
 
 public slots:
-    void fileRequestStarted(int requestId, const QString& fileMD5);
-    void fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data);
+    void fileRequestStarted(int requestId, const QString& fileMD5, const QString& fileUuid);
+    void fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
 
 signals:
-    void requestFile(const QString& md5String);
+    void requestFile(const QString& md5String, const QString& uuid);
 
 private:
     void setChecked(bool checked);
@@ -54,7 +54,7 @@ public:
     void setChecked(bool checked);
 
 signals:
-    void requestFile(const QString& md5String);
+    void requestFile(const QString& md5String, const QString& uuid);
 
 private:
     AudioTrack* _track;

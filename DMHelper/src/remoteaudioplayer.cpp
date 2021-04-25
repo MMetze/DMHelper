@@ -63,13 +63,14 @@ void RemoteAudioPlayer::parseAudioString(const QString& audioString)
     clearUnchecked();
 }
 
-void RemoteAudioPlayer::fileRequestStarted(int requestId, const QString& fileMD5)
+void RemoteAudioPlayer::fileRequestStarted(int requestId, const QString& fileMD5, const QString& fileUuid)
 {
     Q_UNUSED(requestId);
     Q_UNUSED(fileMD5);
+    Q_UNUSED(fileUuid);
 }
 
-void RemoteAudioPlayer::fileRequestCompleted(int requestId, const QString& fileMD5, const QByteArray& data)
+void RemoteAudioPlayer::fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data)
 {
     Q_UNUSED(requestId);
 
@@ -81,7 +82,7 @@ void RemoteAudioPlayer::fileRequestCompleted(int requestId, const QString& fileM
         {
             AudioTrackFileDownload* downloadTrack = dynamic_cast<AudioTrackFileDownload*>(_tracks[i]);
             if(downloadTrack)
-                downloadTrack->fileReceived(fileMD5, data);
+                downloadTrack->fileReceived(fileMD5, fileUuid, data);
         }
     }
 }
