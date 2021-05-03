@@ -54,6 +54,7 @@ public slots:
 
     void setCurrentInvite(const QString& invite);
     void addInvite(const QString& invite, const QString& inviteName);
+    void changeInviteValue(const QString& oldInvite, const QString& newInvite);
     void setInviteName(const QString& invite, const QString& inviteName);
     void removeInvite(const QString& invite);
 
@@ -74,7 +75,6 @@ private:
     //QString _session;
     QString _currentInvite;
     QMap<QString, QString> _invites;
-
 
     // File settings
     QString _cacheDirectory;

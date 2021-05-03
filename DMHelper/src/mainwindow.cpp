@@ -763,12 +763,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
-    _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getPassword(), _options->getCurrentSession(), QString());
+    _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getUserId(), _options->getPassword(), _options->getCurrentSession(), QString());
     //connect(_networkController, &NetworkController::requestSettings, _options, &OptionsContainer::editSettings);
     connect(_networkController, &NetworkController::requestSettings, this, &MainWindow::editNetworkSettings);
     connect(_networkController, &NetworkController::networkEnabledChanged, _options, &OptionsContainer::setNetworkEnabled);
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
-    connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
+    connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString,QString)));
     //_networkController->enableNetworkController(_options->getNetworkEnabled());
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));

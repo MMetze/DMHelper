@@ -39,6 +39,21 @@ private:
 
 
 
+
+
+class DMHNetworkData_DM_Push_Private : public DMHNetworkData_Private_Base
+{
+public:
+    explicit DMHNetworkData_DM_Push_Private(QDomElement data);
+    virtual ~DMHNetworkData_DM_Push_Private() override {}
+
+protected:
+
+};
+
+
+
+
 class DMHNetworkData_Payload_Private : public DMHNetworkData_Private_Base
 {
 public:
@@ -52,6 +67,8 @@ protected:
     DMHPayload _payload;
     QString _timestamp;
 };
+
+
 
 
 
@@ -268,5 +285,34 @@ public:
 protected:
     QString _data;
 };
+
+
+
+
+
+
+
+class DMHNetworkData_UserInfo_Private : public DMHNetworkData_Private_Base
+{
+public:
+    explicit DMHNetworkData_UserInfo_Private(QDomElement data);
+    virtual ~DMHNetworkData_UserInfo_Private() override {}
+
+    QString getUserId() const;
+    QString getUsername() const;
+    QString getMail() const;
+    QString getSurname() const;
+    QString getForename() const;
+    bool getDisabled() const;
+
+protected:
+    QString _userId;
+    QString _username;
+    QString _mail;
+    QString _surname;
+    QString _forename;
+    bool _disabled;
+};
+
 
 #endif // DMHNETWORKDATA_PRIVATE_H

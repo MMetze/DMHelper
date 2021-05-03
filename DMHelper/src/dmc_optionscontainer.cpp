@@ -82,6 +82,7 @@ void DMC_OptionsContainer::readSettings()
 
     setURLString(settings.value("url","").toString());
     setUserName(settings.value("username","").toString());
+    setUserId(settings.value("userid","").toString());
     setSavePassword(settings.value("savePassword",QVariant(false)).toBool());
     setPassword(settings.value("password","").toString());
 
@@ -118,6 +119,7 @@ void DMC_OptionsContainer::writeSettings()
 
     settings.setValue("url", getURLString());
     settings.setValue("username", getUserName());
+    settings.setValue("userid", getUserId());
     settings.setValue("savePassword", getSavePassword());
     if(getSavePassword())
         settings.setValue("password", getPassword());
@@ -202,6 +204,19 @@ void DMC_OptionsContainer::addInvite(const QString& invite, const QString& invit
 
     _invites.insert(invite, inviteName);
     emit inviteChanged(invite, inviteName);
+}
+
+void DMC_OptionsContainer::changeInviteValue(const QString& oldInvite, const QString& newInvite)
+{
+    if((oldInvite.isEmpty()) || (newInvite.isEmpty()) || (!_invites.contains(oldInvite)) || (_invites.contains(newInvite)))
+        return;
+
+    QString inviteName = _invites.value(oldInvite);
+    _invites.insert(newInvite, inviteName);
+    _invites.remove(oldInvite);
+
+    emit inviteChanged(oldInvite, QString());
+    emit inviteChanged(newInvite, inviteName);
 }
 
 void DMC_OptionsContainer::setInviteName(const QString& invite, const QString& inviteName)

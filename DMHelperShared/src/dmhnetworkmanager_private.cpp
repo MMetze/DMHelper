@@ -47,7 +47,7 @@ void DMHNetworkManager_Private::uploadPayload(const DMHPayload& payload)
     qDebug() << "[DMHNetworkManager] Uploading payload. Image: " << payload.getImageFile() << ", Audio: " << payload.getAudioFile();
 
     QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
     QString payloadString = payload.toString();
@@ -61,7 +61,11 @@ void DMHNetworkManager_Private::uploadPayload(const DMHPayload& payload)
     emit DEBUG_message_contents(postDataArray);
 #endif
 
-    _manager->post(request, postDataArray);
+    QNetworkReply* reply = _manager->post(request, postDataArray);
+    int replyId = getRequestId(false);
+    _replies.insert(reply, replyId);
+
+    qDebug() << "[DMHNetworkManager] Upload payload request sent for session: " << _logon.getSession() << " with ID " << replyId;
 }
 
 int DMHNetworkManager_Private::uploadFile(const QString& filename)
@@ -105,7 +109,7 @@ int DMHNetworkManager_Private::fileExists(const QString& fileMD5, const QString&
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("action", "exists");
     postData.addQueryItem("fileids[]", fileMD5);
@@ -133,7 +137,7 @@ int DMHNetworkManager_Private::uploadData(const QByteArray& data)
     QHttpPart userNamePart;
     //userNamePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
     userNamePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"user\""));
-    userNamePart.setBody(_logon.getUserName().toUtf8());
+    userNamePart.setBody(_logon.getUserId().toUtf8());
     multiPart->append(userNamePart);
 
     QHttpPart passwordPart;
@@ -181,8 +185,10 @@ int DMHNetworkManager_Private::downloadFile(const QString& md5, const QString& u
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
+    //postData.addQueryItem("user", "c.turner");
+    //postData.addQueryItem("password", "Ente2020");
     postData.addQueryItem("action", "pull");
     //postData.addQueryItem("files[][md5]", md5);
     postData.addQueryItem("fileids[]", uuid);
@@ -285,17 +291,16 @@ int DMHNetworkManager_Private::createUser(const QString& username, const QString
     return replyId;
 }
 
-int DMHNetworkManager_Private::joinSession(const QString& invite)
+int DMHNetworkManager_Private::getUserInfo()
 {
-    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/ssn_ass.php"));
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/usr_mng.php"));
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
     postData.addQueryItem("user", _logon.getUserName());
     postData.addQueryItem("password", _logon.getPassword());
-    postData.addQueryItem("action", "join");
-    postData.addQueryItem("code", invite);
+    postData.addQueryItem("action", "info");
 
 #ifdef QT_DEBUG
     emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
@@ -306,9 +311,34 @@ int DMHNetworkManager_Private::joinSession(const QString& invite)
     int replyId = getRequestId(true);
     _replies.insert(reply, replyId);
 
-    qDebug() << "[DMHNetworkManager] Join session request sent with ID " << replyId << " for username: " << _logon.getUserName()<< " with invite: " << invite;
+    qDebug() << "[DMHNetworkManager] Get user info request sent with ID " << replyId << " for username: " << _logon.getUserName();
 
-    emit joinSessionStarted(replyId, reply, _logon.getUserName(), invite);
+    return replyId;
+}
+
+int DMHNetworkManager_Private::joinSession(const QString& invite)
+{
+    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/ssn_ass.php"));
+    QNetworkRequest request(serviceUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+
+    QUrlQuery postData;
+    postData.addQueryItem("user", _logon.getUserId());
+    postData.addQueryItem("password", _logon.getPassword());
+    postData.addQueryItem("action", "join");
+    postData.addQueryItem("code", invite);
+
+#ifdef QT_DEBUG
+    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+#endif
+
+    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    int replyId = getRequestId(true);
+    _replies.insert(reply, replyId);
+
+    qDebug() << "[DMHNetworkManager] Join session request sent with ID " << replyId << " for username: " << _logon.getUserName() << " for User ID: " << _logon.getUserId()<< " with invite: " << invite;
+
+    emit joinSessionStarted(replyId, reply, _logon.getUserId(), invite);
 
     return replyId;
 }
@@ -320,9 +350,9 @@ int DMHNetworkManager_Private::sendMessage(const QString& message, const QString
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
-    //postData.addQueryItem("user", _logon.getUserId());
+    postData.addQueryItem("user", _logon.getUserId());
     // TODO : replace hard-coded string with real userId!!
-    postData.addQueryItem("user", QString("44C79028-2817-4F60-A0D2-ED88B62D895D"));
+    //postData.addQueryItem("user", QString("44C79028-2817-4F60-A0D2-ED88B62D895D"));
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
     postData.addQueryItem("action", "send");
@@ -358,7 +388,7 @@ int DMHNetworkManager_Private::pollMessages()
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
     postData.addQueryItem("action", "poll");
@@ -384,7 +414,7 @@ int DMHNetworkManager_Private::ackMessages()
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
     postData.addQueryItem("action", "ack");
@@ -458,7 +488,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
 
     QByteArray bytes = reply->readAll();
     //qDebug() << "[DMHNetworkManager] Request with ID " << replyData << "received; payload " << bytes.size() << " bytes";
-    qDebug() << "[DMHNetworkManager] Payload contents: " << QString(bytes.left(2000));
+    qDebug() << "[DMHNetworkManager] Payload contents: " << QString(bytes.left(1000));
 
 #ifdef QT_DEBUG
     emit DEBUG_response_contents(bytes.left(2000));
@@ -474,15 +504,15 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
     DMHNetworkDataFactory factory(bytes);
     if(factory.getStateValue() == DMHShared::DMH_Message_State_Error)
     {
-        qDebug() << "[DMHNetworkManager] Error in server response: " << factory.getErrorString();
+        qDebug() << "[DMHNetworkManager] Error in server response for request: " << replyData << ": " << factory.getErrorString();
         emit messageError(replyData, factory.getErrorString());
         return;
     }
 
     std::unique_ptr<DMHNetworkData>& factoryData = factory.getData();
-    if((!factoryData) || ((factory.getModeValue() != DMHShared::DMH_Message_file_exists) && (!factoryData->isValid())))
+    if((!factoryData) || (!factoryData->isValid()))
     {
-        qDebug() << "[DMHNetworkManager] ERROR identified reading raw data: parsed raw data is invalid.";
+        qDebug() << "[DMHNetworkManager] ERROR identified reading raw data: parsed raw data is invalid for request: " << replyData;
         emit requestError(replyData);
         return;
     }
@@ -570,25 +600,38 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
                 qDebug() << "[DMHNetworkManager] Message Ack Received. Session: " << messageNetworkData.getData();
                 emit ackMessageComplete(replyData, messageNetworkData.getData());
             }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_usr_info)
+            {
+                DMHNetworkData_UserInfo& userInfoNetworkData = dynamic_cast<DMHNetworkData_UserInfo&>(*factoryData);
+                qDebug() << "[DMHNetworkManager] User Info Received. Session: " << userInfoNetworkData.getUsername() << ", User ID: " << userInfoNetworkData.getUserId() << ", Email: " << userInfoNetworkData.getMail() << ", Surname: " << userInfoNetworkData.getSurname() << ", Forename: " << userInfoNetworkData.getForename() << ", Disabled: " << userInfoNetworkData.getDisabled();
+                emit userInfoComplete(replyData, userInfoNetworkData.getUsername(), userInfoNetworkData.getUserId(), userInfoNetworkData.getMail(), userInfoNetworkData.getSurname(), userInfoNetworkData.getForename(), userInfoNetworkData.getDisabled());
+            }
             else
             {
                 qDebug() << "[DMHNetworkManager] ERROR identified reading download data: unable to identify data from download.";
                 emit requestError(replyData);
-                return;
             }
         }
         else
         {
-            if(factory.getModeValue() != DMHShared::DMH_Message_file_push)
+            if(factory.getModeValue() == DMHShared::DMH_Message_file_push)
+            {
+                DMHNetworkData_Upload& uploadNetworkData = dynamic_cast<DMHNetworkData_Upload&>(*factoryData);
+                qDebug() << "[DMHNetworkManager] Upload Complete. Filename: " << uploadNetworkData.getName() << ", md5: " << uploadNetworkData.getMD5() << ", uuid: " << uploadNetworkData.getUuid();
+                emit uploadComplete(replyData, uploadNetworkData.getMD5(), uploadNetworkData.getUuid());
+            }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_dm_push)
+            {
+                DMHNetworkData_DM_Push& uploadDMPushData = dynamic_cast<DMHNetworkData_DM_Push&>(*factoryData);
+                Q_UNUSED(uploadDMPushData);
+                qDebug() << "[DMHNetworkManager] Upload Payload Complete";
+                //emit uploadComplete(replyData, uploadNetworkData.getMD5(), uploadNetworkData.getUuid());
+            }
+            else
             {
                 qDebug() << "[DMHNetworkManager] ERROR identified reading raw data: unable to identify data from upload.";
                 emit requestError(replyData);
-                return;
             }
-
-            DMHNetworkData_Upload& uploadNetworkData = dynamic_cast<DMHNetworkData_Upload&>(*factoryData);
-            qDebug() << "[DMHNetworkManager] Upload Complete. Filename: " << uploadNetworkData.getName() << ", md5: " << uploadNetworkData.getMD5() << ", uuid: " << uploadNetworkData.getUuid();
-            emit uploadComplete(replyData, uploadNetworkData.getMD5(), uploadNetworkData.getUuid());
         }
     }
     catch(const std::bad_cast&)
@@ -645,7 +688,7 @@ int DMHNetworkManager_Private::sendSessionMgmt(const QString& action, const QStr
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserName());
+    postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("action", action);
     postData.addQueryItem("session", session.isEmpty() ? _logon.getSession() : session);
@@ -661,7 +704,7 @@ int DMHNetworkManager_Private::sendSessionMgmt(const QString& action, const QStr
     _replies.insert(reply, replyId);
 
     if(action != QString("member"))
-        qDebug() << "[DMHNetworkManager] Session management request sent: " << action << " with ID " << replyId << " for session " << session << " with name " << sessionName;
+        qDebug() << "[DMHNetworkManager] Session management request sent: " << action << " with ID " << replyId << " for session " << session << " with name " << sessionName << ". User ID " << _logon.getUserId();
 
     emit sessionMgmtStarted(replyId, reply, action, session, sessionName);
 

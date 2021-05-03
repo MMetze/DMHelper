@@ -8,6 +8,7 @@
 
 class QString;
 class DMHNetworkData_Private;
+class DMHNetworkData_DM_Push_Private;
 class DMHNetworkData_Payload_Private;
 class DMHNetworkData_Raw_Private;
 class DMHNetworkData_Upload_Private;
@@ -21,6 +22,7 @@ class DMHNetworkData_SessionMembers_Private;
 class DMHNetworkData_CreateUser_Private;
 class DMHNetworkData_JoinSession_Private;
 class DMHNetworkData_Message_Private;
+class DMHNetworkData_UserInfo_Private;
 
 
 //class DMHSHARED_EXPORT DMHNetworkData
@@ -37,6 +39,25 @@ private:
     DMHNetworkData(const DMHNetworkData& other);
 
     std::unique_ptr<DMHNetworkData_Private> d;
+};
+
+
+
+//class DMHSHARED_EXPORT DMHNetworkData_Payload : public DMHNetworkData
+class DMHNetworkData_DM_Push : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_DM_Push(QDomElement data);
+    virtual ~DMHNetworkData_DM_Push() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_DM_Push(const DMHNetworkData_DM_Push& other);
+
+    std::unique_ptr<DMHNetworkData_DM_Push_Private> d;
 };
 
 
@@ -346,5 +367,37 @@ private:
 
     std::unique_ptr<DMHNetworkData_Message_Private> d;
 };
+
+
+
+
+
+
+
+
+
+class DMHNetworkData_UserInfo : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_UserInfo(QDomElement data);
+    virtual ~DMHNetworkData_UserInfo() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getUserId() const;
+    QString getUsername() const;
+    QString getMail() const;
+    QString getSurname() const;
+    QString getForename() const;
+    bool getDisabled() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_UserInfo(const DMHNetworkData_UserInfo& other);
+
+    std::unique_ptr<DMHNetworkData_UserInfo_Private> d;
+};
+
 
 #endif // DMHNETWORKDATA_H

@@ -79,7 +79,7 @@ public:
 
 public slots:
     void getFile();
-    void fileReceived(const QString& md5, const QString& uuid, const QString& cacheDirectory, const QByteArray& data);
+    bool fileReceived(int requestID, const QString& md5, const QString& uuid, const QString& cacheDirectory, const QByteArray& data);
 
 signals:
     void requestFile(const QString& md5, const QString& uuid);

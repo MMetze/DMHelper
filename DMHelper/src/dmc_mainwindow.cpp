@@ -101,9 +101,7 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
 
     QScreen* screen = QGuiApplication::primaryScreen();
     if(screen)
-    {
         resize(screen->availableSize().width() * 4 / 5, screen->availableSize().height() * 4 / 5);
-    }
 
     qDebug() << "[Main] Main Initialization complete";
 }
@@ -129,6 +127,8 @@ void DMC_MainWindow::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblOptions, *ui->btnOptions, frameHeight);
     setStandardButtonSize(*ui->lblExit, *ui->btnExit, frameHeight);
 
+    qDebug() << "[Main] Showing Main Window size sizes: " << ui->frame->size() << ui->lblImage->size();
+    _serverConnection->targetResized(ui->lblImage->size());
     updatePixmap();
 }
 

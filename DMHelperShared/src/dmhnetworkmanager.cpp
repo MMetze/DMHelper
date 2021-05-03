@@ -17,6 +17,7 @@ DMHNetworkManager::DMHNetworkManager(const DMHLogon& logon, QObject *parent) :
     connect(&(*d), SIGNAL(closeSessionComplete(int, const QString&)), this, SIGNAL(closeSessionComplete(int, const QString&)));
     connect(&(*d), SIGNAL(createUserStarted(int, QNetworkReply*, const QString&, const QString&, const QString&)), this, SIGNAL(createUserStarted(int, QNetworkReply*, const QString&, const QString&, const QString&)));
     connect(&(*d), SIGNAL(createUserComplete(int, const QString&, const QString&, const QString&)), this, SIGNAL(createUserComplete(int, const QString&, const QString&, const QString&)));
+    connect(&(*d), SIGNAL(userInfoComplete(int, const QString&, const QString&, const QString&, const QString&, const QString&, bool)), this, SIGNAL(userInfoComplete(int, const QString&, const QString&, const QString&, const QString&, const QString&, bool)));
     connect(&(*d), SIGNAL(joinSessionStarted(int, QNetworkReply*, const QString&, const QString&)), this, SIGNAL(joinSessionStarted(int, QNetworkReply*, const QString&, const QString&)));
     connect(&(*d), SIGNAL(joinSessionComplete(int, const QString&)), this, SIGNAL(joinSessionComplete(int, const QString&)));
     connect(&(*d), SIGNAL(sessionMembersComplete(int, const QString&, const QString&)), this, SIGNAL(sessionMembersComplete(int, const QString&, const QString&)));
@@ -102,6 +103,11 @@ int DMHNetworkManager::getSessionMembers(const QString & session)
 int DMHNetworkManager::createUser(const QString& username, const QString& password, const QString& email, const QString& screenName)
 {
     return d->createUser(username, password, email, screenName);
+}
+
+int DMHNetworkManager::getUserInfo()
+{
+    return d->getUserInfo();
 }
 
 int DMHNetworkManager::joinSession(const QString& invite)

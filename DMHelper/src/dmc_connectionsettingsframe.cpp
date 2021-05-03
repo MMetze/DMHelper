@@ -2,7 +2,7 @@
 #include "ui_dmc_connectionsettingsframe.h"
 #include "dmc_optionscontainer.h"
 #include "dmc_connectioninviteseditdialog.h"
-#include "dmc_connectionuserdialog.h"
+#include "connectionuserdialog.h"
 #include "dmhnetworkmanager.h"
 #include <QGuiApplication>
 #include <QScreen>
@@ -65,7 +65,7 @@ void DMC_ConnectionSettingsFrame::createUser()
     if(!_settings)
         return;
 
-    DMC_ConnectionUserDialog dlg;
+    ConnectionUserDialog dlg;
     QScreen* primary = QGuiApplication::primaryScreen();
     if(primary)
         dlg.resize(primary->availableSize().width() / 4, primary->availableSize().height() / 3);
@@ -118,6 +118,7 @@ void DMC_ConnectionSettingsFrame::editInvites()
         return;
 
     DMC_ConnectionInvitesEditDialog dlg(*_settings);
+    dlg.resize(width(), height() * 2);
     dlg.exec();
     populateInvites();
 }

@@ -23,7 +23,7 @@ DMHNetworkDataFactory::DMHNetworkDataFactory(const QByteArray& data) :
     //      ((dataFromPercent.front() == '\n') || (dataFromPercent.front() == ' ')))
     //    dataFromPercent.remove(0, 1);
 
-    qDebug() << "[DMHNetworkDataFactory] Data contents: " << dataFromPercent;
+    //qDebug() << "[DMHNetworkDataFactory] Data contents: " << dataFromPercent;
 
     QString errorMsg;
     int errorLine;
@@ -139,6 +139,9 @@ bool DMHNetworkDataFactory::readDataElement()
 {
     switch(_modeValue)
     {
+        case DMHShared::DMH_Message_dm_push:
+            _data.reset(new DMHNetworkData_DM_Push(_dataElement));
+            return _data->isValid();
         case DMHShared::DMH_Message_pl_pull:
             _data.reset(new DMHNetworkData_Payload(_dataElement));
             return _data->isValid();
@@ -183,6 +186,9 @@ bool DMHNetworkDataFactory::readDataElement()
             return _data->isValid();
         case DMHShared::DMH_Message_msg_ack:
             _data.reset(new DMHNetworkData_Message(_dataElement));
+            return _data->isValid();
+        case DMHShared::DMH_Message_usr_info:
+            _data.reset(new DMHNetworkData_UserInfo(_dataElement));
             return _data->isValid();
         case DMHShared::DMH_Message_ERROR:
             qDebug() << "[NetworkDataFactory] Error message received: " << getErrorString();

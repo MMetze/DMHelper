@@ -25,6 +25,7 @@ DMHLogon& DMHLogon::operator=(const DMHLogon& other)
 {
     setURLString(other.getURLString());
     setUserName(other.getUserName());
+    setUserId(other.getUserId());
     setPassword(other.getPassword());
     setSession(other.getSession());
     return *this;
@@ -87,6 +88,6 @@ void DMHLogon::setSession(const QString& session)
 
 QDebug operator<<(QDebug d, const DMHLogon &logon)
 {
-    d << QString("(DMHLogon: URL: ") << logon.getURLString() << QString(", Username: ") << logon.getUserName() << QString(", Session: ") << logon.getSession() << QString(")");
+    d << QString("(DMHLogon: URL: ") << logon.getURLString() << QString(", Username: ") << logon.getUserName() << QString(", User ID: ") << logon.getUserId() << QString(", Session: ") << logon.getSession() << QString(")");
     return d;
 }

@@ -104,7 +104,7 @@ void DMHNetworkObserver_Private::interpretReply(QNetworkReply* reply)
     }
 
 #ifdef DMH_VERBOSE
-    qDebug() << "[DMHNetworkObserver] Payload contents: " << QString(bytes.left(2000));
+    qDebug() << "[DMHNetworkObserver] Payload contents: " << QString(bytes.left(1000));
 #endif
 
 #ifdef QT_DEBUG

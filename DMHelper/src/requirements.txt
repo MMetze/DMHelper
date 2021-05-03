@@ -142,6 +142,11 @@ NewUser
 44C79028-2817-4F60-A0D2-ED88B62D895D
 asdfasdf1
 
+
+1. Add createuser to DMH
+2. use usr_mng info to get user ID if not known
+
+
 https://www.youtube.com/watch?v=fIuO3RpMvHg
 <image></image><audio>https://www.youtube.com/watch?v=fIuO3RpMvHg</audio><command></command><payload></payload>
 <image>25b939c597a98aa5aba30a09837c7065</image><audio>https://www.youtube.com/watch?v=fIuO3RpMvHg</audio><command></command><payload></payload>

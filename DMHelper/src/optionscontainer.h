@@ -59,6 +59,7 @@ public:
     bool getNetworkEnabled() const;
     QString getURLString() const;
     QString getUserName() const;
+    QString getUserId() const;
     bool getSavePassword() const;
     QString getPassword() const; // note: password will not be stored in settings
     QString getCurrentSession() const;
@@ -106,6 +107,7 @@ signals:
     void networkEnabledChanged(bool enabled);
     void urlStringChanged(const QString& urlString);
     void userNameChanged(const QString& username);
+    void userIdChanged(const QString& userid);
     void savePasswordChanged(bool savePassword);
     void passwordChanged(const QString& password); // note: password will not be stored in settings
     void currentSessionChanged(const QString& session);
@@ -113,7 +115,7 @@ signals:
     void inviteChanged(const QString& session, const QString& invite);
     //void sessionIDChanged(const QString& sessionID);
     //void inviteIDChanged(const QString& inviteID);
-    void networkSettingsChanged(const QString& urlString, const QString& username, const QString& password, const QString& sessionID, const QString& inviteID);
+    void networkSettingsChanged(const QString& urlString, const QString& username, const QString& userId, const QString& password, const QString& sessionID, const QString& inviteID);
 #endif
 
 public slots:
@@ -171,6 +173,7 @@ public slots:
     void setNetworkEnabled(bool enabled);
     void setURLString(const QString& urlString);
     void setUserName(const QString& username);
+    void setUserId(const QString& userId);
     void setSavePassword(bool savePassword);
     void setPassword(const QString& password); // note: password will not be stored in settings
     //void setSessionID(const QString& sessionID);
@@ -235,6 +238,7 @@ private:
     bool _networkEnabled;
     QString _urlString;
     QString _userName;
+    QString _userId;
     bool _savePassword;
     QString _password; // note: password will not be stored in settings
     QString _currentSession;

@@ -13,6 +13,10 @@ DMC_ConnectionInvitesEditDialog::DMC_ConnectionInvitesEditDialog(DMC_OptionsCont
     connect(ui->btnAddInvite, &QAbstractButton::clicked, this, &DMC_ConnectionInvitesEditDialog::addInvite);
     connect(ui->btnRenameInvite, &QAbstractButton::clicked, this, &DMC_ConnectionInvitesEditDialog::renameInvite);
     connect(ui->btnRemoveInvite, &QAbstractButton::clicked, this, &DMC_ConnectionInvitesEditDialog::removeInvite);
+
+    connect(ui->tableWidget, &QTableWidget::itemChanged, this, &DMC_ConnectionInvitesEditDialog::inviteChanged);
+
+    populateInvites();
 }
 
 DMC_ConnectionInvitesEditDialog::~DMC_ConnectionInvitesEditDialog()
@@ -66,6 +70,30 @@ void DMC_ConnectionInvitesEditDialog::removeInvite()
     populateInvites();
 }
 
+void DMC_ConnectionInvitesEditDialog::inviteChanged(QTableWidgetItem *item)
+{
+    if(!item)
+        return;
+
+    switch(item->column())
+    {
+        case 0:
+            _options.setInviteName(item->data(Qt::UserRole).toString(), item->text());
+            break;
+        case 1:
+            {
+                _options.changeInviteValue(item->data(Qt::UserRole).toString(), item->text());
+                item->setData(Qt::UserRole, item->text());
+                QTableWidgetItem* nameItem = ui->tableWidget->item(0, item->row());
+                if(nameItem)
+                    nameItem->setData(Qt::UserRole, item->text());
+                break;
+            }
+        default:
+            break;
+    }
+}
+
 void DMC_ConnectionInvitesEditDialog::populateInvites()
 {
     ui->tableWidget->clear();
@@ -78,10 +106,12 @@ void DMC_ConnectionInvitesEditDialog::populateInvites()
 
         QTableWidgetItem* nameItem = new QTableWidgetItem(_options.getInviteName(invite));
         nameItem->setToolTip(nameItem->text());
+        nameItem->setData(Qt::UserRole, invite);
         ui->tableWidget->setItem(i, 0, nameItem);
 
         QTableWidgetItem* sessionItem = new QTableWidgetItem(invite);
-        nameItem->setToolTip(sessionItem->text());
+        sessionItem->setToolTip(invite);
+        sessionItem->setData(Qt::UserRole, invite);
         ui->tableWidget->setItem(i, 1, sessionItem);
     }
 }

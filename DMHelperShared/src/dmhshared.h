@@ -16,29 +16,30 @@ public:
 
     enum DMH_Message
     {
-        DMH_Message_INVALID = -1,
-        DMH_Message_ERROR,
-        DMH_Message_dm_push,
-        DMH_Message_dm_push_pull,
-        DMH_Message_pl_pull,
-        DMH_Message_pl_pull_push,
-        DMH_Message_ssn_ass,
-        DMH_Message_ssn_create,
-        DMH_Message_ssn_isowner,
-        DMH_Message_ssn_rename,
-        DMH_Message_ssn_remove,
-        DMH_Message_ssn_renew,
-        DMH_Message_ssn_close,
-        DMH_Message_ssn_members,
-        DMH_Message_ssn_general,
-        DMH_Message_file_push,
-        DMH_Message_file_pull,
-        DMH_Message_file_list,
-        DMH_Message_file_exists,
-        DMH_Message_usr_create,
-        DMH_Message_msg_send,
-        DMH_Message_msg_poll,
-        DMH_Message_msg_ack,
+        DMH_Message_INVALID = -1,   // -1
+        DMH_Message_ERROR,          //  0
+        DMH_Message_dm_push,        //  1
+        DMH_Message_dm_push_pull,   //  2
+        DMH_Message_pl_pull,        //  3
+        DMH_Message_pl_pull_push,   //  4
+        DMH_Message_ssn_ass,        //  5
+        DMH_Message_ssn_create,     //  6
+        DMH_Message_ssn_isowner,    //  7
+        DMH_Message_ssn_rename,     //  8
+        DMH_Message_ssn_remove,     //  9
+        DMH_Message_ssn_renew,      // 10
+        DMH_Message_ssn_close,      // 11
+        DMH_Message_ssn_members,    // 12
+        DMH_Message_ssn_general,    // 13
+        DMH_Message_file_push,      // 14
+        DMH_Message_file_pull,      // 15
+        DMH_Message_file_list,      // 16
+        DMH_Message_file_exists,    // 17
+        DMH_Message_usr_create,     // 18
+        DMH_Message_msg_send,       // 19
+        DMH_Message_msg_poll,       // 20
+        DMH_Message_msg_ack,        // 21
+        DMH_Message_usr_info,       // 22
     };
 };
 

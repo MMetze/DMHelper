@@ -41,6 +41,7 @@ public:
 
     // User Management
     int createUser(const QString& username, const QString& password, const QString& email, const QString& screenName);
+    int getUserInfo();
     int joinSession(const QString& invite);
 
     // Communication
@@ -76,6 +77,7 @@ signals:
     // User Management
     void createUserStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& email, const QString& screenName);
     void createUserComplete(int requestID, const QString& username, const QString& userId, const QString& email);
+    void userInfoComplete(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);
     void joinSessionStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& invite);
     void joinSessionComplete(int requestID, const QString& session);
 

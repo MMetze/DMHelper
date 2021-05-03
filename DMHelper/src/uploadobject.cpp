@@ -112,7 +112,7 @@ void UploadObject::setData(const QString& data)
 
 QString UploadObject::getDescriptor() const
 {
-    return getMD5() + QString(",") + getUuid();
+    return getDescriptor(getMD5(), getUuid());
 }
 
 QString UploadObject::getMD5() const
@@ -159,4 +159,9 @@ int UploadObject::getStatus() const
 void UploadObject::setStatus(int status)
 {
     _status = status;
+}
+
+QString UploadObject::getDescriptor(const QString& md5, const QString& uuid)
+{
+    return md5.isEmpty() ? md5 : md5 + QString(",") + uuid;
 }

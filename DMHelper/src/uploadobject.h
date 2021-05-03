@@ -53,6 +53,8 @@ public:
     virtual int getStatus() const;
     virtual void setStatus(int status);
 
+    static QString getDescriptor(const QString& md5, const QString& uuid);
+
 protected:
     CampaignObjectBase* _object;
     QString _filename;

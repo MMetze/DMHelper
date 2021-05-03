@@ -8,6 +8,7 @@ class DMC_ConnectionInvitesEditDialog;
 }
 
 class DMC_OptionsContainer;
+class QTableWidgetItem;
 
 class DMC_ConnectionInvitesEditDialog : public QDialog
 {
@@ -21,6 +22,8 @@ private slots:
     void addInvite();
     void renameInvite();
     void removeInvite();
+
+    void inviteChanged(QTableWidgetItem *item);
 
 private:
     void populateInvites();

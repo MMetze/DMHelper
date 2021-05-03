@@ -23,10 +23,13 @@ protected:
     virtual void timerEvent(QTimerEvent *event);
 
 private slots:
+    void createUser();
     void sessionSelected(int selection);
     void editSessions();
     void checkLogon();
 
+    void userCreated(int requestID, const QString& username, const QString& userId, const QString& email);
+    void userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);
     void isOwnerComplete(int requestID, const QString& session, const QString& sessionName, const QString& invite, bool isOwner);
     void sessionMembersComplete(int requestID, const QString& sessionName, const QString& members);
 

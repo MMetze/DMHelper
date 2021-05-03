@@ -43,6 +43,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _networkEnabled(false),
     _urlString(),
     _userName(),
+    _userId(),
     _savePassword(false),
     _password(), // note: password will not be stored in settings
     _currentSession(),
@@ -221,6 +222,11 @@ QString OptionsContainer::getURLString() const
 QString OptionsContainer::getUserName() const
 {
     return _userName;
+}
+
+QString OptionsContainer::getUserId() const
+{
+    return _userId;
 }
 
 bool OptionsContainer::getSavePassword() const
@@ -958,7 +964,7 @@ void OptionsContainer::setURLString(const QString& urlString)
     {
         _urlString = urlString;
         emit urlStringChanged(_urlString);
-        emit networkSettingsChanged(_urlString, _userName, _password, _currentSession, _invites.value(_currentSession));
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
     }
 }
 
@@ -967,8 +973,20 @@ void OptionsContainer::setUserName(const QString& username)
     if(_userName != username)
     {
         _userName = username;
+        _userId.clear();
         emit userNameChanged(_userName);
-        emit networkSettingsChanged(_urlString, _userName, _password, _currentSession, _invites.value(_currentSession));
+        emit userIdChanged(_userId);
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
+    }
+}
+
+void OptionsContainer::setUserId(const QString& userId)
+{
+    if(_userId != userId)
+    {
+        _userId = userId;
+        emit userIdChanged(_userId);
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
     }
 }
 
@@ -987,7 +1005,7 @@ void OptionsContainer::setPassword(const QString& password)
     {
         _password = password;
         emit passwordChanged(_password);
-        emit networkSettingsChanged(_urlString, _userName, _password, _currentSession, _invites.value(_currentSession));
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
     }
 }
 
@@ -997,7 +1015,7 @@ void OptionsContainer::setCurrentSession(const QString& session)
     {
         _currentSession = session;
         emit currentSessionChanged(_currentSession);
-        emit networkSettingsChanged(_urlString, _userName, _password, _currentSession, _invites.value(_currentSession));
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
     }
 }
 

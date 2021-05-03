@@ -52,7 +52,7 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
         }
         else
         {
-            qDebug() << "[RemoteRenderer] Image String: " << payloadString;
+            qDebug() << "[RemoteRenderer] Payload String: " << payloadString;
             payloadElement = doc.documentElement().firstChildElement();
             parsePayloadData(payloadElement);
         }
@@ -176,31 +176,40 @@ void RemoteRenderer::fileRequestStarted(int requestId, const QString& fileMD5, c
     qDebug() << "[RemoteRenderer] File request started for " << fileMD5 << ", " << fileUuid << " with request " << requestId;
 
     if((_fow) && (_fow->getMD5() == fileMD5))
+    {
         _fow->setStatus(requestId);
+        return;
+    }
 
     if((_background) && (_background->getMD5() == fileMD5))
+    {
         _background->setStatus(requestId);
+        return;
+    }
 
     for(int i = 0; i < _payloadFiles.count(); ++i)
     {
         if((_payloadFiles.at(i)) && (_payloadFiles.at(i)->getMD5() == fileMD5))
+        {
             _payloadFiles.at(i)->setStatus(requestId);
+            return;
+        }
     }
 }
 
 void RemoteRenderer::fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data)
 {
     qDebug() << "[RemoteRenderer] File request completed for " << fileMD5 << ", " << fileUuid << " with request " << requestId;
-    if(_fow)
-        _fow->fileReceived(fileMD5, fileUuid, _cacheDirectory, data);
+    if((_fow) && (_fow->fileReceived(requestId, fileMD5, fileUuid, _cacheDirectory, data)))
+        return;
 
-    if(_background)
-        _background->fileReceived(fileMD5, fileUuid, _cacheDirectory, data);
+    if((_background) && (_background->fileReceived(requestId, fileMD5, fileUuid, _cacheDirectory, data)))
+        return;
 
     for(int i = 0; i < _payloadFiles.count(); ++i)
     {
-        if(_payloadFiles.at(i))
-            _payloadFiles.at(i)->fileReceived(fileMD5, fileUuid, _cacheDirectory, data);
+        if((_payloadFiles.at(i)) && (_payloadFiles.at(i)->fileReceived(requestId, fileMD5, fileUuid, _cacheDirectory, data)))
+            return;
     }
 }
 
@@ -443,10 +452,18 @@ void RemoteRenderer_FileWrapper::getFile()
     emit requestFile(_md5, _uuid);
 }
 
-void RemoteRenderer_FileWrapper::fileReceived(const QString& md5, const QString& uuid, const QString& cacheDirectory, const QByteArray& data)
+bool RemoteRenderer_FileWrapper::fileReceived(int requestID, const QString& md5, const QString& uuid, const QString& cacheDirectory, const QByteArray& data)
 {
+    /*
+     * TODO: reinstate this
     if(_md5 != md5)
         return;
+        */
+    if((requestID != -1) && (requestID != _status))
+        return false;
+
+    if((!md5.isEmpty()) && (_md5 != md5))
+        return false;
 
     QString fullFileName = cacheDirectory + QString("/") + _md5;
     if(QFile::exists(fullFileName))
@@ -464,7 +481,7 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5, const QString&
             {
                 qDebug() << "[RemoteRenderer_FileWrapper] ERROR: not able to open input file for reading: " << readFile.error() << ", " << readFile.errorString();
                 _status = DMC_SERVER_CONNECTION_CONTROLLER_UPLOAD_ERROR;
-                return;
+                return true;
             }
 
             QByteArray readArray = readFile.readAll();
@@ -472,7 +489,7 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5, const QString&
             {
                 qDebug() << "[RemoteRenderer_FileWrapper] ERROR: not able to read input file: " << readFile.error() << ", " << readFile.errorString();
                 _status = DMC_SERVER_CONNECTION_CONTROLLER_UPLOAD_ERROR;
-                return;
+                return true;
             }
 
             qDebug() << "[RemoteRenderer_FileWrapper] File read: " << fullFileName;
@@ -486,7 +503,7 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5, const QString&
         {
            qDebug() << "[RemoteRenderer_FileWrapper] ERROR: empty data string received!";
            _status = DMC_SERVER_CONNECTION_CONTROLLER_UPLOAD_ERROR;
-           return;
+           return true;
         }
 
         QFile outputFile(fullFileName);
@@ -494,7 +511,7 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5, const QString&
         {
             qDebug() << "[RemoteRenderer_FileWrapper] ERROR: not able to open output file for writing: " << outputFile.error() << ", " << outputFile.errorString();
             _status = DMC_SERVER_CONNECTION_CONTROLLER_UPLOAD_ERROR;
-            return;
+            return true;
         }
 
         outputFile.write(data);
@@ -504,4 +521,6 @@ void RemoteRenderer_FileWrapper::fileReceived(const QString& md5, const QString&
         _status = DMC_SERVER_CONNECTION_UPLOAD_COMPLETE;
         emit dataAvailable(md5, uuid, ((_fileType == DMHelper::FileType_Video) ? QByteArray() : data));
     }
+
+    return true;
 }

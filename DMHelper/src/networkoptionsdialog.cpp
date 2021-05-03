@@ -1,8 +1,10 @@
 #include "networkoptionsdialog.h"
 #include "networksessionseditdialog.h"
 #include "dmhlogon.h"
+#include "connectionuserdialog.h"
 #include "ui_networkoptionsdialog.h"
 #include <QDomDocument>
+#include <QScreen>
 #include <QDebug>
 
 const int INVALID_REQUEST_ID = -1;
@@ -43,11 +45,14 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     connect(ui->chkSavePassword, &QAbstractButton::clicked, &options, &OptionsContainer::setSavePassword);
     connect(ui->edtURL, &QLineEdit::editingFinished, this, &NetworkOptionsDialog::checkLogon);
     connect(ui->edtUserName, &QLineEdit::editingFinished, this, &NetworkOptionsDialog::checkLogon);
+    connect(ui->btnCreateUser, &QAbstractButton::clicked, this, &NetworkOptionsDialog::createUser);
     connect(ui->edtPassword, &QLineEdit::editingFinished, this, &NetworkOptionsDialog::checkLogon);
     connect(ui->cmbSession, qOverload<int>(&QComboBox::currentIndexChanged), this, &NetworkOptionsDialog::sessionSelected);
 
     connect(ui->btnEditSessions, &QAbstractButton::clicked, this, &NetworkOptionsDialog::editSessions);
 
+    connect(_networkManager, &DMHNetworkManager::createUserComplete, this, &NetworkOptionsDialog::userCreated);
+    connect(_networkManager, &DMHNetworkManager::userInfoComplete, this, &NetworkOptionsDialog::userInfoCompleted);
     connect(_networkManager, &DMHNetworkManager::isOwnerComplete, this, &NetworkOptionsDialog::isOwnerComplete);
     connect(_networkManager, &DMHNetworkManager::sessionMembersComplete, this, &NetworkOptionsDialog::sessionMembersComplete);
 
@@ -71,6 +76,23 @@ void NetworkOptionsDialog::timerEvent(QTimerEvent *event)
         return;
 
     _currentRequest = _networkManager->getSessionMembers(ui->cmbSession->currentData().toString());
+}
+
+void NetworkOptionsDialog::createUser()
+{
+    ConnectionUserDialog dlg;
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg.resize(primary->availableSize().width() / 4, primary->availableSize().height() / 3);
+
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        if(dlg.doesPasswordMatch())
+        {
+            _networkManager->setLogon(DMHLogon(_options.getURLString(), QString(), QString(), QString(), QString()));
+            _networkManager->createUser(dlg.getUsername(), dlg.getPassword(), dlg.getEmail(), dlg.getScreenName());
+        }
+    }
 }
 
 void NetworkOptionsDialog::sessionSelected(int selection)
@@ -103,26 +125,59 @@ void NetworkOptionsDialog::checkLogon()
     if(_currentRequest != INVALID_REQUEST_ID)
         return;
 
+    if(_memberTimer != INVALID_TIMER_ID)
+    {
+        killTimer(_memberTimer);
+        _memberTimer = INVALID_TIMER_ID;
+    }
+
     _options.setURLString(ui->edtURL->text());
     _options.setUserName(ui->edtUserName->text());
     _options.setPassword(ui->edtPassword->text());
 
-    DMHLogon logon(ui->edtURL->text(), ui->edtUserName->text(), QString(), ui->edtPassword->text(), ui->cmbSession->currentData().toString());
+    DMHLogon logon(_options.getURLString(), _options.getUserName(), _options.getUserId(), _options.getPassword(), ui->cmbSession->currentData().toString());
     if(logon.isValid())
     {
-        if(_memberTimer != INVALID_TIMER_ID)
-        {
-            killTimer(_memberTimer);
-            _memberTimer = INVALID_TIMER_ID;
-        }
-
         _networkManager->setLogon(logon);
-        _currentRequest = _networkManager->isSessionOwner(ui->cmbSession->currentData().toString());
+        if(_options.getUserId().isEmpty())
+            _currentRequest = _networkManager->getUserInfo();
+        else
+            userInfoCompleted(INVALID_REQUEST_ID, _options.getUserName(), _options.getUserId(), QString(), QString(), QString(), false);
     }
+}
+
+void NetworkOptionsDialog::userCreated(int requestID, const QString& username, const QString& userId, const QString& email)
+{
+    Q_UNUSED(requestID);
+    Q_UNUSED(email);
+
+    ui->edtUserName->setText(username);
+    ui->edtPassword->setText(QString());
+
+    _options.setUserId(userId);
+}
+
+void NetworkOptionsDialog::userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled)
+{
+    if(_currentRequest != requestID)
+        return;
+
+    DMHLogon logon = _networkManager->getLogon();
+    if(username != logon.getUserName())
+        return;
+
+    qDebug() << "[NetworkOptionsDialog] User Info query answered with request " << requestID << ". User: " << username << ", User ID: " << userId << ", email: " << email << ", surname: " << surname << ", forename: " << forename << ", disabled: " << disabled;
+
+    logon.setUserId(userId);
+    _networkManager->setLogon(logon);
+    _currentRequest = _networkManager->isSessionOwner(ui->cmbSession->currentData().toString());
 }
 
 void NetworkOptionsDialog::isOwnerComplete(int requestID, const QString& session, const QString& sessionName, const QString& invite, bool isOwner)
 {
+    Q_UNUSED(sessionName);
+    Q_UNUSED(invite);
+
     if(_currentRequest != requestID)
         return;
 
@@ -137,6 +192,8 @@ void NetworkOptionsDialog::isOwnerComplete(int requestID, const QString& session
 
 void NetworkOptionsDialog::sessionMembersComplete(int requestID, const QString& sessionName, const QString& members)
 {
+    Q_UNUSED(sessionName);
+
     if(_currentRequest != requestID)
         return;
 

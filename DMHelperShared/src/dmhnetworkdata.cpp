@@ -13,6 +13,25 @@ DMHNetworkData::~DMHNetworkData()
 }
 
 
+
+DMHNetworkData_DM_Push::DMHNetworkData_DM_Push(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_DM_Push_Private(data))
+{
+}
+
+DMHNetworkData_DM_Push::~DMHNetworkData_DM_Push()
+{
+}
+
+bool DMHNetworkData_DM_Push::isValid()
+{
+    return d->isValid();
+}
+
+
+
+
 DMHNetworkData_Payload::DMHNetworkData_Payload(QDomElement data) :
     DMHNetworkData(),
     d(new DMHNetworkData_Payload_Private(data))
@@ -406,3 +425,50 @@ QString DMHNetworkData_Message::getData() const
 {
     return d->getData();
 }
+
+
+DMHNetworkData_UserInfo::DMHNetworkData_UserInfo(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_UserInfo_Private(data))
+{
+}
+
+DMHNetworkData_UserInfo::~DMHNetworkData_UserInfo()
+{
+}
+
+bool DMHNetworkData_UserInfo::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_UserInfo::getUserId() const
+{
+    return d->getUserId();
+}
+
+QString DMHNetworkData_UserInfo::getUsername() const
+{
+    return d->getUsername();
+}
+
+QString DMHNetworkData_UserInfo::getMail() const
+{
+    return d->getMail();
+}
+
+QString DMHNetworkData_UserInfo::getSurname() const
+{
+    return d->getSurname();
+}
+
+QString DMHNetworkData_UserInfo::getForename() const
+{
+    return d->getForename();
+}
+
+bool DMHNetworkData_UserInfo::getDisabled() const
+{
+    return d->getDisabled();
+}
+

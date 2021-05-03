@@ -53,6 +53,17 @@ DMHNetworkData_Private::DMHNetworkData_Private() :
 
 
 
+DMHNetworkData_DM_Push_Private::DMHNetworkData_DM_Push_Private(QDomElement data) :
+    DMHNetworkData_Private_Base()
+{
+    Q_UNUSED(data);
+    _valid = true;
+}
+
+
+
+
+
 DMHNetworkData_Payload_Private::DMHNetworkData_Payload_Private(QDomElement data) :
     DMHNetworkData_Private_Base(),
     _payload(),
@@ -96,11 +107,19 @@ DMHNetworkData_Raw_Private::DMHNetworkData_Raw_Private(QDomElement data) :
     QDomElement nodeElement = data.firstChildElement(QString("node"));
     if(!nodeElement.isNull())
     {
+        readChildElement(nodeElement, QString("name"), _name);
+        readChildElement(nodeElement, QString("md5"), _md5);
+        readChildElement(nodeElement, QString("ID"), _uuid);
+        readChildElement(nodeElement, QString("data"), _data);
+
+        _valid = !_data.isEmpty();
+        /*
         if((readChildElement(nodeElement, QString("name"), _name)) &&
            (readChildElement(nodeElement, QString("md5"), _md5)) &&
            (readChildElement(nodeElement, QString("ID"), _uuid)) &&
            (readChildElement(nodeElement, QString("data"), _data)))
             _valid = true;
+            */
     }
 }
 
@@ -177,6 +196,10 @@ DMHNetworkData_Exists_Private::DMHNetworkData_Exists_Private(QDomElement data) :
            (readChildElement(nodeElement, QString("name"), _name)))
             _valid = true;
     }
+    else
+    {
+        _valid = true; // empty / exists=false response
+    }
 }
 
 bool DMHNetworkData_Exists_Private::exists() const
@@ -214,11 +237,14 @@ DMHNetworkData_IsOwner_Private::DMHNetworkData_IsOwner_Private(QDomElement data)
     QString isOwner;
     if((readChildElement(data, QString("session"), _session)) &&
        (readChildElement(data, QString("user"), _user)) &&
-       (readChildElement(data, QString("name"), _sessionName)) &&
-       (readChildElement(data, QString("isowner"), isOwner)) &&
-       (readChildElement(data, QString("code"), _invite)))
+       (readChildElement(data, QString("isowner"), isOwner)))
     {
         _isOwner = static_cast<bool>(isOwner.toInt());
+        if((_isOwner) &&
+           ((!readChildElement(data, QString("name"), _sessionName)) ||
+           (!readChildElement(data, QString("code"), _invite))))
+                return; // If isOwner comes back true, the session name and code should also be part of the response
+
         _valid = true;
     }
 }
@@ -422,3 +448,62 @@ QString DMHNetworkData_Message_Private::getData() const
 {
     return _data;
 }
+
+
+
+
+
+DMHNetworkData_UserInfo_Private::DMHNetworkData_UserInfo_Private(QDomElement data) :
+    DMHNetworkData_Private_Base(),
+    _userId(),
+    _username(),
+    _mail(),
+    _surname(),
+    _forename(),
+    _disabled(false)
+{
+
+    QString disabled;
+    if((readChildElement(data, QString("ID"), _userId)) &&
+       (readChildElement(data, QString("username"), _username)) &&
+       (readChildElement(data, QString("mail"), _mail)) &&
+       (readChildElement(data, QString("surname"), _surname)) &&
+       (readChildElement(data, QString("forename"), _forename)) &&
+       (readChildElement(data, QString("disabled"), disabled)))
+    {
+         _disabled = static_cast<bool>(disabled.toInt());
+        _valid = true;
+    }
+}
+
+QString DMHNetworkData_UserInfo_Private::getUserId() const
+{
+    return _userId;
+}
+
+QString DMHNetworkData_UserInfo_Private::getUsername() const
+{
+    return _username;
+}
+
+QString DMHNetworkData_UserInfo_Private::getMail() const
+{
+    return _mail;
+}
+
+QString DMHNetworkData_UserInfo_Private::getSurname() const
+{
+    return _surname;
+}
+
+QString DMHNetworkData_UserInfo_Private::getForename() const
+{
+    return _forename;
+}
+
+bool DMHNetworkData_UserInfo_Private::getDisabled() const
+{
+    return _disabled;
+}
+
+

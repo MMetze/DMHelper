@@ -64,11 +64,11 @@ SOURCES += \
         combatant.cpp \
         combatantfactory.cpp \
         combatantreference.cpp \
+        connectionuserdialog.cpp \
         dice.cpp \
         dmc_connectioninviteseditdialog.cpp \
         dmc_connectionsettingsdialog.cpp \
         dmc_connectionsettingsframe.cpp \
-        dmc_connectionuserdialog.cpp \
         dmc_main.cpp \
         ../../DMHelperShared/src/dmhlogon.cpp \
         ../../DMHelperShared/src/dmhlogon_private.cpp \
@@ -159,11 +159,11 @@ HEADERS += \
     combatant.h \
     combatantfactory.h \
     combatantreference.h \
+    connectionuserdialog.h \
     dice.h \
     dmc_connectioninviteseditdialog.h \
     dmc_connectionsettingsdialog.h \
     dmc_connectionsettingsframe.h \
-    dmc_connectionuserdialog.h \
     dmc_constants.h \
     dmc_mainwindow.h\
     ../../DMHelperShared/inc/dmhglobal.h \
@@ -216,10 +216,10 @@ HEADERS += \
 
 FORMS += \
     battledialogeffectsettings.ui \
+    connectionuserdialog.ui \
     dmc_connectioninviteseditdialog.ui \
     dmc_connectionsettingsdialog.ui \
     dmc_connectionsettingsframe.ui \
-    dmc_connectionuserdialog.ui \
     dmc_mainwindow.ui \
     dmc_settingsdialog.ui
 
