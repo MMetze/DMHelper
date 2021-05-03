@@ -100,7 +100,11 @@ void DMC_ServerConnection::checkLogon()
     qDebug() << "[DMC_ServerConnection] Login data valid, attempting to join the session. Invite: " << _options.getCurrentInvite();
 
     startManager();
-    joinSession();
+
+    if(_options.getUserId().isEmpty())
+        _networkManager->getUserInfo();
+    else
+        userInfoCompleted(-1, _options.getUserName(), _options.getUserId(), QString(), QString(), QString(), false);
 }
 
 void DMC_ServerConnection::startServer()
@@ -111,16 +115,7 @@ void DMC_ServerConnection::startServer()
         stopServer();
 
     startManager();
-    startObserver();
-
-    if(!_connected)
-    {
-        emit connectionChanged(true);
-        _connected = true;
-    }
-
-    if(_networkManager)
-        _networkManager->sendMessage(QString("join"));
+    connectServer(true);
 }
 
 void DMC_ServerConnection::stopServer()
@@ -163,6 +158,28 @@ void DMC_ServerConnection::targetResized(const QSize& newSize)
         _renderer->targetResized(newSize);
 }
 
+void DMC_ServerConnection::userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled)
+{
+    Q_UNUSED(requestID);
+    Q_UNUSED(email);
+    Q_UNUSED(surname);
+    Q_UNUSED(forename);
+    Q_UNUSED(disabled);
+
+    if(!_networkManager)
+        return;
+
+    if((username != _options.getUserName()) || (userId.isEmpty()) || (disabled))
+    {
+        qDebug() << "[DMC_ServerConnection] Invalid user info received. Username: " << username << ", User ID: " << userId << ", disabled: " << disabled;
+        stopServer();
+    }
+
+    _options.setUserId(userId);
+    _networkManager->setLogon(_options.getLogon());
+    joinSession();
+}
+
 void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& session)
 {
     Q_UNUSED(requestID);
@@ -172,7 +189,17 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
 
     qDebug() << "[DMC_ServerConnection] Successfully joined the session. Session ID: " << session;
     _session = session;
-    startServer();
+
+    // Just restart the server components
+    startManager();
+    startObserver();
+    //startServer();
+
+    if(!_connected)
+    {
+        emit connectionChanged(true);
+        _connected = true;
+    }
 }
 
 void DMC_ServerConnection::messageError(int requestID, const QString& errorString)
@@ -202,6 +229,7 @@ void DMC_ServerConnection::startManager()
         _networkManager = new DMHNetworkManager(logon, this);
         connect(_networkManager, &DMHNetworkManager::downloadComplete, this, &DMC_ServerConnection::downloadComplete);
         connect(_networkManager, &DMHNetworkManager::joinSessionComplete, this, &DMC_ServerConnection::joinSessionComplete);
+        connect(_networkManager, &DMHNetworkManager::userInfoComplete, this, &DMC_ServerConnection::userInfoCompleted);
         connect(_networkManager, &DMHNetworkManager::messageError, this, &DMC_ServerConnection::messageError);
         connect(_networkManager, &DMHNetworkManager::requestError, this, &DMC_ServerConnection::requestError);
     }
@@ -225,6 +253,7 @@ void DMC_ServerConnection::startObserver()
         logon.setSession(_session);
         _networkObserver = new DMHNetworkObserver(logon, this);
         connect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
+        _lastPayload.clear();
         _networkObserver->start();
     }
 }
@@ -262,6 +291,6 @@ void DMC_ServerConnection::joinSession()
         return;
 
     qDebug() << "[DMC_ServerConnection] Sending the join session request.";
-    //_networkManager->joinSession(_options.getCurrentInvite());
-    joinSessionComplete(0, QString("7B3AA550-649A-4D51-920E-CAB465616995"));
+    _networkManager->joinSession(_options.getCurrentInvite());
+    //joinSessionComplete(0, QString("7B3AA550-649A-4D51-920E-CAB465616995"));
 }

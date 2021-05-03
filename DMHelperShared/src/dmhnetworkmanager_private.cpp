@@ -27,6 +27,7 @@ DMHNetworkManager_Private::DMHNetworkManager_Private(const DMHLogon& logon, QObj
 
 DMHNetworkManager_Private::~DMHNetworkManager_Private()
 {
+    disconnect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(requestFinished(QNetworkReply*)));
     for(QNetworkReply* reply : _replies.keys())
     {
         delete reply;
@@ -332,6 +333,8 @@ int DMHNetworkManager_Private::joinSession(const QString& invite)
     emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
 #endif
 
+    qDebug() << "[DMHNetworkManager] " << postData.toString(QUrl::FullyEncoded).toUtf8();
+
     QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
     int replyId = getRequestId(true);
     _replies.insert(reply, replyId);
@@ -575,6 +578,12 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
                 DMHNetworkData_SessionMembers& sessionMembersNetworkData = dynamic_cast<DMHNetworkData_SessionMembers&>(*factoryData);
                 //qDebug() << "[DMHNetworkManager] Session Members Received. Session: " << sessionMembersNetworkData.getSession() << ", Members: " << sessionMembersNetworkData.getMembers();
                 emit sessionMembersComplete(replyData, sessionMembersNetworkData.getSession(), sessionMembersNetworkData.getMembers());
+            }
+            else if(factory.getModeValue() == DMHShared::DMH_Message_ssn_general)
+            {
+                DMHNetworkData_SessionGeneral& sessionGeneralNetworkData = dynamic_cast<DMHNetworkData_SessionGeneral&>(*factoryData);
+                //qDebug() << "[DMHNetworkManager] Session Members Received. Session: " << sessionMembersNetworkData.getSession() << ", Members: " << sessionMembersNetworkData.getMembers();
+                emit sessionGeneralComplete(replyData);
             }
             else if(factory.getModeValue() == DMHShared::DMH_Message_usr_create)
             {

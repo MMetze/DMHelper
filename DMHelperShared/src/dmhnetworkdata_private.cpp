@@ -390,6 +390,19 @@ QString DMHNetworkData_SessionMembers_Private::getMembers() const
 
 
 
+DMHNetworkData_SessionGeneral_Private::DMHNetworkData_SessionGeneral_Private(QDomElement data) :
+    DMHNetworkData_Private_Base()
+{
+    Q_UNUSED(data);
+    _valid = true;
+}
+
+
+
+
+
+
+
 DMHNetworkData_CreateUser_Private::DMHNetworkData_CreateUser_Private(QDomElement data) :
     DMHNetworkData_Private_Base(),
     _username(),
@@ -416,6 +429,8 @@ QString DMHNetworkData_CreateUser_Private::getEmail() const
 {
     return _email;
 }
+
+
 
 
 

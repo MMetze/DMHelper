@@ -21,8 +21,10 @@ signals:
     void encounterComplete();
 
 protected:
-    QString _md5Text;
-    QString _md5TranslatedText;
+    QString _textMD5;
+    QString _textUuid;
+    QString _translatedMD5;
+    QString _translatedUuid;
     QString _cacheDirectory;
 
 };

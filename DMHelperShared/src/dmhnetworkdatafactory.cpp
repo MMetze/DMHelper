@@ -175,6 +175,9 @@ bool DMHNetworkDataFactory::readDataElement()
         case DMHShared::DMH_Message_ssn_members:
             _data.reset(new DMHNetworkData_SessionMembers(_dataElement));
             return _data->isValid();
+        case DMHShared::DMH_Message_ssn_general:
+            _data.reset(new DMHNetworkData_SessionGeneral(_dataElement));
+            return _data->isValid();
         case DMHShared::DMH_Message_usr_create:
             _data.reset(new DMHNetworkData_CreateUser(_dataElement));
             return _data->isValid();

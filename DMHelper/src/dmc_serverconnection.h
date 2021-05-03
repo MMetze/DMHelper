@@ -49,6 +49,7 @@ public slots:
     void targetResized(const QSize& newSize);
 
 private slots:
+    void userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);
     void joinSessionComplete(int requestID, const QString& session);
     void messageError(int requestID, const QString& errorString);
     void requestError(int requestID);

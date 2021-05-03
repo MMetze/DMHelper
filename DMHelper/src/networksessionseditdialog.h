@@ -30,7 +30,9 @@ private slots:
     void renameSessionComplete(int requestID, const QString& sessionName);
     void renewSessionComplete(int requestID, const QString& sessionName, const QString& invite);
     void closeSessionComplete(int requestID, const QString& sessionName);
+    void sessionGeneralComplete(int requestID);
 
+    void messageError(int requestID, const QString& errorString);
     void requestError(int requestID);
 
 private:

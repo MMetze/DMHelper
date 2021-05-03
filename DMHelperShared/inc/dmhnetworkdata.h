@@ -19,6 +19,7 @@ class DMHNetworkData_RenameSession_Private;
 class DMHNetworkData_RenewSession_Private;
 class DMHNetworkData_CloseSession_Private;
 class DMHNetworkData_SessionMembers_Private;
+class DMHNetworkData_SessionGeneral_Private;
 class DMHNetworkData_CreateUser_Private;
 class DMHNetworkData_JoinSession_Private;
 class DMHNetworkData_Message_Private;
@@ -290,6 +291,27 @@ private:
     DMHNetworkData_SessionMembers(const DMHNetworkData_SessionMembers& other);
 
     std::unique_ptr<DMHNetworkData_SessionMembers_Private> d;
+};
+
+
+
+
+
+
+class DMHNetworkData_SessionGeneral : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_SessionGeneral(QDomElement data);
+    virtual ~DMHNetworkData_SessionGeneral() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_SessionGeneral(const DMHNetworkData_SessionGeneral& other);
+
+    std::unique_ptr<DMHNetworkData_SessionGeneral_Private> d;
 };
 
 

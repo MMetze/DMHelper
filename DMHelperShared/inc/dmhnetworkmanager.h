@@ -73,6 +73,7 @@ signals:
     void renewSessionComplete(int requestID, const QString& sessionName, const QString& invite);
     void closeSessionComplete(int requestID, const QString& sessionName);
     void sessionMembersComplete(int requestID, const QString& sessionName, const QString& members);
+    void sessionGeneralComplete(int requestID);
 
     // User Management
     void createUserStarted(int requestID, QNetworkReply* reply, const QString& username, const QString& email, const QString& screenName);

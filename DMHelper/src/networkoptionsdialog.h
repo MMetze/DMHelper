@@ -32,6 +32,7 @@ private slots:
     void userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);
     void isOwnerComplete(int requestID, const QString& session, const QString& sessionName, const QString& invite, bool isOwner);
     void sessionMembersComplete(int requestID, const QString& sessionName, const QString& members);
+    void sessionGeneralComplete(int requestID);
 
     void requestError(int requestID);
 

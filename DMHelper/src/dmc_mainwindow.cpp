@@ -199,7 +199,7 @@ void DMC_MainWindow::openOptions()
     if(dlg.exec() == QDialog::Accepted)
     {
         _settings->copy(tempOptions);
-        if(_serverConnection)
+        if((_serverConnection) && (_serverConnection->isConnected()))
             _serverConnection->startServer();
     }
 }

@@ -64,6 +64,7 @@ void DMHNetworkObserver_Private::timerEvent(QTimerEvent *event)
     //postData.addQueryItem("password", "Ente12345");
     //postData.addQueryItem("session", "7B3AA550-649A-4D51-920E-CAB465616995");
     postData.addQueryItem("user", _logon.getUserName());
+    //postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
 

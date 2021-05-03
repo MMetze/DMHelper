@@ -257,6 +257,19 @@ protected:
 
 
 
+class DMHNetworkData_SessionGeneral_Private : public DMHNetworkData_Private_Base
+{
+public:
+    explicit DMHNetworkData_SessionGeneral_Private(QDomElement data);
+    virtual ~DMHNetworkData_SessionGeneral_Private() override {}
+
+protected:
+};
+
+
+
+
+
 class DMHNetworkData_JoinSession_Private : public DMHNetworkData_Private_Base
 {
 public:

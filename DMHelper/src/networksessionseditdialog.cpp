@@ -31,9 +31,11 @@ NetworkSessionsEditDialog::NetworkSessionsEditDialog(OptionsContainer& options, 
     connect(_networkManager, &DMHNetworkManager::renameSessionComplete, this, &NetworkSessionsEditDialog::renameSessionComplete);
     connect(_networkManager, &DMHNetworkManager::renewSessionComplete, this, &NetworkSessionsEditDialog::renewSessionComplete);
     connect(_networkManager, &DMHNetworkManager::closeSessionComplete, this, &NetworkSessionsEditDialog::closeSessionComplete);
+    connect(_networkManager, &DMHNetworkManager::sessionGeneralComplete, this, &NetworkSessionsEditDialog::sessionGeneralComplete);
+    connect(_networkManager, &DMHNetworkManager::messageError, this, &NetworkSessionsEditDialog::messageError);
     connect(_networkManager, &DMHNetworkManager::requestError, this, &NetworkSessionsEditDialog::requestError);
 
-    _logon = DMHLogon(_options.getURLString(), _options.getUserName(), QString(), _options.getPassword(), QString());
+    _logon = DMHLogon(_options.getURLString(), _options.getUserName(), _options.getUserId(), _options.getPassword(), QString());
     _networkManager->setLogon(_logon);
 }
 
@@ -186,12 +188,30 @@ void NetworkSessionsEditDialog::closeSessionComplete(int requestID, const QStrin
     _currentRequest = INVALID_REQUEST_ID;
 }
 
+void NetworkSessionsEditDialog::sessionGeneralComplete(int requestID)
+{
+    if(_currentRequest != requestID)
+        return;
+
+    qDebug() << "[NetworkSessionsEditDialog] General session response received for request " << requestID;
+    _currentRequest = INVALID_REQUEST_ID;
+}
+
+void NetworkSessionsEditDialog::messageError(int requestID, const QString& errorString)
+{
+    if(_currentRequest != requestID)
+        return;
+
+    qDebug() << "[NetworkSessionsEditDialog] Message error received for request " << requestID << ": " << errorString;
+    _currentRequest = INVALID_REQUEST_ID;
+}
+
 void NetworkSessionsEditDialog::requestError(int requestID)
 {
     if(_currentRequest != requestID)
         return;
 
-    qDebug() << "[NetworkSessionsEditDialog] Error received for request " << requestID;
+    qDebug() << "[NetworkSessionsEditDialog] Request error received for request " << requestID;
     _currentRequest = INVALID_REQUEST_ID;
 }
 

@@ -348,6 +348,27 @@ QString DMHNetworkData_SessionMembers::getMembers() const
 
 
 
+
+DMHNetworkData_SessionGeneral::DMHNetworkData_SessionGeneral(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_SessionGeneral_Private(data))
+{
+}
+
+DMHNetworkData_SessionGeneral::~DMHNetworkData_SessionGeneral()
+{
+}
+
+bool DMHNetworkData_SessionGeneral::isValid()
+{
+    return d->isValid();
+}
+
+
+
+
+
+
 DMHNetworkData_CreateUser::DMHNetworkData_CreateUser(QDomElement data) :
     DMHNetworkData(),
     d(new DMHNetworkData_CreateUser_Private(data))

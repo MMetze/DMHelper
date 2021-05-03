@@ -55,6 +55,7 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     connect(_networkManager, &DMHNetworkManager::userInfoComplete, this, &NetworkOptionsDialog::userInfoCompleted);
     connect(_networkManager, &DMHNetworkManager::isOwnerComplete, this, &NetworkOptionsDialog::isOwnerComplete);
     connect(_networkManager, &DMHNetworkManager::sessionMembersComplete, this, &NetworkOptionsDialog::sessionMembersComplete);
+    connect(_networkManager, &DMHNetworkManager::sessionGeneralComplete, this, &NetworkOptionsDialog::sessionGeneralComplete);
 
     checkLogon();
 }
@@ -162,6 +163,16 @@ void NetworkOptionsDialog::userInfoCompleted(int requestID, const QString& usern
     if(_currentRequest != requestID)
         return;
 
+    if(username != _options.getUserName())
+        return;
+
+    qDebug() << "[NetworkOptionsDialog] User Info query answered with request " << requestID << ". User: " << username << ", User ID: " << userId << ", email: " << email << ", surname: " << surname << ", forename: " << forename << ", disabled: " << disabled;
+
+    _options.setUserId(userId);
+    _networkManager->setLogon(DMHLogon(_options.getURLString(), _options.getUserName(), _options.getUserId(), _options.getPassword(), QString()));
+    _currentRequest = _networkManager->isSessionOwner(ui->cmbSession->currentData().toString());
+
+    /*
     DMHLogon logon = _networkManager->getLogon();
     if(username != logon.getUserName())
         return;
@@ -171,6 +182,7 @@ void NetworkOptionsDialog::userInfoCompleted(int requestID, const QString& usern
     logon.setUserId(userId);
     _networkManager->setLogon(logon);
     _currentRequest = _networkManager->isSessionOwner(ui->cmbSession->currentData().toString());
+    */
 }
 
 void NetworkOptionsDialog::isOwnerComplete(int requestID, const QString& session, const QString& sessionName, const QString& invite, bool isOwner)
@@ -225,6 +237,15 @@ void NetworkOptionsDialog::sessionMembersComplete(int requestID, const QString& 
         memberElement = memberElement.nextSiblingElement("node");
     }
 
+    _currentRequest = INVALID_REQUEST_ID;
+}
+
+void NetworkOptionsDialog::sessionGeneralComplete(int requestID)
+{
+    if(_currentRequest != requestID)
+        return;
+
+    qDebug() << "[NetworkOptionsDialog] General session response received for request " << requestID;
     _currentRequest = INVALID_REQUEST_ID;
 }
 
