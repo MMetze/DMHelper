@@ -27,6 +27,8 @@ public slots:
     void fileRequestStarted(int requestId, const QString& fileMD5, const QString& fileUuid);
     void fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
 
+    void reset();
+
 signals:
     void requestFile(const QString& md5, const QString& uuid);
     void abortRequest(int requestID);

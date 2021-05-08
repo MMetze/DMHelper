@@ -213,6 +213,39 @@ void RemoteRenderer::fileRequestCompleted(int requestId, const QString& fileMD5,
     }
 }
 
+void RemoteRenderer::reset()
+{
+    if(_activeObject)
+    {
+        _activeObject->deleteLater();
+        _activeObject = nullptr;
+    }
+
+    if(_renderer)
+    {
+        _renderer->deleteLater();
+        _renderer = nullptr;
+    }
+
+    if(_background)
+    {
+        _background->deleteLater();
+        _background = nullptr;
+    }
+
+    if(_fow)
+    {
+        _fow->deleteLater();
+        _fow = nullptr;
+    }
+
+    qDeleteAll(_payloadFiles);
+    _payloadFiles.clear();
+
+    _backgroundPmp = QPixmap();
+    _fowPmp = QPixmap();
+}
+
 void RemoteRenderer::setBackgroundData(const QString& md5, const QString& uuid, const QByteArray& data)
 {
     Q_UNUSED(md5);

@@ -61,6 +61,7 @@ private:
     void stopObserver();
 
     void connectRemotePlayers();
+    void disconnectRemotePlayers();
     void joinSession();
 
     bool _connected;
@@ -70,7 +71,6 @@ private:
     DMHNetworkObserver* _networkObserver;
     RemoteAudioPlayer* _audioPlayer;
     RemoteRenderer* _renderer;
-    QPixmap _pmp;
     QString _lastPayload;
 
 };

@@ -125,6 +125,7 @@ void DMC_OptionsContainer::writeSettings()
         settings.setValue("password", getPassword());
 
     settings.beginGroup("Invites");
+        settings.remove("");
         QStringList invites = _invites.keys();
         for(QString invite : invites)
         {
@@ -258,12 +259,13 @@ void DMC_OptionsContainer::copy(DMC_OptionsContainer& other)
     setUserName(other._userName);
     setUserId(other._userId);
     setPassword(other._password);
-    setCurrentInvite(other._currentInvite);
 
+    _invites.clear();
     QStringList invites = other._invites.keys();
     for(QString invite : invites)
         _invites.insert(invite, other._invites.value(invite));
 
+    setCurrentInvite(other._currentInvite);
     setCacheDirectory(other._cacheDirectory);
 }
 

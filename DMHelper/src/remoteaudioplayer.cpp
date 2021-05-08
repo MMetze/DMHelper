@@ -87,6 +87,12 @@ void RemoteAudioPlayer::fileRequestCompleted(int requestId, const QString& fileM
     }
 }
 
+void RemoteAudioPlayer::reset()
+{
+    qDeleteAll(_tracks);
+    _tracks.clear();
+}
+
 void RemoteAudioPlayer::setChecked(bool checked)
 {
     for(int i = 0; i < _tracks.count(); ++i)

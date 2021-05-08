@@ -28,10 +28,9 @@ DMC_ServerConnection::DMC_ServerConnection(DMC_OptionsContainer& options, QObjec
     _networkObserver(nullptr),
     _audioPlayer(new RemoteAudioPlayer(options.getCacheDirectory(), this)),
     _renderer(new RemoteRenderer(options.getCacheDirectory(), this)),
-    _pmp(),
     _lastPayload()
 {
-    connectRemotePlayers();
+    //connectRemotePlayers();
 }
 
 DMC_ServerConnection::~DMC_ServerConnection()
@@ -125,11 +124,8 @@ void DMC_ServerConnection::stopServer()
     stopManager();
     stopObserver();
 
-    if(_connected)
-    {
-        emit connectionChanged(false);
-        _connected = false;
-    }
+    emit connectionChanged(false);
+    _connected = false;
 }
 
 void DMC_ServerConnection::fileRequested(const QString& md5, const QString& uuid)
@@ -252,8 +248,7 @@ void DMC_ServerConnection::startObserver()
         DMHLogon logon = _options.getLogon();
         logon.setSession(_session);
         _networkObserver = new DMHNetworkObserver(logon, this);
-        connect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
-        _lastPayload.clear();
+        connectRemotePlayers();
         _networkObserver->start();
     }
 }
@@ -262,27 +257,59 @@ void DMC_ServerConnection::stopObserver()
 {
     if(_networkObserver)
     {
-        disconnect(_networkObserver, nullptr, this, nullptr);
+        disconnectRemotePlayers();
+
         _networkObserver->deleteLater();
         _networkObserver = nullptr;
+
+        _lastPayload.clear();
+        _audioPlayer->reset();
+        _renderer->reset();
     }
 }
 
 void DMC_ServerConnection::connectRemotePlayers()
 {
-    if((!_audioPlayer) || (!_renderer))
-        return;
+    connect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
 
-    connect(_audioPlayer, &RemoteAudioPlayer::requestFile, this, &DMC_ServerConnection::fileRequested);
-    connect(this, &DMC_ServerConnection::fileRequestStarted, _audioPlayer, &RemoteAudioPlayer::fileRequestStarted);
-    connect(this, &DMC_ServerConnection::fileRequestCompleted, _audioPlayer, &RemoteAudioPlayer::fileRequestCompleted);
+    if(_audioPlayer)
+    {
+        connect(_audioPlayer, &RemoteAudioPlayer::requestFile, this, &DMC_ServerConnection::fileRequested);
+        connect(this, &DMC_ServerConnection::fileRequestStarted, _audioPlayer, &RemoteAudioPlayer::fileRequestStarted);
+        connect(this, &DMC_ServerConnection::fileRequestCompleted, _audioPlayer, &RemoteAudioPlayer::fileRequestCompleted);
+    }
 
-    connect(_renderer, &RemoteRenderer::requestFile, this, &DMC_ServerConnection::fileRequested);
-    connect(_renderer, &RemoteRenderer::abortRequest, this, &DMC_ServerConnection::fileAborted);
-    connect(_renderer, &RemoteRenderer::publishPixmap, this, &DMC_ServerConnection::pixmapActive);
-    connect(_renderer, &RemoteRenderer::publishImage, this, &DMC_ServerConnection::imageActive);
-    connect(this, &DMC_ServerConnection::fileRequestStarted, _renderer, &RemoteRenderer::fileRequestStarted);
-    connect(this, &DMC_ServerConnection::fileRequestCompleted, _renderer, &RemoteRenderer::fileRequestCompleted);
+    if(_renderer)
+    {
+        connect(_renderer, &RemoteRenderer::requestFile, this, &DMC_ServerConnection::fileRequested);
+        connect(_renderer, &RemoteRenderer::abortRequest, this, &DMC_ServerConnection::fileAborted);
+        connect(_renderer, &RemoteRenderer::publishPixmap, this, &DMC_ServerConnection::pixmapActive);
+        connect(_renderer, &RemoteRenderer::publishImage, this, &DMC_ServerConnection::imageActive);
+        connect(this, &DMC_ServerConnection::fileRequestStarted, _renderer, &RemoteRenderer::fileRequestStarted);
+        connect(this, &DMC_ServerConnection::fileRequestCompleted, _renderer, &RemoteRenderer::fileRequestCompleted);
+    }
+}
+
+void DMC_ServerConnection::disconnectRemotePlayers()
+{
+    disconnect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
+
+    if(_audioPlayer)
+    {
+        disconnect(_audioPlayer, &RemoteAudioPlayer::requestFile, this, &DMC_ServerConnection::fileRequested);
+        disconnect(this, &DMC_ServerConnection::fileRequestStarted, _audioPlayer, &RemoteAudioPlayer::fileRequestStarted);
+        disconnect(this, &DMC_ServerConnection::fileRequestCompleted, _audioPlayer, &RemoteAudioPlayer::fileRequestCompleted);
+    }
+
+    if(_renderer)
+    {
+        disconnect(_renderer, &RemoteRenderer::requestFile, this, &DMC_ServerConnection::fileRequested);
+        disconnect(_renderer, &RemoteRenderer::abortRequest, this, &DMC_ServerConnection::fileAborted);
+        disconnect(_renderer, &RemoteRenderer::publishPixmap, this, &DMC_ServerConnection::pixmapActive);
+        disconnect(_renderer, &RemoteRenderer::publishImage, this, &DMC_ServerConnection::imageActive);
+        disconnect(this, &DMC_ServerConnection::fileRequestStarted, _renderer, &RemoteRenderer::fileRequestStarted);
+        disconnect(this, &DMC_ServerConnection::fileRequestCompleted, _renderer, &RemoteRenderer::fileRequestCompleted);
+    }
 }
 
 void DMC_ServerConnection::joinSession()

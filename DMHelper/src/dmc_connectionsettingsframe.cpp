@@ -16,7 +16,6 @@ DMC_ConnectionSettingsFrame::DMC_ConnectionSettingsFrame(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->edtURL, &QLineEdit::textChanged, this, &DMC_ConnectionSettingsFrame::urlTextChanged);
-    connect(ui->cmbInvites, &QComboBox::currentTextChanged, this, &DMC_ConnectionSettingsFrame::inviteChanged);
     connect(ui->btnReset, &QAbstractButton::clicked, this, &DMC_ConnectionSettingsFrame::resetUrl);
     connect(ui->btnCreateUser, &QAbstractButton::clicked, this, &DMC_ConnectionSettingsFrame::createUser);
     connect(ui->btnEditInvites, &QAbstractButton::clicked, this, &DMC_ConnectionSettingsFrame::editInvites);
@@ -104,12 +103,14 @@ void DMC_ConnectionSettingsFrame::urlTextChanged(const QString& text)
     _settings->setURLString(correctedText);
 }
 
-void DMC_ConnectionSettingsFrame::inviteChanged(const QString& invite)
+void DMC_ConnectionSettingsFrame::inviteChanged(int index)
 {
-    if(!_settings)
+    if((!_settings) || (index < 0) || (index >= ui->cmbInvites->count()))
         return;
 
-    _settings->setCurrentInvite(invite);
+    QString invite = ui->cmbInvites->itemData(index).toString();
+    if(!invite.isEmpty())
+        _settings->setCurrentInvite(invite);
 }
 
 void DMC_ConnectionSettingsFrame::editInvites()
@@ -128,6 +129,8 @@ void DMC_ConnectionSettingsFrame::populateInvites()
     if(!_settings)
         return;
 
+    disconnect(ui->cmbInvites, qOverload<int>(&QComboBox::currentIndexChanged), this, &DMC_ConnectionSettingsFrame::inviteChanged);
+
     ui->cmbInvites->clear();
 
     QStringList invites = _settings->getInvites();
@@ -140,9 +143,11 @@ void DMC_ConnectionSettingsFrame::populateInvites()
         }
     }
 
+    connect(ui->cmbInvites, qOverload<int>(&QComboBox::currentIndexChanged), this, &DMC_ConnectionSettingsFrame::inviteChanged);
+
     for(int i = 0; i < ui->cmbInvites->count(); ++i)
     {
-        if(ui->cmbInvites->currentData().toString() == _settings->getCurrentInvite())
+        if(ui->cmbInvites->itemData(i).toString() == _settings->getCurrentInvite())
         {
             ui->cmbInvites->setCurrentIndex(i);
             return;
@@ -151,4 +156,5 @@ void DMC_ConnectionSettingsFrame::populateInvites()
 
     if((ui->cmbInvites->count() > 0) && (_settings->getCurrentInvite().isEmpty()))
         _settings->setCurrentInvite(ui->cmbInvites->currentData().toString());
+
 }

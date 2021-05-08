@@ -36,8 +36,8 @@ public:
     virtual int getFileType() const;
     virtual void setFileType(int filetype);
 
-    virtual QString getData() const;
-    virtual void setData(const QString& data);
+    virtual QByteArray getData() const;
+    virtual void setData(const QByteArray& data);
 
     virtual QString getDescriptor() const;
 
@@ -59,7 +59,7 @@ protected:
     CampaignObjectBase* _object;
     QString _filename;
     int _filetype;
-    QString _data;
+    QByteArray _data;
     QString _md5;
     QString _uuid;
     QString _description;

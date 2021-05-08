@@ -25,7 +25,7 @@ protected slots:
     void createUser();
     void userCreated(int requestID, const QString& username, const QString& userId, const QString& email);
     void urlTextChanged(const QString& text);
-    void inviteChanged(const QString& invite);
+    void inviteChanged(int index);
     void editInvites();
 
 private:

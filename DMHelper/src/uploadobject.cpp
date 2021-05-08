@@ -100,12 +100,12 @@ void UploadObject::setFileType(int filetype)
     _filetype = filetype;
 }
 
-QString UploadObject::getData() const
+QByteArray UploadObject::getData() const
 {
     return _data;
 }
 
-void UploadObject::setData(const QString& data)
+void UploadObject::setData(const QByteArray& data)
 {
     _data = data;
 }

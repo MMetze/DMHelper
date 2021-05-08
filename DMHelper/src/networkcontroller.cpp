@@ -734,7 +734,7 @@ void NetworkController::startObjectUpload(UploadObject* uploadObject)
         else
         {
             if(uploadObject->getFilename().isEmpty())
-                uploadObject->setStatus(_networkManager->uploadData(uploadObject->getData().toUtf8()));
+                uploadObject->setStatus(_networkManager->uploadData(uploadObject->getData()));
             else
                 uploadObject->setStatus(_networkManager->uploadFile(uploadObject->getFilename()));
 
@@ -835,6 +835,7 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
         result->setDescription(imageName);
         result->setFileType(DMHelper::FileType_Image);
         result->setStatus(UploadObject::Status_NotStarted);
+        result->setData(data);
         qDebug() << "[NetworkController] Uploading image " << image << " with name: " << imageName << "data with MD5 hash HEX: " << result->getMD5();
     }
 
@@ -860,6 +861,7 @@ UploadObject* NetworkController::uploadPixmap(QPixmap pixmap, const QString& pix
         result->setDescription(pixmapName);
         result->setFileType(DMHelper::FileType_Image);
         result->setStatus(UploadObject::Status_NotStarted);
+        result->setData(data);
         qDebug() << "[NetworkController] Uploading pixmap " << pixmap << " with name: " << pixmapName << "data with MD5 hash HEX: " << result->getMD5();
     }
 
@@ -957,7 +959,7 @@ bool NetworkController::uploadMap(Map* map)
     }
 
     _fowUpload = new UploadObject();
-    _fowUpload->setData(doc.toString());
+    _fowUpload->setData(doc.toString().toUtf8());
     _fowUpload->setFileType(DMHelper::FileType_Text);
     _fowUpload->setDescription(QString("Fog of War: ") + map->getName());
     return true;
@@ -982,7 +984,7 @@ bool NetworkController::uploadEncounterText(EncounterText* encounterText)
         if(!_uploadedFiles.contains(textMD5))
         {
             textUpload = new UploadObject();
-            textUpload->setData(encounterText->getText());
+            textUpload->setData(encounterText->getText().toUtf8());
             textUpload->setDescription(QString("Text: ") + encounterText->getName());
             textUpload->setFileType(DMHelper::FileType_Text);
             textUpload->setMD5(textMD5);
@@ -997,7 +999,7 @@ bool NetworkController::uploadEncounterText(EncounterText* encounterText)
         if(!_uploadedFiles.contains(translatedMD5))
         {
             translateUpload = new UploadObject();
-            translateUpload->setData(encounterText->getTranslatedText());
+            translateUpload->setData(encounterText->getTranslatedText().toUtf8());
             translateUpload->setDescription(QString("Translated Text: ") + encounterText->getName());
             translateUpload->setFileType(DMHelper::FileType_Text);
             translateUpload->setMD5(translatedMD5);
