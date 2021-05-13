@@ -37,7 +37,11 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
 {
     QDomElement payloadElement;
 
-    if(!payloadData.isEmpty())
+    if(payloadData.isEmpty())
+    {
+        resetRendering();
+    }
+    else
     {
 //        QString payloadString = payloadData;
 //        payloadString = QString("<root>") + payloadString.replace(QString("\\"""), QString("""")) + QString("</root>");
@@ -62,60 +66,56 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
     QRegularExpressionMatch matchFoW = reFoW.match(imageData);
     QString fowMD5 = matchFoW.captured(1);
     QString fowUuid = matchFoW.captured(2);
-    if((!_fow) || (_fow->getMD5() != fowMD5) || (_fow->isNotStarted()))
+
+    // If the existing FoW is not the new one, delete it
+    if((_fow) && (_fow->getMD5() != fowMD5))
     {
         _fowPmp = QPixmap();
-        if((_fow) && (_fow->getMD5() != fowMD5))
-        {
-            qDebug() << "[RemoteRenderer] Deleting FoW wrapper for md5: " << _fow->getMD5();
-            _fow->deleteLater();
-            _fow = nullptr;
-        }
-
-        if(_fow)
-        {
-            qDebug() << "[RemoteRenderer] Restarting download for FoW image: " << fowMD5;
-            _fow->getFile();
-        }
-        else if((!fowMD5.isEmpty()) && (!fowUuid.isEmpty()))
-        {
-            qDebug() << "[RemoteRenderer] New FoW image found: " << fowMD5;
-            _fow = new RemoteRenderer_FileWrapper(fowMD5, fowUuid, DMHelper::FileType_Image);
-            connect(_fow, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
-            connect(_fow, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setFowData);
-            _fow->getFile();
-        }
+        qDebug() << "[RemoteRenderer] Deleting FoW wrapper for md5: " << _fow->getMD5();
+        _fow->deleteLater();
+        _fow = nullptr;
     }
+
+    // If there isn't an FoW wrapper, create one if needed
+    if((!_fow) && (!fowUuid.isEmpty()))
+    {
+        qDebug() << "[RemoteRenderer] New FoW image found: " << fowMD5 << ", UUID: " << fowUuid;
+        _fow = new RemoteRenderer_FileWrapper(fowMD5, fowUuid, DMHelper::FileType_Image);
+        connect(_fow, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
+        connect(_fow, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setFowData);
+    }
+
+    // If the current FoW download has not been started, start it
+    if((_fow) && (_fow->isNotStarted()))
+        _fow->getFile();
 
     QRegularExpression reBackground("<background(?: type=)?(.*)>(.*),(.*)<\\/background>");
     QRegularExpressionMatch matchBackground = reBackground.match(imageData);
     QString backgroundTypeString = matchBackground.captured(1);
     QString backgroundMD5 = matchBackground.captured(2);
     QString backgroundUuid = matchBackground.captured(3);
-    if((!_background) || (_background->getMD5() != backgroundMD5) || (_background->isNotStarted()))
+
+    // If the existing background is not the new one, delete it
+    if((_background) && (_background->getMD5() != backgroundMD5))
     {
         _backgroundPmp = QPixmap();
-        if((_background) && (_background->getMD5() != backgroundMD5))
-        {
-            qDebug() << "[RemoteRenderer] Deleting Background wrapper for md5: " << _background->getMD5();
-            _background->deleteLater();
-            _background = nullptr;
-        }
-
-        if(_background)
-        {
-            qDebug() << "[RemoteRenderer] Restarting download for Background image: " << backgroundMD5;
-            _background->getFile();
-        }
-        else if((!backgroundMD5.isEmpty()) && (!backgroundUuid.isEmpty()))
-        {
-            qDebug() << "[RemoteRenderer] New Background image found: " << backgroundMD5 << ", UUID: " << backgroundUuid;
-            _background = new RemoteRenderer_FileWrapper(backgroundMD5, backgroundUuid, backgroundTypeString.toInt());
-            connect(_background, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
-            connect(_background, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setBackgroundData);
-            _background->getFile();
-        }
+        qDebug() << "[RemoteRenderer] Deleting background wrapper for md5: " << _background->getMD5();
+        _background->deleteLater();
+        _background = nullptr;
     }
+
+    // If there isn't a background wrapper, create one if needed
+    if((!_background) && (!backgroundUuid.isEmpty()))
+    {
+        qDebug() << "[RemoteRenderer] New Background image found: " << backgroundMD5 << ", UUID: " << backgroundUuid << ", type: " << backgroundTypeString;
+        _background = new RemoteRenderer_FileWrapper(backgroundMD5, backgroundUuid, backgroundTypeString.toInt());
+        connect(_background, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
+        connect(_background, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setBackgroundData);
+    }
+
+    // If the current FoW download has not been started, start it
+    if((_background) && (_background->isNotStarted()))
+        _background->getFile();
 
     requestPayloadData();
 }
@@ -215,17 +215,7 @@ void RemoteRenderer::fileRequestCompleted(int requestId, const QString& fileMD5,
 
 void RemoteRenderer::reset()
 {
-    if(_activeObject)
-    {
-        _activeObject->deleteLater();
-        _activeObject = nullptr;
-    }
-
-    if(_renderer)
-    {
-        _renderer->deleteLater();
-        _renderer = nullptr;
-    }
+    resetRendering();
 
     if(_background)
     {
@@ -272,6 +262,12 @@ void RemoteRenderer::dataComplete()
 {
     if(!isComplete())
         return;
+
+    if(_renderer)
+    {
+        qDebug() << "[RemoteRenderer] ERROR: Unexpected renderer found prior to creating appropriate renderer: " << _renderer;
+        return;
+    }
 
     if(_activeObject)
     {
@@ -334,20 +330,9 @@ void RemoteRenderer::parsePayloadData(const QDomElement& element)
     if(_activeObject)
     {
         if(_activeObject->getID() == QUuid(element.attribute(QString("_baseID"))))
-        {
             return;
-        }
-        else
-        {
-            _activeObject->deleteLater();
-            _activeObject = nullptr;
 
-            if(_renderer)
-            {
-                _renderer->deleteLater();
-                _renderer = nullptr;
-            }
-        }
+        resetRendering();
     }
 
     QString tagName = element.tagName();
@@ -395,6 +380,23 @@ void RemoteRenderer::payloadDataRequested(const QString& md5String, const QStrin
     connect(fileWrapper, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::payloadDataAvailable);
     _payloadFiles.append(fileWrapper);
 }
+
+void RemoteRenderer::resetRendering()
+{
+    if(_renderer)
+    {
+        _renderer->stopRendering();
+        _renderer->deleteLater();
+        _renderer = nullptr;
+    }
+
+    if(_activeObject)
+    {
+        _activeObject->deleteLater();
+        _activeObject = nullptr;
+    }
+}
+
 
 RemoteRenderer_FileWrapper::RemoteRenderer_FileWrapper(const QString& md5, const QString& uuid, int fileType) :
     _md5(md5),

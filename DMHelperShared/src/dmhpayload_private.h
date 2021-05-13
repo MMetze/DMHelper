@@ -19,6 +19,8 @@ public:
     void fromString(const QString& data);
     QString toString() const;
 
+    void clear();
+
 private:
     QString _imageFile;
     QString _audioFile;

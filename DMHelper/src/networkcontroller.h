@@ -85,13 +85,18 @@ private slots:
     QByteArray getFileMD5(const QString& filename);
     QByteArray getDataMD5(const QByteArray& data);
 
+    void cancelObjectUpload();
+    void cancelBackgroundUpload();
+    void cancelFoWUpload();
+    void cancelDependencyUpload();
+
 private:
     DMHNetworkManager* _networkManager;
     DMHPayload _payload;
     CampaignObjectBase* _currentObject;
     QList<UploadObject*> _tracks;
     UploadObject* _backgroundUpload;
-    qint64 _backgroundCacheKey;
+    qint64 _backgroundCacheKey; // TODO: check if this has any value!
     UploadObject* _fowUpload;
     QString _backgroundColor;
     QList<UploadObject*> _dependencies;

@@ -25,6 +25,8 @@ public:
     void fromString(const QString& data);
     QString toString() const;
 
+    void clear();
+
 private:
     // No copy constructor allowed
     DMHPayload(const DMHPayload& other);

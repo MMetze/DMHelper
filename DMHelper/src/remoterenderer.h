@@ -45,6 +45,7 @@ private:
     void parsePayloadData(const QDomElement& element);
     void requestPayloadData();
     void payloadDataRequested(const QString& md5String, const QString& uuid, int fileType);
+    void resetRendering();
 
     CampaignObjectBase* _activeObject;
     CampaignObjectRenderer* _renderer;

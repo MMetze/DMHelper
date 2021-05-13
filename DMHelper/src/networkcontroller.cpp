@@ -124,44 +124,40 @@ void NetworkController::uploadImage(QImage background)
 
 void NetworkController::uploadImage(QImage background, QColor color)
 {
-    if(!_enabled)
+    if((!_enabled) || (background.isNull()))
         return;
 
     bool changed = false;
 
     qDebug() << "[NetworkController] Uploading image: " << background << ", color: " << color;
 
-    if((!background.isNull()) && (background.cacheKey() != _backgroundCacheKey))
+    if(_currentObject)
     {
+        cancelObjectUpload();
+        cancelDependencyUpload();
         changed = true;
-        if(_backgroundUpload)
-        {
-            if(_backgroundUpload->getStatus() > 0)
-                _networkManager->abortRequest(_backgroundUpload->getStatus());
+    }
 
-            delete _backgroundUpload;
-            _backgroundUpload = nullptr;
-        }
+    if(background.cacheKey() != _backgroundCacheKey)
+    {
+        cancelBackgroundUpload();
 
         _backgroundCacheKey = background.cacheKey();
         _backgroundUpload = uploadImage(background, QString("Published Image"));
         startObjectUpload(_backgroundUpload);
+        changed = true;
     }
 
     if(_fowUpload)
     {
-        if(_fowUpload->getStatus() > 0)
-            _networkManager->abortRequest(_fowUpload->getStatus());
-
-        delete _fowUpload;
-        _fowUpload = nullptr;
+        cancelFoWUpload();
         changed = true;
     }
 
     if(color.name() != _backgroundColor)
     {
-        changed = true;
         _backgroundColor = color.name();
+        changed = true;
     }
 
     if(changed)
@@ -189,37 +185,12 @@ void NetworkController::cancelUpload()
     if(!_enabled)
         return;
 
-    if(_currentObject)
-    {
-        disconnect(_currentObject, nullptr, this, nullptr);
-        _currentObject = nullptr;
-    }
+    cancelObjectUpload();
+    cancelBackgroundUpload();
+    cancelFoWUpload();
+    cancelDependencyUpload();
 
-    if(_backgroundUpload)
-    {
-        if(_backgroundUpload->getStatus() > 0)
-            _networkManager->abortRequest(_backgroundUpload->getStatus());
-
-        delete _backgroundUpload;
-        _backgroundUpload = nullptr;
-    }
-
-    if(_fowUpload)
-    {
-        if(_fowUpload->getStatus() > 0)
-            _networkManager->abortRequest(_fowUpload->getStatus());
-
-        delete _fowUpload;
-        _fowUpload = nullptr;
-    }
-
-    while(_dependencies.count() > 0)
-    {
-        if((_dependencies.at(0)) && (_dependencies.at(0)->getStatus() > 0))
-            _networkManager->abortRequest(_dependencies.at(0)->getStatus());
-
-        delete _dependencies.takeAt(0);
-    }
+    _payload.clear();
 
     //_payload.setImageFile(QString());
     //uploadPayload();
@@ -730,8 +701,18 @@ void NetworkController::startObjectUpload(UploadObject* uploadObject)
     {
         if(uploadObject->hasMD5())
         {
-            uploadObject->setStatus(_networkManager->fileExists(uploadObject->getMD5(), uploadObject->getUuid()));
-            qDebug() << "[NetworkController] Checking if object exists: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", UUID: " << uploadObject->getUuid() << ", Request: " << uploadObject->getStatus();
+            if(isAlreadyUploaded(uploadObject->getMD5()))
+            {
+                qDebug() << "[NetworkController] Object known and already uploaded: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", Request: " << uploadObject->getStatus();
+                uploadObject->setUuid(_uploadedFiles.value(uploadObject->getMD5()));
+                uploadObject->setStatus(UploadObject::Status_Exists);
+                existsCompleted(UploadObject::Status_Exists, uploadObject->getMD5(), uploadObject->getUuid(), QString(), true);
+            }
+            else
+            {
+                uploadObject->setStatus(_networkManager->fileExists(uploadObject->getMD5(), uploadObject->getUuid()));
+                qDebug() << "[NetworkController] Checking if object exists: " << uploadName << ", MD5: " << uploadObject->getMD5() << ", UUID: " << uploadObject->getUuid() << ", Request: " << uploadObject->getStatus();
+            }
         }
         else
         {
@@ -824,10 +805,11 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
     if((!_enabled) || (image.isNull()))
         return nullptr;
 
+    /*
     QByteArray data = QByteArray::fromRawData(reinterpret_cast<const char*>(image.bits()), image.sizeInBytes());
     UploadObject* result = nullptr;
+    */
 
-    /*
     QByteArray data;
     QBuffer buffer(&data);
     if(!buffer.open(QIODevice::WriteOnly))
@@ -835,7 +817,6 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
 
     UploadObject* result = nullptr;
     if(image.save(&buffer, "PNG"))
-    */
     {
         result = new UploadObject(nullptr, UploadObject::Status_Error);
         result->setMD5(getDataMD5(data));
@@ -846,7 +827,7 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
         qDebug() << "[NetworkController] Uploading image " << image << " with name: " << imageName << "data with MD5 hash HEX: " << result->getMD5();
     }
 
-    //buffer.close();
+    buffer.close();
 
     return result;
 }
@@ -1196,5 +1177,50 @@ QByteArray NetworkController::getDataMD5(const QByteArray& data)
 {
     return QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex(0);
 }
+
+void NetworkController::cancelObjectUpload()
+{
+    if(!_currentObject)
+        return;
+
+    disconnect(_currentObject, nullptr, this, nullptr);
+    _currentObject = nullptr;
+}
+
+void NetworkController::cancelBackgroundUpload()
+{
+    if(!_backgroundUpload)
+        return;
+
+    if(_backgroundUpload->getStatus() > 0)
+        _networkManager->abortRequest(_backgroundUpload->getStatus());
+
+    delete _backgroundUpload;
+    _backgroundUpload = nullptr;
+}
+
+void NetworkController::cancelFoWUpload()
+{
+    if(!_fowUpload)
+        return;
+
+    if(_fowUpload->getStatus() > 0)
+        _networkManager->abortRequest(_fowUpload->getStatus());
+
+    delete _fowUpload;
+    _fowUpload = nullptr;
+}
+
+void NetworkController::cancelDependencyUpload()
+{
+    while(_dependencies.count() > 0)
+    {
+        if((_dependencies.at(0)) && (_dependencies.at(0)->getStatus() > 0))
+            _networkManager->abortRequest(_dependencies.at(0)->getStatus());
+
+        delete _dependencies.takeAt(0);
+    }
+}
+
 
 #endif // INCLUDE_NETWORK_SUPPORT

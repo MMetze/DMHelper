@@ -56,3 +56,9 @@ QString DMHPayload::toString() const
 {
     return d->toString();
 }
+
+void DMHPayload::clear()
+{
+    d->clear();
+}
+

@@ -75,3 +75,11 @@ QString DMHPayload_Private::toString() const
 
     return result;
 }
+
+void DMHPayload_Private::clear()
+{
+    _imageFile.clear();
+    _audioFile.clear();
+    _data.clear();
+}
+
