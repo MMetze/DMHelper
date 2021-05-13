@@ -72,7 +72,7 @@ QComboBox{background-image: url(:/img/data/parchment.jpg);}</string>
           </property>
           <property name="icon">
            <iconset resource="dmc_resources.qrc">
-            <normaloff>:/img/data/icon_networkconnection_off.png</normaloff>:/img/data/icon_networkconnection_off.png</iconset>
+            <normaloff>:/img/data/icon-die-disconnected.png</normaloff>:/img/data/icon-die-disconnected.png</iconset>
           </property>
           <property name="iconSize">
            <size>

@@ -21,5 +21,7 @@
         <file>data/icon_options.png</file>
         <file>data/icon_close.png</file>
         <file>data/dmhelper_opaque.png</file>
+        <file>data/icon-die-connected.png</file>
+        <file>data/icon-die-disconnected.png</file>
     </qresource>
 </RCC>

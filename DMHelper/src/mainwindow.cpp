@@ -424,7 +424,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), pubWindow, SLOT(setImageNoScale(QImage)));
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), this, SLOT(handleAnimationPreview(QImage)));
 
-    connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
+    connect(&bestiaryDlg, SIGNAL(publishMonsterImage(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -596,7 +596,7 @@ MainWindow::MainWindow(QWidget *parent) :
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    connect(mapFrame, SIGNAL(publishImage(QImage)),this, SIGNAL(dispatchPublishImage(QImage)));
     connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(mapFrame, SIGNAL(animationStarted(CampaignObjectBase*)), this, SLOT(handleAnimationStarted(CampaignObjectBase*)));
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
@@ -685,12 +685,12 @@ MainWindow::MainWindow(QWidget *parent) :
     qApp->processEvents();
     qDebug() << "[MainWindow] Creating Reference Tabs";
     previewFrame = new PublishFrame(this);
-    connect(previewFrame,SIGNAL(arrowVisibleChanged(bool)),pubWindow,SLOT(setArrowVisible(bool)));
-    connect(previewFrame,SIGNAL(arrowVisibleChanged(bool)),previewFrame,SLOT(setArrowVisible(bool)));
-    connect(previewFrame,SIGNAL(positionChanged(QPointF)),previewFrame,SLOT(setArrowPosition(QPointF)));
-    connect(previewFrame,SIGNAL(positionChanged(QPointF)),pubWindow,SLOT(setArrowPosition(QPointF)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage)),previewFrame,SLOT(setImage(QImage)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage,QColor)),previewFrame,SLOT(setImage(QImage)));
+    connect(previewFrame, SIGNAL(arrowVisibleChanged(bool)), pubWindow, SLOT(setArrowVisible(bool)));
+    connect(previewFrame, SIGNAL(arrowVisibleChanged(bool)), previewFrame, SLOT(setArrowVisible(bool)));
+    connect(previewFrame, SIGNAL(positionChanged(QPointF)), previewFrame, SLOT(setArrowPosition(QPointF)));
+    connect(previewFrame, SIGNAL(positionChanged(QPointF)), pubWindow, SLOT(setArrowPosition(QPointF)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage)), previewFrame, SLOT(setImage(QImage)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), previewFrame, SLOT(setImage(QImage)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), previewFrame, SLOT(setPointerFile(const QString&)));
     previewFrame->setPointerFile(_options->getPointerFile());
     previewDlg = createDialog(previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
@@ -770,8 +770,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString,QString)));
     //_networkController->enableNetworkController(_options->getNetworkEnabled());
-    connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
-    connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
+
+    connect(&bestiaryDlg, SIGNAL(publishMonsterImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
+    connect(encounterTextEdit, SIGNAL(publishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
+    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
+    connect(partyFrame, SIGNAL(publishPartyImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
+    connect(mapFrame, SIGNAL(publishMap(CampaignObjectBase*)), _networkController, SLOT(uploadObject(CampaignObjectBase*)));
+
+    //connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
+    //connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
     connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(QColor)), _networkController, SLOT(setBackgroundColor(QColor)));
     //connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     // TODO: _battleDlgMgr->setNetworkManager(_networkController);

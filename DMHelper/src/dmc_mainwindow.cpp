@@ -150,9 +150,9 @@ void DMC_MainWindow::resizeEvent(QResizeEvent *event)
 void DMC_MainWindow::connectToggled(bool checked)
 {
     if(checked)
-        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon_networkconnection_on.png"))));
+        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon-die-connected.png"))));
     else
-        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon_networkconnection_off.png"))));
+        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon-die-disconnected.png"))));
 
     if(_serverConnection)
         _serverConnection->connectServer(checked);
@@ -234,7 +234,7 @@ void DMC_MainWindow::updatePixmap()
     else
     {
         QPixmap newPixmap = QPixmap(QString(":/img/data/dmc_background.png"));
-        ui->lblImage->setPixmap(newPixmap.scaled(ui->frame->size(), Qt::KeepAspectRatioByExpanding));
+        ui->lblImage->setPixmap(newPixmap.scaled(ui->frame->size(), Qt::KeepAspectRatio));
     }
 }
 

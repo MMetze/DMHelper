@@ -629,8 +629,10 @@ void NetworkController::attemptCampaignObjectUpload()
             Map* map = dynamic_cast<Map*>(_currentObject);
             if(map)
             {
+                changed = true;
                 _backgroundUpload->setFileType(map->isInitialized() ? DMHelper::FileType_Image : DMHelper::FileType_Video);
-                changed = uploadMap(map) ? true : changed;
+                if(uploadMap(map))
+                    _payload.setData(QString());
             }
         }
         else if(_currentObject->getObjectType() == DMHelper::CampaignType_Text)
@@ -822,6 +824,10 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
     if((!_enabled) || (image.isNull()))
         return nullptr;
 
+    QByteArray data = QByteArray::fromRawData(reinterpret_cast<const char*>(image.bits()), image.sizeInBytes());
+    UploadObject* result = nullptr;
+
+    /*
     QByteArray data;
     QBuffer buffer(&data);
     if(!buffer.open(QIODevice::WriteOnly))
@@ -829,6 +835,7 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
 
     UploadObject* result = nullptr;
     if(image.save(&buffer, "PNG"))
+    */
     {
         result = new UploadObject(nullptr, UploadObject::Status_Error);
         result->setMD5(getDataMD5(data));
@@ -839,7 +846,8 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
         qDebug() << "[NetworkController] Uploading image " << image << " with name: " << imageName << "data with MD5 hash HEX: " << result->getMD5();
     }
 
-    buffer.close();
+    //buffer.close();
+
     return result;
 }
 
@@ -892,19 +900,19 @@ void NetworkController::updateImagePayload()
             else
                 imagePayload += QString("<background ") + QString("type=""") + QString::number(_backgroundUpload->getFileType()) + QString(""">");
             imagePayload += _backgroundUpload->getDescriptor() + QString("</background>");
+        }
+    }
 
-            if((_fowUpload) && (_fowUpload->isValid()))
-            {
-                if(_fowUpload->getStatus() < UploadObject::Status_Complete)
-                {
-                    startObjectUpload(_fowUpload);
-                    payloadReady = false;
-                }
-                else
-                {
-                    imagePayload += QString("<fow>") + _fowUpload->getDescriptor() + QString("</fow>");
-                }
-            }
+    if((_fowUpload) && (_fowUpload->isValid()))
+    {
+        if(_fowUpload->getStatus() < UploadObject::Status_Complete)
+        {
+            startObjectUpload(_fowUpload);
+            payloadReady = false;
+        }
+        else
+        {
+            imagePayload += QString("<fow>") + _fowUpload->getDescriptor() + QString("</fow>");
         }
     }
 
@@ -930,6 +938,9 @@ bool NetworkController::uploadMap(Map* map)
     if(!map)
         return false;
 
+    if(_fowUpload)
+        return false;
+
     QUndoStack* undoStack = map->getUndoStack();
     if(!undoStack)
         return false;
@@ -950,6 +961,7 @@ bool NetworkController::uploadMap(Map* map)
         }
     }
 
+    /*
     if(_fowUpload)
     {
         if(_fowUpload->getStatus() > 0)
@@ -957,11 +969,13 @@ bool NetworkController::uploadMap(Map* map)
         delete _fowUpload;
         _fowUpload = nullptr;
     }
+    */
 
     _fowUpload = new UploadObject();
     _fowUpload->setData(doc.toString().toUtf8());
     _fowUpload->setFileType(DMHelper::FileType_Text);
     _fowUpload->setDescription(QString("Fog of War: ") + map->getName());
+
     return true;
 }
 

@@ -563,6 +563,7 @@ void MapFrame::publishClicked(bool checked)
         //emit publishImage(pub, ui->framePublish->getColor());
         //emit publishImage(pub, _color);
         emit publishImage(pub);
+        emit publishMap(_mapSource);
         emit showPublishWindow();
         startAudioTrack();
     }

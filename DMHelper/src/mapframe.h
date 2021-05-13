@@ -41,6 +41,7 @@ public:
 
 signals:
     void publishImage(QImage image);
+    void publishMap(CampaignObjectBase* map);
     void openPreview();
     void windowClosed(MapFrame* mapFrame);
     void dirty();

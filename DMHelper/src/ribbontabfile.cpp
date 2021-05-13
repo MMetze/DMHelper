@@ -96,5 +96,5 @@ void RibbonTabFile::hideMRUMenu()
 
 void RibbonTabFile::setNetworkActiveImage(bool active)
 {
-    ui->btnNetworkActive->setIcon(QIcon(active ? QString(":/img/data/icon_networkconnection_on.png") : QString(":/img/data/icon_networkconnection_off.png")));
+    ui->btnNetworkActive->setIcon(QIcon(active ? QString(":/img/data/icon-die-connected.png") : QString(":/img/data/icon-die-disconnected.png")));
 }
