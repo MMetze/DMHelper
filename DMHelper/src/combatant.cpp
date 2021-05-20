@@ -43,6 +43,7 @@ Combatant::Combatant(const QString& name, QObject *parent) :
     _conditions(Condition_None),
     _icon(""),
     _iconPixmap(),
+    _md5(),
     _batchChanges(false),
     _changesMade(false)
 {

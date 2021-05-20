@@ -15,11 +15,14 @@
 
 class AudioTrack;
 class DMHNetworkManager;
-class QNetworkReply;
 class CampaignObjectBase;
 class Map;
 class EncounterText;
 class EncounterBattle;
+class BattleDialogModelEffect;
+class QNetworkReply;
+class QDomElement;
+class QDomDocument;
 
 class NetworkController : public QObject
 {
@@ -77,9 +80,11 @@ private slots:
     bool uploadMap(Map* map);
     bool uploadEncounterText(EncounterText* encounterText);
     bool uploadBattle(EncounterBattle* encounterBattle);
+    void addEffectDependency(QDomDocument& doc, QDomElement& parentElement, BattleDialogModelEffect* effect);
 
     bool validateLogon(const DMHLogon& logon);
 
+    bool isUploading(const QString& md5);
     bool isAlreadyUploaded(const QString& md5);
     void registerUpload(const QString& md5, const QString& uuid);
     QByteArray getFileMD5(const QString& filename);

@@ -14,7 +14,8 @@ BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *p
     _position(0,0),
     _rotation(0),
     _color(115,18,0,64),
-    _tip()
+    _tip(),
+    _md5()
 {
 }
 
@@ -26,7 +27,8 @@ BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& positi
     _position(position),
     _rotation(rotation),
     _color(color),
-    _tip(tip)
+    _tip(tip),
+    _md5()
 {
 }
 
@@ -47,6 +49,7 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
                     element.attribute("colorB",QString::number(0)).toInt(),
                     element.attribute("colorA",QString::number(64)).toInt());
     _tip = element.attribute("tip");
+    _md5 = element.attribute("md5");
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -67,6 +70,17 @@ QDomElement BattleDialogModelEffect::outputNetworkXML(QDomDocument &doc)
     element.setAttribute("tip", _tip);
 
     return element;
+}
+
+
+QString BattleDialogModelEffect::getMD5() const
+{
+    return _md5;
+}
+
+void BattleDialogModelEffect::setMD5(const QString& md5)
+{
+    _md5 = md5;
 }
 
 BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
@@ -251,6 +265,7 @@ void BattleDialogModelEffect::internalOutputXML(QDomDocument &doc, QDomElement &
     element.setAttribute("colorB", _color.blue());
     element.setAttribute("colorA", _color.alpha());
     element.setAttribute("tip", _tip);
+    element.setAttribute("md5", _md5);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
@@ -282,4 +297,5 @@ void BattleDialogModelEffect::copyValues(const BattleDialogModelEffect &other)
     setImageRotation(other.getImageRotation());
     setImageFile(other.getImageFile());
     _tip = other._tip;
+    _md5 = other._md5;
 }

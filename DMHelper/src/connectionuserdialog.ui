@@ -98,7 +98,7 @@
      <item row="2" column="1">
       <widget class="QLabel" name="label_8">
        <property name="text">
-        <string>Password requirements: length at least 8 characters, including at least one number or character.</string>
+        <string>Password requirements: length at least 8 characters, including at least one number and character.</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>

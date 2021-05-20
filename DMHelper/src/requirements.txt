@@ -144,8 +144,13 @@ NewUser
 asdfasdf1
 
 
+Make the Network button look enabled, but not activated
+Add network logging details
 1. Add createuser to DMH
 2. use usr_mng info to get user ID if not known
+Bugs:
+* error message if create user fails
+* error message if anything fails!!!
 
 
 https://www.youtube.com/watch?v=fIuO3RpMvHg

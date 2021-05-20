@@ -37,7 +37,8 @@ public:
     static ScaledPixmap* defaultPixmap();
     static void cleanupDefaultPixmap();
 
-    bool setBasePixmap(const QString& basePixmap);
+    bool setBasePixmap(const QString& basePixmapFile);
+    bool setBasePixmap(QPixmap basePixmap);
     bool isValid();
     void invalidate();
 

@@ -85,10 +85,6 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
         connect(_fow, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setFowData);
     }
 
-    // If the current FoW download has not been started, start it
-    if((_fow) && (_fow->isNotStarted()))
-        _fow->getFile();
-
     QRegularExpression reBackground("<background(?: type=)?(.*)>(.*),(.*)<\\/background>");
     QRegularExpressionMatch matchBackground = reBackground.match(imageData);
     QString backgroundTypeString = matchBackground.captured(1);
@@ -112,6 +108,10 @@ void RemoteRenderer::parseImageData(const QString& imageData, const QString& pay
         connect(_background, &RemoteRenderer_FileWrapper::requestFile, this, &RemoteRenderer::requestFile);
         connect(_background, &RemoteRenderer_FileWrapper::dataAvailable, this, &RemoteRenderer::setBackgroundData);
     }
+
+    // If the current FoW download has not been started, start it
+    if((_fow) && (_fow->isNotStarted()))
+        _fow->getFile();
 
     // If the current FoW download has not been started, start it
     if((_background) && (_background->isNotStarted()))

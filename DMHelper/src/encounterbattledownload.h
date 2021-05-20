@@ -3,6 +3,8 @@
 
 #include "encounterbattle.h"
 
+class BattleDialogModelEffect;
+
 class EncounterBattleDownload : public EncounterBattle
 {
     Q_OBJECT
@@ -23,6 +25,8 @@ signals:
 protected:
     virtual void inputXMLBattle(const QDomElement &element, bool isImport) override;
     virtual void inputXMLEffects(const QDomElement &parentElement, bool isImport) override;
+    BattleDialogModelEffect* createEffect(const QDomElement& element, bool isImport);
+    void checkComplete();
 
     QString _cacheDirectory;
 };

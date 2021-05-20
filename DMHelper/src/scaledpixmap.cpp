@@ -37,16 +37,29 @@ void ScaledPixmap::cleanupDefaultPixmap()
     _defaultPixmap = nullptr;
 }
 
-bool ScaledPixmap::setBasePixmap(const QString& basePixmap)
+bool ScaledPixmap::setBasePixmap(const QString& basePixmapFile)
 {
-    if(!QFile::exists(basePixmap))
+    if(!QFile::exists(basePixmapFile))
     {
-        qDebug() << "[ScaledPixmap] Invalid Base Pixmap set: " << basePixmap;
+        qDebug() << "[ScaledPixmap] ERROR: Invalid Base Pixmap set: " << basePixmapFile;
         return false;
     }
 
     invalidate();
-    return _pixmaps[DMHelper::PixmapSize_Full].load(basePixmap);
+    return _pixmaps[DMHelper::PixmapSize_Full].load(basePixmapFile);
+}
+
+bool ScaledPixmap::setBasePixmap(QPixmap basePixmap)
+{
+    if(basePixmap.isNull())
+    {
+        qDebug() << "[ScaledPixmap] ERROR: Invalid Base Pixmap set!";
+        return false;
+    }
+
+    invalidate();
+    _pixmaps[DMHelper::PixmapSize_Full] = basePixmap;
+    return true;
 }
 
 bool ScaledPixmap::isValid()

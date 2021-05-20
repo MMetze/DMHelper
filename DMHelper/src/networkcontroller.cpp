@@ -1054,7 +1054,7 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
         {
             QDomElement combatantElement = combatant->outputNetworkXML(doc);
 
-            if(!isAlreadyUploaded(combatant->getMD5()))
+            if((!isAlreadyUploaded(combatant->getMD5())) && (!isUploading(combatant->getMD5())))
             {
                 UploadObject* tokenUpload = uploadPixmap(combatant->getIconPixmap(DMHelper::PixmapSize_Full), QString("Token for ") + combatant->getName());
                 if(tokenUpload)
@@ -1064,7 +1064,8 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
                     startObjectUpload(tokenUpload);
                 }
             }
-            combatantElement.setAttribute("token", combatant->getMD5());
+            //combatantElement.setAttribute("token", combatant->getMD5());
+            combatantElement.setAttribute("token", UploadObject::getDescriptor(combatant->getMD5(), _uploadedFiles.value(combatant->getMD5())));
 
             combatantsElement.appendChild(combatantElement);
         }
@@ -1076,29 +1077,7 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
         QDomElement effectsElement = doc.createElement("effects");
         for(int i = 0; i < model->getEffectCount(); ++i)
         {
-            BattleDialogModelEffect* effect = model->getEffect(i);
-            if((effect) && (effect->getEffectVisible()))
-            {
-                QDomElement effectElement = effect->outputNetworkXML(doc);
-
-                if(!effect->getImageFile().isEmpty())
-                {
-                    if(!isAlreadyUploaded(effect->getMD5()))
-                    {
-                        if(effect->getMD5().isEmpty())
-                            effect->setMD5(getFileMD5(effect->getImageFile()));
-
-                        UploadObject* effectToken = new UploadObject(nullptr, UploadObject::Status_NotStarted);
-                        effectToken->setFilename(effect->getImageFile());
-                        effectToken->setFileType(DMHelper::FileType_Image);
-                        effectToken->setDescription(QString("Effect Token ") + effect->getImageFile());
-                        _dependencies.append(effectToken);
-                        startObjectUpload(effectToken);
-                    }
-                    effectElement.setAttribute("token", effect->getMD5());
-                }
-                effectsElement.appendChild(effectElement);
-            }
+            addEffectDependency(doc, effectsElement, model->getEffect(i));
         }
         battleElement.appendChild(effectsElement);
     }
@@ -1113,6 +1092,40 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
     _payload.setData(battlePayload);
 
     return true;
+}
+
+void NetworkController::addEffectDependency(QDomDocument& doc, QDomElement& parentElement, BattleDialogModelEffect* effect)
+{
+    //BattleDialogModelEffect* effect = model->getEffect(i);
+    if((!effect) || (!effect->getEffectVisible()))
+        return;
+
+    QDomElement effectElement = effect->outputNetworkXML(doc);
+
+    if(!effect->getImageFile().isEmpty())
+    {
+        if((!isAlreadyUploaded(effect->getMD5())) && (!isUploading(effect->getMD5())))
+        {
+            if(effect->getMD5().isEmpty())
+                effect->setMD5(getFileMD5(effect->getImageFile()));
+
+            UploadObject* effectToken = new UploadObject(nullptr, UploadObject::Status_NotStarted);
+            effectToken->setFilename(effect->getImageFile());
+            effectToken->setMD5(effect->getMD5());
+            effectToken->setFileType(DMHelper::FileType_Image);
+            effectToken->setDescription(QString("Effect Token ") + effect->getImageFile());
+            _dependencies.append(effectToken);
+            startObjectUpload(effectToken);
+        }
+
+        effectElement.setAttribute("token", UploadObject::getDescriptor(effect->getMD5(), _uploadedFiles.value(effect->getMD5())));
+    }
+
+    QList<CampaignObjectBase*> childList = effect->getChildObjects();
+    for(int i = 0; i < childList.count(); ++i)
+        addEffectDependency(doc, effectElement, dynamic_cast<BattleDialogModelEffect*>(childList.at(i)));
+
+    parentElement.appendChild(effectElement);
 }
 
 bool NetworkController::validateLogon(const DMHLogon& logon)
@@ -1139,6 +1152,20 @@ bool NetworkController::validateLogon(const DMHLogon& logon)
     msgBox.exec();
     if(msgBox.clickedButton() == openButton)
         emit requestSettings(DMHelper::OptionsTab_Network);
+
+    return false;
+}
+
+bool NetworkController::isUploading(const QString& md5)
+{
+    if(md5.isEmpty())
+        return false;
+
+    for(int i = 0; i < _dependencies.count(); ++i)
+    {
+        if((_dependencies.at(i)) && (_dependencies.at(i)->getMD5() == md5))
+            return true;
+    }
 
     return false;
 }

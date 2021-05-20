@@ -44,6 +44,9 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual QDomElement outputNetworkXML(QDomDocument &doc) override;
 
+    virtual QString getMD5() const override;
+    virtual void setMD5(const QString& md5) override;
+
     virtual BattleDialogModelEffect* clone() const = 0;
 
     virtual int getEffectType() const = 0;
@@ -106,6 +109,7 @@ protected:
     qreal _rotation;
     QColor _color;
     QString _tip;
+    QString _md5;
 };
 
 

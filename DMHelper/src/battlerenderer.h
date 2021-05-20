@@ -6,6 +6,8 @@
 #include <QPixmap>
 
 class BattleDialogGraphicsScene;
+class BattleDialogModelCombatant;
+class QGraphicsPixmapItem;
 
 class BattleRenderer : public CampaignObjectRenderer
 {
@@ -13,6 +15,16 @@ class BattleRenderer : public CampaignObjectRenderer
 public:
     explicit BattleRenderer(EncounterBattle& battle, QPixmap background, QObject *parent = nullptr);
     virtual ~BattleRenderer() override;
+
+    enum BattleRendererItemChild
+    {
+        BattleRendererItemChild_Base = 0,
+        BattleRendererItemChild_Selection,
+        BattleRendererItemChild_AreaEffect,
+        BattleRendererItemChild_Area,
+        BattleRendererItemChild_PersonalEffect
+    };
+
 
 public slots:
     // From CampaignObjectRenderer
@@ -23,9 +35,10 @@ public slots:
 
 protected:
     void getImageForPublishing(QImage& imageForPublishing);
+    void createCombatantIcon(BattleDialogModelCombatant* combatant);
 
     EncounterBattle& _battle;
-    QPixmap _background;
+    QGraphicsPixmapItem* _background;
     BattleDialogGraphicsScene* _scene;
     QSize _targetSize;
     int _rotation;

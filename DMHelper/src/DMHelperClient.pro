@@ -49,6 +49,7 @@ SOURCES += \
         battledialogmodeleffectfactory.cpp \
         battledialogmodeleffectline.cpp \
         battledialogmodeleffectobject.cpp \
+        battledialogmodeleffectobjectdownload.cpp \
         battledialogmodeleffectradius.cpp \
         battledialogmodeleffectshape.cpp \
         battledialogmodelmonsterbase.cpp \
@@ -144,6 +145,7 @@ HEADERS += \
     battledialogmodeleffectfactory.h \
     battledialogmodeleffectline.h \
     battledialogmodeleffectobject.h \
+    battledialogmodeleffectobjectdownload.h \
     battledialogmodeleffectradius.h \
     battledialogmodeleffectshape.h \
     battledialogmodelmonsterbase.h \

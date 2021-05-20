@@ -540,7 +540,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             else if(factory.getModeValue() == DMHShared::DMH_Message_file_exists)
             {
                 DMHNetworkData_Exists& existsNetworkData = dynamic_cast<DMHNetworkData_Exists&>(*factoryData);
-                qDebug() << "[DMHNetworkManager] File Exist Complete. Filename: " << existsNetworkData.getName() << ", MD5: " << existsNetworkData.getMD5() << ", Exists: " << existsNetworkData.exists();
+                qDebug() << "[DMHNetworkManager] File Exist Complete. Filename: " << existsNetworkData.getName() << ", MD5: " << existsNetworkData.getMD5() << ", UUID: " << existsNetworkData.getUuid() << ", Exists: " << existsNetworkData.exists();
                 emit existsComplete(replyData, existsNetworkData.getMD5(), existsNetworkData.getUuid(), existsNetworkData.getName(), existsNetworkData.exists());
             }
             else if(factory.getModeValue() == DMHShared::DMH_Message_ssn_create)

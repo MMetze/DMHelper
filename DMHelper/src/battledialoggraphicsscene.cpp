@@ -99,17 +99,20 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
         }
     }
 
-    QGraphicsView* view = views().constFirst();
-    if(view)
+    if(views().count() > 0)
     {
-        if(_pointerPixmap.isNull())
-            _pointerPixmap.load(":/img/data/arrow.png");
-        _pointerPixmapItem = addPixmap(_pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-        _pointerPixmapItem->setTransformationMode(Qt::SmoothTransformation);
-        QRectF sizeInScene = view->mapToScene(0, 0, DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE).boundingRect();
-        _pointerPixmapItem->setScale(sizeInScene.width() / static_cast<qreal>(DMHelper::CURSOR_SIZE));
-        _pointerPixmapItem->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
-        _pointerPixmapItem->setVisible(_pointerVisible);
+        QGraphicsView* view = views().constFirst();
+        if(view)
+        {
+            if(_pointerPixmap.isNull())
+                _pointerPixmap.load(":/img/data/arrow.png");
+            _pointerPixmapItem = addPixmap(_pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+            _pointerPixmapItem->setTransformationMode(Qt::SmoothTransformation);
+            QRectF sizeInScene = view->mapToScene(0, 0, DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE).boundingRect();
+            _pointerPixmapItem->setScale(sizeInScene.width() / static_cast<qreal>(DMHelper::CURSOR_SIZE));
+            _pointerPixmapItem->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+            _pointerPixmapItem->setVisible(_pointerVisible);
+        }
     }
 }
 

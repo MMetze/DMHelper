@@ -138,7 +138,11 @@ QString BattleDialogModelEffectObject::getImageFile() const
 
 void BattleDialogModelEffectObject::setImageFile(const QString& imageFile)
 {
-    _imageFile = imageFile;
+    if(_imageFile != imageFile)
+    {
+        _imageFile = imageFile;
+        setMD5(QString());
+    }
 }
 
 qreal BattleDialogModelEffectObject::getImageScaleFactor() const

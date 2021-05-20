@@ -64,7 +64,7 @@ cd ..
 move ".\bin64-client\DMHelper Client 64-bit release Installer.exe" ".\DMHelper Client 64-bit release Installer.exe"
 
 rem Create the zip-file distribution
-"%SEVENZIP_APP%" a -tzip archive.zip .\bin64\packages\com.dmhelperclient.app\data\*
+"%SEVENZIP_APP%" a -tzip archive.zip .\bin64-client\packages\com.dmhelperclient.app\data\*
 del "DMHelper Client 64-bit release.zip"
 rename archive.zip "DMHelper Client 64-bit release.zip"
 
