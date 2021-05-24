@@ -17,6 +17,7 @@ public:
     QDomElement getVersion() const;
     QDomElement getMode() const;
     DMHShared::DMH_Message getModeValue() const;
+    QString getModeString() const;
     QDomElement getState() const;
     DMHShared::DMH_Message_State getStateValue() const;
     QDomElement getError() const;

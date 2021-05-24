@@ -46,6 +46,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab sta
         ui->edtActiveIcon->setText(_options->getActiveIcon());
         ui->edtCombatantFrame->setText(_options->getCombatantFrame());
         ui->edtCountdownFrame->setText(_options->getCountdownFrame());
+/*
 #ifdef INCLUDE_NETWORK_SUPPORT
         ui->chkEnableNetworkClient->setChecked(_options->getNetworkEnabled());
         ui->edtUserName->setText(_options->getUserName());
@@ -68,9 +69,11 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab sta
         ui->edtInviteID->setEnabled(_options->getNetworkEnabled());
         ui->btnGenerateInvite->setEnabled(_options->getNetworkEnabled());
 #else
+*/
         ui->tabWidget->removeTab(DMHelper::OptionsTab_Network);
+/*
 #endif
-
+*/
         connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
         connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), _options, SLOT(setFontSize(int)));
         connect(ui->chkShowOnDeck, SIGNAL(clicked(bool)), _options, SLOT(setShowOnDeck(bool)));
@@ -87,6 +90,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab sta
         connect(ui->btnCountdownFrame, &QAbstractButton::clicked, this, &OptionsDialog::browseCountdownFrame);
         connect(ui->edtCountdownFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editCountdownFrame);
 
+/*
 #ifdef INCLUDE_NETWORK_SUPPORT
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
         connect(ui->edtURL, SIGNAL(textChanged(QString)), _options, SLOT(setURLString(QString)));
@@ -108,6 +112,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, DMHelper::OptionsTab sta
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), ui->edtInviteID, SLOT(setEnabled(bool)));
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), ui->btnGenerateInvite, SLOT(setEnabled(bool)));
 #endif
+*/
 
         ui->chkEnableUpdates->setChecked(_options->isUpdatesEnabled());
         connect(ui->chkEnableUpdates, SIGNAL(clicked(bool)), _options, SLOT(setUpdatesEnabled(bool)));

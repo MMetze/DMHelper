@@ -150,9 +150,9 @@ void DMC_MainWindow::resizeEvent(QResizeEvent *event)
 void DMC_MainWindow::connectToggled(bool checked)
 {
     if(checked)
-        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon-die-connected.png"))));
+        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon_die_connected.png"))));
     else
-        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon-die-disconnected.png"))));
+        ui->btnConnect->setIcon(QIcon(QPixmap(QString(":/img/data/icon_die_disconnected.png"))));
 
     if(_serverConnection)
         _serverConnection->connectServer(checked);

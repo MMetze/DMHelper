@@ -385,7 +385,7 @@ void OptionsContainer::readSettings()
 #ifdef INCLUDE_NETWORK_SUPPORT
     //setNetworkEnabled(settings.value("networkEnabled",QVariant(false)).toBool());
     setNetworkEnabled(false);
-    setURLString(settings.value("url","").toString());
+    setURLString(settings.value("url","https://dmh.wwpd.de").toString());
     setUserName(settings.value("username","").toString());
     setSavePassword(settings.value("savePassword",QVariant(false)).toBool());
     setPassword(settings.value("password","").toString());

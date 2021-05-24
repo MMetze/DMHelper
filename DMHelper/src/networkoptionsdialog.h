@@ -17,6 +17,10 @@ public:
     explicit NetworkOptionsDialog(OptionsContainer& options, QWidget *parent = nullptr);
     ~NetworkOptionsDialog();
 
+public slots:
+    void logMessage(const QString& message);
+    void logMessageError(int requestID, const QString& errorString);
+
 signals:
 
 protected:

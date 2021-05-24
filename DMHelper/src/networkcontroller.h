@@ -32,11 +32,14 @@ public:
     ~NetworkController();
 
 signals:
-    void requestSettings(DMHelper::OptionsTab startTab);
+    //void requestSettings(DMHelper::OptionsTab startTab);
     void networkEnabledChanged(bool enabled);
+    void openNetworkOptions();
 
     void networkError(int error);
     void networkSuccess();
+    void networkMessage(const QString& message);
+    void networkErrorMessage(int requestID, const QString& message);
 
     void uploadStarted(int requestID, QNetworkReply* reply, const QString& fileName);
     void uploadComplete(int requestID, const QString& fileMD5, const QString& fileUuid);
@@ -62,7 +65,9 @@ private slots:
     void uploadCompleted(int requestID, const QString& fileMD5, const QString& fileUuid);
     void existsCompleted(int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
     bool handleExistsResult(UploadObject* uploadObject, int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
-    void uploadError(int requestID);
+    UploadObject* setRequestError(int requestID);
+    void handleUploadError(int requestID);
+    void handleNetworkError(int requestID, const QString& message);
     void uploadPayload();
 
     void removeTrackIndex(int index);

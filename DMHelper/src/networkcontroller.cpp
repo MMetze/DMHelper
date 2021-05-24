@@ -44,9 +44,10 @@ NetworkController::NetworkController(QObject *parent) :
 {
     connect(_networkManager, SIGNAL(uploadComplete(int, const QString&, const QString&)), this, SLOT(uploadCompleted(int, const QString&, const QString&)));
     connect(_networkManager, SIGNAL(existsComplete(int, const QString&, const QString&, const QString&, bool)), this, SLOT(existsCompleted(int, const QString&, const QString&, const QString&, bool)));
-    connect(_networkManager, SIGNAL(requestError(int)), this, SLOT(uploadError(int)));
+    connect(_networkManager, SIGNAL(requestError(int)), this, SLOT(handleUploadError(int)));
     connect(_networkManager, SIGNAL(requestError(int)), this, SIGNAL(networkError(int)));
     connect(_networkManager, SIGNAL(otherRequestComplete()), this, SIGNAL(networkSuccess()));
+    connect(_networkManager, &DMHNetworkManager::messageError, this, &NetworkController::handleNetworkError);
     connect(_networkManager, &DMHNetworkManager::uploadComplete, this, &NetworkController::uploadComplete);
     connect(_networkManager, &DMHNetworkManager::downloadStarted, this, &NetworkController::downloadStarted);
     connect(_networkManager, &DMHNetworkManager::downloadComplete, this, &NetworkController::downloadComplete);
@@ -111,10 +112,7 @@ void NetworkController::setBackgroundColor(QColor color)
         return;
 
     if(color.name() != _backgroundColor)
-    {
         _backgroundColor = color.name();
-        //updateImagePayload();
-    }
 }
 
 void NetworkController::uploadImage(QImage background)
@@ -191,9 +189,6 @@ void NetworkController::cancelUpload()
     cancelDependencyUpload();
 
     _payload.clear();
-
-    //_payload.setImageFile(QString());
-    //uploadPayload();
 }
 
 void NetworkController::setPayloadData(const QString& data)
@@ -203,8 +198,6 @@ void NetworkController::setPayloadData(const QString& data)
 
     _payload.setData(data);
     uploadPayload();
-
-    //_currentPayloadRequest = _networkManager->uploadData(_payload.toUtf8());
 }
 
 void NetworkController::clearTracks()
@@ -214,11 +207,8 @@ void NetworkController::clearTracks()
 
     while(_tracks.count() > 0)
         removeTrackIndex(0);
-    //_tracks.clear();
 
     updateAudioPayload();
-
-    // uploadPayload();
 }
 
 void NetworkController::clearPayloadData()
@@ -258,7 +248,7 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
     qDebug() << "[NetworkController] Network login updated. URL: " << urlString << ", Username: " << username << ", User ID: " << userId << ", Session: " << sessionID << ", Invite: " << inviteID;
 
     DMHLogon logon(urlString, username, userId, password, sessionID);
-    if(!validateLogon(logon))
+    if(!logon.isValid())
         return;
 
     _networkManager->setLogon(logon);
@@ -267,11 +257,6 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
         _networkManager->getUserInfo();
     else
         userInfoCompleted(-1, logon.getUserName(), logon.getUserId(), QString(), QString(), QString(), false);
-
-    /*
-    clearUploadErrors();
-    //updateAudioPayload();
-    */
 }
 
 void NetworkController::userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled)
@@ -309,7 +294,6 @@ void NetworkController::uploadCompleted(int requestID, const QString& fileMD5, c
             _backgroundUpload->setUuid(fileUuid);
             _backgroundUpload->setStatus(UploadObject::Status_Complete);
             attemptCampaignObjectUpload();
-            //uploadPayload();
         }
 
         return;
@@ -329,7 +313,6 @@ void NetworkController::uploadCompleted(int requestID, const QString& fileMD5, c
             _fowUpload->setUuid(fileUuid);
             _fowUpload->setStatus(UploadObject::Status_Complete);
             attemptCampaignObjectUpload();
-            //uploadPayload();
         }
 
         return;
@@ -352,7 +335,6 @@ void NetworkController::uploadCompleted(int requestID, const QString& fileMD5, c
 
                 qDebug() << "[NetworkController] Upload complete for track: " << _tracks.at(i)->getObject() << ", MD5: " << fileMD5 << ", Uuid: " << fileUuid;
                 updateAudioPayload();
-                //uploadPayload();
             }
             return;
         }
@@ -382,34 +364,6 @@ void NetworkController::uploadCompleted(int requestID, const QString& fileMD5, c
 
     qDebug() << "[NetworkController] ERROR: Unexpected request ID received: " << requestID;
 }
-
-/*
-UploadObject uploadObject = _tracks.at(i);
-if(exists)
-{
-    qDebug() << "[NetworkController] Audio track already exists, updating payload directly.";
-    uploadObject.setStatus(UploadObject::Status_Complete);
-    if(uploadObject.getObject())
-    {
-        uploadObject.getObject()->setMD5(fileMD5);
-    }
-    _tracks[i] = uploadObject;
-    registerUpload(fileMD5, fileUuid);
-    updateAudioPayload();
-}
-else
-{
-    qDebug() << "[NetworkController] Audio track does not exist, beginning upload.";
-    uploadObject.setStatus(UploadObject::Status_NotStarted);
-    if(uploadObject.getObject())
-    {
-        uploadObject.getObject()->setMD5(QString());
-        startObjectUpload(&uploadObject);
-    }
-    _tracks[i] = uploadObject;
-}
-return;
-*/
 
 void NetworkController::existsCompleted(int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists)
 {
@@ -476,29 +430,26 @@ bool NetworkController::handleExistsResult(UploadObject* uploadObject, int reque
     return true;
 }
 
-void NetworkController::uploadError(int requestID)
+UploadObject* NetworkController::setRequestError(int requestID)
 {
     if((_backgroundUpload) && (_backgroundUpload->getStatus() == requestID))
     {
-        qDebug() << "[NetworkController] Upload error discovered for background request " << requestID;
         _backgroundUpload->setStatus(UploadObject::Status_Error);
-        return;
+        return _backgroundUpload;
     }
 
     if((_fowUpload) && (_fowUpload->getStatus() == requestID))
     {
-        qDebug() << "[NetworkController] Upload error discovered for FoW request " << requestID;
         _fowUpload->setStatus(UploadObject::Status_Error);
-        return;
+        return _fowUpload;
     }
 
     for(int i = 0; i < _tracks.count(); ++i)
     {
         if((_tracks.at(i)) && (_tracks.at(i)->getStatus() == requestID))
         {
-            qDebug() << "[NetworkController] Upload audio error discovered for request " << requestID;
             _tracks.at(i)->setStatus(UploadObject::Status_Error);
-            return;
+            return _tracks.at(i);
         }
     }
 
@@ -506,13 +457,42 @@ void NetworkController::uploadError(int requestID)
     {
         if((_dependencies.at(i)) && (_dependencies.at(i)->getStatus() == requestID))
         {
-            qDebug() << "[NetworkController] Upload dependency error discovered for request " << requestID;
             _dependencies.at(i)->setStatus(UploadObject::Status_Error);
-            return;
+            return _dependencies.at(i);
         }
     }
 
-    qDebug() << "[NetworkController] ERROR: Unexpected request ID received in upload error: " << requestID;
+    return nullptr;
+}
+
+void NetworkController::handleUploadError(int requestID)
+{
+    UploadObject* errorObject = setRequestError(requestID);
+    if(errorObject)
+    {
+        qDebug() << "[NetworkController] Upload error discovered for request: " << requestID << ", object: " << errorObject->getDescription() << ", md5: " << errorObject->getMD5();
+        emit networkMessage(QString("Uploading file failed for: ") + errorObject->getDescription());
+    }
+    else
+    {
+        qDebug() << "[NetworkController] ERROR: Unexpected request ID received in upload error: " << requestID;
+        emit networkMessage(QString("Unexpected error uploading file!"));
+    }
+}
+
+void NetworkController::handleNetworkError(int requestID, const QString& message)
+{
+    UploadObject* errorObject = setRequestError(requestID);
+    if(errorObject)
+    {
+        qDebug() << "[NetworkController] Network error discovered for request: " << requestID << ", object: " << errorObject->getDescription() << ", md5: " << errorObject->getMD5() << ". " << message;
+        emit networkMessage(QString("Uploading background image failed for: ") + errorObject->getDescription() + QString(". ") + message);
+    }
+    else
+    {
+        qDebug() << "[NetworkController] ERROR: Unknown request ID received in network error: " << requestID << ". Message: " << message;
+        emit networkMessage(QString("Unexpected network error: ") + message);
+    }
 }
 
 void NetworkController::uploadPayload()
@@ -942,16 +922,6 @@ bool NetworkController::uploadMap(Map* map)
         }
     }
 
-    /*
-    if(_fowUpload)
-    {
-        if(_fowUpload->getStatus() > 0)
-            _networkManager->abortRequest(_fowUpload->getStatus());
-        delete _fowUpload;
-        _fowUpload = nullptr;
-    }
-    */
-
     _fowUpload = new UploadObject();
     _fowUpload->setData(doc.toString().toUtf8());
     _fowUpload->setFileType(DMHelper::FileType_Text);
@@ -1064,7 +1034,6 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
                     startObjectUpload(tokenUpload);
                 }
             }
-            //combatantElement.setAttribute("token", combatant->getMD5());
             combatantElement.setAttribute("token", UploadObject::getDescriptor(combatant->getMD5(), _uploadedFiles.value(combatant->getMD5())));
 
             combatantsElement.appendChild(combatantElement);
@@ -1096,7 +1065,6 @@ bool NetworkController::uploadBattle(EncounterBattle* encounterBattle)
 
 void NetworkController::addEffectDependency(QDomDocument& doc, QDomElement& parentElement, BattleDialogModelEffect* effect)
 {
-    //BattleDialogModelEffect* effect = model->getEffect(i);
     if((!effect) || (!effect->getEffectVisible()))
         return;
 
@@ -1131,27 +1099,16 @@ void NetworkController::addEffectDependency(QDomDocument& doc, QDomElement& pare
 bool NetworkController::validateLogon(const DMHLogon& logon)
 {
     if(logon.isValid())
-    {
-
-
         return true;
-    }
 
-    /*
     QMessageBox msgBox(QMessageBox::Warning,
                        QString("DMHelper Network Connection"),
-                       QString("Warning: The network client publishing is enabled, but the network URL, username, password and/or session ID are not properly set. Network publishing will not work unless these values are correct.\n\nWould you like to correct these settings or disable network publishing?"));
-    QAbstractButton* openButton = msgBox.addButton(QString("Open Network Settings"), QMessageBox::AcceptRole);
-    msgBox.addButton(QString("Disable Network Publish"), QMessageBox::RejectRole);
-    */
-    QMessageBox msgBox(QMessageBox::Warning,
-                       QString("DMHelper Network Connection"),
-                       QString("Warning: The network client publishing is enabled, but the network URL, username, password and/or session ID are not properly set. Network publishing will not work unless these values are correct.\n\nWould you like to correct these settings?"));
+                       QString("The network client publishing is enabled, but the network URL, username, password and/or session ID are not properly set. Network publishing will not work unless these values are correct.\n\nWould you like to correct these settings?"));
     QAbstractButton* openButton = msgBox.addButton(QString("Yes"), QMessageBox::AcceptRole);
     msgBox.addButton(QString("No"), QMessageBox::RejectRole);
     msgBox.exec();
     if(msgBox.clickedButton() == openButton)
-        emit requestSettings(DMHelper::OptionsTab_Network);
+        emit openNetworkOptions();
 
     return false;
 }

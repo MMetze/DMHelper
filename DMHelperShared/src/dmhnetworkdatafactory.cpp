@@ -105,6 +105,11 @@ DMHShared::DMH_Message DMHNetworkDataFactory::getModeValue() const
     return _modeValue;
 }
 
+QString DMHNetworkDataFactory::getModeString() const
+{
+    return _mode.firstChildElement(QString("text")).text();
+}
+
 QDomElement DMHNetworkDataFactory::getState() const
 {
     return _state;
@@ -122,7 +127,7 @@ QDomElement DMHNetworkDataFactory::getError() const
 
 QString DMHNetworkDataFactory::getErrorString() const
 {
-    return _error.text();
+    return getModeString() + QString(": ") + _error.text();
 }
 
 QDomElement DMHNetworkDataFactory::getDataElement() const

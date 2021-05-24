@@ -18,7 +18,7 @@ RibbonTabFile::RibbonTabFile(QWidget *parent) :
     connect(ui->btnSaveAs, SIGNAL(clicked(bool)), this, SIGNAL(saveAsClicked()));
 
     connect(ui->btnNetworkActive, SIGNAL(toggled(bool)), this, SLOT(setNetworkActiveImage(bool)));
-    connect(ui->btnNetworkActive, SIGNAL(toggled(bool)), ui->btnSession, SLOT(setEnabled(bool)));
+    //connect(ui->btnNetworkActive, SIGNAL(toggled(bool)), ui->btnSession, SLOT(setEnabled(bool)));
     connect(ui->btnNetworkActive, SIGNAL(toggled(bool)), this, SIGNAL(networkActiveClicked(bool)));
     connect(ui->btnSession, SIGNAL(clicked(bool)), this, SIGNAL(sessionClicked()));
 
@@ -96,5 +96,5 @@ void RibbonTabFile::hideMRUMenu()
 
 void RibbonTabFile::setNetworkActiveImage(bool active)
 {
-    ui->btnNetworkActive->setIcon(QIcon(active ? QString(":/img/data/icon_networkconnection_on.png") : QString(":/img/data/icon_networkconnection_off.png")));
+    ui->btnNetworkActive->setIcon(QIcon(active ? QString(":/img/data/icon_die_connected.png") : QString(":/img/data/icon_die_disconnected.png")));
 }

@@ -48,6 +48,7 @@ class RibbonTabMap;
 class RibbonTabAudio;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
+class NetworkOptionsDialog;
 #endif
 class ObjectDispatcher;
 
@@ -237,6 +238,7 @@ private:
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     NetworkController* _networkController;
+    NetworkOptionsDialog* _networkOptionsDlg;
 #endif
 
     bool mouseDown;

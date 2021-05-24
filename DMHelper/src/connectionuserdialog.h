@@ -21,6 +21,9 @@ public:
     QString getEmail() const;
     QString getScreenName() const;
 
+private slots:
+    void tryAccept();
+
 private:
     Ui::ConnectionUserDialog *ui;
 };

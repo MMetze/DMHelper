@@ -168,6 +168,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _audioPlayer(nullptr),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController(nullptr),
+    _networkOptionsDlg(nullptr),
 #endif
     mouseDown(false),
     mouseDownPos(),
@@ -765,7 +766,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _networkController = new NetworkController(this);
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getUserId(), _options->getPassword(), _options->getCurrentSession(), QString());
     //connect(_networkController, &NetworkController::requestSettings, _options, &OptionsContainer::editSettings);
-    connect(_networkController, &NetworkController::requestSettings, this, &MainWindow::editNetworkSettings);
+    //connect(_networkController, &NetworkController::requestSettings, this, &MainWindow::editNetworkSettings);
+    connect(_networkController, &NetworkController::openNetworkOptions, this, &MainWindow::editNetworkSettings);
     connect(_networkController, &NetworkController::networkEnabledChanged, _options, &OptionsContainer::setNetworkEnabled);
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString,QString)));
@@ -787,6 +789,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_networkController, &NetworkController::networkError, ui->frameNetwork, &NetworkStatusFrame::setNetworkError);
     connect(_networkController, &NetworkController::networkSuccess, ui->frameNetwork, &NetworkStatusFrame::setNetworkSuccess);
     connect(_networkController, &NetworkController::uploadStarted, ui->frameNetwork, &NetworkStatusFrame::uploadStarted);
+
+    _networkOptionsDlg = new NetworkOptionsDialog(*_options);
+    connect(_networkController, &NetworkController::networkMessage, _networkOptionsDlg, &NetworkOptionsDialog::logMessage);
+    connect(_networkController, &NetworkController::networkErrorMessage, _networkOptionsDlg, &NetworkOptionsDialog::logMessageError);
 #endif
 
     _objectDispatcher = new ObjectDispatcher(this);
@@ -2490,12 +2496,11 @@ void MainWindow::openRandomMarkets()
 
 void MainWindow::editNetworkSettings()
 {
-    if(!_options)
+    if((!_options) || (!_networkOptionsDlg))
         return;
 
-    NetworkOptionsDialog dlg(*_options);
-    dlg.resize(width() * 3 / 4, height() * 9 / 10);
-    dlg.exec();
+    _networkOptionsDlg->resize(width() * 3 / 4, height() * 9 / 10);
+    _networkOptionsDlg->exec();
 }
 
 QDialog* MainWindow::createDialog(QWidget* contents, const QSize& dlgSize)

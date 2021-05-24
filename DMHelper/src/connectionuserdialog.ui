@@ -37,7 +37,11 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="edtPassword"/>
+      <widget class="QLineEdit" name="edtPassword">
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
      </item>
      <item row="3" column="0">
       <widget class="QLabel" name="label_3">
@@ -47,7 +51,11 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLineEdit" name="edtRepeat"/>
+      <widget class="QLineEdit" name="edtRepeat">
+       <property name="echoMode">
+        <enum>QLineEdit::Password</enum>
+       </property>
+      </widget>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_4">
@@ -124,22 +132,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>ConnectionUserDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>

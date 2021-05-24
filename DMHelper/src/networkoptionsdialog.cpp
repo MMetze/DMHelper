@@ -19,6 +19,7 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     _memberTimer(INVALID_TIMER_ID)
 {
     ui->setupUi(this);
+    connect(_networkManager, &DMHNetworkManager::messageError, this, &NetworkOptionsDialog::logMessageError);
 
     ui->edtURL->setText(options.getURLString());
     ui->edtUserName->setText(options.getUserName());
@@ -68,6 +69,20 @@ NetworkOptionsDialog::~NetworkOptionsDialog()
     delete ui;
 }
 
+void NetworkOptionsDialog::logMessage(const QString& message)
+{
+    if(message.isEmpty())
+        return;
+
+    ui->txtLog->append(message.trimmed());
+}
+
+void NetworkOptionsDialog::logMessageError(int requestID, const QString& errorString)
+{
+    Q_UNUSED(requestID);
+    logMessage(errorString);
+}
+
 void NetworkOptionsDialog::timerEvent(QTimerEvent *event)
 {
     if((!event) || (event->timerId() != _memberTimer))
@@ -86,14 +101,18 @@ void NetworkOptionsDialog::createUser()
     if(primary)
         dlg.resize(primary->availableSize().width() / 4, primary->availableSize().height() / 3);
 
-    if(dlg.exec() == QDialog::Accepted)
-    {
-        if(dlg.doesPasswordMatch())
-        {
-            _networkManager->setLogon(DMHLogon(_options.getURLString(), QString(), QString(), QString(), QString()));
-            _networkManager->createUser(dlg.getUsername(), dlg.getPassword(), dlg.getEmail(), dlg.getScreenName());
-        }
-    }
+    if((dlg.exec() != QDialog::Accepted) ||
+       (!dlg.doesPasswordMatch()))
+        return;
+
+    qDebug() << "[NetworkOptionsDialog] Trying to create user with name: " << dlg.getUsername() << ", Email: " << dlg.getEmail() << ", screen name: " << dlg.getScreenName();
+    ui->edtUserName->setText(QString());
+    ui->edtPassword->setText(QString());
+    _options.setUserName(QString());
+    _options.setPassword(QString());
+
+    _networkManager->setLogon(DMHLogon(_options.getURLString(), QString(), QString(), QString(), QString()));
+    _networkManager->createUser(dlg.getUsername(), dlg.getPassword(), dlg.getEmail(), dlg.getScreenName());
 }
 
 void NetworkOptionsDialog::sessionSelected(int selection)
@@ -152,9 +171,10 @@ void NetworkOptionsDialog::userCreated(int requestID, const QString& username, c
     Q_UNUSED(requestID);
     Q_UNUSED(email);
 
+    logMessage(QString("User created: ") + username);
+
     ui->edtUserName->setText(username);
     ui->edtPassword->setText(QString());
-
     _options.setUserId(userId);
 }
 
