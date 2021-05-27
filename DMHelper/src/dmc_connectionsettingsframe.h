@@ -20,6 +20,9 @@ public:
 
     void setSettings(DMC_OptionsContainer* settings);
 
+public slots:
+    void logMessage(const QString& message);
+
 protected slots:
     void resetUrl();
     void createUser();

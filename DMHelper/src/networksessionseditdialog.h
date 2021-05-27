@@ -18,6 +18,9 @@ public:
     explicit NetworkSessionsEditDialog(OptionsContainer& options, QWidget *parent = nullptr);
     ~NetworkSessionsEditDialog();
 
+signals:
+    void networkMessage(const QString& message);
+
 private slots:
     void newSession();
     void addSession();

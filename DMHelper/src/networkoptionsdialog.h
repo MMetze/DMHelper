@@ -19,7 +19,7 @@ public:
 
 public slots:
     void logMessage(const QString& message);
-    void logMessageError(int requestID, const QString& errorString);
+    void handleMessageError(int requestID, const QString& errorString);
 
 signals:
 

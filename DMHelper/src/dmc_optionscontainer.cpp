@@ -80,7 +80,7 @@ void DMC_OptionsContainer::readSettings()
     settings.beginGroup("DEBUG");
 #endif
 
-    setURLString(settings.value("url","").toString());
+    setURLString(settings.value("url","https://dmh.wwpd.de").toString());
     setUserName(settings.value("username","").toString());
     setUserId(settings.value("userid","").toString());
     setSavePassword(settings.value("savePassword",QVariant(false)).toBool());

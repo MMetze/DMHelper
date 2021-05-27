@@ -17,6 +17,9 @@ public:
     explicit DMC_ConnectionSettingsDialog(DMC_OptionsContainer& options, QWidget *parent = nullptr);
     ~DMC_ConnectionSettingsDialog();
 
+public slots:
+    void logMessage(const QString& message);
+
 private:
     Ui::DMC_ConnectionSettingsDialog *ui;
 

@@ -9,10 +9,10 @@ class DMC_MainWindow;
 
 class DMC_OptionsContainer;
 class DMC_ServerConnection;
+class DMC_SettingsDialog;
 class QCloseEvent;
 class QResizeEvent;
 class AudioTrack;
-//class QWebEngineView;
 class QLabel;
 class QPushButton;
 
@@ -44,9 +44,10 @@ private:
     Ui::DMC_MainWindow *ui;
     DMC_OptionsContainer* _settings;
     DMC_ServerConnection* _serverConnection;
+    DMC_SettingsDialog* _settingsDlg;
 
     QPixmap _labelPixmap;
-    //QWebEngineView* _webView;
+
 
 };
 

@@ -17,15 +17,14 @@ class DMC_ServerConnection : public QObject
 {
     Q_OBJECT
 public:
-//    DMC_ServerConnection(const QString& cacheDirectory, QObject *parent = 0);
     DMC_ServerConnection(DMC_OptionsContainer& options, QObject *parent = 0);
-//    DMC_ServerConnection(const QString& urlString, const QString& username, const QString& password, const QString& session, const QString& cacheDirectory, QObject *parent = 0);
     virtual ~DMC_ServerConnection();
 
     bool isConnected() const;
 
 signals:
     void connectionChanged(bool connected);
+    void networkMessage(const QString& message);
 
     void pixmapActive(QPixmap pixmap);
     void imageActive(QImage pixmap);

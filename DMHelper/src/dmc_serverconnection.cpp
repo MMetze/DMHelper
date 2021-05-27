@@ -30,7 +30,6 @@ DMC_ServerConnection::DMC_ServerConnection(DMC_OptionsContainer& options, QObjec
     _renderer(new RemoteRenderer(options.getCacheDirectory(), this)),
     _lastPayload()
 {
-    //connectRemotePlayers();
 }
 
 DMC_ServerConnection::~DMC_ServerConnection()
@@ -80,6 +79,9 @@ void DMC_ServerConnection::connectServer(bool connect)
 void DMC_ServerConnection::checkLogon()
 {
     if((!_options.getLogon().isValid()) || (_options.getCurrentInvite().isEmpty()))
+        return;
+
+    /*
     {
         qDebug() << "[DMC_ServerConnection] Login data not valid, opening connection settings.";
         DMC_ConnectionSettingsDialog dlg(_options);
@@ -97,6 +99,8 @@ void DMC_ServerConnection::checkLogon()
     }
 
     qDebug() << "[DMC_ServerConnection] Login data valid, attempting to join the session. Invite: " << _options.getCurrentInvite();
+    emit networkMessage(QString("Joining the session with invite: ") + _options.getCurrentInvite());
+    */
 
     startManager();
 
@@ -167,10 +171,16 @@ void DMC_ServerConnection::userInfoCompleted(int requestID, const QString& usern
 
     if((username != _options.getUserName()) || (userId.isEmpty()) || (disabled))
     {
+        if(username == _options.getUserName() && (disabled))
+            emit networkMessage(QString("User ") + username + QString(" is disabled!"));
+        else
+            emit networkMessage(QString("Unexpected error connecting to server with user name ") + username);
+
         qDebug() << "[DMC_ServerConnection] Invalid user info received. Username: " << username << ", User ID: " << userId << ", disabled: " << disabled;
         stopServer();
     }
 
+    emit networkMessage(QString("Connected to server with user name ") + username);
     _options.setUserId(userId);
     _networkManager->setLogon(_options.getLogon());
     joinSession();
@@ -183,6 +193,7 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
     if(session.isEmpty())
         return;
 
+    emit networkMessage(QString("Successfully joined the session with ID ") + session);
     qDebug() << "[DMC_ServerConnection] Successfully joined the session. Session ID: " << session;
     _session = session;
 
@@ -200,15 +211,17 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
 
 void DMC_ServerConnection::messageError(int requestID, const QString& errorString)
 {
-    QMessageBox::critical(nullptr, QString("Server Error"), QString("An error was received from the DMH server:\n\n") + errorString);
+    //QMessageBox::critical(nullptr, QString("Server Error"), QString("An error was received from the DMH server:\n\n") + errorString);
+    emit networkMessage(QString("An error was received from the server: ") + errorString);
     qDebug() << "[DMC_ServerConnection] Error in message, stopping the server. Request: " << requestID << ", error: " << errorString;
-    stopServer();
+    //stopServer();
 }
 
 void DMC_ServerConnection::requestError(int requestID)
 {
+    emit networkMessage(QString("There was an unexpected error in communication with the server!"));
     qDebug() << "[DMC_ServerConnection] Error in connection, stopping the server. Request: " << requestID;
-    stopServer();
+    //stopServer();
 }
 
 void DMC_ServerConnection::startManager()
@@ -317,7 +330,8 @@ void DMC_ServerConnection::joinSession()
     if((!_networkManager) || (!_options.getLogon().isValid()) || (_options.getCurrentInvite().isEmpty()))
         return;
 
-    qDebug() << "[DMC_ServerConnection] Sending the join session request.";
+    emit networkMessage(QString("Joining the session with invite ") + _options.getCurrentInvite());
+    qDebug() << "[DMC_ServerConnection] Sending the join session request with invite: " << _options.getCurrentInvite();
     _networkManager->joinSession(_options.getCurrentInvite());
     //joinSessionComplete(0, QString("7B3AA550-649A-4D51-920E-CAB465616995"));
 }

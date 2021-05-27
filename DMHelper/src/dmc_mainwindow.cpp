@@ -20,8 +20,8 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
     ui(new Ui::DMC_MainWindow),
     _settings(nullptr),
     _serverConnection(nullptr),
+    _settingsDlg(nullptr),
     _labelPixmap()
-    //_webView(nullptr)
 {
     qDebug() << "[Main] Initializing Main";
 
@@ -90,14 +90,11 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
     connect(_serverConnection, &DMC_ServerConnection::pixmapActive, this, &DMC_MainWindow::setLabelPixmap);
     connect(_serverConnection, &DMC_ServerConnection::imageActive, this, &DMC_MainWindow::setLabelImage);
 
+    _settingsDlg = new DMC_SettingsDialog(*_settings);
+    connect(_serverConnection, &DMC_ServerConnection::networkMessage, _settingsDlg, &DMC_SettingsDialog::logMessage);
+
     ui->sliderVolume->setValue(50);
     enableAudio(nullptr);
-
-    /*
-    _webView = new QWebEngineView(parent);
-    ui->gridLayout_2->addWidget(_webView);
-    _webView->load(QUrl("https://www.dndbeyond.com/profile/Gyarc2/characters/3294604"));
-    */
 
     QScreen* screen = QGuiApplication::primaryScreen();
     if(screen)
@@ -186,22 +183,18 @@ void DMC_MainWindow::enableAudio(AudioTrack* track)
 
 void DMC_MainWindow::openOptions()
 {
-    DMC_OptionsContainer tempOptions;
-    tempOptions.copy(*_settings);
+    if(!_settingsDlg)
+        return;
 
-    DMC_SettingsDialog dlg(tempOptions);
     QScreen* primary = QGuiApplication::primaryScreen();
     if(primary)
-        dlg.resize(primary->availableSize().width() / 3, primary->availableSize().height() / 3);
+        _settingsDlg->resize(primary->availableSize().width() / 3, primary->availableSize().height() / 3);
     else
-        dlg.resize(width() / 2, height() * 3 / 4);
+        _settingsDlg->resize(width() / 2, height() * 3 / 4);
 
-    if(dlg.exec() == QDialog::Accepted)
-    {
-        _settings->copy(tempOptions);
-        if((_serverConnection) && (_serverConnection->isConnected()))
-            _serverConnection->startServer();
-    }
+    _settingsDlg->exec();
+    if(_settingsDlg->isDirty() && (_serverConnection) && (_serverConnection->isConnected()))
+        _serverConnection->startServer();
 }
 
 void DMC_MainWindow::setLabelPixmap(QPixmap pixmap)
@@ -217,16 +210,6 @@ void DMC_MainWindow::setLabelImage(QImage image)
 
 void DMC_MainWindow::updatePixmap()
 {
-/*
-    QPixmap newPixmap;
-    if(_labelPixmap.isNull())
-        newPixmap = QPixmap(QString(":/img/data/dmc_background.png"));
-    else
-        newPixmap = _labelPixmap;
-
-    ui->lblImage->setPixmap(newPixmap.scaled(ui->lblImage->size(), Qt::KeepAspectRatio));
-    */
-
     if(!_labelPixmap.isNull())
     {
         ui->lblImage->setPixmap(_labelPixmap);

@@ -6,7 +6,8 @@
 DMC_SettingsDialog::DMC_SettingsDialog(DMC_OptionsContainer& settings, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DMC_SettingsDialog),
-    _settings(settings)
+    _settings(settings),
+    _dirty(false)
 {
     ui->setupUi(this);
     ui->frame->setSettings(&settings);
@@ -15,11 +16,35 @@ DMC_SettingsDialog::DMC_SettingsDialog(DMC_OptionsContainer& settings, QWidget *
 
     connect(ui->edtCacheDirectory, &QLineEdit::textChanged, &_settings, &DMC_OptionsContainer::setCacheDirectory);
     connect(ui->btnBrowseCache, &QAbstractButton::clicked, this, &DMC_SettingsDialog::browseCache);
+
+    connect(&settings, &DMC_OptionsContainer::urlStringChanged, this, &DMC_SettingsDialog::setDirty);
+    connect(&settings, &DMC_OptionsContainer::userNameChanged, this, &DMC_SettingsDialog::setDirty);
+    connect(&settings, &DMC_OptionsContainer::userIdChanged, this, &DMC_SettingsDialog::setDirty);
+    connect(&settings, &DMC_OptionsContainer::passwordChanged, this, &DMC_SettingsDialog::setDirty);
+    connect(&settings, &DMC_OptionsContainer::currentInviteChanged, this, &DMC_SettingsDialog::setDirty);
+    connect(&settings, &DMC_OptionsContainer::inviteChanged, this, &DMC_SettingsDialog::setDirty);
+    connect(&settings, &DMC_OptionsContainer::cacheDirectoryChanged, this, &DMC_SettingsDialog::setDirty);
 }
 
 DMC_SettingsDialog::~DMC_SettingsDialog()
 {
     delete ui;
+}
+
+bool DMC_SettingsDialog::isDirty() const
+{
+    return _dirty;
+}
+
+int DMC_SettingsDialog::exec()
+{
+    _dirty = false;
+    return QDialog::exec();
+}
+
+void DMC_SettingsDialog::logMessage(const QString& message)
+{
+    ui->frame->logMessage(message);
 }
 
 void DMC_SettingsDialog::browseCache()
@@ -30,4 +55,9 @@ void DMC_SettingsDialog::browseCache()
 
     if(!selectedDir.isEmpty())
         _settings.setCacheDirectory(selectedDir);
+}
+
+void DMC_SettingsDialog::setDirty()
+{
+    _dirty = true;
 }

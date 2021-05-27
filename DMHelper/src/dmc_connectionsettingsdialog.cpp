@@ -16,3 +16,8 @@ DMC_ConnectionSettingsDialog::~DMC_ConnectionSettingsDialog()
 {
     delete ui;
 }
+
+void DMC_ConnectionSettingsDialog::logMessage(const QString& message)
+{
+    ui->frameConnection->logMessage(message);
+}

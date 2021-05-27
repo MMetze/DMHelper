@@ -792,7 +792,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _networkOptionsDlg = new NetworkOptionsDialog(*_options);
     connect(_networkController, &NetworkController::networkMessage, _networkOptionsDlg, &NetworkOptionsDialog::logMessage);
-    connect(_networkController, &NetworkController::networkErrorMessage, _networkOptionsDlg, &NetworkOptionsDialog::logMessageError);
+    connect(_networkController, &NetworkController::networkErrorMessage, _networkOptionsDlg, &NetworkOptionsDialog::handleMessageError);
 #endif
 
     _objectDispatcher = new ObjectDispatcher(this);

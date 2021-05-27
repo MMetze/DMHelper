@@ -53,7 +53,9 @@ void NetworkSessionsEditDialog::newSession()
     if(_requestedSessionName.isEmpty())
         return;
 
+    emit networkMessage(QString("Creating session: ") + _requestedSessionName);
     _currentRequest = _networkManager->createSession(_requestedSessionName);
+    qDebug() << "[NetworkSessionsEditDialog] Creating session: " << _requestedSessionName << ", request: " << _currentRequest;
 }
 
 void NetworkSessionsEditDialog::addSession()
@@ -65,8 +67,17 @@ void NetworkSessionsEditDialog::addSession()
     if(_requestedSession.isEmpty())
         return;
 
-    if(!_options.doesSessionExist(_requestedSession))
+    if(_options.doesSessionExist(_requestedSession))
+    {
+        qDebug() << "[NetworkSessionsEditDialog] Session ID already exists: " << _requestedSession;
+        emit networkMessage(QString("Session ID already exists: ") + _requestedSession);
+    }
+    else
+    {
+        emit networkMessage(QString("Adding session ID: ") + _requestedSession);
         _currentRequest = _networkManager->isSessionOwner(_requestedSession);
+        qDebug() << "[NetworkSessionsEditDialog] Adding session ID: " << _requestedSession << ", request: " << _currentRequest;
+    }
 }
 
 void NetworkSessionsEditDialog::renameSession()
@@ -83,7 +94,9 @@ void NetworkSessionsEditDialog::renameSession()
     if((_requestedSession.isEmpty()) || (_requestedSessionName.isEmpty()))
         return;
 
+    emit networkMessage(QString("Renaming session ID ") + _requestedSession + QString(" to: ") + _requestedSessionName);
     _currentRequest = _networkManager->renameSession(_requestedSessionName, _requestedSession);
+    qDebug() << "[NetworkSessionsEditDialog] Renaming session ID " << _requestedSession << " to: " << _requestedSessionName << ", request: " << _currentRequest;
 }
 
 void NetworkSessionsEditDialog::newInvite()
@@ -99,7 +112,9 @@ void NetworkSessionsEditDialog::newInvite()
     if(_requestedSession.isEmpty())
         return;
 
+    emit networkMessage(QString("Creating a new invite for session ID ") + _requestedSession + QString(" (also closes any active invites)"));
     _currentRequest = _networkManager->renewSessionInvite(_requestedSession);
+    qDebug() << "[NetworkSessionsEditDialog] Creating a new invite for session ID " << _requestedSession << ", request: " << _currentRequest;
 }
 
 void NetworkSessionsEditDialog::closeInvite()
@@ -115,7 +130,9 @@ void NetworkSessionsEditDialog::closeInvite()
     if(_requestedSession.isEmpty())
         return;
 
+    emit networkMessage(QString("Closing the active invite for session ID ") + _requestedSession);
     _currentRequest = _networkManager->closeSession(_requestedSession);
+    qDebug() << "[NetworkSessionsEditDialog] Closing the active invite for session ID " << _requestedSession << ", request: " << _currentRequest;
 }
 
 void NetworkSessionsEditDialog::createSessionComplete(int requestID, const QString& session, const QString& invite)
@@ -124,6 +141,7 @@ void NetworkSessionsEditDialog::createSessionComplete(int requestID, const QStri
         return;
 
     qDebug() << "[NetworkSessionsEditDialog] Session created for request " << requestID << ". Session: " << session << ", Invite: " << invite;
+    emit networkMessage(QString("Session created: ") + session + QString(" with invite: ") + invite);
 
     _options.addSession(session, _requestedSessionName);
     _options.addInvite(session, invite);
@@ -141,9 +159,14 @@ void NetworkSessionsEditDialog::isOwnerComplete(int requestID, const QString& se
 
     if(isOwner)
     {
+        emit networkMessage(QString("Session added: ") + sessionName + QString(" with ID: ") + session + QString(" and invite: ") + invite);
         _options.addSession(session, sessionName);
         _options.addInvite(session, invite);
         populateSessions();
+    }
+    else
+    {
+        emit networkMessage(QString("Session ID: ") + session + QString(" does not belong to this user and cannot be added"));
     }
 
     _currentRequest = INVALID_REQUEST_ID;
@@ -156,6 +179,7 @@ void NetworkSessionsEditDialog::renameSessionComplete(int requestID, const QStri
 
     qDebug() << "[NetworkSessionsEditDialog] Session renamed with request " << requestID << ". Session: " << _requestedSession << ", New name: " << sessionName;
 
+    emit networkMessage(QString("Session: ") + _requestedSession + QString(" renamed to: ") + sessionName);
     _options.setSessionName(_requestedSession, sessionName);
     populateSessions();
 
@@ -168,6 +192,7 @@ void NetworkSessionsEditDialog::renewSessionComplete(int requestID, const QStrin
         return;
 
     qDebug() << "[NetworkSessionsEditDialog] Session invite renewed with request " << requestID << ". Session: " << sessionName << ", New invite: " << invite;
+    emit networkMessage(QString("New invite created for session: ") + sessionName + QString(", Invite: ") + invite);
 
     _options.setInvite(_requestedSession, invite);
     populateSessions();
@@ -181,6 +206,7 @@ void NetworkSessionsEditDialog::closeSessionComplete(int requestID, const QStrin
         return;
 
     qDebug() << "[NetworkSessionsEditDialog] Session invite closed with request " << requestID << ". Session: " << sessionName;
+    emit networkMessage(QString("Invite closed for session: ") + sessionName);
 
     _options.removeInvite(_requestedSession);
     populateSessions();
@@ -194,6 +220,7 @@ void NetworkSessionsEditDialog::sessionGeneralComplete(int requestID)
         return;
 
     qDebug() << "[NetworkSessionsEditDialog] General session response received for request " << requestID;
+    emit networkMessage(QString("Received general session response."));
     _currentRequest = INVALID_REQUEST_ID;
 }
 
@@ -203,6 +230,7 @@ void NetworkSessionsEditDialog::messageError(int requestID, const QString& error
         return;
 
     qDebug() << "[NetworkSessionsEditDialog] Message error received for request " << requestID << ": " << errorString;
+    emit networkMessage(QString("Error received from network request: ") + errorString);
     _currentRequest = INVALID_REQUEST_ID;
 }
 
@@ -212,6 +240,7 @@ void NetworkSessionsEditDialog::requestError(int requestID)
         return;
 
     qDebug() << "[NetworkSessionsEditDialog] Request error received for request " << requestID;
+    emit networkMessage(QString("Unexpected error received from network request."));
     _currentRequest = INVALID_REQUEST_ID;
 }
 

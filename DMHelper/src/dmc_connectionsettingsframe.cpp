@@ -6,6 +6,7 @@
 #include "dmhnetworkmanager.h"
 #include <QGuiApplication>
 #include <QScreen>
+#include <QDebug>
 
 DMC_ConnectionSettingsFrame::DMC_ConnectionSettingsFrame(QWidget *parent) :
     QFrame(parent),
@@ -54,6 +55,14 @@ void DMC_ConnectionSettingsFrame::setSettings(DMC_OptionsContainer* settings)
         ui->edtPassword->setFocus();
 }
 
+void DMC_ConnectionSettingsFrame::logMessage(const QString& message)
+{
+    if(message.isEmpty())
+        return;
+
+    ui->edtLog->append(message.trimmed());
+}
+
 void DMC_ConnectionSettingsFrame::resetUrl()
 {
     ui->edtURL->setText(QString("https://dmh.wwpd.de"));
@@ -69,20 +78,27 @@ void DMC_ConnectionSettingsFrame::createUser()
     if(primary)
         dlg.resize(primary->availableSize().width() / 4, primary->availableSize().height() / 3);
 
-    if(dlg.exec() == QDialog::Accepted)
-    {
-        if(dlg.doesPasswordMatch())
-        {
-            _networkManager->setLogon(DMHLogon(_settings->getURLString(), QString(), QString(), QString(), QString()));
-            _networkManager->createUser(dlg.getUsername(), dlg.getPassword(), dlg.getEmail(), dlg.getScreenName());
-        }
-    }
+    if((dlg.exec() != QDialog::Accepted) || (!dlg.doesPasswordMatch()))
+        return;
+
+    qDebug() << "[DMC_ConnectionSettingsFrame] Trying to create user with name: " << dlg.getUsername() << ", Email: " << dlg.getEmail() << ", screen name: " << dlg.getScreenName();
+    logMessage(QString("Creating user with username: ") + dlg.getUsername() + QString(" and screen name: ") + dlg.getScreenName());
+    ui->edtUserName->setText(QString());
+    ui->edtPassword->setText(QString());
+    _settings->setUserName(QString());
+    _settings->setPassword(QString());
+
+    _networkManager->setLogon(DMHLogon(_settings->getURLString(), QString(), QString(), QString(), QString()));
+    _networkManager->createUser(dlg.getUsername(), dlg.getPassword(), dlg.getEmail(), dlg.getScreenName());
 }
 
 void DMC_ConnectionSettingsFrame::userCreated(int requestID, const QString& username, const QString& userId, const QString& email)
 {
     Q_UNUSED(requestID);
     Q_UNUSED(email);
+
+    qDebug() << "[DMC_ConnectionSettingsFrame] User creation complete. Request: " << requestID << ". User: " << username << ", User ID: " << userId << ", email: " << email;
+    logMessage(QString("User created: ") + username);
 
     ui->edtUserName->setText(username);
     ui->edtPassword->setText(QString());

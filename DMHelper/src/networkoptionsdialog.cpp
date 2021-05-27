@@ -19,7 +19,7 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     _memberTimer(INVALID_TIMER_ID)
 {
     ui->setupUi(this);
-    connect(_networkManager, &DMHNetworkManager::messageError, this, &NetworkOptionsDialog::logMessageError);
+    connect(_networkManager, &DMHNetworkManager::messageError, this, &NetworkOptionsDialog::handleMessageError);
 
     ui->edtURL->setText(options.getURLString());
     ui->edtUserName->setText(options.getUserName());
@@ -77,10 +77,14 @@ void NetworkOptionsDialog::logMessage(const QString& message)
     ui->txtLog->append(message.trimmed());
 }
 
-void NetworkOptionsDialog::logMessageError(int requestID, const QString& errorString)
+void NetworkOptionsDialog::handleMessageError(int requestID, const QString& errorString)
 {
-    Q_UNUSED(requestID);
-    logMessage(errorString);
+    if(_currentRequest != requestID)
+        return;
+
+    logMessage(QString("Network error encountered for: ") + errorString);
+    qDebug() << "[NetworkController] Network error discovered for request " << requestID << ": " << errorString;
+    _currentRequest = INVALID_REQUEST_ID;
 }
 
 void NetworkOptionsDialog::timerEvent(QTimerEvent *event)
@@ -101,11 +105,11 @@ void NetworkOptionsDialog::createUser()
     if(primary)
         dlg.resize(primary->availableSize().width() / 4, primary->availableSize().height() / 3);
 
-    if((dlg.exec() != QDialog::Accepted) ||
-       (!dlg.doesPasswordMatch()))
+    if((dlg.exec() != QDialog::Accepted) || (!dlg.doesPasswordMatch()))
         return;
 
     qDebug() << "[NetworkOptionsDialog] Trying to create user with name: " << dlg.getUsername() << ", Email: " << dlg.getEmail() << ", screen name: " << dlg.getScreenName();
+    logMessage(QString("Creating user with username: ") + dlg.getUsername() + QString(" and screen name: ") + dlg.getScreenName());
     ui->edtUserName->setText(QString());
     ui->edtPassword->setText(QString());
     _options.setUserName(QString());
@@ -133,6 +137,7 @@ void NetworkOptionsDialog::sessionSelected(int selection)
 void NetworkOptionsDialog::editSessions()
 {
     NetworkSessionsEditDialog editDlg(_options, this);
+    connect(&editDlg, &NetworkSessionsEditDialog::networkMessage, this, &NetworkOptionsDialog::logMessage);
     editDlg.resize(width() * 9 / 10, height() * 9 / 10);
     editDlg.exec();
 
@@ -159,10 +164,15 @@ void NetworkOptionsDialog::checkLogon()
     if(logon.isValid())
     {
         _networkManager->setLogon(logon);
+        logMessage(QString("Connecting to server: ") + logon.getURLString() + QString(" with user ") + logon.getUserName());
         if(_options.getUserId().isEmpty())
+        {
             _currentRequest = _networkManager->getUserInfo();
+        }
         else
+        {
             userInfoCompleted(INVALID_REQUEST_ID, _options.getUserName(), _options.getUserId(), QString(), QString(), QString(), false);
+        }
     }
 }
 
@@ -171,6 +181,7 @@ void NetworkOptionsDialog::userCreated(int requestID, const QString& username, c
     Q_UNUSED(requestID);
     Q_UNUSED(email);
 
+    qDebug() << "[NetworkOptionsDialog] User creation complete. Request: " << requestID << ". User: " << username << ", User ID: " << userId << ", email: " << email;
     logMessage(QString("User created: ") + username);
 
     ui->edtUserName->setText(username);
@@ -189,20 +200,10 @@ void NetworkOptionsDialog::userInfoCompleted(int requestID, const QString& usern
     qDebug() << "[NetworkOptionsDialog] User Info query answered with request " << requestID << ". User: " << username << ", User ID: " << userId << ", email: " << email << ", surname: " << surname << ", forename: " << forename << ", disabled: " << disabled;
 
     _options.setUserId(userId);
+
+    logMessage(QString("Connected to server. Starting session: ") + ui->cmbSession->currentData().toString());
     _networkManager->setLogon(DMHLogon(_options.getURLString(), _options.getUserName(), _options.getUserId(), _options.getPassword(), QString()));
     _currentRequest = _networkManager->isSessionOwner(ui->cmbSession->currentData().toString());
-
-    /*
-    DMHLogon logon = _networkManager->getLogon();
-    if(username != logon.getUserName())
-        return;
-
-    qDebug() << "[NetworkOptionsDialog] User Info query answered with request " << requestID << ". User: " << username << ", User ID: " << userId << ", email: " << email << ", surname: " << surname << ", forename: " << forename << ", disabled: " << disabled;
-
-    logon.setUserId(userId);
-    _networkManager->setLogon(logon);
-    _currentRequest = _networkManager->isSessionOwner(ui->cmbSession->currentData().toString());
-    */
 }
 
 void NetworkOptionsDialog::isOwnerComplete(int requestID, const QString& session, const QString& sessionName, const QString& invite, bool isOwner)
@@ -216,8 +217,16 @@ void NetworkOptionsDialog::isOwnerComplete(int requestID, const QString& session
     qDebug() << "[NetworkOptionsDialog] IsOwner query answered with request " << requestID << ". Session: " << session << ", Is Owner: " << isOwner;
 
     ui->lblSessionStatus->setPixmap(isOwner ? QPixmap(":/img/data/icon_network_ok.png") : QPixmap(":/img/data/icon_network_error.png"));
-    if((isOwner) && (_memberTimer == INVALID_TIMER_ID))
-        _memberTimer = startTimer(500);
+    if(isOwner)
+    {
+        logMessage(QString("Session ") + sessionName + QString(" with ID ") + session + QString(" started."));
+        if(_memberTimer == INVALID_TIMER_ID)
+            _memberTimer = startTimer(500);
+    }
+    else
+    {
+        logMessage(QString("Session ") + sessionName + QString(" with ID ") + session + QString(" does not belong to user ") + _options.getUserName());
+    }
 
     _currentRequest = INVALID_REQUEST_ID;
 }
@@ -265,6 +274,7 @@ void NetworkOptionsDialog::sessionGeneralComplete(int requestID)
     if(_currentRequest != requestID)
         return;
 
+    logMessage(QString("Received general session response."));
     qDebug() << "[NetworkOptionsDialog] General session response received for request " << requestID;
     _currentRequest = INVALID_REQUEST_ID;
 }
@@ -274,6 +284,7 @@ void NetworkOptionsDialog::requestError(int requestID)
     if(_currentRequest != requestID)
         return;
 
+    logMessage(QString("Unexpected error received from network request."));
     qDebug() << "[NetworkOptionsDialog] Error received for request " << requestID;
     _currentRequest = INVALID_REQUEST_ID;
 }

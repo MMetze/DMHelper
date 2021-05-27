@@ -486,7 +486,7 @@ void NetworkController::handleNetworkError(int requestID, const QString& message
     if(errorObject)
     {
         qDebug() << "[NetworkController] Network error discovered for request: " << requestID << ", object: " << errorObject->getDescription() << ", md5: " << errorObject->getMD5() << ". " << message;
-        emit networkMessage(QString("Uploading background image failed for: ") + errorObject->getDescription() + QString(". ") + message);
+        emit networkMessage(QString("Network error encountered for: ") + errorObject->getDescription() + QString(". ") + message);
     }
     else
     {
