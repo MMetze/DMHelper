@@ -86,7 +86,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _combatantWidgets(),
     _combatantIcons(),
     _stateMachine(),
-    _selectedCombatant(nullptr),
     _contextMenuCombatant(nullptr),
     _mouseDown(false),
     _mouseDownPos(),
@@ -521,6 +520,9 @@ void BattleFrame::setTargetLabelSize(const QSize& targetSize)
 
 void BattleFrame::publishWindowMouseDown(const QPointF& position)
 {
+    if(!_model)
+        return;
+
     QPointF newPosition;
     if(!convertPublishToScene(position, newPosition))
         return;
@@ -537,7 +539,7 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
                 if(selectedCombatant)
                 {
                     setUniqueSelection(selectedCombatant);
-                    _selectedCombatant = selectedCombatant;
+                    _model->setSelectedCombatant(selectedCombatant);
                     _publishMouseDown = true;
                     _publishMouseDownPos = newPosition;
                     startMovement(pixmapItem, selectedCombatant->getSpeed());
@@ -549,7 +551,7 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
 
 void BattleFrame::publishWindowMouseMove(const QPointF& position)
 {
-    if((!_selectedCombatant) || (!_publishMouseDown))
+    if((!_model) || (!_model->getSelectedCombatant()) || (!_publishMouseDown))
         return;
 
     QPointF newPosition;
@@ -559,7 +561,7 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
     if(newPosition == _publishMouseDownPos)
         return;
 
-    QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
+    QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_model->getSelectedCombatant());
     pixmapItem->setPos(newPosition);
     updateMovement(pixmapItem);
 }
@@ -568,8 +570,11 @@ void BattleFrame::publishWindowMouseRelease(const QPointF& position)
 {
     Q_UNUSED(position);
 
+    if(!_model)
+        return;
+
     endMovement();
-    _selectedCombatant = nullptr;
+    _model->setSelectedCombatant(nullptr);
     _publishMouseDown = false;
 }
 
@@ -1689,7 +1694,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
     if(combatant)
     {
         startMovement(_combatantIcons.value(combatant), combatant->getSpeed());
-        _selectedCombatant = combatant;
+        _model->setSelectedCombatant(combatant);
         ui->frameCombatant->setCombatant(combatant);
 
         CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
@@ -1715,8 +1720,11 @@ void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
 {
     Q_UNUSED(item);
 
+    if(!_model)
+        return;
+
     endMovement();
-    _selectedCombatant = nullptr;
+    _model->setSelectedCombatant(nullptr);
 }
 
 void BattleFrame::handleItemChanged(QGraphicsItem* item)
@@ -2236,7 +2244,7 @@ void BattleFrame::setPublishVisibility(bool publish)
                         item->setVisible(!publish);
                     }
 
-                    if((combatant == _selectedCombatant) && (_movementPixmap))
+                    if((combatant == _model->getSelectedCombatant()) && (_movementPixmap))
                         _movementPixmap->setVisible(!publish);
 
                     if((_activePixmap) && (combatant == _model->getActiveCombatant()))
@@ -2456,6 +2464,7 @@ void BattleFrame::setEditMode()
         disconnect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
         disconnect(_scene, SIGNAL(itemMouseDoubleClick(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDoubleClick(QGraphicsPixmapItem*)));
         disconnect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
+        disconnect(_scene, SIGNAL(mapMouseUp()), this, SLOT(mapClickDetected()));
 
         connect(_scene, SIGNAL(battleMousePress(const QPointF&)), _mapDrawer, SLOT(handleMouseDown(const QPointF&)));
         connect(_scene, SIGNAL(battleMouseMove(const QPointF&)), _mapDrawer, SLOT(handleMouseMoved(const QPointF&)));
@@ -2478,6 +2487,7 @@ void BattleFrame::setEditMode()
         connect(_scene, SIGNAL(itemMouseUp(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseUp(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMouseDoubleClick(QGraphicsPixmapItem*)), this, SLOT(handleItemMouseDoubleClick(QGraphicsPixmapItem*)));
         connect(_scene, SIGNAL(itemMoved(QGraphicsPixmapItem*, bool*)), this, SLOT(handleItemMoved(QGraphicsPixmapItem*, bool*)));
+        connect(_scene, SIGNAL(mapMouseUp()), this, SLOT(mapClickDetected()));
     }
 }
 
@@ -2539,6 +2549,12 @@ void BattleFrame::stateUpdated()
     {
         ui->graphicsView->viewport()->setCursor(currentState->getCursor());
     }
+}
+
+void BattleFrame::mapClickDetected()
+{
+    if(_battle)
+        emit animationUpdated(_battle);
 }
 
 CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* combatant)
@@ -3780,6 +3796,7 @@ void BattleFrame::endMovement()
 
     _movementPixmap->setRotation(0.0);
     _movementPixmap->setVisible(false);
+    //emit animationUpdated(_battle);
 }
 
 QPixmap BattleFrame::getPointerPixmap()

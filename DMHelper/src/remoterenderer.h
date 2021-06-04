@@ -30,6 +30,7 @@ public slots:
     void reset();
 
 signals:
+    void targetChanged();
     void requestFile(const QString& md5, const QString& uuid);
     void abortRequest(int requestID);
     void publishPixmap(QPixmap pixmap);

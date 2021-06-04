@@ -58,6 +58,7 @@ QDomElement BattleDialogModelEffect::outputNetworkXML(QDomDocument &doc)
 {
     QDomElement element = createOutputXML(doc);
 
+    element.setAttribute("_baseID", getID().toString());
     element.setAttribute("type", getEffectType());
     element.setAttribute("size", _size);
     element.setAttribute("positionX", _position.x());

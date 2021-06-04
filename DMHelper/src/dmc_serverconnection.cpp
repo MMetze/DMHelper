@@ -19,6 +19,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
+const int DMC_OBSERVER_INTERVAL = 100;
+
 DMC_ServerConnection::DMC_ServerConnection(DMC_OptionsContainer& options, QObject *parent) :
     QObject(parent),
     _connected(false),
@@ -202,6 +204,8 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
     startObserver();
     //startServer();
 
+    _networkManager->sendMessage(QString("Joining session: ") + _options.getUserName());
+
     if(!_connected)
     {
         emit connectionChanged(true);
@@ -260,7 +264,8 @@ void DMC_ServerConnection::startObserver()
     {
         DMHLogon logon = _options.getLogon();
         logon.setSession(_session);
-        _networkObserver = new DMHNetworkObserver(logon, this);
+        _networkObserver = new DMHNetworkObserver(logon, DMHNetworkObserver::ObserverType_All, this);
+        _networkObserver->setInterval(DMC_OBSERVER_INTERVAL);
         connectRemotePlayers();
         _networkObserver->start();
     }

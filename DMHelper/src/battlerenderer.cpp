@@ -8,14 +8,18 @@
 
 const int BattleRendererItemChild_Index = 0;
 const int BattleRendererItemChild_EffectId = 0;
+const qreal SELECTED_PIXMAP_SIZE = 800.0;
+const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 
 BattleRenderer::BattleRenderer(EncounterBattle& battle, QPixmap background, QObject *parent) :
     CampaignObjectRenderer(parent),
     _battle(battle),
     _background(nullptr),
     _scene(new BattleDialogGraphicsScene(this)),
+    _combatantIcons(),
     _targetSize(),
-    _rotation(0)
+    _rotation(0),
+    _activePixmap(nullptr)
 {
     if(!_battle.getBattleDialogModel())
         return;
@@ -51,8 +55,24 @@ BattleRenderer::BattleRenderer(EncounterBattle& battle, QPixmap background, QObj
     ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
 
     _scene->createBattleContents(_background->boundingRect().toRect());
+    */
 
-    createActiveIcon();
+    //createActiveIcon();
+    QPixmap activePmp;
+    //if((_activeFile.isEmpty()) || (!activePmp.load(_activeFile)))
+        activePmp.load(QString(":/img/data/active.png"));
+
+    _activePixmap = _scene->addPixmap(activePmp);
+    _activePixmap->setTransformationMode(Qt::SmoothTransformation);
+    //_activePixmap->setScale(static_cast<qreal>(_battle.getBattleDialogModel()->getGridScale()) * _activeScale / ACTIVE_PIXMAP_SIZE);
+    _activePixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+    _activePixmap->setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent);
+    //_activePixmap->hide();
+
+    // QRect itemRect = item->boundingRect().toRect();
+    // int maxSize = qMax(itemRect.width(), itemRect.height());
+
+    /*
     createCombatantFrame();
     createCountdownFrame();
 
@@ -65,8 +85,12 @@ BattleRenderer::BattleRenderer(EncounterBattle& battle, QPixmap background, QObj
     // Add icons for existing combatants
     for(int i = 0; i < _battle.getBattleDialogModel()->getCombatantCount(); ++i)
     {
-        createCombatantIcon(_battle.getBattleDialogModel()->getCombatant(i));
+        BattleDialogModelCombatant* combatant = _battle.getBattleDialogModel()->getCombatant(i);
+        if(combatant)
+            createCombatantIcon(combatant);
     }
+
+    updateModel();
 
     /*
     updateHighlights();
@@ -79,6 +103,39 @@ BattleRenderer::~BattleRenderer()
 
 void BattleRenderer::startRendering()
 {
+    refreshRender();
+}
+
+void BattleRenderer::refreshRender()
+{
+    if(!_battle.getBattleDialogModel())
+        return;
+
+    int i;
+    for(i = 0; i < _battle.getBattleDialogModel()->getCombatantCount(); ++i)
+    {
+        BattleDialogModelCombatant* combatant = _battle.getBattleDialogModel()->getCombatant(i);
+        if(combatant)
+        {
+            QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(combatant);
+            if(pixmapItem)
+                pixmapItem->setPos(combatant->getPosition());
+        }
+    }
+
+    QList<QGraphicsItem*> effectItems = _scene->getEffectItems();
+    for(QGraphicsItem* item : effectItems)
+    {
+        if(item)
+        {
+            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+            if(effect)
+                effect->applyEffectValues(*item, _battle.getBattleDialogModel()->getGridScale());
+        }
+    }
+
+    updateModel();
+
     QImage imagePublish;
     getImageForPublishing(imagePublish);
     emit publishImage(imagePublish);
@@ -91,11 +148,43 @@ void BattleRenderer::stopRendering()
 void BattleRenderer::targetResized(const QSize& newSize)
 {
     _targetSize = newSize;
+    refreshRender();
 }
 
 void BattleRenderer::setRotation(int rotation)
 {
     _rotation = rotation;
+    refreshRender();
+}
+
+void BattleRenderer::updateModel()
+{
+    bool activePixmapShown = false;
+
+    QList<BattleDialogModelCombatant*> combatants = _combatantIcons.keys();
+    for(BattleDialogModelCombatant* combatant : combatants)
+    {
+        if(combatant)
+        {
+            UnselectedPixmap* combatantPixmap = dynamic_cast<UnselectedPixmap*>(_combatantIcons.value(combatant));
+            if(combatantPixmap)
+            {
+                combatantPixmap->setSelected(combatant == _battle.getBattleDialogModel()->getSelectedCombatant());
+                if((combatant == _battle.getBattleDialogModel()->getActiveCombatant()) && (combatantPixmap->scale() > 0.0))
+                {
+                    _activePixmap->show();
+                    activePixmapShown = true;
+                    _activePixmap->setScale(static_cast<qreal>(_battle.getBattleDialogModel()->getGridScale()) * combatant->getSizeFactor() / (ACTIVE_PIXMAP_SIZE * combatantPixmap->scale()));
+                    QSizeF pixmapSize = combatantPixmap->boundingRect().size();
+                    _activePixmap->setPos(-pixmapSize.width() / 2.0, -pixmapSize.height() / 2.0);
+                    _activePixmap->setParentItem(combatantPixmap);
+                }
+            }
+        }
+    }
+
+    if(!activePixmapShown)
+        _activePixmap->hide();
 }
 
 void BattleRenderer::getImageForPublishing(QImage& imageForPublishing)
@@ -289,10 +378,10 @@ void BattleRenderer::getImageForPublishing(QImage& imageForPublishing)
     imageForPublishing = drawingImageForPublishing;
 }
 
-void BattleRenderer::createCombatantIcon(BattleDialogModelCombatant* combatant)
+UnselectedPixmap* BattleRenderer::createCombatantIcon(BattleDialogModelCombatant* combatant)
 {
     if((!_battle.getBattleDialogModel()) || (!combatant))
-        return;
+        return nullptr;
 
     QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
     if(combatant->hasCondition(Combatant::Condition_Unconscious))
@@ -303,7 +392,7 @@ void BattleRenderer::createCombatantIcon(BattleDialogModelCombatant* combatant)
     }
     Combatant::drawConditions(&pix, combatant->getConditions());
 
-    QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(pix, combatant);
+    UnselectedPixmap* pixmapItem = new UnselectedPixmap(pix, combatant);
     _scene->addItem(pixmapItem);
     pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
     pixmapItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -333,9 +422,11 @@ void BattleRenderer::createCombatantIcon(BattleDialogModelCombatant* combatant)
 
     //applyPersonalEffectToItem(pixmapItem);
 
-    //_combatantIcons.insert(combatant, pixmapItem);
+    _combatantIcons.insert(combatant, pixmapItem);
 
     //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(handleCombatantMoved(BattleDialogModelCombatant*)), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
     //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
     //connect(combatant, SIGNAL(combatantSelected(BattleDialogModelCombatant*)), this, SLOT(handleCombatantSelected(BattleDialogModelCombatant*)));
+
+    return pixmapItem;
 }

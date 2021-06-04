@@ -78,6 +78,10 @@ void EncounterTextRenderer::startRendering()
     }
 }
 
+void EncounterTextRenderer::refreshRender()
+{
+}
+
 void EncounterTextRenderer::stopRendering()
 {
     qDebug() << "[EncounterTextRenderer] Stopping renderer. Animated: " << _text.getAnimated() << ", running: " << _animationRunning << ", background image: " << _backgroundImage.size() << ", file: " << _text.getImageFile();

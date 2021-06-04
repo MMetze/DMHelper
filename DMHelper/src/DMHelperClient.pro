@@ -21,6 +21,7 @@ macx:ICON=data/macimg/DMHelper.icns
 CONFIG += c++11
 
 SOURCES += \
+        ../../DMHelperShared/src/dmhmessage.cpp \
         attack.cpp \
         audiofactory.cpp \
         audioplayer.cpp \
@@ -117,6 +118,7 @@ SOURCES += \
         videoplayer.cpp
 
 HEADERS += \
+    ../../DMHelperShared/inc/dmhmessage.h \
     attack.h \
     audiofactory.h \
     audioplayer.h \

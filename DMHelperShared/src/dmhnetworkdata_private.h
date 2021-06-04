@@ -3,7 +3,9 @@
 
 #include <QString>
 #include <QDomElement>
+#include <QList>
 #include "dmhpayload.h"
+#include "dmhmessage.h"
 
 class QByteArray;
 
@@ -14,6 +16,7 @@ public:
     virtual ~DMHNetworkData_Private_Base() {}
 
     virtual bool readChildElement(QDomElement element, const QString& childName, QString& stringOut);
+    virtual QString readChildElement(QDomElement element, const QString& childName);
     virtual bool readChildElement(QDomElement element, const QString& childName, QByteArray& baOut);
 
     // From DMHNetworkData
@@ -287,16 +290,32 @@ protected:
 
 
 
+class DMHNetworkData_SimpleMessage_Private : public DMHNetworkData_Private_Base
+{
+public:
+    explicit DMHNetworkData_SimpleMessage_Private(QDomElement data);
+    virtual ~DMHNetworkData_SimpleMessage_Private() override {}
+
+    QString getData() const;
+
+protected:
+    QString _data;
+};
+
+
+
+
+
 class DMHNetworkData_Message_Private : public DMHNetworkData_Private_Base
 {
 public:
     explicit DMHNetworkData_Message_Private(QDomElement data);
     virtual ~DMHNetworkData_Message_Private() override {}
 
-    QString getData() const;
+    QList<DMHMessage> getMessages() const;
 
 protected:
-    QString _data;
+    QList<DMHMessage> _messages;
 };
 
 

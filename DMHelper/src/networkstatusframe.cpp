@@ -49,6 +49,14 @@ void NetworkStatusFrame::setOptionsContainer(OptionsContainer* optionsContainer)
     connect(optionsContainer, &OptionsContainer::networkEnabledChanged, this, &NetworkStatusFrame::networkEnabled);
 }
 
+void NetworkStatusFrame::setNetworkStatus(bool success)
+{
+    if(success)
+        setNetworkSuccess();
+    else
+        setNetworkError(-1);
+}
+
 void NetworkStatusFrame::setNetworkSuccess()
 {
     if(!_currentReply)
@@ -166,6 +174,8 @@ void NetworkStatusFrame::setStatusString()
 
 void NetworkStatusFrame::setReply(QNetworkReply* reply, const QString& filename)
 {
+    _currentReply = reply;
+
     if(reply)
     {
         setStatusString(QString("Uploading ") + filename + QString("..."));
@@ -176,6 +186,4 @@ void NetworkStatusFrame::setReply(QNetworkReply* reply, const QString& filename)
     {
         setNetworkSuccess();
     }
-
-    _currentReply = reply;
 }

@@ -3,7 +3,9 @@
 
 #include "dmhglobal.h"
 #include "dmhpayload.h"
+#include "dmhmessage.h"
 #include <QDomElement>
+#include <QList>
 #include <memory>
 
 class QString;
@@ -22,6 +24,7 @@ class DMHNetworkData_SessionMembers_Private;
 class DMHNetworkData_SessionGeneral_Private;
 class DMHNetworkData_CreateUser_Private;
 class DMHNetworkData_JoinSession_Private;
+class DMHNetworkData_SimpleMessage_Private;
 class DMHNetworkData_Message_Private;
 class DMHNetworkData_UserInfo_Private;
 
@@ -372,6 +375,31 @@ private:
 
 
 
+class DMHNetworkData_SimpleMessage : public DMHNetworkData
+{
+public:
+    explicit DMHNetworkData_SimpleMessage(QDomElement data);
+    virtual ~DMHNetworkData_SimpleMessage() override;
+
+    // From DMHNetworkData
+    virtual bool isValid() override;
+
+    QString getData() const;
+
+private:
+    // No copy constructor allowed
+    DMHNetworkData_SimpleMessage(const DMHNetworkData_SimpleMessage& other);
+
+    std::unique_ptr<DMHNetworkData_SimpleMessage_Private> d;
+};
+
+
+
+
+
+
+
+
 class DMHNetworkData_Message : public DMHNetworkData
 {
 public:
@@ -381,7 +409,7 @@ public:
     // From DMHNetworkData
     virtual bool isValid() override;
 
-    QString getData() const;
+    QList<DMHMessage> getMessages() const;
 
 private:
     // No copy constructor allowed

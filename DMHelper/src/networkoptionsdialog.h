@@ -24,7 +24,9 @@ public slots:
 signals:
 
 protected:
-    virtual void timerEvent(QTimerEvent *event);
+    virtual void timerEvent(QTimerEvent *event) override;
+    virtual void closeEvent(QCloseEvent *event) override;
+    virtual void showEvent(QShowEvent *event) override;
 
 private slots:
     void createUser();

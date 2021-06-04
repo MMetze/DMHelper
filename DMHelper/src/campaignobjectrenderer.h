@@ -14,6 +14,7 @@ public:
 public slots:
     virtual void rendering(bool render);
     virtual void startRendering() = 0;
+    virtual void refreshRender() = 0;
     virtual void stopRendering() = 0;
     virtual void targetResized(const QSize& newSize) = 0;
     virtual void setRotation(int rotation) = 0;

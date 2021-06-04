@@ -24,7 +24,6 @@ BattleDialogModelEffectLine::~BattleDialogModelEffectLine()
 void BattleDialogModelEffectLine::inputXML(const QDomElement &element, bool isImport)
 {
     _width = element.attribute("width", QString::number(5)).toInt();
-
     BattleDialogModelEffectShape::inputXML(element, isImport);
 }
 

@@ -22,6 +22,7 @@ public:
     void setOptionsContainer(OptionsContainer* optionsContainer);
 
 public slots:
+    void setNetworkStatus(bool success);
     void setNetworkSuccess();
     void setNetworkError(int error);
     void uploadStarted(int requestID, QNetworkReply* reply, const QString& filename);

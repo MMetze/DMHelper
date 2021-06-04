@@ -57,12 +57,12 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     connect(_networkManager, &DMHNetworkManager::isOwnerComplete, this, &NetworkOptionsDialog::isOwnerComplete);
     connect(_networkManager, &DMHNetworkManager::sessionMembersComplete, this, &NetworkOptionsDialog::sessionMembersComplete);
     connect(_networkManager, &DMHNetworkManager::sessionGeneralComplete, this, &NetworkOptionsDialog::sessionGeneralComplete);
-
-    checkLogon();
 }
 
 NetworkOptionsDialog::~NetworkOptionsDialog()
 {
+    disconnect(_networkManager, nullptr, this, nullptr);
+
     if(_memberTimer != INVALID_TIMER_ID)
         killTimer(_memberTimer);
 
@@ -96,6 +96,23 @@ void NetworkOptionsDialog::timerEvent(QTimerEvent *event)
         return;
 
     _currentRequest = _networkManager->getSessionMembers(ui->cmbSession->currentData().toString());
+}
+
+void NetworkOptionsDialog::closeEvent(QCloseEvent *event)
+{
+    if(_memberTimer != INVALID_TIMER_ID)
+    {
+        killTimer(_memberTimer);
+        _memberTimer = INVALID_TIMER_ID;
+    }
+
+    QDialog::closeEvent(event);
+}
+
+void NetworkOptionsDialog::showEvent(QShowEvent *event)
+{
+    checkLogon();
+    QDialog::showEvent(event);
 }
 
 void NetworkOptionsDialog::createUser()

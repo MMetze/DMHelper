@@ -115,7 +115,9 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 
 QDomElement EncounterBattle::outputNetworkXML(QDomDocument &doc)
 {
-    return createOutputXML(doc);
+    QDomElement battleElement = createOutputXML(doc);
+    battleElement.setAttribute("_baseID", getID().toString());
+    return battleElement;
 }
 
 int EncounterBattle::getObjectType() const

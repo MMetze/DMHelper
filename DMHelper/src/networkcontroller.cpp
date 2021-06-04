@@ -4,7 +4,9 @@
 
 #include "audiotrack.h"
 #include "dmhnetworkmanager.h"
+#include "dmhnetworkobserver.h"
 #include "dmhpayload.h"
+#include "dmhmessage.h"
 #include "dmhlogon.h"
 #include "map.h"
 #include "encountertext.h"
@@ -31,6 +33,7 @@
 NetworkController::NetworkController(QObject *parent) :
     QObject(parent),
     _networkManager(new DMHNetworkManager(DMHLogon(), this)),
+    _networkObserver(new DMHNetworkObserver(DMHLogon(), DMHNetworkObserver::ObserverType_Message, this)),
     _payload(),
     _currentObject(nullptr),
     _tracks(),
@@ -52,11 +55,14 @@ NetworkController::NetworkController(QObject *parent) :
     connect(_networkManager, &DMHNetworkManager::downloadStarted, this, &NetworkController::downloadStarted);
     connect(_networkManager, &DMHNetworkManager::downloadComplete, this, &NetworkController::downloadComplete);
     connect(_networkManager, &DMHNetworkManager::userInfoComplete, this, &NetworkController::userInfoCompleted);
+
+    connect(_networkObserver, &DMHNetworkObserver::messageReceived, this, &NetworkController::handleMessageReceived);
 }
 
 NetworkController::~NetworkController()
 {
     disconnect(_networkManager, nullptr, this, nullptr);
+    disconnect(_networkObserver, nullptr, this, nullptr);
 
     delete _backgroundUpload;
     delete _fowUpload;
@@ -174,8 +180,26 @@ void NetworkController::uploadObject(CampaignObjectBase* baseObject)
         cancelUpload();
 
     _currentObject = baseObject;
-    connect(baseObject, &QObject::destroyed, this, &NetworkController::cancelUpload);
+    connect(baseObject, &QObject::destroyed, this, &NetworkController::uploadDeleted);
     attemptCampaignObjectUpload();
+}
+
+void NetworkController::uploadDeleted()
+{
+    if(!_enabled)
+        return;
+
+    if(_backgroundUpload)
+        _backgroundUpload->setObject(nullptr);
+
+    if(_fowUpload)
+        _fowUpload->setObject(nullptr);
+
+    for(int i = 0; i < _dependencies.count(); ++i)
+        if(_dependencies.at(i))
+            _dependencies.at(i)->setObject(nullptr);
+
+    cancelUpload();
 }
 
 void NetworkController::cancelUpload()
@@ -237,6 +261,10 @@ void NetworkController::enableNetworkController(bool enabled)
         else
             userInfoCompleted(-1, logon.getUserName(), logon.getUserId(), QString(), QString(), QString(), false);
     }
+    else
+    {
+        _networkObserver->stop();
+    }
 
     emit networkEnabledChanged(_enabled);
 }
@@ -252,6 +280,10 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
         return;
 
     _networkManager->setLogon(logon);
+    _networkObserver->setLogon(logon);
+
+    if(!_enabled)
+        return;
 
     if(logon.getUserId().isEmpty())
         _networkManager->getUserInfo();
@@ -269,9 +301,11 @@ void NetworkController::userInfoCompleted(int requestID, const QString& username
 
     logon.setUserId(userId);
     _networkManager->setLogon(logon);
+    _networkObserver->setLogon(logon);
 
     clearUploadErrors();
     updateAudioPayload();
+    _networkObserver->start();
 }
 
 void NetworkController::uploadCompleted(int requestID, const QString& fileMD5, const QString& fileUuid)
@@ -465,6 +499,16 @@ UploadObject* NetworkController::setRequestError(int requestID)
     return nullptr;
 }
 
+void NetworkController::handleMessageReceived(const QList<DMHMessage>& messages)
+{
+    qDebug() << "[NetworkController] Message received: " << messages.count();
+    for(int i = 0; i < messages.count(); ++i)
+    {
+        DMHMessage message(messages.at(i));
+        qDebug() << "[NetworkController]       Message " << i << ": " << message.getBody();
+    }
+}
+
 void NetworkController::handleUploadError(int requestID)
 {
     UploadObject* errorObject = setRequestError(requestID);
@@ -605,8 +649,9 @@ void NetworkController::attemptCampaignObjectUpload()
             EncounterBattle* encounter = dynamic_cast<EncounterBattle*>(_currentObject);
             if(encounter)
             {
-                if(!encounter->getFileName().isEmpty())
+                if((encounter->getBattleDialogModel()) && (encounter->getBattleDialogModel()->getMap()) && (!encounter->getFileName().isEmpty()))
                 {
+                    _backgroundUpload->setObject(encounter->getBattleDialogModel()->getMap());
                     QImageReader reader(encounter->getFileName());
                     _backgroundUpload->setFileType(reader.canRead() ? DMHelper::FileType_Image : DMHelper::FileType_Video);
 

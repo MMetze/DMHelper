@@ -4,10 +4,12 @@
 #include "campaignobjectrenderer.h"
 #include "encounterbattle.h"
 #include <QPixmap>
+#include <QMap>
 
 class BattleDialogGraphicsScene;
 class BattleDialogModelCombatant;
 class QGraphicsPixmapItem;
+class UnselectedPixmap;
 
 class BattleRenderer : public CampaignObjectRenderer
 {
@@ -29,19 +31,26 @@ public:
 public slots:
     // From CampaignObjectRenderer
     virtual void startRendering() override;
+    virtual void refreshRender() override;
     virtual void stopRendering() override;
     virtual void targetResized(const QSize& newSize) override;
     virtual void setRotation(int rotation) override;
 
+    void updateModel();
+
 protected:
     void getImageForPublishing(QImage& imageForPublishing);
-    void createCombatantIcon(BattleDialogModelCombatant* combatant);
+    UnselectedPixmap* createCombatantIcon(BattleDialogModelCombatant* combatant);
 
     EncounterBattle& _battle;
     QGraphicsPixmapItem* _background;
     BattleDialogGraphicsScene* _scene;
+    QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
     QSize _targetSize;
     int _rotation;
+
+    QGraphicsPixmapItem* _activePixmap;
+
 };
 
 #endif // BATTLERENDERER_H

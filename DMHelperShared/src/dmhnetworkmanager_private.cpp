@@ -1,6 +1,7 @@
 #include "dmhnetworkmanager_private.h"
 #include "dmhnetworkobserver.h"
 #include "dmhpayload.h"
+#include "dmhmessage.h"
 #include "dmhnetworkdatafactory.h"
 #include <QFile>
 #include <QNetworkAccessManager>
@@ -34,11 +35,6 @@ DMHNetworkManager_Private::~DMHNetworkManager_Private()
     }
 }
 
-DMHNetworkObserver* DMHNetworkManager_Private::registerNetworkObserver(QObject *parent)
-{
-    return new DMHNetworkObserver(_logon, parent);
-}
-
 void DMHNetworkManager_Private::uploadPayload(const DMHPayload& payload)
 {
     QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/pll_dm.php"));
@@ -56,7 +52,7 @@ void DMHNetworkManager_Private::uploadPayload(const DMHPayload& payload)
 
     QString postDataString = postData.toString(QUrl::FullyEncoded);
     QByteArray postDataArray = postDataString.toUtf8();
-    qDebug() << "[DMHNetworkManager] Uploading payload. Request: " << postDataArray;
+    //qDebug() << "[DMHNetworkManager] Uploading payload. Request: " << postDataArray;
 
 #ifdef QT_DEBUG
     emit DEBUG_message_contents(postDataArray);
@@ -384,58 +380,6 @@ int DMHNetworkManager_Private::sendMessage(const QString& message, const QString
     return replyId;
 }
 
-int DMHNetworkManager_Private::pollMessages()
-{
-    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/communication.php"));
-    QNetworkRequest request(serviceUrl);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-    QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserId());
-    postData.addQueryItem("password", _logon.getPassword());
-    postData.addQueryItem("session", _logon.getSession());
-    postData.addQueryItem("action", "poll");
-
-#ifdef QT_DEBUG
-    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
-#endif
-    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
-
-    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
-    int replyId = getRequestId(true);
-    _replies.insert(reply, replyId);
-
-    qDebug() << "[DMHNetworkManager] Poll message request send.";
-
-    return replyId;
-}
-
-int DMHNetworkManager_Private::ackMessages()
-{
-    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/communication.php"));
-    QNetworkRequest request(serviceUrl);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
-
-    QUrlQuery postData;
-    postData.addQueryItem("user", _logon.getUserId());
-    postData.addQueryItem("password", _logon.getPassword());
-    postData.addQueryItem("session", _logon.getSession());
-    postData.addQueryItem("action", "ack");
-
-#ifdef QT_DEBUG
-    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
-#endif
-    qDebug() << postData.toString(QUrl::FullyEncoded).toUtf8();
-
-    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
-    int replyId = getRequestId(true);
-    _replies.insert(reply, replyId);
-
-    qDebug() << "[DMHNetworkManager] Ack message request sent.";
-
-    return replyId;
-}
-
 void DMHNetworkManager_Private::abortRequest(int id)
 {
     QNetworkReply* reply = _replies.key(id, nullptr);
@@ -581,7 +525,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             }
             else if(factory.getModeValue() == DMHShared::DMH_Message_ssn_general)
             {
-                DMHNetworkData_SessionGeneral& sessionGeneralNetworkData = dynamic_cast<DMHNetworkData_SessionGeneral&>(*factoryData);
+                //DMHNetworkData_SessionGeneral& sessionGeneralNetworkData = dynamic_cast<DMHNetworkData_SessionGeneral&>(*factoryData);
                 //qDebug() << "[DMHNetworkManager] Session Members Received. Session: " << sessionMembersNetworkData.getSession() << ", Members: " << sessionMembersNetworkData.getMembers();
                 emit sessionGeneralComplete(replyData);
             }
@@ -593,21 +537,9 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
             }
             else if(factory.getModeValue() == DMHShared::DMH_Message_msg_send)
             {
-                DMHNetworkData_Message& messageNetworkData = dynamic_cast<DMHNetworkData_Message&>(*factoryData);
+                DMHNetworkData_SimpleMessage& messageNetworkData = dynamic_cast<DMHNetworkData_SimpleMessage&>(*factoryData);
                 qDebug() << "[DMHNetworkManager] Message Send Received. Session: " << messageNetworkData.getData();
                 emit sendMessageComplete(replyData, messageNetworkData.getData());
-            }
-            else if(factory.getModeValue() == DMHShared::DMH_Message_msg_poll)
-            {
-                DMHNetworkData_Message& messageNetworkData = dynamic_cast<DMHNetworkData_Message&>(*factoryData);
-                qDebug() << "[DMHNetworkManager] Message Poll Received. Session: " << messageNetworkData.getData();
-                emit pollMessageComplete(replyData, messageNetworkData.getData());
-            }
-            else if(factory.getModeValue() == DMHShared::DMH_Message_msg_ack)
-            {
-                DMHNetworkData_Message& messageNetworkData = dynamic_cast<DMHNetworkData_Message&>(*factoryData);
-                qDebug() << "[DMHNetworkManager] Message Ack Received. Session: " << messageNetworkData.getData();
-                emit ackMessageComplete(replyData, messageNetworkData.getData());
             }
             else if(factory.getModeValue() == DMHShared::DMH_Message_usr_info)
             {

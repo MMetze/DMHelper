@@ -778,6 +778,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(charFrame, SIGNAL(publishCharacterImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     connect(partyFrame, SIGNAL(publishPartyImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     connect(mapFrame, SIGNAL(publishMap(CampaignObjectBase*)), _networkController, SLOT(uploadObject(CampaignObjectBase*)));
+    connect(battleFrame, SIGNAL(animationUpdated(CampaignObjectBase*)), _networkController, SLOT(uploadObject(CampaignObjectBase*)));
 
     //connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     //connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
@@ -789,6 +790,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_networkController, &NetworkController::networkError, ui->frameNetwork, &NetworkStatusFrame::setNetworkError);
     connect(_networkController, &NetworkController::networkSuccess, ui->frameNetwork, &NetworkStatusFrame::setNetworkSuccess);
     connect(_networkController, &NetworkController::uploadStarted, ui->frameNetwork, &NetworkStatusFrame::uploadStarted);
+    connect(_options, SIGNAL(networkEnabledChanged(bool)), ui->frameNetwork, SLOT(setNetworkStatus(bool)));
 
     _networkOptionsDlg = new NetworkOptionsDialog(*_options);
     connect(_networkController, &NetworkController::networkMessage, _networkOptionsDlg, &NetworkOptionsDialog::logMessage);

@@ -54,7 +54,7 @@ QDomElement BattleDialogModelCombatant::outputNetworkXML(QDomDocument &doc)
 {
     QDomElement element = createOutputXML(doc);
 
-    element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
+    element.setAttribute("_baseID", getID().toString());
     element.setAttribute("type", getCombatantType());
     element.setAttribute("initiative", _initiative);
     element.setAttribute("positionX", _position.x());

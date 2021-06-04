@@ -17,6 +17,7 @@ public:
 public slots:
     // From CampaignObjectRenderer
     virtual void startRendering() override;
+    virtual void refreshRender() override;
     virtual void stopRendering() override;
     virtual void targetResized(const QSize& newSize) override;
     virtual void setRotation(int rotation) override;

@@ -427,6 +427,29 @@ QString DMHNetworkData_JoinSession::getSession() const
 
 
 
+DMHNetworkData_SimpleMessage::DMHNetworkData_SimpleMessage(QDomElement data) :
+    DMHNetworkData(),
+    d(new DMHNetworkData_SimpleMessage_Private(data))
+{
+}
+
+DMHNetworkData_SimpleMessage::~DMHNetworkData_SimpleMessage()
+{
+}
+
+bool DMHNetworkData_SimpleMessage::isValid()
+{
+    return d->isValid();
+}
+
+QString DMHNetworkData_SimpleMessage::getData() const
+{
+    return d->getData();
+}
+
+
+
+
 DMHNetworkData_Message::DMHNetworkData_Message(QDomElement data) :
     DMHNetworkData(),
     d(new DMHNetworkData_Message_Private(data))
@@ -442,10 +465,12 @@ bool DMHNetworkData_Message::isValid()
     return d->isValid();
 }
 
-QString DMHNetworkData_Message::getData() const
+QList<DMHMessage> DMHNetworkData_Message::getMessages() const
 {
-    return d->getData();
+    return d->getMessages();
 }
+
+
 
 
 DMHNetworkData_UserInfo::DMHNetworkData_UserInfo(QDomElement data) :

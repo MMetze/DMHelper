@@ -19,8 +19,6 @@ public:
     explicit DMHNetworkManager(const DMHLogon& logon, QObject *parent = nullptr);
     ~DMHNetworkManager();
 
-    DMHNetworkObserver* registerNetworkObserver(QObject *parent = nullptr);
-
     // Payload Management
     void uploadPayload(const DMHPayload& payload);
 
@@ -46,8 +44,6 @@ public:
 
     // Communication
     int sendMessage(const QString& message, const QString& userId = QString());
-    int pollMessages();
-    int ackMessages();
 
     // Request controls
     void abortRequest(int id);
@@ -84,8 +80,6 @@ signals:
 
     // Communication
     void sendMessageComplete(int requestID, const QString& data);
-    void pollMessageComplete(int requestID, const QString& data);
-    void ackMessageComplete(int requestID, const QString& data);
 
     // Request controls
     void otherRequestComplete();

@@ -4,6 +4,7 @@
 #include "encounterbattle.h"
 
 class BattleDialogModelEffect;
+class BattleDialogModelCombatantDownload;
 
 class EncounterBattleDownload : public EncounterBattle
 {
@@ -12,6 +13,7 @@ public:
     explicit EncounterBattleDownload(const QString& cacheDirectory, QObject *parent = nullptr);
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    void updateXML(const QDomElement &element);
 
     bool isComplete();
 
@@ -27,6 +29,8 @@ protected:
     virtual void inputXMLEffects(const QDomElement &parentElement, bool isImport) override;
     BattleDialogModelEffect* createEffect(const QDomElement& element, bool isImport);
     void checkComplete();
+    BattleDialogModelCombatantDownload* findCombatantById(QUuid combatantId);
+    BattleDialogModelEffect* findEffectById(QUuid effectId);
 
     QString _cacheDirectory;
 };

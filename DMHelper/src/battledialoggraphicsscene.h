@@ -75,6 +75,7 @@ signals:
     void itemMouseDown(QGraphicsPixmapItem* item);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
+    void mapMouseUp();
     void itemChanged(QGraphicsItem* item);
     void itemMouseDoubleClick(QGraphicsPixmapItem* item);
 

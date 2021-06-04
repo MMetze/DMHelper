@@ -23,6 +23,7 @@ macx:ICON=data/macimg/DMHelper.icns
 SOURCES += main.cpp\
     ../../DMHelperShared/src/dmhlogon.cpp \
     ../../DMHelperShared/src/dmhlogon_private.cpp \
+    ../../DMHelperShared/src/dmhmessage.cpp \
     ../../DMHelperShared/src/dmhnetworkdata.cpp \
     ../../DMHelperShared/src/dmhnetworkdata_private.cpp \
     ../../DMHelperShared/src/dmhnetworkdatafactory.cpp \
@@ -244,6 +245,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
     ../../DMHelperShared/inc/dmhglobal.h \
     ../../DMHelperShared/inc/dmhlogon.h \
+    ../../DMHelperShared/inc/dmhmessage.h \
     ../../DMHelperShared/inc/dmhnetworkdata.h \
     ../../DMHelperShared/inc/dmhnetworkmanager.h \
     ../../DMHelperShared/inc/dmhnetworkobserver.h \

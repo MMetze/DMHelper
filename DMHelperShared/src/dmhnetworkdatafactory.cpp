@@ -187,13 +187,13 @@ bool DMHNetworkDataFactory::readDataElement()
             _data.reset(new DMHNetworkData_CreateUser(_dataElement));
             return _data->isValid();
         case DMHShared::DMH_Message_msg_send:
-            _data.reset(new DMHNetworkData_Message(_dataElement));
+            _data.reset(new DMHNetworkData_SimpleMessage(_dataElement));
             return _data->isValid();
         case DMHShared::DMH_Message_msg_poll:
             _data.reset(new DMHNetworkData_Message(_dataElement));
             return _data->isValid();
         case DMHShared::DMH_Message_msg_ack:
-            _data.reset(new DMHNetworkData_Message(_dataElement));
+            _data.reset(new DMHNetworkData_SimpleMessage(_dataElement));
             return _data->isValid();
         case DMHShared::DMH_Message_usr_info:
             _data.reset(new DMHNetworkData_UserInfo(_dataElement));

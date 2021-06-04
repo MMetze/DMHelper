@@ -24,6 +24,7 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     _showMovement(true),
     _showLairActions(false),
     _activeCombatant(nullptr),
+    _selectedCombatant(nullptr),
     _logger(),
     _backgroundImage()
 {
@@ -82,6 +83,7 @@ QDomElement BattleDialogModel::outputNetworkXML(QDomDocument &doc)
     element.setAttribute("showMovement", _showMovement);
     element.setAttribute("showLairActions", _showLairActions);
     element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
+    element.setAttribute("selectedId", _selectedCombatant ? _selectedCombatant->getID().toString() : QUuid().toString());
 
     return element;
 }
@@ -343,6 +345,11 @@ BattleDialogModelCombatant* BattleDialogModel::getActiveCombatant() const
     return _activeCombatant;
 }
 
+BattleDialogModelCombatant* BattleDialogModel::getSelectedCombatant() const
+{
+    return _selectedCombatant;
+}
+
 QImage BattleDialogModel::getBackgroundImage() const
 {
     return _backgroundImage;
@@ -500,6 +507,15 @@ void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCom
     {
         _activeCombatant = activeCombatant;
         emit activeCombatantChanged(_activeCombatant);
+    }
+}
+
+void BattleDialogModel::setSelectedCombatant(BattleDialogModelCombatant* selectedCombatant)
+{
+    if(_selectedCombatant != selectedCombatant)
+    {
+        _selectedCombatant = selectedCombatant;
+        emit selectedCombatantChanged(_selectedCombatant);
     }
 }
 

@@ -298,6 +298,7 @@ void RemoteRenderer::dataComplete()
 
         if(_renderer)
         {
+            connect(this, &RemoteRenderer::targetChanged, _renderer, &CampaignObjectRenderer::refreshRender);
             connect(_renderer, &CampaignObjectRenderer::publishImage, this, &RemoteRenderer::publishImage);
             connect(_renderer, &CampaignObjectRenderer::animateImage, this, &RemoteRenderer::publishImage);
             _renderer->targetResized(_targetSize);
@@ -327,15 +328,29 @@ void RemoteRenderer::parsePayloadData(const QDomElement& element)
     if(element.isNull())
         return;
 
+    QString tagName = element.tagName();
+    QUuid elementId(element.attribute(QString("_baseID")));
+
     if(_activeObject)
     {
-        if(_activeObject->getID() == QUuid(element.attribute(QString("_baseID"))))
+        if(_activeObject->getID() == elementId)
+        {
+            if(tagName == "battle-object")
+            {
+                EncounterBattleDownload* battle = dynamic_cast<EncounterBattleDownload*>(_activeObject);
+                if(battle)
+                {
+                    battle->updateXML(element);
+                    emit targetChanged();
+                }
+            }
+
             return;
+        }
 
         resetRendering();
     }
 
-    QString tagName = element.tagName();
     if(tagName == "entry-object")
     {
         EncounterTextDownload* encounter = new EncounterTextDownload(_cacheDirectory, this);

@@ -13,6 +13,7 @@ public:
     virtual ~BattleDialogModelCombatantDownload() override;
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    void updateXML(const QDomElement &element);
 
     virtual QString getMD5() const override;
     virtual void setMD5(const QString& md5) override;
@@ -54,7 +55,7 @@ signals:
 protected:
     void interpretToken();
 
-    QUuid _combatantId;
+//    QUuid _combatantId;
     qreal _sizeFactor;
     int _conditions;
     int _speed;

@@ -157,6 +157,7 @@ signals:
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
     void animationStarted(CampaignObjectBase* animatedObject);
+    void animationUpdated(CampaignObjectBase* animatedObject);
     void animateImage(QImage img);
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
@@ -244,6 +245,8 @@ private slots:
     // State Machine
     void stateUpdated();
 
+    void mapClickDetected();
+
 private:
 
     CombatantWidget* createCombatantWidget(BattleDialogModelCombatant* combatant);
@@ -317,7 +320,6 @@ private:
 
     BattleFrameStateMachine _stateMachine;
 
-    BattleDialogModelCombatant* _selectedCombatant;
     BattleDialogModelCombatant* _contextMenuCombatant;
     bool _mouseDown;
     QPoint _mouseDownPos;

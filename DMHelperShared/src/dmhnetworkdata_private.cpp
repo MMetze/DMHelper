@@ -21,6 +21,18 @@ bool DMHNetworkData_Private_Base::readChildElement(QDomElement element, const QS
     return !childElement.isNull();
 }
 
+QString DMHNetworkData_Private_Base::readChildElement(QDomElement element, const QString& childName)
+{
+    if(!element.isNull())
+    {
+        QDomElement childElement = element.firstChildElement(childName);
+        if(!childElement.isNull())
+            return childElement.text();
+    }
+
+    return QString();
+}
+
 bool DMHNetworkData_Private_Base::readChildElement(QDomElement element, const QString& childName, QByteArray& baOut)
 {
     if(element.isNull())
@@ -450,18 +462,50 @@ QString DMHNetworkData_JoinSession_Private::getSession() const
 
 
 
-
-DMHNetworkData_Message_Private::DMHNetworkData_Message_Private(QDomElement data) :
+DMHNetworkData_SimpleMessage_Private::DMHNetworkData_SimpleMessage_Private(QDomElement data) :
     DMHNetworkData_Private_Base(),
     _data()
 {
     _data = data.text();
-    _valid = !_data.isEmpty();
+    _valid = true;
 }
 
-QString DMHNetworkData_Message_Private::getData() const
+QString DMHNetworkData_SimpleMessage_Private::getData() const
 {
     return _data;
+}
+
+
+
+
+
+
+DMHNetworkData_Message_Private::DMHNetworkData_Message_Private(QDomElement data) :
+    DMHNetworkData_Private_Base(),
+    _messages()
+{
+    _valid = true;
+    QDomElement nodeElement = data.firstChildElement(QString("node"));
+    while(!nodeElement.isNull())
+    {
+        _messages.append(DMHMessage(readChildElement(nodeElement, QString("ID")),
+                                    readChildElement(nodeElement, QString("sender")),
+                                    readChildElement(nodeElement, QString("body")),
+                                    static_cast<bool>(readChildElement(nodeElement, QString("polled")).toInt()),
+                                    readChildElement(nodeElement, QString("timestamp"))));
+
+        nodeElement = nodeElement.nextSiblingElement(QString("node"));
+    }
+
+    // <ID>BD04EDC8-FAF9-4EF9-8563-61AA18B8CAC8</ID>\n   <sender>NewUser</sender>\n   <body>Joining session: NewUser</body>\n   <polled>0</polled>\n   <timestamp>2021-05-30 12:21:09</timestamp>
+    // <node>\n   <ID>BD04EDC8-FAF9-4EF9-8563-61AA18B8CAC8</ID>\n   <sender>NewUser</sender>\n   <body>Joining session: NewUser</body>\n   <polled>1</polled>\n   <timestamp>2021-05-30 12:21:09</timestamp>\n  </node>\n  <node>\n   <ID>73BD6FB0-7DDA-4A01-A367-F5A95CE77A45</ID>\n   <sender>NewUser</sender>\n   <body>Joining session: NewUser</body>\n   <polled>0</polled>\n   <timestamp>2021-05-30 12:23:51</timestamp>\n  </node>\n  <node>\n   <ID>DC26831F-707A-4604-994E-C01C99DD4630</ID>\n   <sender>NewUser</sender>\n   <body>Joining session: NewUser</body>\n   <polled>0</polled>\n   <timestamp>2021-05-30 12:23:53</timestamp>\n  </node>\n  <node>\n   <ID>7FC1B8B8-E289-46F3-847B-72F4436C8FEE</ID>\n   <sender>NewUser</sender>\n   <body>Joining session: NewUser</body>\n   <polled>0</polled>\n   <timestamp>2021-05-30 12:24:06</timestamp>\n  </node>\n  <node>\n   <ID>0991FD94-D0D1-4D3A-BE27-40F4E42472F0</ID>\n   <sender>NewUser</sender>\n   <body>Joining session: NewUser</body>\n   <polled>0</polled>\n   <timestamp>2021-05-30 12:24:10</timestamp>\n  </node>
+    //_data = data.text();
+    _valid = true;
+}
+
+QList<DMHMessage> DMHNetworkData_Message_Private::getMessages() const
+{
+    return _messages;
 }
 
 

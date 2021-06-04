@@ -15,6 +15,8 @@
 
 class AudioTrack;
 class DMHNetworkManager;
+class DMHNetworkObserver;
+class DMHMessage;
 class CampaignObjectBase;
 class Map;
 class EncounterText;
@@ -53,6 +55,7 @@ public slots:
     void uploadImage(QImage background);
     void uploadImage(QImage background, QColor color);
     void uploadObject(CampaignObjectBase* baseObject);
+    void uploadDeleted();
     void cancelUpload();
     void setPayloadData(const QString& data);
     void clearTracks();
@@ -66,6 +69,7 @@ private slots:
     void existsCompleted(int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
     bool handleExistsResult(UploadObject* uploadObject, int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
     UploadObject* setRequestError(int requestID);
+    void handleMessageReceived(const QList<DMHMessage>& messages);
     void handleUploadError(int requestID);
     void handleNetworkError(int requestID, const QString& message);
     void uploadPayload();
@@ -102,6 +106,7 @@ private slots:
 
 private:
     DMHNetworkManager* _networkManager;
+    DMHNetworkObserver* _networkObserver;
     DMHPayload _payload;
     CampaignObjectBase* _currentObject;
     QList<UploadObject*> _tracks;

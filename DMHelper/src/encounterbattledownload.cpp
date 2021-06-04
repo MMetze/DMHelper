@@ -21,6 +21,71 @@ void EncounterBattleDownload::inputXML(const QDomElement &element, bool isImport
     inputXMLBattle(element, false);
 }
 
+void EncounterBattleDownload::updateXML(const QDomElement &element)
+{
+    if(!_battleModel)
+        return;
+
+    QDomElement rootBattleElement = element.firstChildElement("battle");
+    if(rootBattleElement.isNull())
+        return;
+
+    int activeIdInt = DMH_GLOBAL_INVALID_ID;
+    QUuid activeId = parseIdString(rootBattleElement.attribute("activeId"), &activeIdInt, true);
+    QUuid selectedId = parseIdString(rootBattleElement.attribute("selectedId"), &activeIdInt, true);
+
+    QDomElement combatantsElement = rootBattleElement.firstChildElement("combatants");
+    if(!combatantsElement.isNull())
+    {
+        QDomElement combatantElement = combatantsElement.firstChildElement("battlecombatant");
+        while(!combatantElement.isNull())
+        {
+            if(combatantElement.hasAttribute("_baseID"))
+            {
+                QUuid combatantId(combatantElement.attribute("_baseID"));
+                BattleDialogModelCombatantDownload* combatant = findCombatantById(combatantId);
+                if(combatant)
+                {
+                    combatant->updateXML(combatantElement);
+                    if(activeId == combatantId)
+                        _battleModel->setActiveCombatant(combatant);
+                    if(selectedId == combatantId)
+                        _battleModel->setSelectedCombatant(combatant);
+                }
+            }
+
+            combatantElement = combatantElement.nextSiblingElement("battlecombatant");
+        }
+    }
+
+    QDomElement effectsElement = rootBattleElement.firstChildElement("effects");
+    if(!effectsElement.isNull())
+    {
+        QDomElement effectElement = effectsElement.firstChildElement("battleeffect");
+        while(!effectElement.isNull())
+        {
+            if(effectElement.hasAttribute("_baseID"))
+            {
+                QUuid effectId(effectElement.attribute("_baseID"));
+                BattleDialogModelEffect* effect = findEffectById(effectId);
+                if(effect)
+                    effect->inputXML(effectElement, false);
+
+                QDomElement effectChildElement = effectElement.firstChildElement("battleeffect");
+                if(!effectChildElement.isNull())
+                {
+                    QUuid effectChildId(effectChildElement.attribute("_baseID"));
+                    BattleDialogModelEffect* effectChild = findEffectById(effectChildId);
+                    if(effectChild)
+                        effectChild->inputXML(effectChildElement, false);
+                }
+            }
+
+            effectElement = effectElement.nextSiblingElement("battleeffect");
+        }
+    }
+}
+
 bool EncounterBattleDownload::isComplete()
 {
     for(int i = 0; i < _battleModel->getCombatantCount(); ++i)
@@ -150,20 +215,19 @@ void EncounterBattleDownload::inputXMLBattle(const QDomElement &element, bool is
     QDomElement combatantsElement = rootBattleElement.firstChildElement("combatants");
     if(!combatantsElement.isNull())
     {
-        QDomElement combatantElement = combatantsElement.firstChildElement();
+        QDomElement combatantElement = combatantsElement.firstChildElement("battlecombatant");
         while(!combatantElement.isNull())
         {
             BattleDialogModelCombatantDownload* combatant = new BattleDialogModelCombatantDownload(this);
             connect(combatant, &BattleDialogModelCombatantDownload::requestFile, this, &EncounterBattleDownload::requestFile);
             combatant->inputXML(combatantElement, false);
             _battleModel->appendCombatant(combatant);
-            if( ((!activeId.isNull()) && (combatant->getID() == activeId)) ||
-                (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
-            {
+            //if(((!activeId.isNull()) && (combatant->getID() == activeId)) ||
+            //   (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
+            if((!activeId.isNull()) && (combatant->getID() == activeId))
                 _battleModel->setActiveCombatant(combatant);
-            }
 
-            combatantElement = combatantElement.nextSiblingElement();
+            combatantElement = combatantElement.nextSiblingElement("battlecombatant");
         }
     }
 
@@ -175,13 +239,13 @@ void EncounterBattleDownload::inputXMLEffects(const QDomElement &parentElement, 
     if(parentElement.isNull())
         return;
 
-    QDomElement effectElement = parentElement.firstChildElement();
+    QDomElement effectElement = parentElement.firstChildElement("battleeffect");
     while(!effectElement.isNull())
     {
         BattleDialogModelEffect* newEffect = createEffect(effectElement, isImport);
         if(newEffect)
         {
-            QDomElement effectChildElement = effectElement.firstChildElement();
+            QDomElement effectChildElement = effectElement.firstChildElement("battleeffect");
             if(!effectChildElement.isNull())
             {
                 BattleDialogModelEffect* childEffect = createEffect(effectChildElement, isImport);
@@ -191,7 +255,7 @@ void EncounterBattleDownload::inputXMLEffects(const QDomElement &parentElement, 
             _battleModel->appendEffect(newEffect);
         }
 
-        effectElement = effectElement.nextSiblingElement();
+        effectElement = effectElement.nextSiblingElement("battleeffect");
     }
 }
 
@@ -216,4 +280,45 @@ void EncounterBattleDownload::checkComplete()
 {
     if(isComplete())
         emit encounterComplete();
+}
+
+BattleDialogModelCombatantDownload* EncounterBattleDownload::findCombatantById(QUuid combatantId)
+{
+    if(_battleModel)
+    {
+        QList<BattleDialogModelCombatant*> combatants = _battleModel->getCombatantList();
+        for(BattleDialogModelCombatant* combatant : combatants)
+        {
+            if((combatant) && (combatant->getID() == combatantId))
+                return dynamic_cast<BattleDialogModelCombatantDownload*>(combatant);
+        }
+    }
+
+    return nullptr;
+}
+
+BattleDialogModelEffect* EncounterBattleDownload::findEffectById(QUuid effectId)
+{
+    if(_battleModel)
+    {
+        QList<BattleDialogModelEffect*> effects = _battleModel->getEffectList();
+        for(BattleDialogModelEffect* effect : effects)
+        {
+            if(effect)
+            {
+                if(effect->getID() == effectId)
+                    return effect;
+
+                CampaignObjectBase* childObject = effect->searchChildrenById(effectId);
+                if(childObject)
+                {
+                    BattleDialogModelEffect* childEffect = dynamic_cast<BattleDialogModelEffect*>(childObject);
+                    if(childEffect)
+                        return childEffect;
+                }
+            }
+        }
+    }
+
+    return nullptr;
 }

@@ -578,6 +578,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         {
             qDebug() << "[Battle Dialog Scene] left mouse released on background";
         }
+        emit mapMouseUp();
     }
 
     _contextMenuItem = nullptr;

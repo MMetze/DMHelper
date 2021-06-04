@@ -4,7 +4,7 @@
 
 BattleDialogModelCombatantDownload::BattleDialogModelCombatantDownload(QObject *parent) :
     BattleDialogModelCombatant(QString(), parent),
-    _combatantId(),
+//    _combatantId(),
     _sizeFactor(1.0),
     _conditions(0),
     _speed(30),
@@ -28,7 +28,7 @@ void BattleDialogModelCombatantDownload::inputXML(const QDomElement &element, bo
     // element.setAttribute("type", getCombatantType());
 
     // element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
-    _combatantId = QUuid(element.attribute("combatantId", QUuid().toString()));
+//_combatantId = QUuid(element.attribute("combatantId", QUuid().toString()));
     // element.setAttribute("sizeFactor", getSizeFactor());
     _sizeFactor = element.attribute("sizeFactor", QString::number(0)).toInt();
     // element.setAttribute("conditions", getConditions());
@@ -55,6 +55,15 @@ void BattleDialogModelCombatantDownload::inputXML(const QDomElement &element, bo
 
     if(!getMD5().isEmpty())
         emit requestFile(getMD5(), getUuid(), DMHelper::FileType_Image);
+}
+
+void BattleDialogModelCombatantDownload::updateXML(const QDomElement &element)
+{
+    _initiative = element.attribute("initiative",QString::number(0)).toInt();
+    _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
+                        element.attribute("positionY",QString::number(0)).toDouble());
+    _isShown = static_cast<bool>(element.attribute("isShown",QString::number(1)).toInt());
+    _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(1)).toInt());
 }
 
 QString BattleDialogModelCombatantDownload::getMD5() const
