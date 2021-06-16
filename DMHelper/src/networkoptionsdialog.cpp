@@ -2,6 +2,8 @@
 #include "networksessionseditdialog.h"
 #include "dmhlogon.h"
 #include "connectionuserdialog.h"
+#include "networksession.h"
+#include "networkplayer.h"
 #include "ui_networkoptionsdialog.h"
 #include <QDomDocument>
 #include <QScreen>
@@ -29,6 +31,7 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     //ui->edtInviteID
 
     populateSessionsList();
+    updatePlayersList();
 
     /*
     select --> check isowner text shows session name, detailed list shows name and ID
@@ -87,6 +90,36 @@ void NetworkOptionsDialog::handleMessageError(int requestID, const QString& erro
     _currentRequest = INVALID_REQUEST_ID;
 }
 
+void NetworkOptionsDialog::currentSessionChanged(NetworkSession* session)
+{
+    ui->edtInviteID->setText(session ? session->getInvite() : QString());
+    if(session)
+    {
+        if(ui->cmbSession->currentData().toString() != session->getID())
+            ui->cmbSession->setCurrentText(session->getName());
+
+        updatePlayersList();
+        checkLogon();
+    }
+}
+
+void NetworkOptionsDialog::sessionChanged(NetworkSession* session)
+{
+    if((!session) || (_options.getCurrentSession() != session))
+        return;
+
+    ui->cmbSession->setItemText(ui->cmbSession->currentIndex(), session->getName());
+    ui->edtInviteID->setText(session->getInvite());
+
+    updatePlayersList();
+
+    if(ui->cmbSession->currentData().toString() != session->getID())
+    {
+        ui->cmbSession->setItemData(ui->cmbSession->currentIndex(), session->getID());
+        checkLogon();
+    }
+}
+
 void NetworkOptionsDialog::timerEvent(QTimerEvent *event)
 {
     if((!event) || (event->timerId() != _memberTimer))
@@ -142,13 +175,10 @@ void NetworkOptionsDialog::sessionSelected(int selection)
         return;
 
     QString newSession = ui->cmbSession->itemData(selection).toString();
-    if((newSession.isEmpty()) || (!_options.doesSessionExist(newSession)))
-        return;
+//    if((newSession.isEmpty()) || (!_options.doesSessionExist(newSession)))
+//        return;
 
-    ui->edtInviteID->setText(_options.getSessionInvite(newSession));
-   _options.setCurrentSession(newSession);
-
-   checkLogon();
+    _options.setCurrentSessionId(newSession);
 }
 
 void NetworkOptionsDialog::editSessions()
@@ -255,32 +285,38 @@ void NetworkOptionsDialog::sessionMembersComplete(int requestID, const QString& 
     if(_currentRequest != requestID)
         return;
 
-    ui->listPlayers->clear();
-
-    QDomDocument doc;
-    QString errorMsg;
-    int errorLine;
-    int errorColumn;
-    if(!doc.setContent(members, &errorMsg, &errorLine, &errorColumn))
+    if(_options.getCurrentSession()->getName() == sessionName)
     {
-        qDebug() << "[NetworkOptionsDialog] ERROR identified reading audio data: unable to parse XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
-        qDebug() << "[NetworkOptionsDialog] Members String: " << members;
-        return;
-    }
+        QDomDocument doc;
+        QString errorMsg;
+        int errorLine;
+        int errorColumn;
+        if(!doc.setContent(members, &errorMsg, &errorLine, &errorColumn))
+        {
+            qDebug() << "[NetworkOptionsDialog] ERROR identified reading audio data: unable to parse XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
+            qDebug() << "[NetworkOptionsDialog] Members String: " << members;
+            return;
+        }
 
-    //<node><username>m.metze</username><surname>Matthias</surname><forename>Metze</forename></node>
-    QDomElement rootElement = doc.documentElement();
-    QDomElement memberElement = rootElement.firstChildElement("node");
-    while(!memberElement.isNull())
-    {
-        QDomElement usernameElement = memberElement.firstChildElement("username");
-        if(!usernameElement.isNull())
-            ui->listPlayers->addItem(usernameElement.text());
+        /*
+        QDomElement rootElement = doc.documentElement();
+        QDomElement memberElement = rootElement.firstChildElement("node");
+        while(!memberElement.isNull())
+        {
+            QDomElement idElement = memberElement.firstChildElement("ID");
+            QDomElement usernameElement = memberElement.firstChildElement("username");
+            QDomElement surnameElement = memberElement.firstChildElement("surname");
+            QDomElement forenameElement = memberElement.firstChildElement("forename");
 
-        QDomElement surnameElement = memberElement.firstChildElement("surname");
-        QDomElement forenameElement = memberElement.firstChildElement("forename");
+            emit addSessionUser(idElement.text(), usernameElement.text(), surnameElement.text());
 
-        memberElement = memberElement.nextSiblingElement("node");
+            memberElement = memberElement.nextSiblingElement("node");
+        }
+        */
+
+        qDebug() << "[NetworkOptionsDialog] Members: " << doc.toString();
+
+        emit updateSessionMembers(doc.documentElement());
     }
 
     _currentRequest = INVALID_REQUEST_ID;
@@ -310,25 +346,96 @@ void NetworkOptionsDialog::populateSessionsList()
 {
     ui->cmbSession->clear();
 
-    QString currentSession = _options.getCurrentSession();
-
-    QStringList sessions = _options.getSessions();
-    for(QString session : sessions)
-        ui->cmbSession->addItem(_options.getSessionName(session), session);
-
-    if((!currentSession.isEmpty()) && (sessions.contains(currentSession)))
+    QStringList sessionIds = _options.getSessionIds();
+    for(QString sessionId : sessionIds)
     {
-        int index = sessions.indexOf(currentSession);
-        if((index < 0) || (index >= ui->cmbSession->count()))
+        NetworkSession* session = _options.getSession(sessionId);
+        if(session)
+            ui->cmbSession->addItem(session->getName(), sessionId);
+    }
+
+    if(_options.getCurrentSession())
+    {
+        int index = ui->cmbSession->findData(_options.getCurrentSession()->getID());
+        if((index >= 0) && (index < ui->cmbSession->count()))
         {
             ui->cmbSession->setCurrentIndex(index);
-            ui->edtInviteID->setText(_options.getSessionInvite(currentSession));
+            ui->edtInviteID->setText(_options.getCurrentSession()->getInvite());
+            return;
         }
     }
-    else if(ui->cmbSession->count() > 0)
+
+    if(ui->cmbSession->count() > 0)
     {
         ui->cmbSession->setCurrentIndex(0);
-        _options.setCurrentSession(ui->cmbSession->currentData().toString());
-        ui->edtInviteID->setText(_options.getSessionInvite(_options.getCurrentSession()));
+        _options.setCurrentSessionId(ui->cmbSession->currentData().toString());
+        if(_options.getCurrentSession())
+        {
+            ui->edtInviteID->setText(_options.getCurrentSession()->getInvite());
+            return;
+        }
     }
+
+    ui->edtInviteID->setText(QString());
+}
+
+void NetworkOptionsDialog::updatePlayersList()
+{
+    NetworkSession* session = _options.getCurrentSession();
+    if(!session)
+    {
+        ui->listPlayers->clear();
+        return;
+    }
+
+    QList<NetworkPlayer*> players = session->getPlayers();
+    /*if(players.isEmpty())
+    {
+        ui->listPlayers->clear();
+        return;
+    }*/
+
+    for(NetworkPlayer* player : players)
+    {
+        if(player)
+        {
+            QString playerText = player->getScreenName().isEmpty() ? player->getUserName() : player->getScreenName() + QString(" (") + player->getUserName() + QString(")");
+            QListWidgetItem* item = playerExists(player->getID());
+            if(item)
+            {
+                item->setText(playerText);
+            }
+            else
+            {
+                item = new QListWidgetItem(playerText);
+                item->setData(Qt::UserRole, player->getID());
+                ui->listPlayers->addItem(item);
+            }
+        }
+    }
+
+    int i = ui->listPlayers->count() - 1;
+    while(i >= 0)
+    {
+        QListWidgetItem* item = ui->listPlayers->item(i);
+        if(item)
+        {
+            if(!session->playerExistsById(item->data(Qt::UserRole).toString()))
+                delete ui->listPlayers->takeItem(i);
+        }
+
+        --i;
+    }
+}
+
+QListWidgetItem* NetworkOptionsDialog::playerExists(const QString& playerId)
+{
+    for(int i = 0; i < ui->listPlayers->count(); ++i)
+    {
+        QListWidgetItem* item = ui->listPlayers->item(i);
+        if((item) && (item->data(Qt::UserRole).toString() == playerId))
+            return item;
+    }
+
+    return nullptr;
 }

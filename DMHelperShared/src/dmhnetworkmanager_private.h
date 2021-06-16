@@ -7,6 +7,7 @@
 
 class DMHNetworkObserver;
 class DMHPayload;
+class DMHMessage;
 class QFile;
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -81,7 +82,7 @@ public:
     int joinSession(const QString& invite);
 
     // Communication
-    int sendMessage(const QString& message, const QString& userId = QString());
+    int sendMessage(const DMHMessage& message, const QString& userId = QString());
 
     // Request controls
     void abortRequest(int id);

@@ -109,7 +109,7 @@ int DMHNetworkManager::joinSession(const QString& invite)
     return d->joinSession(invite);
 }
 
-int DMHNetworkManager::sendMessage(const QString& message, const QString& userId)
+int DMHNetworkManager::sendMessage(const DMHMessage& message, const QString& userId)
 {
     return d->sendMessage(message, userId);
 }

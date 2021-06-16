@@ -79,7 +79,9 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     mapfactory.cpp \
     networkoptionsdialog.cpp \
+    networkplayer.cpp \
     networkplayerframe.cpp \
+    networksession.cpp \
     networksessionseditdialog.cpp \
     networksinglestatusframe.cpp \
     networkstatusframe.cpp \
@@ -303,7 +305,9 @@ HEADERS  += mainwindow.h \
     mapfactory.h \
     mapmarker.h \
     networkoptionsdialog.h \
+    networkplayer.h \
     networkplayerframe.h \
+    networksession.h \
     networksessionseditdialog.h \
     networksinglestatusframe.h \
     networkstatusframe.h \

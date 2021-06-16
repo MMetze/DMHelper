@@ -1,15 +1,16 @@
 #include "networkplayerframe.h"
 #include "ui_networkplayerframe.h"
+#include "networkplayer.h"
 #include <QMenu>
 
-NetworkPlayerFrame::NetworkPlayerFrame(const QString& playerName, QWidget *parent) :
+NetworkPlayerFrame::NetworkPlayerFrame(NetworkPlayer* player, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::NetworkPlayerFrame),
-    _playerName(playerName),
+    _player(player),
     _status(0)
 {
     ui->setupUi(this);
-    ui->lblName->setText(playerName);
+    updateFrame();
     ui->btnStatus->setIcon((QIcon(QPixmap(":/img/data/icon_contentnpc.png"))));
     connect(ui->btnStatus, &QAbstractButton::clicked, this, &NetworkPlayerFrame::statusClicked);
 }
@@ -17,6 +18,56 @@ NetworkPlayerFrame::NetworkPlayerFrame(const QString& playerName, QWidget *paren
 NetworkPlayerFrame::~NetworkPlayerFrame()
 {
     delete ui;
+}
+
+NetworkPlayer* NetworkPlayerFrame::getPlayer() const
+{
+    return _player;
+}
+
+QString NetworkPlayerFrame::getUserId() const
+{
+    return _player->getID();
+}
+
+QString NetworkPlayerFrame::getUserName() const
+{
+    return _player->getUserName();
+}
+
+QString NetworkPlayerFrame::getScreenName() const
+{
+    return _player->getScreenName();
+}
+
+int NetworkPlayerFrame::getStatus() const
+{
+    return _status;
+}
+
+void NetworkPlayerFrame::setPlayer(NetworkPlayer* player)
+{
+    _player = player;
+    updateFrame();
+}
+
+void NetworkPlayerFrame::setConnected(bool connected)
+{
+    ui->lblStatus->setPixmap(connected ? QPixmap(":/img/data/icon_network_ok.png") : QPixmap(":/img/data/icon_network_off.png"));
+}
+
+void NetworkPlayerFrame::updateFrame()
+{
+    if(_player->getScreenName().isEmpty())
+    {
+        ui->lblName->setText(_player->getUserName());
+        ui->lblName->setToolTip(_player->getUserName());
+    }
+    else
+    {
+        ui->lblName->setText(_player->getScreenName());
+        ui->lblName->setToolTip(_player->getScreenName() + QString(" (") + _player->getUserName() + QString(")"));
+    }
 }
 
 void NetworkPlayerFrame::statusClicked()

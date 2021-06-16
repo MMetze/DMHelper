@@ -8,6 +8,7 @@
 #include "dmhpayload.h"
 #include "dmhmessage.h"
 #include "dmhlogon.h"
+#include "networksession.h"
 #include "map.h"
 #include "encountertext.h"
 #include "encounterbattle.h"
@@ -47,6 +48,7 @@ NetworkController::NetworkController(QObject *parent) :
 {
     connect(_networkManager, SIGNAL(uploadComplete(int, const QString&, const QString&)), this, SLOT(uploadCompleted(int, const QString&, const QString&)));
     connect(_networkManager, SIGNAL(existsComplete(int, const QString&, const QString&, const QString&, bool)), this, SLOT(existsCompleted(int, const QString&, const QString&, const QString&, bool)));
+    connect(_networkManager, &DMHNetworkManager::sessionMembersComplete, this, &NetworkController::sessionMembersComplete);
     connect(_networkManager, SIGNAL(requestError(int)), this, SLOT(handleUploadError(int)));
     connect(_networkManager, SIGNAL(requestError(int)), this, SIGNAL(networkError(int)));
     connect(_networkManager, SIGNAL(otherRequestComplete()), this, SIGNAL(networkSuccess()));
@@ -269,13 +271,13 @@ void NetworkController::enableNetworkController(bool enabled)
     emit networkEnabledChanged(_enabled);
 }
 
-void NetworkController::setNetworkLogin(const QString& urlString, const QString& username, const QString& userId, const QString& password, const QString& sessionID, const QString& inviteID)
+void NetworkController::setNetworkLogin(const QString& urlString, const QString& username, const QString& userId, const QString& password, NetworkSession* session)
 {
-    Q_UNUSED(inviteID);
+    QString sessionId = session ? session->getID() : QString();
 
-    qDebug() << "[NetworkController] Network login updated. URL: " << urlString << ", Username: " << username << ", User ID: " << userId << ", Session: " << sessionID << ", Invite: " << inviteID;
+    qDebug() << "[NetworkController] Network login updated. URL: " << urlString << ", Username: " << username << ", User ID: " << userId << ", Session: " << sessionId;
 
-    DMHLogon logon(urlString, username, userId, password, sessionID);
+    DMHLogon logon(urlString, username, userId, password, sessionId);
     if(!logon.isValid())
         return;
 
@@ -302,6 +304,8 @@ void NetworkController::userInfoCompleted(int requestID, const QString& username
     logon.setUserId(userId);
     _networkManager->setLogon(logon);
     _networkObserver->setLogon(logon);
+
+    _networkManager->getSessionMembers(logon.getSession());
 
     clearUploadErrors();
     updateAudioPayload();
@@ -440,6 +444,41 @@ void NetworkController::existsCompleted(int requestID, const QString& fileMD5, c
     qDebug() << "[NetworkController] ERROR: Unexpected file exists request ID received!";
 }
 
+void NetworkController::sessionMembersComplete(int requestID, const QString& sessionName, const QString& members)
+{
+    Q_UNUSED(sessionName);
+    Q_UNUSED(requestID);
+
+    QDomDocument doc;
+    QString errorMsg;
+    int errorLine;
+    int errorColumn;
+    if(!doc.setContent(members, &errorMsg, &errorLine, &errorColumn))
+    {
+        qDebug() << "[NetworkController] ERROR identified reading audio data: unable to parse XML at line " << errorLine << ", column " << errorColumn << ": " << errorMsg;
+        qDebug() << "[NetworkController] Members String: " << members;
+        return;
+    }
+
+    /*
+    QDomElement rootElement = doc.documentElement();
+    QDomElement memberElement = rootElement.firstChildElement("node");
+    while(!memberElement.isNull())
+    {
+        QDomElement idElement = memberElement.firstChildElement("ID");
+        QDomElement usernameElement = memberElement.firstChildElement("username");
+        QDomElement surnameElement = memberElement.firstChildElement("surname");
+        QDomElement forenameElement = memberElement.firstChildElement("forename");
+
+        emit addSessionUser(idElement.text(), usernameElement.text(), surnameElement.text());
+
+        memberElement = memberElement.nextSiblingElement("node");
+    }
+    */
+
+    emit updateSessionMembers(doc.documentElement());
+}
+
 bool NetworkController::handleExistsResult(UploadObject* uploadObject, int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists)
 {
     if((!uploadObject) || (uploadObject->getStatus() != requestID))
@@ -505,7 +544,9 @@ void NetworkController::handleMessageReceived(const QList<DMHMessage>& messages)
     for(int i = 0; i < messages.count(); ++i)
     {
         DMHMessage message(messages.at(i));
-        qDebug() << "[NetworkController]       Message " << i << ": " << message.getBody();
+        qDebug() << "[NetworkController]       Message " << i << ": " << message;
+        if(message.getCommand() == QString("join"))
+            emit userJoined(message.getSender());
     }
 }
 

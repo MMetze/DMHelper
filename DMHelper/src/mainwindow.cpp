@@ -63,6 +63,7 @@
 #include "basicdateserver.h"
 #ifdef INCLUDE_NETWORK_SUPPORT
     #include "networkcontroller.h"
+    #include "networksession.h"
 #endif
 #include "aboutdialog.h"
 //#include "campaignexporter.h"
@@ -764,13 +765,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
-    _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getUserId(), _options->getPassword(), _options->getCurrentSession(), QString());
+    _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getUserId(), _options->getPassword(), _options->getCurrentSession());
     //connect(_networkController, &NetworkController::requestSettings, _options, &OptionsContainer::editSettings);
     //connect(_networkController, &NetworkController::requestSettings, this, &MainWindow::editNetworkSettings);
     connect(_networkController, &NetworkController::openNetworkOptions, this, &MainWindow::editNetworkSettings);
     connect(_networkController, &NetworkController::networkEnabledChanged, _options, &OptionsContainer::setNetworkEnabled);
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
-    connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString,QString)));
+    connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,NetworkSession*)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,NetworkSession*)));
     //_networkController->enableNetworkController(_options->getNetworkEnabled());
 
     connect(&bestiaryDlg, SIGNAL(publishMonsterImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
@@ -790,11 +791,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_networkController, &NetworkController::networkError, ui->frameNetwork, &NetworkStatusFrame::setNetworkError);
     connect(_networkController, &NetworkController::networkSuccess, ui->frameNetwork, &NetworkStatusFrame::setNetworkSuccess);
     connect(_networkController, &NetworkController::uploadStarted, ui->frameNetwork, &NetworkStatusFrame::uploadStarted);
-    connect(_options, SIGNAL(networkEnabledChanged(bool)), ui->frameNetwork, SLOT(setNetworkStatus(bool)));
+    //connect(_networkController, &NetworkController::addSessionUser, _options, &OptionsContainer::addPlayer);
+    connect(_networkController, &NetworkController::updateSessionMembers, _options, &OptionsContainer::updatePlayers);
+    connect(_networkController, &NetworkController::userJoined, ui->frameNetwork, &NetworkStatusFrame::userJoined);
+    connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
+    connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
 
     _networkOptionsDlg = new NetworkOptionsDialog(*_options);
     connect(_networkController, &NetworkController::networkMessage, _networkOptionsDlg, &NetworkOptionsDialog::logMessage);
     connect(_networkController, &NetworkController::networkErrorMessage, _networkOptionsDlg, &NetworkOptionsDialog::handleMessageError);
+    //connect(_networkOptionsDlg, &NetworkOptionsDialog::addSessionUser, _options, &OptionsContainer::addPlayer);
+    connect(_networkOptionsDlg, &NetworkOptionsDialog::updateSessionMembers, _options, &OptionsContainer::updatePlayers);
+
+    connect(_options, &OptionsContainer::currentSessionChanged, _networkOptionsDlg, &NetworkOptionsDialog::currentSessionChanged);
+    connect(_options, &OptionsContainer::sessionChanged, _networkOptionsDlg, &NetworkOptionsDialog::sessionChanged);
+    connect(_options, &OptionsContainer::currentSessionChanged, ui->frameNetwork, &NetworkStatusFrame::currentSessionChanged);
+    connect(_options, &OptionsContainer::sessionChanged, ui->frameNetwork, &NetworkStatusFrame::sessionChanged);
+
 #endif
 
     _objectDispatcher = new ObjectDispatcher(this);

@@ -1,11 +1,14 @@
 #include "optionscontainer.h"
 #include "optionsdialog.h"
+#include "networksession.h"
+#include "networkplayer.h"
 #include <QSettings>
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QDomElement>
 #include <QDebug>
 
 // TODO: consider copy of MRU functionality
@@ -48,7 +51,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _password(), // note: password will not be stored in settings
     _currentSession(),
     _sessions(),
-    _invites(),
+    //_invites(),
     //_sessionID(),
     //_inviteID(),
 #endif
@@ -58,6 +61,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
 
 OptionsContainer::~OptionsContainer()
 {
+    qDeleteAll(_sessions);
 }
 
 QString OptionsContainer::getBestiaryFileName() const
@@ -239,42 +243,33 @@ QString OptionsContainer::getPassword() const
     return _password;
 }
 
-QString OptionsContainer::getCurrentSession() const
+QString OptionsContainer::getCurrentSessionId() const
 {
     return _currentSession;
 }
 
-QStringList OptionsContainer::getSessions() const
+NetworkSession* OptionsContainer::getCurrentSession() const
+{
+    return getSession(getCurrentSessionId());
+}
+
+QStringList OptionsContainer::getSessionIds() const
 {
     return _sessions.keys();
 }
 
-bool OptionsContainer::doesSessionExist(const QString& session) const
+bool OptionsContainer::doesSessionExist(const QString& sessionId) const
 {
-    return _sessions.contains(session);
+    return _sessions.contains(sessionId);
 }
 
-QString OptionsContainer::getSessionName(const QString& session) const
+NetworkSession* OptionsContainer::getSession(const QString& sessionId) const
 {
-    return _sessions.value(session, QString());
+    if(sessionId.isEmpty())
+        return nullptr;
+    else
+        return _sessions.value(sessionId, nullptr);
 }
-
-QString OptionsContainer::getSessionInvite(const QString& session) const
-{
-    return _invites.value(session, QString());
-}
-
-/*
-QString OptionsContainer::getSessionID() const
-{
-    return _sessionID;
-}
-
-QString OptionsContainer::getInviteID() const
-{
-    return _inviteID;
-}
-*/
 
 #endif //INCLUDE_NETWORK_SUPPORT
 
@@ -392,6 +387,33 @@ void OptionsContainer::readSettings()
 
     settings.beginGroup("Sessions");
         QStringList sessions = settings.childGroups();
+        for(QString sessionId : sessions)
+        {
+            settings.beginGroup(sessionId); // Session ID
+                QString sessionName = settings.value("name").toString();
+                QString invite = settings.value("invite").toString();
+                NetworkSession* session = new NetworkSession(sessionId, sessionName, invite);
+                settings.beginGroup("Members"); // Members
+                    QStringList members = settings.childGroups();
+                    for(QString memberId : members)
+                    {
+                        settings.beginGroup(memberId); // Member ID
+                            QString userName = settings.value("username").toString();
+                            QString screenName = settings.value("screenname").toString();
+                            QString lastSeen = settings.value("lastseen").toString();
+                            QString status = settings.value("status").toString();
+                            session->addPlayer(new NetworkPlayer(memberId, userName, screenName, lastSeen, status));
+                        settings.endGroup(); // Member ID
+                    }
+                settings.endGroup(); // Members
+                addSession(session);
+            settings.endGroup(); // Session ID
+        }
+    settings.endGroup(); // Sessions
+
+    /*
+    settings.beginGroup("Sessions");
+        QStringList sessions = settings.childGroups();
         for(QString session : sessions)
         {
             settings.beginGroup(session);
@@ -405,10 +427,11 @@ void OptionsContainer::readSettings()
             settings.endGroup();
         }
     settings.endGroup(); // Sessions
+    */
 
     QString currentSession = settings.value("currentSession").toString();
     if(_sessions.contains(currentSession))
-        setCurrentSession(currentSession);
+        setCurrentSessionId(currentSession);
 
 //    setSessionID(settings.value("sessionID","").toString());
 //    setInviteID(settings.value("inviteID","").toString());
@@ -486,6 +509,69 @@ void OptionsContainer::writeSettings()
 
     settings.beginGroup("Sessions");
         QStringList sessions = _sessions.keys();
+        for(QString sessionId : sessions)
+        {
+            NetworkSession* session = _sessions.value(sessionId);
+            if(session)
+            {
+                settings.beginGroup(sessionId); // Session ID
+                    settings.setValue("name", session->getName());
+                    settings.setValue("invite", session->getInvite());
+
+                    settings.beginGroup("Members"); // Members
+                        QList<NetworkPlayer*> players = session->getPlayers();
+                        for(NetworkPlayer* player : players)
+                        {
+                            if(player)
+                            {
+                                settings.beginGroup(player->getID()); // Member ID
+                                    settings.setValue("username", player->getUserName());
+                                    settings.setValue("screenname", player->getScreenName());
+                                    settings.setValue("lastseen", player->getLastSeen().toString());
+                                    settings.setValue("status", QString::number(player->getStatus()));
+                                settings.endGroup(); // Member ID
+                            }
+                        }
+                    settings.endGroup(); // Members
+                settings.endGroup(); // Session ID
+            }
+        }
+    settings.endGroup(); // Sessions
+
+
+    /*
+    settings.beginGroup("Sessions");
+        QStringList sessions = settings.childGroups();
+        for(QString sessionId : sessions)
+        {
+            settings.beginGroup(sessionId); // Session ID
+                QString sessionName = settings.value("name").toString();
+                QString invite = settings.value("invite").toString();
+                NetworkSession* session = new NetworkSession(sessionId, sessionName, invite);
+                settings.beginGroup("Members"); // Members
+                    QStringList members = settings.childGroups();
+                    for(QString memberId : members)
+                    {
+                        settings.beginGroup(memberId); // Member ID
+                            QString userName = settings.value("username").toString();
+                            QString screenName = settings.value("screenname").toString();
+                            QString lastSeen = settings.value("lastseen").toString();
+                            QString status = settings.value("status").toString();
+                            session->addPlayer(new NetworkPlayer(memberId, userName, screenName, lastSeen, status));
+                        settings.endGroup(); // Member ID
+                    }
+                settings.endGroup(); // Members
+                addSession(session);
+            settings.endGroup(); // Session ID
+        }
+    settings.endGroup(); // Sessions
+
+     */
+
+
+    /*
+    settings.beginGroup("Sessions");
+        QStringList sessions = _sessions.keys();
         for(QString session : sessions)
         {
             settings.beginGroup(session);
@@ -496,8 +582,9 @@ void OptionsContainer::writeSettings()
             settings.endGroup(); // Session
         }
     settings.endGroup(); // Sessions
+    */
 
-    settings.setValue("currentSession", getCurrentSession());
+    settings.setValue("currentSession", getCurrentSessionId());
 
     //settings.setValue("sessionID", getSessionID());
     //settings.setValue("inviteID", getInviteID());
@@ -964,7 +1051,7 @@ void OptionsContainer::setURLString(const QString& urlString)
     {
         _urlString = urlString;
         emit urlStringChanged(_urlString);
-        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, getCurrentSession());
     }
 }
 
@@ -976,7 +1063,7 @@ void OptionsContainer::setUserName(const QString& username)
         _userId.clear();
         emit userNameChanged(_userName);
         emit userIdChanged(_userId);
-        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, getCurrentSession());
     }
 }
 
@@ -986,7 +1073,7 @@ void OptionsContainer::setUserId(const QString& userId)
     {
         _userId = userId;
         emit userIdChanged(_userId);
-        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, getCurrentSession());
     }
 }
 
@@ -1005,47 +1092,165 @@ void OptionsContainer::setPassword(const QString& password)
     {
         _password = password;
         emit passwordChanged(_password);
-        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, getCurrentSession());
     }
 }
 
-void OptionsContainer::setCurrentSession(const QString& session)
+void OptionsContainer::setCurrentSessionId(const QString& sessionId)
 {
-    if(_currentSession != session)
+    if(_currentSession != sessionId)
     {
-        _currentSession = session;
-        emit currentSessionChanged(_currentSession);
-        emit networkSettingsChanged(_urlString, _userName, _userId, _password, _currentSession, _invites.value(_currentSession));
+        _currentSession = sessionId;
+        emit currentSessionChanged(getCurrentSession());
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, getCurrentSession());
     }
 }
 
-void OptionsContainer::addSession(const QString& session, const QString& sessionName)
+void OptionsContainer::setCurrentSession(const NetworkSession& session)
 {
-    if((session.isEmpty()) || (_sessions.contains(session)))
-        return;
-
-    _sessions.insert(session, sessionName);
-    emit sessionChanged(session, sessionName);
+    if((_currentSession != session.getID()) && (doesSessionExist(session.getID())))
+    {
+        _currentSession = session.getID();
+        emit currentSessionChanged(getCurrentSession());
+        emit networkSettingsChanged(_urlString, _userName, _userId, _password, getCurrentSession());
+    }
 }
 
-void OptionsContainer::setSessionName(const QString& session, const QString& sessionName)
+bool OptionsContainer::addSession(NetworkSession* session)
 {
-    if((session.isEmpty()) || (!_sessions.contains(session)))
-        return;
+    if((!session) || (session->getID().isEmpty()) || (_sessions.contains(session->getID())))
+        return false;
 
-    _sessions[session] = sessionName;
-    emit sessionChanged(session, sessionName);
+    _sessions.insert(session->getID(), session);
+    emit sessionChanged(session);
+
+    return true;
 }
 
-void OptionsContainer::removeSession(const QString& session)
+/*
+void OptionsContainer::addPlayer(const QString& id, const QString& username, const QString& screenName)
 {
-    if((session.isEmpty()) || (!_sessions.contains(session)))
+    if((id.isEmpty()) && (username.isEmpty()))
         return;
 
-    emit sessionChanged(session, _sessions.value(session));
-    _sessions.remove(session);
+    NetworkSession* session = getCurrentSession();
+    if(!session)
+        return;
+
+    NetworkPlayer* player = session->getPlayer(id, username);
+    if(player)
+    {
+        player->setID(id);
+        player->setUserName(username);
+        player->setScreenName(screenName);
+    }
+    else
+    {
+        player = new NetworkPlayer(id, username, screenName);
+        if(!session->addPlayer(player))
+        {
+            delete player;
+            return;
+        }
+    }
+
+    emit sessionChanged(session);
+}
+*/
+
+void OptionsContainer::updatePlayers(const QDomElement& rootElement)
+{
+    if(rootElement.isNull())
+        return;
+
+    NetworkSession* session = getCurrentSession();
+    if(!session)
+        return;
+
+    bool changed = false;
+
+    // Update the player list and track which were updated
+    QStringList updated;
+    QDomElement memberElement = rootElement.firstChildElement("node");
+    while(!memberElement.isNull())
+    {
+        QString idString = memberElement.firstChildElement("ID").text();
+        QString usernameString = memberElement.firstChildElement("username").text();
+        QString surnameString = memberElement.firstChildElement("surname").text();
+        //QDomElement forenameElement = memberElement.firstChildElement("forename");
+
+        NetworkPlayer* player = session->getPlayer(idString, usernameString);
+        if(player)
+        {
+            player->setValues(idString, usernameString, surnameString);
+        }
+        else
+        {
+            player = new NetworkPlayer(idString, usernameString, surnameString);
+            if(!session->addPlayer(player))
+            {
+                delete player;
+                player = nullptr;
+            }
+
+            changed = true;
+        }
+
+        if(player)
+            updated.append(player->getID());
+
+        memberElement = memberElement.nextSiblingElement("node");
+    }
+
+    // Remove any players that are not part of the current list
+    QList<NetworkPlayer*> players = session->getPlayers();
+    for(NetworkPlayer* player : players)
+    {
+        QString playerId = player->getID();
+        if((player) && (!updated.contains(player->getID())))
+        {
+            session->removePlayer(player);
+            delete player;
+            changed = true;
+        }
+    }
+
+    if(changed)
+        emit sessionChanged(session);
 }
 
+void OptionsContainer::setSessionName(const QString& sessionId, const QString& sessionName)
+{
+    if((sessionId.isEmpty()) || (!_sessions.contains(sessionId)))
+        return;
+
+    NetworkSession* networkSession = _sessions.value(sessionId, nullptr);
+    if(!networkSession)
+        return;
+
+    networkSession->setName(sessionName);
+    emit sessionChanged(networkSession);
+}
+
+void OptionsContainer::removeSession(const QString& sessionId)
+{
+    if((sessionId.isEmpty()) || (!_sessions.contains(sessionId)))
+        return;
+
+    NetworkSession* networkSession = _sessions.take(sessionId);
+    if(networkSession)
+    {
+        if((_sessions.count() > 0) && (_sessions.first() != nullptr))
+            setCurrentSession(*_sessions.first());
+        else
+            setCurrentSessionId(QString());
+
+        emit sessionRemoved(networkSession);
+        delete networkSession;
+    }
+}
+
+/*
 void OptionsContainer::addInvite(const QString& session, const QString& invite)
 {
     if((session.isEmpty()) || (invite.isEmpty()) || (_invites.contains(session)))
@@ -1054,12 +1259,21 @@ void OptionsContainer::addInvite(const QString& session, const QString& invite)
     _invites.insert(session, invite);
     emit inviteChanged(session, invite);
 }
+*/
 
-void OptionsContainer::setInvite(const QString& session, const QString& invite)
+void OptionsContainer::setInvite(const QString& sessionId, const QString& invite)
 {
-    if((session.isEmpty()) || (invite.isEmpty()))
+    if(sessionId.isEmpty())
         return;
 
+    NetworkSession* session = getSession(sessionId);
+    if(!session)
+        return;
+
+    session->setInvite(invite);
+    emit inviteChanged(session);
+
+    /*
     if(!_invites.contains(session))
     {
         addInvite(session, invite);
@@ -1069,8 +1283,10 @@ void OptionsContainer::setInvite(const QString& session, const QString& invite)
         _invites[session] = invite;
         emit inviteChanged(session, QString());
     }
+    */
 }
 
+/*
 void OptionsContainer::removeInvite(const QString& session)
 {
     if((session.isEmpty()) || (!_invites.contains(session)))
@@ -1078,27 +1294,6 @@ void OptionsContainer::removeInvite(const QString& session)
 
     _invites.remove(session);
     emit inviteChanged(session, QString());
-}
-
-/*
-void OptionsContainer::setSessionID(const QString& sessionID)
-{
-    if(_sessionID != sessionID)
-    {
-        _sessionID = sessionID;
-        emit sessionIDChanged(_sessionID);
-        emit networkSettingsChanged(_urlString, _userName, _password, _sessionID, _inviteID);
-    }
-}
-
-void OptionsContainer::setInviteID(const QString& inviteID)
-{
-    if(_inviteID != inviteID)
-    {
-        _inviteID = inviteID;
-        emit inviteIDChanged(_inviteID);
-        emit networkSettingsChanged(_urlString, _userName, _password, _sessionID, _inviteID);
-    }
 }
 */
 
@@ -1143,11 +1338,33 @@ void OptionsContainer::copy(OptionsContainer* other)
         setUserName(other->_userName);
         setSavePassword(other->_savePassword);
         setPassword(other->_password);
-        //setSessionID(other->_sessionID);
-        //setInviteID(other->_inviteID);
         setNetworkEnabled(other->_networkEnabled);
-        setCurrentSession(other->_currentSession);
+        setCurrentSessionId(other->_currentSession);
 
+        // Update the session data, creating new sessions where needed
+        QStringList otherSessionList = other->_sessions.keys();
+        for(QString otherSessionId : otherSessionList)
+        {
+            NetworkSession* otherSession = other->_sessions.value(otherSessionId, nullptr);
+            if(otherSession)
+            {
+                NetworkSession* currentSession = _sessions.value(otherSessionId, nullptr);
+                if(currentSession)
+                    currentSession->setValues(*otherSession);
+                else
+                    _sessions.insert(otherSessionId, new NetworkSession(*otherSession));
+            }
+        }
+
+        // Remove any sessions not longer needed
+        QStringList currentSessionList = _sessions.keys();
+        for(QString currentSessionId : currentSessionList)
+        {
+            if(!other->_sessions.contains(currentSessionId))
+                delete _sessions.take(currentSessionId);
+        }
+
+        /*
         QStringList sessionList = other->_sessions.keys();
         for(QString session : sessionList)
             _sessions.insert(session, other->_sessions.value(session));
@@ -1155,6 +1372,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         QStringList inviteList = other->_invites.keys();
         for(QString inviteSession : inviteList)
             _invites.insert(inviteSession, other->_invites.value(inviteSession));
+            */
 #endif
     }
 }

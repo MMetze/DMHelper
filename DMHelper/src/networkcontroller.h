@@ -17,6 +17,7 @@ class AudioTrack;
 class DMHNetworkManager;
 class DMHNetworkObserver;
 class DMHMessage;
+class NetworkSession;
 class CampaignObjectBase;
 class Map;
 class EncounterText;
@@ -48,6 +49,10 @@ signals:
     void downloadStarted(int requestID, const QString& fileMD5, const QString& fileUuid, QNetworkReply* reply);
     void downloadComplete(int requestID, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
 
+    //void addSessionUser(const QString& id, const QString& username, const QString& screenName);
+    void updateSessionMembers(const QDomElement& rootElement);
+    void userJoined(const QString& username);
+
 public slots:
     void addTrack(AudioTrack* track);
     void removeTrack(AudioTrack* track);
@@ -61,12 +66,13 @@ public slots:
     void clearTracks();
     void clearPayloadData();
     void enableNetworkController(bool enabled);
-    void setNetworkLogin(const QString& urlString, const QString& username, const QString& userId, const QString& password, const QString& sessionID, const QString& inviteID);
+    void setNetworkLogin(const QString& urlString, const QString& username, const QString& userId, const QString& password, NetworkSession* session);
 
 private slots:
     void userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);
     void uploadCompleted(int requestID, const QString& fileMD5, const QString& fileUuid);
     void existsCompleted(int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
+    void sessionMembersComplete(int requestID, const QString& sessionName, const QString& members);
     bool handleExistsResult(UploadObject* uploadObject, int requestID, const QString& fileMD5, const QString& fileUuid, const QString& filename, bool exists);
     UploadObject* setRequestError(int requestID);
     void handleMessageReceived(const QList<DMHMessage>& messages);

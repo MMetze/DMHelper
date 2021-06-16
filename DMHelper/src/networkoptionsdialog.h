@@ -9,6 +9,9 @@ namespace Ui {
 class NetworkOptionsDialog;
 }
 
+class QListWidgetItem;
+class QDomElement;
+
 class NetworkOptionsDialog : public QDialog
 {
     Q_OBJECT
@@ -20,8 +23,12 @@ public:
 public slots:
     void logMessage(const QString& message);
     void handleMessageError(int requestID, const QString& errorString);
+    void currentSessionChanged(NetworkSession* session);
+    void sessionChanged(NetworkSession* session);
 
 signals:
+    //void addSessionUser(const QString& id, const QString& username, const QString& screenName);
+    void updateSessionMembers(const QDomElement& rootElement);
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
@@ -44,6 +51,8 @@ private slots:
 
 private:
     void populateSessionsList();
+    void updatePlayersList();
+    QListWidgetItem* playerExists(const QString& playerId);
 
     Ui::NetworkOptionsDialog *ui;
 

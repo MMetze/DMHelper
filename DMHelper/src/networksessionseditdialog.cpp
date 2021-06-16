@@ -1,5 +1,6 @@
 #include "networksessionseditdialog.h"
 #include "ui_networksessionseditdialog.h"
+#include "networksession.h"
 #include <QInputDialog>
 #include <QDebug>
 
@@ -143,8 +144,18 @@ void NetworkSessionsEditDialog::createSessionComplete(int requestID, const QStri
     qDebug() << "[NetworkSessionsEditDialog] Session created for request " << requestID << ". Session: " << session << ", Invite: " << invite;
     emit networkMessage(QString("Session created: ") + session + QString(" with invite: ") + invite);
 
-    _options.addSession(session, _requestedSessionName);
-    _options.addInvite(session, invite);
+    NetworkSession* networkSession = _options.getSession(session);
+    if(networkSession)
+    {
+        networkSession->setName(_requestedSessionName);
+        networkSession->setInvite(invite);
+    }
+    else
+    {
+        networkSession = new NetworkSession(session, _requestedSessionName, invite);
+        if(!_options.addSession(networkSession))
+            delete networkSession;
+    }
     populateSessions();
 
     _currentRequest = INVALID_REQUEST_ID;
@@ -159,9 +170,22 @@ void NetworkSessionsEditDialog::isOwnerComplete(int requestID, const QString& se
 
     if(isOwner)
     {
-        emit networkMessage(QString("Session added: ") + sessionName + QString(" with ID: ") + session + QString(" and invite: ") + invite);
-        _options.addSession(session, sessionName);
-        _options.addInvite(session, invite);
+        NetworkSession* networkSession = _options.getSession(session);
+        if(networkSession)
+        {
+            networkSession->setID(session);
+            networkSession->setName(sessionName);
+            networkSession->setInvite(invite);
+            emit networkMessage(QString("Session updated: ") + sessionName + QString(" with ID: ") + session + QString(" and invite: ") + invite);
+        }
+        else
+        {
+            networkSession = new NetworkSession(session, sessionName, invite);
+            if(_options.addSession(networkSession))
+                emit networkMessage(QString("Session added: ") + sessionName + QString(" with ID: ") + session + QString(" and invite: ") + invite);
+            else
+                delete networkSession;
+        }
         populateSessions();
     }
     else
@@ -208,7 +232,7 @@ void NetworkSessionsEditDialog::closeSessionComplete(int requestID, const QStrin
     qDebug() << "[NetworkSessionsEditDialog] Session invite closed with request " << requestID << ". Session: " << sessionName;
     emit networkMessage(QString("Invite closed for session: ") + sessionName);
 
-    _options.removeInvite(_requestedSession);
+    _options.setInvite(_requestedSession, QString());
     populateSessions();
 
     _currentRequest = INVALID_REQUEST_ID;
@@ -248,23 +272,25 @@ void NetworkSessionsEditDialog::populateSessions()
 {
     ui->tableWidget->clear();
 
-    QStringList sessions = _options.getSessions();
-    ui->tableWidget->setRowCount(sessions.count());
-    for(int i = 0; i < sessions.count(); ++i)
+    QStringList sessionIds = _options.getSessionIds();
+    ui->tableWidget->setRowCount(sessionIds.count());
+    for(int i = 0; i < sessionIds.count(); ++i)
     {
-        QString session = sessions.at(i);
+        NetworkSession* networkSession = _options.getSession(sessionIds.at(i));
+        if(networkSession)
+        {
+            QTableWidgetItem* nameItem = new QTableWidgetItem(networkSession->getName());
+            nameItem->setToolTip(nameItem->text());
+            ui->tableWidget->setItem(i, 0, nameItem);
 
-        QTableWidgetItem* nameItem = new QTableWidgetItem(_options.getSessionName(session));
-        nameItem->setToolTip(nameItem->text());
-        ui->tableWidget->setItem(i, 0, nameItem);
+            QTableWidgetItem* sessionItem = new QTableWidgetItem(networkSession->getID());
+            nameItem->setToolTip(sessionItem->text());
+            ui->tableWidget->setItem(i, 1, sessionItem);
 
-        QTableWidgetItem* sessionItem = new QTableWidgetItem(session);
-        nameItem->setToolTip(sessionItem->text());
-        ui->tableWidget->setItem(i, 1, sessionItem);
-
-        QTableWidgetItem* inviteItem = new QTableWidgetItem(_options.getSessionInvite(session));
-        nameItem->setToolTip(inviteItem->text());
-        ui->tableWidget->setItem(i, 2, inviteItem);
+            QTableWidgetItem* inviteItem = new QTableWidgetItem(networkSession->getInvite());
+            nameItem->setToolTip(inviteItem->text());
+            ui->tableWidget->setItem(i, 2, inviteItem);
+        }
     }
 }
 

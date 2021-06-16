@@ -2,6 +2,8 @@
 #include "ui_networkstatusframe.h"
 #include "networksinglestatusframe.h"
 #include "networkplayerframe.h"
+#include "networksession.h"
+#include "networkplayer.h"
 #include "optionscontainer.h"
 #include <QNetworkReply>
 #include <QMainWindow>
@@ -28,11 +30,6 @@ NetworkStatusFrame::NetworkStatusFrame(QWidget *parent) :
     _playersLayout = new QVBoxLayout;
     _playersLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui->scrollAreaPlayersWidget->setLayout(_playersLayout);
-
-    _playersLayout->addWidget(new NetworkPlayerFrame(QString("Kiiron")));
-    _playersLayout->addWidget(new NetworkPlayerFrame(QString("Dered")));
-    _playersLayout->addWidget(new NetworkPlayerFrame(QString("ElmoEVL")));
-    _playersLayout->addWidget(new NetworkPlayerFrame(QString("Tim")));
 }
 
 NetworkStatusFrame::~NetworkStatusFrame()
@@ -111,6 +108,72 @@ void NetworkStatusFrame::uploadComplete()
         setReply(nullptr, QString());
 }
 
+/*
+void NetworkStatusFrame::addUser(const QString& username, const QString& screenName)
+{
+    if((!_playersLayout) || (username.isEmpty()) || (getPlayerFrameByName(username)))
+        return;
+
+    _playersLayout->addWidget(new NetworkPlayerFrame(username, screenName));
+}
+*/
+
+void NetworkStatusFrame::currentSessionChanged(NetworkSession* session)
+{
+    QLayoutItem *child;
+    while((child = _playersLayout->takeAt(0)) != nullptr)
+    {
+        delete child->widget();
+        delete child;
+    }
+
+    sessionChanged(session);
+}
+
+void NetworkStatusFrame::sessionChanged(NetworkSession* session)
+{
+    if(!session)
+        return;
+
+    QList<NetworkPlayer*> players = session->getPlayers();
+    for(NetworkPlayer* player : players)
+    {
+        if(player)
+        {
+            NetworkPlayerFrame* frame = getPlayerFrameById(player->getID());
+            if(frame)
+                frame->updateFrame();
+            else
+                _playersLayout->addWidget(new NetworkPlayerFrame(player));
+        }
+    }
+
+    int i = _playersLayout->count() - 1;
+    while(i > 0)
+    {
+        if(doesSessionExcludeItem(session, _playersLayout->itemAt(i)))
+        {
+            QLayoutItem *child = _playersLayout->takeAt(i);
+            if(child)
+            {
+                delete child->widget(); // delete the widget
+                delete child;   // delete the layout item
+            }
+        }
+        else
+        {
+            --i;
+        }
+    }
+}
+
+void NetworkStatusFrame::userJoined(const QString& username)
+{
+    NetworkPlayerFrame* frame = getPlayerFrameByName(username);
+    if(frame)
+        frame->setConnected(true);
+}
+
 void NetworkStatusFrame::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
@@ -186,4 +249,54 @@ void NetworkStatusFrame::setReply(QNetworkReply* reply, const QString& filename)
     {
         setNetworkSuccess();
     }
+}
+
+NetworkPlayerFrame* NetworkStatusFrame::getPlayerFrameById(const QString& id)
+{
+    if((!_playersLayout) || (id.isEmpty()))
+        return nullptr;
+
+    for(int i = 0; i < _playersLayout->count(); ++i)
+    {
+        QLayoutItem* item = _playersLayout->itemAt(i);
+        if((item) && (item->widget()))
+        {
+            NetworkPlayerFrame* frame = dynamic_cast<NetworkPlayerFrame*>(item->widget());
+            if((frame) && (frame->getUserId() == id))
+                return frame;
+        }
+    }
+
+    return nullptr;
+}
+
+NetworkPlayerFrame* NetworkStatusFrame::getPlayerFrameByName(const QString& username)
+{
+    if((!_playersLayout) || (username.isEmpty()))
+        return nullptr;
+
+    for(int i = 0; i < _playersLayout->count(); ++i)
+    {
+        QLayoutItem* item = _playersLayout->itemAt(i);
+        if((item) && (item->widget()))
+        {
+            NetworkPlayerFrame* frame = dynamic_cast<NetworkPlayerFrame*>(item->widget());
+            if((frame) && (frame->getUserName() == username))
+                return frame;
+        }
+    }
+
+    return nullptr;
+}
+
+bool NetworkStatusFrame::doesSessionExcludeItem(NetworkSession* session, QLayoutItem* item)
+{
+    if((!session) || (!item))
+        return false;
+
+    NetworkPlayerFrame* frame = dynamic_cast<NetworkPlayerFrame*>(item->widget());
+    if(!frame)
+        return false;
+
+    return !session->playerExistsById(frame->getUserId());
 }

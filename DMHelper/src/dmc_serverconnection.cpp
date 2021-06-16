@@ -6,6 +6,7 @@
 #include "dmhnetworkobserver.h"
 #include "dmhpayload.h"
 #include "dmhlogon.h"
+#include "dmhmessage.h"
 #include "dmconstants.h"
 #include "dmversion.h"
 #include "remoteaudioplayer.h"
@@ -204,7 +205,7 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
     startObserver();
     //startServer();
 
-    _networkManager->sendMessage(QString("Joining session: ") + _options.getUserName());
+    _networkManager->sendMessage(DMHMessage(QString("join"), QString("")));
 
     if(!_connected)
     {

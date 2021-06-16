@@ -342,8 +342,11 @@ int DMHNetworkManager_Private::joinSession(const QString& invite)
     return replyId;
 }
 
-int DMHNetworkManager_Private::sendMessage(const QString& message, const QString& userId)
+int DMHNetworkManager_Private::sendMessage(const DMHMessage& message, const QString& userId)
 {
+    if(message.isEmpty())
+        return -1;
+
     QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/communication.php"));
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -364,7 +367,8 @@ int DMHNetworkManager_Private::sendMessage(const QString& message, const QString
         postData.addQueryItem("type", "user");
         postData.addQueryItem("target", userId);
     }
-    postData.addQueryItem("body", message);
+
+    postData.addQueryItem("body", message.getBody());
 
 #ifdef QT_DEBUG
     emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
@@ -435,7 +439,7 @@ void DMHNetworkManager_Private::interpretRequestFinished(QNetworkReply* reply)
 
     QByteArray bytes = reply->readAll();
     //qDebug() << "[DMHNetworkManager] Request with ID " << replyData << "received; payload " << bytes.size() << " bytes";
-    qDebug() << "[DMHNetworkManager] Payload contents: " << QString(bytes.left(1000));
+    //qDebug() << "[DMHNetworkManager] Payload contents: " << QString(bytes.left(1000));
 
 #ifdef QT_DEBUG
     emit DEBUG_response_contents(bytes.left(2000));

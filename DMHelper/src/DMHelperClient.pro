@@ -102,6 +102,8 @@ SOURCES += \
         monster.cpp \
         monsteraction.cpp \
         monsterclass.cpp \
+        networkplayer.cpp \
+        networksession.cpp \
         objectfactory.cpp \
         party.cpp \
         placeholder.cpp \
@@ -202,6 +204,8 @@ HEADERS += \
     monster.h \
     monsteraction.h \
     monsterclass.h \
+    networkplayer.h \
+    networksession.h \
     objectfactory.h \
     party.h \
     placeholder.h \

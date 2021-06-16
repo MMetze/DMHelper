@@ -7,13 +7,26 @@ namespace Ui {
 class NetworkPlayerFrame;
 }
 
+class NetworkPlayer;
+
 class NetworkPlayerFrame : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit NetworkPlayerFrame(const QString& playerName, QWidget *parent = nullptr);
+    explicit NetworkPlayerFrame(NetworkPlayer* player, QWidget *parent = nullptr);
     ~NetworkPlayerFrame();
+
+    NetworkPlayer* getPlayer() const;
+    QString getUserId() const;
+    QString getUserName() const;
+    QString getScreenName() const;
+    int getStatus() const;
+
+public slots:
+    void setPlayer(NetworkPlayer* player);
+    void setConnected(bool connected);
+    void updateFrame();
 
 private slots:
     void statusClicked();
@@ -23,7 +36,7 @@ private slots:
 private:
     Ui::NetworkPlayerFrame *ui;
 
-    QString _playerName;
+    NetworkPlayer* _player;
     int _status;
 };
 

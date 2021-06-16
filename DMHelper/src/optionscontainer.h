@@ -9,6 +9,9 @@
 #include "mruhandler.h"
 #include "dmconstants.h"
 
+class NetworkSession;
+class QDomElement;
+
 class OptionsContainer : public QObject
 {
     Q_OBJECT
@@ -62,13 +65,11 @@ public:
     QString getUserId() const;
     bool getSavePassword() const;
     QString getPassword() const; // note: password will not be stored in settings
-    QString getCurrentSession() const;
-    QStringList getSessions() const;
-    bool doesSessionExist(const QString& session) const;
-    QString getSessionName(const QString& session) const;
-    QString getSessionInvite(const QString& session) const;
-    //QString getSessionID() const;
-    //QString getInviteID() const;
+    QString getCurrentSessionId() const;
+    NetworkSession* getCurrentSession() const;
+    QStringList getSessionIds() const;
+    bool doesSessionExist(const QString& sessionId) const;
+    NetworkSession* getSession(const QString& sessionId) const;
 #endif
 
     MRUHandler* getMRUHandler() const;
@@ -110,12 +111,11 @@ signals:
     void userIdChanged(const QString& userid);
     void savePasswordChanged(bool savePassword);
     void passwordChanged(const QString& password); // note: password will not be stored in settings
-    void currentSessionChanged(const QString& session);
-    void sessionChanged(const QString& session, const QString& sessionName);
-    void inviteChanged(const QString& session, const QString& invite);
-    //void sessionIDChanged(const QString& sessionID);
-    //void inviteIDChanged(const QString& inviteID);
-    void networkSettingsChanged(const QString& urlString, const QString& username, const QString& userId, const QString& password, const QString& sessionID, const QString& inviteID);
+    void currentSessionChanged(NetworkSession* session);
+    void sessionChanged(NetworkSession* session);
+    void sessionRemoved(NetworkSession* session);
+    void inviteChanged(NetworkSession* session);
+    void networkSettingsChanged(const QString& urlString, const QString& username, const QString& userId, const QString& password, NetworkSession* session);
 #endif
 
 public slots:
@@ -176,15 +176,16 @@ public slots:
     void setUserId(const QString& userId);
     void setSavePassword(bool savePassword);
     void setPassword(const QString& password); // note: password will not be stored in settings
-    //void setSessionID(const QString& sessionID);
-    //void setInviteID(const QString& inviteID);
-    void setCurrentSession(const QString& session);
-    void addSession(const QString& session, const QString& sessionName);
-    void setSessionName(const QString& session, const QString& sessionName);
-    void removeSession(const QString& session);
-    void addInvite(const QString& session, const QString& invite);
-    void setInvite(const QString& session, const QString& invite);
-    void removeInvite(const QString& session);
+    void setCurrentSessionId(const QString& sessionId);
+    void setCurrentSession(const NetworkSession& session);
+    bool addSession(NetworkSession* session);
+    //void addPlayer(const QString& id, const QString& username, const QString& screenName);
+    void updatePlayers(const QDomElement& rootElement);
+    void setSessionName(const QString& sessionId, const QString& sessionName);
+    void removeSession(const QString& sessionId);
+//    void addInvite(const QString& session, const QString& invite);
+    void setInvite(const QString& sessionId, const QString& invite);
+//    void removeInvite(const QString& session);
 
 #endif
 
@@ -242,10 +243,8 @@ private:
     bool _savePassword;
     QString _password; // note: password will not be stored in settings
     QString _currentSession;
-    QMap<QString, QString> _sessions;
-    QMap<QString, QString> _invites;
-    //QString _sessionID;
-    //QString _inviteID;
+    QMap<QString, NetworkSession*> _sessions;
+//    QMap<QString, QString> _invites;
 #endif
 
     MRUHandler* _mruHandler;
