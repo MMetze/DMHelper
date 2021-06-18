@@ -16,7 +16,6 @@
 #include <QAbstractButton>
 #include <QDebug>
 
-//#define IMPORTER_LOCAL_TEST
 #define IMPORTER_LOG_AC
 #define IMPORTER_LOG_HP
 
@@ -321,7 +320,6 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         return false;
     }
 
-#ifndef IMPORTER_LOCAL_TEST
     if(reply->error() != QNetworkReply::NoError)
     {
         QMessageBox::critical(nullptr, QString("Character Import Error"), QString("An error occured connecting to Dnd Beyond:") + QChar::LineFeed + reply->errorString());
@@ -331,13 +329,6 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     }
 
     QByteArray bytes = reply->readAll();
-#else
-    Q_UNUSED(reply);
-    QFile TEMPFILE("C://Users//Craig//Documents//GitHub//DMHelper//DMHelper//testdata//cyrus.json");
-    if(!TEMPFILE.open(QIODevice::ReadOnly | QIODevice::Text))
-        return false;
-    QByteArray bytes = TEMPFILE.readAll();
-#endif
 
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(bytes, &err);
@@ -769,9 +760,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         connect(_manager, &QNetworkAccessManager::finished, this, &CharacterImporter::imageReplyFinished);
         _reply = _manager->get(QNetworkRequest(QUrl(avatarUrl)));
 
-        #ifndef IMPORTER_LOCAL_TEST
-            return true;
-        #endif
+        return true;
     }
     else
     {
@@ -779,15 +768,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
         _character->endBatchChanges();
         emit characterImported(_character->getID());
 
-        #ifndef IMPORTER_LOCAL_TEST
-            return false;
-        #endif
+        return false;
     }
-
-#ifdef IMPORTER_LOCAL_TEST
-    TEMPFILE.close();
-    return false;
-#endif
 }
 
 bool CharacterImporter::interpretImageReply(QNetworkReply* reply)

@@ -460,22 +460,6 @@ void NetworkController::sessionMembersComplete(int requestID, const QString& ses
         return;
     }
 
-    /*
-    QDomElement rootElement = doc.documentElement();
-    QDomElement memberElement = rootElement.firstChildElement("node");
-    while(!memberElement.isNull())
-    {
-        QDomElement idElement = memberElement.firstChildElement("ID");
-        QDomElement usernameElement = memberElement.firstChildElement("username");
-        QDomElement surnameElement = memberElement.firstChildElement("surname");
-        QDomElement forenameElement = memberElement.firstChildElement("forename");
-
-        emit addSessionUser(idElement.text(), usernameElement.text(), surnameElement.text());
-
-        memberElement = memberElement.nextSiblingElement("node");
-    }
-    */
-
     emit updateSessionMembers(doc.documentElement());
 }
 
@@ -740,15 +724,6 @@ void NetworkController::startObjectUpload(UploadObject* uploadObject)
     if(uploadObject->getObject())
         uploadName += uploadObject->getObject()->getName();
 
-
-    /*
-    md5 empty --> upload
-    if id empty --> getexists(md5)
-                if not exists --> upload
-    if both there, done --
-    */
-
-
     // Check if this file has been uploaded previously
     if(uploadObject->hasUuid())
     {
@@ -871,11 +846,6 @@ UploadObject* NetworkController::uploadImage(QImage image, const QString& imageN
 {
     if((!_enabled) || (image.isNull()))
         return nullptr;
-
-    /*
-    QByteArray data = QByteArray::fromRawData(reinterpret_cast<const char*>(image.bits()), image.sizeInBytes());
-    UploadObject* result = nullptr;
-    */
 
     QByteArray data;
     QBuffer buffer(&data);

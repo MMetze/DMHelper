@@ -132,29 +132,16 @@ int DMHNetworkManager_Private::uploadData(const QByteArray& data)
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
     QHttpPart userNamePart;
-    //userNamePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
     userNamePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"user\""));
     userNamePart.setBody(_logon.getUserId().toUtf8());
     multiPart->append(userNamePart);
 
     QHttpPart passwordPart;
-    //passwordPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
     passwordPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"password\""));
     passwordPart.setBody(_logon.getPassword().toUtf8());
     multiPart->append(passwordPart);
 
-    /*
-#ifdef QT_DEBUG
-    QHttpPart debugPart;
-    debugPart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
-    debugPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"debug\""));
-    debugPart.setBody(QString("1").toUtf8());
-    multiPart->append(debugPart);
-#endif
-*/
-
     QHttpPart filePart;
-    //filePart.setHeader(QNetworkRequest::ContentTypeHeader, QVariant( "text/plain"));
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"myFile[]\"; filename=\"internal\""));
     filePart.setBody(data);
     multiPart->append(filePart);
@@ -176,7 +163,6 @@ int DMHNetworkManager_Private::uploadData(const QByteArray& data)
 
 int DMHNetworkManager_Private::downloadFile(const QString& md5, const QString& uuid)
 {
-//    QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/file_pull.php"));
     QUrl serviceUrl = QUrl(_logon.getURLString() + QString("/file.php"));
     QNetworkRequest request(serviceUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
@@ -184,10 +170,7 @@ int DMHNetworkManager_Private::downloadFile(const QString& md5, const QString& u
     QUrlQuery postData;
     postData.addQueryItem("user", _logon.getUserId());
     postData.addQueryItem("password", _logon.getPassword());
-    //postData.addQueryItem("user", "c.turner");
-    //postData.addQueryItem("password", "Ente2020");
     postData.addQueryItem("action", "pull");
-    //postData.addQueryItem("files[][md5]", md5);
     postData.addQueryItem("fileids[]", uuid);
 
 #ifdef QT_DEBUG
@@ -353,8 +336,6 @@ int DMHNetworkManager_Private::sendMessage(const DMHMessage& message, const QStr
 
     QUrlQuery postData;
     postData.addQueryItem("user", _logon.getUserId());
-    // TODO : replace hard-coded string with real userId!!
-    //postData.addQueryItem("user", QString("44C79028-2817-4F60-A0D2-ED88B62D895D"));
     postData.addQueryItem("password", _logon.getPassword());
     postData.addQueryItem("session", _logon.getSession());
     postData.addQueryItem("action", "send");
