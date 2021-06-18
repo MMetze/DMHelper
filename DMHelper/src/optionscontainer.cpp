@@ -1299,7 +1299,18 @@ void OptionsContainer::removeInvite(const QString& session)
 
 void OptionsContainer::userJoined(const QString& username)
 {
+    if(username.isEmpty())
+        return;
 
+    NetworkSession* session = getCurrentSession();
+    if(!session)
+        return;
+
+    NetworkPlayer* player = session->getPlayerByName(username);
+    if(!player)
+        return;
+
+    player->setLastSeenNow();
 }
 
 

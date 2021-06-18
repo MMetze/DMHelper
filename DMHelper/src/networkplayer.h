@@ -48,6 +48,11 @@ public slots:
     void setBlocked();
 
 signals:
+    void idChanged(const QString& id);
+    void userNameChanged(const QString& userName);
+    void screenNameChanged(const QString& screenName);
+    void lastSeenChanged(const QDateTime& lastSeen);
+    void statusChanged(int status);
 
 protected:
     QString _id;

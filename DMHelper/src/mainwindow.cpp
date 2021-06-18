@@ -793,8 +793,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_networkController, &NetworkController::uploadStarted, ui->frameNetwork, &NetworkStatusFrame::uploadStarted);
     //connect(_networkController, &NetworkController::addSessionUser, _options, &OptionsContainer::addPlayer);
     connect(_networkController, &NetworkController::updateSessionMembers, _options, &OptionsContainer::updatePlayers);
-    connect(_networkController, &NetworkController::userJoined, ui->frameNetwork, &NetworkStatusFrame::userJoined);
-    connect(_networkController, &NetworkController::userJoined, _options, &OptionsContainer::userJoined);
     connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
     connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
 
@@ -808,6 +806,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, &OptionsContainer::sessionChanged, _networkOptionsDlg, &NetworkOptionsDialog::sessionChanged);
     connect(_options, &OptionsContainer::currentSessionChanged, ui->frameNetwork, &NetworkStatusFrame::currentSessionChanged);
     connect(_options, &OptionsContainer::sessionChanged, ui->frameNetwork, &NetworkStatusFrame::sessionChanged);
+
+    //connect(_networkController, &NetworkController::userJoined, ui->frameNetwork, &NetworkStatusFrame::userJoined);
+    connect(_networkController, &NetworkController::userJoined, _options, &OptionsContainer::userJoined);
 
 #endif
 

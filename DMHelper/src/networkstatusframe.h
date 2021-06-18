@@ -52,6 +52,7 @@ private:
     NetworkPlayerFrame* getPlayerFrameById(const QString& id);
     NetworkPlayerFrame* getPlayerFrameByName(const QString& username);
     bool doesSessionExcludeItem(NetworkSession* session, QLayoutItem* item);
+    void removePlayerFrame(int index);
 
     Ui::NetworkStatusFrame *ui;
     QString _statusString;

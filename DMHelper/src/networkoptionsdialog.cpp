@@ -4,6 +4,7 @@
 #include "connectionuserdialog.h"
 #include "networksession.h"
 #include "networkplayer.h"
+#include "networkplayerframe.h"
 #include "ui_networkoptionsdialog.h"
 #include <QDomDocument>
 #include <QScreen>
@@ -17,6 +18,7 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     ui(new Ui::NetworkOptionsDialog),
     _options(options),
     _networkManager(new DMHNetworkManager(DMHLogon(), this)),
+    _playersLayout(nullptr),
     _currentRequest(INVALID_REQUEST_ID),
     _memberTimer(INVALID_TIMER_ID)
 {
@@ -27,8 +29,10 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     ui->edtUserName->setText(options.getUserName());
     ui->edtPassword->setText(options.getPassword());
     ui->chkSavePassword->setChecked(options.getSavePassword());
-    //ui->edtSessionID
-    //ui->edtInviteID
+
+    _playersLayout = new QVBoxLayout;
+    _playersLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    ui->scrollAreaPlayers->setLayout(_playersLayout);
 
     populateSessionsList();
     updatePlayersList();
@@ -92,6 +96,9 @@ void NetworkOptionsDialog::handleMessageError(int requestID, const QString& erro
 
 void NetworkOptionsDialog::currentSessionChanged(NetworkSession* session)
 {
+    while(_playersLayout->count() > 0)
+        removePlayerFrame(0);
+
     ui->edtInviteID->setText(session ? session->getInvite() : QString());
     if(session)
     {
@@ -384,7 +391,9 @@ void NetworkOptionsDialog::updatePlayersList()
     NetworkSession* session = _options.getCurrentSession();
     if(!session)
     {
-        ui->listPlayers->clear();
+        while(_playersLayout->count() > 0)
+            removePlayerFrame(0);
+
         return;
     }
 
@@ -394,35 +403,25 @@ void NetworkOptionsDialog::updatePlayersList()
     {
         if(player)
         {
-            QString playerText = player->getScreenName().isEmpty() ? player->getUserName() : player->getScreenName() + QString(" (") + player->getUserName() + QString(")");
-            QListWidgetItem* item = playerExists(player->getID());
-            if(item)
-            {
-                item->setText(playerText);
-            }
+            NetworkPlayerFrame* frame = getPlayerFrameById(player->getID());
+            if(frame)
+                frame->updateFrame();
             else
-            {
-                item = new QListWidgetItem(playerText);
-                item->setData(Qt::UserRole, player->getID());
-                ui->listPlayers->addItem(item);
-            }
+                _playersLayout->addWidget(new NetworkPlayerFrame(player));
         }
     }
 
-    int i = ui->listPlayers->count() - 1;
-    while(i >= 0)
+    int i = _playersLayout->count() - 1;
+    while(i > 0)
     {
-        QListWidgetItem* item = ui->listPlayers->item(i);
-        if(item)
-        {
-            if(!session->playerExistsById(item->data(Qt::UserRole).toString()))
-                delete ui->listPlayers->takeItem(i);
-        }
-
-        --i;
+        if(doesSessionExcludeItem(session, _playersLayout->itemAt(i)))
+            removePlayerFrame(i);
+        else
+            --i;
     }
 }
 
+/*
 QListWidgetItem* NetworkOptionsDialog::playerExists(const QString& playerId)
 {
     for(int i = 0; i < ui->listPlayers->count(); ++i)
@@ -433,4 +432,68 @@ QListWidgetItem* NetworkOptionsDialog::playerExists(const QString& playerId)
     }
 
     return nullptr;
+}
+*/
+
+NetworkPlayerFrame* NetworkOptionsDialog::getPlayerFrameById(const QString& id)
+{
+    if((!_playersLayout) || (id.isEmpty()))
+        return nullptr;
+
+    for(int i = 0; i < _playersLayout->count(); ++i)
+    {
+        QLayoutItem* item = _playersLayout->itemAt(i);
+        if((item) && (item->widget()))
+        {
+            NetworkPlayerFrame* frame = dynamic_cast<NetworkPlayerFrame*>(item->widget());
+            if((frame) && (frame->getUserId() == id))
+                return frame;
+        }
+    }
+
+    return nullptr;
+}
+
+NetworkPlayerFrame* NetworkOptionsDialog::getPlayerFrameByName(const QString& username)
+{
+    if((!_playersLayout) || (username.isEmpty()))
+        return nullptr;
+
+    for(int i = 0; i < _playersLayout->count(); ++i)
+    {
+        QLayoutItem* item = _playersLayout->itemAt(i);
+        if((item) && (item->widget()))
+        {
+            NetworkPlayerFrame* frame = dynamic_cast<NetworkPlayerFrame*>(item->widget());
+            if((frame) && (frame->getUserName() == username))
+                return frame;
+        }
+    }
+
+    return nullptr;
+}
+
+bool NetworkOptionsDialog::doesSessionExcludeItem(NetworkSession* session, QLayoutItem* item)
+{
+    if((!session) || (!item))
+        return false;
+
+    NetworkPlayerFrame* frame = dynamic_cast<NetworkPlayerFrame*>(item->widget());
+    if(!frame)
+        return false;
+
+    return !session->playerExistsById(frame->getUserId());
+}
+
+void NetworkOptionsDialog::removePlayerFrame(int index)
+{
+    if((index < 0) || (index >= _playersLayout->count()))
+        return;
+
+    QLayoutItem* child = _playersLayout->takeAt(index);
+    if(child)
+    {
+        delete child->widget(); // delete the widget
+        delete child;   // delete the layout item
+    }
 }

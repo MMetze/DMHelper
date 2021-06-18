@@ -9,8 +9,11 @@ namespace Ui {
 class NetworkOptionsDialog;
 }
 
+class NetworkPlayerFrame;
 class QListWidgetItem;
 class QDomElement;
+class QVBoxLayout;
+class QLayoutItem;
 
 class NetworkOptionsDialog : public QDialog
 {
@@ -52,12 +55,18 @@ private slots:
 private:
     void populateSessionsList();
     void updatePlayersList();
-    QListWidgetItem* playerExists(const QString& playerId);
+//    QListWidgetItem* playerExists(const QString& playerId);
+
+    NetworkPlayerFrame* getPlayerFrameById(const QString& id);
+    NetworkPlayerFrame* getPlayerFrameByName(const QString& username);
+    bool doesSessionExcludeItem(NetworkSession* session, QLayoutItem* item);
+    void removePlayerFrame(int index);
 
     Ui::NetworkOptionsDialog *ui;
 
     OptionsContainer& _options;
     DMHNetworkManager* _networkManager;
+    QVBoxLayout* _playersLayout;
 
     int _currentRequest;
     int _memberTimer;

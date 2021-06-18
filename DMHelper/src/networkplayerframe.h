@@ -27,11 +27,15 @@ public slots:
     void setPlayer(NetworkPlayer* player);
     void setConnected(bool connected);
     void updateFrame();
+    void updateFrameName();
+    void updateFrameLastSeen();
+    void updateFrameStatus();
 
 private slots:
     void statusClicked();
-    void handleAccept();
-    void handleReject();
+    void handleStatusAccept();
+    void handleStatusRemove();
+    void handleStatusBlock();
 
 private:
     Ui::NetworkPlayerFrame *ui;

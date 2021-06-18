@@ -108,24 +108,10 @@ void NetworkStatusFrame::uploadComplete()
         setReply(nullptr, QString());
 }
 
-/*
-void NetworkStatusFrame::addUser(const QString& username, const QString& screenName)
-{
-    if((!_playersLayout) || (username.isEmpty()) || (getPlayerFrameByName(username)))
-        return;
-
-    _playersLayout->addWidget(new NetworkPlayerFrame(username, screenName));
-}
-*/
-
 void NetworkStatusFrame::currentSessionChanged(NetworkSession* session)
 {
-    QLayoutItem *child;
-    while((child = _playersLayout->takeAt(0)) != nullptr)
-    {
-        delete child->widget();
-        delete child;
-    }
+    while(_playersLayout->count() > 0)
+        removePlayerFrame(0);
 
     sessionChanged(session);
 }
@@ -152,18 +138,9 @@ void NetworkStatusFrame::sessionChanged(NetworkSession* session)
     while(i > 0)
     {
         if(doesSessionExcludeItem(session, _playersLayout->itemAt(i)))
-        {
-            QLayoutItem *child = _playersLayout->takeAt(i);
-            if(child)
-            {
-                delete child->widget(); // delete the widget
-                delete child;   // delete the layout item
-            }
-        }
+            removePlayerFrame(i);
         else
-        {
             --i;
-        }
     }
 }
 
@@ -299,4 +276,17 @@ bool NetworkStatusFrame::doesSessionExcludeItem(NetworkSession* session, QLayout
         return false;
 
     return !session->playerExistsById(frame->getUserId());
+}
+
+void NetworkStatusFrame::removePlayerFrame(int index)
+{
+    if((index < 0) || (index >= _playersLayout->count()))
+        return;
+
+    QLayoutItem* child = _playersLayout->takeAt(index);
+    if(child)
+    {
+        delete child->widget(); // delete the widget
+        delete child;   // delete the layout item
+    }
 }

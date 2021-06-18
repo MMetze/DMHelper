@@ -67,7 +67,6 @@ NetworkPlayer::NetworkPlayer(const NetworkPlayer& other) :
 
 NetworkPlayer::~NetworkPlayer()
 {
-    int n = 0;
 }
 
 bool NetworkPlayer::operator==(const NetworkPlayer& other)
@@ -78,18 +77,18 @@ bool NetworkPlayer::operator==(const NetworkPlayer& other)
 
 void NetworkPlayer::setValues(const NetworkPlayer& other)
 {
-    _id = other._id;
-    _userName = other._userName;
-    _screenName = other._screenName;
-    _lastSeen = other._lastSeen;
-    _status = other._status;
+    setID(other._id);
+    setUserName(other._userName);
+    setScreenName(other._screenName);
+    setLastSeen(other._lastSeen);
+    setStatus(other._status);
 }
 
 void NetworkPlayer::setValues(const QString& id, const QString& userName, const QString& screenName)
 {
-    _id = id;
-    _userName = userName;
-    _screenName = screenName;
+    setID(id);
+    setUserName(userName);
+    setScreenName(screenName);
 }
 
 QString NetworkPlayer::getID() const
@@ -124,24 +123,40 @@ int NetworkPlayer::getStatus() const
 
 void NetworkPlayer::setID(const QString& id)
 {
-    _id = id;
+    if(_id != id)
+    {
+        _id = id;
+        emit idChanged(_id);
+    }
 }
 
 void NetworkPlayer::setUserName(const QString& userName)
 {
-    _userName = userName;
+    if(_userName != userName)
+    {
+        _userName = userName;
+        emit userNameChanged(_userName);
+    }
 }
 
 void NetworkPlayer::setScreenName(const QString& screenName)
 {
-    _screenName = screenName;
+    if(_screenName != screenName)
+    {
+        _screenName = screenName;
+        emit screenNameChanged(_screenName);
+    }
 }
 
 bool NetworkPlayer::setLastSeen(const QDateTime& lastSeen)
 {
     if(lastSeen.isValid())
     {
-        _lastSeen = lastSeen;
+        if(_lastSeen != lastSeen)
+        {
+            _lastSeen = lastSeen;
+            emit lastSeenChanged(_lastSeen);
+        }
         return true;
     }
     else
@@ -157,25 +172,29 @@ bool NetworkPlayer::setLastSeen(const QString& lastSeen)
 
 void NetworkPlayer::setLastSeenNow()
 {
-    _lastSeen = QDateTime::currentDateTime();
+    setLastSeen(QDateTime::currentDateTime());
 }
 
 void NetworkPlayer::setStatus(int status)
 {
-    _status = status;
+    if(_status != status)
+    {
+        _status = status;
+        emit statusChanged(_status);
+    }
 }
 
 void NetworkPlayer::setStatus(const QString& status)
 {
-    _status = status.isEmpty() ? NetworkPlayer_Status::Unknown : status.toInt();
+    setStatus(status.isEmpty() ? NetworkPlayer_Status::Unknown : status.toInt());
 }
 
 void NetworkPlayer::setAccepted()
 {
-    _status = NetworkPlayer_Status::Accepted;
+    setStatus(NetworkPlayer_Status::Accepted);
 }
 
 void NetworkPlayer::setBlocked()
 {
-    _status = NetworkPlayer_Status::Blocked;
+    setStatus(NetworkPlayer_Status::Blocked);
 }
