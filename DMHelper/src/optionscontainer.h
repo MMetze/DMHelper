@@ -116,6 +116,9 @@ signals:
     void sessionRemoved(NetworkSession* session);
     void inviteChanged(NetworkSession* session);
     void networkSettingsChanged(const QString& urlString, const QString& username, const QString& userId, const QString& password, NetworkSession* session);
+
+    void userAccepted(const QString& userId);
+
 #endif
 
 public slots:
@@ -179,19 +182,17 @@ public slots:
     void setCurrentSessionId(const QString& sessionId);
     void setCurrentSession(const NetworkSession& session);
     bool addSession(NetworkSession* session);
-    //void addPlayer(const QString& id, const QString& username, const QString& screenName);
     void updatePlayers(const QDomElement& rootElement);
     void setSessionName(const QString& sessionId, const QString& sessionName);
     void removeSession(const QString& sessionId);
-//    void addInvite(const QString& session, const QString& invite);
     void setInvite(const QString& sessionId, const QString& invite);
-//    void removeInvite(const QString& session);
 
     void userJoined(const QString& username);
 
 #endif
 
 private slots:
+    void playerAccepted(const QString& userId);
     void registerFontChange();
 
 private:
@@ -246,7 +247,6 @@ private:
     QString _password; // note: password will not be stored in settings
     QString _currentSession;
     QMap<QString, NetworkSession*> _sessions;
-//    QMap<QString, QString> _invites;
 #endif
 
     MRUHandler* _mruHandler;

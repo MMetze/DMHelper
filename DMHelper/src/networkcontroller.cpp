@@ -293,6 +293,11 @@ void NetworkController::setNetworkLogin(const QString& urlString, const QString&
         userInfoCompleted(-1, logon.getUserName(), logon.getUserId(), QString(), QString(), QString(), false);
 }
 
+void NetworkController::acceptUser(const QString& userId)
+{
+    _networkManager->sendMessage(DMHMessage(QString("accept"), userId));
+}
+
 void NetworkController::userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled)
 {
     DMHLogon logon = _networkManager->getLogon();

@@ -350,7 +350,7 @@ int DMHNetworkManager_Private::sendMessage(const DMHMessage& message, const QStr
     }
 
     //postData.addQueryItem("body", message.getBody().toUtf8());
-    postData.addQueryItem("body", QString("join"));
+    postData.addQueryItem("body", message.getCommand());
 
     QString postDataString = postData.toString(QUrl::FullyEncoded);
     QByteArray postDataArray = postDataString.toUtf8();

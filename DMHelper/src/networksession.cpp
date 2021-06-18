@@ -29,7 +29,7 @@ NetworkSession::NetworkSession(const NetworkSession& other) :
     for(NetworkPlayer* player : other._players)
     {
         if(player)
-            _players.append(new NetworkPlayer(*player));
+            appendNewPlayer(new NetworkPlayer(*player));
     }
 }
 
@@ -53,7 +53,7 @@ void NetworkSession::setValues(const NetworkSession& other)
             if(currentPlayer)
                 currentPlayer->setValues(*player);
             else
-                _players.append(new NetworkPlayer(*player));
+                appendNewPlayer(new NetworkPlayer(*player));
         }
     }
 
@@ -153,6 +153,7 @@ void NetworkSession::removePlayer(NetworkPlayer* player)
     if(!player)
         return;
 
+    disconnect(player, &NetworkPlayer::statusChanged, this, &NetworkSession::playerStatusChange);
     _players.removeAll(player);
 }
 
@@ -176,7 +177,7 @@ bool NetworkSession::addPlayer(const QString& userName)
     if(playerExistsByName(userName))
         return false;
 
-    _players.append(new NetworkPlayer(userName));
+    appendNewPlayer(new NetworkPlayer(userName));
     return true;
 }
 
@@ -185,6 +186,25 @@ bool NetworkSession::addPlayer(NetworkPlayer* player)
     if((!player) || (playerExists(*player)))
         return false;
 
-    _players.append(player);
+    appendNewPlayer(player);
     return true;
+}
+
+void NetworkSession::appendNewPlayer(NetworkPlayer* player)
+{
+    if(!player)
+        return;
+
+    connect(player, &NetworkPlayer::statusChanged, this, &NetworkSession::playerStatusChange);
+    _players.append(player);
+}
+
+void NetworkSession::playerStatusChange(int status)
+{
+    if(status != NetworkPlayer::Accepted)
+        return;
+
+    NetworkPlayer* player = dynamic_cast<NetworkPlayer*>(sender());
+    if((player) && (!player->getID().isEmpty()))
+        emit playerAccepted(player->getID());
 }

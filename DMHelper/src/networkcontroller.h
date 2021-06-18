@@ -67,6 +67,7 @@ public slots:
     void clearPayloadData();
     void enableNetworkController(bool enabled);
     void setNetworkLogin(const QString& urlString, const QString& username, const QString& userId, const QString& password, NetworkSession* session);
+    void acceptUser(const QString& userId);
 
 private slots:
     void userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);

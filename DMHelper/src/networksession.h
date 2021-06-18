@@ -42,6 +42,11 @@ public slots:
     bool addPlayer(NetworkPlayer* player);
 
 signals:
+    void playerAccepted(const QString& userId);
+
+protected slots:
+    void appendNewPlayer(NetworkPlayer* player);
+    void playerStatusChange(int status);
 
 protected:
     QString _sessionID;

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QPixmap>
 #include "dmhlogon.h"
+#include "dmhmessage.h"
 
 class DMHNetworkManager;
 class DMHPayload;
@@ -50,6 +51,8 @@ public slots:
 private slots:
     void userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);
     void joinSessionComplete(int requestID, const QString& session);
+    void handleMessageReceived(const QList<DMHMessage>& messages);
+
     void messageError(int requestID, const QString& errorString);
     void requestError(int requestID);
 

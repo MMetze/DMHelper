@@ -207,26 +207,42 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
 
     _networkManager->sendMessage(DMHMessage(QString("join"), QString("")));
 
-    if(!_connected)
+}
+
+void DMC_ServerConnection::handleMessageReceived(const QList<DMHMessage>& messages)
+{
+    qDebug() << "[DMC_ServerConnection] Message received: " << messages.count();
+    for(int i = 0; i < messages.count(); ++i)
     {
-        emit connectionChanged(true);
-        _connected = true;
+        DMHMessage message(messages.at(i));
+        qDebug() << "[DMC_ServerConnection]       Message " << i << ": " << message;
+        //if(message.getCommand() == QString("accepted"))
+        if(message.getBody() == QString("accept"))
+        {
+            qDebug() << "[DMC_ServerConnection] DM Helper server accepted participation";
+
+            if(_networkObserver)
+                _networkObserver->setObserverType(DMHNetworkObserver::ObserverType_All);
+
+            if(!_connected)
+            {
+                emit connectionChanged(true);
+                _connected = true;
+            }
+        }
     }
 }
 
 void DMC_ServerConnection::messageError(int requestID, const QString& errorString)
 {
-    //QMessageBox::critical(nullptr, QString("Server Error"), QString("An error was received from the DMH server:\n\n") + errorString);
     emit networkMessage(QString("An error was received from the server: ") + errorString);
     qDebug() << "[DMC_ServerConnection] Error in message, stopping the server. Request: " << requestID << ", error: " << errorString;
-    //stopServer();
 }
 
 void DMC_ServerConnection::requestError(int requestID)
 {
     emit networkMessage(QString("There was an unexpected error in communication with the server!"));
     qDebug() << "[DMC_ServerConnection] Error in connection, stopping the server. Request: " << requestID;
-    //stopServer();
 }
 
 void DMC_ServerConnection::startManager()
@@ -265,7 +281,7 @@ void DMC_ServerConnection::startObserver()
     {
         DMHLogon logon = _options.getLogon();
         logon.setSession(_session);
-        _networkObserver = new DMHNetworkObserver(logon, DMHNetworkObserver::ObserverType_All, this);
+        _networkObserver = new DMHNetworkObserver(logon, DMHNetworkObserver::ObserverType_Message, this);
         _networkObserver->setInterval(DMC_OBSERVER_INTERVAL);
         connectRemotePlayers();
         _networkObserver->start();
@@ -290,6 +306,7 @@ void DMC_ServerConnection::stopObserver()
 void DMC_ServerConnection::connectRemotePlayers()
 {
     connect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
+    connect(_networkObserver, &DMHNetworkObserver::messageReceived, this, &DMC_ServerConnection::handleMessageReceived);
 
     if(_audioPlayer)
     {
@@ -312,6 +329,7 @@ void DMC_ServerConnection::connectRemotePlayers()
 void DMC_ServerConnection::disconnectRemotePlayers()
 {
     disconnect(_networkObserver, SIGNAL(payloadReceived(const DMHPayload&, const QString&)), this, SLOT(payloadReceived(const DMHPayload&, const QString&)));
+    disconnect(_networkObserver, &DMHNetworkObserver::messageReceived, this, &DMC_ServerConnection::handleMessageReceived);
 
     if(_audioPlayer)
     {

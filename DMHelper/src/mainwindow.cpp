@@ -809,6 +809,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //connect(_networkController, &NetworkController::userJoined, ui->frameNetwork, &NetworkStatusFrame::userJoined);
     connect(_networkController, &NetworkController::userJoined, _options, &OptionsContainer::userJoined);
+    connect(_options, &OptionsContainer::userAccepted, _networkController, &NetworkController::acceptUser);
 
 #endif
 
