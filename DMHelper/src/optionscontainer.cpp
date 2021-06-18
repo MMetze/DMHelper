@@ -1297,6 +1297,12 @@ void OptionsContainer::removeInvite(const QString& session)
 }
 */
 
+void OptionsContainer::userJoined(const QString& username)
+{
+
+}
+
+
 #endif //INCLUDE_NETWORK_SUPPORT
 
 void OptionsContainer::registerFontChange()

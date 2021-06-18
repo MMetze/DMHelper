@@ -389,11 +389,6 @@ void NetworkOptionsDialog::updatePlayersList()
     }
 
     QList<NetworkPlayer*> players = session->getPlayers();
-    /*if(players.isEmpty())
-    {
-        ui->listPlayers->clear();
-        return;
-    }*/
 
     for(NetworkPlayer* player : players)
     {

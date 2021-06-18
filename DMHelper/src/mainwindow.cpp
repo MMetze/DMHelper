@@ -794,6 +794,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(_networkController, &NetworkController::addSessionUser, _options, &OptionsContainer::addPlayer);
     connect(_networkController, &NetworkController::updateSessionMembers, _options, &OptionsContainer::updatePlayers);
     connect(_networkController, &NetworkController::userJoined, ui->frameNetwork, &NetworkStatusFrame::userJoined);
+    connect(_networkController, &NetworkController::userJoined, _options, &OptionsContainer::userJoined);
     connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
     connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
 

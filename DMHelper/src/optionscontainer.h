@@ -187,6 +187,8 @@ public slots:
     void setInvite(const QString& sessionId, const QString& invite);
 //    void removeInvite(const QString& session);
 
+    void userJoined(const QString& username);
+
 #endif
 
 private slots:

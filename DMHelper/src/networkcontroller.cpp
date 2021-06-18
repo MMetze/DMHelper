@@ -545,8 +545,9 @@ void NetworkController::handleMessageReceived(const QList<DMHMessage>& messages)
     {
         DMHMessage message(messages.at(i));
         qDebug() << "[NetworkController]       Message " << i << ": " << message;
-        if(message.getCommand() == QString("join"))
-            emit userJoined(message.getSender());
+        //if(message.getCommand() == QString("join"))
+        if(message.getBody() == QString("join"))
+            emit userJoined(message.getSender()); connect this to options
     }
 }
 

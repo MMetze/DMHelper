@@ -52,7 +52,7 @@ void DMHNetworkManager_Private::uploadPayload(const DMHPayload& payload)
 
     QString postDataString = postData.toString(QUrl::FullyEncoded);
     QByteArray postDataArray = postDataString.toUtf8();
-    //qDebug() << "[DMHNetworkManager] Uploading payload. Request: " << postDataArray;
+    qDebug() << "[DMHNetworkManager] Uploading payload. Request: " << postDataArray;
 
 #ifdef QT_DEBUG
     emit DEBUG_message_contents(postDataArray);
@@ -368,14 +368,18 @@ int DMHNetworkManager_Private::sendMessage(const DMHMessage& message, const QStr
         postData.addQueryItem("target", userId);
     }
 
-    postData.addQueryItem("body", message.getBody());
+    //postData.addQueryItem("body", message.getBody().toUtf8());
+    postData.addQueryItem("body", QString("join"));
+
+    QString postDataString = postData.toString(QUrl::FullyEncoded);
+    QByteArray postDataArray = postDataString.toUtf8();
+    qDebug() << "[DMHNetworkManager] Sending Message. Request: " << postDataArray;
 
 #ifdef QT_DEBUG
-    emit DEBUG_message_contents(postData.toString(QUrl::FullyEncoded).toUtf8());
+    emit DEBUG_message_contents(postDataArray);
 #endif
-    qDebug() << "[DMHNetworkManager] " << postData.toString(QUrl::FullyEncoded).toUtf8();
 
-    QNetworkReply* reply = _manager->post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
+    QNetworkReply* reply = _manager->post(request, postDataArray);
     int replyId = getRequestId(true);
     _replies.insert(reply, replyId);
 

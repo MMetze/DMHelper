@@ -157,7 +157,7 @@ void DMHMessage::setTimestamp(const QString& timestamp)
 
 QDebug operator<<(QDebug d, const DMHMessage &message)
 {
-    d << QString("(DMHMessage: ID: ") << message.getId() << QString(", Sender: ") << message.getSender() << QString(", Body: ") << message.getBody() << QString(", Command: ") << message.getCommand() << QString(", Message: ") << message.getMessage() << QString(", Polled: ") << message.isPolled() << QString(", Timestamp: ") << message.getTimestamp() << QString(")");
+    d << QString("(DMHMessage: ID: ") + message.getId() + QString(", Sender: ") + message.getSender() + QString(", Body: ") + message.getBody() + QString(", Command: ") + message.getCommand() + QString(", Message: ") + message.getMessage() + QString(", Polled: ") + message.isPolled() + QString(", Timestamp: ") + message.getTimestamp() + QString(")");
     return d;
 }
 
