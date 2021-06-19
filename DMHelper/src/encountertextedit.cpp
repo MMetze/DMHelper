@@ -1,6 +1,7 @@
 #include "encountertextedit.h"
 #include "encountertext.h"
 #include "dmconstants.h"
+#include "campaign.h"
 #include "texttranslatedialog.h"
 #include "ui_encountertextedit.h"
 #include <QKeyEvent>
@@ -10,6 +11,7 @@
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <QDebug>
 
 EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
@@ -37,6 +39,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     ui->textBrowser->viewport()->setCursor(Qt::IBeamCursor);
 
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(updateAnchors()));
     connect(ui->textBrowser, SIGNAL(anchorClicked(QUrl)), this, SIGNAL(anchorClicked(QUrl)));
 
     connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SIGNAL(fontFamilyChanged(const QString&)));
@@ -248,14 +251,9 @@ void EncounterTextEdit::setHtml()
         ui->textBrowser->setHtml(_encounter->getTranslatedText());
     else
         ui->textBrowser->setHtml(_encounter->getText());
-}
 
-/*
-void EncounterTextEdit::setPlainText(const QString &text)
-{
-    ui->textBrowser->setPlainText(text);
+    updateAnchors();
 }
-*/
 
 void EncounterTextEdit::setBackgroundImage(bool on)
 {
@@ -363,7 +361,6 @@ void EncounterTextEdit::hyperlinkClicked()
     format.setAnchor(!newHRef.isEmpty());
     format.setAnchorHref(newHRef);
     cursor.mergeCharFormat(format);
-    //ui->textBrowser->setHtml(ui->textBrowser->toHtml());
 }
 
 void EncounterTextEdit::setTextWidth(int textWidth)
@@ -553,6 +550,58 @@ void EncounterTextEdit::setRotation(int rotation)
         prepareImages();
         startPublishTimer();
     }
+}
+
+void EncounterTextEdit::updateAnchors()
+{
+    if(!_encounter)
+        return;
+
+    qDebug() << "[EncounterTextEdit] Checking anchors...";
+    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(updateAnchors()));
+
+    QTextCursor originalCursor = ui->textBrowser->textCursor();
+
+    QTextCursor startPosCursor = originalCursor;
+    startPosCursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+    ui->textBrowser->setTextCursor(startPosCursor);
+
+    QRegularExpression regex("\\[\\[(.*?)\\]\\]");
+    while(ui->textBrowser->find(regex))
+    {
+        QTextCursor cursor = ui->textBrowser->textCursor();
+        int startPos = cursor.selectionStart();
+        int endPos = cursor.selectionEnd();
+        cursor.setPosition(startPos + 2);
+        cursor.setPosition(endPos - 2, QTextCursor::KeepAnchor);
+        if(!cursor.selectedText().isEmpty())
+        {
+            Campaign* campaign = dynamic_cast<Campaign*>(_encounter->getParentByType(DMHelper::CampaignType_Campaign));
+            if(campaign)
+            {
+                QTextCharFormat format = cursor.charFormat();
+                if(campaign->searchDirectChildrenByName(cursor.selectedText()))
+                {
+                    qDebug() << "[EncounterTextEdit] Setting cursor format for text: " << cursor.selectedText();
+                    format.setAnchor(true);
+                    format.setAnchorHref(QString("DMHelper@") + cursor.selectedText());
+                    format.setFontItalic(true);
+                    cursor.mergeCharFormat(format);
+                }
+                else if(format.isAnchor())
+                {
+                    qDebug() << "[EncounterTextEdit] Removing cursor format for text: " << cursor.selectedText();
+                    format.setAnchor(false);
+                    format.setAnchorHref(QString(""));
+                    format.setFontItalic(false);
+                    cursor.mergeCharFormat(format);
+                }
+            }
+        }
+    }
+
+    ui->textBrowser->setTextCursor(originalCursor);
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(updateAnchors()));
 }
 
 void EncounterTextEdit::storeEncounter()

@@ -66,7 +66,6 @@
     #include "networksession.h"
 #endif
 #include "aboutdialog.h"
-//#include "campaignexporter.h"
 #include "basicdateserver.h"
 #include "welcomeframe.h"
 #include "customtableframe.h"
@@ -154,7 +153,6 @@ MainWindow::MainWindow(QWidget *parent) :
     encounterTextEdit(nullptr),
     _scrollingTextEdit(nullptr),
     treeModel(nullptr),
-    treeIndexMap(),
     characterLayout(nullptr),
     _objectDispatcher(nullptr),
     campaign(nullptr),
@@ -441,8 +439,6 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Creating Encounter Pages";
 
     // Empty Campaign Page
-    //ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Base,
-    //                                                  DMHelper::CampaignType_AudioTrack}), new EmptyCampaignFrame);
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Base, new EmptyCampaignFrame);
 
     // EncounterType_Text
@@ -454,7 +450,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), encounterTextEdit, SLOT(targetResized(QSize)));
-    //connect(_ribbonTabText, SIGNAL(backgroundClicked()), encounterTextEdit, SLOT(browseImageFile()));
     connect(_ribbonTabText, &RibbonTabText::backgroundClicked, encounterTextEdit, &EncounterTextEdit::setBackgroundImage);
     connect(encounterTextEdit, &EncounterTextEdit::imageFileChanged, _ribbonTabText, &RibbonTabText::setImageFile);
     connect(_ribbonTabText, SIGNAL(animationClicked(bool)), encounterTextEdit, SLOT(setAnimated(bool)));
@@ -710,20 +705,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
     readQuickRef();
 
-    /*
-    AudioPlaybackFrame* audioPlaybackFrame = new AudioPlaybackFrame(this);
-    audioPlaybackFrame->setVolume(_options->getAudioVolume());
-    connect(_audioPlayer, SIGNAL(positionChanged(qint64)), audioPlaybackFrame, SLOT(setPosition(qint64)));
-    connect(_audioPlayer, SIGNAL(durationChanged(qint64)), audioPlaybackFrame, SLOT(setDuration(qint64)));
-    connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), audioPlaybackFrame, SLOT(trackChanged(AudioTrack*)));
-    connect(_audioPlayer, SIGNAL(stateChanged(AudioPlayer::State)), audioPlaybackFrame, SLOT(stateChanged(AudioPlayer::State)));
-    connect(audioPlaybackFrame, SIGNAL(play()), _audioPlayer, SLOT(play()));
-    connect(audioPlaybackFrame, SIGNAL(pause()), _audioPlayer, SLOT(pause()));
-    connect(audioPlaybackFrame, SIGNAL(positionChanged(qint64)), _audioPlayer, SLOT(setPosition(qint64)));
-    connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _audioPlayer, SLOT(setVolume(int)));
-    connect(audioPlaybackFrame, SIGNAL(volumeChanged(int)), _options, SLOT(setAudioVolume(int)));
-    soundDlg = createDialog(audioPlaybackFrame);
-    */
     SoundboardFrame* soundboard = new SoundboardFrame(this);
     connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
     connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
@@ -760,19 +741,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
-    //connect(audioTrackEdit, SIGNAL(trackSelected(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
     connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController = new NetworkController(this);
     _networkController->setNetworkLogin(_options->getURLString(), _options->getUserName(), _options->getUserId(), _options->getPassword(), _options->getCurrentSession());
-    //connect(_networkController, &NetworkController::requestSettings, _options, &OptionsContainer::editSettings);
-    //connect(_networkController, &NetworkController::requestSettings, this, &MainWindow::editNetworkSettings);
     connect(_networkController, &NetworkController::openNetworkOptions, this, &MainWindow::editNetworkSettings);
     connect(_networkController, &NetworkController::networkEnabledChanged, _options, &OptionsContainer::setNetworkEnabled);
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
     connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,NetworkSession*)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,NetworkSession*)));
-    //_networkController->enableNetworkController(_options->getNetworkEnabled());
 
     connect(&bestiaryDlg, SIGNAL(publishMonsterImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
     connect(encounterTextEdit, SIGNAL(publishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
@@ -781,17 +758,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(publishMap(CampaignObjectBase*)), _networkController, SLOT(uploadObject(CampaignObjectBase*)));
     connect(battleFrame, SIGNAL(animationUpdated(CampaignObjectBase*)), _networkController, SLOT(uploadObject(CampaignObjectBase*)));
 
-    //connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
-    //connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), _networkController, SLOT(uploadImage(QImage, QColor)));
     connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(QColor)), _networkController, SLOT(setBackgroundColor(QColor)));
-    //connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
-    // TODO: _battleDlgMgr->setNetworkManager(_networkController);
 
     ui->frameNetwork->setOptionsContainer(_options);
     connect(_networkController, &NetworkController::networkError, ui->frameNetwork, &NetworkStatusFrame::setNetworkError);
     connect(_networkController, &NetworkController::networkSuccess, ui->frameNetwork, &NetworkStatusFrame::setNetworkSuccess);
     connect(_networkController, &NetworkController::uploadStarted, ui->frameNetwork, &NetworkStatusFrame::uploadStarted);
-    //connect(_networkController, &NetworkController::addSessionUser, _options, &OptionsContainer::addPlayer);
     connect(_networkController, &NetworkController::updateSessionMembers, _options, &OptionsContainer::updatePlayers);
     connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
     connect(_options, &OptionsContainer::networkEnabledChanged, ui->frameNetwork, &NetworkStatusFrame::setNetworkStatus);
@@ -799,7 +771,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _networkOptionsDlg = new NetworkOptionsDialog(*_options);
     connect(_networkController, &NetworkController::networkMessage, _networkOptionsDlg, &NetworkOptionsDialog::logMessage);
     connect(_networkController, &NetworkController::networkErrorMessage, _networkOptionsDlg, &NetworkOptionsDialog::handleMessageError);
-    //connect(_networkOptionsDlg, &NetworkOptionsDialog::addSessionUser, _options, &OptionsContainer::addPlayer);
     connect(_networkOptionsDlg, &NetworkOptionsDialog::updateSessionMembers, _options, &OptionsContainer::updatePlayers);
 
     connect(_options, &OptionsContainer::currentSessionChanged, _networkOptionsDlg, &NetworkOptionsDialog::currentSessionChanged);
@@ -807,7 +778,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, &OptionsContainer::currentSessionChanged, ui->frameNetwork, &NetworkStatusFrame::currentSessionChanged);
     connect(_options, &OptionsContainer::sessionChanged, ui->frameNetwork, &NetworkStatusFrame::sessionChanged);
 
-    //connect(_networkController, &NetworkController::userJoined, ui->frameNetwork, &NetworkStatusFrame::userJoined);
     connect(_networkController, &NetworkController::userJoined, _options, &OptionsContainer::userJoined);
     connect(_options, &OptionsContainer::userAccepted, _networkController, &NetworkController::acceptUser);
 
@@ -817,7 +787,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _objectDispatcher->setSoundboard(soundboard);
     _objectDispatcher->setNetworkController(_networkController);
     connect(this, &MainWindow::objectAdded, _objectDispatcher, &ObjectDispatcher::addObject);
-//    connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
 
     emit campaignLoaded(nullptr);
 
@@ -1271,50 +1240,6 @@ void MainWindow::exportCurrentItem()
     dlg.resize(width() * 3 / 4, height() * 9 / 10);
     dlg.exec();
 
-    /*
-    QModelIndex index = ui->treeView->currentIndex();
-    QStandardItem* exportItem = treeModel->itemFromIndex(index);
-    if(!exportItem)
-        return;
-
-    QString exportFileName = QFileDialog::getSaveFileName(this,QString("Export Object"),QString(),QString("XML files (*.xml)"));
-    if(exportFileName.isEmpty())
-        return;
-
-    QFileInfo fileInfo(exportFileName);
-    QDir targetDir(fileInfo.absoluteDir());
-
-    QUuid exportId(exportItem->data(DMHelper::TreeItemData_ID).toString());
-
-    qDebug() << "[MainWindow] Exporting object with ID " << exportId << " to " << exportFileName;
-
-    CampaignExporter exporter(*campaign, exportId, targetDir);
-    if(!exporter.isValid())
-    {
-        qDebug() << "[MainWindow] Error - invalid export created!";
-        return;
-    }
-
-    QString exportString = exporter.getExportDocument().toString();
-    if(exportString.isEmpty())
-    {
-        qDebug() << "[MainWindow] Error - export null string found, no export created!";
-        return;
-    }
-
-    QFile file(exportFileName);
-    if( !file.open( QIODevice::WriteOnly ) )
-    {
-        qDebug() << "[MainWindow] Not able to open export file " << exportFileName;
-        return;
-    }
-
-    QTextStream ts(&file);
-    ts.setCodec("UTF-8");
-    ts << exportString;
-    file.close();
-    */
-
     qDebug() << "[MainWindow] Export complete";
 }
 
@@ -1364,11 +1289,7 @@ void MainWindow::showPublishWindow(bool visible)
     if(visible)
     {
         if(!pubWindow->isVisible())
-        {
             pubWindow->show();
-        }
-        // TODO: do we need this at all?
-        // pubWindow->activateWindow();
     }
     else
     {
@@ -1382,12 +1303,9 @@ void MainWindow::linkActivated(const QUrl & link)
     if(path.startsWith(QString("DMHelper@")))
     {
         QString linkName = path.remove(0, 9);
-        if(treeIndexMap.contains(linkName))
-        {
-            //QModelIndex index = treeIndexMap.value(linkName);
-            //ui->treeView->setCurrentIndex(index);
-            selectItem(treeIndexMap.value(linkName));
-        }
+        CampaignTreeItem* item = treeModel->getObjectItemByName(linkName);
+        if(item)
+            selectIndex(item->index());
     }
     else
     {
@@ -1571,8 +1489,6 @@ void MainWindow::showEvent(QShowEvent * event)
         initialized = true;
     }
 
-    //ui->scrollWidget->resizeTabs();
-
     QMainWindow::showEvent(event);
 }
 
@@ -1754,24 +1670,25 @@ void MainWindow::deleteCampaign()
 
 void MainWindow::enableCampaignMenu()
 {
-    //ui->menu_Campaign->setEnabled(campaign != nullptr);
     _ribbonTabCampaign->setCampaignEnabled(campaign != nullptr);
+}
+
+bool MainWindow::selectIndex(const QModelIndex& index)
+{
+    if(!index.isValid())
+        return false;
+
+    ui->treeView->setCurrentIndex(index);
+    activateWindow();
+    return true;
 }
 
 bool MainWindow::selectItem(QUuid itemId)
 {
-    if((treeModel) && (!itemId.isNull()))
-    {
-        QModelIndex index = treeModel->getObjectIndex(itemId);
-        if(index.isValid())
-        {
-            ui->treeView->setCurrentIndex(index);
-            activateWindow();
-            return true;
-        }
-    }
+    if((!treeModel) || (itemId.isNull()))
+        return false;
 
-    return false;
+    return selectIndex(treeModel->getObjectIndex(itemId));
 }
 
 bool MainWindow::selectItem(int itemType, QUuid itemId)
@@ -1786,72 +1703,6 @@ bool MainWindow::selectItem(int itemType, QUuid itemId, QUuid adventureId)
     Q_UNUSED(adventureId);
 
     return selectItem(itemId);
-}
-
-QStandardItem* MainWindow::findItem(QStandardItem* parent, int itemType, QUuid itemId)
-{
-    if(!parent)
-        return nullptr;
-
-    for(int i = 0; i < parent->rowCount(); ++i)
-    {
-        QStandardItem* child = parent->child(i);
-        if( ( child->data(DMHelper::TreeItemData_Type).toInt() == itemType ) && ( QUuid(child->data(DMHelper::TreeItemData_ID).toString()) == itemId ) )
-        {
-            return child;
-        }
-
-        QStandardItem* childResult = findItem(child, itemType, itemId);
-        if(childResult != nullptr)
-            return childResult;
-    }
-
-    return nullptr;
-}
-
-QStandardItem* MainWindow::findItem(QStandardItem* parent, QUuid itemId)
-{
-    if(!parent)
-        return nullptr;
-
-    for(int i = 0; i < parent->rowCount(); ++i)
-    {
-        QStandardItem* child = parent->child(i);
-        if(QUuid(child->data(DMHelper::TreeItemData_ID).toString()) == itemId)
-        {
-            return child;
-        }
-
-        QStandardItem* childResult = findItem(child, itemId);
-        if(childResult != nullptr)
-            return childResult;
-    }
-
-    return nullptr;
-}
-
-QStandardItem* MainWindow::findParentbyType(QStandardItem* child, int parentType)
-{
-    if(!child)
-        return nullptr;
-
-    if( child->data(DMHelper::TreeItemData_Type).toInt() == parentType )
-        return child;
-
-    return findParentbyType(child->parent(), parentType);
-}
-
-void MainWindow::setIndexExpanded(bool expanded, const QModelIndex& index)
-{
-    if(expanded)
-    {
-        ui->treeView->expand(index);
-    }
-    else
-    {
-        ui->treeView->collapse(index);
-    }
-
 }
 
 void MainWindow::writeBestiary()
@@ -2149,10 +2000,6 @@ void MainWindow::updateCampaignTree()
     qDebug() << "[MainWindow] Updating Campaign Tree";
     if(treeModel)
         treeModel->refresh();
-
-    treeIndexMap.clear();
-    treeIndexMap = treeModel->getTreeEntryMap();
-    encounterTextEdit->setKeys(treeIndexMap.uniqueKeys());
 }
 
 void MainWindow::updateMapFiles()
