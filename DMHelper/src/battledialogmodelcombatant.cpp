@@ -7,6 +7,7 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObj
     _combatant(nullptr),
     _initiative(0),
     _position(0,0),
+    _moved(0.0),
     _isShown(true),
     _isKnown(true),
     _isSelected(false)
@@ -18,6 +19,7 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
     _combatant(combatant),
     _initiative(0),
     _position(0,0),
+    _moved(0.0),
     _isShown(true),
     _isKnown(true),
     _isSelected(false)
@@ -29,6 +31,7 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int
     _combatant(combatant),
     _initiative(initiative),
     _position(position),
+    _moved(0.0),
     _isShown(true),
     _isKnown(true),
     _isSelected(false)
@@ -136,6 +139,38 @@ int BattleDialogModelCombatant::getAbilityValue(Combatant::Ability ability) cons
     }
 }
 
+qreal BattleDialogModelCombatant::getMoved()
+{
+    return _moved;
+}
+
+void BattleDialogModelCombatant::setMoved(qreal moved)
+{
+    if(_moved != moved)
+    {
+        _moved = moved;
+        emit moveUpdated();
+    }
+}
+
+void BattleDialogModelCombatant::incrementMoved(qreal moved)
+{
+    if(moved != 0.0)
+    {
+        _moved += moved;
+        emit moveUpdated();
+    }
+}
+
+void BattleDialogModelCombatant::resetMoved()
+{
+    if(_moved != 0)
+    {
+        _moved = 0;
+        emit moveUpdated();
+    }
+}
+
 void BattleDialogModelCombatant::setShown(bool isShown)
 {
     _isShown = isShown;
@@ -191,6 +226,7 @@ void BattleDialogModelCombatant::copyValues(const BattleDialogModelCombatant &ot
     _combatant = other._combatant;
     _initiative = other._initiative;
     _position = other._position;
+    _moved = other._moved;
     _isShown = other._isShown;
     _isKnown = other._isKnown;
     _isSelected = other._isSelected;

@@ -78,6 +78,12 @@ void WidgetCombatantBase::initiativeChanged(int initiative)
     }
 }
 
+void WidgetCombatantBase::moveChanged(int move)
+{
+    if(getCombatant())
+        getCombatant()->setMoved(move);
+}
+
 void WidgetCombatantBase::handleHitPointsChanged(int hp)
 {
     if(getCombatant() && (getCombatant()->getHitPoints() != hp))

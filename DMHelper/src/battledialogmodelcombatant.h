@@ -57,6 +57,11 @@ public:
     virtual void setHitPoints(int hitPoints) = 0;
     virtual QPixmap getIconPixmap(DMHelper::PixmapSize iconSize) const = 0;
 
+    qreal getMoved();
+    void setMoved(qreal moved);
+    void incrementMoved(qreal moved);
+    void resetMoved();
+
 public slots:
     virtual void setShown(bool isShown);
     virtual void setKnown(bool isKnown);
@@ -69,6 +74,7 @@ signals:
     void initiativeChanged(BattleDialogModelCombatant* combatant);
     void combatantMoved(BattleDialogModelCombatant* combatant);
     void combatantSelected(BattleDialogModelCombatant* combatant);
+    void moveUpdated();
 
 protected:
     // From BattleDialogModelCombatant
@@ -82,6 +88,7 @@ protected:
     Combatant* _combatant;
     int _initiative;
     QPointF _position;
+    qreal _moved;
     bool _isShown;
     bool _isKnown;
     bool _isSelected;

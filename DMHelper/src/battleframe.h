@@ -300,8 +300,8 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
-    void startMovement(QGraphicsPixmapItem* item, int speed);
-    void updateMovement(QGraphicsPixmapItem* item);
+    void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);
+    void updateMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item);
     void endMovement();
 
     QPixmap getPointerPixmap();

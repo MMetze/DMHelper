@@ -15,8 +15,9 @@ WidgetCharacter::WidgetCharacter(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->edtInit,SIGNAL(editingFinished()),this,SLOT(edtInitiativeChanged()));
-    connect(ui->edtHP,SIGNAL(editingFinished()),this,SLOT(edtHPChanged()));
+    connect(ui->edtInit, SIGNAL(editingFinished()), this, SLOT(edtInitiativeChanged()));
+    connect(ui->edtMove, SIGNAL(editingFinished()), this, SLOT(edtMoveChanged()));
+    connect(ui->edtHP, SIGNAL(editingFinished()), this, SLOT(edtHPChanged()));
 
     connect(ui->chkKnown, SIGNAL(clicked(bool)), this, SIGNAL(isKnownChanged(bool)));
     connect(ui->chkVisible, SIGNAL(clicked(bool)), this, SIGNAL(isShownChanged(bool)));
@@ -85,6 +86,14 @@ void WidgetCharacter::updateData()
     update();
 }
 
+void WidgetCharacter::updateMove()
+{
+    if((!_internals) || (!_internals->getCombatant()))
+        return;
+
+    ui->edtMove->setText(QString::number(static_cast<int>(_internals->getCombatant()->getMoved())));
+}
+
 void WidgetCharacter::selectCombatant()
 {
     if(_internals)
@@ -129,6 +138,12 @@ void WidgetCharacter::edtInitiativeChanged()
         _internals->initiativeChanged(ui->edtInit->text().toInt());
 }
 
+void WidgetCharacter::edtMoveChanged()
+{
+    if(_internals)
+        _internals->moveChanged(ui->edtMove->text().toInt());
+}
+
 void WidgetCharacter::edtHPChanged()
 {
     if(_internals)
@@ -141,11 +156,13 @@ void WidgetCharacter::readInternals()
         return;
 
     loadImage();
+    updateMove();
 
     ui->edtName->setText(_internals->getCombatant()->getName());
     ui->edtName->home(false);
     ui->edtAC->setText(QString::number(_internals->getCombatant()->getArmorClass()));
     ui->edtHP->setText(QString::number(_internals->getCombatant()->getHitPoints()));
+    ui->edtMove->setText(QString::number(static_cast<int>(_internals->getCombatant()->getMoved())));
     ui->edtInit->setText(QString::number(_internals->getCombatant()->getInitiative()));
     ui->chkKnown->setChecked(_internals->getCombatant()->getKnown());
     ui->chkVisible->setChecked(_internals->getCombatant()->getShown());
