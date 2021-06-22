@@ -22,6 +22,7 @@ signals:
 
 public slots:
     void handleMouseDown(const QPointF& pos);
+    void handleMouseDown(const QPointF& pos, int size, int brushType, bool erase, bool smooth);
     void handleMouseMoved(const QPointF& pos);
     void handleMouseUp(const QPointF& pos);
 

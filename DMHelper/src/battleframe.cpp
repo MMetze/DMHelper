@@ -3749,54 +3749,77 @@ void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
 
 void BattleFrame::startMovement(QGraphicsPixmapItem* item, int speed)
 {
-    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+    if((!item) || (!_model))
         return;
 
-    int speedSquares = 2 * (speed / 5) + 1;
-    _moveRadius = _model->getGridScale() * speedSquares;
-    _moveStart = item->pos();
-    _movementPixmap->setPos(_moveStart);
-    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
-    _movementPixmap->setVisible(true);
+    if((_movementPixmap) && (_model->getShowMovement()))
+    {
+        int speedSquares = 2 * (speed / 5) + 1;
+        _moveRadius = _model->getGridScale() * speedSquares;
+        _moveStart = item->pos();
+        _movementPixmap->setPos(_moveStart);
+        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+        _movementPixmap->setVisible(true);
+    }
+
+    if((_mapDrawer) && (_model->getFowMovement()))
+    {
+        BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
+        if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Character))
+        {
+            qreal gridSize = static_cast<qreal>(_model->getGridScale());
+            // TODO: make the radius variable instead of 30'
+            _mapDrawer->handleMouseDown(item->pos(), 6 * gridSize, DMHelper::BrushType_Circle, true, true);
+        }
+    }
 }
 
 void BattleFrame::updateMovement(QGraphicsPixmapItem* item)
 {
-    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+    if((!item) || (!_model))
         return;
 
-    QPointF combatantPos = item->pos();
-
-    if(_moveRadius > _model->getGridScale())
+    if((_movementPixmap) && (_model->getShowMovement()))
     {
-        QPointF diff = _moveStart - combatantPos;
-        qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
-        _moveRadius -= 2 * delta;
+        QPointF combatantPos = item->pos();
+
+        if(_moveRadius > _model->getGridScale())
+        {
+            QPointF diff = _moveStart - combatantPos;
+            qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
+            _moveRadius -= 2 * delta;
+        }
+
+        if(_moveRadius <= _model->getGridScale())
+        {
+            _moveRadius = _model->getGridScale();
+            _movementPixmap->setRotation(0.0);
+            _movementPixmap->setVisible(false);
+        }
+        else
+        {
+            _moveStart = combatantPos;
+        }
+
+        _movementPixmap->setPos(combatantPos);
+        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
     }
 
-    if(_moveRadius <= _model->getGridScale())
-    {
-        _moveRadius = _model->getGridScale();
-        _movementPixmap->setRotation(0.0);
-        _movementPixmap->setVisible(false);
-    }
-    else
-    {
-        _moveStart = combatantPos;
-    }
-
-    _movementPixmap->setPos(combatantPos);
-    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+    if((_mapDrawer) && (_model->getFowMovement()))
+        _mapDrawer->handleMouseMoved(item->pos());
 }
 
 void BattleFrame::endMovement()
 {
-    if(!_movementPixmap)
-        return;
+    if(_movementPixmap)
+    {
+        _movementPixmap->setRotation(0.0);
+        _movementPixmap->setVisible(false);
+        //emit animationUpdated(_battle);
+    }
 
-    _movementPixmap->setRotation(0.0);
-    _movementPixmap->setVisible(false);
-    //emit animationUpdated(_battle);
+    if((_mapDrawer) && (_model) && (_model->getFowMovement()))
+        _mapDrawer->handleMouseUp(QPointF());
 }
 
 QPixmap BattleFrame::getPointerPixmap()

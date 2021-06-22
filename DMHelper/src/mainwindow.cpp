@@ -2397,10 +2397,12 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattle->setShowLiving(model->getShowAlive());
         _ribbonTabBattle->setShowEffects(model->getShowEffects());
         _ribbonTabBattle->setShowMovement(model->getShowMovement());
+        _ribbonTabBattle->setFowMovement(model->getFowMovement());
         _ribbonTabBattle->setLairActions(model->getShowLairActions());
         connect(_ribbonTabBattle, SIGNAL(showLivingClicked(bool)), model, SLOT(setShowAlive(bool)));
         connect(_ribbonTabBattle, SIGNAL(showDeadClicked(bool)), model, SLOT(setShowDead(bool)));
         connect(_ribbonTabBattle, SIGNAL(showEffectsClicked(bool)), model, SLOT(setShowEffects(bool)));
+        connect(_ribbonTabBattle, SIGNAL(fowMovementClicked(bool)), model, SLOT(setFowMovement(bool)));
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
         connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 

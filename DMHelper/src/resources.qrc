@@ -295,6 +295,7 @@
         <file>data/icon_die_connected.png</file>
         <file>data/icon_die_disconnected.png</file>
         <file>data/icon_shield.png</file>
+        <file>data/icon_movefow.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

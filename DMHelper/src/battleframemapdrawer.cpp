@@ -42,6 +42,11 @@ const QCursor& BattleFrameMapDrawer::getCursor() const
 
 void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
 {
+    handleMouseDown(pos, _size, _brushMode, _erase, _smooth);
+}
+
+void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos, int size, int brushType, bool erase, bool smooth)
+{
     if((!_map) || (!_fow))
         return;
 
@@ -49,7 +54,7 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
     _mouseDown = true;
 
     // Math says divide by 10: radius of 5 to adjust scale to "one square"
-    _undoPath = new UndoPath(*_map, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
+    _undoPath = new UndoPath(*_map, MapDrawPath(_gridScale * size / 10, brushType, erase, smooth, pos.toPoint()));
     _map->getUndoStack()->push(_undoPath);
     _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
     emit fowChanged(*_fow);

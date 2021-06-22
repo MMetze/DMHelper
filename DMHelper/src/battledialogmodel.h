@@ -59,6 +59,7 @@ public:
     bool getShowDead() const;
     bool getShowEffects() const;
     bool getShowMovement() const;
+    bool getFowMovement() const;
     bool getShowLairActions() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
@@ -79,6 +80,7 @@ public slots:
     void setShowDead(bool showDead);
     void setShowEffects(bool showEffects);
     void setShowMovement(bool showMovement);
+    void setFowMovement(bool fowMovement);
     void setShowLairActions(bool showLairActions);
     void setActiveCombatant(BattleDialogModelCombatant* activeCombatant);
     void setSelectedCombatant(BattleDialogModelCombatant* selectedCombatant);
@@ -99,6 +101,7 @@ signals:
     void showDeadChanged(bool showDead);
     void showEffectsChanged(bool showEffects);
     void showMovementChanged(bool showMovement);
+    void fowMovementChanged(bool fowMovement);
     void showLairActionsChanged(bool showLairActions);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void selectedCombatantChanged(BattleDialogModelCombatant* selectedCombatant);
@@ -140,6 +143,7 @@ private:
     bool _showDead;
     bool _showEffects;
     bool _showMovement;
+    bool _fowMovement;
     bool _showLairActions;
 
     BattleDialogModelCombatant* _activeCombatant;

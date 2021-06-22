@@ -22,6 +22,7 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     _showDead(false),
     _showEffects(true),
     _showMovement(true),
+    _fowMovement(true),
     _showLairActions(false),
     _activeCombatant(nullptr),
     _selectedCombatant(nullptr),
@@ -63,6 +64,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
     _showMovement = static_cast<bool>(element.attribute("showMovement",QString::number(1)).toInt());
+    _fowMovement = static_cast<bool>(element.attribute("fowMovement",QString::number(0)).toInt());
     _showLairActions = static_cast<bool>(element.attribute("showLairActions",QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
@@ -81,6 +83,7 @@ QDomElement BattleDialogModel::outputNetworkXML(QDomDocument &doc)
     element.setAttribute("showDead", _showDead);
     element.setAttribute("showEffects", _showEffects);
     element.setAttribute("showMovement", _showMovement);
+    element.setAttribute("fowMovement", _fowMovement);
     element.setAttribute("showLairActions", _showLairActions);
     element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
     element.setAttribute("selectedId", _selectedCombatant ? _selectedCombatant->getID().toString() : QUuid().toString());
@@ -330,6 +333,11 @@ bool BattleDialogModel::getShowMovement() const
     return _showMovement;
 }
 
+bool BattleDialogModel::getFowMovement() const
+{
+    return _fowMovement;
+}
+
 bool BattleDialogModel::getShowLairActions() const
 {
     return _showLairActions;
@@ -492,6 +500,15 @@ void BattleDialogModel::setShowMovement(bool showMovement)
     }
 }
 
+void BattleDialogModel::setFowMovement(bool fowMovement)
+{
+    if(_fowMovement != fowMovement)
+    {
+        _fowMovement = fowMovement;
+        emit fowMovementChanged(_fowMovement);
+    }
+}
+
 void BattleDialogModel::setShowLairActions(bool showLairActions)
 {
     if(_showLairActions != showLairActions)
@@ -584,6 +601,7 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("showDead", _showDead);
     element.setAttribute("showEffects", _showEffects);
     element.setAttribute("showMovement", _showMovement);
+    element.setAttribute("fowMovement", _fowMovement);
     element.setAttribute("showLairActions", _showLairActions);
     element.setAttribute("activeId", _activeCombatant ? _activeCombatant->getID().toString() : QUuid().toString());
 
