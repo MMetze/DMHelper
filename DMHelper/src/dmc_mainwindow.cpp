@@ -68,6 +68,8 @@ DMC_MainWindow::DMC_MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
 
+    ui->lblImage->installEventFilter(this);
+
     connect(ui->btnConnect, &QAbstractButton::toggled, this, &DMC_MainWindow::connectToggled);
     connect(ui->btnOptions, &QAbstractButton::clicked, this, &DMC_MainWindow::openOptions);
     connect(ui->btnExit, &QAbstractButton::clicked, qApp, &QCoreApplication::quit);
@@ -142,6 +144,33 @@ void DMC_MainWindow::resizeEvent(QResizeEvent *event)
     qDebug() << "[Main] Main Window resized to: " << event->size() << ui->frame->size() << ui->lblImage->size();
     _serverConnection->targetResized(ui->lblImage->size());
     updatePixmap();
+}
+
+bool DMC_MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if(event)
+    {
+        if(event->type() == QEvent::MouseButtonPress)
+        {
+            QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+            _serverConnection->publishWindowMouseDown(mouseEvent->localPos());
+            return true;
+        }
+        else if(event->type() == QEvent::QEvent::MouseButtonRelease)
+        {
+            QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+            _serverConnection->publishWindowMouseRelease(mouseEvent->localPos());
+            return true;
+        }
+        else if(event->type() == QEvent::QEvent::MouseMove)
+        {
+            QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+            _serverConnection->publishWindowMouseMove(mouseEvent->localPos());
+            return true;
+        }
+    }
+
+    return QMainWindow::eventFilter(watched, event);
 }
 
 void DMC_MainWindow::connectToggled(bool checked)

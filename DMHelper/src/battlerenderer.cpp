@@ -19,6 +19,8 @@ BattleRenderer::BattleRenderer(EncounterBattle& battle, QPixmap background, QObj
     _combatantIcons(),
     _targetSize(),
     _rotation(0),
+    _scaledSceneSize(),
+    _targetRect(),
     _activePixmap(nullptr)
 {
     if(!_battle.getBattleDialogModel())
@@ -95,6 +97,13 @@ BattleRenderer::BattleRenderer(EncounterBattle& battle, QPixmap background, QObj
     /*
     updateHighlights();
     */
+
+    QRectF sceneRect = _scene->sceneRect();
+    _scaledSceneSize = sceneRect.size().scaled(_targetSize, Qt::KeepAspectRatio);
+    _targetRect = QRectF((_targetSize.width() - _scaledSceneSize.width()) / 2,
+                         (_targetSize.height() - _scaledSceneSize.height()) / 2,
+                         _scaledSceneSize.width(),
+                         _scaledSceneSize.height());
 }
 
 BattleRenderer::~BattleRenderer()
@@ -148,6 +157,12 @@ void BattleRenderer::stopRendering()
 void BattleRenderer::targetResized(const QSize& newSize)
 {
     _targetSize = newSize;
+    QRectF sceneRect = _scene->sceneRect();
+    _scaledSceneSize = sceneRect.size().scaled(_targetSize, Qt::KeepAspectRatio);
+    _targetRect = QRectF((_targetSize.width() - _scaledSceneSize.width()) / 2,
+                         (_targetSize.height() - _scaledSceneSize.height()) / 2,
+                         _scaledSceneSize.width(),
+                         _scaledSceneSize.height());
     refreshRender();
 }
 
@@ -155,6 +170,56 @@ void BattleRenderer::setRotation(int rotation)
 {
     _rotation = rotation;
     refreshRender();
+}
+
+void BattleRenderer::publishWindowMouseDown(const QPointF& position)
+{
+    if((!_scene) || (_targetRect.width() == 0.0) || (_targetRect.height() == 0.0))
+        return;
+
+    if((position.x() < _targetRect.left()) || (position.x() > _targetRect.right()) ||
+       (position.y() < _targetRect.top()) || (position.y() > _targetRect.bottom()))
+        return;
+
+    QPointF scenePos(_scene->sceneRect().width() * (position.x() - _targetRect.left()) / _targetRect.width(),
+                     _scene->sceneRect().height() * (position.y() - _targetRect.top()) / _targetRect.height());
+
+    for(int i = 0; i < _battle.getBattleDialogModel()->getCombatantCount(); ++i)
+    {
+        BattleDialogModelCombatant* combatant = _battle.getBattleDialogModel()->getCombatant(i);
+        if(combatant)
+            combatant->setPosition(scenePos);
+    }
+    refreshRender();
+    /*
+    QList<QGraphicsItem *> itemList = _scene->items(newPosition);
+    for(QGraphicsItem* graphicsItem : itemList)
+    {
+        QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
+        if((pixmapItem) && ((pixmapItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+        {
+            BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
+            if(selectedCombatant)
+            {
+                setUniqueSelection(selectedCombatant);
+                _model->setSelectedCombatant(selectedCombatant);
+                _publishMouseDown = true;
+                _publishMouseDownPos = newPosition;
+                startMovement(pixmapItem, selectedCombatant->getSpeed());
+            }
+        }
+    }
+    */
+}
+
+void BattleRenderer::publishWindowMouseMove(const QPointF& position)
+{
+
+}
+
+void BattleRenderer::publishWindowMouseRelease(const QPointF& position)
+{
+
 }
 
 void BattleRenderer::updateModel()
@@ -252,7 +317,8 @@ void BattleRenderer::getImageForPublishing(QImage& imageForPublishing)
                              sourceRect);
     setPublishVisibility(false);
     */
-    _scene->render(&painter);
+
+    _scene->render(&painter, _targetRect);
 
     /*
     // Draw the active combatant image on top

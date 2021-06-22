@@ -213,6 +213,24 @@ void RemoteRenderer::fileRequestCompleted(int requestId, const QString& fileMD5,
     }
 }
 
+void RemoteRenderer::publishWindowMouseDown(const QPointF& position)
+{
+    if(_renderer)
+        _renderer->publishWindowMouseDown(position);
+}
+
+void RemoteRenderer::publishWindowMouseMove(const QPointF& position)
+{
+    if(_renderer)
+        _renderer->publishWindowMouseMove(position);
+}
+
+void RemoteRenderer::publishWindowMouseRelease(const QPointF& position)
+{
+    if(_renderer)
+        _renderer->publishWindowMouseRelease(position);
+}
+
 void RemoteRenderer::reset()
 {
     resetRendering();

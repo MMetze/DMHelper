@@ -16,3 +16,19 @@ void CampaignObjectRenderer::rendering(bool render)
     else
         stopRendering();
 }
+
+void CampaignObjectRenderer::publishWindowMouseDown(const QPointF& position)
+{
+    Q_UNUSED(position);
+}
+
+void CampaignObjectRenderer::publishWindowMouseMove(const QPointF& position)
+{
+    Q_UNUSED(position);
+}
+
+void CampaignObjectRenderer::publishWindowMouseRelease(const QPointF& position)
+{
+    Q_UNUSED(position);
+}
+

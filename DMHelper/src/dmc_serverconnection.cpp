@@ -161,6 +161,24 @@ void DMC_ServerConnection::targetResized(const QSize& newSize)
         _renderer->targetResized(newSize);
 }
 
+void DMC_ServerConnection::publishWindowMouseDown(const QPointF& position)
+{
+    if(_renderer)
+        _renderer->publishWindowMouseDown(position);
+}
+
+void DMC_ServerConnection::publishWindowMouseMove(const QPointF& position)
+{
+    if(_renderer)
+        _renderer->publishWindowMouseMove(position);
+}
+
+void DMC_ServerConnection::publishWindowMouseRelease(const QPointF& position)
+{
+    if(_renderer)
+        _renderer->publishWindowMouseRelease(position);
+}
+
 void DMC_ServerConnection::userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled)
 {
     Q_UNUSED(requestID);
@@ -207,6 +225,9 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
 
     _networkManager->sendMessage(DMHMessage(QString("join"), QString("")));
 
+    // TODO: local debug only
+    startObserverPayload();
+
 }
 
 void DMC_ServerConnection::handleMessageReceived(const QList<DMHMessage>& messages)
@@ -220,15 +241,7 @@ void DMC_ServerConnection::handleMessageReceived(const QList<DMHMessage>& messag
         if(message.getBody() == QString("accept"))
         {
             qDebug() << "[DMC_ServerConnection] DM Helper server accepted participation";
-
-            if(_networkObserver)
-                _networkObserver->setObserverType(DMHNetworkObserver::ObserverType_All);
-
-            if(!_connected)
-            {
-                emit connectionChanged(true);
-                _connected = true;
-            }
+            startObserverPayload();
         }
     }
 }
@@ -285,6 +298,18 @@ void DMC_ServerConnection::startObserver()
         _networkObserver->setInterval(DMC_OBSERVER_INTERVAL);
         connectRemotePlayers();
         _networkObserver->start();
+    }
+}
+
+void DMC_ServerConnection::startObserverPayload()
+{
+    if(_networkObserver)
+        _networkObserver->setObserverType(DMHNetworkObserver::ObserverType_All);
+
+    if(!_connected)
+    {
+        emit connectionChanged(true);
+        _connected = true;
     }
 }
 

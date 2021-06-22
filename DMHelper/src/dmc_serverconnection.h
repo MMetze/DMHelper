@@ -48,6 +48,10 @@ public slots:
     void fileAborted(int requestID);
     void targetResized(const QSize& newSize);
 
+    void publishWindowMouseDown(const QPointF& position);
+    void publishWindowMouseMove(const QPointF& position);
+    void publishWindowMouseRelease(const QPointF& position);
+
 private slots:
     void userInfoCompleted(int requestID, const QString& username, const QString& userId, const QString& email, const QString& surname, const QString& forename, bool disabled);
     void joinSessionComplete(int requestID, const QString& session);
@@ -60,6 +64,7 @@ private:
     void startManager();
     void stopManager();
     void startObserver();
+    void startObserverPayload();
     void stopObserver();
 
     void connectRemotePlayers();

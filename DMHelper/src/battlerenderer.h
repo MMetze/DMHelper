@@ -27,7 +27,6 @@ public:
         BattleRendererItemChild_PersonalEffect
     };
 
-
 public slots:
     // From CampaignObjectRenderer
     virtual void startRendering() override;
@@ -35,6 +34,10 @@ public slots:
     virtual void stopRendering() override;
     virtual void targetResized(const QSize& newSize) override;
     virtual void setRotation(int rotation) override;
+
+    virtual void publishWindowMouseDown(const QPointF& position) override;
+    virtual void publishWindowMouseMove(const QPointF& position) override;
+    virtual void publishWindowMouseRelease(const QPointF& position) override;
 
     void updateModel();
 
@@ -48,6 +51,9 @@ protected:
     QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
     QSize _targetSize;
     int _rotation;
+
+    QSizeF _scaledSceneSize;
+    QRectF _targetRect;
 
     QGraphicsPixmapItem* _activePixmap;
 

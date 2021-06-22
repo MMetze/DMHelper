@@ -22,12 +22,14 @@ class DMC_MainWindow : public QMainWindow
 
 public:
     explicit DMC_MainWindow(QWidget *parent = nullptr);
-    ~DMC_MainWindow();
+    virtual ~DMC_MainWindow() override;
 
 protected:
-    virtual void showEvent(QShowEvent *event);
-    virtual void closeEvent(QCloseEvent *event);
-    virtual void resizeEvent(QResizeEvent *event);
+    virtual void showEvent(QShowEvent *event) override;
+    virtual void closeEvent(QCloseEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
     void connectToggled(bool checked);

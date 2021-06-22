@@ -27,6 +27,10 @@ public slots:
     void fileRequestStarted(int requestId, const QString& fileMD5, const QString& fileUuid);
     void fileRequestCompleted(int requestId, const QString& fileMD5, const QString& fileUuid, const QByteArray& data);
 
+    void publishWindowMouseDown(const QPointF& position);
+    void publishWindowMouseMove(const QPointF& position);
+    void publishWindowMouseRelease(const QPointF& position);
+
     void reset();
 
 signals:

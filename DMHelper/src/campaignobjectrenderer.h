@@ -19,6 +19,10 @@ public slots:
     virtual void targetResized(const QSize& newSize) = 0;
     virtual void setRotation(int rotation) = 0;
 
+    virtual void publishWindowMouseDown(const QPointF& position);
+    virtual void publishWindowMouseMove(const QPointF& position);
+    virtual void publishWindowMouseRelease(const QPointF& position);
+
 signals:
     void showPublishWindow();
     void publishImage(QImage image);
