@@ -125,6 +125,17 @@ BattleDialogModelCombatant* BattleDialogModel::getCombatantById(QUuid combatantI
     return nullptr;
 }
 
+BattleDialogModelCombatant* BattleDialogModel::getCombatantByModelId(QUuid combatantId) const
+{
+    for(BattleDialogModelCombatant* combatant : _combatants)
+    {
+        if((combatant) && (combatant->getID() == combatantId))
+            return combatant;
+    }
+
+    return nullptr;
+}
+
 void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
@@ -182,6 +193,14 @@ bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
     return false;
 }
 
+void BattleDialogModel::externalSetCombatantPosition(BattleDialogModelCombatant* combatant, const QPointF& position)
+{
+    if((!combatant) || (combatant->getPosition() == position))
+        return;
+
+    emit externalCombatantPositionChanged(combatant, position);
+}
+
 QList<BattleDialogModelEffect*> BattleDialogModel::getEffectList() const
 {
     return _effects;
@@ -204,8 +223,17 @@ BattleDialogModelEffect* BattleDialogModel::getEffectById(QUuid effectId) const
 {
     for(BattleDialogModelEffect* effect : _effects)
     {
-        if((effect) && (effect->getID() == effectId))
-            return effect;
+        if(effect)
+        {
+            //            if((effect->getID() == effectId) || (effect->getChildById(effectId) != nullptr))
+            //                return effect;
+            if(effect->getID() == effectId)
+                return effect;
+
+            BattleDialogModelEffect* childEffect = dynamic_cast<BattleDialogModelEffect*>(effect->getChildById(effectId));
+            if(childEffect)
+                return childEffect;
+        }
     }
 
     return nullptr;
@@ -251,6 +279,14 @@ void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
         return;
 
     _effects.append(effect);
+}
+
+void BattleDialogModel::externalSetEffectPosition(BattleDialogModelEffect* effect, const QPointF& position)
+{
+    if((!effect) || (effect->getPosition() == position))
+        return;
+
+    emit externalEffectPositionChanged(effect, position);
 }
 
 Map* BattleDialogModel::getMap() const

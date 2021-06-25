@@ -1583,6 +1583,18 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
     }
 }
 
+void BattleFrame::handleExternalCombatantMove(BattleDialogModelCombatant* combatant, const QPointF& position)
+{
+    if(!combatant)
+        return;
+
+    QGraphicsPixmapItem* item = _combatantIcons.value(combatant, nullptr);
+    if(!item)
+        return;
+
+    item->setPos(position);
+}
+
 void BattleFrame::handleCombatantMoved(BattleDialogModelCombatant* combatant)
 {
     if((!_scene) || (!combatant))
@@ -2369,6 +2381,9 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
+        connect(_model, &BattleDialogModel::externalCombatantPositionChanged, this, &BattleFrame::handleExternalCombatantMove);
+        if(_scene)
+            connect(_model, &BattleDialogModel::externalEffectPositionChanged, _scene, &BattleDialogGraphicsScene::handleExternalEffectMove);
 
         setBattleMap();
         recreateCombatantWidgets();

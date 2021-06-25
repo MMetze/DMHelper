@@ -537,6 +537,32 @@ void NetworkController::handleMessageReceived(const QList<DMHMessage>& messages)
         //if(message.getCommand() == QString("join"))
         if(message.getBody() == QString("join"))
             emit userJoined(message.getSender());
+        else if((_currentObject) && (_currentObject->getObjectType() == DMHelper::CampaignType_Battle))
+        {
+            EncounterBattle* encounter = dynamic_cast<EncounterBattle*>(_currentObject);
+            if((!encounter) || (!encounter->getBattleDialogModel()))
+                return;
+
+            QString hash = message.getBody();
+            QStringList hashList = hash.split(QString("#"));
+            if(hashList.count() != 3)
+                return;
+
+            QUuid objectId = QUuid::fromString(hashList.at(0));
+            QPointF newPosition = QPointF(hashList.at(1).toDouble(), hashList.at(2).toDouble());
+
+            BattleDialogModelCombatant* combatant = encounter->getBattleDialogModel()->getCombatantByModelId(objectId);
+            if(combatant)
+            {
+                encounter->getBattleDialogModel()->externalSetCombatantPosition(combatant, newPosition);
+            }
+            else
+            {
+                BattleDialogModelEffect* effect = encounter->getBattleDialogModel()->getEffectById(objectId);
+                if(effect)
+                    encounter->getBattleDialogModel()->externalSetEffectPosition(effect, newPosition);
+            }
+        }
     }
 }
 

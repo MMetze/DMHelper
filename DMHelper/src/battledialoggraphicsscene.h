@@ -62,6 +62,8 @@ public slots:
 
     void setSelectedIcon(const QString& selectedIcon);
 
+    void handleExternalEffectMove(BattleDialogModelEffect* effect, const QPointF& position);
+
 signals:
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);

@@ -223,7 +223,8 @@ void DMC_ServerConnection::joinSessionComplete(int requestID, const QString& ses
     startObserver();
     //startServer();
 
-    _networkManager->sendMessage(DMHMessage(QString("join"), QString("")));
+    if(_networkManager)
+        _networkManager->sendMessage(DMHMessage(QString("join"), QString("")));
 
     // TODO: local debug only
     startObserverPayload();
@@ -256,6 +257,14 @@ void DMC_ServerConnection::requestError(int requestID)
 {
     emit networkMessage(QString("There was an unexpected error in communication with the server!"));
     qDebug() << "[DMC_ServerConnection] Error in connection, stopping the server. Request: " << requestID;
+}
+
+void DMC_ServerConnection::rendererMessage(const QString& message)
+{
+    if((!_networkManager) || (message.isEmpty()))
+        return;
+
+    _networkManager->sendMessage(DMHMessage(message, QString("")));
 }
 
 void DMC_ServerConnection::startManager()
@@ -346,6 +355,7 @@ void DMC_ServerConnection::connectRemotePlayers()
         connect(_renderer, &RemoteRenderer::abortRequest, this, &DMC_ServerConnection::fileAborted);
         connect(_renderer, &RemoteRenderer::publishPixmap, this, &DMC_ServerConnection::pixmapActive);
         connect(_renderer, &RemoteRenderer::publishImage, this, &DMC_ServerConnection::imageActive);
+        connect(_renderer, &RemoteRenderer::sendServerMessage, this, &DMC_ServerConnection::rendererMessage);
         connect(this, &DMC_ServerConnection::fileRequestStarted, _renderer, &RemoteRenderer::fileRequestStarted);
         connect(this, &DMC_ServerConnection::fileRequestCompleted, _renderer, &RemoteRenderer::fileRequestCompleted);
     }
@@ -369,6 +379,7 @@ void DMC_ServerConnection::disconnectRemotePlayers()
         disconnect(_renderer, &RemoteRenderer::abortRequest, this, &DMC_ServerConnection::fileAborted);
         disconnect(_renderer, &RemoteRenderer::publishPixmap, this, &DMC_ServerConnection::pixmapActive);
         disconnect(_renderer, &RemoteRenderer::publishImage, this, &DMC_ServerConnection::imageActive);
+        disconnect(_renderer, &RemoteRenderer::sendServerMessage, this, &DMC_ServerConnection::rendererMessage);
         disconnect(this, &DMC_ServerConnection::fileRequestStarted, _renderer, &RemoteRenderer::fileRequestStarted);
         disconnect(this, &DMC_ServerConnection::fileRequestCompleted, _renderer, &RemoteRenderer::fileRequestCompleted);
     }

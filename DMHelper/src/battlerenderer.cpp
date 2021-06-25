@@ -19,6 +19,8 @@ BattleRenderer::BattleRenderer(EncounterBattle& battle, QPixmap background, QObj
     _combatantIcons(),
     _targetSize(),
     _rotation(0),
+    _selectedCombatant(nullptr),
+    _selectedItem(nullptr),
     _scaledSceneSize(),
     _targetRect(),
     _activePixmap(nullptr)
@@ -174,6 +176,9 @@ void BattleRenderer::setRotation(int rotation)
 
 void BattleRenderer::publishWindowMouseDown(const QPointF& position)
 {
+    _selectedCombatant = nullptr;
+    _selectedItem = nullptr;
+
     if((!_scene) || (_targetRect.width() == 0.0) || (_targetRect.height() == 0.0))
         return;
 
@@ -184,42 +189,89 @@ void BattleRenderer::publishWindowMouseDown(const QPointF& position)
     QPointF scenePos(_scene->sceneRect().width() * (position.x() - _targetRect.left()) / _targetRect.width(),
                      _scene->sceneRect().height() * (position.y() - _targetRect.top()) / _targetRect.height());
 
-    for(int i = 0; i < _battle.getBattleDialogModel()->getCombatantCount(); ++i)
+    QList<QGraphicsItem *> itemList = _scene->items(scenePos, Qt::IntersectsItemShape, Qt::DescendingOrder, QTransform());
+    if(itemList.count() <= 0)
+        return;
+
+    // Search for the first selectable item
+    for(QGraphicsItem* item : qAsConst(itemList))
     {
-        BattleDialogModelCombatant* combatant = _battle.getBattleDialogModel()->getCombatant(i);
-        if(combatant)
-            combatant->setPosition(scenePos);
-    }
-    refreshRender();
-    /*
-    QList<QGraphicsItem *> itemList = _scene->items(newPosition);
-    for(QGraphicsItem* graphicsItem : itemList)
-    {
-        QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
-        if((pixmapItem) && ((pixmapItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+        if((item) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
         {
-            BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
-            if(selectedCombatant)
+            QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+            if((pixmapItem) && (_selectedCombatant = _combatantIcons.key(pixmapItem)))
             {
-                setUniqueSelection(selectedCombatant);
-                _model->setSelectedCombatant(selectedCombatant);
-                _publishMouseDown = true;
-                _publishMouseDownPos = newPosition;
-                startMovement(pixmapItem, selectedCombatant->getSpeed());
+                _selectedItem = pixmapItem;
+                _selectedCombatant->setPosition(scenePos);
+                refreshRender();
+                return;
+            }
+
+            BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+            if(effect)
+            {
+                _selectedItem = item;
+                _selectedItem->setPos(scenePos);
+                effect->setPosition(scenePos);
             }
         }
     }
-    */
 }
 
 void BattleRenderer::publishWindowMouseMove(const QPointF& position)
 {
+    if((!_scene) || (_targetRect.width() == 0.0) || (_targetRect.height() == 0.0))
+        return;
 
+    if((position.x() < _targetRect.left()) || (position.x() > _targetRect.right()) ||
+       (position.y() < _targetRect.top()) || (position.y() > _targetRect.bottom()))
+        return;
+
+    QPointF scenePos(_scene->sceneRect().width() * (position.x() - _targetRect.left()) / _targetRect.width(),
+                     _scene->sceneRect().height() * (position.y() - _targetRect.top()) / _targetRect.height());
+
+    if(_selectedCombatant)
+    {
+        _selectedCombatant->setPosition(scenePos);
+        refreshRender();
+    }
+    else if(_selectedItem)
+    {
+        BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_selectedItem);
+        if(effect)
+        {
+            _selectedItem->setPos(scenePos);
+            effect->setPosition(scenePos);
+            refreshRender();
+        }
+    }
 }
 
 void BattleRenderer::publishWindowMouseRelease(const QPointF& position)
 {
-
+    Q_UNUSED(position);
+    if(_selectedCombatant)
+    {
+        QString message = _selectedCombatant->getID().toString() + QString("#") +
+                          QString::number(_selectedCombatant->getPosition().x()) + QString("#") +
+                          QString::number(_selectedCombatant->getPosition().y());
+        qDebug() << "[BattleRenderer] Sending message to server: " << message;
+        emit sendServerMessage(message);
+    }
+    else if(_selectedItem)
+    {
+        BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_selectedItem);
+        if(effect)
+        {
+            QString message = effect->getID().toString() + QString("#") +
+                              QString::number(effect->getPosition().x()) + QString("#") +
+                              QString::number(effect->getPosition().y());
+            qDebug() << "[BattleRenderer] Sending message to server: " << message;
+            emit sendServerMessage(message);
+        }
+    }
+    _selectedCombatant = nullptr;
+    _selectedItem = nullptr;
 }
 
 void BattleRenderer::updateModel()

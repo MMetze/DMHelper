@@ -10,7 +10,6 @@ class CampaignObjectBase;
 class CampaignObjectRenderer;
 class RemoteRenderer_FileWrapper;
 
-
 class RemoteRenderer : public QObject
 {
     Q_OBJECT
@@ -40,6 +39,8 @@ signals:
     void publishPixmap(QPixmap pixmap);
     void publishImage(QImage image);
     void payloadDataAvailable(const QString& md5, const QString& uuid, const QByteArray& data);
+
+    void sendServerMessage(const QString& message);
 
 private slots:
     void setBackgroundData(const QString& md5, const QString& uuid, const QByteArray& data);

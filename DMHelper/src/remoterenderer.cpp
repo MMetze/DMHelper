@@ -319,6 +319,7 @@ void RemoteRenderer::dataComplete()
             connect(this, &RemoteRenderer::targetChanged, _renderer, &CampaignObjectRenderer::refreshRender);
             connect(_renderer, &CampaignObjectRenderer::publishImage, this, &RemoteRenderer::publishImage);
             connect(_renderer, &CampaignObjectRenderer::animateImage, this, &RemoteRenderer::publishImage);
+            connect(_renderer, &CampaignObjectRenderer::sendServerMessage, this, &RemoteRenderer::sendServerMessage);
             _renderer->targetResized(_targetSize);
             _renderer->startRendering();
         }

@@ -141,16 +141,23 @@ void DMC_MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
 
-    qDebug() << "[Main] Main Window resized to: " << event->size() << ui->frame->size() << ui->lblImage->size();
-    _serverConnection->targetResized(ui->lblImage->size());
-    updatePixmap();
+    //qDebug() << "[Main] Main Window resized to: " << event->size() << ui->frame->size() << ui->lblImage->size();
+    //_serverConnection->targetResized(ui->lblImage->size());
+    //updatePixmap();
 }
 
 bool DMC_MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
     if(event)
     {
-        if(event->type() == QEvent::MouseButtonPress)
+        if(event->type() == QEvent::Resize)
+        {
+            QResizeEvent* resizeEvent = dynamic_cast<QResizeEvent*>(event);
+            qDebug() << "[Main] Label resized to: " << resizeEvent->size();
+            _serverConnection->targetResized(resizeEvent->size());
+            updatePixmap();
+        }
+        else if(event->type() == QEvent::MouseButtonPress)
         {
             QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
             _serverConnection->publishWindowMouseDown(mouseEvent->localPos());

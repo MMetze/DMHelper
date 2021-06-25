@@ -9,6 +9,7 @@
 class BattleDialogGraphicsScene;
 class BattleDialogModelCombatant;
 class QGraphicsPixmapItem;
+class QGraphicsItem;
 class UnselectedPixmap;
 
 class BattleRenderer : public CampaignObjectRenderer
@@ -51,6 +52,9 @@ protected:
     QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
     QSize _targetSize;
     int _rotation;
+
+    BattleDialogModelCombatant* _selectedCombatant;
+    QGraphicsItem* _selectedItem;
 
     QSizeF _scaledSceneSize;
     QRectF _targetRect;

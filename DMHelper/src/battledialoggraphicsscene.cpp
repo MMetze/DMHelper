@@ -788,6 +788,23 @@ void BattleDialogGraphicsScene::setSelectedIcon(const QString& selectedIcon)
     _selectedIcon = selectedIcon;
 }
 
+void BattleDialogGraphicsScene::handleExternalEffectMove(BattleDialogModelEffect* effect, const QPointF& position)
+{
+    if(!effect)
+        return;
+
+    for(QGraphicsItem* item : qAsConst(_itemList))
+    {
+        BattleDialogModelEffect* itemEffect = BattleDialogModelEffect::getEffectFromItem(item);
+        if(itemEffect == effect)
+        {
+            item->setPos(position);
+            effect->setPosition(position);
+            return;
+        }
+    }
+}
+
 void BattleDialogGraphicsScene::editItem()
 {
     if(!_model)

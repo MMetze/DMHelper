@@ -60,6 +60,8 @@ private slots:
     void messageError(int requestID, const QString& errorString);
     void requestError(int requestID);
 
+    void rendererMessage(const QString& message);
+
 private:
     void startManager();
     void stopManager();

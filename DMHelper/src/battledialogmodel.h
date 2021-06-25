@@ -28,11 +28,13 @@ public:
     int getCombatantCount() const;
     BattleDialogModelCombatant* getCombatant(int index) const;
     BattleDialogModelCombatant* getCombatantById(QUuid combatantId) const;
+    BattleDialogModelCombatant* getCombatantByModelId(QUuid combatantId) const;
     void insertCombatant(int index, BattleDialogModelCombatant* combatant);
     BattleDialogModelCombatant* removeCombatant(int index);
     void appendCombatant(BattleDialogModelCombatant* combatant);
     void appendCombatants(QList<BattleDialogModelCombatant*> combatants);
     bool isCombatantInList(Combatant* combatant) const;
+    void externalSetCombatantPosition(BattleDialogModelCombatant* combatant, const QPointF& position);
 
     QList<BattleDialogModelEffect*> getEffectList() const;
     int getEffectCount() const;
@@ -42,6 +44,7 @@ public:
     BattleDialogModelEffect* removeEffect(int index);
     bool removeEffect(BattleDialogModelEffect* effect);
     void appendEffect(BattleDialogModelEffect* effect);
+    void externalSetEffectPosition(BattleDialogModelEffect* effect, const QPointF& position);
 
     Map* getMap() const;
     const QRect& getMapRect() const;
@@ -106,6 +109,8 @@ signals:
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void selectedCombatantChanged(BattleDialogModelCombatant* selectedCombatant);
     void backgroundImageChanged(QImage backgroundImage);
+    void externalCombatantPositionChanged(BattleDialogModelCombatant* combatant, const QPointF& position);
+    void externalEffectPositionChanged(BattleDialogModelEffect* effect, const QPointF& position);
 
 protected slots:
     void mapDestroyed(QObject *obj);

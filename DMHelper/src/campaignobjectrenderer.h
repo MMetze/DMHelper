@@ -29,6 +29,7 @@ signals:
     void animationStarted();
     void animateImage(QImage image);
     void animationStopped();
+    void sendServerMessage(const QString& message);
 
 };
 
