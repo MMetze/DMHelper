@@ -1,0 +1,65 @@
+echo .
+echo Building DMHelper Client for MacOS
+echo .
+
+export QT_DIR=$HOME/Qt
+export QT_VERSION=5.15.2
+
+export PATH=$PATH:$QT_DIR/$QT_VERSION/clang_64/bin:$QT_DIR/Tools/QtInstallerFramework/4.0/bin
+echo $PATH
+
+cd ..
+rm -R build-client-clang_64bit-Release
+rm -R bin64-client
+rm "DMHelper Client macOS release.zip"
+rm -Rf "DMHelper Client macOS release Installer.app"
+mkdir build-client-clang_64bit-Release
+mkdir bin64-client
+mkdir bin64-client/config
+mkdir bin64-client/packages
+mkdir bin64-client/packages/com.dmhelperclient.app
+mkdir bin64-client/packages/com.dmhelperclient.app/meta
+mkdir bin64-client/packages/com.dmhelperclient.app/data
+cp -R src/installer-client/ bin64-client/
+
+cd build-client-clang_64bit-Release
+qmake ../src/DMHelperClient.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompiler
+make -j4
+
+cp -R DMHelperClient.app/ ../bin64-client/packages/com.dmhelperclient.app/data/DMHelperClient.app/
+cp ../src/binsrcmac/Info-Client.plist ../bin64-client/packages/com.dmhelperclient.app/data/DMHelperClient.app/Contents/Info.plist
+
+cd ../bin64-client/packages/com.dmhelperclient.app/data
+mkdir DMHelperClient.app/Contents/Frameworks
+cp -R ../../../../src/vlc/VLCKit.framework DMHelperClient.app/Contents/Frameworks/VLCKit.framework
+otool -L DMHelperClient.app/Contents/MacOS/DMHelperClient
+install_name_tool -id @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelperClient.app/Contents/Frameworks/VLCKit.framework/Versions/A/VLCKit
+install_name_tool -change @loader_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelperClient.app/Contents/MacOS/DMHelperClient
+otool -L DMHelperClient.app/Contents/MacOS/DMHelperClient
+
+cd ../../../../build-client-clang_64bit-Release
+
+macdeployqt ../bin64-client/packages/com.dmhelperclient.app/data/DMHelperClient.app/
+
+cp -R ../src/bestiary/ ../bin64-client/packages/com.dmhelperclient.app/data/DMHelperClient.app/Contents/Resources
+cp -R ../src/resources/ ../bin64-client/packages/com.dmhelperclient.app/data/DMHelperClient.app/Contents/Resources
+echo Uncomment this when we have documentation for the client app!
+echo cp -R ../src/doc/ ../bin64-client/packages/com.dmhelperclient.app/data/DMHelperClient.app/Contents/Resources
+cp ../src/binsrcmac/DMHelper.icns ../bin64-client/packages/com.dmhelperclient.app/data/DMHelperClient.app/Contents/Resources
+
+cd ../bin64-client
+
+echo .
+echo Create the installer
+echo .
+cd ../bin64-client
+binarycreator -c ./config/config_mac.xml -p ./packages "DM-Helper-Client-macOS-release-Installer"
+mv "./DM-Helper-Client-macOS-release-Installer.app" "../DMHelper Client macOS release Installer.app"
+
+echo .
+echo Create the zip-file distribution
+echo .
+cd packages/com.dmhelperclient.app/data
+zip -r "DMHelper Client macOS release.zip" *
+mv "DMHelper Client macOS release.zip" ../../../../
+cd ../../../..

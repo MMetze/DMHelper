@@ -145,7 +145,7 @@ void DMC_ConnectionSettingsFrame::populateInvites()
     if(!_settings)
         return;
 
-    disconnect(ui->cmbInvites, qOverload<int>(&QComboBox::currentIndexChanged), this, &DMC_ConnectionSettingsFrame::inviteChanged);
+    disconnect(ui->cmbInvites, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DMC_ConnectionSettingsFrame::inviteChanged);
 
     ui->cmbInvites->clear();
 
@@ -159,7 +159,7 @@ void DMC_ConnectionSettingsFrame::populateInvites()
         }
     }
 
-    connect(ui->cmbInvites, qOverload<int>(&QComboBox::currentIndexChanged), this, &DMC_ConnectionSettingsFrame::inviteChanged);
+    connect(ui->cmbInvites, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DMC_ConnectionSettingsFrame::inviteChanged);
 
     for(int i = 0; i < ui->cmbInvites->count(); ++i)
     {

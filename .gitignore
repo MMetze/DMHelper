@@ -9,7 +9,6 @@ DMHelper/release
 DMHelper/src/DMHelper.pro.user
 DMHelper/src/DMHelper.pro.user*
 DMHelper/working
-DMHelper/DM Helper release.__zip
 DMHelper/DM Helper release.zip
 DMHelper/DMHelper.log
 DMHelper/src.zip
@@ -25,7 +24,6 @@ DMHelperShared/build-64_bit-profile
 DMHelperShared/build-64_bit-release
 DMHelperShared/release
 DMHelperShared/src/DMHelperShared.pro.user*
-DMHelperShared/DM Helper Shared release.__zip
 DMHelperShared/src.zip
 
 #DMHelper Client ignores
@@ -41,7 +39,6 @@ DMHelperClient/rawdata
 DMHelperClient/release
 DMHelperClient/working
 DMHelperClient/src/DMHelperClient.pro.user*
-DMHelperClient/DM Helper Client release.__zip
 DMHelperClient/DMHelperClient.log
 DMHelperClient/src.zip
 
@@ -80,14 +77,11 @@ bin64/Qt5Xml.dll
 DM Helper 64-bit release.zip
 DMHelper/DM Helper 64-bit release Installer.exe
 DMHelper/DM Helper macOS release Installer.app
-<<<<<<< HEAD
-DMHelper/DM Helper Client macOS release Installer.app
+DMHelper/DMHelper Client macOS release Installer.app
 DMHelper/DMHelper 64-bit release Client demo.zip
 DMHelper/DMHelper 64-bit release Installer.exe
-=======
-
 DMHelper/DMHelper 64-bit release Installer.exe
 DMHelper/DMHelper 64-bit release.zip
->>>>>>> v2.3
 DMHelper/DMHelper Client 64-bit release Installer.exe
 DMHelper/DMHelper Client 64-bit release.zip
+DMHelper/DMHelper Client macOS release.zip

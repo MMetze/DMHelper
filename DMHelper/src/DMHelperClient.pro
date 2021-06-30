@@ -99,6 +99,8 @@ SOURCES += \
         encountertextdownload.cpp \
         encountertextrenderer.cpp \
         grid.cpp \
+        map.cpp \
+        mapcontent.cpp \
         monster.cpp \
         monsteraction.cpp \
         monsterclass.cpp \
@@ -113,6 +115,12 @@ SOURCES += \
         soundboardgroup.cpp \
         spell.cpp \
         spellbook.cpp \
+        undobase.cpp \
+        undofill.cpp \
+        undomarker.cpp \
+        undopath.cpp \
+        undopoint.cpp \
+        undoshape.cpp \
         unselectedellipse.cpp \
         unselectedpixmap.cpp \
         unselectedpolygon.cpp \
@@ -201,6 +209,9 @@ HEADERS += \
     encountertextdownload.h \
     encountertextrenderer.h \
     grid.h \
+    map.h \
+    mapcontent.h \
+    mapmarker.h \
     monster.h \
     monsteraction.h \
     monsterclass.h \
@@ -215,6 +226,12 @@ HEADERS += \
     soundboardgroup.h \
     spell.h \
     spellbook.h \
+    undobase.h \
+    undofill.h \
+    undomarker.h \
+    undopath.h \
+    undopoint.h \
+    undoshape.h \
     unselectedellipse.h \
     unselectedpixmap.h \
     unselectedpolygon.h \
@@ -243,4 +260,5 @@ macx: LIBS += -F$$PWD/vlc/ -framework VLCKit
 
 DISTFILES += \
     buildanddeploy_client_msvc.cmd \
+    buildanddeploymac_client \
     requirements.txt

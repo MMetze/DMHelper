@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>362</width>
-    <height>262</height>
+    <height>288</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -103,7 +103,11 @@
             <widget class="QLineEdit" name="edtUserName"/>
            </item>
            <item>
-            <widget class="QLineEdit" name="edtPassword"/>
+            <widget class="QLineEdit" name="edtPassword">
+             <property name="echoMode">
+              <enum>QLineEdit::Password</enum>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>

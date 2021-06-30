@@ -55,7 +55,7 @@ NetworkOptionsDialog::NetworkOptionsDialog(OptionsContainer& options, QWidget *p
     connect(ui->edtUserName, &QLineEdit::editingFinished, this, &NetworkOptionsDialog::checkLogon);
     connect(ui->btnCreateUser, &QAbstractButton::clicked, this, &NetworkOptionsDialog::createUser);
     connect(ui->edtPassword, &QLineEdit::editingFinished, this, &NetworkOptionsDialog::checkLogon);
-    connect(ui->cmbSession, qOverload<int>(&QComboBox::currentIndexChanged), this, &NetworkOptionsDialog::sessionSelected);
+    connect(ui->cmbSession, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &NetworkOptionsDialog::sessionSelected);
 
     connect(ui->btnEditSessions, &QAbstractButton::clicked, this, &NetworkOptionsDialog::editSessions);
 
