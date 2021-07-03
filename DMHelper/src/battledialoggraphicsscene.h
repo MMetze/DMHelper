@@ -72,6 +72,12 @@ signals:
     void battleMouseMove(const QPointF& pos);
     void battleMouseRelease(const QPointF& pos);
 
+    void mapMousePress(const QPointF& pos);
+    void mapMouseMove(const QPointF& pos);
+    void mapMouseRelease(const QPointF& pos);
+
+    void mapZoom(int zoomFactor);
+
     void itemMouseDown(QGraphicsPixmapItem* item);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
@@ -90,13 +96,16 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    virtual void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
+    virtual void keyPressEvent(QKeyEvent *keyEvent);
+    virtual void keyReleaseEvent(QKeyEvent *keyEvent);
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
     QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
     QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
 
-    BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
     QPointF getViewportCenter();
 
     QGraphicsItem* _contextMenuItem;
@@ -111,6 +120,7 @@ protected:
     qreal _previousRotation;
     QPointF _commandPosition;
 
+    bool _spaceDown;
     int _inputMode;
 
     QGraphicsPixmapItem* _pointerPixmapItem;
@@ -124,6 +134,7 @@ protected:
     BattleDialogGraphicsSceneMouseHandlerRaw _rawMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCamera _cameraMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCombatants _combatantMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerMaps _mapsMouseHandler;
 };
 
 #endif // BATTLEDIALOGGRAPHICSSCENE_H

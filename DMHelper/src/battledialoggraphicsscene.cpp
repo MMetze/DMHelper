@@ -10,6 +10,7 @@
 #include "spell.h"
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
+#include <QKeyEvent>
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QtMath>
@@ -37,6 +38,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mouseHoverItem(nullptr),
     _previousRotation(0.0),
     _commandPosition(INVALID_POINT),
+    _spaceDown(false),
     _inputMode(-1),
     _pointerPixmapItem(nullptr),
     _pointerVisible(false),
@@ -46,12 +48,18 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _pointerMouseHandler(*this),
     _rawMouseHandler(*this),
     _cameraMouseHandler(*this),
-    _combatantMouseHandler(*this)
+    _combatantMouseHandler(*this),
+    _mapsMouseHandler(*this)
 {
     connect(&_distanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerDistance::distanceChanged, this, &BattleDialogGraphicsScene::distanceChanged);
+
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMousePress, this, &BattleDialogGraphicsScene::battleMousePress);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseMove, this, &BattleDialogGraphicsScene::battleMouseMove);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseRelease, this, &BattleDialogGraphicsScene::battleMouseRelease);
+
+    connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMousePress, this, &BattleDialogGraphicsScene::mapMousePress);
+    connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseMove, this, &BattleDialogGraphicsScene::mapMouseMove);
+    connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseRelease, this, &BattleDialogGraphicsScene::mapMouseRelease);
 }
 
 BattleDialogGraphicsScene::~BattleDialogGraphicsScene()
@@ -895,7 +903,7 @@ void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mouseDoubleClickEvent(mouseEvent))
@@ -918,7 +926,7 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mouseMoveEvent(mouseEvent))
@@ -934,7 +942,7 @@ void BattleDialogGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseE
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mousePressEvent(mouseEvent))
@@ -950,7 +958,7 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mouseReleaseEvent(mouseEvent))
@@ -959,6 +967,33 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
 
     // If the function reaches this point, default handling is expected
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
+}
+
+void BattleDialogGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
+{
+    if((wheelEvent) &&
+       ((wheelEvent->orientation() & Qt::Vertical) == Qt::Vertical) &&
+       ((wheelEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
+    {
+        wheelEvent->accept();
+        emit mapZoom(wheelEvent->delta());
+    }
+}
+
+void BattleDialogGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
+{
+    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+        _spaceDown = true;
+
+    QGraphicsScene::keyPressEvent(keyEvent);
+}
+
+void BattleDialogGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
+{
+    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+        _spaceDown = false;
+
+    QGraphicsScene::keyReleaseEvent(keyEvent);
 }
 
 BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int size, int width, const QColor& color, const QString& filename)
@@ -1096,8 +1131,14 @@ QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect
     return effectItem;
 }
 
-BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler()
+BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    if((mouseEvent) &&
+       (  //(_spaceDown) || <-- removed because space bar triggers "next" in combat
+        ((mouseEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier) ||
+        ((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton)))
+        return &_mapsMouseHandler;
+
     switch(_inputMode)
     {
         case DMHelper::BattleFrameState_FoWEdit:

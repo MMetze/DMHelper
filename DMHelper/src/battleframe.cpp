@@ -59,11 +59,9 @@
 
 //#define BATTLE_DIALOG_LOG_VIDEO
 
-const qreal SELECTED_PIXMAP_SIZE = 800.0;
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
 const qreal COMPASS_SCALE = 0.4;
-const int ROTATION_TIMER = 50;
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     QTime tProfile;
@@ -160,7 +158,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _mapDrawer = new BattleFrameMapDrawer(this);
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, this, &BattleFrame::updateFowImage);
 
-    connect(ui->graphicsView,SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)),this,SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
+    connect(ui->graphicsView, SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)), this, SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
 
     connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
@@ -168,12 +166,16 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
+    connect(_scene, SIGNAL(mapZoom(int)), this, SLOT(zoomDelta(int)));
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
     connect(_scene, SIGNAL(combatantHover(BattleDialogModelCombatant*, bool)), this, SLOT(handleCombatantHover(BattleDialogModelCombatant*, bool)));
-    connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
+    connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));    
+    connect(_scene, &BattleDialogGraphicsScene::mapMousePress, this, &BattleFrame::handleMapMousePress);
+    connect(_scene, &BattleDialogGraphicsScene::mapMouseMove, this, &BattleFrame::handleMapMouseMove);
+    connect(_scene, &BattleDialogGraphicsScene::mapMouseRelease, this, &BattleFrame::handleMapMouseRelease);
     setEditMode();
 
     // CombatantFrame
@@ -801,6 +803,14 @@ void BattleFrame::zoomSelect(bool enabled)
         return;
 
     _stateMachine.toggleState(DMHelper::BattleFrameState_ZoomSelect);
+}
+
+void BattleFrame::zoomDelta(int delta)
+{
+    if(delta > 0)
+        zoomIn();
+    else if(delta < 0)
+        zoomOut();
 }
 
 void BattleFrame::cancelSelect()
@@ -1742,6 +1752,36 @@ void BattleFrame::handleItemMouseDoubleClick(QGraphicsPixmapItem* item)
         return;
 
     widget->selectCombatant();
+}
+
+void BattleFrame::handleMapMousePress(const QPointF& pos)
+{
+    _mouseDown = true;
+    _mouseDownPos = ui->graphicsView->mapFromScene(pos);
+}
+
+void BattleFrame::handleMapMouseMove(const QPointF& pos)
+{
+    if(!_mouseDown)
+        return;
+
+    QPoint viewPos = ui->graphicsView->mapFromScene(pos);
+    QPoint delta = _mouseDownPos - viewPos;
+
+    _mouseDown = false;
+    if(ui->graphicsView->horizontalScrollBar())
+        ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + delta.x());
+    if(ui->graphicsView->verticalScrollBar())
+        ui->graphicsView->verticalScrollBar()->setValue(ui->graphicsView->verticalScrollBar()->value() + delta.y());
+    _mouseDown = true;
+
+    _mouseDownPos = viewPos;
+}
+
+void BattleFrame::handleMapMouseRelease(const QPointF& pos)
+{
+    Q_UNUSED(pos);
+    _mouseDown = false;
 }
 
 void BattleFrame::removeCombatant()
