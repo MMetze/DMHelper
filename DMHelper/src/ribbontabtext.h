@@ -28,6 +28,7 @@ public slots:
     void setFontItalics(bool fontItalics);
     void setFontUnderline(bool fontUnderline);
     void setAlignment(Qt::Alignment alignment);
+    void setPasteRich(bool pasteRich);
 
     void setWidth(int width);
     void setSpeed(int speed);
@@ -53,6 +54,7 @@ signals:
     void fontItalicsChanged(bool fontItalics);
     void fontUnderlineChanged(bool fontUnderline);
     void alignmentChanged(Qt::Alignment alignment);
+    void pasteRichChanged(bool pasteRich);
     void hyperlinkClicked();
 
     // Tools

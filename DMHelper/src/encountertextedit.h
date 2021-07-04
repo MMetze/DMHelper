@@ -52,6 +52,7 @@ public slots:
     void setUnderline(bool underline);
     void setColor(QColor color);
     void setAlignment(Qt::Alignment alignment);
+    void setPasteRich(bool pasteRich);
 
     void hyperlinkClicked();
     void setTextWidth(int textWidth);

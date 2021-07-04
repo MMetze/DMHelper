@@ -32,6 +32,9 @@ public:
     int getFontSize() const;
     qreal getLogicalDPI() const;
 
+    // Text settings
+    bool getPasteRich() const;
+
     // Audio settings
     int getAudioVolume() const;
 
@@ -81,6 +84,9 @@ signals:
     // Font settings
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
+
+    // Text settings
+    void pasteRichChanged(bool pasteRich);
 
     // Audio settings
     void audioVolumeChanged(int volume);
@@ -138,6 +144,9 @@ public slots:
     void setFontSize(int fontSize);
     void setLogicalDPI(qreal logicalDPI);
 
+    // Text settings
+    void setPasteRich(bool pasteRich);
+
     // Audio settings
     void setAudioVolume(int volume);
 
@@ -192,6 +201,9 @@ private:
     int _fontSize;
     qreal _logicalDPI;
     bool _fontChanged;
+
+    // Text settings
+    bool _pasteRich;
 
     // Audio settings
     int _audioVolume;

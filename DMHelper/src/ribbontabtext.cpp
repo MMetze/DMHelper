@@ -17,6 +17,7 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->frameText, &RibbonFrameText::fontItalicsChanged, this, &RibbonTabText::fontItalicsChanged);
     connect(ui->frameText, &RibbonFrameText::fontUnderlineChanged, this, &RibbonTabText::fontUnderlineChanged);
     connect(ui->frameText, &RibbonFrameText::alignmentChanged, this, &RibbonTabText::alignmentChanged);
+    connect(ui->btnPasteRich, &QAbstractButton::toggled, this, &RibbonTabText::pasteRichChanged);
 
     connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
     connect(ui->btnTranslateText, &QAbstractButton::clicked, this, &RibbonTabText::translateTextClicked);
@@ -85,6 +86,11 @@ void RibbonTabText::setAlignment(Qt::Alignment alignment)
     ui->frameText->setAlignment(alignment);
 }
 
+void RibbonTabText::setPasteRich(bool pasteRich)
+{
+    ui->btnPasteRich->setChecked(pasteRich);
+}
+
 void RibbonTabText::setWidth(int width)
 {
     if((width != ui->sliderWidth->value()) &&
@@ -123,6 +129,7 @@ void RibbonTabText::showEvent(QShowEvent *event)
 
     setStandardButtonSize(*ui->lblBackground, *ui->btnBackground, frameHeight);
     setLineHeight(*ui->line_1, frameHeight);
+    setStandardButtonSize(*ui->lblPasteRich, *ui->btnPasteRich, frameHeight);
     setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);
     setStandardButtonSize(*ui->lblAnimation, *ui->btnAnimation, frameHeight);

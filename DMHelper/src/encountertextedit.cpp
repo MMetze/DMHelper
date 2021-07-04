@@ -334,6 +334,11 @@ void EncounterTextEdit::setAlignment(Qt::Alignment alignment)
     _formatter->setAlignment(alignment);
 }
 
+void EncounterTextEdit::setPasteRich(bool pasteRich)
+{
+    ui->textBrowser->setAcceptRichText(pasteRich);
+}
+
 void EncounterTextEdit::hyperlinkClicked()
 {
     QTextCursor cursor = ui->textBrowser->textCursor();
