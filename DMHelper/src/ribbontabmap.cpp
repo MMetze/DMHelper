@@ -8,6 +8,7 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->btnEditFile, SIGNAL(clicked()), this, SIGNAL(editFileClicked()));
+
     connect(ui->btnZoomIn, SIGNAL(clicked()), this, SIGNAL(zoomInClicked()));
     connect(ui->btnZoomOut, SIGNAL(clicked()), this, SIGNAL(zoomOutClicked()));
     connect(ui->btnZoomOne, SIGNAL(clicked()), this, SIGNAL(zoomOneClicked()));

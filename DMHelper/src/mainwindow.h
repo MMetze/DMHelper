@@ -45,6 +45,7 @@ class RibbonTabScrolling;
 class RibbonTabText;
 class BattleDialogModel;
 class RibbonTabMap;
+class RibbonTabWorldMap;
 class RibbonTabAudio;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
@@ -253,6 +254,7 @@ private:
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
     RibbonTabMap* _ribbonTabMiniMap;
+    RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
 };
 

@@ -10,6 +10,8 @@
 #include "selectzoom.h"
 #include "audiotrack.h"
 #include "campaign.h"
+#include "party.h"
+#include "unselectedpixmap.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -25,6 +27,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _backgroundImage(nullptr),
     _backgroundVideo(nullptr),
     _fow(nullptr),
+    _partyIcon(nullptr),
     _erase(true),
     _smooth(true),
     _brushMode(DMHelper::BrushType_Circle),
@@ -61,6 +64,16 @@ MapFrame::MapFrame(QWidget *parent) :
     //TODO Markers: connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
 
     connect(this, SIGNAL(dirty()), this, SLOT(resetPublishFoW()));
+    connect(this, &MapFrame::dirty, this, &MapFrame::checkPartyUpdate);
+
+    connect(ui->chkAudio, SIGNAL(clicked()), this, SLOT(audioPlaybackChecked()));
+
+    //_publishTimer = new QTimer(this);
+    //_publishTimer->setSingleShot(false);
+    //connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
+
+    //setMapCursor();
+    //setScale(1.0);
 }
 
 MapFrame::~MapFrame()
@@ -103,6 +116,9 @@ void MapFrame::deactivateObject()
         qDebug() << "[MapFrame] WARNING: Invalid (nullptr) map object deactivated!";
         return;
     }
+
+    if(_partyIcon)
+        _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
@@ -254,6 +270,54 @@ void MapFrame::cancelPublish()
 {
     emit publishCancelled();
     _isPublishing = false;
+}
+
+void MapFrame::setParty(Party* party)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setParty(party);
+}
+
+void MapFrame::setShowParty(bool showParty)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setShowParty(showParty);
+}
+
+void MapFrame::setPartyScale(int partyScale)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setPartyScale(partyScale);
+}
+
+void MapFrame::editModeToggled(int editMode)
+{
+    _undoPath = nullptr;
+    switch(editMode)
+    {
+        case DMHelper::EditMode_FoW:
+            ui->graphicsView->viewport()->installEventFilter(this);
+            ui->graphicsView->removeEventFilter(this);
+            break;
+        case DMHelper::EditMode_Edit:
+            ui->graphicsView->viewport()->installEventFilter(this);
+            ui->graphicsView->removeEventFilter(this);
+            break;
+        case DMHelper::EditMode_Move:
+            ui->graphicsView->viewport()->removeEventFilter(this);
+            ui->graphicsView->installEventFilter(this);
+            break;
+        default:
+            break;
+    }
+
+    setMapCursor();
 }
 
 void MapFrame::setBrushMode(int brushMode)
@@ -458,6 +522,16 @@ void MapFrame::initializeFoW()
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    connect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
+    connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
+    connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
+    connect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
+
+    emit partyChanged(_mapSource->getParty());
+    emit showPartyChanged(_mapSource->getShowParty());
+    emit partyScaleChanged(_mapSource->getPartyScale());
 
     _isVideo = !_mapSource->isInitialized();
 }
@@ -466,6 +540,15 @@ void MapFrame::uninitializeFoW()
 {
     qDebug() << "[MapFrame] Uninitializing MapFrame...";
 
+    if((_mapSource) && (_partyIcon))
+        _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
+
+    disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
+    disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
+    disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
     disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
@@ -1079,4 +1162,43 @@ void MapFrame::resetPublishFoW()
 {
     if(!_bwFoWImage.isNull())
         _bwFoWImage = QImage();
+}
+
+void MapFrame::audioPlaybackChecked()
+{
+    if(_mapSource)
+        _mapSource->setPlayAudio(ui->chkAudio->isChecked());
+
+    //if((ui->framePublish->isChecked()) && (_videoPlayer))
+    if((_isPublishing) && (_videoPlayer))
+        _videoPlayer->setPlayingAudio(ui->chkAudio->isChecked());
+}
+
+void MapFrame::checkPartyUpdate()
+{
+    if((!_mapSource) || (!_scene))
+        return;
+
+    if((!_mapSource->getShowParty()) || (_mapSource->getPartyId().isNull()))
+    {
+        delete _partyIcon;
+        _partyIcon = nullptr;
+        return;
+    }
+
+    Party* party = _mapSource->getParty();
+    if(!party)
+        return;
+
+    if(!_partyIcon)
+    {
+        _partyIcon = new UnselectedPixmap();
+        _scene->addItem(_partyIcon);
+        if((_mapSource->getPartyIconPos().x() == -1) && (_mapSource->getPartyIconPos().y() == -1))
+            _mapSource->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
+        _partyIcon->setPos(_mapSource->getPartyIconPos());
+        _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
+    }
+    _partyIcon->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale())); //250 * 25 / 625  = 10;
+    _partyIcon->setPixmap(party->getIconPixmap(DMHelper::PixmapSize_Battle));
 }

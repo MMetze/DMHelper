@@ -76,6 +76,7 @@
 #include "ribbontabscrolling.h"
 #include "ribbontabtext.h"
 #include "ribbontabmap.h"
+#include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
 #include <QResizeEvent>
@@ -177,6 +178,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabScrolling(nullptr),
     _ribbonTabText(nullptr),
     _ribbonTabMiniMap(nullptr),
+    _ribbonTabWorldMap(nullptr),
     _ribbonTabAudio(nullptr)
 {
 
@@ -604,6 +606,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabMiniMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
     connect(_ribbonTabMiniMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
 
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, mapFrame, &MapFrame::setParty);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, mapFrame, &MapFrame::setShowParty);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, mapFrame, &MapFrame::setPartyScale);
+    connect(mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
+    connect(mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
+    connect(mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
+
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
     // EncounterType_ScrollingText
@@ -1030,7 +1039,8 @@ void MainWindow::importItem()
 
 void MainWindow::newParty()
 {
-    newEncounter(DMHelper::CampaignType_Party, QString("New Party"), QString("Enter new party name:"));
+    Party* newParty = dynamic_cast<Party*>(newEncounter(DMHelper::CampaignType_Party, QString("New Party"), QString("Enter new party name:")));
+    _ribbonTabWorldMap->registerPartyIcon(newParty);
 }
 
 void MainWindow::newTextEncounter()
@@ -1644,6 +1654,8 @@ void MainWindow::setupRibbonBar()
     _ribbonTabText->hide();
     _ribbonTabMiniMap = new RibbonTabMap(this);
     _ribbonTabMiniMap->hide();
+    _ribbonTabWorldMap = new RibbonTabWorldMap(this);
+    _ribbonTabWorldMap->hide();
     _ribbonTabAudio = new RibbonTabAudio(this);
     _ribbonTabAudio->hide();
 
@@ -2054,6 +2066,9 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
+        QList<CampaignObjectBase*> parties = campaign->getChildObjectsByType(DMHelper::CampaignType_Party);
+        for(CampaignObjectBase* party : parties)
+            _ribbonTabWorldMap->registerPartyIcon(dynamic_cast<Party*>(party));
     }
     else
     {
@@ -2065,6 +2080,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
         setRibbonToType(DMHelper::CampaignType_WelcomeScreen);
         _ribbon->setCurrentIndex(0); // Shift to the File tab
         _ribbonTabCampaign->setAddPCButton(false);
+        _ribbonTabWorldMap->clearPartyIcons();
     }
 
     enableCampaignMenu();
@@ -2537,12 +2553,14 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->enableTab(_ribbonTabMap);
             _ribbon->enableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_Map:
             _ribbon->enableTab(_ribbonTabMiniMap);
+            _ribbon->enableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabScrolling);
@@ -2554,6 +2572,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), _scrollingTextEdit, SLOT(publishClicked(bool)));
@@ -2565,6 +2584,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
@@ -2573,6 +2593,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             break;
@@ -2585,6 +2606,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);

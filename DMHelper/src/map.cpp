@@ -8,6 +8,7 @@
 #include "dmconstants.h"
 #include "campaign.h"
 #include "audiotrack.h"
+#include "party.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QUndoStack>
@@ -25,6 +26,10 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _audioTrackId(),
     _playAudio(false),
     _mapRect(),
+    _showPartyIcon(false),
+    _partyId(),
+    _partyIconPos(-1, -1),
+    _partyScale(10),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -156,6 +161,35 @@ void Map::setPlayAudio(bool playAudio)
         _playAudio = playAudio;
         emit dirty();
     }
+}
+
+Party* Map::getParty()
+{
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return nullptr;
+
+    return dynamic_cast<Party*>(campaign->getObjectById(_partyId));
+}
+
+QUuid Map::getPartyId() const
+{
+    return _partyId;
+}
+
+bool Map::getShowParty() const
+{
+    return _showPartyIcon;
+}
+
+const QPoint& Map::getPartyIconPos() const
+{
+    return _partyIconPos;
+}
+
+int Map::getPartyScale() const
+{
+    return _partyScale;
 }
 
 const QRect& Map::getMapRect() const
@@ -641,6 +675,43 @@ void Map::updateFoW()
     emit requestFoWUpdate();
 }
 
+void Map::setParty(Party* party)
+{
+    QUuid newPartyId = (party == nullptr) ? QUuid() : party->getID();
+    if(_partyId != newPartyId)
+    {
+        _partyId = newPartyId;
+        emit partyChanged(party);
+        emit dirty();
+    }
+}
+
+void Map::setShowParty(bool showParty)
+{
+    if(_showPartyIcon != showParty)
+    {
+        _showPartyIcon = showParty;
+        emit showPartyChanged(showParty);
+        emit dirty();
+    }
+}
+
+void Map::setPartyIconPos(const QPoint& pos)
+{
+    _partyIconPos = pos;
+}
+
+void Map::setPartyScale(int partyScale)
+{
+    if(_partyScale != partyScale)
+    {
+        _partyScale = partyScale;
+        emit partyScaleChanged(_partyScale);
+        emit dirty();
+    }
+}
+
+
 QDomElement Map::createOutputXML(QDomDocument &doc)
 {
    return doc.createElement("map");
@@ -651,6 +722,11 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
     element.setAttribute("audiotrack", _audioTrackId.toString());
     element.setAttribute("playaudio", _playAudio);
+    element.setAttribute("party", _partyId.toString());
+    element.setAttribute("showparty", _showPartyIcon);
+    element.setAttribute("partyPosX", _partyIconPos.x());
+    element.setAttribute("partyPosY", _partyIconPos.y());
+    element.setAttribute("partyScale", _partyScale);
     element.setAttribute("mapRectX", _mapRect.x());
     element.setAttribute("mapRectY", _mapRect.y());
     element.setAttribute("mapRectWidth", _mapRect.width());
@@ -693,7 +769,12 @@ bool Map::belongsToObject(QDomElement& element)
 void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
 {
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
-    _playAudio = static_cast<bool>(element.attribute("playaudio",QString::number(1)).toInt());
+    _playAudio = static_cast<bool>(element.attribute("playaudio", QString::number(1)).toInt());
+    _partyId = parseIdString(element.attribute("party"));
+    _showPartyIcon = static_cast<bool>(element.attribute("showparty", QString::number(1)).toInt());
+    _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
+                           element.attribute("partyPosY", QString::number(-1)).toInt());
+    _partyScale = element.attribute("partyScale", QString::number(10)).toInt();
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }
 

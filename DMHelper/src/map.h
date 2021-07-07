@@ -10,6 +10,7 @@ class QDomDocument;
 class QDomElement;
 class QUndoStack;
 class AudioTrack;
+class Party;
 
 class Map : public CampaignObjectBase
 {
@@ -31,6 +32,12 @@ public:
 
     bool getPlayAudio() const;
     void setPlayAudio(bool playAudio);
+
+    Party* getParty();
+    QUuid getPartyId() const;
+    bool getShowParty() const;
+    const QPoint& getPartyIconPos() const;
+    int getPartyScale() const;
 
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
@@ -63,13 +70,21 @@ signals:
     void executeUndo();
     void requestFoWUpdate();
 
-public slots:
+    void partyChanged(Party* party);
+    void showPartyChanged(bool showParty);
+    void partyScaleChanged(int partyScale);
 
+public slots:
     void initialize();
     void uninitialize();
 
     void undoPaint();
     void updateFoW();
+
+    void setParty(Party* party);
+    void setShowParty(bool showParty);
+    void setPartyIconPos(const QPoint& pos);
+    void setPartyScale(int partyScale);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -83,6 +98,11 @@ protected:
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
+
+    bool _showPartyIcon;
+    QUuid _partyId;
+    QPoint _partyIconPos;
+    int _partyScale;
 
     bool _initialized;
     QImage _imgBackground;

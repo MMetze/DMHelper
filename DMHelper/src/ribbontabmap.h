@@ -27,6 +27,7 @@ public slots:
 
 signals:
     void editFileClicked();
+
     void zoomInClicked();
     void zoomOutClicked();
     void zoomOneClicked();

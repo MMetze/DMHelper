@@ -14,6 +14,7 @@ class MapFrame;
 }
 
 class Map;
+class Party;
 class MapMarkerGraphicsItem;
 class AudioTrack;
 
@@ -46,6 +47,10 @@ signals:
     void dirty();
     void showPublishWindow();
 
+    void partyChanged(Party* party);
+    void showPartyChanged(bool showParty);
+    void partyScaleChanged(int scale);
+
     void animationStarted();
     void animateImage(QImage img);
 
@@ -64,6 +69,11 @@ public slots:
 
     void cancelPublish();
 
+    void setParty(Party* party);
+    void setShowParty(bool showParty);
+    void setPartyScale(int partyScale);
+
+    void editModeToggled(int editMode);
     void setBrushMode(int brushMode);
     void brushSizeChanged(int size);
 
@@ -118,6 +128,8 @@ protected slots:
     void storeViewRect();
     void loadViewRect();
     void resetPublishFoW();
+    void audioPlaybackChecked();
+    void checkPartyUpdate();
 
 private:
     Ui::MapFrame *ui;
@@ -126,6 +138,7 @@ private:
     QGraphicsPixmapItem* _backgroundImage;
     QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
+    QGraphicsPixmapItem* _partyIcon;
 
     bool _erase;
     bool _smooth;
