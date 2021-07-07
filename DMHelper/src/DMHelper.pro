@@ -99,6 +99,7 @@ SOURCES += main.cpp\
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
     ribbontabtools.cpp \
+    ribbontabworldmap.cpp \
     soundboardframe.cpp \
     soundboardgroup.cpp \
     soundboardgroupframe.cpp \
@@ -311,6 +312,7 @@ HEADERS  += mainwindow.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
     ribbontabtools.h \
+    ribbontabworldmap.h \
     soundboardframe.h \
     soundboardgroup.h \
     soundboardgroupframe.h \
@@ -476,6 +478,7 @@ FORMS    += mainwindow.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
+    ribbontabworldmap.ui \
     soundboardframe.ui \
     soundboardgroupframe.ui \
     soundboardtrackframe.ui \
