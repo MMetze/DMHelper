@@ -112,6 +112,7 @@ public slots:
     void zoomOut();
     void zoomFit();
     void zoomSelect(bool enabled);
+    void zoomDelta(int delta);
     void cancelSelect();
 
     // Public for connection to battle ribbon
@@ -203,6 +204,10 @@ private slots:
     void handleItemMouseUp(QGraphicsPixmapItem* item);
     void handleItemChanged(QGraphicsItem* item);
     void handleItemMouseDoubleClick(QGraphicsPixmapItem* item);
+
+    void handleMapMousePress(const QPointF& pos);
+    void handleMapMouseMove(const QPointF& pos);
+    void handleMapMouseRelease(const QPointF& pos);
 
     void removeCombatant();
     void activateCombatant();

@@ -64,7 +64,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Zoom in</string>
+        <string>Edit the map file</string>
        </property>
        <property name="text">
         <string/>
