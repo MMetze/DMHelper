@@ -636,6 +636,7 @@ void MapFrame::timerEvent(QTimerEvent *event)
 
         if(_isPublishing)
         {
+            // Note: Publish Visible and Publish Zoom don't work on animated maps!
             if(!_videoPlayer->getImage()->isNull())
             {
                 if((_bwFoWImage.isNull()) && (!_mapSource->isCleared()))
@@ -657,6 +658,15 @@ void MapFrame::timerEvent(QTimerEvent *event)
                     QPainter p;
                     p.begin(&result);
                         p.drawImage(0, 0, _bwFoWImage);
+                        if((_mapSource->getShowParty()) && (_mapSource->getParty()))
+                        {
+                            qreal targetWidth = _targetSize.width();
+                            qreal imgWidth = _backgroundImage->pixmap().width();
+                            QPixmap partyPixmap = _mapSource->getParty()->getIconPixmap(DMHelper::PixmapSize_Battle);
+                            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
+                            QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
+                            p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                        }
                     p.end();
                 }
 
@@ -704,6 +714,8 @@ void MapFrame::timerEvent(QTimerEvent *event)
                     }
 
                     loadViewRect();
+                    if(_partyIcon)
+                        _partyIcon->setPos(_mapSource->getPartyIconPos());
 
                     stopPublishTimer();
                     startTimer(500); // Clean up the initial image after a brief period (determined by trial and error)
