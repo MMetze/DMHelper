@@ -8,7 +8,6 @@
 #include "undomarker.h"
 #include "mapmarkerdialog.h"
 #include "selectzoom.h"
-#include "audiotrack.h"
 #include "campaign.h"
 #include "party.h"
 #include "unselectedpixmap.h"
@@ -28,6 +27,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _backgroundVideo(nullptr),
     _fow(nullptr),
     _partyIcon(nullptr),
+    _editMode(-1),
     _erase(true),
     _smooth(true),
     _brushMode(DMHelper::BrushType_Circle),
@@ -66,14 +66,14 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(this, SIGNAL(dirty()), this, SLOT(resetPublishFoW()));
     connect(this, &MapFrame::dirty, this, &MapFrame::checkPartyUpdate);
 
-    connect(ui->chkAudio, SIGNAL(clicked()), this, SLOT(audioPlaybackChecked()));
-
     //_publishTimer = new QTimer(this);
     //_publishTimer->setSingleShot(false);
     //connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
 
     //setMapCursor();
     //setScale(1.0);
+
+    editModeToggled(DMHelper::EditMode_Move);
 }
 
 MapFrame::~MapFrame()
@@ -191,7 +191,7 @@ bool MapFrame::eventFilter(QObject *obj, QEvent *event)
             if(execEventFilterSelectZoom(obj, event))
                 return true;
         }
-        else
+        else if(_editMode == DMHelper::EditMode_FoW)
         {
             if(execEventFilterEditModeFoW(obj, event))
                 return true;
@@ -260,6 +260,7 @@ void MapFrame::undoPaint()
 void MapFrame::clear()
 {
     _mapSource = nullptr;
+    delete _partyIcon; _partyIcon = nullptr;
     delete _backgroundImage; _backgroundImage = nullptr;
     delete _backgroundVideo; _backgroundVideo = nullptr;
     delete _fow; _fow = nullptr;
@@ -298,6 +299,10 @@ void MapFrame::setPartyScale(int partyScale)
 
 void MapFrame::editModeToggled(int editMode)
 {
+    if(_editMode == editMode)
+        return;
+
+    _editMode = editMode;
     _undoPath = nullptr;
     switch(editMode)
     {
@@ -318,6 +323,11 @@ void MapFrame::editModeToggled(int editMode)
     }
 
     setMapCursor();
+}
+
+void MapFrame::setMapEdit(bool enabled)
+{
+    editModeToggled(enabled ? DMHelper::EditMode_FoW : DMHelper::EditMode_Move);
 }
 
 void MapFrame::setBrushMode(int brushMode)
@@ -436,6 +446,7 @@ void MapFrame::publishClicked(bool checked)
     {
         // Still Image
         QImage pub;
+        QPointF partyTopLeft;
         if(_publishZoom)
         {
             QRect imgRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
@@ -446,17 +457,29 @@ void MapFrame::publishClicked(bool checked)
             // TODO: Consider zoom factor...
 
             pub = _mapSource->getPublishImage(imgRect);
+            partyTopLeft = _partyIcon->pos() - imgRect.topLeft();
         }
         else
         {
             if(_publishVisible)
             {
-                pub = _mapSource->getShrunkPublishImage();
+                QRect targetRect;
+                pub = _mapSource->getShrunkPublishImage(&targetRect);
+                partyTopLeft = _partyIcon->pos() - targetRect.topLeft();
             }
             else
             {
                 pub = _mapSource->getPublishImage();
+                partyTopLeft = _partyIcon->pos();
             }
+        }
+
+        if((_mapSource->getShowParty()) && (_mapSource->getParty()))
+        {
+            QPainter p(&pub);
+            QPixmap partyPixmap = _mapSource->getParty()->getIconPixmap(DMHelper::PixmapSize_Battle);
+            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale());
+            p.drawPixmap(partyTopLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
         }
 
         if(_rotation != 0)
@@ -520,6 +543,8 @@ void MapFrame::initializeFoW()
         startPublishTimer();
     }
 
+    checkPartyUpdate();
+
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
@@ -560,12 +585,10 @@ void MapFrame::uninitializeFoW()
         _videoPlayer = nullptr;
     }
 
-    delete _backgroundImage;
-    _backgroundImage = nullptr;
-    delete _backgroundVideo;
-    _backgroundVideo = nullptr;
-    delete _fow;
-    _fow = nullptr;
+    delete _partyIcon; _partyIcon = nullptr;
+    delete _backgroundImage; _backgroundImage = nullptr;
+    delete _backgroundVideo; _backgroundVideo = nullptr;
+    delete _fow; _fow = nullptr;
 
     delete _scene;
     _scene = nullptr;
@@ -1035,6 +1058,15 @@ void MapFrame::cleanupBuffers()
 {
     QGraphicsItem* tempItem;
 
+    if(_partyIcon)
+    {
+        if(_scene)
+            _scene->removeItem(_partyIcon);
+        tempItem = _partyIcon;
+        _partyIcon = nullptr;
+        delete tempItem;
+    }
+
     if(_backgroundImage)
     {
         if(_scene)
@@ -1085,12 +1117,19 @@ void MapFrame::setMapCursor()
     }
     else
     {
-        if(_brushMode == DMHelper::BrushType_Circle)
-            drawEditCursor();
-        else if(_brushMode == DMHelper::BrushType_Square)
-            drawEditCursor();
+        if(_editMode == DMHelper::EditMode_Move)
+        {
+            ui->graphicsView->viewport()->setCursor(QCursor(Qt::ArrowCursor));
+        }
         else
-            ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+        {
+            if(_brushMode == DMHelper::BrushType_Circle)
+                drawEditCursor();
+            else if(_brushMode == DMHelper::BrushType_Square)
+                drawEditCursor();
+            else
+                ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+        }
     }
 }
 
@@ -1164,16 +1203,6 @@ void MapFrame::resetPublishFoW()
         _bwFoWImage = QImage();
 }
 
-void MapFrame::audioPlaybackChecked()
-{
-    if(_mapSource)
-        _mapSource->setPlayAudio(ui->chkAudio->isChecked());
-
-    //if((ui->framePublish->isChecked()) && (_videoPlayer))
-    if((_isPublishing) && (_videoPlayer))
-        _videoPlayer->setPlayingAudio(ui->chkAudio->isChecked());
-}
-
 void MapFrame::checkPartyUpdate()
 {
     if((!_mapSource) || (!_scene))
@@ -1196,6 +1225,8 @@ void MapFrame::checkPartyUpdate()
         _scene->addItem(_partyIcon);
         if((_mapSource->getPartyIconPos().x() == -1) && (_mapSource->getPartyIconPos().y() == -1))
             _mapSource->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
+        _partyIcon->setFlag(QGraphicsItem::ItemIsMovable, true);
+        _partyIcon->setFlag(QGraphicsItem::ItemIsSelectable, true);
         _partyIcon->setPos(_mapSource->getPartyIconPos());
         _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
     }

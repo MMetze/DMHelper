@@ -540,7 +540,7 @@ QImage Map::getGrayImage()
     return result;
 }
 
-QImage Map::getShrunkPublishImage()
+QImage Map::getShrunkPublishImage(QRect* targetRect)
 {
     QImage bwFoWImage = getBWFoWImage(_imgBackground);
 
@@ -605,6 +605,9 @@ QImage Map::getShrunkPublishImage()
             p.drawImage(0, 0, bwFoWImage, left, top, right - left, bottom - top);
         p.end();
     }
+
+    if(targetRect)
+        *targetRect = QRect(left, top, right - left, bottom - top);
 
     return result;
 }

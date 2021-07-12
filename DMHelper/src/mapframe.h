@@ -16,7 +16,6 @@ class MapFrame;
 class Map;
 class Party;
 class MapMarkerGraphicsItem;
-class AudioTrack;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -54,6 +53,7 @@ signals:
     void animationStarted();
     void animateImage(QImage img);
 
+    void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
     void brushModeSet(int brushMode);
 
@@ -74,6 +74,7 @@ public slots:
     void setPartyScale(int partyScale);
 
     void editModeToggled(int editMode);
+    void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
     void brushSizeChanged(int size);
 
@@ -128,7 +129,6 @@ protected slots:
     void storeViewRect();
     void loadViewRect();
     void resetPublishFoW();
-    void audioPlaybackChecked();
     void checkPartyUpdate();
 
 private:
@@ -140,6 +140,7 @@ private:
     QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _partyIcon;
 
+    int _editMode;
     bool _erase;
     bool _smooth;
     int _brushMode;

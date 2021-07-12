@@ -62,7 +62,7 @@ public:
     QImage getPublishImage();
     QImage getPublishImage(const QRect& rect);
     QImage getGrayImage();
-    QImage getShrunkPublishImage();
+    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
 
     QImage getPreviewImage();
 
