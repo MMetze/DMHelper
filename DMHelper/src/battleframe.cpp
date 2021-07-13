@@ -523,6 +523,9 @@ void BattleFrame::setTargetLabelSize(const QSize& targetSize)
 
 void BattleFrame::publishWindowMouseDown(const QPointF& position)
 {
+    if(!_battle)
+        return;
+
     QPointF newPosition;
     if(!convertPublishToScene(position, newPosition))
         return;
@@ -551,6 +554,9 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
 
 void BattleFrame::publishWindowMouseMove(const QPointF& position)
 {
+    if(!_battle)
+        return;
+
     if((!_selectedCombatant) || (!_publishMouseDown))
         return;
 
@@ -569,6 +575,9 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
 void BattleFrame::publishWindowMouseRelease(const QPointF& position)
 {
     Q_UNUSED(position);
+
+    if(!_battle)
+        return;
 
     endMovement();
     _selectedCombatant = nullptr;
@@ -3533,7 +3542,7 @@ bool BattleFrame::convertPublishToScene(const QPointF& publishPosition, QPointF&
         return false;
 
     qreal maxPercent = static_cast<qreal>(publishWidth - getFrameWidth()) / static_cast<qreal>(publishWidth);
-    if((maxPercent <= 0.0) || (publishX < 0.0) || (publishX > maxPercent) || (publishY < 0.0) || (publishY > 100.0))
+    if((maxPercent <= 0.0) || (publishX < 0.0) || (publishX > maxPercent) || (publishY < 0.0) || (publishY > 1.0))
         return false;
 
     scenePosition = QPointF((publishX * _publishRectValue.width() / maxPercent) + _publishRectValue.x(),

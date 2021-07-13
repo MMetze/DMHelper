@@ -42,6 +42,8 @@ MapFrame::MapFrame(QWidget *parent) :
     _mouseDown(false),
     _mouseDownPos(),
     _undoPath(nullptr),
+    _publishMouseDown(false),
+    _publishMouseDownPos(),
     _zoomSelect(false),
     _rubberBand(nullptr),
     _scale(1.0),
@@ -49,6 +51,8 @@ MapFrame::MapFrame(QWidget *parent) :
     _timerId(0),
     _videoPlayer(nullptr),
     _targetSize(),
+    _targetLabelSize(),
+    _publishRect(),
     _bwFoWImage()
 {
     ui->setupUi(this);
@@ -435,6 +439,55 @@ void MapFrame::targetResized(const QSize& newSize)
     resetPublishFoW();
 }
 
+void MapFrame::setTargetLabelSize(const QSize& targetSize)
+{
+    _targetLabelSize = targetSize;
+}
+
+void MapFrame::publishWindowMouseDown(const QPointF& position)
+{
+    if((!_mapSource) || (!_partyIcon) || (!_scene))
+        return;
+
+    QPointF newPosition;
+    if(!convertPublishToScene(position, newPosition))
+        return;
+
+    QRectF sceneRect = _scene->sceneRect();
+    QRectF iconRect = _partyIcon->boundingRect();
+
+    if(_partyIcon->contains(newPosition - _partyIcon->pos()))
+    {
+        _publishMouseDown = true;
+        _publishMouseDownPos = newPosition;
+    }
+}
+
+void MapFrame::publishWindowMouseMove(const QPointF& position)
+{
+    if((!_mapSource) || (!_partyIcon) || (!_publishMouseDown))
+        return;
+
+    QPointF newPosition;
+    if(!convertPublishToScene(position, newPosition))
+        return;
+
+    if(newPosition == _publishMouseDownPos)
+        return;
+
+    _partyIcon->setPos(newPosition);
+}
+
+void MapFrame::publishWindowMouseRelease(const QPointF& position)
+{
+    Q_UNUSED(position);
+
+    if((!_mapSource) || (!_partyIcon) || (!_publishMouseDown))
+        return;
+
+    _publishMouseDown = false;
+}
+
 void MapFrame::publishClicked(bool checked)
 {
     if(!_mapSource)
@@ -449,27 +502,27 @@ void MapFrame::publishClicked(bool checked)
         QPointF partyTopLeft;
         if(_publishZoom)
         {
-            QRect imgRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
+            _publishRect = QRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
+                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
+                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
+                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
 
             // TODO: Consider zoom factor...
 
-            pub = _mapSource->getPublishImage(imgRect);
-            partyTopLeft = _partyIcon->pos() - imgRect.topLeft();
+            pub = _mapSource->getPublishImage(_publishRect);
+            partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
         }
         else
         {
             if(_publishVisible)
             {
-                QRect targetRect;
-                pub = _mapSource->getShrunkPublishImage(&targetRect);
-                partyTopLeft = _partyIcon->pos() - targetRect.topLeft();
+                pub = _mapSource->getShrunkPublishImage(&_publishRect);
+                partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
             }
             else
             {
                 pub = _mapSource->getPublishImage();
+                _publishRect = pub.rect();
                 partyTopLeft = _partyIcon->pos();
             }
         }
@@ -651,13 +704,13 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 }
 
                 QImage result = _videoPlayer->getImage()->copy();
-                uchar* b = result.bits();
-                memset(b, 0, 100);
-                if(!_bwFoWImage.isNull())
+                if((!_bwFoWImage.isNull()) || (_mapSource->getShowParty()))
                 {
                     QPainter p;
                     p.begin(&result);
-                        p.drawImage(0, 0, _bwFoWImage);
+                        if(!_bwFoWImage.isNull())
+                            p.drawImage(0, 0, _bwFoWImage);
+
                         if((_mapSource->getShowParty()) && (_mapSource->getParty()))
                         {
                             qreal targetWidth = _targetSize.width();
@@ -686,6 +739,7 @@ void MapFrame::timerEvent(QTimerEvent *event)
                         _backgroundImage->hide();
 
                     QPixmap pmpCopy = QPixmap::fromImage(*(_videoPlayer->getImage())).copy();
+                    _publishRect = pmpCopy.rect();
                     if(_backgroundVideo)
                     {
                         // TODO: update the graphics view/scene to work with the mutex on drawforeground/background
@@ -1244,4 +1298,48 @@ void MapFrame::checkPartyUpdate()
     }
     _partyIcon->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale())); //250 * 25 / 625  = 10;
     _partyIcon->setPixmap(party->getIconPixmap(DMHelper::PixmapSize_Battle));
+}
+
+
+bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)
+{
+    qreal publishWidth = 0.0;
+    qreal publishX = 0.0;
+    qreal publishY = 0.0;
+
+    if(_rotation == 0)
+    {
+        publishWidth = _targetLabelSize.width();
+        publishX = publishPosition.x();
+        publishY = publishPosition.y();
+    }
+    else if(_rotation == 90)
+    {
+        publishWidth = _targetLabelSize.height();
+        publishX = publishPosition.y();
+        publishY = 1.0 - publishPosition.x();
+    }
+    else if(_rotation == 180)
+    {
+        publishWidth = _targetLabelSize.width();
+        publishX = 1.0 - publishPosition.x();
+        publishY = 1.0 - publishPosition.y();
+    }
+    else if(_rotation == 270)
+    {
+        publishWidth = _targetLabelSize.height();
+        publishX = 1.0 - publishPosition.y();
+        publishY = publishPosition.x();
+    }
+
+    if(publishWidth <= 0)
+        return false;
+
+    if((publishX < 0.0) || (publishX > 1.0) || (publishY < 0.0) || (publishY > 1.0))
+        return false;
+
+    scenePosition = QPointF((publishX * _publishRect.width()) + _publishRect.x(),
+                            (publishY * _publishRect.height()) + _publishRect.y());
+
+    return true;
 }

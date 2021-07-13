@@ -92,6 +92,11 @@ public slots:
     void setPublishZoom(bool enabled);
     void setPublishVisible(bool enabled);
 
+    void setTargetLabelSize(const QSize& targetSize);
+    void publishWindowMouseDown(const QPointF& position);
+    void publishWindowMouseMove(const QPointF& position);
+    void publishWindowMouseRelease(const QPointF& position);
+
     void targetResized(const QSize& newSize);
 
     // Publish slots from CampaignObjectFrame
@@ -132,6 +137,8 @@ protected slots:
     void checkPartyUpdate();
 
 private:
+    bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
+
     Ui::MapFrame *ui;
 
     QGraphicsScene* _scene;
@@ -158,6 +165,9 @@ private:
     QPoint _mouseDownPos;
     UndoPath* _undoPath;
 
+    bool _publishMouseDown;
+    QPointF _publishMouseDownPos;
+
     bool _zoomSelect;
     QRubberBand* _rubberBand;
     qreal _scale;
@@ -167,6 +177,8 @@ private:
     int _timerId;
     VideoPlayer* _videoPlayer;
     QSize _targetSize;
+    QSize _targetLabelSize;
+    QRect _publishRect;
     QImage _bwFoWImage;
 
 };
