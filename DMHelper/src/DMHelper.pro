@@ -49,6 +49,8 @@ SOURCES += main.cpp\
     battleframemapdrawer.cpp \
     battleframestate.cpp \
     battleframestatemachine.cpp \
+    battleglobject.cpp \
+    battleglrenderer.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     campaignexporter.cpp \
@@ -261,6 +263,8 @@ HEADERS  += mainwindow.h \
     battleframemapdrawer.h \
     battleframestate.h \
     battleframestatemachine.h \
+    battleglobject.h \
+    battleglrenderer.h \
     bestiaryexportdialog.h \
     camerarect.h \
     campaignexporter.h \

@@ -31,6 +31,7 @@
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
 #include "combatantrolloverframe.h"
+#include "battleglrenderer.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -1517,8 +1518,17 @@ void BattleFrame::publishClicked(bool checked)
 
     if(_publishing)
     {
+        /*
         createPrescaledBackground();
         publishImage();
+        */
+        QDialog* openGLDlg = new QDialog();
+        QVBoxLayout *dlgLayout = new QVBoxLayout;
+        dlgLayout->addWidget(new BattleGLRenderer(_model));
+        dlgLayout->setSpacing(3);
+        openGLDlg->setLayout(dlgLayout);
+        openGLDlg->resize(size());
+        openGLDlg->show();
     }
     else
     {
