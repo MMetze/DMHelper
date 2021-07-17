@@ -1,9 +1,23 @@
 #include "battleglobject.h"
+#include <QOpenGLContext>
+#include <QOpenGLFunctions>
 
 BattleGLObject::BattleGLObject() :
     _textureID(0),
     _modelMatrix()
 {
+}
+
+BattleGLObject::~BattleGLObject()
+{
+    if(_textureID > 0)
+    {
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        if(!f)
+            return;
+
+        f->glDeleteTextures(1, &_textureID);
+    }
 }
 
 unsigned int BattleGLObject::getTextureID() const

@@ -7,6 +7,9 @@ class BattleGLObject
 {
 public:
     BattleGLObject();
+    virtual ~BattleGLObject();
+
+    virtual void paintGL() = 0;
 
     unsigned int getTextureID() const;
     const float * getMatrixData() const;

@@ -1,31 +1,32 @@
 #include "battleglrenderer.h"
 #include "battledialogmodel.h"
+#include "battleglbackground.h"
 #include "map.h"
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
 #include <QDebug>
 
+
+
+#include <QOpenGLExtraFunctions>
+
+
+
 BattleGLRenderer::BattleGLRenderer(BattleDialogModel* model) :
     _model(model),
-    _backgroundTexture(0),
-    _fowTexture(0),
+    _targetSize(),
     _shaderProgram(0),
-    _VBO(0),
-    _EBO(0)
+    _backgroundObject(nullptr),
+    _fowObject(nullptr)
 {
 }
 
 void BattleGLRenderer::cleanup()
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if(!f)
-        return;
-
-    if(_VBO > 0)
-        f->glDeleteBuffers(1, &_VBO);
-
-    if(_EBO > 0)
-        f->glDeleteBuffers(1, &_EBO);
+    delete _backgroundObject;
+    _backgroundObject = nullptr;
+    delete _fowObject;
+    _fowObject = nullptr;
 }
 
 /*
@@ -66,7 +67,8 @@ void BattleGLRenderer::initializeGL()
 
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if(!f)
+    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    if((!f) || (!e))
         return;
 
     // In this example the widget's corresponding top-level window can change
@@ -81,8 +83,8 @@ void BattleGLRenderer::initializeGL()
     f->glEnable(GL_TEXTURE_2D); // Enable texturing
     f->glEnable(GL_BLEND);// you enable blending function
     f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    f->glEnable(GL_DEPTH_TEST);
-    f->glDepthFunc(GL_GREATER);
+    //f->glEnable(GL_DEPTH_TEST);
+    //f->glDepthFunc(GL_GREATER);
 
     const char *vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
@@ -156,153 +158,31 @@ void BattleGLRenderer::initializeGL()
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
 
-    /*
-    float vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
-    };
-    */
-
-    /*
-    QSizeF imageSize = _model->getBackgroundImage().size();
-    imageSize.scale(_targetSize, Qt::KeepAspectRatio);
-    if(imageSize.width() == _targetSize.width())
-    {
-        imageSize.rwidth() /= _targetSize.width();
-        imageSize.rheight() /= _targetSize.width();
-    }
-    else
-    {
-        imageSize.rwidth() /= _targetSize.height();
-        imageSize.rheight() /= _targetSize.height();
-    }
-    */
-
-    QSizeF imageSize = _model->getBackgroundImage().size();
-    float vertices[] = {
-        // positions    // colors           // texture coords
-         (float)imageSize.width() / 2,  (float)imageSize.height() / 2, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         (float)imageSize.width() / 2, -(float)imageSize.height() / 2, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -(float)imageSize.width() / 2, -(float)imageSize.height() / 2, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -(float)imageSize.width() / 2,  (float)imageSize.height() / 2, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
-    };
-
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-
-    f->glGenBuffers(1, &_VBO);
-    f->glGenBuffers(1, &_EBO);
-    f->glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    //f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    //f->glEnableVertexAttribArray(0);
-    // position attribute
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    f->glEnableVertexAttribArray(0);
-    // color attribute
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
-    f->glEnableVertexAttribArray(1);
-    // texture attribute
-    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    f->glEnableVertexAttribArray(2);
+    // Create the objects
+    _backgroundObject = new BattleGLBackground(_model->getBackgroundImage(), GL_NEAREST);
+    _fowObject = new BattleGLBackground(_model->getMap()->getBWFoWImage(), GL_LINEAR);
 
     // Matrices
     // Model
-    int modelLoc = f->glGetUniformLocation(_shaderProgram, "model");
     QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(modelLoc, 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
     // View
-    int viewLoc = f->glGetUniformLocation(_shaderProgram, "view");
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
-    f->glUniformMatrix4fv(viewLoc, 1, GL_FALSE, viewMatrix.constData());
-    // Projection
-    int projectionLoc = f->glGetUniformLocation(_shaderProgram, "projection");
-    QMatrix4x4 projectionMatrix;
-    imageSize = _model->getBackgroundImage().size();
-    imageSize.scale(_targetSize, Qt::KeepAspectRatio);
-    projectionMatrix.ortho(-imageSize.width() * 2, imageSize.width() * 2, -imageSize.height() * 2, imageSize.height() * 2, 0.1f, 1000.f);
-    f->glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMatrix.constData());
-
-    // Texture
-    f->glGenTextures(1, &_backgroundTexture);
-    f->glBindTexture(GL_TEXTURE_2D, _backgroundTexture);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);//_MIPMAP_NEAREST); //GL_LINEAR);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); //GL_LINEAR);
-
-    // load and generate the background texture
-    QImage glBackgroundImage = _model->getBackgroundImage().convertToFormat(QImage::Format_RGBA8888).mirrored();//.scaled(512, 512);
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
-
-    f->glGenTextures(1, &_fowTexture);
-    f->glBindTexture(GL_TEXTURE_2D, _fowTexture);
-    Map* map = _model->getMap();
-    QImage glFowImage = map->getBWFoWImage().convertToFormat(QImage::Format_RGBA8888).mirrored();//.scaled(512, 512);
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glFowImage.width(), glFowImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glFowImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
+    // Projection - note, this is set later when resizing the window
+    setOrthoProjection();
 
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
-
-
-//    f->glMatrixMode(GL_PROJECTION); // Switch to projection matrix
-//    f->glLoadIdentity(); // Clear any existing matrix
-//    f->glOrtho(0,width(),0,HEIGHT,-1000.0,1000.0);
 }
 
 void BattleGLRenderer::resizeGL(int w, int h)
 {
-    // Update projection matrix and other size related settings:
-    //m_projection.setToIdentity();
-    //m_projection.perspective(45.0f, w / float(h), 0.01f, 100.0f);
     _targetSize = QSize(w, h);
     qDebug() << "[BattleGLRenderer] Resize w: " << w << ", h: " << h;
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if(!f)
-        return;
-
-    QSizeF imageSize = _targetSize.scaled(_model->getBackgroundImage().size(), Qt::KeepAspectRatioByExpanding);
-    //imageSize.scale(_targetSize, Qt::KeepAspectRatio);
-    //float dim = qMax(imageSize.width() / 2.0, imageSize.height() / 2.0);
-
-    // Projection
-    int projectionLoc = f->glGetUniformLocation(_shaderProgram, "projection");
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-imageSize.width() / 2, imageSize.width() / 2, -imageSize.height() / 2, imageSize.height() / 2, 0.1f, 1000.f);
-    //projectionMatrix.ortho(-imageSize.width(), imageSize.width(), -imageSize.height(), imageSize.height(), 0.1f, 1000.f);
-    //projectionMatrix.ortho(-imageSize.width()*2, imageSize.width()*2, -imageSize.height()*2, imageSize.height()*2, 0.1f, 1000.f);
-    //projectionMatrix.ortho(-dim, dim, -dim, dim, 0.1f, 1000.f);
-    f->glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projectionMatrix.constData());
-
-    /*
-    imageSize.rwidth() /= _targetSize.width();
-    imageSize.rheight() /= _targetSize.height();
-
-    float vertices[] = {
-        // positions    // colors           // texture coords
-         (float)imageSize.width(),  (float)imageSize.height(), 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         (float)imageSize.width(), -(float)imageSize.height(), 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -(float)imageSize.width(), -(float)imageSize.height(), 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -(float)imageSize.width(),  (float)imageSize.height(), 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
-    };
-
-    f->glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    */
-
+    setOrthoProjection();
 }
 
 void BattleGLRenderer::paintGL()
@@ -310,23 +190,45 @@ void BattleGLRenderer::paintGL()
     if(!_model)
         return;
 
-    // Draw the scene:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if(!f)
+    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    if((!f) || (!e))
         return;
 
+    // Draw the scene:
     f->glClearColor(_model->getBackgroundColor().redF(), _model->getBackgroundColor().greenF(), _model->getBackgroundColor().blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     f->glUseProgram(_shaderProgram);
-
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    f->glBindTexture(GL_TEXTURE_2D, _backgroundTexture);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    f->glBindTexture(GL_TEXTURE_2D, _fowTexture);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    if(_backgroundObject)
+    {
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
+        _backgroundObject->paintGL();
+    }
 
+    if(_fowObject)
+    {
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _fowObject->getMatrixData());
+        _fowObject->paintGL();
+    }
+}
+
+void BattleGLRenderer::setOrthoProjection()
+{
+    if((!_model) || (_targetSize.isEmpty()) || (_shaderProgram == 0))
+        return;
+
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if(!f)
+        return;
+
+    // Update projection matrix and other size related settings:
+    QSizeF imageSize = _targetSize.scaled(_model->getBackgroundImage().size(), Qt::KeepAspectRatioByExpanding);
+    QMatrix4x4 projectionMatrix;
+    projectionMatrix.ortho(-imageSize.width() / 2, imageSize.width() / 2, -imageSize.height() / 2, imageSize.height() / 2, 0.1f, 1000.f);
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 }
 
 
