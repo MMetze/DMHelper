@@ -50,8 +50,10 @@ SOURCES += main.cpp\
     battleframestate.cpp \
     battleframestatemachine.cpp \
     battleglbackground.cpp \
+    battlegleffect.cpp \
     battleglobject.cpp \
     battleglrenderer.cpp \
+    battleglscene.cpp \
     battlegltoken.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
@@ -266,8 +268,10 @@ HEADERS  += mainwindow.h \
     battleframestate.h \
     battleframestatemachine.h \
     battleglbackground.h \
+    battlegleffect.h \
     battleglobject.h \
     battleglrenderer.h \
+    battleglscene.h \
     battlegltoken.h \
     bestiaryexportdialog.h \
     camerarect.h \

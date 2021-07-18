@@ -90,6 +90,9 @@ public:
     static bool getEffectActiveFromItem(QGraphicsItem* item);
     static bool getEffectVisibleFromItem(QGraphicsItem* item);
 
+signals:
+    void effectMoved(BattleDialogModelEffect* effect);
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;

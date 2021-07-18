@@ -5,8 +5,10 @@
 
 class BattleGLBackground : public BattleGLObject
 {
+    Q_OBJECT
+
 public:
-    BattleGLBackground(const QImage& image, int textureParam);
+    BattleGLBackground(BattleGLScene& scene, const QImage& image, int textureParam);
     virtual ~BattleGLBackground() override;
 
     virtual void paintGL() override;

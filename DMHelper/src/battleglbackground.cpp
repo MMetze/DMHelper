@@ -4,8 +4,8 @@
 #include <QOpenGLExtraFunctions>
 #include <QImage>
 
-BattleGLBackground::BattleGLBackground(const QImage& image, int textureParam) :
-    BattleGLObject(),
+BattleGLBackground::BattleGLBackground(BattleGLScene& scene, const QImage& image, int textureParam) :
+    BattleGLObject(scene),
     _VAO(0),
     _VBO(0),
     _EBO(0)

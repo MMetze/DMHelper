@@ -1,24 +1,32 @@
 #include "battleglrenderer.h"
 #include "battledialogmodel.h"
+#include "battledialogmodelcharacter.h"
+#include "battledialogmodeleffect.h"
 #include "battleglbackground.h"
+#include "battlegltoken.h"
+#include "battlegleffect.h"
 #include "map.h"
+#include "character.h"
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
 #include <QDebug>
 
-
-
-#include <QOpenGLExtraFunctions>
-
-
-
 BattleGLRenderer::BattleGLRenderer(BattleDialogModel* model) :
+    QOpenGLWidget(),
     _model(model),
-    _targetSize(),
+    _scene(),
     _shaderProgram(0),
     _backgroundObject(nullptr),
-    _fowObject(nullptr)
+    _fowObject(nullptr),
+    _pcTokens(),
+    _enemyTokens(),
+    _effectTokens()
 {
+}
+
+BattleGLRenderer::~BattleGLRenderer()
+{
+    cleanup();
 }
 
 void BattleGLRenderer::cleanup()
@@ -27,7 +35,20 @@ void BattleGLRenderer::cleanup()
     _backgroundObject = nullptr;
     delete _fowObject;
     _fowObject = nullptr;
+
+    qDeleteAll(_pcTokens);
+    _pcTokens.clear();
+    qDeleteAll(_enemyTokens);
+    _enemyTokens.clear();
+    qDeleteAll(_effectTokens);
+    _effectTokens.clear();
 }
+
+void BattleGLRenderer::updateWidget()
+{
+    update();
+}
+
 
 /*
 static const char *vertexShaderSource =
@@ -64,6 +85,8 @@ void BattleGLRenderer::initializeGL()
 {
     if((!_model) || (_model->getBackgroundImage().isNull()))
         return;
+
+    _scene.setGridScale(_model->getGridScale());
 
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -159,8 +182,34 @@ void BattleGLRenderer::initializeGL()
     f->glDeleteShader(fragmentShader);
 
     // Create the objects
-    _backgroundObject = new BattleGLBackground(_model->getBackgroundImage(), GL_NEAREST);
-    _fowObject = new BattleGLBackground(_model->getMap()->getBWFoWImage(), GL_LINEAR);
+    _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
+    _backgroundObject = new BattleGLBackground(_scene, _model->getBackgroundImage(), GL_NEAREST);
+    _fowObject = new BattleGLBackground(_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
+    for(int i = 0; i < _model->getCombatantCount(); ++i)
+    {
+        BattleDialogModelCombatant* combatant = _model->getCombatant(i);
+        if(combatant)
+        {
+            BattleGLObject* combatantToken = new BattleGLToken(_scene, combatant);
+            BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(combatant);
+            if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
+                _pcTokens.append(combatantToken);
+            else
+                _enemyTokens.append(combatantToken);
+            connect(combatantToken, &BattleGLObject::changed, this, &BattleGLRenderer::updateWidget);
+        }
+    }
+
+    for(int i = 0; i < _model->getEffectCount(); ++i)
+    {
+        BattleDialogModelEffect* effect = _model->getEffect(i);
+        if(effect)
+        {
+            BattleGLObject* effectToken = new BattleGLEffect(_scene, effect);
+            _effectTokens.append(effectToken);
+            connect(effectToken, &BattleGLObject::changed, this, &BattleGLRenderer::updateWidget);
+        }
+    }
 
     // Matrices
     // Model
@@ -179,7 +228,7 @@ void BattleGLRenderer::initializeGL()
 
 void BattleGLRenderer::resizeGL(int w, int h)
 {
-    _targetSize = QSize(w, h);
+    _scene.setTargetSize(QSize(w, h));
     qDebug() << "[BattleGLRenderer] Resize w: " << w << ", h: " << h;
 
     setOrthoProjection();
@@ -208,16 +257,34 @@ void BattleGLRenderer::paintGL()
         _backgroundObject->paintGL();
     }
 
+    for(BattleGLObject* enemyToken : _enemyTokens)
+    {
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, enemyToken->getMatrixData());
+        enemyToken->paintGL();
+    }
+
+    for(BattleGLObject* effectToken : _effectTokens)
+    {
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, effectToken->getMatrixData());
+        effectToken->paintGL();
+    }
+
     if(_fowObject)
     {
         f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _fowObject->getMatrixData());
         _fowObject->paintGL();
     }
+
+    for(BattleGLObject* pcToken : _pcTokens)
+    {
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, pcToken->getMatrixData());
+        pcToken->paintGL();
+    }
 }
 
 void BattleGLRenderer::setOrthoProjection()
 {
-    if((!_model) || (_targetSize.isEmpty()) || (_shaderProgram == 0))
+    if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgram == 0))
         return;
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
@@ -225,9 +292,9 @@ void BattleGLRenderer::setOrthoProjection()
         return;
 
     // Update projection matrix and other size related settings:
-    QSizeF imageSize = _targetSize.scaled(_model->getBackgroundImage().size(), Qt::KeepAspectRatioByExpanding);
+    QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-imageSize.width() / 2, imageSize.width() / 2, -imageSize.height() / 2, imageSize.height() / 2, 0.1f, 1000.f);
+    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 }
 

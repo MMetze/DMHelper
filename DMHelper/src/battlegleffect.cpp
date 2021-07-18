@@ -1,37 +1,60 @@
-#include "battlegltoken.h"
-#include "battledialogmodelcombatant.h"
+#include "battlegleffect.h"
+#include "battledialogmodeleffect.h"
+#include "battledialogmodeleffectobject.h"
+#include "scaledpixmap.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QPixmap>
+#include <QPainter>
 
-BattleGLToken::BattleGLToken(BattleGLScene& scene, BattleDialogModelCombatant* combatant) :
+BattleGLEffect::BattleGLEffect(BattleGLScene& scene, BattleDialogModelEffect* effect) :
     BattleGLObject(scene),
-    _combatant(combatant),
+    _effect(effect),
+    _childEffect(nullptr),
     _VAO(0),
     _VBO(0),
     _EBO(0),
-    _textureSize()
+    _textureSize(),
+    _imageScaleFactor(1.0)
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
 
-    if(!_combatant)
+    if(!_effect)
         return;
 
-    QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
-    if(combatant->hasCondition(Combatant::Condition_Unconscious))
-    {
-        QImage originalImage = pix.toImage();
-        QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
-        pix = QPixmap::fromImage(grayscaleImage);
-    }
-    Combatant::drawConditions(&pix, combatant->getConditions());
-    QImage textureImage = pix.toImage().convertToFormat(QImage::Format_RGBA8888).mirrored();
-    _textureSize = textureImage.size();
+    QList<CampaignObjectBase*> childEffects = _effect->getChildObjects();
+    if(childEffects.count() == 1)
+        _childEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
+
+    QSize effectSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * (_effect->getSize() / 5),
+                     DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][1] * (_effect->getSize() / 5));
+    QImage effectImage(effectSize, QImage::Format_RGBA8888);
+    effectImage.fill(QColor(0, 0, 0, 0));
+    QPainter painter;
+    painter.begin(&effectImage);
+        painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        painter.setBrush(QBrush(_effect->getColor()));
+        painter.drawEllipse(effectImage.rect());
+
+        if(_childEffect)
+        {
+            QPixmap itemPixmap(_childEffect->getImageFile());
+            if(!itemPixmap.isNull())
+            {
+                //_imageScaleFactor = 100.0 / itemPixmap.width();
+                if(_childEffect->getImageRotation() != 0)
+                    itemPixmap = itemPixmap.transformed(QTransform().rotate(_childEffect->getImageRotation()));//.scale(_imageScaleFactor, _imageScaleFactor));
+            }
+            painter.drawPixmap(effectImage.rect(), itemPixmap);
+        }
+
+    painter.end();
+    _textureSize = effectImage.size();
 
     float vertices[] = {
         // positions    // colors           // texture coords
@@ -77,16 +100,18 @@ BattleGLToken::BattleGLToken(BattleGLScene& scene, BattleDialogModelCombatant* c
     f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // load and generate the background texture
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, textureImage.width(), textureImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, textureImage.bits());
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, effectImage.width(), effectImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, effectImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 
     // set the initial position matrix
-    combatantMoved();
+    effectMoved();
 
-    connect(_combatant, &BattleDialogModelCombatant::combatantMoved, this, &BattleGLToken::combatantMoved);
+    connect(_effect, &BattleDialogModelEffect::effectMoved, this, &BattleGLEffect::effectMoved);
+    if(_childEffect)
+        connect(_childEffect, &BattleDialogModelEffect::effectMoved, this, &BattleGLEffect::effectMoved);
 }
 
-BattleGLToken::~BattleGLToken()
+BattleGLEffect::~BattleGLEffect()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
@@ -103,7 +128,7 @@ BattleGLToken::~BattleGLToken()
         f->glDeleteBuffers(1, &_EBO);
 }
 
-void BattleGLToken::paintGL()
+void BattleGLEffect::paintGL()
 {
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
@@ -115,15 +140,17 @@ void BattleGLToken::paintGL()
     f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void BattleGLToken::combatantMoved()
+void BattleGLEffect::effectMoved()
 {
-    QPointF combatantPos = _combatant->getPosition();
+    BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
+
+    QPointF effectPos = effect->getPosition();
     QRectF sceneRect = _scene.getSceneRect();
-    qreal sizeFactor = _combatant->getSizeFactor();
-    qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+    qreal sizeFactor = effect->getSize() / 5;
+    qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale())) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
-    _modelMatrix.translate(combatantPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - combatantPos.y());
+    _modelMatrix.translate(effectPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - effectPos.y());
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
     emit changed();

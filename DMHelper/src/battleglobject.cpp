@@ -2,7 +2,9 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 
-BattleGLObject::BattleGLObject() :
+BattleGLObject::BattleGLObject(BattleGLScene& scene) :
+    QObject(),
+    _scene(scene),
     _textureID(0),
     _modelMatrix()
 {

@@ -2,6 +2,8 @@
 #define BATTLEGLRENDERER_H
 
 #include <QOpenGLWidget>
+#include <QList>
+#include "battleglscene.h"
 
 class BattleDialogModel;
 class BattleGLObject;
@@ -11,31 +13,29 @@ class BattleGLRenderer : public QOpenGLWidget
     Q_OBJECT
 public:
     BattleGLRenderer(BattleDialogModel* model);
+    ~BattleGLRenderer();
 
 public slots:
     void cleanup();
+    void updateWidget();
 
 protected:
-     virtual void initializeGL() override;
-     virtual void resizeGL(int w, int h) override;
-     virtual void paintGL() override;
+    virtual void initializeGL() override;
+    virtual void resizeGL(int w, int h) override;
+    virtual void paintGL() override;
 
     void setOrthoProjection();
 
 private:
     BattleDialogModel* _model;
-    QSize _targetSize;
-    unsigned int _backgroundTexture;
-    unsigned int _fowTexture;
+    BattleGLScene _scene;
     unsigned int _shaderProgram;
 
     BattleGLObject* _backgroundObject;
     BattleGLObject* _fowObject;
-
-    unsigned int _VAO;
-    unsigned int _VBO;
-    unsigned int _EBO;
-    unsigned int _textureID;
+    QList<BattleGLObject*> _pcTokens;
+    QList<BattleGLObject*> _enemyTokens;
+    QList<BattleGLObject*> _effectTokens;
 };
 
 #endif // BATTLEGLRENDERER_H
