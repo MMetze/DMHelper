@@ -1,5 +1,6 @@
 #include "publishwindow.h"
-#include "publishframe.h"
+#include "publishglframe.h"
+#include "publishglrenderer.h"
 #include <QKeyEvent>
 #include <QDebug>
 
@@ -15,7 +16,7 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     //setAutoFillBackground(true);
     //setStyleSheet("background-color: rgba(0,0,0,255);");
 
-    _publishFrame = new PublishFrame(this);
+    _publishFrame = new PublishGLFrame(this);
     setCentralWidget(_publishFrame);
     resize(800, 600);
     //_publishFrame->setAutoFillBackground(true);
@@ -81,6 +82,11 @@ void PublishWindow::setBackgroundColor(QColor color)
 void PublishWindow::setPointerFile(const QString& filename)
 {
     _publishFrame->setPointerFile(filename);
+}
+
+void PublishWindow::setRenderer(PublishGLRenderer* renderer)
+{
+    _publishFrame->setRenderer(renderer);
 }
 
 void PublishWindow::keyPressEvent(QKeyEvent * event)

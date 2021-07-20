@@ -116,6 +116,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _targetSize(),
     _targetLabelSize(),
     _mapDrawer(nullptr),
+    _renderer(nullptr),
     _showOnDeck(true),
     _showCountdown(true),
     _countdownDuration(15),
@@ -197,6 +198,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
 BattleFrame::~BattleFrame()
 {
     qDebug() << "[Battle Frame] being destroyed: " << _combatantLayout->count() << " layouts and " << _combatantWidgets.count() << " widgets";
+
+    delete _renderer;
+    _renderer = nullptr;
 
     VideoPlayer* deletePlayer = _videoPlayer;
     _videoPlayer = nullptr;
@@ -1522,6 +1526,7 @@ void BattleFrame::publishClicked(bool checked)
         createPrescaledBackground();
         publishImage();
         */
+        /*
         QDialog* openGLDlg = new QDialog();
         QVBoxLayout *dlgLayout = new QVBoxLayout;
         dlgLayout->addWidget(new BattleGLRenderer(_model));
@@ -1529,6 +1534,11 @@ void BattleFrame::publishClicked(bool checked)
         openGLDlg->setLayout(dlgLayout);
         openGLDlg->resize(size());
         openGLDlg->show();
+        */
+        emit showPublishWindow();
+        if(!_renderer)
+            _renderer = new BattleGLRenderer(_model);
+        emit registerRenderer(_renderer);
     }
     else
     {

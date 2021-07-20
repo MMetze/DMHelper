@@ -7,12 +7,15 @@
 #include "battlegleffect.h"
 #include "map.h"
 #include "character.h"
+#include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
 #include <QDebug>
 
 BattleGLRenderer::BattleGLRenderer(BattleDialogModel* model) :
-    QOpenGLWidget(),
+    PublishGLRenderer(),
+    _initialized(false),
+    _targetWidget(nullptr),
     _model(model),
     _scene(),
     _shaderProgram(0),
@@ -29,8 +32,26 @@ BattleGLRenderer::~BattleGLRenderer()
     cleanup();
 }
 
+void BattleGLRenderer::rendererActivated(QOpenGLWidget* glWidget)
+{
+    _targetWidget = glWidget;
+
+    if((_targetWidget) && (_targetWidget->context()))
+        connect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &BattleGLRenderer::cleanup);
+}
+
+void BattleGLRenderer::rendererDeactivated()
+{
+    if((_targetWidget) && (_targetWidget->context()))
+        disconnect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &BattleGLRenderer::cleanup);
+
+    _targetWidget = nullptr;
+}
+
 void BattleGLRenderer::cleanup()
 {
+    _initialized = false;
+
     delete _backgroundObject;
     _backgroundObject = nullptr;
     delete _fowObject;
@@ -44,64 +65,17 @@ void BattleGLRenderer::cleanup()
     _effectTokens.clear();
 }
 
-void BattleGLRenderer::updateWidget()
-{
-    update();
-}
-
-
-/*
-static const char *vertexShaderSource =
-    "#version 150\n"
-    "in vec4 vertex;\n"
-    "in vec3 normal;\n"
-    "out vec3 vert;\n"
-    "out vec3 vertNormal;\n"
-    "uniform mat4 projMatrix;\n"
-    "uniform mat4 mvMatrix;\n"
-    "uniform mat3 normalMatrix;\n"
-    "void main() {\n"
-    "   vert = vertex.xyz;\n"
-    "   vertNormal = normalMatrix * normal;\n"
-    "   gl_Position = projMatrix * mvMatrix * vertex;\n"
-    "}\n";
-
-static const char *fragmentShaderSource =
-    "#version 150\n"
-    "in highp vec3 vert;\n"
-    "in highp vec3 vertNormal;\n"
-    "out highp vec4 fragColor;\n"
-    "uniform highp vec3 lightPos;\n"
-    "void main() {\n"
-    "   highp vec3 L = normalize(lightPos - vert);\n"
-    "   highp float NL = max(dot(normalize(vertNormal), L), 0.0);\n"
-    "   highp vec3 color = vec3(0.39, 1.0, 0.0);\n"
-    "   highp vec3 col = clamp(color * 0.2 + color * 0.8 * NL, 0.0, 1.0);\n"
-    "   fragColor = vec4(col, 1.0);\n"
-    "}\n";
-*/
-
 void BattleGLRenderer::initializeGL()
 {
-    if((!_model) || (_model->getBackgroundImage().isNull()))
+    if((_initialized) || (!_model) || (_model->getBackgroundImage().isNull()) || (!_targetWidget))
         return;
 
     _scene.setGridScale(_model->getGridScale());
 
     // Set up the rendering context, load shaders and other resources, etc.:
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
+    if(!f)
         return;
-
-    // In this example the widget's corresponding top-level window can change
-    // several times during the widget's lifetime. Whenever this happens, the
-    // QOpenGLWidget's associated context is destroyed and a new one is created.
-    // Therefore we have to be prepared to clean up the resources on the
-    // aboutToBeDestroyed() signal, instead of the destructor. The emission of
-    // the signal will be followed by an invocation of initializeGL() where we
-    // can recreate all resources.
-    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &BattleGLRenderer::cleanup);
 
     f->glEnable(GL_TEXTURE_2D); // Enable texturing
     f->glEnable(GL_BLEND);// you enable blending function
@@ -224,6 +198,8 @@ void BattleGLRenderer::initializeGL()
 
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
+
+    _initialized = true;
 }
 
 void BattleGLRenderer::resizeGL(int w, int h)
@@ -232,15 +208,17 @@ void BattleGLRenderer::resizeGL(int w, int h)
     qDebug() << "[BattleGLRenderer] Resize w: " << w << ", h: " << h;
 
     setOrthoProjection();
+    emit updateWidget();
 }
 
 void BattleGLRenderer::paintGL()
 {
-    if(!_model)
+    if((!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    //QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
+    QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
     if((!f) || (!e))
         return;
 
@@ -284,10 +262,10 @@ void BattleGLRenderer::paintGL()
 
 void BattleGLRenderer::setOrthoProjection()
 {
-    if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgram == 0))
+    if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
     if(!f)
         return;
 

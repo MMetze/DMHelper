@@ -1,32 +1,36 @@
 #ifndef BATTLEGLRENDERER_H
 #define BATTLEGLRENDERER_H
 
-#include <QOpenGLWidget>
-#include <QList>
+#include "publishglrenderer.h"
 #include "battleglscene.h"
+#include <QList>
 
 class BattleDialogModel;
 class BattleGLObject;
 
-class BattleGLRenderer : public QOpenGLWidget
+class BattleGLRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
     BattleGLRenderer(BattleDialogModel* model);
-    ~BattleGLRenderer();
+    virtual ~BattleGLRenderer() override;
 
-public slots:
-    void cleanup();
-    void updateWidget();
+    // DMH OpenGL renderer calls
+    virtual void rendererActivated(QOpenGLWidget* glWidget) override;
+    virtual void rendererDeactivated() override;
+    virtual void cleanup() override;
 
-protected:
+    // Standard OpenGL calls
     virtual void initializeGL() override;
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
+protected:
     void setOrthoProjection();
 
 private:
+    bool _initialized;
+    QOpenGLWidget* _targetWidget;
     BattleDialogModel* _model;
     BattleGLScene _scene;
     unsigned int _shaderProgram;

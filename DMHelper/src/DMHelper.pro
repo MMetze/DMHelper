@@ -91,6 +91,8 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
+    publishglframe.cpp \
+    publishglrenderer.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -310,6 +312,8 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
+    publishglframe.h \
+    publishglrenderer.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \

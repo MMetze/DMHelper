@@ -500,6 +500,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
     connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
     connect(battleFrame, SIGNAL(animateImage(QImage)), pubWindow, SLOT(setBackgroundColor()));
+    connect(battleFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
     connect(battleFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
     connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
