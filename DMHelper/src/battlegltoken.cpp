@@ -6,7 +6,7 @@
 #include <QImage>
 #include <QPixmap>
 
-BattleGLToken::BattleGLToken(BattleGLScene& scene, BattleDialogModelCombatant* combatant) :
+BattleGLToken::BattleGLToken(BattleGLScene* scene, BattleDialogModelCombatant* combatant) :
     BattleGLObject(scene),
     _combatant(combatant),
     _VAO(0),
@@ -88,19 +88,35 @@ BattleGLToken::BattleGLToken(BattleGLScene& scene, BattleDialogModelCombatant* c
 
 BattleGLToken::~BattleGLToken()
 {
+    BattleGLToken::cleanup();
+}
+
+void BattleGLToken::cleanup()
+{
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
 
     if(_VAO > 0)
+    {
         e->glDeleteVertexArrays(1, &_VAO);
+        _VAO = 0;
+    }
 
     if(_VBO > 0)
+    {
         f->glDeleteBuffers(1, &_VBO);
+        _VBO = 0;
+    }
 
     if(_EBO > 0)
+    {
         f->glDeleteBuffers(1, &_EBO);
+        _EBO = 0;
+    }
+
+    BattleGLObject::cleanup();
 }
 
 void BattleGLToken::paintGL()
@@ -117,10 +133,13 @@ void BattleGLToken::paintGL()
 
 void BattleGLToken::combatantMoved()
 {
+    if(!_scene)
+        return;
+
     QPointF combatantPos = _combatant->getPosition();
-    QRectF sceneRect = _scene.getSceneRect();
+    QRectF sceneRect = _scene->getSceneRect();
     qreal sizeFactor = _combatant->getSizeFactor();
-    qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+    qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(combatantPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - combatantPos.y());

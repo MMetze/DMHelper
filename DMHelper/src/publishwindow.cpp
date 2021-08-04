@@ -34,20 +34,20 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
 
 void PublishWindow::setImage(QImage img)
 {
-    _publishFrame->setImage(img);
+    _publishFrame->setImage(img, _globalColor);
 }
 
 void PublishWindow::setImage(QImage img, QColor color)
 {
     setBackgroundColorStyle(color);
-    setImage(img);
+    _publishFrame->setImage(img, color);
     _globalColorSet = false;
 }
 
 void PublishWindow::setImageNoScale(QImage img)
 {
     setBackgroundColor();
-    _publishFrame->setImageNoScale(img);
+    _publishFrame->setImageNoScale(img, _globalColor);
 }
 
 void PublishWindow::setArrowVisible(bool visible)

@@ -15,7 +15,6 @@
 BattleGLRenderer::BattleGLRenderer(BattleDialogModel* model) :
     PublishGLRenderer(),
     _initialized(false),
-    _targetWidget(nullptr),
     _model(model),
     _scene(),
     _shaderProgram(0),
@@ -30,22 +29,6 @@ BattleGLRenderer::BattleGLRenderer(BattleDialogModel* model) :
 BattleGLRenderer::~BattleGLRenderer()
 {
     cleanup();
-}
-
-void BattleGLRenderer::rendererActivated(QOpenGLWidget* glWidget)
-{
-    _targetWidget = glWidget;
-
-    if((_targetWidget) && (_targetWidget->context()))
-        connect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &BattleGLRenderer::cleanup);
-}
-
-void BattleGLRenderer::rendererDeactivated()
-{
-    if((_targetWidget) && (_targetWidget->context()))
-        disconnect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &BattleGLRenderer::cleanup);
-
-    _targetWidget = nullptr;
 }
 
 void BattleGLRenderer::cleanup()
@@ -157,14 +140,14 @@ void BattleGLRenderer::initializeGL()
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
-    _backgroundObject = new BattleGLBackground(_scene, _model->getBackgroundImage(), GL_NEAREST);
-    _fowObject = new BattleGLBackground(_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
+    _backgroundObject = new BattleGLBackground(&_scene, _model->getBackgroundImage(), GL_NEAREST);
+    _fowObject = new BattleGLBackground(&_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(i);
         if(combatant)
         {
-            BattleGLObject* combatantToken = new BattleGLToken(_scene, combatant);
+            BattleGLObject* combatantToken = new BattleGLToken(&_scene, combatant);
             BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(combatant);
             if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
                 _pcTokens.append(combatantToken);
@@ -179,7 +162,7 @@ void BattleGLRenderer::initializeGL()
         BattleDialogModelEffect* effect = _model->getEffect(i);
         if(effect)
         {
-            BattleGLObject* effectToken = new BattleGLEffect(_scene, effect);
+            BattleGLObject* effectToken = new BattleGLEffect(&_scene, effect);
             _effectTokens.append(effectToken);
             connect(effectToken, &BattleGLObject::changed, this, &BattleGLRenderer::updateWidget);
         }
@@ -224,7 +207,7 @@ void BattleGLRenderer::paintGL()
 
     // Draw the scene:
     f->glClearColor(_model->getBackgroundColor().redF(), _model->getBackgroundColor().greenF(), _model->getBackgroundColor().blueF(), 1.0f);
-    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture

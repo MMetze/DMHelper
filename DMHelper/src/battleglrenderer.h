@@ -16,8 +16,6 @@ public:
     virtual ~BattleGLRenderer() override;
 
     // DMH OpenGL renderer calls
-    virtual void rendererActivated(QOpenGLWidget* glWidget) override;
-    virtual void rendererDeactivated() override;
     virtual void cleanup() override;
 
     // Standard OpenGL calls
@@ -30,7 +28,6 @@ protected:
 
 private:
     bool _initialized;
-    QOpenGLWidget* _targetWidget;
     BattleDialogModel* _model;
     BattleGLScene _scene;
     unsigned int _shaderProgram;

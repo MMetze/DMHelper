@@ -48,8 +48,9 @@ struct iovec;
 
 /**
  * \defgroup os Operating system
- * @{
+ * \ingroup vlc
  * \defgroup file File system
+ * \ingroup os
  * @{
  *
  * \file
@@ -99,11 +100,32 @@ VLC_API int vlc_openat(int fd, const char *filename, int flags, ...) VLC_USED;
 VLC_API int vlc_mkstemp( char * );
 
 /**
- * Duplicates a file descriptor. The new file descriptor has the close-on-exec
- * descriptor flag preset.
- * @return a new file descriptor, -1 (see errno)
+ * Duplicates a file descriptor.
+ *
+ * @param oldfd file descriptor to duplicate
+ *
+ * @note Contrary to standard dup(), the new file descriptor has the
+ * close-on-exec descriptor flag preset.
+ * @return a new file descriptor, -1 (see @c errno)
  */
-VLC_API int vlc_dup(int) VLC_USED;
+VLC_API int vlc_dup(int oldfd) VLC_USED;
+
+/**
+ * Replaces a file descriptor.
+ *
+ * This function duplicates a file descriptor to a specified file descriptor.
+ * This is primarily used to atomically replace a described file.
+ *
+ * @param oldfd source file descriptor to copy
+ * @param newfd destination file descriptor to replace
+ *
+ * @note Contrary to standard dup2(), the new file descriptor has the
+ * close-on-exec descriptor flag preset.
+ *
+ * @retval newfd success
+ * @retval -1 failure (see @c errno)
+ */
+VLC_API int vlc_dup2(int oldfd, int newfd);
 
 /**
  * Creates a pipe (see "man pipe" for further reference). The new file
@@ -250,7 +272,6 @@ VLC_API int vlc_mkdir(const char *dirname, mode_t mode);
  */
 VLC_API char *vlc_getcwd(void) VLC_USED;
 
-/** @} */
 /** @} */
 
 #if defined( _WIN32 )

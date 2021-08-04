@@ -92,7 +92,10 @@ SOURCES += main.cpp\
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
     publishglframe.cpp \
+    publishglimagerenderer.cpp \
+    publishglmaprenderer.cpp \
     publishglrenderer.cpp \
+    publishgltextrenderer.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -196,6 +199,7 @@ SOURCES += main.cpp\
     unselectedrect.cpp \
     updatechecker.cpp \
     videoplayer.cpp \
+    videoplayergl.cpp \
     welcomeframe.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
@@ -313,7 +317,10 @@ HEADERS  += mainwindow.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
     publishglframe.h \
+    publishglimagerenderer.h \
+    publishglmaprenderer.h \
     publishglrenderer.h \
+    publishgltextrenderer.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \
@@ -418,6 +425,7 @@ HEADERS  += mainwindow.h \
     unselectedrect.h \
     updatechecker.h \
     videoplayer.h \
+    videoplayergl.h \
     welcomeframe.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \

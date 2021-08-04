@@ -10,9 +10,10 @@ class BattleGLToken : public BattleGLObject
     Q_OBJECT
 
 public:
-    BattleGLToken(BattleGLScene& scene, BattleDialogModelCombatant* combatant);
+    BattleGLToken(BattleGLScene* scene, BattleDialogModelCombatant* combatant);
     virtual ~BattleGLToken() override;
 
+    virtual void cleanup() override;
     virtual void paintGL() override;
 
 public slots:

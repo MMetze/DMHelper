@@ -9,7 +9,7 @@
 #include <QPixmap>
 #include <QPainter>
 
-BattleGLEffect::BattleGLEffect(BattleGLScene& scene, BattleDialogModelEffect* effect) :
+BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* effect) :
     BattleGLObject(scene),
     _effect(effect),
     _childEffect(nullptr),
@@ -113,19 +113,35 @@ BattleGLEffect::BattleGLEffect(BattleGLScene& scene, BattleDialogModelEffect* ef
 
 BattleGLEffect::~BattleGLEffect()
 {
+    BattleGLEffect::cleanup();
+}
+
+void BattleGLEffect::cleanup()
+{
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
 
     if(_VAO > 0)
+    {
         e->glDeleteVertexArrays(1, &_VAO);
+        _VAO = 0;
+    }
 
     if(_VBO > 0)
+    {
         f->glDeleteBuffers(1, &_VBO);
+        _VBO = 0;
+    }
 
     if(_EBO > 0)
+    {
         f->glDeleteBuffers(1, &_EBO);
+        _EBO = 0;
+    }
+
+    BattleGLObject::cleanup();
 }
 
 void BattleGLEffect::paintGL()
@@ -142,12 +158,15 @@ void BattleGLEffect::paintGL()
 
 void BattleGLEffect::effectMoved()
 {
+    if(!_scene)
+        return;
+
     BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
 
     QPointF effectPos = effect->getPosition();
-    QRectF sceneRect = _scene.getSceneRect();
+    QRectF sceneRect = _scene->getSceneRect();
     qreal sizeFactor = effect->getSize() / 5;
-    qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale())) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+    qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale())) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(effectPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - effectPos.y());

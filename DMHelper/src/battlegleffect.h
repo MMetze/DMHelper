@@ -10,9 +10,10 @@ class BattleGLEffect : public BattleGLObject
 {
     Q_OBJECT
 public:
-    BattleGLEffect(BattleGLScene& scene, BattleDialogModelEffect* effect);
+    BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* effect);
     virtual ~BattleGLEffect() override;
 
+    virtual void cleanup() override;
     virtual void paintGL() override;
 
 public slots:

@@ -1,5 +1,6 @@
 #include "encountertextedit.h"
 #include "encountertext.h"
+#include "publishgltextrenderer.h"
 #include "dmconstants.h"
 #include "texttranslatedialog.h"
 #include "ui_encountertextedit.h"
@@ -17,6 +18,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     ui(new Ui::EncounterTextEdit),
     _keys(),
     _encounter(nullptr),
+    _renderer(nullptr),
     _formatter(new TextEditFormatterFrame(this)),
     _backgroundImage(),
     _backgroundImageScaled(),
@@ -63,6 +65,9 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
 EncounterTextEdit::~EncounterTextEdit()
 {
     stopPublishTimer();
+
+    delete _renderer;
+    _renderer = nullptr;
 
     if(_videoPlayer)
     {
@@ -484,6 +489,7 @@ void EncounterTextEdit::publishClicked(bool checked)
 
         if(checked)
         {
+            /*
             emit showPublishWindow();
             prepareImages();
 
@@ -492,6 +498,13 @@ void EncounterTextEdit::publishClicked(bool checked)
 
             emit animationStarted();
             startPublishTimer();
+            */
+            emit showPublishWindow();
+            prepareImages();
+            if(!_renderer)
+                _renderer = new PublishGLTextRenderer(_prescaledImage, _textImage);
+            emit registerRenderer(_renderer);
+
         }
         else
         {

@@ -1,5 +1,6 @@
 #include "publishglframe.h"
 #include "publishglrenderer.h"
+#include "publishglimagerenderer.h"
 #include <QOpenGLFunctions>
 #include <QDebug>
 
@@ -15,6 +16,7 @@ PublishGLFrame::PublishGLFrame(QWidget *parent) :
 PublishGLFrame::~PublishGLFrame()
 {
     cleanup();
+    setRenderer(nullptr);
 }
 
 bool PublishGLFrame::isInitialized() const
@@ -51,12 +53,15 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
     {
         _renderer->rendererDeactivated();
         disconnect(_renderer, &PublishGLRenderer::updateWidget, this, &PublishGLFrame::updateWidget);
+        if(_renderer->deleteOnDeactivation())
+            _renderer->deleteLater();
     }
 
     _renderer = renderer;
     if(_renderer)
     {
         connect(_renderer, &PublishGLRenderer::updateWidget, this, &PublishGLFrame::updateWidget);
+        connect(_renderer, &PublishGLRenderer::destroyed, this, &PublishGLFrame::clearRenderer);
         _renderer->rendererActivated(this);
         if(isInitialized())
         {
@@ -67,14 +72,28 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
     }
 }
 
-void PublishGLFrame::setImage(QImage img)
+void PublishGLFrame::clearRenderer()
 {
-
+    _renderer = nullptr;
 }
 
-void PublishGLFrame::setImageNoScale(QImage img)
+void PublishGLFrame::setImage(QImage img, QColor color)
 {
+    PublishGLImageRenderer* imageRenderer = dynamic_cast<PublishGLImageRenderer*>(_renderer);
+    if(imageRenderer)
+    {
+        imageRenderer->setColor(color);
+        imageRenderer->setImage(img);
+    }
+    else
+    {
+        setRenderer(new PublishGLImageRenderer(img, color));
+    }
+}
 
+void PublishGLFrame::setImageNoScale(QImage img, QColor color)
+{
+    setImage(img, color);
 }
 
 void PublishGLFrame::setArrowVisible(bool visible)
@@ -193,6 +212,8 @@ void PublishGLFrame::resizeGL(int w, int h)
 
     if(_renderer)
         _renderer->resizeGL(w, h);
+
+    emit frameResized(_targetSize);
 }
 
 void PublishGLFrame::paintGL()

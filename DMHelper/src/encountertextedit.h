@@ -11,6 +11,8 @@ class EncounterTextEdit;
 }
 
 class EncounterText;
+class PublishGLTextRenderer;
+class PublishGLRenderer;
 
 class EncounterTextEdit : public CampaignObjectFrame
 {
@@ -89,6 +91,8 @@ signals:
     void scrollSpeedChanged(int scrollSpeed);
     void translatedChanged(bool translated);
 
+    void registerRenderer(PublishGLRenderer* renderer);
+
     void publishImage(QImage image);
     void animationStarted();
     void animateImage(QImage image);
@@ -127,6 +131,7 @@ protected:
 
     QList<QString> _keys;
     EncounterText* _encounter;
+    PublishGLTextRenderer* _renderer;
     TextEditFormatterFrame* _formatter;
 
     QImage _backgroundImage;

@@ -14,6 +14,8 @@ class MapFrame;
 }
 
 class Map;
+class PublishGLMapRenderer;
+class PublishGLRenderer;
 class Party;
 class MapMarkerGraphicsItem;
 
@@ -52,6 +54,7 @@ signals:
 
     void animationStarted();
     void animateImage(QImage img);
+    void registerRenderer(PublishGLRenderer* renderer);
 
     void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
@@ -173,6 +176,7 @@ private:
     qreal _scale;
 
     Map* _mapSource;
+    PublishGLMapRenderer* _renderer;
 
     int _timerId;
     VideoPlayer* _videoPlayer;
