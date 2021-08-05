@@ -137,13 +137,10 @@ protected:
     void deleteCampaign();
     void enableCampaignMenu();
 
+    bool selectIndex(const QModelIndex& index);
     bool selectItem(QUuid itemId);
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
-    QStandardItem* findItem(QStandardItem* parent, int itemType, QUuid itemId);
-    QStandardItem* findItem(QStandardItem* parent, QUuid itemId);
-    QStandardItem* findParentbyType(QStandardItem* child, int parentType);
-    void setIndexExpanded(bool expanded, const QModelIndex& index);
 
     // Bestiary
     void writeBestiary();
@@ -213,7 +210,6 @@ private:
     EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* treeModel;
-    QMultiMap<QString, QUuid> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;
     QString campaignFileName;

@@ -488,6 +488,7 @@ void BattleFrame::next()
         _logger->newRound();
 
     setActiveCombatant(nextCombatant);
+    nextCombatant->resetMoved();
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
 }
 
@@ -545,7 +546,7 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
                     _selectedCombatant = selectedCombatant;
                     _publishMouseDown = true;
                     _publishMouseDownPos = newPosition;
-                    startMovement(pixmapItem, selectedCombatant->getSpeed());
+                    startMovement(selectedCombatant, pixmapItem, selectedCombatant->getSpeed());
                 }
             }
         }
@@ -569,7 +570,7 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
 
     QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
     pixmapItem->setPos(newPosition);
-    updateMovement(pixmapItem);
+    updateMovement(_selectedCombatant, pixmapItem);
 }
 
 void BattleFrame::publishWindowMouseRelease(const QPointF& position)
@@ -1707,7 +1708,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
     BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
     if(combatant)
     {
-        startMovement(_combatantIcons.value(combatant), combatant->getSpeed());
+        startMovement(combatant, _combatantIcons.value(combatant), combatant->getSpeed());
         _selectedCombatant = combatant;
         ui->frameCombatant->setCombatant(combatant);
 
@@ -1727,7 +1728,7 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
         return;
     }
 
-    updateMovement(item);
+    updateMovement(_selectedCombatant, item);
 }
 
 void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
@@ -1865,6 +1866,7 @@ void BattleFrame::activateCombatant()
 
     qDebug() << "[Battle Frame] activating combatant " << _contextMenuCombatant->getName();
     setActiveCombatant(_contextMenuCombatant);
+    _contextMenuCombatant->resetMoved();
 }
 
 void BattleFrame::damageCombatant()
@@ -2618,6 +2620,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
                 connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isShownChanged(bool)), character, SLOT(setShown(bool)));
                 connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isKnownChanged(bool)), character, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
+                connect(character, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
             }
             break;
         }
@@ -2636,6 +2639,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isShownChanged(bool)), monster, SLOT(setShown(bool)));
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isKnownChanged(bool)), monster, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
+                connect(monster, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
             }
             break;
         }
@@ -3780,31 +3784,46 @@ void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
     // TODO: Add personal effects
 }
 
-void BattleFrame::startMovement(QGraphicsPixmapItem* item, int speed)
+void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed)
 {
-    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+    if((!combatant) || (!item) || (!_model))
         return;
 
-    int speedSquares = 2 * (speed / 5) + 1;
-    _moveRadius = _model->getGridScale() * speedSquares;
-    _moveStart = item->pos();
-    _movementPixmap->setPos(_moveStart);
-    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
-    _movementPixmap->setVisible(true);
+    if((_movementPixmap) && (_model->getShowMovement()))
+    {
+        int speedSquares = 2 * (speed / 5) + 1;
+        _moveRadius = _model->getGridScale() * speedSquares;
+        _moveStart = item->pos();
+        _movementPixmap->setPos(_moveStart);
+        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+        _movementPixmap->setVisible(true);
+    }
 }
 
-void BattleFrame::updateMovement(QGraphicsPixmapItem* item)
+void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item)
 {
-    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+    if((!combatant) || (!item) || (!_model))
         return;
 
     QPointF combatantPos = item->pos();
+    QPointF diff = _moveStart - combatantPos;
+    _moveStart = combatantPos;
+    qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
 
-    if(_moveRadius > _model->getGridScale())
+    if(_model->getGridScale() > 0)
+        combatant->incrementMoved(5.0 * delta / static_cast<qreal>(_model->getGridScale()));
+
+    if((_movementPixmap) && (_model->getShowMovement()))
     {
-        QPointF diff = _moveStart - combatantPos;
-        qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
-        _moveRadius -= 2 * delta;
+        if(_moveRadius > _model->getGridScale())
+            _moveRadius -= 2 * delta;
+
+        if(_moveRadius <= _model->getGridScale())
+        {
+            _moveRadius = _model->getGridScale();
+            _movementPixmap->setRotation(0.0);
+            _movementPixmap->setVisible(false);
+        }
     }
 
     if(_moveRadius <= _model->getGridScale())

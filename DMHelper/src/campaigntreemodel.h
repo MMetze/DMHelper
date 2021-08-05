@@ -18,12 +18,11 @@ public:
 
     bool containsObject(const QUuid& objectId) const;
     QModelIndex getObjectIndex(const QUuid& objectId) const;
+    CampaignTreeItem* getObjectItemByName(const QString& name) const;
     CampaignTreeItem* getObjectItem(const QUuid& objectId) const;
 
     CampaignTreeItem* campaignItem(int row, int column = 0) const;
     CampaignTreeItem* campaignItemFromIndex(const QModelIndex &index) const;
-
-    QMap<QString, QUuid> getTreeEntryMap();
 
     // From QAbstractItemModel
     virtual QMimeData *	mimeData(const QModelIndexList & indexes) const override;
@@ -32,7 +31,6 @@ public:
 
 signals:
     void campaignChanged(Campaign* campaign);
-    //void itemMoved(QStandardItem* parentItem, int row);
     void itemMoved(QStandardItem* movedItem);
 
 public slots:
@@ -62,8 +60,7 @@ protected:
     void setTreeEntryVisualization(CampaignTreeItem* entry);
     void updateChildRows(QStandardItem* parentItem);
     CampaignTreeItem* getChildById(QStandardItem* parentItem, const QUuid& itemId) const;
-
-    //void rebuildIndexMap();
+    QStandardItem* searchChildByName(QStandardItem* parentItem, const QString& name) const;
 
     Campaign* _campaign;
     QMap<QUuid, QPersistentModelIndex> _objectIndexMap;
