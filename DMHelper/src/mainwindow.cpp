@@ -37,6 +37,7 @@
 #include "spell.h"
 #include "spellbook.h"
 #include "bestiaryexportdialog.h"
+#include "exportdialog.h"
 #include "equipmentserver.h"
 #include "textpublishdialog.h"
 #include "texttranslatedialog.h"
@@ -1020,7 +1021,7 @@ void MainWindow::newTextEncounter()
 
 void MainWindow::newBattleEncounter()
 {
-    CampaignObjectBase* encounter = newEncounter(DMHelper::CampaignType_Battle, QString("New Battle"), QString("Enter new battle name:"));
+    CampaignObjectBase* encounter = newEncounter(DMHelper::CampaignType_Battle, QString("New Combat"), QString("Enter new combat name:"));
     if(!encounter)
         return;
 

@@ -562,7 +562,7 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
 
     QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
     pixmapItem->setPos(newPosition);
-    updateMovement(_model->getSelectedCombatant(), pixmapItem);
+    updateMovement(_selectedCombatant, pixmapItem);
 }
 
 void BattleFrame::publishWindowMouseRelease(const QPointF& position)
@@ -1689,7 +1689,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
     BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
     if(combatant)
     {
-        startMovement(_combatantIcons.value(combatant), combatant->getSpeed());
+        startMovement(combatant, _combatantIcons.value(combatant), combatant->getSpeed());
         _selectedCombatant = combatant;
         ui->frameCombatant->setCombatant(combatant);
 
@@ -1709,7 +1709,7 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
         return;
     }
 
-    updateMovement(_model->getSelectedCombatant(), item);
+    updateMovement(_selectedCombatant, item);
 }
 
 void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
@@ -3748,16 +3748,6 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
         _movementPixmap->setPos(_moveStart);
         _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
         _movementPixmap->setVisible(true);
-    }
-
-    if((_mapDrawer) && (_model->getFowMovement()))
-    {
-        if(combatant->getCombatantType() == DMHelper::CombatantType_Character)
-        {
-            qreal gridSize = static_cast<qreal>(_model->getGridScale());
-            // TODO: make the radius variable instead of 30'
-            _mapDrawer->handleMouseDown(item->pos(), 6 * gridSize, DMHelper::BrushType_Circle, true, true);
-        }
     }
 }
 

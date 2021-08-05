@@ -524,6 +524,7 @@ FORMS    += mainwindow.ui \
     battledialoglogview.ui \
     monsteractioneditdialog.ui \
     aboutdialog.ui \
+    exportdialog.ui \
     texttranslatedialog.ui
 
 RESOURCES += \
