@@ -5,6 +5,7 @@
 #include "mapcontent.h"
 #include <QList>
 #include <QImage>
+#include <QPixmap>
 
 class QDomDocument;
 class QDomElement;
@@ -34,10 +35,12 @@ public:
     void setPlayAudio(bool playAudio);
 
     Party* getParty();
+    QString getPartyAltIcon();
     QUuid getPartyId() const;
     bool getShowParty() const;
     const QPoint& getPartyIconPos() const;
     int getPartyScale() const;
+    QPixmap getPartyPixmap();
 
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
@@ -71,6 +74,7 @@ signals:
     void requestFoWUpdate();
 
     void partyChanged(Party* party);
+    void partyIconChanged(const QString& partyIcon);
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int partyScale);
 
@@ -82,6 +86,7 @@ public slots:
     void updateFoW();
 
     void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
     void setPartyIconPos(const QPoint& pos);
     void setPartyScale(int partyScale);
@@ -101,6 +106,7 @@ protected:
 
     bool _showPartyIcon;
     QUuid _partyId;
+    QString _partyAltIcon;
     QPoint _partyIconPos;
     int _partyScale;
 

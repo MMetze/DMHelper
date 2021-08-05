@@ -285,6 +285,14 @@ void MapFrame::setParty(Party* party)
     _mapSource->setParty(party);
 }
 
+void MapFrame::setPartyIcon(const QString& partyIcon)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setPartyIcon(partyIcon);
+}
+
 void MapFrame::setShowParty(bool showParty)
 {
     if(!_mapSource)
@@ -481,10 +489,6 @@ void MapFrame::publishWindowMouseMove(const QPointF& position)
 void MapFrame::publishWindowMouseRelease(const QPointF& position)
 {
     Q_UNUSED(position);
-
-    if((!_mapSource) || (!_partyIcon) || (!_publishMouseDown))
-        return;
-
     _publishMouseDown = false;
 }
 
@@ -510,29 +514,35 @@ void MapFrame::publishClicked(bool checked)
             // TODO: Consider zoom factor...
 
             pub = _mapSource->getPublishImage(_publishRect);
-            partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
+        if(_partyIcon)
+                partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
         }
         else
         {
             if(_publishVisible)
             {
                 pub = _mapSource->getShrunkPublishImage(&_publishRect);
-                partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
+                if(_partyIcon)
+                    partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
             }
             else
             {
                 pub = _mapSource->getPublishImage();
                 _publishRect = pub.rect();
-                partyTopLeft = _partyIcon->pos();
+                if(_partyIcon)
+                    partyTopLeft = _partyIcon->pos();
             }
         }
 
-        if((_mapSource->getShowParty()) && (_mapSource->getParty()))
+        if((_mapSource->getShowParty()) && ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
         {
             QPainter p(&pub);
-            QPixmap partyPixmap = _mapSource->getParty()->getIconPixmap(DMHelper::PixmapSize_Battle);
-            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale());
-            p.drawPixmap(partyTopLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+            QPixmap partyPixmap = _mapSource->getPartyPixmap();
+            if(!partyPixmap.isNull())
+            {
+                qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale());
+                p.drawPixmap(partyTopLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+            }
         }
 
         if(_rotation != 0)
@@ -601,13 +611,19 @@ void MapFrame::initializeFoW()
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
+    connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
     connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
     connect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
 
-    emit partyChanged(_mapSource->getParty());
+    if(_mapSource->getParty())
+        emit partyChanged(_mapSource->getParty());
+    else
+        emit partyIconChanged(_mapSource->getPartyAltIcon());
+
     emit showPartyChanged(_mapSource->getShowParty());
     emit partyScaleChanged(_mapSource->getPartyScale());
 
@@ -622,9 +638,11 @@ void MapFrame::uninitializeFoW()
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
     disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
+    disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
     disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
     disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
     disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -711,14 +729,19 @@ void MapFrame::timerEvent(QTimerEvent *event)
                         if(!_bwFoWImage.isNull())
                             p.drawImage(0, 0, _bwFoWImage);
 
-                        if((_mapSource->getShowParty()) && (_mapSource->getParty()))
+                        if((_mapSource->getShowParty()) &&
+                           (_partyIcon) &&
+                           ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
                         {
                             qreal targetWidth = _targetSize.width();
                             qreal imgWidth = _backgroundImage->pixmap().width();
-                            QPixmap partyPixmap = _mapSource->getParty()->getIconPixmap(DMHelper::PixmapSize_Battle);
-                            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
-                            QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
-                            p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                            QPixmap partyPixmap = _mapSource->getPartyPixmap();
+                            if(!partyPixmap.isNull())
+                            {
+                                qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
+                                QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
+                                p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                            }
                         }
                     p.end();
                 }
@@ -1274,16 +1297,13 @@ void MapFrame::checkPartyUpdate()
     if((!_mapSource) || (!_scene))
         return;
 
-    if((!_mapSource->getShowParty()) || (_mapSource->getPartyId().isNull()))
+    if((!_mapSource->getShowParty()) ||
+       ((!_mapSource->getParty()) && (_mapSource->getPartyAltIcon().isEmpty())))
     {
         delete _partyIcon;
         _partyIcon = nullptr;
         return;
     }
-
-    Party* party = _mapSource->getParty();
-    if(!party)
-        return;
 
     if(!_partyIcon)
     {
@@ -1297,7 +1317,9 @@ void MapFrame::checkPartyUpdate()
         _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
     }
     _partyIcon->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale())); //250 * 25 / 625  = 10;
-    _partyIcon->setPixmap(party->getIconPixmap(DMHelper::PixmapSize_Battle));
+    QPixmap partyPixmap = _mapSource->getPartyPixmap();
+    if(!partyPixmap.isNull())
+        _partyIcon->setPixmap(partyPixmap);
 }
 
 

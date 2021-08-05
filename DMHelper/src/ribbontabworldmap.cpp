@@ -2,6 +2,7 @@
 #include "ui_ribbontabworldmap.h"
 #include "party.h"
 #include <QMenu>
+#include <QFileDialog>
 
 RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
     RibbonFrame(parent),
@@ -14,8 +15,19 @@ RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
     connect(ui->spinScale, SIGNAL(valueChanged(int)), this, SIGNAL(scaleChanged(int)));
 
     ui->btnShowParty->setMenu(_menu);
-    selectAction(_menu->addAction(QIcon(":/img/data/icon_contentparty.png"), QString("Default Icon")));
-    _menu->addAction(QString("Choose icon..."));
+
+    RibbonTabWorldMap_PartyAction* defaultAction = new RibbonTabWorldMap_PartyAction(nullptr, RibbonTabWorldMap_PartyAction::PartyActionType_Default);
+    defaultAction->setIcon(QIcon(":/img/data/icon_contentparty.png"));
+    defaultAction->setText(QString("Default Icon"));
+    _menu->addAction(defaultAction);
+    selectAction(defaultAction);
+//    selectAction(_menu->addAction(QIcon(":/img/data/icon_contentparty.png"), QString("Default Icon")));
+
+    RibbonTabWorldMap_PartyAction* selectAction = new RibbonTabWorldMap_PartyAction(nullptr, RibbonTabWorldMap_PartyAction::PartyActionType_Select);
+//    _menu->addAction(QString("Choose icon..."));
+    selectAction->setText(QString("Choose icon..."));
+    _menu->addAction(selectAction);
+
     _menu->addSeparator();
     connect(_menu, &QMenu::triggered, this, &RibbonTabWorldMap::selectAction);
 }
@@ -39,10 +51,7 @@ void RibbonTabWorldMap::setShowParty(bool showParty)
 void RibbonTabWorldMap::setParty(Party* party)
 {
     if(!party)
-    {
-        selectAction(_menu->actions().at(0));
         return;
-    }
 
     QList<QAction*> actionList = _menu->actions();
     for(QAction* action : actionList)
@@ -54,6 +63,11 @@ void RibbonTabWorldMap::setParty(Party* party)
             return;
         }
     }
+}
+
+void RibbonTabWorldMap::setPartyIcon(const QString& partyIcon)
+{
+    setPartyButtonIcon(QIcon(partyIcon));
 }
 
 void RibbonTabWorldMap::setScale(int scale)
@@ -126,15 +140,45 @@ void RibbonTabWorldMap::selectAction(QAction* action)
         return;
 
     if(!action->icon().isNull())
-        ui->btnShowParty->setIcon(action->icon());
+        setPartyButtonIcon(action->icon());
 
     RibbonTabWorldMap_PartyAction* partyAction = dynamic_cast<RibbonTabWorldMap_PartyAction*>(action);
-    emit partySelected(partyAction ? partyAction->getParty() : nullptr);
+    if(!partyAction)
+        return;
+
+    switch(partyAction->getPartyType())
+    {
+        case RibbonTabWorldMap_PartyAction::PartyActionType_Party:
+            emit partySelected(partyAction->getParty());
+            break;
+        case RibbonTabWorldMap_PartyAction::PartyActionType_Default:
+            emit partyIconSelected(QString(":/img/data/icon_contentparty.png"));
+            break;
+        case RibbonTabWorldMap_PartyAction::PartyActionType_Select:
+        {
+            QString iconFile = QFileDialog::getOpenFileName(nullptr, QString("Select party token image file"));
+            if(!iconFile.isEmpty())
+                emit partyIconSelected(iconFile);
+            break;
+        }
+        default:
+            break;
+    }
 }
 
-RibbonTabWorldMap_PartyAction::RibbonTabWorldMap_PartyAction(Party* party, QObject *parent) :
+void RibbonTabWorldMap::setPartyButtonIcon(const QIcon &icon)
+{
+    ui->btnShowParty->setIcon(icon);
+}
+
+
+
+
+
+RibbonTabWorldMap_PartyAction::RibbonTabWorldMap_PartyAction(Party* party, int partyType, QObject *parent) :
     QAction(parent),
-    _party(party)
+    _party(party),
+    _partyType(partyType)
 {
     updateParty();
     if(_party)
@@ -148,9 +192,14 @@ RibbonTabWorldMap_PartyAction::~RibbonTabWorldMap_PartyAction()
 {
 }
 
-Party* RibbonTabWorldMap_PartyAction::getParty()
+Party* RibbonTabWorldMap_PartyAction::getParty() const
 {
     return _party;
+}
+
+int RibbonTabWorldMap_PartyAction::getPartyType() const
+{
+    return _partyType;
 }
 
 void RibbonTabWorldMap_PartyAction::updateParty()

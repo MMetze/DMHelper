@@ -47,6 +47,7 @@ signals:
     void showPublishWindow();
 
     void partyChanged(Party* party);
+    void partyIconChanged(const QString& partyIcon);
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int scale);
 
@@ -70,6 +71,7 @@ public slots:
     void cancelPublish();
 
     void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
     void setPartyScale(int partyScale);
 

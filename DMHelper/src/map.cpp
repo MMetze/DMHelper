@@ -172,6 +172,11 @@ Party* Map::getParty()
     return dynamic_cast<Party*>(campaign->getObjectById(_partyId));
 }
 
+QString Map::getPartyAltIcon()
+{
+    return _partyAltIcon;
+}
+
 QUuid Map::getPartyId() const
 {
     return _partyId;
@@ -190,6 +195,26 @@ const QPoint& Map::getPartyIconPos() const
 int Map::getPartyScale() const
 {
     return _partyScale;
+}
+
+QPixmap Map::getPartyPixmap()
+{
+    QPixmap partyPixmap;
+
+    if(getParty())
+    {
+        partyPixmap = getParty()->getIconPixmap(DMHelper::PixmapSize_Battle);
+    }
+    else
+    {
+        if(partyPixmap.load(getPartyAltIcon()))
+            partyPixmap = partyPixmap.scaled(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0],
+                                             DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][1],
+                                             Qt::KeepAspectRatio,
+                                             Qt::SmoothTransformation);
+    }
+
+    return partyPixmap;
 }
 
 const QRect& Map::getMapRect() const
@@ -683,8 +708,20 @@ void Map::setParty(Party* party)
     QUuid newPartyId = (party == nullptr) ? QUuid() : party->getID();
     if(_partyId != newPartyId)
     {
+        _partyAltIcon = QString();
         _partyId = newPartyId;
         emit partyChanged(party);
+        emit dirty();
+    }
+}
+
+void Map::setPartyIcon(const QString& partyIcon)
+{
+    if(_partyAltIcon != partyIcon)
+    {
+        _partyId = QUuid();
+        _partyAltIcon = partyIcon;
+        emit partyIconChanged(_partyAltIcon);
         emit dirty();
     }
 }
@@ -727,6 +764,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("playaudio", _playAudio);
     element.setAttribute("party", _partyId.toString());
     element.setAttribute("showparty", _showPartyIcon);
+    element.setAttribute("partyalticon", _partyAltIcon);
     element.setAttribute("partyPosX", _partyIconPos.x());
     element.setAttribute("partyPosY", _partyIconPos.y());
     element.setAttribute("partyScale", _partyScale);
@@ -778,6 +816,8 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
     _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
                            element.attribute("partyPosY", QString::number(-1)).toInt());
     _partyScale = element.attribute("partyScale", QString::number(10)).toInt();
+    _partyAltIcon = element.attribute("partyalticon");
+
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }
 

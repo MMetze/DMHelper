@@ -27,6 +27,7 @@ public:
 public slots:
     void setShowParty(bool showParty);
     void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
     void setScale(int scale);
 
     void registerPartyIcon(Party* party);
@@ -36,6 +37,7 @@ public slots:
 signals:
     void showPartyClicked(bool showParty);
     void partySelected(Party* party);
+    void partyIconSelected(const QString& partyIcon);
     void scaleChanged(int scale);
 
 protected:
@@ -43,6 +45,7 @@ protected:
 
 protected slots:
     void selectAction(QAction* action);
+    void setPartyButtonIcon(const QIcon &icon);
 
 private:
     Ui::RibbonTabWorldMap *ui;
@@ -55,10 +58,19 @@ class RibbonTabWorldMap_PartyAction : public QAction
     Q_OBJECT
 
 public:
-    explicit RibbonTabWorldMap_PartyAction(Party* party, QObject *parent = nullptr);
+    enum PartyActionType
+    {
+        PartyActionType_Invalid = -1,
+        PartyActionType_Party = 0,
+        PartyActionType_Default,
+        PartyActionType_Select
+    };
+
+    explicit RibbonTabWorldMap_PartyAction(Party* party, int partyType = PartyActionType_Party, QObject *parent = nullptr);
     virtual ~RibbonTabWorldMap_PartyAction() override;
 
-    Party* getParty();
+    Party* getParty() const;
+    int getPartyType() const;
 
 public slots:
     void updateParty();
@@ -66,6 +78,7 @@ public slots:
 
 protected:
     Party* _party;
+    int _partyType;
 
 };
 
