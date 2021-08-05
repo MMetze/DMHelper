@@ -47,6 +47,7 @@ QDomElement UndoShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& 
     element.setAttribute("width", _mapEditShape.rect().width());
     element.setAttribute("height", _mapEditShape.rect().height());
     element.setAttribute("erase", static_cast<int>(_mapEditShape.erase()));
+    element.setAttribute("smooth", static_cast<int>(_mapEditShape.smooth()));
 
     return element;
 }
@@ -61,7 +62,8 @@ void UndoShape::inputXML(const QDomElement &element, bool isImport)
     inputRect.setWidth(element.attribute(QString("width")).toInt());
     inputRect.setHeight(element.attribute(QString("height")).toInt());
     _mapEditShape.setRect(inputRect);
-    _mapEditShape.setErase(static_cast<bool>(element.attribute("erase",QString::number(1)).toInt()));
+    _mapEditShape.setErase(static_cast<bool>(element.attribute("erase", QString::number(1)).toInt()));
+    _mapEditShape.setSmooth(static_cast<bool>(element.attribute("smooth", QString::number(1)).toInt()));
 }
 
 int UndoShape::getType() const

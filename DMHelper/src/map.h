@@ -5,11 +5,13 @@
 #include "mapcontent.h"
 #include <QList>
 #include <QImage>
+#include <QPixmap>
 
 class QDomDocument;
 class QDomElement;
 class QUndoStack;
 class AudioTrack;
+class Party;
 
 class Map : public CampaignObjectBase
 {
@@ -31,6 +33,14 @@ public:
 
     bool getPlayAudio() const;
     void setPlayAudio(bool playAudio);
+
+    Party* getParty();
+    QString getPartyAltIcon();
+    QUuid getPartyId() const;
+    bool getShowParty() const;
+    const QPoint& getPartyIconPos() const;
+    int getPartyScale() const;
+    QPixmap getPartyPixmap();
 
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
@@ -55,7 +65,7 @@ public:
     QImage getPublishImage();
     QImage getPublishImage(const QRect& rect);
     QImage getGrayImage();
-    QImage getShrunkPublishImage();
+    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
 
     QImage getPreviewImage();
 
@@ -63,13 +73,23 @@ signals:
     void executeUndo();
     void requestFoWUpdate();
 
-public slots:
+    void partyChanged(Party* party);
+    void partyIconChanged(const QString& partyIcon);
+    void showPartyChanged(bool showParty);
+    void partyScaleChanged(int partyScale);
 
+public slots:
     void initialize();
     void uninitialize();
 
     void undoPaint();
     void updateFoW();
+
+    void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
+    void setShowParty(bool showParty);
+    void setPartyIconPos(const QPoint& pos);
+    void setPartyScale(int partyScale);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -83,6 +103,12 @@ protected:
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
+
+    bool _showPartyIcon;
+    QUuid _partyId;
+    QString _partyAltIcon;
+    QPoint _partyIconPos;
+    int _partyScale;
 
     bool _initialized;
     QImage _imgBackground;

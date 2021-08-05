@@ -1,6 +1,6 @@
 #include "ribbonframe.h"
 #include <QLabel>
-#include <QPushButton>
+#include <QAbstractButton>
 #include <QGuiApplication>
 #include <QScreen>
 
@@ -85,7 +85,7 @@ void RibbonFrame::showEvent(QShowEvent *event)
     }
 }
 
-void RibbonFrame::setStandardButtonSize(QLabel& label, QPushButton& button, int frameHeight)
+void RibbonFrame::setStandardButtonSize(QLabel& label, QAbstractButton& button, int frameHeight)
 {
     QFontMetrics metrics = label.fontMetrics();
     int labelHeight = getLabelHeight(metrics, frameHeight);
@@ -133,7 +133,7 @@ void RibbonFrame::setWidgetSize(QWidget& widget, int w, int h)
     widget.setMaximumHeight(h);
 }
 
-void RibbonFrame::setButtonSize(QPushButton& button, int w, int h)
+void RibbonFrame::setButtonSize(QAbstractButton& button, int w, int h)
 {
     setWidgetSize(button, w, h);
     int iconSize = getIconSize(w, h);

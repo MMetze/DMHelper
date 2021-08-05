@@ -4,7 +4,7 @@
 #include <QFrame>
 
 class QLabel;
-class QPushButton;
+class QAbstractButton;
 class PublishButtonRibbon;
 
 class RibbonFrame : public QFrame
@@ -16,13 +16,13 @@ public:
 
     virtual PublishButtonRibbon* getPublishRibbon() = 0;
 
-    static void setStandardButtonSize(QLabel& label, QPushButton& button, int frameHeight);
+    static void setStandardButtonSize(QLabel& label, QAbstractButton& button, int frameHeight);
     static void setLineHeight(QFrame& line, int frameHeight);
     static int getRibbonHeight(int defaultHeight = 0);
     static int getLabelHeight(QLabel& label, int frameHeight);
     static int getLabelHeight(const QFontMetrics& metrics, int frameHeight);
     static void setWidgetSize(QWidget& widget, int w, int h);
-    static void setButtonSize(QPushButton& button, int w, int h);
+    static void setButtonSize(QAbstractButton& button, int w, int h);
     static int getIconSize(int buttonWidth, int buttonHeight);
 
 protected:

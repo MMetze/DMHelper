@@ -14,8 +14,8 @@ class MapFrame;
 }
 
 class Map;
+class Party;
 class MapMarkerGraphicsItem;
-class AudioTrack;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -44,17 +44,21 @@ signals:
     void openPreview();
     void windowClosed(MapFrame* mapFrame);
     void dirty();
-    void startTrack(AudioTrack* track);
     void showPublishWindow();
+
+    void partyChanged(Party* party);
+    void partyIconChanged(const QString& partyIcon);
+    void showPartyChanged(bool showParty);
+    void partyScaleChanged(int scale);
 
     void animationStarted();
     void animateImage(QImage img);
 
+    void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
     void brushModeSet(int brushMode);
 
     void publishCancelled();
-    //void publishCheckable(bool checkable);
 
 public slots:
     void updateFoW();
@@ -62,12 +66,17 @@ public slots:
     void resetFoW();
     void clearFoW();
     void undoPaint();
-//    void publishFoWImage(bool publishing = false);
     void clear();
 
     void cancelPublish();
 
+    void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
+    void setShowParty(bool showParty);
+    void setPartyScale(int partyScale);
+
     void editModeToggled(int editMode);
+    void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
     void brushSizeChanged(int size);
 
@@ -85,25 +94,29 @@ public slots:
     void setPublishZoom(bool enabled);
     void setPublishVisible(bool enabled);
 
+    void setTargetLabelSize(const QSize& targetSize);
+    void publishWindowMouseDown(const QPointF& position);
+    void publishWindowMouseMove(const QPointF& position);
+    void publishWindowMouseRelease(const QPointF& position);
+
     void targetResized(const QSize& newSize);
 
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
-    //virtual void setBackgroundColor(QColor color) override;
-    //void setRotation(int rotation);
-    //void setColor(QColor color);
 
 protected:
     void initializeFoW();
     void uninitializeFoW();
-    void loadTracks();
 
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
     virtual void timerEvent(QTimerEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
+    virtual void keyReleaseEvent(QKeyEvent *event) override;
 
+    bool checkMapMove(QEvent* event);
     bool execEventFilterSelectZoom(QObject *obj, QEvent *event);
     bool execEventFilterEditModeFoW(QObject *obj, QEvent *event);
     bool execEventFilterEditModeEdit(QObject *obj, QEvent *event);
@@ -115,29 +128,28 @@ protected:
     void createVideoPlayer(bool dmPlayer);
     void cleanupBuffers();
 
-    void startAudioTrack();
-
 protected slots:
     void setMapCursor();
     void drawEditCursor();
-//    void publishModeVisibleClicked();
-//    void publishModeZoomClicked();
     void rotatePublish();
-    void trackSelected(int index);
     void setScale(qreal s);
     void storeViewRect();
     void loadViewRect();
     void resetPublishFoW();
-    void audioPlaybackChecked();
+    void checkPartyUpdate();
 
 private:
+    bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
+
     Ui::MapFrame *ui;
 
     QGraphicsScene* _scene;
     QGraphicsPixmapItem* _backgroundImage;
     QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
+    QGraphicsPixmapItem* _partyIcon;
 
+    int _editMode;
     bool _erase;
     bool _smooth;
     int _brushMode;
@@ -148,11 +160,15 @@ private:
     bool _isVideo;
 
     int _rotation;
-    //QColor _color;
 
+    bool _spaceDown;
+    bool _mapMoveMouseDown;
     bool _mouseDown;
     QPoint _mouseDownPos;
     UndoPath* _undoPath;
+
+    bool _publishMouseDown;
+    QPointF _publishMouseDownPos;
 
     bool _zoomSelect;
     QRubberBand* _rubberBand;
@@ -163,6 +179,8 @@ private:
     int _timerId;
     VideoPlayer* _videoPlayer;
     QSize _targetSize;
+    QSize _targetLabelSize;
+    QRect _publishRect;
     QImage _bwFoWImage;
 
 };
