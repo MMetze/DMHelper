@@ -76,6 +76,7 @@ SOURCES += main.cpp\
     legaldialog.cpp \
     mainwindow.cpp \
     mapfactory.cpp \
+    mapframescene.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
     party.cpp \
@@ -291,6 +292,7 @@ HEADERS  += mainwindow.h \
     exportworker.h \
     legaldialog.h \
     mapfactory.h \
+    mapframescene.h \
     mapmarker.h \
     objectfactory.h \
     objectimporter.h \

@@ -1,5 +1,6 @@
 #include "mapframe.h"
 #include "ui_mapframe.h"
+#include "mapframescene.h"
 #include "dmconstants.h"
 #include "map.h"
 #include "mapmarkergraphicsitem.h"
@@ -60,9 +61,15 @@ MapFrame::MapFrame(QWidget *parent) :
     // TODO: reactivate markers
     //ui->btnShowMarkers->setVisible(false);
 
-    _scene = new QGraphicsScene(this);
+    _scene = new MapFrameScene(this);
     ui->graphicsView->setScene(_scene);
+    connect(_scene, &MapFrameScene::mapMousePress, this, &MapFrame::handleMapMousePress);
+    connect(_scene, &MapFrameScene::mapMouseMove, this, &MapFrame::handleMapMouseMove);
+    connect(_scene, &MapFrameScene::mapMouseRelease, this, &MapFrame::handleMapMouseRelease);
+    connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
+
     ui->graphicsView->viewport()->installEventFilter(this);
+    ui->graphicsView->installEventFilter(this);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
     //TODO Markers: connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
@@ -408,6 +415,14 @@ void MapFrame::zoomSelect(bool enabled)
     }
 }
 
+void MapFrame::zoomDelta(int delta)
+{
+    if(delta > 0)
+        zoomIn();
+    else if(delta < 0)
+        zoomOut();
+}
+
 void MapFrame::cancelSelect()
 {
     delete _rubberBand;
@@ -579,8 +594,12 @@ void MapFrame::initializeFoW()
     if((_backgroundImage) || (_backgroundVideo) || (_fow) || (_scene))
         qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame contents NOT done. Undefined behavior!";
 
-    _scene = new QGraphicsScene(this);
+    _scene = new MapFrameScene(this);
     ui->graphicsView->setScene(_scene);
+    connect(_scene, &MapFrameScene::mapMousePress, this, &MapFrame::handleMapMousePress);
+    connect(_scene, &MapFrameScene::mapMouseMove, this, &MapFrame::handleMapMouseMove);
+    connect(_scene, &MapFrameScene::mapMouseRelease, this, &MapFrame::handleMapMouseRelease);
+    connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
 
     if(!_mapSource)
         return;
@@ -1322,6 +1341,35 @@ void MapFrame::checkPartyUpdate()
         _partyIcon->setPixmap(partyPixmap);
 }
 
+void MapFrame::handleMapMousePress(const QPointF& pos)
+{
+    _mouseDown = true;
+    _mouseDownPos = ui->graphicsView->mapFromScene(pos);
+}
+
+void MapFrame::handleMapMouseMove(const QPointF& pos)
+{
+    if(!_mouseDown)
+        return;
+
+    QPoint viewPos = ui->graphicsView->mapFromScene(pos);
+    QPoint delta = _mouseDownPos - viewPos;
+
+    _mouseDown = false;
+    if(ui->graphicsView->horizontalScrollBar())
+        ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + delta.x());
+    if(ui->graphicsView->verticalScrollBar())
+        ui->graphicsView->verticalScrollBar()->setValue(ui->graphicsView->verticalScrollBar()->value() + delta.y());
+    _mouseDown = true;
+
+    _mouseDownPos = viewPos;
+}
+
+void MapFrame::handleMapMouseRelease(const QPointF& pos)
+{
+    Q_UNUSED(pos);
+    _mouseDown = false;
+}
 
 bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)
 {

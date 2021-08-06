@@ -13,6 +13,7 @@ namespace Ui {
 class MapFrame;
 }
 
+class MapFrameScene;
 class Map;
 class Party;
 class MapMarkerGraphicsItem;
@@ -86,6 +87,7 @@ public slots:
     void zoomOne();
     void zoomFit();
     void zoomSelect(bool enabled);
+    void zoomDelta(int delta);
     void cancelSelect();
 
     void setErase(bool enabled);
@@ -138,12 +140,16 @@ protected slots:
     void resetPublishFoW();
     void checkPartyUpdate();
 
+    void handleMapMousePress(const QPointF& pos);
+    void handleMapMouseMove(const QPointF& pos);
+    void handleMapMouseRelease(const QPointF& pos);
+
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
 
     Ui::MapFrame *ui;
 
-    QGraphicsScene* _scene;
+    MapFrameScene* _scene;
     QGraphicsPixmapItem* _backgroundImage;
     QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
