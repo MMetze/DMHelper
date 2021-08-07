@@ -373,7 +373,7 @@ void MapFrame::editMapFile()
     if(!_mapSource)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."), QString(), QString("Image files (*.png *.jpg)"));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
     if(!filename.isEmpty())
     {
         uninitializeFoW();

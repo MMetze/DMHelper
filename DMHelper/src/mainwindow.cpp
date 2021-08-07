@@ -1068,7 +1068,7 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."), QString(), QString("Image files (*.png *.jpg)"));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
     if(filename.isEmpty())
         return;
 

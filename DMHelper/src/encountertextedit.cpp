@@ -279,7 +279,7 @@ void EncounterTextEdit::setImageFile(const QString& imageFile)
 
 void EncounterTextEdit::browseImageFile()
 {
-    QString imageFileName = QFileDialog::getOpenFileName(this, QString("Select Image File"), QString(), QString("Image files (*.png *.jpg)"));
+    QString imageFileName = QFileDialog::getOpenFileName(this, QString("Select Image File"));
 
     if(imageFileName.isEmpty())
     {

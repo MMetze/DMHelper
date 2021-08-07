@@ -304,7 +304,7 @@ void OptionsDialog::setTables(const QString& tablesDirectory)
 
 void OptionsDialog::browsePointerFile()
 {
-    setPointerFile(QFileDialog::getOpenFileName(this, QString("Select Pointer File"), QString(), QString("Image files (*.png *.jpg)")));
+    setPointerFile(QFileDialog::getOpenFileName(this, QString("Select Pointer File")));
 }
 
 void OptionsDialog::editPointerFile()
@@ -320,7 +320,7 @@ void OptionsDialog::setPointerFile(const QString& pointerFile)
 
 void OptionsDialog::browseSelectedIcon()
 {
-    setSelectedIcon(QFileDialog::getOpenFileName(this, QString("Select Icon for Selected Tokens"), QString(), QString("Image files (*.png *.jpg)")));
+    setSelectedIcon(QFileDialog::getOpenFileName(this, QString("Select Icon for Selected Tokens")));
 }
 
 void OptionsDialog::editSelectedIcon()
@@ -336,7 +336,7 @@ void OptionsDialog::setSelectedIcon(const QString& selectedIcon)
 
 void OptionsDialog::browseActiveIcon()
 {
-    setActiveIcon(QFileDialog::getOpenFileName(this, QString("Select Icon for Active Combatants"), QString(), QString("Image files (*.png *.jpg)")));
+    setActiveIcon(QFileDialog::getOpenFileName(this, QString("Select Icon for Active Combatants")));
 }
 
 void OptionsDialog::editActiveIcon()
@@ -352,7 +352,7 @@ void OptionsDialog::setActiveIcon(const QString& activeIcon)
 
 void OptionsDialog::browseCombatantFrame()
 {
-    setCombatantFrame(QFileDialog::getOpenFileName(this, QString("Select Image for the Combatant Frame"), QString(), QString("Image files (*.png *.jpg)")));
+    setCombatantFrame(QFileDialog::getOpenFileName(this, QString("Select Image for the Combatant Frame")));
 }
 
 void OptionsDialog::editCombatantFrame()
@@ -368,7 +368,7 @@ void OptionsDialog::setCombatantFrame(const QString& combatantFrame)
 
 void OptionsDialog::browseCountdownFrame()
 {
-    setCountdownFrame(QFileDialog::getOpenFileName(this, QString("Select Image for the Countdown Frame"), QString(), QString("Image files (*.png *.jpg)")));
+    setCountdownFrame(QFileDialog::getOpenFileName(this, QString("Select Image for the Countdown Frame")));
 }
 
 void OptionsDialog::editCountdownFrame()

@@ -3642,7 +3642,7 @@ void BattleFrame::updateCameraRect()
 
 QRectF BattleFrame::getCameraRect()
 {
-    return _publishRectValue;f
+    return _publishRectValue;
 }
 
 void BattleFrame::setCameraToView()
