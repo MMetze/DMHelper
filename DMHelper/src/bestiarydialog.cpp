@@ -608,7 +608,7 @@ void BestiaryDialog::mouseReleaseEvent(QMouseEvent * event)
         {
             ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
             _mouseDown = false;
-            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."), QString(), QString("Image files (*.png *.jpg)"));
+            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
             if(!filename.isEmpty())
             {
                 _monster->setIcon(filename);

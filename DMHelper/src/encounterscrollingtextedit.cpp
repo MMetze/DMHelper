@@ -179,7 +179,7 @@ void EncounterScrollingTextEdit::setImageFile(const QString& imgFile)
 
 void EncounterScrollingTextEdit::browseImageFile()
 {
-    QString imageFileName = QFileDialog::getOpenFileName(this,QString("Select Image File"), QString(), QString("Image files (*.png *.jpg)"));
+    QString imageFileName = QFileDialog::getOpenFileName(this,QString("Select Image File"));
 
     if((imageFileName.isEmpty()) || (!QFile::exists(imageFileName)))
     {
