@@ -1697,6 +1697,8 @@ color: rgb(50, 50, 50);</string>
   <tabstop>cmbSearch</tabstop>
   <tabstop>btnLeft</tabstop>
   <tabstop>btnRight</tabstop>
+  <tabstop>btnReload</tabstop>
+  <tabstop>btnClear</tabstop>
   <tabstop>btnNewMonster</tabstop>
   <tabstop>btnDeleteMonster</tabstop>
   <tabstop>scrollArea</tabstop>
@@ -1707,8 +1709,11 @@ color: rgb(50, 50, 50);</string>
   <tabstop>edtAlignment</tabstop>
   <tabstop>chkLegendary</tabstop>
   <tabstop>chkPrivate</tabstop>
-  <tabstop>edtArmorClass</tabstop>
   <tabstop>edtSpeed</tabstop>
+  <tabstop>edtSize</tabstop>
+  <tabstop>edtArmorClass</tabstop>
+  <tabstop>edtAverageHitPoints</tabstop>
+  <tabstop>edtHitDice</tabstop>
   <tabstop>edtStrength</tabstop>
   <tabstop>edtDexterity</tabstop>
   <tabstop>edtConstitution</tabstop>

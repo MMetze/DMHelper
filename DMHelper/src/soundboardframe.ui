@@ -384,6 +384,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>btnAddGroup</tabstop>
+  <tabstop>btnAddSound</tabstop>
+  <tabstop>btnAddYoutube</tabstop>
+  <tabstop>btnAddSyrinscape</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>treeWidget</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

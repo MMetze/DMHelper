@@ -513,6 +513,8 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
     if(mouseEvent->button() == Qt::RightButton)
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
+        QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+
         qDebug() << "[Battle Dialog Scene] right mouse released at " << mouseEvent->scenePos() << " for item " << item;
 
         QMenu menu(views().constFirst());
@@ -536,35 +538,61 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 QAction* deleteItem = new QAction(QString("Delete Effect..."), &menu);
                 connect(deleteItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
                 menu.addAction(deleteItem);
+
+                menu.addSeparator();
             }
+        }
+        else if((item) && (pixItem) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+        {
+            qDebug() << "[Battle Dialog Scene] right click identified on combatant " << pixItem;
+            _contextMenuItem = item;
+            _mouseDownPos = mouseEvent->scenePos();
+
+            QAction* activateItem = new QAction(QString("Activate"), &menu);
+            connect(activateItem,SIGNAL(triggered()),this,SLOT(activateCombatant()));
+            menu.addAction(activateItem);
+
+            QAction* removeItem = new QAction(QString("Remove"), &menu);
+            connect(removeItem,SIGNAL(triggered()),this,SLOT(removeCombatant()));
+            menu.addAction(removeItem);
+
+            QAction* damageItem = new QAction(QString("Damage..."), &menu);
+            connect(damageItem,SIGNAL(triggered()),this,SLOT(damageCombatant()));
+            menu.addAction(damageItem);
+
+            QAction* healItem = new QAction(QString("Heal..."), &menu);
+            connect(healItem,SIGNAL(triggered()),this,SLOT(healCombatant()));
+            menu.addAction(healItem);
+
+            menu.addSeparator();
         }
         else
         {
             qDebug() << "[Battle Dialog Scene] right click identified on background";
             _mouseDownPos = mouseEvent->scenePos();
-
-            QAction* addRadiusItem = new QAction(QString("Create Radius Effect"), &menu);
-            connect(addRadiusItem, SIGNAL(triggered()), this, SLOT(addEffectRadius()));
-            menu.addAction(addRadiusItem);
-
-            QAction* addConeItem = new QAction(QString("Create Cone Effect"), &menu);
-            connect(addConeItem, SIGNAL(triggered()), this, SLOT(addEffectCone()));
-            menu.addAction(addConeItem);
-
-            QAction* addCubeItem = new QAction(QString("Create Cube Effect"), &menu);
-            connect(addCubeItem, SIGNAL(triggered()), this, SLOT(addEffectCube()));
-            menu.addAction(addCubeItem);
-
-            QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
-            connect(addLineItem, SIGNAL(triggered()), this, SLOT(addEffectLine()));
-            menu.addAction(addLineItem);
-
-            menu.addSeparator();
-
-            QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
-            connect(castItem, SIGNAL(triggered()), this, SLOT(castSpell()));
-            menu.addAction(castItem);
         }
+
+        QAction* addRadiusItem = new QAction(QString("Create Radius Effect"), &menu);
+        connect(addRadiusItem, SIGNAL(triggered()), this, SLOT(addEffectRadius()));
+        menu.addAction(addRadiusItem);
+
+        QAction* addConeItem = new QAction(QString("Create Cone Effect"), &menu);
+        connect(addConeItem, SIGNAL(triggered()), this, SLOT(addEffectCone()));
+        menu.addAction(addConeItem);
+
+        QAction* addCubeItem = new QAction(QString("Create Cube Effect"), &menu);
+        connect(addCubeItem, SIGNAL(triggered()), this, SLOT(addEffectCube()));
+        menu.addAction(addCubeItem);
+
+        QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
+        connect(addLineItem, SIGNAL(triggered()), this, SLOT(addEffectLine()));
+        menu.addAction(addLineItem);
+
+        menu.addSeparator();
+
+        QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
+        connect(castItem, SIGNAL(triggered()), this, SLOT(castSpell()));
+        menu.addAction(castItem);
 
         _commandPosition = _mouseDownPos;
         menu.exec(mouseEvent->screenPos());
@@ -896,6 +924,50 @@ void BattleDialogGraphicsScene::deleteItem()
         delete _contextMenuItem;
         _contextMenuItem = nullptr;
     }
+}
+
+void BattleDialogGraphicsScene::activateCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantActivate(combatant);
+}
+
+void BattleDialogGraphicsScene::removeCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantRemove(combatant);
+}
+
+void BattleDialogGraphicsScene::damageCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantDamage(combatant);
+}
+
+void BattleDialogGraphicsScene::healCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantHeal(combatant);
 }
 
 void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)

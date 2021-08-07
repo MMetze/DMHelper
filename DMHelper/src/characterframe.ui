@@ -7132,6 +7132,7 @@
   <tabstop>edtLevel</tabstop>
   <tabstop>edtBackground</tabstop>
   <tabstop>edtRace</tabstop>
+  <tabstop>edtSize</tabstop>
   <tabstop>edtExperience</tabstop>
   <tabstop>edtAlignment</tabstop>
   <tabstop>edtStr</tabstop>
@@ -7141,6 +7142,7 @@
   <tabstop>edtWis</tabstop>
   <tabstop>edtCha</tabstop>
   <tabstop>edtHitPoints</tabstop>
+  <tabstop>edtHitPointsMax</tabstop>
   <tabstop>edtArmorClass</tabstop>
   <tabstop>chkStrSave</tabstop>
   <tabstop>chkDexSave</tabstop>
@@ -7171,11 +7173,13 @@
   <tabstop>edtInitiative</tabstop>
   <tabstop>edtProficiencyBonus</tabstop>
   <tabstop>edtPassivePerception</tabstop>
+  <tabstop>conditionScrollArea</tabstop>
+  <tabstop>btnEditConditions</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>edtFeatures</tabstop>
+  <tabstop>edtSpells</tabstop>
   <tabstop>edtEquipment</tabstop>
   <tabstop>edtNotes</tabstop>
-  <tabstop>edtSpells</tabstop>
  </tabstops>
  <resources>
   <include location="resources.qrc"/>

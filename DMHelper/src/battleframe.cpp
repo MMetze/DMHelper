@@ -172,10 +172,15 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
     connect(_scene, SIGNAL(combatantHover(BattleDialogModelCombatant*, bool)), this, SLOT(handleCombatantHover(BattleDialogModelCombatant*, bool)));
+    connect(_scene, SIGNAL(combatantActivate(BattleDialogModelCombatant*)), this, SLOT(handleCombatantActivate(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantRemove(BattleDialogModelCombatant*)), this, SLOT(handleCombatantRemove(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));    
     connect(_scene, &BattleDialogGraphicsScene::mapMousePress, this, &BattleFrame::handleMapMousePress);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseMove, this, &BattleFrame::handleMapMouseMove);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseRelease, this, &BattleFrame::handleMapMouseRelease);
+
     setEditMode();
 
     // CombatantFrame
@@ -1486,9 +1491,13 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
     connect(removeItem,SIGNAL(triggered()),this,SLOT(removeCombatant()));
     contextMenu->addAction(removeItem);
 
-    QAction* damageItem = new QAction(QString("Damage"), contextMenu);
+    QAction* damageItem = new QAction(QString("Damage..."), contextMenu);
     connect(damageItem,SIGNAL(triggered()),this,SLOT(damageCombatant()));
     contextMenu->addAction(damageItem);
+
+    QAction* healItem = new QAction(QString("Heal..."), contextMenu);
+    connect(healItem,SIGNAL(triggered()),this,SLOT(healCombatant()));
+    contextMenu->addAction(healItem);
 
     contextMenu->exec(position);
     delete contextMenu;
@@ -1662,6 +1671,99 @@ void BattleFrame::handleCombatantHover(BattleDialogModelCombatant* combatant, bo
     widget->setHover(hover);
 }
 
+void BattleFrame::handleCombatantActivate(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    qDebug() << "[Battle Frame] activating combatant " << combatant->getName();
+    setActiveCombatant(combatant);
+    combatant->resetMoved();
+}
+
+void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to remove combatant, no battle model is set!";
+        return;
+    }
+
+    if(!combatant)
+        return;
+
+    qDebug() << "[Battle Frame] removing combatant " << combatant->getName();
+    removeRollover();
+
+    // Check the active combatant highlight
+    if(combatant == _model->getActiveCombatant())
+    {
+        if(_model->getCombatantCount() <= 1)
+        {
+            _model->setActiveCombatant(nullptr);
+            qDebug() << "[Battle Frame] removed combatant has highlight, highlight removed";
+        }
+        else
+        {
+            next();
+        }
+    }
+    else if(combatant == ui->frameCombatant->getCombatant())
+    {
+        ui->frameCombatant->setCombatant(nullptr);
+    }
+
+    // Find the index of the removed item
+    int i = _model->getCombatantList().indexOf(combatant);
+
+    // Delete the widget for the combatant
+    QLayoutItem *child = _combatantLayout->takeAt(i);
+    if(child != nullptr)
+    {
+        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
+        child->widget()->deleteLater();
+        delete child;
+    }
+
+    // Remove the combatant
+    BattleDialogModelCombatant* removedCombatant = _model->removeCombatant(i);
+    if(removedCombatant)
+    {
+        qDebug() << "[Battle Frame] removing combatant from list " << removedCombatant->getName();
+
+        // Remove the widget from the list of widgets
+        // TODO: should this be above with deleting the widget for the combatant?
+        _combatantWidgets.remove(removedCombatant);
+
+        // Remove the icon from the list of icons and delete it from the scene
+        QGraphicsPixmapItem* item = _combatantIcons.take(removedCombatant);
+        if(item)
+        {
+            delete item;
+        }
+
+        delete removedCombatant;
+    }
+}
+
+void BattleFrame::handleCombatantDamage(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    int damage = QInputDialog::getInt(this, QString("Damage Combatant"), QString("Please enter the amount of damage to be done: "));
+    applyCombatantHPChange(combatant, -damage);
+}
+
+void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    int heal = QInputDialog::getInt(this, QString("Heal Combatant"), QString("Please enter the amount of healing to be applied: "));
+    applyCombatantHPChange(combatant, heal);
+}
+
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
     if(!effect)
@@ -1796,91 +1898,34 @@ void BattleFrame::handleMapMouseRelease(const QPointF& pos)
 
 void BattleFrame::removeCombatant()
 {
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to remove combatant, no battle model is set!";
-        return;
-    }
-
-    if(!_contextMenuCombatant)
-        return;
-
-    qDebug() << "[Battle Frame] removing combatant " << _contextMenuCombatant->getName();
-    removeRollover();
-
-    // Check the active combatant highlight
-    if(_contextMenuCombatant == _model->getActiveCombatant())
-    {
-        if(_model->getCombatantCount() <= 1)
-        {
-            _model->setActiveCombatant(nullptr);
-            qDebug() << "[Battle Frame] removed combatant has highlight, highlight removed";
-        }
-        else
-        {
-            next();
-        }
-    }
-    else if(_contextMenuCombatant == ui->frameCombatant->getCombatant())
-    {
-        ui->frameCombatant->setCombatant(nullptr);
-    }
-
-    // Find the index of the removed item
-    int i = _model->getCombatantList().indexOf(_contextMenuCombatant);
-
-    // Delete the widget for the combatant
-    QLayoutItem *child = _combatantLayout->takeAt(i);
-    if(child != nullptr)
-    {
-        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
-        child->widget()->deleteLater();
-        delete child;
-    }
-
-    // Remove the combatant
-    BattleDialogModelCombatant* combatant = _model->removeCombatant(i);
-    if(combatant)
-    {
-        qDebug() << "[Battle Frame] removing combatant from list " << combatant->getName();
-
-        // Remove the widget from the list of widgets
-        // TODO: should this be above with deleting the widget for the combatant?
-        _combatantWidgets.remove(combatant);
-
-        // Remove the icon from the list of icons and delete it from the scene
-        QGraphicsPixmapItem* item = _combatantIcons.take(combatant);
-        if(item)
-        {
-            delete item;
-        }
-
-        delete combatant;
-    }
+    handleCombatantRemove(_contextMenuCombatant);
 }
 
 void BattleFrame::activateCombatant()
 {
-    if(!_contextMenuCombatant)
-        return;
-
-    qDebug() << "[Battle Frame] activating combatant " << _contextMenuCombatant->getName();
-    setActiveCombatant(_contextMenuCombatant);
-    _contextMenuCombatant->resetMoved();
+    handleCombatantActivate(_contextMenuCombatant);
 }
 
 void BattleFrame::damageCombatant()
 {
-    if(!_contextMenuCombatant)
+    handleCombatantDamage(_contextMenuCombatant);
+}
+
+void BattleFrame::healCombatant()
+{
+    handleCombatantHeal(_contextMenuCombatant);
+}
+
+void BattleFrame::applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange)
+{
+    if(!combatant)
         return;
 
-    int damage = QInputDialog::getInt(this, QString("Damage Combatant"), QString("Please enter the amount of damage to be done: "));
-
-    _contextMenuCombatant->setHitPoints(_contextMenuCombatant->getHitPoints() - damage);
-    updateCombatantWidget(_contextMenuCombatant);
+    combatant->setHitPoints(combatant->getHitPoints() + hpChange);
+    updateCombatantWidget(combatant);
     updateCombatantVisibility();
 
-    registerCombatantDamage(_contextMenuCombatant, -damage);
+    registerCombatantDamage(combatant, hpChange);
 }
 
 void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
@@ -3597,7 +3642,7 @@ void BattleFrame::updateCameraRect()
 
 QRectF BattleFrame::getCameraRect()
 {
-    return _publishRectValue;
+    return _publishRectValue;f
 }
 
 void BattleFrame::setCameraToView()

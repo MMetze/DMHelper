@@ -2420,6 +2420,35 @@ color: rgb(50, 50, 50);</string>
    <header>colorpushbutton.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>cmbSearch</tabstop>
+  <tabstop>btnLeft</tabstop>
+  <tabstop>btnRight</tabstop>
+  <tabstop>edtName</tabstop>
+  <tabstop>edtSchool</tabstop>
+  <tabstop>edtLevel</tabstop>
+  <tabstop>edtClasses</tabstop>
+  <tabstop>edtComponents</tabstop>
+  <tabstop>edtCastingTime</tabstop>
+  <tabstop>edtDuration</tabstop>
+  <tabstop>edtRange</tabstop>
+  <tabstop>chkConcentration</tabstop>
+  <tabstop>chkRitual</tabstop>
+  <tabstop>edtDescription</tabstop>
+  <tabstop>cmbEffectType</tabstop>
+  <tabstop>edtEffectWidth</tabstop>
+  <tabstop>edtEffectHeight</tabstop>
+  <tabstop>grpShape</tabstop>
+  <tabstop>btnEffectColor</tabstop>
+  <tabstop>sliderOpacity</tabstop>
+  <tabstop>edtEffectToken</tabstop>
+  <tabstop>btnEffectTokenBrowse</tabstop>
+  <tabstop>btnTokenCW</tabstop>
+  <tabstop>btnTokenCCW</tabstop>
+  <tabstop>btnEditConditions</tabstop>
+  <tabstop>btnNewSpell</tabstop>
+  <tabstop>btnDeleteSpell</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>
