@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>229</width>
+    <width>228</width>
     <height>56</height>
    </rect>
   </property>
@@ -333,7 +333,7 @@ background-color: rgba(0, 0, 0, 0);</string>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2,2,1,2">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -378,13 +378,95 @@ background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="minimumSize">
           <size>
-           <width>40</width>
+           <width>0</width>
            <height>22</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::MinimumExpanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>5</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
+         <property name="text">
+          <string>Mv:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtMove">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
            <height>30</height>
           </size>
          </property>
@@ -409,7 +491,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::MinimumExpanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -460,13 +542,13 @@ background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="minimumSize">
           <size>
-           <width>60</width>
+           <width>0</width>
            <height>22</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>16777215</width>
            <height>30</height>
           </size>
          </property>

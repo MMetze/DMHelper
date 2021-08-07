@@ -112,6 +112,7 @@ public slots:
     void zoomOut();
     void zoomFit();
     void zoomSelect(bool enabled);
+    void zoomDelta(int delta);
     void cancelSelect();
 
     // Public for connection to battle ribbon
@@ -208,6 +209,10 @@ private slots:
     void handleItemChanged(QGraphicsItem* item);
     void handleItemMouseDoubleClick(QGraphicsPixmapItem* item);
 
+    void handleMapMousePress(const QPointF& pos);
+    void handleMapMouseMove(const QPointF& pos);
+    void handleMapMouseRelease(const QPointF& pos);
+
     void removeCombatant();
     void activateCombatant();
     void damageCombatant();
@@ -303,8 +308,8 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
-    void startMovement(QGraphicsPixmapItem* item, int speed);
-    void updateMovement(QGraphicsPixmapItem* item);
+    void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);
+    void updateMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item);
     void endMovement();
 
     QPixmap getPointerPixmap();

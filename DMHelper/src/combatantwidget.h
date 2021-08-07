@@ -34,6 +34,7 @@ signals:
 public slots:
 
     virtual void updateData();
+    virtual void updateMove();
     virtual void setInitiative(int initiative);
     virtual void initiativeChanged();
     virtual void setActive(bool active);

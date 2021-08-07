@@ -37,9 +37,7 @@ public:
 
 public slots:
     void clear();
-    //void setHtml(const QString &text);
     void setHtml();
-    //void setPlainText(const QString &text);
 
     void setBackgroundImage(bool on);
     void setImageFile(const QString& imageFile);
@@ -52,6 +50,7 @@ public slots:
     void setUnderline(bool underline);
     void setColor(QColor color);
     void setAlignment(Qt::Alignment alignment);
+    void setPasteRich(bool pasteRich);
 
     void hyperlinkClicked();
     void setTextWidth(int textWidth);
@@ -96,6 +95,7 @@ signals:
     void showPublishWindow();
 
 protected slots:
+    void updateAnchors();
     void storeEncounter();
     void readEncounter();
 

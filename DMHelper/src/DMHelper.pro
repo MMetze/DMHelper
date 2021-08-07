@@ -71,9 +71,12 @@ SOURCES += main.cpp\
     emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
+    exportdialog.cpp \
+    exportworker.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapfactory.cpp \
+    mapframescene.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
     party.cpp \
@@ -99,6 +102,8 @@ SOURCES += main.cpp\
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
     ribbontabtools.cpp \
+    ribbontabworldmap.cpp \
+    selectstringdialog.cpp \
     soundboardframe.cpp \
     soundboardgroup.cpp \
     soundboardgroupframe.cpp \
@@ -283,8 +288,11 @@ HEADERS  += mainwindow.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
+    exportdialog.h \
+    exportworker.h \
     legaldialog.h \
     mapfactory.h \
+    mapframescene.h \
     mapmarker.h \
     objectfactory.h \
     objectimporter.h \
@@ -311,6 +319,8 @@ HEADERS  += mainwindow.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
     ribbontabtools.h \
+    ribbontabworldmap.h \
+    selectstringdialog.h \
     soundboardframe.h \
     soundboardgroup.h \
     soundboardgroupframe.h \
@@ -476,6 +486,8 @@ FORMS    += mainwindow.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
+    ribbontabworldmap.ui \
+    selectstringdialog.ui \
     soundboardframe.ui \
     soundboardgroupframe.ui \
     soundboardtrackframe.ui \
@@ -517,6 +529,7 @@ FORMS    += mainwindow.ui \
     battledialoglogview.ui \
     monsteractioneditdialog.ui \
     aboutdialog.ui \
+    exportdialog.ui \
     texttranslatedialog.ui
 
 RESOURCES += \

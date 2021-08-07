@@ -91,8 +91,6 @@ void WidgetMonsterInternal::setInitiative(int initiative)
 
 void WidgetMonsterInternal::setHitPoints(int hp)
 {
-    Q_UNUSED(hp);
-
     if(!_widgetParent || !_monster)
         return;
 

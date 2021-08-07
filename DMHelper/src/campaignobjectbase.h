@@ -82,4 +82,7 @@ protected:
     int _row;
 };
 
+Q_DECLARE_METATYPE(CampaignObjectBase*)
+Q_DECLARE_METATYPE(const CampaignObjectBase*)
+
 #endif // CAMPAIGNOBJECTBASE_H
