@@ -2483,21 +2483,7 @@ Map* BattleFrame::selectRelatedMap()
     if(!parentObject)
         return nullptr;
 
-    // TODO: Check what happens if separator is selected
-    MapSelectDialog mapSelectDlg;
-
-    QList<Map*> allMaps = campaign->findChildren<Map*>();
-    for(Map* map : allMaps)
-    {
-        if(map)
-        {
-            if(map->getParentById(parentObject->getID()) != nullptr)
-                mapSelectDlg.prependMap(map);
-            else
-                mapSelectDlg.appendMap(map);
-        }
-    }
-
+    MapSelectDialog mapSelectDlg(*campaign, _battle->getID());
     if(mapSelectDlg.exec() != QDialog::Accepted)
         return nullptr;
     else
