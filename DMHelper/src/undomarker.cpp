@@ -14,7 +14,7 @@ UndoMarker::UndoMarker(Map& map, const MapMarker& marker) :
 
 UndoMarker::~UndoMarker()
 {
-    delete _markerGraphicsItem;
+//    delete _markerGraphicsItem;
 }
 
 void UndoMarker::undo()
@@ -25,14 +25,9 @@ void UndoMarker::undo()
 
 void UndoMarker::redo()
 {
-    // TODO: fix this to get markers working...
-    /*
-    delete _markerGraphicsItem;
-    if(_map.getRegisteredWindow())
-    {
-        _markerGraphicsItem = _map.getRegisteredWindow()->addMapMarker(_marker);
-    }
-    */
+    //delete _markerGraphicsItem;
+    //_markerGraphicsItem = _map.addMapMarker(this, &_marker);
+    _map.addMapMarker(this, &_marker);
 }
 
 void UndoMarker::apply(bool preview, QPaintDevice* target) const
@@ -79,3 +74,13 @@ const MapMarker& UndoMarker::marker() const
 {
     return _marker;
 }
+
+void UndoMarker::setMarkerItem(MapMarkerGraphicsItem* markerItem)
+{
+    if(!markerItem)
+        return;
+
+    delete _markerGraphicsItem;
+    _markerGraphicsItem = markerItem;
+}
+

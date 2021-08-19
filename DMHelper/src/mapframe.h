@@ -17,6 +17,7 @@ class MapFrameScene;
 class Map;
 class Party;
 class MapMarkerGraphicsItem;
+class UndoMarker;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -52,6 +53,8 @@ signals:
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int scale);
 
+    void showMarkersChanged(bool show);
+
     void animationStarted();
     void animateImage(QImage img);
 
@@ -75,6 +78,12 @@ public slots:
     void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
     void setPartyScale(int partyScale);
+
+    void setShowMarkers(bool show);
+    void addNewMarker();
+    void addMarker(const QPointF& markerPosition);
+//    void addMarker(QPointF pos);
+    void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void editModeToggled(int editMode);
     void setMapEdit(bool enabled);

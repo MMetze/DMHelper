@@ -12,6 +12,7 @@ class QDomElement;
 class QUndoStack;
 class AudioTrack;
 class Party;
+class UndoMarker;
 
 class Map : public CampaignObjectBase
 {
@@ -72,6 +73,7 @@ public:
 signals:
     void executeUndo();
     void requestFoWUpdate();
+    void requestMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void partyChanged(Party* party);
     void partyIconChanged(const QString& partyIcon);
@@ -84,6 +86,8 @@ public slots:
 
     void undoPaint();
     void updateFoW();
+
+    void addMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);

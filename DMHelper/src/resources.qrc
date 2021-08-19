@@ -51,10 +51,8 @@
         <file>data/icon_edit.png</file>
         <file>data/icon_fow2.png</file>
         <file>data/icon_move.png</file>
-        <file>data/map_marker.png</file>
         <file>data/crosshair.png</file>
         <file>data/eye.png</file>
-        <file>data/map_marker_bw.png</file>
         <file>data/circle.png</file>
         <file>data/square.png</file>
         <file>data/icon_shrink.png</file>
@@ -288,6 +286,9 @@
         <file>data/fonts/Davek-vGXA.ttf</file>
         <file>data/fonts/Iokharic-dqvK.ttf</file>
         <file>data/fonts/Rellanic-Agx7.ttf</file>
+        <file>data/icon_newmarker.png</file>
+        <file>data/icon_mapmarker.png</file>
+        <file>data/icon_mapmarker_bw.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

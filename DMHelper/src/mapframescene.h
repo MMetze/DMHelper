@@ -15,6 +15,8 @@ signals:
     void mapMouseRelease(const QPointF& pos);
     void mapZoom(int delta);
 
+    void addMarker(const QPointF& pos);
+
 protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent* mouseEvent);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent* mouseEvent);

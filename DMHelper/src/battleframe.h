@@ -76,8 +76,7 @@ public:
         BattleFrameMode_Battle = 0,
         BattleFrameMode_Combatants,
         BattleFrameMode_Map,
-        BattleFrameMode_Grid,
-        BattleFrameMode_Markers
+        BattleFrameMode_Grid
     };
 
 public slots:

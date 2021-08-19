@@ -23,6 +23,8 @@ public:
 
     const MapMarker& marker() const;
 
+    void setMarkerItem(MapMarkerGraphicsItem* markerItem);
+
 protected:
     MapMarker _marker;
     MapMarkerGraphicsItem* _markerGraphicsItem;

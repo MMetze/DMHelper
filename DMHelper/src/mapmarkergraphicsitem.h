@@ -31,8 +31,8 @@ protected:
     MapFrame& _mapFrame;
 
     QGraphicsPixmapItem* _markerIcon;
-    QGraphicsTextItem* _title;
-    QGraphicsTextItem* _details;
+    QGraphicsSimpleTextItem* _title;
+    QGraphicsSimpleTextItem* _details;
 
     bool _detailsVisible;
     bool _clicked;

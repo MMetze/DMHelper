@@ -67,6 +67,7 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(_scene, &MapFrameScene::mapMouseMove, this, &MapFrame::handleMapMouseMove);
     connect(_scene, &MapFrameScene::mapMouseRelease, this, &MapFrame::handleMapMouseRelease);
     connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
+    connect(_scene, &MapFrameScene::addMarker, this, &MapFrame::addMarker);
 
     ui->graphicsView->viewport()->installEventFilter(this);
     ui->graphicsView->installEventFilter(this);
@@ -115,6 +116,7 @@ void MapFrame::activateObject(CampaignObjectBase* object)
     connect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     connect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     connect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
+    connect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
     emit checkableChanged(_isVideo);
     emit setPublishEnabled(true);
@@ -134,6 +136,7 @@ void MapFrame::deactivateObject()
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
+    disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
     setMap(nullptr);
 }
 
@@ -200,6 +203,12 @@ bool MapFrame::eventFilter(QObject *obj, QEvent *event)
         if(_zoomSelect)
         {
             if(execEventFilterSelectZoom(obj, event))
+                return true;
+        }
+        else if((_editMode == DMHelper::EditMode_Edit) ||
+                (_editMode == DMHelper::EditMode_Move))
+        {
+            if(execEventFilterEditModeEdit(obj, event))
                 return true;
         }
         else if(_editMode == DMHelper::EditMode_FoW)
@@ -316,6 +325,41 @@ void MapFrame::setPartyScale(int partyScale)
     _mapSource->setPartyScale(partyScale);
 }
 
+void MapFrame::setShowMarkers(bool show)
+{
+    // TODO
+}
+
+void MapFrame::addNewMarker()
+{
+    QRect viewportRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
+    QPoint centerPos = viewportRect.topLeft() + QPoint(viewportRect.width() / 2, viewportRect.height() / 2);
+    addMarker(centerPos);
+}
+
+void MapFrame::addMarker(const QPointF& markerPosition)
+{
+    MapMarkerDialog dlg(QString(""), QString(""), this);
+    dlg.move(ui->graphicsView->mapFromScene(markerPosition) + mapToGlobal(ui->graphicsView->pos()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        UndoMarker* undoMarker = new UndoMarker(*_mapSource, MapMarker(markerPosition.toPoint(), dlg.getTitle(), dlg.getDescription()));
+        _mapSource->getUndoStack()->push(undoMarker);
+    }
+}
+
+void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
+{
+    if((!undoEntry) || (!marker) || (!_scene))
+        return;
+
+    MapMarkerGraphicsItem* markerItem = new MapMarkerGraphicsItem(_scene, *marker, *this);
+    markerItem->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale()));
+    markerItem->setPos(marker->position());
+    markerItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
+    undoEntry->setMarkerItem(markerItem);
+}
+
 void MapFrame::editModeToggled(int editMode)
 {
     if(_editMode == editMode)
@@ -326,9 +370,6 @@ void MapFrame::editModeToggled(int editMode)
     switch(editMode)
     {
         case DMHelper::EditMode_FoW:
-            ui->graphicsView->viewport()->installEventFilter(this);
-            ui->graphicsView->removeEventFilter(this);
-            break;
         case DMHelper::EditMode_Edit:
             ui->graphicsView->viewport()->installEventFilter(this);
             ui->graphicsView->removeEventFilter(this);
@@ -600,6 +641,7 @@ void MapFrame::initializeFoW()
     connect(_scene, &MapFrameScene::mapMouseMove, this, &MapFrame::handleMapMouseMove);
     connect(_scene, &MapFrameScene::mapMouseRelease, this, &MapFrame::handleMapMouseRelease);
     connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
+    connect(_scene, &MapFrameScene::addMarker, this, &MapFrame::addMarker);
 
     if(!_mapSource)
         return;

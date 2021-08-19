@@ -34,11 +34,16 @@ public slots:
     void removePartyIcon(Party* party);
     void clearPartyIcons();
 
+    void setShowMarkers(bool checked);
+
 signals:
     void showPartyClicked(bool showParty);
     void partySelected(Party* party);
     void partyIconSelected(const QString& partyIcon);
     void scaleChanged(int scale);
+
+    void showMarkersClicked(bool checked);
+    void addMarkerClicked();
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

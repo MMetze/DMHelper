@@ -703,6 +703,11 @@ void Map::updateFoW()
     emit requestFoWUpdate();
 }
 
+void Map::addMapMarker(UndoMarker* undoEntry, MapMarker* marker)
+{
+    emit requestMapMarker(undoEntry, marker);
+}
+
 void Map::setParty(Party* party)
 {
     QUuid newPartyId = (party == nullptr) ? QUuid() : party->getID();

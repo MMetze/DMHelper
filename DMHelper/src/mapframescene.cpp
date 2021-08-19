@@ -15,37 +15,47 @@ void MapFrameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
     {
         emit mapMouseMove(mouseEvent->scenePos());
         mouseEvent->accept();
+        return;
     }
-    else
-    {
-        QGraphicsScene::mouseMoveEvent(mouseEvent);
-    }
+
+    QGraphicsScene::mouseMoveEvent(mouseEvent);
 }
 
 void MapFrameScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if(isMapMovement(mouseEvent))
+    if(mouseEvent)
     {
-        emit mapMousePress(mouseEvent->scenePos());
-        mouseEvent->accept();
+        if(isMapMovement(mouseEvent))
+        {
+            emit mapMousePress(mouseEvent->scenePos());
+            mouseEvent->accept();
+            return;
+        }
     }
-    else
-    {
-        QGraphicsScene::mousePressEvent(mouseEvent);
-    }
+
+    QGraphicsScene::mousePressEvent(mouseEvent);
 }
 
 void MapFrameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if(isMapMovement(mouseEvent))
+    if(mouseEvent)
     {
-        emit mapMouseRelease(mouseEvent->scenePos());
-        mouseEvent->accept();
+        if(isMapMovement(mouseEvent))
+        {
+            emit mapMouseRelease(mouseEvent->scenePos());
+            mouseEvent->accept();
+            return;
+        }
+
+        if((mouseEvent->button() == Qt::RightButton) &&
+           (mouseEvent->buttonDownScreenPos(Qt::RightButton) == mouseEvent->lastScreenPos()))
+        {
+            emit addMarker(mouseEvent->scenePos());
+            return;
+        }
     }
-    else
-    {
-        QGraphicsScene::mouseReleaseEvent(mouseEvent);
-    }
+
+    QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
 void MapFrameScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)

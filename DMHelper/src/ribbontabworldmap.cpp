@@ -21,15 +21,16 @@ RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
     defaultAction->setText(QString("Default Icon"));
     _menu->addAction(defaultAction);
     selectAction(defaultAction);
-//    selectAction(_menu->addAction(QIcon(":/img/data/icon_contentparty.png"), QString("Default Icon")));
 
     RibbonTabWorldMap_PartyAction* selectAction = new RibbonTabWorldMap_PartyAction(nullptr, RibbonTabWorldMap_PartyAction::PartyActionType_Select);
-//    _menu->addAction(QString("Choose icon..."));
     selectAction->setText(QString("Choose icon..."));
     _menu->addAction(selectAction);
 
     _menu->addSeparator();
     connect(_menu, &QMenu::triggered, this, &RibbonTabWorldMap::selectAction);
+
+    connect(ui->btnShowMarkers, &QAbstractButton::toggled, this, &RibbonTabWorldMap::showMarkersClicked);
+    connect(ui->btnAddMarker, &QAbstractButton::clicked, this, &RibbonTabWorldMap::addMarkerClicked);
 }
 
 RibbonTabWorldMap::~RibbonTabWorldMap()
@@ -123,6 +124,12 @@ void RibbonTabWorldMap::clearPartyIcons()
         delete actionList.takeAt(3);
 }
 
+void RibbonTabWorldMap::setShowMarkers(bool checked)
+{
+    if(ui->btnShowMarkers->isChecked() != checked)
+        ui->btnShowMarkers->setChecked(checked);
+}
+
 void RibbonTabWorldMap::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
@@ -132,6 +139,8 @@ void RibbonTabWorldMap::showEvent(QShowEvent *event)
     setWidgetSize(*ui->spinScale, ui->lblShowParty->width() * 9 / 10, ui->spinScale->height());
     setWidgetSize(*ui->lblScale, ui->lblShowParty->width(), ui->lblShowParty->height());
     setLineHeight(*ui->line_1, frameHeight);
+    setStandardButtonSize(*ui->lblShowMarkers, *ui->btnShowMarkers, frameHeight);
+    setStandardButtonSize(*ui->lblAddMarker, *ui->btnAddMarker, frameHeight);
 }
 
 void RibbonTabWorldMap::selectAction(QAction* action)
