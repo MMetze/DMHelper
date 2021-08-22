@@ -21,7 +21,11 @@ public:
     virtual int getType() const override;
     virtual UndoBase* clone() const override;
 
+    void setTitle(const QString& title);
+    void setDescription(const QString& description);
+
     const MapMarker& marker() const;
+    MapMarker& marker();
 
     void setMarkerItem(MapMarkerGraphicsItem* markerItem);
 

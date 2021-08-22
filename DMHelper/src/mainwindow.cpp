@@ -586,6 +586,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
+    connect(mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
 
     connect(_ribbonTabMiniMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
     connect(_ribbonTabMiniMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
@@ -935,6 +936,11 @@ void MainWindow::openDiceDialog()
     DiceRollDialog *drDlg = new DiceRollDialog(this);
     drDlg->resize(width() / 2, height() / 2);
     drDlg->exec();
+}
+
+void MainWindow::openEncounter(QUuid id)
+{
+    selectItem(id);
 }
 
 void MainWindow::openCharacter(QUuid id)

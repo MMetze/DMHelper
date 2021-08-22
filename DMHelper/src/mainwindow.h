@@ -73,6 +73,7 @@ public slots:
     bool closeCampaign();
     void openDiceDialog();
 
+    void openEncounter(QUuid id);
     void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
 

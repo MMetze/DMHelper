@@ -22,7 +22,6 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
     _filename(fileName),
     _undoStack(nullptr),
-    _markerList(),
     _audioTrackId(),
     _playAudio(false),
     _mapRect(),
@@ -67,11 +66,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                     newAction = new UndoShape(*this, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
-                    {
-                        MapMarker m(QPoint(0,0), QString(""), QString(""));
-                        m.inputXML(actionElement, isImport);
-                        _markerList.append(m);
-                    }
+                    newAction = new UndoMarker(*this, MapMarker(QPoint(0,0), QString(""), QString(""), QUuid()));
                     break;
                 case DMHelper::ActionType_Base:
                 default:
@@ -267,35 +262,17 @@ void Map::applyPaintTo(QImage* target, QColor clearColor, int index, bool previe
     }
 }
 
-MapMarker* Map::getMapMarker(int id)
+UndoMarker* Map::getMapMarker(int id)
 {
-    // Search the map's marker list for existing markers
-    int i;
-    for(i = 0; i < _markerList.count(); ++i)
-    {
-        if(_markerList.at(i).getID() == id)
-        {
-            return &(_markerList[i]);
-        }
-    }
-
-    /*
-     * TODO FIX
     // Search the undo stack for new markers
-    for(i = 0; i < _undoStack->count(); ++i)
+    for(int i = 0; i < _undoStack->count(); ++i)
     {
-        const UndoMarker* undoItem = dynamic_cast<const UndoMarker*>(_undoStack->command(i));
-        if(undoItem)
-        {
-            if(undoItem->marker().getID() == id)
-            {
-                return &(undoItem->marker());
-            }
-        }
+        // This is a little evil, will need to do it better with a full undo/redo implementation...
+        UndoMarker* undoItem = const_cast<UndoMarker*>(dynamic_cast<const UndoMarker*>(_undoStack->command(i)));
+        if((undoItem) && (undoItem->marker().getID() == id))
+            return undoItem;
     }
-    */
 
-    // Marker not found.
     return nullptr;
 }
 
@@ -779,6 +756,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("mapRectHeight", _mapRect.height());
 
     QDomElement actionsElement = doc.createElement("actions");
+    /*
     int i;
     for(i = 0; i < _markerList.count(); ++i)
     {
@@ -787,8 +765,9 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
         _markerList.at(i).outputXML(actionElement, isExport);
         actionsElement.appendChild(actionElement);
     }
+    */
 
-    for(i = 0; i < _undoStack->index(); ++i )
+    for(int i = 0; i < _undoStack->index(); ++i )
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)

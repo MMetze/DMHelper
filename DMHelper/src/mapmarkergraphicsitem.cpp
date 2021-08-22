@@ -17,20 +17,23 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     _detailsVisible(false),
     _clicked(false)
 {
-    _markerIcon = scene->addPixmap(QPixmap(":/img/data/icon_mapmarker.png").scaled(MARKER_SIZE, MARKER_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    _markerIcon = new MapMarkerGraphicsPixmapItem(QPixmap(":/img/data/icon_mapmarker.png").scaled(MARKER_SIZE, MARKER_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    scene->addItem(_markerIcon);
     _markerIcon->setFlag(QGraphicsItem::ItemIsMovable);
     _markerIcon->setPos(-MARKER_SIZE / 2, -MARKER_SIZE);
-    addToGroup(_markerIcon);
+    _markerIcon->setGroup(this);
 
-    _title = scene->addSimpleText(marker.title());
+    _title = new MapMarkerGraphicsSimpleTextItem(marker.title());
+    scene->addItem(_title);
     _title->setBrush(QBrush(Qt::white));
     _title->setPen(QPen(QColor(115,18,0)));
     QFont titleFont = _title->font();
     titleFont.setPointSize(MARKER_SIZE / 8);
     _title->setFont(titleFont);
-    addToGroup(_title);
+    _title->setGroup(this);
 
-    _details = scene->addSimpleText(marker.description());
+    _details = new MapMarkerGraphicsSimpleTextItem(marker.description());
+    scene->addItem(_details);
     _details->setBrush(QBrush(Qt::white));
     _details->setPen(QPen(QColor(115,18,0)));
     _details->setVisible(_detailsVisible);
@@ -38,10 +41,12 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     detailsFont.setPointSize(MARKER_SIZE / 10);
     _details->setFont(detailsFont);
     _details->setPos(0, QFontMetrics(detailsFont).height() * 15 / 10);
-    addToGroup(_details);
+    _details->setGroup(this);
 
     setFlag(QGraphicsItem::ItemIsMovable);
     scene->addItem(this);
+
+    setCursor(Qt::PointingHandCursor);
 }
 
 void MapMarkerGraphicsItem::setGroupVisible(bool visible)
@@ -58,6 +63,18 @@ void MapMarkerGraphicsItem::setGroupVisible(bool visible)
         _title->setVisible(false);
         _details->setVisible(false);
     }
+}
+
+void MapMarkerGraphicsItem::setTitle(const QString& title)
+{
+    if(_title)
+        _title->setText(title);
+}
+
+void MapMarkerGraphicsItem::setDescription(const QString& description)
+{
+    if(_details)
+        _details->setText(description);
 }
 
 QVariant MapMarkerGraphicsItem::itemChange(GraphicsItemChange change, const QVariant & value)
@@ -101,13 +118,21 @@ void MapMarkerGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
     if(_clicked)
     {
         if((event) && ((event->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
-            toggleDetails(); // TODO: add encounter link to click here
+            _mapFrame.activateMapMarker(_marker);
         else
             toggleDetails();
         _clicked = false;
     }
 
     QGraphicsItem::mouseReleaseEvent(event);
+}
+
+void MapMarkerGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+    //if((event) && ((event->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
+    //    setCursor(Qt::PointingHandCursor);
+    //else
+    //    unsetCursor();
 }
 
 void MapMarkerGraphicsItem::toggleDetails()

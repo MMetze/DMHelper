@@ -54,7 +54,8 @@ MapFrame::MapFrame(QWidget *parent) :
     _targetSize(),
     _targetLabelSize(),
     _publishRect(),
-    _bwFoWImage()
+    _bwFoWImage(),
+    _activatedId()
 {
     ui->setupUi(this);
 
@@ -172,9 +173,38 @@ void MapFrame::mapMarkerMoved(int markerId)
 
 void MapFrame::editMapMarker(int markerId)
 {
-    Q_UNUSED(markerId);
-    // TODO: add marker and layer support...
+    if(!_mapSource)
+        return;
 
+    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
+    if(!undoMarker)
+        return;
+
+    MapMarkerDialog dlg(undoMarker->marker().title(), undoMarker->marker().description(), undoMarker->marker().encounter(), *_mapSource, this);
+    dlg.resize(width() / 3, height() / 3);
+    dlg.move(ui->graphicsView->mapFromScene(undoMarker->marker().position()) + mapToGlobal(ui->graphicsView->pos()));
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        undoMarker->setTitle(dlg.getTitle());
+        undoMarker->setDescription(dlg.getDescription());
+        undoMarker->marker().setEncounter(dlg.getEncounter());
+    }
+}
+
+void MapFrame::activateMapMarker(int markerId)
+{
+    if(!_mapSource)
+        return;
+
+    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
+    if(!undoMarker)
+        return;
+
+    if(undoMarker->marker().encounter().isNull())
+        return;
+
+    _activatedId = undoMarker->marker().encounter();
+    QTimer::singleShot(0, this, SLOT(handleActivateMapMarker()));
 }
 
 bool MapFrame::eventFilter(QObject *obj, QEvent *event)
@@ -339,11 +369,12 @@ void MapFrame::addNewMarker()
 
 void MapFrame::addMarker(const QPointF& markerPosition)
 {
-    MapMarkerDialog dlg(QString(""), QString(""), this);
+    MapMarkerDialog dlg(QString(""), QString(""), QUuid(), *_mapSource, this);
+    dlg.resize(width() / 3, height() / 3);
     dlg.move(ui->graphicsView->mapFromScene(markerPosition) + mapToGlobal(ui->graphicsView->pos()));
     if(dlg.exec() == QDialog::Accepted)
     {
-        UndoMarker* undoMarker = new UndoMarker(*_mapSource, MapMarker(markerPosition.toPoint(), dlg.getTitle(), dlg.getDescription()));
+        UndoMarker* undoMarker = new UndoMarker(*_mapSource, MapMarker(markerPosition.toPoint(), dlg.getTitle(), dlg.getDescription(), dlg.getEncounter()));
         _mapSource->getUndoStack()->push(undoMarker);
     }
 }
@@ -1113,16 +1144,6 @@ bool MapFrame::execEventFilterEditModeEdit(QObject *obj, QEvent *event)
     }
     else if(event->type() == QEvent::MouseButtonRelease)
     {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-        if(_mouseDownPos == mouseEvent->pos())
-        {
-            MapMarkerDialog dlg(QString(""), QString(""), this);
-            if(dlg.exec() == QDialog::Accepted)
-            {
-                UndoMarker* undoMarker = new UndoMarker(*_mapSource, MapMarker(_mouseDownPos, dlg.getTitle(), dlg.getDescription()));
-                _mapSource->getUndoStack()->push(undoMarker);
-            }
-        }
         _mouseDown = false;
         return true;
     }
@@ -1411,6 +1432,12 @@ void MapFrame::handleMapMouseRelease(const QPointF& pos)
 {
     Q_UNUSED(pos);
     _mouseDown = false;
+}
+
+void MapFrame::handleActivateMapMarker()
+{
+    if(!_activatedId.isNull())
+        emit encounterSelected(_activatedId);
 }
 
 bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)

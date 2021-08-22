@@ -35,6 +35,7 @@ public:
     MapMarkerGraphicsItem* addMapMarker(MapMarker& marker);
     void mapMarkerMoved(int markerId);
     void editMapMarker(int markerId);
+    void activateMapMarker(int markerId);
 
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -42,6 +43,8 @@ public:
     QAction* getRedoAction(QObject* parent);
 
 signals:
+    void encounterSelected(QUuid id);
+
     void publishImage(QImage image);
     void openPreview();
     void windowClosed(MapFrame* mapFrame);
@@ -153,6 +156,8 @@ protected slots:
     void handleMapMouseMove(const QPointF& pos);
     void handleMapMouseRelease(const QPointF& pos);
 
+    void handleActivateMapMarker();
+
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
 
@@ -198,6 +203,7 @@ private:
     QRect _publishRect;
     QImage _bwFoWImage;
 
+    QUuid _activatedId;
 };
 
 #endif // MAPFRAME_H

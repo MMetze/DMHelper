@@ -49,7 +49,7 @@ public:
     QUndoStack* getUndoStack() const;
     void applyPaintTo(QImage* target, QColor clearColor, int index, bool preview = false);
 
-    MapMarker* getMapMarker(int id);
+    UndoMarker* getMapMarker(int id);
 
     bool isInitialized();
     void setExternalFoWImage(QImage externalImage);
@@ -103,7 +103,6 @@ protected:
 
     QString _filename;
     QUndoStack* _undoStack;
-    QList<MapMarker> _markerList;
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;

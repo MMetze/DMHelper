@@ -1,6 +1,8 @@
 #include "mapframescene.h"
+#include "mapmarkergraphicsitem.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
+#include <QGraphicsItem>
 #include <QKeyEvent>
 
 MapFrameScene::MapFrameScene(QObject* parent) :
@@ -25,7 +27,10 @@ void MapFrameScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if(mouseEvent)
     {
-        if(isMapMovement(mouseEvent))
+        QList<QGraphicsItem*> mouseItems = items(mouseEvent->scenePos());
+        int itemType = (mouseItems.count() > 0) ? mouseItems.at(0)->type() : -1;
+
+        if((itemType != MapMarkerGraphicsItem::Type) && (isMapMovement(mouseEvent)))
         {
             emit mapMousePress(mouseEvent->scenePos());
             mouseEvent->accept();
@@ -37,10 +42,13 @@ void MapFrameScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 }
 
 void MapFrameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
-{
+{    
     if(mouseEvent)
     {
-        if(isMapMovement(mouseEvent))
+        QList<QGraphicsItem*> mouseItems = items(mouseEvent->scenePos());
+        int itemType = (mouseItems.count() > 0) ? mouseItems.at(0)->type() : -1;
+
+        if((itemType != MapMarkerGraphicsItem::Type) && (isMapMovement(mouseEvent)))
         {
             emit mapMouseRelease(mouseEvent->scenePos());
             mouseEvent->accept();

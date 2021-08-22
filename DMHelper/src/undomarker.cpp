@@ -46,6 +46,7 @@ QDomElement UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir&
     element.setAttribute("y", _marker.position().y());
     element.setAttribute("title", _marker.title());
     element.setAttribute("description", _marker.description());
+    element.setAttribute("encounter", _marker.encounter().toString());
 
     return element;
 }
@@ -58,6 +59,7 @@ void UndoMarker::inputXML(const QDomElement &element, bool isImport)
     _marker.setY(element.attribute(QString("y")).toInt());
     _marker.setTitle(element.attribute( QString("title") ));
     _marker.setDescription(element.attribute( QString("description") ));
+    _marker.setEncounter(QUuid(element.attribute(QString("encounter"))));
 }
 
 int UndoMarker::getType() const
@@ -70,7 +72,26 @@ UndoBase* UndoMarker::clone() const
     return new UndoMarker(_map, _marker);
 }
 
+void UndoMarker::setTitle(const QString& title)
+{
+    _marker.setTitle(title);
+    if(_markerGraphicsItem)
+        _markerGraphicsItem->setTitle(title);
+}
+
+void UndoMarker::setDescription(const QString& description)
+{
+    _marker.setDescription(description);
+    if(_markerGraphicsItem)
+        _markerGraphicsItem->setDescription(description);
+}
+
 const MapMarker& UndoMarker::marker() const
+{
+    return _marker;
+}
+
+MapMarker& UndoMarker::marker()
 {
     return _marker;
 }
