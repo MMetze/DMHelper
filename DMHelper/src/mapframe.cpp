@@ -117,7 +117,6 @@ void MapFrame::activateObject(CampaignObjectBase* object)
     connect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     connect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     connect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
-    connect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
     emit checkableChanged(_isVideo);
     emit setPublishEnabled(true);
@@ -152,6 +151,8 @@ void MapFrame::setMap(Map* map)
     _mapSource = map;
     if(!_mapSource)
         return;
+
+    connect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
     initializeFoW();
     setMapCursor();
@@ -389,6 +390,26 @@ void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
     markerItem->setPos(marker->position());
     markerItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
     undoEntry->setMarkerItem(markerItem);
+}
+
+void MapFrame::setMarkerVisible(bool visible)
+{
+    if((!_mapSource) || (!_mapSource->getUndoStack()))
+        return;
+
+    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    {
+        const UndoMarker* marker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
+        if((marker) && (marker->getMarkerItem()))
+            marker->getMarkerItem()->setVisible(visible);
+        /*
+        if(constMarker)
+        {
+            UndoMarker* marker = const_cast<UndoMarker*>(constMarker);
+            marker->redo();
+        }
+        */
+    }
 }
 
 void MapFrame::editModeToggled(int editMode)
@@ -700,6 +721,8 @@ void MapFrame::initializeFoW()
 
     checkPartyUpdate();
 
+    createMarkerItems();
+
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
@@ -748,13 +771,40 @@ void MapFrame::uninitializeFoW()
         _videoPlayer = nullptr;
     }
 
-    delete _partyIcon; _partyIcon = nullptr;
-    delete _backgroundImage; _backgroundImage = nullptr;
-    delete _backgroundVideo; _backgroundVideo = nullptr;
-    delete _fow; _fow = nullptr;
-
     delete _scene;
     _scene = nullptr;
+}
+
+void MapFrame::createMarkerItems()
+{
+    if((!_mapSource) || (!_mapSource->getUndoStack()))
+        return;
+
+    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    {
+        const UndoMarker* constMarker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
+        if(constMarker)
+        {
+            UndoMarker* marker = const_cast<UndoMarker*>(constMarker);
+            marker->redo();
+        }
+    }
+}
+
+void MapFrame::cleanupMarkerItems()
+{
+    if((!_mapSource) || (!_mapSource->getUndoStack()))
+        return;
+
+    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    {
+        const UndoMarker* constMarker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
+        if(constMarker)
+        {
+            UndoMarker* marker = const_cast<UndoMarker*>(constMarker);
+            marker->undo();
+        }
+    }
 }
 
 void MapFrame::hideEvent(QHideEvent * event)
@@ -1264,6 +1314,8 @@ void MapFrame::cleanupBuffers()
         _fow = nullptr;
         delete tempItem;
     }
+
+    cleanupMarkerItems();
 
     if(_scene)
     {

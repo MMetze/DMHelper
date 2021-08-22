@@ -27,6 +27,7 @@ public:
     const MapMarker& marker() const;
     MapMarker& marker();
 
+    MapMarkerGraphicsItem* getMarkerItem() const;
     void setMarkerItem(MapMarkerGraphicsItem* markerItem);
 
 protected:

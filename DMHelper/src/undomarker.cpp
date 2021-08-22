@@ -27,6 +27,9 @@ void UndoMarker::redo()
 {
     //delete _markerGraphicsItem;
     //_markerGraphicsItem = _map.addMapMarker(this, &_marker);
+    if(_markerGraphicsItem)
+        undo();
+
     _map.addMapMarker(this, &_marker);
 }
 
@@ -94,6 +97,11 @@ const MapMarker& UndoMarker::marker() const
 MapMarker& UndoMarker::marker()
 {
     return _marker;
+}
+
+MapMarkerGraphicsItem* UndoMarker::getMarkerItem() const
+{
+    return _markerGraphicsItem;
 }
 
 void UndoMarker::setMarkerItem(MapMarkerGraphicsItem* markerItem)

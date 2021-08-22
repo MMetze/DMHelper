@@ -87,6 +87,7 @@ public slots:
     void addMarker(const QPointF& markerPosition);
 //    void addMarker(QPointF pos);
     void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
+    void setMarkerVisible(bool visible);
 
     void editModeToggled(int editMode);
     void setMapEdit(bool enabled);
@@ -122,6 +123,9 @@ public slots:
 protected:
     void initializeFoW();
     void uninitializeFoW();
+
+    void createMarkerItems();
+    void cleanupMarkerItems();
 
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
