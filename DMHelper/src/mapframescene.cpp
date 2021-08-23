@@ -3,12 +3,44 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsSceneWheelEvent>
 #include <QGraphicsItem>
+#include <QGraphicsView>
 #include <QKeyEvent>
+#include <QMenu>
 
 MapFrameScene::MapFrameScene(QObject* parent) :
     QGraphicsScene(parent),
-    _spaceDown(false)
+    _spaceDown(false),
+    _contextMenuItem(nullptr),
+    _contextMenuPos()
 {
+}
+
+void MapFrameScene::handleAddMarker()
+{
+    emit addMarker(_contextMenuPos);
+}
+
+void MapFrameScene::handleEditMarker()
+{
+    if(!_contextMenuItem)
+        return;
+
+    MapMarkerGraphicsItem* markerItem = dynamic_cast<MapMarkerGraphicsItem*>(_contextMenuItem);
+    if((!markerItem) && (_contextMenuItem->parentItem()))
+        markerItem = dynamic_cast<MapMarkerGraphicsItem*>(_contextMenuItem->parentItem());
+
+    if(markerItem)
+        emit editMarker(markerItem->getMarkerId());
+}
+
+void MapFrameScene::handleCenterView()
+{
+    emit centerView(_contextMenuPos);
+}
+
+void MapFrameScene::handleClearFoW()
+{
+    emit clearFoW();
 }
 
 void MapFrameScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
@@ -58,7 +90,34 @@ void MapFrameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
         if((mouseEvent->button() == Qt::RightButton) &&
            (mouseEvent->buttonDownScreenPos(Qt::RightButton) == mouseEvent->lastScreenPos()))
         {
-            emit addMarker(mouseEvent->scenePos());
+            QMenu menu(views().constFirst());
+            _contextMenuPos = mouseEvent->scenePos();
+            if(itemType == MapMarkerGraphicsItem::Type)
+            {
+                _contextMenuItem = mouseItems.at(0);
+
+                QAction* editMarkerAction = new QAction(QString("Edit Marker..."), &menu);
+                connect(editMarkerAction, SIGNAL(triggered()), this, SLOT(handleEditMarker()));
+                menu.addAction(editMarkerAction);
+            }
+            else
+            {
+                QAction* addMarkerAction = new QAction(QString("Add Marker..."), &menu);
+                connect(addMarkerAction, SIGNAL(triggered()), this, SLOT(handleAddMarker()));
+                menu.addAction(addMarkerAction);
+            }
+
+            menu.addSeparator();
+
+            QAction* centerViewAction = new QAction(QString("Center View"), &menu);
+            connect(centerViewAction, SIGNAL(triggered()), this, SLOT(centerView()));
+            menu.addAction(centerViewAction);
+
+            QAction* clearFoWAction = new QAction(QString("Clear Fog of War"), &menu);
+            connect(clearFoWAction, SIGNAL(triggered()), this, SLOT(handleClearFoW()));
+            menu.addAction(clearFoWAction);
+
+            menu.exec(mouseEvent->screenPos());
             return;
         }
     }

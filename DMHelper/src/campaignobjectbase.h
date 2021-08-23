@@ -22,11 +22,6 @@ public:
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void postProcessXML(const QDomElement &element, bool isImport);
-    //virtual void resolveReferences();
-
-    // Base functions to handle UI widgets
-    //virtual void widgetActivated(QWidget* widget) = 0;
-    //virtual void widgetDeactivated(QWidget* widget) = 0;
 
     virtual int getObjectType() const;
     virtual bool getExpanded() const;

@@ -273,6 +273,9 @@
        <property name="checkable">
         <bool>true</bool>
        </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
        <property name="flat">
         <bool>true</bool>
        </property>
@@ -281,7 +284,7 @@
      <item>
       <widget class="QLabel" name="lblShowMarkers">
        <property name="text">
-        <string>Markers</string>
+        <string>Show Markers</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>

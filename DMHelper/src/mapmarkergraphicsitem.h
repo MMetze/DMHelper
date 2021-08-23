@@ -21,6 +21,9 @@ public:
     void setGroupVisible(bool visible);
     void setTitle(const QString& title);
     void setDescription(const QString& description);
+    void setDetailsVisible(bool visible);
+
+    int getMarkerId() const;
 
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
@@ -28,7 +31,6 @@ protected:
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * event) override;
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * event) override;
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event) override;
-    virtual void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void toggleDetails();
 
     virtual int type() const override;
@@ -47,7 +49,7 @@ protected:
 class MapMarkerGraphicsPixmapItem : public QGraphicsPixmapItem
 {
 public:
-    MapMarkerGraphicsPixmapItem(const QPixmap &pixmap, QGraphicsItem *parent = nullptr) :
+    MapMarkerGraphicsPixmapItem(const QPixmap &pixmap, QGraphicsItem *parent) :
         QGraphicsPixmapItem(pixmap, parent)
     {}
 
@@ -58,7 +60,7 @@ protected:
 class MapMarkerGraphicsSimpleTextItem : public QGraphicsSimpleTextItem
 {
 public:
-    MapMarkerGraphicsSimpleTextItem(const QString &text, QGraphicsItem *parent = nullptr) :
+    MapMarkerGraphicsSimpleTextItem(const QString &text, QGraphicsItem *parent) :
         QGraphicsSimpleTextItem(text, parent)
     {}
 

@@ -50,6 +50,7 @@ public:
     void applyPaintTo(QImage* target, QColor clearColor, int index, bool preview = false);
 
     UndoMarker* getMapMarker(int id);
+    bool getShowMarkers() const;
 
     bool isInitialized();
     void setExternalFoWImage(QImage externalImage);
@@ -80,6 +81,8 @@ signals:
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int partyScale);
 
+    void showMarkersChanged(bool showMarkers);
+
 public slots:
     void initialize();
     void uninitialize();
@@ -94,6 +97,8 @@ public slots:
     void setShowParty(bool showParty);
     void setPartyIconPos(const QPoint& pos);
     void setPartyScale(int partyScale);
+
+    void setShowMarkers(bool showMarkers);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -112,6 +117,8 @@ protected:
     QString _partyAltIcon;
     QPoint _partyIconPos;
     int _partyScale;
+
+    bool _showMarkers;
 
     bool _initialized;
     QImage _imgBackground;

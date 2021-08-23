@@ -8,6 +8,7 @@
 #include <QRubberBand>
 #include "undopath.h"
 #include "videoplayer.h"
+#include "unselectedpixmap.h"
 
 namespace Ui {
 class MapFrame;
@@ -32,9 +33,7 @@ public:
 
     void setMap(Map* map);
 
-    MapMarkerGraphicsItem* addMapMarker(MapMarker& marker);
     void mapMarkerMoved(int markerId);
-    void editMapMarker(int markerId);
     void activateMapMarker(int markerId);
 
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
@@ -81,13 +80,13 @@ public slots:
     void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
     void setPartyScale(int partyScale);
+    void setPartySelected(bool selected);
 
     void setShowMarkers(bool show);
     void addNewMarker();
     void addMarker(const QPointF& markerPosition);
-//    void addMarker(QPointF pos);
     void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
-    void setMarkerVisible(bool visible);
+    void editMapMarker(int markerId);
 
     void editModeToggled(int editMode);
     void setMapEdit(bool enabled);
@@ -101,6 +100,7 @@ public slots:
     void zoomFit();
     void zoomSelect(bool enabled);
     void zoomDelta(int delta);
+    void centerWindow(const QPointF& position);
     void cancelSelect();
 
     void setErase(bool enabled);
@@ -171,7 +171,7 @@ private:
     QGraphicsPixmapItem* _backgroundImage;
     QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
-    QGraphicsPixmapItem* _partyIcon;
+    UnselectedPixmap* _partyIcon;
 
     int _editMode;
     bool _erase;

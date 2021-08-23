@@ -59,9 +59,7 @@ MapFrame::MapFrame(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // TODO: reactivate markers
-    //ui->btnShowMarkers->setVisible(false);
-
+    /*
     _scene = new MapFrameScene(this);
     ui->graphicsView->setScene(_scene);
     connect(_scene, &MapFrameScene::mapMousePress, this, &MapFrame::handleMapMousePress);
@@ -69,22 +67,14 @@ MapFrame::MapFrame(QWidget *parent) :
     connect(_scene, &MapFrameScene::mapMouseRelease, this, &MapFrame::handleMapMouseRelease);
     connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
     connect(_scene, &MapFrameScene::addMarker, this, &MapFrame::addMarker);
+    */
 
     ui->graphicsView->viewport()->installEventFilter(this);
     ui->graphicsView->installEventFilter(this);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
-    //TODO Markers: connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
-
     connect(this, SIGNAL(dirty()), this, SLOT(resetPublishFoW()));
     connect(this, &MapFrame::dirty, this, &MapFrame::checkPartyUpdate);
-
-    //_publishTimer = new QTimer(this);
-    //_publishTimer->setSingleShot(false);
-    //connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
-
-    //setMapCursor();
-    //setScale(1.0);
 
     editModeToggled(DMHelper::EditMode_Move);
 }
@@ -138,6 +128,8 @@ void MapFrame::deactivateObject()
     disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
     disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
     setMap(nullptr);
+
+    _spaceDown = false;
 }
 
 void MapFrame::setMap(Map* map)
@@ -158,21 +150,7 @@ void MapFrame::setMap(Map* map)
     setMapCursor();
 }
 
-MapMarkerGraphicsItem* MapFrame::addMapMarker(MapMarker& marker)
-{
-    // TODO: add marker and layer support...
-    Q_UNUSED(marker);
-    return nullptr;
-}
-
 void MapFrame::mapMarkerMoved(int markerId)
-{
-    Q_UNUSED(markerId);
-    // TODO: add marker and layer support...
-
-}
-
-void MapFrame::editMapMarker(int markerId)
 {
     if(!_mapSource)
         return;
@@ -181,14 +159,10 @@ void MapFrame::editMapMarker(int markerId)
     if(!undoMarker)
         return;
 
-    MapMarkerDialog dlg(undoMarker->marker().title(), undoMarker->marker().description(), undoMarker->marker().encounter(), *_mapSource, this);
-    dlg.resize(width() / 3, height() / 3);
-    dlg.move(ui->graphicsView->mapFromScene(undoMarker->marker().position()) + mapToGlobal(ui->graphicsView->pos()));
-    if(dlg.exec() == QDialog::Accepted)
+    if(undoMarker->getMarkerItem())
     {
-        undoMarker->setTitle(dlg.getTitle());
-        undoMarker->setDescription(dlg.getDescription());
-        undoMarker->marker().setEncounter(dlg.getEncounter());
+        undoMarker->marker().setPosition(undoMarker->getMarkerItem()->pos().toPoint());
+        emit dirty();
     }
 }
 
@@ -356,9 +330,25 @@ void MapFrame::setPartyScale(int partyScale)
     _mapSource->setPartyScale(partyScale);
 }
 
+void MapFrame::setPartySelected(bool selected)
+{
+    if(_partyIcon)
+        _partyIcon->setSelected(selected);
+}
+
 void MapFrame::setShowMarkers(bool show)
 {
-    // TODO
+    if((!_mapSource) || (!_mapSource->getUndoStack()))
+        return;
+
+    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    {
+        const UndoMarker* marker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
+        if((marker) && (marker->getMarkerItem()))
+            marker->getMarkerItem()->setVisible(show);
+    }
+
+    _mapSource->setShowMarkers(show);
 }
 
 void MapFrame::addNewMarker()
@@ -377,6 +367,8 @@ void MapFrame::addMarker(const QPointF& markerPosition)
     {
         UndoMarker* undoMarker = new UndoMarker(*_mapSource, MapMarker(markerPosition.toPoint(), dlg.getTitle(), dlg.getDescription(), dlg.getEncounter()));
         _mapSource->getUndoStack()->push(undoMarker);
+        emit dirty();
+        setShowMarkers(true);
     }
 }
 
@@ -389,26 +381,31 @@ void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
     markerItem->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale()));
     markerItem->setPos(marker->position());
     markerItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
+
+    if(_mapSource)
+        markerItem->setVisible(_mapSource->getShowMarkers());
+
     undoEntry->setMarkerItem(markerItem);
 }
 
-void MapFrame::setMarkerVisible(bool visible)
+void MapFrame::editMapMarker(int markerId)
 {
-    if((!_mapSource) || (!_mapSource->getUndoStack()))
+    if(!_mapSource)
         return;
 
-    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
+    if(!undoMarker)
+        return;
+
+    MapMarkerDialog dlg(undoMarker->marker().title(), undoMarker->marker().description(), undoMarker->marker().encounter(), *_mapSource, this);
+    dlg.resize(width() / 3, height() / 3);
+    dlg.move(ui->graphicsView->mapFromScene(undoMarker->marker().position()) + mapToGlobal(ui->graphicsView->pos()));
+    if(dlg.exec() == QDialog::Accepted)
     {
-        const UndoMarker* marker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
-        if((marker) && (marker->getMarkerItem()))
-            marker->getMarkerItem()->setVisible(visible);
-        /*
-        if(constMarker)
-        {
-            UndoMarker* marker = const_cast<UndoMarker*>(constMarker);
-            marker->redo();
-        }
-        */
+        undoMarker->setTitle(dlg.getTitle());
+        undoMarker->setDescription(dlg.getDescription());
+        undoMarker->marker().setEncounter(dlg.getEncounter());
+        emit dirty();
     }
 }
 
@@ -516,6 +513,13 @@ void MapFrame::zoomDelta(int delta)
         zoomOut();
 }
 
+void MapFrame::centerWindow(const QPointF& position)
+{
+    ui->graphicsView->centerOn(position);
+    setMapCursor();
+    storeViewRect();
+}
+
 void MapFrame::cancelSelect()
 {
     delete _rubberBand;
@@ -569,9 +573,6 @@ void MapFrame::publishWindowMouseDown(const QPointF& position)
     if(!convertPublishToScene(position, newPosition))
         return;
 
-    QRectF sceneRect = _scene->sceneRect();
-    QRectF iconRect = _partyIcon->boundingRect();
-
     if(_partyIcon->contains(newPosition - _partyIcon->pos()))
     {
         _publishMouseDown = true;
@@ -622,7 +623,7 @@ void MapFrame::publishClicked(bool checked)
             // TODO: Consider zoom factor...
 
             pub = _mapSource->getPublishImage(_publishRect);
-        if(_partyIcon)
+            if(_partyIcon)
                 partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
         }
         else
@@ -695,6 +696,10 @@ void MapFrame::initializeFoW()
     connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
     connect(_scene, &MapFrameScene::addMarker, this, &MapFrame::addMarker);
 
+    connect(_scene, &MapFrameScene::editMarker, this, &MapFrame::editMapMarker);
+    connect(_scene, &MapFrameScene::centerView, this, &MapFrame::centerWindow);
+    connect(_scene, &MapFrameScene::clearFoW, this, &MapFrame::clearFoW);
+
     if(!_mapSource)
         return;
 
@@ -729,6 +734,7 @@ void MapFrame::initializeFoW()
     connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
     connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
+    connect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
     connect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
@@ -741,6 +747,7 @@ void MapFrame::initializeFoW()
 
     emit showPartyChanged(_mapSource->getShowParty());
     emit partyScaleChanged(_mapSource->getPartyScale());
+    emit showMarkersChanged(_mapSource->getShowMarkers());
 
     _isVideo = !_mapSource->isInitialized();
 }
@@ -756,6 +763,7 @@ void MapFrame::uninitializeFoW()
     disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
     disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
     disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
     disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);

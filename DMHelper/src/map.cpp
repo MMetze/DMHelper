@@ -29,6 +29,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _partyId(),
     _partyIconPos(-1, -1),
     _partyScale(10),
+    _showMarkers(true),
     _initialized(false),
     _imgBackground(),
     _imgFow()
@@ -274,6 +275,11 @@ UndoMarker* Map::getMapMarker(int id)
     }
 
     return nullptr;
+}
+
+bool Map::getShowMarkers() const
+{
+    return _showMarkers;
 }
 
 bool Map::isInitialized()
@@ -733,6 +739,15 @@ void Map::setPartyScale(int partyScale)
     }
 }
 
+void Map::setShowMarkers(bool showMarkers)
+{
+    if(_showMarkers != showMarkers)
+    {
+        _showMarkers = showMarkers;
+        emit showMarkersChanged(_showMarkers);
+        emit dirty();
+    }
+}
 
 QDomElement Map::createOutputXML(QDomDocument &doc)
 {
@@ -744,12 +759,13 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
     element.setAttribute("audiotrack", _audioTrackId.toString());
     element.setAttribute("playaudio", _playAudio);
-    element.setAttribute("party", _partyId.toString());
     element.setAttribute("showparty", _showPartyIcon);
+    element.setAttribute("party", _partyId.toString());
     element.setAttribute("partyalticon", _partyAltIcon);
     element.setAttribute("partyPosX", _partyIconPos.x());
     element.setAttribute("partyPosY", _partyIconPos.y());
     element.setAttribute("partyScale", _partyScale);
+    element.setAttribute("showMarkers", _showMarkers);
     element.setAttribute("mapRectX", _mapRect.x());
     element.setAttribute("mapRectY", _mapRect.y());
     element.setAttribute("mapRectWidth", _mapRect.width());
@@ -795,12 +811,13 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
 {
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
     _playAudio = static_cast<bool>(element.attribute("playaudio", QString::number(1)).toInt());
-    _partyId = parseIdString(element.attribute("party"));
     _showPartyIcon = static_cast<bool>(element.attribute("showparty", QString::number(1)).toInt());
+    _partyId = parseIdString(element.attribute("party"));
+    _partyAltIcon = element.attribute("partyalticon");
     _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
                            element.attribute("partyPosY", QString::number(-1)).toInt());
     _partyScale = element.attribute("partyScale", QString::number(10)).toInt();
-    _partyAltIcon = element.attribute("partyalticon");
+    _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }

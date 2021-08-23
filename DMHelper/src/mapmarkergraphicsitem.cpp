@@ -17,13 +17,13 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     _detailsVisible(false),
     _clicked(false)
 {
-    _markerIcon = new MapMarkerGraphicsPixmapItem(QPixmap(":/img/data/icon_mapmarker.png").scaled(MARKER_SIZE, MARKER_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+    _markerIcon = new MapMarkerGraphicsPixmapItem(QPixmap(":/img/data/icon_mapmarker.png").scaled(MARKER_SIZE, MARKER_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation), this);
     scene->addItem(_markerIcon);
     _markerIcon->setFlag(QGraphicsItem::ItemIsMovable);
     _markerIcon->setPos(-MARKER_SIZE / 2, -MARKER_SIZE);
     _markerIcon->setGroup(this);
 
-    _title = new MapMarkerGraphicsSimpleTextItem(marker.title());
+    _title = new MapMarkerGraphicsSimpleTextItem(marker.title(), this);
     scene->addItem(_title);
     _title->setBrush(QBrush(Qt::white));
     _title->setPen(QPen(QColor(115,18,0)));
@@ -32,7 +32,7 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     _title->setFont(titleFont);
     _title->setGroup(this);
 
-    _details = new MapMarkerGraphicsSimpleTextItem(marker.description());
+    _details = new MapMarkerGraphicsSimpleTextItem(marker.description(), this);
     scene->addItem(_details);
     _details->setBrush(QBrush(Qt::white));
     _details->setPen(QPen(QColor(115,18,0)));
@@ -44,6 +44,8 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     _details->setGroup(this);
 
     setFlag(QGraphicsItem::ItemIsMovable);
+    setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+
     scene->addItem(this);
 
     setCursor(Qt::PointingHandCursor);
@@ -77,12 +79,25 @@ void MapMarkerGraphicsItem::setDescription(const QString& description)
         _details->setText(description);
 }
 
+void MapMarkerGraphicsItem::setDetailsVisible(bool visible)
+{
+    if(_detailsVisible != visible)
+    {
+        _detailsVisible = visible;
+        _details->setVisible(_detailsVisible);
+    }
+}
+
+int MapMarkerGraphicsItem::getMarkerId() const
+{
+    return _marker;
+}
+
 QVariant MapMarkerGraphicsItem::itemChange(GraphicsItemChange change, const QVariant & value)
 {
     if((change == QGraphicsItem::ItemSelectedChange) && (value.toBool() == false))
     {
-        // Deselected
-        _details->setVisible(false);
+        setDetailsVisible(false);
     }
     else if(change == QGraphicsItem::ItemPositionHasChanged)
     {
@@ -94,6 +109,7 @@ QVariant MapMarkerGraphicsItem::itemChange(GraphicsItemChange change, const QVar
 
 void MapMarkerGraphicsItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event)
 {
+    setDetailsVisible(true);
     _mapFrame.editMapMarker(_marker);
 
     QGraphicsItem::mouseDoubleClickEvent(event);
@@ -109,6 +125,7 @@ void MapMarkerGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent * event)
 void MapMarkerGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {
     _clicked = true;
+    _mapFrame.setPartySelected(false);
 
     QGraphicsItem::mousePressEvent(event);
 }
@@ -127,18 +144,9 @@ void MapMarkerGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
     QGraphicsItem::mouseReleaseEvent(event);
 }
 
-void MapMarkerGraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{
-    //if((event) && ((event->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
-    //    setCursor(Qt::PointingHandCursor);
-    //else
-    //    unsetCursor();
-}
-
 void MapMarkerGraphicsItem::toggleDetails()
 {
-    _detailsVisible = !_detailsVisible;
-    _details->setVisible(_detailsVisible);
+    setDetailsVisible(!_detailsVisible);
 }
 
 int MapMarkerGraphicsItem::type() const
