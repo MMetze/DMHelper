@@ -92,7 +92,7 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
 
     qDebug() << "[Battle Dialog Scene] Creating scene contents: " << rect;
     _grid = new Grid(*this, rect);
-    _grid->rebuildGrid(*_model, Grid::GridType_Square);
+    _grid->rebuildGrid(*_model);
 
     QList<BattleDialogModelEffect*> effects = _model->getEffectList();
     for(BattleDialogModelEffect* effect : qAsConst(effects))
@@ -135,7 +135,7 @@ void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
     {
         qDebug() << "[Battle Dialog Scene]     Resizing grid, grid shape = " << rect;
         _grid->setGridShape(rect);
-        _grid->rebuildGrid(*_model, Grid::GridType_Square);
+        _grid->rebuildGrid(*_model);
     }
 
     for(QGraphicsItem* item : qAsConst(_itemList))
@@ -165,7 +165,7 @@ void BattleDialogGraphicsScene::updateBattleContents()
     if(_grid)
     {
         qDebug() << "[Battle Dialog Scene]     Rebuilding grid, grid scale = " << _model->getGridScale();
-        _grid->rebuildGrid(*_model, Grid::GridType_Square);
+        _grid->rebuildGrid(*_model);
     }
 
     for(QGraphicsItem* item : qAsConst(_itemList))

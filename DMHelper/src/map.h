@@ -28,6 +28,11 @@ public:
     QString getFileName() const;
     void setFileName(const QString& newFileName);
 
+    QColor getMapColor() const;
+    void setMapColor(QColor color);
+    QSize getMapSize() const;
+    void setMapSize(QSize size);
+
     AudioTrack* getAudioTrack();
     QUuid getAudioTrackId();
     void setAudioTrack(AudioTrack* track);
@@ -58,9 +63,9 @@ public:
     QImage getFoWImage();
     bool isCleared();
 
-    void paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview );
-    void paintFoWRect( QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview );
-    void fillFoW( QColor color, QPaintDevice* target );
+    void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
+    void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
+    void fillFoW(QColor color, QPaintDevice* target);
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
@@ -123,6 +128,10 @@ protected:
     bool _initialized;
     QImage _imgBackground;
     QImage _imgFow;
+
+    // For a generic map
+    QColor _mapColor;
+    QSize _mapSize;
 };
 
 #endif // MAP_H

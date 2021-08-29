@@ -91,6 +91,8 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
+    void setGridAngle(int gridAngle);
+    void setGridType(int gridType);
     void setXOffset(int xOffset);
     void setYOffset(int yOffset);
     void setGridVisible(bool gridVisible);
@@ -174,6 +176,7 @@ signals:
 
     void foWEditToggled(bool enabled);
     void foWSelectToggled(bool enabled);
+    void mapCreated();
 
     void pointerToggled(bool enabled);
 

@@ -26,7 +26,7 @@ public:
     virtual void setGridVisible(bool gridVisible);
     virtual void clear();
 
-    void rebuildGrid(BattleDialogModel& model, int gridType);
+    void rebuildGrid(BattleDialogModel& model);
 
 private:
 
@@ -34,6 +34,9 @@ private:
     void rebuildGrid_Hex(BattleDialogModel& model);
     void rebuildGrid_Isosquare(BattleDialogModel& model);
     void rebuildGrid_Isohex(BattleDialogModel& model);
+
+    int computeOutCode(int x, int y);
+    void createLine(int x1, int y1, int x2, int y2);
 
     QRect _gridShape;
     QList<QGraphicsItem*> _grid;

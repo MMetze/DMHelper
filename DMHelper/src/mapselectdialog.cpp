@@ -4,13 +4,17 @@
 #include "character.h"
 #include "audiotrack.h"
 #include "campaign.h"
+#include "mapfactory.h"
+#include "mapblankdialog.h"
 #include <QBrush>
 #include <QMessageBox>
 
 MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::MapSelectDialog),
-    _currentItem(nullptr)
+    _currentItem(nullptr),
+    _createNewMapEntry(nullptr),
+    _blankMap(nullptr)
 {
     ui->setupUi(this);
     connect(ui->lstMaps, &QTreeWidget::currentItemChanged, this, &MapSelectDialog::handleItemChanged);
@@ -28,7 +32,19 @@ Map* MapSelectDialog::getSelectedMap() const
     if(!currentItem)
         return nullptr;
 
+    if(currentItem == _createNewMapEntry)
+        return _blankMap;
+
     return currentItem->data(0, Qt::UserRole).value<Map*>();
+}
+
+void MapSelectDialog::accept()
+{
+    QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
+    if((currentItem) && (currentItem == _createNewMapEntry))
+        createBlankMap();
+
+    QDialog::accept();
 }
 
 void MapSelectDialog::handleItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
@@ -52,6 +68,10 @@ void MapSelectDialog::setupSelectTree(Campaign& campaign, const QUuid& currentId
     ui->lstMaps->clear();
 
     _currentItem = nullptr;
+
+    _createNewMapEntry = new QTreeWidgetItem();
+    _createNewMapEntry->setText(0, QString("Create Blank Map..."));
+    ui->lstMaps->invisibleRootItem()->addChild(_createNewMapEntry);
 
     QList<CampaignObjectBase*> campaignObjects = campaign.getChildObjects();
     for(CampaignObjectBase* object : campaignObjects)
@@ -117,6 +137,7 @@ bool MapSelectDialog::insertObject(CampaignObjectBase* object, QTreeWidgetItem* 
     {
         hasMap = true;
         _currentItem = newItem;
+        _currentItem->setData(0, Qt::UserRole + 1, QVariant::fromValue(dynamic_cast<CampaignObjectBase*>(object)));
     }
 
     QList<CampaignObjectBase*> childObjects = object->getChildObjects();
@@ -179,5 +200,31 @@ void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* ob
             break;
         default:
             break;
+    }
+}
+
+void MapSelectDialog::createBlankMap()
+{
+    if(!_currentItem)
+        return;
+
+    CampaignObjectBase* parentObject = _currentItem->data(0, Qt::UserRole + 1).value<CampaignObjectBase*>();
+    if(!parentObject)
+        return;
+
+    MapBlankDialog blankDlg;
+    int result = blankDlg.exec();
+    if(result != QDialog::Accepted)
+        return;
+
+    CampaignObjectBase* mapObject = MapFactory().createObject(DMHelper::CampaignType_Map, 0, _currentItem->text(0) + QString(" map"), false);
+    _blankMap = dynamic_cast<Map*>(mapObject);
+    if(_blankMap)
+    {
+        _blankMap->setMapColor(blankDlg.getMapColor());
+        _blankMap->setMapSize(blankDlg.getMapSize());
+
+        parentObject->addObject(_blankMap);
+        emit mapCreated();
     }
 }

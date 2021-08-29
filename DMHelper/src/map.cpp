@@ -32,7 +32,9 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _showMarkers(true),
     _initialized(false),
     _imgBackground(),
-    _imgFow()
+    _imgFow(),
+    _mapColor(Qt::white),
+    _mapSize()
 {
     _undoStack = new QUndoStack(this);
 }
@@ -40,10 +42,13 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
     setFileName(element.attribute("filename"));
-    _mapRect = QRect(element.attribute("mapRectX",QString::number(0)).toInt(),
-                     element.attribute("mapRectY",QString::number(0)).toInt(),
-                     element.attribute("mapRectWidth",QString::number(0)).toInt(),
-                     element.attribute("mapRectHeight",QString::number(0)).toInt());
+    setMapColor(QColor(element.attribute("mapColor")));
+    setMapSize(QSize(element.attribute("mapSizeWidth", QString::number(0)).toInt(),
+                     element.attribute("mapSizeHeight", QString::number(0)).toInt()));
+    _mapRect = QRect(element.attribute("mapRectX", QString::number(0)).toInt(),
+                     element.attribute("mapRectY", QString::number(0)).toInt(),
+                     element.attribute("mapRectWidth", QString::number(0)).toInt(),
+                     element.attribute("mapRectHeight", QString::number(0)).toInt());
 
     QDomElement actionsElement = element.firstChildElement(QString("actions"));
     if(!actionsElement.isNull())
@@ -119,6 +124,26 @@ void Map::setFileName(const QString& newFileName)
 
     _filename = newFileName;
     emit dirty();
+}
+
+QColor Map::getMapColor() const
+{
+    return _mapColor;
+}
+
+void Map::setMapColor(QColor color)
+{
+    _mapColor = color;
+}
+
+QSize Map::getMapSize() const
+{
+    return _mapSize;
+}
+
+void Map::setMapSize(QSize size)
+{
+    _mapSize = size;
 }
 
 AudioTrack* Map::getAudioTrack()
@@ -638,30 +663,39 @@ void Map::initialize()
     if(_initialized)
         return;
 
-    if((_filename.isNull()) || (_filename.isEmpty()))
-        return;
-
-    if(!QFile::exists(_filename))
+    if(!_filename.isEmpty())
     {
-        QMessageBox::critical(nullptr,
-                              QString("DMHelper Map File Not Found"),
-                              QString("The map file could not be found: ") + _filename);
-        qDebug() << "[Map] Map file not found: " << _filename;
+        if(!QFile::exists(_filename))
+        {
+            QMessageBox::critical(nullptr,
+                                  QString("DMHelper Map File Not Found"),
+                                  QString("The map file could not be found: ") + _filename);
+            qDebug() << "[Map] Map file not found: " << _filename;
+            return;
+        }
+
+        QImageReader reader(_filename);
+        _imgBackground = reader.read();
+
+        if(_imgBackground.isNull())
+        {
+            qDebug() << "[Map] Error reading map file " << _filename;
+            qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
+            return;
+        }
+
+        if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
+            _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
+    }
+    else if(_mapColor.isValid() && _mapSize.isValid())
+    {
+        _imgBackground = QImage(_mapSize, QImage::Format_ARGB32_Premultiplied);
+        _imgBackground.fill(_mapColor);
+    }
+    else
+    {
         return;
     }
-
-    QImageReader reader(_filename);
-    _imgBackground = reader.read();
-
-    if(_imgBackground.isNull())
-    {
-        qDebug() << "[Map] Error reading map file " << _filename;
-        qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
-        return;
-    }
-
-    if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
-        _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
 
     _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
@@ -757,6 +791,9 @@ QDomElement Map::createOutputXML(QDomDocument &doc)
 void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
+    element.setAttribute("mapColor", _mapColor.name());
+    element.setAttribute("mapSizeWidth", _mapSize.width());
+    element.setAttribute("mapSizeHeight", _mapSize.height());
     element.setAttribute("audiotrack", _audioTrackId.toString());
     element.setAttribute("playaudio", _playAudio);
     element.setAttribute("showparty", _showPartyIcon);
@@ -821,4 +858,3 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }
-

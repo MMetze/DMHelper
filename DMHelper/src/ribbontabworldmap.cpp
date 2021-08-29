@@ -22,9 +22,9 @@ RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
     _menu->addAction(defaultAction);
     selectAction(defaultAction);
 
-    RibbonTabWorldMap_PartyAction* selectAction = new RibbonTabWorldMap_PartyAction(nullptr, RibbonTabWorldMap_PartyAction::PartyActionType_Select);
-    selectAction->setText(QString("Choose icon..."));
-    _menu->addAction(selectAction);
+    RibbonTabWorldMap_PartyAction* chooseAction = new RibbonTabWorldMap_PartyAction(nullptr, RibbonTabWorldMap_PartyAction::PartyActionType_Select);
+    chooseAction->setText(QString("Choose icon..."));
+    _menu->addAction(chooseAction);
 
     _menu->addSeparator();
     connect(_menu, &QMenu::triggered, this, &RibbonTabWorldMap::selectAction);

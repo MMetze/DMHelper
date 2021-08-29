@@ -2,12 +2,14 @@
 #define RIBBONTABBATTLEMAP_H
 
 #include "ribbonframe.h"
+#include <QAction>
 
 namespace Ui {
 class RibbonTabBattleMap;
 }
 
 class PublishButtonRibbon;
+class QMenu;
 
 class RibbonTabBattleMap : public RibbonFrame
 {
@@ -20,16 +22,10 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
-    void setZoomSelect(bool checked);
-
-    void setCameraCouple(bool checked);
-    void setDistanceOn(bool checked);
-    void setDistance(const QString& distance);
-    void setCameraSelect(bool checked);
-    void setCameraEdit(bool checked);
-
     void setGridOn(bool checked);
+    void setGridType(int gridType);
     void setGridScale(int scale);
+    void setGridAngle(int angle);
     void setGridXOffset(int offset);
     void setGridYOffset(int offset);
 
@@ -39,25 +35,13 @@ public slots:
     void setBrushSize(int size);
     void setSelectFoW(bool checked);
 
-    void setPointerOn(bool checked);
-    void setPointerFile(const QString& filename);
-
 signals:
-    void zoomInClicked();
-    void zoomOutClicked();
-    void zoomFullClicked();
-    void zoomSelectClicked(bool checked);
-
-    void cameraCoupleClicked(bool checked);
-    void cameraZoomClicked();
-    void cameraSelectClicked(bool checked);
-    void cameraEditClicked(bool checked);
-
-    void distanceClicked(bool checked);
-    void heightChanged(bool checked, qreal height);
-
+    void newMapClicked();
+    void reloadMapClicked();
     void gridClicked(bool checked);
+    void gridTypeChanged(int gridType);
     void gridScaleChanged(int scale);
+    void gridAngleChanged(int angle);
     void gridXOffsetChanged(int offset);
     void gridYOffsetChanged(int offset);
 
@@ -71,17 +55,42 @@ signals:
     void selectFoWClicked(bool checked);
     void fillFoWClicked();
 
-    void pointerClicked(bool checked);
-
 protected:
     virtual void showEvent(QShowEvent *event) override;
+    virtual void timerEvent(QTimerEvent *event) override;
 
 private slots:
     void setEraseMode();
-    void heightEdited();
+    void spinChanged(int value);
+    void selectAction(QAction* action);
+    void setGridButtonIcon(const QIcon &icon);
 
 private:
     Ui::RibbonTabBattleMap *ui;
+
+    QMenu* _menu;
+    int _timerId;
 };
+
+class RibbonTabBattleMap_GridAction : public QAction
+{
+    Q_OBJECT
+
+public:
+    explicit RibbonTabBattleMap_GridAction(int gridType, const QString& actionIcon, const QString& actionText, QObject *parent = nullptr) :
+        QAction(QIcon(actionIcon), actionText, parent),
+        _gridType(gridType)
+    {}
+
+    virtual ~RibbonTabBattleMap_GridAction() override {}
+
+    int getGridType() const { return _gridType; }
+
+protected:
+    int _gridType;
+
+};
+
+
 
 #endif // RIBBONTABBATTLEMAP_H

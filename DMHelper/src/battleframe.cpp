@@ -633,6 +633,40 @@ void BattleFrame::setGridScale(int gridScale)
     }
 }
 
+void BattleFrame::setGridAngle(int gridAngle)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid angle, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridAngle(gridAngle);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+    }
+}
+
+void BattleFrame::setGridType(int gridType)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid type, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridType(gridType);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+    }
+}
+
 void BattleFrame::setXOffset(int xOffset)
 {
     if(!_model)
@@ -2484,6 +2518,7 @@ Map* BattleFrame::selectRelatedMap()
         return nullptr;
 
     MapSelectDialog mapSelectDlg(*campaign, _battle->getID());
+    connect(&mapSelectDlg, &MapSelectDialog::mapCreated, this, &BattleFrame::mapCreated);
     if(mapSelectDlg.exec() != QDialog::Accepted)
         return nullptr;
     else

@@ -40,6 +40,7 @@ class RibbonTabFile;
 class RibbonTabCampaign;
 class RibbonTabTools;
 class RibbonTabBattleMap;
+class RibbonTabBattleView;
 class RibbonTabBattle;
 class RibbonTabScrolling;
 class RibbonTabText;
@@ -246,7 +247,8 @@ private:
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
     RibbonTabTools* _ribbonTabTools;
-    RibbonTabBattleMap* _ribbonTabMap;
+    RibbonTabBattleMap* _ribbonTabBattleMap;
+    RibbonTabBattleView* _ribbonTabBattleView;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;

@@ -48,7 +48,9 @@ public:
     QRectF getCameraRect() const;
     QColor getBackgroundColor() const;
     bool getGridOn() const;
+    int getGridType() const;
     int getGridScale() const;
+    int getGridAngle() const;
     int getGridOffsetX() const;
     int getGridOffsetY() const;
     bool getShowCompass() const;
@@ -67,7 +69,9 @@ public slots:
     void setCameraRect(const QRectF& rect);
     void setBackgroundColor(QColor color);
     void setGridOn(bool gridOn);
+    void setGridType(int gridType);
     void setGridScale(int gridScale);
+    void setGridAngle(int gridAngle);
     void setGridOffsetX(int gridOffsetX);
     void setGridOffsetY(int gridOffsetY);
     void setShowCompass(bool showCompass);
@@ -86,7 +90,9 @@ signals:
     void cameraRectChanged(const QRectF& rect);
     void backgroundColorChanged(QColor color);
     void gridOnChanged(bool gridOn);
+    void gridTypeChanged(int gridType);
     void gridScaleChanged(int gridScale);
+    void gridAngleChanged(int gridAngle);
     void gridOffsetXChanged(int gridOffsetX);
     void gridOffsetYChanged(int gridOffsetY);
     void showCompassChanged(bool showCompass);
@@ -125,7 +131,9 @@ private:
     QColor _background;
 
     bool _gridOn;
+    int _gridType;
     int _gridScale;
+    int _gridAngle;
     int _gridOffsetX;
     int _gridOffsetY;
 

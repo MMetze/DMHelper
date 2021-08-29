@@ -289,6 +289,9 @@
         <file>data/icon_newmarker.png</file>
         <file>data/icon_mapmarker.png</file>
         <file>data/icon_mapmarker_bw.png</file>
+        <file>data/icon_gridhex.png</file>
+        <file>data/icon_gridhexiso.png</file>
+        <file>data/icon_gridiso.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

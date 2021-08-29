@@ -75,6 +75,7 @@ SOURCES += main.cpp\
     exportworker.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
+    mapblankdialog.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
     objectfactory.cpp \
@@ -96,6 +97,7 @@ SOURCES += main.cpp\
     ribbontabaudio.cpp \
     ribbontabbattle.cpp \
     ribbontabbattlemap.cpp \
+    ribbontabbattleview.cpp \
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
     ribbontabmap.cpp \
@@ -291,6 +293,7 @@ HEADERS  += mainwindow.h \
     exportdialog.h \
     exportworker.h \
     legaldialog.h \
+    mapblankdialog.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
@@ -313,6 +316,7 @@ HEADERS  += mainwindow.h \
     ribbontabaudio.h \
     ribbontabbattle.h \
     ribbontabbattlemap.h \
+    ribbontabbattleview.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
     ribbontabmap.h \
@@ -469,6 +473,7 @@ FORMS    += mainwindow.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
+    mapblankdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \
@@ -480,6 +485,7 @@ FORMS    += mainwindow.ui \
     ribbontabaudio.ui \
     ribbontabbattle.ui \
     ribbontabbattlemap.ui \
+    ribbontabbattleview.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
     ribbontabmap.ui \

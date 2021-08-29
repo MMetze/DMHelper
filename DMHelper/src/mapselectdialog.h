@@ -21,11 +21,13 @@ public:
     explicit MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWidget *parent = nullptr);
     ~MapSelectDialog();
 
-    //void prependMap(Map* newMap);
-    //void appendMap(Map* newMap);
-    //void addSeparator(int index);
-
     Map* getSelectedMap() const;
+
+signals:
+    void mapCreated();
+
+public slots:
+    virtual void accept() override;
 
 protected slots:
     void handleItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
@@ -34,9 +36,13 @@ protected slots:
     void decorateItem(QTreeWidgetItem* item, CampaignObjectBase* object);
 
 protected:
+    void createBlankMap();
+
     Ui::MapSelectDialog *ui;
 
     QTreeWidgetItem* _currentItem;
+    QTreeWidgetItem* _createNewMapEntry;
+    Map* _blankMap;
 };
 
 #endif // MAPSELECTDIALOG_H
