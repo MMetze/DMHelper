@@ -250,6 +250,7 @@ void BattleFrame::deactivateObject()
         return;
     }
 
+    ui->frameCombatant->setCombatant(nullptr);
     setBattle(nullptr);
 }
 
