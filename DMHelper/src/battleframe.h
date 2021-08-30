@@ -82,6 +82,7 @@ public:
 public slots:
     void clear();
     void sort();
+    void top();
     void next();
 
     void setTargetSize(const QSize& targetSize);

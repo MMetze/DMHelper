@@ -292,6 +292,7 @@
         <file>data/icon_gridhex.png</file>
         <file>data/icon_gridhexiso.png</file>
         <file>data/icon_gridiso.png</file>
+        <file>data/icon_top.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
