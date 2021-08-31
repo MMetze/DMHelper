@@ -12,7 +12,6 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(newMapClicked()));
     connect(ui->btnNewText, SIGNAL(clicked(bool)), this, SIGNAL(newTextClicked()));
     connect(ui->btnNewBattle, SIGNAL(clicked(bool)), this, SIGNAL(newBattleClicked()));
-    connect(ui->btnNewScrollingText, SIGNAL(clicked(bool)), this, SIGNAL(newScrollingTextClicked()));
     connect(ui->btnAddSound, SIGNAL(clicked(bool)), this, SIGNAL(newSoundClicked()));
     connect(ui->btnSyrinscape, SIGNAL(clicked(bool)), this, SIGNAL(newSyrinscapeClicked()));
     connect(ui->btnYouTube, SIGNAL(clicked(bool)), this, SIGNAL(newYoutubeClicked()));
@@ -51,10 +50,9 @@ void RibbonTabCampaign::setCampaignEnabled(bool enabled)
     ui->btnNewMap->setEnabled(enabled);
     ui->btnNewText->setEnabled(enabled);
     ui->btnNewBattle->setEnabled(enabled);
-    ui->btnNewScrollingText->setEnabled(enabled);
     ui->btnAddSound->setEnabled(enabled);
     ui->btnSyrinscape->setEnabled(enabled);
-    ui->btnNewScrollingText->setEnabled(enabled);
+    ui->btnYouTube->setEnabled(enabled);
     ui->btnRemove->setEnabled(enabled);
     ui->btnExportItem->setEnabled(enabled);
     ui->btnImportItem->setEnabled(enabled);
@@ -80,13 +78,10 @@ void RibbonTabCampaign::showEvent(QShowEvent *event)
     int frameHeight = height();
 
     setStandardButtonSize(*ui->lblNewText, *ui->btnNewText, frameHeight);
-    setLineHeight(*ui->line_3, frameHeight);
     setStandardButtonSize(*ui->lblNewParty, *ui->btnNewParty, frameHeight);
     setStandardButtonSize(*ui->lblNewCharacter, *ui->btnNewCharacter, frameHeight);
-    setLineHeight(*ui->line_4, frameHeight);
     setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap, frameHeight);
     setStandardButtonSize(*ui->lblNewBattle, *ui->btnNewBattle, frameHeight);
-    setStandardButtonSize(*ui->lblNewScrollingText, *ui->btnNewScrollingText, frameHeight);
     setLineHeight(*ui->line_5, frameHeight);
     setStandardButtonSize(*ui->lblAddSound, *ui->btnAddSound, frameHeight);
     setStandardButtonSize(*ui->lblSyrinscape, *ui->btnSyrinscape, frameHeight);

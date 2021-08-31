@@ -23,7 +23,7 @@ bool ObjectImporter::importObject(Campaign& campaign)
 {
     _duplicateObjects.clear();
 
-    QString filename = QFileDialog::getOpenFileName(nullptr,QString("Select Campaign"));
+    QString filename = QFileDialog::getOpenFileName(nullptr,QString("Select file for importing"), QString(), QString("XML files (*.xml)"));
     if((filename.isNull()) || (filename.isEmpty()) || (!QFile::exists(filename)))
     {
         qDebug() << "[ObjectImporter] Not able to find the selected file " << filename;

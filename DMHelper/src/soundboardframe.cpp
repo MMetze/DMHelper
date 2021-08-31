@@ -3,7 +3,7 @@
 #include "campaign.h"
 #include "dmconstants.h"
 #include "soundboardgroup.h"
-#include "soundboardframegroupbox.h"
+#include "soundboardgroupframe.h"
 #include "audiotrack.h"
 #include "audiofactory.h"
 #include "ribbonframe.h"
@@ -30,7 +30,6 @@ SoundboardFrame::SoundboardFrame(QWidget *parent) :
     ui->setupUi(this);
     _layout = new QVBoxLayout();
     ui->scrollAreaWidgetContents->setLayout(_layout);
-    _layout->addStretch(1);
 
     ui->treeWidget->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeWidget->setDragEnabled(true);
@@ -50,8 +49,7 @@ SoundboardFrame::SoundboardFrame(QWidget *parent) :
     connect(ui->btnAddGroup, &QAbstractButton::clicked, this, &SoundboardFrame::addGroup);
     connect(ui->btnAddSound, &QAbstractButton::clicked, this, &SoundboardFrame::addSound);
     connect(ui->btnAddYoutube, &QAbstractButton::clicked, this, &SoundboardFrame::addYoutube);
-    connect(ui->btnAddSound, &QAbstractButton::clicked, this, &SoundboardFrame::addSyrinscape);
-    connect(ui->btnRemoveSound, &QAbstractButton::clicked, this, &SoundboardFrame::removeSound);
+    connect(ui->btnAddSyrinscape, &QAbstractButton::clicked, this, &SoundboardFrame::addSyrinscape);
 }
 
 SoundboardFrame::~SoundboardFrame()
@@ -66,9 +64,12 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
     QLayoutItem *child;
     while((child = _layout->takeAt(0)) != nullptr)
     {
-        QWidget* layoutWidget = child->widget();
-        if(layoutWidget)
-            layoutWidget->deleteLater();
+        SoundBoardGroupFrame* groupFrame = dynamic_cast<SoundBoardGroupFrame*>(child->widget());
+        if(groupFrame)
+        {
+            disconnect(groupFrame->getGroup(), &SoundboardGroup::destroyed, groupFrame, &SoundBoardGroupFrame::handleRemove);
+            delete groupFrame;
+        }
         delete child;
     }
 
@@ -77,6 +78,7 @@ void SoundboardFrame::setCampaign(Campaign* campaign)
     if(!campaign)
         return;
 
+    _layout->addStretch(10);
     for(SoundboardGroup* group : campaign->getSoundboardGroups())
     {
         if(group)
@@ -144,18 +146,20 @@ void SoundboardFrame::showEvent(QShowEvent *event)
     RibbonFrame::setStandardButtonSize(*ui->lblAddSound, *ui->btnAddSound, ribbonHeight);
     RibbonFrame::setStandardButtonSize(*ui->lblAddYoutube, *ui->btnAddYoutube, ribbonHeight);
     RibbonFrame::setStandardButtonSize(*ui->lblAddSyrinscape, *ui->btnAddSyrinscape, ribbonHeight);
-    RibbonFrame::setStandardButtonSize(*ui->lblRemoveSound, *ui->btnRemoveSound, ribbonHeight);
 
 }
 
 void SoundboardFrame::updateTrackLayout()
 {
+    if(!_layout)
+        return;
+
     for(int i = 0; i < _layout->count() - 1; ++i)
     {
         QLayoutItem* item = _layout->itemAt(i);
         if(item)
         {
-            SoundBoardFrameGroupBox* group = dynamic_cast<SoundBoardFrameGroupBox*>(item->widget());
+            SoundBoardGroupFrame* group = dynamic_cast<SoundBoardGroupFrame*>(item->widget());
             if(group)
                 group->updateTrackLayout();
         }
@@ -182,6 +186,28 @@ void SoundboardFrame::addGroup()
     SoundboardGroup* newGroup = new SoundboardGroup(groupName);
     _campaign->addSoundboardGroup(newGroup);
     addGroupToLayout(newGroup);
+}
+
+void SoundboardFrame::removeGroup(SoundboardGroup* group)
+{
+    if((!group) || (!_layout) || (!_campaign))
+        return;
+
+    for(int i = 0; i < _layout->count() - 1; ++i)
+    {
+        QLayoutItem* item = _layout->itemAt(i);
+        if(item)
+        {
+            SoundBoardGroupFrame* groupFrame = dynamic_cast<SoundBoardGroupFrame*>(item->widget());
+            if((groupFrame) && (groupFrame->getGroup() == group))
+            {
+                disconnect(group, &SoundboardGroup::destroyed, groupFrame, &SoundBoardGroupFrame::handleRemove);
+                delete groupFrame;
+            }
+        }
+    }
+
+    _campaign->removeSoundboardGroup(group);
 }
 
 void SoundboardFrame::addSound()
@@ -224,11 +250,6 @@ void SoundboardFrame::addSyrinscape()
     addTrack(QUrl(urlName));
 }
 
-void SoundboardFrame::removeSound()
-{
-
-}
-
 void SoundboardFrame::addTrack(const QUrl& url)
 {
     if((!_campaign) || (!url.isValid()))
@@ -242,7 +263,7 @@ void SoundboardFrame::addTrack(const QUrl& url)
 
     AudioTrack* newTrack = AudioFactory().createTrackFromUrl(url, trackName);
 
-    _campaign->addObject(newTrack);
+    emit trackCreated(newTrack);
     addTrackToTree(newTrack);
 }
 
@@ -251,5 +272,8 @@ void SoundboardFrame::addGroupToLayout(SoundboardGroup* group)
     if((!_campaign) || (!_layout))
         return;
 
-    _layout->insertWidget(_layout->count() - 1, new SoundBoardFrameGroupBox(group, _campaign));
+    SoundBoardGroupFrame* newGroupBox = new SoundBoardGroupFrame(group, _campaign);
+    connect(newGroupBox, &SoundBoardGroupFrame::dirty, this, &SoundboardFrame::dirty);
+    connect(newGroupBox, &SoundBoardGroupFrame::removeGroup, this, &SoundboardFrame::removeGroup);
+    _layout->insertWidget(_layout->count() - 1, newGroupBox);
 }

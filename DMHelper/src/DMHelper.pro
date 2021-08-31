@@ -67,12 +67,16 @@ SOURCES += main.cpp\
     discordposter.cpp \
     dmhelperribbon.cpp \
     dmhlogger.cpp \
+    dmhwaitingdialog.cpp \
     emptycampaignframe.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
+    exportdialog.cpp \
+    exportworker.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapfactory.cpp \
+    mapframescene.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
     party.cpp \
@@ -98,13 +102,16 @@ SOURCES += main.cpp\
     ribbontabscrolling.cpp \
     ribbontabtext.cpp \
     ribbontabtools.cpp \
+    ribbontabworldmap.cpp \
+    selectstringdialog.cpp \
     soundboardframe.cpp \
-    soundboardframegroupbox.cpp \
     soundboardgroup.cpp \
-    soundboardtrack.cpp \
+    soundboardgroupframe.cpp \
+    soundboardtrackframe.cpp \
     spell.cpp \
     spellbook.cpp \
     spellbookdialog.cpp \
+    textbrowsermargins.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
     undopath.cpp \
@@ -276,12 +283,16 @@ HEADERS  += mainwindow.h \
     discordposter.h \
     dmhelperribbon.h \
     dmhlogger.h \
+    dmhwaitingdialog.h \
     dmversion.h \
     emptycampaignframe.h \
     equipmentserver.h \
     expertisedialog.h \
+    exportdialog.h \
+    exportworker.h \
     legaldialog.h \
     mapfactory.h \
+    mapframescene.h \
     mapmarker.h \
     objectfactory.h \
     objectimporter.h \
@@ -308,13 +319,16 @@ HEADERS  += mainwindow.h \
     ribbontabscrolling.h \
     ribbontabtext.h \
     ribbontabtools.h \
+    ribbontabworldmap.h \
+    selectstringdialog.h \
     soundboardframe.h \
-    soundboardframegroupbox.h \
     soundboardgroup.h \
-    soundboardtrack.h \
+    soundboardgroupframe.h \
+    soundboardtrackframe.h \
     spell.h \
     spellbook.h \
     spellbookdialog.h \
+    textbrowsermargins.h \
     texteditmargins.h \
     undopoint.h \
     undopath.h \
@@ -451,6 +465,7 @@ FORMS    += mainwindow.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
     addmonstersdialog.ui \
+    dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
@@ -471,9 +486,11 @@ FORMS    += mainwindow.ui \
     ribbontabscrolling.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
+    ribbontabworldmap.ui \
+    selectstringdialog.ui \
     soundboardframe.ui \
-    soundboardframegroupbox.ui \
-    soundboardtrack.ui \
+    soundboardgroupframe.ui \
+    soundboardtrackframe.ui \
     spellbookdialog.ui \
     textpublishdialog.ui \
     chasedialog.ui \
@@ -512,6 +529,7 @@ FORMS    += mainwindow.ui \
     battledialoglogview.ui \
     monsteractioneditdialog.ui \
     aboutdialog.ui \
+    exportdialog.ui \
     texttranslatedialog.ui
 
 RESOURCES += \
@@ -543,7 +561,8 @@ DISTFILES += \
     resources/shops.xml \
     resources/tables/Indefinite Madness.xml \
     resources/tables/Long Term Madness.xml \
-    resources/tables/Short Term Madness.xml
+    resources/tables/Short Term Madness.xml \
+    todos
 
 INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc

@@ -89,9 +89,9 @@ int Bestiary::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDire
     return monsterCount;
 }
 
-void Bestiary::inputXML(const QDomElement &element, bool isImport)
+void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
 {
-    qDebug() << "[Bestiary] Loading bestiary...";
+    qDebug() << "[Bestiary] Bestiary provided for input";
 
     QDomElement bestiaryElement = element.firstChildElement( QString("bestiary") );
     if(bestiaryElement.isNull())
@@ -112,75 +112,10 @@ void Bestiary::inputXML(const QDomElement &element, bool isImport)
     if (!isVersionIdentical())
         qDebug() << "[Bestiary]    WARNING: Bestiary version is not the same as expected version: " << getExpectedVersion();
 
-    if(isImport)
-    {
-        int importCount = 0;
-        QMessageBox::StandardButton challengeResult = QMessageBox::NoButton;
-        QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
-        while( !monsterElement.isNull() )
-        {
-            bool importOK = true;
-            QString monsterName = monsterElement.firstChildElement(QString("name")).text();
-            if(Bestiary::Instance()->exists(monsterName))
-            {
-                if((challengeResult != QMessageBox::YesToAll) && (challengeResult != QMessageBox::NoToAll))
-                {
-                    challengeResult = QMessageBox::question(nullptr,
-                                                            QString("Import Monster Conflict"),
-                                                            QString("The monster '") + monsterName + QString("' already exists in the Bestiary. Would you like to overwrite the existing entry?"),
-                                                            QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel );
-                    if(challengeResult == QMessageBox::Cancel)
-                    {
-                        qDebug() << "[Bestiary] Import monsters cancelled";
-                        return;
-                    }
-                }
-
-                importOK = ((challengeResult == QMessageBox::Yes) || (challengeResult == QMessageBox::YesToAll));
-            }
-
-            if(importOK)
-            {
-                MonsterClass* monster = new MonsterClass(monsterElement, isImport);
-                if(insertMonsterClass(monster))
-                    ++importCount;
-            }
-
-            monsterElement = monsterElement.nextSiblingElement( QString("element") );
-        }
-
-        qDebug() << "[Bestiary] Importing bestiary completed. " << importCount << " creatures imported.";
-    }
+    if(importFile.isEmpty())
+        loadBestiary(bestiaryElement);
     else
-    {
-        if(_bestiaryMap.count() > 0)
-        {
-            qDebug() << "[Bestiary]    Unloading previous bestiary";
-            qDeleteAll(_bestiaryMap);
-            _bestiaryMap.clear();
-        }
-
-        QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
-        while( !monsterElement.isNull() )
-        {
-            MonsterClass* monster = new MonsterClass(monsterElement, isImport);
-            insertMonsterClass(monster);
-            monsterElement = monsterElement.nextSiblingElement( QString("element") );
-        }
-
-        QDomElement licenseElement = bestiaryElement.firstChildElement( QString("license") );
-        if(licenseElement.isNull())
-            qDebug() << "[Bestiary] ERROR: not able to find the license text in the bestiary!";
-
-        QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
-        while(!licenseText.isNull())
-        {
-            _licenseText.append(licenseText.text());
-            licenseText = licenseText.nextSiblingElement(QString("element"));
-        }
-
-        qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
-    }
+        importBestiary(bestiaryElement, importFile);
 
     emit changed();
 }
@@ -367,26 +302,30 @@ Monster* Bestiary::createMonster(const QDomElement& element, bool isImport)
 
 QString Bestiary::findMonsterImage(const QString& monsterName, const QString& iconFile)
 {
-    QString fileName = iconFile;
+    if((!iconFile.isEmpty()) && (_bestiaryDirectory.exists(iconFile)))
+        return iconFile;
 
-    if((fileName.isEmpty()) || ( !_bestiaryDirectory.exists(fileName) ))
+    QString resultName = findMonsterImage(_bestiaryDirectory, monsterName);
+    if(resultName.isEmpty())
+        qDebug() << "[Bestiary] Not able to find monster image for " << monsterName << " with icon file " << iconFile;
+
+    return resultName;
+}
+
+QString Bestiary::findMonsterImage(const QDir& sourceDir, const QString& monsterName)
+{
+    QString fileName = QString("./") + monsterName + QString(".png");
+    if(!sourceDir.exists(fileName))
     {
-        fileName = QString("./") + monsterName + QString(".png");
-        if( !_bestiaryDirectory.exists(fileName) )
+        fileName = QString("./") + monsterName + QString(".jpg");
+        if(!sourceDir.exists(fileName))
         {
-            fileName = QString("./") + monsterName + QString(".jpg");
-            if( !_bestiaryDirectory.exists(fileName) )
+            fileName = QString("./Images/") + monsterName + QString(".png");
+            if(!sourceDir.exists(fileName))
             {
-                fileName = QString("./Images/") + monsterName + QString(".png");
-                if( !_bestiaryDirectory.exists(fileName) )
-                {
-                    fileName = QString("./Images/") + monsterName + QString(".jpg");
-                    if( !_bestiaryDirectory.exists(fileName) )
-                    {
-                        qDebug() << "[Bestiary] Not able to find monster image for " << monsterName << " with icon file " << iconFile;
-                        fileName = QString();
-                    }
-                }
+                fileName = QString("./Images/") + monsterName + QString(".jpg");
+                if(!sourceDir.exists(fileName))
+                    fileName = QString();
             }
         }
     }
@@ -431,5 +370,137 @@ void Bestiary::showMonsterClassWarning(const QString& monsterClass)
     else
     {
         QMessageBox::critical(nullptr, QString("Unknown monster"), QString("WARNING: The monster """) + monsterClass + QString(""" was not found in the current bestiary! If you save the current campaign, all references to this monster will be lost!"));
+    }
+}
+
+void Bestiary::loadBestiary(const QDomElement& bestiaryElement)
+{
+    qDebug() << "[Bestiary] Loading bestiary...";
+
+    if(_bestiaryMap.count() > 0)
+    {
+        qDebug() << "[Bestiary]    Unloading previous bestiary";
+        qDeleteAll(_bestiaryMap);
+        _bestiaryMap.clear();
+    }
+
+    QDomElement monsterElement = bestiaryElement.firstChildElement( QString("element") );
+    while( !monsterElement.isNull() )
+    {
+        MonsterClass* monster = new MonsterClass(monsterElement, false);
+        insertMonsterClass(monster);
+        monsterElement = monsterElement.nextSiblingElement( QString("element") );
+    }
+
+    QDomElement licenseElement = bestiaryElement.firstChildElement( QString("license") );
+    if(licenseElement.isNull())
+        qDebug() << "[Bestiary] ERROR: not able to find the license text in the bestiary!";
+
+    QDomElement licenseText = licenseElement.firstChildElement(QString("element"));
+    while(!licenseText.isNull())
+    {
+        _licenseText.append(licenseText.text());
+        licenseText = licenseText.nextSiblingElement(QString("element"));
+    }
+
+    qDebug() << "[Bestiary] Loading bestiary completed. " << _bestiaryMap.count() << " creatures loaded.";
+}
+
+void Bestiary::importBestiary(const QDomElement& bestiaryElement, const QString& importFile)
+{
+    qDebug() << "[Bestiary] Importing bestiary...";
+
+    int importCount = 0;
+    QMessageBox::StandardButton challengeResult = QMessageBox::NoButton;
+    QDomElement monsterElement = bestiaryElement.firstChildElement(QString("element"));
+    while(!monsterElement.isNull())
+    {
+        bool importOK = true;
+        QString monsterName = monsterElement.firstChildElement(QString("name")).text();
+        if(Bestiary::Instance()->exists(monsterName))
+        {
+            if((challengeResult != QMessageBox::YesToAll) && (challengeResult != QMessageBox::NoToAll))
+            {
+                challengeResult = QMessageBox::question(nullptr,
+                                                        QString("Import Monster Conflict"),
+                                                        QString("The monster '") + monsterName + QString("' already exists in the Bestiary. Would you like to overwrite the existing entry?"),
+                                                        QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel );
+                if(challengeResult == QMessageBox::Cancel)
+                {
+                    qDebug() << "[Bestiary] Import monsters cancelled";
+                    return;
+                }
+            }
+
+            importOK = ((challengeResult == QMessageBox::Yes) || (challengeResult == QMessageBox::YesToAll));
+        }
+
+        if(importOK)
+        {
+            importMonsterImage(monsterElement, importFile);
+            MonsterClass* monster = new MonsterClass(monsterElement, true);
+            if(insertMonsterClass(monster))
+            {
+                ++importCount;
+            }
+        }
+
+        monsterElement = monsterElement.nextSiblingElement( QString("element") );
+    }
+
+    qDebug() << "[Bestiary] Importing bestiary completed. " << importCount << " creatures imported.";
+}
+
+void Bestiary::importMonsterImage(const QDomElement& monsterElement, const QString& importFile)
+{
+    QString monsterIcon = monsterElement.attribute(("icon"));
+    if(!monsterIcon.isEmpty())
+    {
+        QFileInfo embeddedIconInfo(monsterIcon);
+
+        // Files in absolute paths can't be copied
+        if(embeddedIconInfo.isAbsolute())
+            return;
+
+        QString relativePath = embeddedIconInfo.path();
+        if(!_bestiaryDirectory.mkpath(relativePath))
+            return;
+
+        //
+        //if(!embeddedIconInfo.exists())
+        //    return;
+        QFileInfo importFileInfo(importFile);
+        QDir importFileDir(importFileInfo.absoluteDir());
+        //QString relativePath = importFileDir.relativeFilePath(monsterIcon);
+
+        //QString absolutePath = embeddedIconInfo.absoluteFilePath();
+        QString absolutePath = importFileDir.absoluteFilePath(monsterIcon);
+        QFile currentFile(absolutePath);
+
+        QString targetFile = _bestiaryDirectory.absoluteFilePath(monsterIcon);
+        bool result = currentFile.copy(targetFile);
+
+        qDebug() << "[Bestiary] Copied " << currentFile << " to " << targetFile << ", result: " << result;
+    }
+    else
+    {
+        QFileInfo importFileInfo(importFile);
+        QDir importFileDir(importFileInfo.absoluteDir());
+        QString sourcePath = findMonsterImage(importFileDir, monsterElement.firstChildElement(QString("name")).text());
+        if(sourcePath.isEmpty())
+            return;
+
+        QFileInfo embeddedIconInfo(sourcePath);
+
+        QString relativePath = embeddedIconInfo.path();
+        if(!_bestiaryDirectory.mkpath(relativePath))
+            return;
+
+        QString absolutePath = importFileDir.absoluteFilePath(sourcePath);
+        QFile currentFile(absolutePath);
+        QString targetFile = _bestiaryDirectory.absoluteFilePath(sourcePath);
+        bool result = currentFile.copy(targetFile);
+
+        qDebug() << "[Bestiary] Copied " << currentFile << " to " << targetFile << ", result: " << result;
     }
 }

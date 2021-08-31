@@ -45,6 +45,7 @@ class RibbonTabScrolling;
 class RibbonTabText;
 class BattleDialogModel;
 class RibbonTabMap;
+class RibbonTabWorldMap;
 class RibbonTabAudio;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
@@ -81,7 +82,6 @@ public slots:
     void newParty();
     void newTextEncounter();
     void newBattleEncounter();
-    void newScrollingTextEncounter();
     void newMap();
     void newAudioEntry();
     void newSyrinscapeEntry();
@@ -89,6 +89,7 @@ public slots:
     void removeCurrentItem();
     void editCurrentItem();
     void exportCurrentItem();
+    void addNewObject(CampaignObjectBase* newObject);
 
     void clearDirty();
     void setDirty();
@@ -102,6 +103,7 @@ public slots:
     // Bestiary
     void readBestiary();
     void readSpellbook();
+    void readQuickRef();
 
 signals:
     void campaignLoaded(Campaign* campaign);
@@ -135,13 +137,10 @@ protected:
     void deleteCampaign();
     void enableCampaignMenu();
 
+    bool selectIndex(const QModelIndex& index);
     bool selectItem(QUuid itemId);
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
-    QStandardItem* findItem(QStandardItem* parent, int itemType, QUuid itemId);
-    QStandardItem* findItem(QStandardItem* parent, QUuid itemId);
-    QStandardItem* findParentbyType(QStandardItem* child, int parentType);
-    void setIndexExpanded(bool expanded, const QModelIndex& index);
 
     // Bestiary
     void writeBestiary();
@@ -149,7 +148,6 @@ protected:
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
     void addNewAudioObject(const QString& audioFile);
-    void addNewObject(CampaignObjectBase* newObject);
 
 protected slots:
     void openFile(const QString& filename);
@@ -178,15 +176,9 @@ protected slots:
     void importSpellbook();
 
     void openAboutDialog();
-
-    void openTextPublisher();
-    void openTextTranslator();
     void openRandomMarkets();
 
     QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
-
-    void connectTextToText();
-    void connectTextToScroll();
 
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);
@@ -218,7 +210,6 @@ private:
     EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* treeModel;
-    QMultiMap<QString, QUuid> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;
     QString campaignFileName;
@@ -259,6 +250,7 @@ private:
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
     RibbonTabMap* _ribbonTabMiniMap;
+    RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
 };
 

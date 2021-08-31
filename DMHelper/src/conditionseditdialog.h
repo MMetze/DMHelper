@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QLabel>
+#include "combatant.h"
 
 namespace Ui {
 class ConditionsEditDialog;
@@ -27,6 +28,7 @@ protected:
 
 private:
     void setButtonSize(QLabel& label, QPushButton& button, int frameHeight, int buttonWidth);
+    void setConditionTooltip(QPushButton& button, Combatant::Condition condition);
 
     Ui::ConditionsEditDialog *ui;
 };

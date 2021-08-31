@@ -12,9 +12,11 @@ AboutDialog::AboutDialog(QWidget *parent) :
 
     QString licenseText;
 
-    licenseText += QString("The DM Helper is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.\n\n");
+    licenseText += QString("DMHelper is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.\n\n");
 
     licenseText += QString("All menu icons are derived from tokens provided by Ross from 2-Minute Tabletop, an amazing source of RPG resources: www.2minutetabletop.com under the Creative Commons BY-NC 4.0 (www.creativecommons.org/licenses/by-nc/4.0/)\n\n");
+
+    licenseText += QString("The sample spell tokens included with the spellbook are kindly provided by 2-Minute Tabletop as well!\n\n");
 
     licenseText += QString("Vectorized dragon logo provided by Mike Rickard from ""I Cast Pod!"", our guide to everything dungeonesque and dragonny (and a great DnD podcast)\n\n");
 
@@ -27,13 +29,17 @@ AboutDialog::AboutDialog(QWidget *parent) :
     licenseText += QString("The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n");
     licenseText += QString("THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.\n\n\n");
 
-    licenseText += QString("Some content provided in the bestiary and the quick reference tables are from the Wizards of the Coast SRD (Systems Reference Document) published under the OPEN GAME LICENSE Version 1.0a as follows\n\n");
+    licenseText += QString("Content provided in the bestiary, the spellbook and the quick reference tables are from the Wizards of the Coast SRD (Systems Reference Document) published under the OPEN GAME LICENSE Version 1.0a as follows\n\n");
     if(Bestiary::Instance())
         licenseText += Bestiary::Instance()->getLicenseText().join(QString("\n")).append(QString("\n"));
 
     ui->edtLicenses->setText(licenseText);
 
-    ui->lblVersion->setText(QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION));
+    if(DMHelper::DMHELPER_ENGINEERING_VERSION > 0)
+        ui->lblVersion->setText(QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_ENGINEERING_VERSION) + " (pre-release version)");
+    else
+        ui->lblVersion->setText(QString::number(DMHelper::DMHELPER_MAJOR_VERSION) + "." + QString::number(DMHelper::DMHELPER_MINOR_VERSION));
+
     ui->lblBestiaryVersion->setText(Bestiary::getExpectedVersion());
 }
 

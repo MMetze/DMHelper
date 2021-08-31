@@ -151,7 +151,10 @@ public:
     static int getConditionCount();
     static Condition getConditionByIndex(int index);
     static QString getConditionIcon(int condition);
+    static QString getConditionTitle(int condition);
     static QString getConditionDescription(int condition);
+    static void drawConditions(QPaintDevice* target, int conditions);
+    static QStringList getConditionString(int conditions);
 
     virtual int getConditions() const;
     virtual bool hasCondition(Condition condition) const;
@@ -168,6 +171,7 @@ public slots:
     virtual void setHitDice(const Dice& hitDice);
     virtual void setConditions(int conditions);
     virtual void applyConditions(int conditions);
+    virtual void removeConditions(int conditions);
     virtual void addCondition(Condition condition);
     virtual void removeCondition(Condition condition);
     virtual void clearConditions();

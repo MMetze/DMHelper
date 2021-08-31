@@ -3,11 +3,16 @@
 #include "characterimporter.h"
 #include "scaledpixmap.h"
 #include "expertisedialog.h"
+#include "conditionseditdialog.h"
+#include "quickref.h"
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QFileDialog>
 #include <QIntValidator>
+#include <QGridLayout>
 #include <QDebug>
+
+const int CONDITION_FRAME_SPACING = 8;
 
 // TODO: automate character level, next level exp, proficiency bonus
 
@@ -17,11 +22,10 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     _character(nullptr),
     _mouseDown(false),
     _reading(false),
-    _rotation(0)
+    _rotation(0),
+    _conditionGrid(nullptr)
 {
     ui->setupUi(this);
-
-    //connect(ui->framePublish, SIGNAL(clicked(bool)), this, SLOT(handlePublishClicked()));
 
     ui->edtArmorClass->setValidator(new QIntValidator(0,100,this));
     ui->edtInitiative->setValidator(new QIntValidator(-10,100,this));
@@ -51,10 +55,9 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->edtSize,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtHitPoints,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
+    connect(ui->edtHitPointsMax,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtArmorClass,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtInitiative,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    //connect(ui->edtSex,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
-    //connect(ui->edtSize,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtSpeed,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtAlignment,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
     connect(ui->edtBackground,SIGNAL(editingFinished()),this,SLOT(writeCharacterData()));
@@ -94,6 +97,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->edtEquipment,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
     connect(ui->edtSpells,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
     connect(ui->edtNotes,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
+
+    connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &CharacterFrame::editConditions);
 }
 
 CharacterFrame::~CharacterFrame()
@@ -157,34 +162,6 @@ void CharacterFrame::calculateMods()
 
     ui->edtPassivePerception->setText(QString::number(_character->getPassivePerception()));
 
-    /*
-    int proficiencyBonus = ui->edtProficiencyBonus->text().toInt();
-    bool halfProficiency = static_cast<bool>(_character->getIntValue(Character::IntValue_jackofalltrades));
-    updateCheckboxName(ui->chkStrSave, Character::getAbilityMod(ui->edtStr->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_strengthSave), halfProficiency);
-    updateCheckboxName(ui->chkAthletics, Character::getAbilityMod(ui->edtStr->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_athletics), halfProficiency);
-    updateCheckboxName(ui->chkDexSave, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_dexteritySave), halfProficiency);
-    updateCheckboxName(ui->chkStealth, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_stealth), halfProficiency);
-    updateCheckboxName(ui->chkAcrobatics, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_acrobatics), halfProficiency);
-    updateCheckboxName(ui->chkSleightOfHand, Character::getAbilityMod(ui->edtDex->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_sleightOfHand), halfProficiency);
-    updateCheckboxName(ui->chkConSave, Character::getAbilityMod(ui->edtCon->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_constitutionSave), halfProficiency);
-    updateCheckboxName(ui->chkIntSave, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_intelligenceSave), halfProficiency);
-    updateCheckboxName(ui->chkInvestigation, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_investigation), halfProficiency);
-    updateCheckboxName(ui->chkArcana, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_arcana), halfProficiency);
-    updateCheckboxName(ui->chkNature, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_nature), halfProficiency);
-    updateCheckboxName(ui->chkHistory, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_history), halfProficiency);
-    updateCheckboxName(ui->chkReligion, Character::getAbilityMod(ui->edtInt->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_religion), halfProficiency);
-    updateCheckboxName(ui->chkWisSave, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_wisdomSave), halfProficiency);
-    updateCheckboxName(ui->chkMedicine, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_medicine), halfProficiency);
-    updateCheckboxName(ui->chkAnimalHandling, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_animalHandling), halfProficiency);
-    updateCheckboxName(ui->chkPerception, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_perception), halfProficiency);
-    updateCheckboxName(ui->chkInsight, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_insight), halfProficiency);
-    updateCheckboxName(ui->chkSurvival, Character::getAbilityMod(ui->edtWis->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_survival), halfProficiency);
-    updateCheckboxName(ui->chkChaSave, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_charismaSave), halfProficiency);
-    updateCheckboxName(ui->chkPerformance, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_performance), halfProficiency);
-    updateCheckboxName(ui->chkDeception, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_deception), halfProficiency);
-    updateCheckboxName(ui->chkPersuasion, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_persuasion), halfProficiency);
-    updateCheckboxName(ui->chkIntimidation, Character::getAbilityMod(ui->edtCha->text().toInt()), proficiencyBonus, _character->getSkillExpertise(Combatant::Skills_intimidation), halfProficiency);
-    */
     updateCheckboxName(ui->chkStrSave, Combatant::Skills_strengthSave);
     updateCheckboxName(ui->chkAthletics, Combatant::Skills_athletics);
     updateCheckboxName(ui->chkDexSave, Combatant::Skills_dexteritySave);
@@ -227,14 +204,12 @@ void CharacterFrame::clear()
     ui->edtSize->setText(QString(""));
     ui->edtClass->setText(QString(""));
     ui->edtHitPoints->setText(QString(""));
+    ui->edtHitPointsMax->setText(QString(""));
     ui->edtArmorClass->setText(QString(""));
     ui->edtInitiative->setText(QString(""));
-    //ui->edtSex->setText(QString(""));
-    //ui->edtSize->setText(QString(""));
     ui->edtSpeed->setText(QString(""));
     ui->edtAlignment->setText(QString(""));
     ui->edtBackground->setText(QString(""));
-    //ui->edtNextLevel->setText(QString(""));
 
     ui->edtStr->setText(QString(""));
     ui->edtDex->setText(QString(""));
@@ -308,6 +283,8 @@ void CharacterFrame::clear()
     ui->chkPersuasion->setText(QString(""));
     ui->chkIntimidation->setText(QString(""));
 
+    clearConditionGrid();
+
     enableDndBeyondSync(false);
 
     _reading = false;
@@ -380,23 +357,18 @@ void CharacterFrame::readCharacterData()
     ui->edtClass->home(false);
     ui->edtHitPoints->setText(QString::number(_character->getHitPoints()));
     ui->edtHitPoints->home(false);
+    ui->edtHitPointsMax->setText(QString::number(_character->getIntValue(Character::IntValue_maximumHP)));
+    ui->edtHitPointsMax->home(false);
     ui->edtArmorClass->setText(QString::number(_character->getArmorClass()));
     ui->edtArmorClass->home(false);
     ui->edtInitiative->setText(QString::number(_character->getInitiative()));
     ui->edtInitiative->home(false);
-    //ui->edtSex->setText(_character->getStringValue(Character::StringValue_sex));
-    //ui->edtSex->home(false);
-    //ui->edtSize->setText(_character->getStringValue(Character::StringValue_size));
-    //ui->edtSize->home(false);
     ui->edtSpeed->setText(QString::number(_character->getIntValue(Character::IntValue_speed)));
     ui->edtSpeed->home(false);
     ui->edtAlignment->setText(_character->getStringValue(Character::StringValue_alignment));
     ui->edtAlignment->home(false);
     ui->edtBackground->setText(_character->getStringValue(Character::StringValue_background));
     ui->edtBackground->home(false);
-
-    //ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
-    //ui->edtNextLevel->home(false);
 
     ui->edtStr->setText(QString::number(_character->getIntValue(Character::IntValue_strength)));
     ui->edtDex->setText(QString::number(_character->getIntValue(Character::IntValue_dexterity)));
@@ -437,6 +409,8 @@ void CharacterFrame::readCharacterData()
     ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
+    updateConditionLayout();
+
     connectChanged(true);
 
     calculateMods();
@@ -460,10 +434,9 @@ void CharacterFrame::writeCharacterData()
         _character->setIntValue(Character::IntValue_experience, ui->edtExperience->text().toInt());
         _character->setStringValue(Character::StringValue_class, ui->edtClass->text());
         _character->setHitPoints(ui->edtHitPoints->text().toInt());
+        _character->setIntValue(Character::IntValue_maximumHP, ui->edtHitPointsMax->text().toInt());
         _character->setArmorClass(ui->edtArmorClass->text().toInt());
         _character->setInitiative(ui->edtInitiative->text().toInt());
-        //_character->setStringValue(Character::StringValue_sex, ui->edtSex->text());
-        //_character->setStringValue(Character::StringValue_size, ui->edtSize->text());
         _character->setIntValue(Character::IntValue_speed, ui->edtSpeed->text().toInt());
         _character->setStringValue(Character::StringValue_alignment, ui->edtAlignment->text());
         _character->setStringValue(Character::StringValue_background, ui->edtBackground->text());
@@ -508,7 +481,6 @@ void CharacterFrame::writeCharacterData()
         _character->endBatchChanges();
 
         calculateMods();
-        //ui->edtNextLevel->setText(QString::number(_character->getNextLevelXP()));
     }
 }
 
@@ -562,27 +534,116 @@ void CharacterFrame::openExpertiseDialog()
     writeCharacterData();
 }
 
+void CharacterFrame::editConditions()
+{
+    if(!_character)
+        return;
+
+    ConditionsEditDialog dlg;
+    dlg.setConditions(_character->getConditions());
+    int result = dlg.exec();
+    if(result == QDialog::Accepted)
+    {
+        if(dlg.getConditions() != _character->getConditions())
+        {
+            _character->setConditions(dlg.getConditions());
+            updateConditionLayout();
+        }
+    }
+}
+
+void CharacterFrame::updateConditionLayout()
+{
+    clearConditionGrid();
+
+    if(!_character)
+        return;
+
+    _conditionGrid = new QGridLayout;
+    _conditionGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    _conditionGrid->setContentsMargins(CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING);
+    _conditionGrid->setSpacing(CONDITION_FRAME_SPACING);
+    ui->scrollAreaWidgetContents->setLayout(_conditionGrid);
+
+    int conditions = _character->getConditions();
+
+    for(int i = 0; i < Combatant::getConditionCount(); ++i)
+    {
+        Combatant::Condition condition = Combatant::getConditionByIndex(i);
+        if(conditions & condition)
+            addCondition(condition);
+    }
+
+    int spacingColumn = _conditionGrid->columnCount();
+
+    _conditionGrid->addItem(new QSpacerItem(20, 40, QSizePolicy::Expanding), 0, spacingColumn);
+
+    for(int i = 0; i < spacingColumn; ++i)
+        _conditionGrid->setColumnStretch(i, 1);
+
+    _conditionGrid->setColumnStretch(spacingColumn, 10);
+
+    update();
+}
+
+void CharacterFrame::clearConditionGrid()
+{
+    if(!_conditionGrid)
+        return;
+
+    qDebug() << "[BattleCombatantFrame] Clearing the condition grid";
+
+    // Delete the grid entries
+    QLayoutItem *child = nullptr;
+    while((child = _conditionGrid->takeAt(0)) != nullptr)
+    {
+        delete child->widget();
+        delete child;
+    }
+
+    delete _conditionGrid;
+    _conditionGrid = nullptr;
+
+    ui->scrollAreaWidgetContents->update();
+}
+
+void CharacterFrame::addCondition(Combatant::Condition condition)
+{
+    if(!_conditionGrid)
+        return;
+
+    QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
+    QLabel* conditionLabel = new QLabel(this);
+    conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
+
+    QString conditionText = QString("<b>") + Combatant::getConditionDescription(condition) + QString("</b>");
+    if(QuickRef::Instance())
+    {
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        if(conditionData)
+            conditionText += QString("<p>") + conditionData->getOverview();
+    }
+    conditionLabel->setToolTip(conditionText);
+
+    int columnCount = (ui->scrollAreaWidgetContents->width() - CONDITION_FRAME_SPACING) / (40 + CONDITION_FRAME_SPACING);
+    int row = _conditionGrid->count() / columnCount;
+    int column = _conditionGrid->count() % columnCount;
+
+    _conditionGrid->addWidget(conditionLabel, row, column);
+}
+
 void CharacterFrame::loadCharacterImage()
 {
     if(_character)
         ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
 }
 
-//void CharacterFrame::updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency)
 void CharacterFrame::updateCheckboxName(QCheckBox* chk, Combatant::Skills skill)
 {
     if(!_character)
         return;
 
     int skillBonus = _character->getSkillBonus(skill);
-
-    /*
-    int skillBonus = abilityMod;
-    if(chk->isChecked())
-        skillBonus += expertise ? proficiencyBonus * 2 : proficiencyBonus;
-    else
-        skillBonus += halfProficiency ? proficiencyBonus / 2 : 0;
-    */
 
     QString chkName;
     if(skillBonus >= 0)

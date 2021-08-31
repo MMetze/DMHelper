@@ -22,17 +22,20 @@ public:
 
 public slots:
     void setZoomSelect(bool checked);
+    void setMapEdit(bool checked);
     void setBrushMode(int brushMode);
     void setDrawErase(bool checked);
 
 signals:
     void editFileClicked();
+
     void zoomInClicked();
     void zoomOutClicked();
     void zoomOneClicked();
     void zoomFullClicked();
     void zoomSelectClicked(bool checked);
 
+    void mapEditClicked(bool checked);
     void drawEraseClicked(bool checked);
     void smoothClicked(bool checked);
     void brushModeChanged(int brushMode);

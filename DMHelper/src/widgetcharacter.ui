@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>229</width>
+    <width>228</width>
     <height>56</height>
    </rect>
   </property>
@@ -129,6 +129,9 @@
            <height>20</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Is this character visible?</string>
+         </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
          </property>
@@ -153,6 +156,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Is this character visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -203,7 +209,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Is this character known? If the this isn't checked, the character will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the character takes any actions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>Is this character known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -231,7 +237,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this character known? If the this isn't checked, the character will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the character takes any actions.</string>
+          <string>Is this character known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -265,7 +271,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The character's name. To edit this, double click to go to the character's full view.</string>
+          <string>The character's name</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -285,7 +291,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The character's armor class. To edit this, double click to go to the character's full view.</string>
+          <string>The character's armor class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -307,7 +313,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The character's armor class. To edit this, double click to go to the character's full view.</string>
+          <string>The character's armor class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -327,7 +333,7 @@ background-color: rgba(0, 0, 0, 0);</string>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2,2,1,2">
        <property name="spacing">
         <number>0</number>
        </property>
@@ -352,7 +358,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's initiative value.</string>
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -372,18 +378,100 @@ background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="minimumSize">
           <size>
-           <width>40</width>
+           <width>0</width>
            <height>22</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>16777215</width>
            <height>30</height>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's initiative value.</string>
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::MinimumExpanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>5</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
+         <property name="text">
+          <string>Mv:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtMove">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>22</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>The character's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -403,7 +491,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeType">
-          <enum>QSizePolicy::Preferred</enum>
+          <enum>QSizePolicy::MinimumExpanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -434,7 +522,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's remaining hit points</string>
+          <string>The character's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -454,18 +542,18 @@ background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="minimumSize">
           <size>
-           <width>60</width>
+           <width>0</width>
            <height>22</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>16777215</width>
            <height>30</height>
           </size>
          </property>
          <property name="toolTip">
-          <string>The character's remaining hit points</string>
+          <string>The character's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();

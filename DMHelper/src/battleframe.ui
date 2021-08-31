@@ -467,6 +467,14 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>graphicsView</tabstop>
+  <tabstop>btnNext</tabstop>
+  <tabstop>btnSort</tabstop>
+  <tabstop>edtRounds</tabstop>
+  <tabstop>edtCountdown</tabstop>
+  <tabstop>scrollArea</tabstop>
+ </tabstops>
  <resources>
   <include location="resources.qrc"/>
  </resources>

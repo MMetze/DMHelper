@@ -34,11 +34,13 @@ signals:
 public slots:
 
     virtual void updateData();
+    virtual void updateMove();
     virtual void setInitiative(int initiative);
     virtual void initiativeChanged();
     virtual void setActive(bool active);
     virtual void setSelected(bool selected);
     virtual void setHover(bool hover);
+    virtual void selectCombatant() = 0;
 
 protected:
 

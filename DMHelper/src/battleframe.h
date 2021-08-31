@@ -22,6 +22,7 @@ class VideoPlayer;
 class CameraRect;
 class BattleCombatantFrame;
 class UnselectedPixmap;
+class CombatantRolloverFrame;
 
 namespace Ui {
 class BattleFrame;
@@ -111,6 +112,7 @@ public slots:
     void zoomOut();
     void zoomFit();
     void zoomSelect(bool enabled);
+    void zoomDelta(int delta);
     void cancelSelect();
 
     // Public for connection to battle ribbon
@@ -190,22 +192,32 @@ private slots:
     void updateRounds();
     void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
-//    void handleSelectionChanged();
     void handleEffectChanged(QGraphicsItem* effectItem);
     void handleEffectRemoved(QGraphicsItem* effectItem);
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
+    void handleCombatantActivate(BattleDialogModelCombatant* combatant);
+    void handleCombatantRemove(BattleDialogModelCombatant* combatant);
+    void handleCombatantDamage(BattleDialogModelCombatant* combatant);
+    void handleCombatantHeal(BattleDialogModelCombatant* combatant);
     void handleApplyEffect(QGraphicsItem* effect);
 
     void handleItemMouseDown(QGraphicsPixmapItem* item);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
     void handleItemMouseUp(QGraphicsPixmapItem* item);
     void handleItemChanged(QGraphicsItem* item);
+    void handleItemMouseDoubleClick(QGraphicsPixmapItem* item);
+
+    void handleMapMousePress(const QPointF& pos);
+    void handleMapMouseMove(const QPointF& pos);
+    void handleMapMouseRelease(const QPointF& pos);
 
     void removeCombatant();
     void activateCombatant();
     void damageCombatant();
+    void healCombatant();
+    void applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange);
     void setSelectedCombatant(BattleDialogModelCombatant* selected);
     void setUniqueSelection(BattleDialogModelCombatant* selected);
     void updateCombatantWidget(BattleDialogModelCombatant* combatant);
@@ -237,6 +249,8 @@ private slots:
     void setEditMode();
     void updateFowImage(const QPixmap& fow);
     void setItemsInert(bool inert);
+
+    void removeRollover();
 
     // State Machine
     void stateUpdated();
@@ -294,8 +308,8 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
-    void startMovement(QGraphicsPixmapItem* item, int speed);
-    void updateMovement(QGraphicsPixmapItem* item);
+    void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);
+    void updateMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item);
     void endMovement();
 
     QPixmap getPointerPixmap();
@@ -318,10 +332,8 @@ private:
     BattleDialogModelCombatant* _contextMenuCombatant;
     bool _mouseDown;
     QPoint _mouseDownPos;
-    QWidget* _hoverFrame;
-//    BattleCombatantFrame* _combatantSummary;
+    CombatantRolloverFrame* _hoverFrame;
 
-//    QGraphicsItem* _publishSelected;
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
 
@@ -330,7 +342,6 @@ private:
     QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
     qreal _activeScale;
-//    QGraphicsPixmapItem* _selectedPixmap;
     qreal _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;

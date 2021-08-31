@@ -59,7 +59,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Welcome to the DM Helper</string>
+        <string>Welcome to DMHelper</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>

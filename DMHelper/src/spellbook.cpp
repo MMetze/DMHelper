@@ -23,7 +23,39 @@
         </spell
                 <ritual
 */
+/*
 
+<root>
+    <element>
+          <casting_time/>
+          <classes>
+                <element/>
+          </classees>
+          <components>
+                <raw/>
+                <verbal/>
+                <somatic/>
+                <material/>
+                <materials_needed>
+                      <element/>
+                </materials_needed>
+          </components>
+          <description/>
+          <duration/>
+          <higher_levels/>
+          <level/>
+          <name/>
+          <range/>
+          <ritual/>
+          <school/>
+          <tags>
+                <element/>
+          </tages>
+          <type/>
+    </element>
+</root>
+
+ */
 Spellbook* Spellbook::_instance = nullptr;
 
 Spellbook::Spellbook(QObject *parent) :
@@ -89,7 +121,7 @@ int Spellbook::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDir
     }
 
     QDomElement licenseElement = doc.createElement(QString("license"));
-    for(QString licenseText : _licenseText)
+    for(const QString& licenseText : _licenseText)
     {
         QDomElement licenseTextElement = doc.createElement(QString("element"));
         licenseTextElement.appendChild(doc.createTextNode(licenseText));
@@ -119,6 +151,8 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
     if(!isVersionCompatible())
     {
         qDebug() << "[Spellbook]    ERROR: Spellbook version is not compatible with expected version: " << getExpectedVersion();
+        if(_majorVersion == 9999)
+            input_START_CONVERSION(spellbookElement);
         return;
     }
 
@@ -195,6 +229,34 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
 
         qDebug() << "[Spellbook] Loading spellbook completed. " << _spellbookMap.count() << " spells loaded.";
     }
+
+    emit changed();
+}
+
+void Spellbook::input_START_CONVERSION(const QDomElement &element)
+{
+    if(element.isNull())
+        return;
+
+    qDebug() << "[Spellbook] CONVERTING spellbook...";
+
+    if(_spellbookMap.count() > 0)
+    {
+        qDebug() << "[Spellbook]    Unloading previous spellbook";
+        qDeleteAll(_spellbookMap);
+        _spellbookMap.clear();
+    }
+
+    QDomElement spellElement = element.firstChildElement(QString("element"));
+    while(!spellElement.isNull())
+    {
+        Spell* spell = new Spell(QString());
+        spell->inputXML_CONVERT(spellElement);
+        insertSpell(spell);
+        spellElement = spellElement.nextSiblingElement(QString("element"));
+    }
+
+    qDebug() << "[Spellbook] ... spellbook CONVERTED";
 
     emit changed();
 }

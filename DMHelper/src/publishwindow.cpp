@@ -14,12 +14,13 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
 
     //setAutoFillBackground(true);
     //setStyleSheet("background-color: rgba(0,0,0,255);");
-    setBackgroundColor();
 
     _publishFrame = new PublishFrame(this);
     setCentralWidget(_publishFrame);
-    resize(600, 400);
+    resize(800, 600);
     //_publishFrame->setAutoFillBackground(true);
+
+    setBackgroundColor();
 
     connect(_publishFrame,SIGNAL(arrowVisibleChanged(bool)),this,SIGNAL(arrowVisibleChanged(bool)));
     connect(_publishFrame, SIGNAL(publishMouseDown(QPointF)),this,SIGNAL(publishMouseDown(QPointF)));

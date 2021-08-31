@@ -22,16 +22,13 @@ signals:
     void exportBestiaryClicked();
     void importBestiaryClicked();
 
-    void spellbookClicked();
-
     void screenClicked();
     void tablesClicked();
     void referenceClicked();
     void soundboardClicked();
+    void spellbookClicked();
 
     void rollDiceClicked();
-    void publishTextClicked();
-    void translateTextClicked();
     void randomMarketClicked();
     void calendarClicked();
     void countdownClicked();

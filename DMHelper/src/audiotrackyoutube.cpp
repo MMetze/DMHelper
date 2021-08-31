@@ -130,27 +130,29 @@ void AudioTrackYoutube::setRepeat(bool repeat)
 
 void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
 {
+    if(!reply)
+    {
+        QMessageBox::critical(nullptr,
+        QString("DMHelper Audio Error"),
+        QString("An unexpected and unknown error was encountered trying to find the requested YouTube video for playback!"));
+        qDebug() << "[AudioTrackYoutube] ERROR identified in reply, unexpected null pointer reply received!";
+        return;
+    }
+
     if((!_vlcInstance) && (!_vlcListPlayer) && (!_vlcPlayer))
     {
-        if(!reply)
-        {
-            QMessageBox::critical(nullptr,
-                                  QString("DM Helper Audio Error"),
-                                  QString("An unexpected and unknown error was encountered trying to find the requested YouTube video for playback!"));
-            qDebug() << "[AudioTrackYoutube] ERROR identified in reply, unexpected null pointer reply received!";
-        }
-        else if(reply->error() != QNetworkReply::NoError)
+        if(reply->error() != QNetworkReply::NoError)
         {
             if(reply->error() == QNetworkReply::HostNotFoundError)
             {
                 QMessageBox::critical(nullptr,
-                                      QString("DM Helper Audio Error"),
+                                      QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video. It was not possible to reach the server!"));
             }
             else
             {
                 QMessageBox::critical(nullptr,
-                                      QString("DM Helper Audio Error"),
+                                      QString("DMHelper Audio Error"),
                                       QString("A network error was encountered trying to find the requested YouTube video:") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
             }
 
@@ -183,7 +185,7 @@ void AudioTrackYoutube::findDirectUrl(const QString& youtubeId)
     getString.append(youtubeId);
     getString.append("&version=");
     getString.append(QString("%1.%2").arg(DMHelper::DMHELPER_MAJOR_VERSION)
-                                     .arg(DMHelper::DMHELPER_MINOR_VERSION));
+                                   .arg(DMHelper::DMHELPER_MINOR_VERSION));
     if(DMHelper::DMHELPER_ENGINEERING_VERSION > 0)
         getString.append("&debug=true");
 
@@ -303,7 +305,7 @@ void AudioTrackYoutube::internalStopCheck(int status)
 {
     _stopStatus |= status;
 
-    qDebug() << "[VideoPlayer] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
+    qDebug() << "[AudioTrackYoutube] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
 
     if(_stopStatus != stopComplete)
         return;

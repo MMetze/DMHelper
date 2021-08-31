@@ -31,16 +31,6 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monst
         _monsterHP = _monsterClass->getHitDice().roll();
 }
 
-/*
-BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const BattleDialogModelMonsterClass& other) :
-    BattleDialogModelMonsterBase(other),
-    _monsterClass(other._monsterClass),
-    _monsterName(other._monsterName),
-    _monsterHP(other._monsterHP)
-{
-}
-*/
-
 BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
 {
 }
@@ -215,7 +205,11 @@ int BattleDialogModelMonsterClass::getHitPoints() const
 
 void BattleDialogModelMonsterClass::setHitPoints(int hitPoints)
 {
-    _monsterHP = hitPoints;
+    if(_monsterHP != hitPoints)
+    {
+        _monsterHP = hitPoints;
+        emit dataChanged(this);
+    }
 }
 
 QString BattleDialogModelMonsterClass::getName() const
@@ -268,7 +262,11 @@ MonsterClass* BattleDialogModelMonsterClass::getMonsterClass() const
 
 void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
 {
-    _monsterName = monsterName;
+    if(_monsterName != monsterName)
+    {
+        _monsterName = monsterName;
+        emit dataChanged(this);
+    }
 }
 
 void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

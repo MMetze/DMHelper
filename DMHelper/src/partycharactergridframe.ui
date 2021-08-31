@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>PartyCharacterGridFrame</class>
  <widget class="QFrame" name="PartyCharacterGridFrame">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>406</width>
+    <height>368</height>
+   </rect>
+  </property>
   <property name="sizePolicy">
    <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
     <horstretch>0</horstretch>
@@ -111,6 +119,9 @@
            <weight>75</weight>
            <bold>true</bold>
           </font>
+         </property>
+         <property name="cursor">
+          <cursorShape>ArrowCursor</cursorShape>
          </property>
          <property name="focusPolicy">
           <enum>Qt::NoFocus</enum>

@@ -7,10 +7,9 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
 2. Spellbook
     DONE - Engineering version with PHB (WotC IP) data
     DONE - Non-standard meta-data like conditions/damage caused, color/shape of AoE effects, or optional images for use on a battle map
-    SRD data xml
-    Potential need for xml reading performance improvement
-    Images to be possible "on top" of real effects to consider radius, etc.
     DONE - Images and shapes need to be saved
+    DONE - SRD data xml
+    Potential need for xml reading performance improvement
 3. Conditions
     DONE - Can be set in battles
     DONE - Visual reminders in DM view
@@ -35,40 +34,55 @@ IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FRO
     DONE - Editing/Saving of monster skills enabled
     DONE - Editing/Saving of character and monster size enabled
     DONE - Edit map file possible
-    Split Max HP and Current HP
+    DONE - Split Max HP and Current HP
+    DONE - Improved importer AC and HP calculations
+    DONE - Import Character puts it in the selected tree items
+
+
+Long actions that need a loading bar
+- opening a bestiary
+- opening a spellbook
+- opening a campaign
+- reading a map
+- importing a campaign
+- importing a bestiary
+- importing a character
+- updating a character
+- updating a party
+
+    Background color default to black, not transparent
+    Background color on maps defaults weird
+
+    Conditions
+    Other effects, tie things to individuals
+
+Remove dicerollframe
+
     Improve Objects and Effects editing
     Object editing should allow editing width or height...
     Delete key in battle
-    Import Character puts it in the selected tree items
+    Drag a character to top doesn't make it an NPC
     Add progress indications to loading campaigns and importing characters (and maybe maps?), new bestiary/spellbook, etc
-    Check importer AC calculations
     Delete entry in the tree move selection to parent item
     Pointer on maps
 
 Red color:  _color(115,18,0,64)
 
-AoE hitting the middle of creatures rather than the edge
 General Todos:
-Update roadmap github
-Update website
 Create generic Bestiary imports - some sort of contribution mechanism?
 Online docs
 Marketing Videos
 Make truly opensource
 
-v2.1 Features:
+v2.2+ Features:
 1) Syrinscape integration
-2) Youtube Audio (vlc)
 3) Youtube Vidoes?
-4) Conditions, battle upgrades in general
-5) Spell DB
 6) OpenGL based battles?
 
-v2.1 Todos:
+v3.0 Todos:
 1) Update Documentation
 
 
-Reload tables
 add opensource comments on all files
 white grid or black screen at button click
 Import/Export bestiary
@@ -84,9 +98,9 @@ Export/Import of individual adventures, party, characters, encounters
 Item cards like in Critical Role
 
 Shortcuts
-Ctrl+Q: Quit DM Helper
+Ctrl+Q: Quit DMHelper
 Ctrl+W:     (Close Window)
-Ctrl+E: Opens the DM ScrEEn
+Ctrl+E: Opens the DM Screen
 Ctrl+R: Opens the Quick Reference Guide
 Ctrl+T: Tables Tables Tables
 Ctrl+Z: Undo
@@ -99,7 +113,7 @@ Ctrl+S: Save the current campaign
 Ctrl+D: Dice roll Dialog
 Ctrl+F: Find
 Ctrl+G: Go to the Soundboard
-Ctrl+H:
+Ctrl+H: Go to the Spellbook
 Ctrl+J:
 Ctrl+K: Opens the Kalendar
 Ctrl+L: Open the Preview Window
@@ -110,6 +124,11 @@ Ctrl+V: Paste
 Ctrl+B: Bold
 Ctrl+N: Move to the Next combatant (in Combats only)
 Ctrl+M: Open the Bestiary to search for Monsters
+
+
+Localization:
+Italian: Rufus Loacker
+Portugese: texmex42
 
 
 syrinscape-fantasy:moods/YnJpbmRvbC10b3duOjpCdXN5IG1hcmtldCBkYXk/play/

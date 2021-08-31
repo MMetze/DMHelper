@@ -29,7 +29,7 @@ void RibbonMain::enableTab(RibbonFrame* page)
         int index = addTab(page, page->windowTitle());
         if(index > 1)
         {
-            // Set the publishbutton of the new page to match the state of the Campaign Tab publish button
+            // Set the publish button of the new page to match the state of the Campaign Tab publish button
             RibbonFrame* campaignFrame = dynamic_cast<RibbonFrame*>(widget(1));
             if(campaignFrame)
             {
@@ -39,8 +39,6 @@ void RibbonMain::enableTab(RibbonFrame* page)
         }
         _publishProxy.addPublishButton(page->getPublishRibbon());
     }
-
-    //setCurrentWidget(page);
 }
 
 void RibbonMain::disableTab(RibbonFrame* page)

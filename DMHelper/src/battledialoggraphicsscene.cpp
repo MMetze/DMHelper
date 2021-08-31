@@ -10,6 +10,7 @@
 #include "spell.h"
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
+#include <QKeyEvent>
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QtMath>
@@ -23,6 +24,8 @@
 // Uncomment this to log all mouse movement actions
 //#define BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
 
+const QPointF INVALID_POINT = QPointF(-1.0,-1.0);
+
 BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     QGraphicsScene(parent),
     _contextMenuItem(nullptr),
@@ -34,6 +37,8 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mouseDownItem(nullptr),
     _mouseHoverItem(nullptr),
     _previousRotation(0.0),
+    _commandPosition(INVALID_POINT),
+    _spaceDown(false),
     _inputMode(-1),
     _pointerPixmapItem(nullptr),
     _pointerVisible(false),
@@ -43,13 +48,18 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _pointerMouseHandler(*this),
     _rawMouseHandler(*this),
     _cameraMouseHandler(*this),
-    _combatantMouseHandler(*this)//,
-    //_selectMouseHandler(*this)
+    _combatantMouseHandler(*this),
+    _mapsMouseHandler(*this)
 {
     connect(&_distanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerDistance::distanceChanged, this, &BattleDialogGraphicsScene::distanceChanged);
+
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMousePress, this, &BattleDialogGraphicsScene::battleMousePress);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseMove, this, &BattleDialogGraphicsScene::battleMouseMove);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseRelease, this, &BattleDialogGraphicsScene::battleMouseRelease);
+
+    connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMousePress, this, &BattleDialogGraphicsScene::mapMousePress);
+    connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseMove, this, &BattleDialogGraphicsScene::mapMouseMove);
+    connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseRelease, this, &BattleDialogGraphicsScene::mapMouseRelease);
 }
 
 BattleDialogGraphicsScene::~BattleDialogGraphicsScene()
@@ -85,7 +95,7 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
     _grid->rebuildGrid(*_model);
 
     QList<BattleDialogModelEffect*> effects = _model->getEffectList();
-    for(BattleDialogModelEffect* effect : effects)
+    for(BattleDialogModelEffect* effect : qAsConst(effects))
     {
         if(effect)
         {
@@ -97,10 +107,9 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
         }
     }
 
-    QList<QGraphicsView*> viewList = views();
-    if((viewList.count() > 0) && (viewList.at(0)))
+    QGraphicsView* view = views().constFirst();
+    if(view)
     {
-        QGraphicsView* view = viewList.at(0);
         if(_pointerPixmap.isNull())
             _pointerPixmap.load(":/img/data/arrow.png");
         _pointerPixmapItem = addPixmap(_pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -129,13 +138,12 @@ void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
         _grid->rebuildGrid(*_model);
     }
 
-    for(QGraphicsItem* item : _itemList)
+    for(QGraphicsItem* item : qAsConst(_itemList))
     {
         if(item)
         {
             QPoint mapPos = item->pos().toPoint() + _model->getPreviousMapRect().topLeft();
             item->setPos(mapPos - _model->getMapRect().topLeft());
-            //_model->getEffectById(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()))->setPosition(item->pos());
             BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
             if(effect)
                 effect->setPosition(item->pos());
@@ -160,7 +168,7 @@ void BattleDialogGraphicsScene::updateBattleContents()
         _grid->rebuildGrid(*_model);
     }
 
-    for(QGraphicsItem* item : _itemList)
+    for(QGraphicsItem* item : qAsConst(_itemList))
     {
         if(item)
         {
@@ -182,10 +190,9 @@ void BattleDialogGraphicsScene::scaleBattleContents()
 {
     if(_pointerPixmapItem)
     {
-        QList<QGraphicsView*> viewList = views();
-        if((viewList.count() > 0) && (viewList.at(0)))
+        QGraphicsView* view = views().constFirst();
+        if(view)
         {
-            QGraphicsView* view = viewList.at(0);
             QRectF sizeInScene = view->mapToScene(0, 0, DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE).boundingRect();
             _pointerPixmapItem->setScale(sizeInScene.width() / static_cast<qreal>(DMHelper::CURSOR_SIZE));
         }
@@ -212,7 +219,7 @@ void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffect
 {
     bool newVisible = visible;
 
-    for(QGraphicsItem* item : _itemList)
+    for(QGraphicsItem* item : qAsConst(_itemList))
     {
         if(item)
         {
@@ -283,7 +290,7 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
 {
     QGraphicsItem* result = nullptr;
 
-    QGraphicsView* localView = views().first();
+    QGraphicsView* localView = views().constFirst();
     if(!localView)
         return nullptr;
 
@@ -292,12 +299,11 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
         return nullptr;
 
     // Search for the first selectable item
-    for(QGraphicsItem* item : itemList)
+    for(QGraphicsItem* item : qAsConst(itemList))
     {
         if((item)&&((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
         {
             result = dynamic_cast<QGraphicsItem*>(item);
-            //qDebug() << "[Battle Dialog Scene] find top object found selectable object: " << result;
             return result;
         }
     }
@@ -305,7 +311,6 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
     // If we get here, nothing selectable was found, so return the top-most item
     // WRONG - return no item - the callers assume a returned item is selectable!
     result = nullptr;
-    //qDebug() << "[Battle Dialog Scene] find top object found, but not selectable: " << result;
     return result;
 }
 
@@ -316,13 +321,25 @@ bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseE
     if(mouseEvent->button() == Qt::LeftButton)
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-        QUuid itemId = BattleDialogModelEffect::getEffectIdFromItem(item);
-        if((item)&&(!(itemId.isNull())))
+        if(item)
         {
-            qDebug() << "[Battle Dialog Scene] doubleclick identified on item " << itemId;
-            _contextMenuItem = item;
-            editItem();
-            _contextMenuItem = nullptr;
+            QUuid itemId = BattleDialogModelEffect::getEffectIdFromItem(item);
+            if(!(itemId.isNull()))
+            {
+                qDebug() << "[Battle Dialog Scene] doubleclick identified on item " << itemId;
+                _contextMenuItem = item;
+                editItem();
+                _contextMenuItem = nullptr;
+            }
+            else if((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
+            {
+                QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+                if(pixItem)
+                {
+                    qDebug() << "[Battle Dialog Scene] doubleclick on combatant " << pixItem;
+                    emit itemMouseDoubleClick(pixItem);
+                }
+            }
         }
 
         _mouseDown = false;
@@ -356,7 +373,6 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
     }
     else
     {
-        //QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(_mouseDownItem);
         QGraphicsItem* abstractShape = _mouseDownItem;
         QUuid effectId = BattleDialogModelEffect::getEffectIdFromItem(_mouseDownItem);
 
@@ -497,12 +513,11 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
     if(mouseEvent->button() == Qt::RightButton)
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
+        QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+
         qDebug() << "[Battle Dialog Scene] right mouse released at " << mouseEvent->scenePos() << " for item " << item;
 
-        QWidget* parentWidget = nullptr;
-        if(views().count() > 0 )
-            parentWidget = views().first();
-        QMenu menu(parentWidget);
+        QMenu menu(views().constFirst());
         if((item)&&(!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
         {
             qDebug() << "[Battle Dialog Scene] right click identified on effect " << item;
@@ -523,37 +538,65 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 QAction* deleteItem = new QAction(QString("Delete Effect..."), &menu);
                 connect(deleteItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
                 menu.addAction(deleteItem);
+
+                menu.addSeparator();
             }
+        }
+        else if((item) && (pixItem) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+        {
+            qDebug() << "[Battle Dialog Scene] right click identified on combatant " << pixItem;
+            _contextMenuItem = item;
+            _mouseDownPos = mouseEvent->scenePos();
+
+            QAction* activateItem = new QAction(QString("Activate"), &menu);
+            connect(activateItem,SIGNAL(triggered()),this,SLOT(activateCombatant()));
+            menu.addAction(activateItem);
+
+            QAction* removeItem = new QAction(QString("Remove"), &menu);
+            connect(removeItem,SIGNAL(triggered()),this,SLOT(removeCombatant()));
+            menu.addAction(removeItem);
+
+            QAction* damageItem = new QAction(QString("Damage..."), &menu);
+            connect(damageItem,SIGNAL(triggered()),this,SLOT(damageCombatant()));
+            menu.addAction(damageItem);
+
+            QAction* healItem = new QAction(QString("Heal..."), &menu);
+            connect(healItem,SIGNAL(triggered()),this,SLOT(healCombatant()));
+            menu.addAction(healItem);
+
+            menu.addSeparator();
         }
         else
         {
             qDebug() << "[Battle Dialog Scene] right click identified on background";
             _mouseDownPos = mouseEvent->scenePos();
-
-            QAction* addRadiusItem = new QAction(QString("Create Radius Effect"), &menu);
-            connect(addRadiusItem, SIGNAL(triggered()), this, SLOT(addEffectRadius()));
-            menu.addAction(addRadiusItem);
-
-            QAction* addConeItem = new QAction(QString("Create Cone Effect"), &menu);
-            connect(addConeItem, SIGNAL(triggered()), this, SLOT(addEffectCone()));
-            menu.addAction(addConeItem);
-
-            QAction* addCubeItem = new QAction(QString("Create Cube Effect"), &menu);
-            connect(addCubeItem, SIGNAL(triggered()), this, SLOT(addEffectCube()));
-            menu.addAction(addCubeItem);
-
-            QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
-            connect(addLineItem, SIGNAL(triggered()), this, SLOT(addEffectLine()));
-            menu.addAction(addLineItem);
-
-            menu.addSeparator();
-
-            QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
-            connect(castItem, SIGNAL(triggered()), this, SLOT(castSpell()));
-            menu.addAction(castItem);
         }
 
+        QAction* addRadiusItem = new QAction(QString("Create Radius Effect"), &menu);
+        connect(addRadiusItem, SIGNAL(triggered()), this, SLOT(addEffectRadius()));
+        menu.addAction(addRadiusItem);
+
+        QAction* addConeItem = new QAction(QString("Create Cone Effect"), &menu);
+        connect(addConeItem, SIGNAL(triggered()), this, SLOT(addEffectCone()));
+        menu.addAction(addConeItem);
+
+        QAction* addCubeItem = new QAction(QString("Create Cube Effect"), &menu);
+        connect(addCubeItem, SIGNAL(triggered()), this, SLOT(addEffectCube()));
+        menu.addAction(addCubeItem);
+
+        QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
+        connect(addLineItem, SIGNAL(triggered()), this, SLOT(addEffectLine()));
+        menu.addAction(addLineItem);
+
+        menu.addSeparator();
+
+        QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
+        connect(castItem, SIGNAL(triggered()), this, SLOT(castSpell()));
+        menu.addAction(castItem);
+
+        _commandPosition = _mouseDownPos;
         menu.exec(mouseEvent->screenPos());
+        _commandPosition = INVALID_POINT;
     }
     else if(mouseEvent->button() == Qt::LeftButton)
     {
@@ -718,7 +761,7 @@ void BattleDialogGraphicsScene::castSpell()
                                                    spell->getEffectSize().height(),
                                                    spell->getEffectSize().width(),
                                                    spell->getEffectColor(),
-                                                   spell->getEffectToken());
+                                                   spell->getEffectTokenPath());
 
     if(!effect)
     {
@@ -726,11 +769,11 @@ void BattleDialogGraphicsScene::castSpell()
         return;
     }
 
-    effect->setName(spell->getName());
-
     if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
     {
         // Either an Object or a basic shape without a token
+        effect->setName(spell->getName());
+        effect->setTip(spell->getName());
         addEffect(effect);
     }
     else
@@ -752,7 +795,7 @@ void BattleDialogGraphicsScene::castSpell()
                                                                                                                 tokenHeight,
                                                                                                                 tokenWidth,
                                                                                                                 spell->getEffectColor(),
-                                                                                                                spell->getEffectToken()));
+                                                                                                                spell->getEffectTokenPath()));
 
         if(!tokenEffect)
         {
@@ -762,6 +805,7 @@ void BattleDialogGraphicsScene::castSpell()
         }
 
         tokenEffect->setName(spell->getName());
+        tokenEffect->setTip(spell->getName());
         tokenEffect->setEffectActive(true);
         tokenEffect->setImageRotation(spell->getEffectTokenRotation());
 
@@ -844,18 +888,32 @@ void BattleDialogGraphicsScene::deleteItem()
         return;
     }
 
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
-    if(!effect)
+    QGraphicsItem* deleteItem = _contextMenuItem;
+    const QList<QGraphicsItem*> deleteChildItems = deleteItem->childItems();
+    for(QGraphicsItem* childItem : deleteChildItems)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << _contextMenuItem;
+        if(childItem->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area)
+            deleteItem = childItem;
+    }
+
+    if(!deleteItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, unexpected error finding the right item to delete!";
+        return;
+    }
+
+    BattleDialogModelEffect* deleteEffect = BattleDialogModelEffect::getEffectFromItem(deleteItem);
+    if(!deleteEffect)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to delete item, no model data available! " << deleteItem;
         return;
     }
 
     QMessageBox::StandardButton result = QMessageBox::critical(nullptr, QString("Confirm Delete Effect"), QString("Are you sure you wish to delete this effect?"), QMessageBox::Yes | QMessageBox::No);
     if(result == QMessageBox::Yes)
     {
-        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << effect;
-        _model->removeEffect(effect);
+        qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << deleteEffect;
+        _model->removeEffect(deleteEffect);
         _itemList.removeOne(_contextMenuItem);
         if(_mouseDownItem == _contextMenuItem)
         {
@@ -868,12 +926,56 @@ void BattleDialogGraphicsScene::deleteItem()
     }
 }
 
+void BattleDialogGraphicsScene::activateCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantActivate(combatant);
+}
+
+void BattleDialogGraphicsScene::removeCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantRemove(combatant);
+}
+
+void BattleDialogGraphicsScene::damageCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantDamage(combatant);
+}
+
+void BattleDialogGraphicsScene::healCombatant()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantHeal(combatant);
+}
+
 void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mouseDoubleClickEvent(mouseEvent))
@@ -896,7 +998,7 @@ void BattleDialogGraphicsScene::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEv
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mouseMoveEvent(mouseEvent))
@@ -912,7 +1014,7 @@ void BattleDialogGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseE
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mousePressEvent(mouseEvent))
@@ -928,7 +1030,7 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
     if(!mouseEvent)
         return;
 
-    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
         if(!mouseHandler->mouseReleaseEvent(mouseEvent))
@@ -939,31 +1041,59 @@ void BattleDialogGraphicsScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mous
     QGraphicsScene::mouseReleaseEvent(mouseEvent);
 }
 
+void BattleDialogGraphicsScene::wheelEvent(QGraphicsSceneWheelEvent *wheelEvent)
+{
+    if((wheelEvent) &&
+       ((wheelEvent->orientation() & Qt::Vertical) == Qt::Vertical) &&
+       ((wheelEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
+    {
+        wheelEvent->accept();
+        emit mapZoom(wheelEvent->delta());
+    }
+}
+
+void BattleDialogGraphicsScene::keyPressEvent(QKeyEvent *keyEvent)
+{
+    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+        _spaceDown = true;
+
+    QGraphicsScene::keyPressEvent(keyEvent);
+}
+
+void BattleDialogGraphicsScene::keyReleaseEvent(QKeyEvent *keyEvent)
+{
+    if((keyEvent) && (keyEvent->key() == Qt::Key_Space))
+        _spaceDown = false;
+
+    QGraphicsScene::keyReleaseEvent(keyEvent);
+}
+
 BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int size, int width, const QColor& color, const QString& filename)
 {
     BattleDialogModelEffect* result = nullptr;
     qreal scaledHalfSize;
-    QPointF effectPosition;
+    QPointF effectPosition = _commandPosition != INVALID_POINT ? _commandPosition : getViewportCenter();
+
     switch(type)
     {
         case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
             //scaledHalfSize = static_cast<qreal>(size) * 2.0 * _model->getGridScale() / (5.0 * 2.0);
-            effectPosition = _mouseDownPos;// - QPointF(scaledHalfSize, scaledHalfSize);
+            //effectPosition = _mouseDownPos;// - QPointF(scaledHalfSize, scaledHalfSize);
             result = BattleDialogModelEffectFactory::createEffectRadius(effectPosition, size, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Cone:
-            result = BattleDialogModelEffectFactory::createEffectCone(_mouseDownPos, size, color);
+            result = BattleDialogModelEffectFactory::createEffectCone(effectPosition, size, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Cube:
             scaledHalfSize = static_cast<qreal>(size) * _model->getGridScale() / (5.0 * 2.0);
-            effectPosition = _mouseDownPos - QPointF(scaledHalfSize, scaledHalfSize);
+            effectPosition -= QPointF(scaledHalfSize, scaledHalfSize);
             result = BattleDialogModelEffectFactory::createEffectCube(effectPosition, size, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Line:
-            result = BattleDialogModelEffectFactory::createEffectLine(_mouseDownPos, size, width, color);
+            result = BattleDialogModelEffectFactory::createEffectLine(effectPosition, size, width, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
-            result = BattleDialogModelEffectFactory::createEffectObject(_mouseDownPos, QSize(width, size), color, filename);
+            result = BattleDialogModelEffectFactory::createEffectObject(effectPosition, QSize(width, size), color, filename);
             break;
         default:
             break;
@@ -1066,14 +1196,21 @@ QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect
     effectItem->setParentItem(tokenItem);
     effectItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
     effectItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+    effectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
     effectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
     effectItem->setPos(QPointF(0.0, 0.0));
 
     return effectItem;
 }
 
-BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler()
+BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent)
 {
+    if((mouseEvent) &&
+       (  //(_spaceDown) || <-- removed because space bar triggers "next" in combat
+        ((mouseEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier) ||
+        ((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton)))
+        return &_mapsMouseHandler;
+
     switch(_inputMode)
     {
         case DMHelper::BattleFrameState_FoWEdit:
@@ -1093,4 +1230,18 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
         default:
             return nullptr;
     }
+}
+
+QPointF BattleDialogGraphicsScene::getViewportCenter()
+{
+    QPointF combatantPos(INVALID_POINT);
+
+    QGraphicsView* view = views().constFirst();
+    if(view)
+    {
+        QRectF viewportRect = view->mapToScene(view->viewport()->rect()).boundingRect().toAlignedRect();
+        combatantPos = viewportRect.topLeft() + QPointF(viewportRect.width() / 2, viewportRect.height() / 2);
+    }
+
+    return combatantPos;
 }

@@ -22,7 +22,7 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
 void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
 
 
-VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo, bool playAudio, QObject *parent) :
+VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo, bool playAudio, bool autoStart, QObject *parent) :
     QObject(parent),
     _videoFile(videoFile),
     _playVideo(playVideo),
@@ -49,7 +49,7 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
 #ifdef Q_OS_WIN
     _videoFile.replace("/","\\\\");
 #endif
-    _vlcError = !initializeVLC();
+    _vlcError = !initializeVLC(autoStart);
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Player object initialized: " << this;
 #endif
@@ -436,7 +436,7 @@ bool VideoPlayer::restartPlayer()
     }
 }
 
-bool VideoPlayer::initializeVLC()
+bool VideoPlayer::initializeVLC(bool autoStart)
 {
     qDebug() << "[VideoPlayer] Initializing VLC!";
 
@@ -453,8 +453,6 @@ bool VideoPlayer::initializeVLC()
     _vlcInstance = libvlc_new(0, nullptr);
 #endif
 
-    _vlcInstance = libvlc_new(0, nullptr);
-
     if(!_vlcInstance)
         return false;
 
@@ -466,7 +464,10 @@ bool VideoPlayer::initializeVLC()
     qDebug() << "[VideoPlayer] Initializing VLC completed";
 #endif
 
-    return startPlayer();
+    if(autoStart)
+        return startPlayer();
+    else
+        return true;
 }
 
 bool VideoPlayer::startPlayer()
@@ -509,11 +510,17 @@ bool VideoPlayer::startPlayer()
 
     // Create a new libvlc player
     _vlcListPlayer = libvlc_media_list_player_new(_vlcInstance);
+    if(!_vlcListPlayer)
+        return false;
+
     libvlc_media_player_t *player = libvlc_media_player_new(_vlcInstance);
+    if(!player)
+        return false;
 
     libvlc_media_list_player_set_media_list(_vlcListPlayer, vlcMediaList);
     libvlc_media_list_player_set_media_player(_vlcListPlayer, player);
     libvlc_media_list_player_set_playback_mode(_vlcListPlayer, libvlc_playback_mode_loop);
+    libvlc_audio_set_volume(player, 0);
     libvlc_video_set_scale(player, 0.25f );
     libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(player);
     if(eventManager)
@@ -563,6 +570,8 @@ void VideoPlayer::cleanupBuffers()
     _newImage = false;
     _originalSize = QSize();
 
+    QMutexLocker locker(_mutex);
+
     if(_loadImage)
     {
         QImage* tempImage = _loadImage;
@@ -598,6 +607,7 @@ void VideoPlayer::internalStopCheck(int status)
     if(_vlcListPlayer)
     {
         libvlc_media_list_player_release(_vlcListPlayer);
+        cleanupBuffers();
         _vlcListPlayer = nullptr;
         qDebug() << "[VideoPlayer] Internal Stop Check: vlc player destroyed.";
     }

@@ -16,10 +16,10 @@ Component.prototype.createOperations = function()
         // 1638: Happens when another version of the Redistributable Package is already installed.
         component.addElevatedOperation("Execute", "{0,3010,1602,1638,5100}", "@TargetDir@\\vc_redist.x64.exe", "/norestart", "/q");
 
-        component.addOperation("CreateShortcut", "@TargetDir@/DMHelper.exe", "@StartMenuDir@/DM Helper.lnk",
-            "workingDirectory=@TargetDir@", "description=Open the DM Helper");
+        component.addOperation("CreateShortcut", "@TargetDir@/DMHelper.exe", "@StartMenuDir@/DMHelper.lnk",
+            "workingDirectory=@TargetDir@", "description=Open DMHelper");
 
-        component.addOperation("CreateShortcut", "@TargetDir@/maintenancetool.exe", "@StartMenuDir@/Uninstall DM Helper.lnk",
-            "workingDirectory=@TargetDir@", "description=Open the DM Helper maintenance tool");
+        component.addOperation("CreateShortcut", "@TargetDir@/maintenancetool.exe", "@StartMenuDir@/Uninstall DMHelper.lnk",
+            "workingDirectory=@TargetDir@", "description=Open the DMHelper maintenance tool");
     }
 }

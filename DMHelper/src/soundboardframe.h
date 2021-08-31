@@ -9,9 +9,10 @@ class SoundboardFrame;
 
 class Campaign;
 class QVBoxLayout;
-class SoundBoardFrameGroupBox;
+class SoundBoardGroupFrame;
 class SoundboardGroup;
 class AudioTrack;
+class CampaignObjectBase;
 
 class SoundboardFrame : public QFrame
 {
@@ -20,6 +21,10 @@ class SoundboardFrame : public QFrame
 public:
     explicit SoundboardFrame(QWidget *parent = nullptr);
     ~SoundboardFrame();
+
+signals:
+    void trackCreated(CampaignObjectBase* track);
+    void dirty();
 
 public slots:
     void setCampaign(Campaign* campaign);
@@ -33,12 +38,11 @@ protected:
 
 protected slots:
     void addGroup();
+    void removeGroup(SoundboardGroup* group);
 
     void addSound();
     void addYoutube();
     void addSyrinscape();
-
-    void removeSound();
 
     void addTrack(const QUrl& url);
 
@@ -48,7 +52,7 @@ private:
     Ui::SoundboardFrame *ui;
 
     QVBoxLayout* _layout;
-    QList<SoundBoardFrameGroupBox*> _groupList;
+    QList<SoundBoardGroupFrame*> _groupList;
     bool _mouseDown;
     QPoint _mouseDownPos;
     Campaign* _campaign;

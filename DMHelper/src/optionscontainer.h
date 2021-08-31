@@ -32,6 +32,9 @@ public:
     int getFontSize() const;
     qreal getLogicalDPI() const;
 
+    // Text settings
+    bool getPasteRich() const;
+
     // Audio settings
     int getAudioVolume() const;
 
@@ -82,6 +85,9 @@ signals:
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
 
+    // Text settings
+    void pasteRichChanged(bool pasteRich);
+
     // Audio settings
     void audioVolumeChanged(int volume);
 
@@ -119,11 +125,11 @@ public slots:
     void setCalendarFileName(const QString& filename);
     void setEquipmentFileName(const QString& filename);
     void setShopsFileName(const QString& filename);
-    QString getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename);
-    QString getStandardFile(const QString& defaultFilename);
+    QString getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename, bool* exists = nullptr);
+    QString getStandardFile(const QString& defaultFilename, bool* exists = nullptr);
     void setTablesDirectory(const QString& directory);
     QString getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir);
-    QString getDataDirectory(const QString& defaultDir);
+    QString getDataDirectory(const QString& defaultDir, bool overwrite = false);
     QString getStandardDirectory(const QString& defaultDir, bool* created = nullptr);
     void backupFile(const QString& filename);
     void resetFileSettings();
@@ -137,6 +143,9 @@ public slots:
     void setFontFamilyFromFont(const QFont& font);
     void setFontSize(int fontSize);
     void setLogicalDPI(qreal logicalDPI);
+
+    // Text settings
+    void setPasteRich(bool pasteRich);
 
     // Audio settings
     void setAudioVolume(int volume);
@@ -192,6 +201,9 @@ private:
     int _fontSize;
     qreal _logicalDPI;
     bool _fontChanged;
+
+    // Text settings
+    bool _pasteRich;
 
     // Audio settings
     int _audioVolume;

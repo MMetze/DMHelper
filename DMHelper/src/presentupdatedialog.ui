@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string/>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -39,7 +42,7 @@
         </font>
        </property>
        <property name="text">
-        <string>A New Version of the DM Helper is available!</string>
+        <string>A New Version of DMHelper is available!</string>
        </property>
       </widget>
      </item>
@@ -171,7 +174,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>You can get the latest version of the DM Helper from: </string>
+        <string>You can get the latest version of the DMHelper from: </string>
        </property>
       </widget>
      </item>

@@ -25,6 +25,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _fontFamily("Trebuchet MS"),
     _fontSize(12),
     _logicalDPI(0.0),
+    _pasteRich(false),
     _audioVolume(100),
     _showOnDeck(true),
     _showCountdown(true),
@@ -119,6 +120,11 @@ int OptionsContainer::getFontSize() const
 qreal OptionsContainer::getLogicalDPI() const
 {
     return _logicalDPI;
+}
+
+bool OptionsContainer::getPasteRich() const
+{
+    return _pasteRich;
 }
 
 int OptionsContainer::getAudioVolume() const
@@ -267,7 +273,7 @@ void OptionsContainer::editSettings()
     if(dlg.exec() == QDialog::Accepted)
     {
         if(_fontChanged)
-            QMessageBox::information(nullptr, QString("Font Changed"), QString("Changes made in the font used by the DM Helper will only be applied when then application is restarted."));
+            QMessageBox::information(nullptr, QString("Font Changed"), QString("Changes made in the font used by the DMHelper will only be applied when then application is restarted."));
 
         copy(editCopyContainer);
     }
@@ -292,12 +298,16 @@ void OptionsContainer::readSettings()
     }
 
     // Note: password will not be stored in settings
-    setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml")));
-    if(!settings.contains(QString("bestiary")))
-        getDataDirectory(QString("Images"));
+    bool bestiaryExists = true;
+    setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml"), &bestiaryExists));
+    if((!settings.contains(QString("bestiary"))) || (!bestiaryExists))
+        getDataDirectory(QString("Images"), true);
     setLastMonster(settings.value("lastMonster","").toString());
 
-    setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml")));
+    bool spellbookExists = true;
+    setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml"), &spellbookExists));
+    if((!settings.contains(QString("spellbook"))) || (!spellbookExists))
+        getDataDirectory(QString("Images"), true);
     setLastSpell(settings.value("lastSpell","").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
@@ -318,6 +328,7 @@ void OptionsContainer::readSettings()
     if(_logicalDPI > 0)
         defaultFontSize = (20*72)/_logicalDPI;
     setFontSize(settings.value("fontSize",QVariant(defaultFontSize)).toInt());
+    setPasteRich(settings.value("pasteRich",QVariant(false)).toBool());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
@@ -391,6 +402,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("fontFamily", getFontFamily());
     settings.setValue("fontSize", getFontSize());
+    settings.setValue("pasteRich", getPasteRich());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("showOnDeck", getShowOnDeck());
     settings.setValue("showCountdown", getShowCountdown());
@@ -495,7 +507,7 @@ void OptionsContainer::setShopsFileName(const QString& filename)
     }
 }
 
-QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename)
+QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename, bool* exists)
 {
     QString result = settings.value(key, QVariant()).toString();
 
@@ -504,7 +516,7 @@ QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& ke
         qDebug() << "[OptionsContainer] WARNING: old style relative path found for bestiary. Asking user for how to proceed...";
         QMessageBox::StandardButton response = QMessageBox::warning(nullptr,
                                                                     QString("Invalid bestiary path"),
-                                                                    QString("Older versions of the DM Helper had a bad choice of location for the bestiary. The file itself is fine, but sometimes the application would get confused where the file is actually located.") + QChar::LineFeed + QChar::LineFeed + QString("Would you like to point the DM Helper at the right location of your Bestiary file now?") + QChar::LineFeed + QChar::LineFeed + QString("If you answer No, it will create a new default bestiary in the ""right"" location for your system."),
+                                                                    QString("Older versions of the DMHelper had a bad choice of location for the bestiary. The file itself is fine, but sometimes the application would get confused where the file is actually located.") + QChar::LineFeed + QChar::LineFeed + QString("Would you like to point the DMHelper at the right location of your Bestiary file now?") + QChar::LineFeed + QChar::LineFeed + QString("If you answer No, it will create a new default bestiary in the ""right"" location for your system."),
                                                                     QMessageBox::Yes | QMessageBox::No);
         if(response == QMessageBox::Yes)
         {
@@ -519,17 +531,25 @@ QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& ke
     }
 
     if(!result.isEmpty())
+    {
+        if(exists)
+            *exists = true;
         return result;
+    }
     else
-        return getStandardFile(defaultFilename);
+    {
+        return getStandardFile(defaultFilename, exists);
+    }
 }
 
-QString OptionsContainer::getStandardFile(const QString& defaultFilename)
+QString OptionsContainer::getStandardFile(const QString& defaultFilename, bool* exists)
 {
     QString standardPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QString standardFile = standardPath + QString("/") + defaultFilename;
-    if(QFile::exists(standardFile))
+    if(QFileInfo::exists(standardFile))
     {
+        if(exists)
+            *exists = true;
         qDebug() << "[OptionsContainer] Standard File found: " << standardFile;
         return standardFile;
     }
@@ -545,6 +565,9 @@ QString OptionsContainer::getStandardFile(const QString& defaultFilename)
 #endif
 
     QDir().mkpath(standardPath);
+
+    if(exists)
+        *exists = false;
 
     if(QFile::copy(appFile, standardFile))
     {
@@ -577,7 +600,7 @@ QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QStrin
         return getDataDirectory(defaultDir);
 }
 
-QString OptionsContainer::getDataDirectory(const QString& defaultDir)
+QString OptionsContainer::getDataDirectory(const QString& defaultDir, bool overwrite)
 {
     bool created = false;
     QString standardPath = getStandardDirectory(defaultDir, &created);
@@ -588,7 +611,7 @@ QString OptionsContainer::getDataDirectory(const QString& defaultDir)
         return QString();
     }
 
-    if(!created)
+    if((!created)&&(!overwrite))
     {
         qDebug() << "[OptionsContainer] Data Directory found: " << standardPath;
         return standardPath;
@@ -676,14 +699,13 @@ void OptionsContainer::backupFile(const QString& filename)
 void OptionsContainer::resetFileSettings()
 {
     setBestiaryFileName(getStandardFile(QString("DMHelperBestiary.xml")));
-    getDataDirectory(QString("Images"));
-
     setSpellbookFileName(getStandardFile(QString("spellbook.xml")));
     setQuickReferenceFileName(getStandardFile(QString("quickref_data.xml")));
     setCalendarFileName(getStandardFile(QString("calendar.xml")));
     setEquipmentFileName(getStandardFile(QString("equipment.xml")));
     setShopsFileName(getStandardFile(QString("shops.xml")));
-    setTablesDirectory(getDataDirectory(QString("tables")));
+    setTablesDirectory(getDataDirectory(QString("tables"), true));
+    getDataDirectory(QString("Images"), true);
 }
 
 void OptionsContainer::setLastMonster(const QString& lastMonster)
@@ -740,6 +762,15 @@ void OptionsContainer::setLogicalDPI(qreal logicalDPI)
     if(logicalDPI != _logicalDPI)
     {
         _logicalDPI = logicalDPI;
+    }
+}
+
+void OptionsContainer::setPasteRich(bool pasteRich)
+{
+    if(_pasteRich != pasteRich)
+    {
+        _pasteRich = pasteRich;
+        emit pasteRichChanged(_pasteRich);
     }
 }
 

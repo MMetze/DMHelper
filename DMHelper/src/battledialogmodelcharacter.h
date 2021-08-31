@@ -36,6 +36,7 @@ public:
     virtual int getCharisma() const override;
     virtual int getSkillModifier(Combatant::Skills skill) const override;
     virtual int getConditions() const override;
+    virtual bool hasCondition(Combatant::Condition condition) const override;
 
     virtual int getSpeed() const override;
     virtual int getArmorClass() const override;
@@ -50,6 +51,7 @@ public:
 public slots:
     virtual void setConditions(int conditions) override;
     virtual void applyConditions(int conditions) override;
+    virtual void removeConditions(int conditions) override;
 
 protected:
 

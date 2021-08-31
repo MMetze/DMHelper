@@ -5,7 +5,7 @@ if '%choice%'=='n' goto end
 if not '%choice%'=='y' goto start
 
 set QT_DIR=C:\Qt
-set QT_VERSION=5.15.1
+set QT_VERSION=5.15.2
 set QT_INSTALLER_VERSION=4.0
 set MSVC_VERSION=2019
 set SEVENZIP_APP=C:\Program Files\7-Zip\7z
@@ -49,7 +49,7 @@ cd build-64_bit-release
 :build_done
 
 xcopy .\release\DMHelper.exe ..\bin64\packages\com.dmhelper.app\data\
-xcopy %QT_DIR%\%QT_VERSION%\msvc2017_64\bin\Qt5Xml.dll ..\bin64\packages\com.dmhelper.app\data\
+xcopy %QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%_64\bin\Qt5Xml.dll ..\bin64\packages\com.dmhelper.app\data\
 xcopy ..\src\binsrc\* ..\bin64\packages\com.dmhelper.app\data\*
 xcopy /s ..\src\bestiary\* ..\bin64\packages\com.dmhelper.app\data\resources\*
 xcopy /s ..\src\doc\* ..\bin64\packages\com.dmhelper.app\data\doc\*
@@ -61,18 +61,14 @@ windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin64\packa
 
 rem Create the installer
 cd ..\bin64
-binarycreator -c config\config_win64.xml -p packages "DM Helper 64-bit release Installer"
+binarycreator -c config\config_win64.xml -p packages "DMHelper 64-bit release Installer"
 cd ..
-move ".\bin64\DM Helper 64-bit release Installer.exe" ".\DM Helper 64-bit release Installer.exe"
+move ".\bin64\DMHelper 64-bit release Installer.exe" ".\DMHelper 64-bit release Installer.exe"
 
 rem Create the zip-file distribution
 "%SEVENZIP_APP%" a -tzip archive.zip .\bin64\packages\com.dmhelper.app\data\*
-del "DM Helper 64-bit release.zip"
-rename archive.zip "DM Helper 64-bit release.zip"
-
-rem Create the source distribution
-del src.zip
-"%SEVENZIP_APP%" a -tzip src.zip .\src\*
+del "DMHelper 64-bit release.zip"
+rename archive.zip "DMHelper 64-bit release.zip"
 
 :end
 pause

@@ -41,7 +41,6 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->edtComponents, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
     connect(ui->chkRitual, SIGNAL(stateChanged(int)), this, SIGNAL(spellDataEdit()));
     connect(ui->edtDescription, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
-    connect(ui->edtRoll, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
     connect(this, SIGNAL(spellDataEdit()), this, SLOT(handleEditedData()));
 
     ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
@@ -56,11 +55,10 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->edtEffectHeight, &QLineEdit::textEdited, this, &SpellbookDialog::handleHeightChanged);
     connect(ui->btnEffectColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(spellDataEdit()));
     connect(ui->sliderOpacity, &QAbstractSlider::valueChanged, this, &SpellbookDialog::spellDataEdit);
-    connect(ui->edtEffectToken, SIGNAL(textChanged()), this, SIGNAL(spellDataEdit()));
+    connect(ui->edtEffectToken, &QLineEdit::textChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->cmbEffectType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleEffectChanged(int)));
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &SpellbookDialog::editConditions);
     connect(ui->btnEffectTokenBrowse, &QAbstractButton::clicked, this, &SpellbookDialog::selectToken);
-    connect(ui->grpToken, &QGroupBox::clicked, this, &SpellbookDialog::spellDataEdit);
     connect(ui->grpShape, &QGroupBox::clicked, this, &SpellbookDialog::spellDataEdit);
     connect(ui->btnTokenCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleTokenRotateCW);
     connect(ui->btnTokenCCW, &QAbstractButton::clicked, this, &SpellbookDialog::handleTokenRotateCCW);
@@ -104,6 +102,7 @@ void SpellbookDialog::setSpell(Spell* spell)
     ui->edtSchool->setCursorPosition(0);
     ui->edtClasses->setText(_spell->getClasses());
     ui->edtClasses->setCursorPosition(0);
+    ui->edtClasses->setToolTip(_spell->getClasses());
     ui->edtCastingTime->setText(_spell->getTime());
     ui->edtCastingTime->setCursorPosition(0);
     ui->edtDuration->setText(_spell->getDuration());
@@ -112,11 +111,11 @@ void SpellbookDialog::setSpell(Spell* spell)
     ui->edtRange->setCursorPosition(0);
     ui->edtComponents->setText(_spell->getComponents());
     ui->edtComponents->setCursorPosition(0);
+    ui->edtComponents->setToolTip(_spell->getComponents());
 
     ui->chkRitual->setChecked(_spell->isRitual());
 
     ui->edtDescription->setPlainText(_spell->getDescription());
-    ui->edtRoll->setPlainText(_spell->getRollsString());
 
     ui->btnLeft->setEnabled(_spell != Spellbook::Instance()->getFirstSpell());
     ui->btnRight->setEnabled(_spell != Spellbook::Instance()->getLastSpell());
@@ -138,8 +137,9 @@ void SpellbookDialog::setSpell(Spell* spell)
         ui->edtEffectWidth->setText(QString::number(_spell->getEffectSize().width()));
     }
 
-    ui->grpToken->setChecked(_spell->getEffectTokenActive());
     ui->edtEffectToken->setText(_spell->getEffectToken());
+    ui->lblTwoMinute->setVisible(ui->edtEffectToken->text().contains(QString("2-Minute Tabletop")));
+    ui->lblTwoMinuteBlank->setVisible(ui->lblTwoMinute->isHidden());
     ui->cmbEffectType->setCurrentIndex(_spell->getEffectType());
     _tokenRotation = _spell->getEffectTokenRotation();
     handleEffectChanged(_spell->getEffectType());
@@ -282,18 +282,12 @@ void SpellbookDialog::handleEffectChanged(int index)
     if((index < 0) || (index >= BattleDialogModelEffect::BattleDialogModelEffect_Count))
         return;
 
-//    ui->btnEffectColor->setVisible((index != BattleDialogModelEffect::BattleDialogModelEffect_Base) &&
-//                                   (index != BattleDialogModelEffect::BattleDialogModelEffect_Object));
-//    ui->lblSize->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
     ui->lblSize->setText(index == BattleDialogModelEffect::BattleDialogModelEffect_Radius ? QString("Radius") : QString("Size"));
-//    ui->edtEffectWidth->setVisible((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
-//                                   (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
-//    ui->lblSizeX->setVisible((index == BattleDialogModelEffect::BattleDialogModelEffect_Line) ||
-//                             (index == BattleDialogModelEffect::BattleDialogModelEffect_Object));
-//    ui->edtEffectHeight->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
 
-//    ui->edtEffectToken->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
-//    ui->btnEffectTokenBrowse->setVisible(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+    ui->edtEffectWidth->setEnabled(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+    ui->edtEffectHeight->setEnabled(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+    ui->grpShape->setEnabled(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
+    ui->grpConditions->setEnabled(index != BattleDialogModelEffect::BattleDialogModelEffect_Base);
 
     emit spellDataEdit();
 }
@@ -364,7 +358,7 @@ void SpellbookDialog::selectToken()
         return;
 
     QString searchDir;
-    QFileInfo currentToken(_spell->getEffectToken());
+    QFileInfo currentToken(_spell->getEffectTokenPath());
     if(currentToken.exists())
         searchDir = currentToken.absolutePath();
 
@@ -378,6 +372,8 @@ void SpellbookDialog::selectToken()
     }
 
     ui->edtEffectToken->setText(tokenFile);
+    ui->lblTwoMinute->setVisible(ui->edtEffectToken->text().contains(QString("2-Minute Tabletop")));
+    ui->lblTwoMinuteBlank->setVisible(ui->lblTwoMinute->isHidden());
 
     emit spellDataEdit();
 }
@@ -393,7 +389,7 @@ void SpellbookDialog::updateLayout()
 
     _conditionLayout = new QHBoxLayout;
     _conditionLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
-    _conditionLayout->setContentsMargins(CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING);
+    _conditionLayout->setContentsMargins(0, 0, 0, 0);
     _conditionLayout->setSpacing(CONDITION_FRAME_SPACING);
     ui->frameConditions->setLayout(_conditionLayout);
 
@@ -441,8 +437,15 @@ void SpellbookDialog::addCondition(Combatant::Condition condition)
 
     QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
     QLabel* conditionLabel = new QLabel(this);
-    conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
+    int frameHeight = ui->frameConditions->height();
+    int iconSize = frameHeight - (2 * conditionLabel->margin());
+
+    conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(iconSize, iconSize));
     conditionLabel->setToolTip(Combatant::getConditionDescription(condition));
+    conditionLabel->setMinimumWidth(frameHeight);
+    conditionLabel->setMaximumWidth(frameHeight);
+    conditionLabel->setMinimumHeight(frameHeight);
+    conditionLabel->setMaximumHeight(frameHeight);
 
     _conditionLayout->addWidget(conditionLabel);
 }
@@ -461,6 +464,26 @@ void SpellbookDialog::showEvent(QShowEvent * event)
     qDebug() << "[Spellbook Dialog] Spellbook Dialog shown";
     connect(Spellbook::Instance(),SIGNAL(changed()),this,SLOT(dataChanged()));
     QDialog::showEvent(event);
+
+    ui->edtEffectWidth->setMinimumWidth(ui->lblSize->width());
+    ui->edtEffectWidth->setMaximumWidth(ui->lblSize->width());
+    ui->edtEffectHeight->setMinimumWidth(ui->lblSize->width());
+    ui->edtEffectHeight->setMaximumWidth(ui->lblSize->width());
+
+    QFontMetrics metrics = ui->btnEditConditions->fontMetrics();
+    QRect buttonTextRect = metrics.boundingRect(ui->btnEditConditions->text());
+    ui->btnEditConditions->setMinimumWidth(buttonTextRect.width() * 2);
+    ui->btnEditConditions->setMaximumWidth(buttonTextRect.width() * 2);
+    ui->btnEditConditions->setMinimumHeight((buttonTextRect.height() * 3) / 2);
+    ui->btnEditConditions->setMaximumHeight((buttonTextRect.height() * 3) / 2);
+
+    ui->frameConditions->setMinimumHeight(buttonTextRect.height() * 3);
+    ui->frameConditions->setMaximumHeight(buttonTextRect.height() * 3);
+
+    ui->grpConditions->setMinimumHeight(buttonTextRect.height() * 4);
+    ui->grpConditions->setMaximumHeight(buttonTextRect.height() * 4);
+
+    updateLayout();
 }
 
 void SpellbookDialog::hideEvent(QHideEvent * event)
@@ -507,8 +530,9 @@ void SpellbookDialog::storeSpellData()
     QColor newColor = ui->btnEffectColor->getColor();
     newColor.setAlpha(ui->sliderOpacity->value());
     _spell->setEffectColor(newColor);
-    _spell->setEffectTokenActive(ui->grpToken->isChecked());
     _spell->setEffectToken(ui->edtEffectToken->text());
+    ui->lblTwoMinute->setVisible(ui->edtEffectToken->text().contains(QString("2-Minute Tabletop")));
+    ui->lblTwoMinuteBlank->setVisible(ui->lblTwoMinute->isHidden());
     _spell->setEffectTokenRotation(_tokenRotation);
     // Conditions are set directly
 
@@ -571,10 +595,10 @@ void SpellbookDialog::updateImage()
             }
         }
 
-        if(ui->grpToken->isChecked())
+        if(!ui->edtEffectToken->text().isEmpty())
         {
             QPixmap imagePmp;
-            if(imagePmp.load(ui->edtEffectToken->text()))
+            if(imagePmp.load(Spellbook::Instance()->getDirectory().filePath(ui->edtEffectToken->text())))
             {
                 if(_tokenRotation != 0)
                 {

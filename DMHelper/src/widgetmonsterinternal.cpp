@@ -19,6 +19,12 @@ WidgetMonsterInternal::WidgetMonsterInternal(BattleDialogModelMonsterBase* monst
 {
     if(_widgetParent)
         _widgetParent->setInternals(this);
+
+    if(_monster)
+    {
+        connect(_monster, &BattleDialogModelMonsterBase::dataChanged, this, &WidgetMonsterInternal::updateData);
+        connect(_monster, &BattleDialogModelCombatant::initiativeChanged, this, &WidgetMonsterInternal::updateData);
+    }
 }
 
 BattleDialogModelCombatant* WidgetMonsterInternal::getCombatant()
@@ -81,21 +87,23 @@ void WidgetMonsterInternal::setInitiative(int initiative)
 
     if(initiative != _monster->getInitiative())
         _monster->setInitiative(initiative);
-
-    updateData();
 }
 
 void WidgetMonsterInternal::setHitPoints(int hp)
 {
-    Q_UNUSED(hp);
-
     if(!_widgetParent || !_monster)
         return;
 
     if(hp != _monster->getHitPoints())
         _monster->setHitPoints(hp);
+}
 
-    updateData();
+void WidgetMonsterInternal::executeDoubleClick()
+{
+    if((_monster) && (_monster->getMonsterClass()))
+        emit clicked(_monster->getMonsterClass()->getName());
+    else
+        qDebug() << "[Widget Monster Internal] no valid monster class found!";
 }
 
 void WidgetMonsterInternal::decrementLegendary()
@@ -107,21 +115,9 @@ void WidgetMonsterInternal::decrementLegendary()
         resetLegendary();
     else
         _monster->setLegendaryCount(_monster->getLegendaryCount() - 1);
-
-    updateData();
 }
 
 void WidgetMonsterInternal::resetLegendary()
 {
     _monster->setLegendaryCount(_legendaryMaximum);
-    updateData();
 }
-
-void WidgetMonsterInternal::executeDoubleClick()
-{
-    if((_monster) && (_monster->getMonsterClass()))
-        emit clicked(_monster->getMonsterClass()->getName());
-    else
-        qDebug() << "[Widget Monster Internal] no valid monster class found!";
-}
-

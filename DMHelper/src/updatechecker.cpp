@@ -33,7 +33,7 @@ void UpdateChecker::requestFinished(QNetworkReply *reply)
     {
         if(!_silentUpdate)
             QMessageBox::critical(nullptr,
-                                  QString("DM Helper Update"),
+                                  QString("DMHelper Update"),
                                   QString("An unexpected and unknown error was encountered trying to check for updates!"));
         qDebug() << "[UpdateChecker] ERROR identified in reply, unexpected null pointer reply received!";
         return;
@@ -46,13 +46,13 @@ void UpdateChecker::requestFinished(QNetworkReply *reply)
             if(reply->error() == QNetworkReply::HostNotFoundError)
             {
                 QMessageBox::critical(nullptr,
-                                      QString("DM Helper Update"),
+                                      QString("DMHelper Update"),
                                       QString("A network error was encountered trying to check for updates. It was not possible to reach the server!"));
             }
             else
             {
                 QMessageBox::critical(nullptr,
-                                      QString("DM Helper Update"),
+                                      QString("DMHelper Update"),
                                       QString("A network error was encountered trying to check for updates:") + QChar::LineFeed + QChar::LineFeed + reply->errorString());
             }
         }
@@ -68,8 +68,8 @@ void UpdateChecker::requestFinished(QNetworkReply *reply)
 
     if((!handleReplyPayload(bytes)) && (!_silentUpdate))
         QMessageBox::information(nullptr,
-                                 QString("DM Helper Update"),
-                                 QString("Your DM Helper is up to date!"));
+                                 QString("DMHelper Update"),
+                                 QString("Your DMHelper is up to date!"));
 
     reply->deleteLater();
 

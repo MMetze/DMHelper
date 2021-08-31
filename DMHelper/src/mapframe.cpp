@@ -1,5 +1,6 @@
 #include "mapframe.h"
 #include "ui_mapframe.h"
+#include "mapframescene.h"
 #include "dmconstants.h"
 #include "map.h"
 #include "mapmarkergraphicsitem.h"
@@ -8,8 +9,9 @@
 #include "undomarker.h"
 #include "mapmarkerdialog.h"
 #include "selectzoom.h"
-#include "audiotrack.h"
 #include "campaign.h"
+#include "party.h"
+#include "unselectedpixmap.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -18,8 +20,6 @@
 #include <QFileDialog>
 #include <QDebug>
 
-// MapFrame definitions
-
 MapFrame::MapFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::MapFrame),
@@ -27,6 +27,8 @@ MapFrame::MapFrame(QWidget *parent) :
     _backgroundImage(nullptr),
     _backgroundVideo(nullptr),
     _fow(nullptr),
+    _partyIcon(nullptr),
+    _editMode(-1),
     _erase(true),
     _smooth(true),
     _brushMode(DMHelper::BrushType_Circle),
@@ -36,10 +38,13 @@ MapFrame::MapFrame(QWidget *parent) :
     _isPublishing(false),
     _isVideo(false),
     _rotation(0),
-    //_color(Qt::black),
+    _spaceDown(false),
+    _mapMoveMouseDown(false),
     _mouseDown(false),
     _mouseDownPos(),
     _undoPath(nullptr),
+    _publishMouseDown(false),
+    _publishMouseDownPos(),
     _zoomSelect(false),
     _rubberBand(nullptr),
     _scale(1.0),
@@ -47,59 +52,30 @@ MapFrame::MapFrame(QWidget *parent) :
     _timerId(0),
     _videoPlayer(nullptr),
     _targetSize(),
+    _targetLabelSize(),
+    _publishRect(),
     _bwFoWImage()
 {
     ui->setupUi(this);
 
     // TODO: reactivate markers
-    ui->grpMode->setVisible(false);
-    ui->btnModeFoW->setVisible(false);
-    ui->btnModeEdit->setVisible(false);
-    ui->btnModeMove->setVisible(false);
-    ui->btnShowMarkers->setVisible(false);
+    //ui->btnShowMarkers->setVisible(false);
 
-    _scene = new QGraphicsScene(this);
+    _scene = new MapFrameScene(this);
     ui->graphicsView->setScene(_scene);
+    connect(_scene, &MapFrameScene::mapMousePress, this, &MapFrame::handleMapMousePress);
+    connect(_scene, &MapFrameScene::mapMouseMove, this, &MapFrame::handleMapMouseMove);
+    connect(_scene, &MapFrameScene::mapMouseRelease, this, &MapFrame::handleMapMouseRelease);
+    connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
+
     ui->graphicsView->viewport()->installEventFilter(this);
+    ui->graphicsView->installEventFilter(this);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
-    // Set up the edit mode button group
-    ui->grpEditMode->setId(ui->btnModeFoW, DMHelper::EditMode_FoW);
-    ui->grpEditMode->setId(ui->btnModeEdit, DMHelper::EditMode_Edit);
-    ui->grpEditMode->setId(ui->btnModeMove, DMHelper::EditMode_Move);
-    connect(ui->grpEditMode,SIGNAL(buttonClicked(int)),this,SLOT(editModeToggled(int)));
-
-    // Set up the brush mode button group
-    ui->grpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
-    ui->grpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
-    ui->grpBrush->setId(ui->btnBrushSelect, DMHelper::BrushType_Select);
-
-    //connect(ui->framePublish,SIGNAL(clicked()),this,SLOT(publishFoWImage()));
-    connect(ui->framePublish, SIGNAL(rotateCW()), this, SLOT(rotatePublish()));
-    connect(ui->framePublish, SIGNAL(rotateCCW()), this, SLOT(rotatePublish()));
-    connect(ui->btnClearFoW,SIGNAL(clicked()),this,SLOT(clearFoW()));
-    connect(ui->btnResetFoW,SIGNAL(clicked()),this,SLOT(resetFoW()));
     //TODO Markers: connect(ui->btnShowMarkers,SIGNAL(toggled(bool)),this,SLOT(setViewMarkerVisible(bool)));
 
-    connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(zoomIn()));
-    connect(ui->btnZoomIn,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnZoomOut,SIGNAL(clicked()),this,SLOT(zoomOut()));
-    connect(ui->btnZoomOut,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnZoomOne,SIGNAL(clicked()),this,SLOT(zoomOne()));
-    connect(ui->btnZoomOne,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(zoomFit()));
-    connect(ui->btnZoomFit,SIGNAL(clicked()),this,SLOT(cancelSelect()));
-    //connect(ui->btnZoomSelect,SIGNAL(clicked()),this,SLOT(zoomSelect()));
-
-    //connect(ui->btnPublishVisible,SIGNAL(clicked(bool)),this,SLOT(publishModeVisibleClicked()));
-    //connect(ui->btnPublishZoom,SIGNAL(clicked(bool)),this,SLOT(publishModeZoomClicked()));
-
-    connect(ui->grpBrush,SIGNAL(buttonClicked(int)),this,SLOT(setMapCursor()));
-    connect(ui->spinBox,SIGNAL(valueChanged(int)),this,SLOT(setMapCursor()));
-
     connect(this, SIGNAL(dirty()), this, SLOT(resetPublishFoW()));
-
-    connect(ui->chkAudio, SIGNAL(clicked()), this, SLOT(audioPlaybackChecked()));
+    connect(this, &MapFrame::dirty, this, &MapFrame::checkPartyUpdate);
 
     //_publishTimer = new QTimer(this);
     //_publishTimer->setSingleShot(false);
@@ -108,17 +84,7 @@ MapFrame::MapFrame(QWidget *parent) :
     //setMapCursor();
     //setScale(1.0);
 
-    /***** TODO: Remove this when finalized ****/
-    ui->grpMode->hide();
-    ui->groupBox_5->hide();
-    ui->groupBox_2->hide();
-    ui->btnShowMarkers->hide();
-    ui->groupBox_4->hide();
-    ui->chkAudio->hide();
-    ui->label_2->hide();
-    ui->cmbTracks->hide();
-    ui->groupBox_3->hide();
-    ui->framePublish->hide();
+    editModeToggled(DMHelper::EditMode_Move);
 }
 
 MapFrame::~MapFrame()
@@ -162,6 +128,9 @@ void MapFrame::deactivateObject()
         return;
     }
 
+    if(_partyIcon)
+        _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
+
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
@@ -182,7 +151,6 @@ void MapFrame::setMap(Map* map)
 
     initializeFoW();
     setMapCursor();
-    loadTracks();
 }
 
 MapMarkerGraphicsItem* MapFrame::addMapMarker(MapMarker& marker)
@@ -208,30 +176,36 @@ void MapFrame::editMapMarker(int markerId)
 
 bool MapFrame::eventFilter(QObject *obj, QEvent *event)
 {
-    //if(ui->btnZoomSelect->isChecked())
-    if(_zoomSelect)
+    if((event) && event->type() == QEvent::Wheel)
     {
-        if(execEventFilterSelectZoom(obj, event))
+        QWheelEvent* wheelEvent = dynamic_cast<QWheelEvent*>(event);
+        if((wheelEvent) && ((wheelEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier) && (wheelEvent->angleDelta().y() != 0))
+        {
+            if(wheelEvent->angleDelta().y() > 0)
+                zoomIn();
+            else
+                zoomOut();
+
+            wheelEvent->accept();
             return true;
+        }
+    }
+    else if(checkMapMove(event))
+    {
+        setMapCursor();
+        return true;
     }
     else
     {
-        switch(ui->grpEditMode->checkedId())
+        if(_zoomSelect)
         {
-            case DMHelper::EditMode_FoW:
-                if(execEventFilterEditModeFoW(obj, event))
-                    return true;
-                break;
-            case DMHelper::EditMode_Edit:
-                if(execEventFilterEditModeEdit(obj, event))
-                    return true;
-                break;
-            case DMHelper::EditMode_Move:
-                if(execEventFilterEditModeMove(obj, event))
-                    return true;
-                break;
-            default:
-                break;
+            if(execEventFilterSelectZoom(obj, event))
+                return true;
+        }
+        else if(_editMode == DMHelper::EditMode_FoW)
+        {
+            if(execEventFilterEditModeFoW(obj, event))
+                return true;
         }
     }
 
@@ -294,80 +268,10 @@ void MapFrame::undoPaint()
     updateFoW();
 }
 
-/*
-void MapFrame::publishFoWImage(bool publishing)
-{
-    if(!_mapSource)
-        return;
-
-    _isPublishing = publishing;
-
-    //if(!ui->framePublish->isCheckable())
-    if(!_isVideo)
-    {
-        // Still Image
-        QImage pub;
-        //if(ui->btnPublishZoom->isChecked())
-        if(_publishZoom)
-        {
-            QRect imgRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
-
-            // TODO: Consider zoom factor...
-
-            pub = _mapSource->getPublishImage(imgRect);
-        }
-        else
-        {
-            //if(ui->btnPublishVisible->isChecked())
-            if(_publishVisible)
-            {
-                pub = _mapSource->getShrunkPublishImage();
-            }
-            else
-            {
-                pub = _mapSource->getPublishImage();
-            }
-        }
-
-        //if(ui->framePublish->getRotation() != 0)
-        if(_rotation != 0)
-        {
-            //pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
-            pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
-        }
-
-        //emit publishImage(pub, ui->framePublish->getColor());
-        emit publishImage(pub, _color);
-        emit showPublishWindow();
-        startAudioTrack();
-    }
-    else
-    {
-        //Video
-        stopPublishTimer();
-        //createVideoPlayer(!ui->framePublish->isChecked());
-        createVideoPlayer(!_isPublishing);
-        //if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
-        if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
-        {
-            //emit animationStarted(ui->framePublish->getColor());
-            //emit animationStarted(_color);
-            emit animationStarted();
-            emit showPublishWindow();
-            startAudioTrack();
-        }
-
-        startPublishTimer();
-    }
-}
-*/
-
 void MapFrame::clear()
 {
     _mapSource = nullptr;
+    delete _partyIcon; _partyIcon = nullptr;
     delete _backgroundImage; _backgroundImage = nullptr;
     delete _backgroundVideo; _backgroundVideo = nullptr;
     delete _fow; _fow = nullptr;
@@ -376,13 +280,48 @@ void MapFrame::clear()
 
 void MapFrame::cancelPublish()
 {
-    //ui->framePublish->cancelPublish();
     emit publishCancelled();
     _isPublishing = false;
 }
 
+void MapFrame::setParty(Party* party)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setParty(party);
+}
+
+void MapFrame::setPartyIcon(const QString& partyIcon)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setPartyIcon(partyIcon);
+}
+
+void MapFrame::setShowParty(bool showParty)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setShowParty(showParty);
+}
+
+void MapFrame::setPartyScale(int partyScale)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setPartyScale(partyScale);
+}
+
 void MapFrame::editModeToggled(int editMode)
 {
+    if(_editMode == editMode)
+        return;
+
+    _editMode = editMode;
     _undoPath = nullptr;
     switch(editMode)
     {
@@ -403,6 +342,11 @@ void MapFrame::editModeToggled(int editMode)
     }
 
     setMapCursor();
+}
+
+void MapFrame::setMapEdit(bool enabled)
+{
+    editModeToggled(enabled ? DMHelper::EditMode_FoW : DMHelper::EditMode_Move);
 }
 
 void MapFrame::setBrushMode(int brushMode)
@@ -463,7 +407,6 @@ void MapFrame::zoomFit()
 
 void MapFrame::zoomSelect(bool enabled)
 {
-    //ui->btnZoomSelect->setChecked(true);
     if(_zoomSelect != enabled)
     {
         _zoomSelect = enabled;
@@ -472,14 +415,18 @@ void MapFrame::zoomSelect(bool enabled)
     }
 }
 
+void MapFrame::zoomDelta(int delta)
+{
+    if(delta > 0)
+        zoomIn();
+    else if(delta < 0)
+        zoomOut();
+}
+
 void MapFrame::cancelSelect()
 {
     delete _rubberBand;
     _rubberBand = nullptr;
-    //ui->btnBrushSelect->setChecked(false);
-    //ui->btnZoomSelect->setChecked(false);
-    //_zoomSelect = false;
-    //setMapCursor();
     zoomSelect(false);
     setBrushMode(DMHelper::BrushType_Circle);
 }
@@ -507,13 +454,57 @@ void MapFrame::setPublishVisible(bool enabled)
 void MapFrame::targetResized(const QSize& newSize)
 {
     _targetSize = newSize;
-    //if((_videoPlayer) && (ui->framePublish->isChecked()))
     if((_videoPlayer) && (_isPublishing))
     {
         _videoPlayer->targetResized(newSize);
     }
 
     resetPublishFoW();
+}
+
+void MapFrame::setTargetLabelSize(const QSize& targetSize)
+{
+    _targetLabelSize = targetSize;
+}
+
+void MapFrame::publishWindowMouseDown(const QPointF& position)
+{
+    if((!_mapSource) || (!_partyIcon) || (!_scene))
+        return;
+
+    QPointF newPosition;
+    if(!convertPublishToScene(position, newPosition))
+        return;
+
+    QRectF sceneRect = _scene->sceneRect();
+    QRectF iconRect = _partyIcon->boundingRect();
+
+    if(_partyIcon->contains(newPosition - _partyIcon->pos()))
+    {
+        _publishMouseDown = true;
+        _publishMouseDownPos = newPosition;
+    }
+}
+
+void MapFrame::publishWindowMouseMove(const QPointF& position)
+{
+    if((!_mapSource) || (!_partyIcon) || (!_publishMouseDown))
+        return;
+
+    QPointF newPosition;
+    if(!convertPublishToScene(position, newPosition))
+        return;
+
+    if(newPosition == _publishMouseDownPos)
+        return;
+
+    _partyIcon->setPos(newPosition);
+}
+
+void MapFrame::publishWindowMouseRelease(const QPointF& position)
+{
+    Q_UNUSED(position);
+    _publishMouseDown = false;
 }
 
 void MapFrame::publishClicked(bool checked)
@@ -523,63 +514,69 @@ void MapFrame::publishClicked(bool checked)
 
     _isPublishing = checked;
 
-    //if(!ui->framePublish->isCheckable())
     if(!_isVideo)
     {
         // Still Image
         QImage pub;
-        //if(ui->btnPublishZoom->isChecked())
+        QPointF partyTopLeft;
         if(_publishZoom)
         {
-            QRect imgRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
-                          static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
+            _publishRect = QRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
+                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
+                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
+                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
 
             // TODO: Consider zoom factor...
 
-            pub = _mapSource->getPublishImage(imgRect);
+            pub = _mapSource->getPublishImage(_publishRect);
+        if(_partyIcon)
+                partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
         }
         else
         {
-            //if(ui->btnPublishVisible->isChecked())
             if(_publishVisible)
             {
-                pub = _mapSource->getShrunkPublishImage();
+                pub = _mapSource->getShrunkPublishImage(&_publishRect);
+                if(_partyIcon)
+                    partyTopLeft = _partyIcon->pos() - _publishRect.topLeft();
             }
             else
             {
                 pub = _mapSource->getPublishImage();
+                _publishRect = pub.rect();
+                if(_partyIcon)
+                    partyTopLeft = _partyIcon->pos();
             }
         }
 
-        //if(ui->framePublish->getRotation() != 0)
+        if((_mapSource->getShowParty()) && ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
+        {
+            QPainter p(&pub);
+            QPixmap partyPixmap = _mapSource->getPartyPixmap();
+            if(!partyPixmap.isNull())
+            {
+                qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale());
+                p.drawPixmap(partyTopLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+            }
+        }
+
         if(_rotation != 0)
         {
-            //pub = pub.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
             pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
         }
 
-        //emit publishImage(pub, ui->framePublish->getColor());
-        //emit publishImage(pub, _color);
         emit publishImage(pub);
         emit showPublishWindow();
-        startAudioTrack();
     }
     else
     {
         //Video
         stopPublishTimer();
-        //createVideoPlayer(!ui->framePublish->isChecked());
         createVideoPlayer(!_isPublishing);
-        //if((ui->framePublish->isChecked()) && (_videoPlayer) && (!_videoPlayer->isError()))
         if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
         {
-            //emit animationStarted(ui->framePublish->getColor());
-            //emit animationStarted(_color);
             emit animationStarted();
             emit showPublishWindow();
-            startAudioTrack();
         }
 
         startPublishTimer();
@@ -592,23 +589,17 @@ void MapFrame::setRotation(int rotation)
     rotatePublish();
 }
 
-/*
-void MapFrame::setBackgroundColor(QColor color)
-{
-    _color = color;
-}
-*/
-
 void MapFrame::initializeFoW()
 {
     if((_backgroundImage) || (_backgroundVideo) || (_fow) || (_scene))
         qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame contents NOT done. Undefined behavior!";
 
-    _scene = new QGraphicsScene(this);
+    _scene = new MapFrameScene(this);
     ui->graphicsView->setScene(_scene);
-
-    //cancelSelect();
-    //ui->framePublish->cancelPublish();
+    connect(_scene, &MapFrameScene::mapMousePress, this, &MapFrame::handleMapMousePress);
+    connect(_scene, &MapFrameScene::mapMouseMove, this, &MapFrame::handleMapMouseMove);
+    connect(_scene, &MapFrameScene::mapMouseRelease, this, &MapFrame::handleMapMouseRelease);
+    connect(_scene, &MapFrameScene::mapZoom, this, &MapFrame::zoomDelta);
 
     if(!_mapSource)
         return;
@@ -625,7 +616,6 @@ void MapFrame::initializeFoW()
         _fow->setEnabled(false);
         _fow->setZValue(-1);
 
-        //ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
         loadViewRect();
     }
     else
@@ -635,8 +625,26 @@ void MapFrame::initializeFoW()
         startPublishTimer();
     }
 
+    checkPartyUpdate();
+
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    connect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
+    connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
+    connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
+    connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
+    connect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
+
+    if(_mapSource->getParty())
+        emit partyChanged(_mapSource->getParty());
+    else
+        emit partyIconChanged(_mapSource->getPartyAltIcon());
+
+    emit showPartyChanged(_mapSource->getShowParty());
+    emit partyScaleChanged(_mapSource->getPartyScale());
 
     _isVideo = !_mapSource->isInitialized();
 }
@@ -645,6 +653,17 @@ void MapFrame::uninitializeFoW()
 {
     qDebug() << "[MapFrame] Uninitializing MapFrame...";
 
+    if((_mapSource) && (_partyIcon))
+        _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
+
+    disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
+    disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
+    disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
+    disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
     disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
@@ -656,42 +675,13 @@ void MapFrame::uninitializeFoW()
         _videoPlayer = nullptr;
     }
 
-    delete _backgroundImage;
-    _backgroundImage = nullptr;
-    delete _backgroundVideo;
-    _backgroundVideo = nullptr;
-    delete _fow;
-    _fow = nullptr;
+    delete _partyIcon; _partyIcon = nullptr;
+    delete _backgroundImage; _backgroundImage = nullptr;
+    delete _backgroundVideo; _backgroundVideo = nullptr;
+    delete _fow; _fow = nullptr;
 
     delete _scene;
     _scene = nullptr;
-}
-
-void MapFrame::loadTracks()
-{
-    if(!_mapSource)
-        return;
-
-    disconnect(ui->cmbTracks, SIGNAL(currentIndexChanged(int)), this, SLOT(trackSelected(int)));
-
-    ui->cmbTracks->clear();
-    ui->cmbTracks->addItem(QString("---"), QVariant::fromValue(0));
-
-    //Campaign* campaign = _mapSource->getCampaign();
-    Campaign* campaign = dynamic_cast<Campaign*>(_mapSource->getParentByType(DMHelper::CampaignType_Campaign));
-    int currentIndex = 0;
-    QList<AudioTrack*> trackList = campaign->findChildren<AudioTrack*>();
-    //for(int i = 0; i < campaign->getTrackCount(); ++i)
-    for(AudioTrack* track : trackList)
-    {
-        //AudioTrack* track = campaign->getTrackByIndex(i);
-        ui->cmbTracks->addItem(track->getName(), QVariant::fromValue(track));
-        if(_mapSource->getAudioTrackId() == track->getID())
-            currentIndex = ui->cmbTracks->count() - 1;
-    }
-    ui->cmbTracks->setCurrentIndex(currentIndex);
-
-    connect(ui->cmbTracks, SIGNAL(currentIndexChanged(int)), this, SLOT(trackSelected(int)));
 }
 
 void MapFrame::hideEvent(QHideEvent * event)
@@ -734,9 +724,9 @@ void MapFrame::timerEvent(QTimerEvent *event)
     {
         QMutexLocker locker(_videoPlayer->getMutex());
 
-        //if(ui->framePublish->isChecked())
         if(_isPublishing)
         {
+            // Note: Publish Visible and Publish Zoom don't work on animated maps!
             if(!_videoPlayer->getImage()->isNull())
             {
                 if((_bwFoWImage.isNull()) && (!_mapSource->isCleared()))
@@ -751,22 +741,32 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 }
 
                 QImage result = _videoPlayer->getImage()->copy();
-                uchar* b = result.bits();
-                memset(b, 0, 100);
-                if(!_bwFoWImage.isNull())
+                if((!_bwFoWImage.isNull()) || (_mapSource->getShowParty()))
                 {
                     QPainter p;
                     p.begin(&result);
-                        p.drawImage(0, 0, _bwFoWImage);
+                        if(!_bwFoWImage.isNull())
+                            p.drawImage(0, 0, _bwFoWImage);
+
+                        if((_mapSource->getShowParty()) &&
+                           (_partyIcon) &&
+                           ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
+                        {
+                            qreal targetWidth = _targetSize.width();
+                            qreal imgWidth = _backgroundImage->pixmap().width();
+                            QPixmap partyPixmap = _mapSource->getPartyPixmap();
+                            if(!partyPixmap.isNull())
+                            {
+                                qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
+                                QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
+                                p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                            }
+                        }
                     p.end();
                 }
 
-                //if(ui->framePublish->getRotation() != 0)
                 if(_rotation != 0)
-                {
-                    //result = result.transformed(QTransform().rotate(ui->framePublish->getRotation()), Qt::SmoothTransformation);
                     result = result.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
-                }
 
                 emit animateImage(result);
             }
@@ -778,21 +778,18 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 if((!_backgroundVideo) ||(!_backgroundVideo->isVisible()))
                 {
                     if(_backgroundImage)
-                    {
                         _backgroundImage->hide();
-                    }
 
                     QPixmap pmpCopy = QPixmap::fromImage(*(_videoPlayer->getImage())).copy();
+                    _publishRect = pmpCopy.rect();
                     if(_backgroundVideo)
                     {
-                        //_backgroundVideo->setPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
                         // TODO: update the graphics view/scene to work with the mutex on drawforeground/background
                         _backgroundVideo->setPixmap(pmpCopy);
                         _backgroundVideo->show();
                     }
                     else
                     {
-                        //_backgroundVideo = _scene->addPixmap(QPixmap::fromImage(*(_videoPlayer->getImage())));
                         _backgroundVideo = _scene->addPixmap(pmpCopy);
                         _backgroundVideo->setEnabled(false);
                         _backgroundVideo->setZValue(-2);
@@ -812,8 +809,9 @@ void MapFrame::timerEvent(QTimerEvent *event)
                         _fow->setZValue(1);
                     }
 
-                    //ui->graphicsView->fitInView(_mapSource->getMapRect(), Qt::KeepAspectRatio);
                     loadViewRect();
+                    if(_partyIcon)
+                        _partyIcon->setPos(_mapSource->getPartyIconPos());
 
                     stopPublishTimer();
                     startTimer(500); // Clean up the initial image after a brief period (determined by trial and error)
@@ -826,6 +824,78 @@ void MapFrame::timerEvent(QTimerEvent *event)
         if(_videoPlayer)
             _videoPlayer->clearNewImage();
     }
+}
+
+void MapFrame::keyPressEvent(QKeyEvent *event)
+{
+    if((event) && (((event->key() == Qt::Key_Space)) || ((event->key() == Qt::Key_Control))))
+    {
+        _spaceDown = true;
+        setMapCursor();
+        event->accept();
+        return;
+    }
+
+    CampaignObjectFrame::keyPressEvent(event);
+}
+
+void MapFrame::keyReleaseEvent(QKeyEvent *event)
+{
+    if((event) && (((event->key() == Qt::Key_Space)) || ((event->key() == Qt::Key_Control))))
+    {
+        _spaceDown = false;
+        setMapCursor();
+        event->accept();
+        return;
+    }
+
+    CampaignObjectFrame::keyReleaseEvent(event);
+}
+
+bool MapFrame::checkMapMove(QEvent* event)
+{
+    if(!event)
+        return false;
+
+    if((event->type() != QEvent::MouseButtonPress) && (event->type() != QEvent::MouseMove) && (event->type() != QEvent::MouseButtonRelease))
+        return false;
+
+    QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+    if((!mouseEvent) ||
+       ((!_spaceDown) &&
+        (!_mapMoveMouseDown) &&
+        ((mouseEvent->modifiers() & Qt::ControlModifier) == 0) &&
+        ((mouseEvent->buttons() & Qt::MiddleButton) == 0)))
+        return false;
+
+    if(event->type() == QEvent::MouseButtonPress)
+    {
+        _mapMoveMouseDown = true;
+        _mouseDownPos = mouseEvent->pos();
+        return true;
+    }
+    else if((event->type() == QEvent::MouseMove) && (_mapMoveMouseDown))
+    {
+        QPoint newPos = mouseEvent->pos();
+        QPoint delta = _mouseDownPos - newPos;
+
+        _mapMoveMouseDown = false;
+        if(ui->graphicsView->horizontalScrollBar())
+            ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + delta.x());
+        if(ui->graphicsView->verticalScrollBar())
+            ui->graphicsView->verticalScrollBar()->setValue(ui->graphicsView->verticalScrollBar()->value() + delta.y());
+        _mapMoveMouseDown = true;
+
+        _mouseDownPos = newPos;
+        return true;
+    }
+    else if(event->type() == QEvent::MouseButtonRelease)
+    {
+        _mapMoveMouseDown = false;
+        return true;
+    }
+
+    return false;
 }
 
 bool MapFrame::execEventFilterSelectZoom(QObject *obj, QEvent *event)
@@ -901,7 +971,6 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
     if(!_mapSource)
         return false;
 
-    //if(ui->grpBrush->checkedId() == DMHelper::BrushType_Select)
     if(_brushMode == DMHelper::BrushType_Select)
     {
         if(event->type() == QEvent::MouseButtonPress)
@@ -909,9 +978,8 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
             _mouseDownPos = mouseEvent->pos();
             if(!_rubberBand)
-            {
                 _rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->graphicsView);
-            }
+
             _rubberBand->setGeometry(QRect(_mouseDownPos, QSize()));
             _rubberBand->show();
 
@@ -925,11 +993,11 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, _erase, _smooth));
+                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, _erase, false)); //_smooth));
                 _mapSource->getUndoStack()->push(undoShape);
                 emit dirty();
             }
-            //cancelSelect();
+            cancelSelect();
             return true;
         }
         else if(event->type() == QEvent::MouseMove)
@@ -956,7 +1024,6 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDownPos = mouseEvent->pos();
             _mouseDown = true;
 
-            //_undoPath = new UndoPath(*_mapSource, MapDrawPath(ui->spinBox->value(), ui->grpBrush->checkedId(), _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
             _undoPath = new UndoPath(*_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
             _mapSource->getUndoStack()->push(_undoPath);
 
@@ -1084,30 +1151,29 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     {
         qDebug() << "[MapFrame] Publish FoW DM animation started";
         _videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
-        /*
-        if((_videoPlayer) && (!_videoPlayer->isError()))
-        {
-            startPublishTimer();
-        }
-        */
     }
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
-        //QSize rotatedSize = (ui->framePublish->getRotation() % 180 == 0) ? _targetSize :  _targetSize.transposed();
         QSize rotatedSize = (_rotation % 180 == 0) ? _targetSize :  _targetSize.transposed();
         _videoPlayer = new VideoPlayer(_mapSource->getFileName(), rotatedSize, true, _mapSource->getPlayAudio());
-        //_videoPlayer->targetResized(rotatedSize);
         if(!_videoPlayer->isError())
-        {
             _bwFoWImage = QImage();
-        }
     }
 }
 
 void MapFrame::cleanupBuffers()
 {
     QGraphicsItem* tempItem;
+
+    if(_partyIcon)
+    {
+        if(_scene)
+            _scene->removeItem(_partyIcon);
+        tempItem = _partyIcon;
+        _partyIcon = nullptr;
+        delete tempItem;
+    }
 
     if(_backgroundImage)
     {
@@ -1143,51 +1209,34 @@ void MapFrame::cleanupBuffers()
     }
 }
 
-void MapFrame::startAudioTrack()
-{
-    // TODO: FIX THIS!
-//    if((_mapSource) && (_mapSource->getPlayAudio()))
-//        emit startTrack(_mapSource->getAudioTrack());
-}
-
 void MapFrame::setMapCursor()
 {
-    //if(ui->btnZoomSelect->isChecked())
-    if(_zoomSelect)
+    if(_mapMoveMouseDown)
+    {
+        ui->graphicsView->viewport()->setCursor(QCursor(Qt::ClosedHandCursor));
+    }
+    else if(_spaceDown)
+    {
+        ui->graphicsView->viewport()->setCursor(QCursor(Qt::OpenHandCursor));
+    }
+    else if(_zoomSelect)
     {
         ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
     }
     else
     {
-        switch(ui->grpEditMode->checkedId())
+        if(_editMode == DMHelper::EditMode_Move)
         {
-            case DMHelper::EditMode_FoW:
-                //if(ui->grpBrush->checkedId() == DMHelper::BrushType_Circle)
-                if(_brushMode == DMHelper::BrushType_Circle)
-                {
-                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_circle.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                    drawEditCursor();
-                }
-                //else if(ui->grpBrush->checkedId() == DMHelper::BrushType_Square)
-                else if(_brushMode == DMHelper::BrushType_Square)
-                {
-                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(ui->spinBox->value()*2*_scale, ui->spinBox->value()*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                    //ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/icon_square.png").scaled(_brushSize*2*_scale, _brushSize*2*_scale, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                    drawEditCursor();
-                }
-                else
-                {
-                    ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                }
-                break;
-            case DMHelper::EditMode_Edit:
+            ui->graphicsView->viewport()->setCursor(QCursor(Qt::ArrowCursor));
+        }
+        else
+        {
+            if(_brushMode == DMHelper::BrushType_Circle)
+                drawEditCursor();
+            else if(_brushMode == DMHelper::BrushType_Square)
+                drawEditCursor();
+            else
                 ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
-                break;
-            case DMHelper::EditMode_Move:
-            default:
-                ui->graphicsView->viewport()->unsetCursor();
-                break;
         }
     }
 }
@@ -1210,42 +1259,11 @@ void MapFrame::drawEditCursor()
     ui->graphicsView->viewport()->setCursor(QCursor(cursorPixmap));
 }
 
-/*
-void MapFrame::publishModeVisibleClicked()
-{
-    if(ui->btnPublishVisible->isChecked())
-    {
-        ui->btnPublishZoom->setChecked(false);
-    }
-}
-
-void MapFrame::publishModeZoomClicked()
-{
-    if(ui->btnPublishZoom->isChecked())
-    {
-        ui->btnPublishVisible->setChecked(false);
-    }
-}
-*/
-
 void MapFrame::rotatePublish()
 {
     resetPublishFoW();
-    //if((_videoPlayer) && (ui->framePublish->isChecked()))
     if((_videoPlayer) && (_isPublishing))
-    {
-        //createVideoPlayer(!ui->framePublish->isChecked());
         createVideoPlayer(!_isPublishing);
-    }
-}
-
-void MapFrame::trackSelected(int index)
-{
-    if(!_mapSource)
-        return;
-
-    AudioTrack* track = ui->cmbTracks->itemData(index).value<AudioTrack*>();
-    _mapSource->setAudioTrack(track);
 }
 
 void MapFrame::setScale(qreal s)
@@ -1290,18 +1308,108 @@ void MapFrame::loadViewRect()
 void MapFrame::resetPublishFoW()
 {
     if(!_bwFoWImage.isNull())
-    {
         _bwFoWImage = QImage();
-    }
 }
 
-void MapFrame::audioPlaybackChecked()
+void MapFrame::checkPartyUpdate()
 {
-    if(_mapSource)
-        _mapSource->setPlayAudio(ui->chkAudio->isChecked());
+    if((!_mapSource) || (!_scene))
+        return;
 
-    //if((ui->framePublish->isChecked()) && (_videoPlayer))
-    if((_isPublishing) && (_videoPlayer))
-        _videoPlayer->setPlayingAudio(ui->chkAudio->isChecked());
+    if((!_mapSource->getShowParty()) ||
+       ((!_mapSource->getParty()) && (_mapSource->getPartyAltIcon().isEmpty())))
+    {
+        delete _partyIcon;
+        _partyIcon = nullptr;
+        return;
+    }
+
+    if(!_partyIcon)
+    {
+        _partyIcon = new UnselectedPixmap();
+        _scene->addItem(_partyIcon);
+        if((_mapSource->getPartyIconPos().x() == -1) && (_mapSource->getPartyIconPos().y() == -1))
+            _mapSource->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
+        _partyIcon->setFlag(QGraphicsItem::ItemIsMovable, true);
+        _partyIcon->setFlag(QGraphicsItem::ItemIsSelectable, true);
+        _partyIcon->setPos(_mapSource->getPartyIconPos());
+        _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
+    }
+    _partyIcon->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale())); //250 * 25 / 625  = 10;
+    QPixmap partyPixmap = _mapSource->getPartyPixmap();
+    if(!partyPixmap.isNull())
+        _partyIcon->setPixmap(partyPixmap);
 }
 
+void MapFrame::handleMapMousePress(const QPointF& pos)
+{
+    _mouseDown = true;
+    _mouseDownPos = ui->graphicsView->mapFromScene(pos);
+}
+
+void MapFrame::handleMapMouseMove(const QPointF& pos)
+{
+    if(!_mouseDown)
+        return;
+
+    QPoint viewPos = ui->graphicsView->mapFromScene(pos);
+    QPoint delta = _mouseDownPos - viewPos;
+
+    _mouseDown = false;
+    if(ui->graphicsView->horizontalScrollBar())
+        ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + delta.x());
+    if(ui->graphicsView->verticalScrollBar())
+        ui->graphicsView->verticalScrollBar()->setValue(ui->graphicsView->verticalScrollBar()->value() + delta.y());
+    _mouseDown = true;
+
+    _mouseDownPos = viewPos;
+}
+
+void MapFrame::handleMapMouseRelease(const QPointF& pos)
+{
+    Q_UNUSED(pos);
+    _mouseDown = false;
+}
+
+bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)
+{
+    qreal publishWidth = 0.0;
+    qreal publishX = 0.0;
+    qreal publishY = 0.0;
+
+    if(_rotation == 0)
+    {
+        publishWidth = _targetLabelSize.width();
+        publishX = publishPosition.x();
+        publishY = publishPosition.y();
+    }
+    else if(_rotation == 90)
+    {
+        publishWidth = _targetLabelSize.height();
+        publishX = publishPosition.y();
+        publishY = 1.0 - publishPosition.x();
+    }
+    else if(_rotation == 180)
+    {
+        publishWidth = _targetLabelSize.width();
+        publishX = 1.0 - publishPosition.x();
+        publishY = 1.0 - publishPosition.y();
+    }
+    else if(_rotation == 270)
+    {
+        publishWidth = _targetLabelSize.height();
+        publishX = 1.0 - publishPosition.y();
+        publishY = publishPosition.x();
+    }
+
+    if(publishWidth <= 0)
+        return false;
+
+    if((publishX < 0.0) || (publishX > 1.0) || (publishY < 0.0) || (publishY > 1.0))
+        return false;
+
+    scenePosition = QPointF((publishX * _publishRect.width()) + _publishRect.x(),
+                            (publishY * _publishRect.height()) + _publishRect.y());
+
+    return true;
+}

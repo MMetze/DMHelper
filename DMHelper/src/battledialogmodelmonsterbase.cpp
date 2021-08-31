@@ -55,6 +55,11 @@ int BattleDialogModelMonsterBase::getConditions() const
     return _conditions;
 }
 
+bool BattleDialogModelMonsterBase::hasCondition(Combatant::Condition condition) const
+{
+    return ((_conditions & condition) != 0);
+}
+
 int BattleDialogModelMonsterBase::getLegendaryCount() const
 {
     return _legendaryCount;
@@ -62,17 +67,38 @@ int BattleDialogModelMonsterBase::getLegendaryCount() const
 
 void BattleDialogModelMonsterBase::setConditions(int conditions)
 {
-    _conditions = conditions;
+    if(_conditions != conditions)
+    {
+        _conditions = conditions;
+        emit dataChanged(this);
+    }
 }
 
 void BattleDialogModelMonsterBase::applyConditions(int conditions)
 {
-    _conditions |= conditions;
+    if((_conditions & conditions) != conditions)
+    {
+        _conditions |= conditions;
+        emit dataChanged(this);
+    }
+}
+
+void BattleDialogModelMonsterBase::removeConditions(int conditions)
+{
+    if((_conditions & conditions) != 0)
+    {
+        _conditions &= ~conditions;
+        emit dataChanged(this);
+    }
 }
 
 void BattleDialogModelMonsterBase::setLegendaryCount(int legendaryCount)
 {
-    _legendaryCount = legendaryCount;
+    if(_legendaryCount != legendaryCount)
+    {
+        _legendaryCount = legendaryCount;
+        emit dataChanged(this);
+    }
 }
 
 void BattleDialogModelMonsterBase::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

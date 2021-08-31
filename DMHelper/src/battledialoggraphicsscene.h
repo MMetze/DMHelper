@@ -50,7 +50,6 @@ public:
 
 public slots:
     void setDistanceHeight(qreal heightDelta);
-    //void setRawMouse(bool rawMouse);
     void setInputMode(int inputMode);
 
     void addEffectObject();
@@ -73,10 +72,22 @@ signals:
     void battleMouseMove(const QPointF& pos);
     void battleMouseRelease(const QPointF& pos);
 
+    void mapMousePress(const QPointF& pos);
+    void mapMouseMove(const QPointF& pos);
+    void mapMouseRelease(const QPointF& pos);
+
+    void mapZoom(int zoomFactor);
+
     void itemMouseDown(QGraphicsPixmapItem* item);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
     void itemChanged(QGraphicsItem* item);
+    void itemMouseDoubleClick(QGraphicsPixmapItem* item);
+
+    void combatantActivate(BattleDialogModelCombatant* combatant);
+    void combatantRemove(BattleDialogModelCombatant* combatant);
+    void combatantDamage(BattleDialogModelCombatant* combatant);
+    void combatantHeal(BattleDialogModelCombatant* combatant);
 
     void combatantHover(BattleDialogModelCombatant* combatant, bool hover);
 
@@ -85,18 +96,27 @@ protected slots:
     void rollItem();
     void deleteItem();
 
+    void activateCombatant();
+    void removeCombatant();
+    void damageCombatant();
+    void healCombatant();
+
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
+    virtual void wheelEvent(QGraphicsSceneWheelEvent *wheelEvent);
+    virtual void keyPressEvent(QKeyEvent *keyEvent);
+    virtual void keyReleaseEvent(QKeyEvent *keyEvent);
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
     QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
     QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
 
-    BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler();
+    BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
+    QPointF getViewportCenter();
 
     QGraphicsItem* _contextMenuItem;
     Grid* _grid;
@@ -108,8 +128,9 @@ protected:
     QGraphicsItem* _mouseDownItem;
     BattleDialogModelCombatant* _mouseHoverItem;
     qreal _previousRotation;
+    QPointF _commandPosition;
 
-    //bool _rawMouse;
+    bool _spaceDown;
     int _inputMode;
 
     QGraphicsPixmapItem* _pointerPixmapItem;
@@ -123,7 +144,7 @@ protected:
     BattleDialogGraphicsSceneMouseHandlerRaw _rawMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCamera _cameraMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCombatants _combatantMouseHandler;
-    //BattleDialogGraphicsSceneMouseHandlerSelect _selectMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerMaps _mapsMouseHandler;
 };
 
 #endif // BATTLEDIALOGGRAPHICSSCENE_H

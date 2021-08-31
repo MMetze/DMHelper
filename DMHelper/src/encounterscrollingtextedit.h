@@ -2,8 +2,8 @@
 #define ENCOUNTERSCROLLINGTEXTEDIT_H
 
 #include "campaignobjectframe.h"
-#include <QElapsedTimer>
 #include "videoplayer.h"
+#include <QElapsedTimer>
 
 namespace Ui {
 class EncounterScrollingTextEdit;

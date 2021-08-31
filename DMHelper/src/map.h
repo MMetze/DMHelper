@@ -5,27 +5,22 @@
 #include "mapcontent.h"
 #include <QList>
 #include <QImage>
+#include <QPixmap>
 
 class QDomDocument;
 class QDomElement;
 class QUndoStack;
-//class MapFrame;
 class AudioTrack;
+class Party;
 
 class Map : public CampaignObjectBase
 {
     Q_OBJECT
 public:
     explicit Map(const QString& mapName = QString(), const QString& fileName = QString(), QObject *parent = nullptr);
-    //explicit Map(const QDomElement& element, bool isImport, QObject *parent = nullptr);
-    //explicit Map(const Map &obj);  // copy constructor
 
     // From CampaignObjectBase
-    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-
-    //QString getName() const;
-    //void setName(const QString& newName);
 
     virtual int getObjectType() const override;
 
@@ -39,12 +34,19 @@ public:
     bool getPlayAudio() const;
     void setPlayAudio(bool playAudio);
 
+    Party* getParty();
+    QString getPartyAltIcon();
+    QUuid getPartyId() const;
+    bool getShowParty() const;
+    const QPoint& getPartyIconPos() const;
+    int getPartyScale() const;
+    QPixmap getPartyPixmap();
+
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
 
     QUndoStack* getUndoStack() const;
-    void applyPaintTo(QImage* target, QColor clearColor, int index);
-    //MapFrame* getRegisteredWindow() const;
+    void applyPaintTo(QImage* target, QColor clearColor, int index, bool preview = false);
 
     MapMarker* getMapMarker(int id);
 
@@ -57,32 +59,37 @@ public:
     void paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview );
     void paintFoWRect( QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview );
     void fillFoW( QColor color, QPaintDevice* target );
-    //void undoPaint();
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
     QImage getPublishImage();
     QImage getPublishImage(const QRect& rect);
-    QImage getShrunkPublishImage();
+    QImage getGrayImage();
+    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
 
     QImage getPreviewImage();
 
 signals:
-//    void dirty();
-//    void changed();
     void executeUndo();
     void requestFoWUpdate();
 
-public slots:
-    //void registerWindow(MapFrame* mapFrame);
-    //void unregisterWindow(MapFrame* mapFrame);
+    void partyChanged(Party* party);
+    void partyIconChanged(const QString& partyIcon);
+    void showPartyChanged(bool showParty);
+    void partyScaleChanged(int partyScale);
 
+public slots:
     void initialize();
     void uninitialize();
 
-    //
     void undoPaint();
     void updateFoW();
+
+    void setParty(Party* party);
+    void setPartyIcon(const QString& partyIcon);
+    void setShowParty(bool showParty);
+    void setPartyIconPos(const QPoint& pos);
+    void setPartyScale(int partyScale);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -90,14 +97,18 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
-    //QString _name;
     QString _filename;
     QUndoStack* _undoStack;
-    //MapFrame* _mapFrame;
     QList<MapMarker> _markerList;
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
+
+    bool _showPartyIcon;
+    QUuid _partyId;
+    QString _partyAltIcon;
+    QPoint _partyIconPos;
+    int _partyScale;
 
     bool _initialized;
     QImage _imgBackground;

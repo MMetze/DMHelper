@@ -1,4 +1,2 @@
-Welcome to the DM Helper! We hope you enjoy using it and encourage you to stop by our Discord server and say hi: https://discord.gg/C7zPKBp
+Welcome to DMHelper! We hope you enjoy using it and encourage you to stop by our Discord server and say hi: https://discord.gg/C7zPKBp
 
-
-If you are having trouble because the program keeps crashing, saying something about a missing ‘MSVCP140.dll’ or 'VCRUNTIME140.dll', we can help! These are part of the Microsoft Visual Studio runtime required to run the DM Helper. Unfortunately, MSVS is not pre-installed, but it is included with the DM Helper package - you already have it! All you have to do is run the vc_redist.x64.exe that came with the DM Helper. If you are unsure about what you are installing, you can alternatively get the runtime directly from Microsoft here: http://bit.ly/DMH-MSVCP140

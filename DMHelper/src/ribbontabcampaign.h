@@ -28,7 +28,6 @@ signals:
     void newMapClicked();
     void newTextClicked();
     void newBattleClicked();
-    void newScrollingTextClicked();
     void newSoundClicked();
     void newSyrinscapeClicked();
     void newYoutubeClicked();

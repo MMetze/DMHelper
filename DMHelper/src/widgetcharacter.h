@@ -27,6 +27,10 @@ public:
 
 public slots:
     virtual void updateData() override;
+    virtual void updateMove() override;
+
+    // From CombatantWidget
+    virtual void selectCombatant() override;
 
 protected:
     // From QWidget
@@ -37,6 +41,7 @@ protected:
 
 private slots:
     void edtInitiativeChanged();
+    void edtMoveChanged();
     void edtHPChanged();
 
 private:

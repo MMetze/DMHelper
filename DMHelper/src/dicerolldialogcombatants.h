@@ -24,7 +24,7 @@ public:
 
     void fireAndForget();
 
-    virtual QSize sizeHint() const;
+//    virtual QSize sizeHint() const;
 
 signals:
     void selectCombatant(BattleDialogModelCombatant* combatant);

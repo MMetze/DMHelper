@@ -3,6 +3,7 @@
 #include "battledialogmodelcombatant.h"
 #include "character.h"
 #include "conditionseditdialog.h"
+#include "quickref.h"
 #include <QDebug>
 
 const int CONDITION_FRAME_SPACING = 8;
@@ -48,8 +49,12 @@ void BattleCombatantFrame::setCombatant(BattleDialogModelCombatant* combatant)
 {
     qDebug() << "[BattleCombatantFrame] Reading combatant: " << combatant;
 
-    disconnect(_combatant, &BattleDialogModelCombatant::campaignObjectDestroyed, this, &BattleCombatantFrame::clearCombatant);
-    clearGrid();
+    if(_combatant)
+    {
+        disconnect(_combatant, &BattleDialogModelCombatant::campaignObjectDestroyed, this, &BattleCombatantFrame::clearCombatant);
+        if(_combatant->getCombatant())
+            disconnect(_combatant->getCombatant(), &Combatant::dirty, this, &BattleCombatantFrame::readCombatant);
+    }
 
     ui->edtName->setEnabled(combatant != nullptr);
     ui->frameInfoContents->setEnabled(combatant != nullptr);
@@ -60,25 +65,42 @@ void BattleCombatantFrame::setCombatant(BattleDialogModelCombatant* combatant)
     if(!combatant)
     {
         ui->edtName->setText(QString());
+        clearGrid();
+        ui->edtStr->setText(QString());
+        ui->edtDex->setText(QString());
+        ui->edtCon->setText(QString());
+        ui->edtInt->setText(QString());
+        ui->edtWis->setText(QString());
+        ui->edtCha->setText(QString());
         return;
     }
 
     connect(_combatant, &BattleDialogModelCombatant::campaignObjectDestroyed, this, &BattleCombatantFrame::clearCombatant);
+    if(_combatant->getCombatant())
+        connect(_combatant->getCombatant(), &Combatant::dirty, this, &BattleCombatantFrame::readCombatant);
 
-    ui->edtName->setText(combatant->getName());
-    updateLayout();
-
-    ui->edtStr->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_strengthSave)));
-    ui->edtDex->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_dexteritySave)));
-    ui->edtCon->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_constitutionSave)));
-    ui->edtInt->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_intelligenceSave)));
-    ui->edtWis->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_wisdomSave)));
-    ui->edtCha->setText(Combatant::convertModToStr(combatant->getSkillModifier(Combatant::Skills_charismaSave)));
+    readCombatant();
 }
 
 BattleDialogModelCombatant* BattleCombatantFrame::getCombatant() const
 {
     return _combatant;
+}
+
+void BattleCombatantFrame::readCombatant()
+{
+    if(!_combatant)
+        return;
+
+    ui->edtName->setText(_combatant->getName());
+    updateLayout();
+
+    ui->edtStr->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_strengthSave)));
+    ui->edtDex->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_dexteritySave)));
+    ui->edtCon->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_constitutionSave)));
+    ui->edtInt->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_intelligenceSave)));
+    ui->edtWis->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_wisdomSave)));
+    ui->edtCha->setText(Combatant::convertModToStr(_combatant->getSkillModifier(Combatant::Skills_charismaSave)));
 }
 
 void BattleCombatantFrame::clearCombatant()
@@ -96,8 +118,12 @@ void BattleCombatantFrame::editConditions()
     int result = dlg.exec();
     if(result == QDialog::Accepted)
     {
-        _combatant->setConditions(dlg.getConditions());
-        updateLayout();
+        if(dlg.getConditions() != _combatant->getConditions())
+        {
+            _combatant->setConditions(dlg.getConditions());
+            updateLayout();
+            emit conditionsChanged(_combatant);
+        }
     }
 }
 
@@ -108,8 +134,6 @@ void BattleCombatantFrame::updateLayout()
     if(!_combatant)
         return;
 
-    qDebug() << "[BattleCombatantFrame] Creating a new condition grid";
-
     _conditionGrid = new QGridLayout;
     _conditionGrid->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
     _conditionGrid->setContentsMargins(CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING, CONDITION_FRAME_SPACING);
@@ -118,16 +142,12 @@ void BattleCombatantFrame::updateLayout()
 
     int conditions = _combatant->getConditions();
 
-    qDebug() << "[BattleCombatantFrame] Adding conditions: " << conditions;
-
     for(int i = 0; i < Combatant::getConditionCount(); ++i)
     {
         Combatant::Condition condition = Combatant::getConditionByIndex(i);
         if(conditions & condition)
             addCondition(condition);
     }
-
-    qDebug() << "[BattleCombatantFrame] Total grid entries created: " << _conditionGrid->count();
 
     int spacingColumn = _conditionGrid->columnCount();
 
@@ -170,7 +190,15 @@ void BattleCombatantFrame::addCondition(Combatant::Condition condition)
     QString resourceIcon = QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png");
     QLabel* conditionLabel = new QLabel(this);
     conditionLabel->setPixmap(QPixmap(resourceIcon).scaled(40, 40));
-    conditionLabel->setToolTip(Combatant::getConditionDescription(condition));
+
+    QString conditionText = QString("<b>") + Combatant::getConditionDescription(condition) + QString("</b>");
+    if(QuickRef::Instance())
+    {
+        QuickRefData* conditionData = QuickRef::Instance()->getData(QString("Condition"), 0, Combatant::getConditionTitle(condition));
+        if(conditionData)
+            conditionText += QString("<p>") + conditionData->getOverview();
+    }
+    conditionLabel->setToolTip(conditionText);
 
     int columnCount = (ui->scrollAreaWidgetContents->width() - CONDITION_FRAME_SPACING) / (40 + CONDITION_FRAME_SPACING);
     int row = _conditionGrid->count() / columnCount;

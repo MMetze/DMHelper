@@ -6,15 +6,9 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>260</width>
+    <width>242</width>
     <height>57</height>
    </rect>
-  </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string/>
@@ -133,7 +127,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Is this monster visible? If the this isn't checked, the monster will not be shown in the Player's Window, but will still be visible in the initiative order</string>
+          <string>Is this monster visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -161,7 +155,7 @@
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this monster visible? If the this isn't checked, the monster will not be shown in the Player's Window, but will still be visible in the initiative order</string>
+          <string>Is this monster visible?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -212,7 +206,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </size>
          </property>
          <property name="toolTip">
-          <string>Is this monster known? If the this isn't checked, the monster will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the monster takes any actions.</string>
+          <string>Is this monster known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -240,7 +234,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>Is this monster known? If the this isn't checked, the monster will not be shown in the Player's Window and will be skipped in the initiative order. It is up to you to decide if the monster takes any actions.</string>
+          <string>Is this monster known?</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -261,7 +255,7 @@ background-color: rgba(0, 0, 0, 0);</string>
       <number>0</number>
      </property>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="5,1,1">
+      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="5,1,1,1">
        <property name="spacing">
         <number>2</number>
        </property>
@@ -286,6 +280,34 @@ background-color: rgba(0, 0, 0, 0);</string>
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="btnLegendary">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>30</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>Remaining Legendary Actions</string>
+         </property>
+         <property name="text">
+          <string>L: 3</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="label_5">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -294,7 +316,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's Armor Class. To edit this, double click to go to the monster's full view in the Bestiary.</string>
+          <string>The monster's Armor Class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -316,7 +338,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's Armor Class. To edit this, double click to go to the monster's full view in the Bestiary.</string>
+          <string>The monster's Armor Class</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -336,7 +358,7 @@ background-color: rgba(0, 0, 0, 0);</string>
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2,1">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,2,2,1,2,2,1,2">
        <property name="spacing">
         <number>2</number>
        </property>
@@ -349,7 +371,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's initiative value.</string>
+          <string>The monster's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -368,7 +390,65 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's initiative value.</string>
+          <string>The monster's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();
+background-color: rgba(0, 0, 0, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Preferred</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>0</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_9">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The monster's initiative</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">background-image: url();</string>
+         </property>
+         <property name="text">
+          <string>Mv:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtMove">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>The monster's initiative</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -407,7 +487,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's remaining hit points</string>
+          <string>The monster's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();</string>
@@ -426,7 +506,7 @@ background-color: rgba(0, 0, 0, 0);</string>
           </sizepolicy>
          </property>
          <property name="toolTip">
-          <string>The monster's remaining hit points</string>
+          <string>The monster's current hit points</string>
          </property>
          <property name="styleSheet">
           <string notr="true">background-image: url();
@@ -437,31 +517,6 @@ background-color: rgba(0, 0, 0, 0);</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnLegendary">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="font">
-          <font>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>The number of Legendary Actions remaining for this monster. Click here to reduce by one, these are automatically reset at the start of the creature's turn.</string>
-         </property>
-         <property name="styleSheet">
-          <string notr="true"/>
-         </property>
-         <property name="text">
-          <string>L: </string>
          </property>
         </widget>
        </item>
