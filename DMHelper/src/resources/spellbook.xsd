@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="root" type="rootType"/>
+  <xs:complexType name="effectType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="token"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="shapeActive"/>
+    <xs:attribute type="xs:string" name="colorG"/>
+    <xs:attribute type="xs:string" name="conditions"/>
+    <xs:attribute type="xs:string" name="colorR"/>
+    <xs:attribute type="xs:string" name="colorB"/>
+    <xs:attribute type="xs:string" name="sizeX"/>
+    <xs:attribute type="xs:string" name="type"/>
+    <xs:attribute type="xs:string" name="colorA"/>
+    <xs:attribute type="xs:string" name="sizeY"/>
+    <xs:attribute type="xs:string" name="tokenRotation"/>
+  </xs:complexType>
+  <xs:complexType name="spellType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="level"/>
+      <xs:element type="xs:string" name="school"/>
+      <xs:element type="xs:string" name="time"/>
+      <xs:element type="xs:string" name="range"/>
+      <xs:element type="xs:string" name="components"/>
+      <xs:element type="xs:string" name="duration"/>
+      <xs:element type="xs:string" name="classes"/>
+      <xs:element type="xs:string" name="ritual" minOccurs="0"/>
+      <xs:element type="xs:string" name="text" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element type="xs:string" name="roll" minOccurs="0"/>
+      <xs:element type="effectType" name="effect"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="spellbookType">
+    <xs:sequence>
+      <xs:element type="spellType" name="spell" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element type="xs:string" name="license"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="minorversion"/>
+    <xs:attribute type="xs:string" name="majorversion"/>
+  </xs:complexType>
+  <xs:complexType name="rootType">
+    <xs:sequence>
+      <xs:element type="spellbookType" name="spellbook"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
