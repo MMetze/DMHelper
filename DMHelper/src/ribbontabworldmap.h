@@ -34,6 +34,11 @@ public slots:
     void removePartyIcon(Party* party);
     void clearPartyIcons();
 
+    void setDistanceOn(bool checked);
+    void setFreeDistanceOn(bool checked);
+    void setDistance(const QString& distance);
+    void setDistanceScale(int scale);
+
     void setShowMarkers(bool checked);
 
 signals:
@@ -41,6 +46,10 @@ signals:
     void partySelected(Party* party);
     void partyIconSelected(const QString& partyIcon);
     void scaleChanged(int scale);
+
+    void distanceClicked(bool);
+    void freeDistanceClicked(bool);
+    void distanceScaleChanged(int scale);
 
     void showMarkersClicked(bool checked);
     void addMarkerClicked();
@@ -51,6 +60,7 @@ protected:
 protected slots:
     void selectAction(QAction* action);
     void setPartyButtonIcon(const QIcon &icon);
+    void freeScaleEdited(const QString &text);
 
 private:
     Ui::RibbonTabWorldMap *ui;

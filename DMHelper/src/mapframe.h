@@ -55,6 +55,11 @@ signals:
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int scale);
 
+    void showDistanceChanged(bool show);
+    void showFreeDistanceChanged(bool show);
+    void distanceScaleChanged(int scale);
+    void distanceChanged(const QString& distance);
+
     void showMarkersChanged(bool show);
 
     void animationStarted();
@@ -74,6 +79,8 @@ public slots:
     void undoPaint();
     void clear();
 
+    void colorize();
+
     void cancelPublish();
 
     void setParty(Party* party);
@@ -88,7 +95,6 @@ public slots:
     void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
     void editMapMarker(int markerId);
 
-    void editModeToggled(int editMode);
     void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
     void brushSizeChanged(int size);
@@ -105,6 +111,10 @@ public slots:
 
     void setErase(bool enabled);
     void setSmooth(bool enabled);
+
+    void setDistance(bool enabled);
+    void setFreeDistance(bool enabled);
+    void setDistanceScale(int scale);
 
     void setPublishZoom(bool enabled);
     void setPublishVisible(bool enabled);
@@ -134,11 +144,16 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;
 
+    void editModeToggled(int editMode);
+    void changeEditMode(int editMode, bool active);
+
     bool checkMapMove(QEvent* event);
     bool execEventFilterSelectZoom(QObject *obj, QEvent *event);
     bool execEventFilterEditModeFoW(QObject *obj, QEvent *event);
     bool execEventFilterEditModeEdit(QObject *obj, QEvent *event);
     bool execEventFilterEditModeMove(QObject *obj, QEvent *event);
+    bool execEventFilterEditModeDistance(QObject *obj, QEvent *event);
+    bool execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event);
 
     void startPublishTimer();
     void stopPublishTimer();
@@ -190,6 +205,10 @@ private:
     bool _mouseDown;
     QPoint _mouseDownPos;
     UndoPath* _undoPath;
+
+    QGraphicsLineItem* _distanceLine;
+    QGraphicsPathItem* _distancePath;
+    QGraphicsSimpleTextItem* _distanceText;
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;

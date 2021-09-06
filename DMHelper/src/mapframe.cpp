@@ -8,6 +8,7 @@
 #include "undoshape.h"
 #include "undomarker.h"
 #include "mapmarkerdialog.h"
+#include "mapcolorizedialog.h"
 #include "selectzoom.h"
 #include "campaign.h"
 #include "party.h"
@@ -43,6 +44,9 @@ MapFrame::MapFrame(QWidget *parent) :
     _mouseDown(false),
     _mouseDownPos(),
     _undoPath(nullptr),
+    _distanceLine(nullptr),
+    _distancePath(nullptr),
+    _distanceText(nullptr),
     _publishMouseDown(false),
     _publishMouseDownPos(),
     _zoomSelect(false),
@@ -221,6 +225,16 @@ bool MapFrame::eventFilter(QObject *obj, QEvent *event)
             if(execEventFilterEditModeFoW(obj, event))
                 return true;
         }
+        else if(_editMode == DMHelper::EditMode_Distance)
+        {
+            if(execEventFilterEditModeDistance(obj, event))
+                return true;
+        }
+        else if(_editMode == DMHelper::EditMode_FreeDistance)
+        {
+            if(execEventFilterEditModeFreeDistance(obj, event))
+                return true;
+        }
     }
 
     return QWidget::eventFilter(obj, event);
@@ -290,6 +304,32 @@ void MapFrame::clear()
     delete _backgroundVideo; _backgroundVideo = nullptr;
     delete _fow; _fow = nullptr;
     delete _undoPath; _undoPath = nullptr;
+}
+
+void MapFrame::colorize()
+{
+    if(!_mapSource)
+        return;
+
+    if(!_backgroundImage)
+        return;
+
+    bool previousApplied = _mapSource->isFilterApplied();
+    if(previousApplied)
+        _mapSource->setApplyFilter(false);
+    MapColorizeDialog dlg(_mapSource->getBackgroundImage(), _mapSource->getFilter());
+    dlg.resize(width() / 2, height() / 2);
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        _mapSource->setFilter(dlg.getFilter());
+        _mapSource->setApplyFilter(dlg.getFilter().isValid());
+        _backgroundImage->setPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
+    }
+    else
+    {
+        if(previousApplied)
+            _mapSource->setApplyFilter(true);
+    }
 }
 
 void MapFrame::cancelPublish()
@@ -409,31 +449,6 @@ void MapFrame::editMapMarker(int markerId)
     }
 }
 
-void MapFrame::editModeToggled(int editMode)
-{
-    if(_editMode == editMode)
-        return;
-
-    _editMode = editMode;
-    _undoPath = nullptr;
-    switch(editMode)
-    {
-        case DMHelper::EditMode_FoW:
-        case DMHelper::EditMode_Edit:
-            ui->graphicsView->viewport()->installEventFilter(this);
-            ui->graphicsView->removeEventFilter(this);
-            break;
-        case DMHelper::EditMode_Move:
-            ui->graphicsView->viewport()->removeEventFilter(this);
-            ui->graphicsView->installEventFilter(this);
-            break;
-        default:
-            break;
-    }
-
-    setMapCursor();
-}
-
 void MapFrame::setMapEdit(bool enabled)
 {
     editModeToggled(enabled ? DMHelper::EditMode_FoW : DMHelper::EditMode_Move);
@@ -536,6 +551,24 @@ void MapFrame::setErase(bool enabled)
 void MapFrame::setSmooth(bool enabled)
 {
     _smooth = enabled;
+}
+
+void MapFrame::setDistance(bool enabled)
+{
+    editModeToggled(enabled ? DMHelper::EditMode_Distance : DMHelper::EditMode_Move);
+}
+
+void MapFrame::setFreeDistance(bool enabled)
+{
+    editModeToggled(enabled ? DMHelper::EditMode_FreeDistance : DMHelper::EditMode_Move);
+}
+
+void MapFrame::setDistanceScale(int scale)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setMapScale(scale);
 }
 
 void MapFrame::setPublishZoom(bool enabled)
@@ -734,11 +767,13 @@ void MapFrame::initializeFoW()
     connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
     connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
+    connect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::distanceScaleChanged);
     connect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
     connect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::dirty);
 
     if(_mapSource->getParty())
         emit partyChanged(_mapSource->getParty());
@@ -747,6 +782,7 @@ void MapFrame::initializeFoW()
 
     emit showPartyChanged(_mapSource->getShowParty());
     emit partyScaleChanged(_mapSource->getPartyScale());
+    emit distanceScaleChanged(_mapSource->getMapScale());
     emit showMarkersChanged(_mapSource->getShowMarkers());
 
     _isVideo = !_mapSource->isInitialized();
@@ -759,9 +795,11 @@ void MapFrame::uninitializeFoW()
     if((_mapSource) && (_partyIcon))
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
+    disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::distanceScaleChanged);
     disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
     disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
@@ -959,12 +997,15 @@ void MapFrame::timerEvent(QTimerEvent *event)
 
 void MapFrame::keyPressEvent(QKeyEvent *event)
 {
-    if((event) && (((event->key() == Qt::Key_Space)) || ((event->key() == Qt::Key_Control))))
+    if(event)
     {
-        _spaceDown = true;
-        setMapCursor();
-        event->accept();
-        return;
+        if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Control))
+        {
+            _spaceDown = true;
+            setMapCursor();
+            event->accept();
+            return;
+        }
     }
 
     CampaignObjectFrame::keyPressEvent(event);
@@ -972,15 +1013,74 @@ void MapFrame::keyPressEvent(QKeyEvent *event)
 
 void MapFrame::keyReleaseEvent(QKeyEvent *event)
 {
-    if((event) && (((event->key() == Qt::Key_Space)) || ((event->key() == Qt::Key_Control))))
+    if(event)
     {
-        _spaceDown = false;
-        setMapCursor();
-        event->accept();
-        return;
+        if((event->key() == Qt::Key_Space) || (event->key() == Qt::Key_Control))
+        {
+            _spaceDown = false;
+            setMapCursor();
+            event->accept();
+            return;
+        }
+        else if(event->key() == Qt::Key_Escape)
+        {
+            editModeToggled(DMHelper::EditMode_Move);
+            event->accept();
+            return;
+        }
     }
 
     CampaignObjectFrame::keyReleaseEvent(event);
+}
+
+void MapFrame::editModeToggled(int editMode)
+{
+    if(_editMode == editMode)
+        return;
+
+    changeEditMode(_editMode, false);
+    changeEditMode(editMode, true);
+
+    _editMode = editMode;
+    _undoPath = nullptr;
+    switch(editMode)
+    {
+        case DMHelper::EditMode_FoW:
+        case DMHelper::EditMode_Edit:
+        case DMHelper::EditMode_Distance:
+        case DMHelper::EditMode_FreeDistance:
+            ui->graphicsView->viewport()->installEventFilter(this);
+            ui->graphicsView->removeEventFilter(this);
+            break;
+        case DMHelper::EditMode_Move:
+            ui->graphicsView->viewport()->removeEventFilter(this);
+            ui->graphicsView->installEventFilter(this);
+            break;
+        default:
+            break;
+    }
+
+    setMapCursor();
+}
+
+void MapFrame::changeEditMode(int editMode, bool active)
+{
+    switch(editMode)
+    {
+        case DMHelper::EditMode_FoW:
+            emit mapEditChanged(active);
+            break;
+        case DMHelper::EditMode_Distance:
+            emit showDistanceChanged(active);
+            break;
+        case DMHelper::EditMode_FreeDistance:
+            emit showFreeDistanceChanged(active);
+            break;
+        case DMHelper::EditMode_Edit:
+        case DMHelper::EditMode_Move:
+        default:
+        break;
+    }
 }
 
 bool MapFrame::checkMapMove(QEvent* event)
@@ -1222,6 +1322,140 @@ bool MapFrame::execEventFilterEditModeMove(QObject *obj, QEvent *event)
     return false;
 }
 
+bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj);
+
+    if(!_mapSource)
+        return false;
+
+    QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+    if(!mouseEvent)
+        return false;
+
+    if(event->type() == QEvent::MouseButtonPress)
+    {
+        if(!_scene)
+            return false;
+
+        if(_distanceLine)
+            delete _distanceLine;
+
+        QPointF scenePos = ui->graphicsView->mapToScene(mouseEvent->pos());
+        _distanceLine = _scene->addLine(QLineF(scenePos, scenePos));
+        _distanceLine->setPen(QPen(Qt::yellow));
+
+        if(_distanceText)
+            delete _distanceText;
+        _distanceText = _scene->addSimpleText(QString("0"));
+        _distanceText->setBrush(QBrush(Qt::yellow));
+        _distanceText->setPos(scenePos);
+        mouseEvent->accept();
+    }
+    else if(event->type() == QEvent::MouseButtonRelease)
+    {
+        delete _distanceLine; _distanceLine = nullptr;
+        delete _distanceText; _distanceText = nullptr;
+        mouseEvent->accept();
+    }
+    else if(event->type() == QEvent::MouseMove)
+    {
+        if((!_distanceLine) || (!_distanceText) || (!_scene) || (_mapSource->getMapScale() <= 0.0))
+            return false;
+
+        QLineF line = _distanceLine->line();
+        line.setP2(ui->graphicsView->mapToScene(mouseEvent->pos()));
+        _distanceLine->setLine(line);
+        qreal lineDistance = line.length() * _mapSource->getMapScale() / 1000.0;
+        QString distanceText;
+        distanceText = QString::number(lineDistance, 'f', 1);
+        _distanceText->setText(distanceText);
+        _distanceText->setPos(line.center());
+        emit distanceChanged(distanceText);
+    #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+        qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
+    #endif
+        mouseEvent->accept();
+    }
+    return false;
+}
+
+bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj);
+
+    if(!_mapSource)
+        return false;
+
+    QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+    if(!mouseEvent)
+        return false;
+
+    if(event->type() == QEvent::MouseButtonPress)
+    {
+        if(!_scene)
+            return false;
+
+        if(_distancePath)
+            delete _distancePath;
+
+        _mouseDownPos = mouseEvent->pos();
+                /*
+        QPointF scenePos = ui->graphicsView->mapToScene(mouseEvent->pos());
+        QPainterPath newPath(scenePos);
+        newPath.lineTo(scenePos + QPoint(5,5));
+        _distancePath = _scene->addPath(newPath);
+
+        _distancePath->setPen(QPen(Qt::yellow));
+                */
+
+        if(_distanceText)
+            delete _distanceText;
+        _distanceText = _scene->addSimpleText(QString("0"));
+        _distanceText->setBrush(QBrush(Qt::yellow));
+        _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos()));
+        mouseEvent->accept();
+    }
+    else if(event->type() == QEvent::MouseButtonRelease)
+    {
+        delete _distancePath; _distancePath = nullptr;
+        delete _distanceText; _distanceText = nullptr;
+        mouseEvent->accept();
+    }
+    else if(event->type() == QEvent::MouseMove)
+    {
+        if((!_distanceText) || (!_scene) || (_mapSource->getMapScale() <= 0.0))
+            return false;
+
+        QPointF scenePos = ui->graphicsView->mapToScene(mouseEvent->pos());
+        QPainterPath currentPath;
+        if(_distancePath)
+        {
+            currentPath = _distancePath->path();
+        }
+        else
+        {
+            currentPath = QPainterPath(scenePos);
+            _distancePath = _scene->addPath(currentPath);
+            _distancePath->setPen(QPen(Qt::yellow));
+
+        }
+        currentPath.lineTo(ui->graphicsView->mapToScene(mouseEvent->pos()));
+        _distancePath->setPath(currentPath);
+        qreal lineDistance = _distancePath->path().length() * _mapSource->getMapScale() / 1000.0;
+        QString distanceText;
+        distanceText = QString::number(lineDistance, 'f', 1);
+        _distanceText->setText(distanceText);
+        _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5,5)));
+        emit distanceChanged(distanceText);
+    #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+        qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
+    #endif
+        mouseEvent->accept();
+    }
+    return false;
+}
+
 void MapFrame::startPublishTimer()
 {
     if(!_timerId)
@@ -1351,6 +1585,13 @@ void MapFrame::setMapCursor()
         if(_editMode == DMHelper::EditMode_Move)
         {
             ui->graphicsView->viewport()->setCursor(QCursor(Qt::ArrowCursor));
+        }
+        else if((_editMode == DMHelper::EditMode_Distance) || (_editMode == DMHelper::EditMode_FreeDistance))
+        {
+            QPixmap cursorPixmap(":/img/data/icon_distancecursor.png");
+            ui->graphicsView->viewport()->setCursor(QCursor(cursorPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation),
+                                                            32 * DMHelper::CURSOR_SIZE / cursorPixmap.width(),
+                                                            32 * DMHelper::CURSOR_SIZE / cursorPixmap.height()));
         }
         else
         {

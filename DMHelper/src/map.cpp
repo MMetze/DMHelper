@@ -29,10 +29,13 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _partyId(),
     _partyIconPos(-1, -1),
     _partyScale(10),
+    _mapScale(100),
     _showMarkers(true),
     _initialized(false),
     _imgBackground(),
     _imgFow(),
+    _filterApplied(false),
+    _filter(),
     _mapColor(Qt::white),
     _mapSize()
 {
@@ -238,6 +241,11 @@ QPixmap Map::getPartyPixmap()
     return partyPixmap;
 }
 
+int Map::getMapScale() const
+{
+    return _mapScale;
+}
+
 const QRect& Map::getMapRect() const
 {
     return _mapRect;
@@ -320,7 +328,7 @@ void Map::setExternalFoWImage(QImage externalImage)
 
 QImage Map::getBackgroundImage()
 {
-    return _imgBackground;
+    return _filterApplied ? _filter.apply(_imgBackground) : _imgBackground;
 }
 
 QImage Map::getFoWImage()
@@ -524,7 +532,7 @@ QImage Map::getBWFoWImage(const QSize &size)
 
 QImage Map::getPublishImage()
 {
-    QImage result(_imgBackground);
+    QImage result(getBackgroundImage());
 
     QImage bwFoWImage = getBWFoWImage(_imgBackground);
     QPainter p;
@@ -551,7 +559,7 @@ QImage Map::getPublishImage(const QRect& rect)
     QImage bwFoWImage = getBWFoWImage(_imgBackground);
     QPainter p;
     p.begin(&result);
-        p.drawImage(0, 0, _imgBackground, targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
+        p.drawImage(0, 0, getBackgroundImage(), targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
         p.drawImage(0, 0, bwFoWImage, targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
     p.end();
 
@@ -560,7 +568,7 @@ QImage Map::getPublishImage(const QRect& rect)
 
 QImage Map::getGrayImage()
 {
-    QImage result(_imgBackground);
+    QImage result(getBackgroundImage());
 
     QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
     applyPaintTo(&grayFoWImage, QColor(0,0,0,128), _undoStack->index(), true);
@@ -634,7 +642,7 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
         result = QImage(right - left, bottom - top, _imgBackground.format());
         QPainter p;
         p.begin(&result);
-            p.drawImage(0, 0, _imgBackground, left, top, right - left, bottom - top);
+            p.drawImage(0, 0, getBackgroundImage(), left, top, right - left, bottom - top);
             p.drawImage(0, 0, bwFoWImage, left, top, right - left, bottom - top);
         p.end();
     }
@@ -645,16 +653,27 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
     return result;
 }
 
+bool Map::isFilterApplied() const
+{
+    return _filterApplied;
+}
+
+MapColorizeFilter Map::getFilter() const
+{
+    return _filter;
+}
+
 QImage Map::getPreviewImage()
 {
     if(!_imgBackground.isNull())
-        return _imgBackground;
+        return getBackgroundImage();
 
     if((_filename.isNull()) || (_filename.isEmpty()))
         return QImage();
 
     QImage previewImage;
     previewImage.load(_filename);
+    return _filterApplied ? _filter.apply(previewImage) : _imgBackground;
     return previewImage;
 }
 
@@ -773,6 +792,16 @@ void Map::setPartyScale(int partyScale)
     }
 }
 
+void Map::setMapScale(int mapScale)
+{
+    if(_mapScale != mapScale)
+    {
+        _mapScale = mapScale;
+        emit mapScaleChanged(_mapScale);
+        emit dirty();
+    }
+}
+
 void Map::setShowMarkers(bool showMarkers)
 {
     if(_showMarkers != showMarkers)
@@ -781,6 +810,21 @@ void Map::setShowMarkers(bool showMarkers)
         emit showMarkersChanged(_showMarkers);
         emit dirty();
     }
+}
+
+void Map::setApplyFilter(bool applyFilter)
+{
+    if(_filterApplied != applyFilter)
+    {
+        _filterApplied = applyFilter;
+        emit dirty();
+    }
+}
+
+void Map::setFilter(const MapColorizeFilter& filter)
+{
+    _filter = filter;
+    emit dirty();
 }
 
 QDomElement Map::createOutputXML(QDomDocument &doc)
@@ -802,6 +846,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("partyPosX", _partyIconPos.x());
     element.setAttribute("partyPosY", _partyIconPos.y());
     element.setAttribute("partyScale", _partyScale);
+    element.setAttribute("mapScale", _mapScale);
     element.setAttribute("showMarkers", _showMarkers);
     element.setAttribute("mapRectX", _mapRect.x());
     element.setAttribute("mapRectY", _mapRect.y());
@@ -854,6 +899,7 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
     _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
                            element.attribute("partyPosY", QString::number(-1)).toInt());
     _partyScale = element.attribute("partyScale", QString::number(10)).toInt();
+    _mapScale = element.attribute("mapScale", QString::number(100)).toInt();
     _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);

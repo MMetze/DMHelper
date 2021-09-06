@@ -33,6 +33,8 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
     // Set up the extra slot to configure the erase button
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SLOT(setEraseMode()));
 
+    connect(ui->btnColorize, SIGNAL(clicked(bool)), this, SIGNAL(colorizeClicked()));
+
     connect(ui->btnPublishVisible, SIGNAL(clicked(bool)), this, SLOT(publishModeVisibleClicked()));
     connect(ui->btnPublishZoom, SIGNAL(clicked(bool)), this, SLOT(publishModeZoomClicked()));
 
@@ -106,6 +108,11 @@ void RibbonTabMap::showEvent(QShowEvent *event)
 
     setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW, frameHeight);
     setLineHeight(*ui->line_5, frameHeight);
+
+    setStandardButtonSize(*ui->lblColorize, *ui->btnColorize, frameHeight);
+
+    setLineHeight(*ui->line_8, frameHeight);
+
     setStandardButtonSize(*ui->lblPublishVisible, *ui->btnPublishVisible, frameHeight);
     setStandardButtonSize(*ui->lblPublishZoom, *ui->btnPublishZoom, frameHeight);
 }

@@ -609,6 +609,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabMiniMap, SIGNAL(smoothClicked(bool)), mapFrame, SLOT(setSmooth(bool)));
     connect(_ribbonTabMiniMap, SIGNAL(brushSizeChanged(int)), mapFrame, SLOT(brushSizeChanged(int)));
     connect(_ribbonTabMiniMap, SIGNAL(fillFoWClicked()), mapFrame, SLOT(fillFoW()));
+    connect(_ribbonTabMiniMap, SIGNAL(colorizeClicked()), mapFrame, SLOT(colorize()));
     connect(_ribbonTabMiniMap, SIGNAL(brushModeChanged(int)), mapFrame, SLOT(setBrushMode(int)));
     connect(mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMiniMap, SLOT(setBrushMode(int)));
 
@@ -621,10 +622,17 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, mapFrame, &MapFrame::setPartyScale);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, mapFrame, &MapFrame::setShowMarkers);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, mapFrame, &MapFrame::addNewMarker);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceClicked, mapFrame, &MapFrame::setDistance);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::freeDistanceClicked, mapFrame, &MapFrame::setFreeDistance);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceScaleChanged, mapFrame, &MapFrame::setDistanceScale);
     connect(mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
     connect(mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
     connect(mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
     connect(mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
+    connect(mapFrame, &MapFrame::showDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceOn);
+    connect(mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setFreeDistanceOn);
+    connect(mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceScale);
+    connect(mapFrame, &MapFrame::distanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistance);
     connect(mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
 
     connect(pubWindow, SIGNAL(labelResized(QSize)), mapFrame, SLOT(setTargetLabelSize(QSize)));

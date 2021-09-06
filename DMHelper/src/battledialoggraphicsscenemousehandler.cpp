@@ -112,7 +112,6 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mouseReleaseEvent(QGraphicsS
     delete _distanceText; _distanceText = nullptr;
     mouseEvent->accept();
     return false;
-
 }
 
 void BattleDialogGraphicsSceneMouseHandlerDistance::setHeightDelta(qreal heightDelta)

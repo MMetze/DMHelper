@@ -25,7 +25,6 @@ RibbonTabBattleView::RibbonTabBattleView(QWidget *parent) :
     ui->edtHeightDiff->setValidator(new QDoubleValidator(-9999, 9999, 2, this));
     ui->edtHeightDiff->setText(QString::number(0.0));
 
-
     connect(ui->btnPointer, SIGNAL(clicked(bool)), this, SIGNAL(pointerClicked(bool)));
 }
 

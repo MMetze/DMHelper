@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "mapcontent.h"
+#include "mapcolorizefilter.h"
 #include <QList>
 #include <QImage>
 #include <QPixmap>
@@ -48,6 +49,8 @@ public:
     int getPartyScale() const;
     QPixmap getPartyPixmap();
 
+    int getMapScale() const;
+
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
 
@@ -74,6 +77,9 @@ public:
     QImage getGrayImage();
     QImage getShrunkPublishImage(QRect* targetRect = nullptr);
 
+    bool isFilterApplied() const;
+    MapColorizeFilter getFilter() const;
+
     QImage getPreviewImage();
 
 signals:
@@ -85,6 +91,7 @@ signals:
     void partyIconChanged(const QString& partyIcon);
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int partyScale);
+    void mapScaleChanged(int mapScale);
 
     void showMarkersChanged(bool showMarkers);
 
@@ -102,8 +109,12 @@ public slots:
     void setShowParty(bool showParty);
     void setPartyIconPos(const QPoint& pos);
     void setPartyScale(int partyScale);
+    void setMapScale(int mapScale);
 
     void setShowMarkers(bool showMarkers);
+
+    void setApplyFilter(bool applyFilter);
+    void setFilter(const MapColorizeFilter& filter);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -122,12 +133,15 @@ protected:
     QString _partyAltIcon;
     QPoint _partyIconPos;
     int _partyScale;
+    int _mapScale;
 
     bool _showMarkers;
 
     bool _initialized;
     QImage _imgBackground;
     QImage _imgFow;
+    bool _filterApplied;
+    MapColorizeFilter _filter;
 
     // For a generic map
     QColor _mapColor;

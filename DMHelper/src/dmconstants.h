@@ -101,6 +101,8 @@ namespace DMHelper
         EditMode_FoW = 0,
         EditMode_Edit,
         EditMode_Move,
+        EditMode_Distance,
+        EditMode_FreeDistance,
 
         EditMode_Count
     };

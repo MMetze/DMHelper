@@ -76,6 +76,8 @@ SOURCES += main.cpp\
     legaldialog.cpp \
     mainwindow.cpp \
     mapblankdialog.cpp \
+    mapcolorizedialog.cpp \
+    mapcolorizefilter.cpp \
     mapfactory.cpp \
     mapframescene.cpp \
     objectfactory.cpp \
@@ -294,6 +296,8 @@ HEADERS  += mainwindow.h \
     exportworker.h \
     legaldialog.h \
     mapblankdialog.h \
+    mapcolorizedialog.h \
+    mapcolorizefilter.h \
     mapfactory.h \
     mapframescene.h \
     mapmarker.h \
@@ -474,6 +478,7 @@ FORMS    += mainwindow.ui \
     expertisedialog.ui \
     legaldialog.ui \
     mapblankdialog.ui \
+    mapcolorizedialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \
