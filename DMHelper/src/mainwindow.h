@@ -252,7 +252,7 @@ private:
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
-    RibbonTabMap* _ribbonTabMiniMap;
+    RibbonTabMap* _ribbonTabMap;
     RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
 };

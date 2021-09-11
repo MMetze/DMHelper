@@ -178,7 +178,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabBattle(nullptr),
     _ribbonTabScrolling(nullptr),
     _ribbonTabText(nullptr),
-    _ribbonTabMiniMap(nullptr),
+    _ribbonTabMap(nullptr),
     _ribbonTabWorldMap(nullptr),
     _ribbonTabAudio(nullptr)
 {
@@ -595,26 +595,26 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
     connect(mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
 
-    connect(_ribbonTabMiniMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
-    connect(_ribbonTabMiniMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
-    connect(_ribbonTabMiniMap, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
-    connect(_ribbonTabMiniMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
-    connect(_ribbonTabMiniMap, SIGNAL(zoomFullClicked()), mapFrame, SLOT(zoomFit()));
-    connect(_ribbonTabMiniMap, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
-    connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabMiniMap, SLOT(setZoomSelect(bool)));
-    connect(_ribbonTabMiniMap, SIGNAL(mapEditClicked(bool)), mapFrame, SLOT(setMapEdit(bool)));
-    connect(mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMiniMap, SLOT(setMapEdit(bool)));
+    connect(_ribbonTabMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
+    connect(_ribbonTabMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
+    connect(_ribbonTabMap, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
+    connect(_ribbonTabMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
+    connect(_ribbonTabMap, SIGNAL(zoomFullClicked()), mapFrame, SLOT(zoomFit()));
+    connect(_ribbonTabMap, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
+    connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabMap, SLOT(setZoomSelect(bool)));
+    connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), mapFrame, SLOT(setMapEdit(bool)));
+    connect(mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
 
-    connect(_ribbonTabMiniMap, SIGNAL(drawEraseClicked(bool)), mapFrame, SLOT(setErase(bool)));
-    connect(_ribbonTabMiniMap, SIGNAL(smoothClicked(bool)), mapFrame, SLOT(setSmooth(bool)));
-    connect(_ribbonTabMiniMap, SIGNAL(brushSizeChanged(int)), mapFrame, SLOT(brushSizeChanged(int)));
-    connect(_ribbonTabMiniMap, SIGNAL(fillFoWClicked()), mapFrame, SLOT(fillFoW()));
-    connect(_ribbonTabMiniMap, SIGNAL(colorizeClicked()), mapFrame, SLOT(colorize()));
-    connect(_ribbonTabMiniMap, SIGNAL(brushModeChanged(int)), mapFrame, SLOT(setBrushMode(int)));
-    connect(mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMiniMap, SLOT(setBrushMode(int)));
+    connect(_ribbonTabMap, SIGNAL(drawEraseClicked(bool)), mapFrame, SLOT(setErase(bool)));
+    connect(_ribbonTabMap, SIGNAL(smoothClicked(bool)), mapFrame, SLOT(setSmooth(bool)));
+    connect(_ribbonTabMap, SIGNAL(brushSizeChanged(int)), mapFrame, SLOT(brushSizeChanged(int)));
+    connect(_ribbonTabMap, SIGNAL(fillFoWClicked()), mapFrame, SLOT(fillFoW()));
+    connect(_ribbonTabMap, SIGNAL(colorizeClicked()), mapFrame, SLOT(colorize()));
+    connect(_ribbonTabMap, SIGNAL(brushModeChanged(int)), mapFrame, SLOT(setBrushMode(int)));
+    connect(mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMap, SLOT(setBrushMode(int)));
 
-    connect(_ribbonTabMiniMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
-    connect(_ribbonTabMiniMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
+    connect(_ribbonTabMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
+    connect(_ribbonTabMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
 
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, mapFrame, &MapFrame::setParty);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, mapFrame, &MapFrame::setPartyIcon);
@@ -634,6 +634,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceScale);
     connect(mapFrame, &MapFrame::distanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistance);
     connect(mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
+
+    connect(this, SIGNAL(cancelSelect()), mapFrame, SLOT(cancelSelect()));
 
     connect(pubWindow, SIGNAL(labelResized(QSize)), mapFrame, SLOT(setTargetLabelSize(QSize)));
     connect(pubWindow, SIGNAL(publishMouseDown(const QPointF&)), mapFrame, SLOT(publishWindowMouseDown(const QPointF&)));
@@ -765,7 +767,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
-    connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
+    //connect(mapFrame, SIGNAL(startTrack(AudioTrack*)), _audioPlayer, SLOT(playTrack(AudioTrack*)));
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     /*
@@ -1631,8 +1633,8 @@ void MainWindow::setupRibbonBar()
     _ribbonTabScrolling->hide();
     _ribbonTabText = new RibbonTabText(this);
     _ribbonTabText->hide();
-    _ribbonTabMiniMap = new RibbonTabMap(this);
-    _ribbonTabMiniMap->hide();
+    _ribbonTabMap = new RibbonTabMap(this);
+    _ribbonTabMap->hide();
     _ribbonTabWorldMap = new RibbonTabWorldMap(this);
     _ribbonTabWorldMap->hide();
     _ribbonTabAudio = new RibbonTabAudio(this);
@@ -2465,14 +2467,14 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->enableTab(_ribbonTabBattleMap);
             _ribbon->enableTab(_ribbonTabBattleView);
             _ribbon->enableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_Map:
-            _ribbon->enableTab(_ribbonTabMiniMap);
+            _ribbon->enableTab(_ribbonTabMap);
             _ribbon->enableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
@@ -2486,7 +2488,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
@@ -2499,7 +2501,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabAudio);
@@ -2509,7 +2511,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
@@ -2523,7 +2525,7 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabMiniMap);
+            _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);

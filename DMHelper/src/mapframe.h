@@ -136,6 +136,7 @@ protected:
 
     void createMarkerItems();
     void cleanupMarkerItems();
+    void cleanupSelectionItems();
 
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -144,10 +145,11 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;
 
-    void editModeToggled(int editMode);
+    bool editModeToggled(int editMode);
     void changeEditMode(int editMode, bool active);
 
     bool checkMapMove(QEvent* event);
+    bool execEventFilter(QObject *obj, QEvent *event);
     bool execEventFilterSelectZoom(QObject *obj, QEvent *event);
     bool execEventFilterEditModeFoW(QObject *obj, QEvent *event);
     bool execEventFilterEditModeEdit(QObject *obj, QEvent *event);
@@ -213,7 +215,6 @@ private:
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
 
-    bool _zoomSelect;
     QRubberBand* _rubberBand;
     qreal _scale;
 
