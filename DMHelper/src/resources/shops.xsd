@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="locations"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="locations">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="location"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="location">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element maxOccurs="unbounded" ref="shop"/>
+            </xs:sequence>
+            <xs:attribute name="name" use="required" type="xs:NCName"/>
+            <xs:attribute name="probability" use="required" type="xs:decimal"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="shop">
+        <xs:complexType>
+            <xs:attribute name="armor" use="required" type="xs:decimal"/>
+            <xs:attribute name="goods" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_armor" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_potion" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_ring" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_rod" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_scroll" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_staff" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_wand" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_weapon" use="required" type="xs:decimal"/>
+            <xs:attribute name="magic_wondrousitem" use="required" type="xs:decimal"/>
+            <xs:attribute name="mundane" use="required" type="xs:decimal"/>
+            <xs:attribute name="name" use="required"/>
+            <xs:attribute name="vehicles" use="required" type="xs:decimal"/>
+            <xs:attribute name="weapon" use="required" type="xs:decimal"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
