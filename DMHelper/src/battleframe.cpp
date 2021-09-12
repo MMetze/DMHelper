@@ -1604,7 +1604,7 @@ void BattleFrame::setRotation(int rotation)
     createPrescaledBackground();
 }
 
-void BattleFrame::setBackgroundColor(QColor color)
+void BattleFrame::setBackgroundColor(const QColor& color)
 {
     if(!_model)
     {

@@ -30,7 +30,7 @@ public:
     void setFileName(const QString& newFileName);
 
     QColor getMapColor() const;
-    void setMapColor(QColor color);
+    void setMapColor(const QColor& color);
     QSize getMapSize() const;
     void setMapSize(QSize size);
 
@@ -49,13 +49,16 @@ public:
     int getPartyScale() const;
     QPixmap getPartyPixmap();
 
+    int getDistanceLineType() const;
+    QColor getDistanceLineColor() const;
+    int getDistanceLineWidth() const;
     int getMapScale() const;
 
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
 
     QUndoStack* getUndoStack() const;
-    void applyPaintTo(QImage* target, QColor clearColor, int index, bool preview = false);
+    void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false);
 
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
@@ -68,7 +71,7 @@ public:
 
     void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
     void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
-    void fillFoW(QColor color, QPaintDevice* target);
+    void fillFoW(const QColor& color, QPaintDevice* target);
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
@@ -93,6 +96,10 @@ signals:
     void partyScaleChanged(int partyScale);
     void mapScaleChanged(int mapScale);
 
+    void distanceLineColorChanged(const QColor& color);
+    void distanceLineTypeChanged(int lineType);
+    void distanceLineWidthChanged(int lineWidth);
+
     void showMarkersChanged(bool showMarkers);
 
 public slots:
@@ -110,6 +117,10 @@ public slots:
     void setPartyIconPos(const QPoint& pos);
     void setPartyScale(int partyScale);
     void setMapScale(int mapScale);
+
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
 
     void setShowMarkers(bool showMarkers);
 
@@ -142,6 +153,9 @@ protected:
     QImage _imgFow;
     bool _filterApplied;
     MapColorizeFilter _filter;
+    int _lineType;
+    QColor _lineColor;
+    int _lineWidth;
 
     // For a generic map
     QColor _mapColor;

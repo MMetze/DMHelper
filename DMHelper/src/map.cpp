@@ -36,6 +36,9 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _imgFow(),
     _filterApplied(false),
     _filter(),
+    _lineType(Qt::SolidLine),
+    _lineColor(Qt::yellow),
+    _lineWidth(1),
     _mapColor(Qt::white),
     _mapSize()
 {
@@ -45,6 +48,9 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
     setFileName(element.attribute("filename"));
+    setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
+    setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
+    setDistanceLineWidth(element.attribute("lineWidth", QString::number(1)).toInt());
     setMapColor(QColor(element.attribute("mapColor")));
     setMapSize(QSize(element.attribute("mapSizeWidth", QString::number(0)).toInt(),
                      element.attribute("mapSizeHeight", QString::number(0)).toInt()));
@@ -134,7 +140,7 @@ QColor Map::getMapColor() const
     return _mapColor;
 }
 
-void Map::setMapColor(QColor color)
+void Map::setMapColor(const QColor& color)
 {
     _mapColor = color;
 }
@@ -241,6 +247,21 @@ QPixmap Map::getPartyPixmap()
     return partyPixmap;
 }
 
+int Map::getDistanceLineType() const
+{
+    return _lineType;
+}
+
+QColor Map::getDistanceLineColor() const
+{
+    return _lineColor;
+}
+
+int Map::getDistanceLineWidth() const
+{
+    return _lineWidth;
+}
+
 int Map::getMapScale() const
 {
     return _mapScale;
@@ -265,7 +286,7 @@ QUndoStack* Map::getUndoStack() const
     return _undoStack;
 }
 
-void Map::applyPaintTo(QImage* target, QColor clearColor, int index, bool preview)
+void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview)
 {
     bool previewNeed = preview;
 
@@ -374,9 +395,9 @@ void Map::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* targ
             if(mapDraw.smooth())
             {
                 QRadialGradient grad(point, mapDraw.radius());
-                grad.setColorAt(0,QColor(0,0,0,0));
-                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())),QColor(0,0,0,0));
-                grad.setColorAt(1,QColor(255,255,255));
+                grad.setColorAt(0, QColor(0,0,0,0));
+                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())), QColor(0,0,0,0));
+                grad.setColorAt(1, QColor(255,255,255));
                 p.setBrush(grad);
             }
             else
@@ -496,7 +517,7 @@ void Map::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevic
     }
 }
 
-void Map::fillFoW( QColor color, QPaintDevice* target )
+void Map::fillFoW(const QColor& color, QPaintDevice* target)
 {
     if(!target)
     {
@@ -802,6 +823,36 @@ void Map::setMapScale(int mapScale)
     }
 }
 
+void Map::setDistanceLineColor(const QColor& color)
+{
+    if(_lineColor != color)
+    {
+        _lineColor = color;
+        emit distanceLineColorChanged(_lineColor);
+        emit dirty();
+    }
+}
+
+void Map::setDistanceLineType(int lineType)
+{
+    if(_lineType != lineType)
+    {
+        _lineType = lineType;
+        emit distanceLineTypeChanged(_lineType);
+        emit dirty();
+    }
+}
+
+void Map::setDistanceLineWidth(int lineWidth)
+{
+    if(_lineWidth != lineWidth)
+    {
+        _lineWidth = lineWidth;
+        emit distanceLineWidthChanged(_lineWidth);
+        emit dirty();
+    }
+}
+
 void Map::setShowMarkers(bool showMarkers)
 {
     if(_showMarkers != showMarkers)
@@ -835,6 +886,9 @@ QDomElement Map::createOutputXML(QDomDocument &doc)
 void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
+    element.setAttribute("lineColor", _lineColor.name());
+    element.setAttribute("lineType", _lineType);
+    element.setAttribute("lineWidth", _lineWidth);
     element.setAttribute("mapColor", _mapColor.name());
     element.setAttribute("mapSizeWidth", _mapSize.width());
     element.setAttribute("mapSizeHeight", _mapSize.height());

@@ -534,6 +534,30 @@ void MapFrame::setDistanceScale(int scale)
     _mapSource->setMapScale(scale);
 }
 
+void MapFrame::setDistanceLineColor(const QColor& color)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setDistanceLineColor(color);
+}
+
+void MapFrame::setDistanceLineType(int lineType)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setDistanceLineType(lineType);
+}
+
+void MapFrame::setDistanceLineWidth(int lineWidth)
+{
+    if(!_mapSource)
+        return;
+
+    _mapSource->setDistanceLineWidth(lineWidth);
+}
+
 void MapFrame::setPublishZoom(bool enabled)
 {
     _publishZoom = enabled;
@@ -645,7 +669,9 @@ void MapFrame::publishClicked(bool checked)
                 }
             }
 
-            p.setPen(Qt::yellow);
+            p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
+                          _mapSource->getDistanceLineWidth(),
+                          static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
             if(_distanceLine)
                 p.drawLine(_distanceLine->line().translated(-topLeftOffset));
             if(_distancePath)
@@ -735,12 +761,18 @@ void MapFrame::initializeFoW()
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
     connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
     connect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::distanceScaleChanged);
+    connect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::distanceLineColorChanged);
+    connect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::distanceLineTypeChanged);
+    connect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::distanceLineWidthChanged);
     connect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
     connect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
+    connect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
 
     if(_mapSource->getParty())
         emit partyChanged(_mapSource->getParty());
@@ -751,6 +783,9 @@ void MapFrame::initializeFoW()
     emit partyScaleChanged(_mapSource->getPartyScale());
     emit distanceScaleChanged(_mapSource->getMapScale());
     emit showMarkersChanged(_mapSource->getShowMarkers());
+    emit distanceLineColorChanged(_mapSource->getDistanceLineColor());
+    emit distanceLineTypeChanged(_mapSource->getDistanceLineType());
+    emit distanceLineWidthChanged(_mapSource->getDistanceLineWidth());
 
     _isVideo = !_mapSource->isInitialized();
 }
@@ -762,10 +797,16 @@ void MapFrame::uninitializeFoW()
     if((_mapSource) && (_partyIcon))
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
+    disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
+    disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::distanceLineColorChanged);
+    disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::distanceLineTypeChanged);
+    disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::distanceLineWidthChanged);
     disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::distanceScaleChanged);
     disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
@@ -920,12 +961,13 @@ void MapFrame::timerEvent(QTimerEvent *event)
                         if(!_bwFoWImage.isNull())
                             p.drawImage(0, 0, _bwFoWImage);
 
+                        qreal targetWidth = _targetSize.width();
+                        qreal imgWidth = _backgroundImage->pixmap().width();
+
                         if((_mapSource->getShowParty()) &&
                            (_partyIcon) &&
                            ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
                         {
-                            qreal targetWidth = _targetSize.width();
-                            qreal imgWidth = _backgroundImage->pixmap().width();
                             QPixmap partyPixmap = _mapSource->getPartyPixmap();
                             if(!partyPixmap.isNull())
                             {
@@ -934,6 +976,22 @@ void MapFrame::timerEvent(QTimerEvent *event)
                                 p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
                             }
                         }
+
+                        p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
+                                      _mapSource->getDistanceLineWidth(),
+                                      static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
+
+                        p.scale(targetWidth / imgWidth, targetWidth / imgWidth);
+                        if(_distanceLine)
+                            p.drawLine(_distanceLine->line());
+                            //p.drawLine(QLineF(_distanceLine->line().p1() * targetWidth / imgWidth, _distanceLine->line().p2() * targetWidth / imgWidth));
+
+                        if(_distancePath)
+                            p.drawPath(_distancePath->path());
+
+                        if(_distanceText)
+                            p.drawText(_distanceText->pos(), _distanceText->text());
+                            //p.drawText(_distanceText->pos() * targetWidth / imgWidth, _distanceText->text());
                     p.end();
                 }
 
@@ -1381,10 +1439,15 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
 
         QPointF scenePos = ui->graphicsView->mapToScene(mouseEvent->pos());
         _distanceLine = _scene->addLine(QLineF(scenePos, scenePos));
-        _distanceLine->setPen(QPen(Qt::yellow));
+        _distanceLine->setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
+                                   _mapSource->getDistanceLineWidth(),
+                                   static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
 
         _distanceText = _scene->addSimpleText(QString("0"));
-        _distanceText->setBrush(QBrush(Qt::yellow));
+        _distanceText->setBrush(QBrush(_mapSource->getDistanceLineColor()));
+        QFont textFont = _distanceText->font();
+        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        _distanceText->setFont(textFont);
         _distanceText->setPos(scenePos);
         mouseEvent->accept();
     }
@@ -1431,19 +1494,13 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
             return false;
 
         cleanupSelectionItems();
-
-        /*
-        QPointF scenePos = ui->graphicsView->mapToScene(mouseEvent->pos());
-        QPainterPath currentPath;
-        currentPath.moveTo(scenePos);
-        currentPath.lineTo(scenePos + QPointF(1.0, 1.0));
-        _distancePath = _scene->addPath(currentPath, QPen(Qt::yellow));
-        qDebug() << "[MapFrame] Creating path at position: " << scenePos;
-        */
         _mouseDownPos = mouseEvent->pos();
 
         _distanceText = _scene->addSimpleText(QString("0"));
-        _distanceText->setBrush(QBrush(Qt::yellow));
+        _distanceText->setBrush(QBrush(_mapSource->getDistanceLineColor()));
+        QFont textFont = _distanceText->font();
+        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        _distanceText->setFont(textFont);
         _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5,5)));
         mouseEvent->accept();
     }
@@ -1470,7 +1527,9 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
             QPainterPath currentPath;
             currentPath.moveTo(ui->graphicsView->mapToScene(_mouseDownPos));
             currentPath.lineTo(scenePos);
-            _distancePath = _scene->addPath(currentPath, QPen(Qt::yellow));
+            _distancePath = _scene->addPath(currentPath, QPen(QBrush(_mapSource->getDistanceLineColor()),
+                                                              _mapSource->getDistanceLineWidth(),
+                                                              static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
             qDebug() << "[MapFrame] Move creating path at position: " << scenePos;
         }
         qreal lineDistance = _distancePath->path().length() * _mapSource->getMapScale() / 1000.0;

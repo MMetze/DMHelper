@@ -21,7 +21,7 @@ public slots:
     void setAnimation(bool checked);
     void setImageFile(const QString& imageFile);
 
-    void setColor(QColor color);
+    void setColor(const QColor& color);
     void setFontFamily(const QString& fontFamily);
     void setFontSize(int fontSize);
     void setFontBold(bool fontBold);
@@ -47,7 +47,7 @@ signals:
     void rewindClicked();
 
     // Text
-    void colorChanged(QColor color);
+    void colorChanged(const QColor& color);
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);

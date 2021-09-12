@@ -370,7 +370,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pubWindow->setPointerFile(_options->getPointerFile());
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), pubWindow, SLOT(setPointerFile(const QString&)));
     connect(pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
-    connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(QColor)), pubWindow, SLOT(setBackgroundColor(QColor)));
+    connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), pubWindow, SLOT(setBackgroundColor(const QColor&)));
     qDebug() << "[MainWindow] Player's Window Created";
 
     qDebug() << "[MainWindow] Creating Tree Model";
@@ -407,13 +407,13 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
-    connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), this, SLOT(showPublishWindow()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), this, SLOT(showPublishWindow()));
     connect(this, SIGNAL(dispatchPublishImage(QImage)), pubWindow, SLOT(setImage(QImage)));
-    connect(this, SIGNAL(dispatchPublishImage(QImage, QColor)), pubWindow, SLOT(setImage(QImage, QColor)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), pubWindow, SLOT(setImage(QImage, const QColor&)));
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), pubWindow, SLOT(setImageNoScale(QImage)));
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), this, SLOT(handleAnimationPreview(QImage)));
 
-    connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage, QColor)),this,SIGNAL(dispatchPublishImage(QImage, QColor)));
+    connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -448,7 +448,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
     connect(encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
     connect(encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
-    connect(_ribbonTabText, SIGNAL(colorChanged(QColor)), encounterTextEdit, SLOT(setColor(QColor)));
+    connect(_ribbonTabText, SIGNAL(colorChanged(const QColor&)), encounterTextEdit, SLOT(setColor(const QColor&)));
     connect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), encounterTextEdit, SLOT(setFont(const QString&)));
     connect(_ribbonTabText, SIGNAL(fontSizeChanged(int)), encounterTextEdit, SLOT(setFontSize(int)));
     connect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), encounterTextEdit, SLOT(setBold(bool)));
@@ -462,7 +462,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabText, SIGNAL(translateTextClicked(bool)), encounterTextEdit, SLOT(setTranslated(bool)));
     //translate - both directions, get rid of previous button & link, make dialog bigger, better, apply, clear
     // remove text publish dialog
-    connect(encounterTextEdit, SIGNAL(colorChanged(QColor)), _ribbonTabText, SLOT(setColor(QColor)));
+    connect(encounterTextEdit, SIGNAL(colorChanged(const QColor&)), _ribbonTabText, SLOT(setColor(const QColor&)));
     connect(encounterTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabText, SLOT(setFontFamily(const QString&)));
     connect(encounterTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabText, SLOT(setFontSize(int)));
     connect(encounterTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabText, SLOT(setFontBold(bool)));
@@ -625,6 +625,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceClicked, mapFrame, &MapFrame::setDistance);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::freeDistanceClicked, mapFrame, &MapFrame::setFreeDistance);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceScaleChanged, mapFrame, &MapFrame::setDistanceScale);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineColorChanged, mapFrame, &MapFrame::setDistanceLineColor);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineTypeChanged, mapFrame, &MapFrame::setDistanceLineType);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineWidthChanged, mapFrame, &MapFrame::setDistanceLineWidth);
     connect(mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
     connect(mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
     connect(mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
@@ -633,6 +636,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setFreeDistanceOn);
     connect(mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceScale);
     connect(mapFrame, &MapFrame::distanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistance);
+    connect(mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineColor);
+    connect(mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineType);
+    connect(mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineWidth);
+
     connect(mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
 
     connect(this, SIGNAL(cancelSelect()), mapFrame, SLOT(cancelSelect()));
@@ -658,13 +665,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabScrolling, SIGNAL(rewindClicked()), _scrollingTextEdit, SLOT(rewind()));
     connect(_scrollingTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabScrolling, SLOT(setSpeed(int)));
     connect(_scrollingTextEdit, SIGNAL(imageWidthChanged(int)), _ribbonTabScrolling, SLOT(setWidth(int)));
-    connect(_ribbonTabScrolling, SIGNAL(colorChanged(QColor)), _scrollingTextEdit, SLOT(setColor(QColor)));
+    connect(_ribbonTabScrolling, SIGNAL(colorChanged(const QColor&)), _scrollingTextEdit, SLOT(setColor(const QColor&)));
     connect(_ribbonTabScrolling, SIGNAL(fontFamilyChanged(const QString&)), _scrollingTextEdit, SLOT(setFontFamily(const QString&)));
     connect(_ribbonTabScrolling, SIGNAL(fontSizeChanged(int)), _scrollingTextEdit, SLOT(setFontSize(int)));
     connect(_ribbonTabScrolling, SIGNAL(fontBoldChanged(bool)), _scrollingTextEdit, SLOT(setFontBold(bool)));
     connect(_ribbonTabScrolling, SIGNAL(fontItalicsChanged(bool)), _scrollingTextEdit, SLOT(setFontItalics(bool)));
     connect(_ribbonTabScrolling, SIGNAL(alignmentChanged(Qt::Alignment)), _scrollingTextEdit, SLOT(setAlignment(Qt::Alignment)));
-    connect(_scrollingTextEdit, SIGNAL(colorChanged(QColor)), _ribbonTabScrolling, SLOT(setColor(QColor)));
+    connect(_scrollingTextEdit, SIGNAL(colorChanged(const QColor&)), _ribbonTabScrolling, SLOT(setColor(const QColor&)));
     connect(_scrollingTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabScrolling, SLOT(setFontFamily(const QString&)));
     connect(_scrollingTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabScrolling, SLOT(setFontSize(int)));
     connect(_scrollingTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabScrolling, SLOT(setFontBold(bool)));
@@ -698,7 +705,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Encounter Pages Created";
 
     // Ensure publishing a single image stops any running animations
-    connect(this, SIGNAL(dispatchPublishImage(QImage,QColor)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
 
     // Load the quick reference tabs
 #ifndef Q_OS_MAC
@@ -712,7 +719,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(previewFrame,SIGNAL(positionChanged(QPointF)),previewFrame,SLOT(setArrowPosition(QPointF)));
     connect(previewFrame,SIGNAL(positionChanged(QPointF)),pubWindow,SLOT(setArrowPosition(QPointF)));
     connect(this,SIGNAL(dispatchPublishImage(QImage)),previewFrame,SLOT(setImage(QImage)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage,QColor)),previewFrame,SLOT(setImage(QImage)));
+    connect(this,SIGNAL(dispatchPublishImage(QImage, const QColor&)),previewFrame,SLOT(setImage(QImage)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), previewFrame, SLOT(setPointerFile(const QString&)));
     previewFrame->setPointerFile(_options->getPointerFile());
     previewDlg = createDialog(previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
@@ -2442,13 +2449,13 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
     {
         connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), objectFrame, SLOT(setRotation(int)));
-        connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(QColor)), objectFrame, SLOT(setBackgroundColor(QColor)));
+        connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
 
         connect(objectFrame, SIGNAL(setPublishEnabled(bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool)));
         connect(objectFrame, SIGNAL(checkedChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setChecked(bool)));
         connect(objectFrame, SIGNAL(checkableChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setCheckable(bool)));
         connect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
-        connect(objectFrame, SIGNAL(backgroundColorChanged(QColor)), _ribbon->getPublishRibbon(), SLOT(setColor(QColor)));
+        connect(objectFrame, SIGNAL(backgroundColorChanged(const QColor&)), _ribbon->getPublishRibbon(), SLOT(setColor(const QColor&)));
 
         objectFrame->activateObject(object);
         if(_ribbon && _ribbon->getPublishRibbon())
@@ -2587,7 +2594,7 @@ void MainWindow::startChase()
         chaseDlg->addCombatantGroups(selectDlg->getQuarryGroups(), false);
 
         connect(chaseDlg, SIGNAL(chaseComplete()), this, SLOT(handleChaseComplete()));
-        connect(chaseDlg, SIGNAL(publishChaseScene(QImage, QColor)), this, SIGNAL(dispatchPublishImage(QImage, QColor)));
+        connect(chaseDlg, SIGNAL(publishChaseScene(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
     }
 
     chaseDlg->show();

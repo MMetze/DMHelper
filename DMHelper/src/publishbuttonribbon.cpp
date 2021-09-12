@@ -24,7 +24,7 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
 
     connect(ui->btnColor, SIGNAL(rotationChanged(int)), this, SIGNAL(rotationChanged(int)));
 //    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
-    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SLOT(handleColorChanged(QColor)));
+    connect(ui->btnColor, SIGNAL(colorChanged(const QColor&)), this, SLOT(handleColorChanged(const QColor&)));
 
     connect(ui->btnPreview, SIGNAL(clicked()), this, SIGNAL(previewClicked()));
     connect(ui->btnPlayersWindow, SIGNAL(clicked(bool)), this, SIGNAL(playersWindowClicked(bool)));
@@ -83,7 +83,7 @@ void PublishButtonRibbon::setRotation(int rotation)
     ui->btnColor->setRotation(rotation);
 }
 
-void PublishButtonRibbon::setColor(QColor color)
+void PublishButtonRibbon::setColor(const QColor& color)
 {
     ui->btnColor->setColor(color);
 }
@@ -155,7 +155,7 @@ void PublishButtonRibbon::handleRotation()
     emit rotationChanged(ui->btnColor->getRotation());
 }
 
-void PublishButtonRibbon::handleColorChanged(QColor color)
+void PublishButtonRibbon::handleColorChanged(const QColor& color)
 {
     emit buttonColorChanged(color);
 

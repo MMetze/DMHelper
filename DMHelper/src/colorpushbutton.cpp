@@ -57,7 +57,7 @@ void ColorPushButton::setRotationVisible(bool rotationVisible)
     }
 }
 
-void ColorPushButton::setColor(QColor color)
+void ColorPushButton::setColor(const QColor& color)
 {
     if(color != _color)
     {

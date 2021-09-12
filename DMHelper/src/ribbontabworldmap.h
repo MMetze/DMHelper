@@ -39,6 +39,10 @@ public slots:
     void setDistance(const QString& distance);
     void setDistanceScale(int scale);
 
+    void setDistanceLineType(int lineType);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineWidth(int lineWidth);
+
     void setShowMarkers(bool checked);
 
 signals:
@@ -51,6 +55,10 @@ signals:
     void freeDistanceClicked(bool);
     void distanceScaleChanged(int scale);
 
+    void distanceLineTypeChanged(int lineType);
+    void distanceLineColorChanged(const QColor& color);
+    void distanceLineWidthChanged(int lineWidth);
+
     void showMarkersClicked(bool checked);
     void addMarkerClicked();
 
@@ -61,6 +69,7 @@ protected slots:
     void selectAction(QAction* action);
     void setPartyButtonIcon(const QIcon &icon);
     void freeScaleEdited(const QString &text);
+    void selectLineTypeAction(QAction* action);
 
 private:
     Ui::RibbonTabWorldMap *ui;
@@ -94,6 +103,21 @@ public slots:
 protected:
     Party* _party;
     int _partyType;
+
+};
+
+class RibbonTabWorldMap_LineTypeAction : public QAction
+{
+    Q_OBJECT
+
+public:
+    explicit RibbonTabWorldMap_LineTypeAction(const QIcon &icon, const QString &text, int lineType, QObject *parent = nullptr);
+    virtual ~RibbonTabWorldMap_LineTypeAction() override;
+
+    int getLineType() const;
+
+protected:
+    int _lineType;
 
 };
 

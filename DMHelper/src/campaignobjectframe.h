@@ -21,12 +21,12 @@ signals:
     void checkedChanged(bool checked);
     void checkableChanged(bool checkable);
     void rotationChanged(int rotation);
-    void backgroundColorChanged(QColor color);
+    void backgroundColorChanged(const QColor& color);
 
 public slots:
     virtual void publishClicked(bool checked);
     virtual void setRotation(int rotation);
-    virtual void setBackgroundColor(QColor color);
+    virtual void setBackgroundColor(const QColor& color);
     virtual void reloadObject();
 };
 

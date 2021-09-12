@@ -381,7 +381,7 @@ void BattleDialogModel::setCameraRect(const QRectF& rect)
     }
 }
 
-void BattleDialogModel::setBackgroundColor(QColor color)
+void BattleDialogModel::setBackgroundColor(const QColor& color)
 {
     if(_background != color)
     {

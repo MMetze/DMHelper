@@ -110,7 +110,7 @@ public slots:
 signals:
     void campaignLoaded(Campaign* campaign);
     void dispatchPublishImage(QImage img);
-    void dispatchPublishImage(QImage img, QColor color);
+    void dispatchPublishImage(QImage img, const QColor& color);
     void dispatchAnimateImage(QImage img);
 
     void cancelSelect();

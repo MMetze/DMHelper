@@ -48,7 +48,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SIGNAL(fontItalicsChanged(bool)));
     connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SIGNAL(alignmentChanged(Qt::Alignment)));
-    connect(_formatter, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
+    connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
 
     connect(_formatter, SIGNAL(fontFamilyChanged(const QString&)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(fontSizeChanged(int)), this, SLOT(takeFocus()));
@@ -56,7 +56,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     connect(_formatter, SIGNAL(fontItalicsChanged(bool)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(fontUnderlineChanged(bool)), this, SLOT(takeFocus()));
     connect(_formatter, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(takeFocus()));
-    connect(_formatter, SIGNAL(colorChanged(QColor)), this, SLOT(takeFocus()));
+    connect(_formatter, SIGNAL(colorChanged(const QColor&)), this, SLOT(takeFocus()));
 
     ui->textBrowser->installEventFilter(this);
     ui->textFormatter->hide();
@@ -322,7 +322,7 @@ void EncounterTextEdit::setUnderline(bool underline)
     _formatter->setUnterline(underline);
 }
 
-void EncounterTextEdit::setColor(QColor color)
+void EncounterTextEdit::setColor(const QColor& color)
 {
     _formatter->setColor(color);
 }

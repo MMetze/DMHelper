@@ -17,10 +17,10 @@ public:
 
 public slots:
     void publishTextImage();
-    void setPreviewImage(QImage img, QColor color);
+    void setPreviewImage(QImage img, const QColor& color);
 
 signals:
-    void publishImage(QImage img, QColor color);
+    void publishImage(QImage img, const QColor& color);
     void openPreview();
 
 protected:

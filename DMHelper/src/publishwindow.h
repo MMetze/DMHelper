@@ -23,12 +23,12 @@ signals:
 
 public slots:
     void setImage(QImage img);
-    void setImage(QImage img, QColor color);
+    void setImage(QImage img, const QColor& color);
     void setImageNoScale(QImage img);
     void setArrowVisible(bool visible);
     void setArrowPosition(const QPointF& position);
     void setBackgroundColor();
-    void setBackgroundColor(QColor color);
+    void setBackgroundColor(const QColor& color);
     void setPointerFile(const QString& filename);
 
 protected:
@@ -36,7 +36,7 @@ protected:
     virtual void showEvent(QShowEvent *event);
     virtual void hideEvent(QHideEvent *event);
 
-    void setBackgroundColorStyle(QColor color);
+    void setBackgroundColorStyle(const QColor& color);
 
 private:
     PublishFrame* _publishFrame;

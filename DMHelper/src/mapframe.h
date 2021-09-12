@@ -59,6 +59,9 @@ signals:
     void showFreeDistanceChanged(bool show);
     void distanceScaleChanged(int scale);
     void distanceChanged(const QString& distance);
+    void distanceLineColorChanged(const QColor& color);
+    void distanceLineTypeChanged(int lineType);
+    void distanceLineWidthChanged(int lineWidth);
 
     void showMarkersChanged(bool show);
 
@@ -115,6 +118,9 @@ public slots:
     void setDistance(bool enabled);
     void setFreeDistance(bool enabled);
     void setDistanceScale(int scale);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
 
     void setPublishZoom(bool enabled);
     void setPublishVisible(bool enabled);

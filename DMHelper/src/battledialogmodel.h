@@ -67,7 +67,7 @@ public slots:
     void setMap(Map* map, const QRect& mapRect);
     void setMapRect(const QRect& mapRect);
     void setCameraRect(const QRectF& rect);
-    void setBackgroundColor(QColor color);
+    void setBackgroundColor(const QColor& color);
     void setGridOn(bool gridOn);
     void setGridType(int gridType);
     void setGridScale(int gridScale);
@@ -88,7 +88,7 @@ signals:
     void mapChanged(Map* map);
     void mapRectChanged(const QRect& mapRect);
     void cameraRectChanged(const QRectF& rect);
-    void backgroundColorChanged(QColor color);
+    void backgroundColorChanged(const QColor& color);
     void gridOnChanged(bool gridOn);
     void gridTypeChanged(int gridType);
     void gridScaleChanged(int gridScale);

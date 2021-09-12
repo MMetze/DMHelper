@@ -18,11 +18,11 @@ public slots:
     void rotateCCW();
     void setRotation(int rotation);
     void setRotationVisible(bool rotationVisible);
-    void setColor(QColor color);
+    void setColor(const QColor& color);
 
 signals:
     void rotationChanged(int rotation);
-    void colorChanged(QColor color);
+    void colorChanged(const QColor& color);
 
 protected slots:
     void selectColor();

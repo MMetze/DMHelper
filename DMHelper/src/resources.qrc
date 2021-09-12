@@ -295,6 +295,11 @@
         <file>data/icon_top.png</file>
         <file>data/icon_freedistance.png</file>
         <file>data/icon_colorize.png</file>
+        <file>data/icon_pendash.png</file>
+        <file>data/icon_pendashdot.png</file>
+        <file>data/icon_pendashdotdot.png</file>
+        <file>data/icon_pendot.png</file>
+        <file>data/icon_pensolid.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -141,8 +141,8 @@ void EncounterScrollingTextEdit::setScrollingText(EncounterScrollingText* scroll
     connect(scrollingText, SIGNAL(alignmentChanged(Qt::Alignment)), this, SLOT(setTextAlignment()));
     connect(scrollingText, SIGNAL(imageWidthChanged(int)), this, SIGNAL(imageWidthChanged(int)));
     connect(scrollingText, &EncounterScrollingText::imageWidthChanged, ui->edtText, &TextEditMargins::setTextWidth);
-    connect(scrollingText, SIGNAL(fontColorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
-    connect(scrollingText, SIGNAL(fontColorChanged(QColor)), this, SLOT(setTextColor()));
+    connect(scrollingText, SIGNAL(fontColorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
+    connect(scrollingText, SIGNAL(fontColorChanged(const QColor&)), this, SLOT(setTextColor()));
 }
 
 void EncounterScrollingTextEdit::unsetScrollingText(EncounterScrollingText* scrollingText)
@@ -232,7 +232,7 @@ void EncounterScrollingTextEdit::setImageWidth(int imageWidth)
         _scrollingText->setImageWidth(imageWidth);
 }
 
-void EncounterScrollingTextEdit::setColor(QColor color)
+void EncounterScrollingTextEdit::setColor(const QColor& color)
 {
     if(_scrollingText)
         _scrollingText->setFontColor(color);

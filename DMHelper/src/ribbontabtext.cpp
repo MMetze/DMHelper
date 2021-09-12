@@ -51,7 +51,7 @@ void RibbonTabText::setImageFile(const QString& imageFile)
     ui->btnBackground->setChecked(!imageFile.isEmpty());
 }
 
-void RibbonTabText::setColor(QColor color)
+void RibbonTabText::setColor(const QColor& color)
 {
     ui->frameText->setColor(color);
 }

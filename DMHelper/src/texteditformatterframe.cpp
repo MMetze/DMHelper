@@ -131,7 +131,7 @@ void TextEditFormatterFrame::setUnterline(bool underline)
     }
 }
 
-void TextEditFormatterFrame::setColor(QColor color)
+void TextEditFormatterFrame::setColor(const QColor& color)
 {
     if(!_textEdit)
         return;

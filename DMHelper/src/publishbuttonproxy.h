@@ -22,17 +22,16 @@ public slots:
     void setChecked(bool checked);
     void setCheckable(bool checkable);
     void setRotation(int rotation);
-    void setColor(QColor color);
+    void setColor(const QColor& color);
     void cancelPublish();
     void setPlayersWindow(bool checked);
 
 signals:
     void clicked(bool checked = false);
-//    void toggled(bool checked);
     void rotateCW();
     void rotateCCW();
     void rotationChanged(int rotation);
-    void colorChanged(QColor color);
+    void colorChanged(const QColor& color);
     void previewClicked();
     void playersWindowClicked(bool checked);
 
@@ -40,7 +39,7 @@ signals:
     void shareSetChecked(bool checked);
     void shareSetCheckable(bool checkable);
     void shareSetRotation(int rotation);
-    void shareSetColor(QColor color);
+    void shareSetColor(const QColor& color);
     void shareCancelPublish();
     void shareSetPlayersWindow(bool checked);
 

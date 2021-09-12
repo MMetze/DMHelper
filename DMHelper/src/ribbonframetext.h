@@ -18,7 +18,7 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
-    void setColor(QColor color);
+    void setColor(const QColor& color);
     void setFontFamily(const QString& fontFamily);
     void setFontSize(int fontSize);
     void setFontBold(bool fontBold);
@@ -27,7 +27,7 @@ public slots:
     void setAlignment(Qt::Alignment alignment);
 
 signals:
-    void colorChanged(QColor color);
+    void colorChanged(const QColor& color);
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);

@@ -39,7 +39,7 @@ public slots:
     void setFontItalics(bool fontItalics);
     void setAlignment(Qt::Alignment alignment);
     void setImageWidth(int imageWidth);
-    void setColor(QColor color);
+    void setColor(const QColor& color);
 
     void targetResized(const QSize& newSize);
 
@@ -60,7 +60,7 @@ signals:
     void fontItalicsChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
     void imageWidthChanged(int imageWidth);
-    void colorChanged(QColor color);
+    void colorChanged(const QColor& color);
 
     void animationStarted();
     void animateImage(QImage img);
