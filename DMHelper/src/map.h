@@ -3,6 +3,7 @@
 
 #include "campaignobjectbase.h"
 #include "mapcontent.h"
+#include "mapcolorizefilter.h"
 #include <QList>
 #include <QImage>
 #include <QPixmap>
@@ -12,6 +13,7 @@ class QDomElement;
 class QUndoStack;
 class AudioTrack;
 class Party;
+class UndoMarker;
 
 class Map : public CampaignObjectBase
 {
@@ -26,6 +28,11 @@ public:
 
     QString getFileName() const;
     void setFileName(const QString& newFileName);
+
+    QColor getMapColor() const;
+    void setMapColor(const QColor& color);
+    QSize getMapSize() const;
+    void setMapSize(QSize size);
 
     AudioTrack* getAudioTrack();
     QUuid getAudioTrackId();
@@ -42,13 +49,19 @@ public:
     int getPartyScale() const;
     QPixmap getPartyPixmap();
 
+    int getDistanceLineType() const;
+    QColor getDistanceLineColor() const;
+    int getDistanceLineWidth() const;
+    int getMapScale() const;
+
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
 
     QUndoStack* getUndoStack() const;
-    void applyPaintTo(QImage* target, QColor clearColor, int index, bool preview = false);
+    void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false);
 
-    MapMarker* getMapMarker(int id);
+    UndoMarker* getMapMarker(int id);
+    bool getShowMarkers() const;
 
     bool isInitialized();
     void setExternalFoWImage(QImage externalImage);
@@ -56,9 +69,9 @@ public:
     QImage getFoWImage();
     bool isCleared();
 
-    void paintFoWPoint( QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview );
-    void paintFoWRect( QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview );
-    void fillFoW( QColor color, QPaintDevice* target );
+    void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
+    void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
+    void fillFoW(const QColor& color, QPaintDevice* target);
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
@@ -67,16 +80,27 @@ public:
     QImage getGrayImage();
     QImage getShrunkPublishImage(QRect* targetRect = nullptr);
 
+    bool isFilterApplied() const;
+    MapColorizeFilter getFilter() const;
+
     QImage getPreviewImage();
 
 signals:
     void executeUndo();
     void requestFoWUpdate();
+    void requestMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void partyChanged(Party* party);
     void partyIconChanged(const QString& partyIcon);
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int partyScale);
+    void mapScaleChanged(int mapScale);
+
+    void distanceLineColorChanged(const QColor& color);
+    void distanceLineTypeChanged(int lineType);
+    void distanceLineWidthChanged(int lineWidth);
+
+    void showMarkersChanged(bool showMarkers);
 
 public slots:
     void initialize();
@@ -85,11 +109,23 @@ public slots:
     void undoPaint();
     void updateFoW();
 
+    void addMapMarker(UndoMarker* undoEntry, MapMarker* marker);
+
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
     void setPartyIconPos(const QPoint& pos);
     void setPartyScale(int partyScale);
+    void setMapScale(int mapScale);
+
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
+
+    void setShowMarkers(bool showMarkers);
+
+    void setApplyFilter(bool applyFilter);
+    void setFilter(const MapColorizeFilter& filter);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -99,7 +135,6 @@ protected:
 
     QString _filename;
     QUndoStack* _undoStack;
-    QList<MapMarker> _markerList;
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
@@ -109,10 +144,22 @@ protected:
     QString _partyAltIcon;
     QPoint _partyIconPos;
     int _partyScale;
+    int _mapScale;
+
+    bool _showMarkers;
 
     bool _initialized;
     QImage _imgBackground;
     QImage _imgFow;
+    bool _filterApplied;
+    MapColorizeFilter _filter;
+    int _lineType;
+    QColor _lineColor;
+    int _lineWidth;
+
+    // For a generic map
+    QColor _mapColor;
+    QSize _mapSize;
 };
 
 #endif // MAP_H

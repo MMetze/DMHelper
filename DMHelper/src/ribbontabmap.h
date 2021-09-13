@@ -42,6 +42,8 @@ signals:
     void brushSizeChanged(int size);
     void fillFoWClicked();
 
+    void colorizeClicked();
+
     void publishZoomChanged(bool checked);
     void publishVisibleChanged(bool checked);
 

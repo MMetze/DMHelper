@@ -36,7 +36,7 @@ void PublishWindow::setImage(QImage img)
     _publishFrame->setImage(img);
 }
 
-void PublishWindow::setImage(QImage img, QColor color)
+void PublishWindow::setImage(QImage img, const QColor& color)
 {
     setBackgroundColorStyle(color);
     setImage(img);
@@ -68,7 +68,7 @@ void PublishWindow::setBackgroundColor()
     }
 }
 
-void PublishWindow::setBackgroundColor(QColor color)
+void PublishWindow::setBackgroundColor(const QColor& color)
 {
     if(_globalColor != color)
     {
@@ -117,7 +117,7 @@ void PublishWindow::hideEvent(QHideEvent *event)
     emit windowVisible(false);
 }
 
-void PublishWindow::setBackgroundColorStyle(QColor color)
+void PublishWindow::setBackgroundColorStyle(const QColor& color)
 {
     if(!_publishFrame)
         return;

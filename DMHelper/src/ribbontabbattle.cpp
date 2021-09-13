@@ -7,8 +7,6 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(newMapClicked()));
-    connect(ui->btnReloadMap, SIGNAL(clicked(bool)), this, SIGNAL(reloadMapClicked()));
     connect(ui->btnAddCharacter, SIGNAL(clicked(bool)), this, SIGNAL(addCharacterClicked()));
     connect(ui->btnAddMonsters, SIGNAL(clicked(bool)), this, SIGNAL(addMonsterClicked()));
     connect(ui->btnAddNPC, SIGNAL(clicked(bool)), this, SIGNAL(addNPCClicked()));
@@ -67,9 +65,6 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
 
     int frameHeight = height();
 
-    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap, frameHeight);
-    setStandardButtonSize(*ui->lblReloadMap, *ui->btnReloadMap, frameHeight);
-    setLineHeight(*ui->line, frameHeight);
     setStandardButtonSize(*ui->lblAddCharacter, *ui->btnAddCharacter, frameHeight);
     setStandardButtonSize(*ui->lblAddMonsters, *ui->btnAddMonsters, frameHeight);
     setStandardButtonSize(*ui->lblAddNPC, *ui->btnAddNPC, frameHeight);

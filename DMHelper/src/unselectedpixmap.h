@@ -8,8 +8,8 @@ class BattleDialogModelCombatant;
 class UnselectedPixmap : public QGraphicsPixmapItem
 {
 public:
-    explicit UnselectedPixmap(BattleDialogModelCombatant* combatant = nullptr);
-    UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant);
+    explicit UnselectedPixmap(BattleDialogModelCombatant* combatant = nullptr, QGraphicsItem *parent = nullptr);
+    UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant, QGraphicsItem *parent = nullptr);
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
     void setDraw(bool draw);

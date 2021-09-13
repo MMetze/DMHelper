@@ -53,7 +53,7 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     ui->btnEffectTokenBrowse->setStyleSheet(QString("QPushButton:disabled {color: rgb(196, 196, 196);}"));
     connect(ui->edtEffectWidth, &QLineEdit::textEdited, this, &SpellbookDialog::handleWidthChanged);
     connect(ui->edtEffectHeight, &QLineEdit::textEdited, this, &SpellbookDialog::handleHeightChanged);
-    connect(ui->btnEffectColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(spellDataEdit()));
+    connect(ui->btnEffectColor, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(spellDataEdit()));
     connect(ui->sliderOpacity, &QAbstractSlider::valueChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->edtEffectToken, &QLineEdit::textChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->cmbEffectType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleEffectChanged(int)));

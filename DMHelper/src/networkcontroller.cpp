@@ -59,7 +59,7 @@ void NetworkController::uploadTrack(AudioTrack* track)
     }
 }
 
-void NetworkController::uploadImage(QImage img, QColor color)
+void NetworkController::uploadImage(QImage img, const QColor& color)
 {
 //    if((_currentImageRequest > 0) || (!_enabled))
     if(!_enabled)

@@ -19,7 +19,7 @@ PublishButtonFrame::PublishButtonFrame(QWidget *parent) :
     connect(ui->btnCCW, SIGNAL(clicked()), ui->btnColor, SLOT(rotateCCW()));
     connect(ui->btnCCW, SIGNAL(clicked()), this, SIGNAL(rotateCCW()));
 
-    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
+    connect(ui->btnColor, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
 
     setDefaults();
 }
@@ -64,7 +64,7 @@ void PublishButtonFrame::setRotation(int rotation)
     ui->btnColor->setRotation(rotation);
 }
 
-void PublishButtonFrame::setColor(QColor color)
+void PublishButtonFrame::setColor(const QColor& color)
 {
     ui->btnColor->setColor(color);
 }

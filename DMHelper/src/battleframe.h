@@ -76,13 +76,13 @@ public:
         BattleFrameMode_Battle = 0,
         BattleFrameMode_Combatants,
         BattleFrameMode_Map,
-        BattleFrameMode_Grid,
-        BattleFrameMode_Markers
+        BattleFrameMode_Grid
     };
 
 public slots:
     void clear();
     void sort();
+    void top();
     void next();
 
     void setTargetSize(const QSize& targetSize);
@@ -92,6 +92,8 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
+    void setGridAngle(int gridAngle);
+    void setGridType(int gridType);
     void setXOffset(int xOffset);
     void setYOffset(int yOffset);
     void setGridVisible(bool gridVisible);
@@ -151,7 +153,7 @@ public slots:
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
-    virtual void setBackgroundColor(QColor color) override;
+    virtual void setBackgroundColor(const QColor& color) override;
     virtual void reloadObject() override;
 
 signals:
@@ -175,6 +177,7 @@ signals:
 
     void foWEditToggled(bool enabled);
     void foWSelectToggled(bool enabled);
+    void mapCreated();
 
     void pointerToggled(bool enabled);
 

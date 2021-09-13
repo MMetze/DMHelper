@@ -14,7 +14,7 @@ UndoMarker::UndoMarker(Map& map, const MapMarker& marker) :
 
 UndoMarker::~UndoMarker()
 {
-    delete _markerGraphicsItem;
+//    delete _markerGraphicsItem;
 }
 
 void UndoMarker::undo()
@@ -25,14 +25,12 @@ void UndoMarker::undo()
 
 void UndoMarker::redo()
 {
-    // TODO: fix this to get markers working...
-    /*
-    delete _markerGraphicsItem;
-    if(_map.getRegisteredWindow())
-    {
-        _markerGraphicsItem = _map.getRegisteredWindow()->addMapMarker(_marker);
-    }
-    */
+    //delete _markerGraphicsItem;
+    //_markerGraphicsItem = _map.addMapMarker(this, &_marker);
+    if(_markerGraphicsItem)
+        undo();
+
+    _map.addMapMarker(this, &_marker);
 }
 
 void UndoMarker::apply(bool preview, QPaintDevice* target) const
@@ -51,6 +49,7 @@ QDomElement UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir&
     element.setAttribute("y", _marker.position().y());
     element.setAttribute("title", _marker.title());
     element.setAttribute("description", _marker.description());
+    element.setAttribute("encounter", _marker.encounter().toString());
 
     return element;
 }
@@ -63,6 +62,7 @@ void UndoMarker::inputXML(const QDomElement &element, bool isImport)
     _marker.setY(element.attribute(QString("y")).toInt());
     _marker.setTitle(element.attribute( QString("title") ));
     _marker.setDescription(element.attribute( QString("description") ));
+    _marker.setEncounter(QUuid(element.attribute(QString("encounter"))));
 }
 
 int UndoMarker::getType() const
@@ -75,7 +75,41 @@ UndoBase* UndoMarker::clone() const
     return new UndoMarker(_map, _marker);
 }
 
+void UndoMarker::setTitle(const QString& title)
+{
+    _marker.setTitle(title);
+    if(_markerGraphicsItem)
+        _markerGraphicsItem->setTitle(title);
+}
+
+void UndoMarker::setDescription(const QString& description)
+{
+    _marker.setDescription(description);
+    if(_markerGraphicsItem)
+        _markerGraphicsItem->setDescription(description);
+}
+
 const MapMarker& UndoMarker::marker() const
 {
     return _marker;
 }
+
+MapMarker& UndoMarker::marker()
+{
+    return _marker;
+}
+
+MapMarkerGraphicsItem* UndoMarker::getMarkerItem() const
+{
+    return _markerGraphicsItem;
+}
+
+void UndoMarker::setMarkerItem(MapMarkerGraphicsItem* markerItem)
+{
+    if(!markerItem)
+        return;
+
+    delete _markerGraphicsItem;
+    _markerGraphicsItem = markerItem;
+}
+

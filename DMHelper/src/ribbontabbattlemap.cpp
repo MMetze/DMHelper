@@ -1,33 +1,37 @@
 #include "ribbontabbattlemap.h"
 #include "ui_ribbontabbattlemap.h"
 #include "dmconstants.h"
+#include "grid.h"
+#include <QMenu>
 #include <QDebug>
 
 RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     RibbonFrame(parent),
-    ui(new Ui::RibbonTabBattleMap)
+    ui(new Ui::RibbonTabBattleMap),
+    _menu(new QMenu(this)),
+    _timerId(0)
 {
     ui->setupUi(this);
 
-    connect(ui->btnZoomIn, SIGNAL(clicked()), this, SIGNAL(zoomInClicked()));
-    connect(ui->btnZoomOut, SIGNAL(clicked()), this, SIGNAL(zoomOutClicked()));
-    connect(ui->btnZoomFull, SIGNAL(clicked()), this, SIGNAL(zoomFullClicked()));
-    connect(ui->btnZoomSelect, SIGNAL(clicked(bool)), this, SIGNAL(zoomSelectClicked(bool)));
+    connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(newMapClicked()));
+    connect(ui->btnReloadMap, SIGNAL(clicked(bool)), this, SIGNAL(reloadMapClicked()));
 
-    connect(ui->btnCameraCouple, SIGNAL(clicked(bool)), this, SIGNAL(cameraCoupleClicked(bool)));
-    connect(ui->btnCameraFullMap, SIGNAL(clicked(bool)), this, SIGNAL(cameraZoomClicked()));
-    connect(ui->btnCameraSelect, SIGNAL(clicked(bool)), this, SIGNAL(cameraSelectClicked(bool)));
-    connect(ui->btnEditCamera, SIGNAL(clicked(bool)), this, SIGNAL(cameraEditClicked(bool)));
+    connect(ui->btnGrid, SIGNAL(toggled(bool)), this, SIGNAL(gridClicked(bool)));
+    ui->btnGrid->setMenu(_menu);
 
-    connect(ui->btnDistance, SIGNAL(clicked(bool)), this, SIGNAL(distanceClicked(bool)));
-    connect(ui->btnHeight, SIGNAL(clicked()), this, SLOT(heightEdited()));
-    connect(ui->edtHeightDiff, SIGNAL(editingFinished()), this, SLOT(heightEdited()));
+    RibbonTabBattleMap_GridAction* gridAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Square, QString(":/img/data/icon_grid.png"), QString("Square Grid"));
+    _menu->addAction(gridAction);
+    RibbonTabBattleMap_GridAction* gridIsoAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Isosquare, QString(":/img/data/icon_gridiso.png"), QString("Isometric Grid"));
+    _menu->addAction(gridIsoAction);
+    RibbonTabBattleMap_GridAction* gridHexAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Hex, QString(":/img/data/icon_gridhex.png"), QString("Hex Grid"));
+    _menu->addAction(gridHexAction);
+    RibbonTabBattleMap_GridAction* gridHexIsoAction = new RibbonTabBattleMap_GridAction(Grid::GridType_Isohex, QString(":/img/data/icon_gridhexiso.png"), QString("Isometric Hex Grid"));
+    _menu->addAction(gridHexIsoAction);
+    selectAction(gridAction);
+    connect(_menu, &QMenu::triggered, this, &RibbonTabBattleMap::selectAction);
 
-    ui->edtHeightDiff->setValidator(new QDoubleValidator(-9999, 9999, 2, this));
-    ui->edtHeightDiff->setText(QString::number(0.0));
-
-    connect(ui->btnGrid, SIGNAL(clicked(bool)), this, SIGNAL(gridClicked(bool)));
-    connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SIGNAL(gridScaleChanged(int)));
+    connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
+    connect(ui->spinGridAngle, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
     connect(ui->sliderX, SIGNAL(valueChanged(int)), this, SIGNAL(gridXOffsetChanged(int)));
     connect(ui->sliderY, SIGNAL(valueChanged(int)), this, SIGNAL(gridYOffsetChanged(int)));
 
@@ -39,8 +43,6 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     connect(ui->spinSize, SIGNAL(valueChanged(int)), this, SIGNAL(brushSizeChanged(int)));
     connect(ui->btnBrushSelect, SIGNAL(clicked(bool)), this, SIGNAL(selectFoWClicked(bool)));
     connect(ui->btnFillFoW, SIGNAL(clicked(bool)), this, SIGNAL(fillFoWClicked()));
-
-    connect(ui->btnPointer, SIGNAL(clicked(bool)), this, SIGNAL(pointerClicked(bool)));
 
     // Set up the brush mode button group
     ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
@@ -55,6 +57,9 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
 
 RibbonTabBattleMap::~RibbonTabBattleMap()
 {
+    if(_timerId)
+        killTimer(_timerId);
+
     delete ui;
 }
 
@@ -63,44 +68,36 @@ PublishButtonRibbon* RibbonTabBattleMap::getPublishRibbon()
     return ui->framePublish;
 }
 
-void RibbonTabBattleMap::setZoomSelect(bool checked)
-{
-    ui->btnZoomSelect->setChecked(checked);
-}
-
-void RibbonTabBattleMap::setCameraCouple(bool checked)
-{
-    ui->btnCameraCouple->setChecked(checked);
-}
-
-void RibbonTabBattleMap::setDistanceOn(bool checked)
-{
-    ui->btnDistance->setChecked(checked);
-}
-
-void RibbonTabBattleMap::setDistance(const QString& distance)
-{
-    ui->edtDistance->setText(distance);
-}
-
-void RibbonTabBattleMap::setCameraSelect(bool checked)
-{
-    ui->btnCameraSelect->setChecked(checked);
-}
-
-void RibbonTabBattleMap::setCameraEdit(bool checked)
-{
-    ui->btnEditCamera->setChecked(checked);
-}
-
 void RibbonTabBattleMap::setGridOn(bool checked)
 {
     ui->btnGrid->setChecked(checked);
 }
 
+void RibbonTabBattleMap::setGridType(int gridType)
+{
+    if((gridType < Grid::GridType_Square) || (gridType > Grid::GridType_Isohex))
+        return;
+
+    QList<QAction*> actionList = _menu->actions();
+    for(QAction* action : actionList)
+    {
+        RibbonTabBattleMap_GridAction* gridAction = dynamic_cast<RibbonTabBattleMap_GridAction*>(action);
+        if((gridAction) && (gridAction->getGridType() == gridType))
+        {
+            selectAction(gridAction);
+            return;
+        }
+    }
+}
+
 void RibbonTabBattleMap::setGridScale(int scale)
 {
     ui->spinGridScale->setValue(scale);
+}
+
+void RibbonTabBattleMap::setGridAngle(int angle)
+{
+    ui->spinGridAngle->setValue(angle);
 }
 
 void RibbonTabBattleMap::setGridXOffset(int offset)
@@ -139,40 +136,15 @@ void RibbonTabBattleMap::setSelectFoW(bool checked)
     ui->btnBrushSelect->setChecked(checked);
 }
 
-void RibbonTabBattleMap::setPointerOn(bool checked)
-{
-    ui->btnPointer->setChecked(checked);
-}
-
-void RibbonTabBattleMap::setPointerFile(const QString& filename)
-{
-    QPixmap pointerImage;
-    if((filename.isEmpty()) ||
-       (!pointerImage.load(filename)))
-    {
-        pointerImage = QPixmap(":/img/data/arrow.png");
-    }
-
-    QPixmap scaledPointer = pointerImage.scaled(40, 40, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    ui->btnPointer->setIcon(QIcon(scaledPointer));
-}
-
 void RibbonTabBattleMap::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
 
     int frameHeight = height();
 
-    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn, frameHeight);
-    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut, frameHeight);
-    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull, frameHeight);
-    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect, frameHeight);
-    setStandardButtonSize(*ui->lblCameraCouple, *ui->btnCameraCouple, frameHeight);
-    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap, frameHeight);
-    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap, frameHeight);
-    setStandardButtonSize(*ui->lblCameraSelect, *ui->btnCameraSelect, frameHeight);
-    setStandardButtonSize(*ui->lblEditCamera, *ui->btnEditCamera, frameHeight);
-    setStandardButtonSize(*ui->lblDistance, *ui->btnDistance, frameHeight);
+    setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap, frameHeight);
+    setStandardButtonSize(*ui->lblReloadMap, *ui->btnReloadMap, frameHeight);
+    setLineHeight(*ui->line_6, frameHeight);
 
     setStandardButtonSize(*ui->lblGrid, *ui->btnGrid, frameHeight);
 
@@ -182,25 +154,14 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
 
     setStandardButtonSize(*ui->lblBrushSelect, *ui->btnBrushSelect, frameHeight);
     setStandardButtonSize(*ui->lblFillFoW, *ui->btnFillFoW, frameHeight);
-    setStandardButtonSize(*ui->lblPointer, *ui->btnPointer, frameHeight);
 
-    setLineHeight(*ui->line_2, frameHeight);
-    setLineHeight(*ui->line_3, frameHeight);
     setLineHeight(*ui->line_4, frameHeight);
     setLineHeight(*ui->line_5, frameHeight);
-    setLineHeight(*ui->line_6, frameHeight);
-    setLineHeight(*ui->line_7, frameHeight);
 
-    int labelHeight = getLabelHeight(*ui->lblDistance2, frameHeight);
+    int labelHeight = getLabelHeight(*ui->lblGrid, frameHeight);
     int iconDim = height() - labelHeight;
-    QFontMetrics metrics = ui->lblDistance->fontMetrics();
+    QFontMetrics metrics = ui->lblGrid->fontMetrics();
     int textWidth = metrics.maxWidth();
-
-    // Distance cluster
-    setWidgetSize(*ui->edtDistance, (iconDim / 2) + (textWidth * 4), iconDim / 2);
-    setButtonSize(*ui->btnHeight, iconDim / 2, iconDim / 2);
-    setWidgetSize(*ui->edtHeightDiff, (textWidth * 4), iconDim / 2);
-    setWidgetSize(*ui->lblDistance2, (iconDim / 2) + (textWidth * 4), labelHeight);
 
     // Grid size cluster
     int labelWidth = qMax(metrics.horizontalAdvance(ui->lblGridScale->text()),
@@ -209,6 +170,8 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
     int sliderWidth = ui->btnGrid->width() * 3 / 2;
     setWidgetSize(*ui->lblGridScale, labelWidth, height() / 3);
     setWidgetSize(*ui->spinGridScale, sliderWidth, height() / 3);
+    setWidgetSize(*ui->lblGridAngle, labelWidth, height() / 3);
+    setWidgetSize(*ui->spinGridAngle, sliderWidth, height() / 3);
     setWidgetSize(*ui->lblSliderX, labelWidth, height() / 3);
     setWidgetSize(*ui->sliderX, sliderWidth, height() / 3);
     setWidgetSize(*ui->lblSliderY, labelWidth, height() / 3);
@@ -221,6 +184,17 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
     setWidgetSize(*ui->lblSize, sizeWidth, iconDim / 2);
     setWidgetSize(*ui->spinSize, sizeWidth*3, iconDim / 2);
     setWidgetSize(*ui->lblBrush, qMax((textWidth * 4), 2 * sizeWidth), labelHeight);
+}
+
+void RibbonTabBattleMap::timerEvent(QTimerEvent *event)
+{
+    if((!event) && (event->timerId() != _timerId))
+        return;
+
+    killTimer(_timerId);
+    emit gridScaleChanged(ui->spinGridScale->value());
+    emit gridAngleChanged(ui->spinGridAngle->value());
+    _timerId = 0;
 }
 
 void RibbonTabBattleMap::setEraseMode()
@@ -237,13 +211,32 @@ void RibbonTabBattleMap::setEraseMode()
     }
 }
 
-void RibbonTabBattleMap::heightEdited()
+void RibbonTabBattleMap::spinChanged(int value)
 {
-    bool ok = false;
-    qreal heightDiff = 0.0;
-    heightDiff = ui->edtHeightDiff->text().toDouble(&ok);
-    if(!ok)
-        heightDiff = 0.0;
+    Q_UNUSED(value);
 
-    emit heightChanged(ui->btnHeight->isChecked(), heightDiff);
+    // Need to buffer changes here for a second
+    if(_timerId != 0)
+        killTimer(_timerId);
+
+    _timerId = startTimer(1000);
+}
+
+void RibbonTabBattleMap::selectAction(QAction* action)
+{
+    if(!action)
+        return;
+
+    RibbonTabBattleMap_GridAction* gridAction = dynamic_cast<RibbonTabBattleMap_GridAction*>(action);
+    if(!gridAction)
+        return;
+
+    setGridButtonIcon(action->icon());
+    ui->spinGridAngle->setEnabled((gridAction->getGridType() == Grid::GridType_Isosquare) || (gridAction->getGridType() == Grid::GridType_Isohex));
+    emit gridTypeChanged(gridAction->getGridType());
+}
+
+void RibbonTabBattleMap::setGridButtonIcon(const QIcon &icon)
+{
+    ui->btnGrid->setIcon(icon);
 }

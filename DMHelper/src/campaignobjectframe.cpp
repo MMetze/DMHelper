@@ -30,7 +30,7 @@ void CampaignObjectFrame::setRotation(int rotation)
     Q_UNUSED(rotation);
 }
 
-void CampaignObjectFrame::setBackgroundColor(QColor color)
+void CampaignObjectFrame::setBackgroundColor(const QColor& color)
 {
     Q_UNUSED(color);
 }

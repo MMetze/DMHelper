@@ -22,7 +22,6 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
     _filename(fileName),
     _undoStack(nullptr),
-    _markerList(),
     _audioTrackId(),
     _playAudio(false),
     _mapRect(),
@@ -30,9 +29,18 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _partyId(),
     _partyIconPos(-1, -1),
     _partyScale(10),
+    _mapScale(100),
+    _showMarkers(true),
     _initialized(false),
     _imgBackground(),
-    _imgFow()
+    _imgFow(),
+    _filterApplied(false),
+    _filter(),
+    _lineType(Qt::SolidLine),
+    _lineColor(Qt::yellow),
+    _lineWidth(1),
+    _mapColor(Qt::white),
+    _mapSize()
 {
     _undoStack = new QUndoStack(this);
 }
@@ -40,10 +48,16 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
     setFileName(element.attribute("filename"));
-    _mapRect = QRect(element.attribute("mapRectX",QString::number(0)).toInt(),
-                     element.attribute("mapRectY",QString::number(0)).toInt(),
-                     element.attribute("mapRectWidth",QString::number(0)).toInt(),
-                     element.attribute("mapRectHeight",QString::number(0)).toInt());
+    setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
+    setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
+    setDistanceLineWidth(element.attribute("lineWidth", QString::number(1)).toInt());
+    setMapColor(QColor(element.attribute("mapColor")));
+    setMapSize(QSize(element.attribute("mapSizeWidth", QString::number(0)).toInt(),
+                     element.attribute("mapSizeHeight", QString::number(0)).toInt()));
+    _mapRect = QRect(element.attribute("mapRectX", QString::number(0)).toInt(),
+                     element.attribute("mapRectY", QString::number(0)).toInt(),
+                     element.attribute("mapRectWidth", QString::number(0)).toInt(),
+                     element.attribute("mapRectHeight", QString::number(0)).toInt());
 
     QDomElement actionsElement = element.firstChildElement(QString("actions"));
     if(!actionsElement.isNull())
@@ -67,11 +81,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                     newAction = new UndoShape(*this, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
-                    {
-                        MapMarker m(QPoint(0,0), QString(""), QString(""));
-                        m.inputXML(actionElement, isImport);
-                        _markerList.append(m);
-                    }
+                    newAction = new UndoMarker(*this, MapMarker(QPoint(0,0), QString(""), QString(""), QUuid()));
                     break;
                 case DMHelper::ActionType_Base:
                 default:
@@ -123,6 +133,26 @@ void Map::setFileName(const QString& newFileName)
 
     _filename = newFileName;
     emit dirty();
+}
+
+QColor Map::getMapColor() const
+{
+    return _mapColor;
+}
+
+void Map::setMapColor(const QColor& color)
+{
+    _mapColor = color;
+}
+
+QSize Map::getMapSize() const
+{
+    return _mapSize;
+}
+
+void Map::setMapSize(QSize size)
+{
+    _mapSize = size;
 }
 
 AudioTrack* Map::getAudioTrack()
@@ -217,6 +247,26 @@ QPixmap Map::getPartyPixmap()
     return partyPixmap;
 }
 
+int Map::getDistanceLineType() const
+{
+    return _lineType;
+}
+
+QColor Map::getDistanceLineColor() const
+{
+    return _lineColor;
+}
+
+int Map::getDistanceLineWidth() const
+{
+    return _lineWidth;
+}
+
+int Map::getMapScale() const
+{
+    return _mapScale;
+}
+
 const QRect& Map::getMapRect() const
 {
     return _mapRect;
@@ -236,7 +286,7 @@ QUndoStack* Map::getUndoStack() const
     return _undoStack;
 }
 
-void Map::applyPaintTo(QImage* target, QColor clearColor, int index, bool preview)
+void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview)
 {
     bool previewNeed = preview;
 
@@ -267,36 +317,23 @@ void Map::applyPaintTo(QImage* target, QColor clearColor, int index, bool previe
     }
 }
 
-MapMarker* Map::getMapMarker(int id)
+UndoMarker* Map::getMapMarker(int id)
 {
-    // Search the map's marker list for existing markers
-    int i;
-    for(i = 0; i < _markerList.count(); ++i)
-    {
-        if(_markerList.at(i).getID() == id)
-        {
-            return &(_markerList[i]);
-        }
-    }
-
-    /*
-     * TODO FIX
     // Search the undo stack for new markers
-    for(i = 0; i < _undoStack->count(); ++i)
+    for(int i = 0; i < _undoStack->count(); ++i)
     {
-        const UndoMarker* undoItem = dynamic_cast<const UndoMarker*>(_undoStack->command(i));
-        if(undoItem)
-        {
-            if(undoItem->marker().getID() == id)
-            {
-                return &(undoItem->marker());
-            }
-        }
+        // This is a little evil, will need to do it better with a full undo/redo implementation...
+        UndoMarker* undoItem = const_cast<UndoMarker*>(dynamic_cast<const UndoMarker*>(_undoStack->command(i)));
+        if((undoItem) && (undoItem->marker().getID() == id))
+            return undoItem;
     }
-    */
 
-    // Marker not found.
     return nullptr;
+}
+
+bool Map::getShowMarkers() const
+{
+    return _showMarkers;
 }
 
 bool Map::isInitialized()
@@ -312,7 +349,7 @@ void Map::setExternalFoWImage(QImage externalImage)
 
 QImage Map::getBackgroundImage()
 {
-    return _imgBackground;
+    return _filterApplied ? _filter.apply(_imgBackground) : _imgBackground;
 }
 
 QImage Map::getFoWImage()
@@ -358,9 +395,9 @@ void Map::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* targ
             if(mapDraw.smooth())
             {
                 QRadialGradient grad(point, mapDraw.radius());
-                grad.setColorAt(0,QColor(0,0,0,0));
-                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())),QColor(0,0,0,0));
-                grad.setColorAt(1,QColor(255,255,255));
+                grad.setColorAt(0, QColor(0,0,0,0));
+                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())), QColor(0,0,0,0));
+                grad.setColorAt(1, QColor(255,255,255));
                 p.setBrush(grad);
             }
             else
@@ -480,7 +517,7 @@ void Map::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevic
     }
 }
 
-void Map::fillFoW( QColor color, QPaintDevice* target )
+void Map::fillFoW(const QColor& color, QPaintDevice* target)
 {
     if(!target)
     {
@@ -516,7 +553,7 @@ QImage Map::getBWFoWImage(const QSize &size)
 
 QImage Map::getPublishImage()
 {
-    QImage result(_imgBackground);
+    QImage result(getBackgroundImage());
 
     QImage bwFoWImage = getBWFoWImage(_imgBackground);
     QPainter p;
@@ -543,7 +580,7 @@ QImage Map::getPublishImage(const QRect& rect)
     QImage bwFoWImage = getBWFoWImage(_imgBackground);
     QPainter p;
     p.begin(&result);
-        p.drawImage(0, 0, _imgBackground, targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
+        p.drawImage(0, 0, getBackgroundImage(), targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
         p.drawImage(0, 0, bwFoWImage, targetRect.x(), targetRect.y(), targetRect.width(), targetRect.height());
     p.end();
 
@@ -552,7 +589,7 @@ QImage Map::getPublishImage(const QRect& rect)
 
 QImage Map::getGrayImage()
 {
-    QImage result(_imgBackground);
+    QImage result(getBackgroundImage());
 
     QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
     applyPaintTo(&grayFoWImage, QColor(0,0,0,128), _undoStack->index(), true);
@@ -626,7 +663,7 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
         result = QImage(right - left, bottom - top, _imgBackground.format());
         QPainter p;
         p.begin(&result);
-            p.drawImage(0, 0, _imgBackground, left, top, right - left, bottom - top);
+            p.drawImage(0, 0, getBackgroundImage(), left, top, right - left, bottom - top);
             p.drawImage(0, 0, bwFoWImage, left, top, right - left, bottom - top);
         p.end();
     }
@@ -637,16 +674,27 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
     return result;
 }
 
+bool Map::isFilterApplied() const
+{
+    return _filterApplied;
+}
+
+MapColorizeFilter Map::getFilter() const
+{
+    return _filter;
+}
+
 QImage Map::getPreviewImage()
 {
     if(!_imgBackground.isNull())
-        return _imgBackground;
+        return getBackgroundImage();
 
     if((_filename.isNull()) || (_filename.isEmpty()))
         return QImage();
 
     QImage previewImage;
     previewImage.load(_filename);
+    return _filterApplied ? _filter.apply(previewImage) : _imgBackground;
     return previewImage;
 }
 
@@ -655,30 +703,39 @@ void Map::initialize()
     if(_initialized)
         return;
 
-    if((_filename.isNull()) || (_filename.isEmpty()))
-        return;
-
-    if(!QFile::exists(_filename))
+    if(!_filename.isEmpty())
     {
-        QMessageBox::critical(nullptr,
-                              QString("DMHelper Map File Not Found"),
-                              QString("The map file could not be found: ") + _filename);
-        qDebug() << "[Map] Map file not found: " << _filename;
+        if(!QFile::exists(_filename))
+        {
+            QMessageBox::critical(nullptr,
+                                  QString("DMHelper Map File Not Found"),
+                                  QString("The map file could not be found: ") + _filename);
+            qDebug() << "[Map] Map file not found: " << _filename;
+            return;
+        }
+
+        QImageReader reader(_filename);
+        _imgBackground = reader.read();
+
+        if(_imgBackground.isNull())
+        {
+            qDebug() << "[Map] Error reading map file " << _filename;
+            qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
+            return;
+        }
+
+        if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
+            _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
+    }
+    else if(_mapColor.isValid() && _mapSize.isValid())
+    {
+        _imgBackground = QImage(_mapSize, QImage::Format_ARGB32_Premultiplied);
+        _imgBackground.fill(_mapColor);
+    }
+    else
+    {
         return;
     }
-
-    QImageReader reader(_filename);
-    _imgBackground = reader.read();
-
-    if(_imgBackground.isNull())
-    {
-        qDebug() << "[Map] Error reading map file " << _filename;
-        qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
-        return;
-    }
-
-    if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
-        _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
 
     _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
@@ -701,6 +758,11 @@ void Map::undoPaint()
 void Map::updateFoW()
 {
     emit requestFoWUpdate();
+}
+
+void Map::addMapMarker(UndoMarker* undoEntry, MapMarker* marker)
+{
+    emit requestMapMarker(undoEntry, marker);
 }
 
 void Map::setParty(Party* party)
@@ -751,6 +813,70 @@ void Map::setPartyScale(int partyScale)
     }
 }
 
+void Map::setMapScale(int mapScale)
+{
+    if(_mapScale != mapScale)
+    {
+        _mapScale = mapScale;
+        emit mapScaleChanged(_mapScale);
+        emit dirty();
+    }
+}
+
+void Map::setDistanceLineColor(const QColor& color)
+{
+    if(_lineColor != color)
+    {
+        _lineColor = color;
+        emit distanceLineColorChanged(_lineColor);
+        emit dirty();
+    }
+}
+
+void Map::setDistanceLineType(int lineType)
+{
+    if(_lineType != lineType)
+    {
+        _lineType = lineType;
+        emit distanceLineTypeChanged(_lineType);
+        emit dirty();
+    }
+}
+
+void Map::setDistanceLineWidth(int lineWidth)
+{
+    if(_lineWidth != lineWidth)
+    {
+        _lineWidth = lineWidth;
+        emit distanceLineWidthChanged(_lineWidth);
+        emit dirty();
+    }
+}
+
+void Map::setShowMarkers(bool showMarkers)
+{
+    if(_showMarkers != showMarkers)
+    {
+        _showMarkers = showMarkers;
+        emit showMarkersChanged(_showMarkers);
+        emit dirty();
+    }
+}
+
+void Map::setApplyFilter(bool applyFilter)
+{
+    if(_filterApplied != applyFilter)
+    {
+        _filterApplied = applyFilter;
+        emit dirty();
+    }
+}
+
+void Map::setFilter(const MapColorizeFilter& filter)
+{
+    _filter = filter;
+    emit dirty();
+}
 
 QDomElement Map::createOutputXML(QDomDocument &doc)
 {
@@ -760,20 +886,29 @@ QDomElement Map::createOutputXML(QDomDocument &doc)
 void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
+    element.setAttribute("lineColor", _lineColor.name());
+    element.setAttribute("lineType", _lineType);
+    element.setAttribute("lineWidth", _lineWidth);
+    element.setAttribute("mapColor", _mapColor.name());
+    element.setAttribute("mapSizeWidth", _mapSize.width());
+    element.setAttribute("mapSizeHeight", _mapSize.height());
     element.setAttribute("audiotrack", _audioTrackId.toString());
     element.setAttribute("playaudio", _playAudio);
-    element.setAttribute("party", _partyId.toString());
     element.setAttribute("showparty", _showPartyIcon);
+    element.setAttribute("party", _partyId.toString());
     element.setAttribute("partyalticon", _partyAltIcon);
     element.setAttribute("partyPosX", _partyIconPos.x());
     element.setAttribute("partyPosY", _partyIconPos.y());
     element.setAttribute("partyScale", _partyScale);
+    element.setAttribute("mapScale", _mapScale);
+    element.setAttribute("showMarkers", _showMarkers);
     element.setAttribute("mapRectX", _mapRect.x());
     element.setAttribute("mapRectY", _mapRect.y());
     element.setAttribute("mapRectWidth", _mapRect.width());
     element.setAttribute("mapRectHeight", _mapRect.height());
 
     QDomElement actionsElement = doc.createElement("actions");
+    /*
     int i;
     for(i = 0; i < _markerList.count(); ++i)
     {
@@ -782,8 +917,9 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
         _markerList.at(i).outputXML(actionElement, isExport);
         actionsElement.appendChild(actionElement);
     }
+    */
 
-    for(i = 0; i < _undoStack->index(); ++i )
+    for(int i = 0; i < _undoStack->index(); ++i )
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)
@@ -811,13 +947,14 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
 {
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
     _playAudio = static_cast<bool>(element.attribute("playaudio", QString::number(1)).toInt());
-    _partyId = parseIdString(element.attribute("party"));
     _showPartyIcon = static_cast<bool>(element.attribute("showparty", QString::number(1)).toInt());
+    _partyId = parseIdString(element.attribute("party"));
+    _partyAltIcon = element.attribute("partyalticon");
     _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
                            element.attribute("partyPosY", QString::number(-1)).toInt());
     _partyScale = element.attribute("partyScale", QString::number(10)).toInt();
-    _partyAltIcon = element.attribute("partyalticon");
+    _mapScale = element.attribute("mapScale", QString::number(100)).toInt();
+    _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }
-

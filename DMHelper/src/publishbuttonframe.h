@@ -24,7 +24,7 @@ public:
 public slots:
     void setChecked(bool checked);
     void setRotation(int rotation);
-    void setColor(QColor color);
+    void setColor(const QColor& color);
     void clickPublish();
     void cancelPublish();
 
@@ -33,7 +33,7 @@ signals:
     void toggled(bool checked);
     void rotateCW();
     void rotateCCW();
-    void colorChanged(QColor color);
+    void colorChanged(const QColor& color);
 
 private slots:
     void handleToggle(bool checked);

@@ -48,7 +48,7 @@ public slots:
     void setBold(bool bold);
     void setItalics(bool italics);
     void setUnderline(bool underline);
-    void setColor(QColor color);
+    void setColor(const QColor& color);
     void setAlignment(Qt::Alignment alignment);
     void setPasteRich(bool pasteRich);
 
@@ -79,7 +79,7 @@ signals:
     void fontItalicsChanged(bool fontItalics);
     void fontUnderlineChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
-    void colorChanged(QColor color);
+    void colorChanged(const QColor& color);
 
     void setHyperlinkActive(bool active);
     void textWidthChanged(int textWidth);
