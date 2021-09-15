@@ -40,6 +40,7 @@ class RibbonTabFile;
 class RibbonTabCampaign;
 class RibbonTabTools;
 class RibbonTabBattleMap;
+class RibbonTabBattleView;
 class RibbonTabBattle;
 class RibbonTabScrolling;
 class RibbonTabText;
@@ -73,6 +74,7 @@ public slots:
     bool closeCampaign();
     void openDiceDialog();
 
+    void openEncounter(QUuid id);
     void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
 
@@ -108,7 +110,7 @@ public slots:
 signals:
     void campaignLoaded(Campaign* campaign);
     void dispatchPublishImage(QImage img);
-    void dispatchPublishImage(QImage img, QColor color);
+    void dispatchPublishImage(QImage img, const QColor& color);
     void dispatchAnimateImage(QImage img);
 
     void cancelSelect();
@@ -245,11 +247,12 @@ private:
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
     RibbonTabTools* _ribbonTabTools;
-    RibbonTabBattleMap* _ribbonTabMap;
+    RibbonTabBattleMap* _ribbonTabBattleMap;
+    RibbonTabBattleView* _ribbonTabBattleView;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
-    RibbonTabMap* _ribbonTabMiniMap;
+    RibbonTabMap* _ribbonTabMap;
     RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
 };

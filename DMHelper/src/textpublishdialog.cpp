@@ -15,7 +15,7 @@ TextPublishDialog::TextPublishDialog(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->btnPublish, SIGNAL(clicked()), this, SLOT(publishTextImage()));
-    connect(this, SIGNAL(publishImage(QImage, QColor)), this, SLOT(setPreviewImage(QImage, QColor)));
+    connect(this, SIGNAL(publishImage(QImage, const QColor&)), this, SLOT(setPreviewImage(QImage, const QColor&)));
     connect(ui->btnClear, SIGNAL(clicked()), ui->textEdit, SLOT(clear()));
 }
 
@@ -37,7 +37,7 @@ void TextPublishDialog::publishTextImage()
     emit publishImage(pub, Qt::white);
 }
 
-void TextPublishDialog::setPreviewImage(QImage img, QColor color)
+void TextPublishDialog::setPreviewImage(QImage img, const QColor& color)
 {
     Q_UNUSED(color);
 

@@ -3,10 +3,13 @@
 
 #include "mapcontent.h"
 #include <QGraphicsItemGroup>
+#include <QGraphicsPixmapItem>
+#include <QGraphicsSimpleTextItem>
 
-class QGraphicsTextItem;
 class QGraphicsScene;
 class MapFrame;
+class MapMarkerGraphicsPixmapItem;
+class MapMarkerGraphicsSimpleTextItem;
 
 class MapMarkerGraphicsItem : public QGraphicsItemGroup
 {
@@ -16,26 +19,53 @@ public:
     enum { Type = UserType + 1 };
 
     void setGroupVisible(bool visible);
+    void setTitle(const QString& title);
+    void setDescription(const QString& description);
+    void setDetailsVisible(bool visible);
+
+    int getMarkerId() const;
 
 protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant & value);
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent * event);
-    void mousePressEvent(QGraphicsSceneMouseEvent * event);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent * event);
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
+    virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event) override;
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent * event) override;
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent * event) override;
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event) override;
     void toggleDetails();
 
-    int type() const;
+    virtual int type() const override;
 
     int _marker;
     MapFrame& _mapFrame;
 
-    QGraphicsPixmapItem* _markerIcon;
-    QGraphicsTextItem* _title;
-    QGraphicsTextItem* _details;
+    MapMarkerGraphicsPixmapItem* _markerIcon;
+    MapMarkerGraphicsSimpleTextItem* _title;
+    MapMarkerGraphicsSimpleTextItem* _details;
 
     bool _detailsVisible;
     bool _clicked;
+};
+
+class MapMarkerGraphicsPixmapItem : public QGraphicsPixmapItem
+{
+public:
+    MapMarkerGraphicsPixmapItem(const QPixmap &pixmap, QGraphicsItem *parent) :
+        QGraphicsPixmapItem(pixmap, parent)
+    {}
+
+protected:
+    virtual int type() const { return MapMarkerGraphicsItem::Type; }
+};
+
+class MapMarkerGraphicsSimpleTextItem : public QGraphicsSimpleTextItem
+{
+public:
+    MapMarkerGraphicsSimpleTextItem(const QString &text, QGraphicsItem *parent) :
+        QGraphicsSimpleTextItem(text, parent)
+    {}
+
+protected:
+    virtual int type() const { return MapMarkerGraphicsItem::Type; }
 };
 
 #endif // MAPMARKERGRAPHICSITEM_H

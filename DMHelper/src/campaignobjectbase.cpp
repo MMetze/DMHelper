@@ -118,12 +118,6 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
 #endif
 }
 
-/*
-void CampaignObjectBase::resolveReferences()
-{
-}
-*/
-
 int CampaignObjectBase::getObjectType() const
 {
     return DMHelper::CampaignType_Base;
@@ -347,7 +341,6 @@ void CampaignObjectBase::setName(const QString& name)
     {
         setObjectName(name);
         emit nameChanged(this, objectName());
-        //handleInternalDirty();
         handleInternalChange();
     }
 }

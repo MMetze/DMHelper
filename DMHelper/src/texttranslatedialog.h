@@ -24,7 +24,7 @@ public slots:
     void translateText();
 
 signals:
-    void publishImage(QImage img, QColor color);
+    void publishImage(QImage img, const QColor& color);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event) override;

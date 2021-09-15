@@ -52,7 +52,7 @@ void RibbonTabScrolling::setWidth(int width)
     }
 }
 
-void RibbonTabScrolling::setColor(QColor color)
+void RibbonTabScrolling::setColor(const QColor& color)
 {
     ui->frameText->setColor(color);
 }

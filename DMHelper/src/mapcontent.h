@@ -5,6 +5,7 @@
 #include <QRect>
 #include <QString>
 #include <QColor>
+#include <QUuid>
 #include <QDomElement>
 #include "dmconstants.h"
 
@@ -30,28 +31,27 @@ private:
 class MapMarker : public MapContent
 {
 public:
-    MapMarker(const QPoint& position, const QString& title, const QString& description);
+    MapMarker(const QPoint& position, const QString& title, const QString& description, const QUuid& encounter);
     MapMarker(const MapMarker &obj);
-    virtual ~MapMarker();
+    virtual ~MapMarker() override;
 
-    virtual const QPoint& position() const;
-    virtual const QString& title() const;
-    virtual const QString& description() const;
+    QPoint position() const;
+    QString title() const;
+    QString description() const;
+    const QUuid& encounter() const;
 
-    virtual void setPosition(const QPoint& position);
-    virtual void setX(int x);
-    virtual void setY(int y);
-    virtual void setTitle(const QString& title);
-    virtual void setDescription(const QString& description);
-
-    virtual QDomElement outputXML(QDomElement &element, bool isExport) const;
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    void setPosition(const QPoint& position);
+    void setX(int x);
+    void setY(int y);
+    void setTitle(const QString& title);
+    void setDescription(const QString& description);
+    void setEncounter(const QUuid& encounter);
 
 private:
     QPoint _position;
     QString _title;
     QString _description;
-
+    QUuid _encounter;
 };
 
 
@@ -60,7 +60,7 @@ class MapEdit : public MapContent
 public:
     MapEdit();
     MapEdit(const MapEdit &obj);
-    virtual ~MapEdit();
+    virtual ~MapEdit() override;
 };
 
 
@@ -69,15 +69,15 @@ class MapEditFill : public MapEdit
 public:
     explicit MapEditFill(const QColor& color);
     MapEditFill(const MapEditFill &obj);
-    virtual ~MapEditFill();
+    virtual ~MapEditFill() override;
 
-    virtual const QColor& color() const;
+    QColor color() const;
 
-    virtual void setColor(const QColor& color);
-    virtual void setRed(int red);
-    virtual void setGreen(int green);
-    virtual void setBlue(int blue);
-    virtual void setAlpha(int alpha);
+    void setColor(const QColor& color);
+    void setRed(int red);
+    void setGreen(int green);
+    void setBlue(int blue);
+    void setAlpha(int alpha);
 
 protected:
     QColor _color;
@@ -89,7 +89,7 @@ class MapDraw : public MapEdit
 public:
     MapDraw(int radius = 0, int brushType = DMHelper::BrushType_Circle, bool erase = true, bool smooth = true);
     MapDraw(const MapDraw &obj);
-    virtual ~MapDraw();
+    virtual ~MapDraw() override;
 
     virtual int radius() const;
     virtual int brushType() const;
@@ -114,9 +114,9 @@ class MapDrawPoint : public MapDraw
 public:
     MapDrawPoint(int radius, int brushType, bool erase, bool smooth, const QPoint& point);
     MapDrawPoint(const MapDrawPoint &obj);
-    virtual ~MapDrawPoint();
+    virtual ~MapDrawPoint() override;
 
-    virtual const QPoint& point() const;
+    virtual QPoint point() const;
     virtual void setX(int x);
     virtual void setY(int y);
 
@@ -133,7 +133,7 @@ public:
     MapDrawPath();
     MapDrawPath(int radius, int brushType, bool erase, bool smooth, const QPoint& point);
     MapDrawPath(const MapDrawPath &obj);
-    virtual ~MapDrawPath();
+    virtual ~MapDrawPath() override;
 
     virtual void addPoint(const QPoint& point);
 
@@ -150,9 +150,9 @@ class MapEditShape : public MapEdit
 public:
     MapEditShape(const QRect& rect, bool erase, bool smooth);
     MapEditShape(const MapEditShape &obj);
-    virtual ~MapEditShape();
+    virtual ~MapEditShape() override;
 
-    virtual const QRect& rect() const;
+    virtual QRect rect() const;
     virtual bool erase() const;
     virtual bool smooth() const;
 

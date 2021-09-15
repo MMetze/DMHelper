@@ -233,7 +233,7 @@ void EncounterScrollingText::setImageWidth(int imageWidth)
     }
 }
 
-void EncounterScrollingText::setFontColor(QColor fontColor)
+void EncounterScrollingText::setFontColor(const QColor& fontColor)
 {
     if(_fontColor != fontColor)
     {

@@ -4,7 +4,7 @@
 #include <QColorDialog>
 #include <QIntValidator>
 
-BattleDialogEffectSettings::BattleDialogEffectSettings(int sizeval, qreal rotation, QColor color, QString tip, QWidget *parent) :
+BattleDialogEffectSettings::BattleDialogEffectSettings(int sizeval, qreal rotation, const QColor& color, QString tip, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::BattleDialogEffectSettings),
     _color(color)
@@ -148,7 +148,7 @@ void BattleDialogEffectSettings::selectNewColor()
     }
 }
 
-void BattleDialogEffectSettings::setButtonColor(QColor color)
+void BattleDialogEffectSettings::setButtonColor(const QColor& color)
 {
     _color = color;
     QString style = "background-image: url(); background-color: rgb(" + QString::number(color.red()) + "," + QString::number(color.green()) + "," + QString::number(color.blue()) + ");";

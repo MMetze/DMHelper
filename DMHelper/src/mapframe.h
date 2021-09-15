@@ -8,6 +8,7 @@
 #include <QRubberBand>
 #include "undopath.h"
 #include "videoplayer.h"
+#include "unselectedpixmap.h"
 
 namespace Ui {
 class MapFrame;
@@ -17,6 +18,7 @@ class MapFrameScene;
 class Map;
 class Party;
 class MapMarkerGraphicsItem;
+class UndoMarker;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -31,9 +33,8 @@ public:
 
     void setMap(Map* map);
 
-    MapMarkerGraphicsItem* addMapMarker(MapMarker& marker);
     void mapMarkerMoved(int markerId);
-    void editMapMarker(int markerId);
+    void activateMapMarker(int markerId);
 
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -41,6 +42,8 @@ public:
     QAction* getRedoAction(QObject* parent);
 
 signals:
+    void encounterSelected(QUuid id);
+
     void publishImage(QImage image);
     void openPreview();
     void windowClosed(MapFrame* mapFrame);
@@ -51,6 +54,16 @@ signals:
     void partyIconChanged(const QString& partyIcon);
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int scale);
+
+    void showDistanceChanged(bool show);
+    void showFreeDistanceChanged(bool show);
+    void distanceScaleChanged(int scale);
+    void distanceChanged(const QString& distance);
+    void distanceLineColorChanged(const QColor& color);
+    void distanceLineTypeChanged(int lineType);
+    void distanceLineWidthChanged(int lineWidth);
+
+    void showMarkersChanged(bool show);
 
     void animationStarted();
     void animateImage(QImage img);
@@ -69,14 +82,22 @@ public slots:
     void undoPaint();
     void clear();
 
+    void colorize();
+
     void cancelPublish();
 
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
     void setPartyScale(int partyScale);
+    void setPartySelected(bool selected);
 
-    void editModeToggled(int editMode);
+    void setShowMarkers(bool show);
+    void addNewMarker();
+    void addMarker(const QPointF& markerPosition);
+    void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
+    void editMapMarker(int markerId);
+
     void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
     void brushSizeChanged(int size);
@@ -88,10 +109,18 @@ public slots:
     void zoomFit();
     void zoomSelect(bool enabled);
     void zoomDelta(int delta);
+    void centerWindow(const QPointF& position);
     void cancelSelect();
 
     void setErase(bool enabled);
     void setSmooth(bool enabled);
+
+    void setDistance(bool enabled);
+    void setFreeDistance(bool enabled);
+    void setDistanceScale(int scale);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
 
     void setPublishZoom(bool enabled);
     void setPublishVisible(bool enabled);
@@ -111,6 +140,10 @@ protected:
     void initializeFoW();
     void uninitializeFoW();
 
+    void createMarkerItems();
+    void cleanupMarkerItems();
+    void cleanupSelectionItems();
+
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
@@ -118,11 +151,17 @@ protected:
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;
 
+    bool editModeToggled(int editMode);
+    void changeEditMode(int editMode, bool active);
+
     bool checkMapMove(QEvent* event);
+    bool execEventFilter(QObject *obj, QEvent *event);
     bool execEventFilterSelectZoom(QObject *obj, QEvent *event);
     bool execEventFilterEditModeFoW(QObject *obj, QEvent *event);
     bool execEventFilterEditModeEdit(QObject *obj, QEvent *event);
     bool execEventFilterEditModeMove(QObject *obj, QEvent *event);
+    bool execEventFilterEditModeDistance(QObject *obj, QEvent *event);
+    bool execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event);
 
     void startPublishTimer();
     void stopPublishTimer();
@@ -144,6 +183,8 @@ protected slots:
     void handleMapMouseMove(const QPointF& pos);
     void handleMapMouseRelease(const QPointF& pos);
 
+    void handleActivateMapMarker();
+
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
 
@@ -153,7 +194,7 @@ private:
     QGraphicsPixmapItem* _backgroundImage;
     QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
-    QGraphicsPixmapItem* _partyIcon;
+    UnselectedPixmap* _partyIcon;
 
     int _editMode;
     bool _erase;
@@ -173,10 +214,13 @@ private:
     QPoint _mouseDownPos;
     UndoPath* _undoPath;
 
+    QGraphicsLineItem* _distanceLine;
+    QGraphicsPathItem* _distancePath;
+    QGraphicsSimpleTextItem* _distanceText;
+
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
 
-    bool _zoomSelect;
     QRubberBand* _rubberBand;
     qreal _scale;
 
@@ -189,6 +233,7 @@ private:
     QRect _publishRect;
     QImage _bwFoWImage;
 
+    QUuid _activatedId;
 };
 
 #endif // MAPFRAME_H

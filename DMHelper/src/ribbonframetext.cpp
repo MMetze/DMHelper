@@ -10,7 +10,7 @@ RibbonFrameText::RibbonFrameText(QWidget *parent) :
     ui->setupUi(this);
 
     ui->btnColor->setRotationVisible(false);
-    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
+    connect(ui->btnColor, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
 
     QFontDatabase fontDB;
     ui->cmbFont->addItems(fontDB.families());
@@ -40,7 +40,7 @@ PublishButtonRibbon* RibbonFrameText::getPublishRibbon()
     return nullptr;
 }
 
-void RibbonFrameText::setColor(QColor color)
+void RibbonFrameText::setColor(const QColor& color)
 {
     ui->btnColor->setColor(color); // color button takes care of the signal and duplicates
 }

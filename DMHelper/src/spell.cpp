@@ -502,7 +502,7 @@ void Spell::setEffectSize(QSize effectSize)
     registerChange();
 }
 
-void Spell::setEffectColor(QColor effectColor)
+void Spell::setEffectColor(const QColor& effectColor)
 {
     if(_effectColor == effectColor)
         return;

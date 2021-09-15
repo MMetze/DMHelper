@@ -161,6 +161,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->graphicsView, SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)), this, SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
 
     connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
+    connect(ui->btnTop, SIGNAL(clicked()), this, SLOT(top()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -250,6 +251,7 @@ void BattleFrame::deactivateObject()
         return;
     }
 
+    ui->frameCombatant->setCombatant(nullptr);
     setBattle(nullptr);
 }
 
@@ -456,6 +458,19 @@ void BattleFrame::sort()
     qDebug() << "[Battle Frame] combatant widgets sorted";
 }
 
+void BattleFrame::top()
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to go to the first combatant, no battle model is set!";
+        return;
+    }
+
+    BattleDialogModelCombatant* nextCombatant = getFirstLivingCombatant();
+    setActiveCombatant(nextCombatant);
+    qDebug() << "[Battle Frame] Activated first combatant: " << nextCombatant;
+}
+
 void BattleFrame::next()
 {
     if(!_model)
@@ -493,7 +508,6 @@ void BattleFrame::next()
         _logger->newRound();
 
     setActiveCombatant(nextCombatant);
-    nextCombatant->resetMoved();
     qDebug() << "[Battle Frame] ... next combatant found: " << nextCombatant;
 }
 
@@ -628,6 +642,40 @@ void BattleFrame::setGridScale(int gridScale)
 
         _scene->updateBattleContents();
 
+        ui->graphicsView->update();
+        createPrescaledBackground();
+    }
+}
+
+void BattleFrame::setGridAngle(int gridAngle)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid angle, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridAngle(gridAngle);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+    }
+}
+
+void BattleFrame::setGridType(int gridType)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid type, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridType(gridType);
+        _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
     }
@@ -1327,6 +1375,11 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->lblNext->setMinimumHeight(labelHeight);
     ui->lblNext->setMaximumHeight(labelHeight);
 
+    ui->lblTop->setMinimumWidth(newWidth);
+    ui->lblTop->setMaximumWidth(newWidth);
+    ui->lblTop->setMinimumHeight(labelHeight);
+    ui->lblTop->setMaximumHeight(labelHeight);
+
     ui->lblSort->setMinimumWidth(newWidth);
     ui->lblSort->setMaximumWidth(newWidth);
     ui->lblSort->setMinimumHeight(labelHeight);
@@ -1357,6 +1410,11 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->btnNext->setMinimumHeight(iconDim);
     ui->btnNext->setMaximumHeight(iconDim);
 
+    ui->btnTop->setMinimumWidth(newWidth);
+    ui->btnTop->setMaximumWidth(newWidth);
+    ui->btnTop->setMinimumHeight(iconDim);
+    ui->btnTop->setMaximumHeight(iconDim);
+
     ui->btnSort->setMinimumWidth(newWidth);
     ui->btnSort->setMaximumWidth(newWidth);
     ui->btnSort->setMinimumHeight(iconDim);
@@ -1364,6 +1422,7 @@ void BattleFrame::showEvent(QShowEvent *event)
 
     int iconSize = qMin(newWidth, iconDim) * 4 / 5;
     ui->btnNext->setIconSize(QSize(iconSize, iconSize));
+    ui->btnTop->setIconSize(QSize(iconSize, iconSize));
     ui->btnSort->setIconSize(QSize(iconSize, iconSize));
 }
 
@@ -1545,7 +1604,7 @@ void BattleFrame::setRotation(int rotation)
     createPrescaledBackground();
 }
 
-void BattleFrame::setBackgroundColor(QColor color)
+void BattleFrame::setBackgroundColor(const QColor& color)
 {
     if(!_model)
     {
@@ -1678,7 +1737,6 @@ void BattleFrame::handleCombatantActivate(BattleDialogModelCombatant* combatant)
 
     qDebug() << "[Battle Frame] activating combatant " << combatant->getName();
     setActiveCombatant(combatant);
-    combatant->resetMoved();
 }
 
 void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
@@ -2436,6 +2494,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         _scene->setModel(model);
 
     ui->btnSort->setEnabled(_model != nullptr);
+    ui->btnTop->setEnabled(_model != nullptr);
     ui->btnNext->setEnabled(_model != nullptr);
     ui->edtRounds->setEnabled(_model != nullptr);
     ui->edtCountdown->setEnabled(_model != nullptr);
@@ -2483,21 +2542,8 @@ Map* BattleFrame::selectRelatedMap()
     if(!parentObject)
         return nullptr;
 
-    // TODO: Check what happens if separator is selected
-    MapSelectDialog mapSelectDlg;
-
-    QList<Map*> allMaps = campaign->findChildren<Map*>();
-    for(Map* map : allMaps)
-    {
-        if(map)
-        {
-            if(map->getParentById(parentObject->getID()) != nullptr)
-                mapSelectDlg.prependMap(map);
-            else
-                mapSelectDlg.appendMap(map);
-        }
-    }
-
+    MapSelectDialog mapSelectDlg(*campaign, _battle->getID());
+    connect(&mapSelectDlg, &MapSelectDialog::mapCreated, this, &BattleFrame::mapCreated);
     if(mapSelectDlg.exec() != QDialog::Accepted)
         return nullptr;
     else
@@ -2798,6 +2844,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
     {
         _activeScale = active->getSizeFactor();
         ui->frameCombatant->setCombatant(active);
+        active->resetMoved();
     }
 
     if(_activePixmap)
