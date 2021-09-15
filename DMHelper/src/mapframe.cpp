@@ -13,6 +13,7 @@
 #include "campaign.h"
 #include "party.h"
 #include "unselectedpixmap.h"
+#include "publishglmaprenderer.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -52,6 +53,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _rubberBand(nullptr),
     _scale(1.0),
     _mapSource(nullptr),
+    _renderer(nullptr),
     _timerId(0),
     _videoPlayer(nullptr),
     _targetSize(),
@@ -1595,15 +1597,23 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     if(dmPlayer)
     {
         qDebug() << "[MapFrame] Publish FoW DM animation started";
-        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
+        // TBD
+        //_videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
     }
     else
     {
         qDebug() << "[MapFrame] Publish FoW Player animation started";
+        /*
         QSize rotatedSize = (_rotation % 180 == 0) ? _targetSize :  _targetSize.transposed();
-        _videoPlayer = new VideoPlayer(_mapSource->getFileName(), rotatedSize, true, _mapSource->getPlayAudio());
+        _videoPlayer = new VideoPlayerGL(_mapSource->getFileName(), rotatedSize, true, _mapSource->getPlayAudio());
         if(!_videoPlayer->isError())
             _bwFoWImage = QImage();
+            */
+        if(_renderer)
+            delete _renderer;
+
+        _renderer = new PublishGLMapRenderer(_mapSource, Qt::red);
+        emit registerRenderer(_renderer);
     }
 }
 

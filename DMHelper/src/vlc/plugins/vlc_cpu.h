@@ -26,12 +26,22 @@
 #ifndef VLC_CPU_H
 # define VLC_CPU_H 1
 
+/**
+ * Retrieves CPU capability flags.
+ */
 VLC_API unsigned vlc_CPU(void);
+
+/**
+ * Computes CPU capability flags.
+ *
+ * Do not call this function directly.
+ * Call vlc_CPU() instead, which caches the correct value.
+ */
+unsigned vlc_CPU_raw(void);
 
 # if defined (__i386__) || defined (__x86_64__)
 #  define HAVE_FPU 1
 #  define VLC_CPU_MMX    0x00000008
-#  define VLC_CPU_3dNOW  0x00000010
 #  define VLC_CPU_MMXEXT 0x00000020
 #  define VLC_CPU_SSE    0x00000040
 #  define VLC_CPU_SSE2   0x00000080
@@ -101,20 +111,16 @@ VLC_API unsigned vlc_CPU(void);
 
 # ifdef __AVX__
 #  define vlc_CPU_AVX() (1)
+#  define VLC_AVX
 # else
 #  define vlc_CPU_AVX() ((vlc_CPU() & VLC_CPU_AVX) != 0)
+#  define VLC_AVX __attribute__ ((__target__ ("avx")))
 # endif
 
 # ifdef __AVX2__
 #  define vlc_CPU_AVX2() (1)
 # else
 #  define vlc_CPU_AVX2() ((vlc_CPU() & VLC_CPU_AVX2) != 0)
-# endif
-
-# ifdef __3dNOW__
-#  define vlc_CPU_3dNOW() (1)
-# else
-#  define vlc_CPU_3dNOW() ((vlc_CPU() & VLC_CPU_3dNOW) != 0)
 # endif
 
 # ifdef __XOP__
@@ -170,8 +176,20 @@ VLC_API unsigned vlc_CPU(void);
 
 # elif defined (__aarch64__)
 #  define HAVE_FPU 1
-// NEON is mandatory for general purpose ARMv8-a CPUs
-#  define vlc_CPU_ARM64_NEON() (1)
+#  define VLC_CPU_ARM_NEON 0x1
+#  define VLC_CPU_ARM_SVE  0x2
+
+#  ifdef __ARM_NEON
+#   define vlc_CPU_ARM_NEON() (1)
+#  else
+#   define vlc_CPU_ARM_NEON() ((vlc_CPU() & VLC_CPU_ARM_NEON) != 0)
+#  endif
+
+#  ifdef __ARM_FEATURE_SVE
+#   define vlc_CPU_ARM_SVE()   (1)
+#  else
+#   define vlc_CPU_ARM_SVE()   ((vlc_CPU() & VLC_CPU_ARM_SVE) != 0)
+#  endif
 
 # elif defined (__sparc__)
 #  define HAVE_FPU 1

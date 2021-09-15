@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 
-class PublishFrame;
+class PublishGLFrame;
+class PublishGLRenderer;
 
 class PublishWindow : public QMainWindow
 {
@@ -31,6 +32,8 @@ public slots:
     void setBackgroundColor(const QColor& color);
     void setPointerFile(const QString& filename);
 
+    void setRenderer(PublishGLRenderer* renderer);
+
 protected:
     virtual void keyPressEvent(QKeyEvent * event);
     virtual void showEvent(QShowEvent *event);
@@ -39,7 +42,7 @@ protected:
     void setBackgroundColorStyle(const QColor& color);
 
 private:
-    PublishFrame* _publishFrame;
+    PublishGLFrame* _publishFrame;
     QColor _globalColor;
     bool _globalColorSet;
 };

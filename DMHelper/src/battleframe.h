@@ -23,6 +23,8 @@ class CameraRect;
 class BattleCombatantFrame;
 class UnselectedPixmap;
 class CombatantRolloverFrame;
+class PublishGLRenderer;
+class BattleGLRenderer;
 
 namespace Ui {
 class BattleFrame;
@@ -159,6 +161,9 @@ public slots:
 signals:
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
+
+    void registerRenderer(PublishGLRenderer* renderer);
+
     void animationStarted();
     void animateImage(QImage img);
     void showPublishWindow();
@@ -368,6 +373,8 @@ private:
     QSize _targetLabelSize;
 
     BattleFrameMapDrawer* _mapDrawer;
+
+    BattleGLRenderer* _renderer;
 
     bool _showOnDeck;
     bool _showCountdown;

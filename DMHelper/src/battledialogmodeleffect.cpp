@@ -119,7 +119,11 @@ QPointF BattleDialogModelEffect::getPosition() const
 
 void BattleDialogModelEffect::setPosition(const QPointF& position)
 {
-    _position = position;
+    if(_position != position)
+    {
+        _position = position;
+        emit effectMoved(this);
+    }
 }
 
 void BattleDialogModelEffect::setPosition(qreal x, qreal y)
@@ -134,7 +138,11 @@ qreal BattleDialogModelEffect::getRotation() const
 
 void BattleDialogModelEffect::setRotation(qreal rotation)
 {
-    _rotation = rotation;
+    if(_rotation != rotation)
+    {
+        _rotation = rotation;
+        emit effectMoved(this);
+    }
 }
 
 QColor BattleDialogModelEffect::getColor() const

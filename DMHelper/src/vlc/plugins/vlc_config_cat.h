@@ -2,7 +2,6 @@
  * vlc_config_cat.h : Definition of configuration categories
  *****************************************************************************
  * Copyright (C) 2003 VLC authors and VideoLAN
- * $Id: 55d2e468d1ccc3fcd8d165dcecc10ec753021a5e $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Anil Daoud <anil@videolan.org>
@@ -65,9 +64,6 @@
 
 #define AOUT_TITLE N_( "Output modules" )
 #define AOUT_HELP N_("General settings for audio output modules.")
-
-#define AMISC_TITLE N_("Miscellaneous")
-#define AMISC_HELP N_( "Miscellaneous audio settings and modules." )
 
 /* Video */
 #define VIDEO_TITLE N_("Video")
@@ -159,6 +155,9 @@
         "You should probably not do that.\n" \
         "You can also set default parameters for each packetizer." )
 
+#define SOUT_RENDER_TITLE N_( "Renderers" )
+#define SOUT_RENDER_HELP N_( "External renderer discovery related settings." )
+
 #define SOUT_STREAM_TITLE N_("Sout stream")
 #define SOUT_STREAM_HELP N_( "Sout stream modules allow to build a sout " \
                 "processing chain. Please refer to the Streaming Howto for " \
@@ -180,13 +179,18 @@
 #define SD_HELP N_("Services discovery modules are facilities "\
         "that automatically add items to playlist.")
 
+#define PEXPORT_TITLE N_( "Export" )
+#define PEXPORT_HELP N_( "Settings relating to exporting playlists." )
+
 /* Advanced */
 #define AADVANCED_TITLE N_( "Advanced" )
 #define AADVANCED_HELP N_( "Advanced settings. Use with care...")
 
 #define MISC_TITLE N_( "Advanced settings" )
 
-/* This function is deprecated and is kept only for compatibility */
+#define ANETWORK_TITLE N_( "Network" )
+#define ANETWORK_HELP N_( "Advanced network settings." )
+
 static const struct config_category_t categories_array[] =
 {
     /* Interface */
@@ -202,7 +206,6 @@ static const struct config_category_t categories_array[] =
     { SUBCAT_AUDIO_AFILTER, AFILTER_TITLE, AFILTER_HELP },
     { SUBCAT_AUDIO_RESAMPLER, ARESAMPLER_TITLE, AFILTER_HELP },
     { SUBCAT_AUDIO_VISUAL, AVISUAL_TITLE, AVISUAL_HELP },
-    { SUBCAT_AUDIO_MISC, AMISC_TITLE, AMISC_HELP },
 
     { CAT_VIDEO, VIDEO_TITLE, VIDEO_HELP },
     { SUBCAT_VIDEO_GENERAL, VIDEO_TITLE, VIDEO_GENERAL_HELP },
@@ -226,14 +229,17 @@ static const struct config_category_t categories_array[] =
     { SUBCAT_SOUT_MUX, SOUT_MUX_TITLE, SOUT_MUX_HELP },
     { SUBCAT_SOUT_ACO, SOUT_ACO_TITLE, SOUT_ACO_HELP },
     { SUBCAT_SOUT_PACKETIZER, SOUT_PACKET_TITLE, SOUT_PACKET_HELP },
+    { SUBCAT_SOUT_RENDERER, SOUT_RENDER_TITLE, SOUT_RENDER_HELP },
     { SUBCAT_SOUT_VOD, SOUT_VOD_TITLE, SOUT_VOD_HELP },
 
     { CAT_PLAYLIST, PLAYLIST_TITLE , PLAYLIST_HELP },
     { SUBCAT_PLAYLIST_GENERAL, PLAYLIST_TITLE, PGENERAL_HELP },
+    { SUBCAT_PLAYLIST_EXPORT, PEXPORT_TITLE, PEXPORT_HELP },
     { SUBCAT_PLAYLIST_SD, SD_TITLE, SD_HELP },
 
     { CAT_ADVANCED, AADVANCED_TITLE, AADVANCED_HELP },
     { SUBCAT_ADVANCED_MISC, MISC_TITLE, AADVANCED_HELP },
+    { SUBCAT_ADVANCED_NETWORK, ANETWORK_TITLE, ANETWORK_HELP },
 
     { -1, NULL, NULL }
 };
@@ -266,6 +272,39 @@ static inline const char *config_CategoryHelpGet( int i_value )
         i++;
     }
     return NULL;
+}
+
+/** Check if the given subcategory is a "general" one.
+ *
+ * In a cat/subcat preference tree, subcategories typically appear as child
+ * nodes under their respective parent category node. Core config items, which
+ * are always associated with a particular subcategory, are shown when that
+ * subcategory node is selected. Each category however has a "general"
+ * subcategory which is not shown as a child node, instead the options for
+ * this are shown when the category node itself is selected in the tree.
+ *
+ * One or more nodes are also created in the tree per plugin, with the
+ * location relating to the subcategory association of its config items. Plugin
+ * nodes associated with general subcategories naturally appear as child nodes
+ * of the category node (as a sibling to its subcategory nodes), rather than as
+ * a child node of a subcategory node.
+ */
+VLC_USED
+static inline bool vlc_config_subcat_IsGeneral( int subcat )
+{
+    switch (subcat)
+    {
+        case SUBCAT_INTERFACE_GENERAL:
+        case SUBCAT_AUDIO_GENERAL:
+        case SUBCAT_VIDEO_GENERAL:
+        case SUBCAT_INPUT_GENERAL:
+        case SUBCAT_SOUT_GENERAL:
+        case SUBCAT_ADVANCED_MISC:
+        case SUBCAT_PLAYLIST_GENERAL:
+            return true;
+        default:
+            return false;
+    }
 }
 
 #endif /* VLC_HELP_H */

@@ -22,7 +22,6 @@
 #define VLC_ADDONS_H 1
 
 #include <vlc_arrays.h>
-#include <vlc_events.h>
 
 # ifdef __cplusplus
 extern "C" {
@@ -106,7 +105,7 @@ typedef struct addons_finder_t addons_finder_t;
 typedef struct addons_finder_sys_t addons_finder_sys_t;
 struct addons_finder_t
 {
-    VLC_COMMON_MEMBERS
+    struct vlc_object_t obj;
 
     int ( * pf_find )( addons_finder_t * );
     int ( * pf_retrieve )( addons_finder_t *, addon_entry_t * );
@@ -120,7 +119,7 @@ typedef struct addons_storage_t addons_storage_t;
 typedef struct addons_storage_sys_t addons_storage_sys_t;
 struct addons_storage_t
 {
-    VLC_COMMON_MEMBERS
+    struct vlc_object_t obj;
 
     int ( * pf_install )( addons_storage_t *, addon_entry_t * );
     int ( * pf_remove )( addons_storage_t *, addon_entry_t * );

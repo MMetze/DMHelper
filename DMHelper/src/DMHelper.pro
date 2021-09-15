@@ -49,6 +49,12 @@ SOURCES += main.cpp\
     battleframemapdrawer.cpp \
     battleframestate.cpp \
     battleframestatemachine.cpp \
+    battleglbackground.cpp \
+    battlegleffect.cpp \
+    battleglobject.cpp \
+    battleglrenderer.cpp \
+    battleglscene.cpp \
+    battlegltoken.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     campaignexporter.cpp \
@@ -91,6 +97,11 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
+    publishglframe.cpp \
+    publishglimagerenderer.cpp \
+    publishglmaprenderer.cpp \
+    publishglrenderer.cpp \
+    publishgltextrenderer.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -196,6 +207,7 @@ SOURCES += main.cpp\
     unselectedrect.cpp \
     updatechecker.cpp \
     videoplayer.cpp \
+    videoplayergl.cpp \
     welcomeframe.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
@@ -269,6 +281,12 @@ HEADERS  += mainwindow.h \
     battleframemapdrawer.h \
     battleframestate.h \
     battleframestatemachine.h \
+    battleglbackground.h \
+    battlegleffect.h \
+    battleglobject.h \
+    battleglrenderer.h \
+    battleglscene.h \
+    battlegltoken.h \
     bestiaryexportdialog.h \
     camerarect.h \
     campaignexporter.h \
@@ -312,6 +330,11 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
+    publishglframe.h \
+    publishglimagerenderer.h \
+    publishglmaprenderer.h \
+    publishglrenderer.h \
+    publishgltextrenderer.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \
@@ -418,6 +441,7 @@ HEADERS  += mainwindow.h \
     unselectedrect.h \
     updatechecker.h \
     videoplayer.h \
+    videoplayergl.h \
     welcomeframe.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \

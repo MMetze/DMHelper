@@ -6,6 +6,9 @@
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
 
+    // this important so we can call makeCurrent from our rendering thread
+    QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);
+
     int result = 0;
 
     try {
