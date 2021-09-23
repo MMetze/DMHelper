@@ -208,6 +208,7 @@ SOURCES += main.cpp\
     updatechecker.cpp \
     videoplayer.cpp \
     videoplayergl.cpp \
+    videoplayerglvideo.cpp \
     welcomeframe.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
@@ -303,6 +304,7 @@ HEADERS  += mainwindow.h \
     customtableentry.h \
     customtableframe.h \
     discordposter.h \
+    dmh_vlc.h \
     dmhelperribbon.h \
     dmhlogger.h \
     dmhwaitingdialog.h \
@@ -442,6 +444,7 @@ HEADERS  += mainwindow.h \
     updatechecker.h \
     videoplayer.h \
     videoplayergl.h \
+    videoplayerglvideo.h \
     welcomeframe.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \

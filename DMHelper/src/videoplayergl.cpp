@@ -1,4 +1,5 @@
 #include "videoplayergl.h"
+#include "videoplayerglvideo.h"
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QDebug>
@@ -14,20 +15,14 @@ VideoPlayerGL::VideoPlayerGL(const QString& videoFile, QOpenGLContext* context, 
     QObject(parent),
     _videoFile(videoFile),
     _context(context),
-    _surface(nullptr),
-    _videoReady(),
-    _buffers(),
-    _indexRender(0),
-    _indexSwap(1),
-    _indexDisplay(2),
+    _format(format),
     _playVideo(playVideo),
     _playAudio(playAudio),
+    _video(nullptr),
     _vlcError(false),
     _vlcInstance(nullptr),
     _vlcPlayer(nullptr),
     _vlcMedia(nullptr),
-    _mutex(),
-    _newImage(false),
     _originalSize(),
     _targetSize(targetSize),
     _status(-1),
@@ -44,7 +39,7 @@ VideoPlayerGL::VideoPlayerGL(const QString& videoFile, QOpenGLContext* context, 
 #ifdef Q_OS_WIN
     _videoFile.replace("/","\\\\");
 #endif
-    _vlcError = !initializeVLC(format);
+    _vlcError = !initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGL] Player object initialized: " << this;
 #endif
@@ -59,7 +54,8 @@ VideoPlayerGL::~VideoPlayerGL()
     _selfRestart = false;
     stopPlayer();
 
-    cleanupBuffers();
+    delete _video;
+    //cleanupBuffers();
 
     if(_vlcInstance)
     {
@@ -82,6 +78,7 @@ const QString& VideoPlayerGL::getFileName() const
     return _videoFile;
 }
 
+/*
 QOpenGLFramebufferObject* VideoPlayerGL::getVideoFrame()
 {
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -96,21 +93,30 @@ QOpenGLFramebufferObject* VideoPlayerGL::getVideoFrame()
     }
     return _buffers[_indexDisplay];
 }
+*/
 
 void VideoPlayerGL::paintGL()
 {
+    if(!_video)
+        return;
+
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
 
-    QOpenGLFramebufferObject *fbo = getVideoFrame();
+    QOpenGLFramebufferObject *fbo = _video->getVideoFrame();
     if(!fbo)
         return;
 
     e->glBindVertexArray(_VAO);
-    f->glBindTexture(GL_TEXTURE_2D, fbo->takeTexture());
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    GLuint fboTexture = fbo->takeTexture();
+    if(fboTexture >= 0)
+    {
+        f->glBindTexture(GL_TEXTURE_2D, fboTexture);
+        f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        f->glDeleteTextures(1, &fboTexture);
+    }
 }
 
 bool VideoPlayerGL::isPlayingVideo() const
@@ -180,6 +186,7 @@ bool VideoPlayerGL::isError() const
     return _vlcError;
 }
 
+/*
 QMutex* VideoPlayerGL::getMutex()
 {
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -188,6 +195,7 @@ QMutex* VideoPlayerGL::getMutex()
 
     return &_mutex;
 }
+*/
 
 QSize VideoPlayerGL::getOriginalSize() const
 {
@@ -198,6 +206,7 @@ QSize VideoPlayerGL::getOriginalSize() const
     return _originalSize;
 }
 
+/*
 bool VideoPlayerGL::isNewImage() const
 {
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -215,7 +224,19 @@ void VideoPlayerGL::clearNewImage()
 
     _newImage = false;
 }
+*/
 
+void VideoPlayerGL::registerNewFrame()
+{
+    emit frameAvailable();
+}
+
+const QSurfaceFormat &VideoPlayerGL::getFormat() const
+{
+    return _format;
+}
+
+/*
 // this callback will create the surfaces and FBO used by VLC to perform its rendering
 bool VideoPlayerGL::resizeRenderTextures(void* data, const libvlc_video_render_cfg_t *cfg, libvlc_video_output_cfg_t *render_cfg)
 {
@@ -262,7 +283,7 @@ bool VideoPlayerGL::setup(void** data, const libvlc_video_setup_device_cfg_t *cf
     if(!that)
         return false;
 
-    /* Wait for rendering view to be ready. */
+    // Wait for rendering view to be ready.
     // TBD - do we need the Semaphore
     //that->videoReady.acquire();
 
@@ -307,8 +328,6 @@ void VideoPlayerGL::swap(void* data)
 // This callback is called to set the OpenGL context
 bool VideoPlayerGL::makeCurrent(void* data, bool current)
 {
-    qDebug() << "[VideoPlayerGL] makeCurrent";
-
     VideoPlayerGL* that = static_cast<VideoPlayerGL*>(data);
     if((!that) || (!that->_context))
         return false;
@@ -324,22 +343,21 @@ bool VideoPlayerGL::makeCurrent(void* data, bool current)
 // This callback is called by VLC to get OpenGL functions.
 void* VideoPlayerGL::getProcAddress(void* data, const char* current)
 {
-    qDebug() << "[VideoPlayerGL] getProcAddress";
-
     VideoPlayerGL* that = static_cast<VideoPlayerGL*>(data);
     if((!that) || (!that->_context))
         return nullptr;
 
-    /* Qt usual expects core symbols to be queryable, even though it's not
-     * mentioned in the API. Cf QPlatformOpenGLContext::getProcAddress.
-     * Thus, we don't need to wrap the function symbols here, but it might
-     * fail to work (not crash though) on exotic platforms since Qt doesn't
-     * commit to this behaviour. A way to handle this in a more stable way
-     * would be to store the mContext->functions() table in a thread local
-     * variable, and wrap every call to OpenGL in a function using this
-     * thread local state to call the correct variant. */
+    // Qt usual expects core symbols to be queryable, even though it's not
+    // mentioned in the API. Cf QPlatformOpenGLContext::getProcAddress.
+    // Thus, we don't need to wrap the function symbols here, but it might
+    // fail to work (not crash though) on exotic platforms since Qt doesn't
+    // commit to this behaviour. A way to handle this in a more stable way
+    // would be to store the mContext->functions() table in a thread local
+    // variable, and wrap every call to OpenGL in a function using this
+    // thread local state to call the correct variant.
     return reinterpret_cast<void*>(that->_context->getProcAddress(current));
 }
+*/
 
 /**
  * Callback prototype for LibVLC log message handler.
@@ -353,6 +371,7 @@ void* VideoPlayerGL::getProcAddress(void* data, const char* current)
  * \warning The message context pointer, the format string parameters and the
  *          variable arguments are only valid until the callback returns.
  */
+/*
 void VideoPlayerGL::playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const char *fmt, va_list args)
 {
     Q_UNUSED(data);
@@ -367,6 +386,7 @@ void VideoPlayerGL::playerLogCallback(void *data, int level, const libvlc_log_t 
 
     return;
 }
+*/
 
 /*
 void* VideoPlayerGL::lockCallback(void **planes)
@@ -601,7 +621,7 @@ bool VideoPlayerGL::restartPlayer()
     }
 }
 
-bool VideoPlayerGL::initializeVLC(QSurfaceFormat format)
+bool VideoPlayerGL::initializeVLC()
 {
     qDebug() << "[VideoPlayerGL] Initializing VLC!";
 
@@ -631,9 +651,10 @@ bool VideoPlayerGL::initializeVLC(QSurfaceFormat format)
     // libvlc_log_set(_vlcInstance, playerLogCallback, nullptr);
 
     // Use offscreen surface to render the buffers
-    _surface = new QOffscreenSurface(nullptr);
-    _surface->setFormat(format);
-    _surface->create();
+    //_surface = new QOffscreenSurface(nullptr);
+    //_surface->setFormat(format);
+    //_surface->create();
+    _video = new VideoPlayerGLVideo(this);
 
     // TBD - do we need this
     //libvlc_set_exit_handler(_vlcInstance, playerExitEventCallback, this);
@@ -728,16 +749,16 @@ bool VideoPlayerGL::startPlayer()
 
     libvlc_video_set_output_callbacks(_vlcPlayer,
                                       libvlc_video_engine_opengl,
-                                      VideoPlayerGL::setup,
-                                      VideoPlayerGL::cleanup,
+                                      VideoPlayerGLVideo::setup,
+                                      VideoPlayerGLVideo::cleanup,
                                       nullptr,
-                                      VideoPlayerGL::resizeRenderTextures,
-                                      VideoPlayerGL::swap,
-                                      VideoPlayerGL::makeCurrent,
-                                      VideoPlayerGL::getProcAddress,
+                                      VideoPlayerGLVideo::resizeRenderTextures,
+                                      VideoPlayerGLVideo::swap,
+                                      VideoPlayerGLVideo::makeCurrent,
+                                      VideoPlayerGLVideo::getProcAddress,
                                       nullptr,
                                       nullptr,
-                                      this);
+                                      _video);
 
     //libvlc_video_set_callbacks(player, playerLockCallback, playerUnlockCallback, playerDisplayCallback, static_cast<void*>(this));
     //libvlc_video_set_format_callbacks(player, playerFormatCallback, playerCleanupCallback);
@@ -785,6 +806,7 @@ bool VideoPlayerGL::stopPlayer()
     return true;
 }
 
+/*
 void VideoPlayerGL::cleanupBuffers()
 {
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -806,6 +828,7 @@ void VideoPlayerGL::cleanupBuffers()
 #endif
 
 }
+*/
 
 // TBD - do we need this mechanism?
 /*

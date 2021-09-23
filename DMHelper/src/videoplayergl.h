@@ -9,12 +9,9 @@
 #include <QOffscreenSurface>
 #include <QSemaphore>
 #include <QMatrix4x4>
+#include "dmh_vlc.h"
 
-#ifdef Q_OS_WIN
-    #include <BaseTsd.h>
-    typedef SSIZE_T ssize_t;
-#endif
-#include <vlc/vlc.h>
+class VideoPlayerGLVideo;
 
 class VideoPlayerGL : public QObject
 {
@@ -24,7 +21,7 @@ public:
     virtual ~VideoPlayerGL();
 
     virtual const QString& getFileName() const;
-    QOpenGLFramebufferObject* getVideoFrame();
+//    QOpenGLFramebufferObject* getVideoFrame();
     void paintGL();
 
     virtual bool isPlayingVideo() const;
@@ -33,12 +30,16 @@ public:
     virtual void setPlayingAudio(bool playAudio);
 
     virtual bool isError() const;
-    virtual QMutex* getMutex();
+    //virtual QMutex* getMutex();
     virtual QSize getOriginalSize() const;
-    virtual bool isNewImage() const;
-    virtual void clearNewImage();
+    //virtual bool isNewImage() const;
+    //virtual void clearNewImage();
+    virtual void registerNewFrame();
+
+    const QSurfaceFormat &getFormat() const;
 
     // libvlc callback static functions
+    /*
     static bool resizeRenderTextures(void* data, const libvlc_video_render_cfg_t *cfg, libvlc_video_output_cfg_t *render_cfg);
     static bool setup(void** data, const libvlc_video_setup_device_cfg_t *cfg, libvlc_video_setup_device_info_t *out);
     static void cleanup(void* data);
@@ -46,6 +47,7 @@ public:
     static bool makeCurrent(void* data, bool current);
     static void* getProcAddress(void* data, const char* current);
     static void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const char *fmt, va_list args);
+    */
 
     /*
     virtual void* lockCallback(void **planes);
@@ -67,6 +69,8 @@ signals:
     void screenShotAvailable();
     void frameAvailable();
 
+    void contextReady(QOpenGLContext *renderContext);
+
 public slots:
     virtual void targetResized(const QSize& newSize);
     virtual void stopThenDelete();
@@ -74,10 +78,10 @@ public slots:
 
 protected:
 
-    virtual bool initializeVLC(QSurfaceFormat format);
+    virtual bool initializeVLC();
     virtual bool startPlayer();
     virtual bool stopPlayer();
-    virtual void cleanupBuffers();
+    //virtual void cleanupBuffers();
     void createGLObjects();
 
 //    virtual void internalStopCheck(int status);
@@ -90,21 +94,18 @@ protected:
 
     QString _videoFile;
     QOpenGLContext* _context;
-    QOffscreenSurface* _surface;
-    QSemaphore _videoReady;
-    QOpenGLFramebufferObject* _buffers[3];
-    int _indexRender = 0;
-    int _indexSwap = 1;
-    int _indexDisplay = 2;
+    QSurfaceFormat _format;
     bool _playVideo;
     bool _playAudio;
+
+    VideoPlayerGLVideo* _video;
 
     bool _vlcError;
     libvlc_instance_t* _vlcInstance;
     libvlc_media_player_t* _vlcPlayer;
     libvlc_media_t* _vlcMedia;
-    QMutex _mutex;
-    bool _newImage;
+    //QMutex _mutex;
+    //bool _newImage;
     QSize _originalSize;
     QSize _targetSize;
     int _status;

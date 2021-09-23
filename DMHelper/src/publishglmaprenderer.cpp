@@ -127,6 +127,7 @@ void PublishGLMapRenderer::initializeGL()
                                      _targetSize,
                                      true,
                                      false);
+    connect(_videoPlayer, &VideoPlayerGL::frameAvailable, this, &PublishGLMapRenderer::updateWidget);
 
     // Matrices
     // Model
