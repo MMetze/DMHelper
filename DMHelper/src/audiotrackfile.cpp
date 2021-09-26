@@ -3,6 +3,7 @@
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 #include <QFile>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -51,6 +52,16 @@ void AudioTrackFile::play()
                               QString("DMHelper Audio Track File Not Found"),
                               QString("The audio track could not be found: ") + fileString);
         qDebug() << "[AudioTrackFile] Audio track file not found: " << fileString;
+        return;
+    }
+
+    QFileInfo fileInfo(fileString);
+    if(!fileInfo.isFile())
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DMHelper Audio Track File Not Valid"),
+                              QString("The audio track isn't a file: ") + fileString);
+        qDebug() << "[AudioTrackFile] Audio track file not a file: " << fileString;
         return;
     }
 

@@ -745,9 +745,12 @@ void MapFrame::initializeFoW()
     }
     else
     {
-        qDebug() << "[MapFrame] Initializing map frame video";
-        createVideoPlayer(true);
-        startPublishTimer();
+        if(_mapSource->isValid())
+        {
+            qDebug() << "[MapFrame] Initializing map frame video";
+            createVideoPlayer(true);
+            startPublishTimer();
+        }
     }
 
     checkPartyUpdate();

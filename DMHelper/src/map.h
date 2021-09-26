@@ -64,6 +64,7 @@ public:
     bool getShowMarkers() const;
 
     bool isInitialized();
+    bool isValid();
     void setExternalFoWImage(QImage externalImage);
     QImage getBackgroundImage();
     QImage getFoWImage();

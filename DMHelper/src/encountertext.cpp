@@ -27,7 +27,7 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
 {
     extractTextNode(element, isImport);
 
-    setImageFile(element.attribute("imageFile"));
+    _imageFile = element.attribute("imageFile"); // Want to keep the filename even if the file was accidentally moved
     setTextWidth(element.attribute("textWidth", "80").toInt());
     int scrollSpeed = element.attribute("scrollSpeed").toInt();
     setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);

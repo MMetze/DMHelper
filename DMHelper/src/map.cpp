@@ -47,7 +47,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
 
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
-    setFileName(element.attribute("filename"));
+    _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
     setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
     setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
     setDistanceLineWidth(element.attribute("lineWidth", QString::number(1)).toInt());
@@ -120,8 +120,18 @@ void Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Found"),
-                              QString("The selected map file could not be found: ") + newFileName);
+                              QString("The map file could not be found: ") + newFileName);
         qDebug() << "[Map] New map file not found: " << newFileName;
+        return;
+    }
+
+    QFileInfo fileInfo(newFileName);
+    if(!fileInfo.isFile())
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DMHelper Map File Not Valid"),
+                              QString("The map isn't a file: ") + newFileName);
+        qDebug() << "[Map] Map file not a file: " << newFileName;
         return;
     }
 
@@ -339,6 +349,24 @@ bool Map::getShowMarkers() const
 bool Map::isInitialized()
 {
     return _initialized;
+}
+
+bool Map::isValid()
+{
+    if(isInitialized())
+        return true;
+
+    if(_filename.isEmpty())
+        return false;
+
+    if(!QFile::exists(_filename))
+        return false;
+
+    QFileInfo fileInfo(_filename);
+    if(!fileInfo.isFile())
+        return false;
+
+    return true;
 }
 
 void Map::setExternalFoWImage(QImage externalImage)
@@ -711,6 +739,16 @@ void Map::initialize()
                                   QString("DMHelper Map File Not Found"),
                                   QString("The map file could not be found: ") + _filename);
             qDebug() << "[Map] Map file not found: " << _filename;
+            return;
+        }
+
+        QFileInfo fileInfo(_filename);
+        if(!fileInfo.isFile())
+        {
+            QMessageBox::critical(nullptr,
+                                  QString("DMHelper Map File Not Valid"),
+                                  QString("The map isn't a file: ") + _filename);
+            qDebug() << "[Map] Map file not a file: " << _filename;
             return;
         }
 
