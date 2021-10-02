@@ -30,21 +30,43 @@ int MapContent::createId()
 
 
 
-MapMarker::MapMarker(const QPoint& position, const QString& title, const QString& description, const QUuid& encounter) :
+MapMarker::MapMarker() :
+    MapContent(),
+    _position(),
+    _title(),
+    _description(),
+    _color(115,18,0),
+    _iconFile(),
+    _iconScale(40),
+    _coloredIcon(false),
+    _encounter()
+{
+}
+
+
+MapMarker::MapMarker(const QPoint& position, const QString& title, const QString& description, const QColor& color, const QString& iconFile, int iconScale, bool coloredIcon, const QUuid& encounter) :
     MapContent(),
     _position(position),
     _title(title),
     _description(description),
+    _color(color),
+    _iconFile(iconFile),
+    _iconScale(iconScale),
+    _coloredIcon(coloredIcon),
     _encounter(encounter)
 {
 }
 
 MapMarker::MapMarker(const MapMarker &obj) :
     MapContent(obj),
-    _position(obj.position()),
-    _title(obj.title()),
-    _description(obj.description()),
-    _encounter(obj.encounter())
+    _position(obj.getPosition()),
+    _title(obj.getTitle()),
+    _description(obj.getDescription()),
+    _color(obj.getColor()),
+    _iconFile(obj.getIconFile()),
+    _iconScale(obj.getIconScale()),
+    _coloredIcon(obj.isColoredIcon()),
+    _encounter(obj.getEncounter())
 {
 }
 
@@ -52,22 +74,42 @@ MapMarker::~MapMarker()
 {
 }
 
-QPoint MapMarker::position() const
+QPoint MapMarker::getPosition() const
 {
     return _position;
 }
 
-QString MapMarker::title() const
+QString MapMarker::getTitle() const
 {
     return _title;
 }
 
-QString MapMarker::description() const
+QString MapMarker::getDescription() const
 {
     return _description;
 }
 
-const QUuid& MapMarker::encounter() const
+QColor MapMarker::getColor() const
+{
+    return _color;
+}
+
+QString MapMarker::getIconFile() const
+{
+    return _iconFile;
+}
+
+int MapMarker::getIconScale() const
+{
+    return _iconScale;
+}
+
+bool MapMarker::isColoredIcon() const
+{
+    return _coloredIcon;
+}
+
+const QUuid& MapMarker::getEncounter() const
 {
     return _encounter;
 }
@@ -97,10 +139,31 @@ void MapMarker::setDescription(const QString& description)
     _description = description;
 }
 
+void MapMarker::setColor(const QColor& color)
+{
+    _color = color;
+}
+
+void MapMarker::setIconFile(const QString& iconFile)
+{
+    _iconFile = iconFile;
+}
+
+void MapMarker::setIconScale(int iconScale)
+{
+    _iconScale = iconScale;
+}
+
+void MapMarker::setColoredIcon(bool coloredIcon)
+{
+    _coloredIcon = coloredIcon;
+}
+
 void MapMarker::setEncounter(const QUuid& encounter)
 {
     _encounter = encounter;
 }
+
 
 
 

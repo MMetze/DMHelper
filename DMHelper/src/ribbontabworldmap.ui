@@ -844,7 +844,7 @@
        </property>
        <property name="icon">
         <iconset resource="resources.qrc">
-         <normaloff>:/img/data/icon_mapmarker_bw.png</normaloff>:/img/data/icon_mapmarker_bw.png</iconset>
+         <normaloff>:/img/data/icon_pin.png</normaloff>:/img/data/icon_pin.png</iconset>
        </property>
        <property name="iconSize">
         <size>
@@ -969,15 +969,15 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>ColorPushButton</class>
+   <extends>QPushButton</extends>
+   <header>colorpushbutton.h</header>
+  </customwidget>
+  <customwidget>
    <class>PublishButtonRibbon</class>
    <extends>QFrame</extends>
    <header>publishbuttonribbon.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ColorPushButton</class>
-   <extends>QPushButton</extends>
-   <header>colorpushbutton.h</header>
   </customwidget>
  </customwidgets>
  <resources>

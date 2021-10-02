@@ -81,7 +81,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                     newAction = new UndoShape(*this, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
-                    newAction = new UndoMarker(*this, MapMarker(QPoint(0,0), QString(""), QString(""), QUuid()));
+                    newAction = new UndoMarker(*this, MapMarker(QPoint(0,0), QString(""), QString(""), QColor(), QString(), 40, false, QUuid()));
                     break;
                 case DMHelper::ActionType_Base:
                 default:
@@ -334,7 +334,7 @@ UndoMarker* Map::getMapMarker(int id)
     {
         // This is a little evil, will need to do it better with a full undo/redo implementation...
         UndoMarker* undoItem = const_cast<UndoMarker*>(dynamic_cast<const UndoMarker*>(_undoStack->command(i)));
-        if((undoItem) && (undoItem->marker().getID() == id))
+        if((undoItem) && (undoItem->getMarker().getID() == id))
             return undoItem;
     }
 
@@ -945,22 +945,14 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("mapRectWidth", _mapRect.width());
     element.setAttribute("mapRectHeight", _mapRect.height());
 
-    QDomElement actionsElement = doc.createElement("actions");
-    /*
-    int i;
-    for(i = 0; i < _markerList.count(); ++i)
-    {
-        QDomElement actionElement = doc.createElement("action");
-        actionElement.setAttribute("type", DMHelper::ActionType_SetMarker);
-        _markerList.at(i).outputXML(actionElement, isExport);
-        actionsElement.appendChild(actionElement);
-    }
-    */
+    // Check if we can skip some paint commands because they have been covered up by a fill
+    challengeUndoStack();
 
+    QDomElement actionsElement = doc.createElement("actions");
     for(int i = 0; i < _undoStack->index(); ++i )
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
-        if(action)
+        if((action) && (!action->isRemoved()))
         {
             QDomElement actionElement = doc.createElement("action");
             actionElement.setAttribute("type", action->getType());
@@ -995,4 +987,31 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
     _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
+}
+
+void Map::challengeUndoStack()
+{
+    bool filled = false;
+    for(int i = _undoStack->index(); i >= 0; --i)
+    {
+        const UndoBase* constAction = dynamic_cast<const UndoBase*>(_undoStack->command(i));
+        if(constAction)
+        {
+            if(filled)
+            {
+                if((constAction->getType() == DMHelper::ActionType_Fill) ||
+                   (constAction->getType() == DMHelper::ActionType_Path) ||
+                   (constAction->getType() == DMHelper::ActionType_Point) ||
+                   (constAction->getType() == DMHelper::ActionType_Rect))
+                {
+                    UndoBase* action = const_cast<UndoBase*>(constAction);
+                    action->setRemoved(true);
+                }
+            }
+            else if(constAction->getType() == DMHelper::ActionType_Fill)
+            {
+                filled = true;
+            }
+        }
+    }
 }

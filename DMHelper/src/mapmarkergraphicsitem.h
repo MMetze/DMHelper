@@ -19,8 +19,7 @@ public:
     enum { Type = UserType + 1 };
 
     void setGroupVisible(bool visible);
-    void setTitle(const QString& title);
-    void setDescription(const QString& description);
+    void setMarker(const MapMarker& marker);
     void setDetailsVisible(bool visible);
 
     int getMarkerId() const;
@@ -53,6 +52,10 @@ public:
         QGraphicsPixmapItem(pixmap, parent)
     {}
 
+    MapMarkerGraphicsPixmapItem(QGraphicsItem *parent) :
+        QGraphicsPixmapItem(parent)
+    {}
+
 protected:
     virtual int type() const { return MapMarkerGraphicsItem::Type; }
 };
@@ -62,6 +65,10 @@ class MapMarkerGraphicsSimpleTextItem : public QGraphicsSimpleTextItem
 public:
     MapMarkerGraphicsSimpleTextItem(const QString &text, QGraphicsItem *parent) :
         QGraphicsSimpleTextItem(text, parent)
+    {}
+
+    MapMarkerGraphicsSimpleTextItem(QGraphicsItem *parent) :
+        QGraphicsSimpleTextItem(parent)
     {}
 
 protected:
