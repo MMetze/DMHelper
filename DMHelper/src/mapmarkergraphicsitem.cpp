@@ -4,6 +4,7 @@
 #include "mapcolorizefilter.h"
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
+#include <QStyleOptionGraphicsItem>
 #include <QPainter>
 
 const int MARKER_SIZE = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0];
@@ -115,6 +116,43 @@ void MapMarkerGraphicsItem::setDetailsVisible(bool visible)
 int MapMarkerGraphicsItem::getMarkerId() const
 {
     return _marker;
+}
+
+void MapMarkerGraphicsItem::drawGraphicsItem(QPainter& painter)
+{
+    QSize pixmapSize = boundingRect().size().toSize();
+    QSize iconSize = _markerIcon->boundingRect().size().toSize();
+    QSize titleSize = _title->boundingRect().size().toSize();
+    QSize detailsSize = _details->boundingRect().size().toSize();
+
+    qreal pixmapScale = scale();
+    qreal iconScale = _markerIcon->scale();
+    qreal titleScale = _title->scale();
+
+    QPointF pixmapPos = pos();
+    QPointF iconPos = _markerIcon->pos();
+    QPointF titlePos = _title->pos();
+
+    QPointF pixmapScenePos = scenePos();
+    QPointF iconScenePos = _markerIcon->scenePos();
+    QPointF titleScenePos = _title->scenePos();
+
+    pixmapSize = QSize((iconSize.width() / 2) + titleSize.width(),
+                       iconSize.height() + titleSize.height());
+
+    QPixmap pixmap(pixmapSize);
+    pixmap.fill(Qt::transparent);
+    QPainter itemPainter;
+    itemPainter.begin(&pixmap);
+    itemPainter.setRenderHint(QPainter::Antialiasing);
+    itemPainter.scale(pixmapScale, pixmapScale);
+    QStyleOptionGraphicsItem opt;
+    _markerIcon->paint(&itemPainter, &opt, nullptr);
+    itemPainter.translate(iconSize.width() / 2, iconSize.height());
+    _title->paint(&itemPainter, &opt, nullptr);
+    itemPainter.end();
+
+    painter.drawPixmap(iconScenePos, pixmap);
 }
 
 QVariant MapMarkerGraphicsItem::itemChange(GraphicsItemChange change, const QVariant & value)

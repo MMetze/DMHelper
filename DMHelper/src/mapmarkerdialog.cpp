@@ -31,6 +31,7 @@ MapMarkerDialog::MapMarkerDialog(const MapMarker& marker, Map& map, QWidget *par
     ui->btnColor->setColor(marker.getColor());
     ui->btnColor->setRotationVisible(false);
     ui->spinScale->setValue(marker.getIconScale());
+    ui->chkPlayerVisible->setChecked(marker.isPlayerVisible());
 
     ui->btnIcon->setMenu(_menu);
 
@@ -89,6 +90,7 @@ MapMarkerDialog::~MapMarkerDialog()
 
 MapMarker MapMarkerDialog::getMarker()
 {
+    _marker.setPlayerVisible(ui->chkPlayerVisible->isChecked());
     _marker.setTitle(ui->edtTitle->text());
     _marker.setDescription(ui->txtDescription->toPlainText());
     _marker.setEncounter(ui->cmbEncounter->currentIndex() == -1 ? QUuid() : QUuid(ui->cmbEncounter->currentData().toString()));

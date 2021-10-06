@@ -47,6 +47,7 @@ QDomElement UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir&
 
     element.setAttribute("x", _marker.getPosition().x());
     element.setAttribute("y", _marker.getPosition().y());
+    element.setAttribute("playerVisible", _marker.isPlayerVisible());
     element.setAttribute("title", _marker.getTitle());
     element.setAttribute("description", _marker.getDescription());
     element.setAttribute("color", _marker.getColor().name());
@@ -64,6 +65,7 @@ void UndoMarker::inputXML(const QDomElement &element, bool isImport)
 
     _marker.setX(element.attribute(QString("x")).toInt());
     _marker.setY(element.attribute(QString("y")).toInt());
+    _marker.setPlayerVisible(static_cast<bool>(element.attribute("playerVisible", QString::number(0)).toInt()));
     _marker.setTitle(element.attribute(QString("title")));
     _marker.setDescription(element.attribute(QString("description")));
     _marker.setIconFile(element.attribute("icon", QString(":/img/data/icon_pin.png")));

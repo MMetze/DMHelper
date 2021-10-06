@@ -24,6 +24,8 @@ public:
 
     int getMarkerId() const;
 
+    void drawGraphicsItem(QPainter& painter);
+
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event) override;

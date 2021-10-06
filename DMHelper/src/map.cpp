@@ -81,7 +81,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                     newAction = new UndoShape(*this, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
-                    newAction = new UndoMarker(*this, MapMarker(QPoint(0,0), QString(""), QString(""), QColor(), QString(), 40, false, QUuid()));
+                    newAction = new UndoMarker(*this, MapMarker());
                     break;
                 case DMHelper::ActionType_Base:
                 default:
@@ -321,9 +321,7 @@ void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)
-        {
             action->apply(previewNeed, target);
-        }
     }
 }
 

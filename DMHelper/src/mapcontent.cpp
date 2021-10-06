@@ -33,6 +33,7 @@ int MapContent::createId()
 MapMarker::MapMarker() :
     MapContent(),
     _position(),
+    _playerVisible(false),
     _title(),
     _description(),
     _color(115,18,0),
@@ -44,9 +45,10 @@ MapMarker::MapMarker() :
 }
 
 
-MapMarker::MapMarker(const QPoint& position, const QString& title, const QString& description, const QColor& color, const QString& iconFile, int iconScale, bool coloredIcon, const QUuid& encounter) :
+MapMarker::MapMarker(const QPoint& position, bool playerVisible, const QString& title, const QString& description, const QColor& color, const QString& iconFile, int iconScale, bool coloredIcon, const QUuid& encounter) :
     MapContent(),
     _position(position),
+    _playerVisible(playerVisible),
     _title(title),
     _description(description),
     _color(color),
@@ -60,6 +62,7 @@ MapMarker::MapMarker(const QPoint& position, const QString& title, const QString
 MapMarker::MapMarker(const MapMarker &obj) :
     MapContent(obj),
     _position(obj.getPosition()),
+    _playerVisible(obj.isPlayerVisible()),
     _title(obj.getTitle()),
     _description(obj.getDescription()),
     _color(obj.getColor()),
@@ -77,6 +80,11 @@ MapMarker::~MapMarker()
 QPoint MapMarker::getPosition() const
 {
     return _position;
+}
+
+bool MapMarker::isPlayerVisible() const
+{
+    return _playerVisible;
 }
 
 QString MapMarker::getTitle() const
@@ -127,6 +135,11 @@ void MapMarker::setX(int x)
 void MapMarker::setY(int y)
 {
     _position.setY(y);
+}
+
+void MapMarker::setPlayerVisible(bool playerVisible)
+{
+    _playerVisible = playerVisible;
 }
 
 void MapMarker::setTitle(const QString& title)

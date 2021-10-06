@@ -65,6 +65,20 @@
      <item row="0" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
+        <widget class="QCheckBox" name="chkPlayerVisible">
+         <property name="toolTip">
+          <string>Is this marker visible to the players?</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="resources.qrc">
+           <normaloff>:/img/data/small_icon_eye.png</normaloff>:/img/data/small_icon_eye.png</iconset>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLineEdit" name="edtTitle"/>
        </item>
        <item>

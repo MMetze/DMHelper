@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <QMutexLocker>
 #include <QFileDialog>
+#include <QStyleOptionGraphicsItem>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -350,7 +351,7 @@ void MapFrame::setShowMarkers(bool show)
     for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
     {
         const UndoMarker* marker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
-        if((marker) && (marker->getMarkerItem()) && (marker->isRemoved()))
+        if((marker) && (marker->getMarkerItem()) && (!marker->isRemoved()))
             marker->getMarkerItem()->setVisible(show);
     }
 
@@ -706,6 +707,23 @@ void MapFrame::publishClicked(bool checked)
                 p.drawPath(_distancePath->path().translated(-topLeftOffset));
             if(_distanceText)
                 p.drawText(_distanceText->pos() - topLeftOffset, _distanceText->text());
+
+            if(_mapSource->getShowMarkers())
+            {
+                if(QUndoStack* stack = _mapSource->getUndoStack())
+                {
+                    for( int i = 0; i < stack->index(); ++i )
+                    {
+                        const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
+                        if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
+                        {
+                            MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
+                            if(markerItem)
+                                markerItem->drawGraphicsItem(p);
+                        }
+                    }
+                }
+            }
         }
 
         if(_rotation != 0)

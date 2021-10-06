@@ -32,11 +32,12 @@ class MapMarker : public MapContent
 {
 public:
     MapMarker();
-    MapMarker(const QPoint& position, const QString& title, const QString& description, const QColor& color, const QString& iconFile, int iconScale, bool coloredIcon, const QUuid& encounter);
+    MapMarker(const QPoint& position, bool playerVisible, const QString& title, const QString& description, const QColor& color, const QString& iconFile, int iconScale, bool coloredIcon, const QUuid& encounter);
     MapMarker(const MapMarker &obj);
     virtual ~MapMarker() override;
 
     QPoint getPosition() const;
+    bool isPlayerVisible() const;
     QString getTitle() const;
     QString getDescription() const;
     QColor getColor() const;
@@ -48,6 +49,7 @@ public:
     void setPosition(const QPoint& position);
     void setX(int x);
     void setY(int y);
+    void setPlayerVisible(bool playerVisible);
     void setTitle(const QString& title);
     void setDescription(const QString& description);
     void setColor(const QColor& color);
@@ -58,6 +60,7 @@ public:
 
 private:
     QPoint _position;
+    bool _playerVisible;
     QString _title;
     QString _description;
     QColor _color;
