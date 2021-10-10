@@ -33,6 +33,7 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * event) override;
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event) override;
     void toggleDetails();
+    void preparePixmap();
 
     virtual int type() const override;
 
@@ -42,6 +43,7 @@ protected:
     MapMarkerGraphicsPixmapItem* _markerIcon;
     MapMarkerGraphicsSimpleTextItem* _title;
     MapMarkerGraphicsSimpleTextItem* _details;
+    QPixmap _markerPixmap;
 
     bool _detailsVisible;
     bool _clicked;

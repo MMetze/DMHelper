@@ -16,6 +16,7 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     _markerIcon(nullptr),
     _title(nullptr),
     _details(nullptr),
+    _markerPixmap(),
     _detailsVisible(false),
     _clicked(false)
 {
@@ -102,6 +103,8 @@ void MapMarkerGraphicsItem::setMarker(const MapMarker& marker)
     detailsFont.setPointSize(markerSize / 10);
     _details->setFont(detailsFont);
     _details->setPos(0, QFontMetrics(detailsFont).height() * 15 / 10);
+
+    preparePixmap();
 }
 
 void MapMarkerGraphicsItem::setDetailsVisible(bool visible)
@@ -120,39 +123,8 @@ int MapMarkerGraphicsItem::getMarkerId() const
 
 void MapMarkerGraphicsItem::drawGraphicsItem(QPainter& painter)
 {
-    QSize pixmapSize = boundingRect().size().toSize();
-    QSize iconSize = _markerIcon->boundingRect().size().toSize();
-    QSize titleSize = _title->boundingRect().size().toSize();
-    QSize detailsSize = _details->boundingRect().size().toSize();
-
-    qreal pixmapScale = scale();
-    qreal iconScale = _markerIcon->scale();
-    qreal titleScale = _title->scale();
-
-    QPointF pixmapPos = pos();
-    QPointF iconPos = _markerIcon->pos();
-    QPointF titlePos = _title->pos();
-
-    QPointF pixmapScenePos = scenePos();
-    QPointF iconScenePos = _markerIcon->scenePos();
-    QPointF titleScenePos = _title->scenePos();
-
-    pixmapSize = QSize((iconSize.width() / 2) + titleSize.width(),
-                       iconSize.height() + titleSize.height());
-
-    QPixmap pixmap(pixmapSize);
-    pixmap.fill(Qt::transparent);
-    QPainter itemPainter;
-    itemPainter.begin(&pixmap);
-    itemPainter.setRenderHint(QPainter::Antialiasing);
-    itemPainter.scale(pixmapScale, pixmapScale);
-    QStyleOptionGraphicsItem opt;
-    _markerIcon->paint(&itemPainter, &opt, nullptr);
-    itemPainter.translate(iconSize.width() / 2, iconSize.height());
-    _title->paint(&itemPainter, &opt, nullptr);
-    itemPainter.end();
-
-    painter.drawPixmap(iconScenePos, pixmap);
+    if(!_markerPixmap.isNull())
+        painter.drawPixmap(_markerIcon->scenePos(), _markerPixmap);
 }
 
 QVariant MapMarkerGraphicsItem::itemChange(GraphicsItemChange change, const QVariant & value)
@@ -209,6 +181,32 @@ void MapMarkerGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent * event)
 void MapMarkerGraphicsItem::toggleDetails()
 {
     setDetailsVisible(!_detailsVisible);
+}
+
+void MapMarkerGraphicsItem::preparePixmap()
+{
+    _markerPixmap = QPixmap();
+    if((!_markerIcon) || (!_title))
+        return;
+
+    QSize pixmapSize = boundingRect().size().toSize();
+    QSize iconSize = _markerIcon->boundingRect().size().toSize();
+    QSize titleSize = _title->boundingRect().size().toSize();
+    qreal pixmapScale = scale();
+
+    pixmapSize = QSize((iconSize.width() / 2) + titleSize.width(),
+                       iconSize.height() + titleSize.height());
+
+    _markerPixmap = QPixmap(pixmapSize);
+    _markerPixmap.fill(Qt::transparent);
+
+    QPainter itemPainter(&_markerPixmap);
+    itemPainter.setRenderHint(QPainter::Antialiasing);
+    itemPainter.scale(pixmapScale, pixmapScale);
+    QStyleOptionGraphicsItem opt;
+    _markerIcon->paint(&itemPainter, &opt, nullptr);
+    itemPainter.translate(iconSize.width() / 2, iconSize.height());
+    _title->paint(&itemPainter, &opt, nullptr);
 }
 
 int MapMarkerGraphicsItem::type() const

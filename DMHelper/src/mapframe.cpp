@@ -1006,43 +1006,55 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 QImage result = _videoPlayer->getImage()->copy();
                 if((!_bwFoWImage.isNull()) || (_mapSource->getShowParty()))
                 {
-                    QPainter p;
-                    p.begin(&result);
-                        if(!_bwFoWImage.isNull())
-                            p.drawImage(0, 0, _bwFoWImage);
+                    QPainter p(&result);
 
-                        qreal targetWidth = _targetSize.width();
-                        qreal imgWidth = _backgroundImage->pixmap().width();
+                    if(!_bwFoWImage.isNull())
+                        p.drawImage(0, 0, _bwFoWImage);
 
-                        if((_mapSource->getShowParty()) &&
-                           (_partyIcon) &&
-                           ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
+                    qreal targetWidth = _targetSize.width();
+                    qreal imgWidth = _backgroundImage->pixmap().width();
+
+                    if((_mapSource->getShowParty()) &&
+                       (_partyIcon) &&
+                       ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
+                    {
+                        QPixmap partyPixmap = _mapSource->getPartyPixmap();
+                        if(!partyPixmap.isNull())
                         {
-                            QPixmap partyPixmap = _mapSource->getPartyPixmap();
-                            if(!partyPixmap.isNull())
+                            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
+                            QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
+                            p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                        }
+                    }
+
+                    p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
+                                  _mapSource->getDistanceLineWidth(),
+                                  static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
+
+                    p.scale(targetWidth / imgWidth, targetWidth / imgWidth);
+                    if(_distanceLine)
+                        p.drawLine(_distanceLine->line());
+                    if(_distancePath)
+                        p.drawPath(_distancePath->path());
+                    if(_distanceText)
+                        p.drawText(_distanceText->pos(), _distanceText->text());
+
+                    if(_mapSource->getShowMarkers())
+                    {
+                        if(QUndoStack* stack = _mapSource->getUndoStack())
+                        {
+                            for( int i = 0; i < stack->index(); ++i )
                             {
-                                qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
-                                QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
-                                p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                                const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
+                                if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
+                                {
+                                    MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
+                                    if(markerItem)
+                                        markerItem->drawGraphicsItem(p);
+                                }
                             }
                         }
-
-                        p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
-                                      _mapSource->getDistanceLineWidth(),
-                                      static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
-
-                        p.scale(targetWidth / imgWidth, targetWidth / imgWidth);
-                        if(_distanceLine)
-                            p.drawLine(_distanceLine->line());
-                            //p.drawLine(QLineF(_distanceLine->line().p1() * targetWidth / imgWidth, _distanceLine->line().p2() * targetWidth / imgWidth));
-
-                        if(_distancePath)
-                            p.drawPath(_distancePath->path());
-
-                        if(_distanceText)
-                            p.drawText(_distanceText->pos(), _distanceText->text());
-                            //p.drawText(_distanceText->pos() * targetWidth / imgWidth, _distanceText->text());
-                    p.end();
+                    }
                 }
 
                 if(_rotation != 0)
