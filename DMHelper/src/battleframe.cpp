@@ -1493,8 +1493,11 @@ void BattleFrame::updateMap()
     }
     else
     {
-        qDebug() << "[Battle Frame] Initializing battle map video";
-        createVideoPlayer(true);
+        if(_model->getMap()->isValid())
+        {
+            qDebug() << "[Battle Frame] Initializing battle map video";
+            createVideoPlayer(true);
+        }
     }
 }
 
@@ -2108,7 +2111,7 @@ void BattleFrame::publishImage()
         if(!_publishTimer->isActive())
         {
             emit showPublishWindow();
-            if(!_model->getMap()->isInitialized())
+            if((!_model->getMap()->isInitialized()) && (_model->getMap()->isValid()))
             {
                 createVideoPlayer(false);
             }
@@ -3288,7 +3291,7 @@ void BattleFrame::createVideoPlayer(bool dmPlayer)
 
     if(dmPlayer)
     {
-        qDebug() << "[BattleDialog] Publish FoW DM animation started";
+        qDebug() << "[BattleFrame] Publish FoW DM animation started";
         _videoPlayer = new VideoPlayer(_model->getMap()->getFileName(), QSize(0, 0), true, false);
         if(_videoPlayer->isNewImage())
             updateVideoBackground();
@@ -3297,7 +3300,7 @@ void BattleFrame::createVideoPlayer(bool dmPlayer)
     }
     else
     {
-        qDebug() << "[BattleDialog] Publish FoW Player animation started";
+        qDebug() << "[BattleFrame] Publish FoW Player animation started";
         resetVideoSizes();
         _videoPlayer = new VideoPlayer(_model->getMap()->getFileName(), _videoSize, true, _model->getMap()->getPlayAudio());
     }

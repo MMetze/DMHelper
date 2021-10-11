@@ -97,6 +97,7 @@ public slots:
     void addMarker(const QPointF& markerPosition);
     void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
     void editMapMarker(int markerId);
+    void deleteMapMarker(int markerId);
 
     void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
