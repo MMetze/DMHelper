@@ -6,8 +6,8 @@
 #include <QGraphicsScene>
 #include <QDebug>
 
-UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant) :
-    QGraphicsPixmapItem(),
+UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant, QGraphicsItem *parent) :
+    QGraphicsPixmapItem(parent),
     _combatant(combatant),
     _draw(true)
 {
@@ -15,8 +15,8 @@ UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant) :
     //setAcceptHoverEvents(true);
 }
 
-UnselectedPixmap::UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant) :
-    QGraphicsPixmapItem(pixmap),
+UnselectedPixmap::UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant, QGraphicsItem *parent) :
+    QGraphicsPixmapItem(pixmap, parent),
     _combatant(combatant),
     _draw(true)
 {
@@ -42,21 +42,6 @@ BattleDialogModelCombatant* UnselectedPixmap::getCombatant()
 {
     return _combatant;
 }
-
-
-
-/*
-void UnselectedPixmap::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
-{
-    if((!event) || ((flags() & QGraphicsItem::ItemIsSelectable) == 0))
-    {
-        unsetCursor();
-        return;
-    }
-
-    setCursor(Qt::ArrowCursor);
-}
-*/
 
 QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant &value)
 {

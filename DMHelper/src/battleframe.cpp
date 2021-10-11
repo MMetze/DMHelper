@@ -59,11 +59,9 @@
 
 //#define BATTLE_DIALOG_LOG_VIDEO
 
-const qreal SELECTED_PIXMAP_SIZE = 800.0;
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
 const qreal COMPASS_SCALE = 0.4;
-const int ROTATION_TIMER = 50;
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     QTime tProfile;
@@ -160,20 +158,30 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _mapDrawer = new BattleFrameMapDrawer(this);
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, this, &BattleFrame::updateFowImage);
 
-    connect(ui->graphicsView,SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)),this,SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
+    connect(ui->graphicsView, SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)), this, SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
 
     connect(ui->btnSort, SIGNAL(clicked()), this, SLOT(sort()));
+    connect(ui->btnTop, SIGNAL(clicked()), this, SLOT(top()));
     connect(ui->btnNext, SIGNAL(clicked()), this, SLOT(next()));
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
+    connect(_scene, SIGNAL(mapZoom(int)), this, SLOT(zoomDelta(int)));
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
     connect(_scene, SIGNAL(combatantHover(BattleDialogModelCombatant*, bool)), this, SLOT(handleCombatantHover(BattleDialogModelCombatant*, bool)));
-    connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
+    connect(_scene, SIGNAL(combatantActivate(BattleDialogModelCombatant*)), this, SLOT(handleCombatantActivate(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantRemove(BattleDialogModelCombatant*)), this, SLOT(handleCombatantRemove(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));    
+    connect(_scene, &BattleDialogGraphicsScene::mapMousePress, this, &BattleFrame::handleMapMousePress);
+    connect(_scene, &BattleDialogGraphicsScene::mapMouseMove, this, &BattleFrame::handleMapMouseMove);
+    connect(_scene, &BattleDialogGraphicsScene::mapMouseRelease, this, &BattleFrame::handleMapMouseRelease);
+
     setEditMode();
 
     // CombatantFrame
@@ -243,6 +251,7 @@ void BattleFrame::deactivateObject()
         return;
     }
 
+    ui->frameCombatant->setCombatant(nullptr);
     setBattle(nullptr);
 }
 
@@ -449,6 +458,19 @@ void BattleFrame::sort()
     qDebug() << "[Battle Frame] combatant widgets sorted";
 }
 
+void BattleFrame::top()
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to go to the first combatant, no battle model is set!";
+        return;
+    }
+
+    BattleDialogModelCombatant* nextCombatant = getFirstLivingCombatant();
+    setActiveCombatant(nextCombatant);
+    qDebug() << "[Battle Frame] Activated first combatant: " << nextCombatant;
+}
+
 void BattleFrame::next()
 {
     if(!_model)
@@ -521,6 +543,9 @@ void BattleFrame::setTargetLabelSize(const QSize& targetSize)
 
 void BattleFrame::publishWindowMouseDown(const QPointF& position)
 {
+    if(!_battle)
+        return;
+
     QPointF newPosition;
     if(!convertPublishToScene(position, newPosition))
         return;
@@ -540,7 +565,7 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
                     _selectedCombatant = selectedCombatant;
                     _publishMouseDown = true;
                     _publishMouseDownPos = newPosition;
-                    startMovement(pixmapItem, selectedCombatant->getSpeed());
+                    startMovement(selectedCombatant, pixmapItem, selectedCombatant->getSpeed());
                 }
             }
         }
@@ -549,6 +574,9 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
 
 void BattleFrame::publishWindowMouseMove(const QPointF& position)
 {
+    if(!_battle)
+        return;
+
     if((!_selectedCombatant) || (!_publishMouseDown))
         return;
 
@@ -561,12 +589,15 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
 
     QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
     pixmapItem->setPos(newPosition);
-    updateMovement(pixmapItem);
+    updateMovement(_selectedCombatant, pixmapItem);
 }
 
 void BattleFrame::publishWindowMouseRelease(const QPointF& position)
 {
     Q_UNUSED(position);
+
+    if(!_battle)
+        return;
 
     endMovement();
     _selectedCombatant = nullptr;
@@ -611,6 +642,40 @@ void BattleFrame::setGridScale(int gridScale)
 
         _scene->updateBattleContents();
 
+        ui->graphicsView->update();
+        createPrescaledBackground();
+    }
+}
+
+void BattleFrame::setGridAngle(int gridAngle)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid angle, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridAngle(gridAngle);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+    }
+}
+
+void BattleFrame::setGridType(int gridType)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid type, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridType(gridType);
+        _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
     }
@@ -801,6 +866,14 @@ void BattleFrame::zoomSelect(bool enabled)
         return;
 
     _stateMachine.toggleState(DMHelper::BattleFrameState_ZoomSelect);
+}
+
+void BattleFrame::zoomDelta(int delta)
+{
+    if(delta > 0)
+        zoomIn();
+    else if(delta < 0)
+        zoomOut();
 }
 
 void BattleFrame::cancelSelect()
@@ -1302,6 +1375,11 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->lblNext->setMinimumHeight(labelHeight);
     ui->lblNext->setMaximumHeight(labelHeight);
 
+    ui->lblTop->setMinimumWidth(newWidth);
+    ui->lblTop->setMaximumWidth(newWidth);
+    ui->lblTop->setMinimumHeight(labelHeight);
+    ui->lblTop->setMaximumHeight(labelHeight);
+
     ui->lblSort->setMinimumWidth(newWidth);
     ui->lblSort->setMaximumWidth(newWidth);
     ui->lblSort->setMinimumHeight(labelHeight);
@@ -1332,6 +1410,11 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->btnNext->setMinimumHeight(iconDim);
     ui->btnNext->setMaximumHeight(iconDim);
 
+    ui->btnTop->setMinimumWidth(newWidth);
+    ui->btnTop->setMaximumWidth(newWidth);
+    ui->btnTop->setMinimumHeight(iconDim);
+    ui->btnTop->setMaximumHeight(iconDim);
+
     ui->btnSort->setMinimumWidth(newWidth);
     ui->btnSort->setMaximumWidth(newWidth);
     ui->btnSort->setMinimumHeight(iconDim);
@@ -1339,6 +1422,7 @@ void BattleFrame::showEvent(QShowEvent *event)
 
     int iconSize = qMin(newWidth, iconDim) * 4 / 5;
     ui->btnNext->setIconSize(QSize(iconSize, iconSize));
+    ui->btnTop->setIconSize(QSize(iconSize, iconSize));
     ui->btnSort->setIconSize(QSize(iconSize, iconSize));
 }
 
@@ -1466,9 +1550,13 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
     connect(removeItem,SIGNAL(triggered()),this,SLOT(removeCombatant()));
     contextMenu->addAction(removeItem);
 
-    QAction* damageItem = new QAction(QString("Damage"), contextMenu);
+    QAction* damageItem = new QAction(QString("Damage..."), contextMenu);
     connect(damageItem,SIGNAL(triggered()),this,SLOT(damageCombatant()));
     contextMenu->addAction(damageItem);
+
+    QAction* healItem = new QAction(QString("Heal..."), contextMenu);
+    connect(healItem,SIGNAL(triggered()),this,SLOT(healCombatant()));
+    contextMenu->addAction(healItem);
 
     contextMenu->exec(position);
     delete contextMenu;
@@ -1516,7 +1604,7 @@ void BattleFrame::setRotation(int rotation)
     createPrescaledBackground();
 }
 
-void BattleFrame::setBackgroundColor(QColor color)
+void BattleFrame::setBackgroundColor(const QColor& color)
 {
     if(!_model)
     {
@@ -1642,6 +1730,98 @@ void BattleFrame::handleCombatantHover(BattleDialogModelCombatant* combatant, bo
     widget->setHover(hover);
 }
 
+void BattleFrame::handleCombatantActivate(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    qDebug() << "[Battle Frame] activating combatant " << combatant->getName();
+    setActiveCombatant(combatant);
+}
+
+void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to remove combatant, no battle model is set!";
+        return;
+    }
+
+    if(!combatant)
+        return;
+
+    qDebug() << "[Battle Frame] removing combatant " << combatant->getName();
+    removeRollover();
+
+    // Check the active combatant highlight
+    if(combatant == _model->getActiveCombatant())
+    {
+        if(_model->getCombatantCount() <= 1)
+        {
+            _model->setActiveCombatant(nullptr);
+            qDebug() << "[Battle Frame] removed combatant has highlight, highlight removed";
+        }
+        else
+        {
+            next();
+        }
+    }
+    else if(combatant == ui->frameCombatant->getCombatant())
+    {
+        ui->frameCombatant->setCombatant(nullptr);
+    }
+
+    // Find the index of the removed item
+    int i = _model->getCombatantList().indexOf(combatant);
+
+    // Delete the widget for the combatant
+    QLayoutItem *child = _combatantLayout->takeAt(i);
+    if(child != nullptr)
+    {
+        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
+        child->widget()->deleteLater();
+        delete child;
+    }
+
+    // Remove the combatant
+    BattleDialogModelCombatant* removedCombatant = _model->removeCombatant(i);
+    if(removedCombatant)
+    {
+        qDebug() << "[Battle Frame] removing combatant from list " << removedCombatant->getName();
+
+        // Remove the widget from the list of widgets
+        // TODO: should this be above with deleting the widget for the combatant?
+        _combatantWidgets.remove(removedCombatant);
+
+        // Remove the icon from the list of icons and delete it from the scene
+        QGraphicsPixmapItem* item = _combatantIcons.take(removedCombatant);
+        if(item)
+        {
+            delete item;
+        }
+
+        delete removedCombatant;
+    }
+}
+
+void BattleFrame::handleCombatantDamage(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    int damage = QInputDialog::getInt(this, QString("Damage Combatant"), QString("Please enter the amount of damage to be done: "));
+    applyCombatantHPChange(combatant, -damage);
+}
+
+void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    int heal = QInputDialog::getInt(this, QString("Heal Combatant"), QString("Please enter the amount of healing to be applied: "));
+    applyCombatantHPChange(combatant, heal);
+}
+
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
     if(!effect)
@@ -1688,7 +1868,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
     BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
     if(combatant)
     {
-        startMovement(_combatantIcons.value(combatant), combatant->getSpeed());
+        startMovement(combatant, _combatantIcons.value(combatant), combatant->getSpeed());
         _selectedCombatant = combatant;
         ui->frameCombatant->setCombatant(combatant);
 
@@ -1708,7 +1888,7 @@ void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)
         return;
     }
 
-    updateMovement(item);
+    updateMovement(_selectedCombatant, item);
 }
 
 void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
@@ -1744,92 +1924,66 @@ void BattleFrame::handleItemMouseDoubleClick(QGraphicsPixmapItem* item)
     widget->selectCombatant();
 }
 
+void BattleFrame::handleMapMousePress(const QPointF& pos)
+{
+    _mouseDown = true;
+    _mouseDownPos = ui->graphicsView->mapFromScene(pos);
+}
+
+void BattleFrame::handleMapMouseMove(const QPointF& pos)
+{
+    if(!_mouseDown)
+        return;
+
+    QPoint viewPos = ui->graphicsView->mapFromScene(pos);
+    QPoint delta = _mouseDownPos - viewPos;
+
+    _mouseDown = false;
+    if(ui->graphicsView->horizontalScrollBar())
+        ui->graphicsView->horizontalScrollBar()->setValue(ui->graphicsView->horizontalScrollBar()->value() + delta.x());
+    if(ui->graphicsView->verticalScrollBar())
+        ui->graphicsView->verticalScrollBar()->setValue(ui->graphicsView->verticalScrollBar()->value() + delta.y());
+    _mouseDown = true;
+
+    _mouseDownPos = viewPos;
+}
+
+void BattleFrame::handleMapMouseRelease(const QPointF& pos)
+{
+    Q_UNUSED(pos);
+    _mouseDown = false;
+}
+
 void BattleFrame::removeCombatant()
 {
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to remove combatant, no battle model is set!";
-        return;
-    }
-
-    if(!_contextMenuCombatant)
-        return;
-
-    qDebug() << "[Battle Frame] removing combatant " << _contextMenuCombatant->getName();
-    removeRollover();
-
-    // Check the active combatant highlight
-    if(_contextMenuCombatant == _model->getActiveCombatant())
-    {
-        if(_model->getCombatantCount() <= 1)
-        {
-            _model->setActiveCombatant(nullptr);
-            qDebug() << "[Battle Frame] removed combatant has highlight, highlight removed";
-        }
-        else
-        {
-            next();
-        }
-    }
-    else if(_contextMenuCombatant == ui->frameCombatant->getCombatant())
-    {
-        ui->frameCombatant->setCombatant(nullptr);
-    }
-
-    // Find the index of the removed item
-    int i = _model->getCombatantList().indexOf(_contextMenuCombatant);
-
-    // Delete the widget for the combatant
-    QLayoutItem *child = _combatantLayout->takeAt(i);
-    if(child != nullptr)
-    {
-        qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
-        child->widget()->deleteLater();
-        delete child;
-    }
-
-    // Remove the combatant
-    BattleDialogModelCombatant* combatant = _model->removeCombatant(i);
-    if(combatant)
-    {
-        qDebug() << "[Battle Frame] removing combatant from list " << combatant->getName();
-
-        // Remove the widget from the list of widgets
-        // TODO: should this be above with deleting the widget for the combatant?
-        _combatantWidgets.remove(combatant);
-
-        // Remove the icon from the list of icons and delete it from the scene
-        QGraphicsPixmapItem* item = _combatantIcons.take(combatant);
-        if(item)
-        {
-            delete item;
-        }
-
-        delete combatant;
-    }
+    handleCombatantRemove(_contextMenuCombatant);
 }
 
 void BattleFrame::activateCombatant()
 {
-    if(!_contextMenuCombatant)
-        return;
-
-    qDebug() << "[Battle Frame] activating combatant " << _contextMenuCombatant->getName();
-    setActiveCombatant(_contextMenuCombatant);
+    handleCombatantActivate(_contextMenuCombatant);
 }
 
 void BattleFrame::damageCombatant()
 {
-    if(!_contextMenuCombatant)
+    handleCombatantDamage(_contextMenuCombatant);
+}
+
+void BattleFrame::healCombatant()
+{
+    handleCombatantHeal(_contextMenuCombatant);
+}
+
+void BattleFrame::applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange)
+{
+    if(!combatant)
         return;
 
-    int damage = QInputDialog::getInt(this, QString("Damage Combatant"), QString("Please enter the amount of damage to be done: "));
-
-    _contextMenuCombatant->setHitPoints(_contextMenuCombatant->getHitPoints() - damage);
-    updateCombatantWidget(_contextMenuCombatant);
+    combatant->setHitPoints(combatant->getHitPoints() + hpChange);
+    updateCombatantWidget(combatant);
     updateCombatantVisibility();
 
-    registerCombatantDamage(_contextMenuCombatant, -damage);
+    registerCombatantDamage(combatant, hpChange);
 }
 
 void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
@@ -2340,6 +2494,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         _scene->setModel(model);
 
     ui->btnSort->setEnabled(_model != nullptr);
+    ui->btnTop->setEnabled(_model != nullptr);
     ui->btnNext->setEnabled(_model != nullptr);
     ui->edtRounds->setEnabled(_model != nullptr);
     ui->edtCountdown->setEnabled(_model != nullptr);
@@ -2387,21 +2542,8 @@ Map* BattleFrame::selectRelatedMap()
     if(!parentObject)
         return nullptr;
 
-    // TODO: Check what happens if separator is selected
-    MapSelectDialog mapSelectDlg;
-
-    QList<Map*> allMaps = campaign->findChildren<Map*>();
-    for(Map* map : allMaps)
-    {
-        if(map)
-        {
-            if(map->getParentById(parentObject->getID()) != nullptr)
-                mapSelectDlg.prependMap(map);
-            else
-                mapSelectDlg.appendMap(map);
-        }
-    }
-
+    MapSelectDialog mapSelectDlg(*campaign, _battle->getID());
+    connect(&mapSelectDlg, &MapSelectDialog::mapCreated, this, &BattleFrame::mapCreated);
     if(mapSelectDlg.exec() != QDialog::Accepted)
         return nullptr;
     else
@@ -2569,6 +2711,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
                 connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isShownChanged(bool)), character, SLOT(setShown(bool)));
                 connect(dynamic_cast<WidgetCharacter*>(newWidget), SIGNAL(isKnownChanged(bool)), character, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
+                connect(character, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
             }
             break;
         }
@@ -2587,6 +2730,7 @@ CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* 
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isShownChanged(bool)), monster, SLOT(setShown(bool)));
                 connect(dynamic_cast<WidgetMonster*>(newWidget), SIGNAL(isKnownChanged(bool)), monster, SLOT(setKnown(bool)));
                 connect(newWidget, SIGNAL(imageChanged(BattleDialogModelCombatant*)), this, SLOT(updateCombatantIcon(BattleDialogModelCombatant*)));
+                connect(monster, SIGNAL(moveUpdated()), newWidget, SLOT(updateMove()));
             }
             break;
         }
@@ -2700,6 +2844,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
     {
         _activeScale = active->getSizeFactor();
         ui->frameCombatant->setCombatant(active);
+        active->resetMoved();
     }
 
     if(_activePixmap)
@@ -3493,7 +3638,7 @@ bool BattleFrame::convertPublishToScene(const QPointF& publishPosition, QPointF&
         return false;
 
     qreal maxPercent = static_cast<qreal>(publishWidth - getFrameWidth()) / static_cast<qreal>(publishWidth);
-    if((maxPercent <= 0.0) || (publishX < 0.0) || (publishX > maxPercent) || (publishY < 0.0) || (publishY > 100.0))
+    if((maxPercent <= 0.0) || (publishX < 0.0) || (publishX > maxPercent) || (publishY < 0.0) || (publishY > 1.0))
         return false;
 
     scenePosition = QPointF((publishX * _publishRectValue.width() / maxPercent) + _publishRectValue.x(),
@@ -3731,31 +3876,46 @@ void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
     // TODO: Add personal effects
 }
 
-void BattleFrame::startMovement(QGraphicsPixmapItem* item, int speed)
+void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed)
 {
-    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+    if((!combatant) || (!item) || (!_model))
         return;
 
-    int speedSquares = 2 * (speed / 5) + 1;
-    _moveRadius = _model->getGridScale() * speedSquares;
-    _moveStart = item->pos();
-    _movementPixmap->setPos(_moveStart);
-    _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
-    _movementPixmap->setVisible(true);
+    if((_movementPixmap) && (_model->getShowMovement()))
+    {
+        int speedSquares = 2 * (speed / 5) + 1;
+        _moveRadius = _model->getGridScale() * speedSquares;
+        _moveStart = item->pos();
+        _movementPixmap->setPos(_moveStart);
+        _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+        _movementPixmap->setVisible(true);
+    }
 }
 
-void BattleFrame::updateMovement(QGraphicsPixmapItem* item)
+void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item)
 {
-    if((!item) || (!_movementPixmap) || (!_model->getShowMovement()))
+    if((!combatant) || (!item) || (!_model))
         return;
 
     QPointF combatantPos = item->pos();
+    QPointF diff = _moveStart - combatantPos;
+    _moveStart = combatantPos;
+    qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
 
-    if(_moveRadius > _model->getGridScale())
+    if(_model->getGridScale() > 0)
+        combatant->incrementMoved(5.0 * delta / static_cast<qreal>(_model->getGridScale()));
+
+    if((_movementPixmap) && (_model->getShowMovement()))
     {
-        QPointF diff = _moveStart - combatantPos;
-        qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));
-        _moveRadius -= 2 * delta;
+        if(_moveRadius > _model->getGridScale())
+            _moveRadius -= 2 * delta;
+
+        if(_moveRadius <= _model->getGridScale())
+        {
+            _moveRadius = _model->getGridScale();
+            _movementPixmap->setRotation(0.0);
+            _movementPixmap->setVisible(false);
+        }
     }
 
     if(_moveRadius <= _model->getGridScale())

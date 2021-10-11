@@ -76,13 +76,13 @@ public:
         BattleFrameMode_Battle = 0,
         BattleFrameMode_Combatants,
         BattleFrameMode_Map,
-        BattleFrameMode_Grid,
-        BattleFrameMode_Markers
+        BattleFrameMode_Grid
     };
 
 public slots:
     void clear();
     void sort();
+    void top();
     void next();
 
     void setTargetSize(const QSize& targetSize);
@@ -92,6 +92,8 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
+    void setGridAngle(int gridAngle);
+    void setGridType(int gridType);
     void setXOffset(int xOffset);
     void setYOffset(int yOffset);
     void setGridVisible(bool gridVisible);
@@ -112,6 +114,7 @@ public slots:
     void zoomOut();
     void zoomFit();
     void zoomSelect(bool enabled);
+    void zoomDelta(int delta);
     void cancelSelect();
 
     // Public for connection to battle ribbon
@@ -150,7 +153,7 @@ public slots:
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
-    virtual void setBackgroundColor(QColor color) override;
+    virtual void setBackgroundColor(const QColor& color) override;
     virtual void reloadObject() override;
 
 signals:
@@ -174,6 +177,7 @@ signals:
 
     void foWEditToggled(bool enabled);
     void foWSelectToggled(bool enabled);
+    void mapCreated();
 
     void pointerToggled(bool enabled);
 
@@ -196,6 +200,10 @@ private slots:
     void handleCombatantMoved(BattleDialogModelCombatant* combatant);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
+    void handleCombatantActivate(BattleDialogModelCombatant* combatant);
+    void handleCombatantRemove(BattleDialogModelCombatant* combatant);
+    void handleCombatantDamage(BattleDialogModelCombatant* combatant);
+    void handleCombatantHeal(BattleDialogModelCombatant* combatant);
     void handleApplyEffect(QGraphicsItem* effect);
 
     void handleItemMouseDown(QGraphicsPixmapItem* item);
@@ -204,9 +212,15 @@ private slots:
     void handleItemChanged(QGraphicsItem* item);
     void handleItemMouseDoubleClick(QGraphicsPixmapItem* item);
 
+    void handleMapMousePress(const QPointF& pos);
+    void handleMapMouseMove(const QPointF& pos);
+    void handleMapMouseRelease(const QPointF& pos);
+
     void removeCombatant();
     void activateCombatant();
     void damageCombatant();
+    void healCombatant();
+    void applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange);
     void setSelectedCombatant(BattleDialogModelCombatant* selected);
     void setUniqueSelection(BattleDialogModelCombatant* selected);
     void updateCombatantWidget(BattleDialogModelCombatant* combatant);
@@ -297,8 +311,8 @@ private:
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
-    void startMovement(QGraphicsPixmapItem* item, int speed);
-    void updateMovement(QGraphicsPixmapItem* item);
+    void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);
+    void updateMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item);
     void endMovement();
 
     QPixmap getPointerPixmap();

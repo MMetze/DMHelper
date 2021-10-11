@@ -25,6 +25,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _fontFamily("Trebuchet MS"),
     _fontSize(12),
     _logicalDPI(0.0),
+    _pasteRich(false),
     _audioVolume(100),
     _showOnDeck(true),
     _showCountdown(true),
@@ -119,6 +120,11 @@ int OptionsContainer::getFontSize() const
 qreal OptionsContainer::getLogicalDPI() const
 {
     return _logicalDPI;
+}
+
+bool OptionsContainer::getPasteRich() const
+{
+    return _pasteRich;
 }
 
 int OptionsContainer::getAudioVolume() const
@@ -322,6 +328,7 @@ void OptionsContainer::readSettings()
     if(_logicalDPI > 0)
         defaultFontSize = (20*72)/_logicalDPI;
     setFontSize(settings.value("fontSize",QVariant(defaultFontSize)).toInt());
+    setPasteRich(settings.value("pasteRich",QVariant(false)).toBool());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
     setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
@@ -395,6 +402,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("showAnimations", getShowAnimations());
     settings.setValue("fontFamily", getFontFamily());
     settings.setValue("fontSize", getFontSize());
+    settings.setValue("pasteRich", getPasteRich());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("showOnDeck", getShowOnDeck());
     settings.setValue("showCountdown", getShowCountdown());
@@ -754,6 +762,15 @@ void OptionsContainer::setLogicalDPI(qreal logicalDPI)
     if(logicalDPI != _logicalDPI)
     {
         _logicalDPI = logicalDPI;
+    }
+}
+
+void OptionsContainer::setPasteRich(bool pasteRich)
+{
+    if(_pasteRich != pasteRich)
+    {
+        _pasteRich = pasteRich;
+        emit pasteRichChanged(_pasteRich);
     }
 }
 

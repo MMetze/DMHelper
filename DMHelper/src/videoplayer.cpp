@@ -22,7 +22,7 @@ void playerLogCallback(void *data, int level, const libvlc_log_t *ctx, const cha
 void playerEventCallback(const struct libvlc_event_t *p_event, void *p_data);
 
 
-VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo, bool playAudio, QObject *parent) :
+VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo, bool playAudio, bool autoStart, QObject *parent) :
     QObject(parent),
     _videoFile(videoFile),
     _playVideo(playVideo),
@@ -49,7 +49,7 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
 #ifdef Q_OS_WIN
     _videoFile.replace("/","\\\\");
 #endif
-    _vlcError = !initializeVLC();
+    _vlcError = !initializeVLC(autoStart);
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayer] Player object initialized: " << this;
 #endif
@@ -436,7 +436,7 @@ bool VideoPlayer::restartPlayer()
     }
 }
 
-bool VideoPlayer::initializeVLC()
+bool VideoPlayer::initializeVLC(bool autoStart)
 {
     qDebug() << "[VideoPlayer] Initializing VLC!";
 
@@ -453,8 +453,6 @@ bool VideoPlayer::initializeVLC()
     _vlcInstance = libvlc_new(0, nullptr);
 #endif
 
-    _vlcInstance = libvlc_new(0, nullptr);
-
     if(!_vlcInstance)
         return false;
 
@@ -466,7 +464,10 @@ bool VideoPlayer::initializeVLC()
     qDebug() << "[VideoPlayer] Initializing VLC completed";
 #endif
 
-    return startPlayer();
+    if(autoStart)
+        return startPlayer();
+    else
+        return true;
 }
 
 bool VideoPlayer::startPlayer()

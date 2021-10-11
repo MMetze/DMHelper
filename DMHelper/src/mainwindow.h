@@ -40,11 +40,13 @@ class RibbonTabFile;
 class RibbonTabCampaign;
 class RibbonTabTools;
 class RibbonTabBattleMap;
+class RibbonTabBattleView;
 class RibbonTabBattle;
 class RibbonTabScrolling;
 class RibbonTabText;
 class BattleDialogModel;
 class RibbonTabMap;
+class RibbonTabWorldMap;
 class RibbonTabAudio;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
@@ -72,6 +74,7 @@ public slots:
     bool closeCampaign();
     void openDiceDialog();
 
+    void openEncounter(QUuid id);
     void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
 
@@ -81,7 +84,6 @@ public slots:
     void newParty();
     void newTextEncounter();
     void newBattleEncounter();
-    void newScrollingTextEncounter();
     void newMap();
     void newAudioEntry();
     void newSyrinscapeEntry();
@@ -108,7 +110,7 @@ public slots:
 signals:
     void campaignLoaded(Campaign* campaign);
     void dispatchPublishImage(QImage img);
-    void dispatchPublishImage(QImage img, QColor color);
+    void dispatchPublishImage(QImage img, const QColor& color);
     void dispatchAnimateImage(QImage img);
 
     void cancelSelect();
@@ -137,13 +139,10 @@ protected:
     void deleteCampaign();
     void enableCampaignMenu();
 
+    bool selectIndex(const QModelIndex& index);
     bool selectItem(QUuid itemId);
     bool selectItem(int itemType, QUuid itemId);
     bool selectItem(int itemType, QUuid itemId, QUuid adventureId);
-    QStandardItem* findItem(QStandardItem* parent, int itemType, QUuid itemId);
-    QStandardItem* findItem(QStandardItem* parent, QUuid itemId);
-    QStandardItem* findParentbyType(QStandardItem* child, int parentType);
-    void setIndexExpanded(bool expanded, const QModelIndex& index);
 
     // Bestiary
     void writeBestiary();
@@ -179,15 +178,9 @@ protected slots:
     void importSpellbook();
 
     void openAboutDialog();
-
-    void openTextPublisher();
-    void openTextTranslator();
     void openRandomMarkets();
 
     QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
-
-    void connectTextToText();
-    void connectTextToScroll();
 
     void battleModelChanged(BattleDialogModel* model);
     void activateObject(CampaignObjectBase* object);
@@ -219,7 +212,6 @@ private:
     EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* treeModel;
-    QMultiMap<QString, QUuid> treeIndexMap;
     QVBoxLayout* characterLayout;
     Campaign* campaign;
     QString campaignFileName;
@@ -255,11 +247,13 @@ private:
     RibbonTabFile* _ribbonTabFile;
     RibbonTabCampaign* _ribbonTabCampaign;
     RibbonTabTools* _ribbonTabTools;
-    RibbonTabBattleMap* _ribbonTabMap;
+    RibbonTabBattleMap* _ribbonTabBattleMap;
+    RibbonTabBattleView* _ribbonTabBattleView;
     RibbonTabBattle* _ribbonTabBattle;
     RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
-    RibbonTabMap* _ribbonTabMiniMap;
+    RibbonTabMap* _ribbonTabMap;
+    RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
 };
 

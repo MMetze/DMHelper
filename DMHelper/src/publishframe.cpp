@@ -68,7 +68,6 @@ void PublishFrame::setImage(QImage img)
     _publishImg = img;
     _isScaled = true;
     setScaledImg();
-
 }
 
 void PublishFrame::setImageNoScale(QImage img)

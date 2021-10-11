@@ -58,6 +58,7 @@ void Combatant::inputXML(const QDomElement &element, bool isImport)
     setHitPoints(element.attribute("hitPoints").toInt());
     setHitDice(Dice(element.attribute("hitDice")));
     setConditions(element.attribute("conditions", QString("0")).toInt());
+    setInitiative(element.attribute("initiative", QString("0")).toInt());
     setIcon(element.attribute("icon"));
 
     QDomElement attacksElement = element.firstChildElement( QString("attacks") );
@@ -572,6 +573,7 @@ void Combatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     element.setAttribute("hitPoints", getHitPoints());
     element.setAttribute("hitDice", getHitDice().toString());
     element.setAttribute("conditions", getConditions());
+    element.setAttribute("initiative", getInitiative());
 
     QString iconPath = getIcon(true);
     if(iconPath.isEmpty())

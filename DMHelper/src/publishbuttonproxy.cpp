@@ -20,9 +20,9 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
     connect(publishButton, SIGNAL(rotateCCW()), this, SIGNAL(rotateCCW()));
     connect(publishButton, SIGNAL(rotationChanged(int)), this, SIGNAL(rotationChanged(int)));
     connect(publishButton, SIGNAL(rotationChanged(int)), this, SIGNAL(shareSetRotation(int)));
-    connect(publishButton, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
-    connect(publishButton, SIGNAL(colorChanged(QColor)), this, SIGNAL(shareSetColor(QColor)));
-    connect(publishButton, SIGNAL(buttonColorChanged(QColor)), this, SIGNAL(shareSetColor(QColor)));
+    connect(publishButton, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
+    connect(publishButton, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(shareSetColor(const QColor&)));
+    connect(publishButton, SIGNAL(buttonColorChanged(const QColor&)), this, SIGNAL(shareSetColor(const QColor&)));
     connect(publishButton, SIGNAL(previewClicked()), this, SIGNAL(previewClicked()));
     connect(publishButton, SIGNAL(playersWindowClicked(bool)), this, SIGNAL(playersWindowClicked(bool)));
     connect(publishButton, SIGNAL(playersWindowClicked(bool)), this, SIGNAL(shareSetPlayersWindow(bool)));
@@ -31,7 +31,7 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
     connect(this, SIGNAL(shareSetChecked(bool)), publishButton, SLOT(setChecked(bool)));
     connect(this, SIGNAL(shareSetCheckable(bool)), publishButton, SLOT(setCheckable(bool)));
     connect(this, SIGNAL(shareSetRotation(int)), publishButton, SLOT(setRotation(int)));
-    connect(this, SIGNAL(shareSetColor(QColor)), publishButton, SLOT(setColor(QColor)));
+    connect(this, SIGNAL(shareSetColor(const QColor&)), publishButton, SLOT(setColor(const QColor&)));
     connect(this, SIGNAL(shareCancelPublish()), publishButton, SLOT(cancelPublish()));
     connect(this, SIGNAL(shareSetPlayersWindow(bool)), publishButton, SLOT(setPlayersWindow(bool)));
 }
@@ -70,7 +70,7 @@ void PublishButtonProxy::setRotation(int rotation)
     emit shareSetRotation(rotation);
 }
 
-void PublishButtonProxy::setColor(QColor color)
+void PublishButtonProxy::setColor(const QColor& color)
 {
     emit shareSetColor(color);
 }

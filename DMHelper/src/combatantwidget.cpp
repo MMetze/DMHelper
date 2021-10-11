@@ -56,6 +56,11 @@ void CombatantWidget::updateData()
     return;
 }
 
+void CombatantWidget::updateMove()
+{
+    return;
+}
+
 void CombatantWidget::setInitiative(int initiative)
 {
     if(_edtInit)

@@ -1,6 +1,7 @@
 #include "battledialogmodel.h"
 #include "dmconstants.h"
 #include "map.h"
+#include "grid.h"
 #include <QDebug>
 
 BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
@@ -14,7 +15,9 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     _cameraRect(),
     _background(Qt::black),
     _gridOn(true),
+    _gridType(Grid::GridType_Square),
     _gridScale(DMHelper::STARTING_GRID_SCALE),
+    _gridAngle(50),
     _gridOffsetX(0),
     _gridOffsetY(0),
     _showCompass(false),
@@ -39,11 +42,6 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    // TODO: Manager needs to set battle
-    // TODO: Manager needs to set map and rect
-    // TODO: Manager needs to add combatants
-    // TODO: Manager needs to set active combatant
-
     _background = QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
                          element.attribute("backgroundColorG",QString::number(0)).toInt(),
                          element.attribute("backgroundColorB",QString::number(0)).toInt());
@@ -52,7 +50,9 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
                          element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
                          element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
     _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
+    _gridType = element.attribute("gridType",QString::number(0)).toInt();
     _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
+    _gridAngle = element.attribute("gridAngle",QString::number(50)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
     _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
     // TODO: possibly re-enable compass at some point
@@ -264,9 +264,19 @@ bool BattleDialogModel::getGridOn() const
     return _gridOn;
 }
 
+int BattleDialogModel::getGridType() const
+{
+    return _gridType;
+}
+
 int BattleDialogModel::getGridScale() const
 {
     return _gridScale;
+}
+
+int BattleDialogModel::getGridAngle() const
+{
+    return _gridAngle;
 }
 
 int BattleDialogModel::getGridOffsetX() const
@@ -371,7 +381,7 @@ void BattleDialogModel::setCameraRect(const QRectF& rect)
     }
 }
 
-void BattleDialogModel::setBackgroundColor(QColor color)
+void BattleDialogModel::setBackgroundColor(const QColor& color)
 {
     if(_background != color)
     {
@@ -389,12 +399,30 @@ void BattleDialogModel::setGridOn(bool gridOn)
     }
 }
 
+void BattleDialogModel::setGridType(int gridType)
+{
+    if(_gridType != gridType)
+    {
+        _gridType = gridType;
+        emit gridTypeChanged(_gridType);
+    }
+}
+
 void BattleDialogModel::setGridScale(int gridScale)
 {
     if(_gridScale != gridScale)
     {
         _gridScale = gridScale;
         emit gridScaleChanged(_gridScale);
+    }
+}
+
+void BattleDialogModel::setGridAngle(int gridAngle)
+{
+    if(_gridAngle != gridAngle)
+    {
+        _gridAngle = gridAngle;
+        emit gridAngleChanged(_gridAngle);
     }
 }
 
@@ -536,7 +564,9 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("backgroundColorB", _background.blue());
     element.setAttribute("background", _mapRect.height());
     element.setAttribute("showGrid", _gridOn);
+    element.setAttribute("gridType", _gridType);
     element.setAttribute("gridScale", _gridScale);
+    element.setAttribute("gridAngle", _gridAngle);
     element.setAttribute("gridOffsetX", _gridOffsetX);
     element.setAttribute("gridOffsetY", _gridOffsetY);
     element.setAttribute("showCompass", _showCompass);

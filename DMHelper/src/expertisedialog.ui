@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Expertise Settings</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QGridLayout" name="gridLayout">
@@ -364,6 +367,27 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>chkAthletics</tabstop>
+  <tabstop>chkAcrobatics</tabstop>
+  <tabstop>chkSleightOfHand</tabstop>
+  <tabstop>chkStealth</tabstop>
+  <tabstop>chkArcana</tabstop>
+  <tabstop>chkHistory</tabstop>
+  <tabstop>chkInvestigation</tabstop>
+  <tabstop>chkNature</tabstop>
+  <tabstop>chkReligion</tabstop>
+  <tabstop>chkAnimalHandling</tabstop>
+  <tabstop>chkInsight</tabstop>
+  <tabstop>chkPerception</tabstop>
+  <tabstop>chkSurvival</tabstop>
+  <tabstop>chkMedicine</tabstop>
+  <tabstop>chkDeception</tabstop>
+  <tabstop>chkIntimidation</tabstop>
+  <tabstop>chkPersuasion</tabstop>
+  <tabstop>chkPerformance</tabstop>
+  <tabstop>chkJackOfAllTrades</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

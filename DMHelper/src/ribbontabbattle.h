@@ -25,8 +25,6 @@ public slots:
     void setLairActions(bool checked);
 
 signals:
-    void newMapClicked();
-    void reloadMapClicked();
     void addCharacterClicked();
     void addMonsterClicked();
     void addNPCClicked();

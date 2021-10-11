@@ -112,7 +112,6 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mouseReleaseEvent(QGraphicsS
     delete _distanceText; _distanceText = nullptr;
     mouseEvent->accept();
     return false;
-
 }
 
 void BattleDialogGraphicsSceneMouseHandlerDistance::setHeightDelta(qreal heightDelta)
@@ -267,80 +266,33 @@ bool BattleDialogGraphicsSceneMouseHandlerCombatants::mouseReleaseEvent(QGraphic
 
 /******************************************************************************************************/
 
-/*
-BattleDialogGraphicsSceneMouseHandlerSelect::BattleDialogGraphicsSceneMouseHandlerSelect(BattleDialogGraphicsScene& scene) :
+
+BattleDialogGraphicsSceneMouseHandlerMaps::BattleDialogGraphicsSceneMouseHandlerMaps(BattleDialogGraphicsScene& scene) :
     BattleDialogGraphicsSceneMouseHandlerBase(scene)
 {
 }
 
-BattleDialogGraphicsSceneMouseHandlerSelect::~BattleDialogGraphicsSceneMouseHandlerSelect()
+BattleDialogGraphicsSceneMouseHandlerMaps::~BattleDialogGraphicsSceneMouseHandlerMaps()
 {
 }
 
-bool BattleDialogGraphicsSceneMouseHandlerSelect::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
+bool BattleDialogGraphicsSceneMouseHandlerMaps::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-
+    emit mapMouseMove(mouseEvent->scenePos());
+    mouseEvent->accept();
+    return false;
 }
 
-bool BattleDialogGraphicsSceneMouseHandlerSelect::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
+bool BattleDialogGraphicsSceneMouseHandlerMaps::mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-    QAbstractGraphicsShapeItem* abstractShape = dynamic_cast<QAbstractGraphicsShapeItem*>(item);
-
-    qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
-
-    if(item)
-    {
-        if(!(QUuid(item->data(BATTLE_DIALOG_MODEL_EFFECT_ID).toString()).isNull()))
-        {
-            _mouseDown = true;
-            _mouseDownPos = mouseEvent->scenePos() - item->scenePos();
-            _mouseDownItem = item;
-
-            if(mouseEvent->button() == Qt::RightButton)
-            {
-                _previousRotation = _mouseDownItem->rotation();
-                 qDebug() << "[Battle Dialog Scene] right mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ", rot=" << _previousRotation;
-                mouseEvent->accept();
-                return false;
-            }
-            else if(mouseEvent->button() == Qt::LeftButton)
-            {
-                qDebug() << "[Battle Dialog Scene] left mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
-                emit effectChanged(abstractShape);
-            }
-            else
-            {
-                qDebug() << "[Battle Dialog Scene] other mouse button down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
-            }
-        }
-        else if((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
-        {
-            QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
-            if(pixItem)
-            {
-                _mouseDown = true;
-                _mouseDownItem = item;
-                qDebug() << "[Battle Dialog Scene] left mouse down on combatant " << pixItem;
-                emit itemMouseDown(pixItem);
-                mouseEvent->accept();
-            }
-        }
-    }
-    else
-    {
-        qDebug() << "[Battle Dialog Scene] ignoring mouse click for non-selectable item " << item;
-        mouseEvent->ignore();
-        return false;
-    }
-
-    qDebug() << "[Battle Dialog Scene] mouse press default handling triggered " << mouseEvent;
-
-    return true;
+    emit mapMousePress(mouseEvent->scenePos());
+    mouseEvent->accept();
+    return false;
 }
 
-bool BattleDialogGraphicsSceneMouseHandlerSelect::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
+bool BattleDialogGraphicsSceneMouseHandlerMaps::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-
+    emit mapMouseRelease(mouseEvent->scenePos());
+    mouseEvent->accept();
+    return false;
 }
-*/

@@ -1,22 +1,33 @@
-<!DOCTYPE DMHelperDataXML>
-<root>
-    <locations>
-	<location name="Metropolis" probability="10.0">
-	    <shop name="General Store" mundane="1.0" goods="1.0" magic_armor="0.1" magic_potion="0.5" magic_ring="0.1" magic_rod="0.1" magic_scroll="0.1" magic_staff="0.1" magic_wand="0.1" magic_weapon="0.1" magic_wondrousitem="0.1" vehicles="0.1" weapon="0.5" armor="0.5"></shop>
-	    <shop name="Smith" mundane="0.0" goods="0.0" magic_armor="1.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0" magic_wand="0.0" magic_weapon="1.0" magic_wondrousitem="0.0" vehicles="0.0" weapon="1.0" armor="1.0"></shop>
-	    <shop name="Magical Items" mundane="0.1" goods="0.0" magic_armor="0.5" magic_potion="1.0" magic_ring="1.0" magic_rod="1.0" magic_scroll="1.0" magic_staff="1.0" magic_wand="1.0" magic_weapon="0.5" magic_wondrousitem="1.0" vehicles="0.0" weapon="0.0" armor="0.0"></shop>
-	    <shop name="Transportation" mundane="0.0" goods="0.0" magic_armor="0.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0" magic_wand="0.0" magic_weapon="0.0" magic_wondrousitem="0.1" vehicles="1.0" weapon="0.1" armor="0.1"></shop>
-	</location>
-	<location name="City" probability="1.0">
-	    <shop name="General Store" mundane="3.0" goods="1.0" magic_armor="0.1" magic_potion="0.5" magic_ring="0.1" magic_rod="0.1" magic_scroll="0.1" magic_staff="0.1" magic_wand="0.1" magic_weapon="0.1" magic_wondrousitem="0.1" vehicles="0.1" weapon="0.5" armor="0.5"></shop>
-	    <shop name="Smith" mundane="0.0" goods="0.0" magic_armor="0.5" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0" magic_wand="0.0" magic_weapon="0.5" magic_wondrousitem="0.0" vehicles="0.0" weapon="1.0" armor="1.0"></shop>
-	    <shop name="Magical Items" mundane="0.1" goods="0.0" magic_armor="0.5" magic_potion="1.0" magic_ring="1.0" magic_rod="1.0" magic_scroll="1.0" magic_staff="1.0" magic_wand="1.0" magic_weapon="0.5" magic_wondrousitem="1.0" vehicles="0.0" weapon="0.0" armor="0.0"></shop>
-	    <shop name="Transportation" mundane="0.0" goods="0.0" magic_armor="0.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0" magic_wand="0.0" magic_weapon="0.0" magic_wondrousitem="0.1" vehicles="1.0" weapon="0.1" armor="0.1"></shop>
-	</location>    
-	<location name="Village" probability="0.5">
-	    <shop name="General Store" mundane="4.0" goods="1.0" magic_armor="0.0" magic_potion="0.1" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0" magic_wand="0.0" magic_weapon="0.1" magic_wondrousitem="0.1" vehicles="0.1" weapon="0.2" armor="0.2"></shop>
-	    <shop name="Smith" mundane="0.0" goods="0.0" magic_armor="0.1" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0" magic_wand="0.0" magic_weapon="0.1" magic_wondrousitem="0.0" vehicles="0.0" weapon="1.0" armor="1.0"></shop>
-	    <shop name="Transportation" mundane="0.0" goods="0.0" magic_armor="0.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0" magic_wand="0.0" magic_weapon="0.0" magic_wondrousitem="0.0" vehicles="1.0" weapon="0.1" armor="0.1"></shop>
-	</location>  
-    </locations>
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="shops.xsd">
+  <locations>
+    <location name="Metropolis" probability="10.0">
+      <shop name="General Store" mundane="1.0" goods="1.0" magic_armor="0.1" magic_potion="0.5" magic_ring="0.1" magic_rod="0.1" magic_scroll="0.1"
+            magic_staff="0.1" magic_wand="0.1" magic_weapon="0.1" magic_wondrousitem="0.1" vehicles="0.1" weapon="0.5" armor="0.5"/>
+      <shop name="Smith" mundane="0.0" goods="0.0" magic_armor="1.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0"
+            magic_wand="0.0" magic_weapon="1.0" magic_wondrousitem="0.0" vehicles="0.0" weapon="1.0" armor="1.0"/>
+      <shop name="Magical Items" mundane="0.1" goods="0.0" magic_armor="0.5" magic_potion="1.0" magic_ring="1.0" magic_rod="1.0" magic_scroll="1.0"
+            magic_staff="1.0" magic_wand="1.0" magic_weapon="0.5" magic_wondrousitem="1.0" vehicles="0.0" weapon="0.0" armor="0.0"/>
+      <shop name="Transportation" mundane="0.0" goods="0.0" magic_armor="0.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0"
+            magic_staff="0.0" magic_wand="0.0" magic_weapon="0.0" magic_wondrousitem="0.1" vehicles="1.0" weapon="0.1" armor="0.1"/>
+    </location>
+    <location name="City" probability="1.0">
+      <shop name="General Store" mundane="3.0" goods="1.0" magic_armor="0.1" magic_potion="0.5" magic_ring="0.1" magic_rod="0.1" magic_scroll="0.1"
+            magic_staff="0.1" magic_wand="0.1" magic_weapon="0.1" magic_wondrousitem="0.1" vehicles="0.1" weapon="0.5" armor="0.5"/>
+      <shop name="Smith" mundane="0.0" goods="0.0" magic_armor="0.5" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0"
+            magic_wand="0.0" magic_weapon="0.5" magic_wondrousitem="0.0" vehicles="0.0" weapon="1.0" armor="1.0"/>
+      <shop name="Magical Items" mundane="0.1" goods="0.0" magic_armor="0.5" magic_potion="1.0" magic_ring="1.0" magic_rod="1.0" magic_scroll="1.0"
+            magic_staff="1.0" magic_wand="1.0" magic_weapon="0.5" magic_wondrousitem="1.0" vehicles="0.0" weapon="0.0" armor="0.0"/>
+      <shop name="Transportation" mundane="0.0" goods="0.0" magic_armor="0.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0"
+            magic_staff="0.0" magic_wand="0.0" magic_weapon="0.0" magic_wondrousitem="0.1" vehicles="1.0" weapon="0.1" armor="0.1"/>
+    </location>
+    <location name="Village" probability="0.5">
+      <shop name="General Store" mundane="4.0" goods="1.0" magic_armor="0.0" magic_potion="0.1" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0"
+            magic_staff="0.0" magic_wand="0.0" magic_weapon="0.1" magic_wondrousitem="0.1" vehicles="0.1" weapon="0.2" armor="0.2"/>
+      <shop name="Smith" mundane="0.0" goods="0.0" magic_armor="0.1" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0" magic_staff="0.0"
+            magic_wand="0.0" magic_weapon="0.1" magic_wondrousitem="0.0" vehicles="0.0" weapon="1.0" armor="1.0"/>
+      <shop name="Transportation" mundane="0.0" goods="0.0" magic_armor="0.0" magic_potion="0.0" magic_ring="0.0" magic_rod="0.0" magic_scroll="0.0"
+            magic_staff="0.0" magic_wand="0.0" magic_weapon="0.0" magic_wondrousitem="0.0" vehicles="1.0" weapon="0.1" armor="0.1"/>
+    </location>
+  </locations>
 </root>

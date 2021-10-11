@@ -54,7 +54,6 @@ QUuid CampaignTreeItem::getCampaignItemId() const
     QString s = v.toString();
     QUuid u(s);
     return u;
-    //return QUuid(data(DMHelper::TreeItemData_ID).toString());
 }
 
 void CampaignTreeItem::setCampaignItemId(const QUuid& itemId)

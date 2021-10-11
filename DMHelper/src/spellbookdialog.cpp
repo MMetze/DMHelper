@@ -53,7 +53,7 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     ui->btnEffectTokenBrowse->setStyleSheet(QString("QPushButton:disabled {color: rgb(196, 196, 196);}"));
     connect(ui->edtEffectWidth, &QLineEdit::textEdited, this, &SpellbookDialog::handleWidthChanged);
     connect(ui->edtEffectHeight, &QLineEdit::textEdited, this, &SpellbookDialog::handleHeightChanged);
-    connect(ui->btnEffectColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(spellDataEdit()));
+    connect(ui->btnEffectColor, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(spellDataEdit()));
     connect(ui->sliderOpacity, &QAbstractSlider::valueChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->edtEffectToken, &QLineEdit::textChanged, this, &SpellbookDialog::spellDataEdit);
     connect(ui->cmbEffectType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleEffectChanged(int)));
@@ -364,8 +364,7 @@ void SpellbookDialog::selectToken()
 
     QString tokenFile = QFileDialog::getOpenFileName(nullptr,
                                                      QString("Select a token file for the spell"),
-                                                     searchDir,
-                                                     QString("Image files (*.png *.jpg)"));
+                                                     searchDir);
     if(tokenFile.isEmpty())
     {
         qDebug() << "[SpellbookDialog] Not able to select a token file; selection dialog cancelled.";

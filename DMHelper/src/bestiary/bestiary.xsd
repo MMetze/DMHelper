@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="root">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="bestiary"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="bestiary">
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element maxOccurs="unbounded" ref="element"/>
+                <xs:element ref="license"/>
+            </xs:choice>
+            <xs:attribute name="majorversion" use="required" type="xs:integer"/>
+            <xs:attribute name="minorversion" use="required" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="license">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="element" maxOccurs="unbounded" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="element">
+        <xs:complexType mixed="true">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="acrobatics"/>
+                <xs:element ref="actions"/>
+                <xs:element ref="alignment"/>
+                <xs:element ref="arcana"/>
+                <xs:element ref="armor_class"/>
+                <xs:element ref="athletics"/>
+                <xs:element ref="challenge_rating"/>
+                <xs:element ref="charisma"/>
+                <xs:element ref="charisma_save"/>
+                <xs:element ref="condition_immunities"/>
+                <xs:element ref="constitution"/>
+                <xs:element ref="constitution_save"/>
+                <xs:element ref="damage_immunities"/>
+                <xs:element ref="damage_resistances"/>
+                <xs:element ref="damage_vulnerabilities"/>
+                <xs:element ref="deception"/>
+                <xs:element ref="dexterity"/>
+                <xs:element ref="dexterity_save"/>
+                <xs:element ref="history"/>
+                <xs:element ref="hit_dice"/>
+                <xs:element ref="hit_points"/>
+                <xs:element ref="insight"/>
+                <xs:element ref="intelligence"/>
+                <xs:element ref="intelligence_save"/>
+                <xs:element ref="intimidation"/>
+                <xs:element ref="investigation"/>
+                <xs:element ref="languages"/>
+                <xs:element ref="legendary_actions"/>
+                <xs:element ref="medicine"/>
+                <xs:element ref="name"/>
+                <xs:element ref="nature"/>
+                <xs:element ref="perception"/>
+                <xs:element ref="performance"/>
+                <xs:element ref="persuasion"/>
+                <xs:element ref="reactions"/>
+                <xs:element ref="religion"/>
+                <xs:element ref="senses"/>
+                <xs:element ref="size"/>
+                <xs:element ref="special_abilities"/>
+                <xs:element ref="speed"/>
+                <xs:element ref="stealth"/>
+                <xs:element ref="strength"/>
+                <xs:element ref="strength_save"/>
+                <xs:element ref="subtype"/>
+                <xs:element ref="survival"/>
+                <xs:element ref="type"/>
+                <xs:element ref="wisdom"/>
+                <xs:element ref="wisdom_save"/>
+            </xs:choice>
+            <xs:attribute name="icon"/>
+            <xs:attribute name="private" type="xs:integer"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="acrobatics" type="xs:integer"/>
+    <xs:element name="actions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="element" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType mixed="true">
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element name="attack_bonus" type="xs:integer"/>
+                            <xs:element name="desc" type="xs:string"/>
+                            <xs:element name="name" type="xs:string"/>
+                            <xs:element name="damage_bonus" type="xs:integer"/>
+                            <xs:element name="damage_dice" type="xs:string"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="alignment" type="xs:string"/>
+    <xs:element name="arcana" type="xs:integer"/>
+    <xs:element name="armor_class" type="xs:integer"/>
+    <xs:element name="athletics" type="xs:integer"/>
+    <xs:element name="challenge_rating" type="xs:string"/>
+    <xs:element name="charisma" type="xs:integer"/>
+    <xs:element name="charisma_save" type="xs:integer"/>
+    <xs:element name="condition_immunities" type="xs:string"/>
+    <xs:element name="constitution" type="xs:integer"/>
+    <xs:element name="constitution_save" type="xs:integer"/>
+    <xs:element name="damage_immunities" type="xs:string"/>
+    <xs:element name="damage_resistances" type="xs:string"/>
+    <xs:element name="damage_vulnerabilities" type="xs:string"/>
+    <xs:element name="deception" type="xs:integer"/>
+    <xs:element name="dexterity" type="xs:integer"/>
+    <xs:element name="dexterity_save" type="xs:integer"/>
+    <xs:element name="history" type="xs:integer"/>
+    <xs:element name="hit_dice" type="xs:string"/>
+    <xs:element name="hit_points" type="xs:integer"/>
+    <xs:element name="insight" type="xs:integer"/>
+    <xs:element name="intelligence" type="xs:integer"/>
+    <xs:element name="intelligence_save" type="xs:integer"/>
+    <xs:element name="intimidation" type="xs:integer"/>
+    <xs:element name="investigation" type="xs:integer"/>
+    <xs:element name="languages" type="xs:string"/>
+    <xs:element name="legendary_actions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="element" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType mixed="true">
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element name="attack_bonus" type="xs:integer"/>
+                            <xs:element name="desc" type="xs:string"/>
+                            <xs:element name="name" type="xs:string"/>
+                            <xs:element name="damage_bonus" type="xs:integer"/>
+                            <xs:element name="damage_dice" type="xs:string"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="medicine" type="xs:integer"/>
+    <xs:element name="name" type="xs:string"/>
+    <xs:element name="nature" type="xs:integer"/>
+    <xs:element name="perception" type="xs:integer"/>
+    <xs:element name="performance" type="xs:integer"/>
+    <xs:element name="persuasion" type="xs:integer"/>
+    <xs:element name="reactions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="element" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType mixed="true">
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element name="attack_bonus" type="xs:integer"/>
+                            <xs:element name="desc" type="xs:string"/>
+                            <xs:element name="name" type="xs:string"/>
+                            <xs:element name="damage_bonus" type="xs:integer"/>
+                            <xs:element name="damage_dice" type="xs:string"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="religion" type="xs:integer"/>
+    <xs:element name="senses" type="xs:string"/>
+    <xs:element name="size" type="xs:NCName"/>
+    <xs:element name="special_abilities">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="element" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType mixed="true">
+                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element name="attack_bonus" type="xs:integer"/>
+                            <xs:element name="desc" type="xs:string"/>
+                            <xs:element name="name" type="xs:string"/>
+                            <xs:element name="damage_bonus" type="xs:integer"/>
+                            <xs:element name="damage_dice" type="xs:string"/>
+                        </xs:choice>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="speed" type="xs:string"/>
+    <xs:element name="stealth" type="xs:integer"/>
+    <xs:element name="strength" type="xs:integer"/>
+    <xs:element name="strength_save" type="xs:integer"/>
+    <xs:element name="subtype" type="xs:string"/>
+    <xs:element name="survival" type="xs:integer"/>
+    <xs:element name="type" type="xs:string"/>
+    <xs:element name="wisdom" type="xs:integer"/>
+    <xs:element name="wisdom_save" type="xs:integer"/>
+</xs:schema>

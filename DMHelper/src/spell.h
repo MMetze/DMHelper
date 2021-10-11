@@ -71,7 +71,7 @@ public slots:
     void setEffectType(int effectType);
     void setEffectShapeActive(bool effectShapeActive);
     void setEffectSize(QSize effectSize);
-    void setEffectColor(QColor effectColor);
+    void setEffectColor(const QColor& effectColor);
     void setEffectToken(QString effectToken);
     void setEffectTokenRotation(int effectTokenRotation);
     void setEffectConditions(int conditions);

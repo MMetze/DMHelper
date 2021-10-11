@@ -18,23 +18,47 @@ public:
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
 public slots:
-    void setColor(QColor color);
+    void setAnimation(bool checked);
+    void setImageFile(const QString& imageFile);
+
+    void setColor(const QColor& color);
     void setFontFamily(const QString& fontFamily);
     void setFontSize(int fontSize);
     void setFontBold(bool fontBold);
     void setFontItalics(bool fontItalics);
+    void setFontUnderline(bool fontUnderline);
     void setAlignment(Qt::Alignment alignment);
+    void setPasteRich(bool pasteRich);
+
+    void setWidth(int width);
+    void setSpeed(int speed);
 
     void setHyperlinkActive(bool active);
 
+    void setTranslationActive(bool active);
+
 signals:
-    void colorChanged(QColor color);
+    void backgroundClicked(bool checked);
+
+    // Animation
+    void animationClicked(bool checked);
+    void speedChanged(int speed);
+    void widthChanged(int width);
+    void rewindClicked();
+
+    // Text
+    void colorChanged(const QColor& color);
     void fontFamilyChanged(const QString& fontFamily);
     void fontSizeChanged(int fontSize);
     void fontBoldChanged(bool fontBold);
     void fontItalicsChanged(bool fontItalics);
+    void fontUnderlineChanged(bool fontUnderline);
     void alignmentChanged(Qt::Alignment alignment);
+    void pasteRichChanged(bool pasteRich);
     void hyperlinkClicked();
+
+    // Tools
+    void translateTextClicked(bool checked);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

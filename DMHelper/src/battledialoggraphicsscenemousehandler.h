@@ -134,19 +134,24 @@ public:
 
 /******************************************************************************************************/
 
-/*
-class BattleDialogGraphicsSceneMouseHandlerSelect : public BattleDialogGraphicsSceneMouseHandlerBase
+
+class BattleDialogGraphicsSceneMouseHandlerMaps : public BattleDialogGraphicsSceneMouseHandlerBase
 {
     Q_OBJECT
 public:
-    explicit BattleDialogGraphicsSceneMouseHandlerSelect(BattleDialogGraphicsScene& scene);
-    virtual ~BattleDialogGraphicsSceneMouseHandlerSelect() override;
+    explicit BattleDialogGraphicsSceneMouseHandlerMaps(BattleDialogGraphicsScene& scene);
+    virtual ~BattleDialogGraphicsSceneMouseHandlerMaps() override;
 
 public:
     virtual bool mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual bool mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
+
+signals:
+    void mapMousePress(const QPointF& pos);
+    void mapMouseMove(const QPointF& pos);
+    void mapMouseRelease(const QPointF& pos);
+
 };
-*/
 
 #endif // BATTLEDIALOGGRAPHICSSCENEMOUSEHANDLERBASE_H

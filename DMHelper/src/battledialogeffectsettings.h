@@ -14,7 +14,7 @@ class BattleDialogEffectSettings : public QDialog
     Q_OBJECT
 
 public:
-    explicit BattleDialogEffectSettings(int sizeval, qreal rotation, QColor color, QString tip, QWidget *parent = nullptr);
+    explicit BattleDialogEffectSettings(int sizeval, qreal rotation, const QColor& color, QString tip, QWidget *parent = nullptr);
     explicit BattleDialogEffectSettings(const BattleDialogModelEffect& effect, QWidget *parent = nullptr);
     ~BattleDialogEffectSettings();
 
@@ -39,7 +39,7 @@ private slots:
     void selectNewColor();
 
 private:
-    void setButtonColor(QColor color);
+    void setButtonColor(const QColor& color);
 
     Ui::BattleDialogEffectSettings *ui;
 

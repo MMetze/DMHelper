@@ -43,7 +43,7 @@ public slots:
     virtual void setFontItalics(bool fontItalics);
     virtual void setAlignment(Qt::Alignment alignment);
     virtual void setImageWidth(int imageWidth);
-    virtual void setFontColor(QColor fontColor);
+    virtual void setFontColor(const QColor& fontColor);
 
 signals:
     void scrollSpeedChanged(int scrollSpeed);
@@ -54,7 +54,7 @@ signals:
     void fontItalicsChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
     void imageWidthChanged(int imageWidth);
-    void fontColorChanged(QColor fontColor);
+    void fontColorChanged(const QColor& fontColor);
 
 protected slots:
     //virtual void widgetChanged() override;

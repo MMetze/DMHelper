@@ -30,11 +30,12 @@ int MapContent::createId()
 
 
 
-MapMarker::MapMarker(const QPoint& position, const QString& title, const QString& description) :
+MapMarker::MapMarker(const QPoint& position, const QString& title, const QString& description, const QUuid& encounter) :
     MapContent(),
     _position(position),
     _title(title),
-    _description(description)
+    _description(description),
+    _encounter(encounter)
 {
 }
 
@@ -42,7 +43,8 @@ MapMarker::MapMarker(const MapMarker &obj) :
     MapContent(obj),
     _position(obj.position()),
     _title(obj.title()),
-    _description(obj.description())
+    _description(obj.description()),
+    _encounter(obj.encounter())
 {
 }
 
@@ -50,19 +52,24 @@ MapMarker::~MapMarker()
 {
 }
 
-const QPoint& MapMarker::position() const
+QPoint MapMarker::position() const
 {
     return _position;
 }
 
-const QString& MapMarker::title() const
+QString MapMarker::title() const
 {
     return _title;
 }
 
-const QString& MapMarker::description() const
+QString MapMarker::description() const
 {
     return _description;
+}
+
+const QUuid& MapMarker::encounter() const
+{
+    return _encounter;
 }
 
 void MapMarker::setPosition(const QPoint& position)
@@ -90,26 +97,9 @@ void MapMarker::setDescription(const QString& description)
     _description = description;
 }
 
-QDomElement MapMarker::outputXML(QDomElement &element, bool isExport) const
+void MapMarker::setEncounter(const QUuid& encounter)
 {
-    Q_UNUSED(isExport);
-
-    element.setAttribute( "x", _position.x() );
-    element.setAttribute( "y", _position.y() );
-    element.setAttribute( "title", _title );
-    element.setAttribute( "description", _description );
-
-    return element;
-}
-
-void MapMarker::inputXML(const QDomElement &element, bool isImport)
-{
-    Q_UNUSED(isImport);
-
-    setX(element.attribute(QString("x")).toInt());
-    setY(element.attribute(QString("y")).toInt());
-    setTitle(element.attribute( QString("title") ));
-    setDescription(element.attribute( QString("description") ));
+    _encounter = encounter;
 }
 
 
@@ -148,7 +138,7 @@ MapEditFill::~MapEditFill()
 {
 }
 
-const QColor& MapEditFill::color() const
+QColor MapEditFill::color() const
 {
     return _color;
 }
@@ -261,7 +251,7 @@ MapDrawPoint::~MapDrawPoint()
 {
 }
 
-const QPoint& MapDrawPoint::point() const
+QPoint MapDrawPoint::point() const
 {
     return _point;
 }
@@ -340,7 +330,7 @@ MapEditShape::~MapEditShape()
 {
 }
 
-const QRect& MapEditShape::rect() const
+QRect MapEditShape::rect() const
 {
     return _rect;
 }
