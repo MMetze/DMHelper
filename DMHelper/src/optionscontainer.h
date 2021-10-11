@@ -8,6 +8,8 @@
 #include "mruhandler.h"
 #include "dmconstants.h"
 
+class OptionsAccessor;
+
 class OptionsContainer : public QObject
 {
     Q_OBJECT
@@ -125,10 +127,10 @@ public slots:
     void setCalendarFileName(const QString& filename);
     void setEquipmentFileName(const QString& filename);
     void setShopsFileName(const QString& filename);
-    QString getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename, bool* exists = nullptr);
+    QString getSettingsFile(OptionsAccessor& settings, const QString& key, const QString& defaultFilename, bool* exists = nullptr);
     QString getStandardFile(const QString& defaultFilename, bool* exists = nullptr);
     void setTablesDirectory(const QString& directory);
-    QString getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir);
+    QString getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir);
     QString getDataDirectory(const QString& defaultDir, bool overwrite = false);
     QString getStandardDirectory(const QString& defaultDir, bool* created = nullptr);
     void backupFile(const QString& filename);

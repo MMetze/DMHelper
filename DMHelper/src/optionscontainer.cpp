@@ -1,6 +1,6 @@
 #include "optionscontainer.h"
 #include "optionsdialog.h"
-#include <QSettings>
+#include "optionsaccessor.h"
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
@@ -283,11 +283,7 @@ void OptionsContainer::editSettings()
 
 void OptionsContainer::readSettings()
 {
-    QSettings settings("Glacial Software", "DMHelper");
-
-#ifdef QT_DEBUG
-    settings.beginGroup("DEBUG");
-#endif
+    OptionsAccessor settings;
 
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
@@ -367,19 +363,11 @@ void OptionsContainer::readSettings()
     {
         _mruHandler->readMRUFromSettings(settings);
     }
-
-#ifdef QT_DEBUG
-    settings.endGroup(); // DEBUG
-#endif
 }
 
 void OptionsContainer::writeSettings()
 {
-    QSettings settings("Glacial Software", "DMHelper");
-
-#ifdef QT_DEBUG
-    settings.beginGroup("DEBUG");
-#endif
+    OptionsAccessor settings;
 
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
@@ -441,10 +429,6 @@ void OptionsContainer::writeSettings()
     {
         _mruHandler->writeMRUToSettings(settings);
     }
-
-#ifdef QT_DEBUG
-    settings.endGroup(); // DEBUG
-#endif
 }
 
 void OptionsContainer::setBestiaryFileName(const QString& filename)
@@ -507,7 +491,7 @@ void OptionsContainer::setShopsFileName(const QString& filename)
     }
 }
 
-QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename, bool* exists)
+QString OptionsContainer::getSettingsFile(OptionsAccessor& settings, const QString& key, const QString& defaultFilename, bool* exists)
 {
     QString result = settings.value(key, QVariant()).toString();
 
@@ -591,7 +575,7 @@ void OptionsContainer::setTablesDirectory(const QString& directory)
     }
 }
 
-QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir)
+QString OptionsContainer::getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir)
 {
     QString result = settings.value(key, QVariant()).toString();
     if(!result.isEmpty())

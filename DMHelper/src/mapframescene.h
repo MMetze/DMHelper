@@ -17,12 +17,14 @@ signals:
 
     void addMarker(const QPointF& pos);
     void editMarker(int marker);
+    void deleteMarker(int marker);
     void centerView(const QPointF& pos);
     void clearFoW();
 
 protected slots:
     void handleAddMarker();
     void handleEditMarker();
+    void handleDeleteMarker();
     void handleCenterView();
     void handleClearFoW();
 

@@ -20,6 +20,8 @@
 #include <QTimer>
 #include <QMutexLocker>
 #include <QFileDialog>
+#include <QStyleOptionGraphicsItem>
+#include <QMessageBox>
 #include <QDebug>
 
 MapFrame::MapFrame(QWidget *parent) :
@@ -156,7 +158,7 @@ void MapFrame::mapMarkerMoved(int markerId)
 
     if(undoMarker->getMarkerItem())
     {
-        undoMarker->marker().setPosition(undoMarker->getMarkerItem()->pos().toPoint());
+        undoMarker->getMarker().setPosition(undoMarker->getMarkerItem()->pos().toPoint());
         emit dirty();
     }
 }
@@ -170,10 +172,10 @@ void MapFrame::activateMapMarker(int markerId)
     if(!undoMarker)
         return;
 
-    if(undoMarker->marker().encounter().isNull())
+    if(undoMarker->getMarker().getEncounter().isNull())
         return;
 
-    _activatedId = undoMarker->marker().encounter();
+    _activatedId = undoMarker->getMarker().getEncounter();
     QTimer::singleShot(0, this, SLOT(handleActivateMapMarker()));
 }
 
@@ -351,7 +353,7 @@ void MapFrame::setShowMarkers(bool show)
     for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
     {
         const UndoMarker* marker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
-        if((marker) && (marker->getMarkerItem()))
+        if((marker) && (marker->getMarkerItem()) && (!marker->isRemoved()))
             marker->getMarkerItem()->setVisible(show);
     }
 
@@ -367,12 +369,14 @@ void MapFrame::addNewMarker()
 
 void MapFrame::addMarker(const QPointF& markerPosition)
 {
-    MapMarkerDialog dlg(QString(""), QString(""), QUuid(), *_mapSource, this);
+    MapMarkerDialog dlg(MapMarker(), *_mapSource, this);
     dlg.resize(width() / 3, height() / 3);
     dlg.move(ui->graphicsView->mapFromScene(markerPosition) + mapToGlobal(ui->graphicsView->pos()));
     if(dlg.exec() == QDialog::Accepted)
     {
-        UndoMarker* undoMarker = new UndoMarker(*_mapSource, MapMarker(markerPosition.toPoint(), dlg.getTitle(), dlg.getDescription(), dlg.getEncounter()));
+        MapMarker marker = dlg.getMarker();
+        marker.setPosition(markerPosition.toPoint());
+        UndoMarker* undoMarker = new UndoMarker(*_mapSource, marker);
         _mapSource->getUndoStack()->push(undoMarker);
         emit dirty();
         setShowMarkers(true);
@@ -384,13 +388,15 @@ void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
     if((!undoEntry) || (!marker) || (!_scene))
         return;
 
+    if(!_mapSource)
+        return;
+
     MapMarkerGraphicsItem* markerItem = new MapMarkerGraphicsItem(_scene, *marker, *this);
     markerItem->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale()));
-    markerItem->setPos(marker->position());
+    markerItem->setPos(marker->getPosition());
     markerItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
 
-    if(_mapSource)
-        markerItem->setVisible(_mapSource->getShowMarkers());
+    markerItem->setVisible(_mapSource->getShowMarkers());
 
     undoEntry->setMarkerItem(markerItem);
 }
@@ -404,14 +410,37 @@ void MapFrame::editMapMarker(int markerId)
     if(!undoMarker)
         return;
 
-    MapMarkerDialog dlg(undoMarker->marker().title(), undoMarker->marker().description(), undoMarker->marker().encounter(), *_mapSource, this);
+    MapMarkerDialog dlg(undoMarker->getMarker(), *_mapSource, this);
     dlg.resize(width() / 3, height() / 3);
-    dlg.move(ui->graphicsView->mapFromScene(undoMarker->marker().position()) + mapToGlobal(ui->graphicsView->pos()));
-    if(dlg.exec() == QDialog::Accepted)
+    dlg.move(ui->graphicsView->mapFromScene(undoMarker->getMarker().getPosition()) + mapToGlobal(ui->graphicsView->pos()));
+    int result = dlg.exec();
+    if(result == QDialog::Accepted)
     {
-        undoMarker->setTitle(dlg.getTitle());
-        undoMarker->setDescription(dlg.getDescription());
-        undoMarker->marker().setEncounter(dlg.getEncounter());
+        undoMarker->setMarker(dlg.getMarker());
+        emit dirty();
+    }
+    else if(result == MapMarkerDialog::MAPMARKERDIALOG_DELETE)
+    {
+        deleteMapMarker(undoMarker->getMarker().getID());
+    }
+}
+
+void MapFrame::deleteMapMarker(int markerId)
+{
+    if(!_mapSource)
+        return;
+
+    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
+    if(!undoMarker)
+        return;
+
+    QMessageBox::StandardButton deleteConfirm = QMessageBox::question(this,
+                                                                      QString("Delete Marker"),
+                                                                      QString("Are you sure that you want to delete this marker?"));
+
+    if(deleteConfirm == QMessageBox::Yes)
+    {
+        undoMarker->setRemoved(false);
         emit dirty();
     }
 }
@@ -680,6 +709,23 @@ void MapFrame::publishClicked(bool checked)
                 p.drawPath(_distancePath->path().translated(-topLeftOffset));
             if(_distanceText)
                 p.drawText(_distanceText->pos() - topLeftOffset, _distanceText->text());
+
+            if(_mapSource->getShowMarkers())
+            {
+                if(QUndoStack* stack = _mapSource->getUndoStack())
+                {
+                    for( int i = 0; i < stack->index(); ++i )
+                    {
+                        const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
+                        if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
+                        {
+                            MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
+                            if(markerItem)
+                                markerItem->drawGraphicsItem(p);
+                        }
+                    }
+                }
+            }
         }
 
         if(_rotation != 0)
@@ -725,6 +771,7 @@ void MapFrame::initializeFoW()
     connect(_scene, &MapFrameScene::addMarker, this, &MapFrame::addMarker);
 
     connect(_scene, &MapFrameScene::editMarker, this, &MapFrame::editMapMarker);
+    connect(_scene, &MapFrameScene::deleteMarker, this, &MapFrame::deleteMapMarker);
     connect(_scene, &MapFrameScene::centerView, this, &MapFrame::centerWindow);
     connect(_scene, &MapFrameScene::clearFoW, this, &MapFrame::clearFoW);
 
@@ -747,9 +794,12 @@ void MapFrame::initializeFoW()
     }
     else
     {
-        qDebug() << "[MapFrame] Initializing map frame video";
-        createVideoPlayer(true);
-        startPublishTimer();
+        if(_mapSource->isValid())
+        {
+            qDebug() << "[MapFrame] Initializing map frame video";
+            createVideoPlayer(true);
+            startPublishTimer();
+        }
     }
 
     checkPartyUpdate();
@@ -958,43 +1008,55 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 QImage result = _videoPlayer->getImage()->copy();
                 if((!_bwFoWImage.isNull()) || (_mapSource->getShowParty()))
                 {
-                    QPainter p;
-                    p.begin(&result);
-                        if(!_bwFoWImage.isNull())
-                            p.drawImage(0, 0, _bwFoWImage);
+                    QPainter p(&result);
 
-                        qreal targetWidth = _targetSize.width();
-                        qreal imgWidth = _backgroundImage->pixmap().width();
+                    if(!_bwFoWImage.isNull())
+                        p.drawImage(0, 0, _bwFoWImage);
 
-                        if((_mapSource->getShowParty()) &&
-                           (_partyIcon) &&
-                           ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
+                    qreal targetWidth = _targetSize.width();
+                    qreal imgWidth = _backgroundImage->pixmap().width();
+
+                    if((_mapSource->getShowParty()) &&
+                       (_partyIcon) &&
+                       ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
+                    {
+                        QPixmap partyPixmap = _mapSource->getPartyPixmap();
+                        if(!partyPixmap.isNull())
                         {
-                            QPixmap partyPixmap = _mapSource->getPartyPixmap();
-                            if(!partyPixmap.isNull())
+                            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
+                            QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
+                            p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                        }
+                    }
+
+                    p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
+                                  _mapSource->getDistanceLineWidth(),
+                                  static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
+
+                    p.scale(targetWidth / imgWidth, targetWidth / imgWidth);
+                    if(_distanceLine)
+                        p.drawLine(_distanceLine->line());
+                    if(_distancePath)
+                        p.drawPath(_distancePath->path());
+                    if(_distanceText)
+                        p.drawText(_distanceText->pos(), _distanceText->text());
+
+                    if(_mapSource->getShowMarkers())
+                    {
+                        if(QUndoStack* stack = _mapSource->getUndoStack())
+                        {
+                            for( int i = 0; i < stack->index(); ++i )
                             {
-                                qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
-                                QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
-                                p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+                                const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
+                                if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
+                                {
+                                    MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
+                                    if(markerItem)
+                                        markerItem->drawGraphicsItem(p);
+                                }
                             }
                         }
-
-                        p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
-                                      _mapSource->getDistanceLineWidth(),
-                                      static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
-
-                        p.scale(targetWidth / imgWidth, targetWidth / imgWidth);
-                        if(_distanceLine)
-                            p.drawLine(_distanceLine->line());
-                            //p.drawLine(QLineF(_distanceLine->line().p1() * targetWidth / imgWidth, _distanceLine->line().p2() * targetWidth / imgWidth));
-
-                        if(_distancePath)
-                            p.drawPath(_distancePath->path());
-
-                        if(_distanceText)
-                            p.drawText(_distanceText->pos(), _distanceText->text());
-                            //p.drawText(_distanceText->pos() * targetWidth / imgWidth, _distanceText->text());
-                    p.end();
+                    }
                 }
 
                 if(_rotation != 0)

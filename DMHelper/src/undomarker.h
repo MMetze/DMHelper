@@ -18,14 +18,14 @@ public:
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
+    virtual void setRemoved(bool removed) override;
+
     virtual int getType() const override;
     virtual UndoBase* clone() const override;
 
-    void setTitle(const QString& title);
-    void setDescription(const QString& description);
-
-    const MapMarker& marker() const;
-    MapMarker& marker();
+    void setMarker(const MapMarker& marker);
+    const MapMarker& getMarker() const;
+    MapMarker& getMarker();
 
     MapMarkerGraphicsItem* getMarkerItem() const;
     void setMarkerItem(MapMarkerGraphicsItem* markerItem);

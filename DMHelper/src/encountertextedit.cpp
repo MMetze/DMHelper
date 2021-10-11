@@ -299,6 +299,16 @@ void EncounterTextEdit::browseImageFile()
         return;
     }
 
+    QFileInfo fileInfo(imageFileName);
+    if(!fileInfo.isFile())
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DMHelper Image Not Valid"),
+                              QString("The selected image file isn't a file: ") + imageFileName);
+        qDebug() << "[EncounterTextEdit] Image file not a file: " << imageFileName;
+        return;
+    }
+
     setImageFile(imageFileName);
 }
 
@@ -673,10 +683,14 @@ void EncounterTextEdit::loadImage()
 
     if(!_encounter->getImageFile().isEmpty())
     {
-        if(_backgroundImage.load(_encounter->getImageFile()))
-            scaleBackgroundImage();
-        else
-            createVideoPlayer(true);
+        QFileInfo fileInfo(_encounter->getImageFile());
+        if(fileInfo.isFile())
+        {
+            if(_backgroundImage.load(_encounter->getImageFile()))
+                scaleBackgroundImage();
+            else
+                createVideoPlayer(true);
+        }
     }
 
     setPublishCheckable();
@@ -898,8 +912,12 @@ bool EncounterTextEdit::isVideo() const
 {
     if(!_encounter)
         return false;
-    else
-        return((_backgroundImage.isNull()) && (!_encounter->getImageFile().isEmpty()));
+
+    QFileInfo fileInfo(_encounter->getImageFile());
+    if(!fileInfo.isFile())
+        return false;
+
+    return((_backgroundImage.isNull()) && (!_encounter->getImageFile().isEmpty()));
 }
 
 bool EncounterTextEdit::isAnimated() const

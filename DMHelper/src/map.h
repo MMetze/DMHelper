@@ -64,6 +64,7 @@ public:
     bool getShowMarkers() const;
 
     bool isInitialized();
+    bool isValid();
     void setExternalFoWImage(QImage externalImage);
     QImage getBackgroundImage();
     QImage getFoWImage();
@@ -132,6 +133,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
+    void challengeUndoStack();
 
     QString _filename;
     QUndoStack* _undoStack;

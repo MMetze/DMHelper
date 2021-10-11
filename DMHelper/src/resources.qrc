@@ -287,8 +287,6 @@
         <file>data/fonts/Iokharic-dqvK.ttf</file>
         <file>data/fonts/Rellanic-Agx7.ttf</file>
         <file>data/icon_newmarker.png</file>
-        <file>data/icon_mapmarker.png</file>
-        <file>data/icon_mapmarker_bw.png</file>
         <file>data/icon_gridhex.png</file>
         <file>data/icon_gridhexiso.png</file>
         <file>data/icon_gridiso.png</file>
@@ -300,6 +298,11 @@
         <file>data/icon_pendashdotdot.png</file>
         <file>data/icon_pendot.png</file>
         <file>data/icon_pensolid.png</file>
+        <file>data/icon_banner_1.png</file>
+        <file>data/icon_banner_2.png</file>
+        <file>data/icon_banner_3.png</file>
+        <file>data/icon_flag.png</file>
+        <file>data/icon_pin.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

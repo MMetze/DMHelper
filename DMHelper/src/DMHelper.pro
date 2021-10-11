@@ -88,6 +88,7 @@ SOURCES += main.cpp\
     mapframescene.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
+    optionsaccessor.cpp \
     party.cpp \
     partycharactergridframe.cpp \
     partyframe.cpp \
@@ -323,6 +324,7 @@ HEADERS  += mainwindow.h \
     mapmarker.h \
     objectfactory.h \
     objectimporter.h \
+    optionsaccessor.h \
     party.h \
     partycharactergridframe.h \
     partyframe.h \

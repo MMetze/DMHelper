@@ -31,26 +31,42 @@ private:
 class MapMarker : public MapContent
 {
 public:
-    MapMarker(const QPoint& position, const QString& title, const QString& description, const QUuid& encounter);
+    MapMarker();
+    MapMarker(const QPoint& position, bool playerVisible, const QString& title, const QString& description, const QColor& color, const QString& iconFile, int iconScale, bool coloredIcon, const QUuid& encounter);
     MapMarker(const MapMarker &obj);
     virtual ~MapMarker() override;
 
-    QPoint position() const;
-    QString title() const;
-    QString description() const;
-    const QUuid& encounter() const;
+    QPoint getPosition() const;
+    bool isPlayerVisible() const;
+    QString getTitle() const;
+    QString getDescription() const;
+    QColor getColor() const;
+    QString getIconFile() const;
+    int getIconScale() const;
+    bool isColoredIcon() const;
+    const QUuid& getEncounter() const;
 
     void setPosition(const QPoint& position);
     void setX(int x);
     void setY(int y);
+    void setPlayerVisible(bool playerVisible);
     void setTitle(const QString& title);
     void setDescription(const QString& description);
+    void setColor(const QColor& color);
+    void setIconFile(const QString& iconFile);
+    void setIconScale(int iconScale);
+    void setColoredIcon(bool coloredIcon);
     void setEncounter(const QUuid& encounter);
 
 private:
     QPoint _position;
+    bool _playerVisible;
     QString _title;
     QString _description;
+    QColor _color;
+    QString _iconFile;
+    int _iconScale;
+    bool _coloredIcon;
     QUuid _encounter;
 };
 
