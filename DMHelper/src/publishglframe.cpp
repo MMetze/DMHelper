@@ -77,12 +77,18 @@ void PublishGLFrame::clearRenderer()
     _renderer = nullptr;
 }
 
+void PublishGLFrame::setBackgroundColor(const QColor& color)
+{
+    if(_renderer)
+        _renderer->setBackgroundColor(color);
+}
+
 void PublishGLFrame::setImage(QImage img, QColor color)
 {
     PublishGLImageRenderer* imageRenderer = dynamic_cast<PublishGLImageRenderer*>(_renderer);
     if(imageRenderer)
     {
-        imageRenderer->setColor(color);
+        imageRenderer->setBackgroundColor(color);
         imageRenderer->setImage(img);
     }
     else

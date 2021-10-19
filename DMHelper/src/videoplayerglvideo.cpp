@@ -5,6 +5,8 @@
 #include <QOffscreenSurface>
 #include <QDebug>
 
+//#define VIDEO_DEBUG_MESSAGES
+
 VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _player(player),
     _context(nullptr),
@@ -61,7 +63,9 @@ VideoPlayerGLVideo::~VideoPlayerGLVideo()
 // Return the texture to be displayed
 QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
 {
+#ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLVideo] Video frame requested";
+#endif
 
     QMutexLocker locker(&_textLock);
 
@@ -90,16 +94,19 @@ bool VideoPlayerGLVideo::resizeRenderTextures(void* data,
 
     qDebug() << "[VideoPlayerGLVideo] Resizing render textures to: " << cfg->width << " x " << cfg->height;
 
-    if(cfg->width != that->_width || cfg->height != that->_height)
+    if((cfg->width != that->_width) || (cfg->height != that->_height))
         cleanup(data);
 
-    that->_buffers[0] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
-    that->_buffers[1] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
-    that->_buffers[2] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
-    that->_buffers[3] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
+    if(!that->_buffers[0])
+    {
+        that->_buffers[0] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
+        that->_buffers[1] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
+        that->_buffers[2] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
+        that->_buffers[3] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
 
-    that->_width = cfg->width;
-    that->_height = cfg->height;
+        that->_width = cfg->width;
+        that->_height = cfg->height;
+    }
 
     that->_buffers[that->_idxRender]->bind();
 
@@ -108,6 +115,9 @@ bool VideoPlayerGLVideo::resizeRenderTextures(void* data,
     render_cfg->colorspace = libvlc_video_colorspace_BT709;
     render_cfg->primaries  = libvlc_video_primaries_BT709;
     render_cfg->transfer   = libvlc_video_transfer_func_SRGB;
+
+    if(that->_player)
+        that->_player->videoResized();
 
     return true;
 }
@@ -147,7 +157,7 @@ void VideoPlayerGLVideo::cleanup(void* data)
 
     that->_videoReady.release();
 
-    if (that->_width == 0 && that->_height == 0)
+    if((that->_width == 0) && (that->_height == 0))
         return;
 
     delete that->_buffers[0]; that->_buffers[0] = nullptr;
@@ -159,7 +169,9 @@ void VideoPlayerGLVideo::cleanup(void* data)
 //This callback is called after VLC performs drawing calls
 void VideoPlayerGLVideo::swap(void* data)
 {
+#ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLVideo] Swapping video data";
+#endif
 
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(data);
     if((!that) || (!that->_player))
@@ -177,7 +189,9 @@ void VideoPlayerGLVideo::swap(void* data)
 // This callback is called to set the OpenGL context
 bool VideoPlayerGLVideo::makeCurrent(void* data, bool current)
 {
+#ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLVideo] Making context current (current = " << current << ")";
+#endif
 
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(data);
     if(!that)

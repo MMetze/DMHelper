@@ -86,6 +86,9 @@ void PublishWindow::setPointerFile(const QString& filename)
 
 void PublishWindow::setRenderer(PublishGLRenderer* renderer)
 {
+    if(renderer)
+        renderer->setBackgroundColor(_globalColor);
+
     _publishFrame->setRenderer(renderer);
 }
 
@@ -125,8 +128,8 @@ void PublishWindow::hideEvent(QHideEvent *event)
 
 void PublishWindow::setBackgroundColorStyle(const QColor& color)
 {
-    if(!_publishFrame)
-        return;
+    // Make sure the OpenGL background is also set properly
+    _publishFrame->setBackgroundColor(color);
 
     QString styleString("background-color: rgba(");
     styleString += QString::number(color.red());

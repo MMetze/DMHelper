@@ -18,6 +18,7 @@ public:
     virtual void rendererDeactivated();
     virtual void cleanup() = 0;
     virtual bool deleteOnDeactivation();
+    virtual void setBackgroundColor(const QColor& color);
 
     // Standard OpenGL calls
     virtual void initializeGL() = 0;

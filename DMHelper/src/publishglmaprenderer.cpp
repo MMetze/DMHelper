@@ -8,13 +8,13 @@
 #include <QMatrix4x4>
 #include <QDebug>
 
-PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QColor color, QObject *parent) :
+PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
     _image(),
     _videoPlayer(nullptr),
     _targetSize(),
-    _color(color),
+    _color(),
     _initialized(false),
     _shaderProgram(0),
     _backgroundObject(nullptr)
@@ -40,6 +40,12 @@ void PublishGLMapRenderer::cleanup()
 bool PublishGLMapRenderer::deleteOnDeactivation()
 {
     return true;
+}
+
+void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
+{
+    _color = color;
+    emit updateWidget();
 }
 
 void PublishGLMapRenderer::initializeGL()
@@ -229,12 +235,12 @@ void PublishGLMapRenderer::setImage(const QImage& image)
         */
     }
 }
-
+/*
 void PublishGLMapRenderer::setColor(QColor color)
 {
     _color = color;
     emit updateWidget();
-}
+}*/
 
 void PublishGLMapRenderer::setOrthoProjection()
 {

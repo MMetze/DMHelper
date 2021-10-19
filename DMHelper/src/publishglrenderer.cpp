@@ -32,3 +32,8 @@ bool PublishGLRenderer::deleteOnDeactivation()
 {
     return false;
 }
+
+void PublishGLRenderer::setBackgroundColor(const QColor& color)
+{
+    Q_UNUSED(color);
+}

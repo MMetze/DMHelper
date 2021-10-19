@@ -1678,7 +1678,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         //_renderer = new PublishGLMapRenderer(_mapSource, Qt::red);
         //emit registerRenderer(_renderer);
 
-        emit registerRenderer(new PublishGLMapRenderer(_mapSource, Qt::red));
+        emit registerRenderer(new PublishGLMapRenderer(_mapSource));
     }
 }
 

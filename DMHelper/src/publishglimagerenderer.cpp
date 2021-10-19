@@ -33,6 +33,12 @@ bool PublishGLImageRenderer::deleteOnDeactivation()
     return true;
 }
 
+void PublishGLImageRenderer::setBackgroundColor(const QColor& color)
+{
+    _color = color;
+    emit updateWidget();
+}
+
 void PublishGLImageRenderer::initializeGL()
 {
     if((_initialized) || (!_targetWidget))
@@ -198,11 +204,13 @@ void PublishGLImageRenderer::setImage(const QImage& image)
     }
 }
 
+/*
 void PublishGLImageRenderer::setColor(QColor color)
 {
     _color = color;
     emit updateWidget();
 }
+*/
 
 void PublishGLImageRenderer::setOrthoProjection()
 {

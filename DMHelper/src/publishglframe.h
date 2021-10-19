@@ -24,6 +24,8 @@ public slots:
     void setRenderer(PublishGLRenderer* renderer);
     void clearRenderer();
 
+    void setBackgroundColor(const QColor& color);
+
     void setImage(QImage img, QColor color);
     void setImageNoScale(QImage img, QColor color);
     void setArrowVisible(bool visible);

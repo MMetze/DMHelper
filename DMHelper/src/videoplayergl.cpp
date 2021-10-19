@@ -111,13 +111,17 @@ void VideoPlayerGL::paintGL()
     if(!fbo)
         return;
 
+    /*
     QColor testColor(Qt::blue);
     f->glClearColor(testColor.redF(), testColor.greenF(), testColor.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    */
 
     e->glBindVertexArray(_VAO);
     GLuint fboTexture = fbo->takeTexture();
+#ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGL] Painting new texture: " << fboTexture;
+#endif
     if(fboTexture >= 0)
     {
         f->glBindTexture(GL_TEXTURE_2D, fboTexture);
@@ -238,7 +242,10 @@ void VideoPlayerGL::clearNewImage()
 
 void VideoPlayerGL::registerNewFrame()
 {
+#ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGL] Confirming frame available";
+#endif
+
     emit frameAvailable();
 }
 
@@ -641,6 +648,13 @@ void VideoPlayerGL::initializationComplete()
     emit contextReady(_context);
 }
 
+void VideoPlayerGL::videoResized()
+{
+    qDebug() << "[VideoPlayerGL] Video being resized, recreating vertex arrays";
+    cleanupVBObjects();
+    createVBObjects();
+}
+
 bool VideoPlayerGL::initializeVLC()
 {
     qDebug() << "[VideoPlayerGL] Initializing VLC!";
@@ -901,8 +915,43 @@ void VideoPlayerGL::createGLObjects()
 
     QImage image;
     image.load(QString("C:\\Users\\turne\\Documents\\DnD\\DM Helper\\testdata\\Desert Stronghold.jpg"));
-    //QSize videoSize = getOriginalSize();
-    QSize videoSize = image.size();
+
+    createVBObjects();
+
+    // Texture
+    f->glGenTextures(1, &_tempTexture);
+    f->glBindTexture(GL_TEXTURE_2D, _tempTexture);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // load and generate the background texture
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    f->glGenerateMipmap(GL_TEXTURE_2D);
+
+}
+
+void VideoPlayerGL::cleanupGLObjects()
+{
+    cleanupVBObjects();
+}
+
+void VideoPlayerGL::createVBObjects()
+{
+    if(!_context)
+        return;
+
+    // Set up the rendering context, load shaders and other resources, etc.:
+    QOpenGLFunctions *f = _context->functions();
+    QOpenGLExtraFunctions *e = _context->extraFunctions();
+    if((!f) || (!e))
+        return;
+
+    QSize videoSize = getOriginalSize();
+    //QSize videoSize = image.size();
     if((videoSize.width() <= 0) || (videoSize.height() <= 0))
         return;
 
@@ -939,24 +988,9 @@ void VideoPlayerGL::createGLObjects()
     // texture attribute
     f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     f->glEnableVertexAttribArray(2);
+}
 
-    // Texture
-    f->glGenTextures(1, &_tempTexture);
-    f->glBindTexture(GL_TEXTURE_2D, _tempTexture);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-    // load and generate the background texture
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
-
- }
-
-void VideoPlayerGL::cleanupGLObjects()
+void VideoPlayerGL::cleanupVBObjects()
 {
     if(!_context)
         return;

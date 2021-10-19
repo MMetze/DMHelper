@@ -18,6 +18,7 @@ public:
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
+    virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
@@ -29,7 +30,7 @@ public:
 
 public slots:
     void setImage(const QImage& image);
-    void setColor(QColor color);
+    //void setColor(QColor color);
 
 protected:
     void setOrthoProjection();

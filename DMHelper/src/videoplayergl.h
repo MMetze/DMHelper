@@ -77,6 +77,7 @@ public slots:
     virtual bool restartPlayer();
 
     void initializationComplete();
+    void videoResized();
 
 protected:
 
@@ -86,6 +87,8 @@ protected:
     //virtual void cleanupBuffers();
     void createGLObjects();
     void cleanupGLObjects();
+    void createVBObjects();
+    void cleanupVBObjects();
 
 //    virtual void internalStopCheck(int status);
     virtual void internalAudioCheck(int newStatus);
