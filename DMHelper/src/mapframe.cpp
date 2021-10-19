@@ -739,7 +739,7 @@ void MapFrame::publishClicked(bool checked)
     else
     {
         //Video
-        stopPublishTimer();
+        //stopPublishTimer();
         createVideoPlayer(!_isPublishing);
         if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
         {
@@ -747,7 +747,7 @@ void MapFrame::publishClicked(bool checked)
             emit showPublishWindow();
         }
 
-        startPublishTimer();
+        //startPublishTimer();
     }
 }
 
@@ -798,7 +798,7 @@ void MapFrame::initializeFoW()
         {
             qDebug() << "[MapFrame] Initializing map frame video";
             createVideoPlayer(true);
-            startPublishTimer();
+            //startPublishTimer();
         }
     }
 
@@ -1661,6 +1661,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         qDebug() << "[MapFrame] Publish FoW DM animation started";
         // TBD
         //_videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
+        emit registerRenderer(nullptr);
     }
     else
     {
@@ -1671,11 +1672,13 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         if(!_videoPlayer->isError())
             _bwFoWImage = QImage();
             */
-        if(_renderer)
-            delete _renderer;
 
-        _renderer = new PublishGLMapRenderer(_mapSource, Qt::red);
-        emit registerRenderer(_renderer);
+        //if(_renderer)
+        //    delete _renderer;
+        //_renderer = new PublishGLMapRenderer(_mapSource, Qt::red);
+        //emit registerRenderer(_renderer);
+
+        emit registerRenderer(new PublishGLMapRenderer(_mapSource, Qt::red));
     }
 }
 

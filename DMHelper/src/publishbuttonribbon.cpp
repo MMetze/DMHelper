@@ -69,7 +69,7 @@ void PublishButtonRibbon::setChecked(bool checked)
     if(ui->btnPublish->isChecked() != checked)
     {
         ui->btnPublish->setChecked(checked);
-        emit clicked(checked);
+        //emit clicked(checked);
     }
 }
 

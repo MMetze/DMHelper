@@ -80,6 +80,7 @@
 #include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
+#include "dmh_vlc.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -809,6 +810,7 @@ MainWindow::~MainWindow()
     delete ui;
 
     Bestiary::Shutdown();
+    DMH_VLC::Shutdown();
     ScaledPixmap::cleanupDefaultPixmap();
 }
 

@@ -71,6 +71,7 @@ SOURCES += main.cpp\
     customtableentry.cpp \
     customtableframe.cpp \
     discordposter.cpp \
+    dmh_vlc.cpp \
     dmhelperribbon.cpp \
     dmhlogger.cpp \
     dmhwaitingdialog.cpp \

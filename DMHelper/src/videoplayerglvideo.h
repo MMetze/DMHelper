@@ -4,6 +4,7 @@
 #include "dmh_vlc.h"
 #include <QSemaphore>
 #include <QMutex>
+#include <QSize>
 
 class VideoPlayerGL;
 class QOpenGLContext;
@@ -17,6 +18,7 @@ public:
     ~VideoPlayerGLVideo();
 
     QOpenGLFramebufferObject *getVideoFrame();
+    QSize getVideoSize() const;
 
     static bool resizeRenderTextures(void* data, const libvlc_video_render_cfg_t *cfg,
                                      libvlc_video_output_cfg_t *render_cfg);

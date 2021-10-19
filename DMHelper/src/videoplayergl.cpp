@@ -19,11 +19,11 @@ VideoPlayerGL::VideoPlayerGL(const QString& videoFile, QOpenGLContext* context, 
     _playVideo(playVideo),
     _playAudio(playAudio),
     _video(nullptr),
+    _tempTexture(0),
     _vlcError(false),
-    _vlcInstance(nullptr),
     _vlcPlayer(nullptr),
     _vlcMedia(nullptr),
-    _originalSize(),
+    //_originalSize(),
     _targetSize(targetSize),
     _status(-1),
     _selfRestart(false),
@@ -36,13 +36,18 @@ VideoPlayerGL::VideoPlayerGL(const QString& videoFile, QOpenGLContext* context, 
     _VBO(0),
     _EBO(0)
 {
+    if(_context)
+    {
 #ifdef Q_OS_WIN
-    _videoFile.replace("/","\\\\");
+        _videoFile.replace("/","\\\\");
 #endif
-    _vlcError = !initializeVLC();
+        _vlcError = !initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayerGL] Player object initialized: " << this;
+        qDebug() << "[VideoPlayerGL] Player object initialized: " << this;
 #endif
+
+        createGLObjects();
+    }
 }
 
 VideoPlayerGL::~VideoPlayerGL()
@@ -55,13 +60,8 @@ VideoPlayerGL::~VideoPlayerGL()
     stopPlayer();
 
     delete _video;
-    //cleanupBuffers();
 
-    if(_vlcInstance)
-    {
-        libvlc_release(_vlcInstance);
-        _vlcInstance = nullptr;
-    }
+    cleanupGLObjects();
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGL] Player object destroyed: " << this;
@@ -97,11 +97,13 @@ QOpenGLFramebufferObject* VideoPlayerGL::getVideoFrame()
 
 void VideoPlayerGL::paintGL()
 {
-    if(!_video)
+    if((!_context) || (!_video))
         return;
 
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    //    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    //    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    QOpenGLFunctions *f = _context->functions();
+    QOpenGLExtraFunctions *e = _context->extraFunctions();
     if((!f) || (!e))
         return;
 
@@ -109,11 +111,17 @@ void VideoPlayerGL::paintGL()
     if(!fbo)
         return;
 
+    QColor testColor(Qt::blue);
+    f->glClearColor(testColor.redF(), testColor.greenF(), testColor.blueF(), 1.0f);
+    f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     e->glBindVertexArray(_VAO);
     GLuint fboTexture = fbo->takeTexture();
+    qDebug() << "[VideoPlayerGL] Painting new texture: " << fboTexture;
     if(fboTexture >= 0)
     {
         f->glBindTexture(GL_TEXTURE_2D, fboTexture);
+        //f->glBindTexture(GL_TEXTURE_2D, _tempTexture);
         f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         f->glDeleteTextures(1, &fboTexture);
     }
@@ -199,11 +207,13 @@ QMutex* VideoPlayerGL::getMutex()
 
 QSize VideoPlayerGL::getOriginalSize() const
 {
+    QSize originalSize = _video ? _video->getVideoSize() : QSize();
+
 #ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayerGL] Getting original size: " << _originalSize;
+    qDebug() << "[VideoPlayerGL] Getting original size: " << originalSize;
 #endif
 
-    return _originalSize;
+    return originalSize;
 }
 
 /*
@@ -228,6 +238,7 @@ void VideoPlayerGL::clearNewImage()
 
 void VideoPlayerGL::registerNewFrame()
 {
+    qDebug() << "[VideoPlayerGL] Confirming frame available";
     emit frameAvailable();
 }
 
@@ -621,6 +632,15 @@ bool VideoPlayerGL::restartPlayer()
     }
 }
 
+void VideoPlayerGL::initializationComplete()
+{
+    if((!_context) || (!_video))
+        return;
+
+    qDebug() << "[VideoPlayerGL] Confirming initialization complete";
+    emit contextReady(_context);
+}
+
 bool VideoPlayerGL::initializeVLC()
 {
     qDebug() << "[VideoPlayerGL] Initializing VLC!";
@@ -637,14 +657,7 @@ bool VideoPlayerGL::initializeVLC()
         return false;
     }
 
-#ifdef VIDEO_DEBUG_MESSAGES
-    const char *verbose_args = "-vvv";
-    _vlcInstance = libvlc_new(1, &verbose_args);
-#else
-    _vlcInstance = libvlc_new(0, nullptr);
-#endif
-
-    if(!_vlcInstance)
+    if(!DMH_VLC::Instance())
         return false;
 
     // TBD - don't think I need this it seems doubled
@@ -668,7 +681,7 @@ bool VideoPlayerGL::initializeVLC()
 
 bool VideoPlayerGL::startPlayer()
 {
-    if(!_vlcInstance)
+    if(!DMH_VLC::Instance())
     {
         qDebug() << "[VideoPlayerGL] VLC not instantiated - not able to start player!";
         return false;
@@ -694,7 +707,7 @@ bool VideoPlayerGL::startPlayer()
     //    return false;
 
     // Create a new Media
-    _vlcMedia = libvlc_media_new_path(_vlcInstance, _videoFile.toUtf8().constData());
+    _vlcMedia = libvlc_media_new_path(DMH_VLC::Instance(), _videoFile.toUtf8().constData());
     //https://en.savefrom.net/18/
     //QString ytPath("https://r1---sn-w5nuxa-c33ey.googlevideo.com/videoplayback?expire=1597525099&ei=C_g3X8GwLLHU3LUP6dOm6A4&ip=14.207.129.148&id=o-AKlo5xUHtI-1uAnEPCm0wXnPupzmzuiOIXrUGtmT9WvJ&itag=22&source=youtube&requiressl=yes&mh=3O&mm=31%2C26&mn=sn-w5nuxa-c33ey%2Csn-npoe7ne6&ms=au%2Conr&mv=m&mvi=1&pl=23&initcwndbps=812500&vprv=1&mime=video%2Fmp4&ratebypass=yes&dur=167.090&lmt=1597239028450972&mt=1597503397&fvip=1&fexp=23883098&c=WEB&txp=6316222&sparams=expire%2Cei%2Cip%2Cid%2Citag%2Csource%2Crequiressl%2Cvprv%2Cmime%2Cratebypass%2Cdur%2Clmt&sig=AOq0QJ8wRQIgHwkUXh_YN2OS5o76bNa1APrbw3G4nMZgjVQQhMj7OUoCIQDesCxcrVOBSme7QNmar0mkG5U8fz_01LP3CAoXpmCwaQ%3D%3D&lsparams=mh%2Cmm%2Cmn%2Cms%2Cmv%2Cmvi%2Cpl%2Cinitcwndbps&lsig=AG3C_xAwRQIhAKjExXaqpMXxMk4sOFBoQBg6c7kfVKYnhFkv43RqJZ0JAiA10pSSMS4ozj73yfIXjEmcLEnqi5sqMEj9EvWTa3EVgg%3D%3D&contentlength=15083894&video_id=9bMTK0ml9ZI&title=%F0%9F%8E%B5+RPG+Boss+Battle+Music+-+Hydra");
     //libvlc_media_t *vlcMedia = libvlc_media_new_location(_vlcInstance, ytPath.toUtf8().constData());
@@ -747,18 +760,20 @@ bool VideoPlayerGL::startPlayer()
     int result = libvlc_video_get_size(_vlcPlayer, 0, &x, &y);
     qDebug() << "[VideoPlayerGL] Video size (result: " << result << "): " << x << " x " << y << ". File: " << _videoFile;
 
-    libvlc_video_set_output_callbacks(_vlcPlayer,
-                                      libvlc_video_engine_opengl,
-                                      VideoPlayerGLVideo::setup,
-                                      VideoPlayerGLVideo::cleanup,
-                                      nullptr,
-                                      VideoPlayerGLVideo::resizeRenderTextures,
-                                      VideoPlayerGLVideo::swap,
-                                      VideoPlayerGLVideo::makeCurrent,
-                                      VideoPlayerGLVideo::getProcAddress,
-                                      nullptr,
-                                      nullptr,
-                                      _video);
+    bool callbackResult = libvlc_video_set_output_callbacks(_vlcPlayer,
+                                                            libvlc_video_engine_opengl,
+                                                            VideoPlayerGLVideo::setup,
+                                                            VideoPlayerGLVideo::cleanup,
+                                                            nullptr,
+                                                            VideoPlayerGLVideo::resizeRenderTextures,
+                                                            VideoPlayerGLVideo::swap,
+                                                            VideoPlayerGLVideo::makeCurrent,
+                                                            VideoPlayerGLVideo::getProcAddress,
+                                                            nullptr,
+                                                            nullptr,
+                                                            _video);
+
+    qDebug() << "[VideoPlayerGL] Player callback result: " << callbackResult;
 
     //libvlc_video_set_callbacks(player, playerLockCallback, playerUnlockCallback, playerDisplayCallback, static_cast<void*>(this));
     //libvlc_video_set_format_callbacks(player, playerFormatCallback, playerCleanupCallback);
@@ -873,21 +888,30 @@ void VideoPlayerGL::internalStopCheck(int status)
 
 void VideoPlayerGL::createGLObjects()
 {
+    if(!_context)
+        return;
+
     // Set up the rendering context, load shaders and other resources, etc.:
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    //QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    //QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+    QOpenGLFunctions *f = _context->functions();
+    QOpenGLExtraFunctions *e = _context->extraFunctions();
     if((!f) || (!e))
         return;
 
-    if((_originalSize.width() <= 0) || (_originalSize.height() <= 0))
+    QImage image;
+    image.load(QString("C:\\Users\\turne\\Documents\\DnD\\DM Helper\\testdata\\Desert Stronghold.jpg"));
+    //QSize videoSize = getOriginalSize();
+    QSize videoSize = image.size();
+    if((videoSize.width() <= 0) || (videoSize.height() <= 0))
         return;
 
     float vertices[] = {
         // positions    // colors           // texture coords
-         (float)_originalSize.width() / 2,  (float)_originalSize.height() / 2, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         (float)_originalSize.width() / 2, -(float)_originalSize.height() / 2, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -(float)_originalSize.width() / 2, -(float)_originalSize.height() / 2, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -(float)_originalSize.width() / 2,  (float)_originalSize.height() / 2, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+         (float)videoSize.width() / 2,  (float)videoSize.height() / 2, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         (float)videoSize.width() / 2, -(float)videoSize.height() / 2, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -(float)videoSize.width() / 2, -(float)videoSize.height() / 2, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -(float)videoSize.width() / 2,  (float)videoSize.height() / 2, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
     };
 
     unsigned int indices[] = {  // note that we start from 0!
@@ -915,7 +939,51 @@ void VideoPlayerGL::createGLObjects()
     // texture attribute
     f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     f->glEnableVertexAttribArray(2);
+
+    // Texture
+    f->glGenTextures(1, &_tempTexture);
+    f->glBindTexture(GL_TEXTURE_2D, _tempTexture);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // load and generate the background texture
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    f->glGenerateMipmap(GL_TEXTURE_2D);
+
  }
+
+void VideoPlayerGL::cleanupGLObjects()
+{
+    if(!_context)
+        return;
+
+    QOpenGLFunctions *f = _context->functions();
+    QOpenGLExtraFunctions *e = _context->extraFunctions();
+    if((!f) || (!e))
+        return;
+
+    if(_VAO > 0)
+    {
+        e->glDeleteVertexArrays(1, &_VAO);
+        _VAO = 0;
+    }
+
+    if(_VBO > 0)
+    {
+        f->glDeleteBuffers(1, &_VBO);
+        _VBO = 0;
+    }
+
+    if(_EBO > 0)
+    {
+        f->glDeleteBuffers(1, &_EBO);
+        _EBO = 0;
+    }
+}
 
 void VideoPlayerGL::internalAudioCheck(int newStatus)
 {

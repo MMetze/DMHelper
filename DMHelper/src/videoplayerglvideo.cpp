@@ -3,6 +3,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
 #include <QOffscreenSurface>
+#include <QDebug>
 
 VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _player(player),
@@ -19,6 +20,8 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _idxDisplay(3),
     _updated(false)
 {
+    qDebug() << "[VideoPlayerGLVideo] Creating VideoPlayerGLVideo";
+
     _buffers[0] = nullptr;
     _buffers[1] = nullptr;
     _buffers[2] = nullptr;
@@ -50,12 +53,16 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
 
 VideoPlayerGLVideo::~VideoPlayerGLVideo()
 {
+    qDebug() << "[VideoPlayerGLVideo] Destroying VideoPlayerGLVideo";
+
     cleanup(this);
 }
 
 // Return the texture to be displayed
 QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
 {
+    qDebug() << "[VideoPlayerGLVideo] Video frame requested";
+
     QMutexLocker locker(&_textLock);
 
     if(_updated)
@@ -66,13 +73,24 @@ QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
     return _buffers[_idxDisplay];
 }
 
+QSize VideoPlayerGLVideo::getVideoSize() const
+{
+    return QSize(static_cast<int>(_width), static_cast<int>(_height));
+}
+
 // This callback will create the surfaces and FBO used by VLC to perform its rendering
 bool VideoPlayerGLVideo::resizeRenderTextures(void* data,
                                               const libvlc_video_render_cfg_t *cfg,
                                               libvlc_video_output_cfg_t *render_cfg)
 {
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(data);
-    if (cfg->width != that->_width || cfg->height != that->_height)
+
+    if((!that) || (!cfg) || (!render_cfg))
+        return false;
+
+    qDebug() << "[VideoPlayerGLVideo] Resizing render textures to: " << cfg->width << " x " << cfg->height;
+
+    if(cfg->width != that->_width || cfg->height != that->_height)
         cleanup(data);
 
     that->_buffers[0] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
@@ -102,6 +120,8 @@ bool VideoPlayerGLVideo::setup(void** data,
     Q_UNUSED(cfg);
     Q_UNUSED(out);
 
+    qDebug() << "[VideoPlayerGLVideo] Setting up video";
+
     if (!QOpenGLContext::supportsThreadedOpenGL())
         return false;
 
@@ -120,6 +140,10 @@ bool VideoPlayerGLVideo::setup(void** data,
 void VideoPlayerGLVideo::cleanup(void* data)
 {
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(data);
+    if(!that)
+        return;
+
+    qDebug() << "[VideoPlayerGLVideo] Cleaning up video";
 
     that->_videoReady.release();
 
@@ -135,6 +159,8 @@ void VideoPlayerGLVideo::cleanup(void* data)
 //This callback is called after VLC performs drawing calls
 void VideoPlayerGLVideo::swap(void* data)
 {
+    qDebug() << "[VideoPlayerGLVideo] Swapping video data";
+
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(data);
     if((!that) || (!that->_player))
         return;
@@ -151,11 +177,17 @@ void VideoPlayerGLVideo::swap(void* data)
 // This callback is called to set the OpenGL context
 bool VideoPlayerGLVideo::makeCurrent(void* data, bool current)
 {
+    qDebug() << "[VideoPlayerGLVideo] Making context current (current = " << current << ")";
+
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(data);
-    if (current)
+    if(!that)
+        return false;
+
+    if(current)
         that->_context->makeCurrent(that->_surface);
     else
         that->_context->doneCurrent();
+
     return true;
 }
 
@@ -163,6 +195,11 @@ bool VideoPlayerGLVideo::makeCurrent(void* data, bool current)
 void* VideoPlayerGLVideo::getProcAddress(void* data, const char* current)
 {
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(data);
+    if(!that)
+        return nullptr;
+
+    qDebug() << "[VideoPlayerGLVideo] Querying proc address for: " << current;
+
     /* Qt usual expects core symbols to be queryable, even though it's not
      * mentioned in the API. Cf QPlatformOpenGLContext::getProcAddress.
      * Thus, we don't need to wrap the function symbols here, but it might

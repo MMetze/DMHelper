@@ -1,6 +1,7 @@
 #include "publishglmaprenderer.h"
 #include "map.h"
 #include "videoplayergl.h"
+#include "battleglbackground.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
@@ -15,7 +16,8 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QColor color, QObject *pare
     _targetSize(),
     _color(color),
     _initialized(false),
-    _shaderProgram(0)
+    _shaderProgram(0),
+    _backgroundObject(nullptr)
 {
 }
 
@@ -27,6 +29,12 @@ PublishGLMapRenderer::~PublishGLMapRenderer()
 void PublishGLMapRenderer::cleanup()
 {
     _initialized = false;
+
+    delete _backgroundObject;
+    _backgroundObject = nullptr;
+
+    delete _videoPlayer;
+    _videoPlayer = nullptr;
 }
 
 bool PublishGLMapRenderer::deleteOnDeactivation()
@@ -121,6 +129,10 @@ void PublishGLMapRenderer::initializeGL()
     f->glDeleteShader(fragmentShader);
 
     // Create the objects
+    _image.load(QString("C:\\Users\\turne\\Documents\\DnD\\DM Helper\\testdata\\Desert Stronghold.jpg"));
+    _backgroundObject = new BattleGLBackground(nullptr, _image, GL_NEAREST);
+
+    // Create the objects
     _videoPlayer = new VideoPlayerGL(_map->getFileName(),
                                      _targetWidget->context(),
                                      _targetWidget->format(),
@@ -144,6 +156,7 @@ void PublishGLMapRenderer::initializeGL()
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
     _initialized = true;
+    _videoPlayer->initializationComplete();
 }
 
 void PublishGLMapRenderer::resizeGL(int w, int h)
@@ -157,6 +170,9 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
 
 void PublishGLMapRenderer::paintGL()
 {
+    if(!_initialized)
+        return;
+
     if((!_targetWidget) || (!_targetWidget->context()) || (!_videoPlayer))
         return;
 
@@ -175,6 +191,15 @@ void PublishGLMapRenderer::paintGL()
     QMatrix4x4 modelMatrix;
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
     _videoPlayer->paintGL();
+
+    /*
+    if(_backgroundObject)
+    {
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
+        _backgroundObject->paintGL();
+    }
+    */
+
 }
 
 const QImage& PublishGLMapRenderer::getImage() const

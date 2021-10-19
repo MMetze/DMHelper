@@ -7,6 +7,7 @@
 
 class Map;
 class VideoPlayerGL;
+class BattleGLBackground;
 
 class PublishGLMapRenderer : public PublishGLRenderer
 {
@@ -42,6 +43,7 @@ private:
     QColor _color;
     bool _initialized;
     unsigned int _shaderProgram;
+    BattleGLBackground* _backgroundObject;
 };
 
 #endif // PUBLISHGLMAPRENDERER_H

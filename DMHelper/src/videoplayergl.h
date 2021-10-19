@@ -76,6 +76,8 @@ public slots:
     virtual void stopThenDelete();
     virtual bool restartPlayer();
 
+    void initializationComplete();
+
 protected:
 
     virtual bool initializeVLC();
@@ -83,6 +85,7 @@ protected:
     virtual bool stopPlayer();
     //virtual void cleanupBuffers();
     void createGLObjects();
+    void cleanupGLObjects();
 
 //    virtual void internalStopCheck(int status);
     virtual void internalAudioCheck(int newStatus);
@@ -99,14 +102,14 @@ protected:
     bool _playAudio;
 
     VideoPlayerGLVideo* _video;
+    GLuint _tempTexture;
 
     bool _vlcError;
-    libvlc_instance_t* _vlcInstance;
     libvlc_media_player_t* _vlcPlayer;
     libvlc_media_t* _vlcMedia;
     //QMutex _mutex;
     //bool _newImage;
-    QSize _originalSize;
+    //QSize _originalSize;
     QSize _targetSize;
     int _status;
     bool _selfRestart;
