@@ -100,8 +100,10 @@ SOURCES += main.cpp\
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
     publishglframe.cpp \
+    publishglimage.cpp \
     publishglimagerenderer.cpp \
     publishglmaprenderer.cpp \
+    publishglobject.cpp \
     publishglrenderer.cpp \
     publishgltextrenderer.cpp \
     publishwindow.cpp \
@@ -210,6 +212,8 @@ SOURCES += main.cpp\
     updatechecker.cpp \
     videoplayer.cpp \
     videoplayergl.cpp \
+    videoplayerglplayer.cpp \
+    videoplayerglscreenshot.cpp \
     videoplayerglvideo.cpp \
     welcomeframe.cpp \
     widgetbattlecombatant.cpp \
@@ -336,8 +340,10 @@ HEADERS  += mainwindow.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
     publishglframe.h \
+    publishglimage.h \
     publishglimagerenderer.h \
     publishglmaprenderer.h \
+    publishglobject.h \
     publishglrenderer.h \
     publishgltextrenderer.h \
     publishwindow.h \
@@ -447,6 +453,8 @@ HEADERS  += mainwindow.h \
     updatechecker.h \
     videoplayer.h \
     videoplayergl.h \
+    videoplayerglplayer.h \
+    videoplayerglscreenshot.h \
     videoplayerglvideo.h \
     welcomeframe.h \
     widgetbattlecombatant.h \

@@ -25,12 +25,18 @@ void PublishGLRenderer::rendererDeactivated()
     if((_targetWidget) && (_targetWidget->context()))
         disconnect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLRenderer::cleanup);
 
+    emit deactivated();
     _targetWidget = nullptr;
 }
 
 bool PublishGLRenderer::deleteOnDeactivation()
 {
     return false;
+}
+
+void PublishGLRenderer::updateRender()
+{
+    emit updateWidget();
 }
 
 void PublishGLRenderer::setBackgroundColor(const QColor& color)

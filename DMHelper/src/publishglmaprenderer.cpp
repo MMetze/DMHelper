@@ -1,7 +1,9 @@
 #include "publishglmaprenderer.h"
 #include "map.h"
-#include "videoplayergl.h"
+#include "videoplayerglplayer.h"
 #include "battleglbackground.h"
+#include "publishglobject.h"
+#include "publishglimage.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
@@ -17,7 +19,8 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _color(),
     _initialized(false),
     _shaderProgram(0),
-    _backgroundObject(nullptr)
+    _backgroundObject(nullptr),
+    _partyToken(nullptr)
 {
 }
 
@@ -29,6 +32,9 @@ PublishGLMapRenderer::~PublishGLMapRenderer()
 void PublishGLMapRenderer::cleanup()
 {
     _initialized = false;
+
+    delete _partyToken;
+    _partyToken = nullptr;
 
     delete _backgroundObject;
     _backgroundObject = nullptr;
@@ -138,14 +144,22 @@ void PublishGLMapRenderer::initializeGL()
     _image.load(QString("C:\\Users\\turne\\Documents\\DnD\\DM Helper\\testdata\\Desert Stronghold.jpg"));
     _backgroundObject = new BattleGLBackground(nullptr, _image, GL_NEAREST);
 
+    // Create the party token
+    if(_map->getShowParty())
+    {
+        QImage partyImage = _map->getPartyPixmap().toImage();
+        _partyToken = new PublishGLImage(partyImage, false);
+        _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
+    }
+
     // Create the objects
-    _videoPlayer = new VideoPlayerGL(_map->getFileName(),
-                                     _targetWidget->context(),
-                                     _targetWidget->format(),
-                                     _targetSize,
-                                     true,
-                                     false);
-    connect(_videoPlayer, &VideoPlayerGL::frameAvailable, this, &PublishGLMapRenderer::updateWidget);
+    _videoPlayer = new VideoPlayerGLPlayer(_map->getFileName(),
+                                           _targetWidget->context(),
+                                           _targetWidget->format(),
+                                           _targetSize,
+                                           true,
+                                           false);
+    connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapRenderer::updateWidget);
 
     // Matrices
     // Model
@@ -162,21 +176,24 @@ void PublishGLMapRenderer::initializeGL()
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
     _initialized = true;
-    _videoPlayer->initializationComplete();
 }
 
 void PublishGLMapRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
-
     setOrthoProjection();
+    if(_videoPlayer)
+    {
+        _videoPlayer->targetResized(_targetSize);
+        _videoPlayer->initializationComplete();
+    }
     emit updateWidget();
 }
 
 void PublishGLMapRenderer::paintGL()
 {
-    if(!_initialized)
+    if((!_initialized) || (!_map))
         return;
 
     if((!_targetWidget) || (!_targetWidget->context()) || (!_videoPlayer))
@@ -198,6 +215,13 @@ void PublishGLMapRenderer::paintGL()
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
     _videoPlayer->paintGL();
 
+    if(_partyToken)
+    {
+        QSize sceneSize = _videoPlayer->getSize();
+        _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y());
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _partyToken->getMatrixData());
+        _partyToken->paintGL();
+    }
     /*
     if(_backgroundObject)
     {
@@ -206,6 +230,14 @@ void PublishGLMapRenderer::paintGL()
     }
     */
 
+}
+
+QImage PublishGLMapRenderer::getLastScreenshot()
+{
+    if(!_videoPlayer)
+        return QImage();
+
+    return _videoPlayer->getLastScreenshot();
 }
 
 const QImage& PublishGLMapRenderer::getImage() const

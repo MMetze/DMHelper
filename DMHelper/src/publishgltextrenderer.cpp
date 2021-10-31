@@ -174,7 +174,7 @@ void PublishGLTextRenderer::paintGL()
 
     // Draw the scene:
     //f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
-    f->glClearColor(0.2, 0.2, 0.2, 1.0f);
+    f->glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     f->glUseProgram(_shaderProgram);

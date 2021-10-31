@@ -18,6 +18,8 @@ public:
     virtual void rendererDeactivated();
     virtual void cleanup() = 0;
     virtual bool deleteOnDeactivation();
+
+    virtual void updateRender();
     virtual void setBackgroundColor(const QColor& color);
 
     // Standard OpenGL calls
@@ -27,6 +29,7 @@ public:
 
 signals:
     void updateWidget();
+    void deactivated();
 
 protected:
     QOpenGLWidget* _targetWidget;

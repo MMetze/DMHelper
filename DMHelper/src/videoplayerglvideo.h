@@ -17,6 +17,7 @@ public:
     VideoPlayerGLVideo(VideoPlayerGL* player);
     ~VideoPlayerGLVideo();
 
+    bool isNewFrameAvailable();
     QOpenGLFramebufferObject *getVideoFrame();
     QSize getVideoSize() const;
 
@@ -39,11 +40,10 @@ private:
     unsigned _width = 0;
     unsigned _height = 0;
     QMutex _textLock;
-    QOpenGLFramebufferObject *_buffers[4];
+    QOpenGLFramebufferObject *_buffers[3];
     size_t _idxRender = 0;
-    size_t _idxSwap1 = 1;
-    size_t _idxSwap2 = 2;
-    size_t _idxDisplay = 3;
+    size_t _idxSwap = 1;
+    size_t _idxDisplay = 2;
     bool _updated = false;
 };
 

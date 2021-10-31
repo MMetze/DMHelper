@@ -14,6 +14,7 @@
 #include "party.h"
 #include "unselectedpixmap.h"
 #include "publishglmaprenderer.h"
+#include "videoplayerglscreenshot.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -29,7 +30,7 @@ MapFrame::MapFrame(QWidget *parent) :
     ui(new Ui::MapFrame),
     _scene(nullptr),
     _backgroundImage(nullptr),
-    _backgroundVideo(nullptr),
+//    _backgroundVideo(nullptr),
     _fow(nullptr),
     _partyIcon(nullptr),
     _editMode(-1),
@@ -270,7 +271,7 @@ void MapFrame::clear()
     _mapSource = nullptr;
     delete _partyIcon; _partyIcon = nullptr;
     delete _backgroundImage; _backgroundImage = nullptr;
-    delete _backgroundVideo; _backgroundVideo = nullptr;
+//    delete _backgroundVideo; _backgroundVideo = nullptr;
     delete _fow; _fow = nullptr;
     delete _undoPath; _undoPath = nullptr;
 }
@@ -601,11 +602,11 @@ void MapFrame::setPublishVisible(bool enabled)
 
 void MapFrame::targetResized(const QSize& newSize)
 {
+    qDebug() << "[MapFrame] Target size being set to: " << newSize;
+
     _targetSize = newSize;
-    if((_videoPlayer) && (_isPublishing))
-    {
+    if(_videoPlayer)
         _videoPlayer->targetResized(newSize);
-    }
 
     resetPublishFoW();
 }
@@ -741,7 +742,7 @@ void MapFrame::publishClicked(bool checked)
         //Video
         //stopPublishTimer();
         createVideoPlayer(!_isPublishing);
-        if((_isPublishing) && (_videoPlayer) && (!_videoPlayer->isError()))
+        if(_isPublishing) // && (_videoPlayer) && (!_videoPlayer->isError()))
         {
             emit animationStarted();
             emit showPublishWindow();
@@ -759,7 +760,8 @@ void MapFrame::setRotation(int rotation)
 
 void MapFrame::initializeFoW()
 {
-    if((_backgroundImage) || (_backgroundVideo) || (_fow) || (_scene))
+//    if((_backgroundImage) || (_backgroundVideo) || (_fow) || (_scene))
+    if((_backgroundImage) || (_fow) || (_scene))
         qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame contents NOT done. Undefined behavior!";
 
     _scene = new MapFrameScene(this);
@@ -775,6 +777,8 @@ void MapFrame::initializeFoW()
     connect(_scene, &MapFrameScene::centerView, this, &MapFrame::centerWindow);
     connect(_scene, &MapFrameScene::clearFoW, this, &MapFrame::clearFoW);
 
+    connect(_scene, &MapFrameScene::changed, this, &MapFrame::handleSceneChanged);
+
     if(!_mapSource)
         return;
 
@@ -782,15 +786,15 @@ void MapFrame::initializeFoW()
     if(_mapSource->isInitialized())
     {
         qDebug() << "[MapFrame] Initializing map frame image";
-        _backgroundImage = _scene->addPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
-        _backgroundImage->setEnabled(false);
-        _backgroundImage->setZValue(-2);
+        setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
 
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         _fow->setEnabled(false);
         _fow->setZValue(-1);
 
         loadViewRect();
+        checkPartyUpdate();
+        createMarkerItems();
     }
     else
     {
@@ -801,10 +805,6 @@ void MapFrame::initializeFoW()
             //startPublishTimer();
         }
     }
-
-    checkPartyUpdate();
-
-    createMarkerItems();
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -1069,13 +1069,14 @@ void MapFrame::timerEvent(QTimerEvent *event)
         {
             if(!_videoPlayer->getImage()->isNull())
             {
-                if((!_backgroundVideo) ||(!_backgroundVideo->isVisible()))
+                //if((!_backgroundVideo) ||(!_backgroundVideo->isVisible()))
                 {
                     if(_backgroundImage)
                         _backgroundImage->hide();
 
                     QPixmap pmpCopy = QPixmap::fromImage(*(_videoPlayer->getImage())).copy();
                     _publishRect = pmpCopy.rect();
+                    /*
                     if(_backgroundVideo)
                     {
                         // TODO: update the graphics view/scene to work with the mutex on drawforeground/background
@@ -1088,6 +1089,7 @@ void MapFrame::timerEvent(QTimerEvent *event)
                         _backgroundVideo->setEnabled(false);
                         _backgroundVideo->setZValue(-2);
                     }
+                    */
 
                     if(_fow)
                     {
@@ -1632,6 +1634,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
     if(!_mapSource)
         return;
 
+    /*
     if((!dmPlayer) && (_backgroundVideo))
     {
         QPixmap pmpCopy = _backgroundVideo->pixmap().copy();
@@ -1649,6 +1652,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
 
         _backgroundVideo->hide();
     }
+    */
 
     if(_videoPlayer)
     {
@@ -1661,7 +1665,15 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         qDebug() << "[MapFrame] Publish FoW DM animation started";
         // TBD
         //_videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
+        if(_renderer)
+        {
+            disconnect(_renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+            rendererDeactivated();
+        }
         emit registerRenderer(nullptr);
+        VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_mapSource->getFileName());
+        connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &MapFrame::handleScreenshotReady);
+        screenshot->retrieveScreenshot();
     }
     else
     {
@@ -1673,12 +1685,16 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
             _bwFoWImage = QImage();
             */
 
-        //if(_renderer)
-        //    delete _renderer;
-        //_renderer = new PublishGLMapRenderer(_mapSource, Qt::red);
-        //emit registerRenderer(_renderer);
+        if(_renderer)
+        {
+            qDebug() << "[MapFrame] ERROR: Unexpected overwrite of existing renderer! Should not happen!";
+            disconnect(_renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+            rendererDeactivated();
+        }
 
-        emit registerRenderer(new PublishGLMapRenderer(_mapSource));
+        _renderer = new PublishGLMapRenderer(_mapSource);
+        connect(_renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+        emit registerRenderer(_renderer);
     }
 }
 
@@ -1704,6 +1720,7 @@ void MapFrame::cleanupBuffers()
         delete tempItem;
     }
 
+    /*
     if(_backgroundVideo)
     {
         if(_scene)
@@ -1712,6 +1729,7 @@ void MapFrame::cleanupBuffers()
         _backgroundVideo = nullptr;
         delete tempItem;
     }
+    */
 
     if(_fow)
     {
@@ -1875,6 +1893,32 @@ void MapFrame::checkPartyUpdate()
         _partyIcon->setPixmap(partyPixmap);
 }
 
+void MapFrame::handleScreenshotReady(const QImage& image)
+{
+    qDebug() << "[MapFrame] Screenshot received: " << image.size();
+
+    if(image.isNull())
+        return;
+
+    setBackgroundPixmap(QPixmap::fromImage(image));
+    checkPartyUpdate();
+    createMarkerItems();
+}
+
+void MapFrame::rendererDeactivated()
+{
+    if(!_renderer)
+        return;
+
+    QImage screenshot = _renderer->getLastScreenshot();
+    if(screenshot.isNull())
+        return;
+
+    setBackgroundPixmap(QPixmap::fromImage(screenshot));
+
+    _renderer = nullptr;
+}
+
 void MapFrame::handleMapMousePress(const QPointF& pos)
 {
     _mouseDown = true;
@@ -1909,6 +1953,19 @@ void MapFrame::handleActivateMapMarker()
 {
     if(!_activatedId.isNull())
         emit encounterSelected(_activatedId);
+}
+
+void MapFrame::handleSceneChanged(const QList<QRectF> &region)
+{
+    Q_UNUSED(region);
+
+    if((_isPublishing) && (_renderer))
+    {
+        if((_mapSource) && (_partyIcon))
+            _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
+
+        _renderer->updateRender();
+    }
 }
 
 bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)
@@ -1952,4 +2009,19 @@ bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& sc
                             (publishY * _publishRect.height()) + _publishRect.y());
 
     return true;
+}
+
+void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
+{
+    if(!_backgroundImage)
+    {
+        _backgroundImage = _scene->addPixmap(pixmap);
+        _backgroundImage->setEnabled(false);
+        _backgroundImage->setZValue(-2);
+    }
+    else
+    {
+        _backgroundImage->setPixmap(pixmap);
+        _backgroundImage->show();
+    }
 }

@@ -183,20 +183,26 @@ protected slots:
     void resetPublishFoW();
     void checkPartyUpdate();
 
+    void handleScreenshotReady(const QImage& image);
+    void rendererDeactivated();
+
     void handleMapMousePress(const QPointF& pos);
     void handleMapMouseMove(const QPointF& pos);
     void handleMapMouseRelease(const QPointF& pos);
 
     void handleActivateMapMarker();
 
+    void handleSceneChanged(const QList<QRectF> &region);
+
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
+    void setBackgroundPixmap(const QPixmap& pixmap);
 
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
     QGraphicsPixmapItem* _backgroundImage;
-    QGraphicsPixmapItem* _backgroundVideo;
+    //QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
 

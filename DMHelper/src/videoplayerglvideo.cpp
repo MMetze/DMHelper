@@ -1,5 +1,5 @@
 #include "videoplayerglvideo.h"
-#include "videoplayergl.h"
+#include "videoplayerglplayer.h"
 #include <QOpenGLContext>
 #include <QOpenGLFramebufferObject>
 #include <QOffscreenSurface>
@@ -17,9 +17,8 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _textLock(),
     _buffers(),
     _idxRender(0),
-    _idxSwap1(1),
-    _idxSwap2(2),
-    _idxDisplay(3),
+    _idxSwap(1),
+    _idxDisplay(2),
     _updated(false)
 {
     qDebug() << "[VideoPlayerGLVideo] Creating VideoPlayerGLVideo";
@@ -27,7 +26,6 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _buffers[0] = nullptr;
     _buffers[1] = nullptr;
     _buffers[2] = nullptr;
-    _buffers[3] = nullptr;
 
     // Use default format for context
     _context = new QOpenGLContext(player);
@@ -38,7 +36,7 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     // Player doesn't have an established OpenGL context right now, we'll get it later
     QObject::connect(player, &VideoPlayerGL::contextReady, [this](QOpenGLContext *renderContext)
     {
-        if((!_player) || (!_surface) || (!_context) || (!renderContext))
+        if((!_player) || (!_surface) || (!_context))
             return;
 
         // Video view is now ready, we can start
@@ -46,7 +44,8 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
         _surface->create();
 
         _context->setFormat(_player->getFormat());
-        _context->setShareContext(renderContext);
+        if(renderContext)
+            _context->setShareContext(renderContext);
         _context->create();
 
         _videoReady.release();
@@ -60,6 +59,12 @@ VideoPlayerGLVideo::~VideoPlayerGLVideo()
     cleanup(this);
 }
 
+// Is there a new texture to be displayed
+bool VideoPlayerGLVideo::isNewFrameAvailable()
+{
+    return _updated;
+}
+
 // Return the texture to be displayed
 QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
 {
@@ -71,7 +76,7 @@ QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
 
     if(_updated)
     {
-        std::swap(_idxSwap1, _idxDisplay);
+        std::swap(_idxSwap, _idxDisplay);
         _updated = false;
     }
     return _buffers[_idxDisplay];
@@ -102,7 +107,6 @@ bool VideoPlayerGLVideo::resizeRenderTextures(void* data,
         that->_buffers[0] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
         that->_buffers[1] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
         that->_buffers[2] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
-        that->_buffers[3] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
 
         that->_width = cfg->width;
         that->_height = cfg->height;
@@ -163,7 +167,6 @@ void VideoPlayerGLVideo::cleanup(void* data)
     delete that->_buffers[0]; that->_buffers[0] = nullptr;
     delete that->_buffers[1]; that->_buffers[1] = nullptr;
     delete that->_buffers[2]; that->_buffers[2] = nullptr;
-    delete that->_buffers[3]; that->_buffers[3] = nullptr;
 }
 
 //This callback is called after VLC performs drawing calls
@@ -178,11 +181,11 @@ void VideoPlayerGLVideo::swap(void* data)
         return;
 
     QMutexLocker locker(&that->_textLock);
-    std::swap(that->_idxSwap2, that->_idxSwap1);
-    std::swap(that->_idxSwap2, that->_idxRender);
-
+    std::swap(that->_idxSwap, that->_idxRender);
     that->_buffers[that->_idxRender]->bind();
     that->_updated = true;
+    locker.unlock();
+
     that->_player->registerNewFrame();
 }
 

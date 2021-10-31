@@ -239,5 +239,4 @@ void PublishGLFrame::setOrthoProjection()
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     if(!f)
         return;
-
 }

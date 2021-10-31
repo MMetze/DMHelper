@@ -6,8 +6,9 @@
 #include <QImage>
 
 class Map;
-class VideoPlayerGL;
+class VideoPlayerGLPlayer;
 class BattleGLBackground;
+class PublishGLImage;
 
 class PublishGLMapRenderer : public PublishGLRenderer
 {
@@ -26,6 +27,7 @@ public:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
+    QImage getLastScreenshot();
     const QImage& getImage() const;
     QColor getColor() const;
 
@@ -39,12 +41,13 @@ protected:
 private:
     Map* _map;
     QImage _image;
-    VideoPlayerGL* _videoPlayer;
+    VideoPlayerGLPlayer* _videoPlayer;
     QSize _targetSize;
     QColor _color;
     bool _initialized;
     unsigned int _shaderProgram;
     BattleGLBackground* _backgroundObject;
+    PublishGLImage* _partyToken;
 };
 
 #endif // PUBLISHGLMAPRENDERER_H

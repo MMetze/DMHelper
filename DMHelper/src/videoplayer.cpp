@@ -401,11 +401,6 @@ void VideoPlayer::targetResized(const QSize& newSize)
     qDebug() << "[VideoPlayer] Target window resized: " << newSize;
     _targetSize = newSize;
     restartPlayer();
-
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayer] Target window resize completed";
-#endif
-
 }
 
 void VideoPlayer::stopThenDelete()
