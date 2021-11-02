@@ -2442,6 +2442,7 @@ void MainWindow::deactivateObject()
     if(objectFrame)
     {
         disconnect(_ribbon->getPublishRibbon(), nullptr, objectFrame, nullptr);
+        disconnect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
         disconnect(objectFrame, nullptr, _ribbon->getPublishRibbon(), nullptr);
         objectFrame->deactivateObject();
     }
@@ -2455,6 +2456,7 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), objectFrame, SLOT(setRotation(int)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
+        connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
 
         connect(objectFrame, SIGNAL(setPublishEnabled(bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool)));
         connect(objectFrame, SIGNAL(checkedChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setChecked(bool)));

@@ -62,7 +62,8 @@ void PublishButtonProxy::setChecked(bool checked)
 
 void PublishButtonProxy::setCheckable(bool checkable)
 {
-    emit shareSetCheckable(checkable);
+    //emit shareSetCheckable(checkable);
+    emit shareSetCheckable(true);
 }
 
 void PublishButtonProxy::setRotation(int rotation)
