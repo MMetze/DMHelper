@@ -1,6 +1,8 @@
 #include "publishglrenderer.h"
+#include "campaignobjectbase.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
+#include <QUuid>
 
 PublishGLRenderer::PublishGLRenderer(QObject *parent) :
     QObject(parent),
@@ -10,6 +12,20 @@ PublishGLRenderer::PublishGLRenderer(QObject *parent) :
 
 PublishGLRenderer::~PublishGLRenderer()
 {
+}
+
+CampaignObjectBase* PublishGLRenderer::getObject()
+{
+    return nullptr;
+}
+
+QUuid PublishGLRenderer::getObjectId()
+{
+    CampaignObjectBase* obj = getObject();
+    if(obj)
+        return obj->getID();
+    else
+        return QUuid();
 }
 
 void PublishGLRenderer::rendererActivated(QOpenGLWidget* glWidget)

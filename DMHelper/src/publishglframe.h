@@ -13,6 +13,7 @@ public:
     virtual ~PublishGLFrame() override;
 
     bool isInitialized() const;
+    PublishGLRenderer* getRenderer() const;
 
 signals:
     void frameResized(const QSize& newSize);

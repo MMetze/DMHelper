@@ -117,6 +117,7 @@ protected:
     void scaleBackgroundImage();
     void prepareImages();
     void prepareTextImage();
+    QImage getDocumentTextImage();
     void drawTextImage(QPaintDevice* target);
 
     void createVideoPlayer(bool dmPlayer);

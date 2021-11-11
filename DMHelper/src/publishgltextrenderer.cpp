@@ -1,12 +1,17 @@
 #include "publishgltextrenderer.h"
+#include "encountertext.h"
 #include "battleglbackground.h"
 #include "dmconstants.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
+#include <QTextDocument>
+#include <QPainter>
 
-PublishGLTextRenderer::PublishGLTextRenderer(QImage& backgroundImage, QImage& textImage, QObject *parent) :
+PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
+    _encounter(encounter),
+    _targetSize(),
     _backgroundImage(backgroundImage),
     _textImage(textImage),
     _scene(),
@@ -23,6 +28,11 @@ PublishGLTextRenderer::PublishGLTextRenderer(QImage& backgroundImage, QImage& te
 PublishGLTextRenderer::~PublishGLTextRenderer()
 {
     cleanup();
+}
+
+CampaignObjectBase* PublishGLTextRenderer::getObject()
+{
+    return _encounter;
 }
 
 void PublishGLTextRenderer::cleanup()
@@ -155,7 +165,8 @@ void PublishGLTextRenderer::initializeGL()
 
 void PublishGLTextRenderer::resizeGL(int w, int h)
 {
-    _scene.setTargetSize(QSize(w, h));
+    _targetSize = QSize(w, h);
+    _scene.setTargetSize(_targetSize);
     qDebug() << "[PublishGLTextRenderer] Resize w: " << w << ", h: " << h;
 
     setOrthoProjection();
@@ -225,3 +236,4 @@ void PublishGLTextRenderer::setOrthoProjection()
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 }
+

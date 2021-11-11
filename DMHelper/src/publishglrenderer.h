@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+class CampaignObjectBase;
 class QOpenGLWidget;
 
 class PublishGLRenderer : public QObject
@@ -12,6 +13,9 @@ class PublishGLRenderer : public QObject
 public:
     PublishGLRenderer(QObject *parent = nullptr);
     virtual ~PublishGLRenderer();
+
+    virtual CampaignObjectBase* getObject();
+    virtual QUuid getObjectId();
 
     // DMH OpenGL renderer calls
     virtual void rendererActivated(QOpenGLWidget* glWidget);

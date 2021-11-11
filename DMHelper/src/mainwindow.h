@@ -196,30 +196,30 @@ protected slots:
 private:
     Ui::MainWindow *ui;
 
-    PublishWindow* pubWindow;
-    ScrollTabWidget* previewTab;
-    PublishFrame* previewFrame;
-    QDialog* previewDlg;
-    QDialog* dmScreenDlg;
-    QDialog* tableDlg;
-    QDialog* quickRefDlg;
-    QDialog* soundDlg;
-    TimeAndDateFrame* timeAndDateFrame;
-    QDialog* calendarDlg;
-    QDialog* countdownDlg;
+    PublishWindow* _pubWindow;
+    ScrollTabWidget* _previewTab;
+    PublishFrame* _previewFrame;
+    QDialog* _previewDlg;
+    QDialog* _dmScreenDlg;
+    QDialog* _tableDlg;
+    QDialog* _quickRefDlg;
+    QDialog* _soundDlg;
+    TimeAndDateFrame* _timeAndDateFrame;
+    QDialog* _calendarDlg;
+    QDialog* _countdownDlg;
 
-    EncounterTextEdit* encounterTextEdit;
+    EncounterTextEdit* _encounterTextEdit;
     EncounterScrollingTextEdit* _scrollingTextEdit;
 
-    CampaignTreeModel* treeModel;
-    QVBoxLayout* characterLayout;
-    Campaign* campaign;
-    QString campaignFileName;
+    CampaignTreeModel* _treeModel;
+    QVBoxLayout* _characterLayout;
+    Campaign* _campaign;
+    QString _campaignFileName;
 
     OptionsContainer* _options;
 
-    BestiaryDialog bestiaryDlg;
-    SpellbookDialog spellDlg;
+    BestiaryDialog _bestiaryDlg;
+    SpellbookDialog _spellDlg;
 
 #ifdef INCLUDE_CHASE_SUPPORT
     ChaseDialog* chaseDlg;
@@ -233,14 +233,14 @@ private:
     NetworkController* _networkController;
 #endif
 
-    bool mouseDown;
-    QPoint mouseDownPos;
+    bool _mouseDown;
+    QPoint _mouseDownPos;
 
-    QAction* undoAction;
-    QAction* redoAction;
+    QAction* _undoAction;
+    QAction* _redoAction;
 
-    bool initialized;
-    bool dirty;
+    bool _initialized;
+    bool _dirty;
     int _animationFrameCount;
 
     RibbonMain* _ribbon;

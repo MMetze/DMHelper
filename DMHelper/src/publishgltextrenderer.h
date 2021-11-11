@@ -7,13 +7,17 @@
 #include <QElapsedTimer>
 
 class BattleGLBackground;
+class EncounterText;
 
 class PublishGLTextRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLTextRenderer(QImage& backgroundImage, QImage& textImage, QObject *parent = nullptr);
+//    PublishGLTextRenderer(QImage& backgroundImage, QImage& textImage, QObject *parent = nullptr);
+    PublishGLTextRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent = nullptr);
     virtual ~PublishGLTextRenderer() override;
+
+    virtual CampaignObjectBase* getObject() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
@@ -30,6 +34,8 @@ protected:
     virtual void timerEvent(QTimerEvent *event) override;
     void setOrthoProjection();
 
+    EncounterText* _encounter;
+    QSize _targetSize;
     QImage _backgroundImage;
     QImage _textImage;
     BattleGLScene _scene;

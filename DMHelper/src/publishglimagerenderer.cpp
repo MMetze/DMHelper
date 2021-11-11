@@ -4,8 +4,9 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 
-PublishGLImageRenderer::PublishGLImageRenderer(const QImage& image, QColor color, QObject *parent) :
+PublishGLImageRenderer::PublishGLImageRenderer(CampaignObjectBase* renderObject, const QImage& image, QColor color, QObject *parent) :
     PublishGLRenderer(parent),
+    _renderObject(renderObject),
     _image(image),
     _color(color),
     _scene(),

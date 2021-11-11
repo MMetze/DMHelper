@@ -12,7 +12,7 @@ class PublishGLImageRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLImageRenderer(const QImage& image, QColor color, QObject *parent = nullptr);
+    PublishGLImageRenderer(CampaignObjectBase* renderObject, const QImage& image, QColor color, QObject *parent = nullptr);
     virtual ~PublishGLImageRenderer() override;
 
     // DMH OpenGL renderer calls
@@ -36,6 +36,7 @@ protected:
     void setOrthoProjection();
 
 private:
+    CampaignObjectBase* _renderObject;
     QImage _image;
     QColor _color;
     BattleGLScene _scene;

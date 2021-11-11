@@ -24,6 +24,11 @@ bool PublishGLFrame::isInitialized() const
     return _initialized;
 }
 
+PublishGLRenderer* PublishGLFrame::getRenderer() const
+{
+    return _renderer;
+}
+
 void PublishGLFrame::cleanup()
 {
     _initialized = false;

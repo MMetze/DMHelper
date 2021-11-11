@@ -514,7 +514,7 @@ void EncounterTextEdit::publishClicked(bool checked)
             emit showPublishWindow();
             prepareImages();
             if(!_renderer)
-                _renderer = new PublishGLTextRenderer(_prescaledImage, _textImage);
+                _renderer = new PublishGLTextRenderer(_encounter, _prescaledImage, _textImage); //_backgroundImage, getDocumentTextImage());
             emit registerRenderer(_renderer);
 
         }
@@ -816,26 +816,7 @@ void EncounterTextEdit::prepareTextImage()
     if((!_encounter) || (_prescaledImage.isNull()))
         return;
 
-    QTextDocument* doc = ui->textBrowser->document();
-    if(!doc)
-        return;
-
-    int oldTextWidth = doc->textWidth();
-    int absoluteWidth = oldTextWidth * _encounter->getTextWidth() / 100;
-    int targetMargin = (oldTextWidth - absoluteWidth) / 2;
-
-    doc->setTextWidth(absoluteWidth);
-
-    _textImage = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
-    //_textImage = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
-    _textImage.fill(Qt::transparent);
-    QPainter painter;
-    painter.begin(&_textImage);
-        painter.translate(targetMargin, 0);
-        doc->drawContents(&painter);
-    painter.end();
-
-    doc->setTextWidth(oldTextWidth);
+    _textImage = getDocumentTextImage();
 
     QSize rotatedSize = getRotatedTargetSize();
     //int rotatedWidth = rotatedSize.width() * _encounter->getTextWidth() / 100;
@@ -844,6 +825,34 @@ void EncounterTextEdit::prepareTextImage()
     //_textImage = _textImage.scaledToWidth(rotatedWidth, Qt::SmoothTransformation);
     if(_rotation != 0)
         _textImage = _textImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+}
+
+QImage EncounterTextEdit::getDocumentTextImage()
+{
+    QImage result;
+
+    QTextDocument* doc = ui->textBrowser->document();
+    if(doc)
+    {
+        int oldTextWidth = doc->textWidth();
+        int absoluteWidth = oldTextWidth * _encounter->getTextWidth() / 100;
+        int targetMargin = (oldTextWidth - absoluteWidth) / 2;
+
+        doc->setTextWidth(absoluteWidth);
+
+        result = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        //_textImage = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        result.fill(Qt::transparent);
+        QPainter painter;
+        painter.begin(&result);
+            painter.translate(targetMargin, 0);
+            doc->drawContents(&painter);
+        painter.end();
+
+        doc->setTextWidth(oldTextWidth);
+    }
+
+    return result;
 }
 
 void EncounterTextEdit::drawTextImage(QPaintDevice* target)

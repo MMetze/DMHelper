@@ -2,6 +2,7 @@
 #include "publishglframe.h"
 #include "publishglrenderer.h"
 #include <QKeyEvent>
+#include <QUuid>
 #include <QDebug>
 
 PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
@@ -30,6 +31,11 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     connect(_publishFrame, SIGNAL(positionChanged(QPointF)),this,SIGNAL(positionChanged(QPointF)));
     connect(_publishFrame,SIGNAL(frameResized(QSize)),this,SIGNAL(frameResized(QSize)));
     connect(_publishFrame,SIGNAL(labelResized(QSize)),this,SIGNAL(labelResized(QSize)));
+}
+
+QUuid PublishWindow::getObjectId()
+{
+    return ((_publishFrame) && (_publishFrame->getRenderer())) ? _publishFrame->getRenderer()->getObjectId() : QUuid();
 }
 
 void PublishWindow::setImage(QImage img)
