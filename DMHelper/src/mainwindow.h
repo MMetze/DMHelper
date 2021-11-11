@@ -5,9 +5,6 @@
 #include "bestiarydialog.h"
 #include "spellbookdialog.h"
 #include "dmconstants.h"
-#ifdef INCLUDE_CHASE_SUPPORT
-#include "chasedialog.h"
-#endif
 #include "optionscontainer.h"
 #include <QMainWindow>
 #include <QLabel>
@@ -188,11 +185,6 @@ protected slots:
     void activateWidget(int objectType, CampaignObjectBase* object = nullptr);
     void setRibbonToType(int objectType);
 
-#ifdef INCLUDE_CHASE_SUPPORT
-    void startChase();
-    void handleChaseComplete();
-#endif
-
 private:
     Ui::MainWindow *ui;
 
@@ -220,10 +212,6 @@ private:
 
     BestiaryDialog _bestiaryDlg;
     SpellbookDialog _spellDlg;
-
-#ifdef INCLUDE_CHASE_SUPPORT
-    ChaseDialog* chaseDlg;
-#endif
 
     BattleDialogManager* _battleDlgMgr;
 

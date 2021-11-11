@@ -22,7 +22,7 @@ namespace DMHelper
         { -1,  -1}, // PixmapSize_Full = fullsize,
         {250, 350}, // PixmapSize_Showcase = large-scale
         {250, 250}, // PixmapSize_Battle = mid-size square
-        {110, 150}, // PixmapSize_Animate = mid-sized icon for animation dialogs (e.g. chase)
+        {110, 150}, // PixmapSize_Animate = mid-sized icon for animation dialogs
         {CHARACTER_ICON_WIDTH, CHARACTER_ICON_HEIGHT}  // PixmapSize_Thumb = small thumbnail
     };
 }

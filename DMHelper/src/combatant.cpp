@@ -375,7 +375,6 @@ void Combatant::drawConditions(QPaintDevice* target, int conditions)
         qDebug() << "[Combatant] spacing or icon size are not ok to draw conditions. Spacing: " << spacing << ", icon size: " << iconSize << ", target: " << target->width() << " x " << target->height();
         return;
     }
-    // {110, 150}, // PixmapSize_Animate = mid-sized icon for animation dialogs (e.g. chase)
 
     QPainter painter(target);
     int cx = spacing;

@@ -4,7 +4,6 @@
 #include <Qt>
 
 //#define INCLUDE_NETWORK_SUPPORT
-//#define INCLUDE_CHASE_SUPPORT
 
 namespace DMHelper
 {
@@ -30,13 +29,6 @@ namespace DMHelper
         BattleEvent_Blank = 0,
         BattleEvent_NewRound,
         BattleEvent_Damage
-    };
-
-    enum ChaseContent
-    {
-        ChaseContent_Blank = 0,
-        ChaseContent_Complication,
-        ChaseContent_Character
     };
 
     enum ActionType
@@ -151,9 +143,6 @@ namespace DMHelper
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
     const int TreeItemData_Object = Qt::UserRole + 3;
-
-    const int ChaserContent_Type = Qt::UserRole + 1;
-    const int ChaserContent_Pointer = Qt::UserRole + 2;
 
     const int CHARACTER_WIDGET_HEIGHT = 20;
     const int CHARACTER_ICON_WIDTH = CHARACTER_WIDGET_HEIGHT * 4 / 3;

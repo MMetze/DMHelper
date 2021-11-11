@@ -43,9 +43,6 @@
 #include "texttranslatedialog.h"
 #include "randommarketdialog.h"
 #include "combatantselectdialog.h"
-#ifdef INCLUDE_CHASE_SUPPORT
-    #include "chaserselectiondialog.h"
-#endif
 #include "optionsdialog.h"
 #include "selectzoom.h"
 #include "scrolltabwidget.h"
@@ -110,28 +107,6 @@
 #include <QSplashScreen>
 #endif
 
-/*
- * TODO:
- * Add copyright notice to all files
- * Remove commented code
- * Refactor mainwindow, make it smaller
- * Avoid redrawing the tree every time a change is made
- * Add maps to Settings
- * Add NPCs - first just to the tree, then to battles, chases or party
- * Add non-characters to the party (monsters or NPCs) --> create a chracter from a monster class
- * Spell reference
- * More editing ability for UI elements (campaign, adventure, encounter, maps - rename, remap, etc)
- * Remove chase and other duplicate classes (dialogs instead of frames, old monster/character widgets)
- * Cross-populate preview screens
- * Image publisher
- * Items in the campaign
- * Drag and Drop to add maps and images
- * Check member variable naming convention
- * Maps - Tokens and DM layers, clickable?
- * different brushes for FOW clearing
- * Full character sheet
- */
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -155,9 +130,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _options(nullptr),
     _bestiaryDlg(),
     _spellDlg(),
-#ifdef INCLUDE_CHASE_SUPPORT
-    chaseDlg(nullptr),
-#endif
     _battleDlgMgr(nullptr),
     _audioPlayer(nullptr),
 #ifdef INCLUDE_NETWORK_SUPPORT
@@ -326,11 +298,6 @@ MainWindow::MainWindow(QWidget *parent) :
     enableCampaignMenu();
 
     // Tools Menu
-    /*
-#ifdef INCLUDE_CHASE_SUPPORT
-    connect(ui->action_Chase_Dialog,SIGNAL(triggered()),this,SLOT(startChase()));
-#endif
-    */
     connect(_ribbonTabTools, SIGNAL(bestiaryClicked()), this, SLOT(openBestiary()));
     QShortcut* bestiaryShortcut = new QShortcut(QKeySequence(tr("Ctrl+M", "Open Bestiary")), this);
     connect(bestiaryShortcut, SIGNAL(activated()), this, SLOT(openBestiary()));
@@ -2547,78 +2514,3 @@ void MainWindow::setRibbonToType(int objectType)
             break;
     }
 }
-
-#ifdef INCLUDE_CHASE_SUPPORT
-
-void MainWindow::startChase()
-{
-    if(!campaign)
-        return;
-
-    QString chaseFileName = _options->getChaseFileName();
-
-    if(chaseFileName.isEmpty())
-    {
-        chaseFileName = QFileDialog::getOpenFileName(this,QString("Select Chase File"),QString(),QString("XML files (*.xml)"));
-        if(chaseFileName.isEmpty())
-            return;
-
-        _options->setChaseFileName(chaseFileName);
-    }
-
-    if(!chaseDlg)
-    {
-        ChaserSelectionDialog* selectDlg = new ChaserSelectionDialog(this);
-
-        // Add the characters
-        selectDlg->addCharacters(campaign->getActiveCharacters());
-
-        // Add combatants from a selected battle encounter
-        Encounter* encounter = encounterFromIndex(ui->treeView->currentIndex());
-        if((encounter) && (encounter->getType() == DMHelper::EncounterType_Battle))
-        {
-            EncounterBattle* battle = dynamic_cast<EncounterBattle*>(encounter);
-            if(battle)
-            {
-                selectDlg->addEncounterCombatants(battle->getCombatantsAllWaves());
-            }
-        }
-
-        // Add living monsters from an existing battle
-        /*
-        TODO: Fix this for chases
-        selectDlg->addBattleCombatants(_battleDlgMgr->getLivingMonsters());
-        */
-
-        if(selectDlg->exec() == QDialog::Rejected)
-            return;
-
-        chaseDlg = new ChaseDialog(chaseFileName, this);
-
-        chaseDlg->addCombatants(selectDlg->getPursuers(), true);
-        chaseDlg->addCombatantGroups(selectDlg->getPursuerGroups(), true);
-        chaseDlg->addCombatants(selectDlg->getQuarry(), false);
-        chaseDlg->addCombatantGroups(selectDlg->getQuarryGroups(), false);
-
-        connect(chaseDlg, SIGNAL(chaseComplete()), this, SLOT(handleChaseComplete()));
-        connect(chaseDlg, SIGNAL(publishChaseScene(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
-    }
-
-    chaseDlg->show();
-    chaseDlg->activateWindow();
-}
-
-void MainWindow::handleChaseComplete()
-{
-    if(!chaseDlg)
-        return;
-
-    QMessageBox::StandardButton result = QMessageBox::critical(chaseDlg, QString("Confirm Chase Complete"), QString("Are you sure you wish to end this chase? All changes will be discarded."), QMessageBox::Yes | QMessageBox::No);
-    if(result == QMessageBox::Yes)
-    {
-        delete chaseDlg;
-        chaseDlg = nullptr;
-    }
-}
-
-#endif //INCLUDE_CHASE_SUPPORT

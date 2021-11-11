@@ -159,15 +159,10 @@ SOURCES += main.cpp\
     campaigntree.cpp \
     campaigntreemodel.cpp \
     textpublishdialog.cpp \
-    chasedialog.cpp \
-    chaserwidget.cpp \
-    chaser.cpp \
     complicationdata.cpp \
     combatantselectdialog.cpp \
-    chaserselectiondialog.cpp \
     quickref.cpp \
     quickrefdatawidget.cpp \
-    chaseanimationdialog.cpp \
     mapmarkerdialog.cpp \
     undomarker.cpp \
     mapcontent.cpp \
@@ -400,15 +395,10 @@ HEADERS  += mainwindow.h \
     campaigntree.h \
     campaigntreemodel.h \
     textpublishdialog.h \
-    chasedialog.h \
-    chaserwidget.h \
-    chaser.h \
     complicationdata.h \
     combatantselectdialog.h \
-    chaserselectiondialog.h \
     quickref.h \
     quickrefdatawidget.h \
-    chaseanimationdialog.h \
     mapmarkerdialog.h \
     undomarker.h \
     mapcontent.h \
@@ -542,11 +532,8 @@ FORMS    += mainwindow.ui \
     soundboardtrackframe.ui \
     spellbookdialog.ui \
     textpublishdialog.ui \
-    chasedialog.ui \
     combatantselectdialog.ui \
-    chaserselectiondialog.ui \
     quickrefdatawidget.ui \
-    chaseanimationdialog.ui \
     mapmarkerdialog.ui \
     characterframe.ui \
     mapframe.ui \
