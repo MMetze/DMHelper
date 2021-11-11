@@ -47,7 +47,6 @@ signals:
     void encounterSelected(QUuid id);
 
     void publishImage(QImage image);
-    void openPreview();
     void windowClosed(MapFrame* mapFrame);
     void dirty();
     void showPublishWindow();

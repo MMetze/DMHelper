@@ -111,9 +111,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     _pubWindow(nullptr),
-    _previewTab(nullptr),
-    _previewFrame(nullptr),
-    _previewDlg(nullptr),
     _dmScreenDlg(nullptr),
     _tableDlg(nullptr),
     _quickRefDlg(nullptr),
@@ -378,7 +375,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _pubWindow, SLOT(setImage(QImage)));
     connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
     connect(this, SIGNAL(dispatchAnimateImage(QImage)), _pubWindow, SLOT(setImageNoScale(QImage)));
-    connect(this, SIGNAL(dispatchAnimateImage(QImage)), this, SLOT(handleAnimationPreview(QImage)));
 
     connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
 
@@ -683,19 +679,6 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qApp->processEvents();
     qDebug() << "[MainWindow] Creating Reference Tabs";
-    _previewFrame = new PublishFrame(this);
-    connect(_previewFrame,SIGNAL(arrowVisibleChanged(bool)),_pubWindow,SLOT(setArrowVisible(bool)));
-    connect(_previewFrame,SIGNAL(arrowVisibleChanged(bool)),_previewFrame,SLOT(setArrowVisible(bool)));
-    connect(_previewFrame,SIGNAL(positionChanged(QPointF)),_previewFrame,SLOT(setArrowPosition(QPointF)));
-    connect(_previewFrame,SIGNAL(positionChanged(QPointF)),_pubWindow,SLOT(setArrowPosition(QPointF)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage)),_previewFrame,SLOT(setImage(QImage)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage, const QColor&)),_previewFrame,SLOT(setImage(QImage)));
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _previewFrame, SLOT(setPointerFile(const QString&)));
-    _previewFrame->setPointerFile(_options->getPointerFile());
-    _previewDlg = createDialog(_previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
-    connect(_ribbon->getPublishRibbon(), SIGNAL(previewClicked()), _previewDlg, SLOT(exec()));
-    QShortcut* previewShortcut = new QShortcut(QKeySequence(tr("Ctrl+L", "Preview")), this);
-    connect(previewShortcut, SIGNAL(activated()), _previewDlg, SLOT(exec()));
 
     _dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
     _tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
@@ -2206,18 +2189,6 @@ void MainWindow::handleAnimationStarted()
     if(_pubWindow)
         _pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
-}
-
-void MainWindow::handleAnimationPreview(QImage img)
-{
-    if(!_previewFrame)
-        return;
-
-    if(++_animationFrameCount > DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES)
-    {
-        _previewFrame->setImage(img);
-        _animationFrameCount = 0;
-    }
 }
 
 void MainWindow::openBestiary()

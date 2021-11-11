@@ -163,7 +163,6 @@ protected slots:
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
 
     void handleAnimationStarted();
-    void handleAnimationPreview(QImage img);
 
     // Bestiary
     void openBestiary();
@@ -189,9 +188,6 @@ private:
     Ui::MainWindow *ui;
 
     PublishWindow* _pubWindow;
-    ScrollTabWidget* _previewTab;
-    PublishFrame* _previewFrame;
-    QDialog* _previewDlg;
     QDialog* _dmScreenDlg;
     QDialog* _tableDlg;
     QDialog* _quickRefDlg;
