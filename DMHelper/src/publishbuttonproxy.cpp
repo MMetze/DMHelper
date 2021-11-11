@@ -61,6 +61,8 @@ void PublishButtonProxy::setChecked(bool checked)
 
 void PublishButtonProxy::setCheckable(bool checkable)
 {
+    Q_UNUSED(checkable);
+
     //emit shareSetCheckable(checkable);
     emit shareSetCheckable(true);
 }

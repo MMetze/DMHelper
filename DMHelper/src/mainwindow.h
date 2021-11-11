@@ -14,13 +14,11 @@
 #include <QUuid>
 
 class PublishWindow;
-class ScrollTabWidget;
 class Campaign;
 class Character;
 class Adventure;
 class Encounter;
 class EncounterTextEdit;
-class EncounterScrollingTextEdit;
 class TimeAndDateFrame;
 class Map;
 class MRUHandler;
@@ -39,7 +37,6 @@ class RibbonTabTools;
 class RibbonTabBattleMap;
 class RibbonTabBattleView;
 class RibbonTabBattle;
-class RibbonTabScrolling;
 class RibbonTabText;
 class BattleDialogModel;
 class RibbonTabMap;
@@ -108,7 +105,6 @@ signals:
     void campaignLoaded(Campaign* campaign);
     void dispatchPublishImage(QImage img);
     void dispatchPublishImage(QImage img, const QColor& color);
-    void dispatchAnimateImage(QImage img);
 
     void cancelSelect();
 
@@ -197,7 +193,6 @@ private:
     QDialog* _countdownDlg;
 
     EncounterTextEdit* _encounterTextEdit;
-    EncounterScrollingTextEdit* _scrollingTextEdit;
 
     CampaignTreeModel* _treeModel;
     QVBoxLayout* _characterLayout;
@@ -234,7 +229,6 @@ private:
     RibbonTabBattleMap* _ribbonTabBattleMap;
     RibbonTabBattleView* _ribbonTabBattleView;
     RibbonTabBattle* _ribbonTabBattle;
-    RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
     RibbonTabMap* _ribbonTabMap;
     RibbonTabWorldMap* _ribbonTabWorldMap;

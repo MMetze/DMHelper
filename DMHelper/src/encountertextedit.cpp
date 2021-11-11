@@ -547,7 +547,7 @@ void EncounterTextEdit::publishClicked(bool checked)
             if(checked)
             {
                 createVideoPlayer(false);
-                emit animationStarted();
+//                emit animationStarted();
             }
             else
             {
@@ -769,10 +769,10 @@ void EncounterTextEdit::timerEvent(QTimerEvent *event)
     }
 
     drawTextImage(&targetImage);
-    emit animateImage(targetImage);
+//    emit animateImage(targetImage);
 
-    if((_encounter->getAnimated()) && (_textPos.y() < -_textImage.height()))
-        emit animationStopped();
+//    if((_encounter->getAnimated()) && (_textPos.y() < -_textImage.height()))
+//        emit animationStopped();
 }
 
 void EncounterTextEdit::resizeEvent(QResizeEvent *event)
@@ -890,7 +890,7 @@ void EncounterTextEdit::createVideoPlayer(bool dmPlayer)
 
     if(dmPlayer)
     {
-        qDebug() << "[ScrollingText] Publish FoW DM animation started";
+        qDebug() << "[EncounterTextEdit] Publish FoW DM animation started";
         _videoPlayer = new VideoPlayer(_encounter->getImageFile(), QSize(0, 0), true, false);
         if(_videoPlayer->isNewImage())
             updateVideoBackground();
@@ -899,7 +899,7 @@ void EncounterTextEdit::createVideoPlayer(bool dmPlayer)
     }
     else
     {
-        qDebug() << "[ScrollingText] Publish FoW Player animation started";
+        qDebug() << "[EncounterTextEdit] Publish FoW Player animation started";
 
         // TODO: consider audio in the scrolling text
         QSize rotatedSize = getRotatedTargetSize();

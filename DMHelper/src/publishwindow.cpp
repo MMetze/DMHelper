@@ -38,6 +38,7 @@ QUuid PublishWindow::getObjectId()
     return ((_publishFrame) && (_publishFrame->getRenderer())) ? _publishFrame->getRenderer()->getObjectId() : QUuid();
 }
 
+/*
 void PublishWindow::setImage(QImage img)
 {
     _publishFrame->setImage(img, _globalColor);
@@ -55,6 +56,7 @@ void PublishWindow::setImageNoScale(QImage img)
     setBackgroundColor();
     _publishFrame->setImageNoScale(img, _globalColor);
 }
+*/
 
 void PublishWindow::setArrowVisible(bool visible)
 {

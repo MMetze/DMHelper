@@ -88,6 +88,7 @@ void PublishGLFrame::setBackgroundColor(const QColor& color)
         _renderer->setBackgroundColor(color);
 }
 
+/*
 void PublishGLFrame::setImage(QImage img, QColor color)
 {
     PublishGLImageRenderer* imageRenderer = dynamic_cast<PublishGLImageRenderer*>(_renderer);
@@ -106,6 +107,7 @@ void PublishGLFrame::setImageNoScale(QImage img, QColor color)
 {
     setImage(img, color);
 }
+*/
 
 void PublishGLFrame::setArrowVisible(bool visible)
 {

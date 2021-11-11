@@ -73,69 +73,6 @@
         <file>data/icon_reference.png</file>
         <file>data/icon_clock.png</file>
         <file>data/icon_screen.png</file>
-        <file>data/lightning/lightning01.png</file>
-        <file>data/lightning/lightning02.png</file>
-        <file>data/lightning/lightning03.png</file>
-        <file>data/lightning/lightning05.png</file>
-        <file>data/lightning/lightning06.png</file>
-        <file>data/lightning/lightning07.png</file>
-        <file>data/lightning/lightning08.png</file>
-        <file>data/lightning/lightning09.png</file>
-        <file>data/lightning/lightning10.png</file>
-        <file>data/lightning/lightning11.png</file>
-        <file>data/smoke/smoke01.png</file>
-        <file>data/smoke/smoke02.png</file>
-        <file>data/smoke/smoke03.png</file>
-        <file>data/smoke/smoke04.png</file>
-        <file>data/smoke/smoke05.png</file>
-        <file>data/smoke/smoke06.png</file>
-        <file>data/smoke/smoke07.png</file>
-        <file>data/smoke/smoke08.png</file>
-        <file>data/smoke/smoke09.png</file>
-        <file>data/smoke/smoke10.png</file>
-        <file>data/smoke/smoke11.png</file>
-        <file>data/smoke/smoke12.png</file>
-        <file>data/smoke/smoke13.png</file>
-        <file>data/smoke/smoke14.png</file>
-        <file>data/smoke/smoke15.png</file>
-        <file>data/smoke/smoke16.png</file>
-        <file>data/smoke/smoke17.png</file>
-        <file>data/smoke/smoke18.png</file>
-        <file>data/smoke/smoke19.png</file>
-        <file>data/smoke/smoke20.png</file>
-        <file>data/smoke/smoke21.png</file>
-        <file>data/smoke/smoke22.png</file>
-        <file>data/smoke/smoke23.png</file>
-        <file>data/smoke/smoke24.png</file>
-        <file>data/smoke/smoke25.png</file>
-        <file>data/smoke/smoke26.png</file>
-        <file>data/smoke/smoke27.png</file>
-        <file>data/smoke/smoke28.png</file>
-        <file>data/smoke/smoke29.png</file>
-        <file>data/smoke/smoke30.png</file>
-        <file>data/smoke/smoke31.png</file>
-        <file>data/smoke/smoke32.png</file>
-        <file>data/smoke/smoke33.png</file>
-        <file>data/smoke/smoke34.png</file>
-        <file>data/smoke/smoke35.png</file>
-        <file>data/smoke/smoke36.png</file>
-        <file>data/smoke/smoke37.png</file>
-        <file>data/smoke/smoke38.png</file>
-        <file>data/smoke/smoke39.png</file>
-        <file>data/smoke/smoke40.png</file>
-        <file>data/smoke/smoke41.png</file>
-        <file>data/zap/zap01.png</file>
-        <file>data/zap/zap02.png</file>
-        <file>data/zap/zap03.png</file>
-        <file>data/zap/zap04.png</file>
-        <file>data/zap/zap05.png</file>
-        <file>data/zap/zap06.png</file>
-        <file>data/zap/zap07.png</file>
-        <file>data/zap/zap08.png</file>
-        <file>data/zap/zap09.png</file>
-        <file>data/zap/zap10.png</file>
-        <file>data/zap/zap11.png</file>
-        <file>data/zap/zap12.png</file>
         <file>data/parchmentdark.png</file>
         <file>data/align-center.png</file>
         <file>data/align-left.png</file>

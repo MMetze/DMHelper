@@ -164,8 +164,6 @@ signals:
 
     void registerRenderer(PublishGLRenderer* renderer);
 
-    void animationStarted();
-    void animateImage(QImage img);
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
 

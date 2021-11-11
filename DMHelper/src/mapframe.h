@@ -66,8 +66,6 @@ signals:
 
     void showMarkersChanged(bool show);
 
-    void animationStarted();
-    void animateImage(QImage img);
     void registerRenderer(PublishGLRenderer* renderer);
 
     void mapEditChanged(bool enabled);

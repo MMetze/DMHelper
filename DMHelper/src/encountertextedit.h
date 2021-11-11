@@ -93,9 +93,6 @@ signals:
     void registerRenderer(PublishGLRenderer* renderer);
 
     void publishImage(QImage image);
-    void animationStarted();
-    void animateImage(QImage image);
-    void animationStopped();
     void showPublishWindow();
 
 protected slots:

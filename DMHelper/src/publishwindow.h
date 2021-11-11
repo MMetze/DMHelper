@@ -25,9 +25,9 @@ signals:
     void labelResized(const QSize& newSize);
 
 public slots:
-    void setImage(QImage img);
-    void setImage(QImage img, const QColor& color);
-    void setImageNoScale(QImage img);
+    //void setImage(QImage img);
+    //void setImage(QImage img, const QColor& color);
+    //void setImageNoScale(QImage img);
     void setArrowVisible(bool visible);
     void setArrowPosition(const QPointF& position);
     void setBackgroundColor();

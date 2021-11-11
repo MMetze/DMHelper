@@ -1,7 +1,6 @@
 #include "encounterfactory.h"
 #include "encountertext.h"
 #include "encounterbattle.h"
-#include "encounterscrollingtext.h"
 #include "party.h"
 #include "dmconstants.h"
 #include <QDomElement>
@@ -20,11 +19,10 @@ CampaignObjectBase* EncounterFactory::createObject(int objectType, int subType, 
     switch(objectType)
     {
         case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_ScrollingText:
             return new EncounterText(objectName);
         case DMHelper::CampaignType_Battle:
             return new EncounterBattle(objectName);
-        case DMHelper::CampaignType_ScrollingText:
-            return new EncounterScrollingText(objectName);
         case DMHelper::CampaignType_Party:
             return new Party(objectName);
         default:
@@ -46,11 +44,10 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
             switch(encounterType)
             {
                 case ObjectFactory::EncounterType_Text:
-                    return new EncounterText();
+                case ObjectFactory::EncounterType_ScrollingText:
+                        return new EncounterText();
                 case ObjectFactory::EncounterType_Battle:
                     return new EncounterBattle();
-                case ObjectFactory::EncounterType_ScrollingText:
-                    return new EncounterText();
                 default:
                     break;
             }

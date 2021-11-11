@@ -744,7 +744,7 @@ void MapFrame::publishClicked(bool checked)
         createVideoPlayer(!_isPublishing);
         if(_isPublishing) // && (_videoPlayer) && (!_videoPlayer->isError()))
         {
-            emit animationStarted();
+//            emit animationStarted();
             emit showPublishWindow();
         }
 
@@ -1062,7 +1062,7 @@ void MapFrame::timerEvent(QTimerEvent *event)
                 if(_rotation != 0)
                     result = result.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
 
-                emit animateImage(result);
+//                emit animateImage(result);
             }
         }
         else

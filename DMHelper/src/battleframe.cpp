@@ -2138,7 +2138,7 @@ void BattleFrame::publishImage()
 
             // OPTIMIZE: optimize this to be faster, doing only changes?
             _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
-            emit animationStarted();
+//            emit animationStarted();
             qDebug() << "[Battle Frame] publish timer activated";
         }
     }
@@ -2148,7 +2148,7 @@ void BattleFrame::executeAnimateImage()
 {
     QImage pub;
     getImageForPublishing(pub);
-    emit animateImage(pub);
+//    emit animateImage(pub);
 }
 
 void BattleFrame::updateHighlights()

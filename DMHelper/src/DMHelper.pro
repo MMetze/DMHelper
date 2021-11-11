@@ -118,7 +118,6 @@ SOURCES += main.cpp\
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
     ribbontabmap.cpp \
-    ribbontabscrolling.cpp \
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     ribbontabworldmap.cpp \
@@ -182,21 +181,9 @@ SOURCES += main.cpp\
     undoshape.cpp \
     unselectedellipse.cpp \
     unselectedpixmap.cpp \
-    scrolltabwidget.cpp \
-    scrolloverlaywidget.cpp \
     publishframe.cpp \
     quickrefframe.cpp \
     dmscreentabwidget.cpp \
-    scrolltabtransitionfactory.cpp \
-    scrolltabtransitionbase.cpp \
-    scrolltabtransitionrotate.cpp \
-    scrolltabtransitionanimation.cpp \
-    scrolltabtransitionsmoke.cpp \
-    scrolltabtransitionzap.cpp \
-    scrolltabtransitioninstant.cpp \
-    encounterscrollingtext.cpp \
-    encounterscrollingtextedit.cpp \
-    scrollingtextwindow.cpp \
     dicerollframe.cpp \
     battledialogmodel.cpp \
     battledialoggraphicsview.cpp \
@@ -353,7 +340,6 @@ HEADERS  += mainwindow.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
     ribbontabmap.h \
-    ribbontabscrolling.h \
     ribbontabtext.h \
     ribbontabtools.h \
     ribbontabworldmap.h \
@@ -418,21 +404,9 @@ HEADERS  += mainwindow.h \
     undoshape.h \
     unselectedellipse.h \
     unselectedpixmap.h \
-    scrolltabwidget.h \
-    scrolloverlaywidget.h \
     publishframe.h \
     quickrefframe.h \
     dmscreentabwidget.h \
-    scrolltabtransitionfactory.h \
-    scrolltabtransitionbase.h \
-    scrolltabtransitionrotate.h \
-    scrolltabtransitionanimation.h \
-    scrolltabtransitionsmoke.h \
-    scrolltabtransitionzap.h \
-    scrolltabtransitioninstant.h \
-    encounterscrollingtext.h \
-    encounterscrollingtextedit.h \
-    scrollingtextwindow.h \
     dicerollframe.h \
     battledialogmodel.h \
     battledialoggraphicsview.h \
@@ -522,7 +496,6 @@ FORMS    += mainwindow.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
     ribbontabmap.ui \
-    ribbontabscrolling.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
     ribbontabworldmap.ui \
@@ -545,8 +518,6 @@ FORMS    += mainwindow.ui \
     timeanddateframe.ui \
     quickrefframe.ui \
     dmscreentabwidget.ui \
-    encounterscrollingtextedit.ui \
-    scrollingtextwindow.ui \
     dicerollframe.ui \
     battledialogeffectsettings.ui \
     welcomeframe.ui \

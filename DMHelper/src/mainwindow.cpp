@@ -22,8 +22,6 @@
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encounterbattle.h"
-#include "encounterscrollingtext.h"
-#include "encounterscrollingtextedit.h"
 #include "campaignobjectframe.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
@@ -45,7 +43,6 @@
 #include "combatantselectdialog.h"
 #include "optionsdialog.h"
 #include "selectzoom.h"
-#include "scrolltabwidget.h"
 #include "quickref.h"
 #include "quickrefframe.h"
 #include "dmscreentabwidget.h"
@@ -71,7 +68,6 @@
 #include "ribbontabbattlemap.h"
 #include "ribbontabbattleview.h"
 #include "ribbontabbattle.h"
-#include "ribbontabscrolling.h"
 #include "ribbontabtext.h"
 #include "ribbontabmap.h"
 #include "ribbontabworldmap.h"
@@ -119,7 +115,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _calendarDlg(nullptr),
     _countdownDlg(nullptr),
     _encounterTextEdit(nullptr),
-    _scrollingTextEdit(nullptr),
     _treeModel(nullptr),
     _characterLayout(nullptr),
     _campaign(nullptr),
@@ -146,7 +141,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabBattleMap(nullptr),
     _ribbonTabBattleView(nullptr),
     _ribbonTabBattle(nullptr),
-    _ribbonTabScrolling(nullptr),
     _ribbonTabText(nullptr),
     _ribbonTabMap(nullptr),
     _ribbonTabWorldMap(nullptr),
@@ -370,13 +364,12 @@ MainWindow::MainWindow(QWidget *parent) :
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Bestiary Loaded";
 
-    connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
-    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), this, SLOT(showPublishWindow()));
-    connect(this, SIGNAL(dispatchPublishImage(QImage)), _pubWindow, SLOT(setImage(QImage)));
-    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
-    connect(this, SIGNAL(dispatchAnimateImage(QImage)), _pubWindow, SLOT(setImageNoScale(QImage)));
+    //connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
+    //connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), this, SLOT(showPublishWindow()));
+    //connect(this, SIGNAL(dispatchPublishImage(QImage)), _pubWindow, SLOT(setImage(QImage)));
+    //connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
 
-    connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
+    //connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -396,10 +389,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_Text
     _encounterTextEdit = new EncounterTextEdit;
     connect(_encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
-    connect(_encounterTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(_encounterTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
-    connect(_encounterTextEdit, SIGNAL(animationStopped()), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
-    connect(_encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    //connect(_encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(_encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_encounterTextEdit, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), _encounterTextEdit, SLOT(targetResized(QSize)));
@@ -465,10 +455,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), battleFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
     connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
     connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
-    connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(battleFrame, SIGNAL(animateImage(QImage)), _pubWindow, SLOT(setBackgroundColor()));
     connect(battleFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
-    connect(battleFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
     connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
     connect(battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
@@ -539,12 +526,12 @@ MainWindow::MainWindow(QWidget *parent) :
     CharacterFrame* charFrame = new CharacterFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    //connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
 
     PartyFrame* partyFrame = new PartyFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
     qDebug() << "[MainWindow]     Adding Party Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(partyFrame, SIGNAL(publishPartyImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    //connect(partyFrame, SIGNAL(publishPartyImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(this, SIGNAL(characterChanged(QUuid)), partyFrame, SLOT(handleCharacterChanged(QUuid)));
     connect(partyFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
 
@@ -553,9 +540,7 @@ MainWindow::MainWindow(QWidget *parent) :
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
-    connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(mapFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
+    //connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
@@ -617,33 +602,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
 
-    // EncounterType_ScrollingText
-    _scrollingTextEdit = new EncounterScrollingTextEdit;
-    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_ScrollingText, _scrollingTextEdit);
-    qDebug() << "[MainWindow]     Adding Scrolling Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(_scrollingTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(_scrollingTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
-    connect(_scrollingTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
-    connect(_pubWindow, SIGNAL(frameResized(QSize)), _scrollingTextEdit, SLOT(targetResized(QSize)));
-    connect(_ribbonTabScrolling, SIGNAL(backgroundClicked()), _scrollingTextEdit, SLOT(browseImageFile()));
-    connect(_ribbonTabScrolling, SIGNAL(speedChanged(int)), _scrollingTextEdit, SLOT(setScrollSpeed(int)));
-    connect(_ribbonTabScrolling, SIGNAL(widthChanged(int)), _scrollingTextEdit, SLOT(setImageWidth(int)));
-    connect(_ribbonTabScrolling, SIGNAL(rewindClicked()), _scrollingTextEdit, SLOT(rewind()));
-    connect(_scrollingTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabScrolling, SLOT(setSpeed(int)));
-    connect(_scrollingTextEdit, SIGNAL(imageWidthChanged(int)), _ribbonTabScrolling, SLOT(setWidth(int)));
-    connect(_ribbonTabScrolling, SIGNAL(colorChanged(const QColor&)), _scrollingTextEdit, SLOT(setColor(const QColor&)));
-    connect(_ribbonTabScrolling, SIGNAL(fontFamilyChanged(const QString&)), _scrollingTextEdit, SLOT(setFontFamily(const QString&)));
-    connect(_ribbonTabScrolling, SIGNAL(fontSizeChanged(int)), _scrollingTextEdit, SLOT(setFontSize(int)));
-    connect(_ribbonTabScrolling, SIGNAL(fontBoldChanged(bool)), _scrollingTextEdit, SLOT(setFontBold(bool)));
-    connect(_ribbonTabScrolling, SIGNAL(fontItalicsChanged(bool)), _scrollingTextEdit, SLOT(setFontItalics(bool)));
-    connect(_ribbonTabScrolling, SIGNAL(alignmentChanged(Qt::Alignment)), _scrollingTextEdit, SLOT(setAlignment(Qt::Alignment)));
-    connect(_scrollingTextEdit, SIGNAL(colorChanged(const QColor&)), _ribbonTabScrolling, SLOT(setColor(const QColor&)));
-    connect(_scrollingTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabScrolling, SLOT(setFontFamily(const QString&)));
-    connect(_scrollingTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabScrolling, SLOT(setFontSize(int)));
-    connect(_scrollingTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabScrolling, SLOT(setFontBold(bool)));
-    connect(_scrollingTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabScrolling, SLOT(setFontItalics(bool)));
-    connect(_scrollingTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabScrolling, SLOT(setAlignment(Qt::Alignment)));
-
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
     //TODO: can this edit frame be completely removed?
@@ -669,9 +627,6 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Welcome Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     qDebug() << "[MainWindow] Encounter Pages Created";
-
-    // Ensure publishing a single image stops any running animations
-    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
 
     // Load the quick reference tabs
 #ifndef Q_OS_MAC
@@ -1590,8 +1545,6 @@ void MainWindow::setupRibbonBar()
     _ribbonTabBattleView->hide();
     _ribbonTabBattle = new RibbonTabBattle(this);
     _ribbonTabBattle->hide();
-    _ribbonTabScrolling = new RibbonTabScrolling(this);
-    _ribbonTabScrolling->hide();
     _ribbonTabText = new RibbonTabText(this);
     _ribbonTabText->hide();
     _ribbonTabMap = new RibbonTabMap(this);
@@ -2421,7 +2374,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->enableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
@@ -2431,21 +2383,8 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
-            break;
-        case DMHelper::CampaignType_ScrollingText:
-            _ribbon->enableTab(_ribbonTabScrolling);
-            _ribbon->disableTab(_ribbonTabBattleMap);
-            _ribbon->disableTab(_ribbonTabBattleView);
-            _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabMap);
-            _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabText);
-            _ribbon->disableTab(_ribbonTabAudio);
-            connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), _scrollingTextEdit, SLOT(publishClicked(bool)));
-            connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), _scrollingTextEdit, SLOT(setRotation(int)));
             break;
         case DMHelper::CampaignType_Campaign:
         case DMHelper::CampaignType_Text:
@@ -2455,7 +2394,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_AudioTrack:
@@ -2465,7 +2403,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             break;
         case DMHelper::CampaignType_Party:
@@ -2479,7 +2416,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;

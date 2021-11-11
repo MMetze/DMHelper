@@ -214,6 +214,8 @@ void PublishGLTextRenderer::rewind()
 
 void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
 {
+    Q_UNUSED(event);
+
     qreal elapsedtime = _elapsed.restart();
     //_textPos.ry() -= _encounter->getScrollSpeed() * (_prescaledImage.height() / 250) * (elapsedtime / 1000.0);
     _textPos.ry() += 25.0 * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0);
