@@ -6,6 +6,7 @@
 
 BattleGLBackground::BattleGLBackground(BattleGLScene* scene, const QImage& image, int textureParam) :
     BattleGLObject(scene),
+    _imageSize(),
     _textureParam(textureParam),
     _VAO(0),
     _VBO(0),
@@ -25,6 +26,8 @@ void BattleGLBackground::cleanup()
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    _imageSize = QSize();
 
     if(_VAO > 0)
     {
@@ -65,6 +68,11 @@ void BattleGLBackground::setImage(const QImage& image)
     createImageObjects(image);
 }
 
+QSize BattleGLBackground::getSize() const
+{
+    return _imageSize;
+}
+
 void BattleGLBackground::createImageObjects(const QImage& image)
 {
     // Set up the rendering context, load shaders and other resources, etc.:
@@ -72,6 +80,8 @@ void BattleGLBackground::createImageObjects(const QImage& image)
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    _imageSize = image.size();
 
     float vertices[] = {
         // positions    // colors           // texture coords

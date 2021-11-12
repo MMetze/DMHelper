@@ -102,7 +102,8 @@ SOURCES += main.cpp\
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
-    publishglmaprenderer.cpp \
+    publishglmapimagerenderer.cpp \
+    publishglmapvideorenderer.cpp \
     publishglobject.cpp \
     publishglrenderer.cpp \
     publishgltextrenderer.cpp \
@@ -324,7 +325,8 @@ HEADERS  += mainwindow.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \
-    publishglmaprenderer.h \
+    publishglmapimagerenderer.h \
+    publishglmapvideorenderer.h \
     publishglobject.h \
     publishglrenderer.h \
     publishgltextrenderer.h \

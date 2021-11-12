@@ -16,7 +16,6 @@ class MapFrame;
 
 class MapFrameScene;
 class Map;
-class PublishGLMapRenderer;
 class PublishGLRenderer;
 class Party;
 class MapMarkerGraphicsItem;
@@ -232,7 +231,7 @@ private:
     qreal _scale;
 
     Map* _mapSource;
-    PublishGLMapRenderer* _renderer;
+    PublishGLRenderer* _renderer;
 
     int _timerId;
     VideoPlayer* _videoPlayer;

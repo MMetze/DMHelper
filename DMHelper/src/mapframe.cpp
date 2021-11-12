@@ -13,7 +13,8 @@
 #include "campaign.h"
 #include "party.h"
 #include "unselectedpixmap.h"
-#include "publishglmaprenderer.h"
+#include "publishglmapimagerenderer.h"
+#include "publishglmapvideorenderer.h"
 #include "videoplayerglscreenshot.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
@@ -662,6 +663,7 @@ void MapFrame::publishClicked(bool checked)
 
     if(!_isVideo)
     {
+        /*
         // Still Image
         QImage pub;
         if(_publishZoom)
@@ -735,6 +737,11 @@ void MapFrame::publishClicked(bool checked)
         }
 
         emit publishImage(pub);
+        */
+
+        _renderer = new PublishGLMapImageRenderer(_mapSource);
+        connect(_renderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+        emit registerRenderer(_renderer);
         emit showPublishWindow();
     }
     else
@@ -1667,7 +1674,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         //_videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
         if(_renderer)
         {
-            disconnect(_renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+            disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
             rendererDeactivated();
         }
         emit registerRenderer(nullptr);
@@ -1688,12 +1695,12 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         if(_renderer)
         {
             qDebug() << "[MapFrame] ERROR: Unexpected overwrite of existing renderer! Should not happen!";
-            disconnect(_renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+            disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
             rendererDeactivated();
         }
 
-        _renderer = new PublishGLMapRenderer(_mapSource);
-        connect(_renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+        _renderer = new PublishGLMapVideoRenderer(_mapSource);
+        connect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         emit registerRenderer(_renderer);
     }
 }
@@ -1910,11 +1917,13 @@ void MapFrame::rendererDeactivated()
     if(!_renderer)
         return;
 
-    QImage screenshot = _renderer->getLastScreenshot();
-    if(screenshot.isNull())
-        return;
-
-    setBackgroundPixmap(QPixmap::fromImage(screenshot));
+    PublishGLMapVideoRenderer* videoRenderer = dynamic_cast<PublishGLMapVideoRenderer*>(_renderer);
+    if(videoRenderer)
+    {
+        QImage screenshot = videoRenderer->getLastScreenshot();
+        if(!screenshot.isNull())
+            setBackgroundPixmap(QPixmap::fromImage(screenshot));
+    }
 
     _renderer = nullptr;
 }

@@ -1,4 +1,4 @@
-#include "publishglmaprenderer.h"
+#include "publishglmapimagerenderer.h"
 #include "map.h"
 #include "videoplayerglplayer.h"
 #include "battleglbackground.h"
@@ -10,11 +10,10 @@
 #include <QMatrix4x4>
 #include <QDebug>
 
-PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
+PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
     _image(),
-    _videoPlayer(nullptr),
     _targetSize(),
     _color(),
     _initialized(false),
@@ -24,12 +23,17 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
 {
 }
 
-PublishGLMapRenderer::~PublishGLMapRenderer()
+PublishGLMapImageRenderer::~PublishGLMapImageRenderer()
 {
     cleanup();
 }
 
-void PublishGLMapRenderer::cleanup()
+CampaignObjectBase* PublishGLMapImageRenderer::getObject()
+{
+    return _map;
+}
+
+void PublishGLMapImageRenderer::cleanup()
 {
     _initialized = false;
 
@@ -38,25 +42,22 @@ void PublishGLMapRenderer::cleanup()
 
     delete _backgroundObject;
     _backgroundObject = nullptr;
-
-    delete _videoPlayer;
-    _videoPlayer = nullptr;
 }
 
-bool PublishGLMapRenderer::deleteOnDeactivation()
+bool PublishGLMapImageRenderer::deleteOnDeactivation()
 {
     return true;
 }
 
-void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
+void PublishGLMapImageRenderer::setBackgroundColor(const QColor& color)
 {
     _color = color;
     emit updateWidget();
 }
 
-void PublishGLMapRenderer::initializeGL()
+void PublishGLMapImageRenderer::initializeGL()
 {
-    if((_initialized) || (!_targetWidget) || (!_map))
+    if((_initialized) || (!_targetWidget) || (!_map) || (!_map->isInitialized()))
         return;
 
     // Set up the rendering context, load shaders and other resources, etc.:
@@ -141,7 +142,8 @@ void PublishGLMapRenderer::initializeGL()
     f->glDeleteShader(fragmentShader);
 
     // Create the objects
-    _image.load(QString("C:\\Users\\turne\\Documents\\DnD\\DM Helper\\testdata\\Desert Stronghold.jpg"));
+    if(_image.isNull())
+        _image = _map->getBackgroundImage();
     _backgroundObject = new BattleGLBackground(nullptr, _image, GL_NEAREST);
 
     // Create the party token
@@ -151,15 +153,6 @@ void PublishGLMapRenderer::initializeGL()
         _partyToken = new PublishGLImage(partyImage, false);
         _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
     }
-
-    // Create the objects
-    _videoPlayer = new VideoPlayerGLPlayer(_map->getFileName(),
-                                           _targetWidget->context(),
-                                           _targetWidget->format(),
-                                           _targetSize,
-                                           true,
-                                           false);
-    connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapRenderer::updateWidget);
 
     // Matrices
     // Model
@@ -178,25 +171,20 @@ void PublishGLMapRenderer::initializeGL()
     _initialized = true;
 }
 
-void PublishGLMapRenderer::resizeGL(int w, int h)
+void PublishGLMapImageRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
     setOrthoProjection();
-    if(_videoPlayer)
-    {
-        _videoPlayer->targetResized(_targetSize);
-        _videoPlayer->initializationComplete();
-    }
     emit updateWidget();
 }
 
-void PublishGLMapRenderer::paintGL()
+void PublishGLMapImageRenderer::paintGL()
 {
     if((!_initialized) || (!_map))
         return;
 
-    if((!_targetWidget) || (!_targetWidget->context()) || (!_videoPlayer))
+    if((!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
         return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
@@ -211,60 +199,43 @@ void PublishGLMapRenderer::paintGL()
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
-    _videoPlayer->paintGL();
-
-    if(_partyToken)
-    {
-        QSize sceneSize = _videoPlayer->getSize();
-        _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y());
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _partyToken->getMatrixData());
-        _partyToken->paintGL();
-    }
-    /*
     if(_backgroundObject)
     {
         f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
     }
-    */
 
+    if(_partyToken)
+    {
+//        QSize sceneSize = _videoPlayer->getSize();
+//        _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y());
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _partyToken->getMatrixData());
+        _partyToken->paintGL();
+    }
 }
 
-QImage PublishGLMapRenderer::getLastScreenshot()
-{
-    if(!_videoPlayer)
-        return QImage();
-
-    return _videoPlayer->getLastScreenshot();
-}
-
-const QImage& PublishGLMapRenderer::getImage() const
+const QImage& PublishGLMapImageRenderer::getImage() const
 {
     return _image;
 }
 
-QColor PublishGLMapRenderer::getColor() const
+QColor PublishGLMapImageRenderer::getColor() const
 {
     return _color;
 }
 
-void PublishGLMapRenderer::setImage(const QImage& image)
+void PublishGLMapImageRenderer::setImage(const QImage& image)
 {
     if(image != _image)
     {
         _image = image;
 
-        // TBD
-        /*
         if(_backgroundObject)
         {
             _backgroundObject->setImage(image);
             setOrthoProjection();
             emit updateWidget();
         }
-        */
     }
 }
 /*
@@ -274,24 +245,28 @@ void PublishGLMapRenderer::setColor(QColor color)
     emit updateWidget();
 }*/
 
-void PublishGLMapRenderer::setOrthoProjection()
+void PublishGLMapImageRenderer::setOrthoProjection()
 {
-    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
+    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
         return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     if(!f)
         return;
 
+    QSize imgSize = _backgroundObject->getSize();
+    QSize trgSize = _targetSize;
+
     // Update projection matrix and other size related settings:
-    /*
-    QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+//    QSizeF rectSize = QSizeF(_backgroundObject->getSize()).scaled(_targetSize, Qt::KeepAspectRatio);
+    QSizeF rectSize = QSizeF(_targetSize).scaled(_backgroundObject->getSize(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
-    */
 
+    /*
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-_targetSize.width() / 2, _targetSize.width() / 2, -_targetSize.height() / 2, _targetSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+    */
 }

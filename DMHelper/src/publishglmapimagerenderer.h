@@ -1,21 +1,22 @@
-#ifndef PUBLISHGLMAPRENDERER_H
-#define PUBLISHGLMAPRENDERER_H
+#ifndef PUBLISHGLMAPIMAGERENDERER_H
+#define PUBLISHGLMAPIMAGERENDERER_H
 
 #include "publishglrenderer.h"
 #include <QColor>
 #include <QImage>
 
 class Map;
-class VideoPlayerGLPlayer;
 class BattleGLBackground;
 class PublishGLImage;
 
-class PublishGLMapRenderer : public PublishGLRenderer
+class PublishGLMapImageRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLMapRenderer(Map* map, QObject *parent = nullptr);
-    virtual ~PublishGLMapRenderer() override;
+    PublishGLMapImageRenderer(Map* map, QObject *parent = nullptr);
+    virtual ~PublishGLMapImageRenderer() override;
+
+    virtual CampaignObjectBase* getObject() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
@@ -27,7 +28,6 @@ public:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
-    QImage getLastScreenshot();
     const QImage& getImage() const;
     QColor getColor() const;
 
@@ -41,7 +41,6 @@ protected:
 private:
     Map* _map;
     QImage _image;
-    VideoPlayerGLPlayer* _videoPlayer;
     QSize _targetSize;
     QColor _color;
     bool _initialized;
@@ -50,4 +49,4 @@ private:
     PublishGLImage* _partyToken;
 };
 
-#endif // PUBLISHGLMAPRENDERER_H
+#endif // PUBLISHGLMAPIMAGERENDERER_H

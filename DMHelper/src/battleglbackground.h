@@ -15,10 +15,12 @@ public:
     virtual void paintGL() override;
 
     void setImage(const QImage& image);
+    QSize getSize() const;
 
 protected:
     void createImageObjects(const QImage& image);
 
+    QSize _imageSize;
     int _textureParam;
     unsigned int _VAO;
     unsigned int _VBO;
