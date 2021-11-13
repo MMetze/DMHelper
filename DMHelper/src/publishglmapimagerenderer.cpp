@@ -10,6 +10,69 @@
 #include <QMatrix4x4>
 #include <QDebug>
 
+/*
+if(_publishZoom)
+    _publishRect = QRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
+                         static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
+                         static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
+                         static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
+    // TODO: Consider zoom factor...
+else
+    if(_publishVisible)
+        pub = _mapSource->getShrunkPublishImage(&_publishRect);
+    else
+        pub = _mapSource->getPublishImage();
+        _publishRect = pub.rect();
+
+    QPainter p(&pub);
+    QPointF topLeftOffset = (_publishZoom || _publishVisible) ? _publishRect.topLeft() : QPointF();
+    if((_mapSource->getShowParty()) && ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
+    {
+        QPixmap partyPixmap = _mapSource->getPartyPixmap();
+        if(!partyPixmap.isNull())
+        {
+            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale());
+            p.drawPixmap(_partyIcon->pos() - topLeftOffset, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
+        }
+    }
+
+    p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
+                  _mapSource->getDistanceLineWidth(),
+                  static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
+    if(_distanceLine)
+        p.drawLine(_distanceLine->line().translated(-topLeftOffset));
+    if(_distancePath)
+        p.drawPath(_distancePath->path().translated(-topLeftOffset));
+    if(_distanceText)
+        p.drawText(_distanceText->pos() - topLeftOffset, _distanceText->text());
+
+    if(_mapSource->getShowMarkers())
+    {
+        if(QUndoStack* stack = _mapSource->getUndoStack())
+        {
+            for( int i = 0; i < stack->index(); ++i )
+            {
+                const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
+                if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
+                {
+                    MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
+                    if(markerItem)
+                        markerItem->drawGraphicsItem(p);
+                }
+            }
+        }
+    }
+}
+
+if(_rotation != 0)
+{
+    pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+}
+
+emit publishImage(pub);
+*/
+
+
 PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
@@ -207,8 +270,8 @@ void PublishGLMapImageRenderer::paintGL()
 
     if(_partyToken)
     {
-//        QSize sceneSize = _videoPlayer->getSize();
-//        _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y());
+        QSize sceneSize = _backgroundObject->getSize();
+        _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y() - _partyToken->getSize().height());
         f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _partyToken->getMatrixData());
         _partyToken->paintGL();
     }
@@ -254,19 +317,9 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     if(!f)
         return;
 
-    QSize imgSize = _backgroundObject->getSize();
-    QSize trgSize = _targetSize;
-
     // Update projection matrix and other size related settings:
-//    QSizeF rectSize = QSizeF(_backgroundObject->getSize()).scaled(_targetSize, Qt::KeepAspectRatio);
     QSizeF rectSize = QSizeF(_targetSize).scaled(_backgroundObject->getSize(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
-
-    /*
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-_targetSize.width() / 2, _targetSize.width() / 2, -_targetSize.height() / 2, _targetSize.height() / 2, 0.1f, 1000.f);
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
-    */
 }

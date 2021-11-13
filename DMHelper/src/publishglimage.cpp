@@ -12,7 +12,8 @@ PublishGLImage::PublishGLImage(const QImage& image, bool centered, QObject *pare
     _EBO(0),
     _scaleFactor(1.f),
     _x(0.f),
-    _y(0.f)
+    _y(0.f),
+    _imageSize()
 {
     createImageObjects(image);
 }
@@ -26,7 +27,8 @@ PublishGLImage::PublishGLImage(const QImage& image, int textureParam, bool cente
     _EBO(0),
     _scaleFactor(1.f),
     _x(0.f),
-    _y(0.f)
+    _y(0.f),
+    _imageSize()
 {
     createImageObjects(image);
 }
@@ -42,6 +44,8 @@ void PublishGLImage::cleanup()
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    _imageSize = QSize();
 
     if(_VAO > 0)
     {
@@ -99,6 +103,11 @@ void PublishGLImage::setPosition(float x, float y)
         _y = y;
         updateMatrix();
     }
+}
+
+QSize PublishGLImage::getSize() const
+{
+    return _imageSize * _scaleFactor;
 }
 
 void PublishGLImage::createImageObjects(const QImage& image)
@@ -164,6 +173,8 @@ void PublishGLImage::createImageObjects(const QImage& image)
     QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
+
+    _imageSize = glBackgroundImage.size();
 }
 
 void PublishGLImage::updateMatrix()

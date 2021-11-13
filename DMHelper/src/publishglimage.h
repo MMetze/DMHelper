@@ -19,6 +19,8 @@ public:
     void setScale(float scaleFactor);
     void setPosition(float x, float y);
 
+    QSize getSize() const;
+
 protected:
     void createImageObjects(const QImage& image);
     void updateMatrix();
@@ -32,6 +34,7 @@ protected:
     float _scaleFactor;
     float _x;
     float _y;
+    QSize _imageSize;
 };
 
 #endif // PUBLISHGLIMAGE_H
