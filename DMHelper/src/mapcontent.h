@@ -165,9 +165,11 @@ public:
     virtual void setLine(const QLine& line);
     virtual void setP1(const QPoint &p1);
     virtual void setP2(const QPoint &p2);
+    virtual qreal length() const;
     virtual QLine line() const;
     virtual QSize lineSize() const;
     virtual QPoint origin() const;
+    virtual QPoint originCenter() const;
     virtual QLine originLine() const;
 
 protected:

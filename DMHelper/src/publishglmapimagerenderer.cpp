@@ -292,21 +292,31 @@ void PublishGLMapImageRenderer::paintGL()
     if(_map->getMapItemCount() > 0)
     {
         MapDrawLine* line = dynamic_cast<MapDrawLine*>(_map->getMapItem(0));
-        if((line) &&
-                (line->line().p1() != line->line().p2()))
-
+        if(line)
         {
-            QSize lSize = line->lineSize();
-            QPoint lOrigin = line->origin();
-            QLine lOriginLine = line->originLine();
+            QFont textFont;
+            textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+            qreal lineDistance = line->length() * _map->getMapScale() / 1000.0;
+            QString distanceText;
+            distanceText = QString::number(lineDistance, 'f', 1);
 
+            QSize lineImageSize = line->lineSize();
+            QFontMetrics fontMetrics(textFont);
+            if((lineImageSize.width() / 2) < fontMetrics.horizontalAdvance(distanceText))
+                lineImageSize.setWidth((lineImageSize.width() / 2) + fontMetrics.horizontalAdvance(distanceText));
 
-            QImage lineImage(line->lineSize(), QImage::Format_ARGB32_Premultiplied);
+            QImage lineImage(lineImageSize, QImage::Format_ARGB32_Premultiplied);
             lineImage.fill(Qt::transparent);
             QPainter linePainter;
             linePainter.begin(&lineImage);
                 linePainter.setPen(QPen(QBrush(line->penColor()), line->penWidth(), line->penStyle()));
                 linePainter.drawLine(line->originLine());
+
+                linePainter.setFont(textFont);
+                linePainter.setPen(QPen(QBrush(line->penColor()), line->penWidth(), Qt::SolidLine));
+
+                linePainter.drawText(line->originCenter(), distanceText);
+
             linePainter.end();
 
             if(_lineImage)

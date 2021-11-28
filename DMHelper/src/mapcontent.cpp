@@ -1,4 +1,5 @@
 #include "mapcontent.h"
+#include <QtMath>
 
 int MapContent::_id_global = 1000000;
 
@@ -425,6 +426,15 @@ void MapDrawLine::setP2(const QPoint &p2)
     _line.setP2(p2);
 }
 
+qreal MapDrawLine::length() const
+{
+    qreal squareLength = (_line.dx() * _line.dx()) + (_line.dy() * _line.dy());
+    if(squareLength > 0.0)
+        return qSqrt(squareLength);
+    else
+        return 0.0;
+}
+
 QLine MapDrawLine::line() const
 {
     return _line;
@@ -438,6 +448,11 @@ QSize MapDrawLine::lineSize() const
 QPoint MapDrawLine::origin() const
 {
     return QPoint(qMin(_line.x1(), _line.x2()), qMin(_line.y1(), _line.y2()));
+}
+
+QPoint MapDrawLine::originCenter() const
+{
+    return originLine().center();
 }
 
 QLine MapDrawLine::originLine() const
