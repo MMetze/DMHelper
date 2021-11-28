@@ -2,6 +2,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
+#include <QDebug>
 
 PublishGLImage::PublishGLImage(const QImage& image, bool centered, QObject *parent) :
     PublishGLObject(parent),
@@ -40,40 +41,49 @@ PublishGLImage::~PublishGLImage()
 
 void PublishGLImage::cleanup()
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
-        return;
+    if(QOpenGLContext::currentContext())
+    {
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+
+        if(_VAO > 0)
+        {
+            if(e)
+                e->glDeleteVertexArrays(1, &_VAO);
+            _VAO = 0;
+        }
+
+        if(_VBO > 0)
+        {
+            if(f)
+                f->glDeleteBuffers(1, &_VBO);
+            _VBO = 0;
+        }
+
+        if(_EBO > 0)
+        {
+            if(f)
+                f->glDeleteBuffers(1, &_EBO);
+            _EBO = 0;
+        }
+    }
 
     _imageSize = QSize();
-
-    if(_VAO > 0)
-    {
-        e->glDeleteVertexArrays(1, &_VAO);
-        _VAO = 0;
-    }
-
-    if(_VBO > 0)
-    {
-        f->glDeleteBuffers(1, &_VBO);
-        _VBO = 0;
-    }
-
-    if(_EBO > 0)
-    {
-        f->glDeleteBuffers(1, &_EBO);
-        _EBO = 0;
-    }
 
     PublishGLObject::cleanup();
 }
 
 void PublishGLImage::paintGL()
 {
+    if(!QOpenGLContext::currentContext())
+        return;
+
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    qDebug() << "[PublishGLImage] Painting image. VAO: " << _VAO << ", texture: " << _textureID;
 
     e->glBindVertexArray(_VAO);
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
@@ -88,6 +98,8 @@ void PublishGLImage::setImage(const QImage& image)
 
 void PublishGLImage::setScale(float scaleFactor)
 {
+    qDebug() << "[PublishGLImage] Image scale factor set to: " << scaleFactor;
+
     if(scaleFactor != _scaleFactor)
     {
         _scaleFactor = scaleFactor;
@@ -105,6 +117,11 @@ void PublishGLImage::setPosition(float x, float y)
     }
 }
 
+void PublishGLImage::setPosition(const QPointF& pos)
+{
+    setPosition(pos.x(), pos.y());
+}
+
 QSize PublishGLImage::getSize() const
 {
     return _imageSize * _scaleFactor;
@@ -112,11 +129,16 @@ QSize PublishGLImage::getSize() const
 
 void PublishGLImage::createImageObjects(const QImage& image)
 {
+    if(!QOpenGLContext::currentContext())
+        return;
+
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    qDebug() << "[PublishGLImage] Creating images objects for image";
 
     float vertices[] = {
         // positions                                                   // colors           // texture coords

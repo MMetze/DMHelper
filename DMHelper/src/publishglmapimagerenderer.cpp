@@ -1,5 +1,6 @@
 #include "publishglmapimagerenderer.h"
 #include "map.h"
+#include "party.h"
 #include "videoplayerglplayer.h"
 #include "battleglbackground.h"
 #include "publishglobject.h"
@@ -8,6 +9,7 @@
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
+#include <QPainter>
 #include <QDebug>
 
 /*
@@ -81,9 +83,17 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _color(),
     _initialized(false),
     _shaderProgram(0),
+    _shaderModelMatrix(0),
     _backgroundObject(nullptr),
-    _partyToken(nullptr)
+    _partyToken(nullptr),
+    _lineImage(nullptr),
+    _recreatePartyToken(false)
 {
+    connect(_map, &Map::partyChanged, this, &PublishGLMapImageRenderer::handlePartyChanged);
+    connect(_map, &Map::partyIconChanged, this, &PublishGLMapImageRenderer::handlePartyIconChanged);
+    connect(_map, &Map::partyIconPosChanged, this, &PublishGLMapImageRenderer::handlePartyIconPosChanged);
+    connect(_map, &Map::showPartyChanged, this, &PublishGLMapImageRenderer::handleShowPartyChanged);
+    connect(_map, &Map::partyScaleChanged, this, &PublishGLMapImageRenderer::handlePartyScaleChanged);
 }
 
 PublishGLMapImageRenderer::~PublishGLMapImageRenderer()
@@ -100,11 +110,27 @@ void PublishGLMapImageRenderer::cleanup()
 {
     _initialized = false;
 
+    delete _lineImage;
+    _lineImage = nullptr;
+
     delete _partyToken;
     _partyToken = nullptr;
+    _recreatePartyToken = false;
 
     delete _backgroundObject;
     _backgroundObject = nullptr;
+
+    if(_shaderProgram > 0)
+    {
+        if((_targetWidget) && (_targetWidget->context()))
+        {
+            QOpenGLFunctions *f = _targetWidget->context()->functions();
+            if(f)
+                f->glDeleteProgram(_shaderProgram);
+        }
+        _shaderProgram = 0;
+    }
+    _shaderModelMatrix = 0;
 }
 
 bool PublishGLMapImageRenderer::deleteOnDeactivation()
@@ -119,7 +145,7 @@ void PublishGLMapImageRenderer::setBackgroundColor(const QColor& color)
 }
 
 void PublishGLMapImageRenderer::initializeGL()
-{
+{    
     if((_initialized) || (!_targetWidget) || (!_map) || (!_map->isInitialized()))
         return;
 
@@ -128,9 +154,11 @@ void PublishGLMapImageRenderer::initializeGL()
     if(!f)
         return;
 
-    f->glEnable(GL_TEXTURE_2D); // Enable texturing
-    f->glEnable(GL_BLEND);// you enable blending function
-    f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    qDebug() << "[PublishGLMapRenderer] Initializing renderer";
+
+    //f->glEnable(GL_TEXTURE_2D); // Enable texturing
+    //f->glEnable(GL_BLEND);// you enable blending function
+    //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     const char *vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
@@ -203,6 +231,9 @@ void PublishGLMapImageRenderer::initializeGL()
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
+    _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
+
+    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     // Create the objects
     if(_image.isNull())
@@ -210,12 +241,7 @@ void PublishGLMapImageRenderer::initializeGL()
     _backgroundObject = new BattleGLBackground(nullptr, _image, GL_NEAREST);
 
     // Create the party token
-    if(_map->getShowParty())
-    {
-        QImage partyImage = _map->getPartyPixmap().toImage();
-        _partyToken = new PublishGLImage(partyImage, false);
-        _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
-    }
+    createPartyToken();
 
     // Matrices
     // Model
@@ -228,8 +254,8 @@ void PublishGLMapImageRenderer::initializeGL()
     // Projection - note, this is set later when resizing the window
     setOrthoProjection();
 
-    f->glUseProgram(_shaderProgram);
-    f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
+    //f->glUseProgram(_shaderProgram);
+    //f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
     _initialized = true;
 }
@@ -238,17 +264,61 @@ void PublishGLMapImageRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
-    setOrthoProjection();
+    if(_backgroundObject)
+        setOrthoProjection();
+
     emit updateWidget();
 }
 
 void PublishGLMapImageRenderer::paintGL()
 {
+    qDebug() << "[PublishGLMapRenderer] Painting renderer";
+    if(!_initialized)
+        initializeGL();
+
     if((!_initialized) || (!_map))
         return;
 
-    if((!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
+    if((!_targetWidget) || (!_targetWidget->context()))
         return;
+
+    if(_recreatePartyToken)
+        createPartyToken();
+
+    QSize sceneSize;
+    if(_backgroundObject)
+        sceneSize = _backgroundObject->getSize();
+
+    if(_map->getMapItemCount() > 0)
+    {
+        MapDrawLine* line = dynamic_cast<MapDrawLine*>(_map->getMapItem(0));
+        if((line) &&
+                (line->line().p1() != line->line().p2()))
+
+        {
+            QSize lSize = line->lineSize();
+            QPoint lOrigin = line->origin();
+            QLine lOriginLine = line->originLine();
+
+
+            QImage lineImage(line->lineSize(), QImage::Format_ARGB32_Premultiplied);
+            lineImage.fill(Qt::transparent);
+            QPainter linePainter;
+            linePainter.begin(&lineImage);
+                linePainter.setPen(QPen(QBrush(line->penColor()), line->penWidth(), line->penStyle()));
+                linePainter.drawLine(line->originLine());
+            linePainter.end();
+
+            if(_lineImage)
+                _lineImage->setImage(lineImage);
+            else
+                _lineImage = new PublishGLImage(lineImage, false);
+
+            //_partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y() - _partyToken->getSize().height());
+            _lineImage->setPosition(line->origin().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - line->origin().y() - _lineImage->getSize().height());
+            //_lineImage->setPosition(line->origin());
+        }
+    }
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
@@ -260,19 +330,23 @@ void PublishGLMapImageRenderer::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     f->glUseProgram(_shaderProgram);
-    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     if(_backgroundObject)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
     }
 
-    if(_partyToken)
+    if(_lineImage)
     {
-        QSize sceneSize = _backgroundObject->getSize();
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineImage->getMatrixData());
+        _lineImage->paintGL();
+    }
+
+    if((_partyToken) && (_map->getShowParty()))
+    {
         _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y() - _partyToken->getSize().height());
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _partyToken->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _partyToken->getMatrixData());
         _partyToken->paintGL();
     }
 }
@@ -296,6 +370,7 @@ void PublishGLMapImageRenderer::setImage(const QImage& image)
         if(_backgroundObject)
         {
             _backgroundObject->setImage(image);
+            createPartyToken();
             setOrthoProjection();
             emit updateWidget();
         }
@@ -321,5 +396,59 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     QSizeF rectSize = QSizeF(_targetSize).scaled(_backgroundObject->getSize(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+    qDebug() << "[PublishGLMapRenderer] Setting orthogonal projection to " << projectionMatrix;
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+}
+
+void PublishGLMapImageRenderer::createPartyToken()
+{
+    if(_partyToken)
+    {
+        delete _partyToken;
+        _partyToken = nullptr;
+    }
+
+    QImage partyImage = _map->getPartyPixmap().toImage();
+    if(!partyImage.isNull())
+    {
+        _partyToken = new PublishGLImage(partyImage, false);
+        _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
+    }
+
+    _recreatePartyToken = false;
+}
+
+void PublishGLMapImageRenderer::handlePartyChanged(Party* party)
+{
+    Q_UNUSED(party);
+    _recreatePartyToken = true;
+    updateRender();
+}
+
+void PublishGLMapImageRenderer::handlePartyIconChanged(const QString& partyIcon)
+{
+    Q_UNUSED(partyIcon);
+    _recreatePartyToken = true;
+    updateRender();
+}
+
+void PublishGLMapImageRenderer::handlePartyIconPosChanged(const QPoint& pos)
+{
+    Q_UNUSED(pos);
+    updateRender();
+}
+
+void PublishGLMapImageRenderer::handleShowPartyChanged(bool showParty)
+{
+    Q_UNUSED(showParty);
+    updateRender();
+}
+
+void PublishGLMapImageRenderer::handlePartyScaleChanged(int partyScale)
+{
+    if(_partyToken)
+    {
+        _partyToken->setScale(0.04f * static_cast<float>(partyScale));
+        updateRender();
+    }
 }

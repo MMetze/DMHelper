@@ -20,6 +20,7 @@ class Map : public CampaignObjectBase
     Q_OBJECT
 public:
     explicit Map(const QString& mapName = QString(), const QString& fileName = QString(), QObject *parent = nullptr);
+    virtual ~Map() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -63,6 +64,11 @@ public:
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
 
+    void addMapLine(MapDrawLine* mapLine);
+    void removeMapLine(MapDrawLine* mapLine);
+    int getMapItemCount() const;
+    MapDraw* getMapItem(int index);
+
     bool isInitialized();
     bool isValid();
     void setExternalFoWImage(QImage externalImage);
@@ -93,6 +99,7 @@ signals:
 
     void partyChanged(Party* party);
     void partyIconChanged(const QString& partyIcon);
+    void partyIconPosChanged(const QPoint& pos);
     void showPartyChanged(bool showParty);
     void partyScaleChanged(int partyScale);
     void mapScaleChanged(int mapScale);
@@ -149,6 +156,7 @@ protected:
     int _mapScale;
 
     bool _showMarkers;
+    QList<MapDraw*> _mapItems;
 
     bool _initialized;
     QImage _imgBackground;

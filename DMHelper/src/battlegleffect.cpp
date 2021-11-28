@@ -19,6 +19,9 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
     _textureSize(),
     _imageScaleFactor(1.0)
 {
+    if(!QOpenGLContext::currentContext())
+        return;
+
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
@@ -118,27 +121,31 @@ BattleGLEffect::~BattleGLEffect()
 
 void BattleGLEffect::cleanup()
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
-        return;
-
-    if(_VAO > 0)
+    if(QOpenGLContext::currentContext())
     {
-        e->glDeleteVertexArrays(1, &_VAO);
-        _VAO = 0;
-    }
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
 
-    if(_VBO > 0)
-    {
-        f->glDeleteBuffers(1, &_VBO);
-        _VBO = 0;
-    }
+        if(_VAO > 0)
+        {
+            if(e)
+                e->glDeleteVertexArrays(1, &_VAO);
+            _VAO = 0;
+        }
 
-    if(_EBO > 0)
-    {
-        f->glDeleteBuffers(1, &_EBO);
-        _EBO = 0;
+        if(_VBO > 0)
+        {
+            if(f)
+                f->glDeleteBuffers(1, &_VBO);
+            _VBO = 0;
+        }
+
+        if(_EBO > 0)
+        {
+            if(f)
+                f->glDeleteBuffers(1, &_EBO);
+            _EBO = 0;
+        }
     }
 
     BattleGLObject::cleanup();
@@ -146,6 +153,9 @@ void BattleGLEffect::cleanup()
 
 void BattleGLEffect::paintGL()
 {
+    if(!QOpenGLContext::currentContext())
+        return;
+
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))

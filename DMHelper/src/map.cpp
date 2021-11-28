@@ -31,6 +31,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _partyScale(10),
     _mapScale(100),
     _showMarkers(true),
+    _mapItems(),
     _initialized(false),
     _imgBackground(),
     _imgFow(),
@@ -43,6 +44,11 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _mapSize()
 {
     _undoStack = new QUndoStack(this);
+}
+
+Map::~Map()
+{
+    qDeleteAll(_mapItems);
 }
 
 void Map::inputXML(const QDomElement &element, bool isImport)
@@ -342,6 +348,29 @@ UndoMarker* Map::getMapMarker(int id)
 bool Map::getShowMarkers() const
 {
     return _showMarkers;
+}
+
+void Map::addMapLine(MapDrawLine* mapLine)
+{
+    _mapItems.append(mapLine);
+}
+
+void Map::removeMapLine(MapDrawLine* mapLine)
+{
+    _mapItems.removeOne(mapLine);
+}
+
+int Map::getMapItemCount() const
+{
+    return _mapItems.count();
+}
+
+MapDraw* Map::getMapItem(int index)
+{
+    if((index < 0) || (index >= _mapItems.count()))
+        return nullptr;
+    else
+        return _mapItems.at(index);
 }
 
 bool Map::isInitialized()
@@ -836,7 +865,12 @@ void Map::setShowParty(bool showParty)
 
 void Map::setPartyIconPos(const QPoint& pos)
 {
-    _partyIconPos = pos;
+    if(_partyIconPos != pos)
+    {
+        _partyIconPos = pos;
+        emit partyIconPosChanged(pos);
+        emit dirty();
+    }
 }
 
 void Map::setPartyScale(int partyScale)

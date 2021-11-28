@@ -50,7 +50,7 @@ void BattleGLRenderer::cleanup()
 
 void BattleGLRenderer::initializeGL()
 {
-    if((_initialized) || (!_model) || (_model->getBackgroundImage().isNull()) || (!_targetWidget))
+    if((_initialized) || (!_model) || (_model->getBackgroundImage().isNull()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
     _scene.setGridScale(_model->getGridScale());
@@ -60,9 +60,9 @@ void BattleGLRenderer::initializeGL()
     if(!f)
         return;
 
-    f->glEnable(GL_TEXTURE_2D); // Enable texturing
-    f->glEnable(GL_BLEND);// you enable blending function
-    f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //f->glEnable(GL_TEXTURE_2D); // Enable texturing
+    //f->glEnable(GL_BLEND);// you enable blending function
+    //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //f->glEnable(GL_DEPTH_TEST);
     //f->glDepthFunc(GL_GREATER);
 
@@ -199,7 +199,6 @@ void BattleGLRenderer::paintGL()
     if((!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    //QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
     if((!f) || (!e))

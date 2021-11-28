@@ -2,14 +2,15 @@
 #include "publishglrenderer.h"
 #include "publishglimagerenderer.h"
 #include <QOpenGLFunctions>
+#include <QTimer>
 #include <QDebug>
 
 PublishGLFrame::PublishGLFrame(QWidget *parent) :
     QOpenGLWidget(parent),
     _initialized(false),
     _targetSize(),
-    _renderer(nullptr),
-    _shaderProgram(0)
+    _renderer(nullptr)//,
+//    _shaderProgram(0)
 {
 }
 
@@ -36,15 +37,18 @@ void PublishGLFrame::cleanup()
     if(_renderer)
         _renderer->cleanup();
 
+    /*
     if(_shaderProgram > 0)
     {
-        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-        if(f)
+        if(QOpenGLContext::currentContext())
         {
-            f->glDeleteProgram(_shaderProgram);
-            _shaderProgram = 0;
+            QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+            if(f)
+                f->glDeleteProgram(_shaderProgram);
         }
+        _shaderProgram = 0;
     }
+    */
 }
 
 void PublishGLFrame::updateWidget()
@@ -54,6 +58,12 @@ void PublishGLFrame::updateWidget()
 
 void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
 {
+    if(renderer == _renderer)
+    {
+        updateWidget();
+        return;
+    }
+
     if(_renderer)
     {
         _renderer->rendererDeactivated();
@@ -126,18 +136,23 @@ void PublishGLFrame::setPointerFile(const QString& filename)
 
 void PublishGLFrame::initializeGL()
 {
-    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLFrame::cleanup);
+    if(!QOpenGLContext::currentContext())
+        return;
+
+//    connect(context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLFrame::cleanup);
+    connect(QOpenGLContext::currentContext(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLFrame::cleanup);
 
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if(!f)
-        return;
+    if(f)
+    {
+        f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+        f->glEnable(GL_TEXTURE_2D); // Enable texturing
+        f->glEnable(GL_BLEND);// you enable blending function
+        f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
 
     /*
-    f->glEnable(GL_TEXTURE_2D); // Enable texturing
-    f->glEnable(GL_BLEND);// you enable blending function
-    f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     const char *vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
@@ -211,10 +226,11 @@ void PublishGLFrame::initializeGL()
     f->glDeleteShader(fragmentShader);
     */
 
+    QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
+    //initializeRenderer();
+
     _initialized = true;
 
-    if(_renderer)
-        _renderer->initializeGL();
 }
 
 void PublishGLFrame::resizeGL(int w, int h)
@@ -231,19 +247,19 @@ void PublishGLFrame::resizeGL(int w, int h)
 
 void PublishGLFrame::paintGL()
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if(!f)
-        return;
-
-    //f->glUseProgram(_shaderProgram);
-
     if(_renderer)
         _renderer->paintGL();
 }
 
 void PublishGLFrame::setOrthoProjection()
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    if(!f)
-        return;
+}
+
+void PublishGLFrame::initializeRenderer()
+{
+    if(_renderer)
+    {
+//        _renderer->initializeGL();
+//        update();
+    }
 }

@@ -3,6 +3,7 @@
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QImage>
+#include <QDebug>
 
 BattleGLBackground::BattleGLBackground(BattleGLScene* scene, const QImage& image, int textureParam) :
     BattleGLObject(scene),
@@ -22,29 +23,32 @@ BattleGLBackground::~BattleGLBackground()
 
 void BattleGLBackground::cleanup()
 {
-    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-    QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
-    if((!f) || (!e))
-        return;
-
     _imageSize = QSize();
 
-    if(_VAO > 0)
+    if(QOpenGLContext::currentContext())
     {
-        e->glDeleteVertexArrays(1, &_VAO);
-        _VAO = 0;
-    }
+        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+        QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
+        if(_VAO > 0)
+        {
+            if(e)
+                e->glDeleteVertexArrays(1, &_VAO);
+            _VAO = 0;
+        }
 
-    if(_VBO > 0)
-    {
-        f->glDeleteBuffers(1, &_VBO);
-        _VBO = 0;
-    }
+        if(_VBO > 0)
+        {
+            if(f)
+                f->glDeleteBuffers(1, &_VBO);
+            _VBO = 0;
+        }
 
-    if(_EBO > 0)
-    {
-        f->glDeleteBuffers(1, &_EBO);
-        _EBO = 0;
+        if(_EBO > 0)
+        {
+            if(f)
+                f->glDeleteBuffers(1, &_EBO);
+            _EBO = 0;
+        }
     }
 
     BattleGLObject::cleanup();
@@ -52,10 +56,15 @@ void BattleGLBackground::cleanup()
 
 void BattleGLBackground::paintGL()
 {
+    if(!QOpenGLContext::currentContext())
+        return;
+
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
+
+    qDebug() << "[BattleGLBackground] Painting background. VAO: " << _VAO << ", texture: " << _textureID;
 
     e->glBindVertexArray(_VAO);
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
@@ -75,6 +84,11 @@ QSize BattleGLBackground::getSize() const
 
 void BattleGLBackground::createImageObjects(const QImage& image)
 {
+    if(!QOpenGLContext::currentContext())
+        return;
+
+    qDebug() << "[BattleGLBackground] Creating background image objects";
+
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();

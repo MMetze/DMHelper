@@ -6,6 +6,7 @@
 #include <QImage>
 
 class Map;
+class Party;
 class BattleGLBackground;
 class PublishGLImage;
 
@@ -37,6 +38,14 @@ public slots:
 
 protected:
     void setOrthoProjection();
+    void createPartyToken();
+
+protected slots:
+    void handlePartyChanged(Party* party);
+    void handlePartyIconChanged(const QString& partyIcon);
+    void handlePartyIconPosChanged(const QPoint& pos);
+    void handleShowPartyChanged(bool showParty);
+    void handlePartyScaleChanged(int partyScale);
 
 private:
     Map* _map;
@@ -45,8 +54,11 @@ private:
     QColor _color;
     bool _initialized;
     unsigned int _shaderProgram;
+    int _shaderModelMatrix;
     BattleGLBackground* _backgroundObject;
     PublishGLImage* _partyToken;
+    PublishGLImage* _lineImage;
+    bool _recreatePartyToken;
 };
 
 #endif // PUBLISHGLMAPIMAGERENDERER_H

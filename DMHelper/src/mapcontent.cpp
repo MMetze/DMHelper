@@ -245,10 +245,15 @@ void MapEditFill::setAlpha(int alpha)
 }
 
 
-MapDraw::MapDraw(int radius, int brushType, bool erase, bool smooth) :
+
+
+MapDraw::MapDraw(int radius, int brushType, const QColor& penColor, int penWidth, Qt::PenStyle penStyle, bool erase, bool smooth) :
     MapEdit(),
     _radius(radius),
     _brushType(brushType),
+    _penColor(penColor),
+    _penWidth(penWidth),
+    _penStyle(penStyle),
     _erase(erase),
     _smooth(smooth)
 {
@@ -258,6 +263,9 @@ MapDraw::MapDraw(const MapDraw &obj) :
     MapEdit(obj),
     _radius(obj.radius()),
     _brushType(obj.brushType()),
+    _penColor(obj.penColor()),
+    _penWidth(obj.penWidth()),
+    _penStyle(obj.penStyle()),
     _erase(obj.erase()),
     _smooth(obj.smooth())
 {
@@ -275,6 +283,21 @@ int MapDraw::radius() const
 int MapDraw::brushType() const
 {
     return _brushType;
+}
+
+QColor MapDraw::penColor() const
+{
+    return _penColor;
+}
+
+int MapDraw::penWidth() const
+{
+    return _penWidth;
+}
+
+Qt::PenStyle MapDraw::penStyle() const
+{
+    return _penStyle;
 }
 
 bool MapDraw::erase() const
@@ -297,6 +320,21 @@ void MapDraw::setBrushType(int brushType)
     _brushType = brushType;
 }
 
+void MapDraw::setPenColor(const QColor& penColor)
+{
+    _penColor = penColor;
+}
+
+void MapDraw::setPenWidth(int penWidth)
+{
+    _penWidth = penWidth;
+}
+
+void MapDraw::setPenStyle(Qt::PenStyle penStyle)
+{
+    _penStyle = penStyle;
+}
+
 void MapDraw::setErase(bool erase)
 {
     _erase = erase;
@@ -311,8 +349,8 @@ void MapDraw::setSmooth(bool smooth)
 
 
 
-MapDrawPoint::MapDrawPoint(int radius, int brushType, bool erase, bool smooth, const QPoint& point) :
-    MapDraw(radius, brushType, erase, smooth),
+MapDrawPoint::MapDrawPoint(int radius, int brushType, bool erase, bool smooth, const QPoint& point, const QColor& penColor, int penWidth, Qt::PenStyle penStyle) :
+    MapDraw(radius, brushType, penColor, penWidth, penStyle, erase, smooth),
     _point(point)
 {
 }
@@ -350,14 +388,75 @@ void MapDrawPoint::setY(int y)
 
 
 
+MapDrawLine::MapDrawLine() :
+    MapDraw(),
+    _line()
+{
+}
+
+MapDrawLine::MapDrawLine(const QLine& line, bool erase, bool smooth, const QColor& penColor, int penWidth, Qt::PenStyle penStyle) :
+    MapDraw(1, Qt::SolidPattern, penColor, penWidth, penStyle, erase, smooth),
+    _line(line)
+{
+}
+
+MapDrawLine::MapDrawLine(const MapDrawLine &obj) :
+    MapDraw(obj),
+    _line(obj._line)
+{
+}
+
+MapDrawLine::~MapDrawLine()
+{
+}
+
+void MapDrawLine::setLine(const QLine& line)
+{
+    _line = line;
+}
+
+void MapDrawLine::setP1(const QPoint &p1)
+{
+    _line.setP1(p1);
+}
+
+void MapDrawLine::setP2(const QPoint &p2)
+{
+    _line.setP2(p2);
+}
+
+QLine MapDrawLine::line() const
+{
+    return _line;
+}
+
+QSize MapDrawLine::lineSize() const
+{
+    return QSize(qAbs(_line.dx()), qAbs(_line.dy()));
+}
+
+QPoint MapDrawLine::origin() const
+{
+    return QPoint(qMin(_line.x1(), _line.x2()), qMin(_line.y1(), _line.y2()));
+}
+
+QLine MapDrawLine::originLine() const
+{
+    return _line.translated(-origin());
+}
+
+
+
+
+
 MapDrawPath::MapDrawPath() :
     MapDraw(),
     _points()
 {
 }
 
-MapDrawPath::MapDrawPath(int radius, int brushType, bool erase, bool smooth, const QPoint& point) :
-    MapDraw(radius, brushType, erase, smooth),
+MapDrawPath::MapDrawPath(int radius, int brushType, bool erase, bool smooth, const QPoint& point, const QColor& penColor, int penWidth, Qt::PenStyle penStyle) :
+    MapDraw(radius, brushType, penColor, penWidth, penStyle, erase, smooth),
     _points()
 {
     _points.append(point);

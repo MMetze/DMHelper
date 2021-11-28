@@ -2,6 +2,7 @@
 #define MAPCONTENT_H
 
 #include <QPoint>
+#include <QLine>
 #include <QRect>
 #include <QString>
 #include <QColor>
@@ -103,23 +104,32 @@ protected:
 class MapDraw : public MapEdit
 {
 public:
-    MapDraw(int radius = 0, int brushType = DMHelper::BrushType_Circle, bool erase = true, bool smooth = true);
+    MapDraw(int radius = 0, int brushType = DMHelper::BrushType_Circle, const QColor& penColor = Qt::black, int penWidth = 1, Qt::PenStyle penStyle = Qt::SolidLine, bool erase = true, bool smooth = true);
     MapDraw(const MapDraw &obj);
     virtual ~MapDraw() override;
 
     virtual int radius() const;
     virtual int brushType() const;
+    virtual QColor penColor() const;
+    virtual int penWidth() const;
+    virtual Qt::PenStyle penStyle() const;
     virtual bool erase() const;
     virtual bool smooth() const;
 
     virtual void setRadius(int radius);
     virtual void setBrushType(int brushType);
+    virtual void setPenColor(const QColor& penColor);
+    virtual void setPenWidth(int penWidth);
+    virtual void setPenStyle(Qt::PenStyle penStyle);
     virtual void setErase(bool erase);
     virtual void setSmooth(bool smooth);
 
 protected:
     int _radius;
     int _brushType;
+    QColor _penColor;
+    int _penWidth;
+    Qt::PenStyle _penStyle;
     bool _erase;
     bool _smooth;
 };
@@ -128,7 +138,7 @@ protected:
 class MapDrawPoint : public MapDraw
 {
 public:
-    MapDrawPoint(int radius, int brushType, bool erase, bool smooth, const QPoint& point);
+    MapDrawPoint(int radius, int brushType, bool erase, bool smooth, const QPoint& point, const QColor& penColor = Qt::black, int penWidth = 1, Qt::PenStyle penStyle = Qt::SolidLine);
     MapDrawPoint(const MapDrawPoint &obj);
     virtual ~MapDrawPoint() override;
 
@@ -143,11 +153,36 @@ protected:
 };
 
 
+
+class MapDrawLine : public MapDraw
+{
+public:
+    MapDrawLine();
+    MapDrawLine(const QLine& line, bool erase, bool smooth, const QColor& penColor = Qt::black, int penWidth = 1, Qt::PenStyle penStyle = Qt::SolidLine);
+    MapDrawLine(const MapDrawLine &obj);
+    virtual ~MapDrawLine() override;
+
+    virtual void setLine(const QLine& line);
+    virtual void setP1(const QPoint &p1);
+    virtual void setP2(const QPoint &p2);
+    virtual QLine line() const;
+    virtual QSize lineSize() const;
+    virtual QPoint origin() const;
+    virtual QLine originLine() const;
+
+protected:
+    QLine _line;
+
+};
+
+
+
+
 class MapDrawPath : public MapDraw
 {
 public:
     MapDrawPath();
-    MapDrawPath(int radius, int brushType, bool erase, bool smooth, const QPoint& point);
+    MapDrawPath(int radius, int brushType, bool erase, bool smooth, const QPoint& point, const QColor& penColor = Qt::black, int penWidth = 1, Qt::PenStyle penStyle = Qt::SolidLine);
     MapDrawPath(const MapDrawPath &obj);
     virtual ~MapDrawPath() override;
 

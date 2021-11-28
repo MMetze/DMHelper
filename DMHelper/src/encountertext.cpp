@@ -16,7 +16,7 @@ EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
     _text(),
     _translatedText(),
     _imageFile(),
-    _textWidth(80),
+    _textWidth(100),
     _animated(false),
     _translated(false),
     _scrollSpeed(25)
@@ -28,7 +28,7 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
     extractTextNode(element, isImport);
 
     _imageFile = element.attribute("imageFile"); // Want to keep the filename even if the file was accidentally moved
-    setTextWidth(element.attribute("textWidth", "80").toInt());
+    setTextWidth(element.attribute("textWidth", "100").toInt());
     int scrollSpeed = element.attribute("scrollSpeed").toInt();
     setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);
     setAnimated(static_cast<bool>(element.attribute("animated", QString::number(0)).toInt()));

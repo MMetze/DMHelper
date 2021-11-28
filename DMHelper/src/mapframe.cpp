@@ -50,6 +50,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _mouseDownPos(),
     _undoPath(nullptr),
     _distanceLine(nullptr),
+    _line(nullptr),
     _distancePath(nullptr),
     _distanceText(nullptr),
     _publishMouseDown(false),
@@ -935,6 +936,14 @@ void MapFrame::cleanupSelectionItems()
         _distanceLine = nullptr;
     }
 
+    if(_line)
+    {
+        if(_mapSource)
+            _mapSource->removeMapLine(_line);
+        delete _line;
+        _line = nullptr;
+    }
+
     if(_distancePath)
     {
         _scene->removeItem(_distancePath);
@@ -1522,6 +1531,14 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
         _distanceText->setFont(textFont);
         _distanceText->setPos(scenePos);
+
+        _line = new MapDrawLine(QLine(scenePos.toPoint(), scenePos.toPoint()),
+                                false, true,
+                                _mapSource->getDistanceLineColor(),
+                                _mapSource->getDistanceLineWidth(),
+                                static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType()));
+        _mapSource->addMapLine(_line);
+
         mouseEvent->accept();
     }
     else if(event->type() == QEvent::MouseButtonRelease)
@@ -1533,8 +1550,10 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         if((!_distanceLine) || (!_distanceText) || (!_scene) || (_mapSource->getMapScale() <= 0.0) || (mouseEvent->buttons() == Qt::NoButton))
             return false;
 
+        QPointF scenePos = ui->graphicsView->mapToScene(mouseEvent->pos());
+
         QLineF line = _distanceLine->line();
-        line.setP2(ui->graphicsView->mapToScene(mouseEvent->pos()));
+        line.setP2(scenePos);
         _distanceLine->setLine(line);
         qreal lineDistance = line.length() * _mapSource->getMapScale() / 1000.0;
         QString distanceText;
@@ -1545,6 +1564,10 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
     #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
         qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
     #endif
+
+        if(_line)
+            _line->setP2(scenePos.toPoint());
+
         mouseEvent->accept();
     }
     return false;
@@ -1968,13 +1991,11 @@ void MapFrame::handleSceneChanged(const QList<QRectF> &region)
 {
     Q_UNUSED(region);
 
-    if((_isPublishing) && (_renderer))
-    {
-        if((_mapSource) && (_partyIcon))
-            _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
+    if((_mapSource) && (_partyIcon))
+        _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
+    if((_isPublishing) && (_renderer))
         _renderer->updateRender();
-    }
 }
 
 bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)

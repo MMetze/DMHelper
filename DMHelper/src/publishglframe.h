@@ -40,11 +40,14 @@ protected:
 
     void setOrthoProjection();
 
+protected slots:
+    void initializeRenderer();
+
 private:
     bool _initialized;
     QSize _targetSize;
     PublishGLRenderer* _renderer;
-    unsigned int _shaderProgram;
+//    unsigned int _shaderProgram;
 };
 
 #endif // PUBLISHGLFRAME_H

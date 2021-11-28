@@ -18,11 +18,12 @@ void PublishGLObject::cleanup()
 {
     if(_textureID > 0)
     {
-        QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
-        if(!f)
-            return;
-
-        f->glDeleteTextures(1, &_textureID);
+        if(QOpenGLContext::currentContext())
+        {
+            QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+            if(f)
+                f->glDeleteTextures(1, &_textureID);
+        }
         _textureID = 0;
     }
 }

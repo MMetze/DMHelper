@@ -50,9 +50,9 @@ void PublishGLImageRenderer::initializeGL()
     if(!f)
         return;
 
-    f->glEnable(GL_TEXTURE_2D); // Enable texturing
-    f->glEnable(GL_BLEND);// you enable blending function
-    f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //f->glEnable(GL_TEXTURE_2D); // Enable texturing
+    //f->glEnable(GL_BLEND);// you enable blending function
+    //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     const char *vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
