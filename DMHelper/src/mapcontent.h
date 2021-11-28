@@ -29,6 +29,8 @@ private:
 };
 
 
+
+
 class MapMarker : public MapContent
 {
 public:
@@ -72,6 +74,8 @@ private:
 };
 
 
+
+
 class MapEdit : public MapContent
 {
 public:
@@ -79,6 +83,8 @@ public:
     MapEdit(const MapEdit &obj);
     virtual ~MapEdit() override;
 };
+
+
 
 
 class MapEditFill : public MapEdit
@@ -99,6 +105,8 @@ public:
 protected:
     QColor _color;
 };
+
+
 
 
 class MapDraw : public MapEdit
@@ -135,6 +143,8 @@ protected:
 };
 
 
+
+
 class MapDrawPoint : public MapDraw
 {
 public:
@@ -151,6 +161,7 @@ public:
 protected:
     QPoint _point;
 };
+
 
 
 
@@ -191,11 +202,15 @@ public:
     virtual void addPoint(const QPoint& point);
 
     virtual QList<QPoint> points() const;
+    virtual QRect pathRect() const;
+    virtual QSize pathSize() const;
 
 protected:
     QList<QPoint> _points;
 
 };
+
+
 
 
 class MapEditShape : public MapEdit

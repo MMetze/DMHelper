@@ -350,14 +350,14 @@ bool Map::getShowMarkers() const
     return _showMarkers;
 }
 
-void Map::addMapLine(MapDrawLine* mapLine)
+void Map::addMapItem(MapDraw* mapItem)
 {
-    _mapItems.append(mapLine);
+    _mapItems.append(mapItem);
 }
 
-void Map::removeMapLine(MapDrawLine* mapLine)
+void Map::removeMapItem(MapDraw* mapItem)
 {
-    _mapItems.removeOne(mapLine);
+    _mapItems.removeOne(mapItem);
 }
 
 int Map::getMapItemCount() const

@@ -50,7 +50,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _mouseDownPos(),
     _undoPath(nullptr),
     _distanceLine(nullptr),
-    _line(nullptr),
+    _mapItem(nullptr),
     _distancePath(nullptr),
     _distanceText(nullptr),
     _publishMouseDown(false),
@@ -741,6 +741,7 @@ void MapFrame::publishClicked(bool checked)
         */
 
         _renderer = new PublishGLMapImageRenderer(_mapSource);
+        connect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
         connect(_renderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         emit registerRenderer(_renderer);
         emit showPublishWindow();
@@ -936,12 +937,12 @@ void MapFrame::cleanupSelectionItems()
         _distanceLine = nullptr;
     }
 
-    if(_line)
+    if(_mapItem)
     {
         if(_mapSource)
-            _mapSource->removeMapLine(_line);
-        delete _line;
-        _line = nullptr;
+            _mapSource->removeMapItem(_mapItem);
+        delete _mapItem;
+        _mapItem = nullptr;
     }
 
     if(_distancePath)
@@ -1532,12 +1533,12 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         _distanceText->setFont(textFont);
         _distanceText->setPos(scenePos);
 
-        _line = new MapDrawLine(QLine(scenePos.toPoint(), scenePos.toPoint()),
+        _mapItem = new MapDrawLine(QLine(scenePos.toPoint(), scenePos.toPoint()),
                                 false, true,
                                 _mapSource->getDistanceLineColor(),
                                 _mapSource->getDistanceLineWidth(),
                                 static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType()));
-        _mapSource->addMapLine(_line);
+        _mapSource->addMapItem(_mapItem);
 
         mouseEvent->accept();
     }
@@ -1560,14 +1561,15 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         distanceText = QString::number(lineDistance, 'f', 1);
         _distanceText->setText(distanceText);
         _distanceText->setPos(line.center());
+
+        MapDrawLine* mapLine = dynamic_cast<MapDrawLine*>(_mapItem);
+        if(mapLine)
+            mapLine->setP2(scenePos.toPoint());
+
+        #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+            qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
+        #endif
         emit distanceChanged(distanceText);
-    #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
-        qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
-    #endif
-
-        if(_line)
-            _line->setP2(scenePos.toPoint());
-
         mouseEvent->accept();
     }
     return false;
@@ -1598,6 +1600,15 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
         _distanceText->setFont(textFont);
         _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5,5)));
+
+        _mapItem = new MapDrawPath(1, DMHelper::BrushType_Circle,
+                                   false, true,
+                                   ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint(),
+                                   _mapSource->getDistanceLineColor(),
+                                   _mapSource->getDistanceLineWidth(),
+                                   static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType()));
+        _mapSource->addMapItem(_mapItem);
+
         mouseEvent->accept();
     }
     else if(event->type() == QEvent::MouseButtonRelease)
@@ -1633,10 +1644,15 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         distanceText = QString::number(lineDistance, 'f', 1);
         _distanceText->setText(distanceText);
         _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5,5)));
-        emit distanceChanged(distanceText);
-    #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
-        qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
-    #endif
+
+        MapDrawPath* mapPath = dynamic_cast<MapDrawPath*>(_mapItem);
+        if(mapPath)
+            mapPath->addPoint(scenePos.toPoint());
+
+        #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
+            qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
+        #endif
+            emit distanceChanged(distanceText);
         mouseEvent->accept();
     }
     return false;
@@ -1697,6 +1713,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         //_videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
         if(_renderer)
         {
+            disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
             disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
             rendererDeactivated();
         }

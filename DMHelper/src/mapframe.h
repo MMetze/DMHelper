@@ -221,7 +221,7 @@ private:
     UndoPath* _undoPath;
 
     QGraphicsLineItem* _distanceLine;
-    MapDrawLine* _line;
+    MapDraw* _mapItem;
     QGraphicsPathItem* _distancePath;
     QGraphicsSimpleTextItem* _distanceText;
 

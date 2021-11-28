@@ -64,8 +64,8 @@ public:
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
 
-    void addMapLine(MapDrawLine* mapLine);
-    void removeMapLine(MapDrawLine* mapLine);
+    void addMapItem(MapDraw* mapItem);
+    void removeMapItem(MapDraw* mapItem);
     int getMapItemCount() const;
     MapDraw* getMapItem(int index);
 

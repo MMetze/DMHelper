@@ -498,6 +498,35 @@ QList<QPoint> MapDrawPath::points() const
     return _points;
 }
 
+QRect MapDrawPath::pathRect() const
+{
+    if(_points.count() <= 0)
+        return QRect();
+
+    QRect resultRect(_points.first(), _points.first());
+
+    for(int i = 1; i < _points.count(); ++i)
+    {
+        if(_points.at(i).x() < resultRect.left())
+            resultRect.setLeft(_points.at(i).x());
+        else if(_points.at(i).x() > resultRect.right())
+            resultRect.setRight(_points.at(i).x());
+
+        if(_points.at(i).y() < resultRect.top())
+            resultRect.setTop(_points.at(i).y());
+        else if(_points.at(i).y() > resultRect.bottom())
+            resultRect.setBottom(_points.at(i).y());
+    }
+
+    return resultRect;
+}
+
+QSize MapDrawPath::pathSize() const
+{
+    return pathRect().size();
+}
+
+
 
 
 MapEditShape::MapEditShape(const QRect& rect, bool erase, bool smooth) :

@@ -34,11 +34,13 @@ public:
 
 public slots:
     void setImage(const QImage& image);
+    void distanceChanged();
 //    void setColor(QColor color);
 
 protected:
     void setOrthoProjection();
     void createPartyToken();
+    void createLineToken(const QSize& sceneSize);
 
 protected slots:
     void handlePartyChanged(Party* party);
@@ -57,8 +59,10 @@ private:
     int _shaderModelMatrix;
     BattleGLBackground* _backgroundObject;
     PublishGLImage* _partyToken;
-    PublishGLImage* _lineImage;
+    PublishGLImage* _itemImage;
+
     bool _recreatePartyToken;
+    bool _recreateLineToken;
 };
 
 #endif // PUBLISHGLMAPIMAGERENDERER_H

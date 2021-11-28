@@ -10,6 +10,7 @@
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
 #include <QPainter>
+#include <QPainterPath>
 #include <QDebug>
 
 /*
@@ -86,8 +87,9 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _shaderModelMatrix(0),
     _backgroundObject(nullptr),
     _partyToken(nullptr),
-    _lineImage(nullptr),
-    _recreatePartyToken(false)
+    _itemImage(nullptr),
+    _recreatePartyToken(false),
+    _recreateLineToken(false)
 {
     connect(_map, &Map::partyChanged, this, &PublishGLMapImageRenderer::handlePartyChanged);
     connect(_map, &Map::partyIconChanged, this, &PublishGLMapImageRenderer::handlePartyIconChanged);
@@ -110,8 +112,8 @@ void PublishGLMapImageRenderer::cleanup()
 {
     _initialized = false;
 
-    delete _lineImage;
-    _lineImage = nullptr;
+    delete _itemImage;
+    _itemImage = nullptr;
 
     delete _partyToken;
     _partyToken = nullptr;
@@ -289,46 +291,8 @@ void PublishGLMapImageRenderer::paintGL()
     if(_backgroundObject)
         sceneSize = _backgroundObject->getSize();
 
-    if(_map->getMapItemCount() > 0)
-    {
-        MapDrawLine* line = dynamic_cast<MapDrawLine*>(_map->getMapItem(0));
-        if(line)
-        {
-            QFont textFont;
-            textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
-            qreal lineDistance = line->length() * _map->getMapScale() / 1000.0;
-            QString distanceText;
-            distanceText = QString::number(lineDistance, 'f', 1);
-
-            QSize lineImageSize = line->lineSize();
-            QFontMetrics fontMetrics(textFont);
-            if((lineImageSize.width() / 2) < fontMetrics.horizontalAdvance(distanceText))
-                lineImageSize.setWidth((lineImageSize.width() / 2) + fontMetrics.horizontalAdvance(distanceText));
-
-            QImage lineImage(lineImageSize, QImage::Format_ARGB32_Premultiplied);
-            lineImage.fill(Qt::transparent);
-            QPainter linePainter;
-            linePainter.begin(&lineImage);
-                linePainter.setPen(QPen(QBrush(line->penColor()), line->penWidth(), line->penStyle()));
-                linePainter.drawLine(line->originLine());
-
-                linePainter.setFont(textFont);
-                linePainter.setPen(QPen(QBrush(line->penColor()), line->penWidth(), Qt::SolidLine));
-
-                linePainter.drawText(line->originCenter(), distanceText);
-
-            linePainter.end();
-
-            if(_lineImage)
-                _lineImage->setImage(lineImage);
-            else
-                _lineImage = new PublishGLImage(lineImage, false);
-
-            //_partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y() - _partyToken->getSize().height());
-            _lineImage->setPosition(line->origin().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - line->origin().y() - _lineImage->getSize().height());
-            //_lineImage->setPosition(line->origin());
-        }
-    }
+    if(((_map->getMapItemCount() > 0) && (!_itemImage)) || (_recreateLineToken))
+        createLineToken(sceneSize);
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
@@ -347,10 +311,10 @@ void PublishGLMapImageRenderer::paintGL()
         _backgroundObject->paintGL();
     }
 
-    if(_lineImage)
+    if(_itemImage)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineImage->getMatrixData());
-        _lineImage->paintGL();
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _itemImage->getMatrixData());
+        _itemImage->paintGL();
     }
 
     if((_partyToken) && (_map->getShowParty()))
@@ -386,6 +350,12 @@ void PublishGLMapImageRenderer::setImage(const QImage& image)
         }
     }
 }
+
+void PublishGLMapImageRenderer::distanceChanged()
+{
+    _recreateLineToken = true;
+}
+
 /*
 void PublishGLMapRenderer::setColor(QColor color)
 {
@@ -426,6 +396,72 @@ void PublishGLMapImageRenderer::createPartyToken()
     }
 
     _recreatePartyToken = false;
+}
+
+void PublishGLMapImageRenderer::createLineToken(const QSize& sceneSize)
+{
+    if((_map->getMapItemCount() <= 0) || (sceneSize.isEmpty()))
+        return;
+
+    MapDrawLine* line = dynamic_cast<MapDrawLine*>(_map->getMapItem(0));
+    if(line)
+    {
+        QFont textFont;
+        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        qreal lineDistance = line->length() * _map->getMapScale() / 1000.0;
+        QString distanceText;
+        distanceText = QString::number(lineDistance, 'f', 1);
+
+        QSize lineImageSize = line->lineSize();
+        QFontMetrics fontMetrics(textFont);
+        if((lineImageSize.width() / 2) < fontMetrics.horizontalAdvance(distanceText))
+            lineImageSize.setWidth((lineImageSize.width() / 2) + fontMetrics.horizontalAdvance(distanceText));
+
+        QImage lineImage(lineImageSize, QImage::Format_ARGB32_Premultiplied);
+        lineImage.fill(Qt::transparent);
+        QPainter linePainter;
+        linePainter.begin(&lineImage);
+            linePainter.setPen(QPen(QBrush(line->penColor()), line->penWidth(), line->penStyle()));
+            linePainter.drawLine(line->originLine());
+
+            linePainter.setFont(textFont);
+            linePainter.setPen(QPen(QBrush(line->penColor()), line->penWidth(), Qt::SolidLine));
+            linePainter.drawText(line->originCenter(), distanceText);
+        linePainter.end();
+
+        if(_itemImage)
+            _itemImage->setImage(lineImage);
+        else
+            _itemImage = new PublishGLImage(lineImage, false);
+
+        _itemImage->setPosition(line->origin().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - line->origin().y() - _itemImage->getSize().height());
+        return;
+    }
+
+    MapDrawPath* path = dynamic_cast<MapDrawPath*>(_map->getMapItem(0));
+    if((path) && (path->points().count() > 0))
+    {
+        QRect pathRect = path->pathRect();
+        QPainterPath painterPath(path->points().first() - pathRect.topLeft());
+        for(int i = 1; i < path->points().count(); ++i)
+            painterPath.lineTo(path->points().at(i) - pathRect.topLeft());
+
+        QImage pathImage(pathRect.size(), QImage::Format_ARGB32_Premultiplied);
+        pathImage.fill(Qt::transparent);
+        QPainter pathPainter;
+        pathPainter.begin(&pathImage);
+            pathPainter.setPen(QPen(QBrush(path->penColor()), path->penWidth(), path->penStyle()));
+            pathPainter.drawPath(painterPath);
+        pathPainter.end();
+
+        if(_itemImage)
+            _itemImage->setImage(pathImage);
+        else
+            _itemImage = new PublishGLImage(pathImage, false);
+
+        _itemImage->setPosition(pathRect.topLeft().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - pathRect.topLeft().y() - _itemImage->getSize().height());
+        return;
+    }
 }
 
 void PublishGLMapImageRenderer::handlePartyChanged(Party* party)
