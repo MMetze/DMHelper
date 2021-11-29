@@ -446,12 +446,29 @@ void PublishGLMapImageRenderer::createLineToken(const QSize& sceneSize)
         for(int i = 1; i < path->points().count(); ++i)
             painterPath.lineTo(path->points().at(i) - pathRect.topLeft());
 
+        QFont textFont;
+        textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
+        qreal pathDistance = painterPath.length() * _map->getMapScale() / 1000.0;
+        QString distanceText;
+        distanceText = QString::number(pathDistance, 'f', 1);
+
+        QFontMetrics fontMetrics(textFont);
+        int topPosition = pathRect.top();
+        if(pathRect.right() < path->points().last().x() + fontMetrics.horizontalAdvance(distanceText))
+            pathRect.setRight(path->points().last().x() + fontMetrics.horizontalAdvance(distanceText));
+        if(pathRect.top() > path->points().last().y() - fontMetrics.height())
+            pathRect.setTop(path->points().last().y() - fontMetrics.height());
+
         QImage pathImage(pathRect.size(), QImage::Format_ARGB32_Premultiplied);
         pathImage.fill(Qt::transparent);
         QPainter pathPainter;
         pathPainter.begin(&pathImage);
             pathPainter.setPen(QPen(QBrush(path->penColor()), path->penWidth(), path->penStyle()));
             pathPainter.drawPath(painterPath);
+
+            pathPainter.setFont(textFont);
+            pathPainter.setPen(QPen(QBrush(path->penColor()), path->penWidth(), Qt::SolidLine));
+            pathPainter.drawText(path->points().last() - pathRect.topLeft(), distanceText);
         pathPainter.end();
 
         if(_itemImage)
@@ -459,7 +476,7 @@ void PublishGLMapImageRenderer::createLineToken(const QSize& sceneSize)
         else
             _itemImage = new PublishGLImage(pathImage, false);
 
-        _itemImage->setPosition(pathRect.topLeft().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - pathRect.topLeft().y() - _itemImage->getSize().height());
+        _itemImage->setPosition(pathRect.topLeft().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - topPosition - _itemImage->getSize().height());
         return;
     }
 }
