@@ -35,6 +35,7 @@ public:
 public slots:
     void setImage(const QImage& image);
     void distanceChanged();
+    void fowChanged();
 //    void setColor(QColor color);
 
 protected:
@@ -58,11 +59,13 @@ private:
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
     BattleGLBackground* _backgroundObject;
+    BattleGLBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _itemImage;
 
     bool _recreatePartyToken;
     bool _recreateLineToken;
+    bool _updateFow;
 };
 
 #endif // PUBLISHGLMAPIMAGERENDERER_H

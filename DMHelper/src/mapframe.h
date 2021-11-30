@@ -63,6 +63,8 @@ signals:
     void distanceLineTypeChanged(int lineType);
     void distanceLineWidthChanged(int lineWidth);
 
+    void fowChanged();
+
     void showMarkersChanged(bool show);
 
     void registerRenderer(PublishGLRenderer* renderer);

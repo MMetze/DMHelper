@@ -59,7 +59,7 @@ public:
     void setMapRect(const QRect& mapRect);
 
     QUndoStack* getUndoStack() const;
-    void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false);
+    void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
 
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
@@ -161,6 +161,8 @@ protected:
     bool _initialized;
     QImage _imgBackground;
     QImage _imgFow;
+    QImage _imgBWFow;
+    int _indexBWFow;
     bool _filterApplied;
     MapColorizeFilter _filter;
     int _lineType;

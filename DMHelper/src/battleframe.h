@@ -24,7 +24,7 @@ class BattleCombatantFrame;
 class UnselectedPixmap;
 class CombatantRolloverFrame;
 class PublishGLRenderer;
-class BattleGLRenderer;
+class PublishGLBattleRenderer;
 
 namespace Ui {
 class BattleFrame;
@@ -372,7 +372,7 @@ private:
 
     BattleFrameMapDrawer* _mapDrawer;
 
-    BattleGLRenderer* _renderer;
+    PublishGLBattleRenderer* _renderer;
 
     bool _showOnDeck;
     bool _showCountdown;

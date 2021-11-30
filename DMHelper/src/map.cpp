@@ -35,6 +35,8 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _initialized(false),
     _imgBackground(),
     _imgFow(),
+    _imgBWFow(),
+    _indexBWFow(0),
     _filterApplied(false),
     _filter(),
     _lineType(Qt::SolidLine),
@@ -302,7 +304,7 @@ QUndoStack* Map::getUndoStack() const
     return _undoStack;
 }
 
-void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview)
+void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
 {
     bool previewNeed = preview;
 
@@ -315,15 +317,16 @@ void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool
         previewNeed = true;
     }
 
-    if(index < 0)
+    if(index < startIndex)
         return;
 
     if(index > _undoStack->count())
         index = _undoStack->count();
 
-    target->fill(clearColor);
+    if(startIndex == 0)
+        target->fill(clearColor);
 
-    for( int i = 0; i < index; ++i )
+    for( int i = startIndex; i < index; ++i )
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)
@@ -599,11 +602,16 @@ QImage Map::getBWFoWImage(const QImage &img)
 
 QImage Map::getBWFoWImage(const QSize &size)
 {
-    QImage result(size, QImage::Format_ARGB32);
+    if((_imgBWFow.isNull()) || (size != _imgBWFow.size()) || (_indexBWFow > _undoStack->index()))
+    {
+        _imgBWFow = QImage(size, QImage::Format_ARGB32);
+        _indexBWFow = 0;
+    }
 
-    applyPaintTo(&result, QColor(0,0,0,255), _undoStack->index());
+    applyPaintTo(&_imgBWFow, QColor(0,0,0,255), _undoStack->index(), false, _indexBWFow);
+    _indexBWFow = qMax(_undoStack->index() - 1, 0);
 
-    return result;
+    return _imgBWFow;
 }
 
 QImage Map::getPublishImage()

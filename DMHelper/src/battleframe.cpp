@@ -31,7 +31,7 @@
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
 #include "combatantrolloverframe.h"
-#include "battleglrenderer.h"
+#include "publishglbattlerenderer.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -1609,7 +1609,7 @@ void BattleFrame::publishClicked(bool checked)
         */
         emit showPublishWindow();
         if(!_renderer)
-            _renderer = new BattleGLRenderer(_model);
+            _renderer = new PublishGLBattleRenderer(_model);
         emit registerRenderer(_renderer);
     }
     else

@@ -1,5 +1,5 @@
-#ifndef BATTLEGLRENDERER_H
-#define BATTLEGLRENDERER_H
+#ifndef PUBLISHGLBATTLERENDERER_H
+#define PUBLISHGLBATTLERENDERER_H
 
 #include "publishglrenderer.h"
 #include "battleglscene.h"
@@ -8,12 +8,12 @@
 class BattleDialogModel;
 class BattleGLObject;
 
-class BattleGLRenderer : public PublishGLRenderer
+class PublishGLBattleRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    BattleGLRenderer(BattleDialogModel* model);
-    virtual ~BattleGLRenderer() override;
+    PublishGLBattleRenderer(BattleDialogModel* model);
+    virtual ~PublishGLBattleRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
@@ -39,4 +39,4 @@ private:
     QList<BattleGLObject*> _effectTokens;
 };
 
-#endif // BATTLEGLRENDERER_H
+#endif // PUBLISHGLBATTLERENDERER_H

@@ -742,6 +742,7 @@ void MapFrame::publishClicked(bool checked)
 
         _renderer = new PublishGLMapImageRenderer(_mapSource);
         connect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
+        connect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::fowChanged);
         connect(_renderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         emit registerRenderer(_renderer);
         emit showPublishWindow();
@@ -1407,14 +1408,18 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, _erase, false)); //_smooth));
                 _mapSource->getUndoStack()->push(undoShape);
                 emit dirty();
+                emit fowChanged();
                 cleanupSelectionItems();
             }
             return true;
         }
         else if(event->type() == QEvent::MouseMove)
         {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-            _rubberBand->setGeometry(QRect(_mouseDownPos, mouseEvent->pos()).normalized());
+            if(_rubberBand)
+            {
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+                _rubberBand->setGeometry(QRect(_mouseDownPos, mouseEvent->pos()).normalized());
+            }
             return true;
         }
         else if(event->type() == QEvent::KeyPress)
@@ -1438,6 +1443,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _undoPath = new UndoPath(*_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
             _mapSource->getUndoStack()->push(_undoPath);
 
+            emit fowChanged();
             return true;
         }
         else if(event->type() == QEvent::MouseButtonRelease)
@@ -1456,6 +1462,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 QPoint localPos =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
                 _undoPath->addPoint(localPos);
+                emit fowChanged();
             }
             return true;
         }
@@ -1714,6 +1721,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         if(_renderer)
         {
             disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
+            disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::fowChanged);
             disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
             rendererDeactivated();
         }

@@ -86,10 +86,12 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _shaderProgram(0),
     _shaderModelMatrix(0),
     _backgroundObject(nullptr),
+    _fowObject(nullptr),
     _partyToken(nullptr),
     _itemImage(nullptr),
     _recreatePartyToken(false),
-    _recreateLineToken(false)
+    _recreateLineToken(false),
+    _updateFow(false)
 {
     connect(_map, &Map::partyChanged, this, &PublishGLMapImageRenderer::handlePartyChanged);
     connect(_map, &Map::partyIconChanged, this, &PublishGLMapImageRenderer::handlePartyIconChanged);
@@ -121,6 +123,8 @@ void PublishGLMapImageRenderer::cleanup()
 
     delete _backgroundObject;
     _backgroundObject = nullptr;
+    delete _fowObject;
+    _fowObject = nullptr;
 
     if(_shaderProgram > 0)
     {
@@ -241,6 +245,7 @@ void PublishGLMapImageRenderer::initializeGL()
     if(_image.isNull())
         _image = _map->getBackgroundImage();
     _backgroundObject = new BattleGLBackground(nullptr, _image, GL_NEAREST);
+    _fowObject = new BattleGLBackground(nullptr, _map->getBWFoWImage(), GL_NEAREST);
 
     // Create the party token
     createPartyToken();
@@ -248,7 +253,7 @@ void PublishGLMapImageRenderer::initializeGL()
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     // View
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
@@ -291,6 +296,12 @@ void PublishGLMapImageRenderer::paintGL()
     if(_backgroundObject)
         sceneSize = _backgroundObject->getSize();
 
+    if((_fowObject) && (_updateFow))
+    {
+        _fowObject->setImage(_map->getBWFoWImage());
+        _updateFow = false;
+    }
+
     if(((_map->getMapItemCount() > 0) && (!_itemImage)) || (_recreateLineToken))
         createLineToken(sceneSize);
 
@@ -309,6 +320,12 @@ void PublishGLMapImageRenderer::paintGL()
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
+    }
+
+    if(_fowObject)
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
+        _fowObject->paintGL();
     }
 
     if(_itemImage)
@@ -354,6 +371,11 @@ void PublishGLMapImageRenderer::setImage(const QImage& image)
 void PublishGLMapImageRenderer::distanceChanged()
 {
     _recreateLineToken = true;
+}
+
+void PublishGLMapImageRenderer::fowChanged()
+{
+    _updateFow = true;
 }
 
 /*

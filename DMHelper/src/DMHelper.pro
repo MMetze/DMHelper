@@ -52,7 +52,6 @@ SOURCES += main.cpp\
     battleglbackground.cpp \
     battlegleffect.cpp \
     battleglobject.cpp \
-    battleglrenderer.cpp \
     battleglscene.cpp \
     battlegltoken.cpp \
     bestiaryexportdialog.cpp \
@@ -100,6 +99,7 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
+    publishglbattlerenderer.cpp \
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
@@ -275,7 +275,6 @@ HEADERS  += mainwindow.h \
     battleglbackground.h \
     battlegleffect.h \
     battleglobject.h \
-    battleglrenderer.h \
     battleglscene.h \
     battlegltoken.h \
     bestiaryexportdialog.h \
@@ -324,6 +323,7 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
+    publishglbattlerenderer.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \

@@ -1,4 +1,4 @@
-#include "battleglrenderer.h"
+#include "publishglbattlerenderer.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodeleffect.h"
@@ -12,7 +12,7 @@
 #include <QMatrix4x4>
 #include <QDebug>
 
-BattleGLRenderer::BattleGLRenderer(BattleDialogModel* model) :
+PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
     PublishGLRenderer(),
     _initialized(false),
     _model(model),
@@ -26,12 +26,12 @@ BattleGLRenderer::BattleGLRenderer(BattleDialogModel* model) :
 {
 }
 
-BattleGLRenderer::~BattleGLRenderer()
+PublishGLBattleRenderer::~PublishGLBattleRenderer()
 {
     cleanup();
 }
 
-void BattleGLRenderer::cleanup()
+void PublishGLBattleRenderer::cleanup()
 {
     _initialized = false;
 
@@ -48,7 +48,7 @@ void BattleGLRenderer::cleanup()
     _effectTokens.clear();
 }
 
-void BattleGLRenderer::initializeGL()
+void PublishGLBattleRenderer::initializeGL()
 {
     if((_initialized) || (!_model) || (_model->getBackgroundImage().isNull()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
@@ -153,7 +153,7 @@ void BattleGLRenderer::initializeGL()
                 _pcTokens.append(combatantToken);
             else
                 _enemyTokens.append(combatantToken);
-            connect(combatantToken, &BattleGLObject::changed, this, &BattleGLRenderer::updateWidget);
+            connect(combatantToken, &BattleGLObject::changed, this, &PublishGLBattleRenderer::updateWidget);
         }
     }
 
@@ -164,7 +164,7 @@ void BattleGLRenderer::initializeGL()
         {
             BattleGLObject* effectToken = new BattleGLEffect(&_scene, effect);
             _effectTokens.append(effectToken);
-            connect(effectToken, &BattleGLObject::changed, this, &BattleGLRenderer::updateWidget);
+            connect(effectToken, &BattleGLObject::changed, this, &PublishGLBattleRenderer::updateWidget);
         }
     }
 
@@ -185,7 +185,7 @@ void BattleGLRenderer::initializeGL()
     _initialized = true;
 }
 
-void BattleGLRenderer::resizeGL(int w, int h)
+void PublishGLBattleRenderer::resizeGL(int w, int h)
 {
     _scene.setTargetSize(QSize(w, h));
     qDebug() << "[BattleGLRenderer] Resize w: " << w << ", h: " << h;
@@ -194,7 +194,7 @@ void BattleGLRenderer::resizeGL(int w, int h)
     emit updateWidget();
 }
 
-void BattleGLRenderer::paintGL()
+void PublishGLBattleRenderer::paintGL()
 {
     if((!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
@@ -242,7 +242,7 @@ void BattleGLRenderer::paintGL()
     }
 }
 
-void BattleGLRenderer::setOrthoProjection()
+void PublishGLBattleRenderer::setOrthoProjection()
 {
     if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
