@@ -83,6 +83,8 @@ public slots:
     void newSyrinscapeEntry();
     void newYoutubeEntry();
     void removeCurrentItem();
+    void showNotes();
+    void addNote();
     void editCurrentItem();
     void exportCurrentItem();
     void addNewObject(CampaignObjectBase* newObject);

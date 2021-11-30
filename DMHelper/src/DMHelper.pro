@@ -58,6 +58,7 @@ SOURCES += main.cpp\
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     campaignexporter.cpp \
+    campaignnotesdialog.cpp \
     campaignobjectfactory.cpp \
     campaignobjectframe.cpp \
     campaignobjectframestack.cpp \
@@ -280,6 +281,7 @@ HEADERS  += mainwindow.h \
     bestiaryexportdialog.h \
     camerarect.h \
     campaignexporter.h \
+    campaignnotesdialog.h \
     campaignobjectfactory.h \
     campaignobjectframe.h \
     campaignobjectframestack.h \
@@ -469,6 +471,7 @@ FORMS    += mainwindow.ui \
     battlecombatantframe.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
+    campaignnotesdialog.ui \
     characterimportdialog.ui \
     combatantrolloverframe.ui \
     conditionseditdialog.ui \

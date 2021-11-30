@@ -34,6 +34,7 @@
 #include "bestiary.h"
 #include "spell.h"
 #include "spellbook.h"
+#include "campaignnotesdialog.h"
 #include "bestiaryexportdialog.h"
 #include "exportdialog.h"
 #include "equipmentserver.h"
@@ -283,6 +284,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
+    connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
+    QShortcut* notesShortcut = new QShortcut(QKeySequence(tr("Ctrl+Alt+N", "Add Note")), this);
+    connect(notesShortcut, SIGNAL(activated()), this, SLOT(addNote()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(importItemClicked()), this, SLOT(importItem()));
     connect(_ribbonTabCampaign, SIGNAL(importCharacterClicked()), this, SLOT(importCharacter()));
@@ -724,7 +728,7 @@ void MainWindow::newCampaign()
         return;
 
     bool ok;
-    QString campaignName = QInputDialog::getText(this, QString("Enter New Campaign Name"),QString("Campaign"),QLineEdit::Normal,QString(),&ok);
+    QString campaignName = QInputDialog::getText(this, QString("Enter New Campaign Name"), QString("Campaign"), QLineEdit::Normal, QString(), &ok);
     if(ok)
     {
         if(campaignName.isEmpty())
@@ -1111,6 +1115,38 @@ void MainWindow::removeCurrentItem()
 
     delete _campaign->removeObject(removeObject->getID());
     updateCampaignTree();
+}
+
+void MainWindow::showNotes()
+{
+    if(!_campaign)
+        return;
+
+    CampaignNotesDialog dlg(_campaign->getNotes(), this);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg.resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+    if(dlg.exec() == QDialog::Accepted)
+        _campaign->setNotes(dlg.getNotes());
+}
+
+void MainWindow::addNote()
+{
+    if(!_campaign)
+        return;
+
+    QInputDialog inputDlg(this);
+    inputDlg.setInputMode(QInputDialog::TextInput);
+    inputDlg.setWindowTitle(QString("New Note"));
+    inputDlg.setLabelText(QString("Note:"));
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        inputDlg.resize(primary->availableSize().width() / 2, inputDlg.height());
+
+    inputDlg.exec();
+    QString newNote = inputDlg.textValue();
+    if(!newNote.isEmpty())
+        _campaign->addNote(newNote);
 }
 
 void MainWindow::editCurrentItem()
@@ -1893,7 +1929,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
             ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
-        connect(campaign,SIGNAL(_dirty()),this,SLOT(setDirty()));
+        connect(campaign, SIGNAL(dirty()), this, SLOT(setDirty()));
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
         QList<CampaignObjectBase*> parties = campaign->getChildObjectsByType(DMHelper::CampaignType_Party);

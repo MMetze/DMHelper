@@ -71,6 +71,7 @@ Campaign::Campaign(const QString& campaignName, QObject *parent) :
     CampaignObjectBase(campaignName, parent),
     _date(1,1,0),
     _time(0,0),
+    _notes(),
     _batchChanges(false),
     _changesMade(false),
     _dirtyMade(false),
@@ -107,6 +108,13 @@ void Campaign::inputXML(const QDomElement &element, bool isImport)
 
     CampaignObjectBase::inputXML(element, isImport);
     Bestiary::Instance()->finishBatchProcessing();
+
+    QDomElement notesElement = element.firstChildElement(QString("notes"));
+    if(!notesElement.isNull())
+    {
+        QDomCDATASection notesData = notesElement.firstChild().toCDATASection();
+        setNotes(notesData.data());
+    }
 
     // TODO: add back in some kind of object counting
     // Sum up all the elements loaded. The +2 is for the campaign object itself and the notes object
@@ -318,6 +326,11 @@ bool Campaign::isValid() const
     return _isValid;
 }
 
+QStringList Campaign::getNotes() const
+{
+    return _notes;
+}
+
 void Campaign::cleanupCampaign(bool deleteAll)
 {
     if(_batchChanges)
@@ -361,6 +374,22 @@ void Campaign::setTime(const QTime& time)
     }
 }
 
+void Campaign::setNotes(const QString& notes)
+{
+    QStringList newNotes = notes.split(QString("\n"));
+    if(_notes != newNotes)
+    {
+        _notes = newNotes;
+        emit dirty();
+    }
+}
+
+void Campaign::addNote(const QString& note)
+{
+    _notes.append(note);
+    emit dirty();
+}
+
 bool Campaign::validateCampaignIds()
 {
     QList<QUuid> knownIds;
@@ -402,6 +431,14 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
     element.setAttribute("calendar", BasicDateServer::Instance() ? BasicDateServer::Instance()->getActiveCalendarName() : QString());
     element.setAttribute("date", getDate().toStringDDMMYYYY());
     element.setAttribute("time", getTime().msecsSinceStartOfDay());
+
+    if(_notes.count() > 0)
+    {
+        QDomElement notesElement = doc.createElement("notes");
+        QDomCDATASection notesData = doc.createCDATASection(_notes.join(QString("\n")));
+        notesElement.appendChild(notesData);
+        element.appendChild(notesElement);
+    }
 
     QDomElement soundboardElement = doc.createElement("soundboard");
     for(SoundboardGroup* group : _soundboardGroups)
