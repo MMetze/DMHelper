@@ -391,6 +391,7 @@ void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
 {
     _cameraRect = cameraRect;
     setScissorRect();
+    emit updateWidget();
 }
 
 void PublishGLMapImageRenderer::setOrthoProjection()

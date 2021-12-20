@@ -150,45 +150,56 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if((!_mouseDown) || (_mouseDownSection == RectSection_None) || (_mouseDownSection == RectSection_Middle))
+    if((!_mouseDown) || (_mouseDownSection == RectSection_None))
     {
-        // Use the normal functionality to move the rectangle around
         QGraphicsRectItem::mouseMoveEvent(event);
         return;
     }
 
-    // Resize the rectangle
-    qreal dx = 0.0;
-    qreal dy = 0.0;
-    qreal w = rect().width();
-    qreal h = rect().height();
-
-    if((_mouseDownSection & RectSection_Left) == RectSection_Left)
+    if(_mouseDownSection == RectSection_Middle)
     {
-        dx = event->pos().x() - _mouseDownPos.x();
-        w -= dx;
+        // Use the normal functionality to move the rectangle around
+        QGraphicsRectItem::mouseMoveEvent(event);
     }
-    else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
+    else
     {
-        w += event->pos().x() - _mouseLastPos.x();
+        // Resize the rectangle
+        qreal dx = 0.0;
+        qreal dy = 0.0;
+        qreal w = rect().width();
+        qreal h = rect().height();
+
+        if((_mouseDownSection & RectSection_Left) == RectSection_Left)
+        {
+            dx = event->pos().x() - _mouseDownPos.x();
+            w -= dx;
+        }
+        else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
+        {
+            w += event->pos().x() - _mouseLastPos.x();
+        }
+
+        if((_mouseDownSection & RectSection_Top) == RectSection_Top)
+        {
+            dy = event->pos().y() - _mouseDownPos.y();
+            h -= dy;
+        }
+        if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
+        {
+            h += event->pos().y() - _mouseLastPos.y();
+        }
+
+        moveBy(dx, dy);
+        setRect(0.0, 0.0, w, h);
+        _shadowItem->setRect(CAMERA_SHADOW_OFFSET, CAMERA_SHADOW_OFFSET, w, h);
+        _drawItem->setRect(0.0, 0.0, w, h);
+
+        _mouseLastPos = event->pos();
     }
 
-    if((_mouseDownSection & RectSection_Top) == RectSection_Top)
-    {
-        dy = event->pos().y() - _mouseDownPos.y();
-        h -= dy;
-    }
-    if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
-    {
-        h += event->pos().y() - _mouseLastPos.y();
-    }
-
-    moveBy(dx, dy);
-    setRect(0.0, 0.0, w, h);
-    _shadowItem->setRect(CAMERA_SHADOW_OFFSET, CAMERA_SHADOW_OFFSET, w, h);
-    _drawItem->setRect(0.0, 0.0, w, h);
-
-    _mouseLastPos = event->pos();
+    CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
+    if(cameraScene)
+        cameraScene->handleItemChanged(this);
 }
 
 void CameraRect::mousePressEvent(QGraphicsSceneMouseEvent *event)

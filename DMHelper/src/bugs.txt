@@ -1,3 +1,10 @@
+Key things:
+* Repeated "Notes" entries
+* Not working import/export of items
+* Bugs from email with pdf attachment
+
+
+
 v2.0
 Text Ribbon: [BUG?]  Would like to see it larger to make it more user friendly
 
