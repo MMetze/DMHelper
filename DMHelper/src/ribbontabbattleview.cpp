@@ -43,11 +43,6 @@ void RibbonTabBattleView::setZoomSelect(bool checked)
     ui->btnZoomSelect->setChecked(checked);
 }
 
-void RibbonTabBattleView::setCameraCouple(bool checked)
-{
-    ui->btnCameraCouple->setChecked(checked);
-}
-
 void RibbonTabBattleView::setDistanceOn(bool checked)
 {
     ui->btnDistance->setChecked(checked);

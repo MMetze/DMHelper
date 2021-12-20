@@ -82,6 +82,8 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _image(),
     _targetSize(),
     _color(),
+    _cameraRect(),
+    _scissorRect(),
     _initialized(false),
     _shaderProgram(0),
     _shaderModelMatrix(0),
@@ -279,7 +281,6 @@ void PublishGLMapImageRenderer::resizeGL(int w, int h)
 
 void PublishGLMapImageRenderer::paintGL()
 {
-    qDebug() << "[PublishGLMapRenderer] Painting renderer";
     if(!_initialized)
         initializeGL();
 
@@ -310,6 +311,11 @@ void PublishGLMapImageRenderer::paintGL()
     if((!f) || (!e))
         return;
 
+    if(!_scissorRect.isEmpty())
+    {
+        f->glEnable(GL_SCISSOR_TEST);
+        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+    }
     // Draw the scene:
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -340,6 +346,9 @@ void PublishGLMapImageRenderer::paintGL()
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _partyToken->getMatrixData());
         _partyToken->paintGL();
     }
+
+    if(!_scissorRect.isEmpty())
+        f->glDisable(GL_SCISSOR_TEST);
 }
 
 const QImage& PublishGLMapImageRenderer::getImage() const
@@ -378,12 +387,11 @@ void PublishGLMapImageRenderer::fowChanged()
     _updateFow = true;
 }
 
-/*
-void PublishGLMapRenderer::setColor(QColor color)
+void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
 {
-    _color = color;
-    emit updateWidget();
-}*/
+    _cameraRect = cameraRect;
+    setScissorRect();
+}
 
 void PublishGLMapImageRenderer::setOrthoProjection()
 {
@@ -398,8 +406,32 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     QSizeF rectSize = QSizeF(_targetSize).scaled(_backgroundObject->getSize(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+//    projectionMatrix.ortho(0.0, rectSize.width() / 2, 0.0, rectSize.height() / 2, 0.1f, 1000.f);
     qDebug() << "[PublishGLMapRenderer] Setting orthogonal projection to " << projectionMatrix;
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+
+    setScissorRect();
+}
+
+void PublishGLMapImageRenderer::setScissorRect()
+{
+    if((_cameraRect.isEmpty()) || (!_backgroundObject) || (_backgroundObject->getSize().isEmpty()) || (_targetSize.isEmpty()))
+    {
+        _scissorRect = QRect();
+        return;
+    }
+
+    QSizeF rectSize = QSizeF(_targetSize).scaled(_backgroundObject->getSize(), Qt::KeepAspectRatioByExpanding);
+    //QSizeF backRatio(_backgroundObject->getSize().width() / rectSize.width(), _backgroundObject->getSize().height() / rectSize.height());
+    QPointF imgTopLeft((rectSize.width() - _backgroundObject->getSize().width()) / 2.0, (rectSize.height() - _backgroundObject->getSize().height()) / 2);
+    QSizeF screenScale(_targetSize.width() / rectSize.width(), _targetSize.height() / rectSize.height());
+    qDebug() << "[PublishGLMapImageRenderer] _targetSize: " << _targetSize << ", _backgroundObject: " << _backgroundObject->getSize();
+    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", imgTopLeft: " << imgTopLeft << ", screenScale: " << screenScale;
+    _scissorRect.setX((imgTopLeft.x() + _cameraRect.x()) * screenScale.width());
+    _scissorRect.setY(_targetSize.height() - ((imgTopLeft.y() + _cameraRect.y() + _cameraRect.height()) * screenScale.height()));
+    _scissorRect.setWidth(_cameraRect.width() * screenScale.width());
+    _scissorRect.setHeight(_cameraRect.height() * screenScale.height());
+    qDebug() << "[PublishGLMapImageRenderer] camera: " << _cameraRect << ", scissor: " << _scissorRect;
 }
 
 void PublishGLMapImageRenderer::createPartyToken()

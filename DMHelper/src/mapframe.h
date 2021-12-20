@@ -20,6 +20,7 @@ class PublishGLRenderer;
 class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
+class CameraRect;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -64,6 +65,7 @@ signals:
     void distanceLineWidthChanged(int lineWidth);
 
     void fowChanged();
+    void cameraRectChanged(const QRectF& cameraRect);
 
     void showMarkersChanged(bool show);
 
@@ -72,6 +74,9 @@ signals:
     void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
     void brushModeSet(int brushMode);
+
+    void cameraSelectToggled(bool enabled);
+    void cameraEditToggled(bool enabled);
 
     void publishCancelled();
 
@@ -124,6 +129,11 @@ public slots:
     void setDistanceLineType(int lineType);
     void setDistanceLineWidth(int lineWidth);
 
+    void setCameraCouple();
+    void setCameraMap();
+    void setCameraSelect(bool enabled);
+    void setCameraEdit(bool enabled);
+
     void setPublishZoom(bool enabled);
     void setPublishVisible(bool enabled);
 
@@ -164,6 +174,8 @@ protected:
     bool execEventFilterEditModeMove(QObject *obj, QEvent *event);
     bool execEventFilterEditModeDistance(QObject *obj, QEvent *event);
     bool execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event);
+    bool execEventFilterCameraSelect(QObject *obj, QEvent *event);
+    bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
 
     void startPublishTimer();
     void stopPublishTimer();
@@ -190,11 +202,13 @@ protected slots:
 
     void handleActivateMapMarker();
 
+    void handleItemChanged(QGraphicsItem* item);
     void handleSceneChanged(const QList<QRectF> &region);
 
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
     void setBackgroundPixmap(const QPixmap& pixmap);
+    void setCameraToView();
 
     Ui::MapFrame *ui;
 
@@ -203,6 +217,7 @@ private:
     //QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
+    CameraRect* _cameraRect;
 
     int _editMode;
     bool _erase;

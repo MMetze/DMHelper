@@ -56,6 +56,7 @@ SOURCES += main.cpp\
     battlegltoken.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
+    camerascene.cpp \
     campaignexporter.cpp \
     campaignnotesdialog.cpp \
     campaignobjectfactory.cpp \
@@ -279,6 +280,7 @@ HEADERS  += mainwindow.h \
     battlegltoken.h \
     bestiaryexportdialog.h \
     camerarect.h \
+    camerascene.h \
     campaignexporter.h \
     campaignnotesdialog.h \
     campaignobjectfactory.h \

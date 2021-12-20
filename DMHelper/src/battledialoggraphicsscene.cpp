@@ -27,7 +27,7 @@
 const QPointF INVALID_POINT = QPointF(-1.0,-1.0);
 
 BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
-    QGraphicsScene(parent),
+    CameraScene(parent),
     _contextMenuItem(nullptr),
     _grid(nullptr),
     _model(nullptr),
@@ -279,11 +279,6 @@ QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
 bool BattleDialogGraphicsScene::isSceneEmpty() const
 {
     return((_grid == nullptr) && (_itemList.count() == 0));
-}
-
-void BattleDialogGraphicsScene::handleItemChanged(QGraphicsItem* item)
-{
-    emit itemChanged(item);
 }
 
 QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)

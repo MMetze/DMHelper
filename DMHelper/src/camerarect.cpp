@@ -1,6 +1,6 @@
 #include "camerarect.h"
 #include "dmconstants.h"
-#include "battledialoggraphicsscene.h"
+#include "camerascene.h"
 #include <QPen>
 #include <QCursor>
 #include <QStyleOptionGraphicsItem>
@@ -34,6 +34,23 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     initialize(scene);
 }
 
+CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewport) :
+    QGraphicsRectItem(rect, nullptr),
+    _draw(true),
+    _mouseDown(false),
+    _mouseDownPos(),
+    _mouseLastPos(),
+    _mouseDownSection(0),
+    _shadowItem(nullptr),
+    _drawItem(nullptr),
+    _drawText(nullptr),
+    _drawTextRect(nullptr),
+    _viewport(viewport)
+{
+    initialize(scene);
+    setPos(rect.topLeft());
+}
+
 CameraRect::~CameraRect()
 {
     delete _drawItem;
@@ -48,6 +65,11 @@ void CameraRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     return;
 }
 
+QRectF CameraRect::getCameraRect() const
+{
+    return QRectF(pos(), rect().size());
+}
+
 void CameraRect::setCameraRect(const QRectF& rect)
 {
     setPos(rect.topLeft());
@@ -55,9 +77,9 @@ void CameraRect::setCameraRect(const QRectF& rect)
     _shadowItem->setRect(CAMERA_SHADOW_OFFSET, CAMERA_SHADOW_OFFSET, rect.width(), rect.height());
     _drawItem->setRect(0.0, 0.0, rect.width(), rect.height());
 
-    BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
-    if(battleScene)
-        battleScene->handleItemChanged(this);
+    CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
+    if(cameraScene)
+        cameraScene->handleItemChanged(this);
 }
 
 void CameraRect::setCameraSelectable(bool selectable)
@@ -188,9 +210,9 @@ void CameraRect::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
     QGraphicsRectItem::mouseReleaseEvent(event);
 
-    BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
-    if(battleScene)
-        battleScene->handleItemChanged(this);
+    CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
+    if(cameraScene)
+        cameraScene->handleItemChanged(this);
 }
 
 QVariant CameraRect::itemChange(GraphicsItemChange change, const QVariant &value)

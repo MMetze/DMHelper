@@ -7,9 +7,11 @@ class CameraRect : public QGraphicsRectItem
 {
 public:
     CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport);
+    CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewport);
     virtual ~CameraRect();
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
+    QRectF getCameraRect() const;
     void setCameraRect(const QRectF& rect);
     void setCameraSelectable(bool selectable);
     void setDraw(bool draw);

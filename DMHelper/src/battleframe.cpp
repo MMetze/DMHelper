@@ -102,7 +102,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _movementPixmap(nullptr),
     _publishRect(nullptr),
     _publishRectValue(),
-    _cameraCoupled(false),
     _includeHeight(false),
     _pitchHeight(0.0),
     _countdownTimer(nullptr),
@@ -1068,22 +1067,9 @@ void BattleFrame::addEffectLine()
         _scene->addEffectLine();
 }
 
-void BattleFrame::setCameraCouple(bool couple)
+void BattleFrame::setCameraCouple()
 {
-    if((!_publishRect) || (_cameraCoupled == couple))
-        return;
-
-    _cameraCoupled = couple;
-
-    if(couple)
-        setCameraToView();
-
-    emit cameraCoupleChanged(couple);
-}
-
-void BattleFrame::cancelCameraCouple()
-{
-    setCameraCouple(false);
+    setCameraToView();
 }
 
 void BattleFrame::setCameraMap()
@@ -2492,9 +2478,6 @@ void BattleFrame::storeViewRect()
     }
 
     _model->setMapRect(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect());
-
-    if(_cameraCoupled)
-        setCameraToView();
 
     if(_compassPixmap)
     {

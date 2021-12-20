@@ -36,10 +36,11 @@ public slots:
     void setImage(const QImage& image);
     void distanceChanged();
     void fowChanged();
-//    void setColor(QColor color);
+    void setCameraRect(const QRectF& cameraRect);
 
 protected:
     void setOrthoProjection();
+    void setScissorRect();
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
 
@@ -55,6 +56,8 @@ private:
     QImage _image;
     QSize _targetSize;
     QColor _color;
+    QRectF _cameraRect;
+    QRect _scissorRect;
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;

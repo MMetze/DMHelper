@@ -1,9 +1,9 @@
 #ifndef MAPFRAMESCENE_H
 #define MAPFRAMESCENE_H
 
-#include <QGraphicsScene>
+#include "camerascene.h"
 
-class MapFrameScene : public QGraphicsScene
+class MapFrameScene : public CameraScene
 {
     Q_OBJECT
 public:

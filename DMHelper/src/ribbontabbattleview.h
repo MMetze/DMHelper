@@ -21,7 +21,6 @@ public:
 
 public slots:
     void setZoomSelect(bool checked);
-    void setCameraCouple(bool checked);
     void setCameraSelect(bool checked);
     void setCameraEdit(bool checked);
 

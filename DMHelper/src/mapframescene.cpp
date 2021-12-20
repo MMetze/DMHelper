@@ -8,7 +8,7 @@
 #include <QMenu>
 
 MapFrameScene::MapFrameScene(QObject* parent) :
-    QGraphicsScene(parent),
+    CameraScene(parent),
     _spaceDown(false),
     _contextMenuItem(nullptr),
     _contextMenuPos()

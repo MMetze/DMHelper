@@ -64,8 +64,6 @@ void BattleGLBackground::paintGL()
     if((!f) || (!e))
         return;
 
-    qDebug() << "[BattleGLBackground] Painting background. VAO: " << _VAO << ", texture: " << _textureID;
-
     e->glBindVertexArray(_VAO);
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
     f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

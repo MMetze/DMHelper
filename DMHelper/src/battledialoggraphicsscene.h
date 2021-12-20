@@ -1,8 +1,8 @@
 #ifndef BATTLEDIALOGGRAPHICSSCENE_H
 #define BATTLEDIALOGGRAPHICSSCENE_H
 
-#include <QGraphicsScene>
 #include <QPixmap>
+#include "camerascene.h"
 #include "battledialoggraphicsscenemousehandler.h"
 
 class BattleDialogModel;
@@ -11,7 +11,7 @@ class BattleDialogModelCombatant;
 class Grid;
 class QAbstractGraphicsShapeItem;
 
-class BattleDialogGraphicsScene : public QGraphicsScene
+class BattleDialogGraphicsScene : public CameraScene
 {
     Q_OBJECT
 
@@ -39,7 +39,6 @@ public:
     QList<QGraphicsItem*> getEffectItems() const;
 
     bool isSceneEmpty() const;
-    void handleItemChanged(QGraphicsItem* item);
 
     QGraphicsItem* findTopObject(const QPointF &pos);
 
@@ -81,7 +80,6 @@ signals:
     void itemMouseDown(QGraphicsPixmapItem* item);
     void itemMoved(QGraphicsPixmapItem* item, bool* result);
     void itemMouseUp(QGraphicsPixmapItem* item);
-    void itemChanged(QGraphicsItem* item);
     void itemMouseDoubleClick(QGraphicsPixmapItem* item);
 
     void combatantActivate(BattleDialogModelCombatant* combatant);

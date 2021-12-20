@@ -502,14 +502,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), battleFrame, SLOT(zoomSelect(bool)));
     connect(battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
 
-    connect(_ribbonTabBattleView, SIGNAL(cameraCoupleClicked(bool)), battleFrame, SLOT(setCameraCouple(bool)));
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, battleFrame, &BattleFrame::setCameraCouple);
     connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(setCameraMap()));
-    connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(cancelCameraCouple()));
     connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(setCameraSelect(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(cancelCameraCouple()));
     connect(battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
     connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(setCameraEdit(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(cancelCameraCouple()));
     connect(battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
 
     connect(_ribbonTabBattleView, SIGNAL(distanceClicked(bool)), battleFrame, SLOT(setDistance(bool)));
@@ -551,12 +548,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
 
     connect(_ribbonTabMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
-    connect(_ribbonTabMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
-    connect(_ribbonTabMap, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
-    connect(_ribbonTabMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
-    connect(_ribbonTabMap, SIGNAL(zoomFullClicked()), mapFrame, SLOT(zoomFit()));
-    connect(_ribbonTabMap, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
-    connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabMap, SLOT(setZoomSelect(bool)));
+    connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
+    connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
+    // connect(_ribbonTabMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
+    connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), mapFrame, SLOT(zoomFit()));
+    connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
+    connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+
+    connect(_ribbonTabMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
+    connect(_ribbonTabMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
+
     connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), mapFrame, SLOT(setMapEdit(bool)));
     connect(mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
 
@@ -568,8 +569,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabMap, SIGNAL(brushModeChanged(int)), mapFrame, SLOT(setBrushMode(int)));
     connect(mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMap, SLOT(setBrushMode(int)));
 
-    connect(_ribbonTabMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
-    connect(_ribbonTabMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, mapFrame, &MapFrame::setCameraCouple);
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraZoomClicked, mapFrame, &MapFrame::setCameraMap);
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraSelectClicked, mapFrame, &MapFrame::setCameraSelect);
+    connect(mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, mapFrame, &MapFrame::setCameraEdit);
+    connect(mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
 
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, mapFrame, &MapFrame::setParty);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, mapFrame, &MapFrame::setPartyIcon);
@@ -653,7 +658,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
     connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
     connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
-    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
+// TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
     _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
     _timeAndDateFrame = new TimeAndDateFrame(this);
@@ -2416,8 +2421,8 @@ void MainWindow::setRibbonToType(int objectType)
         case DMHelper::CampaignType_Map:
             _ribbon->enableTab(_ribbonTabMap);
             _ribbon->enableTab(_ribbonTabWorldMap);
+            _ribbon->enableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattleMap);
-            _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);

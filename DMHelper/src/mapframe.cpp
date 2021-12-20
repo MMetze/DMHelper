@@ -13,6 +13,7 @@
 #include "campaign.h"
 #include "party.h"
 #include "unselectedpixmap.h"
+#include "camerarect.h"
 #include "publishglmapimagerenderer.h"
 #include "publishglmapvideorenderer.h"
 #include "videoplayerglscreenshot.h"
@@ -34,6 +35,7 @@ MapFrame::MapFrame(QWidget *parent) :
 //    _backgroundVideo(nullptr),
     _fow(nullptr),
     _partyIcon(nullptr),
+    _cameraRect(nullptr),
     _editMode(-1),
     _erase(true),
     _smooth(true),
@@ -592,6 +594,31 @@ void MapFrame::setDistanceLineWidth(int lineWidth)
     _mapSource->setDistanceLineWidth(lineWidth);
 }
 
+void MapFrame::setCameraCouple()
+{
+    setCameraToView();
+}
+
+void MapFrame::setCameraMap()
+{
+    if((!_cameraRect) || (!_backgroundImage))
+        return;
+
+    QRectF newRect = _backgroundImage->boundingRect();
+    _cameraRect->setCameraRect(newRect);
+    emit cameraRectChanged(newRect);
+}
+
+void MapFrame::setCameraSelect(bool enabled)
+{
+    editModeToggled(enabled ? DMHelper::EditMode_CameraSelect : DMHelper::EditMode_Move);
+}
+
+void MapFrame::setCameraEdit(bool enabled)
+{
+    editModeToggled(enabled ? DMHelper::EditMode_CameraEdit : DMHelper::EditMode_Move);
+}
+
 void MapFrame::setPublishZoom(bool enabled)
 {
     _publishZoom = enabled;
@@ -743,6 +770,7 @@ void MapFrame::publishClicked(bool checked)
         _renderer = new PublishGLMapImageRenderer(_mapSource);
         connect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
         connect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::fowChanged);
+        connect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::setCameraRect);
         connect(_renderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         emit registerRenderer(_renderer);
         emit showPublishWindow();
@@ -787,6 +815,7 @@ void MapFrame::initializeFoW()
     connect(_scene, &MapFrameScene::centerView, this, &MapFrame::centerWindow);
     connect(_scene, &MapFrameScene::clearFoW, this, &MapFrame::clearFoW);
 
+    connect(_scene, &MapFrameScene::itemChanged, this, &MapFrame::handleItemChanged);
     connect(_scene, &MapFrameScene::changed, this, &MapFrame::handleSceneChanged);
 
     if(!_mapSource)
@@ -930,7 +959,6 @@ void MapFrame::cleanupSelectionItems()
     if(!_scene)
         return;
 
-    qDebug() << "[MapFrame] Cleaning up distances";
     if(_distanceLine)
     {
         _scene->removeItem(_distanceLine);
@@ -1197,6 +1225,8 @@ bool MapFrame::editModeToggled(int editMode)
         case DMHelper::EditMode_ZoomSelect:
         case DMHelper::EditMode_Distance:
         case DMHelper::EditMode_FreeDistance:
+        case DMHelper::EditMode_CameraEdit:
+        case DMHelper::EditMode_CameraSelect:
             ui->graphicsView->viewport()->installEventFilter(this);
             ui->graphicsView->removeEventFilter(this);
             break;
@@ -1227,6 +1257,14 @@ void MapFrame::changeEditMode(int editMode, bool active)
             break;
         case DMHelper::EditMode_ZoomSelect:
             emit zoomSelectChanged(active);
+            break;
+        case DMHelper::EditMode_CameraEdit:
+            if(_cameraRect)
+                _cameraRect->setCameraSelectable(active);
+            emit cameraEditToggled(active);
+            break;
+        case DMHelper::EditMode_CameraSelect:
+            emit cameraSelectToggled(active);
             break;
         case DMHelper::EditMode_Edit:
         case DMHelper::EditMode_Move:
@@ -1299,6 +1337,10 @@ bool MapFrame::execEventFilter(QObject *obj, QEvent *event)
             return execEventFilterEditModeDistance(obj, event);
         case DMHelper::EditMode_FreeDistance:
             return execEventFilterEditModeFreeDistance(obj, event);
+        case DMHelper::EditMode_CameraSelect:
+            return execEventFilterCameraSelect(obj, event);
+        case DMHelper::EditMode_CameraEdit:
+            return execEventFilterCameraEdit(obj, event);
         default:
             break;
     };
@@ -1665,6 +1707,86 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
     return false;
 }
 
+bool MapFrame::execEventFilterCameraSelect(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj);
+
+    if(event->type() == QEvent::MouseButtonPress)
+    {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+        _mouseDownPos = mouseEvent->pos();
+        if(!_rubberBand)
+        {
+            _rubberBand = new QRubberBand(QRubberBand::Rectangle, ui->graphicsView);
+        }
+        _rubberBand->setGeometry(QRect(_mouseDownPos, QSize()));
+        _rubberBand->show();
+
+        return true;
+    }
+    else if(event->type() == QEvent::MouseButtonRelease)
+    {
+        if(_rubberBand)
+        {
+            QRect bandRect(_rubberBand->x(), _rubberBand->y(), _rubberBand->width(), _rubberBand->height());
+            QRectF sceneBand = ui->graphicsView->mapToScene(bandRect).boundingRect();
+            QRectF targetRect = sceneBand.intersected(_backgroundImage->boundingRect());
+            targetRect.adjust(1.0, 1.0, -1.0, -1.0);
+
+            if(_cameraRect)
+            {
+                _cameraRect->setCameraRect(targetRect);
+                emit cameraRectChanged(targetRect);
+            }
+
+            cleanupSelectionItems();
+            ui->graphicsView->update();
+            editModeToggled(DMHelper::EditMode_Move);
+        }
+        return true;
+    }
+    else if(event->type() == QEvent::MouseMove)
+    {
+        if(_rubberBand)
+        {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            _rubberBand->setGeometry(QRect(_mouseDownPos, mouseEvent->pos()).normalized());
+        }
+        return true;
+    }
+    else if(event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if(keyEvent->key() == Qt::Key_Escape)
+        {
+            editModeToggled(DMHelper::EditMode_Move);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool MapFrame::execEventFilterCameraEdit(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj);
+
+    QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+    if(mouseEvent)
+    {
+        QGraphicsItem* item = ui->graphicsView->itemAt(mouseEvent->pos());
+        if(item)
+        {
+            // Ignore any interactions with items other than overlays. The camera rect is set to Z_Overlay when active.
+            if(item->zValue() < DMHelper::BattleDialog_Z_Overlay)
+                return true;
+        }
+    }
+
+    // Continue with normal processing
+    return false;
+}
+
 void MapFrame::startPublishTimer()
 {
     if(!_timerId)
@@ -1722,6 +1844,7 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
         {
             disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
             disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::fowChanged);
+            disconnect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::setCameraRect);
             disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
             rendererDeactivated();
         }
@@ -1764,6 +1887,12 @@ void MapFrame::cleanupBuffers()
         tempItem = _partyIcon;
         _partyIcon = nullptr;
         delete tempItem;
+    }
+
+    if(_cameraRect)
+    {
+        delete _cameraRect;
+        _cameraRect = nullptr;
     }
 
     if(_backgroundImage)
@@ -1820,6 +1949,7 @@ void MapFrame::setMapCursor()
         switch(_editMode)
         {
             case DMHelper::EditMode_Move:
+            case DMHelper::EditMode_CameraEdit:
                 ui->graphicsView->viewport()->setCursor(QCursor(Qt::ArrowCursor));
                 break;
             case DMHelper::EditMode_Distance:
@@ -1833,6 +1963,14 @@ void MapFrame::setMapCursor()
                 break;
             case DMHelper::EditMode_ZoomSelect:
                 ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/crosshair.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                break;
+            case DMHelper::EditMode_CameraSelect:
+                {
+                    QPixmap cursorPixmap(":/img/data/icon_cameraselectcursor.png");
+                    ui->graphicsView->viewport()->setCursor(QCursor(cursorPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation),
+                                                                    32 * DMHelper::CURSOR_SIZE / cursorPixmap.width(),
+                                                                    32 * DMHelper::CURSOR_SIZE / cursorPixmap.height()));
+                }
                 break;
             case DMHelper::EditMode_FoW:
             case DMHelper::EditMode_Edit:
@@ -2012,6 +2150,15 @@ void MapFrame::handleActivateMapMarker()
         emit encounterSelected(_activatedId);
 }
 
+void MapFrame::handleItemChanged(QGraphicsItem* item)
+{
+    if((_cameraRect) && (_cameraRect == item))
+    {
+        emit cameraRectChanged(_cameraRect->getCameraRect());
+        ui->graphicsView->update();
+    }
+}
+
 void MapFrame::handleSceneChanged(const QList<QRectF> &region)
 {
     Q_UNUSED(region);
@@ -2079,4 +2226,29 @@ void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
         _backgroundImage->setPixmap(pixmap);
         _backgroundImage->show();
     }
+
+    QRectF imageBoundingRect = _backgroundImage->boundingRect();
+    imageBoundingRect.moveTo(50.f, 50.f);
+    imageBoundingRect.setWidth(imageBoundingRect.width() - 100.f);
+    imageBoundingRect.setHeight(imageBoundingRect.height() - 100.f);
+
+    if(_cameraRect)
+        _cameraRect->setCameraRect(imageBoundingRect);
+    else
+        _cameraRect = new CameraRect(imageBoundingRect, *_scene, ui->graphicsView->viewport());
+
+    //_cameraRect->setPos(50.f, 50.f);
+    emit cameraRectChanged(imageBoundingRect);
+}
+
+void MapFrame::setCameraToView()
+{
+    if((!_cameraRect) || (!_backgroundImage))
+        return;
+
+    QRectF viewRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
+    QRectF targetRect = viewRect.intersected(_backgroundImage->boundingRect());
+    targetRect.adjust(1.0, 1.0, -1.0, -1.0);
+    _cameraRect->setCameraRect(targetRect);
+    emit cameraRectChanged(targetRect);
 }

@@ -134,8 +134,7 @@ public slots:
     void addEffectLine();
 
     // Public for connection to map ribbon
-    void setCameraCouple(bool couple);
-    void cancelCameraCouple();
+    void setCameraCouple();
     void setCameraMap();
     void setCameraSelect(bool enabled);
     void setCameraEdit(bool enabled);
@@ -171,7 +170,6 @@ signals:
 
     void zoomSelectToggled(bool enabled);
 
-    void cameraCoupleChanged(bool coupled);
     void cameraSelectToggled(bool enabled);
     void cameraEditToggled(bool enabled);
 
@@ -353,7 +351,6 @@ private:
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _publishRect;
     QRectF _publishRectValue;
-    bool _cameraCoupled;
     bool _includeHeight;
     qreal _pitchHeight;
 
