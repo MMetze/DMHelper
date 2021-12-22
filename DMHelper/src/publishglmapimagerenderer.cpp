@@ -407,8 +407,6 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     if(!f)
         return;
 
-    //setScissorRect();
-
     // Update projection matrix and other size related settings:
     QSizeF rectSize = QSizeF(_targetSize).scaled(_cameraRect.size(), Qt::KeepAspectRatioByExpanding);
     QSizeF halfRect = rectSize / 2.0;
@@ -426,29 +424,6 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
     _scissorRect.setHeight(scissorSize.height());
-}
-
-void PublishGLMapImageRenderer::setScissorRect()
-{
-    if((_cameraRect.isEmpty()) || (!_backgroundObject) || (_backgroundObject->getSize().isEmpty()) || (_targetSize.isEmpty()))
-    {
-        _scissorRect = QRect();
-        return;
-    }
-
-    QSizeF rectSize = QSizeF(_targetSize).scaled(_backgroundObject->getSize(), Qt::KeepAspectRatioByExpanding);
-    //QSizeF backRatio(_backgroundObject->getSize().width() / rectSize.width(), _backgroundObject->getSize().height() / rectSize.height());
-    QPointF imgTopLeft((rectSize.width() - _backgroundObject->getSize().width()) / 2.0, (rectSize.height() - _backgroundObject->getSize().height()) / 2);
-    QSizeF screenScale(_targetSize.width() / rectSize.width(), _targetSize.height() / rectSize.height());
-    qDebug() << "[PublishGLMapImageRenderer] _targetSize: " << _targetSize << ", _backgroundObject: " << _backgroundObject->getSize();
-    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", imgTopLeft: " << imgTopLeft << ", screenScale: " << screenScale;
-    _scissorRect.setX((imgTopLeft.x() + _cameraRect.x()) * screenScale.width());
-    _scissorRect.setY(_targetSize.height() - ((imgTopLeft.y() + _cameraRect.y() + _cameraRect.height()) * screenScale.height()));
-    _scissorRect.setWidth(_cameraRect.width() * screenScale.width());
-    _scissorRect.setHeight(_cameraRect.height() * screenScale.height());
-    qDebug() << "[PublishGLMapImageRenderer] camera: " << _cameraRect << ", scissor: " << _scissorRect;
-
-    _scissorRect = QRect(QPoint(0,0), _targetSize);
 }
 
 void PublishGLMapImageRenderer::createPartyToken()

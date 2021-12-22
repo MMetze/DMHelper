@@ -688,6 +688,8 @@ void MapFrame::publishClicked(bool checked)
         return;
 
     _isPublishing = checked;
+    if(_cameraRect)
+        _cameraRect->setPublishing(_isPublishing);
 
     if(!_isVideo)
     {
@@ -767,11 +769,14 @@ void MapFrame::publishClicked(bool checked)
         emit publishImage(pub);
         */
 
-        _renderer = new PublishGLMapImageRenderer(_mapSource);
-        connect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
-        connect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::fowChanged);
-        connect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::setCameraRect);
-        connect(_renderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+        PublishGLMapImageRenderer* newRenderer = new PublishGLMapImageRenderer(_mapSource);
+        connect(this, &MapFrame::distanceChanged, newRenderer, &PublishGLMapImageRenderer::distanceChanged);
+        connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapImageRenderer::fowChanged);
+        connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapImageRenderer::setCameraRect);
+        connect(newRenderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+        newRenderer->setCameraRect(_cameraRect->getCameraRect());
+
+        _renderer = newRenderer;
         emit registerRenderer(_renderer);
         emit showPublishWindow();
     }

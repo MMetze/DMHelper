@@ -41,7 +41,6 @@ public slots:
 
 protected:
     void setOrthoProjection();
-    void setScissorRect();
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
 
