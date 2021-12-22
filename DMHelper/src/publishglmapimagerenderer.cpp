@@ -8,7 +8,6 @@
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
-#include <QMatrix4x4>
 #include <QPainter>
 #include <QPainterPath>
 #include <QDebug>
@@ -82,6 +81,7 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _image(),
     _targetSize(),
     _color(),
+    _projectionMatrix(),
     _cameraRect(),
     _scissorRect(),
     _initialized(false),
@@ -127,6 +127,8 @@ void PublishGLMapImageRenderer::cleanup()
     _backgroundObject = nullptr;
     delete _fowObject;
     _fowObject = nullptr;
+
+    _projectionMatrix.setToIdentity();
 
     if(_shaderProgram > 0)
     {
@@ -311,6 +313,8 @@ void PublishGLMapImageRenderer::paintGL()
     if((!f) || (!e))
         return;
 
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
+
     if(!_scissorRect.isEmpty())
     {
         f->glEnable(GL_SCISSOR_TEST);
@@ -390,7 +394,7 @@ void PublishGLMapImageRenderer::fowChanged()
 void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
 {
     _cameraRect = cameraRect;
-    setScissorRect();
+    setOrthoProjection();
     emit updateWidget();
 }
 
@@ -403,15 +407,25 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     if(!f)
         return;
 
-    // Update projection matrix and other size related settings:
-    QSizeF rectSize = QSizeF(_targetSize).scaled(_backgroundObject->getSize(), Qt::KeepAspectRatioByExpanding);
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-//    projectionMatrix.ortho(0.0, rectSize.width() / 2, 0.0, rectSize.height() / 2, 0.1f, 1000.f);
-    qDebug() << "[PublishGLMapRenderer] Setting orthogonal projection to " << projectionMatrix;
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+    //setScissorRect();
 
-    setScissorRect();
+    // Update projection matrix and other size related settings:
+    QSizeF rectSize = QSizeF(_targetSize).scaled(_cameraRect.size(), Qt::KeepAspectRatioByExpanding);
+    QSizeF halfRect = rectSize / 2.0;
+    QPointF cameraTopLeft((rectSize.width() - _cameraRect.size().width()) / 2.0, (rectSize.height() - _cameraRect.size().height()) / 2);
+    QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
+    QSizeF backgroundMiddle = _backgroundObject->getSize() / 2.0;
+
+    _projectionMatrix.setToIdentity();
+    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
+                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
+                            0.1f, 1000.f);
+
+    QSizeF scissorSize = _cameraRect.size().scaled(_targetSize, Qt::KeepAspectRatio);
+    _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
+    _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
+    _scissorRect.setWidth(scissorSize.width());
+    _scissorRect.setHeight(scissorSize.height());
 }
 
 void PublishGLMapImageRenderer::setScissorRect()
@@ -433,6 +447,8 @@ void PublishGLMapImageRenderer::setScissorRect()
     _scissorRect.setWidth(_cameraRect.width() * screenScale.width());
     _scissorRect.setHeight(_cameraRect.height() * screenScale.height());
     qDebug() << "[PublishGLMapImageRenderer] camera: " << _cameraRect << ", scissor: " << _scissorRect;
+
+    _scissorRect = QRect(QPoint(0,0), _targetSize);
 }
 
 void PublishGLMapImageRenderer::createPartyToken()

@@ -4,6 +4,7 @@
 #include "publishglrenderer.h"
 #include <QColor>
 #include <QImage>
+#include <QMatrix4x4>
 
 class Map;
 class Party;
@@ -56,6 +57,7 @@ private:
     QImage _image;
     QSize _targetSize;
     QColor _color;
+    QMatrix4x4 _projectionMatrix;
     QRectF _cameraRect;
     QRect _scissorRect;
     bool _initialized;
