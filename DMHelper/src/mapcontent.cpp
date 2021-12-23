@@ -45,7 +45,6 @@ MapMarker::MapMarker() :
 {
 }
 
-
 MapMarker::MapMarker(const QPoint& position, bool playerVisible, const QString& title, const QString& description, const QColor& color, const QString& iconFile, int iconScale, bool coloredIcon, const QUuid& encounter) :
     MapContent(),
     _position(position),

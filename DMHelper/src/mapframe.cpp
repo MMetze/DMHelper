@@ -396,8 +396,7 @@ void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
     if(!_mapSource)
         return;
 
-    MapMarkerGraphicsItem* markerItem = new MapMarkerGraphicsItem(_scene, *marker, *this);
-    markerItem->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale()));
+    MapMarkerGraphicsItem* markerItem = new MapMarkerGraphicsItem(_scene, *marker, 0.04 * static_cast<qreal>(_mapSource->getPartyScale()), *this);
     markerItem->setPos(marker->getPosition());
     markerItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
 

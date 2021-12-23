@@ -1,6 +1,8 @@
 #include "publishglmapimagerenderer.h"
 #include "map.h"
 #include "party.h"
+#include "undomarker.h"
+#include "mapmarkergraphicsitem.h"
 #include "videoplayerglplayer.h"
 #include "battleglbackground.h"
 #include "publishglobject.h"
@@ -10,6 +12,7 @@
 #include <QOpenGLFunctions>
 #include <QPainter>
 #include <QPainterPath>
+#include <QUndoStack>
 #include <QDebug>
 
 /*
@@ -91,6 +94,7 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _fowObject(nullptr),
     _partyToken(nullptr),
     _itemImage(nullptr),
+    _markerTokens(),
     _recreatePartyToken(false),
     _recreateLineToken(false),
     _updateFow(false)
@@ -115,6 +119,9 @@ CampaignObjectBase* PublishGLMapImageRenderer::getObject()
 void PublishGLMapImageRenderer::cleanup()
 {
     _initialized = false;
+
+    qDeleteAll(_markerTokens);
+    _markerTokens.clear();
 
     delete _itemImage;
     _itemImage = nullptr;
@@ -308,6 +315,8 @@ void PublishGLMapImageRenderer::paintGL()
     if(((_map->getMapItemCount() > 0) && (!_itemImage)) || (_recreateLineToken))
         createLineToken(sceneSize);
 
+    createMarkerTokens(sceneSize);
+
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
     if((!f) || (!e))
@@ -349,6 +358,18 @@ void PublishGLMapImageRenderer::paintGL()
         _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y() - _partyToken->getSize().height());
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _partyToken->getMatrixData());
         _partyToken->paintGL();
+    }
+
+    if((_markerTokens.count() > 0) && (_map->getShowMarkers()))
+    {
+        for(PublishGLImage* markerToken : _markerTokens)
+        {
+            if(markerToken)
+            {
+                f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, markerToken->getMatrixData());
+                markerToken->paintGL();
+            }
+        }
     }
 
     if(!_scissorRect.isEmpty())
@@ -434,19 +455,22 @@ void PublishGLMapImageRenderer::createPartyToken()
         _partyToken = nullptr;
     }
 
-    QImage partyImage = _map->getPartyPixmap().toImage();
-    if(!partyImage.isNull())
+    if(_map)
     {
-        _partyToken = new PublishGLImage(partyImage, false);
-        _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
-    }
+        QImage partyImage = _map->getPartyPixmap().toImage();
+        if(!partyImage.isNull())
+        {
+            _partyToken = new PublishGLImage(partyImage, false);
+            _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
+        }
 
-    _recreatePartyToken = false;
+        _recreatePartyToken = false;
+    }
 }
 
 void PublishGLMapImageRenderer::createLineToken(const QSize& sceneSize)
 {
-    if((_map->getMapItemCount() <= 0) || (sceneSize.isEmpty()))
+    if((!_map) || (_map->getMapItemCount() <= 0) || (sceneSize.isEmpty()))
         return;
 
     MapDrawLine* line = dynamic_cast<MapDrawLine*>(_map->getMapItem(0));
@@ -525,6 +549,60 @@ void PublishGLMapImageRenderer::createLineToken(const QSize& sceneSize)
         _itemImage->setPosition(pathRect.topLeft().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - topPosition - _itemImage->getSize().height());
         return;
     }
+}
+
+void PublishGLMapImageRenderer::createMarkerTokens(const QSize& sceneSize)
+{
+    qDeleteAll(_markerTokens);
+    _markerTokens.clear();
+
+    if((!_map) || (!_map->getShowMarkers()) || (sceneSize.isEmpty()))
+        return;
+
+    QUndoStack* stack = _map->getUndoStack();
+    if(!stack)
+        return;
+
+    for( int i = 0; i < stack->index(); ++i )
+    {
+        const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
+        if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
+        {
+            MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
+            if((markerItem) && (!markerItem->getGraphicsItemPixmap().isNull()))
+            {
+                QImage markerImage = markerItem->getGraphicsItemPixmap().toImage();
+                PublishGLImage* newMarkerItem = new PublishGLImage(markerImage, false);
+                // /*
+                QPointF markerTopLeft = markerItem->getTopLeft();
+                newMarkerItem->setPosition(markerItem->x() + markerTopLeft.x() - (sceneSize.width() / 2),
+                                           (sceneSize.height() / 2) - (markerItem->y() + markerTopLeft.y() + markerImage.height()));
+                // */
+                //newMarkerItem->setPosition(markerItem->x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - markerItem->y() - markerImage.height());
+
+                _markerTokens.append(newMarkerItem);
+            }
+        }
+    }
+
+    /*
+    if(_mapSource->getShowMarkers())
+    {
+        if(QUndoStack* stack = _mapSource->getUndoStack())
+        {
+            for( int i = 0; i < stack->index(); ++i )
+            {
+                const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
+                if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
+                {
+                    MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
+                    if(markerItem)
+                        markerItem->drawGraphicsItem(p);
+                }
+            }
+        }
+    }
+    */
 }
 
 void PublishGLMapImageRenderer::handlePartyChanged(Party* party)

@@ -14,7 +14,7 @@ class MapMarkerGraphicsSimpleTextItem;
 class MapMarkerGraphicsItem : public QGraphicsItemGroup
 {
 public:
-    MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, MapFrame& mapFrame);
+    MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, qreal initialScale, MapFrame& mapFrame);
 
     enum { Type = UserType + 1 };
 
@@ -25,6 +25,8 @@ public:
     int getMarkerId() const;
 
     void drawGraphicsItem(QPainter& painter);
+    QPixmap getGraphicsItemPixmap() const;
+    QPointF getTopLeft() const;
 
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;

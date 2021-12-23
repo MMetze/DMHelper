@@ -9,7 +9,7 @@
 
 const int MARKER_SIZE = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0];
 
-MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, MapFrame& mapFrame) :
+MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, qreal initialScale, MapFrame& mapFrame) :
     QGraphicsItemGroup(),
     _marker(marker.getID()),
     _mapFrame(mapFrame),
@@ -36,6 +36,7 @@ MapMarkerGraphicsItem::MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMar
     _details->setVisible(_detailsVisible);
     _details->setGroup(this);
 
+    setScale(initialScale);
     setMarker(marker);
 
     setFlag(QGraphicsItem::ItemIsMovable);
@@ -125,6 +126,16 @@ void MapMarkerGraphicsItem::drawGraphicsItem(QPainter& painter)
 {
     if(!_markerPixmap.isNull())
         painter.drawPixmap(_markerIcon->scenePos(), _markerPixmap);
+}
+
+QPixmap MapMarkerGraphicsItem::getGraphicsItemPixmap() const
+{
+    return _markerPixmap;
+}
+
+QPointF MapMarkerGraphicsItem::getTopLeft() const
+{
+    return _markerIcon->pos() * scale();
 }
 
 QVariant MapMarkerGraphicsItem::itemChange(GraphicsItemChange change, const QVariant & value)

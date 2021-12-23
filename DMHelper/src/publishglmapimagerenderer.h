@@ -43,6 +43,7 @@ protected:
     void setOrthoProjection();
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
+    void createMarkerTokens(const QSize& sceneSize);
 
 protected slots:
     void handlePartyChanged(Party* party);
@@ -66,6 +67,7 @@ private:
     BattleGLBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _itemImage;
+    QList<PublishGLImage*> _markerTokens;
 
     bool _recreatePartyToken;
     bool _recreateLineToken;

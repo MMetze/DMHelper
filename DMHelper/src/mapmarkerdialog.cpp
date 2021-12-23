@@ -199,6 +199,18 @@ bool MapMarkerDialog::populateIconList()
     if(_currentIcon.isEmpty())
         _currentIcon = settings.value("lastMapIcon").toString();
 
+    // Check the default entries for the current icon
+    QList<QAction *> existingActions = _menu->actions();
+    for(QAction* action : existingActions)
+    {
+        MapMarkerDialog_IconAction* iconAction = dynamic_cast<MapMarkerDialog_IconAction*>(action);
+        if((iconAction) && (iconAction->getIconFile() == _currentIcon))
+        {
+            defaultFound = true;
+            iconAction->trigger();
+        }
+    }
+
     settings.beginGroup("MapIcons");
 
         keys = settings.allKeys();
