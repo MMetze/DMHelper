@@ -2410,8 +2410,8 @@ void MainWindow::setRibbonToType(int objectType)
     {
         case DMHelper::CampaignType_Battle:
         case DMHelper::CampaignType_BattleContent:
+            _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs map and reuse
             _ribbon->enableTab(_ribbonTabBattleMap);
-            _ribbon->enableTab(_ribbonTabBattleView);
             _ribbon->enableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
@@ -2419,9 +2419,9 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_Map:
+            _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs battle and reuse
             _ribbon->enableTab(_ribbonTabMap);
             _ribbon->enableTab(_ribbonTabWorldMap);
-            _ribbon->enableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabText);

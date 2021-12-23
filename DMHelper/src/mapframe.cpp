@@ -839,6 +839,13 @@ void MapFrame::initializeFoW()
         loadViewRect();
         checkPartyUpdate();
         createMarkerItems();
+
+        if(_cameraRect)
+            _cameraRect->setCameraRect(_mapSource->getCameraRect());
+        else
+            _cameraRect = new CameraRect(_mapSource->getCameraRect(), *_scene, ui->graphicsView->viewport());
+
+        emit cameraRectChanged(_mapSource->getCameraRect());
     }
     else
     {
@@ -869,6 +876,7 @@ void MapFrame::initializeFoW()
     connect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
+    connect(this, &MapFrame::cameraRectChanged, _mapSource, qOverload<const QRectF&>(&Map::setCameraRect));
 
     if(_mapSource->getParty())
         emit partyChanged(_mapSource->getParty());
@@ -893,6 +901,7 @@ void MapFrame::uninitializeFoW()
     if((_mapSource) && (_partyIcon))
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
+    disconnect(this, &MapFrame::cameraRectChanged, _mapSource, qOverload<const QRectF&>(&Map::setCameraRect));
     disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
     disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
@@ -1776,14 +1785,16 @@ bool MapFrame::execEventFilterCameraEdit(QObject *obj, QEvent *event)
 {
     Q_UNUSED(obj);
 
-    QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-    if(mouseEvent)
+    if((event->type() == QEvent::MouseButtonPress) ||
+       (event->type() == QEvent::MouseButtonRelease) ||
+       (event->type() == QEvent::MouseButtonDblClick))
     {
-        QGraphicsItem* item = ui->graphicsView->itemAt(mouseEvent->pos());
-        if(item)
+        QMouseEvent *mouseEvent = dynamic_cast<QMouseEvent *>(event);
+        if(mouseEvent)
         {
             // Ignore any interactions with items other than overlays. The camera rect is set to Z_Overlay when active.
-            if(item->zValue() < DMHelper::BattleDialog_Z_Overlay)
+            QGraphicsItem* item = findTopObject(mouseEvent->pos());
+            if((item) && (item->zValue() < DMHelper::BattleDialog_Z_Overlay))
                 return true;
         }
     }
@@ -2101,6 +2112,15 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     setBackgroundPixmap(QPixmap::fromImage(image));
     checkPartyUpdate();
     createMarkerItems();
+
+    if(!_mapSource->getCameraRect().isValid())
+        _mapSource->setCameraRect(_backgroundImage->boundingRect().toRect());
+
+    if(_cameraRect)
+        _cameraRect->setCameraRect(_mapSource->getCameraRect());
+    else
+        _cameraRect = new CameraRect(_mapSource->getCameraRect(), *_scene, ui->graphicsView->viewport());
+    emit cameraRectChanged(_mapSource->getCameraRect());
 }
 
 void MapFrame::rendererDeactivated()
@@ -2231,19 +2251,6 @@ void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
         _backgroundImage->setPixmap(pixmap);
         _backgroundImage->show();
     }
-
-    QRectF imageBoundingRect = _backgroundImage->boundingRect();
-    imageBoundingRect.moveTo(50.f, 50.f);
-    imageBoundingRect.setWidth(imageBoundingRect.width() - 100.f);
-    imageBoundingRect.setHeight(imageBoundingRect.height() - 100.f);
-
-    if(_cameraRect)
-        _cameraRect->setCameraRect(imageBoundingRect);
-    else
-        _cameraRect = new CameraRect(imageBoundingRect, *_scene, ui->graphicsView->viewport());
-
-    //_cameraRect->setPos(50.f, 50.f);
-    emit cameraRectChanged(imageBoundingRect);
 }
 
 void MapFrame::setCameraToView()
@@ -2257,3 +2264,21 @@ void MapFrame::setCameraToView()
     _cameraRect->setCameraRect(targetRect);
     emit cameraRectChanged(targetRect);
 }
+
+QGraphicsItem* MapFrame::findTopObject(const QPoint &pos)
+{
+    QList<QGraphicsItem *> itemList = ui->graphicsView->items(pos);
+    if(itemList.count() <= 0)
+        return nullptr;
+
+    // Search for the first selectable item
+    for(QGraphicsItem* item : qAsConst(itemList))
+    {
+        if((item)&&((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+            return dynamic_cast<QGraphicsItem*>(item);
+    }
+
+    // If we get here, nothing selectable was found
+    return nullptr;
+}
+

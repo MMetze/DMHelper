@@ -58,6 +58,8 @@ public:
     const QRect& getMapRect() const;
     void setMapRect(const QRect& mapRect);
 
+    const QRect& getCameraRect() const;
+
     QUndoStack* getUndoStack() const;
     void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
 
@@ -135,6 +137,9 @@ public slots:
     void setApplyFilter(bool applyFilter);
     void setFilter(const MapColorizeFilter& filter);
 
+    void setCameraRect(const QRect& cameraRect);
+    void setCameraRect(const QRectF& cameraRect);
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
@@ -147,6 +152,7 @@ protected:
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
+    QRect _cameraRect;
 
     bool _showPartyIcon;
     QUuid _partyId;

@@ -209,6 +209,7 @@ private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
     void setBackgroundPixmap(const QPixmap& pixmap);
     void setCameraToView();
+    QGraphicsItem* findTopObject(const QPoint &pos);
 
     Ui::MapFrame *ui;
 

@@ -25,6 +25,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _audioTrackId(),
     _playAudio(false),
     _mapRect(),
+    _cameraRect(),
     _showPartyIcon(false),
     _partyId(),
     _partyIconPos(-1, -1),
@@ -66,6 +67,10 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                      element.attribute("mapRectY", QString::number(0)).toInt(),
                      element.attribute("mapRectWidth", QString::number(0)).toInt(),
                      element.attribute("mapRectHeight", QString::number(0)).toInt());
+    _cameraRect = QRect(element.attribute("cameraRectX", QString::number(0)).toInt(),
+                        element.attribute("cameraRectY", QString::number(0)).toInt(),
+                        element.attribute("cameraRectWidth", QString::number(0)).toInt(),
+                        element.attribute("cameraRectHeight", QString::number(0)).toInt());
 
     QDomElement actionsElement = element.firstChildElement(QString("actions"));
     if(!actionsElement.isNull())
@@ -297,6 +302,11 @@ void Map::setMapRect(const QRect& mapRect)
         _mapRect = mapRect;
         emit dirty();
     }
+}
+
+const QRect& Map::getCameraRect() const
+{
+    return _cameraRect;
 }
 
 QUndoStack* Map::getUndoStack() const
@@ -813,6 +823,12 @@ void Map::initialize()
     _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
+    if(!_cameraRect.isValid())
+    {
+        _cameraRect.setTopLeft(QPoint(0, 0));
+        _cameraRect.setSize(_imgBackground.size());
+    }
+
     _initialized = true;
 }
 
@@ -956,6 +972,20 @@ void Map::setFilter(const MapColorizeFilter& filter)
     emit dirty();
 }
 
+void Map::setCameraRect(const QRect& cameraRect)
+{
+    if(_cameraRect != cameraRect)
+    {
+        _cameraRect = cameraRect;
+        emit dirty();
+    }
+}
+
+void Map::setCameraRect(const QRectF& cameraRect)
+{
+    setCameraRect(cameraRect.toRect());
+}
+
 QDomElement Map::createOutputXML(QDomDocument &doc)
 {
    return doc.createElement("map");
@@ -984,6 +1014,10 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("mapRectY", _mapRect.y());
     element.setAttribute("mapRectWidth", _mapRect.width());
     element.setAttribute("mapRectHeight", _mapRect.height());
+    element.setAttribute("cameraRectX", _cameraRect.x());
+    element.setAttribute("cameraRectY", _cameraRect.y());
+    element.setAttribute("cameraRectWidth", _cameraRect.width());
+    element.setAttribute("cameraRectHeight", _cameraRect.height());
 
     // Check if we can skip some paint commands because they have been covered up by a fill
     challengeUndoStack();

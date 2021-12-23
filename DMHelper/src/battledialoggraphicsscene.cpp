@@ -283,8 +283,6 @@ bool BattleDialogGraphicsScene::isSceneEmpty() const
 
 QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
 {
-    QGraphicsItem* result = nullptr;
-
     QGraphicsView* localView = views().constFirst();
     if(!localView)
         return nullptr;
@@ -297,16 +295,11 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
     for(QGraphicsItem* item : qAsConst(itemList))
     {
         if((item)&&((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
-        {
-            result = dynamic_cast<QGraphicsItem*>(item);
-            return result;
-        }
+            return dynamic_cast<QGraphicsItem*>(item);
     }
 
-    // If we get here, nothing selectable was found, so return the top-most item
-    // WRONG - return no item - the callers assume a returned item is selectable!
-    result = nullptr;
-    return result;
+    // If we get here, nothing selectable was found. The callers assume a returned item is selectable!
+    return nullptr;
 }
 
 bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
