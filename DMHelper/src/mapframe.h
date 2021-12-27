@@ -68,6 +68,7 @@ signals:
     void cameraRectChanged(const QRectF& cameraRect);
 
     void showMarkersChanged(bool show);
+    void markerChanged();
 
     void registerRenderer(PublishGLRenderer* renderer);
 

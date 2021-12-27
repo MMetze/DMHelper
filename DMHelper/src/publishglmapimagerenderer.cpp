@@ -16,9 +16,7 @@
 #include <QDebug>
 
 /*
-start with pointer off
 handle marker changes
-changing pointers
 remove publish zoom and stuff
 
 if(_rotation != 0)
@@ -52,6 +50,7 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _pointerFile(),
     _recreatePartyToken(false),
     _recreateLineToken(false),
+    _recreateMarkers(false),
     _updateFow(false)
 {
     connect(_map, &Map::partyChanged, this, &PublishGLMapImageRenderer::handlePartyChanged);
@@ -219,6 +218,10 @@ void PublishGLMapImageRenderer::initializeGL()
     // Create the party token
     createPartyToken();
 
+    // Create the markers
+    _recreateMarkers = true;
+
+    // Check if we need a pointer
     evaluatePointer();
 
     // Matrices
@@ -275,7 +278,8 @@ void PublishGLMapImageRenderer::paintGL()
     if(((_map->getMapItemCount() > 0) && (!_itemImage)) || (_recreateLineToken))
         createLineToken(sceneSize);
 
-    createMarkerTokens(sceneSize);
+    if((_map->getMarkerCount() > 0) && (_recreateMarkers))
+        createMarkerTokens(sceneSize);
 
     evaluatePointer();
 
@@ -394,6 +398,11 @@ void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
         setOrthoProjection();
         emit updateWidget();
     }
+}
+
+void PublishGLMapImageRenderer::markerChanged()
+{
+    _recreateMarkers = true;
 }
 
 void PublishGLMapImageRenderer::pointerToggled(bool enabled)

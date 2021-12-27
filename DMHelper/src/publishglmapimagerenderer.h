@@ -38,6 +38,7 @@ public slots:
     void distanceChanged();
     void fowChanged();
     void setCameraRect(const QRectF& cameraRect);
+    void markerChanged();
 
     void pointerToggled(bool enabled);
     void setPointerPosition(const QPointF& pos);
@@ -82,6 +83,7 @@ private:
 
     bool _recreatePartyToken;
     bool _recreateLineToken;
+    bool _recreateMarkers;
     bool _updateFow;
 };
 

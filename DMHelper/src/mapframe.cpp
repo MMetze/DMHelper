@@ -402,8 +402,9 @@ void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
     markerItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
 
     markerItem->setVisible(_mapSource->getShowMarkers());
-
     undoEntry->setMarkerItem(markerItem);
+
+    emit markerChanged();
 }
 
 void MapFrame::editMapMarker(int markerId)
@@ -423,6 +424,7 @@ void MapFrame::editMapMarker(int markerId)
     {
         undoMarker->setMarker(dlg.getMarker());
         emit dirty();
+        emit markerChanged();
     }
     else if(result == MapMarkerDialog::MAPMARKERDIALOG_DELETE)
     {
@@ -447,6 +449,7 @@ void MapFrame::deleteMapMarker(int markerId)
     {
         undoMarker->setRemoved(false);
         emit dirty();
+        emit markerChanged();
     }
 }
 
@@ -788,6 +791,7 @@ void MapFrame::publishClicked(bool checked)
         connect(this, &MapFrame::distanceChanged, newRenderer, &PublishGLMapImageRenderer::distanceChanged);
         connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapImageRenderer::fowChanged);
         connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapImageRenderer::setCameraRect);
+        connect(this, &MapFrame::markerChanged, newRenderer, &PublishGLMapImageRenderer::markerChanged);
         connect(this, &MapFrame::pointerToggled, newRenderer, &PublishGLMapImageRenderer::pointerToggled);
         connect(this, &MapFrame::pointerPositionChanged, newRenderer, &PublishGLMapImageRenderer::setPointerPosition);
         connect(this, &MapFrame::pointerFileNameChanged, newRenderer, &PublishGLMapImageRenderer::setPointerFileName);

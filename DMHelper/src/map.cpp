@@ -363,6 +363,11 @@ bool Map::getShowMarkers() const
     return _showMarkers;
 }
 
+int Map::getMarkerCount() const
+{
+    return _undoStack->count();
+}
+
 void Map::addMapItem(MapDraw* mapItem)
 {
     _mapItems.append(mapItem);
