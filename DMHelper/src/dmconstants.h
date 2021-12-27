@@ -98,6 +98,7 @@ namespace DMHelper
         EditMode_FreeDistance,
         EditMode_CameraEdit,
         EditMode_CameraSelect,
+        EditMode_Pointer,
 
         EditMode_Count
     };

@@ -78,6 +78,9 @@ signals:
     void cameraSelectToggled(bool enabled);
     void cameraEditToggled(bool enabled);
 
+    void pointerToggled(bool enabled);
+    void pointerPositionChanged(const QPointF& pos);
+
     void publishCancelled();
 
 public slots:
@@ -137,6 +140,8 @@ public slots:
     void setPublishZoom(bool enabled);
     void setPublishVisible(bool enabled);
 
+    void setPointerOn(bool enabled);
+
     void setTargetLabelSize(const QSize& targetSize);
     void publishWindowMouseDown(const QPointF& position);
     void publishWindowMouseMove(const QPointF& position);
@@ -176,6 +181,7 @@ protected:
     bool execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event);
     bool execEventFilterCameraSelect(QObject *obj, QEvent *event);
     bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
+    bool execEventFilterPointer(QObject *obj, QEvent *event);
 
     void startPublishTimer();
     void stopPublishTimer();

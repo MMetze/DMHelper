@@ -639,6 +639,11 @@ void MapFrame::targetResized(const QSize& newSize)
     resetPublishFoW();
 }
 
+void MapFrame::setPointerOn(bool enabled)
+{
+    editModeToggled(enabled ? DMHelper::EditMode_Pointer : DMHelper::EditMode_Move);
+}
+
 void MapFrame::setTargetLabelSize(const QSize& targetSize)
 {
     _targetLabelSize = targetSize;
@@ -772,6 +777,8 @@ void MapFrame::publishClicked(bool checked)
         connect(this, &MapFrame::distanceChanged, newRenderer, &PublishGLMapImageRenderer::distanceChanged);
         connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapImageRenderer::fowChanged);
         connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapImageRenderer::setCameraRect);
+        connect(this, &MapFrame::pointerToggled, newRenderer, &PublishGLMapImageRenderer::pointerToggled);
+        connect(this, &MapFrame::pointerPositionChanged, newRenderer, &PublishGLMapImageRenderer::pointerPositionChanged);
         connect(newRenderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         newRenderer->setCameraRect(_cameraRect->getCameraRect());
 
@@ -1240,6 +1247,7 @@ bool MapFrame::editModeToggled(int editMode)
         case DMHelper::EditMode_FreeDistance:
         case DMHelper::EditMode_CameraEdit:
         case DMHelper::EditMode_CameraSelect:
+        case DMHelper::EditMode_Pointer:
             ui->graphicsView->viewport()->installEventFilter(this);
             ui->graphicsView->removeEventFilter(this);
             break;
@@ -1278,6 +1286,10 @@ void MapFrame::changeEditMode(int editMode, bool active)
             break;
         case DMHelper::EditMode_CameraSelect:
             emit cameraSelectToggled(active);
+            break;
+        case DMHelper::EditMode_Pointer:
+            setMouseTracking(active);
+            emit pointerToggled(active);
             break;
         case DMHelper::EditMode_Edit:
         case DMHelper::EditMode_Move:
@@ -1354,6 +1366,8 @@ bool MapFrame::execEventFilter(QObject *obj, QEvent *event)
             return execEventFilterCameraSelect(obj, event);
         case DMHelper::EditMode_CameraEdit:
             return execEventFilterCameraEdit(obj, event);
+        case DMHelper::EditMode_Pointer:
+            return execEventFilterPointer(obj, event);
         default:
             break;
     };
@@ -1802,6 +1816,25 @@ bool MapFrame::execEventFilterCameraEdit(QObject *obj, QEvent *event)
     return false;
 }
 
+bool MapFrame::execEventFilterPointer(QObject *obj, QEvent *event)
+{
+    Q_UNUSED(obj);
+
+    if(event->type() == QEvent::MouseMove)
+    {
+        QMouseEvent* mouseEvent = dynamic_cast<QMouseEvent*>(event);
+        if(!mouseEvent)
+            return false;
+
+        emit pointerPositionChanged(ui->graphicsView->mapToScene(mouseEvent->pos()));
+    }
+
+    // Ignore any mouse clicks
+    return((event->type() == QEvent::MouseButtonPress) ||
+           (event->type() == QEvent::MouseButtonRelease) ||
+           (event->type() == QEvent::MouseButtonDblClick));
+}
+
 void MapFrame::startPublishTimer()
 {
     if(!_timerId)
@@ -1860,6 +1893,8 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
             disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::distanceChanged);
             disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::fowChanged);
             disconnect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::setCameraRect);
+            disconnect(this, &MapFrame::pointerToggled, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::pointerToggled);
+            disconnect(this, &MapFrame::pointerPositionChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::pointerPositionChanged);
             disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
             rendererDeactivated();
         }
@@ -1986,6 +2021,9 @@ void MapFrame::setMapCursor()
                                                                     32 * DMHelper::CURSOR_SIZE / cursorPixmap.width(),
                                                                     32 * DMHelper::CURSOR_SIZE / cursorPixmap.height()));
                 }
+                break;
+            case DMHelper::EditMode_Pointer:
+                ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/arrow.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
                 break;
             case DMHelper::EditMode_FoW:
             case DMHelper::EditMode_Edit:

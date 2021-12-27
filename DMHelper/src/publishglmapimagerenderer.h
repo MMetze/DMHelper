@@ -39,11 +39,15 @@ public slots:
     void fowChanged();
     void setCameraRect(const QRectF& cameraRect);
 
+    void pointerToggled(bool enabled);
+    void pointerPositionChanged(const QPointF& pos);
+
 protected:
     void setOrthoProjection();
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
     void createMarkerTokens(const QSize& sceneSize);
+    void evaluatePointer();
 
 protected slots:
     void handlePartyChanged(Party* party);
@@ -67,7 +71,11 @@ private:
     BattleGLBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _itemImage;
+    PublishGLImage* _pointerImage;
     QList<PublishGLImage*> _markerTokens;
+
+    bool _pointerActive;
+    QPointF _pointerPos;
 
     bool _recreatePartyToken;
     bool _recreateLineToken;

@@ -9,12 +9,6 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
 
     connect(ui->btnEditFile, SIGNAL(clicked()), this, SIGNAL(editFileClicked()));
 
-    connect(ui->btnZoomIn, SIGNAL(clicked()), this, SIGNAL(zoomInClicked()));
-    connect(ui->btnZoomOut, SIGNAL(clicked()), this, SIGNAL(zoomOutClicked()));
-    connect(ui->btnZoomOne, SIGNAL(clicked()), this, SIGNAL(zoomOneClicked()));
-    connect(ui->btnZoomFull, SIGNAL(clicked()), this, SIGNAL(zoomFullClicked()));
-    connect(ui->btnZoomSelect, SIGNAL(clicked(bool)), this, SIGNAL(zoomSelectClicked(bool)));
-
     connect(ui->btnMapEdit, SIGNAL(clicked(bool)), this, SIGNAL(mapEditClicked(bool)));
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SIGNAL(drawEraseClicked(bool)));
     connect(ui->btnSmooth, SIGNAL(clicked(bool)), this, SIGNAL(smoothClicked(bool)));
@@ -51,11 +45,6 @@ PublishButtonRibbon* RibbonTabMap::getPublishRibbon()
     return ui->framePublish;
 }
 
-void RibbonTabMap::setZoomSelect(bool checked)
-{
-    ui->btnZoomSelect->setChecked(checked);
-}
-
 void RibbonTabMap::setMapEdit(bool checked)
 {
     ui->btnMapEdit->setChecked(checked);
@@ -82,12 +71,6 @@ void RibbonTabMap::showEvent(QShowEvent *event)
 
     setStandardButtonSize(*ui->lblEditFile, *ui->btnEditFile, frameHeight);
     setLineHeight(*ui->line_7, frameHeight);
-    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn, frameHeight);
-    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut, frameHeight);
-    setStandardButtonSize(*ui->lblZoomOne, *ui->btnZoomOne, frameHeight);
-    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull, frameHeight);
-    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect, frameHeight);
-    setLineHeight(*ui->line_6, frameHeight);
     setStandardButtonSize(*ui->lblMapEdit, *ui->btnMapEdit, frameHeight);
     setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase, frameHeight);
     setStandardButtonSize(*ui->lblSmooth, *ui->btnSmooth, frameHeight);

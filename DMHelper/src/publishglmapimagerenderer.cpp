@@ -16,65 +16,16 @@
 #include <QDebug>
 
 /*
-if(_publishZoom)
-    _publishRect = QRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
-                         static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
-                         static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
-                         static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
-    // TODO: Consider zoom factor...
-else
-    if(_publishVisible)
-        pub = _mapSource->getShrunkPublishImage(&_publishRect);
-    else
-        pub = _mapSource->getPublishImage();
-        _publishRect = pub.rect();
-
-    QPainter p(&pub);
-    QPointF topLeftOffset = (_publishZoom || _publishVisible) ? _publishRect.topLeft() : QPointF();
-    if((_mapSource->getShowParty()) && ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
-    {
-        QPixmap partyPixmap = _mapSource->getPartyPixmap();
-        if(!partyPixmap.isNull())
-        {
-            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale());
-            p.drawPixmap(_partyIcon->pos() - topLeftOffset, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
-        }
-    }
-
-    p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
-                  _mapSource->getDistanceLineWidth(),
-                  static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
-    if(_distanceLine)
-        p.drawLine(_distanceLine->line().translated(-topLeftOffset));
-    if(_distancePath)
-        p.drawPath(_distancePath->path().translated(-topLeftOffset));
-    if(_distanceText)
-        p.drawText(_distanceText->pos() - topLeftOffset, _distanceText->text());
-
-    if(_mapSource->getShowMarkers())
-    {
-        if(QUndoStack* stack = _mapSource->getUndoStack())
-        {
-            for( int i = 0; i < stack->index(); ++i )
-            {
-                const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
-                if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
-                {
-                    MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
-                    if(markerItem)
-                        markerItem->drawGraphicsItem(p);
-                }
-            }
-        }
-    }
-}
+start with pointer off
+handle marker changes
+changing pointers
+remove publish zoom and stuff
 
 if(_rotation != 0)
 {
     pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
 }
 
-emit publishImage(pub);
 */
 
 
@@ -94,7 +45,10 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _fowObject(nullptr),
     _partyToken(nullptr),
     _itemImage(nullptr),
+    _pointerImage(nullptr),
     _markerTokens(),
+    _pointerActive(false),
+    _pointerPos(),
     _recreatePartyToken(false),
     _recreateLineToken(false),
     _updateFow(false)
@@ -122,6 +76,9 @@ void PublishGLMapImageRenderer::cleanup()
 
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
+
+    delete _pointerImage;
+    _pointerImage = nullptr;
 
     delete _itemImage;
     _itemImage = nullptr;
@@ -261,6 +218,8 @@ void PublishGLMapImageRenderer::initializeGL()
     // Create the party token
     createPartyToken();
 
+    evaluatePointer();
+
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
@@ -317,6 +276,8 @@ void PublishGLMapImageRenderer::paintGL()
 
     createMarkerTokens(sceneSize);
 
+    evaluatePointer();
+
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
     if((!f) || (!e))
@@ -372,6 +333,18 @@ void PublishGLMapImageRenderer::paintGL()
         }
     }
 
+    if(_pointerImage)
+    {
+        QSize pointerSize = _pointerImage->getSize();
+        QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2) - pointerSize.height());
+        //QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2));
+        qDebug() << "[PublishGLMapImageRenderer] pos: " << _pointerPos << ", img size: " << _pointerImage->getSize() << ", scene size: " << sceneSize;
+        qDebug() << "[PublishGLMapImageRenderer]    output position: " << pointPos;
+        _pointerImage->setPosition(pointPos);
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _pointerImage->getMatrixData());
+        _pointerImage->paintGL();
+    }
+
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
 }
@@ -414,9 +387,30 @@ void PublishGLMapImageRenderer::fowChanged()
 
 void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
 {
-    _cameraRect = cameraRect;
-    setOrthoProjection();
-    emit updateWidget();
+    if(_cameraRect != cameraRect)
+    {
+        _cameraRect = cameraRect;
+        setOrthoProjection();
+        emit updateWidget();
+    }
+}
+
+void PublishGLMapImageRenderer::pointerToggled(bool enabled)
+{
+    if(_pointerActive != enabled)
+    {
+        _pointerActive = enabled;
+        emit updateWidget();
+    }
+}
+
+void PublishGLMapImageRenderer::pointerPositionChanged(const QPointF& pos)
+{
+    if(_pointerPos != pos)
+    {
+        _pointerPos = pos;
+        emit updateWidget();
+    }
 }
 
 void PublishGLMapImageRenderer::setOrthoProjection()
@@ -439,6 +433,10 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);
+
+    qreal pointerScale = rectSize.width() / _targetSize.width();
+    if(_pointerImage)
+        _pointerImage->setScale(pointerScale);
 
     QSizeF scissorSize = _cameraRect.size().scaled(_targetSize, Qt::KeepAspectRatio);
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
@@ -577,32 +575,25 @@ void PublishGLMapImageRenderer::createMarkerTokens(const QSize& sceneSize)
                 QPointF markerTopLeft = markerItem->getTopLeft();
                 newMarkerItem->setPosition(markerItem->x() + markerTopLeft.x() - (sceneSize.width() / 2),
                                            (sceneSize.height() / 2) - (markerItem->y() + markerTopLeft.y() + markerImage.height()));
-                // */
-                //newMarkerItem->setPosition(markerItem->x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - markerItem->y() - markerImage.height());
 
                 _markerTokens.append(newMarkerItem);
             }
         }
     }
+}
 
-    /*
-    if(_mapSource->getShowMarkers())
+void PublishGLMapImageRenderer::evaluatePointer()
+{
+    if(_pointerActive)
     {
-        if(QUndoStack* stack = _mapSource->getUndoStack())
-        {
-            for( int i = 0; i < stack->index(); ++i )
-            {
-                const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
-                if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
-                {
-                    MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
-                    if(markerItem)
-                        markerItem->drawGraphicsItem(p);
-                }
-            }
-        }
+        if(!_pointerImage)
+            _pointerImage = new PublishGLImage(QPixmap(":/img/data/arrow.png").scaled(DMHelper::CURSOR_SIZE * 2, DMHelper::CURSOR_SIZE * 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).toImage(), false);
     }
-    */
+    else if(_pointerImage)
+    {
+        delete _pointerImage;
+        _pointerImage = nullptr;
+    }
 }
 
 void PublishGLMapImageRenderer::handlePartyChanged(Party* party)

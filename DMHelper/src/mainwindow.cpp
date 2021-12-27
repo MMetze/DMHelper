@@ -575,6 +575,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
     connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, mapFrame, &MapFrame::setCameraEdit);
     connect(mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, mapFrame, &MapFrame::setPointerOn);
+    connect(mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
 
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, mapFrame, &MapFrame::setParty);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, mapFrame, &MapFrame::setPartyIcon);

@@ -83,7 +83,7 @@ void PublishGLImage::paintGL()
     if((!f) || (!e))
         return;
 
-    qDebug() << "[PublishGLImage] Painting image. VAO: " << _VAO << ", texture: " << _textureID;
+    // qDebug() << "[PublishGLImage] Painting image. VAO: " << _VAO << ", texture: " << _textureID;
 
     e->glBindVertexArray(_VAO);
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
@@ -138,7 +138,7 @@ void PublishGLImage::createImageObjects(const QImage& image)
     if((!f) || (!e))
         return;
 
-    qDebug() << "[PublishGLImage] Creating images objects for image";
+    // qDebug() << "[PublishGLImage] Creating images objects for image";
 
     float vertices[] = {
         // positions                                                   // colors           // texture coords
