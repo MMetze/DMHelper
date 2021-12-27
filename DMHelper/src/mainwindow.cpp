@@ -541,6 +541,7 @@ MainWindow::MainWindow(QWidget *parent) :
     MapFrame* mapFrame = new MapFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
+    mapFrame->setPointerFile(_options->getPointerFile());
     //connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
     connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
@@ -603,6 +604,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineWidth);
 
     connect(mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), mapFrame, SLOT(setPointerFile(const QString&)));
 
     connect(this, SIGNAL(cancelSelect()), mapFrame, SLOT(cancelSelect()));
 

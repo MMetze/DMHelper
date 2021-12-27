@@ -55,6 +55,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _mapItem(nullptr),
     _distancePath(nullptr),
     _distanceText(nullptr),
+    _pointerFile(),
     _publishMouseDown(false),
     _publishMouseDownPos(),
     _rubberBand(nullptr),
@@ -644,6 +645,16 @@ void MapFrame::setPointerOn(bool enabled)
     editModeToggled(enabled ? DMHelper::EditMode_Pointer : DMHelper::EditMode_Move);
 }
 
+void MapFrame::setPointerFile(const QString& filename)
+{
+    if(_pointerFile != filename)
+    {
+        _pointerFile = filename;
+        setMapCursor();
+        emit pointerFileNameChanged(_pointerFile);
+    }
+}
+
 void MapFrame::setTargetLabelSize(const QSize& targetSize)
 {
     _targetLabelSize = targetSize;
@@ -778,9 +789,11 @@ void MapFrame::publishClicked(bool checked)
         connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapImageRenderer::fowChanged);
         connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapImageRenderer::setCameraRect);
         connect(this, &MapFrame::pointerToggled, newRenderer, &PublishGLMapImageRenderer::pointerToggled);
-        connect(this, &MapFrame::pointerPositionChanged, newRenderer, &PublishGLMapImageRenderer::pointerPositionChanged);
+        connect(this, &MapFrame::pointerPositionChanged, newRenderer, &PublishGLMapImageRenderer::setPointerPosition);
+        connect(this, &MapFrame::pointerFileNameChanged, newRenderer, &PublishGLMapImageRenderer::setPointerFileName);
         connect(newRenderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         newRenderer->setCameraRect(_cameraRect->getCameraRect());
+        newRenderer->setPointerFileName(_pointerFile);
 
         _renderer = newRenderer;
         emit registerRenderer(_renderer);
@@ -1894,7 +1907,8 @@ void MapFrame::createVideoPlayer(bool dmPlayer)
             disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::fowChanged);
             disconnect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::setCameraRect);
             disconnect(this, &MapFrame::pointerToggled, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::pointerToggled);
-            disconnect(this, &MapFrame::pointerPositionChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::pointerPositionChanged);
+            disconnect(this, &MapFrame::pointerPositionChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::setPointerPosition);
+            disconnect(this, &MapFrame::pointerFileNameChanged, dynamic_cast<PublishGLMapImageRenderer*>(_renderer), &PublishGLMapImageRenderer::setPointerFileName);
             disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
             rendererDeactivated();
         }
@@ -2023,7 +2037,7 @@ void MapFrame::setMapCursor()
                 }
                 break;
             case DMHelper::EditMode_Pointer:
-                ui->graphicsView->viewport()->setCursor(QCursor(QPixmap(":/img/data/arrow.png").scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
+                ui->graphicsView->viewport()->setCursor(QCursor(getPointerPixmap().scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)));
                 break;
             case DMHelper::EditMode_FoW:
             case DMHelper::EditMode_Edit:
@@ -2319,3 +2333,14 @@ QGraphicsItem* MapFrame::findTopObject(const QPoint &pos)
     return nullptr;
 }
 
+QPixmap MapFrame::getPointerPixmap()
+{
+    if(!_pointerFile.isEmpty())
+    {
+        QPixmap result;
+        if(result.load(_pointerFile))
+            return result;
+    }
+
+    return QPixmap(":/img/data/arrow.png");
+}

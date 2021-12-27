@@ -49,6 +49,7 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _markerTokens(),
     _pointerActive(false),
     _pointerPos(),
+    _pointerFile(),
     _recreatePartyToken(false),
     _recreateLineToken(false),
     _updateFow(false)
@@ -404,11 +405,22 @@ void PublishGLMapImageRenderer::pointerToggled(bool enabled)
     }
 }
 
-void PublishGLMapImageRenderer::pointerPositionChanged(const QPointF& pos)
+void PublishGLMapImageRenderer::setPointerPosition(const QPointF& pos)
 {
     if(_pointerPos != pos)
     {
         _pointerPos = pos;
+        emit updateWidget();
+    }
+}
+
+void PublishGLMapImageRenderer::setPointerFileName(const QString& filename)
+{
+    if(_pointerFile != filename)
+    {
+        _pointerFile = filename;
+        delete _pointerImage;
+        _pointerImage = nullptr;
         emit updateWidget();
     }
 }
@@ -587,13 +599,25 @@ void PublishGLMapImageRenderer::evaluatePointer()
     if(_pointerActive)
     {
         if(!_pointerImage)
-            _pointerImage = new PublishGLImage(QPixmap(":/img/data/arrow.png").scaled(DMHelper::CURSOR_SIZE * 2, DMHelper::CURSOR_SIZE * 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).toImage(), false);
+            _pointerImage = new PublishGLImage(getPointerPixmap().scaled(DMHelper::CURSOR_SIZE * 2, DMHelper::CURSOR_SIZE * 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).toImage(), false);
     }
     else if(_pointerImage)
     {
         delete _pointerImage;
         _pointerImage = nullptr;
     }
+}
+
+QPixmap PublishGLMapImageRenderer::getPointerPixmap()
+{
+    if(!_pointerFile.isEmpty())
+    {
+        QPixmap result;
+        if(result.load(_pointerFile))
+            return result;
+    }
+
+    return QPixmap(":/img/data/arrow.png");
 }
 
 void PublishGLMapImageRenderer::handlePartyChanged(Party* party)

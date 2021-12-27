@@ -80,6 +80,7 @@ signals:
 
     void pointerToggled(bool enabled);
     void pointerPositionChanged(const QPointF& pos);
+    void pointerFileNameChanged(const QString& filename);
 
     void publishCancelled();
 
@@ -141,6 +142,7 @@ public slots:
     void setPublishVisible(bool enabled);
 
     void setPointerOn(bool enabled);
+    void setPointerFile(const QString& filename);
 
     void setTargetLabelSize(const QSize& targetSize);
     void publishWindowMouseDown(const QPointF& position);
@@ -216,6 +218,7 @@ private:
     void setBackgroundPixmap(const QPixmap& pixmap);
     void setCameraToView();
     QGraphicsItem* findTopObject(const QPoint &pos);
+    QPixmap getPointerPixmap();
 
     Ui::MapFrame *ui;
 
@@ -248,6 +251,7 @@ private:
     MapDraw* _mapItem;
     QGraphicsPathItem* _distancePath;
     QGraphicsSimpleTextItem* _distanceText;
+    QString _pointerFile;
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;

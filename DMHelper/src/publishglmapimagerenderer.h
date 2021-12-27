@@ -40,7 +40,8 @@ public slots:
     void setCameraRect(const QRectF& cameraRect);
 
     void pointerToggled(bool enabled);
-    void pointerPositionChanged(const QPointF& pos);
+    void setPointerPosition(const QPointF& pos);
+    void setPointerFileName(const QString& filename);
 
 protected:
     void setOrthoProjection();
@@ -48,6 +49,7 @@ protected:
     void createLineToken(const QSize& sceneSize);
     void createMarkerTokens(const QSize& sceneSize);
     void evaluatePointer();
+    QPixmap getPointerPixmap();
 
 protected slots:
     void handlePartyChanged(Party* party);
@@ -76,6 +78,7 @@ private:
 
     bool _pointerActive;
     QPointF _pointerPos;
+    QString _pointerFile;
 
     bool _recreatePartyToken;
     bool _recreateLineToken;
