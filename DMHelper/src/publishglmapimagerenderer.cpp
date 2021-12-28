@@ -232,7 +232,7 @@ void PublishGLMapImageRenderer::initializeGL()
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
     // Projection - note, this is set later when resizing the window
-    setOrthoProjection();
+    updateProjectionMatrix();
 
     //f->glUseProgram(_shaderProgram);
     //f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
@@ -245,7 +245,7 @@ void PublishGLMapImageRenderer::resizeGL(int w, int h)
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
     if(_backgroundObject)
-        setOrthoProjection();
+        updateProjectionMatrix();
 
     emit updateWidget();
 }
@@ -373,7 +373,7 @@ void PublishGLMapImageRenderer::setImage(const QImage& image)
         {
             _backgroundObject->setImage(image);
             createPartyToken();
-            setOrthoProjection();
+            updateProjectionMatrix();
             emit updateWidget();
         }
     }
@@ -394,7 +394,7 @@ void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
     if(_cameraRect != cameraRect)
     {
         _cameraRect = cameraRect;
-        setOrthoProjection();
+        updateProjectionMatrix();
         emit updateWidget();
     }
 }
@@ -433,7 +433,7 @@ void PublishGLMapImageRenderer::setPointerFileName(const QString& filename)
     }
 }
 
-void PublishGLMapImageRenderer::setOrthoProjection()
+void PublishGLMapImageRenderer::updateProjectionMatrix()
 {
     if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
         return;
@@ -443,13 +443,21 @@ void PublishGLMapImageRenderer::setOrthoProjection()
         return;
 
     // Update projection matrix and other size related settings:
-    QSizeF rectSize = QSizeF(_targetSize).scaled(_cameraRect.size(), Qt::KeepAspectRatioByExpanding);
+    QRectF transformedCamera = _cameraRect;
+    if((_rotation == 90) || (_rotation == 270))
+    {
+        transformedCamera = transformedCamera.transposed();
+        transformedCamera.moveTo(transformedCamera.topLeft().transposed());
+    }
+
+    QSizeF rectSize = QSizeF(_targetSize).scaled(transformedCamera.size(), Qt::KeepAspectRatioByExpanding);
     QSizeF halfRect = rectSize / 2.0;
-    QPointF cameraTopLeft((rectSize.width() - _cameraRect.size().width()) / 2.0, (rectSize.height() - _cameraRect.size().height()) / 2);
-    QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
+    QPointF cameraTopLeft((rectSize.width() - transformedCamera.width()) / 2.0, (rectSize.height() - transformedCamera.height()) / 2);
+    QPointF cameraMiddle(transformedCamera.x() + (transformedCamera.width() / 2.0), transformedCamera.y() + (transformedCamera.height() / 2.0));
     QSizeF backgroundMiddle = _backgroundObject->getSize() / 2.0;
 
     _projectionMatrix.setToIdentity();
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, 1.0);
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);
@@ -458,7 +466,7 @@ void PublishGLMapImageRenderer::setOrthoProjection()
     if(_pointerImage)
         _pointerImage->setScale(pointerScale);
 
-    QSizeF scissorSize = _cameraRect.size().scaled(_targetSize, Qt::KeepAspectRatio);
+    QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());

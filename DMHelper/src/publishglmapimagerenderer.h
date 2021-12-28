@@ -45,7 +45,7 @@ public slots:
     void setPointerFileName(const QString& filename);
 
 protected:
-    void setOrthoProjection();
+    virtual void updateProjectionMatrix();
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
     void createMarkerTokens(const QSize& sceneSize);

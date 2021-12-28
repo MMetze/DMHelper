@@ -24,7 +24,6 @@ public:
     virtual bool deleteOnDeactivation();
 
     virtual void updateRender();
-    virtual void setBackgroundColor(const QColor& color);
 
     // Standard OpenGL calls
     virtual void initializeGL() = 0;
@@ -35,9 +34,15 @@ signals:
     void updateWidget();
     void deactivated();
 
-protected:
-    QOpenGLWidget* _targetWidget;
+public slots:
+    virtual void setBackgroundColor(const QColor& color);
+    virtual void setRotation(int rotation);
 
+protected:
+    virtual void updateProjectionMatrix();
+
+    QOpenGLWidget* _targetWidget;
+    int _rotation;
 };
 
 #endif // PUBLISHGLRENDERER_H

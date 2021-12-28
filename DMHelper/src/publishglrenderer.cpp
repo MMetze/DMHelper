@@ -6,7 +6,8 @@
 
 PublishGLRenderer::PublishGLRenderer(QObject *parent) :
     QObject(parent),
-    _targetWidget(nullptr)
+    _targetWidget(nullptr),
+    _rotation(0)
 {
 }
 
@@ -59,3 +60,18 @@ void PublishGLRenderer::setBackgroundColor(const QColor& color)
 {
     Q_UNUSED(color);
 }
+
+void PublishGLRenderer::setRotation(int rotation)
+{
+    if(rotation != _rotation)
+    {
+        _rotation = rotation;
+        updateProjectionMatrix();
+        emit updateWidget();
+    }
+}
+
+void PublishGLRenderer::updateProjectionMatrix()
+{
+}
+

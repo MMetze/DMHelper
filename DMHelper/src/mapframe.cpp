@@ -796,6 +796,7 @@ void MapFrame::publishClicked(bool checked)
         connect(newRenderer, &PublishGLMapImageRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         newRenderer->setCameraRect(_cameraRect->getCameraRect());
         newRenderer->setPointerFileName(_pointerFile);
+        newRenderer->setRotation(_rotation);
 
         _renderer = newRenderer;
         emit registerRenderer(_renderer);
@@ -2081,6 +2082,9 @@ void MapFrame::rotatePublish()
     resetPublishFoW();
     if((_videoPlayer) && (_isPublishing))
         createVideoPlayer(!_isPublishing);
+
+    if(_renderer)
+        _renderer->setRotation(_rotation);
 }
 
 void MapFrame::setScale(qreal s)
