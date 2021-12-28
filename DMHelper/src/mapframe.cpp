@@ -41,8 +41,6 @@ MapFrame::MapFrame(QWidget *parent) :
     _smooth(true),
     _brushMode(DMHelper::BrushType_Circle),
     _brushSize(30),
-    _publishZoom(false),
-    _publishVisible(false),
     _isPublishing(false),
     _isVideo(false),
     _rotation(0),
@@ -612,6 +610,16 @@ void MapFrame::setCameraMap()
     emit cameraRectChanged(newRect);
 }
 
+void MapFrame::setCameraVisible()
+{
+    if((!_cameraRect) || (!_mapSource))
+        return;
+
+    QRectF newRect = _mapSource->getShrunkPublishRect();
+    _cameraRect->setCameraRect(newRect);
+    emit cameraRectChanged(newRect);
+}
+
 void MapFrame::setCameraSelect(bool enabled)
 {
     editModeToggled(enabled ? DMHelper::EditMode_CameraSelect : DMHelper::EditMode_Move);
@@ -620,16 +628,6 @@ void MapFrame::setCameraSelect(bool enabled)
 void MapFrame::setCameraEdit(bool enabled)
 {
     editModeToggled(enabled ? DMHelper::EditMode_CameraEdit : DMHelper::EditMode_Move);
-}
-
-void MapFrame::setPublishZoom(bool enabled)
-{
-    _publishZoom = enabled;
-}
-
-void MapFrame::setPublishVisible(bool enabled)
-{
-    _publishVisible = enabled;
 }
 
 void MapFrame::targetResized(const QSize& newSize)
@@ -924,26 +922,29 @@ void MapFrame::uninitializeFoW()
     if((_mapSource) && (_partyIcon))
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
 
-    disconnect(this, &MapFrame::cameraRectChanged, _mapSource, qOverload<const QRectF&>(&Map::setCameraRect));
-    disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::distanceLineColorChanged);
-    disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::distanceLineTypeChanged);
-    disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::distanceLineWidthChanged);
-    disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::distanceScaleChanged);
-    disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
-    disconnect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
-    disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
-    disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
-    disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
-    disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
-    disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
-    disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    if(_mapSource)
+    {
+        disconnect(this, &MapFrame::cameraRectChanged, _mapSource, qOverload<const QRectF&>(&Map::setCameraRect));
+        disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::distanceLineColorChanged);
+        disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::distanceLineTypeChanged);
+        disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::distanceLineWidthChanged);
+        disconnect(_mapSource, &Map::mapScaleChanged, this, &MapFrame::distanceScaleChanged);
+        disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::dirty);
+        disconnect(_mapSource, &Map::showMarkersChanged, this, &MapFrame::showMarkersChanged);
+        disconnect(_mapSource, &Map::partyChanged, this, &MapFrame::partyChanged);
+        disconnect(_mapSource, &Map::partyIconChanged, this, &MapFrame::partyIconChanged);
+        disconnect(_mapSource, &Map::showPartyChanged, this, &MapFrame::showPartyChanged);
+        disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
+        disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+        disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+    }
 
     stopPublishTimer();
     cleanupBuffers();
@@ -1051,7 +1052,7 @@ void MapFrame::resizeEvent(QResizeEvent *event)
 void MapFrame::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
-    qDebug() << "[MapFrame] shown (" << isVisible() << ")";
+    //qDebug() << "[MapFrame] shown (" << isVisible() << ")";
     loadViewRect();
 }
 

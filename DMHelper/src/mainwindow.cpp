@@ -556,9 +556,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
     connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
 
-    connect(_ribbonTabMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
-    connect(_ribbonTabMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
-
     connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), mapFrame, SLOT(setMapEdit(bool)));
     connect(mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
 
@@ -572,6 +569,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, mapFrame, &MapFrame::setCameraCouple);
     connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraZoomClicked, mapFrame, &MapFrame::setCameraMap);
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, mapFrame, &MapFrame::setCameraVisible);
     connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraSelectClicked, mapFrame, &MapFrame::setCameraSelect);
     connect(mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
     connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, mapFrame, &MapFrame::setCameraEdit);

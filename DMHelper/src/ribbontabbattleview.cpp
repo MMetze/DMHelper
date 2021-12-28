@@ -15,6 +15,7 @@ RibbonTabBattleView::RibbonTabBattleView(QWidget *parent) :
 
     connect(ui->btnCameraCouple, SIGNAL(clicked(bool)), this, SIGNAL(cameraCoupleClicked(bool)));
     connect(ui->btnCameraFullMap, SIGNAL(clicked(bool)), this, SIGNAL(cameraZoomClicked()));
+    connect(ui->btnCameraVisible, SIGNAL(clicked(bool)), this, SIGNAL(cameraVisibleClicked()));
     connect(ui->btnCameraSelect, SIGNAL(clicked(bool)), this, SIGNAL(cameraSelectClicked(bool)));
     connect(ui->btnEditCamera, SIGNAL(clicked(bool)), this, SIGNAL(cameraEditClicked(bool)));
 
@@ -93,7 +94,7 @@ void RibbonTabBattleView::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect, frameHeight);
     setStandardButtonSize(*ui->lblCameraCouple, *ui->btnCameraCouple, frameHeight);
     setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap, frameHeight);
-    setStandardButtonSize(*ui->lblCameraFullMap, *ui->btnCameraFullMap, frameHeight);
+    setStandardButtonSize(*ui->lblCameraVisible, *ui->btnCameraVisible, frameHeight);
     setStandardButtonSize(*ui->lblCameraSelect, *ui->btnCameraSelect, frameHeight);
     setStandardButtonSize(*ui->lblEditCamera, *ui->btnEditCamera, frameHeight);
     setStandardButtonSize(*ui->lblDistance, *ui->btnDistance, frameHeight);

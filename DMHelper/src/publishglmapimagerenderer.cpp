@@ -16,7 +16,6 @@
 #include <QDebug>
 
 /*
-handle marker changes
 remove publish zoom and stuff
 
 if(_rotation != 0)

@@ -752,6 +752,60 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
     return result;
 }
 
+QRect Map::getShrunkPublishRect()
+{
+    QImage bwFoWImage = getBWFoWImage(_imgBackground);
+
+    int top, bottom, left, right;
+    top = bottom = left = right = -1;
+    int i, j;
+    for(j = 0; (j < bwFoWImage.height()) && (top == -1); ++j)
+    {
+        for(i = 0; (i < bwFoWImage.width()) && (top == -1); ++i)
+        {
+            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            {
+                top = j;
+            }
+        }
+    }
+
+    for(j = bwFoWImage.height() - 1; (j > top) && (bottom == -1); --j)
+    {
+        for(i = 0; (i < bwFoWImage.width()) && (bottom == -1); ++i)
+        {
+            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            {
+                bottom = j;
+            }
+        }
+    }
+
+    for(i = 0; (i < bwFoWImage.width()) && (left == -1); ++i)
+    {
+        for(j = top; (j < bottom) && (left == -1); ++j)
+        {
+            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            {
+                left = i;
+            }
+        }
+    }
+
+    for(i = bwFoWImage.width() - 1; (i > left) && (right == -1); --i)
+    {
+        for(j = top; (j < bottom) && (right == -1); ++j)
+        {
+            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            {
+                right = i;
+            }
+        }
+    }
+
+    return QRect(left, top, right - left, bottom - top);
+}
+
 bool Map::isFilterApplied() const
 {
     return _filterApplied;

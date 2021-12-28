@@ -38,6 +38,7 @@ signals:
 
     void cameraCoupleClicked(bool checked);
     void cameraZoomClicked();
+    void cameraVisibleClicked();
     void cameraSelectClicked(bool checked);
     void cameraEditClicked(bool checked);
 

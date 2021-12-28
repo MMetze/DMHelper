@@ -15,9 +15,6 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
     connect(ui->spinSize, SIGNAL(valueChanged(int)), this, SIGNAL(brushSizeChanged(int)));
     connect(ui->btnFillFoW, SIGNAL(clicked(bool)), this, SIGNAL(fillFoWClicked()));
 
-    connect(ui->btnPublishZoom, SIGNAL(clicked(bool)), this, SIGNAL(publishZoomChanged(bool)));
-    connect(ui->btnPublishVisible, SIGNAL(clicked(bool)), this, SIGNAL(publishVisibleChanged(bool)));
-
     // Set up the brush mode button group
     ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
     ui->btnGrpBrush->setId(ui->btnBrushSquare, DMHelper::BrushType_Square);
@@ -28,9 +25,6 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SLOT(setEraseMode()));
 
     connect(ui->btnColorize, SIGNAL(clicked(bool)), this, SIGNAL(colorizeClicked()));
-
-    connect(ui->btnPublishVisible, SIGNAL(clicked(bool)), this, SLOT(publishModeVisibleClicked()));
-    connect(ui->btnPublishZoom, SIGNAL(clicked(bool)), this, SLOT(publishModeZoomClicked()));
 
     setEraseMode();
 }
@@ -93,11 +87,6 @@ void RibbonTabMap::showEvent(QShowEvent *event)
     setLineHeight(*ui->line_5, frameHeight);
 
     setStandardButtonSize(*ui->lblColorize, *ui->btnColorize, frameHeight);
-
-    setLineHeight(*ui->line_8, frameHeight);
-
-    setStandardButtonSize(*ui->lblPublishVisible, *ui->btnPublishVisible, frameHeight);
-    setStandardButtonSize(*ui->lblPublishZoom, *ui->btnPublishZoom, frameHeight);
 }
 
 void RibbonTabMap::setEraseMode()
@@ -111,23 +100,5 @@ void RibbonTabMap::setEraseMode()
     {
         ui->btnFillFoW->setIcon(QPixmap(":/img/data/square.png"));
         ui->lblFillFoW->setText(QString("Fill"));
-    }
-}
-
-void RibbonTabMap::publishModeVisibleClicked()
-{
-    if((ui->btnPublishVisible->isChecked()) &&
-       (ui->btnPublishZoom->isChecked()))
-    {
-        ui->btnPublishZoom->click();
-    }
-}
-
-void RibbonTabMap::publishModeZoomClicked()
-{
-    if((ui->btnPublishVisible->isChecked()) &&
-       (ui->btnPublishZoom->isChecked()))
-    {
-        ui->btnPublishVisible->click();
     }
 }

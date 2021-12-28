@@ -136,11 +136,9 @@ public slots:
 
     void setCameraCouple();
     void setCameraMap();
+    void setCameraVisible();
     void setCameraSelect(bool enabled);
     void setCameraEdit(bool enabled);
-
-    void setPublishZoom(bool enabled);
-    void setPublishVisible(bool enabled);
 
     void setPointerOn(bool enabled);
     void setPointerFile(const QString& filename);
@@ -235,8 +233,6 @@ private:
     bool _smooth;
     int _brushMode;
     int _brushSize;
-    bool _publishZoom;
-    bool _publishVisible;
     bool _isPublishing;
     bool _isVideo;
 

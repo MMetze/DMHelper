@@ -240,6 +240,7 @@
         <file>data/icon_banner_3.png</file>
         <file>data/icon_flag.png</file>
         <file>data/icon_pin.png</file>
+        <file>data/icon_visiblecamera.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

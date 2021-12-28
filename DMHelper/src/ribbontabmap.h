@@ -37,16 +37,11 @@ signals:
 
     void colorizeClicked();
 
-    void publishZoomChanged(bool checked);
-    void publishVisibleChanged(bool checked);
-
 protected:
     virtual void showEvent(QShowEvent *event) override;
 
 private slots:
     void setEraseMode();
-    void publishModeVisibleClicked();
-    void publishModeZoomClicked();
 
 private:
     Ui::RibbonTabMap *ui;
