@@ -444,25 +444,27 @@ void PublishGLMapImageRenderer::updateProjectionMatrix()
 
     // Update projection matrix and other size related settings:
     QRectF transformedCamera = _cameraRect;
+    QSizeF transformedTarget = _targetSize;
     if((_rotation == 90) || (_rotation == 270))
     {
         transformedCamera = transformedCamera.transposed();
         transformedCamera.moveTo(transformedCamera.topLeft().transposed());
+        transformedTarget.transpose();
     }
 
-    QSizeF rectSize = QSizeF(_targetSize).scaled(transformedCamera.size(), Qt::KeepAspectRatioByExpanding);
+    QSizeF rectSize = transformedTarget.scaled(_cameraRect.size(), Qt::KeepAspectRatioByExpanding);
     QSizeF halfRect = rectSize / 2.0;
-    QPointF cameraTopLeft((rectSize.width() - transformedCamera.width()) / 2.0, (rectSize.height() - transformedCamera.height()) / 2);
-    QPointF cameraMiddle(transformedCamera.x() + (transformedCamera.width() / 2.0), transformedCamera.y() + (transformedCamera.height() / 2.0));
+    QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
+    QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = _backgroundObject->getSize() / 2.0;
 
     _projectionMatrix.setToIdentity();
-    _projectionMatrix.rotate(_rotation, 0.0, 0.0, 1.0);
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);
 
-    qreal pointerScale = rectSize.width() / _targetSize.width();
+    qreal pointerScale = rectSize.width() / transformedTarget.width();
     if(_pointerImage)
         _pointerImage->setScale(pointerScale);
 
