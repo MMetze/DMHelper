@@ -34,6 +34,8 @@ public:
     QColor getColor() const;
 
 public slots:
+    virtual void setRotation(int rotation) override;
+
     void setImage(const QImage& image);
     void distanceChanged();
     void fowChanged();
@@ -45,7 +47,8 @@ public slots:
     void setPointerFileName(const QString& filename);
 
 protected:
-    virtual void updateProjectionMatrix();
+    virtual void timerEvent(QTimerEvent *event) override;
+    virtual void updateProjectionMatrix() override;
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
     void createMarkerTokens(const QSize& sceneSize);
@@ -85,6 +88,11 @@ private:
     bool _recreateLineToken;
     bool _recreateMarkers;
     bool _updateFow;
+
+    // For animation
+    int _animRotation;
+    int _animZoom;
+    int _animTimer;
 };
 
 #endif // PUBLISHGLMAPIMAGERENDERER_H

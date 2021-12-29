@@ -147,17 +147,6 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabWorldMap(nullptr),
     _ribbonTabAudio(nullptr)
 {
-
-    QScreen* screen = QGuiApplication::primaryScreen();
-
-#ifndef Q_OS_MAC
-    QPixmap pixmap(":/img/data/dmhelper_opaque.png");
-    QSize screenSize = screen != nullptr ? screen->availableSize() : QSize(1000, 1000);
-    QSplashScreen splash(pixmap.scaled(screenSize.width() / 2, screenSize.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    splash.show();
-    splash.showMessage(QString("Initializing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
-#endif
-
     qDebug() << "[MainWindow] Initializing Main";
 
     qDebug() << "[MainWindow] DMHelper version information";
@@ -222,6 +211,17 @@ MainWindow::MainWindow(QWidget *parent) :
     f.setPointSize(_options->getFontSize());
     qDebug() << "[MainWindow] Setting application font to: " << _options->getFontFamily() << " size " << _options->getFontSize();
     qApp->setFont(f);
+
+    QScreen* screen = QGuiApplication::primaryScreen();
+
+#ifndef Q_OS_MAC
+    // Run the splash screen as soon as the application font has been selected to avoid font-change-popping
+    QPixmap pixmap(":/img/data/dmhelper_opaque.png");
+    QSize screenSize = screen != nullptr ? screen->availableSize() : QSize(1000, 1000);
+    QSplashScreen splash(pixmap.scaled(screenSize.width() / 2, screenSize.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    splash.show();
+    splash.showMessage(QString("Initializing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+#endif
 
     ui->setupUi(this);
     if(screen)

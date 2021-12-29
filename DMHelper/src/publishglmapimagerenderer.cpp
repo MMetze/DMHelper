@@ -15,17 +15,6 @@
 #include <QUndoStack>
 #include <QDebug>
 
-/*
-remove publish zoom and stuff
-
-if(_rotation != 0)
-{
-    pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
-}
-
-*/
-
-
 PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
@@ -50,7 +39,10 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _recreatePartyToken(false),
     _recreateLineToken(false),
     _recreateMarkers(false),
-    _updateFow(false)
+    _updateFow(false),
+    _animRotation(0),
+    _animZoom(0),
+    _animTimer(0)
 {
     connect(_map, &Map::partyChanged, this, &PublishGLMapImageRenderer::handlePartyChanged);
     connect(_map, &Map::partyIconChanged, this, &PublishGLMapImageRenderer::handlePartyIconChanged);
@@ -72,6 +64,12 @@ CampaignObjectBase* PublishGLMapImageRenderer::getObject()
 void PublishGLMapImageRenderer::cleanup()
 {
     _initialized = false;
+
+    if(_animTimer > 0)
+    {
+        killTimer(_animTimer);
+        _animTimer = 0;
+    }
 
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
@@ -128,10 +126,6 @@ void PublishGLMapImageRenderer::initializeGL()
         return;
 
     qDebug() << "[PublishGLMapRenderer] Initializing renderer";
-
-    //f->glEnable(GL_TEXTURE_2D); // Enable texturing
-    //f->glEnable(GL_BLEND);// you enable blending function
-    //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     const char *vertexShaderSource = "#version 330 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
@@ -233,9 +227,6 @@ void PublishGLMapImageRenderer::initializeGL()
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
     // Projection - note, this is set later when resizing the window
     updateProjectionMatrix();
-
-    //f->glUseProgram(_shaderProgram);
-    //f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
     _initialized = true;
 }
@@ -341,7 +332,6 @@ void PublishGLMapImageRenderer::paintGL()
     {
         QSize pointerSize = _pointerImage->getSize();
         QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2) - pointerSize.height());
-        //QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2));
         qDebug() << "[PublishGLMapImageRenderer] pos: " << _pointerPos << ", img size: " << _pointerImage->getSize() << ", scene size: " << sceneSize;
         qDebug() << "[PublishGLMapImageRenderer]    output position: " << pointPos;
         _pointerImage->setPosition(pointPos);
@@ -361,6 +351,18 @@ const QImage& PublishGLMapImageRenderer::getImage() const
 QColor PublishGLMapImageRenderer::getColor() const
 {
     return _color;
+}
+
+void PublishGLMapImageRenderer::setRotation(int rotation)
+{
+    if(rotation != _rotation)
+    {
+        _rotation = rotation;
+        updateProjectionMatrix();
+        if(_animTimer == 0)
+            _animTimer = startTimer(30);
+        emit updateWidget();
+    }
 }
 
 void PublishGLMapImageRenderer::setImage(const QImage& image)
@@ -433,6 +435,59 @@ void PublishGLMapImageRenderer::setPointerFileName(const QString& filename)
     }
 }
 
+void PublishGLMapImageRenderer::timerEvent(QTimerEvent *event)
+{
+    Q_UNUSED(event);
+
+    const int ANIM_SPEED = 10;  // units = degrees / 30ms
+
+    int delta;
+    if(_rotation >= _animRotation)
+    {
+        if(_rotation - _animRotation <= 180)
+            delta = _rotation - _animRotation;
+        else
+            delta = 360 - (_rotation - _animRotation);
+    }
+    else
+    {
+        if(_animRotation - _rotation <= 180)
+            delta = _animRotation - _rotation;
+        else
+            delta = 360 - (_animRotation - _rotation);
+    }
+
+    if(delta <= ANIM_SPEED)
+    {
+        _animRotation = _rotation;
+        _animZoom = 0;
+        killTimer(_animTimer);
+        _animTimer = 0;
+    }
+    else
+    {
+        if(((_rotation > _animRotation) && (_rotation - _animRotation <= 180)) ||
+           ((_rotation < _animRotation) && (_animRotation - _rotation > 180)))
+            _animRotation += ANIM_SPEED;
+        else
+            _animRotation -= ANIM_SPEED;
+
+        if(_animRotation >= 360)
+            _animRotation -= 360;
+        if(_animRotation < 0)
+            _animRotation += 360;
+
+        int target = delta * 10;
+        if(_animZoom > target)
+            _animZoom -= ANIM_SPEED * 10;
+        else if(delta < target)
+            _animZoom += ANIM_SPEED * 10;
+    }
+
+    updateProjectionMatrix();
+    emit updateWidget();
+}
+
 void PublishGLMapImageRenderer::updateProjectionMatrix()
 {
     if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
@@ -459,20 +514,23 @@ void PublishGLMapImageRenderer::updateProjectionMatrix()
     QSizeF backgroundMiddle = _backgroundObject->getSize() / 2.0;
 
     _projectionMatrix.setToIdentity();
-    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
-    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
-                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
+    _projectionMatrix.rotate(_animRotation, 0.0, 0.0, -1.0);
+    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width() - _animZoom, cameraMiddle.x() - backgroundMiddle.width() + halfRect.width() + _animZoom,
+                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height() - _animZoom, backgroundMiddle.height() - cameraMiddle.y() + halfRect.height() + _animZoom,
                             0.1f, 1000.f);
 
     qreal pointerScale = rectSize.width() / transformedTarget.width();
     if(_pointerImage)
         _pointerImage->setScale(pointerScale);
 
-    QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
-    _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
-    _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
-    _scissorRect.setWidth(scissorSize.width());
-    _scissorRect.setHeight(scissorSize.height());
+    if(_animTimer == 0)
+    {
+        QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
+        _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
+        _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
+        _scissorRect.setWidth(scissorSize.width());
+        _scissorRect.setHeight(scissorSize.height());
+    }
 }
 
 void PublishGLMapImageRenderer::createPartyToken()
