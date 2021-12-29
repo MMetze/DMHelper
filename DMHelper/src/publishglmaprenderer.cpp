@@ -1,4 +1,4 @@
-#include "publishglmapimagerenderer.h"
+#include "publishglmaprenderer.h"
 #include "map.h"
 #include "party.h"
 #include "undomarker.h"
@@ -15,7 +15,7 @@
 #include <QUndoStack>
 #include <QDebug>
 
-PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) :
+PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
     _image(),
@@ -39,37 +39,28 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
     _recreatePartyToken(false),
     _recreateLineToken(false),
     _recreateMarkers(false),
-    _updateFow(false),
-    _animRotation(0),
-    _animZoom(0),
-    _animTimer(0)
+    _updateFow(false)
 {
-    connect(_map, &Map::partyChanged, this, &PublishGLMapImageRenderer::handlePartyChanged);
-    connect(_map, &Map::partyIconChanged, this, &PublishGLMapImageRenderer::handlePartyIconChanged);
-    connect(_map, &Map::partyIconPosChanged, this, &PublishGLMapImageRenderer::handlePartyIconPosChanged);
-    connect(_map, &Map::showPartyChanged, this, &PublishGLMapImageRenderer::handleShowPartyChanged);
-    connect(_map, &Map::partyScaleChanged, this, &PublishGLMapImageRenderer::handlePartyScaleChanged);
+    connect(_map, &Map::partyChanged, this, &PublishGLMapRenderer::handlePartyChanged);
+    connect(_map, &Map::partyIconChanged, this, &PublishGLMapRenderer::handlePartyIconChanged);
+    connect(_map, &Map::partyIconPosChanged, this, &PublishGLMapRenderer::handlePartyIconPosChanged);
+    connect(_map, &Map::showPartyChanged, this, &PublishGLMapRenderer::handleShowPartyChanged);
+    connect(_map, &Map::partyScaleChanged, this, &PublishGLMapRenderer::handlePartyScaleChanged);
 }
 
-PublishGLMapImageRenderer::~PublishGLMapImageRenderer()
+PublishGLMapRenderer::~PublishGLMapRenderer()
 {
     cleanup();
 }
 
-CampaignObjectBase* PublishGLMapImageRenderer::getObject()
+CampaignObjectBase* PublishGLMapRenderer::getObject()
 {
     return _map;
 }
 
-void PublishGLMapImageRenderer::cleanup()
+void PublishGLMapRenderer::cleanup()
 {
     _initialized = false;
-
-    if(_animTimer > 0)
-    {
-        killTimer(_animTimer);
-        _animTimer = 0;
-    }
 
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
@@ -104,18 +95,18 @@ void PublishGLMapImageRenderer::cleanup()
     _shaderModelMatrix = 0;
 }
 
-bool PublishGLMapImageRenderer::deleteOnDeactivation()
+bool PublishGLMapRenderer::deleteOnDeactivation()
 {
     return true;
 }
 
-void PublishGLMapImageRenderer::setBackgroundColor(const QColor& color)
+void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
 {
     _color = color;
     emit updateWidget();
 }
 
-void PublishGLMapImageRenderer::initializeGL()
+void PublishGLMapRenderer::initializeGL()
 {    
     if((_initialized) || (!_targetWidget) || (!_map) || (!_map->isInitialized()))
         return;
@@ -231,7 +222,7 @@ void PublishGLMapImageRenderer::initializeGL()
     _initialized = true;
 }
 
-void PublishGLMapImageRenderer::resizeGL(int w, int h)
+void PublishGLMapRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
@@ -241,7 +232,7 @@ void PublishGLMapImageRenderer::resizeGL(int w, int h)
     emit updateWidget();
 }
 
-void PublishGLMapImageRenderer::paintGL()
+void PublishGLMapRenderer::paintGL()
 {
     if(!_initialized)
         initializeGL();
@@ -343,29 +334,27 @@ void PublishGLMapImageRenderer::paintGL()
         f->glDisable(GL_SCISSOR_TEST);
 }
 
-const QImage& PublishGLMapImageRenderer::getImage() const
+const QImage& PublishGLMapRenderer::getImage() const
 {
     return _image;
 }
 
-QColor PublishGLMapImageRenderer::getColor() const
+QColor PublishGLMapRenderer::getColor() const
 {
     return _color;
 }
 
-void PublishGLMapImageRenderer::setRotation(int rotation)
+void PublishGLMapRenderer::setRotation(int rotation)
 {
     if(rotation != _rotation)
     {
         _rotation = rotation;
         updateProjectionMatrix();
-        if(_animTimer == 0)
-            _animTimer = startTimer(30);
         emit updateWidget();
     }
 }
 
-void PublishGLMapImageRenderer::setImage(const QImage& image)
+void PublishGLMapRenderer::setImage(const QImage& image)
 {
     if(image != _image)
     {
@@ -381,17 +370,17 @@ void PublishGLMapImageRenderer::setImage(const QImage& image)
     }
 }
 
-void PublishGLMapImageRenderer::distanceChanged()
+void PublishGLMapRenderer::distanceChanged()
 {
     _recreateLineToken = true;
 }
 
-void PublishGLMapImageRenderer::fowChanged()
+void PublishGLMapRenderer::fowChanged()
 {
     _updateFow = true;
 }
 
-void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
+void PublishGLMapRenderer::setCameraRect(const QRectF& cameraRect)
 {
     if(_cameraRect != cameraRect)
     {
@@ -401,12 +390,12 @@ void PublishGLMapImageRenderer::setCameraRect(const QRectF& cameraRect)
     }
 }
 
-void PublishGLMapImageRenderer::markerChanged()
+void PublishGLMapRenderer::markerChanged()
 {
     _recreateMarkers = true;
 }
 
-void PublishGLMapImageRenderer::pointerToggled(bool enabled)
+void PublishGLMapRenderer::pointerToggled(bool enabled)
 {
     if(_pointerActive != enabled)
     {
@@ -415,7 +404,7 @@ void PublishGLMapImageRenderer::pointerToggled(bool enabled)
     }
 }
 
-void PublishGLMapImageRenderer::setPointerPosition(const QPointF& pos)
+void PublishGLMapRenderer::setPointerPosition(const QPointF& pos)
 {
     if(_pointerPos != pos)
     {
@@ -424,7 +413,7 @@ void PublishGLMapImageRenderer::setPointerPosition(const QPointF& pos)
     }
 }
 
-void PublishGLMapImageRenderer::setPointerFileName(const QString& filename)
+void PublishGLMapRenderer::setPointerFileName(const QString& filename)
 {
     if(_pointerFile != filename)
     {
@@ -435,60 +424,7 @@ void PublishGLMapImageRenderer::setPointerFileName(const QString& filename)
     }
 }
 
-void PublishGLMapImageRenderer::timerEvent(QTimerEvent *event)
-{
-    Q_UNUSED(event);
-
-    const int ANIM_SPEED = 10;  // units = degrees / 30ms
-
-    int delta;
-    if(_rotation >= _animRotation)
-    {
-        if(_rotation - _animRotation <= 180)
-            delta = _rotation - _animRotation;
-        else
-            delta = 360 - (_rotation - _animRotation);
-    }
-    else
-    {
-        if(_animRotation - _rotation <= 180)
-            delta = _animRotation - _rotation;
-        else
-            delta = 360 - (_animRotation - _rotation);
-    }
-
-    if(delta <= ANIM_SPEED)
-    {
-        _animRotation = _rotation;
-        _animZoom = 0;
-        killTimer(_animTimer);
-        _animTimer = 0;
-    }
-    else
-    {
-        if(((_rotation > _animRotation) && (_rotation - _animRotation <= 180)) ||
-           ((_rotation < _animRotation) && (_animRotation - _rotation > 180)))
-            _animRotation += ANIM_SPEED;
-        else
-            _animRotation -= ANIM_SPEED;
-
-        if(_animRotation >= 360)
-            _animRotation -= 360;
-        if(_animRotation < 0)
-            _animRotation += 360;
-
-        int target = delta * 10;
-        if(_animZoom > target)
-            _animZoom -= ANIM_SPEED * 10;
-        else if(delta < target)
-            _animZoom += ANIM_SPEED * 10;
-    }
-
-    updateProjectionMatrix();
-    emit updateWidget();
-}
-
-void PublishGLMapImageRenderer::updateProjectionMatrix()
+void PublishGLMapRenderer::updateProjectionMatrix()
 {
     if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
         return;
@@ -514,26 +450,23 @@ void PublishGLMapImageRenderer::updateProjectionMatrix()
     QSizeF backgroundMiddle = _backgroundObject->getSize() / 2.0;
 
     _projectionMatrix.setToIdentity();
-    _projectionMatrix.rotate(_animRotation, 0.0, 0.0, -1.0);
-    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width() - _animZoom, cameraMiddle.x() - backgroundMiddle.width() + halfRect.width() + _animZoom,
-                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height() - _animZoom, backgroundMiddle.height() - cameraMiddle.y() + halfRect.height() + _animZoom,
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
+                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);
 
     qreal pointerScale = rectSize.width() / transformedTarget.width();
     if(_pointerImage)
         _pointerImage->setScale(pointerScale);
 
-    if(_animTimer == 0)
-    {
-        QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
-        _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
-        _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
-        _scissorRect.setWidth(scissorSize.width());
-        _scissorRect.setHeight(scissorSize.height());
-    }
+    QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
+    _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
+    _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
+    _scissorRect.setWidth(scissorSize.width());
+    _scissorRect.setHeight(scissorSize.height());
 }
 
-void PublishGLMapImageRenderer::createPartyToken()
+void PublishGLMapRenderer::createPartyToken()
 {
     if(_partyToken)
     {
@@ -554,7 +487,7 @@ void PublishGLMapImageRenderer::createPartyToken()
     }
 }
 
-void PublishGLMapImageRenderer::createLineToken(const QSize& sceneSize)
+void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
 {
     if((!_map) || (_map->getMapItemCount() <= 0) || (sceneSize.isEmpty()))
         return;
@@ -637,7 +570,7 @@ void PublishGLMapImageRenderer::createLineToken(const QSize& sceneSize)
     }
 }
 
-void PublishGLMapImageRenderer::createMarkerTokens(const QSize& sceneSize)
+void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
 {
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
@@ -670,7 +603,7 @@ void PublishGLMapImageRenderer::createMarkerTokens(const QSize& sceneSize)
     }
 }
 
-void PublishGLMapImageRenderer::evaluatePointer()
+void PublishGLMapRenderer::evaluatePointer()
 {
     if(_pointerActive)
     {
@@ -684,7 +617,7 @@ void PublishGLMapImageRenderer::evaluatePointer()
     }
 }
 
-QPixmap PublishGLMapImageRenderer::getPointerPixmap()
+QPixmap PublishGLMapRenderer::getPointerPixmap()
 {
     if(!_pointerFile.isEmpty())
     {
@@ -696,33 +629,33 @@ QPixmap PublishGLMapImageRenderer::getPointerPixmap()
     return QPixmap(":/img/data/arrow.png");
 }
 
-void PublishGLMapImageRenderer::handlePartyChanged(Party* party)
+void PublishGLMapRenderer::handlePartyChanged(Party* party)
 {
     Q_UNUSED(party);
     _recreatePartyToken = true;
     updateRender();
 }
 
-void PublishGLMapImageRenderer::handlePartyIconChanged(const QString& partyIcon)
+void PublishGLMapRenderer::handlePartyIconChanged(const QString& partyIcon)
 {
     Q_UNUSED(partyIcon);
     _recreatePartyToken = true;
     updateRender();
 }
 
-void PublishGLMapImageRenderer::handlePartyIconPosChanged(const QPoint& pos)
+void PublishGLMapRenderer::handlePartyIconPosChanged(const QPoint& pos)
 {
     Q_UNUSED(pos);
     updateRender();
 }
 
-void PublishGLMapImageRenderer::handleShowPartyChanged(bool showParty)
+void PublishGLMapRenderer::handleShowPartyChanged(bool showParty)
 {
     Q_UNUSED(showParty);
     updateRender();
 }
 
-void PublishGLMapImageRenderer::handlePartyScaleChanged(int partyScale)
+void PublishGLMapRenderer::handlePartyScaleChanged(int partyScale)
 {
     if(_partyToken)
     {

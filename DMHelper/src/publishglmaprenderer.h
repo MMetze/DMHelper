@@ -1,5 +1,5 @@
-#ifndef PUBLISHGLMAPIMAGERENDERER_H
-#define PUBLISHGLMAPIMAGERENDERER_H
+#ifndef PUBLISHGLMAPRENDERER_H
+#define PUBLISHGLMAPRENDERER_H
 
 #include "publishglrenderer.h"
 #include <QColor>
@@ -11,12 +11,12 @@ class Party;
 class BattleGLBackground;
 class PublishGLImage;
 
-class PublishGLMapImageRenderer : public PublishGLRenderer
+class PublishGLMapRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLMapImageRenderer(Map* map, QObject *parent = nullptr);
-    virtual ~PublishGLMapImageRenderer() override;
+    PublishGLMapRenderer(Map* map, QObject *parent = nullptr);
+    virtual ~PublishGLMapRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
 
@@ -47,7 +47,6 @@ public slots:
     void setPointerFileName(const QString& filename);
 
 protected:
-    virtual void timerEvent(QTimerEvent *event) override;
     virtual void updateProjectionMatrix() override;
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
@@ -88,11 +87,6 @@ private:
     bool _recreateLineToken;
     bool _recreateMarkers;
     bool _updateFow;
-
-    // For animation
-    int _animRotation;
-    int _animZoom;
-    int _animTimer;
 };
 
-#endif // PUBLISHGLMAPIMAGERENDERER_H
+#endif // PUBLISHGLMAPRENDERER_H
