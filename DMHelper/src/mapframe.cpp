@@ -14,7 +14,7 @@
 #include "party.h"
 #include "unselectedpixmap.h"
 #include "camerarect.h"
-#include "publishglmaprenderer.h"
+#include "publishglmapimagerenderer.h"
 #include "publishglmapvideorenderer.h"
 #include "videoplayerglscreenshot.h"
 #include <QGraphicsPixmapItem>
@@ -785,7 +785,7 @@ void MapFrame::publishClicked(bool checked)
         emit publishImage(pub);
         */
 
-        PublishGLMapRenderer* newRenderer = new PublishGLMapRenderer(_mapSource);
+        PublishGLMapImageRenderer* newRenderer = new PublishGLMapImageRenderer(_mapSource);
         connect(this, &MapFrame::distanceChanged, newRenderer, &PublishGLMapRenderer::distanceChanged);
         connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapRenderer::fowChanged);
         connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapRenderer::setCameraRect);

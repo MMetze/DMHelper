@@ -18,7 +18,6 @@
 PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
-    _image(),
     _targetSize(),
     _color(),
     _projectionMatrix(),
@@ -27,7 +26,6 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _initialized(false),
     _shaderProgram(0),
     _shaderModelMatrix(0),
-    _backgroundObject(nullptr),
     _fowObject(nullptr),
     _partyToken(nullptr),
     _itemImage(nullptr),
@@ -75,8 +73,6 @@ void PublishGLMapRenderer::cleanup()
     _partyToken = nullptr;
     _recreatePartyToken = false;
 
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
     delete _fowObject;
     _fowObject = nullptr;
 
@@ -194,9 +190,7 @@ void PublishGLMapRenderer::initializeGL()
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     // Create the objects
-    if(_image.isNull())
-        _image = _map->getBackgroundImage();
-    _backgroundObject = new BattleGLBackground(nullptr, _image, GL_NEAREST);
+    initializeBackground();
     _fowObject = new BattleGLBackground(nullptr, _map->getBWFoWImage(), GL_NEAREST);
 
     // Create the party token
@@ -226,8 +220,7 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
-    if(_backgroundObject)
-        updateProjectionMatrix();
+    resizeBackground(w, h);
 
     emit updateWidget();
 }
@@ -246,9 +239,7 @@ void PublishGLMapRenderer::paintGL()
     if(_recreatePartyToken)
         createPartyToken();
 
-    QSize sceneSize;
-    if(_backgroundObject)
-        sceneSize = _backgroundObject->getSize();
+    QSize sceneSize = getBackgroundSize().toSize();
 
     if((_fowObject) && (_updateFow))
     {
@@ -282,11 +273,7 @@ void PublishGLMapRenderer::paintGL()
 
     f->glUseProgram(_shaderProgram);
 
-    if(_backgroundObject)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
-        _backgroundObject->paintGL();
-    }
+    paintBackground(f);
 
     if(_fowObject)
     {
@@ -334,10 +321,12 @@ void PublishGLMapRenderer::paintGL()
         f->glDisable(GL_SCISSOR_TEST);
 }
 
+/*
 const QImage& PublishGLMapRenderer::getImage() const
 {
     return _image;
 }
+*/
 
 QColor PublishGLMapRenderer::getColor() const
 {
@@ -354,6 +343,7 @@ void PublishGLMapRenderer::setRotation(int rotation)
     }
 }
 
+/*
 void PublishGLMapRenderer::setImage(const QImage& image)
 {
     if(image != _image)
@@ -369,6 +359,7 @@ void PublishGLMapRenderer::setImage(const QImage& image)
         }
     }
 }
+*/
 
 void PublishGLMapRenderer::distanceChanged()
 {
@@ -426,7 +417,7 @@ void PublishGLMapRenderer::setPointerFileName(const QString& filename)
 
 void PublishGLMapRenderer::updateProjectionMatrix()
 {
-    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
+    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
@@ -447,7 +438,7 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     QSizeF halfRect = rectSize / 2.0;
     QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
-    QSizeF backgroundMiddle = _backgroundObject->getSize() / 2.0;
+    QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);

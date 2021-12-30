@@ -10,6 +10,7 @@ class Map;
 class Party;
 class BattleGLBackground;
 class PublishGLImage;
+class QOpenGLFunctions;
 
 class PublishGLMapRenderer : public PublishGLRenderer
 {
@@ -30,13 +31,13 @@ public:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
-    const QImage& getImage() const;
+    // const QImage& getImage() const;
     QColor getColor() const;
 
 public slots:
     virtual void setRotation(int rotation) override;
 
-    void setImage(const QImage& image);
+    //void setImage(const QImage& image);
     void distanceChanged();
     void fowChanged();
     void setCameraRect(const QRectF& cameraRect);
@@ -48,6 +49,13 @@ public slots:
 
 protected:
     virtual void updateProjectionMatrix() override;
+
+    // Background overrides
+    virtual void initializeBackground() = 0;
+    virtual void resizeBackground(int w, int h) = 0;
+    virtual void paintBackground(QOpenGLFunctions* functions) = 0;
+    virtual QSizeF getBackgroundSize() = 0;
+
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
     void createMarkerTokens(const QSize& sceneSize);
@@ -61,9 +69,8 @@ protected slots:
     void handleShowPartyChanged(bool showParty);
     void handlePartyScaleChanged(int partyScale);
 
-private:
+protected:
     Map* _map;
-    QImage _image;
     QSize _targetSize;
     QColor _color;
     QMatrix4x4 _projectionMatrix;
@@ -72,7 +79,6 @@ private:
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
-    BattleGLBackground* _backgroundObject;
     BattleGLBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _itemImage;

@@ -1,21 +1,17 @@
-#ifndef PUBLISHGLMAPVIDEORENDERER_H
-#define PUBLISHGLMAPVIDEORENDERER_H
+#ifndef PUBLISHGLMAPIMAGERENDERER_H
+#define PUBLISHGLMAPIMAGERENDERER_H
 
 #include "publishglmaprenderer.h"
 
-class VideoPlayerGLPlayer;
-
-class PublishGLMapVideoRenderer : public PublishGLMapRenderer
+class PublishGLMapImageRenderer : public PublishGLMapRenderer
 {
     Q_OBJECT
 public:
-    PublishGLMapVideoRenderer(Map* map, QObject *parent = nullptr);
-    virtual ~PublishGLMapVideoRenderer() override;
+    PublishGLMapImageRenderer(Map* map, QObject *parent = nullptr);
+    virtual ~PublishGLMapImageRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
-
-    QImage getLastScreenshot();
 
 protected:
     // Background overrides
@@ -24,7 +20,8 @@ protected:
     virtual void paintBackground(QOpenGLFunctions* functions) override;
     virtual QSizeF getBackgroundSize() override;
 
-    VideoPlayerGLPlayer* _videoPlayer;
+    BattleGLBackground* _backgroundObject;
+    QImage _backgroundImage;
 };
 
-#endif // PUBLISHGLMAPVIDEORENDERER_H
+#endif // PUBLISHGLMAPIMAGERENDERER_H
