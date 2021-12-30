@@ -165,7 +165,6 @@ protected:
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
-    virtual void timerEvent(QTimerEvent *event) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;
 
@@ -184,10 +183,8 @@ protected:
     bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
     bool execEventFilterPointer(QObject *obj, QEvent *event);
 
-    void startPublishTimer();
-    void stopPublishTimer();
-
-    void createVideoPlayer(bool dmPlayer);
+    void stopPlayerVideoPlayer();
+    void extractDMScreenshot();
     void cleanupBuffers();
 
 protected slots:
@@ -223,7 +220,6 @@ private:
 
     MapFrameScene* _scene;
     QGraphicsPixmapItem* _backgroundImage;
-    //QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
     CameraRect* _cameraRect;
@@ -259,8 +255,6 @@ private:
     Map* _mapSource;
     PublishGLRenderer* _renderer;
 
-    int _timerId;
-    VideoPlayer* _videoPlayer;
     QSize _targetSize;
     QSize _targetLabelSize;
     QRect _publishRect;

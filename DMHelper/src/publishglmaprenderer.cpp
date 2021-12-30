@@ -104,7 +104,7 @@ void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
 
 void PublishGLMapRenderer::initializeGL()
 {    
-    if((_initialized) || (!_targetWidget) || (!_map) || (!_map->isInitialized()))
+    if((_initialized) || (!_targetWidget) || (!_map)) // || (!_map->isInitialized()))
         return;
 
     // Set up the rendering context, load shaders and other resources, etc.:
@@ -262,12 +262,15 @@ void PublishGLMapRenderer::paintGL()
 
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
 
+/*
     if(!_scissorRect.isEmpty())
     {
         f->glEnable(GL_SCISSOR_TEST);
         f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
     }
-    // Draw the scene:
+*/
+
+    // Draw the scene
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -278,7 +281,7 @@ void PublishGLMapRenderer::paintGL()
     if(_fowObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
-        _fowObject->paintGL();
+//        _fowObject->paintGL();
     }
 
     if(_itemImage)
@@ -317,16 +320,9 @@ void PublishGLMapRenderer::paintGL()
         _pointerImage->paintGL();
     }
 
-    if(!_scissorRect.isEmpty())
-        f->glDisable(GL_SCISSOR_TEST);
+//    if(!_scissorRect.isEmpty())
+//        f->glDisable(GL_SCISSOR_TEST);
 }
-
-/*
-const QImage& PublishGLMapRenderer::getImage() const
-{
-    return _image;
-}
-*/
 
 QColor PublishGLMapRenderer::getColor() const
 {
@@ -342,24 +338,6 @@ void PublishGLMapRenderer::setRotation(int rotation)
         emit updateWidget();
     }
 }
-
-/*
-void PublishGLMapRenderer::setImage(const QImage& image)
-{
-    if(image != _image)
-    {
-        _image = image;
-
-        if(_backgroundObject)
-        {
-            _backgroundObject->setImage(image);
-            createPartyToken();
-            updateProjectionMatrix();
-            emit updateWidget();
-        }
-    }
-}
-*/
 
 void PublishGLMapRenderer::distanceChanged()
 {

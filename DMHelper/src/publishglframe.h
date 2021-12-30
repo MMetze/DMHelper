@@ -27,8 +27,6 @@ public slots:
 
     void setBackgroundColor(const QColor& color);
 
-    //void setImage(QImage img, QColor color);
-    //void setImageNoScale(QImage img, QColor color);
     void setArrowVisible(bool visible);
     void setArrowPosition(const QPointF& position);
     void setPointerFile(const QString& filename);
@@ -38,8 +36,6 @@ protected:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
-    void setOrthoProjection();
-
 protected slots:
     void initializeRenderer();
 
@@ -47,7 +43,6 @@ private:
     bool _initialized;
     QSize _targetSize;
     PublishGLRenderer* _renderer;
-//    unsigned int _shaderProgram;
 };
 
 #endif // PUBLISHGLFRAME_H

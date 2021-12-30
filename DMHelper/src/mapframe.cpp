@@ -32,7 +32,6 @@ MapFrame::MapFrame(QWidget *parent) :
     ui(new Ui::MapFrame),
     _scene(nullptr),
     _backgroundImage(nullptr),
-//    _backgroundVideo(nullptr),
     _fow(nullptr),
     _partyIcon(nullptr),
     _cameraRect(nullptr),
@@ -60,8 +59,6 @@ MapFrame::MapFrame(QWidget *parent) :
     _scale(1.0),
     _mapSource(nullptr),
     _renderer(nullptr),
-    _timerId(0),
-    _videoPlayer(nullptr),
     _targetSize(),
     _targetLabelSize(),
     _publishRect(),
@@ -82,13 +79,6 @@ MapFrame::MapFrame(QWidget *parent) :
 
 MapFrame::~MapFrame()
 {
-    stopPublishTimer();
-
-    VideoPlayer* deletePlayer = _videoPlayer;
-    _videoPlayer = nullptr;
-    delete deletePlayer;
-
-    //cancelSelect();
     delete ui;
 }
 
@@ -633,11 +623,7 @@ void MapFrame::setCameraEdit(bool enabled)
 void MapFrame::targetResized(const QSize& newSize)
 {
     qDebug() << "[MapFrame] Target size being set to: " << newSize;
-
     _targetSize = newSize;
-    if(_videoPlayer)
-        _videoPlayer->targetResized(newSize);
-
     resetPublishFoW();
 }
 
@@ -707,85 +693,24 @@ void MapFrame::publishClicked(bool checked)
     if(_cameraRect)
         _cameraRect->setPublishing(_isPublishing);
 
-    if(!_isVideo)
+    if(_isPublishing)
     {
-        /*
-        // Still Image
-        QImage pub;
-        if(_publishZoom)
+        PublishGLMapRenderer* newRenderer;
+        if(_isVideo)
         {
-            _publishRect = QRect(static_cast<int>(static_cast<qreal>(ui->graphicsView->horizontalScrollBar()->value()) / _scale),
-                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->verticalScrollBar()->value()) / _scale),
-                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scale),
-                                 static_cast<int>(static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scale));
+            qDebug() << "[MapFrame] Publish FoW animation started";
+            if(_renderer)
+            {
+                qDebug() << "[MapFrame] ERROR: Unexpected overwrite of existing renderer! Should not happen!";
+                stopPlayerVideoPlayer();
+            }
 
-            // TODO: Consider zoom factor...
-
-            pub = _mapSource->getPublishImage(_publishRect);
+            newRenderer = new PublishGLMapVideoRenderer(_mapSource);
         }
         else
         {
-            if(_publishVisible)
-            {
-                pub = _mapSource->getShrunkPublishImage(&_publishRect);
-            }
-            else
-            {
-                pub = _mapSource->getPublishImage();
-                _publishRect = pub.rect();
-            }
+            newRenderer = new PublishGLMapImageRenderer(_mapSource);
         }
-
-        {
-            QPainter p(&pub);
-            QPointF topLeftOffset = (_publishZoom || _publishVisible) ? _publishRect.topLeft() : QPointF();
-            if((_mapSource->getShowParty()) && ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
-            {
-                QPixmap partyPixmap = _mapSource->getPartyPixmap();
-                if(!partyPixmap.isNull())
-                {
-                    qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale());
-                    p.drawPixmap(_partyIcon->pos() - topLeftOffset, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
-                }
-            }
-
-            p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
-                          _mapSource->getDistanceLineWidth(),
-                          static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
-            if(_distanceLine)
-                p.drawLine(_distanceLine->line().translated(-topLeftOffset));
-            if(_distancePath)
-                p.drawPath(_distancePath->path().translated(-topLeftOffset));
-            if(_distanceText)
-                p.drawText(_distanceText->pos() - topLeftOffset, _distanceText->text());
-
-            if(_mapSource->getShowMarkers())
-            {
-                if(QUndoStack* stack = _mapSource->getUndoStack())
-                {
-                    for( int i = 0; i < stack->index(); ++i )
-                    {
-                        const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
-                        if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
-                        {
-                            MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
-                            if(markerItem)
-                                markerItem->drawGraphicsItem(p);
-                        }
-                    }
-                }
-            }
-        }
-
-        if(_rotation != 0)
-        {
-            pub = pub.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
-        }
-
-        emit publishImage(pub);
-        */
-
-        PublishGLMapImageRenderer* newRenderer = new PublishGLMapImageRenderer(_mapSource);
         connect(this, &MapFrame::distanceChanged, newRenderer, &PublishGLMapRenderer::distanceChanged);
         connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapRenderer::fowChanged);
         connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapRenderer::setCameraRect);
@@ -804,16 +729,10 @@ void MapFrame::publishClicked(bool checked)
     }
     else
     {
-        //Video
-        //stopPublishTimer();
-        createVideoPlayer(!_isPublishing);
-        if(_isPublishing) // && (_videoPlayer) && (!_videoPlayer->isError()))
-        {
-//            emit animationStarted();
-            emit showPublishWindow();
-        }
+        if(_isVideo)
+            stopPlayerVideoPlayer();
 
-        //startPublishTimer();
+        emit registerRenderer(nullptr);
     }
 }
 
@@ -874,8 +793,9 @@ void MapFrame::initializeFoW()
         if(_mapSource->isValid())
         {
             qDebug() << "[MapFrame] Initializing map frame video";
-            createVideoPlayer(true);
-            //startPublishTimer();
+            if(_renderer)
+                stopPlayerVideoPlayer();
+            extractDMScreenshot();
         }
     }
 
@@ -947,14 +867,9 @@ void MapFrame::uninitializeFoW()
         disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     }
 
-    stopPublishTimer();
-    cleanupBuffers();
-    if(_videoPlayer)
-    {
-        _videoPlayer->stopThenDelete();
-        _videoPlayer = nullptr;
-    }
+    emit registerRenderer(nullptr);
 
+    cleanupBuffers();
     cleanupSelectionItems();
 
     delete _scene;
@@ -1055,156 +970,6 @@ void MapFrame::showEvent(QShowEvent *event)
     Q_UNUSED(event);
     //qDebug() << "[MapFrame] shown (" << isVisible() << ")";
     loadViewRect();
-}
-
-void MapFrame::timerEvent(QTimerEvent *event)
-{
-    if((event) && (_timerId == 0) && (_videoPlayer))
-    {
-        killTimer(event->timerId());
-        _videoPlayer->stopThenDelete();
-        _videoPlayer = nullptr;
-        return;
-    }
-
-    if((!_mapSource) || (!_videoPlayer)|| (!_videoPlayer->getImage()) || (_videoPlayer->isError()) || (!_videoPlayer->getMutex()))
-        return;
-
-    if(_videoPlayer->isNewImage())
-    {
-        QMutexLocker locker(_videoPlayer->getMutex());
-
-        if(_isPublishing)
-        {
-            // Note: Publish Visible and Publish Zoom don't work on animated maps!
-            if(!_videoPlayer->getImage()->isNull())
-            {
-                if((_bwFoWImage.isNull()) && (!_mapSource->isCleared()))
-                {
-                    QSize originalSize = _videoPlayer->getOriginalSize();
-                    if(!originalSize.isEmpty())
-                    {
-                        QImage bwImg = _mapSource->getBWFoWImage(originalSize);
-                        QSize imgSize = _videoPlayer->getImage()->size();
-                        _bwFoWImage = bwImg.scaled(imgSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-                    }
-                }
-
-                QImage result = _videoPlayer->getImage()->copy();
-                if((!_bwFoWImage.isNull()) || (_mapSource->getShowParty()))
-                {
-                    QPainter p(&result);
-
-                    if(!_bwFoWImage.isNull())
-                        p.drawImage(0, 0, _bwFoWImage);
-
-                    qreal targetWidth = _targetSize.width();
-                    qreal imgWidth = _backgroundImage->pixmap().width();
-
-                    if((_mapSource->getShowParty()) &&
-                       (_partyIcon) &&
-                       ((_mapSource->getParty()) || (!_mapSource->getPartyAltIcon().isEmpty())))
-                    {
-                        QPixmap partyPixmap = _mapSource->getPartyPixmap();
-                        if(!partyPixmap.isNull())
-                        {
-                            qreal partyScale = 0.04 * static_cast<qreal>(_mapSource->getPartyScale()) * targetWidth / imgWidth;
-                            QPointF topLeft(_partyIcon->pos().x() * targetWidth / imgWidth, _partyIcon->pos().y() * targetWidth / imgWidth);
-                            p.drawPixmap(topLeft, partyPixmap.scaled(partyPixmap.width() * partyScale, partyPixmap.height() * partyScale));
-                        }
-                    }
-
-                    p.setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
-                                  _mapSource->getDistanceLineWidth(),
-                                  static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
-
-                    p.scale(targetWidth / imgWidth, targetWidth / imgWidth);
-                    if(_distanceLine)
-                        p.drawLine(_distanceLine->line());
-                    if(_distancePath)
-                        p.drawPath(_distancePath->path());
-                    if(_distanceText)
-                        p.drawText(_distanceText->pos(), _distanceText->text());
-
-                    if(_mapSource->getShowMarkers())
-                    {
-                        if(QUndoStack* stack = _mapSource->getUndoStack())
-                        {
-                            for( int i = 0; i < stack->index(); ++i )
-                            {
-                                const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
-                                if((markerAction) && (markerAction->getMarker().isPlayerVisible()))
-                                {
-                                    MapMarkerGraphicsItem* markerItem = markerAction->getMarkerItem();
-                                    if(markerItem)
-                                        markerItem->drawGraphicsItem(p);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if(_rotation != 0)
-                    result = result.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
-
-//                emit animateImage(result);
-            }
-        }
-        else
-        {
-            if(!_videoPlayer->getImage()->isNull())
-            {
-                //if((!_backgroundVideo) ||(!_backgroundVideo->isVisible()))
-                {
-                    if(_backgroundImage)
-                        _backgroundImage->hide();
-
-                    QPixmap pmpCopy = QPixmap::fromImage(*(_videoPlayer->getImage())).copy();
-                    _publishRect = pmpCopy.rect();
-                    /*
-                    if(_backgroundVideo)
-                    {
-                        // TODO: update the graphics view/scene to work with the mutex on drawforeground/background
-                        _backgroundVideo->setPixmap(pmpCopy);
-                        _backgroundVideo->show();
-                    }
-                    else
-                    {
-                        _backgroundVideo = _scene->addPixmap(pmpCopy);
-                        _backgroundVideo->setEnabled(false);
-                        _backgroundVideo->setZValue(-2);
-                    }
-                    */
-
-                    if(_fow)
-                    {
-                        _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-                    }
-                    else
-                    {
-                        QImage fowImage = QImage(_videoPlayer->getImage()->size(), QImage::Format_ARGB32);
-                        fowImage.fill(QColor(0,0,0,128));
-                        _mapSource->setExternalFoWImage(fowImage);
-                        _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-                        _fow->setEnabled(false);
-                        _fow->setZValue(1);
-                    }
-
-                    loadViewRect();
-                    if(_partyIcon)
-                        _partyIcon->setPos(_mapSource->getPartyIconPos());
-
-                    stopPublishTimer();
-                    startTimer(500); // Clean up the initial image after a brief period (determined by trial and error)
-                }
-            }
-
-            update();
-        }
-
-        if(_videoPlayer)
-            _videoPlayer->clearNewImage();
-    }
 }
 
 void MapFrame::keyPressEvent(QKeyEvent *event)
@@ -1854,96 +1619,32 @@ bool MapFrame::execEventFilterPointer(QObject *obj, QEvent *event)
            (event->type() == QEvent::MouseButtonDblClick));
 }
 
-void MapFrame::startPublishTimer()
+void MapFrame::stopPlayerVideoPlayer()
 {
-    if(!_timerId)
+    if(_renderer)
     {
-        _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION);
+        disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::distanceChanged);
+        disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::fowChanged);
+        disconnect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setCameraRect);
+        disconnect(this, &MapFrame::pointerToggled, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::pointerToggled);
+        disconnect(this, &MapFrame::pointerPositionChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setPointerPosition);
+        disconnect(this, &MapFrame::pointerFileNameChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setPointerFileName);
+        disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+        rendererDeactivated();
     }
+    emit registerRenderer(nullptr);
 }
 
-void MapFrame::stopPublishTimer()
-{
-    if(_timerId)
-    {
-        killTimer(_timerId);
-        _timerId = 0;
-    }
-}
-
-void MapFrame::createVideoPlayer(bool dmPlayer)
+void MapFrame::extractDMScreenshot()
 {
     if(!_mapSource)
         return;
 
-    /*
-    if((!dmPlayer) && (_backgroundVideo))
-    {
-        QPixmap pmpCopy = _backgroundVideo->pixmap().copy();
-        if(!_backgroundImage)
-        {
-            _backgroundImage = _scene->addPixmap(pmpCopy);
-            _backgroundImage->setEnabled(false);
-            _backgroundImage->setZValue(-2);
-        }
-        else
-        {
-            _backgroundImage->setPixmap(pmpCopy);
-            _backgroundImage->show();
-        }
+    qDebug() << "[MapFrame] Publish FoW DM animation started";
 
-        _backgroundVideo->hide();
-    }
-    */
-
-    if(_videoPlayer)
-    {
-        _videoPlayer->stopThenDelete();
-        _videoPlayer = nullptr;
-    }
-
-    if(dmPlayer)
-    {
-        qDebug() << "[MapFrame] Publish FoW DM animation started";
-        // TBD
-        //_videoPlayer = new VideoPlayer(_mapSource->getFileName(), QSize(0, 0), true, false);
-        if(_renderer)
-        {
-            disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::distanceChanged);
-            disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::fowChanged);
-            disconnect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setCameraRect);
-            disconnect(this, &MapFrame::pointerToggled, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::pointerToggled);
-            disconnect(this, &MapFrame::pointerPositionChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setPointerPosition);
-            disconnect(this, &MapFrame::pointerFileNameChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setPointerFileName);
-            disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
-            rendererDeactivated();
-        }
-        emit registerRenderer(nullptr);
-        VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_mapSource->getFileName());
-        connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &MapFrame::handleScreenshotReady);
-        screenshot->retrieveScreenshot();
-    }
-    else
-    {
-        qDebug() << "[MapFrame] Publish FoW Player animation started";
-        /*
-        QSize rotatedSize = (_rotation % 180 == 0) ? _targetSize :  _targetSize.transposed();
-        _videoPlayer = new VideoPlayerGL(_mapSource->getFileName(), rotatedSize, true, _mapSource->getPlayAudio());
-        if(!_videoPlayer->isError())
-            _bwFoWImage = QImage();
-            */
-
-        if(_renderer)
-        {
-            qDebug() << "[MapFrame] ERROR: Unexpected overwrite of existing renderer! Should not happen!";
-            disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
-            rendererDeactivated();
-        }
-
-        _renderer = new PublishGLMapVideoRenderer(_mapSource);
-        connect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
-        emit registerRenderer(_renderer);
-    }
+    VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_mapSource->getFileName());
+    connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &MapFrame::handleScreenshotReady);
+    screenshot->retrieveScreenshot();
 }
 
 void MapFrame::cleanupBuffers()
@@ -1973,17 +1674,6 @@ void MapFrame::cleanupBuffers()
         _backgroundImage = nullptr;
         delete tempItem;
     }
-
-    /*
-    if(_backgroundVideo)
-    {
-        if(_scene)
-            _scene->removeItem(_backgroundVideo);
-        tempItem = _backgroundVideo;
-        _backgroundVideo = nullptr;
-        delete tempItem;
-    }
-    */
 
     if(_fow)
     {
@@ -2080,8 +1770,6 @@ void MapFrame::drawEditCursor()
 void MapFrame::rotatePublish()
 {
     resetPublishFoW();
-    if((_videoPlayer) && (_isPublishing))
-        createVideoPlayer(!_isPublishing);
 
     if(_renderer)
         _renderer->setRotation(_rotation);

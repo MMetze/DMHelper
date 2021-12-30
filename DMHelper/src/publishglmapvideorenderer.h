@@ -3,6 +3,8 @@
 
 #include "publishglmaprenderer.h"
 
+#define USE_SCREENSHOT_ONLY
+
 class VideoPlayerGLPlayer;
 
 class PublishGLMapVideoRenderer : public PublishGLMapRenderer
@@ -17,6 +19,11 @@ public:
 
     QImage getLastScreenshot();
 
+#ifdef USE_SCREENSHOT_ONLY
+protected slots:
+    void handleScreenshotReady(const QImage& image);
+#endif
+
 protected:
     // Background overrides
     virtual void initializeBackground() override;
@@ -25,6 +32,13 @@ protected:
     virtual QSizeF getBackgroundSize() override;
 
     VideoPlayerGLPlayer* _videoPlayer;
+
+
+#ifdef USE_SCREENSHOT_ONLY
+    BattleGLBackground* _backgroundObject;
+    QImage _backgroundImage;
+#endif
+
 };
 
 #endif // PUBLISHGLMAPVIDEORENDERER_H

@@ -259,7 +259,7 @@ void VideoPlayerGL::clearNewImage()
 
 void VideoPlayerGLPlayer::registerNewFrame()
 {
-    //qDebug() << "[VideoPlayerGLPlayer] Confirming frame available";
+    qDebug() << "[VideoPlayerGLPlayer] Confirming frame available";
     emit frameAvailable();
 }
 
@@ -943,8 +943,8 @@ void VideoPlayerGLPlayer::createGLObjects()
     if((!f) || (!e))
         return;
 
-    QImage image;
-    image.load(QString("C:\\Users\\turne\\Documents\\DnD\\DM Helper\\testdata\\Desert Stronghold.jpg"));
+//    QImage image;
+//    image.load(QString("C:\\Users\\turne\\Documents\\DnD\\DM Helper\\testdata\\Desert Stronghold.jpg"));
 
     createVBObjects();
 
@@ -960,9 +960,9 @@ void VideoPlayerGLPlayer::createGLObjects()
     */
 
     // load and generate the background texture
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
+    //QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    //f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    //f->glGenerateMipmap(GL_TEXTURE_2D);
 
 }
 
