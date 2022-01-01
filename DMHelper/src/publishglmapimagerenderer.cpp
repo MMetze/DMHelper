@@ -24,9 +24,14 @@ void PublishGLMapImageRenderer::cleanup()
 
 void PublishGLMapImageRenderer::initializeBackground()
 {
+    if(_backgroundObject)
+        return;
+
     if(_backgroundImage.isNull())
         _backgroundImage = _map->getBackgroundImage();
+
     _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
+    updateProjectionMatrix();
 }
 
 void PublishGLMapImageRenderer::resizeBackground(int w, int h)

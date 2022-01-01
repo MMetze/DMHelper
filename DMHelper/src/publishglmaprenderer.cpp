@@ -218,6 +218,9 @@ void PublishGLMapRenderer::initializeGL()
 
 void PublishGLMapRenderer::resizeGL(int w, int h)
 {
+    if(_targetSize == QSize(w, h))
+        return;
+
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
     resizeBackground(w, h);
@@ -227,14 +230,13 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
 
 void PublishGLMapRenderer::paintGL()
 {
-    if(!_initialized)
-        initializeGL();
+//    if(!_initialized)
+//        initializeGL();
 
-    if((!_initialized) || (!_map))
+    if((!_initialized) || (!_map) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    if((!_targetWidget) || (!_targetWidget->context()))
-        return;
+//    initializeBackground();
 
     if(_recreatePartyToken)
         createPartyToken();
@@ -262,13 +264,11 @@ void PublishGLMapRenderer::paintGL()
 
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
 
-/*
     if(!_scissorRect.isEmpty())
     {
         f->glEnable(GL_SCISSOR_TEST);
         f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
     }
-*/
 
     // Draw the scene
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
@@ -281,7 +281,7 @@ void PublishGLMapRenderer::paintGL()
     if(_fowObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
-//        _fowObject->paintGL();
+        _fowObject->paintGL();
     }
 
     if(_itemImage)
@@ -313,15 +313,15 @@ void PublishGLMapRenderer::paintGL()
     {
         QSize pointerSize = _pointerImage->getSize();
         QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2) - pointerSize.height());
-        qDebug() << "[PublishGLMapImageRenderer] pos: " << _pointerPos << ", img size: " << _pointerImage->getSize() << ", scene size: " << sceneSize;
-        qDebug() << "[PublishGLMapImageRenderer]    output position: " << pointPos;
+        //qDebug() << "[PublishGLMapImageRenderer] Pointer pos: " << _pointerPos << ", img size: " << _pointerImage->getSize() << ", scene size: " << sceneSize;
+        //qDebug() << "[PublishGLMapImageRenderer]    output position: " << pointPos;
         _pointerImage->setPosition(pointPos);
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _pointerImage->getMatrixData());
         _pointerImage->paintGL();
     }
 
-//    if(!_scissorRect.isEmpty())
-//        f->glDisable(GL_SCISSOR_TEST);
+    if(!_scissorRect.isEmpty())
+        f->glDisable(GL_SCISSOR_TEST);
 }
 
 QColor PublishGLMapRenderer::getColor() const
@@ -395,7 +395,7 @@ void PublishGLMapRenderer::setPointerFileName(const QString& filename)
 
 void PublishGLMapRenderer::updateProjectionMatrix()
 {
-    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
+    if((_shaderProgram == 0) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
@@ -418,6 +418,9 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
+    qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
+    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
@@ -429,6 +432,7 @@ void PublishGLMapRenderer::updateProjectionMatrix()
         _pointerImage->setScale(pointerScale);
 
     QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
+    //qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());

@@ -31,6 +31,7 @@ PublishGLRenderer* PublishGLFrame::getRenderer() const
 
 void PublishGLFrame::cleanup()
 {
+    qDebug() << "[PublishGLFrame] Cleaning up the publish frame...";
     _initialized = false;
 
     if(_renderer)
@@ -52,7 +53,6 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
 
     if(_renderer)
     {
-        cleanup();
         _renderer->rendererDeactivated();
         disconnect(_renderer, &PublishGLRenderer::updateWidget, this, &PublishGLFrame::updateWidget);
         if(_renderer->deleteOnDeactivation())
@@ -67,8 +67,10 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
         _renderer->rendererActivated(this);
         if(isInitialized())
         {
+            makeCurrent();
             _renderer->initializeGL();
             _renderer->resizeGL(_targetSize.width(), _targetSize.height());
+            doneCurrent();
             updateWidget();
         }
     }
@@ -117,7 +119,7 @@ void PublishGLFrame::initializeGL()
         f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
-    //QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
+    QTimer::singleShot(0, this, &PublishGLFrame::initializeRenderer);
 
     _initialized = true;
 
@@ -125,6 +127,9 @@ void PublishGLFrame::initializeGL()
 
 void PublishGLFrame::resizeGL(int w, int h)
 {
+    if(_targetSize == QSize(w, h))
+        return;
+
     qDebug() << "[PublishGLFrame] Resize w: " << w << ", h: " << h;
     _targetSize = QSize(w, h);
 
@@ -144,7 +149,10 @@ void PublishGLFrame::initializeRenderer()
 {
     if(_renderer)
     {
-//        _renderer->initializeGL();
-//        update();
+        makeCurrent();
+        _renderer->initializeGL();
+        _renderer->resizeGL(_targetSize.width(), _targetSize.height());
+        doneCurrent();
+        updateWidget();
     }
 }
