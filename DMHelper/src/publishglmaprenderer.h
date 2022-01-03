@@ -20,6 +20,7 @@ public:
     virtual ~PublishGLMapRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
+    virtual QColor getBackgroundColor() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;

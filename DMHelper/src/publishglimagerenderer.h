@@ -15,6 +15,8 @@ public:
     PublishGLImageRenderer(CampaignObjectBase* renderObject, const QImage& image, QColor color, QObject *parent = nullptr);
     virtual ~PublishGLImageRenderer() override;
 
+    virtual QColor getBackgroundColor() override;
+
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;

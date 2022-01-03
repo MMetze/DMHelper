@@ -53,8 +53,12 @@ void PublishGLFrame::setRenderer(PublishGLRenderer* renderer)
 
     if(_renderer)
     {
+        if(!renderer)
+            renderer = new PublishGLImageRenderer(nullptr, grabFramebuffer(), _renderer->getBackgroundColor());
+
         _renderer->rendererDeactivated();
         disconnect(_renderer, &PublishGLRenderer::updateWidget, this, &PublishGLFrame::updateWidget);
+        disconnect(_renderer, &PublishGLRenderer::destroyed, this, &PublishGLFrame::clearRenderer);
         if(_renderer->deleteOnDeactivation())
             _renderer->deleteLater();
     }

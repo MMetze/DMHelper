@@ -30,6 +30,11 @@ QUuid PublishGLRenderer::getObjectId()
         return QUuid();
 }
 
+QColor PublishGLRenderer::getBackgroundColor()
+{
+    return QColor();
+}
+
 void PublishGLRenderer::rendererActivated(QOpenGLWidget* glWidget)
 {
     _targetWidget = glWidget;

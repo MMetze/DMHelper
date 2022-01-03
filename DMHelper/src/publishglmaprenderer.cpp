@@ -56,6 +56,11 @@ CampaignObjectBase* PublishGLMapRenderer::getObject()
     return _map;
 }
 
+QColor PublishGLMapRenderer::getBackgroundColor()
+{
+    return _color;
+}
+
 void PublishGLMapRenderer::cleanup()
 {
     _initialized = false;

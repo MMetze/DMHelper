@@ -16,6 +16,7 @@ public:
 
     virtual CampaignObjectBase* getObject();
     virtual QUuid getObjectId();
+    virtual QColor getBackgroundColor();
 
     // DMH OpenGL renderer calls
     virtual void rendererActivated(QOpenGLWidget* glWidget);

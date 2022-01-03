@@ -21,6 +21,11 @@ PublishGLImageRenderer::~PublishGLImageRenderer()
     cleanup();
 }
 
+QColor PublishGLImageRenderer::getBackgroundColor()
+{
+    return _color;
+}
+
 void PublishGLImageRenderer::cleanup()
 {
     _initialized = false;
