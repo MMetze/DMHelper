@@ -368,12 +368,12 @@ MainWindow::MainWindow(QWidget *parent) :
     _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Bestiary Loaded";
 
-    //connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
-    //connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), this, SLOT(showPublishWindow()));
-    //connect(this, SIGNAL(dispatchPublishImage(QImage)), _pubWindow, SLOT(setImage(QImage)));
-    //connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), this, SLOT(showPublishWindow()));
+    connect(this, SIGNAL(dispatchPublishImage(QImage)), _pubWindow, SLOT(setImage(QImage)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
 
-    //connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
+    connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -527,12 +527,12 @@ MainWindow::MainWindow(QWidget *parent) :
     CharacterFrame* charFrame = new CharacterFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    //connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
 
     PartyFrame* partyFrame = new PartyFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
     qDebug() << "[MainWindow]     Adding Party Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    //connect(partyFrame, SIGNAL(publishPartyImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(partyFrame, SIGNAL(publishPartyImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(this, SIGNAL(characterChanged(QUuid)), partyFrame, SLOT(handleCharacterChanged(QUuid)));
     connect(partyFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
 

@@ -1,6 +1,7 @@
 #include "publishwindow.h"
 #include "publishglframe.h"
 #include "publishglrenderer.h"
+#include "publishglimagerenderer.h"
 #include <QKeyEvent>
 #include <QUuid>
 #include <QDebug>
@@ -38,19 +39,25 @@ QUuid PublishWindow::getObjectId()
     return ((_publishFrame) && (_publishFrame->getRenderer())) ? _publishFrame->getRenderer()->getObjectId() : QUuid();
 }
 
-/*
 void PublishWindow::setImage(QImage img)
 {
-    _publishFrame->setImage(img, _globalColor);
+    PublishGLImageRenderer* newRenderer = new PublishGLImageRenderer(nullptr, img, _globalColor);
+    _publishFrame->setRenderer(newRenderer);
+    //_publishFrame->setImage(img, _globalColor);
 }
 
 void PublishWindow::setImage(QImage img, const QColor& color)
 {
     setBackgroundColorStyle(color);
-    _publishFrame->setImage(img, color);
+
+    PublishGLImageRenderer* newRenderer = new PublishGLImageRenderer(nullptr, img, color);
+    _publishFrame->setRenderer(newRenderer);
+
+//    _publishFrame->setImage(img, color);
     _globalColorSet = false;
 }
 
+/*
 void PublishWindow::setImageNoScale(QImage img)
 {
     setBackgroundColor();
