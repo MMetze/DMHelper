@@ -172,6 +172,7 @@ signals:
 
     void cameraSelectToggled(bool enabled);
     void cameraEditToggled(bool enabled);
+    void cameraRectChanged(const QRectF& cameraRect);
 
     void distanceToggled(bool enabled);
     void distanceChanged(const QString&);

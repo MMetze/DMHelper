@@ -33,7 +33,7 @@ public:
     virtual void paintGL() override;
 
 public slots:
-    virtual void setRotation(int rotation) override;
+    //virtual void setRotation(int rotation) override;
 
     //void setImage(const QImage& image);
     void distanceChanged();

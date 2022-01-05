@@ -5,6 +5,7 @@
 #include "battleglscene.h"
 #include <QList>
 #include <QColor>
+#include <QMatrix4x4>
 
 class BattleDialogModel;
 class BattleGLObject;
@@ -32,6 +33,7 @@ public:
 
 public slots:
     void fowChanged();
+    void setCameraRect(const QRectF& cameraRect);
 
 protected:
     virtual void updateProjectionMatrix() override;
@@ -40,6 +42,10 @@ private:
     bool _initialized;
     BattleDialogModel* _model;
     BattleGLScene _scene;
+
+    QMatrix4x4 _projectionMatrix;
+    QRectF _cameraRect;
+    QRect _scissorRect;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
 

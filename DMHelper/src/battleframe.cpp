@@ -1082,6 +1082,7 @@ void BattleFrame::setCameraMap()
 
     QRectF sceneRect = _scene->sceneRect();
     _publishRect->setCameraRect(sceneRect);
+    emit cameraRectChanged(sceneRect);
 }
 
 void BattleFrame::setCameraSelect(bool enabled)
@@ -1606,6 +1607,9 @@ void BattleFrame::setRotation(int rotation)
 
     _rotation = rotation;
     createPrescaledBackground();
+
+    if(_renderer)
+        _renderer->setRotation(_rotation);
 }
 
 void BattleFrame::setBackgroundColor(const QColor& color)
@@ -2266,7 +2270,10 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
         else if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_CameraSelect)
         {
             if(_publishRect)
+            {
                 _publishRect->setCameraRect(ui->graphicsView->mapToScene(_rubberBandRect).boundingRect());
+                emit cameraRectChanged(_publishRect->getCameraRect());
+            }
         }
         else if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWSelect)
         {
@@ -2676,12 +2683,13 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
         return;
 
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
+    connect(this, &BattleFrame::cameraRectChanged, renderer, &PublishGLBattleRenderer::setCameraRect);
     connect(this, &BattleFrame::pointerToggled, renderer, &PublishGLRenderer::pointerToggled);
     connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
     connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
     connect(renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
 
-    //renderer->setCameraRect(_cameraRect->getCameraRect());
+    renderer->setCameraRect(_publishRect->getCameraRect());
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
 
@@ -3710,6 +3718,7 @@ void BattleFrame::updateCameraRect()
     {
         _publishRectValue = _publishRect->rect();
         _publishRectValue.moveTo(_publishRect->pos());
+        emit cameraRectChanged(_publishRect->getCameraRect());
     }
     else
     {
@@ -3733,6 +3742,7 @@ void BattleFrame::setCameraToView()
     QRectF viewRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
     viewRect.adjust(1.0, 1.0, -1.0, -1.0);
     _publishRect->setCameraRect(viewRect);
+    emit cameraRectChanged(viewRect);
 }
 
 void BattleFrame::renderPrescaledBackground(QPainter& painter, QSize targetSize)

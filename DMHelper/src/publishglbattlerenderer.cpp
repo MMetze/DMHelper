@@ -17,6 +17,9 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
     _initialized(false),
     _model(model),
     _scene(),
+    _projectionMatrix(),
+    _cameraRect(),
+    _scissorRect(),
     _shaderProgram(0),
     _shaderModelMatrix(0),
     _backgroundObject(nullptr),
@@ -58,6 +61,8 @@ void PublishGLBattleRenderer::cleanup()
     _enemyTokens.clear();
     qDeleteAll(_effectTokens);
     _effectTokens.clear();
+
+    _projectionMatrix.setToIdentity();
 
     if(_shaderProgram > 0)
     {
@@ -257,6 +262,14 @@ void PublishGLBattleRenderer::paintGL()
     if((!f) || (!e))
         return;
 
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
+
+    if(!_scissorRect.isEmpty())
+    {
+        f->glEnable(GL_SCISSOR_TEST);
+        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+    }
+
     // Draw the scene:
     f->glClearColor(_model->getBackgroundColor().redF(), _model->getBackgroundColor().greenF(), _model->getBackgroundColor().blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -300,12 +313,25 @@ void PublishGLBattleRenderer::paintGL()
     }
 
     paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
+
+    if(!_scissorRect.isEmpty())
+        f->glDisable(GL_SCISSOR_TEST);
 }
 
 void PublishGLBattleRenderer::fowChanged()
 {
     _updateFow = true;
     emit updateWidget();
+}
+
+void PublishGLBattleRenderer::setCameraRect(const QRectF& cameraRect)
+{
+    if(_cameraRect != cameraRect)
+    {
+        _cameraRect = cameraRect;
+        updateProjectionMatrix();
+        emit updateWidget();
+    }
 }
 
 void PublishGLBattleRenderer::updateProjectionMatrix()
@@ -318,24 +344,46 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
         return;
 
     // Update projection matrix and other size related settings:
+    QRectF transformedCamera = _cameraRect;
+    QSizeF transformedTarget = _scene.getTargetSize();
+    if((_rotation == 90) || (_rotation == 270))
+    {
+        transformedCamera = transformedCamera.transposed();
+        transformedCamera.moveTo(transformedCamera.topLeft().transposed());
+        transformedTarget.transpose();
+    }
+
+    QSizeF rectSize = transformedTarget.scaled(_cameraRect.size(), Qt::KeepAspectRatioByExpanding);
+    QSizeF halfRect = rectSize / 2.0;
+    QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
+    QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
+    QSizeF backgroundMiddle = _scene.getSceneRect().size() / 2.0;
+
+    //qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
+    //qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+
+    _projectionMatrix.setToIdentity();
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
+                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
+                            0.1f, 1000.f);
+
+    setPointerScale(rectSize.width() / transformedTarget.width());
+
+    QSizeF scissorSize = transformedCamera.size().scaled(_scene.getTargetSize(), Qt::KeepAspectRatio);
+    //qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
+    _scissorRect.setX((_scene.getTargetSize().width() - scissorSize.width()) / 2.0);
+    _scissorRect.setY((_scene.getTargetSize().height() - scissorSize.height()) / 2.0);
+    _scissorRect.setWidth(scissorSize.width());
+    _scissorRect.setHeight(scissorSize.height());
+
+    /*
+    // Update projection matrix and other size related settings:
     QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 
     setPointerScale(rectSize.width() / _scene.getTargetSize().width());
+    */
 }
-
-
-/*
-// 0. copy our vertices array in a buffer for OpenGL to use
-glBindBuffer(GL_ARRAY_BUFFER, VBO);
-glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-// 1. then set the vertex attributes pointers
-glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-glEnableVertexAttribArray(0);
-// 2. use our shader program when we want to render an object
-glUseProgram(shaderProgram);
-// 3. now draw the object
-someOpenGLFunctionThatDrawsOurTriangle();
-*/

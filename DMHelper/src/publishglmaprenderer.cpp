@@ -315,6 +315,7 @@ void PublishGLMapRenderer::paintGL()
         f->glDisable(GL_SCISSOR_TEST);
 }
 
+/*
 void PublishGLMapRenderer::setRotation(int rotation)
 {
     if(rotation != _rotation)
@@ -324,6 +325,7 @@ void PublishGLMapRenderer::setRotation(int rotation)
         emit updateWidget();
     }
 }
+*/
 
 void PublishGLMapRenderer::distanceChanged()
 {

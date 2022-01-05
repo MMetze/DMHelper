@@ -1853,6 +1853,7 @@ void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)
     connect(this, &MapFrame::pointerPositionChanged, renderer, &PublishGLRenderer::setPointerPosition);
     connect(this, &MapFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
     connect(renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+
     renderer->setCameraRect(_cameraRect->getCameraRect());
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
