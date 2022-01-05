@@ -1085,6 +1085,16 @@ void BattleFrame::setCameraMap()
     emit cameraRectChanged(sceneRect);
 }
 
+void BattleFrame::setCameraVisible()
+{
+    if((!_publishRect) || (!_model) || (!_model->getMap()))
+        return;
+
+    QRectF newRect = _model->getMap()->getShrunkPublishRect();
+    _publishRect->setCameraRect(newRect);
+    emit cameraRectChanged(newRect);
+}
+
 void BattleFrame::setCameraSelect(bool enabled)
 {
     Q_UNUSED(enabled);

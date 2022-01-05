@@ -136,6 +136,7 @@ public slots:
     // Public for connection to map ribbon
     void setCameraCouple();
     void setCameraMap();
+    void setCameraVisible();
     void setCameraSelect(bool enabled);
     void setCameraEdit(bool enabled);
 

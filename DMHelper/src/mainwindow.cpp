@@ -503,6 +503,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, battleFrame, &BattleFrame::setCameraCouple);
     connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(setCameraMap()));
     connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(setCameraSelect(bool)));
+    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, battleFrame, &BattleFrame::setCameraVisible);
     connect(battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
     connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(setCameraEdit(bool)));
     connect(battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
