@@ -55,8 +55,8 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
             }
             painter.drawPixmap(effectImage.rect(), itemPixmap);
         }
-
     painter.end();
+
     _textureSize = effectImage.size();
 
     float vertices[] = {

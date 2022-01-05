@@ -309,10 +309,10 @@ void PublishGLMapRenderer::paintGL()
         }
     }
 
-    paintPointer(f, sceneSize, _shaderModelMatrix);
-
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
+
+    paintPointer(f, sceneSize, _shaderModelMatrix);
 }
 
 /*

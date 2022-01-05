@@ -312,10 +312,10 @@ void PublishGLBattleRenderer::paintGL()
         pcToken->paintGL();
     }
 
-    paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
-
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
+
+    paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
 }
 
 void PublishGLBattleRenderer::fowChanged()
