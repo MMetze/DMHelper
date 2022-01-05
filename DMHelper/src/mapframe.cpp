@@ -237,6 +237,7 @@ void MapFrame::resetFoW()
     UndoFill* undoFill = new UndoFill(*_mapSource, MapEditFill(QColor(0,0,0,255)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
+    emit fowChanged();
 }
 
 void MapFrame::clearFoW()
@@ -247,6 +248,7 @@ void MapFrame::clearFoW()
     UndoFill* undoFill = new UndoFill(*_mapSource, MapEditFill(QColor(0,0,0,0)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
+    emit fowChanged();
 }
 
 void MapFrame::undoPaint()
@@ -686,7 +688,7 @@ void MapFrame::publishWindowMouseRelease(const QPointF& position)
 
 void MapFrame::publishClicked(bool checked)
 {
-    if(!_mapSource)
+    if((!_mapSource) || (_isPublishing == checked))
         return;
 
     _isPublishing = checked;

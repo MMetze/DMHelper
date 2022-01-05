@@ -1574,31 +1574,17 @@ void BattleFrame::publishClicked(bool checked)
     if(_publishing == checked)
         return;
 
-    qDebug() << "[Battle Frame] publishing toggled (" << checked << ")";
     _publishing = checked;
-
     if(_publishRect)
         _publishRect->setPublishing(checked);
 
     if(_publishing)
     {
-        /*
-        createPrescaledBackground();
-        publishImage();
-        */
-        /*
-        QDialog* openGLDlg = new QDialog();
-        QVBoxLayout *dlgLayout = new QVBoxLayout;
-        dlgLayout->addWidget(new BattleGLRenderer(_model));
-        dlgLayout->setSpacing(3);
-        openGLDlg->setLayout(dlgLayout);
-        openGLDlg->resize(size());
-        openGLDlg->show();
-        */
         emit showPublishWindow();
         if(!_renderer)
         {
             _renderer = new PublishGLBattleRenderer(_model);
+            connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
             connect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
             connect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
             connect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);

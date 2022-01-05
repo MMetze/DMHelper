@@ -338,6 +338,7 @@ void PublishGLMapRenderer::distanceChanged()
 void PublishGLMapRenderer::fowChanged()
 {
     _updateFow = true;
+    emit updateWidget();
 }
 
 void PublishGLMapRenderer::setCameraRect(const QRectF& cameraRect)

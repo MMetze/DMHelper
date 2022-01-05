@@ -23,7 +23,8 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
     _fowObject(nullptr),
     _pcTokens(),
     _enemyTokens(),
-    _effectTokens()
+    _effectTokens(),
+    _updateFow(false)
 {
 }
 
@@ -157,7 +158,10 @@ void PublishGLBattleRenderer::initializeGL()
     // Create the objects
     _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
     _backgroundObject = new BattleGLBackground(&_scene, _model->getBackgroundImage(), GL_LINEAR);
-    _fowObject = new BattleGLBackground(&_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
+
+    if(_model->getMap())
+        _fowObject = new BattleGLBackground(&_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
+
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(i);
@@ -256,6 +260,11 @@ void PublishGLBattleRenderer::paintGL()
 
     if(_fowObject)
     {
+        if((_updateFow) && (_model->getMap()))
+        {
+            _fowObject->setImage(_model->getMap()->getBWFoWImage());
+            _updateFow = false;
+        }
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
         _fowObject->paintGL();
     }
@@ -267,6 +276,12 @@ void PublishGLBattleRenderer::paintGL()
     }
 
     paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
+}
+
+void PublishGLBattleRenderer::fowChanged()
+{
+    _updateFow = true;
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::updateProjectionMatrix()

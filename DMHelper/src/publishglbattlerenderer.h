@@ -24,6 +24,9 @@ public:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
+public slots:
+    void fowChanged();
+
 protected:
     virtual void updateProjectionMatrix() override;
 
@@ -35,10 +38,12 @@ private:
     int _shaderModelMatrix;
 
     BattleGLBackground* _backgroundObject;
-    BattleGLObject* _fowObject;
+    BattleGLBackground* _fowObject;
     QList<BattleGLObject*> _pcTokens;
     QList<BattleGLObject*> _enemyTokens;
     QList<BattleGLObject*> _effectTokens;
+
+    bool _updateFow;
 };
 
 #endif // PUBLISHGLBATTLERENDERER_H
