@@ -44,10 +44,6 @@ public slots:
     void setCameraRect(const QRectF& cameraRect);
     void markerChanged();
 
-    void pointerToggled(bool enabled);
-    void setPointerPosition(const QPointF& pos);
-    void setPointerFileName(const QString& filename);
-
 protected:
     virtual void updateProjectionMatrix() override;
 
@@ -60,8 +56,6 @@ protected:
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
     void createMarkerTokens(const QSize& sceneSize);
-    void evaluatePointer();
-    QPixmap getPointerPixmap();
 
 protected slots:
     void handlePartyChanged(Party* party);
@@ -83,12 +77,7 @@ protected:
     BattleGLBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _itemImage;
-    PublishGLImage* _pointerImage;
     QList<PublishGLImage*> _markerTokens;
-
-    bool _pointerActive;
-    QPointF _pointerPos;
-    QString _pointerFile;
 
     bool _recreatePartyToken;
     bool _recreateLineToken;

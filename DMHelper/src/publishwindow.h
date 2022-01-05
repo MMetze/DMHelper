@@ -28,11 +28,8 @@ public slots:
     void setImage(QImage img);
     void setImage(QImage img, const QColor& color);
     //void setImageNoScale(QImage img);
-    void setArrowVisible(bool visible);
-    void setArrowPosition(const QPointF& position);
     void setBackgroundColor();
     void setBackgroundColor(const QColor& color);
-    void setPointerFile(const QString& filename);
 
     void setRenderer(PublishGLRenderer* renderer);
 

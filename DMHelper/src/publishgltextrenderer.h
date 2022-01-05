@@ -32,7 +32,7 @@ public slots:
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
-    void setOrthoProjection();
+    virtual void updateProjectionMatrix() override;
 
     EncounterText* _encounter;
     QSize _targetSize;

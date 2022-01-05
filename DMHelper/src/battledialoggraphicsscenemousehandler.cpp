@@ -135,6 +135,7 @@ BattleDialogGraphicsSceneMouseHandlerPointer::~BattleDialogGraphicsSceneMouseHan
 bool BattleDialogGraphicsSceneMouseHandlerPointer::mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     _scene.setPointerPos(mouseEvent->scenePos());
+    emit pointerMoved(mouseEvent->scenePos());
     mouseEvent->ignore();
     return true;
 }

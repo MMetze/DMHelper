@@ -65,16 +65,6 @@ void PublishWindow::setImageNoScale(QImage img)
 }
 */
 
-void PublishWindow::setArrowVisible(bool visible)
-{
-    _publishFrame->setArrowVisible(visible);
-}
-
-void PublishWindow::setArrowPosition(const QPointF& position)
-{
-    _publishFrame->setArrowPosition(position);
-}
-
 void PublishWindow::setBackgroundColor()
 {
     if(!_globalColorSet)
@@ -92,11 +82,6 @@ void PublishWindow::setBackgroundColor(const QColor& color)
         _globalColorSet = false;
         setBackgroundColor();
     }
-}
-
-void PublishWindow::setPointerFile(const QString& filename)
-{
-    _publishFrame->setPointerFile(filename);
 }
 
 void PublishWindow::setRenderer(PublishGLRenderer* renderer)

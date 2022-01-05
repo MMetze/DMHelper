@@ -53,6 +53,8 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
 {
     connect(&_distanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerDistance::distanceChanged, this, &BattleDialogGraphicsScene::distanceChanged);
 
+    connect(&_pointerMouseHandler, &BattleDialogGraphicsSceneMouseHandlerPointer::pointerMoved, this, &BattleDialogGraphicsScene::pointerMove);
+
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMousePress, this, &BattleDialogGraphicsScene::battleMousePress);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseMove, this, &BattleDialogGraphicsScene::battleMouseMove);
     connect(&_rawMouseHandler, &BattleDialogGraphicsSceneMouseHandlerRaw::rawMouseRelease, this, &BattleDialogGraphicsScene::battleMouseRelease);

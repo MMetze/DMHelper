@@ -715,9 +715,9 @@ void MapFrame::publishClicked(bool checked)
         connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapRenderer::fowChanged);
         connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapRenderer::setCameraRect);
         connect(this, &MapFrame::markerChanged, newRenderer, &PublishGLMapRenderer::markerChanged);
-        connect(this, &MapFrame::pointerToggled, newRenderer, &PublishGLMapRenderer::pointerToggled);
-        connect(this, &MapFrame::pointerPositionChanged, newRenderer, &PublishGLMapRenderer::setPointerPosition);
-        connect(this, &MapFrame::pointerFileNameChanged, newRenderer, &PublishGLMapRenderer::setPointerFileName);
+        connect(this, &MapFrame::pointerToggled, newRenderer, &PublishGLRenderer::pointerToggled);
+        connect(this, &MapFrame::pointerPositionChanged, newRenderer, &PublishGLRenderer::setPointerPosition);
+        connect(this, &MapFrame::pointerFileNameChanged, newRenderer, &PublishGLRenderer::setPointerFileName);
         connect(newRenderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         newRenderer->setCameraRect(_cameraRect->getCameraRect());
         newRenderer->setPointerFileName(_pointerFile);
@@ -1626,9 +1626,9 @@ void MapFrame::stopPlayerVideoPlayer()
         disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::distanceChanged);
         disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::fowChanged);
         disconnect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setCameraRect);
-        disconnect(this, &MapFrame::pointerToggled, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::pointerToggled);
-        disconnect(this, &MapFrame::pointerPositionChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setPointerPosition);
-        disconnect(this, &MapFrame::pointerFileNameChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setPointerFileName);
+        disconnect(this, &MapFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
+        disconnect(this, &MapFrame::pointerPositionChanged, _renderer, &PublishGLRenderer::setPointerPosition);
+        disconnect(this, &MapFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
         disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
         rendererDeactivated();
     }

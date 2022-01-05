@@ -35,7 +35,7 @@ public slots:
     //void setColor(QColor color);
 
 protected:
-    void setOrthoProjection();
+    virtual void updateProjectionMatrix() override;
 
 private:
     CampaignObjectBase* _renderObject;

@@ -7,6 +7,7 @@
 
 class BattleDialogModel;
 class BattleGLObject;
+class BattleGLBackground;
 
 class PublishGLBattleRenderer : public PublishGLRenderer
 {
@@ -24,15 +25,16 @@ public:
     virtual void paintGL() override;
 
 protected:
-    void setOrthoProjection();
+    virtual void updateProjectionMatrix() override;
 
 private:
     bool _initialized;
     BattleDialogModel* _model;
     BattleGLScene _scene;
     unsigned int _shaderProgram;
+    int _shaderModelMatrix;
 
-    BattleGLObject* _backgroundObject;
+    BattleGLBackground* _backgroundObject;
     BattleGLObject* _fowObject;
     QList<BattleGLObject*> _pcTokens;
     QList<BattleGLObject*> _enemyTokens;

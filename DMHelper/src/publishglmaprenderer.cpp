@@ -29,11 +29,7 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _fowObject(nullptr),
     _partyToken(nullptr),
     _itemImage(nullptr),
-    _pointerImage(nullptr),
     _markerTokens(),
-    _pointerActive(false),
-    _pointerPos(),
-    _pointerFile(),
     _recreatePartyToken(false),
     _recreateLineToken(false),
     _recreateMarkers(false),
@@ -68,9 +64,6 @@ void PublishGLMapRenderer::cleanup()
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
 
-    delete _pointerImage;
-    _pointerImage = nullptr;
-
     delete _itemImage;
     _itemImage = nullptr;
 
@@ -94,6 +87,8 @@ void PublishGLMapRenderer::cleanup()
         _shaderProgram = 0;
     }
     _shaderModelMatrix = 0;
+
+    PublishGLRenderer::cleanup();
 }
 
 bool PublishGLMapRenderer::deleteOnDeactivation()
@@ -314,16 +309,7 @@ void PublishGLMapRenderer::paintGL()
         }
     }
 
-    if(_pointerImage)
-    {
-        QSize pointerSize = _pointerImage->getSize();
-        QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2) - pointerSize.height());
-        //qDebug() << "[PublishGLMapImageRenderer] Pointer pos: " << _pointerPos << ", img size: " << _pointerImage->getSize() << ", scene size: " << sceneSize;
-        //qDebug() << "[PublishGLMapImageRenderer]    output position: " << pointPos;
-        _pointerImage->setPosition(pointPos);
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _pointerImage->getMatrixData());
-        _pointerImage->paintGL();
-    }
+    paintPointer(f, sceneSize, _shaderModelMatrix);
 
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
@@ -369,35 +355,6 @@ void PublishGLMapRenderer::markerChanged()
     _recreateMarkers = true;
 }
 
-void PublishGLMapRenderer::pointerToggled(bool enabled)
-{
-    if(_pointerActive != enabled)
-    {
-        _pointerActive = enabled;
-        emit updateWidget();
-    }
-}
-
-void PublishGLMapRenderer::setPointerPosition(const QPointF& pos)
-{
-    if(_pointerPos != pos)
-    {
-        _pointerPos = pos;
-        emit updateWidget();
-    }
-}
-
-void PublishGLMapRenderer::setPointerFileName(const QString& filename)
-{
-    if(_pointerFile != filename)
-    {
-        _pointerFile = filename;
-        delete _pointerImage;
-        _pointerImage = nullptr;
-        emit updateWidget();
-    }
-}
-
 void PublishGLMapRenderer::updateProjectionMatrix()
 {
     if((_shaderProgram == 0) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
@@ -423,8 +380,8 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
-    qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
-    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+    //qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
+    //qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
@@ -432,9 +389,7 @@ void PublishGLMapRenderer::updateProjectionMatrix()
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);
 
-    qreal pointerScale = rectSize.width() / transformedTarget.width();
-    if(_pointerImage)
-        _pointerImage->setScale(pointerScale);
+    setPointerScale(rectSize.width() / transformedTarget.width());
 
     QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
     //qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
@@ -579,32 +534,6 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
             }
         }
     }
-}
-
-void PublishGLMapRenderer::evaluatePointer()
-{
-    if(_pointerActive)
-    {
-        if(!_pointerImage)
-            _pointerImage = new PublishGLImage(getPointerPixmap().scaled(DMHelper::CURSOR_SIZE * 2, DMHelper::CURSOR_SIZE * 2, Qt::IgnoreAspectRatio, Qt::SmoothTransformation).toImage(), false);
-    }
-    else if(_pointerImage)
-    {
-        delete _pointerImage;
-        _pointerImage = nullptr;
-    }
-}
-
-QPixmap PublishGLMapRenderer::getPointerPixmap()
-{
-    if(!_pointerFile.isEmpty())
-    {
-        QPixmap result;
-        if(result.load(_pointerFile))
-            return result;
-    }
-
-    return QPixmap(":/img/data/arrow.png");
 }
 
 void PublishGLMapRenderer::handlePartyChanged(Party* party)

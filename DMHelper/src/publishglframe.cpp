@@ -91,21 +91,6 @@ void PublishGLFrame::setBackgroundColor(const QColor& color)
         _renderer->setBackgroundColor(color);
 }
 
-void PublishGLFrame::setArrowVisible(bool visible)
-{
-
-}
-
-void PublishGLFrame::setArrowPosition(const QPointF& position)
-{
-
-}
-
-void PublishGLFrame::setPointerFile(const QString& filename)
-{
-
-}
-
 void PublishGLFrame::initializeGL()
 {
     if(!QOpenGLContext::currentContext())

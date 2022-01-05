@@ -67,6 +67,8 @@ signals:
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
 
+    void pointerMove(const QPointF& pos);
+
     void battleMousePress(const QPointF& pos);
     void battleMouseMove(const QPointF& pos);
     void battleMouseRelease(const QPointF& pos);

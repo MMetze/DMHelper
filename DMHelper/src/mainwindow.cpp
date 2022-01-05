@@ -329,8 +329,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qDebug() << "[MainWindow] Creating Player's Window";
     _pubWindow = new PublishWindow(QString("DMHelper Player's Window"));
-    _pubWindow->setPointerFile(_options->getPointerFile());
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _pubWindow, SLOT(setPointerFile(const QString&)));
     connect(_pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
     connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), _pubWindow, SLOT(setBackgroundColor(const QColor&)));
     qDebug() << "[MainWindow] Player's Window Created";

@@ -761,6 +761,8 @@ void BattleFrame::setPointerFile(const QString& filename)
     if(_pointerFile != filename)
     {
         _pointerFile = filename;
+        emit pointerFileNameChanged(_pointerFile);
+
         QPixmap pointerPixmap = getPointerPixmap();
         _scene->setPointerPixmap(pointerPixmap);
         emit pointerChanged(QCursor(pointerPixmap.scaled(DMHelper::CURSOR_SIZE, DMHelper::CURSOR_SIZE, Qt::IgnoreAspectRatio, Qt::SmoothTransformation), 0, 0));
@@ -1595,7 +1597,13 @@ void BattleFrame::publishClicked(bool checked)
         */
         emit showPublishWindow();
         if(!_renderer)
+        {
             _renderer = new PublishGLBattleRenderer(_model);
+            connect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
+            connect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
+            connect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
+        }
+
         emit registerRenderer(_renderer);
     }
     else

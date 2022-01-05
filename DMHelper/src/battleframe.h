@@ -181,6 +181,7 @@ signals:
     void mapCreated();
 
     void pointerToggled(bool enabled);
+    void pointerFileNameChanged(const QString& filename);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * e) override;

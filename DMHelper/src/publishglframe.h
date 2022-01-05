@@ -4,6 +4,7 @@
 #include <QOpenGLWidget>
 
 class PublishGLRenderer;
+class PublishGLImage;
 
 class PublishGLFrame : public QOpenGLWidget
 {
@@ -27,10 +28,6 @@ public slots:
 
     void setBackgroundColor(const QColor& color);
 
-    void setArrowVisible(bool visible);
-    void setArrowPosition(const QPointF& position);
-    void setPointerFile(const QString& filename);
-
 protected:
     virtual void initializeGL() override;
     virtual void resizeGL(int w, int h) override;
@@ -43,6 +40,7 @@ private:
     bool _initialized;
     QSize _targetSize;
     PublishGLRenderer* _renderer;
+
 };
 
 #endif // PUBLISHGLFRAME_H

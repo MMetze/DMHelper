@@ -32,6 +32,8 @@ void PublishGLImageRenderer::cleanup()
 
     delete _backgroundObject;
     _backgroundObject = nullptr;
+
+    PublishGLRenderer::cleanup();
 }
 
 bool PublishGLImageRenderer::deleteOnDeactivation()
@@ -144,7 +146,7 @@ void PublishGLImageRenderer::initializeGL()
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
     // Projection - note, this is set later when resizing the window
-    setOrthoProjection();
+    updateProjectionMatrix();
 
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
@@ -157,7 +159,7 @@ void PublishGLImageRenderer::resizeGL(int w, int h)
     _scene.setTargetSize(QSize(w, h));
     qDebug() << "[PublishGLImageRenderer] Resize w: " << w << ", h: " << h;
 
-    setOrthoProjection();
+    updateProjectionMatrix();
     emit updateWidget();
 }
 
@@ -204,7 +206,7 @@ void PublishGLImageRenderer::setImage(const QImage& image)
         if(_backgroundObject)
         {
             _backgroundObject->setImage(image);
-            setOrthoProjection();
+            updateProjectionMatrix();
             emit updateWidget();
         }
     }
@@ -218,7 +220,7 @@ void PublishGLImageRenderer::setColor(QColor color)
 }
 */
 
-void PublishGLImageRenderer::setOrthoProjection()
+void PublishGLImageRenderer::updateProjectionMatrix()
 {
     if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;

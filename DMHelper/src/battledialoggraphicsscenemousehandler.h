@@ -68,6 +68,9 @@ public:
     virtual bool mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual bool mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
+
+signals:
+    void pointerMoved(const QPointF& pos);
 };
 
 
@@ -90,7 +93,6 @@ signals:
     void rawMousePress(const QPointF& pos);
     void rawMouseMove(const QPointF& pos);
     void rawMouseRelease(const QPointF& pos);
-
 };
 
 
@@ -151,7 +153,6 @@ signals:
     void mapMousePress(const QPointF& pos);
     void mapMouseMove(const QPointF& pos);
     void mapMouseRelease(const QPointF& pos);
-
 };
 
 #endif // BATTLEDIALOGGRAPHICSSCENEMOUSEHANDLERBASE_H

@@ -18,6 +18,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
     _model(model),
     _scene(),
     _shaderProgram(0),
+    _shaderModelMatrix(0),
     _backgroundObject(nullptr),
     _fowObject(nullptr),
     _pcTokens(),
@@ -46,6 +47,20 @@ void PublishGLBattleRenderer::cleanup()
     _enemyTokens.clear();
     qDeleteAll(_effectTokens);
     _effectTokens.clear();
+
+    if(_shaderProgram > 0)
+    {
+        if((_targetWidget) && (_targetWidget->context()))
+        {
+            QOpenGLFunctions *f = _targetWidget->context()->functions();
+            if(f)
+                f->glDeleteProgram(_shaderProgram);
+        }
+        _shaderProgram = 0;
+    }
+    _shaderModelMatrix = 0;
+
+    PublishGLRenderer::cleanup();
 }
 
 void PublishGLBattleRenderer::initializeGL()
@@ -137,10 +152,11 @@ void PublishGLBattleRenderer::initializeGL()
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
+    _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
-    _backgroundObject = new BattleGLBackground(&_scene, _model->getBackgroundImage(), GL_NEAREST);
+    _backgroundObject = new BattleGLBackground(&_scene, _model->getBackgroundImage(), GL_LINEAR);
     _fowObject = new BattleGLBackground(&_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
@@ -168,16 +184,19 @@ void PublishGLBattleRenderer::initializeGL()
         }
     }
 
+    // Check if we need a pointer
+    evaluatePointer();
+
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     // View
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
     // Projection - note, this is set later when resizing the window
-    setOrthoProjection();
+    updateProjectionMatrix();
 
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
@@ -187,17 +206,23 @@ void PublishGLBattleRenderer::initializeGL()
 
 void PublishGLBattleRenderer::resizeGL(int w, int h)
 {
-    _scene.setTargetSize(QSize(w, h));
-    qDebug() << "[BattleGLRenderer] Resize w: " << w << ", h: " << h;
+    QSize targetSize(w, h);
+    if(_scene.getTargetSize() == targetSize)
+        return;
 
-    setOrthoProjection();
+    qDebug() << "[BattleGLRenderer] Resize to: " << targetSize;
+    _scene.setTargetSize(targetSize);
+
+    updateProjectionMatrix();
     emit updateWidget();
 }
 
 void PublishGLBattleRenderer::paintGL()
 {
-    if((!_model) || (!_targetWidget) || (!_targetWidget->context()))
+    if((!_model) || (!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
         return;
+
+    evaluatePointer();
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
@@ -213,36 +238,38 @@ void PublishGLBattleRenderer::paintGL()
 
     if(_backgroundObject)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
     }
 
     for(BattleGLObject* enemyToken : _enemyTokens)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, enemyToken->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, enemyToken->getMatrixData());
         enemyToken->paintGL();
     }
 
     for(BattleGLObject* effectToken : _effectTokens)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, effectToken->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, effectToken->getMatrixData());
         effectToken->paintGL();
     }
 
     if(_fowObject)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _fowObject->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
         _fowObject->paintGL();
     }
 
     for(BattleGLObject* pcToken : _pcTokens)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, pcToken->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, pcToken->getMatrixData());
         pcToken->paintGL();
     }
+
+    paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
 }
 
-void PublishGLBattleRenderer::setOrthoProjection()
+void PublishGLBattleRenderer::updateProjectionMatrix()
 {
     if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
@@ -256,6 +283,8 @@ void PublishGLBattleRenderer::setOrthoProjection()
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+
+    setPointerScale(rectSize.width() / _scene.getTargetSize().width());
 }
 
 
