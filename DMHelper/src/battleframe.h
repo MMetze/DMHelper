@@ -41,7 +41,7 @@ public:
     explicit BattleFrame(QWidget *parent = nullptr);
     virtual ~BattleFrame() override;
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setBattle(EncounterBattle* battle);
@@ -256,6 +256,9 @@ private slots:
     void setItemsInert(bool inert);
 
     void removeRollover();
+
+    void rendererActivated(PublishGLBattleRenderer* renderer);
+    void rendererDeactivated();
 
     // State Machine
     void stateUpdated();

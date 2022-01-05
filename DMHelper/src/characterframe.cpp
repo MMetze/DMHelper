@@ -106,8 +106,10 @@ CharacterFrame::~CharacterFrame()
     delete ui;
 }
 
-void CharacterFrame::activateObject(CampaignObjectBase* object)
+void CharacterFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
+    Q_UNUSED(currentRenderer);
+
     Character* character = dynamic_cast<Character*>(object);
     if(!character)
         return;

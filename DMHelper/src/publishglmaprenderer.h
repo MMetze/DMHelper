@@ -32,9 +32,6 @@ public:
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
-    // const QImage& getImage() const;
-    QColor getColor() const;
-
 public slots:
     virtual void setRotation(int rotation) override;
 

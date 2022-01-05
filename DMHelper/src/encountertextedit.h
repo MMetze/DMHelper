@@ -22,7 +22,7 @@ public:
     explicit EncounterTextEdit(QWidget *parent = nullptr);
     virtual ~EncounterTextEdit() override;
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setKeys(const QList<QString>& keys);

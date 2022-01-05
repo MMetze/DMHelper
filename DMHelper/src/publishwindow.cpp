@@ -34,9 +34,14 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     connect(_publishFrame, SIGNAL(labelResized(QSize)), this, SIGNAL(labelResized(QSize)));
 }
 
-QUuid PublishWindow::getObjectId()
+QUuid PublishWindow::getObjectId() const
 {
     return ((_publishFrame) && (_publishFrame->getRenderer())) ? _publishFrame->getRenderer()->getObjectId() : QUuid();
+}
+
+PublishGLRenderer* PublishWindow::getRenderer() const
+{
+    return _publishFrame ? _publishFrame->getRenderer() : nullptr;
 }
 
 void PublishWindow::setImage(QImage img)

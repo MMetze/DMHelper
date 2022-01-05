@@ -19,7 +19,7 @@ public:
     explicit CharacterFrame(QWidget *parent = nullptr);
     ~CharacterFrame();
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setCharacter(Character* character);

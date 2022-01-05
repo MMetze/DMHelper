@@ -82,7 +82,7 @@ MapFrame::~MapFrame()
     delete ui;
 }
 
-void MapFrame::activateObject(CampaignObjectBase* object)
+void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
     Map* map = dynamic_cast<Map*>(object);
     if(!map)
@@ -99,6 +99,8 @@ void MapFrame::activateObject(CampaignObjectBase* object)
     connect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     connect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
 
+    rendererActivated(dynamic_cast<PublishGLMapRenderer*>(currentRenderer));
+
     emit checkableChanged(_isVideo);
     emit setPublishEnabled(true);
 }
@@ -113,6 +115,8 @@ void MapFrame::deactivateObject()
 
     if(_partyIcon)
         _mapSource->setPartyIconPos(_partyIcon->pos().toPoint());
+
+    rendererDeactivated();
 
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
@@ -688,7 +692,7 @@ void MapFrame::publishWindowMouseRelease(const QPointF& position)
 
 void MapFrame::publishClicked(bool checked)
 {
-    if((!_mapSource) || (_isPublishing == checked))
+    if((!_mapSource) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _mapSource)))
         return;
 
     _isPublishing = checked;
@@ -697,43 +701,21 @@ void MapFrame::publishClicked(bool checked)
 
     if(_isPublishing)
     {
+        if(_renderer)
+            emit registerRenderer(nullptr);
+
         PublishGLMapRenderer* newRenderer;
         if(_isVideo)
-        {
-            qDebug() << "[MapFrame] Publish FoW animation started";
-            if(_renderer)
-            {
-                qDebug() << "[MapFrame] ERROR: Unexpected overwrite of existing renderer! Should not happen!";
-                stopPlayerVideoPlayer();
-            }
-
             newRenderer = new PublishGLMapVideoRenderer(_mapSource);
-        }
         else
-        {
             newRenderer = new PublishGLMapImageRenderer(_mapSource);
-        }
-        connect(this, &MapFrame::distanceChanged, newRenderer, &PublishGLMapRenderer::distanceChanged);
-        connect(this, &MapFrame::fowChanged, newRenderer, &PublishGLMapRenderer::fowChanged);
-        connect(this, &MapFrame::cameraRectChanged, newRenderer, &PublishGLMapRenderer::setCameraRect);
-        connect(this, &MapFrame::markerChanged, newRenderer, &PublishGLMapRenderer::markerChanged);
-        connect(this, &MapFrame::pointerToggled, newRenderer, &PublishGLRenderer::pointerToggled);
-        connect(this, &MapFrame::pointerPositionChanged, newRenderer, &PublishGLRenderer::setPointerPosition);
-        connect(this, &MapFrame::pointerFileNameChanged, newRenderer, &PublishGLRenderer::setPointerFileName);
-        connect(newRenderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
-        newRenderer->setCameraRect(_cameraRect->getCameraRect());
-        newRenderer->setPointerFileName(_pointerFile);
-        newRenderer->setRotation(_rotation);
 
-        _renderer = newRenderer;
-        emit registerRenderer(_renderer);
+        rendererActivated(newRenderer);
+        emit registerRenderer(newRenderer);
         emit showPublishWindow();
     }
     else
     {
-        if(_isVideo)
-            stopPlayerVideoPlayer();
-
         emit registerRenderer(nullptr);
     }
 }
@@ -796,8 +778,9 @@ void MapFrame::initializeFoW()
         {
             qDebug() << "[MapFrame] Initializing map frame video";
             if(_renderer)
-                stopPlayerVideoPlayer();
-            extractDMScreenshot();
+                emit registerRenderer(nullptr); // TODO: is this really ok?
+            else
+                extractDMScreenshot();
         }
     }
 
@@ -869,7 +852,7 @@ void MapFrame::uninitializeFoW()
         disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     }
 
-    emit registerRenderer(nullptr);
+    //emit registerRenderer(nullptr);
 
     cleanupBuffers();
     cleanupSelectionItems();
@@ -1621,22 +1604,6 @@ bool MapFrame::execEventFilterPointer(QObject *obj, QEvent *event)
            (event->type() == QEvent::MouseButtonDblClick));
 }
 
-void MapFrame::stopPlayerVideoPlayer()
-{
-    if(_renderer)
-    {
-        disconnect(this, &MapFrame::distanceChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::distanceChanged);
-        disconnect(this, &MapFrame::fowChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::fowChanged);
-        disconnect(this, &MapFrame::cameraRectChanged, dynamic_cast<PublishGLMapRenderer*>(_renderer), &PublishGLMapRenderer::setCameraRect);
-        disconnect(this, &MapFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
-        disconnect(this, &MapFrame::pointerPositionChanged, _renderer, &PublishGLRenderer::setPointerPosition);
-        disconnect(this, &MapFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
-        disconnect(_renderer, &PublishGLMapVideoRenderer::deactivated, this, &MapFrame::rendererDeactivated);
-        rendererDeactivated();
-    }
-    emit registerRenderer(nullptr);
-}
-
 void MapFrame::extractDMScreenshot()
 {
     if(!_mapSource)
@@ -1873,6 +1840,26 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     emit cameraRectChanged(_mapSource->getCameraRect());
 }
 
+void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)
+{
+    if((!renderer) || (!_mapSource) || (renderer->getObject() != _mapSource))
+        return;
+
+    connect(this, &MapFrame::distanceChanged, renderer, &PublishGLMapRenderer::distanceChanged);
+    connect(this, &MapFrame::fowChanged, renderer, &PublishGLMapRenderer::fowChanged);
+    connect(this, &MapFrame::cameraRectChanged, renderer, &PublishGLMapRenderer::setCameraRect);
+    connect(this, &MapFrame::markerChanged, renderer, &PublishGLMapRenderer::markerChanged);
+    connect(this, &MapFrame::pointerToggled, renderer, &PublishGLRenderer::pointerToggled);
+    connect(this, &MapFrame::pointerPositionChanged, renderer, &PublishGLRenderer::setPointerPosition);
+    connect(this, &MapFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
+    connect(renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
+    renderer->setCameraRect(_cameraRect->getCameraRect());
+    renderer->setPointerFileName(_pointerFile);
+    renderer->setRotation(_rotation);
+
+    _renderer = renderer;
+}
+
 void MapFrame::rendererDeactivated()
 {
     if(!_renderer)
@@ -1885,6 +1872,15 @@ void MapFrame::rendererDeactivated()
         if(!screenshot.isNull())
             setBackgroundPixmap(QPixmap::fromImage(screenshot));
     }
+
+    disconnect(this, &MapFrame::distanceChanged, _renderer, &PublishGLMapRenderer::distanceChanged);
+    disconnect(this, &MapFrame::fowChanged, _renderer, &PublishGLMapRenderer::fowChanged);
+    disconnect(this, &MapFrame::cameraRectChanged, _renderer, &PublishGLMapRenderer::setCameraRect);
+    disconnect(this, &MapFrame::markerChanged, _renderer, &PublishGLMapRenderer::markerChanged);
+    disconnect(this, &MapFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
+    disconnect(this, &MapFrame::pointerPositionChanged, _renderer, &PublishGLRenderer::setPointerPosition);
+    disconnect(this, &MapFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
+    disconnect(_renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
 
     _renderer = nullptr;
 }

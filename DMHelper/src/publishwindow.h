@@ -12,7 +12,8 @@ class PublishWindow : public QMainWindow
 public:
     explicit PublishWindow(const QString& title, QWidget *parent = nullptr);
 
-    QUuid getObjectId();
+    QUuid getObjectId() const;
+    PublishGLRenderer* getRenderer() const;
 
 signals:
     void windowVisible(bool visible);

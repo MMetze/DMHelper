@@ -315,11 +315,6 @@ void PublishGLMapRenderer::paintGL()
         f->glDisable(GL_SCISSOR_TEST);
 }
 
-QColor PublishGLMapRenderer::getColor() const
-{
-    return _color;
-}
-
 void PublishGLMapRenderer::setRotation(int rotation)
 {
     if(rotation != _rotation)
@@ -416,15 +411,17 @@ void PublishGLMapRenderer::createPartyToken()
             _partyToken = new PublishGLImage(partyImage, false);
             _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
         }
-
-        _recreatePartyToken = false;
     }
+
+    _recreatePartyToken = false;
 }
 
 void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
 {
     if((!_map) || (_map->getMapItemCount() <= 0) || (sceneSize.isEmpty()))
         return;
+
+    _recreateLineToken = false;
 
     MapDrawLine* line = dynamic_cast<MapDrawLine*>(_map->getMapItem(0));
     if(line)
@@ -509,6 +506,8 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
 
+    _recreateMarkers = false;
+
     if((!_map) || (!_map->getShowMarkers()) || (sceneSize.isEmpty()))
         return;
 
@@ -526,7 +525,6 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
             {
                 QImage markerImage = markerItem->getGraphicsItemPixmap().toImage();
                 PublishGLImage* newMarkerItem = new PublishGLImage(markerImage, false);
-                // /*
                 QPointF markerTopLeft = markerItem->getTopLeft();
                 newMarkerItem->setPosition(markerItem->x() + markerTopLeft.x() - (sceneSize.width() / 2),
                                            (sceneSize.height() / 2) - (markerItem->y() + markerTopLeft.y() + markerImage.height()));

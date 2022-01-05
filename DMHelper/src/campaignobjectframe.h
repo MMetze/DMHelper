@@ -4,6 +4,7 @@
 #include <QFrame>
 
 class CampaignObjectBase;
+class PublishGLRenderer;
 
 class CampaignObjectFrame : public QFrame
 {
@@ -13,7 +14,7 @@ public:
     CampaignObjectFrame(QWidget *parent = nullptr);
     virtual ~CampaignObjectFrame();
 
-    virtual void activateObject(CampaignObjectBase* object);
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer);
     virtual void deactivateObject();
 
 signals:

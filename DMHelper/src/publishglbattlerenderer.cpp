@@ -33,6 +33,16 @@ PublishGLBattleRenderer::~PublishGLBattleRenderer()
     cleanup();
 }
 
+CampaignObjectBase* PublishGLBattleRenderer::getObject()
+{
+    return _model;
+}
+
+QColor PublishGLBattleRenderer::getBackgroundColor()
+{
+    return _model ? _model->getBackgroundColor() : QColor();
+}
+
 void PublishGLBattleRenderer::cleanup()
 {
     _initialized = false;
@@ -62,6 +72,20 @@ void PublishGLBattleRenderer::cleanup()
     _shaderModelMatrix = 0;
 
     PublishGLRenderer::cleanup();
+}
+
+bool PublishGLBattleRenderer::deleteOnDeactivation()
+{
+    return true;
+}
+
+void PublishGLBattleRenderer::setBackgroundColor(const QColor& color)
+{
+    if(_model)
+    {
+        _model->setBackgroundColor(color);
+        emit updateWidget();
+    }
 }
 
 void PublishGLBattleRenderer::initializeGL()

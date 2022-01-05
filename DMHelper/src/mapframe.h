@@ -17,6 +17,7 @@ class MapFrame;
 class MapFrameScene;
 class Map;
 class PublishGLRenderer;
+class PublishGLMapRenderer;
 class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
@@ -30,7 +31,7 @@ public:
     explicit MapFrame(QWidget *parent = nullptr);
     virtual ~MapFrame() override;
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setMap(Map* map);
@@ -183,7 +184,6 @@ protected:
     bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
     bool execEventFilterPointer(QObject *obj, QEvent *event);
 
-    void stopPlayerVideoPlayer();
     void extractDMScreenshot();
     void cleanupBuffers();
 
@@ -198,6 +198,7 @@ protected slots:
     void checkPartyUpdate();
 
     void handleScreenshotReady(const QImage& image);
+    void rendererActivated(PublishGLMapRenderer* renderer);
     void rendererDeactivated();
 
     void handleMapMousePress(const QPointF& pos);
@@ -253,7 +254,7 @@ private:
     qreal _scale;
 
     Map* _mapSource;
-    PublishGLRenderer* _renderer;
+    PublishGLMapRenderer* _renderer;
 
     QSize _targetSize;
     QSize _targetLabelSize;

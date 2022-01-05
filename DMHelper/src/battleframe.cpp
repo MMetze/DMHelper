@@ -204,9 +204,6 @@ BattleFrame::~BattleFrame()
 {
     qDebug() << "[Battle Frame] being destroyed: " << _combatantLayout->count() << " layouts and " << _combatantWidgets.count() << " widgets";
 
-    delete _renderer;
-    _renderer = nullptr;
-
     VideoPlayer* deletePlayer = _videoPlayer;
     _videoPlayer = nullptr;
     delete deletePlayer;
@@ -230,7 +227,7 @@ BattleFrame::~BattleFrame()
     qDebug() << "[Battle Frame] destroyed.";
 }
 
-void BattleFrame::activateObject(CampaignObjectBase* object)
+void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
     EncounterBattle* battle = dynamic_cast<EncounterBattle*>(object);
     if(!battle)
@@ -244,6 +241,8 @@ void BattleFrame::activateObject(CampaignObjectBase* object)
 
     setBattle(battle);
 
+    rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
+
     emit checkableChanged(true);
 }
 
@@ -254,6 +253,8 @@ void BattleFrame::deactivateObject()
         qDebug() << "[BattleFrame] WARNING: Invalid (nullptr) battle object deactivated!";
         return;
     }
+
+    rendererDeactivated();
 
     ui->frameCombatant->setCombatant(nullptr);
     setBattle(nullptr);
@@ -1580,21 +1581,21 @@ void BattleFrame::publishClicked(bool checked)
 
     if(_publishing)
     {
-        emit showPublishWindow();
-        if(!_renderer)
+        if(_renderer)
         {
-            _renderer = new PublishGLBattleRenderer(_model);
-            connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
-            connect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
-            connect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
-            connect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
+            qDebug() << "[BattleFrame] ERROR: Unexpected overwrite of existing renderer: " << _renderer;
+            emit registerRenderer(nullptr);
         }
 
-        emit registerRenderer(_renderer);
+        PublishGLBattleRenderer* newRenderer = new PublishGLBattleRenderer(_model);
+        rendererActivated(newRenderer);
+        emit registerRenderer(newRenderer);
+        emit showPublishWindow();
     }
     else
     {
         _publishTimer->stop();
+        emit registerRenderer(nullptr);
     }
 }
 
@@ -2667,6 +2668,38 @@ void BattleFrame::removeRollover()
     _hoverFrame->cancelClose();
     _hoverFrame->deleteLater();
     _hoverFrame = nullptr;
+}
+
+void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
+{
+    if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
+        return;
+
+    connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
+    connect(this, &BattleFrame::pointerToggled, renderer, &PublishGLRenderer::pointerToggled);
+    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
+    connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
+    connect(renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
+
+    //renderer->setCameraRect(_cameraRect->getCameraRect());
+    renderer->setPointerFileName(_pointerFile);
+    renderer->setRotation(_rotation);
+
+    _renderer = renderer;
+}
+
+void BattleFrame::rendererDeactivated()
+{
+    if(!_renderer)
+        return;
+
+    disconnect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
+    disconnect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
+    disconnect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
+    disconnect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
+    disconnect(_renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
+
+    _renderer = nullptr;
 }
 
 void BattleFrame::stateUpdated()

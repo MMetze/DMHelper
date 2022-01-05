@@ -4,6 +4,7 @@
 #include "publishglrenderer.h"
 #include "battleglscene.h"
 #include <QList>
+#include <QColor>
 
 class BattleDialogModel;
 class BattleGLObject;
@@ -16,8 +17,13 @@ public:
     PublishGLBattleRenderer(BattleDialogModel* model);
     virtual ~PublishGLBattleRenderer() override;
 
+    virtual CampaignObjectBase* getObject() override;
+    virtual QColor getBackgroundColor() override;
+
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
+    virtual bool deleteOnDeactivation() override;
+    virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;

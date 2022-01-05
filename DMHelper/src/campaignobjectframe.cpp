@@ -9,9 +9,11 @@ CampaignObjectFrame::~CampaignObjectFrame()
 {
 }
 
-void CampaignObjectFrame::activateObject(CampaignObjectBase* object)
+void CampaignObjectFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
     Q_UNUSED(object);
+    Q_UNUSED(currentRenderer);
+
     emit checkableChanged(false);
     emit setPublishEnabled(false);
 }

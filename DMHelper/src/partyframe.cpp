@@ -52,8 +52,10 @@ PartyFrame::~PartyFrame()
     delete ui;
 }
 
-void PartyFrame::activateObject(CampaignObjectBase* object)
+void PartyFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
+    Q_UNUSED(currentRenderer);
+
     Party* party = dynamic_cast<Party*>(object);
     if(!party)
         return;

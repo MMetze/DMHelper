@@ -82,7 +82,7 @@ EncounterTextEdit::~EncounterTextEdit()
     delete ui;
 }
 
-void EncounterTextEdit::activateObject(CampaignObjectBase* object)
+void EncounterTextEdit::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
     EncounterText* encounter = dynamic_cast<EncounterText*>(object);
     if(!encounter)
@@ -95,6 +95,9 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object)
     }
 
     setEncounter(encounter);
+
+    if((currentRenderer) && (currentRenderer->getObject() == object))
+        _renderer = dynamic_cast<PublishGLTextRenderer*>(currentRenderer);
 
     emit setPublishEnabled(true);
 }

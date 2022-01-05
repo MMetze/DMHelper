@@ -2395,7 +2395,7 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         connect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
         connect(objectFrame, SIGNAL(backgroundColorChanged(const QColor&)), _ribbon->getPublishRibbon(), SLOT(setColor(const QColor&)));
 
-        objectFrame->activateObject(object);
+        objectFrame->activateObject(object, _pubWindow ? _pubWindow->getRenderer() : nullptr);
         if(_ribbon && _ribbon->getPublishRibbon())
         {
             objectFrame->setRotation(_ribbon->getPublishRibbon()->getRotation());

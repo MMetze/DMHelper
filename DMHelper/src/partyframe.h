@@ -23,7 +23,7 @@ public:
     explicit PartyFrame(QWidget *parent = nullptr);
     ~PartyFrame();
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setParty(Party* party);
