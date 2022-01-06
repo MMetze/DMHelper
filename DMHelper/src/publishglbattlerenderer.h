@@ -4,12 +4,15 @@
 #include "publishglrenderer.h"
 #include "battleglscene.h"
 #include <QList>
+#include <QHash>
 #include <QColor>
 #include <QMatrix4x4>
 
 class BattleDialogModel;
 class BattleGLObject;
+class BattleGLToken;
 class BattleGLBackground;
+class BattleDialogModelCombatant;
 
 class PublishGLBattleRenderer : public PublishGLRenderer
 {
@@ -48,11 +51,13 @@ private:
     QRect _scissorRect;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
+    int _shaderProjectionMatrix;
 
     BattleGLBackground* _backgroundObject;
     BattleGLBackground* _fowObject;
-    QList<BattleGLObject*> _pcTokens;
-    QList<BattleGLObject*> _enemyTokens;
+    QHash<BattleDialogModelCombatant*, BattleGLToken*> _combatantTokens;
+    QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
+    PublishGLImage* _unknownToken;
     QList<BattleGLObject*> _effectTokens;
 
     bool _updateFow;

@@ -61,6 +61,7 @@ public:
     bool getShowLairActions() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
+    int getActiveCombatantIndex() const;
     QImage getBackgroundImage() const;
 
 public slots:
@@ -101,6 +102,7 @@ signals:
     void showEffectsChanged(bool showEffects);
     void showMovementChanged(bool showMovement);
     void showLairActionsChanged(bool showLairActions);
+    void combatantListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void backgroundImageChanged(QImage backgroundImage);
 

@@ -96,7 +96,7 @@ void BattleGLBackground::createImageObjects(const QImage& image)
     _imageSize = image.size();
 
     float vertices[] = {
-        // positions    // colors           // texture coords
+        // positions                                                   // colors           // texture coords
          (float)image.width() / 2,  (float)image.height() / 2, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
          (float)image.width() / 2, -(float)image.height() / 2, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
         -(float)image.width() / 2, -(float)image.height() / 2, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left

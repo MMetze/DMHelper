@@ -127,6 +127,16 @@ QSize PublishGLImage::getSize() const
     return _imageSize * _scaleFactor;
 }
 
+QSize PublishGLImage::getImageSize() const
+{
+    return _imageSize;
+}
+
+float PublishGLImage::getScale() const
+{
+    return _scaleFactor;
+}
+
 void PublishGLImage::createImageObjects(const QImage& image)
 {
     if(!QOpenGLContext::currentContext())

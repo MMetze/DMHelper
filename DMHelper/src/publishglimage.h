@@ -21,6 +21,7 @@ public:
     void setPosition(const QPointF& pos);
 
     QSize getSize() const;
+    QSize getImageSize() const;
     float getScale() const;
 
 protected:

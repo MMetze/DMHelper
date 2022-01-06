@@ -6,13 +6,14 @@
 #include <QImage>
 #include <QPixmap>
 
-BattleGLToken::BattleGLToken(BattleGLScene* scene, BattleDialogModelCombatant* combatant) :
+BattleGLToken::BattleGLToken(BattleGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
     BattleGLObject(scene),
     _combatant(combatant),
     _VAO(0),
     _VBO(0),
     _EBO(0),
-    _textureSize()
+    _textureSize(),
+    _isPC(isPC)
 {
     if(!QOpenGLContext::currentContext())
         return;
@@ -141,6 +142,16 @@ void BattleGLToken::paintGL()
     f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+QSizeF BattleGLToken::getTextureSize() const
+{
+    return _textureSize;
+}
+
+bool BattleGLToken::isPC() const
+{
+    return _isPC;
+}
+
 void BattleGLToken::combatantMoved()
 {
     if(!_scene)
@@ -156,4 +167,13 @@ void BattleGLToken::combatantMoved()
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
     emit changed();
+}
+
+void BattleGLToken::setPC(bool isPC)
+{
+    if(isPC != _isPC)
+    {
+        _isPC = isPC;
+        emit changed();
+    }
 }

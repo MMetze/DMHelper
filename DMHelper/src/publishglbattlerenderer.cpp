@@ -5,11 +5,15 @@
 #include "battleglbackground.h"
 #include "battlegltoken.h"
 #include "battlegleffect.h"
+#include "publishglimage.h"
+#include "battledialogmodelcombatant.h"
 #include "map.h"
 #include "character.h"
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
 #include <QMatrix4x4>
+#include <QPainter>
+#include <QApplication>
 #include <QDebug>
 
 PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
@@ -22,10 +26,12 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
     _scissorRect(),
     _shaderProgram(0),
     _shaderModelMatrix(0),
+    _shaderProjectionMatrix(0),
     _backgroundObject(nullptr),
     _fowObject(nullptr),
-    _pcTokens(),
-    _enemyTokens(),
+    _combatantTokens(),
+    _combatantNames(),
+    _unknownToken(nullptr),
     _effectTokens(),
     _updateFow(false)
 {
@@ -50,15 +56,20 @@ void PublishGLBattleRenderer::cleanup()
 {
     _initialized = false;
 
+    disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
+
     delete _backgroundObject;
     _backgroundObject = nullptr;
     delete _fowObject;
     _fowObject = nullptr;
 
-    qDeleteAll(_pcTokens);
-    _pcTokens.clear();
-    qDeleteAll(_enemyTokens);
-    _enemyTokens.clear();
+    qDeleteAll(_combatantTokens);
+    _combatantTokens.clear();
+    qDeleteAll(_combatantNames);
+    _combatantNames.clear();
+    delete _unknownToken;
+    _unknownToken = nullptr;
+
     qDeleteAll(_effectTokens);
     _effectTokens.clear();
 
@@ -75,6 +86,7 @@ void PublishGLBattleRenderer::cleanup()
         _shaderProgram = 0;
     }
     _shaderModelMatrix = 0;
+    _shaderProjectionMatrix = 0;
 
     PublishGLRenderer::cleanup();
 }
@@ -183,6 +195,7 @@ void PublishGLBattleRenderer::initializeGL()
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
+    _shaderProjectionMatrix = f->glGetUniformLocation(_shaderProgram, "projection");
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
@@ -191,20 +204,34 @@ void PublishGLBattleRenderer::initializeGL()
     if(_model->getMap())
         _fowObject = new BattleGLBackground(&_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
 
+    QFontMetrics fm(qApp->font());
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(i);
         if(combatant)
         {
-            BattleGLObject* combatantToken = new BattleGLToken(&_scene, combatant);
+            BattleGLToken* combatantToken = new BattleGLToken(&_scene, combatant);
             BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(combatant);
             if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
-                _pcTokens.append(combatantToken);
-            else
-                _enemyTokens.append(combatantToken);
+                combatantToken->setPC(true);
+            _combatantTokens.insert(combatant, combatantToken);
+
+            QRect nameBounds = fm.boundingRect(combatant->getName());
+            QImage nameImage(nameBounds.size(), QImage::Format_RGBA8888);
+            nameImage.fill(Qt::transparent);
+            QPainter namePainter;
+            namePainter.begin(&nameImage);
+                namePainter.setPen(QPen(Qt::white));
+                namePainter.drawText(0, -nameBounds.top(), combatant->getName());
+            namePainter.end();
+            PublishGLImage* combatantName = new PublishGLImage(nameImage, false);
+            _combatantNames.insert(combatant, combatantName);
+
             connect(combatantToken, &BattleGLObject::changed, this, &PublishGLBattleRenderer::updateWidget);
         }
     }
+
+    _unknownToken = new PublishGLImage(ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate).toImage());
 
     for(int i = 0; i < _model->getEffectCount(); ++i)
     {
@@ -234,6 +261,8 @@ void PublishGLBattleRenderer::initializeGL()
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
+    connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
+    connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
     _initialized = true;
 }
 
@@ -262,7 +291,7 @@ void PublishGLBattleRenderer::paintGL()
     if((!f) || (!e))
         return;
 
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
+    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
 
     if(!_scissorRect.isEmpty())
     {
@@ -283,10 +312,14 @@ void PublishGLBattleRenderer::paintGL()
         _backgroundObject->paintGL();
     }
 
-    for(BattleGLObject* enemyToken : _enemyTokens)
+    QList<BattleGLToken*> tokens = _combatantTokens.values();
+    for(BattleGLToken* enemyToken : tokens)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, enemyToken->getMatrixData());
-        enemyToken->paintGL();
+        if(!enemyToken->isPC())
+        {
+            f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, enemyToken->getMatrixData());
+            enemyToken->paintGL();
+        }
     }
 
     for(BattleGLObject* effectToken : _effectTokens)
@@ -306,15 +339,76 @@ void PublishGLBattleRenderer::paintGL()
         _fowObject->paintGL();
     }
 
-    for(BattleGLObject* pcToken : _pcTokens)
+    for(BattleGLToken* pcToken : tokens)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, pcToken->getMatrixData());
-        pcToken->paintGL();
+        if(pcToken->isPC())
+        {
+            f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, pcToken->getMatrixData());
+            pcToken->paintGL();
+        }
     }
 
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
 
+    // Initiative timeline test
+    QMatrix4x4 screenCoords;
+    screenCoords.ortho(0.f, _scene.getTargetSize().width(), 0.f, _scene.getTargetSize().height(), 0.1f, 1000.f);
+    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, screenCoords.constData());
+    QMatrix4x4 tokenScreenCoords;
+    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
+    qreal tokenY = _scene.getTargetSize().height() - tokenSize / 2.0 - 5.0;
+
+    int activeCombatant = _model->getActiveCombatantIndex();
+    int currentCombatant = activeCombatant;
+    do
+    {
+        BattleDialogModelCombatant* combatant = _model->getCombatant(currentCombatant);
+        if((combatant) && (combatant->getHitPoints() > 0) && (combatant->getKnown()))
+        {
+            PublishGLObject* tokenObject = nullptr;
+            QSizeF textureSize;
+            if(combatant->getShown())
+            {
+                BattleGLToken* combatantToken = _combatantTokens.value(combatant);
+                tokenObject = combatantToken;
+                if(combatantToken)
+                    textureSize = combatantToken->getTextureSize();
+            }
+            else
+            {
+                tokenObject = _unknownToken;
+                textureSize = _unknownToken->getImageSize();
+            }
+
+            if(tokenObject)
+            {
+                qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
+                tokenScreenCoords.setToIdentity();
+                tokenScreenCoords.translate(tokenSize / 2.0, tokenY);
+                tokenScreenCoords.scale(scaleFactor, scaleFactor);
+                f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
+                tokenObject->paintGL();
+            }
+
+            PublishGLImage* combatantName = _combatantNames.value(combatant);
+            if(combatantName)
+            {
+                tokenScreenCoords.setToIdentity();
+                tokenScreenCoords.translate(tokenSize * 1.2, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
+                f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
+                combatantName->paintGL();
+            }
+
+            tokenY -= (tokenSize * 1.1);
+        }
+
+        if(++currentCombatant >= _model->getCombatantCount())
+            currentCombatant = 0;
+
+    } while(currentCombatant != activeCombatant);
+
+    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
     paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
 }
 

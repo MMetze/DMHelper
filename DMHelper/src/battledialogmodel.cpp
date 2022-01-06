@@ -102,6 +102,7 @@ void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* c
         return;
 
     _combatants.insert(index, combatant);
+    emit combatantListChanged();
 }
 
 BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
@@ -113,6 +114,8 @@ BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
         if(_activeCombatant == removedCombatant)
             _activeCombatant = nullptr;
     }
+
+    emit combatantListChanged();
 
     return removedCombatant;
 }
@@ -127,11 +130,14 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
     // For a character addition, connect to the destroyed signal
     if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
         connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
+
+    emit combatantListChanged();
 }
 
 void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
 {
-    _combatants.append(combatants);
+    for(BattleDialogModelCombatant* combatant : combatants)
+        appendCombatant(combatant);
 }
 
 bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
@@ -327,6 +333,11 @@ const BattleDialogLogger& BattleDialogModel::getLogger() const
 BattleDialogModelCombatant* BattleDialogModel::getActiveCombatant() const
 {
     return _activeCombatant;
+}
+
+int BattleDialogModel::getActiveCombatantIndex() const
+{
+    return _activeCombatant ? _combatants.indexOf(_activeCombatant) : -1;
 }
 
 QImage BattleDialogModel::getBackgroundImage() const
