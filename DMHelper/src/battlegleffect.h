@@ -5,6 +5,7 @@
 
 class BattleDialogModelEffect;
 class BattleDialogModelEffectObject;
+class QPainter;
 
 class BattleGLEffect : public BattleGLObject
 {
@@ -20,6 +21,8 @@ public slots:
     void effectMoved();
 
 protected:
+    virtual void drawShape(QPainter& painter, int effectType, int effectSize, int effectWidth);
+
     BattleDialogModelEffect* _effect;
     BattleDialogModelEffectObject* _childEffect;
     unsigned int _VAO;

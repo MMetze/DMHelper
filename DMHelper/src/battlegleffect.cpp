@@ -34,15 +34,16 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
     if(childEffects.count() == 1)
         _childEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
 
-    QSize effectSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * (_effect->getSize() / 5),
-                     DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][1] * (_effect->getSize() / 5));
-    QImage effectImage(effectSize, QImage::Format_RGBA8888);
+    int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * (_effect->getSize() / 5); // Primary dimension
+    int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * (_effect->getWidth() / 5); // Secondary dimension
+    QImage effectImage(QSize(effectSize, effectSize), QImage::Format_RGBA8888);
     effectImage.fill(QColor(0, 0, 0, 0));
     QPainter painter;
     painter.begin(&effectImage);
         painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter.setBrush(QBrush(_effect->getColor()));
-        painter.drawEllipse(effectImage.rect());
+        //painter.drawEllipse(effectImage.rect());
+        drawShape(painter, effect->getEffectType(), effectSize, effectWidth);
 
         if(_childEffect)
         {
@@ -66,6 +67,16 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
         -(float)_textureSize.width() / 2.f, -(float)_textureSize.height() / 2.f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
         -(float)_textureSize.width() / 2.f,  (float)_textureSize.height() / 2.f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
     };
+
+    if((effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+       (effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+    {
+        /*vertices[0]  = (float)_textureSize.width(); */ vertices[1]  = 0.0f;
+        /*vertices[8]  = (float)_textureSize.width(); */ vertices[9]  = (float)-_textureSize.height();
+        /*vertices[16] = 0.0f;                        */ vertices[17] = (float)-_textureSize.height();
+        /*vertices[24] = 0.0f;                        */ vertices[25] = 0.0f;
+    }
+
 
     unsigned int indices[] = {  // note that we start from 0!
         0, 1, 3,   // first triangle
@@ -180,7 +191,38 @@ void BattleGLEffect::effectMoved()
 
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(effectPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - effectPos.y());
+    _modelMatrix.rotate(effect->getRotation(), 0.f, 0.f, -1.f);
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
     emit changed();
 }
+
+void BattleGLEffect::drawShape(QPainter& painter, int effectType, int effectSize, int effectWidth)
+{
+    switch(effectType)
+    {
+        case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
+            painter.drawEllipse(QRectF(0, 0, effectSize, effectSize));
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Cone:
+            {
+                QPolygonF poly;
+                poly << QPointF(effectSize / 2, effectSize) << QPointF(0, 0) << QPoint(effectSize, 0) << QPoint(effectSize / 2, effectSize);
+                painter.drawPolygon(poly);
+            }
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Cube:
+            painter.drawRect(QRectF(0, 0, effectSize, effectSize));
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Line:
+            {
+                painter.drawRect(QRect((effectSize / 2) - (effectWidth / 2), 0, effectWidth, effectSize));
+                break;
+            }
+        case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+        default:
+            painter.drawEllipse(QRectF(0, 0, effectSize, effectSize)); // TODO: FIX
+            break;
+    }
+}
+
