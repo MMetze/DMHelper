@@ -38,18 +38,20 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
     int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * (_effect->getWidth() / 5); // Secondary dimension
     if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
         effectSize *= 2; // Convert radius to diameter
+
     QImage effectImage;
     if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
         effectImage = QImage(QSize(effectWidth, effectSize), QImage::Format_RGBA8888);
     else
         effectImage = QImage(QSize(effectSize, effectSize), QImage::Format_RGBA8888);
 
-    effectImage.fill(QColor(0, 0, 128, 255));
+    effectImage.fill(QColor(0, 0, 0, 0));
+
     QPainter painter;
     painter.begin(&effectImage);
         painter.setPen(QPen(QColor(_effect->getColor().red(), _effect->getColor().green(), _effect->getColor().blue(), 255), 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         painter.setBrush(QBrush(_effect->getColor()));
-        drawShape(painter, effect->getEffectType(), effectSize, effectWidth);
+        drawShape(painter, _effect, effectSize, effectWidth);
 
         if(_childEffect)
         {
@@ -63,7 +65,7 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
                     itemImage = itemImage.mirrored(false, true); // mirror vertically
 
                 if(_childEffect->getImageRotation() != 0)
-                    itemImage = itemImage.transformed(QTransform().rotate(_childEffect->getImageRotation()));//.scale(_imageScaleFactor, _imageScaleFactor));
+                    itemImage = itemImage.transformed(QTransform().rotate(_childEffect->getImageRotation()));
 
                 if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
                     painter.drawImage(QRect(0, 0, effectWidth, effectSize), itemImage);
@@ -220,9 +222,12 @@ void BattleGLEffect::effectMoved()
     emit changed();
 }
 
-void BattleGLEffect::drawShape(QPainter& painter, int effectType, int effectSize, int effectWidth)
+void BattleGLEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth)
 {
-    switch(effectType)
+    if(!effect)
+        return;
+
+    switch(effect->getEffectType())
     {
         case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
             painter.drawEllipse(QRectF(0, 0, effectSize, effectSize));
@@ -243,9 +248,26 @@ void BattleGLEffect::drawShape(QPainter& painter, int effectType, int effectSize
                 break;
             }
         case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+            drawObject(painter, dynamic_cast<BattleDialogModelEffectObject*>(effect), effectSize, effectWidth);
+            break;
         default:
-            painter.drawEllipse(QRectF(0, 0, effectSize, effectSize)); // TODO: FIX
             break;
     }
+}
+
+void BattleGLEffect::drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth)
+{
+    if(!effectObject)
+        return;
+
+    QImage itemImage(effectObject->getImageFile());
+    if(itemImage.isNull())
+        return;
+
+    itemImage = itemImage.mirrored(false, true); // mirror vertically
+    if(effectObject->getImageRotation() != 0)
+        itemImage = itemImage.transformed(QTransform().rotate(effectObject->getImageRotation()));
+
+    painter.drawImage(QRect(0, 0, effectWidth, effectSize), itemImage);
 }
 
