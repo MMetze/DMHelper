@@ -461,7 +461,8 @@ void Campaign::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
 
 bool Campaign::belongsToObject(QDomElement& element)
 {
-    if(element.tagName() == QString("soundboard"))
+    if((element.tagName() == QString("soundboard")) ||
+       (element.tagName() == QString("notes")))
         return true;
     else
         return CampaignObjectBase::belongsToObject(element);

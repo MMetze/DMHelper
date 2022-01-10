@@ -748,17 +748,25 @@ bool MainWindow::saveCampaign()
 
     qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
 
-    QDomDocument doc( "DMHelperXML" );
+    QDomDocument doc("DMHelperXML");
 
-    QDomElement root = doc.createElement( "root" );
-    doc.appendChild( root );
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
 
     QFileInfo fileInfo(_campaignFileName);
     QDir targetDir(fileInfo.absoluteDir());
     _campaign->outputXML(doc, root, targetDir, false);
 
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(currentObject)
+    {
+        QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+        if(!campaignElement.isNull())
+            campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+    }
+
     QFile file(_campaignFileName);
-    if( !file.open( QIODevice::WriteOnly ) )
+    if(!file.open(QIODevice::WriteOnly))
     {
         qDebug() << "[MainWindow] Unable to open campaign file for writing: " << _campaignFileName;
         qDebug() << "       Error " << file.error() << ": " << file.errorString();
@@ -769,7 +777,7 @@ bool MainWindow::saveCampaign()
         return false;
     }
 
-    QTextStream ts( &file );
+    QTextStream ts(&file);
     ts.setCodec("UTF-8");
     ts << doc.toString();
 
@@ -1932,6 +1940,8 @@ void MainWindow::openCampaign(const QString& filename)
         return;
     }
 
+    QUuid lastElementId = QUuid(campaignElement.attribute(QString("lastElement")));
+
     _campaignFileName = filename;
     QFileInfo fileInfo(_campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
@@ -1961,6 +1971,8 @@ void MainWindow::openCampaign(const QString& filename)
 
     selectItem(DMHelper::TreeType_Campaign, QUuid());
     emit campaignLoaded(_campaign);
+    if(!lastElementId.isNull())
+        selectItem(lastElementId);
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(filename);
@@ -2417,9 +2429,6 @@ void MainWindow::activateObject(CampaignObjectBase* object)
 
 void MainWindow::deactivateObject()
 {
-//    if(_ribbon->getPublishRibbon())
-//        _ribbon->getPublishRibbon()->cancelPublish();
-
     CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
     if(objectFrame)
     {
@@ -2432,7 +2441,7 @@ void MainWindow::deactivateObject()
 
 void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
 {
-    CampaignObjectFrame* objectFrame = ui->stackedWidgetEncounter->setCurrentFrame(objectType); //ui->stackedWidgetEncounter->setCurrentIndex(widgetId);
+    CampaignObjectFrame* objectFrame = ui->stackedWidgetEncounter->setCurrentFrame(objectType);
     if(objectFrame)
     {
         connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
