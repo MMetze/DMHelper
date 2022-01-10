@@ -194,14 +194,17 @@ void BattleDialogModel::insertEffect(int index, BattleDialogModelEffect* effect)
         return;
 
     _effects.insert(index, effect);
+    emit effectListChanged();
 }
 
 BattleDialogModelEffect* BattleDialogModel::removeEffect(int index)
 {
-    if((index < 0) || (index >= _effects.count()))
-        return nullptr;
-    else
-        return _effects.takeAt(index);
+    BattleDialogModelEffect* result = nullptr;
+    if((index >= 0) && (index < _effects.count()))
+        result = _effects.takeAt(index);
+
+    emit effectListChanged();
+    return result;
 }
 
 bool BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
@@ -215,10 +218,9 @@ bool BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
     bool result = _effects.removeOne(effect);
 
     if(!result)
-    {
         qDebug() << "[Battle Dialog Model] ERROR: Unable to remove effect " << effect;
-    }
 
+    emit effectListChanged();
     return result;
 }
 
@@ -228,6 +230,7 @@ void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
         return;
 
     _effects.append(effect);
+    emit effectListChanged();
 }
 
 Map* BattleDialogModel::getMap() const

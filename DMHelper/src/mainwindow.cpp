@@ -145,7 +145,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabText(nullptr),
     _ribbonTabMap(nullptr),
     _ribbonTabWorldMap(nullptr),
-    _ribbonTabAudio(nullptr)
+    _ribbonTabAudio(nullptr),
+    _battleFrame(nullptr),
+    _mapFrame(nullptr)
 {
     qDebug() << "[MainWindow] Initializing Main";
 
@@ -433,93 +435,71 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Adding Text Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Battle
-    BattleFrame* battleFrame = new BattleFrame;
-    battleFrame->setShowOnDeck(_options->getShowOnDeck());
-    battleFrame->setShowCountdown(_options->getShowCountdown());
-    battleFrame->setCountdownDuration(_options->getCountdownDuration());
-    battleFrame->setPointerFile(_options->getPointerFile());
-    battleFrame->setSelectedIcon(_options->getSelectedIcon());
-    battleFrame->setActiveIcon(_options->getActiveIcon());
-    battleFrame->setCombatantFrame(_options->getCombatantFrame());
-    battleFrame->setCountdownFrame(_options->getCountdownFrame());
-    connect(_options, SIGNAL(showOnDeckChanged(bool)), battleFrame, SLOT(setShowOnDeck(bool)));
-    connect(_options, SIGNAL(showCountdownChanged(bool)), battleFrame, SLOT(setShowCountdown(bool)));
-    connect(_options, SIGNAL(countdownDurationChanged(int)), battleFrame, SLOT(setCountdownDuration(int)));
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), battleFrame, SLOT(setPointerFile(const QString&)));
-    connect(_options, SIGNAL(selectedIconChanged(const QString&)), battleFrame, SLOT(setSelectedIcon(const QString&)));
-    connect(_options, SIGNAL(activeIconChanged(const QString&)), battleFrame, SLOT(setActiveIcon(const QString&)));
-    connect(_options, SIGNAL(combatantFrameChanged(const QString&)), battleFrame, SLOT(setCombatantFrame(const QString&)));
-    connect(_options, SIGNAL(countdownFrameChanged(const QString&)), battleFrame, SLOT(setCountdownFrame(const QString&)));
-    connect(_pubWindow, SIGNAL(frameResized(QSize)), battleFrame, SLOT(setTargetSize(QSize)));
-    connect(_pubWindow, SIGNAL(labelResized(QSize)), battleFrame, SLOT(setTargetLabelSize(QSize)));
-    connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), battleFrame, SLOT(publishWindowMouseDown(const QPointF&)));
-    connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), battleFrame, SLOT(publishWindowMouseMove(const QPointF&)));
-    connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), battleFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
-    connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
-    connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
-    connect(battleFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
-    connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
-    connect(battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
-    connect(battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
-    connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), battleFrame, SLOT(addCharacter()));
-    connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), battleFrame, SLOT(addMonsters()));
-    connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
-    connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), battleFrame, SLOT(addObject()));
-    connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), battleFrame, SLOT(castSpell()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(addEffectRadius()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), battleFrame, SLOT(addEffectCone()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), battleFrame, SLOT(addEffectCube()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), battleFrame, SLOT(addEffectLine()));
-    connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), battleFrame, SLOT(showStatistics()));
+    _battleFrame = new BattleFrame;
+    _battleFrame->setShowOnDeck(_options->getShowOnDeck());
+    _battleFrame->setShowCountdown(_options->getShowCountdown());
+    _battleFrame->setCountdownDuration(_options->getCountdownDuration());
+    _battleFrame->setPointerFile(_options->getPointerFile());
+    _battleFrame->setSelectedIcon(_options->getSelectedIcon());
+    _battleFrame->setActiveIcon(_options->getActiveIcon());
+    _battleFrame->setCombatantFrame(_options->getCombatantFrame());
+    _battleFrame->setCountdownFrame(_options->getCountdownFrame());
+    connect(_options, SIGNAL(showOnDeckChanged(bool)), _battleFrame, SLOT(setShowOnDeck(bool)));
+    connect(_options, SIGNAL(showCountdownChanged(bool)), _battleFrame, SLOT(setShowCountdown(bool)));
+    connect(_options, SIGNAL(countdownDurationChanged(int)), _battleFrame, SLOT(setCountdownDuration(int)));
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _battleFrame, SLOT(setPointerFile(const QString&)));
+    connect(_options, SIGNAL(selectedIconChanged(const QString&)), _battleFrame, SLOT(setSelectedIcon(const QString&)));
+    connect(_options, SIGNAL(activeIconChanged(const QString&)), _battleFrame, SLOT(setActiveIcon(const QString&)));
+    connect(_options, SIGNAL(combatantFrameChanged(const QString&)), _battleFrame, SLOT(setCombatantFrame(const QString&)));
+    connect(_options, SIGNAL(countdownFrameChanged(const QString&)), _battleFrame, SLOT(setCountdownFrame(const QString&)));
+    connect(_pubWindow, SIGNAL(frameResized(QSize)), _battleFrame, SLOT(setTargetSize(QSize)));
+    connect(_pubWindow, SIGNAL(labelResized(QSize)), _battleFrame, SLOT(setTargetLabelSize(QSize)));
+    connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), _battleFrame, SLOT(publishWindowMouseDown(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), _battleFrame, SLOT(publishWindowMouseMove(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _battleFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
+    connect(_battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
+    connect(_battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
+    connect(_battleFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
+    connect(_battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    connect(_battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
+    connect(_battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
+    connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), _battleFrame, SLOT(addCharacter()));
+    connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), _battleFrame, SLOT(addMonsters()));
+    connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
+    connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), _battleFrame, SLOT(addObject()));
+    connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), _battleFrame, SLOT(castSpell()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), _battleFrame, SLOT(addEffectRadius()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), _battleFrame, SLOT(addEffectCone()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), _battleFrame, SLOT(addEffectCube()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), _battleFrame, SLOT(addEffectLine()));
+    connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "Next Combatant")), this);
-    connect(nextShortcut, SIGNAL(activated()), battleFrame, SLOT(next()));
+    connect(nextShortcut, SIGNAL(activated()), _battleFrame, SLOT(next()));
 
-    connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), battleFrame, SLOT(selectBattleMap()));
-    connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), battleFrame, SLOT(reloadMap()));
-    connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), battleFrame, SLOT(setGridVisible(bool)));
-    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, battleFrame, &BattleFrame::setGridType);
-    connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), battleFrame, SLOT(setGridScale(int)));
-    connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), battleFrame, SLOT(setGridAngle(int)));
-    connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), battleFrame, SLOT(setXOffset(int)));
-    connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), battleFrame, SLOT(setYOffset(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), _battleFrame, SLOT(selectBattleMap()));
+    connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
+    connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
+    connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
 
-    connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), battleFrame, SLOT(setFoWEdit(bool)));
-    connect(battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
-    connect(_ribbonTabBattleMap, SIGNAL(selectFoWClicked(bool)), battleFrame, SLOT(setFoWSelect(bool)));
-    connect(battleFrame, SIGNAL(foWSelectToggled(bool)), _ribbonTabBattleMap, SLOT(setSelectFoW(bool)));
-    BattleFrameMapDrawer* mapDrawer = battleFrame->getMapDrawer();
+    connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
+    connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
+    connect(_ribbonTabBattleMap, SIGNAL(selectFoWClicked(bool)), _battleFrame, SLOT(setFoWSelect(bool)));
+    connect(_battleFrame, SIGNAL(foWSelectToggled(bool)), _ribbonTabBattleMap, SLOT(setSelectFoW(bool)));
+    BattleFrameMapDrawer* mapDrawer = _battleFrame->getMapDrawer();
     connect(_ribbonTabBattleMap, SIGNAL(drawEraseClicked(bool)), mapDrawer, SLOT(setErase(bool)));
     connect(_ribbonTabBattleMap, SIGNAL(smoothClicked(bool)), mapDrawer, SLOT(setSmooth(bool)));
     connect(_ribbonTabBattleMap, SIGNAL(brushSizeChanged(int)), mapDrawer, SLOT(setSize(int)));
     connect(_ribbonTabBattleMap, SIGNAL(fillFoWClicked()), mapDrawer, SLOT(fillFoW()));
     connect(_ribbonTabBattleMap, SIGNAL(brushModeChanged(int)), mapDrawer, SLOT(setBrushMode(int)));
 
-    connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), battleFrame, SLOT(zoomIn()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), battleFrame, SLOT(zoomOut()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), battleFrame, SLOT(zoomFit()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), battleFrame, SLOT(zoomSelect(bool)));
-    connect(battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
-
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, battleFrame, &BattleFrame::setCameraCouple);
-    connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(setCameraMap()));
-    connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(setCameraSelect(bool)));
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, battleFrame, &BattleFrame::setCameraVisible);
-    connect(battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(setCameraEdit(bool)));
-    connect(battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
-
-    connect(_ribbonTabBattleView, SIGNAL(distanceClicked(bool)), battleFrame, SLOT(setDistance(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), battleFrame, SLOT(setDistanceHeight(bool, qreal)));
-    connect(battleFrame, SIGNAL(distanceToggled(bool)), _ribbonTabBattleView, SLOT(setDistanceOn(bool)));
-    connect(battleFrame, SIGNAL(distanceChanged(const QString&)), _ribbonTabBattleView, SLOT(setDistance(const QString&)));
-
-    connect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), battleFrame, SLOT(setPointerOn(bool)));
-    connect(battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
-
-    connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
+    connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
 
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Battle,
-                                                      DMHelper::CampaignType_BattleContent}), battleFrame);
+                                                      DMHelper::CampaignType_BattleContent}), _battleFrame);
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
@@ -535,82 +515,66 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(characterChanged(QUuid)), partyFrame, SLOT(handleCharacterChanged(QUuid)));
     connect(partyFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
 
-
     // EncounterType_Map
-    MapFrame* mapFrame = new MapFrame;
-    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, mapFrame);
+    _mapFrame = new MapFrame;
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, _mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    mapFrame->setPointerFile(_options->getPointerFile());
+    _mapFrame->setPointerFile(_options->getPointerFile());
     //connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
-    connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
-    connect(mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
-    connect(_pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
-    connect(mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
+    connect(_mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    connect(_mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
+    connect(_pubWindow, SIGNAL(frameResized(QSize)), _mapFrame, SLOT(targetResized(QSize)));
+    connect(_mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
 
-    connect(_ribbonTabMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
+    connect(_ribbonTabMap, SIGNAL(editFileClicked()), _mapFrame, SLOT(editMapFile()));
     // connect(_ribbonTabMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), mapFrame, SLOT(zoomFit()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
-    connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
 
-    connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), mapFrame, SLOT(setMapEdit(bool)));
-    connect(mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
+    connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), _mapFrame, SLOT(setMapEdit(bool)));
+    connect(_mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
 
-    connect(_ribbonTabMap, SIGNAL(drawEraseClicked(bool)), mapFrame, SLOT(setErase(bool)));
-    connect(_ribbonTabMap, SIGNAL(smoothClicked(bool)), mapFrame, SLOT(setSmooth(bool)));
-    connect(_ribbonTabMap, SIGNAL(brushSizeChanged(int)), mapFrame, SLOT(brushSizeChanged(int)));
-    connect(_ribbonTabMap, SIGNAL(fillFoWClicked()), mapFrame, SLOT(fillFoW()));
-    connect(_ribbonTabMap, SIGNAL(colorizeClicked()), mapFrame, SLOT(colorize()));
-    connect(_ribbonTabMap, SIGNAL(brushModeChanged(int)), mapFrame, SLOT(setBrushMode(int)));
-    connect(mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMap, SLOT(setBrushMode(int)));
+    connect(_ribbonTabMap, SIGNAL(drawEraseClicked(bool)), _mapFrame, SLOT(setErase(bool)));
+    connect(_ribbonTabMap, SIGNAL(smoothClicked(bool)), _mapFrame, SLOT(setSmooth(bool)));
+    connect(_ribbonTabMap, SIGNAL(brushSizeChanged(int)), _mapFrame, SLOT(brushSizeChanged(int)));
+    connect(_ribbonTabMap, SIGNAL(fillFoWClicked()), _mapFrame, SLOT(fillFoW()));
+    connect(_ribbonTabMap, SIGNAL(colorizeClicked()), _mapFrame, SLOT(colorize()));
+    connect(_ribbonTabMap, SIGNAL(brushModeChanged(int)), _mapFrame, SLOT(setBrushMode(int)));
+    connect(_mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMap, SLOT(setBrushMode(int)));
 
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, mapFrame, &MapFrame::setCameraCouple);
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraZoomClicked, mapFrame, &MapFrame::setCameraMap);
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, mapFrame, &MapFrame::setCameraVisible);
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraSelectClicked, mapFrame, &MapFrame::setCameraSelect);
-    connect(mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, mapFrame, &MapFrame::setCameraEdit);
-    connect(mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
-    connect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, mapFrame, &MapFrame::setPointerOn);
-    connect(mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, _mapFrame, &MapFrame::setParty);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, _mapFrame, &MapFrame::setPartyIcon);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, _mapFrame, &MapFrame::setShowParty);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, _mapFrame, &MapFrame::setPartyScale);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, _mapFrame, &MapFrame::setShowMarkers);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, _mapFrame, &MapFrame::addNewMarker);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceClicked, _mapFrame, &MapFrame::setDistance);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::freeDistanceClicked, _mapFrame, &MapFrame::setFreeDistance);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceScaleChanged, _mapFrame, &MapFrame::setDistanceScale);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineColorChanged, _mapFrame, &MapFrame::setDistanceLineColor);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineTypeChanged, _mapFrame, &MapFrame::setDistanceLineType);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineWidthChanged, _mapFrame, &MapFrame::setDistanceLineWidth);
+    connect(_mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
+    connect(_mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
+    connect(_mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
+    connect(_mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
+    connect(_mapFrame, &MapFrame::showDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceOn);
+    connect(_mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setFreeDistanceOn);
+    connect(_mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceScale);
+    connect(_mapFrame, &MapFrame::distanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistance);
+    connect(_mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineColor);
+    connect(_mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineType);
+    connect(_mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineWidth);
 
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, mapFrame, &MapFrame::setParty);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, mapFrame, &MapFrame::setPartyIcon);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, mapFrame, &MapFrame::setShowParty);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, mapFrame, &MapFrame::setPartyScale);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, mapFrame, &MapFrame::setShowMarkers);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, mapFrame, &MapFrame::addNewMarker);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceClicked, mapFrame, &MapFrame::setDistance);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::freeDistanceClicked, mapFrame, &MapFrame::setFreeDistance);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceScaleChanged, mapFrame, &MapFrame::setDistanceScale);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineColorChanged, mapFrame, &MapFrame::setDistanceLineColor);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineTypeChanged, mapFrame, &MapFrame::setDistanceLineType);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineWidthChanged, mapFrame, &MapFrame::setDistanceLineWidth);
-    connect(mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
-    connect(mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
-    connect(mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
-    connect(mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
-    connect(mapFrame, &MapFrame::showDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceOn);
-    connect(mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setFreeDistanceOn);
-    connect(mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceScale);
-    connect(mapFrame, &MapFrame::distanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistance);
-    connect(mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineColor);
-    connect(mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineType);
-    connect(mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineWidth);
+    connect(_mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _mapFrame, SLOT(setPointerFile(const QString&)));
 
-    connect(mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), mapFrame, SLOT(setPointerFile(const QString&)));
+    connect(this, SIGNAL(cancelSelect()), _mapFrame, SLOT(cancelSelect()));
 
-    connect(this, SIGNAL(cancelSelect()), mapFrame, SLOT(cancelSelect()));
+    connect(_pubWindow, SIGNAL(labelResized(QSize)), _mapFrame, SLOT(setTargetLabelSize(QSize)));
+    connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), _mapFrame, SLOT(publishWindowMouseDown(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), _mapFrame, SLOT(publishWindowMouseMove(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
 
-    connect(_pubWindow, SIGNAL(labelResized(QSize)), mapFrame, SLOT(setTargetLabelSize(QSize)));
-    connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), mapFrame, SLOT(publishWindowMouseDown(const QPointF&)));
-    connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), mapFrame, SLOT(publishWindowMouseMove(const QPointF&)));
-    connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
-
-    connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
+    connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
 
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
@@ -1604,8 +1568,91 @@ void MainWindow::setupRibbonBar()
     setMenuWidget(_ribbon);
 }
 
+void MainWindow::connectBattleView(bool toBattle)
+{
+    if(toBattle)
+    {
+        // Battle
+        connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _battleFrame, SLOT(zoomIn()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _battleFrame, SLOT(zoomOut()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _battleFrame, SLOT(zoomFit()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _battleFrame, SLOT(zoomSelect(bool)));
+        connect(_battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _battleFrame, &BattleFrame::setCameraCouple);
+        connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), _battleFrame, SLOT(setCameraMap()));
+        connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), _battleFrame, SLOT(setCameraSelect(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _battleFrame, &BattleFrame::setCameraVisible);
+        connect(_battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
+        connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), _battleFrame, SLOT(setCameraEdit(bool)));
+        connect(_battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
+        connect(_ribbonTabBattleView, SIGNAL(distanceClicked(bool)), _battleFrame, SLOT(setDistance(bool)));
+        connect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), _battleFrame, SLOT(setDistanceHeight(bool, qreal)));
+        connect(_battleFrame, SIGNAL(distanceToggled(bool)), _ribbonTabBattleView, SLOT(setDistanceOn(bool)));
+        connect(_battleFrame, SIGNAL(distanceChanged(const QString&)), _ribbonTabBattleView, SLOT(setDistance(const QString&)));
+        connect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), _battleFrame, SLOT(setPointerOn(bool)));
+        connect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
+
+        // Map
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _mapFrame, SLOT(zoomOut()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _mapFrame, SLOT(zoomFit()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _mapFrame, SLOT(zoomSelect(bool)));
+        disconnect(_mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _mapFrame, &MapFrame::setCameraCouple);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraZoomClicked, _mapFrame, &MapFrame::setCameraMap);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _mapFrame, &MapFrame::setCameraVisible);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraSelectClicked, _mapFrame, &MapFrame::setCameraSelect);
+        disconnect(_mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, _mapFrame, &MapFrame::setCameraEdit);
+        disconnect(_mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, _mapFrame, &MapFrame::setPointerOn);
+        disconnect(_mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
+    }
+    else
+    {
+        // Battle
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _battleFrame, SLOT(zoomIn()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _battleFrame, SLOT(zoomOut()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _battleFrame, SLOT(zoomFit()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _battleFrame, SLOT(zoomSelect(bool)));
+        disconnect(_battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _battleFrame, &BattleFrame::setCameraCouple);
+        disconnect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), _battleFrame, SLOT(setCameraMap()));
+        disconnect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), _battleFrame, SLOT(setCameraSelect(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _battleFrame, &BattleFrame::setCameraVisible);
+        disconnect(_battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
+        disconnect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), _battleFrame, SLOT(setCameraEdit(bool)));
+        disconnect(_battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
+        disconnect(_ribbonTabBattleView, SIGNAL(distanceClicked(bool)), _battleFrame, SLOT(setDistance(bool)));
+        disconnect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), _battleFrame, SLOT(setDistanceHeight(bool, qreal)));
+        disconnect(_battleFrame, SIGNAL(distanceToggled(bool)), _ribbonTabBattleView, SLOT(setDistanceOn(bool)));
+        disconnect(_battleFrame, SIGNAL(distanceChanged(const QString&)), _ribbonTabBattleView, SLOT(setDistance(const QString&)));
+        disconnect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), _battleFrame, SLOT(setPointerOn(bool)));
+        disconnect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
+
+        // Map
+        connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _mapFrame, SLOT(zoomOut()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _mapFrame, SLOT(zoomFit()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _mapFrame, SLOT(zoomSelect(bool)));
+        connect(_mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _mapFrame, &MapFrame::setCameraCouple);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraZoomClicked, _mapFrame, &MapFrame::setCameraMap);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _mapFrame, &MapFrame::setCameraVisible);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraSelectClicked, _mapFrame, &MapFrame::setCameraSelect);
+        connect(_mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, _mapFrame, &MapFrame::setCameraEdit);
+        connect(_mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, _mapFrame, &MapFrame::setPointerOn);
+        connect(_mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
+    }
+}
+
 void MainWindow::deleteCampaign()
 {
+    if(_pubWindow)
+        _pubWindow->setRenderer(nullptr);
+
     if(_treeModel)
     {
         // Deselect the current object
@@ -2412,6 +2459,7 @@ void MainWindow::setRibbonToType(int objectType)
         case DMHelper::CampaignType_Battle:
         case DMHelper::CampaignType_BattleContent:
             _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs map and reuse
+            connectBattleView(true);
             _ribbon->enableTab(_ribbonTabBattleMap);
             _ribbon->enableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
@@ -2421,6 +2469,7 @@ void MainWindow::setRibbonToType(int objectType)
             break;
         case DMHelper::CampaignType_Map:
             _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs battle and reuse
+            connectBattleView(false);
             _ribbon->enableTab(_ribbonTabMap);
             _ribbon->enableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabBattleMap);

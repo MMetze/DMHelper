@@ -103,6 +103,7 @@ signals:
     void showMovementChanged(bool showMovement);
     void showLairActionsChanged(bool showLairActions);
     void combatantListChanged();
+    void effectListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void backgroundImageChanged(QImage backgroundImage);
 

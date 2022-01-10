@@ -42,6 +42,8 @@ class BattleDialogModel;
 class RibbonTabMap;
 class RibbonTabWorldMap;
 class RibbonTabAudio;
+class BattleFrame;
+class MapFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -130,6 +132,7 @@ protected:
     void dropEvent(QDropEvent *event);
 
     void setupRibbonBar();
+    void connectBattleView(bool toBattle);
 
     void deleteCampaign();
     void enableCampaignMenu();
@@ -235,6 +238,9 @@ private:
     RibbonTabMap* _ribbonTabMap;
     RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
+
+    BattleFrame* _battleFrame;
+    MapFrame* _mapFrame;
 };
 
 #endif // MAINWINDOW_H

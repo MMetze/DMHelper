@@ -503,6 +503,9 @@ void MapFrame::zoomOne()
 
 void MapFrame::zoomFit()
 {
+    if((!ui->graphicsView->viewport()) || (!_scene))
+        return;
+
     qreal widthFactor = static_cast<qreal>(ui->graphicsView->viewport()->width()) / _scene->width();
     qreal heightFactor = static_cast<qreal>(ui->graphicsView->viewport()->height()) / _scene->height();
     setScale(qMin(widthFactor, heightFactor));

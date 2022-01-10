@@ -56,6 +56,8 @@ void PublishGLBattleRenderer::cleanup()
 {
     _initialized = false;
 
+    disconnect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
 
     delete _backgroundObject;
@@ -263,6 +265,7 @@ void PublishGLBattleRenderer::initializeGL()
 
     connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
     connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
+    connect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::updateWidget);
     _initialized = true;
 }
 
