@@ -150,7 +150,7 @@ protected:
     void addNewAudioObject(const QString& audioFile);
 
 protected slots:
-    void openFile(const QString& filename);
+    void openCampaign(const QString& filename);
     void handleCampaignLoaded(Campaign* campaign);
     void updateCampaignTree();
     void updateMapFiles();

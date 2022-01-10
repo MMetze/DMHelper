@@ -360,9 +360,7 @@ void OptionsContainer::readSettings()
 #endif
 
     if(_mruHandler)
-    {
         _mruHandler->readMRUFromSettings(settings);
-    }
 }
 
 void OptionsContainer::writeSettings()

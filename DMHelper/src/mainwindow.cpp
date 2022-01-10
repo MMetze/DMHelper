@@ -200,7 +200,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Reading Settings";
     _options = new OptionsContainer(this);
     MRUHandler* mruHandler = new MRUHandler(nullptr, DEFAULT_MRU_FILE_COUNT, this);
-    connect(mruHandler,SIGNAL(triggerMRU(QString)),this,SLOT(openFile(QString)));
+    connect(mruHandler, SIGNAL(triggerMRU(QString)), this, SLOT(openCampaign(QString)));
     _options->setMRUHandler(mruHandler);
     _options->readSettings();
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
@@ -594,7 +594,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
-    connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openFile(QString)));
+    connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openCampaign(QString)));
     connect(_ribbonTabFile, SIGNAL(userGuideClicked()), welcomeFrame, SLOT(openUsersGuide()));
     connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_WelcomeScreen, welcomeFrame);
@@ -801,7 +801,7 @@ void MainWindow::openFileDialog()
 {
     QString filename = QFileDialog::getOpenFileName(this,QString("Select Campaign"), QString(), QString("XML files (*.xml)"));
     if( (!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)) )
-        openFile(filename);
+        openCampaign(filename);
 }
 
 bool MainWindow::closeCampaign()
@@ -1394,18 +1394,21 @@ void MainWindow::showEvent(QShowEvent * event)
     qDebug() << "[MainWindow] Main window Show event.";
     if(!_initialized)
     {
-        // Implement any one-time initialization here
-        if((_options) && (!_options->doDataSettingsExist()))
-        {
-            LegalDialog dlg;
-            dlg.exec();
-            _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
-            _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
-        }
-
         if(_options)
         {
+            // Implement any one-time initialization here
+            if(!_options->doDataSettingsExist())
+            {
+                LegalDialog dlg;
+                dlg.exec();
+                _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
+                _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
+            }
+
             checkForUpdates(true);
+
+            if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUCount() == 1))
+                openCampaign(_options->getMRUHandler()->getMRUList().first());
         }
 
         _initialized = true;
@@ -1525,7 +1528,7 @@ void MainWindow::dropEvent(QDropEvent *event)
         (data->urls().first().isLocalFile()) )
     {
         QString filename = data->urls().first().toLocalFile();
-        openFile(filename);
+        openCampaign(filename);
         event->accept();
     }
     else
@@ -1877,7 +1880,7 @@ void MainWindow::addNewAudioObject(const QString& audioFile)
     emit audioTrackAdded(track);
 }
 
-void MainWindow::openFile(const QString& filename)
+void MainWindow::openCampaign(const QString& filename)
 {
     if(!closeCampaign())
         return;
