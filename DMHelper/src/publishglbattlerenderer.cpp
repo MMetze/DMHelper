@@ -16,8 +16,8 @@
 #include <QApplication>
 #include <QDebug>
 
-PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
-    PublishGLRenderer(),
+PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObject *parent) :
+    PublishGLRenderer(parent),
     _initialized(false),
     _model(model),
     _scene(),
@@ -27,7 +27,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model) :
     _shaderProgram(0),
     _shaderModelMatrix(0),
     _shaderProjectionMatrix(0),
-    _backgroundObject(nullptr),
+    //D _backgroundObject(nullptr),
     _fowObject(nullptr),
     _combatantTokens(),
     _combatantNames(),
@@ -60,8 +60,8 @@ void PublishGLBattleRenderer::cleanup()
     disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
 
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
+    //D delete _backgroundObject;
+    //D _backgroundObject = nullptr;
     delete _fowObject;
     _fowObject = nullptr;
 
@@ -200,11 +200,12 @@ void PublishGLBattleRenderer::initializeGL()
     _shaderProjectionMatrix = f->glGetUniformLocation(_shaderProgram, "projection");
 
     // Create the objects
-    _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
-    _backgroundObject = new BattleGLBackground(&_scene, _model->getBackgroundImage(), GL_LINEAR);
+    initializeBackground();
+    //D _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
+    //D _backgroundObject = new BattleGLBackground(&_scene, _model->getBackgroundImage(), GL_NEAREST);
 
     if(_model->getMap())
-        _fowObject = new BattleGLBackground(&_scene, _model->getMap()->getBWFoWImage(), GL_LINEAR);
+        _fowObject = new BattleGLBackground(&_scene, _model->getMap()->getBWFoWImage(), GL_NEAREST);
 
     QFontMetrics fm(qApp->font());
     for(int i = 0; i < _model->getCombatantCount(); ++i)
@@ -277,6 +278,7 @@ void PublishGLBattleRenderer::resizeGL(int w, int h)
 
     qDebug() << "[BattleGLRenderer] Resize to: " << targetSize;
     _scene.setTargetSize(targetSize);
+    resizeBackground(w, h);
 
     updateProjectionMatrix();
     emit updateWidget();
@@ -284,7 +286,7 @@ void PublishGLBattleRenderer::resizeGL(int w, int h)
 
 void PublishGLBattleRenderer::paintGL()
 {
-    if((!_model) || (!_targetWidget) || (!_targetWidget->context()) || (!_backgroundObject))
+    if((!_model) || (!_targetWidget) || (!_targetWidget->context())) //D || (!_backgroundObject))
         return;
 
     evaluatePointer();
@@ -309,11 +311,13 @@ void PublishGLBattleRenderer::paintGL()
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    if(_backgroundObject)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
-        _backgroundObject->paintGL();
-    }
+    //D if(_backgroundObject)
+    //D {
+    //D     f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+    //D     _backgroundObject->paintGL();
+    //D }
+
+    paintBackground(f);
 
     QList<BattleGLToken*> tokens = _combatantTokens.values();
     for(BattleGLToken* enemyToken : tokens)
@@ -412,7 +416,8 @@ void PublishGLBattleRenderer::paintGL()
     } while(currentCombatant != activeCombatant);
 
     f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
-    paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
+    //D paintPointer(f, _backgroundObject->getSize(), _shaderModelMatrix);
+    paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrix);
 }
 
 void PublishGLBattleRenderer::fowChanged()
@@ -454,7 +459,8 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     QSizeF halfRect = rectSize / 2.0;
     QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
-    QSizeF backgroundMiddle = _scene.getSceneRect().size() / 2.0;
+    //D QSizeF backgroundMiddle = _scene.getSceneRect().size() / 2.0;
+    QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
     //qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
     //qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;

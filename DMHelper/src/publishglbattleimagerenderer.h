@@ -1,13 +1,15 @@
-#ifndef PUBLISHGLMAPIMAGERENDERER_H
-#define PUBLISHGLMAPIMAGERENDERER_H
+#ifndef PUBLISHGLBATTLEIMAGERENDERER_H
+#define PUBLISHGLBATTLEIMAGERENDERER_H
 
-#include "publishglmaprenderer.h"
+#include "publishglbattlerenderer.h"
 
-class PublishGLMapImageRenderer : public PublishGLMapRenderer
+class BattleGLBackground;
+
+class PublishGLBattleImageRenderer : public PublishGLBattleRenderer
 {
     Q_OBJECT
 public:
-    PublishGLMapImageRenderer(Map* map, QObject *parent = nullptr);
+    PublishGLBattleImageRenderer(BattleDialogModel* model, QObject *parent = nullptr);
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
@@ -23,4 +25,4 @@ protected:
     QImage _backgroundImage;
 };
 
-#endif // PUBLISHGLMAPIMAGERENDERER_H
+#endif // PUBLISHGLBATTLEIMAGERENDERER_H

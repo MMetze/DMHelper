@@ -5,6 +5,7 @@
 #include "battleglscene.h"
 #include <QList>
 #include <QHash>
+#include <QImage>
 #include <QColor>
 #include <QMatrix4x4>
 
@@ -18,7 +19,7 @@ class PublishGLBattleRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLBattleRenderer(BattleDialogModel* model);
+    PublishGLBattleRenderer(BattleDialogModel* model, QObject *parent);
     virtual ~PublishGLBattleRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
@@ -39,9 +40,16 @@ public slots:
     void setCameraRect(const QRectF& cameraRect);
 
 protected:
+    // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
 
-private:
+    // Background overrides
+    virtual void initializeBackground() = 0;
+    virtual void resizeBackground(int w, int h) = 0;
+    virtual void paintBackground(QOpenGLFunctions* functions) = 0;
+    virtual QSizeF getBackgroundSize() = 0;
+
+protected:
     bool _initialized;
     BattleDialogModel* _model;
     BattleGLScene _scene;
@@ -53,7 +61,7 @@ private:
     int _shaderModelMatrix;
     int _shaderProjectionMatrix;
 
-    BattleGLBackground* _backgroundObject;
+    //D BattleGLBackground* _backgroundObject;
     BattleGLBackground* _fowObject;
     QHash<BattleDialogModelCombatant*, BattleGLToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;

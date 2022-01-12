@@ -6,7 +6,7 @@ Key things:
 * Bugs from Word doc from MelcorStarr (pinned in Prerelease support)
 * Open last campaign at start-up
 * Ask to go full-screen, mention F
-*
+* Rounds don't save in battles
 
 
 v2.0

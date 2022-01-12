@@ -231,8 +231,6 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
-    void publishImage();
-    void executeAnimateImage();
     void updateHighlights();
     void countdownTimerExpired();
     void updateCountdownText();
@@ -259,6 +257,7 @@ private slots:
 
     void removeRollover();
 
+    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
 
@@ -310,6 +309,7 @@ private:
     void setCameraToView();
 
     // Helper functions to simplify rendering
+    void extractDMScreenshot();
     void renderPrescaledBackground(QPainter& painter, QSize targetSize);
     void renderVideoBackground(QPainter& painter);
 
@@ -355,7 +355,7 @@ private:
     qreal _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
-    CameraRect* _publishRect;
+    CameraRect* _cameraRect;
     QRectF _publishRectValue;
     bool _includeHeight;
     qreal _pitchHeight;
@@ -363,8 +363,8 @@ private:
     QTimer* _countdownTimer;
     qreal _countdown;
 
-    bool _publishing;
-    QTimer* _publishTimer;
+    bool _isPublishing;
+    bool _isVideo;
 
     QPixmap _prescaledBackground;
     QPixmap _fowImage;
@@ -393,7 +393,6 @@ private:
     qreal _moveRadius;
     QPointF _moveStart;
 
-    VideoPlayer* _videoPlayer;
     QImage _bwFoWImage;
     QRect _sourceRect;
     QSize _videoSize;

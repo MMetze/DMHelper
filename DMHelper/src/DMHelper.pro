@@ -100,7 +100,9 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
+    publishglbattleimagerenderer.cpp \
     publishglbattlerenderer.cpp \
+    publishglbattlevideorenderer.cpp \
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
@@ -326,7 +328,9 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
+    publishglbattleimagerenderer.h \
     publishglbattlerenderer.h \
+    publishglbattlevideorenderer.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \

@@ -42,6 +42,7 @@ public slots:
     void markerChanged();
 
 protected:
+    // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
 
     // Background overrides

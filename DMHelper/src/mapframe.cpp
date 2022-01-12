@@ -779,10 +779,10 @@ void MapFrame::initializeFoW()
     {
         if(_mapSource->isValid())
         {
-            qDebug() << "[MapFrame] Initializing map frame video";
-            if(_renderer)
-                emit registerRenderer(nullptr); // TODO: is this really ok?
-            else
+            //D qDebug() << "[MapFrame] Initializing map frame video";
+            //D if(_renderer)
+            //D     emit registerRenderer(nullptr); // TODO: is this really ok?
+            //D else
                 extractDMScreenshot();
         }
     }
@@ -1612,8 +1612,6 @@ void MapFrame::extractDMScreenshot()
     if(!_mapSource)
         return;
 
-    qDebug() << "[MapFrame] Publish FoW DM animation started";
-
     VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_mapSource->getFileName());
     connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &MapFrame::handleScreenshotReady);
     screenshot->retrieveScreenshot();
@@ -1824,12 +1822,24 @@ void MapFrame::checkPartyUpdate()
 
 void MapFrame::handleScreenshotReady(const QImage& image)
 {
-    qDebug() << "[MapFrame] Screenshot received: " << image.size();
-
-    if(image.isNull())
+    if((image.isNull()) || (!_mapSource))
         return;
 
     setBackgroundPixmap(QPixmap::fromImage(image));
+    QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
+    fowImage.fill(QColor(0,0,0,0));
+    _mapSource->setExternalFoWImage(fowImage);
+    if(!_fow)
+    {
+        _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+        _fow->setEnabled(false);
+        _fow->setZValue(-1);
+    }
+    else
+    {
+        _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+    }
+
     checkPartyUpdate();
     createMarkerItems();
 
