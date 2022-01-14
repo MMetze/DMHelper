@@ -31,6 +31,11 @@ void PublishGLBattleImageRenderer::initializeBackground()
     updateProjectionMatrix();
 }
 
+bool PublishGLBattleImageRenderer::isBackgroundReady()
+{
+    return _backgroundObject != nullptr;
+}
+
 void PublishGLBattleImageRenderer::resizeBackground(int w, int h)
 {
     Q_UNUSED(w);

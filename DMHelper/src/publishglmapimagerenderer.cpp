@@ -30,6 +30,11 @@ void PublishGLMapImageRenderer::initializeBackground()
     updateProjectionMatrix();
 }
 
+bool PublishGLMapImageRenderer::isBackgroundReady()
+{
+    return _backgroundObject != nullptr;
+}
+
 void PublishGLMapImageRenderer::resizeBackground(int w, int h)
 {
     Q_UNUSED(w);

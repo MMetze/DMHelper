@@ -5,7 +5,6 @@
 #include <QOpenGLWidget>
 #include <QDebug>
 
-
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
 #include "videoplayerglscreenshot.h"
 #include "battleglbackground.h"
@@ -44,6 +43,7 @@ void PublishGLMapVideoRenderer::handleScreenshotReady(const QImage& image)
         return;
 
     _backgroundImage = image;
+    _updateFow = true;
     emit updateWidget();
 }
 #endif
@@ -69,6 +69,15 @@ void PublishGLMapVideoRenderer::initializeBackground()
 #endif
 }
 
+bool PublishGLMapVideoRenderer::isBackgroundReady()
+{
+#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+    return _backgroundObject != nullptr;
+#else
+    return _videoPlayer != nullptr;
+#endif
+}
+
 void PublishGLMapVideoRenderer::resizeBackground(int w, int h)
 {
     Q_UNUSED(w);
@@ -89,9 +98,6 @@ void PublishGLMapVideoRenderer::resizeBackground(int w, int h)
 void PublishGLMapVideoRenderer::paintBackground(QOpenGLFunctions* functions)
 {
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
-    if((!_backgroundObject) && (!_backgroundImage.isNull()))
-        _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
-
     if(_backgroundObject)
     {
         functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
@@ -113,6 +119,18 @@ QSizeF PublishGLMapVideoRenderer::getBackgroundSize()
     return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
 #else
     return _videoPlayer ? _videoPlayer->getSize() : QSizeF();
+#endif
+}
+
+void PublishGLMapVideoRenderer::updateBackground()
+{
+#ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
+    if((!_backgroundObject) && (!_backgroundImage.isNull()))
+    {
+        _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
+        updateFoW();
+        updateProjectionMatrix();
+    }
 #endif
 }
 

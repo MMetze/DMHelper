@@ -104,7 +104,7 @@ void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
 
 void PublishGLMapRenderer::initializeGL()
 {    
-    if((_initialized) || (!_targetWidget) || (!_map)) // || (!_map->isInitialized()))
+    if((_initialized) || (!_targetWidget) || (!_map))
         return;
 
     // Set up the rendering context, load shaders and other resources, etc.:
@@ -191,7 +191,7 @@ void PublishGLMapRenderer::initializeGL()
 
     // Create the objects
     initializeBackground();
-    _fowObject = new BattleGLBackground(nullptr, _map->getBWFoWImage(), GL_NEAREST);
+    updateFoW();
 
     // Create the party token
     createPartyToken();
@@ -230,24 +230,26 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
 
 void PublishGLMapRenderer::paintGL()
 {
-//    if(!_initialized)
-//        initializeGL();
-
     if((!_initialized) || (!_map) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-//    initializeBackground();
+    if(!isBackgroundReady())
+    {
+        updateBackground();
+        if(!isBackgroundReady())
+            return;
+
+        _recreatePartyToken = true;
+        _recreateMarkers = true;
+        _updateFow = true;
+    }
+    QSize sceneSize = getBackgroundSize().toSize();
 
     if(_recreatePartyToken)
         createPartyToken();
 
-    QSize sceneSize = getBackgroundSize().toSize();
-
-    if((_fowObject) && (_updateFow))
-    {
-        _fowObject->setImage(_map->getBWFoWImage());
-        _updateFow = false;
-    }
+    if(_updateFow)
+        updateFoW();
 
     if(((_map->getMapItemCount() > 0) && (!_itemImage)) || (_recreateLineToken))
         createLineToken(sceneSize);
@@ -314,18 +316,6 @@ void PublishGLMapRenderer::paintGL()
 
     paintPointer(f, sceneSize, _shaderModelMatrix);
 }
-
-/*
-void PublishGLMapRenderer::setRotation(int rotation)
-{
-    if(rotation != _rotation)
-    {
-        _rotation = rotation;
-        updateProjectionMatrix();
-        emit updateWidget();
-    }
-}
-*/
 
 void PublishGLMapRenderer::distanceChanged()
 {
@@ -395,6 +385,10 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
     _scissorRect.setHeight(scissorSize.height());
+}
+
+void PublishGLMapRenderer::updateBackground()
+{
 }
 
 void PublishGLMapRenderer::createPartyToken()
@@ -535,6 +529,29 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
             }
         }
     }
+}
+
+void PublishGLMapRenderer::updateFoW()
+{
+    if(!_map)
+        return;
+
+    QSize backgroundSize = getBackgroundSize().toSize();
+
+    if(!backgroundSize.isEmpty())
+    {
+        if(!_fowObject)
+            _fowObject = new BattleGLBackground(nullptr, _map->getBWFoWImage(backgroundSize), GL_NEAREST);
+        else
+            _fowObject->setImage(_map->getBWFoWImage(backgroundSize));
+
+        _updateFow = false;
+    }
+}
+
+void PublishGLMapRenderer::updateContents()
+{
+
 }
 
 void PublishGLMapRenderer::handlePartyChanged(Party* party)

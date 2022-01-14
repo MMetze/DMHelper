@@ -40,6 +40,7 @@ void PublishGLBattleVideoRenderer::handleScreenshotReady(const QImage& image)
         return;
 
     _backgroundImage = image;
+    _updateFow = true;
     emit updateWidget();
 }
 #endif
@@ -65,6 +66,15 @@ void PublishGLBattleVideoRenderer::initializeBackground()
 #endif
 }
 
+bool PublishGLBattleVideoRenderer::isBackgroundReady()
+{
+#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+    return _backgroundObject != nullptr;
+#else
+    return _videoPlayer != nullptr;
+#endif
+}
+
 void PublishGLBattleVideoRenderer::resizeBackground(int w, int h)
 {
     Q_UNUSED(w);
@@ -85,9 +95,6 @@ void PublishGLBattleVideoRenderer::resizeBackground(int w, int h)
 void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
 {
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
-    if((!_backgroundObject) && (!_backgroundImage.isNull()))
-        _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
-
     if(_backgroundObject)
     {
         functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
@@ -109,6 +116,18 @@ QSizeF PublishGLBattleVideoRenderer::getBackgroundSize()
     return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
 #else
     return _videoPlayer ? _videoPlayer->getSize() : QSizeF();
+#endif
+}
+
+void PublishGLBattleVideoRenderer::updateBackground()
+{
+#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+    if((!_backgroundObject) && (!_backgroundImage.isNull()))
+    {
+        _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
+        updateFoW();
+        updateProjectionMatrix();
+    }
 #endif
 }
 

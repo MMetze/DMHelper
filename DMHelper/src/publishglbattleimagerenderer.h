@@ -17,6 +17,7 @@ public:
 protected:
     // Background overrides
     virtual void initializeBackground() override;
+    virtual bool isBackgroundReady() override;
     virtual void resizeBackground(int w, int h) override;
     virtual void paintBackground(QOpenGLFunctions* functions) override;
     virtual QSizeF getBackgroundSize() override;

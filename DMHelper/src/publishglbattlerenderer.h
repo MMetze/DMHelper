@@ -45,9 +45,14 @@ protected:
 
     // Background overrides
     virtual void initializeBackground() = 0;
+    virtual bool isBackgroundReady() = 0;
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
     virtual QSizeF getBackgroundSize() = 0;
+    virtual void updateBackground();
+
+    virtual void updateFoW();
+    virtual void updateContents();
 
 protected:
     bool _initialized;
@@ -61,7 +66,6 @@ protected:
     int _shaderModelMatrix;
     int _shaderProjectionMatrix;
 
-    //D BattleGLBackground* _backgroundObject;
     BattleGLBackground* _fowObject;
     QHash<BattleDialogModelCombatant*, BattleGLToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
