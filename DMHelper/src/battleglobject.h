@@ -12,6 +12,9 @@ public:
     BattleGLObject(BattleGLScene* scene = nullptr);
     virtual ~BattleGLObject() override;
 
+    QPointF sceneToWorld(const QPointF& point) const;
+    static QPointF sceneToWorld(const QRectF& sceneRect, const QPointF& point);
+
 protected:
     BattleGLScene* _scene;
 };

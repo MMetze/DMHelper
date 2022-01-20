@@ -19,6 +19,8 @@ public:
     void setScale(float scaleFactor);
     void setPosition(float x, float y);
     void setPosition(const QPointF& pos);
+    void setPositionScale(float x, float y, float scaleFactor);
+    void setPositionScale(const QPointF& pos, float scaleFactor);
 
     QSize getSize() const;
     QSize getImageSize() const;

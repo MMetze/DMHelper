@@ -98,8 +98,6 @@ void PublishGLImage::setImage(const QImage& image)
 
 void PublishGLImage::setScale(float scaleFactor)
 {
-    qDebug() << "[PublishGLImage] Image scale factor set to: " << scaleFactor;
-
     if(scaleFactor != _scaleFactor)
     {
         _scaleFactor = scaleFactor;
@@ -120,6 +118,22 @@ void PublishGLImage::setPosition(float x, float y)
 void PublishGLImage::setPosition(const QPointF& pos)
 {
     setPosition(pos.x(), pos.y());
+}
+
+void PublishGLImage::setPositionScale(float x, float y, float scaleFactor)
+{
+    if((x != _x) || (y != _y) || (scaleFactor != _scaleFactor))
+    {
+        _x = x;
+        _y = y;
+        _scaleFactor = scaleFactor;
+        updateMatrix();
+    }
+}
+
+void PublishGLImage::setPositionScale(const QPointF& pos, float scaleFactor)
+{
+    setPositionScale(pos.x(), pos.y(), scaleFactor);
 }
 
 QSize PublishGLImage::getSize() const

@@ -39,6 +39,8 @@ public slots:
     void fowChanged();
     void setCameraRect(const QRectF& cameraRect);
 
+    void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
+
 protected:
     // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
@@ -70,6 +72,10 @@ protected:
     QHash<BattleDialogModelCombatant*, BattleGLToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
     PublishGLImage* _unknownToken;
+    bool _movementVisible;
+    BattleDialogModelCombatant* _movementCombatant;
+    bool _movementPC;
+    PublishGLImage* _movementToken;
     QList<BattleGLObject*> _effectTokens;
 
     bool _updateFow;

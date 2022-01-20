@@ -185,6 +185,8 @@ signals:
     void pointerToggled(bool enabled);
     void pointerFileNameChanged(const QString& filename);
 
+    void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
+
 protected:
     virtual void keyPressEvent(QKeyEvent * e) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;

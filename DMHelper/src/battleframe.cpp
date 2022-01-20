@@ -2684,10 +2684,11 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
         return;
 
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
+    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
     connect(this, &BattleFrame::cameraRectChanged, renderer, &PublishGLBattleRenderer::setCameraRect);
     connect(this, &BattleFrame::pointerToggled, renderer, &PublishGLRenderer::pointerToggled);
-    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
     connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
+    connect(this, &BattleFrame::movementChanged, renderer, &PublishGLBattleRenderer::movementChanged);
     connect(renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
 
     renderer->setCameraRect(_cameraRect->getCameraRect());
@@ -2703,9 +2704,11 @@ void BattleFrame::rendererDeactivated()
         return;
 
     disconnect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
-    disconnect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
     disconnect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
+    disconnect(this, &BattleFrame::cameraRectChanged, _renderer, &PublishGLBattleRenderer::setCameraRect);
+    disconnect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
     disconnect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
+    disconnect(this, &BattleFrame::movementChanged, _renderer, &PublishGLBattleRenderer::movementChanged);
     disconnect(_renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
 
     _renderer = nullptr;
@@ -3941,6 +3944,8 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
         _movementPixmap->setPos(_moveStart);
         _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
         _movementPixmap->setVisible(true);
+
+        emit movementChanged(true, combatant, _moveRadius);
     }
 }
 
@@ -3983,6 +3988,8 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
 
     _movementPixmap->setPos(combatantPos);
     _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+
+    emit movementChanged(_movementPixmap->isVisible(), combatant, _moveRadius);
 }
 
 void BattleFrame::endMovement()
@@ -3992,6 +3999,7 @@ void BattleFrame::endMovement()
 
     _movementPixmap->setRotation(0.0);
     _movementPixmap->setVisible(false);
+    emit movementChanged(false, nullptr, 0.0);
 }
 
 QPixmap BattleFrame::getPointerPixmap()

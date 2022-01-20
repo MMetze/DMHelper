@@ -208,14 +208,15 @@ void BattleGLEffect::effectMoved()
     BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
 
     QPointF effectPos = effect->getPosition();
-    QRectF sceneRect = _scene->getSceneRect();
+    //QRectF sceneRect = _scene->getSceneRect();
     qreal sizeFactor = effect->getSize() / 5;
     if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
         sizeFactor *= 2.0; // Convert radius to diameter
     qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale())) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
-    _modelMatrix.translate(effectPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - effectPos.y());
+    //_modelMatrix.translate(effectPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - effectPos.y());
+    _modelMatrix.translate(QVector3D(sceneToWorld(effectPos)));
     _modelMatrix.rotate(effect->getRotation(), 0.f, 0.f, -1.f);
     _modelMatrix.scale(scaleFactor, scaleFactor);
 

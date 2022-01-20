@@ -16,6 +16,8 @@
 #include <QApplication>
 #include <QDebug>
 
+const int MOVEMENT_TOKEN_SIZE = 512;
+
 PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObject *parent) :
     PublishGLRenderer(parent),
     _initialized(false),
@@ -31,6 +33,10 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _combatantTokens(),
     _combatantNames(),
     _unknownToken(nullptr),
+    _movementVisible(false),
+    _movementCombatant(nullptr),
+    _movementPC(false),
+    _movementToken(nullptr),
     _effectTokens(),
     _updateFow(false)
 {
@@ -66,8 +72,14 @@ void PublishGLBattleRenderer::cleanup()
     _combatantTokens.clear();
     qDeleteAll(_combatantNames);
     _combatantNames.clear();
+
     delete _unknownToken;
     _unknownToken = nullptr;
+    delete _movementToken;
+    _movementToken = nullptr;
+    _movementVisible = false;
+    _movementCombatant = nullptr;
+    _movementPC = false;
 
     qDeleteAll(_effectTokens);
     _effectTokens.clear();
@@ -293,10 +305,22 @@ void PublishGLBattleRenderer::paintGL()
         effectToken->paintGL();
     }
 
+    if((!_movementPC) && (_movementVisible) && (_movementToken))
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
+        _movementToken->paintGL();
+    }
+
     if(_fowObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
         _fowObject->paintGL();
+    }
+
+    if((_movementPC) && (_movementVisible) && (_movementToken))
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
+        _movementToken->paintGL();
     }
 
     for(BattleGLToken* pcToken : tokens)
@@ -386,6 +410,31 @@ void PublishGLBattleRenderer::setCameraRect(const QRectF& cameraRect)
         updateProjectionMatrix();
         emit updateWidget();
     }
+}
+
+void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining)
+{
+    if(!_movementToken)
+        return;
+
+    if(!combatant)
+    {
+        _movementVisible = false;
+        _movementCombatant = nullptr;
+        _movementPC = false;
+        return;
+    }
+
+    _movementVisible = visible;
+    if(combatant != _movementCombatant)
+    {
+        _movementCombatant = combatant;
+        BattleGLToken* combatantToken = _combatantTokens.value(combatant);
+        _movementPC = combatantToken ? combatantToken->isPC() : false;
+    }
+
+    _movementToken->setPositionScale(BattleGLObject::sceneToWorld(_scene.getSceneRect(), combatant->getPosition()), remaining / MOVEMENT_TOKEN_SIZE);
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::updateProjectionMatrix()
@@ -489,6 +538,16 @@ void PublishGLBattleRenderer::updateContents()
     }
 
     _unknownToken = new PublishGLImage(ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate).toImage());
+
+    QImage movementImage(QSize(MOVEMENT_TOKEN_SIZE, MOVEMENT_TOKEN_SIZE), QImage::Format_RGBA8888);
+    movementImage.fill(Qt::transparent);
+    QPainter movementPainter;
+    movementPainter.begin(&movementImage);
+        movementPainter.setPen(QPen(QColor(23,23,23,200), 3, Qt::DashDotLine));
+        movementPainter.setBrush(QBrush(QColor(255,255,255,25)));
+        movementPainter.drawEllipse(0, 0, 512, 512);
+    movementPainter.end();
+    _movementToken = new PublishGLImage(movementImage);
 
     for(int i = 0; i < _model->getEffectCount(); ++i)
     {

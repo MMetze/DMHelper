@@ -158,12 +158,13 @@ void BattleGLToken::combatantMoved()
         return;
 
     QPointF combatantPos = _combatant->getPosition();
-    QRectF sceneRect = _scene->getSceneRect();
+    //QRectF sceneRect = _scene->getSceneRect();
     qreal sizeFactor = _combatant->getSizeFactor();
     qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
-    _modelMatrix.translate(combatantPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - combatantPos.y());
+    //_modelMatrix.translate(combatantPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - combatantPos.y());
+    _modelMatrix.translate(QVector3D(sceneToWorld(combatantPos)));
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
     emit changed();
