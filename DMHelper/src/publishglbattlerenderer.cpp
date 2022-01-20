@@ -305,7 +305,7 @@ void PublishGLBattleRenderer::paintGL()
         effectToken->paintGL();
     }
 
-    if((!_movementPC) && (_movementVisible) && (_movementToken))
+    if((!_movementPC) && (_movementVisible) && (_movementToken) && (_model->getShowMovement()))
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
         _movementToken->paintGL();
@@ -317,7 +317,7 @@ void PublishGLBattleRenderer::paintGL()
         _fowObject->paintGL();
     }
 
-    if((_movementPC) && (_movementVisible) && (_movementToken))
+    if((_movementPC) && (_movementVisible) && (_movementToken) && (_model->getShowMovement()))
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
         _movementToken->paintGL();
