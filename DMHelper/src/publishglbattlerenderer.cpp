@@ -33,11 +33,14 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _combatantTokens(),
     _combatantNames(),
     _unknownToken(nullptr),
+    _effectTokens(),
     _movementVisible(false),
     _movementCombatant(nullptr),
     _movementPC(false),
     _movementToken(nullptr),
-    _effectTokens(),
+    _activeCombatant(nullptr),
+    _activePC(false),
+    _activeToken(nullptr),
     _updateFow(false)
 {
 }
@@ -63,6 +66,7 @@ void PublishGLBattleRenderer::cleanup()
 
     disconnect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
     disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
 
     delete _fowObject;
@@ -230,6 +234,7 @@ void PublishGLBattleRenderer::initializeGL()
 
     connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
     connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
+    connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
     connect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::updateWidget);
     _initialized = true;
 }
@@ -305,22 +310,12 @@ void PublishGLBattleRenderer::paintGL()
         effectToken->paintGL();
     }
 
-    if((!_movementPC) && (_movementVisible) && (_movementToken) && (_model->getShowMovement()))
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
-        _movementToken->paintGL();
-    }
+    paintTokens(f, false);
 
     if(_fowObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
         _fowObject->paintGL();
-    }
-
-    if((_movementPC) && (_movementVisible) && (_movementToken) && (_model->getShowMovement()))
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
-        _movementToken->paintGL();
     }
 
     for(BattleGLToken* pcToken : tokens)
@@ -331,6 +326,8 @@ void PublishGLBattleRenderer::paintGL()
             pcToken->paintGL();
         }
     }
+
+    paintTokens(f, true);
 
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
@@ -437,6 +434,23 @@ void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCom
     emit updateWidget();
 }
 
+void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant* activeCombatant)
+{
+    if(_activeCombatant == activeCombatant)
+        return;
+
+    disconnect(_activeCombatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
+
+    _activeCombatant = activeCombatant;
+    if(_activeCombatant)
+    {
+        BattleGLToken* combatantToken = _combatantTokens.value(_activeCombatant);
+        _activePC = combatantToken ? combatantToken->isPC() : false;
+        activeCombatantMoved();
+        connect(_activeCombatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
+    }
+}
+
 void PublishGLBattleRenderer::updateProjectionMatrix()
 {
     if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
@@ -479,6 +493,21 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     _scissorRect.setY((_scene.getTargetSize().height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
     _scissorRect.setHeight(scissorSize.height());
+}
+
+void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool drawPCs)
+{
+    if((_activePC == drawPCs) && (_activeCombatant) && (_activeToken))
+    {
+        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _activeToken->getMatrixData());
+        _activeToken->paintGL();
+    }
+
+    if((_movementPC == drawPCs) && (_movementVisible) && (_movementToken) && (_model->getShowMovement()))
+    {
+        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
+        _movementToken->paintGL();
+    }
 }
 
 void PublishGLBattleRenderer::updateBackground()
@@ -549,6 +578,11 @@ void PublishGLBattleRenderer::updateContents()
     movementPainter.end();
     _movementToken = new PublishGLImage(movementImage);
 
+    QImage activeImage;
+    activeImage.load(QString(":/img/data/active.png"));
+    _activeToken = new PublishGLImage(activeImage);
+    activeCombatantChanged(_model->getActiveCombatant());
+
     for(int i = 0; i < _model->getEffectCount(); ++i)
     {
         BattleDialogModelEffect* effect = _model->getEffect(i);
@@ -562,4 +596,16 @@ void PublishGLBattleRenderer::updateContents()
 
     // Check if we need a pointer
     evaluatePointer();
+}
+
+void PublishGLBattleRenderer::activeCombatantMoved()
+{
+    if((!_activeCombatant) || (!_activeToken))
+        return;
+
+    QSize textureSize = _activeToken->getImageSize();
+    qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale()-2)) * _activeCombatant->getSizeFactor() / qMax(textureSize.width(), textureSize.height());
+
+    _activeToken->setPositionScale(BattleGLObject::sceneToWorld(_scene.getSceneRect(), _activeCombatant->getPosition()), scaleFactor);
+    emit updateWidget();
 }

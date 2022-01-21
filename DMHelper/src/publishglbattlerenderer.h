@@ -40,6 +40,7 @@ public slots:
     void setCameraRect(const QRectF& cameraRect);
 
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
+    void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
 
 protected:
     // DMH OpenGL renderer calls
@@ -50,11 +51,15 @@ protected:
     virtual bool isBackgroundReady() = 0;
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
+    virtual void paintTokens(QOpenGLFunctions* functions, bool drawPCs);
     virtual QSizeF getBackgroundSize() = 0;
     virtual void updateBackground();
 
     virtual void updateFoW();
     virtual void updateContents();
+
+protected slots:
+    void activeCombatantMoved();
 
 protected:
     bool _initialized;
@@ -72,11 +77,16 @@ protected:
     QHash<BattleDialogModelCombatant*, BattleGLToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
     PublishGLImage* _unknownToken;
+    QList<BattleGLObject*> _effectTokens;
+
     bool _movementVisible;
     BattleDialogModelCombatant* _movementCombatant;
     bool _movementPC;
     PublishGLImage* _movementToken;
-    QList<BattleGLObject*> _effectTokens;
+
+    BattleDialogModelCombatant* _activeCombatant;
+    bool _activePC;
+    PublishGLImage* _activeToken;
 
     bool _updateFow;
 };
