@@ -1872,7 +1872,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
 {
     if(!_model)
     {
-        qDebug() << "[Battle Frame] ERROR: Not possible to handle item mouse movement, no battle model is set!";
+        qDebug() << "[Battle Frame] ERROR: Not possible to handle item mouse down, no battle model is set!";
         return;
     }
 
