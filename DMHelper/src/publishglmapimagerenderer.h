@@ -20,7 +20,7 @@ protected:
     virtual void paintBackground(QOpenGLFunctions* functions) override;
     virtual QSizeF getBackgroundSize() override;
 
-    BattleGLBackground* _backgroundObject;
+    PublishGLBattleBackground* _backgroundObject;
     QImage _backgroundImage;
 };
 

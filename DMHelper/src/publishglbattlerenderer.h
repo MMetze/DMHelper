@@ -2,7 +2,7 @@
 #define PUBLISHGLBATTLERENDERER_H
 
 #include "publishglrenderer.h"
-#include "battleglscene.h"
+#include "publishglbattlescene.h"
 #include <QList>
 #include <QHash>
 #include <QImage>
@@ -10,9 +10,9 @@
 #include <QMatrix4x4>
 
 class BattleDialogModel;
-class BattleGLObject;
-class BattleGLToken;
-class BattleGLBackground;
+class PublishGLBattleObject;
+class PublishGLBattleToken;
+class PublishGLBattleBackground;
 class BattleDialogModelCombatant;
 
 class PublishGLBattleRenderer : public PublishGLRenderer
@@ -60,11 +60,12 @@ protected:
 
 protected slots:
     void activeCombatantMoved();
+    void tokenSelectionChanged(PublishGLBattleToken* token);
 
 protected:
     bool _initialized;
     BattleDialogModel* _model;
-    BattleGLScene _scene;
+    PublishGLBattleScene _scene;
 
     QMatrix4x4 _projectionMatrix;
     QRectF _cameraRect;
@@ -73,11 +74,11 @@ protected:
     int _shaderModelMatrix;
     int _shaderProjectionMatrix;
 
-    BattleGLBackground* _fowObject;
-    QHash<BattleDialogModelCombatant*, BattleGLToken*> _combatantTokens;
+    PublishGLBattleBackground* _fowObject;
+    QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
     PublishGLImage* _unknownToken;
-    QList<BattleGLObject*> _effectTokens;
+    QList<PublishGLBattleObject*> _effectTokens;
 
     bool _movementVisible;
     BattleDialogModelCombatant* _movementCombatant;
@@ -87,6 +88,8 @@ protected:
     BattleDialogModelCombatant* _activeCombatant;
     bool _activePC;
     PublishGLImage* _activeToken;
+
+    PublishGLImage* _selectionToken;
 
     bool _updateFow;
 };

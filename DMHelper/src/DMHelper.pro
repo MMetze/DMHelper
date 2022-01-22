@@ -49,11 +49,6 @@ SOURCES += main.cpp\
     battleframemapdrawer.cpp \
     battleframestate.cpp \
     battleframestatemachine.cpp \
-    battleglbackground.cpp \
-    battlegleffect.cpp \
-    battleglobject.cpp \
-    battleglscene.cpp \
-    battlegltoken.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     camerascene.cpp \
@@ -100,9 +95,15 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
+    publishglbattlebackground.cpp \
+    publishglbattleeffect.cpp \
     publishglbattleimagerenderer.cpp \
+    publishglbattleobject.cpp \
     publishglbattlerenderer.cpp \
+    publishglbattlescene.cpp \
+    publishglbattletoken.cpp \
     publishglbattlevideorenderer.cpp \
+    publishgleffect.cpp \
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
@@ -276,11 +277,6 @@ HEADERS  += mainwindow.h \
     battleframemapdrawer.h \
     battleframestate.h \
     battleframestatemachine.h \
-    battleglbackground.h \
-    battlegleffect.h \
-    battleglobject.h \
-    battleglscene.h \
-    battlegltoken.h \
     bestiaryexportdialog.h \
     camerarect.h \
     camerascene.h \
@@ -328,9 +324,15 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
+    publishglbattlebackground.h \
+    publishglbattleeffect.h \
     publishglbattleimagerenderer.h \
+    publishglbattleobject.h \
     publishglbattlerenderer.h \
+    publishglbattlescene.h \
+    publishglbattletoken.h \
     publishglbattlevideorenderer.h \
+    publishgleffect.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \

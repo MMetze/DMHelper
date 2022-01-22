@@ -3,7 +3,7 @@
 
 #include "publishglbattlerenderer.h"
 
-class BattleGLBackground;
+class PublishGLBattleBackground;
 
 class PublishGLBattleImageRenderer : public PublishGLBattleRenderer
 {
@@ -22,7 +22,7 @@ protected:
     virtual void paintBackground(QOpenGLFunctions* functions) override;
     virtual QSizeF getBackgroundSize() override;
 
-    BattleGLBackground* _backgroundObject;
+    PublishGLBattleBackground* _backgroundObject;
     QImage _backgroundImage;
 };
 

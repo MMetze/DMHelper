@@ -7,7 +7,7 @@
 
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
 #include "videoplayerglscreenshot.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #endif
 
 PublishGLMapVideoRenderer::PublishGLMapVideoRenderer(Map* map, QObject *parent) :
@@ -127,7 +127,7 @@ void PublishGLMapVideoRenderer::updateBackground()
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     if((!_backgroundObject) && (!_backgroundImage.isNull()))
     {
-        _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
+        _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
         updateFoW();
         updateProjectionMatrix();
     }

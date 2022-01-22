@@ -1,5 +1,5 @@
 #include "publishglbattlevideorenderer.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #include "battledialogmodel.h"
 #include "videoplayerglplayer.h"
 #include "videoplayerglscreenshot.h"
@@ -124,7 +124,7 @@ void PublishGLBattleVideoRenderer::updateBackground()
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
     if((!_backgroundObject) && (!_backgroundImage.isNull()))
     {
-        _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
+        _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
         updateFoW();
         updateProjectionMatrix();
     }

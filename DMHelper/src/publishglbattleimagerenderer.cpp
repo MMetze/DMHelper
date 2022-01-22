@@ -1,5 +1,5 @@
 #include "publishglbattleimagerenderer.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #include "battledialogmodel.h"
 #include <QOpenGLFunctions>
 
@@ -27,7 +27,7 @@ void PublishGLBattleImageRenderer::initializeBackground()
         _backgroundImage = _model->getBackgroundImage();
 
     _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
-    _backgroundObject = new BattleGLBackground(&_scene, _backgroundImage, GL_NEAREST);
+    _backgroundObject = new PublishGLBattleBackground(&_scene, _backgroundImage, GL_NEAREST);
     updateProjectionMatrix();
 }
 

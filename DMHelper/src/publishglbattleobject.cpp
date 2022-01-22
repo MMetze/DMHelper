@@ -1,16 +1,16 @@
-#include "battleglobject.h"
+#include "publishglbattleobject.h"
 
-BattleGLObject::BattleGLObject(BattleGLScene* scene) :
+PublishGLBattleObject::PublishGLBattleObject(PublishGLBattleScene* scene) :
     PublishGLObject(),
     _scene(scene)
 {
 }
 
-BattleGLObject::~BattleGLObject()
+PublishGLBattleObject::~PublishGLBattleObject()
 {
 }
 
-QPointF BattleGLObject::sceneToWorld(const QPointF& point) const
+QPointF PublishGLBattleObject::sceneToWorld(const QPointF& point) const
 {
     QPointF result;
 
@@ -21,7 +21,7 @@ QPointF BattleGLObject::sceneToWorld(const QPointF& point) const
     return result;
 }
 
-QPointF BattleGLObject::sceneToWorld(const QRectF& sceneRect, const QPointF& point)
+QPointF PublishGLBattleObject::sceneToWorld(const QRectF& sceneRect, const QPointF& point)
 {
     return QPointF(point.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - point.y());
 }

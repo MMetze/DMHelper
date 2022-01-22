@@ -2,11 +2,11 @@
 #define PUBLISHGLTEXTRENDERER_H
 
 #include "publishglrenderer.h"
-#include "battleglscene.h"
+#include "publishglbattlescene.h"
 #include <QImage>
 #include <QElapsedTimer>
 
-class BattleGLBackground;
+class PublishGLBattleBackground;
 class EncounterText;
 
 class PublishGLTextRenderer : public PublishGLRenderer
@@ -38,11 +38,11 @@ protected:
     QSize _targetSize;
     QImage _backgroundImage;
     QImage _textImage;
-    BattleGLScene _scene;
+    PublishGLBattleScene _scene;
     bool _initialized;
     unsigned int _shaderProgram;
-    BattleGLBackground* _backgroundObject;
-    BattleGLBackground* _textObject;
+    PublishGLBattleBackground* _backgroundObject;
+    PublishGLBattleBackground* _textObject;
 
     QPointF _textPos;
     QElapsedTimer _elapsed;

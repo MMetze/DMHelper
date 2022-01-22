@@ -1,6 +1,6 @@
 #include "publishgltextrenderer.h"
 #include "encountertext.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #include "dmconstants.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
@@ -137,8 +137,8 @@ void PublishGLTextRenderer::initializeGL()
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_backgroundImage.size());
-    _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
-    _textObject = new BattleGLBackground(nullptr, _textImage, GL_LINEAR);
+    _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
+    _textObject = new PublishGLBattleBackground(nullptr, _textImage, GL_LINEAR);
 
     // Matrices
     // Model

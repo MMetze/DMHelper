@@ -4,7 +4,7 @@
 #include "undomarker.h"
 #include "mapmarkergraphicsitem.h"
 #include "videoplayerglplayer.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #include "publishglobject.h"
 #include "publishglimage.h"
 #include <QOpenGLWidget>
@@ -541,7 +541,7 @@ void PublishGLMapRenderer::updateFoW()
     if(!backgroundSize.isEmpty())
     {
         if(!_fowObject)
-            _fowObject = new BattleGLBackground(nullptr, _map->getBWFoWImage(backgroundSize), GL_NEAREST);
+            _fowObject = new PublishGLBattleBackground(nullptr, _map->getBWFoWImage(backgroundSize), GL_NEAREST);
         else
             _fowObject->setImage(_map->getBWFoWImage(backgroundSize));
 

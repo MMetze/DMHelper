@@ -1,18 +1,19 @@
-#ifndef BATTLEGLEFFECT_H
-#define BATTLEGLEFFECT_H
+#ifndef PUBLISHGLBATTLEEFFECT_H
+#define PUBLISHGLBATTLEEFFECT_H
 
-#include "battleglobject.h"
+#include "publishglbattleobject.h"
 
 class BattleDialogModelEffect;
 class BattleDialogModelEffectObject;
 class QPainter;
 
-class BattleGLEffect : public BattleGLObject
+class PublishGLBattleEffect : public PublishGLBattleObject
 {
     Q_OBJECT
+
 public:
-    BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* effect);
-    virtual ~BattleGLEffect() override;
+    PublishGLBattleEffect(PublishGLBattleScene* scene, BattleDialogModelEffect* effect);
+    virtual ~PublishGLBattleEffect() override;
 
     virtual void cleanup() override;
     virtual void paintGL() override;
@@ -33,4 +34,4 @@ protected:
     qreal _imageScaleFactor;
 };
 
-#endif // BATTLEGLEFFECT_H
+#endif // PUBLISHGLBATTLEEFFECT_H

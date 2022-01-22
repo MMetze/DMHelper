@@ -1,19 +1,22 @@
-#include "battlegltoken.h"
+#include "publishglbattletoken.h"
 #include "battledialogmodelcombatant.h"
+#include "publishglimage.h"
+#include "publishgleffect.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QPixmap>
 
-BattleGLToken::BattleGLToken(BattleGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
-    BattleGLObject(scene),
+PublishGLBattleToken::PublishGLBattleToken(PublishGLBattleScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
+    PublishGLBattleObject(scene),
     _combatant(combatant),
     _VAO(0),
     _VBO(0),
     _EBO(0),
     _textureSize(),
-    _isPC(isPC)
+    _isPC(isPC),
+    _effectList()
 {
     if(!QOpenGLContext::currentContext())
         return;
@@ -87,15 +90,16 @@ BattleGLToken::BattleGLToken(BattleGLScene* scene, BattleDialogModelCombatant* c
     // set the initial position matrix
     combatantMoved();
 
-    connect(_combatant, &BattleDialogModelCombatant::combatantMoved, this, &BattleGLToken::combatantMoved);
+    connect(_combatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleToken::combatantMoved);
+    connect(_combatant, &BattleDialogModelCombatant::combatantSelected, this, &PublishGLBattleToken::combatantSelected);
 }
 
-BattleGLToken::~BattleGLToken()
+PublishGLBattleToken::~PublishGLBattleToken()
 {
-    BattleGLToken::cleanup();
+    PublishGLBattleToken::cleanup();
 }
 
-void BattleGLToken::cleanup()
+void PublishGLBattleToken::cleanup()
 {
     if(QOpenGLContext::currentContext())
     {
@@ -124,10 +128,12 @@ void BattleGLToken::cleanup()
         }
     }
 
-    BattleGLObject::cleanup();
+    qDeleteAll(_effectList);
+
+    PublishGLBattleObject::cleanup();
 }
 
-void BattleGLToken::paintGL()
+void PublishGLBattleToken::paintGL()
 {
     if(!QOpenGLContext::currentContext())
         return;
@@ -139,36 +145,92 @@ void BattleGLToken::paintGL()
 
     e->glBindVertexArray(_VAO);
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);    
 }
 
-QSizeF BattleGLToken::getTextureSize() const
+void PublishGLBattleToken::paintEffects(int shaderModelMatrix)
+{
+    if(!QOpenGLContext::currentContext())
+        return;
+
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if(!f)
+        return;
+
+    for(PublishGLEffect* effect : _effectList)
+    {
+        if(effect)
+        {
+            f->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, effect->getMatrixData());
+            effect->getImage().paintGL();
+        }
+    }
+}
+
+BattleDialogModelCombatant* PublishGLBattleToken::getCombatant() const
+{
+    return _combatant;
+}
+
+QSizeF PublishGLBattleToken::getTextureSize() const
 {
     return _textureSize;
 }
 
-bool BattleGLToken::isPC() const
+bool PublishGLBattleToken::isPC() const
 {
     return _isPC;
 }
 
-void BattleGLToken::combatantMoved()
+void PublishGLBattleToken::addEffect(PublishGLImage& effectImage)
 {
-    if(!_scene)
+    PublishGLEffect* newEffect = new PublishGLEffect(effectImage);
+
+    QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
+    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
+    newEffect->setPositionScale(newPosition, sizeFactor);
+
+    _effectList.append(newEffect);
+}
+
+void PublishGLBattleToken::removeEffect(const PublishGLImage& effectImage)
+{
+    for(int i = 0; i < _effectList.count(); ++i)
+    {
+        if((_effectList.at(i)) && (_effectList.at(i)->getImage() == effectImage))
+        {
+            PublishGLEffect* removeEffect = _effectList.takeAt(i);
+            delete removeEffect;
+            return;
+        }
+    }
+}
+
+void PublishGLBattleToken::combatantMoved()
+{
+    if((!_scene) || (_textureSize.isEmpty()))
         return;
 
-    QPointF combatantPos = _combatant->getPosition();
-    qreal sizeFactor = _combatant->getSizeFactor();
-    qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
+    QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
+    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
+    qreal scaleFactor = sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
-    _modelMatrix.translate(QVector3D(sceneToWorld(combatantPos)));
+    _modelMatrix.translate(newPosition);
     _modelMatrix.scale(scaleFactor, scaleFactor);
+
+    for(PublishGLEffect* effect : _effectList)
+        effect->setPositionScale(newPosition, sizeFactor);
 
     emit changed();
 }
 
-void BattleGLToken::setPC(bool isPC)
+void PublishGLBattleToken::combatantSelected()
+{
+    emit selectionChanged(this);
+}
+
+void PublishGLBattleToken::setPC(bool isPC)
 {
     if(isPC != _isPC)
     {

@@ -35,7 +35,7 @@ protected:
     VideoPlayerGLPlayer* _videoPlayer;
 
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
-    BattleGLBackground* _backgroundObject;
+    PublishGLBattleBackground* _backgroundObject;
     QImage _backgroundImage;
 #endif
 };

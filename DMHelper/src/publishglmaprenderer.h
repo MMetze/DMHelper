@@ -8,7 +8,7 @@
 
 class Map;
 class Party;
-class BattleGLBackground;
+class PublishGLBattleBackground;
 class PublishGLImage;
 class QOpenGLFunctions;
 
@@ -77,7 +77,7 @@ protected:
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
-    BattleGLBackground* _fowObject;
+    PublishGLBattleBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _itemImage;
     QList<PublishGLImage*> _markerTokens;

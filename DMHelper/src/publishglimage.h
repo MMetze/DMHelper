@@ -42,4 +42,8 @@ protected:
     QSize _imageSize;
 };
 
+inline bool operator==(const PublishGLImage& lhs, const PublishGLImage& rhs){ return lhs.getTextureID() == rhs.getTextureID(); }
+inline bool operator!=(const PublishGLImage& lhs, const PublishGLImage& rhs){return !operator==(lhs, rhs);}
+
+
 #endif // PUBLISHGLIMAGE_H

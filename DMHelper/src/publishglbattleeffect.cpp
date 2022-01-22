@@ -1,4 +1,4 @@
-#include "battlegleffect.h"
+#include "publishglbattleeffect.h"
 #include "battledialogmodeleffect.h"
 #include "battledialogmodeleffectobject.h"
 #include "scaledpixmap.h"
@@ -9,8 +9,8 @@
 #include <QPixmap>
 #include <QPainter>
 
-BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* effect) :
-    BattleGLObject(scene),
+PublishGLBattleEffect::PublishGLBattleEffect(PublishGLBattleScene* scene, BattleDialogModelEffect* effect) :
+    PublishGLBattleObject(scene),
     _effect(effect),
     _childEffect(nullptr),
     _VAO(0),
@@ -143,17 +143,17 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
     // set the initial position matrix
     effectMoved();
 
-    connect(_effect, &BattleDialogModelEffect::effectMoved, this, &BattleGLEffect::effectMoved);
+    connect(_effect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
     if(_childEffect)
-        connect(_childEffect, &BattleDialogModelEffect::effectMoved, this, &BattleGLEffect::effectMoved);
+        connect(_childEffect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
 }
 
-BattleGLEffect::~BattleGLEffect()
+PublishGLBattleEffect::~PublishGLBattleEffect()
 {
-    BattleGLEffect::cleanup();
+    PublishGLBattleEffect::cleanup();
 }
 
-void BattleGLEffect::cleanup()
+void PublishGLBattleEffect::cleanup()
 {
     if(QOpenGLContext::currentContext())
     {
@@ -182,10 +182,10 @@ void BattleGLEffect::cleanup()
         }
     }
 
-    BattleGLObject::cleanup();
+    PublishGLBattleObject::cleanup();
 }
 
-void BattleGLEffect::paintGL()
+void PublishGLBattleEffect::paintGL()
 {
     if(!QOpenGLContext::currentContext())
         return;
@@ -200,7 +200,7 @@ void BattleGLEffect::paintGL()
     f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void BattleGLEffect::effectMoved()
+void PublishGLBattleEffect::effectMoved()
 {
     if(!_scene)
         return;
@@ -223,7 +223,7 @@ void BattleGLEffect::effectMoved()
     emit changed();
 }
 
-void BattleGLEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth)
+void PublishGLBattleEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth)
 {
     if(!effect)
         return;
@@ -256,7 +256,7 @@ void BattleGLEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effec
     }
 }
 
-void BattleGLEffect::drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth)
+void PublishGLBattleEffect::drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth)
 {
     if(!effectObject)
         return;

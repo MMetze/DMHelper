@@ -1,14 +1,14 @@
-#ifndef BATTLEGLSCENE_H
-#define BATTLEGLSCENE_H
+#ifndef PUBLISHGLBATTLESCENE_H
+#define PUBLISHGLBATTLESCENE_H
 
 #include <QSize>
 #include <QRectF>
 
-class BattleGLScene
+class PublishGLBattleScene
 {
 public:
-    BattleGLScene();
-    virtual ~BattleGLScene();
+    PublishGLBattleScene();
+    virtual ~PublishGLBattleScene();
 
     QSize getTargetSize() const;
     void setTargetSize(const QSize& size);
@@ -27,4 +27,4 @@ protected:
 
 };
 
-#endif // BATTLEGLSCENE_H
+#endif // PUBLISHGLBATTLESCENE_H

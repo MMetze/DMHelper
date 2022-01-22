@@ -1,5 +1,5 @@
 #include "publishglmapimagerenderer.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #include "map.h"
 #include <QOpenGLFunctions>
 
@@ -26,7 +26,7 @@ void PublishGLMapImageRenderer::initializeBackground()
     if(_backgroundImage.isNull())
         _backgroundImage = _map->getBackgroundImage();
 
-    _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
+    _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
     updateProjectionMatrix();
 }
 

@@ -2,9 +2,9 @@
 #include "battledialogmodel.h"
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodeleffect.h"
-#include "battleglbackground.h"
-#include "battlegltoken.h"
-#include "battlegleffect.h"
+#include "publishglbattlebackground.h"
+#include "publishglbattletoken.h"
+#include "publishglbattleeffect.h"
 #include "publishglimage.h"
 #include "battledialogmodelcombatant.h"
 #include "map.h"
@@ -41,6 +41,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _activeCombatant(nullptr),
     _activePC(false),
     _activeToken(nullptr),
+    _selectionToken(nullptr),
     _updateFow(false)
 {
 }
@@ -76,6 +77,9 @@ void PublishGLBattleRenderer::cleanup()
     _combatantTokens.clear();
     qDeleteAll(_combatantNames);
     _combatantNames.clear();
+
+    delete _selectionToken;
+    _selectionToken = nullptr;
 
     delete _unknownToken;
     _unknownToken = nullptr;
@@ -294,17 +298,18 @@ void PublishGLBattleRenderer::paintGL()
 
     paintBackground(f);
 
-    QList<BattleGLToken*> tokens = _combatantTokens.values();
-    for(BattleGLToken* enemyToken : tokens)
+    QList<PublishGLBattleToken*> tokens = _combatantTokens.values();
+    for(PublishGLBattleToken* enemyToken : tokens)
     {
         if(!enemyToken->isPC())
         {
             f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, enemyToken->getMatrixData());
             enemyToken->paintGL();
+            enemyToken->paintEffects(_shaderModelMatrix);
         }
     }
 
-    for(BattleGLObject* effectToken : _effectTokens)
+    for(PublishGLBattleObject* effectToken : _effectTokens)
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, effectToken->getMatrixData());
         effectToken->paintGL();
@@ -318,12 +323,13 @@ void PublishGLBattleRenderer::paintGL()
         _fowObject->paintGL();
     }
 
-    for(BattleGLToken* pcToken : tokens)
+    for(PublishGLBattleToken* pcToken : tokens)
     {
         if(pcToken->isPC())
         {
             f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, pcToken->getMatrixData());
             pcToken->paintGL();
+            pcToken->paintEffects(_shaderModelMatrix);
         }
     }
 
@@ -351,7 +357,7 @@ void PublishGLBattleRenderer::paintGL()
             QSizeF textureSize;
             if(combatant->getShown())
             {
-                BattleGLToken* combatantToken = _combatantTokens.value(combatant);
+                PublishGLBattleToken* combatantToken = _combatantTokens.value(combatant);
                 tokenObject = combatantToken;
                 if(combatantToken)
                     textureSize = combatantToken->getTextureSize();
@@ -419,18 +425,20 @@ void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCom
         _movementVisible = false;
         _movementCombatant = nullptr;
         _movementPC = false;
-        return;
     }
-
-    _movementVisible = visible;
-    if(combatant != _movementCombatant)
+    else
     {
-        _movementCombatant = combatant;
-        BattleGLToken* combatantToken = _combatantTokens.value(combatant);
-        _movementPC = combatantToken ? combatantToken->isPC() : false;
+        _movementVisible = visible;
+        if(combatant != _movementCombatant)
+        {
+            _movementCombatant = combatant;
+            PublishGLBattleToken* combatantToken = _combatantTokens.value(combatant);
+            _movementPC = combatantToken ? combatantToken->isPC() : false;
+        }
+
+        _movementToken->setPositionScale(PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), combatant->getPosition()), remaining / MOVEMENT_TOKEN_SIZE);
     }
 
-    _movementToken->setPositionScale(BattleGLObject::sceneToWorld(_scene.getSceneRect(), combatant->getPosition()), remaining / MOVEMENT_TOKEN_SIZE);
     emit updateWidget();
 }
 
@@ -444,7 +452,7 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
     _activeCombatant = activeCombatant;
     if(_activeCombatant)
     {
-        BattleGLToken* combatantToken = _combatantTokens.value(_activeCombatant);
+        PublishGLBattleToken* combatantToken = _combatantTokens.value(_activeCombatant);
         _activePC = combatantToken ? combatantToken->isPC() : false;
         activeCombatantMoved();
         connect(_activeCombatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
@@ -524,7 +532,7 @@ void PublishGLBattleRenderer::updateFoW()
     if(!backgroundSize.isEmpty())
     {
         if(!_fowObject)
-            _fowObject = new BattleGLBackground(nullptr, _model->getMap()->getBWFoWImage(backgroundSize), GL_NEAREST);
+            _fowObject = new PublishGLBattleBackground(nullptr, _model->getMap()->getBWFoWImage(backgroundSize), GL_NEAREST);
         else
             _fowObject->setImage(_model->getMap()->getBWFoWImage(backgroundSize));
 
@@ -539,16 +547,22 @@ void PublishGLBattleRenderer::updateContents()
 
     updateFoW();
 
+    QImage selectImage;
+    selectImage.load(QString(":/img/data/selected.png"));
+    _selectionToken = new PublishGLImage(selectImage);
+
     QFontMetrics fm(qApp->font());
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(i);
         if(combatant)
         {
-            BattleGLToken* combatantToken = new BattleGLToken(&_scene, combatant);
+            PublishGLBattleToken* combatantToken = new PublishGLBattleToken(&_scene, combatant);
             BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(combatant);
             if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
                 combatantToken->setPC(true);
+            if(combatant->getSelected())
+                combatantToken->addEffect(*_selectionToken);
             _combatantTokens.insert(combatant, combatantToken);
 
             QRect nameBounds = fm.boundingRect(combatant->getName());
@@ -562,7 +576,8 @@ void PublishGLBattleRenderer::updateContents()
             PublishGLImage* combatantName = new PublishGLImage(nameImage, false);
             _combatantNames.insert(combatant, combatantName);
 
-            connect(combatantToken, &BattleGLObject::changed, this, &PublishGLBattleRenderer::updateWidget);
+            connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
+            connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
         }
     }
 
@@ -588,9 +603,9 @@ void PublishGLBattleRenderer::updateContents()
         BattleDialogModelEffect* effect = _model->getEffect(i);
         if(effect)
         {
-            BattleGLObject* effectToken = new BattleGLEffect(&_scene, effect);
+            PublishGLBattleObject* effectToken = new PublishGLBattleEffect(&_scene, effect);
             _effectTokens.append(effectToken);
-            connect(effectToken, &BattleGLObject::changed, this, &PublishGLBattleRenderer::updateWidget);
+            connect(effectToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
         }
     }
 
@@ -606,6 +621,19 @@ void PublishGLBattleRenderer::activeCombatantMoved()
     QSize textureSize = _activeToken->getImageSize();
     qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale()-2)) * _activeCombatant->getSizeFactor() / qMax(textureSize.width(), textureSize.height());
 
-    _activeToken->setPositionScale(BattleGLObject::sceneToWorld(_scene.getSceneRect(), _activeCombatant->getPosition()), scaleFactor);
+    _activeToken->setPositionScale(PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), _activeCombatant->getPosition()), scaleFactor);
+    emit updateWidget();
+}
+
+void PublishGLBattleRenderer::tokenSelectionChanged(PublishGLBattleToken* token)
+{
+    if((!token) || (!token->getCombatant()) || (!_selectionToken))
+        return;
+
+    if(token->getCombatant()->getSelected())
+        token->addEffect(*_selectionToken);
+    else
+        token->removeEffect(*_selectionToken);
+
     emit updateWidget();
 }
