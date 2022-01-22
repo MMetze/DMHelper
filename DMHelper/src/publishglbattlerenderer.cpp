@@ -298,6 +298,12 @@ void PublishGLBattleRenderer::paintGL()
 
     paintBackground(f);
 
+    for(PublishGLBattleObject* effectToken : _effectTokens)
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, effectToken->getMatrixData());
+        effectToken->paintGL();
+    }
+
     QList<PublishGLBattleToken*> tokens = _combatantTokens.values();
     for(PublishGLBattleToken* enemyToken : tokens)
     {
@@ -307,12 +313,6 @@ void PublishGLBattleRenderer::paintGL()
             enemyToken->paintGL();
             enemyToken->paintEffects(_shaderModelMatrix);
         }
-    }
-
-    for(PublishGLBattleObject* effectToken : _effectTokens)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, effectToken->getMatrixData());
-        effectToken->paintGL();
     }
 
     paintTokens(f, false);
