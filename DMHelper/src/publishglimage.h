@@ -17,11 +17,15 @@ public:
 
     void setImage(const QImage& image);
     void setScale(float scaleFactor);
+    void setX(float x);
+    void setY(float y);
     void setPosition(float x, float y);
     void setPosition(const QPointF& pos);
     void setPositionScale(float x, float y, float scaleFactor);
     void setPositionScale(const QPointF& pos, float scaleFactor);
 
+    float getX() const;
+    float getY() const;
     QSize getSize() const;
     QSize getImageSize() const;
     float getScale() const;

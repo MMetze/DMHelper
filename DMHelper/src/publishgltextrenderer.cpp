@@ -1,6 +1,7 @@
 #include "publishgltextrenderer.h"
 #include "encountertext.h"
 #include "publishglbattlebackground.h"
+#include "publishglimage.h"
 #include "dmconstants.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
@@ -12,11 +13,13 @@ PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage ba
     PublishGLRenderer(parent),
     _encounter(encounter),
     _targetSize(),
+    _color(),
     _backgroundImage(backgroundImage),
     _textImage(textImage),
     _scene(),
     _initialized(false),
     _shaderProgram(0),
+    _shaderModelMatrix(0),
     _backgroundObject(nullptr),
     _textObject(nullptr),
     _textPos(),
@@ -35,22 +38,41 @@ CampaignObjectBase* PublishGLTextRenderer::getObject()
     return _encounter;
 }
 
+QColor PublishGLTextRenderer::getBackgroundColor()
+{
+    return _color;
+}
+
 void PublishGLTextRenderer::cleanup()
 {
     _initialized = false;
 
-    if(_timerId)
-    {
-        killTimer(_timerId);
-        _timerId = 0;
-    }
+    stop();
 
     delete _backgroundObject;
     _backgroundObject = nullptr;
     delete _textObject;
     _textObject = nullptr;
 
+    if(_shaderProgram > 0)
+    {
+        if((_targetWidget) && (_targetWidget->context()))
+        {
+            QOpenGLFunctions *f = _targetWidget->context()->functions();
+            if(f)
+                f->glDeleteProgram(_shaderProgram);
+        }
+        _shaderProgram = 0;
+    }
+    _shaderModelMatrix = 0;
+
     PublishGLRenderer::cleanup();
+}
+
+void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
+{
+    _color = color;
+    emit updateWidget();
 }
 
 void PublishGLTextRenderer::initializeGL()
@@ -134,16 +156,19 @@ void PublishGLTextRenderer::initializeGL()
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
+    _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_backgroundImage.size());
     _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
-    _textObject = new PublishGLBattleBackground(nullptr, _textImage, GL_LINEAR);
+    //_textObject = new PublishGLBattleBackground(nullptr, _textImage, GL_LINEAR);
+    _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
+    _textObject->setX(-_backgroundImage.width() / 2);
 
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     // View
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
@@ -157,8 +182,7 @@ void PublishGLTextRenderer::initializeGL()
     _initialized = true;
 
     rewind();
-    _elapsed.start();
-    _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
+    play();
 }
 
 void PublishGLTextRenderer::resizeGL(int w, int h)
@@ -182,8 +206,7 @@ void PublishGLTextRenderer::paintGL()
         return;
 
     // Draw the scene:
-    //f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
-    f->glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     f->glUseProgram(_shaderProgram);
@@ -191,32 +214,57 @@ void PublishGLTextRenderer::paintGL()
 
     if(_backgroundObject)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
     }
 
     if(_textObject)
     {
-        QMatrix4x4 textMatrix = _textObject->getMatrix();
-        textMatrix.translate(0, _textPos.y());
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, textMatrix.constData() );
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _textObject->getMatrixData());
         _textObject->paintGL();
     }
 }
 
 void PublishGLTextRenderer::rewind()
 {
+    if(!_textObject)
+        return;
+
     //_textPos.setY(_backgroundImage.height());
-    _textPos.setY(0.0);
+    //_textPos.setY(0.0);
+    //_textPos.setY(-_backgroundImage.height() / 2);
+
+    _textObject->setY(-_backgroundImage.height() / 2 - _textObject->getImageSize().height());
+    emit updateWidget();
+}
+
+void PublishGLTextRenderer::play()
+{
+    _elapsed.start();
+    stop();
+    _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
+}
+
+void PublishGLTextRenderer::stop()
+{
+    if(_timerId)
+    {
+        killTimer(_timerId);
+        _timerId = 0;
+    }
 }
 
 void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
+    if((!_textObject) || (!_encounter))
+        return;
+
     qreal elapsedtime = _elapsed.restart();
     //_textPos.ry() -= _encounter->getScrollSpeed() * (_prescaledImage.height() / 250) * (elapsedtime / 1000.0);
-    _textPos.ry() += 25.0 * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0);
+    //_textPos.ry() += 25.0 * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0);
+    _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0));
 
     emit updateWidget();
 }

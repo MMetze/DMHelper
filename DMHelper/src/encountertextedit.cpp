@@ -110,6 +110,8 @@ void EncounterTextEdit::deactivateObject()
         return;
     }
 
+    _renderer = nullptr;
+
     storeEncounter();
     unsetEncounter(_encounter);
 }
@@ -414,6 +416,9 @@ void EncounterTextEdit::stopAnimation()
 
 void EncounterTextEdit::rewind()
 {
+    if(_renderer)
+        _renderer->rewind();
+    /*
     qreal yPos = 0.0;
     if(_encounter->getAnimated())
     {
@@ -434,6 +439,7 @@ void EncounterTextEdit::rewind()
     }
 
     _textPos.setY(yPos);
+    */
 }
 
 void EncounterTextEdit::setTranslated(bool translated)
@@ -516,16 +522,25 @@ void EncounterTextEdit::publishClicked(bool checked)
             */
             emit showPublishWindow();
             prepareImages();
-            if(!_renderer)
+            if(_renderer)
+            {
+                _renderer->play();
+            }
+            else
+            {
                 _renderer = new PublishGLTextRenderer(_encounter, _prescaledImage, _textImage); //_backgroundImage, getDocumentTextImage());
-            emit registerRenderer(_renderer);
-
+                emit registerRenderer(_renderer);
+            }
         }
         else
         {
+            /*
             stopPublishTimer();
             if(isVideo())
                 createVideoPlayer(true);
+                */
+            if(_renderer)
+                _renderer->stop();
         }
 
         _animationRunning = checked;
@@ -805,9 +820,9 @@ void EncounterTextEdit::prepareImages()
     }
     else
     {
-        _prescaledImage = _backgroundImage.scaled(getRotatedTargetSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        if(_rotation != 0)
-            _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+        _prescaledImage = _backgroundImage;//.scaled(getRotatedTargetSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+//        if(_rotation != 0)
+//            _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
     }
 
     _textImage = QImage();
@@ -821,13 +836,15 @@ void EncounterTextEdit::prepareTextImage()
 
     _textImage = getDocumentTextImage();
 
-    QSize rotatedSize = getRotatedTargetSize();
+    //QSize rotatedSize = getRotatedTargetSize();
     //int rotatedWidth = rotatedSize.width() * _encounter->getTextWidth() / 100;
 
-    _textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
+    //_textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
+    _textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
+
     //_textImage = _textImage.scaledToWidth(rotatedWidth, Qt::SmoothTransformation);
-    if(_rotation != 0)
-        _textImage = _textImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+//    if(_rotation != 0)
+//        _textImage = _textImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
 }
 
 QImage EncounterTextEdit::getDocumentTextImage()

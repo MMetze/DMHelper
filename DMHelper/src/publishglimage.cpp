@@ -105,6 +105,24 @@ void PublishGLImage::setScale(float scaleFactor)
     }
 }
 
+void PublishGLImage::setX(float x)
+{
+    if(x != _x)
+    {
+        _x = x;
+        updateMatrix();
+    }
+}
+
+void PublishGLImage::setY(float y)
+{
+    if(y != _y)
+    {
+        _y = y;
+        updateMatrix();
+    }
+}
+
 void PublishGLImage::setPosition(float x, float y)
 {
     if((x != _x) || (y != _y))
@@ -134,6 +152,16 @@ void PublishGLImage::setPositionScale(float x, float y, float scaleFactor)
 void PublishGLImage::setPositionScale(const QPointF& pos, float scaleFactor)
 {
     setPositionScale(pos.x(), pos.y(), scaleFactor);
+}
+
+float PublishGLImage::getX() const
+{
+    return _x;
+}
+
+float PublishGLImage::getY() const
+{
+    return _y;
 }
 
 QSize PublishGLImage::getSize() const

@@ -7,6 +7,7 @@
 #include <QElapsedTimer>
 
 class PublishGLBattleBackground;
+class PublishGLImage;
 class EncounterText;
 
 class PublishGLTextRenderer : public PublishGLRenderer
@@ -18,9 +19,11 @@ public:
     virtual ~PublishGLTextRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
+    virtual QColor getBackgroundColor() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
+    virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
@@ -29,6 +32,8 @@ public:
 
 public slots:
     void rewind();
+    void play();
+    void stop();
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
@@ -36,13 +41,15 @@ protected:
 
     EncounterText* _encounter;
     QSize _targetSize;
+    QColor _color;
     QImage _backgroundImage;
     QImage _textImage;
     PublishGLBattleScene _scene;
     bool _initialized;
     unsigned int _shaderProgram;
+    int _shaderModelMatrix;
     PublishGLBattleBackground* _backgroundObject;
-    PublishGLBattleBackground* _textObject;
+    PublishGLImage* _textObject;
 
     QPointF _textPos;
     QElapsedTimer _elapsed;
