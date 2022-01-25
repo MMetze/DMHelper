@@ -9,18 +9,18 @@
 #include <QTextDocument>
 #include <QPainter>
 
-PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent) :
+PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, /*QImage backgroundImage,*/ QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
     _targetSize(),
     _color(),
-    _backgroundImage(backgroundImage),
+    //_backgroundImage(backgroundImage),
     _textImage(textImage),
     _scene(),
     _initialized(false),
     _shaderProgram(0),
     _shaderModelMatrix(0),
-    _backgroundObject(nullptr),
+    //_backgroundObject(nullptr),
     _textObject(nullptr),
     _textPos(),
     _elapsed(),
@@ -49,8 +49,8 @@ void PublishGLTextRenderer::cleanup()
 
     stop();
 
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
+    //delete _backgroundObject;
+    //_backgroundObject = nullptr;
     delete _textObject;
     _textObject = nullptr;
 
@@ -159,11 +159,15 @@ void PublishGLTextRenderer::initializeGL()
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
 
     // Create the objects
-    _scene.deriveSceneRectFromSize(_backgroundImage.size());
-    _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
+    //_scene.deriveSceneRectFromSize(_backgroundImage.size());
+    initializeBackground();
+    _scene.deriveSceneRectFromSize(getBackgroundSize());
+    //_backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
+
     //_textObject = new PublishGLBattleBackground(nullptr, _textImage, GL_LINEAR);
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
-    _textObject->setX(-_backgroundImage.width() / 2);
+    //_textObject->setX(-_backgroundImage.width() / 2);
+    _textObject->setX(-getBackgroundSize().width() / 2);
 
     // Matrices
     // Model
@@ -212,11 +216,14 @@ void PublishGLTextRenderer::paintGL()
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
+    paintBackground(f);
+    /*
     if(_backgroundObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
     }
+    */
 
     if(_textObject)
     {
@@ -227,19 +234,27 @@ void PublishGLTextRenderer::paintGL()
 
 void PublishGLTextRenderer::rewind()
 {
-    if(!_textObject)
+    if((!_encounter) || (!_textObject))
         return;
 
     //_textPos.setY(_backgroundImage.height());
     //_textPos.setY(0.0);
     //_textPos.setY(-_backgroundImage.height() / 2);
 
-    _textObject->setY(-_backgroundImage.height() / 2 - _textObject->getImageSize().height());
+    //_textObject->setY(-_backgroundImage.height() / 2 - _textObject->getImageSize().height());
+    if(_encounter->getAnimated())
+        _textObject->setY(-getBackgroundSize().height() / 2 - _textObject->getImageSize().height());
+    else
+        _textObject->setY(getBackgroundSize().height() / 2 - _textObject->getImageSize().height());
+
     emit updateWidget();
 }
 
 void PublishGLTextRenderer::play()
 {
+    if((!_encounter) || (!_encounter->getAnimated()))
+        return;
+
     _elapsed.start();
     stop();
     _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
@@ -264,7 +279,8 @@ void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
     qreal elapsedtime = _elapsed.restart();
     //_textPos.ry() -= _encounter->getScrollSpeed() * (_prescaledImage.height() / 250) * (elapsedtime / 1000.0);
     //_textPos.ry() += 25.0 * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0);
-    _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0));
+    //_textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0));
+    _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (getBackgroundSize().height() / 250) * (elapsedtime / 1000.0));
 
     emit updateWidget();
 }
@@ -284,4 +300,9 @@ void PublishGLTextRenderer::updateProjectionMatrix()
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 }
+
+void PublishGLTextRenderer::updateBackground()
+{
+}
+
 

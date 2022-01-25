@@ -301,11 +301,13 @@ void MapFrame::colorize()
     }
 }
 
+/*
 void MapFrame::cancelPublish()
 {
     emit publishCancelled();
     _isPublishing = false;
 }
+*/
 
 void MapFrame::setParty(Party* party)
 {
@@ -631,9 +633,12 @@ void MapFrame::setCameraEdit(bool enabled)
 
 void MapFrame::targetResized(const QSize& newSize)
 {
-    qDebug() << "[MapFrame] Target size being set to: " << newSize;
-    _targetSize = newSize;
-    resetPublishFoW();
+    if(_targetSize != newSize)
+    {
+        qDebug() << "[MapFrame] Target size being set to: " << newSize;
+        _targetSize = newSize;
+        resetPublishFoW();
+    }
 }
 
 void MapFrame::setPointerOn(bool enabled)

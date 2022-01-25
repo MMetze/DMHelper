@@ -15,7 +15,7 @@ class PublishGLTextRenderer : public PublishGLRenderer
     Q_OBJECT
 public:
 //    PublishGLTextRenderer(QImage& backgroundImage, QImage& textImage, QObject *parent = nullptr);
-    PublishGLTextRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent = nullptr);
+    PublishGLTextRenderer(EncounterText* encounter, /*QImage backgroundImage,*/ QImage textImage, QObject *parent = nullptr);
     virtual ~PublishGLTextRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
@@ -36,19 +36,30 @@ public slots:
     void stop();
 
 protected:
+    // QObject overrides
     virtual void timerEvent(QTimerEvent *event) override;
+
+    // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
+
+    // Background overrides
+    virtual void initializeBackground() = 0;
+    virtual bool isBackgroundReady() = 0;
+    virtual void resizeBackground(int w, int h) = 0;
+    virtual void paintBackground(QOpenGLFunctions* functions) = 0;
+    virtual QSizeF getBackgroundSize() = 0;
+    virtual void updateBackground();
 
     EncounterText* _encounter;
     QSize _targetSize;
     QColor _color;
-    QImage _backgroundImage;
+    //QImage _backgroundImage;
     QImage _textImage;
     PublishGLBattleScene _scene;
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
-    PublishGLBattleBackground* _backgroundObject;
+    //PublishGLBattleBackground* _backgroundObject;
     PublishGLImage* _textObject;
 
     QPointF _textPos;
