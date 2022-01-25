@@ -59,7 +59,6 @@ public slots:
 
     void setAnimated(bool animated);
     void setScrollSpeed(int scrollSpeed);
-    //void stopAnimation();
     void rewind();
 
     void setTranslated(bool translated);
@@ -103,13 +102,8 @@ protected slots:
     void takeFocus();
     void loadImage();
     void handleScreenshotReady(const QImage& image);
-    //void updateVideoBackground();
-
-    //void startPublishTimer();
-    //void stopPublishTimer();
 
 protected:
-    //virtual void timerEvent(QTimerEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
 
     void scaleBackgroundImage();
@@ -118,9 +112,7 @@ protected:
     QImage getDocumentTextImage();
     void drawTextImage(QPaintDevice* target);
 
-    //void createVideoPlayer(bool dmPlayer);
     void extractDMScreenshot();
-    //void cleanupPlayer();
 
     bool isVideo() const;
     bool isAnimated() const;
@@ -139,18 +131,13 @@ protected:
     QImage _prescaledImage;
     QImage _textImage;
 
-    //VideoPlayer* _videoPlayer;
     bool _isDMPlayer;
     bool _isPublishing;
-    //QImage _backgroundVideo;
 
     QSize _targetSize;
     int _rotation;
 
-    //bool _animationRunning;
     QPointF _textPos;
-    //QElapsedTimer _elapsed;
-    //int _timerId;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H

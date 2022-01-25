@@ -96,8 +96,6 @@ public slots:
 
     void colorize();
 
-    //void cancelPublish();
-
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);

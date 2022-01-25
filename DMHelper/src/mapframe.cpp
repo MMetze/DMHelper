@@ -301,14 +301,6 @@ void MapFrame::colorize()
     }
 }
 
-/*
-void MapFrame::cancelPublish()
-{
-    emit publishCancelled();
-    _isPublishing = false;
-}
-*/
-
 void MapFrame::setParty(Party* party)
 {
     if(!_mapSource)
@@ -535,12 +527,6 @@ void MapFrame::centerWindow(const QPointF& position)
 
 void MapFrame::cancelSelect()
 {
-    /*
-    delete _rubberBand;
-    _rubberBand = nullptr;
-    zoomSelect(false);
-    setBrushMode(DMHelper::BrushType_Circle);
-    */
     editModeToggled(DMHelper::EditMode_Move);
 }
 
@@ -736,7 +722,6 @@ void MapFrame::setRotation(int rotation)
 
 void MapFrame::initializeFoW()
 {
-//    if((_backgroundImage) || (_backgroundVideo) || (_fow) || (_scene))
     if((_backgroundImage) || (_fow) || (_scene))
         qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame contents NOT done. Undefined behavior!";
 
@@ -784,11 +769,7 @@ void MapFrame::initializeFoW()
     {
         if(_mapSource->isValid())
         {
-            //D qDebug() << "[MapFrame] Initializing map frame video";
-            //D if(_renderer)
-            //D     emit registerRenderer(nullptr); // TODO: is this really ok?
-            //D else
-                extractDMScreenshot();
+            extractDMScreenshot();
         }
     }
 
@@ -859,8 +840,6 @@ void MapFrame::uninitializeFoW()
         disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     }
-
-    //emit registerRenderer(nullptr);
 
     cleanupBuffers();
     cleanupSelectionItems();
@@ -944,7 +923,6 @@ void MapFrame::cleanupSelectionItems()
 
 void MapFrame::hideEvent(QHideEvent * event)
 {
-    //cancelSelect();
     uninitializeFoW();
     emit windowClosed(this);
 
@@ -1251,7 +1229,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, _erase, false)); //_smooth));
+                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, _erase, false));
                 _mapSource->getUndoStack()->push(undoShape);
                 emit dirty();
                 emit fowChanged();
