@@ -58,7 +58,7 @@ protected:
 
     virtual void updateGrid();
     virtual void updateFoW();
-    virtual void updateContents();
+    virtual void createContents();
 
 protected slots:
     void activeCombatantMoved();
@@ -83,6 +83,7 @@ protected:
     QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
     PublishGLImage* _unknownToken;
+    PublishGLImage* _initiativeBackground;
     QList<PublishGLBattleObject*> _effectTokens;
 
     bool _movementVisible;
