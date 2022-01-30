@@ -40,6 +40,7 @@ public slots:
     void fowChanged();
     void setCameraRect(const QRectF& cameraRect);
     void setGrid(QImage gridImage);
+    void setInitiativeVisible(bool visible);
 
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
@@ -59,6 +60,9 @@ protected:
     virtual void updateGrid();
     virtual void updateFoW();
     virtual void createContents();
+
+    virtual void updateInitiative();
+    virtual void paintInitiative(QOpenGLFunctions* functions);
 
 protected slots:
     void activeCombatantMoved();
@@ -86,6 +90,8 @@ protected:
     PublishGLImage* _initiativeBackground;
     QList<PublishGLBattleObject*> _effectTokens;
 
+    bool _showInitiative;
+    qreal _initiativeTokenHeight;
     bool _movementVisible;
     BattleDialogModelCombatant* _movementCombatant;
     bool _movementPC;

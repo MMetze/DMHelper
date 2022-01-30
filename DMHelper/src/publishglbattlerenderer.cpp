@@ -37,6 +37,8 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _unknownToken(nullptr),
     _initiativeBackground(nullptr),
     _effectTokens(),
+    _showInitiative(false),
+    _initiativeTokenHeight(0.0),
     _movementVisible(false),
     _movementCombatant(nullptr),
     _movementPC(false),
@@ -90,6 +92,8 @@ void PublishGLBattleRenderer::cleanup()
     _initiativeBackground = nullptr;
     delete _movementToken;
     _movementToken = nullptr;
+    _showInitiative = false;
+    _initiativeTokenHeight = 0.0;
     _movementVisible = false;
     _movementCombatant = nullptr;
     _movementPC = false;
@@ -258,23 +262,7 @@ void PublishGLBattleRenderer::resizeGL(int w, int h)
     _scene.setTargetSize(targetSize);
     resizeBackground(w, h);
 
-    if(_initiativeBackground)
-    {
-        qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
-        QSize initiativeArea(0, (_model->getCombatantCount() * tokenSize * 1.1) + 5);
-        QList<PublishGLImage*> nameTokens = _combatantNames.values();
-        for(PublishGLImage* nameToken : nameTokens)
-        {
-            if(initiativeArea.width() < (tokenSize * 1.2) + nameToken->getSize().width() + 5)
-                initiativeArea.setWidth((tokenSize * 1.2) + nameToken->getSize().width() + 5);
-        }
-
-        QImage initiativeAreaImage(initiativeArea, QImage::Format_RGBA8888);
-        initiativeAreaImage.fill(QColor(0, 0, 0, 128));
-        delete _initiativeBackground;
-        _initiativeBackground = new PublishGLImage(initiativeAreaImage, false);
-        _initiativeBackground->setPosition(0, _scene.getTargetSize().height() - initiativeArea.height());
-    }
+    updateInitiative();
 
     updateProjectionMatrix();
     emit updateWidget();
@@ -369,71 +357,7 @@ void PublishGLBattleRenderer::paintGL()
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
 
-    // Initiative timeline test
-    QMatrix4x4 screenCoords;
-    screenCoords.ortho(0.f, _scene.getTargetSize().width(), 0.f, _scene.getTargetSize().height(), 0.1f, 1000.f);
-    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, screenCoords.constData());
-    QMatrix4x4 tokenScreenCoords;
-    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
-    qreal tokenY = _scene.getTargetSize().height() - tokenSize / 2.0 - 5.0;
-
-    if(_initiativeBackground)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _initiativeBackground->getMatrixData());
-        _initiativeBackground->paintGL();
-    }
-
-    int activeCombatant = _model->getActiveCombatantIndex();
-    int currentCombatant = activeCombatant;
-    do
-    {
-        BattleDialogModelCombatant* combatant = _model->getCombatant(currentCombatant);
-        if((combatant) && (combatant->getHitPoints() > 0) && (combatant->getKnown()))
-        {
-            PublishGLObject* tokenObject = nullptr;
-            QSizeF textureSize;
-            if(combatant->getShown())
-            {
-                PublishGLBattleToken* combatantToken = _combatantTokens.value(combatant);
-                tokenObject = combatantToken;
-                if(combatantToken)
-                    textureSize = combatantToken->getTextureSize();
-            }
-            else
-            {
-                tokenObject = _unknownToken;
-                textureSize = _unknownToken->getImageSize();
-            }
-
-            if(tokenObject)
-            {
-                qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
-                tokenScreenCoords.setToIdentity();
-                tokenScreenCoords.translate(tokenSize / 2.0, tokenY);
-                tokenScreenCoords.scale(scaleFactor, scaleFactor);
-                f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
-                tokenObject->paintGL();
-            }
-
-            if(combatant->getShown())
-            {
-                PublishGLImage* combatantName = _combatantNames.value(combatant);
-                if(combatantName)
-                {
-                    tokenScreenCoords.setToIdentity();
-                    tokenScreenCoords.translate(tokenSize * 1.2, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
-                    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
-                    combatantName->paintGL();
-                }
-            }
-
-            tokenY -= (tokenSize * 1.1);
-        }
-
-        if(++currentCombatant >= _model->getCombatantCount())
-            currentCombatant = 0;
-
-    } while(currentCombatant != activeCombatant);
+    paintInitiative(f);
 
     f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
     paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrix);
@@ -465,6 +389,15 @@ void PublishGLBattleRenderer::setGrid(QImage gridImage)
     _gridObject = nullptr;
 
     emit updateWidget();
+}
+
+void PublishGLBattleRenderer::setInitiativeVisible(bool visible)
+{
+    if(_showInitiative != visible)
+    {
+        _showInitiative = visible;
+        emit updateWidget();
+    }
 }
 
 void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining)
@@ -612,8 +545,6 @@ void PublishGLBattleRenderer::createContents()
     selectImage.load(QString(":/img/data/selected.png"));
     _selectionToken = new PublishGLImage(selectImage);
 
-    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
-    QSize initiativeArea(0, (_model->getCombatantCount() * tokenSize * 1.1) + 5);
     QFontMetrics fm(qApp->font());
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
@@ -639,18 +570,12 @@ void PublishGLBattleRenderer::createContents()
             PublishGLImage* combatantName = new PublishGLImage(nameImage, false);
             _combatantNames.insert(combatant, combatantName);
 
-            if(initiativeArea.width() < (tokenSize * 1.2) + combatantName->getSize().width() + 5)
-                initiativeArea.setWidth((tokenSize * 1.2) + combatantName->getSize().width() + 5);
-
             connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
             connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
         }
     }
 
-    QImage initiativeAreaImage(initiativeArea, QImage::Format_RGBA8888);
-    initiativeAreaImage.fill(QColor(0, 0, 0, 128));
-    _initiativeBackground = new PublishGLImage(initiativeAreaImage, false);
-    _initiativeBackground->setPosition(0, _scene.getTargetSize().height() - initiativeArea.height());
+    updateInitiative();
 
     _unknownToken = new PublishGLImage(ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate).toImage());
 
@@ -682,6 +607,109 @@ void PublishGLBattleRenderer::createContents()
 
     // Check if we need a pointer
     evaluatePointer();
+}
+
+void PublishGLBattleRenderer::updateInitiative()
+{
+    delete _initiativeBackground;
+    _initiativeBackground = nullptr;
+
+    QList<PublishGLImage*> nameTokens = _combatantNames.values();
+    if(nameTokens.count() <= 0)
+        return;
+
+    _initiativeTokenHeight = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
+    QSize initiativeArea;
+    for(PublishGLImage* nameToken : nameTokens)
+    {
+        if(nameToken)
+        {
+            if(initiativeArea.width() < (_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5)
+                initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5);
+
+            if(_initiativeTokenHeight < nameToken->getSize().height())
+                _initiativeTokenHeight = nameToken->getSize().height();
+        }
+    }
+
+    initiativeArea.setHeight((_model->getCombatantCount() * _initiativeTokenHeight * 1.1) + 5);
+
+    QImage initiativeAreaImage(initiativeArea, QImage::Format_RGBA8888);
+    initiativeAreaImage.fill(QColor(0, 0, 0, 128));
+    _initiativeBackground = new PublishGLImage(initiativeAreaImage, false);
+    _initiativeBackground->setPosition(0, _scene.getTargetSize().height() - initiativeArea.height());
+}
+
+void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
+{
+    if((!functions) || (!_model) || (_model->getCombatantCount() <= 0) || (!_showInitiative))
+        return;
+
+    // Initiative timeline test
+    QMatrix4x4 screenCoords;
+    screenCoords.ortho(0.f, _scene.getTargetSize().width(), 0.f, _scene.getTargetSize().height(), 0.1f, 1000.f);
+    functions->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, screenCoords.constData());
+    QMatrix4x4 tokenScreenCoords;
+    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
+    qreal tokenY = _scene.getTargetSize().height() - tokenSize / 2.0 - 5.0;
+
+    if(_initiativeBackground)
+    {
+        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _initiativeBackground->getMatrixData());
+        _initiativeBackground->paintGL();
+    }
+
+    int activeCombatant = _model->getActiveCombatantIndex();
+    int currentCombatant = activeCombatant;
+    do
+    {
+        BattleDialogModelCombatant* combatant = _model->getCombatant(currentCombatant);
+        if((combatant) && (combatant->getHitPoints() > 0) && (combatant->getKnown()))
+        {
+            PublishGLObject* tokenObject = nullptr;
+            QSizeF textureSize;
+            if(combatant->getShown())
+            {
+                PublishGLBattleToken* combatantToken = _combatantTokens.value(combatant);
+                tokenObject = combatantToken;
+                if(combatantToken)
+                    textureSize = combatantToken->getTextureSize();
+            }
+            else
+            {
+                tokenObject = _unknownToken;
+                textureSize = _unknownToken->getImageSize();
+            }
+
+            if(tokenObject)
+            {
+                qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
+                tokenScreenCoords.setToIdentity();
+                tokenScreenCoords.translate(tokenSize / 2.0, tokenY);
+                tokenScreenCoords.scale(scaleFactor, scaleFactor);
+                functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
+                tokenObject->paintGL();
+            }
+
+            if(combatant->getShown())
+            {
+                PublishGLImage* combatantName = _combatantNames.value(combatant);
+                if(combatantName)
+                {
+                    tokenScreenCoords.setToIdentity();
+                    tokenScreenCoords.translate(tokenSize * 1.2, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
+                    functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
+                    combatantName->paintGL();
+                }
+            }
+
+            tokenY -= (_initiativeTokenHeight * 1.1);
+        }
+
+        if(++currentCombatant >= _model->getCombatantCount())
+            currentCombatant = 0;
+
+    } while(currentCombatant != activeCombatant);
 }
 
 void PublishGLBattleRenderer::activeCombatantMoved()

@@ -735,6 +735,8 @@ void BattleFrame::setGridVisible(bool gridVisible)
 void BattleFrame::setShowOnDeck(bool showOnDeck)
 {
     _showOnDeck = showOnDeck;
+    if(_renderer)
+        _renderer->setInitiativeVisible(_showOnDeck);
     createPrescaledBackground();
 }
 
@@ -2704,6 +2706,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
+    renderer->setInitiativeVisible(_showOnDeck);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());
