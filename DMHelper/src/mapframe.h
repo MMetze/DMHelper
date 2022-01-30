@@ -188,7 +188,6 @@ protected:
 protected slots:
     void setMapCursor();
     void drawEditCursor();
-    void rotatePublish();
     void setScale(qreal s);
     void storeViewRect();
     void loadViewRect();

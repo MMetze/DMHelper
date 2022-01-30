@@ -262,6 +262,7 @@ private slots:
     void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
+    void updateRendererGrid();
 
     // State Machine
     void stateUpdated();

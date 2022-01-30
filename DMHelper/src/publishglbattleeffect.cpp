@@ -45,7 +45,7 @@ PublishGLBattleEffect::PublishGLBattleEffect(PublishGLBattleScene* scene, Battle
     else
         effectImage = QImage(QSize(effectSize, effectSize), QImage::Format_RGBA8888);
 
-    effectImage.fill(QColor(0, 0, 0, 0));
+    effectImage.fill(Qt::transparent);
 
     QPainter painter;
     painter.begin(&effectImage);

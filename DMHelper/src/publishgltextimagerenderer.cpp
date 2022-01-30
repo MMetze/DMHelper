@@ -3,7 +3,7 @@
 #include <QOpenGLFunctions>
 
 PublishGLTextImageRenderer::PublishGLTextImageRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent) :
-    PublishGLTextRenderer(encounter, /*backgroundImage,*/ textImage, parent),
+    PublishGLTextRenderer(encounter, textImage, parent),
     _backgroundObject(nullptr),
     _backgroundImage(backgroundImage)
 {
@@ -21,9 +21,6 @@ void PublishGLTextImageRenderer::initializeBackground()
 {
     if((_backgroundObject) || (!_encounter))
         return;
-
-//    if(_backgroundImage.isNull())
-//        _backgroundImage = _map->getBackgroundImage();
 
     _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
     updateProjectionMatrix();

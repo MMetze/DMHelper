@@ -9,18 +9,18 @@
 #include <QTextDocument>
 #include <QPainter>
 
-PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, /*QImage backgroundImage,*/ QImage textImage, QObject *parent) :
+PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
     _targetSize(),
     _color(),
-    //_backgroundImage(backgroundImage),
     _textImage(textImage),
     _scene(),
     _initialized(false),
     _shaderProgram(0),
     _shaderModelMatrix(0),
-    //_backgroundObject(nullptr),
+    _shaderProjectionMatrix(0),
+    _projectionMatrix(),
     _textObject(nullptr),
     _textPos(),
     _elapsed(),
@@ -49,8 +49,6 @@ void PublishGLTextRenderer::cleanup()
 
     stop();
 
-    //delete _backgroundObject;
-    //_backgroundObject = nullptr;
     delete _textObject;
     _textObject = nullptr;
 
@@ -65,14 +63,9 @@ void PublishGLTextRenderer::cleanup()
         _shaderProgram = 0;
     }
     _shaderModelMatrix = 0;
+    _shaderProjectionMatrix = 0;
 
     PublishGLRenderer::cleanup();
-}
-
-void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
-{
-    _color = color;
-    emit updateWidget();
 }
 
 void PublishGLTextRenderer::initializeGL()
@@ -157,16 +150,13 @@ void PublishGLTextRenderer::initializeGL()
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
+    _shaderProjectionMatrix = f->glGetUniformLocation(_shaderProgram, "projection");
 
     // Create the objects
-    //_scene.deriveSceneRectFromSize(_backgroundImage.size());
     initializeBackground();
     _scene.deriveSceneRectFromSize(getBackgroundSize());
-    //_backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
 
-    //_textObject = new PublishGLBattleBackground(nullptr, _textImage, GL_LINEAR);
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
-    //_textObject->setX(-_backgroundImage.width() / 2);
     _textObject->setX(-getBackgroundSize().width() / 2);
 
     // Matrices
@@ -209,6 +199,8 @@ void PublishGLTextRenderer::paintGL()
     if((!f) || (!e))
         return;
 
+    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
+
     // Draw the scene:
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -217,13 +209,6 @@ void PublishGLTextRenderer::paintGL()
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     paintBackground(f);
-    /*
-    if(_backgroundObject)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
-        _backgroundObject->paintGL();
-    }
-    */
 
     if(_textObject)
     {
@@ -232,20 +217,33 @@ void PublishGLTextRenderer::paintGL()
     }
 }
 
+void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
+{
+    _color = color;
+    emit updateWidget();
+}
+
+void PublishGLTextRenderer::setRotation(int rotation)
+{
+    if((rotation != _rotation) && (_textObject) && (_encounter) && (!_encounter->getAnimated()))
+        _textObject->setY((getRotatedHeight(rotation) / 2) - _textObject->getImageSize().height());
+
+    PublishGLRenderer::setRotation(rotation);
+}
+
 void PublishGLTextRenderer::rewind()
 {
     if((!_encounter) || (!_textObject))
         return;
 
-    //_textPos.setY(_backgroundImage.height());
-    //_textPos.setY(0.0);
-    //_textPos.setY(-_backgroundImage.height() / 2);
+    int rotHeight = getRotatedHeight(_rotation);
+    QSize imgSize = _textObject->getImageSize();
+    int imgHeight = imgSize.height();
 
-    //_textObject->setY(-_backgroundImage.height() / 2 - _textObject->getImageSize().height());
     if(_encounter->getAnimated())
-        _textObject->setY(-getBackgroundSize().height() / 2 - _textObject->getImageSize().height());
+        _textObject->setY((-getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
     else
-        _textObject->setY(getBackgroundSize().height() / 2 - _textObject->getImageSize().height());
+        _textObject->setY((getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
 
     emit updateWidget();
 }
@@ -277,10 +275,7 @@ void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
         return;
 
     qreal elapsedtime = _elapsed.restart();
-    //_textPos.ry() -= _encounter->getScrollSpeed() * (_prescaledImage.height() / 250) * (elapsedtime / 1000.0);
-    //_textPos.ry() += 25.0 * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0);
-    //_textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0));
-    _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (getBackgroundSize().height() / 250) * (elapsedtime / 1000.0));
+    _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (getRotatedHeight(_rotation) / 250) * (elapsedtime / 1000.0));
 
     emit updateWidget();
 }
@@ -294,15 +289,25 @@ void PublishGLTextRenderer::updateProjectionMatrix()
     if(!f)
         return;
 
+    QSizeF transformedTarget = _targetSize;
+    if((_rotation == 90) || (_rotation == 270))
+        transformedTarget.transpose();
+
     // Update projection matrix and other size related settings:
-    QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+    QSizeF rectSize = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+    _projectionMatrix.setToIdentity();
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+    _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
 }
 
 void PublishGLTextRenderer::updateBackground()
 {
 }
 
-
+int PublishGLTextRenderer::getRotatedHeight(int rotation)
+{
+    if((rotation == 90) || (rotation == 270))
+        return getBackgroundSize().width();
+    else
+        return getBackgroundSize().height();
+}

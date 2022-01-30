@@ -31,6 +31,15 @@ void PublishGLBattleVideoRenderer::cleanup()
     PublishGLBattleRenderer::cleanup();
 }
 
+QSizeF PublishGLBattleVideoRenderer::getBackgroundSize()
+{
+#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+    return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
+#else
+    return _videoPlayer ? _videoPlayer->getSize() : QSizeF();
+#endif
+}
+
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
 void PublishGLBattleVideoRenderer::handleScreenshotReady(const QImage& image)
 {
@@ -42,6 +51,7 @@ void PublishGLBattleVideoRenderer::handleScreenshotReady(const QImage& image)
     _backgroundImage = image;
     _updateFow = true;
     emit updateWidget();
+    initializationComplete();
 }
 #endif
 
@@ -63,6 +73,7 @@ void PublishGLBattleVideoRenderer::initializeBackground()
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget);
+    initializationComplete();
 #endif
 }
 
@@ -107,15 +118,6 @@ void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
     QMatrix4x4 modelMatrix;
     functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     _videoPlayer->paintGL();
-#endif
-}
-
-QSizeF PublishGLBattleVideoRenderer::getBackgroundSize()
-{
-#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
-    return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
-#else
-    return _videoPlayer ? _videoPlayer->getSize() : QSizeF();
 #endif
 }
 

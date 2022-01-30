@@ -240,6 +240,14 @@ void BattleDialogGraphicsScene::setGridVisibility(bool visible)
         _grid->setGridVisible(visible);
 }
 
+void BattleDialogGraphicsScene::paintGrid(QPainter* painter)
+{
+    if((!_model) || (!_grid) || (!painter))
+        return;
+
+    _grid->rebuildGrid(*_model, painter);
+}
+
 void BattleDialogGraphicsScene::setPointerVisibility(bool visible)
 {
     if(_pointerVisible == visible)

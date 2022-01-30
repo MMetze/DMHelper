@@ -1415,7 +1415,7 @@ void MainWindow::showEvent(QShowEvent * event)
 
             checkForUpdates(true);
 
-            if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUCount() == 1))
+            if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
                 openCampaign(_options->getMRUHandler()->getMRUList().first());
         }
 

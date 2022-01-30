@@ -34,6 +34,7 @@ public:
     virtual void paintGL() = 0;
 
 signals:
+    void initializationComplete();
     void updateWidget();
     void deactivated();
 

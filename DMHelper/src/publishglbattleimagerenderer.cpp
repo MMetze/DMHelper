@@ -18,6 +18,11 @@ void PublishGLBattleImageRenderer::cleanup()
     PublishGLBattleRenderer::cleanup();
 }
 
+QSizeF PublishGLBattleImageRenderer::getBackgroundSize()
+{
+    return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
+}
+
 void PublishGLBattleImageRenderer::initializeBackground()
 {
     if((_backgroundObject) || (!_model))
@@ -29,6 +34,8 @@ void PublishGLBattleImageRenderer::initializeBackground()
     _scene.deriveSceneRectFromSize(_model->getBackgroundImage().size());
     _backgroundObject = new PublishGLBattleBackground(&_scene, _backgroundImage, GL_NEAREST);
     updateProjectionMatrix();
+
+    emit initializationComplete();
 }
 
 bool PublishGLBattleImageRenderer::isBackgroundReady()
@@ -52,9 +59,4 @@ void PublishGLBattleImageRenderer::paintBackground(QOpenGLFunctions* functions)
 
     functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
     _backgroundObject->paintGL();
-}
-
-QSizeF PublishGLBattleImageRenderer::getBackgroundSize()
-{
-    return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
 }

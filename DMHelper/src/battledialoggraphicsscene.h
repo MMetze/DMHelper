@@ -29,6 +29,7 @@ public:
     void clearBattleContents();
     void setEffectVisibility(bool visible, bool allEffects = true);
     void setGridVisibility(bool visible);
+    void paintGrid(QPainter* painter);
 
     void setPointerVisibility(bool visible);
     void setPointerPos(const QPointF& pos);

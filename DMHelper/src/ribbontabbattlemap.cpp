@@ -5,6 +5,8 @@
 #include <QMenu>
 #include <QDebug>
 
+const int GRID_SIZE_PAUSE_TIMER = 750;
+
 RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     RibbonFrame(parent),
     ui(new Ui::RibbonTabBattleMap),
@@ -219,7 +221,7 @@ void RibbonTabBattleMap::spinChanged(int value)
     if(_timerId != 0)
         killTimer(_timerId);
 
-    _timerId = startTimer(1000);
+    _timerId = startTimer(GRID_SIZE_PAUSE_TIMER);
 }
 
 void RibbonTabBattleMap::selectAction(QAction* action)

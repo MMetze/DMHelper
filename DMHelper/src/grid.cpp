@@ -2,6 +2,7 @@
 #include "dmconstants.h"
 #include "battledialogmodel.h"
 #include <QGraphicsScene>
+#include <QPainter>
 #include <QtMath>
 #include <QDebug>
 
@@ -40,9 +41,10 @@ void Grid::clear()
     _grid.clear();
 }
 
-void Grid::rebuildGrid(BattleDialogModel& model)
+void Grid::rebuildGrid(BattleDialogModel& model, QPainter* painter)
 {
-    clear();
+    if(!painter)
+        clear();
 
     if(model.getGridOn() == false)
         return;
@@ -50,16 +52,16 @@ void Grid::rebuildGrid(BattleDialogModel& model)
     switch(model.getGridType())
     {
         case GridType_Square:
-            rebuildGrid_Square(model);
+            rebuildGrid_Square(model, painter);
             break;
         case GridType_Hex:
-            rebuildGrid_Hex(model);
+            rebuildGrid_Hex(model, painter);
             break;
         case GridType_Isosquare:
-            rebuildGrid_Isosquare(model);
+            rebuildGrid_Isosquare(model, painter);
             break;
         case GridType_Isohex:
-            rebuildGrid_Isohex(model);
+            rebuildGrid_Isohex(model, painter);
             break;
         default:
             qDebug() << "[Grid] ERROR: Invalid grid type requested (" << model.getGridType() << "). No grid drawn";
@@ -67,7 +69,7 @@ void Grid::rebuildGrid(BattleDialogModel& model)
     }
 }
 
-void Grid::rebuildGrid_Square(BattleDialogModel& model)
+void Grid::rebuildGrid_Square(BattleDialogModel& model, QPainter* painter)
 {
     int xOffset = model.getGridScale() * model.getGridOffsetX() / 100;
     int yOffset = model.getGridScale() * model.getGridOffsetY() / 100;
@@ -75,22 +77,22 @@ void Grid::rebuildGrid_Square(BattleDialogModel& model)
     int yCount = (_gridShape.height() - yOffset) / model.getGridScale();
 
     // Set an outline
-    QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
-    newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-    _grid.append(newItem);
+    //QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
+    //newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
+    //_grid.append(newItem);
 
     for(int x = 0; x <= xCount; ++x)
     {
-        createLine((x*model.getGridScale()) + xOffset, 0, (x*model.getGridScale()) + xOffset, _gridShape.height());
+        createLine((x*model.getGridScale()) + xOffset, 0, (x*model.getGridScale()) + xOffset, _gridShape.height(), painter);
     }
 
     for(int y = 0; y <= yCount; ++y)
     {
-        createLine(0, (y*model.getGridScale()) + yOffset, _gridShape.width(), (y*model.getGridScale()) + yOffset);
+        createLine(0, (y*model.getGridScale()) + yOffset, _gridShape.width(), (y*model.getGridScale()) + yOffset, painter);
     }
 }
 
-void Grid::rebuildGrid_Hex(BattleDialogModel& model)
+void Grid::rebuildGrid_Hex(BattleDialogModel& model, QPainter* painter)
 {
     int hexScale = model.getGridScale();
     int hexScaleShort = model.getGridScale() * 0.5;
@@ -103,31 +105,31 @@ void Grid::rebuildGrid_Hex(BattleDialogModel& model)
     int yCount = (_gridShape.height() - yOffset) / hexScale;
 
     // Set an outline
-    QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
-    newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-    _grid.append(newItem);
+    //QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
+    //newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
+    //_grid.append(newItem);
 
     for(int y = 0; y <= yCount; ++y)
     {
         for(int x = 0; x <= xCount; ++x)
         {
             createLine((x*hexScaleStep) + xOffset, (y*hexScaleLong*2) + yOffset,
-                       (x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset);
+                       (x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset, painter);
             createLine((x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset,
-                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong);
+                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong, painter);
             createLine((x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset,
-                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset - hexScaleLong);
+                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset - hexScaleLong, painter);
             createLine((x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong,
-                       (x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong);
+                       (x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong, painter);
             createLine((x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong,
-                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset);
+                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset, painter);
             createLine((x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong,
-                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset + (hexScaleLong*2));
+                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset + (hexScaleLong*2), painter);
         }
     }
 }
 
-void Grid::rebuildGrid_Isosquare(BattleDialogModel& model)
+void Grid::rebuildGrid_Isosquare(BattleDialogModel& model, QPainter* painter)
 {
     int isoScale = model.getGridScale() * 3;
     int xOffset = isoScale * model.getGridOffsetX() / 100;
@@ -145,9 +147,9 @@ void Grid::rebuildGrid_Isosquare(BattleDialogModel& model)
     }
 
     // Set an outline
-    QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
-    newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-    _grid.append(newItem);
+    //QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
+    //newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
+    //_grid.append(newItem);
 
     // Lines from the top to the right
     for(int x = -xStart; x <= xCount; ++x)
@@ -167,7 +169,7 @@ void Grid::rebuildGrid_Isosquare(BattleDialogModel& model)
             right = _gridShape.width();
         }
 
-        createLine(left, top, right, bottom);
+        createLine(left, top, right, bottom, painter);
     }
 
     // Lines from the top to the right
@@ -188,11 +190,11 @@ void Grid::rebuildGrid_Isosquare(BattleDialogModel& model)
             right = _gridShape.width();
         }
 
-        createLine(right, top, left, bottom);
+        createLine(right, top, left, bottom, painter);
     }
 }
 
-void Grid::rebuildGrid_Isohex(BattleDialogModel& model)
+void Grid::rebuildGrid_Isohex(BattleDialogModel& model, QPainter* painter)
 {
     qreal isoAngle = qCos(qDegreesToRadians(static_cast<qreal>(model.getGridAngle())));
     int hexScale = static_cast<int>(static_cast<qreal>(model.getGridScale()) * isoAngle);
@@ -205,29 +207,29 @@ void Grid::rebuildGrid_Isohex(BattleDialogModel& model)
     int yCount = (_gridShape.height() - yOffset) / hexScaleStep;
 
     // Set an outline
-    QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
-    newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-    _grid.append(newItem);
+    //QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
+    //newItem->setZValue(DMHelper::BattleDialog_Z_Grid);
+    //_grid.append(newItem);
 
     for(int x = 0; x <= xCount; ++x)
     {
         for(int y = 0; y <= yCount; ++y)
         {
             createLine((x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset,
-                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale);
+                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale, painter);
 
             createLine((x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale,
-                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort);
+                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort, painter);
             createLine((x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale,
-                       (x*hexScaleLong*2) + xOffset - hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort);
+                       (x*hexScaleLong*2) + xOffset - hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort, painter);
 
             createLine((x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort,
-                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort);
+                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort, painter);
 
             createLine((x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort,
-                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2));
+                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2), painter);
             createLine((x*hexScaleLong*2) + xOffset - (hexScaleLong), (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort,
-                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2));
+                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2), painter);
         }
     }
 }
@@ -262,7 +264,7 @@ int Grid::computeOutCode(int x, int y)
 // P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
 // diagonal from (xmin, ymin) to (xmax, ymax).
 
-void Grid::createLine(int x0, int y0, int x1, int y1)
+void Grid::createLine(int x0, int y0, int x1, int y1, QPainter* painter)
 {
     // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
     int outcode0 = computeOutCode(x0, y0);
@@ -313,10 +315,17 @@ void Grid::createLine(int x0, int y0, int x1, int y1)
         }
     }
 
-    QGraphicsItem* newLineItem = scene()->addLine(x0, y0, x1, y1);
-    if(newLineItem)
+    if(painter)
     {
-        newLineItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-        _grid.append(newLineItem);
+        painter->drawLine(x0, y0, x1, y1);
+    }
+    else if(scene())
+    {
+        QGraphicsItem* newLineItem = scene()->addLine(x0, y0, x1, y1);
+        if(newLineItem)
+        {
+            newLineItem->setZValue(DMHelper::BattleDialog_Z_Grid);
+            _grid.append(newLineItem);
+        }
     }
 }

@@ -236,6 +236,10 @@ void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* 
 
     rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
 
+    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle->getBattleDialogModel());
+    if(_cameraRect)
+        _cameraRect->setPublishing(_isPublishing);
+
     emit checkableChanged(true);
 }
 
@@ -634,6 +638,7 @@ void BattleFrame::setGridScale(int gridScale)
 
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -651,6 +656,7 @@ void BattleFrame::setGridAngle(int gridAngle)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -668,6 +674,7 @@ void BattleFrame::setGridType(int gridType)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -685,6 +692,7 @@ void BattleFrame::setXOffset(int xOffset)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -702,6 +710,7 @@ void BattleFrame::setYOffset(int yOffset)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -719,6 +728,7 @@ void BattleFrame::setGridVisible(bool gridVisible)
         _scene->setGridVisibility(gridVisible);
         ui->graphicsView->invalidateScene();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -2690,12 +2700,16 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
     connect(this, &BattleFrame::movementChanged, renderer, &PublishGLBattleRenderer::movementChanged);
     connect(renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
+    connect(renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
-    renderer->setCameraRect(_cameraRect->getCameraRect());
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
 
+    if(_cameraRect)
+        renderer->setCameraRect(_cameraRect->getCameraRect());
+
     _renderer = renderer;
+    updateRendererGrid();
 }
 
 void BattleFrame::rendererDeactivated()
@@ -2710,8 +2724,29 @@ void BattleFrame::rendererDeactivated()
     disconnect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
     disconnect(this, &BattleFrame::movementChanged, _renderer, &PublishGLBattleRenderer::movementChanged);
     disconnect(_renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
+    disconnect(_renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
     _renderer = nullptr;
+}
+
+void BattleFrame::updateRendererGrid()
+{
+    if((!_renderer) || (!_scene))
+        return;
+
+    QImage gridImage(_renderer->getBackgroundSize().toSize(), QImage::Format_RGBA8888);
+    if(gridImage.isNull())
+        return;
+
+    gridImage.fill(Qt::transparent);
+
+    QPainter gridPainter;
+    gridPainter.begin(&gridImage);
+        gridPainter.setRenderHint(QPainter::Antialiasing);
+        _scene->paintGrid(&gridPainter);
+    gridPainter.end();
+
+    _renderer->setGrid(gridImage);
 }
 
 void BattleFrame::stateUpdated()

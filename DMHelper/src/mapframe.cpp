@@ -101,6 +101,10 @@ void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* cur
 
     rendererActivated(dynamic_cast<PublishGLMapRenderer*>(currentRenderer));
 
+    _isPublishing = (currentRenderer) && (_mapSource) && (currentRenderer->getObject() == _mapSource);
+    if(_cameraRect)
+        _cameraRect->setPublishing(_isPublishing);
+
     emit checkableChanged(_isVideo);
     emit setPublishEnabled(true);
 }
@@ -716,8 +720,13 @@ void MapFrame::publishClicked(bool checked)
 
 void MapFrame::setRotation(int rotation)
 {
+    if(_rotation == rotation)
+        return;
+
     _rotation = rotation;
-    rotatePublish();
+    resetPublishFoW();
+    if(_renderer)
+        _renderer->setRotation(_rotation);
 }
 
 void MapFrame::initializeFoW()
@@ -1720,14 +1729,6 @@ void MapFrame::drawEditCursor()
     ui->graphicsView->viewport()->setCursor(QCursor(cursorPixmap));
 }
 
-void MapFrame::rotatePublish()
-{
-    resetPublishFoW();
-
-    if(_renderer)
-        _renderer->setRotation(_rotation);
-}
-
 void MapFrame::setScale(qreal s)
 {
     _scale = s;
@@ -1850,9 +1851,11 @@ void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)
     connect(this, &MapFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
     connect(renderer, &PublishGLMapRenderer::deactivated, this, &MapFrame::rendererDeactivated);
 
-    renderer->setCameraRect(_cameraRect->getCameraRect());
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
+
+    if(_cameraRect)
+        renderer->setCameraRect(_cameraRect->getCameraRect());
 
     _renderer = renderer;
 }

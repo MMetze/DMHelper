@@ -29,6 +29,7 @@ public:
     virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
     virtual void setBackgroundColor(const QColor& color) override;
+    virtual QSizeF getBackgroundSize() = 0;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
@@ -38,6 +39,7 @@ public:
 public slots:
     void fowChanged();
     void setCameraRect(const QRectF& cameraRect);
+    void setGrid(QImage gridImage);
 
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
@@ -52,9 +54,9 @@ protected:
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
     virtual void paintTokens(QOpenGLFunctions* functions, bool drawPCs);
-    virtual QSizeF getBackgroundSize() = 0;
     virtual void updateBackground();
 
+    virtual void updateGrid();
     virtual void updateFoW();
     virtual void updateContents();
 
@@ -73,6 +75,9 @@ protected:
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
     int _shaderProjectionMatrix;
+
+    QImage _gridImage;
+    PublishGLImage* _gridObject;
 
     PublishGLBattleBackground* _fowObject;
     QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;

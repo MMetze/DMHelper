@@ -86,7 +86,11 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object, PublishGLRend
     setEncounter(encounter);
 
     if((currentRenderer) && (currentRenderer->getObject() == object))
+    {
         _renderer = dynamic_cast<PublishGLTextRenderer*>(currentRenderer);
+        if(_renderer)
+            _renderer->setRotation(_rotation);
+    }
 
     emit setPublishEnabled(true);
 }
@@ -460,6 +464,7 @@ void EncounterTextEdit::publishClicked(bool checked)
             else
                 _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
 
+            _renderer->setRotation(_rotation);
             emit registerRenderer(_renderer);
         }
     }
@@ -476,6 +481,8 @@ void EncounterTextEdit::setRotation(int rotation)
         return;
 
     _rotation = rotation;
+    if(_renderer)
+        _renderer->setRotation(_rotation);
 }
 
 void EncounterTextEdit::updateAnchors()

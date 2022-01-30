@@ -29,6 +29,8 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _shaderProgram(0),
     _shaderModelMatrix(0),
     _shaderProjectionMatrix(0),
+    _gridImage(),
+    _gridObject(nullptr),
     _fowObject(nullptr),
     _combatantTokens(),
     _combatantNames(),
@@ -271,6 +273,8 @@ void PublishGLBattleRenderer::paintGL()
             return;
     }
 
+    updateGrid();
+
     if(_updateFow)
         updateFoW();
 
@@ -297,6 +301,12 @@ void PublishGLBattleRenderer::paintGL()
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     paintBackground(f);
+
+    if(_gridObject)
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _gridObject->getMatrixData());
+        _gridObject->paintGL();
+    }
 
     for(PublishGLBattleObject* effectToken : _effectTokens)
     {
@@ -415,6 +425,18 @@ void PublishGLBattleRenderer::setCameraRect(const QRectF& cameraRect)
     }
 }
 
+void PublishGLBattleRenderer::setGrid(QImage gridImage)
+{
+    if(gridImage == _gridImage)
+        return;
+
+    _gridImage = gridImage;
+    delete _gridObject;
+    _gridObject = nullptr;
+
+    emit updateWidget();
+}
+
 void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining)
 {
     if(!_movementToken)
@@ -522,6 +544,14 @@ void PublishGLBattleRenderer::updateBackground()
 {
 }
 
+void PublishGLBattleRenderer::updateGrid()
+{
+    if((_gridObject) || (_gridImage.isNull()))
+        return;
+
+    _gridObject = new PublishGLImage(_gridImage);
+}
+
 void PublishGLBattleRenderer::updateFoW()
 {
     if((!_model) || (!_model->getMap()))
@@ -546,6 +576,7 @@ void PublishGLBattleRenderer::updateContents()
         return;
 
     updateFoW();
+    updateGrid();
 
     QImage selectImage;
     selectImage.load(QString(":/img/data/selected.png"));

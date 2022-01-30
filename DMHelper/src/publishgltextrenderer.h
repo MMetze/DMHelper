@@ -5,6 +5,7 @@
 #include "publishglbattlescene.h"
 #include <QImage>
 #include <QElapsedTimer>
+#include <QMatrix4x4>
 
 class PublishGLBattleBackground;
 class PublishGLImage;
@@ -14,8 +15,7 @@ class PublishGLTextRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-//    PublishGLTextRenderer(QImage& backgroundImage, QImage& textImage, QObject *parent = nullptr);
-    PublishGLTextRenderer(EncounterText* encounter, /*QImage backgroundImage,*/ QImage textImage, QObject *parent = nullptr);
+    PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent = nullptr);
     virtual ~PublishGLTextRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
@@ -23,7 +23,6 @@ public:
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
-    virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
@@ -31,6 +30,10 @@ public:
     virtual void paintGL() override;
 
 public slots:
+    // DMH OpenGL renderer calls
+    virtual void setBackgroundColor(const QColor& color) override;
+    virtual void setRotation(int rotation) override;
+
     void rewind();
     void play();
     void stop();
@@ -50,16 +53,18 @@ protected:
     virtual QSizeF getBackgroundSize() = 0;
     virtual void updateBackground();
 
+    int getRotatedHeight(int rotation);
+
     EncounterText* _encounter;
     QSize _targetSize;
     QColor _color;
-    //QImage _backgroundImage;
     QImage _textImage;
     PublishGLBattleScene _scene;
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
-    //PublishGLBattleBackground* _backgroundObject;
+    int _shaderProjectionMatrix;
+    QMatrix4x4 _projectionMatrix;
     PublishGLImage* _textObject;
 
     QPointF _textPos;
