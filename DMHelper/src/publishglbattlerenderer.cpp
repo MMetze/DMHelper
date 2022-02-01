@@ -47,7 +47,8 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _activePC(false),
     _activeToken(nullptr),
     _selectionToken(nullptr),
-    _updateFow(false)
+    _updateFow(false),
+    _recreateContent(false)
 {
 }
 
@@ -70,36 +71,12 @@ void PublishGLBattleRenderer::cleanup()
 {
     _initialized = false;
 
-    disconnect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::recreateContents);
     disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
-    disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::recreateContents);
 
-    delete _fowObject;
-    _fowObject = nullptr;
-
-    qDeleteAll(_combatantTokens);
-    _combatantTokens.clear();
-    qDeleteAll(_combatantNames);
-    _combatantNames.clear();
-
-    delete _selectionToken;
-    _selectionToken = nullptr;
-
-    delete _unknownToken;
-    _unknownToken = nullptr;
-    delete _initiativeBackground;
-    _initiativeBackground = nullptr;
-    delete _movementToken;
-    _movementToken = nullptr;
-    _showInitiative = false;
-    _initiativeTokenHeight = 0.0;
-    _movementVisible = false;
-    _movementCombatant = nullptr;
-    _movementPC = false;
-
-    qDeleteAll(_effectTokens);
-    _effectTokens.clear();
+    cleanupContents();
 
     _projectionMatrix.setToIdentity();
 
@@ -245,10 +222,10 @@ void PublishGLBattleRenderer::initializeGL()
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
-    connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::updateWidget);
+    connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::recreateContents);
     connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
     connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
-    connect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::updateWidget);
+    connect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::recreateContents);
     _initialized = true;
 }
 
@@ -282,10 +259,18 @@ void PublishGLBattleRenderer::paintGL()
             return;
     }
 
-    updateGrid();
+    if(_recreateContent)
+    {
+        cleanupContents();
+        createContents();
+    }
+    else
+    {
+        updateGrid();
 
-    if(_updateFow)
-        updateFoW();
+        if(_updateFow)
+            updateFoW();
+    }
 
     evaluatePointer();
 
@@ -607,6 +592,30 @@ void PublishGLBattleRenderer::createContents()
 
     // Check if we need a pointer
     evaluatePointer();
+
+    _recreateContent = false;
+}
+
+void PublishGLBattleRenderer::cleanupContents()
+{
+    delete _gridObject; _gridObject = nullptr;
+    delete _fowObject; _fowObject = nullptr;
+    delete _selectionToken; _selectionToken = nullptr;
+    delete _unknownToken; _unknownToken = nullptr;
+    delete _initiativeBackground; _initiativeBackground = nullptr;
+    delete _movementToken; _movementToken = nullptr;
+
+    qDeleteAll(_combatantTokens); _combatantTokens.clear();
+    qDeleteAll(_combatantNames); _combatantNames.clear();
+    qDeleteAll(_effectTokens); _effectTokens.clear();
+
+    _showInitiative = false;
+    _initiativeTokenHeight = 0.0;
+    _movementVisible = false;
+    _movementCombatant = nullptr;
+    _movementPC = false;
+
+    activeCombatantChanged(nullptr);
 }
 
 void PublishGLBattleRenderer::updateInitiative()
@@ -710,6 +719,12 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
             currentCombatant = 0;
 
     } while(currentCombatant != activeCombatant);
+}
+
+void PublishGLBattleRenderer::recreateContents()
+{
+    _recreateContent = true;
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::activeCombatantMoved()

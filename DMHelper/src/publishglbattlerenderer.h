@@ -60,11 +60,13 @@ protected:
     virtual void updateGrid();
     virtual void updateFoW();
     virtual void createContents();
+    virtual void cleanupContents();
 
     virtual void updateInitiative();
     virtual void paintInitiative(QOpenGLFunctions* functions);
 
 protected slots:
+    void recreateContents();
     void activeCombatantMoved();
     void tokenSelectionChanged(PublishGLBattleToken* token);
 
@@ -104,6 +106,7 @@ protected:
     PublishGLImage* _selectionToken;
 
     bool _updateFow;
+    bool _recreateContent;
 };
 
 #endif // PUBLISHGLBATTLERENDERER_H
