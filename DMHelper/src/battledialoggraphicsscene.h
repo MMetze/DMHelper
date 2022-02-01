@@ -129,6 +129,7 @@ protected:
     QGraphicsItem* _mouseDownItem;
     BattleDialogModelCombatant* _mouseHoverItem;
     qreal _previousRotation;
+    bool _isRotation;
     QPointF _commandPosition;
 
     bool _spaceDown;

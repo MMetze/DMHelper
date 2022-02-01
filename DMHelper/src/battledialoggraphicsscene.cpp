@@ -37,6 +37,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mouseDownItem(nullptr),
     _mouseHoverItem(nullptr),
     _previousRotation(0.0),
+    _isRotation(false),
     _commandPosition(INVALID_POINT),
     _spaceDown(false),
     _inputMode(-1),
@@ -389,6 +390,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
                 qreal dot = _mouseDownPos.x()*eventPos.x()+_mouseDownPos.y()*eventPos.y();
                 qreal angle = qRadiansToDegrees(qAtan2(cross,dot));
                 _mouseDownItem->setRotation(_previousRotation + angle);
+                _isRotation = true;
                 BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
                 if(effect)
                     effect->setRotation(_previousRotation + angle);
@@ -447,6 +449,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
 {
     QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
     QGraphicsItem* abstractShape = item;
+    _isRotation = false;
 
     qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
 
@@ -481,7 +484,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
                 qDebug() << "[Battle Dialog Scene] other mouse button down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
             }
         }
-        else if((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
+        else if((mouseEvent->button() == Qt::LeftButton) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
         {
             QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
             if(pixItem)
@@ -508,7 +511,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
 
 bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if(mouseEvent->button() == Qt::RightButton)
+    if((mouseEvent->button() == Qt::RightButton) && (!_isRotation))
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
         QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
