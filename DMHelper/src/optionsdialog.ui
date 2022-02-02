@@ -111,11 +111,38 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QCheckBox" name="chkShowOnDeck">
-            <property name="text">
-             <string>Show Character Icons in Player's Window</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_13">
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>Initiative:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="cmbInitiativeType">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,1">
@@ -654,7 +681,6 @@
   <tabstop>tabWidget</tabstop>
   <tabstop>fontComboBox</tabstop>
   <tabstop>spinBoxFontSize</tabstop>
-  <tabstop>chkShowOnDeck</tabstop>
   <tabstop>chkShowCountdown</tabstop>
   <tabstop>edtCountdownDuration</tabstop>
   <tabstop>edtPointerFile</tabstop>

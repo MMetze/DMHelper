@@ -27,7 +27,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _logicalDPI(0.0),
     _pasteRich(false),
     _audioVolume(100),
-    _showOnDeck(true),
+    _initiativeType(DMHelper::InitiativeType_None),
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
@@ -132,9 +132,9 @@ int OptionsContainer::getAudioVolume() const
     return _audioVolume;
 }
 
-bool OptionsContainer::getShowOnDeck() const
+int OptionsContainer::getInitiativeType() const
 {
-    return _showOnDeck;
+    return _initiativeType;
 }
 
 bool OptionsContainer::getShowCountdown() const
@@ -326,7 +326,10 @@ void OptionsContainer::readSettings()
     setFontSize(settings.value("fontSize",QVariant(defaultFontSize)).toInt());
     setPasteRich(settings.value("pasteRich",QVariant(false)).toBool());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
-    setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
+    if(settings.contains("initiativeType"))
+        setInitiativeType(settings.value("initiativeType",QVariant(0)).toInt());
+    else
+        setInitiativeType(settings.value("showOnDeck",QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
@@ -390,7 +393,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("fontSize", getFontSize());
     settings.setValue("pasteRich", getPasteRich());
     settings.setValue("audioVolume", getAudioVolume());
-    settings.setValue("showOnDeck", getShowOnDeck());
+    settings.setValue("initiativeType", getInitiativeType());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
@@ -427,6 +430,8 @@ void OptionsContainer::writeSettings()
     {
         _mruHandler->writeMRUToSettings(settings);
     }
+
+    cleanupLegacy(settings);
 }
 
 void OptionsContainer::setBestiaryFileName(const QString& filename)
@@ -768,12 +773,12 @@ void OptionsContainer::setAudioVolume(int volume)
     }
 }
 
-void OptionsContainer::setShowOnDeck(bool showOnDeck)
+void OptionsContainer::setInitiativeType(int initiativeType)
 {
-    if(_showOnDeck != showOnDeck)
+    if(_initiativeType != initiativeType)
     {
-        _showOnDeck = showOnDeck;
-        emit showOnDeckChanged(_showOnDeck);
+        _initiativeType = initiativeType;
+        emit initiativeTypeChanged(_initiativeType);
     }
 }
 
@@ -965,7 +970,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setShowAnimations(other->_showAnimations);
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
-        setShowOnDeck(other->_showOnDeck);
+        setInitiativeType(other->_initiativeType);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);
@@ -993,4 +998,9 @@ void OptionsContainer::copy(OptionsContainer* other)
 QMainWindow* OptionsContainer::getMainWindow()
 {
     return dynamic_cast<QMainWindow*>(parent());
+}
+
+void OptionsContainer::cleanupLegacy(OptionsAccessor& settings)
+{
+    settings.remove("showOnDeck");
 }

@@ -118,7 +118,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _targetLabelSize(),
     _mapDrawer(nullptr),
     _renderer(nullptr),
-    _showOnDeck(true),
+    _initiativeType(DMHelper::InitiativeType_ImageName),
     _showCountdown(true),
     _countdownDuration(15),
     _countdownColor(0,0,0),
@@ -732,11 +732,11 @@ void BattleFrame::setGridVisible(bool gridVisible)
     }
 }
 
-void BattleFrame::setShowOnDeck(bool showOnDeck)
+void BattleFrame::setInitiativeType(int initiativeType)
 {
-    _showOnDeck = showOnDeck;
+    _initiativeType = initiativeType;
     if(_renderer)
-        _renderer->setInitiativeVisible(_showOnDeck);
+        _renderer->setInitiativeType(_initiativeType);
     createPrescaledBackground();
 }
 
@@ -2706,7 +2706,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
-    renderer->setInitiativeVisible(_showOnDeck);
+    renderer->setInitiativeType(_initiativeType);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());
@@ -3618,7 +3618,7 @@ QSize BattleFrame::sizeBackgroundToFrame(const QSize& backgroundSize)
 // Returns the required frame width based on the current settings
 int BattleFrame::getFrameWidth()
 {
-    return (_showOnDeck ? _combatantFrame.width() : 0) +
+    return ((_initiativeType != DMHelper::InitiativeType_None) ? _combatantFrame.width() : 0) +
            (_showCountdown ? _countdownFrame.width() : 0);
 }
 
@@ -3633,7 +3633,7 @@ int BattleFrame::getFrameHeight()
 
     if(_model->getActiveCombatant())
     {
-        if(_showOnDeck)
+        if(_initiativeType != DMHelper::InitiativeType_None)
             return 2 * _combatantFrame.height();
         else if(_showCountdown)
             return _countdownFrame.height();

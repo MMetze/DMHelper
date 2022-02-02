@@ -436,7 +436,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_Battle
     _battleFrame = new BattleFrame;
-    _battleFrame->setShowOnDeck(_options->getShowOnDeck());
+    _battleFrame->setInitiativeType(_options->getInitiativeType());
     _battleFrame->setShowCountdown(_options->getShowCountdown());
     _battleFrame->setCountdownDuration(_options->getCountdownDuration());
     _battleFrame->setPointerFile(_options->getPointerFile());
@@ -444,7 +444,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleFrame->setActiveIcon(_options->getActiveIcon());
     _battleFrame->setCombatantFrame(_options->getCombatantFrame());
     _battleFrame->setCountdownFrame(_options->getCountdownFrame());
-    connect(_options, SIGNAL(showOnDeckChanged(bool)), _battleFrame, SLOT(setShowOnDeck(bool)));
+    connect(_options, SIGNAL(initiativeTypeChanged(int)), _battleFrame, SLOT(setInitiativeType(int)));
     connect(_options, SIGNAL(showCountdownChanged(bool)), _battleFrame, SLOT(setShowCountdown(bool)));
     connect(_options, SIGNAL(countdownDurationChanged(int)), _battleFrame, SLOT(setCountdownDuration(int)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _battleFrame, SLOT(setPointerFile(const QString&)));

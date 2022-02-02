@@ -143,6 +143,13 @@ namespace DMHelper
         AudioType_Youtube
     };
 
+    enum InitiativeType
+    {
+        InitiativeType_None = 0,
+        InitiativeType_Image,
+        InitiativeType_ImageName
+    };
+
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
     const int TreeItemData_Object = Qt::UserRole + 3;

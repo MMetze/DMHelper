@@ -37,7 +37,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _unknownToken(nullptr),
     _initiativeBackground(nullptr),
     _effectTokens(),
-    _showInitiative(false),
+    _initiativeType(DMHelper::InitiativeType_ImageName),
     _initiativeTokenHeight(0.0),
     _movementVisible(false),
     _movementCombatant(nullptr),
@@ -376,12 +376,12 @@ void PublishGLBattleRenderer::setGrid(QImage gridImage)
     emit updateWidget();
 }
 
-void PublishGLBattleRenderer::setInitiativeVisible(bool visible)
+void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
 {
-    if(_showInitiative != visible)
+    if(_initiativeType != initiativeType)
     {
-        _showInitiative = visible;
-        emit updateWidget();
+        _initiativeType = initiativeType;
+        recreateContents();
     }
 }
 
@@ -544,16 +544,19 @@ void PublishGLBattleRenderer::createContents()
                 combatantToken->addEffect(*_selectionToken);
             _combatantTokens.insert(combatant, combatantToken);
 
-            QRect nameBounds = fm.boundingRect(combatant->getName());
-            QImage nameImage(nameBounds.size(), QImage::Format_RGBA8888);
-            nameImage.fill(Qt::transparent);
-            QPainter namePainter;
-            namePainter.begin(&nameImage);
-                namePainter.setPen(QPen(Qt::white));
-                namePainter.drawText(0, -nameBounds.top(), combatant->getName());
-            namePainter.end();
-            PublishGLImage* combatantName = new PublishGLImage(nameImage, false);
-            _combatantNames.insert(combatant, combatantName);
+            if(_initiativeType == DMHelper::InitiativeType_ImageName)
+            {
+                QRect nameBounds = fm.boundingRect(combatant->getName());
+                QImage nameImage(nameBounds.size(), QImage::Format_RGBA8888);
+                nameImage.fill(Qt::transparent);
+                QPainter namePainter;
+                namePainter.begin(&nameImage);
+                    namePainter.setPen(QPen(Qt::white));
+                    namePainter.drawText(0, -nameBounds.top(), combatant->getName());
+                namePainter.end();
+                PublishGLImage* combatantName = new PublishGLImage(nameImage, false);
+                _combatantNames.insert(combatant, combatantName);
+            }
 
             connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
             connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
@@ -609,7 +612,6 @@ void PublishGLBattleRenderer::cleanupContents()
     qDeleteAll(_combatantNames); _combatantNames.clear();
     qDeleteAll(_effectTokens); _effectTokens.clear();
 
-    _showInitiative = false;
     _initiativeTokenHeight = 0.0;
     _movementVisible = false;
     _movementCombatant = nullptr;
@@ -624,20 +626,23 @@ void PublishGLBattleRenderer::updateInitiative()
     _initiativeBackground = nullptr;
 
     QList<PublishGLImage*> nameTokens = _combatantNames.values();
-    if(nameTokens.count() <= 0)
-        return;
 
     _initiativeTokenHeight = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
     QSize initiativeArea;
-    for(PublishGLImage* nameToken : nameTokens)
-    {
-        if(nameToken)
-        {
-            if(initiativeArea.width() < (_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5)
-                initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5);
+    initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + 5);
 
-            if(_initiativeTokenHeight < nameToken->getSize().height())
-                _initiativeTokenHeight = nameToken->getSize().height();
+    if(_initiativeType == DMHelper::InitiativeType_ImageName)
+    {
+        for(PublishGLImage* nameToken : nameTokens)
+        {
+            if(nameToken)
+            {
+                if(initiativeArea.width() < (_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5)
+                    initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5);
+
+                if(_initiativeTokenHeight < nameToken->getSize().height())
+                    _initiativeTokenHeight = nameToken->getSize().height();
+            }
         }
     }
 
@@ -651,7 +656,7 @@ void PublishGLBattleRenderer::updateInitiative()
 
 void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
 {
-    if((!functions) || (!_model) || (_model->getCombatantCount() <= 0) || (!_showInitiative))
+    if((!functions) || (!_model) || (_model->getCombatantCount() <= 0) || (_initiativeType == DMHelper::InitiativeType_None))
         return;
 
     // Initiative timeline test
@@ -700,7 +705,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 tokenObject->paintGL();
             }
 
-            if(combatant->getShown())
+            if((_initiativeType == DMHelper::InitiativeType_ImageName) && (combatant->getShown()))
             {
                 PublishGLImage* combatantName = _combatantNames.value(combatant);
                 if(combatantName)

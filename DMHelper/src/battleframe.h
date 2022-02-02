@@ -100,7 +100,7 @@ public slots:
     void setYOffset(int yOffset);
     void setGridVisible(bool gridVisible);
 
-    void setShowOnDeck(bool showOnDeck);
+    void setInitiativeType(int initiativeType);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
@@ -380,7 +380,7 @@ private:
 
     PublishGLBattleRenderer* _renderer;
 
-    bool _showOnDeck;
+    int _initiativeType;
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;
