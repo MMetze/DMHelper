@@ -14,6 +14,8 @@ class PublishGLBattleObject;
 class PublishGLBattleToken;
 class PublishGLBattleBackground;
 class BattleDialogModelCombatant;
+class QGraphicsItem;
+class QGraphicsSimpleTextItem;
 
 class PublishGLBattleRenderer : public PublishGLRenderer
 {
@@ -42,6 +44,9 @@ public slots:
     void setGrid(QImage gridImage);
     void setInitiativeType(int initiativeType);
 
+    void distanceChanged(const QString& distance);
+    void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
+
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
 
@@ -69,6 +74,7 @@ protected slots:
     void recreateContents();
     void activeCombatantMoved();
     void tokenSelectionChanged(PublishGLBattleToken* token);
+    void createLineToken();
 
 protected:
     bool _initialized;
@@ -104,6 +110,12 @@ protected:
     PublishGLImage* _activeToken;
 
     PublishGLImage* _selectionToken;
+
+    bool _recreateLine;
+    QGraphicsItem* _lineItem;
+    QGraphicsSimpleTextItem* _lineText;
+    PublishGLImage* _lineImage;
+    PublishGLImage* _lineTextImage;
 
     bool _updateFow;
     bool _recreateContent;

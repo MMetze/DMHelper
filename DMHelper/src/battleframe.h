@@ -141,7 +141,12 @@ public slots:
     void setCameraEdit(bool enabled);
 
     void setDistance(bool enabled);
+    void setFreeDistance(bool enabled);
     void setDistanceHeight(bool heightEnabled, qreal height);
+    void setDistanceScale(int scale);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
 
     void setShowHeight(bool showHeight);
     void setHeight(qreal height);
@@ -176,6 +181,7 @@ signals:
     void cameraRectChanged(const QRectF& cameraRect);
 
     void distanceToggled(bool enabled);
+    void freeDistanceToggled(bool enabled);
     void distanceChanged(const QString&);
 
     void foWEditToggled(bool enabled);

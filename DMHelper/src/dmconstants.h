@@ -131,6 +131,7 @@ namespace DMHelper
         BattleFrameState_CameraSelect,
         BattleFrameState_CameraEdit,
         BattleFrameState_Distance,
+        BattleFrameState_FreeDistance,
         BattleFrameState_Pointer,
         BattleFrameState_FoWSelect,
         BattleFrameState_FoWEdit,

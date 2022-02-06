@@ -252,6 +252,7 @@ void BattleFrame::deactivateObject()
     }
 
     rendererDeactivated();
+    cancelSelect();
 
     ui->frameCombatant->setCombatant(nullptr);
     setBattle(nullptr);
@@ -1110,10 +1111,40 @@ void BattleFrame::setDistance(bool enabled)
     _stateMachine.toggleState(DMHelper::BattleFrameState_Distance);
 }
 
+void BattleFrame::setFreeDistance(bool enabled)
+{
+    Q_UNUSED(enabled);
+    _stateMachine.toggleState(DMHelper::BattleFrameState_FreeDistance);
+}
+
 void BattleFrame::setDistanceHeight(bool heightEnabled, qreal height)
 {
     if(_scene)
         _scene->setDistanceHeight(heightEnabled ? height : 0.0);
+}
+
+void BattleFrame::setDistanceScale(int scale)
+{
+    if(_scene)
+        _scene->setDistanceScale(scale);
+}
+
+void BattleFrame::setDistanceLineColor(const QColor& color)
+{
+    if(_scene)
+        _scene->setDistanceLineColor(color);
+}
+
+void BattleFrame::setDistanceLineType(int lineType)
+{
+    if(_scene)
+        _scene->setDistanceLineType(lineType);
+}
+
+void BattleFrame::setDistanceLineWidth(int lineWidth)
+{
+    if(_scene)
+        _scene->setDistanceLineWidth(lineWidth);
 }
 
 void BattleFrame::setShowHeight(bool showHeight)
@@ -2697,6 +2728,8 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
     connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
+    connect(_scene, &BattleDialogGraphicsScene::distanceChanged, renderer, &PublishGLBattleRenderer::distanceChanged);
+    connect(_scene, &BattleDialogGraphicsScene::distanceItemChanged, renderer, &PublishGLBattleRenderer::distanceItemChanged);
     connect(this, &BattleFrame::cameraRectChanged, renderer, &PublishGLBattleRenderer::setCameraRect);
     connect(this, &BattleFrame::pointerToggled, renderer, &PublishGLRenderer::pointerToggled);
     connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
@@ -2722,6 +2755,8 @@ void BattleFrame::rendererDeactivated()
 
     disconnect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
     disconnect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
+    disconnect(_scene, &BattleDialogGraphicsScene::distanceChanged, _renderer, &PublishGLBattleRenderer::distanceChanged);
+    disconnect(_scene, &BattleDialogGraphicsScene::distanceItemChanged, _renderer, &PublishGLBattleRenderer::distanceItemChanged);
     disconnect(this, &BattleFrame::cameraRectChanged, _renderer, &PublishGLBattleRenderer::setCameraRect);
     disconnect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
     disconnect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
@@ -4086,6 +4121,10 @@ instead move the player view
     BattleFrameState* distanceState = new BattleFrameState(DMHelper::BattleFrameState_Distance, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/icon_distancecursor.png"), 32, 32);
     connect(distanceState, &BattleFrameState::stateChanged, this, &BattleFrame::distanceToggled);
     _stateMachine.addState(distanceState);
+
+    BattleFrameState* freeDistanceState = new BattleFrameState(DMHelper::BattleFrameState_FreeDistance, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/icon_distancecursor.png"), 32, 32);
+    connect(freeDistanceState, &BattleFrameState::stateChanged, this, &BattleFrame::freeDistanceToggled);
+    _stateMachine.addState(freeDistanceState);
 
     BattleFrameState* pointerState = new BattleFrameState(DMHelper::BattleFrameState_Pointer, BattleFrameState::BattleFrameStateType_Persistent, getPointerPixmap(), 0, 0);
     connect(pointerState, &BattleFrameState::stateChanged, this, &BattleFrame::pointerToggled);

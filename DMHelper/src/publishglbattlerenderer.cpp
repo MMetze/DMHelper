@@ -14,6 +14,8 @@
 #include <QMatrix4x4>
 #include <QPainter>
 #include <QApplication>
+#include <QGraphicsLineItem>
+#include <QStyleOptionGraphicsItem>
 #include <QDebug>
 
 const int MOVEMENT_TOKEN_SIZE = 512;
@@ -47,6 +49,11 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _activePC(false),
     _activeToken(nullptr),
     _selectionToken(nullptr),
+    _recreateLine(false),
+    _lineItem(nullptr),
+    _lineText(nullptr),
+    _lineImage(nullptr),
+    _lineTextImage(nullptr),
     _updateFow(false),
     _recreateContent(false)
 {
@@ -270,6 +277,9 @@ void PublishGLBattleRenderer::paintGL()
 
         if(_updateFow)
             updateFoW();
+
+        if(_recreateLine)
+            createLineToken();
     }
 
     evaluatePointer();
@@ -339,6 +349,18 @@ void PublishGLBattleRenderer::paintGL()
 
     paintTokens(f, true);
 
+    if(_lineImage)
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineImage->getMatrixData());
+        _lineImage->paintGL();
+    }
+
+    if(_lineTextImage)
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineTextImage->getMatrixData());
+        _lineTextImage->paintGL();
+    }
+
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
 
@@ -383,6 +405,25 @@ void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
         _initiativeType = initiativeType;
         recreateContents();
     }
+}
+
+void PublishGLBattleRenderer::distanceChanged(const QString& distance)
+{
+    Q_UNUSED(distance);
+
+    _recreateLine = true;
+    emit updateWidget();
+}
+
+void PublishGLBattleRenderer::distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem)
+{
+    if((shapeItem == _lineItem) && (textItem == _lineText))
+        return;
+
+    _lineItem = shapeItem;
+    _lineText = textItem;
+    _recreateLine = true;
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining)
@@ -525,6 +566,7 @@ void PublishGLBattleRenderer::createContents()
 
     updateFoW();
     updateGrid();
+    createLineToken();
 
     QImage selectImage;
     selectImage.load(QString(":/img/data/selected.png"));
@@ -607,6 +649,8 @@ void PublishGLBattleRenderer::cleanupContents()
     delete _unknownToken; _unknownToken = nullptr;
     delete _initiativeBackground; _initiativeBackground = nullptr;
     delete _movementToken; _movementToken = nullptr;
+    delete _lineImage; _lineImage = nullptr;
+    delete _lineTextImage; _lineTextImage = nullptr;
 
     qDeleteAll(_combatantTokens); _combatantTokens.clear();
     qDeleteAll(_combatantNames); _combatantNames.clear();
@@ -753,6 +797,57 @@ void PublishGLBattleRenderer::tokenSelectionChanged(PublishGLBattleToken* token)
         token->addEffect(*_selectionToken);
     else
         token->removeEffect(*_selectionToken);
+
+    emit updateWidget();
+}
+
+void PublishGLBattleRenderer::createLineToken()
+{
+    delete _lineImage; _lineImage = nullptr;
+    delete _lineTextImage; _lineTextImage = nullptr;
+    _recreateLine = false;
+
+    if(_lineItem)
+    {
+        QRectF lineRect = _lineItem->boundingRect();
+        QImage lineImage(lineRect.size().toSize(), QImage::Format_RGBA8888);
+        lineImage.fill(Qt::transparent);
+        QPainter linePainter;
+        linePainter.begin(&lineImage);
+            linePainter.translate(-lineRect.topLeft());
+            QStyleOptionGraphicsItem options;
+            _lineItem->paint(&linePainter, &options);
+        linePainter.end();
+
+        if(_lineImage)
+            _lineImage->setImage(lineImage);
+        else
+            _lineImage = new PublishGLImage(lineImage, false);
+
+        QPointF linePos = PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), lineRect.topLeft());
+        _lineImage->setPosition(linePos.x(), linePos.y() - lineRect.height());
+    }
+
+    if(_lineText)
+    {
+        QRectF textRect = _lineText->boundingRect();
+        QImage textImage(textRect.size().toSize(), QImage::Format_RGBA8888);
+        textImage.fill(Qt::transparent);
+        QPainter textPainter;
+        textPainter.begin(&textImage);
+            textPainter.translate(-textRect.topLeft());
+            QStyleOptionGraphicsItem options;
+            _lineText->paint(&textPainter, &options, nullptr);
+        textPainter.end();
+
+        if(_lineTextImage)
+            _lineTextImage->setImage(textImage);
+        else
+            _lineTextImage = new PublishGLImage(textImage, false);
+
+        QPointF textPos = PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), _lineText->pos());
+        _lineTextImage->setPosition(textPos.x(), textPos.y() - textRect.height());
+    }
 
     emit updateWidget();
 }

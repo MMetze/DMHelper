@@ -79,7 +79,7 @@ protected:
     int _shaderModelMatrix;
     PublishGLBattleBackground* _fowObject;
     PublishGLImage* _partyToken;
-    PublishGLImage* _itemImage;
+    PublishGLImage* _lineImage;
     QList<PublishGLImage*> _markerTokens;
 
     bool _recreatePartyToken;

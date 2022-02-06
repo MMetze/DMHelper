@@ -46,6 +46,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _pointerPixmap(),
     _selectedIcon(),
     _distanceMouseHandler(*this),
+    _freeDistanceMouseHandler(*this),
     _pointerMouseHandler(*this),
     _rawMouseHandler(*this),
     _cameraMouseHandler(*this),
@@ -53,6 +54,9 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mapsMouseHandler(*this)
 {
     connect(&_distanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerDistance::distanceChanged, this, &BattleDialogGraphicsScene::distanceChanged);
+    connect(&_freeDistanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerFreeDistance::distanceChanged, this, &BattleDialogGraphicsScene::distanceChanged);
+    connect(&_distanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerDistance::distanceItemChanged, this, &BattleDialogGraphicsScene::distanceItemChanged);
+    connect(&_freeDistanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerFreeDistance::distanceItemChanged, this, &BattleDialogGraphicsScene::distanceItemChanged);
 
     connect(&_pointerMouseHandler, &BattleDialogGraphicsSceneMouseHandlerPointer::pointerMoved, this, &BattleDialogGraphicsScene::pointerMove);
 
@@ -626,10 +630,42 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 void BattleDialogGraphicsScene::setDistanceHeight(qreal heightDelta)
 {
     _distanceMouseHandler.setHeightDelta(heightDelta);
+    _freeDistanceMouseHandler.setHeightDelta(heightDelta);
+}
+
+void BattleDialogGraphicsScene::setDistanceScale(int scale)
+{
+    _distanceMouseHandler.setDistanceScale(scale);
+    _freeDistanceMouseHandler.setDistanceScale(scale);
+}
+
+void BattleDialogGraphicsScene::setDistanceLineColor(const QColor& color)
+{
+    _distanceMouseHandler.setDistanceLineColor(color);
+    _freeDistanceMouseHandler.setDistanceLineColor(color);
+}
+
+void BattleDialogGraphicsScene::setDistanceLineType(int lineType)
+{
+    _distanceMouseHandler.setDistanceLineType(lineType);
+    _freeDistanceMouseHandler.setDistanceLineType(lineType);
+}
+
+void BattleDialogGraphicsScene::setDistanceLineWidth(int lineWidth)
+{
+    _distanceMouseHandler.setDistanceLineWidth(lineWidth);
+    _freeDistanceMouseHandler.setDistanceLineWidth(lineWidth);
 }
 
 void BattleDialogGraphicsScene::setInputMode(int inputMode)
 {
+    if(((_inputMode == DMHelper::BattleFrameState_Distance) || (_inputMode == DMHelper::BattleFrameState_FreeDistance)) &&
+       ((inputMode != DMHelper::BattleFrameState_Distance) && (inputMode != DMHelper::BattleFrameState_FreeDistance)))
+    {
+        _distanceMouseHandler.cleanup();
+        _freeDistanceMouseHandler.cleanup();
+    }
+
     _inputMode = inputMode;
 }
 
@@ -1018,6 +1054,12 @@ void BattleDialogGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseE
     BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
+        if((mouseHandler == &_distanceMouseHandler) || (mouseHandler == &_freeDistanceMouseHandler))
+        {
+            _distanceMouseHandler.cleanup();
+            _freeDistanceMouseHandler.cleanup();
+        }
+
         if(!mouseHandler->mousePressEvent(mouseEvent))
             return;
     }
@@ -1224,6 +1266,9 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
                 break;
             case DMHelper::BattleFrameState_Distance:
                 result = &_distanceMouseHandler;
+                break;
+            case DMHelper::BattleFrameState_FreeDistance:
+                result = &_freeDistanceMouseHandler;
                 break;
             case DMHelper::BattleFrameState_CameraEdit:
                 result = &_cameraMouseHandler;

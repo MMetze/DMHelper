@@ -50,6 +50,10 @@ public:
 
 public slots:
     void setDistanceHeight(qreal heightDelta);
+    void setDistanceScale(int scale);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
     void setInputMode(int inputMode);
 
     void addEffectObject();
@@ -67,6 +71,7 @@ signals:
     void effectRemoved(QGraphicsItem* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
+    void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
 
     void pointerMove(const QPointF& pos);
 
@@ -142,6 +147,7 @@ protected:
     QString _selectedIcon;
 
     BattleDialogGraphicsSceneMouseHandlerDistance _distanceMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerFreeDistance _freeDistanceMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerPointer _pointerMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerRaw _rawMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCamera _cameraMouseHandler;

@@ -28,7 +28,7 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _shaderModelMatrix(0),
     _fowObject(nullptr),
     _partyToken(nullptr),
-    _itemImage(nullptr),
+    _lineImage(nullptr),
     _markerTokens(),
     _recreatePartyToken(false),
     _recreateLineToken(false),
@@ -64,8 +64,8 @@ void PublishGLMapRenderer::cleanup()
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
 
-    delete _itemImage;
-    _itemImage = nullptr;
+    delete _lineImage;
+    _lineImage = nullptr;
 
     delete _partyToken;
     _partyToken = nullptr;
@@ -251,7 +251,7 @@ void PublishGLMapRenderer::paintGL()
     if(_updateFow)
         updateFoW();
 
-    if(((_map->getMapItemCount() > 0) && (!_itemImage)) || (_recreateLineToken))
+    if(((_map->getMapItemCount() > 0) && (!_lineImage)) || (_recreateLineToken))
         createLineToken(sceneSize);
 
     if((_map->getMarkerCount() > 0) && (_recreateMarkers))
@@ -286,10 +286,10 @@ void PublishGLMapRenderer::paintGL()
         _fowObject->paintGL();
     }
 
-    if(_itemImage)
+    if(_lineImage)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _itemImage->getMatrixData());
-        _itemImage->paintGL();
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineImage->getMatrixData());
+        _lineImage->paintGL();
     }
 
     if((_partyToken) && (_map->getShowParty()))
@@ -433,7 +433,7 @@ void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
         if((lineImageSize.width() / 2) < fontMetrics.horizontalAdvance(distanceText))
             lineImageSize.setWidth((lineImageSize.width() / 2) + fontMetrics.horizontalAdvance(distanceText));
 
-        QImage lineImage(lineImageSize, QImage::Format_ARGB32_Premultiplied);
+        QImage lineImage(lineImageSize, QImage::Format_RGBA8888);
         lineImage.fill(Qt::transparent);
         QPainter linePainter;
         linePainter.begin(&lineImage);
@@ -445,12 +445,12 @@ void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
             linePainter.drawText(line->originCenter(), distanceText);
         linePainter.end();
 
-        if(_itemImage)
-            _itemImage->setImage(lineImage);
+        if(_lineImage)
+            _lineImage->setImage(lineImage);
         else
-            _itemImage = new PublishGLImage(lineImage, false);
+            _lineImage = new PublishGLImage(lineImage, false);
 
-        _itemImage->setPosition(line->origin().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - line->origin().y() - _itemImage->getSize().height());
+        _lineImage->setPosition(line->origin().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - line->origin().y() - _lineImage->getSize().height());
         return;
     }
 
@@ -475,7 +475,7 @@ void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
         if(pathRect.top() > path->points().last().y() - fontMetrics.height())
             pathRect.setTop(path->points().last().y() - fontMetrics.height());
 
-        QImage pathImage(pathRect.size(), QImage::Format_ARGB32_Premultiplied);
+        QImage pathImage(pathRect.size(), QImage::Format_RGBA8888);
         pathImage.fill(Qt::transparent);
         QPainter pathPainter;
         pathPainter.begin(&pathImage);
@@ -487,12 +487,12 @@ void PublishGLMapRenderer::createLineToken(const QSize& sceneSize)
             pathPainter.drawText(path->points().last() - pathRect.topLeft(), distanceText);
         pathPainter.end();
 
-        if(_itemImage)
-            _itemImage->setImage(pathImage);
+        if(_lineImage)
+            _lineImage->setImage(pathImage);
         else
-            _itemImage = new PublishGLImage(pathImage, false);
+            _lineImage = new PublishGLImage(pathImage, false);
 
-        _itemImage->setPosition(pathRect.topLeft().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - topPosition - _itemImage->getSize().height());
+        _lineImage->setPosition(pathRect.topLeft().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - topPosition - _lineImage->getSize().height());
         return;
     }
 }

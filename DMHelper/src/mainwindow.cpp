@@ -322,6 +322,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Battle View Menu
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabBattleView, SLOT(setPointerFile(const QString&)));
     _ribbonTabBattleView->setPointerFile(_options->getPointerFile());
+    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
     // Mini Map Menu
     // connections set up elsewhere
@@ -546,23 +547,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, _mapFrame, &MapFrame::setPartyScale);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, _mapFrame, &MapFrame::setShowMarkers);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, _mapFrame, &MapFrame::addNewMarker);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceClicked, _mapFrame, &MapFrame::setDistance);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::freeDistanceClicked, _mapFrame, &MapFrame::setFreeDistance);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceScaleChanged, _mapFrame, &MapFrame::setDistanceScale);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineColorChanged, _mapFrame, &MapFrame::setDistanceLineColor);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineTypeChanged, _mapFrame, &MapFrame::setDistanceLineType);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineWidthChanged, _mapFrame, &MapFrame::setDistanceLineWidth);
     connect(_mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
     connect(_mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
     connect(_mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
     connect(_mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
-    connect(_mapFrame, &MapFrame::showDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceOn);
-    connect(_mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setFreeDistanceOn);
-    connect(_mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceScale);
-    connect(_mapFrame, &MapFrame::distanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistance);
-    connect(_mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineColor);
-    connect(_mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineType);
-    connect(_mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineWidth);
 
     connect(_mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _mapFrame, SLOT(setPointerFile(const QString&)));
@@ -1581,6 +1569,11 @@ void MainWindow::setupRibbonBar()
 
 void MainWindow::connectBattleView(bool toBattle)
 {
+    if((!_ribbonTabBattleView) || (_ribbonTabBattleView->getIsBattle() == toBattle))
+        return;
+
+    _ribbonTabBattleView->setIsBattle(toBattle);
+
     if(toBattle)
     {
         // Battle
@@ -1596,12 +1589,21 @@ void MainWindow::connectBattleView(bool toBattle)
         connect(_battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
         connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), _battleFrame, SLOT(setCameraEdit(bool)));
         connect(_battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
-        connect(_ribbonTabBattleView, SIGNAL(distanceClicked(bool)), _battleFrame, SLOT(setDistance(bool)));
         connect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), _battleFrame, SLOT(setDistanceHeight(bool, qreal)));
-        connect(_battleFrame, SIGNAL(distanceToggled(bool)), _ribbonTabBattleView, SLOT(setDistanceOn(bool)));
-        connect(_battleFrame, SIGNAL(distanceChanged(const QString&)), _ribbonTabBattleView, SLOT(setDistance(const QString&)));
         connect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), _battleFrame, SLOT(setPointerOn(bool)));
         connect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);
+        connect(_battleFrame, &BattleFrame::distanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        connect(_battleFrame, &BattleFrame::freeDistanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        connect(_battleFrame, &BattleFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        //connect(_battleFrame, &BattleFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        //connect(_battleFrame, &BattleFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        //connect(_battleFrame, &BattleFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
 
         // Map
         disconnect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
@@ -1618,6 +1620,19 @@ void MainWindow::connectBattleView(bool toBattle)
         disconnect(_mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, _mapFrame, &MapFrame::setPointerOn);
         disconnect(_mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _mapFrame, &MapFrame::setDistance);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _mapFrame, &MapFrame::setFreeDistance);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _mapFrame, &MapFrame::setDistanceScale);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _mapFrame, &MapFrame::setDistanceLineColor);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _mapFrame, &MapFrame::setDistanceLineType);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _mapFrame, &MapFrame::setDistanceLineWidth);
+        disconnect(_mapFrame, &MapFrame::showDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        disconnect(_mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        disconnect(_mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceScale);
+        disconnect(_mapFrame, &MapFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        disconnect(_mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        disconnect(_mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        disconnect(_mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
     }
     else
     {
@@ -1634,12 +1649,21 @@ void MainWindow::connectBattleView(bool toBattle)
         disconnect(_battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
         disconnect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), _battleFrame, SLOT(setCameraEdit(bool)));
         disconnect(_battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
-        disconnect(_ribbonTabBattleView, SIGNAL(distanceClicked(bool)), _battleFrame, SLOT(setDistance(bool)));
         disconnect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), _battleFrame, SLOT(setDistanceHeight(bool, qreal)));
-        disconnect(_battleFrame, SIGNAL(distanceToggled(bool)), _ribbonTabBattleView, SLOT(setDistanceOn(bool)));
-        disconnect(_battleFrame, SIGNAL(distanceChanged(const QString&)), _ribbonTabBattleView, SLOT(setDistance(const QString&)));
         disconnect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), _battleFrame, SLOT(setPointerOn(bool)));
         disconnect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);
+        disconnect(_battleFrame, &BattleFrame::distanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        disconnect(_battleFrame, &BattleFrame::freeDistanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        disconnect(_battleFrame, &BattleFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        //disconnect(_battleFrame, &BattleFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        //disconnect(_battleFrame, &BattleFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        //disconnect(_battleFrame, &BattleFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
 
         // Map
         connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
@@ -1656,6 +1680,19 @@ void MainWindow::connectBattleView(bool toBattle)
         connect(_mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, _mapFrame, &MapFrame::setPointerOn);
         connect(_mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _mapFrame, &MapFrame::setDistance);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _mapFrame, &MapFrame::setFreeDistance);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _mapFrame, &MapFrame::setDistanceScale);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _mapFrame, &MapFrame::setDistanceLineColor);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _mapFrame, &MapFrame::setDistanceLineType);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _mapFrame, &MapFrame::setDistanceLineWidth);
+        connect(_mapFrame, &MapFrame::showDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        connect(_mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        connect(_mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceScale);
+        connect(_mapFrame, &MapFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        connect(_mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        connect(_mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        connect(_mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
     }
 }
 
