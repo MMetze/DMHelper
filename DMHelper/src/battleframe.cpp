@@ -27,11 +27,13 @@
 #include "dicerolldialogcombatants.h"
 #include "itemselectdialog.h"
 #include "videoplayer.h"
+#include "videoplayerglscreenshot.h"
 #include "camerarect.h"
 #include "battleframemapdrawer.h"
 #include "battleframestate.h"
 #include "combatantrolloverframe.h"
-#include "publishglbattlerenderer.h"
+#include "publishglbattleimagerenderer.h"
+#include "publishglbattlevideorenderer.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -100,14 +102,14 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _selectedScale(1.0),
     _compassPixmap(nullptr),
     _movementPixmap(nullptr),
-    _publishRect(nullptr),
+    _cameraRect(nullptr),
     _publishRectValue(),
     _includeHeight(false),
     _pitchHeight(0.0),
     _countdownTimer(nullptr),
     _countdown(0.0),
-    _publishing(false),
-    _publishTimer(nullptr),
+    _isPublishing(false),
+    _isVideo(false),
     _prescaledBackground(),
     _fowImage(),
     _combatantFrame(),
@@ -116,7 +118,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _targetLabelSize(),
     _mapDrawer(nullptr),
     _renderer(nullptr),
-    _showOnDeck(true),
+    _initiativeType(DMHelper::InitiativeType_ImageName),
     _showCountdown(true),
     _countdownDuration(15),
     _countdownColor(0,0,0),
@@ -127,7 +129,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _rotation(0),
     _moveRadius(0.0),
     _moveStart(),
-    _videoPlayer(nullptr),
     _bwFoWImage(),
     _sourceRect(),
     _videoSize()
@@ -147,10 +148,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     ui->scrollArea->installEventFilter(this);
 
     ui->graphicsView->installEventFilter(this);
-
-    _publishTimer = new QTimer(this);
-    _publishTimer->setSingleShot(false);
-    connect(_publishTimer, SIGNAL(timeout()),this,SLOT(executeAnimateImage()));
 
     _countdownTimer = new QTimer(this);
     _countdownTimer->setSingleShot(false);
@@ -204,10 +201,6 @@ BattleFrame::~BattleFrame()
 {
     qDebug() << "[Battle Frame] being destroyed: " << _combatantLayout->count() << " layouts and " << _combatantWidgets.count() << " widgets";
 
-    VideoPlayer* deletePlayer = _videoPlayer;
-    _videoPlayer = nullptr;
-    delete deletePlayer;
-
     QLayoutItem *child;
     while ((child = _combatantLayout->takeAt(0)) != nullptr)
     {
@@ -243,6 +236,10 @@ void BattleFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* 
 
     rendererActivated(dynamic_cast<PublishGLBattleRenderer*>(currentRenderer));
 
+    _isPublishing = (currentRenderer) && (_battle) && (currentRenderer->getObject() == _battle->getBattleDialogModel());
+    if(_cameraRect)
+        _cameraRect->setPublishing(_isPublishing);
+
     emit checkableChanged(true);
 }
 
@@ -255,6 +252,7 @@ void BattleFrame::deactivateObject()
     }
 
     rendererDeactivated();
+    cancelSelect();
 
     ui->frameCombatant->setCombatant(nullptr);
     setBattle(nullptr);
@@ -525,15 +523,7 @@ void BattleFrame::setTargetSize(const QSize& targetSize)
 
     _targetSize = targetSize;
 
-    if(_videoPlayer)
-    {
-        resetVideoSizes();
-        _videoPlayer->targetResized(_videoSize);
-    }
-    else
-    {
-        createPrescaledBackground();
-    }
+    createPrescaledBackground();
 }
 
 void BattleFrame::setTargetLabelSize(const QSize& targetSize)
@@ -649,6 +639,7 @@ void BattleFrame::setGridScale(int gridScale)
 
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -666,6 +657,7 @@ void BattleFrame::setGridAngle(int gridAngle)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -683,6 +675,7 @@ void BattleFrame::setGridType(int gridType)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -700,6 +693,7 @@ void BattleFrame::setXOffset(int xOffset)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -717,6 +711,7 @@ void BattleFrame::setYOffset(int yOffset)
         _scene->updateBattleContents();
         ui->graphicsView->update();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
@@ -734,12 +729,15 @@ void BattleFrame::setGridVisible(bool gridVisible)
         _scene->setGridVisibility(gridVisible);
         ui->graphicsView->invalidateScene();
         createPrescaledBackground();
+        updateRendererGrid();
     }
 }
 
-void BattleFrame::setShowOnDeck(bool showOnDeck)
+void BattleFrame::setInitiativeType(int initiativeType)
 {
-    _showOnDeck = showOnDeck;
+    _initiativeType = initiativeType;
+    if(_renderer)
+        _renderer->setInitiativeType(_initiativeType);
     createPrescaledBackground();
 }
 
@@ -1077,21 +1075,21 @@ void BattleFrame::setCameraCouple()
 
 void BattleFrame::setCameraMap()
 {
-    if((!_publishRect) || (!_scene))
+    if((!_cameraRect) || (!_scene))
         return;
 
     QRectF sceneRect = _scene->sceneRect();
-    _publishRect->setCameraRect(sceneRect);
+    _cameraRect->setCameraRect(sceneRect);
     emit cameraRectChanged(sceneRect);
 }
 
 void BattleFrame::setCameraVisible()
 {
-    if((!_publishRect) || (!_model) || (!_model->getMap()))
+    if((!_cameraRect) || (!_model) || (!_model->getMap()))
         return;
 
     QRectF newRect = _model->getMap()->getShrunkPublishRect();
-    _publishRect->setCameraRect(newRect);
+    _cameraRect->setCameraRect(newRect);
     emit cameraRectChanged(newRect);
 }
 
@@ -1113,10 +1111,40 @@ void BattleFrame::setDistance(bool enabled)
     _stateMachine.toggleState(DMHelper::BattleFrameState_Distance);
 }
 
+void BattleFrame::setFreeDistance(bool enabled)
+{
+    Q_UNUSED(enabled);
+    _stateMachine.toggleState(DMHelper::BattleFrameState_FreeDistance);
+}
+
 void BattleFrame::setDistanceHeight(bool heightEnabled, qreal height)
 {
     if(_scene)
         _scene->setDistanceHeight(heightEnabled ? height : 0.0);
+}
+
+void BattleFrame::setDistanceScale(int scale)
+{
+    if(_scene)
+        _scene->setDistanceScale(scale);
+}
+
+void BattleFrame::setDistanceLineColor(const QColor& color)
+{
+    if(_scene)
+        _scene->setDistanceLineColor(color);
+}
+
+void BattleFrame::setDistanceLineType(int lineType)
+{
+    if(_scene)
+        _scene->setDistanceLineType(lineType);
+}
+
+void BattleFrame::setDistanceLineWidth(int lineWidth)
+{
+    if(_scene)
+        _scene->setDistanceLineWidth(lineWidth);
 }
 
 void BattleFrame::setShowHeight(bool showHeight)
@@ -1477,13 +1505,14 @@ void BattleFrame::updateMap()
         return;
     }
 
-    if((!_background) || (!_fow) || (!_model->getMap()))
+    if((!_background) || (!_fow) || (!_model->getMap()) || (!_mapDrawer))
     {
         qDebug() << "[Battle Frame] No map found to be updated for the current battle model";
         return;
     }
 
     qDebug() << "[Battle Frame] Updating map " << _model->getMap()->getFileName() << " rect=" << _model->getMapRect().left() << "," << _model->getMapRect().top() << ", " << _model->getMapRect().width() << "x" << _model->getMapRect().height();
+    _isVideo = false;
     _model->getMap()->initialize();
     if(_model->getMap()->isInitialized())
     {
@@ -1501,7 +1530,9 @@ void BattleFrame::updateMap()
         if(_model->getMap()->isValid())
         {
             qDebug() << "[Battle Frame] Initializing battle map video";
-            createVideoPlayer(true);
+            extractDMScreenshot();
+            //createVideoPlayer(true);
+            _isVideo = true;
         }
     }
 }
@@ -1520,6 +1551,9 @@ void BattleFrame::updateVideoBackground()
         return;
     }
 
+    // TODO: put in a void MapFrame::extractDMScreenshot()
+
+/*
     qDebug() << "[Battle Frame] Initializing battle map video background image";
     if((!_videoPlayer) || (!_videoPlayer->getImage()))
         return;
@@ -1533,6 +1567,7 @@ void BattleFrame::updateVideoBackground()
     _model->getMap()->setExternalFoWImage(fowImage);
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     _mapDrawer->setMap(_model->getMap(), &_fowImage);
+    */
 
     if(!doSceneContentsExist())
         createSceneContents();
@@ -1583,29 +1618,30 @@ void BattleFrame::showStatistics()
 
 void BattleFrame::publishClicked(bool checked)
 {
-    if(_publishing == checked)
+    if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _model)))
         return;
 
-    _publishing = checked;
-    if(_publishRect)
-        _publishRect->setPublishing(checked);
+    _isPublishing = checked;
+    if(_cameraRect)
+        _cameraRect->setPublishing(_isPublishing);
 
-    if(_publishing)
+    if(_isPublishing)
     {
         if(_renderer)
-        {
-            qDebug() << "[BattleFrame] ERROR: Unexpected overwrite of existing renderer: " << _renderer;
             emit registerRenderer(nullptr);
-        }
 
-        PublishGLBattleRenderer* newRenderer = new PublishGLBattleRenderer(_model);
+        PublishGLBattleRenderer* newRenderer;
+        if(_isVideo)
+            newRenderer = new PublishGLBattleVideoRenderer(_model);
+        else
+            newRenderer = new PublishGLBattleImageRenderer(_model);
+
         rendererActivated(newRenderer);
         emit registerRenderer(newRenderer);
         emit showPublishWindow();
     }
     else
     {
-        _publishTimer->stop();
         emit registerRenderer(nullptr);
     }
 }
@@ -1879,7 +1915,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
 {
     if(!_model)
     {
-        qDebug() << "[Battle Frame] ERROR: Not possible to handle item mouse movement, no battle model is set!";
+        qDebug() << "[Battle Frame] ERROR: Not possible to handle item mouse down, no battle model is set!";
         return;
     }
 
@@ -1919,7 +1955,7 @@ void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
 
 void BattleFrame::handleItemChanged(QGraphicsItem* item)
 {
-    if((_publishRect) && (_publishRect == item))
+    if((_cameraRect) && (_cameraRect == item))
     {
         updateCameraRect();
         createPrescaledBackground();
@@ -2119,33 +2155,6 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
         _logger->damageDone(_model->getActiveCombatant()->getID(), combatant->getID(), damage);
 }
 
-void BattleFrame::publishImage()
-{
-    if((_model) && (_publishing))
-    {
-        if(!_publishTimer->isActive())
-        {
-            emit showPublishWindow();
-            if((!_model->getMap()->isInitialized()) && (_model->getMap()->isValid()))
-            {
-                createVideoPlayer(false);
-            }
-
-            // OPTIMIZE: optimize this to be faster, doing only changes?
-            _publishTimer->start(DMHelper::ANIMATION_TIMER_DURATION);
-//            emit animationStarted();
-            qDebug() << "[Battle Frame] publish timer activated";
-        }
-    }
-}
-
-void BattleFrame::executeAnimateImage()
-{
-    QImage pub;
-    getImageForPublishing(pub);
-//    emit animateImage(pub);
-}
-
 void BattleFrame::updateHighlights()
 {
     if(!_model)
@@ -2214,13 +2223,14 @@ void BattleFrame::createPrescaledBackground()
 {
     qDebug() << "[Battle Frame] Creating Prescaled Background";
 
+    /*
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible to create a prescaled background, no battle model is set!";
         return;
     }
 
-    if((!_model->getMap()) || (!_publishing))
+    if((!_model->getMap()) || (!_isPublishing))
         return;
 
     if(_videoPlayer)
@@ -2256,6 +2266,7 @@ void BattleFrame::createPrescaledBackground()
 #ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
     qDebug() << "[Battle Frame][PROFILE] " << t.elapsed() << "; prescaled background created";
 #endif
+    */
 
     qDebug() << "[Battle Frame] Prescaled Background created";
 }
@@ -2279,10 +2290,10 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
         }
         else if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_CameraSelect)
         {
-            if(_publishRect)
+            if(_cameraRect)
             {
-                _publishRect->setCameraRect(ui->graphicsView->mapToScene(_rubberBandRect).boundingRect());
-                emit cameraRectChanged(_publishRect->getCameraRect());
+                _cameraRect->setCameraRect(ui->graphicsView->mapToScene(_rubberBandRect).boundingRect());
+                emit cameraRectChanged(_cameraRect->getCameraRect());
             }
         }
         else if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWSelect)
@@ -2349,6 +2360,7 @@ void BattleFrame::setEffectLayerVisibility(bool visibility)
 
 void BattleFrame::setPublishVisibility(bool publish)
 {
+    /*
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Setting publish visibility: " << publish;
 #endif
@@ -2363,8 +2375,8 @@ void BattleFrame::setPublishVisibility(bool publish)
         _background->setVisible(!publish);
 
     // Don't render the camera rect for the publish image
-    if(_publishRect)
-        _publishRect->setDraw(!publish);
+    if(_cameraRect)
+        _cameraRect->setDraw(!publish);
 
     // Don't render invisible individual effects
     if((_scene) && (_model->getShowEffects()))
@@ -2424,6 +2436,7 @@ void BattleFrame::setPublishVisibility(bool publish)
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Publish visibility set";
 #endif
+*/
 }
 
 void BattleFrame::setGridOnlyVisibility(bool gridOnly)
@@ -2440,8 +2453,8 @@ void BattleFrame::setGridOnlyVisibility(bool gridOnly)
     if(_background)
         _background->setVisible(!gridOnly);
 
-    if(_publishRect)
-        _publishRect->setDraw(!gridOnly);
+    if(_cameraRect)
+        _cameraRect->setDraw(!gridOnly);
 
     setEffectLayerVisibility((!gridOnly) && (_model->getShowEffects()));
 
@@ -2465,8 +2478,8 @@ void BattleFrame::setMapCursor()
 
 void BattleFrame::setCameraSelectable(bool selectable)
 {
-    if(_publishRect)
-        _publishRect->setCameraSelectable(selectable);
+    if(_cameraRect)
+        _cameraRect->setCameraSelectable(selectable);
 }
 
 void BattleFrame::setScale(qreal s)
@@ -2687,23 +2700,52 @@ void BattleFrame::removeRollover()
     _hoverFrame = nullptr;
 }
 
+void BattleFrame::handleScreenshotReady(const QImage& image)
+{
+    if((image.isNull()) || (!_background) || (!_mapDrawer))
+        return;
+
+    if(_model->getBackgroundImage().isNull())
+        _model->setBackgroundImage(image);
+    _background->setPixmap((QPixmap::fromImage(image)));
+    _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
+    _mapDrawer->setMap(_model->getMap(), &_fowImage);
+
+    if(!_model->getCameraRect().isValid())
+        _model->setCameraRect(_background->boundingRect().toRect());
+
+    if(_cameraRect)
+        _cameraRect->setCameraRect(_model->getCameraRect());
+    else
+        _cameraRect = new CameraRect(_model->getCameraRect(), *_scene, ui->graphicsView->viewport());
+    emit cameraRectChanged(_model->getCameraRect());
+}
+
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
     if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
         return;
 
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
+    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
+    connect(_scene, &BattleDialogGraphicsScene::distanceChanged, renderer, &PublishGLBattleRenderer::distanceChanged);
+    connect(_scene, &BattleDialogGraphicsScene::distanceItemChanged, renderer, &PublishGLBattleRenderer::distanceItemChanged);
     connect(this, &BattleFrame::cameraRectChanged, renderer, &PublishGLBattleRenderer::setCameraRect);
     connect(this, &BattleFrame::pointerToggled, renderer, &PublishGLRenderer::pointerToggled);
-    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
     connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
+    connect(this, &BattleFrame::movementChanged, renderer, &PublishGLBattleRenderer::movementChanged);
     connect(renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
+    connect(renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
-    renderer->setCameraRect(_publishRect->getCameraRect());
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
+    renderer->setInitiativeType(_initiativeType);
+
+    if(_cameraRect)
+        renderer->setCameraRect(_cameraRect->getCameraRect());
 
     _renderer = renderer;
+    updateRendererGrid();
 }
 
 void BattleFrame::rendererDeactivated()
@@ -2712,12 +2754,37 @@ void BattleFrame::rendererDeactivated()
         return;
 
     disconnect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
-    disconnect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
     disconnect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
+    disconnect(_scene, &BattleDialogGraphicsScene::distanceChanged, _renderer, &PublishGLBattleRenderer::distanceChanged);
+    disconnect(_scene, &BattleDialogGraphicsScene::distanceItemChanged, _renderer, &PublishGLBattleRenderer::distanceItemChanged);
+    disconnect(this, &BattleFrame::cameraRectChanged, _renderer, &PublishGLBattleRenderer::setCameraRect);
+    disconnect(this, &BattleFrame::pointerToggled, _renderer, &PublishGLRenderer::pointerToggled);
     disconnect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
+    disconnect(this, &BattleFrame::movementChanged, _renderer, &PublishGLBattleRenderer::movementChanged);
     disconnect(_renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
+    disconnect(_renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
     _renderer = nullptr;
+}
+
+void BattleFrame::updateRendererGrid()
+{
+    if((!_renderer) || (!_scene))
+        return;
+
+    QImage gridImage(_renderer->getBackgroundSize().toSize(), QImage::Format_RGBA8888);
+    if(gridImage.isNull())
+        return;
+
+    gridImage.fill(Qt::transparent);
+
+    QPainter gridPainter;
+    gridPainter.begin(&gridImage);
+        gridPainter.setRenderHint(QPainter::Antialiasing);
+        _scene->paintGrid(&gridPainter);
+    gridPainter.end();
+
+    _renderer->setGrid(gridImage);
 }
 
 void BattleFrame::stateUpdated()
@@ -3087,6 +3154,7 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
 
 void BattleFrame::getImageForPublishing(QImage& imageForPublishing)
 {
+    /*
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Getting image for publishing" << imageForPublishing;
 #endif
@@ -3309,6 +3377,7 @@ void BattleFrame::getImageForPublishing(QImage& imageForPublishing)
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Image for publishing created.";
 #endif
+*/
 }
 
 void BattleFrame::updatePublishEnable()
@@ -3318,6 +3387,7 @@ void BattleFrame::updatePublishEnable()
 
 void BattleFrame::createVideoPlayer(bool dmPlayer)
 {
+    /*
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Creating video player. For DM: " << dmPlayer << ". Existing player: " << _videoPlayer;
 #endif
@@ -3356,7 +3426,7 @@ void BattleFrame::createVideoPlayer(bool dmPlayer)
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Video player created.";
 #endif
-
+    */
 }
 
 void BattleFrame::resetVideoSizes()
@@ -3390,13 +3460,7 @@ void BattleFrame::resetVideoSizes()
 
 void BattleFrame::clearBattleFrame()
 {
-    qDebug() << "[Battle Frame] Clearing Battle Frame.";
-
-    if(_videoPlayer)
-    {
-        _videoPlayer->stopThenDelete();
-        _videoPlayer = nullptr;
-    }
+    qDebug() << "[Battle Frame] Clearing Battle Frame";
 
     BattleDialogLogger* tempLogger = _logger;
     _logger = nullptr;
@@ -3437,7 +3501,7 @@ void BattleFrame::cleanupBattleMap()
     delete _background; _background = nullptr; _fow = nullptr;
     delete _activePixmap; _activePixmap = nullptr;
     delete _compassPixmap; _compassPixmap = nullptr;
-    delete _publishRect; _publishRect = nullptr;
+    delete _cameraRect; _cameraRect = nullptr;
     delete _movementPixmap; _movementPixmap = nullptr;
 
     // Clean up any existing icons
@@ -3472,8 +3536,7 @@ void BattleFrame::replaceBattleMap()
     _background->setEnabled(false);
     _background->setZValue(DMHelper::BattleDialog_Z_Background);
 
-    if(!_videoPlayer)
-        createSceneContents();
+    createSceneContents();
 
     qDebug() << "[Battle Frame] map set to new image (" << _model->getMap()->getFileName() << ")";
 }
@@ -3590,7 +3653,7 @@ QSize BattleFrame::sizeBackgroundToFrame(const QSize& backgroundSize)
 // Returns the required frame width based on the current settings
 int BattleFrame::getFrameWidth()
 {
-    return (_showOnDeck ? _combatantFrame.width() : 0) +
+    return ((_initiativeType != DMHelper::InitiativeType_None) ? _combatantFrame.width() : 0) +
            (_showCountdown ? _countdownFrame.width() : 0);
 }
 
@@ -3605,7 +3668,7 @@ int BattleFrame::getFrameHeight()
 
     if(_model->getActiveCombatant())
     {
-        if(_showOnDeck)
+        if(_initiativeType != DMHelper::InitiativeType_None)
             return 2 * _combatantFrame.height();
         else if(_showCountdown)
             return _countdownFrame.height();
@@ -3705,17 +3768,17 @@ void BattleFrame::setCameraRect(bool cameraOn)
     if(!_scene)
         return;
 
-    if(!_publishRect)
+    if(!_cameraRect)
     {
         if((!_model) || (_model->getCameraRect().isValid()))
         {
-            _publishRect = new CameraRect(_model->getCameraRect().width(), _model->getCameraRect().height(), *_scene, ui->graphicsView->viewport());
-            _publishRect->setPos(_model->getCameraRect().x(),_model->getCameraRect().y());
+            _cameraRect = new CameraRect(_model->getCameraRect().width(), _model->getCameraRect().height(), *_scene, ui->graphicsView->viewport());
+            _cameraRect->setPos(_model->getCameraRect().x(),_model->getCameraRect().y());
         }
         else
         {
-            _publishRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport());
-            _publishRect->setPos(0,0);
+            _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport());
+            _cameraRect->setPos(0,0);
         }
     }
 
@@ -3724,11 +3787,11 @@ void BattleFrame::setCameraRect(bool cameraOn)
 
 void BattleFrame::updateCameraRect()
 {
-    if(_publishRect)
+    if(_cameraRect)
     {
-        _publishRectValue = _publishRect->rect();
-        _publishRectValue.moveTo(_publishRect->pos());
-        emit cameraRectChanged(_publishRect->getCameraRect());
+        _publishRectValue = _cameraRect->rect();
+        _publishRectValue.moveTo(_cameraRect->pos());
+        emit cameraRectChanged(_cameraRect->getCameraRect());
     }
     else
     {
@@ -3746,13 +3809,23 @@ QRectF BattleFrame::getCameraRect()
 
 void BattleFrame::setCameraToView()
 {
-    if(!_publishRect)
+    if(!_cameraRect)
         return;
 
     QRectF viewRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
     viewRect.adjust(1.0, 1.0, -1.0, -1.0);
-    _publishRect->setCameraRect(viewRect);
+    _cameraRect->setCameraRect(viewRect);
     emit cameraRectChanged(viewRect);
+}
+
+void BattleFrame::extractDMScreenshot()
+{
+    if((!_model) || (!_model->getMap()))
+        return;
+
+    VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_model->getMap()->getFileName());
+    connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &BattleFrame::handleScreenshotReady);
+    screenshot->retrieveScreenshot();
 }
 
 void BattleFrame::renderPrescaledBackground(QPainter& painter, QSize targetSize)
@@ -3781,6 +3854,7 @@ void BattleFrame::renderPrescaledBackground(QPainter& painter, QSize targetSize)
 
 void BattleFrame::renderVideoBackground(QPainter& painter)
 {
+    /*
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Rendering video background";
 #endif
@@ -3846,6 +3920,7 @@ void BattleFrame::renderVideoBackground(QPainter& painter)
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Video background rendered.";
 #endif
+*/
 }
 
 bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect)
@@ -3942,6 +4017,8 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
         _movementPixmap->setPos(_moveStart);
         _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
         _movementPixmap->setVisible(true);
+
+        emit movementChanged(true, combatant, _moveRadius);
     }
 }
 
@@ -3984,6 +4061,8 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
 
     _movementPixmap->setPos(combatantPos);
     _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
+
+    emit movementChanged(_movementPixmap->isVisible(), combatant, _moveRadius);
 }
 
 void BattleFrame::endMovement()
@@ -3993,6 +4072,7 @@ void BattleFrame::endMovement()
 
     _movementPixmap->setRotation(0.0);
     _movementPixmap->setVisible(false);
+    emit movementChanged(false, nullptr, 0.0);
 }
 
 QPixmap BattleFrame::getPointerPixmap()
@@ -4041,6 +4121,10 @@ instead move the player view
     BattleFrameState* distanceState = new BattleFrameState(DMHelper::BattleFrameState_Distance, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/icon_distancecursor.png"), 32, 32);
     connect(distanceState, &BattleFrameState::stateChanged, this, &BattleFrame::distanceToggled);
     _stateMachine.addState(distanceState);
+
+    BattleFrameState* freeDistanceState = new BattleFrameState(DMHelper::BattleFrameState_FreeDistance, BattleFrameState::BattleFrameStateType_Persistent, QPixmap(":/img/data/icon_distancecursor.png"), 32, 32);
+    connect(freeDistanceState, &BattleFrameState::stateChanged, this, &BattleFrame::freeDistanceToggled);
+    _stateMachine.addState(freeDistanceState);
 
     BattleFrameState* pointerState = new BattleFrameState(DMHelper::BattleFrameState_Pointer, BattleFrameState::BattleFrameStateType_Persistent, getPointerPixmap(), 0, 0);
     connect(pointerState, &BattleFrameState::stateChanged, this, &BattleFrame::pointerToggled);

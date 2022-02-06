@@ -1,6 +1,7 @@
 #include "publishgltextrenderer.h"
 #include "encountertext.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
+#include "publishglimage.h"
 #include "dmconstants.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
@@ -8,16 +9,18 @@
 #include <QTextDocument>
 #include <QPainter>
 
-PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent) :
+PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
     _targetSize(),
-    _backgroundImage(backgroundImage),
+    _color(),
     _textImage(textImage),
     _scene(),
     _initialized(false),
     _shaderProgram(0),
-    _backgroundObject(nullptr),
+    _shaderModelMatrix(0),
+    _shaderProjectionMatrix(0),
+    _projectionMatrix(),
     _textObject(nullptr),
     _textPos(),
     _elapsed(),
@@ -35,20 +38,32 @@ CampaignObjectBase* PublishGLTextRenderer::getObject()
     return _encounter;
 }
 
+QColor PublishGLTextRenderer::getBackgroundColor()
+{
+    return _color;
+}
+
 void PublishGLTextRenderer::cleanup()
 {
     _initialized = false;
 
-    if(_timerId)
-    {
-        killTimer(_timerId);
-        _timerId = 0;
-    }
+    stop();
 
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
     delete _textObject;
     _textObject = nullptr;
+
+    if(_shaderProgram > 0)
+    {
+        if((_targetWidget) && (_targetWidget->context()))
+        {
+            QOpenGLFunctions *f = _targetWidget->context()->functions();
+            if(f)
+                f->glDeleteProgram(_shaderProgram);
+        }
+        _shaderProgram = 0;
+    }
+    _shaderModelMatrix = 0;
+    _shaderProjectionMatrix = 0;
 
     PublishGLRenderer::cleanup();
 }
@@ -134,16 +149,20 @@ void PublishGLTextRenderer::initializeGL()
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
+    _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
+    _shaderProjectionMatrix = f->glGetUniformLocation(_shaderProgram, "projection");
 
     // Create the objects
-    _scene.deriveSceneRectFromSize(_backgroundImage.size());
-    _backgroundObject = new BattleGLBackground(nullptr, _backgroundImage, GL_NEAREST);
-    _textObject = new BattleGLBackground(nullptr, _textImage, GL_LINEAR);
+    initializeBackground();
+    _scene.deriveSceneRectFromSize(getBackgroundSize());
+
+    _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
+    _textObject->setX(-getBackgroundSize().width() / 2);
 
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     // View
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
@@ -157,8 +176,7 @@ void PublishGLTextRenderer::initializeGL()
     _initialized = true;
 
     rewind();
-    _elapsed.start();
-    _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
+    play();
 }
 
 void PublishGLTextRenderer::resizeGL(int w, int h)
@@ -181,42 +199,83 @@ void PublishGLTextRenderer::paintGL()
     if((!f) || (!e))
         return;
 
+    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
+
     // Draw the scene:
-    //f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
-    f->glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    if(_backgroundObject)
-    {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
-        _backgroundObject->paintGL();
-    }
+    paintBackground(f);
 
     if(_textObject)
     {
-        QMatrix4x4 textMatrix = _textObject->getMatrix();
-        textMatrix.translate(0, _textPos.y());
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, textMatrix.constData() );
+        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _textObject->getMatrixData());
         _textObject->paintGL();
     }
 }
 
+void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
+{
+    _color = color;
+    emit updateWidget();
+}
+
+void PublishGLTextRenderer::setRotation(int rotation)
+{
+    if((rotation != _rotation) && (_textObject) && (_encounter) && (!_encounter->getAnimated()))
+        _textObject->setY((getRotatedHeight(rotation) / 2) - _textObject->getImageSize().height());
+
+    PublishGLRenderer::setRotation(rotation);
+}
+
 void PublishGLTextRenderer::rewind()
 {
-    //_textPos.setY(_backgroundImage.height());
-    _textPos.setY(0.0);
+    if((!_encounter) || (!_textObject))
+        return;
+
+    int rotHeight = getRotatedHeight(_rotation);
+    QSize imgSize = _textObject->getImageSize();
+    int imgHeight = imgSize.height();
+
+    if(_encounter->getAnimated())
+        _textObject->setY((-getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
+    else
+        _textObject->setY((getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
+
+    emit updateWidget();
+}
+
+void PublishGLTextRenderer::play()
+{
+    if((!_encounter) || (!_encounter->getAnimated()))
+        return;
+
+    _elapsed.start();
+    stop();
+    _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
+}
+
+void PublishGLTextRenderer::stop()
+{
+    if(_timerId)
+    {
+        killTimer(_timerId);
+        _timerId = 0;
+    }
 }
 
 void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
+    if((!_textObject) || (!_encounter))
+        return;
+
     qreal elapsedtime = _elapsed.restart();
-    //_textPos.ry() -= _encounter->getScrollSpeed() * (_prescaledImage.height() / 250) * (elapsedtime / 1000.0);
-    _textPos.ry() += 25.0 * (_backgroundImage.height() / 250) * (elapsedtime / 1000.0);
+    _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (getRotatedHeight(_rotation) / 250) * (elapsedtime / 1000.0));
 
     emit updateWidget();
 }
@@ -230,10 +289,25 @@ void PublishGLTextRenderer::updateProjectionMatrix()
     if(!f)
         return;
 
+    QSizeF transformedTarget = _targetSize;
+    if((_rotation == 90) || (_rotation == 270))
+        transformedTarget.transpose();
+
     // Update projection matrix and other size related settings:
-    QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+    QSizeF rectSize = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+    _projectionMatrix.setToIdentity();
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+    _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
 }
 
+void PublishGLTextRenderer::updateBackground()
+{
+}
+
+int PublishGLTextRenderer::getRotatedHeight(int rotation)
+{
+    if((rotation == 90) || (rotation == 270))
+        return getBackgroundSize().width();
+    else
+        return getBackgroundSize().height();
+}

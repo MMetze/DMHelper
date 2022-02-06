@@ -1,12 +1,12 @@
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QDebug>
 
-BattleGLBackground::BattleGLBackground(BattleGLScene* scene, const QImage& image, int textureParam) :
-    BattleGLObject(scene),
+PublishGLBattleBackground::PublishGLBattleBackground(PublishGLBattleScene* scene, const QImage& image, int textureParam) :
+    PublishGLBattleObject(scene),
     _imageSize(),
     _textureParam(textureParam),
     _VAO(0),
@@ -16,12 +16,12 @@ BattleGLBackground::BattleGLBackground(BattleGLScene* scene, const QImage& image
     createImageObjects(image);
 }
 
-BattleGLBackground::~BattleGLBackground()
+PublishGLBattleBackground::~PublishGLBattleBackground()
 {
-    BattleGLBackground::cleanup();
+    PublishGLBattleBackground::cleanup();
 }
 
-void BattleGLBackground::cleanup()
+void PublishGLBattleBackground::cleanup()
 {
     _imageSize = QSize();
 
@@ -51,10 +51,10 @@ void BattleGLBackground::cleanup()
         }
     }
 
-    BattleGLObject::cleanup();
+    PublishGLBattleObject::cleanup();
 }
 
-void BattleGLBackground::paintGL()
+void PublishGLBattleBackground::paintGL()
 {
     if(!QOpenGLContext::currentContext())
         return;
@@ -69,18 +69,18 @@ void BattleGLBackground::paintGL()
     f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void BattleGLBackground::setImage(const QImage& image)
+void PublishGLBattleBackground::setImage(const QImage& image)
 {
     cleanup();
     createImageObjects(image);
 }
 
-QSize BattleGLBackground::getSize() const
+QSize PublishGLBattleBackground::getSize() const
 {
     return _imageSize;
 }
 
-void BattleGLBackground::createImageObjects(const QImage& image)
+void PublishGLBattleBackground::createImageObjects(const QImage& image)
 {
     if(!QOpenGLContext::currentContext())
         return;

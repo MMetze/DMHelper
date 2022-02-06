@@ -1,4 +1,4 @@
-#include "battlegleffect.h"
+#include "publishglbattleeffect.h"
 #include "battledialogmodeleffect.h"
 #include "battledialogmodeleffectobject.h"
 #include "scaledpixmap.h"
@@ -9,8 +9,8 @@
 #include <QPixmap>
 #include <QPainter>
 
-BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* effect) :
-    BattleGLObject(scene),
+PublishGLBattleEffect::PublishGLBattleEffect(PublishGLBattleScene* scene, BattleDialogModelEffect* effect) :
+    PublishGLBattleObject(scene),
     _effect(effect),
     _childEffect(nullptr),
     _VAO(0),
@@ -45,7 +45,7 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
     else
         effectImage = QImage(QSize(effectSize, effectSize), QImage::Format_RGBA8888);
 
-    effectImage.fill(QColor(0, 0, 0, 0));
+    effectImage.fill(Qt::transparent);
 
     QPainter painter;
     painter.begin(&effectImage);
@@ -143,17 +143,17 @@ BattleGLEffect::BattleGLEffect(BattleGLScene* scene, BattleDialogModelEffect* ef
     // set the initial position matrix
     effectMoved();
 
-    connect(_effect, &BattleDialogModelEffect::effectMoved, this, &BattleGLEffect::effectMoved);
+    connect(_effect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
     if(_childEffect)
-        connect(_childEffect, &BattleDialogModelEffect::effectMoved, this, &BattleGLEffect::effectMoved);
+        connect(_childEffect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
 }
 
-BattleGLEffect::~BattleGLEffect()
+PublishGLBattleEffect::~PublishGLBattleEffect()
 {
-    BattleGLEffect::cleanup();
+    PublishGLBattleEffect::cleanup();
 }
 
-void BattleGLEffect::cleanup()
+void PublishGLBattleEffect::cleanup()
 {
     if(QOpenGLContext::currentContext())
     {
@@ -182,10 +182,10 @@ void BattleGLEffect::cleanup()
         }
     }
 
-    BattleGLObject::cleanup();
+    PublishGLBattleObject::cleanup();
 }
 
-void BattleGLEffect::paintGL()
+void PublishGLBattleEffect::paintGL()
 {
     if(!QOpenGLContext::currentContext())
         return;
@@ -200,7 +200,7 @@ void BattleGLEffect::paintGL()
     f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
-void BattleGLEffect::effectMoved()
+void PublishGLBattleEffect::effectMoved()
 {
     if(!_scene)
         return;
@@ -208,21 +208,22 @@ void BattleGLEffect::effectMoved()
     BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
 
     QPointF effectPos = effect->getPosition();
-    QRectF sceneRect = _scene->getSceneRect();
+    //QRectF sceneRect = _scene->getSceneRect();
     qreal sizeFactor = effect->getSize() / 5;
     if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
         sizeFactor *= 2.0; // Convert radius to diameter
     qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale())) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();
-    _modelMatrix.translate(effectPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - effectPos.y());
+    //_modelMatrix.translate(effectPos.x() - (sceneRect.width() / 2), (sceneRect.height() / 2) - effectPos.y());
+    _modelMatrix.translate(QVector3D(sceneToWorld(effectPos)));
     _modelMatrix.rotate(effect->getRotation(), 0.f, 0.f, -1.f);
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
     emit changed();
 }
 
-void BattleGLEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth)
+void PublishGLBattleEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth)
 {
     if(!effect)
         return;
@@ -255,7 +256,7 @@ void BattleGLEffect::drawShape(QPainter& painter, BattleDialogModelEffect* effec
     }
 }
 
-void BattleGLEffect::drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth)
+void PublishGLBattleEffect::drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth)
 {
     if(!effectObject)
         return;

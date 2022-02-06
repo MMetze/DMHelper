@@ -2,10 +2,13 @@
 #define BATTLEDIALOGGRAPHICSSCENEMOUSEHANDLERBASE_H
 
 #include <QObject>
+#include <QColor>
 
 class BattleDialogGraphicsScene;
 class QGraphicsSceneMouseEvent;
+class QGraphicsItem;
 class QGraphicsLineItem;
+class QGraphicsPathItem;
 class QGraphicsSimpleTextItem;
 
 class BattleDialogGraphicsSceneMouseHandlerBase : public QObject
@@ -29,7 +32,38 @@ protected:
 /******************************************************************************************************/
 
 
-class BattleDialogGraphicsSceneMouseHandlerDistance : public BattleDialogGraphicsSceneMouseHandlerBase
+class BattleDialogGraphicsSceneMouseHandlerDistanceBase : public BattleDialogGraphicsSceneMouseHandlerBase
+{
+    Q_OBJECT
+public:
+    explicit BattleDialogGraphicsSceneMouseHandlerDistanceBase(BattleDialogGraphicsScene& scene);
+    virtual ~BattleDialogGraphicsSceneMouseHandlerDistanceBase() override;
+
+public:
+    virtual void cleanup() = 0;
+    virtual void setHeightDelta(qreal heightDelta);
+    virtual void setDistanceScale(int scale);
+    virtual void setDistanceLineColor(const QColor& color);
+    virtual void setDistanceLineType(int lineType);
+    virtual void setDistanceLineWidth(int lineWidth);
+
+signals:
+    void distanceChanged(const QString& distance);
+    void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
+
+protected:
+    qreal _heightDelta;
+    int _scale;
+    QColor _color;
+    int _lineType;
+    int _lineWidth;
+};
+
+
+/******************************************************************************************************/
+
+
+class BattleDialogGraphicsSceneMouseHandlerDistance : public BattleDialogGraphicsSceneMouseHandlerDistanceBase
 {
     Q_OBJECT
 public:
@@ -37,18 +71,37 @@ public:
     virtual ~BattleDialogGraphicsSceneMouseHandlerDistance() override;
 
 public:
+    virtual void cleanup() override;
     virtual bool mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual bool mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
     virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 
-    void setHeightDelta(qreal heightDelta);
+protected:
+    QGraphicsLineItem* _distanceLine;
+    QGraphicsSimpleTextItem* _distanceText;
 
-signals:
-    void distanceChanged(const QString& distance);
+};
+
+
+/******************************************************************************************************/
+
+
+class BattleDialogGraphicsSceneMouseHandlerFreeDistance : public BattleDialogGraphicsSceneMouseHandlerDistanceBase
+{
+    Q_OBJECT
+public:
+    explicit BattleDialogGraphicsSceneMouseHandlerFreeDistance(BattleDialogGraphicsScene& scene);
+    virtual ~BattleDialogGraphicsSceneMouseHandlerFreeDistance() override;
+
+public:
+    virtual void cleanup() override;
+    virtual bool mouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
+    virtual bool mousePressEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
+    virtual bool mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) override;
 
 protected:
-    qreal _heightDelta;
-    QGraphicsLineItem* _distanceLine;
+    QPointF _mouseDownPos;
+    QGraphicsPathItem* _distancePath;
     QGraphicsSimpleTextItem* _distanceText;
 
 };

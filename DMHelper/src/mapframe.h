@@ -96,8 +96,6 @@ public slots:
 
     void colorize();
 
-    void cancelPublish();
-
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
@@ -190,7 +188,6 @@ protected:
 protected slots:
     void setMapCursor();
     void drawEditCursor();
-    void rotatePublish();
     void setScale(qreal s);
     void storeViewRect();
     void loadViewRect();

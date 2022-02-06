@@ -2,23 +2,26 @@
 #define PUBLISHGLBATTLERENDERER_H
 
 #include "publishglrenderer.h"
-#include "battleglscene.h"
+#include "publishglbattlescene.h"
 #include <QList>
 #include <QHash>
+#include <QImage>
 #include <QColor>
 #include <QMatrix4x4>
 
 class BattleDialogModel;
-class BattleGLObject;
-class BattleGLToken;
-class BattleGLBackground;
+class PublishGLBattleObject;
+class PublishGLBattleToken;
+class PublishGLBattleBackground;
 class BattleDialogModelCombatant;
+class QGraphicsItem;
+class QGraphicsSimpleTextItem;
 
 class PublishGLBattleRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLBattleRenderer(BattleDialogModel* model);
+    PublishGLBattleRenderer(BattleDialogModel* model, QObject *parent);
     virtual ~PublishGLBattleRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
@@ -28,6 +31,7 @@ public:
     virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
     virtual void setBackgroundColor(const QColor& color) override;
+    virtual QSizeF getBackgroundSize() = 0;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
@@ -37,14 +41,45 @@ public:
 public slots:
     void fowChanged();
     void setCameraRect(const QRectF& cameraRect);
+    void setGrid(QImage gridImage);
+    void setInitiativeType(int initiativeType);
+
+    void distanceChanged(const QString& distance);
+    void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
+
+    void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
+    void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
 
 protected:
+    // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
 
-private:
+    // Background overrides
+    virtual void initializeBackground() = 0;
+    virtual bool isBackgroundReady() = 0;
+    virtual void resizeBackground(int w, int h) = 0;
+    virtual void paintBackground(QOpenGLFunctions* functions) = 0;
+    virtual void paintTokens(QOpenGLFunctions* functions, bool drawPCs);
+    virtual void updateBackground();
+
+    virtual void updateGrid();
+    virtual void updateFoW();
+    virtual void createContents();
+    virtual void cleanupContents();
+
+    virtual void updateInitiative();
+    virtual void paintInitiative(QOpenGLFunctions* functions);
+
+protected slots:
+    void recreateContents();
+    void activeCombatantMoved();
+    void tokenSelectionChanged(PublishGLBattleToken* token);
+    void createLineToken();
+
+protected:
     bool _initialized;
     BattleDialogModel* _model;
-    BattleGLScene _scene;
+    PublishGLBattleScene _scene;
 
     QMatrix4x4 _projectionMatrix;
     QRectF _cameraRect;
@@ -53,14 +88,37 @@ private:
     int _shaderModelMatrix;
     int _shaderProjectionMatrix;
 
-    BattleGLBackground* _backgroundObject;
-    BattleGLBackground* _fowObject;
-    QHash<BattleDialogModelCombatant*, BattleGLToken*> _combatantTokens;
+    QImage _gridImage;
+    PublishGLImage* _gridObject;
+
+    PublishGLBattleBackground* _fowObject;
+    QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
     PublishGLImage* _unknownToken;
-    QList<BattleGLObject*> _effectTokens;
+    PublishGLImage* _initiativeBackground;
+    QList<PublishGLBattleObject*> _effectTokens;
+
+    int _initiativeType;
+    qreal _initiativeTokenHeight;
+    bool _movementVisible;
+    BattleDialogModelCombatant* _movementCombatant;
+    bool _movementPC;
+    PublishGLImage* _movementToken;
+
+    BattleDialogModelCombatant* _activeCombatant;
+    bool _activePC;
+    PublishGLImage* _activeToken;
+
+    PublishGLImage* _selectionToken;
+
+    bool _recreateLine;
+    QGraphicsItem* _lineItem;
+    QGraphicsSimpleTextItem* _lineText;
+    PublishGLImage* _lineImage;
+    PublishGLImage* _lineTextImage;
 
     bool _updateFow;
+    bool _recreateContent;
 };
 
 #endif // PUBLISHGLBATTLERENDERER_H

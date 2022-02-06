@@ -8,7 +8,7 @@
 
 class Map;
 class Party;
-class BattleGLBackground;
+class PublishGLBattleBackground;
 class PublishGLImage;
 class QOpenGLFunctions;
 
@@ -42,17 +42,23 @@ public slots:
     void markerChanged();
 
 protected:
+    // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
 
     // Background overrides
     virtual void initializeBackground() = 0;
+    virtual bool isBackgroundReady() = 0;
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
     virtual QSizeF getBackgroundSize() = 0;
+    virtual void updateBackground();
 
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);
     void createMarkerTokens(const QSize& sceneSize);
+
+    virtual void updateFoW();
+    virtual void updateContents();
 
 protected slots:
     void handlePartyChanged(Party* party);
@@ -71,9 +77,9 @@ protected:
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
-    BattleGLBackground* _fowObject;
+    PublishGLBattleBackground* _fowObject;
     PublishGLImage* _partyToken;
-    PublishGLImage* _itemImage;
+    PublishGLImage* _lineImage;
     QList<PublishGLImage*> _markerTokens;
 
     bool _recreatePartyToken;

@@ -37,6 +37,24 @@ void RibbonFrame::setStandardButtonSize(QLabel& label, QAbstractButton& button, 
     setButtonSize(button, newWidth, iconDim);
 }
 
+void RibbonFrame::setButtonSizeOnly(QLabel& label, QAbstractButton& button, int frameHeight)
+{
+    QFontMetrics metrics = label.fontMetrics();
+    int labelHeight = getLabelHeight(metrics, frameHeight);
+    int iconWidth = frameHeight - labelHeight;
+
+    setButtonSize(button, iconWidth, iconWidth);
+}
+
+void RibbonFrame::setLabelHeight(QLabel& label, int frameHeight)
+{
+    QFontMetrics metrics = label.fontMetrics();
+    int labelHeight = getLabelHeight(metrics, frameHeight);
+
+    label.setMinimumHeight(labelHeight);
+    label.setMaximumHeight(labelHeight);
+}
+
 void RibbonFrame::setLineHeight(QFrame& line, int frameHeight)
 {
     int lineHeight = frameHeight * 9 / 10;

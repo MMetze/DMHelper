@@ -1,24 +1,24 @@
-#ifndef PUBLISHGLMAPVIDEORENDERER_H
-#define PUBLISHGLMAPVIDEORENDERER_H
+#ifndef PUBLISHGLTEXTVIDEORENDERER_H
+#define PUBLISHGLTEXTVIDEORENDERER_H
 
-#include "publishglmaprenderer.h"
+#include "publishgltextrenderer.h"
 
-#define MAPVIDEO_USE_SCREENSHOT_ONLY
+#define TEXTVIDEO_USE_SCREENSHOT_ONLY
 
 class VideoPlayerGLPlayer;
 
-class PublishGLMapVideoRenderer : public PublishGLMapRenderer
+class PublishGLTextVideoRenderer : public PublishGLTextRenderer
 {
     Q_OBJECT
 public:
-    PublishGLMapVideoRenderer(Map* map, QObject *parent = nullptr);
+    PublishGLTextVideoRenderer(EncounterText* encounter, QImage textImage, QObject *parent = nullptr);
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
 
     QImage getLastScreenshot();
 
-#ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
+#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
 protected slots:
     void handleScreenshotReady(const QImage& image);
 #endif
@@ -34,10 +34,10 @@ protected:
 
     VideoPlayerGLPlayer* _videoPlayer;
 
-#ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
+#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
     PublishGLBattleBackground* _backgroundObject;
     QImage _backgroundImage;
 #endif
 };
 
-#endif // PUBLISHGLMAPVIDEORENDERER_H
+#endif // PUBLISHGLTEXTVIDEORENDERER_H

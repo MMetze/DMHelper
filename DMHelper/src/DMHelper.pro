@@ -49,11 +49,6 @@ SOURCES += main.cpp\
     battleframemapdrawer.cpp \
     battleframestate.cpp \
     battleframestatemachine.cpp \
-    battleglbackground.cpp \
-    battlegleffect.cpp \
-    battleglobject.cpp \
-    battleglscene.cpp \
-    battlegltoken.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
     camerascene.cpp \
@@ -100,7 +95,15 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
+    publishglbattlebackground.cpp \
+    publishglbattleeffect.cpp \
+    publishglbattleimagerenderer.cpp \
+    publishglbattleobject.cpp \
     publishglbattlerenderer.cpp \
+    publishglbattlescene.cpp \
+    publishglbattletoken.cpp \
+    publishglbattlevideorenderer.cpp \
+    publishgleffect.cpp \
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
@@ -109,7 +112,9 @@ SOURCES += main.cpp\
     publishglmapvideorenderer.cpp \
     publishglobject.cpp \
     publishglrenderer.cpp \
+    publishgltextimagerenderer.cpp \
     publishgltextrenderer.cpp \
+    publishgltextvideorenderer.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -274,11 +279,6 @@ HEADERS  += mainwindow.h \
     battleframemapdrawer.h \
     battleframestate.h \
     battleframestatemachine.h \
-    battleglbackground.h \
-    battlegleffect.h \
-    battleglobject.h \
-    battleglscene.h \
-    battlegltoken.h \
     bestiaryexportdialog.h \
     camerarect.h \
     camerascene.h \
@@ -326,7 +326,15 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
+    publishglbattlebackground.h \
+    publishglbattleeffect.h \
+    publishglbattleimagerenderer.h \
+    publishglbattleobject.h \
     publishglbattlerenderer.h \
+    publishglbattlescene.h \
+    publishglbattletoken.h \
+    publishglbattlevideorenderer.h \
+    publishgleffect.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \
@@ -335,7 +343,9 @@ HEADERS  += mainwindow.h \
     publishglmapvideorenderer.h \
     publishglobject.h \
     publishglrenderer.h \
+    publishgltextimagerenderer.h \
     publishgltextrenderer.h \
+    publishgltextvideorenderer.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \

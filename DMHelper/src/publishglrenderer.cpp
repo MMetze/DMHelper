@@ -85,41 +85,41 @@ void PublishGLRenderer::setBackgroundColor(const QColor& color)
 
 void PublishGLRenderer::setRotation(int rotation)
 {
-    if(rotation != _rotation)
-    {
-        _rotation = rotation;
-        updateProjectionMatrix();
-        emit updateWidget();
-    }
+    if(rotation == _rotation)
+        return;
+
+    _rotation = rotation;
+    updateProjectionMatrix();
+    emit updateWidget();
 }
 
 void PublishGLRenderer::pointerToggled(bool enabled)
 {
-    if(_pointerActive != enabled)
-    {
-        _pointerActive = enabled;
-        emit updateWidget();
-    }
+    if(_pointerActive == enabled)
+        return;
+
+    _pointerActive = enabled;
+    emit updateWidget();
 }
 
 void PublishGLRenderer::setPointerPosition(const QPointF& pos)
 {
-    if(_pointerPos != pos)
-    {
-        _pointerPos = pos;
-        emit updateWidget();
-    }
+    if(_pointerPos == pos)
+        return;
+
+    _pointerPos = pos;
+    emit updateWidget();
 }
 
 void PublishGLRenderer::setPointerFileName(const QString& filename)
 {
-    if(_pointerFile != filename)
-    {
-        _pointerFile = filename;
-        delete _pointerImage;
-        _pointerImage = nullptr;
-        emit updateWidget();
-    }
+    if(_pointerFile == filename)
+        return;
+
+    _pointerFile = filename;
+    delete _pointerImage;
+    _pointerImage = nullptr;
+    emit updateWidget();
 }
 
 void PublishGLRenderer::paintPointer(QOpenGLFunctions* functions, const QSize& sceneSize, int shaderModelMatrix)
@@ -128,8 +128,6 @@ void PublishGLRenderer::paintPointer(QOpenGLFunctions* functions, const QSize& s
         return;
 
     QPointF pointPos(_pointerPos.x() - (sceneSize.width() / 2.0) - (DMHelper::CURSOR_SIZE / 2), (sceneSize.height() / 2.0) - _pointerPos.y() + (DMHelper::CURSOR_SIZE / 2) - _pointerImage->getSize().height());
-    //qDebug() << "[PublishGLRenderer] Pointer pos: " << _pointerPos << ", img size: " << _pointerImage->getSize() << ", scene size: " << sceneSize;
-    //qDebug() << "[PublishGLRenderer]    output position: " << pointPos;
     _pointerImage->setPosition(pointPos);
     functions->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, _pointerImage->getMatrixData());
     _pointerImage->paintGL();

@@ -131,6 +131,7 @@ namespace DMHelper
         BattleFrameState_CameraSelect,
         BattleFrameState_CameraEdit,
         BattleFrameState_Distance,
+        BattleFrameState_FreeDistance,
         BattleFrameState_Pointer,
         BattleFrameState_FoWSelect,
         BattleFrameState_FoWEdit,
@@ -141,6 +142,13 @@ namespace DMHelper
         AudioType_File = 0,
         AudioType_Syrinscape,
         AudioType_Youtube
+    };
+
+    enum InitiativeType
+    {
+        InitiativeType_None = 0,
+        InitiativeType_Image,
+        InitiativeType_ImageName
     };
 
     const int TreeItemData_Type = Qt::UserRole + 1;

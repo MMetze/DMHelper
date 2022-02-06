@@ -29,6 +29,7 @@ public:
     void clearBattleContents();
     void setEffectVisibility(bool visible, bool allEffects = true);
     void setGridVisibility(bool visible);
+    void paintGrid(QPainter* painter);
 
     void setPointerVisibility(bool visible);
     void setPointerPos(const QPointF& pos);
@@ -49,6 +50,10 @@ public:
 
 public slots:
     void setDistanceHeight(qreal heightDelta);
+    void setDistanceScale(int scale);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
     void setInputMode(int inputMode);
 
     void addEffectObject();
@@ -66,6 +71,7 @@ signals:
     void effectRemoved(QGraphicsItem* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
+    void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
 
     void pointerMove(const QPointF& pos);
 
@@ -128,6 +134,7 @@ protected:
     QGraphicsItem* _mouseDownItem;
     BattleDialogModelCombatant* _mouseHoverItem;
     qreal _previousRotation;
+    bool _isRotation;
     QPointF _commandPosition;
 
     bool _spaceDown;
@@ -140,6 +147,7 @@ protected:
     QString _selectedIcon;
 
     BattleDialogGraphicsSceneMouseHandlerDistance _distanceMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerFreeDistance _freeDistanceMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerPointer _pointerMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerRaw _rawMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerCamera _cameraMouseHandler;

@@ -1,41 +1,37 @@
-#include "publishglmapimagerenderer.h"
+#include "publishgltextimagerenderer.h"
 #include "publishglbattlebackground.h"
-#include "map.h"
 #include <QOpenGLFunctions>
 
-PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) :
-    PublishGLMapRenderer(map, parent),
+PublishGLTextImageRenderer::PublishGLTextImageRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent) :
+    PublishGLTextRenderer(encounter, textImage, parent),
     _backgroundObject(nullptr),
-    _backgroundImage()
+    _backgroundImage(backgroundImage)
 {
 }
 
-void PublishGLMapImageRenderer::cleanup()
+void PublishGLTextImageRenderer::cleanup()
 {
     delete _backgroundObject;
     _backgroundObject = nullptr;
 
-    PublishGLMapRenderer::cleanup();
+    PublishGLTextRenderer::cleanup();
 }
 
-void PublishGLMapImageRenderer::initializeBackground()
+void PublishGLTextImageRenderer::initializeBackground()
 {
-    if((_backgroundObject) || (!_map))
+    if((_backgroundObject) || (!_encounter))
         return;
-
-    if(_backgroundImage.isNull())
-        _backgroundImage = _map->getBackgroundImage();
 
     _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
     updateProjectionMatrix();
 }
 
-bool PublishGLMapImageRenderer::isBackgroundReady()
+bool PublishGLTextImageRenderer::isBackgroundReady()
 {
     return _backgroundObject != nullptr;
 }
 
-void PublishGLMapImageRenderer::resizeBackground(int w, int h)
+void PublishGLTextImageRenderer::resizeBackground(int w, int h)
 {
     Q_UNUSED(w);
     Q_UNUSED(h);
@@ -44,7 +40,7 @@ void PublishGLMapImageRenderer::resizeBackground(int w, int h)
         updateProjectionMatrix();
 }
 
-void PublishGLMapImageRenderer::paintBackground(QOpenGLFunctions* functions)
+void PublishGLTextImageRenderer::paintBackground(QOpenGLFunctions* functions)
 {
     if((!_backgroundObject) || (!functions))
         return;
@@ -53,7 +49,7 @@ void PublishGLMapImageRenderer::paintBackground(QOpenGLFunctions* functions)
     _backgroundObject->paintGL();
 }
 
-QSizeF PublishGLMapImageRenderer::getBackgroundSize()
+QSizeF PublishGLTextImageRenderer::getBackgroundSize()
 {
     return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
 }

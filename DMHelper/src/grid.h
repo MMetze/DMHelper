@@ -26,17 +26,17 @@ public:
     virtual void setGridVisible(bool gridVisible);
     virtual void clear();
 
-    void rebuildGrid(BattleDialogModel& model);
+    void rebuildGrid(BattleDialogModel& model, QPainter* painter = nullptr);
 
 private:
 
-    void rebuildGrid_Square(BattleDialogModel& model);
-    void rebuildGrid_Hex(BattleDialogModel& model);
-    void rebuildGrid_Isosquare(BattleDialogModel& model);
-    void rebuildGrid_Isohex(BattleDialogModel& model);
+    void rebuildGrid_Square(BattleDialogModel& model, QPainter* painter = nullptr);
+    void rebuildGrid_Hex(BattleDialogModel& model, QPainter* painter = nullptr);
+    void rebuildGrid_Isosquare(BattleDialogModel& model, QPainter* painter = nullptr);
+    void rebuildGrid_Isohex(BattleDialogModel& model, QPainter* painter = nullptr);
 
     int computeOutCode(int x, int y);
-    void createLine(int x1, int y1, int x2, int y2);
+    void createLine(int x1, int y1, int x2, int y2, QPainter* painter);
 
     QRect _gridShape;
     QList<QGraphicsItem*> _grid;

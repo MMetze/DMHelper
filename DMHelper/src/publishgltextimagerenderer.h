@@ -1,13 +1,13 @@
-#ifndef PUBLISHGLMAPIMAGERENDERER_H
-#define PUBLISHGLMAPIMAGERENDERER_H
+#ifndef PUBLISHGLTEXTIMAGERENDERER_H
+#define PUBLISHGLTEXTIMAGERENDERER_H
 
-#include "publishglmaprenderer.h"
+#include "publishgltextrenderer.h"
 
-class PublishGLMapImageRenderer : public PublishGLMapRenderer
+class PublishGLTextImageRenderer : public PublishGLTextRenderer
 {
     Q_OBJECT
 public:
-    PublishGLMapImageRenderer(Map* map, QObject *parent = nullptr);
+    PublishGLTextImageRenderer(EncounterText* encounter, QImage backgroundImage, QImage textImage, QObject *parent = nullptr);
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
@@ -24,4 +24,4 @@ protected:
     QImage _backgroundImage;
 };
 
-#endif // PUBLISHGLMAPIMAGERENDERER_H
+#endif // PUBLISHGLTEXTIMAGERENDERER_H

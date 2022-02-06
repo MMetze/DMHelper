@@ -37,6 +37,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mouseDownItem(nullptr),
     _mouseHoverItem(nullptr),
     _previousRotation(0.0),
+    _isRotation(false),
     _commandPosition(INVALID_POINT),
     _spaceDown(false),
     _inputMode(-1),
@@ -45,6 +46,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _pointerPixmap(),
     _selectedIcon(),
     _distanceMouseHandler(*this),
+    _freeDistanceMouseHandler(*this),
     _pointerMouseHandler(*this),
     _rawMouseHandler(*this),
     _cameraMouseHandler(*this),
@@ -52,6 +54,9 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mapsMouseHandler(*this)
 {
     connect(&_distanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerDistance::distanceChanged, this, &BattleDialogGraphicsScene::distanceChanged);
+    connect(&_freeDistanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerFreeDistance::distanceChanged, this, &BattleDialogGraphicsScene::distanceChanged);
+    connect(&_distanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerDistance::distanceItemChanged, this, &BattleDialogGraphicsScene::distanceItemChanged);
+    connect(&_freeDistanceMouseHandler, &BattleDialogGraphicsSceneMouseHandlerFreeDistance::distanceItemChanged, this, &BattleDialogGraphicsScene::distanceItemChanged);
 
     connect(&_pointerMouseHandler, &BattleDialogGraphicsSceneMouseHandlerPointer::pointerMoved, this, &BattleDialogGraphicsScene::pointerMove);
 
@@ -240,6 +245,14 @@ void BattleDialogGraphicsScene::setGridVisibility(bool visible)
         _grid->setGridVisible(visible);
 }
 
+void BattleDialogGraphicsScene::paintGrid(QPainter* painter)
+{
+    if((!_model) || (!_grid) || (!painter))
+        return;
+
+    _grid->rebuildGrid(*_model, painter);
+}
+
 void BattleDialogGraphicsScene::setPointerVisibility(bool visible)
 {
     if(_pointerVisible == visible)
@@ -381,6 +394,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
                 qreal dot = _mouseDownPos.x()*eventPos.x()+_mouseDownPos.y()*eventPos.y();
                 qreal angle = qRadiansToDegrees(qAtan2(cross,dot));
                 _mouseDownItem->setRotation(_previousRotation + angle);
+                _isRotation = true;
                 BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
                 if(effect)
                     effect->setRotation(_previousRotation + angle);
@@ -439,6 +453,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
 {
     QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
     QGraphicsItem* abstractShape = item;
+    _isRotation = false;
 
     qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
 
@@ -473,7 +488,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
                 qDebug() << "[Battle Dialog Scene] other mouse button down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
             }
         }
-        else if((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
+        else if((mouseEvent->button() == Qt::LeftButton) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
         {
             QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
             if(pixItem)
@@ -500,7 +515,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
 
 bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if(mouseEvent->button() == Qt::RightButton)
+    if((mouseEvent->button() == Qt::RightButton) && (!_isRotation))
     {
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
         QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
@@ -615,10 +630,42 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 void BattleDialogGraphicsScene::setDistanceHeight(qreal heightDelta)
 {
     _distanceMouseHandler.setHeightDelta(heightDelta);
+    _freeDistanceMouseHandler.setHeightDelta(heightDelta);
+}
+
+void BattleDialogGraphicsScene::setDistanceScale(int scale)
+{
+    _distanceMouseHandler.setDistanceScale(scale);
+    _freeDistanceMouseHandler.setDistanceScale(scale);
+}
+
+void BattleDialogGraphicsScene::setDistanceLineColor(const QColor& color)
+{
+    _distanceMouseHandler.setDistanceLineColor(color);
+    _freeDistanceMouseHandler.setDistanceLineColor(color);
+}
+
+void BattleDialogGraphicsScene::setDistanceLineType(int lineType)
+{
+    _distanceMouseHandler.setDistanceLineType(lineType);
+    _freeDistanceMouseHandler.setDistanceLineType(lineType);
+}
+
+void BattleDialogGraphicsScene::setDistanceLineWidth(int lineWidth)
+{
+    _distanceMouseHandler.setDistanceLineWidth(lineWidth);
+    _freeDistanceMouseHandler.setDistanceLineWidth(lineWidth);
 }
 
 void BattleDialogGraphicsScene::setInputMode(int inputMode)
 {
+    if(((_inputMode == DMHelper::BattleFrameState_Distance) || (_inputMode == DMHelper::BattleFrameState_FreeDistance)) &&
+       ((inputMode != DMHelper::BattleFrameState_Distance) && (inputMode != DMHelper::BattleFrameState_FreeDistance)))
+    {
+        _distanceMouseHandler.cleanup();
+        _freeDistanceMouseHandler.cleanup();
+    }
+
     _inputMode = inputMode;
 }
 
@@ -1007,6 +1054,12 @@ void BattleDialogGraphicsScene::mousePressEvent(QGraphicsSceneMouseEvent *mouseE
     BattleDialogGraphicsSceneMouseHandlerBase* mouseHandler = getMouseHandler(mouseEvent);
     if(mouseHandler)
     {
+        if((mouseHandler == &_distanceMouseHandler) || (mouseHandler == &_freeDistanceMouseHandler))
+        {
+            _distanceMouseHandler.cleanup();
+            _freeDistanceMouseHandler.cleanup();
+        }
+
         if(!mouseHandler->mousePressEvent(mouseEvent))
             return;
     }
@@ -1195,31 +1248,53 @@ QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect
 
 BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent)
 {
-    if((mouseEvent) &&
-       (  //(_spaceDown) || <-- removed because space bar triggers "next" in combat
-        ((mouseEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier) ||
-        ((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton)))
-        return &_mapsMouseHandler;
+    BattleDialogGraphicsSceneMouseHandlerBase* result = nullptr;
 
-    switch(_inputMode)
+    if((mouseEvent) && ((mouseEvent->buttons() & Qt::MiddleButton) == Qt::MiddleButton))
     {
-        case DMHelper::BattleFrameState_FoWEdit:
-            return &_rawMouseHandler;
-        case DMHelper::BattleFrameState_Pointer:
-            return &_pointerMouseHandler;
-        case DMHelper::BattleFrameState_Distance:
-            return &_distanceMouseHandler;
-        case DMHelper::BattleFrameState_CameraEdit:
-            return &_cameraMouseHandler;
-        case DMHelper::BattleFrameState_CombatantEdit:
-            return &_combatantMouseHandler;
-        case DMHelper::BattleFrameState_ZoomSelect:
-        case DMHelper::BattleFrameState_CameraSelect:
-        case DMHelper::BattleFrameState_FoWSelect:
-            return &_combatantMouseHandler;
-        default:
-            return nullptr;
+        result = &_mapsMouseHandler;
     }
+    else
+    {
+        switch(_inputMode)
+        {
+            case DMHelper::BattleFrameState_FoWEdit:
+                result = &_rawMouseHandler;
+                break;
+            case DMHelper::BattleFrameState_Pointer:
+                result = &_pointerMouseHandler;
+                break;
+            case DMHelper::BattleFrameState_Distance:
+                result = &_distanceMouseHandler;
+                break;
+            case DMHelper::BattleFrameState_FreeDistance:
+                result = &_freeDistanceMouseHandler;
+                break;
+            case DMHelper::BattleFrameState_CameraEdit:
+                result = &_cameraMouseHandler;
+                break;
+            case DMHelper::BattleFrameState_CombatantEdit:
+                result = &_combatantMouseHandler;
+                break;
+            case DMHelper::BattleFrameState_ZoomSelect:
+            case DMHelper::BattleFrameState_CameraSelect:
+            case DMHelper::BattleFrameState_FoWSelect:
+                result = &_combatantMouseHandler;
+                break;
+            default:
+                result = nullptr;
+                break;
+        }
+
+        if((result == &_combatantMouseHandler) && (mouseEvent) && ((mouseEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
+        {
+            QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
+            if((!item) || ((item->flags() & QGraphicsItem::ItemIsSelectable) != QGraphicsItem::ItemIsSelectable))
+                result = &_mapsMouseHandler;
+        }
+    }
+
+    return result;
 }
 
 QPointF BattleDialogGraphicsScene::getViewportCenter()

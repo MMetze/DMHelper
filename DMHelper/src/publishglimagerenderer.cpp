@@ -1,5 +1,5 @@
 #include "publishglimagerenderer.h"
-#include "battleglbackground.h"
+#include "publishglbattlebackground.h"
 #include <QOpenGLWidget>
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
@@ -135,7 +135,7 @@ void PublishGLImageRenderer::initializeGL()
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_image.size());
-    _backgroundObject = new BattleGLBackground(nullptr, _image, GL_NEAREST);
+    _backgroundObject = new PublishGLBattleBackground(nullptr, _image, GL_NEAREST);
 
     // Matrices
     // Model

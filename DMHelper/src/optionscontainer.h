@@ -41,7 +41,7 @@ public:
     int getAudioVolume() const;
 
     // Battle settings
-    bool getShowOnDeck() const;
+    int getInitiativeType() const;
     bool getShowCountdown() const;
     int getCountdownDuration() const;
     QString getPointerFile() const;
@@ -94,7 +94,7 @@ signals:
     void audioVolumeChanged(int volume);
 
     // Battle settings
-    void showOnDeckChanged(bool showOnDeck);
+    void initiativeTypeChanged(int initiativeType);
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
     void pointerFileNameChanged(const QString& filename);
@@ -153,7 +153,7 @@ public slots:
     void setAudioVolume(int volume);
 
     // Battle settings
-    void setShowOnDeck(bool showOnDeck);
+    void setInitiativeType(int initiativeType);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
@@ -185,6 +185,7 @@ private slots:
 private:
     void copy(OptionsContainer* other);
     QMainWindow* getMainWindow();
+    void cleanupLegacy(OptionsAccessor& settings);
 
     // General settings
     QString _bestiaryFileName;
@@ -211,7 +212,7 @@ private:
     int _audioVolume;
 
     // Battle settings
-    bool _showOnDeck;
+    int _initiativeType;
     bool _showCountdown;
     int _countdownDuration;
     QString _pointerFile;

@@ -2,6 +2,7 @@
 #define RIBBONTABBATTLEVIEW_H
 
 #include "ribbonframe.h"
+#include <QAction>
 
 namespace Ui {
 class RibbonTabBattleView;
@@ -19,13 +20,23 @@ public:
 
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
+    bool getIsBattle() const;
+
 public slots:
+    void setIsBattle(bool isBattle);
+
     void setZoomSelect(bool checked);
     void setCameraSelect(bool checked);
     void setCameraEdit(bool checked);
 
     void setDistanceOn(bool checked);
+    void setFreeDistanceOn(bool checked);
     void setDistance(const QString& distance);
+    void setDistanceScale(int scale);
+
+    void setDistanceLineType(int lineType);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineWidth(int lineWidth);
 
     void setPointerOn(bool checked);
     void setPointerFile(const QString& filename);
@@ -43,18 +54,43 @@ signals:
     void cameraEditClicked(bool checked);
 
     void distanceClicked(bool checked);
+    void freeDistanceClicked(bool);
+    void distanceScaleChanged(int scale);
     void heightChanged(bool checked, qreal height);
+
+    void distanceLineTypeChanged(int lineType);
+    void distanceLineColorChanged(const QColor& color);
+    void distanceLineWidthChanged(int lineWidth);
 
     void pointerClicked(bool checked);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;
 
-private slots:
+protected slots:
+    void freeScaleEdited(const QString &text);
+    void selectLineTypeAction(QAction* action);
     void heightEdited();
 
 private:
     Ui::RibbonTabBattleView *ui;
+
+    bool _isBattle;
+};
+
+class RibbonTabBattleView_LineTypeAction : public QAction
+{
+    Q_OBJECT
+
+public:
+    explicit RibbonTabBattleView_LineTypeAction(const QIcon &icon, const QString &text, int lineType, QObject *parent = nullptr);
+    virtual ~RibbonTabBattleView_LineTypeAction() override;
+
+    int getLineType() const;
+
+protected:
+    int _lineType;
+
 };
 
 #endif // RIBBONTABBATTLEVIEW_H
