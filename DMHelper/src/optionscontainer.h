@@ -51,6 +51,7 @@ public:
     QString getCountdownFrame() const;
 
     // Data settings
+    QString getLastAppVersion() const;
     bool doDataSettingsExist() const;
     bool isUpdatesEnabled() const;
     bool isStatisticsAccepted() const;
@@ -222,6 +223,7 @@ private:
     QString _countdownFrame;
 
     // Data settings
+    QString _lastAppVersion;
     bool _dataSettingsExist;
     bool _updatesEnabled;
     bool _statisticsAccepted;

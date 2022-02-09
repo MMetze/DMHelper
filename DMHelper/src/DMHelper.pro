@@ -207,6 +207,7 @@ SOURCES += main.cpp\
     videoplayerglscreenshot.cpp \
     videoplayerglvideo.cpp \
     welcomeframe.cpp \
+    whatsnewdialog.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
     widgetcharacter.cpp \
@@ -439,6 +440,7 @@ HEADERS  += mainwindow.h \
     videoplayerglscreenshot.h \
     videoplayerglvideo.h \
     welcomeframe.h \
+    whatsnewdialog.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \
     widgetcharacter.h \
@@ -540,6 +542,7 @@ FORMS    += mainwindow.ui \
     dicerollframe.ui \
     battledialogeffectsettings.ui \
     welcomeframe.ui \
+    whatsnewdialog.ui \
     widgetbattlecombatant.ui \
     dicerolldialogcombatants.ui \
     widgetcharacter.ui \
