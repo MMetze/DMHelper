@@ -75,6 +75,7 @@
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
 #include "dmh_vlc.h"
+#include "whatsnewdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -1405,6 +1406,16 @@ void MainWindow::showEvent(QShowEvent * event)
 
             if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
                 openCampaign(_options->getMRUHandler()->getMRUList().first());
+
+            QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                                       .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                                       .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+            if(_options->getLastAppVersion() != versionString)
+            {
+                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(this);
+                whatsNewDlg->show();
+                whatsNewDlg->move(geometry().center() - whatsNewDlg->rect().center());
+            }
         }
 
         _initialized = true;
