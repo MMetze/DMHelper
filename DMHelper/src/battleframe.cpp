@@ -3748,6 +3748,7 @@ bool BattleFrame::convertPublishToScene(const QPointF& publishPosition, QPointF&
         publishY = publishPosition.x();
     }
 
+    /*
     if((publishWidth <= 0) || (publishWidth <= getFrameWidth()))
         return false;
 
@@ -3756,6 +3757,13 @@ bool BattleFrame::convertPublishToScene(const QPointF& publishPosition, QPointF&
         return false;
 
     scenePosition = QPointF((publishX * _publishRectValue.width() / maxPercent) + _publishRectValue.x(),
+                            (publishY * _publishRectValue.height()) + _publishRectValue.y());
+    */
+
+    if(publishWidth <= 0)
+        return false;
+
+    scenePosition = QPointF((publishX * _publishRectValue.width()) + _publishRectValue.x(),
                             (publishY * _publishRectValue.height()) + _publishRectValue.y());
 
     return true;
