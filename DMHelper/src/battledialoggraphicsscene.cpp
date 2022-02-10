@@ -452,10 +452,9 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
 bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-    QGraphicsItem* abstractShape = item;
     _isRotation = false;
 
-    qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
+    qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item;
 
     if(item)
     {
@@ -481,7 +480,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
             else if(mouseEvent->button() == Qt::LeftButton)
             {
                 qDebug() << "[Battle Dialog Scene] left mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
-                emit effectChanged(abstractShape);
+                emit effectChanged(item);
             }
             else
             {
