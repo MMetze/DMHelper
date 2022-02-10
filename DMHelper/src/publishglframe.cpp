@@ -94,21 +94,11 @@ void PublishGLFrame::setBackgroundColor(const QColor& color)
 
 void PublishGLFrame::mousePressEvent(QMouseEvent *event)
 {
-//    QPointF position((event->localPos().x() - x()) / width(),
-//                     (event->localPos().y() - y()) / height());
-
     emit publishMouseDown(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
 }
 
 void PublishGLFrame::mouseMoveEvent(QMouseEvent * event)
 {
-//    QPointF position;
-//    position.setX((event->localPos().x() - x()) / width());
-//    position.setY((event->localPos().y() - y()) / height());
-
-//    if(_arrowVisible)
-//        emit positionChanged(_arrowPosition);
-
     emit publishMouseMove(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
 
     QWidget::mouseMoveEvent(event);
@@ -116,9 +106,6 @@ void PublishGLFrame::mouseMoveEvent(QMouseEvent * event)
 
 void PublishGLFrame::mouseReleaseEvent(QMouseEvent * event)
 {
-//    QPointF position((event->localPos().x() - x()) / width(),
-//                     (event->localPos().y() - y()) / height());
-
     emit publishMouseRelease(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
 }
 
