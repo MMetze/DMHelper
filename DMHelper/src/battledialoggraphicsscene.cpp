@@ -100,6 +100,7 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
     qDebug() << "[Battle Dialog Scene] Creating scene contents: " << rect;
     _grid = new Grid(*this, rect);
     _grid->rebuildGrid(*_model);
+    setDistanceScale(_model->getGridScale());
 
     QList<BattleDialogModelEffect*> effects = _model->getEffectList();
     for(BattleDialogModelEffect* effect : qAsConst(effects))
@@ -452,10 +453,9 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
 bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
-    QGraphicsItem* abstractShape = item;
     _isRotation = false;
 
-    qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item << " shape " << abstractShape;
+    qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item;
 
     if(item)
     {
@@ -481,7 +481,7 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
             else if(mouseEvent->button() == Qt::LeftButton)
             {
                 qDebug() << "[Battle Dialog Scene] left mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
-                emit effectChanged(abstractShape);
+                emit effectChanged(item);
             }
             else
             {
@@ -635,6 +635,9 @@ void BattleDialogGraphicsScene::setDistanceHeight(qreal heightDelta)
 
 void BattleDialogGraphicsScene::setDistanceScale(int scale)
 {
+    if(scale <= 0)
+        return;
+
     _distanceMouseHandler.setDistanceScale(scale);
     _freeDistanceMouseHandler.setDistanceScale(scale);
 }

@@ -355,6 +355,7 @@ private:
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
+    QGraphicsItem* _publishEffectItem;
 
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _background;

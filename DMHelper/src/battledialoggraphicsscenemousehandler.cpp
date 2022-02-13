@@ -204,7 +204,7 @@ bool BattleDialogGraphicsSceneMouseHandlerFreeDistance::mouseMoveEvent(QGraphics
         _distancePath = _scene.addPath(currentPath, QPen(QBrush(_color), _lineWidth, static_cast<Qt::PenStyle>(_lineType)));
         emit distanceItemChanged(_distancePath, _distanceText);
     }
-    qreal lineDistance = _distancePath->path().length() * _scale / 1000.0;
+    qreal lineDistance = 5.0 * _distancePath->path().length() / _scale;//_distancePath->path().length() * _scale / 1000.0;
     QString distanceText;
     if(_heightDelta == 0.0)
     {

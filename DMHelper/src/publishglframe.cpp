@@ -2,6 +2,7 @@
 #include "publishglrenderer.h"
 #include "publishglimagerenderer.h"
 #include <QOpenGLFunctions>
+#include <QMouseEvent>
 #include <QTimer>
 #include <QDebug>
 
@@ -91,6 +92,23 @@ void PublishGLFrame::setBackgroundColor(const QColor& color)
         _renderer->setBackgroundColor(color);
 }
 
+void PublishGLFrame::mousePressEvent(QMouseEvent *event)
+{
+    emit publishMouseDown(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
+}
+
+void PublishGLFrame::mouseMoveEvent(QMouseEvent * event)
+{
+    emit publishMouseMove(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
+
+    QWidget::mouseMoveEvent(event);
+}
+
+void PublishGLFrame::mouseReleaseEvent(QMouseEvent * event)
+{
+    emit publishMouseRelease(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
+}
+
 void PublishGLFrame::initializeGL()
 {
     if(!QOpenGLContext::currentContext())
@@ -125,6 +143,7 @@ void PublishGLFrame::resizeGL(int w, int h)
     if(_renderer)
         _renderer->resizeGL(w, h);
 
+    emit labelResized(_targetSize);
     emit frameResized(_targetSize);
 }
 
