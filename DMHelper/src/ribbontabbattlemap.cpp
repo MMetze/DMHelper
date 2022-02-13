@@ -11,7 +11,9 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     RibbonFrame(parent),
     ui(new Ui::RibbonTabBattleMap),
     _menu(new QMenu(this)),
-    _timerId(0)
+    _timerId(0),
+    _lastGridScale(1),
+    _lastGridAngle(1)
 {
     ui->setupUi(this);
 
@@ -95,11 +97,13 @@ void RibbonTabBattleMap::setGridType(int gridType)
 void RibbonTabBattleMap::setGridScale(int scale)
 {
     ui->spinGridScale->setValue(scale);
+    _lastGridScale = scale;
 }
 
 void RibbonTabBattleMap::setGridAngle(int angle)
 {
     ui->spinGridAngle->setValue(angle);
+    _lastGridAngle = angle;
 }
 
 void RibbonTabBattleMap::setGridXOffset(int offset)
@@ -194,8 +198,19 @@ void RibbonTabBattleMap::timerEvent(QTimerEvent *event)
         return;
 
     killTimer(_timerId);
-    emit gridScaleChanged(ui->spinGridScale->value());
-    emit gridAngleChanged(ui->spinGridAngle->value());
+
+    if(ui->spinGridScale->value() != _lastGridScale)
+    {
+        _lastGridScale = ui->spinGridScale->value();
+        emit gridScaleChanged(_lastGridScale);
+    }
+
+    if(ui->spinGridAngle->value() != _lastGridAngle)
+    {
+        _lastGridAngle = ui->spinGridAngle->value();
+        emit gridAngleChanged(_lastGridAngle);
+    }
+
     _timerId = 0;
 }
 

@@ -634,6 +634,7 @@ void BattleFrame::setGridScale(int gridScale)
 
     if(_scene)
     {
+        _scene->setDistanceScale(gridScale);
         _model->setGridScale(gridScale);
 
         qreal scaleFactor;
