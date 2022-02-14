@@ -364,17 +364,18 @@ void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
 
     if((_map) && (_previousMap != _map))
     {
-        qDebug() << "[Battle Dialog Model] new map set in model: " << _map->getFileName() << " and setting all contents to the middle.";
+        _map->initialize();
+        QRect mapRect(QPoint(), _map->getBackgroundImage().size());
+        qDebug() << "[Battle Dialog Model] new map set in model: " << _map->getFileName() << " and setting all contents outside the map to the middle.";
         for(BattleDialogModelCombatant* combatant : _combatants)
         {
-            if(combatant)
-            {
+            if((combatant) && (!mapRect.contains(combatant->getPosition().toPoint())))
                 combatant->setPosition(QPointF(_mapRect.x() + _mapRect.width() / 2, _mapRect.y() + _mapRect.height() / 2));
-            }
         }
     }
 
     emit mapChanged(_map);
+    emit dirty();
 }
 
 void BattleDialogModel::setMapRect(const QRect& mapRect)

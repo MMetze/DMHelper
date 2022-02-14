@@ -3554,6 +3554,7 @@ void BattleFrame::replaceBattleMap()
 
     _background = new UnselectedPixmap();
     _fow = new UnselectedPixmap();
+    _model->setBackgroundImage(QImage());
 
     updateMap();
 

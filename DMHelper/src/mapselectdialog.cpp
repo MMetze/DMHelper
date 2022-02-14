@@ -57,7 +57,10 @@ void MapSelectDialog::handleItemChanged(QTreeWidgetItem *current, QTreeWidgetIte
     {
         Map* map = current->data(0, Qt::UserRole).value<Map*>();
         if(map)
+        {
+            map->initialize();
             img = map->getPreviewImage();
+        }
     }
 
     ui->lblPreview->setPixmap(QPixmap::fromImage(img).scaled(ui->lblPreview->size(),Qt::KeepAspectRatio));

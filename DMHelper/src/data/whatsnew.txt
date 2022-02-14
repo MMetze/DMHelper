@@ -31,3 +31,6 @@
 </div>
 </body>
 </html>
+
+What's New? This What's New Dialog!
+Moving characters, effects and objects from the Player's Window
