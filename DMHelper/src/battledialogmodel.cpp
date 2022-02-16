@@ -103,6 +103,7 @@ void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* c
 
     _combatants.insert(index, combatant);
     emit combatantListChanged();
+    emit dirty();
 }
 
 BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
@@ -116,6 +117,7 @@ BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
     }
 
     emit combatantListChanged();
+    emit dirty();
 
     return removedCombatant;
 }
@@ -132,6 +134,7 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
         connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
 
     emit combatantListChanged();
+    emit dirty();
 }
 
 void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
@@ -195,6 +198,7 @@ void BattleDialogModel::insertEffect(int index, BattleDialogModelEffect* effect)
 
     _effects.insert(index, effect);
     emit effectListChanged();
+    emit dirty();
 }
 
 BattleDialogModelEffect* BattleDialogModel::removeEffect(int index)
@@ -204,6 +208,7 @@ BattleDialogModelEffect* BattleDialogModel::removeEffect(int index)
         result = _effects.takeAt(index);
 
     emit effectListChanged();
+    emit dirty();
     return result;
 }
 
@@ -221,6 +226,7 @@ bool BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
         qDebug() << "[Battle Dialog Model] ERROR: Unable to remove effect " << effect;
 
     emit effectListChanged();
+    emit dirty();
     return result;
 }
 
@@ -231,6 +237,7 @@ void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
 
     _effects.append(effect);
     emit effectListChanged();
+    emit dirty();
 }
 
 Map* BattleDialogModel::getMap() const
@@ -384,6 +391,7 @@ void BattleDialogModel::setMapRect(const QRect& mapRect)
     {
         _mapRect = mapRect;
         emit mapRectChanged(_mapRect);
+        emit dirty();
     }
 }
 
@@ -393,6 +401,7 @@ void BattleDialogModel::setCameraRect(const QRectF& rect)
     {
         _cameraRect = rect;
         emit cameraRectChanged(_cameraRect);
+        emit dirty();
     }
 }
 
@@ -402,6 +411,7 @@ void BattleDialogModel::setBackgroundColor(const QColor& color)
     {
         _background = color;
         emit backgroundColorChanged(color);
+        emit dirty();
     }
 }
 
@@ -411,6 +421,7 @@ void BattleDialogModel::setGridOn(bool gridOn)
     {
         _gridOn = gridOn;
         emit gridOnChanged(_gridOn);
+        emit dirty();
     }
 }
 
@@ -420,6 +431,7 @@ void BattleDialogModel::setGridType(int gridType)
     {
         _gridType = gridType;
         emit gridTypeChanged(_gridType);
+        emit dirty();
     }
 }
 
@@ -429,6 +441,7 @@ void BattleDialogModel::setGridScale(int gridScale)
     {
         _gridScale = gridScale;
         emit gridScaleChanged(_gridScale);
+        emit dirty();
     }
 }
 
@@ -438,6 +451,7 @@ void BattleDialogModel::setGridAngle(int gridAngle)
     {
         _gridAngle = gridAngle;
         emit gridAngleChanged(_gridAngle);
+        emit dirty();
     }
 }
 
@@ -447,6 +461,7 @@ void BattleDialogModel::setGridOffsetX(int gridOffsetX)
     {
         _gridOffsetX = gridOffsetX;
         emit gridOffsetXChanged(_gridOffsetX);
+        emit dirty();
     }
 }
 
@@ -456,6 +471,7 @@ void BattleDialogModel::setGridOffsetY(int gridOffsetY)
     {
         _gridOffsetY = gridOffsetY;
         emit gridOffsetYChanged(_gridOffsetY);
+        emit dirty();
     }
 }
 
@@ -465,6 +481,7 @@ void BattleDialogModel::setShowCompass(bool showCompass)
     {
         _showCompass = showCompass;
         emit showCompassChanged(_showCompass);
+        emit dirty();
     }
 }
 
@@ -474,6 +491,7 @@ void BattleDialogModel::setShowAlive(bool showAlive)
     {
         _showAlive = showAlive;
         emit showAliveChanged(_showAlive);
+        emit dirty();
     }
 }
 
@@ -483,6 +501,7 @@ void BattleDialogModel::setShowDead(bool showDead)
     {
         _showDead = showDead;
         emit showDeadChanged(_showDead);
+        emit dirty();
     }
 }
 
@@ -492,6 +511,7 @@ void BattleDialogModel::setShowEffects(bool showEffects)
     {
         _showEffects = showEffects;
         emit showEffectsChanged(_showEffects);
+        emit dirty();
     }
 }
 
@@ -501,6 +521,7 @@ void BattleDialogModel::setShowMovement(bool showMovement)
     {
         _showMovement = showMovement;
         emit showMovementChanged(_showMovement);
+        emit dirty();
     }
 }
 
@@ -510,6 +531,7 @@ void BattleDialogModel::setShowLairActions(bool showLairActions)
     {
         _showLairActions = showLairActions;
         emit showLairActionsChanged(_showLairActions);
+        emit dirty();
     }
 }
 
@@ -519,6 +541,7 @@ void BattleDialogModel::setActiveCombatant(BattleDialogModelCombatant* activeCom
     {
         _activeCombatant = activeCombatant;
         emit activeCombatantChanged(_activeCombatant);
+        emit dirty();
     }
 }
 
@@ -528,12 +551,14 @@ void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
     {
         _backgroundImage = backgroundImage;
         emit backgroundImageChanged(_backgroundImage);
+        emit dirty();
     }
 }
 
 void BattleDialogModel::sortCombatants()
 {
     std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
+    emit dirty();
 }
 
 void BattleDialogModel::mapDestroyed(QObject *obj)
