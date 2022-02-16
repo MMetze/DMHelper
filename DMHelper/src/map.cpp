@@ -16,6 +16,7 @@
 #include <QPainter>
 #include <QImageReader>
 #include <QMessageBox>
+#include <QFileDialog>
 #include <QDebug>
 
 Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
@@ -133,8 +134,8 @@ void Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Found"),
-                              QString("The map file could not be found: ") + newFileName);
-        qDebug() << "[Map] New map file not found: " << newFileName;
+                              QString("The new map file could not be found: ") + newFileName);
+        qDebug() << "[Map] setFileName - New map file not found: " << newFileName << " for entry " << getName();
         return;
     }
 
@@ -143,8 +144,8 @@ void Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Valid"),
-                              QString("The map isn't a file: ") + newFileName);
-        qDebug() << "[Map] Map file not a file: " << newFileName;
+                              QString("The new map isn't a file: ") + newFileName);
+        qDebug() << "[Map] setFileName - Map file not a file: " << newFileName << " for entry " << getName();
         return;
     }
 
@@ -839,21 +840,41 @@ void Map::initialize()
     {
         if(!QFile::exists(_filename))
         {
-            QMessageBox::critical(nullptr,
-                                  QString("DMHelper Map File Not Found"),
-                                  QString("The map file could not be found: ") + _filename);
-            qDebug() << "[Map] Map file not found: " << _filename;
-            return;
+            qDebug() << "[Map] Map file not found: " << _filename << " for entry " << getName();
+            QMessageBox::StandardButton result = QMessageBox::critical(nullptr,
+                                                                       QString("DMHelper Map File Not Found"),
+                                                                       QString("For the map entry """) + getName() + QString(""", the map file could not be found: ") + _filename + QString("\n Do you want to select a new map file?"),
+                                                                       QMessageBox::Yes | QMessageBox::No,
+                                                                       QMessageBox::Yes);
+
+            QString newFileName;
+            if(result == QMessageBox::Yes)
+                newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
+
+            if(newFileName.isEmpty())
+                return;
+
+            setFileName(newFileName);
         }
 
         QFileInfo fileInfo(_filename);
         if(!fileInfo.isFile())
         {
-            QMessageBox::critical(nullptr,
-                                  QString("DMHelper Map File Not Valid"),
-                                  QString("The map isn't a file: ") + _filename);
-            qDebug() << "[Map] Map file not a file: " << _filename;
-            return;
+            qDebug() << "[Map] Map file not a file: " << _filename << " for entry " << getName();
+            QMessageBox::StandardButton result = QMessageBox::critical(nullptr,
+                                                                       QString("DMHelper Map File Not Valid"),
+                                                                       QString("For the map entry """) + getName() + QString(""", the map isn't a file: ") + _filename + QString("\n Do you want to select a new map file?"),
+                                                                       QMessageBox::Yes | QMessageBox::No,
+                                                                       QMessageBox::Yes);
+
+            QString newFileName;
+            if(result == QMessageBox::Yes)
+                newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
+
+            if(newFileName.isEmpty())
+                return;
+
+            setFileName(newFileName);
         }
 
         QImageReader reader(_filename);
@@ -863,6 +884,9 @@ void Map::initialize()
         {
             qDebug() << "[Map] Error reading map file " << _filename;
             qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
+            QMessageBox::critical(nullptr,
+                                  QString("DMHelper Map File Not Readable"),
+                                  QString("For the map entry """) + getName() + QString(""", there was an error encountered reading the map file: ") + _filename);
             return;
         }
 
