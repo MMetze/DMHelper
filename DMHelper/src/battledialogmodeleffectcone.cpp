@@ -11,13 +11,6 @@ BattleDialogModelEffectCone::BattleDialogModelEffectCone(int size, const QPointF
 {
 }
 
-/*
-BattleDialogModelEffectCone::BattleDialogModelEffectCone(const BattleDialogModelEffectCone& other) :
-    BattleDialogModelEffect(other)
-{
-}
-*/
-
 BattleDialogModelEffectCone::~BattleDialogModelEffectCone()
 {
 }

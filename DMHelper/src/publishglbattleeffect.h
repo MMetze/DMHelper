@@ -18,10 +18,15 @@ public:
     virtual void cleanup() override;
     virtual void paintGL() override;
 
+    BattleDialogModelEffect* getEffect() const;
+    qreal getEffectAlpha() const;
+
 public slots:
     void effectMoved();
+    void effectChanged();
 
 protected:
+    virtual void prepareObjects();
     virtual void drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth);
     virtual void drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth);
 
@@ -32,6 +37,7 @@ protected:
     unsigned int _EBO;
     QSizeF _textureSize;
     qreal _imageScaleFactor;
+    bool _recreateEffect;
 };
 
 #endif // PUBLISHGLBATTLEEFFECT_H

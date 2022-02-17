@@ -73,7 +73,11 @@ bool BattleDialogModelEffect::getEffectActive() const
 
 void BattleDialogModelEffect::setEffectActive(bool active)
 {
-    _active = active;
+    if(_active != active)
+    {
+        _active = active;
+        emit effectChanged(this);
+    }
 }
 
 bool BattleDialogModelEffect::getEffectVisible() const
@@ -83,7 +87,11 @@ bool BattleDialogModelEffect::getEffectVisible() const
 
 void BattleDialogModelEffect::setEffectVisible(bool visible)
 {
-    _visible = visible;
+    if(_visible != visible)
+    {
+        _visible = visible;
+        emit effectChanged(this);
+    }
 }
 
 int BattleDialogModelEffect::getSize() const
@@ -93,7 +101,11 @@ int BattleDialogModelEffect::getSize() const
 
 void BattleDialogModelEffect::setSize(int size)
 {
-    _size = size;
+    if(_size != size)
+    {
+        _size = size;
+        emit effectChanged(this);
+    }
 }
 
 int BattleDialogModelEffect::getWidth() const
@@ -152,7 +164,11 @@ QColor BattleDialogModelEffect::getColor() const
 
 void BattleDialogModelEffect::setColor(const QColor& color)
 {
-    _color = color;
+    if(_color != color)
+    {
+        _color = color;
+        emit effectChanged(this);
+    }
 }
 
 int BattleDialogModelEffect::getImageRotation() const
@@ -182,7 +198,11 @@ QString BattleDialogModelEffect::getTip() const
 
 void BattleDialogModelEffect::setTip(const QString& tip)
 {
-    _tip = tip;
+    if(_tip != tip)
+    {
+        _tip = tip;
+        emit effectChanged(this);
+    }
 }
 
 void BattleDialogModelEffect::setEffectItemData(QGraphicsItem* item) const

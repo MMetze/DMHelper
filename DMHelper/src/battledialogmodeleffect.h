@@ -92,6 +92,7 @@ public:
 
 signals:
     void effectMoved(BattleDialogModelEffect* effect);
+    void effectChanged(BattleDialogModelEffect* effect);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

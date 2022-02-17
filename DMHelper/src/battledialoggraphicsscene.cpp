@@ -834,7 +834,7 @@ void BattleDialogGraphicsScene::castSpell()
         BattleDialogModelEffectObject* tokenEffect =  dynamic_cast<BattleDialogModelEffectObject*>(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
                                                                                                                 tokenHeight,
                                                                                                                 tokenWidth,
-                                                                                                                spell->getEffectColor(),
+                                                                                                                Qt::black, //spell->getEffectColor(),
                                                                                                                 spell->getEffectTokenPath()));
 
         if(!tokenEffect)
