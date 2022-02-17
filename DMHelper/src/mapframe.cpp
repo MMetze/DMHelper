@@ -753,9 +753,11 @@ void MapFrame::initializeFoW()
     if(!_mapSource)
         return;
 
-    _mapSource->initialize();
-    if(_mapSource->isInitialized())
+    if(_mapSource->initialize())
     {
+        if(!_mapSource->isInitialized())
+            return;
+
         qDebug() << "[MapFrame] Initializing map frame image";
         setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
 
@@ -777,9 +779,7 @@ void MapFrame::initializeFoW()
     else
     {
         if(_mapSource->isValid())
-        {
             extractDMScreenshot();
-        }
     }
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));

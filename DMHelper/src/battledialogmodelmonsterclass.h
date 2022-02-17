@@ -43,6 +43,7 @@ public:
     virtual int getMonsterType() const override;
     virtual MonsterClass* getMonsterClass() const override;
 
+    void setSizeFactor(qreal sizeFactor);
     void setMonsterName(const QString& monsterName);
 
 protected:
@@ -52,6 +53,7 @@ protected:
     MonsterClass* _monsterClass;
     QString _monsterName;
     int _monsterHP;
+    qreal _monsterSize;
 };
 
 

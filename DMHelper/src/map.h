@@ -115,7 +115,7 @@ signals:
     void showMarkersChanged(bool showMarkers);
 
 public slots:
-    void initialize();
+    bool initialize(); // returns false only if reasonably believe this is a video file
     void uninitialize();
 
     void undoPaint();

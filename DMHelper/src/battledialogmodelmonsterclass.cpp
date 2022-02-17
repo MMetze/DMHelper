@@ -7,7 +7,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(const QString& name
     BattleDialogModelMonsterBase(name, parent),
     _monsterClass(nullptr),
     _monsterName(),
-    _monsterHP(-1)
+    _monsterHP(-1),
+    _monsterSize(0.0)
 {
 }
 
@@ -15,7 +16,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monst
     BattleDialogModelMonsterBase(),
     _monsterClass(monsterClass),
     _monsterName(),
-    _monsterHP(-1)
+    _monsterHP(-1),
+    _monsterSize(0.0)
 {
     if(_monsterClass)
         _monsterHP = _monsterClass->getHitDice().roll();
@@ -25,7 +27,8 @@ BattleDialogModelMonsterClass::BattleDialogModelMonsterClass(MonsterClass* monst
     BattleDialogModelMonsterBase(nullptr, initiative, position),
     _monsterClass(monsterClass),
     _monsterName(monsterName),
-    _monsterHP(-1)
+    _monsterHP(-1),
+    _monsterSize(0.0)
 {
     if(_monsterClass)
         _monsterHP = _monsterClass->getHitDice().roll();
@@ -38,7 +41,8 @@ BattleDialogModelMonsterClass::~BattleDialogModelMonsterClass()
 void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool isImport)
 {
     _monsterName = element.attribute("monsterName");
-    _monsterHP = element.attribute("monsterHP",QString::number(0)).toInt();
+    _monsterHP = element.attribute("monsterHP", QString::number(0)).toInt();
+    _monsterSize = element.attribute("monsterSize", QString::number(0.0)).toDouble();
 
     BattleDialogModelMonsterBase::inputXML(element, isImport);
 }
@@ -52,150 +56,122 @@ BattleDialogModelCombatant* BattleDialogModelMonsterClass::clone() const
     newMonster->_monsterClass = _monsterClass;
     newMonster->_monsterName = _monsterName;
     newMonster->_monsterHP = _monsterHP;
+    newMonster->_monsterSize = _monsterSize;
 
     return newMonster;
 }
 
 qreal BattleDialogModelMonsterClass::getSizeFactor() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        //return convertSizeToFactor(_monsterClass->getMonsterSize());
-        return _monsterClass->getMonsterSizeFactor();
-    }
-    else
+    if(_monsterSize > 0.0)
+        return _monsterSize;
+
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getSizeFactor!";
-        return 1;
+        return 1.0;
     }
+
+    return _monsterClass->getMonsterSizeFactor();
 }
 
 int BattleDialogModelMonsterClass::getSizeCategory() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        //return convertSizeToFactor(_monsterClass->getMonsterSize());
-        return _monsterClass->getMonsterSizeCategory();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getSizeCategory!";
         return DMHelper::CombatantSize_Medium;
     }
+
+    return _monsterClass->getMonsterSizeCategory();
 }
 
 int BattleDialogModelMonsterClass::getStrength() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getStrength();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getStrength!";
         return 0;
     }
+
+    return _monsterClass->getStrength();
 }
 
 int BattleDialogModelMonsterClass::getDexterity() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getDexterity();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getDexterity!";
         return 0;
     }
+
+    return _monsterClass->getDexterity();
 }
 
 int BattleDialogModelMonsterClass::getConstitution() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getConstitution();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getConstitution!";
         return 0;
     }
+
+    return _monsterClass->getConstitution();
 }
 
 int BattleDialogModelMonsterClass::getIntelligence() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getIntelligence();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getIntelligence!";
         return 0;
     }
+
+    return _monsterClass->getIntelligence();
 }
 
 int BattleDialogModelMonsterClass::getWisdom() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getWisdom();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getWisdom!";
         return 0;
     }
+
+    return _monsterClass->getWisdom();
 }
 
 int BattleDialogModelMonsterClass::getCharisma() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getCharisma();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getCharisma!";
         return 0;
     }
+
+    return _monsterClass->getCharisma();
 }
 
 int BattleDialogModelMonsterClass::getSpeed() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getSpeedValue();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getSpeed!";
         return 30;
     }
+
+    return _monsterClass->getSpeedValue();
 }
 
 int BattleDialogModelMonsterClass::getArmorClass() const
 {
-    // TODO: should this just be impossible?
-    if(_monsterClass)
-    {
-        return _monsterClass->getArmorClass();
-    }
-    else
+    if(!_monsterClass)
     {
         qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getArmorClass!";
         return 10;
     }
+
+    return _monsterClass->getArmorClass();
 }
 
 int BattleDialogModelMonsterClass::getHitPoints() const
@@ -215,22 +191,15 @@ void BattleDialogModelMonsterClass::setHitPoints(int hitPoints)
 QString BattleDialogModelMonsterClass::getName() const
 {
     if(!_monsterName.isEmpty())
-    {
         return _monsterName;
-    }
-    else
+
+    if(!_monsterClass)
     {
-        // TODO: should this just be impossible?
-        if(_monsterClass)
-        {
-            return _monsterClass->getName();
-        }
-        else
-        {
-            qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getName!";
-            return QString();
-        }
+        qDebug() << "[BattleDialogModelMonsterClass] WARNING: No valid monster class in getName!";
+        return QString();
     }
+
+    return _monsterClass->getName();
 }
 
 QPixmap BattleDialogModelMonsterClass::getIconPixmap(DMHelper::PixmapSize iconSize) const
@@ -260,6 +229,15 @@ MonsterClass* BattleDialogModelMonsterClass::getMonsterClass() const
     return _monsterClass;
 }
 
+void BattleDialogModelMonsterClass::setSizeFactor(qreal sizeFactor)
+{
+    if((_monsterClass) && (_monsterClass->getMonsterSizeFactor() == sizeFactor))
+        return;
+
+    _monsterSize = sizeFactor;
+    emit dataChanged(this);
+}
+
 void BattleDialogModelMonsterClass::setMonsterName(const QString &monsterName)
 {
     if(_monsterName != monsterName)
@@ -274,6 +252,8 @@ void BattleDialogModelMonsterClass::internalOutputXML(QDomDocument &doc, QDomEle
     element.setAttribute("monsterClass", _monsterClass->getName());
     element.setAttribute("monsterName", _monsterName);
     element.setAttribute("monsterHP", _monsterHP);
+    if(_monsterSize > 0.0)
+        element.setAttribute("monsterSize", _monsterSize);
 
     BattleDialogModelMonsterBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

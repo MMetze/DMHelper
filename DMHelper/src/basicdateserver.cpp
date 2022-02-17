@@ -20,9 +20,6 @@ BasicDateServer::BasicDateServer(const QString& calendarFile, QObject *parent) :
 
 BasicDateServer* BasicDateServer::Instance()
 {
-//    if(!_instance)
-//        Initialize();
-
     return _instance;
 }
 

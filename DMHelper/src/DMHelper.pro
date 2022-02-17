@@ -163,7 +163,6 @@ SOURCES += main.cpp\
     bestiarydialog.cpp \
     monsterclass.cpp \
     bestiary.cpp \
-    addmonstersdialog.cpp \
     campaigntree.cpp \
     campaigntreemodel.cpp \
     textpublishdialog.cpp \
@@ -178,7 +177,6 @@ SOURCES += main.cpp\
     scaledpixmap.cpp \
     characterframe.cpp \
     mapframe.cpp \
-    addbattlewavedialog.cpp \
     optionsdialog.cpp \
     optionscontainer.cpp \
     selectzoom.cpp \
@@ -396,7 +394,6 @@ HEADERS  += mainwindow.h \
     bestiarydialog.h \
     monsterclass.h \
     bestiary.h \
-    addmonstersdialog.h \
     campaigntree.h \
     campaigntreemodel.h \
     textpublishdialog.h \
@@ -411,7 +408,6 @@ HEADERS  += mainwindow.h \
     scaledpixmap.h \
     characterframe.h \
     mapframe.h \
-    addbattlewavedialog.h \
     optionsdialog.h \
     optionscontainer.h \
     selectzoom.h \
@@ -495,7 +491,6 @@ FORMS    += mainwindow.ui \
     dicerolldialog.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
-    addmonstersdialog.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
@@ -531,7 +526,6 @@ FORMS    += mainwindow.ui \
     mapmarkerdialog.ui \
     characterframe.ui \
     mapframe.ui \
-    addbattlewavedialog.ui \
     optionsdialog.ui \
     selectzoom.ui \
     itemselectdialog.ui \

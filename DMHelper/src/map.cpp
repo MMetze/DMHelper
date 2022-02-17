@@ -831,10 +831,10 @@ QImage Map::getPreviewImage()
     return previewImage;
 }
 
-void Map::initialize()
+bool Map::initialize()
 {
     if(_initialized)
-        return;
+        return true;
 
     if(!_filename.isEmpty())
     {
@@ -851,10 +851,10 @@ void Map::initialize()
             if(result == QMessageBox::Yes)
                 newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
 
-            if(newFileName.isEmpty())
-                return;
-
             setFileName(newFileName);
+
+            if(newFileName.isEmpty())
+                return true;
         }
 
         QFileInfo fileInfo(_filename);
@@ -871,24 +871,17 @@ void Map::initialize()
             if(result == QMessageBox::Yes)
                 newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
 
-            if(newFileName.isEmpty())
-                return;
-
             setFileName(newFileName);
+
+            if(newFileName.isEmpty())
+                return true;
         }
 
         QImageReader reader(_filename);
         _imgBackground = reader.read();
 
         if(_imgBackground.isNull())
-        {
-            qDebug() << "[Map] Error reading map file " << _filename;
-            qDebug() << "[Map] Error " << reader.error() << ": " << reader.errorString();
-            QMessageBox::critical(nullptr,
-                                  QString("DMHelper Map File Not Readable"),
-                                  QString("For the map entry """) + getName() + QString(""", there was an error encountered reading the map file: ") + _filename);
-            return;
-        }
+            return false; // Could not read the file as an image - it could be a video
 
         if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
             _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
@@ -900,7 +893,8 @@ void Map::initialize()
     }
     else
     {
-        return;
+        qDebug() << "[Map] ERROR: Unable to initialize map with neither a file nor a color & size";
+        return true;
     }
 
     _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
@@ -913,6 +907,7 @@ void Map::initialize()
     }
 
     _initialized = true;
+    return true;
 }
 
 void Map::uninitialize()

@@ -970,22 +970,25 @@ void BattleFrame::addMonsters()
         QString baseName = combatantDlg.getName();
         int monsterCount = combatantDlg.getCount();
         int localHP = combatantDlg.getLocalHitPoints().isEmpty() ? 0 : combatantDlg.getLocalHitPoints().toInt();
+        int localInitiative = combatantDlg.getInitiative().toInt();
+
+        qreal sizeFactor = 0.0;
+        bool conversionResult = false;
+        sizeFactor = combatantDlg.getSizeFactor().toDouble(&conversionResult);
+        if(!conversionResult)
+            sizeFactor = 0.0;
 
         qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
 
         for(int i = 0; i < monsterCount; ++i)
         {
             BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
-            if(monsterCount == 1)
-            {
-                monster->setMonsterName(baseName);
-            }
-            else
-            {
-                monster->setMonsterName(baseName + QString("#") + QString::number(i+1));
-            }
+            monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
             monster->setHitPoints(localHP == 0 ? monsterClass->getHitDice().roll() : localHP);
-            monster->setInitiative(Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()));
+            monster->setInitiative(combatantDlg.isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
+            monster->setKnown(combatantDlg.isKnown());
+            monster->setShown(combatantDlg.isShown());
+            monster->setSizeFactor(sizeFactor);
             monster->setPosition(combatantPos);
             addCombatant(monster);
         }
@@ -1539,9 +1542,11 @@ void BattleFrame::updateMap()
 
     qDebug() << "[Battle Frame] Updating map " << _model->getMap()->getFileName() << " rect=" << _model->getMapRect().left() << "," << _model->getMapRect().top() << ", " << _model->getMapRect().width() << "x" << _model->getMapRect().height();
     _isVideo = false;
-    _model->getMap()->initialize();
-    if(_model->getMap()->isInitialized())
+    if(_model->getMap()->initialize())
     {
+        if(!_model->getMap()->isInitialized())
+            return;
+
         qDebug() << "[Battle Frame] Initializing battle map image";
         if(_model->getBackgroundImage().isNull())
             _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
