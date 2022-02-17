@@ -14,11 +14,9 @@ public:
     BattleDialogModelCombatant(const QString& name = QString(), QObject *parent = nullptr);
     explicit BattleDialogModelCombatant(Combatant* combatant);
     explicit BattleDialogModelCombatant(Combatant* combatant, int initiative, const QPointF& position);
-    //BattleDialogModelCombatant(const BattleDialogModelCombatant& other);
     virtual ~BattleDialogModelCombatant() override;
 
     // From CampaignObjectBase
-    //virtual void outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     // Local
@@ -68,9 +66,11 @@ public slots:
     virtual void setConditions(int conditions) = 0;
     virtual void applyConditions(int conditions) = 0;
     virtual void removeConditions(int conditions) = 0;
+    virtual void clearConditions() = 0;
 
 signals:
     void initiativeChanged(BattleDialogModelCombatant* combatant);
+    void conditionsChanged(BattleDialogModelCombatant* combatant);
     void combatantMoved(BattleDialogModelCombatant* combatant);
     void combatantSelected(BattleDialogModelCombatant* combatant);
     void moveUpdated();

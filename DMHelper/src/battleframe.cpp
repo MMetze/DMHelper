@@ -2724,8 +2724,6 @@ void BattleFrame::removeRollover()
     if(!_hoverFrame)
         return;
 
-    qDebug() << "[Battle Frame] Removing rollover";
-
     _hoverFrame->cancelClose();
     _hoverFrame->deleteLater();
     _hoverFrame = nullptr;

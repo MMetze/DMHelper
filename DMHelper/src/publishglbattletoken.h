@@ -34,8 +34,11 @@ public slots:
     void combatantMoved();
     void combatantSelected();
     void setPC(bool isPC);
+    void recreateToken();
 
 protected:
+    void createTokenObjects();
+
     BattleDialogModelCombatant* _combatant;
     unsigned int _VAO;
     unsigned int _VBO;
@@ -45,6 +48,8 @@ protected:
     bool _isPC;
 
     QList<PublishGLEffect*> _effectList;
+
+    bool _recreateToken;
 };
 
 #endif // PUBLISHGLBATTLETOKEN_H

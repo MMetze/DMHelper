@@ -44,6 +44,7 @@ public slots:
     virtual void setConditions(int conditions) override;
     virtual void applyConditions(int conditions) override;
     virtual void removeConditions(int conditions) override;
+    virtual void clearConditions() override;
     virtual void setLegendaryCount(int legendaryCount);
 
 protected:
