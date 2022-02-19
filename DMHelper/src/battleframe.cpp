@@ -539,7 +539,7 @@ void BattleFrame::setTargetLabelSize(const QSize& targetSize)
 
 void BattleFrame::publishWindowMouseDown(const QPointF& position)
 {
-    if(!_battle)
+    if((!_battle) || (!_isPublishing))
         return;
 
     QPointF newPosition;
@@ -585,6 +585,12 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
 {
     if((!_battle) || (!_publishMouseDown))
         return;
+
+    if(!_isPublishing)
+    {
+        publishWindowMouseRelease(position);
+        return;
+    }
 
     QPointF newPosition;
     if(!convertPublishToScene(position, newPosition))
