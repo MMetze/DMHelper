@@ -37,7 +37,6 @@ private:
     QPointF _mouseLastPos;
     int _mouseDownSection;
 
-    QGraphicsRectItem* _shadowItem;
     QGraphicsRectItem* _drawItem;
     QGraphicsSimpleTextItem* _drawText;
     QGraphicsRectItem* _drawTextRect;
