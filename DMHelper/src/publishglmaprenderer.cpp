@@ -96,6 +96,11 @@ bool PublishGLMapRenderer::deleteOnDeactivation()
     return true;
 }
 
+QRect PublishGLMapRenderer::getScissorRect()
+{
+    return _scissorRect;
+}
+
 void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
 {
     _color = color;

@@ -25,6 +25,8 @@ public:
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
+    virtual QRect getScissorRect() override;
+
     virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls

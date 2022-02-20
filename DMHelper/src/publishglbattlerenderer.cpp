@@ -101,6 +101,11 @@ bool PublishGLBattleRenderer::deleteOnDeactivation()
     return true;
 }
 
+QRect PublishGLBattleRenderer::getScissorRect()
+{
+    return _scissorRect;
+}
+
 void PublishGLBattleRenderer::setBackgroundColor(const QColor& color)
 {
     if(_model)

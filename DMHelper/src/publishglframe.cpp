@@ -92,21 +92,40 @@ void PublishGLFrame::setBackgroundColor(const QColor& color)
         _renderer->setBackgroundColor(color);
 }
 
-void PublishGLFrame::mousePressEvent(QMouseEvent *event)
+void PublishGLFrame::mousePressEvent(QMouseEvent* event)
 {
-    emit publishMouseDown(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
+    if((_renderer) && (event))
+    {
+        QPointF result;
+        if(convertMousePosition(*event, _renderer->getScissorRect(), result))
+            emit publishMouseDown(result);
+    }
+
+    QWidget::mousePressEvent(event);
 }
 
-void PublishGLFrame::mouseMoveEvent(QMouseEvent * event)
+void PublishGLFrame::mouseMoveEvent(QMouseEvent* event)
 {
-    emit publishMouseMove(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
+    if((_renderer) && (event))
+    {
+        QPointF result;
+        if(convertMousePosition(*event, _renderer->getScissorRect(), result))
+            emit publishMouseMove(result);
+    }
 
     QWidget::mouseMoveEvent(event);
 }
 
-void PublishGLFrame::mouseReleaseEvent(QMouseEvent * event)
+void PublishGLFrame::mouseReleaseEvent(QMouseEvent* event)
 {
-    emit publishMouseRelease(QPointF(event->localPos().x() / width(), event->localPos().y() / height()));
+    if((_renderer) && (event))
+    {
+        QPointF result;
+        if(convertMousePosition(*event, _renderer->getScissorRect(), result))
+            emit publishMouseRelease(result);
+    }
+
+    QWidget::mouseReleaseEvent(event);
 }
 
 void PublishGLFrame::initializeGL()
@@ -151,6 +170,20 @@ void PublishGLFrame::paintGL()
 {
     if(_renderer)
         _renderer->paintGL();
+}
+
+bool PublishGLFrame::convertMousePosition(QMouseEvent& event, const QRect& scissorRect, QPointF& result)
+{
+    if((scissorRect.width() <= 0) || (scissorRect.height() <= 0))
+        return false;
+
+    if((event.pos().x() < scissorRect.left()) || (event.pos().x() > scissorRect.right()) ||
+       (event.pos().y() < scissorRect.top()) || (event.pos().y() > scissorRect.bottom()))
+        return false;
+
+    result.setX(static_cast<qreal>(event.pos().x() - scissorRect.left()) / static_cast<qreal>(scissorRect.width()));
+    result.setY(static_cast<qreal>(event.pos().y() - scissorRect.top()) / static_cast<qreal>(scissorRect.height()));
+    return true;
 }
 
 void PublishGLFrame::initializeRenderer()

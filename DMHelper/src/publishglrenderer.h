@@ -26,6 +26,8 @@ public:
     virtual void cleanup();
     virtual bool deleteOnDeactivation();
 
+    virtual QRect getScissorRect();
+
     virtual void updateRender();
 
     // Standard OpenGL calls
