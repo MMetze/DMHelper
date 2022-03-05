@@ -31,10 +31,13 @@ QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent
     QDomElement newElement = createOutputXML(doc);
     internalOutputXML(doc, newElement, targetDirectory, isExport);
 
-    QList<CampaignObjectBase*> childList = getChildObjects();
-    for(int i = 0; i < childList.count(); ++i)
+    if(!isExport)
     {
-        childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+        QList<CampaignObjectBase*> childList = getChildObjects();
+        for(int i = 0; i < childList.count(); ++i)
+        {
+            childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+        }
     }
 
     parent.appendChild(newElement);

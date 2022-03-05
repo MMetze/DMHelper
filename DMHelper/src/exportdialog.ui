@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>655</width>
-    <height>421</height>
+    <width>750</width>
+    <height>480</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,7 +19,7 @@
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,5,0">
    <item>
     <widget class="QGroupBox" name="grpEntries">
      <property name="title">
@@ -60,57 +60,152 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_3">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
-      <widget class="QGroupBox" name="grpMonsters">
-       <property name="title">
-        <string>Monsters</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_2">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item row="0" column="0">
-         <widget class="QListWidget" name="listMonsters"/>
-        </item>
-       </layout>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Export Name:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="edtExportName"/>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QGroupBox" name="grpSpells">
+      <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Spells</string>
+        <string>Export Content</string>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item row="0" column="0">
-         <widget class="QListWidget" name="listSpells"/>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QFormLayout" name="formLayout">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="chkCampaignFile">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Use this to export assets to send to your Players that use DMClient</string>
+            </property>
+            <property name="text">
+             <string>Campaign File</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QCheckBox" name="chkReferences">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Use this for sharing your notes, maps, encounters and assets for importing into another DMHelper campaign</string>
+            </property>
+            <property name="text">
+             <string>Referenced Files</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="chkSoundboard">
+            <property name="text">
+             <string>Soundboard</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpMonsters">
+          <property name="title">
+           <string>Monsters</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_2">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="1" column="0">
+            <widget class="QListWidget" name="listMonsters"/>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="btnAddMonsters">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Add Monsters...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="grpSpells">
+          <property name="title">
+           <string>Spells</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_3">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item row="2" column="0">
+            <widget class="QListWidget" name="listSpells"/>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="btnAddSpells">
+             <property name="enabled">
+              <bool>true</bool>
+             </property>
+             <property name="text">
+              <string>Add Spells...</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -118,84 +213,24 @@
     </layout>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <widget class="QGroupBox" name="groupBox">
-       <property name="title">
-        <string>Export Target</string>
+      <widget class="QPushButton" name="btnExport">
+       <property name="text">
+        <string>&amp;Export...</string>
        </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QRadioButton" name="btnClient">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Use this to export assets to send to your Players that use DMClient</string>
-          </property>
-          <property name="text">
-           <string>DMClient Export</string>
-          </property>
-          <property name="checked">
-           <bool>true</bool>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">grpExportType</string>
-          </attribute>
-         </widget>
-        </item>
-        <item>
-         <widget class="QRadioButton" name="btnFull">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="toolTip">
-           <string>Use this for sharing your notes, maps, encounters and assets for importing into another DMHelper campaign</string>
-          </property>
-          <property name="text">
-           <string>DMHelper Export</string>
-          </property>
-          <attribute name="buttonGroup">
-           <string notr="true">grpExportType</string>
-          </attribute>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnAddMonsters">
-       <property name="enabled">
+       <property name="default">
         <bool>true</bool>
        </property>
-       <property name="text">
-        <string>Add Monsters...</string>
-       </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="btnAddSpells">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
+      <widget class="QPushButton" name="btnCancel">
        <property name="text">
-        <string>Add Spells...</string>
+        <string>Cancel</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="chkSoundboard">
-       <property name="enabled">
+       <property name="autoDefault">
         <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Include Soundboard</string>
        </property>
       </widget>
      </item>
@@ -212,26 +247,6 @@
        </property>
       </spacer>
      </item>
-     <item>
-      <widget class="QPushButton" name="btnExport">
-       <property name="text">
-        <string>&amp;Export...</string>
-       </property>
-       <property name="default">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btnClose">
-       <property name="text">
-        <string>&amp;Close</string>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>
@@ -239,20 +254,30 @@
  <tabstops>
   <tabstop>treeCampaign</tabstop>
   <tabstop>grpMonsters</tabstop>
-  <tabstop>listMonsters</tabstop>
   <tabstop>grpSpells</tabstop>
   <tabstop>listSpells</tabstop>
-  <tabstop>btnClient</tabstop>
-  <tabstop>btnFull</tabstop>
-  <tabstop>btnAddMonsters</tabstop>
-  <tabstop>btnAddSpells</tabstop>
-  <tabstop>chkSoundboard</tabstop>
+  <tabstop>chkCampaignFile</tabstop>
+  <tabstop>chkReferences</tabstop>
   <tabstop>btnExport</tabstop>
-  <tabstop>btnClose</tabstop>
+  <tabstop>btnCancel</tabstop>
  </tabstops>
  <resources/>
- <connections/>
- <buttongroups>
-  <buttongroup name="grpExportType"/>
- </buttongroups>
+ <connections>
+  <connection>
+   <sender>btnCancel</sender>
+   <signal>clicked()</signal>
+   <receiver>ExportDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>637</x>
+     <y>50</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>347</x>
+     <y>239</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

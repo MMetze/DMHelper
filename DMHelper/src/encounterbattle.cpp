@@ -329,30 +329,31 @@ QDomElement EncounterBattle::createOutputXML(QDomDocument &doc)
 
 void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute( "audiotrack", _audioTrackId.toString() );
+    element.setAttribute("audiotrack", _audioTrackId.toString());
 
-    QDomElement wavesElement = doc.createElement( "waves" );
+    QDomElement wavesElement = doc.createElement("waves");
     element.appendChild(wavesElement);
-    for( int wave = 0; wave < _combatantWaves.count(); ++wave )
+    for(int wave = 0; wave < _combatantWaves.count(); ++wave)
     {
-        QDomElement waveElement = doc.createElement( QString("wave") );
+        QDomElement waveElement = doc.createElement(QString("wave"));
         wavesElement.appendChild(waveElement);
 
-        QDomElement combatantsElement = doc.createElement( "combatants" );
+        QDomElement combatantsElement = doc.createElement("combatants");
         waveElement.appendChild(combatantsElement);
-        for( int i = 0; i < _combatantWaves.at(wave).count(); ++i )
+        for(int i = 0; i < _combatantWaves.at(wave).count(); ++i)
         {
             CombatantGroup combatantPair = _combatantWaves.at(wave).at(i);
-            QDomElement combatantPairElement = doc.createElement( QString("combatantPair") );
+            QDomElement combatantPairElement = doc.createElement(QString("combatantPair"));
 
-            combatantPairElement.setAttribute( "count", combatantPair.first );
+            combatantPairElement.setAttribute("count", combatantPair.first);
             combatantPair.second->outputXML(doc, combatantPairElement, targetDirectory, isExport);
 
             combatantsElement.appendChild(combatantPairElement);
         }
     }
 
-    if(_battleModel && !isExport)
+    //if(_battleModel && !isExport)
+    if(_battleModel)
         _battleModel->outputXML(doc, element, targetDirectory, isExport);
 
     EncounterText::internalOutputXML(doc, element, targetDirectory, isExport);

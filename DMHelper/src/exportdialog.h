@@ -11,6 +11,7 @@ class ExportWorker;
 class DMHWaitingDialog;
 class MonsterClass;
 class Spell;
+class Character;
 class QThread;
 
 namespace Ui {
@@ -22,17 +23,16 @@ class ExportDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit ExportDialog(const Campaign& campaign, const QUuid& selectedItem, QWidget *parent = nullptr);
+    explicit ExportDialog(Campaign& campaign, const QUuid& selectedItem, QWidget *parent = nullptr);
     virtual ~ExportDialog() override;
 
-    QTreeWidgetItem* createChildObject(const CampaignObjectBase* childObject, const QUuid& selectedItem);
+    QTreeWidgetItem* createChildObject(CampaignObjectBase* childObject);
 
 signals:
     void startWork();
 
 private slots:
     void handleCampaignItemChanged(QTreeWidgetItem *item, int column);
-    void handleExportTypeChanged(int id);
     void addMonsters();
     void addSpells();
     void runExport();
@@ -40,26 +40,29 @@ private slots:
     void threadFinished();
 
 private:
-    enum ExportType
-    {
-        ExportType_DMClient = 0,
-        ExportType_DMHelper,
-    };
-
     void setRecursiveChecked(QTreeWidgetItem *item, bool checked);
-    void setObjectIcon(const CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem);
+    void setRecursiveParentChecked(QTreeWidgetItem *item);
+    void setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem);
+    void checkCharacters();
     void refreshMonsters();
     void recursiveRefreshMonsters(QTreeWidgetItem* widgetItem);
-    void checkObjectContent(const CampaignObjectBase* object);
+    void checkObjectContent(CampaignObjectBase* object);
+
+    void checkItem(CampaignObjectBase* object);
+    void checkItem(QUuid id);
+    QTreeWidgetItem* findItem(QTreeWidgetItem *item, QUuid id);
+
+    void addCharacter(Character* character);
     void addMonster(MonsterClass* monsterClass);
     void addSpell(Spell* spell);
 
     Ui::ExportDialog *ui;
 
-    const Campaign& _campaign;
+    Campaign& _campaign;
     const QUuid& _selectedItem;
     QStringList _monsters;
     QStringList _spells;
+    QList<Character*> _characters;
 
     QThread* _workerThread;
     ExportWorker* _worker;

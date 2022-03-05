@@ -74,7 +74,7 @@ void AudioTrack::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
     if(urlString.isEmpty())
         urlString = getUrl().toString();
 
-    QDomElement urlElement = doc.createElement( "url" );
+    QDomElement urlElement = doc.createElement("url");
     QDomCDATASection urlData = doc.createCDATASection(urlString);
     urlElement.appendChild(urlData);
     element.appendChild(urlElement);

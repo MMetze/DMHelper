@@ -1,4 +1,5 @@
 #include "exportworker.h"
+#include "campaign.h"
 #include "character.h"
 #include "audiotrack.h"
 #include "encounterbattle.h"
@@ -11,58 +12,45 @@
 #include "bestiary.h"
 #include "spellbook.h"
 #include "spell.h"
+#include "dmversion.h"
 #include <QTreeWidgetItem>
 #include <QCryptographicHash>
 #include <QDir>
 #include <QDebug>
 
 
-ExportWorker::ExportWorker(QTreeWidgetItem* widgetItem, const QDir& directory, bool fullExport, QObject *parent) :
+ExportWorker::ExportWorker(Campaign& campaign, QTreeWidgetItem* widgetItem, QDir& directory, const QString& exportName, QObject *parent) :
     QObject(parent),
+    _campaign(campaign),
     _widgetItem(widgetItem),
+    _exportName(exportName),
+    _campaignExport(false),
+    _referencesExport(false),
+    _soundboardExport(false),
+    _monstersExport(false),
+    _spellsExport(false),
     _spellList(),
     _monsterList(),
     _exportedSpells(),
     _exportedMonsters(),
-    _directory(directory),
-    _fullExport(fullExport)
+    _exportedFiles(),
+    _directory(directory)
 {
 }
 
 void ExportWorker::doWork()
 {
-    bool result = false;
-
-    if(!_directory.exists())
-    {
-        qDebug() << "[ExportWorker] Not exporting anything because " << _directory << " does not exist";
-    }
-    else
-    {
-        qDebug() << "[ExportWorker] Starting to export " << _widgetItem << " to " << _directory << "...";
-
-        _exportedMonsters.clear();
-        _exportedSpells.clear();
-
-        if(_widgetItem)
-            result = recursiveExport(_widgetItem, _directory);
-
-        qDebug() << "[ExportWorker] Campaign tree export complete, exporting monsters...";
-        for(QString monsterName : _monsterList)
-        {
-            exportMonster(monsterName, _directory);
-        }
-
-        qDebug() << "[ExportWorker] Monster export complete, exporting spells...";
-        for(QString spellName : _spellList)
-        {
-            exportSpell(spellName, _directory);
-        }
-
-        qDebug() << "[ExportWorker] Export complete";
-    }
-
+    bool result = tryToDoWork();
     emit workComplete(result);
+}
+
+void ExportWorker::setExportFlags(bool campaign, bool references, bool soundboard, bool monsters, bool spells)
+{
+    _campaignExport = campaign;
+    _referencesExport = references;
+    _soundboardExport = soundboard;
+    _monstersExport = monsters;
+    _spellsExport = spells;
 }
 
 void ExportWorker::setSpellExports(QStringList spellList)
@@ -75,51 +63,59 @@ void ExportWorker::setMonsterExports(QStringList monsterList)
     _monsterList = monsterList;
 }
 
-bool ExportWorker::recursiveExport(QTreeWidgetItem* widgetItem, const QDir& directory)
+void ExportWorker::recursiveExport(QTreeWidgetItem* widgetItem, QDomDocument &doc, QDomElement &parentElement, QDir& directory)
 {
     if(!widgetItem)
-        return false;
+        return;
 
     qDebug() << "[ExportWorker] Exporting object " << widgetItem;
 
+    QDomElement objectElement;
+
     if(widgetItem->checkState(0) == Qt::Checked)
-        if(!exportObjectAssets(widgetItem->data(0, Qt::UserRole).value<const CampaignObjectBase*>(), directory))
-            return false;
+    {
+        CampaignObjectBase* object = widgetItem->data(0, Qt::UserRole).value<CampaignObjectBase*>();
+        if(object)
+        {
+            if(_campaignExport)
+                objectElement = object->outputXML(doc, parentElement, directory, true);
+
+            if(_referencesExport)
+                exportObjectAssets(object, directory, doc, objectElement);
+        }
+    }
 
     for(int i = 0; i < widgetItem->childCount(); ++i)
     {
-        if(!recursiveExport(widgetItem->child(i), directory))
-            return false;
+        recursiveExport(widgetItem->child(i), doc, (objectElement.isNull() ? parentElement : objectElement), directory);
     }
-
-    return true;
 }
 
-bool ExportWorker::exportObjectAssets(const CampaignObjectBase* object, const QDir& directory)
+void ExportWorker::exportObjectAssets(const CampaignObjectBase* object, QDir& directory, QDomDocument &doc, QDomElement &element)
 {
     if(!object)
-        return false;
+        return;
 
     switch(object->getObjectType())
     {
         case DMHelper::CampaignType_Map:
         {
             const Map* map = dynamic_cast<const Map*>(object);
-            qDebug() << "[ExportDialog] Exporting map: " << map->getName() << ", file: " << map->getFileName();
-            exportFile(map->getFileName(), directory, true);
+            qDebug() << "[ExportWorker] Exporting map: " << map->getName() << ", file: " << map->getFileName();
+            exportFile(map->getFileName(), directory, element, QString("filename"), false);
             break;
         }
         case DMHelper::CampaignType_Combatant:
         {
             const Combatant* combatant = dynamic_cast<const Combatant*>(object);
-            qDebug() << "[ExportDialog] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIcon();
-            exportFile(combatant->getIcon(), directory, true);
+            qDebug() << "[ExportWorker] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIcon();
+            exportFile(combatant->getIcon(), directory, element, QString("icon"), false);
             break;
         }
         case DMHelper::CampaignType_Text:
         {
             const EncounterText* textEncounter = dynamic_cast<const EncounterText*>(object);
-            exportFile(textEncounter->getImageFile(), directory, true);
+            exportFile(textEncounter->getImageFile(), directory, element, QString("imageFile"), false);
             break;
         }
         case DMHelper::CampaignType_AudioTrack:
@@ -127,22 +123,29 @@ bool ExportWorker::exportObjectAssets(const CampaignObjectBase* object, const QD
             const AudioTrack* track = dynamic_cast<const AudioTrack*>(object);
             if(track->getAudioType() == DMHelper::AudioType_File)
             {
-                qDebug() << "[ExportDialog] Exporting track: " << track->getName() << ", file: " << track->getUrl();
-                exportFile(track->getUrl().toString(), directory, true);
+                qDebug() << "[ExportWorker] Exporting track: " << track->getName() << ", file: " << track->getUrl();
+                QString exportedFile = exportFile(track->getUrl().toString(), directory, element, QString(), false);
+                if((!exportedFile.isEmpty()) && (!element.isNull()))
+                {
+                    element.removeChild(element.firstChildElement("url"));
+                    QDomElement urlElement = doc.createElement("url");
+                    QDomCDATASection urlData = doc.createCDATASection(exportedFile);
+                    urlElement.appendChild(urlData);
+                    element.appendChild(urlElement);
+
+                }
             }
             break;
         }
         case DMHelper::CampaignType_Battle:
-            exportBattle(dynamic_cast<const EncounterBattle*>(object), directory);
+            exportBattle(dynamic_cast<const EncounterBattle*>(object), directory, element);
             break;
         default:
             break;
     }
-
-    return true;
 }
 
-void ExportWorker::exportBattle(const EncounterBattle* battle, const QDir& directory)
+void ExportWorker::exportBattle(const EncounterBattle* battle, QDir& directory, QDomElement &battleElement)
 {
     if(!battle)
         return;
@@ -151,9 +154,10 @@ void ExportWorker::exportBattle(const EncounterBattle* battle, const QDir& direc
     if(!battleModel)
         return;
 
-    qDebug() << "[ExportDialog] Exporting battle: " << battle->getName();
+    qDebug() << "[ExportWorker] Exporting battle: " << battle->getName();
 
     int i;
+    /*
     for(i = 0; i < battleModel->getCombatantCount(); ++i)
     {
         BattleDialogModelCombatant* combatant = battleModel->getCombatant(i);
@@ -163,16 +167,19 @@ void ExportWorker::exportBattle(const EncounterBattle* battle, const QDir& direc
             exportMonster(monsterCombatant->getMonsterClass(), directory);
         }
     }
+    */
 
+    QDomElement effectsElement = battleElement.firstChildElement("effects");
     for(i = 0; i < battleModel->getEffectCount(); ++i)
     {
         BattleDialogModelEffect* effect = battleModel->getEffect(i);
         if(effect)
         {
+            QDomElement effectElement = findEffectElement(effectsElement, effect);
             if(!effect->getImageFile().isEmpty())
             {
-                qDebug() << "[ExportDialog] Exporting effect: " << effect->getName() << ", image: " << effect->getImageFile();
-                exportFile(effect->getImageFile(), directory, true);
+                qDebug() << "[ExportWorker] Exporting effect: " << effect->getName() << ", image: " << effect->getImageFile();
+                exportFile(effect->getImageFile(), directory, effectElement, QString("filename"), false);
             }
 
             QList<CampaignObjectBase*> childObjects = effect->getChildObjects();
@@ -181,41 +188,51 @@ void ExportWorker::exportBattle(const EncounterBattle* battle, const QDir& direc
                 BattleDialogModelEffect* childEffect = dynamic_cast<BattleDialogModelEffect*>(childObject);
                 if((childEffect) && (!childEffect->getImageFile().isEmpty()))
                 {
-                    qDebug() << "[ExportDialog] Exporting child effect: " << childEffect->getName() << ", image: " << childEffect->getImageFile();
-                    exportFile(childEffect->getImageFile(), directory, true);
+                    qDebug() << "[ExportWorker] Exporting child effect: " << childEffect->getName() << ", image: " << childEffect->getImageFile();
+                    QDomElement childElement = findEffectElement(effectElement, childEffect);
+                    exportFile(childEffect->getImageFile(), directory, childElement, QString("filename"), false);
                 }
             }
         }
     }
-
-    exportObjectAssets(battleModel->getMap(), directory);
 }
 
-void ExportWorker::exportMonster(const QString& monsterName, const QDir& directory)
+void ExportWorker::exportMonster(QDomDocument &doc, QDomElement& bestiaryElement, const QString& monsterName, QDir& directory)
 {
     if((!Bestiary::Instance()) || (monsterName.isEmpty()))
         return;
 
-    exportMonster(Bestiary::Instance()->getMonsterClass(monsterName), directory);
+    exportMonster(doc, bestiaryElement, Bestiary::Instance()->getMonsterClass(monsterName), directory);
 }
 
-void ExportWorker::exportMonster(MonsterClass* monster, const QDir& directory)
+void ExportWorker::exportMonster(QDomDocument &doc, QDomElement& bestiaryElement, MonsterClass* monster, QDir& directory)
 {
     if((!Bestiary::Instance()) || (!monster) || (_exportedMonsters.contains(monster)))
         return;
+
+    QDomElement monsterElement;
+
+    if(!bestiaryElement.isNull())
+    {
+        monsterElement = doc.createElement("element");
+        monster->outputXML(doc, monsterElement, directory, true);
+    }
 
     QString monsterIconFile = Bestiary::Instance()->findMonsterImage(monster->getName(), monster->getIcon());
     if(!monsterIconFile.isEmpty())
     {
         QString fullMonsterFile = Bestiary::Instance()->getDirectory().filePath(monsterIconFile);
-        qDebug() << "[ExportDialog] Exporting monster: " << monster->getName() << ", icon: " << fullMonsterFile;
-        exportFile(fullMonsterFile, directory, true);
+        qDebug() << "[ExportWorker] Exporting monster: " << monster->getName() << ", icon: " << fullMonsterFile;
+        exportFile(fullMonsterFile, directory, monsterElement, QString("icon"), false);
     }
+
+    if((!bestiaryElement.isNull()) && (!monsterElement.isNull()))
+        bestiaryElement.appendChild(monsterElement);
 
     _exportedMonsters.append(monster);
 }
 
-void ExportWorker::exportSpell(const QString& spellName, const QDir& directory)
+void ExportWorker::exportSpell(QDomDocument &doc, QDomElement& spellbookElement, const QString& spellName, QDir& directory)
 {
     if((!Spellbook::Instance()) || (spellName.isEmpty()))
         return;
@@ -224,48 +241,208 @@ void ExportWorker::exportSpell(const QString& spellName, const QDir& directory)
     if((!spell) || (_exportedSpells.contains(spell)))
         return;
 
+    QDomElement spellElement;
+    QDomElement effectElement;
+
+    if(!spellbookElement.isNull())
+    {
+        QDomElement spellElement = doc.createElement("spell");
+        spell->outputXML(doc, spellElement, directory, true);
+        effectElement = spellElement.firstChildElement("effect");
+    }
+
     QString spellToken = spell->getEffectTokenPath();
     if(!spellToken.isEmpty())
     {
-        qDebug() << "[ExportDialog] Exporting spell: " << spell->getName() << ", token: " << spellToken;
-        exportFile(spellToken, directory, true);
+        qDebug() << "[ExportWorker] Exporting spell: " << spell->getName() << ", token: " << spellToken;
+        exportFile(spellToken, directory, effectElement, QString("token"), false);
     }
+
+    if((!spellbookElement.isNull()) && (!spellElement.isNull()))
+        spellbookElement.appendChild(spellElement);
 
     _exportedSpells.append(spell);
 }
 
-void ExportWorker::exportFile(const QString& filename, const QDir& directory, bool hashfileNaming)
+QString ExportWorker::exportFile(const QString& filename, const QDir& directory, QDomElement& element, const QString& fileAttribute, bool hashfileNaming)
 {
     if((filename.isEmpty()) || !QFile::exists(filename))
-        return;
+        return QString();
 
     QString exportFileName;
     if(hashfileNaming)
+        exportFileName = exportHashedFile(filename, directory);
+    else
+        exportFileName = exportDirectFile(filename, directory);
+
+    if(exportFileName.isEmpty())
+        return QString();
+
+    qDebug() << "[ExportWorker]     Copying file: " << filename << " to " << exportFileName;
+    if((QFile::exists(exportFileName)) || (QFile::copy(filename, exportFileName)))
     {
-        QFile file(filename);
-        if(!file.open(QIODevice::ReadOnly))
-            return;
-
-        QByteArray readData = file.readAll();
-        if(readData.size() <= 0)
-            return;
-
-        file.close();
-
-        QString path = directory.filePath(QString());
-        QByteArray byteHash = QCryptographicHash::hash(readData, QCryptographicHash::Md5);
-        QString hashFileName = byteHash.toHex(0);
-        exportFileName = directory.filePath(hashFileName);
+        if((!element.isNull()) && (!fileAttribute.isEmpty()))
+        {
+            QFileInfo fileInfo(exportFileName);
+            element.setAttribute(fileAttribute, fileInfo.fileName());
+        }
+        return exportFileName;
     }
     else
     {
-
+        qDebug() << "[ExportWorker]     ==> Copy FAILED!";
+        return QString();
     }
+}
 
-    if((!exportFileName.isEmpty()) && (!QFile::exists(exportFileName)))
+bool ExportWorker::tryToDoWork()
+{
+    if(!_directory.exists())
     {
-        qDebug() << "[ExportDialog]     Copying file: " << filename << " to " << exportFileName;
-        if(!QFile::copy(filename, exportFileName))
-            qDebug() << "[ExportDialog]     ==> Copy FAILED!";
+        qDebug() << "[ExportWorker] Not exporting anything because " << _directory << " does not exist";
+        return false;
     }
+
+    QString exportFileName(_exportName + QString(".xml"));
+    qDebug() << "[ExportWorker] Starting to export to " << _directory << " for " << _exportName << "...";
+
+    _exportedMonsters.clear();
+    _exportedSpells.clear();
+
+    QDomDocument doc("DMHelperXML");
+    QDomElement root;
+    QDomElement campaignElement;
+
+    if(_campaignExport)
+    {
+        root = doc.createElement("root");
+        doc.appendChild(root);
+
+        campaignElement = _campaign.outputXML(doc, root, _directory, true);
+        campaignElement.setAttribute("name", _exportName);
+
+        if(!_soundboardExport)
+        {
+            QDomElement soundboardElement = campaignElement.firstChildElement("soundboard");
+            campaignElement.removeChild(soundboardElement);
+        }
+    }
+
+    if(_widgetItem)
+        recursiveExport(_widgetItem, doc, campaignElement, _directory);
+
+    if(_campaignExport)
+        root.appendChild(campaignElement);
+
+    if((_monstersExport) && (_monsterList.count() > 0))
+    {
+        QDomElement bestiaryElement = doc.createElement("bestiary");
+        bestiaryElement.setAttribute("majorversion", DMHelper::BESTIARY_MAJOR_VERSION);
+        bestiaryElement.setAttribute("minorversion", DMHelper::BESTIARY_MINOR_VERSION);
+
+        for(QString monsterName : _monsterList)
+        {
+            exportMonster(doc, bestiaryElement, monsterName, _directory);
+        }
+
+        root.appendChild(bestiaryElement);
+    }
+
+    if((_spellsExport) && (_spellList.count() > 0))
+    {
+        QDomElement spellbookElement = doc.createElement("spellbook");
+        spellbookElement.setAttribute("majorversion", DMHelper::SPELLBOOK_MAJOR_VERSION);
+        spellbookElement.setAttribute("minorversion", DMHelper::SPELLBOOK_MINOR_VERSION);
+
+        for(QString spellName : _spellList)
+        {
+            exportSpell(doc, spellbookElement, spellName, _directory);
+        }
+
+        root.appendChild(spellbookElement);
+    }
+
+    if(_campaignExport)
+    {
+        qDebug() << "[ExportWorker] Exporting campaign tree...";
+        QFile file(_directory.absoluteFilePath(exportFileName));
+        if(!file.open(QIODevice::WriteOnly))
+        {
+            qDebug() << "[ExportWorker] Unable to open campaign file for writing: " << _directory.absoluteFilePath(exportFileName);
+            qDebug() << "       Error " << file.error() << ": " << file.errorString();
+            return false;
+        }
+
+        QTextStream ts(&file);
+        ts.setCodec("UTF-8");
+        ts << doc.toString();
+
+        file.close();
+        qDebug() << "[ExportWorker] Campaign tree export complete.";
+    }
+
+    qDebug() << "[ExportWorker] Export completed successfully!";
+
+    return true;
+}
+
+QString ExportWorker::exportHashedFile(const QString& filename, const QDir& directory)
+{
+    QFile file(filename);
+    if(!file.open(QIODevice::ReadOnly))
+        return QString();
+
+    QByteArray readData = file.readAll();
+    if(readData.size() <= 0)
+        return QString();
+
+    file.close();
+
+    QString path = directory.filePath(QString());
+    QByteArray byteHash = QCryptographicHash::hash(readData, QCryptographicHash::Md5);
+    QString hashFileName = byteHash.toHex(0);
+    QString exportFileName = directory.filePath(hashFileName);
+
+    return exportFileName;
+}
+
+QString ExportWorker::exportDirectFile(const QString& filename, const QDir& directory)
+{
+    if(_exportedFiles.contains(filename))
+        return _exportedFiles.value(filename);
+
+    QFileInfo fileInfo(filename);
+    QString exportFileName(fileInfo.fileName());
+    int n = 0;
+    while((directory.exists(exportFileName)) && (n < 1000))
+    {
+        ++n;
+        exportFileName = fileInfo.baseName() + QString("_") + QString::number(n) + QString(".") + fileInfo.completeSuffix();
+    }
+
+    if(n < 1000)
+    {
+        exportFileName = directory.filePath(exportFileName);
+        _exportedFiles.insert(filename, exportFileName);
+        return exportFileName;
+    }
+
+    return QString();
+}
+
+QDomElement ExportWorker::findEffectElement(QDomElement& parentElement, BattleDialogModelEffect* effect)
+{
+    if(effect)
+    {
+        QDomElement childElement = parentElement.firstChildElement("battleeffect");
+        while(!childElement.isNull())
+        {
+            if(QUuid(childElement.attribute(QString("_baseID"))) == effect->getID())
+                return childElement;
+
+            childElement = childElement.nextSiblingElement("battleffect");
+        }
+    }
+
+    return QDomElement();
 }

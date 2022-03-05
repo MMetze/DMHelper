@@ -34,6 +34,12 @@ BattleDialogModelEffect::~BattleDialogModelEffect()
 {
 }
 
+QDomElement BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
+{
+    Q_UNUSED(isExport);
+    return CampaignObjectBase::outputXML(doc, parent, targetDirectory, false);
+}
+
 void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport)
 {
     _active = static_cast<bool>(element.attribute("active",QString::number(1)).toInt());
