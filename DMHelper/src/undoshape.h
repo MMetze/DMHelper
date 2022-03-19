@@ -7,7 +7,7 @@
 class UndoShape : public UndoBase
 {
 public:
-    UndoShape(Map& map, const MapEditShape& mapEditShape);
+    UndoShape(Map* map, const MapEditShape& mapEditShape);
 
     virtual void undo() override;
     virtual void redo() override;

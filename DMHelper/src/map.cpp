@@ -83,19 +83,19 @@ void Map::inputXML(const QDomElement &element, bool isImport)
             switch( actionElement.attribute(QString("type")).toInt())
             {
                 case DMHelper::ActionType_Fill:
-                    newAction = new UndoFill(*this, MapEditFill(QColor()));
+                    newAction = new UndoFill(this, MapEditFill(QColor()));
                     break;
                 case DMHelper::ActionType_Path:
-                    newAction = new UndoPath(*this, MapDrawPath());
+                    newAction = new UndoPath(this, MapDrawPath());
                     break;
                 case DMHelper::ActionType_Point:
-                    newAction = new UndoPoint(*this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
+                    newAction = new UndoPoint(this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
                     break;
                 case DMHelper::ActionType_Rect:
-                    newAction = new UndoShape(*this, MapEditShape(QRect(), true, true));
+                    newAction = new UndoShape(this, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
-                    newAction = new UndoMarker(*this, MapMarker());
+                    newAction = new UndoMarker(this, MapMarker());
                     break;
                 case DMHelper::ActionType_Base:
                 default:
@@ -171,7 +171,9 @@ void Map::copyValues(const CampaignObjectBase* other)
         const UndoBase* action = dynamic_cast<const UndoBase*>(otherMap->getUndoStack()->command(i));
         if((action) && (!action->isRemoved()))
         {
-            _undoStack->push(action->clone());
+            UndoBase* newAction = action->clone();
+            newAction->setMap(this);
+            _undoStack->push(newAction);
         }
     }
 

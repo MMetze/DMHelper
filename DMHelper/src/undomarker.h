@@ -9,7 +9,7 @@ class MapMarkerGraphicsItem;
 class UndoMarker : public UndoBase
 {
 public:
-    UndoMarker(Map& map, const MapMarker& marker);
+    UndoMarker(Map* map, const MapMarker& marker);
     virtual ~UndoMarker() override;
 
     virtual void undo() override;

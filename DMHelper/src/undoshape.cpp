@@ -2,7 +2,7 @@
 #include "map.h"
 #include "mapframe.h"
 
-UndoShape::UndoShape(Map& map, const MapEditShape& mapEditShape) :
+UndoShape::UndoShape(Map* map, const MapEditShape& mapEditShape) :
     UndoBase(map, QString("Paint")),
     _mapEditShape(mapEditShape)
 {
@@ -10,30 +10,23 @@ UndoShape::UndoShape(Map& map, const MapEditShape& mapEditShape) :
 
 void UndoShape::undo()
 {
-    _map.undoPaint();
-    //if(_map.getRegisteredWindow())
-    //    _map.getRegisteredWindow()->undoPaint();
+    if(_map)
+       _map->undoPaint();
 }
 
 void UndoShape::redo()
 {
-    /*
-    if(_map.getRegisteredWindow())
+    if(_map)
     {
-    */
-    apply(true, nullptr);
-    _map.updateFoW();
-    /*
-    if(_map.getRegisteredWindow())
-    {
-        _map.getRegisteredWindow()->updateFoW();
+        apply(true, nullptr);
+        _map->updateFoW();
     }
-    */
 }
 
 void UndoShape::apply(bool preview, QPaintDevice* target) const
 {
-    _map.paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview);
+    if(_map)
+        _map->paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview);
 }
 
 QDomElement UndoShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const

@@ -4,7 +4,7 @@
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoPath::UndoPath(Map& map, const MapDrawPath& mapDrawPath) :
+UndoPath::UndoPath(Map* map, const MapDrawPath& mapDrawPath) :
     UndoBase(map, QString("Paint Path")),
     _mapDrawPath(mapDrawPath)
 {
@@ -12,32 +12,27 @@ UndoPath::UndoPath(Map& map, const MapDrawPath& mapDrawPath) :
 
 void UndoPath::undo()
 {
-//    if(_map.getRegisteredWindow())
-//        _map.getRegisteredWindow()->undoPaint();
-    _map.undoPaint();
+    if(_map)
+        _map->undoPaint();
 }
 
 void UndoPath::redo()
 {
-    /*
-    if( _map.getRegisteredWindow() )
+    if(_map)
     {
-    */
-    apply(true, nullptr);
-    _map.updateFoW();
-    /*
-    if(_map.getRegisteredWindow())
-    {
-        _map.getRegisteredWindow()->updateFoW();
+        apply(true, nullptr);
+        _map->updateFoW();
     }
-    */
 }
 
 void UndoPath::apply(bool preview, QPaintDevice* target) const
 {
-    for(int i = 0; i < _mapDrawPath.points().count(); ++i)
+    if(_map)
     {
-        _map.paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath, target, preview);
+        for(int i = 0; i < _mapDrawPath.points().count(); ++i)
+        {
+            _map->paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath, target, preview);
+        }
     }
 }
 
@@ -100,15 +95,12 @@ UndoBase* UndoPath::clone() const
 
 void UndoPath::addPoint(QPoint aPoint)
 {
-    _mapDrawPath.addPoint(aPoint);
-    _map.paintFoWPoint(aPoint, _mapDrawPath, nullptr, true);
-    _map.updateFoW();
-    /*
-    if(_map.getRegisteredWindow())
+    if(_map)
     {
-        _map.getRegisteredWindow()->updateFoW();
+        _mapDrawPath.addPoint(aPoint);
+        _map->paintFoWPoint(aPoint, _mapDrawPath, nullptr, true);
+        _map->updateFoW();
     }
-    */
 }
 
 const MapDrawPath& UndoPath::mapDrawPath() const

@@ -242,7 +242,7 @@ void MapFrame::resetFoW()
     if(!_mapSource)
         return;
 
-    UndoFill* undoFill = new UndoFill(*_mapSource, MapEditFill(QColor(0,0,0,255)));
+    UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,255)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
     emit fowChanged();
@@ -253,7 +253,7 @@ void MapFrame::clearFoW()
     if(!_mapSource)
         return;
 
-    UndoFill* undoFill = new UndoFill(*_mapSource, MapEditFill(QColor(0,0,0,0)));
+    UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,0)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
     emit fowChanged();
@@ -374,7 +374,7 @@ void MapFrame::addMarker(const QPointF& markerPosition)
     {
         MapMarker marker = dlg.getMarker();
         marker.setPosition(markerPosition.toPoint());
-        UndoMarker* undoMarker = new UndoMarker(*_mapSource, marker);
+        UndoMarker* undoMarker = new UndoMarker(_mapSource, marker);
         _mapSource->getUndoStack()->push(undoMarker);
         emit dirty();
         setShowMarkers(true);
@@ -1238,7 +1238,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                UndoShape* undoShape = new UndoShape(*_mapSource, MapEditShape(shapeRect, _erase, false));
+                UndoShape* undoShape = new UndoShape(_mapSource, MapEditShape(shapeRect, _erase, false));
                 _mapSource->getUndoStack()->push(undoShape);
                 emit dirty();
                 emit fowChanged();
@@ -1273,7 +1273,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDownPos = mouseEvent->pos();
             _mouseDown = true;
 
-            _undoPath = new UndoPath(*_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
+            _undoPath = new UndoPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
             _mapSource->getUndoStack()->push(_undoPath);
 
             emit fowChanged();
