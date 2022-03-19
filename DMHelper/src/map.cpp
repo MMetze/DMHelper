@@ -112,7 +112,76 @@ void Map::inputXML(const QDomElement &element, bool isImport)
         }
     }
 
+    QDomElement filterElement = element.firstChildElement(QString("filter"));
+    if(!filterElement.isNull())
+    {
+        _filterApplied = true;
+
+        _filter._r2r = filterElement.attribute("r2r",QString::number(1.0)).toDouble();
+        _filter._g2r = filterElement.attribute("g2r",QString::number(0.0)).toDouble();
+        _filter._b2r = filterElement.attribute("b2r",QString::number(0.0)).toDouble();
+        _filter._r2g = filterElement.attribute("r2g",QString::number(0.0)).toDouble();
+        _filter._g2g = filterElement.attribute("g2g",QString::number(1.0)).toDouble();
+        _filter._b2g = filterElement.attribute("b2g",QString::number(0.0)).toDouble();
+        _filter._r2b = filterElement.attribute("r2b",QString::number(0.0)).toDouble();
+        _filter._g2b = filterElement.attribute("g2b",QString::number(0.0)).toDouble();
+        _filter._b2b = filterElement.attribute("b2b",QString::number(1.0)).toDouble();
+        _filter._sr = filterElement.attribute("sr",QString::number(1.0)).toDouble();
+        _filter._sg = filterElement.attribute("sg",QString::number(1.0)).toDouble();
+        _filter._sb = filterElement.attribute("sb",QString::number(1.0)).toDouble();
+
+        _filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay",QString::number(1)).toInt());
+        _filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor",QString("#000000")));
+        _filter._overlayAlpha = filterElement.attribute("overlayAlpha",QString::number(128)).toInt();
+    }
+
     CampaignObjectBase::inputXML(element, isImport);
+}
+
+void Map::copyValues(const CampaignObjectBase* other)
+{
+    const Map* otherMap = dynamic_cast<const Map*>(other);
+    if(!otherMap)
+        return;
+
+    _filename = otherMap->_filename;
+    _audioTrackId = otherMap->getAudioTrackId();
+    _playAudio = otherMap->getPlayAudio();
+    _mapRect = otherMap->getMapRect();
+    _cameraRect = otherMap->getCameraRect();
+    _showPartyIcon = otherMap->getShowParty();
+    _partyId = otherMap->getPartyId();
+    _partyAltIcon = otherMap->getPartyAltIcon();
+    _partyIconPos = otherMap->getPartyIconPos();
+    _partyScale = otherMap->getPartyScale();
+    _mapScale = otherMap->getMapScale();
+
+    _showMarkers = otherMap->getShowMarkers();
+
+    setDistanceLineType(otherMap->getDistanceLineType());
+    setDistanceLineColor(otherMap->getDistanceLineColor());
+    setDistanceLineWidth(otherMap->getDistanceLineWidth());
+
+    setMapColor(otherMap->getMapColor());
+    setMapSize(otherMap->getMapSize());
+
+    _undoStack->clear();
+    for(int i = 0; i < otherMap->getUndoStack()->index(); ++i )
+    {
+        const UndoBase* action = dynamic_cast<const UndoBase*>(otherMap->getUndoStack()->command(i));
+        if((action) && (!action->isRemoved()))
+        {
+            _undoStack->push(action->clone());
+        }
+    }
+
+    // Check if we can skip some paint commands because they have been covered up by a fill
+    challengeUndoStack();
+
+    _filterApplied = otherMap->_filterApplied;
+    _filter = otherMap->_filter;
+
+    CampaignObjectBase::copyValues(other);
 }
 
 int Map::getObjectType() const
@@ -188,7 +257,7 @@ AudioTrack* Map::getAudioTrack()
     return campaign->getTrackById(_audioTrackId);
 }
 
-QUuid Map::getAudioTrackId()
+QUuid Map::getAudioTrackId() const
 {
     return _audioTrackId;
 }
@@ -226,7 +295,7 @@ Party* Map::getParty()
     return dynamic_cast<Party*>(campaign->getObjectById(_partyId));
 }
 
-QString Map::getPartyAltIcon()
+QString Map::getPartyAltIcon() const
 {
     return _partyAltIcon;
 }
@@ -1114,12 +1183,33 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     }
     element.appendChild(actionsElement);
 
+    if(_filterApplied)
+    {
+        QDomElement filterElement = doc.createElement("filter");
+        filterElement.setAttribute("r2r", _filter._r2r);
+        filterElement.setAttribute("g2r", _filter._g2r);
+        filterElement.setAttribute("b2r", _filter._b2r);
+        filterElement.setAttribute("r2g", _filter._r2g);
+        filterElement.setAttribute("g2g", _filter._g2g);
+        filterElement.setAttribute("b2g", _filter._b2g);
+        filterElement.setAttribute("r2b", _filter._r2b);
+        filterElement.setAttribute("g2b", _filter._g2b);
+        filterElement.setAttribute("b2b", _filter._b2b);
+        filterElement.setAttribute("sr", _filter._sr);
+        filterElement.setAttribute("sg", _filter._sg);
+        filterElement.setAttribute("sb", _filter._sb);
+        filterElement.setAttribute("isOverlay", _filter._isOverlay);
+        filterElement.setAttribute("overlayColor", _filter._overlayColor.name());
+        filterElement.setAttribute("overlayAlpha", _filter._overlayAlpha);
+        element.appendChild(filterElement);
+    }
+
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool Map::belongsToObject(QDomElement& element)
 {
-    if(element.tagName() == QString("actions"))
+    if((element.tagName() == QString("actions")) || (element.tagName() == QString("filter")))
         return true;
     else
         return CampaignObjectBase::belongsToObject(element);

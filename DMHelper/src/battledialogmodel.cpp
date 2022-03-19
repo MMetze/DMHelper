@@ -67,6 +67,32 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 }
 
+void BattleDialogModel::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModel* otherModel = dynamic_cast<const BattleDialogModel*>(other);
+    if(!otherModel)
+        return;
+
+    _background = otherModel->_background;
+    _cameraRect = otherModel->_cameraRect;
+    _gridOn = otherModel->_gridOn;
+    _gridType = otherModel->_gridType;
+    _gridScale = otherModel->_gridScale;
+    _gridAngle = otherModel->_gridAngle;
+    _gridOffsetX = otherModel->_gridOffsetX;
+    _gridOffsetY = otherModel->_gridOffsetY;
+    _showCompass = otherModel->_showCompass;
+    _showAlive = otherModel->_showAlive;
+    _showDead = otherModel->_showDead;
+    _showEffects = otherModel->_showEffects;
+    _showMovement = otherModel->_showMovement;
+    _showLairActions = otherModel->_showLairActions;
+
+    _logger = otherModel->_logger;
+
+    CampaignObjectBase::copyValues(other);
+}
+
 QList<BattleDialogModelCombatant*> BattleDialogModel::getCombatantList() const
 {
     return _combatants;

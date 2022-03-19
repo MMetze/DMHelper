@@ -57,6 +57,23 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+void BattleDialogModelEffect::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelEffect* otherEffect = dynamic_cast<const BattleDialogModelEffect*>(other);
+    if(!otherEffect)
+        return;
+
+    _active = otherEffect->_active;
+    _visible = otherEffect->_visible;
+    _size = otherEffect->_size;
+    _position = otherEffect->_position;
+    _rotation = otherEffect->_rotation;
+    _color = otherEffect->_color;
+    _tip = otherEffect->_tip;
+
+    CampaignObjectBase::copyValues(other);
+}
+
 BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
 {
     return new BattleDialogEffectSettings(*this);
@@ -284,18 +301,4 @@ void BattleDialogModelEffect::prepareItem(QGraphicsItem& item) const
     item.setFlag(QGraphicsItem::ItemIsMovable, true);
     item.setFlag(QGraphicsItem::ItemIsSelectable, true);
     item.setZValue(DMHelper::BattleDialog_Z_BackHighlight);
-}
-
-void BattleDialogModelEffect::copyValues(const BattleDialogModelEffect &other)
-{
-    _active = other._active;
-    _visible = other._visible;
-    _size = other._size;
-    setWidth(other.getWidth());
-    _position = other._position;
-    _rotation = other._rotation;
-    _color = other._color;
-    setImageRotation(other.getImageRotation());
-    setImageFile(other.getImageFile());
-    _tip = other._tip;
 }

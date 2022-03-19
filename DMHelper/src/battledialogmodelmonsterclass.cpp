@@ -47,16 +47,25 @@ void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool is
     BattleDialogModelMonsterBase::inputXML(element, isImport);
 }
 
+void BattleDialogModelMonsterClass::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelMonsterClass* otherMonsterClass = dynamic_cast<const BattleDialogModelMonsterClass*>(other);
+    if(!otherMonsterClass)
+        return;
+
+    _monsterClass = otherMonsterClass->_monsterClass;
+    _monsterName = otherMonsterClass->_monsterName;
+    _monsterHP = otherMonsterClass->_monsterHP;
+    _monsterSize = otherMonsterClass->_monsterSize;
+
+    BattleDialogModelMonsterBase::copyValues(other);
+}
+
 BattleDialogModelCombatant* BattleDialogModelMonsterClass::clone() const
 {
     BattleDialogModelMonsterClass* newMonster = new BattleDialogModelMonsterClass(getName());
 
-    newMonster->copyValues(*this);
-    newMonster->_legendaryCount = _legendaryCount;
-    newMonster->_monsterClass = _monsterClass;
-    newMonster->_monsterName = _monsterName;
-    newMonster->_monsterHP = _monsterHP;
-    newMonster->_monsterSize = _monsterSize;
+    newMonster->copyValues(this);
 
     return newMonster;
 }

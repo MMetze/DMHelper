@@ -18,6 +18,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     // Local
     virtual int getCombatantType() const = 0;
@@ -82,7 +83,6 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
 
     void setCombatant(Combatant* combatant);
-    void copyValues(const BattleDialogModelCombatant &other);
 
     Combatant* _combatant;
     int _initiative;

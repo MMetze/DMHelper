@@ -19,7 +19,7 @@ BattleDialogModelEffectRadius::~BattleDialogModelEffectRadius()
 BattleDialogModelEffect* BattleDialogModelEffectRadius::clone() const
 {
     BattleDialogModelEffectRadius* newEffect = new BattleDialogModelEffectRadius(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 

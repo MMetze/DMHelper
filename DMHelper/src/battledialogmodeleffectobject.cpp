@@ -10,6 +10,7 @@ BattleDialogModelEffectObject::BattleDialogModelEffectObject(const QString& name
     BattleDialogModelEffect(name, parent),
     _width(5),
     _imageRotation(0),
+    _imageScaleFactor(0.0),
     _imageFile()
 {
     setEffectActive(false);
@@ -19,6 +20,7 @@ BattleDialogModelEffectObject::BattleDialogModelEffectObject(int size, int width
     BattleDialogModelEffect(size, position, rotation, QColor(), tip),
     _width(width),
     _imageRotation(0),
+    _imageScaleFactor(0.0),
     _imageFile(imageFile)
 {
     setEffectActive(false);
@@ -37,10 +39,23 @@ void BattleDialogModelEffectObject::inputXML(const QDomElement &element, bool is
     BattleDialogModelEffect::inputXML(element, isImport);
 }
 
+void BattleDialogModelEffectObject::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelEffectObject* otherEffect = dynamic_cast<const BattleDialogModelEffectObject*>(other);
+    if(!otherEffect)
+        return;
+
+    _width = otherEffect->_width;
+    _imageRotation = otherEffect->_imageRotation;
+    _imageFile = otherEffect->_imageFile;
+
+    BattleDialogModelEffect::copyValues(other);
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectObject::clone() const
 {
     BattleDialogModelEffectObject* newEffect = new BattleDialogModelEffectObject(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 

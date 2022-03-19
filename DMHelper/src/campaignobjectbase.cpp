@@ -121,6 +121,14 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
 #endif
 }
 
+void CampaignObjectBase::copyValues(const CampaignObjectBase* other)
+{
+    if(!other)
+        return;
+
+    setName(other->getName());
+}
+
 int CampaignObjectBase::getObjectType() const
 {
     return DMHelper::CampaignType_Base;
@@ -280,6 +288,18 @@ QUuid CampaignObjectBase::addObject(CampaignObjectBase* object)
     return object->getID();
 }
 
+CampaignObjectBase* CampaignObjectBase::removeObject(CampaignObjectBase* object)
+{
+    if(!object)
+        return nullptr;
+
+    object->setParent(nullptr);
+    handleInternalChange();
+    handleInternalDirty();
+
+    return object;
+}
+
 CampaignObjectBase* CampaignObjectBase::removeObject(QUuid id)
 {
     CampaignObjectBase* removed = getObjectById(id);
@@ -289,11 +309,7 @@ CampaignObjectBase* CampaignObjectBase::removeObject(QUuid id)
         return nullptr;
     }
 
-    removed->setParent(nullptr);
-    handleInternalChange();
-    handleInternalDirty();
-
-    return removed;
+    return removeObject(removed);
 }
 
 CampaignObjectBase* CampaignObjectBase::getObjectById(QUuid id)

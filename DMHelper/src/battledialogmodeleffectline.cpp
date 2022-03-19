@@ -28,10 +28,21 @@ void BattleDialogModelEffectLine::inputXML(const QDomElement &element, bool isIm
     BattleDialogModelEffectShape::inputXML(element, isImport);
 }
 
+void BattleDialogModelEffectLine::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelEffectLine* otherEffect = dynamic_cast<const BattleDialogModelEffectLine*>(other);
+    if(!otherEffect)
+        return;
+
+    _width = otherEffect->_width;
+
+    BattleDialogModelEffect::copyValues(other);
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectLine::clone() const
 {
     BattleDialogModelEffectLine* newEffect = new BattleDialogModelEffectLine(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 

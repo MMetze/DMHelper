@@ -19,6 +19,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual int getObjectType() const override;
 
@@ -45,14 +46,15 @@ public:
     BattleDialogModel* getBattleDialogModel() const;
     void removeBattleDialogModel();
 
+    void inputXMLBattle(const QDomElement &element, bool isImport);
+    void inputXMLEffects(const QDomElement &parentElement, bool isImport);
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
-    void inputXMLBattle(const QDomElement &element, bool isImport);
-    void inputXMLEffects(const QDomElement &parentElement, bool isImport);
     BattleDialogModel* createNewBattle(QPointF combatantPos);
 
     void connectFrameToModel();

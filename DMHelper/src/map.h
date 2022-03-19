@@ -24,6 +24,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual int getObjectType() const override;
 
@@ -36,14 +37,14 @@ public:
     void setMapSize(QSize size);
 
     AudioTrack* getAudioTrack();
-    QUuid getAudioTrackId();
+    QUuid getAudioTrackId() const;
     void setAudioTrack(AudioTrack* track);
 
     bool getPlayAudio() const;
     void setPlayAudio(bool playAudio);
 
     Party* getParty();
-    QString getPartyAltIcon();
+    QString getPartyAltIcon() const;
     QUuid getPartyId() const;
     bool getShowParty() const;
     const QPoint& getPartyIconPos() const;

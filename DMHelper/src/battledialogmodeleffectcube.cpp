@@ -17,7 +17,7 @@ BattleDialogModelEffectCube::~BattleDialogModelEffectCube()
 BattleDialogModelEffect* BattleDialogModelEffectCube::clone() const
 {
     BattleDialogModelEffectCube* newEffect = new BattleDialogModelEffectCube(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 

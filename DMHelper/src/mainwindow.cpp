@@ -939,8 +939,11 @@ void MainWindow::importItem()
     if(!_campaign)
         return;
 
-    ObjectImporter importer;
-    importer.importObject(*_campaign);
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+
+    ObjectImporter* importer = new ObjectImporter();
+    connect(importer, &ObjectImporter::importComplete, this, &MainWindow::updateCampaignTree);
+    importer->importObject(_campaign, currentObject ? currentObject : _campaign, _campaignFileName);
 }
 
 void MainWindow::newParty()

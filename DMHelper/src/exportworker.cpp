@@ -101,27 +101,37 @@ void ExportWorker::exportObjectAssets(const CampaignObjectBase* object, QDir& di
         case DMHelper::CampaignType_Map:
         {
             const Map* map = dynamic_cast<const Map*>(object);
-            qDebug() << "[ExportWorker] Exporting map: " << map->getName() << ", file: " << map->getFileName();
-            exportFile(map->getFileName(), directory, element, QString("filename"), false);
+            if(map)
+            {
+                qDebug() << "[ExportWorker] Exporting map: " << map->getName() << ", file: " << map->getFileName();
+                exportFile(map->getFileName(), directory, element, QString("filename"), false);
+            }
             break;
         }
         case DMHelper::CampaignType_Combatant:
         {
             const Combatant* combatant = dynamic_cast<const Combatant*>(object);
-            qDebug() << "[ExportWorker] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIcon();
-            exportFile(combatant->getIcon(), directory, element, QString("icon"), false);
+            if(combatant)
+            {
+                qDebug() << "[ExportWorker] Exporting combatant: " << combatant->getName() << ", icon: " << combatant->getIcon();
+                exportFile(combatant->getIcon(), directory, element, QString("icon"), false);
+            }
             break;
         }
         case DMHelper::CampaignType_Text:
         {
             const EncounterText* textEncounter = dynamic_cast<const EncounterText*>(object);
-            exportFile(textEncounter->getImageFile(), directory, element, QString("imageFile"), false);
+            if(textEncounter)
+            {
+                qDebug() << "[ExportWorker] Exporting text entry: " << textEncounter->getName();
+                exportFile(textEncounter->getImageFile(), directory, element, QString("imageFile"), false);
+            }
             break;
         }
         case DMHelper::CampaignType_AudioTrack:
         {
             const AudioTrack* track = dynamic_cast<const AudioTrack*>(object);
-            if(track->getAudioType() == DMHelper::AudioType_File)
+            if((track) && (track->getAudioType() == DMHelper::AudioType_File))
             {
                 qDebug() << "[ExportWorker] Exporting track: " << track->getName() << ", file: " << track->getUrl();
                 QString exportedFile = exportFile(track->getUrl().toString(), directory, element, QString(), false);
@@ -157,18 +167,6 @@ void ExportWorker::exportBattle(const EncounterBattle* battle, QDir& directory, 
     qDebug() << "[ExportWorker] Exporting battle: " << battle->getName();
 
     int i;
-    /*
-    for(i = 0; i < battleModel->getCombatantCount(); ++i)
-    {
-        BattleDialogModelCombatant* combatant = battleModel->getCombatant(i);
-        if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster))
-        {
-            BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
-            exportMonster(monsterCombatant->getMonsterClass(), directory);
-        }
-    }
-    */
-
     QDomElement effectsElement = battleElement.firstChildElement("effects");
     for(i = 0; i < battleModel->getEffectCount(); ++i)
     {

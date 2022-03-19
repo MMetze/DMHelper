@@ -36,7 +36,7 @@ int BattleDialogModelCharacter::getCombatantType() const
 BattleDialogModelCombatant* BattleDialogModelCharacter::clone() const
 {
     BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(getName());
-    newCharacter->copyValues(*this);
+    newCharacter->copyValues(this);
     return newCharacter;
 }
 

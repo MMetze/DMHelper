@@ -36,7 +36,25 @@ DMHWaitingDialog::~DMHWaitingDialog()
 
 void DMHWaitingDialog::setStatus(const QString& statusString)
 {
-    ui->lblStatus->setText(statusString);
+    QFontMetrics labelMetrics = ui->lblStatus->fontMetrics();
+    ui->lblStatus->setText(labelMetrics.elidedText(statusString, Qt::ElideRight, ui->lblStatus->width()));
+}
+
+void DMHWaitingDialog::setSplitStatus(const QString& primary, const QString& secondary)
+{
+    if(secondary.isEmpty())
+    {
+        setStatus(primary);
+    }
+    else
+    {
+        QFontMetrics labelMetrics = ui->lblStatus->fontMetrics();
+        int primaryWidth = labelMetrics.horizontalAdvance(primary);
+        if(primaryWidth >= ui->lblStatus->width())
+            setStatus(primary);
+        else
+            ui->lblStatus->setText(primary + labelMetrics.elidedText(secondary, Qt::ElideLeft, ui->lblStatus->width() - primaryWidth));
+    }
 }
 
 void DMHWaitingDialog::closeEvent(QCloseEvent *event)

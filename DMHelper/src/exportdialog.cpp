@@ -199,7 +199,6 @@ void ExportDialog::runExport()
         }
     }
 
-
     qDebug() << "[ExportDialog] Exporting to " << exportDirPath << " as " << ui->edtExportName->text() << ", monsters included: " << ui->grpMonsters->isChecked() << ", spells included: " << ui->grpSpells->isChecked();
 
     _workerThread = new QThread(this);
@@ -227,9 +226,7 @@ void ExportDialog::runExport()
 
 void ExportDialog::exportFinished(bool success)
 {
-    Q_UNUSED(success);
-
-    qDebug() << "[ExportDialog] Export completed, stopping dialog and thread.";
+    qDebug() << "[ExportDialog] Export completed, stopping dialog and thread. Success: " << success;
 
     if(_waitingDlg)
     {

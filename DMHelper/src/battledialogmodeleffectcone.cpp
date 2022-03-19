@@ -18,7 +18,7 @@ BattleDialogModelEffectCone::~BattleDialogModelEffectCone()
 BattleDialogModelEffect* BattleDialogModelEffectCone::clone() const
 {
     BattleDialogModelEffectCone* newEffect = new BattleDialogModelEffectCone(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 

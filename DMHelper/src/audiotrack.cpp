@@ -25,6 +25,17 @@ void AudioTrack::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+void AudioTrack::copyValues(const CampaignObjectBase* other)
+{
+    const AudioTrack* otherAudioTrack = dynamic_cast<const AudioTrack*>(other);
+    if(!otherAudioTrack)
+        return;
+
+    _md5 = otherAudioTrack->_md5;
+
+    CampaignObjectBase::copyValues(other);
+}
+
 int AudioTrack::getObjectType() const
 {
     return DMHelper::CampaignType_AudioTrack;

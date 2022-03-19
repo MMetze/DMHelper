@@ -49,15 +49,24 @@ void BattleDialogModelMonsterCombatant::inputXML(const QDomElement &element, boo
     _monsterHP = element.attribute("monsterHP",QString::number(0)).toInt();
 }
 
+void BattleDialogModelMonsterCombatant::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelMonsterCombatant* otherMonsterCombatant = dynamic_cast<const BattleDialogModelMonsterCombatant*>(other);
+    if(!otherMonsterCombatant)
+        return;
+
+    _monsterSize = otherMonsterCombatant->_monsterSize;
+    _monsterName = otherMonsterCombatant->_monsterName;
+    _monsterHP = otherMonsterCombatant->_monsterHP;
+
+    BattleDialogModelMonsterBase::copyValues(other);
+}
+
 BattleDialogModelCombatant* BattleDialogModelMonsterCombatant::clone() const
 {
     BattleDialogModelMonsterCombatant* newMonster = new BattleDialogModelMonsterCombatant(getName());
 
-    newMonster->copyValues(*this);
-    newMonster->_legendaryCount = _legendaryCount;
-    newMonster->_monsterSize = _monsterSize;
-    newMonster->_monsterName = _monsterName;
-    newMonster->_monsterHP = _monsterHP;
+    newMonster->copyValues(this);
 
     return newMonster;
 }
