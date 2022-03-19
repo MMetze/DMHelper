@@ -15,13 +15,10 @@ ObjectImportWorker::ObjectImportWorker(QObject *parent) :
     QObject(parent),
     _campaign(nullptr),
     _parentObject(nullptr),
-    _campaignFile(),
     _importFilename(),
     _assetPath(),
     _assetDir(),
     _replaceDuplicates(false),
-    _currentFileInfo(),
-    _currentDir(),
     _importCampaign(nullptr),
     _duplicateObjects(),
     _importedBattles()
@@ -33,35 +30,26 @@ ObjectImportWorker::~ObjectImportWorker()
     delete _importCampaign;
 }
 
-bool ObjectImportWorker::setImportObject(Campaign* campaign, CampaignObjectBase* parentObject, const QString& campaignFile, const QString& importFilename, const QString& assetPath, bool replaceDuplicates)
+bool ObjectImportWorker::setImportObject(Campaign* campaign, CampaignObjectBase* parentObject, const QString& importFilename, const QString& assetPath, bool replaceDuplicates)
 {
     if((!campaign) || (!parentObject))
         return false;
 
     _campaign = campaign;
     _parentObject = parentObject;
-    _campaignFile = campaignFile;
     _importFilename = importFilename;
     _assetPath = assetPath;
     _assetDir = QDir(assetPath);
     _replaceDuplicates = replaceDuplicates;
-
-    _currentFileInfo = QFileInfo (campaignFile);
-    _currentDir = QDir(_currentFileInfo.absoluteDir());
-    if(!_currentDir.exists())
-    {
-        qDebug() << "[ObjectImportWorker] Not able to find the current campaign file location: " << _campaignFile;
-        return false;
-    }
 
     return true;
 }
 
 bool ObjectImportWorker::doWork()
 {
-    if((!_campaign) || (!_parentObject) || (_campaignFile.isEmpty()) || (_importFilename.isEmpty()) || (!_assetDir.exists()))
+    if((!_campaign) || (!_parentObject) || (_importFilename.isEmpty()) || (!_assetDir.exists()))
         return registerImportResult(false,
-                                    QString("The required import parameters were not set prior to starting the import! Campaign: ") + _campaign->getName() + QString(", parent: ") + _parentObject->getName() + QString(", campaign file: ") + _campaignFile + QString(", import file: ") + _importFilename + QString(", asset dir: ") + _assetDir.path(),
+                                    QString("The required import parameters were not set prior to starting the import! Campaign: ") + _campaign->getName() + QString(", parent: ") + _parentObject->getName() + QString(", import file: ") + _importFilename + QString(", asset dir: ") + _assetDir.path(),
                                     QString("Invalid import started!"));
 
     QDomDocument doc("DMHelperXML");

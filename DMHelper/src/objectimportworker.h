@@ -20,7 +20,7 @@ public:
     explicit ObjectImportWorker(QObject *parent = nullptr);
     virtual ~ObjectImportWorker() override;
 
-    bool setImportObject(Campaign* campaign, CampaignObjectBase* parentObject, const QString& campaignFile, const QString& importFilename, const QString& assetPath, bool replaceDuplicates);
+    bool setImportObject(Campaign* campaign, CampaignObjectBase* parentObject, const QString& importFilename, const QString& assetPath, bool replaceDuplicates);
 
 public slots:
     bool doWork();
@@ -40,13 +40,10 @@ protected:
 
     Campaign* _campaign;
     CampaignObjectBase* _parentObject;
-    QString _campaignFile;
     QString _importFilename;
     QString _assetPath;
     QDir _assetDir;
     bool _replaceDuplicates;
-    QFileInfo _currentFileInfo;
-    QDir _currentDir;
 
     Campaign* _importCampaign;
     QList<CampaignObjectBase*> _duplicateObjects;

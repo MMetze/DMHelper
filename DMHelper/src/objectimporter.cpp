@@ -52,7 +52,7 @@ bool ObjectImporter::importObject(Campaign* campaign, CampaignObjectBase* parent
 
     //_workerThread = new QThread(this);
     _worker = new ObjectImportWorker();
-    if(!_worker->setImportObject(campaign, parentObject, campaignFile, importFilename, assetPath, replaceDuplicates))
+    if(!_worker->setImportObject(campaign, parentObject, importFilename, assetPath, replaceDuplicates))
     {
         qDebug() << "[ObjectImporter] Not able to set import object information!";
         delete _worker; _worker = nullptr;
