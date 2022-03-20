@@ -142,7 +142,7 @@ void DMHLogger::writeOutput(QtMsgType type, const QMessageLogContext &context, c
             msgContext = QString("Fatal: [%1:%2, %3] ").arg(context.file).arg(context.line).arg(context.function);
             break;
     }
-    (*_out) << debugdate << " " << msgContext << msg << endl;
+    (*_out) << debugdate << " " << msgContext << msg << Qt::endl;
 
     if (QtFatalMsg == type)
     {
