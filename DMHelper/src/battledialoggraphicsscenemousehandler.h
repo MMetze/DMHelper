@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QColor>
+#include <QPointF>
 
 class BattleDialogGraphicsScene;
 class QGraphicsSceneMouseEvent;

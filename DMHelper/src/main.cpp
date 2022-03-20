@@ -1,10 +1,17 @@
 #include "mainwindow.h"
 #include "dmhlogger.h"
 #include <QApplication>
+#include <QSurfaceFormat>
 #include <QDebug>
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
+
+    // Explicitly set the application surface format for OpenGL surfaces
+    QSurfaceFormat fmt;
+    fmt.setVersion(3, 3);
+    fmt.setProfile(QSurfaceFormat::CoreProfile);
+    QSurfaceFormat::setDefaultFormat(fmt);
 
     // this important so we can call makeCurrent from our rendering thread
     QCoreApplication::setAttribute(Qt::AA_DontCheckOpenGLContextThreadAffinity);

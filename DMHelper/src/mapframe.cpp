@@ -801,7 +801,7 @@ void MapFrame::initializeFoW()
     connect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
-    connect(this, &MapFrame::cameraRectChanged, _mapSource, qOverload<const QRectF&>(&Map::setCameraRect));
+    connect(this, &MapFrame::cameraRectChanged, _mapSource, QOverload<const QRectF&>::of(&Map::setCameraRect));
 
     if(_mapSource->getParty())
         emit partyChanged(_mapSource->getParty());
@@ -828,7 +828,7 @@ void MapFrame::uninitializeFoW()
 
     if(_mapSource)
     {
-        disconnect(this, &MapFrame::cameraRectChanged, _mapSource, qOverload<const QRectF&>(&Map::setCameraRect));
+        disconnect(this, &MapFrame::cameraRectChanged, _mapSource, QOverload<const QRectF&>::of(&Map::setCameraRect));
         disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
         disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
         disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
