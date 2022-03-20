@@ -7,7 +7,7 @@
 class UndoFill : public UndoBase
 {
 public:
-    UndoFill(Map& map, const MapEditFill& mapEditFill);
+    UndoFill(Map* map, const MapEditFill& mapEditFill);
 
     virtual void undo() override;
     virtual void redo() override;

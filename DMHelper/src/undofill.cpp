@@ -4,7 +4,7 @@
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoFill::UndoFill(Map& map, const MapEditFill& mapEditFill) :
+UndoFill::UndoFill(Map* map, const MapEditFill& mapEditFill) :
     UndoBase(map, QString("Fill")),
     _mapEditFill(mapEditFill)
 {
@@ -12,32 +12,29 @@ UndoFill::UndoFill(Map& map, const MapEditFill& mapEditFill) :
 
 void UndoFill::undo()
 {
-    _map.undoPaint();
-    //if(_map.getRegisteredWindow())
-    //    _map.getRegisteredWindow()->undoPaint();
+    if(_map)
+        _map->undoPaint();
 }
 
 void UndoFill::redo()
 {
-    apply(true, nullptr);
-    _map.updateFoW();
-    /*
-    if(_map.getRegisteredWindow())
+    if(_map)
     {
-        _map.getRegisteredWindow()->updateFoW();
+        apply(true, nullptr);
+        _map->updateFoW();
     }
-    */
 }
 
 void UndoFill::apply(bool preview, QPaintDevice* target) const
 {
-    QColor applyColor = _mapEditFill.color();
-    if(preview)
+    if(_map)
     {
-        applyColor.setAlpha(_mapEditFill.color().alpha() / 2);
-    }
+        QColor applyColor = _mapEditFill.color();
+        if(preview)
+            applyColor.setAlpha(_mapEditFill.color().alpha() / 2);
 
-    _map.fillFoW(applyColor,target);
+        _map->fillFoW(applyColor,target);
+    }
 }
 
 QDomElement UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const

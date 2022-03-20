@@ -241,6 +241,8 @@
         <file>data/icon_flag.png</file>
         <file>data/icon_pin.png</file>
         <file>data/icon_visiblecamera.png</file>
+        <file>data/dmc_background.png</file>
+        <file>data/whatsnew.txt</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

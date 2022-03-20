@@ -2,12 +2,10 @@
 #define OBJECTIMPORTER_H
 
 #include <QObject>
-#include <QUuid>
-#include <QStringList>
 
+class ObjectImportWorker;
+class DMHWaitingDialog;
 class Campaign;
-class QStandardItem;
-class QDomElement;
 class CampaignObjectBase;
 
 class ObjectImporter : public QObject
@@ -15,25 +13,26 @@ class ObjectImporter : public QObject
     Q_OBJECT
 public:
     explicit ObjectImporter(QObject *parent = nullptr);
+    virtual ~ObjectImporter() override;
+
+    bool importObject(Campaign* campaign, CampaignObjectBase* parentObject, const QString& campaignFile);
 
 signals:
+    //void startWork();
+    void importComplete(bool success);
+    void statusUpdate(const QString& primary, const QString& secondary);
 
-public slots:
-    bool importObject(Campaign& campaign);
+protected slots:
+    void importFinished(bool success, const QString& error);
+//    void threadFinished();
 
 protected:
-    bool checkObjectDuplicates(CampaignObjectBase* object, Campaign& targetCampaign, Campaign& importCampaign);
-    /*
-    QUuid importCombatant(Campaign& campaign, QStandardItem* item, QDomElement& element);
-    QUuid importEncounter(Campaign& campaign, QStandardItem* item, QDomElement& element);
-    QUuid importMap(Campaign& campaign, QStandardItem* item, QDomElement& element);
-    QUuid importAdventure(Campaign& campaign, QStandardItem* item, QDomElement& element);
+    void completeCheck(int completeValue);
 
-    bool isWorldEntry(QStandardItem* item);
-    QStandardItem* findParentbyType(QStandardItem* child, int parentType);
-    */
-
-    QStringList _duplicateObjects;
+    //QThread* _workerThread;
+    ObjectImportWorker* _worker;
+    DMHWaitingDialog* _waitingDlg;
+    //int _completeValue;
 };
 
 #endif // OBJECTIMPORTER_H

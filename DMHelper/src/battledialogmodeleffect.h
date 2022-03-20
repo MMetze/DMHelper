@@ -41,7 +41,9 @@ public:
     virtual ~BattleDialogModelEffect() override;
 
     // From CampaignObjectBase
+    virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
 
@@ -92,6 +94,7 @@ public:
 
 signals:
     void effectMoved(BattleDialogModelEffect* effect);
+    void effectChanged(BattleDialogModelEffect* effect);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
@@ -99,7 +102,6 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
 
     virtual void prepareItem(QGraphicsItem& item) const;
-    void copyValues(const BattleDialogModelEffect &other);
 
     bool _active;
     bool _visible;

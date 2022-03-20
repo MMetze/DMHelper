@@ -5,7 +5,7 @@
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoMarker::UndoMarker(Map& map, const MapMarker& marker) :
+UndoMarker::UndoMarker(Map* map, const MapMarker& marker) :
     UndoBase(map, QString("Set Marker")),
     _marker(marker),
     _markerGraphicsItem(nullptr)
@@ -14,7 +14,6 @@ UndoMarker::UndoMarker(Map& map, const MapMarker& marker) :
 
 UndoMarker::~UndoMarker()
 {
-//    delete _markerGraphicsItem;
 }
 
 void UndoMarker::undo()
@@ -25,12 +24,13 @@ void UndoMarker::undo()
 
 void UndoMarker::redo()
 {
-    //delete _markerGraphicsItem;
-    //_markerGraphicsItem = _map.addMapMarker(this, &_marker);
-    if(_markerGraphicsItem)
-        undo();
+    if(_map)
+    {
+        if(_markerGraphicsItem)
+            undo();
 
-    _map.addMapMarker(this, &_marker);
+        _map->addMapMarker(this, &_marker);
+    }
 }
 
 void UndoMarker::apply(bool preview, QPaintDevice* target) const

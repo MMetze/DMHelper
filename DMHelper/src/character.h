@@ -71,6 +71,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     // From Combatant
     virtual void beginBatchChanges() override;

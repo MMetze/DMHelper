@@ -12,7 +12,7 @@ class Map;
 class UndoBase : public QUndoCommand
 {
 public:
-    UndoBase(Map& map, const QString & text);
+    UndoBase(Map* map, const QString & text);
     virtual ~UndoBase() override;
 
     virtual void apply( bool preview, QPaintDevice* target ) const = 0;
@@ -26,8 +26,10 @@ public:
     virtual int getType() const;
     virtual UndoBase* clone() const = 0;
 
+    void setMap(Map* map);
+
 protected:
-    Map& _map;
+    Map* _map;
     bool _removed;
 };
 

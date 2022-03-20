@@ -101,7 +101,7 @@ Combatant* CombatantReference::clone() const
 {
     CombatantReference* newReference = new CombatantReference(getName());
 
-    newReference->copyValues(*this);
+    newReference->copyValues(this);
 
     newReference->_referenceId = _referenceId;
     newReference->_referenceIntId = _referenceIntId;

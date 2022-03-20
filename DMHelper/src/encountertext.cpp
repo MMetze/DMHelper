@@ -78,6 +78,24 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+void EncounterText::copyValues(const CampaignObjectBase* other)
+{
+    const EncounterText* otherEntry = dynamic_cast<const EncounterText*>(other);
+    if(!otherEntry)
+        return;
+
+    _text = otherEntry->_text;
+    _translatedText = otherEntry->_translatedText;
+    _imageFile = otherEntry->_imageFile;
+    _textWidth = otherEntry->_textWidth;
+
+    _animated = otherEntry->_animated;
+    _translated = otherEntry->_translated;
+    _scrollSpeed = otherEntry->_scrollSpeed;
+
+    CampaignObjectBase::copyValues(other);
+}
+
 int EncounterText::getObjectType() const
 {
     return DMHelper::CampaignType_Text;

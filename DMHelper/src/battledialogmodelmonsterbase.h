@@ -26,6 +26,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual int getCombatantType() const override;
     virtual int getMonsterType() const = 0;
@@ -44,6 +45,7 @@ public slots:
     virtual void setConditions(int conditions) override;
     virtual void applyConditions(int conditions) override;
     virtual void removeConditions(int conditions) override;
+    virtual void clearConditions() override;
     virtual void setLegendaryCount(int legendaryCount);
 
 protected:

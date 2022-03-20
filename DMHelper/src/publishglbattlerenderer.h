@@ -12,6 +12,7 @@
 class BattleDialogModel;
 class PublishGLBattleObject;
 class PublishGLBattleToken;
+class PublishGLBattleEffect;
 class PublishGLBattleBackground;
 class BattleDialogModelCombatant;
 class QGraphicsItem;
@@ -30,6 +31,8 @@ public:
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
+    virtual QRect getScissorRect() override;
+
     virtual void setBackgroundColor(const QColor& color) override;
     virtual QSizeF getBackgroundSize() = 0;
 
@@ -70,6 +73,9 @@ protected:
     virtual void updateInitiative();
     virtual void paintInitiative(QOpenGLFunctions* functions);
 
+    virtual void createShaders();
+    virtual void destroyShaders();
+
 protected slots:
     void recreateContents();
     void activeCombatantMoved();
@@ -84,9 +90,13 @@ protected:
     QMatrix4x4 _projectionMatrix;
     QRectF _cameraRect;
     QRect _scissorRect;
-    unsigned int _shaderProgram;
-    int _shaderModelMatrix;
-    int _shaderProjectionMatrix;
+    unsigned int _shaderProgramRGB;
+    int _shaderModelMatrixRGB;
+    int _shaderProjectionMatrixRGB;
+    unsigned int _shaderProgramRGBA;
+    int _shaderModelMatrixRGBA;
+    int _shaderProjectionMatrixRGBA;
+    int _shaderAlphaRGBA;
 
     QImage _gridImage;
     PublishGLImage* _gridObject;
@@ -96,7 +106,7 @@ protected:
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
     PublishGLImage* _unknownToken;
     PublishGLImage* _initiativeBackground;
-    QList<PublishGLBattleObject*> _effectTokens;
+    QList<PublishGLBattleEffect*> _effectTokens;
 
     int _initiativeType;
     qreal _initiativeTokenHeight;

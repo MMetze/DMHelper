@@ -70,6 +70,8 @@ private:
 
     QMenu* _menu;
     int _timerId;
+    int _lastGridScale;
+    int _lastGridAngle;
 };
 
 class RibbonTabBattleMap_GridAction : public QAction

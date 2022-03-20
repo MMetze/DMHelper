@@ -108,7 +108,7 @@ void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
     if(_backgroundObject)
     {
-        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
     }
 #else
@@ -116,7 +116,7 @@ void PublishGLBattleVideoRenderer::paintBackground(QOpenGLFunctions* functions)
         return;
 
     QMatrix4x4 modelMatrix;
-    functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
+    functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, modelMatrix.constData());
     _videoPlayer->paintGL();
 #endif
 }

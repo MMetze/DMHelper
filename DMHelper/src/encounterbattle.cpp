@@ -114,6 +114,17 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 
 }
 
+void EncounterBattle::copyValues(const CampaignObjectBase* other)
+{
+    const EncounterBattle* otherBattle = dynamic_cast<const EncounterBattle*>(other);
+    if(!otherBattle)
+        return;
+
+    _audioTrackId = otherBattle->_audioTrackId;
+
+    EncounterText::copyValues(other);
+}
+
 int EncounterBattle::getObjectType() const
 {
     return DMHelper::CampaignType_Battle;
@@ -322,60 +333,6 @@ void EncounterBattle::removeBattleDialogModel()
     emit dirty();
 }
 
-QDomElement EncounterBattle::createOutputXML(QDomDocument &doc)
-{
-    return doc.createElement("battle-object");
-}
-
-void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
-{
-    element.setAttribute( "audiotrack", _audioTrackId.toString() );
-
-    QDomElement wavesElement = doc.createElement( "waves" );
-    element.appendChild(wavesElement);
-    for( int wave = 0; wave < _combatantWaves.count(); ++wave )
-    {
-        QDomElement waveElement = doc.createElement( QString("wave") );
-        wavesElement.appendChild(waveElement);
-
-        QDomElement combatantsElement = doc.createElement( "combatants" );
-        waveElement.appendChild(combatantsElement);
-        for( int i = 0; i < _combatantWaves.at(wave).count(); ++i )
-        {
-            CombatantGroup combatantPair = _combatantWaves.at(wave).at(i);
-            QDomElement combatantPairElement = doc.createElement( QString("combatantPair") );
-
-            combatantPairElement.setAttribute( "count", combatantPair.first );
-            combatantPair.second->outputXML(doc, combatantPairElement, targetDirectory, isExport);
-
-            combatantsElement.appendChild(combatantPairElement);
-        }
-    }
-
-    if(_battleModel && !isExport)
-        _battleModel->outputXML(doc, element, targetDirectory, isExport);
-
-    EncounterText::internalOutputXML(doc, element, targetDirectory, isExport);
-}
-
-bool EncounterBattle::belongsToObject(QDomElement& element)
-{
-    if((element.tagName() == QString("combatants")) || (element.tagName() == QString("waves")) || (element.tagName() == QString("battle")))
-        return true;
-    else
-        return EncounterText::belongsToObject(element);
-}
-
-void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool isImport)
-{
-    _audioTrackId = parseIdString(element.attribute("audiotrack"));
-
-    // Read the battle
-    inputXMLBattle(element, isImport);
-
-    EncounterText::internalPostProcessXML(element, isImport);
-}
-
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 {
     if((_battleModel)||(isImport))
@@ -508,6 +465,62 @@ void EncounterBattle::inputXMLEffects(const QDomElement &parentElement, bool isI
 
         effectElement = effectElement.nextSiblingElement();
     }
+}
+
+QDomElement EncounterBattle::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("battle-object");
+}
+
+void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("audiotrack", _audioTrackId.toString());
+
+    QDomElement wavesElement = doc.createElement("waves");
+    element.appendChild(wavesElement);
+    for(int wave = 0; wave < _combatantWaves.count(); ++wave)
+    {
+        QDomElement waveElement = doc.createElement(QString("wave"));
+        wavesElement.appendChild(waveElement);
+
+        QDomElement combatantsElement = doc.createElement("combatants");
+        waveElement.appendChild(combatantsElement);
+        for(int i = 0; i < _combatantWaves.at(wave).count(); ++i)
+        {
+            CombatantGroup combatantPair = _combatantWaves.at(wave).at(i);
+            QDomElement combatantPairElement = doc.createElement(QString("combatantPair"));
+
+            combatantPairElement.setAttribute("count", combatantPair.first);
+            combatantPair.second->outputXML(doc, combatantPairElement, targetDirectory, isExport);
+
+            combatantsElement.appendChild(combatantPairElement);
+        }
+    }
+
+    //if(_battleModel && !isExport)
+    if(_battleModel)
+        _battleModel->outputXML(doc, element, targetDirectory, isExport);
+
+    EncounterText::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool EncounterBattle::belongsToObject(QDomElement& element)
+{
+    if((element.tagName() == QString("combatants")) || (element.tagName() == QString("waves")) || (element.tagName() == QString("battle")))
+        return true;
+    else
+        return EncounterText::belongsToObject(element);
+}
+
+void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    _audioTrackId = parseIdString(element.attribute("audiotrack"));
+
+    // Read the battle
+    if(!isImport)
+        inputXMLBattle(element, isImport);
+
+    EncounterText::internalPostProcessXML(element, isImport);
 }
 
 BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)

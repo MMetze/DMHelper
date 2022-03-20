@@ -1,0 +1,41 @@
+<html>
+<head>
+<style>
+.myDiv {
+    width: 70%;
+    margin: 0 auto;
+}
+</style>
+</head>
+<body>
+<div class="myDiv">
+<h2>What's New: Version 2.3.5</h2>
+<h3>With this version, I have two questions:</h3>
+<ol>
+<li>Does it not work for anybody? I expect every machine out there is somehow OpenGL-enabled, but I want to be sure...
+<li>What do you think? Does it make a difference? Is it smoother?
+</ol>
+<p>
+<h3>More Feature improvements:</h3>
+<ul>
+<li>Publish an entry but still look at other entries (published entry is marked in the campaign tree)
+<li>Added all the Indiana Jones path entries for battles, too
+<li>3 versions of the initiative list in the player's window: none, images-only and images-with-names... what do you think?
+</ul>
+<p>
+<h3>Downsides for now</h3>
+<ul>
+<li>No MacOS version of this yet, I need to update it first
+<li>The new libvlc I need to use doesn't work well with videos, so animated maps don't animate right now, they just show as their static version.
+</ul>
+</div>
+</body>
+</html>
+
+What's New? This What's New Dialog!
+Amazing new HW-accelerated Player Window rendering... lots more to come here!
+All-new (and still optional) Initiative Tracker on the Player Window
+Moving characters, effects and objects from the Player's Window
+Rebooted "Add Monster" dialog, with more customization options
+Added proper transparency support for objects and spell effects
+Fixed Export & Import

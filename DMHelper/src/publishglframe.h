@@ -17,7 +17,11 @@ public:
     PublishGLRenderer* getRenderer() const;
 
 signals:
+    void publishMouseDown(const QPointF& position);
+    void publishMouseMove(const QPointF& position);
+    void publishMouseRelease(const QPointF& position);
     void frameResized(const QSize& newSize);
+    void labelResized(const QSize& newSize);
 
 public slots:
     void cleanup();
@@ -29,9 +33,15 @@ public slots:
     void setBackgroundColor(const QColor& color);
 
 protected:
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+
     virtual void initializeGL() override;
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
+
+    bool convertMousePosition(QMouseEvent& event, const QRect& scissorRect, QPointF& result);
 
 protected slots:
     void initializeRenderer();

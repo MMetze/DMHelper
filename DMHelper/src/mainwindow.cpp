@@ -75,6 +75,7 @@
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
 #include "dmh_vlc.h"
+#include "whatsnewdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -938,8 +939,11 @@ void MainWindow::importItem()
     if(!_campaign)
         return;
 
-    ObjectImporter importer;
-    importer.importObject(*_campaign);
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+
+    ObjectImporter* importer = new ObjectImporter();
+    connect(importer, &ObjectImporter::importComplete, this, &MainWindow::updateCampaignTree);
+    importer->importObject(_campaign, currentObject ? currentObject : _campaign, _campaignFileName);
 }
 
 void MainWindow::newParty()
@@ -1405,6 +1409,16 @@ void MainWindow::showEvent(QShowEvent * event)
 
             if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
                 openCampaign(_options->getMRUHandler()->getMRUList().first());
+
+            QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                                       .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                                       .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+            if(_options->getLastAppVersion() != versionString)
+            {
+                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(this);
+                whatsNewDlg->show();
+                whatsNewDlg->move(geometry().center() - whatsNewDlg->rect().center());
+            }
         }
 
         _initialized = true;
@@ -1594,7 +1608,7 @@ void MainWindow::connectBattleView(bool toBattle)
         connect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
-        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
+        //connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
         connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);
@@ -1654,7 +1668,7 @@ void MainWindow::connectBattleView(bool toBattle)
         disconnect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
-        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
+        //disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
         disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);

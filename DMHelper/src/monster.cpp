@@ -52,6 +52,20 @@ void Monster::inputXML(const QDomElement &element, bool isImport)
     endBatchChanges();
 }
 
+void Monster::copyValues(const CampaignObjectBase* other)
+{
+    const Monster* otherMonster = dynamic_cast<const Monster*>(other);
+    if(!otherMonster)
+        return;
+
+    _monsterClass = otherMonster->_monsterClass;
+    _passivePerception = otherMonster->_passivePerception;
+    _active = otherMonster->_active;
+    _notes = otherMonster->_notes;
+
+    Combatant::copyValues(other);
+}
+
 void Monster::beginBatchChanges()
 {
     _iconChanged = false;
@@ -81,7 +95,7 @@ Combatant* Monster::clone() const
 
     Monster* newMonster = new Monster(_monsterClass, getName());
 
-    newMonster->copyValues(*this);
+    newMonster->copyValues(this);
 
     newMonster->_monsterClass = _monsterClass;
     newMonster->_passivePerception = _passivePerception;

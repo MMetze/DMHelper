@@ -267,7 +267,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>Edit the camera rectangle directly</string>
+          <string>Move and edit the camera rectangle</string>
          </property>
          <property name="text">
           <string/>

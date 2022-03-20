@@ -115,6 +115,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
     virtual int getObjectType() const override;
 
     virtual void beginBatchChanges();
@@ -184,7 +185,6 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
 
     void registerChange();
-    void copyValues(const Combatant &other);
 
     int _initiative;
     int _armorClass;

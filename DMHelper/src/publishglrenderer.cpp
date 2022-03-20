@@ -73,6 +73,11 @@ bool PublishGLRenderer::deleteOnDeactivation()
     return false;
 }
 
+QRect PublishGLRenderer::getScissorRect()
+{
+    return QRect();
+}
+
 void PublishGLRenderer::updateRender()
 {
     emit updateWidget();

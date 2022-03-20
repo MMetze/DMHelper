@@ -48,6 +48,7 @@ private slots:
     void syncDndBeyond();
     void openExpertiseDialog();
     void editConditions();
+    void clearConditions();
     void updateConditionLayout();
     void clearConditionGrid();
     void addCondition(Combatant::Condition condition);

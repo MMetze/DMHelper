@@ -28,6 +28,7 @@ signals:
 
 protected slots:
     void editConditions();
+    void removeConditions();
     void readCombatant();
     void clearCombatant();
     void updateLayout();

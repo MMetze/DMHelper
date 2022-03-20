@@ -23,6 +23,12 @@ public:
     int getCount() const;
     QString getName() const;
     QString getLocalHitPoints() const;
+    bool isRandomInitiative() const;
+    QString getInitiative() const;
+    bool isKnown() const;
+    bool isShown() const;
+    bool isCustomSize() const;
+    QString getSizeFactor() const;
     MonsterClass* getMonsterClass() const;
 
     void writeCombatant(Combatant* combatant);
@@ -34,12 +40,19 @@ public slots:
     // From QDialog
     virtual void accept();
 
+protected:
+    virtual void showEvent(QShowEvent *event) override;
+    virtual void resizeEvent(QResizeEvent *event) override;
+
 private slots:
     void monsterClassChanged(const QString &text);
-    void useHitPointAverageChanged(bool useAverage);
+    void updateIcon();
+    void setHitPointAverageChanged();
     void openMonsterClicked();
+    void sizeSelected(int index);
 
 private:
+    void fillSizeCombo();
 
     Ui::CombatantDialog *ui;
     Combatant* _combatant;

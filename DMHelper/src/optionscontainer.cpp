@@ -1,6 +1,7 @@
 #include "optionscontainer.h"
 #include "optionsdialog.h"
 #include "optionsaccessor.h"
+#include "dmversion.h"
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
@@ -35,6 +36,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _activeIcon(),
     _combatantFrame(),
     _countdownFrame(),
+    _lastAppVersion(),
     _dataSettingsExist(false),
     _updatesEnabled(false),
     _statisticsAccepted(false),
@@ -170,6 +172,11 @@ QString OptionsContainer::getCombatantFrame() const
 QString OptionsContainer::getCountdownFrame() const
 {
     return _countdownFrame;
+}
+
+QString OptionsContainer::getLastAppVersion() const
+{
+    return _lastAppVersion;
 }
 
 bool OptionsContainer::doDataSettingsExist() const
@@ -338,6 +345,8 @@ void OptionsContainer::readSettings()
     setCombatantFrame(settings.value("combatantFrame").toString());
     setCountdownFrame(settings.value("countdownFrame").toString());
 
+    _lastAppVersion = settings.value("lastAppVersion").toString();
+
     _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
     if(_dataSettingsExist)
     {
@@ -401,6 +410,11 @@ void OptionsContainer::writeSettings()
     settings.setValue("activeIcon", getActiveIcon());
     settings.setValue("combatantFrame", getCombatantFrame());
     settings.setValue("countdownFrame", getCountdownFrame());
+
+    QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                               .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                               .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+    settings.setValue("lastAppVersion", versionString);
 
     if(_dataSettingsExist)
     {
@@ -978,6 +992,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setActiveIcon(other->_activeIcon);
         setCombatantFrame(other->_combatantFrame);
         setCountdownFrame(other->_countdownFrame);
+        _lastAppVersion = other->_lastAppVersion;
         _dataSettingsExist = other->_dataSettingsExist;
         _updatesEnabled = other->_updatesEnabled;
         _statisticsAccepted = other->_statisticsAccepted;

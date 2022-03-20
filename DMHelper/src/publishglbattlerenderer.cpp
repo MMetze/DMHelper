@@ -28,9 +28,13 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _projectionMatrix(),
     _cameraRect(),
     _scissorRect(),
-    _shaderProgram(0),
-    _shaderModelMatrix(0),
-    _shaderProjectionMatrix(0),
+    _shaderProgramRGB(0),
+    _shaderModelMatrixRGB(0),
+    _shaderProjectionMatrixRGB(0),
+    _shaderProgramRGBA(0),
+    _shaderModelMatrixRGBA(0),
+    _shaderProjectionMatrixRGBA(0),
+    _shaderAlphaRGBA(0),
     _gridImage(),
     _gridObject(nullptr),
     _fowObject(nullptr),
@@ -87,18 +91,7 @@ void PublishGLBattleRenderer::cleanup()
 
     _projectionMatrix.setToIdentity();
 
-    if(_shaderProgram > 0)
-    {
-        if((_targetWidget) && (_targetWidget->context()))
-        {
-            QOpenGLFunctions *f = _targetWidget->context()->functions();
-            if(f)
-                f->glDeleteProgram(_shaderProgram);
-        }
-        _shaderProgram = 0;
-    }
-    _shaderModelMatrix = 0;
-    _shaderProjectionMatrix = 0;
+    destroyShaders();
 
     PublishGLRenderer::cleanup();
 }
@@ -106,6 +99,11 @@ void PublishGLBattleRenderer::cleanup()
 bool PublishGLBattleRenderer::deleteOnDeactivation()
 {
     return true;
+}
+
+QRect PublishGLBattleRenderer::getScissorRect()
+{
+    return _scissorRect;
 }
 
 void PublishGLBattleRenderer::setBackgroundColor(const QColor& color)
@@ -129,85 +127,13 @@ void PublishGLBattleRenderer::initializeGL()
     if(!f)
         return;
 
+    createShaders();
+
     //f->glEnable(GL_TEXTURE_2D); // Enable texturing
     //f->glEnable(GL_BLEND);// you enable blending function
     //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //f->glEnable(GL_DEPTH_TEST);
     //f->glDepthFunc(GL_GREATER);
-
-    const char *vertexShaderSource = "#version 330 core\n"
-        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
-        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
-        "layout (location = 2) in vec2 aTexCoord;\n"
-        "uniform mat4 model;\n"
-        "uniform mat4 view;\n"
-        "uniform mat4 projection;\n"
-        "out vec3 ourColor; // output a color to the fragment shader\n"
-        "out vec2 TexCoord;\n"
-        "void main()\n"
-        "{\n"
-        "   // note that we read the multiplication from right to left\n"
-        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "   ourColor = aColor; // set ourColor to the input color we got from the vertex data\n"
-        "   TexCoord = aTexCoord;\n"
-        "}\0";
-
-    unsigned int vertexShader;
-    vertexShader = f->glCreateShader(GL_VERTEX_SHADER);
-    f->glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    f->glCompileShader(vertexShader);
-
-    int  success;
-    char infoLog[512];
-    f->glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        f->glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
-        return;
-    }
-
-    const char *fragmentShaderSource = "#version 330 core\n"
-        "out vec4 FragColor;\n"
-        "in vec3 ourColor;\n"
-        "in vec2 TexCoord;\n"
-        "uniform sampler2D texture1;\n"
-        "void main()\n"
-        "{\n"
-        "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
-        "}\0";
-
-    unsigned int fragmentShader;
-    fragmentShader = f->glCreateShader(GL_FRAGMENT_SHADER);
-    f->glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    f->glCompileShader(fragmentShader);
-
-    f->glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        f->glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
-        return;
-    }
-
-    _shaderProgram = f->glCreateProgram();
-
-    f->glAttachShader(_shaderProgram, vertexShader);
-    f->glAttachShader(_shaderProgram, fragmentShader);
-    f->glLinkProgram(_shaderProgram);
-
-    f->glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &success);
-    if(!success) {
-        f->glGetProgramInfoLog(_shaderProgram, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
-        return;
-    }
-
-    f->glUseProgram(_shaderProgram);
-    f->glDeleteShader(vertexShader);
-    f->glDeleteShader(fragmentShader);
-    _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
-    _shaderProjectionMatrix = f->glGetUniformLocation(_shaderProgram, "projection");
 
     // Create the objects
     initializeBackground();
@@ -215,19 +141,22 @@ void PublishGLBattleRenderer::initializeGL()
     if(isBackgroundReady())
         createContents();
 
-    // Matrices
-    // Model
     QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
-    // View
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
+
+    f->glUseProgram(_shaderProgramRGBA);
+    f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
+    f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData());
+
+    f->glUseProgram(_shaderProgramRGB);
+    f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGB, "texture1"), 0); // set it manually
+    f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGB, "view"), 1, GL_FALSE, viewMatrix.constData());
+
     // Projection - note, this is set later when resizing the window
     updateProjectionMatrix();
-
-    f->glUseProgram(_shaderProgram);
-    f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
     connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::recreateContents);
     connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
@@ -289,7 +218,9 @@ void PublishGLBattleRenderer::paintGL()
     if((!f) || (!e))
         return;
 
-    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
+    f->glUseProgram(_shaderProgramRGB);
+    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData());
 
     if(!_scissorRect.isEmpty())
     {
@@ -301,31 +232,36 @@ void PublishGLBattleRenderer::paintGL()
     f->glClearColor(_model->getBackgroundColor().redF(), _model->getBackgroundColor().greenF(), _model->getBackgroundColor().blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    f->glUseProgram(_shaderProgram);
-    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-
     paintBackground(f);
 
     if(_gridObject)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _gridObject->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _gridObject->getMatrixData());
         _gridObject->paintGL();
     }
 
-    for(PublishGLBattleObject* effectToken : _effectTokens)
+    f->glUseProgram(_shaderProgramRGBA);
+    f->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, _projectionMatrix.constData());
+    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    for(PublishGLBattleEffect* effectToken : _effectTokens)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, effectToken->getMatrixData());
-        effectToken->paintGL();
+        if((effectToken) && (effectToken->getEffect()) && (effectToken->getEffect()->getEffectVisible()))
+        {
+            f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
+            f->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
+            effectToken->paintGL();
+        }
     }
+    f->glUseProgram(_shaderProgramRGB);
 
     QList<PublishGLBattleToken*> tokens = _combatantTokens.values();
     for(PublishGLBattleToken* enemyToken : tokens)
     {
-        if(!enemyToken->isPC())
+        if((enemyToken) && (!enemyToken->isPC()) && (enemyToken->getCombatant()) && (enemyToken->getCombatant()->getKnown()) && (enemyToken->getCombatant()->getShown()))
         {
-            f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, enemyToken->getMatrixData());
+            f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, enemyToken->getMatrixData());
             enemyToken->paintGL();
-            enemyToken->paintEffects(_shaderModelMatrix);
+            enemyToken->paintEffects(_shaderModelMatrixRGB);
         }
     }
 
@@ -333,7 +269,7 @@ void PublishGLBattleRenderer::paintGL()
 
     if(_fowObject)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _fowObject->getMatrixData());
         _fowObject->paintGL();
     }
 
@@ -341,9 +277,9 @@ void PublishGLBattleRenderer::paintGL()
     {
         if(pcToken->isPC())
         {
-            f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, pcToken->getMatrixData());
+            f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, pcToken->getMatrixData());
             pcToken->paintGL();
-            pcToken->paintEffects(_shaderModelMatrix);
+            pcToken->paintEffects(_shaderModelMatrixRGB);
         }
     }
 
@@ -351,13 +287,13 @@ void PublishGLBattleRenderer::paintGL()
 
     if(_lineImage)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineImage->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _lineImage->getMatrixData());
         _lineImage->paintGL();
     }
 
     if(_lineTextImage)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineTextImage->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _lineTextImage->getMatrixData());
         _lineTextImage->paintGL();
     }
 
@@ -366,8 +302,7 @@ void PublishGLBattleRenderer::paintGL()
 
     paintInitiative(f);
 
-    f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
-    paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrix);
+    paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrixRGB);
 }
 
 void PublishGLBattleRenderer::fowChanged()
@@ -472,7 +407,7 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
 
 void PublishGLBattleRenderer::updateProjectionMatrix()
 {
-    if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
+    if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgramRGB == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
@@ -518,13 +453,13 @@ void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool draw
 {
     if((_activePC == drawPCs) && (_activeCombatant) && (_activeToken))
     {
-        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _activeToken->getMatrixData());
+        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _activeToken->getMatrixData());
         _activeToken->paintGL();
     }
 
     if((_movementPC == drawPCs) && (_movementVisible) && (_movementToken) && (_model->getShowMovement()))
     {
-        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _movementToken->getMatrixData());
+        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
         _movementToken->paintGL();
     }
 }
@@ -629,7 +564,7 @@ void PublishGLBattleRenderer::createContents()
         BattleDialogModelEffect* effect = _model->getEffect(i);
         if(effect)
         {
-            PublishGLBattleObject* effectToken = new PublishGLBattleEffect(&_scene, effect);
+            PublishGLBattleEffect* effectToken = new PublishGLBattleEffect(&_scene, effect);
             _effectTokens.append(effectToken);
             connect(effectToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
         }
@@ -706,14 +641,14 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
     // Initiative timeline test
     QMatrix4x4 screenCoords;
     screenCoords.ortho(0.f, _scene.getTargetSize().width(), 0.f, _scene.getTargetSize().height(), 0.1f, 1000.f);
-    functions->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, screenCoords.constData());
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, screenCoords.constData());
     QMatrix4x4 tokenScreenCoords;
     qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
     qreal tokenY = _scene.getTargetSize().height() - tokenSize / 2.0 - 5.0;
 
     if(_initiativeBackground)
     {
-        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _initiativeBackground->getMatrixData());
+        functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _initiativeBackground->getMatrixData());
         _initiativeBackground->paintGL();
     }
 
@@ -745,7 +680,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 tokenScreenCoords.setToIdentity();
                 tokenScreenCoords.translate(tokenSize / 2.0, tokenY);
                 tokenScreenCoords.scale(scaleFactor, scaleFactor);
-                functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
+                functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
                 tokenObject->paintGL();
             }
 
@@ -756,7 +691,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 {
                     tokenScreenCoords.setToIdentity();
                     tokenScreenCoords.translate(tokenSize * 1.2, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
-                    functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, tokenScreenCoords.constData());
+                    functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
                     combatantName->paintGL();
                 }
             }
@@ -768,6 +703,188 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
             currentCombatant = 0;
 
     } while(currentCombatant != activeCombatant);
+
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData());
+}
+
+void PublishGLBattleRenderer::createShaders()
+{
+    int  success;
+    char infoLog[512];
+
+    // Set up the rendering context, load shaders and other resources, etc.:
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
+    if(!f)
+        return;
+
+    const char *vertexShaderSourceRGB = "#version 330 core\n"
+        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+        "layout (location = 2) in vec2 aTexCoord;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection;\n"
+        "out vec3 ourColor; // output a color to the fragment shader\n"
+        "out vec2 TexCoord;\n"
+        "void main()\n"
+        "{\n"
+        "   // note that we read the multiplication from right to left\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   ourColor = aColor; // set ourColor to the input color we got from the vertex data\n"
+        "   TexCoord = aTexCoord;\n"
+        "}\0";
+
+    unsigned int vertexShaderRGB;
+    vertexShaderRGB = f->glCreateShader(GL_VERTEX_SHADER);
+    f->glShaderSource(vertexShaderRGB, 1, &vertexShaderSourceRGB, NULL);
+    f->glCompileShader(vertexShaderRGB);
+
+    f->glGetShaderiv(vertexShaderRGB, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(vertexShaderRGB, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    const char *fragmentShaderSourceRGB = "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "in vec3 ourColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D texture1;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+        "}\0";
+
+    unsigned int fragmentShaderRGB;
+    fragmentShaderRGB = f->glCreateShader(GL_FRAGMENT_SHADER);
+    f->glShaderSource(fragmentShaderRGB, 1, &fragmentShaderSourceRGB, NULL);
+    f->glCompileShader(fragmentShaderRGB);
+
+    f->glGetShaderiv(fragmentShaderRGB, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(fragmentShaderRGB, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    _shaderProgramRGB = f->glCreateProgram();
+
+    f->glAttachShader(_shaderProgramRGB, vertexShaderRGB);
+    f->glAttachShader(_shaderProgramRGB, fragmentShaderRGB);
+    f->glLinkProgram(_shaderProgramRGB);
+
+    f->glGetProgramiv(_shaderProgramRGB, GL_LINK_STATUS, &success);
+    if(!success) {
+        f->glGetProgramInfoLog(_shaderProgramRGB, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    f->glUseProgram(_shaderProgramRGB);
+    f->glDeleteShader(vertexShaderRGB);
+    f->glDeleteShader(fragmentShaderRGB);
+    _shaderModelMatrixRGB = f->glGetUniformLocation(_shaderProgramRGB, "model");
+    _shaderProjectionMatrixRGB = f->glGetUniformLocation(_shaderProgramRGB, "projection");
+
+    const char *vertexShaderSourceRGBA = "#version 330 core\n"
+        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+        "layout (location = 2) in vec2 aTexCoord;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection;\n"
+        "uniform float alpha;\n"
+        "out vec4 ourColor; // output a color to the fragment shader\n"
+        "out vec2 TexCoord;\n"
+        "void main()\n"
+        "{\n"
+        "   // note that we read the multiplication from right to left\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
+        "   TexCoord = aTexCoord;\n"
+        "}\0";
+
+    unsigned int vertexShaderRGBA;
+    vertexShaderRGBA = f->glCreateShader(GL_VERTEX_SHADER);
+    f->glShaderSource(vertexShaderRGBA, 1, &vertexShaderSourceRGBA, NULL);
+    f->glCompileShader(vertexShaderRGBA);
+
+    f->glGetShaderiv(vertexShaderRGBA, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(vertexShaderRGBA, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    const char *fragmentShaderSourceRGBA = "#version 330 core\n"
+        "out vec4 FragColor;\n"
+        "in vec4 ourColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D texture1;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = texture(texture1, TexCoord) * ourColor; // FragColor = vec4(ourColor, 1.0f);\n"
+        "}\0";
+
+    unsigned int fragmentShaderRGBA;
+    fragmentShaderRGBA = f->glCreateShader(GL_FRAGMENT_SHADER);
+    f->glShaderSource(fragmentShaderRGBA, 1, &fragmentShaderSourceRGBA, NULL);
+    f->glCompileShader(fragmentShaderRGBA);
+
+    f->glGetShaderiv(fragmentShaderRGBA, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(fragmentShaderRGBA, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    _shaderProgramRGBA = f->glCreateProgram();
+
+    f->glAttachShader(_shaderProgramRGBA, vertexShaderRGBA);
+    f->glAttachShader(_shaderProgramRGBA, fragmentShaderRGBA);
+    f->glLinkProgram(_shaderProgramRGBA);
+
+    f->glGetProgramiv(_shaderProgramRGBA, GL_LINK_STATUS, &success);
+    if(!success) {
+        f->glGetProgramInfoLog(_shaderProgramRGBA, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    f->glUseProgram(_shaderProgramRGBA);
+    f->glDeleteShader(vertexShaderRGBA);
+    f->glDeleteShader(fragmentShaderRGBA);
+    _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
+    _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
+    _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
+}
+
+void PublishGLBattleRenderer::destroyShaders()
+{
+    if((_targetWidget) && (_targetWidget->context()))
+    {
+        QOpenGLFunctions *f = _targetWidget->context()->functions();
+        if(f)
+        {
+            if(_shaderProgramRGB > 0)
+                f->glDeleteProgram(_shaderProgramRGB);
+            if(_shaderProgramRGBA > 0)
+                f->glDeleteProgram(_shaderProgramRGBA);
+        }
+    }
+
+    _shaderProgramRGB = 0;
+    _shaderModelMatrixRGB = 0;
+    _shaderProjectionMatrixRGB = 0;
+    _shaderProgramRGBA = 0;
+    _shaderModelMatrixRGBA = 0;
+    _shaderProjectionMatrixRGBA = 0;
+    _shaderAlphaRGBA = 0;
 }
 
 void PublishGLBattleRenderer::recreateContents()

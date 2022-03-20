@@ -20,6 +20,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     QList<BattleDialogModelCombatant*> getCombatantList() const;
     int getCombatantCount() const;

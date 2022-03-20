@@ -94,6 +94,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _hoverFrame(nullptr),
     _publishMouseDown(false),
     _publishMouseDownPos(),
+    _publishEffectItem(nullptr),
     _scene(nullptr),
     _background(nullptr),
     _fow(nullptr),
@@ -538,7 +539,7 @@ void BattleFrame::setTargetLabelSize(const QSize& targetSize)
 
 void BattleFrame::publishWindowMouseDown(const QPointF& position)
 {
-    if(!_battle)
+    if((!_battle) || (!_isPublishing))
         return;
 
     QPointF newPosition;
@@ -550,17 +551,30 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
         QList<QGraphicsItem *> itemList = _scene->items(newPosition);
         for(QGraphicsItem* graphicsItem : itemList)
         {
-            QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
-            if((pixmapItem) && ((pixmapItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
+            if((graphicsItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
             {
-                BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
-                if(selectedCombatant)
+                QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
+                if(pixmapItem)
                 {
-                    setUniqueSelection(selectedCombatant);
-                    _selectedCombatant = selectedCombatant;
+                    BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
+                    if(selectedCombatant)
+                    {
+                        setUniqueSelection(selectedCombatant);
+                        _selectedCombatant = selectedCombatant;
+                        _publishMouseDown = true;
+                        _publishMouseDownPos = newPosition;
+                        startMovement(selectedCombatant, pixmapItem, selectedCombatant->getSpeed());
+                        return;
+                    }
+                }
+
+                if(!BattleDialogModelEffect::getEffectIdFromItem(graphicsItem).isNull())
+                {
+                    cancelSelect();
+                    _publishEffectItem = graphicsItem;
                     _publishMouseDown = true;
                     _publishMouseDownPos = newPosition;
-                    startMovement(selectedCombatant, pixmapItem, selectedCombatant->getSpeed());
+                    handleEffectChanged(graphicsItem);
                 }
             }
         }
@@ -569,11 +583,14 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
 
 void BattleFrame::publishWindowMouseMove(const QPointF& position)
 {
-    if(!_battle)
+    if((!_battle) || (!_publishMouseDown))
         return;
 
-    if((!_selectedCombatant) || (!_publishMouseDown))
+    if(!_isPublishing)
+    {
+        publishWindowMouseRelease(position);
         return;
+    }
 
     QPointF newPosition;
     if(!convertPublishToScene(position, newPosition))
@@ -582,9 +599,22 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
     if(newPosition == _publishMouseDownPos)
         return;
 
-    QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
-    pixmapItem->setPos(newPosition);
-    updateMovement(_selectedCombatant, pixmapItem);
+    if(_selectedCombatant)
+    {
+        QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
+        pixmapItem->setPos(newPosition);
+        updateMovement(_selectedCombatant, pixmapItem);
+    }
+    else if(_publishEffectItem)
+    {
+        BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_publishEffectItem);
+        if(effect)
+        {
+            _publishEffectItem->setPos(newPosition);
+            effect->setPosition(_publishEffectItem->pos());
+            handleEffectChanged(_publishEffectItem);
+        }
+    }
 }
 
 void BattleFrame::publishWindowMouseRelease(const QPointF& position)
@@ -596,6 +626,7 @@ void BattleFrame::publishWindowMouseRelease(const QPointF& position)
 
     endMovement();
     _selectedCombatant = nullptr;
+    _publishEffectItem = nullptr;
     _publishMouseDown = false;
 }
 
@@ -609,6 +640,7 @@ void BattleFrame::setGridScale(int gridScale)
 
     if(_scene)
     {
+        _scene->setDistanceScale(gridScale);
         _model->setGridScale(gridScale);
 
         qreal scaleFactor;
@@ -944,22 +976,25 @@ void BattleFrame::addMonsters()
         QString baseName = combatantDlg.getName();
         int monsterCount = combatantDlg.getCount();
         int localHP = combatantDlg.getLocalHitPoints().isEmpty() ? 0 : combatantDlg.getLocalHitPoints().toInt();
+        int localInitiative = combatantDlg.getInitiative().toInt();
+
+        qreal sizeFactor = 0.0;
+        bool conversionResult = false;
+        sizeFactor = combatantDlg.getSizeFactor().toDouble(&conversionResult);
+        if(!conversionResult)
+            sizeFactor = 0.0;
 
         qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
 
         for(int i = 0; i < monsterCount; ++i)
         {
             BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
-            if(monsterCount == 1)
-            {
-                monster->setMonsterName(baseName);
-            }
-            else
-            {
-                monster->setMonsterName(baseName + QString("#") + QString::number(i+1));
-            }
+            monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
             monster->setHitPoints(localHP == 0 ? monsterClass->getHitDice().roll() : localHP);
-            monster->setInitiative(Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()));
+            monster->setInitiative(combatantDlg.isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
+            monster->setKnown(combatantDlg.isKnown());
+            monster->setShown(combatantDlg.isShown());
+            monster->setSizeFactor(sizeFactor);
             monster->setPosition(combatantPos);
             addCombatant(monster);
         }
@@ -1513,9 +1548,11 @@ void BattleFrame::updateMap()
 
     qDebug() << "[Battle Frame] Updating map " << _model->getMap()->getFileName() << " rect=" << _model->getMapRect().left() << "," << _model->getMapRect().top() << ", " << _model->getMapRect().width() << "x" << _model->getMapRect().height();
     _isVideo = false;
-    _model->getMap()->initialize();
-    if(_model->getMap()->isInitialized())
+    if(_model->getMap()->initialize())
     {
+        if(!_model->getMap()->isInitialized())
+            return;
+
         qDebug() << "[Battle Frame] Initializing battle map image";
         if(_model->getBackgroundImage().isNull())
             _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
@@ -2693,8 +2730,6 @@ void BattleFrame::removeRollover()
     if(!_hoverFrame)
         return;
 
-    qDebug() << "[Battle Frame] Removing rollover";
-
     _hoverFrame->cancelClose();
     _hoverFrame->deleteLater();
     _hoverFrame = nullptr;
@@ -3528,6 +3563,7 @@ void BattleFrame::replaceBattleMap()
 
     _background = new UnselectedPixmap();
     _fow = new UnselectedPixmap();
+    _model->setBackgroundImage(QImage());
 
     updateMap();
 
@@ -3748,14 +3784,10 @@ bool BattleFrame::convertPublishToScene(const QPointF& publishPosition, QPointF&
         publishY = publishPosition.x();
     }
 
-    if((publishWidth <= 0) || (publishWidth <= getFrameWidth()))
+    if(publishWidth <= 0)
         return false;
 
-    qreal maxPercent = static_cast<qreal>(publishWidth - getFrameWidth()) / static_cast<qreal>(publishWidth);
-    if((maxPercent <= 0.0) || (publishX < 0.0) || (publishX > maxPercent) || (publishY < 0.0) || (publishY > 1.0))
-        return false;
-
-    scenePosition = QPointF((publishX * _publishRectValue.width() / maxPercent) + _publishRectValue.x(),
+    scenePosition = QPointF((publishX * _publishRectValue.width()) + _publishRectValue.x(),
                             (publishY * _publishRectValue.height()) + _publishRectValue.y());
 
     return true;

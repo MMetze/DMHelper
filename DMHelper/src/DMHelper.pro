@@ -85,6 +85,7 @@ SOURCES += main.cpp\
     mapframescene.cpp \
     objectfactory.cpp \
     objectimporter.cpp \
+    objectimportworker.cpp \
     optionsaccessor.cpp \
     party.cpp \
     partycharactergridframe.cpp \
@@ -163,7 +164,6 @@ SOURCES += main.cpp\
     bestiarydialog.cpp \
     monsterclass.cpp \
     bestiary.cpp \
-    addmonstersdialog.cpp \
     campaigntree.cpp \
     campaigntreemodel.cpp \
     textpublishdialog.cpp \
@@ -178,7 +178,6 @@ SOURCES += main.cpp\
     scaledpixmap.cpp \
     characterframe.cpp \
     mapframe.cpp \
-    addbattlewavedialog.cpp \
     optionsdialog.cpp \
     optionscontainer.cpp \
     selectzoom.cpp \
@@ -207,6 +206,7 @@ SOURCES += main.cpp\
     videoplayerglscreenshot.cpp \
     videoplayerglvideo.cpp \
     welcomeframe.cpp \
+    whatsnewdialog.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
     widgetcharacter.cpp \
@@ -316,6 +316,7 @@ HEADERS  += mainwindow.h \
     mapmarker.h \
     objectfactory.h \
     objectimporter.h \
+    objectimportworker.h \
     optionsaccessor.h \
     party.h \
     partycharactergridframe.h \
@@ -395,7 +396,6 @@ HEADERS  += mainwindow.h \
     bestiarydialog.h \
     monsterclass.h \
     bestiary.h \
-    addmonstersdialog.h \
     campaigntree.h \
     campaigntreemodel.h \
     textpublishdialog.h \
@@ -410,7 +410,6 @@ HEADERS  += mainwindow.h \
     scaledpixmap.h \
     characterframe.h \
     mapframe.h \
-    addbattlewavedialog.h \
     optionsdialog.h \
     optionscontainer.h \
     selectzoom.h \
@@ -439,6 +438,7 @@ HEADERS  += mainwindow.h \
     videoplayerglscreenshot.h \
     videoplayerglvideo.h \
     welcomeframe.h \
+    whatsnewdialog.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \
     widgetcharacter.h \
@@ -493,7 +493,6 @@ FORMS    += mainwindow.ui \
     dicerolldialog.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
-    addmonstersdialog.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
@@ -529,7 +528,6 @@ FORMS    += mainwindow.ui \
     mapmarkerdialog.ui \
     characterframe.ui \
     mapframe.ui \
-    addbattlewavedialog.ui \
     optionsdialog.ui \
     selectzoom.ui \
     itemselectdialog.ui \
@@ -540,6 +538,7 @@ FORMS    += mainwindow.ui \
     dicerollframe.ui \
     battledialogeffectsettings.ui \
     welcomeframe.ui \
+    whatsnewdialog.ui \
     widgetbattlecombatant.ui \
     dicerolldialogcombatants.ui \
     widgetcharacter.ui \

@@ -20,6 +20,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     // Local
     virtual BattleDialogModelCombatant* clone() const override;
@@ -43,6 +44,7 @@ public:
     virtual int getMonsterType() const override;
     virtual MonsterClass* getMonsterClass() const override;
 
+    void setSizeFactor(qreal sizeFactor);
     void setMonsterName(const QString& monsterName);
 
 protected:
@@ -52,6 +54,7 @@ protected:
     MonsterClass* _monsterClass;
     QString _monsterName;
     int _monsterHP;
+    qreal _monsterSize;
 };
 
 
