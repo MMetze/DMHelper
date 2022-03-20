@@ -2,6 +2,7 @@
 #define PUBLISHGLRENDERER_H
 
 #include <QObject>
+#include <QPointF>
 
 class CampaignObjectBase;
 class PublishGLImage;

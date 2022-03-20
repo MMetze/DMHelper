@@ -38,7 +38,7 @@ signals:
 
 public slots:
     // From QDialog
-    virtual void accept();
+    virtual void accept() override;
 
 protected:
     virtual void showEvent(QShowEvent *event) override;
