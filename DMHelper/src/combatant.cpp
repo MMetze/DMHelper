@@ -87,6 +87,7 @@ void Combatant::copyValues(const CampaignObjectBase* other)
     _hitDice = otherCombatant->_hitDice;
     _conditions = otherCombatant->_conditions;
     _icon = otherCombatant->_icon;
+    _iconPixmap.setBasePixmap(_icon);
 
     for(int i = 0; i < otherCombatant->_attacks.count(); ++i)
     {

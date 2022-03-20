@@ -29,12 +29,6 @@ public:
     QUuid getID() const;
     int getIntID() const;
 
-    // STATIC FUNCTIONS
-    //static void setBaseId(int baseId);
-    //static void resetBaseId();
-    //static int createId();
-    //static QString createId();
-
 signals:
 
 public slots:

@@ -11,7 +11,6 @@ class PartyFrame;
 
 class Party;
 class Character;
-//class QVBoxLayout;
 class QGridLayout;
 class PartyCharacterGridFrame;
 
@@ -61,7 +60,6 @@ private:
     void handlePublishClicked();
 
     Ui::PartyFrame *ui;
-    //QVBoxLayout* _characterLayout;
     QGridLayout* _characterGrid;
     QList<PartyCharacterGridFrame* > _characterFrames;
 

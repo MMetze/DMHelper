@@ -2,7 +2,6 @@
 #include "ui_partyframe.h"
 #include "party.h"
 #include "character.h"
-//#include "partyframecharacter.h"
 #include "partycharactergridframe.h"
 #include "characterimporter.h"
 #include <QFileDialog>
@@ -14,7 +13,6 @@ const int PARTY_FRAME_SPACING = 20;
 PartyFrame::PartyFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::PartyFrame),
-    //_characterLayout(nullptr),
     _characterGrid(nullptr),
     _characterFrames(),
     _party(nullptr),
@@ -23,29 +21,12 @@ PartyFrame::PartyFrame(QWidget *parent) :
     _layoutColumns(-1)
 {
     ui->setupUi(this);
-
-//    _characterLayout = new QVBoxLayout;
-//    _characterLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-//    _characterLayout->setContentsMargins(3,3,3,3);
-//    ui->scrollAreaWidgetContents->setLayout(_characterLayout);
-
     connect(ui->btnUpdateAll, &QAbstractButton::clicked, this, &PartyFrame::updateAll);
-
 }
 
 PartyFrame::~PartyFrame()
 {
-    //qDebug() << "[PartyFrame] being destroyed: " << _characterLayout->count() << " widgets";
     qDebug() << "[PartyFrame] being destroyed: " << (_characterGrid ? _characterGrid->count() : 0) << " widgets";
-
-    /*
-    QLayoutItem *child;
-    //while ((child = _characterLayout->takeAt(0)) != nullptr)
-    while ((child = _characterGrid->takeAt(0)) != nullptr)
-    {
-        delete child;
-    }
-    */
 
     clearList();
 
@@ -301,7 +282,6 @@ int PartyFrame::getColumnCount()
     qDebug() << "[PartyFrame] calculated columns: " << (ui->characterList->width() - PARTY_FRAME_SPACING) / (_characterFrames.at(0)->width() + PARTY_FRAME_SPACING);
 
     // (Width of the scroll area minus the left margin) / (width of a frame plus spacing between frames)
-    //return (ui->characterList->width() - PARTY_FRAME_SPACING) / (_characterFrames.at(0)->width() + PARTY_FRAME_SPACING);
     return (ui->characterList->width() - PARTY_FRAME_SPACING) / (320 + PARTY_FRAME_SPACING);
 }
 

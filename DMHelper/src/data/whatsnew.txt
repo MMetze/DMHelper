@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 2.3.4</h2>
+<h2>What's New: Version 2.3.5</h2>
 <h3>With this version, I have two questions:</h3>
 <ol>
 <li>Does it not work for anybody? I expect every machine out there is somehow OpenGL-enabled, but I want to be sure...
