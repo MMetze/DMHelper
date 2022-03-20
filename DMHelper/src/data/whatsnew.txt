@@ -38,4 +38,4 @@ All-new (and still optional) Initiative Tracker on the Player Window
 Moving characters, effects and objects from the Player's Window
 Rebooted "Add Monster" dialog, with more customization options
 Added proper transparency support for objects and spell effects
-
+Fixed Export & Import
