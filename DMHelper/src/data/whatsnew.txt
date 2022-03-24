@@ -11,13 +11,18 @@
 <div class="myDiv">
 <h2>What's New: Version 2.4</h2>
 <h3>New Features:</h3>
-<ol>
+<ul>
 <li>What's New? This What's New Dialog! Spiffy, isn't it?
 <li>Amazing new HW-accelerated Player Window rendering... lots more to come here! If you had any performance issues while publishing with previous versions, that should be a thing of the past now.
 <li>All-new (and still optional) Initiative Tracker on the Player Window. Somewhat condensed and two different visualization options
 <li>Moving characters, effects and objects from the Player's Window. Your players want to move their fireball around? Their spaceship? No problem!
 <li>Added proper transparency support for objects and spell effects
-</ol>
+<li>Add map markers with flexible icons
+<li>Distance moved for each combatant is tracked during their turn
+<li>Smooth multi-selection of combatants in battle
+<li>Distance measurement added to the map view as well as combat
+<li>Quick shortcut campaign notes, just hit Ctrl+Alt+N and enter a note, you can open the notes to view/edit them on the Campaign tab
+</ul>
 <p>
 <h3>Other Improvements:</h3>
 <ul>
