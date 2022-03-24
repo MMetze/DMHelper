@@ -26,20 +26,23 @@ signals:
 private slots:
     void selectImportFile();
     void selectAssetDirectory();
-    void importFileChanged();
-    void assetDirectoryChanged();
+    void targetObjectSelected();
+    void checkImportValid();
 
     void runImport();
     void importFinished(bool success, const QString& error);
 
 private:
-    void checkImportValid();
     bool isImportValid();
+    void populateCampaign();
+    void addCampaignObject(CampaignObjectBase* object, int depth, const QUuid& selectedObject);
+    QIcon objectIcon(CampaignObjectBase* object);
 
     Ui::ObjectImportDialog *ui;
 
     Campaign* _campaign;
     CampaignObjectBase* _parentObject;
+    CampaignObjectBase* _targetObject;
 
     ObjectImportWorker* _worker;
     DMHWaitingDialog* _waitingDlg;

@@ -30,7 +30,7 @@ CombatantDialog::CombatantDialog(QDialogButtonBox::StandardButtons buttons, QWid
     ui->edtInitiative->setValidator(new QIntValidator(-100, 1000, this));
 
     ui->edtSize->setValidator(new QDoubleValidator(0.25, 1000.0, 2, this));
-    connect(ui->cmbSize,  QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CombatantDialog::sizeSelected);
+    connect(ui->cmbSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CombatantDialog::sizeSelected);
     fillSizeCombo();
 
     ui->cmbMonsterClass->addItems(Bestiary::Instance()->getMonsterList());
