@@ -84,7 +84,7 @@ SOURCES += main.cpp\
     mapfactory.cpp \
     mapframescene.cpp \
     objectfactory.cpp \
-    objectimporter.cpp \
+    objectimportdialog.cpp \
     objectimportworker.cpp \
     optionsaccessor.cpp \
     party.cpp \
@@ -315,7 +315,7 @@ HEADERS  += mainwindow.h \
     mapframescene.h \
     mapmarker.h \
     objectfactory.h \
-    objectimporter.h \
+    objectimportdialog.h \
     objectimportworker.h \
     optionsaccessor.h \
     party.h \
@@ -499,6 +499,7 @@ FORMS    += mainwindow.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
+    objectimportdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \

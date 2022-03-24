@@ -110,7 +110,7 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
             if(childObject)
                 childObject->internalPostProcessXML(childElement, isImport);
 
-            postProcessXML(childElement, isImport);
+            CampaignObjectBase::postProcessXML(childElement, isImport);
         }
 
         childElement = childElement.nextSiblingElement();
