@@ -39,7 +39,7 @@ private:
 
     QImage _dieImage;
     QImage _backgroundImage;
-    QString _status;
+    QString _initialStatus;
 
     QElapsedTimer _elapsed;
     int _timerId;

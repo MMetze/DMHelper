@@ -395,7 +395,7 @@ void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
     _previousMapRect = _mapRect;
     _mapRect = mapRect;
 
-    if((_map) && (_previousMap != _map))
+    if((_map) && (_previousMap != _map) && (_combatants.count() > 0))
     {
         _map->initialize();
         QRect mapRect(QPoint(), _map->getBackgroundImage().size());

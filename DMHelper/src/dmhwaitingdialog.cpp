@@ -9,6 +9,7 @@ DMHWaitingDialog::DMHWaitingDialog(const QString& statusString, QWidget *parent)
     ui(new Ui::DMHWaitingDialog),
     _dieImage(),
     _backgroundImage(),
+    _initialStatus(statusString),
     _elapsed(),
     _timerId(0),
     _rotation(0.0)
@@ -18,7 +19,6 @@ DMHWaitingDialog::DMHWaitingDialog(const QString& statusString, QWidget *parent)
 
     _backgroundImage.load(":/img/data/dmhelper_waiting_image");
     _dieImage.load(":/img/data/dmhelper_waiting_die");
-    ui->lblStatus->setText(statusString);
 
     ui->label->installEventFilter(this);
 }
@@ -71,6 +71,9 @@ void DMHWaitingDialog::closeEvent(QCloseEvent *event)
 void DMHWaitingDialog::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
+
+    if(!_initialStatus.isEmpty())
+        setStatus(_initialStatus);
 
     if(parentWidget())
         move((parentWidget()->width() / 2) - (width() / 2), (parentWidget()->height() / 2) - (height() / 2));

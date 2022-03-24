@@ -236,10 +236,6 @@ void PublishGLTextRenderer::rewind()
     if((!_encounter) || (!_textObject))
         return;
 
-    int rotHeight = getRotatedHeight(_rotation);
-    QSize imgSize = _textObject->getImageSize();
-    int imgHeight = imgSize.height();
-
     if(_encounter->getAnimated())
         _textObject->setY((-getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
     else

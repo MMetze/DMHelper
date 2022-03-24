@@ -8,7 +8,7 @@
 #include "party.h"
 #include "character.h"
 #include "characterimporter.h"
-#include "objectimporter.h"
+#include "objectimportdialog.h"
 #include "partyframe.h"
 #include "characterframe.h"
 #include "campaign.h"
@@ -941,9 +941,12 @@ void MainWindow::importItem()
 
     CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
 
-    ObjectImporter* importer = new ObjectImporter();
-    connect(importer, &ObjectImporter::importComplete, this, &MainWindow::updateCampaignTree);
-    importer->importObject(_campaign, currentObject ? currentObject : _campaign, _campaignFileName);
+    ObjectImportDialog dlg(_campaign, currentObject ? currentObject : _campaign, _campaignFileName);
+    connect(&dlg, &ObjectImportDialog::importComplete, this, &MainWindow::updateCampaignTree);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg.resize(primary->availableSize().width() / 2, primary->availableSize().height() / 4);
+    dlg.exec();
 }
 
 void MainWindow::newParty()
