@@ -9,33 +9,32 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 2.3.5</h2>
-<h3>With this version, I have two questions:</h3>
+<h2>What's New: Version 2.4</h2>
+<h3>New Features:</h3>
 <ol>
-<li>Does it not work for anybody? I expect every machine out there is somehow OpenGL-enabled, but I want to be sure...
-<li>What do you think? Does it make a difference? Is it smoother?
+<li>What's New? This What's New Dialog! Spiffy, isn't it?
+<li>Amazing new HW-accelerated Player Window rendering... lots more to come here! If you had any performance issues while publishing with previous versions, that should be a thing of the past now.
+<li>All-new (and still optional) Initiative Tracker on the Player Window. Somewhat condensed and two different visualization options
+<li>Moving characters, effects and objects from the Player's Window. Your players want to move their fireball around? Their spaceship? No problem!
+<li>Added proper transparency support for objects and spell effects
 </ol>
 <p>
-<h3>More Feature improvements:</h3>
+<h3>Other Improvements:</h3>
 <ul>
-<li>Publish an entry but still look at other entries (published entry is marked in the campaign tree)
-<li>Added all the Indiana Jones path entries for battles, too
-<li>3 versions of the initiative list in the player's window: none, images-only and images-with-names... what do you think?
+<li>Changing a map in combat leaves combatants where they are. This is really useful if the terrain changes dramatically mid-battle.
+<li>Rebooted "Add Monster" dialog, with even more customization options
+<li>Fixed and enhanced the Export & Import functionality, which unfortunately <u>really</u> didn't work right in v2.3
 </ul>
 <p>
-<h3>Downsides for now</h3>
+<h3>Downside for now</h3>
 <ul>
-<li>No MacOS version of this yet, I need to update it first
-<li>The new libvlc I need to use doesn't work well with videos, so animated maps don't animate right now, they just show as their static version.
+<li>The new libvlc I need to use doesn't work well yet with videos and OpenGL, so animated maps don't animate right now, they just show as their static version. I assure you it is in my own very personal interest to get this sorted out asap!
+</ul>
+<p>
+<h3>And don't forget</h3>
+<ul>
+<li><b>Press the magical "F" key on the Player's Window for Fullscreen mode, the only way to play!</b>
 </ul>
 </div>
 </body>
 </html>
-
-What's New? This What's New Dialog!
-Amazing new HW-accelerated Player Window rendering... lots more to come here!
-All-new (and still optional) Initiative Tracker on the Player Window
-Moving characters, effects and objects from the Player's Window
-Rebooted "Add Monster" dialog, with more customization options
-Added proper transparency support for objects and spell effects
-Fixed Export & Import
