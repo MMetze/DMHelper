@@ -22,6 +22,18 @@ void Party::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+void Party::copyValues(const CampaignObjectBase* other)
+{
+    const Party* otherParty = dynamic_cast<const Party*>(other);
+    if(!otherParty)
+        return;
+
+    _icon = otherParty->_icon;
+    _iconPixmap.setBasePixmap(_icon.isEmpty() ? QString(":/img/data/icon_party.png") : _icon);
+
+    EncounterText::copyValues(other);
+}
+
 int Party::getObjectType() const
 {
     return DMHelper::CampaignType_Party;

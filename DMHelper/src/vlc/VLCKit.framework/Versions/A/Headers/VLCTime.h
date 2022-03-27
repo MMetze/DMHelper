@@ -27,6 +27,7 @@
 /**
  * Provides an object to define VLCMedia's time.
  */
+OBJC_VISIBLE
 @interface VLCTime : NSObject
 
 /**
@@ -46,6 +47,16 @@
  * \return the VLCTime object
  */
 + (VLCTime *)timeWithInt:(int)aInt;
+/**
+ * return the libvlc clock time as microseconds
+ */
++ (int64_t)clock;
+/**
+ * return the delay (in microseconds) until a specific timestamp
+ * \param ts the target timestamp
+ * \return negative if timestamp is in the past, positive if it is in the future
+ */
++ (int64_t)delay:(int64_t)ts;
 
 /**
  * init a time object with a given number object
@@ -66,12 +77,6 @@
  * \return the NSNumber object
  */
 @property (nonatomic, readonly) NSNumber * value;    ///< Holds, in milliseconds, the VLCTime value
-/**
- * the current time value as NSNumber
- * \return the NSNumber object
- * \deprecated use value instead
- */
-@property (readonly) NSNumber * numberValue __attribute__((deprecated));	    // here for backwards compatibility
 
 /**
  * the current time value as string value localized for the current environment
@@ -79,7 +84,8 @@
  */
 @property (readonly) NSString * stringValue;
 /**
- * the current time value as verbose string value localized for the current environment
+ * the current time value as verbose localized string
+ * examples: 17 minutes 1 second, 1 Stunde 33 Minuten und 41 Sekunden
  * \return the NSString object
  */
 @property (readonly) NSString * verboseStringValue;

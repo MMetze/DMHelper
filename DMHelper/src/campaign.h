@@ -47,6 +47,7 @@ public:
 
     BasicDate getDate() const;
     QTime getTime() const;
+    QStringList getNotes() const;
 
     bool isValid() const;
     void cleanupCampaign(bool deleteAll);
@@ -58,6 +59,8 @@ signals:
 public slots:
     void setDate(const BasicDate& date);
     void setTime(const QTime& time);
+    void setNotes(const QString& notes);
+    void addNote(const QString& note);
     bool validateCampaignIds();
 
 protected slots:
@@ -75,6 +78,7 @@ protected:
 
     BasicDate _date;
     QTime _time;
+    QStringList _notes;
 
     bool _batchChanges;
     bool _changesMade;

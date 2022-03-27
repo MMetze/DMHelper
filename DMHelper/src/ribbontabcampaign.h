@@ -32,6 +32,7 @@ signals:
     void newSyrinscapeClicked();
     void newYoutubeClicked();
     void removeItemClicked();
+    void showNotesClicked();
     void exportItemClicked();
     void importItemClicked();
     void importCharacterClicked();

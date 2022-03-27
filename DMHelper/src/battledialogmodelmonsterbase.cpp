@@ -36,6 +36,18 @@ void BattleDialogModelMonsterBase::inputXML(const QDomElement &element, bool isI
     _conditions = element.attribute("conditions",QString::number(0)).toInt();
 }
 
+void BattleDialogModelMonsterBase::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelMonsterBase* otherMonsterBase = dynamic_cast<const BattleDialogModelMonsterBase*>(other);
+    if(!otherMonsterBase)
+        return;
+
+    _legendaryCount = otherMonsterBase->_legendaryCount;
+    _conditions = otherMonsterBase->_conditions;
+
+    BattleDialogModelCombatant::copyValues(other);
+}
+
 int BattleDialogModelMonsterBase::getCombatantType() const
 {
     return DMHelper::CombatantType_Monster;
@@ -71,6 +83,7 @@ void BattleDialogModelMonsterBase::setConditions(int conditions)
     {
         _conditions = conditions;
         emit dataChanged(this);
+        emit conditionsChanged(this);
     }
 }
 
@@ -80,6 +93,7 @@ void BattleDialogModelMonsterBase::applyConditions(int conditions)
     {
         _conditions |= conditions;
         emit dataChanged(this);
+        emit conditionsChanged(this);
     }
 }
 
@@ -89,6 +103,17 @@ void BattleDialogModelMonsterBase::removeConditions(int conditions)
     {
         _conditions &= ~conditions;
         emit dataChanged(this);
+        emit conditionsChanged(this);
+    }
+}
+
+void BattleDialogModelMonsterBase::clearConditions()
+{
+    if(_conditions != 0)
+    {
+        _conditions = 0;
+        emit dataChanged(this);
+        emit conditionsChanged(this);
     }
 }
 

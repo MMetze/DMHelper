@@ -18,14 +18,20 @@ CombatantDialog::CombatantDialog(QDialogButtonBox::StandardButtons buttons, QWid
 {
     ui->setupUi(this);
 
-    ui->edtCount->setValidator(new QIntValidator(1,100,this));
-    ui->edtHitPointsLocal->setValidator(new QIntValidator(-10,1000,this));
+    ui->edtCount->setValidator(new QIntValidator(1, 100, this));
+    ui->edtHitPointsLocal->setValidator(new QIntValidator(-10, 1000, this));
     ui->buttonBox->setStandardButtons(buttons);
 
     connect(ui->cmbMonsterClass, SIGNAL(currentIndexChanged(QString)), this, SLOT(monsterClassChanged(QString)));
     connect(ui->chkUseAverage, SIGNAL(clicked(bool)), ui->edtHitPointsLocal, SLOT(setDisabled(bool)));
-    connect(ui->chkUseAverage, SIGNAL(clicked(bool)), this, SLOT(useHitPointAverageChanged(bool)));
     connect(ui->btnOpenMonster, SIGNAL(clicked(bool)), this, SLOT(openMonsterClicked()));
+
+    connect(ui->chkRandomInitiative, &QAbstractButton::clicked, ui->edtInitiative, &QWidget::setDisabled);
+    ui->edtInitiative->setValidator(new QIntValidator(-100, 1000, this));
+
+    ui->edtSize->setValidator(new QDoubleValidator(0.25, 1000.0, 2, this));
+    connect(ui->cmbSize, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &CombatantDialog::sizeSelected);
+    fillSizeCombo();
 
     ui->cmbMonsterClass->addItems(Bestiary::Instance()->getMonsterList());
 }
@@ -74,6 +80,36 @@ QString CombatantDialog::getLocalHitPoints() const
     return ui->edtHitPointsLocal->text();
 }
 
+bool CombatantDialog::isRandomInitiative() const
+{
+    return ui->chkRandomInitiative->isChecked();
+}
+
+QString CombatantDialog::getInitiative() const
+{
+    return ui->edtInitiative->text();
+}
+
+bool CombatantDialog::isKnown() const
+{
+    return ui->chkKnown->isChecked();
+}
+
+bool CombatantDialog::isShown() const
+{
+    return ui->chkVisible->isChecked();
+}
+
+bool CombatantDialog::isCustomSize() const
+{
+    return ui->cmbSize->currentData().toInt() == DMHelper::CombatantSize_Unknown;
+}
+
+QString CombatantDialog::getSizeFactor() const
+{
+    return ui->edtSize->text();
+}
+
 MonsterClass* CombatantDialog::getMonsterClass() const
 {
     MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
@@ -113,6 +149,18 @@ void CombatantDialog::accept()
     QDialog::accept();
 }
 
+void CombatantDialog::showEvent(QShowEvent *event)
+{
+    updateIcon();
+    QDialog::showEvent(event);
+}
+
+void CombatantDialog::resizeEvent(QResizeEvent *event)
+{
+    updateIcon();
+    QDialog::resizeEvent(event);
+}
+
 void CombatantDialog::monsterClassChanged(const QString &text)
 {
     MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(text);
@@ -122,28 +170,44 @@ void CombatantDialog::monsterClassChanged(const QString &text)
         return;
     }
 
-    QPixmap pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Animate);
-    if(pmp.isNull())
-        pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate);
-
-    ui->lblIcon->setPixmap(pmp);
+    updateIcon();
 
     ui->edtName->setText(text);
     ui->edtHitDice->setText(monsterClass->getHitDice().toString());
-    if(ui->chkUseAverage->isChecked())
-        useHitPointAverageChanged(true);
+
+    setHitPointAverageChanged();
+
+    if(ui->cmbSize->currentData().toInt() != DMHelper::CombatantSize_Unknown)
+        ui->cmbSize->setCurrentIndex(monsterClass->getMonsterSizeCategory() - 1);
 }
 
-void CombatantDialog::useHitPointAverageChanged(bool useAverage)
+void CombatantDialog::updateIcon()
+{
+    if(!ui->lblIcon->size().isValid())
+        return;
+
+    MonsterClass* monsterClass = getMonsterClass();
+    if(!monsterClass)
+        return;
+
+    QPixmap pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Full);
+    if(pmp.isNull())
+    {
+        pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Full);
+        if(pmp.isNull())
+            return;
+    }
+
+    ui->lblIcon->setPixmap(pmp.scaled(ui->lblIcon->size(), Qt::KeepAspectRatio));
+}
+
+void CombatantDialog::setHitPointAverageChanged()
 {
     QString localHitPoints;
 
-    if(useAverage)
-    {
-        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
-        if(monsterClass)
-            localHitPoints = QString::number(monsterClass->getHitDice().average());
-    }
+    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+    if(monsterClass)
+        localHitPoints = QString::number(monsterClass->getHitDice().average());
 
     ui->edtHitPointsLocal->setText(localHitPoints);
 }
@@ -151,4 +215,31 @@ void CombatantDialog::useHitPointAverageChanged(bool useAverage)
 void CombatantDialog::openMonsterClicked()
 {
     emit openMonster(ui->cmbMonsterClass->currentText());
+}
+
+void CombatantDialog::sizeSelected(int index)
+{
+    Q_UNUSED(index);
+    int sizeCategory = ui->cmbSize->currentData().toInt();
+
+    ui->edtSize->setEnabled(sizeCategory == DMHelper::CombatantSize_Unknown);
+    if(sizeCategory != DMHelper::CombatantSize_Unknown)
+        ui->edtSize->setText(QString::number(MonsterClass::convertSizeCategoryToScaleFactor(sizeCategory)));
+}
+
+void CombatantDialog::fillSizeCombo()
+{
+    ui->cmbSize->clear();
+
+    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Tiny), DMHelper::CombatantSize_Tiny);
+    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Small), DMHelper::CombatantSize_Small);
+    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Medium), DMHelper::CombatantSize_Medium);
+    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Large), DMHelper::CombatantSize_Large);
+    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Huge), DMHelper::CombatantSize_Huge);
+    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Gargantuan), DMHelper::CombatantSize_Gargantuan);
+    ui->cmbSize->addItem(MonsterClass::convertCategoryToSize(DMHelper::CombatantSize_Colossal), DMHelper::CombatantSize_Colossal);
+    ui->cmbSize->insertSeparator(999); // Insert at the end of the list
+    ui->cmbSize->addItem(QString("Custom..."), DMHelper::CombatantSize_Unknown);
+
+    ui->cmbSize->setCurrentIndex(2); // Default to Medium
 }

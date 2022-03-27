@@ -19,13 +19,6 @@ BattleDialogModelCharacter::BattleDialogModelCharacter(Character* character, int
 {
 }
 
-/*
-BattleDialogModelCharacter::BattleDialogModelCharacter(const BattleDialogModelCharacter& other) :
-    BattleDialogModelCombatant(other)
-{
-}
-*/
-
 BattleDialogModelCharacter::~BattleDialogModelCharacter()
 {
 }
@@ -43,7 +36,7 @@ int BattleDialogModelCharacter::getCombatantType() const
 BattleDialogModelCombatant* BattleDialogModelCharacter::clone() const
 {
     BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(getName());
-    newCharacter->copyValues(*this);
+    newCharacter->copyValues(this);
     return newCharacter;
 }
 
@@ -280,17 +273,36 @@ void BattleDialogModelCharacter::setCharacter(Character* character)
 void BattleDialogModelCharacter::setConditions(int conditions)
 {
     if(_combatant)
+    {
         _combatant->setConditions(conditions);
+        emit conditionsChanged(this);
+    }
 }
 
 void BattleDialogModelCharacter::applyConditions(int conditions)
 {
     if(_combatant)
+    {
         _combatant->applyConditions(conditions);
+        emit conditionsChanged(this);
+    }
 }
 
 void BattleDialogModelCharacter::removeConditions(int conditions)
 {
     if(_combatant)
+    {
         _combatant->removeConditions(conditions);
+        emit conditionsChanged(this);
+    }
 }
+
+void BattleDialogModelCharacter::clearConditions()
+{
+    if(_combatant)
+    {
+        _combatant->clearConditions();
+        emit conditionsChanged(this);
+    }
+}
+

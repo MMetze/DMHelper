@@ -1,6 +1,7 @@
 #include "optionscontainer.h"
 #include "optionsdialog.h"
-#include <QSettings>
+#include "optionsaccessor.h"
+#include "dmversion.h"
 #include <QDir>
 #include <QCoreApplication>
 #include <QStandardPaths>
@@ -27,7 +28,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _logicalDPI(0.0),
     _pasteRich(false),
     _audioVolume(100),
-    _showOnDeck(true),
+    _initiativeType(DMHelper::InitiativeType_None),
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
@@ -35,6 +36,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _activeIcon(),
     _combatantFrame(),
     _countdownFrame(),
+    _lastAppVersion(),
     _dataSettingsExist(false),
     _updatesEnabled(false),
     _statisticsAccepted(false),
@@ -132,9 +134,9 @@ int OptionsContainer::getAudioVolume() const
     return _audioVolume;
 }
 
-bool OptionsContainer::getShowOnDeck() const
+int OptionsContainer::getInitiativeType() const
 {
-    return _showOnDeck;
+    return _initiativeType;
 }
 
 bool OptionsContainer::getShowCountdown() const
@@ -170,6 +172,11 @@ QString OptionsContainer::getCombatantFrame() const
 QString OptionsContainer::getCountdownFrame() const
 {
     return _countdownFrame;
+}
+
+QString OptionsContainer::getLastAppVersion() const
+{
+    return _lastAppVersion;
 }
 
 bool OptionsContainer::doDataSettingsExist() const
@@ -283,11 +290,7 @@ void OptionsContainer::editSettings()
 
 void OptionsContainer::readSettings()
 {
-    QSettings settings("Glacial Software", "DMHelper");
-
-#ifdef QT_DEBUG
-    settings.beginGroup("DEBUG");
-#endif
+    OptionsAccessor settings;
 
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
@@ -330,7 +333,10 @@ void OptionsContainer::readSettings()
     setFontSize(settings.value("fontSize",QVariant(defaultFontSize)).toInt());
     setPasteRich(settings.value("pasteRich",QVariant(false)).toBool());
     setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
-    setShowOnDeck(settings.value("showOnDeck",QVariant(true)).toBool());
+    if(settings.contains("initiativeType"))
+        setInitiativeType(settings.value("initiativeType",QVariant(0)).toInt());
+    else
+        setInitiativeType(settings.value("showOnDeck",QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
     setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
@@ -338,6 +344,8 @@ void OptionsContainer::readSettings()
     setActiveIcon(settings.value("activeIcon").toString());
     setCombatantFrame(settings.value("combatantFrame").toString());
     setCountdownFrame(settings.value("countdownFrame").toString());
+
+    _lastAppVersion = settings.value("lastAppVersion").toString();
 
     _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
     if(_dataSettingsExist)
@@ -364,22 +372,12 @@ void OptionsContainer::readSettings()
 #endif
 
     if(_mruHandler)
-    {
         _mruHandler->readMRUFromSettings(settings);
-    }
-
-#ifdef QT_DEBUG
-    settings.endGroup(); // DEBUG
-#endif
 }
 
 void OptionsContainer::writeSettings()
 {
-    QSettings settings("Glacial Software", "DMHelper");
-
-#ifdef QT_DEBUG
-    settings.beginGroup("DEBUG");
-#endif
+    OptionsAccessor settings;
 
     QMainWindow* mainWindow = getMainWindow();
     if(mainWindow)
@@ -404,7 +402,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("fontSize", getFontSize());
     settings.setValue("pasteRich", getPasteRich());
     settings.setValue("audioVolume", getAudioVolume());
-    settings.setValue("showOnDeck", getShowOnDeck());
+    settings.setValue("initiativeType", getInitiativeType());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
@@ -412,6 +410,11 @@ void OptionsContainer::writeSettings()
     settings.setValue("activeIcon", getActiveIcon());
     settings.setValue("combatantFrame", getCombatantFrame());
     settings.setValue("countdownFrame", getCountdownFrame());
+
+    QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                               .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                               .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+    settings.setValue("lastAppVersion", versionString);
 
     if(_dataSettingsExist)
     {
@@ -442,9 +445,7 @@ void OptionsContainer::writeSettings()
         _mruHandler->writeMRUToSettings(settings);
     }
 
-#ifdef QT_DEBUG
-    settings.endGroup(); // DEBUG
-#endif
+    cleanupLegacy(settings);
 }
 
 void OptionsContainer::setBestiaryFileName(const QString& filename)
@@ -507,7 +508,7 @@ void OptionsContainer::setShopsFileName(const QString& filename)
     }
 }
 
-QString OptionsContainer::getSettingsFile(QSettings& settings, const QString& key, const QString& defaultFilename, bool* exists)
+QString OptionsContainer::getSettingsFile(OptionsAccessor& settings, const QString& key, const QString& defaultFilename, bool* exists)
 {
     QString result = settings.value(key, QVariant()).toString();
 
@@ -591,7 +592,7 @@ void OptionsContainer::setTablesDirectory(const QString& directory)
     }
 }
 
-QString OptionsContainer::getSettingsDirectory(QSettings& settings, const QString& key, const QString& defaultDir)
+QString OptionsContainer::getSettingsDirectory(OptionsAccessor& settings, const QString& key, const QString& defaultDir)
 {
     QString result = settings.value(key, QVariant()).toString();
     if(!result.isEmpty())
@@ -786,12 +787,12 @@ void OptionsContainer::setAudioVolume(int volume)
     }
 }
 
-void OptionsContainer::setShowOnDeck(bool showOnDeck)
+void OptionsContainer::setInitiativeType(int initiativeType)
 {
-    if(_showOnDeck != showOnDeck)
+    if(_initiativeType != initiativeType)
     {
-        _showOnDeck = showOnDeck;
-        emit showOnDeckChanged(_showOnDeck);
+        _initiativeType = initiativeType;
+        emit initiativeTypeChanged(_initiativeType);
     }
 }
 
@@ -983,7 +984,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setShowAnimations(other->_showAnimations);
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
-        setShowOnDeck(other->_showOnDeck);
+        setInitiativeType(other->_initiativeType);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);
@@ -991,6 +992,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setActiveIcon(other->_activeIcon);
         setCombatantFrame(other->_combatantFrame);
         setCountdownFrame(other->_countdownFrame);
+        _lastAppVersion = other->_lastAppVersion;
         _dataSettingsExist = other->_dataSettingsExist;
         _updatesEnabled = other->_updatesEnabled;
         _statisticsAccepted = other->_statisticsAccepted;
@@ -1011,4 +1013,9 @@ void OptionsContainer::copy(OptionsContainer* other)
 QMainWindow* OptionsContainer::getMainWindow()
 {
     return dynamic_cast<QMainWindow*>(parent());
+}
+
+void OptionsContainer::cleanupLegacy(OptionsAccessor& settings)
+{
+    settings.remove("showOnDeck");
 }

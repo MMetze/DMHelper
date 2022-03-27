@@ -1,3 +1,10 @@
+Checkpoint: when adding a new attribute/item to a campaign entry, consider:
+* presentation in the view
+* output/input
+* export/import (copy)
+
+
+
 IMPORTANT: FIND OUT ABOUT THE DEPENDENCY ON WINDOWS DISTRIBUTABLE, DIFFERENT FROM PREVIOUS
 1. Soundboard
     DONE - First draft done with local files, youtube and syrinscape playback.
@@ -116,7 +123,6 @@ Ctrl+G: Go to the Soundboard
 Ctrl+H: Go to the Spellbook
 Ctrl+J:
 Ctrl+K: Opens the Kalendar
-Ctrl+L: Open the Preview Window
 Ctrl+Y: Redo
 Ctrl+X: Cut
 Ctrl+C: Copy

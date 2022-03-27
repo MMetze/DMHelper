@@ -1,9 +1,12 @@
 #include "encountertextedit.h"
+#include "ui_encountertextedit.h"
 #include "encountertext.h"
+#include "publishgltextimagerenderer.h"
+#include "publishgltextvideorenderer.h"
 #include "dmconstants.h"
 #include "campaign.h"
 #include "texttranslatedialog.h"
-#include "ui_encountertextedit.h"
+#include "videoplayerglscreenshot.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
 #include <QUrl>
@@ -19,20 +22,17 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     ui(new Ui::EncounterTextEdit),
     _keys(),
     _encounter(nullptr),
+    _renderer(nullptr),
     _formatter(new TextEditFormatterFrame(this)),
     _backgroundImage(),
     _backgroundImageScaled(),
     _prescaledImage(),
     _textImage(),
-    _videoPlayer(nullptr),
     _isDMPlayer(false),
-    _backgroundVideo(),
+    _isPublishing(false),
     _targetSize(),
     _rotation(0),
-    _animationRunning(false),
-    _textPos(),
-    _elapsed(),
-    _timerId(0)
+    _textPos()
 {
     ui->setupUi(this);
 
@@ -65,19 +65,13 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
 
 EncounterTextEdit::~EncounterTextEdit()
 {
-    stopPublishTimer();
-
-    if(_videoPlayer)
-    {
-        VideoPlayer* deletePlayer = _videoPlayer;
-        _videoPlayer = nullptr;
-        delete deletePlayer;
-    }
+    delete _renderer;
+    _renderer = nullptr;
 
     delete ui;
 }
 
-void EncounterTextEdit::activateObject(CampaignObjectBase* object)
+void EncounterTextEdit::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
     EncounterText* encounter = dynamic_cast<EncounterText*>(object);
     if(!encounter)
@@ -91,6 +85,13 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object)
 
     setEncounter(encounter);
 
+    if((currentRenderer) && (currentRenderer->getObject() == object))
+    {
+        _renderer = dynamic_cast<PublishGLTextRenderer*>(currentRenderer);
+        if(_renderer)
+            _renderer->setRotation(_rotation);
+    }
+
     emit setPublishEnabled(true);
 }
 
@@ -101,6 +102,8 @@ void EncounterTextEdit::deactivateObject()
         qDebug() << "[EncounterTextEdit] WARNING: Invalid (nullptr) text encounter object deactivated!";
         return;
     }
+
+    _renderer = nullptr;
 
     storeEncounter();
     unsetEncounter(_encounter);
@@ -152,12 +155,7 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
         qDebug() << "[EncounterTextEdit] WARNING: unsetting text with a DIFFERENT encounter than currently set! Current: " << QString(_encounter ? _encounter->getID().toString() : "nullptr") << ", Unset: " << QString(encounter ? encounter->getID().toString() : "nullptr");
 
     if(_encounter)
-    {        
-        if(isAnimated())
-            stopAnimation();
-
-        cleanupPlayer();
-
+    {
         disconnect(_encounter, nullptr, this, nullptr);
         _encounter = nullptr;
     }
@@ -294,6 +292,16 @@ void EncounterTextEdit::browseImageFile()
         return;
     }
 
+    QFileInfo fileInfo(imageFileName);
+    if(!fileInfo.isFile())
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DMHelper Image Not Valid"),
+                              QString("The selected image file isn't a file: ") + imageFileName);
+        qDebug() << "[EncounterTextEdit] Image file not a file: " << imageFileName;
+        return;
+    }
+
     setImageFile(imageFileName);
 }
 
@@ -389,33 +397,10 @@ void EncounterTextEdit::setScrollSpeed(int scrollSpeed)
         _encounter->setScrollSpeed(scrollSpeed);
 }
 
-void EncounterTextEdit::stopAnimation()
-{
-    publishClicked(false);
-}
-
 void EncounterTextEdit::rewind()
 {
-    qreal yPos = 0.0;
-    if(_encounter->getAnimated())
-    {
-        if(_rotation % 180 == 0)
-        {
-            if(_prescaledImage.height() > 0)
-                yPos = _prescaledImage.height();
-        }
-        else
-        {
-            if(_prescaledImage.width() > 0)
-                yPos = _prescaledImage.width();
-        }
-    }
-    else
-    {
-        _textPos.setY(0);
-    }
-
-    _textPos.setY(yPos);
+    if(_renderer)
+        _renderer->rewind();
 }
 
 void EncounterTextEdit::setTranslated(bool translated)
@@ -438,7 +423,6 @@ void EncounterTextEdit::setTranslated(bool translated)
         else
         {
             qDebug() << "[EncounterTextEdit] Translation result rejected: " << translated;
-            //_encounter->setTranslated(false);
             emit translatedChanged(false);
         }
     }
@@ -454,92 +438,40 @@ void EncounterTextEdit::setTranslated(bool translated)
 void EncounterTextEdit::targetResized(const QSize& newSize)
 {
     if(newSize != _targetSize)
-    {
-        int oldHeight = _targetSize.height();
         _targetSize = newSize;
-        if((_encounter) && (isAnimated()))
-        {
-            prepareImages();
-
-            if((_encounter->getAnimated()) && (oldHeight > 0) && (newSize.height() > 0))
-                _textPos.setY(_textPos.y() * newSize.height() / oldHeight);
-        }
-
-        if(_videoPlayer)
-            _videoPlayer->targetResized(newSize);
-    }
 }
 
 void EncounterTextEdit::publishClicked(bool checked)
 {
-    Q_UNUSED(checked);
-
-    if(!_encounter)
+    if((!_encounter) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _encounter)))
         return;
 
-    qDebug() << "[EncounterTextEdit] Publish clicked. Checked: " << checked << ", animated: " << _encounter->getAnimated() << ", running: " << _animationRunning << ", background image: " << _backgroundImage.size() << ", file: " << _encounter->getImageFile();
+    _isPublishing = checked;
 
-    if(_encounter->getAnimated())
+    if(_isPublishing)
     {
-        if(_animationRunning == checked)
-            return;
-
-        if(checked)
+        if(_renderer)
+        {
+            _renderer->play();
+        }
+        else
         {
             emit showPublishWindow();
             prepareImages();
 
             if(isVideo())
-                createVideoPlayer(false);
+                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
+            else
+                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
 
-            emit animationStarted();
-            startPublishTimer();
+            _renderer->setRotation(_rotation);
+            emit registerRenderer(_renderer);
         }
-        else
-        {
-            stopPublishTimer();
-            if(isVideo())
-                createVideoPlayer(true);
-        }
-
-        _animationRunning = checked;
     }
     else
     {
-        if((isVideo()) && (_animationRunning == checked))
-            return;
-
-        emit showPublishWindow();
-        rewind();
-        prepareImages();
-        if(!isVideo())
-        {
-            QImage imagePublish = _prescaledImage;
-            drawTextImage(&imagePublish);
-            emit publishImage(imagePublish);
-        }
-        else if(_encounter)
-        {
-            stopPublishTimer();
-            if(checked)
-            {
-                createVideoPlayer(false);
-                emit animationStarted();
-            }
-            else
-            {
-                if(!_backgroundVideo.isNull())
-                {
-                    _animationRunning = checked;
-                    return;
-                }
-
-                createVideoPlayer(true);
-            }
-            startPublishTimer();
-
-            _animationRunning = checked;
-        }
+        if(_renderer)
+            _renderer->stop();
     }
 }
 
@@ -549,12 +481,8 @@ void EncounterTextEdit::setRotation(int rotation)
         return;
 
     _rotation = rotation;
-    if(_animationRunning)
-    {
-        stopPublishTimer();
-        prepareImages();
-        startPublishTimer();
-    }
+    if(_renderer)
+        _renderer->setRotation(_rotation);
 }
 
 void EncounterTextEdit::updateAnchors()
@@ -625,8 +553,6 @@ void EncounterTextEdit::readEncounter()
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
     if(_encounter)
     {
-        //setHtml(_encounter->getText());
-
         emit imageFileChanged(_encounter->getImageFile());
         emit textWidthChanged(_encounter->getTextWidth());
         emit animatedChanged(_encounter->getAnimated());
@@ -660,92 +586,25 @@ void EncounterTextEdit::loadImage()
 
     if(!_encounter->getImageFile().isEmpty())
     {
-        if(_backgroundImage.load(_encounter->getImageFile()))
-            scaleBackgroundImage();
-        else
-            createVideoPlayer(true);
+        QFileInfo fileInfo(_encounter->getImageFile());
+        if(fileInfo.isFile())
+        {
+            if(_backgroundImage.load(_encounter->getImageFile()))
+                scaleBackgroundImage();
+            else
+                extractDMScreenshot();
+        }
     }
 
     setPublishCheckable();
 }
 
-void EncounterTextEdit::updateVideoBackground()
+void EncounterTextEdit::handleScreenshotReady(const QImage& image)
 {
-    if((!_videoPlayer) || (!_videoPlayer->getImage()))
-        return;
-
-    qDebug() << "[TextEdit] Initializing battle map video background image";
-    _backgroundVideo = _videoPlayer->getImage()->copy();
-    _backgroundImageScaled = _backgroundVideo.scaled(ui->textBrowser->size(), Qt::KeepAspectRatioByExpanding, Qt::FastTransformation);
-    ui->textBrowser->update();
-
-    _videoPlayer->stopThenDelete();
-    _videoPlayer = nullptr;
-}
-
-void EncounterTextEdit::startPublishTimer()
-{
-    if(!_timerId)
-    {
-        rewind();
-        if(_encounter->getAnimated())
-            _elapsed.start();
-        _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
-    }
-}
-
-void EncounterTextEdit::stopPublishTimer()
-{
-    if(_timerId)
-    {
-        killTimer(_timerId);
-        _timerId = 0;
-    }
-}
-
-void EncounterTextEdit::timerEvent(QTimerEvent *event)
-{
-    Q_UNUSED(event);
-
-    if(!_encounter)
-        return;
-
-    qreal elapsedtime = 0.0;
-    if(_encounter->getAnimated())
-    {
-        elapsedtime = _elapsed.restart();
-        _textPos.ry() -= _encounter->getScrollSpeed() * (_prescaledImage.height() / 250) * (elapsedtime / 1000.0);
-    }
-
-    if(_textImage.isNull())
-        prepareTextImage();
-
-    QImage targetImage;
-    if(_videoPlayer)
-    {
-        if((!_animationRunning) ||
-           (!_videoPlayer->isNewImage()) ||
-           (!_videoPlayer->getImage()) || (_videoPlayer->getImage()->isNull()) ||
-           (_videoPlayer->isError()) ||
-           (!_videoPlayer->getMutex()))
-            return;
-
-        QMutexLocker locker(_videoPlayer->getMutex());
-        if(_rotation != 0)
-            targetImage = _videoPlayer->getImage()->transformed(QTransform().rotate(_rotation), Qt::FastTransformation);
-        else
-            targetImage = *(_videoPlayer->getImage());
-    }
-    else
-    {
-        targetImage = _prescaledImage;
-    }
-
-    drawTextImage(&targetImage);
-    emit animateImage(targetImage);
-
-    if((_encounter->getAnimated()) && (_textPos.y() < -_textImage.height()))
-        emit animationStopped();
+    _backgroundImage = image;
+    _backgroundImageScaled = QImage();
+    scaleBackgroundImage();
+    update();
 }
 
 void EncounterTextEdit::resizeEvent(QResizeEvent *event)
@@ -758,8 +617,6 @@ void EncounterTextEdit::scaleBackgroundImage()
 {
     if(!_backgroundImage.isNull())
         _backgroundImageScaled = _backgroundImage.scaledToWidth(ui->textBrowser->width(), Qt::FastTransformation);
-    else if(!_backgroundVideo.isNull())
-        _backgroundImageScaled = _backgroundVideo.scaledToWidth(ui->textBrowser->width(), Qt::FastTransformation);
 }
 
 void EncounterTextEdit::prepareImages()
@@ -769,15 +626,12 @@ void EncounterTextEdit::prepareImages()
 
     if(_backgroundImage.isNull())
     {
-        //_prescaledImage = QImage(_targetSize, QImage::Format_ARGB32);
         _prescaledImage = QImage(_targetSize, QImage::Format_ARGB32_Premultiplied);
         _prescaledImage.fill(QColor(0, 0, 0, 0));
     }
     else
     {
-        _prescaledImage = _backgroundImage.scaled(getRotatedTargetSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        if(_rotation != 0)
-            _prescaledImage = _prescaledImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+        _prescaledImage = _backgroundImage;
     }
 
     _textImage = QImage();
@@ -789,34 +643,35 @@ void EncounterTextEdit::prepareTextImage()
     if((!_encounter) || (_prescaledImage.isNull()))
         return;
 
+    _textImage = getDocumentTextImage();
+    _textImage = _textImage.scaledToWidth(_prescaledImage.width(), Qt::SmoothTransformation);
+}
+
+QImage EncounterTextEdit::getDocumentTextImage()
+{
+    QImage result;
+
     QTextDocument* doc = ui->textBrowser->document();
-    if(!doc)
-        return;
+    if(doc)
+    {
+        int oldTextWidth = doc->textWidth();
+        int absoluteWidth = oldTextWidth * _encounter->getTextWidth() / 100;
+        int targetMargin = (oldTextWidth - absoluteWidth) / 2;
 
-    int oldTextWidth = doc->textWidth();
-    int absoluteWidth = oldTextWidth * _encounter->getTextWidth() / 100;
-    int targetMargin = (oldTextWidth - absoluteWidth) / 2;
+        doc->setTextWidth(absoluteWidth);
 
-    doc->setTextWidth(absoluteWidth);
+        result = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
+        result.fill(Qt::transparent);
+        QPainter painter;
+        painter.begin(&result);
+            painter.translate(targetMargin, 0);
+            doc->drawContents(&painter);
+        painter.end();
 
-    _textImage = QImage(oldTextWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
-    //_textImage = QImage(absoluteWidth, doc->size().height(), QImage::Format_ARGB32_Premultiplied);
-    _textImage.fill(Qt::transparent);
-    QPainter painter;
-    painter.begin(&_textImage);
-        painter.translate(targetMargin, 0);
-        doc->drawContents(&painter);
-    painter.end();
+        doc->setTextWidth(oldTextWidth);
+    }
 
-    doc->setTextWidth(oldTextWidth);
-
-    QSize rotatedSize = getRotatedTargetSize();
-    //int rotatedWidth = rotatedSize.width() * _encounter->getTextWidth() / 100;
-
-    _textImage = _textImage.scaledToWidth(rotatedSize.width(), Qt::SmoothTransformation);
-    //_textImage = _textImage.scaledToWidth(rotatedWidth, Qt::SmoothTransformation);
-    if(_rotation != 0)
-        _textImage = _textImage.transformed(QTransform().rotate(_rotation), Qt::SmoothTransformation);
+    return result;
 }
 
 void EncounterTextEdit::drawTextImage(QPaintDevice* target)
@@ -828,65 +683,37 @@ void EncounterTextEdit::drawTextImage(QPaintDevice* target)
     QPointF drawPoint(0.0, 0.0);
 
     if(_rotation == 0)
-        drawPoint = QPointF(0.0, _textPos.y()); // painter.drawImage(0, _textPos.y(), _textImage);
+        drawPoint = QPointF(0.0, _textPos.y());
     else if(_rotation == 90)
-        drawPoint = QPointF(_prescaledImage.width() - _textImage.width() - _textPos.y(), 0.0); // painter.drawImage(_prescaledImage.width() - _textImage.width() - _textPos.y(), 0, _textImage);
+        drawPoint = QPointF(_prescaledImage.width() - _textImage.width() - _textPos.y(), 0.0);
     else if(_rotation == 180)
-        drawPoint = QPointF(0.0, _prescaledImage.height() - _textImage.height() - _textPos.y()); // painter.drawImage(0, _prescaledImage.height() - _textImage.height() - _textPos.y(), _textImage);
+        drawPoint = QPointF(0.0, _prescaledImage.height() - _textImage.height() - _textPos.y());
     else if(_rotation == 270)
-        drawPoint = QPointF(_textPos.y(), 0.0); // painter.drawImage(_textPos.y(), 0, _textImage);
+        drawPoint = QPointF(_textPos.y(), 0.0);
 
     painter.drawImage(drawPoint, _textImage, _textImage.rect());
 }
 
-void EncounterTextEdit::createVideoPlayer(bool dmPlayer)
+void EncounterTextEdit::extractDMScreenshot()
 {
     if(!_encounter)
         return;
 
-    if(_videoPlayer)
-    {
-        _videoPlayer->stopThenDelete();
-        _videoPlayer = nullptr;
-    }
-
-    _isDMPlayer = dmPlayer;
-
-    if(dmPlayer)
-    {
-        qDebug() << "[ScrollingText] Publish FoW DM animation started";
-        _videoPlayer = new VideoPlayer(_encounter->getImageFile(), QSize(0, 0), true, false);
-        if(_videoPlayer->isNewImage())
-            updateVideoBackground();
-        else
-            connect(_videoPlayer, &VideoPlayer::screenShotAvailable, this, &EncounterTextEdit::updateVideoBackground);
-    }
-    else
-    {
-        qDebug() << "[ScrollingText] Publish FoW Player animation started";
-
-        // TODO: consider audio in the scrolling text
-        QSize rotatedSize = getRotatedTargetSize();
-        _videoPlayer = new VideoPlayer(_encounter->getImageFile(), rotatedSize, true, false);
-    }
-}
-
-void EncounterTextEdit::cleanupPlayer()
-{
-    stopPublishTimer();
-    if(_videoPlayer)
-    {
-        _videoPlayer->stopThenDelete();
-        _videoPlayer = nullptr;
-    }
+    VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_encounter->getImageFile());
+    connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &EncounterTextEdit::handleScreenshotReady);
+    screenshot->retrieveScreenshot();
 }
 
 bool EncounterTextEdit::isVideo() const
 {
     if(!_encounter)
         return false;
-    else
-        return((_backgroundImage.isNull()) && (!_encounter->getImageFile().isEmpty()));
+
+    QFileInfo fileInfo(_encounter->getImageFile());
+    if(!fileInfo.isFile())
+        return false;
+
+    return((_backgroundImage.isNull()) && (!_encounter->getImageFile().isEmpty()));
 }
 
 bool EncounterTextEdit::isAnimated() const

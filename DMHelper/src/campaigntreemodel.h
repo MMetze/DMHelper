@@ -36,6 +36,7 @@ signals:
 public slots:
 
     void setCampaign(Campaign* campaign);
+    void setPublishIndex(const QModelIndex& index, bool publish);
     void refresh();
 
 protected slots:
@@ -57,13 +58,13 @@ protected:
     void resetItemExpansion(QStandardItem* item);
 
     void iterateTreeEntryVisualization(CampaignTreeItem* entry);
-    void setTreeEntryVisualization(CampaignTreeItem* entry);
     void updateChildRows(QStandardItem* parentItem);
     CampaignTreeItem* getChildById(QStandardItem* parentItem, const QUuid& itemId) const;
     QStandardItem* searchChildByName(QStandardItem* parentItem, const QString& name) const;
 
     Campaign* _campaign;
     QMap<QUuid, QPersistentModelIndex> _objectIndexMap;
+    QUuid _publishingItem;
     QStandardItem* _updateParent;
     int _updateRow;
 };

@@ -28,10 +28,21 @@ void BattleDialogModelEffectLine::inputXML(const QDomElement &element, bool isIm
     BattleDialogModelEffectShape::inputXML(element, isImport);
 }
 
+void BattleDialogModelEffectLine::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelEffectLine* otherEffect = dynamic_cast<const BattleDialogModelEffectLine*>(other);
+    if(!otherEffect)
+        return;
+
+    _width = otherEffect->_width;
+
+    BattleDialogModelEffect::copyValues(other);
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectLine::clone() const
 {
     BattleDialogModelEffectLine* newEffect = new BattleDialogModelEffectLine(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 
@@ -87,41 +98,15 @@ void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal g
         qDebug() << "[Battle Dialog Model Effect Line] ERROR: Line Effect found without QGraphicsRectItem!";
     }
 
-    //item.setScale(gridScale / 500.0);
     item.setScale(effectHeight * gridScale / 500.0);
 
     QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
     if(shapeItem)
     {
-        //shapeItem->setPen(QPen(getColor(), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        //shapeItem->setBrush(QBrush(QColor(getColor().red(),getColor().green(),getColor().blue(),getColor().alpha())));
         shapeItem->setPen(QPen(QColor(getColor().red(),getColor().green(),getColor().blue(),255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         shapeItem->setBrush(QBrush(getColor()));
     }
 }
-
-/*
- *     // First apply the base information
-    BattleDialogModelEffectShape::applyEffectValues(item, gridScale);
-    qDebug() << "[Battle Dialog Model Effect Line] applying extra line effect values...";
-
-    // Now correct the special case information for the line effect
-    QGraphicsRectItem* rectItem = dynamic_cast<QGraphicsRectItem*>(&item);
-    if(rectItem)
-    {
-        qreal rectWidth = static_cast<qreal>(getWidth()) * 100.0;
-        rectItem->setRect(QRectF(-rectWidth / 2.0, 0.0, rectWidth, static_cast<qreal>(getSize()) * 100.0));
-    }
-    else
-    {
-        qDebug() << "[Battle Dialog Model Effect Line] ERROR: Line Effect found without QGraphicsRectItem!";
-    }
-
-    item.setScale(gridScale / 500.0);
-    QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
-    if(shapeItem)
-        shapeItem->setPen(QPen(getColor(), 10, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-*/
 
 int BattleDialogModelEffectLine::getWidth() const
 {
@@ -130,7 +115,11 @@ int BattleDialogModelEffectLine::getWidth() const
 
 void BattleDialogModelEffectLine::setWidth(int width)
 {
-    _width = width;
+    if(_width != width)
+    {
+        _width = width;
+        emit effectChanged(this);
+    }
 }
 
 void BattleDialogModelEffectLine::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

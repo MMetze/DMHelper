@@ -26,7 +26,6 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
 //    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
     connect(ui->btnColor, SIGNAL(colorChanged(const QColor&)), this, SLOT(handleColorChanged(const QColor&)));
 
-    connect(ui->btnPreview, SIGNAL(clicked()), this, SIGNAL(previewClicked()));
     connect(ui->btnPlayersWindow, SIGNAL(clicked(bool)), this, SIGNAL(playersWindowClicked(bool)));
 
     setDefaults();
@@ -69,7 +68,7 @@ void PublishButtonRibbon::setChecked(bool checked)
     if(ui->btnPublish->isChecked() != checked)
     {
         ui->btnPublish->setChecked(checked);
-        emit clicked(checked);
+        //emit clicked(checked);
     }
 }
 
@@ -111,7 +110,6 @@ void PublishButtonRibbon::showEvent(QShowEvent *event)
     int frameHeight = height();
 
     setStandardButtonSize(*ui->lblPublish, *ui->btnPublish, frameHeight);
-    setStandardButtonSize(*ui->lblPreview, *ui->btnPreview, frameHeight);
 
     setLineHeight(*ui->line_2, frameHeight);
 

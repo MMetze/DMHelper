@@ -16,9 +16,12 @@ class MapFrame;
 
 class MapFrameScene;
 class Map;
+class PublishGLRenderer;
+class PublishGLMapRenderer;
 class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
+class CameraRect;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -28,7 +31,7 @@ public:
     explicit MapFrame(QWidget *parent = nullptr);
     virtual ~MapFrame() override;
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setMap(Map* map);
@@ -45,7 +48,6 @@ signals:
     void encounterSelected(QUuid id);
 
     void publishImage(QImage image);
-    void openPreview();
     void windowClosed(MapFrame* mapFrame);
     void dirty();
     void showPublishWindow();
@@ -63,14 +65,24 @@ signals:
     void distanceLineTypeChanged(int lineType);
     void distanceLineWidthChanged(int lineWidth);
 
-    void showMarkersChanged(bool show);
+    void fowChanged();
+    void cameraRectChanged(const QRectF& cameraRect);
 
-    void animationStarted();
-    void animateImage(QImage img);
+    void showMarkersChanged(bool show);
+    void markerChanged();
+
+    void registerRenderer(PublishGLRenderer* renderer);
 
     void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
     void brushModeSet(int brushMode);
+
+    void cameraSelectToggled(bool enabled);
+    void cameraEditToggled(bool enabled);
+
+    void pointerToggled(bool enabled);
+    void pointerPositionChanged(const QPointF& pos);
+    void pointerFileNameChanged(const QString& filename);
 
     void publishCancelled();
 
@@ -84,8 +96,6 @@ public slots:
 
     void colorize();
 
-    void cancelPublish();
-
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
     void setShowParty(bool showParty);
@@ -97,6 +107,7 @@ public slots:
     void addMarker(const QPointF& markerPosition);
     void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
     void editMapMarker(int markerId);
+    void deleteMapMarker(int markerId);
 
     void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
@@ -122,8 +133,14 @@ public slots:
     void setDistanceLineType(int lineType);
     void setDistanceLineWidth(int lineWidth);
 
-    void setPublishZoom(bool enabled);
-    void setPublishVisible(bool enabled);
+    void setCameraCouple();
+    void setCameraMap();
+    void setCameraVisible();
+    void setCameraSelect(bool enabled);
+    void setCameraEdit(bool enabled);
+
+    void setPointerOn(bool enabled);
+    void setPointerFile(const QString& filename);
 
     void setTargetLabelSize(const QSize& targetSize);
     void publishWindowMouseDown(const QPointF& position);
@@ -147,7 +164,6 @@ protected:
     virtual void hideEvent(QHideEvent * event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
-    virtual void timerEvent(QTimerEvent *event) override;
     virtual void keyPressEvent(QKeyEvent *event) override;
     virtual void keyReleaseEvent(QKeyEvent *event) override;
 
@@ -162,22 +178,25 @@ protected:
     bool execEventFilterEditModeMove(QObject *obj, QEvent *event);
     bool execEventFilterEditModeDistance(QObject *obj, QEvent *event);
     bool execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event);
+    bool execEventFilterCameraSelect(QObject *obj, QEvent *event);
+    bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
+    bool execEventFilterPointer(QObject *obj, QEvent *event);
 
-    void startPublishTimer();
-    void stopPublishTimer();
-
-    void createVideoPlayer(bool dmPlayer);
+    void extractDMScreenshot();
     void cleanupBuffers();
 
 protected slots:
     void setMapCursor();
     void drawEditCursor();
-    void rotatePublish();
     void setScale(qreal s);
     void storeViewRect();
     void loadViewRect();
     void resetPublishFoW();
     void checkPartyUpdate();
+
+    void handleScreenshotReady(const QImage& image);
+    void rendererActivated(PublishGLMapRenderer* renderer);
+    void rendererDeactivated();
 
     void handleMapMousePress(const QPointF& pos);
     void handleMapMouseMove(const QPointF& pos);
@@ -185,24 +204,29 @@ protected slots:
 
     void handleActivateMapMarker();
 
+    void handleItemChanged(QGraphicsItem* item);
+    void handleSceneChanged(const QList<QRectF> &region);
+
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
+    void setBackgroundPixmap(const QPixmap& pixmap);
+    void setCameraToView();
+    QGraphicsItem* findTopObject(const QPoint &pos);
+    QPixmap getPointerPixmap();
 
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
     QGraphicsPixmapItem* _backgroundImage;
-    QGraphicsPixmapItem* _backgroundVideo;
     QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
+    CameraRect* _cameraRect;
 
     int _editMode;
     bool _erase;
     bool _smooth;
     int _brushMode;
     int _brushSize;
-    bool _publishZoom;
-    bool _publishVisible;
     bool _isPublishing;
     bool _isVideo;
 
@@ -215,8 +239,10 @@ private:
     UndoPath* _undoPath;
 
     QGraphicsLineItem* _distanceLine;
+    MapDraw* _mapItem;
     QGraphicsPathItem* _distancePath;
     QGraphicsSimpleTextItem* _distanceText;
+    QString _pointerFile;
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
@@ -225,9 +251,8 @@ private:
     qreal _scale;
 
     Map* _mapSource;
+    PublishGLMapRenderer* _renderer;
 
-    int _timerId;
-    VideoPlayer* _videoPlayer;
     QSize _targetSize;
     QSize _targetLabelSize;
     QRect _publishRect;

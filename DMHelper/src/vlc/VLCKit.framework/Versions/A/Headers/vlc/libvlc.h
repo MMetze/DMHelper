@@ -2,7 +2,6 @@
  * libvlc.h:  libvlc external API
  *****************************************************************************
  * Copyright (C) 1998-2009 VLC authors and VideoLAN
- * $Id: b12d900469fa6438c41421f2ac7697b93ffc8a35 $
  *
  * Authors: Clément Stenac <zorglub@videolan.org>
  *          Jean-Paul Saman <jpsaman@videolan.org>
@@ -112,7 +111,7 @@ LIBVLC_API const char *libvlc_vprinterr (const char *fmt, va_list ap);
  * Sets the LibVLC error status and message for the current thread.
  * Any previous error is overridden.
  * \param fmt the format string
- * \param args the arguments
+ * \param ...  the arguments for the format string
  * \return a nul terminated string in any case
  */
 LIBVLC_API const char *libvlc_printerr (const char *fmt, ...);
@@ -152,14 +151,9 @@ LIBVLC_API const char *libvlc_printerr (const char *fmt, ...);
    pthread_sigmask(SIG_BLOCK, &set, NULL);
  * @endcode
  *
- * On Microsoft Windows Vista/2008, the process error mode
- * SEM_FAILCRITICALERRORS flag <b>must</b> be set before using LibVLC.
- * On later versions, that is optional and unnecessary.
- * Also on Microsoft Windows (Vista and any later version), setting the default
- * DLL directories to SYSTEM32 exclusively is strongly recommended for
- * security reasons:
+ * On Microsoft Windows, setting the default DLL directories to SYSTEM32
+ * exclusively is strongly recommended for security reasons:
  * @code
-   SetErrorMode(SEM_FAILCRITICALERRORS);
    SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_SYSTEM32);
  * @endcode
  *
@@ -224,7 +218,6 @@ int libvlc_add_intf( libvlc_instance_t *p_instance, const char *name );
  * \param cb callback to invoke when LibVLC wants to exit,
  *           or NULL to disable the exit handler (as by default)
  * \param opaque data pointer for the callback
- * \warning This function and libvlc_wait() cannot be used at the same time.
  */
 LIBVLC_API
 void libvlc_set_exit_handler( libvlc_instance_t *p_instance,
@@ -352,13 +345,6 @@ LIBVLC_API void libvlc_event_detach( libvlc_event_manager_t *p_event_manager,
                                          libvlc_callback_t f_callback,
                                          void *p_user_data );
 
-/**
- * Get an event's type name.
- *
- * \param event_type the desired event
- */
-LIBVLC_API const char * libvlc_event_type_name( libvlc_event_type_t event_type );
-
 /** @} */
 
 /** \defgroup libvlc_log LibVLC logging
@@ -423,7 +409,7 @@ LIBVLC_API void libvlc_log_get_context(const libvlc_log_t *ctx,
  * \param ctx message context (as passed to the @ref libvlc_log_cb callback)
  * \param name object name storage (or NULL) [OUT]
  * \param header object header (or NULL) [OUT]
- * \param line source code file line number storage (or NULL) [OUT]
+ * \param id temporarily-unique object identifier (or 0) [OUT]
  * \warning The returned module name and source code file name, if non-NULL,
  * are only valid until the logging callback returns.
  *

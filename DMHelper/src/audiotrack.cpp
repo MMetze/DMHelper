@@ -25,6 +25,17 @@ void AudioTrack::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+void AudioTrack::copyValues(const CampaignObjectBase* other)
+{
+    const AudioTrack* otherAudioTrack = dynamic_cast<const AudioTrack*>(other);
+    if(!otherAudioTrack)
+        return;
+
+    _md5 = otherAudioTrack->_md5;
+
+    CampaignObjectBase::copyValues(other);
+}
+
 int AudioTrack::getObjectType() const
 {
     return DMHelper::CampaignType_AudioTrack;
@@ -74,7 +85,7 @@ void AudioTrack::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
     if(urlString.isEmpty())
         urlString = getUrl().toString();
 
-    QDomElement urlElement = doc.createElement( "url" );
+    QDomElement urlElement = doc.createElement("url");
     QDomCDATASection urlData = doc.createCDATASection(urlString);
     urlElement.appendChild(urlData);
     element.appendChild(urlElement);

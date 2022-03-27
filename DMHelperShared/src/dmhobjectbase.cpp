@@ -44,23 +44,6 @@ int DMHObjectBase::getIntID() const
     return d->getIntID();
 }
 
-/*
-void DMHObjectBase::setBaseId(int baseId)
-{
-    DMHObjectBase_Private::setBaseId(baseId);
-}
-
-void DMHObjectBase::resetBaseId()
-{
-    DMHObjectBase_Private::resetBaseId();
-}
-
-int DMHObjectBase::createId()
-{
-    return DMHObjectBase_Private::createId();
-}
-*/
-
 void DMHObjectBase::setID(QUuid id)
 {
     d->setID(id);

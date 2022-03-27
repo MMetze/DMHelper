@@ -53,6 +53,23 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
     _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(1)).toInt());
 }
 
+void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelCombatant* otherCombatant = dynamic_cast<const BattleDialogModelCombatant*>(other);
+    if(!otherCombatant)
+        return;
+
+    _combatant = otherCombatant->_combatant;
+    _initiative = otherCombatant->_initiative;
+    _position = otherCombatant->_position;
+    _moved = otherCombatant->_moved;
+    _isShown = otherCombatant->_isShown;
+    _isKnown = otherCombatant->_isKnown;
+    _isSelected = otherCombatant->_isSelected;
+
+    CampaignObjectBase::copyValues(other);
+}
+
 bool BattleDialogModelCombatant::getShown() const
 {
     return _isShown;
@@ -202,15 +219,4 @@ bool BattleDialogModelCombatant::belongsToObject(QDomElement& element)
 void BattleDialogModelCombatant::setCombatant(Combatant* combatant)
 {
     _combatant = combatant;
-}
-
-void BattleDialogModelCombatant::copyValues(const BattleDialogModelCombatant &other)
-{
-    _combatant = other._combatant;
-    _initiative = other._initiative;
-    _position = other._position;
-    _moved = other._moved;
-    _isShown = other._isShown;
-    _isKnown = other._isKnown;
-    _isSelected = other._isSelected;
 }

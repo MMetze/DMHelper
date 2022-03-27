@@ -23,6 +23,8 @@ class CameraRect;
 class BattleCombatantFrame;
 class UnselectedPixmap;
 class CombatantRolloverFrame;
+class PublishGLRenderer;
+class PublishGLBattleRenderer;
 
 namespace Ui {
 class BattleFrame;
@@ -39,7 +41,7 @@ public:
     explicit BattleFrame(QWidget *parent = nullptr);
     virtual ~BattleFrame() override;
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setBattle(EncounterBattle* battle);
@@ -98,7 +100,7 @@ public slots:
     void setYOffset(int yOffset);
     void setGridVisible(bool gridVisible);
 
-    void setShowOnDeck(bool showOnDeck);
+    void setInitiativeType(int initiativeType);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
@@ -132,14 +134,19 @@ public slots:
     void addEffectLine();
 
     // Public for connection to map ribbon
-    void setCameraCouple(bool couple);
-    void cancelCameraCouple();
+    void setCameraCouple();
     void setCameraMap();
+    void setCameraVisible();
     void setCameraSelect(bool enabled);
     void setCameraEdit(bool enabled);
 
     void setDistance(bool enabled);
+    void setFreeDistance(bool enabled);
     void setDistanceHeight(bool heightEnabled, qreal height);
+    void setDistanceScale(int scale);
+    void setDistanceLineColor(const QColor& color);
+    void setDistanceLineType(int lineType);
+    void setDistanceLineWidth(int lineWidth);
 
     void setShowHeight(bool showHeight);
     void setHeight(qreal height);
@@ -159,8 +166,9 @@ public slots:
 signals:
     void characterSelected(QUuid id);
     void monsterSelected(const QString& monsterClass);
-    void animationStarted();
-    void animateImage(QImage img);
+
+    void registerRenderer(PublishGLRenderer* renderer);
+
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);
 
@@ -168,11 +176,12 @@ signals:
 
     void zoomSelectToggled(bool enabled);
 
-    void cameraCoupleChanged(bool coupled);
     void cameraSelectToggled(bool enabled);
     void cameraEditToggled(bool enabled);
+    void cameraRectChanged(const QRectF& cameraRect);
 
     void distanceToggled(bool enabled);
+    void freeDistanceToggled(bool enabled);
     void distanceChanged(const QString&);
 
     void foWEditToggled(bool enabled);
@@ -180,6 +189,9 @@ signals:
     void mapCreated();
 
     void pointerToggled(bool enabled);
+    void pointerFileNameChanged(const QString& filename);
+
+    void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * e) override;
@@ -227,8 +239,6 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
-    void publishImage();
-    void executeAnimateImage();
     void updateHighlights();
     void countdownTimerExpired();
     void updateCountdownText();
@@ -254,6 +264,11 @@ private slots:
     void setItemsInert(bool inert);
 
     void removeRollover();
+
+    void handleScreenshotReady(const QImage& image);
+    void rendererActivated(PublishGLBattleRenderer* renderer);
+    void rendererDeactivated();
+    void updateRendererGrid();
 
     // State Machine
     void stateUpdated();
@@ -303,6 +318,7 @@ private:
     void setCameraToView();
 
     // Helper functions to simplify rendering
+    void extractDMScreenshot();
     void renderPrescaledBackground(QPainter& painter, QSize targetSize);
     void renderVideoBackground(QPainter& painter);
 
@@ -339,6 +355,7 @@ private:
 
     bool _publishMouseDown;
     QPointF _publishMouseDownPos;
+    QGraphicsItem* _publishEffectItem;
 
     BattleDialogGraphicsScene* _scene;
     QGraphicsPixmapItem* _background;
@@ -348,17 +365,16 @@ private:
     qreal _selectedScale;
     QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
-    CameraRect* _publishRect;
+    CameraRect* _cameraRect;
     QRectF _publishRectValue;
-    bool _cameraCoupled;
     bool _includeHeight;
     qreal _pitchHeight;
 
     QTimer* _countdownTimer;
     qreal _countdown;
 
-    bool _publishing;
-    QTimer* _publishTimer;
+    bool _isPublishing;
+    bool _isVideo;
 
     QPixmap _prescaledBackground;
     QPixmap _fowImage;
@@ -369,7 +385,9 @@ private:
 
     BattleFrameMapDrawer* _mapDrawer;
 
-    bool _showOnDeck;
+    PublishGLBattleRenderer* _renderer;
+
+    int _initiativeType;
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;
@@ -385,7 +403,6 @@ private:
     qreal _moveRadius;
     QPointF _moveStart;
 
-    VideoPlayer* _videoPlayer;
     QImage _bwFoWImage;
     QRect _sourceRect;
     QSize _videoSize;

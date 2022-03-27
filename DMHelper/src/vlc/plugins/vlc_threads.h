@@ -28,6 +28,10 @@
 #ifndef VLC_THREADS_H_
 #define VLC_THREADS_H_
 
+#ifndef __cplusplus
+#include <stdatomic.h>
+#endif
+
 /**
  * \ingroup os
  * \defgroup thread Threads and synchronization primitives
@@ -54,24 +58,8 @@ VLC_API void vlc_testcancel(void);
 
 typedef struct vlc_thread *vlc_thread_t;
 # define VLC_THREAD_CANCELED NULL
+
 # define LIBVLC_NEED_SLEEP
-typedef struct
-{
-    bool dynamic;
-    union
-    {
-        struct
-        {
-            bool locked;
-            unsigned long contention;
-        };
-        CRITICAL_SECTION mutex;
-    };
-} vlc_mutex_t;
-#define VLC_STATIC_MUTEX { false, { { false, 0 } } }
-#define LIBVLC_NEED_CONDVAR
-#define LIBVLC_NEED_SEMAPHORE
-#define LIBVLC_NEED_RWLOCK
 typedef struct vlc_threadvar *vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
 
@@ -99,41 +87,16 @@ static inline int vlc_poll(struct pollfd *fds, unsigned nfds, int timeout)
 
 typedef struct vlc_thread *vlc_thread_t;
 #define VLC_THREAD_CANCELED NULL
-typedef struct
-{
-    bool dynamic;
-    union
-    {
-        struct
-        {
-            bool locked;
-            unsigned long contention;
-        };
-        HMTX hmtx;
-    };
-} vlc_mutex_t;
-#define VLC_STATIC_MUTEX { false, { { false, 0 } } }
-typedef struct
-{
-    HEV      hev;
-    unsigned waiters;
-    HEV      hevAck;
-    unsigned signaled;
-} vlc_cond_t;
-#define VLC_STATIC_COND { NULLHANDLE, 0, NULLHANDLE, 0 }
-#define LIBVLC_NEED_SEMAPHORE
-#define LIBVLC_NEED_RWLOCK
+
 typedef struct vlc_threadvar *vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
 
 # define VLC_THREAD_PRIORITY_LOW      0
-# define VLC_THREAD_PRIORITY_INPUT \
-                                    MAKESHORT(PRTYD_MAXIMUM / 2, PRTYC_REGULAR)
-# define VLC_THREAD_PRIORITY_AUDIO    MAKESHORT(PRTYD_MAXIMUM, PRTYC_REGULAR)
+# define VLC_THREAD_PRIORITY_INPUT    1
+# define VLC_THREAD_PRIORITY_AUDIO    VLC_THREAD_PRIORITY_HIGHEST
 # define VLC_THREAD_PRIORITY_VIDEO    0
-# define VLC_THREAD_PRIORITY_OUTPUT \
-                                    MAKESHORT(PRTYD_MAXIMUM / 2, PRTYC_REGULAR)
-# define VLC_THREAD_PRIORITY_HIGHEST  MAKESHORT(0, PRTYC_TIMECRITICAL)
+# define VLC_THREAD_PRIORITY_OUTPUT   1
+# define VLC_THREAD_PRIORITY_HIGHEST  2
 
 # define pthread_sigmask  sigprocmask
 
@@ -163,15 +126,9 @@ static inline int vlc_poll (struct pollfd *fds, unsigned nfds, int timeout)
 # include <poll.h>
 # define LIBVLC_USE_PTHREAD_CLEANUP   1
 # define LIBVLC_NEED_SLEEP
-# define LIBVLC_NEED_CONDVAR
-# define LIBVLC_NEED_SEMAPHORE
-# define LIBVLC_NEED_RWLOCK
 
 typedef struct vlc_thread *vlc_thread_t;
 #define VLC_THREAD_CANCELED NULL
-typedef pthread_mutex_t vlc_mutex_t;
-#define VLC_STATIC_MUTEX PTHREAD_MUTEX_INITIALIZER
-
 typedef pthread_key_t   vlc_threadvar_t;
 typedef struct vlc_timer *vlc_timer_t;
 
@@ -202,39 +159,9 @@ static inline int vlc_poll (struct pollfd *fds, unsigned nfds, int timeout)
 
 # define poll(u,n,t) vlc_poll(u, n, t)
 
-#elif defined (__APPLE__)
-# define _APPLE_C_SOURCE    1 /* Proper pthread semantics on OSX */
-# include <unistd.h>
-# include <pthread.h>
-/* Unnamed POSIX semaphores not supported on Mac OS X */
-# include <mach/semaphore.h>
-# include <mach/task.h>
-# define LIBVLC_USE_PTHREAD           1
-# define LIBVLC_USE_PTHREAD_CLEANUP   1
-
-typedef pthread_t       vlc_thread_t;
-#define VLC_THREAD_CANCELED PTHREAD_CANCELED
-typedef pthread_mutex_t vlc_mutex_t;
-#define VLC_STATIC_MUTEX PTHREAD_MUTEX_INITIALIZER
-typedef pthread_cond_t vlc_cond_t;
-#define VLC_STATIC_COND PTHREAD_COND_INITIALIZER
-typedef semaphore_t     vlc_sem_t;
-typedef pthread_rwlock_t vlc_rwlock_t;
-#define VLC_STATIC_RWLOCK PTHREAD_RWLOCK_INITIALIZER
-typedef pthread_key_t   vlc_threadvar_t;
-typedef struct vlc_timer *vlc_timer_t;
-
-# define VLC_THREAD_PRIORITY_LOW      0
-# define VLC_THREAD_PRIORITY_INPUT   22
-# define VLC_THREAD_PRIORITY_AUDIO   22
-# define VLC_THREAD_PRIORITY_VIDEO    0
-# define VLC_THREAD_PRIORITY_OUTPUT  22
-# define VLC_THREAD_PRIORITY_HIGHEST 22
-
 #else /* POSIX threads */
 # include <unistd.h> /* _POSIX_SPIN_LOCKS */
 # include <pthread.h>
-# include <semaphore.h>
 
 /**
  * Whether LibVLC threads are based on POSIX threads.
@@ -260,99 +187,69 @@ typedef struct
 #define VLC_THREAD_CANCELED PTHREAD_CANCELED
 
 /**
- * Mutex.
- *
- * Storage space for a mutual exclusion lock.
- */
-typedef pthread_mutex_t vlc_mutex_t;
-
-/**
- * Static initializer for (static) mutex.
- */
-#define VLC_STATIC_MUTEX PTHREAD_MUTEX_INITIALIZER
-
-/**
- * Condition variable.
- *
- * Storage space for a thread condition variable.
- */
-typedef pthread_cond_t  vlc_cond_t;
-
-/**
- * Static initializer for (static) condition variable.
- *
- * \note
- * The condition variable will use the default clock, which is OS-dependent.
- * Therefore, where timed waits are necessary the condition variable should
- * always be initialized dynamically explicit instead of using this
- * initializer.
- */
-#define VLC_STATIC_COND  PTHREAD_COND_INITIALIZER
-
-/**
- * Semaphore.
- *
- * Storage space for a thread-safe semaphore.
- */
-typedef sem_t           vlc_sem_t;
-
-/**
- * Read/write lock.
- *
- * Storage space for a slim reader/writer lock.
- */
-typedef pthread_rwlock_t vlc_rwlock_t;
-
-/**
- * Static initializer for (static) read/write lock.
- */
-#define VLC_STATIC_RWLOCK PTHREAD_RWLOCK_INITIALIZER
-
-/**
  * Thread-local key handle.
+ *
+ * \ingroup threadvar
  */
 typedef pthread_key_t   vlc_threadvar_t;
 
 /**
  * Threaded timer handle.
+ *
+ * \ingroup timer
  */
 typedef struct vlc_timer *vlc_timer_t;
 
+/* Thread priorities.
+ * No effect for POSIX threads
+ */
 # define VLC_THREAD_PRIORITY_LOW      0
-# define VLC_THREAD_PRIORITY_INPUT   10
-# define VLC_THREAD_PRIORITY_AUDIO    5
+# define VLC_THREAD_PRIORITY_INPUT    0
+# define VLC_THREAD_PRIORITY_AUDIO    0
 # define VLC_THREAD_PRIORITY_VIDEO    0
-# define VLC_THREAD_PRIORITY_OUTPUT  15
-# define VLC_THREAD_PRIORITY_HIGHEST 20
+# define VLC_THREAD_PRIORITY_OUTPUT   0
+# define VLC_THREAD_PRIORITY_HIGHEST  0
 
 #endif
 
-#ifdef LIBVLC_NEED_CONDVAR
+/**
+ * \defgroup mutex Mutual exclusion locks
+ * @{
+ */
+/**
+ * Mutex.
+ *
+ * Storage space for a mutual exclusion lock.
+ */
 typedef struct
 {
-    unsigned value;
-} vlc_cond_t;
-# define VLC_STATIC_COND { 0 }
+    union {
+#ifndef __cplusplus
+        struct {
+            atomic_uint value;
+            atomic_uint recursion;
+            _Atomic (const void *) owner;
+        };
 #endif
+        struct {
+            unsigned int value;
+            unsigned int recursion;
+            const void *owner;
+        } dummy;
+    };
+} vlc_mutex_t;
 
-#ifdef LIBVLC_NEED_SEMAPHORE
-typedef struct vlc_sem
-{
-    vlc_mutex_t lock;
-    vlc_cond_t  wait;
-    unsigned    value;
-} vlc_sem_t;
-#endif
-
-#ifdef LIBVLC_NEED_RWLOCK
-typedef struct vlc_rwlock
-{
-    vlc_mutex_t   mutex;
-    vlc_cond_t    wait;
-    long          state;
-} vlc_rwlock_t;
-# define VLC_STATIC_RWLOCK { VLC_STATIC_MUTEX, VLC_STATIC_COND, 0 }
-#endif
+/**
+ * Static initializer for (static) mutex.
+ *
+ * \note This only works in C code.
+ * In C++, consider using a global \ref vlc::threads::mutex instance instead.
+ */
+#define VLC_STATIC_MUTEX { \
+    .value = ATOMIC_VAR_INIT(0), \
+    .recursion = ATOMIC_VAR_INIT(0), \
+    .owner = ATOMIC_VAR_INIT(NULL), \
+}
 
 /**
  * Initializes a fast mutex.
@@ -367,13 +264,6 @@ VLC_API void vlc_mutex_init(vlc_mutex_t *);
  * \warning This is strongly discouraged. Please use normal mutexes.
  */
 VLC_API void vlc_mutex_init_recursive(vlc_mutex_t *);
-
-/**
- * Deinitializes a mutex.
- *
- * The mutex must not be locked, otherwise behaviour is undefined.
- */
-VLC_API void vlc_mutex_destroy(vlc_mutex_t *);
 
 /**
  * Acquires a mutex.
@@ -416,28 +306,60 @@ VLC_API int vlc_mutex_trylock( vlc_mutex_t * ) VLC_USED;
 VLC_API void vlc_mutex_unlock(vlc_mutex_t *);
 
 /**
+ * Checks if a mutex is locked.
+ *
+ * Do not use this function directly. Use vlc_mutex_assert() instead.
+ *
+ * @note
+ * This function has no effects.
+ * It is only meant to be use in run-time assertions.
+ *
+ * @warning This function might not return correct results in non-debug builds.
+ *
+ * @retval false the mutex is not locked by the calling thread
+ * @retval true the mutex is locked by the calling thread
+ */
+VLC_API bool vlc_mutex_held(const vlc_mutex_t *) VLC_USED;
+
+/**
+ * Asserts that a mutex is locked by the calling thread.
+ */
+#define vlc_mutex_assert(m) assert(vlc_mutex_held(m))
+
+/** @} */
+
+/**
+ * \defgroup condvar Condition variables
+ *
+ * The condition variable is the most common and generic mean for threads to
+ * wait for events triggered by other threads.
+ *
+ * See also POSIX @c pthread_cond_t .
+ * @{
+ */
+
+struct vlc_cond_waiter;
+
+/**
+ * Condition variable.
+ *
+ * Storage space for a thread condition variable.
+ */
+typedef struct
+{
+    struct vlc_cond_waiter *head;
+    vlc_mutex_t lock;
+} vlc_cond_t;
+
+/**
+ * Static initializer for (static) condition variable.
+ */
+#define VLC_STATIC_COND { NULL, VLC_STATIC_MUTEX }
+
+/**
  * Initializes a condition variable.
  */
 VLC_API void vlc_cond_init(vlc_cond_t *);
-
-/**
- * Initializes a condition variable (wall clock).
- *
- * This function initializes a condition variable for timed waiting using the
- * UTC wall clock time. The time reference is the same as with time() and with
- * timespec_get() and TIME_UTC.
- * vlc_cond_timedwait_daytime() must be instead of
- * vlc_cond_timedwait() for actual waiting.
- */
-void vlc_cond_init_daytime(vlc_cond_t *);
-
-/**
- * Deinitializes a condition variable.
- *
- * No threads shall be waiting or signaling the condition, otherwise the
- * behavior is undefined.
- */
-VLC_API void vlc_cond_destroy(vlc_cond_t *);
 
 /**
  * Wakes up one thread waiting on a condition variable.
@@ -472,19 +394,14 @@ VLC_API void vlc_cond_broadcast(vlc_cond_t *);
  * The canonical way to use a condition variable to wait for event foobar is:
  @code
    vlc_mutex_lock(&lock);
-   mutex_cleanup_push(&lock); // release the mutex in case of cancellation
 
    while (!foobar)
        vlc_cond_wait(&wait, &lock);
 
    // -- foobar is now true, do something about it here --
 
-   vlc_cleanup_pop();
    vlc_mutex_unlock(&lock);
   @endcode
- *
- * \note This function is a cancellation point. In case of thread cancellation,
- * the mutex is always locked before cancellation proceeds.
  *
  * \param cond condition variable to wait on
  * \param mutex mutex which is unlocked while waiting,
@@ -497,27 +414,46 @@ VLC_API void vlc_cond_wait(vlc_cond_t *cond, vlc_mutex_t *mutex);
  *
  * This works like vlc_cond_wait() but with an additional time-out.
  * The time-out is expressed as an absolute timestamp using the same arbitrary
- * time reference as the mdate() and mwait() functions.
- *
- * \note This function is a cancellation point. In case of thread cancellation,
- * the mutex is always locked before cancellation proceeds.
+ * time reference as the vlc_tick_now() and vlc_tick_wait() functions.
  *
  * \param cond condition variable to wait on
  * \param mutex mutex which is unlocked while waiting,
  *              then locked again when waking up
  * \param deadline <b>absolute</b> timeout
  *
- * \warning If the variable was initialized with vlc_cond_init_daytime(), or
- * was statically initialized with \ref VLC_STATIC_COND, the time reference
- * used by this function is unspecified (depending on the implementation, it
- * might be the Unix epoch or the mdate() clock).
- *
  * \return 0 if the condition was signaled, an error code in case of timeout.
  */
 VLC_API int vlc_cond_timedwait(vlc_cond_t *cond, vlc_mutex_t *mutex,
-                               mtime_t deadline);
+                               vlc_tick_t deadline);
 
 int vlc_cond_timedwait_daytime(vlc_cond_t *, vlc_mutex_t *, time_t);
+
+/** @} */
+
+/**
+ * \defgroup semaphore Semaphores
+ *
+ * The semaphore is the simplest thread synchronization primitive, consisting
+ * of a simple counter.
+ *
+ * See also POSIX @c sem_t .
+ *
+ * @{
+ */
+/**
+ * Semaphore.
+ *
+ * Storage space for a thread-safe semaphore.
+ */
+typedef struct
+{
+    union {
+#ifndef __cplusplus
+        atomic_uint value;
+#endif
+        int dummy;
+   };
+} vlc_sem_t;
 
 /**
  * Initializes a semaphore.
@@ -525,11 +461,6 @@ int vlc_cond_timedwait_daytime(vlc_cond_t *, vlc_mutex_t *, time_t);
  * @param count initial semaphore value (typically 0)
  */
 VLC_API void vlc_sem_init(vlc_sem_t *, unsigned count);
-
-/**
- * Deinitializes a semaphore.
- */
-VLC_API void vlc_sem_destroy(vlc_sem_t *);
 
 /**
  * Increments the value of a semaphore.
@@ -552,26 +483,77 @@ VLC_API int vlc_sem_post(vlc_sem_t *);
 VLC_API void vlc_sem_wait(vlc_sem_t *);
 
 /**
+ * Tries to decrement a semaphore.
+ *
+ * This function decrements the semaphore if its value is not zero.
+ *
+ * \param sem semaphore to decrement
+ *
+ * \retval 0 the semaphore was decremented
+ * \retval EAGAIN the semaphore was zero and could not be decremented
+ */
+VLC_API int vlc_sem_trywait(vlc_sem_t *sem) VLC_USED;
+
+/**
+ * Waits on a semaphore within a deadline.
+ *
+ * This function waits for the semaphore just like vlc_sem_wait(), but only
+ * up to a given deadline.
+ *
+ * \param sem semaphore to wait for
+ * \param deadline deadline to wait until
+ *
+ * \retval 0 the semaphore was decremented
+ * \retval ETIMEDOUT the deadline was reached
+ */
+VLC_API int vlc_sem_timedwait(vlc_sem_t *sem, vlc_tick_t deadline) VLC_USED;
+
+/** @} */
+
+/**
+ * \defgroup rwlock Read/write locks
+ *
+ * Read/write locks are a type of thread synchronization primitive meant to
+ * protect access to data that is mostly read, and rarely written.
+ * As long as no threads tries to acquire the lock for "writing", any number of
+ * threads can acquire the lock for "reading".
+ *
+ * See also POSIX @c pthread_rwlock_t .
+ *
+ * @{
+ */
+
+/**
+ * Read/write lock.
+ *
+ * Storage space for a slim reader/writer lock.
+ */
+typedef struct vlc_rwlock
+{
+    vlc_mutex_t   mutex;
+    vlc_cond_t    wait;
+    long          state;
+} vlc_rwlock_t;
+
+/**
+ * Static initializer for (static) read/write lock.
+ */
+#define VLC_STATIC_RWLOCK { VLC_STATIC_MUTEX, VLC_STATIC_COND, 0 }
+
+/**
  * Initializes a read/write lock.
  */
 VLC_API void vlc_rwlock_init(vlc_rwlock_t *);
 
 /**
- * Destroys an initialized unused read/write lock.
- */
-VLC_API void vlc_rwlock_destroy(vlc_rwlock_t *);
-
-/**
  * Acquires a read/write lock for reading.
  *
  * \note Recursion is allowed.
- * \note This function may be a point of cancellation.
  */
 VLC_API void vlc_rwlock_rdlock(vlc_rwlock_t *);
 
 /**
  * Acquires a read/write lock for writing. Recursion is not allowed.
- * \note This function may be a point of cancellation.
  */
 VLC_API void vlc_rwlock_wrlock(vlc_rwlock_t *);
 
@@ -584,6 +566,56 @@ VLC_API void vlc_rwlock_wrlock(vlc_rwlock_t *);
  */
 VLC_API void vlc_rwlock_unlock(vlc_rwlock_t *);
 
+/** @} */
+
+#ifndef __cplusplus
+/**
+ * One-time initialization.
+ *
+ * A one-time initialization object must always be initialized assigned to
+ * \ref VLC_STATIC_ONCE before use.
+ */
+typedef struct
+{
+    atomic_uint value;
+} vlc_once_t;
+
+/**
+ * Static initializer for one-time initialization.
+ */
+#define VLC_STATIC_ONCE { ATOMIC_VAR_INIT(0) }
+
+/**
+ * Executes a function one time.
+ *
+ * The first time this function is called with a given one-time initialization
+ * object, it executes the provided callback.
+ * Any further call with the same object will be a no-op.
+ *
+ * In the corner case that the first time execution is ongoing in another
+ * thread, then the function will wait for completion on the other thread
+ * (and then synchronize memory) before it returns.
+ * This ensures that, no matter what, the callback has been executed exactly
+ * once and its side effects are visible after the function returns.
+ *
+ * \param once a one-time initialization object
+ * \param cb callback to execute (the first time)
+ */
+VLC_API void vlc_once(vlc_once_t *restrict once, void (*cb)(void));
+
+static inline void vlc_once_inline(vlc_once_t *restrict once, void (*cb)(void))
+{
+    /* Fast path: check if already initialized */
+    if (unlikely(atomic_load_explicit(&once->value, memory_order_acquire) < 3))
+        vlc_once(once, cb);
+}
+#define vlc_once(once, cb) vlc_once_inline(once, cb)
+#endif
+
+/**
+ * \defgroup threadvar Thread-specific variables
+ * @{
+ */
 /**
  * Allocates a thread-specific variable.
  *
@@ -620,58 +652,64 @@ VLC_API int vlc_threadvar_set(vlc_threadvar_t key, void *value);
  */
 VLC_API void *vlc_threadvar_get(vlc_threadvar_t);
 
+/** @} */
+
 /**
  * Waits on an address.
  *
- * Puts the calling thread to sleep if a specific value is stored at a
- * specified address. The thread will sleep until it is woken up by a call to
- * vlc_addr_signal() or vlc_addr_broadcast() in another thread, or spuriously.
+ * Puts the calling thread to sleep if a specific unsigned 32-bits value is
+ * stored at a specified address. The thread will sleep until it is woken up by
+ * a call to vlc_atomic_notify_one() or vlc_atomic_notify_all() in another
+ * thread, or spuriously.
  *
  * If the value does not match, do nothing and return immediately.
  *
  * \param addr address to check for
  * \param val value to match at the address
  */
-void vlc_addr_wait(void *addr, unsigned val);
+void vlc_atomic_wait(void *addr, unsigned val);
 
 /**
  * Waits on an address with a time-out.
  *
- * This function operates as vlc_addr_wait() but provides an additional
- * time-out. If the time-out elapses, the thread resumes and the function
+ * This function operates as vlc_atomic_wait() but provides an additional
+ * time-out. If the deadline is reached, the thread resumes and the function
  * returns.
  *
  * \param addr address to check for
  * \param val value to match at the address
- * \param delay time-out duration
+ * \param deadline deadline to wait until
  *
- * \return true if the function was woken up before the time-out,
- * false if the time-out elapsed.
+ * \retval 0 the function was woken up before the time-out
+ * \retval ETIMEDOUT the deadline was reached
  */
-bool vlc_addr_timedwait(void *addr, unsigned val, mtime_t delay);
+int vlc_atomic_timedwait(void *addr, unsigned val, vlc_tick_t deadline);
+
+int vlc_atomic_timedwait_daytime(void *addr, unsigned val, time_t deadline);
 
 /**
  * Wakes up one thread on an address.
  *
  * Wakes up (at least) one of the thread sleeping on the specified address.
  * The address must be equal to the first parameter given by at least one
- * thread sleeping within the vlc_addr_wait() or vlc_addr_timedwait()
+ * thread sleeping within the vlc_atomic_wait() or vlc_atomic_timedwait()
  * functions. If no threads are found, this function does nothing.
  *
  * \param addr address identifying which threads may be woken up
  */
-void vlc_addr_signal(void *addr);
+void vlc_atomic_notify_one(void *addr);
 
 /**
  * Wakes up all thread on an address.
  *
  * Wakes up all threads sleeping on the specified address (if any).
- * Any thread sleeping within a call to vlc_addr_wait() or vlc_addr_timedwait()
- * with the specified address as first call parameter will be woken up.
+ * Any thread sleeping within a call to vlc_atomic_wait() or
+ * vlc_atomic_timedwait() with the specified address as first call parameter
+ * will be woken up.
  *
  * \param addr address identifying which threads to wake up
  */
-void vlc_addr_broadcast(void *addr);
+void vlc_atomic_notify_all(void *addr);
 
 /**
  * Creates and starts a new thread.
@@ -742,30 +780,15 @@ VLC_API int vlc_savecancel(void);
  */
 VLC_API void vlc_restorecancel(int state);
 
+typedef struct vlc_cleanup_t vlc_cleanup_t;
+
 /**
  * Internal handler for thread cancellation.
  *
  * Do not call this function directly. Use wrapper macros instead:
  * vlc_cleanup_push(), vlc_cleanup_pop().
  */
-VLC_API void vlc_control_cancel(int cmd, ...);
-
-/**
- * Thread handle.
- *
- * This function returns the thread handle of the calling thread.
- *
- * \note The exact type of the thread handle depends on the platform,
- * including an integer type, a pointer type or a compound type of any size.
- * If you need an integer identifier, use vlc_thread_id() instead.
- *
- * \note vlc_join(vlc_thread_self(), NULL) is undefined,
- * as it obviously does not make any sense (it might result in a deadlock, but
- * there are no warranties that it will).
- *
- * \return the thread handle
- */
-VLC_API vlc_thread_t vlc_thread_self(void) VLC_USED;
+VLC_API void vlc_control_cancel(vlc_cleanup_t *);
 
 /**
  * Thread identifier.
@@ -790,8 +813,8 @@ VLC_API unsigned long vlc_thread_id(void) VLC_USED;
  * Precision monotonic clock.
  *
  * In principles, the clock has a precision of 1 MHz. But the actual resolution
- * may be much lower, especially when it comes to sleeping with mwait() or
- * msleep(). Most general-purpose operating systems provide a resolution of
+ * may be much lower, especially when it comes to sleeping with vlc_tick_wait() or
+ * vlc_tick_sleep(). Most general-purpose operating systems provide a resolution of
  * only 100 to 1000 Hz.
  *
  * \warning The origin date (time value "zero") is not specified. It is
@@ -800,17 +823,17 @@ VLC_API unsigned long vlc_thread_id(void) VLC_USED;
  *
  * \return a timestamp in microseconds.
  */
-VLC_API mtime_t mdate(void);
+VLC_API vlc_tick_t vlc_tick_now(void);
 
 /**
  * Waits until a deadline.
  *
- * \param deadline timestamp to wait for (\ref mdate())
+ * \param deadline timestamp to wait for (\ref vlc_tick_now())
  *
  * \note The deadline may be exceeded due to OS scheduling.
  * \note This function is a cancellation point.
  */
-VLC_API void mwait(mtime_t deadline);
+VLC_API void vlc_tick_wait(vlc_tick_t deadline);
 
 /**
  * Waits for an interval of time.
@@ -820,10 +843,10 @@ VLC_API void mwait(mtime_t deadline);
  * \note The delay may be exceeded due to OS scheduling.
  * \note This function is a cancellation point.
  */
-VLC_API void msleep(mtime_t delay);
+VLC_API void vlc_tick_sleep(vlc_tick_t delay);
 
-#define VLC_HARD_MIN_SLEEP   10000 /* 10 milliseconds = 1 tick at 100Hz */
-#define VLC_SOFT_MIN_SLEEP 9000000 /* 9 seconds */
+#define VLC_HARD_MIN_SLEEP  VLC_TICK_FROM_MS(10)   /* 10 milliseconds = 1 tick at 100Hz */
+#define VLC_SOFT_MIN_SLEEP  VLC_TICK_FROM_SEC(9)   /* 9 seconds */
 
 #if defined (__GNUC__) && !defined (__clang__)
 /* Linux has 100, 250, 300 or 1000Hz
@@ -835,7 +858,7 @@ static
 __attribute__((unused))
 __attribute__((noinline))
 __attribute__((error("sorry, cannot sleep for such short a time")))
-mtime_t impossible_delay( mtime_t delay )
+vlc_tick_t impossible_delay( vlc_tick_t delay )
 {
     (void) delay;
     return VLC_HARD_MIN_SLEEP;
@@ -845,7 +868,7 @@ static
 __attribute__((unused))
 __attribute__((noinline))
 __attribute__((warning("use proper event handling instead of short delay")))
-mtime_t harmful_delay( mtime_t delay )
+vlc_tick_t harmful_delay( vlc_tick_t delay )
 {
     return delay;
 }
@@ -863,7 +886,7 @@ static
 __attribute__((unused))
 __attribute__((noinline))
 __attribute__((error("deadlines can not be constant")))
-mtime_t impossible_deadline( mtime_t deadline )
+vlc_tick_t impossible_deadline( vlc_tick_t deadline )
 {
     return deadline;
 }
@@ -875,9 +898,13 @@ mtime_t impossible_deadline( mtime_t deadline )
 # define check_deadline(d) (d)
 #endif
 
-#define msleep(d) msleep(check_delay(d))
-#define mwait(d) mwait(check_deadline(d))
+#define vlc_tick_sleep(d) vlc_tick_sleep(check_delay(d))
+#define vlc_tick_wait(d) vlc_tick_wait(check_deadline(d))
 
+/**
+ * \defgroup timer Asynchronous/threaded timers
+ * @{
+ */
 /**
  * Initializes an asynchronous timer.
  *
@@ -906,6 +933,9 @@ VLC_USED;
  */
 VLC_API void vlc_timer_destroy(vlc_timer_t timer);
 
+#define VLC_TIMER_DISARM    (0)
+#define VLC_TIMER_FIRE_ONCE (0)
+
 /**
  * Arms or disarms an initialized timer.
  *
@@ -917,7 +947,7 @@ VLC_API void vlc_timer_destroy(vlc_timer_t timer);
  * timer is still running. See also vlc_timer_getoverrun().
  *
  * \param timer initialized timer
- * \param absolute the timer value origin is the same as mdate() if true,
+ * \param absolute the timer value origin is the same as vlc_tick_now() if true,
  *                 the timer value is relative to now if false.
  * \param value zero to disarm the timer, otherwise the initial time to wait
  *              before firing the timer.
@@ -925,7 +955,17 @@ VLC_API void vlc_timer_destroy(vlc_timer_t timer);
  *                 repetition interval.
  */
 VLC_API void vlc_timer_schedule(vlc_timer_t timer, bool absolute,
-                                mtime_t value, mtime_t interval);
+                                vlc_tick_t value, vlc_tick_t interval);
+
+static inline void vlc_timer_disarm(vlc_timer_t timer)
+{
+    vlc_timer_schedule( timer, false, VLC_TIMER_DISARM, 0 );
+}
+
+static inline void vlc_timer_schedule_asap(vlc_timer_t timer, vlc_tick_t interval)
+{
+    vlc_timer_schedule(timer, false, 1, interval);
+}
 
 /**
  * Fetches and resets the overrun counter for a timer.
@@ -939,20 +979,14 @@ VLC_API void vlc_timer_schedule(vlc_timer_t timer, bool absolute,
  */
 VLC_API unsigned vlc_timer_getoverrun(vlc_timer_t) VLC_USED;
 
+/** @} */
+
 /**
  * Count CPUs.
  *
  * \return number of available (logical) CPUs.
  */
 VLC_API unsigned vlc_GetCPUCount(void);
-
-enum
-{
-    VLC_CLEANUP_PUSH,
-    VLC_CLEANUP_POP,
-    VLC_CANCEL_ADDR_SET,
-    VLC_CANCEL_ADDR_CLEAR,
-};
 
 #if defined (LIBVLC_USE_PTHREAD_CLEANUP)
 /**
@@ -982,9 +1016,7 @@ enum
  */
 # define vlc_cleanup_pop( ) pthread_cleanup_pop (0)
 
-#else
-typedef struct vlc_cleanup_t vlc_cleanup_t;
-
+#else /* !LIBVLC_USE_PTHREAD_CLEANUP */
 struct vlc_cleanup_t
 {
     vlc_cleanup_t *next;
@@ -992,17 +1024,24 @@ struct vlc_cleanup_t
     void          *data;
 };
 
-/* This macros opens a code block on purpose. This is needed for multiple
- * calls within a single function. This also prevent Win32 developers from
- * writing code that would break on POSIX (POSIX opens a block as well). */
+# ifndef __cplusplus
+/* This macros opens a code block on purpose: It reduces the chance of
+ * not pairing the push and pop. It also matches the POSIX Thread internals.
+ * That way, Win32 developers will not accidentally break other platforms.
+ */
 # define vlc_cleanup_push( routine, arg ) \
     do { \
-        vlc_cleanup_t vlc_cleanup_data = { NULL, routine, arg, }; \
-        vlc_control_cancel (VLC_CLEANUP_PUSH, &vlc_cleanup_data)
+        vlc_control_cancel(&(vlc_cleanup_t){ NULL, routine, arg })
 
-# define vlc_cleanup_pop( ) \
-        vlc_control_cancel (VLC_CLEANUP_POP); \
+#  define vlc_cleanup_pop( ) \
+        vlc_control_cancel (NULL); \
     } while (0)
+# else
+#  define vlc_cleanup_push(routine, arg) \
+    static_assert(false, "don't use vlc_cleanup_push in portable C++ code")
+#  define vlc_cleanup_pop() \
+    static_assert(false, "don't use vlc_cleanup_pop in portable C++ code")
+# endif
 
 #endif /* !LIBVLC_USE_PTHREAD_CLEANUP */
 
@@ -1012,17 +1051,10 @@ static inline void vlc_cleanup_lock (void *lock)
 }
 #define mutex_cleanup_push( lock ) vlc_cleanup_push (vlc_cleanup_lock, lock)
 
-static inline void vlc_cancel_addr_set(void *addr)
-{
-    vlc_control_cancel(VLC_CANCEL_ADDR_SET, addr);
-}
-
-static inline void vlc_cancel_addr_clear(void *addr)
-{
-    vlc_control_cancel(VLC_CANCEL_ADDR_CLEAR, addr);
-}
-
-#ifdef __cplusplus
+#ifndef __cplusplus
+void vlc_cancel_addr_set(atomic_uint *addr);
+void vlc_cancel_addr_clear(atomic_uint *addr);
+#else
 /**
  * Helper C++ class to lock a mutex.
  *
@@ -1044,6 +1076,7 @@ class vlc_mutex_locker
             vlc_mutex_unlock (lock);
         }
 };
+
 #endif
 
 enum
@@ -1052,7 +1085,6 @@ enum
    VLC_GCRYPT_MUTEX,
    VLC_XLIB_MUTEX,
    VLC_MOSAIC_MUTEX,
-   VLC_HIGHLIGHT_MUTEX,
 #ifdef _WIN32
    VLC_MTA_MUTEX,
 #endif

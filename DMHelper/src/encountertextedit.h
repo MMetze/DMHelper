@@ -11,6 +11,8 @@ class EncounterTextEdit;
 }
 
 class EncounterText;
+class PublishGLTextRenderer;
+class PublishGLRenderer;
 
 class EncounterTextEdit : public CampaignObjectFrame
 {
@@ -20,7 +22,7 @@ public:
     explicit EncounterTextEdit(QWidget *parent = nullptr);
     virtual ~EncounterTextEdit() override;
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setKeys(const QList<QString>& keys);
@@ -57,7 +59,6 @@ public slots:
 
     void setAnimated(bool animated);
     void setScrollSpeed(int scrollSpeed);
-    void stopAnimation();
     void rewind();
 
     void setTranslated(bool translated);
@@ -88,10 +89,9 @@ signals:
     void scrollSpeedChanged(int scrollSpeed);
     void translatedChanged(bool translated);
 
+    void registerRenderer(PublishGLRenderer* renderer);
+
     void publishImage(QImage image);
-    void animationStarted();
-    void animateImage(QImage image);
-    void animationStopped();
     void showPublishWindow();
 
 protected slots:
@@ -101,22 +101,18 @@ protected slots:
 
     void takeFocus();
     void loadImage();
-    void updateVideoBackground();
-
-    void startPublishTimer();
-    void stopPublishTimer();
+    void handleScreenshotReady(const QImage& image);
 
 protected:
-    virtual void timerEvent(QTimerEvent *event) override;
     virtual void resizeEvent(QResizeEvent *event) override;
 
     void scaleBackgroundImage();
     void prepareImages();
     void prepareTextImage();
+    QImage getDocumentTextImage();
     void drawTextImage(QPaintDevice* target);
 
-    void createVideoPlayer(bool dmPlayer);
-    void cleanupPlayer();
+    void extractDMScreenshot();
 
     bool isVideo() const;
     bool isAnimated() const;
@@ -127,6 +123,7 @@ protected:
 
     QList<QString> _keys;
     EncounterText* _encounter;
+    PublishGLTextRenderer* _renderer;
     TextEditFormatterFrame* _formatter;
 
     QImage _backgroundImage;
@@ -134,17 +131,13 @@ protected:
     QImage _prescaledImage;
     QImage _textImage;
 
-    VideoPlayer* _videoPlayer;
     bool _isDMPlayer;
-    QImage _backgroundVideo;
+    bool _isPublishing;
 
     QSize _targetSize;
     int _rotation;
 
-    bool _animationRunning;
     QPointF _textPos;
-    QElapsedTimer _elapsed;
-    int _timerId;
 };
 
 #endif // ENCOUNTERTEXTEDIT_H

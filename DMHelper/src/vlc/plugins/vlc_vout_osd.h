@@ -3,7 +3,6 @@
  *****************************************************************************
  * Copyright (C) 1999-2010 VLC authors and VideoLAN
  * Copyright (C) 2004-2005 M2X
- * $Id: a07cd9073156d9ce0d5363543bcc3fd98a6de8f8 $
  *
  * Authors: Jean-Paul Saman <jpsaman #_at_# m2x dot nl>
  *          Gildas Bazin <gbazin@videolan.org>
@@ -63,7 +62,7 @@ VLC_API int vout_OSDEpg( vout_thread_t *, input_item_t * );
  * \param duration Duration of the text being displayed
  * \param text Text to be displayed
  */
-VLC_API void vout_OSDText( vout_thread_t *vout, int channel, int position, mtime_t duration, const char *text );
+VLC_API void vout_OSDText( vout_thread_t *vout, int channel, int position, vlc_tick_t duration, const char *text );
 
 /**
  * \brief Write an informative message at the default location,
@@ -71,10 +70,20 @@ VLC_API void vout_OSDText( vout_thread_t *vout, int channel, int position, mtime
  * \param vout The vout on which the message will be displayed
  * \param channel Subpicture channel
  * \param format printf style formatting
+ * \param args format argument list
  *
  * Provided for convenience.
  */
-VLC_API void vout_OSDMessage( vout_thread_t *, int, const char *, ... ) VLC_FORMAT( 3, 4 );
+VLC_API void vout_OSDMessageVa(vout_thread_t *, int, const char *, va_list);
+
+static inline void
+vout_OSDMessage(vout_thread_t *vout, int channel, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vout_OSDMessageVa(vout, channel, format, args);
+    va_end(args);
+}
 
 /**
  * Display a slider on the video output.

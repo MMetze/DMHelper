@@ -174,12 +174,12 @@ void Character::inputXML(const QDomElement &element, bool isImport)
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)
     {
-        setStringValue(static_cast<StringValue>(i), element.attribute(STRINGVALUE_NAMES[i],STRINGVALUE_DEFAULTS[i]) );
+        setStringValue(static_cast<StringValue>(i), element.attribute(STRINGVALUE_NAMES[i],STRINGVALUE_DEFAULTS[i]));
     }
 
     for(i = 0; i < INTVALUE_COUNT; ++i)
     {
-        setIntValue(static_cast<IntValue>(i), element.attribute(INTVALUE_NAMES[i],QString::number(INTVALUE_DEFAULTS[i])).toInt() );
+        setIntValue(static_cast<IntValue>(i), element.attribute(INTVALUE_NAMES[i],QString::number(INTVALUE_DEFAULTS[i])).toInt());
     }
 
     for(i = 0; i < SKILLS_COUNT; ++i)
@@ -197,6 +197,21 @@ void Character::inputXML(const QDomElement &element, bool isImport)
     }
 
     endBatchChanges();
+}
+
+void Character::copyValues(const CampaignObjectBase* other)
+{
+    const Character* otherCharacter = dynamic_cast<const Character*>(other);
+    if(!otherCharacter)
+        return;
+
+    _dndBeyondID = otherCharacter->_dndBeyondID;
+    _stringValues = otherCharacter->_stringValues;
+    _intValues = otherCharacter->_intValues;
+    _skillValues = otherCharacter->_skillValues;
+    _active = otherCharacter->_active;
+
+    Combatant::copyValues(other);
 }
 
 void Character::beginBatchChanges()
@@ -224,15 +239,7 @@ Combatant* Character::clone() const
     qDebug("[Character] WARNING: Character cloned - this is a highly questionable action!");
 
     Character* newCharacter = new Character(getName());
-
-    newCharacter->copyValues(*this);
-
-    newCharacter->_dndBeyondID = _dndBeyondID;
-    newCharacter->_stringValues = _stringValues;
-    newCharacter->_intValues = _intValues;
-    newCharacter->_skillValues = _skillValues;
-    newCharacter->_active = true;
-    newCharacter->_iconChanged = _iconChanged;
+    newCharacter->copyValues(this);
 
     return newCharacter;
 }
@@ -312,7 +319,7 @@ int Character::getCharisma() const
 
 QString Character::getStringValue(StringValue key) const
 {
-    if((key < 0)||(key >= STRINGVALUE_COUNT))
+    if((key < 0) || (key >= STRINGVALUE_COUNT))
     {
         qWarning() << "[Character] Illegal string value requested from character. Id: " << key;
         return QString();
@@ -323,7 +330,7 @@ QString Character::getStringValue(StringValue key) const
 
 int Character::getIntValue(IntValue key) const
 {
-    if((key < 0)||(key >= INTVALUE_COUNT))
+    if((key < 0) || (key >= INTVALUE_COUNT))
     {
         qWarning() << "[Character] Illegal int value requested from character. Id: " << key;
         return 0;
@@ -334,7 +341,7 @@ int Character::getIntValue(IntValue key) const
 
 bool Character::getSkillValue(Skills key) const
 {
-    if((key < 0)||(key >= SKILLS_COUNT))
+    if((key < 0) || (key >= SKILLS_COUNT))
     {
         qWarning() << "[Character] Illegal skill value requested from character. Id: " << key;
         return false;
@@ -345,7 +352,7 @@ bool Character::getSkillValue(Skills key) const
 
 bool Character::getSkillExpertise(Skills key) const
 {
-    if((key < 0)||(key >= SKILLS_COUNT))
+    if((key < 0) || (key >= SKILLS_COUNT))
     {
         qWarning() << "[Character] Illegal skill expertise value requested from character. Id: " << key;
         return false;
@@ -376,7 +383,7 @@ int Character::getSkillBonus(Skills key) const
 
 void Character::setStringValue(StringValue key, const QString& value)
 {
-    if((key < 0)||(key >= STRINGVALUE_COUNT))
+    if((key < 0) || (key >= STRINGVALUE_COUNT))
     {
         qWarning() << "[Character] Tried to set illegal string value from character. Id: " << key;
         return;
@@ -391,7 +398,7 @@ void Character::setStringValue(StringValue key, const QString& value)
 
 void Character::setIntValue(IntValue key, int value)
 {
-    if((key < 0)||(key >= INTVALUE_COUNT))
+    if((key < 0) || (key >= INTVALUE_COUNT))
     {
         qWarning() << "[Character] Tried to set illegal int value from character. Id: " << key;
         return;
@@ -406,7 +413,7 @@ void Character::setIntValue(IntValue key, int value)
 
 void Character::setSkillValue(Skills key, bool value)
 {
-    if((key < 0)||(key >= SKILLS_COUNT))
+    if((key < 0) || (key >= SKILLS_COUNT))
     {
         qWarning() << "[Character] Tried to set illegal skill value from character. Id: " << key;
         return;
@@ -422,7 +429,7 @@ void Character::setSkillValue(Skills key, bool value)
 
 void Character::setSkillValue(Skills key, int value)
 {
-    if((key < 0)||(key >= SKILLS_COUNT))
+    if((key < 0) || (key >= SKILLS_COUNT))
     {
         qWarning() << "[Character] Tried to set illegal skill value from character. Id: " << key;
         return;
@@ -437,7 +444,7 @@ void Character::setSkillValue(Skills key, int value)
 
 void Character::setSkillExpertise(Skills key, bool value)
 {
-    if((key < 0)||(key >= SKILLS_COUNT))
+    if((key < 0) || (key >= SKILLS_COUNT))
     {
         qWarning() << "[Character] Tried to set illegal skill value from character. Id: " << key;
         return;

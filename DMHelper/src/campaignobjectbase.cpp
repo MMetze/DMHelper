@@ -31,10 +31,13 @@ QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent
     QDomElement newElement = createOutputXML(doc);
     internalOutputXML(doc, newElement, targetDirectory, isExport);
 
-    QList<CampaignObjectBase*> childList = getChildObjects();
-    for(int i = 0; i < childList.count(); ++i)
+    if(!isExport)
     {
-        childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+        QList<CampaignObjectBase*> childList = getChildObjects();
+        for(int i = 0; i < childList.count(); ++i)
+        {
+            childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+        }
     }
 
     parent.appendChild(newElement);
@@ -107,7 +110,7 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
             if(childObject)
                 childObject->internalPostProcessXML(childElement, isImport);
 
-            postProcessXML(childElement, isImport);
+            CampaignObjectBase::postProcessXML(childElement, isImport);
         }
 
         childElement = childElement.nextSiblingElement();
@@ -116,6 +119,14 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
 #ifdef CAMPAIGN_OBJECT_LOGGING
     qDebug() << "[CampaignBaseObject] Post-processing object done: " << element.tagName();
 #endif
+}
+
+void CampaignObjectBase::copyValues(const CampaignObjectBase* other)
+{
+    if(!other)
+        return;
+
+    setName(other->getName());
 }
 
 int CampaignObjectBase::getObjectType() const
@@ -277,6 +288,18 @@ QUuid CampaignObjectBase::addObject(CampaignObjectBase* object)
     return object->getID();
 }
 
+CampaignObjectBase* CampaignObjectBase::removeObject(CampaignObjectBase* object)
+{
+    if(!object)
+        return nullptr;
+
+    object->setParent(nullptr);
+    handleInternalChange();
+    handleInternalDirty();
+
+    return object;
+}
+
 CampaignObjectBase* CampaignObjectBase::removeObject(QUuid id)
 {
     CampaignObjectBase* removed = getObjectById(id);
@@ -286,11 +309,7 @@ CampaignObjectBase* CampaignObjectBase::removeObject(QUuid id)
         return nullptr;
     }
 
-    removed->setParent(nullptr);
-    handleInternalChange();
-    handleInternalDirty();
-
-    return removed;
+    return removeObject(removed);
 }
 
 CampaignObjectBase* CampaignObjectBase::getObjectById(QUuid id)

@@ -20,6 +20,7 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
 
     QList<BattleDialogModelCombatant*> getCombatantList() const;
     int getCombatantCount() const;
@@ -61,6 +62,7 @@ public:
     bool getShowLairActions() const;
     const BattleDialogLogger& getLogger() const;
     BattleDialogModelCombatant* getActiveCombatant() const;
+    int getActiveCombatantIndex() const;
     QImage getBackgroundImage() const;
 
 public slots:
@@ -101,6 +103,8 @@ signals:
     void showEffectsChanged(bool showEffects);
     void showMovementChanged(bool showMovement);
     void showLairActionsChanged(bool showLairActions);
+    void combatantListChanged();
+    void effectListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void backgroundImageChanged(QImage backgroundImage);
 

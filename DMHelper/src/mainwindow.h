@@ -5,9 +5,6 @@
 #include "bestiarydialog.h"
 #include "spellbookdialog.h"
 #include "dmconstants.h"
-#ifdef INCLUDE_CHASE_SUPPORT
-#include "chasedialog.h"
-#endif
 #include "optionscontainer.h"
 #include <QMainWindow>
 #include <QLabel>
@@ -17,13 +14,11 @@
 #include <QUuid>
 
 class PublishWindow;
-class ScrollTabWidget;
 class Campaign;
 class Character;
 class Adventure;
 class Encounter;
 class EncounterTextEdit;
-class EncounterScrollingTextEdit;
 class TimeAndDateFrame;
 class Map;
 class MRUHandler;
@@ -42,12 +37,13 @@ class RibbonTabTools;
 class RibbonTabBattleMap;
 class RibbonTabBattleView;
 class RibbonTabBattle;
-class RibbonTabScrolling;
 class RibbonTabText;
 class BattleDialogModel;
 class RibbonTabMap;
 class RibbonTabWorldMap;
 class RibbonTabAudio;
+class BattleFrame;
+class MapFrame;
 #ifdef INCLUDE_NETWORK_SUPPORT
 class NetworkController;
 #endif
@@ -89,6 +85,8 @@ public slots:
     void newSyrinscapeEntry();
     void newYoutubeEntry();
     void removeCurrentItem();
+    void showNotes();
+    void addNote();
     void editCurrentItem();
     void exportCurrentItem();
     void addNewObject(CampaignObjectBase* newObject);
@@ -111,7 +109,6 @@ signals:
     void campaignLoaded(Campaign* campaign);
     void dispatchPublishImage(QImage img);
     void dispatchPublishImage(QImage img, const QColor& color);
-    void dispatchAnimateImage(QImage img);
 
     void cancelSelect();
 
@@ -135,6 +132,7 @@ protected:
     void dropEvent(QDropEvent *event);
 
     void setupRibbonBar();
+    void connectBattleView(bool toBattle);
 
     void deleteCampaign();
     void enableCampaignMenu();
@@ -152,7 +150,7 @@ protected:
     void addNewAudioObject(const QString& audioFile);
 
 protected slots:
-    void openFile(const QString& filename);
+    void openCampaign(const QString& filename);
     void handleCampaignLoaded(Campaign* campaign);
     void updateCampaignTree();
     void updateMapFiles();
@@ -166,7 +164,6 @@ protected slots:
     void handleTreeStateChanged(const QModelIndex & index, bool expanded);
 
     void handleAnimationStarted();
-    void handleAnimationPreview(QImage img);
 
     // Bestiary
     void openBestiary();
@@ -188,42 +185,29 @@ protected slots:
     void activateWidget(int objectType, CampaignObjectBase* object = nullptr);
     void setRibbonToType(int objectType);
 
-#ifdef INCLUDE_CHASE_SUPPORT
-    void startChase();
-    void handleChaseComplete();
-#endif
-
 private:
     Ui::MainWindow *ui;
 
-    PublishWindow* pubWindow;
-    ScrollTabWidget* previewTab;
-    PublishFrame* previewFrame;
-    QDialog* previewDlg;
-    QDialog* dmScreenDlg;
-    QDialog* tableDlg;
-    QDialog* quickRefDlg;
-    QDialog* soundDlg;
-    TimeAndDateFrame* timeAndDateFrame;
-    QDialog* calendarDlg;
-    QDialog* countdownDlg;
+    PublishWindow* _pubWindow;
+    QDialog* _dmScreenDlg;
+    QDialog* _tableDlg;
+    QDialog* _quickRefDlg;
+    QDialog* _soundDlg;
+    TimeAndDateFrame* _timeAndDateFrame;
+    QDialog* _calendarDlg;
+    QDialog* _countdownDlg;
 
-    EncounterTextEdit* encounterTextEdit;
-    EncounterScrollingTextEdit* _scrollingTextEdit;
+    EncounterTextEdit* _encounterTextEdit;
 
-    CampaignTreeModel* treeModel;
-    QVBoxLayout* characterLayout;
-    Campaign* campaign;
-    QString campaignFileName;
+    CampaignTreeModel* _treeModel;
+    QVBoxLayout* _characterLayout;
+    Campaign* _campaign;
+    QString _campaignFileName;
 
     OptionsContainer* _options;
 
-    BestiaryDialog bestiaryDlg;
-    SpellbookDialog spellDlg;
-
-#ifdef INCLUDE_CHASE_SUPPORT
-    ChaseDialog* chaseDlg;
-#endif
+    BestiaryDialog _bestiaryDlg;
+    SpellbookDialog _spellDlg;
 
     BattleDialogManager* _battleDlgMgr;
 
@@ -233,14 +217,14 @@ private:
     NetworkController* _networkController;
 #endif
 
-    bool mouseDown;
-    QPoint mouseDownPos;
+    bool _mouseDown;
+    QPoint _mouseDownPos;
 
-    QAction* undoAction;
-    QAction* redoAction;
+    QAction* _undoAction;
+    QAction* _redoAction;
 
-    bool initialized;
-    bool dirty;
+    bool _initialized;
+    bool _dirty;
     int _animationFrameCount;
 
     RibbonMain* _ribbon;
@@ -250,11 +234,13 @@ private:
     RibbonTabBattleMap* _ribbonTabBattleMap;
     RibbonTabBattleView* _ribbonTabBattleView;
     RibbonTabBattle* _ribbonTabBattle;
-    RibbonTabScrolling* _ribbonTabScrolling;
     RibbonTabText* _ribbonTabText;
     RibbonTabMap* _ribbonTabMap;
     RibbonTabWorldMap* _ribbonTabWorldMap;
     RibbonTabAudio* _ribbonTabAudio;
+
+    BattleFrame* _battleFrame;
+    MapFrame* _mapFrame;
 };
 
 #endif // MAINWINDOW_H

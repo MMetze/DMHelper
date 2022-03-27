@@ -12,18 +12,25 @@ class Map;
 class UndoBase : public QUndoCommand
 {
 public:
-    UndoBase(Map& map, const QString & text);
+    UndoBase(Map* map, const QString & text);
+    virtual ~UndoBase() override;
 
     virtual void apply( bool preview, QPaintDevice* target ) const = 0;
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const = 0;
     virtual void inputXML(const QDomElement &element, bool isImport) = 0;
 
+    virtual bool isRemoved() const;
+    virtual void setRemoved(bool removed);
+
     virtual int getType() const;
     virtual UndoBase* clone() const = 0;
 
+    void setMap(Map* map);
+
 protected:
-    Map& _map;
+    Map* _map;
+    bool _removed;
 };
 
 #endif // UNDOBASE_H

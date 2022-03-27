@@ -99,6 +99,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     connect(ui->edtNotes,SIGNAL(textChanged()),this,SLOT(writeCharacterData()));
 
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &CharacterFrame::editConditions);
+    connect(ui->btnRemoveConditions, &QAbstractButton::clicked, this, &CharacterFrame::clearConditions);
 }
 
 CharacterFrame::~CharacterFrame()
@@ -106,8 +107,10 @@ CharacterFrame::~CharacterFrame()
     delete ui;
 }
 
-void CharacterFrame::activateObject(CampaignObjectBase* object)
+void CharacterFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
+    Q_UNUSED(currentRenderer);
+
     Character* character = dynamic_cast<Character*>(object);
     if(!character)
         return;
@@ -550,6 +553,12 @@ void CharacterFrame::editConditions()
             updateConditionLayout();
         }
     }
+}
+
+void CharacterFrame::clearConditions()
+{
+    if(_character)
+        _character->clearConditions();
 }
 
 void CharacterFrame::updateConditionLayout()

@@ -24,11 +24,6 @@
  *****************************************************************************/
 
 #import <Foundation/Foundation.h>
-#import "VLCAudio.h"
-#import "VLCMediaList.h"
-#import "VLCMedia.h"
-
-@class VLCAudio;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -43,6 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Currently, the framework does not support multiple instances of VLCLibrary.
  * Furthermore, you cannot destroy any instance of VLCLibrary; this is done automatically by the dynamic link loader.
  */
+OBJC_VISIBLE
 @interface VLCLibrary : NSObject
 
 /**
@@ -66,7 +62,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Gets/sets the debug logging level
- * \note Logging level ranges from 0 (just error messages) to 4 (everything)
+ * \note Logging level
+ * 0: info/notice
+ * 1: error
+ * 2: warning
+ * 3-4: debug
  * \note values set here will be consired only when logging to console
  * \warning If an invalid level is provided, level defaults to 0
  */

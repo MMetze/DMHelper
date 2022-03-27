@@ -4,7 +4,7 @@
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoPoint::UndoPoint(Map& map, const MapDrawPoint& mapDrawPoint) :
+UndoPoint::UndoPoint(Map* map, const MapDrawPoint& mapDrawPoint) :
     UndoBase(map, QString("Paint")),
     _mapDrawPoint(mapDrawPoint)
 {
@@ -12,30 +12,23 @@ UndoPoint::UndoPoint(Map& map, const MapDrawPoint& mapDrawPoint) :
 
 void UndoPoint::undo()
 {
-    _map.undoPaint();
-    //if(_map.getRegisteredWindow())
-    //    _map.getRegisteredWindow()->undoPaint();
+    if(_map)
+        _map->undoPaint();
 }
 
 void UndoPoint::redo()
 {
-    /*
-    if(_map.getRegisteredWindow())
+    if(_map)
     {
-    */
-    apply(true, nullptr);
-    _map.updateFoW();
-    /*
-    if(_map.getRegisteredWindow())
-    {
-        _map.getRegisteredWindow()->updateFoW();
+        apply(true, nullptr);
+        _map->updateFoW();
     }
-    */
 }
 
 void UndoPoint::apply( bool preview, QPaintDevice* target ) const
 {
-    _map.paintFoWPoint(_mapDrawPoint.point(), _mapDrawPoint, target, preview);
+    if(_map)
+        _map->paintFoWPoint(_mapDrawPoint.point(), _mapDrawPoint, target, preview);
 }
 
 QDomElement UndoPoint::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const

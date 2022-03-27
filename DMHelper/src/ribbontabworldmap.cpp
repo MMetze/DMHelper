@@ -29,6 +29,7 @@ RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
     _menu->addSeparator();
     connect(_menu, &QMenu::triggered, this, &RibbonTabWorldMap::selectAction);
 
+    /*
     connect(ui->btnDistance, &QAbstractButton::clicked, this, &RibbonTabWorldMap::distanceClicked);
     connect(ui->btnFreeDistance, &QAbstractButton::clicked, this, &RibbonTabWorldMap::freeDistanceClicked);
     connect(ui->edtScale, &QLineEdit::textChanged, this, &RibbonTabWorldMap::freeScaleEdited);
@@ -49,6 +50,7 @@ RibbonTabWorldMap::RibbonTabWorldMap(QWidget *parent) :
     connect(lineTypeMenu, &QMenu::triggered, this, &RibbonTabWorldMap::selectLineTypeAction);
     connect(ui->btnLineColor, &ColorPushButton::colorChanged, this, &RibbonTabWorldMap::distanceLineColorChanged);
     connect(ui->spinLineWidth, SIGNAL(valueChanged(int)), this, SIGNAL(distanceLineWidthChanged(int)));
+    */
 
     connect(ui->btnShowMarkers, &QAbstractButton::toggled, this, &RibbonTabWorldMap::showMarkersClicked);
     connect(ui->btnAddMarker, &QAbstractButton::clicked, this, &RibbonTabWorldMap::addMarkerClicked);
@@ -145,6 +147,7 @@ void RibbonTabWorldMap::clearPartyIcons()
         delete actionList.takeAt(3);
 }
 
+/*
 void RibbonTabWorldMap::setDistanceOn(bool checked)
 {
     if(ui->btnDistance->isChecked() != checked)
@@ -188,6 +191,7 @@ void RibbonTabWorldMap::setDistanceLineWidth(int lineWidth)
 {
     ui->spinLineWidth->setValue(lineWidth);
 }
+*/
 
 void RibbonTabWorldMap::setShowMarkers(bool checked)
 {
@@ -204,6 +208,7 @@ void RibbonTabWorldMap::showEvent(QShowEvent *event)
     setWidgetSize(*ui->spinScale, ui->lblShowParty->width() * 9 / 10, ui->spinScale->height());
     setWidgetSize(*ui->lblScale, ui->lblShowParty->width(), ui->lblShowParty->height());
 
+    /*
     setStandardButtonSize(*ui->lblDistance, *ui->btnDistance, frameHeight);
     setStandardButtonSize(*ui->lblFreeDistance, *ui->btnFreeDistance, frameHeight);
 
@@ -224,12 +229,15 @@ void RibbonTabWorldMap::showEvent(QShowEvent *event)
 
     setWidgetSize(*ui->edtDistance, ui->lblShowParty->width(), ui->spinScale->height());
     setWidgetSize(*ui->edtScale, ui->lblShowParty->width(), ui->spinScale->height());
+    */
 
     setStandardButtonSize(*ui->lblShowMarkers, *ui->btnShowMarkers, frameHeight);
     setStandardButtonSize(*ui->lblAddMarker, *ui->btnAddMarker, frameHeight);
 
+    /*
     setLineHeight(*ui->line_1, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);
+    */
 }
 
 void RibbonTabWorldMap::selectAction(QAction* action)
@@ -269,6 +277,7 @@ void RibbonTabWorldMap::setPartyButtonIcon(const QIcon &icon)
     ui->btnShowParty->setIcon(icon);
 }
 
+/*
 void RibbonTabWorldMap::freeScaleEdited(const QString &text)
 {
     bool ok = false;
@@ -291,7 +300,7 @@ void RibbonTabWorldMap::selectLineTypeAction(QAction* action)
 
     emit distanceLineTypeChanged(lineTypeAction->getLineType());
 }
-
+*/
 
 
 
@@ -341,7 +350,7 @@ void RibbonTabWorldMap_PartyAction::partyDestroyed()
 
 
 
-
+/*
 RibbonTabWorldMap_LineTypeAction::RibbonTabWorldMap_LineTypeAction(const QIcon &icon, const QString &text, int lineType, QObject *parent) :
     QAction(icon, text, parent),
     _lineType(lineType)
@@ -356,3 +365,4 @@ int RibbonTabWorldMap_LineTypeAction::getLineType() const
 {
     return _lineType;
 }
+*/

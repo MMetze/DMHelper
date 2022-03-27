@@ -34,6 +34,12 @@ BattleDialogModelEffect::~BattleDialogModelEffect()
 {
 }
 
+QDomElement BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
+{
+    Q_UNUSED(isExport);
+    return CampaignObjectBase::outputXML(doc, parent, targetDirectory, false);
+}
+
 void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport)
 {
     _active = static_cast<bool>(element.attribute("active",QString::number(1)).toInt());
@@ -49,6 +55,23 @@ void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport
     _tip = element.attribute("tip");
 
     CampaignObjectBase::inputXML(element, isImport);
+}
+
+void BattleDialogModelEffect::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelEffect* otherEffect = dynamic_cast<const BattleDialogModelEffect*>(other);
+    if(!otherEffect)
+        return;
+
+    _active = otherEffect->_active;
+    _visible = otherEffect->_visible;
+    _size = otherEffect->_size;
+    _position = otherEffect->_position;
+    _rotation = otherEffect->_rotation;
+    _color = otherEffect->_color;
+    _tip = otherEffect->_tip;
+
+    CampaignObjectBase::copyValues(other);
 }
 
 BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
@@ -73,7 +96,11 @@ bool BattleDialogModelEffect::getEffectActive() const
 
 void BattleDialogModelEffect::setEffectActive(bool active)
 {
-    _active = active;
+    if(_active != active)
+    {
+        _active = active;
+        emit effectChanged(this);
+    }
 }
 
 bool BattleDialogModelEffect::getEffectVisible() const
@@ -83,7 +110,11 @@ bool BattleDialogModelEffect::getEffectVisible() const
 
 void BattleDialogModelEffect::setEffectVisible(bool visible)
 {
-    _visible = visible;
+    if(_visible != visible)
+    {
+        _visible = visible;
+        emit effectChanged(this);
+    }
 }
 
 int BattleDialogModelEffect::getSize() const
@@ -93,7 +124,11 @@ int BattleDialogModelEffect::getSize() const
 
 void BattleDialogModelEffect::setSize(int size)
 {
-    _size = size;
+    if(_size != size)
+    {
+        _size = size;
+        emit effectChanged(this);
+    }
 }
 
 int BattleDialogModelEffect::getWidth() const
@@ -119,7 +154,11 @@ QPointF BattleDialogModelEffect::getPosition() const
 
 void BattleDialogModelEffect::setPosition(const QPointF& position)
 {
-    _position = position;
+    if(_position != position)
+    {
+        _position = position;
+        emit effectMoved(this);
+    }
 }
 
 void BattleDialogModelEffect::setPosition(qreal x, qreal y)
@@ -134,7 +173,11 @@ qreal BattleDialogModelEffect::getRotation() const
 
 void BattleDialogModelEffect::setRotation(qreal rotation)
 {
-    _rotation = rotation;
+    if(_rotation != rotation)
+    {
+        _rotation = rotation;
+        emit effectMoved(this);
+    }
 }
 
 QColor BattleDialogModelEffect::getColor() const
@@ -144,7 +187,11 @@ QColor BattleDialogModelEffect::getColor() const
 
 void BattleDialogModelEffect::setColor(const QColor& color)
 {
-    _color = color;
+    if(_color != color)
+    {
+        _color = color;
+        emit effectChanged(this);
+    }
 }
 
 int BattleDialogModelEffect::getImageRotation() const
@@ -174,7 +221,11 @@ QString BattleDialogModelEffect::getTip() const
 
 void BattleDialogModelEffect::setTip(const QString& tip)
 {
-    _tip = tip;
+    if(_tip != tip)
+    {
+        _tip = tip;
+        emit effectChanged(this);
+    }
 }
 
 void BattleDialogModelEffect::setEffectItemData(QGraphicsItem* item) const
@@ -250,18 +301,4 @@ void BattleDialogModelEffect::prepareItem(QGraphicsItem& item) const
     item.setFlag(QGraphicsItem::ItemIsMovable, true);
     item.setFlag(QGraphicsItem::ItemIsSelectable, true);
     item.setZValue(DMHelper::BattleDialog_Z_BackHighlight);
-}
-
-void BattleDialogModelEffect::copyValues(const BattleDialogModelEffect &other)
-{
-    _active = other._active;
-    _visible = other._visible;
-    _size = other._size;
-    setWidth(other.getWidth());
-    _position = other._position;
-    _rotation = other._rotation;
-    _color = other._color;
-    setImageRotation(other.getImageRotation());
-    setImageFile(other.getImageFile());
-    _tip = other._tip;
 }

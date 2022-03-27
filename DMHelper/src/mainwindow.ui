@@ -291,11 +291,6 @@
     <string>Publish &amp;Text</string>
    </property>
   </action>
-  <action name="action_Chase_Dialog">
-   <property name="text">
-    <string>&amp;Chase Dialog</string>
-   </property>
-  </action>
   <action name="actionOptions">
    <property name="text">
     <string>&amp;Options...</string>

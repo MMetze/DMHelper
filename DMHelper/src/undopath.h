@@ -7,7 +7,7 @@
 class UndoPath : public UndoBase
 {
 public:
-    UndoPath(Map& map, const MapDrawPath& mapDrawPath);
+    UndoPath(Map* map, const MapDrawPath& mapDrawPath);
 
     virtual void undo() override;
     virtual void redo() override;

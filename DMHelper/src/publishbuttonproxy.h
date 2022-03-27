@@ -32,7 +32,6 @@ signals:
     void rotateCCW();
     void rotationChanged(int rotation);
     void colorChanged(const QColor& color);
-    void previewClicked();
     void playersWindowClicked(bool checked);
 
     void sharePublishEnabled(bool enabled);
