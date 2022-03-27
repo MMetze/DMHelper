@@ -643,6 +643,18 @@ void BattleFrame::setGridScale(int gridScale)
         _scene->setDistanceScale(gridScale);
         _model->setGridScale(gridScale);
 
+
+
+
+        QRectF cameraRect = _model->getCameraRect();
+        cameraRect.setWidth(10*gridScale);
+        cameraRect.setHeight(8*gridScale);
+        _model->setCameraRect(cameraRect);
+        if(_cameraRect)
+            _cameraRect->setCameraRect(cameraRect);
+
+
+
         qreal scaleFactor;
 
         QMapIterator<BattleDialogModelCombatant*, QGraphicsPixmapItem*> i(_combatantIcons);
