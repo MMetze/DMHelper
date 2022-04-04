@@ -3,10 +3,12 @@
 #include "campaign.h"
 #include "dmconstants.h"
 #include "character.h"
+#include "map.h"
 #include "audiotrack.h"
 #include "encounterbattle.h"
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
+#include "battledialogmodelcharacter.h"
 #include "dmhwaitingdialog.h"
 #include "exportworker.h"
 #include "bestiary.h"
@@ -20,39 +22,41 @@
 #include <QMessageBox>
 #include <QDebug>
 
-ExportDialog::ExportDialog(const Campaign& campaign, const QUuid& selectedItem, QWidget *parent) :
+ExportDialog::ExportDialog(Campaign& campaign, const QUuid& selectedItem, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ExportDialog),
     _campaign(campaign),
     _selectedItem(selectedItem),
     _monsters(),
     _spells(),
+    _characters(),
     _workerThread(nullptr),
     _worker(nullptr),
     _waitingDlg(nullptr)
 {
     ui->setupUi(this);
-    connect(ui->treeCampaign, &QTreeWidget::itemChanged, this, &ExportDialog::handleCampaignItemChanged);
-    connect(ui->btnClose, &QAbstractButton::clicked, this, &ExportDialog::close);
+    connect(ui->treeCampaign, &QTreeWidget::itemClicked, this, &ExportDialog::handleCampaignItemChanged);
     connect(ui->btnExport, &QAbstractButton::clicked, this, &ExportDialog::runExport);
-    connect(ui->grpMonsters, &QGroupBox::clicked, ui->grpMonsters, &QGroupBox::setEnabled);
-    connect(ui->grpExportType, &QButtonGroup::idClicked, this, &ExportDialog::handleExportTypeChanged);
     connect(ui->btnAddMonsters, &QAbstractButton::clicked, this, &ExportDialog::addMonsters);
     connect(ui->btnAddSpells, &QAbstractButton::clicked, this, &ExportDialog::addSpells);
 
-    ui->grpExportType->setId(ui->btnClient, ExportType_DMClient);
-    ui->grpExportType->setId(ui->btnFull, ExportType_DMHelper);
+    ui->edtExportName->setText(campaign.getName()); // + "_" + QDateTime::currentDateTime().toString(Qt::ISODate));
 
     QList<CampaignObjectBase*> objectList = campaign.getChildObjects();
     for(CampaignObjectBase* rootObject : objectList)
     {
         if(rootObject)
         {
-            QTreeWidgetItem* rootWidgetItem = createChildObject(rootObject, selectedItem);
+            QTreeWidgetItem* rootWidgetItem = createChildObject(rootObject);
             if(rootWidgetItem)
                 ui->treeCampaign->addTopLevelItem(rootWidgetItem);
         }
     }
+
+    checkItem(_selectedItem);
+
+    refreshMonsters();
+    checkCharacters();
 
     ui->treeCampaign->expandAll();
 }
@@ -78,7 +82,7 @@ ExportDialog::~ExportDialog()
     delete ui;
 }
 
-QTreeWidgetItem* ExportDialog::createChildObject(const CampaignObjectBase* childObject, const QUuid& selectedItem)
+QTreeWidgetItem* ExportDialog::createChildObject(CampaignObjectBase* childObject)
 {
     if(!childObject)
         return nullptr;
@@ -95,16 +99,10 @@ QTreeWidgetItem* ExportDialog::createChildObject(const CampaignObjectBase* child
     {
         if(nextObject)
         {
-            QTreeWidgetItem* nextWidgetItem = createChildObject(nextObject, selectedItem);
+            QTreeWidgetItem* nextWidgetItem = createChildObject(nextObject);
             if(nextWidgetItem)
                 childItem->addChild(nextWidgetItem);
         }
-    }
-
-    if(childObject->getID() == selectedItem)
-    {
-        setRecursiveChecked(childItem, true);
-        checkObjectContent(childObject);
     }
 
     return childItem;
@@ -115,12 +113,17 @@ void ExportDialog::handleCampaignItemChanged(QTreeWidgetItem *item, int column)
     if((!item) || (column > 0))
         return;
 
-    setRecursiveChecked(item, item->checkState(0) == Qt::Checked);
-}
+    for(int i = 0; i < item->childCount(); ++i)
+        setRecursiveChecked(item->child(i), item->checkState(0) == Qt::Checked);
 
-void ExportDialog::handleExportTypeChanged(int id)
-{
-    ui->chkSoundboard->setEnabled(id == ExportType_DMHelper);
+    if(item->checkState(0) == Qt::Checked)
+    {
+        checkObjectContent(item->data(0, Qt::UserRole).value<CampaignObjectBase*>());
+        setRecursiveParentChecked(item->parent());
+    }
+
+    checkCharacters();
+    refreshMonsters();
 }
 
 void ExportDialog::addMonsters()
@@ -183,10 +186,28 @@ void ExportDialog::runExport()
     if(!exportDir.exists())
         return;
 
-    qDebug() << "[ExportDialog] Exporting to " << exportDirPath << ": " << ((ui->grpExportType->checkedId() == ExportType_DMHelper) ? QString("DMHelper full export") : QString("DMClient assets only")) << ", monsters included: " << ui->grpMonsters->isChecked();
+    QString exportFileName(ui->edtExportName->text() + QString(".xml"));
+    if((ui->chkCampaignFile->isChecked()) && (exportDir.exists(exportFileName)))
+    {
+        QMessageBox::StandardButton result = QMessageBox::question(nullptr,
+                                                                   QString("Export file exists"),
+                                                                   QString("The target export file ") + exportDir.absoluteFilePath(exportFileName) + QString(" already exists. Do you want to overwrite the existing file?"));
+        if(result == QMessageBox::No)
+        {
+            qDebug() << "[ExportDialog] Not exporting anything because " << exportDir.absoluteFilePath(exportFileName) << " already exists and should not be overwritten.";
+            return;
+        }
+    }
+
+    qDebug() << "[ExportDialog] Exporting to " << exportDirPath << " as " << ui->edtExportName->text() << ", monsters included: " << ui->grpMonsters->isChecked() << ", spells included: " << ui->grpSpells->isChecked();
 
     _workerThread = new QThread(this);
-    _worker = new ExportWorker(ui->treeCampaign->invisibleRootItem(), exportDir, (ui->grpExportType->checkedId() == ExportType_DMHelper));
+    _worker = new ExportWorker(_campaign, ui->treeCampaign->invisibleRootItem(), exportDir, ui->edtExportName->text());
+    _worker->setExportFlags(ui->chkCampaignFile->isChecked(),
+                            ui->chkReferences->isChecked(),
+                            ui->chkSoundboard->isChecked(),
+                            ui->grpMonsters->isChecked(),
+                            ui->grpSpells->isChecked());
     _worker->setSpellExports(_spells);
     _worker->setMonsterExports(_monsters);
     _worker->moveToThread(_workerThread);
@@ -205,9 +226,7 @@ void ExportDialog::runExport()
 
 void ExportDialog::exportFinished(bool success)
 {
-    Q_UNUSED(success);
-
-    qDebug() << "[ExportDialog] Export completed, stopping dialog and thread.";
+    qDebug() << "[ExportDialog] Export completed, stopping dialog and thread. Success: " << success;
 
     if(_waitingDlg)
     {
@@ -254,14 +273,30 @@ void ExportDialog::setRecursiveChecked(QTreeWidgetItem *item, bool checked)
     if(!item)
         return;
 
-    item->setCheckState(0, checked ? Qt::Checked : Qt::Unchecked);
+    Qt::CheckState targetState = checked ? Qt::Checked : Qt::Unchecked;
+
+    if(item->checkState(0) == targetState)
+        return;
+
+    item->setCheckState(0, targetState);
+    if(item->checkState(0) == Qt::Checked)
+        checkObjectContent(item->data(0, Qt::UserRole).value<CampaignObjectBase*>());
+
     for(int i = 0; i < item->childCount(); ++i)
         setRecursiveChecked(item->child(i), checked);
-
-    refreshMonsters();
 }
 
-void ExportDialog::setObjectIcon(const CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem)
+void ExportDialog::setRecursiveParentChecked(QTreeWidgetItem *item)
+{
+    if((!item) || (item == ui->treeCampaign->invisibleRootItem()))
+        return;
+
+    item->setCheckState(0, Qt::Checked);
+    checkObjectContent(item->data(0, Qt::UserRole).value<CampaignObjectBase*>());
+    setRecursiveParentChecked(item->parent());
+}
+
+void ExportDialog::setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem)
 {
     switch(baseObject->getObjectType())
     {
@@ -304,6 +339,14 @@ void ExportDialog::setObjectIcon(const CampaignObjectBase* baseObject, QTreeWidg
     }
 }
 
+void ExportDialog::checkCharacters()
+{
+    while(!_characters.isEmpty())
+    {
+        checkItem(_characters.takeFirst());
+    }
+}
+
 void ExportDialog::refreshMonsters()
 {
     while(ui->listMonsters->count() > 0)
@@ -320,15 +363,13 @@ void ExportDialog::recursiveRefreshMonsters(QTreeWidgetItem* widgetItem)
         return;
 
     if(widgetItem->checkState(0) == Qt::Checked)
-        checkObjectContent(widgetItem->data(0, Qt::UserRole).value<const CampaignObjectBase*>());
+        checkObjectContent(widgetItem->data(0, Qt::UserRole).value<CampaignObjectBase*>());
 
     for(int i = 0; i < widgetItem->childCount(); ++i)
-    {
         recursiveRefreshMonsters(widgetItem->child(i));
-    }
 }
 
-void ExportDialog::checkObjectContent(const CampaignObjectBase* object)
+void ExportDialog::checkObjectContent(CampaignObjectBase* object)
 {
     if(!object)
         return;
@@ -343,16 +384,71 @@ void ExportDialog::checkObjectContent(const CampaignObjectBase* object)
         if(!battleModel)
             return;
 
+        checkItem(battleModel->getMap());
+
         for(int i = 0; i < battleModel->getCombatantCount(); ++i)
         {
             BattleDialogModelCombatant* combatant = battleModel->getCombatant(i);
-            if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster))
+            if(combatant)
             {
-                BattleDialogModelMonsterBase* monsterCombatant = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
-                addMonster(monsterCombatant->getMonsterClass());
+                if(combatant->getCombatantType() == DMHelper::CombatantType_Monster)
+                {
+                    BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
+                    if(monster)
+                       addMonster(monster->getMonsterClass());
+                }
+                else if(combatant->getCombatantType() == DMHelper::CombatantType_Character)
+                {
+                    BattleDialogModelCharacter* character = dynamic_cast<BattleDialogModelCharacter*>(combatant);
+                    if(character)
+                        addCharacter(character->getCharacter());
+                }
             }
         }
     }
+}
+
+void ExportDialog::checkItem(CampaignObjectBase* object)
+{
+    if(object)
+        checkItem(object->getID());
+}
+
+void ExportDialog::checkItem(QUuid id)
+{
+    QTreeWidgetItem *item = findItem(ui->treeCampaign->invisibleRootItem(), id);
+    if(item)
+    {
+        setRecursiveChecked(item, true);
+        setRecursiveParentChecked(item->parent());
+    }
+}
+
+QTreeWidgetItem* ExportDialog::findItem(QTreeWidgetItem *item, QUuid id)
+{
+    if(!item)
+        return nullptr;
+
+    CampaignObjectBase* object = item->data(0, Qt::UserRole).value<CampaignObjectBase*>();
+    if((object) && (object->getID() == id))
+        return item;
+
+    for(int i = 0; i < item->childCount(); ++i)
+    {
+        QTreeWidgetItem* result = findItem(item->child(i), id);
+        if(result)
+            return result;
+    }
+
+    return nullptr;
+}
+
+void ExportDialog::addCharacter(Character* character)
+{
+    if((!character) || _characters.contains(character))
+        return;
+
+    _characters.append(character);
 }
 
 void ExportDialog::addMonster(MonsterClass* monsterClass)

@@ -9,20 +9,11 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
 
     connect(ui->btnEditFile, SIGNAL(clicked()), this, SIGNAL(editFileClicked()));
 
-    connect(ui->btnZoomIn, SIGNAL(clicked()), this, SIGNAL(zoomInClicked()));
-    connect(ui->btnZoomOut, SIGNAL(clicked()), this, SIGNAL(zoomOutClicked()));
-    connect(ui->btnZoomOne, SIGNAL(clicked()), this, SIGNAL(zoomOneClicked()));
-    connect(ui->btnZoomFull, SIGNAL(clicked()), this, SIGNAL(zoomFullClicked()));
-    connect(ui->btnZoomSelect, SIGNAL(clicked(bool)), this, SIGNAL(zoomSelectClicked(bool)));
-
     connect(ui->btnMapEdit, SIGNAL(clicked(bool)), this, SIGNAL(mapEditClicked(bool)));
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SIGNAL(drawEraseClicked(bool)));
     connect(ui->btnSmooth, SIGNAL(clicked(bool)), this, SIGNAL(smoothClicked(bool)));
     connect(ui->spinSize, SIGNAL(valueChanged(int)), this, SIGNAL(brushSizeChanged(int)));
     connect(ui->btnFillFoW, SIGNAL(clicked(bool)), this, SIGNAL(fillFoWClicked()));
-
-    connect(ui->btnPublishZoom, SIGNAL(clicked(bool)), this, SIGNAL(publishZoomChanged(bool)));
-    connect(ui->btnPublishVisible, SIGNAL(clicked(bool)), this, SIGNAL(publishVisibleChanged(bool)));
 
     // Set up the brush mode button group
     ui->btnGrpBrush->setId(ui->btnBrushCircle, DMHelper::BrushType_Circle);
@@ -35,9 +26,6 @@ RibbonTabMap::RibbonTabMap(QWidget *parent) :
 
     connect(ui->btnColorize, SIGNAL(clicked(bool)), this, SIGNAL(colorizeClicked()));
 
-    connect(ui->btnPublishVisible, SIGNAL(clicked(bool)), this, SLOT(publishModeVisibleClicked()));
-    connect(ui->btnPublishZoom, SIGNAL(clicked(bool)), this, SLOT(publishModeZoomClicked()));
-
     setEraseMode();
 }
 
@@ -49,11 +37,6 @@ RibbonTabMap::~RibbonTabMap()
 PublishButtonRibbon* RibbonTabMap::getPublishRibbon()
 {
     return ui->framePublish;
-}
-
-void RibbonTabMap::setZoomSelect(bool checked)
-{
-    ui->btnZoomSelect->setChecked(checked);
 }
 
 void RibbonTabMap::setMapEdit(bool checked)
@@ -82,12 +65,6 @@ void RibbonTabMap::showEvent(QShowEvent *event)
 
     setStandardButtonSize(*ui->lblEditFile, *ui->btnEditFile, frameHeight);
     setLineHeight(*ui->line_7, frameHeight);
-    setStandardButtonSize(*ui->lblZoomIn, *ui->btnZoomIn, frameHeight);
-    setStandardButtonSize(*ui->lblZoomOut, *ui->btnZoomOut, frameHeight);
-    setStandardButtonSize(*ui->lblZoomOne, *ui->btnZoomOne, frameHeight);
-    setStandardButtonSize(*ui->lblZoomFull, *ui->btnZoomFull, frameHeight);
-    setStandardButtonSize(*ui->lblZoomSelect, *ui->btnZoomSelect, frameHeight);
-    setLineHeight(*ui->line_6, frameHeight);
     setStandardButtonSize(*ui->lblMapEdit, *ui->btnMapEdit, frameHeight);
     setStandardButtonSize(*ui->lblFoWErase, *ui->btnFoWErase, frameHeight);
     setStandardButtonSize(*ui->lblSmooth, *ui->btnSmooth, frameHeight);
@@ -110,11 +87,6 @@ void RibbonTabMap::showEvent(QShowEvent *event)
     setLineHeight(*ui->line_5, frameHeight);
 
     setStandardButtonSize(*ui->lblColorize, *ui->btnColorize, frameHeight);
-
-    setLineHeight(*ui->line_8, frameHeight);
-
-    setStandardButtonSize(*ui->lblPublishVisible, *ui->btnPublishVisible, frameHeight);
-    setStandardButtonSize(*ui->lblPublishZoom, *ui->btnPublishZoom, frameHeight);
 }
 
 void RibbonTabMap::setEraseMode()
@@ -128,23 +100,5 @@ void RibbonTabMap::setEraseMode()
     {
         ui->btnFillFoW->setIcon(QPixmap(":/img/data/square.png"));
         ui->lblFillFoW->setText(QString("Fill"));
-    }
-}
-
-void RibbonTabMap::publishModeVisibleClicked()
-{
-    if((ui->btnPublishVisible->isChecked()) &&
-       (ui->btnPublishZoom->isChecked()))
-    {
-        ui->btnPublishZoom->click();
-    }
-}
-
-void RibbonTabMap::publishModeZoomClicked()
-{
-    if((ui->btnPublishVisible->isChecked()) &&
-       (ui->btnPublishZoom->isChecked()))
-    {
-        ui->btnPublishVisible->click();
     }
 }

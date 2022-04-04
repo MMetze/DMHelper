@@ -2,8 +2,8 @@
  * VLCMediaPlayer.h: VLCKit.framework VLCMediaPlayer header
  *****************************************************************************
  * Copyright (C) 2007-2009 Pierre d'Herbemont
- * Copyright (C) 2007-2015 VLC authors and VideoLAN
- * Copyright (C) 2009-2015 Felix Paul Kühne
+ * Copyright (C) 2007-2020 VLC authors and VideoLAN
+ * Copyright (C) 2009-2020 Felix Paul Kühne
  * $Id$
  *
  * Authors: Pierre d'Herbemont <pdherbemont # videolan.org>
@@ -44,10 +44,16 @@
 @class VLCRendererItem;
 
 /* Notification Messages */
-extern NSString *const VLCMediaPlayerTimeChanged;
-extern NSString *const VLCMediaPlayerStateChanged;
-extern NSString *const VLCMediaPlayerTitleChanged;
-extern NSString *const VLCMediaPlayerChapterChanged;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCMediaPlayerTimeChanged;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCMediaPlayerStateChanged;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCMediaPlayerTitleSelectionChanged;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCMediaPlayerTitleListChanged;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCMediaPlayerChapterChanged;
 
 /**
  * VLCMediaPlayerState describes the state of the media player.
@@ -61,7 +67,9 @@ typedef NS_ENUM(NSInteger, VLCMediaPlayerState)
     VLCMediaPlayerStateError,          ///< Player has generated an error
     VLCMediaPlayerStatePlaying,        ///< Stream is playing
     VLCMediaPlayerStatePaused,         ///< Stream is paused
-    VLCMediaPlayerStateESAdded         ///< Elementary Stream added
+    VLCMediaPlayerStateESAdded,        ///< Elementary Stream added
+    VLCMediaPlayerStateESDeleted,      ///< Elementary Stream deleted
+    VLCMediaPlayerStateLengthChanged   ///< Length changed
 };
 
 /**
@@ -91,7 +99,8 @@ typedef NS_ENUM(NSInteger, VLCDeinterlace)
  * \param state The player state.
  * \return A string containing the name of state. If state is not a valid state, returns nil.
  */
-extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
+OBJC_VISIBLE OBJC_EXTERN
+NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
 
 /**
  * Formal protocol declaration for playback delegates.  Allows playback messages
@@ -116,11 +125,19 @@ extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
 
 /**
  * Sent by the default notification center whenever the player's title has changed (if any).
- * \details Discussion The value of aNotification is always an VLCMediaPlayerTitleChanged notification. You can retrieve
+ * \details Discussion The value of aNotification is always an VLCMediaPlayerTitleSelectionChanged notification. You can retrieve
  * the VLCMediaPlayer object in question by sending object to aNotification.
  * \note this is about a title in the navigation sense, not about metadata
  */
-- (void)mediaPlayerTitleChanged:(NSNotification *)aNotification;
+- (void)mediaPlayerTitleSelectionChanged:(NSNotification *)aNotification;
+
+/**
+* Sent by the default notification center whenever the player's list of titles has changed.
+* \details Discussion The value of aNotification is always an VLCMediaPlayerTitleListChanged notification. You can retrieve
+* the VLCMediaPlayer object in question by sending object to aNotification. Request titleDescriptions to get the actual list.
+* \note this is about a title in the navigation sense, not about metadata.
+*/
+- (void)mediaPlayerTitleListChanged:(NSNotification *)aNotification;
 
 /**
  * Sent by the default notification center whenever the player's chapter has changed (if any).
@@ -155,6 +172,7 @@ extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
 /**
  * The player base class needed to do any playback
  */
+OBJC_VISIBLE
 @interface VLCMediaPlayer : NSObject
 
 /**
@@ -181,6 +199,11 @@ extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
  */
 - (instancetype)initWithVideoLayer:(VLCVideoLayer *)aVideoLayer;
 #endif
+/**
+ * initialize player with a given initialized VLCLibrary
+ * \param library an instance of VLCLibrary to create the player against
+ */
+- (instancetype)initWithLibrary:(VLCLibrary *)library;
 /**
  * initialize player with a given set of options
  * \param options an array of private options
@@ -233,12 +256,12 @@ extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
 @property (NS_NONATOMIC_IOSONLY) char *videoAspectRatio;
 
 /**
- * Set/Get current crop filter geometry.
- *
- * param: psz_geometry new crop filter geometry (NULL to unset)
- * \return the crop filter geometry or NULL if unset
+ * This function forces a crop ratio on any and all video tracks rendered by
+ * the media player. If the display aspect ratio of a video does not match the
+ * crop ratio, either the top and bottom, or the left and right of the video
+ * will be cut out to fit the crop ratio.
  */
-@property (NS_NONATOMIC_IOSONLY) char *videoCropGeometry;
+- (void)setCropRatioWithNumerator:(unsigned int)numerator denominator:(unsigned int)denominator;
 
 /**
  * Set/Get the current video scaling factor.
@@ -273,7 +296,7 @@ extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
 /**
  * Enable or disable deinterlace and specify which filter to use
  *
- * \param deinterlace mode for deinterlacing: enable, disable or auto
+ * \param deinterlace mode for deinterlacing: enable, disable or autos
  * \param name of deinterlace filter to use (availability depends on underlying VLC version).
  */
 - (void)setDeinterlace:(VLCDeinterlace)deinterlace withFilter:(NSString *)name;
@@ -345,13 +368,6 @@ extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
  * \return current video output status
  */
 @property (NS_NONATOMIC_IOSONLY, readonly) BOOL hasVideoOut;
-
-/**
- * Frames per second
- * \deprecated provided for API compatibility only, to retrieve a media's FPS, use VLCMediaTracksInformationFrameRate.
- * \returns 0
- */
-@property (NS_NONATOMIC_IOSONLY, readonly) float framesPerSecond __attribute__((deprecated));
 
 #pragma mark -
 #pragma mark time
@@ -432,13 +448,6 @@ extern NSString * VLCMediaPlayerStateToString(VLCMediaPlayerState state);
 @property (NS_NONATOMIC_IOSONLY, readonly) int numberOfSubtitlesTracks;
 
 /**
- * Load and set a specific video subtitle, from a file.
- *
- * \deprecated use addPlaybackSlave:type:enforce: instead
- */
-- (BOOL)openVideoSubTitlesFromFile:(NSString *)path __attribute__((deprecated));
-
-/**
  * VLCMediaPlaybackNavigationAction describes actions which can be performed to navigate an interactive title
  */
 typedef NS_ENUM(unsigned, VLCMediaPlaybackSlaveType)
@@ -465,6 +474,9 @@ typedef NS_ENUM(unsigned, VLCMediaPlaybackSlaveType)
  */
 @property (readwrite) NSInteger currentVideoSubTitleDelay;
 
+/** Set / get the subtitle font scale. */
+@property (readwrite) float currentSubTitleFontScale;
+
 /**
  * Chapter selection and enumeration, it is bound
  * to a title option.
@@ -490,23 +502,20 @@ typedef NS_ENUM(unsigned, VLCMediaPlaybackSlaveType)
 - (int)numberOfChaptersForTitle:(int)titleIndex;
 
 /**
- * Chapters of a given title index
- * \deprecated Use chapterDescriptionsOfTitle instead
- */
-- (NSArray *)chaptersForTitleIndex:(int)titleIndex __attribute__((deprecated));
-
-/**
  * dictionary value for the user-facing chapter name
  */
-extern NSString *const VLCChapterDescriptionName;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCChapterDescriptionName;
 /**
  * dictionary value for the chapter's time offset
  */
-extern NSString *const VLCChapterDescriptionTimeOffset;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCChapterDescriptionTimeOffset;
 /**
  * dictionary value for the chapter's duration
  */
-extern NSString *const VLCChapterDescriptionDuration;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCChapterDescriptionDuration;
 
 /**
  * chapter descriptions
@@ -532,28 +541,20 @@ extern NSString *const VLCChapterDescriptionDuration;
 @property (readonly) int numberOfTitles;
 
 /**
- * count of titles
- * \deprecated Use numberOfTitles instead
- */
-@property (readonly) NSUInteger countOfTitles __attribute__((deprecated));
-/**
- * array of available titles
- * \deprecated Use titleDescriptions instead
- */
-@property (NS_NONATOMIC_IOSONLY, readonly, copy) NSArray *titles __attribute__((deprecated));
-
-/**
  * dictionary value for the user-facing title name
  */
-extern NSString *const VLCTitleDescriptionName;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCTitleDescriptionName;
 /**
  * dictionary value for the title's duration
  */
-extern NSString *const VLCTitleDescriptionDuration;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCTitleDescriptionDuration;
 /**
  * dictionary value whether the title is a menu or not
  */
-extern NSString *const VLCTitleDescriptionIsMenu;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCTitleDescriptionIsMenu;
 
 /**
  * title descriptions
@@ -833,12 +834,6 @@ extern NSString *const VLCTitleDescriptionIsMenu;
  * \return TRUE if the feed is playing, FALSE if otherwise.
  */
 @property (NS_NONATOMIC_IOSONLY, getter=isPlaying, readonly) BOOL playing;
-
-/**
- * Playback state flag identifying wheather the stream will play.
- * \return TRUE if the feed is ready for playback, FALSE if otherwise.
- */
-@property (NS_NONATOMIC_IOSONLY, readonly) BOOL willPlay;
 
 /**
  * Playback's current state.

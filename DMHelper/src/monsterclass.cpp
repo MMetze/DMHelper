@@ -639,6 +639,29 @@ int MonsterClass::convertSizeToCategory(const QString& monsterSize)
         return DMHelper::CombatantSize_Unknown;
 }
 
+QString MonsterClass::convertCategoryToSize(int category)
+{
+    switch(category)
+    {
+        case DMHelper::CombatantSize_Tiny:
+            return QString("Tiny");
+        case DMHelper::CombatantSize_Small:
+            return QString("Small");
+        case DMHelper::CombatantSize_Medium:
+            return QString("Medium");
+        case DMHelper::CombatantSize_Large:
+            return QString("Large");
+        case DMHelper::CombatantSize_Huge:
+            return QString("Huge");
+        case DMHelper::CombatantSize_Gargantuan:
+            return QString("Gargantuan");
+        case DMHelper::CombatantSize_Colossal:
+            return QString("Colossal");
+        default:
+            return QString("Medium");
+    }
+}
+
 qreal MonsterClass::convertSizeCategoryToScaleFactor(int category)
 {
     switch(category)

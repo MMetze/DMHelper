@@ -13,6 +13,7 @@ public:
     CampaignTreeItem(int rows, int columns = 1);
     CampaignTreeItem(const QIcon &icon, const QString &text);
     CampaignTreeItem(const QString &text);
+    CampaignTreeItem(const CampaignTreeItem& other);
     virtual ~CampaignTreeItem() override;
 
     virtual QStandardItem* clone() const override;
@@ -32,6 +33,14 @@ public:
 
     virtual CampaignTreeItem* getChildById(const QUuid& itemId) const;
     virtual CampaignTreeItem* getChildCampaignItem(int childRow) const;
+
+    void setPublishing(bool publishing);
+    void updateVisualization();
+
+protected:
+    void setVisualization();
+
+    bool _isPublishing = false;
 };
 
 #endif // CAMPAIGNTREEITEM_H

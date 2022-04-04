@@ -23,7 +23,6 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
     connect(publishButton, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(colorChanged(const QColor&)));
     connect(publishButton, SIGNAL(colorChanged(const QColor&)), this, SIGNAL(shareSetColor(const QColor&)));
     connect(publishButton, SIGNAL(buttonColorChanged(const QColor&)), this, SIGNAL(shareSetColor(const QColor&)));
-    connect(publishButton, SIGNAL(previewClicked()), this, SIGNAL(previewClicked()));
     connect(publishButton, SIGNAL(playersWindowClicked(bool)), this, SIGNAL(playersWindowClicked(bool)));
     connect(publishButton, SIGNAL(playersWindowClicked(bool)), this, SIGNAL(shareSetPlayersWindow(bool)));
 
@@ -62,7 +61,10 @@ void PublishButtonProxy::setChecked(bool checked)
 
 void PublishButtonProxy::setCheckable(bool checkable)
 {
-    emit shareSetCheckable(checkable);
+    Q_UNUSED(checkable);
+
+    //emit shareSetCheckable(checkable);
+    emit shareSetCheckable(true);
 }
 
 void PublishButtonProxy::setRotation(int rotation)

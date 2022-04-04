@@ -3,13 +3,17 @@
 
 #include <QMainWindow>
 
-class PublishFrame;
+class PublishGLFrame;
+class PublishGLRenderer;
 
 class PublishWindow : public QMainWindow
 {
     Q_OBJECT
 public:
     explicit PublishWindow(const QString& title, QWidget *parent = nullptr);
+
+    QUuid getObjectId() const;
+    PublishGLRenderer* getRenderer() const;
 
 signals:
     void windowVisible(bool visible);
@@ -24,12 +28,11 @@ signals:
 public slots:
     void setImage(QImage img);
     void setImage(QImage img, const QColor& color);
-    void setImageNoScale(QImage img);
-    void setArrowVisible(bool visible);
-    void setArrowPosition(const QPointF& position);
+    //void setImageNoScale(QImage img);
     void setBackgroundColor();
     void setBackgroundColor(const QColor& color);
-    void setPointerFile(const QString& filename);
+
+    void setRenderer(PublishGLRenderer* renderer);
 
 protected:
     virtual void keyPressEvent(QKeyEvent * event);
@@ -39,7 +42,7 @@ protected:
     void setBackgroundColorStyle(const QColor& color);
 
 private:
-    PublishFrame* _publishFrame;
+    PublishGLFrame* _publishFrame;
     QColor _globalColor;
     bool _globalColorSet;
 };

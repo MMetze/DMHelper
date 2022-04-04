@@ -8,7 +8,7 @@
 #include <QMenu>
 
 MapFrameScene::MapFrameScene(QObject* parent) :
-    QGraphicsScene(parent),
+    CameraScene(parent),
     _spaceDown(false),
     _contextMenuItem(nullptr),
     _contextMenuPos()
@@ -31,6 +31,19 @@ void MapFrameScene::handleEditMarker()
 
     if(markerItem)
         emit editMarker(markerItem->getMarkerId());
+}
+
+void MapFrameScene::handleDeleteMarker()
+{
+    if(!_contextMenuItem)
+        return;
+
+    MapMarkerGraphicsItem* markerItem = dynamic_cast<MapMarkerGraphicsItem*>(_contextMenuItem);
+    if((!markerItem) && (_contextMenuItem->parentItem()))
+        markerItem = dynamic_cast<MapMarkerGraphicsItem*>(_contextMenuItem->parentItem());
+
+    if(markerItem)
+        emit deleteMarker(markerItem->getMarkerId());
 }
 
 void MapFrameScene::handleCenterView()
@@ -99,6 +112,10 @@ void MapFrameScene::mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent)
                 QAction* editMarkerAction = new QAction(QString("Edit Marker..."), &menu);
                 connect(editMarkerAction, SIGNAL(triggered()), this, SLOT(handleEditMarker()));
                 menu.addAction(editMarkerAction);
+
+                QAction* deleteMarkerAction = new QAction(QString("Delete Marker..."), &menu);
+                connect(deleteMarkerAction, SIGNAL(triggered()), this, SLOT(handleDeleteMarker()));
+                menu.addAction(deleteMarkerAction);
             }
             else
             {

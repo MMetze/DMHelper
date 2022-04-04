@@ -4,12 +4,7 @@
 #include "audiotrackurl.h"
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-
-#ifdef Q_OS_WIN
-    #include <BaseTsd.h>
-    typedef SSIZE_T ssize_t;
-#endif
-#include <vlc/vlc.h>
+#include "dmh_vlc.h"
 
 class AudioTrackYoutube : public AudioTrackUrl
 {

@@ -145,7 +145,7 @@ void MRUHandler::internalSetMRUCount(int mruCount)
     _mruCount = mruCount < MRU_HANDLER_MAX_FILES ? mruCount : MRU_HANDLER_MAX_FILES;
 
     // Cull any extra files in the list
-    while( _mruFiles.count() >= _mruCount )
+    while(_mruFiles.count() >= _mruCount)
     {
         _mruFiles.pop_back();
     }
@@ -164,7 +164,7 @@ void MRUHandler::internalAddMRUFile(const QString &mruFile)
     else
     {
         // Cull the MRU list to make space to add one more
-        while( _mruFiles.count() >= _mruCount )
+        while(_mruFiles.count() >= _mruCount)
         {
             _mruFiles.pop_back();
         }

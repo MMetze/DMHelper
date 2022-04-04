@@ -82,6 +82,7 @@ public:
     void cloneMonster(MonsterClass& other);
 
     static int convertSizeToCategory(const QString& monsterSize);
+    static QString convertCategoryToSize(int category);
     static qreal convertSizeCategoryToScaleFactor(int category);
     static qreal convertSizeToScaleFactor(const QString& monsterSize);
     static void outputValue(QDomDocument &doc, QDomElement &element, bool isExport, const QString& valueName, const QString& valueText);

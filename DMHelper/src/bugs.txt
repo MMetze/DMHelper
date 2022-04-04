@@ -1,3 +1,14 @@
+v2.4
+Key things:
+* Repeated "Notes" entries
+* Not working import/export of items
+* Bugs from email with pdf attachment
+* Bugs from Word doc from MelcorStarr (pinned in Prerelease support)
+* Open last campaign at start-up
+* Ask to go full-screen, mention F
+* Rounds don't save in battles
+
+
 v2.0
 Text Ribbon: [BUG?]  Would like to see it larger to make it more user friendly
 

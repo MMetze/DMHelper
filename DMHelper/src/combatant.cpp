@@ -75,6 +75,28 @@ void Combatant::inputXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::inputXML(element, isImport);
 }
 
+void Combatant::copyValues(const CampaignObjectBase* other)
+{
+    const Combatant* otherCombatant = dynamic_cast<const Combatant*>(other);
+    if(!otherCombatant)
+        return;
+
+    _initiative = otherCombatant->_initiative;
+    _armorClass = otherCombatant->_armorClass;
+    _hitPoints = otherCombatant->_hitPoints;
+    _hitDice = otherCombatant->_hitDice;
+    _conditions = otherCombatant->_conditions;
+    _icon = otherCombatant->_icon;
+    _iconPixmap.setBasePixmap(_icon);
+
+    for(int i = 0; i < otherCombatant->_attacks.count(); ++i)
+    {
+        _attacks.append(Attack(otherCombatant->_attacks.at(i)));
+    }
+
+    CampaignObjectBase::copyValues(other);
+}
+
 int Combatant::getObjectType() const
 {
     return DMHelper::CampaignType_Combatant;
@@ -375,7 +397,6 @@ void Combatant::drawConditions(QPaintDevice* target, int conditions)
         qDebug() << "[Combatant] spacing or icon size are not ok to draw conditions. Spacing: " << spacing << ", icon size: " << iconSize << ", target: " << target->width() << " x " << target->height();
         return;
     }
-    // {110, 150}, // PixmapSize_Animate = mid-sized icon for animation dialogs (e.g. chase)
 
     QPainter painter(target);
     int cx = spacing;
@@ -615,23 +636,5 @@ void Combatant::registerChange()
     else
     {
         emit dirty();
-    }
-}
-
-void Combatant::copyValues(const Combatant &other)
-{
-    _initiative = other._initiative;
-    _armorClass = other._armorClass;
-    _hitPoints = other._hitPoints;
-    _hitDice = other._hitDice;
-    _conditions = other._conditions;
-    _icon = other._icon;
-    _iconPixmap = other._iconPixmap;
-    _batchChanges = other._batchChanges;
-    _changesMade = other._changesMade;
-
-    for(int i = 0; i < other._attacks.count(); ++i)
-    {
-        _attacks.append(other._attacks.at(i));
     }
 }

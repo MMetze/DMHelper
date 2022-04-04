@@ -21,6 +21,7 @@ BattleCombatantFrame::BattleCombatantFrame(QWidget *parent) :
     ui->frameStatsContents->setEnabled(false);
 
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &BattleCombatantFrame::editConditions);
+    connect(ui->btnRemoveConditions, &QAbstractButton::clicked, this, &BattleCombatantFrame::removeConditions);
 }
 
 BattleCombatantFrame::BattleCombatantFrame(BattleDialogModelCombatant* combatant, QWidget *parent) :
@@ -125,6 +126,12 @@ void BattleCombatantFrame::editConditions()
             emit conditionsChanged(_combatant);
         }
     }
+}
+
+void BattleCombatantFrame::removeConditions()
+{
+    if(_combatant)
+        _combatant->clearConditions();
 }
 
 void BattleCombatantFrame::updateLayout()

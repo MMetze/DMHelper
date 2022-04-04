@@ -13,7 +13,9 @@ public:
     explicit Party(const QString& name = QString(), QObject *parent = nullptr);
     virtual ~Party() override;
 
+    // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
     virtual int getObjectType() const override;
 
     virtual QString getIcon(bool localOnly = false) const;

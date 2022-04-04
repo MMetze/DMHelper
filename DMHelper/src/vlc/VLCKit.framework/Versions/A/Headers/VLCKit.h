@@ -24,7 +24,6 @@
 
 #import <VLCKit/VLCLibrary.h>
 #import <VLCKit/VLCMedia.h>
-#import <VLCKit/VLCMediaLibrary.h>
 #import <VLCKit/VLCMediaList.h>
 #import <VLCKit/VLCMediaListPlayer.h>
 #import <VLCKit/VLCMediaDiscoverer.h>
@@ -36,9 +35,10 @@
 #import <VLCKit/VLCTranscoder.h>
 #import <VLCKit/VLCVideoView.h>
 #import <VLCKit/VLCVideoLayer.h>
+#import <VLCKit/VLCRendererDiscoverer.h>
+#import <VLCKit/VLCRendererItem.h>
 
 @class VLCMedia;
-@class VLCMediaLibrary;
 @class VLCMediaList;
 @class VLCTime;
 @class VLCVideoView;

@@ -73,7 +73,7 @@ void AudioTrackYoutube::stop()
         return;
 
     _stopStatus = 0;
-    libvlc_media_list_player_stop(_vlcListPlayer);
+    libvlc_media_list_player_stop_async(_vlcListPlayer);
     internalStopCheck(stopCallComplete);
 
     /*
@@ -267,7 +267,7 @@ void AudioTrackYoutube::playDirectUrl()
         return;
 
     _vlcInstance = libvlc_new(0, nullptr);
-    libvlc_media_list_t *vlcMediaList = libvlc_media_list_new(_vlcInstance);
+    libvlc_media_list_t *vlcMediaList = libvlc_media_list_new();
 
     libvlc_media_t *vlcMedia = libvlc_media_new_location(_vlcInstance, _urlString.toUtf8().constData());
     libvlc_media_list_add_media(vlcMediaList, vlcMedia);

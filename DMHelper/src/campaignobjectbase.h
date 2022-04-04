@@ -22,6 +22,7 @@ public:
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void postProcessXML(const QDomElement &element, bool isImport);
+    virtual void copyValues(const CampaignObjectBase* other);
 
     virtual int getObjectType() const;
     virtual bool getExpanded() const;
@@ -42,6 +43,7 @@ public:
     CampaignObjectBase* getParentById(const QUuid& id);
 
     QUuid addObject(CampaignObjectBase* object);
+    CampaignObjectBase* removeObject(CampaignObjectBase* object);
     CampaignObjectBase* removeObject(QUuid id);
 
     CampaignObjectBase* getObjectById(QUuid id);

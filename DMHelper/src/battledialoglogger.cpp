@@ -26,6 +26,19 @@ BattleDialogLogger::~BattleDialogLogger()
     qDeleteAll(_battleEvents);
 }
 
+BattleDialogLogger& BattleDialogLogger::operator=(const BattleDialogLogger& other)
+{
+    qDeleteAll(_battleEvents);
+    _battleEvents.clear();
+
+    for(BattleDialogEvent* i : other._battleEvents)
+    {
+        _battleEvents.append(i->clone());
+    }
+
+    return *this;
+}
+
 QDomElement BattleDialogLogger::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport)
 {
     QDomElement loggerElement = doc.createElement( "battlelogger" );
@@ -74,13 +87,6 @@ void BattleDialogLogger::inputXML(const QDomElement &element, bool isImport)
         eventElement = eventElement.nextSiblingElement("battleevent");
     }
 }
-
-/*
-void BattleDialogLogger::postProcessXML(const QDomElement &element, bool isImport)
-{
-    DMHObjectBase::postProcessXML(element, isImport);
-}
-*/
 
 QList<BattleDialogEvent*> BattleDialogLogger::getEvents() const
 {

@@ -10,6 +10,7 @@ BattleDialogModelEffectObject::BattleDialogModelEffectObject(const QString& name
     BattleDialogModelEffect(name, parent),
     _width(5),
     _imageRotation(0),
+    _imageScaleFactor(0.0),
     _imageFile()
 {
     setEffectActive(false);
@@ -19,6 +20,7 @@ BattleDialogModelEffectObject::BattleDialogModelEffectObject(int size, int width
     BattleDialogModelEffect(size, position, rotation, QColor(), tip),
     _width(width),
     _imageRotation(0),
+    _imageScaleFactor(0.0),
     _imageFile(imageFile)
 {
     setEffectActive(false);
@@ -37,10 +39,23 @@ void BattleDialogModelEffectObject::inputXML(const QDomElement &element, bool is
     BattleDialogModelEffect::inputXML(element, isImport);
 }
 
+void BattleDialogModelEffectObject::copyValues(const CampaignObjectBase* other)
+{
+    const BattleDialogModelEffectObject* otherEffect = dynamic_cast<const BattleDialogModelEffectObject*>(other);
+    if(!otherEffect)
+        return;
+
+    _width = otherEffect->_width;
+    _imageRotation = otherEffect->_imageRotation;
+    _imageFile = otherEffect->_imageFile;
+
+    BattleDialogModelEffect::copyValues(other);
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectObject::clone() const
 {
     BattleDialogModelEffectObject* newEffect = new BattleDialogModelEffectObject(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 
@@ -76,15 +91,11 @@ QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
         return nullptr;
     }
 
-    //_imageScaleFactor = 100.0 / (getWidth() >= getSize() ? getWidth() : getSize());
     _imageScaleFactor = 100.0 / itemPixmap.width();
-    //int pixmapWidth = getWidth() >= getSize() ? 500 : static_cast<int>(500.0 * getWidth() / getSize());
-    //int pixmapHeight = getSize() >= getWidth() ? 500 : static_cast<int>(500.0 * getSize() / getWidth());
     if(_imageRotation != 0)
     {
         itemPixmap = itemPixmap.transformed(QTransform().rotate(_imageRotation));
     }
-    //QPixmap scaledPixmap = itemPixmap.scaled(pixmapWidth, pixmapHeight, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     pixmapItem->setPixmap(itemPixmap);
     pixmapItem->setOffset(-itemPixmap.width() / 2, -itemPixmap.height() / 2);
 
@@ -95,12 +106,10 @@ QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
 
 void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
 {
-    // First apply the base information
-    //BattleDialogModelEffect::applyEffectValues(item, gridScale);
-
     item.setPos(getPosition());
     item.setRotation(getRotation());
     item.setToolTip(getTip());
+    item.setOpacity(_color.alphaF());
 
     setItemScale(&item, static_cast<qreal>(getSize()) * gridScale / 500.0);
 }
@@ -112,7 +121,11 @@ int BattleDialogModelEffectObject::getWidth() const
 
 void BattleDialogModelEffectObject::setWidth(int width)
 {
-    _width = width;
+    if(_width != width)
+    {
+        _width = width;
+        emit effectChanged(this);
+    }
 }
 
 void BattleDialogModelEffectObject::setItemScale(QGraphicsItem* item, qreal scaleFactor) const
@@ -128,7 +141,11 @@ int BattleDialogModelEffectObject::getImageRotation() const
 
 void BattleDialogModelEffectObject::setImageRotation(int imageRotation)
 {
-    _imageRotation = imageRotation;
+    if(_imageRotation != imageRotation)
+    {
+        _imageRotation = imageRotation;
+        emit effectChanged(this);
+    }
 }
 
 QString BattleDialogModelEffectObject::getImageFile() const
@@ -138,7 +155,11 @@ QString BattleDialogModelEffectObject::getImageFile() const
 
 void BattleDialogModelEffectObject::setImageFile(const QString& imageFile)
 {
-    _imageFile = imageFile;
+    if(_imageFile != imageFile)
+    {
+        _imageFile = imageFile;
+        emit effectChanged(this);
+    }
 }
 
 qreal BattleDialogModelEffectObject::getImageScaleFactor() const

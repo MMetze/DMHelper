@@ -1,7 +1,6 @@
 #include "campaigntreemodel.h"
 #include "combatant.h"
 #include "character.h"
-#include "audiotrack.h"
 #include "map.h"
 #include "campaigntreeitem.h"
 #include "dmconstants.h"
@@ -17,6 +16,7 @@ CampaignTreeModel::CampaignTreeModel(QObject *parent) :
     QStandardItemModel(parent),
     _campaign(nullptr),
     _objectIndexMap(),
+    _publishingItem(),
     _updateParent(nullptr),
     _updateRow(-1)
 {
@@ -37,7 +37,10 @@ bool CampaignTreeModel::containsObject(const QUuid& objectId) const
 QModelIndex CampaignTreeModel::getObjectIndex(const QUuid& objectId) const
 {
     qDebug() << "[CampaignTreeModel] Searching for index for object id: " << objectId;
-    QModelIndex result = _objectIndexMap.value(objectId);
+    CampaignTreeItem* item = getObjectItem(objectId);
+    QModelIndex result;
+    if(item)
+        result = item->index();
     if(!result.isValid())
         qDebug() << "[CampaignTreeModel] ERROR: Not able to find a valid index for object id: " << objectId;
 
@@ -53,11 +56,7 @@ CampaignTreeItem* CampaignTreeModel::getObjectItemByName(const QString& name) co
 CampaignTreeItem* CampaignTreeModel::getObjectItem(const QUuid& objectId) const
 {
     qDebug() << "[CampaignTreeModel] Searching for item for object id: " << objectId;
-    QModelIndex index = getObjectIndex(objectId);
-    if(!index.isValid())
-        return nullptr;
-
-    CampaignTreeItem* item = campaignItemFromIndex(index);
+    CampaignTreeItem* item = getChildById(invisibleRootItem(), objectId);
     if((item) && (item->getCampaignItemId() != objectId))
     {
         qDebug() << "[CampaignTreeModel] ERROR: Found item ID does not match: no object found!";
@@ -176,6 +175,25 @@ void CampaignTreeModel::setCampaign(Campaign* campaign)
     }
 }
 
+void CampaignTreeModel::setPublishIndex(const QModelIndex& index, bool publish)
+{
+    if(!_publishingItem.isNull())
+    {
+        CampaignTreeItem* oldTreeItem = getObjectItem(_publishingItem);
+        if(oldTreeItem)
+            oldTreeItem->setPublishing(false);
+        _publishingItem = QUuid();
+    }
+
+    if(publish)
+    {
+        CampaignTreeItem* newTreeItem = campaignItemFromIndex(index);
+        if(newTreeItem)
+            newTreeItem->setPublishing(true);
+        _publishingItem = newTreeItem->getCampaignItemId();
+    }
+}
+
 void CampaignTreeModel::refresh()
 {
     if(!_campaign)
@@ -288,9 +306,9 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     CampaignTreeItem* treeEntry = new CampaignTreeItem(object->getName());
     treeEntry->setEditable(true);
 
-    treeEntry->setData(QVariant::fromValue(reinterpret_cast<quint64>(object)), DMHelper::TreeItemData_Object);
-    treeEntry->setData(QVariant(object->getObjectType()), DMHelper::TreeItemData_Type);
-    treeEntry->setData(QVariant(object->getID().toString()), DMHelper::TreeItemData_ID);
+    treeEntry->setCampaignItemObject(object);
+    treeEntry->setCampaignItemType(object->getObjectType());
+    treeEntry->setCampaignItemId(object->getID());
 
     if(object->getObjectType() == DMHelper::CampaignType_Map)
     {
@@ -299,8 +317,6 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     }
 
     connect(object, &CampaignObjectBase::nameChanged, this, &CampaignTreeModel::handleObjectNameChanged);
-
-    setTreeEntryVisualization(treeEntry);
 
     addTreeEntry(treeEntry, parentEntry);
 
@@ -432,68 +448,12 @@ void CampaignTreeModel::iterateTreeEntryVisualization(CampaignTreeItem* entry)
     if(!entry)
         return;
 
-    setTreeEntryVisualization(entry);
+    entry->updateVisualization();
 
     for(int i = 0; i < entry->rowCount(); ++i)
     {
         iterateTreeEntryVisualization(dynamic_cast<CampaignTreeItem*>(entry->child(i)));
     }
-}
-
-void CampaignTreeModel::setTreeEntryVisualization(CampaignTreeItem* entry)
-{
-    if(!entry)
-        return;
-
-    CampaignObjectBase* object = entry->getCampaignItemObject();
-    if(!object)
-        return;
-
-    switch(object->getObjectType())
-    {
-        case DMHelper::CampaignType_Party:
-            entry->setIcon(QIcon(":/img/data/icon_contentparty.png"));
-            break;
-        case DMHelper::CampaignType_Combatant:
-            {
-                Character* character = dynamic_cast<Character*>(object);
-                bool isPC = ((character) && (character->isInParty()));
-                entry->setIcon(isPC ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png"));
-                entry->setCheckable(isPC);
-                if(isPC)
-                    entry->setCheckState(character->getActive() ? Qt::Checked : Qt::Unchecked);
-                else
-                    entry->setData(QVariant(), Qt::CheckStateRole); // Needed to actively remove the checkbox on the entry
-            }
-            break;
-        case DMHelper::CampaignType_Map:
-            entry->setIcon(QIcon(":/img/data/icon_contentmap.png"));
-            break;
-        case DMHelper::CampaignType_Text:
-            entry->setIcon(QIcon(":/img/data/icon_contenttextencounter.png"));
-            break;
-        case DMHelper::CampaignType_Battle:
-            entry->setIcon(QIcon(":/img/data/icon_contentbattle.png"));
-            break;
-        case DMHelper::CampaignType_ScrollingText:
-            entry->setIcon(QIcon(":/img/data/icon_contentscrollingtext.png"));
-            break;
-        case DMHelper::CampaignType_AudioTrack:
-            {
-                QString audioIcon(":/img/data/icon_soundboard.png");
-                AudioTrack* track = dynamic_cast<AudioTrack*>(object);
-                if(track)
-                {
-                    if(track->getAudioType() == DMHelper::AudioType_Syrinscape)
-                        audioIcon = QString(":/img/data/icon_syrinscape.png");
-                    else if(track->getAudioType() == DMHelper::AudioType_Youtube)
-                        audioIcon = QString(":/img/data/icon_playerswindow.png");
-                }
-                entry->setIcon(QIcon(audioIcon));
-            }
-            break;
-    }
-
 }
 
 void CampaignTreeModel::updateChildRows(QStandardItem* parentItem)

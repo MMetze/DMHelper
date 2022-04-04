@@ -26,6 +26,7 @@ public:
 
 public slots:
     void setStatus(const QString& statusString);
+    void setSplitStatus(const QString& primary, const QString& secondary);
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;
@@ -38,7 +39,7 @@ private:
 
     QImage _dieImage;
     QImage _backgroundImage;
-    QString _status;
+    QString _initialStatus;
 
     QElapsedTimer _elapsed;
     int _timerId;

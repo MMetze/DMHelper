@@ -14,16 +14,19 @@ class MapMarkerGraphicsSimpleTextItem;
 class MapMarkerGraphicsItem : public QGraphicsItemGroup
 {
 public:
-    MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, MapFrame& mapFrame);
+    MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, qreal initialScale, MapFrame& mapFrame);
 
     enum { Type = UserType + 1 };
 
     void setGroupVisible(bool visible);
-    void setTitle(const QString& title);
-    void setDescription(const QString& description);
+    void setMarker(const MapMarker& marker);
     void setDetailsVisible(bool visible);
 
     int getMarkerId() const;
+
+    void drawGraphicsItem(QPainter& painter);
+    QPixmap getGraphicsItemPixmap() const;
+    QPointF getTopLeft() const;
 
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
@@ -32,6 +35,7 @@ protected:
     virtual void mousePressEvent(QGraphicsSceneMouseEvent * event) override;
     virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent * event) override;
     void toggleDetails();
+    void preparePixmap();
 
     virtual int type() const override;
 
@@ -41,6 +45,7 @@ protected:
     MapMarkerGraphicsPixmapItem* _markerIcon;
     MapMarkerGraphicsSimpleTextItem* _title;
     MapMarkerGraphicsSimpleTextItem* _details;
+    QPixmap _markerPixmap;
 
     bool _detailsVisible;
     bool _clicked;
@@ -53,6 +58,10 @@ public:
         QGraphicsPixmapItem(pixmap, parent)
     {}
 
+    MapMarkerGraphicsPixmapItem(QGraphicsItem *parent) :
+        QGraphicsPixmapItem(parent)
+    {}
+
 protected:
     virtual int type() const { return MapMarkerGraphicsItem::Type; }
 };
@@ -62,6 +71,10 @@ class MapMarkerGraphicsSimpleTextItem : public QGraphicsSimpleTextItem
 public:
     MapMarkerGraphicsSimpleTextItem(const QString &text, QGraphicsItem *parent) :
         QGraphicsSimpleTextItem(text, parent)
+    {}
+
+    MapMarkerGraphicsSimpleTextItem(QGraphicsItem *parent) :
+        QGraphicsSimpleTextItem(parent)
     {}
 
 protected:

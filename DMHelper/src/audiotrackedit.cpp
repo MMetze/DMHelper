@@ -35,8 +35,10 @@ AudioTrackEdit::~AudioTrackEdit()
     delete ui;
 }
 
-void AudioTrackEdit::activateObject(CampaignObjectBase* object)
+void AudioTrackEdit::activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer)
 {
+    Q_UNUSED(currentRenderer);
+
     AudioTrack* track = dynamic_cast<AudioTrack*>(object);
     if(!track)
         return;

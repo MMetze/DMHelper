@@ -28,11 +28,13 @@
 /**
  * Standard notification messages that are emitted by VLCAudio object.
  */
-extern NSString *const VLCMediaPlayerVolumeChanged;
+OBJC_VISIBLE OBJC_EXTERN
+NSString *const VLCMediaPlayerVolumeChanged;
 
 /**
  * basic class to control audio output
  */
+OBJC_VISIBLE
 @interface VLCAudio : NSObject
 
 /**
@@ -49,11 +51,6 @@ extern NSString *const VLCMediaPlayerVolumeChanged;
  * enable passthrough mode for the current audio device
  * \note There is no warrenty that it succeeds as it depends on the capabilities of the hardware audio decoder / receiver attached by the user */
 @property (readwrite) BOOL passthrough;
-
-/**
- * Mute the current audio output.
- * \deprecated This selector will be removed in the next release */
-- (void)setMute:(BOOL)value __attribute__((deprecated));
 
 /**
  * lower the current audio output volume */

@@ -12,6 +12,10 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->cmbInitiativeType->addItem("No Initiative", QVariant(DMHelper::InitiativeType_None));
+    ui->cmbInitiativeType->addItem("Icons Only", QVariant(DMHelper::InitiativeType_Image));
+    ui->cmbInitiativeType->addItem("Icons and Names", QVariant(DMHelper::InitiativeType_ImageName));
+
     if(_options)
     {
         updateFileLocations();
@@ -37,7 +41,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         font.setFamily(_options->getFontFamily());
         ui->fontComboBox->setCurrentFont(font);
         ui->spinBoxFontSize->setValue(_options->getFontSize());
-        ui->chkShowOnDeck->setChecked(_options->getShowOnDeck());
+        ui->cmbInitiativeType->setCurrentIndex(_options->getInitiativeType());
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
         ui->edtCountdownDuration->setValidator(new QIntValidator(1,1000,this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
@@ -73,7 +77,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
 
         connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
         connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), _options, SLOT(setFontSize(int)));
-        connect(ui->chkShowOnDeck, SIGNAL(clicked(bool)), _options, SLOT(setShowOnDeck(bool)));
+        connect(ui->cmbInitiativeType, SIGNAL(currentIndexChanged(int)), _options, SLOT(setInitiativeType(int)));
         connect(ui->chkShowCountdown, SIGNAL(clicked(bool)), _options, SLOT(setShowCountdown(bool)));
         connect(ui->edtCountdownDuration, SIGNAL(textChanged(QString)), _options, SLOT(setCountdownDuration(QString)));
         connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);

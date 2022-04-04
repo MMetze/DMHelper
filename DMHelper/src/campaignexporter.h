@@ -4,7 +4,6 @@
 #include "campaign.h"
 #include "encountertext.h"
 #include "encounterbattle.h"
-#include "encounterscrollingtext.h"
 #include <QDomDocument>
 #include <QDir>
 #include <QUuid>
@@ -29,15 +28,6 @@ protected:
     bool checkObjectTreeReferences(CampaignObjectBase* exportObject, QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
     bool checkObjectReferences(CampaignObjectBase* exportObject, QDomDocument &doc, QDomElement &parent, QDir& targetDirectory);
     void addObjectAndChildrenIds(CampaignObjectBase* object);
-
-    /*
-    void addWholeAdventure(Adventure& adventure);
-    Adventure* addShellAdventure(Adventure& adventure);
-    void addEncounterText(Adventure& adventure, EncounterText& encounter);
-    void addEncounterBattle(Adventure& adventure, EncounterBattle& encounter);
-    void addEncounterScrollingText(Adventure& adventure, EncounterScrollingText& encounter);
-    void addMap(Adventure& adventure, Map& map);
-    */
 
     Campaign& _originalCampaign;
     QUuid _exportId;

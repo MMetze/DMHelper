@@ -10,7 +10,6 @@ class BattleDialogModelEffectCube : public BattleDialogModelEffectShape
 public:
     BattleDialogModelEffectCube(const QString& name = QString(), QObject *parent = nullptr);
     explicit BattleDialogModelEffectCube(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
-    //BattleDialogModelEffectCube(const BattleDialogModelEffectCube& other);
     virtual ~BattleDialogModelEffectCube() override;
 
     virtual BattleDialogModelEffect* clone() const override;

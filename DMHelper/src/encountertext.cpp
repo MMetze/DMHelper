@@ -16,7 +16,7 @@ EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
     _text(),
     _translatedText(),
     _imageFile(),
-    _textWidth(80),
+    _textWidth(100),
     _animated(false),
     _translated(false),
     _scrollSpeed(25)
@@ -27,8 +27,8 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
 {
     extractTextNode(element, isImport);
 
-    setImageFile(element.attribute("imageFile"));
-    setTextWidth(element.attribute("textWidth", "80").toInt());
+    _imageFile = element.attribute("imageFile"); // Want to keep the filename even if the file was accidentally moved
+    setTextWidth(element.attribute("textWidth", "100").toInt());
     int scrollSpeed = element.attribute("scrollSpeed").toInt();
     setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);
     setAnimated(static_cast<bool>(element.attribute("animated", QString::number(0)).toInt()));
@@ -76,6 +76,24 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
     }
 
     CampaignObjectBase::inputXML(element, isImport);
+}
+
+void EncounterText::copyValues(const CampaignObjectBase* other)
+{
+    const EncounterText* otherEntry = dynamic_cast<const EncounterText*>(other);
+    if(!otherEntry)
+        return;
+
+    _text = otherEntry->_text;
+    _translatedText = otherEntry->_translatedText;
+    _imageFile = otherEntry->_imageFile;
+    _textWidth = otherEntry->_textWidth;
+
+    _animated = otherEntry->_animated;
+    _translated = otherEntry->_translated;
+    _scrollSpeed = otherEntry->_scrollSpeed;
+
+    CampaignObjectBase::copyValues(other);
 }
 
 int EncounterText::getObjectType() const

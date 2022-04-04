@@ -8,7 +8,7 @@
 #include "party.h"
 #include "character.h"
 #include "characterimporter.h"
-#include "objectimporter.h"
+#include "objectimportdialog.h"
 #include "partyframe.h"
 #include "characterframe.h"
 #include "campaign.h"
@@ -22,8 +22,6 @@
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
 #include "encounterbattle.h"
-#include "encounterscrollingtext.h"
-#include "encounterscrollingtextedit.h"
 #include "campaignobjectframe.h"
 #include "combatant.h"
 #include "campaigntreemodel.h"
@@ -36,6 +34,7 @@
 #include "bestiary.h"
 #include "spell.h"
 #include "spellbook.h"
+#include "campaignnotesdialog.h"
 #include "bestiaryexportdialog.h"
 #include "exportdialog.h"
 #include "equipmentserver.h"
@@ -43,12 +42,8 @@
 #include "texttranslatedialog.h"
 #include "randommarketdialog.h"
 #include "combatantselectdialog.h"
-#ifdef INCLUDE_CHASE_SUPPORT
-    #include "chaserselectiondialog.h"
-#endif
 #include "optionsdialog.h"
 #include "selectzoom.h"
-#include "scrolltabwidget.h"
 #include "quickref.h"
 #include "quickrefframe.h"
 #include "dmscreentabwidget.h"
@@ -74,12 +69,13 @@
 #include "ribbontabbattlemap.h"
 #include "ribbontabbattleview.h"
 #include "ribbontabbattle.h"
-#include "ribbontabscrolling.h"
 #include "ribbontabtext.h"
 #include "ribbontabmap.h"
 #include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
+#include "dmh_vlc.h"
+#include "whatsnewdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -109,65 +105,36 @@
 #include <QSplashScreen>
 #endif
 
-/*
- * TODO:
- * Add copyright notice to all files
- * Remove commented code
- * Refactor mainwindow, make it smaller
- * Avoid redrawing the tree every time a change is made
- * Add maps to Settings
- * Add NPCs - first just to the tree, then to battles, chases or party
- * Add non-characters to the party (monsters or NPCs) --> create a chracter from a monster class
- * Spell reference
- * More editing ability for UI elements (campaign, adventure, encounter, maps - rename, remap, etc)
- * Remove chase and other duplicate classes (dialogs instead of frames, old monster/character widgets)
- * Cross-populate preview screens
- * Image publisher
- * Items in the campaign
- * Drag and Drop to add maps and images
- * Check member variable naming convention
- * Maps - Tokens and DM layers, clickable?
- * different brushes for FOW clearing
- * Full character sheet
- */
-
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    pubWindow(nullptr),
-    previewTab(nullptr),
-    previewFrame(nullptr),
-    previewDlg(nullptr),
-    dmScreenDlg(nullptr),
-    tableDlg(nullptr),
-    quickRefDlg(nullptr),
-    soundDlg(nullptr),
-    timeAndDateFrame(nullptr),
-    calendarDlg(nullptr),
-    countdownDlg(nullptr),
-    encounterTextEdit(nullptr),
-    _scrollingTextEdit(nullptr),
-    treeModel(nullptr),
-    characterLayout(nullptr),
-    campaign(nullptr),
-    campaignFileName(),
+    _pubWindow(nullptr),
+    _dmScreenDlg(nullptr),
+    _tableDlg(nullptr),
+    _quickRefDlg(nullptr),
+    _soundDlg(nullptr),
+    _timeAndDateFrame(nullptr),
+    _calendarDlg(nullptr),
+    _countdownDlg(nullptr),
+    _encounterTextEdit(nullptr),
+    _treeModel(nullptr),
+    _characterLayout(nullptr),
+    _campaign(nullptr),
+    _campaignFileName(),
     _options(nullptr),
-    bestiaryDlg(),
-    spellDlg(),
-#ifdef INCLUDE_CHASE_SUPPORT
-    chaseDlg(nullptr),
-#endif
+    _bestiaryDlg(),
+    _spellDlg(),
     _battleDlgMgr(nullptr),
     _audioPlayer(nullptr),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkController(nullptr),
 #endif
-    mouseDown(false),
-    mouseDownPos(),
-    undoAction(nullptr),
-    redoAction(nullptr),
-    initialized(false),
-    dirty(false),
+    _mouseDown(false),
+    _mouseDownPos(),
+    _undoAction(nullptr),
+    _redoAction(nullptr),
+    _initialized(false),
+    _dirty(false),
     _animationFrameCount(DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES),
     _ribbon(nullptr),
     _ribbonTabFile(nullptr),
@@ -176,23 +143,13 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabBattleMap(nullptr),
     _ribbonTabBattleView(nullptr),
     _ribbonTabBattle(nullptr),
-    _ribbonTabScrolling(nullptr),
     _ribbonTabText(nullptr),
     _ribbonTabMap(nullptr),
     _ribbonTabWorldMap(nullptr),
-    _ribbonTabAudio(nullptr)
+    _ribbonTabAudio(nullptr),
+    _battleFrame(nullptr),
+    _mapFrame(nullptr)
 {
-
-    QScreen* screen = QGuiApplication::primaryScreen();
-
-#ifndef Q_OS_MAC
-    QPixmap pixmap(":/img/data/dmhelper_opaque.png");
-    QSize screenSize = screen != nullptr ? screen->availableSize() : QSize(1000, 1000);
-    QSplashScreen splash(pixmap.scaled(screenSize.width() / 2, screenSize.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    splash.show();
-    splash.showMessage(QString("Initializing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
-#endif
-
     qDebug() << "[MainWindow] Initializing Main";
 
     qDebug() << "[MainWindow] DMHelper version information";
@@ -244,7 +201,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Reading Settings";
     _options = new OptionsContainer(this);
     MRUHandler* mruHandler = new MRUHandler(nullptr, DEFAULT_MRU_FILE_COUNT, this);
-    connect(mruHandler,SIGNAL(triggerMRU(QString)),this,SLOT(openFile(QString)));
+    connect(mruHandler, SIGNAL(triggerMRU(QString)), this, SLOT(openCampaign(QString)));
     _options->setMRUHandler(mruHandler);
     _options->readSettings();
     connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
@@ -257,6 +214,17 @@ MainWindow::MainWindow(QWidget *parent) :
     f.setPointSize(_options->getFontSize());
     qDebug() << "[MainWindow] Setting application font to: " << _options->getFontFamily() << " size " << _options->getFontSize();
     qApp->setFont(f);
+
+    QScreen* screen = QGuiApplication::primaryScreen();
+
+#ifndef Q_OS_MAC
+    // Run the splash screen as soon as the application font has been selected to avoid font-change-popping
+    QPixmap pixmap(":/img/data/dmhelper_opaque.png");
+    QSize screenSize = screen != nullptr ? screen->availableSize() : QSize(1000, 1000);
+    QSplashScreen splash(pixmap.scaled(screenSize.width() / 2, screenSize.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    splash.show();
+    splash.showMessage(QString("Initializing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+#endif
 
     ui->setupUi(this);
     if(screen)
@@ -319,17 +287,15 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
+    connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
+    QShortcut* notesShortcut = new QShortcut(QKeySequence(tr("Ctrl+Alt+N", "Add Note")), this);
+    connect(notesShortcut, SIGNAL(activated()), this, SLOT(addNote()));
     connect(_ribbonTabCampaign, SIGNAL(exportItemClicked()), this, SLOT(exportCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(importItemClicked()), this, SLOT(importItem()));
     connect(_ribbonTabCampaign, SIGNAL(importCharacterClicked()), this, SLOT(importCharacter()));
     enableCampaignMenu();
 
     // Tools Menu
-    /*
-#ifdef INCLUDE_CHASE_SUPPORT
-    connect(ui->action_Chase_Dialog,SIGNAL(triggered()),this,SLOT(startChase()));
-#endif
-    */
     connect(_ribbonTabTools, SIGNAL(bestiaryClicked()), this, SLOT(openBestiary()));
     QShortcut* bestiaryShortcut = new QShortcut(QKeySequence(tr("Ctrl+M", "Open Bestiary")), this);
     connect(bestiaryShortcut, SIGNAL(activated()), this, SLOT(openBestiary()));
@@ -357,6 +323,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // Battle View Menu
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabBattleView, SLOT(setPointerFile(const QString&)));
     _ribbonTabBattleView->setPointerFile(_options->getPointerFile());
+    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
     // Mini Map Menu
     // connections set up elsewhere
@@ -364,19 +331,16 @@ MainWindow::MainWindow(QWidget *parent) :
     // Text Menu
     // connections set up elsewhere
 
-
     qDebug() << "[MainWindow] Creating Player's Window";
-    pubWindow = new PublishWindow(QString("DMHelper Player's Window"));
-    pubWindow->setPointerFile(_options->getPointerFile());
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), pubWindow, SLOT(setPointerFile(const QString&)));
-    connect(pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
-    connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), pubWindow, SLOT(setBackgroundColor(const QColor&)));
+    _pubWindow = new PublishWindow(QString("DMHelper Player's Window"));
+    connect(_pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
+    connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), _pubWindow, SLOT(setBackgroundColor(const QColor&)));
     qDebug() << "[MainWindow] Player's Window Created";
 
     qDebug() << "[MainWindow] Creating Tree Model";
     ui->treeView->setHeaderHidden(true);
-    treeModel = new CampaignTreeModel(ui->treeView);
-    ui->treeView->setModel(treeModel);
+    _treeModel = new CampaignTreeModel(ui->treeView);
+    ui->treeView->setModel(_treeModel);
     ui->treeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->treeView->setSelectionMode(QAbstractItemView::SingleSelection);
 
@@ -386,16 +350,16 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->treeView->header()->setStretchLastSection(false);
     }
 
-    connect(ui->treeView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(handleCustomContextMenu(QPoint)));
-    connect(ui->treeView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),this,SLOT(handleTreeItemSelected(QModelIndex,QModelIndex)));
-    connect(ui->treeView,SIGNAL(activated(QModelIndex)),this,SLOT(handleTreeItemDoubleClicked(QModelIndex)));
-    connect(treeModel, &CampaignTreeModel::campaignChanged, ui->treeView, &CampaignTree::campaignChanged);
-    connect(treeModel, &CampaignTreeModel::itemMoved, ui->treeView, &CampaignTree::handleItemMoved);
-    connect(treeModel,SIGNAL(itemChanged(QStandardItem*)),this,SLOT(handleTreeItemChanged(QStandardItem*)));
+    connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(handleCustomContextMenu(QPoint)));
+    connect(ui->treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(handleTreeItemSelected(QModelIndex,QModelIndex)));
+    connect(ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(handleTreeItemDoubleClicked(QModelIndex)));
+    connect(_treeModel, &CampaignTreeModel::campaignChanged, ui->treeView, &CampaignTree::campaignChanged);
+    connect(_treeModel, &CampaignTreeModel::itemMoved, ui->treeView, &CampaignTree::handleItemMoved);
+    connect(_treeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[MainWindow] Tree Model Created";
 
-    connect(Bestiary::Instance(),SIGNAL(changed()),&bestiaryDlg,SLOT(dataChanged()));
-    connect(Spellbook::Instance(),SIGNAL(changed()),&spellDlg,SLOT(dataChanged()));
+    connect(Bestiary::Instance(),SIGNAL(changed()),&_bestiaryDlg,SLOT(dataChanged()));
+    connect(Spellbook::Instance(),SIGNAL(changed()),&_spellDlg,SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Loading Bestiary";
 #ifndef Q_OS_MAC
@@ -403,17 +367,15 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qApp->processEvents();
     readBestiary();
-    bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
+    _bestiaryDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Bestiary Loaded";
 
     connect(this, SIGNAL(dispatchPublishImage(QImage)), this, SLOT(showPublishWindow()));
     connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), this, SLOT(showPublishWindow()));
-    connect(this, SIGNAL(dispatchPublishImage(QImage)), pubWindow, SLOT(setImage(QImage)));
-    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), pubWindow, SLOT(setImage(QImage, const QColor&)));
-    connect(this, SIGNAL(dispatchAnimateImage(QImage)), pubWindow, SLOT(setImageNoScale(QImage)));
-    connect(this, SIGNAL(dispatchAnimateImage(QImage)), this, SLOT(handleAnimationPreview(QImage)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage)), _pubWindow, SLOT(setImage(QImage)));
+    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
 
-    connect(&bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
+    connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -421,7 +383,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qApp->processEvents();
     readSpellbook();
-    spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
+    _spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Spellbook Loaded";
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
@@ -431,143 +393,115 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Base, new EmptyCampaignFrame);
 
     // EncounterType_Text
-    encounterTextEdit = new EncounterTextEdit;
-    connect(encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
-    connect(encounterTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(encounterTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
-    connect(encounterTextEdit, SIGNAL(animationStopped()), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
-    connect(encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
-    connect(encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
-    connect(pubWindow, SIGNAL(frameResized(QSize)), encounterTextEdit, SLOT(targetResized(QSize)));
-    connect(_ribbonTabText, &RibbonTabText::backgroundClicked, encounterTextEdit, &EncounterTextEdit::setBackgroundImage);
-    connect(encounterTextEdit, &EncounterTextEdit::imageFileChanged, _ribbonTabText, &RibbonTabText::setImageFile);
-    connect(_ribbonTabText, SIGNAL(animationClicked(bool)), encounterTextEdit, SLOT(setAnimated(bool)));
-    connect(_ribbonTabText, SIGNAL(speedChanged(int)), encounterTextEdit, SLOT(setScrollSpeed(int)));
-    connect(_ribbonTabText, SIGNAL(widthChanged(int)), encounterTextEdit, SLOT(setTextWidth(int)));
-    connect(_ribbonTabText, SIGNAL(rewindClicked()), encounterTextEdit, SLOT(rewind()));
-    connect(encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
-    connect(encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
-    connect(encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
-    connect(_ribbonTabText, SIGNAL(colorChanged(const QColor&)), encounterTextEdit, SLOT(setColor(const QColor&)));
-    connect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), encounterTextEdit, SLOT(setFont(const QString&)));
-    connect(_ribbonTabText, SIGNAL(fontSizeChanged(int)), encounterTextEdit, SLOT(setFontSize(int)));
-    connect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), encounterTextEdit, SLOT(setBold(bool)));
-    connect(_ribbonTabText, SIGNAL(fontItalicsChanged(bool)), encounterTextEdit, SLOT(setItalics(bool)));
-    connect(_ribbonTabText, SIGNAL(fontUnderlineChanged(bool)), encounterTextEdit, SLOT(setUnderline(bool)));
-    connect(_ribbonTabText, SIGNAL(alignmentChanged(Qt::Alignment)), encounterTextEdit, SLOT(setAlignment(Qt::Alignment)));
-    connect(_ribbonTabText, SIGNAL(pasteRichChanged(bool)), encounterTextEdit, SLOT(setPasteRich(bool)));
+    _encounterTextEdit = new EncounterTextEdit;
+    connect(_encounterTextEdit, SIGNAL(anchorClicked(QUrl)), this, SLOT(linkActivated(QUrl)));
+    connect(_encounterTextEdit, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(_encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    connect(_encounterTextEdit, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
+    connect(_pubWindow, SIGNAL(frameResized(QSize)), _encounterTextEdit, SLOT(targetResized(QSize)));
+    connect(_ribbonTabText, &RibbonTabText::backgroundClicked, _encounterTextEdit, &EncounterTextEdit::setBackgroundImage);
+    connect(_encounterTextEdit, &EncounterTextEdit::imageFileChanged, _ribbonTabText, &RibbonTabText::setImageFile);
+    connect(_ribbonTabText, SIGNAL(animationClicked(bool)), _encounterTextEdit, SLOT(setAnimated(bool)));
+    connect(_ribbonTabText, SIGNAL(speedChanged(int)), _encounterTextEdit, SLOT(setScrollSpeed(int)));
+    connect(_ribbonTabText, SIGNAL(widthChanged(int)), _encounterTextEdit, SLOT(setTextWidth(int)));
+    connect(_ribbonTabText, SIGNAL(rewindClicked()), _encounterTextEdit, SLOT(rewind()));
+    connect(_encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
+    connect(_encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
+    connect(_encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
+    connect(_ribbonTabText, SIGNAL(colorChanged(const QColor&)), _encounterTextEdit, SLOT(setColor(const QColor&)));
+    connect(_ribbonTabText, SIGNAL(fontFamilyChanged(const QString&)), _encounterTextEdit, SLOT(setFont(const QString&)));
+    connect(_ribbonTabText, SIGNAL(fontSizeChanged(int)), _encounterTextEdit, SLOT(setFontSize(int)));
+    connect(_ribbonTabText, SIGNAL(fontBoldChanged(bool)), _encounterTextEdit, SLOT(setBold(bool)));
+    connect(_ribbonTabText, SIGNAL(fontItalicsChanged(bool)), _encounterTextEdit, SLOT(setItalics(bool)));
+    connect(_ribbonTabText, SIGNAL(fontUnderlineChanged(bool)), _encounterTextEdit, SLOT(setUnderline(bool)));
+    connect(_ribbonTabText, SIGNAL(alignmentChanged(Qt::Alignment)), _encounterTextEdit, SLOT(setAlignment(Qt::Alignment)));
+    connect(_ribbonTabText, SIGNAL(pasteRichChanged(bool)), _encounterTextEdit, SLOT(setPasteRich(bool)));
     connect(_ribbonTabText, SIGNAL(pasteRichChanged(bool)), _options, SLOT(setPasteRich(bool)));
     _ribbonTabText->setPasteRich(_options->getPasteRich());
-    connect(_ribbonTabText, SIGNAL(hyperlinkClicked()), encounterTextEdit, SLOT(hyperlinkClicked()));
-    connect(_ribbonTabText, SIGNAL(translateTextClicked(bool)), encounterTextEdit, SLOT(setTranslated(bool)));
+    connect(_ribbonTabText, SIGNAL(hyperlinkClicked()), _encounterTextEdit, SLOT(hyperlinkClicked()));
+    connect(_ribbonTabText, SIGNAL(translateTextClicked(bool)), _encounterTextEdit, SLOT(setTranslated(bool)));
     //translate - both directions, get rid of previous button & link, make dialog bigger, better, apply, clear
     // remove text publish dialog
-    connect(encounterTextEdit, SIGNAL(colorChanged(const QColor&)), _ribbonTabText, SLOT(setColor(const QColor&)));
-    connect(encounterTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabText, SLOT(setFontFamily(const QString&)));
-    connect(encounterTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabText, SLOT(setFontSize(int)));
-    connect(encounterTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabText, SLOT(setFontBold(bool)));
-    connect(encounterTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabText, SLOT(setFontItalics(bool)));
-    connect(encounterTextEdit, SIGNAL(fontUnderlineChanged(bool)), _ribbonTabText, SLOT(setFontUnderline(bool)));
-    connect(encounterTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabText, SLOT(setAlignment(Qt::Alignment)));
-    connect(encounterTextEdit, SIGNAL(setHyperlinkActive(bool)), _ribbonTabText, SLOT(setHyperlinkActive(bool)));
-    connect(encounterTextEdit, SIGNAL(translatedChanged(bool)), _ribbonTabText, SLOT(setTranslationActive(bool)));
+    connect(_encounterTextEdit, SIGNAL(colorChanged(const QColor&)), _ribbonTabText, SLOT(setColor(const QColor&)));
+    connect(_encounterTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabText, SLOT(setFontFamily(const QString&)));
+    connect(_encounterTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabText, SLOT(setFontSize(int)));
+    connect(_encounterTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabText, SLOT(setFontBold(bool)));
+    connect(_encounterTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabText, SLOT(setFontItalics(bool)));
+    connect(_encounterTextEdit, SIGNAL(fontUnderlineChanged(bool)), _ribbonTabText, SLOT(setFontUnderline(bool)));
+    connect(_encounterTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabText, SLOT(setAlignment(Qt::Alignment)));
+    connect(_encounterTextEdit, SIGNAL(setHyperlinkActive(bool)), _ribbonTabText, SLOT(setHyperlinkActive(bool)));
+    connect(_encounterTextEdit, SIGNAL(translatedChanged(bool)), _ribbonTabText, SLOT(setTranslationActive(bool)));
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
                                                       DMHelper::CampaignType_Text,
-                                                      DMHelper::CampaignType_Placeholder}), encounterTextEdit);
+                                                      DMHelper::CampaignType_Placeholder}), _encounterTextEdit);
     qDebug() << "[MainWindow]     Adding Text Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Battle
-    BattleFrame* battleFrame = new BattleFrame;
-    battleFrame->setShowOnDeck(_options->getShowOnDeck());
-    battleFrame->setShowCountdown(_options->getShowCountdown());
-    battleFrame->setCountdownDuration(_options->getCountdownDuration());
-    battleFrame->setPointerFile(_options->getPointerFile());
-    battleFrame->setSelectedIcon(_options->getSelectedIcon());
-    battleFrame->setActiveIcon(_options->getActiveIcon());
-    battleFrame->setCombatantFrame(_options->getCombatantFrame());
-    battleFrame->setCountdownFrame(_options->getCountdownFrame());
-    connect(_options, SIGNAL(showOnDeckChanged(bool)), battleFrame, SLOT(setShowOnDeck(bool)));
-    connect(_options, SIGNAL(showCountdownChanged(bool)), battleFrame, SLOT(setShowCountdown(bool)));
-    connect(_options, SIGNAL(countdownDurationChanged(int)), battleFrame, SLOT(setCountdownDuration(int)));
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), battleFrame, SLOT(setPointerFile(const QString&)));
-    connect(_options, SIGNAL(selectedIconChanged(const QString&)), battleFrame, SLOT(setSelectedIcon(const QString&)));
-    connect(_options, SIGNAL(activeIconChanged(const QString&)), battleFrame, SLOT(setActiveIcon(const QString&)));
-    connect(_options, SIGNAL(combatantFrameChanged(const QString&)), battleFrame, SLOT(setCombatantFrame(const QString&)));
-    connect(_options, SIGNAL(countdownFrameChanged(const QString&)), battleFrame, SLOT(setCountdownFrame(const QString&)));
-    connect(pubWindow, SIGNAL(frameResized(QSize)), battleFrame, SLOT(setTargetSize(QSize)));
-    connect(pubWindow, SIGNAL(labelResized(QSize)), battleFrame, SLOT(setTargetLabelSize(QSize)));
-    connect(pubWindow, SIGNAL(publishMouseDown(const QPointF&)), battleFrame, SLOT(publishWindowMouseDown(const QPointF&)));
-    connect(pubWindow, SIGNAL(publishMouseMove(const QPointF&)), battleFrame, SLOT(publishWindowMouseMove(const QPointF&)));
-    connect(pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), battleFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
-    connect(battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
-    connect(battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
-    connect(battleFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(battleFrame, SIGNAL(animateImage(QImage)), pubWindow, SLOT(setBackgroundColor()));
-    connect(battleFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
-    connect(battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
-    connect(battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
-    connect(battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
-    connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), battleFrame, SLOT(addCharacter()));
-    connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), battleFrame, SLOT(addMonsters()));
-    connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), battleFrame, SLOT(addNPC()));
-    connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), battleFrame, SLOT(addObject()));
-    connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), battleFrame, SLOT(castSpell()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), battleFrame, SLOT(addEffectRadius()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), battleFrame, SLOT(addEffectCone()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), battleFrame, SLOT(addEffectCube()));
-    connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), battleFrame, SLOT(addEffectLine()));
-    connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), battleFrame, SLOT(showStatistics()));
+    _battleFrame = new BattleFrame;
+    _battleFrame->setInitiativeType(_options->getInitiativeType());
+    _battleFrame->setShowCountdown(_options->getShowCountdown());
+    _battleFrame->setCountdownDuration(_options->getCountdownDuration());
+    _battleFrame->setPointerFile(_options->getPointerFile());
+    _battleFrame->setSelectedIcon(_options->getSelectedIcon());
+    _battleFrame->setActiveIcon(_options->getActiveIcon());
+    _battleFrame->setCombatantFrame(_options->getCombatantFrame());
+    _battleFrame->setCountdownFrame(_options->getCountdownFrame());
+    connect(_options, SIGNAL(initiativeTypeChanged(int)), _battleFrame, SLOT(setInitiativeType(int)));
+    connect(_options, SIGNAL(showCountdownChanged(bool)), _battleFrame, SLOT(setShowCountdown(bool)));
+    connect(_options, SIGNAL(countdownDurationChanged(int)), _battleFrame, SLOT(setCountdownDuration(int)));
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _battleFrame, SLOT(setPointerFile(const QString&)));
+    connect(_options, SIGNAL(selectedIconChanged(const QString&)), _battleFrame, SLOT(setSelectedIcon(const QString&)));
+    connect(_options, SIGNAL(activeIconChanged(const QString&)), _battleFrame, SLOT(setActiveIcon(const QString&)));
+    connect(_options, SIGNAL(combatantFrameChanged(const QString&)), _battleFrame, SLOT(setCombatantFrame(const QString&)));
+    connect(_options, SIGNAL(countdownFrameChanged(const QString&)), _battleFrame, SLOT(setCountdownFrame(const QString&)));
+    connect(_pubWindow, SIGNAL(frameResized(QSize)), _battleFrame, SLOT(setTargetSize(QSize)));
+    connect(_pubWindow, SIGNAL(labelResized(QSize)), _battleFrame, SLOT(setTargetLabelSize(QSize)));
+    connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), _battleFrame, SLOT(publishWindowMouseDown(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), _battleFrame, SLOT(publishWindowMouseMove(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _battleFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
+    connect(_battleFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
+    connect(_battleFrame, SIGNAL(monsterSelected(QString)), this, SLOT(openMonster(QString)));
+    connect(_battleFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
+    connect(_battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    connect(_battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
+    connect(_battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
+    connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), _battleFrame, SLOT(addCharacter()));
+    connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), _battleFrame, SLOT(addMonsters()));
+    connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
+    connect(_ribbonTabBattle, SIGNAL(addObjectClicked()), _battleFrame, SLOT(addObject()));
+    connect(_ribbonTabBattle, SIGNAL(castSpellClicked()), _battleFrame, SLOT(castSpell()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectRadiusClicked()), _battleFrame, SLOT(addEffectRadius()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectConeClicked()), _battleFrame, SLOT(addEffectCone()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), _battleFrame, SLOT(addEffectCube()));
+    connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), _battleFrame, SLOT(addEffectLine()));
+    connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "Next Combatant")), this);
-    connect(nextShortcut, SIGNAL(activated()), battleFrame, SLOT(next()));
+    connect(nextShortcut, SIGNAL(activated()), _battleFrame, SLOT(next()));
 
-    connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), battleFrame, SLOT(selectBattleMap()));
-    connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), battleFrame, SLOT(reloadMap()));
-    connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), battleFrame, SLOT(setGridVisible(bool)));
-    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, battleFrame, &BattleFrame::setGridType);
-    connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), battleFrame, SLOT(setGridScale(int)));
-    connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), battleFrame, SLOT(setGridAngle(int)));
-    connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), battleFrame, SLOT(setXOffset(int)));
-    connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), battleFrame, SLOT(setYOffset(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), _battleFrame, SLOT(selectBattleMap()));
+    connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
+    connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
+    connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
+    connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
 
-    connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), battleFrame, SLOT(setFoWEdit(bool)));
-    connect(battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
-    connect(_ribbonTabBattleMap, SIGNAL(selectFoWClicked(bool)), battleFrame, SLOT(setFoWSelect(bool)));
-    connect(battleFrame, SIGNAL(foWSelectToggled(bool)), _ribbonTabBattleMap, SLOT(setSelectFoW(bool)));
-    BattleFrameMapDrawer* mapDrawer = battleFrame->getMapDrawer();
+    connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
+    connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
+    connect(_ribbonTabBattleMap, SIGNAL(selectFoWClicked(bool)), _battleFrame, SLOT(setFoWSelect(bool)));
+    connect(_battleFrame, SIGNAL(foWSelectToggled(bool)), _ribbonTabBattleMap, SLOT(setSelectFoW(bool)));
+    BattleFrameMapDrawer* mapDrawer = _battleFrame->getMapDrawer();
     connect(_ribbonTabBattleMap, SIGNAL(drawEraseClicked(bool)), mapDrawer, SLOT(setErase(bool)));
     connect(_ribbonTabBattleMap, SIGNAL(smoothClicked(bool)), mapDrawer, SLOT(setSmooth(bool)));
     connect(_ribbonTabBattleMap, SIGNAL(brushSizeChanged(int)), mapDrawer, SLOT(setSize(int)));
     connect(_ribbonTabBattleMap, SIGNAL(fillFoWClicked()), mapDrawer, SLOT(fillFoW()));
     connect(_ribbonTabBattleMap, SIGNAL(brushModeChanged(int)), mapDrawer, SLOT(setBrushMode(int)));
 
-    connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), battleFrame, SLOT(zoomIn()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), battleFrame, SLOT(zoomOut()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), battleFrame, SLOT(zoomFit()));
-    connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), battleFrame, SLOT(zoomSelect(bool)));
-    connect(battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
-
-    connect(_ribbonTabBattleView, SIGNAL(cameraCoupleClicked(bool)), battleFrame, SLOT(setCameraCouple(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(setCameraMap()));
-    connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), battleFrame, SLOT(cancelCameraCouple()));
-    connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(setCameraSelect(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), battleFrame, SLOT(cancelCameraCouple()));
-    connect(battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(setCameraEdit(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), battleFrame, SLOT(cancelCameraCouple()));
-    connect(battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
-
-    connect(_ribbonTabBattleView, SIGNAL(distanceClicked(bool)), battleFrame, SLOT(setDistance(bool)));
-    connect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), battleFrame, SLOT(setDistanceHeight(bool, qreal)));
-    connect(battleFrame, SIGNAL(distanceToggled(bool)), _ribbonTabBattleView, SLOT(setDistanceOn(bool)));
-    connect(battleFrame, SIGNAL(distanceChanged(const QString&)), _ribbonTabBattleView, SLOT(setDistance(const QString&)));
-
-    connect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), battleFrame, SLOT(setPointerOn(bool)));
-    connect(battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
-
-    connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
+    connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
 
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Battle,
-                                                      DMHelper::CampaignType_BattleContent}), battleFrame);
+                                                      DMHelper::CampaignType_BattleContent}), _battleFrame);
     qDebug() << "[MainWindow]     Adding Battle Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
     // EncounterType_Character
@@ -583,100 +517,53 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(characterChanged(QUuid)), partyFrame, SLOT(handleCharacterChanged(QUuid)));
     connect(partyFrame, SIGNAL(characterSelected(QUuid)), this, SLOT(openCharacter(QUuid)));
 
-
     // EncounterType_Map
-    MapFrame* mapFrame = new MapFrame;
-    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, mapFrame);
+    _mapFrame = new MapFrame;
+    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, _mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
-    connect(mapFrame, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(mapFrame, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
-    connect(mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
-    connect(pubWindow, SIGNAL(frameResized(QSize)), mapFrame, SLOT(targetResized(QSize)));
-    connect(mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
+    _mapFrame->setPointerFile(_options->getPointerFile());
+    //connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    connect(_mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
+    connect(_mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
+    connect(_pubWindow, SIGNAL(frameResized(QSize)), _mapFrame, SLOT(targetResized(QSize)));
+    connect(_mapFrame, SIGNAL(encounterSelected(QUuid)), this, SLOT(openEncounter(QUuid)));
 
-    connect(_ribbonTabMap, SIGNAL(editFileClicked()), mapFrame, SLOT(editMapFile()));
-    connect(_ribbonTabMap, SIGNAL(zoomInClicked()), mapFrame, SLOT(zoomIn()));
-    connect(_ribbonTabMap, SIGNAL(zoomOutClicked()), mapFrame, SLOT(zoomOut()));
-    connect(_ribbonTabMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
-    connect(_ribbonTabMap, SIGNAL(zoomFullClicked()), mapFrame, SLOT(zoomFit()));
-    connect(_ribbonTabMap, SIGNAL(zoomSelectClicked(bool)), mapFrame, SLOT(zoomSelect(bool)));
-    connect(mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabMap, SLOT(setZoomSelect(bool)));
-    connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), mapFrame, SLOT(setMapEdit(bool)));
-    connect(mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
+    connect(_ribbonTabMap, SIGNAL(editFileClicked()), _mapFrame, SLOT(editMapFile()));
+    // connect(_ribbonTabMap, SIGNAL(zoomOneClicked()), mapFrame, SLOT(zoomOne()));
 
-    connect(_ribbonTabMap, SIGNAL(drawEraseClicked(bool)), mapFrame, SLOT(setErase(bool)));
-    connect(_ribbonTabMap, SIGNAL(smoothClicked(bool)), mapFrame, SLOT(setSmooth(bool)));
-    connect(_ribbonTabMap, SIGNAL(brushSizeChanged(int)), mapFrame, SLOT(brushSizeChanged(int)));
-    connect(_ribbonTabMap, SIGNAL(fillFoWClicked()), mapFrame, SLOT(fillFoW()));
-    connect(_ribbonTabMap, SIGNAL(colorizeClicked()), mapFrame, SLOT(colorize()));
-    connect(_ribbonTabMap, SIGNAL(brushModeChanged(int)), mapFrame, SLOT(setBrushMode(int)));
-    connect(mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMap, SLOT(setBrushMode(int)));
+    connect(_ribbonTabMap, SIGNAL(mapEditClicked(bool)), _mapFrame, SLOT(setMapEdit(bool)));
+    connect(_mapFrame, SIGNAL(mapEditChanged(bool)), _ribbonTabMap, SLOT(setMapEdit(bool)));
 
-    connect(_ribbonTabMap, SIGNAL(publishZoomChanged(bool)), mapFrame, SLOT(setPublishZoom(bool)));
-    connect(_ribbonTabMap, SIGNAL(publishVisibleChanged(bool)), mapFrame, SLOT(setPublishVisible(bool)));
+    connect(_ribbonTabMap, SIGNAL(drawEraseClicked(bool)), _mapFrame, SLOT(setErase(bool)));
+    connect(_ribbonTabMap, SIGNAL(smoothClicked(bool)), _mapFrame, SLOT(setSmooth(bool)));
+    connect(_ribbonTabMap, SIGNAL(brushSizeChanged(int)), _mapFrame, SLOT(brushSizeChanged(int)));
+    connect(_ribbonTabMap, SIGNAL(fillFoWClicked()), _mapFrame, SLOT(fillFoW()));
+    connect(_ribbonTabMap, SIGNAL(colorizeClicked()), _mapFrame, SLOT(colorize()));
+    connect(_ribbonTabMap, SIGNAL(brushModeChanged(int)), _mapFrame, SLOT(setBrushMode(int)));
+    connect(_mapFrame, SIGNAL(brushModeSet(int)), _ribbonTabMap, SLOT(setBrushMode(int)));
 
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, mapFrame, &MapFrame::setParty);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, mapFrame, &MapFrame::setPartyIcon);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, mapFrame, &MapFrame::setShowParty);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, mapFrame, &MapFrame::setPartyScale);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, mapFrame, &MapFrame::setShowMarkers);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, mapFrame, &MapFrame::addNewMarker);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceClicked, mapFrame, &MapFrame::setDistance);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::freeDistanceClicked, mapFrame, &MapFrame::setFreeDistance);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceScaleChanged, mapFrame, &MapFrame::setDistanceScale);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineColorChanged, mapFrame, &MapFrame::setDistanceLineColor);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineTypeChanged, mapFrame, &MapFrame::setDistanceLineType);
-    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::distanceLineWidthChanged, mapFrame, &MapFrame::setDistanceLineWidth);
-    connect(mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
-    connect(mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
-    connect(mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
-    connect(mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
-    connect(mapFrame, &MapFrame::showDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceOn);
-    connect(mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setFreeDistanceOn);
-    connect(mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceScale);
-    connect(mapFrame, &MapFrame::distanceChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistance);
-    connect(mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineColor);
-    connect(mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineType);
-    connect(mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setDistanceLineWidth);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partySelected, _mapFrame, &MapFrame::setParty);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::partyIconSelected, _mapFrame, &MapFrame::setPartyIcon);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showPartyClicked, _mapFrame, &MapFrame::setShowParty);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, _mapFrame, &MapFrame::setPartyScale);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, _mapFrame, &MapFrame::setShowMarkers);
+    connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, _mapFrame, &MapFrame::addNewMarker);
+    connect(_mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
+    connect(_mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
+    connect(_mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
+    connect(_mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
 
-    connect(mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
+    connect(_mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
+    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _mapFrame, SLOT(setPointerFile(const QString&)));
 
-    connect(this, SIGNAL(cancelSelect()), mapFrame, SLOT(cancelSelect()));
+    connect(this, SIGNAL(cancelSelect()), _mapFrame, SLOT(cancelSelect()));
 
-    connect(pubWindow, SIGNAL(labelResized(QSize)), mapFrame, SLOT(setTargetLabelSize(QSize)));
-    connect(pubWindow, SIGNAL(publishMouseDown(const QPointF&)), mapFrame, SLOT(publishWindowMouseDown(const QPointF&)));
-    connect(pubWindow, SIGNAL(publishMouseMove(const QPointF&)), mapFrame, SLOT(publishWindowMouseMove(const QPointF&)));
-    connect(pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
+    connect(_pubWindow, SIGNAL(labelResized(QSize)), _mapFrame, SLOT(setTargetLabelSize(QSize)));
+    connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), _mapFrame, SLOT(publishWindowMouseDown(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseMove(const QPointF&)), _mapFrame, SLOT(publishWindowMouseMove(const QPointF&)));
+    connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
 
-    connect(this, SIGNAL(cancelSelect()), battleFrame, SLOT(cancelSelect()));
-
-    // EncounterType_ScrollingText
-    _scrollingTextEdit = new EncounterScrollingTextEdit;
-    ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_ScrollingText, _scrollingTextEdit);
-    qDebug() << "[MainWindow]     Adding Scrolling Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
-    connect(_scrollingTextEdit, SIGNAL(animateImage(QImage)), this, SIGNAL(dispatchAnimateImage(QImage)));
-    connect(_scrollingTextEdit, SIGNAL(animationStarted()), this, SLOT(handleAnimationStarted()));
-    connect(_scrollingTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
-    connect(pubWindow, SIGNAL(frameResized(QSize)), _scrollingTextEdit, SLOT(targetResized(QSize)));
-    connect(_ribbonTabScrolling, SIGNAL(backgroundClicked()), _scrollingTextEdit, SLOT(browseImageFile()));
-    connect(_ribbonTabScrolling, SIGNAL(speedChanged(int)), _scrollingTextEdit, SLOT(setScrollSpeed(int)));
-    connect(_ribbonTabScrolling, SIGNAL(widthChanged(int)), _scrollingTextEdit, SLOT(setImageWidth(int)));
-    connect(_ribbonTabScrolling, SIGNAL(rewindClicked()), _scrollingTextEdit, SLOT(rewind()));
-    connect(_scrollingTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabScrolling, SLOT(setSpeed(int)));
-    connect(_scrollingTextEdit, SIGNAL(imageWidthChanged(int)), _ribbonTabScrolling, SLOT(setWidth(int)));
-    connect(_ribbonTabScrolling, SIGNAL(colorChanged(const QColor&)), _scrollingTextEdit, SLOT(setColor(const QColor&)));
-    connect(_ribbonTabScrolling, SIGNAL(fontFamilyChanged(const QString&)), _scrollingTextEdit, SLOT(setFontFamily(const QString&)));
-    connect(_ribbonTabScrolling, SIGNAL(fontSizeChanged(int)), _scrollingTextEdit, SLOT(setFontSize(int)));
-    connect(_ribbonTabScrolling, SIGNAL(fontBoldChanged(bool)), _scrollingTextEdit, SLOT(setFontBold(bool)));
-    connect(_ribbonTabScrolling, SIGNAL(fontItalicsChanged(bool)), _scrollingTextEdit, SLOT(setFontItalics(bool)));
-    connect(_ribbonTabScrolling, SIGNAL(alignmentChanged(Qt::Alignment)), _scrollingTextEdit, SLOT(setAlignment(Qt::Alignment)));
-    connect(_scrollingTextEdit, SIGNAL(colorChanged(const QColor&)), _ribbonTabScrolling, SLOT(setColor(const QColor&)));
-    connect(_scrollingTextEdit, SIGNAL(fontFamilyChanged(const QString&)), _ribbonTabScrolling, SLOT(setFontFamily(const QString&)));
-    connect(_scrollingTextEdit, SIGNAL(fontSizeChanged(int)), _ribbonTabScrolling, SLOT(setFontSize(int)));
-    connect(_scrollingTextEdit, SIGNAL(fontBoldChanged(bool)), _ribbonTabScrolling, SLOT(setFontBold(bool)));
-    connect(_scrollingTextEdit, SIGNAL(fontItalicsChanged(bool)), _ribbonTabScrolling, SLOT(setFontItalics(bool)));
-    connect(_scrollingTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabScrolling, SLOT(setAlignment(Qt::Alignment)));
+    connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
 
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
@@ -696,7 +583,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_WelcomeScreen
     WelcomeFrame* welcomeFrame = new WelcomeFrame(mruHandler);
-    connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openFile(QString)));
+    connect(welcomeFrame, SIGNAL(openCampaignFile(QString)), this, SLOT(openCampaign(QString)));
     connect(_ribbonTabFile, SIGNAL(userGuideClicked()), welcomeFrame, SLOT(openUsersGuide()));
     connect(_ribbonTabFile, SIGNAL(gettingStartedClicked()), welcomeFrame, SLOT(openGettingStarted()));
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_WelcomeScreen, welcomeFrame);
@@ -704,35 +591,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qDebug() << "[MainWindow] Encounter Pages Created";
 
-    // Ensure publishing a single image stops any running animations
-    connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _ribbon->getPublishRibbon(), SLOT(cancelPublish()));
-
     // Load the quick reference tabs
 #ifndef Q_OS_MAC
     splash.showMessage(QString("Initializing Quick Reference tabs...\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
     qDebug() << "[MainWindow] Creating Reference Tabs";
-    previewFrame = new PublishFrame(this);
-    connect(previewFrame,SIGNAL(arrowVisibleChanged(bool)),pubWindow,SLOT(setArrowVisible(bool)));
-    connect(previewFrame,SIGNAL(arrowVisibleChanged(bool)),previewFrame,SLOT(setArrowVisible(bool)));
-    connect(previewFrame,SIGNAL(positionChanged(QPointF)),previewFrame,SLOT(setArrowPosition(QPointF)));
-    connect(previewFrame,SIGNAL(positionChanged(QPointF)),pubWindow,SLOT(setArrowPosition(QPointF)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage)),previewFrame,SLOT(setImage(QImage)));
-    connect(this,SIGNAL(dispatchPublishImage(QImage, const QColor&)),previewFrame,SLOT(setImage(QImage)));
-    connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), previewFrame, SLOT(setPointerFile(const QString&)));
-    previewFrame->setPointerFile(_options->getPointerFile());
-    previewDlg = createDialog(previewFrame, QSize(width() * 9 / 10, height() * 9 / 10));
-    connect(_ribbon->getPublishRibbon(), SIGNAL(previewClicked()), previewDlg, SLOT(exec()));
-    QShortcut* previewShortcut = new QShortcut(QKeySequence(tr("Ctrl+L", "Preview")), this);
-    connect(previewShortcut, SIGNAL(activated()), previewDlg, SLOT(exec()));
 
-    dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
-    tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+    _dmScreenDlg = createDialog(new DMScreenTabWidget(_options->getEquipmentFileName(), this), QSize(width() * 9 / 10, height() * 9 / 10));
+    _tableDlg = createDialog(new CustomTableFrame(_options->getTablesDirectory(), this), QSize(width() * 9 / 10, height() * 9 / 10));
 
     QuickRef::Initialize();
     QuickRefFrame* quickRefFrame = new QuickRefFrame(this);
-    quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
+    _quickRefDlg = createDialog(quickRefFrame, QSize(width() * 3 / 4, height() * 9 / 10));
     connect(_options, &OptionsContainer::quickReferenceFileNameChanged, this, &MainWindow::readQuickRef);
     connect(QuickRef::Instance(), &QuickRef::changed, quickRefFrame, &QuickRefFrame::refreshQuickRef);
     readQuickRef();
@@ -741,29 +612,29 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(campaignLoaded(Campaign*)), soundboard, SLOT(setCampaign(Campaign*)));
     connect(this, SIGNAL(audioTrackAdded(AudioTrack*)), soundboard, SLOT(addTrackToTree(AudioTrack*)));
     connect(soundboard, SIGNAL(trackCreated(CampaignObjectBase*)), this, SLOT(addNewObject(CampaignObjectBase*)));
-    connect(soundboard, SIGNAL(dirty()), this, SLOT(setDirty()));
-    soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
+// TODO:    connect(soundboard, SIGNAL(_dirty()), this, SLOT(setDirty()));
+    _soundDlg = createDialog(soundboard, QSize(width() * 9 / 10, height() * 9 / 10));
 
-    timeAndDateFrame = new TimeAndDateFrame(this);
-    calendarDlg = createDialog(timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
-    countdownDlg = createDialog(new CountdownFrame(this));
+    _timeAndDateFrame = new TimeAndDateFrame(this);
+    _calendarDlg = createDialog(_timeAndDateFrame, QSize(width() / 2, height() * 9 / 10));
+    _countdownDlg = createDialog(new CountdownFrame(this));
 
-    connect(_ribbonTabTools, SIGNAL(screenClicked()), dmScreenDlg, SLOT(exec()));
+    connect(_ribbonTabTools, SIGNAL(screenClicked()), _dmScreenDlg, SLOT(exec()));
     QShortcut* dmScreenShortcut = new QShortcut(QKeySequence(tr("Ctrl+E", "DM Screen")), this);
-    connect(dmScreenShortcut, SIGNAL(activated()), dmScreenDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(tablesClicked()), tableDlg, SLOT(show()));
+    connect(dmScreenShortcut, SIGNAL(activated()), _dmScreenDlg, SLOT(exec()));
+    connect(_ribbonTabTools, SIGNAL(tablesClicked()), _tableDlg, SLOT(show()));
     QShortcut* tablesShortcut = new QShortcut(QKeySequence(tr("Ctrl+T", "Tables")), this);
-    connect(tablesShortcut, SIGNAL(activated()), tableDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(referenceClicked()), quickRefDlg, SLOT(exec()));
+    connect(tablesShortcut, SIGNAL(activated()), _tableDlg, SLOT(exec()));
+    connect(_ribbonTabTools, SIGNAL(referenceClicked()), _quickRefDlg, SLOT(exec()));
     QShortcut* referenceShortcut = new QShortcut(QKeySequence(tr("Ctrl+R", "Reference")), this);
-    connect(referenceShortcut, SIGNAL(activated()), quickRefDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(soundboardClicked()), soundDlg, SLOT(exec()));
+    connect(referenceShortcut, SIGNAL(activated()), _quickRefDlg, SLOT(exec()));
+    connect(_ribbonTabTools, SIGNAL(soundboardClicked()), _soundDlg, SLOT(exec()));
     QShortcut* soundboardShortcut = new QShortcut(QKeySequence(tr("Ctrl+G", "Soundboard")), this);
-    connect(soundboardShortcut, SIGNAL(activated()), soundDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(calendarClicked()), calendarDlg, SLOT(exec()));
+    connect(soundboardShortcut, SIGNAL(activated()), _soundDlg, SLOT(exec()));
+    connect(_ribbonTabTools, SIGNAL(calendarClicked()), _calendarDlg, SLOT(exec()));
     QShortcut* calendarShortcut = new QShortcut(QKeySequence(tr("Ctrl+K", "Calendar")), this);
-    connect(calendarShortcut, SIGNAL(activated()), calendarDlg, SLOT(exec()));
-    connect(_ribbonTabTools, SIGNAL(countdownClicked()), countdownDlg, SLOT(exec()));
+    connect(calendarShortcut, SIGNAL(activated()), _calendarDlg, SLOT(exec()));
+    connect(_ribbonTabTools, SIGNAL(countdownClicked()), _countdownDlg, SLOT(exec()));
 
     qDebug() << "[MainWindow] Reference Tabs Created";
 
@@ -802,10 +673,11 @@ MainWindow::~MainWindow()
 {
     deleteCampaign();
 
-    delete pubWindow;
+    delete _pubWindow;
     delete ui;
 
     Bestiary::Shutdown();
+    DMH_VLC::Shutdown();
     ScaledPixmap::cleanupDefaultPixmap();
 }
 
@@ -815,31 +687,31 @@ void MainWindow::newCampaign()
         return;
 
     bool ok;
-    QString campaignName = QInputDialog::getText(this, QString("Enter New Campaign Name"),QString("Campaign"),QLineEdit::Normal,QString(),&ok);
+    QString campaignName = QInputDialog::getText(this, QString("Enter New Campaign Name"), QString("Campaign"), QLineEdit::Normal, QString(), &ok);
     if(ok)
     {
         if(campaignName.isEmpty())
             campaignName = QString("Campaign");
 
-        campaign = new Campaign(campaignName);
-        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
-        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
-        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
-        campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("World"), false));
+        _campaign = new Campaign(campaignName);
+        _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Notes"), false));
+        _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Party, -1, QString("Party"), false));
+        _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("Adventures"), false));
+        _campaign->addObject(EncounterFactory().createObject(DMHelper::CampaignType_Text, -1, QString("World"), false));
         qDebug() << "[MainWindow] Campaign created: " << campaignName;
         selectItem(DMHelper::TreeType_Campaign, QUuid());
-        emit campaignLoaded(campaign);
+        emit campaignLoaded(_campaign);
         setDirty();
     }
 }
 
 bool MainWindow::saveCampaign()
 {
-    if(!campaign)
+    if(!_campaign)
         return true;
 
-    campaign->validateCampaignIds();
-    if(!campaign->isValid())
+    _campaign->validateCampaignIds();
+    if(!_campaign->isValid())
     {
         QMessageBox::StandardButton result = QMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
@@ -856,37 +728,45 @@ bool MainWindow::saveCampaign()
         }
     }
 
-    if(campaignFileName.isEmpty())
+    if(_campaignFileName.isEmpty())
     {
-        campaignFileName = QFileDialog::getSaveFileName(this,QString("Save Campaign"),QString(),QString("XML files (*.xml)"));
-        if(campaignFileName.isEmpty())
+        _campaignFileName = QFileDialog::getSaveFileName(this,QString("Save Campaign"),QString(),QString("XML files (*.xml)"));
+        if(_campaignFileName.isEmpty())
             return false;
     }
 
-    qDebug() << "[MainWindow] Saving Campaign: " << campaignFileName;
+    qDebug() << "[MainWindow] Saving Campaign: " << _campaignFileName;
 
-    QDomDocument doc( "DMHelperXML" );
+    QDomDocument doc("DMHelperXML");
 
-    QDomElement root = doc.createElement( "root" );
-    doc.appendChild( root );
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
 
-    QFileInfo fileInfo(campaignFileName);
+    QFileInfo fileInfo(_campaignFileName);
     QDir targetDir(fileInfo.absoluteDir());
-    campaign->outputXML(doc, root, targetDir, false);
+    _campaign->outputXML(doc, root, targetDir, false);
 
-    QFile file(campaignFileName);
-    if( !file.open( QIODevice::WriteOnly ) )
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(currentObject)
     {
-        qDebug() << "[MainWindow] Unable to open campaign file for writing: " << campaignFileName;
+        QDomElement campaignElement = root.firstChildElement(QString("campaign"));
+        if(!campaignElement.isNull())
+            campaignElement.setAttribute("lastElement", currentObject->getID().toString());
+    }
+
+    QFile file(_campaignFileName);
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "[MainWindow] Unable to open campaign file for writing: " << _campaignFileName;
         qDebug() << "       Error " << file.error() << ": " << file.errorString();
         QFileInfo info(file);
         qDebug() << "       Full filename: " << info.absoluteFilePath();
 
-        campaignFileName.clear();
+        _campaignFileName.clear();
         return false;
     }
 
-    QTextStream ts( &file );
+    QTextStream ts(&file);
     ts.setCodec("UTF-8");
     ts << doc.toString();
 
@@ -894,23 +774,23 @@ bool MainWindow::saveCampaign()
 
     clearDirty();
 
-    qDebug() << "[MainWindow] Campaign saved: " << campaignFileName;
+    qDebug() << "[MainWindow] Campaign saved: " << _campaignFileName;
 
     if(_options->getMRUHandler())
-        _options->getMRUHandler()->addMRUFile(campaignFileName);
+        _options->getMRUHandler()->addMRUFile(_campaignFileName);
 
     return true;
 }
 
 void MainWindow::saveCampaignAs()
 {
-    QString previousCampaignFileName = campaignFileName;
+    QString previousCampaignFileName = _campaignFileName;
 
-    campaignFileName.clear();
+    _campaignFileName.clear();
 
     if(saveCampaign() == false)
     {
-        campaignFileName = previousCampaignFileName;
+        _campaignFileName = previousCampaignFileName;
     }
 }
 
@@ -918,14 +798,14 @@ void MainWindow::openFileDialog()
 {
     QString filename = QFileDialog::getOpenFileName(this,QString("Select Campaign"), QString(), QString("XML files (*.xml)"));
     if( (!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)) )
-        openFile(filename);
+        openCampaign(filename);
 }
 
 bool MainWindow::closeCampaign()
 {
-    qDebug() << "[MainWindow] Closing Campaign: " << campaignFileName;
+    qDebug() << "[MainWindow] Closing Campaign: " << _campaignFileName;
 
-    if(dirty)
+    if(_dirty)
     {
         QMessageBox::StandardButton result = QMessageBox::question(this,
                                                                    QString("Save Campaign"),
@@ -943,7 +823,7 @@ bool MainWindow::closeCampaign()
         }
         else
         {
-            qDebug() << "[MainWindow] User decided not to save Campaign: " << campaignFileName;
+            qDebug() << "[MainWindow] User decided not to save Campaign: " << _campaignFileName;
         }
     }
 
@@ -976,7 +856,7 @@ void MainWindow::openMonster(const QString& monsterClass)
 {
     if(!monsterClass.isEmpty() && Bestiary::Instance()->exists(monsterClass))
     {
-        bestiaryDlg.setMonster(monsterClass);
+        _bestiaryDlg.setMonster(monsterClass);
         openBestiary();
     }
 }
@@ -985,7 +865,7 @@ void MainWindow::newCharacter()
 {
     qDebug() << "[MainWindow] Creating a new character...";
 
-    if(!campaign)
+    if(!_campaign)
     {
         qDebug() << "[MainWindow] New character cannot be created without a valid campaign open.";
         return;
@@ -1043,7 +923,7 @@ void MainWindow::newCharacter()
 
 void MainWindow::importCharacter()
 {
-    if(!campaign)
+    if(!_campaign)
         return;
 
     CharacterImporter* importer = new CharacterImporter();
@@ -1051,16 +931,22 @@ void MainWindow::importCharacter()
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::updateCampaignTree);
     connect(importer, &CharacterImporter::characterImported, this, &MainWindow::openCharacter);
     connect(this, &MainWindow::campaignLoaded, importer, &CharacterImporter::campaignChanged);
-    importer->importCharacter(campaign, true);
+    importer->importCharacter(_campaign, true);
 }
 
 void MainWindow::importItem()
 {
-    if(!campaign)
+    if(!_campaign)
         return;
 
-    ObjectImporter importer;
-    importer.importObject(*campaign);
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+
+    ObjectImportDialog dlg(_campaign, currentObject ? currentObject : _campaign, _campaignFileName);
+    connect(&dlg, &ObjectImportDialog::importComplete, this, &MainWindow::updateCampaignTree);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg.resize(primary->availableSize().width() / 2, primary->availableSize().height() / 4);
+    dlg.exec();
 }
 
 void MainWindow::newParty()
@@ -1093,7 +979,7 @@ void MainWindow::newBattleEncounter()
 void MainWindow::newMap()
 {
     // TODO: throw a message box when it doesn't work.
-    if(!campaign)
+    if(!_campaign)
         return;
 
     bool ok = false;
@@ -1116,7 +1002,7 @@ void MainWindow::newMap()
 
 void MainWindow::newAudioEntry()
 {
-    if(!campaign)
+    if(!_campaign)
         return;
 
     addNewAudioObject(QFileDialog::getOpenFileName(this, QString("Select local audio file")));
@@ -1124,7 +1010,7 @@ void MainWindow::newAudioEntry()
 
 void MainWindow::newSyrinscapeEntry()
 {
-    if(!campaign)
+    if(!_campaign)
         return;
 
     QString syrinscapeInstructions("To add a link to a Syrinscape sound:\n\n1) Hit the '+' key or select ""3rd party app integration"" ENABLE in the settings menu\n2) Little pluses will appear next to all the MOODs and OneShots\n3) Click one of these pluses to copy a URI shortcut to the clipboard\n4) Paste this URI into the text box here:\n");
@@ -1139,7 +1025,7 @@ void MainWindow::newSyrinscapeEntry()
 
 void MainWindow::newYoutubeEntry()
 {
-    if(!campaign)
+    if(!_campaign)
         return;
 
     QString youtubeInstructions("To add a YouTube video as an audio file, paste the link/URL into the text box here:\n");
@@ -1154,7 +1040,7 @@ void MainWindow::newYoutubeEntry()
 
 void MainWindow::removeCurrentItem()
 {
-    if((!campaign)||(!treeModel))
+    if((!_campaign)||(!_treeModel))
         return;
 
     CampaignObjectBase* removeObject = ui->treeView->currentCampaignObject();
@@ -1183,7 +1069,7 @@ void MainWindow::removeCurrentItem()
     }
     else
     {
-        const QList<CampaignObjectBase*> campaignChildren = campaign->getChildObjects();
+        const QList<CampaignObjectBase*> campaignChildren = _campaign->getChildObjects();
         int i = 0;
         while((nextObjectId.isNull()) && (i < campaignChildren.count()))
         {
@@ -1200,17 +1086,49 @@ void MainWindow::removeCurrentItem()
 
     qDebug() << "[MainWindow] Removed object from the campaign tree: " << removeObject->getName() << ", ID: " << removeObject->getID();
 
-    delete campaign->removeObject(removeObject->getID());
+    delete _campaign->removeObject(removeObject->getID());
     updateCampaignTree();
+}
+
+void MainWindow::showNotes()
+{
+    if(!_campaign)
+        return;
+
+    CampaignNotesDialog dlg(_campaign->getNotes(), this);
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg.resize(primary->availableSize().width() / 2, primary->availableSize().height() / 2);
+    if(dlg.exec() == QDialog::Accepted)
+        _campaign->setNotes(dlg.getNotes());
+}
+
+void MainWindow::addNote()
+{
+    if(!_campaign)
+        return;
+
+    QInputDialog inputDlg(this);
+    inputDlg.setInputMode(QInputDialog::TextInput);
+    inputDlg.setWindowTitle(QString("New Note"));
+    inputDlg.setLabelText(QString("Note:"));
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        inputDlg.resize(primary->availableSize().width() / 2, inputDlg.height());
+
+    inputDlg.exec();
+    QString newNote = inputDlg.textValue();
+    if(!newNote.isEmpty())
+        _campaign->addNote(newNote);
 }
 
 void MainWindow::editCurrentItem()
 {
-    if((!campaign)||(!treeModel))
+    if((!_campaign)||(!_treeModel))
         return;
 
     QModelIndex index = ui->treeView->currentIndex();
-    QStandardItem* editItem = treeModel->itemFromIndex(index);
+    QStandardItem* editItem = _treeModel->itemFromIndex(index);
     int type = editItem->data(DMHelper::TreeItemData_Type).toInt();
 
     if(editItem->isEditable())
@@ -1219,7 +1137,7 @@ void MainWindow::editCurrentItem()
     }
     else if(type == DMHelper::TreeType_Map)
     {
-        Map* map = dynamic_cast<Map*>(campaign->getObjectById(QUuid(editItem->data(DMHelper::TreeItemData_ID).toString())));
+        Map* map = dynamic_cast<Map*>(_campaign->getObjectById(QUuid(editItem->data(DMHelper::TreeItemData_ID).toString())));
 
         if(map)
         {
@@ -1233,17 +1151,17 @@ void MainWindow::editCurrentItem()
 
 void MainWindow::exportCurrentItem()
 {
-    if((!campaign)||(!treeModel))
+    if((!_campaign)||(!_treeModel))
         return;
 
     QModelIndex index = ui->treeView->currentIndex();
-    QStandardItem* exportItem = treeModel->itemFromIndex(index);
+    QStandardItem* exportItem = _treeModel->itemFromIndex(index);
     if(!exportItem)
         return;
 
     QUuid exportId(exportItem->data(DMHelper::TreeItemData_ID).toString());
 
-    ExportDialog dlg(*campaign, exportId);
+    ExportDialog dlg(*_campaign, exportId);
     dlg.resize(width() * 3 / 4, height() * 9 / 10);
     dlg.exec();
 
@@ -1252,12 +1170,12 @@ void MainWindow::exportCurrentItem()
 
 void MainWindow::addNewObject(CampaignObjectBase* newObject)
 {
-    if(!campaign || !treeModel || !newObject)
+    if(!_campaign || !_treeModel || !newObject)
         return;
 
     CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
     if(!currentObject)
-        currentObject = campaign;
+        currentObject = _campaign;
 
     qDebug() << "[MainWindow] Adding object " << newObject->getName() << " (" << newObject->getID() << "), to object " << currentObject->getName() << " (" << currentObject->getID() << ")";
 
@@ -1271,14 +1189,14 @@ void MainWindow::addNewObject(CampaignObjectBase* newObject)
 
 void MainWindow::clearDirty()
 {
-    dirty = false;
-    setWindowModified(dirty);
+    _dirty = false;
+    setWindowModified(_dirty);
 }
 
 void MainWindow::setDirty()
 {
-    dirty = true;
-    setWindowModified(dirty);
+    _dirty = true;
+    setWindowModified(_dirty);
 }
 
 void MainWindow::checkForUpdates(bool silentUpdate)
@@ -1295,12 +1213,12 @@ void MainWindow::showPublishWindow(bool visible)
 {
     if(visible)
     {
-        if(!pubWindow->isVisible())
-            pubWindow->show();
+        if(!_pubWindow->isVisible())
+            _pubWindow->show();
     }
     else
     {
-        pubWindow->hide();
+        _pubWindow->hide();
     }
 }
 
@@ -1310,7 +1228,7 @@ void MainWindow::linkActivated(const QUrl & link)
     if(path.startsWith(QString("DMHelper@")))
     {
         QString linkName = path.remove(0, 9);
-        CampaignTreeItem* item = treeModel->getObjectItemByName(linkName);
+        CampaignTreeItem* item = _treeModel->getObjectItemByName(linkName);
         if(item)
             selectIndex(item->index());
     }
@@ -1384,9 +1302,9 @@ void MainWindow::readBestiary()
     Bestiary::Instance()->inputXML(root);
 
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
-        bestiaryDlg.setMonster(_options->getLastMonster());
+        _bestiaryDlg.setMonster(_options->getLastMonster());
     else
-        bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
+        _bestiaryDlg.setMonster(Bestiary::Instance()->getFirstMonsterClass());
 
     qDebug() << "[MainWindow] Bestiary reading complete.";
 }
@@ -1455,9 +1373,9 @@ void MainWindow::readSpellbook()
     Spellbook::Instance()->inputXML(root, false);
 
     if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
-        spellDlg.setSpell(_options->getLastSpell());
+        _spellDlg.setSpell(_options->getLastSpell());
     else
-        spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
+        _spellDlg.setSpell(Spellbook::Instance()->getFirstSpell());
 
     qDebug() << "[MainWindow] Spellbook reading complete.";
 }
@@ -1477,23 +1395,36 @@ void MainWindow::readQuickRef()
 void MainWindow::showEvent(QShowEvent * event)
 {
     qDebug() << "[MainWindow] Main window Show event.";
-    if(!initialized)
+    if(!_initialized)
     {
-        // Implement any one-time initialization here
-        if((_options) && (!_options->doDataSettingsExist()))
-        {
-            LegalDialog dlg;
-            dlg.exec();
-            _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
-            _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
-        }
-
         if(_options)
         {
+            // Implement any one-time initialization here
+            if(!_options->doDataSettingsExist())
+            {
+                LegalDialog dlg;
+                dlg.exec();
+                _options->setUpdatesEnabled(dlg.isUpdatesEnabled());
+                _options->setStatisticsAccepted(dlg.isStatisticsAccepted());
+            }
+
             checkForUpdates(true);
+
+            if((_options->getMRUHandler()) && (_options->getMRUHandler()->getMRUList().count() == 1))
+                openCampaign(_options->getMRUHandler()->getMRUList().first());
+
+            QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
+                                                       .arg(DMHelper::DMHELPER_MINOR_VERSION)
+                                                       .arg(DMHelper::DMHELPER_ENGINEERING_VERSION);
+            if(_options->getLastAppVersion() != versionString)
+            {
+                WhatsNewDialog* whatsNewDlg = new WhatsNewDialog(this);
+                whatsNewDlg->show();
+                whatsNewDlg->move(geometry().center() - whatsNewDlg->rect().center());
+            }
         }
 
-        initialized = true;
+        _initialized = true;
     }
 
     QMainWindow::showEvent(event);
@@ -1514,8 +1445,8 @@ void MainWindow::closeEvent(QCloseEvent * event)
     writeSpellbook();
     writeBestiary();
 
-    _options->setLastMonster(bestiaryDlg.getMonster() ? bestiaryDlg.getMonster()->getName() : "");
-    _options->setLastSpell(spellDlg.getSpell() ? spellDlg.getSpell()->getName() : "");
+    _options->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getName() : "");
+    _options->setLastSpell(_spellDlg.getSpell() ? _spellDlg.getSpell()->getName() : "");
     _options->writeSettings();
 
     qApp->quit();
@@ -1528,15 +1459,15 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::mousePressEvent(QMouseEvent * event)
 {
-    mouseDownPos = event->pos();
-    mouseDown = true;
+    _mouseDownPos = event->pos();
+    _mouseDown = true;
 
     QMainWindow::mousePressEvent(event);
 }
 
 void MainWindow::mouseReleaseEvent(QMouseEvent * event)
 {
-    mouseDown = false;
+    _mouseDown = false;
     QMainWindow::mouseReleaseEvent(event);
 }
 
@@ -1610,7 +1541,7 @@ void MainWindow::dropEvent(QDropEvent *event)
         (data->urls().first().isLocalFile()) )
     {
         QString filename = data->urls().first().toLocalFile();
-        openFile(filename);
+        openCampaign(filename);
         event->accept();
     }
     else
@@ -1636,8 +1567,6 @@ void MainWindow::setupRibbonBar()
     _ribbonTabBattleView->hide();
     _ribbonTabBattle = new RibbonTabBattle(this);
     _ribbonTabBattle->hide();
-    _ribbonTabScrolling = new RibbonTabScrolling(this);
-    _ribbonTabScrolling->hide();
     _ribbonTabText = new RibbonTabText(this);
     _ribbonTabText->hide();
     _ribbonTabMap = new RibbonTabMap(this);
@@ -1655,33 +1584,165 @@ void MainWindow::setupRibbonBar()
     setMenuWidget(_ribbon);
 }
 
+void MainWindow::connectBattleView(bool toBattle)
+{
+    if((!_ribbonTabBattleView) || (_ribbonTabBattleView->getIsBattle() == toBattle))
+        return;
+
+    _ribbonTabBattleView->setIsBattle(toBattle);
+
+    if(toBattle)
+    {
+        // Battle
+        connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _battleFrame, SLOT(zoomIn()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _battleFrame, SLOT(zoomOut()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _battleFrame, SLOT(zoomFit()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _battleFrame, SLOT(zoomSelect(bool)));
+        connect(_battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _battleFrame, &BattleFrame::setCameraCouple);
+        connect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), _battleFrame, SLOT(setCameraMap()));
+        connect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), _battleFrame, SLOT(setCameraSelect(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _battleFrame, &BattleFrame::setCameraVisible);
+        connect(_battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
+        connect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), _battleFrame, SLOT(setCameraEdit(bool)));
+        connect(_battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
+        connect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), _battleFrame, SLOT(setDistanceHeight(bool, qreal)));
+        connect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), _battleFrame, SLOT(setPointerOn(bool)));
+        connect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
+        //connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);
+        connect(_battleFrame, &BattleFrame::distanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        connect(_battleFrame, &BattleFrame::freeDistanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        connect(_battleFrame, &BattleFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        //connect(_battleFrame, &BattleFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        //connect(_battleFrame, &BattleFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        //connect(_battleFrame, &BattleFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
+
+        // Map
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _mapFrame, SLOT(zoomOut()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _mapFrame, SLOT(zoomFit()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _mapFrame, SLOT(zoomSelect(bool)));
+        disconnect(_mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _mapFrame, &MapFrame::setCameraCouple);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraZoomClicked, _mapFrame, &MapFrame::setCameraMap);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _mapFrame, &MapFrame::setCameraVisible);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraSelectClicked, _mapFrame, &MapFrame::setCameraSelect);
+        disconnect(_mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, _mapFrame, &MapFrame::setCameraEdit);
+        disconnect(_mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, _mapFrame, &MapFrame::setPointerOn);
+        disconnect(_mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _mapFrame, &MapFrame::setDistance);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _mapFrame, &MapFrame::setFreeDistance);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _mapFrame, &MapFrame::setDistanceScale);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _mapFrame, &MapFrame::setDistanceLineColor);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _mapFrame, &MapFrame::setDistanceLineType);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _mapFrame, &MapFrame::setDistanceLineWidth);
+        disconnect(_mapFrame, &MapFrame::showDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        disconnect(_mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        disconnect(_mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceScale);
+        disconnect(_mapFrame, &MapFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        disconnect(_mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        disconnect(_mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        disconnect(_mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
+    }
+    else
+    {
+        // Battle
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _battleFrame, SLOT(zoomIn()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _battleFrame, SLOT(zoomOut()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _battleFrame, SLOT(zoomFit()));
+        disconnect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _battleFrame, SLOT(zoomSelect(bool)));
+        disconnect(_battleFrame, SIGNAL(zoomSelectToggled(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _battleFrame, &BattleFrame::setCameraCouple);
+        disconnect(_ribbonTabBattleView, SIGNAL(cameraZoomClicked()), _battleFrame, SLOT(setCameraMap()));
+        disconnect(_ribbonTabBattleView, SIGNAL(cameraSelectClicked(bool)), _battleFrame, SLOT(setCameraSelect(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _battleFrame, &BattleFrame::setCameraVisible);
+        disconnect(_battleFrame, SIGNAL(cameraSelectToggled(bool)), _ribbonTabBattleView, SLOT(setCameraSelect(bool)));
+        disconnect(_ribbonTabBattleView, SIGNAL(cameraEditClicked(bool)), _battleFrame, SLOT(setCameraEdit(bool)));
+        disconnect(_battleFrame, SIGNAL(cameraEditToggled(bool)), _ribbonTabBattleView, SLOT(setCameraEdit(bool)));
+        disconnect(_ribbonTabBattleView, SIGNAL(heightChanged(bool, qreal)), _battleFrame, SLOT(setDistanceHeight(bool, qreal)));
+        disconnect(_ribbonTabBattleView, SIGNAL(pointerClicked(bool)), _battleFrame, SLOT(setPointerOn(bool)));
+        disconnect(_battleFrame, SIGNAL(pointerToggled(bool)), _ribbonTabBattleView, SLOT(setPointerOn(bool)));
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _battleFrame, &BattleFrame::setDistance);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _battleFrame, &BattleFrame::setFreeDistance);
+        //disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _battleFrame, &BattleFrame::setDistanceScale);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _battleFrame, &BattleFrame::setDistanceLineColor);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _battleFrame, &BattleFrame::setDistanceLineType);
+        disconnect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _battleFrame, &BattleFrame::setDistanceLineWidth);
+        disconnect(_battleFrame, &BattleFrame::distanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        disconnect(_battleFrame, &BattleFrame::freeDistanceToggled, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        disconnect(_battleFrame, &BattleFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        //disconnect(_battleFrame, &BattleFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        //disconnect(_battleFrame, &BattleFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        //disconnect(_battleFrame, &BattleFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
+
+        // Map
+        connect(_ribbonTabBattleView, SIGNAL(zoomInClicked()), _mapFrame, SLOT(zoomIn()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomOutClicked()), _mapFrame, SLOT(zoomOut()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomFullClicked()), _mapFrame, SLOT(zoomFit()));
+        connect(_ribbonTabBattleView, SIGNAL(zoomSelectClicked(bool)), _mapFrame, SLOT(zoomSelect(bool)));
+        connect(_mapFrame, SIGNAL(zoomSelectChanged(bool)), _ribbonTabBattleView, SLOT(setZoomSelect(bool)));
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraCoupleClicked, _mapFrame, &MapFrame::setCameraCouple);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraZoomClicked, _mapFrame, &MapFrame::setCameraMap);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraVisibleClicked, _mapFrame, &MapFrame::setCameraVisible);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraSelectClicked, _mapFrame, &MapFrame::setCameraSelect);
+        connect(_mapFrame, &MapFrame::cameraSelectToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraSelect);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::cameraEditClicked, _mapFrame, &MapFrame::setCameraEdit);
+        connect(_mapFrame, &MapFrame::cameraEditToggled, _ribbonTabBattleView, &RibbonTabBattleView::setCameraEdit);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::pointerClicked, _mapFrame, &MapFrame::setPointerOn);
+        connect(_mapFrame, &MapFrame::pointerToggled, _ribbonTabBattleView, &RibbonTabBattleView::setPointerOn);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceClicked, _mapFrame, &MapFrame::setDistance);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::freeDistanceClicked, _mapFrame, &MapFrame::setFreeDistance);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceScaleChanged, _mapFrame, &MapFrame::setDistanceScale);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineColorChanged, _mapFrame, &MapFrame::setDistanceLineColor);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineTypeChanged, _mapFrame, &MapFrame::setDistanceLineType);
+        connect(_ribbonTabBattleView, &RibbonTabBattleView::distanceLineWidthChanged, _mapFrame, &MapFrame::setDistanceLineWidth);
+        connect(_mapFrame, &MapFrame::showDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceOn);
+        connect(_mapFrame, &MapFrame::showFreeDistanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setFreeDistanceOn);
+        connect(_mapFrame, &MapFrame::distanceScaleChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceScale);
+        connect(_mapFrame, &MapFrame::distanceChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistance);
+        connect(_mapFrame, &MapFrame::distanceLineColorChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineColor);
+        connect(_mapFrame, &MapFrame::distanceLineTypeChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineType);
+        connect(_mapFrame, &MapFrame::distanceLineWidthChanged, _ribbonTabBattleView, &RibbonTabBattleView::setDistanceLineWidth);
+    }
+}
+
 void MainWindow::deleteCampaign()
 {
-    if(treeModel)
+    if(_pubWindow)
+        _pubWindow->setRenderer(nullptr);
+
+    if(_treeModel)
     {
         // Deselect the current object
         handleTreeItemSelected(QModelIndex(), ui->treeView->currentIndex());
         // Clear the tree model
-        treeModel->clear();
+        _treeModel->clear();
     }
 
-    if(campaign)
+    if(_campaign)
     {
-        Campaign* oldCampaign = campaign;
-        campaign = nullptr;
-        emit campaignLoaded(campaign);
+        Campaign* oldCampaign = _campaign;
+        _campaign = nullptr;
+        emit campaignLoaded(_campaign);
 
         // Clear the campaign itself
         delete oldCampaign;
     }
 
     // Ensure the file name is removed
-    campaignFileName.clear();
+    _campaignFileName.clear();
 }
 
 void MainWindow::enableCampaignMenu()
 {
-    _ribbonTabCampaign->setCampaignEnabled(campaign != nullptr);
+    _ribbonTabCampaign->setCampaignEnabled(_campaign != nullptr);
 }
 
 bool MainWindow::selectIndex(const QModelIndex& index)
@@ -1696,10 +1757,10 @@ bool MainWindow::selectIndex(const QModelIndex& index)
 
 bool MainWindow::selectItem(QUuid itemId)
 {
-    if((!treeModel) || (itemId.isNull()))
+    if((!_treeModel) || (itemId.isNull()))
         return false;
 
-    return selectIndex(treeModel->getObjectIndex(itemId));
+    return selectIndex(_treeModel->getObjectIndex(itemId));
 }
 
 bool MainWindow::selectItem(int itemType, QUuid itemId)
@@ -1844,7 +1905,7 @@ void MainWindow::writeSpellbook()
 
 CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText)
 {
-    if((!campaign)||(!treeModel))
+    if((!_campaign)||(!_treeModel))
         return nullptr;
 
     bool ok;
@@ -1863,7 +1924,7 @@ CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& d
 
 void MainWindow::addNewAudioObject(const QString& audioFile)
 {
-    if(!campaign || audioFile.isEmpty())
+    if(!_campaign || audioFile.isEmpty())
         return;
 
     QUrl url(audioFile);
@@ -1881,7 +1942,7 @@ void MainWindow::addNewAudioObject(const QString& audioFile)
     emit audioTrackAdded(track);
 }
 
-void MainWindow::openFile(const QString& filename)
+void MainWindow::openCampaign(const QString& filename)
 {
     if(!closeCampaign())
         return;
@@ -1933,13 +1994,15 @@ void MainWindow::openFile(const QString& filename)
         return;
     }
 
-    campaignFileName = filename;
-    QFileInfo fileInfo(campaignFileName);
+    QUuid lastElementId = QUuid(campaignElement.attribute(QString("lastElement")));
+
+    _campaignFileName = filename;
+    QFileInfo fileInfo(_campaignFileName);
     QDir::setCurrent(fileInfo.absolutePath());
-    campaign = new Campaign();
-    campaign->inputXML(campaignElement, false);
-    campaign->postProcessXML(campaignElement, false);
-    if(!campaign->isValid())
+    _campaign = new Campaign();
+    _campaign->inputXML(campaignElement, false);
+    _campaign->postProcessXML(campaignElement, false);
+    if(!_campaign->isValid())
     {
         QMessageBox::StandardButton result = QMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
@@ -1951,17 +2014,19 @@ void MainWindow::openFile(const QString& filename)
                                      QString("Invalid Campaign"),
                                      QString("The campaign has not been opened."));
             qDebug() << "[MainWindow] Invalid campaign discarded";
-            delete campaign;
-            campaign = nullptr;
+            delete _campaign;
+            _campaign = nullptr;
             return;
         }
     }
 
     // The campaign file seems good, back it up!
-    _options->backupFile(campaignFileName);
+    _options->backupFile(_campaignFileName);
 
     selectItem(DMHelper::TreeType_Campaign, QUuid());
-    emit campaignLoaded(campaign);
+    emit campaignLoaded(_campaign);
+    if(!lastElementId.isNull())
+        selectItem(lastElementId);
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(filename);
@@ -1969,24 +2034,24 @@ void MainWindow::openFile(const QString& filename)
 
 void MainWindow::handleCampaignLoaded(Campaign* campaign)
 {
-    qDebug() << "[MainWindow] Campaign Loaded: " << campaignFileName;
+    qDebug() << "[MainWindow] Campaign Loaded: " << _campaignFileName;
 
     // don't need this, the setcampaign below should do it: updateCampaignTree();
     updateMapFiles();
     updateClock();
 
-    treeModel->setCampaign(campaign);
+    _treeModel->setCampaign(campaign);
 
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
 
     if(campaign)
     {
-        QModelIndex firstIndex = treeModel->index(0,0);
+        QModelIndex firstIndex = _treeModel->index(0,0);
         if(firstIndex.isValid())
             ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
-        connect(campaign,SIGNAL(dirty()),this,SLOT(setDirty()));
+        connect(campaign, SIGNAL(dirty()), this, SLOT(setDirty()));
         setWindowTitle(QString("DMHelper - ") + campaign->getName() + QString("[*]"));
         _ribbon->setCurrentIndex(1); // Shift to the Campaign tab
         QList<CampaignObjectBase*> parties = campaign->getChildObjectsByType(DMHelper::CampaignType_Party);
@@ -2012,19 +2077,19 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 void MainWindow::updateCampaignTree()
 {
     qDebug() << "[MainWindow] Updating Campaign Tree";
-    if(treeModel)
-        treeModel->refresh();
+    if(_treeModel)
+        _treeModel->refresh();
 }
 
 void MainWindow::updateMapFiles()
 {
-    if(!campaign)
+    if(!_campaign)
         return;
 
-    QFileInfo fileInfo(campaignFileName);
+    QFileInfo fileInfo(_campaignFileName);
     QDir sourceDir(fileInfo.absoluteDir());
 
-    QList<Map*> mapList = campaign->findChildren<Map*>();
+    QList<Map*> mapList = _campaign->findChildren<Map*>();
     for(Map* map : mapList)
     {
         if((map) && (!map->getFileName().isEmpty()))
@@ -2034,34 +2099,34 @@ void MainWindow::updateMapFiles()
 
 void MainWindow::updateClock()
 {
-    if(campaign)
+    if(_campaign)
     {
-        connect(timeAndDateFrame,SIGNAL(dateChanged(BasicDate)),campaign,SLOT(setDate(BasicDate)));
-        connect(campaign,SIGNAL(dateChanged(BasicDate)),timeAndDateFrame,SLOT(setDate(BasicDate)));
-        connect(timeAndDateFrame,SIGNAL(timeChanged(QTime)),campaign,SLOT(setTime(QTime)));
-        connect(campaign,SIGNAL(timeChanged(QTime)),timeAndDateFrame,SLOT(setTime(QTime)));
+        connect(_timeAndDateFrame,SIGNAL(dateChanged(BasicDate)),_campaign,SLOT(setDate(BasicDate)));
+        connect(_campaign,SIGNAL(dateChanged(BasicDate)),_timeAndDateFrame,SLOT(setDate(BasicDate)));
+        connect(_timeAndDateFrame,SIGNAL(timeChanged(QTime)),_campaign,SLOT(setTime(QTime)));
+        connect(_campaign,SIGNAL(timeChanged(QTime)),_timeAndDateFrame,SLOT(setTime(QTime)));
 
-        timeAndDateFrame->setDate(campaign->getDate());
-        timeAndDateFrame->setTime(campaign->getTime());
+        _timeAndDateFrame->setDate(_campaign->getDate());
+        _timeAndDateFrame->setTime(_campaign->getTime());
     }
     else
     {
-        timeAndDateFrame->setDate(BasicDate(1,1,0));
-        timeAndDateFrame->setTime(QTime(0,0));
+        _timeAndDateFrame->setDate(BasicDate(1,1,0));
+        _timeAndDateFrame->setTime(QTime(0,0));
     }
 }
 
 void MainWindow::handleCustomContextMenu(const QPoint& point)
 {
     // TODO: PROPERLY!
-    if(!treeModel)
+    if(!_treeModel)
         return;
 
     QModelIndex index = ui->treeView->indexAt(point);
     if(!index.isValid())
         return;
 
-    CampaignTreeItem* campaignItem = treeModel->campaignItemFromIndex(index);
+    CampaignTreeItem* campaignItem = _treeModel->campaignItemFromIndex(index);
     if(!campaignItem)
         return;
 
@@ -2151,7 +2216,7 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
 
 void MainWindow::handleTreeItemChanged(QStandardItem * item)
 {
-    if((!item) || (!campaign))
+    if((!item) || (!_campaign))
         return;
 
     CampaignTreeItem* campaignItem = dynamic_cast<CampaignTreeItem*>(item);
@@ -2186,7 +2251,7 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
     deactivateObject();
 
     // Look for the next object to activate it
-    CampaignTreeItem* item = treeModel->campaignItemFromIndex(current);
+    CampaignTreeItem* item = _treeModel->campaignItemFromIndex(current);
     CampaignObjectBase* itemObject = nullptr;
 
     if(item)
@@ -2219,7 +2284,7 @@ void MainWindow::handleTreeItemCollapsed(const QModelIndex & index)
 
 void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded)
 {
-    CampaignTreeItem* item = treeModel->campaignItemFromIndex(index);
+    CampaignTreeItem* item = _treeModel->campaignItemFromIndex(index);
     if(!item)
         return;
 
@@ -2232,21 +2297,9 @@ void MainWindow::handleTreeStateChanged(const QModelIndex & index, bool expanded
 
 void MainWindow::handleAnimationStarted()
 {
-    if(pubWindow)
-        pubWindow->setBackgroundColor();
+    if(_pubWindow)
+        _pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
-}
-
-void MainWindow::handleAnimationPreview(QImage img)
-{
-    if(!previewFrame)
-        return;
-
-    if(++_animationFrameCount > DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES)
-    {
-        previewFrame->setImage(img);
-        _animationFrameCount = 0;
-    }
 }
 
 void MainWindow::openBestiary()
@@ -2258,13 +2311,13 @@ void MainWindow::openBestiary()
     if(Bestiary::Instance()->count() == 0)
     {
         qDebug() << "[MainWindow]    ...Bestiary is empty, creating a first monster";
-        bestiaryDlg.createNewMonster();
+        _bestiaryDlg.createNewMonster();
     }
     else
     {
-        bestiaryDlg.setFocus();
-        bestiaryDlg.show();
-        bestiaryDlg.activateWindow();
+        _bestiaryDlg.setFocus();
+        _bestiaryDlg.show();
+        _bestiaryDlg.activateWindow();
     }
 }
 
@@ -2337,13 +2390,13 @@ void MainWindow::openSpellbook()
     if(Spellbook::Instance()->count() == 0)
     {
         qDebug() << "[MainWindow]    ...Spellbook is empty, creating a first spell";
-        spellDlg.createNewSpell();
+        _spellDlg.createNewSpell();
     }
     else
     {
-        spellDlg.setFocus();
-        spellDlg.show();
-        spellDlg.activateWindow();
+        _spellDlg.setFocus();
+        _spellDlg.show();
+        _spellDlg.activateWindow();
     }
 }
 
@@ -2430,13 +2483,11 @@ void MainWindow::activateObject(CampaignObjectBase* object)
 
 void MainWindow::deactivateObject()
 {
-    if(_ribbon->getPublishRibbon())
-        _ribbon->getPublishRibbon()->cancelPublish();
-
     CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
     if(objectFrame)
     {
         disconnect(_ribbon->getPublishRibbon(), nullptr, objectFrame, nullptr);
+        disconnect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
         disconnect(objectFrame, nullptr, _ribbon->getPublishRibbon(), nullptr);
         objectFrame->deactivateObject();
     }
@@ -2444,12 +2495,13 @@ void MainWindow::deactivateObject()
 
 void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
 {
-    CampaignObjectFrame* objectFrame = ui->stackedWidgetEncounter->setCurrentFrame(objectType); //ui->stackedWidgetEncounter->setCurrentIndex(widgetId);
+    CampaignObjectFrame* objectFrame = ui->stackedWidgetEncounter->setCurrentFrame(objectType);
     if(objectFrame)
     {
         connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), objectFrame, SLOT(setRotation(int)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
+        connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
 
         connect(objectFrame, SIGNAL(setPublishEnabled(bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool)));
         connect(objectFrame, SIGNAL(checkedChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setChecked(bool)));
@@ -2457,10 +2509,11 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         connect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
         connect(objectFrame, SIGNAL(backgroundColorChanged(const QColor&)), _ribbon->getPublishRibbon(), SLOT(setColor(const QColor&)));
 
-        objectFrame->activateObject(object);
+        objectFrame->activateObject(object, _pubWindow ? _pubWindow->getRenderer() : nullptr);
         if(_ribbon && _ribbon->getPublishRibbon())
         {
             objectFrame->setRotation(_ribbon->getPublishRibbon()->getRotation());
+            _ribbon->getPublishRibbon()->setChecked(object && (object->getID() == _pubWindow->getObjectId()));
         }
     }
 }
@@ -2471,36 +2524,24 @@ void MainWindow::setRibbonToType(int objectType)
     {
         case DMHelper::CampaignType_Battle:
         case DMHelper::CampaignType_BattleContent:
+            _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs map and reuse
+            connectBattleView(true);
             _ribbon->enableTab(_ribbonTabBattleMap);
-            _ribbon->enableTab(_ribbonTabBattleView);
             _ribbon->enableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_Map:
+            _ribbon->enableTab(_ribbonTabBattleView); // note: order is important vs battle and reuse
+            connectBattleView(false);
             _ribbon->enableTab(_ribbonTabMap);
             _ribbon->enableTab(_ribbonTabWorldMap);
             _ribbon->disableTab(_ribbonTabBattleMap);
-            _ribbon->disableTab(_ribbonTabBattleView);
             _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
-            break;
-        case DMHelper::CampaignType_ScrollingText:
-            _ribbon->enableTab(_ribbonTabScrolling);
-            _ribbon->disableTab(_ribbonTabBattleMap);
-            _ribbon->disableTab(_ribbonTabBattleView);
-            _ribbon->disableTab(_ribbonTabBattle);
-            _ribbon->disableTab(_ribbonTabMap);
-            _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabText);
-            _ribbon->disableTab(_ribbonTabAudio);
-            connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), _scrollingTextEdit, SLOT(publishClicked(bool)));
-            connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), _scrollingTextEdit, SLOT(setRotation(int)));
             break;
         case DMHelper::CampaignType_Campaign:
         case DMHelper::CampaignType_Text:
@@ -2510,7 +2551,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
         case DMHelper::CampaignType_AudioTrack:
@@ -2520,7 +2560,6 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             break;
         case DMHelper::CampaignType_Party:
@@ -2534,84 +2573,8 @@ void MainWindow::setRibbonToType(int objectType)
             _ribbon->disableTab(_ribbonTabBattle);
             _ribbon->disableTab(_ribbonTabMap);
             _ribbon->disableTab(_ribbonTabWorldMap);
-            _ribbon->disableTab(_ribbonTabScrolling);
             _ribbon->disableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabAudio);
             break;
     }
 }
-
-#ifdef INCLUDE_CHASE_SUPPORT
-
-void MainWindow::startChase()
-{
-    if(!campaign)
-        return;
-
-    QString chaseFileName = _options->getChaseFileName();
-
-    if(chaseFileName.isEmpty())
-    {
-        chaseFileName = QFileDialog::getOpenFileName(this,QString("Select Chase File"),QString(),QString("XML files (*.xml)"));
-        if(chaseFileName.isEmpty())
-            return;
-
-        _options->setChaseFileName(chaseFileName);
-    }
-
-    if(!chaseDlg)
-    {
-        ChaserSelectionDialog* selectDlg = new ChaserSelectionDialog(this);
-
-        // Add the characters
-        selectDlg->addCharacters(campaign->getActiveCharacters());
-
-        // Add combatants from a selected battle encounter
-        Encounter* encounter = encounterFromIndex(ui->treeView->currentIndex());
-        if((encounter) && (encounter->getType() == DMHelper::EncounterType_Battle))
-        {
-            EncounterBattle* battle = dynamic_cast<EncounterBattle*>(encounter);
-            if(battle)
-            {
-                selectDlg->addEncounterCombatants(battle->getCombatantsAllWaves());
-            }
-        }
-
-        // Add living monsters from an existing battle
-        /*
-        TODO: Fix this for chases
-        selectDlg->addBattleCombatants(_battleDlgMgr->getLivingMonsters());
-        */
-
-        if(selectDlg->exec() == QDialog::Rejected)
-            return;
-
-        chaseDlg = new ChaseDialog(chaseFileName, this);
-
-        chaseDlg->addCombatants(selectDlg->getPursuers(), true);
-        chaseDlg->addCombatantGroups(selectDlg->getPursuerGroups(), true);
-        chaseDlg->addCombatants(selectDlg->getQuarry(), false);
-        chaseDlg->addCombatantGroups(selectDlg->getQuarryGroups(), false);
-
-        connect(chaseDlg, SIGNAL(chaseComplete()), this, SLOT(handleChaseComplete()));
-        connect(chaseDlg, SIGNAL(publishChaseScene(QImage, const QColor&)), this, SIGNAL(dispatchPublishImage(QImage, const QColor&)));
-    }
-
-    chaseDlg->show();
-    chaseDlg->activateWindow();
-}
-
-void MainWindow::handleChaseComplete()
-{
-    if(!chaseDlg)
-        return;
-
-    QMessageBox::StandardButton result = QMessageBox::critical(chaseDlg, QString("Confirm Chase Complete"), QString("Are you sure you wish to end this chase? All changes will be discarded."), QMessageBox::Yes | QMessageBox::No);
-    if(result == QMessageBox::Yes)
-    {
-        delete chaseDlg;
-        chaseDlg = nullptr;
-    }
-}
-
-#endif //INCLUDE_CHASE_SUPPORT

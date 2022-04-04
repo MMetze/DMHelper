@@ -49,7 +49,7 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
     _mouseDown = true;
 
     // Math says divide by 10: radius of 5 to adjust scale to "one square"
-    _undoPath = new UndoPath(*_map, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
+    _undoPath = new UndoPath(_map, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
     _map->getUndoStack()->push(_undoPath);
     _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
     emit fowChanged(*_fow);
@@ -77,8 +77,7 @@ void BattleFrameMapDrawer::drawRect(const QRect& rect)
         return;
 
     // Changed to ignore smoothing on an area
-    // UndoShape* undoShape = new UndoShape(*_map, MapEditShape(rect, _erase, _smooth));
-    UndoShape* undoShape = new UndoShape(*_map, MapEditShape(rect, _erase, false));
+    UndoShape* undoShape = new UndoShape(_map, MapEditShape(rect, _erase, false));
     _map->getUndoStack()->push(undoShape);
     _map->paintFoWRect(rect, undoShape->mapEditShape(), _fow, true);
     emit fowChanged(*_fow);
@@ -119,7 +118,7 @@ void BattleFrameMapDrawer::resetFoW()
     if(!_map)
         return;
 
-    UndoFill* undoFill = new UndoFill(*_map, MapEditFill(QColor(0,0,0,255)));
+    UndoFill* undoFill = new UndoFill(_map, MapEditFill(QColor(0,0,0,255)));
     _map->getUndoStack()->push(undoFill);
     _map->fillFoW(QColor(0,0,0,128), _fow);
     endPath();
@@ -131,7 +130,7 @@ void BattleFrameMapDrawer::clearFoW()
     if(!_map)
         return;
 
-    UndoFill* undoFill = new UndoFill(*_map, MapEditFill(QColor(0,0,0,0)));
+    UndoFill* undoFill = new UndoFill(_map, MapEditFill(QColor(0,0,0,0)));
     _map->getUndoStack()->push(undoFill);
     _map->fillFoW(QColor(0,0,0,0), _fow);
     endPath();

@@ -56,7 +56,7 @@ void MapSelectDialog::handleItemChanged(QTreeWidgetItem *current, QTreeWidgetIte
     if(current)
     {
         Map* map = current->data(0, Qt::UserRole).value<Map*>();
-        if(map)
+        if((map) && (map->initialize()) && (map->isInitialized()))
             img = map->getPreviewImage();
     }
 

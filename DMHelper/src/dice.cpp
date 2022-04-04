@@ -77,7 +77,7 @@ int Dice::roll()
     int result = 0;
     for(int dc = 0; dc < _dieCount; ++dc)
     {
-        result += 1 + QRandomGenerator::global()->bounded(_dieType);
+        result += 1 + QRandomGenerator::global()->bounded(_dieType > 0 ? _dieType : 1);
     }
 
     result += _dieBonus;

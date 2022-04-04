@@ -51,7 +51,9 @@ SOURCES += main.cpp\
     battleframestatemachine.cpp \
     bestiaryexportdialog.cpp \
     camerarect.cpp \
+    camerascene.cpp \
     campaignexporter.cpp \
+    campaignnotesdialog.cpp \
     campaignobjectfactory.cpp \
     campaignobjectframe.cpp \
     campaignobjectframestack.cpp \
@@ -65,6 +67,7 @@ SOURCES += main.cpp\
     customtableentry.cpp \
     customtableframe.cpp \
     discordposter.cpp \
+    dmh_vlc.cpp \
     dmhelperribbon.cpp \
     dmhlogger.cpp \
     dmhwaitingdialog.cpp \
@@ -81,7 +84,9 @@ SOURCES += main.cpp\
     mapfactory.cpp \
     mapframescene.cpp \
     objectfactory.cpp \
-    objectimporter.cpp \
+    objectimportdialog.cpp \
+    objectimportworker.cpp \
+    optionsaccessor.cpp \
     party.cpp \
     partycharactergridframe.cpp \
     partyframe.cpp \
@@ -91,6 +96,26 @@ SOURCES += main.cpp\
     publishbuttonframe.cpp \
     publishbuttonproxy.cpp \
     publishbuttonribbon.cpp \
+    publishglbattlebackground.cpp \
+    publishglbattleeffect.cpp \
+    publishglbattleimagerenderer.cpp \
+    publishglbattleobject.cpp \
+    publishglbattlerenderer.cpp \
+    publishglbattlescene.cpp \
+    publishglbattletoken.cpp \
+    publishglbattlevideorenderer.cpp \
+    publishgleffect.cpp \
+    publishglframe.cpp \
+    publishglimage.cpp \
+    publishglimagerenderer.cpp \
+    publishglmapimagerenderer.cpp \
+    publishglmaprenderer.cpp \
+    publishglmapvideorenderer.cpp \
+    publishglobject.cpp \
+    publishglrenderer.cpp \
+    publishgltextimagerenderer.cpp \
+    publishgltextrenderer.cpp \
+    publishgltextvideorenderer.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -103,7 +128,6 @@ SOURCES += main.cpp\
     ribbontabcampaign.cpp \
     ribbontabfile.cpp \
     ribbontabmap.cpp \
-    ribbontabscrolling.cpp \
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     ribbontabworldmap.cpp \
@@ -140,19 +164,13 @@ SOURCES += main.cpp\
     bestiarydialog.cpp \
     monsterclass.cpp \
     bestiary.cpp \
-    addmonstersdialog.cpp \
     campaigntree.cpp \
     campaigntreemodel.cpp \
     textpublishdialog.cpp \
-    chasedialog.cpp \
-    chaserwidget.cpp \
-    chaser.cpp \
     complicationdata.cpp \
     combatantselectdialog.cpp \
-    chaserselectiondialog.cpp \
     quickref.cpp \
     quickrefdatawidget.cpp \
-    chaseanimationdialog.cpp \
     mapmarkerdialog.cpp \
     undomarker.cpp \
     mapcontent.cpp \
@@ -160,7 +178,6 @@ SOURCES += main.cpp\
     scaledpixmap.cpp \
     characterframe.cpp \
     mapframe.cpp \
-    addbattlewavedialog.cpp \
     optionsdialog.cpp \
     optionscontainer.cpp \
     selectzoom.cpp \
@@ -172,21 +189,9 @@ SOURCES += main.cpp\
     undoshape.cpp \
     unselectedellipse.cpp \
     unselectedpixmap.cpp \
-    scrolltabwidget.cpp \
-    scrolloverlaywidget.cpp \
     publishframe.cpp \
     quickrefframe.cpp \
     dmscreentabwidget.cpp \
-    scrolltabtransitionfactory.cpp \
-    scrolltabtransitionbase.cpp \
-    scrolltabtransitionrotate.cpp \
-    scrolltabtransitionanimation.cpp \
-    scrolltabtransitionsmoke.cpp \
-    scrolltabtransitionzap.cpp \
-    scrolltabtransitioninstant.cpp \
-    encounterscrollingtext.cpp \
-    encounterscrollingtextedit.cpp \
-    scrollingtextwindow.cpp \
     dicerollframe.cpp \
     battledialogmodel.cpp \
     battledialoggraphicsview.cpp \
@@ -196,7 +201,12 @@ SOURCES += main.cpp\
     unselectedrect.cpp \
     updatechecker.cpp \
     videoplayer.cpp \
+    videoplayergl.cpp \
+    videoplayerglplayer.cpp \
+    videoplayerglscreenshot.cpp \
+    videoplayerglvideo.cpp \
     welcomeframe.cpp \
+    whatsnewdialog.cpp \
     widgetbattlecombatant.cpp \
     dicerolldialogcombatants.cpp \
     widgetcharacter.cpp \
@@ -271,7 +281,9 @@ HEADERS  += mainwindow.h \
     battleframestatemachine.h \
     bestiaryexportdialog.h \
     camerarect.h \
+    camerascene.h \
     campaignexporter.h \
+    campaignnotesdialog.h \
     campaignobjectfactory.h \
     campaignobjectframe.h \
     campaignobjectframestack.h \
@@ -285,6 +297,7 @@ HEADERS  += mainwindow.h \
     customtableentry.h \
     customtableframe.h \
     discordposter.h \
+    dmh_vlc.h \
     dmhelperribbon.h \
     dmhlogger.h \
     dmhwaitingdialog.h \
@@ -302,7 +315,9 @@ HEADERS  += mainwindow.h \
     mapframescene.h \
     mapmarker.h \
     objectfactory.h \
-    objectimporter.h \
+    objectimportdialog.h \
+    objectimportworker.h \
+    optionsaccessor.h \
     party.h \
     partycharactergridframe.h \
     partyframe.h \
@@ -312,6 +327,26 @@ HEADERS  += mainwindow.h \
     publishbuttonframe.h \
     publishbuttonproxy.h \
     publishbuttonribbon.h \
+    publishglbattlebackground.h \
+    publishglbattleeffect.h \
+    publishglbattleimagerenderer.h \
+    publishglbattleobject.h \
+    publishglbattlerenderer.h \
+    publishglbattlescene.h \
+    publishglbattletoken.h \
+    publishglbattlevideorenderer.h \
+    publishgleffect.h \
+    publishglframe.h \
+    publishglimage.h \
+    publishglimagerenderer.h \
+    publishglmapimagerenderer.h \
+    publishglmaprenderer.h \
+    publishglmapvideorenderer.h \
+    publishglobject.h \
+    publishglrenderer.h \
+    publishgltextimagerenderer.h \
+    publishgltextrenderer.h \
+    publishgltextvideorenderer.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \
@@ -324,7 +359,6 @@ HEADERS  += mainwindow.h \
     ribbontabcampaign.h \
     ribbontabfile.h \
     ribbontabmap.h \
-    ribbontabscrolling.h \
     ribbontabtext.h \
     ribbontabtools.h \
     ribbontabworldmap.h \
@@ -362,19 +396,13 @@ HEADERS  += mainwindow.h \
     bestiarydialog.h \
     monsterclass.h \
     bestiary.h \
-    addmonstersdialog.h \
     campaigntree.h \
     campaigntreemodel.h \
     textpublishdialog.h \
-    chasedialog.h \
-    chaserwidget.h \
-    chaser.h \
     complicationdata.h \
     combatantselectdialog.h \
-    chaserselectiondialog.h \
     quickref.h \
     quickrefdatawidget.h \
-    chaseanimationdialog.h \
     mapmarkerdialog.h \
     undomarker.h \
     mapcontent.h \
@@ -382,7 +410,6 @@ HEADERS  += mainwindow.h \
     scaledpixmap.h \
     characterframe.h \
     mapframe.h \
-    addbattlewavedialog.h \
     optionsdialog.h \
     optionscontainer.h \
     selectzoom.h \
@@ -394,21 +421,9 @@ HEADERS  += mainwindow.h \
     undoshape.h \
     unselectedellipse.h \
     unselectedpixmap.h \
-    scrolltabwidget.h \
-    scrolloverlaywidget.h \
     publishframe.h \
     quickrefframe.h \
     dmscreentabwidget.h \
-    scrolltabtransitionfactory.h \
-    scrolltabtransitionbase.h \
-    scrolltabtransitionrotate.h \
-    scrolltabtransitionanimation.h \
-    scrolltabtransitionsmoke.h \
-    scrolltabtransitionzap.h \
-    scrolltabtransitioninstant.h \
-    encounterscrollingtext.h \
-    encounterscrollingtextedit.h \
-    scrollingtextwindow.h \
     dicerollframe.h \
     battledialogmodel.h \
     battledialoggraphicsview.h \
@@ -418,7 +433,12 @@ HEADERS  += mainwindow.h \
     unselectedrect.h \
     updatechecker.h \
     videoplayer.h \
+    videoplayergl.h \
+    videoplayerglplayer.h \
+    videoplayerglscreenshot.h \
+    videoplayerglvideo.h \
     welcomeframe.h \
+    whatsnewdialog.h \
     widgetbattlecombatant.h \
     dicerolldialogcombatants.h \
     widgetcharacter.h \
@@ -465,6 +485,7 @@ FORMS    += mainwindow.ui \
     battlecombatantframe.ui \
     battleframe.ui \
     bestiaryexportdialog.ui \
+    campaignnotesdialog.ui \
     characterimportdialog.ui \
     combatantrolloverframe.ui \
     conditionseditdialog.ui \
@@ -472,13 +493,13 @@ FORMS    += mainwindow.ui \
     dicerolldialog.ui \
     combatantdialog.ui \
     bestiarydialog.ui \
-    addmonstersdialog.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
+    objectimportdialog.ui \
     partycharactergridframe.ui \
     partyframe.ui \
     partyframecharacter.ui \
@@ -494,7 +515,6 @@ FORMS    += mainwindow.ui \
     ribbontabcampaign.ui \
     ribbontabfile.ui \
     ribbontabmap.ui \
-    ribbontabscrolling.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
     ribbontabworldmap.ui \
@@ -504,15 +524,11 @@ FORMS    += mainwindow.ui \
     soundboardtrackframe.ui \
     spellbookdialog.ui \
     textpublishdialog.ui \
-    chasedialog.ui \
     combatantselectdialog.ui \
-    chaserselectiondialog.ui \
     quickrefdatawidget.ui \
-    chaseanimationdialog.ui \
     mapmarkerdialog.ui \
     characterframe.ui \
     mapframe.ui \
-    addbattlewavedialog.ui \
     optionsdialog.ui \
     selectzoom.ui \
     itemselectdialog.ui \
@@ -520,11 +536,10 @@ FORMS    += mainwindow.ui \
     timeanddateframe.ui \
     quickrefframe.ui \
     dmscreentabwidget.ui \
-    encounterscrollingtextedit.ui \
-    scrollingtextwindow.ui \
     dicerollframe.ui \
     battledialogeffectsettings.ui \
     welcomeframe.ui \
+    whatsnewdialog.ui \
     widgetbattlecombatant.ui \
     dicerolldialogcombatants.ui \
     widgetcharacter.ui \

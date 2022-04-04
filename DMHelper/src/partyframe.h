@@ -11,7 +11,6 @@ class PartyFrame;
 
 class Party;
 class Character;
-//class QVBoxLayout;
 class QGridLayout;
 class PartyCharacterGridFrame;
 
@@ -23,7 +22,7 @@ public:
     explicit PartyFrame(QWidget *parent = nullptr);
     ~PartyFrame();
 
-    virtual void activateObject(CampaignObjectBase* object) override;
+    virtual void activateObject(CampaignObjectBase* object, PublishGLRenderer* currentRenderer) override;
     virtual void deactivateObject() override;
 
     void setParty(Party* party);
@@ -61,7 +60,6 @@ private:
     void handlePublishClicked();
 
     Ui::PartyFrame *ui;
-    //QVBoxLayout* _characterLayout;
     QGridLayout* _characterGrid;
     QList<PartyCharacterGridFrame* > _characterFrames;
 

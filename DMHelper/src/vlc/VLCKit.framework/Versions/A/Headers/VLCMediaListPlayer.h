@@ -62,6 +62,7 @@ typedef NS_ENUM(NSInteger, VLCRepeatMode) {
 /**
  * A media list player, which eases the use of playlists
  */
+OBJC_VISIBLE
 @interface VLCMediaListPlayer : NSObject
 
 /**
@@ -127,12 +128,6 @@ typedef NS_ENUM(NSInteger, VLCRepeatMode) {
  * \returns YES on success, NO if there is no such item
  */
 @property (NS_NONATOMIC_IOSONLY, readonly) BOOL previous;
-
-/**
- * play an item at at a given index in the media list attached to the player
- * \deprecated This method is not thread safe. Use playItemAtNumber: instead
- */
-- (BOOL)playItemAtIndex:(int)index  __attribute__((deprecated));
 
 /**
  * play an item at a given index in the media list attached to the player

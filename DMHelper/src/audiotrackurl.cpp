@@ -6,6 +6,17 @@ AudioTrackUrl::AudioTrackUrl(const QString& trackName, const QUrl& trackUrl, QOb
 {
 }
 
+void AudioTrackUrl::copyValues(const CampaignObjectBase* other)
+{
+    const AudioTrackUrl* otherAudioTrackUrl = dynamic_cast<const AudioTrackUrl*>(other);
+    if(!otherAudioTrackUrl)
+        return;
+
+    _url = otherAudioTrackUrl->_url;
+
+    AudioTrack::copyValues(other);
+}
+
 QUrl AudioTrackUrl::getUrl() const
 {
     return _url;

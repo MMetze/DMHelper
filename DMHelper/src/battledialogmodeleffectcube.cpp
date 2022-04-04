@@ -10,13 +10,6 @@ BattleDialogModelEffectCube::BattleDialogModelEffectCube(int size, const QPointF
 {
 }
 
-/*
-BattleDialogModelEffectCube::BattleDialogModelEffectCube(const BattleDialogModelEffectCube& other) :
-    BattleDialogModelEffect(other)
-{
-}
-*/
-
 BattleDialogModelEffectCube::~BattleDialogModelEffectCube()
 {
 }
@@ -24,7 +17,7 @@ BattleDialogModelEffectCube::~BattleDialogModelEffectCube()
 BattleDialogModelEffect* BattleDialogModelEffectCube::clone() const
 {
     BattleDialogModelEffectCube* newEffect = new BattleDialogModelEffectCube(getName());
-    newEffect->copyValues(*this);
+    newEffect->copyValues(this);
     return newEffect;
 }
 

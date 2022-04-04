@@ -1,6 +1,6 @@
 #include "camerarect.h"
 #include "dmconstants.h"
-#include "battledialoggraphicsscene.h"
+#include "camerascene.h"
 #include <QPen>
 #include <QCursor>
 #include <QStyleOptionGraphicsItem>
@@ -8,8 +8,6 @@
 
 const qreal CAMERA_RECT_BORDER_SIZE = 4.0;
 const int CAMERA_RECT_BORDER_WIDTH = 1;
-const qreal CAMERA_SHADOW_OFFSET = 4.0;
-const int CAMERA_SHADOW_SIZE = 3;
 
 /*
  * TODOs to finish this
@@ -25,13 +23,28 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _mouseDownPos(),
     _mouseLastPos(),
     _mouseDownSection(0),
-    _shadowItem(nullptr),
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
     _viewport(viewport)
 {
     initialize(scene);
+}
+
+CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewport) :
+    QGraphicsRectItem(rect, nullptr),
+    _draw(true),
+    _mouseDown(false),
+    _mouseDownPos(),
+    _mouseLastPos(),
+    _mouseDownSection(0),
+    _drawItem(nullptr),
+    _drawText(nullptr),
+    _drawTextRect(nullptr),
+    _viewport(viewport)
+{
+    initialize(scene);
+    setPos(rect.topLeft());
 }
 
 CameraRect::~CameraRect()
@@ -48,16 +61,20 @@ void CameraRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
     return;
 }
 
+QRectF CameraRect::getCameraRect() const
+{
+    return QRectF(pos(), rect().size());
+}
+
 void CameraRect::setCameraRect(const QRectF& rect)
 {
     setPos(rect.topLeft());
     setRect(0.0, 0.0, rect.width(), rect.height());
-    _shadowItem->setRect(CAMERA_SHADOW_OFFSET, CAMERA_SHADOW_OFFSET, rect.width(), rect.height());
     _drawItem->setRect(0.0, 0.0, rect.width(), rect.height());
 
-    BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
-    if(battleScene)
-        battleScene->handleItemChanged(this);
+    CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
+    if(cameraScene)
+        cameraScene->handleItemChanged(this);
 }
 
 void CameraRect::setCameraSelectable(bool selectable)
@@ -77,19 +94,17 @@ void CameraRect::setDraw(bool draw)
 
 void CameraRect::setPublishing(bool publishing)
 {
-    if((!_drawItem) || (!_shadowItem) || (!_drawText) || (!_drawTextRect))
+    if((!_drawItem) || (!_drawText) || (!_drawTextRect))
         return;
 
     if(publishing)
     {
         _drawItem->setPen(QPen(QColor(255,0,0,255), CAMERA_RECT_BORDER_WIDTH));
-        _shadowItem->setPen(QPen(QColor(180,0,0,80), CAMERA_SHADOW_SIZE));
         _drawTextRect->setBrush(QBrush(QColor(255,0,0)));
     }
     else
     {
         _drawItem->setPen(QPen(QColor(0,0,255,255), CAMERA_RECT_BORDER_WIDTH));
-        _shadowItem->setPen(QPen(QColor(0,0,180,80), CAMERA_SHADOW_SIZE));
         _drawTextRect->setBrush(QBrush(QColor(0,0,255)));
     }
 }
@@ -97,10 +112,7 @@ void CameraRect::setPublishing(bool publishing)
 void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
     if((!event) || ((flags() & QGraphicsItem::ItemIsSelectable) == 0) || (!_viewport))
-    {
-        //unsetCursor();
         return;
-    }
 
     int section = getRectSection(event->pos());
     switch(section)
@@ -119,7 +131,6 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
             _viewport->setCursor(QCursor(Qt::SizeBDiagCursor)); break;
         case RectSection_Middle:
             _viewport->setCursor(QCursor(Qt::SizeAllCursor)); break;
-            //unsetCursor(); break;
         default:
             _viewport->unsetCursor();
             break;
@@ -128,45 +139,55 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if((!_mouseDown) || (_mouseDownSection == RectSection_None) || (_mouseDownSection == RectSection_Middle))
+    if((!_mouseDown) || (_mouseDownSection == RectSection_None))
     {
-        // Use the normal functionality to move the rectangle around
         QGraphicsRectItem::mouseMoveEvent(event);
         return;
     }
 
-    // Resize the rectangle
-    qreal dx = 0.0;
-    qreal dy = 0.0;
-    qreal w = rect().width();
-    qreal h = rect().height();
-
-    if((_mouseDownSection & RectSection_Left) == RectSection_Left)
+    if(_mouseDownSection == RectSection_Middle)
     {
-        dx = event->pos().x() - _mouseDownPos.x();
-        w -= dx;
+        // Use the normal functionality to move the rectangle around
+        QGraphicsRectItem::mouseMoveEvent(event);
     }
-    else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
+    else
     {
-        w += event->pos().x() - _mouseLastPos.x();
+        // Resize the rectangle
+        qreal dx = 0.0;
+        qreal dy = 0.0;
+        qreal w = rect().width();
+        qreal h = rect().height();
+
+        if((_mouseDownSection & RectSection_Left) == RectSection_Left)
+        {
+            dx = event->pos().x() - _mouseDownPos.x();
+            w -= dx;
+        }
+        else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
+        {
+            w += event->pos().x() - _mouseLastPos.x();
+        }
+
+        if((_mouseDownSection & RectSection_Top) == RectSection_Top)
+        {
+            dy = event->pos().y() - _mouseDownPos.y();
+            h -= dy;
+        }
+        if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
+        {
+            h += event->pos().y() - _mouseLastPos.y();
+        }
+
+        moveBy(dx, dy);
+        setRect(0.0, 0.0, w, h);
+        _drawItem->setRect(0.0, 0.0, w, h);
+
+        _mouseLastPos = event->pos();
     }
 
-    if((_mouseDownSection & RectSection_Top) == RectSection_Top)
-    {
-        dy = event->pos().y() - _mouseDownPos.y();
-        h -= dy;
-    }
-    if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
-    {
-        h += event->pos().y() - _mouseLastPos.y();
-    }
-
-    moveBy(dx, dy);
-    setRect(0.0, 0.0, w, h);
-    _shadowItem->setRect(CAMERA_SHADOW_OFFSET, CAMERA_SHADOW_OFFSET, w, h);
-    _drawItem->setRect(0.0, 0.0, w, h);
-
-    _mouseLastPos = event->pos();
+    CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
+    if(cameraScene)
+        cameraScene->handleItemChanged(this);
 }
 
 void CameraRect::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -188,17 +209,15 @@ void CameraRect::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
     QGraphicsRectItem::mouseReleaseEvent(event);
 
-    BattleDialogGraphicsScene* battleScene = dynamic_cast<BattleDialogGraphicsScene*>(scene());
-    if(battleScene)
-        battleScene->handleItemChanged(this);
+    CameraScene* cameraScene = dynamic_cast<CameraScene*>(scene());
+    if(cameraScene)
+        cameraScene->handleItemChanged(this);
 }
 
 QVariant CameraRect::itemChange(GraphicsItemChange change, const QVariant &value)
 {
     if(change == ItemPositionHasChanged)
-    {
         _drawItem->setPos(pos());
-    }
 
     return QGraphicsItem::itemChange(change, value);
 }
@@ -216,10 +235,6 @@ void CameraRect::initialize(QGraphicsScene& scene)
     _drawItem->setRect(0.0, 0.0, rect().width(), rect().height());
     _drawItem->setZValue(DMHelper::BattleDialog_Z_Overlay);
     scene.addItem(_drawItem);
-
-    _shadowItem = new QGraphicsRectItem(_drawItem);
-    _shadowItem->setRect(CAMERA_SHADOW_OFFSET, CAMERA_SHADOW_OFFSET, rect().width(), rect().height());
-    _shadowItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
 
     _drawTextRect = new QGraphicsRectItem(_drawItem);
     _drawText = new QGraphicsSimpleTextItem(QString(" Player's View "), _drawItem);
