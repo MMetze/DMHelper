@@ -40,10 +40,11 @@ private:
     unsigned _width = 0;
     unsigned _height = 0;
     QMutex _textLock;
-    QOpenGLFramebufferObject *_buffers[3];
+    QOpenGLFramebufferObject *_buffers[4];
     size_t _idxRender = 0;
-    size_t _idxSwap = 1;
-    size_t _idxDisplay = 2;
+    size_t _idxSwapRender = 1;
+    size_t _idxSwapDisplay = 2;
+    size_t _idxDisplay = 3;
     bool _updated = false;
 };
 

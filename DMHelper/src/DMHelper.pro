@@ -566,7 +566,8 @@ OTHER_FILES += \
     bugs.txt
 
 DISTFILES += \
-    buildanddeploy_msvc.cmd \
+    buildanddeploy_msvc32.cmd \
+    buildanddeploy_msvc64.cmd \
     buildanddeploymac \
     bugs.txt \
     installer/config/config_win64.xml \
@@ -580,6 +581,7 @@ DISTFILES += \
     installer/packages/com.dmhelper.app/meta/installscript.qs \
     installer/packages/com.dmhelper.app/meta/license.txt \
     installer/packages/com.dmhelper.app/meta/package.xml \
+    preparebuilddirectory_msvc.cmd \
     release_notes.txt \
     resources/calendar.xml \
     resources/equipment.xml \

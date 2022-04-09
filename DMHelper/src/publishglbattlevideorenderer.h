@@ -3,7 +3,7 @@
 
 #include "publishglbattlerenderer.h"
 
-#define BATTLEVIDEO_USE_SCREENSHOT_ONLY
+//#define BATTLEVIDEO_USE_SCREENSHOT_ONLY
 
 class VideoPlayerGLPlayer;
 

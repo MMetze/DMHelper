@@ -71,7 +71,7 @@ void PublishGLMapVideoRenderer::initializeBackground()
 
 bool PublishGLMapVideoRenderer::isBackgroundReady()
 {
-#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+#ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     return _backgroundObject != nullptr;
 #else
     return _videoPlayer != nullptr;

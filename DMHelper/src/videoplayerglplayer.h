@@ -63,6 +63,9 @@ public:
     virtual void eventCallback(const struct libvlc_event_t *p_event);
     */
 
+    static void playerEventCallback( const struct libvlc_event_t *p_event, void *p_data );
+
+
 signals:
     void videoOpening();
     void videoPlaying();

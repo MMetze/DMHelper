@@ -273,8 +273,8 @@ void PublishGLMapRenderer::paintGL()
 
     if(!_scissorRect.isEmpty())
     {
-        f->glEnable(GL_SCISSOR_TEST);
-        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+//        f->glEnable(GL_SCISSOR_TEST);
+//        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
     }
 
     // Draw the scene
@@ -317,7 +317,7 @@ void PublishGLMapRenderer::paintGL()
     }
 
     if(!_scissorRect.isEmpty())
-        f->glDisable(GL_SCISSOR_TEST);
+//        f->glDisable(GL_SCISSOR_TEST);
 
     paintPointer(f, sceneSize, _shaderModelMatrix);
 }

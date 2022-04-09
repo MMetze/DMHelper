@@ -285,6 +285,55 @@ QImage VideoPlayerGLPlayer::getLastScreenshot()
     return fbo->toImage();
 }
 
+void VideoPlayerGLPlayer::playerEventCallback( const struct libvlc_event_t *p_event, void *p_data )
+{
+    if((!p_event) || (!p_data))
+        return;
+
+    VideoPlayerGLPlayer* that = static_cast<VideoPlayerGLPlayer*>(p_data);
+    if(!that)
+        return;
+
+    switch(p_event->type)
+    {
+        case libvlc_MediaPlayerOpening:
+            qDebug() << "[vlc] Video event received: OPENING = " << p_event->type;
+            //emit videoOpening();
+            break;
+        case libvlc_MediaPlayerBuffering:
+            qDebug() << "[vlc] Video event received: BUFFERING = " << p_event->type;
+            //emit videoBuffering();
+            break;
+        case libvlc_MediaPlayerPlaying:
+            qDebug() << "[vlc] Video event received: PLAYING = " << p_event->type;
+            //internalAudioCheck(p_event->type);
+            //emit videoPlaying();
+            break;
+        case libvlc_MediaPlayerPaused:
+            qDebug() << "[vlc] Video event received: PAUSED = " << p_event->type;
+            //emit videoPaused();
+            break;
+        case libvlc_MediaPlayerStopped:
+            qDebug() << "[vlc] Video event received: STOPPED = " << p_event->type;
+            //internalStopCheck(stopConfirmed);
+            //emit videoStopped();
+            break;
+        case libvlc_MediaListPlayerPlayed:
+            qDebug() << "[vlc] Video event received: LIST PLAYED = " << p_event->type;
+            break;
+        case libvlc_MediaListPlayerStopped:
+            qDebug() << "[vlc] Video event received: LIST STOPPED = " << p_event->type;
+            //internalStopCheck(stopConfirmed);
+            //emit videoStopped();
+            break;
+        default:
+            qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
+            break;
+    };
+
+    that->_status = p_event->type;
+}
+
 /*
 // this callback will create the surfaces and FBO used by VLC to perform its rendering
 bool VideoPlayerGL::resizeRenderTextures(void* data, const libvlc_video_render_cfg_t *cfg, libvlc_video_output_cfg_t *render_cfg)
@@ -575,51 +624,6 @@ void VideoPlayerGL::exitEventCallback()
     qDebug() << "[VideoPlayerGLPlayer] Exit event callback completed";
 #endif
 }
-
-void VideoPlayerGL::eventCallback(const struct libvlc_event_t *p_event)
-{
-    if(p_event)
-    {
-        switch(p_event->type)
-        {
-            case libvlc_MediaPlayerOpening:
-                qDebug() << "[vlc] Video event received: OPENING = " << p_event->type;
-                emit videoOpening();
-                break;
-            case libvlc_MediaPlayerBuffering:
-                qDebug() << "[vlc] Video event received: BUFFERING = " << p_event->type;
-                emit videoBuffering();
-                break;
-            case libvlc_MediaPlayerPlaying:
-                qDebug() << "[vlc] Video event received: PLAYING = " << p_event->type;
-                internalAudioCheck(p_event->type);
-                emit videoPlaying();
-                break;
-            case libvlc_MediaPlayerPaused:
-                qDebug() << "[vlc] Video event received: PAUSED = " << p_event->type;
-                emit videoPaused();
-                break;
-            case libvlc_MediaPlayerStopped:
-                qDebug() << "[vlc] Video event received: STOPPED = " << p_event->type;
-                internalStopCheck(stopConfirmed);
-                emit videoStopped();
-                break;
-            case libvlc_MediaListPlayerPlayed:
-                qDebug() << "[vlc] Video event received: LIST PLAYED = " << p_event->type;
-                break;
-            case libvlc_MediaListPlayerStopped:
-                qDebug() << "[vlc] Video event received: LIST STOPPED = " << p_event->type;
-                internalStopCheck(stopConfirmed);
-                emit videoStopped();
-                break;
-            default:
-                qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
-                break;
-        };
-
-        _status = p_event->type;
-    }
-}
 */
 
 void VideoPlayerGLPlayer::targetResized(const QSize& newSize)
@@ -782,8 +786,7 @@ bool VideoPlayerGLPlayer::startPlayer()
 
     //libvlc_video_set_scale(_vlcPlayer, 0.25f );
 
-    // TBD
-    /*
+    // Set up event callbacks
     libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
     if(eventManager)
     {
@@ -793,7 +796,6 @@ bool VideoPlayerGLPlayer::startPlayer()
         libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
         libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
     }
-    */
 
     /*
     libvlc_event_manager_t* listEventManager = libvlc_media_list_player_event_manager(_vlcListPlayer);

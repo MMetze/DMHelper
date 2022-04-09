@@ -190,10 +190,10 @@ struct timespec timespec_from_vlc_tick(vlc_tick_t date);
 
 
 /*****************************************************************************
- * MSTRTIME_MAX_SIZE: maximum possible size of secstotimestr
+ * MSTRTIME_MAX_SIZE: maximum possible size of vlc_tick_to_str
  *****************************************************************************
  * This values is the maximal possible size of the string returned by the
- * secstotimestr() function, including '-' and the final '\0'. It should be
+ * vlc_tick_to_str() function, including '-' and the final '\0'. It should be
  * used to allocate the buffer.
  *****************************************************************************/
 #define MSTRTIME_MAX_SIZE 22
@@ -208,11 +208,11 @@ struct timespec timespec_from_vlc_tick(vlc_tick_t date);
  * This function is provided for any interface function which need to print a
  * time string in the format h:mm:ss
  * date.
- * \param secs  the date to be converted
+ * \param ticks the time to be converted
  * \param psz_buffer should be a buffer at least MSTRTIME_MAX_SIZE characters
  * \return psz_buffer is returned so this can be used as printf parameter.
  */
-VLC_API char * secstotimestr( char *psz_buffer, int32_t secs );
+VLC_API char * vlc_tick_to_str( char *psz_buffer, vlc_tick_t ticks );
 
 /**
  * \defgroup date Timestamps, error-free

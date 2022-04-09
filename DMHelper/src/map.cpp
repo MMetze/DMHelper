@@ -952,7 +952,11 @@ bool Map::initialize()
         _imgBackground = reader.read();
 
         if(_imgBackground.isNull())
-            return false; // Could not read the file as an image - it could be a video
+        {
+            // Could not read the file as an image - it could be a video, but could be a file error...
+            qDebug() << "[Map] Not able to read map file: " << reader.error() <<", " << reader.errorString();
+            return false;
+        }
 
         if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
             _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);

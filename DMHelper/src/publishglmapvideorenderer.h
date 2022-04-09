@@ -3,7 +3,7 @@
 
 #include "publishglmaprenderer.h"
 
-#define MAPVIDEO_USE_SCREENSHOT_ONLY
+//#define MAPVIDEO_USE_SCREENSHOT_ONLY
 
 class VideoPlayerGLPlayer;
 

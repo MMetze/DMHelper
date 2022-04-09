@@ -41,7 +41,7 @@
 
 struct video_palette_t
 {
-    int i_entries;      /**< to keep the compatibility with libavcodec's palette */
+    int i_entries;                         /**< number of in-use palette entries */
     uint8_t palette[VIDEO_PALETTE_COLORS_MAX][4];  /**< 4-byte RGBA/YUVA palette */
 };
 
@@ -289,7 +289,7 @@ typedef enum video_transfer_func_t
 {
     TRANSFER_FUNC_UNDEF,
     TRANSFER_FUNC_LINEAR,
-    TRANSFER_FUNC_SRGB /*< Gamma 2.2 */,
+    TRANSFER_FUNC_SRGB /**< Gamma 2.2 */,
     TRANSFER_FUNC_BT470_BG,
     TRANSFER_FUNC_BT470_M,
     TRANSFER_FUNC_BT709,
@@ -326,8 +326,8 @@ typedef enum video_color_space_t
 typedef enum video_chroma_location_t
 {
     CHROMA_LOCATION_UNDEF,
-    CHROMA_LOCATION_LEFT,   /*< Most common in MPEG-2 Video, H.264/265 */
-    CHROMA_LOCATION_CENTER, /*< Most common in MPEG-1 Video, JPEG */
+    CHROMA_LOCATION_LEFT,   /**< Most common in MPEG-2 Video, H.264/265 */
+    CHROMA_LOCATION_CENTER, /**< Most common in MPEG-1 Video, JPEG */
     CHROMA_LOCATION_TOP_LEFT,
     CHROMA_LOCATION_TOP_CENTER,
     CHROMA_LOCATION_BOTTOM_LEFT,
@@ -500,7 +500,7 @@ VLC_API void video_format_ScaleCropAr( video_format_t *, const video_format_t * 
 
 /**
  * This function "normalizes" the formats orientation, by switching the a/r according to the orientation,
- * producing a format whose orientation is ORIENT_NORMAL. It makes a shallow copy (pallette is not alloc'ed).
+ * producing a format whose orientation is ORIENT_NORMAL. It makes a shallow copy (palette is not alloc'ed).
  */
 VLC_API void video_format_ApplyRotation(video_format_t * /*restrict*/ out,
                                         const video_format_t *in);
@@ -544,6 +544,63 @@ static inline video_transform_t transform_Inverse( video_transform_t transform )
             return transform;
     }
 }
+
+/**
+ * Dolby Vision metadata description
+ */
+enum vlc_dovi_reshape_method_t
+{
+    VLC_DOVI_RESHAPE_POLYNOMIAL = 0,
+    VLC_DOVI_RESHAPE_MMR = 1,
+};
+
+enum vlc_dovi_nlq_method_t
+{
+    VLC_DOVI_NLQ_NONE = -1,
+    VLC_DOVI_NLQ_LINEAR_DZ = 0,
+};
+
+#define VLC_ANCILLARY_ID_DOVI VLC_FOURCC('D','o','V','i')
+
+typedef struct vlc_video_dovi_metadata_t
+{
+    /* Common header fields */
+    uint8_t coef_log2_denom;
+    uint8_t bl_bit_depth;
+    uint8_t el_bit_depth;
+    enum vlc_dovi_nlq_method_t nlq_method_idc;
+
+    /* Colorspace metadata */
+    float nonlinear_offset[3];
+    float nonlinear_matrix[9];
+    float linear_matrix[9];
+    uint16_t source_min_pq; /* 12-bit PQ values */
+    uint16_t source_max_pq;
+
+    /**
+     * Do not reorder or modify the following structs, they are intentionally
+     * specified to be identical to AVDOVIReshapingCurve / AVDOVINLQParams.
+     */
+    struct vlc_dovi_reshape_t {
+        uint8_t num_pivots;
+        uint16_t pivots[9];
+        enum vlc_dovi_reshape_method_t mapping_idc[8];
+        uint8_t poly_order[8];
+        int64_t poly_coef[8][3];
+        uint8_t mmr_order[8];
+        int64_t mmr_constant[8];
+        int64_t mmr_coef[8][3][7];
+    } curves[3];
+
+    struct vlc_dovi_nlq_t {
+        uint8_t offset_depth; /* bit depth of offset value */
+        uint16_t offset;
+        uint64_t hdr_in_max;
+        uint64_t dz_slope;
+        uint64_t dz_threshold;
+    } nlq[3];
+} vlc_video_dovi_metadata_t;
+
 /**
  * subtitles format description
  */
@@ -641,7 +698,7 @@ struct es_format_t
     union {
         struct {
             audio_format_t  audio;    /**< description of audio format */
-            audio_replay_gain_t audio_replay_gain; /*< audio replay gain information */
+            audio_replay_gain_t audio_replay_gain; /**< audio replay gain information */
         };
         video_format_t video;     /**< description of video format */
         subs_format_t  subs;      /**< description of subtitle format */
@@ -707,7 +764,7 @@ static inline void es_format_Change( es_format_t *fmt, int i_cat, vlc_fourcc_t i
  *
  * Any held ES tracks must be released with vlc_es_id_Release().
  *
- * @param id pointer to the ES id
+ * @param es pointer to the ES id
  * @return the same ES pointer, for convenience
  */
 VLC_API vlc_es_id_t *
