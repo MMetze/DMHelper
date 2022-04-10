@@ -2,6 +2,7 @@
 #include "videoplayerglvideo.h"
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
+#include <QTimerEvent>
 #include <QDebug>
 
 #define VIDEO_DEBUG_MESSAGES
@@ -43,7 +44,7 @@ VideoPlayerGLPlayer::VideoPlayerGLPlayer(const QString& videoFile, QOpenGLContex
 #ifdef Q_OS_WIN
         _videoFile.replace("/","\\\\");
 #endif
-        _vlcError = !initializeVLC();
+        _vlcError = !VideoPlayerGLPlayer::initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES
         qDebug() << "[VideoPlayerGLPlayer] Player object initialized: " << this;
 #endif
@@ -59,10 +60,7 @@ VideoPlayerGLPlayer::~VideoPlayerGLPlayer()
 #endif
 
     _selfRestart = false;
-    stopPlayer();
-
-    delete _video;
-
+    cleanupPlayer();
     cleanupGLObjects();
 
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -297,37 +295,22 @@ void VideoPlayerGLPlayer::playerEventCallback( const struct libvlc_event_t *p_ev
     switch(p_event->type)
     {
         case libvlc_MediaPlayerOpening:
-            qDebug() << "[vlc] Video event received: OPENING = " << p_event->type;
-            //emit videoOpening();
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: OPENING = " << p_event->type;
             break;
         case libvlc_MediaPlayerBuffering:
-            qDebug() << "[vlc] Video event received: BUFFERING = " << p_event->type;
-            //emit videoBuffering();
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: BUFFERING = " << p_event->type;
             break;
         case libvlc_MediaPlayerPlaying:
-            qDebug() << "[vlc] Video event received: PLAYING = " << p_event->type;
-            //internalAudioCheck(p_event->type);
-            //emit videoPlaying();
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: PLAYING = " << p_event->type;
             break;
         case libvlc_MediaPlayerPaused:
-            qDebug() << "[vlc] Video event received: PAUSED = " << p_event->type;
-            //emit videoPaused();
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: PAUSED = " << p_event->type;
             break;
         case libvlc_MediaPlayerStopped:
-            qDebug() << "[vlc] Video event received: STOPPED = " << p_event->type;
-            //internalStopCheck(stopConfirmed);
-            //emit videoStopped();
-            break;
-        case libvlc_MediaListPlayerPlayed:
-            qDebug() << "[vlc] Video event received: LIST PLAYED = " << p_event->type;
-            break;
-        case libvlc_MediaListPlayerStopped:
-            qDebug() << "[vlc] Video event received: LIST STOPPED = " << p_event->type;
-            //internalStopCheck(stopConfirmed);
-            //emit videoStopped();
+            qDebug() << "[VideoPlayerGLPlayer] Video event received: STOPPED = " << p_event->type;
             break;
         default:
-            qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
+            qDebug() << "[VideoPlayerGLPlayer] UNEXPECTED Video event received:  " << p_event->type;
             break;
     };
 
@@ -641,6 +624,11 @@ void VideoPlayerGLPlayer::targetResized(const QSize& newSize)
 
 void VideoPlayerGLPlayer::stopThenDelete()
 {
+    qDebug() << "[VideoPlayerGLPlayer] Stop Then Delete triggered, stop called...";
+    _deleteOnStop = true;
+    stopPlayer();
+
+    /*
     if(isProcessing())
     {
         qDebug() << "[VideoPlayerGLPlayer] Stop Then Delete triggered, stop called...";
@@ -651,8 +639,7 @@ void VideoPlayerGLPlayer::stopThenDelete()
     {
         qDebug() << "[VideoPlayerGLPlayer] Stop Then Delete triggered, immediate delete possible.";
         delete this;
-    }
-
+    }*/
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] stopThenDelete completed";
@@ -671,7 +658,6 @@ bool VideoPlayerGLPlayer::restartPlayer()
     else
     {
         qDebug() << "[VideoPlayerGLPlayer] Restart Player called, but no player running - starting player!";
-        //return false;
         return startPlayer();
     }
 }
@@ -690,6 +676,27 @@ void VideoPlayerGLPlayer::initializationComplete()
 
     qDebug() << "[VideoPlayerGLPlayer] Confirming initialization complete";
     emit contextReady(_context);
+}
+
+void VideoPlayerGLPlayer::timerEvent(QTimerEvent *event)
+{
+    if((_status == libvlc_MediaPlayerOpening) || (_status == libvlc_MediaPlayerBuffering) || (_status == libvlc_MediaPlayerPlaying))
+        return;
+
+    cleanupPlayer();
+    killTimer(event->timerId());
+
+    if(_selfRestart)
+    {
+        _selfRestart = false;
+        startPlayer();
+        qDebug() << "[VideoPlayerGLPlayer] Internal Stop Check: player restarted.";
+    }
+    else if(_deleteOnStop)
+    {
+        qDebug() << "[VideoPlayerGLPlayer] Internal Stop Check: video player being destroyed.";
+        deleteLater();
+    }
 }
 
 bool VideoPlayerGLPlayer::initializeVLC()
@@ -838,31 +845,9 @@ bool VideoPlayerGLPlayer::stopPlayer()
     qDebug() << "[VideoPlayerGLPlayer] Stop Player called";
 
     if(_vlcPlayer)
-    {
-        libvlc_media_player_release(_vlcPlayer);
-        _vlcPlayer = nullptr;
-    }
+        libvlc_media_player_stop_async(_vlcPlayer);
 
-    if(_vlcMedia)
-    {
-        libvlc_media_release(_vlcMedia);
-        _vlcMedia = nullptr;
-    }
-
-    if(_selfRestart)
-    {
-        _selfRestart = false;
-        startPlayer();
-        qDebug() << "[VideoPlayerGLPlayer] Internal Stop Check: player restarted.";
-    }
-
-    if(_deleteOnStop)
-    {
-        qDebug() << "[VideoPlayerGLPlayer] Internal Stop Check: video player being destroyed.";
-
-        // TBD - how to do this...
-        //delete this;
-    }
+    startTimer(500);
 
     return true;
 }
@@ -931,6 +916,27 @@ void VideoPlayerGL::internalStopCheck(int status)
     }
 }
 */
+
+void VideoPlayerGLPlayer::cleanupPlayer()
+{
+    if(_vlcPlayer)
+    {
+        libvlc_media_player_release(_vlcPlayer);
+        _vlcPlayer = nullptr;
+    }
+
+    if(_vlcMedia)
+    {
+        libvlc_media_release(_vlcMedia);
+        _vlcMedia = nullptr;
+    }
+
+    if(_video)
+    {
+        delete _video;
+        _video = nullptr;
+    }
+}
 
 void VideoPlayerGLPlayer::createGLObjects()
 {

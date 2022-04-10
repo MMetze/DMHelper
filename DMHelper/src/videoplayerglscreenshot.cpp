@@ -59,22 +59,22 @@ void VideoPlayerGLScreenshot::playerEventCallback( const struct libvlc_event_t *
     switch(p_event->type)
     {
         case libvlc_MediaPlayerOpening:
-            qDebug() << "[vlc] Video event received: OPENING = " << p_event->type;
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: OPENING = " << p_event->type;
             break;
         case libvlc_MediaPlayerBuffering:
-            qDebug() << "[vlc] Video event received: BUFFERING = " << p_event->type;
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: BUFFERING = " << p_event->type;
             break;
         case libvlc_MediaPlayerPlaying:
-            qDebug() << "[vlc] Video event received: PLAYING = " << p_event->type;
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PLAYING = " << p_event->type;
             break;
         case libvlc_MediaPlayerPaused:
-            qDebug() << "[vlc] Video event received: PAUSED = " << p_event->type;
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PAUSED = " << p_event->type;
             break;
         case libvlc_MediaPlayerStopped:
-            qDebug() << "[vlc] Video event received: STOPPED = " << p_event->type;
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: STOPPED = " << p_event->type;
             break;
         default:
-            qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
+            qDebug() << "[VideoPlayerGLScreenshot] UNEXPECTED Video event received:  " << p_event->type;
             break;
     };
 
@@ -171,10 +171,9 @@ bool VideoPlayerGLScreenshot::stopPlayer()
     _framesReceived = SCREENSHOT_USE_FRAME;
 
     if(_vlcPlayer)
-    {
         libvlc_media_player_stop_async(_vlcPlayer);
-        startTimer(500);
-    }
+
+    startTimer(500);
 
     return true;
 }

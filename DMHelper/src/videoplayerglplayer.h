@@ -86,6 +86,7 @@ public slots:
     void initializationComplete();
 
 protected:
+    virtual void timerEvent(QTimerEvent *event) override;
 
     virtual bool initializeVLC() override;
     virtual bool startPlayer() override;
