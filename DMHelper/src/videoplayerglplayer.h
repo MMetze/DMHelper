@@ -92,6 +92,8 @@ protected:
     virtual bool startPlayer() override;
     virtual bool stopPlayer() override;
 
+    void cleanupPlayer();
+
     //virtual void cleanupBuffers();
     void createGLObjects();
     void cleanupGLObjects();
