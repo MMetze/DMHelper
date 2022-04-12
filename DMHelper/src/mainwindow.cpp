@@ -258,7 +258,7 @@ MainWindow::MainWindow(QWidget *parent) :
     EquipmentServer::Initialize(_options->getEquipmentFileName());
     EquipmentServer* equipmentServer = EquipmentServer::Instance();
     connect(_options, &OptionsContainer::equipmentFileNameChanged, equipmentServer, &EquipmentServer::readEquipment);
-    qDebug() << "[MainWindow] BasicDateServer Initialized";
+    qDebug() << "[MainWindow] EquipmentServer Initialized";
 
     // File Menu
     connect(_ribbonTabFile, SIGNAL(newClicked()), this, SLOT(newCampaign()));
@@ -323,7 +323,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // Battle View Menu
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabBattleView, SLOT(setPointerFile(const QString&)));
     _ribbonTabBattleView->setPointerFile(_options->getPointerFile());
-    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
     // Mini Map Menu
     // connections set up elsewhere
@@ -564,6 +563,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
 
     connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
+
+    // Connect the battle view ribbon to the battle frame and map frame
+    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;

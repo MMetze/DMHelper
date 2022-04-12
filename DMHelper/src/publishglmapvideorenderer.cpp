@@ -66,6 +66,8 @@ void PublishGLMapVideoRenderer::initializeBackground()
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapVideoRenderer::updateWidget);
+    connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLMapVideoRenderer::updateProjectionMatrix);
+    _videoPlayer->restartPlayer();
 #endif
 }
 
@@ -92,6 +94,7 @@ void PublishGLMapVideoRenderer::resizeBackground(int w, int h)
 
     _videoPlayer->targetResized(_targetSize);
     _videoPlayer->initializationComplete();
+    updateProjectionMatrix();
 #endif
 }
 

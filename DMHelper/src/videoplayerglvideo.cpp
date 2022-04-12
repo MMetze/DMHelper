@@ -20,7 +20,8 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _idxSwapRender(1),
     _idxSwapDisplay(2),
     _idxDisplay(3),
-    _updated(false)
+    _updated(false),
+    _initialized(false)
 {
     qDebug() << "[VideoPlayerGLVideo] Creating VideoPlayerGLVideo";
 
@@ -36,6 +37,8 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _surface = new QOffscreenSurface(nullptr, player);
 
     // Player doesn't have an established OpenGL context right now, we'll get it later
+    connect(player, &VideoPlayerGL::contextReady, this, &VideoPlayerGLVideo::configureContext);
+    /*
     QObject::connect(player, &VideoPlayerGL::contextReady, [this](QOpenGLContext *renderContext)
     {
         if((!_player) || (!_surface) || (!_context))
@@ -52,6 +55,7 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
 
         _videoReady.release();
     });
+    */
 }
 
 VideoPlayerGLVideo::~VideoPlayerGLVideo()
@@ -143,7 +147,12 @@ bool VideoPlayerGLVideo::setup(void** data,
     if(!QOpenGLContext::supportsThreadedOpenGL())
         return false;
 
+    if(!data)
+        return false;
+
     VideoPlayerGLVideo* that = static_cast<VideoPlayerGLVideo*>(*data);
+    if(!that)
+        return false;
 
     // Wait for rendering view to be ready
     that->_videoReady.acquire();
@@ -232,4 +241,25 @@ void* VideoPlayerGLVideo::getProcAddress(void* data, const char* current)
      * variable, and wrap every call to OpenGL in a function using this
      * thread local state to call the correct variant. */
     return reinterpret_cast<void*>(that->_context->getProcAddress(current));
+}
+
+void VideoPlayerGLVideo::configureContext(QOpenGLContext *renderContext)
+{
+    if(_initialized)
+        return;
+
+    if((!_player) || (!_surface) || (!_context))
+        return;
+
+    // Video view is now ready, we can start
+    _surface->setFormat(_player->getFormat());
+    _surface->create();
+
+    _context->setFormat(_player->getFormat());
+    if(renderContext)
+        _context->setShareContext(renderContext);
+    _context->create();
+
+    _initialized = true;
+    _videoReady.release();
 }
