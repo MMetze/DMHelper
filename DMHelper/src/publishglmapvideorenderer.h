@@ -34,6 +34,9 @@ protected:
 
     VideoPlayerGLPlayer* _videoPlayer;
 
+    PublishGLBattleBackground* _tempObject;
+    QImage _tempImage;
+
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     PublishGLBattleBackground* _backgroundObject;
     QImage _backgroundImage;

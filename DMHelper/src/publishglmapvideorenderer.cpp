@@ -5,6 +5,8 @@
 #include <QOpenGLWidget>
 #include <QDebug>
 
+#include "publishglbattlebackground.h"
+
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
 #include "videoplayerglscreenshot.h"
 #include "publishglbattlebackground.h"
@@ -13,6 +15,10 @@
 PublishGLMapVideoRenderer::PublishGLMapVideoRenderer(Map* map, QObject *parent) :
     PublishGLMapRenderer(map, parent),
     _videoPlayer(nullptr)
+
+  , _tempObject(nullptr),
+    _tempImage()
+
 
     #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     , _backgroundObject(nullptr),
@@ -27,6 +33,9 @@ void PublishGLMapVideoRenderer::cleanup()
     delete _backgroundObject;
     _backgroundObject = nullptr;
 #endif
+
+    delete _tempObject;
+    _tempObject = nullptr;
 
     delete _videoPlayer;
     _videoPlayer = nullptr;
@@ -68,6 +77,10 @@ void PublishGLMapVideoRenderer::initializeBackground()
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapVideoRenderer::updateWidget);
     connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLMapVideoRenderer::updateProjectionMatrix);
     _videoPlayer->restartPlayer();
+
+    _tempImage.load("mountainruins.png");
+    _tempObject = new PublishGLBattleBackground(nullptr, _tempImage, GL_NEAREST);
+
 #endif
 }
 
@@ -113,6 +126,7 @@ void PublishGLMapVideoRenderer::paintBackground(QOpenGLFunctions* functions)
     QMatrix4x4 modelMatrix;
     functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     _videoPlayer->paintGL();
+    //_tempObject->paintGL();
 #endif
 }
 

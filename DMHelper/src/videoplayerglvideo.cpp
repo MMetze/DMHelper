@@ -80,7 +80,7 @@ QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
 
     QMutexLocker locker(&_textLock);
 
-    if(_updated)
+    if(isNewFrameAvailable())
     {
         std::swap(_idxSwapDisplay, _idxDisplay);
         _updated = false;

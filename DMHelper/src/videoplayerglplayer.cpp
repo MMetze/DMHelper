@@ -89,19 +89,29 @@ void VideoPlayerGLPlayer::paintGL()
     if((!f) || (!e))
         return;
 
-    QOpenGLFramebufferObject *fbo = _video->getVideoFrame();
-    if(!fbo)
+    if(_video->isNewFrameAvailable())
+    {
+        QOpenGLFramebufferObject *fbo = _video->getVideoFrame();
+        if(fbo)
+        {
+            if(_fboTexture > 0)
+            {
+                f->glDeleteTextures(1, &_fboTexture);
+                _fboTexture = -1;
+            }
+            _fboTexture = fbo->takeTexture();
+        }
+    }
+
+    if(_fboTexture <= 0)
         return;
 
     e->glBindVertexArray(_VAO);
-    GLuint fboTexture = fbo->takeTexture();
+    //GLuint fboTexture = fbo->takeTexture();
     // qDebug() << "[VideoPlayerGLPlayer] Painting new texture: " << fboTexture;
-    if(fboTexture > 0)
-    {
-        f->glBindTexture(GL_TEXTURE_2D, fboTexture);
-        f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        f->glDeleteTextures(1, &fboTexture);
-    }
+
+    f->glBindTexture(GL_TEXTURE_2D, _fboTexture);
+    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 bool VideoPlayerGLPlayer::isPlayingVideo() const
