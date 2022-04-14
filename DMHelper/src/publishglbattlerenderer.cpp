@@ -473,7 +473,11 @@ void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool draw
         _activeToken->paintGL();
     }
 
-    if((_movementPC == drawPCs) && (_movementVisible) && (_movementToken) && (_model->getShowMovement()))
+    if((_movementPC == drawPCs) && (_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
+       ((_movementPC) || ((_movementCombatant->getKnown()) &&
+                          (_movementCombatant->getShown()) &&
+                          ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
+                          ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
     {
         functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
         _movementToken->paintGL();

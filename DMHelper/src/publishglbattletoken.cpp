@@ -27,6 +27,7 @@ PublishGLBattleToken::PublishGLBattleToken(PublishGLBattleScene* scene, BattleDi
     connect(_combatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleToken::combatantMoved);
     connect(_combatant, &BattleDialogModelCombatant::combatantSelected, this, &PublishGLBattleToken::combatantSelected);
     connect(_combatant, &BattleDialogModelCombatant::conditionsChanged, this, &PublishGLBattleToken::recreateToken);
+    connect(_combatant, &BattleDialogModelCombatant::visibilityChanged, this, &PublishGLBattleToken::changed);
 }
 
 PublishGLBattleToken::~PublishGLBattleToken()
