@@ -463,7 +463,11 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
 
 void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool drawPCs)
 {
-    if((_activePC == drawPCs) && (_activeCombatant) && (_activeToken))
+    if((_activePC == drawPCs) && (_activeCombatant) && (_activeToken) &&
+       ((_activePC) || ((_activeCombatant->getKnown()) &&
+                        (_activeCombatant->getShown()) &&
+                        ((_model->getShowDead()) || (_activeCombatant->getHitPoints() > 0)) &&
+                        ((_model->getShowAlive()) || (_activeCombatant->getHitPoints() <= 0)))))
     {
         functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _activeToken->getMatrixData());
         _activeToken->paintGL();
