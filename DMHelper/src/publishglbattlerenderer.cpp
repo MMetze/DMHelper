@@ -240,24 +240,30 @@ void PublishGLBattleRenderer::paintGL()
         _gridObject->paintGL();
     }
 
-    f->glUseProgram(_shaderProgramRGBA);
-    f->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, _projectionMatrix.constData());
-    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-    for(PublishGLBattleEffect* effectToken : _effectTokens)
+    if(_model->getShowEffects())
     {
-        if((effectToken) && (effectToken->getEffect()) && (effectToken->getEffect()->getEffectVisible()))
+        f->glUseProgram(_shaderProgramRGBA);
+        f->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, _projectionMatrix.constData());
+        f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+        for(PublishGLBattleEffect* effectToken : _effectTokens)
         {
-            f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
-            f->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
-            effectToken->paintGL();
+            if((effectToken) && (effectToken->getEffect()) && (effectToken->getEffect()->getEffectVisible()))
+            {
+                f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
+                f->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
+                effectToken->paintGL();
+            }
         }
+        f->glUseProgram(_shaderProgramRGB);
     }
-    f->glUseProgram(_shaderProgramRGB);
 
     QList<PublishGLBattleToken*> tokens = _combatantTokens.values();
     for(PublishGLBattleToken* enemyToken : tokens)
     {
-        if((enemyToken) && (!enemyToken->isPC()) && (enemyToken->getCombatant()) && (enemyToken->getCombatant()->getKnown()) && (enemyToken->getCombatant()->getShown()))
+        if((enemyToken) && (!enemyToken->isPC()) &&
+           (enemyToken->getCombatant()) && (enemyToken->getCombatant()->getKnown()) && (enemyToken->getCombatant()->getShown()) &&
+           ((_model->getShowDead()) || (enemyToken->getCombatant()->getHitPoints() > 0)) &&
+           ((_model->getShowAlive()) || (enemyToken->getCombatant()->getHitPoints() <= 0)))
         {
             f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, enemyToken->getMatrixData());
             enemyToken->paintGL();
@@ -275,7 +281,7 @@ void PublishGLBattleRenderer::paintGL()
 
     for(PublishGLBattleToken* pcToken : tokens)
     {
-        if(pcToken->isPC())
+        if((pcToken) && (pcToken->isPC()))
         {
             f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, pcToken->getMatrixData());
             pcToken->paintGL();
