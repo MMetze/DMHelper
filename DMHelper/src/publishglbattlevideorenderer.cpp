@@ -18,6 +18,11 @@ PublishGLBattleVideoRenderer::PublishGLBattleVideoRenderer(BattleDialogModel* mo
 {
 }
 
+PublishGLBattleVideoRenderer::~PublishGLBattleVideoRenderer()
+{
+    PublishGLBattleVideoRenderer::cleanup();
+}
+
 void PublishGLBattleVideoRenderer::cleanup()
 {
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY

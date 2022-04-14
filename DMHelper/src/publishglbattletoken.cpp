@@ -185,6 +185,7 @@ void PublishGLBattleToken::setPC(bool isPC)
 void PublishGLBattleToken::recreateToken()
 {
     _recreateToken = true;
+    emit changed();
 }
 
 void PublishGLBattleToken::createTokenObjects()

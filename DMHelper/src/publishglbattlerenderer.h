@@ -68,13 +68,13 @@ protected:
     virtual void updateGrid();
     virtual void updateFoW();
     virtual void createContents();
-    virtual void cleanupContents();
+    void cleanupContents();
 
     virtual void updateInitiative();
     virtual void paintInitiative(QOpenGLFunctions* functions);
 
     virtual void createShaders();
-    virtual void destroyShaders();
+    void destroyShaders();
 
 protected slots:
     void recreateContents();
