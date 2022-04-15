@@ -584,6 +584,7 @@ void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
 void BattleDialogModel::sortCombatants()
 {
     std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
+    emit initiativeOrderChanged();
     emit dirty();
 }
 
