@@ -224,8 +224,9 @@ void PublishGLBattleRenderer::paintGL()
 
     if(!_scissorRect.isEmpty())
     {
+        int pixelRatio = _targetWidget->devicePixelRatio();
         f->glEnable(GL_SCISSOR_TEST);
-        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+        f->glScissor(_scissorRect.x()*pixelRatio, _scissorRect.y()*pixelRatio, _scissorRect.width()*pixelRatio, _scissorRect.height()*pixelRatio);
     }
 
     // Draw the scene:
