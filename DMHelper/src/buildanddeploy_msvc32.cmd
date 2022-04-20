@@ -34,7 +34,7 @@ rem goto skip_build
 rmdir /s /q .\build-32_bit-release
 mkdir build-32_bit-release
 cd build-32_bit-release
-call vcvarsall.bat x86_amd64
+call vcvarsall.bat x86
 @echo on
 qmake.exe ..\src\DMHelper.pro -spec win32-msvc "CONFIG+=qtquickcompiler" 
 jom.exe /d /f Makefile qmake_all

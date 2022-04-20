@@ -101,6 +101,7 @@
 #include <QScreen>
 #include <QShortcut>
 #include <QFontDatabase>
+#include <QSurfaceFormat>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
@@ -184,6 +185,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     ExamplesPath: " << QLibraryInfo::location(QLibraryInfo::ExamplesPath);
     qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
     qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
+
+    QSurfaceFormat fmt;
+    qDebug() << "[MainWindow] OpenGL Information";
+    qDebug() << "[MainWindow]     Version: " << fmt.majorVersion() << "." << fmt.minorVersion();
+    qDebug() << "[MainWindow]     Device pixel ratio: " << this->devicePixelRatio();
 
     qDebug() << "[MainWindow] Standard Path Information";
     qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());

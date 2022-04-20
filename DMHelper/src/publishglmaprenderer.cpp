@@ -44,7 +44,6 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
 
 PublishGLMapRenderer::~PublishGLMapRenderer()
 {
-    cleanup();
 }
 
 CampaignObjectBase* PublishGLMapRenderer::getObject()
@@ -119,7 +118,7 @@ void PublishGLMapRenderer::initializeGL()
 
     qDebug() << "[PublishGLMapRenderer] Initializing renderer";
 
-    const char *vertexShaderSource = "#version 330 core\n"
+    const char *vertexShaderSource = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
         "layout (location = 2) in vec2 aTexCoord;\n"
@@ -151,7 +150,7 @@ void PublishGLMapRenderer::initializeGL()
         return;
     }
 
-    const char *fragmentShaderSource = "#version 330 core\n"
+    const char *fragmentShaderSource = "#version 410 core\n"
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"
@@ -271,11 +270,11 @@ void PublishGLMapRenderer::paintGL()
     if((!f) || (!e))
         return;
 
-//    if(!_scissorRect.isEmpty())
-//    {
-//        f->glEnable(GL_SCISSOR_TEST);
-//        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
-//    }
+    if(!_scissorRect.isEmpty())
+    {
+        f->glEnable(GL_SCISSOR_TEST);
+        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+    }
 
     // Draw the scene
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
@@ -317,8 +316,8 @@ void PublishGLMapRenderer::paintGL()
         }
     }
 
-//    if(!_scissorRect.isEmpty())
-//        f->glDisable(GL_SCISSOR_TEST);
+    if(!_scissorRect.isEmpty())
+        f->glDisable(GL_SCISSOR_TEST);
 
     paintPointer(f, sceneSize, _shaderModelMatrix);
 }
@@ -374,16 +373,18 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
-    qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
-    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+    //qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
+    //qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+    /*
     int l = cameraMiddle.x() - backgroundMiddle.width() - halfRect.width();
     int r = cameraMiddle.x() - backgroundMiddle.width() + halfRect.width();
     int t = backgroundMiddle.height() - cameraMiddle.y() - halfRect.height();
     int b = backgroundMiddle.height() - cameraMiddle.y() + halfRect.height();
     qDebug() << "[PublishGLMapImageRenderer] l: " << l << ", r: " << r << ", t: " << t << ", b: " << b;
+    */
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);

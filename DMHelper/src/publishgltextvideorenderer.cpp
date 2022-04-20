@@ -21,6 +21,11 @@ PublishGLTextVideoRenderer::PublishGLTextVideoRenderer(EncounterText* encounter,
 {
 }
 
+PublishGLTextVideoRenderer::~PublishGLTextVideoRenderer()
+{
+    PublishGLTextVideoRenderer::cleanup();
+}
+
 void PublishGLTextVideoRenderer::cleanup()
 {
 #ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY

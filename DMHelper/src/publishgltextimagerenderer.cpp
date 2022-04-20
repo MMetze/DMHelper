@@ -9,6 +9,11 @@ PublishGLTextImageRenderer::PublishGLTextImageRenderer(EncounterText* encounter,
 {
 }
 
+PublishGLTextImageRenderer::~PublishGLTextImageRenderer()
+{
+    PublishGLTextImageRenderer::cleanup();
+}
+
 void PublishGLTextImageRenderer::cleanup()
 {
     delete _backgroundObject;

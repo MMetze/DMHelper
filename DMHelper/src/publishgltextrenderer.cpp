@@ -30,7 +30,6 @@ PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage te
 
 PublishGLTextRenderer::~PublishGLTextRenderer()
 {
-    cleanup();
 }
 
 CampaignObjectBase* PublishGLTextRenderer::getObject()
@@ -78,7 +77,7 @@ void PublishGLTextRenderer::initializeGL()
     if(!f)
         return;
 
-    const char *vertexShaderSource = "#version 330 core\n"
+    const char *vertexShaderSource = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
         "layout (location = 2) in vec2 aTexCoord;\n"
@@ -110,7 +109,7 @@ void PublishGLTextRenderer::initializeGL()
         return;
     }
 
-    const char *fragmentShaderSource = "#version 330 core\n"
+    const char *fragmentShaderSource = "#version 410 core\n"
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"

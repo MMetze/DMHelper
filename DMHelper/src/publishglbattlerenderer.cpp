@@ -289,7 +289,8 @@ void PublishGLBattleRenderer::paintGL()
 
     for(PublishGLBattleToken* pcToken : tokens)
     {
-        if((pcToken) && (pcToken->isPC()))
+        if((pcToken) && (pcToken->isPC()) &&
+           (pcToken->getCombatant()) && (pcToken->getCombatant()->getKnown()) && (pcToken->getCombatant()->getShown()))
         {
             f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, pcToken->getMatrixData());
             pcToken->paintGL();
@@ -739,7 +740,7 @@ void PublishGLBattleRenderer::createShaders()
     if(!f)
         return;
 
-    const char *vertexShaderSourceRGB = "#version 330 core\n"
+    const char *vertexShaderSourceRGB = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
         "layout (location = 2) in vec2 aTexCoord;\n"
@@ -769,7 +770,7 @@ void PublishGLBattleRenderer::createShaders()
         return;
     }
 
-    const char *fragmentShaderSourceRGB = "#version 330 core\n"
+    const char *fragmentShaderSourceRGB = "#version 410 core\n"
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"
@@ -811,7 +812,7 @@ void PublishGLBattleRenderer::createShaders()
     _shaderModelMatrixRGB = f->glGetUniformLocation(_shaderProgramRGB, "model");
     _shaderProjectionMatrixRGB = f->glGetUniformLocation(_shaderProgramRGB, "projection");
 
-    const char *vertexShaderSourceRGBA = "#version 330 core\n"
+    const char *vertexShaderSourceRGBA = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
         "layout (location = 2) in vec2 aTexCoord;\n"
@@ -842,7 +843,7 @@ void PublishGLBattleRenderer::createShaders()
         return;
     }
 
-    const char *fragmentShaderSourceRGBA = "#version 330 core\n"
+    const char *fragmentShaderSourceRGBA = "#version 410 core\n"
         "out vec4 FragColor;\n"
         "in vec4 ourColor;\n"
         "in vec2 TexCoord;\n"

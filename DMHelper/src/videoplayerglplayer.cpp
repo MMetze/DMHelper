@@ -89,7 +89,8 @@ void VideoPlayerGLPlayer::paintGL()
     if((!f) || (!e))
         return;
 
-    if(_video->isNewFrameAvailable())
+    bool newFrame = _video->isNewFrameAvailable();
+    if(newFrame)
     {
         QOpenGLFramebufferObject *fbo = _video->getVideoFrame();
         if(fbo)
@@ -108,7 +109,10 @@ void VideoPlayerGLPlayer::paintGL()
 
     e->glBindVertexArray(_VAO);
     //GLuint fboTexture = fbo->takeTexture();
-    // qDebug() << "[VideoPlayerGLPlayer] Painting new texture: " << fboTexture;
+
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayerGLPlayer] Painting texture: " << _fboTexture << ", new frame: " << newFrame << " from video " << _video << " with size " << _video->getVideoSize();
+#endif
 
     f->glBindTexture(GL_TEXTURE_2D, _fboTexture);
     f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -398,7 +402,9 @@ bool VideoPlayerGLPlayer::startPlayer()
                                                             nullptr,
                                                             _video);
 
+#ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Player callback result: " << callbackResult;
+#endif
 
     // And start playback
     libvlc_media_player_play(_vlcPlayer);
@@ -422,6 +428,8 @@ bool VideoPlayerGLPlayer::stopPlayer()
 
 void VideoPlayerGLPlayer::cleanupPlayer()
 {
+    qDebug() << "[VideoPlayerGLPlayer] Player being cleaned up";
+
     if(_vlcPlayer)
     {
         libvlc_media_player_release(_vlcPlayer);
@@ -471,6 +479,10 @@ void VideoPlayerGLPlayer::createVBObjects()
         1, 2, 3    // second triangle
     };
 
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayerGLPlayer] Creating video vertex buffers with size: " << _videoSize;
+#endif
+
     e->glGenVertexArrays(1, &_VAO);
     f->glGenBuffers(1, &_VBO);
     f->glGenBuffers(1, &_EBO);
@@ -504,6 +516,10 @@ void VideoPlayerGLPlayer::cleanupVBObjects()
     QOpenGLExtraFunctions *e = _context->extraFunctions();
     if((!f) || (!e))
         return;
+
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayerGLPlayer] Cleaning up video vertex buffers";
+#endif
 
     _videoSize = QSize();
 

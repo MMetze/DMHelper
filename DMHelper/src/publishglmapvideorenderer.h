@@ -12,6 +12,7 @@ class PublishGLMapVideoRenderer : public PublishGLMapRenderer
     Q_OBJECT
 public:
     PublishGLMapVideoRenderer(Map* map, QObject *parent = nullptr);
+    virtual ~PublishGLMapVideoRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
@@ -33,9 +34,6 @@ protected:
     virtual void updateBackground() override;
 
     VideoPlayerGLPlayer* _videoPlayer;
-
-    PublishGLBattleBackground* _tempObject;
-    QImage _tempImage;
 
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     PublishGLBattleBackground* _backgroundObject;

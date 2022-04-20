@@ -12,6 +12,7 @@ class PublishGLTextVideoRenderer : public PublishGLTextRenderer
     Q_OBJECT
 public:
     PublishGLTextVideoRenderer(EncounterText* encounter, QImage textImage, QObject *parent = nullptr);
+    virtual ~PublishGLTextVideoRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
