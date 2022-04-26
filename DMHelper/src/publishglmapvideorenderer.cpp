@@ -70,7 +70,6 @@ void PublishGLMapVideoRenderer::initializeBackground()
     _videoPlayer = new VideoPlayerGLPlayer(_map->getFileName(),
                                            _targetWidget->context(),
                                            _targetWidget->format(),
-                                           _targetSize,
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapVideoRenderer::updateWidget);
@@ -101,7 +100,6 @@ void PublishGLMapVideoRenderer::resizeBackground(int w, int h)
     if(!_videoPlayer)
         return;
 
-    _videoPlayer->targetResized(_targetSize);
     _videoPlayer->initializationComplete();
     updateProjectionMatrix();
 #endif

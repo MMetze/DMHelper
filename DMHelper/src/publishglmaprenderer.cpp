@@ -157,8 +157,11 @@ void PublishGLMapRenderer::initializeGL()
         "uniform sampler2D texture1;\n"
         "void main()\n"
         "{\n"
-        "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+        "    FragColor = texture(texture1, TexCoord);\n"
         "}\0";
+
+//    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+//    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 
     unsigned int fragmentShader;
     fragmentShader = f->glCreateShader(GL_FRAGMENT_SHADER);
@@ -373,27 +376,29 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
-    //qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
-    //qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+    qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
+    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
-    /*
+
+
     int l = cameraMiddle.x() - backgroundMiddle.width() - halfRect.width();
     int r = cameraMiddle.x() - backgroundMiddle.width() + halfRect.width();
     int t = backgroundMiddle.height() - cameraMiddle.y() - halfRect.height();
     int b = backgroundMiddle.height() - cameraMiddle.y() + halfRect.height();
     qDebug() << "[PublishGLMapImageRenderer] l: " << l << ", r: " << r << ", t: " << t << ", b: " << b;
-    */
+
+
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);
-//    _projectionMatrix.ortho(-401, 401, -301, 301, 0.1f, 1000.f);
+    //_projectionMatrix.ortho(-401, 401, -301, 301, 0.1f, 1000.f);
 
     setPointerScale(rectSize.width() / transformedTarget.width());
 
     QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
-    //qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
+    qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());

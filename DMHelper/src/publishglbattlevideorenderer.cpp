@@ -74,7 +74,6 @@ void PublishGLBattleVideoRenderer::initializeBackground()
     _videoPlayer = new VideoPlayerGLPlayer(_model->getMap()->getFileName(),
                                            _targetWidget->context(),
                                            _targetWidget->format(),
-                                           _scene.getTargetSize(),
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget);
@@ -103,7 +102,6 @@ void PublishGLBattleVideoRenderer::resizeBackground(int w, int h)
     if(!_videoPlayer)
         return;
 
-    _videoPlayer->targetResized(_scene.getTargetSize());
     _videoPlayer->initializationComplete();
 #endif
 }

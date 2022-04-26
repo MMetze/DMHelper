@@ -13,6 +13,11 @@ class QOpenGLFramebufferObject;
 class QOffscreenSurface;
 
 #define VIDEO_DOUBLE_BUFFER
+#ifdef VIDEO_DOUBLE_BUFFER
+    const int VIDEO_BUFFER_COUNT = 5;
+#else
+    const int VIDEO_BUFFER_COUNT = 3;
+#endif
 
 class VideoPlayerGLVideo : public QObject
 {
@@ -47,14 +52,11 @@ protected:
     unsigned _width;
     unsigned _height;
     QMutex _textLock;
-#ifdef VIDEO_DOUBLE_BUFFER
-    QOpenGLFramebufferObject *_buffers[4];
-#else
-    QOpenGLFramebufferObject *_buffers[3];
-#endif
+    QOpenGLFramebufferObject *_buffers[VIDEO_BUFFER_COUNT];
     size_t _idxRender;
     size_t _idxSwapRender;
 #ifdef VIDEO_DOUBLE_BUFFER
+    size_t _idxSwapMid;
     size_t _idxSwapDisplay;
 #endif
     size_t _idxDisplay;

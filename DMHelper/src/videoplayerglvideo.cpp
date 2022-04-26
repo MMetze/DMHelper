@@ -19,8 +19,9 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _idxRender(0),
     _idxSwapRender(1),
 #ifdef VIDEO_DOUBLE_BUFFER
-    _idxSwapDisplay(2),
-    _idxDisplay(3),
+    _idxSwapMid(2),
+    _idxSwapDisplay(3),
+    _idxDisplay(4),
 #else
     _idxDisplay(2),
 #endif
@@ -35,6 +36,7 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _buffers[2] = nullptr;
 #ifdef VIDEO_DOUBLE_BUFFER
     _buffers[3] = nullptr;
+    _buffers[4] = nullptr;
 #endif
 
     // Use default format for context
@@ -45,24 +47,6 @@ VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
 
     // Player doesn't have an established OpenGL context right now, we'll get it later
     connect(player, &VideoPlayerGL::contextReady, this, &VideoPlayerGLVideo::configureContext);
-    /*
-    QObject::connect(player, &VideoPlayerGL::contextReady, [this](QOpenGLContext *renderContext)
-    {
-        if((!_player) || (!_surface) || (!_context))
-            return;
-
-        // Video view is now ready, we can start
-        _surface->setFormat(_player->getFormat());
-        _surface->create();
-
-        _context->setFormat(_player->getFormat());
-        if(renderContext)
-            _context->setShareContext(renderContext);
-        _context->create();
-
-        _videoReady.release();
-    });
-    */
 }
 
 VideoPlayerGLVideo::~VideoPlayerGLVideo()
@@ -75,7 +59,7 @@ VideoPlayerGLVideo::~VideoPlayerGLVideo()
 // Is there a new texture to be displayed
 bool VideoPlayerGLVideo::isNewFrameAvailable()
 {
-    return ((_updated) && (_frameCount > 2));
+    return ((_updated) && (_frameCount > 4));
 }
 
 // Return the texture to be displayed
@@ -85,7 +69,7 @@ QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
     qDebug() << "[VideoPlayerGLVideo] Video frame requested";
 #endif
 
-    if(_frameCount <= 2)
+    if(_frameCount <= 4)
         return nullptr;
 
     QMutexLocker locker(&_textLock);
@@ -94,8 +78,10 @@ QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
     {
 #ifdef VIDEO_DOUBLE_BUFFER
         std::swap(_idxSwapDisplay, _idxDisplay);
+        std::swap(_idxSwapMid, _idxSwapDisplay);
+        std::swap(_idxSwapRender, _idxSwapMid);
         #ifdef VIDEO_DEBUG_MESSAGES
-            qDebug() << "[VideoPlayerGLPlayer] New frame is available, swapping SwapDisplay (" << _idxSwapDisplay << ") and Display (" << _idxDisplay << ") to return buffer " << _buffers[_idxDisplay];
+            qDebug() << "[VideoPlayerGLPlayer] New frame is available, stack: " << _idxDisplay << " - (" << _idxSwapDisplay << "-" << _idxSwapMid << "-" << _idxSwapRender << ") - " << _idxRender;
         #endif
 #else
         std::swap(_idxSwapRender, _idxDisplay);
@@ -135,6 +121,7 @@ bool VideoPlayerGLVideo::resizeRenderTextures(void* data,
         that->_buffers[2] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
 #ifdef VIDEO_DOUBLE_BUFFER
         that->_buffers[3] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
+        that->_buffers[4] = new QOpenGLFramebufferObject(cfg->width, cfg->height);
 #endif
 
         that->_width = cfg->width;
@@ -213,6 +200,7 @@ void VideoPlayerGLVideo::cleanup(void* data)
     delete that->_buffers[2]; that->_buffers[2] = nullptr;
 #ifdef VIDEO_DOUBLE_BUFFER
     delete that->_buffers[3]; that->_buffers[3] = nullptr;
+    delete that->_buffers[4]; that->_buffers[4] = nullptr;
 #endif
 }
 
@@ -228,12 +216,7 @@ void VideoPlayerGLVideo::swap(void* data)
         return;
 
     QMutexLocker locker(&that->_textLock);
-#ifdef VIDEO_DOUBLE_BUFFER
-    std::swap(that->_idxSwapDisplay, that->_idxSwapRender);
     std::swap(that->_idxSwapRender, that->_idxRender);
-#else
-    std::swap(that->_idxSwapRender, that->_idxRender);
-#endif
     that->_buffers[that->_idxRender]->bind();
     that->_updated = true;
     locker.unlock();

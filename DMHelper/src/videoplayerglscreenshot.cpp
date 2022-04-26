@@ -5,7 +5,7 @@
 #include <QTimerEvent>
 #include <QDebug>
 
-const int SCREENSHOT_USE_FRAME = 3;
+const int SCREENSHOT_USE_FRAME = VIDEO_BUFFER_COUNT + 1;
 
 VideoPlayerGLScreenshot::VideoPlayerGLScreenshot(const QString& videoFile, QObject *parent) :
     VideoPlayerGL(parent),
@@ -40,9 +40,10 @@ void VideoPlayerGLScreenshot::registerNewFrame()
     ++_framesReceived;
     qDebug() << "[VideoPlayerGLScreenshot] Screenshot frame received, #" << _framesReceived << " from " << SCREENSHOT_USE_FRAME;
 
+    QImage frameImage = extractImage();
     if(_framesReceived >= SCREENSHOT_USE_FRAME)
     {
-        emit screenshotReady(extractImage());
+        emit screenshotReady(frameImage);
         stopPlayer();
     }
 }

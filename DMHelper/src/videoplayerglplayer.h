@@ -18,7 +18,7 @@ class VideoPlayerGLPlayer : public VideoPlayerGL
 {
     Q_OBJECT
 public:
-    VideoPlayerGLPlayer(const QString& videoFile, QOpenGLContext* context, QSurfaceFormat format, QSize targetSize, bool playVideo = true, bool playAudio = true, QObject *parent = nullptr);
+    VideoPlayerGLPlayer(const QString& videoFile, QOpenGLContext* context, QSurfaceFormat format, bool playVideo = true, bool playAudio = true, QObject *parent = nullptr);
     virtual ~VideoPlayerGLPlayer();
 
     virtual const QString& getFileName() const;
@@ -48,12 +48,10 @@ signals:
     void videoPaused();
     void videoStopped();
 
-    //void screenShotAvailable();
     void frameAvailable();
     void vbObjectsCreated();
 
 public slots:
-    virtual void targetResized(const QSize& newSize);
     virtual void stopThenDelete();
     virtual bool restartPlayer();
 
@@ -93,7 +91,6 @@ protected:
     bool _vlcError;
     libvlc_media_player_t* _vlcPlayer;
     libvlc_media_t* _vlcMedia;
-    QSize _targetSize;
     int _status;
     bool _selfRestart;
     bool _deleteOnStop;
