@@ -450,7 +450,7 @@ void VideoPlayerGLPlayer::createVBObjects()
 
     //QSize videoSize = getOriginalSize();
     _videoSize = _video->getVideoSize();
-    _videoSize = QSize(1920, 1080);
+    //_videoSize = QSize(1920, 1080);
     //QSize videoSize = image.size();
     if((_videoSize.width() <= 0) || (_videoSize.height() <= 0))
         return;
