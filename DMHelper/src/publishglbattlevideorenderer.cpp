@@ -30,8 +30,14 @@ void PublishGLBattleVideoRenderer::cleanup()
     _backgroundObject = nullptr;
 #endif
 
-    delete _videoPlayer;
-    _videoPlayer = nullptr;
+    if(_videoPlayer)
+    {
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget);
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLBattleVideoRenderer::updateProjectionMatrix);
+        VideoPlayerGLPlayer* deletePlayer = _videoPlayer;
+        _videoPlayer = nullptr;
+        deletePlayer->stopThenDelete();
+    }
 
     PublishGLBattleRenderer::cleanup();
 }
@@ -77,7 +83,8 @@ void PublishGLBattleVideoRenderer::initializeBackground()
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget);
-    initializationComplete();
+    connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLBattleVideoRenderer::updateProjectionMatrix);
+    _videoPlayer->restartPlayer();
 #endif
 }
 
@@ -103,6 +110,7 @@ void PublishGLBattleVideoRenderer::resizeBackground(int w, int h)
         return;
 
     _videoPlayer->initializationComplete();
+    updateProjectionMatrix();
 #endif
 }
 

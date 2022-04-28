@@ -17,6 +17,9 @@ DMH_VLC::DMH_VLC() :
         "--reset-plugins-cache",
         "--plugins-cache",
         "--plugins-scan",
+#ifdef QT_DEBUG
+        "-vvv",
+#endif
         ""
     };
     */
@@ -26,6 +29,9 @@ DMH_VLC::DMH_VLC() :
         "--no-reset-plugins-cache",
         "--plugins-cache",
         "--no-plugins-scan",
+#ifdef QT_DEBUG
+        "-vvv",
+#endif
         ""
     };
 

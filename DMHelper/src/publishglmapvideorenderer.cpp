@@ -34,6 +34,8 @@ void PublishGLMapVideoRenderer::cleanup()
 
     if(_videoPlayer)
     {
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapVideoRenderer::updateWidget);
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLMapVideoRenderer::updateProjectionMatrix);
         VideoPlayerGLPlayer* deletePlayer = _videoPlayer;
         _videoPlayer = nullptr;
         deletePlayer->stopThenDelete();
