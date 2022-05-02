@@ -86,8 +86,8 @@ void VideoPlayerGLPlayer::paintGL()
     if((!f) || (!e))
         return;
 
-    if(_VAO == 0)
-        createVBObjects();
+    //if(_VAO == 0)
+    //    createVBObjects();
 
     bool newFrame = _video->isNewFrameAvailable();
     if(newFrame)
@@ -204,6 +204,112 @@ QImage VideoPlayerGLPlayer::getLastScreenshot()
 
     return fbo->toImage();
 }
+
+bool VideoPlayerGLPlayer::vbObjectsExist()
+{
+    return ((_VAO != 0) && (_VBO != 0) && (_EBO != 0));
+}
+
+void VideoPlayerGLPlayer::createVBObjects()
+{
+    if((!_context) || (!_video))
+        return;
+
+    if(vbObjectsExist())
+    {
+        qDebug() << "[VideoPlayerGLPlayer] ERROR: cannot create VBObjects because they already exist! Call to cleanupVBObjects needed first!";
+        return;
+    }
+
+    // Set up the rendering context, load shaders and other resources, etc.:
+    QOpenGLFunctions *f = _context->functions();
+    QOpenGLExtraFunctions *e = _context->extraFunctions();
+    if((!f) || (!e))
+        return;
+
+    //QSize videoSize = getOriginalSize();
+    _videoSize = _video->getVideoSize();
+    //_videoSize = QSize(1920, 1080);
+    //QSize videoSize = image.size();
+    if((_videoSize.width() <= 0) || (_videoSize.height() <= 0))
+        return;
+
+    float vertices[] = {
+        // positions    // colors           // texture coords
+         (float)_videoSize.width() / 2,  (float)_videoSize.height() / 2, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         (float)_videoSize.width() / 2, -(float)_videoSize.height() / 2, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -(float)_videoSize.width() / 2, -(float)_videoSize.height() / 2, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -(float)_videoSize.width() / 2,  (float)_videoSize.height() / 2, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+    };
+
+    unsigned int indices[] = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayerGLPlayer] Creating video vertex buffers with size: " << _videoSize;
+#endif
+
+    e->glGenVertexArrays(1, &_VAO);
+    f->glGenBuffers(1, &_VBO);
+    f->glGenBuffers(1, &_EBO);
+
+    e->glBindVertexArray(_VAO);
+
+    f->glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    // position attribute
+    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    f->glEnableVertexAttribArray(0);
+    // color attribute
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
+    f->glEnableVertexAttribArray(1);
+    // texture attribute
+    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    f->glEnableVertexAttribArray(2);
+
+    emit vbObjectsCreated();
+}
+
+void VideoPlayerGLPlayer::cleanupVBObjects()
+{
+    if(!_context)
+        return;
+
+    QOpenGLFunctions *f = _context->functions();
+    QOpenGLExtraFunctions *e = _context->extraFunctions();
+    if((!f) || (!e))
+        return;
+
+#ifdef VIDEO_DEBUG_MESSAGES
+    qDebug() << "[VideoPlayerGLPlayer] Cleaning up video vertex buffers";
+#endif
+
+    _videoSize = QSize();
+
+    if(_VAO > 0)
+    {
+        e->glDeleteVertexArrays(1, &_VAO);
+        _VAO = 0;
+    }
+
+    if(_VBO > 0)
+    {
+        f->glDeleteBuffers(1, &_VBO);
+        _VBO = 0;
+    }
+
+    if(_EBO > 0)
+    {
+        f->glDeleteBuffers(1, &_EBO);
+        _EBO = 0;
+    }
+}
+
 
 void VideoPlayerGLPlayer::playerEventCallback( const struct libvlc_event_t *p_event, void *p_data )
 {
@@ -434,100 +540,6 @@ void VideoPlayerGLPlayer::cleanupPlayer()
     {
         delete _video;
         _video = nullptr;
-    }
-}
-
-void VideoPlayerGLPlayer::createVBObjects()
-{
-    if((!_context) || (!_video))
-        return;
-
-    // Set up the rendering context, load shaders and other resources, etc.:
-    QOpenGLFunctions *f = _context->functions();
-    QOpenGLExtraFunctions *e = _context->extraFunctions();
-    if((!f) || (!e))
-        return;
-
-    //QSize videoSize = getOriginalSize();
-    _videoSize = _video->getVideoSize();
-    //_videoSize = QSize(1920, 1080);
-    //QSize videoSize = image.size();
-    if((_videoSize.width() <= 0) || (_videoSize.height() <= 0))
-        return;
-
-    float vertices[] = {
-        // positions    // colors           // texture coords
-         (float)_videoSize.width() / 2,  (float)_videoSize.height() / 2, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-         (float)_videoSize.width() / 2, -(float)_videoSize.height() / 2, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-        -(float)_videoSize.width() / 2, -(float)_videoSize.height() / 2, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -(float)_videoSize.width() / 2,  (float)_videoSize.height() / 2, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
-    };
-
-    unsigned int indices[] = {  // note that we start from 0!
-        0, 1, 3,   // first triangle
-        1, 2, 3    // second triangle
-    };
-
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayerGLPlayer] Creating video vertex buffers with size: " << _videoSize;
-#endif
-
-    e->glGenVertexArrays(1, &_VAO);
-    f->glGenBuffers(1, &_VBO);
-    f->glGenBuffers(1, &_EBO);
-
-    e->glBindVertexArray(_VAO);
-
-    f->glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    f->glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-    f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    // position attribute
-    f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    f->glEnableVertexAttribArray(0);
-    // color attribute
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3*sizeof(float)));
-    f->glEnableVertexAttribArray(1);
-    // texture attribute
-    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    f->glEnableVertexAttribArray(2);
-
-    emit vbObjectsCreated();
-}
-
-void VideoPlayerGLPlayer::cleanupVBObjects()
-{
-    if(!_context)
-        return;
-
-    QOpenGLFunctions *f = _context->functions();
-    QOpenGLExtraFunctions *e = _context->extraFunctions();
-    if((!f) || (!e))
-        return;
-
-#ifdef VIDEO_DEBUG_MESSAGES
-    qDebug() << "[VideoPlayerGLPlayer] Cleaning up video vertex buffers";
-#endif
-
-    _videoSize = QSize();
-
-    if(_VAO > 0)
-    {
-        e->glDeleteVertexArrays(1, &_VAO);
-        _VAO = 0;
-    }
-
-    if(_VBO > 0)
-    {
-        f->glDeleteBuffers(1, &_VBO);
-        _VBO = 0;
-    }
-
-    if(_EBO > 0)
-    {
-        f->glDeleteBuffers(1, &_EBO);
-        _EBO = 0;
     }
 }
 

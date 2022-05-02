@@ -176,31 +176,29 @@ void PublishGLBattleRenderer::initializeGL()
 void PublishGLBattleRenderer::resizeGL(int w, int h)
 {
     QSize targetSize(w, h);
-    if(_scene.getTargetSize() == targetSize)
-        return;
-
     qDebug() << "[BattleGLRenderer] Resize to: " << targetSize;
     _scene.setTargetSize(targetSize);
-    resizeBackground(w, h);
 
+    resizeBackground(w, h);
     updateInitiative();
 
-    updateProjectionMatrix();
     emit updateWidget();
 }
 
 void PublishGLBattleRenderer::paintGL()
 {
-    if((!_model) || (!_targetWidget) || (!_targetWidget->context()))
+    if((!_initialized) || (!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
     if(!isBackgroundReady())
     {
         updateBackground();
-        if(isBackgroundReady())
-            createContents();
-        else
+        if(!isBackgroundReady())
             return;
+
+        updateProjectionMatrix();
+
+        _recreateContent = true;
     }
 
     if(_recreateContent)
@@ -284,7 +282,7 @@ void PublishGLBattleRenderer::paintGL()
     if(_fowObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _fowObject->getMatrixData());
-        _fowObject->paintGL();
+        //_fowObject->paintGL();
     }
 
     for(PublishGLBattleToken* pcToken : tokens)
@@ -425,6 +423,9 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgramRGB == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
+    if(!isBackgroundReady())
+        return;
+
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     if(!f)
         return;
@@ -445,8 +446,8 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
-    //qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
-    //qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+    qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
+    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
@@ -457,7 +458,7 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     setPointerScale(rectSize.width() / transformedTarget.width());
 
     QSizeF scissorSize = transformedCamera.size().scaled(_scene.getTargetSize(), Qt::KeepAspectRatio);
-    //qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
+    qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
     _scissorRect.setX((_scene.getTargetSize().width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_scene.getTargetSize().height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
@@ -777,8 +778,11 @@ void PublishGLBattleRenderer::createShaders()
         "uniform sampler2D texture1;\n"
         "void main()\n"
         "{\n"
-        "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+        "    FragColor = texture(texture1, TexCoord);\n"
         "}\0";
+
+    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 
     unsigned int fragmentShaderRGB;
     fragmentShaderRGB = f->glCreateShader(GL_FRAGMENT_SHADER);
@@ -850,8 +854,12 @@ void PublishGLBattleRenderer::createShaders()
         "uniform sampler2D texture1;\n"
         "void main()\n"
         "{\n"
-        "    FragColor = texture(texture1, TexCoord) * ourColor; // FragColor = vec4(ourColor, 1.0f);\n"
+        "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
         "}\0";
+
+    //   "    FragColor = texture(texture1, TexCoord) * ourColor; // FragColor = vec4(ourColor, 1.0f);\n"
+    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 
     unsigned int fragmentShaderRGBA;
     fragmentShaderRGBA = f->glCreateShader(GL_FRAGMENT_SHADER);

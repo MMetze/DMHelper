@@ -38,6 +38,10 @@ public:
 
     QImage getLastScreenshot();
 
+    bool vbObjectsExist();
+    void createVBObjects();
+    void cleanupVBObjects();
+
     static void playerEventCallback( const struct libvlc_event_t *p_event, void *p_data );
 
 
@@ -67,9 +71,6 @@ protected:
     virtual bool stopPlayer() override;
 
     void cleanupPlayer();
-
-    void createVBObjects();
-    void cleanupVBObjects();
 
     virtual void internalAudioCheck(int newStatus);
 

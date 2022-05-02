@@ -225,9 +225,6 @@ void PublishGLMapRenderer::initializeGL()
 
 void PublishGLMapRenderer::resizeGL(int w, int h)
 {
-//    if(_targetSize == QSize(w, h))
-//        return;
-
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
     resizeBackground(w, h);
@@ -246,13 +243,14 @@ void PublishGLMapRenderer::paintGL()
         if(!isBackgroundReady())
             return;
 
+        updateProjectionMatrix();
+
         _recreatePartyToken = true;
+        _recreateLineToken = true;
         _recreateMarkers = true;
         _updateFow = true;
     }
     QSize sceneSize = getBackgroundSize().toSize();
-
-    updateProjectionMatrix();
 
     if(_recreatePartyToken)
         createPartyToken();
@@ -520,9 +518,12 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
 
+    if((!_map) || (sceneSize.isEmpty()))
+        return;
+
     _recreateMarkers = false;
 
-    if((!_map) || (!_map->getShowMarkers()) || (sceneSize.isEmpty()))
+    if(!_map->getShowMarkers())
         return;
 
     QUndoStack* stack = _map->getUndoStack();

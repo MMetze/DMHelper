@@ -93,7 +93,7 @@ bool PublishGLBattleVideoRenderer::isBackgroundReady()
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
     return _backgroundObject != nullptr;
 #else
-    return _videoPlayer != nullptr;
+    return ((_videoPlayer) && (_videoPlayer->vbObjectsExist()));
 #endif
 }
 
@@ -141,6 +141,16 @@ void PublishGLBattleVideoRenderer::updateBackground()
         updateFoW();
         updateProjectionMatrix();
     }
+#else
+    if(!_videoPlayer)
+        return;
+
+    if(_videoPlayer->vbObjectsExist())
+        _videoPlayer->cleanupVBObjects();
+
+    _videoPlayer->createVBObjects();
+    _scene.deriveSceneRectFromSize(getBackgroundSize());
+
 #endif
 }
 
