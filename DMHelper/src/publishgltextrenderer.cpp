@@ -51,6 +51,8 @@ void PublishGLTextRenderer::cleanup()
     delete _textObject;
     _textObject = nullptr;
 
+    _projectionMatrix.setToIdentity();
+
     if(_shaderProgram > 0)
     {
         if((_targetWidget) && (_targetWidget->context()))
@@ -65,6 +67,17 @@ void PublishGLTextRenderer::cleanup()
     _shaderProjectionMatrix = 0;
 
     PublishGLRenderer::cleanup();
+}
+
+bool PublishGLTextRenderer::deleteOnDeactivation()
+{
+    return true;
+}
+
+void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
+{
+    _color = color;
+    emit updateWidget();
 }
 
 void PublishGLTextRenderer::initializeGL()
@@ -181,10 +194,9 @@ void PublishGLTextRenderer::initializeGL()
 void PublishGLTextRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
-    _scene.setTargetSize(_targetSize);
     qDebug() << "[PublishGLTextRenderer] Resize w: " << w << ", h: " << h;
+    resizeBackground(w, h);
 
-    updateProjectionMatrix();
     emit updateWidget();
 }
 
@@ -192,6 +204,15 @@ void PublishGLTextRenderer::paintGL()
 {
     if((!_targetWidget) || (!_targetWidget->context()))
         return;
+
+    if(!isBackgroundReady())
+    {
+        updateBackground();
+        if(!isBackgroundReady())
+            return;
+
+        updateProjectionMatrix();
+    }
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
@@ -214,12 +235,6 @@ void PublishGLTextRenderer::paintGL()
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _textObject->getMatrixData());
         _textObject->paintGL();
     }
-}
-
-void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
-{
-    _color = color;
-    emit updateWidget();
 }
 
 void PublishGLTextRenderer::setRotation(int rotation)

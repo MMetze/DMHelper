@@ -30,6 +30,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _textImage(),
     _isDMPlayer(false),
     _isPublishing(false),
+    _isVideo(false),
     _targetSize(),
     _rotation(0),
     _textPos()
@@ -584,15 +585,21 @@ void EncounterTextEdit::loadImage()
     _backgroundImage = QImage();
     _backgroundImageScaled = QImage();
 
+    _isVideo = false;
     if(!_encounter->getImageFile().isEmpty())
     {
         QFileInfo fileInfo(_encounter->getImageFile());
         if(fileInfo.isFile())
         {
             if(_backgroundImage.load(_encounter->getImageFile()))
+            {
                 scaleBackgroundImage();
+            }
             else
+            {
                 extractDMScreenshot();
+                _isVideo = true;
+            }
         }
     }
 
@@ -706,14 +713,7 @@ void EncounterTextEdit::extractDMScreenshot()
 
 bool EncounterTextEdit::isVideo() const
 {
-    if(!_encounter)
-        return false;
-
-    QFileInfo fileInfo(_encounter->getImageFile());
-    if(!fileInfo.isFile())
-        return false;
-
-    return((_backgroundImage.isNull()) && (!_encounter->getImageFile().isEmpty()));
+    return _isVideo;
 }
 
 bool EncounterTextEdit::isAnimated() const

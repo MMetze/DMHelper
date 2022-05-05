@@ -33,10 +33,25 @@ void PublishGLTextVideoRenderer::cleanup()
     _backgroundObject = nullptr;
 #endif
 
-    delete _videoPlayer;
-    _videoPlayer = nullptr;
+    if(_videoPlayer)
+    {
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLTextVideoRenderer::updateWidget);
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::updateProjectionMatrix);
+        VideoPlayerGLPlayer* deletePlayer = _videoPlayer;
+        _videoPlayer = nullptr;
+        deletePlayer->stopThenDelete();
+    }
 
     PublishGLTextRenderer::cleanup();
+}
+
+QSizeF PublishGLTextVideoRenderer::getBackgroundSize()
+{
+#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
+    return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
+#else
+    return _videoPlayer ? _videoPlayer->getSize() : QSizeF();
+#endif
 }
 
 #ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
@@ -66,10 +81,11 @@ void PublishGLTextVideoRenderer::initializeBackground()
     _videoPlayer = new VideoPlayerGLPlayer(_encounter->getImageFile(),
                                            _targetWidget->context(),
                                            _targetWidget->format(),
-                                           _targetSize,
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLTextVideoRenderer::updateWidget);
+    connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::updateProjectionMatrix);
+    _videoPlayer->restartPlayer();
 #endif
 }
 
@@ -78,7 +94,7 @@ bool PublishGLTextVideoRenderer::isBackgroundReady()
 #ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
     return _backgroundObject != nullptr;
 #else
-    return _videoPlayer != nullptr;
+    return ((_videoPlayer) && (_videoPlayer->vbObjectsExist()));
 #endif
 }
 
@@ -94,8 +110,8 @@ void PublishGLTextVideoRenderer::resizeBackground(int w, int h)
     if(!_videoPlayer)
         return;
 
-    _videoPlayer->targetResized(_targetSize);
     _videoPlayer->initializationComplete();
+    updateProjectionMatrix();
 #endif
 }
 
@@ -117,15 +133,6 @@ void PublishGLTextVideoRenderer::paintBackground(QOpenGLFunctions* functions)
 #endif
 }
 
-QSizeF PublishGLTextVideoRenderer::getBackgroundSize()
-{
-#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
-    return _backgroundObject ? _backgroundObject->getSize() : QSizeF();
-#else
-    return _videoPlayer ? _videoPlayer->getSize() : QSizeF();
-#endif
-}
-
 void PublishGLTextVideoRenderer::updateBackground()
 {
 #ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
@@ -134,6 +141,16 @@ void PublishGLTextVideoRenderer::updateBackground()
         _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
         updateProjectionMatrix();
     }
+#else
+    if(!_videoPlayer)
+        return;
+
+    if(_videoPlayer->vbObjectsExist())
+        _videoPlayer->cleanupVBObjects();
+
+    _videoPlayer->createVBObjects();
+    _scene.deriveSceneRectFromSize(getBackgroundSize());
+
 #endif
 }
 

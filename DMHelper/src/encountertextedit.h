@@ -133,6 +133,7 @@ protected:
 
     bool _isDMPlayer;
     bool _isPublishing;
+    bool _isVideo;
 
     QSize _targetSize;
     int _rotation;

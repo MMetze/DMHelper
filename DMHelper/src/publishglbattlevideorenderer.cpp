@@ -1,11 +1,14 @@
 #include "publishglbattlevideorenderer.h"
-#include "publishglbattlebackground.h"
 #include "battledialogmodel.h"
 #include "videoplayerglplayer.h"
-#include "videoplayerglscreenshot.h"
 #include "map.h"
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
+
+#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+#include "videoplayerglscreenshot.h"
+#include "publishglbattlebackground.h"
+#endif
 
 PublishGLBattleVideoRenderer::PublishGLBattleVideoRenderer(BattleDialogModel* model, QObject *parent) :
     PublishGLBattleRenderer(model, parent),
