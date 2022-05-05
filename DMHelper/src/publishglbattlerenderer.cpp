@@ -282,7 +282,7 @@ void PublishGLBattleRenderer::paintGL()
     if(_fowObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _fowObject->getMatrixData());
-        //_fowObject->paintGL();
+        _fowObject->paintGL();
     }
 
     for(PublishGLBattleToken* pcToken : tokens)

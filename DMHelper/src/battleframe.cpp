@@ -2737,12 +2737,18 @@ void BattleFrame::removeRollover()
 
 void BattleFrame::handleScreenshotReady(const QImage& image)
 {
-    if((image.isNull()) || (!_background) || (!_mapDrawer))
+    if((image.isNull()) || (!_background) || (!_mapDrawer) || (!_model) || (!_model->getMap()))
         return;
 
     if(_model->getBackgroundImage().isNull())
         _model->setBackgroundImage(image);
     _background->setPixmap((QPixmap::fromImage(image)));
+    if(_model->getMap()->getFoWImage().isNull())
+    {
+        QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
+        fowImage.fill(QColor(0,0,0,0));
+        _model->getMap()->setExternalFoWImage(fowImage);
+    }
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     _mapDrawer->setMap(_model->getMap(), &_fowImage);
 
