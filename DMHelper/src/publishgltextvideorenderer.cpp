@@ -28,20 +28,7 @@ PublishGLTextVideoRenderer::~PublishGLTextVideoRenderer()
 
 void PublishGLTextVideoRenderer::cleanup()
 {
-#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
-#endif
-
-    if(_videoPlayer)
-    {
-        disconnect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLTextVideoRenderer::updateWidget);
-        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::updateProjectionMatrix);
-        VideoPlayerGLPlayer* deletePlayer = _videoPlayer;
-        _videoPlayer = nullptr;
-        deletePlayer->stopThenDelete();
-    }
-
+    cleanupBackground();
     PublishGLTextRenderer::cleanup();
 }
 
@@ -63,9 +50,30 @@ void PublishGLTextVideoRenderer::handleScreenshotReady(const QImage& image)
         return;
 
     _backgroundImage = image;
+    rewind();
     emit updateWidget();
 }
 #endif
+
+void PublishGLTextVideoRenderer::play()
+{
+#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
+#else
+    initializeBackground();
+#endif
+
+    PublishGLTextRenderer::play();
+}
+
+void PublishGLTextVideoRenderer::stop()
+{
+#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
+#else
+    cleanupBackground();
+#endif
+
+    PublishGLTextRenderer::stop();
+}
 
 void PublishGLTextVideoRenderer::initializeBackground()
 {
@@ -77,15 +85,19 @@ void PublishGLTextVideoRenderer::initializeBackground()
     connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &PublishGLTextVideoRenderer::handleScreenshotReady);
     screenshot->retrieveScreenshot();
 #else
-    // Create the objects
-    _videoPlayer = new VideoPlayerGLPlayer(_encounter->getImageFile(),
-                                           _targetWidget->context(),
-                                           _targetWidget->format(),
-                                           true,
-                                           false);
-    connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLTextVideoRenderer::updateWidget);
-    connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::updateProjectionMatrix);
-    _videoPlayer->restartPlayer();
+    if(!_videoPlayer)
+    {
+        // Create the objects
+        _videoPlayer = new VideoPlayerGLPlayer(_encounter->getImageFile(),
+                                               _targetWidget->context(),
+                                               _targetWidget->format(),
+                                               true,
+                                               false);
+        connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLTextVideoRenderer::updateWidget);
+        connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::updateProjectionMatrix);
+        connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::startScrollingTimer);
+        _videoPlayer->restartPlayer();
+    }
 #endif
 }
 
@@ -154,10 +166,28 @@ void PublishGLTextVideoRenderer::updateBackground()
 #endif
 }
 
-QImage PublishGLTextVideoRenderer::getLastScreenshot()
+void PublishGLTextVideoRenderer::cleanupBackground()
 {
 #ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
     return _backgroundImage;
+#else
+    if(_videoPlayer)
+    {
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLTextVideoRenderer::updateWidget);
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::updateProjectionMatrix);
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLTextVideoRenderer::startScrollingTimer);
+        VideoPlayerGLPlayer* deletePlayer = _videoPlayer;
+        _videoPlayer = nullptr;
+        deletePlayer->stopThenDelete();
+    }
+#endif
+}
+
+QImage PublishGLTextVideoRenderer::getLastScreenshot()
+{
+#ifdef TEXTVIDEO_USE_SCREENSHOT_ONLY
+    delete _backgroundObject;
+    _backgroundObject = nullptr;
 #else
     return _videoPlayer ? _videoPlayer->getLastScreenshot() : QImage();
 #endif

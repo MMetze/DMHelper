@@ -410,6 +410,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabText, SIGNAL(speedChanged(int)), _encounterTextEdit, SLOT(setScrollSpeed(int)));
     connect(_ribbonTabText, SIGNAL(widthChanged(int)), _encounterTextEdit, SLOT(setTextWidth(int)));
     connect(_ribbonTabText, SIGNAL(rewindClicked()), _encounterTextEdit, SLOT(rewind()));
+    connect(_ribbonTabText, &RibbonTabText::playPauseClicked, _encounterTextEdit, &EncounterTextEdit::playPause);
+    connect(_encounterTextEdit, &EncounterTextEdit::playPauseChanged, _ribbonTabText, &RibbonTabText::setPlaying);
     connect(_encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
     connect(_encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
     connect(_encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));

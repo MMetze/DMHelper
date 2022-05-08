@@ -404,6 +404,12 @@ void EncounterTextEdit::rewind()
         _renderer->rewind();
 }
 
+void EncounterTextEdit::playPause(bool play)
+{
+    if(_renderer)
+        _renderer->playPause(play);
+}
+
 void EncounterTextEdit::setTranslated(bool translated)
 {
     if((!_encounter) || (_encounter->getTranslated() == translated))
@@ -451,11 +457,12 @@ void EncounterTextEdit::publishClicked(bool checked)
 
     if(_isPublishing)
     {
-        if(_renderer)
-        {
-            _renderer->play();
-        }
-        else
+        if(!_renderer)
+//        if(_renderer)
+//        {
+//            _renderer->play();
+//        }
+//        else
         {
             emit showPublishWindow();
             prepareImages();
@@ -466,13 +473,17 @@ void EncounterTextEdit::publishClicked(bool checked)
                 _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
 
             _renderer->setRotation(_rotation);
+            connect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
             emit registerRenderer(_renderer);
         }
     }
     else
     {
-        if(_renderer)
-            _renderer->stop();
+//        if(_renderer)
+//            _renderer->stop();
+        _renderer = nullptr;
+        disconnect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
+        emit registerRenderer(nullptr);
     }
 }
 

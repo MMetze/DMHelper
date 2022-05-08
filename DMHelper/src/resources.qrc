@@ -243,6 +243,8 @@
         <file>data/icon_visiblecamera.png</file>
         <file>data/dmc_background.png</file>
         <file>data/whatsnew.txt</file>
+        <file>data/icon_pause.png</file>
+        <file>data/icon_stop.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

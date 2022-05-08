@@ -25,6 +25,10 @@ protected slots:
     void handleScreenshotReady(const QImage& image);
 #endif
 
+public slots:
+    virtual void play() override;
+    virtual void stop() override;
+
 protected:
     // Background overrides
     virtual void initializeBackground() override;
@@ -32,6 +36,8 @@ protected:
     virtual void resizeBackground(int w, int h) override;
     virtual void paintBackground(QOpenGLFunctions* functions) override;
     virtual void updateBackground() override;
+
+    void cleanupBackground();
 
     VideoPlayerGLPlayer* _videoPlayer;
 
