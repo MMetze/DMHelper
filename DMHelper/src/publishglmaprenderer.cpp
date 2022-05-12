@@ -26,6 +26,7 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _initialized(false),
     _shaderProgram(0),
     _shaderModelMatrix(0),
+    _fowImage(),
     _fowObject(nullptr),
     _partyToken(nullptr),
     _lineImage(nullptr),
@@ -328,8 +329,9 @@ void PublishGLMapRenderer::distanceChanged()
     _recreateLineToken = true;
 }
 
-void PublishGLMapRenderer::fowChanged()
+void PublishGLMapRenderer::fowChanged(const QImage& fow)
 {
+    _fowImage = fow;
     _updateFow = true;
     emit updateWidget();
 }
@@ -559,11 +561,14 @@ void PublishGLMapRenderer::updateFoW()
 
     if(!backgroundSize.isEmpty())
     {
-        if(!_fowObject)
-            _fowObject = new PublishGLBattleBackground(nullptr, _map->getBWFoWImage(backgroundSize), GL_NEAREST);
-        else
-            _fowObject->setImage(_map->getBWFoWImage(backgroundSize));
+        //QImage fowImage = _fowPixmap.isNull() ? _map->getBWFoWImage(backgroundSize) : _fowPixmap.toImage();
 
+        if(!_fowObject)
+            _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
+        else
+            _fowObject->setImage(_fowImage);
+
+        _fowImage = QImage(); //_fowPixmap = QPixmap();
         _updateFow = false;
     }
 }

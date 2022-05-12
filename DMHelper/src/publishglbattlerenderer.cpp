@@ -37,6 +37,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _shaderAlphaRGBA(0),
     _gridImage(),
     _gridObject(nullptr),
+    _fowImage(),
     _fowObject(nullptr),
     _combatantTokens(),
     _combatantNames(),
@@ -318,8 +319,11 @@ void PublishGLBattleRenderer::paintGL()
     paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrixRGB);
 }
 
-void PublishGLBattleRenderer::fowChanged()
+void PublishGLBattleRenderer::fowChanged(const QPixmap& fow, const QImage& glFow)
 {
+    Q_UNUSED(fow);
+
+    _fowImage = glFow;
     _updateFow = true;
     emit updateWidget();
 }
@@ -509,11 +513,14 @@ void PublishGLBattleRenderer::updateFoW()
 
     if(!backgroundSize.isEmpty())
     {
-        if(!_fowObject)
-            _fowObject = new PublishGLBattleBackground(nullptr, _model->getMap()->getBWFoWImage(backgroundSize), GL_NEAREST);
-        else
-            _fowObject->setImage(_model->getMap()->getBWFoWImage(backgroundSize));
+        //QImage fowImage = _fowPixmap.toImage();//_fowPixmap.isNull() ? _model->getMap()->getBWFoWImage(backgroundSize) : _fowPixmap.toImage();
 
+        if(!_fowObject)
+            _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
+        else
+            _fowObject->setImage(_fowImage);
+
+        _fowImage = QImage(); //_fowPixmap = QPixmap();
         _updateFow = false;
     }
 }

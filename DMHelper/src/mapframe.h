@@ -65,7 +65,7 @@ signals:
     void distanceLineTypeChanged(int lineType);
     void distanceLineWidthChanged(int lineWidth);
 
-    void fowChanged();
+    void fowChanged(const QImage& fow);
     void cameraRectChanged(const QRectF& cameraRect);
 
     void showMarkersChanged(bool show);

@@ -245,7 +245,7 @@ void MapFrame::resetFoW()
     UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,255)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
-    emit fowChanged();
+    emit fowChanged(_mapSource->getRawBWFowImage());
 }
 
 void MapFrame::clearFoW()
@@ -256,7 +256,7 @@ void MapFrame::clearFoW()
     UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,0)));
     _mapSource->getUndoStack()->push(undoFill);
     emit dirty();
-    emit fowChanged();
+    emit fowChanged(_mapSource->getRawBWFowImage());
 }
 
 void MapFrame::undoPaint()
@@ -1241,7 +1241,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 UndoShape* undoShape = new UndoShape(_mapSource, MapEditShape(shapeRect, _erase, false));
                 _mapSource->getUndoStack()->push(undoShape);
                 emit dirty();
-                emit fowChanged();
+                emit fowChanged(_mapSource->getRawBWFowImage());
                 cleanupSelectionItems();
             }
             return true;
@@ -1276,7 +1276,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _undoPath = new UndoPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, ui->graphicsView->mapToScene(_mouseDownPos).toPoint()));
             _mapSource->getUndoStack()->push(_undoPath);
 
-            emit fowChanged();
+            emit fowChanged(_mapSource->getRawBWFowImage());
             return true;
         }
         else if(event->type() == QEvent::MouseButtonRelease)
@@ -1295,7 +1295,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 QPoint localPos =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
                 _undoPath->addPoint(localPos);
-                emit fowChanged();
+                emit fowChanged(_mapSource->getRawBWFowImage());
             }
             return true;
         }
@@ -1854,6 +1854,7 @@ void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)
 
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
+    renderer->fowChanged(QImage());
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());

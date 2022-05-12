@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QColor>
 #include <QMatrix4x4>
+#include <QPixmap>
 
 class BattleDialogModel;
 class PublishGLBattleObject;
@@ -42,7 +43,7 @@ public:
     virtual void paintGL() override;
 
 public slots:
-    void fowChanged();
+    void fowChanged(const QPixmap& fow, const QImage& glFow);
     void setCameraRect(const QRectF& cameraRect);
     void setGrid(QImage gridImage);
     void setInitiativeType(int initiativeType);
@@ -101,6 +102,7 @@ protected:
     QImage _gridImage;
     PublishGLImage* _gridObject;
 
+    QImage _fowImage;
     PublishGLBattleBackground* _fowObject;
     QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;

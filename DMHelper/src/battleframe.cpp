@@ -113,6 +113,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _isVideo(false),
     _prescaledBackground(),
     _fowImage(),
+    _bwFoWImage(),
     _combatantFrame(),
     _countdownFrame(),
     _targetSize(),
@@ -130,7 +131,6 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _rotation(0),
     _moveRadius(0.0),
     _moveStart(),
-    _bwFoWImage(),
     _sourceRect(),
     _videoSize()
 {
@@ -1558,7 +1558,8 @@ void BattleFrame::updateMap()
             _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         _background->setPixmap((QPixmap::fromImage(_model->getBackgroundImage())));
         _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-        _mapDrawer->setMap(_model->getMap(), &_fowImage);
+        _bwFoWImage = _model->getMap()->getBWFoWImage();
+        _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
 
         createPrescaledBackground();
     }
@@ -2691,12 +2692,12 @@ void BattleFrame::setEditMode()
     }
 }
 
-void BattleFrame::updateFowImage(const QPixmap& fow)
+void BattleFrame::updateFowImage(const QPixmap& fow, const QImage& glFow)
 {
     if(_fow)
         _fow->setPixmap(fow);
 
-    _bwFoWImage = QImage();
+//    _bwFoWImage = QImage();
 }
 
 void BattleFrame::setItemsInert(bool inert)
@@ -2750,7 +2751,8 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
         _model->getMap()->setExternalFoWImage(fowImage);
     }
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-    _mapDrawer->setMap(_model->getMap(), &_fowImage);
+    _bwFoWImage = _model->getMap()->getBWFoWImage();
+    _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
 
     if(!_model->getCameraRect().isValid())
         _model->setCameraRect(_background->boundingRect().toRect());
@@ -2781,6 +2783,9 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
+    _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
+    _bwFoWImage = _model->getMap()->getBWFoWImage();
+    renderer->fowChanged(_fowImage, _bwFoWImage);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());
@@ -3492,7 +3497,7 @@ void BattleFrame::resetVideoSizes()
                                static_cast<int>(static_cast<qreal>(visibleSceneRect.top()) * (static_cast<qreal>(_videoSize.height()) / static_cast<qreal>(sceneRect.height())))),
                         rotatedTargetBackground);
 
-    _bwFoWImage = QImage();
+//    _bwFoWImage = QImage();
 
 #ifdef BATTLE_DIALOG_LOG_VIDEO
     qDebug() << "[Battle Frame] Video sizes reset.";
@@ -3535,7 +3540,7 @@ void BattleFrame::clearBattleFrame()
 
 void BattleFrame::cleanupBattleMap()
 {
-    _mapDrawer->setMap(nullptr, nullptr);
+    _mapDrawer->setMap(nullptr, nullptr, nullptr);
 
     // Clean up the old map
     _scene->clearBattleContents();

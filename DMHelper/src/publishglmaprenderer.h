@@ -5,6 +5,7 @@
 #include <QColor>
 #include <QImage>
 #include <QMatrix4x4>
+#include <QPixmap>
 
 class Map;
 class Party;
@@ -39,7 +40,7 @@ public slots:
 
     //void setImage(const QImage& image);
     void distanceChanged();
-    void fowChanged();
+    void fowChanged(const QImage& fow);
     void setCameraRect(const QRectF& cameraRect);
     void markerChanged();
 
@@ -79,6 +80,7 @@ protected:
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
+    QImage _fowImage;
     PublishGLBattleBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _lineImage;

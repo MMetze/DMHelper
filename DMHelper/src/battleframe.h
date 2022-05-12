@@ -260,7 +260,7 @@ private slots:
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
 
     void setEditMode();
-    void updateFowImage(const QPixmap& fow);
+    void updateFowImage(const QPixmap& fow, const QImage& glFow);
     void setItemsInert(bool inert);
 
     void removeRollover();
@@ -378,6 +378,7 @@ private:
 
     QPixmap _prescaledBackground;
     QPixmap _fowImage;
+    QImage _bwFoWImage;
     QImage _combatantFrame;
     QImage _countdownFrame;
     QSize _targetSize;
@@ -403,7 +404,6 @@ private:
     qreal _moveRadius;
     QPointF _moveStart;
 
-    QImage _bwFoWImage;
     QRect _sourceRect;
     QSize _videoSize;
 };

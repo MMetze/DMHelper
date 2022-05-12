@@ -5,6 +5,7 @@
 5. character death not updated - me
 PCs should also be able to be made invisible (* visibility/known of PCs should also impact visibility) - DONE
 
+Battle Frame://change to have greyscale and BW FOWs - also, switching back and forth leaves the publish icon not synced!
 Videos to play back in repeat mode
 Custom selection/activation not rendering in player's window
 Visible markers not shown on rendered map (video?)
