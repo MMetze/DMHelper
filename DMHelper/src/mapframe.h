@@ -191,7 +191,6 @@ protected slots:
     void setScale(qreal s);
     void storeViewRect();
     void loadViewRect();
-    //void resetPublishFoW();
     void checkPartyUpdate();
 
     void handleScreenshotReady(const QImage& image);

@@ -71,7 +71,6 @@ MapFrame::MapFrame(QWidget *parent) :
     ui->graphicsView->installEventFilter(this);
     ui->graphicsView->setStyleSheet("background-color: transparent;");
 
-//    connect(this, SIGNAL(dirty()), this, SLOT(resetPublishFoW()));
     connect(this, &MapFrame::dirty, this, &MapFrame::checkPartyUpdate);
 
     editModeToggled(DMHelper::EditMode_Move);
@@ -629,7 +628,6 @@ void MapFrame::targetResized(const QSize& newSize)
     {
         qDebug() << "[MapFrame] Target size being set to: " << newSize;
         _targetSize = newSize;
-        //resetPublishFoW();
     }
 }
 
@@ -726,7 +724,6 @@ void MapFrame::setRotation(int rotation)
         return;
 
     _rotation = rotation;
-    //resetPublishFoW();
     if(_renderer)
         _renderer->setRotation(_rotation);
 }
@@ -1778,12 +1775,6 @@ void MapFrame::loadViewRect()
         zoomFit();
     }
 }
-
-/*void MapFrame::resetPublishFoW()
-{
-    if(!_bwFoWImage.isNull())
-        _bwFoWImage = QImage();
-}*/
 
 void MapFrame::checkPartyUpdate()
 {
