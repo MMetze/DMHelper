@@ -323,6 +323,9 @@ void PublishGLBattleRenderer::fowChanged(const QPixmap& fow, const QImage& glFow
 {
     Q_UNUSED(fow);
 
+    if(glFow.isNull())
+        return;
+
     _fowImage = glFow;
     _updateFow = true;
     emit updateWidget();
@@ -506,23 +509,19 @@ void PublishGLBattleRenderer::updateGrid()
 
 void PublishGLBattleRenderer::updateFoW()
 {
-    if((!_model) || (!_model->getMap()))
+    if((!_model) || (!_model->getMap()) || (_fowImage.isNull()))
         return;
 
     QSize backgroundSize = getBackgroundSize().toSize();
+    if(backgroundSize.isEmpty())
+        return;
 
-    if(!backgroundSize.isEmpty())
-    {
-        //QImage fowImage = _fowPixmap.toImage();//_fowPixmap.isNull() ? _model->getMap()->getBWFoWImage(backgroundSize) : _fowPixmap.toImage();
+    if(_fowObject)
+        _fowObject->setImage(_fowImage);
+    else
+        _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
 
-        if(!_fowObject)
-            _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
-        else
-            _fowObject->setImage(_fowImage);
-
-        _fowImage = QImage(); //_fowPixmap = QPixmap();
-        _updateFow = false;
-    }
+    _updateFow = false;
 }
 
 void PublishGLBattleRenderer::createContents()

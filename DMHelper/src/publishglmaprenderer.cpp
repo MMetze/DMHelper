@@ -331,6 +331,9 @@ void PublishGLMapRenderer::distanceChanged()
 
 void PublishGLMapRenderer::fowChanged(const QImage& fow)
 {
+    if(fow.isNull())
+        return;
+
     _fowImage = fow;
     _updateFow = true;
     emit updateWidget();
@@ -554,28 +557,23 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
 
 void PublishGLMapRenderer::updateFoW()
 {
-    if(!_map)
+    if((!_map) || (_fowImage.isNull()))
         return;
 
     QSize backgroundSize = getBackgroundSize().toSize();
+    if(backgroundSize.isEmpty())
+        return;
 
-    if(!backgroundSize.isEmpty())
-    {
-        //QImage fowImage = _fowPixmap.isNull() ? _map->getBWFoWImage(backgroundSize) : _fowPixmap.toImage();
+    if(_fowObject)
+        _fowObject->setImage(_fowImage);
+    else
+        _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
 
-        if(!_fowObject)
-            _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
-        else
-            _fowObject->setImage(_fowImage);
-
-        _fowImage = QImage(); //_fowPixmap = QPixmap();
-        _updateFow = false;
-    }
+    _updateFow = false;
 }
 
 void PublishGLMapRenderer::updateContents()
 {
-
 }
 
 void PublishGLMapRenderer::handlePartyChanged(Party* party)
