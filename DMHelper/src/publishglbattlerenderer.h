@@ -43,7 +43,7 @@ public:
     virtual void paintGL() override;
 
 public slots:
-    void fowChanged(const QPixmap& fow, const QImage& glFow);
+    void fowChanged(const QImage& glFow);
     void setCameraRect(const QRectF& cameraRect);
     void setGrid(QImage gridImage);
     void setInitiativeType(int initiativeType);

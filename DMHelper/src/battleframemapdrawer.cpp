@@ -34,7 +34,10 @@ void BattleFrameMapDrawer::setMap(Map* map, QPixmap* fow, QImage* glFow)
     _glFow = glFow;
 
     if((_map) && (_fow) && (_glFow))
-        emit fowChanged(*_fow, *_glFow);
+    {
+        emit fowEdited(*_fow);
+        emit fowChanged(*_glFow);
+    }
 }
 
 const QCursor& BattleFrameMapDrawer::getCursor() const
@@ -55,7 +58,7 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
     _map->getUndoStack()->push(_undoPath);
     _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
     _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
-    emit fowChanged(*_fow, *_glFow);
+    emit fowEdited(*_fow);
 }
 
 void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos)
@@ -66,12 +69,14 @@ void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos)
     _undoPath->addPoint(pos.toPoint());
     _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
     _map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
-    emit fowChanged(*_fow, *_glFow);
+    emit fowEdited(*_fow);
 }
 
 void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos)
 {
     Q_UNUSED(pos);
+    if(_glFow)
+        emit fowChanged(*_glFow);
     endPath();
 }
 
@@ -85,7 +90,8 @@ void BattleFrameMapDrawer::drawRect(const QRect& rect)
     _map->getUndoStack()->push(undoShape);
     _map->paintFoWRect(rect, undoShape->mapEditShape(), _fow, true);
     _map->paintFoWRect(rect, undoShape->mapEditShape(), _glFow, false);
-    emit fowChanged(*_fow, *_glFow);
+    emit fowEdited(*_fow);
+    emit fowChanged(*_glFow);
     endPath();
 }
 
@@ -128,7 +134,8 @@ void BattleFrameMapDrawer::resetFoW()
     _map->fillFoW(QColor(0,0,0,128), _fow);
     _map->fillFoW(QColor(0,0,0,255), _glFow);
     endPath();
-    emit fowChanged(*_fow, *_glFow);
+    emit fowEdited(*_fow);
+    emit fowChanged(*_glFow);
 }
 
 void BattleFrameMapDrawer::clearFoW()
@@ -141,7 +148,8 @@ void BattleFrameMapDrawer::clearFoW()
     _map->fillFoW(QColor(0,0,0,0), _fow);
     _map->fillFoW(QColor(0,0,0,0), _glFow);
     endPath();
-    emit fowChanged(*_fow, *_glFow);
+    emit fowEdited(*_fow);
+    emit fowChanged(*_glFow);
 }
 
 void BattleFrameMapDrawer::setErase(bool erase)

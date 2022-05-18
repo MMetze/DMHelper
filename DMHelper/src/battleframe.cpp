@@ -155,7 +155,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_countdownTimer, SIGNAL(timeout()),this,SLOT(countdownTimerExpired()));
 
     _mapDrawer = new BattleFrameMapDrawer(this);
-    connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, this, &BattleFrame::updateFowImage);
+    connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, this, &BattleFrame::updateFowImage);
 
     connect(ui->graphicsView, SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)), this, SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
 
@@ -2692,12 +2692,10 @@ void BattleFrame::setEditMode()
     }
 }
 
-void BattleFrame::updateFowImage(const QPixmap& fow, const QImage& glFow)
+void BattleFrame::updateFowImage(const QPixmap& fow)
 {
     if(_fow)
         _fow->setPixmap(fow);
-
-//    _bwFoWImage = QImage();
 }
 
 void BattleFrame::setItemsInert(bool inert)
@@ -2785,7 +2783,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setInitiativeType(_initiativeType);
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     _bwFoWImage = _model->getMap()->getBWFoWImage();
-    renderer->fowChanged(_fowImage, _bwFoWImage);
+    renderer->fowChanged(_bwFoWImage);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());

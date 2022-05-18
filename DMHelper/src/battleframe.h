@@ -260,7 +260,7 @@ private slots:
     void selectAddCharacter(QList<Character*> characters, const QString& title, const QString& label);
 
     void setEditMode();
-    void updateFowImage(const QPixmap& fow, const QImage& glFow);
+    void updateFowImage(const QPixmap& fow);
     void setItemsInert(bool inert);
 
     void removeRollover();

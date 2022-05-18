@@ -17,7 +17,8 @@ public:
     const QCursor& getCursor() const;
 
 signals:
-    void fowChanged(const QPixmap& fow, const QImage& glFow);
+    void fowEdited(const QPixmap& fow);
+    void fowChanged(const QImage& glFow);
     void cursorChanged(const QCursor& cursor);
 
 public slots:

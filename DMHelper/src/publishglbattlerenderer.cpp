@@ -319,10 +319,8 @@ void PublishGLBattleRenderer::paintGL()
     paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrixRGB);
 }
 
-void PublishGLBattleRenderer::fowChanged(const QPixmap& fow, const QImage& glFow)
+void PublishGLBattleRenderer::fowChanged(const QImage& glFow)
 {
-    Q_UNUSED(fow);
-
     if(glFow.isNull())
         return;
 
