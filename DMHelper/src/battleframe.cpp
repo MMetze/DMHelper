@@ -2749,7 +2749,7 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
         _model->getMap()->setExternalFoWImage(fowImage);
     }
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-    _bwFoWImage = _model->getMap()->getBWFoWImage();
+    _bwFoWImage = _model->getMap()->getBWFoWImage(image.size());
     _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
 
     if(!_model->getCameraRect().isValid())
@@ -2782,7 +2782,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-    _bwFoWImage = _model->getMap()->getBWFoWImage();
+    _bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());
     renderer->fowChanged(_bwFoWImage);
 
     if(_cameraRect)

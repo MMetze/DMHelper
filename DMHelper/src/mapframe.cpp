@@ -1826,7 +1826,7 @@ void MapFrame::handleScreenshotReady(const QImage& image)
         _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
     }
 
-    _bwFoWImage = _mapSource->getBWFoWImage();
+    _bwFoWImage = _mapSource->getBWFoWImage(image.size());
 
     checkPartyUpdate();
     createMarkerItems();
@@ -1858,7 +1858,7 @@ void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)
 
     renderer->setPointerFileName(_pointerFile);
     renderer->setRotation(_rotation);
-    renderer->fowChanged(QImage());
+    renderer->fowChanged(_bwFoWImage);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());
