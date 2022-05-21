@@ -114,6 +114,9 @@ static inline module_t *module_need_var(vlc_object_t *obj, const char *cap,
                                         const char *varname)
 {
     char *list = var_InheritString(obj, varname);
+    if (unlikely(list == NULL))
+        return NULL;
+
     module_t *m = module_need(obj, cap, list, false);
 
     free(list);
@@ -205,6 +208,7 @@ VLC_API const char * module_get_object(const module_t *m) VLC_USED;
  * \return the short or long name of the module
  */
 VLC_API const char *module_get_name(const module_t *m, bool longname) VLC_USED;
+#define module_GetShortName( m ) module_get_name( m, false )
 #define module_GetLongName( m ) module_get_name( m, true )
 
 /**
@@ -244,7 +248,6 @@ VLC_USED static inline module_t *module_get_main (void)
 {
     return module_find ("core");
 }
-#define module_get_main(a) module_get_main()
 
 VLC_USED static inline bool module_is_main( const module_t * p_module )
 {

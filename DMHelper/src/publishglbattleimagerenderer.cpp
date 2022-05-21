@@ -10,6 +10,11 @@ PublishGLBattleImageRenderer::PublishGLBattleImageRenderer(BattleDialogModel* mo
 {
 }
 
+PublishGLBattleImageRenderer::~PublishGLBattleImageRenderer()
+{
+    PublishGLBattleImageRenderer::cleanup();
+}
+
 void PublishGLBattleImageRenderer::cleanup()
 {
     delete _backgroundObject;

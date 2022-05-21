@@ -101,6 +101,7 @@
 #include <QScreen>
 #include <QShortcut>
 #include <QFontDatabase>
+#include <QSurfaceFormat>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
@@ -185,6 +186,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
     qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
 
+    QSurfaceFormat fmt;
+    qDebug() << "[MainWindow] OpenGL Information";
+    qDebug() << "[MainWindow]     Version: " << fmt.majorVersion() << "." << fmt.minorVersion();
+    qDebug() << "[MainWindow]     Device pixel ratio: " << this->devicePixelRatio();
+
     qDebug() << "[MainWindow] Standard Path Information";
     qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
     qDebug() << "[MainWindow]     ApplicationsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::ApplicationsLocation).first());
@@ -258,7 +264,7 @@ MainWindow::MainWindow(QWidget *parent) :
     EquipmentServer::Initialize(_options->getEquipmentFileName());
     EquipmentServer* equipmentServer = EquipmentServer::Instance();
     connect(_options, &OptionsContainer::equipmentFileNameChanged, equipmentServer, &EquipmentServer::readEquipment);
-    qDebug() << "[MainWindow] BasicDateServer Initialized";
+    qDebug() << "[MainWindow] EquipmentServer Initialized";
 
     // File Menu
     connect(_ribbonTabFile, SIGNAL(newClicked()), this, SLOT(newCampaign()));
@@ -323,7 +329,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // Battle View Menu
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabBattleView, SLOT(setPointerFile(const QString&)));
     _ribbonTabBattleView->setPointerFile(_options->getPointerFile());
-    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
     // Mini Map Menu
     // connections set up elsewhere
@@ -405,6 +410,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabText, SIGNAL(speedChanged(int)), _encounterTextEdit, SLOT(setScrollSpeed(int)));
     connect(_ribbonTabText, SIGNAL(widthChanged(int)), _encounterTextEdit, SLOT(setTextWidth(int)));
     connect(_ribbonTabText, SIGNAL(rewindClicked()), _encounterTextEdit, SLOT(rewind()));
+    connect(_ribbonTabText, &RibbonTabText::playPauseClicked, _encounterTextEdit, &EncounterTextEdit::playPause);
+    connect(_encounterTextEdit, &EncounterTextEdit::playPauseChanged, _ribbonTabText, &RibbonTabText::setPlaying);
     connect(_encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
     connect(_encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
     connect(_encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
@@ -564,6 +571,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_pubWindow, SIGNAL(publishMouseRelease(const QPointF&)), _mapFrame, SLOT(publishWindowMouseRelease(const QPointF&)));
 
     connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
+
+    // Connect the battle view ribbon to the battle frame and map frame
+    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;

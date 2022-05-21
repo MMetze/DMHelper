@@ -2,14 +2,19 @@
 #include "videoplayerglvideo.h"
 #include <QImage>
 #include <QOpenGLFramebufferObject>
+#include <QTimerEvent>
 #include <QDebug>
+
+const int SCREENSHOT_USE_FRAME = VIDEO_BUFFER_COUNT + 1;
 
 VideoPlayerGLScreenshot::VideoPlayerGLScreenshot(const QString& videoFile, QObject *parent) :
     VideoPlayerGL(parent),
     _videoFile(videoFile),
     _video(nullptr),
     _vlcPlayer(nullptr),
-    _vlcMedia(nullptr)
+    _vlcMedia(nullptr),
+    _framesReceived(0),
+    _status(-1)
 {
 #ifdef Q_OS_WIN
     _videoFile.replace("/","\\\\");
@@ -18,8 +23,7 @@ VideoPlayerGLScreenshot::VideoPlayerGLScreenshot(const QString& videoFile, QObje
 
 VideoPlayerGLScreenshot::~VideoPlayerGLScreenshot()
 {
-    stopPlayer();
-    delete _video;
+    cleanupPlayer();
 }
 
 void VideoPlayerGLScreenshot::retrieveScreenshot()
@@ -30,8 +34,61 @@ void VideoPlayerGLScreenshot::retrieveScreenshot()
 
 void VideoPlayerGLScreenshot::registerNewFrame()
 {
-    qDebug() << "[VideoPlayerGLScreenshot] Screenshot frame received";
-    emit screenshotReady(extractImage());
+    if(_framesReceived >= SCREENSHOT_USE_FRAME)
+        return;
+
+    ++_framesReceived;
+    qDebug() << "[VideoPlayerGLScreenshot] Screenshot frame received, #" << _framesReceived << " from " << SCREENSHOT_USE_FRAME;
+
+    QImage frameImage = extractImage();
+    if(_framesReceived >= SCREENSHOT_USE_FRAME)
+    {
+        emit screenshotReady(frameImage);
+        stopPlayer();
+    }
+}
+
+void VideoPlayerGLScreenshot::playerEventCallback( const struct libvlc_event_t *p_event, void *p_data )
+{
+    if((!p_event) || (!p_data))
+        return;
+
+    VideoPlayerGLScreenshot* that = static_cast<VideoPlayerGLScreenshot*>(p_data);
+    if(!that)
+        return;
+
+    switch(p_event->type)
+    {
+        case libvlc_MediaPlayerOpening:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: OPENING = " << p_event->type;
+            break;
+        case libvlc_MediaPlayerBuffering:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: BUFFERING = " << p_event->type;
+            break;
+        case libvlc_MediaPlayerPlaying:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PLAYING = " << p_event->type;
+            break;
+        case libvlc_MediaPlayerPaused:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: PAUSED = " << p_event->type;
+            break;
+        case libvlc_MediaPlayerStopped:
+            qDebug() << "[VideoPlayerGLScreenshot] Video event received: STOPPED = " << p_event->type;
+            break;
+        default:
+            qDebug() << "[VideoPlayerGLScreenshot] UNEXPECTED Video event received:  " << p_event->type;
+            break;
+    };
+
+    that->_status = p_event->type;
+}
+
+void VideoPlayerGLScreenshot::timerEvent(QTimerEvent *event)
+{
+    if((_status == libvlc_MediaPlayerOpening) || (_status == libvlc_MediaPlayerBuffering) || (_status == libvlc_MediaPlayerPlaying))
+        return;
+
+    cleanupPlayer();
+    killTimer(event->timerId());
     deleteLater();
 }
 
@@ -76,6 +133,17 @@ bool VideoPlayerGLScreenshot::startPlayer()
         return false;
     }
 
+    // Set up event callbacks
+    libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
+    if(eventManager)
+    {
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, static_cast<void*>(this));
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, static_cast<void*>(this));
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
+    }
+
     qDebug() << "[VideoPlayerGLScreenshot] Playback started to get screenshot for " << _videoFile;
 
     libvlc_audio_set_volume(_vlcPlayer, 0);
@@ -101,6 +169,18 @@ bool VideoPlayerGLScreenshot::startPlayer()
 
 bool VideoPlayerGLScreenshot::stopPlayer()
 {
+    _framesReceived = SCREENSHOT_USE_FRAME;
+
+    if(_vlcPlayer)
+        libvlc_media_player_stop_async(_vlcPlayer);
+
+    startTimer(500);
+
+    return true;
+}
+
+void VideoPlayerGLScreenshot::cleanupPlayer()
+{
     if(_vlcPlayer)
     {
         libvlc_media_player_release(_vlcPlayer);
@@ -113,7 +193,11 @@ bool VideoPlayerGLScreenshot::stopPlayer()
         _vlcMedia = nullptr;
     }
 
-    return true;
+    if(_video)
+    {
+        delete _video;
+        _video = nullptr;
+    }
 }
 
 QImage VideoPlayerGLScreenshot::extractImage()

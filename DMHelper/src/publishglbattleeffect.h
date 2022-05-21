@@ -26,7 +26,7 @@ public slots:
     void effectChanged();
 
 protected:
-    virtual void prepareObjects();
+    void prepareObjects();
     virtual void drawShape(QPainter& painter, BattleDialogModelEffect* effect, int effectSize, int effectWidth);
     virtual void drawObject(QPainter& painter, BattleDialogModelEffectObject* effectObject, int effectSize, int effectWidth);
 

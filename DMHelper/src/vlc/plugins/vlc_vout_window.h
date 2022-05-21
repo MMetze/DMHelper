@@ -64,6 +64,7 @@ enum vout_window_type {
     VOUT_WINDOW_TYPE_ANDROID_NATIVE /**< Android native window */,
     VOUT_WINDOW_TYPE_WAYLAND /**< Wayland surface */,
     VOUT_WINDOW_TYPE_DCOMP /**< Win32 DirectComposition */,
+    VOUT_WINDOW_TYPE_KMS /**< DRM KMS CRTC */,
 };
 
 /**
@@ -131,7 +132,7 @@ typedef struct vout_window_mouse_event_t
     /**
      * Pressed button.
      *
-     * See \ref vlc_mouse_button for possible vaules.
+     * See \ref vlc_mouse_button for possible values.
      *
      * This is set if @c event does not equal \ref VOUT_WINDOW_MOUSE_MOVED.
      */
@@ -190,7 +191,7 @@ typedef void (*vout_window_ack_cb)(struct vout_window_t *, unsigned width,
  * window events.
  *
  * As a general rule, the events can occur synchronously or asynchronously from
- * the time that the window is (succesfully) being created by vout_window_New()
+ * the time that the window is (successfully) being created by vout_window_New()
  * until the time that the window has been deleted by vout_window_Delete().
  *
  * \warning
@@ -371,7 +372,7 @@ typedef struct vout_window_t {
     /**
      * Window handle (mandatory)
      *
-     * This must be filled by the plugin upon succesful vout_window_Enable().
+     * This must be filled by the plugin upon successful vout_window_Enable().
      *
      * Depending on the \ref type above, a different member of this union is
      * used.
@@ -383,6 +384,7 @@ typedef struct vout_window_t {
         void     *anativewindow; /**< Android native window */
         struct wl_surface *wl;   /**< Wayland surface (client pointer) */
         void     *dcomp_visual;  /**<  Win32 direct composition visual */
+        uint32_t crtc;           /**< KMS CRTC identifier */
     } handle;
 
     /** Display server (mandatory)
@@ -397,6 +399,7 @@ typedef struct vout_window_t {
         char     *x11; /**< X11 display string (NULL = use default) */
         struct wl_display *wl; /**< Wayland display (client pointer) */
         void* dcomp_device; /**< DirectComposition device */
+        int      drm_fd; /**< KMS DRM device */
     } display;
 
     const struct vout_window_operations *ops; /**< operations handled by the
@@ -425,11 +428,13 @@ typedef struct vout_window_t {
  * \param obj parent VLC object
  * \param module plugin name, NULL for default
  * \param owner callbacks and private data
+ * \param cfg initial window configuration, NULL for defaults
  * \return a new window, or NULL on error.
  */
 VLC_API vout_window_t *vout_window_New(vlc_object_t *obj,
                                        const char *module,
-                                       const vout_window_owner_t *owner);
+                                       const vout_window_owner_t *owner,
+                                       const vout_window_cfg_t *cfg);
 
 /**
  * Deletes a window.
@@ -445,7 +450,7 @@ VLC_API void vout_window_Delete(vout_window_t *window);
  *
  * \param window window in respect to which the screensaver should be inhibited
  *               or deinhibited
- * \param true to inhibit, false to deinhibit
+ * \param enabled true to inhibit, false to deinhibit
  */
 void vout_window_SetInhibition(vout_window_t *window, bool enabled);
 
@@ -483,12 +488,8 @@ static inline void vout_window_SetState(vout_window_t *window, unsigned state)
  * \param width pixel width
  * \param height height width
  */
-static inline void vout_window_SetSize(vout_window_t *window,
-                                      unsigned width, unsigned height)
-{
-    if (window->ops->resize != NULL)
-        window->ops->resize(window, width, height);
-}
+VLC_API void vout_window_SetSize(vout_window_t *window,
+                                 unsigned width, unsigned height);
 
 /**
  * Requests fullscreen mode.
@@ -496,23 +497,14 @@ static inline void vout_window_SetSize(vout_window_t *window,
  * \param window window to be brought to fullscreen mode.
  * \param id nul-terminated output identifier, NULL for default
  */
-static inline void vout_window_SetFullScreen(vout_window_t *window,
-                                            const char *id)
-{
-    if (window->ops->set_fullscreen != NULL)
-        window->ops->set_fullscreen(window, id);
-}
+VLC_API void vout_window_SetFullScreen(vout_window_t *window, const char *id);
 
 /**
  * Requests windowed mode.
  *
  * \param window window to be brought into windowed mode.
  */
-static inline void vout_window_UnsetFullScreen(vout_window_t *window)
-{
-    if (window->ops->unset_fullscreen != NULL)
-        window->ops->unset_fullscreen(window);
-}
+VLC_API void vout_window_UnsetFullScreen(vout_window_t *window);
 
 /**
  * Request a new window title.
@@ -538,7 +530,7 @@ static inline void vout_window_SetTitle(vout_window_t *window, const char *title
  * while the window is enabled.
  */
 VLC_API
-int vout_window_Enable(vout_window_t *window, const vout_window_cfg_t *cfg);
+int vout_window_Enable(vout_window_t *window);
 
 /**
  * Disables a window.
@@ -585,6 +577,7 @@ static inline void vout_window_ReportClose(vout_window_t *window)
  * This function is called by the window implementation to notify the owner of
  * the window that the state of the window changed.
  *
+ * \param window the window reporting the state change
  * \param state \see vout_window_state
  */
 static inline void vout_window_ReportState(vout_window_t *window,
@@ -605,6 +598,7 @@ VLC_API void vout_window_ReportWindowed(vout_window_t *wnd);
 /**
  * Reports that the window is in full screen.
  *
+ * \param wnd the window reporting the fullscreen state
  * \param id fullscreen output nul-terminated identifier, NULL for default
  */
 VLC_API void vout_window_ReportFullscreen(vout_window_t *wnd, const char *id);
@@ -702,6 +696,7 @@ static inline void vout_window_ReportKeyPress(vout_window_t *window, int key)
  * updated. Otherwise it will be added.
  * If the name parameter is NULL, the output will be removed.
  *
+ * \param window the window reporting the output device
  * \param id unique nul-terminated identifier for the output
  * \param name human-readable name
  */
