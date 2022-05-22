@@ -25,10 +25,11 @@
  * \ingroup vlc
  * @{
  * \file
- * Common VLC object defintions
+ * Common VLC object definitions
  */
 
 struct vlc_logger;
+struct vlc_tracer;
 struct vlc_object_internals;
 struct vlc_object_marker;
 
@@ -71,42 +72,18 @@ struct vlc_object_t
         struct vlc_object_marker *: (x), \
         default: (&((x)->obj)) \
     )
-# define vlc_object_cast(t)
 #else
 static inline vlc_object_t *VLC_OBJECT(vlc_object_t *o)
-{
-    return o;
-}
+    { return o; }
 
-# define vlc_object_cast(t) \
-struct t; \
-static inline struct vlc_object_t *VLC_OBJECT(struct t *d) \
-{ \
-    return (struct vlc_object_t *)d; \
-}
+template<typename T>
+static inline vlc_object_t *VLC_OBJECT(T *d)
+    { return &d->obj; }
 #endif
 
-vlc_object_cast(libvlc_int_t)
-vlc_object_cast(intf_thread_t)
-vlc_object_cast(vlc_player_t)
-vlc_object_cast(stream_t)
-vlc_object_cast(stream_directory_t)
-vlc_object_cast(stream_extractor_t)
-vlc_object_cast(decoder_t)
-vlc_object_cast(filter_t)
-vlc_object_cast(audio_output)
-vlc_object_cast(vout_thread_t)
-vlc_object_cast(vout_display_t)
-vlc_object_cast(vout_window_t)
-vlc_object_cast(sout_stream_t)
-vlc_object_cast(sout_access_out_t)
-vlc_object_cast(extensions_manager_t)
-vlc_object_cast(fingerprinter_thread_t)
-vlc_object_cast(demux_meta_t)
-vlc_object_cast(xml_t)
-vlc_object_cast(services_discovery_t)
-vlc_object_cast(vlc_renderer_discovery_t)
-vlc_object_cast(vlc_medialibrary_module_t)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* The root object */
 struct libvlc_int_t
@@ -121,7 +98,7 @@ struct libvlc_int_t
  *
  * @return the new object, or NULL on error.
  */
-VLC_API void *vlc_object_create( vlc_object_t *, size_t ) VLC_MALLOC VLC_USED;
+VLC_API void *vlc_object_create( vlc_object_t *, size_t i_size) VLC_MALLOC VLC_USED;
 
 /**
  * Drops the strong reference to an object.
@@ -160,6 +137,13 @@ static inline struct vlc_logger *vlc_object_logger(vlc_object_t *obj)
     return obj->logger;
 }
 #define vlc_object_logger(o) vlc_object_logger(VLC_OBJECT(o))
+
+ /**
+ * Get tracer of a vlc instance from an object.
+ *
+ * \return the tracer of a vlc instance from an object (NULL if none).
+ */
+VLC_API struct vlc_tracer *vlc_object_get_tracer(vlc_object_t *obj);
 
 /**
  * Tries to get the name of module bound to an object.
@@ -292,6 +276,25 @@ VLC_API VLC_MALLOC char *vlc_obj_strdup(vlc_object_t *obj, const char *str);
  * @param ptr pointer to the allocated resource
  */
 VLC_API void vlc_obj_free(vlc_object_t *obj, void *ptr);
+
+#ifdef __cplusplus
+} /* extern "C" */
+
+#undef vlc_object_create
+
+template <typename O> VLC_MALLOC VLC_USED
+static inline void* vlc_object_create(O *obj, size_t size)
+{
+    return vlc_object_create(VLC_OBJECT(obj), size);
+}
+
+template<typename T, typename O> VLC_MALLOC VLC_USED
+static inline T* vlc_object_create(O *obj)
+{
+    static_assert(std::is_pointer<T>::value == false, "vlc_object_create can only create objects");
+    return static_cast<T*>(vlc_object_create(VLC_OBJECT(obj), sizeof(T)));
+}
+#endif
 
 /** @} */
 /** @} */

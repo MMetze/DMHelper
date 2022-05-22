@@ -10,6 +10,11 @@ PublishGLMapImageRenderer::PublishGLMapImageRenderer(Map* map, QObject *parent) 
 {
 }
 
+PublishGLMapImageRenderer::~PublishGLMapImageRenderer()
+{
+    PublishGLMapImageRenderer::cleanup();
+}
+
 void PublishGLMapImageRenderer::cleanup()
 {
     delete _backgroundObject;

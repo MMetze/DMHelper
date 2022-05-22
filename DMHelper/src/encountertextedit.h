@@ -60,6 +60,7 @@ public slots:
     void setAnimated(bool animated);
     void setScrollSpeed(int scrollSpeed);
     void rewind();
+    void playPause(bool play);
 
     void setTranslated(bool translated);
 
@@ -81,6 +82,8 @@ signals:
     void fontUnderlineChanged(bool fontItalics);
     void alignmentChanged(Qt::Alignment alignment);
     void colorChanged(const QColor& color);
+
+    void playPauseChanged(bool playing);
 
     void setHyperlinkActive(bool active);
     void textWidthChanged(int textWidth);
@@ -133,6 +136,7 @@ protected:
 
     bool _isDMPlayer;
     bool _isPublishing;
+    bool _isVideo;
 
     QSize _targetSize;
     int _rotation;

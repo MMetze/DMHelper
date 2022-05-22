@@ -1,4 +1,4 @@
-prefix=/builds/videolan/vlc/win64/_win32
+prefix=/builds/videolan/vlc/win32/_win32
 exec_prefix=${prefix}
 includedir=${prefix}/include
 datarootdir=${prefix}/share
@@ -18,5 +18,5 @@ Cflags: -I${includedir} -I${pkgincludedir}/plugins \
 	
 Libs: -L${libdir} -lvlccore
 Libs.private:  \
-	-L/builds/videolan/vlc/contrib/x86_64-w64-mingw32/lib -lintl -L/builds/videolan/vlc/contrib/x86_64-w64-mingw32/lib -liconv -L/builds/videolan/vlc/contrib/x86_64-w64-mingw32/lib -liconv \
+	-lintl -liconv -liconv \
 	-lws2_32 -liphlpapi  -lm

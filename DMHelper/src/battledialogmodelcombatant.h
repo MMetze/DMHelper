@@ -75,6 +75,7 @@ signals:
     void combatantMoved(BattleDialogModelCombatant* combatant);
     void combatantSelected(BattleDialogModelCombatant* combatant);
     void moveUpdated();
+    void visibilityChanged();
 
 protected:
     // From BattleDialogModelCombatant

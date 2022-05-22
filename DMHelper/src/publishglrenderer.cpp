@@ -53,10 +53,10 @@ void PublishGLRenderer::rendererActivated(QOpenGLWidget* glWidget)
 void PublishGLRenderer::rendererDeactivated()
 {
     qDebug() << "[PublishGLRenderer] Renderer deactivated: " << this;
-    cleanup();
-
     if((_targetWidget) && (_targetWidget->context()))
         disconnect(_targetWidget->context(), &QOpenGLContext::aboutToBeDestroyed, this, &PublishGLRenderer::cleanup);
+
+    cleanup();
 
     emit deactivated();
     _targetWidget = nullptr;

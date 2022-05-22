@@ -3,7 +3,7 @@
 
 #include "publishglmaprenderer.h"
 
-#define MAPVIDEO_USE_SCREENSHOT_ONLY
+//#define MAPVIDEO_USE_SCREENSHOT_ONLY
 
 class VideoPlayerGLPlayer;
 
@@ -12,6 +12,7 @@ class PublishGLMapVideoRenderer : public PublishGLMapRenderer
     Q_OBJECT
 public:
     PublishGLMapVideoRenderer(Map* map, QObject *parent = nullptr);
+    virtual ~PublishGLMapVideoRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;

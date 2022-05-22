@@ -106,6 +106,7 @@ signals:
     void combatantListChanged();
     void effectListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
+    void initiativeOrderChanged();
     void backgroundImageChanged(QImage backgroundImage);
 
 protected slots:
