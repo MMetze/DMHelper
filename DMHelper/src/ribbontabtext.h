@@ -33,6 +33,8 @@ public slots:
     void setWidth(int width);
     void setSpeed(int speed);
 
+    void setPlaying(bool playing);
+
     void setHyperlinkActive(bool active);
 
     void setTranslationActive(bool active);
@@ -45,6 +47,7 @@ signals:
     void speedChanged(int speed);
     void widthChanged(int width);
     void rewindClicked();
+    void playPauseClicked(bool playing);
 
     // Text
     void colorChanged(const QColor& color);

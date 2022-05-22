@@ -173,12 +173,20 @@ void BattleDialogModelCombatant::resetMoved()
 
 void BattleDialogModelCombatant::setShown(bool isShown)
 {
-    _isShown = isShown;
+    if(_isShown != isShown)
+    {
+        _isShown = isShown;
+        emit visibilityChanged();
+    }
 }
 
 void BattleDialogModelCombatant::setKnown(bool isKnown)
 {
-    _isKnown = isKnown;
+    if(_isKnown != isKnown)
+    {
+        _isKnown = isKnown;
+        emit visibilityChanged();
+    }
 }
 
 void BattleDialogModelCombatant::setSelected(bool isSelected)

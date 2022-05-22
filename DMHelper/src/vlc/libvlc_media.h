@@ -32,6 +32,7 @@ extern "C" {
 # else
 #  include <stdbool.h>
 # endif
+#include <stddef.h>
 
 /** \defgroup libvlc_media LibVLC media
  * \ingroup libvlc
@@ -76,13 +77,7 @@ typedef enum libvlc_meta_t {
 } libvlc_meta_t;
 
 /**
- * Note the order of libvlc_state_t enum must match exactly the order of
- * \see mediacontrol_PlayerStatus, \see input_state_e enums,
- * and VideoLAN.LibVLC.State (at bindings/cil/src/media.cs).
- *
- * Expected states by web plugins are:
- * IDLE/CLOSE=0, OPENING=1, PLAYING=3, PAUSED=4,
- * STOPPING=5, ENDED=6, ERROR=7
+ * libvlc media or media_player state
  */
 typedef enum libvlc_state_t
 {
@@ -94,7 +89,7 @@ typedef enum libvlc_state_t
     libvlc_Playing,
     libvlc_Paused,
     libvlc_Stopped,
-    libvlc_Ended,
+    libvlc_Stopping,
     libvlc_Error
 } libvlc_state_t;
 
@@ -160,11 +155,11 @@ typedef enum libvlc_media_parse_flag_t
      */
     libvlc_media_parse_network  = 0x01,
     /**
-     * Fetch meta and covert art using local resources
+     * Fetch meta and cover art using local resources
      */
     libvlc_media_fetch_local    = 0x02,
     /**
-     * Fetch meta and covert art using network resources
+     * Fetch meta and cover art using network resources
      */
     libvlc_media_fetch_network  = 0x04,
     /**
@@ -212,6 +207,12 @@ typedef struct libvlc_media_slave_t
 } libvlc_media_slave_t;
 
 /**
+ * Type of stat that can be requested from libvlc_media_get_filestat()
+ */
+#define libvlc_media_filestat_mtime 0
+#define libvlc_media_filestat_size 1
+
+/**
  * Callback prototype to open a custom bitstream input media.
  *
  * The same media item can be opened multiple times. Each time, this callback
@@ -246,8 +247,8 @@ typedef int (*libvlc_media_open_cb)(void *opaque, void **datap,
  * \note If no data is immediately available, then the callback should sleep.
  * \warning The application is responsible for avoiding deadlock situations.
  */
-typedef ssize_t (*libvlc_media_read_cb)(void *opaque, unsigned char *buf,
-                                        size_t len);
+typedef ptrdiff_t (*libvlc_media_read_cb)(void *opaque, unsigned char *buf,
+                                         size_t len);
 
 /**
  * Callback prototype to seek a custom bitstream input media.
@@ -490,29 +491,15 @@ LIBVLC_API void libvlc_media_set_meta( libvlc_media_t *p_md,
 /**
  * Save the meta previously set
  *
- * \param p_md the media desriptor
+ * \param p_md the media descriptor
  * \return true if the write operation was successful
  */
 LIBVLC_API int libvlc_media_save_meta( libvlc_media_t *p_md );
 
-
-/**
- * Get current state of media descriptor object. Possible media states are
- * libvlc_NothingSpecial=0, libvlc_Opening, libvlc_Playing, libvlc_Paused,
- * libvlc_Stopped, libvlc_Ended, libvlc_Error.
- *
- * \see libvlc_state_t
- * \param p_md a media descriptor object
- * \return state of media descriptor object
- */
-LIBVLC_API libvlc_state_t libvlc_media_get_state(
-                                   libvlc_media_t *p_md );
-
-
 /**
  * Get the current statistics about the media
- * \param p_md: media descriptor object
- * \param p_stats: structure that contain the statistics about the media
+ * \param p_md media descriptor object
+ * \param p_stats structure that contain the statistics about the media
  *                 (this structure must be allocated by the caller)
  * \retval true statistics are available
  * \retval false otherwise
@@ -520,7 +507,7 @@ LIBVLC_API libvlc_state_t libvlc_media_get_state(
 LIBVLC_API bool libvlc_media_get_stats(libvlc_media_t *p_md,
                                        libvlc_media_stats_t *p_stats);
 
-/* The following method uses libvlc_media_list_t, however, media_list usage is optionnal
+/* The following method uses libvlc_media_list_t, however, media_list usage is optional
  * and this is here for convenience */
 #define VLC_FORWARD_DECLARE_OBJECT(a) struct a
 
@@ -559,6 +546,22 @@ LIBVLC_API libvlc_event_manager_t *
  */
 LIBVLC_API libvlc_time_t
    libvlc_media_get_duration( libvlc_media_t *p_md );
+
+/**
+ * Get a 'stat' value of media descriptor object item.
+ *
+ * \note 'stat' values are currently only parsed by directory accesses. This
+ * mean that only sub medias of a directory media, parsed with
+ * libvlc_media_parse_with_options() can have valid 'stat' properties.
+ * \version LibVLC 4.0.0 and later.
+ *
+ * \param p_md media descriptor object
+ * \param type a valid libvlc_media_stat_ define
+ * \param out field in which the value will be stored
+ * \return 1 on success, 0 if not found, -1 on error.
+ */
+LIBVLC_API int
+   libvlc_media_get_filestat( libvlc_media_t *p_md, unsigned type, uint64_t *out );
 
 /**
  * Parse the media asynchronously with options.
@@ -715,8 +718,8 @@ typedef enum libvlc_thumbnailer_seek_speed_t
 /**
  * \brief libvlc_media_request_thumbnail_by_time Start an asynchronous thumbnail generation
  *
- * If the request is successfuly queued, the libvlc_MediaThumbnailGenerated
- * is guaranteed to be emited.
+ * If the request is successfully queued, the libvlc_MediaThumbnailGenerated
+ * is guaranteed to be emitted.
  * The resulting thumbnail size can either be:
  * - Hardcoded by providing both width & height. In which case, the image will
  *   be stretched to match the provided aspect ratio, or cropped if crop is true.
@@ -752,8 +755,8 @@ libvlc_media_thumbnail_request_by_time( libvlc_media_t *md,
 /**
  * \brief libvlc_media_request_thumbnail_by_pos Start an asynchronous thumbnail generation
  *
- * If the request is successfuly queued, the libvlc_MediaThumbnailGenerated
- * is guaranteed to be emited.
+ * If the request is successfully queued, the libvlc_MediaThumbnailGenerated
+ * is guaranteed to be emitted.
  * The resulting thumbnail size can either be:
  * - Hardcoded by providing both width & height. In which case, the image will
  *   be stretched to match the provided aspect ratio, or cropped if crop is true.
@@ -791,7 +794,7 @@ libvlc_media_thumbnail_request_by_pos( libvlc_media_t *md,
  * @param p_req An opaque thumbnail request object.
  *
  * Cancelling the request will still cause libvlc_MediaThumbnailGenerated event
- * to be emited, with a NULL libvlc_picture_t
+ * to be emitted, with a NULL libvlc_picture_t
  * If the request is cancelled after its completion, the behavior is undefined.
  */
 LIBVLC_API void

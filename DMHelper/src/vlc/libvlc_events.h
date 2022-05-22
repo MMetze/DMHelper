@@ -72,17 +72,12 @@ enum libvlc_event_e {
     libvlc_MediaParsedChanged,
 
     /* Removed: libvlc_MediaFreed, */
+    /* Removed: libvlc_MediaStateChanged */
 
-    /**
-     * \link #libvlc_state_t State\endlink of the \link
-     * #libvlc_media_t media item\endlink changed
-     * \see libvlc_media_get_state()
-     */
-    libvlc_MediaStateChanged = libvlc_MediaParsedChanged + 2,
     /**
      * Subitem tree was added to a \link #libvlc_media_t media item\endlink
      */
-    libvlc_MediaSubItemTreeAdded,
+    libvlc_MediaSubItemTreeAdded = libvlc_MediaParsedChanged + 3,
     /**
      * A thumbnail generation for this \link #libvlc_media_t media \endlink completed.
      * \see libvlc_media_thumbnail_request_by_time()
@@ -105,7 +100,7 @@ enum libvlc_event_e {
     libvlc_MediaPlayerStopped,
     libvlc_MediaPlayerForward,
     libvlc_MediaPlayerBackward,
-    libvlc_MediaPlayerEndReached,
+    libvlc_MediaPlayerStopping,
     libvlc_MediaPlayerEncounteredError,
     libvlc_MediaPlayerTimeChanged,
     libvlc_MediaPlayerPositionChanged,
@@ -185,22 +180,22 @@ enum libvlc_event_e {
      * \deprecated No longer used.
      * This belonged to the removed libvlc_media_list_view_t
      */
-    libvlc_MediaListViewItemAdded=0x300,
+    libvlc_MediaListViewItemAdded LIBVLC_DEPRECATED =0x300,
     /**
      * \deprecated No longer used.
      * This belonged to the removed libvlc_media_list_view_t
      */
-    libvlc_MediaListViewWillAddItem,
+    libvlc_MediaListViewWillAddItem LIBVLC_DEPRECATED,
     /**
      * \deprecated No longer used.
      * This belonged to the removed libvlc_media_list_view_t
      */
-    libvlc_MediaListViewItemDeleted,
+    libvlc_MediaListViewItemDeleted LIBVLC_DEPRECATED,
     /**
      * \deprecated No longer used.
      * This belonged to the removed libvlc_media_list_view_t
      */
-    libvlc_MediaListViewWillDeleteItem,
+    libvlc_MediaListViewWillDeleteItem LIBVLC_DEPRECATED,
 
     /**
      * Playback of a \link #libvlc_media_list_player_t media list

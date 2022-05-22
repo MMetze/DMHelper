@@ -8,8 +8,35 @@ DMH_VLC::DMH_VLC() :
     _vlcInstance(nullptr)
 {
 #ifdef VIDEO_DEBUG_MESSAGES
-    const char *verbose_args = "-vvv";
-    _vlcInstance = libvlc_new(1, &verbose_args);
+//    const char *verbose_args = "-vvv";
+//    _vlcInstance = libvlc_new(1, &verbose_args);
+
+    /*
+    // Special case version to create a new cache file
+    const char *args[] = {
+        "--reset-plugins-cache",
+        "--plugins-cache",
+        "--plugins-scan",
+#ifdef QT_DEBUG
+        "-vvv",
+#endif
+        ""
+    };
+    */
+
+    // Normal run-time version
+    const char *args[] = {
+        "--no-reset-plugins-cache",
+        "--plugins-cache",
+        "--no-plugins-scan",
+#ifdef QT_DEBUG
+        "-vvv",
+#endif
+        ""
+    };
+
+    _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
+
 #else
     _vlcInstance = libvlc_new(0, nullptr);
 #endif

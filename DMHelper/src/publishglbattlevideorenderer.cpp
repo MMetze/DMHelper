@@ -1,11 +1,14 @@
 #include "publishglbattlevideorenderer.h"
-#include "publishglbattlebackground.h"
 #include "battledialogmodel.h"
 #include "videoplayerglplayer.h"
-#include "videoplayerglscreenshot.h"
 #include "map.h"
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
+
+#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+#include "videoplayerglscreenshot.h"
+#include "publishglbattlebackground.h"
+#endif
 
 PublishGLBattleVideoRenderer::PublishGLBattleVideoRenderer(BattleDialogModel* model, QObject *parent) :
     PublishGLBattleRenderer(model, parent),
@@ -18,6 +21,11 @@ PublishGLBattleVideoRenderer::PublishGLBattleVideoRenderer(BattleDialogModel* mo
 {
 }
 
+PublishGLBattleVideoRenderer::~PublishGLBattleVideoRenderer()
+{
+    PublishGLBattleVideoRenderer::cleanup();
+}
+
 void PublishGLBattleVideoRenderer::cleanup()
 {
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
@@ -25,8 +33,14 @@ void PublishGLBattleVideoRenderer::cleanup()
     _backgroundObject = nullptr;
 #endif
 
-    delete _videoPlayer;
-    _videoPlayer = nullptr;
+    if(_videoPlayer)
+    {
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget);
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLBattleVideoRenderer::updateProjectionMatrix);
+        VideoPlayerGLPlayer* deletePlayer = _videoPlayer;
+        _videoPlayer = nullptr;
+        deletePlayer->stopThenDelete();
+    }
 
     PublishGLBattleRenderer::cleanup();
 }
@@ -69,11 +83,11 @@ void PublishGLBattleVideoRenderer::initializeBackground()
     _videoPlayer = new VideoPlayerGLPlayer(_model->getMap()->getFileName(),
                                            _targetWidget->context(),
                                            _targetWidget->format(),
-                                           _scene.getTargetSize(),
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLBattleVideoRenderer::updateWidget);
-    initializationComplete();
+    connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLBattleVideoRenderer::updateProjectionMatrix);
+    _videoPlayer->restartPlayer();
 #endif
 }
 
@@ -82,7 +96,7 @@ bool PublishGLBattleVideoRenderer::isBackgroundReady()
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
     return _backgroundObject != nullptr;
 #else
-    return _videoPlayer != nullptr;
+    return ((_videoPlayer) && (_videoPlayer->vbObjectsExist()));
 #endif
 }
 
@@ -98,8 +112,8 @@ void PublishGLBattleVideoRenderer::resizeBackground(int w, int h)
     if(!_videoPlayer)
         return;
 
-    _videoPlayer->targetResized(_scene.getTargetSize());
     _videoPlayer->initializationComplete();
+    updateProjectionMatrix();
 #endif
 }
 
@@ -130,6 +144,16 @@ void PublishGLBattleVideoRenderer::updateBackground()
         updateFoW();
         updateProjectionMatrix();
     }
+#else
+    if(!_videoPlayer)
+        return;
+
+    if(_videoPlayer->vbObjectsExist())
+        _videoPlayer->cleanupVBObjects();
+
+    _videoPlayer->createVBObjects();
+    _scene.deriveSceneRectFromSize(getBackgroundSize());
+
 #endif
 }
 

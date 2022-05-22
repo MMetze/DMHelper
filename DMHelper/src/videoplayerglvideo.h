@@ -2,6 +2,7 @@
 #define VIDEOPLAYERGLVIDEO_H
 
 #include "dmh_vlc.h"
+#include <QObject>
 #include <QSemaphore>
 #include <QMutex>
 #include <QSize>
@@ -11,11 +12,19 @@ class QOpenGLContext;
 class QOpenGLFramebufferObject;
 class QOffscreenSurface;
 
-class VideoPlayerGLVideo
+#define VIDEO_DOUBLE_BUFFER
+#ifdef VIDEO_DOUBLE_BUFFER
+    const int VIDEO_BUFFER_COUNT = 5;
+#else
+    const int VIDEO_BUFFER_COUNT = 3;
+#endif
+
+class VideoPlayerGLVideo : public QObject
 {
+    Q_OBJECT
 public:
     VideoPlayerGLVideo(VideoPlayerGL* player);
-    ~VideoPlayerGLVideo();
+    virtual ~VideoPlayerGLVideo();
 
     bool isNewFrameAvailable();
     QOpenGLFramebufferObject *getVideoFrame();
@@ -30,21 +39,30 @@ public:
     static bool makeCurrent(void* data, bool current);
     static void* getProcAddress(void* data, const char* current);
 
-private:
+protected slots:
+    void configureContext(QOpenGLContext *renderContext);
+
+protected:
     VideoPlayerGL *_player;
     QOpenGLContext *_context;
     QOffscreenSurface *_surface;
     QSemaphore _videoReady;
 
     //FBO data
-    unsigned _width = 0;
-    unsigned _height = 0;
+    unsigned _width;
+    unsigned _height;
     QMutex _textLock;
-    QOpenGLFramebufferObject *_buffers[3];
-    size_t _idxRender = 0;
-    size_t _idxSwap = 1;
-    size_t _idxDisplay = 2;
-    bool _updated = false;
+    QOpenGLFramebufferObject *_buffers[VIDEO_BUFFER_COUNT];
+    size_t _idxRender;
+    size_t _idxSwapRender;
+#ifdef VIDEO_DOUBLE_BUFFER
+    size_t _idxSwapMid;
+    size_t _idxSwapDisplay;
+#endif
+    size_t _idxDisplay;
+    bool _updated;
+    bool _initialized;
+    int _frameCount;
 };
 
 #endif // VIDEOPLAYERGLVIDEO_H

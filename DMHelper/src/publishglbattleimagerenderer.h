@@ -10,6 +10,7 @@ class PublishGLBattleImageRenderer : public PublishGLBattleRenderer
     Q_OBJECT
 public:
     PublishGLBattleImageRenderer(BattleDialogModel* model, QObject *parent = nullptr);
+    virtual ~PublishGLBattleImageRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;

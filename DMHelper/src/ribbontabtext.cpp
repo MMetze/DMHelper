@@ -26,6 +26,8 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
     connect(ui->spinSpeed, SIGNAL(valueChanged(int)), this, SIGNAL(speedChanged(int)));
     connect(ui->btnRewind, SIGNAL(clicked()), this, SIGNAL(rewindClicked()));
 
+    connect(ui->btnPlayPause, &QAbstractButton::toggled, this, &RibbonTabText::playPauseClicked);
+
     connect(ui->btnAnimation, &QAbstractButton::clicked, this, &RibbonTabText::animationClicked);
 }
 
@@ -44,6 +46,7 @@ void RibbonTabText::setAnimation(bool checked)
     ui->btnAnimation->setChecked(checked);
     ui->spinSpeed->setEnabled(checked);
     ui->btnRewind->setEnabled(checked);
+    ui->btnPlayPause->setEnabled(checked);
 }
 
 void RibbonTabText::setImageFile(const QString& imageFile)
@@ -111,6 +114,13 @@ void RibbonTabText::setSpeed(int speed)
     }
 }
 
+void RibbonTabText::setPlaying(bool playing)
+{
+    ui->lblPlayPause->setText(playing ? QString("Pause") : QString("Play"));
+    ui->btnPlayPause->setIcon(playing ? QIcon(":/img/data/icon_pause.png") : QIcon(":/img/data/icon_play.png"));
+    ui->btnPlayPause->setChecked(playing);
+}
+
 void RibbonTabText::setHyperlinkActive(bool active)
 {
     ui->btnHyperlink->setEnabled(active);
@@ -133,6 +143,7 @@ void RibbonTabText::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, frameHeight);
     setLineHeight(*ui->line_2, frameHeight);
     setStandardButtonSize(*ui->lblAnimation, *ui->btnAnimation, frameHeight);
+    setStandardButtonSize(*ui->lblPlayPause, *ui->btnPlayPause, frameHeight);
     setStandardButtonSize(*ui->lblRewind, *ui->btnRewind, frameHeight);
     setLineHeight(*ui->line_3, frameHeight);
     setStandardButtonSize(*ui->lblTranslateText, *ui->btnTranslateText, frameHeight);

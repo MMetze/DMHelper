@@ -24,6 +24,10 @@
 #ifndef VLC_GL_H
 #define VLC_GL_H 1
 
+# ifdef __cplusplus
+extern "C" {
+# endif
+
 /**
  * \file
  * This file defines GL structures and functions.
@@ -52,6 +56,7 @@ struct vlc_gl_t
     module_t *module;
     void *sys;
 
+    struct vlc_decoder_device *device;
     union {
         struct { /* on-screen */
             void (*swap)(vlc_gl_t *);
@@ -61,7 +66,6 @@ struct vlc_gl_t
         struct { /* off-screen */
             picture_t *(*swap_offscreen)(vlc_gl_t *);
 
-            struct vlc_decoder_device *device;
             vlc_fourcc_t offscreen_chroma_out;
             struct vlc_video_context *offscreen_vctx_out;
             /* Flag to indicate if the OpenGL implementation produces upside-down
@@ -75,31 +79,6 @@ struct vlc_gl_t
     void (*resize)(vlc_gl_t *, unsigned, unsigned);
     void*(*get_proc_address)(vlc_gl_t *, const char *);
     void (*destroy)(vlc_gl_t *);
-
-    enum {
-        VLC_GL_EXT_DEFAULT,
-        VLC_GL_EXT_EGL,
-        VLC_GL_EXT_WGL,
-    } ext;
-
-    union {
-        /* if ext == VLC_GL_EXT_EGL */
-        struct {
-            /* call eglQueryString() with current display */
-            const char *(*queryString)(vlc_gl_t *, int32_t name);
-            /* call eglCreateImageKHR() with current display and context, can
-             * be NULL */
-            void *(*createImageKHR)(vlc_gl_t *, unsigned target, void *buffer,
-                                    const int32_t *attrib_list);
-            /* call eglDestroyImageKHR() with current display, can be NULL */
-            bool (*destroyImageKHR)(vlc_gl_t *, void *image);
-        } egl;
-        /* if ext == VLC_GL_EXT_WGL */
-        struct
-        {
-            const char *(*getExtensionsString)(vlc_gl_t *);
-        } wgl;
-    };
 
     /* Defined by the core for libvlc_opengl API loading. */
     enum vlc_gl_api_type api_type;
@@ -122,8 +101,7 @@ VLC_API vlc_gl_t *vlc_gl_CreateOffscreen(vlc_object_t *parent,
                                          unsigned width, unsigned height,
                                          unsigned flags, const char *name);
 
-VLC_API void vlc_gl_Release(vlc_gl_t *);
-VLC_API void vlc_gl_Hold(vlc_gl_t *);
+VLC_API void vlc_gl_Delete(vlc_gl_t *);
 
 static inline int vlc_gl_MakeCurrent(vlc_gl_t *gl)
 {
@@ -174,5 +152,9 @@ static inline bool vlc_gl_StrHasToken(const char *apis, const char *api)
     }
     return false;
 }
+
+#ifdef __cplusplus
+}
+#endif /* C++ */
 
 #endif /* VLC_GL_H */

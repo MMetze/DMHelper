@@ -21,6 +21,9 @@
 
 // TODO: adjust grid offsets to really match resized battle contents.
 
+// Uncomment this to log non-movement mouse actions
+//#define BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
+
 // Uncomment this to log all mouse movement actions
 //#define BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
 
@@ -184,7 +187,6 @@ void BattleDialogGraphicsScene::updateBattleContents()
             if(effect)
             {
                 qreal newScale = static_cast<qreal>(effect->getSize()) * static_cast<qreal>(_model->getGridScale()) / 500.0;
-                qDebug() << "[Battle Dialog Scene]     Setting scale for item " << item << " to " << newScale;
                 qreal oldScale = item->scale();
                 effect->setItemScale(item, newScale);
                 item->setPos(item->pos() * item->scale()/oldScale);
@@ -320,7 +322,9 @@ QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
 
 bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
     qDebug() << "[Battle Dialog Scene] doubleclick detected at " << mouseEvent->scenePos();
+#endif
 
     if(mouseEvent->button() == Qt::LeftButton)
     {
@@ -330,7 +334,9 @@ bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseE
             QUuid itemId = BattleDialogModelEffect::getEffectIdFromItem(item);
             if(!(itemId.isNull()))
             {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
                 qDebug() << "[Battle Dialog Scene] doubleclick identified on item " << itemId;
+#endif
                 _contextMenuItem = item;
                 editItem();
                 _contextMenuItem = nullptr;
@@ -340,7 +346,9 @@ bool BattleDialogGraphicsScene::handleMouseDoubleClickEvent(QGraphicsSceneMouseE
                 QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
                 if(pixItem)
                 {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
                     qDebug() << "[Battle Dialog Scene] doubleclick on combatant " << pixItem;
+#endif
                     emit itemMouseDoubleClick(pixItem);
                 }
             }
@@ -455,7 +463,9 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
     QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
     _isRotation = false;
 
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
     qDebug() << "[Battle Dialog Scene] mouse press at " << mouseEvent->scenePos() << " item " << item;
+#endif
 
     if(item)
     {
@@ -474,18 +484,24 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
             if(mouseEvent->button() == Qt::RightButton)
             {
                 _previousRotation = _mouseDownItem->rotation();
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
                  qDebug() << "[Battle Dialog Scene] right mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ", rot=" << _previousRotation;
+#endif
                 mouseEvent->accept();
                 return false;
             }
             else if(mouseEvent->button() == Qt::LeftButton)
             {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
                 qDebug() << "[Battle Dialog Scene] left mouse down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
+#endif
                 emit effectChanged(item);
             }
             else
             {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
                 qDebug() << "[Battle Dialog Scene] other mouse button down on " << _mouseDownItem << " identified: pos=" << _mouseDownPos << ".";
+#endif
             }
         }
         else if((mouseEvent->button() == Qt::LeftButton) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
@@ -495,7 +511,9 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
             {
                 _mouseDown = true;
                 _mouseDownItem = item;
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
                 qDebug() << "[Battle Dialog Scene] left mouse down on combatant " << pixItem;
+#endif
                 emit itemMouseDown(pixItem);
                 mouseEvent->accept();
             }
@@ -503,12 +521,16 @@ bool BattleDialogGraphicsScene::handleMousePressEvent(QGraphicsSceneMouseEvent *
     }
     else
     {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
         qDebug() << "[Battle Dialog Scene] ignoring mouse click for non-selectable item " << item;
+#endif
         mouseEvent->ignore();
         return false;
     }
 
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
     qDebug() << "[Battle Dialog Scene] mouse press default handling triggered " << mouseEvent;
+#endif
 
     return true;
 }
@@ -520,12 +542,16 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
         QGraphicsPixmapItem* pixItem = dynamic_cast<QGraphicsPixmapItem*>(item);
 
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
         qDebug() << "[Battle Dialog Scene] right mouse released at " << mouseEvent->scenePos() << " for item " << item;
+#endif
 
         QMenu menu(views().constFirst());
         if((item)&&(!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
         {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
             qDebug() << "[Battle Dialog Scene] right click identified on effect " << item;
+#endif
             if(_mouseDownPos == mouseEvent->scenePos() - item->scenePos())
             {
                 _contextMenuItem = item;
@@ -549,7 +575,9 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         }
         else if((item) && (pixItem) && ((item->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable))
         {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
             qDebug() << "[Battle Dialog Scene] right click identified on combatant " << pixItem;
+#endif
             _contextMenuItem = item;
             _mouseDownPos = mouseEvent->scenePos();
 
@@ -573,7 +601,9 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         }
         else
         {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
             qDebug() << "[Battle Dialog Scene] right click identified on background";
+#endif
             _mouseDownPos = mouseEvent->scenePos();
         }
 
@@ -609,12 +639,16 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 
         if(pixItem)
         {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
             qDebug() << "[Battle Dialog Scene] left mouse released at " << mouseEvent->scenePos() << " for item " << pixItem;
+#endif
             emit itemMouseUp(pixItem);
         }
         else
         {
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
             qDebug() << "[Battle Dialog Scene] left mouse released on background";
+#endif
         }
     }
 
@@ -622,7 +656,9 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
     _mouseDown = false;
     _mouseDownItem = nullptr;
 
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
     qDebug() << "[Battle Dialog Scene] mouse release default handling triggered " << mouseEvent;
+#endif
 
     return true;
 }
@@ -1022,7 +1058,9 @@ void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *
             return;
     }
 
+#ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
     qDebug() << "[Battle Dialog Scene] mouse double click default handling triggered " << mouseEvent;
+#endif
     // If the function reaches this point, default handling is expected
     QGraphicsScene::mousePressEvent(mouseEvent);
 }
@@ -1123,8 +1161,6 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
     switch(type)
     {
         case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
-            //scaledHalfSize = static_cast<qreal>(size) * 2.0 * _model->getGridScale() / (5.0 * 2.0);
-            //effectPosition = _mouseDownPos;// - QPointF(scaledHalfSize, scaledHalfSize);
             result = BattleDialogModelEffectFactory::createEffectRadius(effectPosition, size, color);
             break;
         case BattleDialogModelEffect::BattleDialogModelEffect_Cone:
