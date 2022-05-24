@@ -44,6 +44,7 @@
  *****************************************************************************/
 #include <stdlib.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -185,14 +186,14 @@
 # define VLC_USED
 #endif
 
-#if defined (__ELF__) || defined (__MACH__)
+#if defined (__ELF__) || defined (__MACH__) || defined (__wasm__)
 # define VLC_WEAK __attribute__((weak))
 #else
 /**
  * Weak symbol annotation
  *
  * Use this macro before an external identifier \b definition to mark it as a
- * weak symbol. A weak symbol can be overriden by another symbol of the same
+ * weak symbol. A weak symbol can be overridden by another symbol of the same
  * name at the link time.
  */
 # define VLC_WEAK
@@ -423,8 +424,9 @@ typedef struct vlc_url_t vlc_url_t;
 typedef struct iso639_lang_t iso639_lang_t;
 
 /* block */
-typedef struct block_t      block_t;
-typedef struct block_fifo_t block_fifo_t;
+typedef struct vlc_frame_t  block_t;
+typedef struct vlc_fifo_t vlc_fifo_t;
+typedef struct vlc_fifo_t block_fifo_t;
 
 /* Hashing */
 typedef struct vlc_hash_md5_ctx vlc_hash_md5_t;
@@ -463,25 +465,29 @@ typedef union
 
 } vlc_value_t;
 
-/*****************************************************************************
- * Error values (shouldn't be exposed)
- *****************************************************************************/
+/**
+ * \defgroup errors Error codes
+ * \ingroup cext
+ * @{
+ */
 /** No error */
-#define VLC_SUCCESS        (-0)
+#define VLC_SUCCESS        0
 /** Unspecified error */
-#define VLC_EGENERIC       (-1)
+#define VLC_EGENERIC       (-2 * (1 << (sizeof (int) * 8 - 2))) /* INT_MIN */
 /** Not enough memory */
-#define VLC_ENOMEM         (-2)
+#define VLC_ENOMEM         (-ENOMEM)
 /** Timeout */
-#define VLC_ETIMEOUT       (-3)
+#define VLC_ETIMEOUT       (-ETIMEDOUT)
 /** Not found */
-#define VLC_ENOENT         (-4)
+#define VLC_ENOENT         (-ENOENT)
 /** Bad variable value */
-#define VLC_EINVAL         (-7)
+#define VLC_EINVAL         (-EINVAL)
 /** Operation forbidden */
-#define VLC_EACCES         (-9)
+#define VLC_EACCES         (-EACCES)
 /** Operation not supported */
-#define VLC_ENOTSUP        (-10)
+#define VLC_ENOTSUP        (-ENOTSUP)
+
+/** @} */
 
 /*****************************************************************************
  * Variable callbacks: called when the value is modified

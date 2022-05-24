@@ -378,6 +378,7 @@ private:
 
     QPixmap _prescaledBackground;
     QPixmap _fowImage;
+    QImage _bwFoWImage;
     QImage _combatantFrame;
     QImage _countdownFrame;
     QSize _targetSize;
@@ -403,7 +404,6 @@ private:
     qreal _moveRadius;
     QPointF _moveStart;
 
-    QImage _bwFoWImage;
     QRect _sourceRect;
     QSize _videoSize;
 };

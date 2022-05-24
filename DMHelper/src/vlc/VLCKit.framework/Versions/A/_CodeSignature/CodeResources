@@ -6,7 +6,7 @@
 	<dict>
 		<key>Resources/Info.plist</key>
 		<data>
-		q65mvjd4B0W2/ueXEvCGwb/6eB8=
+		1525t/OI4HTG2H5edX2x6EldXS8=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -36,21 +36,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			6bhDpj/ypOin3wzW6wIs5CSMS/PhY2lULwZH4e82nnk=
+			l9oxhv/ZpB7tc1JDbTl/yy66jj2slcmel55iyYNnnJc=
 			</data>
 		</dict>
 		<key>Headers/VLCMediaDiscoverer.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			CbTXpdTLHbWNCRmp+YdBZORjQKVaYpxR9wRFAMIyh+k=
+			QzROC8VQ2vpyPLHN8ovzF8t2Ll6qhUTJcESModWnr24=
 			</data>
 		</dict>
 		<key>Headers/VLCMediaList.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			uM5mWbahG9qu9Ba01O9BGDVNM1dEpB2g1lcLuqDlHbc=
+			TxT2YbaPLbsKXhymdPOfXCM3h4fc984eCUtjTvw3q90=
 			</data>
 		</dict>
 		<key>Headers/VLCMediaListPlayer.h</key>
@@ -64,14 +64,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			gzAuGHJBPNPs8tJJvBPjkHYbLMfJpFwfZreoJkPEooo=
+			Jex3Vyl+mPnFHmjSkmBM++Hzg0weanBH7dSkmD6ZJzY=
 			</data>
 		</dict>
 		<key>Headers/VLCMediaThumbnailer.h</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			jN3JSQcfdXfT0dsPanSxqyBTDmwBb4J+DYSE2qm1HcM=
+			FMsIqMOdBkOluDTkeuLDAvH6Bb68M0r/oyN+z1IFxSA=
 			</data>
 		</dict>
 		<key>Headers/VLCStreamOutput.h</key>
@@ -197,7 +197,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			dqApU72CbOOm1ZOSjnj4BzMnZFuJ23cYYhQUIhewhBg=
+			hnmKfBppLOrixJLsLhKb6rrlOKRz2x5NiwGTo6a+XRk=
 			</data>
 		</dict>
 	</dict>

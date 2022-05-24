@@ -388,18 +388,22 @@ QUndoStack* Map::getUndoStack() const
 
 void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
 {
-    bool previewNeed = preview;
-
     if(!target)
     {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-        previewNeed = true;
+        if(!_imgFow.isNull())
+            internalApplyPaintTo(&_imgFow, clearColor, index, true, startIndex);
+        if(!_imgBWFow.isNull())
+            internalApplyPaintTo(&_imgBWFow, clearColor, index, true, startIndex);
     }
+    else
+    {
+        internalApplyPaintTo(target, clearColor, index, preview, startIndex);
+    }
+}
 
-    if(index < startIndex)
+void Map::internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
+{
+    if((!target) || (index < startIndex))
         return;
 
     if(index > _undoStack->count())
@@ -412,9 +416,10 @@ void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)
-            action->apply(previewNeed, target);
+            action->apply(preview, target);
     }
 }
+
 
 UndoMarker* Map::getMapMarker(int id)
 {
@@ -675,6 +680,11 @@ void Map::fillFoW(const QColor& color, QPaintDevice* target)
     QPainter p(target);
     p.setCompositionMode(QPainter::CompositionMode_Source);
     p.fillRect(0,0,target->width(),target->height(),color);
+}
+
+QImage Map::getRawBWFowImage()
+{
+    return _imgBWFow;
 }
 
 QImage Map::getBWFoWImage()
@@ -952,7 +962,11 @@ bool Map::initialize()
         _imgBackground = reader.read();
 
         if(_imgBackground.isNull())
-            return false; // Could not read the file as an image - it could be a video
+        {
+            // Could not read the file as an image - it could be a video, but could be a file error...
+            qDebug() << "[Map] Not able to read map file: " << reader.error() <<", " << reader.errorString();
+            return false;
+        }
 
         if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
             _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);

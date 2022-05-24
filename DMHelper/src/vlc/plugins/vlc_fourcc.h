@@ -55,6 +55,8 @@
 #define VLC_CODEC_DIRAC           VLC_FOURCC('d','r','a','c')
 #define VLC_CODEC_OGGSPOTS        VLC_FOURCC('S','P','O','T')
 #define VLC_CODEC_CAVS            VLC_FOURCC('C','A','V','S')
+#define VLC_CODEC_CAVS2           VLC_FOURCC('A','V','S','2')
+#define VLC_CODEC_CAVS3           VLC_FOURCC('A','V','S','3')
 #define VLC_CODEC_NUV             VLC_FOURCC('N','J','P','G')
 #define VLC_CODEC_RV10            VLC_FOURCC('R','V','1','0')
 #define VLC_CODEC_RV13            VLC_FOURCC('R','V','1','3')
@@ -190,6 +192,8 @@
 #define VLC_CODEC_IMM4            VLC_FOURCC('I','M','M','4')
 #define VLC_CODEC_IMM5            VLC_FOURCC('I','M','M','5')
 #define VLC_CODEC_AGM             VLC_FOURCC('A','G','M','0')
+#define VLC_CODEC_NOTCHLC         VLC_FOURCC('n','c','l','c')
+#define VLC_CODEC_RTP_VIDEO_RAW   VLC_FOURCC('R','T','P','V')
 
 /***********
  * Chromas
@@ -214,7 +218,7 @@
 /* Planar YUV 4:2:0 Y:U:V 10-bit stored on 16 bits LSB */
 #define VLC_CODEC_I420_10L        VLC_FOURCC('I','0','A','L')
 #define VLC_CODEC_I420_10B        VLC_FOURCC('I','0','A','B')
-/* Planar YUV 4:2:0 Y:U:V 12-bit stored on 16 bits */
+/* Planar YUV 4:2:0 Y:U:V 12-bit stored on 16 bits LSB */
 #define VLC_CODEC_I420_12L        VLC_FOURCC('I','0','C','L')
 #define VLC_CODEC_I420_12B        VLC_FOURCC('I','0','C','B')
 
@@ -224,13 +228,13 @@
 
 /* Planar YUV 4:2:2 Y:U:V 8-bit */
 #define VLC_CODEC_I422            VLC_FOURCC('I','4','2','2')
-/* Planar YUV 4:2:2 Y:U:V  9-bit stored on 16 bits */
+/* Planar YUV 4:2:2 Y:U:V  9-bit stored on 16 bits LSB */
 #define VLC_CODEC_I422_9L         VLC_FOURCC('I','2','9','L')
 #define VLC_CODEC_I422_9B         VLC_FOURCC('I','2','9','B')
-/* Planar YUV 4:2:2 Y:U:V 10-bit stored on 16 bits */
+/* Planar YUV 4:2:2 Y:U:V 10-bit stored on 16 bits LSB */
 #define VLC_CODEC_I422_10L        VLC_FOURCC('I','2','A','L')
 #define VLC_CODEC_I422_10B        VLC_FOURCC('I','2','A','B')
-/* Planar YUV 4:2:2 Y:U:V 12-bit stored on 16 bits */
+/* Planar YUV 4:2:2 Y:U:V 12-bit stored on 16 bits LSB */
 #define VLC_CODEC_I422_12L        VLC_FOURCC('I','2','C','L')
 #define VLC_CODEC_I422_12B        VLC_FOURCC('I','2','C','B')
 /* Planar YUV 4:2:2 Y:U:V 16-bit stored on 16 bits */
@@ -241,13 +245,13 @@
 #define VLC_CODEC_I440            VLC_FOURCC('I','4','4','0')
 /* Planar YUV 4:4:4 Y:U:V 8-bit */
 #define VLC_CODEC_I444            VLC_FOURCC('I','4','4','4')
-/* Planar YUV 4:4:4 Y:U:V  9-bit stored on 16 bits */
+/* Planar YUV 4:4:4 Y:U:V  9-bit stored on 16 bits LSB */
 #define VLC_CODEC_I444_9L         VLC_FOURCC('I','4','9','L')
 #define VLC_CODEC_I444_9B         VLC_FOURCC('I','4','9','B')
-/* Planar YUV 4:4:4 Y:U:V 10-bit stored on 16 bits */
+/* Planar YUV 4:4:4 Y:U:V 10-bit stored on 16 bits LSB */
 #define VLC_CODEC_I444_10L        VLC_FOURCC('I','4','A','L')
 #define VLC_CODEC_I444_10B        VLC_FOURCC('I','4','A','B')
-/* Planar YUV 4:4:4 Y:U:V 12-bit stored on 16 bits */
+/* Planar YUV 4:4:4 Y:U:V 12-bit stored on 16 bits LSB */
 #define VLC_CODEC_I444_12L        VLC_FOURCC('I','4','C','L')
 #define VLC_CODEC_I444_12B        VLC_FOURCC('I','4','C','B')
 /* Planar YUV 4:4:4 Y:U:V 16-bit */
@@ -276,6 +280,10 @@
 #define VLC_CODEC_YUVA_444_10L    VLC_FOURCC('Y','A','0','L')
 #define VLC_CODEC_YUVA_444_10B    VLC_FOURCC('Y','A','0','B')
 
+/* Planar Y:U:V:A 4:4:4 12bits */
+#define VLC_CODEC_YUVA_444_12L    VLC_FOURCC('Y','A','2','L')
+#define VLC_CODEC_YUVA_444_12B    VLC_FOURCC('Y','A','2','B')
+
 /* Semi-planar Y/UV */
 
 /* 2 planes Y/UV 4:2:0 */
@@ -290,9 +298,9 @@
 #define VLC_CODEC_NV24            VLC_FOURCC('N','V','2','4')
 /* 2 planes Y/VU 4:4:4 */
 #define VLC_CODEC_NV42            VLC_FOURCC('N','V','4','2')
-/* 2 planes Y/UV 4:2:0 10-bit */
+/* 2 planes Y/UV 4:2:0 10-bit MSB, little endian */
 #define VLC_CODEC_P010            VLC_FOURCC('P','0','1','0')
-/* 2 planes Y/UV 4:2:0 16-bit */
+/* 2 planes Y/UV 4:2:0 16-bit, little endian */
 #define VLC_CODEC_P016            VLC_FOURCC('P','0','1','6')
 
 /* Packed YUV */
@@ -494,6 +502,7 @@
 #define VLC_CODEC_ADPCM_IMA_WS               VLC_FOURCC('A','I','W','S')
 #define VLC_CODEC_ADPCM_G722                 VLC_FOURCC('g','7','2','2')
 #define VLC_CODEC_ADPCM_G726                 VLC_FOURCC('g','7','2','6')
+#define VLC_CODEC_ADPCM_G726_LE              VLC_FOURCC('g','7','2','s')
 #define VLC_CODEC_ADPCM_SWF                  VLC_FOURCC('S','W','F','a')
 #define VLC_CODEC_ADPCM_MS                   VLC_FOURCC('m','s',0x00,0x02)
 #define VLC_CODEC_ADPCM_IMA_WAV              VLC_FOURCC('m','s',0x00,0x11)
