@@ -3,6 +3,7 @@
 
 #include <QGraphicsItemGroup>
 #include <QPoint>
+#include <QPen>
 
 class QGraphicsScene;
 class BattleDialogModel;
@@ -40,6 +41,7 @@ private:
 
     QRect _gridShape;
     QList<QGraphicsItem*> _grid;
+    QPen _localPen;
 };
 
 #endif // GRID_H

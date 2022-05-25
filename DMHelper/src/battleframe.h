@@ -98,6 +98,8 @@ public slots:
     void setGridType(int gridType);
     void setXOffset(int xOffset);
     void setYOffset(int yOffset);
+    void setGridWidth(int gridWidth);
+    void setGridColor(const QColor& gridColor);
     void setGridVisible(bool gridVisible);
 
     void setInitiativeType(int initiativeType);

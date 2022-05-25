@@ -493,6 +493,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridWidthChanged, _battleFrame, &BattleFrame::setGridWidth);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridColorChanged, _battleFrame, &BattleFrame::setGridColor);
 
     connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
     connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
@@ -2477,6 +2479,8 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattleMap->setGridAngle(model->getGridAngle());
         _ribbonTabBattleMap->setGridXOffset(model->getGridOffsetX());
         _ribbonTabBattleMap->setGridYOffset(model->getGridOffsetY());
+        _ribbonTabBattleMap->setGridWidth(model->getGridPen().width());
+        _ribbonTabBattleMap->setGridColor(model->getGridPen().color());
     }
 }
 

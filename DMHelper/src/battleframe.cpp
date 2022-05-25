@@ -747,6 +747,42 @@ void BattleFrame::setYOffset(int yOffset)
     }
 }
 
+void BattleFrame::setGridWidth(int gridWidth)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid width, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridWidth(gridWidth);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+        updateRendererGrid();
+    }
+}
+
+void BattleFrame::setGridColor(const QColor& gridColor)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid color, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridColor(gridColor);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+        updateRendererGrid();
+    }
+}
+
 void BattleFrame::setGridVisible(bool gridVisible)
 {
     if(!_model)
