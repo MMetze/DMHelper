@@ -6,6 +6,7 @@
 #include "spellbookdialog.h"
 #include "dmconstants.h"
 #include "optionscontainer.h"
+#include "campaigntreeactivestack.h"
 #include <QMainWindow>
 #include <QLabel>
 #include <QFileInfo>
@@ -165,6 +166,8 @@ protected slots:
 
     void handleAnimationStarted();
 
+    bool selectItemFromStack(const QUuid& itemId);
+
     // Bestiary
     void openBestiary();
     void exportBestiary();
@@ -200,6 +203,7 @@ private:
     EncounterTextEdit* _encounterTextEdit;
 
     CampaignTreeModel* _treeModel;
+    CampaignTreeActiveStack* _activeItems;
     QVBoxLayout* _characterLayout;
     Campaign* _campaign;
     QString _campaignFileName;

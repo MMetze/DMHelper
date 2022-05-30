@@ -34,7 +34,6 @@ signals:
     void itemMoved(QStandardItem* movedItem);
 
 public slots:
-
     void setCampaign(Campaign* campaign);
     void setPublishIndex(const QModelIndex& index, bool publish);
     void refresh();
@@ -48,7 +47,6 @@ protected slots:
     void handleObjectNameChanged(CampaignObjectBase* object, const QString& name);
 
 protected:
-
     void updateCampaignEntries();
     QStandardItem* createTreeEntry(CampaignObjectBase* object, QStandardItem* parentEntry);
     void addTreeEntry(CampaignTreeItem* objectEntry, QStandardItem* parentEntry);

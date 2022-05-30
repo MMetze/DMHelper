@@ -57,6 +57,7 @@ SOURCES += main.cpp\
     campaignobjectfactory.cpp \
     campaignobjectframe.cpp \
     campaignobjectframestack.cpp \
+    campaigntreeactivestack.cpp \
     campaigntreeitem.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
@@ -287,6 +288,7 @@ HEADERS  += mainwindow.h \
     campaignobjectfactory.h \
     campaignobjectframe.h \
     campaignobjectframestack.h \
+    campaigntreeactivestack.h \
     campaigntreeitem.h \
     characterimportdialog.h \
     colorpushbutton.h \

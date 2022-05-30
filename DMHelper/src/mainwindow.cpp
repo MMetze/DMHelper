@@ -119,6 +119,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _countdownDlg(nullptr),
     _encounterTextEdit(nullptr),
     _treeModel(nullptr),
+    _activeItems(nullptr),
     _characterLayout(nullptr),
     _campaign(nullptr),
     _campaignFileName(),
@@ -654,6 +655,9 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.showMessage(QString("Preparing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
+
+    _activeItems = new CampaignTreeActiveStack(this);
+    connect(_activeItems, &CampaignTreeActiveStack::activateItem, this, &MainWindow::selectItemFromStack);
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
@@ -1490,6 +1494,18 @@ void MainWindow::mouseMoveEvent(QMouseEvent * event)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    if(!event)
+        return;
+
+    if(event->modifiers() == Qt::AltModifier)
+    {
+        if(event->key() == Qt::Key_Left)
+            _activeItems->backwards();
+        else if(event->key() == Qt::Key_Right)
+            _activeItems->forwards();
+        return;
+    }
+
     switch(event->key())
     {
         case Qt::Key_Escape:
@@ -1759,7 +1775,7 @@ void MainWindow::enableCampaignMenu()
 
 bool MainWindow::selectIndex(const QModelIndex& index)
 {
-    if(!index.isValid())
+    if((!index.isValid()) || (!_treeModel))
         return false;
 
     ui->treeView->setCurrentIndex(index);
@@ -2052,6 +2068,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     updateMapFiles();
     updateClock();
 
+    _activeItems->clear();
     _treeModel->setCampaign(campaign);
 
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
@@ -2060,7 +2077,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     {
         QModelIndex firstIndex = _treeModel->index(0,0);
         if(firstIndex.isValid())
-            ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
+            selectIndex(firstIndex); //ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
         connect(campaign, SIGNAL(dirty()), this, SLOT(setDirty()));
@@ -2268,6 +2285,9 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
 
     if(item)
     {
+        // Add the item to the undo stack for IDs
+        _activeItems->push(item->getCampaignItemId());
+
         itemObject = item->getCampaignItemObject();
         if(itemObject)
             activateObject(itemObject);
@@ -2312,6 +2332,20 @@ void MainWindow::handleAnimationStarted()
     if(_pubWindow)
         _pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
+}
+
+bool MainWindow::selectItemFromStack(const QUuid& itemId)
+{
+    if((!_treeModel) || (itemId.isNull()))
+        return false;
+
+    QModelIndex itemIndex = _treeModel->getObjectIndex(itemId);
+    if(!itemIndex.isValid())
+        return false;
+
+    ui->treeView->setCurrentIndex(itemIndex);
+    activateWindow();
+    return true;
 }
 
 void MainWindow::openBestiary()

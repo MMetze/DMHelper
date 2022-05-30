@@ -1,5 +1,6 @@
 #include "textbrowsermargins.h"
 #include <QMargins>
+#include <QKeyEvent>
 
 TextBrowserMargins::TextBrowserMargins(QWidget *parent) :
     QTextBrowser(parent),
@@ -19,7 +20,15 @@ void TextBrowserMargins::setTextWidth(int textWidth)
 void TextBrowserMargins::resizeEvent(QResizeEvent *event)
 {
     updateTextWidth();
-    QTextEdit::resizeEvent(event);
+    QTextBrowser::resizeEvent(event);
+}
+
+void TextBrowserMargins::keyPressEvent(QKeyEvent *event)
+{
+    if(event->modifiers() == Qt::AltModifier)
+        event->ignore();
+    else
+        QTextBrowser::keyPressEvent(event);
 }
 
 void TextBrowserMargins::updateTextWidth()

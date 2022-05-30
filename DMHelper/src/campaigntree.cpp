@@ -64,6 +64,17 @@ void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
     event->accept();
 }
 
+void CampaignTree::keyPressEvent(QKeyEvent *event)
+{
+    if((event) && (event->modifiers() == Qt::AltModifier))
+    {
+        event->ignore();
+        return;
+    }
+
+    QTreeView::keyPressEvent(event);
+}
+
 void CampaignTree::updateExpandedState()
 {
     CampaignTreeModel* campaignModel = dynamic_cast<CampaignTreeModel*>(model());

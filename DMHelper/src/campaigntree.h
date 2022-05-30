@@ -23,6 +23,7 @@ public slots:
 
 protected:
     virtual void dragMoveEvent(QDragMoveEvent * event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
 
     void updateExpandedState();
     void iterateItemExpanded(QStandardItem* item);
