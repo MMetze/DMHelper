@@ -59,7 +59,7 @@ windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin32\packa
 
 rem Create the installer
 cd ..\bin32
-binarycreator -c config\config_win32.xml -p packages "DMHelper 32-bit release Installer"
+binarycreator -v -c config\config_win32.xml -p packages "DMHelper 32-bit release Installer"
 cd ..
 move ".\bin32\DMHelper 32-bit release Installer.exe" ".\DMHelper 32-bit release Installer.exe"
 
