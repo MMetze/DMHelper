@@ -658,6 +658,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     _activeItems = new CampaignTreeActiveStack(this);
     connect(_activeItems, &CampaignTreeActiveStack::activateItem, this, &MainWindow::selectItemFromStack);
+    connect(ui->btnBack, &QAbstractButton::clicked, _activeItems, &CampaignTreeActiveStack::backwards);
+    connect(ui->btnForwards, &QAbstractButton::clicked, _activeItems, &CampaignTreeActiveStack::forwards);
+    connect(_activeItems, &CampaignTreeActiveStack::backwardsAvailable, ui->btnBack, &QAbstractButton::setEnabled);
+    connect(_activeItems, &CampaignTreeActiveStack::forwardsAvailable, ui->btnForwards, &QAbstractButton::setEnabled);
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
@@ -1442,6 +1446,19 @@ void MainWindow::showEvent(QShowEvent * event)
 
         _initialized = true;
     }
+
+    int ribbonHeight = RibbonFrame::getRibbonHeight();
+    int iconSize =  ribbonHeight * 4 / 5;
+    ui->btnBack->setMinimumWidth(ribbonHeight);
+    ui->btnBack->setMaximumWidth(ribbonHeight);
+    ui->btnBack->setMinimumHeight(ribbonHeight);
+    ui->btnBack->setMaximumHeight(ribbonHeight);
+    ui->btnBack->setIconSize(QSize(iconSize, iconSize));
+    ui->btnForwards->setMinimumWidth(ribbonHeight);
+    ui->btnForwards->setMaximumWidth(ribbonHeight);
+    ui->btnForwards->setMinimumHeight(ribbonHeight);
+    ui->btnForwards->setMaximumHeight(ribbonHeight);
+    ui->btnForwards->setIconSize(QSize(iconSize, iconSize));
 
     QMainWindow::showEvent(event);
 }

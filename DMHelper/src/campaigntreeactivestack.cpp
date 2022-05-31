@@ -19,6 +19,7 @@ void CampaignTreeActiveStack::backwards()
     qDebug() << "[CampaignTreeActiveStack] Moving backwards. Stack size: " << _activeStack.count() << ", new index: " << _index - 1 << ", UUID: " << _activeStack.at(_index - 1);
 #endif
     emit activateItem(_activeStack.at(--_index));
+    checkAvailable();
 }
 
 void CampaignTreeActiveStack::forwards()
@@ -30,6 +31,7 @@ void CampaignTreeActiveStack::forwards()
     qDebug() << "[CampaignTreeActiveStack] Moving forwards. Stack size: " << _activeStack.count() << ", new index: " << _index + 1 << ", UUID: " << _activeStack.at(_index + 1);
 #endif
     emit activateItem(_activeStack.at(++_index));
+    checkAvailable();
 }
 
 void CampaignTreeActiveStack::push(const QUuid& uuid)
@@ -56,6 +58,7 @@ void CampaignTreeActiveStack::push(const QUuid& uuid)
 #endif
     _activeStack.append(uuid);
     ++_index;
+    checkAvailable();
 }
 
 void CampaignTreeActiveStack::clear()
@@ -65,4 +68,11 @@ void CampaignTreeActiveStack::clear()
 #endif
     _index = -1;
     _activeStack.clear();
+    checkAvailable();
+}
+
+void CampaignTreeActiveStack::checkAvailable()
+{
+    emit backwardsAvailable(_index > 0);
+    emit forwardsAvailable((_index >= 0) && (_index < _activeStack.count() - 1));
 }

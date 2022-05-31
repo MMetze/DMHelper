@@ -14,7 +14,7 @@ Component.prototype.createOperations = function()
         // return value 5100 means there's a newer version of the runtime already installed
         // 1602: Happens when the installation of Redistributable Package is cancelled.
         // 1638: Happens when another version of the Redistributable Package is already installed.
-        component.addElevatedOperation("Execute", "{0,3010,1602,1638,5100}", "@TargetDir@\\vc_redist.x64.exe", "/norestart", "/q");
+        component.addElevatedOperation("Execute", "{0,3010,1602,1638,5100}", "@TargetDir@\\vc_redist.x86.exe", "/norestart", "/q");
 
         component.addOperation("CreateShortcut", "@TargetDir@/DMHelper.exe", "@StartMenuDir@/DMHelper.lnk",
             "workingDirectory=@TargetDir@", "description=Open DMHelper");

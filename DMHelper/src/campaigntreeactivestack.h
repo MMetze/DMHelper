@@ -13,6 +13,8 @@ public:
 
 signals:
     void activateItem(const QUuid& uuid);
+    void backwardsAvailable(bool available);
+    void forwardsAvailable(bool available);
 
 public slots:
     void backwards();
@@ -21,6 +23,8 @@ public slots:
     void clear();
 
 protected:
+    void checkAvailable();
+
     QList<QUuid> _activeStack;
     int _index;
 };
