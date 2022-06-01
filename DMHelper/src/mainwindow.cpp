@@ -1511,24 +1511,6 @@ void MainWindow::mouseMoveEvent(QMouseEvent * event)
     QMainWindow::mouseMoveEvent(event);
 }
 
-
-
-
-
-
-void MainWindow::timerEvent(QTimerEvent *event)
-{
-    QWidget* fW = QApplication::focusWidget();
-    qDebug() << "[MainWindow] FOCUS CHECK: " << fW << (fW ? QString(", ") + fW->objectName() : QString());
-}
-
-
-
-
-
-
-
-
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(!event)
@@ -2138,18 +2120,6 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     }
 
     enableCampaignMenu();
-
-
-
-
-
-
-
-    startTimer(500);
-
-
-
-
 }
 
 void MainWindow::updateCampaignTree()

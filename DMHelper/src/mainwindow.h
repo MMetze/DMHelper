@@ -125,15 +125,6 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent * event);
     virtual void mouseMoveEvent(QMouseEvent * event);
 
-
-
-
-    virtual void timerEvent(QTimerEvent *event);
-
-
-
-
-
     virtual void keyPressEvent(QKeyEvent *event);
 
     void dragEnterEvent(QDragEnterEvent *event);
