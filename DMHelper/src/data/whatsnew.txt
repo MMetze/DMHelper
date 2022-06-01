@@ -12,6 +12,10 @@
 <h2>What's New: Version 2.4</h2>
 <h3>New Features:</h3>
 <ul>
+
+Navigate backwards and forwards through last campaign entries
+Grid size and grid color are configurable
+
 <li>What's New? This What's New Dialog! Spiffy, isn't it?
 <li>Amazing new HW-accelerated Player Window rendering... lots more to come here! If you had any performance issues while publishing with previous versions, that should be a thing of the past now.
 <li>All-new (and still optional) Initiative Tracker on the Player Window. Somewhat condensed and two different visualization options

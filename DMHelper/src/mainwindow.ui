@@ -97,6 +97,9 @@
               <height>50</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Backwards (Alt-Left)</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -131,6 +134,9 @@
               <width>50</width>
               <height>50</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Forwards (Alt-Right)</string>
             </property>
             <property name="text">
              <string/>
