@@ -23,10 +23,10 @@ setup_build() {
   cp -R src/installer/ bin64/
 }
 
+message "Building DMHelper for MacOS"
+
 # capture current directory.
 message "Running $SCRIPT_DIR/buildanddeploymac.sh from $CUR_DIR"
-
-message "Building DMHelper for MacOS"
 
 # only define QT_DIR if it's not already defined in the environment.
 QT_VERSION=5.15.2

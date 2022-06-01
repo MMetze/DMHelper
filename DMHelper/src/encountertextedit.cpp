@@ -229,7 +229,7 @@ bool EncounterTextEdit::eventFilter(QObject *watched, QEvent *event)
         }
     }
 
-    return false;
+    return CampaignObjectFrame::eventFilter(watched, event);
 }
 
 void EncounterTextEdit::clear()

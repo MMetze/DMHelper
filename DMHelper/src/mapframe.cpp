@@ -207,7 +207,7 @@ bool MapFrame::eventFilter(QObject *obj, QEvent *event)
             return true;
     }
 
-    return QWidget::eventFilter(obj, event);
+    return CampaignObjectFrame::eventFilter(obj, event);
 }
 
 QAction* MapFrame::getUndoAction(QObject* parent)

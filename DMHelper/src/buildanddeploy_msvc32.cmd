@@ -1,3 +1,6 @@
+@set DIR_MSG="Running build script from %cd%"
+@CALL :Message2 "Building DMHelper for Windows x86" %DIR_MSG%
+
 :start
 @set choice=
 @set /p choice=Are you sure you would like to completely rebuild and redeploy the application? (y/n)
@@ -31,6 +34,8 @@ cd ..
 rem Uncomment the following line to skip actually building the SW
 rem goto skip_build
 
+@CALL :Message "Compiling DMHelper"
+
 rmdir /s /q .\build-32_bit-release
 mkdir build-32_bit-release
 cd build-32_bit-release
@@ -45,7 +50,7 @@ goto build_done
 cd build-32_bit-release
 
 :build_done
-
+@CALL :Message "Copy resource content"
 xcopy .\release\DMHelper.exe ..\bin32\packages\com.dmhelper.app\data\
 xcopy %QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%\bin\Qt5Xml.dll ..\bin32\packages\com.dmhelper.app\data\
 xcopy ..\src\binsrc\* ..\bin32\packages\com.dmhelper.app\data\*
@@ -57,16 +62,32 @@ xcopy /s ..\src\resources\* ..\bin32\packages\com.dmhelper.app\data\resources\*
 
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin32\packages\com.dmhelper.app\data
 
-rem Create the installer
+
+@CALL :Message "Create the installer"
 cd ..\bin32
 binarycreator -v -c config\config_win32.xml -p packages "DMHelper 32-bit release Installer"
 cd ..
 move ".\bin32\DMHelper 32-bit release Installer.exe" ".\DMHelper 32-bit release Installer.exe"
 
-rem Create the zip-file distribution
+
+@CALL :Message "Create the zip-file distribution"
 "%SEVENZIP_APP%" a -tzip archive.zip .\bin32\packages\com.dmhelper.app\data\*
 del "DMHelper 32-bit release.zip"
 rename archive.zip "DMHelper 32-bit release.zip"
 
 :end
-pause
+@pause
+@EXIT /B 0
+
+:Message
+@echo ................................................................................
+@echo %~1
+@echo ................................................................................
+@EXIT /B 0
+
+:Message2
+@echo ................................................................................
+@echo %~1
+@echo %~2
+@echo ................................................................................
+@EXIT /B 0

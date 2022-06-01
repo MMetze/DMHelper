@@ -662,6 +662,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->btnForwards, &QAbstractButton::clicked, _activeItems, &CampaignTreeActiveStack::forwards);
     connect(_activeItems, &CampaignTreeActiveStack::backwardsAvailable, ui->btnBack, &QAbstractButton::setEnabled);
     connect(_activeItems, &CampaignTreeActiveStack::forwardsAvailable, ui->btnForwards, &QAbstractButton::setEnabled);
+    connect(_battleFrame, &BattleFrame::navigateBackwards, _activeItems, &CampaignTreeActiveStack::backwards);
+    connect(_battleFrame, &BattleFrame::navigateForwards, _activeItems, &CampaignTreeActiveStack::forwards);
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
@@ -1509,6 +1511,24 @@ void MainWindow::mouseMoveEvent(QMouseEvent * event)
     QMainWindow::mouseMoveEvent(event);
 }
 
+
+
+
+
+
+void MainWindow::timerEvent(QTimerEvent *event)
+{
+    QWidget* fW = QApplication::focusWidget();
+    qDebug() << "[MainWindow] FOCUS CHECK: " << fW << (fW ? QString(", ") + fW->objectName() : QString());
+}
+
+
+
+
+
+
+
+
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(!event)
@@ -2118,6 +2138,18 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     }
 
     enableCampaignMenu();
+
+
+
+
+
+
+
+    startTimer(500);
+
+
+
+
 }
 
 void MainWindow::updateCampaignTree()

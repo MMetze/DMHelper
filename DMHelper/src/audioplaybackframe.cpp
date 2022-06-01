@@ -125,7 +125,7 @@ bool AudioPlaybackFrame::eventFilter(QObject *obj, QEvent *event)
     }
 
     // standard event processing
-    return QObject::eventFilter(obj, event);
+    return QFrame::eventFilter(obj, event);
 }
 
 void AudioPlaybackFrame::togglePlay(bool checked)

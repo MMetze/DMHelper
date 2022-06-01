@@ -195,6 +195,9 @@ signals:
 
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
 
+    void navigateForwards();
+    void navigateBackwards();
+
 protected:
     virtual void keyPressEvent(QKeyEvent * e) override;
     virtual bool eventFilter(QObject *obj, QEvent *event) override;

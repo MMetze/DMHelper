@@ -1265,6 +1265,22 @@ void BattleFrame::keyPressEvent(QKeyEvent * e)
 
 bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
 {
+    if(!event)
+        return false;
+
+    if(event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        if((keyEvent) && (keyEvent->modifiers() == Qt::AltModifier))
+        {
+            if(keyEvent->key() == Qt::Key_Left)
+                emit navigateBackwards();
+            else if(keyEvent->key() == Qt::Key_Right)
+                emit navigateForwards();
+            return true;
+        }
+    }
+
     if(_model)
     {
         CombatantWidget* widget = dynamic_cast<CombatantWidget*>(obj);
@@ -1441,7 +1457,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
         }
     }
 
-    return QObject::eventFilter(obj,event);
+    return CampaignObjectFrame::eventFilter(obj,event);
 }
 
 void BattleFrame::resizeEvent(QResizeEvent *event)

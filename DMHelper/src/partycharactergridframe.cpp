@@ -79,7 +79,7 @@ bool PartyCharacterGridFrame::eventFilter(QObject *obj, QEvent *event)
         return true;
     }
 
-    return false;
+    return QFrame::eventFilter(obj, event);
 }
 
 void PartyCharacterGridFrame::syncDndBeyond()
