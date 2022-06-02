@@ -1011,7 +1011,6 @@ void BattleFrame::addMonsters()
 
         QString baseName = combatantDlg.getName();
         int monsterCount = combatantDlg.getCount();
-        int localHP = combatantDlg.getLocalHitPoints().isEmpty() ? 0 : combatantDlg.getLocalHitPoints().toInt();
         int localInitiative = combatantDlg.getInitiative().toInt();
 
         qreal sizeFactor = 0.0;
@@ -1026,7 +1025,7 @@ void BattleFrame::addMonsters()
         {
             BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
             monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
-            monster->setHitPoints(localHP == 0 ? monsterClass->getHitDice().roll() : localHP);
+            monster->setHitPoints(combatantDlg.getCombatantHitPoints());
             monster->setInitiative(combatantDlg.isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
             monster->setKnown(combatantDlg.isKnown());
             monster->setShown(combatantDlg.isShown());

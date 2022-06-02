@@ -2,17 +2,18 @@
 2. Rendering positioning to work on Mac (ongakugainochi)
 3. init for maps without combat - view tab doesn'T do anything... (Encryptid) - DONE
 4. Players see dead people - Loki - DONE
-5. character death not updated - me
+5. character death not updated - DONE
 PCs should also be able to be made invisible (* visibility/known of PCs should also impact visibility) - DONE
 (TwistedDM — 04/25/2022) Not sure if this has been mentioned before (I looked but didn't see anything mentioned at least), but the latest release seems to mess with custom selection/activation icons. They display properly in the DM Window, but the player window still shows the default icons.
 (Loki — 05/12/2022) Another totally useless find!  Since the PC's were leveling up, I entered their new XP total as 6,500.  When I went back to check them they had all been set to 0.  Entering the value as 6500 worked fine.  Would be nice to have either an error on that field or allow commas.  It doesn't seem to be used anywhere (like auto updating the Proficiency Bonus) so maybe allow both?
-(Loki — 05/03/2022) In 2.3 when adding monsters in combat, you could leave Hit Points blank and not check 'Use Average HP'.  This would add the monster with a simulated HP roll so when adding several monsters they could all have different HP.  In 2.4 it just seems to add them all with the average.
+DONE (Loki — 05/03/2022) In 2.3 when adding monsters in combat, you could leave Hit Points blank and not check 'Use Average HP'.  This would add the monster with a simulated HP roll so when adding several monsters they could all have different HP.  In 2.4 it just seems to add them all with the average.
 (nubsie13 — 05/12/2022) Please forgive my ignorance, but is there a way to have the turn countdown bar appear in the initiative tracker on the player window?
 Configuration of:
    * grid width
    * grid color
    * initiative tracker icon size
    * initiative tracker text size
+Fixed basic Youtube playback - DONE
 
 Battle Frame://change to have greyscale and BW FOWs - also, switching back and forth leaves the publish icon not synced!
 Videos to play back in repeat mode
