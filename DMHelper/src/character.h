@@ -38,6 +38,7 @@ public:
         StringValue_spells,
         StringValue_notes,
         StringValue_size,
+        StringValue_experience,
 
         STRINGVALUE_COUNT
     };
@@ -58,7 +59,6 @@ public:
         IntValue_gold,
         IntValue_silver,
         IntValue_copper,
-        IntValue_experience,
         IntValue_jackofalltrades,
         IntValue_maximumHP,
 

@@ -26,7 +26,8 @@ const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
     "",         // StringValue_proficiencies
     "",         // StringValue_spells
     "",         // StringValue_notes
-    "medium"    // StringValue_size
+    "medium",   // StringValue_size
+    "0"         // StringValue_experience
 };
 
 const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
@@ -49,7 +50,8 @@ const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
     "proficiencies",    // StringValue_proficiencies
     "spells",           // StringValue_spells
     "notes",            // StringValue_notes
-    "size"              // StringValue_size
+    "size",             // StringValue_size
+    "experience"        // StringValue_experience
 };
 
 const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
@@ -68,7 +70,6 @@ const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
     0,      // IntValue_gold
     0,      // IntValue_silver
     0,      // IntValue_copper
-    0,      // IntValue_experience
     0,      // IntValue_jackofalltrades
     1       // IntValue_maximumHP
 };
@@ -89,7 +90,6 @@ const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
     "gold",             // IntValue_gold
     "silver",           // IntValue_silver
     "copper",           // IntValue_copper
-    "experience",       // IntValue_experience
     "jackofalltrades",  // IntValue_jackofalltrades
     "maximumhp"         // IntValue_maximumHP
 };
