@@ -52,7 +52,9 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _movementToken(nullptr),
     _activeCombatant(nullptr),
     _activePC(false),
+    _activeTokenFile(),
     _activeToken(nullptr),
+    _selectionTokenFile(),
     _selectionToken(nullptr),
     _recreateLine(false),
     _lineItem(nullptr),
@@ -60,6 +62,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _lineImage(nullptr),
     _lineTextImage(nullptr),
     _updateFow(false),
+    _updateSelectionTokens(false),
     _recreateContent(false)
 {
 }
@@ -210,6 +213,9 @@ void PublishGLBattleRenderer::paintGL()
     else
     {
         updateGrid();
+
+        if(_updateSelectionTokens)
+            updateSelectionTokens();
 
         if(_updateFow)
             updateFoW();
@@ -424,6 +430,26 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
     }
 }
 
+void PublishGLBattleRenderer::setActiveToken(const QString& activeTokenFile)
+{
+    if(_activeTokenFile == activeTokenFile)
+        return;
+
+    _activeTokenFile = activeTokenFile;
+    _updateSelectionTokens = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setSelectionToken(const QString& selectionTokenFile)
+{
+    if(_selectionTokenFile == selectionTokenFile)
+        return;
+
+    _selectionTokenFile = selectionTokenFile;
+    _updateSelectionTokens = true;
+    updateWidget();
+}
+
 void PublishGLBattleRenderer::updateProjectionMatrix()
 {
     if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgramRGB == 0) || (!_targetWidget) || (!_targetWidget->context()))
@@ -523,6 +549,37 @@ void PublishGLBattleRenderer::updateFoW()
     _updateFow = false;
 }
 
+void PublishGLBattleRenderer::updateSelectionTokens()
+{
+    QImage selectImage;
+    if((_selectionTokenFile.isEmpty()) || (!selectImage.load(_selectionTokenFile)))
+        selectImage.load(QString(":/img/data/selected.png"));
+    PublishGLImage* newSelectionToken = new PublishGLImage(selectImage);
+    QList<BattleDialogModelCombatant*> combatants = _combatantTokens.keys();
+    for(BattleDialogModelCombatant* combatant : combatants)
+    {
+        if(combatant->getSelected())
+        {
+            PublishGLBattleToken* token = _combatantTokens.value(combatant);
+            if(token)
+            {
+                token->removeEffect(*_selectionToken);
+                token->addEffect(*newSelectionToken);
+            }
+        }
+    }
+    delete _selectionToken;
+    _selectionToken = newSelectionToken;
+
+    delete _activeToken; _activeToken = nullptr;
+    QImage activeImage;
+    if((_activeTokenFile.isEmpty()) || (!activeImage.load(_activeTokenFile)))
+        activeImage.load(QString(":/img/data/active.png"));
+    _activeToken = new PublishGLImage(activeImage);
+    //activeCombatantChanged(_model->getActiveCombatant());
+    activeCombatantMoved();
+}
+
 void PublishGLBattleRenderer::createContents()
 {
     if(!_model)
@@ -530,11 +587,8 @@ void PublishGLBattleRenderer::createContents()
 
     updateFoW();
     updateGrid();
+    updateSelectionTokens();
     createLineToken();
-
-    QImage selectImage;
-    selectImage.load(QString(":/img/data/selected.png"));
-    _selectionToken = new PublishGLImage(selectImage);
 
     QFontMetrics fm(qApp->font());
     for(int i = 0; i < _model->getCombatantCount(); ++i)
@@ -583,11 +637,6 @@ void PublishGLBattleRenderer::createContents()
     movementPainter.end();
     _movementToken = new PublishGLImage(movementImage);
 
-    QImage activeImage;
-    activeImage.load(QString(":/img/data/active.png"));
-    _activeToken = new PublishGLImage(activeImage);
-    activeCombatantChanged(_model->getActiveCombatant());
-
     for(int i = 0; i < _model->getEffectCount(); ++i)
     {
         BattleDialogModelEffect* effect = _model->getEffect(i);
@@ -610,6 +659,7 @@ void PublishGLBattleRenderer::cleanupContents()
     delete _gridObject; _gridObject = nullptr;
     delete _fowObject; _fowObject = nullptr;
     delete _selectionToken; _selectionToken = nullptr;
+    delete _activeToken; _activeToken = nullptr;
     delete _unknownToken; _unknownToken = nullptr;
     delete _initiativeBackground; _initiativeBackground = nullptr;
     delete _movementToken; _movementToken = nullptr;

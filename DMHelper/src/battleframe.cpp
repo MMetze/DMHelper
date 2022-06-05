@@ -838,10 +838,11 @@ void BattleFrame::setPointerFile(const QString& filename)
 
 void BattleFrame::setSelectedIcon(const QString& selectedIcon)
 {
-    if(!_scene)
-        return;
+    if(_scene)
+        _scene->setSelectedIcon(selectedIcon);
 
-    _scene->setSelectedIcon(selectedIcon);
+    if(_renderer)
+        _renderer->setSelectionToken(selectedIcon);
 }
 
 void BattleFrame::setActiveIcon(const QString& activeIcon)
@@ -850,6 +851,9 @@ void BattleFrame::setActiveIcon(const QString& activeIcon)
     {
         _activeFile = activeIcon;
         createActiveIcon();
+
+        if(_renderer)
+            _renderer->setActiveToken(activeIcon);
     }
 }
 
@@ -2815,7 +2819,7 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
 
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
-    if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
+    if((!renderer) || (!_battle) || (!_scene) || (renderer->getObject() != _battle->getBattleDialogModel()))
         return;
 
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
@@ -2830,6 +2834,8 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     connect(renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
     renderer->setPointerFileName(_pointerFile);
+    renderer->setActiveToken(_activeFile);
+    renderer->setSelectionToken(_scene->getSelectedIconFile());
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());

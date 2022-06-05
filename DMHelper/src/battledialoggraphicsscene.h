@@ -36,6 +36,7 @@ public:
     void setPointerPixmap(QPixmap pixmap);
 
     QPixmap getSelectedIcon() const;
+    QString getSelectedIconFile() const;
 
     QList<QGraphicsItem*> getEffectItems() const;
 

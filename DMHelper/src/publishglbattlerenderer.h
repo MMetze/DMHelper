@@ -54,6 +54,9 @@ public slots:
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
 
+    void setActiveToken(const QString& activeTokenFile);
+    void setSelectionToken(const QString& selectionTokenFile);
+
 protected:
     // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
@@ -68,6 +71,7 @@ protected:
 
     virtual void updateGrid();
     virtual void updateFoW();
+    virtual void updateSelectionTokens();
     virtual void createContents();
     void cleanupContents();
 
@@ -119,8 +123,10 @@ protected:
 
     BattleDialogModelCombatant* _activeCombatant;
     bool _activePC;
-    PublishGLImage* _activeToken;
 
+    QString _activeTokenFile;
+    PublishGLImage* _activeToken;
+    QString _selectionTokenFile;
     PublishGLImage* _selectionToken;
 
     bool _recreateLine;
@@ -130,6 +136,7 @@ protected:
     PublishGLImage* _lineTextImage;
 
     bool _updateFow;
+    bool _updateSelectionTokens;
     bool _recreateContent;
 };
 
