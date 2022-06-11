@@ -812,6 +812,8 @@ void BattleFrame::setInitiativeType(int initiativeType)
 void BattleFrame::setShowCountdown(bool showCountdown)
 {
     _showCountdown = showCountdown;
+    if(_renderer)
+        _renderer->setShowCountdown(_showCountdown);
     createPrescaledBackground();
 }
 
@@ -885,6 +887,8 @@ void BattleFrame::setCombatantFrame(const QString& combatantFrame)
     if(_combatantFile != combatantFrame)
     {
         _combatantFile = combatantFrame;
+        if(_renderer)
+            _renderer->setCombatantFrame(_combatantFile);
         createCombatantFrame();
     }
 }
@@ -900,6 +904,8 @@ void BattleFrame::setCountdownFrame(const QString& countdownFrame)
     if(_countdownFile != countdownFrame)
     {
         _countdownFile = countdownFrame;
+        if(_renderer)
+            _renderer->setCountdownFrame(_countdownFile);
         createCountdownFrame();
     }
 }
@@ -2841,6 +2847,9 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     _bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());
     renderer->fowChanged(_bwFoWImage);
+    renderer->setCombatantFrame(_combatantFile);
+    renderer->setCountdownFrame(_countdownFile);
+    renderer->setShowCountdown(_showCountdown);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());

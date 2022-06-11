@@ -56,6 +56,9 @@ public slots:
 
     void setActiveToken(const QString& activeTokenFile);
     void setSelectionToken(const QString& selectionTokenFile);
+    void setCombatantFrame(const QString& combatantFrame);
+    void setCountdownFrame(const QString& countdownFrame);
+    void setShowCountdown(bool showCountdown);
 
 protected:
     // DMH OpenGL renderer calls
@@ -120,6 +123,11 @@ protected:
     BattleDialogModelCombatant* _movementCombatant;
     bool _movementPC;
     PublishGLImage* _movementToken;
+    QString _tokenFrameFile;
+    PublishGLImage* _tokenFrame;
+    QString _countdownFrameFile;
+    PublishGLImage* _countdownFrame;
+    bool _showCountdown;
 
     BattleDialogModelCombatant* _activeCombatant;
     bool _activePC;
@@ -137,6 +145,7 @@ protected:
 
     bool _updateFow;
     bool _updateSelectionTokens;
+    bool _updateInitiative;
     bool _recreateContent;
 };
 

@@ -50,6 +50,11 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _movementCombatant(nullptr),
     _movementPC(false),
     _movementToken(nullptr),
+    _tokenFrameFile(),
+    _tokenFrame(nullptr),
+    _countdownFrameFile(),
+    _countdownFrame(nullptr),
+    _showCountdown(false),
     _activeCombatant(nullptr),
     _activePC(false),
     _activeTokenFile(),
@@ -63,6 +68,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _lineTextImage(nullptr),
     _updateFow(false),
     _updateSelectionTokens(false),
+    _updateInitiative(false),
     _recreateContent(false)
 {
 }
@@ -136,12 +142,6 @@ void PublishGLBattleRenderer::initializeGL()
 
     createShaders();
 
-    //f->glEnable(GL_TEXTURE_2D); // Enable texturing
-    //f->glEnable(GL_BLEND);// you enable blending function
-    //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //f->glEnable(GL_DEPTH_TEST);
-    //f->glDepthFunc(GL_GREATER);
-
     // Create the objects
     initializeBackground();
 
@@ -184,7 +184,7 @@ void PublishGLBattleRenderer::resizeGL(int w, int h)
     _scene.setTargetSize(targetSize);
 
     resizeBackground(w, h);
-    updateInitiative();
+    _updateInitiative = true;
 
     emit updateWidget();
 }
@@ -216,6 +216,9 @@ void PublishGLBattleRenderer::paintGL()
 
         if(_updateSelectionTokens)
             updateSelectionTokens();
+
+        if(_updateInitiative)
+            updateInitiative();
 
         if(_updateFow)
             updateFoW();
@@ -360,11 +363,11 @@ void PublishGLBattleRenderer::setGrid(QImage gridImage)
 
 void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
 {
-    if(_initiativeType != initiativeType)
-    {
-        _initiativeType = initiativeType;
-        recreateContents();
-    }
+    if(_initiativeType == initiativeType)
+        return;
+
+    _initiativeType = initiativeType;
+    recreateContents(); // Todo: can we change this to updateInitiative?
 }
 
 void PublishGLBattleRenderer::distanceChanged(const QString& distance)
@@ -447,6 +450,35 @@ void PublishGLBattleRenderer::setSelectionToken(const QString& selectionTokenFil
 
     _selectionTokenFile = selectionTokenFile;
     _updateSelectionTokens = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setCombatantFrame(const QString& combatantFrame)
+{
+    if(_tokenFrameFile == combatantFrame)
+        return;
+
+    _tokenFrameFile = combatantFrame;
+    _updateInitiative = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setCountdownFrame(const QString& countdownFrame)
+{
+    if(_countdownFrameFile == countdownFrame)
+        return;
+
+    _countdownFrameFile = countdownFrame;
+    _updateInitiative = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setShowCountdown(bool showCountdown)
+{
+    if(_showCountdown == showCountdown)
+        return;
+
+    _showCountdown = showCountdown;
     updateWidget();
 }
 
@@ -576,7 +608,6 @@ void PublishGLBattleRenderer::updateSelectionTokens()
     if((_activeTokenFile.isEmpty()) || (!activeImage.load(_activeTokenFile)))
         activeImage.load(QString(":/img/data/active.png"));
     _activeToken = new PublishGLImage(activeImage);
-    //activeCombatantChanged(_model->getActiveCombatant());
     activeCombatantMoved();
 }
 
@@ -590,6 +621,7 @@ void PublishGLBattleRenderer::createContents()
     updateSelectionTokens();
     createLineToken();
 
+    // Todo: move this into updateInitiative to avoid calling createContents when the init type is changed
     QFontMetrics fm(qApp->font());
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
@@ -661,6 +693,8 @@ void PublishGLBattleRenderer::cleanupContents()
     delete _selectionToken; _selectionToken = nullptr;
     delete _activeToken; _activeToken = nullptr;
     delete _unknownToken; _unknownToken = nullptr;
+    delete _tokenFrame; _tokenFrame = nullptr;
+    delete _countdownFrame; _countdownFrame = nullptr;
     delete _initiativeBackground; _initiativeBackground = nullptr;
     delete _movementToken; _movementToken = nullptr;
     delete _lineImage; _lineImage = nullptr;
@@ -710,6 +744,23 @@ void PublishGLBattleRenderer::updateInitiative()
     initiativeAreaImage.fill(QColor(0, 0, 0, 128));
     _initiativeBackground = new PublishGLImage(initiativeAreaImage, false);
     _initiativeBackground->setPosition(0, _scene.getTargetSize().height() - initiativeArea.height());
+
+    delete _tokenFrame; _tokenFrame = nullptr;
+    QImage tokenFrameImage;
+    if((_tokenFrameFile.isEmpty()) || (!tokenFrameImage.load(_tokenFrameFile)))
+        tokenFrameImage.load(QString(":/img/data/combatant_frame.png"));
+    _tokenFrame = new PublishGLImage(tokenFrameImage, false);
+    _tokenFrame->setScale(_initiativeTokenHeight / static_cast<qreal>(tokenFrameImage.height()));
+
+    delete _countdownFrame; _countdownFrame = nullptr;
+    QImage countdownFrameImage;
+    if((_countdownFrameFile.isEmpty()) || (!countdownFrameImage.load(_countdownFrameFile)))
+        countdownFrameImage.load(QString(":/img/data/countdown_frame.png"));
+    _countdownFrame = new PublishGLImage(countdownFrameImage, false);
+    _countdownFrame->setX(_initiativeTokenHeight);
+    _countdownFrame->setScale(_initiativeTokenHeight / static_cast<qreal>(countdownFrameImage.height()));
+
+    _updateInitiative = false;
 }
 
 void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
@@ -755,12 +806,24 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
 
             if(tokenObject)
             {
-                qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
                 tokenScreenCoords.setToIdentity();
                 tokenScreenCoords.translate(tokenSize / 2.0, tokenY);
+                qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
                 tokenScreenCoords.scale(scaleFactor, scaleFactor);
                 functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
                 tokenObject->paintGL();
+                if(_tokenFrame)
+                {
+                    _tokenFrame->setY(tokenY - (_initiativeTokenHeight / 2.0));
+                    functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _tokenFrame->getMatrixData());
+                   _tokenFrame->paintGL();
+                   if((_countdownFrame) && (_showCountdown) && (currentCombatant == activeCombatant))
+                   {
+                       _countdownFrame->setY(tokenY - (_initiativeTokenHeight / 2.0));
+                       functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _countdownFrame->getMatrixData());
+                      _countdownFrame->paintGL();
+                   }
+                }
             }
 
             if((_initiativeType == DMHelper::InitiativeType_ImageName) && (combatant->getShown()))
@@ -769,7 +832,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 if(combatantName)
                 {
                     tokenScreenCoords.setToIdentity();
-                    tokenScreenCoords.translate(tokenSize * 1.2, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
+                    tokenScreenCoords.translate(tokenSize * 1.25, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
                     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
                     combatantName->paintGL();
                 }
