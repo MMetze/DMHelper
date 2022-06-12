@@ -2292,6 +2292,9 @@ void BattleFrame::countdownTimerExpired()
     }
 
     updateCountdownText();
+
+    if((_renderer) && (_countdownFrame.height() > 10))
+        _renderer->setCountdownValues(_countdown / static_cast<qreal>(_countdownFrame.height() - 10), _countdownColor);
 }
 
 void BattleFrame::updateCountdownText()
@@ -2850,6 +2853,9 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setCombatantFrame(_combatantFile);
     renderer->setCountdownFrame(_countdownFile);
     renderer->setShowCountdown(_showCountdown);
+    if(_countdownFrame.height() > 10)
+        renderer->setCountdownValues(_countdown / static_cast<qreal>(_countdownFrame.height() - 10), _countdownColor);
+    renderer->setCountdownValues(_countdown, _countdownColor);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());

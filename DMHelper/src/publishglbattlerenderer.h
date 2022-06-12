@@ -59,6 +59,7 @@ public slots:
     void setCombatantFrame(const QString& combatantFrame);
     void setCountdownFrame(const QString& countdownFrame);
     void setShowCountdown(bool showCountdown);
+    void setCountdownValues(qreal countdown, const QColor& countdownColor);
 
 protected:
     // DMH OpenGL renderer calls
@@ -105,6 +106,10 @@ protected:
     int _shaderModelMatrixRGBA;
     int _shaderProjectionMatrixRGBA;
     int _shaderAlphaRGBA;
+    unsigned int _shaderProgramRGBColor;
+    int _shaderModelMatrixRGBColor;
+    int _shaderProjectionMatrixRGBColor;
+    int _shaderRGBColor;
 
     QImage _gridImage;
     PublishGLImage* _gridObject;
@@ -127,7 +132,10 @@ protected:
     PublishGLImage* _tokenFrame;
     QString _countdownFrameFile;
     PublishGLImage* _countdownFrame;
+    PublishGLImage* _countdownFill;
     bool _showCountdown;
+    qreal _countdownScale;
+    QColor _countdownColor;
 
     BattleDialogModelCombatant* _activeCombatant;
     bool _activePC;
