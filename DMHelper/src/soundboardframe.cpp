@@ -9,14 +9,12 @@
 #include "ribbonframe.h"
 #include <QGroupBox>
 #include <QVBoxLayout>
-#include <QMessageBox>
 #include <QInputDialog>
 #include <QFileDialog>
 #include <QTreeWidgetItem>
 #include <QDrag>
 #include <QFileInfo>
 #include <QMouseEvent>
-#include <QDebug>
 
 SoundboardFrame::SoundboardFrame(QWidget *parent) :
     QFrame(parent),

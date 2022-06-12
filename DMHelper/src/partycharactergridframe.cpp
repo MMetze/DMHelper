@@ -3,7 +3,6 @@
 #include "character.h"
 #include "dmconstants.h"
 #include "characterimporter.h"
-#include <QDebug>
 
 // TODO: make this scalable with screen size
 

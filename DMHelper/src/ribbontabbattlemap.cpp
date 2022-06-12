@@ -3,7 +3,6 @@
 #include "dmconstants.h"
 #include "grid.h"
 #include <QMenu>
-#include <QDebug>
 
 const int GRID_SIZE_PAUSE_TIMER = 750;
 

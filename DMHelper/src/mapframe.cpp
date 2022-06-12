@@ -241,6 +241,9 @@ void MapFrame::resetFoW()
     if(!_mapSource)
         return;
 
+    if(QMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
+        return;
+
     UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,255)));
     _mapSource->getUndoStack()->push(undoFill);
     _mapSource->fillFoW(QColor(0,0,0,255), &_bwFoWImage);
@@ -251,6 +254,9 @@ void MapFrame::resetFoW()
 void MapFrame::clearFoW()
 {
     if(!_mapSource)
+        return;
+
+    if(QMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
         return;
 
     UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,0)));

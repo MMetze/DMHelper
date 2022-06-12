@@ -6,7 +6,6 @@
 #include <QDropEvent>
 #include <QStandardItemModel>
 #include <QMimeData>
-#include <QDebug>
 
 CampaignTree::CampaignTree(QWidget *parent) :
     QTreeView(parent)

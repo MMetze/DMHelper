@@ -4,7 +4,7 @@
 #include "bestiary.h"
 #include <QDomElement>
 #include <QDir>
-#include <QtDebug>
+#include <QDebug>
 
 const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
 {
@@ -236,7 +236,7 @@ void Character::endBatchChanges()
 
 Combatant* Character::clone() const
 {
-    qDebug("[Character] WARNING: Character cloned - this is a highly questionable action!");
+    qDebug() << "[Character] WARNING: Character cloned - this is a highly questionable action!";
 
     Character* newCharacter = new Character(getName());
     newCharacter->copyValues(this);

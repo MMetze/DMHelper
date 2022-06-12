@@ -1,7 +1,6 @@
 #include "battledialogeventnewround.h"
 #include "dmconstants.h"
 #include <QDomElement>
-#include <QDebug>
 
 BattleDialogEventNewRound::BattleDialogEventNewRound() :
     BattleDialogEvent()
