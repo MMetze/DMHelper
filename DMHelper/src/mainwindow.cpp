@@ -292,6 +292,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newSoundClicked()), this, SLOT(newAudioEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
+    connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeOnlineClicked()), this, SLOT(newSyrinscapeOnlineEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
@@ -1039,6 +1040,21 @@ void MainWindow::newSyrinscapeEntry()
 
     bool ok = false;
     QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addNewAudioObject(urlName);
+}
+
+void MainWindow::newSyrinscapeOnlineEntry()
+{
+    if(!_campaign)
+        return;
+
+    QString syrinscapeInstructions("To add a link to a Syrinscape Online sound:\n\n1) Open the desired sound clip in the Syrinscape online player master control\n2) Open the menu (top right) and click 'Show Remote Control Links'\n3) Click the play icon to copy the play link\n4) Paste this URI into the text box here:\n");
+
+    bool ok = false;
+    QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Online Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
     if((!ok)||(urlName.isEmpty()))
         return;
 

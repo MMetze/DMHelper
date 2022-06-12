@@ -38,6 +38,7 @@ SOURCES += main.cpp\
     audiofactory.cpp \
     audiotrackfile.cpp \
     audiotracksyrinscape.cpp \
+    audiotracksyrinscapeonline.cpp \
     audiotrackurl.cpp \
     audiotrackyoutube.cpp \
     basicdateserver.cpp \
@@ -269,6 +270,7 @@ HEADERS  += mainwindow.h \
     audiofactory.h \
     audiotrackfile.h \
     audiotracksyrinscape.h \
+    audiotracksyrinscapeonline.h \
     audiotrackurl.h \
     audiotrackyoutube.h \
     basicdateserver.h \

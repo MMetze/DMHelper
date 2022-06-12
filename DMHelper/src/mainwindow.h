@@ -84,6 +84,7 @@ public slots:
     void newMap();
     void newAudioEntry();
     void newSyrinscapeEntry();
+    void newSyrinscapeOnlineEntry();
     void newYoutubeEntry();
     void removeCurrentItem();
     void showNotes();
