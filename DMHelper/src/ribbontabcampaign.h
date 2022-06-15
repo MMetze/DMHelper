@@ -30,6 +30,7 @@ signals:
     void newBattleClicked();
     void newSoundClicked();
     void newSyrinscapeClicked();
+    void newSyrinscapeOnlineClicked();
     void newYoutubeClicked();
     void removeItemClicked();
     void showNotesClicked();
