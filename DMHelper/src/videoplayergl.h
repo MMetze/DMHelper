@@ -24,7 +24,7 @@ signals:
 protected:
     virtual bool initializeVLC();
     virtual bool startPlayer();
-    virtual bool stopPlayer();
+    virtual bool stopPlayer(bool restart);
 
 };
 

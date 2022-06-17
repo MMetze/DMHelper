@@ -44,7 +44,7 @@ void VideoPlayerGLScreenshot::registerNewFrame()
     if(_framesReceived >= SCREENSHOT_USE_FRAME)
     {
         emit screenshotReady(frameImage);
-        stopPlayer();
+        stopPlayer(false);
     }
 }
 
@@ -82,13 +82,39 @@ void VideoPlayerGLScreenshot::playerEventCallback( const struct libvlc_event_t *
     that->_status = p_event->type;
 }
 
+void VideoPlayerGLScreenshot::videoAvailable()
+{
+    if(_video)
+        return;
+
+    DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+    if(!vlcInstance)
+        return;
+
+    _video = vlcInstance->requestVideo(this);
+    if(_video)
+    {
+        qDebug() << "[VideoPlayerGLScreenshot] Video player received: " << _video;
+        disconnect(vlcInstance, &DMH_VLC::playerAvailable, this, &VideoPlayerGLScreenshot::videoAvailable);
+        if(!startPlayer())
+            qDebug() << "[VideoPlayerGLScreenshot] ERROR: Not able to start video: " << _video;
+    }
+
+    /*
+    _video = new VideoPlayerGLVideo(this);
+
+    return startPlayer();
+    */
+
+}
+
 void VideoPlayerGLScreenshot::timerEvent(QTimerEvent *event)
 {
     if((_status == libvlc_MediaPlayerOpening) || (_status == libvlc_MediaPlayerBuffering) || (_status == libvlc_MediaPlayerPlaying))
         return;
 
-    cleanupPlayer();
     killTimer(event->timerId());
+    cleanupPlayer();
     deleteLater();
 }
 
@@ -97,17 +123,25 @@ bool VideoPlayerGLScreenshot::initializeVLC()
     if(_videoFile.isEmpty())
         return false;
 
-    if(!DMH_VLC::Instance())
+    DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+    if(!vlcInstance)
         return false;
 
+    connect(vlcInstance, &DMH_VLC::playerAvailable, this, &VideoPlayerGLScreenshot::videoAvailable);
+    videoAvailable();
+
+    return true;
+
+    /*
     _video = new VideoPlayerGLVideo(this);
 
     return startPlayer();
+    */
 }
 
 bool VideoPlayerGLScreenshot::startPlayer()
 {
-    if((!DMH_VLC::Instance()) || (_vlcPlayer))
+    if((!DMH_VLC::vlcInstance()) || (_vlcPlayer))
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, already running";
         return false;
@@ -119,7 +153,7 @@ bool VideoPlayerGLScreenshot::startPlayer()
         return false;
     }
 
-    _vlcMedia = libvlc_media_new_path(DMH_VLC::Instance(), _videoFile.toUtf8().constData());
+    _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), _videoFile.toUtf8().constData());
     if (!_vlcMedia)
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, unable to open video file!";
@@ -164,17 +198,19 @@ bool VideoPlayerGLScreenshot::startPlayer()
     libvlc_media_player_play(_vlcPlayer);
     emit contextReady(nullptr);
 
+    startTimer(500);
+
     return true;
 }
 
-bool VideoPlayerGLScreenshot::stopPlayer()
+bool VideoPlayerGLScreenshot::stopPlayer(bool restart)
 {
+    Q_UNUSED(restart);
+
     _framesReceived = SCREENSHOT_USE_FRAME;
 
     if(_vlcPlayer)
         libvlc_media_player_stop_async(_vlcPlayer);
-
-    startTimer(500);
 
     return true;
 }
@@ -193,9 +229,17 @@ void VideoPlayerGLScreenshot::cleanupPlayer()
         _vlcMedia = nullptr;
     }
 
+    /*
     if(_video)
     {
         delete _video;
+        _video = nullptr;
+    }
+    */
+    DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+    if((vlcInstance) && (_video))
+    {
+        vlcInstance->releaseVideo(_video);
         _video = nullptr;
     }
 }

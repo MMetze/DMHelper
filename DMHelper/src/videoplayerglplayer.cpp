@@ -86,9 +86,6 @@ void VideoPlayerGLPlayer::paintGL()
     if((!f) || (!e))
         return;
 
-    //if(_VAO == 0)
-    //    createVBObjects();
-
     bool newFrame = _video->isNewFrameAvailable();
     if(newFrame)
     {
@@ -179,7 +176,9 @@ QSize VideoPlayerGLPlayer::getOriginalSize() const
 
 void VideoPlayerGLPlayer::registerNewFrame()
 {
+#ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Confirming frame available";
+#endif
     emit frameAvailable();
 }
 
@@ -338,7 +337,7 @@ void VideoPlayerGLPlayer::playerEventCallback( const struct libvlc_event_t *p_ev
             qDebug() << "[VideoPlayerGLPlayer] Video event received: STOPPED = " << p_event->type;
             break;
         default:
-            qDebug() << "[VideoPlayerGLPlayer] UNEXPECTED Video event received:  " << p_event->type;
+            qDebug() << "[VideoPlayerGLPlayer] ERROR: Unhandled video event received:  " << p_event->type;
             break;
     };
 
@@ -349,7 +348,7 @@ void VideoPlayerGLPlayer::stopThenDelete()
 {
     qDebug() << "[VideoPlayerGLPlayer] Stop Then Delete triggered, stop called...";
     _deleteOnStop = true;
-    stopPlayer();
+    stopPlayer(false);
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] stopThenDelete completed";
@@ -362,8 +361,7 @@ bool VideoPlayerGLPlayer::restartPlayer()
     if(_vlcPlayer)
     {
         qDebug() << "[VideoPlayerGLPlayer] Restart Player called, stop called...";
-        _selfRestart = true;
-        return stopPlayer();
+        return stopPlayer(true);
     }
     else
     {
@@ -375,8 +373,6 @@ bool VideoPlayerGLPlayer::restartPlayer()
 void VideoPlayerGLPlayer::videoResized()
 {
     qDebug() << "[VideoPlayerGLPlayer] Video being resized, recreating vertex arrays";
-    //cleanupVBObjects();
-    //createVBObjects();
 }
 
 void VideoPlayerGLPlayer::initializationComplete()
@@ -394,11 +390,13 @@ void VideoPlayerGLPlayer::timerEvent(QTimerEvent *event)
         return;
 
     cleanupPlayer();
-    killTimer(event->timerId());
+    if(event)
+        killTimer(event->timerId());
 
     if(_selfRestart)
     {
-        _selfRestart = false;
+        _video = new VideoPlayerGLVideo(this);
+        initializationComplete();
         startPlayer();
         qDebug() << "[VideoPlayerGLPlayer] Internal Stop Check: player restarted.";
     }
@@ -425,7 +423,7 @@ bool VideoPlayerGLPlayer::initializeVLC()
         return false;
     }
 
-    if(!DMH_VLC::Instance())
+    if(!DMH_VLC::vlcInstance())
         return false;
 
     _video = new VideoPlayerGLVideo(this);
@@ -439,7 +437,7 @@ bool VideoPlayerGLPlayer::initializeVLC()
 
 bool VideoPlayerGLPlayer::startPlayer()
 {
-    if(!DMH_VLC::Instance())
+    if(!DMH_VLC::vlcInstance())
     {
         qDebug() << "[VideoPlayerGLPlayer] VLC not instantiated - not able to start player!";
         return false;
@@ -460,7 +458,7 @@ bool VideoPlayerGLPlayer::startPlayer()
     qDebug() << "[VideoPlayerGLPlayer] Starting video player with " << _videoFile.toUtf8().constData();
 
     // Create a new Media
-    _vlcMedia = libvlc_media_new_path(DMH_VLC::Instance(), _videoFile.toUtf8().constData());
+    _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), _videoFile.toUtf8().constData());
     if (!_vlcMedia)
         return false;
 
@@ -479,6 +477,7 @@ bool VideoPlayerGLPlayer::startPlayer()
         libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, playerEventCallback, static_cast<void*>(this));
         libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, static_cast<void*>(this));
         libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
+//        libvlc_event_attach(eventManager, libvlc_MediaPlayerStopping, playerEventCallback, static_cast<void*>(this));
     }
 
     bool callbackResult = libvlc_video_set_output_callbacks(_vlcPlayer,
@@ -499,23 +498,24 @@ bool VideoPlayerGLPlayer::startPlayer()
 #endif
 
     // And start playback
+    _selfRestart = true;
     libvlc_media_player_play(_vlcPlayer);
 
-//    createVBObjects();
-
     qDebug() << "[VideoPlayerGLPlayer] Player started";
+
+    startTimer(100);
 
     return true;
 }
 
-bool VideoPlayerGLPlayer::stopPlayer()
+bool VideoPlayerGLPlayer::stopPlayer(bool restart)
 {
-    qDebug() << "[VideoPlayerGLPlayer] Stop Player called";
+    qDebug() << "[VideoPlayerGLPlayer] Stop Player called. Restart: " << restart;
+
+    _selfRestart = restart;
 
     if(_vlcPlayer)
         libvlc_media_player_stop_async(_vlcPlayer);
-
-    startTimer(500);
 
     return true;
 }

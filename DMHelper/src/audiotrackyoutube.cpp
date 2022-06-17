@@ -282,7 +282,7 @@ void AudioTrackYoutube::playDirectUrl()
 
     libvlc_media_list_t *vlcMediaList = libvlc_media_list_new();
 
-    libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::Instance(), _urlString.toUtf8().constData());
+    libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::vlcInstance(), _urlString.toUtf8().constData());
     libvlc_media_list_add_media(vlcMediaList, vlcMedia);
     libvlc_media_release(vlcMedia);
 
