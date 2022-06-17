@@ -44,7 +44,6 @@ public:
 
     static void playerEventCallback( const struct libvlc_event_t *p_event, void *p_data );
 
-
 signals:
     void videoOpening();
     void videoPlaying();
@@ -62,6 +61,9 @@ public slots:
     virtual void videoResized() override;
 
     void initializationComplete();
+
+protected slots:
+    void videoAvailable();
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;

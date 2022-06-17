@@ -366,7 +366,13 @@ bool VideoPlayerGLPlayer::restartPlayer()
     else
     {
         qDebug() << "[VideoPlayerGLPlayer] Restart Player called, but no player running - starting player!";
-        return startPlayer();
+        DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+        if(!vlcInstance)
+            return false;
+
+        connect(vlcInstance, &DMH_VLC::playerAvailable, this, &VideoPlayerGLPlayer::videoAvailable);
+        videoAvailable();
+        return true;
     }
 }
 
@@ -384,6 +390,28 @@ void VideoPlayerGLPlayer::initializationComplete()
     emit contextReady(_context);
 }
 
+void VideoPlayerGLPlayer::videoAvailable()
+{
+    if(_video)
+        return;
+
+    DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+    if(!vlcInstance)
+        return;
+
+    _video = vlcInstance->requestVideo(this);
+    if(_video)
+    {
+        qDebug() << "[VideoPlayerGLPlayer] Video player received: " << _video;
+        disconnect(vlcInstance, &DMH_VLC::playerAvailable, this, &VideoPlayerGLPlayer::videoAvailable);
+        if(_selfRestart)
+            initializationComplete();
+
+        if(!startPlayer())
+            qDebug() << "[VideoPlayerGLPlayer] ERROR: Not able to start video: " << _video;
+    }
+}
+
 void VideoPlayerGLPlayer::timerEvent(QTimerEvent *event)
 {
     if((_status == libvlc_MediaPlayerOpening) || (_status == libvlc_MediaPlayerBuffering) || (_status == libvlc_MediaPlayerPlaying))
@@ -395,9 +423,17 @@ void VideoPlayerGLPlayer::timerEvent(QTimerEvent *event)
 
     if(_selfRestart)
     {
+        DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+        if(!vlcInstance)
+            return;
+
+        connect(vlcInstance, &DMH_VLC::playerAvailable, this, &VideoPlayerGLPlayer::videoAvailable);
+        videoAvailable();
+        /*
         _video = new VideoPlayerGLVideo(this);
         initializationComplete();
         startPlayer();
+        */
         qDebug() << "[VideoPlayerGLPlayer] Internal Stop Check: player restarted.";
     }
     else
@@ -423,10 +459,16 @@ bool VideoPlayerGLPlayer::initializeVLC()
         return false;
     }
 
+    /*
     if(!DMH_VLC::vlcInstance())
         return false;
 
     _video = new VideoPlayerGLVideo(this);
+    */
+
+    DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+    if(!vlcInstance)
+        return false;
 
 #ifdef VIDEO_DEBUG_MESSAGES
     qDebug() << "[VideoPlayerGLPlayer] Initializing VLC completed";
@@ -536,9 +578,17 @@ void VideoPlayerGLPlayer::cleanupPlayer()
         _vlcMedia = nullptr;
     }
 
+    /*
     if(_video)
     {
         delete _video;
+        _video = nullptr;
+    }
+    */
+    DMH_VLC *vlcInstance = DMH_VLC::DMH_VLCInstance();
+    if((vlcInstance) && (_video))
+    {
+        vlcInstance->releaseVideo(_video);
         _video = nullptr;
     }
 }
