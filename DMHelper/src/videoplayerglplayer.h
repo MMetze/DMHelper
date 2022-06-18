@@ -95,6 +95,7 @@ protected:
     libvlc_media_player_t* _vlcPlayer;
     libvlc_media_t* _vlcMedia;
     int _status;
+    bool _initialized;
     bool _selfRestart;
     bool _deleteOnStop;
     int _stopStatus;

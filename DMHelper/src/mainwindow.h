@@ -9,7 +9,6 @@
 #include "campaigntreeactivestack.h"
 #include <QMainWindow>
 #include <QLabel>
-#include <QFileInfo>
 #include <QList>
 #include <QMultiMap>
 #include <QUuid>

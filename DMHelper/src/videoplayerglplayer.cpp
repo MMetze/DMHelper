@@ -29,6 +29,7 @@ VideoPlayerGLPlayer::VideoPlayerGLPlayer(const QString& videoFile, QOpenGLContex
     _vlcPlayer(nullptr),
     _vlcMedia(nullptr),
     _status(-1),
+    _initialized(false),
     _selfRestart(false),
     _deleteOnStop(false),
     _stopStatus(0),
@@ -383,6 +384,8 @@ void VideoPlayerGLPlayer::videoResized()
 
 void VideoPlayerGLPlayer::initializationComplete()
 {
+    _initialized = true;
+
     if((!_context) || (!_video))
         return;
 
@@ -404,7 +407,7 @@ void VideoPlayerGLPlayer::videoAvailable()
     {
         qDebug() << "[VideoPlayerGLPlayer] Video player received: " << _video;
         disconnect(vlcInstance, &DMH_VLC::playerAvailable, this, &VideoPlayerGLPlayer::videoAvailable);
-        if(_selfRestart)
+        if(_initialized)
             initializationComplete();
 
         if(!startPlayer())

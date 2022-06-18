@@ -1,6 +1,9 @@
 #include "videoplayerglscreenshot.h"
 #include "videoplayerglvideo.h"
+#include "dmhcache.h"
 #include <QImage>
+#include <QImageReader>
+#include <QFile>
 #include <QOpenGLFramebufferObject>
 #include <QTimerEvent>
 #include <QDebug>
@@ -28,6 +31,26 @@ VideoPlayerGLScreenshot::~VideoPlayerGLScreenshot()
 
 void VideoPlayerGLScreenshot::retrieveScreenshot()
 {
+    // Check if we have a valid video file
+    if(_videoFile.isEmpty())
+    {
+        emit screenshotReady(QImage());
+        return;
+    }
+
+    // See if we can find a screenshot in the cache
+    QString cacheFilePath = DMHCache().getCacheFilePath(_videoFile, QString("png"));
+    if((!cacheFilePath.isEmpty()) && (QFile::exists(cacheFilePath)))
+    {
+        QImage cacheImage(cacheFilePath);
+        if(!cacheImage.isNull())
+        {
+            emit screenshotReady(cacheImage);
+            return;
+        }
+    }
+
+    // Have to start VLC to grab a new screenshot
     if(!initializeVLC())
         emit screenshotReady(QImage());
 }
@@ -43,6 +66,11 @@ void VideoPlayerGLScreenshot::registerNewFrame()
     QImage frameImage = extractImage();
     if(_framesReceived >= SCREENSHOT_USE_FRAME)
     {
+        // Try to add the screenshot to the cache
+        QString cacheFilePath = DMHCache().getCacheFilePath(_videoFile, QString("png"));
+        if((!cacheFilePath.isEmpty()) && (!QFile::exists(cacheFilePath)))
+            frameImage.save(cacheFilePath);
+
         emit screenshotReady(frameImage);
         stopPlayer(false);
     }

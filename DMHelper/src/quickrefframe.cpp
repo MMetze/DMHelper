@@ -2,7 +2,6 @@
 #include "ui_quickrefframe.h"
 #include "quickref.h"
 #include "quickrefdatawidget.h"
-#include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
 

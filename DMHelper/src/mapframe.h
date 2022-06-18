@@ -3,7 +3,6 @@
 
 #include "campaignobjectframe.h"
 #include <QGraphicsScene>
-#include <QFileInfo>
 #include <QImage>
 #include <QRubberBand>
 #include "undopath.h"

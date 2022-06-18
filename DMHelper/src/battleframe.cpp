@@ -1624,15 +1624,11 @@ void BattleFrame::updateMap()
 
         createPrescaledBackground();
     }
-    else
+    else if(_model->getMap()->isValid())
     {
-        if(_model->getMap()->isValid())
-        {
-            qDebug() << "[Battle Frame] Initializing battle map video";
-            extractDMScreenshot();
-            //createVideoPlayer(true);
-            _isVideo = true;
-        }
+        qDebug() << "[Battle Frame] Initializing battle map video";
+        extractDMScreenshot();
+        _isVideo = true;
     }
 }
 

@@ -74,6 +74,7 @@
 #include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
+#include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
 #include <QResizeEvent>
@@ -167,6 +168,10 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qDebug() << "[MainWindow]     Working Directory: " << QDir::currentPath();
     qDebug() << "[MainWindow]     Executable Directory: " << QCoreApplication::applicationDirPath();
+
+    DMHCache cache;
+    cache.ensureCacheExists();
+    qDebug() << "[MainWindow]     Cache Directory: " << cache.getCachePath();
 
     qDebug() << "[MainWindow] Qt Information";
     qDebug() << "[MainWindow]     Qt Version: " << QLibraryInfo::version().toString();

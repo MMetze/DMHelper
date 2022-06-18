@@ -70,6 +70,7 @@ SOURCES += main.cpp\
     customtableframe.cpp \
     discordposter.cpp \
     dmh_vlc.cpp \
+    dmhcache.cpp \
     dmhelperribbon.cpp \
     dmhlogger.cpp \
     dmhwaitingdialog.cpp \
@@ -302,6 +303,7 @@ HEADERS  += mainwindow.h \
     customtableframe.h \
     discordposter.h \
     dmh_vlc.h \
+    dmhcache.h \
     dmhelperribbon.h \
     dmhlogger.h \
     dmhwaitingdialog.h \
