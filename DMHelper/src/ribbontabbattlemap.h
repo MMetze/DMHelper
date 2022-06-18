@@ -28,6 +28,8 @@ public slots:
     void setGridAngle(int angle);
     void setGridXOffset(int offset);
     void setGridYOffset(int offset);
+    void setGridWidth(int gridWidth);
+    void setGridColor(const QColor& gridColor);
 
     void setEditFoW(bool checked);
     void setDrawErase(bool checked);
@@ -44,6 +46,8 @@ signals:
     void gridAngleChanged(int angle);
     void gridXOffsetChanged(int offset);
     void gridYOffsetChanged(int offset);
+    void gridWidthChanged(int gridWidth);
+    void gridColorChanged(const QColor& gridColor);
 
     void editFoWClicked(bool checked);
     void drawEraseClicked(bool checked);

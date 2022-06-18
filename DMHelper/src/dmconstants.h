@@ -141,7 +141,8 @@ namespace DMHelper
     {
         AudioType_File = 0,
         AudioType_Syrinscape,
-        AudioType_Youtube
+        AudioType_Youtube,
+        AudioType_SyrinscapeOnline
     };
 
     enum InitiativeType

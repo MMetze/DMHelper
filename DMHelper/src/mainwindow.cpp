@@ -74,6 +74,7 @@
 #include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
+#include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
 #include <QResizeEvent>
@@ -119,6 +120,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _countdownDlg(nullptr),
     _encounterTextEdit(nullptr),
     _treeModel(nullptr),
+    _activeItems(nullptr),
     _characterLayout(nullptr),
     _campaign(nullptr),
     _campaignFileName(),
@@ -166,6 +168,10 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
     qDebug() << "[MainWindow]     Working Directory: " << QDir::currentPath();
     qDebug() << "[MainWindow]     Executable Directory: " << QCoreApplication::applicationDirPath();
+
+    DMHCache cache;
+    cache.ensureCacheExists();
+    qDebug() << "[MainWindow]     Cache Directory: " << cache.getCachePath();
 
     qDebug() << "[MainWindow] Qt Information";
     qDebug() << "[MainWindow]     Qt Version: " << QLibraryInfo::version().toString();
@@ -291,6 +297,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newSoundClicked()), this, SLOT(newAudioEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
+    connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeOnlineClicked()), this, SLOT(newSyrinscapeOnlineEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
@@ -493,6 +500,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridWidthChanged, _battleFrame, &BattleFrame::setGridWidth);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridColorChanged, _battleFrame, &BattleFrame::setGridColor);
 
     connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
     connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
@@ -652,6 +661,15 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.showMessage(QString("Preparing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
+
+    _activeItems = new CampaignTreeActiveStack(this);
+    connect(_activeItems, &CampaignTreeActiveStack::activateItem, this, &MainWindow::selectItemFromStack);
+    connect(ui->btnBack, &QAbstractButton::clicked, _activeItems, &CampaignTreeActiveStack::backwards);
+    connect(ui->btnForwards, &QAbstractButton::clicked, _activeItems, &CampaignTreeActiveStack::forwards);
+    connect(_activeItems, &CampaignTreeActiveStack::backwardsAvailable, ui->btnBack, &QAbstractButton::setEnabled);
+    connect(_activeItems, &CampaignTreeActiveStack::forwardsAvailable, ui->btnForwards, &QAbstractButton::setEnabled);
+    connect(_battleFrame, &BattleFrame::navigateBackwards, _activeItems, &CampaignTreeActiveStack::backwards);
+    connect(_battleFrame, &BattleFrame::navigateForwards, _activeItems, &CampaignTreeActiveStack::forwards);
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
@@ -1027,6 +1045,21 @@ void MainWindow::newSyrinscapeEntry()
 
     bool ok = false;
     QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addNewAudioObject(urlName);
+}
+
+void MainWindow::newSyrinscapeOnlineEntry()
+{
+    if(!_campaign)
+        return;
+
+    QString syrinscapeInstructions("To add a link to a Syrinscape Online sound:\n\n1) Open the desired sound clip in the Syrinscape online player master control\n2) Open the menu (top right) and click 'Show Remote Control Links'\n3) Click the play icon to copy the play link\n4) Paste this URI into the text box here:\n");
+
+    bool ok = false;
+    QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Online Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
     if((!ok)||(urlName.isEmpty()))
         return;
 
@@ -1437,6 +1470,19 @@ void MainWindow::showEvent(QShowEvent * event)
         _initialized = true;
     }
 
+    int ribbonHeight = RibbonFrame::getRibbonHeight();
+    int iconSize =  ribbonHeight * 4 / 5;
+    ui->btnBack->setMinimumWidth(ribbonHeight);
+    ui->btnBack->setMaximumWidth(ribbonHeight);
+    ui->btnBack->setMinimumHeight(ribbonHeight);
+    ui->btnBack->setMaximumHeight(ribbonHeight);
+    ui->btnBack->setIconSize(QSize(iconSize, iconSize));
+    ui->btnForwards->setMinimumWidth(ribbonHeight);
+    ui->btnForwards->setMaximumWidth(ribbonHeight);
+    ui->btnForwards->setMinimumHeight(ribbonHeight);
+    ui->btnForwards->setMaximumHeight(ribbonHeight);
+    ui->btnForwards->setIconSize(QSize(iconSize, iconSize));
+
     QMainWindow::showEvent(event);
 }
 
@@ -1488,6 +1534,18 @@ void MainWindow::mouseMoveEvent(QMouseEvent * event)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    if(!event)
+        return;
+
+    if(event->modifiers() == Qt::AltModifier)
+    {
+        if(event->key() == Qt::Key_Left)
+            _activeItems->backwards();
+        else if(event->key() == Qt::Key_Right)
+            _activeItems->forwards();
+        return;
+    }
+
     switch(event->key())
     {
         case Qt::Key_Escape:
@@ -1757,7 +1815,7 @@ void MainWindow::enableCampaignMenu()
 
 bool MainWindow::selectIndex(const QModelIndex& index)
 {
-    if(!index.isValid())
+    if((!index.isValid()) || (!_treeModel))
         return false;
 
     ui->treeView->setCurrentIndex(index);
@@ -2050,6 +2108,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     updateMapFiles();
     updateClock();
 
+    _activeItems->clear();
     _treeModel->setCampaign(campaign);
 
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
@@ -2058,7 +2117,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     {
         QModelIndex firstIndex = _treeModel->index(0,0);
         if(firstIndex.isValid())
-            ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
+            selectIndex(firstIndex); //ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
         connect(campaign, SIGNAL(dirty()), this, SLOT(setDirty()));
@@ -2266,6 +2325,9 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
 
     if(item)
     {
+        // Add the item to the undo stack for IDs
+        _activeItems->push(item->getCampaignItemId());
+
         itemObject = item->getCampaignItemObject();
         if(itemObject)
             activateObject(itemObject);
@@ -2310,6 +2372,20 @@ void MainWindow::handleAnimationStarted()
     if(_pubWindow)
         _pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
+}
+
+bool MainWindow::selectItemFromStack(const QUuid& itemId)
+{
+    if((!_treeModel) || (itemId.isNull()))
+        return false;
+
+    QModelIndex itemIndex = _treeModel->getObjectIndex(itemId);
+    if(!itemIndex.isValid())
+        return false;
+
+    ui->treeView->setCurrentIndex(itemIndex);
+    activateWindow();
+    return true;
 }
 
 void MainWindow::openBestiary()
@@ -2477,6 +2553,8 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattleMap->setGridAngle(model->getGridAngle());
         _ribbonTabBattleMap->setGridXOffset(model->getGridOffsetX());
         _ribbonTabBattleMap->setGridYOffset(model->getGridOffsetY());
+        _ribbonTabBattleMap->setGridWidth(model->getGridPen().width());
+        _ribbonTabBattleMap->setGridColor(model->getGridPen().color());
     }
 }
 

@@ -3,7 +3,6 @@
 #include "character.h"
 #include "dmconstants.h"
 #include "characterimporter.h"
-#include <QDebug>
 
 // TODO: make this scalable with screen size
 
@@ -79,7 +78,7 @@ bool PartyCharacterGridFrame::eventFilter(QObject *obj, QEvent *event)
         return true;
     }
 
-    return false;
+    return QFrame::eventFilter(obj, event);
 }
 
 void PartyCharacterGridFrame::syncDndBeyond()

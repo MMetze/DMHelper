@@ -5,7 +5,7 @@
 #include <QOffscreenSurface>
 #include <QDebug>
 
-#define VIDEO_DEBUG_MESSAGES
+//#define VIDEO_DEBUG_MESSAGES
 
 VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _player(player),
@@ -81,12 +81,12 @@ QOpenGLFramebufferObject *VideoPlayerGLVideo::getVideoFrame()
         std::swap(_idxSwapMid, _idxSwapDisplay);
         std::swap(_idxSwapRender, _idxSwapMid);
         #ifdef VIDEO_DEBUG_MESSAGES
-            qDebug() << "[VideoPlayerGLPlayer] New frame is available, stack: " << _idxDisplay << " - (" << _idxSwapDisplay << "-" << _idxSwapMid << "-" << _idxSwapRender << ") - " << _idxRender;
+            qDebug() << "[VideoPlayerGLVideo] New frame is available, stack: " << _idxDisplay << " - (" << _idxSwapDisplay << "-" << _idxSwapMid << "-" << _idxSwapRender << ") - " << _idxRender;
         #endif
 #else
         std::swap(_idxSwapRender, _idxDisplay);
         #ifdef VIDEO_DEBUG_MESSAGES
-            qDebug() << "[VideoPlayerGLPlayer] New frame is available, swapping SwapRender (" << _idxSwapRender << ") and Display (" << _idxDisplay << ") to return buffer " << _buffers[_idxDisplay];
+            qDebug() << "[VideoPlayerGLVideo] New frame is available, swapping SwapRender (" << _idxSwapRender << ") and Display (" << _idxDisplay << ") to return buffer " << _buffers[_idxDisplay];
         #endif
 #endif
         _updated = false;

@@ -5,7 +5,6 @@
 #include "dmconstants.h"
 #include <QPainter>
 #include <QTimer>
-#include <QDebug>
 
 SoundboardTrackFrame::SoundboardTrackFrame(AudioTrack* track, QWidget *parent) :
     QFrame(parent),

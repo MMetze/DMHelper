@@ -2,7 +2,6 @@
 #include <QString>
 #include <QRegularExpression>
 #include <QRegularExpressionMatch>
-#include <QDebug>
 
 DMHPayload_Private::DMHPayload_Private() :
     _imageFile(),

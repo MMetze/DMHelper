@@ -33,8 +33,9 @@ bool VideoPlayerGL::startPlayer()
     return true;
 }
 
-bool VideoPlayerGL::stopPlayer()
+bool VideoPlayerGL::stopPlayer(bool restart)
 {
+    Q_UNUSED(restart);
     return true;
 }
 

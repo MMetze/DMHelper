@@ -354,7 +354,7 @@ void CharacterFrame::readCharacterData()
     ui->edtRace->home(false);
     ui->edtSize->setText(_character->getStringValue(Character::StringValue_size));
     ui->edtSize->home(false);
-    ui->edtExperience->setText(QString::number(_character->getIntValue(Character::IntValue_experience)));
+    ui->edtExperience->setText(_character->getStringValue(Character::StringValue_experience));
     ui->edtExperience->home(false);
     ui->edtClass->setText(_character->getStringValue(Character::StringValue_class));
     ui->edtClass->home(false);
@@ -434,7 +434,7 @@ void CharacterFrame::writeCharacterData()
         _character->setIntValue(Character::IntValue_level, ui->edtLevel->text().toInt());
         _character->setStringValue(Character::StringValue_race, ui->edtRace->text());
         _character->setStringValue(Character::StringValue_size, ui->edtSize->text());
-        _character->setIntValue(Character::IntValue_experience, ui->edtExperience->text().toInt());
+        _character->setStringValue(Character::StringValue_experience, ui->edtExperience->text());
         _character->setStringValue(Character::StringValue_class, ui->edtClass->text());
         _character->setHitPoints(ui->edtHitPoints->text().toInt());
         _character->setIntValue(Character::IntValue_maximumHP, ui->edtHitPointsMax->text().toInt());

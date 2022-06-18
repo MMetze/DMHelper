@@ -3,7 +3,6 @@
 #include "party.h"
 #include "undomarker.h"
 #include "mapmarkergraphicsitem.h"
-#include "videoplayerglplayer.h"
 #include "publishglbattlebackground.h"
 #include "publishglobject.h"
 #include "publishglimage.h"

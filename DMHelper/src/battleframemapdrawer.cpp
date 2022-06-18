@@ -5,7 +5,7 @@
 #include "map.h"
 #include <QPixmap>
 #include <QPainter>
-#include <QDebug>
+#include <QMessageBox>
 
 BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     QObject(parent),
@@ -129,6 +129,9 @@ void BattleFrameMapDrawer::resetFoW()
     if((!_map) || (!_fow) || (!_glFow))
         return;
 
+    if(QMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
+        return;
+
     UndoFill* undoFill = new UndoFill(_map, MapEditFill(QColor(0,0,0,255)));
     _map->getUndoStack()->push(undoFill);
     _map->fillFoW(QColor(0,0,0,128), _fow);
@@ -141,6 +144,9 @@ void BattleFrameMapDrawer::resetFoW()
 void BattleFrameMapDrawer::clearFoW()
 {
     if((!_map) || (!_fow) || (!_glFow))
+        return;
+
+    if(QMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
         return;
 
     UndoFill* undoFill = new UndoFill(_map, MapEditFill(QColor(0,0,0,0)));

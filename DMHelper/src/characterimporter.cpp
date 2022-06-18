@@ -385,7 +385,7 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     _character->setStringValue(Character::StringValue_eyes, rootObject["eyes"].toString());
     _character->setStringValue(Character::StringValue_height, rootObject["height"].toString());
     _character->setStringValue(Character::StringValue_weight, QString::number(rootObject["weight"].toInt()));
-    _character->setIntValue(Character::IntValue_experience, rootObject["currentXp"].toInt(0));
+    _character->setStringValue(Character::StringValue_experience, rootObject["currentXp"].toString());
     _character->setStringValue(Character::StringValue_sex, rootObject["gender"].toString());
 
     int alignmentId = rootObject["alignmentId"].toInt(1);

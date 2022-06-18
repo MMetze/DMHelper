@@ -54,6 +54,13 @@ public slots:
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
 
+    void setActiveToken(const QString& activeTokenFile);
+    void setSelectionToken(const QString& selectionTokenFile);
+    void setCombatantFrame(const QString& combatantFrame);
+    void setCountdownFrame(const QString& countdownFrame);
+    void setShowCountdown(bool showCountdown);
+    void setCountdownValues(qreal countdown, const QColor& countdownColor);
+
 protected:
     // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() override;
@@ -68,6 +75,7 @@ protected:
 
     virtual void updateGrid();
     virtual void updateFoW();
+    virtual void updateSelectionTokens();
     virtual void createContents();
     void cleanupContents();
 
@@ -98,6 +106,10 @@ protected:
     int _shaderModelMatrixRGBA;
     int _shaderProjectionMatrixRGBA;
     int _shaderAlphaRGBA;
+    unsigned int _shaderProgramRGBColor;
+    int _shaderModelMatrixRGBColor;
+    int _shaderProjectionMatrixRGBColor;
+    int _shaderRGBColor;
 
     QImage _gridImage;
     PublishGLImage* _gridObject;
@@ -116,11 +128,21 @@ protected:
     BattleDialogModelCombatant* _movementCombatant;
     bool _movementPC;
     PublishGLImage* _movementToken;
+    QString _tokenFrameFile;
+    PublishGLImage* _tokenFrame;
+    QString _countdownFrameFile;
+    PublishGLImage* _countdownFrame;
+    PublishGLImage* _countdownFill;
+    bool _showCountdown;
+    qreal _countdownScale;
+    QColor _countdownColor;
 
     BattleDialogModelCombatant* _activeCombatant;
     bool _activePC;
-    PublishGLImage* _activeToken;
 
+    QString _activeTokenFile;
+    PublishGLImage* _activeToken;
+    QString _selectionTokenFile;
     PublishGLImage* _selectionToken;
 
     bool _recreateLine;
@@ -130,6 +152,8 @@ protected:
     PublishGLImage* _lineTextImage;
 
     bool _updateFow;
+    bool _updateSelectionTokens;
+    bool _updateInitiative;
     bool _recreateContent;
 };
 

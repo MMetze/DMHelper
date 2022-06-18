@@ -289,6 +289,11 @@ QPixmap BattleDialogGraphicsScene::getSelectedIcon() const
     return result;
 }
 
+QString BattleDialogGraphicsScene::getSelectedIconFile() const
+{
+    return _selectedIcon;
+}
+
 QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
 {
     return _itemList;

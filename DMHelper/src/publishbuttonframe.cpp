@@ -2,7 +2,6 @@
 #include "colorpushbutton.h"
 #include "ui_publishbuttonframe.h"
 #include <QKeyEvent>
-#include <QMessageBox>
 
 PublishButtonFrame::PublishButtonFrame(QWidget *parent) :
     QFrame(parent),

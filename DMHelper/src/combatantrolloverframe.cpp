@@ -8,7 +8,6 @@
 #include "combatantwidget.h"
 #include "ui_combatantrolloverframe.h"
 #include <QStringList>
-#include <QDebug>
 
 CombatantRolloverFrame::CombatantRolloverFrame(CombatantWidget* combatantWidget, QWidget *parent) :
     QFrame(parent),

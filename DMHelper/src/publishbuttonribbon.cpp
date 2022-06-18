@@ -2,7 +2,6 @@
 #include "colorpushbutton.h"
 #include "ui_publishbuttonribbon.h"
 #include <QKeyEvent>
-#include <QMessageBox>
 
 PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
     RibbonFrame(parent),
@@ -10,10 +9,8 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
 {
     ui->setupUi(this);
 
-//    connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SIGNAL(clicked(bool)));
     connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SLOT(handleClicked(bool)));
     connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SLOT(handleToggle(bool)));
-//    connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SIGNAL(toggled(bool)));
 
     connect(ui->btnCW, SIGNAL(clicked()), ui->btnColor, SLOT(rotateCW()));
     connect(ui->btnCW, SIGNAL(clicked()), this, SIGNAL(rotateCW()));
@@ -23,7 +20,6 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
     connect(ui->btnCCW, SIGNAL(clicked()), this, SLOT(handleRotation()));
 
     connect(ui->btnColor, SIGNAL(rotationChanged(int)), this, SIGNAL(rotationChanged(int)));
-//    connect(ui->btnColor, SIGNAL(colorChanged(QColor)), this, SIGNAL(colorChanged(QColor)));
     connect(ui->btnColor, SIGNAL(colorChanged(const QColor&)), this, SLOT(handleColorChanged(const QColor&)));
 
     connect(ui->btnPlayersWindow, SIGNAL(clicked(bool)), this, SIGNAL(playersWindowClicked(bool)));

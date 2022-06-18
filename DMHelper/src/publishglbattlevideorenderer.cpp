@@ -8,6 +8,7 @@
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
 #include "videoplayerglscreenshot.h"
 #include "publishglbattlebackground.h"
+#include <QDebug>
 #endif
 
 PublishGLBattleVideoRenderer::PublishGLBattleVideoRenderer(BattleDialogModel* model, QObject *parent) :
