@@ -21,14 +21,9 @@ DONE Configuration of:
 Fixed basic Youtube playback - DONE
 
 Battle Frame://change to have greyscale and BW FOWs - also, switching back and forth leaves the publish icon not synced!
-Videos to play back in repeat mode
-Custom selection/activation not rendering in player's window
-Visible markers not shown on rendered map (video?)
-Not able to manually drag around the party icon from the player's window
-Switching on and off different kinds of renderer doesn't work right
+
 Effects smaller than 5ft are not rendered properly.
 Effect selection is not shown
-Audio playback of YouTube caused crash (probably during rendering)
 
 
 EncounterText complete import/export of extended text capabilities
