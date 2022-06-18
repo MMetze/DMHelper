@@ -9,7 +9,7 @@
     <InstallerWindowIcon>dmhelper_icon.png</InstallerWindowIcon>
     <Banner>dmhelper_banner.png</Banner>
     <StartMenuDir>DMHelper</StartMenuDir>
-    <TargetDir>@ApplicationsDirX64@/DMHelper</TargetDir>
+    <TargetDir>@ApplicationsDirX86@/DMHelper</TargetDir>
     <StyleSheet>style.qss</StyleSheet>
     <RunProgram>@TargetDir@/DMHelper.exe</RunProgram>
 </Installer>

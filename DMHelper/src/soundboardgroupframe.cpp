@@ -7,7 +7,6 @@
 #include <QDropEvent>
 #include <QMimeData>
 #include <QUuid>
-#include <QDebug>
 
 SoundBoardGroupFrame::SoundBoardGroupFrame(SoundboardGroup* group, Campaign* campaign, QWidget *parent) :
     QFrame(parent),

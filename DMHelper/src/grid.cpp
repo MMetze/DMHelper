@@ -9,7 +9,8 @@
 Grid::Grid(QGraphicsScene& graphicsScene, const QRect& gridShape) :
     QGraphicsItemGroup(),
     _gridShape(gridShape),
-    _grid()
+    _grid(),
+    _localPen()
 {
     graphicsScene.addItem(this);
 }
@@ -43,8 +44,15 @@ void Grid::clear()
 
 void Grid::rebuildGrid(BattleDialogModel& model, QPainter* painter)
 {
-    if(!painter)
+    if(painter)
+    {
+        painter->setPen(model.getGridPen());
+    }
+    else
+    {
         clear();
+        _localPen = model.getGridPen();
+    }
 
     if(model.getGridOn() == false)
         return;
@@ -321,7 +329,7 @@ void Grid::createLine(int x0, int y0, int x1, int y1, QPainter* painter)
     }
     else if(scene())
     {
-        QGraphicsItem* newLineItem = scene()->addLine(x0, y0, x1, y1);
+        QGraphicsItem* newLineItem = scene()->addLine(x0, y0, x1, y1, _localPen);
         if(newLineItem)
         {
             newLineItem->setZValue(DMHelper::BattleDialog_Z_Grid);

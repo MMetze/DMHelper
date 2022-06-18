@@ -16,6 +16,11 @@ public:
     virtual int getAudioType() const override;
     virtual void eventCallback(const struct libvlc_event_t *p_event);
 
+    virtual bool isPlaying() const override;
+    virtual bool isRepeat() const override;
+    virtual bool isMuted() const override;
+    virtual int getVolume() const override;
+
 public slots:
     virtual void play() override;
     virtual void stop() override;
@@ -39,13 +44,12 @@ protected:
 
     QNetworkAccessManager* _manager;
     QString _urlString;
-    libvlc_instance_t* _vlcInstance;
-    libvlc_media_list_player_t* _vlcListPlayer;
     libvlc_media_player_t *_vlcPlayer;
     int _stopStatus;
     int _lastVolume;
     int _timerId;
     bool _repeat;
+    bool _mute;
 };
 
 #endif // AUDIOTRACKYOUTUBE_H

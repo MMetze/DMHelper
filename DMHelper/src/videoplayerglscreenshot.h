@@ -22,12 +22,15 @@ public:
 signals:
     void screenshotReady(const QImage& image);
 
+protected slots:
+    void videoAvailable();
+
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
 
     virtual bool initializeVLC() override;
     virtual bool startPlayer() override;
-    virtual bool stopPlayer() override;
+    virtual bool stopPlayer(bool restart) override;
 
     void cleanupPlayer();
     QImage extractImage();

@@ -38,6 +38,7 @@ SOURCES += main.cpp\
     audiofactory.cpp \
     audiotrackfile.cpp \
     audiotracksyrinscape.cpp \
+    audiotracksyrinscapeonline.cpp \
     audiotrackurl.cpp \
     audiotrackyoutube.cpp \
     basicdateserver.cpp \
@@ -57,6 +58,7 @@ SOURCES += main.cpp\
     campaignobjectfactory.cpp \
     campaignobjectframe.cpp \
     campaignobjectframestack.cpp \
+    campaigntreeactivestack.cpp \
     campaigntreeitem.cpp \
     characterimportdialog.cpp \
     colorpushbutton.cpp \
@@ -68,6 +70,7 @@ SOURCES += main.cpp\
     customtableframe.cpp \
     discordposter.cpp \
     dmh_vlc.cpp \
+    dmhcache.cpp \
     dmhelperribbon.cpp \
     dmhlogger.cpp \
     dmhwaitingdialog.cpp \
@@ -268,6 +271,7 @@ HEADERS  += mainwindow.h \
     audiofactory.h \
     audiotrackfile.h \
     audiotracksyrinscape.h \
+    audiotracksyrinscapeonline.h \
     audiotrackurl.h \
     audiotrackyoutube.h \
     basicdateserver.h \
@@ -287,6 +291,7 @@ HEADERS  += mainwindow.h \
     campaignobjectfactory.h \
     campaignobjectframe.h \
     campaignobjectframestack.h \
+    campaigntreeactivestack.h \
     campaigntreeitem.h \
     characterimportdialog.h \
     colorpushbutton.h \
@@ -298,6 +303,7 @@ HEADERS  += mainwindow.h \
     customtableframe.h \
     discordposter.h \
     dmh_vlc.h \
+    dmhcache.h \
     dmhelperribbon.h \
     dmhlogger.h \
     dmhwaitingdialog.h \
@@ -570,6 +576,7 @@ DISTFILES += \
     buildanddeploy_msvc64.cmd \
     buildanddeploymac \
     bugs.txt \
+    buildanddeploymac.sh \
     installer/config/config_win64.xml \
     installer/config/config_mac.xml \
     installer/config/dmhelper.ico \

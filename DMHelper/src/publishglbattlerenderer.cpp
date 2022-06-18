@@ -35,6 +35,10 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _shaderModelMatrixRGBA(0),
     _shaderProjectionMatrixRGBA(0),
     _shaderAlphaRGBA(0),
+    _shaderProgramRGBColor(0),
+    _shaderModelMatrixRGBColor(0),
+    _shaderProjectionMatrixRGBColor(0),
+    _shaderRGBColor(0),
     _gridImage(),
     _gridObject(nullptr),
     _fowImage(),
@@ -50,9 +54,19 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _movementCombatant(nullptr),
     _movementPC(false),
     _movementToken(nullptr),
+    _tokenFrameFile(),
+    _tokenFrame(nullptr),
+    _countdownFrameFile(),
+    _countdownFrame(nullptr),
+    _countdownFill(nullptr),
+    _showCountdown(false),
+    _countdownScale(1.0),
+    _countdownColor(Qt::white),
     _activeCombatant(nullptr),
     _activePC(false),
+    _activeTokenFile(),
     _activeToken(nullptr),
+    _selectionTokenFile(),
     _selectionToken(nullptr),
     _recreateLine(false),
     _lineItem(nullptr),
@@ -60,6 +74,8 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _lineImage(nullptr),
     _lineTextImage(nullptr),
     _updateFow(false),
+    _updateSelectionTokens(false),
+    _updateInitiative(false),
     _recreateContent(false)
 {
 }
@@ -133,12 +149,6 @@ void PublishGLBattleRenderer::initializeGL()
 
     createShaders();
 
-    //f->glEnable(GL_TEXTURE_2D); // Enable texturing
-    //f->glEnable(GL_BLEND);// you enable blending function
-    //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    //f->glEnable(GL_DEPTH_TEST);
-    //f->glDepthFunc(GL_GREATER);
-
     // Create the objects
     initializeBackground();
 
@@ -148,6 +158,11 @@ void PublishGLBattleRenderer::initializeGL()
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
+
+    f->glUseProgram(_shaderProgramRGBColor);
+    f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBColor, "texture1"), 0); // set it manually
+    f->glUniformMatrix4fv(_shaderModelMatrixRGBColor, 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBColor, "view"), 1, GL_FALSE, viewMatrix.constData());
 
     f->glUseProgram(_shaderProgramRGBA);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
@@ -181,7 +196,7 @@ void PublishGLBattleRenderer::resizeGL(int w, int h)
     _scene.setTargetSize(targetSize);
 
     resizeBackground(w, h);
-    updateInitiative();
+    _updateInitiative = true;
 
     emit updateWidget();
 }
@@ -210,6 +225,12 @@ void PublishGLBattleRenderer::paintGL()
     else
     {
         updateGrid();
+
+        if(_updateSelectionTokens)
+            updateSelectionTokens();
+
+        if(_updateInitiative)
+            updateInitiative();
 
         if(_updateFow)
             updateFoW();
@@ -354,11 +375,11 @@ void PublishGLBattleRenderer::setGrid(QImage gridImage)
 
 void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
 {
-    if(_initiativeType != initiativeType)
-    {
-        _initiativeType = initiativeType;
-        recreateContents();
-    }
+    if(_initiativeType == initiativeType)
+        return;
+
+    _initiativeType = initiativeType;
+    recreateContents(); // Todo: can we change this to updateInitiative?
 }
 
 void PublishGLBattleRenderer::distanceChanged(const QString& distance)
@@ -422,6 +443,62 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
         activeCombatantMoved();
         connect(_activeCombatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
     }
+}
+
+void PublishGLBattleRenderer::setActiveToken(const QString& activeTokenFile)
+{
+    if(_activeTokenFile == activeTokenFile)
+        return;
+
+    _activeTokenFile = activeTokenFile;
+    _updateSelectionTokens = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setSelectionToken(const QString& selectionTokenFile)
+{
+    if(_selectionTokenFile == selectionTokenFile)
+        return;
+
+    _selectionTokenFile = selectionTokenFile;
+    _updateSelectionTokens = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setCombatantFrame(const QString& combatantFrame)
+{
+    if(_tokenFrameFile == combatantFrame)
+        return;
+
+    _tokenFrameFile = combatantFrame;
+    _updateInitiative = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setCountdownFrame(const QString& countdownFrame)
+{
+    if(_countdownFrameFile == countdownFrame)
+        return;
+
+    _countdownFrameFile = countdownFrame;
+    _updateInitiative = true;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setShowCountdown(bool showCountdown)
+{
+    if(_showCountdown == showCountdown)
+        return;
+
+    _showCountdown = showCountdown;
+    updateWidget();
+}
+
+void PublishGLBattleRenderer::setCountdownValues(qreal countdown, const QColor& countdownColor)
+{
+    _countdownScale = countdown;
+    _countdownColor = countdownColor;
+    updateWidget();
 }
 
 void PublishGLBattleRenderer::updateProjectionMatrix()
@@ -503,6 +580,7 @@ void PublishGLBattleRenderer::updateGrid()
     if((_gridObject) || (_gridImage.isNull()))
         return;
 
+    qDebug() << "[PublishGLBattleRenderer] Updating Grid";
     _gridObject = new PublishGLImage(_gridImage);
 }
 
@@ -510,6 +588,8 @@ void PublishGLBattleRenderer::updateFoW()
 {
     if((!_model) || (!_model->getMap()) || (_fowImage.isNull()))
         return;
+
+    qDebug() << "[PublishGLBattleRenderer] Updating Fog of War";
 
     QSize backgroundSize = getBackgroundSize().toSize();
     if(backgroundSize.isEmpty())
@@ -523,19 +603,53 @@ void PublishGLBattleRenderer::updateFoW()
     _updateFow = false;
 }
 
+void PublishGLBattleRenderer::updateSelectionTokens()
+{
+    qDebug() << "[PublishGLBattleRenderer] Updating Selection Tokens";
+
+    QImage selectImage;
+    if((_selectionTokenFile.isEmpty()) || (!selectImage.load(_selectionTokenFile)))
+        selectImage.load(QString(":/img/data/selected.png"));
+    PublishGLImage* newSelectionToken = new PublishGLImage(selectImage);
+    QList<BattleDialogModelCombatant*> combatants = _combatantTokens.keys();
+    for(BattleDialogModelCombatant* combatant : combatants)
+    {
+        if(combatant->getSelected())
+        {
+            PublishGLBattleToken* token = _combatantTokens.value(combatant);
+            if(token)
+            {
+                token->removeEffect(*_selectionToken);
+                token->addEffect(*newSelectionToken);
+            }
+        }
+    }
+    delete _selectionToken;
+    _selectionToken = newSelectionToken;
+
+    delete _activeToken; _activeToken = nullptr;
+    QImage activeImage;
+    if((_activeTokenFile.isEmpty()) || (!activeImage.load(_activeTokenFile)))
+        activeImage.load(QString(":/img/data/active.png"));
+    _activeToken = new PublishGLImage(activeImage);
+    activeCombatantMoved();
+
+    _updateSelectionTokens = false;
+}
+
 void PublishGLBattleRenderer::createContents()
 {
     if(!_model)
         return;
 
+    qDebug() << "[PublishGLBattleRenderer] Creating all battle content";
+
     updateFoW();
     updateGrid();
+    updateSelectionTokens();
     createLineToken();
 
-    QImage selectImage;
-    selectImage.load(QString(":/img/data/selected.png"));
-    _selectionToken = new PublishGLImage(selectImage);
-
+    // Todo: move this into updateInitiative to avoid calling createContents when the init type is changed
     QFontMetrics fm(qApp->font());
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
@@ -583,11 +697,6 @@ void PublishGLBattleRenderer::createContents()
     movementPainter.end();
     _movementToken = new PublishGLImage(movementImage);
 
-    QImage activeImage;
-    activeImage.load(QString(":/img/data/active.png"));
-    _activeToken = new PublishGLImage(activeImage);
-    activeCombatantChanged(_model->getActiveCombatant());
-
     for(int i = 0; i < _model->getEffectCount(); ++i)
     {
         BattleDialogModelEffect* effect = _model->getEffect(i);
@@ -610,7 +719,11 @@ void PublishGLBattleRenderer::cleanupContents()
     delete _gridObject; _gridObject = nullptr;
     delete _fowObject; _fowObject = nullptr;
     delete _selectionToken; _selectionToken = nullptr;
+    delete _activeToken; _activeToken = nullptr;
     delete _unknownToken; _unknownToken = nullptr;
+    delete _tokenFrame; _tokenFrame = nullptr;
+    delete _countdownFrame; _countdownFrame = nullptr;
+    delete _countdownFill; _countdownFill = nullptr;
     delete _initiativeBackground; _initiativeBackground = nullptr;
     delete _movementToken; _movementToken = nullptr;
     delete _lineImage; _lineImage = nullptr;
@@ -630,6 +743,8 @@ void PublishGLBattleRenderer::cleanupContents()
 
 void PublishGLBattleRenderer::updateInitiative()
 {
+    qDebug() << "[PublishGLBattleRenderer] Updating Initiative resources";
+
     delete _initiativeBackground;
     _initiativeBackground = nullptr;
 
@@ -660,6 +775,29 @@ void PublishGLBattleRenderer::updateInitiative()
     initiativeAreaImage.fill(QColor(0, 0, 0, 128));
     _initiativeBackground = new PublishGLImage(initiativeAreaImage, false);
     _initiativeBackground->setPosition(0, _scene.getTargetSize().height() - initiativeArea.height());
+
+    delete _tokenFrame; _tokenFrame = nullptr;
+    QImage tokenFrameImage;
+    if((_tokenFrameFile.isEmpty()) || (!tokenFrameImage.load(_tokenFrameFile)))
+        tokenFrameImage.load(QString(":/img/data/combatant_frame.png"));
+    _tokenFrame = new PublishGLImage(tokenFrameImage, false);
+    _tokenFrame->setScale(_initiativeTokenHeight / static_cast<qreal>(tokenFrameImage.height()));
+
+    delete _countdownFrame; _countdownFrame = nullptr;
+    QImage countdownFrameImage;
+    if((_countdownFrameFile.isEmpty()) || (!countdownFrameImage.load(_countdownFrameFile)))
+        countdownFrameImage.load(QString(":/img/data/countdown_frame.png"));
+    _countdownFrame = new PublishGLImage(countdownFrameImage, false);
+    _countdownFrame->setX(_initiativeTokenHeight);
+    _countdownFrame->setScale(_initiativeTokenHeight / static_cast<qreal>(countdownFrameImage.height()));
+
+    QImage countdownFillImage(countdownFrameImage.size(), QImage::Format_RGBA8888);
+    countdownFillImage.fill(Qt::white);
+    _countdownFill = new PublishGLImage(countdownFillImage, false);
+    _countdownFill->setX(_initiativeTokenHeight);
+    _countdownFill->setScale(_initiativeTokenHeight / static_cast<qreal>(countdownFillImage.height()));
+
+    _updateInitiative = false;
 }
 
 void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
@@ -705,12 +843,34 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
 
             if(tokenObject)
             {
-                qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
                 tokenScreenCoords.setToIdentity();
                 tokenScreenCoords.translate(tokenSize / 2.0, tokenY);
+                qreal scaleFactor = tokenSize / qMax(textureSize.width(), textureSize.height());
                 tokenScreenCoords.scale(scaleFactor, scaleFactor);
                 functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
                 tokenObject->paintGL();
+                if(_tokenFrame)
+                {
+                    _tokenFrame->setY(tokenY - (_initiativeTokenHeight / 2.0));
+                    functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _tokenFrame->getMatrixData());
+                   _tokenFrame->paintGL();
+                   if((_countdownFrame) && (_countdownFill) && (_showCountdown) && (currentCombatant == activeCombatant))
+                   {
+                       functions->glUseProgram(_shaderProgramRGBColor);
+                       functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBColor, 1, GL_FALSE, screenCoords.constData());
+                       functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+                       functions->glUniform4f(_shaderRGBColor, _countdownColor.redF(), _countdownColor.greenF(), _countdownColor.blueF(), 1.0);
+                       //_countdownFill->setPositionScaleY(tokenY - (_initiativeTokenHeight / 2.0) + (_countdownScale * _initiativeTokenHeight), _countdownScale);
+                       _countdownFill->setPositionScaleY(tokenY - (_initiativeTokenHeight / 2.0), _countdownScale);
+                       functions->glUniformMatrix4fv(_shaderModelMatrixRGBColor, 1, GL_FALSE, _countdownFill->getMatrixData());
+                       _countdownFill->paintGL();
+                       functions->glUseProgram(_shaderProgramRGB);
+
+                       functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _countdownFrame->getMatrixData());
+                       _countdownFrame->setY(tokenY - (_initiativeTokenHeight / 2.0));
+                       _countdownFrame->paintGL();
+                   }
+                }
             }
 
             if((_initiativeType == DMHelper::InitiativeType_ImageName) && (combatant->getShown()))
@@ -719,7 +879,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 if(combatantName)
                 {
                     tokenScreenCoords.setToIdentity();
-                    tokenScreenCoords.translate(tokenSize * 1.2, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
+                    tokenScreenCoords.translate(tokenSize * 1.25, tokenY - (static_cast<qreal>(combatantName->getImageSize().height()) / 2.0));
                     functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, tokenScreenCoords.constData());
                     combatantName->paintGL();
                 }
@@ -898,6 +1058,81 @@ void PublishGLBattleRenderer::createShaders()
     _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
     _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
     _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
+
+    const char *vertexShaderSourceRGBColor = "#version 410 core\n"
+        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+        "layout (location = 2) in vec2 aTexCoord;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection;\n"
+        "uniform vec4 inColor;\n"
+        "out vec4 ourColor; // output a color to the fragment shader\n"
+        "out vec2 TexCoord;\n"
+        "void main()\n"
+        "{\n"
+        "   // note that we read the multiplication from right to left\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   ourColor = inColor; // set ourColor to the input color we got from the vertex data\n"
+        "   TexCoord = aTexCoord;\n"
+        "}\0";
+
+    unsigned int vertexShaderRGBColor;
+    vertexShaderRGBColor = f->glCreateShader(GL_VERTEX_SHADER);
+    f->glShaderSource(vertexShaderRGBColor, 1, &vertexShaderSourceRGBColor, NULL);
+    f->glCompileShader(vertexShaderRGBColor);
+
+    f->glGetShaderiv(vertexShaderRGBColor, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(vertexShaderRGBColor, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    const char *fragmentShaderSourceRGBColor = "#version 410 core\n"
+        "out vec4 FragColor;\n"
+        "in vec4 ourColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D texture1;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = ourColor;\n"
+        "}\0";
+
+
+    unsigned int fragmentShaderRGBColor;
+    fragmentShaderRGBColor = f->glCreateShader(GL_FRAGMENT_SHADER);
+    f->glShaderSource(fragmentShaderRGBColor, 1, &fragmentShaderSourceRGBColor, NULL);
+    f->glCompileShader(fragmentShaderRGBColor);
+
+    f->glGetShaderiv(fragmentShaderRGBColor, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(fragmentShaderRGBColor, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    _shaderProgramRGBColor = f->glCreateProgram();
+
+    f->glAttachShader(_shaderProgramRGBColor, vertexShaderRGBColor);
+    f->glAttachShader(_shaderProgramRGBColor, fragmentShaderRGBColor);
+    f->glLinkProgram(_shaderProgramRGBColor);
+
+    f->glGetProgramiv(_shaderProgramRGBColor, GL_LINK_STATUS, &success);
+    if(!success) {
+        f->glGetProgramInfoLog(_shaderProgramRGBColor, 512, NULL, infoLog);
+        qDebug() << "[BattleGLRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    f->glUseProgram(_shaderProgramRGBColor);
+    f->glDeleteShader(vertexShaderRGBColor);
+    f->glDeleteShader(fragmentShaderRGBColor);
+    _shaderModelMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "model");
+    _shaderProjectionMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "projection");
+    _shaderRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "inColor");
 }
 
 void PublishGLBattleRenderer::destroyShaders()
@@ -911,6 +1146,8 @@ void PublishGLBattleRenderer::destroyShaders()
                 f->glDeleteProgram(_shaderProgramRGB);
             if(_shaderProgramRGBA > 0)
                 f->glDeleteProgram(_shaderProgramRGBA);
+            if(_shaderProgramRGBColor > 0)
+                f->glDeleteProgram(_shaderProgramRGBColor);
         }
     }
 
@@ -921,6 +1158,10 @@ void PublishGLBattleRenderer::destroyShaders()
     _shaderModelMatrixRGBA = 0;
     _shaderProjectionMatrixRGBA = 0;
     _shaderAlphaRGBA = 0;
+    _shaderProgramRGBColor = 0;
+    _shaderModelMatrixRGBColor = 0;
+    _shaderProjectionMatrixRGBColor = 0;
+    _shaderRGBColor = 0;
 }
 
 void PublishGLBattleRenderer::recreateContents()

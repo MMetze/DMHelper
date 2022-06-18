@@ -84,7 +84,7 @@ bool TextTranslateDialog::eventFilter(QObject *watched, QEvent *event)
     paint.drawImage(0, 0, _backgroundImageScaled);
     paint.end();
 
-    return false;
+    return QDialog::eventFilter(watched, event);
 }
 
 void TextTranslateDialog::getOriginalText(QString& originalText) const

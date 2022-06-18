@@ -12,8 +12,6 @@ class Monster : public Combatant
     Q_OBJECT
 public:
     explicit Monster(MonsterClass* monsterClass, const QString& name = QString(), QObject *parent = nullptr);
-//    explicit Monster(MonsterClass* monsterClass, const QDomElement &element, bool isImport, QObject *parent = nullptr);
-//    explicit Monster(const Monster &obj);  // copy constructor
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;

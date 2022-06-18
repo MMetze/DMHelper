@@ -12,6 +12,8 @@ PublishGLImage::PublishGLImage(const QImage& image, bool centered, QObject *pare
     _VBO(0),
     _EBO(0),
     _scaleFactor(1.f),
+    _scaleX(1.f),
+    _scaleY(1.f),
     _x(0.f),
     _y(0.f),
     _imageSize()
@@ -27,6 +29,8 @@ PublishGLImage::PublishGLImage(const QImage& image, int textureParam, bool cente
     _VBO(0),
     _EBO(0),
     _scaleFactor(1.f),
+    _scaleX(1.f),
+    _scaleY(1.f),
     _x(0.f),
     _y(0.f),
     _imageSize()
@@ -105,6 +109,24 @@ void PublishGLImage::setScale(float scaleFactor)
     }
 }
 
+void PublishGLImage::setScaleX(float scaleFactor)
+{
+    if(scaleFactor != _scaleX)
+    {
+        _scaleX = scaleFactor;
+        updateMatrix();
+    }
+}
+
+void PublishGLImage::setScaleY(float scaleFactor)
+{
+    if(scaleFactor != _scaleY)
+    {
+        _scaleY = scaleFactor;
+        updateMatrix();
+    }
+}
+
 void PublishGLImage::setX(float x)
 {
     if(x != _x)
@@ -136,6 +158,26 @@ void PublishGLImage::setPosition(float x, float y)
 void PublishGLImage::setPosition(const QPointF& pos)
 {
     setPosition(pos.x(), pos.y());
+}
+
+void PublishGLImage::setPositionScaleX(float x, float scaleFactor)
+{
+    if((x != _x) || (scaleFactor != _scaleX))
+    {
+        _x = x;
+        _scaleX = scaleFactor;
+        updateMatrix();
+    }
+}
+
+void PublishGLImage::setPositionScaleY(float y, float scaleFactor)
+{
+    if((y != _y) || (scaleFactor != _scaleY))
+    {
+        _y = y;
+        _scaleY = scaleFactor;
+        updateMatrix();
+    }
 }
 
 void PublishGLImage::setPositionScale(float x, float y, float scaleFactor)
@@ -177,6 +219,16 @@ QSize PublishGLImage::getImageSize() const
 float PublishGLImage::getScale() const
 {
     return _scaleFactor;
+}
+
+float PublishGLImage::getScaleX() const
+{
+    return _scaleX;
+}
+
+float PublishGLImage::getScaleY() const
+{
+    return _scaleY;
 }
 
 void PublishGLImage::createImageObjects(const QImage& image)
@@ -255,5 +307,5 @@ void PublishGLImage::updateMatrix()
 {
     _modelMatrix.setToIdentity();
     _modelMatrix.translate(_x, _y);
-    _modelMatrix.scale(_scaleFactor, _scaleFactor);
+    _modelMatrix.scale(_scaleFactor * _scaleX, _scaleFactor * _scaleY);
 }

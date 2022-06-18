@@ -4,7 +4,6 @@
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
-#include <QDebug>
 
 UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant, QGraphicsItem *parent) :
     QGraphicsPixmapItem(parent),

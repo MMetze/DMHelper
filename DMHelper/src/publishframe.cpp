@@ -7,7 +7,6 @@
 #include <QKeyEvent>
 #include <QResizeEvent>
 #include <QTime>
-#include <QDebug>
 
 PublishFrame::PublishFrame(QWidget *parent) :
     QFrame(parent),

@@ -84,7 +84,7 @@ bool SelectZoom::eventFilter(QObject *obj, QEvent *event)
         }
     }
 
-    return QObject::eventFilter(obj,event);
+    return QDialog::eventFilter(obj,event);
 }
 
 void SelectZoom::setScaledImg()

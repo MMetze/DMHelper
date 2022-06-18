@@ -2,7 +2,6 @@
 #include "ui_dmhwaitingdialog.h"
 #include "dmconstants.h"
 #include <QPainter>
-#include <QDebug>
 
 DMHWaitingDialog::DMHWaitingDialog(const QString& statusString, QWidget *parent) :
     QDialog(parent),
