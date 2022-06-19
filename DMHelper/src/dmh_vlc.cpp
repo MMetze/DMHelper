@@ -4,7 +4,7 @@
 #include <QTimerEvent>
 #include <QDebug>
 
-#define VIDEO_DEBUG_MESSAGES
+//#define VIDEO_DEBUG_MESSAGES
 
 DMH_VLC* DMH_VLC::_instance = nullptr;
 
@@ -49,7 +49,22 @@ DMH_VLC::DMH_VLC(QObject *parent) :
         _vlcInstance = libvlc_new(0, nullptr);
     #endif
 #else
-    _vlcInstance = libvlc_new(0, nullptr);
+    #ifdef VIDEO_DEBUG_MESSAGES
+        // Normal run-time version
+        const char *args[] = {
+     //       "--no-reset-plugins-cache",
+     //       "--plugins-cache",
+     //       "--no-plugins-scan",
+        #ifdef QT_DEBUG
+                "-vvv",
+        #endif
+            ""
+        };
+
+        _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
+    #else
+        _vlcInstance = libvlc_new(0, nullptr);
+    #endif
 #endif
 }
 
@@ -109,7 +124,7 @@ VideoPlayerGLVideo* DMH_VLC::requestVideo(VideoPlayerGL* player)
         return nullptr;
 
     _currentVideo = new VideoPlayerGLVideo(player);
-    qDebug() << "[DMH_VLC] New video created (" << reinterpret_cast<uint>(_currentVideo) << ") for player: " << reinterpret_cast<uint>(player);
+    qDebug() << "[DMH_VLC] New video created (" << reinterpret_cast<void *>(_currentVideo) << ") for player: " << reinterpret_cast<void *>(player);
 
     return _currentVideo;
 }
@@ -120,7 +135,7 @@ bool DMH_VLC::releaseVideo(VideoPlayerGLVideo* video)
         return false;
 
     delete _currentVideo;
-    qDebug() << "[DMH_VLC] Video released: " << reinterpret_cast<uint>(_currentVideo);
+    qDebug() << "[DMH_VLC] Video released: " << reinterpret_cast<void *>(_currentVideo);
     startTimer(1000);
 
     return true;
