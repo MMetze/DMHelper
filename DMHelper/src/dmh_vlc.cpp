@@ -109,7 +109,7 @@ VideoPlayerGLVideo* DMH_VLC::requestVideo(VideoPlayerGL* player)
         return nullptr;
 
     _currentVideo = new VideoPlayerGLVideo(player);
-    qDebug() << "[DMH_VLC] New video created (" << reinterpret_cast<uint>(_currentVideo) << ") for player: " << reinterpret_cast<uint>(player);
+    qDebug() << "[DMH_VLC] New video created (" << reinterpret_cast<void *>(_currentVideo) << ") for player: " << reinterpret_cast<void *>(player);
 
     return _currentVideo;
 }
@@ -120,7 +120,7 @@ bool DMH_VLC::releaseVideo(VideoPlayerGLVideo* video)
         return false;
 
     delete _currentVideo;
-    qDebug() << "[DMH_VLC] Video released: " << reinterpret_cast<uint>(_currentVideo);
+    qDebug() << "[DMH_VLC] Video released: " << reinterpret_cast<void *>(_currentVideo);
     startTimer(1000);
 
     return true;
