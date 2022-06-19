@@ -2,10 +2,8 @@
 #include "ui_quickrefframe.h"
 #include "quickref.h"
 #include "quickrefdatawidget.h"
-#include <QFile>
 #include <QTextStream>
 #include <QCoreApplication>
-#include <QDebug>
 
 QuickRefFrame::QuickRefFrame(QWidget *parent) :
     QFrame(parent),

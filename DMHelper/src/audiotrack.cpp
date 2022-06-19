@@ -81,8 +81,15 @@ void AudioTrack::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
     element.setAttribute("type", getAudioType());
     element.setAttribute("md5", getMD5());
 
-    QString urlString = targetDirectory.relativeFilePath(getUrl().toString());
-    if(urlString.isEmpty())
+    QString urlString;
+
+    if (getUrl().isLocalFile())
+    {
+        urlString = targetDirectory.relativeFilePath(getUrl().toString());
+        if(urlString.isEmpty())
+            urlString = getUrl().toString();
+    }
+    else
         urlString = getUrl().toString();
 
     QDomElement urlElement = doc.createElement("url");

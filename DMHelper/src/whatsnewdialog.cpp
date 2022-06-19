@@ -40,7 +40,7 @@ bool WhatsNewDialog::eventFilter(QObject *watched, QEvent *event)
                         _backgroundImageScaled);
     }
 
-    return false;
+    return QDialog::eventFilter(watched, event);
 }
 
 void WhatsNewDialog::closeEvent(QCloseEvent *event)

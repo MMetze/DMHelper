@@ -747,6 +747,42 @@ void BattleFrame::setYOffset(int yOffset)
     }
 }
 
+void BattleFrame::setGridWidth(int gridWidth)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid width, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridWidth(gridWidth);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+        updateRendererGrid();
+    }
+}
+
+void BattleFrame::setGridColor(const QColor& gridColor)
+{
+    if(!_model)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to set the grid color, no battle model is set!";
+        return;
+    }
+
+    if(_scene)
+    {
+        _model->setGridColor(gridColor);
+        _scene->updateBattleContents();
+        ui->graphicsView->update();
+        createPrescaledBackground();
+        updateRendererGrid();
+    }
+}
+
 void BattleFrame::setGridVisible(bool gridVisible)
 {
     if(!_model)
@@ -776,6 +812,8 @@ void BattleFrame::setInitiativeType(int initiativeType)
 void BattleFrame::setShowCountdown(bool showCountdown)
 {
     _showCountdown = showCountdown;
+    if(_renderer)
+        _renderer->setShowCountdown(_showCountdown);
     createPrescaledBackground();
 }
 
@@ -802,10 +840,11 @@ void BattleFrame::setPointerFile(const QString& filename)
 
 void BattleFrame::setSelectedIcon(const QString& selectedIcon)
 {
-    if(!_scene)
-        return;
+    if(_scene)
+        _scene->setSelectedIcon(selectedIcon);
 
-    _scene->setSelectedIcon(selectedIcon);
+    if(_renderer)
+        _renderer->setSelectionToken(selectedIcon);
 }
 
 void BattleFrame::setActiveIcon(const QString& activeIcon)
@@ -814,6 +853,9 @@ void BattleFrame::setActiveIcon(const QString& activeIcon)
     {
         _activeFile = activeIcon;
         createActiveIcon();
+
+        if(_renderer)
+            _renderer->setActiveToken(activeIcon);
     }
 }
 
@@ -845,6 +887,8 @@ void BattleFrame::setCombatantFrame(const QString& combatantFrame)
     if(_combatantFile != combatantFrame)
     {
         _combatantFile = combatantFrame;
+        if(_renderer)
+            _renderer->setCombatantFrame(_combatantFile);
         createCombatantFrame();
     }
 }
@@ -860,6 +904,8 @@ void BattleFrame::setCountdownFrame(const QString& countdownFrame)
     if(_countdownFile != countdownFrame)
     {
         _countdownFile = countdownFrame;
+        if(_renderer)
+            _renderer->setCountdownFrame(_countdownFile);
         createCountdownFrame();
     }
 }
@@ -975,7 +1021,6 @@ void BattleFrame::addMonsters()
 
         QString baseName = combatantDlg.getName();
         int monsterCount = combatantDlg.getCount();
-        int localHP = combatantDlg.getLocalHitPoints().isEmpty() ? 0 : combatantDlg.getLocalHitPoints().toInt();
         int localInitiative = combatantDlg.getInitiative().toInt();
 
         qreal sizeFactor = 0.0;
@@ -990,7 +1035,7 @@ void BattleFrame::addMonsters()
         {
             BattleDialogModelMonsterClass* monster = new BattleDialogModelMonsterClass(monsterClass);
             monster->setMonsterName((monsterCount == 1) ? baseName : (baseName + QString("#") + QString::number(i+1)));
-            monster->setHitPoints(localHP == 0 ? monsterClass->getHitDice().roll() : localHP);
+            monster->setHitPoints(combatantDlg.getCombatantHitPoints());
             monster->setInitiative(combatantDlg.isRandomInitiative() ? Dice::d20() + Combatant::getAbilityMod(monsterClass->getDexterity()) : localInitiative);
             monster->setKnown(combatantDlg.isKnown());
             monster->setShown(combatantDlg.isShown());
@@ -1229,6 +1274,22 @@ void BattleFrame::keyPressEvent(QKeyEvent * e)
 
 bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
 {
+    if(!event)
+        return false;
+
+    if(event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        if((keyEvent) && (keyEvent->modifiers() == Qt::AltModifier))
+        {
+            if(keyEvent->key() == Qt::Key_Left)
+                emit navigateBackwards();
+            else if(keyEvent->key() == Qt::Key_Right)
+                emit navigateForwards();
+            return true;
+        }
+    }
+
     if(_model)
     {
         CombatantWidget* widget = dynamic_cast<CombatantWidget*>(obj);
@@ -1405,7 +1466,7 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
         }
     }
 
-    return QObject::eventFilter(obj,event);
+    return CampaignObjectFrame::eventFilter(obj,event);
 }
 
 void BattleFrame::resizeEvent(QResizeEvent *event)
@@ -1563,15 +1624,11 @@ void BattleFrame::updateMap()
 
         createPrescaledBackground();
     }
-    else
+    else if(_model->getMap()->isValid())
     {
-        if(_model->getMap()->isValid())
-        {
-            qDebug() << "[Battle Frame] Initializing battle map video";
-            extractDMScreenshot();
-            //createVideoPlayer(true);
-            _isVideo = true;
-        }
+        qDebug() << "[Battle Frame] Initializing battle map video";
+        extractDMScreenshot();
+        _isVideo = true;
     }
 }
 
@@ -2231,6 +2288,9 @@ void BattleFrame::countdownTimerExpired()
     }
 
     updateCountdownText();
+
+    if((_renderer) && (_countdownFrame.height() > 10))
+        _renderer->setCountdownValues(_countdown / static_cast<qreal>(_countdownFrame.height() - 10), _countdownColor);
 }
 
 void BattleFrame::updateCountdownText()
@@ -2764,7 +2824,7 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
 
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
-    if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
+    if((!renderer) || (!_battle) || (!_scene) || (renderer->getObject() != _battle->getBattleDialogModel()))
         return;
 
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
@@ -2779,11 +2839,19 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     connect(renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
     renderer->setPointerFileName(_pointerFile);
+    renderer->setActiveToken(_activeFile);
+    renderer->setSelectionToken(_scene->getSelectedIconFile());
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     _bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());
     renderer->fowChanged(_bwFoWImage);
+    renderer->setCombatantFrame(_combatantFile);
+    renderer->setCountdownFrame(_countdownFile);
+    renderer->setShowCountdown(_showCountdown);
+    if(_countdownFrame.height() > 10)
+        renderer->setCountdownValues(_countdown / static_cast<qreal>(_countdownFrame.height() - 10), _countdownColor);
+    renderer->setCountdownValues(_countdown, _countdownColor);
 
     if(_cameraRect)
         renderer->setCameraRect(_cameraRect->getCameraRect());

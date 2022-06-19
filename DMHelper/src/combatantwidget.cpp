@@ -5,7 +5,6 @@
 #include <QMouseEvent>
 #include <QLabel>
 #include <QHBoxLayout>
-#include <QDebug>
 
 CombatantWidget::CombatantWidget(QWidget *parent) :
     QFrame(parent),

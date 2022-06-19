@@ -1,6 +1,5 @@
 #include "battledialogmodelcombatant.h"
 #include <QDomElement>
-#include <QDebug>
 
 BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),

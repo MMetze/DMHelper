@@ -3,7 +3,6 @@
 #include "map.h"
 #include "audiotrack.h"
 #include "combatantreference.h"
-#include <QDebug>
 
 CampaignExporter::CampaignExporter(Campaign& originalCampaign, QUuid exportId, QDir& exportDirectory) :
     _originalCampaign(originalCampaign),

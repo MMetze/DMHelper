@@ -5,7 +5,6 @@
 #include "character.h"
 #include <QDomElement>
 #include <QDir>
-#include <QDebug>
 #include <QRegularExpression>
 
 static const char* SKILLELEMEMT_NAMES[Combatant::SKILLS_COUNT] =

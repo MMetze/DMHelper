@@ -44,7 +44,6 @@ public:
 
     static void playerEventCallback( const struct libvlc_event_t *p_event, void *p_data );
 
-
 signals:
     void videoOpening();
     void videoPlaying();
@@ -63,12 +62,15 @@ public slots:
 
     void initializationComplete();
 
+protected slots:
+    void videoAvailable();
+
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
 
     virtual bool initializeVLC() override;
     virtual bool startPlayer() override;
-    virtual bool stopPlayer() override;
+    virtual bool stopPlayer(bool restart) override;
 
     void cleanupPlayer();
 
@@ -93,6 +95,7 @@ protected:
     libvlc_media_player_t* _vlcPlayer;
     libvlc_media_t* _vlcMedia;
     int _status;
+    bool _initialized;
     bool _selfRestart;
     bool _deleteOnStop;
     int _stopStatus;

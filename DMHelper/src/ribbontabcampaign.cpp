@@ -14,6 +14,7 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
     connect(ui->btnNewBattle, SIGNAL(clicked(bool)), this, SIGNAL(newBattleClicked()));
     connect(ui->btnAddSound, SIGNAL(clicked(bool)), this, SIGNAL(newSoundClicked()));
     connect(ui->btnSyrinscape, SIGNAL(clicked(bool)), this, SIGNAL(newSyrinscapeClicked()));
+    connect(ui->btnSyrinscapeOnline, SIGNAL(clicked(bool)), this, SIGNAL(newSyrinscapeOnlineClicked()));
     connect(ui->btnYouTube, SIGNAL(clicked(bool)), this, SIGNAL(newYoutubeClicked()));
     connect(ui->btnRemove, SIGNAL(clicked(bool)), this, SIGNAL(removeItemClicked()));
     connect(ui->btnNotes, SIGNAL(clicked(bool)), this, SIGNAL(showNotesClicked()));
@@ -53,6 +54,7 @@ void RibbonTabCampaign::setCampaignEnabled(bool enabled)
     ui->btnNewBattle->setEnabled(enabled);
     ui->btnAddSound->setEnabled(enabled);
     ui->btnSyrinscape->setEnabled(enabled);
+    ui->btnSyrinscapeOnline->setEnabled(enabled);
     ui->btnYouTube->setEnabled(enabled);
     ui->btnRemove->setEnabled(enabled);
     ui->btnNotes->setEnabled(enabled);
@@ -87,6 +89,7 @@ void RibbonTabCampaign::showEvent(QShowEvent *event)
     setLineHeight(*ui->line_5, frameHeight);
     setStandardButtonSize(*ui->lblAddSound, *ui->btnAddSound, frameHeight);
     setStandardButtonSize(*ui->lblSyrinscape, *ui->btnSyrinscape, frameHeight);
+    setStandardButtonSize(*ui->lblSyrinscapeOnline, *ui->btnSyrinscapeOnline, frameHeight);
     setStandardButtonSize(*ui->lblYouTube, *ui->btnYouTube, frameHeight);
     setLineHeight(*ui->line_6, frameHeight);
     setStandardButtonSize(*ui->lblRemove, *ui->btnRemove, frameHeight);

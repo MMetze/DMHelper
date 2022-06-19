@@ -1,7 +1,6 @@
 #include "battledialogeventdamage.h"
 #include "dmconstants.h"
 #include <QDomElement>
-#include <QDebug>
 
 BattleDialogEventDamage::BattleDialogEventDamage(QUuid combatant, QUuid target, int damage) :
     BattleDialogEvent(),

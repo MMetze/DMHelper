@@ -1,6 +1,7 @@
 #include "audiofactory.h"
 #include "audiotrackfile.h"
 #include "audiotracksyrinscape.h"
+#include "audiotracksyrinscapeonline.h"
 #include "audiotrackyoutube.h"
 #include "dmconstants.h"
 #include <QDomElement>
@@ -24,6 +25,8 @@ CampaignObjectBase* AudioFactory::createObject(int objectType, int subType, cons
             return new AudioTrackFile(objectName);
         case DMHelper::AudioType_Syrinscape:
             return new AudioTrackSyrinscape(objectName);
+        case DMHelper::AudioType_SyrinscapeOnline:
+            return new AudioTrackSyrinscapeOnline(objectName);
         case DMHelper::AudioType_Youtube:
             return new AudioTrackYoutube(objectName);
         default:
@@ -60,6 +63,8 @@ CampaignObjectBase* AudioFactory::createObject(const QDomElement& element, bool 
             return new AudioTrackFile();
         case DMHelper::AudioType_Syrinscape:
             return new AudioTrackSyrinscape();
+        case DMHelper::AudioType_SyrinscapeOnline:
+            return new AudioTrackSyrinscapeOnline();
         case DMHelper::AudioType_Youtube:
             return new AudioTrackYoutube();
         default:
@@ -86,6 +91,8 @@ int AudioFactory::identifyAudioSubtype(const QUrl& url)
     QString urlScheme = url.scheme();
     if((!urlScheme.isEmpty()) && (urlScheme.left(10) == QString("syrinscape")))
         return DMHelper::AudioType_Syrinscape;
+    else if (url.path().contains(QString("online/frontend-api")))
+        return DMHelper::AudioType_SyrinscapeOnline;
     else if(url.host().contains(QString("youtube")))
         return DMHelper::AudioType_Youtube;
     else

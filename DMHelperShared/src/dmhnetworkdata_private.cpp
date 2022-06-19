@@ -1,7 +1,5 @@
 #include "dmhnetworkdata_private.h"
 #include <QByteArray>
-#include <QDebug>
-
 
 DMHNetworkData_Private_Base::DMHNetworkData_Private_Base()
 {

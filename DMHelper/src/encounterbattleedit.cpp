@@ -13,6 +13,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
+// TODO: remove this
+
 const int EncounterBattleEdit_CombatantIndexWave = -1;
 
 EncounterBattleEdit::EncounterBattleEdit(QWidget *parent) :
@@ -254,7 +256,7 @@ void EncounterBattleEdit::editCombatant(QTreeWidgetItem * item, int column)
     {
         CombatantDialog dlg(QDialogButtonBox::Save);
         connect(&dlg, SIGNAL(openMonster(QString)), this, SIGNAL(openMonster(QString)));
-        dlg.setCombatant(combatants.at(index).first, combatants.at(index).second);
+        //dlg.setCombatant(combatants.at(index).first, combatants.at(index).second);
         dlg.exec();
         _battle->editCombatant(wave, index, dlg.getCount(), combatants.at(index).second);
         updateCombatantList();

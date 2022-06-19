@@ -1,7 +1,6 @@
 #include "battledialogmodelmonsterbase.h"
 #include "monsterclass.h"
 #include <QDomElement>
-#include <QDebug>
 
 BattleDialogModelMonsterBase::BattleDialogModelMonsterBase(const QString& name, QObject *parent) :
     BattleDialogModelCombatant(name, parent),

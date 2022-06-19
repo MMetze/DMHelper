@@ -11,6 +11,9 @@ public:
     explicit BattleDialogGraphicsView(QWidget *parent = nullptr);
     virtual ~BattleDialogGraphicsView();
 
+protected:
+    virtual void keyPressEvent(QKeyEvent *event) override;
+
 };
 
 #endif // BATTLEDIALOGGRAPHICSVIEW_H
