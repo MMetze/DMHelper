@@ -1000,7 +1000,11 @@ void MainWindow::newBattleEncounter()
         battle->createBattleDialogModel();
         BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
         if(battleFrame)
+        {
             battleFrame->setBattle(battle);
+            battleFrame->selectBattleMap();
+            battleFrame->recenterCombatants();
+        }
     }
 }
 

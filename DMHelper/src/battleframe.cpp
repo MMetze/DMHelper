@@ -422,6 +422,23 @@ void BattleFrame::recreateCombatantWidgets()
     qDebug() << "[Battle Frame] combatant widgets recreated";
 }
 
+void BattleFrame::recenterCombatants()
+{
+    if(!_model)
+        return;
+
+    QPointF mapCenter = _model->getMapRect().center();
+
+    // try to center the icons on the map
+    QList<QGraphicsPixmapItem*> iconList = _combatantIcons.values();
+    for(int i = 0; i < iconList.count(); ++i)
+    {
+        QGraphicsPixmapItem* icon = iconList.at(i);
+        if(icon)
+            icon->setPos(mapCenter);
+    }
+}
+
 QRect BattleFrame::viewportRect()
 {
     return ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
@@ -3170,13 +3187,9 @@ void BattleFrame::relocateCombatantIcon(QGraphicsPixmapItem* icon)
 
     QPoint mapPos = icon->pos().toPoint() + _model->getPreviousMapRect().topLeft();
     if(_model->getMapRect().contains(mapPos))
-    {
         icon->setPos(mapPos - _model->getMapRect().topLeft());
-    }
     else
-    {
-        icon->setPos(10, 10);
-    }
+        icon->setPos(_model->getMapRect().center());
 }
 
 QWidget* BattleFrame::findCombatantWidgetFromPosition(const QPoint& position) const

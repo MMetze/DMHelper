@@ -9,6 +9,7 @@
 #include "campaign.h"
 #include "audiotrack.h"
 #include "party.h"
+#include "dmhcache.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QUndoStack>
@@ -749,7 +750,7 @@ QImage Map::getPublishImage(const QRect& rect)
 
 QImage Map::getGrayImage()
 {
-    QImage result(getBackgroundImage());
+    QImage result(getPreviewImage());
 
     QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
     applyPaintTo(&grayFoWImage, QColor(0,0,0,128), _undoStack->index(), true);
@@ -907,9 +908,14 @@ QImage Map::getPreviewImage()
         return QImage();
 
     QImage previewImage;
-    previewImage.load(_filename);
-    return _filterApplied ? _filter.apply(previewImage) : _imgBackground;
-    return previewImage;
+    if(!previewImage.load(_filename))
+    {
+        // Last attempt, check the cache for a video version
+        QString cacheFilePath = DMHCache().getCacheFilePath(_filename, QString("png"));
+        previewImage.load(cacheFilePath);
+    }
+
+    return _filterApplied ? _filter.apply(previewImage) : previewImage;
 }
 
 bool Map::initialize()
