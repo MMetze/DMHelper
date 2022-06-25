@@ -489,17 +489,23 @@ void SpellbookDialog::showEvent(QShowEvent * event)
 void SpellbookDialog::hideEvent(QHideEvent * event)
 {
     Q_UNUSED(event);
+
     qDebug() << "[Spellbook Dialog] Spellbook Dialog hidden... storing data";
     storeSpellData();
     QDialog::hideEvent(event);
+
+    emit dialogClosed();
 }
 
 void SpellbookDialog::focusOutEvent(QFocusEvent * event)
 {
     Q_UNUSED(event);
+
     qDebug() << "[Spellbook Dialog] Spellbook Dialog lost focus... storing data";
     storeSpellData();
     QDialog::focusOutEvent(event);
+
+    emit dialogClosed();
 }
 
 void SpellbookDialog::storeSpellData()

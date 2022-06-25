@@ -77,6 +77,7 @@
 #include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
+#include "dmhwaitingdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -388,6 +389,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
 
     connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
+    connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -397,6 +399,8 @@ MainWindow::MainWindow(QWidget *parent) :
     readSpellbook();
     _spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Spellbook Loaded";
+
+    connect(&_spellDlg, &SpellbookDialog::dialogClosed, this, &MainWindow::writeSpellbook);
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     qDebug() << "[MainWindow] Creating Encounter Pages";
@@ -1840,6 +1844,12 @@ void MainWindow::writeBestiary()
         return;
     }
 
+    if(!Bestiary::Instance()->isDirty())
+    {
+        qDebug() << "[MainWindow] Bestiary has not been changed, no file will be written";
+        return;
+    }
+
     QString bestiaryFileName = _options->getBestiaryFileName();
     if(bestiaryFileName.isEmpty())
     {
@@ -1869,6 +1879,12 @@ void MainWindow::writeSpellbook()
     if(Spellbook::Instance()->count() <= 0)
     {
         qDebug() << "[MainWindow] Spellbook is empty, no file will be written";
+        return;
+    }
+
+    if(!Spellbook::Instance()->isDirty())
+    {
+        qDebug() << "[MainWindow] Spellbook has not been changed, no file will be written";
         return;
     }
 
