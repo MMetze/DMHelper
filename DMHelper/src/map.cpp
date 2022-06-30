@@ -1004,6 +1004,7 @@ bool Map::initialize()
 void Map::uninitialize()
 {
     _imgBackground = QImage();
+    _imgBWFow = QImage();
     _imgFow = QImage();
     _initialized = false;
 }

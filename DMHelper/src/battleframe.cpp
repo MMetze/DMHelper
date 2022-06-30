@@ -3619,7 +3619,16 @@ void BattleFrame::clearBattleFrame()
 
 void BattleFrame::cleanupBattleMap()
 {
-    _mapDrawer->setMap(nullptr, nullptr, nullptr);
+    // Unload the map
+    if(_mapDrawer)
+    {
+#ifdef Q_OS_WIN32
+        if(_mapDrawer->getMap())
+            _mapDrawer->getMap()->uninitialize();
+#endif
+
+        _mapDrawer->setMap(nullptr, nullptr, nullptr);
+    }
 
     // Clean up the old map
     _scene->clearBattleContents();

@@ -309,6 +309,7 @@ void BestiaryDialog::createNewMonster()
                 if((!ok) || (templateName.isEmpty()))
                 {
                     qDebug() << "[Bestiary Dialog] New monster not created because the select template monster dialog was cancelled";
+                    delete monsterClass;
                     return;
                 }
 
@@ -316,6 +317,7 @@ void BestiaryDialog::createNewMonster()
                 if(!templateClass)
                 {
                     qDebug() << "[Bestiary Dialog] New monster not created because not able to find selected template monster: " << templateName;
+                    delete monsterClass;
                     return;
                 }
 

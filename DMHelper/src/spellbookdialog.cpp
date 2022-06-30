@@ -211,6 +211,7 @@ void SpellbookDialog::createNewSpell()
                 if((!ok) || (templateName.isEmpty()))
                 {
                     qDebug() << "[Spellbook Dialog] New spell not created because the select template spell dialog was cancelled";
+                    delete spell;
                     return;
                 }
 
@@ -218,6 +219,7 @@ void SpellbookDialog::createNewSpell()
                 if(!templateClass)
                 {
                     qDebug() << "[Spellbook Dialog] New spell not created because not able to find selected template spell: " << templateName;
+                    delete spell;
                     return;
                 }
 

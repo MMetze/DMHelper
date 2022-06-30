@@ -217,7 +217,6 @@ void Spell::cloneSpell(Spell& other)
 {
     beginBatchChanges();
 
-    _name = other._name;
     _level = other._level;
     _school = other._school;
     _time = other._time;
