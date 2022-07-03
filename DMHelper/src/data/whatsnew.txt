@@ -13,11 +13,14 @@
 
 <h3>New Features:</h3>
 <ul>
+<li>Syrinscape Online supported
 <li>Animated maps work now across all entries
 <li>Navigate backwards and forwards through last campaign entries
 <li>Grid size and grid color are configurable
 <li>Support added for syrinscape online audio
-<li>Yes/No check for clear/fill Fog of War to avoid embarrassing nudity in combat
+<li>Yes/No check for clear/fill Fog of War to avoid embarrassing map-nudity in combat
+<li>Map selection improvements for videos
+<li>Automatic saving of the bestiary and spellbook upon close of the dialog
 </ul>
 
 <p>
@@ -26,10 +29,12 @@
 <ul>
 <li>Combatant selection and activation tokens are fully configurable again
 <li>Initiative Frame/Countdown works and is configurable
+<li>Effects and objects in combat smaller than 5 ft are drawn properly
 <li>Fixed the HP randomizer in add combatant dialog
 <li>Changed experience from an int to a string to allow e.g. "34,000" as well as "34000"
 <li>Fix issues saving YouTube audio files on MacOS
 <li>Local audio file playback working on MacOS
+<li>32-bit memory management (map images unloaded when not in use)
 </ul>
 
 <p>

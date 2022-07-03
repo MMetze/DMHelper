@@ -1,3 +1,6 @@
+NEXT:
+Fix Map initialization to differentiate videos and get a screenshot itself.
+
 1. Videos to work (Tharky)
 2. Rendering positioning to work on Mac (ongakugainochi)
 3. init for maps without combat - view tab doesn'T do anything... (Encryptid) - DONE
@@ -22,7 +25,7 @@ Fixed basic Youtube playback - DONE
 
 Battle Frame://change to have greyscale and BW FOWs - also, switching back and forth leaves the publish icon not synced!
 
-Effects smaller than 5ft are not rendered properly.
+DONE - Effects smaller than 5ft are not rendered properly.
 Effect selection is not shown
 
 

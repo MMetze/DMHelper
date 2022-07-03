@@ -121,7 +121,7 @@ void PublishGLBattleEffect::effectMoved()
     BattleDialogModelEffect* effect = _childEffect ? _childEffect : _effect;
 
     QPointF effectPos = effect->getPosition();
-    qreal sizeFactor = effect->getSize() / 5;
+    qreal sizeFactor = static_cast<qreal>(effect->getSize()) / 5.0;
     if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
         sizeFactor *= 2.0; // Convert radius to diameter
     qreal scaleFactor = (static_cast<qreal>(_scene->getGridScale())) * sizeFactor / qMax(_textureSize.width(), _textureSize.height());
@@ -150,8 +150,8 @@ void PublishGLBattleEffect::prepareObjects()
     if((!f) || (!e))
         return;
 
-    int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * (_effect->getSize() / 5); // Primary dimension
-    int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * (_effect->getWidth() / 5); // Secondary dimension
+    int effectSize = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getSize() / 5; // Primary dimension
+    int effectWidth = DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] * _effect->getWidth() / 5; // Secondary dimension
     if(_effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
         effectSize *= 2; // Convert radius to diameter
 

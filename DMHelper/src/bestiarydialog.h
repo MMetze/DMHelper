@@ -25,6 +25,7 @@ public:
 signals:
     void monsterChanged();
     void publishMonsterImage(QImage img, const QColor& color);
+    void dialogClosed();
 
 public slots:
     void setMonster(MonsterClass* monster, bool edit = true);

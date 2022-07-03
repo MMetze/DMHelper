@@ -19,9 +19,6 @@ VideoPlayerGLScreenshot::VideoPlayerGLScreenshot(const QString& videoFile, QObje
     _framesReceived(0),
     _status(-1)
 {
-#ifdef Q_OS_WIN
-    _videoFile.replace("/","\\\\");
-#endif
 }
 
 VideoPlayerGLScreenshot::~VideoPlayerGLScreenshot()
@@ -181,7 +178,11 @@ bool VideoPlayerGLScreenshot::startPlayer()
         return false;
     }
 
-    _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), _videoFile.toUtf8().constData());
+    QString localizedVideoFile = _videoFile;
+#ifdef Q_OS_WIN
+    localizedVideoFile.replace("/","\\\\");
+#endif
+    _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), localizedVideoFile.toUtf8().constData());
     if (!_vlcMedia)
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, unable to open video file!";
@@ -206,7 +207,7 @@ bool VideoPlayerGLScreenshot::startPlayer()
         libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
     }
 
-    qDebug() << "[VideoPlayerGLScreenshot] Playback started to get screenshot for " << _videoFile;
+    qDebug() << "[VideoPlayerGLScreenshot] Playback started to get screenshot for " << localizedVideoFile;
 
     libvlc_audio_set_volume(_vlcPlayer, 0);
 

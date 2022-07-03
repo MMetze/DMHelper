@@ -24,6 +24,8 @@ public:
     static void Initialize();
     static void Shutdown();
 
+    bool writeBestiary(const QString& targetFilename);
+    bool readBestiary(const QString& targetFilename);
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
     void inputXML(const QDomElement &element, const QString& importFile = QString());
 
@@ -38,6 +40,8 @@ public:
     int count() const;
     QList<QString> getMonsterList() const;
     QStringList getLicenseText() const;
+
+    bool isDirty();
 
     MonsterClass* getMonsterClass(const QString& name);
     MonsterClass* getFirstMonsterClass() const;
@@ -65,6 +69,9 @@ public slots:
     void startBatchProcessing();
     void finishBatchProcessing();
 
+    void registerDirty();
+    void setDirty(bool dirty = true);
+
 private:
     void showMonsterClassWarning(const QString& monsterClass);
     void loadBestiary(const QDomElement& bestiaryElement);
@@ -78,6 +85,7 @@ private:
     int _majorVersion;
     int _minorVersion;
     QStringList _licenseText;
+    bool _dirty;
 
     bool _batchProcessing;
     bool _batchAcknowledge;

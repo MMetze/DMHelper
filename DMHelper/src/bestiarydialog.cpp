@@ -309,6 +309,7 @@ void BestiaryDialog::createNewMonster()
                 if((!ok) || (templateName.isEmpty()))
                 {
                     qDebug() << "[Bestiary Dialog] New monster not created because the select template monster dialog was cancelled";
+                    delete monsterClass;
                     return;
                 }
 
@@ -316,6 +317,7 @@ void BestiaryDialog::createNewMonster()
                 if(!templateClass)
                 {
                     qDebug() << "[Bestiary Dialog] New monster not created because not able to find selected template monster: " << templateName;
+                    delete monsterClass;
                     return;
                 }
 
@@ -630,17 +632,24 @@ void BestiaryDialog::showEvent(QShowEvent * event)
 void BestiaryDialog::hideEvent(QHideEvent * event)
 {
     Q_UNUSED(event);
+
+    // TODO: Confirm that this is not actually needed since we store data at focusOut
     qDebug() << "[Bestiary Dialog] Bestiary Dialog hidden... storing data";
     storeMonsterData();
     QDialog::hideEvent(event);
+
+    emit dialogClosed();
 }
 
 void BestiaryDialog::focusOutEvent(QFocusEvent * event)
 {
     Q_UNUSED(event);
+
     qDebug() << "[Bestiary Dialog] Bestiary Dialog lost focus... storing data";
     storeMonsterData();
     QDialog::focusOutEvent(event);
+
+    emit dialogClosed();
 }
 
 void BestiaryDialog::previousMonster()

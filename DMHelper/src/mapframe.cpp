@@ -125,6 +125,10 @@ void MapFrame::deactivateObject()
     disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
     disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
+
+#ifdef Q_OS_WIN32
+    _mapSource->uninitialize();
+#endif
     setMap(nullptr);
 
     _spaceDown = false;
@@ -485,7 +489,9 @@ void MapFrame::editMapFile()
     if(!filename.isEmpty())
     {
         uninitializeFoW();
+#ifdef Q_OS_WIN32
         _mapSource->uninitialize();
+#endif
         _mapSource->setFileName(filename);
         initializeFoW();
     }
