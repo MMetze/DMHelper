@@ -17,7 +17,6 @@
 <li>Animated maps work now across all entries
 <li>Navigate backwards and forwards through last campaign entries
 <li>Grid size and grid color are configurable
-<li>Support added for syrinscape online audio
 <li>Yes/No check for clear/fill Fog of War to avoid embarrassing map-nudity in combat
 <li>Map selection improvements for videos
 <li>Automatic saving of the bestiary and spellbook upon close of the dialog
