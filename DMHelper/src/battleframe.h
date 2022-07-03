@@ -58,6 +58,7 @@ public:
     QList<BattleDialogModelCombatant*> getLivingMonsters() const;
 
     void recreateCombatantWidgets();
+    void recenterCombatants();
 
     QRect viewportRect();
     QPoint viewportCenter();

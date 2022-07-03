@@ -40,6 +40,11 @@ void BattleFrameMapDrawer::setMap(Map* map, QPixmap* fow, QImage* glFow)
     }
 }
 
+Map* BattleFrameMapDrawer::getMap() const
+{
+    return _map;
+}
+
 const QCursor& BattleFrameMapDrawer::getCursor() const
 {
     return _cursor;
