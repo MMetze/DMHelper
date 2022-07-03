@@ -489,7 +489,9 @@ void MapFrame::editMapFile()
     if(!filename.isEmpty())
     {
         uninitializeFoW();
+#ifdef Q_OS_WIN32
         _mapSource->uninitialize();
+#endif
         _mapSource->setFileName(filename);
         initializeFoW();
     }
