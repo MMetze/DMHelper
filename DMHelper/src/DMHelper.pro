@@ -577,6 +577,7 @@ DISTFILES += \
     buildanddeploymac \
     bugs.txt \
     buildanddeploymac.sh \
+    installer/config/config_win32.xml \
     installer/config/config_win64.xml \
     installer/config/config_mac.xml \
     installer/config/dmhelper.ico \

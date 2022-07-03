@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 2.4.3</h2>
+<h2>What's New: Version 2.5</h2>
 
 <h3>New Features:</h3>
 <ul>
