@@ -13,6 +13,7 @@
 
 <h3>New Features:</h3>
 <ul>
+<li>Syrinscape Online supported
 <li>Animated maps work now across all entries
 <li>Navigate backwards and forwards through last campaign entries
 <li>Grid size and grid color are configurable
