@@ -23,6 +23,9 @@ DONE Configuration of:
    * initiative tracker text size
 Fixed basic Youtube playback - DONE
 
+Options to remove from libvlc: access_output, gui, keystore, logger, lua, text_renderer
+    plus libaccess_srt_plugin.dll, libvnc_plugin.dll
+
 Battle Frame://change to have greyscale and BW FOWs - also, switching back and forth leaves the publish icon not synced!
 
 DONE - Effects smaller than 5ft are not rendered properly.
