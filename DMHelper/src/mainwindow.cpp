@@ -74,8 +74,10 @@
 #include "ribbontabworldmap.h"
 #include "ribbontabaudio.h"
 #include "publishbuttonribbon.h"
+#include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
+#include "dmhwaitingdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -101,6 +103,7 @@
 #include <QScreen>
 #include <QShortcut>
 #include <QFontDatabase>
+#include <QSurfaceFormat>
 #ifndef Q_OS_MAC
 #include <QSplashScreen>
 #endif
@@ -118,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _countdownDlg(nullptr),
     _encounterTextEdit(nullptr),
     _treeModel(nullptr),
+    _activeItems(nullptr),
     _characterLayout(nullptr),
     _campaign(nullptr),
     _campaignFileName(),
@@ -166,6 +170,10 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     Working Directory: " << QDir::currentPath();
     qDebug() << "[MainWindow]     Executable Directory: " << QCoreApplication::applicationDirPath();
 
+    DMHCache cache;
+    cache.ensureCacheExists();
+    qDebug() << "[MainWindow]     Cache Directory: " << cache.getCachePath();
+
     qDebug() << "[MainWindow] Qt Information";
     qDebug() << "[MainWindow]     Qt Version: " << QLibraryInfo::version().toString();
     qDebug() << "[MainWindow]     Is Debug? " << QLibraryInfo::isDebugBuild();
@@ -184,6 +192,11 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow]     ExamplesPath: " << QLibraryInfo::location(QLibraryInfo::ExamplesPath);
     qDebug() << "[MainWindow]     TestsPath: " << QLibraryInfo::location(QLibraryInfo::TestsPath);
     qDebug() << "[MainWindow]     SettingsPath: " << QLibraryInfo::location(QLibraryInfo::SettingsPath);
+
+    QSurfaceFormat fmt;
+    qDebug() << "[MainWindow] OpenGL Information";
+    qDebug() << "[MainWindow]     Version: " << fmt.majorVersion() << "." << fmt.minorVersion();
+    qDebug() << "[MainWindow]     Device pixel ratio: " << this->devicePixelRatio();
 
     qDebug() << "[MainWindow] Standard Path Information";
     qDebug() << "[MainWindow]     DocumentsLocation: " << (QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).isEmpty() ? QString() : QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).first());
@@ -258,7 +271,7 @@ MainWindow::MainWindow(QWidget *parent) :
     EquipmentServer::Initialize(_options->getEquipmentFileName());
     EquipmentServer* equipmentServer = EquipmentServer::Instance();
     connect(_options, &OptionsContainer::equipmentFileNameChanged, equipmentServer, &EquipmentServer::readEquipment);
-    qDebug() << "[MainWindow] BasicDateServer Initialized";
+    qDebug() << "[MainWindow] EquipmentServer Initialized";
 
     // File Menu
     connect(_ribbonTabFile, SIGNAL(newClicked()), this, SLOT(newCampaign()));
@@ -285,6 +298,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newSoundClicked()), this, SLOT(newAudioEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
+    connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeOnlineClicked()), this, SLOT(newSyrinscapeOnlineEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newYoutubeClicked()), this, SLOT(newYoutubeEntry()));
     connect(_ribbonTabCampaign, SIGNAL(removeItemClicked()), this, SLOT(removeCurrentItem()));
     connect(_ribbonTabCampaign, SIGNAL(showNotesClicked()), this, SLOT(showNotes()));
@@ -323,7 +337,6 @@ MainWindow::MainWindow(QWidget *parent) :
     // Battle View Menu
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _ribbonTabBattleView, SLOT(setPointerFile(const QString&)));
     _ribbonTabBattleView->setPointerFile(_options->getPointerFile());
-    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
 
     // Mini Map Menu
     // connections set up elsewhere
@@ -376,6 +389,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchPublishImage(QImage, const QColor&)), _pubWindow, SLOT(setImage(QImage, const QColor&)));
 
     connect(&_bestiaryDlg,SIGNAL(publishMonsterImage(QImage, const QColor&)),this,SIGNAL(dispatchPublishImage(QImage, const QColor&)));
+    connect(&_bestiaryDlg, &BestiaryDialog::dialogClosed, this, &MainWindow::writeBestiary);
 
     qDebug() << "[MainWindow] Loading Spellbook";
 #ifndef Q_OS_MAC
@@ -385,6 +399,8 @@ MainWindow::MainWindow(QWidget *parent) :
     readSpellbook();
     _spellDlg.resize(width() * 9 / 10, height() * 9 / 10);
     qDebug() << "[MainWindow] Spellbook Loaded";
+
+    connect(&_spellDlg, &SpellbookDialog::dialogClosed, this, &MainWindow::writeSpellbook);
 
     // Add the encounter pages to the stacked widget - implicit mapping to EncounterType enum values
     qDebug() << "[MainWindow] Creating Encounter Pages";
@@ -405,6 +421,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabText, SIGNAL(speedChanged(int)), _encounterTextEdit, SLOT(setScrollSpeed(int)));
     connect(_ribbonTabText, SIGNAL(widthChanged(int)), _encounterTextEdit, SLOT(setTextWidth(int)));
     connect(_ribbonTabText, SIGNAL(rewindClicked()), _encounterTextEdit, SLOT(rewind()));
+    connect(_ribbonTabText, &RibbonTabText::playPauseClicked, _encounterTextEdit, &EncounterTextEdit::playPause);
+    connect(_encounterTextEdit, &EncounterTextEdit::playPauseChanged, _ribbonTabText, &RibbonTabText::setPlaying);
     connect(_encounterTextEdit, SIGNAL(animatedChanged(bool)), _ribbonTabText, SLOT(setAnimation(bool)));
     connect(_encounterTextEdit, SIGNAL(scrollSpeedChanged(int)), _ribbonTabText, SLOT(setSpeed(int)));
     connect(_encounterTextEdit, SIGNAL(textWidthChanged(int)), _ribbonTabText, SLOT(setWidth(int)));
@@ -486,6 +504,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridWidthChanged, _battleFrame, &BattleFrame::setGridWidth);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridColorChanged, _battleFrame, &BattleFrame::setGridColor);
 
     connect(_ribbonTabBattleMap, SIGNAL(editFoWClicked(bool)), _battleFrame, SLOT(setFoWEdit(bool)));
     connect(_battleFrame, SIGNAL(foWEditToggled(bool)), _ribbonTabBattleMap, SLOT(setEditFoW(bool)));
@@ -565,6 +585,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this, SIGNAL(cancelSelect()), _battleFrame, SLOT(cancelSelect()));
 
+    // Connect the battle view ribbon to the battle frame and map frame
+    connectBattleView(false); // initialize to false (default in the class is true) to ensure all connections are made
+
     // EncounterType_AudioTrack
     AudioTrackEdit* audioTrackEdit = new AudioTrackEdit;
     //TODO: can this edit frame be completely removed?
@@ -642,6 +665,15 @@ MainWindow::MainWindow(QWidget *parent) :
     splash.showMessage(QString("Preparing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
+
+    _activeItems = new CampaignTreeActiveStack(this);
+    connect(_activeItems, &CampaignTreeActiveStack::activateItem, this, &MainWindow::selectItemFromStack);
+    connect(ui->btnBack, &QAbstractButton::clicked, _activeItems, &CampaignTreeActiveStack::backwards);
+    connect(ui->btnForwards, &QAbstractButton::clicked, _activeItems, &CampaignTreeActiveStack::forwards);
+    connect(_activeItems, &CampaignTreeActiveStack::backwardsAvailable, ui->btnBack, &QAbstractButton::setEnabled);
+    connect(_activeItems, &CampaignTreeActiveStack::forwardsAvailable, ui->btnForwards, &QAbstractButton::setEnabled);
+    connect(_battleFrame, &BattleFrame::navigateBackwards, _activeItems, &CampaignTreeActiveStack::backwards);
+    connect(_battleFrame, &BattleFrame::navigateForwards, _activeItems, &CampaignTreeActiveStack::forwards);
 
     _audioPlayer = new AudioPlayer(this);
     _audioPlayer->setVolume(_options->getAudioVolume());
@@ -778,6 +810,25 @@ bool MainWindow::saveCampaign()
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(_campaignFileName);
+
+    // Optionally save Bestiary and Spellbook here
+    if((Bestiary::Instance()) && (Bestiary::Instance()->isDirty()))
+    {
+        if(QMessageBox::critical(this,
+                                 QString("Save Bestiary"),
+                                 QString("The Bestiary has been changed. Would you like to save it as well?"),
+                                 QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes)
+            writeBestiary();
+    }
+
+    if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
+    {
+        if(QMessageBox::critical(this,
+                                 QString("Save Spellbook"),
+                                 QString("The Spellbook has been changed. Would you like to save it as well?"),
+                                 QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes)
+            writeSpellbook();
+    }
 
     return true;
 }
@@ -972,7 +1023,11 @@ void MainWindow::newBattleEncounter()
         battle->createBattleDialogModel();
         BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
         if(battleFrame)
+        {
             battleFrame->setBattle(battle);
+            battleFrame->selectBattleMap();
+            battleFrame->recenterCombatants();
+        }
     }
 }
 
@@ -1017,6 +1072,21 @@ void MainWindow::newSyrinscapeEntry()
 
     bool ok = false;
     QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
+    if((!ok)||(urlName.isEmpty()))
+        return;
+
+    addNewAudioObject(urlName);
+}
+
+void MainWindow::newSyrinscapeOnlineEntry()
+{
+    if(!_campaign)
+        return;
+
+    QString syrinscapeInstructions("To add a link to a Syrinscape Online sound:\n\n1) Open the desired sound clip in the Syrinscape online player master control\n2) Open the menu (top right) and click 'Show Remote Control Links'\n3) Click the play icon to copy the play link\n4) Paste this URI into the text box here:\n");
+
+    bool ok = false;
+    QString urlName = QInputDialog::getText(this, QString("Enter Syrinscape Online Audio URI"), syrinscapeInstructions, QLineEdit::Normal, QString(), &ok);
     if((!ok)||(urlName.isEmpty()))
         return;
 
@@ -1248,58 +1318,35 @@ void MainWindow::readBestiary()
         return;
     }
 
+    if(Bestiary::Instance()->isDirty())
+    {
+        qDebug() << "[MainWindow] Existing bestiary is unsaved!";
+        QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                                   QString("Unsaved Bestiary"),
+                                                                   QString("The current bestiary has not been saved. Would you like to save it before loading a new bestiary? If you don't. you may lose monster data!"),
+                                                                   QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::Yes)
+        {
+            QString bestiaryFileName = QFileDialog::getSaveFileName(this, QString("Save Bestiary"), QString(), QString("XML files (*.xml)"));
+            if(!bestiaryFileName.isEmpty())
+            {
+                if(Bestiary::Instance()->writeBestiary(bestiaryFileName))
+                    qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
+                else
+                    qDebug() << "[MainWindow] ERROR: Bestiary file writing failed: " << bestiaryFileName;
+            }
+        }
+    }
+
     QString bestiaryFileName = _options->getBestiaryFileName();
-    if(bestiaryFileName.isEmpty())
+    if(!Bestiary::Instance()->readBestiary(bestiaryFileName))
     {
-        qDebug() << "[MainWindow] ERROR! No known bestiary found, unable to load bestiary";
-        return;
-    }
-
-    qDebug() << "[MainWindow] Reading bestiary: " << bestiaryFileName;
-
-    QDomDocument doc("DMHelperBestiaryXML");
-    QFile file(bestiaryFileName);
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "[MainWindow] Reading bestiary file open failed.";
-        QMessageBox::critical(this, QString("Bestiary file open failed"),
-                              QString("Unable to open the bestiary file: ") + bestiaryFileName);
-        return;
-    }
-
-    QTextStream in(&file);
-    in.setCodec("UTF-8");
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
-
-    file.close();
-
-    if(contentResult == false)
-    {
-        qDebug() << "[MainWindow] Error reading bestiary XML content. The XML is probably not valid.";
-        qDebug() << errMsg << errRow << errColumn;
-        QMessageBox::critical(this, QString("Bestiary file invalid"),
-                              QString("Unable to read the bestiary file: ") + bestiaryFileName + QString(", the XML is invalid"));
-        return;
-    }
-
-    QDomElement root = doc.documentElement();
-    if((root.isNull()) || (root.tagName() != "root"))
-    {
-        qDebug() << "[MainWindow] Bestiary file missing root item";
-        QMessageBox::critical(this, QString("Bestiary file invalid"),
-                              QString("Unable to read the bestiary file: ") + bestiaryFileName + QString(", the XML does not have the expected root item."));
+        qDebug() << "[MainWindow] ERROR: Bestiary reading failed: " << bestiaryFileName;
         return;
     }
 
     // Bestiary file seems ok, make a backup
     _options->backupFile(bestiaryFileName);
-
-    QFileInfo fileInfo(bestiaryFileName);
-    Bestiary::Instance()->setDirectory(fileInfo.absoluteDir());
-    Bestiary::Instance()->inputXML(root);
 
     if(!_options->getLastMonster().isEmpty() && Bestiary::Instance()->exists(_options->getLastMonster()))
         _bestiaryDlg.setMonster(_options->getLastMonster());
@@ -1319,58 +1366,35 @@ void MainWindow::readSpellbook()
         return;
     }
 
+    if(Spellbook::Instance()->isDirty())
+    {
+        qDebug() << "[MainWindow] Existing spellbook is unsaved!";
+        QMessageBox::StandardButton result = QMessageBox::critical(this,
+                                                                   QString("Unsaved Spellbook"),
+                                                                   QString("The current spellbook has not been saved. Would you like to save it before loading a new spellbook? If you don't. you may lose spell data!"),
+                                                                   QMessageBox::Yes | QMessageBox::No);
+        if(result == QMessageBox::Yes)
+        {
+            QString spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
+            if(!spellbookFileName.isEmpty())
+            {
+                if(Spellbook::Instance()->writeSpellbook(spellbookFileName))
+                    qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
+                else
+                    qDebug() << "[MainWindow] ERROR: Spellbook file writing failed: " << spellbookFileName;
+            }
+        }
+    }
+
     QString spellbookFileName = _options->getSpellbookFileName();
-    if(spellbookFileName.isEmpty())
+    if(!Spellbook::Instance()->readSpellbook(spellbookFileName))
     {
-        qDebug() << "[MainWindow] ERROR! No known spellbook found, unable to load spellbook";
-        return;
-    }
-
-    qDebug() << "[MainWindow] Reading spellbook: " << spellbookFileName;
-
-    QDomDocument doc("DMHelperSpellbookXML");
-    QFile file(spellbookFileName);
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "[MainWindow] Reading spellbook file open failed.";
-        QMessageBox::critical(this, QString("Spellbook file open failed"),
-                              QString("Unable to open the spellbook file: ") + spellbookFileName);
-        return;
-    }
-
-    QTextStream in(&file);
-    in.setCodec("UTF-8");
-    QString errMsg;
-    int errRow;
-    int errColumn;
-    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
-
-    file.close();
-
-    if(contentResult == false)
-    {
-        qDebug() << "[MainWindow] Error reading spellbook XML content. The XML is probably not valid.";
-        qDebug() << errMsg << errRow << errColumn;
-        QMessageBox::critical(this, QString("Spellbook file invalid"),
-                              QString("Unable to read the spellbook file: ") + spellbookFileName + QString(", the XML is invalid"));
-        return;
-    }
-
-    QDomElement root = doc.documentElement();
-    if((root.isNull()) || (root.tagName() != "root"))
-    {
-        qDebug() << "[MainWindow] Spellbook file missing root item";
-        QMessageBox::critical(this, QString("Spellbook file invalid"),
-                              QString("Unable to read the spellbook file: ") + spellbookFileName + QString(", the XML does not have the expected root item."));
+        qDebug() << "[MainWindow] ERROR: Spellbook reading failed: " << spellbookFileName;
         return;
     }
 
     // Spellbook file seems ok, make a backup
     _options->backupFile(spellbookFileName);
-
-    QFileInfo fileInfo(spellbookFileName);
-    Spellbook::Instance()->setDirectory(fileInfo.absoluteDir());
-    Spellbook::Instance()->inputXML(root, false);
 
     if(!_options->getLastSpell().isEmpty() && Spellbook::Instance()->exists(_options->getLastSpell()))
         _spellDlg.setSpell(_options->getLastSpell());
@@ -1427,6 +1451,19 @@ void MainWindow::showEvent(QShowEvent * event)
         _initialized = true;
     }
 
+    int ribbonHeight = RibbonFrame::getRibbonHeight();
+    int iconSize =  ribbonHeight * 4 / 5;
+    ui->btnBack->setMinimumWidth(ribbonHeight);
+    ui->btnBack->setMaximumWidth(ribbonHeight);
+    ui->btnBack->setMinimumHeight(ribbonHeight);
+    ui->btnBack->setMaximumHeight(ribbonHeight);
+    ui->btnBack->setIconSize(QSize(iconSize, iconSize));
+    ui->btnForwards->setMinimumWidth(ribbonHeight);
+    ui->btnForwards->setMaximumWidth(ribbonHeight);
+    ui->btnForwards->setMinimumHeight(ribbonHeight);
+    ui->btnForwards->setMaximumHeight(ribbonHeight);
+    ui->btnForwards->setIconSize(QSize(iconSize, iconSize));
+
     QMainWindow::showEvent(event);
 }
 
@@ -1442,8 +1479,10 @@ void MainWindow::closeEvent(QCloseEvent * event)
         return;
     }
 
-    writeSpellbook();
-    writeBestiary();
+    if((Bestiary::Instance()) && (Bestiary::Instance()->isDirty()))
+        writeBestiary();
+    if((Spellbook::Instance()) && (Spellbook::Instance()->isDirty()))
+        writeSpellbook();
 
     _options->setLastMonster(_bestiaryDlg.getMonster() ? _bestiaryDlg.getMonster()->getName() : "");
     _options->setLastSpell(_spellDlg.getSpell() ? _spellDlg.getSpell()->getName() : "");
@@ -1478,6 +1517,18 @@ void MainWindow::mouseMoveEvent(QMouseEvent * event)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    if(!event)
+        return;
+
+    if(event->modifiers() == Qt::AltModifier)
+    {
+        if(event->key() == Qt::Key_Left)
+            _activeItems->backwards();
+        else if(event->key() == Qt::Key_Right)
+            _activeItems->forwards();
+        return;
+    }
+
     switch(event->key())
     {
         case Qt::Key_Escape:
@@ -1747,7 +1798,7 @@ void MainWindow::enableCampaignMenu()
 
 bool MainWindow::selectIndex(const QModelIndex& index)
 {
-    if(!index.isValid())
+    if((!index.isValid()) || (!_treeModel))
         return false;
 
     ui->treeView->setCurrentIndex(index);
@@ -1793,51 +1844,26 @@ void MainWindow::writeBestiary()
         return;
     }
 
-    QString bestiaryFileName = _options->getBestiaryFileName();
-    qDebug() << "[MainWindow] Writing Bestiary to " << bestiaryFileName;
+    if(!Bestiary::Instance()->isDirty())
+    {
+        qDebug() << "[MainWindow] Bestiary has not been changed, no file will be written";
+        return;
+    }
 
+    QString bestiaryFileName = _options->getBestiaryFileName();
     if(bestiaryFileName.isEmpty())
     {
-        bestiaryFileName = QFileDialog::getSaveFileName(this,QString("Save Bestiary"),QString(),QString("XML files (*.xml)"));
+        bestiaryFileName = QFileDialog::getSaveFileName(this, QString("Save Bestiary"), QString(), QString("XML files (*.xml)"));
         if(bestiaryFileName.isEmpty())
             return;
 
         _options->setBestiaryFileName(bestiaryFileName);
     }
 
-    QDomDocument doc( "DMHelperBestiaryXML" );
-
-    QDomElement root = doc.createElement( "root" );
-    doc.appendChild( root );
-
-    QFileInfo fileInfo(bestiaryFileName);
-    QDir targetDirectory(fileInfo.absoluteDir());
-    if( Bestiary::Instance()->outputXML(doc, root, targetDirectory, false) <= 0)
-    {
-        qDebug() << "[MainWindow] Bestiary output did not find any monsters. Aborting writing to file";
-        return;
-    }
-
-    QString xmlString = doc.toString();
-
-    QFile file(bestiaryFileName);
-    if( !file.open( QIODevice::WriteOnly ) )
-    {
-        qDebug() << "[MainWindow] Unable to open Bestiary file for writing: " << bestiaryFileName;
-        qDebug() << "       Error " << file.error() << ": " << file.errorString();
-        QFileInfo info(file);
-        qDebug() << "       Full filename: " << info.absoluteFilePath();
-        bestiaryFileName.clear();
-        return;
-    }
-
-    QTextStream ts( &file );
-    ts.setCodec("UTF-8");
-    ts << xmlString;
-
-    file.close();
-
-    qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
+    if(Bestiary::Instance()->writeBestiary(bestiaryFileName))
+        qDebug() << "[MainWindow] Bestiary file writing complete: " << bestiaryFileName;
+    else
+        qDebug() << "[MainWindow] ERROR: Bestiary file writing failed: " << bestiaryFileName;
 }
 
 void MainWindow::writeSpellbook()
@@ -1856,9 +1882,13 @@ void MainWindow::writeSpellbook()
         return;
     }
 
-    QString spellbookFileName = _options->getSpellbookFileName();
-    qDebug() << "[MainWindow] Writing Spellbook to " << spellbookFileName;
+    if(!Spellbook::Instance()->isDirty())
+    {
+        qDebug() << "[MainWindow] Spellbook has not been changed, no file will be written";
+        return;
+    }
 
+    QString spellbookFileName = _options->getSpellbookFileName();
     if(spellbookFileName.isEmpty())
     {
         spellbookFileName = QFileDialog::getSaveFileName(this, QString("Save Spellbook"), QString(), QString("XML files (*.xml)"));
@@ -1868,39 +1898,10 @@ void MainWindow::writeSpellbook()
         _options->setSpellbookFileName(spellbookFileName);
     }
 
-    QDomDocument doc("DMHelperSpellbookXML");
-
-    QDomElement root = doc.createElement("root");
-    doc.appendChild(root);
-
-    QFileInfo fileInfo(spellbookFileName);
-    QDir targetDirectory(fileInfo.absoluteDir());
-    if(Spellbook::Instance()->outputXML(doc, root, targetDirectory, false) <= 0)
-    {
-        qDebug() << "[MainWindow] Spellbook output did not find any spells. Aborting writing to file";
-        return;
-    }
-
-    QString xmlString = doc.toString();
-
-    QFile file(spellbookFileName);
-    if(!file.open(QIODevice::WriteOnly))
-    {
-        qDebug() << "[MainWindow] Unable to open Spellbook file for writing: " << spellbookFileName;
-        qDebug() << "       Error " << file.error() << ": " << file.errorString();
-        QFileInfo info(file);
-        qDebug() << "       Full filename: " << info.absoluteFilePath();
-        spellbookFileName.clear();
-        return;
-    }
-
-    QTextStream ts(&file);
-    ts.setCodec("UTF-8");
-    ts << xmlString;
-
-    file.close();
-
-    qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
+    if(Spellbook::Instance()->writeSpellbook(spellbookFileName))
+        qDebug() << "[MainWindow] Spellbook file writing complete: " << spellbookFileName;
+    else
+        qDebug() << "[MainWindow] ERROR: Spellbook file writing failed: " << spellbookFileName;
 }
 
 CampaignObjectBase* MainWindow::newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText)
@@ -2040,6 +2041,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     updateMapFiles();
     updateClock();
 
+    _activeItems->clear();
     _treeModel->setCampaign(campaign);
 
     ui->treeView->setMinimumWidth(ui->treeView->sizeHint().width());
@@ -2048,7 +2050,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
     {
         QModelIndex firstIndex = _treeModel->index(0,0);
         if(firstIndex.isValid())
-            ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
+            selectIndex(firstIndex); //ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
             ui->stackedWidgetEncounter->setCurrentFrame(DMHelper::CampaignType_Base); // ui->stackedWidgetEncounter->setCurrentIndex(0);
         connect(campaign, SIGNAL(dirty()), this, SLOT(setDirty()));
@@ -2256,6 +2258,9 @@ void MainWindow::handleTreeItemSelected(const QModelIndex & current, const QMode
 
     if(item)
     {
+        // Add the item to the undo stack for IDs
+        _activeItems->push(item->getCampaignItemId());
+
         itemObject = item->getCampaignItemObject();
         if(itemObject)
             activateObject(itemObject);
@@ -2300,6 +2305,20 @@ void MainWindow::handleAnimationStarted()
     if(_pubWindow)
         _pubWindow->setBackgroundColor();
     _animationFrameCount = DMHelper::ANIMATION_TIMER_PREVIEW_FRAMES;
+}
+
+bool MainWindow::selectItemFromStack(const QUuid& itemId)
+{
+    if((!_treeModel) || (itemId.isNull()))
+        return false;
+
+    QModelIndex itemIndex = _treeModel->getObjectIndex(itemId);
+    if(!itemIndex.isValid())
+        return false;
+
+    ui->treeView->setCurrentIndex(itemIndex);
+    activateWindow();
+    return true;
 }
 
 void MainWindow::openBestiary()
@@ -2467,6 +2486,8 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattleMap->setGridAngle(model->getGridAngle());
         _ribbonTabBattleMap->setGridXOffset(model->getGridOffsetX());
         _ribbonTabBattleMap->setGridYOffset(model->getGridOffsetY());
+        _ribbonTabBattleMap->setGridWidth(model->getGridPen().width());
+        _ribbonTabBattleMap->setGridColor(model->getGridPen().color());
     }
 }
 

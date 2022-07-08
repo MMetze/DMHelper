@@ -19,10 +19,10 @@ public:
     explicit CombatantDialog(QDialogButtonBox::StandardButtons buttons = QDialogButtonBox::Close, QWidget *parent = nullptr);
     ~CombatantDialog();
 
-    void setCombatant(int combatantCount, Combatant* combatant);
+    //void setCombatant(int combatantCount, Combatant* combatant);
     int getCount() const;
     QString getName() const;
-    QString getLocalHitPoints() const;
+    int getCombatantHitPoints() const;
     bool isRandomInitiative() const;
     QString getInitiative() const;
     bool isKnown() const;

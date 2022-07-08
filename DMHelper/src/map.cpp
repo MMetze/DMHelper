@@ -9,6 +9,7 @@
 #include "campaign.h"
 #include "audiotrack.h"
 #include "party.h"
+#include "dmhcache.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QUndoStack>
@@ -388,18 +389,22 @@ QUndoStack* Map::getUndoStack() const
 
 void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
 {
-    bool previewNeed = preview;
-
     if(!target)
     {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-        previewNeed = true;
+        if(!_imgFow.isNull())
+            internalApplyPaintTo(&_imgFow, clearColor, index, true, startIndex);
+        if(!_imgBWFow.isNull())
+            internalApplyPaintTo(&_imgBWFow, clearColor, index, true, startIndex);
     }
+    else
+    {
+        internalApplyPaintTo(target, clearColor, index, preview, startIndex);
+    }
+}
 
-    if(index < startIndex)
+void Map::internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
+{
+    if((!target) || (index < startIndex))
         return;
 
     if(index > _undoStack->count())
@@ -412,9 +417,10 @@ void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool
     {
         const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
         if(action)
-            action->apply(previewNeed, target);
+            action->apply(preview, target);
     }
 }
+
 
 UndoMarker* Map::getMapMarker(int id)
 {
@@ -470,17 +476,26 @@ bool Map::isInitialized()
 
 bool Map::isValid()
 {
+    // If it has been initialized, it's valid
     if(isInitialized())
         return true;
 
+    // If the filename is empty, it's invalid
     if(_filename.isEmpty())
         return false;
 
+    // If the file does not exist, it's invalid
     if(!QFile::exists(_filename))
         return false;
 
+    // If the file is not a file (ie it's a directory), it's invalid
     QFileInfo fileInfo(_filename);
     if(!fileInfo.isFile())
+        return false;
+
+    // If the file is otherwise OK and the format is a known image, it's invalid because it should have been loaded!
+    QImageReader reader(_filename);
+    if(!reader.format().isEmpty())
         return false;
 
     return true;
@@ -677,6 +692,11 @@ void Map::fillFoW(const QColor& color, QPaintDevice* target)
     p.fillRect(0,0,target->width(),target->height(),color);
 }
 
+QImage Map::getRawBWFowImage()
+{
+    return _imgBWFow;
+}
+
 QImage Map::getBWFoWImage()
 {
     return getBWFoWImage(_imgBackground.size());
@@ -739,7 +759,7 @@ QImage Map::getPublishImage(const QRect& rect)
 
 QImage Map::getGrayImage()
 {
-    QImage result(getBackgroundImage());
+    QImage result(getPreviewImage());
 
     QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
     applyPaintTo(&grayFoWImage, QColor(0,0,0,128), _undoStack->index(), true);
@@ -897,9 +917,14 @@ QImage Map::getPreviewImage()
         return QImage();
 
     QImage previewImage;
-    previewImage.load(_filename);
-    return _filterApplied ? _filter.apply(previewImage) : _imgBackground;
-    return previewImage;
+    if(!previewImage.load(_filename))
+    {
+        // Last attempt, check the cache for a video version
+        QString cacheFilePath = DMHCache().getCacheFilePath(_filename, QString("png"));
+        previewImage.load(cacheFilePath);
+    }
+
+    return _filterApplied ? _filter.apply(previewImage) : previewImage;
 }
 
 bool Map::initialize()
@@ -949,10 +974,24 @@ bool Map::initialize()
         }
 
         QImageReader reader(_filename);
+        if(reader.format().isEmpty())
+        {
+            // The image is not a known format, so it could be a video
+            qDebug() << "[Map] Image format is not known, so it cannot be read";
+            return false;
+        }
+
         _imgBackground = reader.read();
 
         if(_imgBackground.isNull())
-            return false; // Could not read the file as an image - it could be a video
+        {
+            // Could not read the file as an image - this is likely a file error...
+            qDebug() << "[Map] Not able to read map file: " << reader.error() <<", " << reader.errorString();
+            QMessageBox::critical(nullptr,
+                                  QString("DMHelper Map File Read Error"),
+                                  QString("For the map entry """) + getName() + QString(""", the map could not be read. It may be too high resolution for DMHelper!"));
+            return false;
+        }
 
         if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
             _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
@@ -984,6 +1023,7 @@ bool Map::initialize()
 void Map::uninitialize()
 {
     _imgBackground = QImage();
+    _imgBWFow = QImage();
     _imgFow = QImage();
     _initialized = false;
 }

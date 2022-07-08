@@ -9,36 +9,45 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 2.4</h2>
+<h2>What's New: Version 2.5</h2>
+
 <h3>New Features:</h3>
 <ul>
-<li>What's New? This What's New Dialog! Spiffy, isn't it?
-<li>Amazing new HW-accelerated Player Window rendering... lots more to come here! If you had any performance issues while publishing with previous versions, that should be a thing of the past now.
-<li>All-new (and still optional) Initiative Tracker on the Player Window. Somewhat condensed and two different visualization options
-<li>Moving characters, effects and objects from the Player's Window. Your players want to move their fireball around? Their spaceship? No problem!
-<li>Added proper transparency support for objects and spell effects
-<li>Add map markers with flexible icons
-<li>Distance moved for each combatant is tracked during their turn
-<li>Smooth multi-selection of combatants in battle
-<li>Distance measurement added to the map view as well as combat
-<li>Quick shortcut campaign notes, just hit Ctrl+Alt+N and enter a note, you can open the notes to view/edit them on the Campaign tab
+<li>Syrinscape Online supported
+<li>Animated maps work now across all entries
+<li>Navigate backwards and forwards through last campaign entries
+<li>Grid size and grid color are configurable
+<li>Yes/No check for clear/fill Fog of War to avoid embarrassing map-nudity in combat
+<li>Map selection improvements for videos
+<li>Automatic saving of the bestiary and spellbook upon close of the dialog
 </ul>
+
 <p>
+
+<h3>Fixes:</h3>
+<ul>
+<li>Combatant selection and activation tokens are fully configurable again
+<li>Initiative Frame/Countdown works and is configurable
+<li>Effects and objects in combat smaller than 5 ft are drawn properly
+<li>Fixed the HP randomizer in add combatant dialog
+<li>Changed experience from an int to a string to allow e.g. "34,000" as well as "34000"
+<li>Fix issues saving YouTube audio files on MacOS
+<li>Local audio file playback working on MacOS
+<li>32-bit memory management (map images unloaded when not in use)
+</ul>
+
+<p>
+
 <h3>Other Improvements:</h3>
 <ul>
-<li>Changing a map in combat leaves combatants where they are. This is really useful if the terrain changes dramatically mid-battle.
-<li>Rebooted "Add Monster" dialog, with even more customization options
-<li>Fixed and enhanced the Export & Import functionality, which unfortunately <u>really</u> didn't work right in v2.3
+<li>Fixed the x86 installer
+<li>Youtube playback is more reliable
 </ul>
-<p>
-<h3>Downside for now</h3>
-<ul>
-<li>The new libvlc I need to use doesn't work well yet with videos and OpenGL, so animated maps don't animate right now, they just show as their static version. I assure you it is in my own very personal interest to get this sorted out asap!
-</ul>
+
 <p>
 <h3>And don't forget</h3>
 <ul>
-<li><b>Press the magical "F" key on the Player's Window for Fullscreen mode, the only way to play!</b>
+<li><b>Press the magical "F" key on the Player's Window for Fullscreen mode</b>
 </ul>
 </div>
 </body>

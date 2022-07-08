@@ -25,6 +25,7 @@ public:
 signals:
     void spellChanged(); // todo connect this
     void spellDataEdit(); // used internally
+    void dialogClosed();
 
 public slots:
     void setSpell(Spell* spell);

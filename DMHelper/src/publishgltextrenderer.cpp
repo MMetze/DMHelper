@@ -21,16 +21,17 @@ PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage te
     _shaderModelMatrix(0),
     _shaderProjectionMatrix(0),
     _projectionMatrix(),
+    _scissorRect(),
     _textObject(nullptr),
     _textPos(),
     _elapsed(),
-    _timerId(0)
+    _timerId(0),
+    _recreateContent(false)
 {
 }
 
 PublishGLTextRenderer::~PublishGLTextRenderer()
 {
-    cleanup();
 }
 
 CampaignObjectBase* PublishGLTextRenderer::getObject()
@@ -52,6 +53,8 @@ void PublishGLTextRenderer::cleanup()
     delete _textObject;
     _textObject = nullptr;
 
+    _projectionMatrix.setToIdentity();
+
     if(_shaderProgram > 0)
     {
         if((_targetWidget) && (_targetWidget->context()))
@@ -68,6 +71,22 @@ void PublishGLTextRenderer::cleanup()
     PublishGLRenderer::cleanup();
 }
 
+bool PublishGLTextRenderer::deleteOnDeactivation()
+{
+    return true;
+}
+
+QRect PublishGLTextRenderer::getScissorRect()
+{
+    return _scissorRect;
+}
+
+void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
+{
+    _color = color;
+    emit updateWidget();
+}
+
 void PublishGLTextRenderer::initializeGL()
 {
     if((_initialized) || (!_targetWidget))
@@ -78,7 +97,7 @@ void PublishGLTextRenderer::initializeGL()
     if(!f)
         return;
 
-    const char *vertexShaderSource = "#version 330 core\n"
+    const char *vertexShaderSource = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
         "layout (location = 2) in vec2 aTexCoord;\n"
@@ -110,7 +129,7 @@ void PublishGLTextRenderer::initializeGL()
         return;
     }
 
-    const char *fragmentShaderSource = "#version 330 core\n"
+    const char *fragmentShaderSource = "#version 410 core\n"
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"
@@ -155,9 +174,7 @@ void PublishGLTextRenderer::initializeGL()
     // Create the objects
     initializeBackground();
     _scene.deriveSceneRectFromSize(getBackgroundSize());
-
-    _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
-    _textObject->setX(-getBackgroundSize().width() / 2);
+    _recreateContent = isBackgroundReady();
 
     // Matrices
     // Model
@@ -182,10 +199,9 @@ void PublishGLTextRenderer::initializeGL()
 void PublishGLTextRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
-    _scene.setTargetSize(_targetSize);
     qDebug() << "[PublishGLTextRenderer] Resize w: " << w << ", h: " << h;
+    resizeBackground(w, h);
 
-    updateProjectionMatrix();
     emit updateWidget();
 }
 
@@ -194,12 +210,31 @@ void PublishGLTextRenderer::paintGL()
     if((!_targetWidget) || (!_targetWidget->context()))
         return;
 
+    if(!isBackgroundReady())
+    {
+        updateBackground();
+        if(!isBackgroundReady())
+            return;
+
+        updateProjectionMatrix();
+        _recreateContent = true;
+    }
+
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     QOpenGLExtraFunctions *e = _targetWidget->context()->extraFunctions();
     if((!f) || (!e))
         return;
 
+    if(_recreateContent)
+        recreateContent();
+
     f->glUniformMatrix4fv(_shaderProjectionMatrix, 1, GL_FALSE, _projectionMatrix.constData());
+
+    if(!_scissorRect.isEmpty())
+    {
+        f->glEnable(GL_SCISSOR_TEST);
+        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+    }
 
     // Draw the scene:
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
@@ -215,12 +250,9 @@ void PublishGLTextRenderer::paintGL()
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _textObject->getMatrixData());
         _textObject->paintGL();
     }
-}
 
-void PublishGLTextRenderer::setBackgroundColor(const QColor& color)
-{
-    _color = color;
-    emit updateWidget();
+    if(!_scissorRect.isEmpty())
+        f->glDisable(GL_SCISSOR_TEST);
 }
 
 void PublishGLTextRenderer::setRotation(int rotation)
@@ -237,21 +269,21 @@ void PublishGLTextRenderer::rewind()
         return;
 
     if(_encounter->getAnimated())
+    {
         _textObject->setY((-getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
+        _elapsed.start();
+    }
     else
+    {
         _textObject->setY((getRotatedHeight(_rotation) / 2) - _textObject->getImageSize().height());
+    }
 
     emit updateWidget();
 }
 
 void PublishGLTextRenderer::play()
 {
-    if((!_encounter) || (!_encounter->getAnimated()))
-        return;
-
-    _elapsed.start();
-    stop();
-    _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
+    startScrollingTimer();
 }
 
 void PublishGLTextRenderer::stop()
@@ -260,7 +292,32 @@ void PublishGLTextRenderer::stop()
     {
         killTimer(_timerId);
         _timerId = 0;
+        emit playPauseChanged(false);
     }
+}
+
+void PublishGLTextRenderer::playPause(bool play)
+{
+    if(play)
+        PublishGLTextRenderer::play();
+    else
+        PublishGLTextRenderer::stop();
+}
+
+void PublishGLTextRenderer::contentChanged()
+{
+    _recreateContent = true;
+    emit updateWidget();
+}
+
+void PublishGLTextRenderer::startScrollingTimer()
+{
+    if((!_encounter) || (!_encounter->getAnimated()) || (_timerId))
+        return;
+
+   _elapsed.start();
+   _timerId = startTimer(DMHelper::ANIMATION_TIMER_DURATION, Qt::PreciseTimer);
+   emit playPauseChanged(true);
 }
 
 void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
@@ -294,6 +351,16 @@ void PublishGLTextRenderer::updateProjectionMatrix()
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
     _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+
+    QSizeF transformedBackgroundSize = getBackgroundSize();
+    if((_rotation == 90) || (_rotation == 270))
+        transformedBackgroundSize.transpose();
+
+    QSizeF scissorSize = transformedBackgroundSize.scaled(_targetSize, Qt::KeepAspectRatio);
+    _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
+    _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
+    _scissorRect.setWidth(scissorSize.width());
+    _scissorRect.setHeight(scissorSize.height());
 }
 
 void PublishGLTextRenderer::updateBackground()
@@ -306,4 +373,18 @@ int PublishGLTextRenderer::getRotatedHeight(int rotation)
         return getBackgroundSize().width();
     else
         return getBackgroundSize().height();
+}
+
+void PublishGLTextRenderer::recreateContent()
+{
+    if(getBackgroundSize().isValid())
+    {
+        delete _textObject;
+        _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
+        _textObject->setX(-getBackgroundSize().width() / 2);
+
+        rewind();
+
+        _recreateContent = false;
+    }
 }

@@ -58,6 +58,7 @@ public:
     QList<BattleDialogModelCombatant*> getLivingMonsters() const;
 
     void recreateCombatantWidgets();
+    void recenterCombatants();
 
     QRect viewportRect();
     QPoint viewportCenter();
@@ -98,6 +99,8 @@ public slots:
     void setGridType(int gridType);
     void setXOffset(int xOffset);
     void setYOffset(int yOffset);
+    void setGridWidth(int gridWidth);
+    void setGridColor(const QColor& gridColor);
     void setGridVisible(bool gridVisible);
 
     void setInitiativeType(int initiativeType);
@@ -192,6 +195,9 @@ signals:
     void pointerFileNameChanged(const QString& filename);
 
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
+
+    void navigateForwards();
+    void navigateBackwards();
 
 protected:
     virtual void keyPressEvent(QKeyEvent * e) override;
@@ -378,6 +384,7 @@ private:
 
     QPixmap _prescaledBackground;
     QPixmap _fowImage;
+    QImage _bwFoWImage;
     QImage _combatantFrame;
     QImage _countdownFrame;
     QSize _targetSize;
@@ -403,7 +410,6 @@ private:
     qreal _moveRadius;
     QPointF _moveStart;
 
-    QImage _bwFoWImage;
     QRect _sourceRect;
     QSize _videoSize;
 };

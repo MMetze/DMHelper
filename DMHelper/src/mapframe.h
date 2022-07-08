@@ -3,7 +3,6 @@
 
 #include "campaignobjectframe.h"
 #include <QGraphicsScene>
-#include <QFileInfo>
 #include <QImage>
 #include <QRubberBand>
 #include "undopath.h"
@@ -65,7 +64,7 @@ signals:
     void distanceLineTypeChanged(int lineType);
     void distanceLineWidthChanged(int lineWidth);
 
-    void fowChanged();
+    void fowChanged(const QImage& fow);
     void cameraRectChanged(const QRectF& cameraRect);
 
     void showMarkersChanged(bool show);
@@ -191,7 +190,6 @@ protected slots:
     void setScale(qreal s);
     void storeViewRect();
     void loadViewRect();
-    void resetPublishFoW();
     void checkPartyUpdate();
 
     void handleScreenshotReady(const QImage& image);

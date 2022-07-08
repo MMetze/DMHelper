@@ -87,7 +87,7 @@ bool WelcomeFrame::eventFilter(QObject *watched, QEvent *event)
             openLink(ui->lblDiscord->text());
     }
 
-    return QFrame::eventFilter(watched, event);
+    return CampaignObjectFrame::eventFilter(watched, event);
 }
 
 void WelcomeFrame::showEvent(QShowEvent *event)

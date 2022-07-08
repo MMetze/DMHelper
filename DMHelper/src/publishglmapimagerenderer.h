@@ -8,6 +8,7 @@ class PublishGLMapImageRenderer : public PublishGLMapRenderer
     Q_OBJECT
 public:
     PublishGLMapImageRenderer(Map* map, QObject *parent = nullptr);
+    virtual ~PublishGLMapImageRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;

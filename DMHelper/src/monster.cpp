@@ -13,31 +13,7 @@ Monster::Monster(MonsterClass* monsterClass, const QString& name, QObject *paren
     _notes(""),
     _iconChanged(false)
 {
-//    setHitPoints(getHitDice().roll());
 }
-
-/*
-Monster::Monster(MonsterClass* monsterClass, const QDomElement &element, bool isImport, QObject *parent) :
-    Combatant(parent),
-    _monsterClass(monsterClass),
-    _passivePerception(10),
-    _active(true),
-    _notes(""),
-    _iconChanged(false)
-{
-    inputXML(element, isImport);
-}
-
-Monster::Monster(const Monster &obj) :
-    Combatant(obj),
-    _monsterClass(obj._monsterClass),
-    _passivePerception(obj._passivePerception),
-    _active(obj._active),
-    _notes(obj._notes),
-    _iconChanged(obj._iconChanged)
-{
-}
-*/
 
 void Monster::inputXML(const QDomElement &element, bool isImport)
 {
@@ -232,7 +208,7 @@ void Monster::setIcon(const QString& newIcon)
 
     _icon = newIcon;
     _iconPixmap.setBasePixmap(_icon);
-    qWarning() << "Monster has a local icon:" << getName() << ": " << _icon;
+    qDebug() << "Monster has a local icon:" << getName() << ": " << _icon;
     registerChange();
     if(_batchChanges)
     {

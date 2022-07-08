@@ -3,7 +3,6 @@
 #include "battledialogmodel.h"
 #include <QIntValidator>
 #include <QMouseEvent>
-#include <QDebug>
 
 WidgetBattleCombatant::WidgetBattleCombatant(BattleDialogModelCombatant* combatant, QWidget *parent) :
     QWidget(parent),

@@ -3,7 +3,9 @@
 
 #include "publishglbattlerenderer.h"
 
-#define BATTLEVIDEO_USE_SCREENSHOT_ONLY
+#ifdef Q_OS_WIN64
+    #define BATTLEVIDEO_USE_SCREENSHOT_ONLY
+#endif
 
 class VideoPlayerGLPlayer;
 
@@ -12,6 +14,7 @@ class PublishGLBattleVideoRenderer : public PublishGLBattleRenderer
     Q_OBJECT
 public:
     PublishGLBattleVideoRenderer(BattleDialogModel* model, QObject *parent = nullptr);
+    virtual ~PublishGLBattleVideoRenderer() override;
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;

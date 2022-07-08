@@ -5,12 +5,16 @@
 #include <QDebug>
 
 int main(int argc, char *argv[]) {
+    QCoreApplication::setAttribute(Qt::AA_DisableHighDpiScaling);
     QApplication a(argc, argv);
 
     // Explicitly set the application surface format for OpenGL surfaces
     QSurfaceFormat fmt;
-    fmt.setVersion(3, 3);
+#ifdef Q_OS_MAC
+    fmt.setVersion(4, 1);
     fmt.setProfile(QSurfaceFormat::CoreProfile);
+#endif
+    fmt.setDepthBufferSize(24);
     QSurfaceFormat::setDefaultFormat(fmt);
 
     // this important so we can call makeCurrent from our rendering thread

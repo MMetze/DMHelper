@@ -3,7 +3,6 @@
 #include "dmconstants.h"
 #include "grid.h"
 #include <QMenu>
-#include <QDebug>
 
 const int GRID_SIZE_PAUSE_TIMER = 750;
 
@@ -38,6 +37,11 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
     connect(ui->spinGridAngle, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
     connect(ui->sliderX, SIGNAL(valueChanged(int)), this, SIGNAL(gridXOffsetChanged(int)));
     connect(ui->sliderY, SIGNAL(valueChanged(int)), this, SIGNAL(gridYOffsetChanged(int)));
+
+    ui->btnGridColor->setRotationVisible(false);
+    ui->btnGridColor->setColor(Qt::black);
+    connect(ui->btnGridColor, &ColorPushButton::colorChanged, this, &RibbonTabBattleMap::gridColorChanged);
+    connect(ui->spinGridWidth, SIGNAL(valueChanged(int)), this, SIGNAL(gridWidthChanged(int)));
 
     connect(ui->btnMapEdit, SIGNAL(clicked(bool)), this, SIGNAL(editFoWClicked(bool)));
     connect(ui->btnFoWErase, SIGNAL(clicked(bool)), this, SIGNAL(drawEraseClicked(bool)));
@@ -116,6 +120,16 @@ void RibbonTabBattleMap::setGridYOffset(int offset)
     ui->sliderY->setValue(offset);
 }
 
+void RibbonTabBattleMap::setGridWidth(int gridWidth)
+{
+    ui->spinGridWidth->setValue(gridWidth);
+}
+
+void RibbonTabBattleMap::setGridColor(const QColor& gridColor)
+{
+    ui->btnGridColor->setColor(gridColor);
+}
+
 void RibbonTabBattleMap::setEditFoW(bool checked)
 {
     ui->btnMapEdit->setChecked(checked);
@@ -182,6 +196,14 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
     setWidgetSize(*ui->sliderX, sliderWidth, height() / 3);
     setWidgetSize(*ui->lblSliderY, labelWidth, height() / 3);
     setWidgetSize(*ui->sliderY, sliderWidth, height() / 3);
+
+    setStandardButtonSize(*ui->lblGridColor, *ui->btnGridColor, frameHeight);
+    int squareButtonSize = qMin(ui->btnGridColor->width(), iconDim);
+    int colorButtonSize = squareButtonSize * 3 / 4;
+
+    setWidgetSize(*ui->btnGridColor, colorButtonSize, colorButtonSize);
+    setWidgetSize(*ui->spinGridWidth, iconDim, iconDim);
+    setLabelHeight(*ui->lblGridWidth, frameHeight);
 
     // Brush cluster
     setButtonSize(*ui->btnBrushCircle, iconDim / 2, iconDim / 2);

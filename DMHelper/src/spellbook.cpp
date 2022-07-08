@@ -65,6 +65,7 @@ Spellbook::Spellbook(QObject *parent) :
     _majorVersion(0),
     _minorVersion(0),
     _licenseText(),
+    _dirty(false),
     _batchProcessing(false),
     _batchAcknowledge(false)
 {
@@ -93,6 +94,101 @@ void Spellbook::Shutdown()
 {
     delete _instance;
     _instance = nullptr;
+}
+
+bool Spellbook::writeSpellbook(const QString& targetFilename)
+{
+    if(targetFilename.isEmpty())
+    {
+        qDebug() << "[Spellbook] Spellbook target filename empty, no file will be written";
+        return false;
+    }
+
+    qDebug() << "[Spellbook] Writing Spellbook to " << targetFilename;
+
+    QDomDocument doc("DMHelperSpellbookXML");
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
+
+    QFileInfo fileInfo(targetFilename);
+    QDir targetDirectory(fileInfo.absoluteDir());
+    if(outputXML(doc, root, targetDirectory, false) <= 0)
+    {
+        qDebug() << "[MainWindow] Spellbook output did not find any spells. Aborting writing to file";
+        return false;
+    }
+
+    QString xmlString = doc.toString();
+
+    QFile file(targetFilename);
+    if(!file.open(QIODevice::WriteOnly))
+    {
+        qDebug() << "[MainWindow] Unable to open Spellbook file for writing: " << targetFilename;
+        qDebug() << "       Error " << file.error() << ": " << file.errorString();
+        QFileInfo info(file);
+        qDebug() << "       Full filename: " << info.absoluteFilePath();
+        return false;
+    }
+
+    QTextStream ts(&file);
+    ts.setCodec("UTF-8");
+    ts << xmlString;
+
+    file.close();
+    setDirty(false);
+
+    return true;
+}
+
+bool Spellbook::readSpellbook(const QString& targetFilename)
+{
+    if(targetFilename.isEmpty())
+    {
+        qDebug() << "[Spellbook] ERROR! No known spellbook found, unable to load spellbook";
+        return false;
+    }
+
+    qDebug() << "[Spellbook] Reading spellbook: " << targetFilename;
+
+    QDomDocument doc("DMHelperSpellbookXML");
+    QFile file(targetFilename);
+    if(!file.open(QIODevice::ReadOnly))
+    {
+        qDebug() << "[Spellbook] Reading spellbook file open failed.";
+        QMessageBox::critical(nullptr, QString("Spellbook file open failed"), QString("Unable to open the spellbook file: ") + targetFilename);
+        return false;
+    }
+
+    QTextStream in(&file);
+    in.setCodec("UTF-8");
+    QString errMsg;
+    int errRow;
+    int errColumn;
+    bool contentResult = doc.setContent(in.readAll(), &errMsg, &errRow, &errColumn);
+
+    file.close();
+
+    if(contentResult == false)
+    {
+        qDebug() << "[Spellbook] Error reading spellbook XML content. The XML is probably not valid.";
+        qDebug() << errMsg << errRow << errColumn;
+        QMessageBox::critical(nullptr, QString("Spellbook file invalid"), QString("Unable to read the spellbook file: ") + targetFilename + QString(", the XML is invalid"));
+        return false;
+    }
+
+    QDomElement root = doc.documentElement();
+    if((root.isNull()) || (root.tagName() != "root"))
+    {
+        qDebug() << "[Spellbook] Spellbook file missing root item";
+        QMessageBox::critical(nullptr, QString("Spellbook file invalid"), QString("Unable to read the spellbook file: ") + targetFilename + QString(", the XML does not have the expected root item."));
+        return false;
+    }
+
+    QFileInfo fileInfo(targetFilename);
+    setDirectory(fileInfo.absoluteDir());
+    inputXML(root, false);
+
+    return true;
 }
 
 int Spellbook::outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const
@@ -176,7 +272,7 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
                     challengeResult = QMessageBox::question(nullptr,
                                                             QString("Import Spell Conflict"),
                                                             QString("The spell '") + spellName + QString("' already exists in the Spell. Would you like to overwrite the existing entry?"),
-                                                            QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel );
+                                                            QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::No | QMessageBox::NoToAll | QMessageBox::Cancel);
                     if(challengeResult == QMessageBox::Cancel)
                     {
                         qDebug() << "[Spellbook] Import spells cancelled";
@@ -198,6 +294,7 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
         }
 
         qDebug() << "[Spellbook] Importing spellbook completed. " << importCount << " spells imported.";
+        setDirty();
     }
     else
     {
@@ -228,6 +325,7 @@ void Spellbook::inputXML(const QDomElement &element, bool isImport)
         }
 
         qDebug() << "[Spellbook] Loading spellbook completed. " << _spellbookMap.count() << " spells loaded.";
+        setDirty(false);
     }
 
     emit changed();
@@ -311,6 +409,11 @@ QStringList Spellbook::getLicenseText() const
     return _licenseText;
 }
 
+bool Spellbook::isDirty()
+{
+    return _dirty;
+}
+
 Spell* Spellbook::getSpell(const QString& name)
 {
     if(!_spellbookMap.contains(name))
@@ -374,7 +477,9 @@ bool Spellbook::insertSpell(Spell* spell)
         return false;
 
     _spellbookMap.insert(spell->getName(), spell);
+    connect(spell, &Spell::dirty, this, &Spellbook::registerDirty);
     emit changed();
+    setDirty();
     return true;
 }
 
@@ -386,8 +491,10 @@ void Spellbook::removeSpell(Spell* spell)
     if(!_spellbookMap.contains(spell->getName()))
         return;
 
+    disconnect(spell, &Spell::dirty, this, &Spellbook::registerDirty);
     _spellbookMap.remove(spell->getName());
     delete spell;
+    setDirty();
     emit changed();
 }
 
@@ -402,11 +509,13 @@ void Spellbook::renameSpell(Spell* spell, const QString& newName)
     _spellbookMap.remove(spell->getName());
     spell->setName(newName);
     insertSpell(spell);
+    setDirty();
 }
 
 void Spellbook::setDirectory(const QDir& directory)
 {
     _spellbookDirectory = directory;
+    setDirty();
 }
 
 const QDir& Spellbook::getDirectory() const
@@ -418,19 +527,19 @@ QString Spellbook::findSpellImage(const QString& spellName, const QString& iconF
 {
     QString fileName = iconFile;
 
-    if((fileName.isEmpty()) || ( !_spellbookDirectory.exists(fileName) ))
+    if((fileName.isEmpty()) || (!_spellbookDirectory.exists(fileName)))
     {
         fileName = QString("./") + spellName + QString(".png");
-        if( !_spellbookDirectory.exists(fileName) )
+        if(!_spellbookDirectory.exists(fileName))
         {
             fileName = QString("./") + spellName + QString(".jpg");
-            if( !_spellbookDirectory.exists(fileName) )
+            if(!_spellbookDirectory.exists(fileName))
             {
                 fileName = QString("./Images/") + spellName + QString(".png");
-                if( !_spellbookDirectory.exists(fileName) )
+                if(!_spellbookDirectory.exists(fileName))
                 {
                     fileName = QString("./Images/") + spellName + QString(".jpg");
-                    if( !_spellbookDirectory.exists(fileName) )
+                    if(!_spellbookDirectory.exists(fileName))
                     {
                         qDebug() << "[Spellbook] Not able to find spell image for " << spellName << " with icon file " << iconFile;
                         fileName = QString();
@@ -453,6 +562,16 @@ void Spellbook::finishBatchProcessing()
 {
     _batchProcessing = false;
     _batchAcknowledge = false;
+}
+
+void Spellbook::registerDirty()
+{
+    setDirty();
+}
+
+void Spellbook::setDirty(bool dirty)
+{
+    _dirty = dirty;
 }
 
 void Spellbook::showSpellWarning(const QString& spell)

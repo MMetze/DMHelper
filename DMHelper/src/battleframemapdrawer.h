@@ -13,11 +13,13 @@ class BattleFrameMapDrawer : public QObject
 public:
     explicit BattleFrameMapDrawer(QObject *parent = nullptr);
 
-    void setMap(Map* map, QPixmap* fow);
+    void setMap(Map* map, QPixmap* fow, QImage* glFow);
+    Map* getMap() const;
     const QCursor& getCursor() const;
 
 signals:
-    void fowChanged(const QPixmap& fow);
+    void fowEdited(const QPixmap& fow);
+    void fowChanged(const QImage& glFow);
     void cursorChanged(const QCursor& cursor);
 
 public slots:
@@ -46,6 +48,7 @@ private:
     UndoPath* _undoPath;
     Map* _map;
     QPixmap* _fow;
+    QImage* _glFow;
     QCursor _cursor;
 
     int _gridScale;

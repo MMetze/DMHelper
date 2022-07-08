@@ -13,12 +13,16 @@
 PublishGLMapVideoRenderer::PublishGLMapVideoRenderer(Map* map, QObject *parent) :
     PublishGLMapRenderer(map, parent),
     _videoPlayer(nullptr)
-
     #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     , _backgroundObject(nullptr),
       _backgroundImage()
     #endif
 {
+}
+
+PublishGLMapVideoRenderer::~PublishGLMapVideoRenderer()
+{
+    PublishGLMapVideoRenderer::cleanup();
 }
 
 void PublishGLMapVideoRenderer::cleanup()
@@ -28,8 +32,14 @@ void PublishGLMapVideoRenderer::cleanup()
     _backgroundObject = nullptr;
 #endif
 
-    delete _videoPlayer;
-    _videoPlayer = nullptr;
+    if(_videoPlayer)
+    {
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapVideoRenderer::updateWidget);
+        disconnect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLMapVideoRenderer::updateProjectionMatrix);
+        VideoPlayerGLPlayer* deletePlayer = _videoPlayer;
+        _videoPlayer = nullptr;
+        deletePlayer->stopThenDelete();
+    }
 
     PublishGLMapRenderer::cleanup();
 }
@@ -62,19 +72,21 @@ void PublishGLMapVideoRenderer::initializeBackground()
     _videoPlayer = new VideoPlayerGLPlayer(_map->getFileName(),
                                            _targetWidget->context(),
                                            _targetWidget->format(),
-                                           _targetSize,
                                            true,
                                            false);
     connect(_videoPlayer, &VideoPlayerGLPlayer::frameAvailable, this, &PublishGLMapVideoRenderer::updateWidget);
+    connect(_videoPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, this, &PublishGLMapVideoRenderer::updateProjectionMatrix);
+    _videoPlayer->restartPlayer();
+
 #endif
 }
 
 bool PublishGLMapVideoRenderer::isBackgroundReady()
 {
-#ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
+#ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     return _backgroundObject != nullptr;
 #else
-    return _videoPlayer != nullptr;
+    return ((_videoPlayer) && (_videoPlayer->vbObjectsExist()));
 #endif
 }
 
@@ -90,8 +102,8 @@ void PublishGLMapVideoRenderer::resizeBackground(int w, int h)
     if(!_videoPlayer)
         return;
 
-    _videoPlayer->targetResized(_targetSize);
     _videoPlayer->initializationComplete();
+    updateProjectionMatrix();
 #endif
 }
 
@@ -131,6 +143,14 @@ void PublishGLMapVideoRenderer::updateBackground()
         updateFoW();
         updateProjectionMatrix();
     }
+#else
+    if(!_videoPlayer)
+        return;
+
+    if(_videoPlayer->vbObjectsExist())
+        _videoPlayer->cleanupVBObjects();
+
+    _videoPlayer->createVBObjects();
 #endif
 }
 
