@@ -476,17 +476,26 @@ bool Map::isInitialized()
 
 bool Map::isValid()
 {
+    // If it has been initialized, it's valid
     if(isInitialized())
         return true;
 
+    // If the filename is empty, it's invalid
     if(_filename.isEmpty())
         return false;
 
+    // If the file does not exist, it's invalid
     if(!QFile::exists(_filename))
         return false;
 
+    // If the file is not a file (ie it's a directory), it's invalid
     QFileInfo fileInfo(_filename);
     if(!fileInfo.isFile())
+        return false;
+
+    // If the file is otherwise OK and the format is a known image, it's invalid because it should have been loaded!
+    QImageReader reader(_filename);
+    if(!reader.format().isEmpty())
         return false;
 
     return true;
@@ -965,12 +974,22 @@ bool Map::initialize()
         }
 
         QImageReader reader(_filename);
+        if(reader.format().isEmpty())
+        {
+            // The image is not a known format, so it could be a video
+            qDebug() << "[Map] Image format is not known, so it cannot be read";
+            return false;
+        }
+
         _imgBackground = reader.read();
 
         if(_imgBackground.isNull())
         {
-            // Could not read the file as an image - it could be a video, but could be a file error...
+            // Could not read the file as an image - this is likely a file error...
             qDebug() << "[Map] Not able to read map file: " << reader.error() <<", " << reader.errorString();
+            QMessageBox::critical(nullptr,
+                                  QString("DMHelper Map File Read Error"),
+                                  QString("For the map entry """) + getName() + QString(""", the map could not be read. It may be too high resolution for DMHelper!"));
             return false;
         }
 
