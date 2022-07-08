@@ -3,7 +3,9 @@
 
 #include "publishglmaprenderer.h"
 
-//#define MAPVIDEO_USE_SCREENSHOT_ONLY
+#ifdef Q_OS_WIN64
+    #define MAPVIDEO_USE_SCREENSHOT_ONLY
+#endif
 
 class VideoPlayerGLPlayer;
 

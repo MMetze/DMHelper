@@ -71,7 +71,7 @@ $QMAKE ../src/DMHelper.pro -spec macx-clang CONFIG+=x86_64 CONFIG+=qtquickcompil
 make -j4
 
 cp -R DMHelper.app/ ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
-cp ../src/binsrcmac/Info.plist ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/
+cp ../src/bin-macos/Info.plist ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/
 
 cd ../bin64/packages/com.dmhelper.app/data
 mkdir DMHelper.app/Contents/Frameworks
@@ -85,7 +85,7 @@ cd ../../../../build-clang_64bit-Release
 
 $MACDEPLOYQT ../bin64/packages/com.dmhelper.app/data/DMHelper.app/
 
-cp -R ../src/bestiary/ ../src/resources/ ../src/doc/ ../src/binsrcmac/DMHelper.icns ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
+cp -R ../src/bestiary/ ../src/resources/ ../src/doc/ ../src/bin-macos/DMHelper.icns ../bin64/packages/com.dmhelper.app/data/DMHelper.app/Contents/Resources
 
 cd ../bin64
 
