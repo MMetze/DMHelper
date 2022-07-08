@@ -5,6 +5,7 @@
 #include <QDebug>
 
 //#define VIDEO_DEBUG_MESSAGES
+//#define VIDEO_CREATE_CACHE
 
 DMH_VLC* DMH_VLC::_instance = nullptr;
 
@@ -15,38 +16,52 @@ DMH_VLC::DMH_VLC(QObject *parent) :
 {
 #ifndef Q_OS_MAC
 
-    #ifdef VIDEO_DEBUG_MESSAGES
-    //    const char *verbose_args = "-vvv";
-    //    _vlcInstance = libvlc_new(1, &verbose_args);
-
-        /*
+    #ifdef VIDEO_CREATE_CACHE
         // Special case version to create a new cache file - only needed for a new version of VLC
         const char *args[] = {
             "--reset-plugins-cache",
             "--plugins-cache",
             "--plugins-scan",
-    #ifdef QT_DEBUG
             "-vvv",
-    #endif
-            ""
-        };
-        */
-
-        // Normal run-time version
-        const char *args[] = {
-            "--no-reset-plugins-cache",
-            "--plugins-cache",
-            "--no-plugins-scan",
-    #ifdef QT_DEBUG
-            "-vvv",
-    #endif
             ""
         };
 
         _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
 
     #else
-        _vlcInstance = libvlc_new(0, nullptr);
+        #ifdef VIDEO_DEBUG_MESSAGES
+        //    const char *verbose_args = "-vvv";
+        //    _vlcInstance = libvlc_new(1, &verbose_args);
+
+            /*
+            // Special case version to create a new cache file - only needed for a new version of VLC
+            const char *args[] = {
+                "--reset-plugins-cache",
+                "--plugins-cache",
+                "--plugins-scan",
+        #ifdef QT_DEBUG
+                "-vvv",
+        #endif
+                ""
+            };
+            */
+
+            // Normal run-time version
+            const char *args[] = {
+                "--no-reset-plugins-cache",
+                "--plugins-cache",
+                "--no-plugins-scan",
+        #ifdef QT_DEBUG
+                "-vvv",
+        #endif
+                ""
+            };
+
+            _vlcInstance = libvlc_new(sizeof(args) / sizeof(*args), args);
+
+        #else
+            _vlcInstance = libvlc_new(0, nullptr);
+        #endif
     #endif
 #else
     #ifdef VIDEO_DEBUG_MESSAGES

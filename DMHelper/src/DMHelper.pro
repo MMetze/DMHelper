@@ -11,11 +11,12 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = DMHelper
 TEMPLATE = app
 
-install_it.path = $$PWD/../bin
-install_it.files = $$PWD/binsrc/*
-
-INSTALLS += \
-    install_it
+#install_it.path = $$PWD/../bin
+#win32:install_it.files = $$PWD/bin-win32/*
+#win64:install_it.files = $$PWD/bin-win64/*
+#
+#INSTALLS += \
+#    install_it
 
 win32:RC_ICONS += dmhelper.ico
 macx:ICON=data/macimg/DMHelper.icns
@@ -586,10 +587,12 @@ DISTFILES += \
     installer/config/dmhelper_icon.png \
     installer/config/parchment.jpg \
     installer/config/style.qss \
-    installer/packages/com.dmhelper.app/meta/installscript.qs \
+    installer/packages/com.dmhelper.app/meta/installscript32.qs \
+    installer/packages/com.dmhelper.app/meta/installscript64.qs \
     installer/packages/com.dmhelper.app/meta/license.txt \
     installer/packages/com.dmhelper.app/meta/package.xml \
-    preparebuilddirectory_msvc.cmd \
+    preparebuilddirectory_msvc32.cmd \
+    preparebuilddirectory_msvc64.cmd \
     release_notes.txt \
     resources/calendar.xml \
     resources/equipment.xml \
@@ -604,6 +607,21 @@ INCLUDEPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/inc
 DEPENDPATH += $$PWD/../../DMHelperShared/src
 
-win32: LIBS += -L$$PWD/vlc -llibvlc
-macx: LIBS += -F$$PWD/vlc/ -framework VLCKit
+# link to libvlc
+win32 {
+    contains(QT_ARCH, i386) {
+        message("32-bit VLC")
+        INCLUDEPATH += $$PWD/vlc32
+        LIBS += -L$$PWD/vlc32 -llibvlc
+    } else {
+        message("64-bit VLC")
+        INCLUDEPATH += $$PWD/vlc64
+        LIBS += -L$$PWD/vlc64 -llibvlc
+    }
+}
+macx {
+    message("MacOS 64-bit VLC")
+    INCLUDEPATH += $$PWD/vlc64
+    LIBS += -F$$PWD/vlc64/ -framework VLCKit
+}
 

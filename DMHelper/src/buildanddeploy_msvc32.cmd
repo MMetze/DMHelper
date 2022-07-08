@@ -1,5 +1,5 @@
 @set DIR_MSG="Running build script from %cd%"
-@CALL :Message2 "Building DMHelper for Windows x86" %DIR_MSG%
+@CALL :Message2 "Building DMHelper for Windows x86_32" %DIR_MSG%
 
 :start
 @set choice=
@@ -28,6 +28,7 @@ mkdir ..\bin32\packages\com.dmhelper.app\data\plugins
 mkdir ..\bin32\packages\com.dmhelper.app\data\resources
 mkdir ..\bin32\packages\com.dmhelper.app\data\resources\tables
 xcopy /s .\installer\* ..\bin32\*
+rename ..\bin32\packages\com.dmhelper.app\meta\installscript32.qs installscript.qs
 
 cd ..
 
@@ -53,22 +54,20 @@ cd build-32_bit-release
 @CALL :Message "Copy resource content"
 xcopy .\release\DMHelper.exe ..\bin32\packages\com.dmhelper.app\data\
 xcopy %QT_DIR%\%QT_VERSION%\msvc%MSVC_VERSION%\bin\Qt5Xml.dll ..\bin32\packages\com.dmhelper.app\data\
-xcopy ..\src\binsrc\* ..\bin32\packages\com.dmhelper.app\data\*
+xcopy ..\src\bin-win32\* ..\bin32\packages\com.dmhelper.app\data\*
 xcopy /s ..\src\bestiary\* ..\bin32\packages\com.dmhelper.app\data\resources\*
 xcopy /s ..\src\doc\* ..\bin32\packages\com.dmhelper.app\data\doc\*
-xcopy /s ..\src\binsrc\pkgconfig\* ..\bin32\packages\com.dmhelper.app\data\pkgconfig\*
-xcopy /s ..\src\binsrc\plugins\* ..\bin32\packages\com.dmhelper.app\data\plugins\*
+xcopy /s ..\src\bin-win32\pkgconfig\* ..\bin32\packages\com.dmhelper.app\data\pkgconfig\*
+xcopy /s ..\src\bin-win32\plugins\* ..\bin32\packages\com.dmhelper.app\data\plugins\*
 xcopy /s ..\src\resources\* ..\bin32\packages\com.dmhelper.app\data\resources\*
 
 windeployqt --compiler-runtime --no-opengl-sw --no-angle --no-svg ..\bin32\packages\com.dmhelper.app\data
-
 
 @CALL :Message "Create the installer"
 cd ..\bin32
 binarycreator -v -c config\config_win32.xml -p packages "DMHelper 32-bit release Installer"
 cd ..
 move ".\bin32\DMHelper 32-bit release Installer.exe" ".\DMHelper 32-bit release Installer.exe"
-
 
 @CALL :Message "Create the zip-file distribution"
 "%SEVENZIP_APP%" a -tzip archive.zip .\bin32\packages\com.dmhelper.app\data\*
