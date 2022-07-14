@@ -131,8 +131,11 @@ void ObjectImportWorker::importObject(CampaignObjectBase* object, CampaignObject
         if(existingObject->getObjectType() == DMHelper::CampaignType_Battle)
             _importedBattles.append(dynamic_cast<EncounterBattle*>(existingObject));
 
-        if((childList.count() == 0) && (currentParent))
+        if((object->children().count() == 0) && (currentParent))
+        {
             currentParent->removeObject(object);
+            object->deleteLater();
+        }
     }
     else
     {
