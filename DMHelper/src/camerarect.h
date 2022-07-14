@@ -6,8 +6,8 @@
 class CameraRect : public QGraphicsRectItem
 {
 public:
-    CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport);
-    CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewport);
+    CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport, bool ratioLocked = false);
+    CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewport, bool ratioLocked = false);
     virtual ~CameraRect();
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
@@ -17,8 +17,11 @@ public:
     void setDraw(bool draw);
     void setPublishing(bool publishing);
 
+    void setRatioLocked(bool locked);
+
 protected:
     virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+    virtual void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
 
     virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
     virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
@@ -41,6 +44,7 @@ private:
     QGraphicsSimpleTextItem* _drawText;
     QGraphicsRectItem* _drawTextRect;
 
+    bool _ratioLocked;
     QWidget* _viewport;
 
     enum RectSection

@@ -179,6 +179,7 @@ protected slots:
 
     void openAboutDialog();
     void openRandomMarkets();
+    void configureGridLock();
 
     QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
 

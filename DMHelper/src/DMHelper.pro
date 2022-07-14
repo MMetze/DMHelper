@@ -66,6 +66,7 @@ SOURCES += main.cpp\
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
     conditionseditdialog.cpp \
+    configuregriddialog.cpp \
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
@@ -299,6 +300,7 @@ HEADERS  += mainwindow.h \
     combatantrolloverframe.h \
     combatantwidget.h \
     conditionseditdialog.h \
+    configuregriddialog.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
@@ -496,6 +498,7 @@ FORMS    += mainwindow.ui \
     characterimportdialog.ui \
     combatantrolloverframe.ui \
     conditionseditdialog.ui \
+    configuregriddialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \
     combatantdialog.ui \

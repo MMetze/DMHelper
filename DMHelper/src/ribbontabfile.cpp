@@ -16,12 +16,11 @@ RibbonTabFile::RibbonTabFile(QWidget *parent) :
     connect(ui->btnOpen, SIGNAL(clicked(bool)), this, SIGNAL(openClicked()));
     connect(ui->btnSave, SIGNAL(clicked(bool)), this, SIGNAL(saveClicked()));
     connect(ui->btnSaveAs, SIGNAL(clicked(bool)), this, SIGNAL(saveAsClicked()));
-
-    connect(ui->btnPreferences, SIGNAL(clicked(bool)), this, SIGNAL(optionsClicked()));
     connect(ui->btnClose, SIGNAL(clicked(bool)), this, SIGNAL(closeClicked()));
 
     connect(ui->btnUsersGuide, SIGNAL(clicked(bool)), this, SIGNAL(userGuideClicked()));
     connect(ui->btnGettingStarted, SIGNAL(clicked(bool)), this, SIGNAL(gettingStartedClicked()));
+    connect(ui->btnPreferences, SIGNAL(clicked(bool)), this, SIGNAL(optionsClicked()));
     connect(ui->btnCheckForUpdates, SIGNAL(clicked(bool)), this, SIGNAL(checkForUpdatesClicked()));
     connect(ui->btnAbout, SIGNAL(clicked(bool)), this, SIGNAL(aboutClicked()));
 }
@@ -52,7 +51,6 @@ void RibbonTabFile::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblSave, *ui->btnSave, frameHeight);
     setStandardButtonSize(*ui->lblSaveAs, *ui->btnSaveAs, frameHeight);
     setLineHeight(*ui->line, frameHeight);
-    setStandardButtonSize(*ui->lblPreferences, *ui->btnPreferences, frameHeight);
     setStandardButtonSize(*ui->lblClose, *ui->btnClose, frameHeight);
 
     int openIconHeight = ui->btnOpen->iconSize().height();
@@ -66,6 +64,7 @@ void RibbonTabFile::showEvent(QShowEvent *event)
 
     setStandardButtonSize(*ui->lblUsersGuide, *ui->btnUsersGuide, frameHeight);
     setStandardButtonSize(*ui->lblGettingStarted, *ui->btnGettingStarted, frameHeight);
+    setStandardButtonSize(*ui->lblPreferences, *ui->btnPreferences, frameHeight);
     setStandardButtonSize(*ui->lblCheckForUpdates, *ui->btnCheckForUpdates, frameHeight);
     setStandardButtonSize(*ui->lblAbout, *ui->btnAbout, frameHeight);
 }
@@ -79,34 +78,3 @@ void RibbonTabFile::hideMRUMenu()
 {
     ui->btnRecent->setChecked(false);
 }
-
-
-
-/*
-<widget class="QMenu" name="menu_File">
- <property name="title">
-  <string>&amp;File</string>
- </property>
- <widget class="QMenu" name="menuRecent_Campaigns">
-  <property name="title">
-   <string>&amp;Recent Campaigns</string>
-  </property>
- </widget>
- <addaction name="action_NewCampaign"/>
- <addaction name="action_OpenCampaign"/>
- <addaction name="menuRecent_Campaigns"/>
- <addaction name="action_SaveCampaign"/>
- <addaction name="actionSave_Campaign_As"/>
- <addaction name="actionClose_Campaign"/>
- <addaction name="separator"/>
- <addaction name="actionE_xit"/>
-</widget>
-
-
-        <widget class="QMenu" name="menu_Edit">
-         <property name="title">
-          <string>&amp;Edit</string>
-         </property>
-        </widget>
-
-*/

@@ -101,6 +101,8 @@ public slots:
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
     void setGridVisible(bool gridVisible);
+    void setGridLocked(bool gridLocked);
+    void setGridLockScale(qreal gridLockScale);
 
     void setInitiativeType(int initiativeType);
     void setShowCountdown(bool showCountdown);
@@ -176,6 +178,7 @@ signals:
 
     void modelChanged(BattleDialogModel* model);
 
+    void gridScaleChanged(int gridScale);
     void zoomSelectToggled(bool enabled);
 
     void cameraSelectToggled(bool enabled);
@@ -376,6 +379,9 @@ private:
     QImage _countdownFrame;
     QSize _targetSize;
     QSize _targetLabelSize;
+
+    bool _isGridLocked;
+    qreal _gridLockScale;
 
     BattleFrameMapDrawer* _mapDrawer;
 

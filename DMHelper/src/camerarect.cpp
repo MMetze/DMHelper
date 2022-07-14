@@ -16,7 +16,7 @@ const int CAMERA_RECT_BORDER_WIDTH = 1;
  * decent icons and layout
  * DON'T DO: add camera rect to map view
  */
-CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport) :
+CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget* viewport, bool ratioLocked) :
     QGraphicsRectItem (0.0, 0.0, width, height, nullptr),
     _draw(true),
     _mouseDown(false),
@@ -26,12 +26,13 @@ CameraRect::CameraRect(qreal width, qreal height, QGraphicsScene& scene, QWidget
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
+    _ratioLocked(ratioLocked),
     _viewport(viewport)
 {
     initialize(scene);
 }
 
-CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewport) :
+CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewport, bool ratioLocked) :
     QGraphicsRectItem(rect, nullptr),
     _draw(true),
     _mouseDown(false),
@@ -41,6 +42,7 @@ CameraRect::CameraRect(const QRectF& rect, QGraphicsScene& scene, QWidget* viewp
     _drawItem(nullptr),
     _drawText(nullptr),
     _drawTextRect(nullptr),
+    _ratioLocked(ratioLocked),
     _viewport(viewport)
 {
     initialize(scene);
@@ -109,12 +111,32 @@ void CameraRect::setPublishing(bool publishing)
     }
 }
 
+void CameraRect::setRatioLocked(bool locked)
+{
+    _ratioLocked = locked;
+}
+
 void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
     if((!event) || ((flags() & QGraphicsItem::ItemIsSelectable) == 0) || (!_viewport))
         return;
 
     int section = getRectSection(event->pos());
+    if((section == RectSection_TopLeft) || (section == RectSection_BottomRight))
+        _viewport->setCursor(QCursor(Qt::SizeFDiagCursor));
+    else if((section == RectSection_TopRight) || (section == RectSection_BottomLeft))
+        _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
+    else if(section == RectSection_Middle)
+        _viewport->setCursor(QCursor(Qt::SizeAllCursor));
+    else if((!_ratioLocked) && ((section == RectSection_Top) || (section == RectSection_Bottom)))
+        _viewport->setCursor(QCursor(Qt::SizeVerCursor));
+    else if((!_ratioLocked) && ((section == RectSection_Left) || (section == RectSection_Right)))
+        _viewport->setCursor(QCursor(Qt::SizeHorCursor));
+    else
+        _viewport->unsetCursor();
+
+
+    /*
     switch(section)
     {
         case RectSection_Top:
@@ -135,6 +157,17 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
             _viewport->unsetCursor();
             break;
     }
+    */
+
+    QGraphicsRectItem::hoverMoveEvent(event);
+}
+
+void CameraRect::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    if(_viewport)
+        _viewport->unsetCursor();
+
+    QGraphicsRectItem::hoverLeaveEvent(event);
 }
 
 void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -158,22 +191,26 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         qreal w = rect().width();
         qreal h = rect().height();
 
-        if((_mouseDownSection & RectSection_Left) == RectSection_Left)
+        if(((_mouseDownSection & RectSection_Left) == RectSection_Left) ||
+           ((_ratioLocked) && (_mouseDownSection == RectSection_Top)))
         {
             dx = event->pos().x() - _mouseDownPos.x();
             w -= dx;
         }
-        else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
+        else if(((_mouseDownSection & RectSection_Right) == RectSection_Right) ||
+                ((_ratioLocked) && (_mouseDownSection == RectSection_Bottom)))
         {
             w += event->pos().x() - _mouseLastPos.x();
         }
 
-        if((_mouseDownSection & RectSection_Top) == RectSection_Top)
+        if(((_mouseDownSection & RectSection_Top) == RectSection_Top) ||
+           ((_ratioLocked) && (_mouseDownSection == RectSection_Left)))
         {
             dy = event->pos().y() - _mouseDownPos.y();
             h -= dy;
         }
-        if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
+        if(((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom) ||
+           ((_ratioLocked) && (_mouseDownSection == RectSection_Right)))
         {
             h += event->pos().y() - _mouseLastPos.y();
         }

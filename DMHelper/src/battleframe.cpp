@@ -126,6 +126,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdownFrame(),
     _targetSize(),
     _targetLabelSize(),
+    _isGridLocked(false),
+    _gridLockScale(0.0),
     _mapDrawer(nullptr),
     _renderer(nullptr),
     _initiativeType(DMHelper::InitiativeType_ImageName),
@@ -814,6 +816,18 @@ void BattleFrame::setGridVisible(bool gridVisible)
     }
 }
 
+void BattleFrame::setGridLocked(bool gridLocked)
+{
+    _isGridLocked = gridLocked;
+    if(_cameraRect)
+        _cameraRect->setRatioLocked(_isGridLocked);
+}
+
+void BattleFrame::setGridLockScale(qreal gridLockScale)
+{
+    _gridLockScale = gridLockScale;
+}
+
 void BattleFrame::setInitiativeType(int initiativeType)
 {
     _initiativeType = initiativeType;
@@ -1169,9 +1183,21 @@ void BattleFrame::setCameraMap()
     if((!_cameraRect) || (!_scene))
         return;
 
-    QRectF sceneRect = _scene->sceneRect();
-    _cameraRect->setCameraRect(sceneRect);
-    emit cameraRectChanged(sceneRect);
+    QRectF newCameraRect;
+    if(_isGridLocked)
+    {
+        QRectF currentRect = _cameraRect->getCameraRect();
+        QPointF newCenter = _scene->sceneRect().center();
+        currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
+        newCameraRect = currentRect;
+    }
+    else
+    {
+        newCameraRect = _scene->sceneRect();
+    }
+
+    _cameraRect->setCameraRect(newCameraRect);
+    emit cameraRectChanged(newCameraRect);
 }
 
 void BattleFrame::setCameraVisible()
@@ -1179,9 +1205,16 @@ void BattleFrame::setCameraVisible()
     if((!_cameraRect) || (!_model) || (!_model->getMap()))
         return;
 
-    QRectF newRect = _model->getMap()->getShrunkPublishRect();
-    _cameraRect->setCameraRect(newRect);
-    emit cameraRectChanged(newRect);
+    QRectF newCameraRect = _model->getMap()->getShrunkPublishRect();
+    if(_isGridLocked)
+    {
+        QRectF currentRect = _cameraRect->getCameraRect();
+        QPointF newCenter = newCameraRect.center();
+        currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
+        newCameraRect = currentRect;
+    }
+    _cameraRect->setCameraRect(newCameraRect);
+    emit cameraRectChanged(newCameraRect);
 }
 
 void BattleFrame::setCameraSelect(bool enabled)
@@ -2306,8 +2339,19 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
         {
             if(_cameraRect)
             {
-                _cameraRect->setCameraRect(ui->graphicsView->mapToScene(_rubberBandRect).boundingRect());
-                emit cameraRectChanged(_cameraRect->getCameraRect());
+                QRectF cameraRect = ui->graphicsView->mapToScene(_rubberBandRect).boundingRect();
+                /*
+                if((_isGridLocked) && (!_targetSize.isEmpty()))
+                {
+                    cameraRect.setHeight(cameraRect.width() * static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_targetSize.width()));
+                    setGridScale(_gridLockScale * cameraRect.width() / static_cast<qreal>(_targetSize.width()));
+                }
+                */
+                if((_isGridLocked) && (!_targetSize.isEmpty()))
+                    cameraRect.setHeight(cameraRect.width() * static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_targetSize.width()));
+
+                _cameraRect->setCameraRect(cameraRect);
+                //emit cameraRectChanged(_cameraRect->getCameraRect());
             }
         }
         else if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWSelect)
@@ -2431,6 +2475,11 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
     if(!_model)
     {
+        disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
+        disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
+
         clearBattleFrame();
         cleanupBattleMap();
         clearCombatantWidgets();
@@ -2439,6 +2488,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
     {
         emit backgroundColorChanged(_model->getBackgroundColor());
 
+        connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
@@ -2617,7 +2667,7 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
     if(_cameraRect)
         _cameraRect->setCameraRect(_model->getCameraRect());
     else
-        _cameraRect = new CameraRect(_model->getCameraRect(), *_scene, ui->graphicsView->viewport());
+        _cameraRect = new CameraRect(_model->getCameraRect(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
     emit cameraRectChanged(_model->getCameraRect());
 }
 
@@ -3194,14 +3244,15 @@ void BattleFrame::createSceneContents()
 
     if(_model->getCameraRect().isValid())
     {
-        _cameraRect = new CameraRect(_model->getCameraRect().width(), _model->getCameraRect().height(), *_scene, ui->graphicsView->viewport());
+        _cameraRect = new CameraRect(_model->getCameraRect().width(), _model->getCameraRect().height(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
         _cameraRect->setPos(_model->getCameraRect().x(),_model->getCameraRect().y());
     }
     else
     {
-        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport());
+        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
         _cameraRect->setPos(0,0);
     }
+    _cameraRect->setRatioLocked(_isGridLocked);
     updateCameraRect();
 
     // Add icons for existing combatants
@@ -3360,6 +3411,9 @@ void BattleFrame::updateCameraRect()
 {
     if(_cameraRect)
     {
+        if(_isGridLocked)
+            setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+
         _publishRectValue = _cameraRect->rect();
         _publishRectValue.moveTo(_cameraRect->pos());
         emit cameraRectChanged(_cameraRect->getCameraRect());
@@ -3384,7 +3438,19 @@ void BattleFrame::setCameraToView()
         return;
 
     QRectF viewRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
-    viewRect.adjust(1.0, 1.0, -1.0, -1.0);
+
+    if(_isGridLocked)
+    {
+        QRectF currentRect = _cameraRect->getCameraRect();
+        QPointF newCenter = viewRect.center();
+        currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
+        viewRect = currentRect;
+    }
+    else
+    {
+        viewRect.adjust(1.0, 1.0, -1.0, -1.0);
+    }
+
     _cameraRect->setCameraRect(viewRect);
     emit cameraRectChanged(viewRect);
 }
