@@ -73,6 +73,11 @@ void DMHObjectBase_Private::setIntID(int id)
     _intId = id;
 }
 
+void DMHObjectBase_Private::renewID()
+{
+    _id = QUuid::createUuid();
+}
+
 /*
 void DMHObjectBase_Private::setBaseId(int baseId)
 {

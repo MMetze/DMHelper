@@ -119,6 +119,16 @@ void ObjectImportDialog::importFinished(bool success, const QString& error)
         _waitingDlg = nullptr;
     }
 
+    if((_campaign) && (success))
+    {
+        if(!_campaign->correctDuplicateIds())
+        {
+            QMessageBox::information(this,
+                                     QString("Duplicate Entries for Loki"),
+                                     QString("After the import, some duplicate entries in your campaign have been created. This may have happened to avoid accidentally losing information."));
+        }
+    }
+
     if(success)
         QMessageBox::information(nullptr, QString("DMHelper - Import Object"), QString("Import completed successfully!"));
     else
