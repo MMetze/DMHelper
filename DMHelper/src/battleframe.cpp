@@ -1186,6 +1186,7 @@ void BattleFrame::setCameraMap()
     QRectF newCameraRect;
     if(_isGridLocked)
     {
+        //QRectF currentRect(QPointF(0.0, 0.0), QSizeF(_targetSize).scaled(_scene->sceneRect().size(), Qt::KeepAspectRatioByExpanding));
         QRectF currentRect = _cameraRect->getCameraRect();
         QPointF newCenter = _scene->sceneRect().center();
         currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
@@ -1208,6 +1209,7 @@ void BattleFrame::setCameraVisible()
     QRectF newCameraRect = _model->getMap()->getShrunkPublishRect();
     if(_isGridLocked)
     {
+        //QRectF currentRect(QPointF(0.0, 0.0), QSizeF(_targetSize).scaled(newCameraRect.size(), Qt::KeepAspectRatioByExpanding));
         QRectF currentRect = _cameraRect->getCameraRect();
         QPointF newCenter = newCameraRect.center();
         currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
@@ -1535,6 +1537,12 @@ void BattleFrame::showEvent(QShowEvent *event)
     QScreen* primary = QGuiApplication::primaryScreen();
     if(!primary)
         return;
+
+    if(_targetSize.isEmpty())
+        _targetSize = primary->availableSize() * primary->devicePixelRatio();
+
+    if(_targetLabelSize.isEmpty())
+        _targetLabelSize = primary->availableSize() * primary->devicePixelRatio();
 
     int ribbonHeight = primary->availableSize().height() / 15;
     QFontMetrics metrics = ui->lblNext->fontMetrics();

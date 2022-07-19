@@ -128,9 +128,9 @@ void CameraRect::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
         _viewport->setCursor(QCursor(Qt::SizeBDiagCursor));
     else if(section == RectSection_Middle)
         _viewport->setCursor(QCursor(Qt::SizeAllCursor));
-    else if((!_ratioLocked) && ((section == RectSection_Top) || (section == RectSection_Bottom)))
+    else if((section == RectSection_Top) || (section == RectSection_Bottom))
         _viewport->setCursor(QCursor(Qt::SizeVerCursor));
-    else if((!_ratioLocked) && ((section == RectSection_Left) || (section == RectSection_Right)))
+    else if((section == RectSection_Left) || (section == RectSection_Right))
         _viewport->setCursor(QCursor(Qt::SizeHorCursor));
     else
         _viewport->unsetCursor();
@@ -172,7 +172,7 @@ void CameraRect::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 
 void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if((!_mouseDown) || (_mouseDownSection == RectSection_None))
+    if((!event) || (!_mouseDown) || (_mouseDownSection == RectSection_None))
     {
         QGraphicsRectItem::mouseMoveEvent(event);
         return;
@@ -191,29 +191,10 @@ void CameraRect::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         qreal w = rect().width();
         qreal h = rect().height();
 
-        if(((_mouseDownSection & RectSection_Left) == RectSection_Left) ||
-           ((_ratioLocked) && (_mouseDownSection == RectSection_Top)))
-        {
-            dx = event->pos().x() - _mouseDownPos.x();
-            w -= dx;
-        }
-        else if(((_mouseDownSection & RectSection_Right) == RectSection_Right) ||
-                ((_ratioLocked) && (_mouseDownSection == RectSection_Bottom)))
-        {
-            w += event->pos().x() - _mouseLastPos.x();
-        }
-
-        if(((_mouseDownSection & RectSection_Top) == RectSection_Top) ||
-           ((_ratioLocked) && (_mouseDownSection == RectSection_Left)))
-        {
-            dy = event->pos().y() - _mouseDownPos.y();
-            h -= dy;
-        }
-        if(((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom) ||
-           ((_ratioLocked) && (_mouseDownSection == RectSection_Right)))
-        {
-            h += event->pos().y() - _mouseLastPos.y();
-        }
+        if(_ratioLocked)
+            resizeRectangleFixed(*event, dx, dy, w, h); // Resize the rectangle with a fixed aspect ratio
+        else
+            resizeRectangle(*event, dx, dy, w, h); // Resize the rectangle normally
 
         moveBy(dx, dy);
         setRect(0.0, 0.0, w, h);
@@ -304,4 +285,91 @@ int CameraRect::getRectSection(const QPointF point)
         return RectSection_Middle;
     else
         return result;
+}
+
+void CameraRect::resizeRectangle(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h)
+{
+    if((_mouseDownSection & RectSection_Left) == RectSection_Left)
+    {
+        dx = event.pos().x() - _mouseDownPos.x();
+        w -= dx;
+    }
+    else if((_mouseDownSection & RectSection_Right) == RectSection_Right)
+    {
+        w += event.pos().x() - _mouseLastPos.x();
+    }
+
+    if((_mouseDownSection & RectSection_Top) == RectSection_Top)
+    {
+        dy = event.pos().y() - _mouseDownPos.y();
+        h -= dy;
+    }
+    else if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
+    {
+        h += event.pos().y() - _mouseLastPos.y();
+    }
+}
+
+void CameraRect::resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h)
+{
+    if((_mouseDownSection == RectSection_Left) || (_mouseDownSection == RectSection_Top) || (_mouseDownSection == RectSection_TopLeft))
+    {
+        if((_mouseDownSection & RectSection_Left) == RectSection_Left)
+        {
+            dx = event.pos().x() - _mouseDownPos.x();
+            w -= dx;
+        }
+        if((_mouseDownSection & RectSection_Top) == RectSection_Top)
+        {
+            dy = event.pos().y() - _mouseDownPos.y();
+            h -= dy;
+        }
+
+        QSizeF newSize = rect().size().scaled(QSizeF(w, h), ((_mouseDownSection == RectSection_TopLeft) || (dx > 0.0) || (dy > 0.0)) ? Qt::KeepAspectRatio : Qt::KeepAspectRatioByExpanding);
+        w = newSize.width();
+        h = newSize.height();
+        dx = rect().size().width() - w;
+        dy = rect().size().height() - h;
+    }
+    else if(_mouseDownSection == RectSection_TopRight)
+    {
+        w += event.pos().x() - _mouseLastPos.x();
+        dy = event.pos().y() - _mouseDownPos.y();
+        h -= dy;
+
+        QSizeF newSize = rect().size().scaled(QSizeF(w, h), Qt::KeepAspectRatio);
+        w = newSize.width();
+        h = newSize.height();
+        dx = 0.0;
+        dy = rect().size().height() - h;
+    }
+    else if((_mouseDownSection == RectSection_Right) || (_mouseDownSection == RectSection_Bottom) || (_mouseDownSection == RectSection_BottomRight))
+    {
+        if((_mouseDownSection & RectSection_Right) == RectSection_Right)
+        {
+            w += event.pos().x() - _mouseLastPos.x();
+        }
+        if((_mouseDownSection & RectSection_Bottom) == RectSection_Bottom)
+        {
+            h += event.pos().y() - _mouseLastPos.y();
+        }
+
+        QSizeF newSize = rect().size().scaled(QSizeF(w, h), ((_mouseDownSection == RectSection_BottomRight) || (dx > 0.0) || (dy > 0.0)) ? Qt::KeepAspectRatio : Qt::KeepAspectRatioByExpanding);
+        w = newSize.width();
+        h = newSize.height();
+        dx = 0;
+        dy = 0;
+    }
+    else if(_mouseDownSection == RectSection_BottomLeft)
+    {
+        dx = event.pos().x() - _mouseDownPos.x();
+        w -= dx;
+        h += event.pos().y() - _mouseLastPos.y();
+
+        QSizeF newSize = rect().size().scaled(QSizeF(w, h), Qt::KeepAspectRatio);
+        w = newSize.width();
+        h = newSize.height();
+        dx = rect().size().width() - w;
+        dy = 0.0;
+    }
 }

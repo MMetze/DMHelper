@@ -32,6 +32,8 @@ protected:
     void initialize(QGraphicsScene& scene);
 
     int getRectSection(const QPointF point);
+    void resizeRectangle(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h);
+    void resizeRectangleFixed(QGraphicsSceneMouseEvent& event, qreal& dx, qreal& dy, qreal& w, qreal& h);
 
 private:
     bool _draw;
