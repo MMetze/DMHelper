@@ -510,6 +510,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
     connect(_battleFrame, &BattleFrame::gridScaleChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridScale);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selecttGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));

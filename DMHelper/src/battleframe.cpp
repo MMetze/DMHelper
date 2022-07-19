@@ -697,6 +697,21 @@ void BattleFrame::setGridScale(int gridScale)
     }
 }
 
+void BattleFrame::selecttGridCount()
+{
+    if((!_model) || (!_background))
+        return;
+
+    bool ok = false;
+    int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map contain?"), 20, 1, 100000, 1, &ok);
+    if((ok) && (gridCount > 0))
+    {
+        int newGridScale = _background->pixmap().width() / gridCount;
+        if(newGridScale > 0)
+        setGridScale(newGridScale);
+    }
+}
+
 void BattleFrame::setGridAngle(int gridAngle)
 {
     if(!_model)

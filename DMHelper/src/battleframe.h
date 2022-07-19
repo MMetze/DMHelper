@@ -94,6 +94,7 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
+    void selecttGridCount();
     void setGridAngle(int gridAngle);
     void setGridType(int gridType);
     void setXOffset(int xOffset);
