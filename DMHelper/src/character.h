@@ -2,6 +2,7 @@
 #define CHARACTER_H
 
 #include "combatant.h"
+#include "monsteraction.h"
 #include <QString>
 #include <QVector>
 #include <QPair>
@@ -115,6 +116,11 @@ public:
     int getProficiencyBonus() const;
     int getPassivePerception() const;
 
+    QList<MonsterAction> getActions() const;
+    void addAction(const MonsterAction& action);
+    void setAction(int index, const MonsterAction& action);
+    int removeAction(const MonsterAction& action);
+
     virtual void copyMonsterValues(MonsterClass& monster);
 
     static int findKeyForSkillName(const QString& skillName);
@@ -129,14 +135,19 @@ public slots:
 protected:
     // From Combatant
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
 private:
     void setDefaultValues();
+    void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport);
+    void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const;
 
     int _dndBeyondID;
     QVector<QString> _stringValues;
     QVector<int> _intValues;
     QVector<int> _skillValues;
+
+    QList<MonsterAction> _actions;
 
     bool _active;
     bool _iconChanged;

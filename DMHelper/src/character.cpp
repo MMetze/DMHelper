@@ -196,6 +196,8 @@ void Character::inputXML(const QDomElement &element, bool isImport)
         setIntValue(IntValue_maximumHP, getHitPoints());
     }
 
+    readActionList(element, QString("actions"), _actions, isImport);
+
     endBatchChanges();
 }
 
@@ -210,6 +212,10 @@ void Character::copyValues(const CampaignObjectBase* other)
     _intValues = otherCharacter->_intValues;
     _skillValues = otherCharacter->_skillValues;
     _active = otherCharacter->_active;
+
+    _actions.clear();
+    for(const MonsterAction& action : otherCharacter->_actions)
+        addAction(action);
 
     Combatant::copyValues(other);
 }
@@ -509,6 +515,31 @@ int Character::getPassivePerception() const
     return 10 + getSkillBonus(Skills_perception);
 }
 
+QList<MonsterAction> Character::getActions() const
+{
+    return _actions;
+}
+
+void Character::addAction(const MonsterAction& action)
+{
+    _actions.append(action);
+}
+
+void Character::setAction(int index, const MonsterAction& action)
+{
+    if((index < 0) || (index >= _actions.count()))
+        return;
+
+    if(_actions.at(index) != action)
+        _actions[index] = action;
+}
+
+int Character::removeAction(const MonsterAction& action)
+{
+    _actions.removeAll(action);
+    return _actions.count();
+}
+
 void Character::copyMonsterValues(MonsterClass& monster)
 {
     beginBatchChanges();
@@ -633,7 +664,17 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
 
     element.setAttribute("active", static_cast<int>(getActive()));
 
+    writeActionList(doc, element, QString("actions"), _actions, isExport);
+
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool Character::belongsToObject(QDomElement& element)
+{
+    if(element.tagName() == QString("actions"))
+        return true;
+    else
+        return Combatant::belongsToObject(element);
 }
 
 void Character::setDefaultValues()
@@ -656,4 +697,33 @@ void Character::setDefaultValues()
     }
 
     _active = true;
+}
+
+void Character::readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport)
+{
+    QDomElement actionListElement = element.firstChildElement(actionName);
+    if(actionListElement.isNull())
+        return;
+
+    QDomElement actionElement = actionListElement.firstChildElement("action");
+    while(!actionElement.isNull())
+    {
+        MonsterAction newAction(actionElement, isImport);
+        actionList.append(newAction);
+        actionElement = actionElement.nextSiblingElement("action");
+    }
+}
+
+void Character::writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const
+{
+    QDomElement actionListElement = doc.createElement(actionName);
+
+    for(int i = 0; i < actionList.count(); ++i)
+    {
+        QDomElement actionElement = doc.createElement("action");
+        actionList.at(i).outputXML(doc, actionElement, isExport);
+        actionListElement.appendChild(actionElement);
+    }
+
+    element.appendChild(actionListElement);
 }
