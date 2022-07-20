@@ -14,9 +14,11 @@
 <h3>New Features:</h3>
 <ul>
 <li>Syrinscape Online supported
+<li>Lock the published grid size - useful to configure an external screen using minis
+<li>Grid size and grid color are configurable
+<li>Enter a fixed number of grid squares for a map
 <li>Animated maps work now across all entries
 <li>Navigate backwards and forwards through last campaign entries
-<li>Grid size and grid color are configurable
 <li>Yes/No check for clear/fill Fog of War to avoid embarrassing map-nudity in combat
 <li>Map selection improvements for videos
 <li>Automatic saving of the bestiary and spellbook upon close of the dialog
