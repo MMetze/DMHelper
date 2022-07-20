@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>917</width>
+    <width>947</width>
     <height>67</height>
    </rect>
   </property>
@@ -775,6 +775,135 @@
       <widget class="QLabel" name="lblCountdown">
        <property name="text">
         <string>Countdown</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="Line" name="line_5">
+     <property name="minimumSize">
+      <size>
+       <width>10</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>10</width>
+       <height>55</height>
+      </size>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_15">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnLockedGrid">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Lock the grid in combat to the configured size</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_lockedgrid.png</normaloff>:/img/data/icon_lockedgrid.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblLockedGrid">
+       <property name="text">
+        <string>Lock Grid</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout_16">
+     <property name="spacing">
+      <number>0</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="btnConfigureGrid">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Configure the size of the grid for your table</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_lockedscale.png</normaloff>:/img/data/icon_lockedscale.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>false</bool>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblConfigureGrid">
+       <property name="text">
+        <string>Configure</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>

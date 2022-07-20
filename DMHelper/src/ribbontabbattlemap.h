@@ -43,6 +43,7 @@ signals:
     void gridClicked(bool checked);
     void gridTypeChanged(int gridType);
     void gridScaleChanged(int scale);
+    void gridScaleSetClicked();
     void gridAngleChanged(int angle);
     void gridXOffsetChanged(int offset);
     void gridYOffsetChanged(int offset);

@@ -62,6 +62,15 @@
 
 //#define BATTLE_DIALOG_LOG_VIDEO
 
+/*
+ *
+ * setCameraRect
+ * emit cameraRectChanged ==> renderer
+ * changing the size/shape of the CameraRect causes handleItemChanged which calls updateCameraRect
+ * updateCameraRect sets CameraRect
+ *
+ */
+
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
 const qreal COMPASS_SCALE = 0.4;
@@ -111,13 +120,14 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _countdown(0.0),
     _isPublishing(false),
     _isVideo(false),
-    _prescaledBackground(),
     _fowImage(),
     _bwFoWImage(),
     _combatantFrame(),
     _countdownFrame(),
     _targetSize(),
     _targetLabelSize(),
+    _isGridLocked(false),
+    _gridLockScale(0.0),
     _mapDrawer(nullptr),
     _renderer(nullptr),
     _initiativeType(DMHelper::InitiativeType_ImageName),
@@ -130,9 +140,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _scale(1.0),
     _rotation(0),
     _moveRadius(0.0),
-    _moveStart(),
-    _sourceRect(),
-    _videoSize()
+    _moveStart()
 {
     ui->setupUi(this);
     ui->splitter->setStretchFactor(0,5);
@@ -540,8 +548,6 @@ void BattleFrame::setTargetSize(const QSize& targetSize)
         return;
 
     _targetSize = targetSize;
-
-    createPrescaledBackground();
 }
 
 void BattleFrame::setTargetLabelSize(const QSize& targetSize)
@@ -687,8 +693,22 @@ void BattleFrame::setGridScale(int gridScale)
         _scene->updateBattleContents();
 
         ui->graphicsView->update();
-        createPrescaledBackground();
         updateRendererGrid();
+    }
+}
+
+void BattleFrame::selecttGridCount()
+{
+    if((!_model) || (!_background))
+        return;
+
+    bool ok = false;
+    int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map contain?"), 20, 1, 100000, 1, &ok);
+    if((ok) && (gridCount > 0))
+    {
+        int newGridScale = _background->pixmap().width() / gridCount;
+        if(newGridScale > 0)
+        setGridScale(newGridScale);
     }
 }
 
@@ -705,7 +725,6 @@ void BattleFrame::setGridAngle(int gridAngle)
         _model->setGridAngle(gridAngle);
         _scene->updateBattleContents();
         ui->graphicsView->update();
-        createPrescaledBackground();
         updateRendererGrid();
     }
 }
@@ -723,7 +742,6 @@ void BattleFrame::setGridType(int gridType)
         _model->setGridType(gridType);
         _scene->updateBattleContents();
         ui->graphicsView->update();
-        createPrescaledBackground();
         updateRendererGrid();
     }
 }
@@ -741,7 +759,6 @@ void BattleFrame::setXOffset(int xOffset)
         _model->setGridOffsetX(xOffset);
         _scene->updateBattleContents();
         ui->graphicsView->update();
-        createPrescaledBackground();
         updateRendererGrid();
     }
 }
@@ -759,7 +776,6 @@ void BattleFrame::setYOffset(int yOffset)
         _model->setGridOffsetY(yOffset);
         _scene->updateBattleContents();
         ui->graphicsView->update();
-        createPrescaledBackground();
         updateRendererGrid();
     }
 }
@@ -777,7 +793,6 @@ void BattleFrame::setGridWidth(int gridWidth)
         _model->setGridWidth(gridWidth);
         _scene->updateBattleContents();
         ui->graphicsView->update();
-        createPrescaledBackground();
         updateRendererGrid();
     }
 }
@@ -795,7 +810,6 @@ void BattleFrame::setGridColor(const QColor& gridColor)
         _model->setGridColor(gridColor);
         _scene->updateBattleContents();
         ui->graphicsView->update();
-        createPrescaledBackground();
         updateRendererGrid();
     }
 }
@@ -813,9 +827,20 @@ void BattleFrame::setGridVisible(bool gridVisible)
         _model->setGridOn(gridVisible);
         _scene->setGridVisibility(gridVisible);
         ui->graphicsView->invalidateScene();
-        createPrescaledBackground();
         updateRendererGrid();
     }
+}
+
+void BattleFrame::setGridLocked(bool gridLocked)
+{
+    _isGridLocked = gridLocked;
+    if(_cameraRect)
+        _cameraRect->setRatioLocked(_isGridLocked);
+}
+
+void BattleFrame::setGridLockScale(qreal gridLockScale)
+{
+    _gridLockScale = gridLockScale;
 }
 
 void BattleFrame::setInitiativeType(int initiativeType)
@@ -823,7 +848,6 @@ void BattleFrame::setInitiativeType(int initiativeType)
     _initiativeType = initiativeType;
     if(_renderer)
         _renderer->setInitiativeType(_initiativeType);
-    createPrescaledBackground();
 }
 
 void BattleFrame::setShowCountdown(bool showCountdown)
@@ -831,7 +855,6 @@ void BattleFrame::setShowCountdown(bool showCountdown)
     _showCountdown = showCountdown;
     if(_renderer)
         _renderer->setShowCountdown(_showCountdown);
-    createPrescaledBackground();
 }
 
 void BattleFrame::setCountdownDuration(int countdownDuration)
@@ -1175,9 +1198,22 @@ void BattleFrame::setCameraMap()
     if((!_cameraRect) || (!_scene))
         return;
 
-    QRectF sceneRect = _scene->sceneRect();
-    _cameraRect->setCameraRect(sceneRect);
-    emit cameraRectChanged(sceneRect);
+    QRectF newCameraRect;
+    if(_isGridLocked)
+    {
+        //QRectF currentRect(QPointF(0.0, 0.0), QSizeF(_targetSize).scaled(_scene->sceneRect().size(), Qt::KeepAspectRatioByExpanding));
+        QRectF currentRect = _cameraRect->getCameraRect();
+        QPointF newCenter = _scene->sceneRect().center();
+        currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
+        newCameraRect = currentRect;
+    }
+    else
+    {
+        newCameraRect = _scene->sceneRect();
+    }
+
+    _cameraRect->setCameraRect(newCameraRect);
+    emit cameraRectChanged(newCameraRect);
 }
 
 void BattleFrame::setCameraVisible()
@@ -1185,9 +1221,17 @@ void BattleFrame::setCameraVisible()
     if((!_cameraRect) || (!_model) || (!_model->getMap()))
         return;
 
-    QRectF newRect = _model->getMap()->getShrunkPublishRect();
-    _cameraRect->setCameraRect(newRect);
-    emit cameraRectChanged(newRect);
+    QRectF newCameraRect = _model->getMap()->getShrunkPublishRect();
+    if(_isGridLocked)
+    {
+        //QRectF currentRect(QPointF(0.0, 0.0), QSizeF(_targetSize).scaled(newCameraRect.size(), Qt::KeepAspectRatioByExpanding));
+        QRectF currentRect = _cameraRect->getCameraRect();
+        QPointF newCenter = newCameraRect.center();
+        currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
+        newCameraRect = currentRect;
+    }
+    _cameraRect->setCameraRect(newCameraRect);
+    emit cameraRectChanged(newCameraRect);
 }
 
 void BattleFrame::setCameraSelect(bool enabled)
@@ -1509,6 +1553,12 @@ void BattleFrame::showEvent(QShowEvent *event)
     if(!primary)
         return;
 
+    if(_targetSize.isEmpty())
+        _targetSize = primary->availableSize() * primary->devicePixelRatio();
+
+    if(_targetLabelSize.isEmpty())
+        _targetLabelSize = primary->availableSize() * primary->devicePixelRatio();
+
     int ribbonHeight = primary->availableSize().height() / 15;
     QFontMetrics metrics = ui->lblNext->fontMetrics();
 
@@ -1638,8 +1688,6 @@ void BattleFrame::updateMap()
         _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
         _bwFoWImage = _model->getMap()->getBWFoWImage();
         _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
-
-        createPrescaledBackground();
     }
     else if(_model->getMap()->isValid())
     {
@@ -1653,37 +1701,6 @@ void BattleFrame::updateRounds()
 {
     if(_logger)
         ui->edtRounds->setText(QString::number(_logger->getRounds()));
-}
-
-void BattleFrame::updateVideoBackground()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to update the video background, no battle model is set!";
-        return;
-    }
-
-    // TODO: put in a void MapFrame::extractDMScreenshot()
-
-/*
-    qDebug() << "[Battle Frame] Initializing battle map video background image";
-    if((!_videoPlayer) || (!_videoPlayer->getImage()))
-        return;
-
-    QImage battleImage = _videoPlayer->getImage()->copy();
-    _model->setBackgroundImage(battleImage);
-    _background->setPixmap((QPixmap::fromImage(battleImage)));
-
-    QImage fowImage = QImage(_videoPlayer->getImage()->size(), QImage::Format_ARGB32);
-    fowImage.fill(QColor(0,0,0,128));
-    _model->getMap()->setExternalFoWImage(fowImage);
-    _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-    _mapDrawer->setMap(_model->getMap(), &_fowImage);
-    */
-
-    if(!doSceneContentsExist())
-        createSceneContents();
-    qDebug() << "[Battle Frame] Battle map video background image initialized.";
 }
 
 void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position)
@@ -1764,7 +1781,6 @@ void BattleFrame::setRotation(int rotation)
         return;
 
     _rotation = rotation;
-    createPrescaledBackground();
 
     if(_renderer)
         _renderer->setRotation(_rotation);
@@ -1810,9 +1826,7 @@ void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
             removeEffectsFromItem(item);
 
             if(isItemInEffect(item, effectItem))
-            {
                 applyEffectToItem(item, effect);
-            }
         }
     }
 }
@@ -1823,11 +1837,9 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
 
     for(QGraphicsPixmapItem* item : _combatantIcons.values())
     {
+        // OPTIMIZE: Optimize to only remove effects if not still relevant
         if(item)
-        {
-            // OPTIMIZE: Optimize to only remove effects if not still relevant
             removeEffectsFromItem(item);
-        }
     }
 }
 
@@ -1962,9 +1974,7 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
         // Remove the icon from the list of icons and delete it from the scene
         QGraphicsPixmapItem* item = _combatantIcons.take(removedCombatant);
         if(item)
-        {
             delete item;
-        }
 
         delete removedCombatant;
     }
@@ -2068,10 +2078,7 @@ void BattleFrame::handleItemMouseUp(QGraphicsPixmapItem* item)
 void BattleFrame::handleItemChanged(QGraphicsItem* item)
 {
     if((_cameraRect) && (_cameraRect == item))
-    {
         updateCameraRect();
-        createPrescaledBackground();
-    }
 }
 
 void BattleFrame::handleItemMouseDoubleClick(QGraphicsPixmapItem* item)
@@ -2173,10 +2180,9 @@ void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
         bool isSelected = selected->getSelected();
         combatantWidget = getWidgetFromCombatant(selected);
         selectedItem = _combatantIcons.value(selected, nullptr);
+
         if(combatantWidget)
-        {
             combatantWidget->setSelected(!isSelected);
-        }
 
         if(selectedItem)
             selectedItem->setSelected(!isSelected);
@@ -2230,6 +2236,7 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
         QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
         pix = QPixmap::fromImage(grayscaleImage);
     }
+
     Combatant::drawConditions(&pix, combatant->getConditions());
     item->setPixmap(pix);
     item->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
@@ -2334,58 +2341,6 @@ void BattleFrame::updateCountdownText()
     ui->edtCountdown->setStyleSheet(style);
 }
 
-void BattleFrame::createPrescaledBackground()
-{
-    qDebug() << "[Battle Frame] Creating Prescaled Background";
-
-    /*
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to create a prescaled background, no battle model is set!";
-        return;
-    }
-
-    if((!_model->getMap()) || (!_isPublishing))
-        return;
-
-    if(_videoPlayer)
-    {
-        QSize oldVideoSize = _videoSize;
-        resetVideoSizes();
-        if(_videoSize != oldVideoSize)
-            _videoPlayer->restartPlayer();
-        return;
-    }
-
-    QRect sourceRect;
-    QRect viewportScene = _publishRectValue.isValid() ? getCameraRect().toRect() : ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
-    QRect sceneRect = ui->graphicsView->sceneRect().toRect();
-    sourceRect = viewportScene.intersected(sceneRect);
-
-#ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
-    qDebug() << "[Battle Frame][PROFILE] prescaled background being created";
-    QTime t;
-    t.start();
-#endif
-
-    QImage battleMap = _model->getMap()->getPublishImage().copy(sourceRect);
-    battleMap.convertTo(QImage::Format_ARGB32_Premultiplied);
-
-    QSize imageSize = getRotatedTargetBackgroundSize(battleMap.size());
-    qreal scaleFactor = static_cast<qreal>(imageSize.width()) / static_cast<qreal>(battleMap.width());
-    if((scaleFactor * static_cast<qreal>(battleMap.height())) > static_cast<qreal>(imageSize.height()))
-        scaleFactor = static_cast<qreal>(imageSize.height()) / static_cast<qreal>(battleMap.height());
-
-    _prescaledBackground = QPixmap::fromImage(battleMap.transformed(QTransform().rotate(_rotation).scale(scaleFactor,scaleFactor), Qt::SmoothTransformation));
-
-#ifdef BATTLE_DIALOG_PROFILE_PRESCALED_BACKGROUND
-    qDebug() << "[Battle Frame][PROFILE] " << t.elapsed() << "; prescaled background created";
-#endif
-    */
-
-    qDebug() << "[Battle Frame] Prescaled Background created";
-}
-
 void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint)
 {
     Q_UNUSED(fromScenePoint);
@@ -2407,8 +2362,19 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
         {
             if(_cameraRect)
             {
-                _cameraRect->setCameraRect(ui->graphicsView->mapToScene(_rubberBandRect).boundingRect());
-                emit cameraRectChanged(_cameraRect->getCameraRect());
+                QRectF cameraRect = ui->graphicsView->mapToScene(_rubberBandRect).boundingRect();
+                /*
+                if((_isGridLocked) && (!_targetSize.isEmpty()))
+                {
+                    cameraRect.setHeight(cameraRect.width() * static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_targetSize.width()));
+                    setGridScale(_gridLockScale * cameraRect.width() / static_cast<qreal>(_targetSize.width()));
+                }
+                */
+                if((_isGridLocked) && (!_targetSize.isEmpty()))
+                    cameraRect.setHeight(cameraRect.width() * static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_targetSize.width()));
+
+                _cameraRect->setCameraRect(cameraRect);
+                //emit cameraRectChanged(_cameraRect->getCameraRect());
             }
         }
         else if(_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_FoWSelect)
@@ -2473,120 +2439,6 @@ void BattleFrame::setEffectLayerVisibility(bool visibility)
     }
 }
 
-void BattleFrame::setPublishVisibility(bool publish)
-{
-    /*
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Setting publish visibility: " << publish;
-#endif
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to set publish visibility, no battle model is set!";
-        return;
-    }
-
-    // The background will be rendered separately for the publish image
-    if(_background)
-        _background->setVisible(!publish);
-
-    // Don't render the camera rect for the publish image
-    if(_cameraRect)
-        _cameraRect->setDraw(!publish);
-
-    // Don't render invisible individual effects
-    if((_scene) && (_model->getShowEffects()))
-        _scene->setEffectVisibility(true, !publish);
-
-    // The grid is rendered separately for videos
-    if((_model->getGridOn()) && (_videoPlayer) && (_scene))
-        _scene->setGridVisibility(!publish);
-
-    // Render the pointer if and only if the pointer is active
-    if((publish) && (_stateMachine.getCurrentStateId() == DMHelper::BattleFrameState_Pointer))
-        _scene->setPointerVisibility(true);
-    else
-        _scene->setPointerVisibility(false);
-
-    // Iterate through the combatants and set those combatants to invisible which are not to be shown
-    QList<BattleDialogModelCombatant*> combatantList = _model->getCombatantList();
-
-    for(BattleDialogModelCombatant* combatant : combatantList)
-    {
-        if(combatant)
-        {
-            if((!combatant->getShown())||(!combatant->getKnown()))
-            {
-                QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
-                if(item)
-                {
-                    UnselectedPixmap* unselectedItem = dynamic_cast<UnselectedPixmap*>(item);
-                    if(unselectedItem)
-                    {
-                        unselectedItem->setDraw(!publish);
-                        // Since we aren't making the item invisible, we have to manually make it's children invisible
-                        if(item->childItems().count() > 0)
-                        {
-                            for(QGraphicsItem* child : item->childItems())
-                            {
-                                if((child) && (child->data(BattleDialogItemChild_Index).toInt() != BattleDialogItemChild_Area))
-                                    child->setVisible(!publish);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        item->setVisible(!publish);
-                    }
-
-                    if((combatant == _selectedCombatant) && (_movementPixmap))
-                        _movementPixmap->setVisible(!publish);
-
-                    if((_activePixmap) && (combatant == _model->getActiveCombatant()))
-                        _activePixmap->setVisible(!publish);
-                }
-            }
-        }
-    }
-
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Publish visibility set";
-#endif
-*/
-}
-
-void BattleFrame::setGridOnlyVisibility(bool gridOnly)
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to set grid only visibility, no battle model is set!";
-        return;
-    }
-
-    if(!_model->getGridOn())
-        return;
-
-    if(_background)
-        _background->setVisible(!gridOnly);
-
-    if(_cameraRect)
-        _cameraRect->setDraw(!gridOnly);
-
-    setEffectLayerVisibility((!gridOnly) && (_model->getShowEffects()));
-
-    if(gridOnly)
-    {
-        if(_activePixmap)
-            _activePixmap->setVisible(false);
-        if(_movementPixmap)
-            _movementPixmap->setVisible(false);
-        setCombatantVisibility(false, false, true);
-    }
-    else
-    {
-        setCombatantVisibility(_model->getShowAlive(), _model->getShowDead(), true);
-    }
-}
-
 void BattleFrame::setMapCursor()
 {
 }
@@ -2601,7 +2453,6 @@ void BattleFrame::setScale(qreal s)
 {
     _scale = s;
     ui->graphicsView->scale(s,s);
-    createPrescaledBackground();
     setMapCursor();
     storeViewRect();
 
@@ -2624,9 +2475,7 @@ void BattleFrame::storeViewRect()
         QPoint origin = ui->graphicsView->mapFromScene(QPoint(0,0));
         _compassPixmap->setPos(ui->graphicsView->mapToScene(qMax(0, origin.x()), qMax(0, origin.y())));
         if(ui->graphicsView->transform().m11() > 0.0)
-        {
             _compassPixmap->setScale(COMPASS_SCALE/ui->graphicsView->transform().m11());
-        }
     }
 }
 
@@ -2649,6 +2498,11 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
     if(!_model)
     {
+        disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
+        disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
+
         clearBattleFrame();
         cleanupBattleMap();
         clearCombatantWidgets();
@@ -2657,6 +2511,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
     {
         emit backgroundColorChanged(_model->getBackgroundColor());
 
+        connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
@@ -2835,7 +2690,7 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
     if(_cameraRect)
         _cameraRect->setCameraRect(_model->getCameraRect());
     else
-        _cameraRect = new CameraRect(_model->getCameraRect(), *_scene, ui->graphicsView->viewport());
+        _cameraRect = new CameraRect(_model->getCameraRect(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
     emit cameraRectChanged(_model->getCameraRect());
 }
 
@@ -2921,13 +2776,9 @@ void BattleFrame::stateUpdated()
     BattleFrameState* currentState = _stateMachine.getCurrentState();
 
     if((currentState == nullptr) || (currentState->getType() == BattleFrameState::BattleFrameStateType_Base))
-    {
         ui->graphicsView->viewport()->unsetCursor();
-    }
     else
-    {
         ui->graphicsView->viewport()->setCursor(currentState->getCursor());
-    }
 }
 
 CombatantWidget* BattleFrame::createCombatantWidget(BattleDialogModelCombatant* combatant)
@@ -3058,9 +2909,7 @@ void BattleFrame::reorderCombatantWidgets()
     {
         CombatantWidget* widget = _combatantWidgets.value(_model->getCombatant(i));
         if(widget)
-        {
             _combatantLayout->addWidget(widget);
-        }
     }
 }
 
@@ -3200,9 +3049,7 @@ QWidget* BattleFrame::findCombatantWidgetFromPosition(const QPoint& position) co
     if(widget)
     {
         while((widget->parentWidget() != ui->scrollAreaWidgetContents) && (widget->parentWidget() != nullptr))
-        {
             widget = widget->parentWidget();
-        }
 
         if(widget->parentWidget() == nullptr)
         {
@@ -3229,13 +3076,9 @@ CombatantWidget* BattleFrame::getWidgetFromCombatant(BattleDialogModelCombatant*
     int pos = _model->getCombatantList().indexOf(combatant);
     qDebug() << "[Battle Frame] finding widget for combatant " << combatant << " at " << pos;
     if((pos >= 0) && (pos < _combatantLayout->count()))
-    {
         return dynamic_cast<CombatantWidget*>(_combatantLayout->itemAt(pos)->widget());
-    }
     else
-    {
         return nullptr;
-    }
 }
 
 void BattleFrame::moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem)
@@ -3267,9 +3110,7 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     do
     {
         if(++nextHighlight >= _model->getCombatantCount())
-        {
             nextHighlight = 0;
-        }
     } while( ( (_model->getCombatant(nextHighlight)->getHitPoints() <= 0) ||
                (!_model->getCombatant(nextHighlight)->getKnown()) ) &&
              (_model->getCombatant(nextHighlight) != _model->getActiveCombatant()));
@@ -3277,310 +3118,9 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     return _model->getCombatant(nextHighlight);
 }
 
-void BattleFrame::getImageForPublishing(QImage& imageForPublishing)
-{
-    /*
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Getting image for publishing" << imageForPublishing;
-#endif
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tProfile.start();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] Starting Render";
-    #endif
-#endif
-
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to get image for publishing, no battle model is set!";
-        return;
-    }
-
-    QSize backgroundImageSize = (_videoPlayer && _videoPlayer->getImage()) ? _sourceRect.size() : _prescaledBackground.size();
-    QSize unrotatedBackgroundImageSize = backgroundImageSize;
-    if((!_videoPlayer || !_videoPlayer->getImage()) && ((_rotation == 90) || (_rotation == 270)))
-        unrotatedBackgroundImageSize.transpose();
-
-    //TODO: premultiplied format and draw directly to the return value image???
-    QSize tempRotFrameSize;
-    if(_videoPlayer && _videoPlayer->getImage())
-    {
-        tempRotFrameSize = sizeBackgroundToFrame(backgroundImageSize);
-        if((_rotation == 90) || (_rotation == 270))
-            tempRotFrameSize.transpose();
-    }
-    else
-    {
-        tempRotFrameSize = getRotatedTargetFrameSize(backgroundImageSize);
-    }
-
-    QImage drawingImageForPublishing = QImage(tempRotFrameSize, QImage::Format_ARGB32_Premultiplied);
-    drawingImageForPublishing.fill(_model->getBackgroundColor());
-
-    QPainter painter;
-    painter.begin(&drawingImageForPublishing);
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tBasicPrep = tProfile.restart();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] " << tProfile.restart() << "; basic preparation complete";
-    #endif
-#endif
-
-    // For a static image, the pre-rendered background image is pre-rotated, so we should render it now before setting a rotation in the painter
-    if(!_videoPlayer)
-        renderPrescaledBackground(painter, tempRotFrameSize);
-
-    if(_rotation != 0)
-    {
-        int rotatePoint = qMax(tempRotFrameSize.width(),tempRotFrameSize.height()) / 2;
-
-        painter.translate(rotatePoint, rotatePoint);
-        painter.rotate(_rotation);
-        painter.translate(-rotatePoint, -rotatePoint);
-
-        if(_rotation == 90)
-            painter.translate(0,tempRotFrameSize.height() - tempRotFrameSize.width());
-        if(_rotation == 180)
-            painter.translate(0,tempRotFrameSize.width() - tempRotFrameSize.height());
-    }
-
-    // For a video image, the image is not pre-rotated, so we should render it now after setting the rotation in the painter
-    if(_videoPlayer)
-        renderVideoBackground(painter);
-
-    // Draw the contents of the battle frame in publish mode
-    QRect viewportRect = _publishRectValue.isValid() ? ui->graphicsView->mapFromScene(getCameraRect()).boundingRect() : ui->graphicsView->viewport()->rect();
-    QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
-    QRect sourceRect = viewportRect.intersected(sceneViewportRect);
-    setPublishVisibility(true);
-    ui->graphicsView->render(&painter,
-                             QRectF(QPointF(0,0),unrotatedBackgroundImageSize),
-                             sourceRect);
-    setPublishVisibility(false);
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tContent = tProfile.restart();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] " << tProfile.restart() << "; contents drawn";
-    #endif
-#endif
-
-    // Draw the active combatant image on top
-    if(_model->getActiveCombatant())
-    {
-        BattleDialogModelCombatant* nextCombatant = nullptr;
-
-        if(_showOnDeck)
-        {
-            QPixmap pmp;
-            if(_model->getActiveCombatant()->getShown())
-                pmp = _model->getActiveCombatant()->getIconPixmap(DMHelper::PixmapSize_Animate);
-            else
-                pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate);
-
-            painter.drawImage(unrotatedBackgroundImageSize.width(),
-                              0,
-                              _combatantFrame);
-            int dx = qMax(5, (_combatantFrame.width()-pmp.width())/2);
-            int dy = qMax(5, (_combatantFrame.height()-pmp.height())/2);
-            painter.drawPixmap(unrotatedBackgroundImageSize.width() + dx,
-                               dy,
-                               pmp);
-            int conditions = _model->getActiveCombatant()->getConditions();
-            if(conditions > 0)
-            {
-                int cx = 5;
-                int cy = 5;
-                for(int i = 0; i < Combatant::getConditionCount(); ++i)
-                {
-                    int condition = Combatant::getConditionByIndex(i);
-                    if((conditions & condition) && (cy <= _combatantFrame.height() - 30))
-                    {
-                        QPixmap conditionPixmap(QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png"));
-                        painter.drawPixmap(unrotatedBackgroundImageSize.width() + cx,
-                                           cy,
-                                           conditionPixmap.scaled(30,30));
-                        cx += 30;
-                        if(cx > _combatantFrame.width() - 30)
-                        {
-                            cx = 5;
-                            cy += 30;
-                        }
-                    }
-                }
-            }
-
-            nextCombatant = getNextCombatant(_model->getActiveCombatant());
-        }
-
-        if(_showCountdown)
-        {
-            int xPos = unrotatedBackgroundImageSize.width();
-            if(_showOnDeck)
-                xPos += _combatantFrame.width();
-            if(_countdown > 0.0)
-            {
-                int countdownInt = static_cast<int>(_countdown);
-                painter.setBrush(QBrush(_countdownColor));
-                painter.drawRect(xPos + 5,
-                                 _countdownFrame.height() - countdownInt - 5,
-                                 10,
-                                 countdownInt);
-            }
-            painter.drawImage(xPos,
-                              0,
-                              _countdownFrame);
-        }
-
-        if(_showOnDeck)
-        {
-            int yPos = DMHelper::PixmapSizes[DMHelper::PixmapSize_Animate][1] + 10;
-            while((nextCombatant) &&
-                  (nextCombatant != _model->getActiveCombatant()) &&
-                  (yPos + _combatantFrame.height() < tempRotFrameSize.height()))
-            {
-                QPixmap nextPmp;
-                if(nextCombatant->getShown())
-                    nextPmp = nextCombatant->getIconPixmap(DMHelper::PixmapSize_Animate);
-                else
-                    nextPmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Animate);
-                painter.drawImage(unrotatedBackgroundImageSize.width(),
-                                  yPos,
-                                  _combatantFrame);
-                int dx = qMax(5, (_combatantFrame.width()-nextPmp.width())/2);
-                int dy = qMax(5, (_combatantFrame.height()-nextPmp.height())/2);
-                painter.drawPixmap(unrotatedBackgroundImageSize.width() + dx,
-                                   yPos + dy,
-                                   nextPmp);
-                int conditions = nextCombatant->getConditions();
-                if(conditions > 0)
-                {
-                    int cx = 5;
-                    int cy = 5;
-                    for(int i = 0; i < Combatant::getConditionCount(); ++i)
-                    {
-                        int condition = Combatant::getConditionByIndex(i);
-                        if((conditions & condition) && (cy <= _combatantFrame.height() - 30))
-                        {
-                            QPixmap conditionPixmap(QString(":/img/data/img/") + Combatant::getConditionIcon(condition) + QString(".png"));
-                            painter.drawPixmap(unrotatedBackgroundImageSize.width() + cx,
-                                               yPos + cy,
-                                               conditionPixmap.scaled(30,30));
-                            cx += 30;
-                            if(cx > _combatantFrame.width() - 30)
-                            {
-                                cx = 5;
-                                cy += 30;
-                            }
-                        }
-                    }
-                }
-
-                yPos += DMHelper::PixmapSizes[DMHelper::PixmapSize_Animate][1] + 10;
-                nextCombatant = getNextCombatant(nextCombatant);
-            }
-        }
-    }
-
-    painter.end();
-
-    imageForPublishing = drawingImageForPublishing;
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tAdditionalContent = tProfile.restart();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] " << tProfile.restart() << "; additional contents drawn";
-    #endif
-#endif
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    qDebug() << "[Battle Frame][PROFILE] " << tBasicPrep << " ; " << tVideoPrep << " ; " << tVideoRender << " ; " << tPrescaledPrep << " ; " << tPrescaledRender << " ; " << tContent << " ; " << tAdditionalContent;
-#endif
-
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Image for publishing created.";
-#endif
-*/
-}
-
 void BattleFrame::updatePublishEnable()
 {
     emit setPublishEnabled((_model) && (_model->getMap()));
-}
-
-void BattleFrame::createVideoPlayer(bool dmPlayer)
-{
-    /*
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Creating video player. For DM: " << dmPlayer << ". Existing player: " << _videoPlayer;
-#endif
-
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to create video player, no battle model is set!";
-        return;
-    }
-
-    if(!_model->getMap())
-        return;
-
-    if(_videoPlayer)
-    {
-        _videoPlayer->stopThenDelete();
-        _videoPlayer = nullptr;
-    }
-
-    if(dmPlayer)
-    {
-        qDebug() << "[BattleFrame] Publish FoW DM animation started";
-        _videoPlayer = new VideoPlayer(_model->getMap()->getFileName(), QSize(0, 0), true, false);
-        if(_videoPlayer->isNewImage())
-            updateVideoBackground();
-        else
-            connect(_videoPlayer, SIGNAL(screenShotAvailable()), this, SLOT(updateVideoBackground()));
-    }
-    else
-    {
-        qDebug() << "[BattleFrame] Publish FoW Player animation started";
-        resetVideoSizes();
-        _videoPlayer = new VideoPlayer(_model->getMap()->getFileName(), _videoSize, true, _model->getMap()->getPlayAudio());
-    }
-
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Video player created.";
-#endif
-    */
-}
-
-void BattleFrame::resetVideoSizes()
-{
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Resetting video sizes";
-#endif
-
-    QRect viewportScene = _publishRectValue.isValid() ? getCameraRect().toRect() : ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect();
-    QRect sceneRect = ui->graphicsView->sceneRect().toRect();
-    QRect visibleSceneRect = viewportScene.intersected(sceneRect);
-
-    qreal widthScale = static_cast<qreal>(sceneRect.width()) / static_cast<qreal>(visibleSceneRect.width());
-    qreal heightScale = static_cast<qreal>(sceneRect.height()) / static_cast<qreal>(visibleSceneRect.height());
-
-    QSize rotatedTargetBackground = getRotatedTargetBackgroundSize(visibleSceneRect.size());
-
-    _videoSize = QSize(static_cast<int>(static_cast<qreal>(rotatedTargetBackground.width()) * widthScale),
-                       static_cast<int>(static_cast<qreal>(rotatedTargetBackground.height()) * heightScale));
-
-    _sourceRect = QRect(QPoint(static_cast<int>(static_cast<qreal>(visibleSceneRect.left()) * (static_cast<qreal>(_videoSize.width()) / static_cast<qreal>(sceneRect.width()))),
-                               static_cast<int>(static_cast<qreal>(visibleSceneRect.top()) * (static_cast<qreal>(_videoSize.height()) / static_cast<qreal>(sceneRect.height())))),
-                        rotatedTargetBackground);
-
-//    _bwFoWImage = QImage();
-
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Video sizes reset.";
-#endif
 }
 
 void BattleFrame::clearBattleFrame()
@@ -3689,6 +3229,12 @@ void BattleFrame::createSceneContents()
 {
     qDebug() << "[Battle Frame] Creating Battle Scene contents.";
 
+    if(!_scene)
+    {
+        qDebug() << "[Battle Frame] ERROR: Not possible to create scene contents, no scene exists!";
+        return;
+    }
+
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible to create scene contents, no battle model is set!";
@@ -3719,7 +3265,18 @@ void BattleFrame::createSceneContents()
     _movementPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     _movementPixmap->setVisible(false);
 
-    setCameraRect(true);
+    if(_model->getCameraRect().isValid())
+    {
+        _cameraRect = new CameraRect(_model->getCameraRect().width(), _model->getCameraRect().height(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
+        _cameraRect->setPos(_model->getCameraRect().x(),_model->getCameraRect().y());
+    }
+    else
+    {
+        _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
+        _cameraRect->setPos(0,0);
+    }
+    _cameraRect->setRatioLocked(_isGridLocked);
+    updateCameraRect();
 
     // Add icons for existing combatants
     for(int i = 0; i < _model->getCombatantCount(); ++i)
@@ -3828,28 +3385,9 @@ QSize BattleFrame::getRotatedTargetBackgroundSize(const QSize& originalBackgroun
 QSize BattleFrame::getRotatedTargetFrameSize(const QSize& originalBackgroundSize)
 {
     if((_rotation == 0) || (_rotation == 180))
-    {
         return sizeBackgroundToFrame(originalBackgroundSize);
-    }
     else
-    {
         return sizeBackgroundToFrame(originalBackgroundSize.transposed()).transposed();
-    }
-}
-
-QPoint BattleFrame::getPrescaledRenderPos(QSize targetSize)
-{
-    if(_rotation == 0)
-        return QPoint(0,0);
-    else if(_rotation == 90)
-        return QPoint(targetSize.width() - _prescaledBackground.width(),0);
-    else if(_rotation == 180)
-        return QPoint(targetSize.width() - _prescaledBackground.width(), targetSize.height() - _prescaledBackground.height());
-    else if(_rotation == 270)
-        return QPoint(0,targetSize.height() - _prescaledBackground.height());
-
-    qDebug() << "[Battle Frame] ERROR: unexpected rotation level found: " << _rotation;
-    return QPoint(0,0);
 }
 
 bool BattleFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)
@@ -3892,34 +3430,13 @@ bool BattleFrame::convertPublishToScene(const QPointF& publishPosition, QPointF&
     return true;
 }
 
-void BattleFrame::setCameraRect(bool cameraOn)
-{
-    Q_UNUSED(cameraOn);
-
-    if(!_scene)
-        return;
-
-    if(!_cameraRect)
-    {
-        if((!_model) || (_model->getCameraRect().isValid()))
-        {
-            _cameraRect = new CameraRect(_model->getCameraRect().width(), _model->getCameraRect().height(), *_scene, ui->graphicsView->viewport());
-            _cameraRect->setPos(_model->getCameraRect().x(),_model->getCameraRect().y());
-        }
-        else
-        {
-            _cameraRect = new CameraRect(_scene->width(), _scene->height(), *_scene, ui->graphicsView->viewport());
-            _cameraRect->setPos(0,0);
-        }
-    }
-
-    updateCameraRect();
-}
-
 void BattleFrame::updateCameraRect()
 {
     if(_cameraRect)
     {
+        if(_isGridLocked)
+            setGridScale(_gridLockScale * _cameraRect->getCameraRect().width() / static_cast<qreal>(_targetSize.width()));
+
         _publishRectValue = _cameraRect->rect();
         _publishRectValue.moveTo(_cameraRect->pos());
         emit cameraRectChanged(_cameraRect->getCameraRect());
@@ -3944,7 +3461,19 @@ void BattleFrame::setCameraToView()
         return;
 
     QRectF viewRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
-    viewRect.adjust(1.0, 1.0, -1.0, -1.0);
+
+    if(_isGridLocked)
+    {
+        QRectF currentRect = _cameraRect->getCameraRect();
+        QPointF newCenter = viewRect.center();
+        currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
+        viewRect = currentRect;
+    }
+    else
+    {
+        viewRect.adjust(1.0, 1.0, -1.0, -1.0);
+    }
+
     _cameraRect->setCameraRect(viewRect);
     emit cameraRectChanged(viewRect);
 }
@@ -3957,101 +3486,6 @@ void BattleFrame::extractDMScreenshot()
     VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_model->getMap()->getFileName());
     connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &BattleFrame::handleScreenshotReady);
     screenshot->retrieveScreenshot();
-}
-
-void BattleFrame::renderPrescaledBackground(QPainter& painter, QSize targetSize)
-{
-    if((_prescaledBackground.isNull()) || (!painter.device()))
-        return;
-
-    QPoint renderImagePosition = getPrescaledRenderPos(targetSize);
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tPrescaledPrep = tProfile.restart();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] " << tProfile.restart() << "; rendering prepared (image background)";
-    #endif
-#endif
-
-    // Draw the background image
-    painter.drawPixmap(renderImagePosition, _prescaledBackground);
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tPrescaledRender = tProfile.restart();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] " << tProfile.restart() << "; background drawn (image background)";
-    #endif
-#endif
-}
-
-void BattleFrame::renderVideoBackground(QPainter& painter)
-{
-    /*
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Rendering video background";
-#endif
-
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to render video background, no battle model is set!";
-        return;
-    }
-
-    if((!_videoPlayer) || (!_videoPlayer->getImage()) || (_videoPlayer->getImage()->isNull()) || (_videoPlayer->isError()) || (!_videoPlayer->getMutex()) || (!_model->getMap()) || (!painter.device()))
-        return;
-
-    QMutexLocker locker(_videoPlayer->getMutex());
-
-    // One-shot prepare the FoW image
-    if((_bwFoWImage.isNull()) && (!_model->getMap()->isCleared()))
-    {
-        QSize originalSize = _videoPlayer->getOriginalSize();
-        QSize imageSize = _videoPlayer->getImage()->size();
-        if((!originalSize.isEmpty()) && (!imageSize.isEmpty()))
-        {
-            QImage bwImg = _model->getMap()->getBWFoWImage(originalSize).scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            _bwFoWImage = bwImg.copy(_sourceRect);
-            _bwFoWImage.convertTo(QImage::Format_ARGB32_Premultiplied);
-
-            if(_model->getGridOn())
-            {
-                QRect viewportRect = ui->graphicsView->viewport()->rect();
-                QRect sceneViewportRect = ui->graphicsView->mapFromScene(ui->graphicsView->sceneRect()).boundingRect();
-                QRect sourceRect = viewportRect.intersected(sceneViewportRect);
-
-                setGridOnlyVisibility(true);
-                QPainter painter;
-                painter.begin(&_bwFoWImage);
-                ui->graphicsView->render(&painter,
-                                         QRectF(),
-                                         sourceRect);
-                painter.end();
-                setGridOnlyVisibility(false);
-            }
-        }
-    }
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tVideoPrep = tProfile.restart();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] " << tProfile.restart() << "; rendering prepared (video background)";
-    #endif
-#endif
-
-    painter.drawImage(QPoint(0,0), *_videoPlayer->getImage(), _sourceRect);
-    if(!_bwFoWImage.isNull())
-        painter.drawImage(QPoint(0,0), _bwFoWImage);
-
-#ifdef BATTLE_DIALOG_PROFILE_RENDER
-    tVideoRender = tProfile.restart();
-    #ifdef BATTLE_DIALOG_PROFILE_RENDER_TEXT
-        qDebug() << "[Battle Frame][PROFILE] " << tProfile.restart() << "; background drawn (video background)";
-    #endif
-#endif
-
-#ifdef BATTLE_DIALOG_LOG_VIDEO
-    qDebug() << "[Battle Frame] Video background rendered.";
-#endif
-*/
 }
 
 bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect)
@@ -4166,7 +3600,10 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if(_model->getGridScale() > 0)
         combatant->incrementMoved(5.0 * delta / static_cast<qreal>(_model->getGridScale()));
 
-    if((_movementPixmap) && (_model->getShowMovement()))
+    if(!_movementPixmap)
+        return;
+
+    if(_model->getShowMovement())
     {
         if(_moveRadius > _model->getGridScale())
             _moveRadius -= 2 * delta;

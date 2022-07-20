@@ -18,7 +18,6 @@ class Grid;
 class Character;
 class Map;
 class QTimer;
-class VideoPlayer;
 class CameraRect;
 class BattleCombatantFrame;
 class UnselectedPixmap;
@@ -95,6 +94,7 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void setGridScale(int gridScale);
+    void selecttGridCount();
     void setGridAngle(int gridAngle);
     void setGridType(int gridType);
     void setXOffset(int xOffset);
@@ -102,6 +102,8 @@ public slots:
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
     void setGridVisible(bool gridVisible);
+    void setGridLocked(bool gridLocked);
+    void setGridLockScale(qreal gridLockScale);
 
     void setInitiativeType(int initiativeType);
     void setShowCountdown(bool showCountdown);
@@ -177,6 +179,7 @@ signals:
 
     void modelChanged(BattleDialogModel* model);
 
+    void gridScaleChanged(int gridScale);
     void zoomSelectToggled(bool enabled);
 
     void cameraSelectToggled(bool enabled);
@@ -211,7 +214,6 @@ private slots:
     void updateEffectLayerVisibility();
     void updateMap();
     void updateRounds();
-    void updateVideoBackground();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleEffectChanged(QGraphicsItem* effectItem);
     void handleEffectRemoved(QGraphicsItem* effectItem);
@@ -248,13 +250,10 @@ private slots:
     void updateHighlights();
     void countdownTimerExpired();
     void updateCountdownText();
-    void createPrescaledBackground();
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
     void setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded);
     void setEffectLayerVisibility(bool visibility);
-    void setPublishVisibility(bool publish);
-    void setGridOnlyVisibility(bool gridOnly);
 
     void setMapCursor();
     void setCameraSelectable(bool selectable);
@@ -294,10 +293,7 @@ private:
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
 
-    void getImageForPublishing(QImage& imageForPublishing);
     void updatePublishEnable();
-    void createVideoPlayer(bool dmPlayer);
-    void resetVideoSizes();
 
     void clearBattleFrame();
     void cleanupBattleMap();
@@ -314,19 +310,15 @@ private:
     QSize getTargetBackgroundSize(const QSize& originalBackgroundSize, const QSize& targetSize);
     QSize getRotatedTargetBackgroundSize(const QSize& originalBackgroundSize);
     QSize getRotatedTargetFrameSize(const QSize& originalBackgroundSize);
-    QPoint getPrescaledRenderPos(QSize targetSize);
 
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
 
-    void setCameraRect(bool cameraOn);
     void updateCameraRect();
     QRectF getCameraRect();
     void setCameraToView();
 
     // Helper functions to simplify rendering
     void extractDMScreenshot();
-    void renderPrescaledBackground(QPainter& painter, QSize targetSize);
-    void renderVideoBackground(QPainter& painter);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
     void removeEffectsFromItem(QGraphicsPixmapItem* item);
@@ -382,13 +374,15 @@ private:
     bool _isPublishing;
     bool _isVideo;
 
-    QPixmap _prescaledBackground;
     QPixmap _fowImage;
     QImage _bwFoWImage;
     QImage _combatantFrame;
     QImage _countdownFrame;
     QSize _targetSize;
     QSize _targetLabelSize;
+
+    bool _isGridLocked;
+    qreal _gridLockScale;
 
     BattleFrameMapDrawer* _mapDrawer;
 
@@ -409,9 +403,6 @@ private:
 
     qreal _moveRadius;
     QPointF _moveStart;
-
-    QRect _sourceRect;
-    QSize _videoSize;
 };
 
 #endif // BATTLEFRAME_H

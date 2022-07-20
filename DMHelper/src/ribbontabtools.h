@@ -17,6 +17,9 @@ public:
 
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
+public slots:
+    void setGridLocked(bool locked);
+
 signals:
     void bestiaryClicked();
     void exportBestiaryClicked();
@@ -32,6 +35,9 @@ signals:
     void randomMarketClicked();
     void calendarClicked();
     void countdownClicked();
+
+    void lockGridClicked(bool checked);
+    void configureGridClicked();
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

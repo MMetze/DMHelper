@@ -120,6 +120,10 @@ void ObjectImportWorker::importObject(CampaignObjectBase* object, CampaignObject
     importObjectAssets(object);
 
     // Either copy the entry or move it
+    CampaignObjectBase* currentParent = dynamic_cast<CampaignObjectBase*>(object->parent());
+    if(!currentParent)
+        qDebug() << "[ObjectImportWorker] ERROR: Not able to find the parent for object: " << object->getName() << " with ID " << object->getID();
+
     if(existingObject)
     {
         existingObject->copyValues(object);
@@ -127,10 +131,14 @@ void ObjectImportWorker::importObject(CampaignObjectBase* object, CampaignObject
         if(existingObject->getObjectType() == DMHelper::CampaignType_Battle)
             _importedBattles.append(dynamic_cast<EncounterBattle*>(existingObject));
 
+        if((object->children().count() == 0) && (currentParent))
+        {
+            currentParent->removeObject(object);
+            object->deleteLater();
+        }
     }
     else
     {
-        CampaignObjectBase* currentParent = dynamic_cast<CampaignObjectBase*>(object->parent());
         if(currentParent)
         {
             currentParent->removeObject(object);
@@ -139,10 +147,6 @@ void ObjectImportWorker::importObject(CampaignObjectBase* object, CampaignObject
             // Keep track of all battle objects for later linking and full creation
             if(object->getObjectType() == DMHelper::CampaignType_Battle)
                 _importedBattles.append(dynamic_cast<EncounterBattle*>(object));
-        }
-        else
-        {
-            qDebug() << "[ObjectImportWorker] ERROR: Not able to find the parent for object: " << object->getName() << " with ID " << object->getID();
         }
     }
 

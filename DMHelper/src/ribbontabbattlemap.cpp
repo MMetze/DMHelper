@@ -35,6 +35,7 @@ RibbonTabBattleMap::RibbonTabBattleMap(QWidget *parent) :
 
     connect(ui->spinGridScale, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
     connect(ui->spinGridAngle, SIGNAL(valueChanged(int)), this, SLOT(spinChanged(int)));
+    connect(ui->btnGridCount, &QAbstractButton::clicked, this, &RibbonTabBattleMap::gridScaleSetClicked);
     connect(ui->sliderX, SIGNAL(valueChanged(int)), this, SIGNAL(gridXOffsetChanged(int)));
     connect(ui->sliderY, SIGNAL(valueChanged(int)), this, SIGNAL(gridYOffsetChanged(int)));
 
@@ -190,7 +191,9 @@ void RibbonTabBattleMap::showEvent(QShowEvent *event)
     int sliderWidth = ui->btnGrid->width() * 3 / 2;
     setWidgetSize(*ui->lblGridScale, labelWidth, height() / 3);
     setWidgetSize(*ui->spinGridScale, sliderWidth, height() / 3);
+    setWidgetSize(*ui->btnGridCount, height() / 3, height() / 3);
     setWidgetSize(*ui->lblGridAngle, labelWidth, height() / 3);
+    ui->spacerAngle->changeSize(height() / 3, height() / 3, QSizePolicy::Fixed, QSizePolicy::Fixed);
     setWidgetSize(*ui->spinGridAngle, sliderWidth, height() / 3);
     setWidgetSize(*ui->lblSliderX, labelWidth, height() / 3);
     setWidgetSize(*ui->sliderX, sliderWidth, height() / 3);

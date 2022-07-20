@@ -77,6 +77,7 @@
 #include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
+#include "configuregriddialog.h"
 #include "dmhwaitingdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
@@ -322,6 +323,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* diceRollShortcut = new QShortcut(QKeySequence(tr("Ctrl+D", "Roll Dice")), this);
     connect(diceRollShortcut, SIGNAL(activated()), this, SLOT(openDiceDialog()));
     connect(_ribbonTabTools, SIGNAL(randomMarketClicked()), this, SLOT(openRandomMarkets()));
+    _ribbonTabTools->setGridLocked(_options->getGridLocked());
+    connect(_ribbonTabTools, &RibbonTabTools::lockGridClicked, _options, &OptionsContainer::setGridLocked);
+    connect(_ribbonTabTools, &RibbonTabTools::configureGridClicked, this, &MainWindow::configureGridLock);
 
     // Help Menu
     connect(_ribbonTabFile, SIGNAL(checkForUpdatesClicked()), this, SLOT(checkForUpdates()));
@@ -464,6 +468,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleFrame->setActiveIcon(_options->getActiveIcon());
     _battleFrame->setCombatantFrame(_options->getCombatantFrame());
     _battleFrame->setCountdownFrame(_options->getCountdownFrame());
+    _battleFrame->setGridLocked(_options->getGridLocked());
+    _battleFrame->setGridLockScale(_options->getGridLockScale());
     connect(_options, SIGNAL(initiativeTypeChanged(int)), _battleFrame, SLOT(setInitiativeType(int)));
     connect(_options, SIGNAL(showCountdownChanged(bool)), _battleFrame, SLOT(setShowCountdown(bool)));
     connect(_options, SIGNAL(countdownDurationChanged(int)), _battleFrame, SLOT(setCountdownDuration(int)));
@@ -472,6 +478,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_options, SIGNAL(activeIconChanged(const QString&)), _battleFrame, SLOT(setActiveIcon(const QString&)));
     connect(_options, SIGNAL(combatantFrameChanged(const QString&)), _battleFrame, SLOT(setCombatantFrame(const QString&)));
     connect(_options, SIGNAL(countdownFrameChanged(const QString&)), _battleFrame, SLOT(setCountdownFrame(const QString&)));
+    connect(_options, SIGNAL(gridLockedChanged(bool)), _battleFrame, SLOT(setGridLocked(bool)));
+    connect(_options, SIGNAL(gridLockScaleChanged(qreal)), _battleFrame, SLOT(setGridLockScale(qreal)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), _battleFrame, SLOT(setTargetSize(QSize)));
     connect(_pubWindow, SIGNAL(labelResized(QSize)), _battleFrame, SLOT(setTargetLabelSize(QSize)));
     connect(_pubWindow, SIGNAL(publishMouseDown(const QPointF&)), _battleFrame, SLOT(publishWindowMouseDown(const QPointF&)));
@@ -501,6 +509,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
+    connect(_battleFrame, &BattleFrame::gridScaleChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridScale);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selecttGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
@@ -2442,6 +2452,19 @@ void MainWindow::openRandomMarkets()
 {
     RandomMarketDialog dlg(_options->getShopsFileName());
     dlg.exec();
+}
+
+void MainWindow::configureGridLock()
+{
+    ConfigureGridDialog dlg;
+    QScreen* primary = QGuiApplication::primaryScreen();
+    if(primary)
+        dlg.resize(primary->availableSize().width() * 3 / 4, primary->availableSize().height() * 2 / 3);
+
+    dlg.setGridScale(_options->getGridLockScale());
+
+    if(dlg.exec() == QDialog::Accepted)
+        _options->setGridLockScale(dlg.getGridScale());
 }
 
 QDialog* MainWindow::createDialog(QWidget* contents, const QSize& dlgSize)

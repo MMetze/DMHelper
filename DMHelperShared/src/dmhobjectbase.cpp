@@ -54,3 +54,9 @@ void DMHObjectBase::setIntID(int id)
     d->setIntID(id);
 }
 
+void DMHObjectBase::renewID()
+{
+    QUuid oldId = getID();
+    d->renewID();
+    qDebug() << "[DMHObjectBase] WARNING: Object " << objectName() << " reset from ID " << oldId << " to " << getID();
+}

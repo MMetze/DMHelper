@@ -25,12 +25,11 @@ signals:
     void openClicked();
     void saveClicked();
     void saveAsClicked();
-
-    void optionsClicked();
     void closeClicked();
 
     void userGuideClicked();
     void gettingStartedClicked();
+    void optionsClicked();
     void checkForUpdatesClicked();
     void aboutClicked();
 
