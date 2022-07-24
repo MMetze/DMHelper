@@ -64,7 +64,8 @@ QString Dice::toString() const
     result.append(QString::number(getType()));
     if(getBonus() != 0)
     {
-        result.append(getBonus() < 0 ? QString("-") : QString("+"));
+        if(getBonus() >= 0)
+            result.append(QString("+"));
         result.append(QString::number(getBonus()));
     }
 

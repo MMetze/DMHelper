@@ -14,13 +14,13 @@ MonsterActionEditDialog::MonsterActionEditDialog(const MonsterAction& action, bo
     ui->edtDescription->setPlainText(action.getDescription());
 
     ui->edtAttackBonus->setText(QString::number(action.getAttackBonus()));
-    ui->edtAttackBonus->setValidator(new QIntValidator(0,999999,this));
+    ui->edtAttackBonus->setValidator(new QIntValidator(-999999,999999,this));
     ui->edtDamageDiceCount->setText(QString::number(action.getDamageDice().getCount()));
     ui->edtDamageDiceCount->setValidator(new QIntValidator(0,999999,this));
     ui->edtDamageDiceType->setText(QString::number(action.getDamageDice().getType()));
     ui->edtDamageDiceType->setValidator(new QIntValidator(0,999999,this));
     ui->edtDamageDiceBonus->setText(QString::number(action.getDamageDice().getBonus()));
-    ui->edtDamageDiceBonus->setValidator(new QIntValidator(0,999999,this));
+    ui->edtDamageDiceBonus->setValidator(new QIntValidator(-999999,999999,this));
 
     ui->btnDelete->setVisible(allowDelete);
     connect(ui->btnOk, SIGNAL(clicked()), this, SLOT(accept()));
