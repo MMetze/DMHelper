@@ -480,7 +480,10 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     QString classString;
     QString classFeatureString;
     QVector<int> spellSlots(9,0);
-    QVector<int> pactMagicSlots(5,0);
+    //QVector<int> pactMagicSlots(5,0);
+    int pactMagicSlots;
+    int pactMagicUsed;
+    int pactMagicLevel;
     int multiclassCasterLevel = 0;
     int casterClassCount = 0;
     bool warlockCaster = false;
@@ -545,7 +548,15 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             {
                 QJsonArray spellSlotsAvailable = spellArray.at(classLevel).toArray();
                 for(int k = 0; k < 5; ++k)
-                    pactMagicSlots[k] = spellSlotsAvailable.at(k).toInt();
+                {
+                    if(spellSlotsAvailable.at(k).toInt() > 0)
+                    {
+                        pactMagicSlots = spellSlotsAvailable.at(k).toInt();
+                        pactMagicLevel = k + 1;
+                    }
+
+                    //pactMagicSlots[k] = spellSlotsAvailable.at(k).toInt();
+                }
             }
         }
         else
@@ -706,6 +717,9 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
                 spellString += QString("Level ") + QString::number(i + 1) + QString(": ");
                 spellString += QString::number(remainingSlots) + QString("/") + QString::number(spellSlots[i]);
                 spellString += QChar::LineFeed;
+
+                _character->setSpellSlots(i + 1, spellSlots[i]);
+                _character->setSpellSlotsUsed(i + 1, usedSlots);
             }
         }
         spellString += QChar::LineFeed;
@@ -715,25 +729,22 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     {
         spellString += QString("Pact Magic Slots available") + QChar::LineFeed;
         QJsonArray pactSlotArray = rootObject["pactMagic"].toArray();
-        for(i = 0; i < 5; ++i)
+
+        if(pactSlotArray.count() >= pactMagicLevel)
         {
-            if(pactMagicSlots[i] > 0)
-            {
-                int usedSlots = 0;
-                if(pactSlotArray.count() > i)
-                {
-                    QJsonObject spellSlotObject = pactSlotArray.at(i).toObject();
-                    usedSlots += spellSlotObject["used"].toInt();
-                }
+            QJsonObject spellSlotObject = pactSlotArray.at(pactMagicLevel - 1).toObject();
+            pactMagicUsed = (spellSlotObject["used"].toInt() > pactMagicSlots) ? pactMagicSlots : spellSlotObject["used"].toInt();
 
-                int remainingSlots = (usedSlots > pactMagicSlots[i]) ? 0 : pactMagicSlots[i] - usedSlots;
-                spellString += QString("Level ") + QString::number(i + 1) + QString(": ");
-                spellString += QString::number(remainingSlots) + QString("/") + QString::number(pactMagicSlots[i]);
-                spellString += QChar::LineFeed;
-            }
+            _character->setIntValue(Character::IntValue_pactMagicLevel, pactMagicLevel);
+            _character->setIntValue(Character::IntValue_pactMagicSlots, pactMagicSlots);
+            _character->setIntValue(Character::IntValue_pactMagicUsed, pactMagicUsed);
+
+            spellString += QString("Level ") + QString::number(_character->getIntValue(Character::IntValue_pactMagicLevel)) + QString(": ");
+            spellString += QString::number(_character->getIntValue(Character::IntValue_pactMagicSlots) - _character->getIntValue(Character::IntValue_pactMagicUsed)) + QString("/") + QString::number(_character->getIntValue(Character::IntValue_pactMagicSlots));
+            spellString += QChar::LineFeed;
         }
-
     }
+
     _character->setStringValue(Character::StringValue_spells, spellString);
 
     // Find actions

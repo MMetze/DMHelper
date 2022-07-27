@@ -71,7 +71,11 @@ const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
     0,      // IntValue_silver
     0,      // IntValue_copper
     0,      // IntValue_jackofalltrades
-    1       // IntValue_maximumHP
+    1,      // IntValue_maximumHP
+    0,      // IntValue_pactMagicSlots
+    0,      // IntValue_pactMagicUsed
+    0,      // IntValue_pactMagicLevel
+    0,      // IntValue_cantrips
 };
 
 const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
@@ -91,7 +95,11 @@ const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
     "silver",           // IntValue_silver
     "copper",           // IntValue_copper
     "jackofalltrades",  // IntValue_jackofalltrades
-    "maximumhp"         // IntValue_maximumHP
+    "maximumhp",        // IntValue_maximumHP
+    "pactmagicslots",   // IntValue_pactMagicSlots
+    "pactmagicused",    // IntValue_pactMagicUsed
+    "pactmagiclevel",   // IntValue_pactMagicLevel
+    "cantrips",         // IntValue_cantrips
 };
 
 const char* SKILLVALUE_NAMES[Combatant::SKILLS_COUNT] =
@@ -156,6 +164,8 @@ Character::Character(const QString& name, QObject *parent) :
     _stringValues(STRINGVALUE_COUNT),
     _intValues(INTVALUE_COUNT),
     _skillValues(SKILLS_COUNT),
+    _spellSlots(DMHelper::MAX_SPELL_LEVEL, 0),
+    _spellSlotsUsed(DMHelper::MAX_SPELL_LEVEL, 0),
     _active(true),
     _iconChanged(false)
 {
@@ -187,6 +197,12 @@ void Character::inputXML(const QDomElement &element, bool isImport)
         setSkillValue(static_cast<Skills>(i), element.attribute(SKILLVALUE_NAMES[i],QString::number(0)).toInt());
     }
 
+    for(i = 0; i < DMHelper::MAX_SPELL_LEVEL; ++i)
+    {
+        setSpellSlots(i+1, element.attribute(QString("slots") + QString::number(i+1)).toInt());
+        setSpellSlotsUsed(i+1, element.attribute(QString("slotsused") + QString::number(i+1)).toInt());
+    }
+
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
 
     Combatant::inputXML(element, isImport);
@@ -211,6 +227,8 @@ void Character::copyValues(const CampaignObjectBase* other)
     _stringValues = otherCharacter->_stringValues;
     _intValues = otherCharacter->_intValues;
     _skillValues = otherCharacter->_skillValues;
+    _spellSlots = otherCharacter->_spellSlots;
+    _spellSlotsUsed = otherCharacter->_spellSlotsUsed;
     _active = otherCharacter->_active;
 
     _actions.clear();
@@ -472,6 +490,54 @@ void Character::setSkillExpertise(Skills key, bool value)
     }
 }
 
+QVector<int> Character::getSpellSlots() const
+{
+    return _spellSlots;
+}
+
+QVector<int> Character::getSpellSlotsUsed() const
+{
+    return _spellSlotsUsed;
+}
+
+void Character::setSpellSlots(int level, int slotCount)
+{
+    if((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL) || (slotCount < 0) || (_spellSlots[level - 1] == slotCount))
+        return;
+
+    _spellSlots[level - 1] = slotCount;
+    registerChange();
+}
+
+int Character::getSpellSlots(int level)
+{
+    return ((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL)) ? 0 : _spellSlots.at(level - 1);
+}
+
+void Character::setSpellSlotsUsed(int level, int slotsUsed)
+{
+    if((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL) || (slotsUsed < 0))
+        return;
+
+    int newSlotsUsed = (slotsUsed > _spellSlots.at(level - 1)) ? _spellSlots.at(level - 1) : slotsUsed;
+    if(_spellSlotsUsed[level - 1] == newSlotsUsed)
+        return;
+
+    _spellSlotsUsed[level - 1] = newSlotsUsed;
+    registerChange();
+}
+
+int Character::getSpellSlotsUsed(int level)
+{
+    return ((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL)) ? 0 : _spellSlotsUsed.at(level - 1);
+}
+
+void Character::clearSpellSlotsUsed()
+{
+    _spellSlotsUsed.fill(0);
+    registerChange();
+}
+
 bool Character::getActive() const
 {
     return _active;
@@ -644,22 +710,28 @@ QString Character::getWrittenSkillName(int skill)
 
 void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute( "dndBeyondID", getDndBeyondID() );
+    element.setAttribute("dndBeyondID", getDndBeyondID());
 
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)
     {
-        element.setAttribute( STRINGVALUE_NAMES[i], getStringValue(static_cast<StringValue>(i)) );
+        element.setAttribute(STRINGVALUE_NAMES[i], getStringValue(static_cast<StringValue>(i)));
     }
 
     for(i = 0; i < INTVALUE_COUNT; ++i)
     {
-        element.setAttribute( INTVALUE_NAMES[i], getIntValue(static_cast<IntValue>(i)) );
+        element.setAttribute(INTVALUE_NAMES[i], getIntValue(static_cast<IntValue>(i)));
     }
 
     for(i = 0; i < SKILLS_COUNT; ++i)
     {
-        element.setAttribute( SKILLVALUE_NAMES[i], _skillValues[static_cast<Skills>(i)] );
+        element.setAttribute(SKILLVALUE_NAMES[i], _skillValues[static_cast<Skills>(i)]);
+    }
+
+    for(i = 0; i < DMHelper::MAX_SPELL_LEVEL; ++i)
+    {
+        element.setAttribute(QString("slots") + QString::number(i+1), _spellSlots.at(i));
+        element.setAttribute(QString("slotsused") + QString::number(i+1), _spellSlotsUsed.at(i));
     }
 
     element.setAttribute("active", static_cast<int>(getActive()));
@@ -695,6 +767,9 @@ void Character::setDefaultValues()
     {
         _skillValues[i] = 0;
     }
+
+    _spellSlots.fill(0);
+    _spellSlotsUsed.fill(0);
 
     _active = true;
 }

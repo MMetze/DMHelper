@@ -62,6 +62,10 @@ public:
         IntValue_copper,
         IntValue_jackofalltrades,
         IntValue_maximumHP,
+        IntValue_pactMagicSlots,
+        IntValue_pactMagicUsed,
+        IntValue_pactMagicLevel,
+        IntValue_cantrips,
 
         INTVALUE_COUNT
     };
@@ -107,6 +111,14 @@ public:
     void setSkillValue(Skills key, int value);
     void setSkillExpertise(Skills key, bool value);
 
+    QVector<int> getSpellSlots() const;
+    QVector<int> getSpellSlotsUsed() const;
+    void setSpellSlots(int level, int slotCount);
+    int getSpellSlots(int level);
+    void setSpellSlotsUsed(int level, int slotsUsed);
+    int getSpellSlotsUsed(int level);
+    void clearSpellSlotsUsed();
+
     bool getActive() const;
     void setActive(bool active);
 
@@ -146,6 +158,8 @@ private:
     QVector<QString> _stringValues;
     QVector<int> _intValues;
     QVector<int> _skillValues;
+    QVector<int> _spellSlots;
+    QVector<int> _spellSlotsUsed;
 
     QList<MonsterAction> _actions;
 
