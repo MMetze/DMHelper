@@ -164,8 +164,8 @@ Character::Character(const QString& name, QObject *parent) :
     _stringValues(STRINGVALUE_COUNT),
     _intValues(INTVALUE_COUNT),
     _skillValues(SKILLS_COUNT),
-    _spellSlots(DMHelper::MAX_SPELL_LEVEL, 0),
-    _spellSlotsUsed(DMHelper::MAX_SPELL_LEVEL, 0),
+    _spellSlots(),
+    _spellSlotsUsed(),
     _active(true),
     _iconChanged(false)
 {
@@ -197,10 +197,12 @@ void Character::inputXML(const QDomElement &element, bool isImport)
         setSkillValue(static_cast<Skills>(i), element.attribute(SKILLVALUE_NAMES[i],QString::number(0)).toInt());
     }
 
-    for(i = 0; i < DMHelper::MAX_SPELL_LEVEL; ++i)
+    i = 0;
+    while(element.hasAttribute(QString("slots") + QString::number(i+1)))
     {
         setSpellSlots(i+1, element.attribute(QString("slots") + QString::number(i+1)).toInt());
         setSpellSlotsUsed(i+1, element.attribute(QString("slotsused") + QString::number(i+1)).toInt());
+        ++i;
     }
 
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
@@ -490,6 +492,11 @@ void Character::setSkillExpertise(Skills key, bool value)
     }
 }
 
+int Character::spellSlotLevels() const
+{
+    return _spellSlots.size();
+}
+
 QVector<int> Character::getSpellSlots() const
 {
     return _spellSlots;
@@ -502,21 +509,38 @@ QVector<int> Character::getSpellSlotsUsed() const
 
 void Character::setSpellSlots(int level, int slotCount)
 {
-    if((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL) || (slotCount < 0) || (_spellSlots[level - 1] == slotCount))
+    if((level <= 0) || (slotCount < 0))
         return;
 
-    _spellSlots[level - 1] = slotCount;
+    while(level > _spellSlots.size())
+    {
+        _spellSlots.append(0);
+        _spellSlotsUsed.append(0);
+    }
+
+    if(slotCount == 0)
+    {
+        while(level <= _spellSlots.size())
+            _spellSlots.takeLast();
+
+        _spellSlotsUsed.resize(_spellSlots.size());
+    }
+    else
+    {
+        _spellSlots[level - 1] = slotCount;
+    }
+
     registerChange();
 }
 
 int Character::getSpellSlots(int level)
 {
-    return ((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL)) ? 0 : _spellSlots.at(level - 1);
+    return ((level <= 0) || (level > _spellSlots.size())) ? 0 : _spellSlots.at(level - 1);
 }
 
 void Character::setSpellSlotsUsed(int level, int slotsUsed)
 {
-    if((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL) || (slotsUsed < 0))
+    if((level <= 0) || (level > _spellSlotsUsed.size()) || (slotsUsed < 0))
         return;
 
     int newSlotsUsed = (slotsUsed > _spellSlots.at(level - 1)) ? _spellSlots.at(level - 1) : slotsUsed;
@@ -529,7 +553,7 @@ void Character::setSpellSlotsUsed(int level, int slotsUsed)
 
 int Character::getSpellSlotsUsed(int level)
 {
-    return ((level <= 0) || (level > DMHelper::MAX_SPELL_LEVEL)) ? 0 : _spellSlotsUsed.at(level - 1);
+    return ((level <= 0) || (level > _spellSlotsUsed.size())) ? 0 : _spellSlotsUsed.at(level - 1);
 }
 
 void Character::clearSpellSlotsUsed()
@@ -728,7 +752,7 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
         element.setAttribute(SKILLVALUE_NAMES[i], _skillValues[static_cast<Skills>(i)]);
     }
 
-    for(i = 0; i < DMHelper::MAX_SPELL_LEVEL; ++i)
+    for(i = 0; i < _spellSlots.size(); ++i)
     {
         element.setAttribute(QString("slots") + QString::number(i+1), _spellSlots.at(i));
         element.setAttribute(QString("slotsused") + QString::number(i+1), _spellSlotsUsed.at(i));
@@ -768,8 +792,8 @@ void Character::setDefaultValues()
         _skillValues[i] = 0;
     }
 
-    _spellSlots.fill(0);
-    _spellSlotsUsed.fill(0);
+    _spellSlots.clear();
+    _spellSlotsUsed.clear();
 
     _active = true;
 }

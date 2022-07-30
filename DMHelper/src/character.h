@@ -111,6 +111,7 @@ public:
     void setSkillValue(Skills key, int value);
     void setSkillExpertise(Skills key, bool value);
 
+    int spellSlotLevels() const;
     QVector<int> getSpellSlots() const;
     QVector<int> getSpellSlotsUsed() const;
     void setSpellSlots(int level, int slotCount);
