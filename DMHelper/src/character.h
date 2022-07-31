@@ -36,7 +36,6 @@ public:
         StringValue_hair,
         StringValue_equipment,
         StringValue_proficiencies,
-        StringValue_spells,
         StringValue_notes,
         StringValue_size,
         StringValue_experience,
@@ -120,6 +119,9 @@ public:
     int getSpellSlotsUsed(int level);
     void clearSpellSlotsUsed();
 
+    QString getSpellString();
+    void setSpellString(const QString& spellString);
+
     bool getActive() const;
     void setActive(bool active);
 
@@ -161,6 +163,7 @@ private:
     QVector<int> _skillValues;
     QVector<int> _spellSlots;
     QVector<int> _spellSlotsUsed;
+    QString _spellList;
 
     QList<MonsterAction> _actions;
 

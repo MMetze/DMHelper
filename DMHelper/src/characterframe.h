@@ -30,6 +30,7 @@ public:
 signals:
     void publishCharacterImage(QImage img);
     void characterChanged();
+    void spellSelected(const QString& spellName);
 
 public slots:
     void calculateMods();
@@ -59,6 +60,7 @@ private slots:
     void editLevelSlots(int level);
     void addSpellLevel();
     void pactLevelChanged();
+    void spellAnchorClicked(const QUrl &link);
 
 private:
     void loadCharacterImage();

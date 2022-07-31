@@ -35,6 +35,9 @@ protected:
     void scanModifiers(QJsonObject modifiersObject, const QString& key, Character& character);
     void scanChoices(QJsonObject choicesObject, Character& character);
     QString getNotesString(QJsonObject notesParent, const QString& key, const QString& title);
+    QString getSpellString(QJsonObject rootObject);
+    void parseSpellSource(QVector<QStringList>& spellVector, QJsonObject rootObject, QJsonArray spellSource, bool autoPrepared);
+    QString getEquipmentName(QJsonObject rootObject, int itemId, int itemTypeId);
     bool interpretReply(QNetworkReply* reply);
     bool interpretImageReply(QNetworkReply* reply);
 

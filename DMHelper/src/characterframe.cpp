@@ -107,6 +107,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
 
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &CharacterFrame::editConditions);
     connect(ui->btnRemoveConditions, &QAbstractButton::clicked, this, &CharacterFrame::clearConditions);
+
+    connect(ui->edtSpells, &QTextBrowser::anchorClicked, this, &CharacterFrame::spellAnchorClicked);
 }
 
 CharacterFrame::~CharacterFrame()
@@ -256,7 +258,7 @@ void CharacterFrame::clear()
 
     ui->edtFeatures->setText(QString(""));
     ui->edtEquipment->setText(QString(""));
-    ui->edtSpells->setText(QString(""));
+    ui->edtSpells->setHtml(QString(""));
     ui->edtNotes->setText(QString(""));
 
     ui->lblStrMod->setText(QString(""));
@@ -416,7 +418,7 @@ void CharacterFrame::readCharacterData()
 
     ui->edtFeatures->setText(_character->getStringValue(Character::StringValue_proficiencies));
     ui->edtEquipment->setText(_character->getStringValue(Character::StringValue_equipment));
-    ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
+    ui->edtSpells->setHtml(_character->getSpellString());
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
     updateConditionLayout();
@@ -486,8 +488,9 @@ void CharacterFrame::writeCharacterData()
 
         _character->setStringValue(Character::StringValue_proficiencies, ui->edtFeatures->toPlainText());
         _character->setStringValue(Character::StringValue_equipment, ui->edtEquipment->toPlainText());
-        _character->setStringValue(Character::StringValue_spells, ui->edtSpells->toPlainText());
         _character->setStringValue(Character::StringValue_notes, ui->edtNotes->toPlainText());
+
+        _character->setSpellString(ui->edtSpells->toHtml());
 
         _character->endBatchChanges();
 
@@ -716,6 +719,12 @@ void CharacterFrame::addSpellLevel()
         return;
 
     editLevelSlots(_character->spellSlotLevels() + 1);
+}
+
+void CharacterFrame::spellAnchorClicked(const QUrl &link)
+{
+    if(!link.path().isEmpty())
+        emit spellSelected(link.path());
 }
 
 void CharacterFrame::loadCharacterImage()

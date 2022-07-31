@@ -24,7 +24,6 @@ const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
     "",         // StringValue_hair
     "",         // StringValue_equipment
     "",         // StringValue_proficiencies
-    "",         // StringValue_spells
     "",         // StringValue_notes
     "medium",   // StringValue_size
     "0"         // StringValue_experience
@@ -48,7 +47,6 @@ const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
     "hair",             // StringValue_hair
     "equipment",        // StringValue_equipment
     "proficiencies",    // StringValue_proficiencies
-    "spells",           // StringValue_spells
     "notes",            // StringValue_notes
     "size",             // StringValue_size
     "experience"        // StringValue_experience
@@ -166,6 +164,7 @@ Character::Character(const QString& name, QObject *parent) :
     _skillValues(SKILLS_COUNT),
     _spellSlots(),
     _spellSlotsUsed(),
+    _spellList(),
     _active(true),
     _iconChanged(false)
 {
@@ -205,6 +204,24 @@ void Character::inputXML(const QDomElement &element, bool isImport)
         ++i;
     }
 
+    if(element.hasAttribute(QString("spells")))
+    {
+        _spellList = element.attribute("spells"); // backwards compatibility
+    }
+    else
+    {
+        QDomElement spellElement = element.firstChildElement("spell-data");
+        if(!spellElement.isNull())
+        {
+            QDomNode spellDataChildNode = spellElement.firstChild();
+            if((!spellDataChildNode.isNull()) && (spellDataChildNode.isCDATASection()))
+            {
+                QDomCDATASection spellData = spellDataChildNode.toCDATASection();
+                _spellList = spellData.data();
+            }
+        }
+    }
+
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
 
     Combatant::inputXML(element, isImport);
@@ -231,6 +248,7 @@ void Character::copyValues(const CampaignObjectBase* other)
     _skillValues = otherCharacter->_skillValues;
     _spellSlots = otherCharacter->_spellSlots;
     _spellSlotsUsed = otherCharacter->_spellSlotsUsed;
+    _spellList = otherCharacter->_spellList;
     _active = otherCharacter->_active;
 
     _actions.clear();
@@ -562,6 +580,20 @@ void Character::clearSpellSlotsUsed()
     registerChange();
 }
 
+QString Character::getSpellString()
+{
+    return _spellList;
+}
+
+void Character::setSpellString(const QString& spellString)
+{
+    if(_spellList != spellString)
+    {
+        _spellList = spellString;
+        registerChange();
+    }
+}
+
 bool Character::getActive() const
 {
     return _active;
@@ -760,6 +792,14 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
 
     element.setAttribute("active", static_cast<int>(getActive()));
 
+    if(!_spellList.isEmpty())
+    {
+        QDomElement spellElement = doc.createElement("spell-data");
+            QDomCDATASection spellData = doc.createCDATASection(_spellList);
+            spellElement.appendChild(spellData);
+        element.appendChild(spellElement);
+    }
+
     writeActionList(doc, element, QString("actions"), _actions, isExport);
 
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
@@ -767,7 +807,7 @@ void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
 
 bool Character::belongsToObject(QDomElement& element)
 {
-    if(element.tagName() == QString("actions"))
+    if((element.tagName() == QString("actions")) || (element.tagName() == QString("spell-data")))
         return true;
     else
         return Combatant::belongsToObject(element);

@@ -2,6 +2,7 @@
 #include "campaign.h"
 #include "characterimportdialog.h"
 #include "combatantfactory.h"
+#include "spellbook.h"
 #include <QInputDialog>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -334,6 +335,96 @@ QString CharacterImporter::getNotesString(QJsonObject notesParent, const QString
     return result;
 }
 
+QString CharacterImporter::getSpellString(QJsonObject rootObject)
+{
+
+    QVector<QStringList> spellVector(10);
+
+    int i;
+    QJsonArray classSpellsArray = rootObject["classSpells"].toArray();
+    for(i = 0; i < classSpellsArray.count(); ++i)
+    {
+        QJsonObject classSpellObject = classSpellsArray.at(i).toObject();
+        QJsonArray classSpellArray = classSpellObject["spells"].toArray();
+        parseSpellSource(spellVector, rootObject, classSpellArray, false);
+    }
+
+    QJsonObject generalSpells = rootObject["spells"].toObject();
+    QJsonArray generalRaceArray = generalSpells["race"].toArray();
+    parseSpellSource(spellVector, rootObject, generalRaceArray, true);
+    QJsonArray generalClassArray = generalSpells["class"].toArray();
+    parseSpellSource(spellVector, rootObject, generalClassArray, true);
+    QJsonArray generalItemArray = generalSpells["item"].toArray();
+    parseSpellSource(spellVector, rootObject, generalItemArray, true);
+
+    QString spellString;
+    for(i = 0; i < spellVector.size(); ++i)
+    {
+        if(spellVector.at(i).count() > 0)
+        {
+            spellString += ((i == 0) ? QString("<b>Cantrips</b>") : (QString("<b>Level ") + QString::number(i) + QString("</b>"))) + QString("<br>");
+            spellString += spellVector.at(i).join(QString("<br>"));
+            spellString += QString("<br>");
+            spellString += QString("<br>");
+        }
+    }
+
+    return spellString;
+}
+
+void CharacterImporter::parseSpellSource(QVector<QStringList>& spellVector, QJsonObject rootObject, QJsonArray spellSource, bool autoPrepared)
+{
+    for(int i = 0; i < spellSource.count(); ++i)
+    {
+        QJsonObject spellObject = spellSource.at(i).toObject();
+        bool prepared = spellObject["prepared"].toBool();
+        bool alwaysPrepared= spellObject["alwaysPrepared"].toBool();
+        QJsonObject definitionObject = spellObject["definition"].toObject();
+        int spellLevel = definitionObject["level"].toInt();
+        QString spellName = definitionObject["name"].toString();
+
+        if(((spellLevel == 0) || (autoPrepared) || (prepared) || (alwaysPrepared)) && ((!spellName.isEmpty()) && (spellLevel >= 0)))
+        {
+            // Make sure there's enough space in the vector
+            if(spellLevel > spellVector.size() + 1)
+                spellVector.resize(spellLevel + 1);
+
+            bool spellExists = ((Spellbook::Instance()) && (Spellbook::Instance()->exists(spellName)));
+
+            QString vectorName = QString("   ");
+            if(spellExists)
+                vectorName += QString("<a href=") + spellName + QString(">");
+            vectorName += spellName;
+            int componentId = spellObject["componentId"].toInt();
+            int componentTypeId = spellObject["componentTypeId"].toInt();
+            if(componentId != 0)
+                vectorName.append(QString(" <i>(") + getEquipmentName(rootObject, componentId, componentTypeId) + QString(")</i>"));
+            if(spellExists)
+                vectorName += QString("</a>");
+            spellVector[spellLevel].append(vectorName);
+        }
+    }
+}
+
+QString CharacterImporter::getEquipmentName(QJsonObject rootObject, int itemId, int itemTypeId)
+{
+    if(itemId == 0)
+        return QString();
+
+    QJsonArray inventoryArray = rootObject["inventory"].toArray();
+    for(int i = 0; i < inventoryArray.count(); ++i)
+    {
+        QJsonObject inventoryObject = inventoryArray.at(i).toObject();
+        QJsonObject definitionObject = inventoryObject["definition"].toObject();
+        int inventoryObjectId = definitionObject["id"].toInt();
+        int inventoryObjectTypeId = definitionObject["entityTypeId"].toInt();
+        QString inventoryObjectName = definitionObject["name"].toString();
+        if((inventoryObjectId == itemId) && (inventoryObjectTypeId == itemTypeId))
+            return inventoryObjectName;
+    }
+
+    return QString();
+}
 
 bool CharacterImporter::interpretReply(QNetworkReply* reply)
 {
@@ -697,10 +788,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     _character->setInitiative(initiativeValue);
 
     // Spell Overview
-    QString spellString;
     if(casterClassCount >= 1)
     {
-        spellString += QString("Spell Slots available") + QChar::LineFeed;
         QJsonArray spellSlotArray = rootObject["spellSlots"].toArray();
         for(i = 0; i < 9; ++i)
         {
@@ -713,21 +802,14 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
                     usedSlots += spellSlotObject["used"].toInt();
                 }
 
-                int remainingSlots = (usedSlots > spellSlots[i]) ? 0 : spellSlots[i] - usedSlots;
-                spellString += QString("Level ") + QString::number(i + 1) + QString(": ");
-                spellString += QString::number(remainingSlots) + QString("/") + QString::number(spellSlots[i]);
-                spellString += QChar::LineFeed;
-
                 _character->setSpellSlots(i + 1, spellSlots[i]);
                 _character->setSpellSlotsUsed(i + 1, usedSlots);
             }
         }
-        spellString += QChar::LineFeed;
     }
 
     if(warlockCaster)
     {
-        spellString += QString("Pact Magic Slots available") + QChar::LineFeed;
         QJsonArray pactSlotArray = rootObject["pactMagic"].toArray();
 
         if(pactSlotArray.count() >= pactMagicLevel)
@@ -738,14 +820,10 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
             _character->setIntValue(Character::IntValue_pactMagicLevel, pactMagicLevel);
             _character->setIntValue(Character::IntValue_pactMagicSlots, pactMagicSlots);
             _character->setIntValue(Character::IntValue_pactMagicUsed, pactMagicUsed);
-
-            spellString += QString("Level ") + QString::number(_character->getIntValue(Character::IntValue_pactMagicLevel)) + QString(": ");
-            spellString += QString::number(_character->getIntValue(Character::IntValue_pactMagicSlots) - _character->getIntValue(Character::IntValue_pactMagicUsed)) + QString("/") + QString::number(_character->getIntValue(Character::IntValue_pactMagicSlots));
-            spellString += QChar::LineFeed;
         }
     }
 
-    _character->setStringValue(Character::StringValue_spells, spellString);
+    _character->setSpellString(getSpellString(rootObject));
 
     // Find actions
     QJsonObject actionsObject = rootObject["actions"].toObject();
@@ -1044,4 +1122,3 @@ void CharacterImporter::messageBoxCancelled()
 
     _reply->abort();
 }
-
