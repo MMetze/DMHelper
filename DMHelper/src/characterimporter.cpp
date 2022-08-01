@@ -345,8 +345,30 @@ QString CharacterImporter::getSpellString(QJsonObject rootObject)
     for(i = 0; i < classSpellsArray.count(); ++i)
     {
         QJsonObject classSpellObject = classSpellsArray.at(i).toObject();
+        //int entityTypeId = classSpellObject["entityTypeId"].toInt();
+        int characterClassId = classSpellObject["characterClassId"].toInt();
+
+        bool classFound = false;
+        bool preparesSpells = false;
+        QJsonArray classesArray = rootObject["classes"].toArray();
+        int k = 0;
+        while((!classFound) && (i < classesArray.count()))
+        {
+            QJsonObject classObject = classesArray.at(k).toObject();
+            int classId = classObject["id"].toInt();
+
+            if(classId == characterClassId)
+            {
+                QJsonObject classDefnObj = classObject["definition"].toObject();
+                preparesSpells = (classDefnObj["spellPrepareType"].toInt() == 1);
+
+                classFound = true;
+            }
+            ++k;
+        }
+
         QJsonArray classSpellArray = classSpellObject["spells"].toArray();
-        parseSpellSource(spellVector, rootObject, classSpellArray, false);
+        parseSpellSource(spellVector, rootObject, classSpellArray, !preparesSpells);
     }
 
     QJsonObject generalSpells = rootObject["spells"].toObject();
@@ -356,6 +378,8 @@ QString CharacterImporter::getSpellString(QJsonObject rootObject)
     parseSpellSource(spellVector, rootObject, generalClassArray, true);
     QJsonArray generalItemArray = generalSpells["item"].toArray();
     parseSpellSource(spellVector, rootObject, generalItemArray, true);
+    QJsonArray generalFeatArray = generalSpells["feat"].toArray();
+    parseSpellSource(spellVector, rootObject, generalFeatArray, true);
 
     QString spellString;
     for(i = 0; i < spellVector.size(); ++i)
@@ -363,6 +387,7 @@ QString CharacterImporter::getSpellString(QJsonObject rootObject)
         if(spellVector.at(i).count() > 0)
         {
             spellString += ((i == 0) ? QString("<b>Cantrips</b>") : (QString("<b>Level ") + QString::number(i) + QString("</b>"))) + QString("<br>");
+            spellVector[i].sort();
             spellString += spellVector.at(i).join(QString("<br>"));
             spellString += QString("<br>");
             spellString += QString("<br>");
@@ -398,7 +423,11 @@ void CharacterImporter::parseSpellSource(QVector<QStringList>& spellVector, QJso
             int componentId = spellObject["componentId"].toInt();
             int componentTypeId = spellObject["componentTypeId"].toInt();
             if(componentId != 0)
-                vectorName.append(QString(" <i>(") + getEquipmentName(rootObject, componentId, componentTypeId) + QString(")</i>"));
+            {
+                QString itemName = getEquipmentName(rootObject, componentId, componentTypeId);
+                if(!itemName.isEmpty())
+                    vectorName.append(QString(" <i>(") + itemName + QString(")</i>"));
+            }
             if(spellExists)
                 vectorName += QString("</a>");
             spellVector[spellLevel].append(vectorName);

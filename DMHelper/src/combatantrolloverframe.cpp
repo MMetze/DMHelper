@@ -132,7 +132,7 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
     for(const MonsterAction& action : qAsConst(actionList))
     {
         QListWidgetItem *item = new QListWidgetItem(action.getName());
-        item->setToolTip(action.getDescription());
+//        item->setToolTip(action.getDescription());
         ui->listActions->addItem(item);
     }
 
