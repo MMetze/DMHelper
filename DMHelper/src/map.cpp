@@ -59,6 +59,8 @@ Map::~Map()
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
     _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
+    if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
+        _filename.clear();
     setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
     setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
     setDistanceLineWidth(element.attribute("lineWidth", QString::number(1)).toInt());
@@ -197,18 +199,18 @@ QString Map::getFileName() const
     return _filename;
 }
 
-void Map::setFileName(const QString& newFileName)
+bool Map::setFileName(const QString& newFileName)
 {
     if((_filename == newFileName) || (newFileName.isEmpty()))
-        return;
+        return true;
 
     if(!QFile::exists(newFileName))
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Found"),
-                              QString("The new map file could not be found: ") + newFileName);
+                              QString("The new map file could not be found: ") + newFileName + QString(", keeping map file: ") + _filename + QString(" for entry: ") + getName());
         qDebug() << "[Map] setFileName - New map file not found: " << newFileName << " for entry " << getName();
-        return;
+        return false;
     }
 
     QFileInfo fileInfo(newFileName);
@@ -216,19 +218,21 @@ void Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Valid"),
-                              QString("The new map isn't a file: ") + newFileName);
+                              QString("The new map isn't a file: ") + newFileName + QString(", keeping map file: ") + _filename + QString(" for entry: ") + getName());
         qDebug() << "[Map] setFileName - Map file not a file: " << newFileName << " for entry " << getName();
-        return;
+        return false;
     }
 
     if(_initialized)
     {
         qDebug() << "[Map] Cannot set new map file, map is initialized and in use! Old: " << _filename << ", New: " << newFileName;
-        return;
+        return true;
     }
 
     _filename = newFileName;
     emit dirty();
+
+    return true;
 }
 
 QColor Map::getMapColor() const

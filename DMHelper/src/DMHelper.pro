@@ -144,6 +144,8 @@ SOURCES += main.cpp\
     spell.cpp \
     spellbook.cpp \
     spellbookdialog.cpp \
+    spellslotlevelbutton.cpp \
+    spellslotradiobutton.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
     undopoint.cpp \
@@ -379,6 +381,8 @@ HEADERS  += mainwindow.h \
     spell.h \
     spellbook.h \
     spellbookdialog.h \
+    spellslotlevelbutton.h \
+    spellslotradiobutton.h \
     textbrowsermargins.h \
     texteditmargins.h \
     undopoint.h \

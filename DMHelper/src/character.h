@@ -2,6 +2,7 @@
 #define CHARACTER_H
 
 #include "combatant.h"
+#include "monsteraction.h"
 #include <QString>
 #include <QVector>
 #include <QPair>
@@ -35,7 +36,6 @@ public:
         StringValue_hair,
         StringValue_equipment,
         StringValue_proficiencies,
-        StringValue_spells,
         StringValue_notes,
         StringValue_size,
         StringValue_experience,
@@ -61,6 +61,10 @@ public:
         IntValue_copper,
         IntValue_jackofalltrades,
         IntValue_maximumHP,
+        IntValue_pactMagicSlots,
+        IntValue_pactMagicUsed,
+        IntValue_pactMagicLevel,
+        IntValue_cantrips,
 
         INTVALUE_COUNT
     };
@@ -106,6 +110,18 @@ public:
     void setSkillValue(Skills key, int value);
     void setSkillExpertise(Skills key, bool value);
 
+    int spellSlotLevels() const;
+    QVector<int> getSpellSlots() const;
+    QVector<int> getSpellSlotsUsed() const;
+    void setSpellSlots(int level, int slotCount);
+    int getSpellSlots(int level);
+    void setSpellSlotsUsed(int level, int slotsUsed);
+    int getSpellSlotsUsed(int level);
+    void clearSpellSlotsUsed();
+
+    QString getSpellString();
+    void setSpellString(const QString& spellString);
+
     bool getActive() const;
     void setActive(bool active);
 
@@ -114,6 +130,11 @@ public:
     int getNextLevelXP() const;
     int getProficiencyBonus() const;
     int getPassivePerception() const;
+
+    QList<MonsterAction> getActions() const;
+    void addAction(const MonsterAction& action);
+    void setAction(int index, const MonsterAction& action);
+    int removeAction(const MonsterAction& action);
 
     virtual void copyMonsterValues(MonsterClass& monster);
 
@@ -129,14 +150,22 @@ public slots:
 protected:
     // From Combatant
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual bool belongsToObject(QDomElement& element) override;
 
 private:
     void setDefaultValues();
+    void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport);
+    void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const;
 
     int _dndBeyondID;
     QVector<QString> _stringValues;
     QVector<int> _intValues;
     QVector<int> _skillValues;
+    QVector<int> _spellSlots;
+    QVector<int> _spellSlotsUsed;
+    QString _spellList;
+
+    QList<MonsterAction> _actions;
 
     bool _active;
     bool _iconChanged;

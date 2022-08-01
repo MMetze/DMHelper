@@ -17,6 +17,7 @@
 <li>Lock the published grid size - useful to configure an external screen using minis
 <li>Grid size and grid color are configurable
 <li>Enter a fixed number of grid squares for a map
+<li>Spell slot management in both character and initiative tracker
 <li>Animated maps work now across all entries
 <li>Navigate backwards and forwards through last campaign entries
 <li>Yes/No check for clear/fill Fog of War to avoid embarrassing map-nudity in combat

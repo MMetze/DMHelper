@@ -29,7 +29,7 @@ public:
     virtual int getObjectType() const override;
 
     QString getFileName() const;
-    void setFileName(const QString& newFileName);
+    bool setFileName(const QString& newFileName);
 
     QColor getMapColor() const;
     void setMapColor(const QColor& color);

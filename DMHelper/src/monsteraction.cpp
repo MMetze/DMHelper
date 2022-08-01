@@ -53,7 +53,8 @@ QString MonsterAction::summaryString() const
     if((_attackBonus != 0) || ((_damageDice.getCount() > 0) && (_damageDice.getType() > 0)))
     {
         result.append(QString(" ("));
-        result.append(_attackBonus < 0 ? QString("-") : QString("+"));
+        if(_attackBonus >= 0)
+            result.append(QString("+"));
         result.append(QString::number(_attackBonus));
         if((_damageDice.getCount() > 0) && (_damageDice.getType() > 0))
         {
