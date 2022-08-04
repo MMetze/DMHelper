@@ -21,6 +21,7 @@ clean_old_artifacts() {
 setup_build() {
   mkdir -p {build-clang_64bit-Release,bin64/config,bin64/packages/com.dmhelper.app/{meta,data}}
   cp -R src/installer/ bin64/
+  mv bin64/packages/com.dmhelper.app/meta/installscript64.qs bin64/packages/com.dmhelper.app/meta/installscript.qs
 }
 
 message "Building DMHelper for MacOS"
@@ -75,7 +76,7 @@ cp ../src/bin-macos/Info.plist ../bin64/packages/com.dmhelper.app/data/DMHelper.
 
 cd ../bin64/packages/com.dmhelper.app/data
 mkdir DMHelper.app/Contents/Frameworks
-cp -R ../../../../src/vlc/VLCKit.framework DMHelper.app/Contents/Frameworks/VLCKit.framework
+cp -R ../../../../src/vlc64/VLCKit.framework DMHelper.app/Contents/Frameworks/VLCKit.framework
 otool -L DMHelper.app/Contents/MacOS/DMHelper
 install_name_tool -id @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelper.app/Contents/Frameworks/VLCKit.framework/Versions/A/VLCKit
 install_name_tool -change @loader_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit @executable_path/../Frameworks/VLCKit.framework/Versions/A/VLCKit DMHelper.app/Contents/MacOS/DMHelper

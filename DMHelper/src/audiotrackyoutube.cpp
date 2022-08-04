@@ -282,7 +282,7 @@ void AudioTrackYoutube::playDirectUrl()
 
     libvlc_media_list_t *vlcMediaList = libvlc_media_list_new();
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN64) //|| defined(Q_OS_MAC)
     libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
 #else
     libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::vlcInstance(), _urlString.toUtf8().constData());
@@ -290,7 +290,7 @@ void AudioTrackYoutube::playDirectUrl()
     libvlc_media_list_add_media(vlcMediaList, vlcMedia);
     libvlc_media_release(vlcMedia);
 
-#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+#if defined(Q_OS_WIN64) //|| defined(Q_OS_MAC)
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
 #else
     _vlcPlayer = libvlc_media_player_new_from_media(vlcMedia);

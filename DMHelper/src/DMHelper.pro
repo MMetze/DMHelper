@@ -628,7 +628,7 @@ win32 {
 }
 macx {
     message("MacOS 64-bit VLC")
-    INCLUDEPATH += $$PWD/vlc64
-    LIBS += -F$$PWD/vlc64/ -framework VLCKit
+    INCLUDEPATH += $$PWD/vlc64/VLCKit.framework/Headers
+    LIBS += -F$$PWD/vlc64 -framework VLCKit
 }
 

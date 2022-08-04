@@ -34,6 +34,10 @@ MonsterAction::MonsterAction(const MonsterAction& other) :
 {
 }
 
+MonsterAction::~MonsterAction()
+{
+}
+
 QDomElement MonsterAction::outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const
 {
     MonsterClass::outputValue(doc, element, isExport, QString("attack_bonus"), QString::number(getAttackBonus()));
