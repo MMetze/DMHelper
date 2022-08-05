@@ -628,7 +628,22 @@ win32 {
 }
 macx {
     message("MacOS 64-bit VLC")
-    INCLUDEPATH += $$PWD/vlc64/VLCKit.framework/Headers
-    LIBS += -F$$PWD/vlc64 -framework VLCKit
+    #INCLUDEPATH += $$PWD/vlc64/VLCKit.framework/Headers
+    #LIBS += -F$$PWD/vlc64 -framework VLCKit
+
+    INCLUDEPATH += $$PWD/vlcMac
+    # link to the lib:
+    LIBS += -L$$PWD/vlcMac -lvlc
+    # make the app find the libs:
+#    QMAKE_RPATHDIR = @executable_path/Frameworks
+    # deploy the libs:
+#    libvlc.files = $$OUT_PWD/libvlc/libvlc.12.dylib
+#    libvlc.path = Frameworks
+#    QMAKE_BUNDLE_DATA += libvlc
+
+
+    MediaFiles.files += vlcMac/libvlc.dylib
+    MediaFiles.path = Contents/MacOS
+    QMAKE_BUNDLE_DATA += MediaFiles
 }
 

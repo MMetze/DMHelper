@@ -501,7 +501,7 @@ bool VideoPlayer::startPlayer()
         return false;
 
     // Create a new Media
-#if defined(Q_OS_WIN64) //|| defined(Q_OS_MAC)
+#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     libvlc_media_t *vlcMedia = libvlc_media_new_path(_videoFile.toUtf8().constData());
 #else
     libvlc_media_t *vlcMedia = libvlc_media_new_path(_vlcInstance, _videoFile.toUtf8().constData());
