@@ -15,7 +15,6 @@ DMH_VLC::DMH_VLC(QObject *parent) :
     _currentVideo(nullptr)
 {
 #ifndef Q_OS_MAC
-
     #ifdef VIDEO_CREATE_CACHE
         // Special case version to create a new cache file - only needed for a new version of VLC
         const char *args[] = {
@@ -67,9 +66,9 @@ DMH_VLC::DMH_VLC(QObject *parent) :
     #ifdef VIDEO_DEBUG_MESSAGES
         // Normal run-time version
         const char *args[] = {
-     //       "--no-reset-plugins-cache",
-     //       "--plugins-cache",
-     //       "--no-plugins-scan",
+            "--no-reset-plugins-cache",
+            "--plugins-cache",
+            "--no-plugins-scan",
         #ifdef QT_DEBUG
                 "-vvv",
         #endif

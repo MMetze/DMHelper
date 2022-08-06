@@ -643,7 +643,8 @@ macx {
 
 
     MediaFiles.files += vlcMac/libvlc.dylib
-    MediaFiles.path = Contents/MacOS
+    MediaFiles.files += vlcMac/libvlccore.dylib
+    MediaFiles.path = Contents/Frameworks
     QMAKE_BUNDLE_DATA += MediaFiles
 }
 
