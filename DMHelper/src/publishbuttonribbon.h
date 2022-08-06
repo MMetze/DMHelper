@@ -15,13 +15,6 @@ public:
     explicit PublishButtonRibbon(QWidget *parent = nullptr);
     virtual ~PublishButtonRibbon();
 
-    /*
-    bool isChecked();
-    bool isCheckable();
-    QColor getColor() const;
-    int getRotation();
-    */
-
     virtual PublishButtonRibbon* getPublishRibbon() override;
 
     virtual bool isChecked() const;
@@ -40,7 +33,7 @@ public slots:
 
 signals:
     void clicked(bool checked = false);
-//    void toggled(bool checked);
+    void layersClicked();
     void rotateCW();
     void rotateCCW();
     void rotationChanged(int rotation);

@@ -247,6 +247,7 @@
         <file>data/icon_stop.png</file>
         <file>data/icon_lockedgrid.png</file>
         <file>data/icon_lockedscale.png</file>
+        <file>data/icon_layers.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

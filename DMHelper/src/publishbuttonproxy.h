@@ -28,6 +28,7 @@ public slots:
 
 signals:
     void clicked(bool checked = false);
+    void layersClicked();
     void rotateCW();
     void rotateCCW();
     void rotationChanged(int rotation);

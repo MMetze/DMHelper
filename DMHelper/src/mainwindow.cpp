@@ -2567,7 +2567,7 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         if(_ribbon && _ribbon->getPublishRibbon())
         {
             objectFrame->setRotation(_ribbon->getPublishRibbon()->getRotation());
-            _ribbon->getPublishRibbon()->setChecked(object && (object->getID() == _pubWindow->getObjectId()));
+            _ribbon->getPublishRibbon()->setChecked(object && _pubWindow && (object->getID() == _pubWindow->getObjectId()));
         }
     }
 }

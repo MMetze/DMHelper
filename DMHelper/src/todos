@@ -1,3 +1,21 @@
+Layers - central concept in the Map, where the existance, type, basic functions (order, draw, create, delete) are handled
+    Each layer will have two child parts, one for the DM View (in DMH, Graphics Scene) and one for the Player View (OpenGL for rendering)
+    Needs for DM Version:
+
+    Needs for Player Version:
+
+    Both with static/dynamic content (eg videos)
+
+    Types of Layers:
+        Color
+            --> Draw
+        Grid
+        Image
+        Video (could this simplify things on different types of rendering)
+        FoW
+
+
+
 NEXT:
 Fix Map initialization to differentiate videos and get a screenshot itself.
 

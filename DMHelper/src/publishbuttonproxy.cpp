@@ -16,6 +16,7 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
 
     connect(publishButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked(bool)));
     connect(publishButton, SIGNAL(clicked(bool)), this, SIGNAL(shareSetChecked(bool)));
+    connect(publishButton, &PublishButtonRibbon::layersClicked, this, &PublishButtonProxy::layersClicked);
     connect(publishButton, SIGNAL(rotateCW()), this, SIGNAL(rotateCW()));
     connect(publishButton, SIGNAL(rotateCCW()), this, SIGNAL(rotateCCW()));
     connect(publishButton, SIGNAL(rotationChanged(int)), this, SIGNAL(rotationChanged(int)));
@@ -63,7 +64,6 @@ void PublishButtonProxy::setCheckable(bool checkable)
 {
     Q_UNUSED(checkable);
 
-    //emit shareSetCheckable(checkable);
     emit shareSetCheckable(true);
 }
 

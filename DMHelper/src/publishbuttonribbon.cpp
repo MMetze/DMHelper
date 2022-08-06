@@ -12,6 +12,7 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
     connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SLOT(handleClicked(bool)));
     connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SLOT(handleToggle(bool)));
 
+    connect(ui->btnLayers, &QAbstractButton::clicked, this, &PublishButtonRibbon::layersClicked);
     connect(ui->btnCW, SIGNAL(clicked()), ui->btnColor, SLOT(rotateCW()));
     connect(ui->btnCW, SIGNAL(clicked()), this, SIGNAL(rotateCW()));
     connect(ui->btnCW, SIGNAL(clicked()), this, SLOT(handleRotation()));
@@ -113,6 +114,7 @@ void PublishButtonRibbon::showEvent(QShowEvent *event)
     int buttonSize = height() - labelHeight;
     setButtonSize(*ui->btnPlayersWindow, buttonSize, buttonSize);
     setLineHeight(*ui->line_3, buttonSize);
+    setButtonSize(*ui->btnLayers, buttonSize, buttonSize);
     setButtonSize(*ui->btnCW, buttonSize, buttonSize);
     setButtonSize(*ui->btnColor, buttonSize, buttonSize);
     setButtonSize(*ui->btnCCW, buttonSize, buttonSize);
@@ -124,14 +126,10 @@ void PublishButtonRibbon::handleToggle(bool checked)
     if(checked)
     {
         emit colorChanged(ui->btnColor->getColor());
-        //ui->btnPublish->setStyleSheet(QString("QPushButton {color: red; font-weight: bold; }"));
-        //ui->btnPublish->setText(QString("Publishing!"));
         ui->btnPublish->setIcon(QIcon(QPixmap(":/img/data/icon_publishon.png")));
     }
     else
     {
-        //ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
-        //ui->btnPublish->setText(QString("Publish"));
         ui->btnPublish->setIcon(QIcon(QPixmap(":/img/data/icon_publish.png")));
     }
 }
