@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="myDiv">
-<h2>What's New: Version 2.5</h2>
+<h2>What's New: Version 2.4.5</h2>
 
 <h3>New Features:</h3>
 <ul>
@@ -17,6 +17,7 @@
 <li>Lock the published grid size - useful to configure an external screen using minis
 <li>Grid size and grid color are configurable
 <li>Enter a fixed number of grid squares for a map
+<li>Spell slot management in the character frame
 <li>Animated maps work now across all entries
 <li>Navigate backwards and forwards through last campaign entries
 <li>Yes/No check for clear/fill Fog of War to avoid embarrassing map-nudity in combat

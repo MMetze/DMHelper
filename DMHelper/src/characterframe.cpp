@@ -5,14 +5,19 @@
 #include "expertisedialog.h"
 #include "conditionseditdialog.h"
 #include "quickref.h"
+#include "spellslotradiobutton.h"
+#include "spellslotlevelbutton.h"
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QFileDialog>
+#include <QInputDialog>
 #include <QIntValidator>
 #include <QGridLayout>
+#include <QFontMetrics>
 #include <QDebug>
 
 const int CONDITION_FRAME_SPACING = 8;
+const int SPELL_LEVEL_PACT_MAGIC = -1;
 
 // TODO: automate character level, next level exp, proficiency bonus
 
@@ -23,7 +28,9 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     _mouseDown(false),
     _reading(false),
     _rotation(0),
-    _conditionGrid(nullptr)
+    _conditionGrid(nullptr),
+    _pactSlots(nullptr),
+    _edtPactLevel(nullptr)
 {
     ui->setupUi(this);
 
@@ -100,6 +107,8 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
 
     connect(ui->btnEditConditions, &QAbstractButton::clicked, this, &CharacterFrame::editConditions);
     connect(ui->btnRemoveConditions, &QAbstractButton::clicked, this, &CharacterFrame::clearConditions);
+
+    connect(ui->edtSpells, &QTextBrowser::anchorClicked, this, &CharacterFrame::spellAnchorClicked);
 }
 
 CharacterFrame::~CharacterFrame()
@@ -249,7 +258,7 @@ void CharacterFrame::clear()
 
     ui->edtFeatures->setText(QString(""));
     ui->edtEquipment->setText(QString(""));
-    ui->edtSpells->setText(QString(""));
+    ui->edtSpells->setHtml(QString(""));
     ui->edtNotes->setText(QString(""));
 
     ui->lblStrMod->setText(QString(""));
@@ -409,10 +418,11 @@ void CharacterFrame::readCharacterData()
 
     ui->edtFeatures->setText(_character->getStringValue(Character::StringValue_proficiencies));
     ui->edtEquipment->setText(_character->getStringValue(Character::StringValue_equipment));
-    ui->edtSpells->setText(_character->getStringValue(Character::StringValue_spells));
+    ui->edtSpells->setHtml(_character->getSpellString());
     ui->edtNotes->setText(_character->getStringValue(Character::StringValue_notes));
 
     updateConditionLayout();
+    readSpellSlots();
 
     connectChanged(true);
 
@@ -478,8 +488,9 @@ void CharacterFrame::writeCharacterData()
 
         _character->setStringValue(Character::StringValue_proficiencies, ui->edtFeatures->toPlainText());
         _character->setStringValue(Character::StringValue_equipment, ui->edtEquipment->toPlainText());
-        _character->setStringValue(Character::StringValue_spells, ui->edtSpells->toPlainText());
         _character->setStringValue(Character::StringValue_notes, ui->edtNotes->toPlainText());
+
+        _character->setSpellString(ui->edtSpells->toHtml());
 
         _character->endBatchChanges();
 
@@ -641,10 +652,93 @@ void CharacterFrame::addCondition(Combatant::Condition condition)
     _conditionGrid->addWidget(conditionLabel, row, column);
 }
 
+void CharacterFrame::spellSlotChanged(int level, int slot, bool checked)
+{
+    if(!_character)
+        return;
+
+    if(level == SPELL_LEVEL_PACT_MAGIC)
+    {
+        if(!_pactSlots)
+            return;
+
+        _character->setIntValue(Character::IntValue_pactMagicUsed, checked ? slot + 1 : slot);
+        for(int i = 0; i < _character->getIntValue(Character::IntValue_pactMagicSlots); ++i)
+        {
+            QLayoutItem* buttonItem =_pactSlots->itemAt(i + 1); // Note: starts at 1 because of the label
+            if((buttonItem) && (buttonItem->widget()))
+            {
+                SpellSlotRadioButton* button = dynamic_cast<SpellSlotRadioButton*>(buttonItem->widget());
+                if(button)
+                    button->setChecked(i < _character->getIntValue(Character::IntValue_pactMagicUsed));
+            }
+        }
+    }
+    else
+    {
+        _character->setSpellSlotsUsed(level, checked ? slot + 1 : slot);
+        updateSpellSlots();
+    }
+}
+
+void CharacterFrame::editLevelSlots(int level)
+{
+    if(!_character)
+        return;
+
+    bool ok = false;
+    QString title = (level == SPELL_LEVEL_PACT_MAGIC) ? QString("Pact Slots") : QString("Level ") + QString::number(level) + QString(" Spell Slots");
+    QString queryText = (level == SPELL_LEVEL_PACT_MAGIC) ? QString("Enter the new number of Pact Slots.") : QString("Enter the number of slots for level ") + QString::number(level) + QString(". Enter 0 slots to remove the level.");
+    int initialValue = (level == SPELL_LEVEL_PACT_MAGIC) ? _character->getIntValue(Character::IntValue_pactMagicSlots) : _character->getSpellSlots(level);
+    int newSlots = QInputDialog::getInt(this, title, queryText, initialValue, 0, 2147483647, 1, &ok);
+    if(!ok)
+        return;
+
+    if(level == SPELL_LEVEL_PACT_MAGIC)
+    {
+        if(_character->getIntValue(Character::IntValue_pactMagicSlots) == newSlots)
+            return;
+
+        _character->setIntValue(Character::IntValue_pactMagicSlots, newSlots);
+        _character->setIntValue(Character::IntValue_pactMagicUsed, 0);
+    }
+    else
+    {
+        if(newSlots == _character->getSpellSlots(level))
+            return;
+
+        _character->setSpellSlots(level, newSlots);
+    }
+
+    readSpellSlots();
+}
+
+void CharacterFrame::addSpellLevel()
+{
+    if(!_character)
+        return;
+
+    editLevelSlots(_character->spellSlotLevels() + 1);
+}
+
+void CharacterFrame::spellAnchorClicked(const QUrl &link)
+{
+    if(!link.path().isEmpty())
+        emit spellSelected(link.path());
+}
+
 void CharacterFrame::loadCharacterImage()
 {
     if(_character)
         ui->lblIcon->setPixmap(_character->getIconPixmap(DMHelper::PixmapSize_Showcase));
+}
+
+void CharacterFrame::pactLevelChanged()
+{
+    if((!_character) || (!_edtPactLevel))
+        return;
+
+    _character->setIntValue(Character::IntValue_pactMagicLevel, _edtPactLevel->text().toInt());
 }
 
 void CharacterFrame::updateCheckboxName(QCheckBox* chk, Combatant::Skills skill)
@@ -742,5 +836,130 @@ void CharacterFrame::connectChanged(bool makeConnection)
         disconnect(ui->chkDeception,SIGNAL(clicked()),this,SLOT(calculateMods()));
         disconnect(ui->chkPersuasion,SIGNAL(clicked()),this,SLOT(calculateMods()));
         disconnect(ui->chkIntimidation,SIGNAL(clicked()),this,SLOT(calculateMods()));
+    }
+}
+
+void CharacterFrame::readSpellSlots()
+{
+    clearLayout(ui->frameSpells->layout());
+    delete ui->frameSpells->layout();
+
+    if(!_character)
+        return;
+
+    QFontMetrics metrics = ui->edtClass->fontMetrics();
+    int buttonWidth = metrics.horizontalAdvance(QString("XXXXX"));
+
+    QVBoxLayout* vSpellsLayout = new QVBoxLayout;
+    vSpellsLayout->addWidget(new QLabel(QString("Spell Slots")));
+    if(_character->spellSlotLevels() > 0)
+    {
+        for(int i = 1; i <= _character->spellSlotLevels(); ++i)
+        {
+            int spellSlotCount = _character->getSpellSlots(i);
+            if(spellSlotCount > 0)
+            {
+                QHBoxLayout* hSlots = new QHBoxLayout;
+                hSlots->addWidget(new QLabel(QString("Level ") + QString::number(i)));
+                for(int j = 0; j < spellSlotCount; ++j)
+                    hSlots->addWidget(createRadioButton(i, j, j < _character->getSpellSlotsUsed(i)));
+                hSlots->addStretch();
+
+                SpellSlotLevelButton* editLevelSlots = new SpellSlotLevelButton(QString("..."), i);
+                editLevelSlots->setMinimumWidth(buttonWidth);
+                editLevelSlots->setMaximumWidth(buttonWidth);
+                connect(editLevelSlots, &SpellSlotLevelButton::spellSlotLevelClicked, this, &CharacterFrame::editLevelSlots);
+                hSlots->addWidget(editLevelSlots);
+
+                vSpellsLayout->addLayout(hSlots);
+            }
+        }
+    }
+
+    QHBoxLayout* hNewLevel = new QHBoxLayout;
+    QPushButton* addLevelButton = new QPushButton(QString("Add Level..."));
+    connect(addLevelButton, &QAbstractButton::clicked, this, &CharacterFrame::addSpellLevel);
+    hNewLevel->addWidget(addLevelButton);
+    hNewLevel->addStretch();
+    vSpellsLayout->addLayout(hNewLevel);
+
+    vSpellsLayout->addWidget(new QLabel(QString("")));
+
+    vSpellsLayout->addWidget(new QLabel(QString("Pact Magic")));
+    QHBoxLayout* hPactLevel = new QHBoxLayout;
+    hPactLevel->addWidget(new QLabel(QString("Level: ")));
+    int pactLevel = _character->getIntValue(Character::IntValue_pactMagicLevel);
+    _edtPactLevel = new QLineEdit((pactLevel > 0) ? QString::number(pactLevel) : QString(""));
+    _edtPactLevel->setValidator(new QIntValidator(0, 999999));
+    _edtPactLevel->setMinimumWidth(buttonWidth);
+    _edtPactLevel->setMaximumWidth(buttonWidth);
+    connect(_edtPactLevel, &QLineEdit::editingFinished, this, &CharacterFrame::pactLevelChanged);
+    hPactLevel->addWidget(_edtPactLevel);
+    hPactLevel->addStretch();
+    vSpellsLayout->addLayout(hPactLevel);
+
+    _pactSlots = new QHBoxLayout;
+    _pactSlots->addWidget(new QLabel(QString("Pact Slots:")));
+    for(int i = 0; i < _character->getIntValue(Character::IntValue_pactMagicSlots); ++i)
+        _pactSlots->addWidget(createRadioButton(SPELL_LEVEL_PACT_MAGIC, i, i < _character->getIntValue(Character::IntValue_pactMagicUsed)));
+    _pactSlots->addStretch();
+    SpellSlotLevelButton* editPactSlots = new SpellSlotLevelButton(QString("..."), SPELL_LEVEL_PACT_MAGIC);
+    editPactSlots->setMinimumWidth(buttonWidth);
+    editPactSlots->setMaximumWidth(buttonWidth);
+    connect(editPactSlots, &SpellSlotLevelButton::spellSlotLevelClicked, this, &CharacterFrame::editLevelSlots);
+    _pactSlots->addWidget(editPactSlots);
+    vSpellsLayout->addLayout(_pactSlots);
+
+    vSpellsLayout->addStretch();
+    ui->frameSpells->setLayout(vSpellsLayout);
+}
+
+void CharacterFrame::updateSpellSlots()
+{
+    if(!_character)
+        return;
+
+    for(int i = 1; i <= _character->spellSlotLevels(); i++)
+    {
+        QLayoutItem* levelItem = ui->frameSpells->layout()->itemAt(i); // Note: starts at 1 because of the label
+        if((levelItem) && (levelItem->layout()))
+        {
+            for(int j = 0; j < _character->getSpellSlots(i); ++j)
+            {
+                QLayoutItem* buttonItem = levelItem->layout()->itemAt(j + 1); // Note: starts at 1 because of the label
+                if((buttonItem) && (buttonItem->widget()))
+                {
+                    SpellSlotRadioButton* button = dynamic_cast<SpellSlotRadioButton*>(buttonItem->widget());
+                    if(button)
+                        button->setChecked(j < _character->getSpellSlotsUsed(i));
+                }
+            }
+        }
+    }
+}
+
+SpellSlotRadioButton* CharacterFrame::createRadioButton(int level, int slot, bool checked)
+{
+    SpellSlotRadioButton* newButton = new SpellSlotRadioButton(level, slot, checked);
+    connect(newButton, &SpellSlotRadioButton::spellSlotClicked, this, &CharacterFrame::spellSlotChanged);
+    return newButton;
+}
+
+void CharacterFrame::clearLayout(QLayout* layout)
+{
+    if(!layout)
+        return;
+
+    _pactSlots = nullptr;
+    _edtPactLevel = nullptr;
+
+    QLayoutItem *child;
+    while((child = layout->takeAt(0)) != nullptr)
+    {
+        if(child->widget())
+            child->widget()->deleteLater();
+        else if(child->layout())
+            clearLayout(child->layout());
+        delete child;
     }
 }

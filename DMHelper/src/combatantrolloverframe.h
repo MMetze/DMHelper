@@ -37,6 +37,7 @@ private:
     void readCharacter(BattleDialogModelCharacter* character);
     void readMonster(BattleDialogModelMonsterBase* monster);
     void addActionList(const QList<MonsterAction>& actionList, const QString& listTitle);
+    void addSectionTitle(const QString& sectionTitle);
 
     Ui::CombatantRolloverFrame *ui;
     CombatantWidget* _widget;

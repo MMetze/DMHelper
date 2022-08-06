@@ -8,8 +8,11 @@ namespace Ui {
 class CharacterFrame;
 }
 
+class SpellSlotRadioButton;
 class QCheckBox;
 class QGridLayout;
+class QHBoxLayout;
+class QLineEdit;
 
 class CharacterFrame : public CampaignObjectFrame
 {
@@ -27,6 +30,7 @@ public:
 signals:
     void publishCharacterImage(QImage img);
     void characterChanged();
+    void spellSelected(const QString& spellName);
 
 public slots:
     void calculateMods();
@@ -52,14 +56,22 @@ private slots:
     void updateConditionLayout();
     void clearConditionGrid();
     void addCondition(Combatant::Condition condition);
+    void spellSlotChanged(int level, int slot, bool checked);
+    void editLevelSlots(int level);
+    void addSpellLevel();
+    void pactLevelChanged();
+    void spellAnchorClicked(const QUrl &link);
 
 private:
     void loadCharacterImage();
-    //void updateCheckboxName(QCheckBox* chk, int abilityMod, int proficiencyBonus, bool expertise, bool halfProficiency);
     void updateCheckboxName(QCheckBox* chk, Combatant::Skills skill);
     void enableDndBeyondSync(bool enabled);
 
     void connectChanged(bool makeConnection);
+    void readSpellSlots();
+    void updateSpellSlots();
+    SpellSlotRadioButton* createRadioButton(int level, int slot, bool checked);
+    void clearLayout(QLayout* layout);
 
     Ui::CharacterFrame *ui;
     Character* _character;
@@ -67,6 +79,8 @@ private:
     bool _reading;
     int _rotation;
     QGridLayout* _conditionGrid;
+    QHBoxLayout* _pactSlots;
+    QLineEdit* _edtPactLevel;
 };
 
 #endif // CHARACTERFRAME_H

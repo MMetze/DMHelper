@@ -73,6 +73,7 @@ public slots:
     void openEncounter(QUuid id);
     void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
+    void openSpell(const QString& spellName);
 
     void newCharacter();
     void importCharacter();

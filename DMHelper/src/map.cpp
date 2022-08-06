@@ -59,6 +59,8 @@ Map::~Map()
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
     _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
+    if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
+        _filename.clear();
     setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
     setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
     setDistanceLineWidth(element.attribute("lineWidth", QString::number(1)).toInt());
@@ -197,18 +199,18 @@ QString Map::getFileName() const
     return _filename;
 }
 
-void Map::setFileName(const QString& newFileName)
+bool Map::setFileName(const QString& newFileName)
 {
     if((_filename == newFileName) || (newFileName.isEmpty()))
-        return;
+        return true;
 
     if(!QFile::exists(newFileName))
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Found"),
-                              QString("The new map file could not be found: ") + newFileName);
+                              QString("The new map file could not be found: ") + newFileName + QString(", keeping map file: ") + _filename + QString(" for entry: ") + getName());
         qDebug() << "[Map] setFileName - New map file not found: " << newFileName << " for entry " << getName();
-        return;
+        return false;
     }
 
     QFileInfo fileInfo(newFileName);
@@ -216,19 +218,21 @@ void Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Valid"),
-                              QString("The new map isn't a file: ") + newFileName);
+                              QString("The new map isn't a file: ") + newFileName + QString(", keeping map file: ") + _filename + QString(" for entry: ") + getName());
         qDebug() << "[Map] setFileName - Map file not a file: " << newFileName << " for entry " << getName();
-        return;
+        return false;
     }
 
     if(_initialized)
     {
         qDebug() << "[Map] Cannot set new map file, map is initialized and in use! Old: " << _filename << ", New: " << newFileName;
-        return;
+        return true;
     }
 
     _filename = newFileName;
     emit dirty();
+
+    return true;
 }
 
 QColor Map::getMapColor() const
@@ -493,10 +497,12 @@ bool Map::isValid()
     if(!fileInfo.isFile())
         return false;
 
+#if !defined(Q_OS_MAC)
     // If the file is otherwise OK and the format is a known image, it's invalid because it should have been loaded!
     QImageReader reader(_filename);
     if(!reader.format().isEmpty())
         return false;
+#endif
 
     return true;
 }
@@ -987,9 +993,12 @@ bool Map::initialize()
         {
             // Could not read the file as an image - this is likely a file error...
             qDebug() << "[Map] Not able to read map file: " << reader.error() <<", " << reader.errorString();
+            qDebug() << "[Map] Image Format: " << QString::fromUtf8(reader.format());
+#if !defined(Q_OS_MAC)
             QMessageBox::critical(nullptr,
                                   QString("DMHelper Map File Read Error"),
                                   QString("For the map entry """) + getName() + QString(""", the map could not be read. It may be too high resolution for DMHelper!"));
+#endif
             return false;
         }
 

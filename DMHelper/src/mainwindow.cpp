@@ -539,6 +539,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
+    connect(charFrame, SIGNAL(spellSelected(QString)), this, SLOT(openSpell(QString)));
 
     PartyFrame* partyFrame = new PartyFrame;
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Party, partyFrame);
@@ -915,11 +916,20 @@ void MainWindow::openCharacter(QUuid id)
 
 void MainWindow::openMonster(const QString& monsterClass)
 {
-    if(!monsterClass.isEmpty() && Bestiary::Instance()->exists(monsterClass))
-    {
-        _bestiaryDlg.setMonster(monsterClass);
-        openBestiary();
-    }
+    if((monsterClass.isEmpty()) || (!Bestiary::Instance()->exists(monsterClass)))
+        return;
+
+    _bestiaryDlg.setMonster(monsterClass);
+    openBestiary();
+}
+
+void MainWindow::openSpell(const QString& spellName)
+{
+    if((spellName.isEmpty()) || (!Spellbook::Instance()->exists(spellName)))
+        return;
+
+    _spellDlg.setSpell(spellName);
+    openSpellbook();
 }
 
 void MainWindow::newCharacter()
