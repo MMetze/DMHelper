@@ -81,6 +81,9 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    layer.cpp \
+    layerfow.cpp \
+    layerimage.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapblankdialog.cpp \
@@ -318,6 +321,9 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    layer.h \
+    layerfow.h \
+    layerimage.h \
     legaldialog.h \
     mapblankdialog.h \
     mapcolorizedialog.h \
