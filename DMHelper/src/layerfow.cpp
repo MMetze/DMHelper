@@ -9,7 +9,7 @@ LayerFow::~LayerFow()
 {
 }
 
-void LayerFow::dmInitialize()
+void LayerFow::dmInitialize(QGraphicsScene& scene)
 {
 }
 

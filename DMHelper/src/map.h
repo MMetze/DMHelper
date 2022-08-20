@@ -4,6 +4,8 @@
 #include "campaignobjectbase.h"
 #include "mapcontent.h"
 #include "mapcolorizefilter.h"
+#include "layerscene.h"
+#include "layerimage.h"
 #include <QList>
 #include <QImage>
 #include <QPixmap>
@@ -15,7 +17,7 @@ class AudioTrack;
 class Party;
 class UndoMarker;
 
-class Map : public CampaignObjectBase
+class Map : public CampaignObjectBase, public ILayerImageSource
 {
     Q_OBJECT
 public:
@@ -28,6 +30,10 @@ public:
 
     virtual int getObjectType() const override;
 
+    // From ILayerImageSource
+    virtual const QImage& getImage() const override;
+
+    // Local
     QString getFileName() const;
     bool setFileName(const QString& newFileName);
 
@@ -76,6 +82,8 @@ public:
 
     bool isInitialized();
     bool isValid();
+    LayerScene& getLayerScene();
+    const LayerScene& getLayerScene() const;
     void setExternalFoWImage(QImage externalImage);
     QImage getBackgroundImage();
     QImage getFoWImage();
@@ -170,6 +178,7 @@ protected:
     QList<MapDraw*> _mapItems;
 
     bool _initialized;
+    LayerScene _layerScene;
     QImage _imgBackground;
     QImage _imgFow;
     QImage _imgBWFow;

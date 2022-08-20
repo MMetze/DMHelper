@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+class QGraphicsScene;
+
 /*
  *
  * Layers - central concept in the Map, where the existance, type, basic functions (order, draw, create, delete) are handled
@@ -32,9 +34,11 @@ public:
     Layer(QObject *parent = nullptr);
     virtual ~Layer();
 
+    virtual QRectF boundingRect() const;
+
 public slots:
     // DM Window Generic Interface
-    virtual void dmInitialize() = 0;
+    virtual void dmInitialize(QGraphicsScene& scene) = 0;
     virtual void dmUninitialize() = 0;
     virtual void dmUpdate() = 0;
 

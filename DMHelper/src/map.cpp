@@ -36,6 +36,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _showMarkers(true),
     _mapItems(),
     _initialized(false),
+    _layerScene(),
     _imgBackground(),
     _imgFow(),
     _imgBWFow(),
@@ -54,6 +55,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
 Map::~Map()
 {
     qDeleteAll(_mapItems);
+    _layerScene.clearLayers();
 }
 
 void Map::inputXML(const QDomElement &element, bool isImport)
@@ -192,6 +194,11 @@ void Map::copyValues(const CampaignObjectBase* other)
 int Map::getObjectType() const
 {
     return DMHelper::CampaignType_Map;
+}
+
+const QImage& Map::getImage() const
+{
+    return _imgBackground;
 }
 
 QString Map::getFileName() const
@@ -505,6 +512,16 @@ bool Map::isValid()
 #endif
 
     return true;
+}
+
+LayerScene& Map::getLayerScene()
+{
+    return _layerScene;
+}
+
+const LayerScene& Map::getLayerScene() const
+{
+    return _layerScene;
 }
 
 void Map::setExternalFoWImage(QImage externalImage)

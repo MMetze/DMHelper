@@ -12,7 +12,7 @@ public:
 
 public slots:
     // DM Window Generic Interface
-    virtual void dmInitialize() override;
+    virtual void dmInitialize(QGraphicsScene& scene) override;
     virtual void dmUninitialize() override;
     virtual void dmUpdate() override;
 

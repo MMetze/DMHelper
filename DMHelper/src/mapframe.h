@@ -21,6 +21,7 @@ class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
+class Layer;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -215,7 +216,8 @@ private:
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
-    QGraphicsPixmapItem* _backgroundImage;
+    //QGraphicsPixmapItem* _backgroundImage;
+    Layer* _backgroundLayer;
     QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
     CameraRect* _cameraRect;

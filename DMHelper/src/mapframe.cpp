@@ -17,6 +17,7 @@
 #include "publishglmapimagerenderer.h"
 #include "publishglmapvideorenderer.h"
 #include "videoplayerglscreenshot.h"
+#include "layerimage.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -31,7 +32,8 @@ MapFrame::MapFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::MapFrame),
     _scene(nullptr),
-    _backgroundImage(nullptr),
+    _backgroundLayer(nullptr),
+//    _backgroundImage(nullptr),
     _fow(nullptr),
     _partyIcon(nullptr),
     _cameraRect(nullptr),
@@ -284,7 +286,9 @@ void MapFrame::clear()
 {
     _mapSource = nullptr;
     delete _partyIcon; _partyIcon = nullptr;
-    delete _backgroundImage; _backgroundImage = nullptr;
+    if(_backgroundLayer)
+        _backgroundLayer->dmUninitialize();
+//    delete _backgroundImage; _backgroundImage = nullptr;
 //    delete _backgroundVideo; _backgroundVideo = nullptr;
     delete _fow; _fow = nullptr;
     delete _undoPath; _undoPath = nullptr;
@@ -307,7 +311,7 @@ void MapFrame::colorize()
     {
         _mapSource->setFilter(dlg.getFilter());
         _mapSource->setApplyFilter(dlg.getFilter().isValid());
-        _backgroundImage->setPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
+        _backgroundImage->setPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage())); // TODO: this has to be handled by the map telling the image layer the image has changed.
     }
     else
     {
@@ -606,10 +610,10 @@ void MapFrame::setCameraCouple()
 
 void MapFrame::setCameraMap()
 {
-    if((!_cameraRect) || (!_backgroundImage))
+    if((!_cameraRect) || (!_mapSource))
         return;
 
-    QRectF newRect = _backgroundImage->boundingRect();
+    QRectF newRect = _mapSource->getLayerScene().boundingRect(); //_backgroundImage->boundingRect();
     _cameraRect->setCameraRect(newRect);
     emit cameraRectChanged(newRect);
 }
@@ -742,7 +746,8 @@ void MapFrame::setRotation(int rotation)
 
 void MapFrame::initializeFoW()
 {
-    if((_backgroundImage) || (_fow) || (_scene))
+//    if((_backgroundImage) || (_fow) || (_scene))
+    if((_fow) || (_scene))
         qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame contents NOT done. Undefined behavior!";
 
     _scene = new MapFrameScene(this);
@@ -770,7 +775,8 @@ void MapFrame::initializeFoW()
             return;
 
         qDebug() << "[MapFrame] Initializing map frame image";
-        setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
+        //setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
+        _mapSource->getLayerScene().dmInitialize(*_scene);
 
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         _fow->setEnabled(false);
@@ -1535,11 +1541,11 @@ bool MapFrame::execEventFilterCameraSelect(QObject *obj, QEvent *event)
     }
     else if(event->type() == QEvent::MouseButtonRelease)
     {
-        if(_rubberBand)
+        if((_rubberBand) && (_mapSource))
         {
             QRect bandRect(_rubberBand->x(), _rubberBand->y(), _rubberBand->width(), _rubberBand->height());
             QRectF sceneBand = ui->graphicsView->mapToScene(bandRect).boundingRect();
-            QRectF targetRect = sceneBand.intersected(_backgroundImage->boundingRect());
+            QRectF targetRect = sceneBand.intersected(_mapSource->getLayerScene().boundingRect()); // _backgroundImage->boundingRect());
             targetRect.adjust(1.0, 1.0, -1.0, -1.0);
 
             if(_cameraRect)
@@ -1646,6 +1652,7 @@ void MapFrame::cleanupBuffers()
         _cameraRect = nullptr;
     }
 
+    /*
     if(_backgroundImage)
     {
         if(_scene)
@@ -1653,6 +1660,14 @@ void MapFrame::cleanupBuffers()
         tempItem = _backgroundImage;
         _backgroundImage = nullptr;
         delete tempItem;
+    }
+    */
+    if(_backgroundLayer)
+    {
+        _backgroundLayer->dmUninitialize();
+        Layer* tempLayer = _backgroundLayer;
+        _backgroundLayer = nullptr;
+        delete tempLayer;
     }
 
     if(_fow)
@@ -1844,7 +1859,9 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     createMarkerItems();
 
     if(!_mapSource->getCameraRect().isValid())
-        _mapSource->setCameraRect(_backgroundImage->boundingRect().toRect());
+        _mapSource->setCameraRect(_mapSource->getLayerScene().boundingRect().toRect());
+
+//        _mapSource->setCameraRect(_backgroundImage->boundingRect().toRect());
 
     if(_cameraRect)
         _cameraRect->setCameraRect(_mapSource->getCameraRect());
@@ -2019,11 +2036,11 @@ void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
 
 void MapFrame::setCameraToView()
 {
-    if((!_cameraRect) || (!_backgroundImage))
+    if((!_cameraRect) || (!_mapSource))
         return;
 
-    QRectF viewRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();
-    QRectF targetRect = viewRect.intersected(_backgroundImage->boundingRect());
+    QRectF viewRect = ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect();    
+    QRectF targetRect = viewRect.intersected(_mapSource->getLayerScene().boundingRect());
     targetRect.adjust(1.0, 1.0, -1.0, -1.0);
     _cameraRect->setCameraRect(targetRect);
     emit cameraRectChanged(targetRect);
