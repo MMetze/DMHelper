@@ -1654,7 +1654,8 @@ void MapFrame::cleanupBuffers()
         _cameraRect = nullptr;
     }
 
-    _mapSource->getLayerScene().dmUninitialize();
+    if(_mapSource)
+        _mapSource->getLayerScene().dmUninitialize();
 
     /*
     if(_backgroundImage)

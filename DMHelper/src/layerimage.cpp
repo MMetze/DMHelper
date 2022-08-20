@@ -79,6 +79,7 @@ void LayerImage::cleanupDM()
             _graphicsItem->scene()->removeItem(_graphicsItem);
 
         delete _graphicsItem;
+        _graphicsItem = nullptr;
     }
 }
 
