@@ -1,9 +1,10 @@
 #include "layerimage.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
+#include <QDebug>
 
-LayerImage::LayerImage(const QImage& image, QObject *parent) :
-    Layer{parent},
+LayerImage::LayerImage(const QImage& image, int order, QObject *parent) :
+    Layer{order, parent},
     _graphicsItem(nullptr),
     _layerImage(image)
 {
@@ -21,6 +22,18 @@ QRectF LayerImage::boundingRect() const
 
 void LayerImage::dmInitialize(QGraphicsScene& scene)
 {
+    if(_graphicsItem)
+    {
+        qDebug() << "[LayerImage] ERROR: dmInitialize called although the graphics item already exists!";
+        return;
+    }
+
+    _graphicsItem = scene.addPixmap(QPixmap::fromImage(_layerImage));
+    if(_graphicsItem)
+    {
+        _graphicsItem->setEnabled(false);
+        _graphicsItem->setZValue(getOrder());
+    }
 }
 
 void LayerImage::dmUninitialize()
@@ -48,6 +61,16 @@ void LayerImage::playerGLPaint()
 {
 }
 
+void LayerImage::updateImage(const QImage& image)
+{
+    if(_layerImage == image)
+        return;
+
+    _layerImage = image;
+    if(_graphicsItem)
+        _graphicsItem->setPixmap(QPixmap::fromImage(image));
+}
+
 void LayerImage::cleanupDM()
 {
     if(_graphicsItem)
@@ -62,12 +85,12 @@ void LayerImage::cleanupDM()
 
 
 
-ILayerImageSource::LayerImageSourceSignaller::LayerImageSourceSignaller(QObject *parent) :
+LayerImageSourceSignaller::LayerImageSourceSignaller(QObject *parent) :
     QObject(parent)
 {
 }
 
-void ILayerImageSource::LayerImageSourceSignaller::emitSignal(const QImage& image)
+void LayerImageSourceSignaller::emitSignal(const QImage& image)
 {
     emit imageChanged(image);
 }
@@ -83,7 +106,7 @@ ILayerImageSource::~ILayerImageSource()
 {
 }
 
-ILayerImageSource::LayerImageSourceSignaller& ILayerImageSource::getSignaller()
+LayerImageSourceSignaller& ILayerImageSource::getSignaller()
 {
     return _signaller;
 }

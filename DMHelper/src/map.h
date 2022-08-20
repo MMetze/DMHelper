@@ -85,6 +85,7 @@ public:
     LayerScene& getLayerScene();
     const LayerScene& getLayerScene() const;
     void setExternalFoWImage(QImage externalImage);
+    QImage getUnfilteredBackgroundImage();
     QImage getBackgroundImage();
     QImage getFoWImage();
     bool isCleared();

@@ -7,7 +7,7 @@ class LayerFow : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerFow(QObject *parent = nullptr);
+    explicit LayerFow(int order = 0, QObject *parent = nullptr);
     virtual ~LayerFow() override;
 
 public slots:

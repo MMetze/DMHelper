@@ -10,7 +10,7 @@ class LayerImage : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerImage(const QImage& image, QObject *parent = nullptr);
+    explicit LayerImage(const QImage& image, int order = 0, QObject *parent = nullptr);
     virtual ~LayerImage() override;
 
     virtual QRectF boundingRect() const override;
@@ -27,6 +27,9 @@ public slots:
     virtual void playerGLUpdate() override;
     virtual void playerGLPaint() override;
 
+    // Local Interface
+    void updateImage(const QImage& image);
+
 protected:
     // DM Window Methods
     void cleanupDM();
@@ -41,21 +44,21 @@ protected:
 
 };
 
+class LayerImageSourceSignaller : public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit LayerImageSourceSignaller(QObject *parent = nullptr);
+    void emitSignal(const QImage& image);
+
+signals:
+    void imageChanged(const QImage& image);
+};
+
 class ILayerImageSource
 {
 public:
-    class LayerImageSourceSignaller : QObject
-    {
-        Q_OBJECT
-
-    public:
-        explicit LayerImageSourceSignaller(QObject *parent = nullptr);
-        void emitSignal(const QImage& image);
-
-    signals:
-        void imageChanged(const QImage& image);
-    };
-
     explicit ILayerImageSource();
     virtual ~ILayerImageSource();
 

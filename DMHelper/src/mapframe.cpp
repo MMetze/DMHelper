@@ -17,7 +17,7 @@
 #include "publishglmapimagerenderer.h"
 #include "publishglmapvideorenderer.h"
 #include "videoplayerglscreenshot.h"
-#include "layerimage.h"
+//#include "layerimage.h"
 #include <QGraphicsPixmapItem>
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -32,7 +32,7 @@ MapFrame::MapFrame(QWidget *parent) :
     CampaignObjectFrame(parent),
     ui(new Ui::MapFrame),
     _scene(nullptr),
-    _backgroundLayer(nullptr),
+//    _backgroundLayer(nullptr),
 //    _backgroundImage(nullptr),
     _fow(nullptr),
     _partyIcon(nullptr),
@@ -282,6 +282,7 @@ void MapFrame::undoPaint()
     updateFoW();
 }
 
+/*
 void MapFrame::clear()
 {
     _mapSource = nullptr;
@@ -293,31 +294,32 @@ void MapFrame::clear()
     delete _fow; _fow = nullptr;
     delete _undoPath; _undoPath = nullptr;
 }
+*/
 
 void MapFrame::colorize()
 {
     if(!_mapSource)
         return;
 
-    if(!_backgroundImage)
-        return;
+//    if(!_backgroundImage)
+//        return;
 
-    bool previousApplied = _mapSource->isFilterApplied();
-    if(previousApplied)
-        _mapSource->setApplyFilter(false);
-    MapColorizeDialog dlg(_mapSource->getBackgroundImage(), _mapSource->getFilter());
+//    bool previousApplied = _mapSource->isFilterApplied();
+//    if(previousApplied)
+//        _mapSource->setApplyFilter(false);
+    MapColorizeDialog dlg(_mapSource->getUnfilteredBackgroundImage(), _mapSource->getFilter());
     dlg.resize(width() / 2, height() / 2);
     if(dlg.exec() == QDialog::Accepted)
     {
         _mapSource->setFilter(dlg.getFilter());
         _mapSource->setApplyFilter(dlg.getFilter().isValid());
-        _backgroundImage->setPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage())); // TODO: this has to be handled by the map telling the image layer the image has changed.
+//        _backgroundImage->setPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage())); // TODO: this has to be handled by the map telling the image layer the image has changed.
     }
-    else
-    {
-        if(previousApplied)
-            _mapSource->setApplyFilter(true);
-    }
+//    else
+//    {
+//        if(previousApplied)
+//            _mapSource->setApplyFilter(true);
+//    }
 }
 
 void MapFrame::setParty(Party* party)
@@ -1652,6 +1654,8 @@ void MapFrame::cleanupBuffers()
         _cameraRect = nullptr;
     }
 
+    _mapSource->getLayerScene().dmUninitialize();
+
     /*
     if(_backgroundImage)
     {
@@ -1662,6 +1666,7 @@ void MapFrame::cleanupBuffers()
         delete tempItem;
     }
     */
+    /*
     if(_backgroundLayer)
     {
         _backgroundLayer->dmUninitialize();
@@ -1669,6 +1674,7 @@ void MapFrame::cleanupBuffers()
         _backgroundLayer = nullptr;
         delete tempLayer;
     }
+    */
 
     if(_fow)
     {
@@ -1900,6 +1906,8 @@ void MapFrame::rendererDeactivated()
     if(!_renderer)
         return;
 
+    /*
+     * TODO: update this with video layers
     PublishGLMapVideoRenderer* videoRenderer = dynamic_cast<PublishGLMapVideoRenderer*>(_renderer);
     if(videoRenderer)
     {
@@ -1907,6 +1915,7 @@ void MapFrame::rendererDeactivated()
         if(!screenshot.isNull())
             setBackgroundPixmap(QPixmap::fromImage(screenshot));
     }
+    */
 
     disconnect(this, &MapFrame::distanceChanged, _renderer, &PublishGLMapRenderer::distanceChanged);
     disconnect(this, &MapFrame::fowChanged, _renderer, &PublishGLMapRenderer::fowChanged);
@@ -2021,9 +2030,10 @@ bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& sc
 
 void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
 {
+    /*
     if(!_backgroundImage)
     {
-        _backgroundImage = _scene->addPixmap(pixmap);
+            _backgroundImage = _scene->addPixmap(pixmap);
         _backgroundImage->setEnabled(false);
         _backgroundImage->setZValue(-2);
     }
@@ -2032,6 +2042,7 @@ void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
         _backgroundImage->setPixmap(pixmap);
         _backgroundImage->show();
     }
+    */
 }
 
 void MapFrame::setCameraToView()

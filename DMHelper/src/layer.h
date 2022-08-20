@@ -31,10 +31,13 @@ class Layer : public QObject
 {
     Q_OBJECT
 public:
-    Layer(QObject *parent = nullptr);
+    Layer(int order = 0, QObject *parent = nullptr);
     virtual ~Layer();
 
     virtual QRectF boundingRect() const;
+
+    virtual int getOrder() const;
+    virtual void setOrder(int order);
 
 public slots:
     // DM Window Generic Interface
@@ -49,7 +52,10 @@ public slots:
     virtual void playerGLPaint() = 0;
 
 signals:
+    void orderChanged(int order);
 
+protected:
+    int _order;
 };
 
 #endif // LAYER_H

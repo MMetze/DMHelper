@@ -530,6 +530,11 @@ void Map::setExternalFoWImage(QImage externalImage)
     applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 }
 
+QImage Map::getUnfilteredBackgroundImage()
+{
+    return _imgBackground;
+}
+
 QImage Map::getBackgroundImage()
 {
     return _filterApplied ? _filter.apply(_imgBackground) : _imgBackground;
@@ -1033,6 +1038,15 @@ bool Map::initialize()
         return true;
     }
 
+    //emitSignal(_imgBackground);
+    LayerImage* backgroundLayer = new LayerImage(_imgBackground, -2);
+    connect(&_signaller, &LayerImageSourceSignaller::imageChanged, backgroundLayer, &LayerImage::updateImage);
+    _layerScene.appendLayer(backgroundLayer);
+
+    QImage cloudsImage("C:/Users/turne/Documents/DnD/DM Helper/testdata/CloudsSquare.png");
+    LayerImage* cloudsLayer = new LayerImage(cloudsImage, 20);
+    _layerScene.appendLayer(cloudsLayer);
+
     _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
@@ -1178,6 +1192,7 @@ void Map::setApplyFilter(bool applyFilter)
     {
         _filterApplied = applyFilter;
         emit dirty();
+        emitSignal(getBackgroundImage());
     }
 }
 
@@ -1185,6 +1200,7 @@ void Map::setFilter(const MapColorizeFilter& filter)
 {
     _filter = filter;
     emit dirty();
+    emitSignal(getBackgroundImage());
 }
 
 void Map::setCameraRect(const QRect& cameraRect)

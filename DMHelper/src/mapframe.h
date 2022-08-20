@@ -21,7 +21,6 @@ class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
-class Layer;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -92,7 +91,7 @@ public slots:
     void resetFoW();
     void clearFoW();
     void undoPaint();
-    void clear();
+  // void clear();
 
     void colorize();
 
@@ -217,7 +216,7 @@ private:
 
     MapFrameScene* _scene;
     //QGraphicsPixmapItem* _backgroundImage;
-    Layer* _backgroundLayer;
+    //Layer* _backgroundLayer;
     QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
     CameraRect* _cameraRect;

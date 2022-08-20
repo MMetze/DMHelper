@@ -1,7 +1,7 @@
 #include "layerfow.h"
 
-LayerFow::LayerFow(QObject *parent)
-    : Layer{parent}
+LayerFow::LayerFow(int order, QObject *parent)
+    : Layer{order, parent}
 {
 }
 
