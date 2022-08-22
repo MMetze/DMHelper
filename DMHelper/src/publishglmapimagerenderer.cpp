@@ -25,6 +25,7 @@ void PublishGLMapImageRenderer::cleanup()
 
 void PublishGLMapImageRenderer::initializeBackground()
 {
+    /*
     if((_backgroundObject) || (!_map))
         return;
 
@@ -33,6 +34,7 @@ void PublishGLMapImageRenderer::initializeBackground()
 
     _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
     updateProjectionMatrix();
+    */
 }
 
 bool PublishGLMapImageRenderer::isBackgroundReady()

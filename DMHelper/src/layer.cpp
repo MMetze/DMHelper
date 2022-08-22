@@ -29,3 +29,8 @@ void Layer::setOrder(int order)
     _order = order;
     emit orderChanged(order);
 }
+
+bool Layer::playerGLUpdate()
+{
+    return false;
+}

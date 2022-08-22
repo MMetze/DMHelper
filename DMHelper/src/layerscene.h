@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QOpenGLFunctions>
 
 class Layer;
 class QGraphicsScene;
@@ -15,6 +16,7 @@ public:
     virtual ~LayerScene();
 
     virtual QRectF boundingRect() const;
+    virtual QSizeF sceneSize() const;
 
     int layerCount();
     Layer* layerAt(int position);
@@ -34,8 +36,9 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize();
     virtual void playerGLUninitialize();
-    virtual void playerGLUpdate();
-    virtual void playerGLPaint();
+    virtual bool playerGLUpdate();
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix);
+    virtual void playerGLResize(int w, int h);
 
 signals:
 

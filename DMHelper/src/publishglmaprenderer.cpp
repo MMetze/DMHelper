@@ -197,7 +197,9 @@ void PublishGLMapRenderer::initializeGL()
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     // Create the objects
-    initializeBackground();
+    //initializeBackground();
+    _map->getLayerScene().playerGLInitialize();
+    updateProjectionMatrix();
     updateFoW();
 
     // Create the party token
@@ -227,7 +229,11 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
-    resizeBackground(w, h);
+//    resizeBackground(w, h);
+    if(_map)
+        _map->getLayerScene().playerGLResize(w, h);
+
+    updateProjectionMatrix();
 
     emit updateWidget();
 }
@@ -237,6 +243,10 @@ void PublishGLMapRenderer::paintGL()
     if((!_initialized) || (!_map) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
+    if(_map->getLayerScene().playerGLUpdate())
+        updateProjectionMatrix();
+
+        /*
     if(!isBackgroundReady())
     {
         updateBackground();
@@ -251,6 +261,8 @@ void PublishGLMapRenderer::paintGL()
         _updateFow = true;
     }
     QSize sceneSize = getBackgroundSize().toSize();
+    */
+    QSize sceneSize = _map->getLayerScene().sceneSize().toSize();
 
     if(_recreatePartyToken)
         createPartyToken();
@@ -285,7 +297,8 @@ void PublishGLMapRenderer::paintGL()
     f->glUseProgram(_shaderProgram);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
 
-    paintBackground(f);
+    //paintBackground(f);
+    _map->getLayerScene().playerGLPaint(f, _shaderModelMatrix);
 
     if(_fowObject)
     {
@@ -377,7 +390,8 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     QSizeF halfRect = rectSize / 2.0;
     QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
-    QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
+    //QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
+    QSizeF backgroundMiddle = _map->getLayerScene().sceneSize() / 2.0;
 
     qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
     qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
@@ -560,7 +574,8 @@ void PublishGLMapRenderer::updateFoW()
     if((!_map) || (_fowImage.isNull()))
         return;
 
-    QSize backgroundSize = getBackgroundSize().toSize();
+    //QSize backgroundSize = getBackgroundSize().toSize();
+    QSize backgroundSize = _map->getLayerScene().sceneSize().toSize();
     if(backgroundSize.isEmpty())
         return;
 

@@ -5,6 +5,7 @@
 #include <QImage>
 
 class QGraphicsPixmapItem;
+class PublishGLBattleBackground;
 
 class LayerImage : public Layer
 {
@@ -24,8 +25,9 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize() override;
     virtual void playerGLUninitialize() override;
-    virtual void playerGLUpdate() override;
-    virtual void playerGLPaint() override;
+    //virtual bool playerGLUpdate() override;
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) override;
+    virtual void playerGLResize(int w, int h) override;
 
     // Local Interface
     void updateImage(const QImage& image);
@@ -38,6 +40,9 @@ protected:
 
     // DM Window Members
     QGraphicsPixmapItem* _graphicsItem;
+
+    // Player Window Members
+    PublishGLBattleBackground* _backgroundObject;
 
     // Core contents
     QImage _layerImage;

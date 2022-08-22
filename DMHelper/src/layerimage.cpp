@@ -1,13 +1,18 @@
 #include "layerimage.h"
+#include "publishglbattlebackground.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
+#include <QOpenGLFunctions>
 #include <QDebug>
 
 LayerImage::LayerImage(const QImage& image, int order, QObject *parent) :
     Layer{order, parent},
     _graphicsItem(nullptr),
+    _backgroundObject(nullptr),
     _layerImage(image)
 {
+    if(_layerImage.isNull())
+        qDebug() << "[LayerImage] ERROR: layer image created with null image!";
 }
 
 LayerImage::~LayerImage()
@@ -47,18 +52,41 @@ void LayerImage::dmUpdate()
 
 void LayerImage::playerGLInitialize()
 {
+    if(_backgroundObject)
+    {
+        qDebug() << "[LayerImage] ERROR: playerGLInitialize called although the background object already exists!";
+        return;
+    }
+
+    _backgroundObject = new PublishGLBattleBackground(nullptr, _layerImage, GL_NEAREST);
 }
 
 void LayerImage::playerGLUninitialize()
 {
+    delete _backgroundObject;
+    _backgroundObject = nullptr;
 }
 
-void LayerImage::playerGLUpdate()
+/*
+bool LayerImage::playerGLUpdate()
 {
+    return false;
+}
+*/
+
+void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
+{
+    if((!_backgroundObject) || (!functions))
+        return;
+
+    functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+    _backgroundObject->paintGL();
 }
 
-void LayerImage::playerGLPaint()
+void LayerImage::playerGLResize(int w, int h)
 {
+    Q_UNUSED(w);
+    Q_UNUSED(h);
 }
 
 void LayerImage::updateImage(const QImage& image)

@@ -2,6 +2,7 @@
 #define LAYER_H
 
 #include <QObject>
+#include <QOpenGLFunctions>
 
 class QGraphicsScene;
 
@@ -48,8 +49,9 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize() = 0;
     virtual void playerGLUninitialize() = 0;
-    virtual void playerGLUpdate() = 0;
-    virtual void playerGLPaint() = 0;
+    virtual bool playerGLUpdate();
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) = 0;
+    virtual void playerGLResize(int w, int h) = 0;
 
 signals:
     void orderChanged(int order);

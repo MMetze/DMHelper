@@ -29,10 +29,16 @@ void LayerFow::playerGLUninitialize()
 {
 }
 
-void LayerFow::playerGLUpdate()
+/*
+bool LayerFow::playerGLUpdate()
+{
+}
+*/
+
+void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
 {
 }
 
-void LayerFow::playerGLPaint()
+void LayerFow::playerGLResize(int w, int h)
 {
 }

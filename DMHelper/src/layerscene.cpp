@@ -25,6 +25,11 @@ QRectF LayerScene::boundingRect() const
     return result;
 }
 
+QSizeF LayerScene::sceneSize() const
+{
+    return boundingRect().size();
+}
+
 int LayerScene::layerCount()
 {
     return _layers.count();
@@ -111,14 +116,24 @@ void LayerScene::playerGLUninitialize()
         _layers[i]->playerGLUninitialize();
 }
 
-void LayerScene::playerGLUpdate()
+bool LayerScene::playerGLUpdate()
 {
+    bool result = false;
+
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->playerGLUpdate();
+        result = result || _layers[i]->playerGLUpdate();
+
+    return result;
 }
 
-void LayerScene::playerGLPaint()
+void LayerScene::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
 {
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->playerGLPaint();
+        _layers[i]->playerGLPaint(functions, modelMatrix);
+}
+
+void LayerScene::playerGLResize(int w, int h)
+{
+    for(int i = 0; i < _layers.count(); ++i)
+        _layers[i]->playerGLResize(w, h);
 }

@@ -19,8 +19,9 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize() override;
     virtual void playerGLUninitialize() override;
-    virtual void playerGLUpdate() override;
-    virtual void playerGLPaint() override;
+//    virtual bool playerGLUpdate() override;
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) override;
+    virtual void playerGLResize(int w, int h) override;
 
 };
 
