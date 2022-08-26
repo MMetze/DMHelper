@@ -2,7 +2,9 @@
 #define LAYER_H
 
 #include <QObject>
+#include <QRectF>
 #include <QOpenGLFunctions>
+#include "dmconstants.h"
 
 class QGraphicsScene;
 
@@ -40,6 +42,8 @@ public:
     virtual int getOrder() const;
     virtual void setOrder(int order);
 
+    virtual DMHelper::LayerType getType() const = 0;
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene& scene) = 0;
@@ -54,6 +58,7 @@ public slots:
     virtual void playerGLResize(int w, int h) = 0;
 
 signals:
+    void dirty();
     void orderChanged(int order);
 
 protected:

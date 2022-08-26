@@ -1,4 +1,4 @@
-#ifndef DMCONSTANTS_H
+    #ifndef DMCONSTANTS_H
 #define DMCONSTANTS_H
 
 #include <Qt>
@@ -134,7 +134,7 @@ namespace DMHelper
         BattleFrameState_FreeDistance,
         BattleFrameState_Pointer,
         BattleFrameState_FoWSelect,
-        BattleFrameState_FoWEdit,
+        BattleFrameState_FoWEdit
     };
 
     enum AudioType
@@ -150,6 +150,12 @@ namespace DMHelper
         InitiativeType_None = 0,
         InitiativeType_Image,
         InitiativeType_ImageName
+    };
+
+    enum LayerType
+    {
+        LayerType_Image = 0,
+        LayerType_Fow
     };
 
     const int TreeItemData_Type = Qt::UserRole + 1;

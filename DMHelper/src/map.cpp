@@ -37,7 +37,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _mapItems(),
     _initialized(false),
     _layerScene(),
-    _imgBackground(),
+    //_imgBackground(),
     _imgFow(),
     _imgBWFow(),
     _indexBWFow(0),
@@ -60,9 +60,13 @@ Map::~Map()
 
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
+    //TODO: include layers in import/export (with backwards compatibility)
+
+    // For backwards compatibility only, should be part of a layer
     _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
     if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
         _filename.clear();
+
     setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
     setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
     setDistanceLineWidth(element.attribute("lineWidth", QString::number(1)).toInt());
@@ -76,7 +80,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     _cameraRect = QRect(element.attribute("cameraRectX", QString::number(0)).toInt(),
                         element.attribute("cameraRectY", QString::number(0)).toInt(),
                         element.attribute("cameraRectWidth", QString::number(0)).toInt(),
-                        element.attribute("cameraRectHeight", QString::number(0)).toInt());
+                        element.attribute("cameraRectHeight ", QString::number(0)).toInt());
 
     QDomElement actionsElement = element.firstChildElement(QString("actions"));
     if(!actionsElement.isNull())
@@ -117,6 +121,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
         }
     }
 
+    // For backwards compatibility only, should be part of a layer
     QDomElement filterElement = element.firstChildElement(QString("filter"));
     if(!filterElement.isNull())
     {
@@ -196,10 +201,12 @@ int Map::getObjectType() const
     return DMHelper::CampaignType_Map;
 }
 
+/*
 const QImage& Map::getImage() const
 {
     return _imgBackground;
 }
+*/
 
 QString Map::getFileName() const
 {
@@ -432,7 +439,6 @@ void Map::internalApplyPaintTo(QImage* target, const QColor& clearColor, int ind
     }
 }
 
-
 UndoMarker* Map::getMapMarker(int id)
 {
     // Search the undo stack for new markers
@@ -532,12 +538,14 @@ void Map::setExternalFoWImage(QImage externalImage)
 
 QImage Map::getUnfilteredBackgroundImage()
 {
-    return _imgBackground;
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    return layer ? layer->getImageUnfiltered() : QImage();
 }
 
 QImage Map::getBackgroundImage()
 {
-    return _filterApplied ? _filter.apply(_imgBackground) : _imgBackground;
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    return layer ? layer->getImage() : QImage();
 }
 
 QImage Map::getFoWImage()
@@ -720,14 +728,10 @@ void Map::fillFoW(const QColor& color, QPaintDevice* target)
     p.fillRect(0,0,target->width(),target->height(),color);
 }
 
-QImage Map::getRawBWFowImage()
-{
-    return _imgBWFow;
-}
-
 QImage Map::getBWFoWImage()
 {
-    return getBWFoWImage(_imgBackground.size());
+    // TODO: get layer and extract BW FOW image
+    return getBWFoWImage(_layerScene.sceneSize().toSize());
 }
 
 QImage Map::getBWFoWImage(const QImage &img)
@@ -749,6 +753,7 @@ QImage Map::getBWFoWImage(const QSize &size)
     return _imgBWFow;
 }
 
+/*
 QImage Map::getPublishImage()
 {
     QImage result(getBackgroundImage());
@@ -784,6 +789,7 @@ QImage Map::getPublishImage(const QRect& rect)
 
     return result;
 }
+*/
 
 QImage Map::getGrayImage()
 {
@@ -800,6 +806,7 @@ QImage Map::getGrayImage()
     return result;
 }
 
+/*
 QImage Map::getShrunkPublishImage(QRect* targetRect)
 {
     QImage bwFoWImage = getBWFoWImage(_imgBackground);
@@ -871,10 +878,12 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
 
     return result;
 }
+*/
 
 QRect Map::getShrunkPublishRect()
 {
-    QImage bwFoWImage = getBWFoWImage(_imgBackground);
+    //QImage bwFoWImage = getBWFoWImage(_imgBackground);
+    QImage bwFoWImage = getBWFoWImage();
 
     int top, bottom, left, right;
     top = bottom = left = right = -1;
@@ -928,23 +937,25 @@ QRect Map::getShrunkPublishRect()
 
 bool Map::isFilterApplied() const
 {
-    return _filterApplied;
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    return layer ? layer->isFilterApplied() : false;
 }
 
 MapColorizeFilter Map::getFilter() const
 {
-    return _filter;
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    return layer ? layer->getFilter() : MapColorizeFilter();
 }
 
 QImage Map::getPreviewImage()
 {
-    if(!_imgBackground.isNull())
-        return getBackgroundImage();
+    QImage previewImage = getBackgroundImage();
+    if(!previewImage.isNull())
+        return previewImage;
 
     if((_filename.isNull()) || (_filename.isEmpty()))
         return QImage();
 
-    QImage previewImage;
     if(!previewImage.load(_filename))
     {
         // Last attempt, check the cache for a video version
@@ -952,7 +963,7 @@ QImage Map::getPreviewImage()
         previewImage.load(cacheFilePath);
     }
 
-    return _filterApplied ? _filter.apply(previewImage) : previewImage;
+    return isFilterApplied() ? getFilter().apply(previewImage) : previewImage;
 }
 
 bool Map::initialize()
@@ -960,6 +971,9 @@ bool Map::initialize()
     if(_initialized)
         return true;
 
+    QImage imgBackground;
+
+    // Everything other than direct layer initialization has to be for backwards compatibility exclusively
     if(!_filename.isEmpty())
     {
         if(!QFile::exists(_filename))
@@ -1009,9 +1023,9 @@ bool Map::initialize()
             return false;
         }
 
-        _imgBackground = reader.read();
+        imgBackground = reader.read();
 
-        if(_imgBackground.isNull())
+        if(imgBackground.isNull())
         {
             // Could not read the file as an image - this is likely a file error...
             qDebug() << "[Map] Not able to read map file: " << reader.error() <<", " << reader.errorString();
@@ -1024,13 +1038,13 @@ bool Map::initialize()
             return false;
         }
 
-        if(_imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
-            _imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
+        if(imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
+            imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
     }
     else if(_mapColor.isValid() && _mapSize.isValid())
     {
-        _imgBackground = QImage(_mapSize, QImage::Format_ARGB32_Premultiplied);
-        _imgBackground.fill(_mapColor);
+        imgBackground = QImage(_mapSize, QImage::Format_ARGB32_Premultiplied);
+        imgBackground.fill(_mapColor);
     }
     else
     {
@@ -1039,21 +1053,26 @@ bool Map::initialize()
     }
 
     //emitSignal(_imgBackground);
-    LayerImage* backgroundLayer = new LayerImage(_imgBackground, -2);
-    connect(&_signaller, &LayerImageSourceSignaller::imageChanged, backgroundLayer, &LayerImage::updateImage);
+    LayerImage* backgroundLayer = new LayerImage(imgBackground, -2);
+    backgroundLayer->setApplyFilter(_filterApplied);
+    backgroundLayer->setFilter(_filter);
+    connect(this, &Map::mapImageChanged, backgroundLayer, &LayerImage::updateImage);
     _layerScene.appendLayer(backgroundLayer);
 
     QImage cloudsImage("C:/Users/turne/Documents/DnD/DM Helper/testdata/CloudsSquare.png");
     LayerImage* cloudsLayer = new LayerImage(cloudsImage, 20);
     _layerScene.appendLayer(cloudsLayer);
 
-    _imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
-    applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
+    //_imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
+    //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
+
+    LayerFow* fowLayer = new LayerFow(-1);
+    _layerScene.appendLayer(fowLayer);
 
     if(!_cameraRect.isValid())
     {
         _cameraRect.setTopLeft(QPoint(0, 0));
-        _cameraRect.setSize(_imgBackground.size());
+        _cameraRect.setSize(imgBackground.size());
     }
 
     _initialized = true;
@@ -1062,7 +1081,7 @@ bool Map::initialize()
 
 void Map::uninitialize()
 {
-    _imgBackground = QImage();
+//    _imgBackground = QImage();
     _imgBWFow = QImage();
     _imgFow = QImage();
     _initialized = false;
@@ -1188,19 +1207,31 @@ void Map::setShowMarkers(bool showMarkers)
 
 void Map::setApplyFilter(bool applyFilter)
 {
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    if(layer)
+        layer->setApplyFilter(applyFilter);
+
+/*
     if(_filterApplied != applyFilter)
     {
         _filterApplied = applyFilter;
         emit dirty();
-        emitSignal(getBackgroundImage());
+        emit mapImageChanged(getBackgroundImage());
     }
+    */
 }
 
 void Map::setFilter(const MapColorizeFilter& filter)
 {
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    if(layer)
+        layer->setFilter(filter);
+
+    /*
     _filter = filter;
     emit dirty();
-    emitSignal(getBackgroundImage());
+    emit mapImageChanged(getBackgroundImage());
+    */
 }
 
 void Map::setCameraRect(const QRect& cameraRect)

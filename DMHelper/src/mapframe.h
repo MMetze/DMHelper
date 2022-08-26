@@ -86,7 +86,7 @@ signals:
     void publishCancelled();
 
 public slots:
-    void updateFoW();
+//    void updateFoW();
     void fillFoW();
     void resetFoW();
     void clearFoW();
@@ -217,7 +217,7 @@ private:
     MapFrameScene* _scene;
     //QGraphicsPixmapItem* _backgroundImage;
     //Layer* _backgroundLayer;
-    QGraphicsPixmapItem* _fow;
+    //QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
     CameraRect* _cameraRect;
 

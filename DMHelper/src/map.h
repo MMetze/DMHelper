@@ -3,9 +3,9 @@
 
 #include "campaignobjectbase.h"
 #include "mapcontent.h"
-#include "mapcolorizefilter.h"
 #include "layerscene.h"
 #include "layerimage.h"
+#include "layerfow.h"
 #include <QList>
 #include <QImage>
 #include <QPixmap>
@@ -17,7 +17,7 @@ class AudioTrack;
 class Party;
 class UndoMarker;
 
-class Map : public CampaignObjectBase, public ILayerImageSource
+class Map : public CampaignObjectBase//, public ILayerImageSource
 {
     Q_OBJECT
 public:
@@ -31,7 +31,7 @@ public:
     virtual int getObjectType() const override;
 
     // From ILayerImageSource
-    virtual const QImage& getImage() const override;
+    //virtual const QImage& getImage() const override;
 
     // Local
     QString getFileName() const;
@@ -93,14 +93,13 @@ public:
     void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
     void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
     void fillFoW(const QColor& color, QPaintDevice* target);
-    QImage getRawBWFowImage();
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
-    QImage getPublishImage();
-    QImage getPublishImage(const QRect& rect);
+//    QImage getPublishImage();
+//    QImage getPublishImage(const QRect& rect);
     QImage getGrayImage();
-    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
+//    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
     QRect getShrunkPublishRect();
 
     bool isFilterApplied() const;
@@ -125,6 +124,8 @@ signals:
     void distanceLineWidthChanged(int lineWidth);
 
     void showMarkersChanged(bool showMarkers);
+
+    void mapImageChanged(const QImage& image);
 
 public slots:
     bool initialize(); // returns false only if reasonably believe this is a video file
@@ -180,7 +181,7 @@ protected:
 
     bool _initialized;
     LayerScene _layerScene;
-    QImage _imgBackground;
+    //QImage _imgBackground;
     QImage _imgFow;
     QImage _imgBWFow;
     int _indexBWFow;

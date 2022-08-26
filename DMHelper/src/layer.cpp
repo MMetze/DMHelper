@@ -27,6 +27,7 @@ void Layer::setOrder(int order)
         return;
 
     _order = order;
+    emit dirty();
     emit orderChanged(order);
 }
 

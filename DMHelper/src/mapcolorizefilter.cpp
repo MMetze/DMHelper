@@ -17,7 +17,7 @@ MapColorizeFilter::~MapColorizeFilter()
 {
 }
 
-QImage MapColorizeFilter::apply(const QImage& in)
+QImage MapColorizeFilter::apply(const QImage& in) const
 {
     if(!in.size().isValid())
         return QImage();
@@ -58,7 +58,7 @@ QImage MapColorizeFilter::apply(const QImage& in)
     return filteredImage;
 }
 
-bool MapColorizeFilter::isValid()
+bool MapColorizeFilter::isValid() const
 {
     return((_r2r != 1.0) || (_g2r != 0.0) || (_b2r != 0.0) ||
            (_r2g != 0.0) || (_g2g != 1.0) || (_b2g != 0.0) ||

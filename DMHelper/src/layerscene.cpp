@@ -1,6 +1,9 @@
 #include "layerscene.h"
 #include "layer.h"
+#include "layerimage.h"
 #include <QRectF>
+#include <QImage>
+#include <QPainter>
 
 LayerScene::LayerScene(QObject *parent) :
     QObject{parent},
@@ -30,12 +33,12 @@ QSizeF LayerScene::sceneSize() const
     return boundingRect().size();
 }
 
-int LayerScene::layerCount()
+int LayerScene::layerCount() const
 {
     return _layers.count();
 }
 
-Layer* LayerScene::layerAt(int position)
+Layer* LayerScene::layerAt(int position) const
 {
     return ((position >= 0) && (position < _layers.count())) ? _layers.at(position) : nullptr;
 }
@@ -84,6 +87,45 @@ void LayerScene::moveLayer(int from, int to)
         return;
 
     _layers.move(from, to);
+}
+
+Layer* LayerScene::getFirst(DMHelper::LayerType type) const
+{
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getType() == type))
+            return _layers.at(i);
+    }
+
+    return nullptr;
+}
+
+QImage LayerScene::mergedImage()
+{
+    QImage result;
+
+    // TODO: add different layer types here
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getType() == DMHelper::LayerType_Image))
+        {
+            LayerImage* layerImage = dynamic_cast<LayerImage*>(_layers.at(i));
+            if(layerImage)
+            {
+                if(result.isNull())
+                {
+                    result = layerImage->getImage();
+                }
+                else
+                {
+                    QPainter painter(&result);
+                    painter.drawImage(0, 0, layerImage->getImage());
+                }
+            }
+        }
+    }
+
+    return result;
 }
 
 void LayerScene::dmInitialize(QGraphicsScene& scene)

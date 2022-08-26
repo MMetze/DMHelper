@@ -34,7 +34,7 @@ MapFrame::MapFrame(QWidget *parent) :
     _scene(nullptr),
 //    _backgroundLayer(nullptr),
 //    _backgroundImage(nullptr),
-    _fow(nullptr),
+//    _fow(nullptr),
     _partyIcon(nullptr),
     _cameraRect(nullptr),
     _editMode(-1),
@@ -97,8 +97,9 @@ void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* cur
 
     setMap(map);
     connect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
-    connect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
-    connect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
+    // TODO: make sure FOW editing works properly on DM and Player views
+//    connect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
+//    connect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
 
     rendererActivated(dynamic_cast<PublishGLMapRenderer*>(currentRenderer));
 
@@ -125,7 +126,7 @@ void MapFrame::deactivateObject()
 
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
     disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
-    disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
+    // TODO: disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
     disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
 #ifdef Q_OS_WIN32
@@ -226,6 +227,7 @@ QAction* MapFrame::getRedoAction(QObject* parent)
     return _mapSource->getUndoStack()->createRedoAction(parent);
 }
 
+/*
 void MapFrame::updateFoW()
 {
     if((_fow)&&(_mapSource))
@@ -233,6 +235,7 @@ void MapFrame::updateFoW()
         _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
     }
 }
+*/
 
 void MapFrame::fillFoW()
 {
@@ -279,7 +282,7 @@ void MapFrame::undoPaint()
 
     _mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1);
 
-    updateFoW();
+    // TODO updateFoW();
 }
 
 /*
@@ -749,8 +752,12 @@ void MapFrame::setRotation(int rotation)
 void MapFrame::initializeFoW()
 {
 //    if((_backgroundImage) || (_fow) || (_scene))
-    if((_fow) || (_scene))
-        qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame contents NOT done. Undefined behavior!";
+//    if((_fow) || (_scene))
+    if(_scene)
+    {
+        qDebug() << "[MapFrame] ERROR: Cleanup of previous map frame scene contents NOT done. Undefined behavior!";
+        delete _scene;
+    }
 
     _scene = new MapFrameScene(this);
     ui->graphicsView->setScene(_scene);
@@ -780,9 +787,9 @@ void MapFrame::initializeFoW()
         //setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
         _mapSource->getLayerScene().dmInitialize(*_scene);
 
-        _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
-        _fow->setEnabled(false);
-        _fow->setZValue(-1);
+        //_fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
+        //_fow->setEnabled(false);
+        //_fow->setZValue(-1);
         _bwFoWImage = _mapSource->getBWFoWImage();
 
         loadViewRect();
@@ -1676,7 +1683,7 @@ void MapFrame::cleanupBuffers()
         delete tempLayer;
     }
     */
-
+/*
     if(_fow)
     {
         if(_scene)
@@ -1685,7 +1692,7 @@ void MapFrame::cleanupBuffers()
         _fow = nullptr;
         delete tempItem;
     }
-
+*/
     _bwFoWImage = QImage();
 
     cleanupMarkerItems();
@@ -1849,6 +1856,8 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
     fowImage.fill(QColor(0,0,0,0));
     _mapSource->setExternalFoWImage(fowImage);
+    /*
+     * TODO
     if(!_fow)
     {
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
@@ -1859,6 +1868,7 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     {
         _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
     }
+    */
 
     _bwFoWImage = _mapSource->getBWFoWImage(image.size());
 

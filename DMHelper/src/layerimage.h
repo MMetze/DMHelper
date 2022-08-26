@@ -2,6 +2,7 @@
 #define LAYERIMAGE_H
 
 #include "layer.h"
+#include "mapcolorizefilter.h"
 #include <QImage>
 
 class QGraphicsPixmapItem;
@@ -14,7 +15,14 @@ public:
     explicit LayerImage(const QImage& image, int order = 0, QObject *parent = nullptr);
     virtual ~LayerImage() override;
 
-    virtual QRectF boundingRect() const override;
+    virtual QRectF boundingRect() const override;    
+    virtual DMHelper::LayerType getType() const override;
+
+    QImage getImage() const;
+    QImage getImageUnfiltered() const;
+
+    bool isFilterApplied() const;
+    MapColorizeFilter getFilter() const;
 
 public slots:
     // DM Window Generic Interface
@@ -25,18 +33,27 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize() override;
     virtual void playerGLUninitialize() override;
-    //virtual bool playerGLUpdate() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) override;
     virtual void playerGLResize(int w, int h) override;
 
     // Local Interface
     void updateImage(const QImage& image);
+    void setApplyFilter(bool applyFilter);
+    void setFilter(const MapColorizeFilter& filter);
+
+signals:
+    void imageChanged(const QImage& image);
+
+protected slots:
+    // Local Interface
+    void updateImageInternal();
 
 protected:
     // DM Window Methods
     void cleanupDM();
 
     // Player Window Methods
+    void cleanupPlayer();
 
     // DM Window Members
     QGraphicsPixmapItem* _graphicsItem;
@@ -46,34 +63,9 @@ protected:
 
     // Core contents
     QImage _layerImage;
+    bool _filterApplied;
+    MapColorizeFilter _filter;
 
 };
-
-class LayerImageSourceSignaller : public QObject
-{
-    Q_OBJECT
-
-public:
-    explicit LayerImageSourceSignaller(QObject *parent = nullptr);
-    void emitSignal(const QImage& image);
-
-signals:
-    void imageChanged(const QImage& image);
-};
-
-class ILayerImageSource
-{
-public:
-    explicit ILayerImageSource();
-    virtual ~ILayerImageSource();
-
-    virtual const QImage& getImage() const = 0;
-    LayerImageSourceSignaller& getSignaller();
-    void emitSignal(const QImage& image);
-
-protected:
-    LayerImageSourceSignaller _signaller;
-};
-
 
 #endif // LAYERIMAGE_H

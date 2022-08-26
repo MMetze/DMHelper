@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QOpenGLFunctions>
+#include "dmconstants.h"
 
 class Layer;
 class QGraphicsScene;
@@ -18,14 +19,17 @@ public:
     virtual QRectF boundingRect() const;
     virtual QSizeF sceneSize() const;
 
-    int layerCount();
-    Layer* layerAt(int position);
+    int layerCount() const;
+    Layer* layerAt(int position) const;
     void insertLayer(int position, Layer* layer);
     void prependLayer(Layer* layer);
     void appendLayer(Layer* layer);
     void removeLayer(int position);
     void clearLayers();
     void moveLayer(int from, int to);
+
+    Layer* getFirst(DMHelper::LayerType type) const;
+    QImage mergedImage();
 
 public slots:
     // DM Window Generic Interface

@@ -9,20 +9,50 @@ LayerImage::LayerImage(const QImage& image, int order, QObject *parent) :
     Layer{order, parent},
     _graphicsItem(nullptr),
     _backgroundObject(nullptr),
-    _layerImage(image)
+    _layerImage(image),
+    _filterApplied(false),
+    _filter()
 {
     if(_layerImage.isNull())
         qDebug() << "[LayerImage] ERROR: layer image created with null image!";
+
+    connect(this, &LayerImage::dirty, this, &LayerImage::updateImageInternal);
 }
 
 LayerImage::~LayerImage()
 {
     cleanupDM();
+    cleanupPlayer();
 }
 
 QRectF LayerImage::boundingRect() const
 {
     return _graphicsItem ? _graphicsItem->boundingRect() : QRectF();
+}
+
+DMHelper::LayerType LayerImage::getType() const
+{
+    return DMHelper::LayerType_Image;
+}
+
+QImage LayerImage::getImage() const
+{
+    return _filterApplied ? _filter.apply(_layerImage) : _layerImage;
+}
+
+QImage LayerImage::getImageUnfiltered() const
+{
+    return _layerImage;
+}
+
+bool LayerImage::isFilterApplied() const
+{
+    return _filterApplied;
+}
+
+MapColorizeFilter LayerImage::getFilter() const
+{
+    return _filter;
 }
 
 void LayerImage::dmInitialize(QGraphicsScene& scene)
@@ -33,7 +63,7 @@ void LayerImage::dmInitialize(QGraphicsScene& scene)
         return;
     }
 
-    _graphicsItem = scene.addPixmap(QPixmap::fromImage(_layerImage));
+    _graphicsItem = scene.addPixmap(QPixmap::fromImage(getImage()));
     if(_graphicsItem)
     {
         _graphicsItem->setEnabled(false);
@@ -58,21 +88,13 @@ void LayerImage::playerGLInitialize()
         return;
     }
 
-    _backgroundObject = new PublishGLBattleBackground(nullptr, _layerImage, GL_NEAREST);
+    _backgroundObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
 }
 
 void LayerImage::playerGLUninitialize()
 {
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
+    cleanupPlayer();
 }
-
-/*
-bool LayerImage::playerGLUpdate()
-{
-    return false;
-}
-*/
 
 void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
 {
@@ -95,52 +117,55 @@ void LayerImage::updateImage(const QImage& image)
         return;
 
     _layerImage = image;
+    emit dirty();
+    emit imageChanged(getImage());
+}
+
+void LayerImage::setApplyFilter(bool applyFilter)
+{
+    if(_filterApplied == applyFilter)
+        return;
+
+    _filterApplied = applyFilter;
+    emit dirty();
+    emit imageChanged(getImage());
+}
+
+void LayerImage::setFilter(const MapColorizeFilter& filter)
+{
+    if(filter == _filter)
+        return;
+
+    _filter = filter;
+    emit dirty();
+    emit imageChanged(getImage());
+}
+
+void LayerImage::updateImageInternal()
+{
+    QImage newImage = getImage();
+
     if(_graphicsItem)
-        _graphicsItem->setPixmap(QPixmap::fromImage(image));
+        _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
+
+    if(_backgroundObject)
+        _backgroundObject->setImage(newImage);
 }
 
 void LayerImage::cleanupDM()
 {
-    if(_graphicsItem)
-    {
-        if(_graphicsItem->scene())
-            _graphicsItem->scene()->removeItem(_graphicsItem);
+    if(!_graphicsItem)
+        return;
 
-        delete _graphicsItem;
-        _graphicsItem = nullptr;
-    }
+    if(_graphicsItem->scene())
+        _graphicsItem->scene()->removeItem(_graphicsItem);
+
+    delete _graphicsItem;
+    _graphicsItem = nullptr;
 }
 
-
-
-
-LayerImageSourceSignaller::LayerImageSourceSignaller(QObject *parent) :
-    QObject(parent)
+void LayerImage::cleanupPlayer()
 {
-}
-
-void LayerImageSourceSignaller::emitSignal(const QImage& image)
-{
-    emit imageChanged(image);
-}
-
-
-
-
-ILayerImageSource::ILayerImageSource()
-{
-}
-
-ILayerImageSource::~ILayerImageSource()
-{
-}
-
-LayerImageSourceSignaller& ILayerImageSource::getSignaller()
-{
-    return _signaller;
-}
-
-void ILayerImageSource::emitSignal(const QImage& image)
-{
-    _signaller.emitSignal(image);
+    delete _backgroundObject;
+    _backgroundObject = nullptr;
 }

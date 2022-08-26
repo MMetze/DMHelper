@@ -10,6 +10,11 @@ public:
     explicit LayerFow(int order = 0, QObject *parent = nullptr);
     virtual ~LayerFow() override;
 
+    virtual QRectF boundingRect() const override;
+    virtual DMHelper::LayerType getType() const override;
+
+    QImage getImage() const;
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene& scene) override;
