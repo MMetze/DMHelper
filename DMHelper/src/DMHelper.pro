@@ -152,10 +152,9 @@ SOURCES += main.cpp\
     spellslotradiobutton.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
-    undopoint.cpp \
-    undopath.cpp \
-    undofill.cpp \
-    undobase.cpp \
+    undofowbase.cpp \
+    undofowfill.cpp \
+    undofowpath.cpp \
     dicerolldialog.cpp \
     map.cpp \
     character.cpp \
@@ -183,6 +182,8 @@ SOURCES += main.cpp\
     quickref.cpp \
     quickrefdatawidget.cpp \
     mapmarkerdialog.cpp \
+    undofowpoint.cpp \
+    undofowshape.cpp \
     undomarker.cpp \
     mapcontent.cpp \
     mapmarkergraphicsitem.cpp \
@@ -197,7 +198,6 @@ SOURCES += main.cpp\
     clockframe.cpp \
     timeanddateframe.cpp \
     basicdate.cpp \
-    undoshape.cpp \
     unselectedellipse.cpp \
     unselectedpixmap.cpp \
     publishframe.cpp \
@@ -393,10 +393,9 @@ HEADERS  += mainwindow.h \
     spellslotradiobutton.h \
     textbrowsermargins.h \
     texteditmargins.h \
-    undopoint.h \
-    undopath.h \
-    undofill.h \
-    undobase.h \
+    undofowbase.h \
+    undofowfill.h \
+    undofowpath.h \
     dicerolldialog.h \
     map.h \
     character.h \
@@ -425,6 +424,8 @@ HEADERS  += mainwindow.h \
     quickref.h \
     quickrefdatawidget.h \
     mapmarkerdialog.h \
+    undofowpoint.h \
+    undofowshape.h \
     undomarker.h \
     mapcontent.h \
     mapmarkergraphicsitem.h \
@@ -439,7 +440,6 @@ HEADERS  += mainwindow.h \
     clockframe.h \
     timeanddateframe.h \
     basicdate.h \
-    undoshape.h \
     unselectedellipse.h \
     unselectedpixmap.h \
     publishframe.h \

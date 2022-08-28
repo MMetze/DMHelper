@@ -1687,7 +1687,8 @@ void BattleFrame::updateMap()
             _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         _background->setPixmap((QPixmap::fromImage(_model->getBackgroundImage())));
         _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-        _bwFoWImage = _model->getMap()->getBWFoWImage();
+        // TODO: Layers
+        //_bwFoWImage = _model->getMap()->getBWFoWImage();
         _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
     }
     else if(_model->getMap()->isValid())
@@ -2682,7 +2683,8 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
         _model->getMap()->setExternalFoWImage(fowImage);
     }
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-    _bwFoWImage = _model->getMap()->getBWFoWImage(image.size());
+    // TODO: Layers
+    //_bwFoWImage = _model->getMap()->getBWFoWImage(image.size());
     _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
 
     if(!_model->getCameraRect().isValid())
@@ -2717,7 +2719,8 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
-    _bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());
+    // TODO: Layers
+    //_bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());
     renderer->fowChanged(_bwFoWImage);
     renderer->setCombatantFrame(_combatantFile);
     renderer->setCountdownFrame(_countdownFile);

@@ -67,10 +67,6 @@ public:
 
     const QRect& getCameraRect() const;
 
-    QUndoStack* getUndoStack() const;
-    void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
-    void internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
-
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
     int getMarkerCount() const;
@@ -84,18 +80,21 @@ public:
     bool isValid();
     LayerScene& getLayerScene();
     const LayerScene& getLayerScene() const;
+    // TODO - remove
     void setExternalFoWImage(QImage externalImage);
     QImage getUnfilteredBackgroundImage();
     QImage getBackgroundImage();
     QImage getFoWImage();
     bool isCleared();
 
+    /*
     void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
     void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
     void fillFoW(const QColor& color, QPaintDevice* target);
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
+    */
 //    QImage getPublishImage();
 //    QImage getPublishImage(const QRect& rect);
     QImage getGrayImage();
@@ -108,8 +107,8 @@ public:
     QImage getPreviewImage();
 
 signals:
-    void executeUndo();
-    void requestFoWUpdate();
+    //void executeUndo();
+    //void requestFoWUpdate();
     void requestMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void partyChanged(Party* party);
@@ -163,7 +162,7 @@ protected:
     void challengeUndoStack();
 
     QString _filename;
-    QUndoStack* _undoStack;
+    //QUndoStack* _undoStack;
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
@@ -182,7 +181,7 @@ protected:
     bool _initialized;
     LayerScene _layerScene;
     //QImage _imgBackground;
-    QImage _imgFow;
+    //QImage _imgFow;
     QImage _imgBWFow;
     int _indexBWFow;
     bool _filterApplied;

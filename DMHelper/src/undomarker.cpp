@@ -6,7 +6,7 @@
 #include <QDomElement>
 
 UndoMarker::UndoMarker(Map* map, const MapMarker& marker) :
-    UndoBase(map, QString("Set Marker")),
+    UndoFowBase(map, QString("Set Marker")),
     _marker(marker),
     _markerGraphicsItem(nullptr)
 {
@@ -81,7 +81,7 @@ void UndoMarker::setRemoved(bool removed)
 {
     if(isRemoved() != removed)
     {
-        UndoBase::setRemoved(removed);
+        UndoFowBase::setRemoved(removed);
         if(_markerGraphicsItem)
             _markerGraphicsItem->setVisible(removed);
     }
@@ -92,7 +92,7 @@ int UndoMarker::getType() const
     return DMHelper::ActionType_SetMarker;
 }
 
-UndoBase* UndoMarker::clone() const
+UndoFowBase* UndoMarker::clone() const
 {
     return new UndoMarker(_map, _marker);
 }

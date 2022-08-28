@@ -1,35 +1,35 @@
-#include "undoshape.h"
-#include "map.h"
-#include "mapframe.h"
+#include "undofowshape.h"
+#include "layerfow.h"
 
-UndoShape::UndoShape(Map* map, const MapEditShape& mapEditShape) :
-    UndoBase(map, QString("Paint")),
+UndoFowShape::UndoFowShape(LayerFow* layer, const MapEditShape& mapEditShape) :
+    UndoFowBase(layer, QString("Paint")),
     _mapEditShape(mapEditShape)
 {
 }
 
-void UndoShape::undo()
+void UndoFowShape::undo()
 {
-    if(_map)
-       _map->undoPaint();
+    if(_layer)
+       _layer->undoPaint();
 }
 
-void UndoShape::redo()
+void UndoFowShape::redo()
 {
-    if(_map)
+    if(_layer)
     {
         apply(true, nullptr);
-        _map->updateFoW();
+        // TODO?
+        //_layer->updateFoW();
     }
 }
 
-void UndoShape::apply(bool preview, QPaintDevice* target) const
+void UndoFowShape::apply(bool preview, QPaintDevice* target) const
 {
-    if(_map)
-        _map->paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview);
+    if(_layer)
+        _layer->paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview);
 }
 
-QDomElement UndoShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement UndoFowShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
@@ -45,7 +45,7 @@ QDomElement UndoShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& 
     return element;
 }
 
-void UndoShape::inputXML(const QDomElement &element, bool isImport)
+void UndoFowShape::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
@@ -59,22 +59,22 @@ void UndoShape::inputXML(const QDomElement &element, bool isImport)
     _mapEditShape.setSmooth(static_cast<bool>(element.attribute("smooth", QString::number(1)).toInt()));
 }
 
-int UndoShape::getType() const
+int UndoFowShape::getType() const
 {
     return DMHelper::ActionType_Rect;
 }
 
-UndoBase* UndoShape::clone() const
+UndoFowBase* UndoFowShape::clone() const
 {
-    return new UndoShape(_map, _mapEditShape);
+    return new UndoFowShape(_layer, _mapEditShape);
 }
 
-const MapEditShape& UndoShape::mapEditShape() const
+const MapEditShape& UndoFowShape::mapEditShape() const
 {
     return _mapEditShape;
 }
 
-MapEditShape& UndoShape::mapEditShape()
+MapEditShape& UndoFowShape::mapEditShape()
 {
     return _mapEditShape;
 }

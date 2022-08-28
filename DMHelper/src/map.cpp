@@ -1,9 +1,9 @@
 #include "map.h"
-#include "undobase.h"
-#include "undofill.h"
-#include "undopath.h"
-#include "undopoint.h"
-#include "undoshape.h"
+#include "undofowbase.h"
+#include "undofowfill.h"
+#include "undofowpath.h"
+#include "undofowpoint.h"
+#include "undofowshape.h"
 #include "undomarker.h"
 #include "dmconstants.h"
 #include "campaign.h"
@@ -23,7 +23,7 @@
 Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
     _filename(fileName),
-    _undoStack(nullptr),
+    //_undoStack(nullptr),
     _audioTrackId(),
     _playAudio(false),
     _mapRect(),
@@ -38,7 +38,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _initialized(false),
     _layerScene(),
     //_imgBackground(),
-    _imgFow(),
+    //_imgFow(),
     _imgBWFow(),
     _indexBWFow(0),
     _filterApplied(false),
@@ -49,7 +49,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _mapColor(Qt::white),
     _mapSize()
 {
-    _undoStack = new QUndoStack(this);
+//    _undoStack = new QUndoStack(this);
 }
 
 Map::~Map()
@@ -88,20 +88,20 @@ void Map::inputXML(const QDomElement &element, bool isImport)
         QDomElement actionElement = actionsElement.firstChildElement(QString("action"));
         while(!actionElement.isNull())
         {
-            UndoBase* newAction = nullptr;
+            UndoFowBase* newAction = nullptr;
             switch( actionElement.attribute(QString("type")).toInt())
             {
                 case DMHelper::ActionType_Fill:
-                    newAction = new UndoFill(this, MapEditFill(QColor()));
+                    newAction = new UndoFowFill(this, MapEditFill(QColor()));
                     break;
                 case DMHelper::ActionType_Path:
-                    newAction = new UndoPath(this, MapDrawPath());
+                    newAction = new UndoFowPath(this, MapDrawPath());
                     break;
                 case DMHelper::ActionType_Point:
-                    newAction = new UndoPoint(this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
+                    newAction = new UndoFowPoint(this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
                     break;
                 case DMHelper::ActionType_Rect:
-                    newAction = new UndoShape(this, MapEditShape(QRect(), true, true));
+                    newAction = new UndoFowShape(this, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
                     newAction = new UndoMarker(this, MapMarker());
@@ -178,10 +178,10 @@ void Map::copyValues(const CampaignObjectBase* other)
     _undoStack->clear();
     for(int i = 0; i < otherMap->getUndoStack()->index(); ++i )
     {
-        const UndoBase* action = dynamic_cast<const UndoBase*>(otherMap->getUndoStack()->command(i));
+        const UndoFowBase* action = dynamic_cast<const UndoFowBase*>(otherMap->getUndoStack()->command(i));
         if((action) && (!action->isRemoved()))
         {
-            UndoBase* newAction = action->clone();
+            UndoFowBase* newAction = action->clone();
             newAction->setMap(this);
             _undoStack->push(newAction);
         }
@@ -400,45 +400,6 @@ const QRect& Map::getCameraRect() const
     return _cameraRect;
 }
 
-QUndoStack* Map::getUndoStack() const
-{
-    return _undoStack;
-}
-
-void Map::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
-{
-    if(!target)
-    {
-        if(!_imgFow.isNull())
-            internalApplyPaintTo(&_imgFow, clearColor, index, true, startIndex);
-        if(!_imgBWFow.isNull())
-            internalApplyPaintTo(&_imgBWFow, clearColor, index, true, startIndex);
-    }
-    else
-    {
-        internalApplyPaintTo(target, clearColor, index, preview, startIndex);
-    }
-}
-
-void Map::internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
-{
-    if((!target) || (index < startIndex))
-        return;
-
-    if(index > _undoStack->count())
-        index = _undoStack->count();
-
-    if(startIndex == 0)
-        target->fill(clearColor);
-
-    for( int i = startIndex; i < index; ++i )
-    {
-        const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
-        if(action)
-            action->apply(preview, target);
-    }
-}
-
 UndoMarker* Map::getMapMarker(int id)
 {
     // Search the undo stack for new markers
@@ -532,8 +493,10 @@ const LayerScene& Map::getLayerScene() const
 
 void Map::setExternalFoWImage(QImage externalImage)
 {
+    /*
     _imgFow = externalImage;
     applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
+    */
 }
 
 QImage Map::getUnfilteredBackgroundImage()
@@ -550,7 +513,9 @@ QImage Map::getBackgroundImage()
 
 QImage Map::getFoWImage()
 {
-    return _imgFow;
+    LayerFow* layer = dynamic_cast<LayerFow*>(_layerScene.getFirst(DMHelper::LayerType_Fow));
+    return layer ? layer->getImage() : QImage();
+    //return _imgFow;
 }
 
 bool Map::isCleared()
@@ -560,7 +525,7 @@ bool Map::isCleared()
         const QUndoCommand* latestCommand = _undoStack->command(_undoStack->index());
         if(latestCommand)
         {
-            const UndoFill* fillObj = dynamic_cast<const UndoFill*>(latestCommand);
+            const UndoFowFill* fillObj = dynamic_cast<const UndoFowFill*>(latestCommand);
             if((fillObj) && (fillObj->mapEditFill().color().alpha() == 0))
             {
                 return true;
@@ -569,188 +534,6 @@ bool Map::isCleared()
     }
 
     return false;
-}
-
-void Map::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview)
-{
-    if(!target)
-    {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-    }
-
-    QPainter p(target);
-    p.setPen(Qt::NoPen);
-
-    if(mapDraw.brushType() == DMHelper::BrushType_Circle)
-    {
-        if(mapDraw.erase())
-        {
-            if(mapDraw.smooth())
-            {
-                QRadialGradient grad(point, mapDraw.radius());
-                grad.setColorAt(0, QColor(0,0,0,0));
-                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())), QColor(0,0,0,0));
-                grad.setColorAt(1, QColor(255,255,255));
-                p.setBrush(grad);
-            }
-            else
-            {
-                p.setBrush(QColor(0,0,0,0));
-            }
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        }
-        else
-        {
-            int alpha = preview ? 128 : 255;
-            p.setBrush(QColor(0,0,0,alpha));
-            p.setCompositionMode(QPainter::CompositionMode_Source);
-        }
-
-        p.drawEllipse( point, mapDraw.radius(), mapDraw.radius() );
-    }
-    else
-    {
-        if(mapDraw.erase())
-        {
-            p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-            if(mapDraw.smooth())
-            {
-                qreal border = static_cast<qreal>(mapDraw.radius()) / 20.0;
-                qreal radius = static_cast<qreal>(mapDraw.radius()) - (border * 4);
-                p.setBrush(QColor(0,0,0,0));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(0,0,0,50));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(0,0,0,100));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(0,0,0,150));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-                radius += border;
-                p.setBrush(QColor(0,0,0,200));
-                p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
-            }
-            else
-            {
-                p.setBrush(QColor(0,0,0,0));
-                p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
-            }
-        }
-        else
-        {
-            int alpha = preview ? 128 : 255;
-            p.setBrush(QColor(0,0,0,alpha));
-            p.setCompositionMode(QPainter::CompositionMode_Source);
-            p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
-        }
-    }
-}
-
-void Map::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview)
-{
-    if(!target)
-    {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-    }
-
-    QPainter p(target);
-    p.setPen(Qt::NoPen);
-
-    if(mapEditShape.erase())
-    {
-        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        if(mapEditShape.smooth())
-        {
-            qreal rectWidth = rect.width() / 80;
-            qreal rectHeight = rect.height() / 80;
-            QRectF baseRect(static_cast<qreal>(rect.x()) + rectWidth * 4,
-                            static_cast<qreal>(rect.y()) + rectHeight * 4,
-                            static_cast<qreal>(rect.width()) - rectWidth * 4 * 2,
-                            static_cast<qreal>(rect.height()) - rectHeight * 4 * 2 );
-            p.setBrush(QColor(0,0,0,0));
-            p.drawRect(baseRect);
-            baseRect.translate(-rectWidth, -rectHeight);
-            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
-            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,50));
-            p.drawRect(baseRect);
-            baseRect.translate(-rectWidth, -rectHeight);
-            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
-            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,100));
-            p.drawRect(baseRect);
-            baseRect.translate(-rectWidth, -rectHeight);
-            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
-            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,150));
-            p.drawRect(baseRect);
-            baseRect.translate(-rectWidth, -rectHeight);
-            baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
-            baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,200));
-            p.drawRect(baseRect);
-        }
-        else
-        {
-            p.setBrush(QColor(0,0,0,0));
-            p.drawRect(rect);
-        }
-    }
-    else
-    {
-        int alpha = preview ? 128 : 255;
-        p.setBrush(QColor(0,0,0,alpha));
-        p.setCompositionMode(QPainter::CompositionMode_Source);
-        p.drawRect(rect);
-    }
-}
-
-void Map::fillFoW(const QColor& color, QPaintDevice* target)
-{
-    if(!target)
-    {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-    }
-
-    QPainter p(target);
-    p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.fillRect(0,0,target->width(),target->height(),color);
-}
-
-QImage Map::getBWFoWImage()
-{
-    // TODO: get layer and extract BW FOW image
-    return getBWFoWImage(_layerScene.sceneSize().toSize());
-}
-
-QImage Map::getBWFoWImage(const QImage &img)
-{
-    return getBWFoWImage(img.size());
-}
-
-QImage Map::getBWFoWImage(const QSize &size)
-{
-    if((_imgBWFow.isNull()) || (size != _imgBWFow.size()) || (_indexBWFow > _undoStack->index()))
-    {
-        _imgBWFow = QImage(size, QImage::Format_ARGB32);
-        _indexBWFow = 0;
-    }
-
-    applyPaintTo(&_imgBWFow, QColor(0,0,0,255), _undoStack->index(), false, _indexBWFow);
-    _indexBWFow = qMax(_undoStack->index() - 1, 0);
-
-    return _imgBWFow;
 }
 
 /*
@@ -1066,7 +849,7 @@ bool Map::initialize()
     //_imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
-    LayerFow* fowLayer = new LayerFow(-1);
+    LayerFow* fowLayer = new LayerFow(imgBackground.size(), -1);
     _layerScene.appendLayer(fowLayer);
 
     if(!_cameraRect.isValid())
@@ -1083,18 +866,18 @@ void Map::uninitialize()
 {
 //    _imgBackground = QImage();
     _imgBWFow = QImage();
-    _imgFow = QImage();
+//    _imgFow = QImage();
     _initialized = false;
 }
 
 void Map::undoPaint()
 {
-    emit executeUndo();
+    //emit executeUndo();
 }
 
 void Map::updateFoW()
 {
-    emit requestFoWUpdate();
+    //emit requestFoWUpdate();
 }
 
 void Map::addMapMarker(UndoMarker* undoEntry, MapMarker* marker)
@@ -1351,7 +1134,7 @@ void Map::challengeUndoStack()
     bool filled = false;
     for(int i = _undoStack->index(); i >= 0; --i)
     {
-        const UndoBase* constAction = dynamic_cast<const UndoBase*>(_undoStack->command(i));
+        const UndoFowBase* constAction = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
         if(constAction)
         {
             if(filled)
@@ -1361,7 +1144,7 @@ void Map::challengeUndoStack()
                    (constAction->getType() == DMHelper::ActionType_Point) ||
                    (constAction->getType() == DMHelper::ActionType_Rect))
                 {
-                    UndoBase* action = const_cast<UndoBase*>(constAction);
+                    UndoFowBase* action = const_cast<UndoFowBase*>(constAction);
                     action->setRemoved(true);
                 }
             }

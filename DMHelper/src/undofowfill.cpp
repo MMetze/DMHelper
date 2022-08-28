@@ -1,43 +1,43 @@
-#include "undofill.h"
-#include "mapframe.h"
-#include "map.h"
+#include "undofowfill.h"
+#include "layerfow.h"
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoFill::UndoFill(Map* map, const MapEditFill& mapEditFill) :
-    UndoBase(map, QString("Fill")),
+UndoFowFill::UndoFowFill(LayerFow* layer, const MapEditFill& mapEditFill) :
+    UndoFowBase(layer, QString("Fill")),
     _mapEditFill(mapEditFill)
 {
 }
 
-void UndoFill::undo()
+void UndoFowFill::undo()
 {
-    if(_map)
-        _map->undoPaint();
+    if(_layer)
+        _layer->undoPaint();
 }
 
-void UndoFill::redo()
+void UndoFowFill::redo()
 {
-    if(_map)
+    if(_layer)
     {
         apply(true, nullptr);
-        _map->updateFoW();
+        // TODO?
+        //_map->updateFoW();
     }
 }
 
-void UndoFill::apply(bool preview, QPaintDevice* target) const
+void UndoFowFill::apply(bool preview, QPaintDevice* target) const
 {
-    if(_map)
+    if(_layer)
     {
         QColor applyColor = _mapEditFill.color();
         if(preview)
             applyColor.setAlpha(_mapEditFill.color().alpha() / 2);
 
-        _map->fillFoW(applyColor,target);
+        _layer->fillFoW(applyColor,target);
     }
 }
 
-QDomElement UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement UndoFowFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
@@ -51,7 +51,7 @@ QDomElement UndoFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& t
     return element;
 }
 
-void UndoFill::inputXML(const QDomElement &element, bool isImport)
+void UndoFowFill::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
@@ -61,22 +61,22 @@ void UndoFill::inputXML(const QDomElement &element, bool isImport)
     _mapEditFill.setAlpha(element.attribute( QString("a")).toInt());
 }
 
-int UndoFill::getType() const
+int UndoFowFill::getType() const
 {
     return DMHelper::ActionType_Fill;
 }
 
-UndoBase* UndoFill::clone() const
+UndoFowBase* UndoFowFill::clone() const
 {
-    return new UndoFill(_map, _mapEditFill);
+    return new UndoFowFill(_layer, _mapEditFill);
 }
 
-const MapEditFill& UndoFill::mapEditFill() const
+const MapEditFill& UndoFowFill::mapEditFill() const
 {
     return _mapEditFill;
 }
 
-MapEditFill& UndoFill::mapEditFill()
+MapEditFill& UndoFowFill::mapEditFill()
 {
     return _mapEditFill;
 }

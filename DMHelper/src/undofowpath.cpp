@@ -1,42 +1,42 @@
-#include "undopath.h"
-#include "mapframe.h"
-#include "map.h"
+#include "undofowpath.h"
+#include "layerfow.h"
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoPath::UndoPath(Map* map, const MapDrawPath& mapDrawPath) :
-    UndoBase(map, QString("Paint Path")),
+UndoFowPath::UndoFowPath(LayerFow* layer, const MapDrawPath& mapDrawPath) :
+    UndoFowBase(layer, QString("Paint Path")),
     _mapDrawPath(mapDrawPath)
 {
 }
 
-void UndoPath::undo()
+void UndoFowPath::undo()
 {
-    if(_map)
-        _map->undoPaint();
+    if(_layer)
+        _layer->undoPaint();
 }
 
-void UndoPath::redo()
+void UndoFowPath::redo()
 {
-    if(_map)
+    if(_layer)
     {
         apply(true, nullptr);
-        _map->updateFoW();
+        // TODO?
+        //_map->updateFoW();
     }
 }
 
-void UndoPath::apply(bool preview, QPaintDevice* target) const
+void UndoFowPath::apply(bool preview, QPaintDevice* target) const
 {
-    if(_map)
+    if(_layer)
     {
         for(int i = 0; i < _mapDrawPath.points().count(); ++i)
         {
-            _map->paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath, target, preview);
+            _layer->paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath, target, preview);
         }
     }
 }
 
-QDomElement UndoPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement UndoFowPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
@@ -59,7 +59,7 @@ QDomElement UndoPath::outputXML(QDomDocument &doc, QDomElement &element, QDir& t
     return element;
 }
 
-void UndoPath::inputXML(const QDomElement &element, bool isImport)
+void UndoFowPath::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
@@ -83,32 +83,33 @@ void UndoPath::inputXML(const QDomElement &element, bool isImport)
     }
 }
 
-int UndoPath::getType() const
+int UndoFowPath::getType() const
 {
     return DMHelper::ActionType_Path;
 }
 
-UndoBase* UndoPath::clone() const
+UndoFowBase* UndoFowPath::clone() const
 {
-    return new UndoPath(_map, _mapDrawPath);
+    return new UndoFowPath(_layer, _mapDrawPath);
 }
 
-void UndoPath::addPoint(QPoint aPoint)
+void UndoFowPath::addPoint(QPoint aPoint)
 {
-    if(_map)
+    if(_layer)
     {
         _mapDrawPath.addPoint(aPoint);
-        _map->paintFoWPoint(aPoint, _mapDrawPath, nullptr, true);
-        _map->updateFoW();
+        _layer->paintFoWPoint(aPoint, _mapDrawPath, nullptr, true);
+        // TODO?
+        //_map->updateFoW();
     }
 }
 
-const MapDrawPath& UndoPath::mapDrawPath() const
+const MapDrawPath& UndoFowPath::mapDrawPath() const
 {
     return _mapDrawPath;
 }
 
-MapDrawPath& UndoPath::mapDrawPath()
+MapDrawPath& UndoFowPath::mapDrawPath()
 {
     return _mapDrawPath;
 }

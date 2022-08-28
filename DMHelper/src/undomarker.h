@@ -1,12 +1,14 @@
 #ifndef UNDOMARKER_H
 #define UNDOMARKER_H
 
-#include "undobase.h"
+#include "undofowbase.h"
 #include "mapcontent.h"
 
 class MapMarkerGraphicsItem;
 
-class UndoMarker : public UndoBase
+// TODO: Layers
+
+class UndoMarker : public UndoFowBase
 {
 public:
     UndoMarker(Map* map, const MapMarker& marker);
@@ -21,7 +23,7 @@ public:
     virtual void setRemoved(bool removed) override;
 
     virtual int getType() const override;
-    virtual UndoBase* clone() const override;
+    virtual UndoFowBase* clone() const override;
 
     void setMarker(const MapMarker& marker);
     const MapMarker& getMarker() const;

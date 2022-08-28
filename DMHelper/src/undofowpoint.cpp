@@ -1,37 +1,37 @@
-#include "undopoint.h"
-#include "mapframe.h"
-#include "map.h"
+#include "undofowpoint.h"
+#include "layerfow.h"
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoPoint::UndoPoint(Map* map, const MapDrawPoint& mapDrawPoint) :
-    UndoBase(map, QString("Paint")),
+UndoFowPoint::UndoFowPoint(LayerFow* layer, const MapDrawPoint& mapDrawPoint) :
+    UndoFowBase(layer, QString("Paint")),
     _mapDrawPoint(mapDrawPoint)
 {
 }
 
-void UndoPoint::undo()
+void UndoFowPoint::undo()
 {
-    if(_map)
-        _map->undoPaint();
+    if(_layer)
+        _layer->undoPaint();
 }
 
-void UndoPoint::redo()
+void UndoFowPoint::redo()
 {
-    if(_map)
+    if(_layer)
     {
         apply(true, nullptr);
-        _map->updateFoW();
+        // TODO?
+        //_map->updateFoW();
     }
 }
 
-void UndoPoint::apply( bool preview, QPaintDevice* target ) const
+void UndoFowPoint::apply( bool preview, QPaintDevice* target ) const
 {
-    if(_map)
-        _map->paintFoWPoint(_mapDrawPoint.point(), _mapDrawPoint, target, preview);
+    if(_layer)
+        _layer->paintFoWPoint(_mapDrawPoint.point(), _mapDrawPoint, target, preview);
 }
 
-QDomElement UndoPoint::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
+QDomElement UndoFowPoint::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     Q_UNUSED(doc);
     Q_UNUSED(targetDirectory);
@@ -47,7 +47,7 @@ QDomElement UndoPoint::outputXML(QDomDocument &doc, QDomElement &element, QDir& 
     return element;
 }
 
-void UndoPoint::inputXML(const QDomElement &element, bool isImport)
+void UndoFowPoint::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
@@ -59,22 +59,22 @@ void UndoPoint::inputXML(const QDomElement &element, bool isImport)
     _mapDrawPoint.setSmooth(static_cast<bool>(element.attribute("smooth",QString::number(1)).toInt()));
 }
 
-int UndoPoint::getType() const
+int UndoFowPoint::getType() const
 {
     return DMHelper::ActionType_Point;
 }
 
-UndoBase* UndoPoint::clone() const
+UndoFowBase* UndoFowPoint::clone() const
 {
-    return new UndoPoint(_map, _mapDrawPoint);
+    return new UndoFowPoint(_layer, _mapDrawPoint);
 }
 
-const MapDrawPoint& UndoPoint::mapDrawPoint() const
+const MapDrawPoint& UndoFowPoint::mapDrawPoint() const
 {
     return _mapDrawPoint;
 }
 
-MapDrawPoint& UndoPoint::mapDrawPoint()
+MapDrawPoint& UndoFowPoint::mapDrawPoint()
 {
     return _mapDrawPoint;
 }

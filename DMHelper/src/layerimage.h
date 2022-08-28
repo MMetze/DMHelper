@@ -5,8 +5,8 @@
 #include "mapcolorizefilter.h"
 #include <QImage>
 
-class QGraphicsPixmapItem;
 class PublishGLBattleBackground;
+class QGraphicsPixmapItem;
 
 class LayerImage : public Layer
 {

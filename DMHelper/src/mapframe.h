@@ -5,7 +5,7 @@
 #include <QGraphicsScene>
 #include <QImage>
 #include <QRubberBand>
-#include "undopath.h"
+#include "undofowpath.h"
 #include "videoplayer.h"
 #include "unselectedpixmap.h"
 
@@ -235,7 +235,7 @@ private:
     bool _mapMoveMouseDown;
     bool _mouseDown;
     QPoint _mouseDownPos;
-    UndoPath* _undoPath;
+    UndoFowPath* _undoPath;
 
     QGraphicsLineItem* _distanceLine;
     MapDraw* _mapItem;

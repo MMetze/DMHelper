@@ -1,5 +1,5 @@
-#ifndef UNDOBASE_H
-#define UNDOBASE_H
+#ifndef UNDOFOWBASE_H
+#define UNDOFOWBASE_H
 
 #include <QUndoCommand>
 
@@ -7,13 +7,13 @@ class QPaintDevice;
 class QDomDocument;
 class QDomElement;
 class QDir;
-class Map;
+class LayerFow;
 
-class UndoBase : public QUndoCommand
+class UndoFowBase : public QUndoCommand
 {
 public:
-    UndoBase(Map* map, const QString & text);
-    virtual ~UndoBase() override;
+    UndoFowBase(LayerFow* layer, const QString & text);
+    virtual ~UndoFowBase() override;
 
     virtual void apply( bool preview, QPaintDevice* target ) const = 0;
 
@@ -24,13 +24,13 @@ public:
     virtual void setRemoved(bool removed);
 
     virtual int getType() const;
-    virtual UndoBase* clone() const = 0;
+    virtual UndoFowBase* clone() const = 0;
 
-    void setMap(Map* map);
+    void setLayer(LayerFow* layer);
 
 protected:
-    Map* _map;
+    LayerFow* _layer;
     bool _removed;
 };
 
-#endif // UNDOBASE_H
+#endif // UNDOFOWBASE_H

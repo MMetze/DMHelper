@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QCursor>
 
-class UndoPath;
+class UndoFowPath;
 class Map;
 
 class BattleFrameMapDrawer : public QObject
@@ -45,7 +45,7 @@ private:
 
     bool _mouseDown;
     QPointF _mouseDownPos;
-    UndoPath* _undoPath;
+    UndoFowPath* _undoPath;
     Map* _map;
     QPixmap* _fow;
     QImage* _glFow;

@@ -4,8 +4,8 @@
 #include "dmconstants.h"
 #include "map.h"
 #include "mapmarkergraphicsitem.h"
-#include "undofill.h"
-#include "undoshape.h"
+#include "undofowfill.h"
+#include "undofowshape.h"
 #include "undomarker.h"
 #include "mapmarkerdialog.h"
 #include "mapcolorizedialog.h"
@@ -125,8 +125,9 @@ void MapFrame::deactivateObject()
     rendererDeactivated();
 
     disconnect(this, SIGNAL(dirty()), _mapSource, SIGNAL(dirty()));
-    disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
-    // TODO: disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
+    // TODO: make sure FOW editing works properly on DM and Player views
+    // disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
+    // disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
     disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
 #ifdef Q_OS_WIN32
@@ -219,12 +220,16 @@ bool MapFrame::eventFilter(QObject *obj, QEvent *event)
 
 QAction* MapFrame::getUndoAction(QObject* parent)
 {
-    return _mapSource->getUndoStack()->createUndoAction(parent);
+    // TODO: layers
+    //return _mapSource->getUndoStack()->createUndoAction(parent);
+    return nullptr;
 }
 
 QAction* MapFrame::getRedoAction(QObject* parent)
 {
-    return _mapSource->getUndoStack()->createRedoAction(parent);
+    // TODO: layers
+    //return _mapSource->getUndoStack()->createRedoAction(parent);
+    return nullptr;
 }
 
 /*
@@ -253,11 +258,14 @@ void MapFrame::resetFoW()
     if(QMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
         return;
 
-    UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,255)));
+    // TODO: layers
+    /*
+    UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0,0,0,255)));
     _mapSource->getUndoStack()->push(undoFill);
     _mapSource->fillFoW(QColor(0,0,0,255), &_bwFoWImage);
     emit dirty();
     emit fowChanged(_bwFoWImage);
+    */
 }
 
 void MapFrame::clearFoW()
@@ -268,11 +276,14 @@ void MapFrame::clearFoW()
     if(QMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
         return;
 
-    UndoFill* undoFill = new UndoFill(_mapSource, MapEditFill(QColor(0,0,0,0)));
+    // TODO: layers
+    /*
+    UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0,0,0,0)));
     _mapSource->getUndoStack()->push(undoFill);
     _mapSource->fillFoW(QColor(0,0,0,0), &_bwFoWImage);
     emit dirty();
     emit fowChanged(_bwFoWImage);
+    */
 }
 
 void MapFrame::undoPaint()
@@ -280,9 +291,9 @@ void MapFrame::undoPaint()
     if(!_mapSource)
         return;
 
-    _mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1);
-
-    // TODO updateFoW();
+    // TODO: layers
+    //_mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1)
+    // updateFoW();
 }
 
 /*
@@ -1266,7 +1277,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                UndoShape* undoShape = new UndoShape(_mapSource, MapEditShape(shapeRect, _erase, false));
+                UndoFowShape* undoShape = new UndoFowShape(_mapSource, MapEditShape(shapeRect, _erase, false));
                 _mapSource->getUndoStack()->push(undoShape);
                 _mapSource->paintFoWRect(shapeRect, undoShape->mapEditShape(), &_bwFoWImage, false);
                 emit dirty();
@@ -1303,7 +1314,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDown = true;
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
-            _undoPath = new UndoPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
+            _undoPath = new UndoFowPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
             _mapSource->getUndoStack()->push(_undoPath);
             _mapSource->paintFoWPoint(drawPoint, _undoPath->mapDrawPath(), &_bwFoWImage, false);
 
@@ -1855,9 +1866,10 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     setBackgroundPixmap(QPixmap::fromImage(image));
     QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
     fowImage.fill(QColor(0,0,0,0));
-    _mapSource->setExternalFoWImage(fowImage);
     /*
      * TODO
+    _mapSource->setExternalFoWImage(fowImage);
+
     if(!_fow)
     {
         _fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
@@ -1870,7 +1882,8 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     }
     */
 
-    _bwFoWImage = _mapSource->getBWFoWImage(image.size());
+    // TODO
+    //_bwFoWImage = _mapSource->getBWFoWImage(image.size());
 
     checkPartyUpdate();
     createMarkerItems();

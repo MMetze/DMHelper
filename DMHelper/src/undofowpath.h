@@ -1,13 +1,13 @@
-#ifndef UNDOPATH_H
-#define UNDOPATH_H
+#ifndef UNDOFOWPATH_H
+#define UNDOFOWPATH_H
 
-#include "undobase.h"
+#include "undofowbase.h"
 #include "mapcontent.h"
 
-class UndoPath : public UndoBase
+class UndoFowPath : public UndoFowBase
 {
 public:
-    UndoPath(Map* map, const MapDrawPath& mapDrawPath);
+    UndoFowPath(LayerFow* layer, const MapDrawPath& mapDrawPath);
 
     virtual void undo() override;
     virtual void redo() override;
@@ -16,7 +16,7 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     virtual int getType() const override;
-    virtual UndoBase* clone() const override;
+    virtual UndoFowBase* clone() const override;
 
     void addPoint(QPoint aPoint);
 
@@ -28,4 +28,4 @@ protected:
 
 };
 
-#endif // UNDOPATH_H
+#endif // UNDOFOWPATH_H
