@@ -7,26 +7,10 @@ UndoFowShape::UndoFowShape(LayerFow* layer, const MapEditShape& mapEditShape) :
 {
 }
 
-void UndoFowShape::undo()
+void UndoFowShape::apply() const
 {
     if(_layer)
-       _layer->undoPaint();
-}
-
-void UndoFowShape::redo()
-{
-    if(_layer)
-    {
-        apply(true, nullptr);
-        // TODO?
-        //_layer->updateFoW();
-    }
-}
-
-void UndoFowShape::apply(bool preview, QPaintDevice* target) const
-{
-    if(_layer)
-        _layer->paintFoWRect(_mapEditShape.rect(), _mapEditShape, target, preview);
+        _layer->paintFoWRect(_mapEditShape.rect(), _mapEditShape);
 }
 
 QDomElement UndoFowShape::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const

@@ -376,6 +376,8 @@ void MapFrame::setPartySelected(bool selected)
 
 void MapFrame::setShowMarkers(bool show)
 {
+    // TODO: Layers
+    /*
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
@@ -385,6 +387,7 @@ void MapFrame::setShowMarkers(bool show)
         if((marker) && (marker->getMarkerItem()) && (!marker->isRemoved()))
             marker->getMarkerItem()->setVisible(show);
     }
+    */
 
     _mapSource->setShowMarkers(show);
 }
@@ -398,6 +401,8 @@ void MapFrame::addNewMarker()
 
 void MapFrame::addMarker(const QPointF& markerPosition)
 {
+    // TODO: Layers
+    /*
     MapMarkerDialog dlg(MapMarker(), *_mapSource, this);
     dlg.resize(width() / 3, height() / 3);
     dlg.move(ui->graphicsView->mapFromScene(markerPosition) + mapToGlobal(ui->graphicsView->pos()));
@@ -410,6 +415,7 @@ void MapFrame::addMarker(const QPointF& markerPosition)
         emit dirty();
         setShowMarkers(true);
     }
+    */
 }
 
 void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
@@ -801,7 +807,7 @@ void MapFrame::initializeFoW()
         //_fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         //_fow->setEnabled(false);
         //_fow->setZValue(-1);
-        _bwFoWImage = _mapSource->getBWFoWImage();
+        //_bwFoWImage = _mapSource->getBWFoWImage();
 
         loadViewRect();
         checkPartyUpdate();
@@ -898,6 +904,8 @@ void MapFrame::uninitializeFoW()
 
 void MapFrame::createMarkerItems()
 {
+    // TODO: Layers
+    /*
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
@@ -910,10 +918,13 @@ void MapFrame::createMarkerItems()
             marker->redo();
         }
     }
+    */
 }
 
 void MapFrame::cleanupMarkerItems()
 {
+    // TODO: Layers
+    /*
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
@@ -926,6 +937,7 @@ void MapFrame::cleanupMarkerItems()
             marker->undo();
         }
     }
+    */
 }
 
 void MapFrame::cleanupSelectionItems()
@@ -1277,11 +1289,14 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
+                // TODO: Layers
+                /*
                 UndoFowShape* undoShape = new UndoFowShape(_mapSource, MapEditShape(shapeRect, _erase, false));
                 _mapSource->getUndoStack()->push(undoShape);
                 _mapSource->paintFoWRect(shapeRect, undoShape->mapEditShape(), &_bwFoWImage, false);
                 emit dirty();
                 emit fowChanged(_bwFoWImage);
+                */
                 cleanupSelectionItems();
             }
             return true;
@@ -1314,11 +1329,14 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDown = true;
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
+            // TODO: Layers
+            /*
             _undoPath = new UndoFowPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
             _mapSource->getUndoStack()->push(_undoPath);
             _mapSource->paintFoWPoint(drawPoint, _undoPath->mapDrawPath(), &_bwFoWImage, false);
 
             emit fowChanged(_bwFoWImage);
+            */
             return true;
         }
         else if(event->type() == QEvent::MouseButtonRelease)
@@ -1336,9 +1354,12 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 QPoint drawPoint =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
+                // TODO: Layers
+                /*
                 _undoPath->addPoint(drawPoint);
                 _mapSource->paintFoWPoint(drawPoint, _undoPath->mapDrawPath(), &_bwFoWImage, false);
                 emit fowChanged(_bwFoWImage);
+                */
             }
             return true;
         }

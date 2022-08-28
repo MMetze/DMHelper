@@ -9,26 +9,10 @@ UndoFowPoint::UndoFowPoint(LayerFow* layer, const MapDrawPoint& mapDrawPoint) :
 {
 }
 
-void UndoFowPoint::undo()
+void UndoFowPoint::apply() const
 {
     if(_layer)
-        _layer->undoPaint();
-}
-
-void UndoFowPoint::redo()
-{
-    if(_layer)
-    {
-        apply(true, nullptr);
-        // TODO?
-        //_map->updateFoW();
-    }
-}
-
-void UndoFowPoint::apply( bool preview, QPaintDevice* target ) const
-{
-    if(_layer)
-        _layer->paintFoWPoint(_mapDrawPoint.point(), _mapDrawPoint, target, preview);
+        _layer->paintFoWPoint(_mapDrawPoint.point(), _mapDrawPoint);
 }
 
 QDomElement UndoFowPoint::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const

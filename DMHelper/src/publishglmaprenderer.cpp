@@ -545,6 +545,8 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
     if(!_map->getShowMarkers())
         return;
 
+    // TODO: Layers
+    /*
     QUndoStack* stack = _map->getUndoStack();
     if(!stack)
         return;
@@ -567,6 +569,7 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
             }
         }
     }
+    */
 }
 
 void PublishGLMapRenderer::updateFoW()

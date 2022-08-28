@@ -9,24 +9,12 @@ UndoFowFill::UndoFowFill(LayerFow* layer, const MapEditFill& mapEditFill) :
 {
 }
 
-void UndoFowFill::undo()
+void UndoFowFill::apply() const
 {
     if(_layer)
-        _layer->undoPaint();
-}
+        _layer->fillFoW(_mapEditFill.color());
 
-void UndoFowFill::redo()
-{
-    if(_layer)
-    {
-        apply(true, nullptr);
-        // TODO?
-        //_map->updateFoW();
-    }
-}
-
-void UndoFowFill::apply(bool preview, QPaintDevice* target) const
-{
+    /*
     if(_layer)
     {
         QColor applyColor = _mapEditFill.color();
@@ -35,6 +23,7 @@ void UndoFowFill::apply(bool preview, QPaintDevice* target) const
 
         _layer->fillFoW(applyColor,target);
     }
+    */
 }
 
 QDomElement UndoFowFill::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
@@ -43,6 +32,7 @@ QDomElement UndoFowFill::outputXML(QDomDocument &doc, QDomElement &element, QDir
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
+    // TODO: remove color from Fill
     element.setAttribute( "r", _mapEditFill.color().red() );
     element.setAttribute( "g", _mapEditFill.color().green() );
     element.setAttribute( "b", _mapEditFill.color().blue() );

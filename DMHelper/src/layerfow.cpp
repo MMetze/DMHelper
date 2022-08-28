@@ -1,5 +1,6 @@
 #include "layerfow.h"
 #include "publishglbattlebackground.h"
+#include "undofowbase.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QOpenGLFunctions>
@@ -19,6 +20,7 @@ LayerFow::LayerFow(const QSize& imageSize, int order, QObject *parent) :
         qDebug() << "[LayerFow] ERROR: layer fow created with an empty size!";
 
     _undoStack = new QUndoStack(this);
+    _imgFow.fill(Qt::red);
 }
 
 LayerFow::~LayerFow()
@@ -43,13 +45,40 @@ QImage LayerFow::getImage() const
     return _imgFow;
 }
 
+QPaintDevice* LayerFow::getImageTarget()
+{
+    return &_imgFow;
+}
+
 QUndoStack* LayerFow::getUndoStack() const
 {
     return _undoStack;
 }
 
-void LayerFow::applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
+void LayerFow::undoPaint()
 {
+    //_mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1)
+    applyPaintTo(getUndoStack()->index() - 1);
+}
+
+void LayerFow::applyPaintTo(int index, int startIndex)
+{
+    if(index < startIndex)
+        return;
+
+    if(index > _undoStack->count())
+        index = _undoStack->count();
+
+    if(startIndex == 0)
+        _imgFow.fill(Qt::black);
+
+    for( int i = startIndex; i < index; ++i )
+    {
+        const UndoFowBase* action = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
+        if(action)
+            action->apply();
+    }
+    /*
     if(!target)
     {
         if(!_imgFow.isNull())
@@ -61,8 +90,10 @@ void LayerFow::applyPaintTo(QImage* target, const QColor& clearColor, int index,
     {
         internalApplyPaintTo(target, clearColor, index, preview, startIndex);
     }
+    */
 }
 
+/*
 void LayerFow::internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview, int startIndex)
 {
     if((!target) || (index < startIndex))
@@ -81,19 +112,11 @@ void LayerFow::internalApplyPaintTo(QImage* target, const QColor& clearColor, in
             action->apply(preview, target);
     }
 }
+*/
 
-
-void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview)
+void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
 {
-    if(!target)
-    {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-    }
-
-    QPainter p(target);
+    QPainter p(&_imgFow);
     p.setPen(Qt::NoPen);
 
     if(mapDraw.brushType() == DMHelper::BrushType_Circle)
@@ -116,8 +139,7 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice*
         }
         else
         {
-            int alpha = preview ? 128 : 255;
-            p.setBrush(QColor(0,0,0,alpha));
+            p.setBrush(QColor(0,0,0,255));
             p.setCompositionMode(QPainter::CompositionMode_Source);
         }
 
@@ -155,25 +177,16 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice*
         }
         else
         {
-            int alpha = preview ? 128 : 255;
-            p.setBrush(QColor(0,0,0,alpha));
+            p.setBrush(QColor(0,0,0,255));
             p.setCompositionMode(QPainter::CompositionMode_Source);
             p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
         }
     }
 }
 
-void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview)
+void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
 {
-    if(!target)
-    {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-    }
-
-    QPainter p(target);
+    QPainter p(&_imgFow);
     p.setPen(Qt::NoPen);
 
     if(mapEditShape.erase())
@@ -218,26 +231,17 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaint
     }
     else
     {
-        int alpha = preview ? 128 : 255;
-        p.setBrush(QColor(0,0,0,alpha));
+        p.setBrush(QColor(0,0,0,255));
         p.setCompositionMode(QPainter::CompositionMode_Source);
         p.drawRect(rect);
     }
 }
 
-void LayerFow::fillFoW(const QColor& color, QPaintDevice* target)
+void LayerFow::fillFoW(const QColor& color)
 {
-    if(!target)
-    {
-        if(_imgFow.isNull())
-            return;
-
-        target = &_imgFow;
-    }
-
-    QPainter p(target);
+    QPainter p(&_imgFow);
     p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.fillRect(0,0,target->width(),target->height(),color);
+    p.fillRect(0, 0, _imgFow.width(), _imgFow.height(), color);
 }
 
 /*
@@ -268,7 +272,6 @@ QImage LayerFow::getBWFoWImage(const QSize &size)
 }
 */
 
-
 void LayerFow::dmInitialize(QGraphicsScene& scene)
 {
     if(_graphicsItem)
@@ -282,6 +285,7 @@ void LayerFow::dmInitialize(QGraphicsScene& scene)
     {
         _graphicsItem->setEnabled(false);
         _graphicsItem->setZValue(getOrder());
+        _graphicsItem->setOpacity(0.5);
     }
 }
 

@@ -92,15 +92,17 @@ void BattleFrameMapDrawer::drawRect(const QRect& rect)
     if((!_map) || (!_fow) || (!_glFow))
         return;
 
+    // TODO: Layers
+    /*
     // Changed to ignore smoothing on an area
     UndoFowShape* undoShape = new UndoFowShape(_map, MapEditShape(rect, _erase, false));
     _map->getUndoStack()->push(undoShape);
-    // TODO: Layers
     //_map->paintFoWRect(rect, undoShape->mapEditShape(), _fow, true);
     //_map->paintFoWRect(rect, undoShape->mapEditShape(), _glFow, false);
     emit fowEdited(*_fow);
     emit fowChanged(*_glFow);
     endPath();
+    */
 }
 
 void BattleFrameMapDrawer::setSize(int size)
@@ -140,14 +142,16 @@ void BattleFrameMapDrawer::resetFoW()
     if(QMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
         return;
 
+    // TODO: Layers
+    /*
     UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0,0,0,255)));
     _map->getUndoStack()->push(undoFill);
-    // TODO: Layers
     //_map->fillFoW(QColor(0,0,0,128), _fow);
     //_map->fillFoW(QColor(0,0,0,255), _glFow);
     endPath();
     emit fowEdited(*_fow);
     emit fowChanged(*_glFow);
+    */
 }
 
 void BattleFrameMapDrawer::clearFoW()
@@ -158,14 +162,16 @@ void BattleFrameMapDrawer::clearFoW()
     if(QMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
         return;
 
+    // TODO: Layers
+    /*
     UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0,0,0,0)));
     _map->getUndoStack()->push(undoFill);
-    // TODO: Layers
     //_map->fillFoW(QColor(0,0,0,0), _fow);
     //_map->fillFoW(QColor(0,0,0,0), _glFow);
     endPath();
     emit fowEdited(*_fow);
     emit fowChanged(*_glFow);
+    */
 }
 
 void BattleFrameMapDrawer::setErase(bool erase)

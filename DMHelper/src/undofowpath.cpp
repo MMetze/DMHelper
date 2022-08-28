@@ -9,29 +9,13 @@ UndoFowPath::UndoFowPath(LayerFow* layer, const MapDrawPath& mapDrawPath) :
 {
 }
 
-void UndoFowPath::undo()
-{
-    if(_layer)
-        _layer->undoPaint();
-}
-
-void UndoFowPath::redo()
-{
-    if(_layer)
-    {
-        apply(true, nullptr);
-        // TODO?
-        //_map->updateFoW();
-    }
-}
-
-void UndoFowPath::apply(bool preview, QPaintDevice* target) const
+void UndoFowPath::apply() const
 {
     if(_layer)
     {
         for(int i = 0; i < _mapDrawPath.points().count(); ++i)
         {
-            _layer->paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath, target, preview);
+            _layer->paintFoWPoint(_mapDrawPath.points().at(i), _mapDrawPath);
         }
     }
 }
@@ -95,13 +79,20 @@ UndoFowBase* UndoFowPath::clone() const
 
 void UndoFowPath::addPoint(QPoint aPoint)
 {
+    _mapDrawPath.addPoint(aPoint);
+    if(_layer)
+        _layer->paintFoWPoint(aPoint, _mapDrawPath);
+
+    // TODO?
+    /*
     if(_layer)
     {
         _mapDrawPath.addPoint(aPoint);
-        _layer->paintFoWPoint(aPoint, _mapDrawPath, nullptr, true);
+        _layer->paintFoWPoint(aPoint, _mapDrawPath);
         // TODO?
         //_map->updateFoW();
     }
+    */
 }
 
 const MapDrawPath& UndoFowPath::mapDrawPath() const

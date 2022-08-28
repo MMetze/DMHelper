@@ -20,14 +20,20 @@ public:
     virtual DMHelper::LayerType getType() const override;
 
     QImage getImage() const;
+    QPaintDevice* getImageTarget();
 
     QUndoStack* getUndoStack() const;
-    void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
-    void internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
+    void undoPaint();
+    void applyPaintTo(int index, int startIndex = 0);
+    //void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
+    //void internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
 
-    void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
-    void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
-    void fillFoW(const QColor& color, QPaintDevice* target);
+    void paintFoWPoint(QPoint point, const MapDraw& mapDraw);
+    void paintFoWRect(QRect rect, const MapEditShape& mapEditShape);
+    void fillFoW(const QColor& color);
+    //void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
+    //void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
+    //void fillFoW(const QColor& color, QPaintDevice* target);
     /*
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);

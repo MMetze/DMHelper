@@ -39,6 +39,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _layerScene(),
     //_imgBackground(),
     //_imgFow(),
+    _undoItems(),
     _imgBWFow(),
     _indexBWFow(0),
     _filterApplied(false),
@@ -55,6 +56,7 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
 Map::~Map()
 {
     qDeleteAll(_mapItems);
+    qDeleteAll(_undoItems);
     _layerScene.clearLayers();
 }
 
@@ -82,6 +84,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                         element.attribute("cameraRectWidth", QString::number(0)).toInt(),
                         element.attribute("cameraRectHeight ", QString::number(0)).toInt());
 
+    // For backwards compatibility only, should be part of a layer
     QDomElement actionsElement = element.firstChildElement(QString("actions"));
     if(!actionsElement.isNull())
     {
@@ -92,19 +95,19 @@ void Map::inputXML(const QDomElement &element, bool isImport)
             switch( actionElement.attribute(QString("type")).toInt())
             {
                 case DMHelper::ActionType_Fill:
-                    newAction = new UndoFowFill(this, MapEditFill(QColor()));
+                    newAction = new UndoFowFill(nullptr, MapEditFill(QColor()));
                     break;
                 case DMHelper::ActionType_Path:
-                    newAction = new UndoFowPath(this, MapDrawPath());
+                    newAction = new UndoFowPath(nullptr, MapDrawPath());
                     break;
                 case DMHelper::ActionType_Point:
-                    newAction = new UndoFowPoint(this, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
+                    newAction = new UndoFowPoint(nullptr, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
                     break;
                 case DMHelper::ActionType_Rect:
-                    newAction = new UndoFowShape(this, MapEditShape(QRect(), true, true));
+                    newAction = new UndoFowShape(nullptr, MapEditShape(QRect(), true, true));
                     break;
                 case DMHelper::ActionType_SetMarker:
-                    newAction = new UndoMarker(this, MapMarker());
+                    newAction = new UndoMarker(nullptr, MapMarker());
                     break;
                 case DMHelper::ActionType_Base:
                 default:
@@ -114,7 +117,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
             if(newAction)
             {
                 newAction->inputXML(actionElement, isImport);
-                _undoStack->push(newAction);
+                _undoItems.append(newAction);
             }
 
             actionElement = actionElement.nextSiblingElement(QString("action"));
@@ -175,6 +178,8 @@ void Map::copyValues(const CampaignObjectBase* other)
     setMapColor(otherMap->getMapColor());
     setMapSize(otherMap->getMapSize());
 
+    // TODO: layers
+    /*
     _undoStack->clear();
     for(int i = 0; i < otherMap->getUndoStack()->index(); ++i )
     {
@@ -189,6 +194,7 @@ void Map::copyValues(const CampaignObjectBase* other)
 
     // Check if we can skip some paint commands because they have been covered up by a fill
     challengeUndoStack();
+    */
 
     _filterApplied = otherMap->_filterApplied;
     _filter = otherMap->_filter;
@@ -402,6 +408,8 @@ const QRect& Map::getCameraRect() const
 
 UndoMarker* Map::getMapMarker(int id)
 {
+    // TODO: Layers
+    /*
     // Search the undo stack for new markers
     for(int i = 0; i < _undoStack->count(); ++i)
     {
@@ -410,6 +418,7 @@ UndoMarker* Map::getMapMarker(int id)
         if((undoItem) && (undoItem->getMarker().getID() == id))
             return undoItem;
     }
+    */
 
     return nullptr;
 }
@@ -421,7 +430,9 @@ bool Map::getShowMarkers() const
 
 int Map::getMarkerCount() const
 {
-    return _undoStack->count();
+    // TODO: Layers
+    //return _undoStack->count();
+    return 0;
 }
 
 void Map::addMapItem(MapDraw* mapItem)
@@ -520,6 +531,8 @@ QImage Map::getFoWImage()
 
 bool Map::isCleared()
 {
+    // TODO: Layers
+    /*
     if((_undoStack) && (_undoStack->count() > 0))
     {
         const QUndoCommand* latestCommand = _undoStack->command(_undoStack->index());
@@ -532,6 +545,7 @@ bool Map::isCleared()
             }
         }
     }
+    */
 
     return false;
 }
@@ -578,6 +592,8 @@ QImage Map::getGrayImage()
 {
     QImage result(getPreviewImage());
 
+    // TODO: Layers
+    /*
     QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
     applyPaintTo(&grayFoWImage, QColor(0,0,0,128), _undoStack->index(), true);
 
@@ -585,6 +601,7 @@ QImage Map::getGrayImage()
     p.begin(&result);
         p.drawImage(0, 0, grayFoWImage);
     p.end();
+    */
 
     return result;
 }
@@ -665,8 +682,9 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
 
 QRect Map::getShrunkPublishRect()
 {
+    // TODO: Layers
     //QImage bwFoWImage = getBWFoWImage(_imgBackground);
-    QImage bwFoWImage = getBWFoWImage();
+    QImage bwFoWImage;// = getBWFoWImage();
 
     int top, bottom, left, right;
     top = bottom = left = right = -1;
@@ -850,6 +868,12 @@ bool Map::initialize()
     //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
     LayerFow* fowLayer = new LayerFow(imgBackground.size(), -1);
+    for(int i = 0; i < _undoItems.count(); ++i)
+    {
+        UndoFowBase* undoItem = _undoItems[i];
+        undoItem->setLayer(fowLayer);
+        fowLayer->getUndoStack()->push(undoItem);
+    }
     _layerScene.appendLayer(fowLayer);
 
     if(!_cameraRect.isValid())
@@ -1067,6 +1091,8 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     // Check if we can skip some paint commands because they have been covered up by a fill
     challengeUndoStack();
 
+    // TODO: Layers
+    /*
     QDomElement actionsElement = doc.createElement("actions");
     for(int i = 0; i < _undoStack->index(); ++i )
     {
@@ -1080,6 +1106,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
         }
     }
     element.appendChild(actionsElement);
+    */
 
     if(_filterApplied)
     {
@@ -1131,6 +1158,8 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
 
 void Map::challengeUndoStack()
 {
+    // TODO: Layers
+    /*
     bool filled = false;
     for(int i = _undoStack->index(); i >= 0; --i)
     {
@@ -1154,4 +1183,5 @@ void Map::challengeUndoStack()
             }
         }
     }
+    */
 }

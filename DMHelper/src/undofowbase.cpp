@@ -13,6 +13,25 @@ UndoFowBase::~UndoFowBase()
 {
 }
 
+void UndoFowBase::undo()
+{
+    if(_layer)
+       _layer->undoPaint();
+}
+
+void UndoFowBase::redo()
+{
+    apply();
+    /*
+    if(_layer)
+    {
+        apply(true, nullptr);
+        // TODO?
+        //_layer->updateFoW();
+    }
+    */
+}
+
 bool UndoFowBase::isRemoved() const
 {
     return _removed;

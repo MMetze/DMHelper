@@ -12,7 +12,7 @@
 
 class QDomDocument;
 class QDomElement;
-class QUndoStack;
+class UndoFowBase;
 class AudioTrack;
 class Party;
 class UndoMarker;
@@ -182,6 +182,7 @@ protected:
     LayerScene _layerScene;
     //QImage _imgBackground;
     //QImage _imgFow;
+    QList<UndoFowBase*> _undoItems;
     QImage _imgBWFow;
     int _indexBWFow;
     bool _filterApplied;

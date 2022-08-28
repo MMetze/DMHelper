@@ -1,12 +1,13 @@
 #include "undomarker.h"
-#include "mapframe.h"
+#include "layerfow.h"
 #include "mapmarkergraphicsitem.h"
-#include "map.h"
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoMarker::UndoMarker(Map* map, const MapMarker& marker) :
-    UndoFowBase(map, QString("Set Marker")),
+// TODO: separate marker layer
+
+UndoMarker::UndoMarker(LayerFow* layer, const MapMarker& marker) :
+    UndoFowBase(layer, QString("Set Marker")),
     _marker(marker),
     _markerGraphicsItem(nullptr)
 {
@@ -24,6 +25,7 @@ void UndoMarker::undo()
 
 void UndoMarker::redo()
 {
+    /*
     if(_map)
     {
         if(_markerGraphicsItem)
@@ -31,12 +33,11 @@ void UndoMarker::redo()
 
         _map->addMapMarker(this, &_marker);
     }
+    */
 }
 
-void UndoMarker::apply(bool preview, QPaintDevice* target) const
+void UndoMarker::apply() const
 {
-    Q_UNUSED(preview);
-    Q_UNUSED(target);
 }
 
 QDomElement UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
@@ -94,7 +95,7 @@ int UndoMarker::getType() const
 
 UndoFowBase* UndoMarker::clone() const
 {
-    return new UndoMarker(_map, _marker);
+    return new UndoMarker(_layer, _marker);
 }
 
 void UndoMarker::setMarker(const MapMarker& marker)
