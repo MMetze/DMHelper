@@ -7,6 +7,7 @@
 #include "undofowfill.h"
 #include "undofowshape.h"
 #include "undomarker.h"
+#include "layerscene.h"
 #include "mapmarkerdialog.h"
 #include "mapcolorizedialog.h"
 #include "selectzoom.h"
@@ -130,7 +131,7 @@ void MapFrame::deactivateObject()
     // disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
     disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32) && !defined(Q_OS_WIN64)
     _mapSource->uninitialize();
 #endif
     setMap(nullptr);
@@ -259,6 +260,14 @@ void MapFrame::resetFoW()
         return;
 
     // TODO: layers
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+    if(layer)
+    {
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0,0,0,255)));
+        layer->getUndoStack()->push(undoFill);
+        emit dirty();
+    }
+
     /*
     UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0,0,0,255)));
     _mapSource->getUndoStack()->push(undoFill);
@@ -277,6 +286,14 @@ void MapFrame::clearFoW()
         return;
 
     // TODO: layers
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+    if(layer)
+    {
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0,0,0,0)));
+        layer->getUndoStack()->push(undoFill);
+        emit dirty();
+    }
+
     /*
     UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0,0,0,0)));
     _mapSource->getUndoStack()->push(undoFill);
@@ -515,7 +532,7 @@ void MapFrame::editMapFile()
     if(!filename.isEmpty())
     {
         uninitializeFoW();
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32) && !defined(Q_OS_WIN64)
         _mapSource->uninitialize();
 #endif
         _mapSource->setFileName(filename);
@@ -1290,6 +1307,13 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
                 // TODO: Layers
+                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+                if(layer)
+                {
+                    UndoFowShape* undoShape = new UndoFowShape(layer, MapEditShape(shapeRect, _erase, false));
+                    layer->getUndoStack()->push(undoShape);
+                    emit dirty();
+                }
                 /*
                 UndoFowShape* undoShape = new UndoFowShape(_mapSource, MapEditShape(shapeRect, _erase, false));
                 _mapSource->getUndoStack()->push(undoShape);
@@ -1330,6 +1354,13 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
             // TODO: Layers
+            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+            if(layer)
+            {
+                _undoPath = new UndoFowPath(layer, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
+                layer->getUndoStack()->push(_undoPath);
+                emit dirty();
+            }
             /*
             _undoPath = new UndoFowPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
             _mapSource->getUndoStack()->push(_undoPath);
@@ -1354,6 +1385,8 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 QPoint drawPoint =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
+                _undoPath->addPoint(drawPoint);
+                emit dirty();
                 // TODO: Layers
                 /*
                 _undoPath->addPoint(drawPoint);

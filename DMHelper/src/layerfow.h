@@ -4,6 +4,7 @@
 #include "layer.h"
 #include "mapcontent.h"
 #include <QImage>
+#include <QPixmap>
 
 class PublishGLBattleBackground;
 class QGraphicsPixmapItem;
@@ -20,7 +21,6 @@ public:
     virtual DMHelper::LayerType getType() const override;
 
     QImage getImage() const;
-    QPaintDevice* getImageTarget();
 
     QUndoStack* getUndoStack() const;
     void undoPaint();
@@ -54,6 +54,10 @@ public slots:
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) override;
     virtual void playerGLResize(int w, int h) override;
 
+protected slots:
+    // Local Interface
+    void updateFowInternal();
+
 protected:
     // DM Window Methods
     void cleanupDM();
@@ -69,6 +73,7 @@ protected:
 
     // Core contents
     QImage _imgFow;
+    QPixmap _pixmapFow;
     QUndoStack* _undoStack;
 
 };

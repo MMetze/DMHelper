@@ -9,7 +9,7 @@ UndoFowPoint::UndoFowPoint(LayerFow* layer, const MapDrawPoint& mapDrawPoint) :
 {
 }
 
-void UndoFowPoint::apply() const
+void UndoFowPoint::apply()
 {
     if(_layer)
         _layer->paintFoWPoint(_mapDrawPoint.point(), _mapDrawPoint);

@@ -9,7 +9,7 @@ UndoFowFill::UndoFowFill(LayerFow* layer, const MapEditFill& mapEditFill) :
 {
 }
 
-void UndoFowFill::apply() const
+void UndoFowFill::apply()
 {
     if(_layer)
         _layer->fillFoW(_mapEditFill.color());

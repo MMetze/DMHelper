@@ -13,15 +13,19 @@ LayerFow::LayerFow(const QSize& imageSize, int order, QObject *parent) :
     Layer{order, parent},
     _graphicsItem(nullptr),
     _backgroundObject(nullptr),
-    _imgFow(imageSize, QImage::Format_ARGB32),
+    _imgFow(imageSize, QImage::Format_RGBA8888),
+    _pixmapFow(),
     _undoStack(nullptr)
 {
     if(imageSize.isEmpty())
         qDebug() << "[LayerFow] ERROR: layer fow created with an empty size!";
 
     _undoStack = new QUndoStack(this);
-    _imgFow.fill(Qt::red);
-}
+
+    _imgFow.fill(Qt::black);
+    _pixmapFow.fill(Qt::black);
+
+    connect(this, &LayerFow::dirty, this, &LayerFow::updateFowInternal);}
 
 LayerFow::~LayerFow()
 {
@@ -32,7 +36,6 @@ LayerFow::~LayerFow()
 QRectF LayerFow::boundingRect() const
 {
     return QRectF(QPointF(0,0), _imgFow.size());
-    //return _graphicsItem ? _graphicsItem->boundingRect() : QRectF();
 }
 
 DMHelper::LayerType LayerFow::getType() const
@@ -45,11 +48,6 @@ QImage LayerFow::getImage() const
     return _imgFow;
 }
 
-QPaintDevice* LayerFow::getImageTarget()
-{
-    return &_imgFow;
-}
-
 QUndoStack* LayerFow::getUndoStack() const
 {
     return _undoStack;
@@ -57,12 +55,16 @@ QUndoStack* LayerFow::getUndoStack() const
 
 void LayerFow::undoPaint()
 {
+    qDebug() << "[LayerFow]: undoPaint";
+
     //_mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1)
     applyPaintTo(getUndoStack()->index() - 1);
 }
 
 void LayerFow::applyPaintTo(int index, int startIndex)
 {
+    qDebug() << "[LayerFow]: applyPaintTo, index: " << index << ", startIndex: " << startIndex;
+
     if(index < startIndex)
         return;
 
@@ -70,13 +72,21 @@ void LayerFow::applyPaintTo(int index, int startIndex)
         index = _undoStack->count();
 
     if(startIndex == 0)
+    {
         _imgFow.fill(Qt::black);
+        //_pixmapFow.fill(Qt::blue);
+    }
 
+    // Need to add some batch processing to avoid updating every step
     for( int i = startIndex; i < index; ++i )
     {
-        const UndoFowBase* action = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
-        if(action)
-            action->apply();
+        const UndoFowBase* constAction = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
+        if(constAction)
+        {
+            UndoFowBase* action = const_cast<UndoFowBase*>(constAction);
+            if(action)
+                action->apply();
+        }
     }
     /*
     if(!target)
@@ -91,6 +101,8 @@ void LayerFow::applyPaintTo(int index, int startIndex)
         internalApplyPaintTo(target, clearColor, index, preview, startIndex);
     }
     */
+
+    emit dirty();
 }
 
 /*
@@ -182,6 +194,9 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
             p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
         }
     }
+
+    p.end();
+    emit dirty();
 }
 
 void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
@@ -235,6 +250,9 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
         p.setCompositionMode(QPainter::CompositionMode_Source);
         p.drawRect(rect);
     }
+
+    p.end();
+    emit dirty();
 }
 
 void LayerFow::fillFoW(const QColor& color)
@@ -242,6 +260,8 @@ void LayerFow::fillFoW(const QColor& color)
     QPainter p(&_imgFow);
     p.setCompositionMode(QPainter::CompositionMode_Source);
     p.fillRect(0, 0, _imgFow.width(), _imgFow.height(), color);
+    p.end();
+    emit dirty();
 }
 
 /*
@@ -280,7 +300,7 @@ void LayerFow::dmInitialize(QGraphicsScene& scene)
         return;
     }
 
-    _graphicsItem = scene.addPixmap(QPixmap::fromImage(getImage()));
+    _graphicsItem = scene.addPixmap(QPixmap::fromImage(_imgFow));
     if(_graphicsItem)
     {
         _graphicsItem->setEnabled(false);
@@ -335,13 +355,23 @@ void LayerFow::playerGLResize(int w, int h)
     Q_UNUSED(h);
 }
 
+void LayerFow::updateFowInternal()
+{
+    if(_graphicsItem)
+        _graphicsItem->setPixmap(QPixmap::fromImage(_imgFow));
+
+    if(_backgroundObject)
+        _backgroundObject->setImage(_imgFow);
+}
+
 void LayerFow::cleanupDM()
 {
     if(!_graphicsItem)
         return;
 
-    if(_graphicsItem->scene())
-        _graphicsItem->scene()->removeItem(_graphicsItem);
+    QGraphicsScene* scene = _graphicsItem->scene();
+    if(scene)
+        scene->removeItem(_graphicsItem);
 
     delete _graphicsItem;
     _graphicsItem = nullptr;

@@ -17,7 +17,7 @@ public:
 
     virtual void undo() override;
     virtual void redo() override;
-    virtual void apply() const = 0;
+    virtual void apply() = 0;
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const = 0;
     virtual void inputXML(const QDomElement &element, bool isImport) = 0;

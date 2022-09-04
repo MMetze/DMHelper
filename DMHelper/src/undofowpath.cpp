@@ -9,7 +9,7 @@ UndoFowPath::UndoFowPath(LayerFow* layer, const MapDrawPath& mapDrawPath) :
 {
 }
 
-void UndoFowPath::apply() const
+void UndoFowPath::apply()
 {
     if(_layer)
     {

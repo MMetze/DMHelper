@@ -9,7 +9,7 @@ class UndoFowFill : public UndoFowBase
 public:
     UndoFowFill(LayerFow* layer, const MapEditFill& mapEditFill);
 
-    virtual void apply() const override;
+    virtual void apply() override;
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 

@@ -57,6 +57,7 @@ MapColorizeFilter LayerImage::getFilter() const
 
 void LayerImage::dmInitialize(QGraphicsScene& scene)
 {
+    qDebug() << "[LayerImage] Image Layer being initialized...";
     if(_graphicsItem)
     {
         qDebug() << "[LayerImage] ERROR: dmInitialize called although the graphics item already exists!";
@@ -154,6 +155,7 @@ void LayerImage::updateImageInternal()
 
 void LayerImage::cleanupDM()
 {
+    qDebug() << "[LayerImage] Cleaning up Image Layer...";
     if(!_graphicsItem)
         return;
 

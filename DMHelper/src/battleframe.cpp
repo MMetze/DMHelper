@@ -3166,7 +3166,7 @@ void BattleFrame::cleanupBattleMap()
     // Unload the map
     if(_mapDrawer)
     {
-#ifdef Q_OS_WIN32
+#if defined(Q_OS_WIN32) && !defined(Q_OS_WIN64)
         if(_mapDrawer->getMap())
             _mapDrawer->getMap()->uninitialize();
 #endif

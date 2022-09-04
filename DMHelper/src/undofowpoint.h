@@ -9,7 +9,7 @@ class UndoFowPoint : public UndoFowBase
 public:
     UndoFowPoint(LayerFow* layer, const MapDrawPoint& mapDrawPoint);
 
-    virtual void apply() const override;
+    virtual void apply() override;
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 

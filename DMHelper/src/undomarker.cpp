@@ -36,7 +36,7 @@ void UndoMarker::redo()
     */
 }
 
-void UndoMarker::apply() const
+void UndoMarker::apply()
 {
 }
 

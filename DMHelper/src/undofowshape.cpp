@@ -7,7 +7,7 @@ UndoFowShape::UndoFowShape(LayerFow* layer, const MapEditShape& mapEditShape) :
 {
 }
 
-void UndoFowShape::apply() const
+void UndoFowShape::apply()
 {
     if(_layer)
         _layer->paintFoWRect(_mapEditShape.rect(), _mapEditShape);

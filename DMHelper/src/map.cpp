@@ -854,15 +854,18 @@ bool Map::initialize()
     }
 
     //emitSignal(_imgBackground);
+
     LayerImage* backgroundLayer = new LayerImage(imgBackground, -2);
     backgroundLayer->setApplyFilter(_filterApplied);
     backgroundLayer->setFilter(_filter);
     connect(this, &Map::mapImageChanged, backgroundLayer, &LayerImage::updateImage);
     _layerScene.appendLayer(backgroundLayer);
 
+    /*
     QImage cloudsImage("C:/Users/turne/Documents/DnD/DM Helper/testdata/CloudsSquare.png");
     LayerImage* cloudsLayer = new LayerImage(cloudsImage, 20);
     _layerScene.appendLayer(cloudsLayer);
+    */
 
     //_imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
@@ -891,6 +894,7 @@ void Map::uninitialize()
 //    _imgBackground = QImage();
     _imgBWFow = QImage();
 //    _imgFow = QImage();
+    _layerScene.clearLayers();
     _initialized = false;
 }
 
