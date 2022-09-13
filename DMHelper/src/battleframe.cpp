@@ -1799,11 +1799,13 @@ void BattleFrame::setBackgroundColor(const QColor& color)
     _model->setBackgroundColor(color);
 }
 
+/*
 void BattleFrame::reloadObject()
 {
     recreateCombatantWidgets();
     reloadMap();
 }
+*/
 
 void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
 {

@@ -183,8 +183,8 @@ protected:
     //QImage _imgBackground;
     //QImage _imgFow;
     QList<UndoFowBase*> _undoItems;
-    QImage _imgBWFow;
-    int _indexBWFow;
+    //QImage _imgBWFow;
+    //int _indexBWFow;
     bool _filterApplied;
     MapColorizeFilter _filter;
     int _lineType;

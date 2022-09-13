@@ -40,8 +40,8 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     //_imgBackground(),
     //_imgFow(),
     _undoItems(),
-    _imgBWFow(),
-    _indexBWFow(0),
+    //_imgBWFow(),
+    //_indexBWFow(0),
     _filterApplied(false),
     _filter(),
     _lineType(Qt::SolidLine),
@@ -855,7 +855,7 @@ bool Map::initialize()
 
     //emitSignal(_imgBackground);
 
-    LayerImage* backgroundLayer = new LayerImage(imgBackground, -2);
+    LayerImage* backgroundLayer = new LayerImage(QString("Background"), imgBackground, -2);
     backgroundLayer->setApplyFilter(_filterApplied);
     backgroundLayer->setFilter(_filter);
     connect(this, &Map::mapImageChanged, backgroundLayer, &LayerImage::updateImage);
@@ -870,7 +870,7 @@ bool Map::initialize()
     //_imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
-    LayerFow* fowLayer = new LayerFow(imgBackground.size(), -1);
+    LayerFow* fowLayer = new LayerFow(QString("FoW"), imgBackground.size(), -1);
     for(int i = 0; i < _undoItems.count(); ++i)
     {
         UndoFowBase* undoItem = _undoItems[i];
@@ -892,7 +892,7 @@ bool Map::initialize()
 void Map::uninitialize()
 {
 //    _imgBackground = QImage();
-    _imgBWFow = QImage();
+//    _imgBWFow = QImage();
 //    _imgFow = QImage();
     _layerScene.clearLayers();
     _initialized = false;

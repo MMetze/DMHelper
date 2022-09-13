@@ -586,6 +586,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(_mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _mapFrame, SLOT(setPointerFile(const QString&)));
+    connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layersClicked, _mapFrame, &MapFrame::editLayers);
 
     connect(this, SIGNAL(cancelSelect()), _mapFrame, SLOT(cancelSelect()));
 

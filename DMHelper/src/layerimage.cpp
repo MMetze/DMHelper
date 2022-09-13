@@ -5,8 +5,8 @@
 #include <QOpenGLFunctions>
 #include <QDebug>
 
-LayerImage::LayerImage(const QImage& image, int order, QObject *parent) :
-    Layer{order, parent},
+LayerImage::LayerImage(const QString& name, const QImage& image, int order, QObject *parent) :
+    Layer{name, order, parent},
     _graphicsItem(nullptr),
     _backgroundObject(nullptr),
     _layerImage(image),
@@ -28,6 +28,11 @@ LayerImage::~LayerImage()
 QRectF LayerImage::boundingRect() const
 {
     return _graphicsItem ? _graphicsItem->boundingRect() : QRectF();
+}
+
+QImage LayerImage::getLayerIcon() const
+{
+    return getImage();
 }
 
 DMHelper::LayerType LayerImage::getType() const

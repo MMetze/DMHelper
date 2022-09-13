@@ -34,13 +34,18 @@ class Layer : public QObject
 {
     Q_OBJECT
 public:
-    Layer(int order = 0, QObject *parent = nullptr);
+    Layer(const QString& name, int order = 0, QObject *parent = nullptr);
     virtual ~Layer();
 
     virtual QRectF boundingRect() const;
 
+    virtual QString getName() const;
+    virtual void setName(const QString& name);
+
     virtual int getOrder() const;
     virtual void setOrder(int order);
+
+    virtual QImage getLayerIcon() const;
 
     virtual DMHelper::LayerType getType() const = 0;
 
@@ -62,7 +67,9 @@ signals:
     void orderChanged(int order);
 
 protected:
+    QString _name;
     int _order;
+
 };
 
 #endif // LAYER_H

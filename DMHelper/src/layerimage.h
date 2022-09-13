@@ -12,10 +12,11 @@ class LayerImage : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerImage(const QImage& image, int order = 0, QObject *parent = nullptr);
+    explicit LayerImage(const QString& name, const QImage& image, int order = 0, QObject *parent = nullptr);
     virtual ~LayerImage() override;
 
     virtual QRectF boundingRect() const override;    
+    virtual QImage getLayerIcon() const override;
     virtual DMHelper::LayerType getType() const override;
 
     QImage getImage() const;

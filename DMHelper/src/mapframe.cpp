@@ -10,6 +10,7 @@
 #include "layerscene.h"
 #include "mapmarkerdialog.h"
 #include "mapcolorizedialog.h"
+#include "layerseditdialog.h"
 #include "selectzoom.h"
 #include "campaign.h"
 #include "party.h"
@@ -260,7 +261,7 @@ void MapFrame::resetFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0,0,0,255)));
@@ -286,7 +287,7 @@ void MapFrame::clearFoW()
         return;
 
     // TODO: layers
-    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
         UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0,0,0,0)));
@@ -781,6 +782,18 @@ void MapFrame::setRotation(int rotation)
     _rotation = rotation;
     if(_renderer)
         _renderer->setRotation(_rotation);
+}
+
+void MapFrame::editLayers()
+{
+    if(!_mapSource)
+        return;
+
+    LayersEditDialog dlg(_mapSource->getLayerScene());
+    dlg.resize(width() / 2, height() / 2);
+    if(dlg.exec() == QDialog::Accepted)
+    {
+    }
 }
 
 void MapFrame::initializeFoW()
@@ -1307,7 +1320,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
                 // TODO: Layers
-                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+                LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
                 if(layer)
                 {
                     UndoFowShape* undoShape = new UndoFowShape(layer, MapEditShape(shapeRect, _erase, false));
@@ -1354,7 +1367,7 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
             // TODO: Layers
-            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getFirst(DMHelper::LayerType_Fow));
+            LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
             if(layer)
             {
                 _undoPath = new UndoFowPath(layer, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));

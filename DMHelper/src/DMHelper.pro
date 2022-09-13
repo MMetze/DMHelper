@@ -83,8 +83,10 @@ SOURCES += main.cpp\
     exportworker.cpp \
     layer.cpp \
     layerfow.cpp \
+    layerframe.cpp \
     layerimage.cpp \
     layerscene.cpp \
+    layerseditdialog.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapblankdialog.cpp \
@@ -324,8 +326,10 @@ HEADERS  += mainwindow.h \
     exportworker.h \
     layer.h \
     layerfow.h \
+    layerframe.h \
     layerimage.h \
     layerscene.h \
+    layerseditdialog.h \
     legaldialog.h \
     mapblankdialog.h \
     mapcolorizedialog.h \
@@ -518,6 +522,8 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    layerframe.ui \
+    layerseditdialog.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \

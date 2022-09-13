@@ -28,6 +28,12 @@ public:
     void clearLayers();
     void moveLayer(int from, int to);
 
+    int getSelectedLayerIndex() const;
+    void setSelectedLayerIndex(int selected);
+    Layer* getSelectedLayer() const;
+    void setSelectedLayer(Layer* layer);
+
+    Layer* getPriority(DMHelper::LayerType type) const;
     Layer* getFirst(DMHelper::LayerType type) const;
     QImage mergedImage();
 
@@ -47,7 +53,10 @@ public slots:
 signals:
 
 protected:
+    void resetLayerOrders();
+
     QList<Layer*> _layers;
+    int _selected;
 
 };
 

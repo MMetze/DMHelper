@@ -37,6 +37,12 @@ void CampaignObjectFrame::setBackgroundColor(const QColor& color)
     Q_UNUSED(color);
 }
 
+/*
 void CampaignObjectFrame::reloadObject()
+{
+}
+*/
+
+void CampaignObjectFrame::editLayers()
 {
 }

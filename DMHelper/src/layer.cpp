@@ -1,8 +1,10 @@
 #include "layer.h"
 #include <QRectF>
+#include <QImage>
 
-Layer::Layer(int order, QObject *parent) :
+Layer::Layer(const QString& name, int order, QObject *parent) :
     QObject{parent},
+    _name(name),
     _order(order)
 {
 }
@@ -14,6 +16,20 @@ Layer::~Layer()
 QRectF Layer::boundingRect() const
 {
     return QRectF();
+}
+
+QString Layer::getName() const
+{
+    return _name;
+}
+
+void Layer::setName(const QString& name)
+{
+    if(_name == name)
+        return;
+
+    _name = name;
+    emit dirty();
 }
 
 int Layer::getOrder() const
@@ -29,6 +45,11 @@ void Layer::setOrder(int order)
     _order = order;
     emit dirty();
     emit orderChanged(order);
+}
+
+QImage Layer::getLayerIcon() const
+{
+    return QImage();
 }
 
 bool Layer::playerGLUpdate()

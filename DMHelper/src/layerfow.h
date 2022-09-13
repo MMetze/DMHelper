@@ -14,11 +14,14 @@ class LayerFow : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerFow(const QSize& imageSize, int order = 0, QObject *parent = nullptr);
+    explicit LayerFow(const QString& name, const QSize& imageSize, int order = 0, QObject *parent = nullptr);
     virtual ~LayerFow() override;
 
     virtual QRectF boundingRect() const override;
+    virtual QImage getLayerIcon() const override;
     virtual DMHelper::LayerType getType() const override;
+
+    virtual void setOrder(int order) override;
 
     QImage getImage() const;
 

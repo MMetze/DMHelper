@@ -7,7 +7,8 @@
 
 LayerScene::LayerScene(QObject *parent) :
     QObject{parent},
-    _layers()
+    _layers(),
+    _selected(-1)
 {
 }
 
@@ -49,6 +50,8 @@ void LayerScene::insertLayer(int position, Layer* layer)
         return;
 
     _layers.insert(position, layer);
+    resetLayerOrders();
+    _selected = position;
 }
 
 void LayerScene::prependLayer(Layer* layer)
@@ -57,6 +60,8 @@ void LayerScene::prependLayer(Layer* layer)
         return;
 
     _layers.prepend(layer);
+    resetLayerOrders();
+    _selected = 0;
 }
 
 void LayerScene::appendLayer(Layer* layer)
@@ -65,6 +70,8 @@ void LayerScene::appendLayer(Layer* layer)
         return;
 
     _layers.append(layer);
+    resetLayerOrders();
+    _selected = _layers.count() - 1;
 }
 
 void LayerScene::removeLayer(int position)
@@ -73,12 +80,16 @@ void LayerScene::removeLayer(int position)
         return;
 
     _layers.removeAt(position);
+    resetLayerOrders();
+    if(_selected >= position)
+        --_selected;
 }
 
 void LayerScene::clearLayers()
 {
     qDeleteAll(_layers);
     _layers.clear();
+    _selected = -1;
 }
 
 void LayerScene::moveLayer(int from, int to)
@@ -87,6 +98,46 @@ void LayerScene::moveLayer(int from, int to)
         return;
 
     _layers.move(from, to);
+    resetLayerOrders();
+}
+
+int LayerScene::getSelectedLayerIndex() const
+{
+    return _selected;
+}
+
+void LayerScene::setSelectedLayerIndex(int selected)
+{
+    _selected = selected;
+}
+
+Layer* LayerScene::getSelectedLayer() const
+{
+    if((_selected >= 0) && (_selected < _layers.count()))
+        return _layers.at(_selected);
+    else
+        return nullptr;
+}
+
+void LayerScene::setSelectedLayer(Layer* layer)
+{
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i) == layer))
+        {
+            _selected = i;
+            return;
+        }
+    }
+}
+
+Layer* LayerScene::getPriority(DMHelper::LayerType type) const
+{
+    Layer* result = getSelectedLayer();
+    if((result) && (result->getType() == type))
+        return result;
+    else
+        return getFirst(type);
 }
 
 Layer* LayerScene::getFirst(DMHelper::LayerType type) const
@@ -178,4 +229,10 @@ void LayerScene::playerGLResize(int w, int h)
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerGLResize(w, h);
+}
+
+void LayerScene::resetLayerOrders()
+{
+    for(int i = 0; i < _layers.count(); ++i)
+        _layers[i]->setOrder(i);
 }

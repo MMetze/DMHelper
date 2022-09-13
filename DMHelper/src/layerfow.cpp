@@ -9,8 +9,8 @@
 #include <QPainter>
 #include <QDebug>
 
-LayerFow::LayerFow(const QSize& imageSize, int order, QObject *parent) :
-    Layer{order, parent},
+LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
+    Layer{name, order, parent},
     _graphicsItem(nullptr),
     _backgroundObject(nullptr),
     _imgFow(imageSize, QImage::Format_RGBA8888),
@@ -25,7 +25,8 @@ LayerFow::LayerFow(const QSize& imageSize, int order, QObject *parent) :
     _imgFow.fill(Qt::black);
     _pixmapFow.fill(Qt::black);
 
-    connect(this, &LayerFow::dirty, this, &LayerFow::updateFowInternal);}
+    connect(this, &LayerFow::dirty, this, &LayerFow::updateFowInternal);
+}
 
 LayerFow::~LayerFow()
 {
@@ -38,9 +39,22 @@ QRectF LayerFow::boundingRect() const
     return QRectF(QPointF(0,0), _imgFow.size());
 }
 
+QImage LayerFow::getLayerIcon() const
+{
+    return getImage();
+}
+
 DMHelper::LayerType LayerFow::getType() const
 {
     return DMHelper::LayerType_Fow;
+}
+
+void LayerFow::setOrder(int order)
+{
+    if(_graphicsItem)
+        _graphicsItem->setZValue(order);
+
+    Layer::setOrder(order);
 }
 
 QImage LayerFow::getImage() const
