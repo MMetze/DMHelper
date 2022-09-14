@@ -21,8 +21,6 @@ public:
     virtual QImage getLayerIcon() const override;
     virtual DMHelper::LayerType getType() const override;
 
-    virtual void setOrder(int order) override;
-
     QImage getImage() const;
 
     QUndoStack* getUndoStack() const;
@@ -56,6 +54,10 @@ public slots:
 //    virtual bool playerGLUpdate() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) override;
     virtual void playerGLResize(int w, int h) override;
+
+    // Layer Specific Interface
+    virtual void setOrder(int order) override;
+    virtual void setLayerVisible(bool layerVisible) override;
 
 protected slots:
     // Local Interface

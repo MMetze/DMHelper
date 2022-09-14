@@ -21,6 +21,8 @@ public:
 
 protected slots:
     void selectFrame(LayerFrame* frame);
+    void moveUp();
+    void moveDown();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;

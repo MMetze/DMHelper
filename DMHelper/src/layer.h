@@ -40,11 +40,8 @@ public:
     virtual QRectF boundingRect() const;
 
     virtual QString getName() const;
-    virtual void setName(const QString& name);
-
     virtual int getOrder() const;
-    virtual void setOrder(int order);
-
+    virtual bool getLayerVisible() const;
     virtual QImage getLayerIcon() const;
 
     virtual DMHelper::LayerType getType() const = 0;
@@ -62,6 +59,11 @@ public slots:
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) = 0;
     virtual void playerGLResize(int w, int h) = 0;
 
+    // Layer Specific Interface
+    virtual void setName(const QString& name);
+    virtual void setOrder(int order);
+    virtual void setLayerVisible(bool layerVisible);
+
 signals:
     void dirty();
     void orderChanged(int order);
@@ -69,6 +71,7 @@ signals:
 protected:
     QString _name;
     int _order;
+    bool _layerVisible;
 
 };
 

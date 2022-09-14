@@ -14,7 +14,7 @@ class LayerFrame : public QFrame
     Q_OBJECT
 
 public:
-    explicit LayerFrame(bool visible, Layer& layer, QWidget *parent = nullptr);
+    explicit LayerFrame(Layer& layer, QWidget *parent = nullptr);
     ~LayerFrame();
 
     void setLayerVisible(bool visible);

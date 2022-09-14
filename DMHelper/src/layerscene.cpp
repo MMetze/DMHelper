@@ -99,6 +99,7 @@ void LayerScene::moveLayer(int from, int to)
 
     _layers.move(from, to);
     resetLayerOrders();
+    _selected = to;
 }
 
 int LayerScene::getSelectedLayerIndex() const
@@ -222,7 +223,10 @@ bool LayerScene::playerGLUpdate()
 void LayerScene::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
 {
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->playerGLPaint(functions, modelMatrix);
+    {
+        if(_layers.at(i)->getLayerVisible())
+            _layers[i]->playerGLPaint(functions, modelMatrix);
+    }
 }
 
 void LayerScene::playerGLResize(int w, int h)

@@ -49,14 +49,6 @@ DMHelper::LayerType LayerFow::getType() const
     return DMHelper::LayerType_Fow;
 }
 
-void LayerFow::setOrder(int order)
-{
-    if(_graphicsItem)
-        _graphicsItem->setZValue(order);
-
-    Layer::setOrder(order);
-}
-
 QImage LayerFow::getImage() const
 {
     return _imgFow;
@@ -367,6 +359,22 @@ void LayerFow::playerGLResize(int w, int h)
 {
     Q_UNUSED(w);
     Q_UNUSED(h);
+}
+
+void LayerFow::setOrder(int order)
+{
+    if(_graphicsItem)
+        _graphicsItem->setZValue(order);
+
+    Layer::setOrder(order);
+}
+
+void LayerFow::setLayerVisible(bool layerVisible)
+{
+    if(_graphicsItem)
+        _graphicsItem->setVisible(layerVisible);
+
+    Layer::setLayerVisible(layerVisible);
 }
 
 void LayerFow::updateFowInternal()

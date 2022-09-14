@@ -37,6 +37,10 @@ public slots:
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) override;
     virtual void playerGLResize(int w, int h) override;
 
+    // Layer Specific Interface
+    virtual void setOrder(int order) override;
+    virtual void setLayerVisible(bool layerVisible) override;
+
     // Local Interface
     void updateImage(const QImage& image);
     void setApplyFilter(bool applyFilter);

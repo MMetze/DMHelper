@@ -2,19 +2,22 @@
 #include "ui_layerframe.h"
 #include "layer.h"
 
-LayerFrame::LayerFrame(bool visible, Layer& layer, QWidget *parent) :
+LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::LayerFrame),
     _layer(layer)
 {
     ui->setupUi(this);
 
-    setLayerVisible(visible);
+    setLayerVisible(layer.getLayerVisible());
     setIcon(layer.getLayerIcon());
     setName(layer.getName());
 
     connect(ui->chkVisible, &QAbstractButton::clicked, this, &LayerFrame::visibleChanged);
     connect(ui->edtName, &QLineEdit::editingFinished, this, &LayerFrame::handleNameChanged);
+
+    connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
+    connect(this, &LayerFrame::visibleChanged, &layer, &Layer::setLayerVisible);
 
     ui->edtName->installEventFilter(this);
 

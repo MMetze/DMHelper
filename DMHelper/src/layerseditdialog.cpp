@@ -16,6 +16,9 @@ LayersEditDialog::LayersEditDialog(LayerScene& scene, QWidget *parent) :
     _layerLayout = new QVBoxLayout;
     _layerLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui->scrollAreaWidgetContents->setLayout(_layerLayout);
+
+    connect(ui->btnUp, &QAbstractButton::clicked, this, &LayersEditDialog::moveUp);
+    connect(ui->btnDown, &QAbstractButton::clicked, this, &LayersEditDialog::moveDown);
 }
 
 LayersEditDialog::~LayersEditDialog()
@@ -38,6 +41,22 @@ void LayersEditDialog::selectFrame(LayerFrame* frame)
     }
     _scene.setSelectedLayerIndex(frame->getLayer().getOrder());
     frame->setSelected(true);
+}
+
+void LayersEditDialog::moveUp()
+{
+    int currentSelected = _scene.getSelectedLayerIndex();
+    _scene.moveLayer(currentSelected, currentSelected - 1);
+    clearLayout();
+    readScene();
+}
+
+void LayersEditDialog::moveDown()
+{
+    int currentSelected = _scene.getSelectedLayerIndex();
+    _scene.moveLayer(currentSelected, currentSelected + 1);
+    clearLayout();
+    readScene();
 }
 
 void LayersEditDialog::resizeEvent(QResizeEvent *event)
@@ -68,7 +87,7 @@ void LayersEditDialog::readScene()
         Layer* layer = _scene.layerAt(i);
         if(layer)
         {
-            LayerFrame* newFrame = new LayerFrame(true, *layer, ui->scrollAreaWidgetContents);
+            LayerFrame* newFrame = new LayerFrame(*layer, ui->scrollAreaWidgetContents);
             newFrame->installEventFilter(this);
             newFrame->setSelected(_scene.getSelectedLayerIndex() == i);
             connect(newFrame, &LayerFrame::selectMe, this, &LayersEditDialog::selectFrame);

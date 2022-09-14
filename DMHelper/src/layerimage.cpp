@@ -117,6 +117,22 @@ void LayerImage::playerGLResize(int w, int h)
     Q_UNUSED(h);
 }
 
+void LayerImage::setOrder(int order)
+{
+    if(_graphicsItem)
+        _graphicsItem->setZValue(order);
+
+    Layer::setOrder(order);
+}
+
+void LayerImage::setLayerVisible(bool layerVisible)
+{
+    if(_graphicsItem)
+        _graphicsItem->setVisible(layerVisible);
+
+    Layer::setLayerVisible(layerVisible);
+}
+
 void LayerImage::updateImage(const QImage& image)
 {
     if(_layerImage == image)

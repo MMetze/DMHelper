@@ -5,7 +5,8 @@
 Layer::Layer(const QString& name, int order, QObject *parent) :
     QObject{parent},
     _name(name),
-    _order(order)
+    _order(order),
+    _layerVisible(true)
 {
 }
 
@@ -23,6 +24,26 @@ QString Layer::getName() const
     return _name;
 }
 
+int Layer::getOrder() const
+{
+    return _order;
+}
+
+bool Layer::getLayerVisible() const
+{
+    return _layerVisible;
+}
+
+QImage Layer::getLayerIcon() const
+{
+    return QImage();
+}
+
+bool Layer::playerGLUpdate()
+{
+    return false;
+}
+
 void Layer::setName(const QString& name)
 {
     if(_name == name)
@@ -30,11 +51,6 @@ void Layer::setName(const QString& name)
 
     _name = name;
     emit dirty();
-}
-
-int Layer::getOrder() const
-{
-    return _order;
 }
 
 void Layer::setOrder(int order)
@@ -47,12 +63,11 @@ void Layer::setOrder(int order)
     emit orderChanged(order);
 }
 
-QImage Layer::getLayerIcon() const
+void Layer::setLayerVisible(bool layerVisible)
 {
-    return QImage();
-}
+    if(_layerVisible == layerVisible)
+        return;
 
-bool Layer::playerGLUpdate()
-{
-    return false;
+    _layerVisible = layerVisible;
+    emit dirty();
 }
