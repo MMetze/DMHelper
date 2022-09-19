@@ -104,8 +104,15 @@ void LayerImage::playerGLUninitialize()
 
 void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
 {
-    if((!_backgroundObject) || (!functions))
+    if(!functions)
         return;
+
+    if(!_backgroundObject)
+    {
+        playerGLInitialize();
+        if(!_backgroundObject)
+            return;
+    }
 
     functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
     _backgroundObject->paintGL();

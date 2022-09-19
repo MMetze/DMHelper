@@ -2,8 +2,15 @@
 #include "ui_layerseditdialog.h"
 #include "layer.h"
 #include "layerscene.h"
+#include "layerfow.h"
+#include "layerimage.h"
 #include "layerframe.h"
+#include <QImageReader>
 #include <QVBoxLayout>
+#include <QInputDialog>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QDebug>
 
 LayersEditDialog::LayersEditDialog(LayerScene& scene, QWidget *parent) :
     QDialog(parent),
@@ -19,6 +26,8 @@ LayersEditDialog::LayersEditDialog(LayerScene& scene, QWidget *parent) :
 
     connect(ui->btnUp, &QAbstractButton::clicked, this, &LayersEditDialog::moveUp);
     connect(ui->btnDown, &QAbstractButton::clicked, this, &LayersEditDialog::moveDown);
+    connect(ui->btnNewLayer, &QAbstractButton::clicked, this, &LayersEditDialog::addLayer);
+    connect(ui->btnRemoveLayer, &QAbstractButton::clicked, this, &LayersEditDialog::removeLayer);
 }
 
 LayersEditDialog::~LayersEditDialog()
@@ -47,16 +56,77 @@ void LayersEditDialog::moveUp()
 {
     int currentSelected = _scene.getSelectedLayerIndex();
     _scene.moveLayer(currentSelected, currentSelected - 1);
-    clearLayout();
-    readScene();
+    resetLayout();
 }
 
 void LayersEditDialog::moveDown()
 {
     int currentSelected = _scene.getSelectedLayerIndex();
     _scene.moveLayer(currentSelected, currentSelected + 1);
-    clearLayout();
-    readScene();
+    resetLayout();
+}
+
+void LayersEditDialog::addLayer()
+{
+    QStringList items;
+    items << tr("Image") << tr("FoW") << tr("Tokens");
+
+    bool ok;
+    QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
+    if((!ok) || (selectedItem.isEmpty()))
+        return;
+
+    Layer* newLayer = nullptr;
+    if(selectedItem == tr("Image"))
+    {
+        QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
+        if(newFileName.isEmpty())
+            return;
+
+        QImageReader reader(newFileName);
+        QImage imgBackground = reader.read();
+        if(imgBackground.isNull())
+        {
+            qDebug() << "[Map] Not able to read new image file " << newFileName << ": " << reader.error() <<", " << reader.errorString();
+#if !defined(Q_OS_MAC)
+            QMessageBox::critical(nullptr,
+                                  QString("DMHelper Image File Read Error"),
+                                  QString("The selected image """) + newFileName + QString(""" could not be read. It may be too high resolution for DMHelper!"));
+#endif
+            return;
+        }
+
+        if(imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
+            imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
+
+        newLayer = new LayerImage(QString("Image"), imgBackground);
+        //qDebug() << "[LayersEditDialog] Trying to add Image layer which is not yet implemented!";
+        //return;
+    }
+    else if(selectedItem == tr("FoW"))
+    {
+        newLayer = new LayerFow(QString("FoW"), _scene.sceneSize().toSize());
+    }
+    else if(selectedItem == tr("Tokens"))
+    {
+        qDebug() << "[LayersEditDialog] Trying to add Token layer which is not yet implemented!";
+        return;
+    }
+    else
+    {
+        qDebug() << "[LayersEditDialog] ERROR: Trying to add an unknown layer type!";
+        return;
+    }
+
+    _scene.appendLayer(newLayer);
+    resetLayout();
+}
+
+void LayersEditDialog::removeLayer()
+{
+    int currentSelected = _scene.getSelectedLayerIndex();
+    _scene.removeLayer(currentSelected);
+    resetLayout();
 }
 
 void LayersEditDialog::resizeEvent(QResizeEvent *event)
@@ -78,6 +148,12 @@ bool LayersEditDialog::eventFilter(QObject *obj, QEvent *event)
         selectFrame(dynamic_cast<LayerFrame*>(obj));
 
     return QDialog::eventFilter(obj,event);
+}
+
+void LayersEditDialog::resetLayout()
+{
+    clearLayout();
+    readScene();
 }
 
 void LayersEditDialog::readScene()
@@ -103,5 +179,9 @@ void LayersEditDialog::clearLayout()
 
     QLayoutItem *child;
     while ((child = _layerLayout->takeAt(0)) != nullptr)
+    {
+        if(child->widget())
+            child->widget()->deleteLater();
         delete child;
+    }
 }

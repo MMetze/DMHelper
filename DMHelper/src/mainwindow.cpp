@@ -586,7 +586,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(_mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _mapFrame, SLOT(setPointerFile(const QString&)));
-    connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layersClicked, _mapFrame, &MapFrame::editLayers);
 
     connect(this, SIGNAL(cancelSelect()), _mapFrame, SLOT(cancelSelect()));
 
@@ -2553,6 +2552,7 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
     CampaignObjectFrame* objectFrame = ui->stackedWidgetEncounter->setCurrentFrame(objectType);
     if(objectFrame)
     {
+        connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layersClicked, objectFrame, &CampaignObjectFrame::editLayers);
         connect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), objectFrame, SLOT(setRotation(int)));
         connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
@@ -2563,6 +2563,7 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         connect(objectFrame, SIGNAL(checkableChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setCheckable(bool)));
         connect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
         connect(objectFrame, SIGNAL(backgroundColorChanged(const QColor&)), _ribbon->getPublishRibbon(), SLOT(setColor(const QColor&)));
+
 
         objectFrame->activateObject(object, _pubWindow ? _pubWindow->getRenderer() : nullptr);
         if(_ribbon && _ribbon->getPublishRibbon())

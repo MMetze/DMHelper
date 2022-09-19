@@ -23,6 +23,8 @@ protected slots:
     void selectFrame(LayerFrame* frame);
     void moveUp();
     void moveDown();
+    void addLayer();
+    void removeLayer();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -30,6 +32,7 @@ protected:
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
 
 private:
+    void resetLayout();
     void readScene();
     void clearLayout();
 

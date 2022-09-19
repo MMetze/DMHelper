@@ -57,7 +57,7 @@ protected:
 
     QList<Layer*> _layers;
     int _selected;
-
+    QGraphicsScene* _dmScene;
 };
 
 #endif // LAYERSCENE_H

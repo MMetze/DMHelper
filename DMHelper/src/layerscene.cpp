@@ -8,7 +8,8 @@
 LayerScene::LayerScene(QObject *parent) :
     QObject{parent},
     _layers(),
-    _selected(-1)
+    _selected(-1),
+    _dmScene(nullptr)
 {
 }
 
@@ -49,6 +50,9 @@ void LayerScene::insertLayer(int position, Layer* layer)
     if((position < 0) || (position >= _layers.count()) || (!layer))
         return;
 
+    if(_dmScene)
+        layer->dmInitialize(*_dmScene);
+
     _layers.insert(position, layer);
     resetLayerOrders();
     _selected = position;
@@ -58,6 +62,9 @@ void LayerScene::prependLayer(Layer* layer)
 {
     if(!layer)
         return;
+
+    if(_dmScene)
+        layer->dmInitialize(*_dmScene);
 
     _layers.prepend(layer);
     resetLayerOrders();
@@ -69,6 +76,9 @@ void LayerScene::appendLayer(Layer* layer)
     if(!layer)
         return;
 
+    if(_dmScene)
+        layer->dmInitialize(*_dmScene);
+
     _layers.append(layer);
     resetLayerOrders();
     _selected = _layers.count() - 1;
@@ -79,7 +89,10 @@ void LayerScene::removeLayer(int position)
     if((position < 0) || (position >= _layers.count()))
         return;
 
-    _layers.removeAt(position);
+    Layer* deleteLayer = _layers.takeAt(position);
+    if(deleteLayer)
+        deleteLayer->deleteLater();
+
     resetLayerOrders();
     if(_selected >= position)
         --_selected;
@@ -184,12 +197,16 @@ void LayerScene::dmInitialize(QGraphicsScene& scene)
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->dmInitialize(scene);
+
+    _dmScene = &scene;
 }
 
 void LayerScene::dmUninitialize()
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->dmUninitialize();
+
+    _dmScene = nullptr;
 }
 
 void LayerScene::dmUpdate()

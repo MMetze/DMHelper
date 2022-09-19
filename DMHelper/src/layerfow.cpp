@@ -20,7 +20,7 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     if(imageSize.isEmpty())
         qDebug() << "[LayerFow] ERROR: layer fow created with an empty size!";
 
-    _undoStack = new QUndoStack(this);
+    _undoStack = new QUndoStack(); // TODO: why does not leaking this avoid a crash at shutdown?
 
     _imgFow.fill(Qt::black);
     _pixmapFow.fill(Qt::black);
@@ -348,8 +348,15 @@ bool LayerFow::playerGLUpdate()
 
 void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
 {
-    if((!_backgroundObject) || (!functions))
+    if(!functions)
         return;
+
+    if(!_backgroundObject)
+    {
+        playerGLInitialize();
+        if(!_backgroundObject)
+            return;
+    }
 
     functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
     _backgroundObject->paintGL();

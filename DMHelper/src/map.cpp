@@ -856,6 +856,7 @@ bool Map::initialize()
     //emitSignal(_imgBackground);
 
     LayerImage* backgroundLayer = new LayerImage(QString("Background"), imgBackground, -2);
+    // TODO: These are needed in the layers...
     backgroundLayer->setApplyFilter(_filterApplied);
     backgroundLayer->setFilter(_filter);
     connect(this, &Map::mapImageChanged, backgroundLayer, &LayerImage::updateImage);
@@ -1112,7 +1113,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.appendChild(actionsElement);
     */
 
-    if(_filterApplied)
+    if(_filterApplied) // TODO: Layers - move this to image layer?
     {
         QDomElement filterElement = doc.createElement("filter");
         filterElement.setAttribute("r2r", _filter._r2r);
