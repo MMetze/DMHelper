@@ -20,6 +20,7 @@ namespace DMHelper
         CampaignType_ScrollingText,
         CampaignType_AudioTrack,
         CampaignType_WelcomeScreen,
+        CampaignType_LayerScene,
 
         CampaignType_Placeholder = 0xffff
     };

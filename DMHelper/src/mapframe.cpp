@@ -791,9 +791,7 @@ void MapFrame::editLayers()
 
     LayersEditDialog dlg(_mapSource->getLayerScene());
     dlg.resize(width() / 2, height() / 2);
-    if(dlg.exec() == QDialog::Accepted)
-    {
-    }
+    dlg.exec();
 }
 
 void MapFrame::initializeFoW()

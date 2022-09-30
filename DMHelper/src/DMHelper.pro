@@ -74,6 +74,7 @@ SOURCES += main.cpp\
     dmh_vlc.cpp \
     dmhcache.cpp \
     dmhelperribbon.cpp \
+    dmhfilereader.cpp \
     dmhlogger.cpp \
     dmhwaitingdialog.cpp \
     emptycampaignframe.cpp \
@@ -316,6 +317,7 @@ HEADERS  += mainwindow.h \
     dmh_vlc.h \
     dmhcache.h \
     dmhelperribbon.h \
+    dmhfilereader.h \
     dmhlogger.h \
     dmhwaitingdialog.h \
     dmversion.h \

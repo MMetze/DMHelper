@@ -1,21 +1,26 @@
 #ifndef LAYERSCENE_H
 #define LAYERSCENE_H
 
-#include <QObject>
 #include <QList>
 #include <QOpenGLFunctions>
 #include "dmconstants.h"
+#include "campaignobjectbase.h"
 
 class Layer;
 class QGraphicsScene;
 
-class LayerScene : public QObject
+class LayerScene : public CampaignObjectBase
 {
     Q_OBJECT
 public:
     explicit LayerScene(QObject *parent = nullptr);
     virtual ~LayerScene();
 
+    // From CampaignObjectBase
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void copyValues(const CampaignObjectBase* other) override;
+
+    // Local
     virtual QRectF boundingRect() const;
     virtual QSizeF sceneSize() const;
 
@@ -38,6 +43,10 @@ public:
     QImage mergedImage();
 
 public slots:
+    // Local
+    void initializeLayers();
+    void uninitializeLayers();
+
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene& scene);
     virtual void dmUninitialize();
@@ -53,8 +62,14 @@ public slots:
 signals:
 
 protected:
+    // From CampaignObjectBase
+    virtual QDomElement createOutputXML(QDomDocument &doc) override;
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+
+    // Local
     void resetLayerOrders();
 
+    bool _initialized;
     QList<Layer*> _layers;
     int _selected;
     QGraphicsScene* _dmScene;

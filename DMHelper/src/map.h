@@ -21,7 +21,7 @@ class Map : public CampaignObjectBase//, public ILayerImageSource
 {
     Q_OBJECT
 public:
-    explicit Map(const QString& mapName = QString(), const QString& fileName = QString(), QObject *parent = nullptr);
+    explicit Map(const QString& mapName = QString(), QObject *parent = nullptr);
     virtual ~Map() override;
 
     // From CampaignObjectBase
@@ -159,9 +159,8 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
-    void challengeUndoStack();
 
-    QString _filename;
+    QString _filename; // for compatibility only
     //QUndoStack* _undoStack;
     QUuid _audioTrackId;
     bool _playAudio;
@@ -185,8 +184,8 @@ protected:
     QList<UndoFowBase*> _undoItems;
     //QImage _imgBWFow;
     //int _indexBWFow;
-    bool _filterApplied;
-    MapColorizeFilter _filter;
+    //bool _filterApplied;
+    //MapColorizeFilter _filter;
     int _lineType;
     QColor _lineColor;
     int _lineWidth;

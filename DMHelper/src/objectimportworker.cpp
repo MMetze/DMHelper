@@ -167,6 +167,7 @@ void ObjectImportWorker::importObjectAssets(CampaignObjectBase* object)
             Map* map = dynamic_cast<Map*>(object);
             if(map)
             {
+                // TODO: Layers import/export
                 qDebug() << "[ObjectImportWorker] Importing map: " << map->getName() << ", file: " << map->getFileName();
                 map->setFileName(importFile(map->getFileName()));
             }

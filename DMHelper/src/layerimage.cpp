@@ -1,21 +1,22 @@
 #include "layerimage.h"
 #include "publishglbattlebackground.h"
+#include "dmhfilereader.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
 #include <QOpenGLFunctions>
 #include <QDebug>
 
-LayerImage::LayerImage(const QString& name, const QImage& image, int order, QObject *parent) :
+// TODO: Layers - clean up image loading to use the filename
+
+LayerImage::LayerImage(const QString& name, const QString& filename, int order, QObject *parent) :
     Layer{name, order, parent},
     _graphicsItem(nullptr),
     _backgroundObject(nullptr),
-    _layerImage(image),
+    _filename(filename),
+    _layerImage(),
     _filterApplied(false),
     _filter()
 {
-    if(_layerImage.isNull())
-        qDebug() << "[LayerImage] ERROR: layer image created with null image!";
-
     connect(this, &LayerImage::dirty, this, &LayerImage::updateImageInternal);
 }
 
@@ -23,6 +24,40 @@ LayerImage::~LayerImage()
 {
     cleanupDM();
     cleanupPlayer();
+}
+
+void LayerImage::inputXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    _filename = element.attribute("imageFile");
+    if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
+        _filename.clear();
+
+    QDomElement filterElement = element.firstChildElement(QString("filter"));
+    if(!filterElement.isNull())
+    {
+        _filterApplied = true;
+
+        _filter._r2r = filterElement.attribute("r2r",QString::number(1.0)).toDouble();
+        _filter._g2r = filterElement.attribute("g2r",QString::number(0.0)).toDouble();
+        _filter._b2r = filterElement.attribute("b2r",QString::number(0.0)).toDouble();
+        _filter._r2g = filterElement.attribute("r2g",QString::number(0.0)).toDouble();
+        _filter._g2g = filterElement.attribute("g2g",QString::number(1.0)).toDouble();
+        _filter._b2g = filterElement.attribute("b2g",QString::number(0.0)).toDouble();
+        _filter._r2b = filterElement.attribute("r2b",QString::number(0.0)).toDouble();
+        _filter._g2b = filterElement.attribute("g2b",QString::number(0.0)).toDouble();
+        _filter._b2b = filterElement.attribute("b2b",QString::number(1.0)).toDouble();
+        _filter._sr = filterElement.attribute("sr",QString::number(1.0)).toDouble();
+        _filter._sg = filterElement.attribute("sg",QString::number(1.0)).toDouble();
+        _filter._sb = filterElement.attribute("sb",QString::number(1.0)).toDouble();
+
+        _filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay",QString::number(1)).toInt());
+        _filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor",QString("#000000")));
+        _filter._overlayAlpha = filterElement.attribute("overlayAlpha",QString::number(128)).toInt();
+    }
+
+    Layer::inputXML(element, isImport);
 }
 
 QRectF LayerImage::boundingRect() const
@@ -38,6 +73,22 @@ QImage LayerImage::getLayerIcon() const
 DMHelper::LayerType LayerImage::getType() const
 {
     return DMHelper::LayerType_Image;
+}
+
+Layer* LayerImage::clone() const
+{
+    LayerImage* newLayer = new LayerImage(_name, _filename, _order);
+
+    newLayer->_layerVisible = _layerVisible;
+    newLayer->_filterApplied = _filterApplied;
+    newLayer->_filter = _filter;
+
+    return newLayer;
+}
+
+QString LayerImage::getImageFile() const
+{
+    return _filename;
 }
 
 QImage LayerImage::getImage() const
@@ -124,6 +175,25 @@ void LayerImage::playerGLResize(int w, int h)
     Q_UNUSED(h);
 }
 
+void LayerImage::initialize(const QSize& layerSize)
+{
+    Q_UNUSED(layerSize);
+
+    DMHFileReader* reader = new DMHFileReader(getImageFile());
+    if(reader)
+    {
+        _layerImage = reader->loadImage();
+        if(!_layerImage.isNull())
+            _filename = reader->getFilename();
+        delete reader;
+    }
+}
+
+void LayerImage::uninitialize()
+{
+    _layerImage = QImage();
+}
+
 void LayerImage::setOrder(int order)
 {
     if(_graphicsItem)
@@ -148,6 +218,18 @@ void LayerImage::updateImage(const QImage& image)
     _layerImage = image;
     emit dirty();
     emit imageChanged(getImage());
+}
+
+void LayerImage::setFileName(const QString& filename)
+{
+    if((filename.isEmpty()) || (_filename == filename))
+        return;
+
+    cleanupDM();
+    cleanupPlayer();
+    _filename = filename;
+    emit dirty();
+    emit imageChanged(getImage()); // TODO: Layers - make sure this really shares the updated image
 }
 
 void LayerImage::setApplyFilter(bool applyFilter)
@@ -179,6 +261,34 @@ void LayerImage::updateImageInternal()
 
     if(_backgroundObject)
         _backgroundObject->setImage(newImage);
+}
+
+void LayerImage::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("imageFile", targetDirectory.relativeFilePath(_filename));
+
+    if(_filterApplied) // TODO: Layers - move this to image layer?
+    {
+        QDomElement filterElement = doc.createElement("filter");
+        filterElement.setAttribute("r2r", _filter._r2r);
+        filterElement.setAttribute("g2r", _filter._g2r);
+        filterElement.setAttribute("b2r", _filter._b2r);
+        filterElement.setAttribute("r2g", _filter._r2g);
+        filterElement.setAttribute("g2g", _filter._g2g);
+        filterElement.setAttribute("b2g", _filter._b2g);
+        filterElement.setAttribute("r2b", _filter._r2b);
+        filterElement.setAttribute("g2b", _filter._g2b);
+        filterElement.setAttribute("b2b", _filter._b2b);
+        filterElement.setAttribute("sr", _filter._sr);
+        filterElement.setAttribute("sg", _filter._sg);
+        filterElement.setAttribute("sb", _filter._sb);
+        filterElement.setAttribute("isOverlay", _filter._isOverlay);
+        filterElement.setAttribute("overlayColor", _filter._overlayColor.name());
+        filterElement.setAttribute("overlayAlpha", _filter._overlayAlpha);
+        element.appendChild(filterElement);
+    }
+
+    Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void LayerImage::cleanupDM()

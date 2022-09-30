@@ -1,12 +1,15 @@
 #include "layerscene.h"
 #include "layer.h"
 #include "layerimage.h"
+#include "layerfow.h"
 #include <QRectF>
 #include <QImage>
 #include <QPainter>
+#include <QDomElement>
 
 LayerScene::LayerScene(QObject *parent) :
-    QObject{parent},
+    CampaignObjectBase{QString(), parent},
+    _initialized(false),
     _layers(),
     _selected(-1),
     _dmScene(nullptr)
@@ -18,14 +21,60 @@ LayerScene::~LayerScene()
     qDeleteAll(_layers);
 }
 
+void LayerScene::inputXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    _selected = element.attribute("selected", QString::number(0)).toInt();
+
+    QDomElement layerElement = element.firstChildElement(QString("layer"));
+    while(!layerElement.isNull())
+    {
+        Layer* newLayer = nullptr;
+        switch( layerElement.attribute(QString("type")).toInt())
+        {
+            case DMHelper::LayerType_Image:
+                newLayer = new LayerImage();
+                break;
+            case DMHelper::LayerType_Fow:
+                newLayer = new LayerFow();
+                break;
+            default:
+                break;
+        }
+
+        if(newLayer)
+        {
+            newLayer->inputXML(layerElement, isImport);
+            _layers.append(newLayer);
+        }
+
+        layerElement = layerElement.nextSiblingElement(QString("layer"));
+    }
+}
+
+void LayerScene::copyValues(const CampaignObjectBase* other)
+{
+    const LayerScene* otherScene = dynamic_cast<const LayerScene*>(other);
+    if(!otherScene)
+        return;
+
+    clearLayers();
+
+    _selected = otherScene->_selected;
+
+    for(int i = 0; i < otherScene->_layers.count(); ++i)
+        _layers.append(otherScene->_layers[i]->clone());
+
+    CampaignObjectBase::copyValues(other);
+}
+
 QRectF LayerScene::boundingRect() const
 {
     QRectF result;
 
     for(int i = 0; i < _layers.count(); ++i)
-    {
         result = result.united(_layers.at(i)->boundingRect());
-    }
 
     return result;
 }
@@ -193,8 +242,35 @@ QImage LayerScene::mergedImage()
     return result;
 }
 
+void LayerScene::initializeLayers()
+{
+    // First initialize images to find the size of the scene
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if(_layers[i]->getType() == DMHelper::LayerType_Image)
+            _layers[i]->initialize();
+    }
+
+    QSizeF currentSize = sceneSize();
+
+    // Initialize other layers, telling them how big they should be
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if(_layers[i]->getType() != DMHelper::LayerType_Image)
+        {
+            _layers[i]->initialize();
+        }
+    }
+}
+
+void LayerScene::uninitializeLayers()
+{
+
+}
+
 void LayerScene::dmInitialize(QGraphicsScene& scene)
 {
+    initializeLayers();
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->dmInitialize(scene);
 
@@ -217,6 +293,7 @@ void LayerScene::dmUpdate()
 
 void LayerScene::playerGLInitialize()
 {
+    initializeLayers();
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerGLInitialize();
 }
@@ -250,6 +327,19 @@ void LayerScene::playerGLResize(int w, int h)
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerGLResize(w, h);
+}
+
+QDomElement LayerScene::createOutputXML(QDomDocument &doc)
+{
+    return doc.createElement("layerScene");
+}
+
+void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    element.setAttribute("selected", _selected);
+
+    for(int i = 0; i < _layers.count(); ++i)
+        _layers[i]->outputXML(doc, element, targetDirectory, isExport);
 }
 
 void LayerScene::resetLayerOrders()

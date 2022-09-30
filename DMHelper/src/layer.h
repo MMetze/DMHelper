@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QRectF>
 #include <QOpenGLFunctions>
+#include <QDomElement>
+#include <QDir>
 #include "dmconstants.h"
 
 class QGraphicsScene;
@@ -37,6 +39,9 @@ public:
     Layer(const QString& name, int order = 0, QObject *parent = nullptr);
     virtual ~Layer();
 
+    virtual void outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport);
+    virtual void inputXML(const QDomElement &element, bool isImport);
+
     virtual QRectF boundingRect() const;
 
     virtual QString getName() const;
@@ -45,8 +50,9 @@ public:
     virtual QImage getLayerIcon() const;
 
     virtual DMHelper::LayerType getType() const = 0;
+    virtual Layer* clone() const = 0;
 
-public slots:
+public slots:    
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene& scene) = 0;
     virtual void dmUninitialize() = 0;
@@ -60,6 +66,8 @@ public slots:
     virtual void playerGLResize(int w, int h) = 0;
 
     // Layer Specific Interface
+    virtual void initialize(const QSize& layerSize) = 0;
+    virtual void uninitialize() = 0;
     virtual void setName(const QString& name);
     virtual void setOrder(int order);
     virtual void setLayerVisible(bool layerVisible);
@@ -69,6 +77,9 @@ signals:
     void orderChanged(int order);
 
 protected:
+    // Layer Specific Interface
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+
     QString _name;
     int _order;
     bool _layerVisible;

@@ -20,9 +20,9 @@
 #include <QFileDialog>
 #include <QDebug>
 
-Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
+Map::Map(const QString& mapName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
-    _filename(fileName),
+    _filename(), // for compatibility only
     //_undoStack(nullptr),
     _audioTrackId(),
     _playAudio(false),
@@ -42,8 +42,8 @@ Map::Map(const QString& mapName, const QString& fileName, QObject *parent) :
     _undoItems(),
     //_imgBWFow(),
     //_indexBWFow(0),
-    _filterApplied(false),
-    _filter(),
+    //_filterApplied(false),
+    //_filter(),
     _lineType(Qt::SolidLine),
     _lineColor(Qt::yellow),
     _lineWidth(1),
@@ -64,11 +64,6 @@ void Map::inputXML(const QDomElement &element, bool isImport)
 {
     //TODO: include layers in import/export (with backwards compatibility)
 
-    // For backwards compatibility only, should be part of a layer
-    _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
-    if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
-        _filename.clear();
-
     setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
     setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
     setDistanceLineWidth(element.attribute("lineWidth", QString::number(1)).toInt());
@@ -84,6 +79,24 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                         element.attribute("cameraRectWidth", QString::number(0)).toInt(),
                         element.attribute("cameraRectHeight ", QString::number(0)).toInt());
 
+    QDomElement layersElement = element.firstChildElement(QString("layerScene"));
+    if(!layersElement.isNull())
+    {
+        _layerScene.inputXML(layersElement, isImport);
+    }
+    else
+    {
+        // For backwards compatibility only, should be part of a layer
+        _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
+        if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
+            _filename.clear();
+
+        _layerScene.
+
+        // TODO: Layers - where should the markers go?
+    }
+
+    // TODO: Layers
     // For backwards compatibility only, should be part of a layer
     QDomElement actionsElement = element.firstChildElement(QString("actions"));
     if(!actionsElement.isNull())
@@ -124,6 +137,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
         }
     }
 
+    /*
     // For backwards compatibility only, should be part of a layer
     QDomElement filterElement = element.firstChildElement(QString("filter"));
     if(!filterElement.isNull())
@@ -147,6 +161,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
         _filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor",QString("#000000")));
         _filter._overlayAlpha = filterElement.attribute("overlayAlpha",QString::number(128)).toInt();
     }
+    */
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -169,6 +184,7 @@ void Map::copyValues(const CampaignObjectBase* other)
     _partyScale = otherMap->getPartyScale();
     _mapScale = otherMap->getMapScale();
 
+    // TODO: Layers - need a markers layer
     _showMarkers = otherMap->getShowMarkers();
 
     setDistanceLineType(otherMap->getDistanceLineType());
@@ -178,26 +194,7 @@ void Map::copyValues(const CampaignObjectBase* other)
     setMapColor(otherMap->getMapColor());
     setMapSize(otherMap->getMapSize());
 
-    // TODO: layers
-    /*
-    _undoStack->clear();
-    for(int i = 0; i < otherMap->getUndoStack()->index(); ++i )
-    {
-        const UndoFowBase* action = dynamic_cast<const UndoFowBase*>(otherMap->getUndoStack()->command(i));
-        if((action) && (!action->isRemoved()))
-        {
-            UndoFowBase* newAction = action->clone();
-            newAction->setMap(this);
-            _undoStack->push(newAction);
-        }
-    }
-
-    // Check if we can skip some paint commands because they have been covered up by a fill
-    challengeUndoStack();
-    */
-
-    _filterApplied = otherMap->_filterApplied;
-    _filter = otherMap->_filter;
+    _layerScene.copyValues(&otherMap->_layerScene);
 
     CampaignObjectBase::copyValues(other);
 }
@@ -216,19 +213,24 @@ const QImage& Map::getImage() const
 
 QString Map::getFileName() const
 {
-    return _filename;
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getPriority(DMHelper::LayerType_Image));
+    return layer ? layer->getImageFile() : QString();
 }
 
 bool Map::setFileName(const QString& newFileName)
 {
-    if((_filename == newFileName) || (newFileName.isEmpty()))
+    if(newFileName.isEmpty())
+        return true;
+
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getPriority(DMHelper::LayerType_Image));
+    if((!layer) || (layer->getImageFile() == newFileName))
         return true;
 
     if(!QFile::exists(newFileName))
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Found"),
-                              QString("The new map file could not be found: ") + newFileName + QString(", keeping map file: ") + _filename + QString(" for entry: ") + getName());
+                              QString("The new map file could not be found: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
         qDebug() << "[Map] setFileName - New map file not found: " << newFileName << " for entry " << getName();
         return false;
     }
@@ -238,18 +240,18 @@ bool Map::setFileName(const QString& newFileName)
     {
         QMessageBox::critical(nullptr,
                               QString("DMHelper Map File Not Valid"),
-                              QString("The new map isn't a file: ") + newFileName + QString(", keeping map file: ") + _filename + QString(" for entry: ") + getName());
+                              QString("The new map isn't a file: ") + newFileName + QString(", keeping map file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
         qDebug() << "[Map] setFileName - Map file not a file: " << newFileName << " for entry " << getName();
         return false;
     }
 
     if(_initialized)
     {
-        qDebug() << "[Map] Cannot set new map file, map is initialized and in use! Old: " << _filename << ", New: " << newFileName;
+        qDebug() << "[Map] Cannot set new map file, map is initialized and in use! Old: " << layer->getImageFile() << ", New: " << newFileName;
         return true;
     }
 
-    _filename = newFileName;
+    layer->setFileName(newFileName);
     emit dirty();
 
     return true;
@@ -463,12 +465,14 @@ bool Map::isInitialized()
     return _initialized;
 }
 
+// TODO: Layers - does this need to be flushed out
 bool Map::isValid()
 {
     // If it has been initialized, it's valid
     if(isInitialized())
         return true;
 
+    /*
     // If the filename is empty, it's invalid
     if(_filename.isEmpty())
         return false;
@@ -488,6 +492,7 @@ bool Map::isValid()
     if(!reader.format().isEmpty())
         return false;
 #endif
+*/
 
     return true;
 }
@@ -754,6 +759,8 @@ QImage Map::getPreviewImage()
     if(!previewImage.isNull())
         return previewImage;
 
+    // TODO: build a preview image
+    /*
     if((_filename.isNull()) || (_filename.isEmpty()))
         return QImage();
 
@@ -763,6 +770,7 @@ QImage Map::getPreviewImage()
         QString cacheFilePath = DMHCache().getCacheFilePath(_filename, QString("png"));
         previewImage.load(cacheFilePath);
     }
+    */
 
     return isFilterApplied() ? getFilter().apply(previewImage) : previewImage;
 }
@@ -772,76 +780,9 @@ bool Map::initialize()
     if(_initialized)
         return true;
 
-    QImage imgBackground;
+    //QImage imgBackground;
 
-    // Everything other than direct layer initialization has to be for backwards compatibility exclusively
-    if(!_filename.isEmpty())
-    {
-        if(!QFile::exists(_filename))
-        {
-            qDebug() << "[Map] Map file not found: " << _filename << " for entry " << getName();
-            QMessageBox::StandardButton result = QMessageBox::critical(nullptr,
-                                                                       QString("DMHelper Map File Not Found"),
-                                                                       QString("For the map entry """) + getName() + QString(""", the map file could not be found: ") + _filename + QString("\n Do you want to select a new map file?"),
-                                                                       QMessageBox::Yes | QMessageBox::No,
-                                                                       QMessageBox::Yes);
-
-            QString newFileName;
-            if(result == QMessageBox::Yes)
-                newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
-
-            setFileName(newFileName);
-
-            if(newFileName.isEmpty())
-                return true;
-        }
-
-        QFileInfo fileInfo(_filename);
-        if(!fileInfo.isFile())
-        {
-            qDebug() << "[Map] Map file not a file: " << _filename << " for entry " << getName();
-            QMessageBox::StandardButton result = QMessageBox::critical(nullptr,
-                                                                       QString("DMHelper Map File Not Valid"),
-                                                                       QString("For the map entry """) + getName() + QString(""", the map isn't a file: ") + _filename + QString("\n Do you want to select a new map file?"),
-                                                                       QMessageBox::Yes | QMessageBox::No,
-                                                                       QMessageBox::Yes);
-
-            QString newFileName;
-            if(result == QMessageBox::Yes)
-                newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
-
-            setFileName(newFileName);
-
-            if(newFileName.isEmpty())
-                return true;
-        }
-
-        QImageReader reader(_filename);
-        if(reader.format().isEmpty())
-        {
-            // The image is not a known format, so it could be a video
-            qDebug() << "[Map] Image format is not known, so it cannot be read";
-            return false;
-        }
-
-        imgBackground = reader.read();
-
-        if(imgBackground.isNull())
-        {
-            // Could not read the file as an image - this is likely a file error...
-            qDebug() << "[Map] Not able to read map file: " << reader.error() <<", " << reader.errorString();
-            qDebug() << "[Map] Image Format: " << QString::fromUtf8(reader.format());
-#if !defined(Q_OS_MAC)
-            QMessageBox::critical(nullptr,
-                                  QString("DMHelper Map File Read Error"),
-                                  QString("For the map entry """) + getName() + QString(""", the map could not be read. It may be too high resolution for DMHelper!"));
-#endif
-            return false;
-        }
-
-        if(imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
-            imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
-    }
+    /*
     else if(_mapColor.isValid() && _mapSize.isValid())
     {
         imgBackground = QImage(_mapSize, QImage::Format_ARGB32_Premultiplied);
@@ -852,8 +793,11 @@ bool Map::initialize()
         qDebug() << "[Map] ERROR: Unable to initialize map with neither a file nor a color & size";
         return true;
     }
+    */
 
     //emitSignal(_imgBackground);
+
+    Todo: create a basic color layer, move image loading into the layer
 
     LayerImage* backgroundLayer = new LayerImage(QString("Background"), imgBackground, -2);
     // TODO: These are needed in the layers...
@@ -872,12 +816,14 @@ bool Map::initialize()
     //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
     LayerFow* fowLayer = new LayerFow(QString("FoW"), imgBackground.size(), -1);
+    /*
     for(int i = 0; i < _undoItems.count(); ++i)
     {
         UndoFowBase* undoItem = _undoItems[i];
         undoItem->setLayer(fowLayer);
         fowLayer->getUndoStack()->push(undoItem);
     }
+    */
     _layerScene.appendLayer(fowLayer);
 
     if(!_cameraRect.isValid())
@@ -1067,7 +1013,7 @@ QDomElement Map::createOutputXML(QDomDocument &doc)
 
 void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
+    //element.setAttribute("filename", targetDirectory.relativeFilePath(getFileName()));
     element.setAttribute("lineColor", _lineColor.name());
     element.setAttribute("lineType", _lineType);
     element.setAttribute("lineWidth", _lineWidth);
@@ -1093,53 +1039,16 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("cameraRectWidth", _cameraRect.width());
     element.setAttribute("cameraRectHeight", _cameraRect.height());
 
-    // Check if we can skip some paint commands because they have been covered up by a fill
-    challengeUndoStack();
+    // TODO: need a layer for markers and tokens
 
-    // TODO: Layers
-    /*
-    QDomElement actionsElement = doc.createElement("actions");
-    for(int i = 0; i < _undoStack->index(); ++i )
-    {
-        const UndoBase* action = dynamic_cast<const UndoBase*>(_undoStack->command(i));
-        if((action) && (!action->isRemoved()))
-        {
-            QDomElement actionElement = doc.createElement("action");
-            actionElement.setAttribute("type", action->getType());
-            action->outputXML(doc, actionElement, targetDirectory, isExport);
-            actionsElement.appendChild(actionElement);
-        }
-    }
-    element.appendChild(actionsElement);
-    */
-
-    if(_filterApplied) // TODO: Layers - move this to image layer?
-    {
-        QDomElement filterElement = doc.createElement("filter");
-        filterElement.setAttribute("r2r", _filter._r2r);
-        filterElement.setAttribute("g2r", _filter._g2r);
-        filterElement.setAttribute("b2r", _filter._b2r);
-        filterElement.setAttribute("r2g", _filter._r2g);
-        filterElement.setAttribute("g2g", _filter._g2g);
-        filterElement.setAttribute("b2g", _filter._b2g);
-        filterElement.setAttribute("r2b", _filter._r2b);
-        filterElement.setAttribute("g2b", _filter._g2b);
-        filterElement.setAttribute("b2b", _filter._b2b);
-        filterElement.setAttribute("sr", _filter._sr);
-        filterElement.setAttribute("sg", _filter._sg);
-        filterElement.setAttribute("sb", _filter._sb);
-        filterElement.setAttribute("isOverlay", _filter._isOverlay);
-        filterElement.setAttribute("overlayColor", _filter._overlayColor.name());
-        filterElement.setAttribute("overlayAlpha", _filter._overlayAlpha);
-        element.appendChild(filterElement);
-    }
+    _layerScene.outputXML(doc, element, targetDirectory, isExport);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool Map::belongsToObject(QDomElement& element)
 {
-    if((element.tagName() == QString("actions")) || (element.tagName() == QString("filter")))
+    if((element.tagName() == QString("actions")) || (element.tagName() == QString("layerScene")))
         return true;
     else
         return CampaignObjectBase::belongsToObject(element);
@@ -1159,34 +1068,4 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
     _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
-}
-
-void Map::challengeUndoStack()
-{
-    // TODO: Layers
-    /*
-    bool filled = false;
-    for(int i = _undoStack->index(); i >= 0; --i)
-    {
-        const UndoFowBase* constAction = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
-        if(constAction)
-        {
-            if(filled)
-            {
-                if((constAction->getType() == DMHelper::ActionType_Fill) ||
-                   (constAction->getType() == DMHelper::ActionType_Path) ||
-                   (constAction->getType() == DMHelper::ActionType_Point) ||
-                   (constAction->getType() == DMHelper::ActionType_Rect))
-                {
-                    UndoFowBase* action = const_cast<UndoFowBase*>(constAction);
-                    action->setRemoved(true);
-                }
-            }
-            else if(constAction->getType() == DMHelper::ActionType_Fill)
-            {
-                filled = true;
-            }
-        }
-    }
-    */
 }

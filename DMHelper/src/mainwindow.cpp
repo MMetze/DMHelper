@@ -1070,6 +1070,7 @@ void MainWindow::newMap()
     if(!map)
         return;
 
+    TODO: Layers - need to change this to set up an image layer and an FOW layer
     map->setFileName(filename);
 
     addNewObject(map);

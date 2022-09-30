@@ -14,6 +14,22 @@ Layer::~Layer()
 {
 }
 
+void Layer::outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport)
+{
+    QDomElement newElement = doc.createElement("layer");
+    internalOutputXML(doc, newElement, targetDirectory, isExport);
+    parentElement.appendChild(newElement);
+}
+
+void Layer::inputXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    _name = element.attribute("layerName");
+    _order = element.attribute("order", QString::number(0)).toInt();
+    _layerVisible = static_cast<bool>(element.attribute("visible",QString::number(1)).toInt());
+}
+
 QRectF Layer::boundingRect() const
 {
     return QRectF();
@@ -70,4 +86,15 @@ void Layer::setLayerVisible(bool layerVisible)
 
     _layerVisible = layerVisible;
     emit dirty();
+}
+
+void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    Q_UNUSED(doc);
+    Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
+
+    element.setAttribute("layerName", _name);
+    element.setAttribute("order", _order);
+    element.setAttribute("visible", _layerVisible);
 }
