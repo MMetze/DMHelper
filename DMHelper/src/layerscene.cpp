@@ -244,28 +244,34 @@ QImage LayerScene::mergedImage()
 
 void LayerScene::initializeLayers()
 {
+    QSize currentSize;
+
     // First initialize images to find the size of the scene
     for(int i = 0; i < _layers.count(); ++i)
     {
         if(_layers[i]->getType() == DMHelper::LayerType_Image)
-            _layers[i]->initialize();
+            _layers[i]->initialize(currentSize);
     }
 
-    QSizeF currentSize = sceneSize();
+    currentSize = sceneSize().toSize();
 
     // Initialize other layers, telling them how big they should be
     for(int i = 0; i < _layers.count(); ++i)
     {
         if(_layers[i]->getType() != DMHelper::LayerType_Image)
-        {
-            _layers[i]->initialize();
-        }
+            _layers[i]->initialize(currentSize);
     }
 }
 
 void LayerScene::uninitializeLayers()
 {
+    dmUninitialize();
+    playerGLUninitialize();
 
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        _layers[i]->uninitialize();
+    }
 }
 
 void LayerScene::dmInitialize(QGraphicsScene& scene)

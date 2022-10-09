@@ -82,7 +82,7 @@ void LayersEditDialog::addLayer()
         QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
         if(newFileName.isEmpty())
             return;
-
+/*
         QImageReader reader(newFileName);
         QImage imgBackground = reader.read();
         if(imgBackground.isNull())
@@ -98,8 +98,9 @@ void LayersEditDialog::addLayer()
 
         if(imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
             imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
+            */
 
-        newLayer = new LayerImage(QString("Image"), imgBackground);
+        newLayer = new LayerImage(QString("Image"), newFileName);
         //qDebug() << "[LayersEditDialog] Trying to add Image layer which is not yet implemented!";
         //return;
     }

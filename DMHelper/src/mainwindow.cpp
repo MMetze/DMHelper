@@ -1070,8 +1070,16 @@ void MainWindow::newMap()
     if(!map)
         return;
 
-    TODO: Layers - need to change this to set up an image layer and an FOW layer
-    map->setFileName(filename);
+    LayerImage* imageLayer = new LayerImage(QString("Map"), filename);
+    map->getLayerScene().appendLayer(imageLayer);
+//    map->setFileName(filename);
+
+    QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
+    if(result == QMessageBox::Yes)
+    {
+        LayerFow* fowLayer = new LayerFow(QString("FoW"));
+        map->getLayerScene().appendLayer(fowLayer);
+    }
 
     addNewObject(map);
 }

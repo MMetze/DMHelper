@@ -267,7 +267,7 @@ void LayerImage::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
 {
     element.setAttribute("imageFile", targetDirectory.relativeFilePath(_filename));
 
-    if(_filterApplied) // TODO: Layers - move this to image layer?
+    if(_filterApplied)
     {
         QDomElement filterElement = doc.createElement("filter");
         filterElement.setAttribute("r2r", _filter._r2r);

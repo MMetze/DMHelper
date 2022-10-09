@@ -62,7 +62,8 @@ Map::~Map()
 
 void Map::inputXML(const QDomElement &element, bool isImport)
 {
-    //TODO: include layers in import/export (with backwards compatibility)
+    // TODO: include layers in import/export (with backwards compatibility)
+    // TODO: Layers - need to find a way to handle changing the image and pointing it at the right layer
 
     setDistanceLineColor(QColor(element.attribute("lineColor", QColor(Qt::yellow).name())));
     setDistanceLineType(element.attribute("lineType", QString::number(Qt::SolidLine)).toInt());
@@ -86,82 +87,90 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     }
     else
     {
+        LayerImage* imageLayer = new LayerImage(QString("Map"), _filename);
+        imageLayer->inputXML(element, isImport);
+        /*
         // For backwards compatibility only, should be part of a layer
         _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
         if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
             _filename.clear();
 
-        _layerScene.
-
-        // TODO: Layers - where should the markers go?
-    }
-
-    // TODO: Layers
-    // For backwards compatibility only, should be part of a layer
-    QDomElement actionsElement = element.firstChildElement(QString("actions"));
-    if(!actionsElement.isNull())
-    {
-        QDomElement actionElement = actionsElement.firstChildElement(QString("action"));
-        while(!actionElement.isNull())
+        // For backwards compatibility only, should be part of a layer
+        QDomElement filterElement = element.firstChildElement(QString("filter"));
+        if(!filterElement.isNull())
         {
-            UndoFowBase* newAction = nullptr;
-            switch( actionElement.attribute(QString("type")).toInt())
-            {
-                case DMHelper::ActionType_Fill:
-                    newAction = new UndoFowFill(nullptr, MapEditFill(QColor()));
-                    break;
-                case DMHelper::ActionType_Path:
-                    newAction = new UndoFowPath(nullptr, MapDrawPath());
-                    break;
-                case DMHelper::ActionType_Point:
-                    newAction = new UndoFowPoint(nullptr, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
-                    break;
-                case DMHelper::ActionType_Rect:
-                    newAction = new UndoFowShape(nullptr, MapEditShape(QRect(), true, true));
-                    break;
-                case DMHelper::ActionType_SetMarker:
-                    newAction = new UndoMarker(nullptr, MapMarker());
-                    break;
-                case DMHelper::ActionType_Base:
-                default:
-                    break;
-            }
+            imageLayer->setApplyFilter(true);
+            //_filterApplied = true;
 
-            if(newAction)
-            {
-                newAction->inputXML(actionElement, isImport);
-                _undoItems.append(newAction);
-            }
+            MapColorizeFilter filter;
+            filter._r2r = filterElement.attribute("r2r",QString::number(1.0)).toDouble();
+            filter._g2r = filterElement.attribute("g2r",QString::number(0.0)).toDouble();
+            filter._b2r = filterElement.attribute("b2r",QString::number(0.0)).toDouble();
+            filter._r2g = filterElement.attribute("r2g",QString::number(0.0)).toDouble();
+            filter._g2g = filterElement.attribute("g2g",QString::number(1.0)).toDouble();
+            filter._b2g = filterElement.attribute("b2g",QString::number(0.0)).toDouble();
+            filter._r2b = filterElement.attribute("r2b",QString::number(0.0)).toDouble();
+            filter._g2b = filterElement.attribute("g2b",QString::number(0.0)).toDouble();
+            filter._b2b = filterElement.attribute("b2b",QString::number(1.0)).toDouble();
+            filter._sr = filterElement.attribute("sr",QString::number(1.0)).toDouble();
+            filter._sg = filterElement.attribute("sg",QString::number(1.0)).toDouble();
+            filter._sb = filterElement.attribute("sb",QString::number(1.0)).toDouble();
 
-            actionElement = actionElement.nextSiblingElement(QString("action"));
+            filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay",QString::number(1)).toInt());
+            filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor",QString("#000000")));
+            filter._overlayAlpha = filterElement.attribute("overlayAlpha",QString::number(128)).toInt();
+
+            imageLayer->setFilter(filter);
         }
+        */
+
+        _layerScene.appendLayer(imageLayer);
+
+        LayerFow* fowLayer = new LayerFow(QString("FoW"));
+        fowLayer->inputXML(element, isImport);
+        /*
+        QDomElement actionsElement = element.firstChildElement(QString("actions"));
+        if(!actionsElement.isNull())
+        {
+            QDomElement actionElement = actionsElement.firstChildElement(QString("action"));
+            while(!actionElement.isNull())
+            {
+                UndoFowBase* newAction = nullptr;
+                switch( actionElement.attribute(QString("type")).toInt())
+                {
+                    case DMHelper::ActionType_Fill:
+                        newAction = new UndoFowFill(nullptr, MapEditFill(QColor()));
+                        break;
+                    case DMHelper::ActionType_Path:
+                        newAction = new UndoFowPath(nullptr, MapDrawPath());
+                        break;
+                    case DMHelper::ActionType_Point:
+                        newAction = new UndoFowPoint(nullptr, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
+                        break;
+                    case DMHelper::ActionType_Rect:
+                        newAction = new UndoFowShape(nullptr, MapEditShape(QRect(), true, true));
+                        break;
+                        // TODO: Layers - where should the markers go?
+                    case DMHelper::ActionType_SetMarker:
+                        newAction = new UndoMarker(nullptr, MapMarker());
+                        break;
+                    case DMHelper::ActionType_Base:
+                    default:
+                        break;
+                }
+
+                if(newAction)
+                {
+                    newAction->inputXML(actionElement, isImport);
+                    _undoItems.append(newAction);
+                }
+
+                actionElement = actionElement.nextSiblingElement(QString("action"));
+            }
+        }
+        */
+
     }
-
-    /*
-    // For backwards compatibility only, should be part of a layer
-    QDomElement filterElement = element.firstChildElement(QString("filter"));
-    if(!filterElement.isNull())
-    {
-        _filterApplied = true;
-
-        _filter._r2r = filterElement.attribute("r2r",QString::number(1.0)).toDouble();
-        _filter._g2r = filterElement.attribute("g2r",QString::number(0.0)).toDouble();
-        _filter._b2r = filterElement.attribute("b2r",QString::number(0.0)).toDouble();
-        _filter._r2g = filterElement.attribute("r2g",QString::number(0.0)).toDouble();
-        _filter._g2g = filterElement.attribute("g2g",QString::number(1.0)).toDouble();
-        _filter._b2g = filterElement.attribute("b2g",QString::number(0.0)).toDouble();
-        _filter._r2b = filterElement.attribute("r2b",QString::number(0.0)).toDouble();
-        _filter._g2b = filterElement.attribute("g2b",QString::number(0.0)).toDouble();
-        _filter._b2b = filterElement.attribute("b2b",QString::number(1.0)).toDouble();
-        _filter._sr = filterElement.attribute("sr",QString::number(1.0)).toDouble();
-        _filter._sg = filterElement.attribute("sg",QString::number(1.0)).toDouble();
-        _filter._sb = filterElement.attribute("sb",QString::number(1.0)).toDouble();
-
-        _filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay",QString::number(1)).toInt());
-        _filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor",QString("#000000")));
-        _filter._overlayAlpha = filterElement.attribute("overlayAlpha",QString::number(128)).toInt();
-    }
-    */
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -797,14 +806,17 @@ bool Map::initialize()
 
     //emitSignal(_imgBackground);
 
+    _layerScene.initializeLayers();
+/*
     Todo: create a basic color layer, move image loading into the layer
 
     LayerImage* backgroundLayer = new LayerImage(QString("Background"), imgBackground, -2);
     // TODO: These are needed in the layers...
     backgroundLayer->setApplyFilter(_filterApplied);
     backgroundLayer->setFilter(_filter);
-    connect(this, &Map::mapImageChanged, backgroundLayer, &LayerImage::updateImage);
-    _layerScene.appendLayer(backgroundLayer);
+    */
+//    connect(this, &Map::mapImageChanged, backgroundLayer, &LayerImage::updateImage);
+    //_layerScene.appendLayer(backgroundLayer);
 
     /*
     QImage cloudsImage("C:/Users/turne/Documents/DnD/DM Helper/testdata/CloudsSquare.png");
@@ -815,7 +827,7 @@ bool Map::initialize()
     //_imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
     //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
 
-    LayerFow* fowLayer = new LayerFow(QString("FoW"), imgBackground.size(), -1);
+    //LayerFow* fowLayer = new LayerFow(QString("FoW"), imgBackground.size(), -1);
     /*
     for(int i = 0; i < _undoItems.count(); ++i)
     {
@@ -824,12 +836,12 @@ bool Map::initialize()
         fowLayer->getUndoStack()->push(undoItem);
     }
     */
-    _layerScene.appendLayer(fowLayer);
+    //_layerScene.appendLayer(fowLayer);
 
     if(!_cameraRect.isValid())
     {
         _cameraRect.setTopLeft(QPoint(0, 0));
-        _cameraRect.setSize(imgBackground.size());
+        _cameraRect.setSize(_layerScene.sceneSize().toSize());
     }
 
     _initialized = true;

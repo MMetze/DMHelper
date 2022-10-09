@@ -63,7 +63,7 @@ public slots:
     virtual void playerGLResize(int w, int h) override;
 
     // Layer Specific Interface
-    virtual void initialize() override;
+    virtual void initialize(const QSize& layerSize) override;
     virtual void uninitialize() override;
     virtual void setOrder(int order) override;
     virtual void setLayerVisible(bool layerVisible) override;
