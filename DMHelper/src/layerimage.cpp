@@ -31,6 +31,8 @@ void LayerImage::inputXML(const QDomElement &element, bool isImport)
     Q_UNUSED(isImport);
 
     _filename = element.attribute("imageFile");
+    if(_filename.isEmpty()) // Backwards compatibility
+        _filename = element.attribute("filename");
     if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
         _filename.clear();
 
