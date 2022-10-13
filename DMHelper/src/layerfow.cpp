@@ -483,7 +483,7 @@ void LayerFow::initialize(const QSize& layerSize)
 
     _imageSize = layerSize;
     _imgFow = QImage(_imageSize, QImage::Format_ARGB32_Premultiplied);
-    _imgFow.fill(Qt::black);
+    //_imgFow.fill(Qt::black);
     //_pixmapFow.fill(Qt::black);
 
     initializeUndoStack();
@@ -609,13 +609,20 @@ void LayerFow::cleanupPlayer()
 
 void LayerFow::initializeUndoStack()
 {
-    while(_undoItems.count() > 0)
+    if(_undoItems.count() > 0)
     {
-        UndoFowBase* undoItem = _undoItems.takeFirst();
-        if(undoItem)
+        while(_undoItems.count() > 0)
         {
-            undoItem->setLayer(this);
-            _undoStack->push(undoItem);
+            UndoFowBase* undoItem = _undoItems.takeFirst();
+            if(undoItem)
+            {
+                undoItem->setLayer(this);
+                _undoStack->push(undoItem);
+            }
         }
+    }
+    else
+    {
+        applyPaintTo(getUndoStack()->index());
     }
 }

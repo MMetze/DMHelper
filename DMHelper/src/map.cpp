@@ -128,6 +128,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
 
         LayerFow* fowLayer = new LayerFow(QString("FoW"));
         fowLayer->inputXML(element, isImport);
+        _layerScene.appendLayer(fowLayer);
         /*
         QDomElement actionsElement = element.firstChildElement(QString("actions"));
         if(!actionsElement.isNull())
