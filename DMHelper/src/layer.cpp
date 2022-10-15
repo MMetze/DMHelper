@@ -25,9 +25,12 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    _name = element.attribute("layerName");
-    _order = element.attribute("order", QString::number(0)).toInt();
-    _layerVisible = static_cast<bool>(element.attribute("visible",QString::number(1)).toInt());
+    if(element.hasAttribute("layerName"))
+        _name = element.attribute("layerName");
+    if(element.hasAttribute("order"))
+        _order = element.attribute("order", QString::number(0)).toInt();
+    if(element.hasAttribute("visible"))
+        _layerVisible = static_cast<bool>(element.attribute("visible",QString::number(1)).toInt());
 }
 
 QRectF Layer::boundingRect() const
@@ -94,6 +97,7 @@ void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
     Q_UNUSED(targetDirectory);
     Q_UNUSED(isExport);
 
+    element.setAttribute("type", getType());
     element.setAttribute("layerName", _name);
     element.setAttribute("order", _order);
     element.setAttribute("visible", _layerVisible);

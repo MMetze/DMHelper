@@ -31,7 +31,7 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
     while(!layerElement.isNull())
     {
         Layer* newLayer = nullptr;
-        switch( layerElement.attribute(QString("type")).toInt())
+        switch(layerElement.attribute(QString("type")).toInt())
         {
             case DMHelper::LayerType_Image:
                 newLayer = new LayerImage();
