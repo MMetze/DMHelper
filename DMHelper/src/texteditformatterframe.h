@@ -4,14 +4,6 @@
 #include <QObject>
 #include <QColor>
 
-/*
-#include <QFrame>
-
-namespace Ui {
-class TextEditFormatterFrame;
-}
-*/
-
 class QTextEdit;
 class QTextCharFormat;
 
@@ -46,7 +38,6 @@ signals:
     void colorChanged(const QColor& color);
 
 protected:
-//    Ui::TextEditFormatterFrame *ui;
 
     QTextEdit* _textEdit;
 };

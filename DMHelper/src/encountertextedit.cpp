@@ -187,37 +187,23 @@ bool EncounterTextEdit::eventFilter(QObject *watched, QEvent *event)
         if(!keyEvent)
             return false;
 
-        switch(keyEvent->key())
+        if((_formatter) && ((keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
         {
-            case Qt::Key_B:
-                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-                {
-                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                    format.setFontWeight(format.fontWeight() == QFont::Bold ? QFont::Normal : QFont::Bold);
-                    ui->textBrowser->setCurrentCharFormat(format);
-                    return true;
-                }
-                break;
-
-            case Qt::Key_I:
-                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-                {
-                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                    format.setFontItalic(!format.fontItalic());
-                    ui->textBrowser->setCurrentCharFormat(format);
-                    return true;
-                }
-                break;
-
-            case Qt::Key_U:
-                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-                {
-                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                    format.setFontUnderline(!format.fontUnderline());
-                    ui->textBrowser->setCurrentCharFormat(format);
-                    return true;
-                }
-                break;
+            if(keyEvent->key() == Qt::Key_B)
+            {
+                _formatter->setBold(ui->textBrowser->fontWeight() == QFont::Normal);
+                return true;
+            }
+            else if(keyEvent->key() == Qt::Key_I)
+            {
+                _formatter->setItalics(!ui->textBrowser->fontItalic());
+                return true;
+            }
+            else if(keyEvent->key() == Qt::Key_U)
+            {
+                _formatter->setUnterline(!ui->textBrowser->fontUnderline());
+                return true;
+            }
         }
     }
     else if(event->type() == QEvent::Paint)
@@ -348,8 +334,7 @@ void EncounterTextEdit::setPasteRich(bool pasteRich)
 
 void EncounterTextEdit::hyperlinkClicked()
 {
-    QTextCursor cursor = ui->textBrowser->textCursor();
-    QTextCharFormat format = cursor.charFormat();
+    QTextCharFormat format = ui->textBrowser->currentCharFormat();
 
     bool result = false;
     QString newHRef = QInputDialog::getText(nullptr,
@@ -369,12 +354,14 @@ void EncounterTextEdit::hyperlinkClicked()
             QMessageBox::critical(nullptr,
                                   QString("Hyperlink Error"),
                                   QString("The provided hyperlink is not valid: ") + newHRef);
+            return;
         }
     }
 
     format.setAnchor(!newHRef.isEmpty());
     format.setAnchorHref(newHRef);
-    cursor.mergeCharFormat(format);
+    format.setFontUnderline(!newHRef.isEmpty());
+    ui->textBrowser->mergeCurrentCharFormat(format);
 }
 
 void EncounterTextEdit::setTextWidth(int textWidth)

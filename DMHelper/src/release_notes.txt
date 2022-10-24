@@ -1,5 +1,6 @@
 v3.0
 LAYERS
+Text formatting significantly improved (it actually works now)
 Hyperlink crash bugs
 
 TODOs
