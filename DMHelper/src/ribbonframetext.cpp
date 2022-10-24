@@ -20,9 +20,9 @@ RibbonFrameText::RibbonFrameText(QWidget *parent) :
     ui->edtSize->setValidator(new QIntValidator(1,999,this));
     connect(ui->edtSize, SIGNAL(editingFinished()), this, SLOT(handleFontSizeChanged()));
 
-    connect(ui->btnBold, SIGNAL(toggled(bool)), this, SIGNAL(fontBoldChanged(bool)));
-    connect(ui->btnItalics, SIGNAL(toggled(bool)), this, SIGNAL(fontItalicsChanged(bool)));
-    connect(ui->btnUnderline, SIGNAL(toggled(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
+    connect(ui->btnBold, SIGNAL(clicked(bool)), this, SIGNAL(fontBoldChanged(bool)));
+    connect(ui->btnItalics, SIGNAL(clicked(bool)), this, SIGNAL(fontItalicsChanged(bool)));
+    connect(ui->btnUnderline, SIGNAL(clicked(bool)), this, SIGNAL(fontUnderlineChanged(bool)));
 
     ui->btnGrpAlignment->setId(ui->btnLeftText, Qt::AlignLeft);
     ui->btnGrpAlignment->setId(ui->btnCenterText, Qt::AlignHCenter);

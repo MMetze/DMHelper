@@ -13,6 +13,7 @@ class TextEditFormatterFrame;
 */
 
 class QTextEdit;
+class QTextCharFormat;
 
 class TextEditFormatterFrame : public QObject
 {
@@ -26,6 +27,7 @@ public:
 
 public slots:
     void loadCurrentFormat();
+    void loadCurrentCharFormat(const QTextCharFormat &f);
     void setFont(const QString& fontFamily);
     void setFontSize(int fontSize);
     void setBold(bool bold);
