@@ -4,6 +4,8 @@
 #include "battledialogmodeleffect.h"
 #include "battledialogmodeleffectobject.h"
 #include "battledialogmodeleffectfactory.h"
+#include "battledialogmodelmonsterclass.h"
+#include "monsterclass.h"
 #include "unselectedpixmap.h"
 #include "grid.h"
 #include "spellbook.h"
@@ -603,6 +605,32 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             menu.addAction(healItem);
 
             menu.addSeparator();
+
+            UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(item);
+            if(pixmap)
+            {
+                BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(pixmap->getCombatant());
+                if(monster)
+                {
+                    MonsterClass* monsterClass = monster->getMonsterClass();
+                    if(monsterClass)
+                    {
+                        QStringList iconList = monsterClass->getIconList();
+                        if(iconList.count() > 0)
+                        {
+                            QMenu* tokenMenu = new QMenu(QString("Select Token..."));
+                            for(int i = 0; i < iconList.count(); ++i)
+                            {
+                                QAction* tokenAction = new QAction(iconList.at(i), tokenMenu);
+                                connect(tokenAction, &QAction::triggered, [i, monster](){monster->setIconIndex(i);});
+                                tokenMenu->addAction(tokenAction);
+                            }
+                            menu.addMenu(tokenMenu);
+                            menu.addSeparator();
+                        }
+                    }
+                }
+            }
         }
         else
         {

@@ -30,6 +30,7 @@ public:
     bool isCustomSize() const;
     QString getSizeFactor() const;
     MonsterClass* getMonsterClass() const;
+    int getIconIndex() const;
 
     void writeCombatant(Combatant* combatant);
 
@@ -46,7 +47,10 @@ protected:
 
 private slots:
     void monsterClassChanged(const QString &text);
+    void setIconIndex(int index);
     void updateIcon();
+    void previousIcon();
+    void nextIcon();
     void setHitPointAverageChanged();
     void openMonsterClicked();
     void sizeSelected(int index);
@@ -55,8 +59,10 @@ private:
     void fillSizeCombo();
 
     Ui::CombatantDialog *ui;
-    Combatant* _combatant;
-    int _count;
+    //Combatant* _combatant;
+    int _iconIndex;
+    //int _count;
+
 };
 
 #endif // COMBATANTDIALOG_H

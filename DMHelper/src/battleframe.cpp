@@ -1081,6 +1081,7 @@ void BattleFrame::addMonsters()
             monster->setShown(combatantDlg.isShown());
             monster->setSizeFactor(sizeFactor);
             monster->setPosition(combatantPos);
+            monster->setIconIndex(combatantDlg.getIconIndex());
             addCombatant(monster);
         }
 

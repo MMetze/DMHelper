@@ -90,6 +90,11 @@ bool WidgetMonster::isKnown()
     return ui->chkKnown->isChecked();
 }
 
+void WidgetMonster::clearImage()
+{
+    ui->lblIcon->clear();
+}
+
 void WidgetMonster::updateData()
 {
     if((!_internals) || (!_internals->getCombatant()))
