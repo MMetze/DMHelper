@@ -45,8 +45,11 @@ protected slots:
     void monsterRenamed();
     void handlePublishButton();
 
+    void handlePreviousToken();
+    void handleAddToken();
     void handleReloadImage();
     void handleClearImage();
+    void handleNextToken();
 
     void addAction();
     void deleteAction(const MonsterAction& action);
@@ -70,6 +73,8 @@ protected:
     virtual void focusOutEvent(QFocusEvent * event);
 
 private:
+    QString selectToken();
+    void setTokenIndex(int index);
     void loadMonsterImage();
     void storeMonsterData();
 
@@ -85,6 +90,7 @@ private:
     QWidget* _reactionsWidget;
 
     MonsterClass* _monster;
+    int _currentToken;
     bool _edit;
     bool _mouseDown;
 };

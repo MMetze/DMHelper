@@ -1,5 +1,11 @@
-
-
+Multiple icons for a monster
+* Add ability to have multiple icons
+* Add saving/loading of multiple or single icons
+* Add search for multiple icons with same base name
+* Add searching for multiple icons in a directory with base name
+* Add handling of multiple icons in bestiary, including viewing
+* Add selection of icon in add monster dialog
+* Add randomization of icon as an option when adding multiple monsters
 
 
 NEXT:

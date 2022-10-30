@@ -61,6 +61,8 @@ public:
 
     QString findMonsterImage(const QString& monsterName, const QString& iconFile);
     QString findMonsterImage(const QDir& sourceDir, const QString& monsterName);
+    QStringList findMonsterImages(const QString& monsterName);
+    QStringList findSpecificImages(const QDir& sourceDir, const QStringList& filterList);
 
 signals:
     void changed();

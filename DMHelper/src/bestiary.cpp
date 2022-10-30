@@ -441,6 +441,55 @@ QString Bestiary::findMonsterImage(const QDir& sourceDir, const QString& monster
     return fileName;
 }
 
+QStringList Bestiary::findMonsterImages(const QString& monsterName)
+{
+    QStringList monsterNameFilter;
+    monsterNameFilter << (monsterName + QString("*.png")) << (monsterName + QString("*.jpg"));
+    QStringList imageNameFilter;
+    imageNameFilter << QString("*.png") << QString("*.jpg");
+
+    /*
+                << (QString("./") + monsterName + QString("/*.png"))
+                << (QString("./") + monsterName + QString("/*.jpg"))
+                << (QString("./Images/") + monsterName + QString("*.png"))
+                << (QString("./Images/") + monsterName + QString("*.jpg"))
+                << (QString("./Images/") + monsterName + QString("/*.png"))
+                << (QString("./Images/") + monsterName + QString("/*.jpg"));
+                */
+
+    //qDebug() << "[Bestiary] Dir: " << _bestiaryDirectory << monsterNameFilter;
+    //QStringList entries = _bestiaryDirectory.entryList(monsterNameFilter);
+    QStringList entries = findSpecificImages(_bestiaryDirectory, monsterNameFilter);
+
+    QDir dir1(_bestiaryDirectory.absolutePath() + QString("/") + monsterName + QString("/"));
+    //qDebug() << "[Bestiary] dir1: " << dir1;
+    //entries << dir1.entryList(imageNameFilter);
+    entries << findSpecificImages(dir1, imageNameFilter);
+
+    QDir dir2(_bestiaryDirectory.absolutePath() + QString("/Images/"));
+    //qDebug() << "[Bestiary] dir2: " << dir2;
+    //entries << dir2.entryList(monsterNameFilter);
+    entries << findSpecificImages(dir2, monsterNameFilter);
+
+    QDir dir3(_bestiaryDirectory.absolutePath() + QString("/Images/") + monsterName + QString("/"));
+    //qDebug() << "[Bestiary] dir3: " << dir3;
+    //entries << dir3.entryList(imageNameFilter);
+    entries << findSpecificImages(dir3, imageNameFilter);
+
+    return entries;
+}
+
+QStringList Bestiary::findSpecificImages(const QDir& sourceDir, const QStringList& filterList)
+{
+    QStringList result;
+
+    QStringList entries = sourceDir.entryList(filterList);
+    for(int i = 0; i < entries.count(); ++i)
+        result << _bestiaryDirectory.relativeFilePath(sourceDir.absoluteFilePath(entries.at(i)));
+
+    return result;
+}
+
 void Bestiary::startBatchProcessing()
 {
     _batchProcessing = true;

@@ -248,6 +248,8 @@
         <file>data/icon_lockedgrid.png</file>
         <file>data/icon_lockedscale.png</file>
         <file>data/icon_layers.png</file>
+        <file>data/icon_forward.png</file>
+        <file>data/icon_plus.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

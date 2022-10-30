@@ -38,7 +38,7 @@ static const char* SKILLELEMEMT_NAMES[Combatant::SKILLS_COUNT] =
 MonsterClass::MonsterClass(const QString& name, QObject *parent) :
     QObject(parent),
     _private(false),
-    _icon(""),
+    _icons(),
     _name(name),
     _monsterType("Beast"),
     _monsterSubType(),
@@ -66,14 +66,14 @@ MonsterClass::MonsterClass(const QString& name, QObject *parent) :
     _batchChanges(false),
     _changesMade(false),
     _iconChanged(false),
-    _scaledPixmap()
+    _scaledPixmaps()
 {
 }
 
 MonsterClass::MonsterClass(const QDomElement &element, bool isImport, QObject *parent) :
     QObject(parent),
     _private(false),
-    _icon(""),
+    _icons(),
     _name(""),
     _monsterType("Beast"),
     _monsterSubType(),
@@ -105,7 +105,7 @@ MonsterClass::MonsterClass(const QDomElement &element, bool isImport, QObject *p
     _batchChanges(false),
     _changesMade(false),
     _iconChanged(false),
-    _scaledPixmap()
+    _scaledPixmaps()
 {
     inputXML(element, isImport);
 }
@@ -117,8 +117,6 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
     beginBatchChanges();
 
     setPrivate(static_cast<bool>(element.attribute("private",QString::number(0)).toInt()));
-    setIcon(element.attribute("icon"));
-
     setName(element.firstChildElement(QString("name")).text());
     setMonsterType(element.firstChildElement(QString("type")).text());
     setMonsterSubType(element.firstChildElement(QString("subtype")).text());
@@ -150,18 +148,14 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
     readActionList(element, QString("special_abilities"), _specialAbilities, isImport);
     readActionList(element, QString("reactions"), _reactions, isImport);
 
+    readIcons(element, isImport);
+
     endBatchChanges();
 }
 
 QDomElement MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
 {
     element.setAttribute("private", static_cast<int>(getPrivate()));
-
-    QString iconPath = getIcon();
-    if(iconPath.isEmpty())
-        element.setAttribute("icon", QString(""));
-    else
-        element.setAttribute("icon", targetDirectory.relativeFilePath(iconPath));
 
     outputValue(doc, element, isExport, QString("name"), getName());
     outputValue(doc, element, isExport, QString("type"), getMonsterType());
@@ -191,6 +185,8 @@ QDomElement MonsterClass::outputXML(QDomDocument &doc, QDomElement &element, QDi
         if(_skillValues.contains(static_cast<Combatant::Skills>(s)))
             outputValue(doc, element, isExport, SKILLELEMEMT_NAMES[s], QString::number(_skillValues[s]));
     }
+
+    writeIcons(doc, element, targetDirectory, isExport);
 
     writeActionList(doc, element, QString("actions"), _actions, isExport);
     writeActionList(doc, element, QString("legendary_actions"), _legendaryActions, isExport);
@@ -235,17 +231,30 @@ bool MonsterClass::getLegendary() const
     return _legendaryActions.count() > 0;
 }
 
-QString MonsterClass::getIcon() const
+int MonsterClass::getIconCount() const
 {
-    return _icon;
+    return _icons.count();
 }
 
-QPixmap MonsterClass::getIconPixmap(DMHelper::PixmapSize iconSize)
+QStringList MonsterClass::getIconList() const
 {
-    if(!_scaledPixmap.isValid())
-        searchForIcon(QString());
+    return _icons;
+}
 
-    return _scaledPixmap.getPixmap(iconSize);
+QString MonsterClass::getIcon(int index) const
+{
+    if((index < 0) || (index >= _icons.count()))
+        return QString();
+    else
+        return _icons.at(index);
+}
+
+QPixmap MonsterClass::getIconPixmap(DMHelper::PixmapSize iconSize, int index)
+{
+    if((index < 0) || (index >= _scaledPixmaps.count()))
+        return QPixmap();
+    else
+        return _scaledPixmaps[index].getPixmap(iconSize);
 }
 
 QString MonsterClass::getName() const
@@ -591,8 +600,14 @@ void MonsterClass::cloneMonster(MonsterClass& other)
     _challenge = other._challenge;
 
     _skillValues.clear(); // just in case we're cloning onto something that exists
-    for(int& skill : other._skillValues.keys())
-        _skillValues[skill] = other._skillValues.value(skill);
+    QList<int> otherKeys = other._skillValues.keys();
+    for(int i = 0; i < otherKeys.count(); ++i)
+    {
+        int skillKey = otherKeys.at(i);
+        _skillValues[skillKey] = other._skillValues.value(skillKey);
+    }
+//    for(int& skill : other._skillValues.keys())
+//        _skillValues[skill] = other._skillValues.value(skill);
 
     _strength = other._strength;
     _dexterity = other._dexterity;
@@ -706,21 +721,79 @@ void MonsterClass::setPrivate(bool isPrivate)
     registerChange();
 }
 
-void MonsterClass::setIcon(const QString &newIcon)
+void MonsterClass::addIcon(const QString &newIcon)
 {
-    if(newIcon == _icon)
+    if((newIcon.isEmpty()) || (_icons.contains(newIcon)))
         return;
 
-    searchForIcon(newIcon);
+//    QString searchResult = Bestiary::Instance()->findMonsterImage(getName(), newIcon);
+//    if((searchResult.isEmpty()) || (_icons.contains(searchResult)))
+//        return;
+
+    _icons.append(newIcon);
+    ScaledPixmap newPixmap;
+    newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(newIcon));
+    _scaledPixmaps.append(newPixmap);
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged();
 }
 
+void MonsterClass::setIcon(int index, const QString& iconFile)
+{
+    if((index < 0) || (index >= _icons.count()))
+        return;
+
+    QString searchResult = Bestiary::Instance()->findMonsterImage(getName(), iconFile);
+    if(searchResult.isEmpty())
+        return;
+
+    _icons[index] = searchResult;
+    ScaledPixmap newPixmap;
+    newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(searchResult));
+    _scaledPixmaps[index] = newPixmap;
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged();
+}
+
+void MonsterClass::removeIcon(int index)
+{
+    if((index < 0) || (index >= _icons.count()))
+        return;
+
+    _icons.removeAt(index);
+    _scaledPixmaps.removeAt(index);
+}
+
+void MonsterClass::removeIcon(const QString& iconFile)
+{
+    removeIcon(_icons.indexOf(iconFile));
+}
+
+void MonsterClass::searchForIcons()
+{
+    QStringList searchResult = Bestiary::Instance()->findMonsterImages(getName());
+    for(int i = 0; i < searchResult.count(); ++i)
+        addIcon(searchResult.at(i));
+}
+
+/*
 void MonsterClass::searchForIcon(const QString &newIcon)
 {
-    QString searchResult = Bestiary::Instance()->findMonsterImage(getName(),newIcon);
-    if(!searchResult.isEmpty())
+    QString searchResult = Bestiary::Instance()->findMonsterImage(getName(), newIcon);
+    if((!searchResult.isEmpty()) && (!_icons.contains(searchResult)))
     {
-        _icon = searchResult;
-        _scaledPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(_icon));
+        _icons.append(searchResult);
+        ScaledPixmap newPixmap;
+        newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(searchResult));
+        _scaledPixmaps.append(newPixmap);
         registerChange();
 
         if(_batchChanges)
@@ -729,11 +802,30 @@ void MonsterClass::searchForIcon(const QString &newIcon)
             emit iconChanged();
     }
 }
+*/
+
+void MonsterClass::refreshIconPixmaps()
+{
+    _scaledPixmaps.clear();
+    for(int i = 0; i < _icons.count(); ++i)
+    {
+        ScaledPixmap newPixmap;
+        newPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(_icons.at(i)));
+        _scaledPixmaps.append(newPixmap);
+    }
+
+    registerChange();
+
+    if(_batchChanges)
+        _iconChanged = true;
+    else
+        emit iconChanged();
+}
 
 void MonsterClass::clearIcon()
 {
-    _icon = QString("");
-    _scaledPixmap.invalidate();
+    _icons.clear();
+    _scaledPixmaps.clear();
     registerChange();
 
     if(_batchChanges)
@@ -994,6 +1086,44 @@ void MonsterClass::writeActionList(QDomDocument &doc, QDomElement& element, cons
     }
 
     element.appendChild(actionListElement);
+}
+
+void MonsterClass::readIcons(const QDomElement& element, bool isImport)
+{
+    Q_UNUSED(isImport);
+
+    if(element.hasAttribute("icon"))
+        addIcon(element.attribute("icon"));
+
+    QDomElement iconElement = element.firstChildElement("icon");
+    while(!iconElement.isNull())
+    {
+        addIcon(iconElement.attribute("filename"));
+        iconElement = iconElement.nextSiblingElement("icon");
+    }
+}
+
+void MonsterClass::writeIcons(QDomDocument &doc, QDomElement& element, QDir& targetDirectory, bool isExport) const
+{
+    Q_UNUSED(isExport);
+
+    if(_icons.count() == 1)
+    {
+        if(!_icons.at(0).isEmpty())
+            element.setAttribute("icon", targetDirectory.relativeFilePath(_icons.at(0)));
+    }
+    else
+    {
+        for(int i = 0; i < _icons.count(); ++i)
+        {
+            if(!_icons.at(i).isEmpty())
+            {
+                QDomElement iconElement = doc.createElement("icon");
+                iconElement.setAttribute("filename", _icons.at(i));
+                element.appendChild(iconElement);
+            }
+        }
+    }
 }
 
 int MonsterClass::getExperienceByCR(const QString& inputCR)
