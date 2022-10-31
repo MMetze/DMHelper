@@ -47,6 +47,8 @@ void BattleDialogModelMonsterClass::inputXML(const QDomElement &element, bool is
     _monsterHP = element.attribute("monsterHP", QString::number(0)).toInt();
     _monsterSize = element.attribute("monsterSize", QString::number(0.0)).toDouble();
     _iconIndex = element.attribute("iconIndex", QString::number(0)).toInt();
+    if((_iconIndex < 0) || ((_iconIndex > 0) && (_monsterClass) && (_iconIndex >= _monsterClass->getIconCount())))
+        _iconIndex = 0;
 
     BattleDialogModelMonsterBase::inputXML(element, isImport);
 }

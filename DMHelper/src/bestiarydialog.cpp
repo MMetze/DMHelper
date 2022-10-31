@@ -123,6 +123,8 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     if(ui->cmbSearch->currentText() != _monster->getName())
         ui->cmbSearch->setCurrentText(_monster->getName());
 
+    if(_monster->getIconCount() == 0)
+        _monster->searchForIcons();
     setTokenIndex(0);
 
     ui->chkPrivate->setChecked(_monster->getPrivate());
@@ -150,12 +152,10 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtDamageVulnerabilities->setText(_monster->getDamageVulnerabilities());
     ui->edtSenses->setText(_monster->getSenses());
     ui->edtLanguages->setText(_monster->getLanguages());
+
     if(_monster->getLanguages().isEmpty())
-    {
         ui->edtLanguages->setText("---");
-    }
-    //ui->edtChallenge->setText(_monster->getChallenge());
-    //ui->edtXP->setText(QString::number(_monster->getXP()));
+
     interpretChallengeRating(_monster->getChallenge());
 
     clearActionWidgets();
@@ -264,7 +264,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtSenses->setReadOnly(!_edit);
     ui->edtLanguages->setReadOnly(!_edit);
     ui->edtChallenge->setReadOnly(!_edit);
-    //ui->edtXP->setReadOnly(!_edit);
 }
 
 void BestiaryDialog::setMonster(const QString& monsterName, bool edit)
@@ -461,8 +460,6 @@ void BestiaryDialog::handleReloadImage()
 
     _monster->searchForIcons();
     _monster->refreshIconPixmaps();
-    //_monster->searchForIcon(_monster->getIcon());
-    //loadMonsterImage();
     setTokenIndex(_currentToken);
 }
 
@@ -471,8 +468,11 @@ void BestiaryDialog::handleClearImage()
     if(!_monster)
         return;
 
-    _monster->clearIcon();
-    loadMonsterImage();
+    _monster->removeIcon(_currentToken);
+    if(_monster->getIconCount() == 0)
+        ui->lblIcon->clear();
+    else
+        setTokenIndex(_currentToken > 0 ? _currentToken - 1 : 0);
 }
 
 void BestiaryDialog::handleNextToken()
@@ -704,13 +704,24 @@ QString BestiaryDialog::selectToken()
 
 void BestiaryDialog::setTokenIndex(int index)
 {
-    if((!_monster) || (index < 0) || (index >= _monster->getIconCount()))
+    if(!_monster)
+    {
+        ui->btnPreviousToken->setVisible(false);
+        ui->btnNextToken->setVisible(false);
+        ui->btnClear->setEnabled(false);
+        return;
+    }
+
+    if((index < 0) || (index >= _monster->getIconCount()))
         return;
 
     _currentToken = index;
     loadMonsterImage();
     ui->btnPreviousToken->setEnabled(_currentToken > 0);
     ui->btnNextToken->setEnabled(_currentToken < _monster->getIconCount() - 1);
+    ui->btnClear->setEnabled(_monster->getIconCount() > 0);
+    ui->btnPreviousToken->setVisible(_monster->getIconCount() > 1);
+    ui->btnNextToken->setVisible(_monster->getIconCount() > 1);
 }
 
 void BestiaryDialog::loadMonsterImage()

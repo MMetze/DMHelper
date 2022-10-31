@@ -9,6 +9,8 @@
 #include <QPixmap>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QDebug>
 
 Bestiary* Bestiary::_instance = nullptr;
@@ -448,44 +450,38 @@ QStringList Bestiary::findMonsterImages(const QString& monsterName)
     QStringList imageNameFilter;
     imageNameFilter << QString("*.png") << QString("*.jpg");
 
-    /*
-                << (QString("./") + monsterName + QString("/*.png"))
-                << (QString("./") + monsterName + QString("/*.jpg"))
-                << (QString("./Images/") + monsterName + QString("*.png"))
-                << (QString("./Images/") + monsterName + QString("*.jpg"))
-                << (QString("./Images/") + monsterName + QString("/*.png"))
-                << (QString("./Images/") + monsterName + QString("/*.jpg"));
-                */
-
-    //qDebug() << "[Bestiary] Dir: " << _bestiaryDirectory << monsterNameFilter;
-    //QStringList entries = _bestiaryDirectory.entryList(monsterNameFilter);
-    QStringList entries = findSpecificImages(_bestiaryDirectory, monsterNameFilter);
-
-    QDir dir1(_bestiaryDirectory.absolutePath() + QString("/") + monsterName + QString("/"));
-    //qDebug() << "[Bestiary] dir1: " << dir1;
-    //entries << dir1.entryList(imageNameFilter);
-    entries << findSpecificImages(dir1, imageNameFilter);
-
-    QDir dir2(_bestiaryDirectory.absolutePath() + QString("/Images/"));
-    //qDebug() << "[Bestiary] dir2: " << dir2;
-    //entries << dir2.entryList(monsterNameFilter);
-    entries << findSpecificImages(dir2, monsterNameFilter);
-
-    QDir dir3(_bestiaryDirectory.absolutePath() + QString("/Images/") + monsterName + QString("/"));
-    //qDebug() << "[Bestiary] dir3: " << dir3;
-    //entries << dir3.entryList(imageNameFilter);
-    entries << findSpecificImages(dir3, imageNameFilter);
+    QStringList entries = findSpecificImages(_bestiaryDirectory, monsterNameFilter, monsterName);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/") + monsterName + QString("/")), imageNameFilter);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/Images/")), monsterNameFilter, monsterName);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/Images/") + monsterName + QString("/")), imageNameFilter);
 
     return entries;
 }
 
-QStringList Bestiary::findSpecificImages(const QDir& sourceDir, const QStringList& filterList)
+QStringList Bestiary::findSpecificImages(const QDir& sourceDir, const QStringList& filterList, const QString& filterName)
 {
     QStringList result;
 
-    QStringList entries = sourceDir.entryList(filterList);
+    QFileInfoList entries = sourceDir.entryInfoList(filterList);
     for(int i = 0; i < entries.count(); ++i)
-        result << _bestiaryDirectory.relativeFilePath(sourceDir.absoluteFilePath(entries.at(i)));
+    {
+        bool accept = false;
+        if(filterName.isEmpty())
+        {
+            accept = true;
+        }
+        else
+        {
+            QRegularExpression re(QString("([a-zA-Z\\s]*)"));
+            QRegularExpressionMatch reMatch = re.match(entries.at(i).baseName());
+            QString matchName = reMatch.captured(1);
+            if((!reMatch.hasMatch()) || (matchName.isEmpty()) || (matchName == filterName) || (!exists(matchName)))
+                accept = true;
+        }
+
+        if(accept)
+            result << _bestiaryDirectory.relativeFilePath(entries.at(i).absoluteFilePath());
+    }
 
     return result;
 }

@@ -5,7 +5,6 @@
 #include "character.h"
 #include <QDomElement>
 #include <QDir>
-#include <QRegularExpression>
 
 static const char* SKILLELEMEMT_NAMES[Combatant::SKILLS_COUNT] =
 {
@@ -252,7 +251,7 @@ QString MonsterClass::getIcon(int index) const
 QPixmap MonsterClass::getIconPixmap(DMHelper::PixmapSize iconSize, int index)
 {
     if((index < 0) || (index >= _scaledPixmaps.count()))
-        return QPixmap();
+        return ScaledPixmap::defaultPixmap()->getPixmap(iconSize);
     else
         return _scaledPixmaps[index].getPixmap(iconSize);
 }

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>839</width>
+    <width>845</width>
     <height>800</height>
    </rect>
   </property>
@@ -43,7 +43,7 @@ color: rgb(50, 50, 50);</string>
        <item>
         <widget class="QComboBox" name="cmbSearch">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -600,7 +600,7 @@ color: rgb(50, 50, 50);</string>
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>568</width>
+        <width>574</width>
         <height>792</height>
        </rect>
       </property>
@@ -1604,7 +1604,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>560</width>
+            <width>566</width>
             <height>70</height>
            </rect>
           </property>
@@ -1683,7 +1683,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>560</width>
+            <width>566</width>
             <height>70</height>
            </rect>
           </property>
@@ -1762,7 +1762,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>560</width>
+            <width>566</width>
             <height>69</height>
            </rect>
           </property>
@@ -1841,7 +1841,7 @@ color: rgb(50, 50, 50);</string>
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>560</width>
+            <width>566</width>
             <height>70</height>
            </rect>
           </property>
