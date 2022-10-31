@@ -247,6 +247,10 @@ private slots:
     void updateCombatantIcon(BattleDialogModelCombatant* combatant);
     void registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage);
 
+    void copyMonsters();
+    void clearCopy();
+    void pasteMonsters();
+
     void updateHighlights();
     void countdownTimerExpired();
     void updateCountdownText();
@@ -400,6 +404,7 @@ private:
     QRect _rubberBandRect;
     qreal _scale;
     int _rotation;
+    QList<BattleDialogModelCombatant*> _copyList;
 
     qreal _moveRadius;
     QPointF _moveStart;

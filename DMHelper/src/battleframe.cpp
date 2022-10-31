@@ -139,6 +139,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _rubberBandRect(),
     _scale(1.0),
     _rotation(0),
+    _copyList(),
     _moveRadius(0.0),
     _moveStart()
 {
@@ -1319,16 +1320,23 @@ void BattleFrame::setPointerOn(bool enabled)
 
 void BattleFrame::keyPressEvent(QKeyEvent * e)
 {
-    switch(e->key())
+    if(e->key() == Qt::Key_Space)
     {
-        case Qt::Key_Space:
-            next();
-            return;
-        case Qt::Key_Escape:
-            cancelSelect();
-            return;
-        default:
-            break;
+        next();
+        return;
+    }
+    else if(e->key() == Qt::Key_Escape)
+    {
+        cancelSelect();
+        return;
+    }
+    else if((e->key() == Qt::Key_C) && (e->modifiers() == Qt::ControlModifier))
+    {
+        copyMonsters();
+    }
+    else if((e->key() == Qt::Key_V) && (e->modifiers() == Qt::ControlModifier))
+    {
+        pasteMonsters();
     }
 
     QFrame::keyPressEvent(e);
@@ -2279,6 +2287,55 @@ void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant,
         _logger->damageDone(_model->getActiveCombatant()->getID(), combatant->getID(), damage);
 }
 
+void BattleFrame::copyMonsters()
+{
+    _copyList.clear();
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+
+    for(int i = 0; i < selected.count(); ++i)
+    {
+        QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(selected.at(i));
+        if(item)
+        {
+            BattleDialogModelCombatant* combatant = _combatantIcons.key(item);
+            if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster))
+                _copyList.append(combatant);
+        }
+    }
+}
+
+void BattleFrame::clearCopy()
+{
+    _copyList.clear();
+}
+
+void BattleFrame::pasteMonsters()
+{
+    if(_copyList.count() == 0)
+        return;
+
+    // Go through the copied monsters and find their rectangle
+    QRectF monsterRect(_copyList.at(0)->getPosition(), QSizeF(0,0));
+    for(int i = 1; i < _copyList.count(); ++i)
+    {
+        monsterRect.setTop(qMin(monsterRect.top(), _copyList.at(i)->getPosition().y()));
+        monsterRect.setLeft(qMin(monsterRect.left(), _copyList.at(i)->getPosition().x()));
+        monsterRect.setBottom(qMax(monsterRect.bottom(), _copyList.at(i)->getPosition().y()));
+        monsterRect.setRight(qMax(monsterRect.right(), _copyList.at(i)->getPosition().x()));
+    }
+    QPointF combatantPos = viewportCenter();
+
+    QList<BattleDialogModelCombatant*> newCombatants;
+    for(int i = 0; i < _copyList.count(); ++i)
+    {
+        BattleDialogModelCombatant* newCombatant = _copyList.at(i)->clone();
+        newCombatant->setPosition(combatantPos + _copyList.at(i)->getPosition() - monsterRect.center());
+        newCombatants.append(newCombatant);
+    }
+    addCombatants(newCombatants);
+    recreateCombatantWidgets();
+}
+
 void BattleFrame::updateHighlights()
 {
     if(!_model)
@@ -2507,6 +2564,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
+        disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
 
         clearBattleFrame();
         cleanupBattleMap();
@@ -2520,6 +2578,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
+        connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
 
         setBattleMap();
         recreateCombatantWidgets();
