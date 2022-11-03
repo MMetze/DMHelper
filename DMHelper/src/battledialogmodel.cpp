@@ -1,4 +1,5 @@
 #include "battledialogmodel.h"
+#include "battledialogmodelmonsterbase.h"
 #include "dmconstants.h"
 #include "map.h"
 #include "grid.h"
@@ -134,6 +135,19 @@ void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* c
         return;
 
     _combatants.insert(index, combatant);
+
+    // For a character addition, connect to the destroyed signal
+    if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
+        connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
+
+    // For a monster addition, also react to image changes
+    if((combatant->getCombatantType() == DMHelper::CombatantType_Monster))
+    {
+        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
+        if(monster)
+            connect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
+    }
+
     emit combatantListChanged();
     emit dirty();
 }
@@ -146,6 +160,13 @@ BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
         removedCombatant = _combatants.takeAt(index);
         if(_activeCombatant == removedCombatant)
             _activeCombatant = nullptr;
+    }
+
+    if((removedCombatant) && (removedCombatant->getCombatantType() == DMHelper::CombatantType_Monster))
+    {
+        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(removedCombatant);
+        if(monster)
+            disconnect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
     }
 
     emit combatantListChanged();
@@ -164,6 +185,14 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
     // For a character addition, connect to the destroyed signal
     if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
         connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
+
+    // For a monster addition, also react to image changes
+    if((combatant->getCombatantType() == DMHelper::CombatantType_Monster))
+    {
+        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
+        if(monster)
+            connect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
+    }
 
     emit combatantListChanged();
     emit dirty();

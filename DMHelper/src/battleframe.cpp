@@ -2314,6 +2314,9 @@ void BattleFrame::pasteMonsters()
     if(_copyList.count() == 0)
         return;
 
+    // Need this because changing the combatant list clears the copy list to avoid issues
+    QList<BattleDialogModelCombatant*> copyListBackup = _copyList;
+
     // Go through the copied monsters and find their rectangle
     QRectF monsterRect(_copyList.at(0)->getPosition(), QSizeF(0,0));
     for(int i = 1; i < _copyList.count(); ++i)
@@ -2334,6 +2337,8 @@ void BattleFrame::pasteMonsters()
     }
     addCombatants(newCombatants);
     recreateCombatantWidgets();
+
+    _copyList = copyListBackup;
 }
 
 void BattleFrame::updateHighlights()
