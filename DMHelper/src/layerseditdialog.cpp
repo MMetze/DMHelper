@@ -5,6 +5,7 @@
 #include "layerfow.h"
 #include "layerimage.h"
 #include "layerframe.h"
+#include "layergrid.h"
 #include <QImageReader>
 #include <QVBoxLayout>
 #include <QInputDialog>
@@ -69,7 +70,7 @@ void LayersEditDialog::moveDown()
 void LayersEditDialog::addLayer()
 {
     QStringList items;
-    items << tr("Image") << tr("FoW") << tr("Tokens");
+    items << tr("Image") << tr("FoW") << tr("Tokens") << tr("Grid") << tr("Text");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -111,6 +112,17 @@ void LayersEditDialog::addLayer()
     else if(selectedItem == tr("Tokens"))
     {
         qDebug() << "[LayersEditDialog] Trying to add Token layer which is not yet implemented!";
+        return;
+    }
+    else if(selectedItem == tr("Grid"))
+    {
+        newLayer = new LayerGrid(QString("Grid"));
+        //qDebug() << "[LayersEditDialog] Trying to add Grid layer which is not yet implemented!";
+        //return;
+    }
+    else if(selectedItem == tr("Text"))
+    {
+        qDebug() << "[LayersEditDialog] Trying to add Text layer which is not yet implemented!";
         return;
     }
     else

@@ -156,7 +156,8 @@ namespace DMHelper
     enum LayerType
     {
         LayerType_Image = 0,
-        LayerType_Fow
+        LayerType_Fow,
+        LayerType_Grid
     };
 
     const int TreeItemData_Type = Qt::UserRole + 1;
@@ -168,6 +169,7 @@ namespace DMHelper
     const int CHARACTER_ICON_HEIGHT = CHARACTER_WIDGET_HEIGHT * 2;
 
     const int STARTING_GRID_SCALE = 25;
+    const int DEFAULT_GRID_COUNT = 25;
 
     const int CURSOR_SIZE = 70; // increased, was 30
 

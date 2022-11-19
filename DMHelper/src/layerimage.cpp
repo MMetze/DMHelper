@@ -156,8 +156,10 @@ void LayerImage::playerGLUninitialize()
     cleanupPlayer();
 }
 
-void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
+void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    Q_UNUSED(projectionMatrix);
+
     if(!functions)
         return;
 
@@ -168,7 +170,7 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
             return;
     }
 
-    functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+    functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
     _backgroundObject->paintGL();
 }
 
@@ -180,14 +182,16 @@ void LayerImage::playerGLResize(int w, int h)
 
 void LayerImage::initialize(const QSize& layerSize)
 {
-    Q_UNUSED(layerSize);
-
     DMHFileReader* reader = new DMHFileReader(getImageFile());
     if(reader)
     {
         _layerImage = reader->loadImage();
         if(!_layerImage.isNull())
+        {
             _filename = reader->getFilename();
+            if(!layerSize.isEmpty())
+                _layerImage = _layerImage.scaled(layerSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
         delete reader;
     }
 }

@@ -24,6 +24,9 @@ public:
     virtual QRectF boundingRect() const;
     virtual QSizeF sceneSize() const;
 
+    int getScale() const;
+    void setScale(int scale);
+
     int layerCount() const;
     Layer* layerAt(int position) const;
     void insertLayer(int position, Layer* layer);
@@ -56,7 +59,7 @@ public slots:
     virtual void playerGLInitialize();
     virtual void playerGLUninitialize();
     virtual bool playerGLUpdate();
-    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix);
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
     virtual void playerGLResize(int w, int h);
 
 signals:
@@ -71,6 +74,7 @@ protected:
 
     bool _initialized;
     QList<Layer*> _layers;
+    int _scale;
     int _selected;
     QGraphicsScene* _dmScene;
 };

@@ -1906,21 +1906,27 @@ void MapFrame::checkPartyUpdate()
         return;
     }
 
-    if(!_partyIcon)
-    {
-        _partyIcon = new UnselectedPixmap();
-        _scene->addItem(_partyIcon);
-        if((_mapSource->getPartyIconPos().x() == -1) && (_mapSource->getPartyIconPos().y() == -1))
-            _mapSource->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
-        _partyIcon->setFlag(QGraphicsItem::ItemIsMovable, true);
-        _partyIcon->setFlag(QGraphicsItem::ItemIsSelectable, true);
-        _partyIcon->setPos(_mapSource->getPartyIconPos());
-        _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
-    }
-    _partyIcon->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale())); //250 * 25 / 625  = 10;
     QPixmap partyPixmap = _mapSource->getPartyPixmap();
     if(!partyPixmap.isNull())
+    {
+        if(!_partyIcon)
+        {
+            _partyIcon = new UnselectedPixmap();
+            _scene->addItem(_partyIcon);
+            if((_mapSource->getPartyIconPos().x() == -1) && (_mapSource->getPartyIconPos().y() == -1))
+                _mapSource->setPartyIconPos(QPoint(_scene->width() / 2, _scene->height() / 2));
+            _partyIcon->setFlag(QGraphicsItem::ItemIsMovable, true);
+            _partyIcon->setFlag(QGraphicsItem::ItemIsSelectable, true);
+            _partyIcon->setPos(_mapSource->getPartyIconPos());
+            _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
+        }
+
+        qreal scaleFactor = (static_cast<qreal>(_mapSource->getPartyScale()-2)) / static_cast<qreal>(qMax(partyPixmap.width(),partyPixmap.height()));
+        //_partyIcon->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale())); //250 * 25 / 625  = 10;
+        _partyIcon->setScale(scaleFactor);
+
         _partyIcon->setPixmap(partyPixmap);
+    }
 }
 
 void MapFrame::handleScreenshotReady(const QImage& image)

@@ -25,8 +25,8 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _initialized(false),
     _shaderProgram(0),
     _shaderModelMatrix(0),
-    _fowImage(),
-    _fowObject(nullptr),
+//    _fowImage(),
+//    _fowObject(nullptr),
     _partyToken(nullptr),
     _lineImage(nullptr),
     _markerTokens(),
@@ -70,8 +70,8 @@ void PublishGLMapRenderer::cleanup()
     _partyToken = nullptr;
     _recreatePartyToken = false;
 
-    delete _fowObject;
-    _fowObject = nullptr;
+//    delete _fowObject;
+//    _fowObject = nullptr;
 
     _projectionMatrix.setToIdentity();
 
@@ -294,17 +294,23 @@ void PublishGLMapRenderer::paintGL()
     f->glClearColor(_color.redF(), _color.greenF(), _color.blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // Set the default render program
     f->glUseProgram(_shaderProgram);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
 
     //paintBackground(f);
-    _map->getLayerScene().playerGLPaint(f, _shaderModelMatrix);
+    _map->getLayerScene().playerGLPaint(f, _shaderModelMatrix, _projectionMatrix.constData());
 
+    // Set the current program, in case the layers changed the program
+    f->glUseProgram(_shaderProgram);
+
+    /*
     if(_fowObject)
     {
         f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
         _fowObject->paintGL();
     }
+    */
 
     if(_lineImage)
     {
@@ -347,7 +353,7 @@ void PublishGLMapRenderer::fowChanged(const QImage& fow)
     if(fow.isNull())
         return;
 
-    _fowImage = fow;
+//    _fowImage = fow;
     _updateFow = true;
     emit updateWidget();
 }
@@ -574,7 +580,8 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
 
 void PublishGLMapRenderer::updateFoW()
 {
-    if((!_map) || (_fowImage.isNull()))
+    //if((!_map) || (_fowImage.isNull()))
+    if(!_map)
         return;
 
     //QSize backgroundSize = getBackgroundSize().toSize();
@@ -582,10 +589,12 @@ void PublishGLMapRenderer::updateFoW()
     if(backgroundSize.isEmpty())
         return;
 
+    /*
     if(_fowObject)
         _fowObject->setImage(_fowImage);
     else
         _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
+    */
 
     _updateFow = false;
 }

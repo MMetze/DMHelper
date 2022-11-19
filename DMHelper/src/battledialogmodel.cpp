@@ -3,6 +3,7 @@
 #include "dmconstants.h"
 #include "map.h"
 #include "grid.h"
+#include "layergrid.h"
 #include <QDebug>
 
 BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
@@ -15,13 +16,6 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     _previousMapRect(),
     _cameraRect(),
     _background(Qt::black),
-    _gridOn(true),
-    _gridType(Grid::GridType_Square),
-    _gridScale(DMHelper::STARTING_GRID_SCALE),
-    _gridAngle(50),
-    _gridOffsetX(0),
-    _gridOffsetY(0),
-    _gridPen(),
     _showCompass(false),
     _showAlive(true),
     _showDead(false),
@@ -51,6 +45,8 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
                          element.attribute("cameraRectY",QString::number(0.0)).toDouble(),
                          element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
                          element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
+    // TODO: Layers - need this as backwards compability
+    /*
     _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
     _gridType = element.attribute("gridType",QString::number(0)).toInt();
     _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
@@ -61,6 +57,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     QColor gridColor = element.attribute("gridColor",QString("#000000"));
     _gridPen = QPen(QBrush(gridColor), gridWidth);
     _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
+    */
     // TODO: possibly re-enable compass at some point
     //_showCompass = static_cast<bool>(element.attribute("showCompass",QString::number(0)).toInt());
     _showCompass = false;
@@ -81,13 +78,6 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
 
     _background = otherModel->_background;
     _cameraRect = otherModel->_cameraRect;
-    _gridOn = otherModel->_gridOn;
-    _gridType = otherModel->_gridType;
-    _gridScale = otherModel->_gridScale;
-    _gridAngle = otherModel->_gridAngle;
-    _gridOffsetX = otherModel->_gridOffsetX;
-    _gridOffsetY = otherModel->_gridOffsetY;
-    _gridPen = otherModel->_gridPen;
     _showCompass = otherModel->_showCompass;
     _showAlive = otherModel->_showAlive;
     _showDead = otherModel->_showDead;
@@ -301,6 +291,16 @@ void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
     emit dirty();
 }
 
+int BattleDialogModel::getGridScale() const
+{
+    // TODO: Layers - need to make this complete
+    if(!_map)
+        return 1;
+
+    LayerGrid* layer = dynamic_cast<LayerGrid*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    return layer ? layer->getConfig().getGridScale() : DMHelper::STARTING_GRID_SCALE;
+}
+
 Map* BattleDialogModel::getMap() const
 {
     return _map;
@@ -334,41 +334,6 @@ QRectF BattleDialogModel::getCameraRect() const
 QColor BattleDialogModel::getBackgroundColor() const
 {
     return _background;
-}
-
-bool BattleDialogModel::getGridOn() const
-{
-    return _gridOn;
-}
-
-int BattleDialogModel::getGridType() const
-{
-    return _gridType;
-}
-
-int BattleDialogModel::getGridScale() const
-{
-    return _gridScale;
-}
-
-int BattleDialogModel::getGridAngle() const
-{
-    return _gridAngle;
-}
-
-int BattleDialogModel::getGridOffsetX() const
-{
-    return _gridOffsetX;
-}
-
-int BattleDialogModel::getGridOffsetY() const
-{
-    return _gridOffsetY;
-}
-
-const QPen& BattleDialogModel::getGridPen() const
-{
-    return _gridPen;
 }
 
 bool BattleDialogModel::getShowCompass() const
@@ -477,86 +442,6 @@ void BattleDialogModel::setBackgroundColor(const QColor& color)
     {
         _background = color;
         emit backgroundColorChanged(color);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridOn(bool gridOn)
-{
-    if(_gridOn != gridOn)
-    {
-        _gridOn = gridOn;
-        emit gridOnChanged(_gridOn);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridType(int gridType)
-{
-    if(_gridType != gridType)
-    {
-        _gridType = gridType;
-        emit gridTypeChanged(_gridType);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridScale(int gridScale)
-{
-    if(_gridScale != gridScale)
-    {
-        _gridScale = gridScale;
-        emit gridScaleChanged(_gridScale);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridAngle(int gridAngle)
-{
-    if(_gridAngle != gridAngle)
-    {
-        _gridAngle = gridAngle;
-        emit gridAngleChanged(_gridAngle);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridOffsetX(int gridOffsetX)
-{
-    if(_gridOffsetX != gridOffsetX)
-    {
-        _gridOffsetX = gridOffsetX;
-        emit gridOffsetXChanged(_gridOffsetX);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridOffsetY(int gridOffsetY)
-{
-    if(_gridOffsetY != gridOffsetY)
-    {
-        _gridOffsetY = gridOffsetY;
-        emit gridOffsetYChanged(_gridOffsetY);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridWidth(int gridWidth)
-{
-    if(_gridPen.width() != gridWidth)
-    {
-        _gridPen.setWidth(gridWidth);
-        emit gridPenChanged(_gridPen);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridColor(const QColor& gridColor)
-{
-    if(_gridPen.color() != gridColor)
-    {
-        _gridPen.setColor(gridColor);
-        emit gridPenChanged(_gridPen);
         emit dirty();
     }
 }
@@ -690,14 +575,6 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("backgroundColorG", _background.green());
     element.setAttribute("backgroundColorB", _background.blue());
     element.setAttribute("background", _mapRect.height());
-    element.setAttribute("showGrid", _gridOn);
-    element.setAttribute("gridType", _gridType);
-    element.setAttribute("gridScale", _gridScale);
-    element.setAttribute("gridAngle", _gridAngle);
-    element.setAttribute("gridOffsetX", _gridOffsetX);
-    element.setAttribute("gridOffsetY", _gridOffsetY);
-    element.setAttribute("gridWidth", _gridPen.width());
-    element.setAttribute("gridColor", _gridPen.color().name());
     element.setAttribute("showCompass", _showCompass);
     element.setAttribute("showAlive", _showAlive);
     element.setAttribute("showDead", _showDead);

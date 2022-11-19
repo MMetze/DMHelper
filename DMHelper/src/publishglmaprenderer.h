@@ -80,8 +80,8 @@ protected:
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;
-    QImage _fowImage;
-    PublishGLBattleBackground* _fowObject;
+//    QImage _fowImage;
+//    PublishGLBattleBackground* _fowObject;
     PublishGLImage* _partyToken;
     PublishGLImage* _lineImage;
     QList<PublishGLImage*> _markerTokens;

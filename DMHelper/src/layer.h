@@ -47,6 +47,7 @@ public:
     virtual QString getName() const;
     virtual int getOrder() const;
     virtual bool getLayerVisible() const;
+    virtual qreal getOpacity() const;
     virtual QImage getLayerIcon() const;
 
     virtual DMHelper::LayerType getType() const = 0;
@@ -62,15 +63,17 @@ public slots:
     virtual void playerGLInitialize() = 0;
     virtual void playerGLUninitialize() = 0;
     virtual bool playerGLUpdate();
-    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) = 0;
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) = 0;
     virtual void playerGLResize(int w, int h) = 0;
 
     // Layer Specific Interface
     virtual void initialize(const QSize& layerSize) = 0;
     virtual void uninitialize() = 0;
+    virtual void setScale(int scale);
     virtual void setName(const QString& name);
     virtual void setOrder(int order);
     virtual void setLayerVisible(bool layerVisible);
+    virtual void setOpacity(qreal opacity);
 
 signals:
     void dirty();
@@ -83,6 +86,7 @@ protected:
     QString _name;
     int _order;
     bool _layerVisible;
+    qreal _opacity;
 
 };
 

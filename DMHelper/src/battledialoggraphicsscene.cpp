@@ -103,8 +103,8 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
     }
 
     qDebug() << "[Battle Dialog Scene] Creating scene contents: " << rect;
-    _grid = new Grid(*this, rect);
-    _grid->rebuildGrid(*_model);
+    //_grid = new Grid(*this, rect);
+    //_grid->rebuildGrid(*_model);
     setDistanceScale(_model->getGridScale());
 
     QList<BattleDialogModelEffect*> effects = _model->getEffectList();
@@ -147,8 +147,9 @@ void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
     if(_grid)
     {
         qDebug() << "[Battle Dialog Scene]     Resizing grid, grid shape = " << rect;
-        _grid->setGridShape(rect);
-        _grid->rebuildGrid(*_model);
+        // TODO: Layers Grid
+        //_grid->setGridShape(rect);
+        //_grid->rebuildGrid(*_model);
     }
 
     for(QGraphicsItem* item : qAsConst(_itemList))
@@ -178,7 +179,8 @@ void BattleDialogGraphicsScene::updateBattleContents()
     if(_grid)
     {
         qDebug() << "[Battle Dialog Scene]     Rebuilding grid, grid scale = " << _model->getGridScale();
-        _grid->rebuildGrid(*_model);
+        // TODO: Layers Grid
+        //_grid->rebuildGrid(*_model);
     }
 
     for(QGraphicsItem* item : qAsConst(_itemList))
@@ -255,7 +257,8 @@ void BattleDialogGraphicsScene::paintGrid(QPainter* painter)
     if((!_model) || (!_grid) || (!painter))
         return;
 
-    _grid->rebuildGrid(*_model, painter);
+    // TODO: Layers Grid
+    //_grid->rebuildGrid(*_model, painter);
 }
 
 void BattleDialogGraphicsScene::setPointerVisibility(bool visible)

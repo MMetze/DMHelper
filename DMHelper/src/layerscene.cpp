@@ -2,6 +2,7 @@
 #include "layer.h"
 #include "layerimage.h"
 #include "layerfow.h"
+#include "layergrid.h"
 #include <QRectF>
 #include <QImage>
 #include <QPainter>
@@ -11,6 +12,7 @@ LayerScene::LayerScene(QObject *parent) :
     CampaignObjectBase{QString(), parent},
     _initialized(false),
     _layers(),
+    _scale(DMHelper::STARTING_GRID_SCALE),
     _selected(-1),
     _dmScene(nullptr)
 {
@@ -26,6 +28,7 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
     Q_UNUSED(isImport);
 
     _selected = element.attribute("selected", QString::number(0)).toInt();
+    _scale = element.attribute("scale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
 
     QDomElement layerElement = element.firstChildElement(QString("layer"));
     while(!layerElement.isNull())
@@ -36,9 +39,12 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             case DMHelper::LayerType_Image:
                 newLayer = new LayerImage();
                 break;
-            case DMHelper::LayerType_Fow:
-                newLayer = new LayerFow();
-                break;
+        case DMHelper::LayerType_Fow:
+            newLayer = new LayerFow();
+            break;
+        case DMHelper::LayerType_Grid:
+            newLayer = new LayerGrid();
+            break;
             default:
                 break;
         }
@@ -46,6 +52,7 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
         if(newLayer)
         {
             newLayer->inputXML(layerElement, isImport);
+            newLayer->setScale(_scale);
             _layers.append(newLayer);
         }
 
@@ -61,6 +68,7 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
 
     clearLayers();
 
+    _scale = otherScene->_scale;
     _selected = otherScene->_selected;
 
     for(int i = 0; i < otherScene->_layers.count(); ++i)
@@ -84,6 +92,21 @@ QSizeF LayerScene::sceneSize() const
     return boundingRect().size();
 }
 
+int LayerScene::getScale() const
+{
+    return _scale;
+}
+
+void LayerScene::setScale(int scale)
+{
+    if((scale == _scale) || (scale <= 0))
+        return;
+
+    _scale = scale;
+    for(int i = 0; i < _layers.count(); ++i)
+        _layers[i]->setScale(scale);
+}
+
 int LayerScene::layerCount() const
 {
     return _layers.count();
@@ -99,6 +122,9 @@ void LayerScene::insertLayer(int position, Layer* layer)
     if((position < 0) || (position >= _layers.count()) || (!layer))
         return;
 
+    if(_initialized)
+        layer->initialize(sceneSize().toSize());
+
     if(_dmScene)
         layer->dmInitialize(*_dmScene);
 
@@ -112,6 +138,9 @@ void LayerScene::prependLayer(Layer* layer)
     if(!layer)
         return;
 
+    if(_initialized)
+        layer->initialize(sceneSize().toSize());
+
     if(_dmScene)
         layer->dmInitialize(*_dmScene);
 
@@ -124,6 +153,11 @@ void LayerScene::appendLayer(Layer* layer)
 {
     if(!layer)
         return;
+
+    if(_initialized)
+        layer->initialize(sceneSize().toSize());
+
+    layer->setScale(_scale);
 
     if(_dmScene)
         layer->dmInitialize(*_dmScene);
@@ -244,6 +278,9 @@ QImage LayerScene::mergedImage()
 
 void LayerScene::initializeLayers()
 {
+    if(_initialized)
+        return;
+
     QSize currentSize;
 
     // First initialize images to find the size of the scene
@@ -261,10 +298,15 @@ void LayerScene::initializeLayers()
         if(_layers[i]->getType() != DMHelper::LayerType_Image)
             _layers[i]->initialize(currentSize);
     }
+
+    _initialized = true;
 }
 
 void LayerScene::uninitializeLayers()
 {
+    if(!_initialized)
+        return;
+
     dmUninitialize();
     playerGLUninitialize();
 
@@ -272,6 +314,8 @@ void LayerScene::uninitializeLayers()
     {
         _layers[i]->uninitialize();
     }
+
+    _initialized = false;
 }
 
 void LayerScene::dmInitialize(QGraphicsScene& scene)
@@ -320,12 +364,12 @@ bool LayerScene::playerGLUpdate()
     return result;
 }
 
-void LayerScene::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
+void LayerScene::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
     for(int i = 0; i < _layers.count(); ++i)
     {
         if(_layers.at(i)->getLayerVisible())
-            _layers[i]->playerGLPaint(functions, modelMatrix);
+            _layers[i]->playerGLPaint(functions, defaultModelMatrix, projectionMatrix);
     }
 }
 
@@ -343,6 +387,7 @@ QDomElement LayerScene::createOutputXML(QDomDocument &doc)
 void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("selected", _selected);
+    element.setAttribute("scale", _scale);
 
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->outputXML(doc, element, targetDirectory, isExport);

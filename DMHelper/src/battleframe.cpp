@@ -665,7 +665,8 @@ void BattleFrame::setGridScale(int gridScale)
     if(_scene)
     {
         _scene->setDistanceScale(gridScale);
-        _model->setGridScale(gridScale);
+        // TODO: Layers
+        //_model->setGridScale(gridScale);
 
         qreal scaleFactor;
 
@@ -698,18 +699,18 @@ void BattleFrame::setGridScale(int gridScale)
     }
 }
 
-void BattleFrame::selecttGridCount()
+void BattleFrame::selectGridCount()
 {
     if((!_model) || (!_background))
         return;
 
     bool ok = false;
-    int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map contain?"), 20, 1, 100000, 1, &ok);
+    int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map have horizontally?"), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
     if((ok) && (gridCount > 0))
     {
         int newGridScale = _background->pixmap().width() / gridCount;
         if(newGridScale > 0)
-        setGridScale(newGridScale);
+            setGridScale(newGridScale);
     }
 }
 
@@ -723,7 +724,8 @@ void BattleFrame::setGridAngle(int gridAngle)
 
     if(_scene)
     {
-        _model->setGridAngle(gridAngle);
+        // TODO: Layers
+        //_model->setGridAngle(gridAngle);
         _scene->updateBattleContents();
         ui->graphicsView->update();
         updateRendererGrid();
@@ -740,7 +742,8 @@ void BattleFrame::setGridType(int gridType)
 
     if(_scene)
     {
-        _model->setGridType(gridType);
+        // TODO: Layers
+        //_model->setGridType(gridType);
         _scene->updateBattleContents();
         ui->graphicsView->update();
         updateRendererGrid();
@@ -757,7 +760,8 @@ void BattleFrame::setXOffset(int xOffset)
 
     if(_scene)
     {
-        _model->setGridOffsetX(xOffset);
+        // TODO: Layers
+        //_model->setGridOffsetX(xOffset);
         _scene->updateBattleContents();
         ui->graphicsView->update();
         updateRendererGrid();
@@ -774,7 +778,8 @@ void BattleFrame::setYOffset(int yOffset)
 
     if(_scene)
     {
-        _model->setGridOffsetY(yOffset);
+        // TODO: Layers
+        //_model->setGridOffsetY(yOffset);
         _scene->updateBattleContents();
         ui->graphicsView->update();
         updateRendererGrid();
@@ -791,7 +796,8 @@ void BattleFrame::setGridWidth(int gridWidth)
 
     if(_scene)
     {
-        _model->setGridWidth(gridWidth);
+        // TODO: Layers
+        //_model->setGridWidth(gridWidth);
         _scene->updateBattleContents();
         ui->graphicsView->update();
         updateRendererGrid();
@@ -808,7 +814,8 @@ void BattleFrame::setGridColor(const QColor& gridColor)
 
     if(_scene)
     {
-        _model->setGridColor(gridColor);
+        // TODO: Layers
+        //_model->setGridColor(gridColor);
         _scene->updateBattleContents();
         ui->graphicsView->update();
         updateRendererGrid();
@@ -823,13 +830,17 @@ void BattleFrame::setGridVisible(bool gridVisible)
         return;
     }
 
+    // TODO: Layers
+    /*
     if((_scene) && (gridVisible != _model->getGridOn()))
     {
-        _model->setGridOn(gridVisible);
+        // TODO: Layers
+        //_model->setGridOn(gridVisible);
         _scene->setGridVisibility(gridVisible);
         ui->graphicsView->invalidateScene();
         updateRendererGrid();
     }
+    */
 }
 
 void BattleFrame::setGridLocked(bool gridLocked)
@@ -2565,7 +2576,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
     if(!_model)
     {
-        disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
+        // TODO: Layers
+        //disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
         disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
@@ -2579,7 +2591,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
     {
         emit backgroundColorChanged(_model->getBackgroundColor());
 
-        connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
+        // TODO: Layers
+        //connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));

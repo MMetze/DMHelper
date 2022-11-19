@@ -171,7 +171,7 @@ protected:
     QUuid _partyId;
     QString _partyAltIcon;
     QPoint _partyIconPos;
-    int _partyScale;
+    //int _partyScale;
     int _mapScale;
 
     bool _showMarkers;

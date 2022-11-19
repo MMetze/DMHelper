@@ -1,5 +1,5 @@
-#ifndef CONFIGUREGRIDDIALOG_H
-#define CONFIGUREGRIDDIALOG_H
+#ifndef CONFIGURELOCKEDGRIDDIALOG_H
+#define CONFIGURELOCKEDGRIDDIALOG_H
 
 #include <QDialog>
 
@@ -8,16 +8,16 @@ class Grid;
 class QGraphicsScene;
 
 namespace Ui {
-class ConfigureGridDialog;
+class ConfigureLockedGridDialog;
 }
 
-class ConfigureGridDialog : public QDialog
+class ConfigureLockedGridDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit ConfigureGridDialog(QWidget *parent = nullptr);
-    ~ConfigureGridDialog();
+    explicit ConfigureLockedGridDialog(QWidget *parent = nullptr);
+    ~ConfigureLockedGridDialog();
 
     qreal getGridScale();
 
@@ -36,7 +36,7 @@ private:
     void rebuildGrid();
     qreal getPixelsPerInch();
 
-    Ui::ConfigureGridDialog *ui;
+    Ui::ConfigureLockedGridDialog *ui;
 
     BattleDialogModel* _model;
     Grid* _grid;
@@ -44,4 +44,4 @@ private:
     qreal _gridScale;
 };
 
-#endif // CONFIGUREGRIDDIALOG_H
+#endif // CONFIGURELOCKEDGRIDDIALOG_H

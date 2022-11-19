@@ -59,7 +59,7 @@ public slots:
     virtual void playerGLInitialize() override;
     virtual void playerGLUninitialize() override;
 //    virtual bool playerGLUpdate() override;
-    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix) override;
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerGLResize(int w, int h) override;
 
     // Layer Specific Interface

@@ -77,7 +77,7 @@
 #include "dmhcache.h"
 #include "dmh_vlc.h"
 #include "whatsnewdialog.h"
-#include "configuregriddialog.h"
+#include "configurelockedgriddialog.h"
 #include "dmhwaitingdialog.h"
 #include <QResizeEvent>
 #include <QFileDialog>
@@ -510,7 +510,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
     connect(_battleFrame, &BattleFrame::gridScaleChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridScale);
-    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selecttGridCount);
+    connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selectGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridYOffsetChanged(int)), _battleFrame, SLOT(setYOffset(int)));
@@ -1073,6 +1073,15 @@ void MainWindow::newMap()
     LayerImage* imageLayer = new LayerImage(QString("Map"), filename);
     map->getLayerScene().appendLayer(imageLayer);
 //    map->setFileName(filename);
+
+    ok = false;
+    int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map have horizontally? Even if you don't use a grid on this map, this is used to set the size of tokens on the map."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
+    if((ok) && (gridCount > 0))
+    {
+        int newScale = map->getLayerScene().sceneSize().width() / gridCount;
+        if(newScale > 0)
+            map->getLayerScene().setScale(newScale);
+    }
 
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
     if(result == QMessageBox::Yes)
@@ -2475,7 +2484,7 @@ void MainWindow::openRandomMarkets()
 
 void MainWindow::configureGridLock()
 {
-    ConfigureGridDialog dlg;
+    ConfigureLockedGridDialog dlg;
     QScreen* primary = QGuiApplication::primaryScreen();
     if(primary)
         dlg.resize(primary->availableSize().width() * 3 / 4, primary->availableSize().height() * 2 / 3);
@@ -2522,6 +2531,8 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
         connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
+        // TODO: Layers
+        /*
         _ribbonTabBattleMap->setGridOn(model->getGridOn());
         _ribbonTabBattleMap->setGridType(model->getGridType());
         _ribbonTabBattleMap->setGridScale(model->getGridScale());
@@ -2530,6 +2541,7 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         _ribbonTabBattleMap->setGridYOffset(model->getGridOffsetY());
         _ribbonTabBattleMap->setGridWidth(model->getGridPen().width());
         _ribbonTabBattleMap->setGridColor(model->getGridPen().color());
+        */
     }
 }
 

@@ -6,7 +6,8 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
     QObject{parent},
     _name(name),
     _order(order),
-    _layerVisible(true)
+    _layerVisible(true),
+    _opacity(1.0)
 {
 }
 
@@ -25,12 +26,10 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    if(element.hasAttribute("layerName"))
-        _name = element.attribute("layerName");
-    if(element.hasAttribute("order"))
-        _order = element.attribute("order", QString::number(0)).toInt();
-    if(element.hasAttribute("visible"))
-        _layerVisible = static_cast<bool>(element.attribute("visible",QString::number(1)).toInt());
+    _name = element.attribute("layerName", QString("Layer"));
+    _order = element.attribute("order", QString::number(0)).toInt();
+    _layerVisible = static_cast<bool>(element.attribute("visible", QString::number(1)).toInt());
+    _opacity = element.attribute(QString("opacity"), QString::number(1.0)).toDouble();
 }
 
 QRectF Layer::boundingRect() const
@@ -53,6 +52,11 @@ bool Layer::getLayerVisible() const
     return _layerVisible;
 }
 
+qreal Layer::getOpacity() const
+{
+    return _opacity;
+}
+
 QImage Layer::getLayerIcon() const
 {
     return QImage();
@@ -61,6 +65,11 @@ QImage Layer::getLayerIcon() const
 bool Layer::playerGLUpdate()
 {
     return false;
+}
+
+void Layer::setScale(int scale)
+{
+    Q_UNUSED(scale);
 }
 
 void Layer::setName(const QString& name)
@@ -91,6 +100,15 @@ void Layer::setLayerVisible(bool layerVisible)
     emit dirty();
 }
 
+void Layer::setOpacity(qreal opacity)
+{
+    if(_opacity == opacity)
+        return;
+
+    _opacity = opacity;
+    emit dirty();
+}
+
 void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     Q_UNUSED(doc);
@@ -98,7 +116,12 @@ void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
     Q_UNUSED(isExport);
 
     element.setAttribute("type", getType());
-    element.setAttribute("layerName", _name);
-    element.setAttribute("order", _order);
-    element.setAttribute("visible", _layerVisible);
+    if(_name != QString("Layer"))
+        element.setAttribute("layerName", _name);
+    if(_order > 0)
+        element.setAttribute("order", _order);
+    if(!_layerVisible)
+        element.setAttribute("visible", _layerVisible);
+    if(_opacity < 1.0)
+        element.setAttribute("opacity", _opacity);
 }

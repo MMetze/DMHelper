@@ -66,7 +66,7 @@ SOURCES += main.cpp\
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
     conditionseditdialog.cpp \
-    configuregriddialog.cpp \
+    configurelockedgriddialog.cpp \
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
@@ -82,9 +82,11 @@ SOURCES += main.cpp\
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    gridconfig.cpp \
     layer.cpp \
     layerfow.cpp \
     layerframe.cpp \
+    layergrid.cpp \
     layerimage.cpp \
     layerscene.cpp \
     layerseditdialog.cpp \
@@ -110,6 +112,7 @@ SOURCES += main.cpp\
     publishbuttonribbon.cpp \
     publishglbattlebackground.cpp \
     publishglbattleeffect.cpp \
+    publishglbattlegrid.cpp \
     publishglbattleimagerenderer.cpp \
     publishglbattleobject.cpp \
     publishglbattlerenderer.cpp \
@@ -309,7 +312,7 @@ HEADERS  += mainwindow.h \
     combatantrolloverframe.h \
     combatantwidget.h \
     conditionseditdialog.h \
-    configuregriddialog.h \
+    configurelockedgriddialog.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
@@ -326,9 +329,11 @@ HEADERS  += mainwindow.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    gridconfig.h \
     layer.h \
     layerfow.h \
     layerframe.h \
+    layergrid.h \
     layerimage.h \
     layerscene.h \
     layerseditdialog.h \
@@ -354,6 +359,7 @@ HEADERS  += mainwindow.h \
     publishbuttonribbon.h \
     publishglbattlebackground.h \
     publishglbattleeffect.h \
+    publishglbattlegrid.h \
     publishglbattleimagerenderer.h \
     publishglbattleobject.h \
     publishglbattlerenderer.h \
@@ -516,7 +522,7 @@ FORMS    += mainwindow.ui \
     characterimportdialog.ui \
     combatantrolloverframe.ui \
     conditionseditdialog.ui \
-    configuregriddialog.ui \
+    configurelockedgriddialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \
     combatantdialog.ui \

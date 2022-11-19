@@ -31,7 +31,7 @@ Map::Map(const QString& mapName, QObject *parent) :
     _showPartyIcon(false),
     _partyId(),
     _partyIconPos(-1, -1),
-    _partyScale(10),
+    //_partyScale(DMHelper::STARTING_GRID_SCALE),
     _mapScale(100),
     _showMarkers(true),
     _mapItems(),
@@ -79,6 +79,13 @@ void Map::inputXML(const QDomElement &element, bool isImport)
                         element.attribute("cameraRectY", QString::number(0)).toInt(),
                         element.attribute("cameraRectWidth", QString::number(0)).toInt(),
                         element.attribute("cameraRectHeight ", QString::number(0)).toInt());
+    _playAudio = static_cast<bool>(element.attribute("playaudio", QString::number(1)).toInt());
+    _showPartyIcon = static_cast<bool>(element.attribute("showparty", QString::number(1)).toInt());
+    _partyAltIcon = element.attribute("partyalticon");
+    _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
+                           element.attribute("partyPosY", QString::number(-1)).toInt());
+    _mapScale = element.attribute("mapScale", QString::number(100)).toInt();
+    _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     QDomElement layersElement = element.firstChildElement(QString("layerScene"));
     if(!layersElement.isNull())
@@ -87,6 +94,8 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     }
     else
     {
+        int partyScale = element.attribute("partyScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
+        _layerScene.setScale(partyScale);
         LayerImage* imageLayer = new LayerImage(QString("Map"), _filename);
         imageLayer->inputXML(element, isImport);
         /*
@@ -191,7 +200,7 @@ void Map::copyValues(const CampaignObjectBase* other)
     _partyId = otherMap->getPartyId();
     _partyAltIcon = otherMap->getPartyAltIcon();
     _partyIconPos = otherMap->getPartyIconPos();
-    _partyScale = otherMap->getPartyScale();
+    //_partyScale = otherMap->getPartyScale();
     _mapScale = otherMap->getMapScale();
 
     // TODO: Layers - need a markers layer
@@ -356,7 +365,8 @@ const QPoint& Map::getPartyIconPos() const
 
 int Map::getPartyScale() const
 {
-    return _partyScale;
+    //return _partyScale;
+    return _layerScene.getScale();
 }
 
 QPixmap Map::getPartyPixmap()
@@ -918,10 +928,12 @@ void Map::setPartyIconPos(const QPoint& pos)
 
 void Map::setPartyScale(int partyScale)
 {
-    if(_partyScale != partyScale)
+    if(_layerScene.getScale() != partyScale)
+    //if(_partyScale != partyScale)
     {
-        _partyScale = partyScale;
-        emit partyScaleChanged(_partyScale);
+        //_partyScale = partyScale;
+        _layerScene.setScale(partyScale);
+        emit partyScaleChanged(partyScale);
         emit dirty();
     }
 }
@@ -1040,7 +1052,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("partyalticon", _partyAltIcon);
     element.setAttribute("partyPosX", _partyIconPos.x());
     element.setAttribute("partyPosY", _partyIconPos.y());
-    element.setAttribute("partyScale", _partyScale);
+    //element.setAttribute("partyScale", _partyScale);
     element.setAttribute("mapScale", _mapScale);
     element.setAttribute("showMarkers", _showMarkers);
     element.setAttribute("mapRectX", _mapRect.x());
@@ -1070,15 +1082,7 @@ bool Map::belongsToObject(QDomElement& element)
 void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
 {
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
-    _playAudio = static_cast<bool>(element.attribute("playaudio", QString::number(1)).toInt());
-    _showPartyIcon = static_cast<bool>(element.attribute("showparty", QString::number(1)).toInt());
     _partyId = parseIdString(element.attribute("party"));
-    _partyAltIcon = element.attribute("partyalticon");
-    _partyIconPos = QPoint(element.attribute("partyPosX", QString::number(-1)).toInt(),
-                           element.attribute("partyPosY", QString::number(-1)).toInt());
-    _partyScale = element.attribute("partyScale", QString::number(10)).toInt();
-    _mapScale = element.attribute("mapScale", QString::number(100)).toInt();
-    _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }

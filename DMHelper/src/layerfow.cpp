@@ -454,8 +454,10 @@ bool LayerFow::playerGLUpdate()
 }
 */
 
-void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
+void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    Q_UNUSED(projectionMatrix);
+
     if(!functions)
         return;
 
@@ -466,7 +468,7 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint modelMatrix)
             return;
     }
 
-    functions->glUniformMatrix4fv(modelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+    functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
     _backgroundObject->paintGL();
 }
 
