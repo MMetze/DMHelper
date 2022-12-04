@@ -31,6 +31,11 @@ QImage LayerGrid::getLayerIcon() const
     return QImage(":/img/data/icon_grid.png");
 }
 
+bool LayerGrid::defaultShader() const
+{
+    return false;
+}
+
 DMHelper::LayerType LayerGrid::getType() const
 {
     return DMHelper::LayerType_Grid;
@@ -52,6 +57,7 @@ QSize LayerGrid::getLayerSize() const
 
 void LayerGrid::setLayerSize(const QSize& layerSize)
 {
+    qDebug() << "[LayerGrid]::setLayerSize";
     if(layerSize == _layerSize)
         return;
 
@@ -101,6 +107,7 @@ void LayerGrid::dmUpdate()
 
 void LayerGrid::playerGLInitialize()
 {
+    qDebug() << "[LayerGrid]::playerGLInitialize";
     if(_gridObject)
     {
         qDebug() << "[LayerGrid] ERROR: playerGLInitialize called although the grid object already exists!";
@@ -112,12 +119,14 @@ void LayerGrid::playerGLInitialize()
 
 void LayerGrid::playerGLUninitialize()
 {
+    qDebug() << "[LayerGrid]::playerGLUninitialize";
     cleanupPlayer();
 }
 
 void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
     Q_UNUSED(defaultModelMatrix);
+    qDebug() << "[LayerGrid]::playerGLPaint";
 
     if((!functions) || (!projectionMatrix))
         return;
@@ -135,12 +144,14 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
 
 void LayerGrid::playerGLResize(int w, int h)
 {
+    qDebug() << "[LayerGrid]::playerGLResize";
     Q_UNUSED(w);
     Q_UNUSED(h);
 }
 
 void LayerGrid::initialize(const QSize& layerSize)
 {
+    qDebug() << "[LayerGrid]::initialize";
     if(_grid)
         return;
 
@@ -151,11 +162,13 @@ void LayerGrid::initialize(const QSize& layerSize)
 
 void LayerGrid::uninitialize()
 {
+    qDebug() << "[LayerGrid]::uninitialize";
     _layerSize = QSize();
 }
 
 void LayerGrid::setScale(int scale)
 {
+    qDebug() << "[LayerGrid]::setScale";
     _config.setGridScale(scale);
     if(_grid)
         _grid->rebuildGrid(_config, getOrder());
@@ -219,6 +232,7 @@ void LayerGrid::cleanupDM()
 
 void LayerGrid::cleanupPlayer()
 {
+    qDebug() << "[LayerGrid]::cleanupPlayer";
     delete _gridObject;
     _gridObject = nullptr;
 }

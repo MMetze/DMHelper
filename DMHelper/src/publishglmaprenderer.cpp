@@ -189,10 +189,12 @@ void PublishGLMapRenderer::initializeGL()
         return;
     }
 
+    qDebug() << "[PublishGLMapRenderer]::initializeGL Program: " << _shaderProgram << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
+    qDebug() << "[PublishGLMapRenderer] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
 
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -211,6 +213,8 @@ void PublishGLMapRenderer::initializeGL()
     // Check if we need a pointer
     evaluatePointer();
 
+    qDebug() << "[PublishGLMapRenderer]::initializeGL Program: " << _shaderProgram << ", context: " << _targetWidget->context();
+    f->glUseProgram(_shaderProgram);
     // Matrices
     // Model
     QMatrix4x4 modelMatrix;
@@ -242,6 +246,8 @@ void PublishGLMapRenderer::paintGL()
 {
     if((!_initialized) || (!_map) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
+
+    qDebug() << "[PublishGLMapRenderer]::paintGL context: " << _targetWidget->context();
 
     if(_map->getLayerScene().playerGLUpdate())
         updateProjectionMatrix();
@@ -295,13 +301,15 @@ void PublishGLMapRenderer::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set the default render program
+    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #1: " << _shaderProgram << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgram);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
 
     //paintBackground(f);
-    _map->getLayerScene().playerGLPaint(f, _shaderModelMatrix, _projectionMatrix.constData());
+    _map->getLayerScene().playerGLPaint(f, _shaderProgram, _shaderModelMatrix, _projectionMatrix.constData());
 
     // Set the current program, in case the layers changed the program
+    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #2: " << _shaderProgram << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgram);
 
     /*
@@ -399,19 +407,17 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     //QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
     QSizeF backgroundMiddle = _map->getLayerScene().sceneSize() / 2.0;
 
-    qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
-    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+    qDebug() << "[PublishGLMapRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
+    qDebug() << "[PublishGLMapRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
-
 
     int l = cameraMiddle.x() - backgroundMiddle.width() - halfRect.width();
     int r = cameraMiddle.x() - backgroundMiddle.width() + halfRect.width();
     int t = backgroundMiddle.height() - cameraMiddle.y() - halfRect.height();
     int b = backgroundMiddle.height() - cameraMiddle.y() + halfRect.height();
-    qDebug() << "[PublishGLMapImageRenderer] l: " << l << ", r: " << r << ", t: " << t << ", b: " << b;
-
+    qDebug() << "[PublishGLMapRenderer] l: " << l << ", r: " << r << ", t: " << t << ", b: " << b;
 
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
@@ -421,7 +427,7 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     setPointerScale(rectSize.width() / transformedTarget.width());
 
     QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
-    qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
+    qDebug() << "[PublishGLMapRenderer] scissor size: " << scissorSize;
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());

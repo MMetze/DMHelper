@@ -17,6 +17,8 @@ public:
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     virtual QImage getLayerIcon() const override;
+    virtual bool defaultShader() const override;
+
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 

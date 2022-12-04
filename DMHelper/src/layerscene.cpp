@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QPainter>
 #include <QDomElement>
+#include <QDebug>
 
 LayerScene::LayerScene(QObject *parent) :
     CampaignObjectBase{QString(), parent},
@@ -364,12 +365,23 @@ bool LayerScene::playerGLUpdate()
     return result;
 }
 
-void LayerScene::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
+void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderProgram, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
+    if(!functions)
+        return;
+
     for(int i = 0; i < _layers.count(); ++i)
     {
         if(_layers.at(i)->getLayerVisible())
+        {
+            if(_layers.at(i)->defaultShader())
+            {
+                qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
+                functions->glUseProgram(shaderProgram);
+            }
+
             _layers[i]->playerGLPaint(functions, defaultModelMatrix, projectionMatrix);
+        }
     }
 }
 

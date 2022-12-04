@@ -59,7 +59,7 @@ public slots:
     virtual void playerGLInitialize();
     virtual void playerGLUninitialize();
     virtual bool playerGLUpdate();
-    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
+    virtual void playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderProgram, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
     virtual void playerGLResize(int w, int h);
 
 signals:

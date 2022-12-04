@@ -1,6 +1,7 @@
 #include "layer.h"
 #include <QRectF>
 #include <QImage>
+#include <QDebug>
 
 Layer::Layer(const QString& name, int order, QObject *parent) :
     QObject{parent},
@@ -62,8 +63,14 @@ QImage Layer::getLayerIcon() const
     return QImage();
 }
 
+bool Layer::defaultShader() const
+{
+    return true;
+}
+
 bool Layer::playerGLUpdate()
 {
+    qDebug() << "[Layer]::playerGLUpdate";
     return false;
 }
 

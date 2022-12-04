@@ -19,6 +19,7 @@ PublishGLBattleGrid::PublishGLBattleGrid(const GridConfig& config, qreal opacity
     _indices()
 {
     _config.copyValues(config);
+
     createGridObjects();
 }
 
@@ -39,6 +40,8 @@ void PublishGLBattleGrid::paintGL()
     if(!QOpenGLContext::currentContext())
         return;
 
+    qDebug() << "[PublishGLBattleGrid]::paintGL context: " << QOpenGLContext::currentContext();
+
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
@@ -57,6 +60,7 @@ void PublishGLBattleGrid::paintGL()
     f->glUseProgram(previousProgram);
     */
 
+    qDebug() << "[PublishGLBattleGrid]::paintGL UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
     f->glUseProgram(_shaderProgram);
     f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData());
     e->glBindVertexArray(_VAO);
@@ -78,6 +82,7 @@ void PublishGLBattleGrid::setProjectionMatrix(const GLfloat* projectionMatrix)
     if(!f)
         return;
 
+    qDebug() << "[PublishGLBattleGrid]::setProjectionMatrix UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
     f->glUseProgram(_shaderProgram);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix);
 }
@@ -122,8 +127,6 @@ void PublishGLBattleGrid::createGridObjects()
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
     if((!f) || (!e))
         return;
-
-    rebuildGrid();
 
 
 
@@ -174,7 +177,7 @@ void PublishGLBattleGrid::createGridObjects()
     if(!success)
     {
         f->glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleGrid] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -209,7 +212,7 @@ void PublishGLBattleGrid::createGridObjects()
     if(!success)
     {
         f->glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleGrid] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -222,15 +225,16 @@ void PublishGLBattleGrid::createGridObjects()
     f->glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &success);
     if(!success) {
         f->glGetProgramInfoLog(_shaderProgram, 512, NULL, infoLog);
-        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleGrid] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
-
+    qDebug() << "[PublishGLBattleGrid]::createGridObjects Program: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
+    qDebug() << "[PublishGLBattleGrid] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
 
     // Matrices
     // Model
@@ -241,7 +245,7 @@ void PublishGLBattleGrid::createGridObjects()
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
 
-
+    rebuildGrid();
 
     /*
     if(!QOpenGLContext::currentContext())
@@ -479,6 +483,7 @@ void PublishGLBattleGrid::rebuildGrid()
     */
 
 
+    /*
     float vertices[] = {
         // positions
          0.0f,    0.0f, 0.0f,
@@ -526,6 +531,7 @@ void PublishGLBattleGrid::rebuildGrid()
        900.0f,  300.0f, 0.0f,
       1000.0f,  300.0f, 0.0f,
     };
+    */
 
 
     /*
@@ -546,6 +552,7 @@ void PublishGLBattleGrid::rebuildGrid()
     };
     */
 
+    /*
     unsigned int indices[] =
     {   // note that we start from 0!
          0,  1,
@@ -586,7 +593,7 @@ void PublishGLBattleGrid::rebuildGrid()
         38, 39,
         39, 40
     };
-
+    */
 
     Grid* tempGrid = new Grid(nullptr, QRect(QPoint(0,0), _gridSize.toSize()));
     tempGrid->rebuildGrid(_config, 0, this);
@@ -598,15 +605,15 @@ void PublishGLBattleGrid::rebuildGrid()
 
     e->glBindVertexArray(_VAO);
 
-    qDebug() << "[PublishGLBattleGrid] vertices: " << sizeof(vertices) << ", _vertices: " << _vertices.count() << ", " << sizeof(_vertices.data()) << ", indices: " << sizeof(indices) << ", _indices: " << _indices.count() << ", " << sizeof(_indices.data());
-    qDebug() << "[PublishGLBattleGrid] glError before buffers: " << f->glGetError();
+//    qDebug() << "[PublishGLBattleGrid] vertices: " << sizeof(vertices) << ", _vertices: " << _vertices.count() << ", " << sizeof(_vertices.data()) << ", indices: " << sizeof(indices) << ", _indices: " << _indices.count() << ", " << sizeof(_indices.data());
+//    qDebug() << "[PublishGLBattleGrid] glError before buffers: " << f->glGetError();
 
     f->glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     f->glBufferData(GL_ARRAY_BUFFER, _vertices.count() * sizeof(float), _vertices.data(), GL_STATIC_DRAW);
     f->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
     f->glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.count() * sizeof(unsigned int), _indices.data(), GL_STATIC_DRAW);
 
-    qDebug() << "[PublishGLBattleGrid] glError after buffers: " << f->glGetError();
+//    qDebug() << "[PublishGLBattleGrid] glError after buffers: " << f->glGetError();
 
     // position attribute
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);

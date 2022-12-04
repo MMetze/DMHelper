@@ -49,6 +49,7 @@ public:
     virtual bool getLayerVisible() const;
     virtual qreal getOpacity() const;
     virtual QImage getLayerIcon() const;
+    virtual bool defaultShader() const;
 
     virtual DMHelper::LayerType getType() const = 0;
     virtual Layer* clone() const = 0;
