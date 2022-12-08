@@ -50,6 +50,7 @@ private slots:
     void updateCharacterName();
     void handlePublishClicked();
     void syncDndBeyond();
+    void importHeroForge();
     void openExpertiseDialog();
     void editConditions();
     void clearConditions();

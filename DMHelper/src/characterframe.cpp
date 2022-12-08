@@ -7,6 +7,7 @@
 #include "quickref.h"
 #include "spellslotradiobutton.h"
 #include "spellslotlevelbutton.h"
+#include "characterimportheroforgedialog.h"
 #include <QCheckBox>
 #include <QMouseEvent>
 #include <QFileDialog>
@@ -50,6 +51,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
 
     connect(ui->btnSync, &QAbstractButton::clicked, this, &CharacterFrame::syncDndBeyond);
     enableDndBeyondSync(false);
+    connect(ui->btnHeroForge, &QAbstractButton::clicked, this, &CharacterFrame::importHeroForge);
 
     connectChanged(true);
 
@@ -534,6 +536,12 @@ void CharacterFrame::syncDndBeyond()
     connect(importer, &CharacterImporter::characterImported, this, &CharacterFrame::readCharacterData);
     connect(this, &CharacterFrame::characterChanged, importer, &CharacterImporter::campaignChanged);
     importer->updateCharacter(_character);
+}
+
+void CharacterFrame::importHeroForge()
+{
+    CharacterImportHeroForgeDialog importDialog;
+    importDialog.exec();
 }
 
 void CharacterFrame::openExpertiseDialog()

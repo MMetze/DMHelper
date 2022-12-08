@@ -1,44 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CharacterImportDialog</class>
- <widget class="QDialog" name="CharacterImportDialog">
+ <class>CharacterImportHeroForgeDialog</class>
+ <widget class="QDialog" name="CharacterImportHeroForgeDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>773</width>
-    <height>158</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Import D&amp;D Beyond Character</string>
+   <string>Import Hero Forge Icon</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Enter the shared URL of the character from D&amp;D Beyond here:</string>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
      </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>380</width>
+        <height>250</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
-   </item>
-   <item>
-    <widget class="QLineEdit" name="edtUrl"/>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -57,7 +51,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CharacterImportDialog</receiver>
+   <receiver>CharacterImportHeroForgeDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -73,7 +67,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CharacterImportDialog</receiver>
+   <receiver>CharacterImportHeroForgeDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

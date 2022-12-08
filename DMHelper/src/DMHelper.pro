@@ -62,6 +62,9 @@ SOURCES += main.cpp\
     campaigntreeactivestack.cpp \
     campaigntreeitem.cpp \
     characterimportdialog.cpp \
+    characterimportheroforge.cpp \
+    characterimportheroforgedata.cpp \
+    characterimportheroforgedialog.cpp \
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
@@ -308,6 +311,9 @@ HEADERS  += mainwindow.h \
     campaigntreeactivestack.h \
     campaigntreeitem.h \
     characterimportdialog.h \
+    characterimportheroforge.h \
+    characterimportheroforgedata.h \
+    characterimportheroforgedialog.h \
     colorpushbutton.h \
     combatantrolloverframe.h \
     combatantwidget.h \
@@ -520,6 +526,7 @@ FORMS    += mainwindow.ui \
     bestiaryexportdialog.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
+    characterimportheroforgedialog.ui \
     combatantrolloverframe.ui \
     conditionseditdialog.ui \
     configurelockedgriddialog.ui \
