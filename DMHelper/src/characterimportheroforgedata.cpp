@@ -54,7 +54,7 @@ bool CharacterImportHeroForgeData::readImportData(const QDomElement& element)
     _imgPerspectivePath = element.firstChildElement("imgPerspective").text();
     _imgTopPath = element.firstChildElement("imgTop").text();
     _imgThumbPath = element.firstChildElement("imgThumb").text();
-    _meshPath = element.firstChildElement("mesh").text();
+//    _meshPath = element.firstChildElement("mesh").text();
     _metaPath = element.firstChildElement("meta").text();
     _name = element.firstChildElement("name").text();
 
@@ -73,7 +73,7 @@ void CharacterImportHeroForgeData::getData()
     _manager->get(QNetworkRequest(QUrl(_imgPerspectivePath)));
     _manager->get(QNetworkRequest(QUrl(_imgTopPath)));
     _manager->get(QNetworkRequest(QUrl(_imgThumbPath)));
-    _manager->get(QNetworkRequest(QUrl(_meshPath)));
+//    _manager->get(QNetworkRequest(QUrl(_meshPath)));
     _manager->get(QNetworkRequest(QUrl(_metaPath)));
 }
 
@@ -191,6 +191,6 @@ bool CharacterImportHeroForgeData::isComplete()
            ((_imgPerspectivePath.isEmpty()) || (!_imgPerspective.isNull())) &&
            ((_imgTopPath.isEmpty()) || (!_imgTop.isNull())) &&
            ((_imgThumbPath.isEmpty()) || (!_imgThumb.isNull())) &&
-           ((_meshPath.isEmpty()) || (!_mesh.isEmpty())) &&
+//           ((_meshPath.isEmpty()) || (!_mesh.isEmpty())) &&
            ((_metaPath.isEmpty()) || (!_meta.isEmpty())));
 }

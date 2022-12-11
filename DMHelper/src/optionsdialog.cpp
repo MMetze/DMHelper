@@ -50,6 +50,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->edtActiveIcon->setText(_options->getActiveIcon());
         ui->edtCombatantFrame->setText(_options->getCombatantFrame());
         ui->edtCountdownFrame->setText(_options->getCountdownFrame());
+        ui->edtHeroForgeAccessKey->setText(_options->getHeroForgeToken());
 #ifdef INCLUDE_NETWORK_SUPPORT
         ui->chkEnableNetworkClient->setChecked(_options->getNetworkEnabled());
         ui->edtUserName->setText(_options->getUserName());
@@ -90,6 +91,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->edtCombatantFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editCombatantFrame);
         connect(ui->btnCountdownFrame, &QAbstractButton::clicked, this, &OptionsDialog::browseCountdownFrame);
         connect(ui->edtCountdownFrame, &QLineEdit::editingFinished, this, &OptionsDialog::editCountdownFrame);
+        connect(ui->edtHeroForgeAccessKey, &QLineEdit::editingFinished, this, &OptionsDialog::heroForgeTokenEdited);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
         connect(ui->chkEnableNetworkClient, SIGNAL(clicked(bool)), _options, SLOT(setNetworkEnabled(bool)));
@@ -384,6 +386,26 @@ void OptionsDialog::setCountdownFrame(const QString& countdownFrame)
 {
     ui->edtCountdownFrame->setText(countdownFrame);
     _options->setCountdownFrame(countdownFrame);
+}
+
+void OptionsDialog::heroForgeTokenEdited()
+{
+    QString newToken = ui->edtHeroForgeAccessKey->text();
+    if(_options->getHeroForgeToken() == newToken)
+        return;
+
+    if(_options->getHeroForgeToken().isEmpty())
+    {
+        if(QMessageBox::question(this,
+                                 QString("Confirm Store Access Key"),
+                                 QString("DMHelper will store your access key for ease of use in the future.") + QChar::LineFeed + QChar::LineFeed + QString("The Access Key will be stored locally on your computer without encryption, it is possible that other applications will be able to access it.") + QChar::LineFeed + QChar::LineFeed + QString("Are you sure?")) != QMessageBox::Yes)
+        {
+            ui->edtHeroForgeAccessKey->setText(QString());
+            return;
+        }
+    }
+
+    _options->setHeroForgeToken(newToken);
 }
 
 void OptionsDialog::updateFileLocations()

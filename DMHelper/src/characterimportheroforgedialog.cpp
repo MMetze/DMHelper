@@ -2,22 +2,24 @@
 #include "ui_characterimportheroforgedialog.h"
 #include "characterimportheroforge.h"
 #include "characterimportheroforgedata.h"
-#include <QPushButton>
+#include "dmhwaitingdialog.h"
+#include <QDebug>
 
 /*
 #include <QFile>
 #include <QFileInfo>
-#include <QDebug>
 */
 
 const int ICON_SPACING = 8;
 
-CharacterImportHeroForgeDialog::CharacterImportHeroForgeDialog(QWidget *parent) :
+CharacterImportHeroForgeDialog::CharacterImportHeroForgeDialog(const QString& token, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CharacterImportHeroForgeDialog),
     _iconGrid(nullptr),
     _buttonGroup(),
-    _importer(nullptr)
+    _importer(nullptr),
+    _waitingDlg(nullptr),
+    _token(token)
 {
     ui->setupUi(this);
 
@@ -33,13 +35,40 @@ CharacterImportHeroForgeDialog::~CharacterImportHeroForgeDialog()
     delete ui;
 }
 
+QImage CharacterImportHeroForgeDialog::getSelectedImage() const
+{
+    HeroForgeButton* selectedButton = dynamic_cast<HeroForgeButton*>(_buttonGroup.checkedButton());
+    return selectedButton ? selectedButton->getImage() : QImage();
+}
+
+QString CharacterImportHeroForgeDialog::getSelectedName() const
+{
+    HeroForgeButton* selectedButton = dynamic_cast<HeroForgeButton*>(_buttonGroup.checkedButton());
+    return selectedButton ? selectedButton->getDataName() : QString();
+}
+
 void CharacterImportHeroForgeDialog::showEvent(QShowEvent *event)
 {
     if(!_importer)
     {
-        _importer = new CharacterImportHeroForge(this);
-        connect(_importer, &CharacterImportHeroForge::importComplete, this, &CharacterImportHeroForgeDialog::importComplete);
-        _importer->runImport();
+        if(_token.isEmpty())
+        {
+            qDebug() << "[CharacterImportHeroForgeDialog] ERROR: Hero Forge importer can't be started without a valid token!";
+        }
+        else
+        {
+            _importer = new CharacterImportHeroForge(this);
+            connect(_importer, &CharacterImportHeroForge::importComplete, this, &CharacterImportHeroForgeDialog::importComplete);
+            _importer->runImport(_token);
+            _token = QString(); // clear the variable for security reasons, it isn't needed any more
+
+            if(!_waitingDlg)
+            {
+                _waitingDlg = new DMHWaitingDialog(QString("Contacting HeroForge..."), this);
+                _waitingDlg->setModal(true);
+                _waitingDlg->show();
+            }
+        }
     }
 
     QDialog::showEvent(event);
@@ -47,6 +76,9 @@ void CharacterImportHeroForgeDialog::showEvent(QShowEvent *event)
 
 void CharacterImportHeroForgeDialog::importComplete(QList<CharacterImportHeroForgeData*> data)
 {
+    if(_waitingDlg)
+        _waitingDlg->setStatus(QString("Downloading tokens..."));
+
     for(int i = 0; i < data.count(); ++i)
     {
         CharacterImportHeroForgeData* singleData = data.at(i);
@@ -60,6 +92,13 @@ void CharacterImportHeroForgeDialog::importComplete(QList<CharacterImportHeroFor
 
 void CharacterImportHeroForgeDialog::dataReady(CharacterImportHeroForgeData* data)
 {
+    if(_waitingDlg)
+    {
+        _waitingDlg->accept();
+        _waitingDlg->deleteLater();
+        _waitingDlg = nullptr;
+    }
+
     int newRow = _iconGrid->rowCount();
     addDataRow(data, newRow);
 
@@ -100,10 +139,10 @@ void CharacterImportHeroForgeDialog::addDataRow(CharacterImportHeroForgeData* da
     }
     */
 
-    addData(data->getThumbImage(), data->getName(), row, 0);
-    addData(data->getPerspectiveImage(), data->getName(), row, 1);
-    addData(data->getFrontImage(), data->getName(), row, 2);
-    addData(data->getTopImage(), data->getName(), row, 3);
+    addData(data->getThumbImage(), data->getName() + QString(" Thumbnail"), row, 0);
+    addData(data->getPerspectiveImage(), data->getName() + QString(" Perspective"), row, 1);
+    addData(data->getFrontImage(), data->getName() + QString(" Front"), row, 2);
+    addData(data->getTopImage(), data->getName() + QString(" Top"), row, 3);
 }
 
 void CharacterImportHeroForgeDialog::addData(QImage image, QString dataName, int row, int column)
@@ -118,14 +157,38 @@ void CharacterImportHeroForgeDialog::addData(QImage image, QString dataName, int
     _iconGrid->addWidget(iconLabel, row, column);
     */
 
-    QPushButton* iconButton = new QPushButton(this);
-    iconButton->setToolTip(dataName);
-    iconButton->setCheckable(true);
-    iconButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    iconButton->setMinimumSize(image.size());
-    iconButton->setMaximumSize(image.size());
-    iconButton->setIconSize(image.size());
-    iconButton->setIcon(QIcon(QPixmap::fromImage(image)));
+    HeroForgeButton* iconButton = new HeroForgeButton(image, dataName, this);
+    connect(iconButton, &HeroForgeButton::selectButton, this, &QDialog::accept);
     _buttonGroup.addButton(iconButton);
     _iconGrid->addWidget(iconButton, row, column);
+}
+
+HeroForgeButton::HeroForgeButton(QImage image, const QString& dataName, QWidget *parent) :
+    QPushButton(parent),
+    _image(image),
+    _dataName(dataName)
+{
+    setToolTip(_dataName);
+    setCheckable(true);
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    setMinimumSize(_image.size());
+    setMaximumSize(_image.size());
+    setIconSize(_image.size());
+    setIcon(QIcon(QPixmap::fromImage(_image)));
+}
+
+QImage HeroForgeButton::getImage() const
+{
+    return _image;
+}
+
+QString HeroForgeButton::getDataName() const
+{
+    return _dataName;
+}
+
+void HeroForgeButton::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event);
+    emit selectButton();
 }

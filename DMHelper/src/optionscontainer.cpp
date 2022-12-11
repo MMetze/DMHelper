@@ -44,6 +44,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _statisticsAccepted(false),
     _instanceUuid(),
     _lastUpdateDate(),
+    _heroForgeToken(),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
@@ -227,6 +228,10 @@ QDate OptionsContainer::getLastUpdateCheck() const
     return _lastUpdateDate;
 }
 
+QString OptionsContainer::getHeroForgeToken() const
+{
+    return _heroForgeToken;
+}
 
 #ifdef INCLUDE_NETWORK_SUPPORT
 
@@ -369,6 +374,8 @@ void OptionsContainer::readSettings()
         setLastUpdateDate(settings.value("lastUpdateCheck","").toDate());
     }
 
+    setHeroForgeToken(settings.value("heroforgeToken").toString());
+
     QString uuidString = settings.value("instanceUuid").toString();
     if(uuidString.isEmpty())
         _instanceUuid = QUuid();
@@ -436,6 +443,7 @@ void OptionsContainer::writeSettings()
     {
         settings.setValue("updatesEnabled", isUpdatesEnabled());
         settings.setValue("statisticsAccepted", isStatisticsAccepted());
+
         if((!_instanceUuid.isNull()) && (_statisticsAccepted))
             settings.setValue("instanceUuid", _instanceUuid.toString());
         else
@@ -444,6 +452,11 @@ void OptionsContainer::writeSettings()
         if(isUpdatesEnabled())
             settings.setValue("lastUpdateCheck", _lastUpdateDate);
     }
+
+    if(_heroForgeToken == QString())
+        settings.remove("heroforgeToken");
+    else
+        settings.setValue("heroforgeToken", _heroForgeToken);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     settings.setValue("networkEnabled", getNetworkEnabled());
@@ -927,6 +940,17 @@ void OptionsContainer::setLastUpdateDate(const QDate& date)
     _lastUpdateDate = date;
 }
 
+void OptionsContainer::setHeroForgeToken(const QString& token)
+{
+    if(_heroForgeToken != token)
+    {
+        _heroForgeToken = token;
+        qDebug() << "[OptionsContainer] Heroforge Token set to: " << _heroForgeToken;
+        emit heroForgeTokenChanged(_heroForgeToken);
+    }
+}
+
+
 #ifdef INCLUDE_NETWORK_SUPPORT
 
 void OptionsContainer::setNetworkEnabled(bool enabled)
@@ -1036,6 +1060,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         _statisticsAccepted = other->_statisticsAccepted;
         _instanceUuid = QUuid::fromString(other->_instanceUuid.toString());
         _lastUpdateDate = other->_lastUpdateDate;
+        _heroForgeToken = other->_heroForgeToken;
 #ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);

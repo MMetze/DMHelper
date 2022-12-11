@@ -60,6 +60,7 @@ public:
     QUuid getInstanceUuid();
     QString getInstanceUuidStr();
     QDate getLastUpdateCheck() const;
+    QString getHeroForgeToken() const;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -107,6 +108,9 @@ signals:
     void countdownFrameChanged(const QString& countdownFrame);
     void gridLockedChanged(bool gridLocked);
     void gridLockScaleChanged(qreal gridLockScale);
+
+    // Data settings
+    void heroForgeTokenChanged(const QString& token);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -174,6 +178,7 @@ public slots:
     void setUpdatesEnabled(bool updatesEnabled);
     void setStatisticsAccepted(bool statisticsAccepted);
     void setLastUpdateDate(const QDate& date);
+    void setHeroForgeToken(const QString& token);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings
@@ -237,6 +242,7 @@ private:
     bool _statisticsAccepted;
     QUuid _instanceUuid;
     QDate _lastUpdateDate;
+    QString _heroForgeToken;
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     // Network settings

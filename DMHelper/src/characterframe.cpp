@@ -29,6 +29,7 @@ CharacterFrame::CharacterFrame(QWidget *parent) :
     _mouseDown(false),
     _reading(false),
     _rotation(0),
+    _heroForgeToken(),
     _conditionGrid(nullptr),
     _pactSlots(nullptr),
     _edtPactLevel(nullptr)
@@ -160,6 +161,11 @@ void CharacterFrame::setCharacter(Character* character)
     _character = character;
     readCharacterData();
     emit characterChanged();
+}
+
+void CharacterFrame::setHeroForgeToken(const QString& token)
+{
+    _heroForgeToken = token;
 }
 
 void CharacterFrame::calculateMods()
@@ -540,8 +546,49 @@ void CharacterFrame::syncDndBeyond()
 
 void CharacterFrame::importHeroForge()
 {
-    CharacterImportHeroForgeDialog importDialog;
-    importDialog.exec();
+    if(!_character)
+        return;
+
+    QString token = _heroForgeToken;
+    if(token.isEmpty())
+    {
+        token = QInputDialog::getText(this, QString("Enter Hero Forge Access Key"), QString("Please enter your Hero Forge Access Key. You can find this in your Hero Forge account information."));
+        if(!token.isEmpty())
+        {
+            if(QMessageBox::question(this,
+                                     QString("Confirm Store Access Key"),
+                                     QString("Should DMHelper store your access key for ease of use in the future?") + QChar::LineFeed + QChar::LineFeed + QString("Please note: the Access Key will be stored locally on your computer without encryption, it is possible that other applications will be able to access it.")) == QMessageBox::Yes)
+            {
+                _heroForgeToken = token;
+                emit heroForgeTokenChanged(_heroForgeToken);
+            }
+        }
+    }
+
+    if(token.isEmpty())
+    {
+        qDebug() << "[CharacterFrame] No Hero Forge token provided, importer can't be started.";
+        return;
+    }
+
+    CharacterImportHeroForgeDialog importDialog(token);
+    importDialog.resize(width() * 3 / 4, height() * 3 / 4);
+    if(importDialog.exec() != QDialog::Accepted)
+        return;
+
+    QImage selectedImage = importDialog.getSelectedImage();
+    if(selectedImage.isNull())
+        return;
+
+    QString filename = QFileDialog::getSaveFileName(this, QString("Choose a filename for the selected token"), importDialog.getSelectedName() + QString(".png"));
+    if(filename.isEmpty())
+        return;
+
+    if(!selectedImage.save(filename))
+        return;
+
+    _character->setIcon(filename);
+    loadCharacterImage();
 }
 
 void CharacterFrame::openExpertiseDialog()

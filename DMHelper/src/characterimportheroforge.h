@@ -15,7 +15,7 @@ public:
     explicit CharacterImportHeroForge(QObject *parent = nullptr);
 
 public slots:
-    void runImport();
+    void runImport(const QString& token);
 
 signals:
     void importComplete(QList<CharacterImportHeroForgeData*> data);

@@ -536,6 +536,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // EncounterType_Character
     CharacterFrame* charFrame = new CharacterFrame;
+    charFrame->setHeroForgeToken(_options->getHeroForgeToken());
+    connect(_options, &OptionsContainer::heroForgeTokenChanged, charFrame, &CharacterFrame::setHeroForgeToken);
+    connect(charFrame, &CharacterFrame::heroForgeTokenChanged, _options, &OptionsContainer::setHeroForgeToken);
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Combatant, charFrame);
     qDebug() << "[MainWindow]     Adding Character Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     connect(charFrame, SIGNAL(publishCharacterImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));

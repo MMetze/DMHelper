@@ -8,7 +8,7 @@
 #include <QDomDocument>
 #include <QDebug>
 
-#define DEBUG_HEROFORGE_IMPORT
+//#define DEBUG_HEROFORGE_IMPORT
 
 CharacterImportHeroForge::CharacterImportHeroForge(QObject *parent) :
     QObject{parent},
@@ -17,7 +17,7 @@ CharacterImportHeroForge::CharacterImportHeroForge(QObject *parent) :
 {
 }
 
-void CharacterImportHeroForge::runImport()
+void CharacterImportHeroForge::runImport(const QString& token)
 {
     if(!_manager)
     {
@@ -33,7 +33,7 @@ void CharacterImportHeroForge::runImport()
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
 
     QUrlQuery postData;
-    postData.addQueryItem("token", QString("c2d7cade71ea8e506071876ca6c897e3070fa787d6e55073c00dc8a81776aac3"));
+    postData.addQueryItem("token", token);
 
 #ifdef DEBUG_HEROFORGE_IMPORT
     qDebug() << "[CharacterImportHeroForge] Posting Heroforge request: " << postData.toString(QUrl::FullyEncoded).toUtf8();
@@ -76,8 +76,8 @@ void CharacterImportHeroForge::handleRequestFinished(QNetworkReply *reply)
     else
     {
         QByteArray bytes = reply->readAll();
+        qDebug() << "[CharacterImportHeroForge] Heroforge Request received; payload " << bytes.size() << " bytes";
 #ifdef DEBUG_HEROFORGE_IMPORT
-        qDebug() << "[CharacterImportHeroForge] Request received; payload " << bytes.size() << " bytes";
         qDebug() << "[CharacterImportHeroForge] Payload contents: " << QString(bytes.left(2000));
 #endif
         parseReply(bytes);
@@ -120,9 +120,7 @@ bool CharacterImportHeroForge::parseReply(const QByteArray& data)
     {
         CharacterImportHeroForgeData* newData = new CharacterImportHeroForgeData;
         newData->readImportData(goodElement);
-#ifdef DEBUG_HEROFORGE_IMPORT
         qDebug() << "[CharacterImportHeroForge] Found Hero Forge data for " << newData->getName();
-#endif
         _importData.append(newData);
 
         goodElement = goodElement.nextSiblingElement(QString("good"));
