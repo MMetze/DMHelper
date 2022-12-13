@@ -210,6 +210,11 @@ void ObjectImportWorker::importObjectAssets(CampaignObjectBase* object)
             importBattle(battle);
             break;
         }
+        case DMHelper::CampaignType_LinkedText:
+        {
+            // Todo: Markdown
+            break;
+        }
         default:
             break;
     }

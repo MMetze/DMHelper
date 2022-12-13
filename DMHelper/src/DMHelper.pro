@@ -81,6 +81,7 @@ SOURCES += main.cpp\
     dmhlogger.cpp \
     dmhwaitingdialog.cpp \
     emptycampaignframe.cpp \
+    encountertextlinked.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
     exportdialog.cpp \
@@ -331,6 +332,7 @@ HEADERS  += mainwindow.h \
     dmhwaitingdialog.h \
     dmversion.h \
     emptycampaignframe.h \
+    encountertextlinked.h \
     equipmentserver.h \
     expertisedialog.h \
     exportdialog.h \

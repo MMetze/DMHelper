@@ -1,6 +1,7 @@
 #include "encountertextedit.h"
 #include "ui_encountertextedit.h"
 #include "encountertext.h"
+#include "encountertextlinked.h"
 #include "publishgltextimagerenderer.h"
 #include "publishgltextvideorenderer.h"
 #include "dmconstants.h"
@@ -148,6 +149,16 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
     connect(_encounter, &EncounterText::animatedChanged, this, &EncounterTextEdit::animatedChanged);
     connect(_encounter, &EncounterText::translatedChanged, this, &EncounterTextEdit::translatedChanged);
+
+    if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+        if(linkedText)
+        {
+            connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::updateEncounter);
+            linkedText->setWatcher(true);
+        }
+    }
 }
 
 void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
@@ -157,6 +168,13 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
     if(_encounter)
     {
+        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+        {
+            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+            if(linkedText)
+                linkedText->setWatcher(false);
+        }
+
         disconnect(_encounter, nullptr, this, nullptr);
         _encounter = nullptr;
     }
@@ -232,10 +250,17 @@ void EncounterTextEdit::setHtml()
         return;
     }
 
-    if(_encounter->getTranslated())
-        ui->textBrowser->setHtml(_encounter->getTranslatedText());
-    else
-        ui->textBrowser->setHtml(_encounter->getText());
+    if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
+    {
+        if(_encounter->getTranslated())
+            ui->textBrowser->setHtml(_encounter->getTranslatedText());
+        else
+            ui->textBrowser->setHtml(_encounter->getText());
+    }
+    else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        ui->textBrowser->setMarkdown(_encounter->getText());
+    }
 
     updateAnchors();
 }
@@ -549,9 +574,11 @@ void EncounterTextEdit::storeEncounter()
 
 void EncounterTextEdit::readEncounter()
 {
+    if(!_encounter)
+        return;
+
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
-    if(_encounter)
-    {
+
         emit imageFileChanged(_encounter->getImageFile());
         emit textWidthChanged(_encounter->getTextWidth());
         emit animatedChanged(_encounter->getAnimated());
@@ -564,7 +591,17 @@ void EncounterTextEdit::readEncounter()
         setAnimated(_encounter->getAnimated());
         setTranslated(_encounter->getTranslated());
         setHtml();
-    }
+
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+}
+
+void EncounterTextEdit::updateEncounter()
+{
+    if(!_encounter)
+        return;
+
+    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+        setHtml();
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
 }
 

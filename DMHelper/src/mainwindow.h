@@ -80,6 +80,7 @@ public slots:
     void importItem();
     void newParty();
     void newTextEncounter();
+    void newLinkedText();
     void newBattleEncounter();
     void newMap();
     void newAudioEntry();

@@ -21,6 +21,7 @@
 #include "encounterfactory.h"
 #include "emptycampaignframe.h"
 #include "encountertextedit.h"
+#include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "campaignobjectframe.h"
 #include "combatant.h"
@@ -296,6 +297,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newCharacterClicked()), this, SLOT(newCharacter()));
     connect(_ribbonTabCampaign, SIGNAL(newMapClicked()), this, SLOT(newMap()));
     connect(_ribbonTabCampaign, SIGNAL(newTextClicked()), this, SLOT(newTextEncounter()));
+    connect(_ribbonTabCampaign, SIGNAL(newLinkedClicked()), this, SLOT(newLinkedText()));
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newSoundClicked()), this, SLOT(newAudioEntry()));
     connect(_ribbonTabCampaign, SIGNAL(newSyrinscapeClicked()), this, SLOT(newSyrinscapeEntry()));
@@ -455,6 +457,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_encounterTextEdit, SIGNAL(translatedChanged(bool)), _ribbonTabText, SLOT(setTranslationActive(bool)));
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
                                                       DMHelper::CampaignType_Text,
+                                                      DMHelper::CampaignType_LinkedText,
                                                       DMHelper::CampaignType_Placeholder}), _encounterTextEdit);
     qDebug() << "[MainWindow]     Adding Text Encounter widget as page #" << ui->stackedWidgetEncounter->count() - 1;
 
@@ -1032,6 +1035,19 @@ void MainWindow::newParty()
 void MainWindow::newTextEncounter()
 {
     newEncounter(DMHelper::CampaignType_Text, QString("New Entry"), QString("Enter new entry name:"));
+}
+
+void MainWindow::newLinkedText()
+{
+    QString mdFilename = QFileDialog::getOpenFileName(this, QString("Select linked file"));
+    if(mdFilename.isEmpty())
+        return;
+
+    EncounterTextLinked* encounter = dynamic_cast<EncounterTextLinked*>(newEncounter(DMHelper::CampaignType_LinkedText, QString("New Linked Entry"), QString("Enter new entry name:")));
+    if(!encounter)
+        return;
+
+    encounter->setLinkedFile(mdFilename);
 }
 
 void MainWindow::newBattleEncounter()
@@ -2184,6 +2200,11 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     connect(addTextEntry, SIGNAL(triggered()), this, SLOT(newTextEncounter()));
     contextMenu->addAction(addTextEntry);
 
+    // New linked text entry
+    QAction* addLinkedEntry = new QAction(QIcon(":/img/data/icon_newlink.png"), QString("New Linked Entry"), contextMenu);
+    connect(addLinkedEntry, SIGNAL(triggered()), this, SLOT(newLinkedText()));
+    contextMenu->addAction(addLinkedEntry);
+
     contextMenu->addSeparator();
 
     // New party
@@ -2625,6 +2646,7 @@ void MainWindow::setRibbonToType(int objectType)
             break;
         case DMHelper::CampaignType_Campaign:
         case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_LinkedText:
             _ribbon->enableTab(_ribbonTabText);
             _ribbon->disableTab(_ribbonTabBattleMap);
             _ribbon->disableTab(_ribbonTabBattleView);

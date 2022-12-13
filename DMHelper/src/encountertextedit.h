@@ -101,6 +101,7 @@ protected slots:
     void updateAnchors();
     void storeEncounter();
     void readEncounter();
+    void updateEncounter();
 
     void takeFocus();
     void loadImage();

@@ -27,6 +27,7 @@ signals:
     void newCharacterClicked();
     void newMapClicked();
     void newTextClicked();
+    void newLinkedClicked();
     void newBattleClicked();
     void newSoundClicked();
     void newSyrinscapeClicked();

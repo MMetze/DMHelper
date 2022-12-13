@@ -236,10 +236,7 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
     element.setAttribute("animated", getAnimated());
     element.setAttribute("translated", getTranslated());
 
-    QDomElement textElement = doc.createElement("text-data");
-        QDomCDATASection textData = doc.createCDATASection(getText());
-        textElement.appendChild(textData);
-    element.appendChild(textElement);
+    createTextNode(doc, element, targetDirectory, isExport);
 
     // Check to only write really translated text, correcting also for a previous error that has created a lot of duplicate entries!
     if((_translatedText.isEmpty()) || (_translatedText != _text))
@@ -291,6 +288,17 @@ void EncounterText::internalPostProcessXML(const QDomElement &element, bool isIm
     //extractTextNode(childElement, isImport);
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
+}
+
+void EncounterText::createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
+
+    QDomElement textElement = doc.createElement("text-data");
+        QDomCDATASection textData = doc.createCDATASection(getText());
+        textElement.appendChild(textData);
+    element.appendChild(textElement);
 }
 
 void EncounterText::extractTextNode(const QDomElement &element, bool isImport)

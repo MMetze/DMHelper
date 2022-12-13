@@ -150,6 +150,9 @@ void ExportWorker::exportObjectAssets(const CampaignObjectBase* object, QDir& di
         case DMHelper::CampaignType_Battle:
             exportBattle(dynamic_cast<const EncounterBattle*>(object), directory, element);
             break;
+        case DMHelper::CampaignType_LinkedText:
+            // TODO: Markdown
+            break;
         default:
             break;
     }

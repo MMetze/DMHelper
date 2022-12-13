@@ -21,6 +21,7 @@ namespace DMHelper
         CampaignType_AudioTrack,
         CampaignType_WelcomeScreen,
         CampaignType_LayerScene,
+        CampaignType_LinkedText,
 
         CampaignType_Placeholder = 0xffff
     };
