@@ -253,6 +253,7 @@
         <file>data/icon_dndbeyond.png</file>
         <file>data/icon_heroforge.png</file>
         <file>data/icon_newlink.png</file>
+        <file>data/icon_code.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

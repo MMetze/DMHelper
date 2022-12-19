@@ -38,6 +38,8 @@ public slots:
     void setHyperlinkActive(bool active);
 
     void setTranslationActive(bool active);
+    void setCodeView(bool active);
+    void showCodeView(bool visible);
 
 signals:
     void backgroundClicked(bool checked);
@@ -62,6 +64,7 @@ signals:
 
     // Tools
     void translateTextClicked(bool checked);
+    void codeViewClicked(bool checked);
 
 protected:
     virtual void showEvent(QShowEvent *event) override;

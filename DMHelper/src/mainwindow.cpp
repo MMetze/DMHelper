@@ -444,6 +444,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _ribbonTabText->setPasteRich(_options->getPasteRich());
     connect(_ribbonTabText, SIGNAL(hyperlinkClicked()), _encounterTextEdit, SLOT(hyperlinkClicked()));
     connect(_ribbonTabText, SIGNAL(translateTextClicked(bool)), _encounterTextEdit, SLOT(setTranslated(bool)));
+    connect(_ribbonTabText, SIGNAL(codeViewClicked(bool)), _encounterTextEdit, SLOT(setCodeView(bool)));
     //translate - both directions, get rid of previous button & link, make dialog bigger, better, apply, clear
     // remove text publish dialog
     connect(_encounterTextEdit, SIGNAL(colorChanged(const QColor&)), _ribbonTabText, SLOT(setColor(const QColor&)));
@@ -455,6 +456,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_encounterTextEdit, SIGNAL(alignmentChanged(Qt::Alignment)), _ribbonTabText, SLOT(setAlignment(Qt::Alignment)));
     connect(_encounterTextEdit, SIGNAL(setHyperlinkActive(bool)), _ribbonTabText, SLOT(setHyperlinkActive(bool)));
     connect(_encounterTextEdit, SIGNAL(translatedChanged(bool)), _ribbonTabText, SLOT(setTranslationActive(bool)));
+    connect(_encounterTextEdit, SIGNAL(codeViewChanged(bool)), _ribbonTabText, SLOT(setCodeView(bool)));
+    connect(_encounterTextEdit, SIGNAL(codeViewVisible(bool)), _ribbonTabText, SLOT(showCodeView(bool)));
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
                                                       DMHelper::CampaignType_Text,
                                                       DMHelper::CampaignType_LinkedText,
@@ -1039,15 +1042,15 @@ void MainWindow::newTextEncounter()
 
 void MainWindow::newLinkedText()
 {
-    QString mdFilename = QFileDialog::getOpenFileName(this, QString("Select linked file"));
-    if(mdFilename.isEmpty())
+    QString extFilename = QFileDialog::getOpenFileName(this, QString("Select linked file"), QString(), tr("Text Files(*.txt);;HTML files (*.htm *.html);;Markdown files (*.md)"));
+    if(extFilename.isEmpty())
         return;
 
     EncounterTextLinked* encounter = dynamic_cast<EncounterTextLinked*>(newEncounter(DMHelper::CampaignType_LinkedText, QString("New Linked Entry"), QString("Enter new entry name:")));
     if(!encounter)
         return;
 
-    encounter->setLinkedFile(mdFilename);
+    encounter->setLinkedFile(extFilename);
 }
 
 void MainWindow::newBattleEncounter()

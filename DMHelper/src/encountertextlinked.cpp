@@ -7,7 +7,8 @@
 EncounterTextLinked::EncounterTextLinked(const QString& encounterName, QObject *parent) :
     EncounterText{encounterName, parent},
     _linkedFile(),
-    _watcher(nullptr)
+    _watcher(nullptr),
+    _fileType(DMHelper::FileType_Unknown)
 {
 }
 
@@ -39,6 +40,11 @@ int EncounterTextLinked::getObjectType() const
 QString EncounterTextLinked::getLinkedFile() const
 {
     return _linkedFile;
+}
+
+int EncounterTextLinked::getFileType() const
+{
+    return _fileType;
 }
 
 void EncounterTextLinked::setText(const QString& newText)
@@ -95,25 +101,37 @@ void EncounterTextLinked::internalOutputXML(QDomDocument &doc, QDomElement &elem
 
 void EncounterTextLinked::readLinkedFile()
 {
-    if(getLinkedFile().isEmpty())
+    if(_linkedFile.isEmpty())
         return;
 
-    QFile mdFile(getLinkedFile());
-    if(!mdFile.open(QIODevice::ReadOnly))
+    QFile extFile(_linkedFile);
+    QFileInfo fileInfo(extFile);
+    if(fileInfo.suffix() == QString("txt"))
+        _fileType = DMHelper::FileType_Text;
+    else if((fileInfo.suffix() == QString("htm")) || (fileInfo.suffix() == QString("html")))
+        _fileType = DMHelper::FileType_HTML;
+    else if(fileInfo.suffix() == QString("md"))
+        _fileType = DMHelper::FileType_Markdown;
+    else
+    {
+        qDebug() << "[EncounterTextLinked] ERROR: unabled to identify type of the linked file for reading: " << getLinkedFile();
+        _fileType = DMHelper::FileType_Unknown;
+        return;
+    }
+
+    if(!extFile.open(QIODevice::ReadOnly))
     {
         qDebug() << "[EncounterTextLinked] ERROR: unabled to open the linked file for reading: " << getLinkedFile();
         return;
     }
 
-    QTextStream in(&mdFile);
+    QTextStream in(&extFile);
     in.setCodec("UTF-8");
     QString inputString;
     QString line;
     while(in.readLineInto(&line))
         inputString += QChar::LineFeed + line;
-//        inputString += QString("<br />") + line;
 
-    //qDebug() << inputString;
     EncounterText::setText(inputString);
 }
 

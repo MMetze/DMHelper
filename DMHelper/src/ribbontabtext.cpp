@@ -21,6 +21,7 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
 
     connect(ui->btnHyperlink, &QAbstractButton::clicked, this, &RibbonTabText::hyperlinkClicked);
     connect(ui->btnTranslateText, &QAbstractButton::clicked, this, &RibbonTabText::translateTextClicked);
+    connect(ui->btnCode, &QAbstractButton::clicked, this, &RibbonTabText::codeViewClicked);
 
     connect(ui->sliderWidth, &QAbstractSlider::valueChanged, this, &RibbonTabText::widthChanged);
     connect(ui->spinSpeed, SIGNAL(valueChanged(int)), this, SIGNAL(speedChanged(int)));
@@ -131,6 +132,19 @@ void RibbonTabText::setTranslationActive(bool active)
     ui->btnTranslateText->setChecked(active);
 }
 
+void RibbonTabText::setCodeView(bool active)
+{
+    ui->btnCode->setChecked(active);
+}
+
+void RibbonTabText::showCodeView(bool visible)
+{
+    ui->lblTranslateText->setVisible(!visible);
+    ui->btnTranslateText->setVisible(!visible);
+    ui->lblCode->setVisible(visible);
+    ui->btnCode->setVisible(visible);
+}
+
 void RibbonTabText::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);
@@ -147,6 +161,7 @@ void RibbonTabText::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblRewind, *ui->btnRewind, frameHeight);
     setLineHeight(*ui->line_3, frameHeight);
     setStandardButtonSize(*ui->lblTranslateText, *ui->btnTranslateText, frameHeight);
+    setStandardButtonSize(*ui->lblCode, *ui->btnCode, frameHeight);
     setLineHeight(*ui->line_4, frameHeight);
 }
 

@@ -18,6 +18,7 @@ public:
 
     // Linked File
     virtual QString getLinkedFile() const;
+    virtual int getFileType() const;
 
 public slots:
     // Text
@@ -40,6 +41,7 @@ protected:
 
     QString _linkedFile;
     QFileSystemWatcher* _watcher;
+    int _fileType;
 };
 
 #endif // ENCOUNTERTEXTLINKED_H

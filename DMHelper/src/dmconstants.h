@@ -161,6 +161,14 @@ namespace DMHelper
         LayerType_Grid
     };
 
+    enum FileType
+    {
+        FileType_Unknown = 0,
+        FileType_Text,
+        FileType_HTML,
+        FileType_Markdown
+    };
+
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
     const int TreeItemData_Object = Qt::UserRole + 3;

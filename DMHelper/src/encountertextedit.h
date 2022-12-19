@@ -63,6 +63,7 @@ public slots:
     void playPause(bool play);
 
     void setTranslated(bool translated);
+    void setCodeView(bool active);
 
     void targetResized(const QSize& newSize);
 
@@ -91,6 +92,8 @@ signals:
     void animatedChanged(bool animated);
     void scrollSpeedChanged(int scrollSpeed);
     void translatedChanged(bool translated);
+    void codeViewChanged(bool active);
+    void codeViewVisible(bool visible);
 
     void registerRenderer(PublishGLRenderer* renderer);
 
@@ -138,6 +141,7 @@ protected:
     bool _isDMPlayer;
     bool _isPublishing;
     bool _isVideo;
+    bool _isCodeView;
 
     QSize _targetSize;
     int _rotation;

@@ -32,6 +32,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _isDMPlayer(false),
     _isPublishing(false),
     _isVideo(false),
+    _isCodeView(false),
     _targetSize(),
     _rotation(0),
     _textPos()
@@ -186,7 +187,25 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
 QString EncounterTextEdit::toHtml() const
 {
-    return ui->textBrowser->toHtml();
+    if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
+    {
+        return ui->textBrowser->toHtml();
+    }
+    else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+        if(linkedText)
+        {
+            if((_isCodeView) || (linkedText->getFileType() == DMHelper::FileType_Text))
+                return ui->textBrowser->toPlainText();
+            else if(linkedText->getFileType() == DMHelper::FileType_HTML)
+                ui->textBrowser->toHtml();
+            else if(linkedText->getFileType() == DMHelper::FileType_Markdown)
+                ui->textBrowser->toMarkdown();
+        }
+    }
+
+    return QString();
 }
 
 QString EncounterTextEdit::toPlainText() const
@@ -259,7 +278,18 @@ void EncounterTextEdit::setHtml()
     }
     else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
     {
-        ui->textBrowser->setMarkdown(_encounter->getText());
+        EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+        if(linkedText)
+        {
+            if((_isCodeView) || (linkedText->getFileType() == DMHelper::FileType_Text))
+                ui->textBrowser->setPlainText(_encounter->getText());
+            else if(linkedText->getFileType() == DMHelper::FileType_HTML)
+                ui->textBrowser->setHtml(_encounter->getText());
+            else if(linkedText->getFileType() == DMHelper::FileType_Markdown)
+                ui->textBrowser->setMarkdown(_encounter->getText());
+            else
+                return;
+        }
     }
 
     updateAnchors();
@@ -454,6 +484,16 @@ void EncounterTextEdit::setTranslated(bool translated)
     setHtml();
 }
 
+void EncounterTextEdit::setCodeView(bool active)
+{
+    if(active == _isCodeView)
+        return;
+
+    _isCodeView = active;
+    setHtml();
+    emit codeViewChanged(active);
+}
+
 void EncounterTextEdit::targetResized(const QSize& newSize)
 {
     if(newSize != _targetSize)
@@ -566,10 +606,17 @@ void EncounterTextEdit::storeEncounter()
     if(!_encounter)
         return;
 
-    if(_encounter->getTranslated())
-        _encounter->setTranslatedText(toHtml());
-    else
+    if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
+    {
+        if(_encounter->getTranslated())
+            _encounter->setTranslatedText(toHtml());
+        else
+            _encounter->setText(toHtml());
+    }
+    else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
         _encounter->setText(toHtml());
+    }
 }
 
 void EncounterTextEdit::readEncounter()
@@ -584,6 +631,19 @@ void EncounterTextEdit::readEncounter()
         emit animatedChanged(_encounter->getAnimated());
         emit scrollSpeedChanged(_encounter->getScrollSpeed());
         emit translatedChanged(_encounter->getTranslated());
+
+        bool showCodeView = false;
+        _isCodeView = false;
+        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+        {
+            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+            if((linkedText->getFileType() == DMHelper::FileType_HTML) || (linkedText->getFileType() == DMHelper::FileType_Markdown))
+            {
+                showCodeView = true;
+                emit codeViewChanged(_isCodeView);
+            }
+        }
+        emit codeViewVisible(showCodeView);
 
         ui->textBrowser->setTextWidth(_encounter->getTextWidth());
         loadImage();
@@ -601,6 +661,14 @@ void EncounterTextEdit::updateEncounter()
         return;
 
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+        bool showCodeView = false;
+        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+        {
+            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+            if((linkedText->getFileType() == DMHelper::FileType_HTML) || (linkedText->getFileType() == DMHelper::FileType_Markdown))
+                showCodeView = true;
+        }
+        emit codeViewVisible(showCodeView);
         setHtml();
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
 }
