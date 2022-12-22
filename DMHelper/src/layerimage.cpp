@@ -116,7 +116,6 @@ MapColorizeFilter LayerImage::getFilter() const
 
 void LayerImage::dmInitialize(QGraphicsScene& scene)
 {
-    qDebug() << "[LayerImage] Image Layer being initialized...";
     if(_graphicsItem)
     {
         qDebug() << "[LayerImage] ERROR: dmInitialize called although the graphics item already exists!";
@@ -142,8 +141,6 @@ void LayerImage::dmUpdate()
 
 void LayerImage::playerGLInitialize()
 {
-    qDebug() << "[LayerImage]::playerGLInitialize";
-
     if(_backgroundObject)
     {
         qDebug() << "[LayerImage] ERROR: playerGLInitialize called although the background object already exists!";
@@ -155,14 +152,11 @@ void LayerImage::playerGLInitialize()
 
 void LayerImage::playerGLUninitialize()
 {
-    qDebug() << "[LayerImage]::playerGLUninitialize";
     cleanupPlayer();
 }
 
 void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
-    qDebug() << "[LayerImage]::playerGLPaint";
-
     Q_UNUSED(projectionMatrix);
 
     if(!functions)
@@ -181,14 +175,12 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 
 void LayerImage::playerGLResize(int w, int h)
 {
-    qDebug() << "[LayerImage]::playerGLResize";
     Q_UNUSED(w);
     Q_UNUSED(h);
 }
 
 void LayerImage::initialize(const QSize& layerSize)
 {
-    qDebug() << "[LayerImage]::initialize";
     DMHFileReader* reader = new DMHFileReader(getImageFile());
     if(reader)
     {
@@ -205,7 +197,6 @@ void LayerImage::initialize(const QSize& layerSize)
 
 void LayerImage::uninitialize()
 {
-    qDebug() << "[LayerImage]::uninitialize";
     _layerImage = QImage();
 }
 
@@ -227,7 +218,6 @@ void LayerImage::setLayerVisible(bool layerVisible)
 
 void LayerImage::updateImage(const QImage& image)
 {
-    qDebug() << "[LayerImage]::updateImage";
     if(_layerImage == image)
         return;
 
@@ -270,7 +260,6 @@ void LayerImage::setFilter(const MapColorizeFilter& filter)
 
 void LayerImage::updateImageInternal()
 {
-    qDebug() << "[LayerImage]::updateImageInternal";
     QImage newImage = getImage();
 
     if(_graphicsItem)
@@ -310,7 +299,6 @@ void LayerImage::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
 
 void LayerImage::cleanupDM()
 {
-    qDebug() << "[LayerImage] Cleaning up Image Layer...";
     if(!_graphicsItem)
         return;
 
@@ -323,7 +311,6 @@ void LayerImage::cleanupDM()
 
 void LayerImage::cleanupPlayer()
 {
-    qDebug() << "[LayerImage]::cleanupPlayer";
     delete _backgroundObject;
     _backgroundObject = nullptr;
 }

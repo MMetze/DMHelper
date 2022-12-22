@@ -2,13 +2,16 @@
 #include "dmconstants.h"
 #include <QDir>
 #include <QFileSystemWatcher>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QDebug>
 
 EncounterTextLinked::EncounterTextLinked(const QString& encounterName, QObject *parent) :
     EncounterText{encounterName, parent},
     _linkedFile(),
     _watcher(nullptr),
-    _fileType(DMHelper::FileType_Unknown)
+    _fileType(DMHelper::FileType_Unknown),
+    _metadata()
 {
 }
 
@@ -27,7 +30,7 @@ void EncounterTextLinked::copyValues(const CampaignObjectBase* other)
     if(!otherEntry)
         return;
 
-    _linkedFile = otherEntry->_linkedFile;
+    setLinkedFile(otherEntry->_linkedFile);
 
     EncounterText::copyValues(other);
 }
@@ -45,6 +48,11 @@ QString EncounterTextLinked::getLinkedFile() const
 int EncounterTextLinked::getFileType() const
 {
     return _fileType;
+}
+
+QString EncounterTextLinked::getMetadata() const
+{
+    return _metadata;
 }
 
 void EncounterTextLinked::setText(const QString& newText)
@@ -104,6 +112,8 @@ void EncounterTextLinked::readLinkedFile()
     if(_linkedFile.isEmpty())
         return;
 
+    _metadata.clear();
+
     QFile extFile(_linkedFile);
     QFileInfo fileInfo(extFile);
     if(fileInfo.suffix() == QString("txt"))
@@ -132,7 +142,7 @@ void EncounterTextLinked::readLinkedFile()
     while(in.readLineInto(&line))
         inputString += QChar::LineFeed + line;
 
-    EncounterText::setText(inputString);
+    EncounterText::setText(extractMetadata(inputString));
 }
 
 void EncounterTextLinked::createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -149,7 +159,13 @@ void EncounterTextLinked::createTextNode(QDomDocument &doc, QDomElement &element
         return;
     }
 
-    mdFile.write(_text.toUtf8());
+    QString outputString;
+    if((_fileType == DMHelper::FileType_Markdown) && (!_metadata.isEmpty()))
+        outputString = QString("---") + _metadata + QString("---") + _text;
+    else
+        outputString = _text;
+
+    mdFile.write(outputString.toUtf8());
     mdFile.close();
 }
 
@@ -159,4 +175,39 @@ void EncounterTextLinked::extractTextNode(const QDomElement &element, bool isImp
     Q_UNUSED(isImport);
 
     readLinkedFile();
+}
+
+QString EncounterTextLinked::extractMetadata(const QString& inputString)
+{
+    if(_fileType != DMHelper::FileType_Markdown)
+        return inputString;
+
+    static QRegularExpression re(QString("---((\\s|.)*)---((\\s|.)*)"));
+    QRegularExpressionMatch reMatch = re.match(inputString);
+    if(!reMatch.hasMatch())
+        return inputString;
+
+    _metadata = reMatch.captured(1);
+    parseMetadata();
+
+    return reMatch.captured(3);
+}
+
+void EncounterTextLinked::parseMetadata()
+{
+    if(_metadata.isEmpty())
+        return;
+
+    qDebug() << "[EncounterTextLinked] Reading Markdown file, found metadata: ";
+
+    static QRegularExpression re(QString("(.+): (.+)"));
+    QRegularExpressionMatchIterator i = re.globalMatch(_metadata);
+    QStringList words;
+    while(i.hasNext())
+    {
+        QRegularExpressionMatch match = i.next();
+        QString keyString = match.captured(1);
+        QString valueString = match.captured(2);
+        qDebug() << "[EncounterTextLinked]     Key: " << keyString << ", value: " << valueString;
+    }
 }

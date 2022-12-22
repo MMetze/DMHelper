@@ -9,6 +9,8 @@
 #include <QPixmap>
 #include <QDebug>
 
+//#define DEBUG_EFFECT_FACTORY
+
 BattleDialogModelEffectFactory::BattleDialogModelEffectFactory(QObject *parent) :
     QObject(parent)
 {
@@ -39,8 +41,10 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
             break;
     }
 
+#ifdef DEBUG_EFFECT_FACTORY
     if(result)
         qDebug() << "[Battle Dialog Model Effect Factory] created model effect " << result << " of type " << result->getEffectType();
+#endif
 
     return result;
 }
@@ -53,7 +57,9 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDom
     if(result)
     {
         result->inputXML(element, isImport);
+#ifdef DEBUG_EFFECT_FACTORY
         qDebug() << "[Battle Dialog Model Effect Factory] read model effect " << result << " of type " << result->getEffectType();
+#endif
     }
 
     return result;

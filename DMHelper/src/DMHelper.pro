@@ -94,6 +94,7 @@ SOURCES += main.cpp\
     layerimage.cpp \
     layerscene.cpp \
     layerseditdialog.cpp \
+    layertokens.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapblankdialog.cpp \
@@ -345,6 +346,7 @@ HEADERS  += mainwindow.h \
     layerimage.h \
     layerscene.h \
     layerseditdialog.h \
+    layertokens.h \
     legaldialog.h \
     mapblankdialog.h \
     mapcolorizedialog.h \

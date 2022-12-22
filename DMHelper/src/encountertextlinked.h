@@ -20,6 +20,9 @@ public:
     virtual QString getLinkedFile() const;
     virtual int getFileType() const;
 
+    // Metadata
+    virtual QString getMetadata() const;
+
 public slots:
     // Text
     virtual void setText(const QString& newText) override;
@@ -39,9 +42,13 @@ protected:
     virtual void createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual void extractTextNode(const QDomElement &element, bool isImport) override;
 
+    QString extractMetadata(const QString& inputString);
+    void parseMetadata();
+
     QString _linkedFile;
     QFileSystemWatcher* _watcher;
     int _fileType;
+    QString _metadata;
 };
 
 #endif // ENCOUNTERTEXTLINKED_H
