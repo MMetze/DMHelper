@@ -10,13 +10,13 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
     _combatants(),
     _effects(),
+    _layerScene(),
     _map(nullptr),
     _mapRect(),
     _previousMap(nullptr),
     _previousMapRect(),
     _cameraRect(),
     _background(Qt::black),
-    _showCompass(false),
     _showAlive(true),
     _showDead(false),
     _showEffects(true),
@@ -32,6 +32,7 @@ BattleDialogModel::~BattleDialogModel()
 {
     qDeleteAll(_combatants);
     qDeleteAll(_effects);
+    _layerScene.clearLayers();
 }
 
 void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
@@ -58,9 +59,6 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _gridPen = QPen(QBrush(gridColor), gridWidth);
     _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
     */
-    // TODO: possibly re-enable compass at some point
-    //_showCompass = static_cast<bool>(element.attribute("showCompass",QString::number(0)).toInt());
-    _showCompass = false;
     _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
     _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
@@ -78,7 +76,6 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
 
     _background = otherModel->_background;
     _cameraRect = otherModel->_cameraRect;
-    _showCompass = otherModel->_showCompass;
     _showAlive = otherModel->_showAlive;
     _showDead = otherModel->_showDead;
     _showEffects = otherModel->_showEffects;
@@ -86,6 +83,8 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
     _showLairActions = otherModel->_showLairActions;
 
     _logger = otherModel->_logger;
+
+    _layerScene.copyValues(&otherModel->_layerScene);
 
     CampaignObjectBase::copyValues(other);
 }
@@ -336,11 +335,6 @@ QColor BattleDialogModel::getBackgroundColor() const
     return _background;
 }
 
-bool BattleDialogModel::getShowCompass() const
-{
-    return _showCompass;
-}
-
 bool BattleDialogModel::getShowAlive() const
 {
     return _showAlive;
@@ -384,6 +378,16 @@ int BattleDialogModel::getActiveCombatantIndex() const
 QImage BattleDialogModel::getBackgroundImage() const
 {
     return _backgroundImage;
+}
+
+LayerScene& BattleDialogModel::getLayerScene()
+{
+    return _layerScene;
+}
+
+const LayerScene& BattleDialogModel::getLayerScene() const
+{
+    return _layerScene;
 }
 
 void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
@@ -442,16 +446,6 @@ void BattleDialogModel::setBackgroundColor(const QColor& color)
     {
         _background = color;
         emit backgroundColorChanged(color);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setShowCompass(bool showCompass)
-{
-    if(_showCompass != showCompass)
-    {
-        _showCompass = showCompass;
-        emit showCompassChanged(_showCompass);
         emit dirty();
     }
 }
@@ -575,7 +569,6 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("backgroundColorG", _background.green());
     element.setAttribute("backgroundColorB", _background.blue());
     element.setAttribute("background", _mapRect.height());
-    element.setAttribute("showCompass", _showCompass);
     element.setAttribute("showAlive", _showAlive);
     element.setAttribute("showDead", _showDead);
     element.setAttribute("showEffects", _showEffects);

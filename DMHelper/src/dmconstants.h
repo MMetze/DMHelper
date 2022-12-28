@@ -158,7 +158,8 @@ namespace DMHelper
     {
         LayerType_Image = 0,
         LayerType_Fow,
-        LayerType_Grid
+        LayerType_Grid,
+        LayerType_Tokens
     };
 
     enum FileType

@@ -209,7 +209,6 @@ protected:
     virtual void showEvent(QShowEvent *event) override;
 
 private slots:
-    void setCompassVisibility(bool visible);
     void updateCombatantVisibility();
     void updateEffectLayerVisibility();
     void updateMap();
@@ -360,12 +359,11 @@ private:
     QGraphicsItem* _publishEffectItem;
 
     BattleDialogGraphicsScene* _scene;
-    QGraphicsPixmapItem* _background;
-    QGraphicsPixmapItem* _fow;
+//    QGraphicsPixmapItem* _background;
+//    QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
     qreal _activeScale;
     qreal _selectedScale;
-    QGraphicsPixmapItem* _compassPixmap;
     QGraphicsEllipseItem* _movementPixmap;
     CameraRect* _cameraRect;
     QRectF _publishRectValue;

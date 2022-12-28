@@ -64,7 +64,6 @@ void LayerImage::inputXML(const QDomElement &element, bool isImport)
 
 QRectF LayerImage::boundingRect() const
 {
-    //return _graphicsItem ? _graphicsItem->boundingRect() : QRectF();
     return _layerImage.isNull() ? QRectF() : QRectF(_layerImage.rect());
 }
 

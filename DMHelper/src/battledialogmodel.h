@@ -4,6 +4,7 @@
 #include "battledialogmodelcombatant.h"
 #include "battledialogmodeleffect.h"
 #include "battledialoglogger.h"
+#include "layerscene.h"
 #include <QList>
 #include <QRect>
 #include <QPen>
@@ -51,7 +52,6 @@ public:
     Map* getPreviousMap() const;
     QRectF getCameraRect() const;
     QColor getBackgroundColor() const;
-    bool getShowCompass() const;
     bool getShowAlive() const;
     bool getShowDead() const;
     bool getShowEffects() const;
@@ -62,12 +62,14 @@ public:
     int getActiveCombatantIndex() const;
     QImage getBackgroundImage() const;
 
+    LayerScene& getLayerScene();
+    const LayerScene& getLayerScene() const;
+
 public slots:
     void setMap(Map* map, const QRect& mapRect);
     void setMapRect(const QRect& mapRect);
     void setCameraRect(const QRectF& rect);
     void setBackgroundColor(const QColor& color);
-    void setShowCompass(bool showCompass);
     void setShowAlive(bool showAlive);
     void setShowDead(bool showDead);
     void setShowEffects(bool showEffects);
@@ -82,7 +84,6 @@ signals:
     void mapRectChanged(const QRect& mapRect);
     void cameraRectChanged(const QRectF& rect);
     void backgroundColorChanged(const QColor& color);
-    void showCompassChanged(bool showCompass);
     void showAliveChanged(bool showAlive);
     void showDeadChanged(bool showDead);
     void showEffectsChanged(bool showEffects);
@@ -111,6 +112,7 @@ private:
     QList<BattleDialogModelEffect*> _effects;
 
     // Visualization values
+    LayerScene _layerScene;
     Map* _map;
     QRect _mapRect;
     Map* _previousMap;
@@ -120,7 +122,6 @@ private:
 
     QColor _background;
 
-    bool _showCompass;
     bool _showAlive;
     bool _showDead;
     bool _showEffects;

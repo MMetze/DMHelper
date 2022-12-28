@@ -73,7 +73,6 @@
 
 const qreal ACTIVE_PIXMAP_SIZE = 800.0;
 const qreal COUNTDOWN_TIMER = 0.05;
-const qreal COMPASS_SCALE = 0.4;
 
 #ifdef BATTLE_DIALOG_PROFILE_RENDER
     QTime tProfile;
@@ -105,12 +104,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _publishMouseDownPos(),
     _publishEffectItem(nullptr),
     _scene(nullptr),
-    _background(nullptr),
-    _fow(nullptr),
     _activePixmap(nullptr),
     _activeScale(1.0),
     _selectedScale(1.0),
-    _compassPixmap(nullptr),
     _movementPixmap(nullptr),
     _cameraRect(nullptr),
     _publishRectValue(),
@@ -570,36 +566,33 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
     if(!convertPublishToScene(position, newPosition))
         return;
 
-    if(_scene)
+    QList<QGraphicsItem *> itemList = _scene->items(newPosition);
+    for(QGraphicsItem* graphicsItem : itemList)
     {
-        QList<QGraphicsItem *> itemList = _scene->items(newPosition);
-        for(QGraphicsItem* graphicsItem : itemList)
+        if((graphicsItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
         {
-            if((graphicsItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
+            QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
+            if(pixmapItem)
             {
-                QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
-                if(pixmapItem)
+                BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
+                if(selectedCombatant)
                 {
-                    BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
-                    if(selectedCombatant)
-                    {
-                        setUniqueSelection(selectedCombatant);
-                        _selectedCombatant = selectedCombatant;
-                        _publishMouseDown = true;
-                        _publishMouseDownPos = newPosition;
-                        startMovement(selectedCombatant, pixmapItem, selectedCombatant->getSpeed());
-                        return;
-                    }
-                }
-
-                if(!BattleDialogModelEffect::getEffectIdFromItem(graphicsItem).isNull())
-                {
-                    cancelSelect();
-                    _publishEffectItem = graphicsItem;
+                    setUniqueSelection(selectedCombatant);
+                    _selectedCombatant = selectedCombatant;
                     _publishMouseDown = true;
                     _publishMouseDownPos = newPosition;
-                    handleEffectChanged(graphicsItem);
+                    startMovement(selectedCombatant, pixmapItem, selectedCombatant->getSpeed());
+                    return;
                 }
+            }
+
+            if(!BattleDialogModelEffect::getEffectIdFromItem(graphicsItem).isNull())
+            {
+                cancelSelect();
+                _publishEffectItem = graphicsItem;
+                _publishMouseDown = true;
+                _publishMouseDownPos = newPosition;
+                handleEffectChanged(graphicsItem);
             }
         }
     }
@@ -662,41 +655,38 @@ void BattleFrame::setGridScale(int gridScale)
         return;
     }
 
-    if(_scene)
+    _scene->setDistanceScale(gridScale);
+    // TODO: Layers
+    //_model->setGridScale(gridScale);
+
+    qreal scaleFactor;
+
+    QMapIterator<BattleDialogModelCombatant*, QGraphicsPixmapItem*> i(_combatantIcons);
+    while(i.hasNext())
     {
-        _scene->setDistanceScale(gridScale);
-        // TODO: Layers
-        //_model->setGridScale(gridScale);
-
-        qreal scaleFactor;
-
-        QMapIterator<BattleDialogModelCombatant*, QGraphicsPixmapItem*> i(_combatantIcons);
-        while(i.hasNext())
+        i.next();
+        if(i.value())
         {
-            i.next();
-            if(i.value())
-            {
-                qreal combatantScaleFactor = 1.0;
-                if(_combatantIcons.key(i.value(), nullptr))
-                    combatantScaleFactor = _combatantIcons.key(i.value(), nullptr)->getSizeFactor();
-                scaleFactor = (static_cast<qreal>(gridScale-2)) * combatantScaleFactor / static_cast<qreal>(qMax(i.value()->pixmap().width(),i.value()->pixmap().height()));
-                i.value()->setScale(scaleFactor);
-            }
+            qreal combatantScaleFactor = 1.0;
+            if(_combatantIcons.key(i.value(), nullptr))
+                combatantScaleFactor = _combatantIcons.key(i.value(), nullptr)->getSizeFactor();
+            scaleFactor = (static_cast<qreal>(gridScale-2)) * combatantScaleFactor / static_cast<qreal>(qMax(i.value()->pixmap().width(),i.value()->pixmap().height()));
+            i.value()->setScale(scaleFactor);
         }
-
-        if(_activePixmap)
-        {
-            scaleFactor = static_cast<qreal>(gridScale) * _activeScale / ACTIVE_PIXMAP_SIZE;
-            qreal oldScaleFactor = _activePixmap->scale();
-            _activePixmap->setScale(scaleFactor);
-            _activePixmap->setPos(_activePixmap->pos() * scaleFactor/oldScaleFactor);
-        }
-
-        _scene->updateBattleContents();
-
-        ui->graphicsView->update();
-        updateRendererGrid();
     }
+
+    if(_activePixmap)
+    {
+        scaleFactor = static_cast<qreal>(gridScale) * _activeScale / ACTIVE_PIXMAP_SIZE;
+        qreal oldScaleFactor = _activePixmap->scale();
+        _activePixmap->setScale(scaleFactor);
+        _activePixmap->setPos(_activePixmap->pos() * scaleFactor/oldScaleFactor);
+    }
+
+    _scene->updateBattleContents();
+
+    ui->graphicsView->update();
+    updateRendererGrid();
 }
 
 void BattleFrame::selectGridCount()
@@ -722,14 +712,11 @@ void BattleFrame::setGridAngle(int gridAngle)
         return;
     }
 
-    if(_scene)
-    {
-        // TODO: Layers
-        //_model->setGridAngle(gridAngle);
-        _scene->updateBattleContents();
-        ui->graphicsView->update();
-        updateRendererGrid();
-    }
+    // TODO: Layers
+    //_model->setGridAngle(gridAngle);
+    _scene->updateBattleContents();
+    ui->graphicsView->update();
+    updateRendererGrid();
 }
 
 void BattleFrame::setGridType(int gridType)
@@ -740,14 +727,11 @@ void BattleFrame::setGridType(int gridType)
         return;
     }
 
-    if(_scene)
-    {
-        // TODO: Layers
-        //_model->setGridType(gridType);
-        _scene->updateBattleContents();
-        ui->graphicsView->update();
-        updateRendererGrid();
-    }
+    // TODO: Layers
+    //_model->setGridType(gridType);
+    _scene->updateBattleContents();
+    ui->graphicsView->update();
+    updateRendererGrid();
 }
 
 void BattleFrame::setXOffset(int xOffset)
@@ -758,14 +742,11 @@ void BattleFrame::setXOffset(int xOffset)
         return;
     }
 
-    if(_scene)
-    {
-        // TODO: Layers
-        //_model->setGridOffsetX(xOffset);
-        _scene->updateBattleContents();
-        ui->graphicsView->update();
-        updateRendererGrid();
-    }
+    // TODO: Layers
+    //_model->setGridOffsetX(xOffset);
+    _scene->updateBattleContents();
+    ui->graphicsView->update();
+    updateRendererGrid();
 }
 
 void BattleFrame::setYOffset(int yOffset)
@@ -776,14 +757,11 @@ void BattleFrame::setYOffset(int yOffset)
         return;
     }
 
-    if(_scene)
-    {
-        // TODO: Layers
-        //_model->setGridOffsetY(yOffset);
-        _scene->updateBattleContents();
-        ui->graphicsView->update();
-        updateRendererGrid();
-    }
+    // TODO: Layers
+    //_model->setGridOffsetY(yOffset);
+    _scene->updateBattleContents();
+    ui->graphicsView->update();
+    updateRendererGrid();
 }
 
 void BattleFrame::setGridWidth(int gridWidth)
@@ -794,14 +772,11 @@ void BattleFrame::setGridWidth(int gridWidth)
         return;
     }
 
-    if(_scene)
-    {
-        // TODO: Layers
-        //_model->setGridWidth(gridWidth);
-        _scene->updateBattleContents();
-        ui->graphicsView->update();
-        updateRendererGrid();
-    }
+    // TODO: Layers
+    //_model->setGridWidth(gridWidth);
+    _scene->updateBattleContents();
+    ui->graphicsView->update();
+    updateRendererGrid();
 }
 
 void BattleFrame::setGridColor(const QColor& gridColor)
@@ -812,14 +787,11 @@ void BattleFrame::setGridColor(const QColor& gridColor)
         return;
     }
 
-    if(_scene)
-    {
-        // TODO: Layers
-        //_model->setGridColor(gridColor);
-        _scene->updateBattleContents();
-        ui->graphicsView->update();
-        updateRendererGrid();
-    }
+    // TODO: Layers
+    //_model->setGridColor(gridColor);
+    _scene->updateBattleContents();
+    ui->graphicsView->update();
+    updateRendererGrid();
 }
 
 void BattleFrame::setGridVisible(bool gridVisible)
@@ -876,9 +848,6 @@ void BattleFrame::setCountdownDuration(int countdownDuration)
 
 void BattleFrame::setPointerFile(const QString& filename)
 {
-    if(!_scene)
-        return;
-
     if(_pointerFile != filename)
     {
         _pointerFile = filename;
@@ -892,8 +861,7 @@ void BattleFrame::setPointerFile(const QString& filename)
 
 void BattleFrame::setSelectedIcon(const QString& selectedIcon)
 {
-    if(_scene)
-        _scene->setSelectedIcon(selectedIcon);
+    _scene->setSelectedIcon(selectedIcon);
 
     if(_renderer)
         _renderer->setSelectionToken(selectedIcon);
@@ -913,7 +881,7 @@ void BattleFrame::setActiveIcon(const QString& activeIcon)
 
 void BattleFrame::createActiveIcon()
 {
-    if((!_scene) || (!_model))
+    if(!_model)
         return;
 
     if(_activePixmap)
@@ -1167,38 +1135,32 @@ void BattleFrame::addNPC()
 
 void BattleFrame::addObject()
 {
-    if(_scene)
-        _scene->addEffectObject();
+    _scene->addEffectObject();
 }
 
 void BattleFrame::castSpell()
 {
-    if(_scene)
-        _scene->castSpell();
+    _scene->castSpell();
 }
 
 void BattleFrame::addEffectRadius()
 {
-    if(_scene)
-        _scene->addEffectRadius();
+    _scene->addEffectRadius();
 }
 
 void BattleFrame::addEffectCone()
 {
-    if(_scene)
-        _scene->addEffectCone();
+    _scene->addEffectCone();
 }
 
 void BattleFrame::addEffectCube()
 {
-    if(_scene)
-        _scene->addEffectCube();
+    _scene->addEffectCube();
 }
 
 void BattleFrame::addEffectLine()
 {
-    if(_scene)
-        _scene->addEffectLine();
+    _scene->addEffectLine();
 }
 
 void BattleFrame::setCameraCouple()
@@ -1208,7 +1170,7 @@ void BattleFrame::setCameraCouple()
 
 void BattleFrame::setCameraMap()
 {
-    if((!_cameraRect) || (!_scene))
+    if(!_cameraRect)
         return;
 
     QRectF newCameraRect;
@@ -1273,32 +1235,27 @@ void BattleFrame::setFreeDistance(bool enabled)
 
 void BattleFrame::setDistanceHeight(bool heightEnabled, qreal height)
 {
-    if(_scene)
-        _scene->setDistanceHeight(heightEnabled ? height : 0.0);
+    _scene->setDistanceHeight(heightEnabled ? height : 0.0);
 }
 
 void BattleFrame::setDistanceScale(int scale)
 {
-    if(_scene)
-        _scene->setDistanceScale(scale);
+    _scene->setDistanceScale(scale);
 }
 
 void BattleFrame::setDistanceLineColor(const QColor& color)
 {
-    if(_scene)
-        _scene->setDistanceLineColor(color);
+    _scene->setDistanceLineColor(color);
 }
 
 void BattleFrame::setDistanceLineType(int lineType)
 {
-    if(_scene)
-        _scene->setDistanceLineType(lineType);
+    _scene->setDistanceLineType(lineType);
 }
 
 void BattleFrame::setDistanceLineWidth(int lineWidth)
 {
-    if(_scene)
-        _scene->setDistanceLineWidth(lineWidth);
+    _scene->setDistanceLineWidth(lineWidth);
 }
 
 void BattleFrame::setShowHeight(bool showHeight)
@@ -1643,20 +1600,6 @@ void BattleFrame::showEvent(QShowEvent *event)
     ui->btnSort->setIconSize(QSize(iconSize, iconSize));
 }
 
-void BattleFrame::setCompassVisibility(bool visible)
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to set compass visibility, no battle model is set!";
-        return;
-    }
-
-    _model->setShowCompass(visible);
-    qDebug() << "[Battle Frame] show compass checked changed: Visibility=" << visible;
-    if(_compassPixmap)
-        _compassPixmap->setVisible(visible);
-}
-
 void BattleFrame::updateCombatantVisibility()
 {
     if(!_model)
@@ -1703,6 +1646,7 @@ void BattleFrame::updateMap()
             return;
 
         qDebug() << "[Battle Frame] Initializing battle map image";
+        _model->getLayerScene().dmInitialize(*_scene);
         if(_model->getBackgroundImage().isNull())
             _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         _background->setPixmap((QPixmap::fromImage(_model->getBackgroundImage())));
@@ -1869,7 +1813,7 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
 
 void BattleFrame::handleCombatantMoved(BattleDialogModelCombatant* combatant)
 {
-    if((!_scene) || (!combatant))
+    if(!combatant)
         return;
 
 #ifdef BATTLE_DIALOG_LOG_MOVEMENT
@@ -2461,8 +2405,7 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
                 _mapDrawer->drawRect(ui->graphicsView->mapToScene(_rubberBandRect).boundingRect().toRect());
         }
 
-        if(_scene)
-            _scene->clearSelection();
+        _scene->clearSelection();
 
         cancelSelect();
     }
@@ -2510,11 +2453,8 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible, bo
 void BattleFrame::setEffectLayerVisibility(bool visibility)
 {
     // NOTE: if effect layer visibility is used, need to sync with setGridVisibility usage
-    if(_scene)
-    {
-        _scene->setEffectVisibility(visibility);
-        ui->graphicsView->invalidateScene();
-    }
+    _scene->setEffectVisibility(visibility);
+    ui->graphicsView->invalidateScene();
 }
 
 void BattleFrame::setMapCursor()
@@ -2534,8 +2474,7 @@ void BattleFrame::setScale(qreal s)
     setMapCursor();
     storeViewRect();
 
-    if(_scene)
-        _scene->scaleBattleContents();
+    _scene->scaleBattleContents();
 }
 
 void BattleFrame::storeViewRect()
@@ -2547,14 +2486,6 @@ void BattleFrame::storeViewRect()
     }
 
     _model->setMapRect(ui->graphicsView->mapToScene(ui->graphicsView->viewport()->rect()).boundingRect().toAlignedRect());
-
-    if(_compassPixmap)
-    {
-        QPoint origin = ui->graphicsView->mapFromScene(QPoint(0,0));
-        _compassPixmap->setPos(ui->graphicsView->mapToScene(qMax(0, origin.x()), qMax(0, origin.y())));
-        if(ui->graphicsView->transform().m11() > 0.0)
-            _compassPixmap->setScale(COMPASS_SCALE/ui->graphicsView->transform().m11());
-    }
 }
 
 void BattleFrame::setModel(BattleDialogModel* model)
@@ -2563,8 +2494,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
     _model = model;
 
-    if(_scene)
-        _scene->setModel(model);
+    _scene->setModel(model);
 
     ui->btnSort->setEnabled(_model != nullptr);
     ui->btnTop->setEnabled(_model != nullptr);
@@ -2779,7 +2709,7 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
 
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
-    if((!renderer) || (!_battle) || (!_scene) || (renderer->getObject() != _battle->getBattleDialogModel()))
+    if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
         return;
 
     connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
@@ -2837,7 +2767,7 @@ void BattleFrame::rendererDeactivated()
 
 void BattleFrame::updateRendererGrid()
 {
-    if((!_renderer) || (!_scene))
+    if(!_renderer)
         return;
 
     QImage gridImage(_renderer->getBackgroundSize().toSize(), QImage::Format_RGBA8888);
@@ -3058,7 +2988,7 @@ void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
         return;
     }
 
-    if((combatant) && (_scene) && (_background))
+    if((combatant) && (_background))
     {
         QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
         if(combatant->hasCondition(Combatant::Condition_Unconscious))
@@ -3258,7 +3188,6 @@ void BattleFrame::cleanupBattleMap()
     _scene->clearBattleContents();
     delete _background; _background = nullptr; _fow = nullptr;
     delete _activePixmap; _activePixmap = nullptr;
-    delete _compassPixmap; _compassPixmap = nullptr;
     delete _cameraRect; _cameraRect = nullptr;
     delete _movementPixmap; _movementPixmap = nullptr;
 
@@ -3303,21 +3232,14 @@ void BattleFrame::replaceBattleMap()
 bool BattleFrame::doSceneContentsExist()
 {
     return((_activePixmap != nullptr) ||
-           (_compassPixmap != nullptr) ||
            (_movementPixmap != nullptr) ||
            (_combatantIcons.count() > 0) ||
-           ((_scene) && (!_scene->isSceneEmpty())));
+           (!_scene->isSceneEmpty()));
 }
 
 void BattleFrame::createSceneContents()
 {
     qDebug() << "[Battle Frame] Creating Battle Scene contents.";
-
-    if(!_scene)
-    {
-        qDebug() << "[Battle Frame] ERROR: Not possible to create scene contents, no scene exists!";
-        return;
-    }
 
     if(!_model)
     {
@@ -3333,16 +3255,6 @@ void BattleFrame::createSceneContents()
     createActiveIcon();
     createCombatantFrame();
     createCountdownFrame();
-
-    QPixmap compassPmp;
-    compassPmp.load(":/img/data/compass.png");
-    _compassPixmap = _scene->addPixmap(compassPmp);
-    _compassPixmap->setTransformationMode(Qt::SmoothTransformation);
-    qreal scaleW = static_cast<qreal>(_background->pixmap().width()) / static_cast<qreal>(compassPmp.width());
-    qreal scaleH = static_cast<qreal>(_background->pixmap().height()) / static_cast<qreal>(compassPmp.height());
-    _compassPixmap->setScale(COMPASS_SCALE * qMin(scaleW, scaleH));
-    _compassPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
-    _compassPixmap->setVisible(_model->getShowCompass());
 
     QPen movementPen(QColor(23,23,23,200), 3, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
     _movementPixmap = _scene->addEllipse(0, 0, 100, 100, movementPen, QBrush(QColor(255,255,255,25)));
