@@ -3,6 +3,8 @@
 #include "layerimage.h"
 #include "layerfow.h"
 #include "layergrid.h"
+#include "layerreference.h"
+#include "campaign.h"
 #include <QRectF>
 #include <QImage>
 #include <QPainter>
@@ -199,6 +201,17 @@ void LayerScene::moveLayer(int from, int to)
     _selected = to;
 }
 
+Layer* LayerScene::findLayer(QUuid id)
+{
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getID() == id))
+            return _layers[i];
+    }
+
+    return nullptr;
+}
+
 int LayerScene::getSelectedLayerIndex() const
 {
     return _selected;
@@ -391,6 +404,14 @@ void LayerScene::playerGLResize(int w, int h)
         _layers[i]->playerGLResize(w, h);
 }
 
+void LayerScene::removeLayer(Layer* reference)
+{
+    if(!reference)
+        return;
+
+    removeLayer(reference->getOrder());
+}
+
 QDomElement LayerScene::createOutputXML(QDomDocument &doc)
 {
     return doc.createElement("layerScene");
@@ -403,6 +424,29 @@ void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
 
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->outputXML(doc, element, targetDirectory, isExport);
+}
+
+void LayerScene::internalPostProcessXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(element);
+
+    Campaign* campaign = nullptr;
+
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if(_layers.at(i)->getType() == DMHelper::LayerType_Reference)
+        {
+            if(!campaign)
+                campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
+
+            LayerReference* referenceLayer = dynamic_cast<LayerReference*>(_layers[i]);
+            if(referenceLayer)
+            {
+                referenceLayer->postProcessXML(campaign, isImport);
+                connect(referenceLayer, &LayerReference::referenceDestroyed, this, QOverload<Layer*>::of(&LayerScene::removeLayer));
+            }
+        }
+    }
 }
 
 void LayerScene::resetLayerOrders()

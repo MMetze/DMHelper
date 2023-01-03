@@ -35,6 +35,7 @@ public:
     void removeLayer(int position);
     void clearLayers();
     void moveLayer(int from, int to);
+    Layer* findLayer(QUuid id);
 
     int getSelectedLayerIndex() const;
     void setSelectedLayerIndex(int selected);
@@ -64,10 +65,14 @@ public slots:
 
 signals:
 
+protected slots:
+    void removeLayer(Layer* reference);
+
 protected:
     // From CampaignObjectBase
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
     // Local
     void resetLayerOrders();

@@ -92,6 +92,7 @@ SOURCES += main.cpp\
     layerframe.cpp \
     layergrid.cpp \
     layerimage.cpp \
+    layerreference.cpp \
     layerscene.cpp \
     layerseditdialog.cpp \
     layertokens.cpp \
@@ -344,6 +345,7 @@ HEADERS  += mainwindow.h \
     layerframe.h \
     layergrid.h \
     layerimage.h \
+    layerreference.h \
     layerscene.h \
     layerseditdialog.h \
     layertokens.h \

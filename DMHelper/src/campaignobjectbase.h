@@ -36,11 +36,11 @@ public:
     CampaignObjectBase* searchChildrenById(QUuid id);
     CampaignObjectBase* searchDirectChildrenByName(const QString& childName);
 
-    const CampaignObjectBase* getParentByType(int parentType) const;
-    CampaignObjectBase* getParentByType(int parentType);
+    virtual const CampaignObjectBase* getParentByType(int parentType) const;
+    virtual CampaignObjectBase* getParentByType(int parentType);
 
-    const CampaignObjectBase* getParentById(const QUuid& id) const;
-    CampaignObjectBase* getParentById(const QUuid& id);
+    virtual const CampaignObjectBase* getParentById(const QUuid& id) const;
+    virtual CampaignObjectBase* getParentById(const QUuid& id);
 
     QUuid addObject(CampaignObjectBase* object);
     CampaignObjectBase* removeObject(CampaignObjectBase* object);

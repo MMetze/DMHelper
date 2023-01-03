@@ -1,13 +1,17 @@
 #include "battledialogmodel.h"
 #include "battledialogmodelmonsterbase.h"
 #include "dmconstants.h"
+#include "campaign.h"
 #include "map.h"
 #include "grid.h"
 #include "layergrid.h"
+#include "layerreference.h"
+#include "encounterbattle.h"
 #include <QDebug>
 
-BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
+BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
+    _encounter(encounter),
     _combatants(),
     _effects(),
     _layerScene(),
@@ -66,6 +70,43 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _showLairActions = static_cast<bool>(element.attribute("showLairActions",QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
+
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
+    if(campaign)
+    {
+        int mapIdInt = DMH_GLOBAL_INVALID_ID;
+        QUuid mapId = parseIdString(element.attribute("mapID"), &mapIdInt);
+        Map* battleMap = dynamic_cast<Map*>(campaign->getObjectById(mapId));
+        if(battleMap)
+        {
+            QRect mapRect(element.attribute("mapRectX",QString::number(0)).toInt(),
+                          element.attribute("mapRectY",QString::number(0)).toInt(),
+                          element.attribute("mapRectWidth",QString::number(0)).toInt(),
+                          element.attribute("mapRectHeight",QString::number(0)).toInt());
+
+            setMap(battleMap, mapRect);
+        }
+    }
+
+    QDomElement layersElement = element.firstChildElement(QString("layerScene"));
+    if(!layersElement.isNull())
+    {
+        _layerScene.inputXML(layersElement, isImport);
+    }
+    else
+    {
+        if(_map)
+        {
+            for(int i = 0; i < _map->getLayerScene().layerCount(); ++i)
+            {
+                Layer* layer = _map->getLayerScene().layerAt(i);
+                if(layer)
+                    _layerScene.appendLayer(new LayerReference(_map, layer, layer->getOrder()));
+            }
+        }
+    }
+
+    _layerScene.postProcessXML(element, isImport);
 }
 
 void BattleDialogModel::copyValues(const CampaignObjectBase* other)
@@ -87,6 +128,67 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
     _layerScene.copyValues(&otherModel->_layerScene);
 
     CampaignObjectBase::copyValues(other);
+}
+
+int BattleDialogModel::getObjectType() const
+{
+    return DMHelper::CampaignType_BattleContent;
+}
+
+const CampaignObjectBase* BattleDialogModel::getParentByType(int parentType) const
+{
+    if(parentType == DMHelper::CampaignType_BattleContent)
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(parentType == _encounter->getObjectType())
+        return _encounter;
+
+    return _encounter->getParentByType(parentType);
+}
+
+CampaignObjectBase* BattleDialogModel::getParentByType(int parentType)
+{
+    if(parentType == DMHelper::CampaignType_BattleContent)
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(parentType == _encounter->getObjectType())
+        return _encounter;
+
+    return _encounter->getParentByType(parentType);
+}
+
+const CampaignObjectBase* BattleDialogModel::getParentById(const QUuid& id) const
+{
+    if(id == getID())
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(id == _encounter->getID())
+        return _encounter;
+
+    return _encounter->getParentById(id);
+}
+
+CampaignObjectBase* BattleDialogModel::getParentById(const QUuid& id)
+{
+    if(id == getID())
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(id == _encounter->getID())
+        return _encounter;
+
+    return _encounter->getParentById(id);
 }
 
 QList<BattleDialogModelCombatant*> BattleDialogModel::getCombatantList() const
@@ -407,6 +509,10 @@ void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
     if((_map) && (_previousMap != _map) && (_combatants.count() > 0))
     {
         _map->initialize();
+
+        // TODO: Layers
+
+
         QRect mapRect(QPoint(), _map->getBackgroundImage().size());
         qDebug() << "[Battle Dialog Model] new map set in model: " << _map->getFileName() << " and setting all contents outside the map to the middle.";
         for(BattleDialogModelCombatant* combatant : _combatants)
@@ -530,6 +636,7 @@ void BattleDialogModel::sortCombatants()
 void BattleDialogModel::mapDestroyed(QObject *obj)
 {
     Q_UNUSED(obj);
+    // TODO: Layers
     setMap(nullptr, QRect());
 }
 
@@ -593,6 +700,9 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
             effect->outputXML(doc, effectsElement, targetDirectory, isExport);
     }
     element.appendChild(effectsElement);
+
+    // TODO: Layers - need a layer for markers and tokens
+    _layerScene.outputXML(doc, element, targetDirectory, isExport);
 }
 
 bool BattleDialogModel::belongsToObject(QDomElement& element)

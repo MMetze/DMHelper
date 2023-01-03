@@ -45,6 +45,7 @@ Layer* LayerGrid::clone() const
 {
     LayerGrid* newLayer = new LayerGrid(_name, _order);
 
+    copyBaseValues(newLayer);
     newLayer->_config.copyValues(_config);
 
     return newLayer;

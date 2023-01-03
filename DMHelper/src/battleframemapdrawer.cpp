@@ -17,7 +17,7 @@ BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     _glFow(nullptr),
     _cursor(),
     _gridScale(10),
-    _viewScale(10),
+    _viewWidth(10),
     _size(10),
     _erase(true),
     _smooth(true),
@@ -115,13 +115,13 @@ void BattleFrameMapDrawer::setSize(int size)
     createCursor();
 }
 
-void BattleFrameMapDrawer::setScale(int gridScale, int viewScale)
+void BattleFrameMapDrawer::setScale(int gridScale, int viewWidth)
 {
-    if((_gridScale == gridScale) && (_viewScale == viewScale))
+    if((_gridScale == gridScale) && (_viewWidth == viewWidth))
         return;
 
     _gridScale = gridScale;
-    _viewScale = viewScale;
+    _viewWidth = viewWidth;
     endPath();
     createCursor();
 }
@@ -208,7 +208,7 @@ void BattleFrameMapDrawer::endPath()
 
 void BattleFrameMapDrawer::createCursor()
 {
-    int cursorSize = _viewScale * _size / 5;
+    int cursorSize = _viewWidth * _size / 5;
     QPixmap cursorPixmap(QSize(cursorSize, cursorSize));
     cursorPixmap.fill(Qt::transparent);
     QPainter painter;

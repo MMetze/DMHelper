@@ -167,6 +167,7 @@ public slots:
     virtual void setRotation(int rotation) override;
     virtual void setBackgroundColor(const QColor& color) override;
     //virtual void reloadObject() override;
+    virtual void editLayers() override;
 
 signals:
     void characterSelected(QUuid id);

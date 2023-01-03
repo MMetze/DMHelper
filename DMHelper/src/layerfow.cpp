@@ -102,7 +102,7 @@ Layer* LayerFow::clone() const
 {
     LayerFow* newLayer = new LayerFow(_name, _imgFow.size(), _order);
 
-    newLayer->_layerVisible = _layerVisible;
+    copyBaseValues(newLayer);
     newLayer->_imgFow = _imgFow;
     //newLayer->_pixmapFow = _pixmapFow;
 
@@ -150,16 +150,12 @@ QUndoStack* LayerFow::getUndoStack() const
 
 void LayerFow::undoPaint()
 {
-    qDebug() << "[LayerFow]: undoPaint";
-
     //_mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1)
     applyPaintTo(getUndoStack()->index() - 1);
 }
 
 void LayerFow::applyPaintTo(int index, int startIndex)
 {
-    qDebug() << "[LayerFow]: applyPaintTo, index: " << index << ", startIndex: " << startIndex;
-
     if(index < startIndex)
         return;
 
@@ -394,7 +390,6 @@ QSize LayerFow::getImageSize() const
 
 void LayerFow::setImageSize(const QSize& imageSize)
 {
-    qDebug() << "[LayerFow]::setImageSize";
     if(imageSize == _imageSize)
         return;
 
@@ -435,7 +430,6 @@ void LayerFow::dmUpdate()
 
 void LayerFow::playerGLInitialize()
 {
-    qDebug() << "[LayerFow]::playerGLInitialize";
     if(_backgroundObject)
     {
         qDebug() << "[LayerFow] ERROR: playerGLInitialize called although the background object already exists!";
@@ -447,7 +441,6 @@ void LayerFow::playerGLInitialize()
 
 void LayerFow::playerGLUninitialize()
 {
-    qDebug() << "[LayerFow]::playerGLUninitialize";
     cleanupPlayer();
 }
 
@@ -459,7 +452,6 @@ bool LayerFow::playerGLUpdate()
 
 void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
-    qDebug() << "[LayerFow]::playerGLPaint";
     Q_UNUSED(projectionMatrix);
 
     if(!functions)
@@ -478,14 +470,12 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatr
 
 void LayerFow::playerGLResize(int w, int h)
 {
-    qDebug() << "[LayerFow]::playerGLResize";
     Q_UNUSED(w);
     Q_UNUSED(h);
 }
 
 void LayerFow::initialize(const QSize& layerSize)
 {
-    qDebug() << "[LayerFow]::initialize";
     if(!_imgFow.isNull())
         return;
 
@@ -499,7 +489,6 @@ void LayerFow::initialize(const QSize& layerSize)
 
 void LayerFow::uninitialize()
 {
-    qDebug() << "[LayerFow]::uninitialize";
     _imgFow = QImage();
     //_pixmapFow = QPixmap();
 }
@@ -522,7 +511,6 @@ void LayerFow::setLayerVisible(bool layerVisible)
 
 void LayerFow::updateFowInternal()
 {
-    qDebug() << "[LayerFow]::updateFowInternal";
     if(_graphicsItem)
         _graphicsItem->setPixmap(QPixmap::fromImage(_imgFow));
 
@@ -613,14 +601,12 @@ void LayerFow::cleanupDM()
 
 void LayerFow::cleanupPlayer()
 {
-    qDebug() << "[LayerFow]::cleanupPlayer";
     delete _backgroundObject;
     _backgroundObject = nullptr;
 }
 
 void LayerFow::initializeUndoStack()
 {
-    qDebug() << "[LayerFow]::initializeUndoStack";
     if(_undoItems.count() > 0)
     {
         while(_undoItems.count() > 0)

@@ -1,4 +1,4 @@
-    #ifndef DMCONSTANTS_H
+#ifndef DMCONSTANTS_H
 #define DMCONSTANTS_H
 
 #include <Qt>
@@ -156,10 +156,12 @@ namespace DMHelper
 
     enum LayerType
     {
+        LayerType_Unknown = -1,
         LayerType_Image = 0,
         LayerType_Fow,
         LayerType_Grid,
-        LayerType_Tokens
+        LayerType_Tokens,
+        LayerType_Reference
     };
 
     enum FileType

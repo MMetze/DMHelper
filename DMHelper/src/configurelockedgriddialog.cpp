@@ -33,7 +33,7 @@ ConfigureLockedGridDialog::ConfigureLockedGridDialog(QWidget *parent) :
     //      model.getGridOffsetX() - default 0
     //      model.getGridOffsetY() - default 0
     //      model.getGridAngle() - default 0
-    _model = new BattleDialogModel(QString(), this);
+    _model = new BattleDialogModel(nullptr, QString(), this);
 
     _grid = new Grid(_scene, QRect());
 }

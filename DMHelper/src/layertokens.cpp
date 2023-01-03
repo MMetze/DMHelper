@@ -19,6 +19,7 @@ void LayerTokens::inputXML(const QDomElement &element, bool isImport)
 
 QRectF LayerTokens::boundingRect() const
 {
+    return QRectF();
 }
 
 QImage LayerTokens::getLayerIcon() const
@@ -35,6 +36,7 @@ Layer* LayerTokens::clone() const
 {
     LayerTokens* newLayer = new LayerTokens(_name, _order);
 
+    copyBaseValues(newLayer);
 
     return newLayer;
 }

@@ -335,7 +335,7 @@ void EncounterBattle::removeBattleDialogModel()
 
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 {
-    if((_battleModel)||(isImport))
+    if((_battleModel) || (isImport))
         return;
 
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
@@ -349,21 +349,8 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
         return;
     }
 
-    _battleModel = new BattleDialogModel();
+    _battleModel = new BattleDialogModel(this);
     _battleModel->inputXML(rootBattleElement, isImport);
-
-    int mapIdInt = DMH_GLOBAL_INVALID_ID;
-    QUuid mapId = parseIdString(rootBattleElement.attribute("mapID"), &mapIdInt);
-    Map* battleMap = dynamic_cast<Map*>(campaign->getObjectById(mapId));
-    if(battleMap)
-    {
-        QRect mapRect(rootBattleElement.attribute("mapRectX",QString::number(0)).toInt(),
-                      rootBattleElement.attribute("mapRectY",QString::number(0)).toInt(),
-                      rootBattleElement.attribute("mapRectWidth",QString::number(0)).toInt(),
-                      rootBattleElement.attribute("mapRectHeight",QString::number(0)).toInt());
-
-        _battleModel->setMap(battleMap, mapRect);
-    }
 
     int activeIdInt = DMH_GLOBAL_INVALID_ID;
     QUuid activeId = parseIdString(rootBattleElement.attribute("activeId"), &activeIdInt, true);
@@ -529,7 +516,7 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
     if(!campaign)
         return nullptr;
 
-    BattleDialogModel* battleModel = new BattleDialogModel();
+    BattleDialogModel* battleModel = new BattleDialogModel(this);
 
     // Add the active characters
     QList<Character*> activeCharacters = campaign->getActiveCharacters();

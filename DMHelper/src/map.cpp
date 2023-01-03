@@ -1064,8 +1064,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("cameraRectWidth", _cameraRect.width());
     element.setAttribute("cameraRectHeight", _cameraRect.height());
 
-    // TODO: need a layer for markers and tokens
-
+    // TODO: Layers - need a layer for markers and tokens
     _layerScene.outputXML(doc, element, targetDirectory, isExport);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
@@ -1083,6 +1082,8 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
 {
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
     _partyId = parseIdString(element.attribute("party"));
+
+    _layerScene.postProcessXML(element, isImport);
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }

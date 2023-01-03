@@ -88,7 +88,7 @@ BattleDialogModel* BattleDialogGraphicsScene::getModel() const
     return _model;
 }
 
-void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
+void BattleDialogGraphicsScene::createBattleContents()
 {
     if(!_model)
     {
@@ -98,11 +98,11 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
 
     if(!isSceneEmpty())
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create scene contents: " << rect << ". Contents already exist!";
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create scene contents. Contents already exist!";
         return;
     }
 
-    qDebug() << "[Battle Dialog Scene] Creating scene contents: " << rect;
+    qDebug() << "[Battle Dialog Scene] Creating scene contents";
     //_grid = new Grid(*this, rect);
     //_grid->rebuildGrid(*_model);
     setDistanceScale(_model->getGridScale());
@@ -134,7 +134,7 @@ void BattleDialogGraphicsScene::createBattleContents(const QRect& rect)
     }
 }
 
-void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
+void BattleDialogGraphicsScene::resizeBattleContents()
 {
     qDebug() << "[Battle Dialog Scene] Resizing scene contents";
 
@@ -146,8 +146,8 @@ void BattleDialogGraphicsScene::resizeBattleContents(const QRect& rect)
 
     if(_grid)
     {
-        qDebug() << "[Battle Dialog Scene]     Resizing grid, grid shape = " << rect;
         // TODO: Layers Grid
+        //qDebug() << "[Battle Dialog Scene]     Resizing grid, grid shape = " << rect;
         //_grid->setGridShape(rect);
         //_grid->rebuildGrid(*_model);
     }

@@ -22,8 +22,8 @@ public:
     void setModel(BattleDialogModel* model);
     BattleDialogModel* getModel() const;
 
-    void createBattleContents(const QRect& rect);
-    void resizeBattleContents(const QRect& rect);
+    void createBattleContents();
+    void resizeBattleContents();
     void updateBattleContents();
     void scaleBattleContents();
     void clearBattleContents();

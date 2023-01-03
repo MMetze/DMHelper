@@ -4,7 +4,7 @@
 #include <QDebug>
 
 Layer::Layer(const QString& name, int order, QObject *parent) :
-    QObject{parent},
+    DMHObjectBase{parent},
     _name(name),
     _order(order),
     _layerVisible(true),
@@ -16,11 +16,12 @@ Layer::~Layer()
 {
 }
 
-void Layer::outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport)
+QDomElement Layer::outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport)
 {
     QDomElement newElement = doc.createElement("layer");
     internalOutputXML(doc, newElement, targetDirectory, isExport);
     parentElement.appendChild(newElement);
+    return newElement;
 }
 
 void Layer::inputXML(const QDomElement &element, bool isImport)
@@ -31,6 +32,8 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
     _order = element.attribute("order", QString::number(0)).toInt();
     _layerVisible = static_cast<bool>(element.attribute("visible", QString::number(1)).toInt());
     _opacity = element.attribute(QString("opacity"), QString::number(1.0)).toDouble();
+
+    DMHObjectBase::inputXML(element, isImport);
 }
 
 QRectF Layer::boundingRect() const
@@ -66,6 +69,14 @@ QImage Layer::getLayerIcon() const
 bool Layer::defaultShader() const
 {
     return true;
+}
+
+void Layer::copyBaseValues(Layer *other) const
+{
+    other->_name = _name;
+    other->_order = _order;
+    other->_layerVisible = _layerVisible;
+    other->_opacity = _opacity;
 }
 
 bool Layer::playerGLUpdate()
@@ -118,10 +129,6 @@ void Layer::setOpacity(qreal opacity)
 
 void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    Q_UNUSED(doc);
-    Q_UNUSED(targetDirectory);
-    Q_UNUSED(isExport);
-
     element.setAttribute("type", getType());
     if(_name != QString("Layer"))
         element.setAttribute("layerName", _name);
@@ -131,4 +138,6 @@ void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
         element.setAttribute("visible", _layerVisible);
     if(_opacity < 1.0)
         element.setAttribute("opacity", _opacity);
+
+    DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

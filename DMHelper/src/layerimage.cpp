@@ -81,7 +81,7 @@ Layer* LayerImage::clone() const
 {
     LayerImage* newLayer = new LayerImage(_name, _filename, _order);
 
-    newLayer->_layerVisible = _layerVisible;
+    copyBaseValues(newLayer);
     newLayer->_filterApplied = _filterApplied;
     newLayer->_filter = _filter;
 

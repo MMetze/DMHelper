@@ -1,7 +1,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include <QObject>
+#include "dmhobjectbase.h"
 #include <QRectF>
 #include <QOpenGLFunctions>
 #include <QDomElement>
@@ -32,15 +32,15 @@ class QGraphicsScene;
  *
  */
 
-class Layer : public QObject
+class Layer : public DMHObjectBase
 {
     Q_OBJECT
 public:
     Layer(const QString& name, int order = 0, QObject *parent = nullptr);
     virtual ~Layer();
 
-    virtual void outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport);
-    virtual void inputXML(const QDomElement &element, bool isImport);
+    virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport) override;
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
 
     virtual QRectF boundingRect() const;
 
@@ -53,6 +53,7 @@ public:
 
     virtual DMHelper::LayerType getType() const = 0;
     virtual Layer* clone() const = 0;
+    virtual void copyBaseValues(Layer *other) const;
 
 public slots:    
     // DM Window Generic Interface
@@ -82,7 +83,7 @@ signals:
 
 protected:
     // Layer Specific Interface
-    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport);
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     QString _name;
     int _order;

@@ -1857,7 +1857,7 @@ void MapFrame::drawEditCursor()
 void MapFrame::setScale(qreal s)
 {
     _scale = s;
-    ui->graphicsView->setTransform(QTransform::fromScale(_scale,_scale));
+    ui->graphicsView->setTransform(QTransform::fromScale(_scale, _scale));
     setMapCursor();
     storeViewRect();
 }
@@ -1934,11 +1934,11 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     if((image.isNull()) || (!_mapSource))
         return;
 
+    // TODO: Layers
     setBackgroundPixmap(QPixmap::fromImage(image));
     QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
     fowImage.fill(QColor(0,0,0,0));
     /*
-     * TODO
     _mapSource->setExternalFoWImage(fowImage);
 
     if(!_fow)
@@ -1953,7 +1953,7 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     }
     */
 
-    // TODO
+    // TODO: Layers
     //_bwFoWImage = _mapSource->getBWFoWImage(image.size());
 
     checkPartyUpdate();

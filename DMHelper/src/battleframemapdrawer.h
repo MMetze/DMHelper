@@ -30,7 +30,7 @@ public slots:
     void drawRect(const QRect& rect);
 
     void setSize(int size);
-    void setScale(int gridScale, int viewScale);
+    void setScale(int gridScale, int viewWidth);
     void fillFoW();
     void resetFoW();
     void clearFoW();
@@ -52,7 +52,7 @@ private:
     QCursor _cursor;
 
     int _gridScale;
-    int _viewScale;
+    int _viewWidth;
     int _size;
     bool _erase;
     bool _smooth;

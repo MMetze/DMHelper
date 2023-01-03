@@ -1,0 +1,66 @@
+#ifndef LAYERREFERENCE_H
+#define LAYERREFERENCE_H
+
+#include "layer.h"
+
+class Campaign;
+class CampaignObjectBase;
+
+class LayerReference : public Layer
+{
+    Q_OBJECT
+public:
+    explicit LayerReference(CampaignObjectBase* referenceObject, Layer* referenceLayer, int order = 0, QObject *parent = nullptr);
+    virtual ~LayerReference();
+
+    virtual void inputXML(const QDomElement &element, bool isImport) override;
+    void postProcessXML(Campaign* campaign, bool isImport);
+
+    virtual QRectF boundingRect() const override;
+
+    virtual QString getName() const override;
+    virtual QImage getLayerIcon() const override;
+    virtual bool defaultShader() const override;
+
+    virtual DMHelper::LayerType getType() const override;
+    virtual Layer* clone() const override;
+
+    DMHelper::LayerType getReferencedType() const;
+    Layer* getReferenceLayer();
+    CampaignObjectBase* getReferenceObject();
+
+public slots:
+    // DM Window Generic Interface
+    virtual void dmInitialize(QGraphicsScene& scene) override;
+    virtual void dmUninitialize() override;
+    virtual void dmUpdate() override;
+
+    // Player Window Generic Interface
+    virtual void playerGLInitialize() override;
+    virtual void playerGLUninitialize() override;
+    virtual bool playerGLUpdate() override;
+    virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
+    virtual void playerGLResize(int w, int h) override;
+
+    // Layer Specific Interface
+    virtual void initialize(const QSize& layerSize) override;
+    virtual void uninitialize() override;
+    virtual void setScale(int scale) override;
+
+signals:
+    void referenceDestroyed(Layer* reference);
+
+protected slots:
+    void handleReferenceDestroyed(QObject *obj);
+
+protected:
+    // Layer Specific Interface
+    virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+
+    CampaignObjectBase* _referenceObject;
+    QUuid _referenceObjectId;
+    Layer* _referenceLayer;
+    QUuid _referenceLayerId;
+};
+
+#endif // LAYERREFERENCE_H

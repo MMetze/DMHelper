@@ -9,20 +9,27 @@
 #include <QRect>
 #include <QPen>
 
+class EncounterBattle;
 class Map;
-
 
 class BattleDialogModel : public CampaignObjectBase
 {
     Q_OBJECT
 
 public:
-    explicit BattleDialogModel(const QString& name = QString(), QObject *parent = nullptr);
+    explicit BattleDialogModel(EncounterBattle* encounter, const QString& name = QString(), QObject *parent = nullptr);
     virtual ~BattleDialogModel() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual int getObjectType() const override;
+
+    virtual const CampaignObjectBase* getParentByType(int parentType) const override;
+    virtual CampaignObjectBase* getParentByType(int parentType) override;
+
+    virtual const CampaignObjectBase* getParentById(const QUuid& id) const override;
+    virtual CampaignObjectBase* getParentById(const QUuid& id) override;
 
     QList<BattleDialogModelCombatant*> getCombatantList() const;
     int getCombatantCount() const;
@@ -106,6 +113,9 @@ protected:
 
 private:
     static bool CompareCombatants(const BattleDialogModelCombatant* a, const BattleDialogModelCombatant* b);
+
+    // Encounter
+    EncounterBattle* _encounter;
 
     // Battle content values
     QList<BattleDialogModelCombatant*> _combatants;
