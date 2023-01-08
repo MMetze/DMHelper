@@ -97,6 +97,9 @@ QSizeF LayerScene::sceneSize() const
 
 int LayerScene::getScale() const
 {
+    //    LayerGrid* layer = dynamic_cast<LayerGrid*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+    //    return layer ? layer->getConfig().getGridScale() : DMHelper::STARTING_GRID_SCALE;
+
     return _scale;
 }
 
@@ -128,6 +131,8 @@ void LayerScene::insertLayer(int position, Layer* layer)
     if(_initialized)
         layer->initialize(sceneSize().toSize());
 
+    layer->setScale(_scale);
+
     if(_dmScene)
         layer->dmInitialize(*_dmScene);
 
@@ -143,6 +148,8 @@ void LayerScene::prependLayer(Layer* layer)
 
     if(_initialized)
         layer->initialize(sceneSize().toSize());
+
+    layer->setScale(_scale);
 
     if(_dmScene)
         layer->dmInitialize(*_dmScene);

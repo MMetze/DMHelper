@@ -180,7 +180,7 @@ namespace DMHelper
     const int CHARACTER_ICON_WIDTH = CHARACTER_WIDGET_HEIGHT * 4 / 3;
     const int CHARACTER_ICON_HEIGHT = CHARACTER_WIDGET_HEIGHT * 2;
 
-    const int STARTING_GRID_SCALE = 25;
+    const int STARTING_GRID_SCALE = 100;
     const int DEFAULT_GRID_COUNT = 25;
 
     const int CURSOR_SIZE = 70; // increased, was 30

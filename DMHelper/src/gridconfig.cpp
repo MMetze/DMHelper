@@ -25,7 +25,7 @@ void GridConfig::inputXML(const QDomElement &element, bool isImport)
 
     _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
     _gridType = element.attribute("gridType",QString::number(0)).toInt();
-    _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
+    _gridScale = element.attribute("gridScale",QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
     _gridAngle = element.attribute("gridAngle",QString::number(50)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
     _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();

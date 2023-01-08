@@ -413,7 +413,8 @@ void LayerFow::dmInitialize(QGraphicsScene& scene)
     _graphicsItem = scene.addPixmap(QPixmap::fromImage(_imgFow));
     if(_graphicsItem)
     {
-        _graphicsItem->setEnabled(false);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
         _graphicsItem->setZValue(getOrder());
         _graphicsItem->setOpacity(0.5);
     }

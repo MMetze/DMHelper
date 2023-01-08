@@ -51,18 +51,9 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
                          element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
                          element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
     // TODO: Layers - need this as backwards compability
-    /*
-    _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
-    _gridType = element.attribute("gridType",QString::number(0)).toInt();
-    _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
-    _gridAngle = element.attribute("gridAngle",QString::number(50)).toInt();
-    _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
-    _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
-    int gridWidth = element.attribute("gridWidth",QString::number(1)).toInt();
-    QColor gridColor = element.attribute("gridColor",QString("#000000"));
-    _gridPen = QPen(QBrush(gridColor), gridWidth);
-    _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
-    */
+    int gridScale = element.attribute("gridScale",QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
+    _layerScene.setScale(gridScale);
+
     _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
     _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
     _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
@@ -104,6 +95,24 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
                     _layerScene.appendLayer(new LayerReference(_map, layer, layer->getOrder()));
             }
         }
+
+        //use the grid Scale to seed the layer scale, if the grid is on, read the rest and create a grid layer
+        LayerGrid* gridLayer = new LayerGrid(QString("grid"));
+        gridLayer->inputXML(element, isImport);
+        _layerScene.appendLayer(gridLayer);
+
+        /*
+        _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
+        _gridType = element.attribute("gridType",QString::number(0)).toInt();
+        _gridAngle = element.attribute("gridAngle",QString::number(50)).toInt();
+        _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
+        _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
+        int gridWidth = element.attribute("gridWidth",QString::number(1)).toInt();
+        QColor gridColor = element.attribute("gridColor",QString("#000000"));
+        _gridPen = QPen(QBrush(gridColor), gridWidth);
+        _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
+        */
+
     }
 
     _layerScene.postProcessXML(element, isImport);
@@ -398,8 +407,9 @@ int BattleDialogModel::getGridScale() const
     if(!_map)
         return 1;
 
-    LayerGrid* layer = dynamic_cast<LayerGrid*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Grid));
-    return layer ? layer->getConfig().getGridScale() : DMHelper::STARTING_GRID_SCALE;
+//    LayerGrid* layer = dynamic_cast<LayerGrid*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+//    return layer ? layer->getConfig().getGridScale() : DMHelper::STARTING_GRID_SCALE;
+    return _layerScene.getScale();
 }
 
 Map* BattleDialogModel::getMap() const

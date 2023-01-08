@@ -124,7 +124,8 @@ void LayerImage::dmInitialize(QGraphicsScene& scene)
     _graphicsItem = scene.addPixmap(QPixmap::fromImage(getImage()));
     if(_graphicsItem)
     {
-        _graphicsItem->setEnabled(false);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
         _graphicsItem->setZValue(getOrder());
     }
 }
