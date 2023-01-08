@@ -138,6 +138,24 @@ Layer* LayerFow::clone() const
     return newLayer;
 }
 
+void LayerFow::applyOrder(int order)
+{
+    if(_graphicsItem)
+        _graphicsItem->setZValue(order);
+}
+
+void LayerFow::applyLayerVisible(bool layerVisible)
+{
+    if(_graphicsItem)
+        _graphicsItem->setVisible(layerVisible);
+}
+
+void LayerFow::applyOpacity(qreal opacity)
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(opacity * 0.5);
+}
+
 QImage LayerFow::getImage() const
 {
     return _imgFow;
@@ -416,8 +434,9 @@ void LayerFow::dmInitialize(QGraphicsScene& scene)
         _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
         _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
         _graphicsItem->setZValue(getOrder());
-        _graphicsItem->setOpacity(0.5);
     }
+
+    Layer::dmInitialize(scene);
 }
 
 void LayerFow::dmUninitialize()
@@ -492,22 +511,6 @@ void LayerFow::uninitialize()
 {
     _imgFow = QImage();
     //_pixmapFow = QPixmap();
-}
-
-void LayerFow::setOrder(int order)
-{
-    if(_graphicsItem)
-        _graphicsItem->setZValue(order);
-
-    Layer::setOrder(order);
-}
-
-void LayerFow::setLayerVisible(bool layerVisible)
-{
-    if(_graphicsItem)
-        _graphicsItem->setVisible(layerVisible);
-
-    Layer::setLayerVisible(layerVisible);
 }
 
 void LayerFow::updateFowInternal()

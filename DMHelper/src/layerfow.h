@@ -25,6 +25,11 @@ public:
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 
+    // Local Layer Interface (generally should call set*() versions below
+    virtual void applyOrder(int order) override;
+    virtual void applyLayerVisible(bool layerVisible) override;
+    virtual void applyOpacity(qreal opacity) override;
+
     QImage getImage() const;
 
     QUndoStack* getUndoStack() const;
@@ -65,8 +70,6 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& layerSize) override;
     virtual void uninitialize() override;
-    virtual void setOrder(int order) override;
-    virtual void setLayerVisible(bool layerVisible) override;
 
 protected slots:
     // Local Interface

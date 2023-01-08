@@ -51,6 +51,24 @@ Layer* LayerGrid::clone() const
     return newLayer;
 }
 
+void LayerGrid::applyOrder(int order)
+{
+    if(_grid)
+        _grid->setZValue(order);
+}
+
+void LayerGrid::applyLayerVisible(bool layerVisible)
+{
+    if(_grid)
+        _grid->setGridVisible(layerVisible);
+}
+
+void LayerGrid::applyOpacity(qreal opacity)
+{
+    if(_grid)
+        _grid->setGridOpacity(opacity);
+}
+
 QSize LayerGrid::getLayerSize() const
 {
     return _layerSize;
@@ -58,7 +76,6 @@ QSize LayerGrid::getLayerSize() const
 
 void LayerGrid::setLayerSize(const QSize& layerSize)
 {
-    qDebug() << "[LayerGrid]::setLayerSize";
     if(layerSize == _layerSize)
         return;
 
@@ -83,7 +100,6 @@ const GridConfig& LayerGrid::getConfig() const
 
 void LayerGrid::dmInitialize(QGraphicsScene& scene)
 {
-    qDebug() << "[LayerGrid] Grid Layer being initialized...";
     if(_grid)
     {
         qDebug() << "[LayerImage] ERROR: dmInitialize called although the grid item already exists!";
@@ -92,9 +108,12 @@ void LayerGrid::dmInitialize(QGraphicsScene& scene)
 
     _grid = new Grid(&scene, QRect(QPoint(0, 0), _layerSize));
     _grid->rebuildGrid(_config, getOrder());
-    _grid->setEnabled(false);
+    _grid->setFlag(QGraphicsItem::ItemIsMovable, false);
+    _grid->setFlag(QGraphicsItem::ItemIsSelectable, false);
     _grid->setZValue(getOrder());
     _grid->setGridOpacity(getOpacity());
+
+    Layer::dmInitialize(scene);
 }
 
 void LayerGrid::dmUninitialize()
@@ -108,7 +127,6 @@ void LayerGrid::dmUpdate()
 
 void LayerGrid::playerGLInitialize()
 {
-    qDebug() << "[LayerGrid]::playerGLInitialize";
     if(_gridObject)
     {
         qDebug() << "[LayerGrid] ERROR: playerGLInitialize called although the grid object already exists!";
@@ -120,14 +138,12 @@ void LayerGrid::playerGLInitialize()
 
 void LayerGrid::playerGLUninitialize()
 {
-    qDebug() << "[LayerGrid]::playerGLUninitialize";
     cleanupPlayer();
 }
 
 void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
     Q_UNUSED(defaultModelMatrix);
-    qDebug() << "[LayerGrid]::playerGLPaint";
 
     if((!functions) || (!projectionMatrix))
         return;
@@ -145,14 +161,12 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
 
 void LayerGrid::playerGLResize(int w, int h)
 {
-    qDebug() << "[LayerGrid]::playerGLResize";
     Q_UNUSED(w);
     Q_UNUSED(h);
 }
 
 void LayerGrid::initialize(const QSize& layerSize)
 {
-    qDebug() << "[LayerGrid]::initialize";
     if(_grid)
         return;
 
@@ -163,40 +177,14 @@ void LayerGrid::initialize(const QSize& layerSize)
 
 void LayerGrid::uninitialize()
 {
-    qDebug() << "[LayerGrid]::uninitialize";
     _layerSize = QSize();
 }
 
 void LayerGrid::setScale(int scale)
 {
-    qDebug() << "[LayerGrid]::setScale";
     _config.setGridScale(scale);
     if(_grid)
         _grid->rebuildGrid(_config, getOrder());
-}
-
-void LayerGrid::setOrder(int order)
-{
-    if(_grid)
-        _grid->setZValue(order);
-
-    Layer::setOrder(order);
-}
-
-void LayerGrid::setLayerVisible(bool layerVisible)
-{
-    if(_grid)
-        _grid->setGridVisible(layerVisible);
-
-    Layer::setLayerVisible(layerVisible);
-}
-
-void LayerGrid::setOpacity(qreal opacity)
-{
-    if(_grid)
-        _grid->setGridOpacity(opacity);
-
-    Layer::setOpacity(opacity);
 }
 
 void LayerGrid::setConfig(const GridConfig& config)
@@ -233,7 +221,6 @@ void LayerGrid::cleanupDM()
 
 void LayerGrid::cleanupPlayer()
 {
-    qDebug() << "[LayerGrid]::cleanupPlayer";
     delete _gridObject;
     _gridObject = nullptr;
 }

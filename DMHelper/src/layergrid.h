@@ -22,6 +22,11 @@ public:
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 
+    // Local Layer Interface (generally should call set*() versions below
+    virtual void applyOrder(int order) override;
+    virtual void applyLayerVisible(bool layerVisible) override;
+    virtual void applyOpacity(qreal opacity) override;
+
     QSize getLayerSize() const;
     void setLayerSize(const QSize& layerSize);
 
@@ -44,9 +49,6 @@ public slots:
     virtual void initialize(const QSize& layerSize) override;
     virtual void uninitialize() override;
     virtual void setScale(int scale) override;
-    virtual void setOrder(int order) override;
-    virtual void setLayerVisible(bool layerVisible) override;
-    virtual void setOpacity(qreal opacity) override;
 
     void setConfig(const GridConfig& config);
 

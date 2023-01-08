@@ -55,9 +55,14 @@ public:
     virtual Layer* clone() const = 0;
     virtual void copyBaseValues(Layer *other) const;
 
+    // Local Layer Interface (generally should call set*() versions below
+    virtual void applyOrder(int order) = 0;
+    virtual void applyLayerVisible(bool layerVisible) = 0;
+    virtual void applyOpacity(qreal opacity) = 0;
+
 public slots:    
     // DM Window Generic Interface
-    virtual void dmInitialize(QGraphicsScene& scene) = 0;
+    virtual void dmInitialize(QGraphicsScene& scene);
     virtual void dmUninitialize() = 0;
     virtual void dmUpdate() = 0;
 
@@ -73,6 +78,8 @@ public slots:
     virtual void uninitialize() = 0;
     virtual void setScale(int scale);
     virtual void setName(const QString& name);
+
+    // Local Layer Interface (changing references doesn't change the source layer)
     virtual void setOrder(int order);
     virtual void setLayerVisible(bool layerVisible);
     virtual void setOpacity(qreal opacity);

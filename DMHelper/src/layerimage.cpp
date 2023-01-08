@@ -88,6 +88,24 @@ Layer* LayerImage::clone() const
     return newLayer;
 }
 
+void LayerImage::applyOrder(int order)
+{
+    if(_graphicsItem)
+        _graphicsItem->setZValue(order);
+}
+
+void LayerImage::applyLayerVisible(bool layerVisible)
+{
+    if(_graphicsItem)
+        _graphicsItem->setVisible(layerVisible);
+}
+
+void LayerImage::applyOpacity(qreal opacity)
+{
+    if(_graphicsItem)
+        _graphicsItem->setOpacity(opacity);
+}
+
 QString LayerImage::getImageFile() const
 {
     return _filename;
@@ -128,6 +146,8 @@ void LayerImage::dmInitialize(QGraphicsScene& scene)
         _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
         _graphicsItem->setZValue(getOrder());
     }
+
+    Layer::dmInitialize(scene);
 }
 
 void LayerImage::dmUninitialize()
@@ -198,22 +218,6 @@ void LayerImage::initialize(const QSize& layerSize)
 void LayerImage::uninitialize()
 {
     _layerImage = QImage();
-}
-
-void LayerImage::setOrder(int order)
-{
-    if(_graphicsItem)
-        _graphicsItem->setZValue(order);
-
-    Layer::setOrder(order);
-}
-
-void LayerImage::setLayerVisible(bool layerVisible)
-{
-    if(_graphicsItem)
-        _graphicsItem->setVisible(layerVisible);
-
-    Layer::setLayerVisible(layerVisible);
 }
 
 void LayerImage::updateImage(const QImage& image)

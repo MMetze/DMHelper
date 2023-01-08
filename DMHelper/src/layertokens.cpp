@@ -41,8 +41,21 @@ Layer* LayerTokens::clone() const
     return newLayer;
 }
 
+void LayerTokens::applyOrder(int order)
+{
+}
+
+void LayerTokens::applyLayerVisible(bool layerVisible)
+{
+}
+
+void LayerTokens::applyOpacity(qreal opacity)
+{
+}
+
 void LayerTokens::dmInitialize(QGraphicsScene& scene)
 {
+    Layer::dmInitialize(scene);
 }
 
 void LayerTokens::dmUninitialize()
@@ -76,14 +89,6 @@ void LayerTokens::initialize(const QSize& layerSize)
 }
 
 void LayerTokens::uninitialize()
-{
-}
-
-void LayerTokens::setOrder(int order)
-{
-}
-
-void LayerTokens::setLayerVisible(bool layerVisible)
 {
 }
 

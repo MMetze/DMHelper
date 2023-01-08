@@ -79,9 +79,16 @@ void Layer::copyBaseValues(Layer *other) const
     other->_opacity = _opacity;
 }
 
+void Layer::dmInitialize(QGraphicsScene& scene)
+{
+    Q_UNUSED(scene);
+    applyOrder(_order);
+    applyLayerVisible(_layerVisible);
+    applyOpacity(_opacity);
+}
+
 bool Layer::playerGLUpdate()
 {
-    qDebug() << "[Layer]::playerGLUpdate";
     return false;
 }
 
@@ -104,6 +111,7 @@ void Layer::setOrder(int order)
     if(_order == order)
         return;
 
+    applyOrder(order);
     _order = order;
     emit dirty();
     emit orderChanged(order);
@@ -114,6 +122,7 @@ void Layer::setLayerVisible(bool layerVisible)
     if(_layerVisible == layerVisible)
         return;
 
+    applyLayerVisible(layerVisible);
     _layerVisible = layerVisible;
     emit dirty();
 }
@@ -123,6 +132,7 @@ void Layer::setOpacity(qreal opacity)
     if(_opacity == opacity)
         return;
 
+    applyOpacity(opacity);
     _opacity = opacity;
     emit dirty();
 }

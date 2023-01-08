@@ -110,6 +110,24 @@ Layer* LayerReference::clone() const
     return newLayer;
 }
 
+void LayerReference::applyOrder(int order)
+{
+    if(_referenceLayer)
+        _referenceLayer->applyOrder(order);
+}
+
+void LayerReference::applyLayerVisible(bool layerVisible)
+{
+    if(_referenceLayer)
+        _referenceLayer->applyLayerVisible(layerVisible);
+}
+
+void LayerReference::applyOpacity(qreal opacity)
+{
+    if(_referenceLayer)
+        _referenceLayer->applyOpacity(opacity);
+}
+
 DMHelper::LayerType LayerReference::getReferencedType() const
 {
     return _referenceLayer ? _referenceLayer->getType() : DMHelper::LayerType_Unknown;
@@ -129,6 +147,8 @@ void LayerReference::dmInitialize(QGraphicsScene& scene)
 {
     if(_referenceLayer)
         _referenceLayer->dmInitialize(scene);
+
+    Layer::dmInitialize(scene);
 }
 
 void LayerReference::dmUninitialize()
