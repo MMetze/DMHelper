@@ -14,7 +14,7 @@ public:
     virtual ~LayerReference();
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
-    void postProcessXML(Campaign* campaign, bool isImport);
+    virtual void postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport) override;
 
     virtual QRectF boundingRect() const override;
 
@@ -23,6 +23,7 @@ public:
     virtual bool defaultShader() const override;
 
     virtual DMHelper::LayerType getType() const override;
+    virtual DMHelper::LayerType getFinalType() const override;
     virtual Layer* clone() const override;
 
     // Local Layer Interface (generally should call set*() versions below
@@ -41,7 +42,7 @@ public slots:
     virtual void dmUpdate() override;
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize() override;
+    virtual void playerGLInitialize(PublishGLScene* scene) override;
     virtual void playerGLUninitialize() override;
     virtual bool playerGLUpdate() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;

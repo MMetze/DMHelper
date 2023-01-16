@@ -31,6 +31,7 @@ public:
 
     virtual void setGridShape(const QRect& gridShape);
     QRect getGridShape() const;
+    virtual void setGridZValue(int zOrder);
     virtual void setGridVisible(bool gridVisible);
     virtual void setGridOpacity(bool gridOpacity);
     virtual void clear();

@@ -13,6 +13,9 @@ CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
     DMHObjectBase(parent),
     _expanded(true),
     _row(-1)
+#ifdef QT_DEBUG
+    , _DEBUG_NAME(name)
+#endif
 {
     if(!name.isEmpty())
         setObjectName(name);
@@ -65,6 +68,9 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
     {
         setObjectName(importName);
     }
+#ifdef QT_DEBUG
+    _DEBUG_NAME = objectName();
+#endif
 
 #ifdef CAMPAIGN_OBJECT_LOGGING
     qDebug() << "[CampaignBaseObject] Inputting object started: " << getName() << ", id: " << getID();
@@ -101,7 +107,7 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
     QDomElement childElement = element.firstChildElement();
     while(!childElement.isNull())
     {
-//        if(!belongsToObject(childElement))
+        //if(!belongsToObject(childElement))
         {
             QString elTagName = childElement.tagName();
             QString elName = childElement.attribute(QString("name"));
@@ -147,6 +153,11 @@ QString CampaignObjectBase::getName() const
 int CampaignObjectBase::getRow() const
 {
     return _row;
+}
+
+bool CampaignObjectBase::isTreeVisible() const
+{
+    return true;
 }
 
 const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
@@ -359,6 +370,9 @@ void CampaignObjectBase::setName(const QString& name)
     if(objectName() != name)
     {
         setObjectName(name);
+#ifdef QT_DEBUG
+        _DEBUG_NAME = name;
+#endif
         emit nameChanged(this, objectName());
         handleInternalChange();
     }

@@ -5,6 +5,7 @@
 #include "map.h"
 #include "grid.h"
 #include "layergrid.h"
+#include "layertokens.h"
 #include "layerreference.h"
 #include "encounterbattle.h"
 #include <QDebug>
@@ -14,7 +15,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _encounter(encounter),
     _combatants(),
     _effects(),
-    _layerScene(),
+    _layerScene(this),
     _map(nullptr),
     _mapRect(),
     _previousMap(nullptr),
@@ -79,7 +80,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         }
     }
 
-    QDomElement layersElement = element.firstChildElement(QString("layerScene"));
+    QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
     if(!layersElement.isNull())
     {
         _layerScene.inputXML(layersElement, isImport);
@@ -97,9 +98,25 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         }
 
         //use the grid Scale to seed the layer scale, if the grid is on, read the rest and create a grid layer
-        LayerGrid* gridLayer = new LayerGrid(QString("grid"));
+        LayerGrid* gridLayer = new LayerGrid();
         gridLayer->inputXML(element, isImport);
-        _layerScene.appendLayer(gridLayer);
+        gridLayer->setName(QString("grid"));
+
+        LayerTokens* tokenLayer = new LayerTokens(this);
+        tokenLayer->inputXML(element, isImport);
+        tokenLayer->setName(QString("tokens"));
+
+        int fowPosition = _layerScene.getFirstIndex(DMHelper::LayerType_Fow);
+        if(fowPosition == -1)
+        {
+            _layerScene.appendLayer(gridLayer);
+            _layerScene.appendLayer(tokenLayer);
+        }
+        else
+        {
+            _layerScene.insertLayer(fowPosition, tokenLayer);
+            _layerScene.insertLayer(fowPosition, gridLayer);
+        }
 
         /*
         _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
@@ -281,6 +298,12 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
         return;
 
     _combatants.append(combatant);
+    // TODO: Layers - need to make the connections below as well
+    LayerTokens* layer = dynamic_cast<LayerTokens*>(_layerScene.getPriority(DMHelper::LayerType_Tokens));
+    if(!layer)
+        return;
+
+    layer->addCombatant(combatant);
 
     // For a character addition, connect to the destroyed signal
     if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
@@ -298,11 +321,13 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
     emit dirty();
 }
 
+/*
 void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
 {
     for(BattleDialogModelCombatant* combatant : combatants)
         appendCombatant(combatant);
 }
+*/
 
 bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
 {
@@ -695,6 +720,10 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
 
     _logger.outputXML(doc, element, targetDirectory, isExport);
 
+    // TODO: Layers - need a layer for markers and tokens
+    _layerScene.outputXML(doc, element, targetDirectory, isExport);
+
+    /*
     QDomElement combatantsElement = doc.createElement("combatants");
     for(BattleDialogModelCombatant* combatant : _combatants)
     {
@@ -702,6 +731,7 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
             combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
     }
     element.appendChild(combatantsElement);
+    */
 
     QDomElement effectsElement = doc.createElement("effects");
     for(BattleDialogModelEffect* effect : _effects)
@@ -710,9 +740,6 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
             effect->outputXML(doc, effectsElement, targetDirectory, isExport);
     }
     element.appendChild(effectsElement);
-
-    // TODO: Layers - need a layer for markers and tokens
-    _layerScene.outputXML(doc, element, targetDirectory, isExport);
 }
 
 bool BattleDialogModel::belongsToObject(QDomElement& element)

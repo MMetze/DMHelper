@@ -30,6 +30,15 @@ QRect Grid::getGridShape() const
     return _gridShape;
 }
 
+void Grid::setGridZValue(int zOrder)
+{
+    for(int i = 0; i < _grid.count(); ++i)
+    {
+        if(_grid[i])
+            _grid[i]->setZValue(zOrder);
+    }
+}
+
 void Grid::setGridVisible(bool gridVisible)
 {
     for(int i = 0; i < _grid.count(); ++i)

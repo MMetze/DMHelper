@@ -24,6 +24,7 @@ LayerGrid::~LayerGrid()
 void LayerGrid::inputXML(const QDomElement &element, bool isImport)
 {
     _config.inputXML(element, isImport);
+    Layer::inputXML(element, isImport);
 }
 
 QImage LayerGrid::getLayerIcon() const
@@ -54,7 +55,7 @@ Layer* LayerGrid::clone() const
 void LayerGrid::applyOrder(int order)
 {
     if(_grid)
-        _grid->setZValue(order);
+        _grid->setGridZValue(order);
 }
 
 void LayerGrid::applyLayerVisible(bool layerVisible)
@@ -125,8 +126,10 @@ void LayerGrid::dmUpdate()
 {
 }
 
-void LayerGrid::playerGLInitialize()
+void LayerGrid::playerGLInitialize(PublishGLScene* scene)
 {
+    Q_UNUSED(scene);
+
     if(_gridObject)
     {
         qDebug() << "[LayerGrid] ERROR: playerGLInitialize called although the grid object already exists!";
@@ -150,7 +153,7 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
 
     if(!_gridObject)
     {
-        playerGLInitialize();
+        playerGLInitialize(nullptr);
         if(!_gridObject)
             return;
     }

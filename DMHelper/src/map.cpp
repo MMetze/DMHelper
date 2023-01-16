@@ -36,7 +36,7 @@ Map::Map(const QString& mapName, QObject *parent) :
     _showMarkers(true),
     _mapItems(),
     _initialized(false),
-    _layerScene(),
+    _layerScene(this),
     //_imgBackground(),
     //_imgFow(),
     _undoItems(),
@@ -87,7 +87,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     _mapScale = element.attribute("mapScale", QString::number(100)).toInt();
     _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
-    QDomElement layersElement = element.firstChildElement(QString("layerScene"));
+    QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
     if(!layersElement.isNull())
     {
         _layerScene.inputXML(layersElement, isImport);
@@ -1072,7 +1072,7 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
 
 bool Map::belongsToObject(QDomElement& element)
 {
-    if((element.tagName() == QString("actions")) || (element.tagName() == QString("layerScene")))
+    if((element.tagName() == QString("actions")) || (element.tagName() == QString("layer-scene")))
         return true;
     else
         return CampaignObjectBase::belongsToObject(element);

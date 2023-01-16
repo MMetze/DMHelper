@@ -448,7 +448,7 @@ void LayerFow::dmUpdate()
 {
 }
 
-void LayerFow::playerGLInitialize()
+void LayerFow::playerGLInitialize(PublishGLScene* scene)
 {
     if(_backgroundObject)
     {
@@ -479,7 +479,7 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatr
 
     if(!_backgroundObject)
     {
-        playerGLInitialize();
+        playerGLInitialize(nullptr);
         if(!_backgroundObject)
             return;
     }

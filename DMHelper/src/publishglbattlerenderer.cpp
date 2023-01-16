@@ -39,10 +39,6 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _shaderModelMatrixRGBColor(0),
     _shaderProjectionMatrixRGBColor(0),
     _shaderRGBColor(0),
-    _gridImage(),
-    _gridObject(nullptr),
-    _fowImage(),
-    _fowObject(nullptr),
     _combatantTokens(),
     _combatantNames(),
     _unknownToken(nullptr),
@@ -73,7 +69,6 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _lineText(nullptr),
     _lineImage(nullptr),
     _lineTextImage(nullptr),
-    _updateFow(false),
     _updateSelectionTokens(false),
     _updateInitiative(false),
     _recreateContent(false)
@@ -155,6 +150,8 @@ void PublishGLBattleRenderer::initializeGL()
     if(isBackgroundReady())
         createContents();
 
+    _model->getLayerScene().playerGLInitialize(&_scene);
+
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
@@ -224,16 +221,11 @@ void PublishGLBattleRenderer::paintGL()
     }
     else
     {
-        updateGrid();
-
         if(_updateSelectionTokens)
             updateSelectionTokens();
 
         if(_updateInitiative)
             updateInitiative();
-
-        if(_updateFow)
-            updateFoW();
 
         if(_recreateLine)
             createLineToken();
@@ -261,6 +253,9 @@ void PublishGLBattleRenderer::paintGL()
     f->glClearColor(_model->getBackgroundColor().redF(), _model->getBackgroundColor().greenF(), _model->getBackgroundColor().blueF(), 1.0f);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    _model->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
+
+    /*
     paintBackground(f);
 
     if(_gridObject)
@@ -320,6 +315,7 @@ void PublishGLBattleRenderer::paintGL()
     }
 
     paintTokens(f, true);
+    */
 
     if(_lineImage)
     {
@@ -341,16 +337,6 @@ void PublishGLBattleRenderer::paintGL()
     paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrixRGB);
 }
 
-void PublishGLBattleRenderer::fowChanged(const QImage& glFow)
-{
-    if(glFow.isNull())
-        return;
-
-    _fowImage = glFow;
-    _updateFow = true;
-    emit updateWidget();
-}
-
 void PublishGLBattleRenderer::setCameraRect(const QRectF& cameraRect)
 {
     if(_cameraRect != cameraRect)
@@ -359,18 +345,6 @@ void PublishGLBattleRenderer::setCameraRect(const QRectF& cameraRect)
         updateProjectionMatrix();
         emit updateWidget();
     }
-}
-
-void PublishGLBattleRenderer::setGrid(QImage gridImage)
-{
-    if(gridImage == _gridImage)
-        return;
-
-    _gridImage = gridImage;
-    delete _gridObject;
-    _gridObject = nullptr;
-
-    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
@@ -575,34 +549,6 @@ void PublishGLBattleRenderer::updateBackground()
 {
 }
 
-void PublishGLBattleRenderer::updateGrid()
-{
-    if((_gridObject) || (_gridImage.isNull()))
-        return;
-
-    qDebug() << "[PublishGLBattleRenderer] Updating Grid";
-    _gridObject = new PublishGLImage(_gridImage);
-}
-
-void PublishGLBattleRenderer::updateFoW()
-{
-    if((!_model) || (!_model->getMap()) || (_fowImage.isNull()))
-        return;
-
-    qDebug() << "[PublishGLBattleRenderer] Updating Fog of War";
-
-    QSize backgroundSize = getBackgroundSize().toSize();
-    if(backgroundSize.isEmpty())
-        return;
-
-    if(_fowObject)
-        _fowObject->setImage(_fowImage);
-    else
-        _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
-
-    _updateFow = false;
-}
-
 void PublishGLBattleRenderer::updateSelectionTokens()
 {
     qDebug() << "[PublishGLBattleRenderer] Updating Selection Tokens";
@@ -644,8 +590,6 @@ void PublishGLBattleRenderer::createContents()
 
     qDebug() << "[PublishGLBattleRenderer] Creating all battle content";
 
-    updateFoW();
-    updateGrid();
     updateSelectionTokens();
     createLineToken();
 
@@ -716,8 +660,6 @@ void PublishGLBattleRenderer::createContents()
 
 void PublishGLBattleRenderer::cleanupContents()
 {
-    delete _gridObject; _gridObject = nullptr;
-    delete _fowObject; _fowObject = nullptr;
     delete _selectionToken; _selectionToken = nullptr;
     delete _activeToken; _activeToken = nullptr;
     delete _unknownToken; _unknownToken = nullptr;

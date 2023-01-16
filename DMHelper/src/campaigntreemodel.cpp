@@ -323,7 +323,8 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     QList<CampaignObjectBase*> childObjects = object->getChildObjects();
     for(CampaignObjectBase* childObject : childObjects)
     {
-        createTreeEntry(childObject, treeEntry);
+        if(childObject->isTreeVisible())
+            createTreeEntry(childObject, treeEntry);
     }
 
     updateChildRows(treeEntry);

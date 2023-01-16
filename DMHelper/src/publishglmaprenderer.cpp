@@ -200,7 +200,7 @@ void PublishGLMapRenderer::initializeGL()
 
     // Create the objects
     //initializeBackground();
-    _map->getLayerScene().playerGLInitialize();
+    _map->getLayerScene().playerGLInitialize(nullptr);
     updateProjectionMatrix();
     updateFoW();
 

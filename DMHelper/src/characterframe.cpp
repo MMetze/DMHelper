@@ -666,7 +666,7 @@ void CharacterFrame::clearConditionGrid()
     if(!_conditionGrid)
         return;
 
-    qDebug() << "[BattleCombatantFrame] Clearing the condition grid";
+    qDebug() << "[CharacterFrame] Clearing the condition grid";
 
     // Delete the grid entries
     QLayoutItem *child = nullptr;

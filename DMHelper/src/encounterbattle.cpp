@@ -1,6 +1,5 @@
 #include "encounterbattle.h"
 #include "dmconstants.h"
-#include "encounterbattleedit.h"
 #include "battleframe.h"
 #include "combatant.h"
 #include "combatantfactory.h"
@@ -352,9 +351,11 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
     _battleModel = new BattleDialogModel(this);
     _battleModel->inputXML(rootBattleElement, isImport);
 
+    // Todo: Layers - include active ID
     int activeIdInt = DMH_GLOBAL_INVALID_ID;
     QUuid activeId = parseIdString(rootBattleElement.attribute("activeId"), &activeIdInt, true);
 
+    /*
     QDomElement combatantsElement = rootBattleElement.firstChildElement("combatants");
     if(!combatantsElement.isNull())
     {
@@ -422,6 +423,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             combatantElement = combatantElement.nextSiblingElement();
         }
     }
+    */
 
     inputXMLEffects(rootBattleElement.firstChildElement("effects"), isImport);
 }

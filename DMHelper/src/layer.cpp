@@ -36,6 +36,13 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
     DMHObjectBase::inputXML(element, isImport);
 }
 
+void Layer::postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(campaign);
+    Q_UNUSED(element);
+    Q_UNUSED(isImport);
+}
+
 QRectF Layer::boundingRect() const
 {
     return QRectF();
@@ -69,6 +76,11 @@ QImage Layer::getLayerIcon() const
 bool Layer::defaultShader() const
 {
     return true;
+}
+
+DMHelper::LayerType Layer::getFinalType() const
+{
+    return getType();
 }
 
 void Layer::copyBaseValues(Layer *other) const

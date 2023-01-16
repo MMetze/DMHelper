@@ -9,7 +9,7 @@
 #include <QPixmap>
 #include <QPainter>
 
-PublishGLBattleEffect::PublishGLBattleEffect(PublishGLBattleScene* scene, BattleDialogModelEffect* effect) :
+PublishGLBattleEffect::PublishGLBattleEffect(PublishGLScene* scene, BattleDialogModelEffect* effect) :
     PublishGLBattleObject(scene),
     _effect(effect),
     _childEffect(nullptr),

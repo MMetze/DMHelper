@@ -28,6 +28,7 @@ public:
     virtual bool getExpanded() const;
     virtual QString getName() const;
     virtual int getRow() const;
+    virtual bool isTreeVisible() const;
 
     const QList<CampaignObjectBase*> getChildObjects() const;
     QList<CampaignObjectBase*> getChildObjects();
@@ -77,6 +78,9 @@ protected:
 
     bool _expanded;
     int _row;
+#ifdef QT_DEBUG
+    QString _DEBUG_NAME;
+#endif
 };
 
 Q_DECLARE_METATYPE(CampaignObjectBase*)

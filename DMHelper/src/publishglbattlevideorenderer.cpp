@@ -64,7 +64,6 @@ void PublishGLBattleVideoRenderer::handleScreenshotReady(const QImage& image)
         return;
 
     _backgroundImage = image;
-    _updateFow = true;
     emit updateWidget();
     initializationComplete();
 }
@@ -142,7 +141,6 @@ void PublishGLBattleVideoRenderer::updateBackground()
     if((!_backgroundObject) && (!_backgroundImage.isNull()))
     {
         _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
-        updateFoW();
         updateProjectionMatrix();
     }
 #else

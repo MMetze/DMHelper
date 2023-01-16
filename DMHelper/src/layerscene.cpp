@@ -63,6 +63,33 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
     }
 }
 
+void LayerScene::postProcessXML(const QDomElement &element, bool isImport)
+{
+    Q_UNUSED(element);
+
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+    {
+        qDebug() << "[LayerScene] ERROR in postProcessXML: could not find campaign pointer!";
+        return;
+    }
+
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if(_layers.at(i))
+        {
+            _layers.at(i)->postProcessXML(campaign, element, isImport);
+
+            if(_layers.at(i)->getType() == DMHelper::LayerType_Reference)
+            {
+                LayerReference* referenceLayer = dynamic_cast<LayerReference*>(_layers[i]);
+                if(referenceLayer)
+                    connect(referenceLayer, &LayerReference::referenceDestroyed, this, QOverload<Layer*>::of(&LayerScene::removeLayer));
+            }
+        }
+    }
+}
+
 void LayerScene::copyValues(const CampaignObjectBase* other)
 {
     const LayerScene* otherScene = dynamic_cast<const LayerScene*>(other);
@@ -78,6 +105,11 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
         _layers.append(otherScene->_layers[i]->clone());
 
     CampaignObjectBase::copyValues(other);
+}
+
+bool LayerScene::isTreeVisible() const
+{
+    return false;
 }
 
 QRectF LayerScene::boundingRect() const
@@ -252,21 +284,41 @@ void LayerScene::setSelectedLayer(Layer* layer)
 Layer* LayerScene::getPriority(DMHelper::LayerType type) const
 {
     Layer* result = getSelectedLayer();
-    if((result) && (result->getType() == type))
+    if((result) && (result->getFinalType() == type))
         return result;
     else
         return getFirst(type);
+}
+
+int LayerScene::getPriorityIndex(DMHelper::LayerType type) const
+{
+    Layer* result = getSelectedLayer();
+    if((result) && (result->getFinalType() == type))
+        return result->getOrder();
+    else
+        return getFirstIndex(type);
 }
 
 Layer* LayerScene::getFirst(DMHelper::LayerType type) const
 {
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if((_layers.at(i)) && (_layers.at(i)->getType() == type))
+        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
             return _layers.at(i);
     }
 
     return nullptr;
+}
+
+int LayerScene::getFirstIndex(DMHelper::LayerType type) const
+{
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
+            return i;
+    }
+
+    return -1;
 }
 
 QImage LayerScene::mergedImage()
@@ -276,9 +328,20 @@ QImage LayerScene::mergedImage()
     // TODO: add different layer types here
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if((_layers.at(i)) && (_layers.at(i)->getType() == DMHelper::LayerType_Image))
+        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == DMHelper::LayerType_Image))
         {
-            LayerImage* layerImage = dynamic_cast<LayerImage*>(_layers.at(i));
+            LayerImage* layerImage = nullptr;
+            if(_layers.at(i)->getType() == DMHelper::LayerType_Image)
+            {
+                layerImage = dynamic_cast<LayerImage*>(_layers.at(i));
+            }
+            else if(_layers.at(i)->getType() == DMHelper::LayerType_Reference)
+            {
+                LayerReference* layerReference = dynamic_cast<LayerReference*>(_layers.at(i));
+                if(layerReference)
+                    layerImage = dynamic_cast<LayerImage*>(layerReference->getReferenceLayer());
+            }
+
             if(layerImage)
             {
                 if(result.isNull())
@@ -307,7 +370,7 @@ void LayerScene::initializeLayers()
     // First initialize images to find the size of the scene
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if(_layers[i]->getType() == DMHelper::LayerType_Image)
+        if(_layers[i]->getFinalType() == DMHelper::LayerType_Image)
             _layers[i]->initialize(currentSize);
     }
 
@@ -316,7 +379,7 @@ void LayerScene::initializeLayers()
     // Initialize other layers, telling them how big they should be
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if(_layers[i]->getType() != DMHelper::LayerType_Image)
+        if(_layers[i]->getFinalType() != DMHelper::LayerType_Image)
             _layers[i]->initialize(currentSize);
     }
 
@@ -362,11 +425,11 @@ void LayerScene::dmUpdate()
         _layers[i]->dmUpdate();
 }
 
-void LayerScene::playerGLInitialize()
+void LayerScene::playerGLInitialize(PublishGLScene* scene)
 {
     initializeLayers();
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->playerGLInitialize();
+        _layers[i]->playerGLInitialize(scene);
 }
 
 void LayerScene::playerGLUninitialize()
@@ -421,7 +484,7 @@ void LayerScene::removeLayer(Layer* reference)
 
 QDomElement LayerScene::createOutputXML(QDomDocument &doc)
 {
-    return doc.createElement("layerScene");
+    return doc.createElement("layer-scene");
 }
 
 void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -431,29 +494,6 @@ void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
 
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->outputXML(doc, element, targetDirectory, isExport);
-}
-
-void LayerScene::internalPostProcessXML(const QDomElement &element, bool isImport)
-{
-    Q_UNUSED(element);
-
-    Campaign* campaign = nullptr;
-
-    for(int i = 0; i < _layers.count(); ++i)
-    {
-        if(_layers.at(i)->getType() == DMHelper::LayerType_Reference)
-        {
-            if(!campaign)
-                campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
-
-            LayerReference* referenceLayer = dynamic_cast<LayerReference*>(_layers[i]);
-            if(referenceLayer)
-            {
-                referenceLayer->postProcessXML(campaign, isImport);
-                connect(referenceLayer, &LayerReference::referenceDestroyed, this, QOverload<Layer*>::of(&LayerScene::removeLayer));
-            }
-        }
-    }
 }
 
 void LayerScene::resetLayerOrders()

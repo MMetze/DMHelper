@@ -2,7 +2,7 @@
 #define PUBLISHGLBATTLERENDERER_H
 
 #include "publishglrenderer.h"
-#include "publishglbattlescene.h"
+#include "publishglscene.h"
 #include <QList>
 #include <QHash>
 #include <QImage>
@@ -43,9 +43,7 @@ public:
     virtual void paintGL() override;
 
 public slots:
-    void fowChanged(const QImage& glFow);
     void setCameraRect(const QRectF& cameraRect);
-    void setGrid(QImage gridImage);
     void setInitiativeType(int initiativeType);
 
     void distanceChanged(const QString& distance);
@@ -73,8 +71,6 @@ protected:
     virtual void paintTokens(QOpenGLFunctions* functions, bool drawPCs);
     virtual void updateBackground();
 
-    virtual void updateGrid();
-    virtual void updateFoW();
     virtual void updateSelectionTokens();
     virtual void createContents();
     void cleanupContents();
@@ -94,7 +90,7 @@ protected slots:
 protected:
     bool _initialized;
     BattleDialogModel* _model;
-    PublishGLBattleScene _scene;
+    PublishGLScene _scene;
 
     QMatrix4x4 _projectionMatrix;
     QRectF _cameraRect;
@@ -111,11 +107,6 @@ protected:
     int _shaderProjectionMatrixRGBColor;
     int _shaderRGBColor;
 
-    QImage _gridImage;
-    PublishGLImage* _gridObject;
-
-    QImage _fowImage;
-    PublishGLBattleBackground* _fowObject;
     QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
     PublishGLImage* _unknownToken;
@@ -151,7 +142,6 @@ protected:
     PublishGLImage* _lineImage;
     PublishGLImage* _lineTextImage;
 
-    bool _updateFow;
     bool _updateSelectionTokens;
     bool _updateInitiative;
     bool _recreateContent;

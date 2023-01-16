@@ -27,8 +27,9 @@ void LayerReference::inputXML(const QDomElement &element, bool isImport)
     _referenceLayerId = QUuid(element.attribute("layerId"));
 }
 
-void LayerReference::postProcessXML(Campaign* campaign, bool isImport)
+void LayerReference::postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport)
 {
+    Q_UNUSED(element);
     Q_UNUSED(isImport);
 
     if(!campaign)
@@ -99,6 +100,11 @@ DMHelper::LayerType LayerReference::getType() const
     return DMHelper::LayerType_Reference;
 }
 
+DMHelper::LayerType LayerReference::getFinalType() const
+{
+    return getReferencedType();
+}
+
 Layer* LayerReference::clone() const
 {
     LayerReference* newLayer = new LayerReference(_referenceObject, _referenceLayer, _order);
@@ -163,10 +169,10 @@ void LayerReference::dmUpdate()
         _referenceLayer->dmUpdate();
 }
 
-void LayerReference::playerGLInitialize()
+void LayerReference::playerGLInitialize(PublishGLScene* scene)
 {
     if(_referenceLayer)
-        _referenceLayer->playerGLInitialize();
+        _referenceLayer->playerGLInitialize(scene);
 }
 
 void LayerReference::playerGLUninitialize()

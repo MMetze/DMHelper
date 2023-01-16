@@ -8,6 +8,7 @@
 
 class Layer;
 class QGraphicsScene;
+class PublishGLScene;
 
 class LayerScene : public CampaignObjectBase
 {
@@ -18,7 +19,9 @@ public:
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual bool isTreeVisible() const override;
 
     // Local
     virtual QRectF boundingRect() const;
@@ -43,7 +46,9 @@ public:
     void setSelectedLayer(Layer* layer);
 
     Layer* getPriority(DMHelper::LayerType type) const;
+    int getPriorityIndex(DMHelper::LayerType type) const;
     Layer* getFirst(DMHelper::LayerType type) const;
+    int getFirstIndex(DMHelper::LayerType type) const;
     QImage mergedImage();
 
 public slots:
@@ -57,7 +62,7 @@ public slots:
     virtual void dmUpdate();
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize();
+    virtual void playerGLInitialize(PublishGLScene* scene);
     virtual void playerGLUninitialize();
     virtual bool playerGLUpdate();
     virtual void playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderProgram, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
@@ -72,7 +77,6 @@ protected:
     // From CampaignObjectBase
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
-    virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
     // Local
     void resetLayerOrders();

@@ -8,7 +8,7 @@
 #include <QImage>
 #include <QPixmap>
 
-PublishGLBattleToken::PublishGLBattleToken(PublishGLBattleScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
+PublishGLBattleToken::PublishGLBattleToken(PublishGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
     PublishGLBattleObject(scene),
     _combatant(combatant),
     _VAO(0),

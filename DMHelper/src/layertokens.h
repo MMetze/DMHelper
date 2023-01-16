@@ -2,15 +2,22 @@
 #define LAYERTOKENS_H
 
 #include "layer.h"
+#include <QHash>
+
+class BattleDialogModel;
+class BattleDialogModelCombatant;
+class PublishGLBattleToken;
+class QGraphicsPixmapItem;
 
 class LayerTokens : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerTokens(const QString& name = QString(), int order = 0, QObject *parent = nullptr);
+    explicit LayerTokens(BattleDialogModel* model, const QString& name = QString(), int order = 0, QObject *parent = nullptr);
     virtual ~LayerTokens() override;
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport) override;
 
     virtual QRectF boundingRect() const override;
     virtual QImage getLayerIcon() const override;
@@ -29,7 +36,7 @@ public slots:
     virtual void dmUpdate() override;
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize() override;
+    virtual void playerGLInitialize(PublishGLScene* scene) override;
     virtual void playerGLUninitialize() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerGLResize(int w, int h) override;
@@ -37,8 +44,10 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& layerSize) override;
     virtual void uninitialize() override;
+    virtual void setScale(int scale) override;
 
     // Local Interface
+    void addCombatant(BattleDialogModelCombatant* combatant);
 
 signals:
 
@@ -51,6 +60,7 @@ protected:
 
     // DM Window Methods
     void cleanupDM();
+    void createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCombatant* combatant);
 
     // Player Window Methods
     void cleanupPlayer();
@@ -58,8 +68,15 @@ protected:
     // DM Window Members
 
     // Player Window Members
+    PublishGLScene* _glScene;
 
     // Core contents
+    BattleDialogModel* _model;
+    QList<BattleDialogModelCombatant*> _combatants;
+    QHash<QString, PublishGLBattleToken*> _tokens;
+    QHash<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
+    QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
+    int _scale;
 
 };
 

@@ -12,6 +12,9 @@
 class EncounterBattle;
 class Map;
 
+// TODO: Layers - probably remove this
+class LayerTokens;
+
 class BattleDialogModel : public CampaignObjectBase
 {
     Q_OBJECT
@@ -38,7 +41,7 @@ public:
     void insertCombatant(int index, BattleDialogModelCombatant* combatant);
     BattleDialogModelCombatant* removeCombatant(int index);
     void appendCombatant(BattleDialogModelCombatant* combatant);
-    void appendCombatants(QList<BattleDialogModelCombatant*> combatants);
+//    void appendCombatants(QList<BattleDialogModelCombatant*> combatants);
     bool isCombatantInList(Combatant* combatant) const;
 
     QList<BattleDialogModelEffect*> getEffectList() const;

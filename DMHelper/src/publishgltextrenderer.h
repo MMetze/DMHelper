@@ -2,7 +2,7 @@
 #define PUBLISHGLTEXTRENDERER_H
 
 #include "publishglrenderer.h"
-#include "publishglbattlescene.h"
+#include "publishglscene.h"
 #include <QImage>
 #include <QElapsedTimer>
 #include <QMatrix4x4>
@@ -71,7 +71,7 @@ protected:
     QSize _targetSize;
     QColor _color;
     QImage _textImage;
-    PublishGLBattleScene _scene;
+    PublishGLScene _scene;
     bool _initialized;
     unsigned int _shaderProgram;
     int _shaderModelMatrix;

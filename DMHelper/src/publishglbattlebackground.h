@@ -8,7 +8,7 @@ class PublishGLBattleBackground : public PublishGLBattleObject
     Q_OBJECT
 
 public:
-    PublishGLBattleBackground(PublishGLBattleScene* scene, const QImage& image, int textureParam);
+    PublishGLBattleBackground(PublishGLScene* scene, const QImage& image, int textureParam);
     virtual ~PublishGLBattleBackground() override;
 
     virtual void cleanup() override;

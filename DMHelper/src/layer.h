@@ -9,6 +9,7 @@
 #include "dmconstants.h"
 
 class QGraphicsScene;
+class PublishGLScene;
 
 /*
  *
@@ -41,6 +42,7 @@ public:
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
+    virtual void postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport);
 
     virtual QRectF boundingRect() const;
 
@@ -52,6 +54,7 @@ public:
     virtual bool defaultShader() const;
 
     virtual DMHelper::LayerType getType() const = 0;
+    virtual DMHelper::LayerType getFinalType() const;
     virtual Layer* clone() const = 0;
     virtual void copyBaseValues(Layer *other) const;
 
@@ -67,7 +70,7 @@ public slots:
     virtual void dmUpdate() = 0;
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize() = 0;
+    virtual void playerGLInitialize(PublishGLScene* scene) = 0;
     virtual void playerGLUninitialize() = 0;
     virtual bool playerGLUpdate();
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) = 0;

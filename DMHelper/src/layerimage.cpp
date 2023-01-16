@@ -159,7 +159,7 @@ void LayerImage::dmUpdate()
 {
 }
 
-void LayerImage::playerGLInitialize()
+void LayerImage::playerGLInitialize(PublishGLScene* scene)
 {
     if(_backgroundObject)
     {
@@ -184,7 +184,7 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 
     if(!_backgroundObject)
     {
-        playerGLInitialize();
+        playerGLInitialize(nullptr);
         if(!_backgroundObject)
             return;
     }

@@ -41,7 +41,7 @@ public slots:
     virtual void dmUpdate() override;
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize() override;
+    virtual void playerGLInitialize(PublishGLScene* scene) override;
     virtual void playerGLUninitialize() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerGLResize(int w, int h) override;

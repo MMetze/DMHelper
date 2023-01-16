@@ -13,7 +13,7 @@ class PublishGLBattleToken : public PublishGLBattleObject
     Q_OBJECT
 
 public:
-    PublishGLBattleToken(PublishGLBattleScene* scene, BattleDialogModelCombatant* combatant, bool isPC = false);
+    PublishGLBattleToken(PublishGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC = false);
     virtual ~PublishGLBattleToken() override;
 
     virtual void cleanup() override;

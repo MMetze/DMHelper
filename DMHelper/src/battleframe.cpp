@@ -688,7 +688,7 @@ void BattleFrame::setGridScale(int gridScale)
     _scene->updateBattleContents();
 
     ui->graphicsView->update();
-    updateRendererGrid();
+    //updateRendererGrid();
 }
 
 void BattleFrame::selectGridCount()
@@ -718,7 +718,7 @@ void BattleFrame::setGridAngle(int gridAngle)
     //_model->setGridAngle(gridAngle);
     _scene->updateBattleContents();
     ui->graphicsView->update();
-    updateRendererGrid();
+    //updateRendererGrid();
 }
 
 void BattleFrame::setGridType(int gridType)
@@ -733,7 +733,7 @@ void BattleFrame::setGridType(int gridType)
     //_model->setGridType(gridType);
     _scene->updateBattleContents();
     ui->graphicsView->update();
-    updateRendererGrid();
+    //updateRendererGrid();
 }
 
 void BattleFrame::setXOffset(int xOffset)
@@ -748,7 +748,7 @@ void BattleFrame::setXOffset(int xOffset)
     //_model->setGridOffsetX(xOffset);
     _scene->updateBattleContents();
     ui->graphicsView->update();
-    updateRendererGrid();
+    //updateRendererGrid();
 }
 
 void BattleFrame::setYOffset(int yOffset)
@@ -763,7 +763,7 @@ void BattleFrame::setYOffset(int yOffset)
     //_model->setGridOffsetY(yOffset);
     _scene->updateBattleContents();
     ui->graphicsView->update();
-    updateRendererGrid();
+    //updateRendererGrid();
 }
 
 void BattleFrame::setGridWidth(int gridWidth)
@@ -778,7 +778,7 @@ void BattleFrame::setGridWidth(int gridWidth)
     //_model->setGridWidth(gridWidth);
     _scene->updateBattleContents();
     ui->graphicsView->update();
-    updateRendererGrid();
+    //updateRendererGrid();
 }
 
 void BattleFrame::setGridColor(const QColor& gridColor)
@@ -793,7 +793,7 @@ void BattleFrame::setGridColor(const QColor& gridColor)
     //_model->setGridColor(gridColor);
     _scene->updateBattleContents();
     ui->graphicsView->update();
-    updateRendererGrid();
+    //updateRendererGrid();
 }
 
 void BattleFrame::setGridVisible(bool gridVisible)
@@ -2717,8 +2717,9 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     if((!renderer) || (!_battle) || (renderer->getObject() != _battle->getBattleDialogModel()))
         return;
 
-    connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
-    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
+    // TODO: Layers
+//    connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
+//    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
     connect(_scene, &BattleDialogGraphicsScene::distanceChanged, renderer, &PublishGLBattleRenderer::distanceChanged);
     connect(_scene, &BattleDialogGraphicsScene::distanceItemChanged, renderer, &PublishGLBattleRenderer::distanceItemChanged);
     connect(this, &BattleFrame::cameraRectChanged, renderer, &PublishGLBattleRenderer::setCameraRect);
@@ -2726,7 +2727,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     connect(this, &BattleFrame::pointerFileNameChanged, renderer, &PublishGLRenderer::setPointerFileName);
     connect(this, &BattleFrame::movementChanged, renderer, &PublishGLBattleRenderer::movementChanged);
     connect(renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
-    connect(renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
+//    connect(renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
     renderer->setPointerFileName(_pointerFile);
     renderer->setActiveToken(_activeFile);
@@ -2736,7 +2737,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     // TODO: Layers
     //_bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());
-    renderer->fowChanged(_bwFoWImage);
+    //renderer->fowChanged(_bwFoWImage);
     renderer->setCombatantFrame(_combatantFile);
     renderer->setCountdownFrame(_countdownFile);
     renderer->setShowCountdown(_showCountdown);
@@ -2748,7 +2749,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
         renderer->setCameraRect(_cameraRect->getCameraRect());
 
     _renderer = renderer;
-    updateRendererGrid();
+//    updateRendererGrid();
 }
 
 void BattleFrame::rendererDeactivated()
@@ -2756,7 +2757,8 @@ void BattleFrame::rendererDeactivated()
     if(!_renderer)
         return;
 
-    disconnect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
+    // TODO: Layers
+//    disconnect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, _renderer, &PublishGLBattleRenderer::fowChanged);
     disconnect(_scene, &BattleDialogGraphicsScene::pointerMove, _renderer, &PublishGLRenderer::setPointerPosition);
     disconnect(_scene, &BattleDialogGraphicsScene::distanceChanged, _renderer, &PublishGLBattleRenderer::distanceChanged);
     disconnect(_scene, &BattleDialogGraphicsScene::distanceItemChanged, _renderer, &PublishGLBattleRenderer::distanceItemChanged);
@@ -2765,11 +2767,12 @@ void BattleFrame::rendererDeactivated()
     disconnect(this, &BattleFrame::pointerFileNameChanged, _renderer, &PublishGLRenderer::setPointerFileName);
     disconnect(this, &BattleFrame::movementChanged, _renderer, &PublishGLBattleRenderer::movementChanged);
     disconnect(_renderer, &PublishGLRenderer::deactivated, this, &BattleFrame::rendererDeactivated);
-    disconnect(_renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
+//    disconnect(_renderer, &PublishGLRenderer::initializationComplete, this, &BattleFrame::updateRendererGrid);
 
     _renderer = nullptr;
 }
 
+/*
 void BattleFrame::updateRendererGrid()
 {
     if(!_renderer)
@@ -2789,6 +2792,7 @@ void BattleFrame::updateRendererGrid()
 
     _renderer->setGrid(gridImage);
 }
+*/
 
 void BattleFrame::stateUpdated()
 {
@@ -2987,6 +2991,8 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
 void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
 {
+    return;
+
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible to create combatant icon, no battle model is set!";

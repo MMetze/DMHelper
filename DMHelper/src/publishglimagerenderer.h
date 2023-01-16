@@ -2,7 +2,7 @@
 #define PUBLISHGLIMAGERENDERER_H
 
 #include "publishglrenderer.h"
-#include "publishglbattlescene.h"
+#include "publishglscene.h"
 #include <QColor>
 #include <QImage>
 
@@ -41,7 +41,7 @@ private:
     CampaignObjectBase* _renderObject;
     QImage _image;
     QColor _color;
-    PublishGLBattleScene _scene;
+    PublishGLScene _scene;
     bool _initialized;
     unsigned int _shaderProgram;
     PublishGLBattleBackground* _backgroundObject;

@@ -5,7 +5,7 @@
 #include <QImage>
 #include <QDebug>
 
-PublishGLBattleBackground::PublishGLBattleBackground(PublishGLBattleScene* scene, const QImage& image, int textureParam) :
+PublishGLBattleBackground::PublishGLBattleBackground(PublishGLScene* scene, const QImage& image, int textureParam) :
     PublishGLBattleObject(scene),
     _imageSize(),
     _textureParam(textureParam),

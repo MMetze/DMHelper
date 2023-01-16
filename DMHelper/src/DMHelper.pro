@@ -122,7 +122,6 @@ SOURCES += main.cpp\
     publishglbattleimagerenderer.cpp \
     publishglbattleobject.cpp \
     publishglbattlerenderer.cpp \
-    publishglbattlescene.cpp \
     publishglbattletoken.cpp \
     publishglbattlevideorenderer.cpp \
     publishgleffect.cpp \
@@ -134,6 +133,7 @@ SOURCES += main.cpp\
     publishglmapvideorenderer.cpp \
     publishglobject.cpp \
     publishglrenderer.cpp \
+    publishglscene.cpp \
     publishgltextimagerenderer.cpp \
     publishgltextrenderer.cpp \
     publishgltextvideorenderer.cpp \
@@ -260,7 +260,6 @@ SOURCES += main.cpp\
     networkcontroller.cpp \
     monsteractionframe.cpp \
     monsteraction.cpp \
-    encounterbattleedit.cpp \
     battledialoglogger.cpp \
     battledialogevent.cpp \
     battledialogeventnewround.cpp \
@@ -375,7 +374,6 @@ HEADERS  += mainwindow.h \
     publishglbattleimagerenderer.h \
     publishglbattleobject.h \
     publishglbattlerenderer.h \
-    publishglbattlescene.h \
     publishglbattletoken.h \
     publishglbattlevideorenderer.h \
     publishgleffect.h \
@@ -387,6 +385,7 @@ HEADERS  += mainwindow.h \
     publishglmapvideorenderer.h \
     publishglobject.h \
     publishglrenderer.h \
+    publishglscene.h \
     publishgltextimagerenderer.h \
     publishgltextrenderer.h \
     publishgltextvideorenderer.h \
@@ -514,7 +513,6 @@ HEADERS  += mainwindow.h \
     networkcontroller.h \
     monsteractionframe.h \
     monsteraction.h \
-    encounterbattleedit.h \
     battledialoglogger.h \
     battledialogevent.h \
     battledialogeventnewround.h \
@@ -600,7 +598,6 @@ FORMS    += mainwindow.ui \
     audioplaybackframe.ui \
     audiotrackedit.ui \
     monsteractionframe.ui \
-    encounterbattleedit.ui \
     battledialoglogview.ui \
     monsteractioneditdialog.ui \
     aboutdialog.ui \
