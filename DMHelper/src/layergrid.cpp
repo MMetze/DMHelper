@@ -206,6 +206,8 @@ void LayerGrid::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir&
     Q_UNUSED(targetDirectory);
 
     _config.outputXML(doc, element, isExport);
+
+    Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void LayerGrid::cleanupDM()

@@ -51,6 +51,8 @@ public:
     int getFirstIndex(DMHelper::LayerType type) const;
     QImage mergedImage();
 
+    QList<Layer*> getLayers(DMHelper::LayerType type) const;
+
 public slots:
     // Local
     void initializeLayers();
@@ -67,8 +69,10 @@ public slots:
     virtual bool playerGLUpdate();
     virtual void playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderProgram, GLint defaultModelMatrix, const GLfloat* projectionMatrix);
     virtual void playerGLResize(int w, int h);
+    virtual void playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA);
 
 signals:
+    void layerAdded(Layer* layer);
 
 protected slots:
     void removeLayer(Layer* reference);

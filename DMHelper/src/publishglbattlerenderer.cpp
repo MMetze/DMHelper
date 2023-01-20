@@ -73,6 +73,8 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _updateInitiative(false),
     _recreateContent(false)
 {
+    if(_model)
+        connect(&_model->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLBattleRenderer::layerAdded);
 }
 
 PublishGLBattleRenderer::~PublishGLBattleRenderer()
@@ -107,6 +109,7 @@ void PublishGLBattleRenderer::cleanup()
     _projectionMatrix.setToIdentity();
 
     destroyShaders();
+    _model->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
 
     PublishGLRenderer::cleanup();
 }
@@ -143,6 +146,7 @@ void PublishGLBattleRenderer::initializeGL()
         return;
 
     createShaders();
+    _model->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
 
     // Create the objects
     initializeBackground();
@@ -1186,4 +1190,10 @@ void PublishGLBattleRenderer::createLineToken()
     }
 
     emit updateWidget();
+}
+
+void PublishGLBattleRenderer::layerAdded(Layer* layer)
+{
+    if(layer)
+        layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
 }

@@ -38,20 +38,24 @@ public:
     int getCombatantCount() const;
     BattleDialogModelCombatant* getCombatant(int index) const;
     BattleDialogModelCombatant* getCombatantById(QUuid combatantId) const;
-    void insertCombatant(int index, BattleDialogModelCombatant* combatant);
-    BattleDialogModelCombatant* removeCombatant(int index);
+    void moveCombatant(int fromIndex, int toIndex);
+    //BattleDialogModelCombatant* removeCombatant(int index);
+    void removeCombatant(BattleDialogModelCombatant* combatant);
     void appendCombatant(BattleDialogModelCombatant* combatant);
-//    void appendCombatants(QList<BattleDialogModelCombatant*> combatants);
+    void appendCombatantToList(BattleDialogModelCombatant* combatant);
+    void removeCombatantFromList(BattleDialogModelCombatant* combatant);
     bool isCombatantInList(Combatant* combatant) const;
 
     QList<BattleDialogModelEffect*> getEffectList() const;
     int getEffectCount() const;
     BattleDialogModelEffect* getEffect(int index) const;
     BattleDialogModelEffect* getEffectById(QUuid effectId) const;
-    void insertEffect(int index, BattleDialogModelEffect* effect);
-    BattleDialogModelEffect* removeEffect(int index);
-    bool removeEffect(BattleDialogModelEffect* effect);
+    //void insertEffect(int index, BattleDialogModelEffect* effect);
+    //BattleDialogModelEffect* removeEffect(int index);
+    void removeEffect(BattleDialogModelEffect* effect);
     void appendEffect(BattleDialogModelEffect* effect);
+    void appendEffectToList(BattleDialogModelEffect* effect);
+    void removeEffectFromList(BattleDialogModelEffect* effect);
 
     int getGridScale() const;
 
@@ -121,6 +125,7 @@ private:
     EncounterBattle* _encounter;
 
     // Battle content values
+    // Note: combatants are owned by the layers, this list is for initiative sorting only
     QList<BattleDialogModelCombatant*> _combatants;
     QList<BattleDialogModelEffect*> _effects;
 

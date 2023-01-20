@@ -104,6 +104,17 @@ bool Layer::playerGLUpdate()
     return false;
 }
 
+void Layer::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
+{
+    Q_UNUSED(programRGB);
+    Q_UNUSED(modelMatrixRGB);
+    Q_UNUSED(projectionMatrixRGB);
+    Q_UNUSED(programRGBA);
+    Q_UNUSED(modelMatrixRGBA);
+    Q_UNUSED(projectionMatrixRGBA);
+    Q_UNUSED(alphaRGBA);
+}
+
 void Layer::setScale(int scale)
 {
     Q_UNUSED(scale);

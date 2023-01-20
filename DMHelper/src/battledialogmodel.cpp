@@ -35,7 +35,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
 
 BattleDialogModel::~BattleDialogModel()
 {
-    qDeleteAll(_combatants);
+    //qDeleteAll(_combatants);
     qDeleteAll(_effects);
     _layerScene.clearLayers();
 }
@@ -133,6 +133,27 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     }
 
     _layerScene.postProcessXML(element, isImport);
+
+    // Todo: Layers - include active ID
+    QUuid activeId(element.attribute("activeId"));
+
+    if(!activeId.isNull())
+    {
+        QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+        foreach(Layer* layer, tokenLayers)
+        {
+            LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+            if(tokenLayer)
+            {
+                QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+                foreach(BattleDialogModelCombatant* combatant, combatants)
+                {
+                    if(combatant->getID() == activeId)
+                        setActiveCombatant(combatant);
+                }
+            }
+        }
+    }
 }
 
 void BattleDialogModel::copyValues(const CampaignObjectBase* other)
@@ -246,29 +267,21 @@ BattleDialogModelCombatant* BattleDialogModel::getCombatantById(QUuid combatantI
     return nullptr;
 }
 
-void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* combatant)
+void BattleDialogModel::moveCombatant(int fromIndex, int toIndex)
 {
-    if(!combatant)
-        return;
-
-    _combatants.insert(index, combatant);
-
-    // For a character addition, connect to the destroyed signal
-    if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
-        connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
-
-    // For a monster addition, also react to image changes
-    if((combatant->getCombatantType() == DMHelper::CombatantType_Monster))
+    if((fromIndex < 0) || (fromIndex >= _combatants.size()) || (toIndex < 0) || (toIndex >= _combatants.size()))
     {
-        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
-        if(monster)
-            connect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
+        qDebug() << "[Battle Dialog Model] ERROR: move from or to an invalid index! from: " << fromIndex << ", to: " << toIndex;
+        return;
     }
+
+    _combatants.move(fromIndex, toIndex);
 
     emit combatantListChanged();
     emit dirty();
 }
 
+/*
 BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
 {
     BattleDialogModelCombatant* removedCombatant = nullptr;
@@ -291,19 +304,44 @@ BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
 
     return removedCombatant;
 }
+*/
+
+void BattleDialogModel::removeCombatant(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    for(Layer* layer : tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if((tokenLayer) && (tokenLayer->containsCombatant(combatant)))
+        {
+            tokenLayer->removeCombatant(combatant);
+            delete combatant;
+            return;
+        }
+    }
+}
 
 void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
         return;
 
-    _combatants.append(combatant);
-    // TODO: Layers - need to make the connections below as well
     LayerTokens* layer = dynamic_cast<LayerTokens*>(_layerScene.getPriority(DMHelper::LayerType_Tokens));
     if(!layer)
         return;
 
     layer->addCombatant(combatant);
+}
+
+void BattleDialogModel::appendCombatantToList(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    _combatants.append(combatant);
 
     // For a character addition, connect to the destroyed signal
     if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
@@ -321,13 +359,24 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
     emit dirty();
 }
 
-/*
-void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
+void BattleDialogModel::removeCombatantFromList(BattleDialogModelCombatant* combatant)
 {
-    for(BattleDialogModelCombatant* combatant : combatants)
-        appendCombatant(combatant);
+    if(!combatant)
+        return;
+
+    if(!_combatants.removeOne(combatant))
+        return;
+
+    if(combatant->getCombatantType() == DMHelper::CombatantType_Monster)
+    {
+        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
+        if(monster)
+            disconnect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
+    }
+
+    emit combatantListChanged();
+    emit dirty();
 }
-*/
 
 bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
 {
@@ -377,6 +426,7 @@ BattleDialogModelEffect* BattleDialogModel::getEffectById(QUuid effectId) const
     return nullptr;
 }
 
+/*
 void BattleDialogModel::insertEffect(int index, BattleDialogModelEffect* effect)
 {
     if(!effect)
@@ -386,7 +436,9 @@ void BattleDialogModel::insertEffect(int index, BattleDialogModelEffect* effect)
     emit effectListChanged();
     emit dirty();
 }
+*/
 
+/*
 BattleDialogModelEffect* BattleDialogModel::removeEffect(int index)
 {
     BattleDialogModelEffect* result = nullptr;
@@ -397,23 +449,24 @@ BattleDialogModelEffect* BattleDialogModel::removeEffect(int index)
     emit dirty();
     return result;
 }
+*/
 
-bool BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
+void BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
 {
     if(!effect)
+        return;
+
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    for(Layer* layer : tokenLayers)
     {
-        qDebug() << "[Battle Dialog Model] ERROR: attempted to remove NULL effect!";
-        return false;
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if((tokenLayer) && (tokenLayer->containsEffect(effect)))
+        {
+            tokenLayer->removeEffect(effect);
+            delete effect;
+            return;
+        }
     }
-
-    bool result = _effects.removeOne(effect);
-
-    if(!result)
-        qDebug() << "[Battle Dialog Model] ERROR: Unable to remove effect " << effect;
-
-    emit effectListChanged();
-    emit dirty();
-    return result;
 }
 
 void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
@@ -421,7 +474,32 @@ void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
     if(!effect)
         return;
 
+    LayerTokens* layer = dynamic_cast<LayerTokens*>(_layerScene.getPriority(DMHelper::LayerType_Tokens));
+    if(!layer)
+        return;
+
+    layer->addEffect(effect);
+}
+
+void BattleDialogModel::appendEffectToList(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return;
+
     _effects.append(effect);
+
+    emit effectListChanged();
+    emit dirty();
+}
+
+void BattleDialogModel::removeEffectFromList(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return;
+
+    if(!_effects.removeOne(effect))
+        return;
+
     emit effectListChanged();
     emit dirty();
 }
@@ -685,7 +763,7 @@ void BattleDialogModel::characterDestroyed(const QUuid& destroyedId)
            (combatant->getCombatant()) &&
            (combatant->getCombatant()->getID() == destroyedId))
         {
-            removeCombatant(i);
+            removeCombatant(combatant);
             return;
         }
     }
@@ -720,26 +798,6 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
 
     _logger.outputXML(doc, element, targetDirectory, isExport);
 
-    // TODO: Layers - need a layer for markers and tokens
-    _layerScene.outputXML(doc, element, targetDirectory, isExport);
-
-    /*
-    QDomElement combatantsElement = doc.createElement("combatants");
-    for(BattleDialogModelCombatant* combatant : _combatants)
-    {
-        if(combatant)
-            combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
-    }
-    element.appendChild(combatantsElement);
-    */
-
-    QDomElement effectsElement = doc.createElement("effects");
-    for(BattleDialogModelEffect* effect : _effects)
-    {
-        if(effect)
-            effect->outputXML(doc, effectsElement, targetDirectory, isExport);
-    }
-    element.appendChild(effectsElement);
 }
 
 bool BattleDialogModel::belongsToObject(QDomElement& element)

@@ -324,6 +324,8 @@ private:
     // Helper functions to simplify rendering
     void extractDMScreenshot();
 
+    BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
+
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
     void removeEffectsFromItem(QGraphicsPixmapItem* item);
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);

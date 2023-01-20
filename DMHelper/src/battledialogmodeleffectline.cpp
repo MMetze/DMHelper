@@ -74,8 +74,9 @@ QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale)
     return rectItem;
 }
 
-void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
+void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal gridScale)
 {
+    beginBatchChanges();
     // First apply the base information
     qDebug() << "[Battle Dialog Model Effect] applying effect values for " << this << " to " << &item;
     item.setPos(getPosition());
@@ -92,6 +93,7 @@ void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal g
     if(rectItem)
     {
         rectItem->setRect(QRectF(-rectWidth / 2.0, 0.0, rectWidth, 100.0));
+        registerChange();
     }
     else
     {
@@ -105,7 +107,10 @@ void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal g
     {
         shapeItem->setPen(QPen(QColor(getColor().red(),getColor().green(),getColor().blue(),255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         shapeItem->setBrush(QBrush(getColor()));
+        registerChange();
     }
+
+    endBatchChanges();
 }
 
 int BattleDialogModelEffectLine::getWidth() const
@@ -118,7 +123,7 @@ void BattleDialogModelEffectLine::setWidth(int width)
     if(_width != width)
     {
         _width = width;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 

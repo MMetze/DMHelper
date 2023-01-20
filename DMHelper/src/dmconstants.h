@@ -2,6 +2,8 @@
 #define DMCONSTANTS_H
 
 #include <Qt>
+#include <QPoint>
+#include <QPointF>
 
 //#define INCLUDE_NETWORK_SUPPORT
 
@@ -175,6 +177,8 @@ namespace DMHelper
     const int TreeItemData_Type = Qt::UserRole + 1;
     const int TreeItemData_ID = Qt::UserRole + 2;
     const int TreeItemData_Object = Qt::UserRole + 3;
+
+    const QPointF INVALID_POINT = QPointF(-1.0,-1.0);
 
     const int CHARACTER_WIDGET_HEIGHT = 20;
     const int CHARACTER_ICON_WIDTH = CHARACTER_WIDGET_HEIGHT * 4 / 3;

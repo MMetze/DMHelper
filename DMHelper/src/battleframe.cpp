@@ -22,6 +22,8 @@
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterbase.h"
 #include "battledialogmodelmonsterclass.h"
+#include "battledialogmodeleffectfactory.h"
+#include "battledialogeffectsettings.h"
 #include "battledialoggraphicsscene.h"
 #include "battlecombatantframe.h"
 #include "dicerolldialogcombatants.h"
@@ -173,6 +175,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
 
     connect(_scene, SIGNAL(mapZoom(int)), this, SLOT(zoomDelta(int)));
+    connect(_scene, &BattleDialogGraphicsScene::addEffectRadius, this, &BattleFrame::addEffectRadius);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
@@ -1139,7 +1142,21 @@ void BattleFrame::castSpell()
 
 void BattleFrame::addEffectRadius()
 {
-    _scene->addEffectRadius();
+    if(!_model)
+        return;
+
+    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115,18,0,64), QString());
+    _model->appendEffect(effect);
+
+    BattleDialogEffectSettings* settings = effect->getEffectEditor();
+    if(!settings)
+        return;
+
+    settings->exec();
+    if(settings->result() == QDialog::Accepted)
+        settings->copyValues(*effect);
+
+    settings->deleteLater();
 }
 
 void BattleFrame::addEffectCone()
@@ -1477,8 +1494,8 @@ bool BattleFrame::eventFilter(QObject *obj, QEvent *event)
 
                         if(currentIndex != index)
                         {
-                            BattleDialogModelCombatant* combatant = _model->removeCombatant(index);
-                            _model->insertCombatant(currentIndex, combatant);
+                            BattleDialogModelCombatant* combatant = _model->getCombatant(index);
+                            _model->moveCombatant(index, currentIndex);
                             qDebug() << "[Battle Frame] combatant widget drag dropped: index " << index << ": " << combatant->getName() << " (" << reinterpret_cast<quint64>(draggedWidget) << "), from pos " << index << " to pos " << currentIndex;
                         }
                     }
@@ -1919,10 +1936,11 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
     }
 
     // Find the index of the removed item
-    int i = _model->getCombatantList().indexOf(combatant);
+    int index = _model->getCombatantList().indexOf(combatant);
 
     // Delete the widget for the combatant
-    QLayoutItem *child = _combatantLayout->takeAt(i);
+    _combatantWidgets.remove(combatant);
+    QLayoutItem *child = _combatantLayout->takeAt(index);
     if(child != nullptr)
     {
         qDebug() << "[Battle Frame] deleting combatant widget: " << reinterpret_cast<quint64>(child->widget());
@@ -1930,6 +1948,9 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
         delete child;
     }
 
+    _model->removeCombatant(combatant);
+
+    /*
     // Remove the combatant
     BattleDialogModelCombatant* removedCombatant = _model->removeCombatant(i);
     if(removedCombatant)
@@ -1938,7 +1959,6 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
 
         // Remove the widget from the list of widgets
         // TODO: should this be above with deleting the widget for the combatant?
-        _combatantWidgets.remove(removedCombatant);
 
         // Remove the icon from the list of icons and delete it from the scene
         QGraphicsPixmapItem* item = _combatantIcons.take(removedCombatant);
@@ -1947,6 +1967,7 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
 
         delete removedCombatant;
     }
+    */
 }
 
 void BattleFrame::handleCombatantDamage(BattleDialogModelCombatant* combatant)
@@ -3497,6 +3518,41 @@ void BattleFrame::extractDMScreenshot()
     VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_model->getMap()->getFileName());
     connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &BattleFrame::handleScreenshotReady);
     screenshot->retrieveScreenshot();
+}
+
+BattleDialogModelEffect* BattleFrame::createEffect(int type, int size, int width, const QColor& color, const QString& filename)
+{
+    if(!_scene)
+        return nullptr;
+
+    BattleDialogModelEffect* result = nullptr;
+    qreal scaledHalfSize;
+    QPointF effectPosition = _scene->getCommandPosition() != DMHelper::INVALID_POINT ? _scene->getCommandPosition() : _scene->getViewportCenter();
+
+    switch(type)
+    {
+        case BattleDialogModelEffect::BattleDialogModelEffect_Radius:
+            result = BattleDialogModelEffectFactory::createEffectRadius(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Cone:
+            result = BattleDialogModelEffectFactory::createEffectCone(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Cube:
+            scaledHalfSize = static_cast<qreal>(size) * _model->getGridScale() / (5.0 * 2.0);
+            effectPosition -= QPointF(scaledHalfSize, scaledHalfSize);
+            result = BattleDialogModelEffectFactory::createEffectCube(effectPosition, size, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Line:
+            result = BattleDialogModelEffectFactory::createEffectLine(effectPosition, size, width, color);
+            break;
+        case BattleDialogModelEffect::BattleDialogModelEffect_Object:
+            result = BattleDialogModelEffectFactory::createEffectObject(effectPosition, QSize(width, size), color, filename);
+            break;
+        default:
+            break;
+    }
+
+    return result;
 }
 
 bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect)

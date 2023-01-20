@@ -75,6 +75,7 @@ public slots:
     virtual bool playerGLUpdate();
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) = 0;
     virtual void playerGLResize(int w, int h) = 0;
+    virtual void playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA);
 
     // Layer Specific Interface
     virtual void initialize(const QSize& layerSize) = 0;

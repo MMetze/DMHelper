@@ -29,8 +29,6 @@
 // Uncomment this to log all mouse movement actions
 //#define BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
 
-const QPointF INVALID_POINT = QPointF(-1.0,-1.0);
-
 BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     CameraScene(parent),
     _contextMenuItem(nullptr),
@@ -43,7 +41,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _mouseHoverItem(nullptr),
     _previousRotation(0.0),
     _isRotation(false),
-    _commandPosition(INVALID_POINT),
+    _commandPosition(DMHelper::INVALID_POINT),
     _spaceDown(false),
     _inputMode(-1),
     _pointerPixmapItem(nullptr),
@@ -107,6 +105,7 @@ void BattleDialogGraphicsScene::createBattleContents()
     //_grid->rebuildGrid(*_model);
     setDistanceScale(_model->getGridScale());
 
+    /*
     QList<BattleDialogModelEffect*> effects = _model->getEffectList();
     for(BattleDialogModelEffect* effect : qAsConst(effects))
     {
@@ -119,6 +118,7 @@ void BattleDialogGraphicsScene::createBattleContents()
             }
         }
     }
+    */
 
     QGraphicsView* view = views().constFirst();
     if(view)
@@ -297,6 +297,11 @@ QPixmap BattleDialogGraphicsScene::getSelectedIcon() const
 QString BattleDialogGraphicsScene::getSelectedIconFile() const
 {
     return _selectedIcon;
+}
+
+QPointF BattleDialogGraphicsScene::getCommandPosition() const
+{
+    return _commandPosition;
 }
 
 QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
@@ -644,7 +649,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         }
 
         QAction* addRadiusItem = new QAction(QString("Create Radius Effect"), &menu);
-        connect(addRadiusItem, SIGNAL(triggered()), this, SLOT(addEffectRadius()));
+        connect(addRadiusItem, SIGNAL(triggered()), this, SIGNAL(addEffectRadius()));
         menu.addAction(addRadiusItem);
 
         QAction* addConeItem = new QAction(QString("Create Cone Effect"), &menu);
@@ -667,7 +672,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 
         _commandPosition = _mouseDownPos;
         menu.exec(mouseEvent->screenPos());
-        _commandPosition = INVALID_POINT;
+        _commandPosition = DMHelper::INVALID_POINT;
     }
     else if(mouseEvent->button() == Qt::LeftButton)
     {
@@ -697,6 +702,20 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 #endif
 
     return true;
+}
+
+QPointF BattleDialogGraphicsScene::getViewportCenter()
+{
+    QPointF combatantPos(DMHelper::INVALID_POINT);
+
+    QGraphicsView* view = views().constFirst();
+    if(view)
+    {
+        QRectF viewportRect = view->mapToScene(view->viewport()->rect()).boundingRect().toAlignedRect();
+        combatantPos = viewportRect.topLeft() + QPointF(viewportRect.width() / 2, viewportRect.height() / 2);
+    }
+
+    return combatantPos;
 }
 
 void BattleDialogGraphicsScene::setDistanceHeight(qreal heightDelta)
@@ -757,30 +776,13 @@ void BattleDialogGraphicsScene::addEffectObject()
     
     if(effect)
     {
-        _contextMenuItem = addEffect(effect);
+        // TODO: Layers - move to Frame
+        //_contextMenuItem = addEffect(effect);
         if(_contextMenuItem)
         {
             editItem();
             _contextMenuItem = nullptr;
         }
-    }
-}
-
-void BattleDialogGraphicsScene::addEffectRadius()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create radius effect, no model exists.";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115,18,0,64), QString());
-
-    _contextMenuItem = addEffect(effect);
-    if(_contextMenuItem)
-    {
-        editItem();
-        _contextMenuItem = nullptr;
     }
 }
 
@@ -794,7 +796,8 @@ void BattleDialogGraphicsScene::addEffectCone()
 
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone, 20, 0, QColor(115,18,0,64), QString());
 
-    _contextMenuItem = addEffect(effect);
+    // TODO: Layers - move to Frame
+    //_contextMenuItem = addEffect(effect);
     if(_contextMenuItem)
     {
         editItem();
@@ -812,7 +815,8 @@ void BattleDialogGraphicsScene::addEffectCube()
 
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube, 20, 0, QColor(115,18,0,64), QString());
 
-    _contextMenuItem = addEffect(effect);
+    // TODO: Layers - move to Frame
+    //_contextMenuItem = addEffect(effect);
     if(_contextMenuItem)
     {
         editItem();
@@ -830,7 +834,8 @@ void BattleDialogGraphicsScene::addEffectLine()
 
     BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115,18,0,64), QString());
 
-    _contextMenuItem = addEffect(effect);
+    // TODO: Layers - move to Frame
+    //_contextMenuItem = addEffect(effect);
     if(_contextMenuItem)
     {
         editItem();
@@ -886,7 +891,8 @@ void BattleDialogGraphicsScene::castSpell()
         // Either an Object or a basic shape without a token
         effect->setName(spell->getName());
         effect->setTip(spell->getName());
-        addEffect(effect);
+        // TODO: Layers - move to Frame
+        //addEffect(effect);
     }
     else
     {
@@ -923,7 +929,8 @@ void BattleDialogGraphicsScene::castSpell()
 
         effect->addObject(tokenEffect);
         _model->appendEffect(effect);
-        addSpellEffect(*effect);
+        // TODO: Layers - move to Frame
+        //addSpellEffect(*effect);
     }
 }
 
@@ -1192,7 +1199,7 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
 {
     BattleDialogModelEffect* result = nullptr;
     qreal scaledHalfSize;
-    QPointF effectPosition = _commandPosition != INVALID_POINT ? _commandPosition : getViewportCenter();
+    QPointF effectPosition = _commandPosition != DMHelper::INVALID_POINT ? _commandPosition : getViewportCenter();
 
     switch(type)
     {
@@ -1220,6 +1227,7 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
     return result;
 }
 
+/*
 QGraphicsItem* BattleDialogGraphicsScene::addEffect(BattleDialogModelEffect* effect)
 {
     if(!_model)
@@ -1235,7 +1243,9 @@ QGraphicsItem* BattleDialogGraphicsScene::addEffect(BattleDialogModelEffect* eff
 
     return addEffectShape(*effect);
 }
+*/
 
+/*
 QGraphicsItem* BattleDialogGraphicsScene::addEffectShape(BattleDialogModelEffect& effect)
 {
     if(!_model)
@@ -1320,6 +1330,7 @@ QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect
 
     return effectItem;
 }
+*/
 
 BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent)
 {
@@ -1372,16 +1383,3 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
     return result;
 }
 
-QPointF BattleDialogGraphicsScene::getViewportCenter()
-{
-    QPointF combatantPos(INVALID_POINT);
-
-    QGraphicsView* view = views().constFirst();
-    if(view)
-    {
-        QRectF viewportRect = view->mapToScene(view->viewport()->rect()).boundingRect().toAlignedRect();
-        combatantPos = viewportRect.topLeft() + QPointF(viewportRect.width() / 2, viewportRect.height() / 2);
-    }
-
-    return combatantPos;
-}

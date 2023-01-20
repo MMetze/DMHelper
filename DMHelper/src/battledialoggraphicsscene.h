@@ -37,6 +37,7 @@ public:
 
     QPixmap getSelectedIcon() const;
     QString getSelectedIconFile() const;
+    QPointF getCommandPosition() const;
 
     QList<QGraphicsItem*> getEffectItems() const;
 
@@ -49,6 +50,8 @@ public:
     bool handleMousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     bool handleMouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
 
+    QPointF getViewportCenter();
+
 public slots:
     void setDistanceHeight(qreal heightDelta);
     void setDistanceScale(int scale);
@@ -58,7 +61,6 @@ public slots:
     void setInputMode(int inputMode);
 
     void addEffectObject();
-    void addEffectRadius();
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
@@ -68,6 +70,8 @@ public slots:
     void setSelectedIcon(const QString& selectedIcon);
 
 signals:
+    void addEffectRadius();
+
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);
     void applyEffect(QGraphicsItem* effect);
@@ -118,12 +122,11 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent *keyEvent);
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
-    QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
-    QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
-    QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
+//    QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
+//    QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
+//    QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
-    QPointF getViewportCenter();
 
     QGraphicsItem* _contextMenuItem;
     Grid* _grid;

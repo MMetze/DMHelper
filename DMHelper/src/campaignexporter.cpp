@@ -94,6 +94,8 @@ bool CampaignExporter::checkObjectReferences(CampaignObjectBase* exportObject, Q
         EncounterBattle* battle = dynamic_cast<EncounterBattle*>(exportObject);
         if(battle)
         {
+            // TODO: Layers - change export/import
+            /*
             addObjectTree(battle->getAudioTrackId(), doc, parent, targetDirectory);
             CombatantGroupList combatants = battle->getCombatantsAllWaves();
             for(int i = 0; i < combatants.count(); ++i)
@@ -106,6 +108,7 @@ bool CampaignExporter::checkObjectReferences(CampaignObjectBase* exportObject, Q
                         addObjectTree(reference->getReferenceId(), doc, parent, targetDirectory);
                 }
             }
+            */
         }
     }
     else if(exportObject->getObjectType() == DMHelper::CampaignType_Map)

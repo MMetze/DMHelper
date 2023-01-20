@@ -6,8 +6,11 @@
 
 class BattleDialogModel;
 class BattleDialogModelCombatant;
+class BattleDialogModelEffect;
 class PublishGLBattleToken;
+class PublishGLBattleEffect;
 class QGraphicsPixmapItem;
+class QGraphicsItem;
 
 class LayerTokens : public Layer
 {
@@ -29,6 +32,10 @@ public:
     virtual void applyLayerVisible(bool layerVisible) override;
     virtual void applyOpacity(qreal opacity) override;
 
+    // Local Interface
+    const QList<BattleDialogModelCombatant*> getCombatants() const;
+    QList<BattleDialogModelCombatant*> getCombatants();
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene& scene) override;
@@ -40,6 +47,7 @@ public slots:
     virtual void playerGLUninitialize() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerGLResize(int w, int h) override;
+    virtual void playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA) override;
 
     // Layer Specific Interface
     virtual void initialize(const QSize& layerSize) override;
@@ -48,11 +56,18 @@ public slots:
 
     // Local Interface
     void addCombatant(BattleDialogModelCombatant* combatant);
+    void removeCombatant(BattleDialogModelCombatant* combatant);
+    bool containsCombatant(BattleDialogModelCombatant* combatant);
+
+    void addEffect(BattleDialogModelEffect* effect);
+    void removeEffect(BattleDialogModelEffect* effect);
+    bool containsEffect(BattleDialogModelEffect* effect);
 
 signals:
 
 protected slots:
     // Local Interface
+    void effectChanged(BattleDialogModelEffect* effect);
 
 protected:
     // Layer Specific Interface
@@ -61,6 +76,8 @@ protected:
     // DM Window Methods
     void cleanupDM();
     void createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCombatant* combatant);
+    QGraphicsItem* addEffectShape(QGraphicsScene& scene, BattleDialogModelEffect* effect);
+    QGraphicsItem* addSpellEffect(QGraphicsScene& scene, BattleDialogModelEffect* effect);
 
     // Player Window Methods
     void cleanupPlayer();
@@ -73,10 +90,22 @@ protected:
     // Core contents
     BattleDialogModel* _model;
     QList<BattleDialogModelCombatant*> _combatants;
-    QHash<QString, PublishGLBattleToken*> _tokens;
-    QHash<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
-    QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
+    QHash<QString, PublishGLBattleToken*> _combatantTokens;
+    QHash<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIconHash;
+    QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokenHash;
+
+    QList<BattleDialogModelEffect*> _effects;
+    QHash<QString, PublishGLBattleEffect*> _effectTokens;
+    QHash<BattleDialogModelEffect*, QGraphicsItem*> _effectIconHash;
+    QHash<BattleDialogModelEffect*, PublishGLBattleEffect*> _effectTokenHash;
+
     int _scale;
+
+    unsigned int _shaderProgramRGB;
+    unsigned int _shaderProgramRGBA;
+    int _shaderModelMatrixRGBA;
+    int _shaderProjectionMatrixRGBA;
+    int _shaderAlphaRGBA;
 
 };
 

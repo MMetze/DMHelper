@@ -14,7 +14,9 @@ BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *p
     _position(0,0),
     _rotation(0),
     _color(115,18,0,64),
-    _tip()
+    _tip(),
+    _batchChanges(false),
+    _changesMade(false)
 {
 }
 
@@ -26,7 +28,9 @@ BattleDialogModelEffect::BattleDialogModelEffect(int size, const QPointF& positi
     _position(position),
     _rotation(rotation),
     _color(color),
-    _tip(tip)
+    _tip(tip),
+    _batchChanges(false),
+    _changesMade(false)
 {
 }
 
@@ -79,14 +83,34 @@ BattleDialogEffectSettings* BattleDialogModelEffect::getEffectEditor() const
     return new BattleDialogEffectSettings(*this);
 }
 
-void BattleDialogModelEffect::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
+void BattleDialogModelEffect::beginBatchChanges()
 {
+    _batchChanges = true;
+    _changesMade = false;
+}
+
+void BattleDialogModelEffect::endBatchChanges()
+{
+    if(_batchChanges)
+    {
+        _batchChanges = false;
+        if(_changesMade)
+        {
+            emit effectChanged(this);
+            emit dirty();
+        }
+    }
+}
+
+void BattleDialogModelEffect::applyEffectValues(QGraphicsItem& item, qreal gridScale)
+{
+    beginBatchChanges();
     qDebug() << "[Battle Dialog Model Effect] applying effect values for " << this << " to " << &item;
     item.setPos(getPosition());
     item.setRotation(getRotation());
     item.setToolTip(getTip());
-
     item.setScale(static_cast<qreal>(getSize()) * gridScale / 500.0);
+    endBatchChanges();
 }
 
 bool BattleDialogModelEffect::getEffectActive() const
@@ -99,7 +123,7 @@ void BattleDialogModelEffect::setEffectActive(bool active)
     if(_active != active)
     {
         _active = active;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -113,7 +137,7 @@ void BattleDialogModelEffect::setEffectVisible(bool visible)
     if(_visible != visible)
     {
         _visible = visible;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -127,7 +151,7 @@ void BattleDialogModelEffect::setSize(int size)
     if(_size != size)
     {
         _size = size;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -141,10 +165,13 @@ void BattleDialogModelEffect::setWidth(int width)
     Q_UNUSED(width);
 }
 
-void BattleDialogModelEffect::setItemScale(QGraphicsItem* item, qreal scaleFactor) const
+void BattleDialogModelEffect::setItemScale(QGraphicsItem* item, qreal scaleFactor)
 {
-    if(item)
+    if((item) && (item->scale() != scaleFactor))
+    {
         item->setScale(scaleFactor);
+        registerChange();
+    }
 }
 
 QPointF BattleDialogModelEffect::getPosition() const
@@ -190,7 +217,7 @@ void BattleDialogModelEffect::setColor(const QColor& color)
     if(_color != color)
     {
         _color = color;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -224,7 +251,7 @@ void BattleDialogModelEffect::setTip(const QString& tip)
     if(_tip != tip)
     {
         _tip = tip;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -301,4 +328,17 @@ void BattleDialogModelEffect::prepareItem(QGraphicsItem& item) const
     item.setFlag(QGraphicsItem::ItemIsMovable, true);
     item.setFlag(QGraphicsItem::ItemIsSelectable, true);
     item.setZValue(DMHelper::BattleDialog_Z_BackHighlight);
+}
+
+void BattleDialogModelEffect::registerChange()
+{
+    if(_batchChanges)
+    {
+        _changesMade = true;
+    }
+    else
+    {
+        emit effectChanged(this);
+        emit dirty();
+    }
 }

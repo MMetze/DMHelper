@@ -171,6 +171,7 @@ void LayerScene::insertLayer(int position, Layer* layer)
     _layers.insert(position, layer);
     resetLayerOrders();
     _selected = position;
+    emit layerAdded(layer);
 }
 
 void LayerScene::prependLayer(Layer* layer)
@@ -189,6 +190,7 @@ void LayerScene::prependLayer(Layer* layer)
     _layers.prepend(layer);
     resetLayerOrders();
     _selected = 0;
+    emit layerAdded(layer);
 }
 
 void LayerScene::appendLayer(Layer* layer)
@@ -207,6 +209,7 @@ void LayerScene::appendLayer(Layer* layer)
     _layers.append(layer);
     resetLayerOrders();
     _selected = _layers.count() - 1;
+    emit layerAdded(layer);
 }
 
 void LayerScene::removeLayer(int position)
@@ -360,6 +363,19 @@ QImage LayerScene::mergedImage()
     return result;
 }
 
+QList<Layer*> LayerScene::getLayers(DMHelper::LayerType type) const
+{
+    QList<Layer*> result;
+
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
+            result.append(_layers.at(i));
+    }
+
+    return result;
+}
+
 void LayerScene::initializeLayers()
 {
     if(_initialized)
@@ -472,6 +488,12 @@ void LayerScene::playerGLResize(int w, int h)
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerGLResize(w, h);
+}
+
+void LayerScene::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
+{
+    for(int i = 0; i < _layers.count(); ++i)
+        _layers[i]->playerSetShaders(programRGB, modelMatrixRGB, projectionMatrixRGB, programRGBA, modelMatrixRGBA, projectionMatrixRGBA, alphaRGBA);
 }
 
 void LayerScene::removeLayer(Layer* reference)

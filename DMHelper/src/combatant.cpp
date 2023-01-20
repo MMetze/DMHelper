@@ -253,6 +253,7 @@ bool Combatant::isSkillSavingThrow(Skills skill)
             (skill == Skills_charismaSave));
 }
 
+/*
 QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup)
 {
     // TODO: Will be obsolete
@@ -290,6 +291,7 @@ QList<Combatant*> Combatant::instantiateCombatants(CombatantGroup combatantGroup
 
     return result;
 }
+*/
 
 int Combatant::getConditionCount()
 {
@@ -630,11 +632,7 @@ bool Combatant::belongsToObject(QDomElement& element)
 void Combatant::registerChange()
 {
     if(_batchChanges)
-    {
         _changesMade = true;
-    }
     else
-    {
         emit dirty();
-    }
 }

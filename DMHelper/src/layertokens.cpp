@@ -3,6 +3,7 @@
 #include "battledialogmodelcombatant.h"
 #include "unselectedpixmap.h"
 #include "publishglbattletoken.h"
+#include "publishglbattleeffect.h"
 #include "campaign.h"
 #include "character.h"
 #include "bestiary.h"
@@ -11,6 +12,8 @@
 #include "battledialogmodelcharacter.h"
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodelmonstercombatant.h"
+#include "battledialogmodeleffectfactory.h"
+#include "battledialogmodeleffectobject.h"
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QImage>
@@ -21,10 +24,19 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _glScene(nullptr),
     _model(model),
     _combatants(),
-    _tokens(),
-    _combatantIcons(),
     _combatantTokens(),
-    _scale(DMHelper::STARTING_GRID_SCALE)
+    _combatantIconHash(),
+    _combatantTokenHash(),
+    _effects(),
+    _effectTokens(),
+    _effectIconHash(),
+    _effectTokenHash(),
+    _scale(DMHelper::STARTING_GRID_SCALE),
+    _shaderProgramRGB(0),
+    _shaderProgramRGBA(0),
+    _shaderModelMatrixRGBA(0),
+    _shaderProjectionMatrixRGBA(0),
+    _shaderAlphaRGBA(0)
 {
 }
 
@@ -45,72 +57,88 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
         return;
 
     QDomElement combatantsElement = element.firstChildElement("combatants");
-    if(combatantsElement.isNull())
-        return;
-
-    QDomElement combatantElement = combatantsElement.firstChildElement("battlecombatant");
-    while(!combatantElement.isNull())
+    if(!combatantsElement.isNull())
     {
-        BattleDialogModelCombatant* combatant = nullptr;
-        int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
-        if(combatantType == DMHelper::CombatantType_Character)
+        QDomElement combatantElement = combatantsElement.firstChildElement("battlecombatant");
+        while(!combatantElement.isNull())
         {
-            QUuid combatantId = QUuid(combatantElement.attribute("combatantId"));
-            Character* character = campaign->getCharacterById(combatantId);
-            if(!character)
-                character = campaign->getNPCById(combatantId);
-
-            if(character)
-                combatant = new BattleDialogModelCharacter(character);
-            else
-                qDebug() << "[LayerTokens] Unknown character ID type found: " << combatantId;
-        }
-        else if(combatantType == DMHelper::CombatantType_Monster)
-        {
-            int monsterType = combatantElement.attribute("monsterType",QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
-            if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Combatant)
+            BattleDialogModelCombatant* combatant = nullptr;
+            int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
+            if(combatantType == DMHelper::CombatantType_Character)
             {
                 QUuid combatantId = QUuid(combatantElement.attribute("combatantId"));
-                Monster* monster = dynamic_cast<Monster*>(_model->getCombatantById(combatantId));
-                if(monster)
-                    combatant = new BattleDialogModelMonsterCombatant(monster);
+                Character* character = campaign->getCharacterById(combatantId);
+                if(!character)
+                    character = campaign->getNPCById(combatantId);
+
+                if(character)
+                    combatant = new BattleDialogModelCharacter(character);
                 else
-                    qDebug() << "[LayerTokens] Unknown monster ID type found: " << combatantId << " for battle";// " << battleId;
+                    qDebug() << "[LayerTokens] Unknown character ID type found: " << combatantId;
             }
-            else if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Class)
+            else if(combatantType == DMHelper::CombatantType_Monster)
             {
-                QString monsterClassName = combatantElement.attribute("monsterClass");
-                MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterClassName);
-                if(monsterClass)
-                    combatant = new BattleDialogModelMonsterClass(monsterClass);
+                int monsterType = combatantElement.attribute("monsterType",QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
+                if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Combatant)
+                {
+                    QUuid combatantId = QUuid(combatantElement.attribute("combatantId"));
+                    Monster* monster = dynamic_cast<Monster*>(_model->getCombatantById(combatantId));
+                    if(monster)
+                        combatant = new BattleDialogModelMonsterCombatant(monster);
+                    else
+                        qDebug() << "[LayerTokens] Unknown monster ID type found: " << combatantId << " for battle";// " << battleId;
+                }
+                else if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Class)
+                {
+                    QString monsterClassName = combatantElement.attribute("monsterClass");
+                    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(monsterClassName);
+                    if(monsterClass)
+                        combatant = new BattleDialogModelMonsterClass(monsterClass);
+                    else
+                        qDebug() << "[LayerTokens] Unknown monster class type found: " << monsterClassName;
+                }
                 else
-                    qDebug() << "[LayerTokens] Unknown monster class type found: " << monsterClassName;
+                {
+                    qDebug() << "[LayerTokens] Invalid monster type found: " << monsterType;
+                }
             }
             else
             {
-                qDebug() << "[LayerTokens] Invalid monster type found: " << monsterType;
+                qDebug() << "[LayerTokens] Invalid combatant type found: " << combatantType;
             }
-        }
-        else
-        {
-            qDebug() << "[LayerTokens] Invalid combatant type found: " << combatantType;
-        }
 
-        if(combatant)
-        {
-            combatant->inputXML(combatantElement, isImport);
-            _model->appendCombatant(combatant);
-            // TODO: Layers - add this back
-            /*
-            if( ((!activeId.isNull()) && (combatant->getID() == activeId)) ||
-                (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
+            if(combatant)
             {
-                _battleModel->setActiveCombatant(combatant);
+                combatant->inputXML(combatantElement, isImport);
+                //_model->appendCombatantToList(combatant);
+                addCombatant(combatant);
             }
-            */
-        }
 
-        combatantElement = combatantElement.nextSiblingElement("battlecombatant");
+            combatantElement = combatantElement.nextSiblingElement("battlecombatant");
+        }
+    }
+
+    QDomElement effectsElement = element.firstChildElement("effects");
+    if(!effectsElement.isNull())
+    {
+        QDomElement effectElement = effectsElement.firstChildElement();
+        while(!effectElement.isNull())
+        {
+            BattleDialogModelEffect* newEffect = BattleDialogModelEffectFactory::createEffect(effectElement, isImport);
+            if(newEffect)
+            {
+                QDomElement effectChildElement = effectElement.firstChildElement();
+                if(!effectChildElement.isNull())
+                {
+                    BattleDialogModelEffect* childEffect = BattleDialogModelEffectFactory::createEffect(effectChildElement, isImport);
+                    if(childEffect)
+                        newEffect->addObject(childEffect);
+                }
+                addEffect(newEffect);
+            }
+
+            effectElement = effectElement.nextSiblingElement();
+        }
     }
 }
 
@@ -140,29 +168,57 @@ Layer* LayerTokens::clone() const
 
 void LayerTokens::applyOrder(int order)
 {
-    foreach(QGraphicsPixmapItem* pixmapItem, _combatantIcons)
+    foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
     {
         if(pixmapItem)
             pixmapItem->setZValue(order);
+    }
+
+    foreach(QGraphicsItem* graphicsItem, _effectIconHash)
+    {
+        if(graphicsItem)
+            graphicsItem->setZValue(order);
     }
 }
 
 void LayerTokens::applyLayerVisible(bool layerVisible)
 {
-    foreach(QGraphicsPixmapItem* pixmapItem, _combatantIcons)
+    foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
     {
         if(pixmapItem)
             pixmapItem->setVisible(layerVisible);
+    }
+
+    foreach(QGraphicsItem* graphicsItem, _effectIconHash)
+    {
+        if(graphicsItem)
+            graphicsItem->setVisible(layerVisible);
     }
 }
 
 void LayerTokens::applyOpacity(qreal opacity)
 {
-    foreach(QGraphicsPixmapItem* pixmapItem, _combatantIcons)
+    foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
     {
         if(pixmapItem)
             pixmapItem->setOpacity(opacity);
     }
+
+    foreach(QGraphicsItem* graphicsItem, _effectIconHash)
+    {
+        if(graphicsItem)
+            graphicsItem->setOpacity(opacity);
+    }
+}
+
+const QList<BattleDialogModelCombatant*> LayerTokens::getCombatants() const
+{
+    return _combatants;
+}
+
+QList<BattleDialogModelCombatant*> LayerTokens::getCombatants()
+{
+    return _combatants;
 }
 
 void LayerTokens::dmInitialize(QGraphicsScene& scene)
@@ -170,6 +226,20 @@ void LayerTokens::dmInitialize(QGraphicsScene& scene)
     for(int i = 0; i < _combatants.count(); ++i)
     {
         createCombatantIcon(scene, _combatants.at(i));
+    }
+
+
+    QList<BattleDialogModelEffect*> effects = _model->getEffectList();
+    for(BattleDialogModelEffect* effect : qAsConst(effects))
+    {
+        if(effect)
+        {
+            if((effect->children().count() != 1) ||
+               (addSpellEffect(scene, effect) == nullptr))
+            {
+                addEffectShape(scene, effect);
+            }
+        }
     }
 
     Layer::dmInitialize(scene);
@@ -209,10 +279,20 @@ void LayerTokens::playerGLInitialize(PublishGLScene* scene)
                 combatantToken->addEffect(*_selectionToken);
             */
 
-            _combatantTokens.insert(combatant, combatantToken);
+            _combatantTokenHash.insert(combatant, combatantToken);
             // TODO: Layers
             //connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
             //connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
+        }
+    }
+
+    for(int i = 0; i < _effects.count(); ++i)
+    {
+        BattleDialogModelEffect* effect = _effects.at(i);
+        if(effect)
+        {
+            PublishGLBattleEffect* effectToken = new PublishGLBattleEffect(_glScene, effect);
+            _effectTokenHash.insert(effect, effectToken);
         }
     }
 }
@@ -227,13 +307,13 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     if(!_model)
         return;
 
-    for(BattleDialogModelCombatant* combatant : _combatants)
+    foreach(BattleDialogModelCombatant* combatant, _combatants)
     {
         if((combatant) && (combatant->getKnown()) && (combatant->getShown()) &&
            ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
            ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0)))
         {
-            PublishGLBattleToken* token = _combatantTokens.value(combatant);
+            PublishGLBattleToken* token = _combatantTokenHash.value(combatant);
             if(token)
             {
                 functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, token->getMatrixData());
@@ -242,10 +322,55 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
             }
         }
     }
+
+    if(_model->getShowEffects())
+    {
+        functions->glUseProgram(_shaderProgramRGBA);
+        functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+        functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+
+        foreach(BattleDialogModelEffect* effect, _effects)
+        {
+            if((effect) && (effect->getEffectVisible()))
+            {
+                PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
+                if(effectToken)
+                {
+                    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
+                    functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
+                    effectToken->paintGL();
+                }
+            }
+        }
+        /*
+        for(PublishGLBattleEffect* effectToken : _effectTokens)
+        {
+            if((effectToken) && (effectToken->getEffect()) && (effectToken->getEffect()->getEffectVisible()))
+            {
+                functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
+                functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
+                effectToken->paintGL();
+            }
+        }
+        */
+        functions->glUseProgram(_shaderProgramRGB);
+    }
 }
 
 void LayerTokens::playerGLResize(int w, int h)
 {
+}
+
+void LayerTokens::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
+{
+    Q_UNUSED(modelMatrixRGB);
+    Q_UNUSED(projectionMatrixRGB);
+
+    _shaderProgramRGB = programRGB;
+    _shaderProgramRGBA = programRGBA;
+    _shaderProjectionMatrixRGBA = projectionMatrixRGBA;
+    _shaderModelMatrixRGBA = modelMatrixRGBA;
+    _shaderAlphaRGBA = alphaRGBA;
 }
 
 void LayerTokens::initialize(const QSize& layerSize)
@@ -270,8 +395,73 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    if(!_combatants.contains(combatant))
-        _combatants.append(combatant);
+    if(_combatants.contains(combatant))
+        return;
+
+    _combatants.append(combatant);
+    _model->appendCombatantToList(combatant);
+}
+
+void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
+{
+    if((!combatant) || (!_model))
+        return;
+
+    if(!_combatants.removeOne(combatant))
+        return;
+
+    _model->removeCombatantFromList(combatant);
+}
+
+bool LayerTokens::containsCombatant(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return false;
+
+    return _combatants.contains(combatant);
+}
+
+void LayerTokens::addEffect(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return;
+
+    if(_effects.contains(effect))
+        return;
+
+    _effects.append(effect);
+    connect(effect, &BattleDialogModelEffect::effectChanged, this, &LayerTokens::effectChanged);
+    _model->appendEffectToList(effect);
+}
+
+void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
+{
+    if((!effect) || (!_model))
+        return;
+
+    if(!_effects.removeOne(effect))
+        return;
+
+    _model->removeEffectFromList(effect);
+}
+
+bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return false;
+
+    return _effects.contains(effect);
+}
+
+void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
+{
+    if((!effect) || (!_model))
+        return;
+
+    // Changes to the player item will be directly handled through the signal
+    QGraphicsItem* graphicsItem = _effectIconHash.value(effect);
+    if(graphicsItem)
+        effect->applyEffectValues(*graphicsItem, _model->getGridScale());
 }
 
 void LayerTokens::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -283,16 +473,52 @@ void LayerTokens::internalOutputXML(QDomDocument &doc, QDomElement &element, QDi
             combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
     }
     element.appendChild(combatantsElement);
+
+    QDomElement effectsElement = doc.createElement("effects");
+    for(BattleDialogModelEffect* effect : _effects)
+    {
+        if(effect)
+            effect->outputXML(doc, effectsElement, targetDirectory, isExport);
+    }
+    element.appendChild(effectsElement);
+
+    Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void LayerTokens::cleanupDM()
 {
-    _combatantIcons.clear();
+    if(!_combatantIconHash.isEmpty())
+    {
+        foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
+        {
+            QGraphicsScene* scene = pixmapItem->scene();
+            if(scene)
+                scene->removeItem(pixmapItem);
+
+            delete pixmapItem;
+        }
+
+        _combatantIconHash.clear();
+    }
+
+    if(!_effectIconHash.isEmpty())
+    {
+        foreach(QGraphicsItem* graphicsItem, _effectIconHash)
+        {
+            QGraphicsScene* scene = graphicsItem->scene();
+            if(scene)
+                scene->removeItem(graphicsItem);
+
+            delete graphicsItem;
+        }
+
+        _effectIconHash.clear();
+    }
 }
 
 void LayerTokens::createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCombatant* combatant)
 {
-    if((!combatant) || (_combatantIcons.contains(combatant)))
+    if((!combatant) || (_combatantIconHash.contains(combatant)))
         return;
 
     if(combatant)
@@ -337,19 +563,103 @@ void LayerTokens::createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCo
         // TODO: Layers
         // applyPersonalEffectToItem(pixmapItem);
 
-        _combatantIcons.insert(combatant, pixmapItem);
+        _combatantIconHash.insert(combatant, pixmapItem);
 
+        // TODO: Layers
         //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(handleCombatantMoved(BattleDialogModelCombatant*)), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
         //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
         //connect(combatant, SIGNAL(combatantSelected(BattleDialogModelCombatant*)), this, SLOT(handleCombatantSelected(BattleDialogModelCombatant*)));
     }
 }
 
+QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene& scene, BattleDialogModelEffect* effect)
+{
+    if((!_model) || (!effect) || (_effectIconHash.contains(effect)))
+        return nullptr;
+
+    QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
+    if(shape)
+    {
+        scene.addItem(shape);
+        _effectIconHash.insert(effect, shape);
+    }
+
+    return shape;
+}
+
+QGraphicsItem* LayerTokens::addSpellEffect(QGraphicsScene& scene, BattleDialogModelEffect* effect)
+{
+    if((!_model) || (!effect))
+        return nullptr;
+
+    QList<CampaignObjectBase*> childEffects = effect->getChildObjects();
+    if(childEffects.count() != 1)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it does not have exactly one child object!";
+        return nullptr;
+    }
+
+    BattleDialogModelEffectObject* tokenEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
+    if(!tokenEffect)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it's child is not an effect!";
+        return nullptr;
+    }
+
+    QGraphicsPixmapItem* tokenItem = dynamic_cast<QGraphicsPixmapItem*>(addEffectShape(scene, tokenEffect));
+    if(!tokenItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to add the spell effect's token object to the scene!";
+        return nullptr;
+    }
+
+    QGraphicsItem* effectItem = effect->createEffectShape(1.0);
+    if(!effectItem)
+    {
+        qDebug() << "[Battle Dialog Scene] ERROR: unable to create the spell effect's basic shape!";
+        return nullptr;
+    }
+
+    if((effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
+       (effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
+    {
+        tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0, 0.0));
+    }
+    else if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)
+    {
+        tokenItem->setOffset(QPointF(0.0, 0.0));
+    }
+
+    if(effect->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+    {
+        tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0,
+                                     -tokenItem->boundingRect().height() / 2.0));
+        effectItem->setScale(1.0 / (2.0 * tokenEffect->getImageScaleFactor()));
+    }
+    else
+    {
+        effectItem->setScale(1.0 / tokenEffect->getImageScaleFactor());
+    }
+
+    effectItem->setParentItem(tokenItem);
+    effectItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    effectItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+    effectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
+    effectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
+    effectItem->setPos(QPointF(0.0, 0.0));
+
+    return tokenItem;
+}
+
 void LayerTokens::cleanupPlayer()
 {
-    qDeleteAll(_tokens);
-    _tokens.clear();
+    qDeleteAll(_combatantTokens);
     _combatantTokens.clear();
+    _combatantTokenHash.clear();
+
+    qDeleteAll(_effectTokens);
+    _effectTokens.clear();
+    _effectTokenHash.clear();
 
     _glScene = nullptr;
 }

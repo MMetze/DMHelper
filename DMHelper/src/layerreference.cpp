@@ -240,4 +240,6 @@ void LayerReference::internalOutputXML(QDomDocument &doc, QDomElement &element, 
 
     if(!_referenceLayerId.isNull())
         element.setAttribute("layerId", _referenceLayerId.toString());
+
+    Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }

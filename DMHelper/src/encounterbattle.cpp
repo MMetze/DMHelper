@@ -24,13 +24,14 @@
 EncounterBattle::EncounterBattle(const QString& encounterName, QObject *parent) :
     EncounterText(encounterName, parent),
     _audioTrackId(),
-    _combatantWaves(),
+//    _combatantWaves(),
     _battleModel(nullptr)
 {
 }
 
 EncounterBattle::~EncounterBattle()
 {
+    /*
     while(_combatantWaves.count() > 0)
     {
         CombatantGroupList wave = _combatantWaves.takeFirst();
@@ -40,10 +41,12 @@ EncounterBattle::~EncounterBattle()
             delete combatantPair.second;
         }
     }
+    */
 }
 
 void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 {
+    /*
     QDomElement rootCombatantsElement = element.firstChildElement( "combatants" );
     if(rootCombatantsElement.isNull())
     {
@@ -87,6 +90,7 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
             }
         }
     }
+    */
 
     extractTextNode(element, isImport);
     if(!getText().isEmpty())
@@ -110,7 +114,6 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
     }
 
     CampaignObjectBase::inputXML(element, isImport);
-
 }
 
 void EncounterBattle::copyValues(const CampaignObjectBase* other)
@@ -158,6 +161,7 @@ void EncounterBattle::setAudioTrack(AudioTrack* track)
     }
 }
 
+/*
 int EncounterBattle::getWaveCount() const
 {
     return _combatantWaves.count();
@@ -290,6 +294,7 @@ Combatant* EncounterBattle::getCombatantById(QUuid combatantId, int combatantInt
 
     return nullptr;
 }
+*/
 
 void EncounterBattle::createBattleDialogModel()
 {
@@ -350,10 +355,6 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 
     _battleModel = new BattleDialogModel(this);
     _battleModel->inputXML(rootBattleElement, isImport);
-
-    // Todo: Layers - include active ID
-    int activeIdInt = DMH_GLOBAL_INVALID_ID;
-    QUuid activeId = parseIdString(rootBattleElement.attribute("activeId"), &activeIdInt, true);
 
     /*
     QDomElement combatantsElement = rootBattleElement.firstChildElement("combatants");
@@ -425,9 +426,10 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
     }
     */
 
-    inputXMLEffects(rootBattleElement.firstChildElement("effects"), isImport);
+    //inputXMLEffects(rootBattleElement.firstChildElement("effects"), isImport);
 }
 
+/*
 void EncounterBattle::inputXMLEffects(const QDomElement &parentElement, bool isImport)
 {
     if((!_battleModel)||(isImport))
@@ -455,6 +457,7 @@ void EncounterBattle::inputXMLEffects(const QDomElement &parentElement, bool isI
         effectElement = effectElement.nextSiblingElement();
     }
 }
+*/
 
 QDomElement EncounterBattle::createOutputXML(QDomDocument &doc)
 {
@@ -465,6 +468,7 @@ void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element,
 {
     element.setAttribute("audiotrack", _audioTrackId.toString());
 
+    /*
     QDomElement wavesElement = doc.createElement("waves");
     element.appendChild(wavesElement);
     for(int wave = 0; wave < _combatantWaves.count(); ++wave)
@@ -485,6 +489,7 @@ void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element,
             combatantsElement.appendChild(combatantPairElement);
         }
     }
+    */
 
     //if(_battleModel && !isExport)
     if(_battleModel)

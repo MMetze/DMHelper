@@ -16,6 +16,7 @@ class PublishGLBattleToken;
 class PublishGLBattleEffect;
 class PublishGLBattleBackground;
 class BattleDialogModelCombatant;
+class Layer;
 class QGraphicsItem;
 class QGraphicsSimpleTextItem;
 
@@ -86,6 +87,7 @@ protected slots:
     void activeCombatantMoved();
     void tokenSelectionChanged(PublishGLBattleToken* token);
     void createLineToken();
+    void layerAdded(Layer* layer);
 
 protected:
     bool _initialized;

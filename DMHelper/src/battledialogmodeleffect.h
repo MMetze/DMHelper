@@ -50,8 +50,11 @@ public:
     virtual int getEffectType() const = 0;
     virtual BattleDialogEffectSettings* getEffectEditor() const;
 
+    virtual void beginBatchChanges();
+    virtual void endBatchChanges();
+
     virtual QGraphicsItem* createEffectShape(qreal gridScale) = 0;
-    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale) const;
+    virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale);
 
     virtual bool getEffectActive() const;
     virtual void setEffectActive(bool active);
@@ -65,7 +68,7 @@ public:
     virtual int getWidth() const;
     virtual void setWidth(int width);
 
-    virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor) const;
+    virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor);
 
     virtual QPointF getPosition() const;
     virtual void setPosition(const QPointF& position);
@@ -102,6 +105,7 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
 
     virtual void prepareItem(QGraphicsItem& item) const;
+    virtual void registerChange();
 
     bool _active;
     bool _visible;
@@ -110,6 +114,9 @@ protected:
     qreal _rotation;
     QColor _color;
     QString _tip;
+
+    bool _batchChanges;
+    bool _changesMade;
 };
 
 

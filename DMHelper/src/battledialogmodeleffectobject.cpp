@@ -104,14 +104,15 @@ QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
     return pixmapItem;
 }
 
-void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
+void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal gridScale)
 {
+    beginBatchChanges();
     item.setPos(getPosition());
     item.setRotation(getRotation());
     item.setToolTip(getTip());
     item.setOpacity(_color.alphaF());
-
     setItemScale(&item, static_cast<qreal>(getSize()) * gridScale / 500.0);
+    endBatchChanges();
 }
 
 int BattleDialogModelEffectObject::getWidth() const
@@ -128,10 +129,13 @@ void BattleDialogModelEffectObject::setWidth(int width)
     }
 }
 
-void BattleDialogModelEffectObject::setItemScale(QGraphicsItem* item, qreal scaleFactor) const
+void BattleDialogModelEffectObject::setItemScale(QGraphicsItem* item, qreal scaleFactor)
 {
-    if(item)
+    if((item) && (item->scale() != scaleFactor * _imageScaleFactor))
+    {
         item->setScale(scaleFactor * _imageScaleFactor);
+        registerChange();
+    }
 }
 
 int BattleDialogModelEffectObject::getImageRotation() const
@@ -144,7 +148,7 @@ void BattleDialogModelEffectObject::setImageRotation(int imageRotation)
     if(_imageRotation != imageRotation)
     {
         _imageRotation = imageRotation;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -158,7 +162,7 @@ void BattleDialogModelEffectObject::setImageFile(const QString& imageFile)
     if(_imageFile != imageFile)
     {
         _imageFile = imageFile;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
