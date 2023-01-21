@@ -60,17 +60,16 @@ public slots:
     void setDistanceLineWidth(int lineWidth);
     void setInputMode(int inputMode);
 
-    void addEffectObject();
-    void addEffectCone();
-    void addEffectCube();
-    void addEffectLine();
-
     void castSpell();
 
     void setSelectedIcon(const QString& selectedIcon);
 
 signals:
     void addEffectRadius();
+    void addEffectCone();
+    void addEffectCube();
+    void addEffectLine();
+    void addEffectObject();
 
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);

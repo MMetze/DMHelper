@@ -221,25 +221,20 @@ QList<BattleDialogModelCombatant*> LayerTokens::getCombatants()
     return _combatants;
 }
 
-void LayerTokens::dmInitialize(QGraphicsScene& scene)
+void LayerTokens::dmInitialize(QGraphicsScene* scene)
 {
+    if(!scene)
+        return;
+
     for(int i = 0; i < _combatants.count(); ++i)
     {
         createCombatantIcon(scene, _combatants.at(i));
     }
 
-
     QList<BattleDialogModelEffect*> effects = _model->getEffectList();
     for(BattleDialogModelEffect* effect : qAsConst(effects))
     {
-        if(effect)
-        {
-            if((effect->children().count() != 1) ||
-               (addSpellEffect(scene, effect) == nullptr))
-            {
-                addEffectShape(scene, effect);
-            }
-        }
+        createEffectIcon(scene, effect);
     }
 
     Layer::dmInitialize(scene);
@@ -313,13 +308,16 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
            ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
            ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0)))
         {
-            PublishGLBattleToken* token = _combatantTokenHash.value(combatant);
-            if(token)
+            PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
+            if(!combatantToken)
             {
-                functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, token->getMatrixData());
-                token->paintGL();
-                token->paintEffects(defaultModelMatrix);
+                combatantToken = new PublishGLBattleToken(_glScene, combatant);
+                _combatantTokenHash.insert(combatant, combatantToken);
             }
+
+            functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, combatantToken->getMatrixData());
+            combatantToken->paintGL();
+            combatantToken->paintEffects(defaultModelMatrix);
         }
     }
 
@@ -334,25 +332,18 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
             if((effect) && (effect->getEffectVisible()))
             {
                 PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
-                if(effectToken)
+                if(!effectToken)
                 {
-                    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
-                    functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
-                    effectToken->paintGL();
+                    effectToken = new PublishGLBattleEffect(_glScene, effect);
+                    _effectTokenHash.insert(effect, effectToken);
                 }
-            }
-        }
-        /*
-        for(PublishGLBattleEffect* effectToken : _effectTokens)
-        {
-            if((effectToken) && (effectToken->getEffect()) && (effectToken->getEffect()->getEffectVisible()))
-            {
+
                 functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
                 functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
                 effectToken->paintGL();
             }
         }
-        */
+
         functions->glUseProgram(_shaderProgramRGB);
     }
 }
@@ -400,6 +391,9 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
 
     _combatants.append(combatant);
     _model->appendCombatantToList(combatant);
+
+    if((getLayerScene()) && (getLayerScene()->getDMScene()))
+        createCombatantIcon(getLayerScene()->getDMScene(), combatant);
 }
 
 void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
@@ -411,6 +405,19 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
         return;
 
     _model->removeCombatantFromList(combatant);
+
+    QGraphicsPixmapItem* combatantIcon = _combatantIconHash.take(combatant);
+    if(combatantIcon)
+    {
+        QGraphicsScene* scene = combatantIcon->scene();
+        if(scene)
+            scene->removeItem(combatantIcon);
+
+        delete combatantIcon;
+    }
+
+    PublishGLBattleToken* combatantToken = _combatantTokenHash.take(combatant);
+    delete combatantToken;
 }
 
 bool LayerTokens::containsCombatant(BattleDialogModelCombatant* combatant)
@@ -432,6 +439,9 @@ void LayerTokens::addEffect(BattleDialogModelEffect* effect)
     _effects.append(effect);
     connect(effect, &BattleDialogModelEffect::effectChanged, this, &LayerTokens::effectChanged);
     _model->appendEffectToList(effect);
+
+    if((getLayerScene()) && (getLayerScene()->getDMScene()))
+        createEffectIcon(getLayerScene()->getDMScene(), effect);
 }
 
 void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
@@ -443,6 +453,19 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
         return;
 
     _model->removeEffectFromList(effect);
+
+    QGraphicsItem* effectIcon = _effectIconHash.take(effect);
+    if(effectIcon)
+    {
+        QGraphicsScene* scene = effectIcon->scene();
+        if(scene)
+            scene->removeItem(effectIcon);
+
+        delete effectIcon;
+    }
+
+    PublishGLBattleEffect* effectToken = _effectTokenHash.take(effect);
+    delete effectToken;
 }
 
 bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
@@ -516,7 +539,7 @@ void LayerTokens::cleanupDM()
     }
 }
 
-void LayerTokens::createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCombatant* combatant)
+void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant)
 {
     if((!combatant) || (_combatantIconHash.contains(combatant)))
         return;
@@ -533,7 +556,7 @@ void LayerTokens::createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCo
         Combatant::drawConditions(&pix, combatant->getConditions());
 
         QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(pix, combatant);
-        scene.addItem(pixmapItem);
+        scene->addItem(pixmapItem);
         pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
         pixmapItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
         pixmapItem->setPos(combatant->getPosition());
@@ -572,7 +595,16 @@ void LayerTokens::createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCo
     }
 }
 
-QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene& scene, BattleDialogModelEffect* effect)
+void LayerTokens::createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect)
+{
+    if((!effect) || (!scene))
+        return;
+
+    if((effect->children().count() != 1) || (addSpellEffect(scene, effect) == nullptr))
+        addEffectShape(scene, effect);
+}
+
+QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect)
 {
     if((!_model) || (!effect) || (_effectIconHash.contains(effect)))
         return nullptr;
@@ -580,14 +612,14 @@ QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene& scene, BattleDialogMo
     QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
     if(shape)
     {
-        scene.addItem(shape);
+        scene->addItem(shape);
         _effectIconHash.insert(effect, shape);
     }
 
     return shape;
 }
 
-QGraphicsItem* LayerTokens::addSpellEffect(QGraphicsScene& scene, BattleDialogModelEffect* effect)
+QGraphicsItem* LayerTokens::addSpellEffect(QGraphicsScene* scene, BattleDialogModelEffect* effect)
 {
     if((!_model) || (!effect))
         return nullptr;

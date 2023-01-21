@@ -1,4 +1,4 @@
-#include "layerscene.h"
+    #include "layerscene.h"
 #include "layer.h"
 #include "layerimage.h"
 #include "layerfow.h"
@@ -17,7 +17,8 @@ LayerScene::LayerScene(QObject *parent) :
     _layers(),
     _scale(DMHelper::STARTING_GRID_SCALE),
     _selected(-1),
-    _dmScene(nullptr)
+    _dmScene(nullptr),
+    _playerGLScene(nullptr)
 {
 }
 
@@ -56,6 +57,7 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
         {
             newLayer->inputXML(layerElement, isImport);
             newLayer->setScale(_scale);
+            newLayer->setLayerScene(this);
             _layers.append(newLayer);
         }
 
@@ -112,6 +114,16 @@ bool LayerScene::isTreeVisible() const
     return false;
 }
 
+QGraphicsScene* LayerScene::getDMScene()
+{
+    return _dmScene;
+}
+
+PublishGLScene* LayerScene::getPlayerGLScene()
+{
+    return _playerGLScene;
+}
+
 QRectF LayerScene::boundingRect() const
 {
     QRectF result;
@@ -164,9 +176,10 @@ void LayerScene::insertLayer(int position, Layer* layer)
         layer->initialize(sceneSize().toSize());
 
     layer->setScale(_scale);
+    layer->setLayerScene(this);
 
     if(_dmScene)
-        layer->dmInitialize(*_dmScene);
+        layer->dmInitialize(_dmScene);
 
     _layers.insert(position, layer);
     resetLayerOrders();
@@ -183,9 +196,10 @@ void LayerScene::prependLayer(Layer* layer)
         layer->initialize(sceneSize().toSize());
 
     layer->setScale(_scale);
+    layer->setLayerScene(this);
 
     if(_dmScene)
-        layer->dmInitialize(*_dmScene);
+        layer->dmInitialize(_dmScene);
 
     _layers.prepend(layer);
     resetLayerOrders();
@@ -202,9 +216,10 @@ void LayerScene::appendLayer(Layer* layer)
         layer->initialize(sceneSize().toSize());
 
     layer->setScale(_scale);
+    layer->setLayerScene(this);
 
     if(_dmScene)
-        layer->dmInitialize(*_dmScene);
+        layer->dmInitialize(_dmScene);
 
     _layers.append(layer);
     resetLayerOrders();
@@ -218,8 +233,11 @@ void LayerScene::removeLayer(int position)
         return;
 
     Layer* deleteLayer = _layers.takeAt(position);
-    if(deleteLayer)
-        deleteLayer->deleteLater();
+    if(!deleteLayer)
+        return;
+
+    emit layerRemoved(deleteLayer);
+    deleteLayer->deleteLater();
 
     resetLayerOrders();
     if(_selected >= position)
@@ -418,13 +436,13 @@ void LayerScene::uninitializeLayers()
     _initialized = false;
 }
 
-void LayerScene::dmInitialize(QGraphicsScene& scene)
+void LayerScene::dmInitialize(QGraphicsScene* scene)
 {
     initializeLayers();
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->dmInitialize(scene);
 
-    _dmScene = &scene;
+    _dmScene = scene;
 }
 
 void LayerScene::dmUninitialize()
@@ -446,12 +464,16 @@ void LayerScene::playerGLInitialize(PublishGLScene* scene)
     initializeLayers();
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerGLInitialize(scene);
+
+    _playerGLScene = scene;
 }
 
 void LayerScene::playerGLUninitialize()
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerGLUninitialize();
+
+    _playerGLScene = nullptr;
 }
 
 bool LayerScene::playerGLUpdate()

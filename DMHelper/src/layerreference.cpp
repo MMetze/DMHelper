@@ -149,7 +149,7 @@ CampaignObjectBase* LayerReference::getReferenceObject()
     return _referenceObject;
 }
 
-void LayerReference::dmInitialize(QGraphicsScene& scene)
+void LayerReference::dmInitialize(QGraphicsScene* scene)
 {
     if(_referenceLayer)
         _referenceLayer->dmInitialize(scene);

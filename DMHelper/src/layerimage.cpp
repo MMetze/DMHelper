@@ -131,15 +131,18 @@ MapColorizeFilter LayerImage::getFilter() const
     return _filter;
 }
 
-void LayerImage::dmInitialize(QGraphicsScene& scene)
+void LayerImage::dmInitialize(QGraphicsScene* scene)
 {
+    if(!scene)
+        return;
+
     if(_graphicsItem)
     {
         qDebug() << "[LayerImage] ERROR: dmInitialize called although the graphics item already exists!";
         return;
     }
 
-    _graphicsItem = scene.addPixmap(QPixmap::fromImage(getImage()));
+    _graphicsItem = scene->addPixmap(QPixmap::fromImage(getImage()));
     if(_graphicsItem)
     {
         _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);

@@ -420,15 +420,18 @@ void LayerFow::setImageSize(const QSize& imageSize)
     }
 }
 
-void LayerFow::dmInitialize(QGraphicsScene& scene)
+void LayerFow::dmInitialize(QGraphicsScene* scene)
 {
+    if(!scene)
+        return;
+
     if(_graphicsItem)
     {
         qDebug() << "[LayerFow] ERROR: dmInitialize called although the graphics item already exists!";
         return;
     }
 
-    _graphicsItem = scene.addPixmap(QPixmap::fromImage(_imgFow));
+    _graphicsItem = scene->addPixmap(QPixmap::fromImage(_imgFow));
     if(_graphicsItem)
     {
         _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);

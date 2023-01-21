@@ -8,6 +8,7 @@
 #include <QDir>
 #include "dmconstants.h"
 
+class LayerScene;
 class QGraphicsScene;
 class PublishGLScene;
 
@@ -46,6 +47,7 @@ public:
 
     virtual QRectF boundingRect() const;
 
+    virtual LayerScene* getLayerScene() const;
     virtual QString getName() const;
     virtual int getOrder() const;
     virtual bool getLayerVisible() const;
@@ -65,7 +67,7 @@ public:
 
 public slots:    
     // DM Window Generic Interface
-    virtual void dmInitialize(QGraphicsScene& scene);
+    virtual void dmInitialize(QGraphicsScene* scene);
     virtual void dmUninitialize() = 0;
     virtual void dmUpdate() = 0;
 
@@ -84,6 +86,7 @@ public slots:
     virtual void setName(const QString& name);
 
     // Local Layer Interface (changing references doesn't change the source layer)
+    virtual void setLayerScene(LayerScene* layerScene);
     virtual void setOrder(int order);
     virtual void setLayerVisible(bool layerVisible);
     virtual void setOpacity(qreal opacity);
@@ -96,6 +99,7 @@ protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
+    LayerScene* _layerScene;
     QString _name;
     int _order;
     bool _layerVisible;

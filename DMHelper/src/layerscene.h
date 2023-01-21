@@ -24,6 +24,8 @@ public:
     virtual bool isTreeVisible() const override;
 
     // Local
+    virtual QGraphicsScene* getDMScene();
+    virtual PublishGLScene* getPlayerGLScene();
     virtual QRectF boundingRect() const;
     virtual QSizeF sceneSize() const;
 
@@ -59,7 +61,7 @@ public slots:
     void uninitializeLayers();
 
     // DM Window Generic Interface
-    virtual void dmInitialize(QGraphicsScene& scene);
+    virtual void dmInitialize(QGraphicsScene* scene);
     virtual void dmUninitialize();
     virtual void dmUpdate();
 
@@ -73,6 +75,7 @@ public slots:
 
 signals:
     void layerAdded(Layer* layer);
+    void layerRemoved(Layer* layer);
 
 protected slots:
     void removeLayer(Layer* reference);
@@ -90,6 +93,7 @@ protected:
     int _scale;
     int _selected;
     QGraphicsScene* _dmScene;
+    PublishGLScene* _playerGLScene;
 };
 
 #endif // LAYERSCENE_H

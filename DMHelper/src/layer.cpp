@@ -5,6 +5,7 @@
 
 Layer::Layer(const QString& name, int order, QObject *parent) :
     DMHObjectBase{parent},
+    _layerScene(nullptr),
     _name(name),
     _order(order),
     _layerVisible(true),
@@ -46,6 +47,11 @@ void Layer::postProcessXML(Campaign* campaign, const QDomElement &element, bool 
 QRectF Layer::boundingRect() const
 {
     return QRectF();
+}
+
+LayerScene* Layer::getLayerScene() const
+{
+    return _layerScene;
 }
 
 QString Layer::getName() const
@@ -91,7 +97,7 @@ void Layer::copyBaseValues(Layer *other) const
     other->_opacity = _opacity;
 }
 
-void Layer::dmInitialize(QGraphicsScene& scene)
+void Layer::dmInitialize(QGraphicsScene* scene)
 {
     Q_UNUSED(scene);
     applyOrder(_order);
@@ -126,6 +132,15 @@ void Layer::setName(const QString& name)
         return;
 
     _name = name;
+    emit dirty();
+}
+
+void Layer::setLayerScene(LayerScene* layerScene)
+{
+    if(_layerScene == layerScene)
+        return;
+
+    _layerScene = layerScene;
     emit dirty();
 }
 

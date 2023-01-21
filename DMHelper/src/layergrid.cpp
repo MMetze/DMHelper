@@ -99,15 +99,18 @@ const GridConfig& LayerGrid::getConfig() const
     return _config;
 }
 
-void LayerGrid::dmInitialize(QGraphicsScene& scene)
+void LayerGrid::dmInitialize(QGraphicsScene* scene)
 {
+    if(!scene)
+        return;
+
     if(_grid)
     {
         qDebug() << "[LayerImage] ERROR: dmInitialize called although the grid item already exists!";
         return;
     }
 
-    _grid = new Grid(&scene, QRect(QPoint(0, 0), _layerSize));
+    _grid = new Grid(scene, QRect(QPoint(0, 0), _layerSize));
     _grid->rebuildGrid(_config, getOrder());
     _grid->setFlag(QGraphicsItem::ItemIsMovable, false);
     _grid->setFlag(QGraphicsItem::ItemIsSelectable, false);

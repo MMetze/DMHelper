@@ -8,8 +8,6 @@
 #include "monsterclass.h"
 #include "unselectedpixmap.h"
 #include "grid.h"
-#include "spellbook.h"
-#include "spell.h"
 #include <QMenu>
 #include <QGraphicsSceneMouseEvent>
 #include <QKeyEvent>
@@ -653,18 +651,22 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         menu.addAction(addRadiusItem);
 
         QAction* addConeItem = new QAction(QString("Create Cone Effect"), &menu);
-        connect(addConeItem, SIGNAL(triggered()), this, SLOT(addEffectCone()));
+        connect(addConeItem, SIGNAL(triggered()), this, SIGNAL(addEffectCone()));
         menu.addAction(addConeItem);
 
         QAction* addCubeItem = new QAction(QString("Create Cube Effect"), &menu);
-        connect(addCubeItem, SIGNAL(triggered()), this, SLOT(addEffectCube()));
+        connect(addCubeItem, SIGNAL(triggered()), this, SIGNAL(addEffectCube()));
         menu.addAction(addCubeItem);
 
         QAction* addLineItem = new QAction(QString("Create Line Effect"), &menu);
-        connect(addLineItem, SIGNAL(triggered()), this, SLOT(addEffectLine()));
+        connect(addLineItem, SIGNAL(triggered()), this, SIGNAL(addEffectLine()));
         menu.addAction(addLineItem);
 
         menu.addSeparator();
+
+        QAction* addObjectItem = new QAction(QString("Add Object..."), &menu);
+        connect(addObjectItem, SIGNAL(triggered()), this, SIGNAL(addEffectObject()));
+        menu.addAction(addObjectItem);
 
         QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
         connect(castItem, SIGNAL(triggered()), this, SLOT(castSpell()));
@@ -763,6 +765,7 @@ void BattleDialogGraphicsScene::setInputMode(int inputMode)
     _inputMode = inputMode;
 }
 
+/*
 void BattleDialogGraphicsScene::addEffectObject()
 {
     if(!_model)
@@ -785,66 +788,11 @@ void BattleDialogGraphicsScene::addEffectObject()
         }
     }
 }
-
-void BattleDialogGraphicsScene::addEffectCone()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create cone effect, no model exists.";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone, 20, 0, QColor(115,18,0,64), QString());
-
-    // TODO: Layers - move to Frame
-    //_contextMenuItem = addEffect(effect);
-    if(_contextMenuItem)
-    {
-        editItem();
-        _contextMenuItem = nullptr;
-    }
-}
-
-void BattleDialogGraphicsScene::addEffectCube()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create cube effect, no model exists.";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube, 20, 0, QColor(115,18,0,64), QString());
-
-    // TODO: Layers - move to Frame
-    //_contextMenuItem = addEffect(effect);
-    if(_contextMenuItem)
-    {
-        editItem();
-        _contextMenuItem = nullptr;
-    }
-}
-
-void BattleDialogGraphicsScene::addEffectLine()
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create a line effect, no model exists.";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115,18,0,64), QString());
-
-    // TODO: Layers - move to Frame
-    //_contextMenuItem = addEffect(effect);
-    if(_contextMenuItem)
-    {
-        editItem();
-        _contextMenuItem = nullptr;
-    }
-}
+*/
 
 void BattleDialogGraphicsScene::castSpell()
 {
+    /*
     if(!_model)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: unable to cast a spell, no model exists.";
@@ -932,6 +880,7 @@ void BattleDialogGraphicsScene::castSpell()
         // TODO: Layers - move to Frame
         //addSpellEffect(*effect);
     }
+    */
 }
 
 void BattleDialogGraphicsScene::setSelectedIcon(const QString& selectedIcon)

@@ -38,7 +38,7 @@ public:
 
 public slots:
     // DM Window Generic Interface
-    virtual void dmInitialize(QGraphicsScene& scene) override;
+    virtual void dmInitialize(QGraphicsScene* scene) override;
     virtual void dmUninitialize() override;
     virtual void dmUpdate() override;
 
@@ -75,9 +75,10 @@ protected:
 
     // DM Window Methods
     void cleanupDM();
-    void createCombatantIcon(QGraphicsScene& scene, BattleDialogModelCombatant* combatant);
-    QGraphicsItem* addEffectShape(QGraphicsScene& scene, BattleDialogModelEffect* effect);
-    QGraphicsItem* addSpellEffect(QGraphicsScene& scene, BattleDialogModelEffect* effect);
+    void createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant);
+    void createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect);
+    QGraphicsItem* addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect);
+    QGraphicsItem* addSpellEffect(QGraphicsScene* scene, BattleDialogModelEffect* effect);
 
     // Player Window Methods
     void cleanupPlayer();
@@ -106,7 +107,6 @@ protected:
     int _shaderModelMatrixRGBA;
     int _shaderProjectionMatrixRGBA;
     int _shaderAlphaRGBA;
-
 };
 
 #endif // LAYERTOKENS_H

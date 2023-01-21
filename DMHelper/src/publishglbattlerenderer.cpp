@@ -74,7 +74,10 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _recreateContent(false)
 {
     if(_model)
+    {
         connect(&_model->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLBattleRenderer::layerAdded);
+        connect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+    }
 }
 
 PublishGLBattleRenderer::~PublishGLBattleRenderer()
@@ -1194,6 +1197,9 @@ void PublishGLBattleRenderer::createLineToken()
 
 void PublishGLBattleRenderer::layerAdded(Layer* layer)
 {
-    if(layer)
-        layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
+    if(!layer)
+        return;
+
+    layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
+    emit updateWidget();
 }

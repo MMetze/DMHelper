@@ -830,7 +830,7 @@ void MapFrame::initializeFoW()
 
         qDebug() << "[MapFrame] Initializing map frame image";
         //setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
-        _mapSource->getLayerScene().dmInitialize(*_scene);
+        _mapSource->getLayerScene().dmInitialize(_scene);
 
         //_fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         //_fow->setEnabled(false);

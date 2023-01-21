@@ -35,11 +35,16 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _recreateMarkers(false),
     _updateFow(false)
 {
-    connect(_map, &Map::partyChanged, this, &PublishGLMapRenderer::handlePartyChanged);
-    connect(_map, &Map::partyIconChanged, this, &PublishGLMapRenderer::handlePartyIconChanged);
-    connect(_map, &Map::partyIconPosChanged, this, &PublishGLMapRenderer::handlePartyIconPosChanged);
-    connect(_map, &Map::showPartyChanged, this, &PublishGLMapRenderer::handleShowPartyChanged);
-    connect(_map, &Map::partyScaleChanged, this, &PublishGLMapRenderer::handlePartyScaleChanged);
+    if(_map)
+    {
+        connect(_map, &Map::partyChanged, this, &PublishGLMapRenderer::handlePartyChanged);
+        connect(_map, &Map::partyIconChanged, this, &PublishGLMapRenderer::handlePartyIconChanged);
+        connect(_map, &Map::partyIconPosChanged, this, &PublishGLMapRenderer::handlePartyIconPosChanged);
+        connect(_map, &Map::showPartyChanged, this, &PublishGLMapRenderer::handleShowPartyChanged);
+        connect(_map, &Map::partyScaleChanged, this, &PublishGLMapRenderer::handlePartyScaleChanged);
+        connect(&_map->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLRenderer::updateWidget);
+        connect(&_map->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+    }
 }
 
 PublishGLMapRenderer::~PublishGLMapRenderer()

@@ -8,6 +8,8 @@
 #include "monsterclass.h"
 #include "dmconstants.h"
 #include "bestiary.h"
+#include "spellbook.h"
+#include "spell.h"
 #include "encounterbattle.h"
 #include "battledialoglogger.h"
 #include "battledialoglogview.h"
@@ -23,6 +25,7 @@
 #include "battledialogmodelmonsterbase.h"
 #include "battledialogmodelmonsterclass.h"
 #include "battledialogmodeleffectfactory.h"
+#include "battledialogmodeleffectobject.h"
 #include "battledialogeffectsettings.h"
 #include "battledialoggraphicsscene.h"
 #include "battlecombatantframe.h"
@@ -53,10 +56,12 @@
 #include <QTime>
 #include <QScrollBar>
 #include <QInputDialog>
+#include <QFileDialog>
 #include <QtMath>
 #include <QUuid>
 #include <QPixmap>
 #include <QScreen>
+#include <QImageReader>
 
 //#define BATTLE_DIALOG_PROFILE_RENDER
 //#define BATTLE_DIALOG_PROFILE_RENDER_TEXT
@@ -176,6 +181,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     connect(_scene, SIGNAL(mapZoom(int)), this, SLOT(zoomDelta(int)));
     connect(_scene, &BattleDialogGraphicsScene::addEffectRadius, this, &BattleFrame::addEffectRadius);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectCone, this, &BattleFrame::addEffectCone);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectCube, this, &BattleFrame::addEffectCube);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectLine, this, &BattleFrame::addEffectLine);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
@@ -1130,48 +1138,148 @@ void BattleFrame::addNPC()
     selectAddCharacter(characterList, QString("Select an NPC"), QString("Select NPC:"));
 }
 
-void BattleFrame::addObject()
+void BattleFrame::addEffectObject()
 {
-    _scene->addEffectObject();
+    QString filename = QFileDialog::getOpenFileName(nullptr, QString("Select object image file.."));
+    if((filename.isEmpty()) || (!QImageReader(filename).canRead()))
+        return;
+
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object, 20, 20, QColor(), filename));
 }
 
 void BattleFrame::castSpell()
 {
-    _scene->castSpell();
+    if(!_model)
+        return;
+
+    bool ok = false;
+    QString selectedSpell = QInputDialog::getItem(nullptr,
+                                                  QString("Select Spell"),
+                                                  QString("Select the spell to cast:"),
+                                                  Spellbook::Instance()->getSpellList(),
+                                                  0,
+                                                  false,
+                                                  &ok);
+    if(!ok)
+    {
+        qDebug() << "[BattleFrame] Spell cast aborted: spell selection dialog cancelled.";
+        return;
+    }
+
+    qDebug() << "[BattleFrame] Casting spell: " << selectedSpell;
+
+    Spell* spell = Spellbook::Instance()->getSpell(selectedSpell);
+    if(!spell)
+    {
+        qDebug() << "[BattleFrame] Spell cast aborted: not able to find selected spell in the Spellbook.";
+        return;
+    }
+
+    BattleDialogModelEffect* effect = createEffect(spell->getEffectType(),
+                                                   spell->getEffectSize().height(),
+                                                   spell->getEffectSize().width(),
+                                                   spell->getEffectColor(),
+                                                   spell->getEffectTokenPath());
+
+    if(!effect)
+    {
+        qDebug() << "[BattleFrame] Spell cast aborted: unable to create the effect object.";
+        return;
+    }
+
+    if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
+    {
+        // Either an Object or a basic shape without a token
+        effect->setName(spell->getName());
+        effect->setTip(spell->getName());
+        // TODO: Layers - move to Frame
+        //addEffect(effect);
+    }
+    else
+    {
+        // A basic shape with a token image as well
+        int tokenHeight = spell->getEffectSize().height();
+        int tokenWidth = spell->getEffectSize().height();
+        if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
+        {
+            tokenHeight *= 2;
+            tokenWidth *= 2;
+        }
+        else if(spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line)
+        {
+            tokenWidth = spell->getEffectSize().width();
+        }
+
+        BattleDialogModelEffectObject* tokenEffect =  dynamic_cast<BattleDialogModelEffectObject*>(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Object,
+                                                                                                                tokenHeight,
+                                                                                                                tokenWidth,
+                                                                                                                Qt::black, //spell->getEffectColor(),
+                                                                                                                spell->getEffectTokenPath()));
+
+        if(!tokenEffect)
+        {
+            qDebug() << "[BattleFrame] Spell cast aborted: unable to create the effect's token object!";
+            delete effect;
+            return;
+        }
+
+        tokenEffect->setName(spell->getName());
+        tokenEffect->setTip(spell->getName());
+        tokenEffect->setEffectActive(true);
+        tokenEffect->setImageRotation(spell->getEffectTokenRotation());
+
+        effect->addObject(tokenEffect);
+        _model->appendEffect(effect);
+        // TODO: Layers - move to Frame
+        //addSpellEffect(*effect);
+    }
 }
 
 void BattleFrame::addEffectRadius()
 {
-    if(!_model)
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115,18,0,64), QString()));
+}
+
+void BattleFrame::addEffectCone()
+{
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cone, 20, 0, QColor(115,18,0,64), QString()));
+}
+
+void BattleFrame::addEffectCube()
+{
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Cube, 20, 0, QColor(115,18,0,64), QString()));
+}
+
+void BattleFrame::addEffectLine()
+{
+    registerEffect(createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Line, 20, 5, QColor(115,18,0,64), QString()));
+}
+
+void BattleFrame::registerEffect(BattleDialogModelEffect* effect)
+{
+    if(!effect)
         return;
 
-    BattleDialogModelEffect* effect = createEffect(BattleDialogModelEffect::BattleDialogModelEffect_Radius, 20, 0, QColor(115,18,0,64), QString());
-    _model->appendEffect(effect);
+    if(!_model)
+    {
+        delete effect;
+        return;
+    }
 
     BattleDialogEffectSettings* settings = effect->getEffectEditor();
     if(!settings)
+    {
+        delete effect;
         return;
+    }
+
+    _model->appendEffect(effect);
 
     settings->exec();
     if(settings->result() == QDialog::Accepted)
         settings->copyValues(*effect);
 
     settings->deleteLater();
-}
-
-void BattleFrame::addEffectCone()
-{
-    _scene->addEffectCone();
-}
-
-void BattleFrame::addEffectCube()
-{
-    _scene->addEffectCube();
-}
-
-void BattleFrame::addEffectLine()
-{
-    _scene->addEffectLine();
 }
 
 void BattleFrame::setCameraCouple()
@@ -1654,7 +1762,7 @@ void BattleFrame::updateMap()
             return;
 
         qDebug() << "[Battle Frame] Initializing battle map image";
-        _model->getLayerScene().dmInitialize(*_scene);
+        _model->getLayerScene().dmInitialize(_scene);
         if(_model->getBackgroundImage().isNull())
             _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         // TODO: Layers

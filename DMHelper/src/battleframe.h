@@ -130,13 +130,14 @@ public slots:
     void addMonsters();
     void addCharacter();
     void addNPC();
-    void addObject();
+    void addEffectObject();
     void castSpell();
 
     void addEffectRadius();
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void registerEffect(BattleDialogModelEffect* effect);
 
     // Public for connection to map ribbon
     void setCameraCouple();
