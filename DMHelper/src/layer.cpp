@@ -15,6 +15,7 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
 
 Layer::~Layer()
 {
+    emit layerDestroyed(this);
 }
 
 QDomElement Layer::outputXML(QDomDocument &doc, QDomElement &parentElement, QDir& targetDirectory, bool isExport)

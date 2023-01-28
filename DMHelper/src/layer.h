@@ -94,6 +94,7 @@ public slots:
 signals:
     void dirty();
     void orderChanged(int order);
+    void layerDestroyed(Layer* layer);
 
 protected:
     // Layer Specific Interface

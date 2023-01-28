@@ -35,44 +35,56 @@ void LayerReference::postProcessXML(Campaign* campaign, const QDomElement &eleme
     if(!campaign)
         return;
 
-    if((_referenceObjectId.isNull()) || (_referenceLayerId.isNull()))
-    {
-        qDebug() << "[LayerReference] Reference Object ID or Reference Layer ID null for object " << getID().toString();
-        return;
-    }
-
-    _referenceObject = campaign->getObjectById(_referenceObjectId);
     if(!_referenceObject)
     {
-        qDebug() << "[LayerReference] Not able to find reference object " << _referenceObjectId << " for object " << getID().toString();
-        return;
-    }
+        if(_referenceObjectId.isNull())
+        {
+            qDebug() << "[LayerReference] Reference Object and Object ID null for object " << getID().toString();
+            return;
+        }
 
-    if(_referenceObject->getObjectType() == DMHelper::CampaignType_Map)
-    {
-        Map* map = dynamic_cast<Map*>(_referenceObject);
-        if(map)
-            _referenceLayer = map->getLayerScene().findLayer(_referenceLayerId);
-    }
-    else if(_referenceObject->getObjectType() == DMHelper::CampaignType_Battle)
-    {
-        EncounterBattle* battle = dynamic_cast<EncounterBattle*>(_referenceObject);
-        if((battle) && (battle->getBattleDialogModel()))
-            _referenceLayer = battle->getBattleDialogModel()->getLayerScene().findLayer(_referenceLayerId);
-    }
-    else
-    {
-        qDebug() << "[LayerReference] Unexpected type of reference object " << _referenceObjectId << " for object " << getID().toString();
-        return;
+        _referenceObject = campaign->getObjectById(_referenceObjectId);
+        if(!_referenceObject)
+        {
+            qDebug() << "[LayerReference] Not able to find reference object " << _referenceObjectId << " for object " << getID().toString();
+            return;
+        }
     }
 
     if(!_referenceLayer)
     {
-        qDebug() << "[LayerReference] Not able to find reference layer " << _referenceLayerId << " for object " << getID().toString() << " in reference object " << _referenceObjectId;
-        return;
+        if(_referenceLayerId.isNull())
+        {
+            qDebug() << "[LayerReference] Reference Layer and Layer ID null for object " << getID().toString();
+            return;
+        }
+
+        if(_referenceObject->getObjectType() == DMHelper::CampaignType_Map)
+        {
+            Map* map = dynamic_cast<Map*>(_referenceObject);
+            if(map)
+                _referenceLayer = map->getLayerScene().findLayer(_referenceLayerId);
+        }
+        else if(_referenceObject->getObjectType() == DMHelper::CampaignType_Battle)
+        {
+            EncounterBattle* battle = dynamic_cast<EncounterBattle*>(_referenceObject);
+            if((battle) && (battle->getBattleDialogModel()))
+                _referenceLayer = battle->getBattleDialogModel()->getLayerScene().findLayer(_referenceLayerId);
+        }
+        else
+        {
+            qDebug() << "[LayerReference] Unexpected type of reference object " << _referenceObjectId << " for object " << getID().toString();
+            return;
+        }
+
+        if(!_referenceLayer)
+        {
+            qDebug() << "[LayerReference] Not able to find reference layer " << _referenceLayerId << " for object " << getID().toString() << " in reference object " << _referenceObjectId;
+            return;
+        }
     }
 
-    connect(_referenceLayer, &QObject::destroyed, this, &LayerReference::handleReferenceDestroyed);
+    connect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
 }
 
 QRectF LayerReference::boundingRect() const
@@ -216,10 +228,9 @@ void LayerReference::setScale(int scale)
         _referenceLayer->setScale(scale);
 }
 
-void LayerReference::handleReferenceDestroyed(QObject *obj)
+void LayerReference::handleReferenceDestroyed(Layer *layer)
 {
-    Layer* referenceLayer = dynamic_cast<Layer*>(obj);
-    if((referenceLayer) && (referenceLayer == _referenceLayer))
+    if((layer) && (layer == _referenceLayer))
         emit referenceDestroyed(this);
 }
 

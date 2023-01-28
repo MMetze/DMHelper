@@ -1902,6 +1902,8 @@ void BattleFrame::editLayers()
     LayersEditDialog dlg(_model->getLayerScene());
     dlg.resize(width() / 2, height() / 2);
     dlg.exec();
+
+    emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
 }
 
 void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)

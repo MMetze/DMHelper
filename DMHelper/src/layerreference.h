@@ -57,7 +57,7 @@ signals:
     void referenceDestroyed(Layer* reference);
 
 protected slots:
-    void handleReferenceDestroyed(QObject *obj);
+    void handleReferenceDestroyed(Layer *layer);
 
 protected:
     // Layer Specific Interface

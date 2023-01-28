@@ -801,6 +801,8 @@ void MapFrame::editLayers()
     LayersEditDialog dlg(_mapSource->getLayerScene());
     dlg.resize(width() / 2, height() / 2);
     dlg.exec();
+
+    emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());
 }
 
 void MapFrame::initializeFoW()
