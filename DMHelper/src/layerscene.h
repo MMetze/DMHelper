@@ -53,6 +53,7 @@ public:
     int getFirstIndex(DMHelper::LayerType type) const;
     QImage mergedImage();
 
+    QList<Layer*> getLayers() const;
     QList<Layer*> getLayers(DMHelper::LayerType type) const;
 
 public slots:

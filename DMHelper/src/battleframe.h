@@ -24,6 +24,7 @@ class UnselectedPixmap;
 class CombatantRolloverFrame;
 class PublishGLRenderer;
 class PublishGLBattleRenderer;
+class Layer;
 
 namespace Ui {
 class BattleFrame;
@@ -163,6 +164,8 @@ public slots:
     void setPointerOn(bool enabled);
     void showStatistics();
 
+    void layerSelected(int selected);
+
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
@@ -175,6 +178,7 @@ signals:
     void monsterSelected(const QString& monsterClass);
 
     void registerRenderer(PublishGLRenderer* renderer);
+    void setLayers(QList<Layer*> layers, int selected);
 
     void showPublishWindow();
     void pointerChanged(const QCursor& cursor);

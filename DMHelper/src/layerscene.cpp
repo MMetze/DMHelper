@@ -381,6 +381,11 @@ QImage LayerScene::mergedImage()
     return result;
 }
 
+QList<Layer*> LayerScene::getLayers() const
+{
+    return _layers;
+}
+
 QList<Layer*> LayerScene::getLayers(DMHelper::LayerType type) const
 {
     QList<Layer*> result;

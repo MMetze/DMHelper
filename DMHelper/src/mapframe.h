@@ -21,6 +21,7 @@ class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
+class Layer;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -71,6 +72,7 @@ signals:
     void markerChanged();
 
     void registerRenderer(PublishGLRenderer* renderer);
+    void setLayers(QList<Layer*> layers, int selected);
 
     void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
@@ -147,6 +149,7 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void targetResized(const QSize& newSize);
+    void layerSelected(int selected);
 
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;

@@ -60,11 +60,21 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
 
     // TODO: Layers
     // Math says divide by 10: radius of 5 to adjust scale to "one square"
+    LayerFow* layer = dynamic_cast<LayerFow*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    if(layer)
+    {
+        _undoPath = new UndoFowPath(layer, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
+        layer->getUndoStack()->push(_undoPath);
+        //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
+        //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
+        emit fowEdited(*_fow);
+    }
+
     //_undoPath = new UndoFowPath(_map, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
     //_map->getUndoStack()->push(_undoPath);
     //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
     //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
-    emit fowEdited(*_fow);
+    //emit fowEdited(*_fow);
 }
 
 void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos)

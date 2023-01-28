@@ -110,7 +110,8 @@ void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* cur
         _cameraRect->setPublishing(_isPublishing);
 
     emit checkableChanged(_isVideo);
-    emit setPublishEnabled(true);
+    emit setPublishEnabled(true);    
+    emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());
 }
 
 void MapFrame::deactivateObject()
@@ -136,6 +137,8 @@ void MapFrame::deactivateObject()
     _mapSource->uninitialize();
 #endif
     setMap(nullptr);
+
+    emit setLayers(QList<Layer*>(), 0);
 
     _spaceDown = false;
 }
@@ -742,6 +745,12 @@ void MapFrame::publishWindowMouseRelease(const QPointF& position)
 {
     Q_UNUSED(position);
     _publishMouseDown = false;
+}
+
+void MapFrame::layerSelected(int selected)
+{
+    if(_mapSource)
+        _mapSource->getLayerScene().setSelectedLayerIndex(selected);
 }
 
 void MapFrame::publishClicked(bool checked)

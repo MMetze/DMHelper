@@ -1,6 +1,7 @@
 #ifndef PUBLISHBUTTONPROXY_H
 #define PUBLISHBUTTONPROXY_H
 
+#include "layer.h"
 #include <QObject>
 #include <QColor>
 
@@ -25,9 +26,11 @@ public slots:
     void setColor(const QColor& color);
     void cancelPublish();
     void setPlayersWindow(bool checked);
+    void setLayers(QList<Layer*> layers, int selected);
 
 signals:
     void clicked(bool checked = false);
+    void layerSelected(int selected);
     void layersClicked();
     void rotateCW();
     void rotateCCW();
@@ -42,6 +45,7 @@ signals:
     void shareSetColor(const QColor& color);
     void shareCancelPublish();
     void shareSetPlayersWindow(bool checked);
+    void shareSetLayers(QList<Layer*> layers, int selected);
 
 protected slots:
     void internalSetRotation(int rotation);

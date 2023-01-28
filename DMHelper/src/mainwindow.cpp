@@ -497,6 +497,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_battleFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_battleFrame, SIGNAL(modelChanged(BattleDialogModel*)), this, SLOT(battleModelChanged(BattleDialogModel*)));
     connect(_battleFrame, &BattleFrame::mapCreated, this, &MainWindow::updateCampaignTree);
+    connect(_battleFrame, &BattleFrame::setLayers, _ribbon->getPublishRibbon(), &PublishButtonProxy::setLayers);
     connect(_ribbonTabBattle, SIGNAL(addCharacterClicked()), _battleFrame, SLOT(addCharacter()));
     connect(_ribbonTabBattle, SIGNAL(addMonsterClicked()), _battleFrame, SLOT(addMonsters()));
     connect(_ribbonTabBattle, SIGNAL(addNPCClicked()), _battleFrame, SLOT(addNPC()));
@@ -507,6 +508,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabBattle, SIGNAL(addEffectCubeClicked()), _battleFrame, SLOT(addEffectCube()));
     connect(_ribbonTabBattle, SIGNAL(addEffectLineClicked()), _battleFrame, SLOT(addEffectLine()));
     connect(_ribbonTabBattle, SIGNAL(statisticsClicked()), _battleFrame, SLOT(showStatistics()));
+    connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _battleFrame, &BattleFrame::layerSelected);
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "Next Combatant")), this);
     connect(nextShortcut, SIGNAL(activated()), _battleFrame, SLOT(next()));
 
@@ -588,10 +590,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::scaleChanged, _mapFrame, &MapFrame::setPartyScale);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::showMarkersClicked, _mapFrame, &MapFrame::setShowMarkers);
     connect(_ribbonTabWorldMap, &RibbonTabWorldMap::addMarkerClicked, _mapFrame, &MapFrame::addNewMarker);
+    connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _mapFrame, &MapFrame::layerSelected);
     connect(_mapFrame, &MapFrame::partyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setParty);
     connect(_mapFrame, &MapFrame::partyIconChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setPartyIcon);
     connect(_mapFrame, &MapFrame::showPartyChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowParty);
     connect(_mapFrame, &MapFrame::partyScaleChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setScale);
+    connect(_mapFrame, &MapFrame::setLayers, _ribbon->getPublishRibbon(), &PublishButtonProxy::setLayers);
 
     connect(_mapFrame, &MapFrame::showMarkersChanged, _ribbonTabWorldMap, &RibbonTabWorldMap::setShowMarkers);
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _mapFrame, SLOT(setPointerFile(const QString&)));
@@ -2588,9 +2592,18 @@ void MainWindow::deactivateObject()
     CampaignObjectFrame* objectFrame = dynamic_cast<CampaignObjectFrame*>(ui->stackedWidgetEncounter->currentWidget());
     if(objectFrame)
     {
-        disconnect(_ribbon->getPublishRibbon(), nullptr, objectFrame, nullptr);
+        disconnect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layersClicked, objectFrame, &CampaignObjectFrame::editLayers);
+        disconnect(_ribbon->getPublishRibbon(), SIGNAL(clicked(bool)), objectFrame, SLOT(publishClicked(bool)));
+        disconnect(_ribbon->getPublishRibbon(), SIGNAL(rotationChanged(int)), objectFrame, SLOT(setRotation(int)));
+        disconnect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
         disconnect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
-        disconnect(objectFrame, nullptr, _ribbon->getPublishRibbon(), nullptr);
+
+        disconnect(objectFrame, SIGNAL(setPublishEnabled(bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool)));
+        disconnect(objectFrame, SIGNAL(checkedChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setChecked(bool)));
+        disconnect(objectFrame, SIGNAL(checkableChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setCheckable(bool)));
+        disconnect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
+        disconnect(objectFrame, SIGNAL(backgroundColorChanged(const QColor&)), _ribbon->getPublishRibbon(), SLOT(setColor(const QColor&)));
+
         objectFrame->deactivateObject();
     }
 }
@@ -2611,7 +2624,6 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         connect(objectFrame, SIGNAL(checkableChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setCheckable(bool)));
         connect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
         connect(objectFrame, SIGNAL(backgroundColorChanged(const QColor&)), _ribbon->getPublishRibbon(), SLOT(setColor(const QColor&)));
-
 
         objectFrame->activateObject(object, _pubWindow ? _pubWindow->getRenderer() : nullptr);
         if(_ribbon && _ribbon->getPublishRibbon())

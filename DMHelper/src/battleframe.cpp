@@ -169,6 +169,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
 
     _mapDrawer = new BattleFrameMapDrawer(this);
     connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, this, &BattleFrame::updateFowImage);
+    connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, this, &BattleFrame::updateFowImage);
 
     connect(ui->graphicsView, SIGNAL(rubberBandChanged(QRect,QPointF,QPointF)), this, SLOT(handleRubberBandChanged(QRect,QPointF,QPointF)));
 
@@ -1828,6 +1829,12 @@ void BattleFrame::showStatistics()
     }
 }
 
+void BattleFrame::layerSelected(int selected)
+{
+    if(_model)
+        _model->getLayerScene().setSelectedLayerIndex(selected);
+}
+
 void BattleFrame::publishClicked(bool checked)
 {
     if((!_model) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _model)))
@@ -2630,10 +2637,13 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
+        disconnect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, _model, &BattleDialogModel::dirty);
 
         clearBattleFrame();
         cleanupBattleMap();
         clearCombatantWidgets();
+
+        emit setLayers(QList<Layer*>(), 0);
     }
 
     _model = model;
@@ -2658,9 +2668,12 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
+        connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, _model, &BattleDialogModel::dirty);
 
         setBattleMap();
         recreateCombatantWidgets();
+
+        emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
 
         if(!_logger)
         {
@@ -2751,6 +2764,7 @@ void BattleFrame::setEditMode()
         {
             QRect viewSize = ui->graphicsView->mapFromScene(QRect(0, 0, _model->getGridScale(), _model->getGridScale())).boundingRect();
             _mapDrawer->setScale(_model->getGridScale(), viewSize.width());
+            // TODO: Layers
 //            TODO _mapDrawer->setSize(ui->spinSize->value());
         }
     }

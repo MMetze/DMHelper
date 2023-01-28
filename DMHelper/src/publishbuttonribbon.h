@@ -2,6 +2,7 @@
 #define PUBLISHBUTTONRIBBON_H
 
 #include "ribbonframe.h"
+#include "layer.h"
 
 namespace Ui {
 class PublishButtonRibbon;
@@ -30,9 +31,11 @@ public slots:
     void clickPublish();
     void cancelPublish();
     void setPlayersWindow(bool checked);
+    void setLayers(QList<Layer*> layers, int selected);
 
 signals:
     void clicked(bool checked = false);
+    void layerSelected(int selected);
     void layersClicked();
     void rotateCW();
     void rotateCCW();
@@ -49,6 +52,7 @@ private slots:
     void handleClicked(bool checked);
     void handleRotation();
     void handleColorChanged(const QColor& color);
+    void selectLayerAction(QAction* action);
 
 private:
     void setDefaults();
