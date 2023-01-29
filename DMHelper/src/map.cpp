@@ -51,6 +51,7 @@ Map::Map(const QString& mapName, QObject *parent) :
     _mapSize()
 {
 //    _undoStack = new QUndoStack(this);
+    connect(&_layerScene, &LayerScene::dirty, this, &Map::dirty);
 }
 
 Map::~Map()
@@ -864,7 +865,7 @@ void Map::uninitialize()
 //    _imgBackground = QImage();
 //    _imgBWFow = QImage();
 //    _imgFow = QImage();
-    _layerScene.clearLayers();
+    _layerScene.uninitializeLayers();
     _initialized = false;
 }
 

@@ -134,6 +134,9 @@ void PublishButtonRibbon::setLayers(QList<Layer*> layers, int selected)
         if(!newDefaultAction)
             newDefaultAction = newAction;
 
+        newMenu->addSeparator();
+        newMenu->addAction(new QAction(QIcon(":/img/data/icon_layers.png"), QString("Edit Layers...")));
+
         connect(newMenu, &QMenu::triggered, this, &PublishButtonRibbon::selectLayerAction);
         ui->btnLayerTool->setMenu(newMenu);
     }
@@ -200,6 +203,12 @@ void PublishButtonRibbon::handleColorChanged(const QColor& color)
 
 void PublishButtonRibbon::selectLayerAction(QAction* action)
 {
+    if((action) && (action->text() == QString("Edit Layers...")))
+    {
+        emit layersClicked();
+        return;
+    }
+
     ui->btnLayerTool->setIcon(action ? action->icon() : QIcon(":/img/data/icon_layers.png"));
     if(ui->btnLayerTool->menu())
         ui->btnLayerTool->menu()->setDefaultAction(action);

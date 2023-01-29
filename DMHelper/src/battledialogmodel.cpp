@@ -31,6 +31,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _logger(),
     _backgroundImage()
 {
+    connect(&_layerScene, &LayerScene::dirty, this, &BattleDialogModel::dirty);
 }
 
 BattleDialogModel::~BattleDialogModel()

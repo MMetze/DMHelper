@@ -155,6 +155,8 @@ void LayerScene::setScale(int scale)
     _scale = scale;
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->setScale(scale);
+
+    emit dirty();
 }
 
 int LayerScene::layerCount() const
@@ -169,7 +171,7 @@ Layer* LayerScene::layerAt(int position) const
 
 void LayerScene::insertLayer(int position, Layer* layer)
 {
-    if((position < 0) || (position >= _layers.count()) || (!layer))
+    if((position < 0) || (position >= _layers.count()) || (!layer) || (_layers.contains(layer)))
         return;
 
     if(_initialized)
@@ -185,11 +187,12 @@ void LayerScene::insertLayer(int position, Layer* layer)
     resetLayerOrders();
     _selected = position;
     emit layerAdded(layer);
+    emit dirty();
 }
 
 void LayerScene::prependLayer(Layer* layer)
 {
-    if(!layer)
+    if((!layer) || (_layers.contains(layer)))
         return;
 
     if(_initialized)
@@ -205,11 +208,12 @@ void LayerScene::prependLayer(Layer* layer)
     resetLayerOrders();
     _selected = 0;
     emit layerAdded(layer);
+    emit dirty();
 }
 
 void LayerScene::appendLayer(Layer* layer)
 {
-    if(!layer)
+    if((!layer) || (_layers.contains(layer)))
         return;
 
     if(_initialized)
@@ -225,6 +229,7 @@ void LayerScene::appendLayer(Layer* layer)
     resetLayerOrders();
     _selected = _layers.count() - 1;
     emit layerAdded(layer);
+    emit dirty();
 }
 
 void LayerScene::removeLayer(int position)
@@ -242,6 +247,8 @@ void LayerScene::removeLayer(int position)
     resetLayerOrders();
     if(_selected >= position)
         --_selected;
+
+    emit dirty();
 }
 
 void LayerScene::clearLayers()
@@ -253,12 +260,13 @@ void LayerScene::clearLayers()
 
 void LayerScene::moveLayer(int from, int to)
 {
-    if((from < 0) || (from >= _layers.count()) || (to < 0) || (to >= _layers.count()))
+    if((from < 0) || (from >= _layers.count()) || (to < 0) || (to >= _layers.count()) || (from == to))
         return;
 
     _layers.move(from, to);
     resetLayerOrders();
     _selected = to;
+    emit dirty();
 }
 
 Layer* LayerScene::findLayer(QUuid id)
@@ -279,7 +287,11 @@ int LayerScene::getSelectedLayerIndex() const
 
 void LayerScene::setSelectedLayerIndex(int selected)
 {
+    if(_selected == selected)
+        return;
+
     _selected = selected;
+    emit dirty();
 }
 
 Layer* LayerScene::getSelectedLayer() const
@@ -292,11 +304,15 @@ Layer* LayerScene::getSelectedLayer() const
 
 void LayerScene::setSelectedLayer(Layer* layer)
 {
+    if(getSelectedLayer() == layer)
+        return;
+
     for(int i = 0; i < _layers.count(); ++i)
     {
         if((_layers.at(i)) && (_layers.at(i) == layer))
         {
             _selected = i;
+            emit dirty();
             return;
         }
     }
