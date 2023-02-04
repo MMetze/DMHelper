@@ -25,6 +25,8 @@ void LayerReference::inputXML(const QDomElement &element, bool isImport)
 
     _referenceObjectId = QUuid(element.attribute("objectId"));
     _referenceLayerId = QUuid(element.attribute("layerId"));
+
+    Layer::inputXML(element, isImport);
 }
 
 void LayerReference::postProcessXML(Campaign* campaign, const QDomElement &element, bool isImport)

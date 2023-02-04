@@ -85,6 +85,19 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     if(!layersElement.isNull())
     {
         _layerScene.inputXML(layersElement, isImport);
+
+        // Set the model for any token layers
+        for(int i = 0; i < _layerScene.layerCount(); ++i)
+        {
+            Layer* layer = _layerScene.layerAt(i);
+            if((layer) && (layer->getType() == DMHelper::LayerType_Tokens))
+            {
+                LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+                if(tokenLayer)
+                    tokenLayer->setModel(this);
+            }
+        }
+        _layerScene.postProcessXML(layersElement, isImport);
     }
     else
     {
@@ -106,6 +119,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         LayerTokens* tokenLayer = new LayerTokens(this);
         tokenLayer->inputXML(element, isImport);
         tokenLayer->setName(QString("tokens"));
+        tokenLayer->postProcessXML(campaign, element, isImport);
 
         int fowPosition = _layerScene.getFirstIndex(DMHelper::LayerType_Fow);
         if(fowPosition == -1)
@@ -131,9 +145,8 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
         */
 
+        //_layerScene.postProcessXML(element, isImport);
     }
-
-    _layerScene.postProcessXML(element, isImport);
 
     // Todo: Layers - include active ID
     QUuid activeId(element.attribute("activeId"));
@@ -799,6 +812,7 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
 
     _logger.outputXML(doc, element, targetDirectory, isExport);
 
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool BattleDialogModel::belongsToObject(QDomElement& element)

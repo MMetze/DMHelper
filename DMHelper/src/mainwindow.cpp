@@ -512,7 +512,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QShortcut* nextShortcut = new QShortcut(QKeySequence(tr("Ctrl+N", "Next Combatant")), this);
     connect(nextShortcut, SIGNAL(activated()), _battleFrame, SLOT(next()));
 
-    connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), _battleFrame, SLOT(selectBattleMap()));
+    // TODO: Layers - do we still do this?
+    //connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), _battleFrame, SLOT(selectBattleMap()));
     connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
     connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);

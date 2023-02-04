@@ -1757,28 +1757,34 @@ void BattleFrame::updateMap()
 
     qDebug() << "[Battle Frame] Updating map " << _model->getMap()->getFileName() << " rect=" << _model->getMapRect().left() << "," << _model->getMapRect().top() << ", " << _model->getMapRect().width() << "x" << _model->getMapRect().height();
     _isVideo = false;
-    if(_model->getMap()->initialize())
+    // TODO: Layers - is this right?
+    //if(_model->getMap()->initialize())
     {
-        if(!_model->getMap()->isInitialized())
-            return;
+        // TODO: Layers - is this right?
+        _model->getLayerScene().initializeLayers();
+        //if(!_model->getMap()->isInitialized())
+        //    return;
 
         qDebug() << "[Battle Frame] Initializing battle map image";
         _model->getLayerScene().dmInitialize(_scene);
-        if(_model->getBackgroundImage().isNull())
-            _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         // TODO: Layers
+        //if(_model->getBackgroundImage().isNull())
+        //    _model->setBackgroundImage(_model->getMap()->getBackgroundImage());
         //_background->setPixmap((QPixmap::fromImage(_model->getBackgroundImage())));
-        _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
+        //_fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
         // TODO: Layers
         //_bwFoWImage = _model->getMap()->getBWFoWImage();
-        _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
+        //_mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
     }
+    // TODO: Layers - video support
+    /*
     else if(_model->getMap()->isValid())
     {
         qDebug() << "[Battle Frame] Initializing battle map video";
         extractDMScreenshot();
         _isVideo = true;
     }
+    */
 }
 
 void BattleFrame::updateRounds()

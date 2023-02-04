@@ -138,7 +138,8 @@ void PublishGLBattleRenderer::setBackgroundColor(const QColor& color)
 
 void PublishGLBattleRenderer::initializeGL()
 {
-    if((_initialized) || (!_model) || (_model->getBackgroundImage().isNull()) || (!_targetWidget) || (!_targetWidget->context()))
+    //if((_initialized) || (!_model) || (_model->getBackgroundImage().isNull()) || (!_targetWidget) || (!_targetWidget->context()))
+    if((_initialized) || (!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
     _scene.setGridScale(_model->getGridScale());
@@ -152,9 +153,11 @@ void PublishGLBattleRenderer::initializeGL()
     _model->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
 
     // Create the objects
-    initializeBackground();
+    // TODO: Layers
+    //initializeBackground();
+    _scene.deriveSceneRectFromSize(_model->getLayerScene().sceneSize());
 
-    if(isBackgroundReady())
+    //if(isBackgroundReady())
         createContents();
 
     _model->getLayerScene().playerGLInitialize(&_scene);
@@ -199,8 +202,11 @@ void PublishGLBattleRenderer::resizeGL(int w, int h)
     qDebug() << "[BattleGLRenderer] Resize to: " << targetSize;
     _scene.setTargetSize(targetSize);
 
-    resizeBackground(w, h);
+    // TODO: Layers
+    //resizeBackground(w, h);
     _updateInitiative = true;
+
+    updateProjectionMatrix();
 
     emit updateWidget();
 }
@@ -210,6 +216,8 @@ void PublishGLBattleRenderer::paintGL()
     if((!_initialized) || (!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
+    // TODO: Layers
+    /*
     if(!isBackgroundReady())
     {
         updateBackground();
@@ -220,6 +228,7 @@ void PublishGLBattleRenderer::paintGL()
 
         _recreateContent = true;
     }
+    */
 
     if(_recreateContent)
     {
@@ -487,8 +496,8 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgramRGB == 0) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    if(!isBackgroundReady())
-        return;
+    //if(!isBackgroundReady())
+    //    return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     if(!f)
@@ -508,7 +517,7 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     QSizeF halfRect = rectSize / 2.0;
     QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
-    QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
+    QSizeF backgroundMiddle = _model->getLayerScene().sceneSize() / 2.0;
 
     // qDebug() << "[PublishGLBattleRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
     // qDebug() << "[PublishGLBattleRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;

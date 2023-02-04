@@ -1,8 +1,9 @@
-    #include "layerscene.h"
+#include "layerscene.h"
 #include "layer.h"
 #include "layerimage.h"
 #include "layerfow.h"
 #include "layergrid.h"
+#include "layertokens.h"
 #include "layerreference.h"
 #include "campaign.h"
 #include <QRectF>
@@ -43,12 +44,18 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             case DMHelper::LayerType_Image:
                 newLayer = new LayerImage();
                 break;
-        case DMHelper::LayerType_Fow:
-            newLayer = new LayerFow();
-            break;
-        case DMHelper::LayerType_Grid:
-            newLayer = new LayerGrid();
-            break;
+            case DMHelper::LayerType_Fow:
+                newLayer = new LayerFow();
+                break;
+            case DMHelper::LayerType_Grid:
+                newLayer = new LayerGrid();
+                break;
+            case DMHelper::LayerType_Tokens:
+                newLayer = new LayerTokens();
+                break;
+            case DMHelper::LayerType_Reference:
+                newLayer = new LayerReference();
+                break;
             default:
                 break;
         }
@@ -76,19 +83,30 @@ void LayerScene::postProcessXML(const QDomElement &element, bool isImport)
         return;
     }
 
-    for(int i = 0; i < _layers.count(); ++i)
+    QDomElement layerElement = element.firstChildElement(QString("layer"));
+    while(!layerElement.isNull())
     {
-        if(_layers.at(i))
+        QUuid layerID = QUuid(layerElement.attribute(QString("_baseID")));
+        if(!layerID.isNull())
         {
-            _layers.at(i)->postProcessXML(campaign, element, isImport);
+            int i = 0;
+            while((i < _layers.count()) && (_layers.at(i)->getID() != layerID))
+                ++i;
 
-            if(_layers.at(i)->getType() == DMHelper::LayerType_Reference)
+            if((i < _layers.count()) && (_layers.at(i)))
             {
-                LayerReference* referenceLayer = dynamic_cast<LayerReference*>(_layers[i]);
-                if(referenceLayer)
-                    connect(referenceLayer, &LayerReference::referenceDestroyed, this, QOverload<Layer*>::of(&LayerScene::removeLayer));
+                _layers.at(i)->postProcessXML(campaign, layerElement, isImport);
+
+                if(_layers.at(i)->getType() == DMHelper::LayerType_Reference)
+                {
+                    LayerReference* referenceLayer = dynamic_cast<LayerReference*>(_layers[i]);
+                    if(referenceLayer)
+                        connect(referenceLayer, &LayerReference::referenceDestroyed, this, QOverload<Layer*>::of(&LayerScene::removeLayer));
+                }
             }
         }
+
+        layerElement = layerElement.nextSiblingElement(QString("layer"));
     }
 }
 

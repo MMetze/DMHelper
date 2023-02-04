@@ -381,6 +381,12 @@ void LayerTokens::setScale(int scale)
     }
 }
 
+void LayerTokens::setModel(BattleDialogModel* model)
+{
+    if(!_model)
+        _model = model;
+}
+
 void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)

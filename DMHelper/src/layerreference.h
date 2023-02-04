@@ -10,7 +10,7 @@ class LayerReference : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerReference(CampaignObjectBase* referenceObject, Layer* referenceLayer, int order = 0, QObject *parent = nullptr);
+    explicit LayerReference(CampaignObjectBase* referenceObject= nullptr, Layer* referenceLayer = nullptr, int order = 0, QObject *parent = nullptr);
     virtual ~LayerReference();
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;

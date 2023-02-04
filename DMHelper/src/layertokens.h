@@ -16,7 +16,7 @@ class LayerTokens : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerTokens(BattleDialogModel* model, const QString& name = QString(), int order = 0, QObject *parent = nullptr);
+    explicit LayerTokens(BattleDialogModel* model = nullptr, const QString& name = QString(), int order = 0, QObject *parent = nullptr);
     virtual ~LayerTokens() override;
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -27,7 +27,7 @@ public:
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 
-    // Local Layer Interface (generally should call set*() versions below
+    // Local Layer Interface (generally should call set*() versions below)
     virtual void applyOrder(int order) override;
     virtual void applyLayerVisible(bool layerVisible) override;
     virtual void applyOpacity(qreal opacity) override;
@@ -55,6 +55,7 @@ public slots:
     virtual void setScale(int scale) override;
 
     // Local Interface
+    void setModel(BattleDialogModel* model); // Note: only works if model not yet set!
     void addCombatant(BattleDialogModelCombatant* combatant);
     void removeCombatant(BattleDialogModelCombatant* combatant);
     bool containsCombatant(BattleDialogModelCombatant* combatant);
