@@ -160,7 +160,7 @@ void PublishGLBattleRenderer::initializeGL()
     //if(isBackgroundReady())
         createContents();
 
-    _model->getLayerScene().playerGLInitialize(&_scene);
+    _model->getLayerScene().playerGLInitialize(this, &_scene);
 
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
@@ -353,6 +353,53 @@ void PublishGLBattleRenderer::paintGL()
     paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrixRGB);
 }
 
+void PublishGLBattleRenderer::updateProjectionMatrix()
+{
+    if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgramRGB == 0) || (!_targetWidget) || (!_targetWidget->context()))
+        return;
+
+    //if(!isBackgroundReady())
+    //    return;
+
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
+    if(!f)
+        return;
+
+    // Update projection matrix and other size related settings:
+    QRectF transformedCamera = _cameraRect;
+    QSizeF transformedTarget = _scene.getTargetSize();
+    if((_rotation == 90) || (_rotation == 270))
+    {
+        transformedCamera = transformedCamera.transposed();
+        transformedCamera.moveTo(transformedCamera.topLeft().transposed());
+        transformedTarget.transpose();
+    }
+
+    QSizeF rectSize = transformedTarget.scaled(_cameraRect.size(), Qt::KeepAspectRatioByExpanding);
+    QSizeF halfRect = rectSize / 2.0;
+    QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
+    QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
+    QSizeF backgroundMiddle = _model->getLayerScene().sceneSize() / 2.0;
+
+    // qDebug() << "[PublishGLBattleRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
+    // qDebug() << "[PublishGLBattleRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+
+    _projectionMatrix.setToIdentity();
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
+                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
+                            0.1f, 1000.f);
+
+    setPointerScale(rectSize.width() / transformedTarget.width());
+
+    QSizeF scissorSize = transformedCamera.size().scaled(_scene.getTargetSize(), Qt::KeepAspectRatio);
+    // qDebug() << "[PublishGLBattleRenderer] scissor size: " << scissorSize;
+    _scissorRect.setX((_scene.getTargetSize().width() - scissorSize.width()) / 2.0);
+    _scissorRect.setY((_scene.getTargetSize().height() - scissorSize.height()) / 2.0);
+    _scissorRect.setWidth(scissorSize.width());
+    _scissorRect.setHeight(scissorSize.height());
+}
+
 void PublishGLBattleRenderer::setCameraRect(const QRectF& cameraRect)
 {
     if(_cameraRect != cameraRect)
@@ -489,53 +536,6 @@ void PublishGLBattleRenderer::setCountdownValues(qreal countdown, const QColor& 
     _countdownScale = countdown;
     _countdownColor = countdownColor;
     updateWidget();
-}
-
-void PublishGLBattleRenderer::updateProjectionMatrix()
-{
-    if((!_model) || (_scene.getTargetSize().isEmpty()) || (_shaderProgramRGB == 0) || (!_targetWidget) || (!_targetWidget->context()))
-        return;
-
-    //if(!isBackgroundReady())
-    //    return;
-
-    QOpenGLFunctions *f = _targetWidget->context()->functions();
-    if(!f)
-        return;
-
-    // Update projection matrix and other size related settings:
-    QRectF transformedCamera = _cameraRect;
-    QSizeF transformedTarget = _scene.getTargetSize();
-    if((_rotation == 90) || (_rotation == 270))
-    {
-        transformedCamera = transformedCamera.transposed();
-        transformedCamera.moveTo(transformedCamera.topLeft().transposed());
-        transformedTarget.transpose();
-    }
-
-    QSizeF rectSize = transformedTarget.scaled(_cameraRect.size(), Qt::KeepAspectRatioByExpanding);
-    QSizeF halfRect = rectSize / 2.0;
-    QPointF cameraTopLeft((rectSize.width() - _cameraRect.width()) / 2.0, (rectSize.height() - _cameraRect.height()) / 2);
-    QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
-    QSizeF backgroundMiddle = _model->getLayerScene().sceneSize() / 2.0;
-
-    // qDebug() << "[PublishGLBattleRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
-    // qDebug() << "[PublishGLBattleRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
-
-    _projectionMatrix.setToIdentity();
-    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
-    _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
-                            backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
-                            0.1f, 1000.f);
-
-    setPointerScale(rectSize.width() / transformedTarget.width());
-
-    QSizeF scissorSize = transformedCamera.size().scaled(_scene.getTargetSize(), Qt::KeepAspectRatio);
-    // qDebug() << "[PublishGLBattleRenderer] scissor size: " << scissorSize;
-    _scissorRect.setX((_scene.getTargetSize().width() - scissorSize.width()) / 2.0);
-    _scissorRect.setY((_scene.getTargetSize().height() - scissorSize.height()) / 2.0);
-    _scissorRect.setWidth(scissorSize.width());
-    _scissorRect.setHeight(scissorSize.height());
 }
 
 void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool drawPCs)

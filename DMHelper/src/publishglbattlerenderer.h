@@ -44,6 +44,9 @@ public:
     virtual void paintGL() override;
 
 public slots:
+    // DMH OpenGL renderer calls
+    virtual void updateProjectionMatrix() override;
+
     void setCameraRect(const QRectF& cameraRect);
     void setInitiativeType(int initiativeType);
 
@@ -61,9 +64,6 @@ public slots:
     void setCountdownValues(qreal countdown, const QColor& countdownColor);
 
 protected:
-    // DMH OpenGL renderer calls
-    virtual void updateProjectionMatrix() override;
-
     // Background overrides
     virtual void initializeBackground() = 0;
     virtual bool isBackgroundReady() = 0;

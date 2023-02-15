@@ -4,6 +4,7 @@
 #include "layerscene.h"
 #include "layerfow.h"
 #include "layerimage.h"
+#include "layervideo.h"
 #include "layerframe.h"
 #include "layergrid.h"
 #include <QImageReader>
@@ -70,7 +71,7 @@ void LayersEditDialog::moveDown()
 void LayersEditDialog::addLayer()
 {
     QStringList items;
-    items << tr("Image") << tr("FoW") << tr("Tokens") << tr("Grid") << tr("Text");
+    items << tr("Image") << tr("Video") << tr("FoW") << tr("Tokens") << tr("Grid") << tr("Text");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -80,7 +81,7 @@ void LayersEditDialog::addLayer()
     Layer* newLayer = nullptr;
     if(selectedItem == tr("Image"))
     {
-        QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Map File"));
+        QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Image File"));
         if(newFileName.isEmpty())
             return;
 /*
@@ -104,6 +105,14 @@ void LayersEditDialog::addLayer()
         newLayer = new LayerImage(QString("Image"), newFileName);
         //qDebug() << "[LayersEditDialog] Trying to add Image layer which is not yet implemented!";
         //return;
+    }
+    else if(selectedItem == tr("Video"))
+    {
+        QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Video File"));
+        if(newFileName.isEmpty())
+            return;
+
+        newLayer = new LayerVideo(QString("Video"), newFileName);
     }
     else if(selectedItem == tr("FoW"))
     {

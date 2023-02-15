@@ -129,8 +129,9 @@ void LayerGrid::dmUpdate()
 {
 }
 
-void LayerGrid::playerGLInitialize(PublishGLScene* scene)
+void LayerGrid::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
+    Q_UNUSED(renderer);
     Q_UNUSED(scene);
 
     if(_gridObject)
@@ -156,7 +157,7 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
 
     if(!_gridObject)
     {
-        playerGLInitialize(nullptr);
+        playerGLInitialize(nullptr, nullptr);
         if(!_gridObject)
             return;
     }

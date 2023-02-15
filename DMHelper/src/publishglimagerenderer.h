@@ -31,11 +31,13 @@ public:
     QColor getColor() const;
 
 public slots:
+    // DMH OpenGL renderer calls
+    virtual void updateProjectionMatrix() override;
+
     void setImage(const QImage& image);
     //void setColor(QColor color);
 
 protected:
-    virtual void updateProjectionMatrix() override;
 
 private:
     CampaignObjectBase* _renderObject;

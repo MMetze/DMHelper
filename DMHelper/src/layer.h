@@ -10,6 +10,7 @@
 
 class LayerScene;
 class QGraphicsScene;
+class PublishGLRenderer;
 class PublishGLScene;
 
 /*
@@ -72,7 +73,7 @@ public slots:
     virtual void dmUpdate() = 0;
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize(PublishGLScene* scene) = 0;
+    virtual void playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene) = 0;
     virtual void playerGLUninitialize() = 0;
     virtual bool playerGLUpdate();
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) = 0;

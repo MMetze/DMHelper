@@ -162,8 +162,11 @@ void LayerImage::dmUpdate()
 {
 }
 
-void LayerImage::playerGLInitialize(PublishGLScene* scene)
+void LayerImage::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
+    Q_UNUSED(renderer);
+    Q_UNUSED(scene);
+
     if(_backgroundObject)
     {
         qDebug() << "[LayerImage] ERROR: playerGLInitialize called although the background object already exists!";
@@ -187,7 +190,7 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 
     if(!_backgroundObject)
     {
-        playerGLInitialize(nullptr);
+        playerGLInitialize(nullptr, nullptr);
         if(!_backgroundObject)
             return;
     }

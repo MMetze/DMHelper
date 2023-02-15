@@ -498,11 +498,11 @@ void LayerScene::dmUpdate()
         _layers[i]->dmUpdate();
 }
 
-void LayerScene::playerGLInitialize(PublishGLScene* scene)
+void LayerScene::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     initializeLayers();
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->playerGLInitialize(scene);
+        _layers[i]->playerGLInitialize(renderer, scene);
 
     _playerGLScene = scene;
 }
@@ -574,6 +574,7 @@ void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
 {
     element.setAttribute("selected", _selected);
     element.setAttribute("scale", _scale);
+    // TODO: Layers - store the scene rect as well
 
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->outputXML(doc, element, targetDirectory, isExport);

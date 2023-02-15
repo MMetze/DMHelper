@@ -35,6 +35,7 @@ public:
 
 public slots:
     // DMH OpenGL renderer calls
+    virtual void updateProjectionMatrix() override;
     virtual void setRotation(int rotation) override;
 
     virtual void rewind();
@@ -52,9 +53,6 @@ protected slots:
 protected:
     // QObject overrides
     virtual void timerEvent(QTimerEvent *event) override;
-
-    // DMH OpenGL renderer calls
-    virtual void updateProjectionMatrix() override;
 
     // Background overrides
     virtual void initializeBackground() = 0;

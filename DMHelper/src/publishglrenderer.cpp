@@ -78,6 +78,11 @@ QRect PublishGLRenderer::getScissorRect()
     return QRect();
 }
 
+QOpenGLWidget* PublishGLRenderer::getTargetWidget()
+{
+    return _targetWidget;
+}
+
 void PublishGLRenderer::updateRender()
 {
     emit updateWidget();

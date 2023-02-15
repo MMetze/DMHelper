@@ -113,7 +113,7 @@ void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
 
 void PublishGLMapRenderer::initializeGL()
 {    
-    if((_initialized) || (!_targetWidget) || (!_map))
+    if((_initialized) || (!_targetWidget) || (!_targetWidget->context()) || (!_map))
         return;
 
     // Set up the rendering context, load shaders and other resources, etc.:
@@ -205,7 +205,7 @@ void PublishGLMapRenderer::initializeGL()
 
     // Create the objects
     //initializeBackground();
-    _map->getLayerScene().playerGLInitialize(nullptr);
+    _map->getLayerScene().playerGLInitialize(this, nullptr);
     updateProjectionMatrix();
     updateFoW();
 
@@ -356,36 +356,6 @@ void PublishGLMapRenderer::paintGL()
     paintPointer(f, sceneSize, _shaderModelMatrix);
 }
 
-void PublishGLMapRenderer::distanceChanged()
-{
-    _recreateLineToken = true;
-}
-
-void PublishGLMapRenderer::fowChanged(const QImage& fow)
-{
-    if(fow.isNull())
-        return;
-
-//    _fowImage = fow;
-    _updateFow = true;
-    emit updateWidget();
-}
-
-void PublishGLMapRenderer::setCameraRect(const QRectF& cameraRect)
-{
-    if(_cameraRect != cameraRect)
-    {
-        _cameraRect = cameraRect;
-        updateProjectionMatrix();
-        emit updateWidget();
-    }
-}
-
-void PublishGLMapRenderer::markerChanged()
-{
-    _recreateMarkers = true;
-}
-
 void PublishGLMapRenderer::updateProjectionMatrix()
 {
     if((_shaderProgram == 0) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
@@ -437,6 +407,36 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
     _scissorRect.setHeight(scissorSize.height());
+}
+
+void PublishGLMapRenderer::distanceChanged()
+{
+    _recreateLineToken = true;
+}
+
+void PublishGLMapRenderer::fowChanged(const QImage& fow)
+{
+    if(fow.isNull())
+        return;
+
+//    _fowImage = fow;
+    _updateFow = true;
+    emit updateWidget();
+}
+
+void PublishGLMapRenderer::setCameraRect(const QRectF& cameraRect)
+{
+    if(_cameraRect != cameraRect)
+    {
+        _cameraRect = cameraRect;
+        updateProjectionMatrix();
+        emit updateWidget();
+    }
+}
+
+void PublishGLMapRenderer::markerChanged()
+{
+    _recreateMarkers = true;
 }
 
 void PublishGLMapRenderer::updateBackground()

@@ -197,6 +197,22 @@ QColor PublishGLImageRenderer::getColor() const
     return _color;
 }
 
+void PublishGLImageRenderer::updateProjectionMatrix()
+{
+    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
+        return;
+
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
+    if(!f)
+        return;
+
+    // Update projection matrix and other size related settings:
+    QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+    QMatrix4x4 projectionMatrix;
+    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+}
+
 void PublishGLImageRenderer::setImage(const QImage& image)
 {
     if(image != _image)
@@ -219,19 +235,3 @@ void PublishGLImageRenderer::setColor(QColor color)
     emit updateWidget();
 }
 */
-
-void PublishGLImageRenderer::updateProjectionMatrix()
-{
-    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
-        return;
-
-    QOpenGLFunctions *f = _targetWidget->context()->functions();
-    if(!f)
-        return;
-
-    // Update projection matrix and other size related settings:
-    QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
-    QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
-}

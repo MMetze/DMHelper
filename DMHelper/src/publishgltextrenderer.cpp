@@ -255,6 +255,36 @@ void PublishGLTextRenderer::paintGL()
         f->glDisable(GL_SCISSOR_TEST);
 }
 
+void PublishGLTextRenderer::updateProjectionMatrix()
+{
+    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
+        return;
+
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
+    if(!f)
+        return;
+
+    QSizeF transformedTarget = _targetSize;
+    if((_rotation == 90) || (_rotation == 270))
+        transformedTarget.transpose();
+
+    // Update projection matrix and other size related settings:
+    QSizeF rectSize = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+    _projectionMatrix.setToIdentity();
+    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+    _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+
+    QSizeF transformedBackgroundSize = getBackgroundSize();
+    if((_rotation == 90) || (_rotation == 270))
+        transformedBackgroundSize.transpose();
+
+    QSizeF scissorSize = transformedBackgroundSize.scaled(_targetSize, Qt::KeepAspectRatio);
+    _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
+    _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
+    _scissorRect.setWidth(scissorSize.width());
+    _scissorRect.setHeight(scissorSize.height());
+}
+
 void PublishGLTextRenderer::setRotation(int rotation)
 {
     if((rotation != _rotation) && (_textObject) && (_encounter) && (!_encounter->getAnimated()))
@@ -331,36 +361,6 @@ void PublishGLTextRenderer::timerEvent(QTimerEvent *event)
     _textObject->setY(_textObject->getY() + _encounter->getScrollSpeed() * (getRotatedHeight(_rotation) / 250) * (elapsedtime / 1000.0));
 
     emit updateWidget();
-}
-
-void PublishGLTextRenderer::updateProjectionMatrix()
-{
-    if((_shaderProgram == 0) || (!_targetWidget) || (!_targetWidget->context()))
-        return;
-
-    QOpenGLFunctions *f = _targetWidget->context()->functions();
-    if(!f)
-        return;
-
-    QSizeF transformedTarget = _targetSize;
-    if((_rotation == 90) || (_rotation == 270))
-        transformedTarget.transpose();
-
-    // Update projection matrix and other size related settings:
-    QSizeF rectSize = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
-    _projectionMatrix.setToIdentity();
-    _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
-    _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-
-    QSizeF transformedBackgroundSize = getBackgroundSize();
-    if((_rotation == 90) || (_rotation == 270))
-        transformedBackgroundSize.transpose();
-
-    QSizeF scissorSize = transformedBackgroundSize.scaled(_targetSize, Qt::KeepAspectRatio);
-    _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
-    _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
-    _scissorRect.setWidth(scissorSize.width());
-    _scissorRect.setHeight(scissorSize.height());
 }
 
 void PublishGLTextRenderer::updateBackground()

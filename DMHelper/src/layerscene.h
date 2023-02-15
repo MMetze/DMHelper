@@ -8,6 +8,7 @@
 
 class Layer;
 class QGraphicsScene;
+class PublishGLRenderer;
 class PublishGLScene;
 
 class LayerScene : public CampaignObjectBase
@@ -67,7 +68,7 @@ public slots:
     virtual void dmUpdate();
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize(PublishGLScene* scene);
+    virtual void playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene);
     virtual void playerGLUninitialize();
     virtual bool playerGLUpdate();
     virtual void playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderProgram, GLint defaultModelMatrix, const GLfloat* projectionMatrix);

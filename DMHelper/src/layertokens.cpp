@@ -249,8 +249,10 @@ void LayerTokens::dmUpdate()
 {
 }
 
-void LayerTokens::playerGLInitialize(PublishGLScene* scene)
+void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
+    Q_UNUSED(renderer);
+
     if(!scene)
         return;
 

@@ -28,6 +28,7 @@ public:
     virtual bool deleteOnDeactivation();
 
     virtual QRect getScissorRect();
+    virtual QOpenGLWidget* getTargetWidget();
 
     virtual void updateRender();
 
@@ -42,6 +43,7 @@ signals:
     void deactivated();
 
 public slots:
+    virtual void updateProjectionMatrix() = 0;
     virtual void setBackgroundColor(const QColor& color);
     virtual void setRotation(int rotation);
 
@@ -51,7 +53,6 @@ public slots:
     virtual void setPointerFileName(const QString& filename);
 
 protected:
-    virtual void updateProjectionMatrix() = 0;
 
     // Protected pointer functions
     virtual void paintPointer(QOpenGLFunctions* functions, const QSize& sceneSize, int shaderModelMatrix);

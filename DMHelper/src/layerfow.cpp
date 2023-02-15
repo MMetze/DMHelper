@@ -451,8 +451,11 @@ void LayerFow::dmUpdate()
 {
 }
 
-void LayerFow::playerGLInitialize(PublishGLScene* scene)
+void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
+    Q_UNUSED(renderer);
+    Q_UNUSED(scene);
+
     if(_backgroundObject)
     {
         qDebug() << "[LayerFow] ERROR: playerGLInitialize called although the background object already exists!";
@@ -482,7 +485,7 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatr
 
     if(!_backgroundObject)
     {
-        playerGLInitialize(nullptr);
+        playerGLInitialize(nullptr, nullptr);
         if(!_backgroundObject)
             return;
     }

@@ -1,3 +1,9 @@
+Layers
+* Update order/opacity/visible to hit both player and dm views
+* Add opacity sliders
+* Updates on Layer Dialog applied to both views immediately (token visibility not reflected)
+* Scaling/positioning of layers (images/videos) of different sizes
+
 Multiple icons for a monster
 * Add ability to have multiple icons
 * Add saving/loading of multiple or single icons

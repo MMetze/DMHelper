@@ -163,7 +163,8 @@ namespace DMHelper
         LayerType_Fow,
         LayerType_Grid,
         LayerType_Tokens,
-        LayerType_Reference
+        LayerType_Reference,
+        LayerType_Video
     };
 
     enum FileType

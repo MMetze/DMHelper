@@ -1,19 +1,18 @@
-#ifndef LAYERIMAGE_H
-#define LAYERIMAGE_H
+#ifndef LAYERVIDEO_H
+#define LAYERVIDEO_H
 
 #include "layer.h"
-#include "mapcolorizefilter.h"
 #include <QImage>
 
-class PublishGLBattleBackground;
 class QGraphicsPixmapItem;
+class VideoPlayerGLPlayer;
 
-class LayerImage : public Layer
+class LayerVideo : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerImage(const QString& name = QString(), const QString& filename = QString(), int order = 0, QObject *parent = nullptr);
-    virtual ~LayerImage() override;
+    explicit LayerVideo(const QString& name = QString(), const QString& filename = QString(), int order = 0, QObject *parent = nullptr);
+    virtual ~LayerVideo() override;
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
@@ -22,17 +21,13 @@ public:
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 
-    // Local Interface
+    // Local Layer Interface
     virtual void applyOrder(int order) override;
     virtual void applyLayerVisible(bool layerVisible) override;
     virtual void applyOpacity(qreal opacity) override;
 
-    QString getImageFile() const;
-    QImage getImage() const;
-    QImage getImageUnfiltered() const;
-
-    bool isFilterApplied() const;
-    MapColorizeFilter getFilter() const;
+    QString getVideoFile() const;
+    QImage getScreenshot() const;
 
 public slots:
     // DM Window Generic Interface
@@ -43,6 +38,7 @@ public slots:
     // Player Window Generic Interface
     virtual void playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene) override;
     virtual void playerGLUninitialize() override;
+    virtual bool playerGLUpdate() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerGLResize(int w, int h) override;
 
@@ -50,18 +46,12 @@ public slots:
     virtual void initialize(const QSize& layerSize) override;
     virtual void uninitialize() override;
 
-    // Local Interface
-    void updateImage(const QImage& image);
-    void setFileName(const QString& filename);
-    void setApplyFilter(bool applyFilter);
-    void setFilter(const MapColorizeFilter& filter);
-
 signals:
-    void imageChanged(const QImage& image);
+    void updateProjectionMatrix();
 
 protected slots:
     // Local Interface
-    void updateImageInternal();
+    void handleScreenshotReady(const QImage& image);
 
 protected:
     // Layer Specific Interface
@@ -77,14 +67,12 @@ protected:
     QGraphicsPixmapItem* _graphicsItem;
 
     // Player Window Members
-    PublishGLBattleBackground* _backgroundObject;
+    VideoPlayerGLPlayer* _videoPlayer;
 
     // Core contents
     QString _filename;
-    QImage _layerImage;
-    bool _filterApplied;
-    MapColorizeFilter _filter;
-
+    QImage _layerScreenshot;
+    QGraphicsScene* _dmScene;
 };
 
-#endif // LAYERIMAGE_H
+#endif // LAYERVIDEO_H

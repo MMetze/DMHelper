@@ -36,6 +36,9 @@ public:
     virtual void paintGL() override;
 
 public slots:
+    // DMH OpenGL renderer calls
+    virtual void updateProjectionMatrix() override;
+
     //virtual void setRotation(int rotation) override;
 
     //void setImage(const QImage& image);
@@ -45,9 +48,6 @@ public slots:
     void markerChanged();
 
 protected:
-    // DMH OpenGL renderer calls
-    virtual void updateProjectionMatrix() override;
-
     // Background overrides
     virtual void initializeBackground() = 0;
     virtual bool isBackgroundReady() = 0;
