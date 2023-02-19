@@ -676,7 +676,7 @@ vlc_player_GetTime(vlc_player_t *player);
  * @return a valid position in the range [0.f;1.f] or -1.f (if no media is
  * set,if playback is not yet started or in case of error)
  */
-VLC_API float
+VLC_API double
 vlc_player_GetPosition(vlc_player_t *player);
 
 /**
@@ -691,7 +691,7 @@ vlc_player_GetPosition(vlc_player_t *player);
  * @param whence absolute or relative
  */
 VLC_API void
-vlc_player_SeekByPos(vlc_player_t *player, float position,
+vlc_player_SeekByPos(vlc_player_t *player, double position,
                      enum vlc_player_seek_speed speed,
                      enum vlc_player_whence whence);
 
@@ -717,7 +717,7 @@ vlc_player_SeekByTime(vlc_player_t *player, vlc_tick_t time,
  * Helper to set the absolute position precisely
  */
 static inline void
-vlc_player_SetPosition(vlc_player_t *player, float position)
+vlc_player_SetPosition(vlc_player_t *player, double position)
 {
     vlc_player_SeekByPos(player, position, VLC_PLAYER_SEEK_PRECISE,
                          VLC_PLAYER_WHENCE_ABSOLUTE);
@@ -727,7 +727,7 @@ vlc_player_SetPosition(vlc_player_t *player, float position)
  * Helper to set the absolute position fast
  */
 static inline void
-vlc_player_SetPositionFast(vlc_player_t *player, float position)
+vlc_player_SetPositionFast(vlc_player_t *player, double position)
 {
     vlc_player_SeekByPos(player, position, VLC_PLAYER_SEEK_FAST,
                          VLC_PLAYER_WHENCE_ABSOLUTE);
@@ -737,7 +737,7 @@ vlc_player_SetPositionFast(vlc_player_t *player, float position)
  * Helper to jump the position precisely
  */
 static inline void
-vlc_player_JumpPos(vlc_player_t *player, float jumppos)
+vlc_player_JumpPos(vlc_player_t *player, double jumppos)
 {
     /* No fask seek for jumps. Indeed, jumps can seek to the current position
      * if not precise enough or if the jump value is too small. */
@@ -861,9 +861,12 @@ vlc_player_IsRecording(vlc_player_t *player);
  *
  * @param player locked player instance
  * @param enabled true to enable recording
+ * @param dir_path path of the recording directory or NULL (use default path),
+ * has only an effect when first enabling recording.
  */
 VLC_API void
-vlc_player_SetRecordingEnabled(vlc_player_t *player, bool enabled);
+vlc_player_SetRecordingEnabled(vlc_player_t *player, bool enabled,
+                               const char *dir_path);
 
 /**
  * Helper to toggle the recording state
@@ -871,7 +874,7 @@ vlc_player_SetRecordingEnabled(vlc_player_t *player, bool enabled);
 static inline void
 vlc_player_ToggleRecording(vlc_player_t *player)
 {
-    vlc_player_SetRecordingEnabled(player, !vlc_player_IsRecording(player));
+    vlc_player_SetRecordingEnabled(player, !vlc_player_IsRecording(player), NULL);
 }
 
 /**
@@ -2814,7 +2817,8 @@ struct vlc_player_cbs
     /**
      * Called when the media capabilities has changed
      *
-     * Always called when the media is opening. Can be called during playback.
+     * Always called when the media is opening or stopping.
+     * Can be called during playback.
      *
      * @param player locked player instance
      * @param old_caps old player capabilities
@@ -2835,7 +2839,7 @@ struct vlc_player_cbs
      * @param data opaque pointer set by vlc_player_AddListener()
      */
     void (*on_position_changed)(vlc_player_t *player,
-        vlc_tick_t new_time, float new_pos, void *data);
+        vlc_tick_t new_time, double new_pos, void *data);
 
     /**
      * Called when the media length has changed
@@ -3107,7 +3111,7 @@ struct vlc_player_cbs
      * @param data opaque pointer set by vlc_player_AddListener()
      */
     void (*on_atobloop_changed)(vlc_player_t *player,
-        enum vlc_player_abloop new_state, vlc_tick_t time, float pos,
+        enum vlc_player_abloop new_state, vlc_tick_t time, double pos,
         void *data);
 
     /**
@@ -3256,7 +3260,7 @@ typedef struct vlc_player_timer_id vlc_player_timer_id;
 struct vlc_player_timer_point
 {
     /** Position in the range [0.0f;1.0] */
-    float position;
+    double position;
     /** Rate of the player */
     double rate;
     /** Valid time >= VLC_TICK_0 or VLC_TICK_INVALID, subtract this time with
@@ -3411,7 +3415,7 @@ vlc_player_RemoveTimer(vlc_player_t *player, vlc_player_timer_id *timer);
 VLC_API int
 vlc_player_timer_point_Interpolate(const struct vlc_player_timer_point *point,
                                    vlc_tick_t system_now,
-                                   vlc_tick_t *out_ts, float *out_pos);
+                                   vlc_tick_t *out_ts, double *out_pos);
 
 /**
  * Get the date of the next interval

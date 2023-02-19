@@ -202,9 +202,10 @@ typedef struct vlc_ml_media_t
     /* Duration in milliseconds */
     int64_t i_duration;
     uint32_t i_playcount;
-    float f_progress;
+    double f_progress;
     time_t i_last_played_date;
     char* psz_title;
+    char* psz_filename;
 
     vlc_ml_thumbnail_t thumbnails[VLC_ML_THUMBNAIL_SIZE_COUNT];
 
@@ -579,6 +580,8 @@ enum vlc_ml_control
     VLC_ML_MEDIA_GENERATE_THUMBNAIL,        /**< arg1: media id; arg2: vlc_ml_thumbnail_size_t; arg3: width; arg4: height; arg5: position */
     VLC_ML_MEDIA_ADD_EXTERNAL_MRL,          /**< arg1: media id; arg2: const char*; arg3: type(vlc_ml_file_type_t) */
     VLC_ML_MEDIA_SET_TYPE,                  /**< arg1: media id; arg2: vlc_ml_media_type_t */
+    VLC_ML_MEDIA_SET_PLAYED,                /**< arg1: media id; arg2: bool */
+    VLC_ML_MEDIA_SET_FAVORITE,              /**< arg1: media id; arg2: bool */
     VLC_ML_MEDIA_ADD_BOOKMARK,              /**< arg1: media id; arg2: int64_t */
     VLC_ML_MEDIA_REMOVE_BOOKMARK,           /**< arg1: media id; arg2: int64_t */
     VLC_ML_MEDIA_REMOVE_ALL_BOOKMARKS,      /**< arg1: media id */
@@ -942,15 +945,15 @@ VLC_API void vlc_ml_playback_states_all_release( vlc_ml_playback_states_all* pre
 VLC_API void vlc_ml_bookmark_release( vlc_ml_bookmark_t* p_bookmark );
 VLC_API void vlc_ml_bookmark_list_release( vlc_ml_bookmark_list_t* p_list );
 
-static inline vlc_ml_query_params_t vlc_ml_query_params_create()
+static inline vlc_ml_query_params_t vlc_ml_query_params_create(void)
 {
-    return (vlc_ml_query_params_t) {
-        .psz_pattern = NULL,
-        .i_nbResults = 0,
-        .i_offset = 0,
-        .i_sort = VLC_ML_SORTING_DEFAULT,
-        .b_desc = false
-    };
+#ifdef __cplusplus
+    vlc_ml_query_params_t ret = { };
+    ret.i_sort = VLC_ML_SORTING_DEFAULT;
+#else
+    vlc_ml_query_params_t ret = { .i_sort = VLC_ML_SORTING_DEFAULT };
+#endif
+    return ret;
 }
 
 static inline int vlc_ml_add_folder( vlc_medialibrary_t* p_ml, const char* psz_folder )
@@ -1062,7 +1065,7 @@ static inline int vlc_ml_media_generate_thumbnail( vlc_medialibrary_t* p_ml, int
                                                    vlc_ml_thumbnail_size_t size_type,
                                                    uint32_t i_desired_width,
                                                    uint32_t i_desired_height,
-                                                   float position )
+                                                   double position )
 {
     return vlc_ml_control( p_ml, VLC_ML_MEDIA_GENERATE_THUMBNAIL, i_media_id,
                            size_type, i_desired_width, i_desired_height, position );
@@ -1078,6 +1081,18 @@ static inline int vlc_ml_media_set_type( vlc_medialibrary_t* p_ml, int64_t i_med
                                          vlc_ml_media_type_t i_type )
 {
     return vlc_ml_control( p_ml, VLC_ML_MEDIA_SET_TYPE, i_media_id, (int)i_type );
+}
+
+static inline int vlc_ml_media_set_played( vlc_medialibrary_t* p_ml, int64_t i_media_id,
+                                           bool b_played )
+{
+    return vlc_ml_control( p_ml, VLC_ML_MEDIA_SET_PLAYED, i_media_id, (int) b_played );
+}
+
+static inline int vlc_ml_media_set_favorite( vlc_medialibrary_t* p_ml, int64_t i_media_id,
+                                             bool b_favorite )
+{
+    return vlc_ml_control( p_ml, VLC_ML_MEDIA_SET_FAVORITE, i_media_id, (int) b_favorite );
 }
 
 static inline vlc_ml_bookmark_list_t*

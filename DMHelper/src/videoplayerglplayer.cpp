@@ -519,6 +519,7 @@ bool VideoPlayerGLPlayer::startPlayer()
     if(!_vlcPlayer)
         return false;
 
+    // TODO: Layers
     libvlc_audio_set_volume(_vlcPlayer, 0);
 
     // Set up event callbacks

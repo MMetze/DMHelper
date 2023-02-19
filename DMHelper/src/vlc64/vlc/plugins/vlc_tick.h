@@ -6,8 +6,6 @@
  * functions like gettimeofday() and ftime() are not always supported.
  * Most functions are declared as inline or as macros since they are only
  * interfaces to system calls and have to be called frequently.
- * 'm' stands for 'micro', since maximum resolution is the microsecond.
- * Functions prototyped are implemented in interface/mtime.c.
  *****************************************************************************
  * Copyright (C) 1996, 1997, 1998, 1999, 2000 VLC authors and VideoLAN
  *
@@ -44,7 +42,6 @@ struct timespec;
  * arithmetic operators, and that no special functions are required.
  */
 typedef int64_t vlc_tick_t;
-typedef vlc_tick_t mtime_t; /* deprecated, use vlc_tick_t */
 
 #define VLC_TICK_MIN INT64_MIN
 #define VLC_TICK_MAX INT64_MAX
@@ -95,17 +92,17 @@ static inline double secf_from_vlc_tick(vlc_tick_t vtk)
 
 static inline vlc_tick_t vlc_tick_rate_duration(float frame_rate)
 {
-    return CLOCK_FREQ / frame_rate;
+    return (vlc_tick_t)(CLOCK_FREQ / frame_rate);
 }
 
 /*
  * samples<>vlc_tick_t
  */
-static inline vlc_tick_t vlc_tick_from_samples(int64_t samples, int samp_rate)
+static inline vlc_tick_t vlc_tick_from_samples(int64_t samples, unsigned samp_rate)
 {
     return CLOCK_FREQ * samples / samp_rate;
 }
-static inline int64_t samples_from_vlc_tick(vlc_tick_t t, int samp_rate)
+static inline int64_t samples_from_vlc_tick(vlc_tick_t t, unsigned samp_rate)
 {
     return t * samp_rate / CLOCK_FREQ;
 }

@@ -536,7 +536,7 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
         {
             if(_layers.at(i)->defaultShader())
             {
-                qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
+                // qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
                 functions->glUseProgram(shaderProgram);
             }
 

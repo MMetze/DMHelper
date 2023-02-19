@@ -4,8 +4,16 @@
 #include "layer.h"
 #include <QImage>
 
+//#define LAYERVIDEO_USE_OPENGL
+
 class QGraphicsPixmapItem;
-class VideoPlayerGLPlayer;
+
+#ifdef LAYERVIDEO_USE_OPENGL
+    class VideoPlayerGLPlayer;
+#else
+    class VideoPlayer;
+    class PublishGLBattleBackground;
+#endif
 
 class LayerVideo : public Layer
 {
@@ -67,7 +75,13 @@ protected:
     QGraphicsPixmapItem* _graphicsItem;
 
     // Player Window Members
-    VideoPlayerGLPlayer* _videoPlayer;
+#ifdef LAYERVIDEO_USE_OPENGL
+    VideoPlayerGLPlayer* _videoGLPlayer;
+#else
+    VideoPlayer* _videoPlayer;
+    PublishGLBattleBackground* _videoObject;
+    QSize _playerSize;
+#endif
 
     // Core contents
     QString _filename;

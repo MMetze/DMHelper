@@ -33,6 +33,7 @@ extern "C" {
 
 #include <sys/types.h>
 #include <vlc_es.h>
+#include <vlc_clock.h>
 
 /**
  * \defgroup sout Stream output
@@ -58,7 +59,7 @@ struct sout_access_out_t
 
     char                    *psz_path;
     void                    *p_sys;
-    int                     (*pf_seek)( sout_access_out_t *, off_t );
+    int                     (*pf_seek)( sout_access_out_t *, uint64_t );
     ssize_t                 (*pf_read)( sout_access_out_t *, block_t * );
     ssize_t                 (*pf_write)( sout_access_out_t *, block_t * );
     int                     (*pf_control)( sout_access_out_t *, int, va_list );
@@ -76,7 +77,7 @@ VLC_API sout_access_out_t * sout_AccessOutNew( vlc_object_t *, const char *psz_a
 #define sout_AccessOutNew( obj, access, name ) \
         sout_AccessOutNew( VLC_OBJECT(obj), access, name )
 VLC_API void sout_AccessOutDelete( sout_access_out_t * );
-VLC_API int sout_AccessOutSeek( sout_access_out_t *, off_t );
+VLC_API int sout_AccessOutSeek( sout_access_out_t *, uint64_t );
 VLC_API ssize_t sout_AccessOutRead( sout_access_out_t *, block_t * );
 VLC_API ssize_t sout_AccessOutWrite( sout_access_out_t *, block_t * );
 VLC_API int sout_AccessOutControl( sout_access_out_t *, int, ... );
@@ -203,6 +204,12 @@ VLC_API int sout_StreamIdSend( sout_stream_t *s, void *id, block_t *b);
 VLC_API void sout_StreamFlush(sout_stream_t *s, void *id);
 VLC_API void sout_StreamSetPCR(sout_stream_t *s, vlc_tick_t pcr);
 VLC_API int sout_StreamControlVa(sout_stream_t *s, int i_query, va_list args);
+
+VLC_API vlc_clock_main_t *sout_ClockMainCreate(sout_stream_t *) VLC_USED;
+VLC_API void sout_ClockMainDelete(vlc_clock_main_t *);
+VLC_API void sout_ClockMainSetFirstPcr(vlc_clock_main_t *, vlc_tick_t pcr);
+VLC_API vlc_clock_t *sout_ClockCreate(vlc_clock_main_t *, const es_format_t *) VLC_USED;
+VLC_API void sout_ClockDelete(vlc_clock_t *);
 
 static inline int sout_StreamControl( sout_stream_t *s, int i_query, ... )
 {

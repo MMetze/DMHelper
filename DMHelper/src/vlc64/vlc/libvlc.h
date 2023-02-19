@@ -34,7 +34,7 @@
 #ifndef VLC_LIBVLC_H
 #define VLC_LIBVLC_H 1
 
-#if defined (_WIN32) && defined (DLL_EXPORT)
+#if defined (_WIN32) && defined (LIBVLC_DLL_EXPORT)
 # define LIBVLC_API __declspec(dllexport)
 #elif defined (__GNUC__) && (__GNUC__ >= 4)
 # define LIBVLC_API __attribute__((visibility("default")))
@@ -42,7 +42,7 @@
 # define LIBVLC_API
 #endif
 
-#ifdef __LIBVLC__
+#ifdef LIBVLC_INTERNAL_
 /* Avoid unhelpful warnings from libvlc with our deprecated APIs */
 #   define LIBVLC_DEPRECATED
 #elif defined(__GNUC__) && \
@@ -183,6 +183,23 @@ LIBVLC_API void libvlc_release( libvlc_instance_t *p_instance );
  * \param p_instance the instance to reference
  */
 LIBVLC_API void libvlc_retain( libvlc_instance_t *p_instance );
+
+/**
+ * Get the ABI version of the libvlc library.
+ *
+ * This is different than the VLC version, which is the version of the whole
+ * VLC package. The value is the same as LIBVLC_ABI_VERSION_INT used when
+ * compiling.
+ *
+ * \return a value with the following mask in hexadecimal
+ *  0xFF000000: major VLC version, similar to VLC major version,
+ *  0x00FF0000: major ABI version, incremented incompatible changes are added,
+ *  0x0000FF00: minor ABI version, incremented when new functions are added
+ *  0x000000FF: micro ABI version, incremented with new release/builds
+ *
+ * \note This the same value as the .so version but cross platform.
+ */
+LIBVLC_API int libvlc_abi_version(void);
 
 /**
  * Try to start a user interface for the libvlc instance.

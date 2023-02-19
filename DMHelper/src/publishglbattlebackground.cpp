@@ -59,7 +59,7 @@ void PublishGLBattleBackground::paintGL()
     if(!QOpenGLContext::currentContext())
         return;
 
-    qDebug() << "[PublishGLBattleBackground]::paintGL context: " << QOpenGLContext::currentContext();
+    //qDebug() << "[PublishGLBattleBackground]::paintGL context: " << QOpenGLContext::currentContext();
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();

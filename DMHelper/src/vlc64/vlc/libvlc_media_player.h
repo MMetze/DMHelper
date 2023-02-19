@@ -1158,7 +1158,7 @@ LIBVLC_API int libvlc_media_player_set_time( libvlc_media_player_t *p_mi,
  * \param p_mi the Media Player
  * \return movie position, or -1. in case of error
  */
-LIBVLC_API float libvlc_media_player_get_position( libvlc_media_player_t *p_mi );
+LIBVLC_API double libvlc_media_player_get_position( libvlc_media_player_t *p_mi );
 
 /**
  * Set movie position as percentage between 0.0 and 1.0.
@@ -1171,7 +1171,7 @@ LIBVLC_API float libvlc_media_player_get_position( libvlc_media_player_t *p_mi )
  * \return 0 on success, -1 on error
  */
 LIBVLC_API int libvlc_media_player_set_position( libvlc_media_player_t *p_mi,
-                                                 float f_pos, bool b_fast );
+                                                 double f_pos, bool b_fast );
 
 /**
  * Set movie chapter (if applicable).
@@ -1356,6 +1356,8 @@ LIBVLC_API void libvlc_media_player_set_video_title_display( libvlc_media_player
  *
  * \param p_mi the media player
  * \param type type of the track list to request
+ * \param selected filter only selected tracks if true (return all tracks, even
+ * selected ones if false)
  *
  * \return a valid libvlc_media_tracklist_t or NULL in case of error, if there
  * is no track for a category, the returned list will have a size of 0, delete
@@ -1363,8 +1365,7 @@ LIBVLC_API void libvlc_media_player_set_video_title_display( libvlc_media_player
  */
 LIBVLC_API libvlc_media_tracklist_t *
 libvlc_media_player_get_tracklist( libvlc_media_player_t *p_mi,
-                                   libvlc_track_type_t type );
-
+                                   libvlc_track_type_t type, bool selected );
 
 /**
  * Get the selected track for one type
@@ -2216,17 +2217,29 @@ LIBVLC_API void libvlc_video_set_adjust_float( libvlc_media_player_t *p_mi,
  */
 
 /**
- * Audio channels
+ * Audio stereo modes
  */
-typedef enum libvlc_audio_output_channel_t {
-    libvlc_AudioChannel_Error   = -1,
-    libvlc_AudioChannel_Stereo  =  1,
-    libvlc_AudioChannel_RStereo =  2,
-    libvlc_AudioChannel_Left    =  3,
-    libvlc_AudioChannel_Right   =  4,
-    libvlc_AudioChannel_Dolbys  =  5
-} libvlc_audio_output_channel_t;
+typedef enum libvlc_audio_output_stereomode_t {
+    libvlc_AudioStereoMode_Unset   = 0,
+    libvlc_AudioStereoMode_Stereo  = 1,
+    libvlc_AudioStereoMode_RStereo = 2,
+    libvlc_AudioStereoMode_Left    = 3,
+    libvlc_AudioStereoMode_Right   = 4,
+    libvlc_AudioStereoMode_Dolbys  = 5,
+    libvlc_AudioStereoMode_Mono  = 7,
+} libvlc_audio_output_stereomode_t;
 
+/**
+ * Audio mix modes
+ */
+typedef enum libvlc_audio_output_mixmode_t {
+    libvlc_AudioMixMode_Unset       = 0,
+    libvlc_AudioMixMode_Stereo      = 1,
+    libvlc_AudioMixMode_Binaural    = 2,
+    libvlc_AudioMixMode_4_0         = 3,
+    libvlc_AudioMixMode_5_1         = 4,
+    libvlc_AudioMixMode_7_1         = 5,
+} libvlc_audio_output_mixmode_t;
 
 /**
  * Gets the list of available audio output modules.
@@ -2408,21 +2421,59 @@ LIBVLC_API int libvlc_audio_get_volume( libvlc_media_player_t *p_mi );
 LIBVLC_API int libvlc_audio_set_volume( libvlc_media_player_t *p_mi, int i_volume );
 
 /**
- * Get current audio channel.
+ * Get current audio stereo-mode.
  *
  * \param p_mi media player
- * \return the audio channel \see libvlc_audio_output_channel_t
+ * \return the audio stereo-mode, \see libvlc_audio_output_stereomode_t
+ * \version LibVLC 4.0.0 or later
  */
-LIBVLC_API int libvlc_audio_get_channel( libvlc_media_player_t *p_mi );
+LIBVLC_API libvlc_audio_output_stereomode_t libvlc_audio_get_stereomode( libvlc_media_player_t *p_mi );
 
 /**
- * Set current audio channel.
+ * Set current audio stereo-mode.
  *
  * \param p_mi media player
- * \param channel the audio channel, \see libvlc_audio_output_channel_t
+ * \param channel the audio stereo-mode, \see libvlc_audio_output_stereomode_t
  * \return 0 on success, -1 on error
+ * \version LibVLC 4.0.0 or later
  */
-LIBVLC_API int libvlc_audio_set_channel( libvlc_media_player_t *p_mi, int channel );
+LIBVLC_API int libvlc_audio_set_stereomode( libvlc_media_player_t *p_mi,
+                                            libvlc_audio_output_stereomode_t mode );
+
+/**
+ * Get current audio mix-mode.
+ *
+ * \param p_mi media player
+ * \return the audio mix-mode, \see libvlc_audio_output_mixmode_t
+ * \version LibVLC 4.0.0 or later
+ */
+LIBVLC_API libvlc_audio_output_mixmode_t libvlc_audio_get_mixmode( libvlc_media_player_t *p_mi );
+
+/**
+ * Set current audio mix-mode.
+ *
+ * By default (libvlc_AudioMixMode_Unset), the audio output will keep its
+ * original channel configuration (play stereo as stereo, or 5.1 as 5.1). Yet,
+ * the OS and Audio API might refuse a channel configuration and asks VLC to
+ * adapt (Stereo played as 5.1 or vice-versa).
+ *
+ * This function allows to force a channel configuration, it will only work if
+ * the OS and Audio API accept this configuration (otherwise, it won't have any
+ * effects). Here are some examples:
+ *  - Play multi-channels (5.1, 7.1...) as stereo (libvlc_AudioMixMode_Stereo)
+ *  - Play Stereo or 5.1 as 7.1 (libvlc_AudioMixMode_7_1)
+ *  - Play multi-channels as stereo with a binaural effect
+ *  (libvlc_AudioMixMode_Binaural). It might be selected automatically if the
+ *  OS and Audio API can detect if a headphone is plugged.
+ *
+ * \param p_mi media player
+ * \param channel the audio mix-mode, \see libvlc_audio_output_mixmode_t
+ * \return 0 on success, -1 on error
+ * \version LibVLC 4.0.0 or later
+ */
+LIBVLC_API int libvlc_audio_set_mixmode( libvlc_media_player_t *p_mi,
+                                         libvlc_audio_output_mixmode_t mode );
+
 
 /**
  * Get current audio delay.
@@ -2649,7 +2700,174 @@ LIBVLC_API int libvlc_media_player_get_role(libvlc_media_player_t *p_mi);
 LIBVLC_API int libvlc_media_player_set_role(libvlc_media_player_t *p_mi,
                                             unsigned role);
 
+/**
+ * Start/stop recording
+ *
+ * \note The user should listen to the libvlc_MediaPlayerRecordChanged event,
+ * to monitor the recording state.
+ *
+ * \version LibVLC 4.0.0 and later.
+ *
+ * \param p_mi media player
+ * \param enable true to start recording, false to stop
+ * \param dir_path path of the recording directory or NULL (use default path),
+ * has only an effect when first enabling recording.
+ */
+LIBVLC_API void libvlc_media_player_record(libvlc_media_player_t *p_mi,
+                                           bool enable, const char *dir_path);
+
 /** @} audio */
+
+/** \defgroup libvlc_media_player_watch_time LibVLC media player time watch API
+ * @{
+ */
+
+/**
+ * Media Player timer point
+ *
+ * \note ts and system_date values should not be used directly by the user.
+ * libvlc_media_player_time_point_interpolate() will read these values and
+ * return an interpolated ts.
+ *
+ * @see libvlc_media_player_watch_time_on_update
+ */
+typedef struct libvlc_media_player_time_point_t
+{
+    /** Position in the range [0.0f;1.0] */
+    double position;
+    /** Rate of the player */
+    double rate;
+    /** Valid time, in us >= 0 or -1 */
+    int64_t ts_us;
+    /** Valid length, in us >= 1 or 0 */
+    int64_t length_us;
+    /**
+     * System date, in us, of this record (always valid).
+     * Based on libvlc_clock(). This date can be in the future or in the past.
+     * The special value of INT64_MAX mean that the clock was paused when this
+     * point was updated. In that case,
+     * libvlc_media_player_time_point_interpolate() will return the current
+     * ts/pos of this point (there is nothing to interpolate).
+     * */
+    int64_t system_date_us;
+} libvlc_media_player_time_point_t;
+
+/**
+ * Callback prototype that notify when the player state or time changed.
+ *
+ * Get notified when the time is updated by the input or output source. The
+ * input source is the 'demux' or the 'access_demux'. The output source are
+ * audio and video outputs: an update is received each time a video frame is
+ * displayed or an audio sample is written. The delay between each updates may
+ * depend on the input and source type (it can be every 5ms, 30ms, 1s or
+ * 10s...). Users of this timer may need to update the position at a higher
+ * frequency from their own mainloop via
+ * libvlc_media_player_time_point_interpolate().
+ *
+ * \warning It is forbidden to call any Media Player functions from here.
+ *
+ * \param value always valid, the time corresponding to the state
+ * \param data opaque pointer set by libvlc_media_player_watch_time()
+ */
+typedef void (*libvlc_media_player_watch_time_on_update)(
+        const libvlc_media_player_time_point_t *value, void *data);
+
+/**
+ * Callback prototype that notify when the player is paused or a discontinuity
+ * occurred.
+ *
+ * Likely caused by seek from the user or because the playback is stopped. The
+ * player user should stop its "interpolate" timer.
+ *
+ * \warning It is forbidden to call any Media Player functions from here.
+ *
+ * \param system_date_us system date, in us, of this event, only valid (> 0)
+ * when paused. It can be used to interpolate the last updated point to this
+ * date in order to get the last paused ts/position.
+ * \param data opaque pointer set by libvlc_media_player_watch_time()
+ */
+typedef void (*libvlc_media_player_watch_time_on_discontinuity)(
+        int64_t system_date_us, void *data);
+
+/**
+ * Watch for times updates
+ *
+ * \warning Only one watcher can be registered at a time. Calling this function
+ * a second time (if libvlc_media_player_unwatch_time() was not called
+ * in-between) will fail.
+ *
+ * \param p_mi the media player
+ * \param min_period_us corresponds to the minimum period, in us, between each
+ * updates, use it to avoid flood from too many source updates, set it to 0 to
+ * receive all updates.
+ * \param on_update callback to listen to update events (must not be NULL)
+ * \param on_discontinuity callback to listen to discontinuity events (can be
+ * be NULL)
+ * \param cbs_data opaque pointer used by the callbacks
+ * \return 0 on success, -1 on error (allocation error, or if already watching)
+ * \version LibVLC 4.0.0 or later
+ */
+LIBVLC_API int
+libvlc_media_player_watch_time(libvlc_media_player_t *p_mi,
+                               int64_t min_period_us,
+                               libvlc_media_player_watch_time_on_update on_update,
+                               libvlc_media_player_watch_time_on_discontinuity on_discontinuity,
+                               void *cbs_data);
+
+/**
+ * Unwatch time updates
+ *
+ * \param p_mi the media player
+ * \version LibVLC 4.0.0 or later
+ */
+LIBVLC_API void
+libvlc_media_player_unwatch_time(libvlc_media_player_t *p_mi);
+
+/**
+ * Interpolate a timer value to now
+
+ * \param point time update obtained via the
+ * libvlc_media_player_watch_time_on_update() callback
+ * \param system_now_us current system date, in us, returned by libvlc_clock()
+ * \param out_ts_us pointer where to set the interpolated ts, in us
+ * \param out_pos pointer where to set the interpolated position
+ * \return 0 in case of success, -1 if the interpolated ts is negative (could
+ * happen during the buffering step)
+ * \version LibVLC 4.0.0 or later
+ */
+LIBVLC_API int
+libvlc_media_player_time_point_interpolate(const libvlc_media_player_time_point_t *point,
+                                           int64_t system_now_us,
+                                           int64_t *out_ts_us, double *out_pos);
+
+/**
+ * Get the date of the next interval
+ *
+ * Can be used to setup an UI timer in order to update some widgets at specific
+ * interval. A next_interval of VLC_TICK_FROM_SEC(1) can be used to update a
+ * time widget when the media reaches a new second.
+ *
+ * \note The media time doesn't necessarily correspond to the system time, that
+ * is why this function is needed and uses the rate of the current point.
+ *
+ * \param point time update obtained via the
+ * libvlc_media_player_watch_time_on_update()
+ * \param system_now_us same system date used by
+ * libvlc_media_player_time_point_interpolate()
+ * \param interpolated_ts_us ts returned by
+ * libvlc_media_player_time_point_interpolate()
+ * \param next_interval_us next interval, in us
+ * \return the absolute system date, in us,  of the next interval,
+ * use libvlc_delay() to get a relative delay.
+ * \version LibVLC 4.0.0 or later
+ */
+LIBVLC_API int64_t
+libvlc_media_player_time_point_get_next_date(const libvlc_media_player_time_point_t *point,
+                                             int64_t system_now_us,
+                                             int64_t interpolated_ts_us,
+                                             int64_t next_interval_us);
+
+/** @} libvlc_media_player_watch_time */
 
 /** @} media_player */
 

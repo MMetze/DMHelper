@@ -340,6 +340,7 @@ INPUT_META(DiscTotal)
 #define input_item_GetArtURL   input_item_GetArtworkURL
 
 VLC_API char * input_item_GetInfo( input_item_t *p_i, const char *psz_cat,const char *psz_name ) VLC_USED;
+VLC_API char * input_item_GetInfoLocked( input_item_t *p_i, const char *psz_cat,const char *psz_name );
 VLC_API int input_item_AddInfo( input_item_t *p_i, const char *psz_cat, const char *psz_name, const char *psz_format, ... ) VLC_FORMAT( 4, 5 );
 VLC_API int input_item_DelInfo( input_item_t *p_i, const char *psz_cat, const char *psz_name );
 VLC_API void input_item_ReplaceInfos( input_item_t *, info_category_t * );
@@ -482,6 +483,7 @@ typedef enum input_item_meta_request_option_t
     META_REQUEST_OPTION_FETCH_NETWORK = 0x08,
     META_REQUEST_OPTION_FETCH_ANY     = 0x0C,
     META_REQUEST_OPTION_DO_INTERACT   = 0x10,
+    META_REQUEST_OPTION_NO_SKIP       = 0x20,
 } input_item_meta_request_option_t;
 
 /* status of the on_preparse_ended() callback */

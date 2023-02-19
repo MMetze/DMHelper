@@ -242,7 +242,7 @@ enum demux_query_e
      * The control is never used if DEMUX_CAN_RECORD fails or returns false.
      * Can fail.
      *
-     * arg1= bool */
+     * arg1= bool arg2= string */
     DEMUX_SET_RECORD_STATE,
 
     /* II. Specific access_demux queries */
@@ -419,6 +419,9 @@ VLC_API void demux_PacketizerDestroy( decoder_t *p_packetizer );
 
 /* */
 #define DEMUX_INIT_COMMON() do {            \
+    p_demux->pf_read = NULL;                \
+    p_demux->pf_block = NULL;               \
+    p_demux->pf_seek = NULL;                \
     p_demux->pf_control = Control;          \
     p_demux->pf_demux = Demux;              \
     p_demux->p_sys = calloc( 1, sizeof( demux_sys_t ) ); \

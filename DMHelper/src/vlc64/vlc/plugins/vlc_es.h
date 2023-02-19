@@ -201,7 +201,7 @@ typedef enum video_orientation_t
 /** Convert enum video_orientation_t to EXIF */
 #define ORIENT_TO_EXIF(orient) ((0x76853421U >> (4 * (orient))) & 15)
 /** If the orientation is natural or mirrored */
-#define ORIENT_IS_MIRROR(orient) parity(orient)
+#define ORIENT_IS_MIRROR(orient) vlc_parity(orient)
 /** If the orientation swaps dimensions */
 #define ORIENT_IS_SWAP(orient) (((orient) & 4) != 0)
 /** Applies horizontal flip to an orientation */
@@ -392,6 +392,15 @@ struct video_format_t
         uint16_t MaxCLL;  /* max content light level */
         uint16_t MaxFALL; /* max frame average light level */
     } lighting;
+    struct {
+        uint8_t version_major;
+        uint8_t version_minor;
+        unsigned profile : 7;
+        unsigned level : 6;
+        unsigned rpu_present : 1;
+        unsigned el_present : 1;
+        unsigned bl_present : 1;
+    } dovi;
     uint32_t i_cubemap_padding; /**< padding in pixels of the cube map faces */
 };
 

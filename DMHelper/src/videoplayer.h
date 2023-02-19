@@ -10,7 +10,7 @@ class VideoPlayer : public QObject
 {
     Q_OBJECT
 public:
-    VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo = true, bool playAudio = true, bool autoStart = true, QObject *parent = nullptr);
+    VideoPlayer(const QString& videoFile, QSize targetSize, bool playVideo = true, bool playAudio = true, QObject *parent = nullptr);
     virtual ~VideoPlayer();
 
     virtual const QString& getFileName() const;
@@ -42,6 +42,7 @@ signals:
     void videoPaused();
     void videoStopped();
 
+    void frameAvailable();
     void screenShotAvailable();
 
 public slots:
@@ -51,7 +52,7 @@ public slots:
 
 protected:
 
-    virtual bool initializeVLC(bool autoStart = true);
+    virtual bool initializeVLC();
     virtual bool startPlayer();
     virtual bool stopPlayer();
     virtual void cleanupBuffers();
@@ -69,14 +70,30 @@ protected:
     bool _playAudio;
 
     bool _vlcError;
-    libvlc_instance_t *_vlcInstance;
-    libvlc_media_list_player_t *_vlcListPlayer;
+    libvlc_media_player_t* _vlcPlayer;
+    libvlc_media_t* _vlcMedia;
+
+    class VideoPlayerImageBuffer
+    {
+    public:
+        VideoPlayerImageBuffer(unsigned int width, unsigned int height);
+        ~VideoPlayerImageBuffer();
+
+        uchar* getNativeBuffer();
+        QImage* getFrame();
+
+    private:
+        uchar* _nativeBufferNotAligned;
+        uchar* _nativeBuffer;
+        QImage* _imgFrame;
+    };
+
     unsigned int _nativeWidth;
     unsigned int _nativeHeight;
-    uchar* _nativeBufferNotAligned;
-    uchar* _nativeBuffer;
     QMutex* _mutex;
-    QImage* _loadImage;
+    class VideoPlayerImageBuffer *_buffers[2];
+    size_t _idxRender;
+    size_t _idxDisplay;
     bool _newImage;
     QSize _originalSize;
     QSize _targetSize;

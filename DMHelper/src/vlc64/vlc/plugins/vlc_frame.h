@@ -81,8 +81,6 @@ typedef struct vlc_frame_t vlc_frame_t;
 #define VLC_FRAME_FLAG_HEADER        0x0020
 /** This frame contains the last part of a sequence  */
 #define VLC_FRAME_FLAG_END_OF_SEQUENCE 0x0040
-/** This frame contains a clock reference */
-#define VLC_FRAME_FLAG_CLOCK         0x0080
 /** This frame is scrambled */
 #define VLC_FRAME_FLAG_SCRAMBLED     0x0100
 /** This frame has to be decoded but not be displayed */
@@ -487,7 +485,7 @@ static size_t vlc_frame_ChainExtract( vlc_frame_t *p_list, void *p_data, size_t 
  * @param[out]  pi_size     Pointer to number of bytes in the chain (may be NULL)
  * @param[out]  pi_length   Pointer to length (duration) of the chain (may be NULL)
  */
-static inline void vlc_frame_ChainProperties( vlc_frame_t *p_list, int *pi_count, size_t *pi_size, vlc_tick_t *pi_length )
+static inline void vlc_frame_ChainProperties( const vlc_frame_t *p_list, int *pi_count, size_t *pi_size, vlc_tick_t *pi_length )
 {
     size_t i_size = 0;
     vlc_tick_t i_length = 0;
@@ -515,7 +513,7 @@ static inline void vlc_frame_ChainProperties( vlc_frame_t *p_list, int *pi_count
  *
  * All frames in the chain are gathered into a single vlc_frame_t and the
  * original chain is released.
- * 
+ *
  * @param   p_list  Pointer to the first vlc_frame_t of the chain to gather
  * @return  Returns a pointer to a new vlc_frame_t or NULL if the frame can not
  *          be allocated, in which case the original chain is not released.
@@ -742,6 +740,28 @@ VLC_API size_t vlc_fifo_GetCount(const vlc_fifo_t *) VLC_USED;
  * a FIFO is empty.
  */
 VLC_API size_t vlc_fifo_GetBytes(const vlc_fifo_t *) VLC_USED;
+
+/**
+ * Checks whether the vlc_fifo_t object is being locked.
+ *
+ * This function checks if the calling thread holds a given vlc_fifo_t
+ * object. It has no side effects and is essentially intended for run-time
+ * debugging.
+ *
+ * @note This function is the vlc_fifo_t equivalent of vlc_mutex_held.
+ *
+ * @note To assert that the calling thread holds a lock, the helper macro
+ * vlc_fifo_Assert() should be used instead of this function.
+ *
+ * @retval false the fifo is not locked by the calling thread
+ * @retval true the fifo is locked by the calling thread
+ */
+VLC_API bool vlc_fifo_Held(const vlc_fifo_t *fifo) VLC_USED;
+
+/**
+ * Asserts that a vlc_fifo_t is locked by the calling thread.
+ */
+#define vlc_fifo_Assert(fifo) assert(vlc_fifo_Held(fifo))
 
 VLC_USED static inline bool vlc_fifo_IsEmpty(const vlc_fifo_t *fifo)
 {
