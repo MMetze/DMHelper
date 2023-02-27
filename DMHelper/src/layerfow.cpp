@@ -156,6 +156,16 @@ void LayerFow::applyOpacity(qreal opacity)
         _graphicsItem->setOpacity(opacity * 0.5);
 }
 
+void LayerFow::applyPosition(const QPoint& position)
+{
+
+}
+
+void LayerFow::applySize(const QSize& size)
+{
+
+}
+
 QImage LayerFow::getImage() const
 {
     return _imgFow;

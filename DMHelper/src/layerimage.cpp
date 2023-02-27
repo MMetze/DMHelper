@@ -106,6 +106,21 @@ void LayerImage::applyOpacity(qreal opacity)
         _graphicsItem->setOpacity(opacity);
 }
 
+void LayerImage::applyPosition(const QPoint& position)
+{
+    if(_graphicsItem)
+        _graphicsItem->setPos(position);
+}
+
+void LayerImage::applySize(const QSize& size)
+{
+    if(_layerImage.size() != size)
+        _layerImage = _layerImage.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    emit dirty();
+    emit imageChanged(getImage());
+}
+
 QString LayerImage::getImageFile() const
 {
     return _filename;
@@ -145,6 +160,7 @@ void LayerImage::dmInitialize(QGraphicsScene* scene)
     _graphicsItem = scene->addPixmap(QPixmap::fromImage(getImage()));
     if(_graphicsItem)
     {
+        _graphicsItem->setPos(_position);
         _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
         _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
         _graphicsItem->setZValue(getOrder());
@@ -219,6 +235,8 @@ void LayerImage::initialize(const QSize& layerSize)
         }
         delete reader;
     }
+
+    _size = _layerImage.size();
 }
 
 void LayerImage::uninitialize()
@@ -232,6 +250,7 @@ void LayerImage::updateImage(const QImage& image)
         return;
 
     _layerImage = image;
+    _size = _layerImage.size();
     emit dirty();
     emit imageChanged(getImage());
 }

@@ -83,6 +83,16 @@ void LayerVideo::applyOpacity(qreal opacity)
         _graphicsItem->setOpacity(opacity);
 }
 
+void LayerVideo::applyPosition(const QPoint& position)
+{
+
+}
+
+void LayerVideo::applySize(const QSize& size)
+{
+
+}
+
 QString LayerVideo::getVideoFile() const
 {
     return _filename;

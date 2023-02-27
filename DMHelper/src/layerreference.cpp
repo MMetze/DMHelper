@@ -136,6 +136,16 @@ void LayerReference::applyOrder(int order)
         _referenceLayer->applyOrder(order);
 }
 
+void LayerReference::applyPosition(const QPoint& position)
+{
+
+}
+
+void LayerReference::applySize(const QSize& size)
+{
+
+}
+
 void LayerReference::applyLayerVisible(bool layerVisible)
 {
     if(_referenceLayer)

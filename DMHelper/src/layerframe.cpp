@@ -5,23 +5,38 @@
 LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::LayerFrame),
-    _layer(layer)
+    _layer(layer),
+    _opacity()
 {
     ui->setupUi(this);
 
     setLayerVisible(layer.getLayerVisible());
     setIcon(layer.getLayerIcon());
     setName(layer.getName());
+    setOpacity(layer.getOpacity() * 100.0);
+    setPosition(layer.getPosition());
+    setSize(layer.getSize());
 
     connect(ui->chkVisible, &QAbstractButton::clicked, this, &LayerFrame::visibleChanged);
     connect(ui->edtName, &QLineEdit::editingFinished, this, &LayerFrame::handleNameChanged);
 
+    connect(ui->sliderOpacity, &QSlider::valueChanged, this, &LayerFrame::handleOpacityChanged);
+    connect(ui->spinOpacity, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleOpacityChanged);
+    connect(ui->spinX, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleXChanged);
+    connect(ui->spinY, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleYChanged);
+    connect(ui->spinWidth, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleWidthChanged);
+    connect(ui->spinHeight, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleHeightChanged);
+    connect(ui->btnLockRatio, &QAbstractButton::clicked, this, &LayerFrame::handleLockClicked);
+
     connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
     connect(this, &LayerFrame::visibleChanged, &layer, &Layer::setLayerVisible);
+    connect(this, &LayerFrame::opacityChanged, &layer, &Layer::setOpacity);
+    connect(this, &LayerFrame::positionChanged, &layer, QOverload<const QPoint&>::of(&Layer::setPosition));
+    connect(this, &LayerFrame::sizeChanged, &layer, QOverload<const QSize&>::of(&Layer::setSize));
 
     ui->edtName->installEventFilter(this);
 
-    setLineWidth(2);
+    setLineWidth(5);
     setAutoFillBackground(true);
     setStyleSheet(getStyleString(false));
 }
@@ -33,7 +48,8 @@ LayerFrame::~LayerFrame()
 
 void LayerFrame::setLayerVisible(bool visible)
 {
-    ui->chkVisible->setChecked(visible);
+    if(ui->chkVisible->isChecked() != visible)
+        ui->chkVisible->setChecked(visible);
 }
 
 void LayerFrame::setIcon(const QImage& image)
@@ -43,7 +59,70 @@ void LayerFrame::setIcon(const QImage& image)
 
 void LayerFrame::setName(const QString& name)
 {
-    ui->edtName->setText(name);
+    if(ui->edtName->text() != name)
+        ui->edtName->setText(name);
+}
+
+void LayerFrame::setOpacity(int opacity)
+{
+    if(_opacity == opacity)
+        return;
+
+    _opacity = opacity;
+
+    if(ui->sliderOpacity->value() != opacity)
+        ui->sliderOpacity->setValue(opacity);
+
+    if(ui->spinOpacity->value() != opacity)
+        ui->spinOpacity->setValue(opacity);
+}
+
+void LayerFrame::setPosition(const QPoint& position)
+{
+    setX(position.x());
+    setY(position.y());
+}
+
+void LayerFrame::setX(int x)
+{
+    if(x < 0)
+        return;
+
+    if(ui->spinX->value() != x)
+        ui->spinX->setValue(x);
+}
+
+void LayerFrame::setY(int y)
+{
+    if(y < 0)
+        return;
+
+    if(ui->spinY->value() != y)
+        ui->spinY->setValue(y);
+}
+
+void LayerFrame::setSize(const QSize& size)
+{
+    setWidth(size.width());
+    setHeight(size.height());
+}
+
+void LayerFrame::setWidth(int width)
+{
+    if(width < 0)
+        return;
+
+    if(ui->spinWidth->value() != width)
+        ui->spinWidth->setValue(width);
+}
+
+void LayerFrame::setHeight(int height)
+{
+    if(height < 0)
+        return;
+
+    if(ui->spinHeight->value() != height)
+        ui->spinHeight->setValue(height);
 }
 
 void LayerFrame::setSelected(bool selected)
@@ -66,6 +145,58 @@ void LayerFrame::handleNameChanged()
     ui->edtName->setReadOnly(true);
     emit selectMe(this);
     emit nameChanged(ui->edtName->text());
+}
+
+void LayerFrame::handleOpacityChanged(int opacity)
+{
+    if(_opacity == opacity)
+        return;
+
+    setOpacity(opacity);
+
+    emit selectMe(this);
+    emit opacityChanged(static_cast<qreal>(opacity) / 100.0);
+}
+
+void LayerFrame::handleXChanged(int x)
+{
+    updatePosition(x, ui->spinY->value());
+    emit selectMe(this);
+}
+
+void LayerFrame::handleYChanged(int y)
+{
+    updatePosition(ui->spinX->value(), y);
+    emit selectMe(this);
+}
+
+void LayerFrame::handleWidthChanged(int width)
+{
+    int newHeight;
+    if((ui->btnLockRatio->isChecked()) && (ui->spinWidth->value() != 0))
+        newHeight = (ui->spinHeight->value() * width) / ui->spinWidth->value();
+    else
+        newHeight = ui->spinHeight->value();
+
+    updateSize(width, newHeight);
+    emit selectMe(this);
+}
+
+void LayerFrame::handleHeightChanged(int height)
+{
+    int newWidth;
+    if((ui->btnLockRatio->isChecked()) && (ui->spinHeight->value() != 0))
+        newWidth = (ui->spinWidth->value() * height) / ui->spinHeight->value();
+    else
+        newWidth = ui->spinWidth->value();
+
+    updateSize(newWidth, height);
+    emit selectMe(this);
+}
+
+void LayerFrame::handleLockClicked()
+{
+    emit selectMe(this);
 }
 
 bool LayerFrame::eventFilter(QObject *obj, QEvent *event)
@@ -94,7 +225,29 @@ bool LayerFrame::eventFilter(QObject *obj, QEvent *event)
 QString LayerFrame::getStyleString(bool selected)
 {
     if(selected)
-        return QString("LayerFrame{ background-image: url(); background-color: rgb(64, 64, 64); }");
+        return QString("LayerFrame{ background-color: rgb(64, 64, 64); }");
     else
-        return QString("LayerFrame{ background-image: url(); background-color: none; }");
+        return QString("LayerFrame{ background-color: none; }");
+}
+
+void LayerFrame::updatePosition(int x, int y)
+{
+    if(ui->spinX->value() != x)
+        ui->spinX->setValue(x);
+
+    if(ui->spinY->value() != y)
+        ui->spinY->setValue(y);
+
+    emit positionChanged(QPoint(x, y));
+}
+
+void LayerFrame::updateSize(int width, int height)
+{
+    if(ui->spinWidth->value() != width)
+        ui->spinWidth->setValue(width);
+
+    if(ui->spinHeight->value() != height)
+        ui->spinHeight->setValue(height);
+
+    emit sizeChanged(QSize(width, height));
 }

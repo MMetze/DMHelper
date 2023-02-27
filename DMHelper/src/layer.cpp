@@ -9,7 +9,9 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
     _name(name),
     _order(order),
     _layerVisible(true),
-    _opacity(1.0)
+    _opacity(1.0),
+    _position(),
+    _size()
 {
 }
 
@@ -34,6 +36,10 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
     _order = element.attribute("order", QString::number(0)).toInt();
     _layerVisible = static_cast<bool>(element.attribute("visible", QString::number(1)).toInt());
     _opacity = element.attribute(QString("opacity"), QString::number(1.0)).toDouble();
+    _position = QPoint(element.attribute("x", QString::number(0)).toInt(),
+                       element.attribute("y", QString::number(0)).toInt());
+    _size = QSize(element.attribute("w", QString::number(0)).toInt(),
+                  element.attribute("h", QString::number(0)).toInt());
 
     DMHObjectBase::inputXML(element, isImport);
 }
@@ -75,6 +81,16 @@ qreal Layer::getOpacity() const
     return _opacity;
 }
 
+QPoint Layer::getPosition() const
+{
+    return _position;
+}
+
+QSize Layer::getSize() const
+{
+    return _size;
+}
+
 QImage Layer::getLayerIcon() const
 {
     return QImage();
@@ -96,6 +112,8 @@ void Layer::copyBaseValues(Layer *other) const
     other->_order = _order;
     other->_layerVisible = _layerVisible;
     other->_opacity = _opacity;
+    other->_position = _position;
+    other->_size = _size;
 }
 
 void Layer::dmInitialize(QGraphicsScene* scene)
@@ -104,6 +122,8 @@ void Layer::dmInitialize(QGraphicsScene* scene)
     applyOrder(_order);
     applyLayerVisible(_layerVisible);
     applyOpacity(_opacity);
+    applyPosition(_position);
+    applySize(_size);
 }
 
 bool Layer::playerGLUpdate()
@@ -176,6 +196,36 @@ void Layer::setOpacity(qreal opacity)
     emit dirty();
 }
 
+void Layer::setPosition(const QPoint& position)
+{
+    if(_position == position)
+        return;
+
+    applyPosition(position);
+    _position = position;
+    emit dirty();
+}
+
+void Layer::setPosition(int x, int y)
+{
+    setPosition(QPoint(x, y));
+}
+
+void Layer::setSize(const QSize& size)
+{
+    if(_size == size)
+        return;
+
+    applySize(size);
+    _size = size;
+    emit dirty();
+}
+
+void Layer::setSize(int w, int h)
+{
+    setSize(QSize(w, h));
+}
+
 void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("type", getType());
@@ -187,6 +237,11 @@ void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
         element.setAttribute("visible", _layerVisible);
     if(_opacity < 1.0)
         element.setAttribute("opacity", _opacity);
+
+    element.setAttribute("x", _position.x());
+    element.setAttribute("y", _position.y());
+    element.setAttribute("w", _size.width());
+    element.setAttribute("h", _size.height());
 
     DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

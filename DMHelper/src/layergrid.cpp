@@ -70,6 +70,16 @@ void LayerGrid::applyOpacity(qreal opacity)
         _grid->setGridOpacity(opacity);
 }
 
+void LayerGrid::applyPosition(const QPoint& position)
+{
+
+}
+
+void LayerGrid::applySize(const QSize& size)
+{
+
+}
+
 QSize LayerGrid::getLayerSize() const
 {
     return _layerSize;

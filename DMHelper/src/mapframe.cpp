@@ -799,7 +799,7 @@ void MapFrame::editLayers()
         return;
 
     LayersEditDialog dlg(_mapSource->getLayerScene());
-    dlg.resize(width() / 2, height() / 2);
+    dlg.resize(width() * 9 / 10, height() * 9 / 10);
     dlg.exec();
 
     emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());

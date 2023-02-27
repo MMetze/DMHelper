@@ -211,6 +211,16 @@ void LayerTokens::applyOpacity(qreal opacity)
     }
 }
 
+void LayerTokens::applyPosition(const QPoint& position)
+{
+
+}
+
+void LayerTokens::applySize(const QSize& size)
+{
+
+}
+
 const QList<BattleDialogModelCombatant*> LayerTokens::getCombatants() const
 {
     return _combatants;

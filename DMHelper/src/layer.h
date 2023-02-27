@@ -53,6 +53,8 @@ public:
     virtual int getOrder() const;
     virtual bool getLayerVisible() const;
     virtual qreal getOpacity() const;
+    virtual QPoint getPosition() const;
+    virtual QSize getSize() const;
     virtual QImage getLayerIcon() const;
     virtual bool defaultShader() const;
 
@@ -65,6 +67,8 @@ public:
     virtual void applyOrder(int order) = 0;
     virtual void applyLayerVisible(bool layerVisible) = 0;
     virtual void applyOpacity(qreal opacity) = 0;
+    virtual void applyPosition(const QPoint& position) = 0;
+    virtual void applySize(const QSize& size) = 0;
 
 public slots:    
     // DM Window Generic Interface
@@ -91,6 +95,10 @@ public slots:
     virtual void setOrder(int order);
     virtual void setLayerVisible(bool layerVisible);
     virtual void setOpacity(qreal opacity);
+    virtual void setPosition(const QPoint& position);
+    virtual void setPosition(int x, int y);
+    virtual void setSize(const QSize& size);
+    virtual void setSize(int w, int h);
 
 signals:
     void dirty();
@@ -106,6 +114,8 @@ protected:
     int _order;
     bool _layerVisible;
     qreal _opacity;
+    QPoint _position;
+    QSize _size;
 
 };
 

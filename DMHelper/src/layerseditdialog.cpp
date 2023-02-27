@@ -7,6 +7,7 @@
 #include "layervideo.h"
 #include "layerframe.h"
 #include "layergrid.h"
+#include "ribbonframe.h"
 #include <QImageReader>
 #include <QVBoxLayout>
 #include <QInputDialog>
@@ -160,6 +161,36 @@ void LayersEditDialog::showEvent(QShowEvent *event)
 {
     if((_layerLayout) && (_layerLayout->count() == 0))
         readScene();
+
+    int ribbonHeight = RibbonFrame::getRibbonHeight();
+    QFontMetrics metrics = ui->lblSceneHeight->fontMetrics();
+    int labelHeight = RibbonFrame::getLabelHeight(metrics, ribbonHeight);
+    int buttonSize = ribbonHeight - labelHeight;
+    QSize iconSize(buttonSize * 4 / 5, buttonSize * 4 / 5);
+
+    RibbonFrame::setButtonSize(*ui->btnScaleScene, buttonSize, buttonSize);
+    ui->btnScaleScene->setIconSize(iconSize);
+    RibbonFrame::setButtonSize(*ui->btnMinimumExpand, buttonSize, buttonSize);
+    ui->btnMinimumExpand->setIconSize(iconSize);
+    RibbonFrame::setButtonSize(*ui->btnMaximumExpand, buttonSize, buttonSize);
+    ui->btnMaximumExpand->setIconSize(iconSize);
+    RibbonFrame::setButtonSize(*ui->btnScaleOriginal, buttonSize, buttonSize);
+    ui->btnScaleOriginal->setIconSize(iconSize);
+    RibbonFrame::setButtonSize(*ui->btnUp, buttonSize, buttonSize);
+    ui->btnUp->setIconSize(iconSize);
+    RibbonFrame::setButtonSize(*ui->btnDown, buttonSize, buttonSize);
+    ui->btnDown->setIconSize(iconSize);
+    RibbonFrame::setButtonSize(*ui->btnNewLayer, buttonSize, buttonSize);
+    ui->btnNewLayer->setIconSize(iconSize);
+    RibbonFrame::setButtonSize(*ui->btnRemoveLayer, buttonSize, buttonSize);
+    ui->btnRemoveLayer->setIconSize(iconSize);
+
+    RibbonFrame::setWidgetSize(*ui->lblSceneWidth, buttonSize / 2, buttonSize / 2);
+    //int labelHeight = RibbonFrame::getLabelHeight(metrics, frameHeight);
+    //setButtonSize(*ui->btnRemoveLayer, ribbonHeight, buttonWidth);
+    RibbonFrame::setWidgetSize(*ui->lblSceneHeight, buttonSize / 2, buttonSize / 2);
+    //setButtonSize(*ui->btnRemoveLayer, ribbonHeight, buttonWidth);
+    //setStandardButtonSize(*ui->lblEditFile, *ui->btnEditFile, frameHeight);
 
     QDialog::showEvent(event);
 }

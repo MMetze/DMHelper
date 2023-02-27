@@ -253,6 +253,10 @@
         <file>data/icon_heroforge.png</file>
         <file>data/icon_newlink.png</file>
         <file>data/icon_code.png</file>
+        <file>data/icon_image_fill.png</file>
+        <file>data/icon_image_max.png</file>
+        <file>data/icon_image_min.png</file>
+        <file>data/icon_image_original.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

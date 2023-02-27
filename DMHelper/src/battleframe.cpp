@@ -1906,7 +1906,7 @@ void BattleFrame::editLayers()
         return;
 
     LayersEditDialog dlg(_model->getLayerScene());
-    dlg.resize(width() / 2, height() / 2);
+    dlg.resize(width() * 9 / 10, height() * 9 / 10);
     dlg.exec();
 
     emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
@@ -2098,7 +2098,7 @@ void BattleFrame::handleCombatantDamage(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    int damage = QInputDialog::getInt(this, QString("Damage Combatant"), QString("Please enter the amount of damage to be done: "));
+    int damage = QInputDialog::getInt(this, QString("Damage Combatant: ") + combatant->getName(), QString("Please enter the amount of damage to be done: "));
     applyCombatantHPChange(combatant, -damage);
 }
 
@@ -2107,7 +2107,7 @@ void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    int heal = QInputDialog::getInt(this, QString("Heal Combatant"), QString("Please enter the amount of healing to be applied: "));
+    int heal = QInputDialog::getInt(this, QString("Heal Combatant: ") + combatant->getName(), QString("Please enter the amount of healing to be applied: "));
     applyCombatantHPChange(combatant, heal);
 }
 

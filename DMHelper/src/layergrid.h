@@ -26,6 +26,8 @@ public:
     virtual void applyOrder(int order) override;
     virtual void applyLayerVisible(bool layerVisible) override;
     virtual void applyOpacity(qreal opacity) override;
+    virtual void applyPosition(const QPoint& position) override;
+    virtual void applySize(const QSize& size) override;
 
     QSize getLayerSize() const;
     void setLayerSize(const QSize& layerSize);
