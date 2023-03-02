@@ -49,7 +49,6 @@ public slots:
     virtual void playerGLUninitialize() override;
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) override;
     virtual void playerGLResize(int w, int h) override;
-    virtual void playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA) override;
 
     // Layer Specific Interface
     virtual void initialize(const QSize& layerSize) override;
@@ -104,12 +103,6 @@ protected:
     QHash<BattleDialogModelEffect*, PublishGLBattleEffect*> _effectTokenHash;
 
     int _scale;
-
-    unsigned int _shaderProgramRGB;
-    unsigned int _shaderProgramRGBA;
-    int _shaderModelMatrixRGBA;
-    int _shaderProjectionMatrixRGBA;
-    int _shaderAlphaRGBA;
 };
 
 #endif // LAYERTOKENS_H

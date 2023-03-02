@@ -31,12 +31,7 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _effectTokens(),
     _effectIconHash(),
     _effectTokenHash(),
-    _scale(DMHelper::STARTING_GRID_SCALE),
-    _shaderProgramRGB(0),
-    _shaderProgramRGBA(0),
-    _shaderModelMatrixRGBA(0),
-    _shaderProjectionMatrixRGBA(0),
-    _shaderAlphaRGBA(0)
+    _scale(DMHelper::STARTING_GRID_SCALE)
 {
 }
 
@@ -362,18 +357,6 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
 
 void LayerTokens::playerGLResize(int w, int h)
 {
-}
-
-void LayerTokens::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
-{
-    Q_UNUSED(modelMatrixRGB);
-    Q_UNUSED(projectionMatrixRGB);
-
-    _shaderProgramRGB = programRGB;
-    _shaderProgramRGBA = programRGBA;
-    _shaderProjectionMatrixRGBA = projectionMatrixRGBA;
-    _shaderModelMatrixRGBA = modelMatrixRGBA;
-    _shaderAlphaRGBA = alphaRGBA;
 }
 
 void LayerTokens::initialize(const QSize& layerSize)

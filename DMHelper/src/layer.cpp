@@ -11,7 +11,12 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
     _layerVisible(true),
     _opacity(1.0),
     _position(),
-    _size()
+    _size(),
+    _shaderProgramRGB(0),
+    _shaderProgramRGBA(0),
+    _shaderModelMatrixRGBA(0),
+    _shaderProjectionMatrixRGBA(0),
+    _shaderAlphaRGBA(0)
 {
 }
 
@@ -133,13 +138,14 @@ bool Layer::playerGLUpdate()
 
 void Layer::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
 {
-    Q_UNUSED(programRGB);
     Q_UNUSED(modelMatrixRGB);
     Q_UNUSED(projectionMatrixRGB);
-    Q_UNUSED(programRGBA);
-    Q_UNUSED(modelMatrixRGBA);
-    Q_UNUSED(projectionMatrixRGBA);
-    Q_UNUSED(alphaRGBA);
+
+    _shaderProgramRGB = programRGB;
+    _shaderProgramRGBA = programRGBA;
+    _shaderProjectionMatrixRGBA = projectionMatrixRGBA;
+    _shaderModelMatrixRGBA = modelMatrixRGBA;
+    _shaderAlphaRGBA = alphaRGBA;
 }
 
 void Layer::setScale(int scale)

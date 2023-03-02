@@ -8,6 +8,8 @@
 PublishGLBattleBackground::PublishGLBattleBackground(PublishGLScene* scene, const QImage& image, int textureParam) :
     PublishGLBattleObject(scene),
     _imageSize(),
+    _position(),
+    _targetSize(),
     _textureParam(textureParam),
     _VAO(0),
     _VBO(0),
@@ -82,6 +84,24 @@ QSize PublishGLBattleBackground::getSize() const
     return _imageSize;
 }
 
+void PublishGLBattleBackground::setPosition(const QPoint& position)
+{
+    if(_position == position)
+        return;
+
+    _position = position;
+    updateModelMatrix();
+}
+
+void PublishGLBattleBackground::setTargetSize(const QSize& size)
+{
+    if(_targetSize == size)
+        return;
+
+    _targetSize = size;
+    updateModelMatrix();
+}
+
 void PublishGLBattleBackground::createImageObjects(const QImage& image)
 {
     if(!QOpenGLContext::currentContext())
@@ -144,4 +164,13 @@ void PublishGLBattleBackground::createImageObjects(const QImage& image)
     QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void PublishGLBattleBackground::updateModelMatrix()
+{
+    _modelMatrix.setToIdentity();
+    _modelMatrix.translate(_position.x(), _position.y());
+    if(_targetSize.isValid())
+        _modelMatrix.scale(static_cast<qreal>(_targetSize.width()) / static_cast<qreal>(_imageSize.width()),
+                           static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_imageSize.height()));
 }

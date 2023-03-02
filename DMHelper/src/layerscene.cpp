@@ -532,7 +532,7 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
 
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if(_layers.at(i)->getLayerVisible())
+        if((_layers.at(i)->getLayerVisible()) && (_layers.at(i)->getOpacity() > 0.0))
         {
             if(_layers.at(i)->defaultShader())
             {

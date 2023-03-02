@@ -112,7 +112,7 @@ void PublishGLMapVideoRenderer::paintBackground(QOpenGLFunctions* functions)
 #ifdef MAPVIDEO_USE_SCREENSHOT_ONLY
     if(_backgroundObject)
     {
-        functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+        //functions->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
         _backgroundObject->paintGL();
     }
 #else

@@ -83,6 +83,7 @@ protected:
 
     // Core contents
     QString _filename;
+    QImage _originalImage;
     QImage _layerImage;
     bool _filterApplied;
     MapColorizeFilter _filter;

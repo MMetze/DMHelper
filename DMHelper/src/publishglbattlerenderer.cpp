@@ -111,8 +111,8 @@ void PublishGLBattleRenderer::cleanup()
 
     _projectionMatrix.setToIdentity();
 
-    destroyShaders();
     _model->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
+    destroyShaders();
 
     PublishGLRenderer::cleanup();
 }

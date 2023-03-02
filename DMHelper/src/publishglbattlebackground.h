@@ -17,10 +17,16 @@ public:
     void setImage(const QImage& image);
     QSize getSize() const;
 
+    void setPosition(const QPoint& position);
+    void setTargetSize(const QSize& size);
+
 protected:
     void createImageObjects(const QImage& image);
+    void updateModelMatrix();
 
     QSize _imageSize;
+    QPoint _position;
+    QSize _targetSize;
     int _textureParam;
     unsigned int _VAO;
     unsigned int _VBO;

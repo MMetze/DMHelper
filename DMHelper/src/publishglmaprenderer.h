@@ -11,6 +11,7 @@ class Map;
 class Party;
 class PublishGLBattleBackground;
 class PublishGLImage;
+class Layer;
 class QOpenGLFunctions;
 
 class PublishGLMapRenderer : public PublishGLRenderer
@@ -63,12 +64,16 @@ protected:
     virtual void updateFoW();
     virtual void updateContents();
 
+    virtual void createShaders();
+    void destroyShaders();
+
 protected slots:
     void handlePartyChanged(Party* party);
     void handlePartyIconChanged(const QString& partyIcon);
     void handlePartyIconPosChanged(const QPoint& pos);
     void handleShowPartyChanged(bool showParty);
     void handlePartyScaleChanged(int partyScale);
+    void layerAdded(Layer* layer);
 
 protected:
     Map* _map;
@@ -78,8 +83,19 @@ protected:
     QRectF _cameraRect;
     QRect _scissorRect;
     bool _initialized;
-    unsigned int _shaderProgram;
-    int _shaderModelMatrix;
+    unsigned int _shaderProgramRGB;
+    int _shaderModelMatrixRGB;
+    int _shaderProjectionMatrixRGB;
+    unsigned int _shaderProgramRGBA;
+    int _shaderModelMatrixRGBA;
+    int _shaderProjectionMatrixRGBA;
+    int _shaderAlphaRGBA;
+    unsigned int _shaderProgramRGBColor;
+    int _shaderModelMatrixRGBColor;
+    int _shaderProjectionMatrixRGBColor;
+    int _shaderRGBColor;
+//    unsigned int _shaderProgram;
+//    int _shaderModelMatrix;
 //    QImage _fowImage;
 //    PublishGLBattleBackground* _fowObject;
     PublishGLImage* _partyToken;

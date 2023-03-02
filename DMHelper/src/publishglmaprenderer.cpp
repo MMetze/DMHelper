@@ -23,8 +23,19 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _cameraRect(),
     _scissorRect(),
     _initialized(false),
-    _shaderProgram(0),
-    _shaderModelMatrix(0),
+    _shaderProgramRGB(0),
+    _shaderModelMatrixRGB(0),
+    _shaderProjectionMatrixRGB(0),
+    _shaderProgramRGBA(0),
+    _shaderModelMatrixRGBA(0),
+    _shaderProjectionMatrixRGBA(0),
+    _shaderAlphaRGBA(0),
+    _shaderProgramRGBColor(0),
+    _shaderModelMatrixRGBColor(0),
+    _shaderProjectionMatrixRGBColor(0),
+    _shaderRGBColor(0),
+//    _shaderProgram(0),
+//    _shaderModelMatrix(0),
 //    _fowImage(),
 //    _fowObject(nullptr),
     _partyToken(nullptr),
@@ -42,7 +53,7 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
         connect(_map, &Map::partyIconPosChanged, this, &PublishGLMapRenderer::handlePartyIconPosChanged);
         connect(_map, &Map::showPartyChanged, this, &PublishGLMapRenderer::handleShowPartyChanged);
         connect(_map, &Map::partyScaleChanged, this, &PublishGLMapRenderer::handlePartyScaleChanged);
-        connect(&_map->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLRenderer::updateWidget);
+        connect(&_map->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLMapRenderer::layerAdded);
         connect(&_map->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
     }
 }
@@ -80,6 +91,7 @@ void PublishGLMapRenderer::cleanup()
 
     _projectionMatrix.setToIdentity();
 
+    /*
     if(_shaderProgram > 0)
     {
         if((_targetWidget) && (_targetWidget->context()))
@@ -91,6 +103,10 @@ void PublishGLMapRenderer::cleanup()
         _shaderProgram = 0;
     }
     _shaderModelMatrix = 0;
+    */
+
+    _map->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
+    destroyShaders();
 
     PublishGLRenderer::cleanup();
 }
@@ -123,6 +139,10 @@ void PublishGLMapRenderer::initializeGL()
 
     qDebug() << "[PublishGLMapRenderer] Initializing renderer";
 
+    createShaders();
+    _map->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
+
+/*
     const char *vertexShaderSource = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
@@ -200,6 +220,7 @@ void PublishGLMapRenderer::initializeGL()
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
     qDebug() << "[PublishGLMapRenderer] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
+*/
 
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -218,6 +239,7 @@ void PublishGLMapRenderer::initializeGL()
     // Check if we need a pointer
     evaluatePointer();
 
+    /*
     qDebug() << "[PublishGLMapRenderer]::initializeGL Program: " << _shaderProgram << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgram);
     // Matrices
@@ -228,6 +250,27 @@ void PublishGLMapRenderer::initializeGL()
     QMatrix4x4 viewMatrix;
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
+    */
+
+    QMatrix4x4 modelMatrix;
+    QMatrix4x4 viewMatrix;
+    viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
+
+    f->glUseProgram(_shaderProgramRGBColor);
+    f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBColor, "texture1"), 0); // set it manually
+    f->glUniformMatrix4fv(_shaderModelMatrixRGBColor, 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBColor, "view"), 1, GL_FALSE, viewMatrix.constData());
+
+    f->glUseProgram(_shaderProgramRGBA);
+    f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGBA, "texture1"), 0); // set it manually
+    f->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGBA, "view"), 1, GL_FALSE, viewMatrix.constData());
+
+    f->glUseProgram(_shaderProgramRGB);
+    f->glUniform1i(f->glGetUniformLocation(_shaderProgramRGB, "texture1"), 0); // set it manually
+    f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, modelMatrix.constData());
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgramRGB, "view"), 1, GL_FALSE, viewMatrix.constData());
+
     // Projection - note, this is set later when resizing the window
     updateProjectionMatrix();
 
@@ -306,16 +349,16 @@ void PublishGLMapRenderer::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set the default render program
-    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #1: " << _shaderProgram << ", context: " << _targetWidget->context();
-    f->glUseProgram(_shaderProgram);
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
+    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #1: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
+    f->glUseProgram(_shaderProgramRGB);
+    f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData());
 
     //paintBackground(f);
-    _map->getLayerScene().playerGLPaint(f, _shaderProgram, _shaderModelMatrix, _projectionMatrix.constData());
+    _map->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
 
     // Set the current program, in case the layers changed the program
-    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #2: " << _shaderProgram << ", context: " << _targetWidget->context();
-    f->glUseProgram(_shaderProgram);
+    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #2: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
+    f->glUseProgram(_shaderProgramRGB);
 
     /*
     if(_fowObject)
@@ -327,14 +370,14 @@ void PublishGLMapRenderer::paintGL()
 
     if(_lineImage)
     {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _lineImage->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _lineImage->getMatrixData());
         _lineImage->paintGL();
     }
 
     if((_partyToken) && (_map->getShowParty()))
     {
         _partyToken->setPosition(_map->getPartyIconPos().x() - (sceneSize.width() / 2), (sceneSize.height() / 2) - _map->getPartyIconPos().y() - _partyToken->getSize().height());
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _partyToken->getMatrixData());
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _partyToken->getMatrixData());
         _partyToken->paintGL();
     }
 
@@ -344,7 +387,7 @@ void PublishGLMapRenderer::paintGL()
         {
             if(markerToken)
             {
-                f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, markerToken->getMatrixData());
+                f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, markerToken->getMatrixData());
                 markerToken->paintGL();
             }
         }
@@ -353,12 +396,12 @@ void PublishGLMapRenderer::paintGL()
     if(!_scissorRect.isEmpty())
         f->glDisable(GL_SCISSOR_TEST);
 
-    paintPointer(f, sceneSize, _shaderModelMatrix);
+    paintPointer(f, sceneSize, _shaderModelMatrixRGB);
 }
 
 void PublishGLMapRenderer::updateProjectionMatrix()
 {
-    if((_shaderProgram == 0) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
+    if((_shaderProgramRGB == 0) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
     QOpenGLFunctions *f = _targetWidget->context()->functions();
@@ -614,6 +657,274 @@ void PublishGLMapRenderer::updateContents()
 {
 }
 
+void PublishGLMapRenderer::createShaders()
+{
+    int  success;
+    char infoLog[512];
+
+    // Set up the rendering context, load shaders and other resources, etc.:
+    QOpenGLFunctions *f = _targetWidget->context()->functions();
+    if(!f)
+        return;
+
+    const char *vertexShaderSourceRGB = "#version 410 core\n"
+        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+        "layout (location = 2) in vec2 aTexCoord;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection;\n"
+        "out vec3 ourColor; // output a color to the fragment shader\n"
+        "out vec2 TexCoord;\n"
+        "void main()\n"
+        "{\n"
+        "   // note that we read the multiplication from right to left\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   ourColor = aColor; // set ourColor to the input color we got from the vertex data\n"
+        "   TexCoord = aTexCoord;\n"
+        "}\0";
+
+    unsigned int vertexShaderRGB;
+    vertexShaderRGB = f->glCreateShader(GL_VERTEX_SHADER);
+    f->glShaderSource(vertexShaderRGB, 1, &vertexShaderSourceRGB, NULL);
+    f->glCompileShader(vertexShaderRGB);
+
+    f->glGetShaderiv(vertexShaderRGB, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(vertexShaderRGB, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    const char *fragmentShaderSourceRGB = "#version 410 core\n"
+        "out vec4 FragColor;\n"
+        "in vec3 ourColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D texture1;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = texture(texture1, TexCoord);\n"
+        "}\0";
+
+    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
+
+    unsigned int fragmentShaderRGB;
+    fragmentShaderRGB = f->glCreateShader(GL_FRAGMENT_SHADER);
+    f->glShaderSource(fragmentShaderRGB, 1, &fragmentShaderSourceRGB, NULL);
+    f->glCompileShader(fragmentShaderRGB);
+
+    f->glGetShaderiv(fragmentShaderRGB, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(fragmentShaderRGB, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    _shaderProgramRGB = f->glCreateProgram();
+
+    f->glAttachShader(_shaderProgramRGB, vertexShaderRGB);
+    f->glAttachShader(_shaderProgramRGB, fragmentShaderRGB);
+    f->glLinkProgram(_shaderProgramRGB);
+
+    f->glGetProgramiv(_shaderProgramRGB, GL_LINK_STATUS, &success);
+    if(!success) {
+        f->glGetProgramInfoLog(_shaderProgramRGB, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    f->glUseProgram(_shaderProgramRGB);
+    f->glDeleteShader(vertexShaderRGB);
+    f->glDeleteShader(fragmentShaderRGB);
+    _shaderModelMatrixRGB = f->glGetUniformLocation(_shaderProgramRGB, "model");
+    _shaderProjectionMatrixRGB = f->glGetUniformLocation(_shaderProgramRGB, "projection");
+
+    const char *vertexShaderSourceRGBA = "#version 410 core\n"
+        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+        "layout (location = 2) in vec2 aTexCoord;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection;\n"
+        "uniform float alpha;\n"
+        "out vec4 ourColor; // output a color to the fragment shader\n"
+        "out vec2 TexCoord;\n"
+        "void main()\n"
+        "{\n"
+        "   // note that we read the multiplication from right to left\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   ourColor = vec4(aColor, alpha); // set ourColor to the input color we got from the vertex data\n"
+        "   TexCoord = aTexCoord;\n"
+        "}\0";
+
+    unsigned int vertexShaderRGBA;
+    vertexShaderRGBA = f->glCreateShader(GL_VERTEX_SHADER);
+    f->glShaderSource(vertexShaderRGBA, 1, &vertexShaderSourceRGBA, NULL);
+    f->glCompileShader(vertexShaderRGBA);
+
+    f->glGetShaderiv(vertexShaderRGBA, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(vertexShaderRGBA, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    const char *fragmentShaderSourceRGBA = "#version 410 core\n"
+        "out vec4 FragColor;\n"
+        "in vec4 ourColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D texture1;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = texture(texture1, TexCoord) * ourColor;\n"
+        "}\0";
+
+    //   "    FragColor = texture(texture1, TexCoord) * ourColor; // FragColor = vec4(ourColor, 1.0f);\n"
+    //    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+    //    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
+
+    unsigned int fragmentShaderRGBA;
+    fragmentShaderRGBA = f->glCreateShader(GL_FRAGMENT_SHADER);
+    f->glShaderSource(fragmentShaderRGBA, 1, &fragmentShaderSourceRGBA, NULL);
+    f->glCompileShader(fragmentShaderRGBA);
+
+    f->glGetShaderiv(fragmentShaderRGBA, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(fragmentShaderRGBA, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    _shaderProgramRGBA = f->glCreateProgram();
+
+    f->glAttachShader(_shaderProgramRGBA, vertexShaderRGBA);
+    f->glAttachShader(_shaderProgramRGBA, fragmentShaderRGBA);
+    f->glLinkProgram(_shaderProgramRGBA);
+
+    f->glGetProgramiv(_shaderProgramRGBA, GL_LINK_STATUS, &success);
+    if(!success) {
+        f->glGetProgramInfoLog(_shaderProgramRGBA, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    f->glUseProgram(_shaderProgramRGBA);
+    f->glDeleteShader(vertexShaderRGBA);
+    f->glDeleteShader(fragmentShaderRGBA);
+    _shaderModelMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "model");
+    _shaderProjectionMatrixRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "projection");
+    _shaderAlphaRGBA = f->glGetUniformLocation(_shaderProgramRGBA, "alpha");
+
+    const char *vertexShaderSourceRGBColor = "#version 410 core\n"
+        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
+        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
+        "layout (location = 2) in vec2 aTexCoord;\n"
+        "uniform mat4 model;\n"
+        "uniform mat4 view;\n"
+        "uniform mat4 projection;\n"
+        "uniform vec4 inColor;\n"
+        "out vec4 ourColor; // output a color to the fragment shader\n"
+        "out vec2 TexCoord;\n"
+        "void main()\n"
+        "{\n"
+        "   // note that we read the multiplication from right to left\n"
+        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+        "   ourColor = inColor; // set ourColor to the input color we got from the vertex data\n"
+        "   TexCoord = aTexCoord;\n"
+        "}\0";
+
+    unsigned int vertexShaderRGBColor;
+    vertexShaderRGBColor = f->glCreateShader(GL_VERTEX_SHADER);
+    f->glShaderSource(vertexShaderRGBColor, 1, &vertexShaderSourceRGBColor, NULL);
+    f->glCompileShader(vertexShaderRGBColor);
+
+    f->glGetShaderiv(vertexShaderRGBColor, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(vertexShaderRGBColor, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    const char *fragmentShaderSourceRGBColor = "#version 410 core\n"
+        "out vec4 FragColor;\n"
+        "in vec4 ourColor;\n"
+        "in vec2 TexCoord;\n"
+        "uniform sampler2D texture1;\n"
+        "void main()\n"
+        "{\n"
+        "    FragColor = ourColor;\n"
+        "}\0";
+
+
+    unsigned int fragmentShaderRGBColor;
+    fragmentShaderRGBColor = f->glCreateShader(GL_FRAGMENT_SHADER);
+    f->glShaderSource(fragmentShaderRGBColor, 1, &fragmentShaderSourceRGBColor, NULL);
+    f->glCompileShader(fragmentShaderRGBColor);
+
+    f->glGetShaderiv(fragmentShaderRGBColor, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+        f->glGetShaderInfoLog(fragmentShaderRGBColor, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    _shaderProgramRGBColor = f->glCreateProgram();
+
+    f->glAttachShader(_shaderProgramRGBColor, vertexShaderRGBColor);
+    f->glAttachShader(_shaderProgramRGBColor, fragmentShaderRGBColor);
+    f->glLinkProgram(_shaderProgramRGBColor);
+
+    f->glGetProgramiv(_shaderProgramRGBColor, GL_LINK_STATUS, &success);
+    if(!success) {
+        f->glGetProgramInfoLog(_shaderProgramRGBColor, 512, NULL, infoLog);
+        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        return;
+    }
+
+    f->glUseProgram(_shaderProgramRGBColor);
+    f->glDeleteShader(vertexShaderRGBColor);
+    f->glDeleteShader(fragmentShaderRGBColor);
+    _shaderModelMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "model");
+    _shaderProjectionMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "projection");
+    _shaderRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "inColor");
+}
+
+void PublishGLMapRenderer::destroyShaders()
+{
+    if((_targetWidget) && (_targetWidget->context()))
+    {
+        QOpenGLFunctions *f = _targetWidget->context()->functions();
+        if(f)
+        {
+            if(_shaderProgramRGB > 0)
+                f->glDeleteProgram(_shaderProgramRGB);
+            if(_shaderProgramRGBA > 0)
+                f->glDeleteProgram(_shaderProgramRGBA);
+            if(_shaderProgramRGBColor > 0)
+                f->glDeleteProgram(_shaderProgramRGBColor);
+        }
+    }
+
+    _shaderProgramRGB = 0;
+    _shaderModelMatrixRGB = 0;
+    _shaderProjectionMatrixRGB = 0;
+    _shaderProgramRGBA = 0;
+    _shaderModelMatrixRGBA = 0;
+    _shaderProjectionMatrixRGBA = 0;
+    _shaderAlphaRGBA = 0;
+    _shaderProgramRGBColor = 0;
+    _shaderModelMatrixRGBColor = 0;
+    _shaderProjectionMatrixRGBColor = 0;
+    _shaderRGBColor = 0;
+}
+
 void PublishGLMapRenderer::handlePartyChanged(Party* party)
 {
     Q_UNUSED(party);
@@ -647,4 +958,13 @@ void PublishGLMapRenderer::handlePartyScaleChanged(int partyScale)
         _partyToken->setScale(0.04f * static_cast<float>(partyScale));
         updateRender();
     }
+}
+
+void PublishGLMapRenderer::layerAdded(Layer* layer)
+{
+    if(!layer)
+        return;
+
+    layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
+    emit updateWidget();
 }

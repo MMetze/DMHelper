@@ -13,6 +13,7 @@ LayerImage::LayerImage(const QString& name, const QString& filename, int order, 
     _graphicsItem(nullptr),
     _backgroundObject(nullptr),
     _filename(filename),
+    _originalImage(),
     _layerImage(),
     _filterApplied(false),
     _filter()
@@ -110,15 +111,21 @@ void LayerImage::applyPosition(const QPoint& position)
 {
     if(_graphicsItem)
         _graphicsItem->setPos(position);
+
+    if(_backgroundObject)
+        _backgroundObject->setPosition(position);
 }
 
 void LayerImage::applySize(const QSize& size)
 {
     if(_layerImage.size() != size)
-        _layerImage = _layerImage.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        _layerImage = _originalImage.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     emit dirty();
     emit imageChanged(getImage());
+
+    if(_backgroundObject)
+        _backgroundObject->setTargetSize(size);
 }
 
 QString LayerImage::getImageFile() const
@@ -189,7 +196,13 @@ void LayerImage::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene*
         return;
     }
 
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+
+    f->glUseProgram(_shaderProgramRGBA);
+    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+
     _backgroundObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
+    _backgroundObject->setPosition(_position);
 }
 
 void LayerImage::playerGLUninitialize()
@@ -211,8 +224,25 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
             return;
     }
 
-    functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+    //if(_opacity < 1.0)
+    {
+        functions->glUseProgram(_shaderProgramRGBA);
+        functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+        functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+        functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _backgroundObject->getMatrixData());
+        functions->glUniform1f(_shaderAlphaRGBA, _opacity);
+    }
+//    else
+    {
+//        functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
+    }
+
     _backgroundObject->paintGL();
+
+//    if(_opacity < 1.0)
+    {
+        functions->glUseProgram(_shaderProgramRGB);
+    }
 }
 
 void LayerImage::playerGLResize(int w, int h)
@@ -226,12 +256,14 @@ void LayerImage::initialize(const QSize& layerSize)
     DMHFileReader* reader = new DMHFileReader(getImageFile());
     if(reader)
     {
-        _layerImage = reader->loadImage();
-        if(!_layerImage.isNull())
+        _originalImage = reader->loadImage();
+        if(!_originalImage.isNull())
         {
             _filename = reader->getFilename();
-            if(!layerSize.isEmpty())
-                _layerImage = _layerImage.scaled(layerSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            if(layerSize.isEmpty())
+                _layerImage = _originalImage;
+            else
+                _layerImage = _originalImage.scaled(layerSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         }
         delete reader;
     }
@@ -242,14 +274,17 @@ void LayerImage::initialize(const QSize& layerSize)
 void LayerImage::uninitialize()
 {
     _layerImage = QImage();
+    _originalImage = QImage();
 }
 
 void LayerImage::updateImage(const QImage& image)
 {
-    if(_layerImage == image)
+    if(_originalImage == image)
         return;
 
-    _layerImage = image;
+    // TODO: Layers
+    _originalImage = image;
+    _layerImage = _originalImage;
     _size = _layerImage.size();
     emit dirty();
     emit imageChanged(getImage());

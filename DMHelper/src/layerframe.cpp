@@ -24,8 +24,8 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(ui->spinOpacity, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleOpacityChanged);
     connect(ui->spinX, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleXChanged);
     connect(ui->spinY, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleYChanged);
-    connect(ui->spinWidth, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleWidthChanged);
-    connect(ui->spinHeight, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleHeightChanged);
+    connect(ui->spinWidth, &QSpinBox::editingFinished, this, &LayerFrame::handleWidthChanged);
+    connect(ui->spinHeight, &QSpinBox::editingFinished, this, &LayerFrame::handleHeightChanged);
     connect(ui->btnLockRatio, &QAbstractButton::clicked, this, &LayerFrame::handleLockClicked);
 
     connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
@@ -170,27 +170,27 @@ void LayerFrame::handleYChanged(int y)
     emit selectMe(this);
 }
 
-void LayerFrame::handleWidthChanged(int width)
+void LayerFrame::handleWidthChanged()
 {
     int newHeight;
     if((ui->btnLockRatio->isChecked()) && (ui->spinWidth->value() != 0))
-        newHeight = (ui->spinHeight->value() * width) / ui->spinWidth->value();
+        newHeight = (ui->spinHeight->value() * ui->spinWidth->value()) / _layer.getSize().width();
     else
         newHeight = ui->spinHeight->value();
 
-    updateSize(width, newHeight);
+    updateSize(ui->spinWidth->value(), newHeight);
     emit selectMe(this);
 }
 
-void LayerFrame::handleHeightChanged(int height)
+void LayerFrame::handleHeightChanged()
 {
     int newWidth;
     if((ui->btnLockRatio->isChecked()) && (ui->spinHeight->value() != 0))
-        newWidth = (ui->spinWidth->value() * height) / ui->spinHeight->value();
+        newWidth = (ui->spinWidth->value() * ui->spinHeight->value()) / _layer.getSize().height();
     else
         newWidth = ui->spinWidth->value();
 
-    updateSize(newWidth, height);
+    updateSize(newWidth, ui->spinHeight->value());
     emit selectMe(this);
 }
 

@@ -117,6 +117,11 @@ protected:
     QPoint _position;
     QSize _size;
 
+    unsigned int _shaderProgramRGB;
+    unsigned int _shaderProgramRGBA;
+    int _shaderModelMatrixRGBA;
+    int _shaderProjectionMatrixRGBA;
+    int _shaderAlphaRGBA;
 };
 
 #endif // LAYER_H

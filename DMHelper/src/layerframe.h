@@ -46,8 +46,8 @@ protected slots:
     void handleOpacityChanged(int opacity);
     void handleXChanged(int x);
     void handleYChanged(int y);
-    void handleWidthChanged(int width);
-    void handleHeightChanged(int height);
+    void handleWidthChanged();
+    void handleHeightChanged();
     void handleLockClicked();
 
 protected:
