@@ -11,14 +11,14 @@
 LayerImage::LayerImage(const QString& name, const QString& filename, int order, QObject *parent) :
     Layer{name, order, parent},
     _graphicsItem(nullptr),
-    _backgroundObject(nullptr),
+    _imageGLObject(nullptr),
+    _scene(nullptr),
     _filename(filename),
     _originalImage(),
     _layerImage(),
     _filterApplied(false),
     _filter()
 {
-    connect(this, &LayerImage::dirty, this, &LayerImage::updateImageInternal);
 }
 
 LayerImage::~LayerImage()
@@ -112,8 +112,18 @@ void LayerImage::applyPosition(const QPoint& position)
     if(_graphicsItem)
         _graphicsItem->setPos(position);
 
-    if(_backgroundObject)
-        _backgroundObject->setPosition(position);
+    if(_imageGLObject)
+    {
+        QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
+        //_imageGLObject->setPosition(QPoint(position.x() + pointTopLeft.x(), pointTopLeft.y() - _size.height() - position.y()));
+//        _imageGLObject->setPosition(QPoint(position.x() + pointTopLeft.x(),
+//                                           position.y()));
+                                           //pointTopLeft.y() - position.y()));
+//        _imageGLObject->setPosition(QPoint(0,0));
+//        _imageGLObject->setPosition(position);
+        _imageGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(),
+                                           -pointTopLeft.y() - position.y()));
+    }
 }
 
 void LayerImage::applySize(const QSize& size)
@@ -121,11 +131,14 @@ void LayerImage::applySize(const QSize& size)
     if(_layerImage.size() != size)
         _layerImage = _originalImage.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
+    QImage newImage = getImage();
     emit dirty();
-    emit imageChanged(getImage());
+    emit imageChanged(newImage);
 
-    if(_backgroundObject)
-        _backgroundObject->setTargetSize(size);
+    updateImageInternal(newImage);
+
+    if(_imageGLObject)
+        _imageGLObject->setTargetSize(size);
 }
 
 QString LayerImage::getImageFile() const
@@ -185,24 +198,24 @@ void LayerImage::dmUpdate()
 {
 }
 
-void LayerImage::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
+void LayerImage::playerGLInitialize(PublishGLScene* scene)
 {
-    Q_UNUSED(renderer);
-    Q_UNUSED(scene);
-
-    if(_backgroundObject)
+    if(_imageGLObject)
     {
         qDebug() << "[LayerImage] ERROR: playerGLInitialize called although the background object already exists!";
         return;
     }
+
+    _scene = scene;
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
 
     f->glUseProgram(_shaderProgramRGBA);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    _backgroundObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
-    _backgroundObject->setPosition(_position);
+    _imageGLObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
+
+    Layer::playerGLInitialize(scene);
 }
 
 void LayerImage::playerGLUninitialize()
@@ -212,24 +225,17 @@ void LayerImage::playerGLUninitialize()
 
 void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
-    Q_UNUSED(projectionMatrix);
+    Q_UNUSED(defaultModelMatrix);
 
     if(!functions)
         return;
-
-    if(!_backgroundObject)
-    {
-        playerGLInitialize(nullptr, nullptr);
-        if(!_backgroundObject)
-            return;
-    }
 
     //if(_opacity < 1.0)
     {
         functions->glUseProgram(_shaderProgramRGBA);
         functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
         functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-        functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _backgroundObject->getMatrixData());
+        functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _imageGLObject->getMatrixData());
         functions->glUniform1f(_shaderAlphaRGBA, _opacity);
     }
 //    else
@@ -237,7 +243,7 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
 //        functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
     }
 
-    _backgroundObject->paintGL();
+    _imageGLObject->paintGL();
 
 //    if(_opacity < 1.0)
     {
@@ -251,6 +257,11 @@ void LayerImage::playerGLResize(int w, int h)
     Q_UNUSED(h);
 }
 
+bool LayerImage::playerIsInitialized()
+{
+    return _imageGLObject != nullptr;
+}
+
 void LayerImage::initialize(const QSize& layerSize)
 {
     DMHFileReader* reader = new DMHFileReader(getImageFile());
@@ -260,10 +271,13 @@ void LayerImage::initialize(const QSize& layerSize)
         if(!_originalImage.isNull())
         {
             _filename = reader->getFilename();
+            /*
             if(layerSize.isEmpty())
                 _layerImage = _originalImage;
             else
                 _layerImage = _originalImage.scaled(layerSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+            */
+            _layerImage = _originalImage;
         }
         delete reader;
     }
@@ -286,8 +300,11 @@ void LayerImage::updateImage(const QImage& image)
     _originalImage = image;
     _layerImage = _originalImage;
     _size = _layerImage.size();
+
+    QImage newImage = getImage();
     emit dirty();
-    emit imageChanged(getImage());
+    emit imageChanged(newImage);
+    changeImageInternal(newImage);
 }
 
 void LayerImage::setFileName(const QString& filename)
@@ -298,8 +315,11 @@ void LayerImage::setFileName(const QString& filename)
     cleanupDM();
     cleanupPlayer();
     _filename = filename;
+
+    QImage newImage = getImage();
     emit dirty();
-    emit imageChanged(getImage()); // TODO: Layers - make sure this really shares the updated image
+    emit imageChanged(newImage); // TODO: Layers - make sure this really shares the updated image
+    changeImageInternal(newImage);
 }
 
 void LayerImage::setApplyFilter(bool applyFilter)
@@ -308,8 +328,10 @@ void LayerImage::setApplyFilter(bool applyFilter)
         return;
 
     _filterApplied = applyFilter;
+    QImage newImage = getImage();
     emit dirty();
-    emit imageChanged(getImage());
+    emit imageChanged(newImage);
+    changeImageInternal(newImage);
 }
 
 void LayerImage::setFilter(const MapColorizeFilter& filter)
@@ -318,19 +340,24 @@ void LayerImage::setFilter(const MapColorizeFilter& filter)
         return;
 
     _filter = filter;
+    QImage newImage = getImage();
     emit dirty();
-    emit imageChanged(getImage());
+    emit imageChanged(newImage);
+    changeImageInternal(newImage);
 }
 
-void LayerImage::updateImageInternal()
+void LayerImage::updateImageInternal(const QImage& newImage)
 {
-    QImage newImage = getImage();
-
     if(_graphicsItem)
         _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
+}
 
-    if(_backgroundObject)
-        _backgroundObject->setImage(newImage);
+void LayerImage::changeImageInternal(const QImage& newImage)
+{
+    updateImageInternal(newImage);
+
+    if(_imageGLObject)
+        _imageGLObject->setImage(newImage);
 }
 
 void LayerImage::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -375,6 +402,8 @@ void LayerImage::cleanupDM()
 
 void LayerImage::cleanupPlayer()
 {
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
+    delete _imageGLObject;
+    _imageGLObject = nullptr;
+
+    _scene = nullptr;
 }

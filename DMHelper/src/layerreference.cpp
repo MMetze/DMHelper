@@ -193,10 +193,12 @@ void LayerReference::dmUpdate()
         _referenceLayer->dmUpdate();
 }
 
-void LayerReference::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
+void LayerReference::playerGLInitialize(PublishGLScene* scene)
 {
     if(_referenceLayer)
-        _referenceLayer->playerGLInitialize(renderer, scene);
+        _referenceLayer->playerGLInitialize(scene);
+
+    Layer::playerGLInitialize(scene);
 }
 
 void LayerReference::playerGLUninitialize()
@@ -220,6 +222,11 @@ void LayerReference::playerGLResize(int w, int h)
 {
     if(_referenceLayer)
         _referenceLayer->playerGLResize(w, h);
+}
+
+bool LayerReference::playerIsInitialized()
+{
+    return _referenceLayer ? _referenceLayer->playerIsInitialized() : false;
 }
 
 void LayerReference::initialize(const QSize& layerSize)

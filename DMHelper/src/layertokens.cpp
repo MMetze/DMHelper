@@ -22,6 +22,7 @@
 LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int order, QObject *parent) :
     Layer{name, order, parent},
     _glScene(nullptr),
+    _playerInitialized(false),
     _model(model),
     _combatants(),
     _combatantTokens(),
@@ -254,10 +255,8 @@ void LayerTokens::dmUpdate()
 {
 }
 
-void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
+void LayerTokens::playerGLInitialize(PublishGLScene* scene)
 {
-    Q_UNUSED(renderer);
-
     if(!scene)
         return;
 
@@ -297,10 +296,15 @@ void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene
             _effectTokenHash.insert(effect, effectToken);
         }
     }
+
+    _playerInitialized = true;
+
+    Layer::playerGLInitialize(scene);
 }
 
 void LayerTokens::playerGLUninitialize()
 {
+    _playerInitialized = false;
     cleanupPlayer();
 }
 
@@ -357,6 +361,11 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
 
 void LayerTokens::playerGLResize(int w, int h)
 {
+}
+
+bool LayerTokens::playerIsInitialized()
+{
+    return _playerInitialized;
 }
 
 void LayerTokens::initialize(const QSize& layerSize)

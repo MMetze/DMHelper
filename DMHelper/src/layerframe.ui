@@ -228,6 +228,9 @@
            <property name="toolTip">
             <string>The layer's X position</string>
            </property>
+           <property name="minimum">
+            <number>-99999999</number>
+           </property>
            <property name="maximum">
             <number>99999999</number>
            </property>
@@ -276,8 +279,14 @@
          </item>
          <item>
           <widget class="QSpinBox" name="spinY">
+           <property name="minimum">
+            <number>-99999989</number>
+           </property>
            <property name="maximum">
             <number>99999999</number>
+           </property>
+           <property name="value">
+            <number>0</number>
            </property>
           </widget>
          </item>

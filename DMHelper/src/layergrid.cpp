@@ -139,9 +139,8 @@ void LayerGrid::dmUpdate()
 {
 }
 
-void LayerGrid::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
+void LayerGrid::playerGLInitialize(PublishGLScene* scene)
 {
-    Q_UNUSED(renderer);
     Q_UNUSED(scene);
 
     if(_gridObject)
@@ -151,6 +150,8 @@ void LayerGrid::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* 
     }
 
     _gridObject = new PublishGLBattleGrid(_config, getOpacity(), getLayerSize());
+
+    Layer::playerGLInitialize(scene);
 }
 
 void LayerGrid::playerGLUninitialize()
@@ -165,13 +166,6 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
     if((!functions) || (!projectionMatrix))
         return;
 
-    if(!_gridObject)
-    {
-        playerGLInitialize(nullptr, nullptr);
-        if(!_gridObject)
-            return;
-    }
-
     _gridObject->setProjectionMatrix(projectionMatrix);
     _gridObject->paintGL();
 }
@@ -180,6 +174,11 @@ void LayerGrid::playerGLResize(int w, int h)
 {
     Q_UNUSED(w);
     Q_UNUSED(h);
+}
+
+bool LayerGrid::playerIsInitialized()
+{
+    return _gridObject != nullptr;
 }
 
 void LayerGrid::initialize(const QSize& layerSize)

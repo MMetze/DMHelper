@@ -54,6 +54,8 @@ public:
     int getFirstIndex(DMHelper::LayerType type) const;
     QImage mergedImage();
 
+    PublishGLRenderer* getRenderer() const;
+
     QList<Layer*> getLayers() const;
     QList<Layer*> getLayers(DMHelper::LayerType type) const;
 
@@ -96,6 +98,7 @@ protected:
     int _selected;
     QGraphicsScene* _dmScene;
     PublishGLScene* _playerGLScene;
+    PublishGLRenderer* _renderer;
 };
 
 #endif // LAYERSCENE_H

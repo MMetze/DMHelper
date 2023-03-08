@@ -461,9 +461,8 @@ void LayerFow::dmUpdate()
 {
 }
 
-void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
+void LayerFow::playerGLInitialize(PublishGLScene* scene)
 {
-    Q_UNUSED(renderer);
     Q_UNUSED(scene);
 
     if(_backgroundObject)
@@ -473,6 +472,8 @@ void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* s
     }
 
     _backgroundObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
+
+    Layer::playerGLInitialize(scene);
 }
 
 void LayerFow::playerGLUninitialize()
@@ -493,13 +494,6 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatr
     if(!functions)
         return;
 
-    if(!_backgroundObject)
-    {
-        playerGLInitialize(nullptr, nullptr);
-        if(!_backgroundObject)
-            return;
-    }
-
     functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
     _backgroundObject->paintGL();
 }
@@ -508,6 +502,11 @@ void LayerFow::playerGLResize(int w, int h)
 {
     Q_UNUSED(w);
     Q_UNUSED(h);
+}
+
+bool LayerFow::playerIsInitialized()
+{
+    return _backgroundObject != nullptr;
 }
 
 void LayerFow::initialize(const QSize& layerSize)

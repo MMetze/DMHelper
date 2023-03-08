@@ -17,6 +17,7 @@
 PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
+    _scene(),
     _targetSize(),
     _color(),
     _projectionMatrix(),
@@ -105,7 +106,7 @@ void PublishGLMapRenderer::cleanup()
     _shaderModelMatrix = 0;
     */
 
-    _map->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
+    //_map->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
     destroyShaders();
 
     PublishGLRenderer::cleanup();
@@ -131,6 +132,8 @@ void PublishGLMapRenderer::initializeGL()
 {    
     if((_initialized) || (!_targetWidget) || (!_targetWidget->context()) || (!_map))
         return;
+
+    _scene.setGridScale(_map->getPartyScale());
 
     // Set up the rendering context, load shaders and other resources, etc.:
     QOpenGLFunctions *f = _targetWidget->context()->functions();
@@ -224,9 +227,11 @@ void PublishGLMapRenderer::initializeGL()
 
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
+    _scene.deriveSceneRectFromSize(_map->getLayerScene().sceneSize());
+
     // Create the objects
     //initializeBackground();
-    _map->getLayerScene().playerGLInitialize(this, nullptr);
+    _map->getLayerScene().playerGLInitialize(this, &_scene);
     updateProjectionMatrix();
     updateFoW();
 
@@ -282,6 +287,7 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
 //    resizeBackground(w, h);
+    _scene.setTargetSize(_targetSize);
     if(_map)
         _map->getLayerScene().playerGLResize(w, h);
 
@@ -295,7 +301,7 @@ void PublishGLMapRenderer::paintGL()
     if((!_initialized) || (!_map) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    qDebug() << "[PublishGLMapRenderer]::paintGL context: " << _targetWidget->context();
+    //qDebug() << "[PublishGLMapRenderer]::paintGL context: " << _targetWidget->context();
 
     if(_map->getLayerScene().playerGLUpdate())
         updateProjectionMatrix();
@@ -349,7 +355,7 @@ void PublishGLMapRenderer::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set the default render program
-    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #1: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
+    //qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #1: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgramRGB);
     f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData());
 
@@ -357,7 +363,7 @@ void PublishGLMapRenderer::paintGL()
     _map->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
 
     // Set the current program, in case the layers changed the program
-    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #2: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
+    //qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #2: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgramRGB);
 
     /*
@@ -962,9 +968,10 @@ void PublishGLMapRenderer::handlePartyScaleChanged(int partyScale)
 
 void PublishGLMapRenderer::layerAdded(Layer* layer)
 {
-    if(!layer)
+    if((!layer) || (!_initialized))
         return;
 
     layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
+    //layer->playerGLInitialize(this, &_scene);
     emit updateWidget();
 }

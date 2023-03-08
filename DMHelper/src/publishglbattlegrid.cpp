@@ -643,6 +643,8 @@ void PublishGLBattleGrid::rebuildGrid()
 
 void PublishGLBattleGrid::cleanupGrid()
 {
+    qDebug() << "[PublishGLBattleGrid] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+
     if(QOpenGLContext::currentContext())
     {
         QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();

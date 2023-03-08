@@ -2,6 +2,7 @@
 #define PUBLISHGLMAPRENDERER_H
 
 #include "publishglrenderer.h"
+#include "publishglscene.h"
 #include <QColor>
 #include <QImage>
 #include <QMatrix4x4>
@@ -77,6 +78,7 @@ protected slots:
 
 protected:
     Map* _map;
+    PublishGLScene _scene;
     QSize _targetSize;
     QColor _color;
     QMatrix4x4 _projectionMatrix;

@@ -134,10 +134,14 @@ void LayerVideo::dmUpdate()
 
 }
 
-void LayerVideo::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
+void LayerVideo::playerGLInitialize(PublishGLScene* scene)
 {
     Q_UNUSED(scene);
 
+    if(!_layerScene)
+        return;
+
+    PublishGLRenderer* renderer = _layerScene->getRenderer();
     if((!renderer) || (!renderer->getTargetWidget()))
         return;
 
@@ -166,6 +170,8 @@ void LayerVideo::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene*
     connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
     _videoPlayer->restartPlayer();
 #endif
+
+    Layer::playerGLInitialize(scene);
 }
 
 void LayerVideo::playerGLUninitialize()
@@ -233,6 +239,15 @@ void LayerVideo::playerGLResize(int w, int h)
     _playerSize = QSize(w, h);
 #endif
     emit updateProjectionMatrix();
+}
+
+bool LayerVideo::playerIsInitialized()
+{
+#ifdef LAYERVIDEO_USE_OPENGL
+    return _videoGLPlayer != nullptr;
+#else
+    return _videoPlayer != nullptr;
+#endif
 }
 
 void LayerVideo::initialize(const QSize& layerSize)

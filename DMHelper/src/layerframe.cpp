@@ -21,9 +21,9 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(ui->edtName, &QLineEdit::editingFinished, this, &LayerFrame::handleNameChanged);
 
     connect(ui->sliderOpacity, &QSlider::valueChanged, this, &LayerFrame::handleOpacityChanged);
-    connect(ui->spinOpacity, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleOpacityChanged);
-    connect(ui->spinX, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleXChanged);
-    connect(ui->spinY, QOverload<int>::of(&QSpinBox::valueChanged), this, &LayerFrame::handleYChanged);
+    connect(ui->spinOpacity, &QSpinBox::editingFinished, this, &LayerFrame::handleOpacityChanged);
+    connect(ui->spinX, &QSpinBox::editingFinished, this, &LayerFrame::handleXChanged);
+    connect(ui->spinY, &QSpinBox::editingFinished, this, &LayerFrame::handleYChanged);
     connect(ui->spinWidth, &QSpinBox::editingFinished, this, &LayerFrame::handleWidthChanged);
     connect(ui->spinHeight, &QSpinBox::editingFinished, this, &LayerFrame::handleHeightChanged);
     connect(ui->btnLockRatio, &QAbstractButton::clicked, this, &LayerFrame::handleLockClicked);
@@ -85,18 +85,12 @@ void LayerFrame::setPosition(const QPoint& position)
 
 void LayerFrame::setX(int x)
 {
-    if(x < 0)
-        return;
-
     if(ui->spinX->value() != x)
         ui->spinX->setValue(x);
 }
 
 void LayerFrame::setY(int y)
 {
-    if(y < 0)
-        return;
-
     if(ui->spinY->value() != y)
         ui->spinY->setValue(y);
 }
@@ -147,26 +141,31 @@ void LayerFrame::handleNameChanged()
     emit nameChanged(ui->edtName->text());
 }
 
-void LayerFrame::handleOpacityChanged(int opacity)
+void LayerFrame::handleOpacityChanged()
 {
-    if(_opacity == opacity)
-        return;
+    int newOpacity = ui->spinOpacity->value();
+    if(_opacity == newOpacity)
+    {
+        newOpacity = ui->sliderOpacity->value();
+        if(_opacity == newOpacity)
+            return;
+    }
 
-    setOpacity(opacity);
+    setOpacity(newOpacity);
 
     emit selectMe(this);
-    emit opacityChanged(static_cast<qreal>(opacity) / 100.0);
+    emit opacityChanged(static_cast<qreal>(newOpacity) / 100.0);
 }
 
-void LayerFrame::handleXChanged(int x)
+void LayerFrame::handleXChanged()
 {
-    updatePosition(x, ui->spinY->value());
+    updatePosition(ui->spinX->value(), ui->spinY->value());
     emit selectMe(this);
 }
 
-void LayerFrame::handleYChanged(int y)
+void LayerFrame::handleYChanged()
 {
-    updatePosition(ui->spinX->value(), y);
+    updatePosition(ui->spinX->value(), ui->spinY->value());
     emit selectMe(this);
 }
 

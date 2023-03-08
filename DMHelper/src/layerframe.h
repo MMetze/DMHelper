@@ -43,9 +43,9 @@ signals:
 
 protected slots:
     void handleNameChanged();
-    void handleOpacityChanged(int opacity);
-    void handleXChanged(int x);
-    void handleYChanged(int y);
+    void handleOpacityChanged();
+    void handleXChanged();
+    void handleYChanged();
     void handleWidthChanged();
     void handleHeightChanged();
     void handleLockClicked();

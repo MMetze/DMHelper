@@ -19,7 +19,8 @@ LayerScene::LayerScene(QObject *parent) :
     _scale(DMHelper::STARTING_GRID_SCALE),
     _selected(-1),
     _dmScene(nullptr),
-    _playerGLScene(nullptr)
+    _playerGLScene(nullptr),
+    _renderer(nullptr)
 {
 }
 
@@ -415,6 +416,11 @@ QImage LayerScene::mergedImage()
     return result;
 }
 
+PublishGLRenderer* LayerScene::getRenderer() const
+{
+    return _renderer;
+}
+
 QList<Layer*> LayerScene::getLayers() const
 {
     return _layers;
@@ -501,8 +507,11 @@ void LayerScene::dmUpdate()
 void LayerScene::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     initializeLayers();
+
+    _renderer = renderer;
+
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->playerGLInitialize(renderer, scene);
+        _layers[i]->playerGLInitialize(scene);
 
     _playerGLScene = scene;
 }
@@ -512,6 +521,7 @@ void LayerScene::playerGLUninitialize()
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerGLUninitialize();
 
+    _renderer = nullptr;
     _playerGLScene = nullptr;
 }
 
@@ -532,15 +542,21 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
 
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if((_layers.at(i)->getLayerVisible()) && (_layers.at(i)->getOpacity() > 0.0))
+        if((_layers.at(i)) && (_layers.at(i)->getLayerVisible()) && (_layers.at(i)->getOpacity() > 0.0))
         {
-            if(_layers.at(i)->defaultShader())
-            {
-                // qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
-                functions->glUseProgram(shaderProgram);
-            }
+            if(!_layers.at(i)->playerIsInitialized())
+                _layers[i]->playerGLInitialize(_playerGLScene);
 
-            _layers[i]->playerGLPaint(functions, defaultModelMatrix, projectionMatrix);
+            if(_layers.at(i)->playerIsInitialized())
+            {
+                if(_layers.at(i)->defaultShader())
+                {
+                    // qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
+                    functions->glUseProgram(shaderProgram);
+                }
+
+                _layers[i]->playerGLPaint(functions, defaultModelMatrix, projectionMatrix);
+            }
         }
     }
 }

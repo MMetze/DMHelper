@@ -124,6 +124,18 @@ void Layer::copyBaseValues(Layer *other) const
 void Layer::dmInitialize(QGraphicsScene* scene)
 {
     Q_UNUSED(scene);
+
+    applyOrder(_order);
+    applyLayerVisible(_layerVisible);
+    applyOpacity(_opacity);
+    applyPosition(_position);
+    applySize(_size);
+}
+
+void Layer::playerGLInitialize(PublishGLScene* scene)
+{
+    Q_UNUSED(scene);
+
     applyOrder(_order);
     applyLayerVisible(_layerVisible);
     applyOpacity(_opacity);

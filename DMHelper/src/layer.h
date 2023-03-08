@@ -77,12 +77,13 @@ public slots:
     virtual void dmUpdate() = 0;
 
     // Player Window Generic Interface
-    virtual void playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene) = 0;
+    virtual void playerGLInitialize(PublishGLScene* scene);
     virtual void playerGLUninitialize() = 0;
     virtual bool playerGLUpdate();
     virtual void playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix) = 0;
     virtual void playerGLResize(int w, int h) = 0;
     virtual void playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA);
+    virtual bool playerIsInitialized() = 0;
 
     // Layer Specific Interface
     virtual void initialize(const QSize& layerSize) = 0;
