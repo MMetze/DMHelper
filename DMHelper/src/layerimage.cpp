@@ -65,7 +65,7 @@ void LayerImage::inputXML(const QDomElement &element, bool isImport)
 
 QRectF LayerImage::boundingRect() const
 {
-    return _layerImage.isNull() ? QRectF() : QRectF(_layerImage.rect());
+    return _layerImage.isNull() ? QRectF() : QRectF(_position, _layerImage.size());
 }
 
 QImage LayerImage::getLayerIcon() const
@@ -230,25 +230,15 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     if(!functions)
         return;
 
-    //if(_opacity < 1.0)
-    {
-        functions->glUseProgram(_shaderProgramRGBA);
-        functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
-        functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
-        functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _imageGLObject->getMatrixData());
-        functions->glUniform1f(_shaderAlphaRGBA, _opacity);
-    }
-//    else
-    {
-//        functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
-    }
+    functions->glUseProgram(_shaderProgramRGBA);
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+    functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _imageGLObject->getMatrixData());
+    functions->glUniform1f(_shaderAlphaRGBA, _opacity);
 
     _imageGLObject->paintGL();
 
-//    if(_opacity < 1.0)
-    {
-        functions->glUseProgram(_shaderProgramRGB);
-    }
+    functions->glUseProgram(_shaderProgramRGB);
 }
 
 void LayerImage::playerGLResize(int w, int h)
@@ -262,8 +252,10 @@ bool LayerImage::playerIsInitialized()
     return _imageGLObject != nullptr;
 }
 
-void LayerImage::initialize(const QSize& layerSize)
+void LayerImage::initialize(const QSize& sceneSize)
 {
+    Q_UNUSED(sceneSize);
+
     DMHFileReader* reader = new DMHFileReader(getImageFile());
     if(reader)
     {

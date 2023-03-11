@@ -250,7 +250,7 @@ bool LayerVideo::playerIsInitialized()
 #endif
 }
 
-void LayerVideo::initialize(const QSize& layerSize)
+void LayerVideo::initialize(const QSize& sceneSize)
 {
 
 }

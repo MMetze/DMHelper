@@ -79,6 +79,7 @@ void PublishGLBattleBackground::setImage(const QImage& image)
 {
     cleanup();
     createImageObjects(image);
+    updateModelMatrix();
 }
 
 QSize PublishGLBattleBackground::getSize() const

@@ -52,8 +52,8 @@ public:
     QImage getBWFoWImage(const QSize &size);
     */
 
-    QSize getImageSize() const;
-    void setImageSize(const QSize& imageSize);
+    //QSize getImageSize() const;
+    //void setImageSize(const QSize& imageSize);
 
 
 public slots:
@@ -71,7 +71,7 @@ public slots:
     virtual bool playerIsInitialized() override;
 
     // Layer Specific Interface
-    virtual void initialize(const QSize& layerSize) override;
+    virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
 
 protected slots:
@@ -96,11 +96,12 @@ protected:
     QGraphicsPixmapItem* _graphicsItem;
 
     // Player Window Members
-    PublishGLBattleBackground* _backgroundObject;
+    PublishGLBattleBackground* _fowGLObject;
+    PublishGLScene* _scene;
 
     // Core contents
-    QSize _imageSize;
-    QImage _imgFow;
+    //QSize _imageSize;
+    QImage _imageFow;
     //QPixmap _pixmapFow;
     QUndoStack* _undoStack;
     QList<UndoFowBase*> _undoItems;

@@ -181,12 +181,12 @@ bool LayerGrid::playerIsInitialized()
     return _gridObject != nullptr;
 }
 
-void LayerGrid::initialize(const QSize& layerSize)
+void LayerGrid::initialize(const QSize& sceneSize)
 {
     if(_grid)
         return;
 
-    _layerSize = layerSize;
+    _layerSize = sceneSize;
     //_grid = new Grid(*this, rect);
     //_grid->rebuildGrid(*_model);
 }

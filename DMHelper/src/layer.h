@@ -86,7 +86,7 @@ public slots:
     virtual bool playerIsInitialized() = 0;
 
     // Layer Specific Interface
-    virtual void initialize(const QSize& layerSize) = 0;
+    virtual void initialize(const QSize& sceneSize) = 0;
     virtual void uninitialize() = 0;
     virtual void setScale(int scale);
     virtual void setName(const QString& name);

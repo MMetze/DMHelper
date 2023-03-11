@@ -17,13 +17,16 @@
 LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObject *parent) :
     Layer{name, order, parent},
     _graphicsItem(nullptr),
-    _backgroundObject(nullptr),
-    _imageSize(imageSize),
-    _imgFow(),
+    _fowGLObject(nullptr),
+    _scene(nullptr),
+    //_imageSize(imageSize),
+    _imageFow(),
     //_pixmapFow(),
     _undoStack(nullptr),
     _undoItems()
 {
+    setSize(imageSize);
+
     _undoStack = new QUndoStack(); // TODO: why does not leaking this avoid a crash at shutdown?
 
     connect(this, &LayerFow::dirty, this, &LayerFow::updateFowInternal);
@@ -85,7 +88,7 @@ void LayerFow::inputXML(const QDomElement &element, bool isImport)
 
 QRectF LayerFow::boundingRect() const
 {
-    return QRectF(QPointF(0,0), _imgFow.size());
+    return _imageFow.isNull() ? QRectF() : QRectF(_position, _imageFow.size());
 }
 
 QImage LayerFow::getLayerIcon() const
@@ -100,10 +103,10 @@ DMHelper::LayerType LayerFow::getType() const
 
 Layer* LayerFow::clone() const
 {
-    LayerFow* newLayer = new LayerFow(_name, _imgFow.size(), _order);
+    LayerFow* newLayer = new LayerFow(_name, _imageFow.size(), _order);
 
     copyBaseValues(newLayer);
-    newLayer->_imgFow = _imgFow;
+    newLayer->_imageFow = _imageFow;
     //newLayer->_pixmapFow = _pixmapFow;
 
     if(_undoStack->count() > 0)
@@ -158,17 +161,48 @@ void LayerFow::applyOpacity(qreal opacity)
 
 void LayerFow::applyPosition(const QPoint& position)
 {
+    if(_graphicsItem)
+        _graphicsItem->setPos(position);
 
+    if(_fowGLObject)
+    {
+        QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
+        _fowGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(),
+                                         -pointTopLeft.y() - position.y()));
+    }
 }
 
 void LayerFow::applySize(const QSize& size)
 {
+    if(size == _imageFow.size())
+        return;
 
+    if(!_imageFow.isNull())
+    {
+        uninitialize();
+        _size = size;
+        initialize(size);
+    }
+
+    QImage newImage = getImage();
+
+    if(_graphicsItem)
+        _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
+
+    if(_fowGLObject)
+    {
+//        _fowGLObject->setTargetSize(size);
+//        _fowGLObject->setImage(newImage);
+
+        delete _fowGLObject;
+        _fowGLObject = nullptr;
+
+    }
 }
 
 QImage LayerFow::getImage() const
 {
-    return _imgFow;
+    return _imageFow;
 }
 
 QUndoStack* LayerFow::getUndoStack() const
@@ -192,7 +226,7 @@ void LayerFow::applyPaintTo(int index, int startIndex)
 
     if(startIndex == 0)
     {
-        _imgFow.fill(Qt::black);
+        _imageFow.fill(Qt::black);
         //_pixmapFow.fill(Qt::blue);
     }
 
@@ -221,6 +255,7 @@ void LayerFow::applyPaintTo(int index, int startIndex)
     }
     */
 
+    updateFowInternal();
     emit dirty();
 }
 
@@ -247,7 +282,7 @@ void LayerFow::internalApplyPaintTo(QImage* target, const QColor& clearColor, in
 
 void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
 {
-    QPainter p(&_imgFow);
+    QPainter p(&_imageFow);
     p.setPen(Qt::NoPen);
 
     if(mapDraw.brushType() == DMHelper::BrushType_Circle)
@@ -315,12 +350,13 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
     }
 
     p.end();
+    updateFowInternal();
     emit dirty();
 }
 
 void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
 {
-    QPainter p(&_imgFow);
+    QPainter p(&_imageFow);
     p.setPen(Qt::NoPen);
 
     if(mapEditShape.erase())
@@ -371,15 +407,17 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
     }
 
     p.end();
+    updateFowInternal();
     emit dirty();
 }
 
 void LayerFow::fillFoW(const QColor& color)
 {
-    QPainter p(&_imgFow);
+    QPainter p(&_imageFow);
     p.setCompositionMode(QPainter::CompositionMode_Source);
-    p.fillRect(0, 0, _imgFow.width(), _imgFow.height(), color);
+    p.fillRect(0, 0, _imageFow.width(), _imageFow.height(), color);
     p.end();
+    updateFowInternal();
     emit dirty();
 }
 
@@ -411,6 +449,7 @@ QImage LayerFow::getBWFoWImage(const QSize &size)
 }
 */
 
+/*
 QSize LayerFow::getImageSize() const
 {
     return _imageSize;
@@ -423,12 +462,13 @@ void LayerFow::setImageSize(const QSize& imageSize)
 
     _imageSize = imageSize;
 
-    if(!_imgFow.isNull())
+    if(!_imageFow.isNull())
     {
         uninitialize();
         initialize(_imageSize);
     }
 }
+*/
 
 void LayerFow::dmInitialize(QGraphicsScene* scene)
 {
@@ -441,9 +481,10 @@ void LayerFow::dmInitialize(QGraphicsScene* scene)
         return;
     }
 
-    _graphicsItem = scene->addPixmap(QPixmap::fromImage(_imgFow));
+    _graphicsItem = scene->addPixmap(QPixmap::fromImage(_imageFow));
     if(_graphicsItem)
     {
+        _graphicsItem->setPos(_position);
         _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
         _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
         _graphicsItem->setZValue(getOrder());
@@ -463,15 +504,20 @@ void LayerFow::dmUpdate()
 
 void LayerFow::playerGLInitialize(PublishGLScene* scene)
 {
-    Q_UNUSED(scene);
-
-    if(_backgroundObject)
+    if(_fowGLObject)
     {
         qDebug() << "[LayerFow] ERROR: playerGLInitialize called although the background object already exists!";
         return;
     }
 
-    _backgroundObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
+    _scene = scene;
+
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+
+    f->glUseProgram(_shaderProgramRGBA);
+    f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+
+    _fowGLObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
 
     Layer::playerGLInitialize(scene);
 }
@@ -489,13 +535,20 @@ bool LayerFow::playerGLUpdate()
 
 void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatrix, const GLfloat* projectionMatrix)
 {
-    Q_UNUSED(projectionMatrix);
+    Q_UNUSED(defaultModelMatrix);
 
     if(!functions)
         return;
 
-    functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, _backgroundObject->getMatrixData());
-    _backgroundObject->paintGL();
+    functions->glUseProgram(_shaderProgramRGBA);
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+    functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _fowGLObject->getMatrixData());
+    functions->glUniform1f(_shaderAlphaRGBA, _opacity);
+
+    _fowGLObject->paintGL();
+
+    functions->glUseProgram(_shaderProgramRGB);
 }
 
 void LayerFow::playerGLResize(int w, int h)
@@ -506,16 +559,19 @@ void LayerFow::playerGLResize(int w, int h)
 
 bool LayerFow::playerIsInitialized()
 {
-    return _backgroundObject != nullptr;
+    return _fowGLObject != nullptr;
 }
 
-void LayerFow::initialize(const QSize& layerSize)
+void LayerFow::initialize(const QSize& sceneSize)
 {
-    if(!_imgFow.isNull())
+    if(!_imageFow.isNull())
         return;
 
-    _imageSize = layerSize;
-    _imgFow = QImage(_imageSize, QImage::Format_ARGB32_Premultiplied);
+    //_imageSize = layerSize;
+    if(getSize().isEmpty())
+        setSize(sceneSize);
+
+    _imageFow = QImage(getSize(), QImage::Format_ARGB32_Premultiplied);
     //_imgFow.fill(Qt::black);
     //_pixmapFow.fill(Qt::black);
 
@@ -524,17 +580,22 @@ void LayerFow::initialize(const QSize& layerSize)
 
 void LayerFow::uninitialize()
 {
-    _imgFow = QImage();
+    _imageFow = QImage();
     //_pixmapFow = QPixmap();
 }
 
 void LayerFow::updateFowInternal()
 {
-    if(_graphicsItem)
-        _graphicsItem->setPixmap(QPixmap::fromImage(_imgFow));
+    QImage newImage = getImage();
 
-    if(_backgroundObject)
-        _backgroundObject->setImage(_imgFow);
+    if(_graphicsItem)
+        _graphicsItem->setPixmap(QPixmap::fromImage(newImage));
+
+    if(_fowGLObject)
+    {
+        delete _fowGLObject;
+        _fowGLObject = nullptr;
+    }
 }
 
 void LayerFow::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -620,8 +681,10 @@ void LayerFow::cleanupDM()
 
 void LayerFow::cleanupPlayer()
 {
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
+    delete _fowGLObject;
+    _fowGLObject = nullptr;
+
+    _scene = nullptr;
 }
 
 void LayerFow::initializeUndoStack()

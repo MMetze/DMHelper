@@ -368,7 +368,7 @@ bool LayerTokens::playerIsInitialized()
     return _playerInitialized;
 }
 
-void LayerTokens::initialize(const QSize& layerSize)
+void LayerTokens::initialize(const QSize& sceneSize)
 {
 }
 

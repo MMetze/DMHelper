@@ -49,7 +49,7 @@ public slots:
     virtual bool playerIsInitialized() override;
 
     // Layer Specific Interface
-    virtual void initialize(const QSize& layerSize) override;
+    virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
     virtual void setScale(int scale) override;
 

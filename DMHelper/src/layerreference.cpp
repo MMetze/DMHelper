@@ -229,10 +229,10 @@ bool LayerReference::playerIsInitialized()
     return _referenceLayer ? _referenceLayer->playerIsInitialized() : false;
 }
 
-void LayerReference::initialize(const QSize& layerSize)
+void LayerReference::initialize(const QSize& sceneSize)
 {
     if(_referenceLayer)
-        _referenceLayer->initialize(layerSize);
+        _referenceLayer->initialize(sceneSize);
 }
 
 void LayerReference::uninitialize()
