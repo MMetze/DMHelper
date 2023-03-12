@@ -30,6 +30,8 @@ public:
     virtual ~Grid();
 
     virtual void setGridShape(const QRect& gridShape);
+    virtual void setGridSize(const QSize& gridSize);
+    virtual void setGridPosition(const QPoint& position);
     QRect getGridShape() const;
     virtual void setGridZValue(int zOrder);
     virtual void setGridVisible(bool gridVisible);

@@ -17,6 +17,8 @@ public:
     virtual void paintGL() override;
     QSize getSize() const;
 
+    void setPosition(const QPoint& position);
+
     void setProjectionMatrix(const GLfloat* projectionMatrix);
     void setConfig(const GridConfig& config);
     void setOpacity(qreal opacity);
@@ -27,6 +29,7 @@ protected:
     void createGridObjects();
     void rebuildGrid();
     void cleanupGrid();
+    void updateModelMatrix();
 
     unsigned int _VAO;
     unsigned int _VBO;
@@ -35,6 +38,7 @@ protected:
     int _shaderModelMatrix;
 
     GridConfig _config;
+    QPoint _position;
     qreal _opacity;
     QSizeF _gridSize;
 

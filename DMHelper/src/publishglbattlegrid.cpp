@@ -73,6 +73,15 @@ void PublishGLBattleGrid::paintGL()
 
 }
 
+void PublishGLBattleGrid::setPosition(const QPoint& position)
+{
+    if(_position == position)
+        return;
+
+    _position = position;
+    updateModelMatrix();
+}
+
 void PublishGLBattleGrid::setProjectionMatrix(const GLfloat* projectionMatrix)
 {
     if(!_shaderProgram)
@@ -105,12 +114,22 @@ void PublishGLBattleGrid::addLine(int x0, int y0, int x1, int y1, int zOrder)
 {
     Q_UNUSED(zOrder);
 
+    /*
     _vertices.append(x0 - (_gridSize.width() / 2.f));
     _vertices.append((_gridSize.height() / 2.f) - y0);
     _vertices.append(0.0f);
 
     _vertices.append(x1 - (_gridSize.width() / 2.f));
     _vertices.append((_gridSize.height() / 2.f) - y1);
+    _vertices.append(0.0f);
+    */
+
+    _vertices.append(x0);
+    _vertices.append(-y0);
+    _vertices.append(0.0f);
+
+    _vertices.append(x1);
+    _vertices.append(-y1);
     _vertices.append(0.0f);
 
     _indices.append((_vertices.count()/3) - 2);
@@ -673,4 +692,11 @@ void PublishGLBattleGrid::cleanupGrid()
 
     _vertices.clear();
     _indices.clear();
+}
+
+void PublishGLBattleGrid::updateModelMatrix()
+{
+    _modelMatrix.setToIdentity();
+    _modelMatrix.translate(_position.x(),
+                           _position.y());
 }

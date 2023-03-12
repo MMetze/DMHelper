@@ -9,9 +9,10 @@
 LayerGrid::LayerGrid(const QString& name, int order, QObject *parent) :
     Layer{name, order, parent},
     _grid(nullptr),
-    _gridObject(nullptr),
-    _config(),
-    _layerSize()
+    _gridGLObject(nullptr),
+    _scene(nullptr),
+    _config() //,
+//    _layerSize()
 {
 }
 
@@ -68,18 +69,43 @@ void LayerGrid::applyOpacity(qreal opacity)
 {
     if(_grid)
         _grid->setGridOpacity(opacity);
+
+    if(_gridGLObject)
+        _gridGLObject->setOpacity(opacity);
 }
 
 void LayerGrid::applyPosition(const QPoint& position)
 {
+    if(_grid)
+        _grid->setGridPosition(position);
 
+    if(_gridGLObject)
+    {
+        QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
+        _gridGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(),
+                                          -pointTopLeft.y() - position.y()));
+    }
 }
 
 void LayerGrid::applySize(const QSize& size)
 {
+    if(getSize() == size)
+        return;
 
+    if(_grid)
+    {
+        _grid->setGridSize(size);
+        _grid->rebuildGrid(_config, getOrder());
+    }
+
+    if(_gridGLObject)
+    {
+        delete _gridGLObject;
+        _gridGLObject = nullptr;
+    }
 }
 
+/*
 QSize LayerGrid::getLayerSize() const
 {
     return _layerSize;
@@ -98,6 +124,7 @@ void LayerGrid::setLayerSize(const QSize& layerSize)
         initialize(_layerSize);
     }
 }
+*/
 
 GridConfig& LayerGrid::getConfig()
 {
@@ -120,7 +147,7 @@ void LayerGrid::dmInitialize(QGraphicsScene* scene)
         return;
     }
 
-    _grid = new Grid(scene, QRect(QPoint(0, 0), _layerSize));
+    _grid = new Grid(scene, QRect(QPoint(0, 0), getSize()));
     _grid->rebuildGrid(_config, getOrder());
     _grid->setFlag(QGraphicsItem::ItemIsMovable, false);
     _grid->setFlag(QGraphicsItem::ItemIsSelectable, false);
@@ -141,15 +168,15 @@ void LayerGrid::dmUpdate()
 
 void LayerGrid::playerGLInitialize(PublishGLScene* scene)
 {
-    Q_UNUSED(scene);
-
-    if(_gridObject)
+    if(_gridGLObject)
     {
         qDebug() << "[LayerGrid] ERROR: playerGLInitialize called although the grid object already exists!";
         return;
     }
 
-    _gridObject = new PublishGLBattleGrid(_config, getOpacity(), getLayerSize());
+    _scene = scene;
+
+    _gridGLObject = new PublishGLBattleGrid(_config, getOpacity(), getSize());
 
     Layer::playerGLInitialize(scene);
 }
@@ -166,8 +193,8 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
     if((!functions) || (!projectionMatrix))
         return;
 
-    _gridObject->setProjectionMatrix(projectionMatrix);
-    _gridObject->paintGL();
+    _gridGLObject->setProjectionMatrix(projectionMatrix);
+    _gridGLObject->paintGL();
 }
 
 void LayerGrid::playerGLResize(int w, int h)
@@ -178,7 +205,7 @@ void LayerGrid::playerGLResize(int w, int h)
 
 bool LayerGrid::playerIsInitialized()
 {
-    return _gridObject != nullptr;
+    return _gridGLObject != nullptr;
 }
 
 void LayerGrid::initialize(const QSize& sceneSize)
@@ -186,14 +213,17 @@ void LayerGrid::initialize(const QSize& sceneSize)
     if(_grid)
         return;
 
-    _layerSize = sceneSize;
+    if(getSize().isEmpty())
+        setSize(sceneSize);
+
+    //_layerSize = sceneSize;
     //_grid = new Grid(*this, rect);
     //_grid->rebuildGrid(*_model);
 }
 
 void LayerGrid::uninitialize()
 {
-    _layerSize = QSize();
+    //_layerSize = QSize();
 }
 
 void LayerGrid::setScale(int scale)
@@ -210,8 +240,8 @@ void LayerGrid::setConfig(const GridConfig& config)
     if(_grid)
         _grid->rebuildGrid(_config, getOrder());
 
-    if(_gridObject)
-        _gridObject->setConfig(_config);
+    if(_gridGLObject)
+        _gridGLObject->setConfig(_config);
 }
 
 void LayerGrid::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -239,6 +269,8 @@ void LayerGrid::cleanupDM()
 
 void LayerGrid::cleanupPlayer()
 {
-    delete _gridObject;
-    _gridObject = nullptr;
+    delete _gridGLObject;
+    _gridGLObject = nullptr;
+
+    _scene = nullptr;
 }

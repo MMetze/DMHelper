@@ -29,8 +29,8 @@ public:
     virtual void applyPosition(const QPoint& position) override;
     virtual void applySize(const QSize& size) override;
 
-    QSize getLayerSize() const;
-    void setLayerSize(const QSize& layerSize);
+    //QSize getLayerSize() const;
+    //void setLayerSize(const QSize& layerSize);
 
     GridConfig& getConfig();
     const GridConfig& getConfig() const;
@@ -69,11 +69,12 @@ protected:
     Grid* _grid;
 
     // Player Window Members
-    PublishGLBattleGrid* _gridObject;
+    PublishGLBattleGrid* _gridGLObject;
+    PublishGLScene* _scene;
 
     // Core contents
     GridConfig _config;
-    QSize _layerSize;
+    //QSize _layerSize;
 
 };
 

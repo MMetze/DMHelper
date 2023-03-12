@@ -25,6 +25,29 @@ void Grid::setGridShape(const QRect& gridShape)
         _gridShape = gridShape;
 }
 
+void Grid::setGridSize(const QSize& gridSize)
+{
+    if(_gridShape.size() != gridSize)
+        _gridShape.setSize(gridSize);
+}
+
+void Grid::setGridPosition(const QPoint& position)
+{
+    if(_gridShape.topLeft() == position)
+        return;
+
+    qreal dx = position.x() - _gridShape.left();
+    qreal dy = position.y() - _gridShape.top();
+
+    for(int i = 0; i < _grid.count(); ++i)
+    {
+        if(_grid[i])
+            _grid[i]->moveBy(dx, dy);
+    }
+
+    _gridShape.moveTopLeft(position);
+}
+
 QRect Grid::getGridShape() const
 {
     return _gridShape;
@@ -68,7 +91,12 @@ void Grid::addLine(int x0, int y0, int x1, int y1, int zOrder)
     if(!scene())
         return;
 
-    QGraphicsItem* newLineItem = scene()->addLine(x0, y0, x1, y1, _localPen);
+    QGraphicsItem* newLineItem = scene()->addLine(_gridShape.left() + x0,
+                                                  _gridShape.top() + y0,
+                                                  _gridShape.left() + x1,
+                                                  _gridShape.top() + y1,
+                                                  _localPen);
+
     if(newLineItem)
     {
         newLineItem->setZValue(zOrder);
