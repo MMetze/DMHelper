@@ -71,7 +71,7 @@ void Grid::setGridVisible(bool gridVisible)
     }
 }
 
-void Grid::setGridOpacity(bool gridOpacity)
+void Grid::setGridOpacity(qreal gridOpacity)
 {
     for(int i = 0; i < _grid.count(); ++i)
     {

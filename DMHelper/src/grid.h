@@ -35,7 +35,7 @@ public:
     QRect getGridShape() const;
     virtual void setGridZValue(int zOrder);
     virtual void setGridVisible(bool gridVisible);
-    virtual void setGridOpacity(bool gridOpacity);
+    virtual void setGridOpacity(qreal gridOpacity);
     virtual void clear();
 
     virtual void addLine(int x0, int y0, int x1, int y1, int zOrder) override;
