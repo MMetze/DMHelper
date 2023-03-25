@@ -18,7 +18,7 @@ public:
     virtual void deactivateObject();
 
 signals:
-    void setPublishEnabled(bool enabled);
+    void setPublishEnabled(bool enabled, bool layered);
     void checkedChanged(bool checked);
     void checkableChanged(bool checkable);
     void rotationChanged(int rotation);

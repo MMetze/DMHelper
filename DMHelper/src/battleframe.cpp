@@ -198,6 +198,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::mapMousePress, this, &BattleFrame::handleMapMousePress);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseMove, this, &BattleFrame::handleMapMouseMove);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseRelease, this, &BattleFrame::handleMapMouseRelease);
+    connect(_scene, &BattleDialogGraphicsScene::changed, this, &BattleFrame::handleSceneChanged);
 
     setEditMode();
 
@@ -1905,7 +1906,7 @@ void BattleFrame::editLayers()
     if(!_model)
         return;
 
-    LayersEditDialog dlg(_model->getLayerScene());
+    LayersEditDialog dlg(_model->getLayerScene(), _model);
     dlg.resize(width() * 9 / 10, height() * 9 / 10);
     dlg.exec();
 
@@ -2238,6 +2239,14 @@ void BattleFrame::handleMapMouseRelease(const QPointF& pos)
 {
     Q_UNUSED(pos);
     _mouseDown = false;
+}
+
+void BattleFrame::handleSceneChanged(const QList<QRectF> &region)
+{
+    Q_UNUSED(region);
+
+    if((_isPublishing) && (_renderer))
+        _renderer->updateRender();
 }
 
 void BattleFrame::removeCombatant()
@@ -3296,7 +3305,7 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
 
 void BattleFrame::updatePublishEnable()
 {
-    emit setPublishEnabled((_model) && (_model->getMap()));
+    emit setPublishEnabled((_model) && (_model->getMap()), true);
 }
 
 void BattleFrame::clearBattleFrame()

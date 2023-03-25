@@ -121,8 +121,7 @@ void LayerImage::applyPosition(const QPoint& position)
                                            //pointTopLeft.y() - position.y()));
 //        _imageGLObject->setPosition(QPoint(0,0));
 //        _imageGLObject->setPosition(position);
-        _imageGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(),
-                                           -pointTopLeft.y() - position.y()));
+        _imageGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(), -pointTopLeft.y() - position.y()));
     }
 }
 

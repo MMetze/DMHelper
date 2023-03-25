@@ -24,10 +24,10 @@ PublishGLBattleVideoRenderer::PublishGLBattleVideoRenderer(BattleDialogModel* mo
 
 PublishGLBattleVideoRenderer::~PublishGLBattleVideoRenderer()
 {
-    PublishGLBattleVideoRenderer::cleanup();
+    PublishGLBattleVideoRenderer::cleanupGL();
 }
 
-void PublishGLBattleVideoRenderer::cleanup()
+void PublishGLBattleVideoRenderer::cleanupGL()
 {
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
     delete _backgroundObject;
@@ -43,7 +43,7 @@ void PublishGLBattleVideoRenderer::cleanup()
         deletePlayer->stopThenDelete();
     }
 
-    PublishGLBattleRenderer::cleanup();
+    PublishGLBattleRenderer::cleanupGL();
 }
 
 QSizeF PublishGLBattleVideoRenderer::getBackgroundSize()

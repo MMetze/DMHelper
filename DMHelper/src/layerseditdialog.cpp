@@ -4,6 +4,7 @@
 #include "layerscene.h"
 #include "layerfow.h"
 #include "layerimage.h"
+#include "layertokens.h"
 #include "layervideo.h"
 #include "layerframe.h"
 #include "layergrid.h"
@@ -15,11 +16,12 @@
 #include <QMessageBox>
 #include <QDebug>
 
-LayersEditDialog::LayersEditDialog(LayerScene& scene, QWidget *parent) :
+LayersEditDialog::LayersEditDialog(LayerScene& scene, BattleDialogModel* model, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::LayersEditDialog),
     _layerLayout(nullptr),
-    _scene(scene)
+    _scene(scene),
+    _model(model)
 {
     ui->setupUi(this);
 
@@ -72,7 +74,10 @@ void LayersEditDialog::moveDown()
 void LayersEditDialog::addLayer()
 {
     QStringList items;
-    items << tr("Image") << tr("Video") << tr("FoW") << tr("Tokens") << tr("Grid") << tr("Text");
+    items << tr("Image") << tr("Video") << tr("FoW");
+    if(_model)
+        items << tr("Tokens") ;
+    items << tr("Grid") << tr("Text");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -121,7 +126,10 @@ void LayersEditDialog::addLayer()
     }
     else if(selectedItem == tr("Tokens"))
     {
-        qDebug() << "[LayersEditDialog] Trying to add Token layer which is not yet implemented!";
+        if(!_model)
+            qDebug() << "[LayersEditDialog] ERROR: Trying to add Token layer without a valid battle model!";
+        else
+            newLayer = new LayerTokens(_model, QString("Tokens"));
         return;
     }
     else if(selectedItem == tr("Grid"))

@@ -24,7 +24,6 @@ public:
     // DMH OpenGL renderer calls
     virtual void rendererActivated(QOpenGLWidget* glWidget);
     virtual void rendererDeactivated();
-    virtual void cleanup();
     virtual bool deleteOnDeactivation();
 
     virtual QRect getScissorRect();
@@ -34,6 +33,7 @@ public:
 
     // Standard OpenGL calls
     virtual void initializeGL() = 0;
+    virtual void cleanupGL();
     virtual void resizeGL(int w, int h) = 0;
     virtual void paintGL() = 0;
 

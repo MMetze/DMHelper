@@ -86,6 +86,7 @@ void LayerReference::postProcessXML(Campaign* campaign, const QDomElement &eleme
         }
     }
 
+    copyReferenceValues();
     connect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
 }
 
@@ -132,18 +133,20 @@ Layer* LayerReference::clone() const
 
 void LayerReference::applyOrder(int order)
 {
-    if(_referenceLayer)
-        _referenceLayer->applyOrder(order);
+//    if(_referenceLayer)
+//        _referenceLayer->applyOrder(order);
 }
 
 void LayerReference::applyPosition(const QPoint& position)
 {
-
+    if(_referenceLayer)
+        _referenceLayer->applyPosition(position);
 }
 
 void LayerReference::applySize(const QSize& size)
 {
-
+    if(_referenceLayer)
+        _referenceLayer->applySize(size);
 }
 
 void LayerReference::applyLayerVisible(bool layerVisible)
@@ -177,6 +180,8 @@ void LayerReference::dmInitialize(QGraphicsScene* scene)
 {
     if(_referenceLayer)
         _referenceLayer->dmInitialize(scene);
+
+    copyReferenceValues();
 
     Layer::dmInitialize(scene);
 }
@@ -272,4 +277,16 @@ void LayerReference::internalOutputXML(QDomDocument &doc, QDomElement &element, 
         element.setAttribute("layerId", _referenceLayerId.toString());
 
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+void LayerReference::copyReferenceValues()
+{
+    if(!_referenceLayer)
+        return;
+
+    _order = _referenceLayer->getOrder();
+    _layerVisible = _referenceLayer->getLayerVisible();
+    _opacity = _referenceLayer->getOpacity();
+    _position = _referenceLayer->getPosition();
+    _size = _referenceLayer->getSize();
 }

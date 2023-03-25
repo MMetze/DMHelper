@@ -17,7 +17,7 @@ public:
     virtual ~PublishGLBattleVideoRenderer() override;
 
     // DMH OpenGL renderer calls
-    virtual void cleanup() override;
+    virtual void cleanupGL() override;
     virtual QSizeF getBackgroundSize() override;
 
     QImage getLastScreenshot();

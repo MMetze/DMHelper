@@ -209,12 +209,32 @@ void LayerTokens::applyOpacity(qreal opacity)
 
 void LayerTokens::applyPosition(const QPoint& position)
 {
+    QPoint delta = position - _position;
 
+    foreach(BattleDialogModelCombatant* combatant, _combatants)
+    {
+        if(combatant)
+        {
+            QGraphicsPixmapItem* combatantIcon = _combatantIconHash.value(combatant);
+            if(combatantIcon)
+                combatantIcon->setPos(combatant->getPosition() + delta);
+        }
+    }
+
+    foreach(BattleDialogModelEffect* effect, _effects)
+    {
+        if(effect)
+        {
+            QGraphicsItem* effectIcon = _effectIconHash.value(effect);
+            if(effectIcon)
+                effectIcon->setPos(effect->getPosition() + delta);
+        }
+    }
 }
 
 void LayerTokens::applySize(const QSize& size)
 {
-
+    Q_UNUSED(size);
 }
 
 const QList<BattleDialogModelCombatant*> LayerTokens::getCombatants() const
@@ -313,6 +333,11 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     if(!_model)
         return;
 
+    QMatrix4x4 localMatrix;
+
+    functions->glUseProgram(_shaderProgramRGBA);
+    functions->glUniform1f(_shaderAlphaRGBA, _opacity);
+
     foreach(BattleDialogModelCombatant* combatant, _combatants)
     {
         if((combatant) && (combatant->getKnown()) && (combatant->getShown()) &&
@@ -326,7 +351,9 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
                 _combatantTokenHash.insert(combatant, combatantToken);
             }
 
-            functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, combatantToken->getMatrixData());
+            localMatrix = combatantToken->getMatrix();
+            localMatrix.translate(_position.x(), _position.y());
+            functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, localMatrix.constData());
             combatantToken->paintGL();
             combatantToken->paintEffects(defaultModelMatrix);
         }
@@ -334,7 +361,6 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
 
     if(_model->getShowEffects())
     {
-        functions->glUseProgram(_shaderProgramRGBA);
         functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
         functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
@@ -349,14 +375,16 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
                     _effectTokenHash.insert(effect, effectToken);
                 }
 
-                functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, effectToken->getMatrixData());
-                functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha());
+                localMatrix = effectToken->getMatrix();
+                localMatrix.translate(_position.x(), _position.y());
+                functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
+                functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacity);
                 effectToken->paintGL();
             }
         }
-
-        functions->glUseProgram(_shaderProgramRGB);
     }
+
+    functions->glUseProgram(_shaderProgramRGB);
 }
 
 void LayerTokens::playerGLResize(int w, int h)
@@ -569,7 +597,7 @@ void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCo
         scene->addItem(pixmapItem);
         pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
         pixmapItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
-        pixmapItem->setPos(combatant->getPosition());
+        pixmapItem->setPos(combatant->getPosition() + _position);
         pixmapItem->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
         qreal sizeFactor = combatant->getSizeFactor();
         qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(),pix.height()));
@@ -622,6 +650,7 @@ QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene* scene, BattleDialogMo
     QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
     if(shape)
     {
+        shape->setPos(effect->getPosition() + _position);
         scene->addItem(shape);
         _effectIconHash.insert(effect, shape);
     }

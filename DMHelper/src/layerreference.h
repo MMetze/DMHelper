@@ -65,6 +65,7 @@ protected slots:
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    void copyReferenceValues();
 
     CampaignObjectBase* _referenceObject;
     QUuid _referenceObjectId;

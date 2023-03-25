@@ -19,7 +19,7 @@ public:
     int getRotation() const;
 
 public slots:
-    void setPublishEnabled(bool enabled);
+    void setPublishEnabled(bool enabled, bool layered);
     void setChecked(bool checked);
     void setCheckable(bool checkable);
     void setRotation(int rotation);
@@ -39,6 +39,7 @@ signals:
     void playersWindowClicked(bool checked);
 
     void sharePublishEnabled(bool enabled);
+    void shareLayersEnabled(bool enabled);
     void shareSetChecked(bool checked);
     void shareSetCheckable(bool checkable);
     void shareSetRotation(int rotation);

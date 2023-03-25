@@ -31,6 +31,7 @@ public slots:
     void clickPublish();
     void cancelPublish();
     void setPlayersWindow(bool checked);
+    void setLayersEnabled(bool enabled);
     void setLayers(QList<Layer*> layers, int selected);
 
 signals:

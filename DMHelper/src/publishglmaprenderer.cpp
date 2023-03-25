@@ -73,45 +73,6 @@ QColor PublishGLMapRenderer::getBackgroundColor()
     return _color;
 }
 
-void PublishGLMapRenderer::cleanup()
-{
-    _initialized = false;
-
-    qDeleteAll(_markerTokens);
-    _markerTokens.clear();
-
-    delete _lineImage;
-    _lineImage = nullptr;
-
-    delete _partyToken;
-    _partyToken = nullptr;
-    _recreatePartyToken = false;
-
-//    delete _fowObject;
-//    _fowObject = nullptr;
-
-    _projectionMatrix.setToIdentity();
-
-    /*
-    if(_shaderProgram > 0)
-    {
-        if((_targetWidget) && (_targetWidget->context()))
-        {
-            QOpenGLFunctions *f = _targetWidget->context()->functions();
-            if(f)
-                f->glDeleteProgram(_shaderProgram);
-        }
-        _shaderProgram = 0;
-    }
-    _shaderModelMatrix = 0;
-    */
-
-    //_map->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
-    destroyShaders();
-
-    PublishGLRenderer::cleanup();
-}
-
 bool PublishGLMapRenderer::deleteOnDeactivation()
 {
     return true;
@@ -280,6 +241,48 @@ void PublishGLMapRenderer::initializeGL()
     updateProjectionMatrix();
 
     _initialized = true;
+}
+
+void PublishGLMapRenderer::cleanupGL()
+{
+    _initialized = false;
+
+    qDeleteAll(_markerTokens);
+    _markerTokens.clear();
+
+    delete _lineImage;
+    _lineImage = nullptr;
+
+    delete _partyToken;
+    _partyToken = nullptr;
+    _recreatePartyToken = false;
+
+    if(_map)
+        _map->getLayerScene().playerGLUninitialize();
+
+//    delete _fowObject;
+//    _fowObject = nullptr;
+
+    _projectionMatrix.setToIdentity();
+
+    /*
+    if(_shaderProgram > 0)
+    {
+        if((_targetWidget) && (_targetWidget->context()))
+        {
+            QOpenGLFunctions *f = _targetWidget->context()->functions();
+            if(f)
+                f->glDeleteProgram(_shaderProgram);
+        }
+        _shaderProgram = 0;
+    }
+    _shaderModelMatrix = 0;
+    */
+
+    //_map->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
+    destroyShaders();
+
+    PublishGLRenderer::cleanupGL();
 }
 
 void PublishGLMapRenderer::resizeGL(int w, int h)
@@ -488,9 +491,11 @@ void PublishGLMapRenderer::markerChanged()
     _recreateMarkers = true;
 }
 
+/*
 void PublishGLMapRenderer::updateBackground()
 {
 }
+*/
 
 void PublishGLMapRenderer::createPartyToken()
 {

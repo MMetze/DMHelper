@@ -240,6 +240,7 @@ private slots:
     void handleMapMousePress(const QPointF& pos);
     void handleMapMouseMove(const QPointF& pos);
     void handleMapMouseRelease(const QPointF& pos);
+    void handleSceneChanged(const QList<QRectF> &region);
 
     void removeCombatant();
     void activateCombatant();

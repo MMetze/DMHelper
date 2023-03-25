@@ -129,15 +129,11 @@ SOURCES += main.cpp\
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
-    publishglmapimagerenderer.cpp \
     publishglmaprenderer.cpp \
-    publishglmapvideorenderer.cpp \
     publishglobject.cpp \
     publishglrenderer.cpp \
     publishglscene.cpp \
-    publishgltextimagerenderer.cpp \
     publishgltextrenderer.cpp \
-    publishgltextvideorenderer.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -382,15 +378,11 @@ HEADERS  += mainwindow.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \
-    publishglmapimagerenderer.h \
     publishglmaprenderer.h \
-    publishglmapvideorenderer.h \
     publishglobject.h \
     publishglrenderer.h \
     publishglscene.h \
-    publishgltextimagerenderer.h \
     publishgltextrenderer.h \
-    publishgltextvideorenderer.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \

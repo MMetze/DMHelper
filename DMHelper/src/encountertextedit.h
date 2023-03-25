@@ -13,6 +13,7 @@ class EncounterTextEdit;
 class EncounterText;
 class PublishGLTextRenderer;
 class PublishGLRenderer;
+class Layer;
 
 class EncounterTextEdit : public CampaignObjectFrame
 {
@@ -66,10 +67,12 @@ public slots:
     void setCodeView(bool active);
 
     void targetResized(const QSize& newSize);
+    void layerSelected(int selected);
 
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void editLayers() override;
 
 signals:
     void anchorClicked(const QUrl &link);
@@ -96,6 +99,7 @@ signals:
     void codeViewVisible(bool visible);
 
     void registerRenderer(PublishGLRenderer* renderer);
+    void setLayers(QList<Layer*> layers, int selected);
 
     void publishImage(QImage image);
     void showPublishWindow();

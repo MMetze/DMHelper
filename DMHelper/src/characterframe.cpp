@@ -137,7 +137,7 @@ void CharacterFrame::activateObject(CampaignObjectBase* object, PublishGLRendere
     connect(_character, &Character::nameChanged, this, &CharacterFrame::updateCharacterName);
 
     emit checkableChanged(false);
-    emit setPublishEnabled(true);
+    emit setPublishEnabled(true, false);
 }
 
 void CharacterFrame::deactivateObject()

@@ -69,6 +69,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     // DM Window Methods
+    void createGraphicsItem();
     void cleanupDM();
 
     // Player Window Methods
@@ -85,6 +86,7 @@ protected:
     PublishGLBattleBackground* _videoObject;
     QSize _playerSize;
 #endif
+    PublishGLScene* _scene;
 
     // Core contents
     QString _filename;

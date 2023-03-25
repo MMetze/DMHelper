@@ -16,7 +16,7 @@ void CampaignObjectFrame::activateObject(CampaignObjectBase* object, PublishGLRe
     Q_UNUSED(currentRenderer);
 
     emit checkableChanged(false);
-    emit setPublishEnabled(false);
+    emit setPublishEnabled(false, false);
 }
 
 void CampaignObjectFrame::deactivateObject()

@@ -102,6 +102,11 @@ void PublishButtonRibbon::setPlayersWindow(bool checked)
     ui->btnPlayersWindow->setChecked(checked);
 }
 
+void PublishButtonRibbon::setLayersEnabled(bool enabled)
+{
+    ui->btnLayerTool->setEnabled(enabled);
+}
+
 void PublishButtonRibbon::setLayers(QList<Layer*> layers, int selected)
 {
     QMenu* oldMenu = ui->btnLayerTool->menu();
@@ -111,7 +116,7 @@ void PublishButtonRibbon::setLayers(QList<Layer*> layers, int selected)
         oldMenu->deleteLater();
     }
 
-    ui->btnLayerTool->setEnabled(layers.count() > 0);
+    //ui->btnLayerTool->setEnabled(layers.count() > 0);
 
     QAction* newDefaultAction = nullptr;
     if(layers.count() > 0)

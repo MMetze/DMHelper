@@ -9,6 +9,7 @@ class LayersEditDialog;
 
 class LayerFrame;
 class LayerScene;
+class BattleDialogModel;
 class QVBoxLayout;
 
 class LayersEditDialog : public QDialog
@@ -16,7 +17,7 @@ class LayersEditDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit LayersEditDialog(LayerScene& scene, QWidget *parent = nullptr);
+    explicit LayersEditDialog(LayerScene& scene, BattleDialogModel* model = nullptr, QWidget *parent = nullptr);
     ~LayersEditDialog();
 
 protected slots:
@@ -39,6 +40,7 @@ private:
     Ui::LayersEditDialog *ui;
     QVBoxLayout* _layerLayout;
     LayerScene& _scene;
+    BattleDialogModel* _model;
 };
 
 #endif // LAYERSEDITDIALOG_H

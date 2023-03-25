@@ -94,29 +94,6 @@ QColor PublishGLBattleRenderer::getBackgroundColor()
     return _model ? _model->getBackgroundColor() : QColor();
 }
 
-void PublishGLBattleRenderer::cleanup()
-{
-    _initialized = false;
-
-    disconnect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::recreateContents);
-    disconnect(_model, &BattleDialogModel::initiativeOrderChanged, this, &PublishGLBattleRenderer::recreateContents);
-    disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
-    disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
-    disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::recreateContents);
-    disconnect(_model, &BattleDialogModel::showAliveChanged, this, &PublishGLBattleRenderer::updateWidget);
-    disconnect(_model, &BattleDialogModel::showDeadChanged, this, &PublishGLBattleRenderer::updateWidget);
-    disconnect(_model, &BattleDialogModel::showEffectsChanged, this, &PublishGLBattleRenderer::updateWidget);
-
-    cleanupContents();
-
-    _projectionMatrix.setToIdentity();
-
-    _model->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
-    destroyShaders();
-
-    PublishGLRenderer::cleanup();
-}
-
 bool PublishGLBattleRenderer::deleteOnDeactivation()
 {
     return true;
@@ -196,11 +173,36 @@ void PublishGLBattleRenderer::initializeGL()
     _initialized = true;
 }
 
+void PublishGLBattleRenderer::cleanupGL()
+{
+    _initialized = false;
+
+    disconnect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::recreateContents);
+    disconnect(_model, &BattleDialogModel::initiativeOrderChanged, this, &PublishGLBattleRenderer::recreateContents);
+    disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
+    disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::recreateContents);
+    disconnect(_model, &BattleDialogModel::showAliveChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, &BattleDialogModel::showDeadChanged, this, &PublishGLBattleRenderer::updateWidget);
+    disconnect(_model, &BattleDialogModel::showEffectsChanged, this, &PublishGLBattleRenderer::updateWidget);
+
+    cleanupContents();
+
+    _projectionMatrix.setToIdentity();
+
+    _model->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
+    destroyShaders();
+
+    PublishGLRenderer::cleanupGL();
+}
+
 void PublishGLBattleRenderer::resizeGL(int w, int h)
 {
     QSize targetSize(w, h);
     qDebug() << "[BattleGLRenderer] Resize to: " << targetSize;
     _scene.setTargetSize(targetSize);
+    if(_model)
+        _model->getLayerScene().playerGLResize(w, h);
 
     // TODO: Layers
     //resizeBackground(w, h);
@@ -229,6 +231,9 @@ void PublishGLBattleRenderer::paintGL()
         _recreateContent = true;
     }
     */
+
+    if(_model->getLayerScene().playerGLUpdate())
+        updateProjectionMatrix();
 
     if(_recreateContent)
     {
@@ -690,6 +695,9 @@ void PublishGLBattleRenderer::cleanupContents()
     qDeleteAll(_combatantTokens); _combatantTokens.clear();
     qDeleteAll(_combatantNames); _combatantNames.clear();
     qDeleteAll(_effectTokens); _effectTokens.clear();
+
+    if(_model)
+        _model->getLayerScene().playerGLUninitialize();
 
     _initiativeTokenHeight = 0.0;
     _movementVisible = false;

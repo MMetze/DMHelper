@@ -16,8 +16,7 @@
 #include "party.h"
 #include "unselectedpixmap.h"
 #include "camerarect.h"
-#include "publishglmapimagerenderer.h"
-#include "publishglmapvideorenderer.h"
+#include "publishglmaprenderer.h"
 #include "videoplayerglscreenshot.h"
 //#include "layerimage.h"
 #include <QGraphicsPixmapItem>
@@ -110,7 +109,7 @@ void MapFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* cur
         _cameraRect->setPublishing(_isPublishing);
 
     emit checkableChanged(_isVideo);
-    emit setPublishEnabled(true);    
+    emit setPublishEnabled(true, true);
     emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());
 }
 
@@ -767,11 +766,7 @@ void MapFrame::publishClicked(bool checked)
         if(_renderer)
             emit registerRenderer(nullptr);
 
-        PublishGLMapRenderer* newRenderer;
-        if(_isVideo)
-            newRenderer = new PublishGLMapVideoRenderer(_mapSource);
-        else
-            newRenderer = new PublishGLMapImageRenderer(_mapSource);
+        PublishGLMapRenderer* newRenderer = new PublishGLMapRenderer(_mapSource);
 
         rendererActivated(newRenderer);
         emit registerRenderer(newRenderer);

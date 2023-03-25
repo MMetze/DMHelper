@@ -24,6 +24,7 @@ LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, 
     _videoObject(),
     _playerSize(),
 #endif
+    _scene(nullptr),
     _filename(filename),
     _layerScreenshot(),
     _dmScene(nullptr)
@@ -38,12 +39,12 @@ LayerVideo::~LayerVideo()
 
 void LayerVideo::inputXML(const QDomElement &element, bool isImport)
 {
-    // todo
+    // TODO: Layers - add storage for video layers
 }
 
 QRectF LayerVideo::boundingRect() const
 {
-    return _layerScreenshot.isNull() ? QRectF() : QRectF(_layerScreenshot.rect());
+    return QRectF(_position, _size);
 }
 
 QImage LayerVideo::getLayerIcon() const
@@ -85,12 +86,29 @@ void LayerVideo::applyOpacity(qreal opacity)
 
 void LayerVideo::applyPosition(const QPoint& position)
 {
+    if(_graphicsItem)
+        _graphicsItem->setPos(position);
+
+#ifdef LAYERVIDEO_USE_OPENGL
+    TODO, how should this work with: VideoPlayerGLPlayer* _videoGLPlayer;
+#else
+    if(_videoObject)
+    {
+        QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
+        _videoObject->setPosition(QPoint(pointTopLeft.x() + position.x(), -pointTopLeft.y() - position.y()));
+    }
+#endif
 
 }
 
 void LayerVideo::applySize(const QSize& size)
 {
-
+    if(_graphicsItem)
+    {
+        qreal xScale = static_cast<qreal>(size.width()) / _layerScreenshot.width();
+        qreal yScale = static_cast<qreal>(size.height()) / _layerScreenshot.height();
+        _graphicsItem->setScale(qMin(xScale, yScale));
+    }
 }
 
 QString LayerVideo::getVideoFile() const
@@ -153,6 +171,8 @@ void LayerVideo::playerGLInitialize(PublishGLScene* scene)
         return;
 #endif
 
+    _scene = scene;
+
     connect(this, &LayerVideo::updateProjectionMatrix, renderer, &PublishGLRenderer::updateProjectionMatrix);
 
     // Create the objects
@@ -166,7 +186,8 @@ void LayerVideo::playerGLInitialize(PublishGLScene* scene)
     connect(_videoGLPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, renderer, &PublishGLRenderer::updateProjectionMatrix);
     _videoGLPlayer->restartPlayer();
 #else
-    _videoPlayer = new VideoPlayer(_filename, _playerSize, true, false);
+    //_videoPlayer = new VideoPlayer(_filename, _playerSize, true, false);
+    _videoPlayer = new VideoPlayer(_filename, QSize(), true, false);
     connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
     _videoPlayer->restartPlayer();
 #endif
@@ -203,6 +224,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     if(!_videoGLPlayer)
         return;
 
+    TODO: update this to position correctly
     QMatrix4x4 modelMatrix;
     functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     _videoGLPlayer->paintGL();
@@ -210,21 +232,32 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     if((!_videoPlayer) || (!_videoPlayer->getImage()))
         return;
 
+    functions->glUseProgram(_shaderProgramRGBA);
+
     if(!_videoObject)
     {
         if(!_videoPlayer->isNewImage())
             return;
 
         _videoObject = new PublishGLBattleBackground(nullptr, *(_videoPlayer->getImage()), GL_NEAREST);
+        QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
+        _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
     }
     else if(_videoPlayer->isNewImage())
     {
         _videoObject->setImage(*(_videoPlayer->getImage()));
     }
 
-    QMatrix4x4 modelMatrix;
-    functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, modelMatrix.constData());
+    functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
+    functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+    functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _videoObject->getMatrixData());
+    functions->glUniform1f(_shaderAlphaRGBA, _opacity);
+
+    //QMatrix4x4 modelMatrix;
+    //functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     _videoObject->paintGL();
+
+    functions->glUseProgram(_shaderProgramRGB);
 #endif
 }
 
@@ -257,37 +290,40 @@ void LayerVideo::initialize(const QSize& sceneSize)
 
 void LayerVideo::uninitialize()
 {
-
+    _layerScreenshot = QImage();
 }
 
 void LayerVideo::handleScreenshotReady(const QImage& image)
 {
-    if((!_dmScene) || (_graphicsItem) || (image.isNull()) ||(!getLayerScene()))
+    if(image.isNull())
         return;
 
     _layerScreenshot = image;
-
-    _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(_layerScreenshot));
-    if(_graphicsItem)
-    {
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
-        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        _graphicsItem->setZValue(getOrder());
-        _graphicsItem->setOffset(-static_cast<qreal>(_layerScreenshot.width())/2.0, -static_cast<qreal>(_layerScreenshot.height())/2.0);
-
-        QSizeF sceneSize = getLayerScene()->sceneSize();
-
-        qreal xScale = sceneSize.width() / _layerScreenshot.width();
-        qreal yScale = sceneSize.height() / _layerScreenshot.height();
-        _graphicsItem->setScale(qMin(xScale, yScale));
-
-        _graphicsItem->setPos(sceneSize.width() / 2.0, sceneSize.height() / 2.0);
-    }
+    if(_size.isEmpty())
+        _size = _layerScreenshot.size();
+    createGraphicsItem();
 }
 
 void LayerVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     // todo
+}
+
+void LayerVideo::createGraphicsItem()
+{
+    if((!_dmScene) || (_graphicsItem) || (_size.isEmpty()))
+        return;
+
+    _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(_layerScreenshot));
+    if(_graphicsItem)
+    {
+        _graphicsItem->setPos(_position);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsMovable, false);
+        _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        _graphicsItem->setZValue(getOrder());
+
+        applySize(_size);
+    }
 }
 
 void LayerVideo::cleanupDM()
@@ -329,4 +365,6 @@ void LayerVideo::cleanupPlayer()
     _videoObject = nullptr;
     _playerSize = QSize();
 #endif
+
+    _scene = nullptr;
 }

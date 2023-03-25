@@ -352,6 +352,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     qDebug() << "[MainWindow] Creating Player's Window";
     _pubWindow = new PublishWindow(QString("DMHelper Player's Window"));
+    _pubWindow->resize(width() * 9 / 10, height() * 9 / 10);
     connect(_pubWindow, SIGNAL(windowVisible(bool)), _ribbon->getPublishRibbon(), SLOT(setPlayersWindow(bool)));
     connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), _pubWindow, SLOT(setBackgroundColor(const QColor&)));
     qDebug() << "[MainWindow] Player's Window Created";
@@ -458,6 +459,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_encounterTextEdit, SIGNAL(translatedChanged(bool)), _ribbonTabText, SLOT(setTranslationActive(bool)));
     connect(_encounterTextEdit, SIGNAL(codeViewChanged(bool)), _ribbonTabText, SLOT(setCodeView(bool)));
     connect(_encounterTextEdit, SIGNAL(codeViewVisible(bool)), _ribbonTabText, SLOT(showCodeView(bool)));
+    connect(_encounterTextEdit, &EncounterTextEdit::setLayers, _ribbon->getPublishRibbon(), &PublishButtonProxy::setLayers);
+    connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::layerSelected, _encounterTextEdit, &EncounterTextEdit::layerSelected);
     ui->stackedWidgetEncounter->addFrames(QList<int>({DMHelper::CampaignType_Campaign,
                                                       DMHelper::CampaignType_Text,
                                                       DMHelper::CampaignType_LinkedText,
@@ -2599,7 +2602,7 @@ void MainWindow::deactivateObject()
         disconnect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
         disconnect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
 
-        disconnect(objectFrame, SIGNAL(setPublishEnabled(bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool)));
+        disconnect(objectFrame, SIGNAL(setPublishEnabled(bool, bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool, bool)));
         disconnect(objectFrame, SIGNAL(checkedChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setChecked(bool)));
         disconnect(objectFrame, SIGNAL(checkableChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setCheckable(bool)));
         disconnect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));
@@ -2620,7 +2623,7 @@ void MainWindow::activateWidget(int objectType, CampaignObjectBase* object)
         connect(_ribbon->getPublishRibbon(), SIGNAL(colorChanged(const QColor&)), objectFrame, SLOT(setBackgroundColor(const QColor&)));
         connect(_ribbon->getPublishRibbon(), &PublishButtonProxy::clicked, ui->treeView, &CampaignTree::publishCurrent);
 
-        connect(objectFrame, SIGNAL(setPublishEnabled(bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool)));
+        connect(objectFrame, SIGNAL(setPublishEnabled(bool, bool)), _ribbon->getPublishRibbon(), SLOT(setPublishEnabled(bool, bool)));
         connect(objectFrame, SIGNAL(checkedChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setChecked(bool)));
         connect(objectFrame, SIGNAL(checkableChanged(bool)), _ribbon->getPublishRibbon(), SLOT(setCheckable(bool)));
         connect(objectFrame, SIGNAL(rotationChanged(int)), _ribbon->getPublishRibbon(), SLOT(setRotation(int)));

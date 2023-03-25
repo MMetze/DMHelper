@@ -2,6 +2,7 @@
 #define ENCOUNTERTEXT_H
 
 #include "campaignobjectbase.h"
+#include "layerscene.h"
 #include <QDomElement>
 
 class QDomDocument;
@@ -12,6 +13,7 @@ class EncounterText : public CampaignObjectBase
 public:
 
     explicit EncounterText(const QString& encounterName = QString(), QObject *parent = nullptr);
+    virtual ~EncounterText() override;
 
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
@@ -31,7 +33,14 @@ public:
     virtual bool getTranslated() const;
     virtual QString getTranslatedText() const;
 
+    bool isInitialized() const;
+    LayerScene& getLayerScene();
+    const LayerScene& getLayerScene() const;
+
 public slots:
+    bool initialize();
+    void uninitialize();
+
     // Text
     virtual void setText(const QString& newText);
     virtual void setImageFile(const QString& imageFile);
@@ -70,10 +79,12 @@ protected:
     virtual void extractTextNode(const QDomElement &element, bool isImport);
 
     // Text
+    LayerScene _layerScene;
     QString _text;
     QString _translatedText;
-    QString _imageFile;
+    QString _imageFile; // For compatibility only
     int _textWidth;
+    bool _initialized;
 
     // Animation
     bool _animated;

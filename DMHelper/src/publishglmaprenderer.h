@@ -26,7 +26,6 @@ public:
     virtual QColor getBackgroundColor() override;
 
     // DMH OpenGL renderer calls
-    virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
     virtual QRect getScissorRect() override;
 
@@ -34,6 +33,7 @@ public:
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
+    virtual void cleanupGL() override;
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
@@ -51,12 +51,14 @@ public slots:
 
 protected:
     // Background overrides
+    /*
     virtual void initializeBackground() = 0;
     virtual bool isBackgroundReady() = 0;
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
     virtual QSizeF getBackgroundSize() = 0;
     virtual void updateBackground();
+    */
 
     void createPartyToken();
     void createLineToken(const QSize& sceneSize);

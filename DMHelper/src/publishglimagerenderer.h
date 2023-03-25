@@ -18,12 +18,12 @@ public:
     virtual QColor getBackgroundColor() override;
 
     // DMH OpenGL renderer calls
-    virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
     virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
+    virtual void cleanupGL() override;
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
@@ -46,7 +46,7 @@ private:
     PublishGLScene _scene;
     bool _initialized;
     unsigned int _shaderProgram;
-    PublishGLBattleBackground* _backgroundObject;
+    PublishGLBattleBackground* _imageGLObject;
 };
 
 #endif // PUBLISHGLIMAGERENDERER_H

@@ -12,28 +12,18 @@ PublishGLImageRenderer::PublishGLImageRenderer(CampaignObjectBase* renderObject,
     _scene(),
     _initialized(false),
     _shaderProgram(0),
-    _backgroundObject(nullptr)
+    _imageGLObject(nullptr)
 {
 }
 
 PublishGLImageRenderer::~PublishGLImageRenderer()
 {
-    cleanup();
+    PublishGLImageRenderer::cleanupGL();
 }
 
 QColor PublishGLImageRenderer::getBackgroundColor()
 {
     return _color;
-}
-
-void PublishGLImageRenderer::cleanup()
-{
-    _initialized = false;
-
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
-
-    PublishGLRenderer::cleanup();
 }
 
 bool PublishGLImageRenderer::deleteOnDeactivation()
@@ -135,7 +125,7 @@ void PublishGLImageRenderer::initializeGL()
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_image.size());
-    _backgroundObject = new PublishGLBattleBackground(nullptr, _image, GL_NEAREST);
+    _imageGLObject = new PublishGLBattleBackground(nullptr, _image, GL_NEAREST);
 
     // Matrices
     // Model
@@ -152,6 +142,16 @@ void PublishGLImageRenderer::initializeGL()
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
 
     _initialized = true;
+}
+
+void PublishGLImageRenderer::cleanupGL()
+{
+    _initialized = false;
+
+    delete _imageGLObject;
+    _imageGLObject = nullptr;
+
+    PublishGLRenderer::cleanupGL();
 }
 
 void PublishGLImageRenderer::resizeGL(int w, int h)
@@ -180,10 +180,10 @@ void PublishGLImageRenderer::paintGL()
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    if(_backgroundObject)
+    if(_imageGLObject)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
-        _backgroundObject->paintGL();
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _imageGLObject->getMatrixData());
+        _imageGLObject->paintGL();
     }
 }
 
@@ -209,7 +209,8 @@ void PublishGLImageRenderer::updateProjectionMatrix()
     // Update projection matrix and other size related settings:
     QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
-    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+    //projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+    projectionMatrix.ortho(0.0, rectSize.width(), -rectSize.height(), 0.0, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 }
 
@@ -219,9 +220,9 @@ void PublishGLImageRenderer::setImage(const QImage& image)
     {
         _image = image;
 
-        if(_backgroundObject)
+        if(_imageGLObject)
         {
-            _backgroundObject->setImage(image);
+            _imageGLObject->setImage(image);
             updateProjectionMatrix();
             emit updateWidget();
         }

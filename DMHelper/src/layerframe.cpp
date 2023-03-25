@@ -39,6 +39,12 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     setLineWidth(5);
     setAutoFillBackground(true);
     setStyleSheet(getStyleString(false));
+
+    if(layer.getFinalType() == DMHelper::LayerType_Tokens)
+    {
+        ui->spinWidth->setEnabled(false);
+        ui->spinHeight->setEnabled(false);
+    }
 }
 
 LayerFrame::~LayerFrame()

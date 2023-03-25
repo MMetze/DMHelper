@@ -29,6 +29,7 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
     connect(publishButton, SIGNAL(playersWindowClicked(bool)), this, SIGNAL(shareSetPlayersWindow(bool)));
 
     connect(this, SIGNAL(sharePublishEnabled(bool)), publishButton, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(shareLayersEnabled(bool)), publishButton, SLOT(setLayersEnabled(bool)));
     connect(this, SIGNAL(shareSetChecked(bool)), publishButton, SLOT(setChecked(bool)));
     connect(this, SIGNAL(shareSetCheckable(bool)), publishButton, SLOT(setCheckable(bool)));
     connect(this, SIGNAL(shareSetRotation(int)), publishButton, SLOT(setRotation(int)));
@@ -52,9 +53,10 @@ int PublishButtonProxy::getRotation() const
     return _rotation;
 }
 
-void PublishButtonProxy::setPublishEnabled(bool enabled)
+void PublishButtonProxy::setPublishEnabled(bool enabled, bool layered)
 {
     emit sharePublishEnabled(enabled);
+    emit shareLayersEnabled(enabled && layered);
 }
 
 void PublishButtonProxy::setChecked(bool checked)

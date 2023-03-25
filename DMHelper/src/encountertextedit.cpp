@@ -2,12 +2,12 @@
 #include "ui_encountertextedit.h"
 #include "encountertext.h"
 #include "encountertextlinked.h"
-#include "publishgltextimagerenderer.h"
-#include "publishgltextvideorenderer.h"
+#include "publishgltextrenderer.h"
 #include "dmconstants.h"
 #include "campaign.h"
 #include "texttranslatedialog.h"
 #include "videoplayerglscreenshot.h"
+#include "layerseditdialog.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
 #include <QUrl>
@@ -95,7 +95,8 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object, PublishGLRend
             _renderer->setRotation(_rotation);
     }
 
-    emit setPublishEnabled(true);
+    emit setPublishEnabled(true, true);
+    emit setLayers(_encounter->getLayerScene().getLayers(), _encounter->getLayerScene().getSelectedLayerIndex());
 }
 
 void EncounterTextEdit::deactivateObject()
@@ -110,6 +111,8 @@ void EncounterTextEdit::deactivateObject()
 
     storeEncounter();
     unsetEncounter(_encounter);
+
+    emit setLayers(QList<Layer*>(), 0);
 }
 
 void EncounterTextEdit::setKeys(const QList<QString>& keys)
@@ -141,6 +144,13 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     storeEncounter();
 
     _encounter = encounter;
+
+    _encounter->initialize();
+//    if(_encounter->isInitialized())
+//    {
+//        qDebug() << "[EncounterTextEdit] Initializing encounter background image";
+//        _encounter->getLayerScene().dmInitialize(nullptr);
+//    }
 
     readEncounter();
     connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
@@ -175,6 +185,8 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
             if(linkedText)
                 linkedText->setWatcher(false);
         }
+
+        _encounter->uninitialize();
 
         disconnect(_encounter, nullptr, this, nullptr);
         _encounter = nullptr;
@@ -500,6 +512,12 @@ void EncounterTextEdit::targetResized(const QSize& newSize)
         _targetSize = newSize;
 }
 
+void EncounterTextEdit::layerSelected(int selected)
+{
+    if(_encounter)
+        _encounter->getLayerScene().setSelectedLayerIndex(selected);
+}
+
 void EncounterTextEdit::publishClicked(bool checked)
 {
     if((!_encounter) || ((_isPublishing == checked) && (_renderer) && (_renderer->getObject() == _encounter)))
@@ -519,10 +537,11 @@ void EncounterTextEdit::publishClicked(bool checked)
             emit showPublishWindow();
             prepareImages();
 
-            if(isVideo())
-                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
-            else
-                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
+//            if(isVideo())
+//                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
+//            else
+//                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
+            _renderer = new PublishGLTextRenderer(_encounter, _textImage);
 
             _renderer->setRotation(_rotation);
             connect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
@@ -547,6 +566,18 @@ void EncounterTextEdit::setRotation(int rotation)
     _rotation = rotation;
     if(_renderer)
         _renderer->setRotation(_rotation);
+}
+
+void EncounterTextEdit::editLayers()
+{
+    if(!_encounter)
+        return;
+
+    LayersEditDialog dlg(_encounter->getLayerScene());
+    dlg.resize(width() * 9 / 10, height() * 9 / 10);
+    dlg.exec();
+
+    emit setLayers(_encounter->getLayerScene().getLayers(), _encounter->getLayerScene().getSelectedLayerIndex());
 }
 
 void EncounterTextEdit::updateAnchors()
@@ -689,6 +720,9 @@ void EncounterTextEdit::loadImage()
     _backgroundImageScaled = QImage();
 
     _isVideo = false;
+    _backgroundImage = _encounter->getLayerScene().mergedImage();
+    scaleBackgroundImage();
+    /*
     if(!_encounter->getImageFile().isEmpty())
     {
         QFileInfo fileInfo(_encounter->getImageFile());
@@ -705,6 +739,7 @@ void EncounterTextEdit::loadImage()
             }
         }
     }
+    */
 
     setPublishCheckable();
 }

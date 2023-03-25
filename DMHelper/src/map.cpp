@@ -1081,7 +1081,9 @@ void Map::internalPostProcessXML(const QDomElement &element, bool isImport)
     _audioTrackId = parseIdString(element.attribute("audiotrack"));
     _partyId = parseIdString(element.attribute("party"));
 
-    _layerScene.postProcessXML(element, isImport);
+    QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
+    if(!layersElement.isNull())
+        _layerScene.postProcessXML(element, isImport);
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }

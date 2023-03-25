@@ -167,8 +167,7 @@ void LayerFow::applyPosition(const QPoint& position)
     if(_fowGLObject)
     {
         QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
-        _fowGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(),
-                                         -pointTopLeft.y() - position.y()));
+        _fowGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(), -pointTopLeft.y() - position.y()));
     }
 }
 

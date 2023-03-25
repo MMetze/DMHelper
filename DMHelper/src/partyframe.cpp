@@ -50,7 +50,7 @@ void PartyFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* c
     setParty(party);
 
     emit checkableChanged(false);
-    emit setPublishEnabled(true);
+    emit setPublishEnabled(true, false);
 }
 
 void PartyFrame::deactivateObject()

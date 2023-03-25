@@ -31,7 +31,6 @@ public:
     virtual QColor getBackgroundColor() override;
 
     // DMH OpenGL renderer calls
-    virtual void cleanup() override;
     virtual bool deleteOnDeactivation() override;
     virtual QRect getScissorRect() override;
 
@@ -40,6 +39,7 @@ public:
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
+    virtual void cleanupGL() override;
     virtual void resizeGL(int w, int h) override;
     virtual void paintGL() override;
 
