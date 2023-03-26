@@ -160,6 +160,7 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
     connect(_encounter, &EncounterText::animatedChanged, this, &EncounterTextEdit::animatedChanged);
     connect(_encounter, &EncounterText::translatedChanged, this, &EncounterTextEdit::translatedChanged);
+    connect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::layerAdded);
 
     if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
     {
@@ -188,6 +189,7 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
         _encounter->uninitialize();
 
+        disconnect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::layerAdded);
         disconnect(_encounter, nullptr, this, nullptr);
         _encounter = nullptr;
     }
@@ -749,6 +751,13 @@ void EncounterTextEdit::handleScreenshotReady(const QImage& image)
     _backgroundImage = image;
     _backgroundImageScaled = QImage();
     scaleBackgroundImage();
+    update();
+}
+
+void EncounterTextEdit::layerAdded(Layer* layer)
+{
+    Q_UNUSED(layer);
+    loadImage();
     update();
 }
 

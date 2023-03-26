@@ -4,6 +4,7 @@
 #include "campaignobjectframe.h"
 #include "texteditformatterframe.h"
 #include "videoplayer.h"
+#include "layer.h"
 #include <QElapsedTimer>
 
 namespace Ui {
@@ -13,7 +14,6 @@ class EncounterTextEdit;
 class EncounterText;
 class PublishGLTextRenderer;
 class PublishGLRenderer;
-class Layer;
 
 class EncounterTextEdit : public CampaignObjectFrame
 {
@@ -113,6 +113,8 @@ protected slots:
     void takeFocus();
     void loadImage();
     void handleScreenshotReady(const QImage& image);
+
+    void layerAdded(Layer* layer);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
