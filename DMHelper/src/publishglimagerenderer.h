@@ -45,6 +45,7 @@ private:
     QColor _color;
     PublishGLScene _scene;
     bool _initialized;
+    bool _newProjection;
     unsigned int _shaderProgram;
     PublishGLBattleBackground* _imageGLObject;
 };

@@ -94,7 +94,10 @@ void PublishButtonRibbon::clickPublish()
 void PublishButtonRibbon::cancelPublish()
 {
     if((ui->btnPublish->isCheckable()) && (ui->btnPublish->isChecked()))
+    {
         setChecked(false);
+        handleClicked(false);
+    }
 }
 
 void PublishButtonRibbon::setPlayersWindow(bool checked)

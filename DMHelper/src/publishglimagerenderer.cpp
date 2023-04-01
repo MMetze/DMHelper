@@ -11,6 +11,7 @@ PublishGLImageRenderer::PublishGLImageRenderer(CampaignObjectBase* renderObject,
     _color(color),
     _scene(),
     _initialized(false),
+    _newProjection(false),
     _shaderProgram(0),
     _imageGLObject(nullptr)
 {
@@ -136,7 +137,7 @@ void PublishGLImageRenderer::initializeGL()
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
     // Projection - note, this is set later when resizing the window
-    updateProjectionMatrix();
+    _newProjection = true;
 
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
@@ -159,7 +160,7 @@ void PublishGLImageRenderer::resizeGL(int w, int h)
     _scene.setTargetSize(QSize(w, h));
     qDebug() << "[PublishGLImageRenderer] Resize w: " << w << ", h: " << h;
 
-    updateProjectionMatrix();
+    _newProjection = true;
     emit updateWidget();
 }
 
@@ -179,6 +180,12 @@ void PublishGLImageRenderer::paintGL()
 
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
+
+    if(_newProjection)
+    {
+        updateProjectionMatrix();
+        _newProjection = false;
+    }
 
     if(_imageGLObject)
     {
@@ -209,9 +216,15 @@ void PublishGLImageRenderer::updateProjectionMatrix()
     // Update projection matrix and other size related settings:
     QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
-    //projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-    projectionMatrix.ortho(0.0, rectSize.width(), -rectSize.height(), 0.0, 0.1f, 1000.f);
+    projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
+    //projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height(), 0.0, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+
+    if(_imageGLObject)
+    {
+        QPoint pointTopLeft = _scene.getSceneRect().toRect().topLeft();
+        _imageGLObject->setPosition(QPoint(pointTopLeft.x(), -pointTopLeft.y()));
+    }
 }
 
 void PublishGLImageRenderer::setImage(const QImage& image)
@@ -223,7 +236,7 @@ void PublishGLImageRenderer::setImage(const QImage& image)
         if(_imageGLObject)
         {
             _imageGLObject->setImage(image);
-            updateProjectionMatrix();
+            _newProjection = true;
             emit updateWidget();
         }
     }
