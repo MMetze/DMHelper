@@ -35,10 +35,6 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _shaderModelMatrixRGBColor(0),
     _shaderProjectionMatrixRGBColor(0),
     _shaderRGBColor(0),
-//    _shaderProgram(0),
-//    _shaderModelMatrix(0),
-//    _fowImage(),
-//    _fowObject(nullptr),
     _partyToken(nullptr),
     _lineImage(nullptr),
     _markerTokens(),
@@ -106,92 +102,11 @@ void PublishGLMapRenderer::initializeGL()
     createShaders();
     _map->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
 
-/*
-    const char *vertexShaderSource = "#version 410 core\n"
-        "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
-        "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
-        "layout (location = 2) in vec2 aTexCoord;\n"
-        "uniform mat4 model;\n"
-        "uniform mat4 view;\n"
-        "uniform mat4 projection;\n"
-        "out vec3 ourColor; // output a color to the fragment shader\n"
-        "out vec2 TexCoord;\n"
-        "void main()\n"
-        "{\n"
-        "   // note that we read the multiplication from right to left\n"
-        "   gl_Position = projection * view * model * vec4(aPos, 1.0); // gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-        "   ourColor = aColor; // set ourColor to the input color we got from the vertex data\n"
-        "   TexCoord = aTexCoord;\n"
-        "}\0";
-
-    unsigned int vertexShader;
-    vertexShader = f->glCreateShader(GL_VERTEX_SHADER);
-    f->glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    f->glCompileShader(vertexShader);
-
-    int  success;
-    char infoLog[512];
-    f->glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        f->glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
-        return;
-    }
-
-    const char *fragmentShaderSource = "#version 410 core\n"
-        "out vec4 FragColor;\n"
-        "in vec3 ourColor;\n"
-        "in vec2 TexCoord;\n"
-        "uniform sampler2D texture1;\n"
-        "void main()\n"
-        "{\n"
-        "    FragColor = texture(texture1, TexCoord);\n"
-        "}\0";
-
-//    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
-//    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
-
-    unsigned int fragmentShader;
-    fragmentShader = f->glCreateShader(GL_FRAGMENT_SHADER);
-    f->glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    f->glCompileShader(fragmentShader);
-
-    f->glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if(!success)
-    {
-        f->glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
-        return;
-    }
-
-    _shaderProgram = f->glCreateProgram();
-
-    f->glAttachShader(_shaderProgram, vertexShader);
-    f->glAttachShader(_shaderProgram, fragmentShader);
-    f->glLinkProgram(_shaderProgram);
-
-    f->glGetProgramiv(_shaderProgram, GL_LINK_STATUS, &success);
-    if(!success) {
-        f->glGetProgramInfoLog(_shaderProgram, 512, NULL, infoLog);
-        qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
-        return;
-    }
-
-    qDebug() << "[PublishGLMapRenderer]::initializeGL Program: " << _shaderProgram << ", context: " << _targetWidget->context();
-    f->glUseProgram(_shaderProgram);
-    f->glDeleteShader(vertexShader);
-    f->glDeleteShader(fragmentShader);
-    _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
-    qDebug() << "[PublishGLMapRenderer] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
-*/
-
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
     _scene.deriveSceneRectFromSize(_map->getLayerScene().sceneSize());
 
     // Create the objects
-    //initializeBackground();
     _map->getLayerScene().playerGLInitialize(this, &_scene);
     updateProjectionMatrix();
     updateFoW();
@@ -204,19 +119,6 @@ void PublishGLMapRenderer::initializeGL()
 
     // Check if we need a pointer
     evaluatePointer();
-
-    /*
-    qDebug() << "[PublishGLMapRenderer]::initializeGL Program: " << _shaderProgram << ", context: " << _targetWidget->context();
-    f->glUseProgram(_shaderProgram);
-    // Matrices
-    // Model
-    QMatrix4x4 modelMatrix;
-    f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, modelMatrix.constData());
-    // View
-    QMatrix4x4 viewMatrix;
-    viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
-    */
 
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
@@ -260,26 +162,8 @@ void PublishGLMapRenderer::cleanupGL()
     if(_map)
         _map->getLayerScene().playerGLUninitialize();
 
-//    delete _fowObject;
-//    _fowObject = nullptr;
-
     _projectionMatrix.setToIdentity();
 
-    /*
-    if(_shaderProgram > 0)
-    {
-        if((_targetWidget) && (_targetWidget->context()))
-        {
-            QOpenGLFunctions *f = _targetWidget->context()->functions();
-            if(f)
-                f->glDeleteProgram(_shaderProgram);
-        }
-        _shaderProgram = 0;
-    }
-    _shaderModelMatrix = 0;
-    */
-
-    //_map->getLayerScene().playerSetShaders(0, 0, 0, 0, 0, 0, 0);
     destroyShaders();
 
     PublishGLRenderer::cleanupGL();
@@ -289,7 +173,7 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
-//    resizeBackground(w, h);
+
     _scene.setTargetSize(_targetSize);
     if(_map)
         _map->getLayerScene().playerGLResize(w, h);
@@ -304,27 +188,9 @@ void PublishGLMapRenderer::paintGL()
     if((!_initialized) || (!_map) || (!_targetSize.isValid()) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
-    //qDebug() << "[PublishGLMapRenderer]::paintGL context: " << _targetWidget->context();
-
     if(_map->getLayerScene().playerGLUpdate())
         updateProjectionMatrix();
 
-        /*
-    if(!isBackgroundReady())
-    {
-        updateBackground();
-        if(!isBackgroundReady())
-            return;
-
-        updateProjectionMatrix();
-
-        _recreatePartyToken = true;
-        _recreateLineToken = true;
-        _recreateMarkers = true;
-        _updateFow = true;
-    }
-    QSize sceneSize = getBackgroundSize().toSize();
-    */
     QSize sceneSize = _map->getLayerScene().sceneSize().toSize();
 
     if(_recreatePartyToken)
@@ -362,20 +228,11 @@ void PublishGLMapRenderer::paintGL()
     f->glUseProgram(_shaderProgramRGB);
     f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData());
 
-    //paintBackground(f);
     _map->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
 
     // Set the current program, in case the layers changed the program
     //qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #2: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgramRGB);
-
-    /*
-    if(_fowObject)
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, _fowObject->getMatrixData());
-        _fowObject->paintGL();
-    }
-    */
 
     if(_lineImage)
     {
