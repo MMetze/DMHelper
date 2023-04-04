@@ -34,6 +34,7 @@ public:
     void setScale(int scale);
 
     int layerCount() const;
+    int layerCount(DMHelper::LayerType type) const;
     Layer* layerAt(int position) const;
     void insertLayer(int position, Layer* layer);
     void prependLayer(Layer* layer);

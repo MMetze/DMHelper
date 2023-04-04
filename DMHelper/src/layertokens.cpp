@@ -257,8 +257,9 @@ void LayerTokens::dmInitialize(QGraphicsScene* scene)
         createCombatantIcon(scene, _combatants.at(i));
     }
 
-    QList<BattleDialogModelEffect*> effects = _model->getEffectList();
-    for(BattleDialogModelEffect* effect : qAsConst(effects))
+//    QList<BattleDialogModelEffect*> effects = _model->getEffectList();
+//    for(BattleDialogModelEffect* effect : qAsConst(effects))
+    for(BattleDialogModelEffect* effect : _effects)
     {
         createEffectIcon(scene, effect);
     }

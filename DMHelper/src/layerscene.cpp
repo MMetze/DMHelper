@@ -183,6 +183,19 @@ int LayerScene::layerCount() const
     return _layers.count();
 }
 
+int LayerScene::layerCount(DMHelper::LayerType type) const
+{
+    int count = 0;
+
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
+            ++count;
+    }
+
+    return count;
+}
+
 Layer* LayerScene::layerAt(int position) const
 {
     return ((position >= 0) && (position < _layers.count())) ? _layers.at(position) : nullptr;

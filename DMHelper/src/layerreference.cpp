@@ -229,6 +229,12 @@ void LayerReference::playerGLResize(int w, int h)
         _referenceLayer->playerGLResize(w, h);
 }
 
+void LayerReference::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
+{
+    if(_referenceLayer)
+        _referenceLayer->playerSetShaders(programRGB, modelMatrixRGB, projectionMatrixRGB, programRGBA, modelMatrixRGBA, projectionMatrixRGBA, alphaRGBA);
+}
+
 bool LayerReference::playerIsInitialized()
 {
     return _referenceLayer ? _referenceLayer->playerIsInitialized() : false;

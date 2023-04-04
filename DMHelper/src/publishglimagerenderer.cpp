@@ -217,7 +217,6 @@ void PublishGLImageRenderer::updateProjectionMatrix()
     QSizeF rectSize = QSizeF(_scene.getTargetSize()).scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
-    //projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height(), 0.0, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
 
     if(_imageGLObject)

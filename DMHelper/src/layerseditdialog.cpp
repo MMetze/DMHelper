@@ -127,10 +127,12 @@ void LayersEditDialog::addLayer()
     else if(selectedItem == tr("Tokens"))
     {
         if(!_model)
+        {
             qDebug() << "[LayersEditDialog] ERROR: Trying to add Token layer without a valid battle model!";
-        else
-            newLayer = new LayerTokens(_model, QString("Tokens"));
-        return;
+            return;
+        }
+
+        newLayer = new LayerTokens(_model, QString("Tokens"));
     }
     else if(selectedItem == tr("Grid"))
     {

@@ -227,6 +227,7 @@ private slots:
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleCombatantActivate(BattleDialogModelCombatant* combatant);
     void handleCombatantRemove(BattleDialogModelCombatant* combatant);
+    void handleCombatantChangeLayer(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
     void handleApplyEffect(QGraphicsItem* effect);
@@ -244,6 +245,7 @@ private slots:
 
     void removeCombatant();
     void activateCombatant();
+    void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
     void applyCombatantHPChange(BattleDialogModelCombatant* combatant, int hpChange);

@@ -96,6 +96,7 @@ signals:
 
     void combatantActivate(BattleDialogModelCombatant* combatant);
     void combatantRemove(BattleDialogModelCombatant* combatant);
+    void combatantChangeLayer(BattleDialogModelCombatant* combatant);
     void combatantDamage(BattleDialogModelCombatant* combatant);
     void combatantHeal(BattleDialogModelCombatant* combatant);
 
@@ -108,6 +109,7 @@ protected slots:
 
     void activateCombatant();
     void removeCombatant();
+    void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
 

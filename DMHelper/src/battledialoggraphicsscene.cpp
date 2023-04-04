@@ -595,19 +595,28 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             _mouseDownPos = mouseEvent->scenePos();
 
             QAction* activateItem = new QAction(QString("Activate"), &menu);
-            connect(activateItem,SIGNAL(triggered()),this,SLOT(activateCombatant()));
+            connect(activateItem, SIGNAL(triggered()), this, SLOT(activateCombatant()));
             menu.addAction(activateItem);
 
             QAction* removeItem = new QAction(QString("Remove"), &menu);
-            connect(removeItem,SIGNAL(triggered()),this,SLOT(removeCombatant()));
+            connect(removeItem, SIGNAL(triggered()), this, SLOT(removeCombatant()));
             menu.addAction(removeItem);
 
+            if((_model) && (_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 1))
+            {
+                QAction* shiftItem = new QAction(QString("Change Layer..."), &menu);
+                connect(shiftItem, SIGNAL(triggered()), this, SLOT(changeCombatantLayer()));
+                menu.addAction(shiftItem);
+            }
+
+            menu.addSeparator();
+
             QAction* damageItem = new QAction(QString("Damage..."), &menu);
-            connect(damageItem,SIGNAL(triggered()),this,SLOT(damageCombatant()));
+            connect(damageItem, SIGNAL(triggered()), this, SLOT(damageCombatant()));
             menu.addAction(damageItem);
 
             QAction* healItem = new QAction(QString("Heal..."), &menu);
-            connect(healItem,SIGNAL(triggered()),this,SLOT(healCombatant()));
+            connect(healItem, SIGNAL(triggered()), this, SLOT(healCombatant()));
             menu.addAction(healItem);
 
             menu.addSeparator();
@@ -1014,6 +1023,17 @@ void BattleDialogGraphicsScene::removeCombatant()
     BattleDialogModelCombatant* combatant = pixmap->getCombatant();
     if(combatant)
         emit combatantRemove(combatant);
+}
+
+void BattleDialogGraphicsScene::changeCombatantLayer()
+{
+    UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+    if(!pixmap)
+        return;
+
+    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    if(combatant)
+        emit combatantChangeLayer(combatant);
 }
 
 void BattleDialogGraphicsScene::damageCombatant()

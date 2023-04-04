@@ -40,6 +40,8 @@
 #include "publishglbattleimagerenderer.h"
 #include "publishglbattlevideorenderer.h"
 #include "layerseditdialog.h"
+#include "layertokens.h"
+#include "selectitemdialog.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -192,6 +194,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(combatantHover(BattleDialogModelCombatant*, bool)), this, SLOT(handleCombatantHover(BattleDialogModelCombatant*, bool)));
     connect(_scene, SIGNAL(combatantActivate(BattleDialogModelCombatant*)), this, SLOT(handleCombatantActivate(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantRemove(BattleDialogModelCombatant*)), this, SLOT(handleCombatantRemove(BattleDialogModelCombatant*)));
+    connect(_scene, SIGNAL(combatantChangeLayer(BattleDialogModelCombatant*)), this, SLOT(handleCombatantChangeLayer(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));    
@@ -1806,19 +1809,28 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
     QMenu* contextMenu = new QMenu(ui->scrollArea);
 
     QAction* activateItem = new QAction(QString("Activate"), contextMenu);
-    connect(activateItem,SIGNAL(triggered()),this,SLOT(activateCombatant()));
+    connect(activateItem, SIGNAL(triggered()), this, SLOT(activateCombatant()));
     contextMenu->addAction(activateItem);
 
     QAction* removeItem = new QAction(QString("Remove"), contextMenu);
-    connect(removeItem,SIGNAL(triggered()),this,SLOT(removeCombatant()));
+    connect(removeItem, SIGNAL(triggered()), this, SLOT(removeCombatant()));
     contextMenu->addAction(removeItem);
 
+    if((_model) && (_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 1))
+    {
+        QAction* shiftItem = new QAction(QString("Change Layer..."), contextMenu);
+        connect(shiftItem, SIGNAL(triggered()), this, SLOT(changeCombatantLayer()));
+        contextMenu->addAction(shiftItem);
+    }
+
+    contextMenu->addSeparator();
+
     QAction* damageItem = new QAction(QString("Damage..."), contextMenu);
-    connect(damageItem,SIGNAL(triggered()),this,SLOT(damageCombatant()));
+    connect(damageItem, SIGNAL(triggered()), this, SLOT(damageCombatant()));
     contextMenu->addAction(damageItem);
 
     QAction* healItem = new QAction(QString("Heal..."), contextMenu);
-    connect(healItem,SIGNAL(triggered()),this,SLOT(healCombatant()));
+    connect(healItem, SIGNAL(triggered()), this, SLOT(healCombatant()));
     contextMenu->addAction(healItem);
 
     contextMenu->exec(position);
@@ -2094,6 +2106,48 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
     */
 }
 
+void BattleFrame::handleCombatantChangeLayer(BattleDialogModelCombatant* combatant)
+{
+    if((!combatant) || (!_model))
+        return;
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    if(tokenLayers.count() <= 1)
+        return;
+
+    int currentLayerIndex = 0;
+    LayerTokens* currentLayer = nullptr;
+    QStringList tokenLayerNames;
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer= dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        tokenLayerNames << (tokenLayer ? tokenLayer->getName() : QString(""));
+        if((tokenLayer) && (tokenLayer->containsCombatant(combatant)))
+        {
+            currentLayerIndex = i;
+            currentLayer = tokenLayer;
+        }
+    }
+
+    if(!currentLayer)
+        return;
+
+    SelectItemDialog dlg(tokenLayerNames);
+    dlg.setSelectedItem(currentLayerIndex);
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        if(dlg.getSelectedItem() == currentLayerIndex)
+            return;
+
+        LayerTokens* newLayer= dynamic_cast<LayerTokens*>(tokenLayers.at(dlg.getSelectedItem()));
+        if(!newLayer)
+            return;
+
+        currentLayer->removeCombatant(combatant);
+        newLayer->addCombatant(combatant);
+    }
+}
+
 void BattleFrame::handleCombatantDamage(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
@@ -2257,6 +2311,11 @@ void BattleFrame::removeCombatant()
 void BattleFrame::activateCombatant()
 {
     handleCombatantActivate(_contextMenuCombatant);
+}
+
+void BattleFrame::changeCombatantLayer()
+{
+    handleCombatantChangeLayer(_contextMenuCombatant);
 }
 
 void BattleFrame::damageCombatant()
