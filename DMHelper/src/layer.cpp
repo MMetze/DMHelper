@@ -9,7 +9,8 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
     _name(name),
     _order(order),
     _layerVisible(true),
-    _opacity(1.0),
+    _layerOpacity(1.0),
+    _opacityReference(1.0),
     _position(),
     _size(),
     _shaderProgramRGB(0),
@@ -40,7 +41,8 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
     _name = element.attribute("layerName", QString("Layer"));
     _order = element.attribute("order", QString::number(0)).toInt();
     _layerVisible = static_cast<bool>(element.attribute("visible", QString::number(1)).toInt());
-    _opacity = element.attribute(QString("opacity"), QString::number(1.0)).toDouble();
+    _layerOpacity = element.attribute(QString("opacity"), QString::number(1.0)).toDouble();
+    _opacityReference = 1.0;
     _position = QPoint(element.attribute("x", QString::number(0)).toInt(),
                        element.attribute("y", QString::number(0)).toInt());
     _size = QSize(element.attribute("w", QString::number(0)).toInt(),
@@ -83,7 +85,7 @@ bool Layer::getLayerVisible() const
 
 qreal Layer::getOpacity() const
 {
-    return _opacity;
+    return _layerOpacity;
 }
 
 QPoint Layer::getPosition() const
@@ -116,7 +118,8 @@ void Layer::copyBaseValues(Layer *other) const
     other->_name = _name;
     other->_order = _order;
     other->_layerVisible = _layerVisible;
-    other->_opacity = _opacity;
+    other->_layerOpacity = _layerOpacity;
+    other->_opacityReference = _opacityReference;
     other->_position = _position;
     other->_size = _size;
 }
@@ -127,7 +130,7 @@ void Layer::dmInitialize(QGraphicsScene* scene)
 
     applyOrder(_order);
     applyLayerVisible(_layerVisible);
-    applyOpacity(_opacity);
+    applyOpacity(_layerOpacity);
     applyPosition(_position);
     applySize(_size);
 }
@@ -138,7 +141,7 @@ void Layer::playerGLInitialize(PublishGLScene* scene)
 
     applyOrder(_order);
     applyLayerVisible(_layerVisible);
-    applyOpacity(_opacity);
+    applyOpacity(_layerOpacity);
     applyPosition(_position);
     applySize(_size);
 }
@@ -206,11 +209,11 @@ void Layer::setLayerVisible(bool layerVisible)
 
 void Layer::setOpacity(qreal opacity)
 {
-    if(_opacity == opacity)
+    if(_layerOpacity == opacity)
         return;
 
     applyOpacity(opacity);
-    _opacity = opacity;
+    _layerOpacity = opacity;
     emit dirty();
 }
 
@@ -253,8 +256,8 @@ void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
         element.setAttribute("order", _order);
     if(!_layerVisible)
         element.setAttribute("visible", _layerVisible);
-    if(_opacity < 1.0)
-        element.setAttribute("opacity", _opacity);
+    if(_layerOpacity < 1.0)
+        element.setAttribute("opacity", _layerOpacity);
 
     element.setAttribute("x", _position.x());
     element.setAttribute("y", _position.y());

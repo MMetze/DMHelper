@@ -103,6 +103,8 @@ void LayerImage::applyLayerVisible(bool layerVisible)
 
 void LayerImage::applyOpacity(qreal opacity)
 {
+    _opacityReference = opacity;
+
     if(_graphicsItem)
         _graphicsItem->setOpacity(opacity);
 }
@@ -233,7 +235,7 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _imageGLObject->getMatrixData());
-    functions->glUniform1f(_shaderAlphaRGBA, _opacity);
+    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
     _imageGLObject->paintGL();
 

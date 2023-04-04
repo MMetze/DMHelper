@@ -67,6 +67,8 @@ void LayerGrid::applyLayerVisible(bool layerVisible)
 
 void LayerGrid::applyOpacity(qreal opacity)
 {
+    _opacityReference = opacity;
+
     if(_grid)
         _grid->setGridOpacity(opacity);
 

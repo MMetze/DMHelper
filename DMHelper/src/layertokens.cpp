@@ -194,6 +194,8 @@ void LayerTokens::applyLayerVisible(bool layerVisible)
 
 void LayerTokens::applyOpacity(qreal opacity)
 {
+    _opacityReference = opacity;
+
     foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
     {
         if(pixmapItem)
@@ -337,7 +339,7 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
     QMatrix4x4 localMatrix;
 
     functions->glUseProgram(_shaderProgramRGBA);
-    functions->glUniform1f(_shaderAlphaRGBA, _opacity);
+    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
     foreach(BattleDialogModelCombatant* combatant, _combatants)
     {
@@ -379,7 +381,7 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
                 localMatrix = effectToken->getMatrix();
                 localMatrix.translate(_position.x(), _position.y());
                 functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, localMatrix.constData());
-                functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacity);
+                functions->glUniform1f(_shaderAlphaRGBA, effectToken->getEffectAlpha() * _opacityReference);
                 effectToken->paintGL();
             }
         }

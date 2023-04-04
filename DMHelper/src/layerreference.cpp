@@ -292,7 +292,7 @@ void LayerReference::copyReferenceValues()
 
     _order = _referenceLayer->getOrder();
     _layerVisible = _referenceLayer->getLayerVisible();
-    _opacity = _referenceLayer->getOpacity();
+    _layerOpacity = _referenceLayer->getOpacity();
     _position = _referenceLayer->getPosition();
     _size = _referenceLayer->getSize();
 }

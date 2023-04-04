@@ -13,28 +13,6 @@ class QGraphicsScene;
 class PublishGLRenderer;
 class PublishGLScene;
 
-/*
- *
- * Layers - central concept in the Map, where the existance, type, basic functions (order, draw, create, delete) are handled
-    Each layer will have two child parts, one for the DM View (in DMH, Graphics Scene) and one for the Player View (OpenGL for rendering)
-    Needs for DM Version:
-
-    Needs for Player Version:
-        init, uninit, update
-
-    Both with static/dynamic content (eg videos)
-        init, uninit, update, draw
-
-    Types of Layers:
-        Color
-            --> Draw
-        Grid
-        Image
-        Video (could this simplify things on different types of rendering)
-        FoW
- *
- */
-
 class Layer : public DMHObjectBase
 {
     Q_OBJECT
@@ -114,7 +92,8 @@ protected:
     QString _name;
     int _order;
     bool _layerVisible;
-    qreal _opacity;
+    qreal _layerOpacity;
+    qreal _opacityReference;
     QPoint _position;
     QSize _size;
 

@@ -155,6 +155,8 @@ void LayerFow::applyLayerVisible(bool layerVisible)
 
 void LayerFow::applyOpacity(qreal opacity)
 {
+    _opacityReference = opacity;
+
     if(_graphicsItem)
         _graphicsItem->setOpacity(opacity * 0.5);
 }
@@ -543,7 +545,7 @@ void LayerFow::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMatr
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _fowGLObject->getMatrixData());
-    functions->glUniform1f(_shaderAlphaRGBA, _opacity);
+    functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
     _fowGLObject->paintGL();
 
