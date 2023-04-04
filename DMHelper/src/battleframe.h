@@ -58,7 +58,7 @@ public:
     QList<BattleDialogModelCombatant*> getLivingMonsters() const;
 
     void recreateCombatantWidgets();
-    void recenterCombatants();
+//    void recenterCombatants();
 
     QRect viewportRect();
     QPoint viewportCenter();
@@ -126,7 +126,7 @@ public slots:
     void cancelSelect();
 
     // Public for connection to battle ribbon
-    void selectBattleMap();
+    bool createNewBattle();
     void reloadMap();
     void addMonsters();
     void addCharacter();

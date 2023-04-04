@@ -519,12 +519,15 @@ void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool is
 
 BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
 {
+    /*
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return nullptr;
+    */
 
     BattleDialogModel* battleModel = new BattleDialogModel(this);
 
+    /*
     // Add the active characters
     QList<Character*> activeCharacters = campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
@@ -533,6 +536,7 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
         newCharacter->setPosition(combatantPos);
         battleModel->appendCombatant(newCharacter);
     }
+    */
 
     connect(battleModel,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
 

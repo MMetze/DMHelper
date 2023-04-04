@@ -61,7 +61,7 @@ public:
 
     Map* getMap() const;
     const QRect& getMapRect() const;
-    bool isMapChanged() const;
+//    bool isMapChanged() const;
     const QRect& getPreviousMapRect() const;
     Map* getPreviousMap() const;
     QRectF getCameraRect() const;

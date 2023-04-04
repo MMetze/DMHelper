@@ -41,6 +41,8 @@
 #include "publishglbattlevideorenderer.h"
 #include "layerseditdialog.h"
 #include "layertokens.h"
+#include "layergrid.h"
+#include "layerreference.h"
 #include "selectitemdialog.h"
 #include <QDebug>
 #include <QVBoxLayout>
@@ -300,18 +302,21 @@ void BattleFrame::setBattleMap()
         return;
     }
 
-    if(_model->isMapChanged())
-    {
+    // TODO: Layers - do we need to resize a map now?
+//    if(_model->isMapChanged())
+//    {
         disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         replaceBattleMap();
         connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
-    }
+/*    }
     else
     {
         resizeBattleMap();
     }
+    *
+    */
 }
 
 void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant)
@@ -444,12 +449,13 @@ void BattleFrame::recreateCombatantWidgets()
     qDebug() << "[Battle Frame] combatant widgets recreated";
 }
 
+/*
 void BattleFrame::recenterCombatants()
 {
     if(!_model)
         return;
 
-    QPointF mapCenter = _model->getMapRect().center();
+    QPointF mapCenter = _model->getLayerScene().boundingRect().center();
 
     // try to center the icons on the map
     QList<QGraphicsPixmapItem*> iconList = _combatantIcons.values();
@@ -460,6 +466,7 @@ void BattleFrame::recenterCombatants()
             icon->setPos(mapCenter);
     }
 }
+*/
 
 QRect BattleFrame::viewportRect()
 {
@@ -995,18 +1002,78 @@ void BattleFrame::cancelSelect()
     _stateMachine.deactivateState();
 }
 
-void BattleFrame::selectBattleMap()
+bool BattleFrame::createNewBattle()
 {
     if((!_battle) || (!_battle->getBattleDialogModel()))
-        return;
+        return false;
+
+    Campaign* campaign = dynamic_cast<Campaign*>(_battle->getParentByType(DMHelper::CampaignType_Campaign));
+    if(!campaign)
+        return false;
+
+    LayerGrid* gridLayer = nullptr;
+    LayerTokens* monsterTokens = nullptr;
+    LayerTokens* pcTokens = nullptr;
 
     qDebug() << "[Battle Frame] Selecting a new map...";
 
     Map* battleMap = selectRelatedMap();
-    if(!battleMap)
-        return;
+    if(battleMap)
+    {
+        battleMap->initialize();
 
-    battleMap->initialize();
+        // Create a grid after the first image layer, a monster token layer before the FoW
+        for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
+        {
+            Layer* layer = battleMap->getLayerScene().layerAt(i);
+            if(layer)
+            {
+                if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                {
+                    monsterTokens = new LayerTokens(_battle->getBattleDialogModel(), QString("Monster tokens"));
+                    _battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                }
+
+                _battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
+
+                if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                {
+                     gridLayer = new LayerGrid(QString("Grid"));
+                     _battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                }
+            }
+        }
+    }
+
+    if(!gridLayer)
+        _battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerGrid(QString("Grid")));
+
+    if(!monsterTokens)
+    {
+        monsterTokens = new LayerTokens(_battle->getBattleDialogModel(), QString("Monster tokens"));
+        _battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+    }
+
+    pcTokens = new LayerTokens(_battle->getBattleDialogModel(), QString("PC tokens"));
+    _battle->getBattleDialogModel()->getLayerScene().appendLayer(pcTokens);
+
+    // Add the active characters
+    _battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(pcTokens);
+    QList<Character*> activeCharacters = campaign->getActiveCharacters();
+    for(int i = 0; i < activeCharacters.count(); ++i)
+    {
+        BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
+        newCharacter->setPosition(QPointF(0.0, 0.0));
+        _battle->getBattleDialogModel()->appendCombatant(newCharacter);
+    }
+
+    // Select the monster layer as a default to add monsters
+    _battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(monsterTokens);
+
+    return battleMap != nullptr;
+
+    // Todo: Layers - maybe need more about the zoom rect
+    /*
     QImage fowImage = battleMap->getGrayImage();
 
     SelectZoom zoomDlg(fowImage, this);
@@ -1016,7 +1083,11 @@ void BattleFrame::selectBattleMap()
         qDebug() << "[Battle Frame] Setting new map to: " << battleMap->getID() << " " << battleMap->getName();
         _battle->getBattleDialogModel()->setMap(battleMap, zoomDlg.getZoomRect());
         setBattleMap();
+        return true;
     }
+
+    return false;
+    */
 }
 
 void BattleFrame::reloadMap()
@@ -1753,6 +1824,8 @@ void BattleFrame::updateMap()
         return;
     }
 
+    // TODO: Layers - is this right?
+    /*
     if((!_model->getMap()) || (!_mapDrawer))
     {
         qDebug() << "[Battle Frame] No map found to be updated for the current battle model";
@@ -1760,8 +1833,8 @@ void BattleFrame::updateMap()
     }
 
     qDebug() << "[Battle Frame] Updating map " << _model->getMap()->getFileName() << " rect=" << _model->getMapRect().left() << "," << _model->getMapRect().top() << ", " << _model->getMapRect().width() << "x" << _model->getMapRect().height();
+    */
     _isVideo = false;
-    // TODO: Layers - is this right?
     //if(_model->getMap()->initialize())
     {
         // TODO: Layers - is this right?
@@ -2953,8 +3026,8 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setSelectionToken(_scene->getSelectedIconFile());
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
-    _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     // TODO: Layers
+    //_fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     //_bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());
     //renderer->fowChanged(_bwFoWImage);
     renderer->setCombatantFrame(_combatantFile);
@@ -3364,7 +3437,8 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
 
 void BattleFrame::updatePublishEnable()
 {
-    emit setPublishEnabled((_model) && (_model->getMap()), true);
+    //emit setPublishEnabled((_model) && (_model->getMap()), true);
+    emit setPublishEnabled(_model != nullptr, true);
 }
 
 void BattleFrame::clearBattleFrame()
@@ -3442,10 +3516,10 @@ void BattleFrame::replaceBattleMap()
 
     updatePublishEnable();
 
-    if(!_model->getMap())
-        return;
-
     // TODO: Layers
+    //if(!_model->getMap())
+    //    return;
+
     //_background = new UnselectedPixmap();
     //_fow = new UnselectedPixmap();
     _model->setBackgroundImage(QImage());
@@ -3460,7 +3534,7 @@ void BattleFrame::replaceBattleMap()
 
     createSceneContents();
 
-    qDebug() << "[Battle Frame] map set to new image (" << _model->getMap()->getFileName() << ")";
+    //qDebug() << "[Battle Frame] map set to new image (" << _model->getMap()->getFileName() << ")";
 }
 
 bool BattleFrame::doSceneContentsExist()

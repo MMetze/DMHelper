@@ -539,10 +539,12 @@ const QRect& BattleDialogModel::getMapRect() const
     return _mapRect;
 }
 
+/*
 bool BattleDialogModel::isMapChanged() const
 {
     return (_map != _previousMap);
 }
+*/
 
 const QRect& BattleDialogModel::getPreviousMapRect() const
 {

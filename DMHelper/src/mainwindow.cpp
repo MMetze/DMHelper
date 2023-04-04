@@ -80,6 +80,11 @@
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
 #include "dmhwaitingdialog.h"
+#include "layergrid.h"
+#include "layertokens.h"
+#include "layerreference.h"
+#include "mapselectdialog.h"
+#include "battledialogmodelcharacter.h"
 #include <QResizeEvent>
 #include <QFileDialog>
 #include <QMimeData>
@@ -1064,22 +1069,102 @@ void MainWindow::newLinkedText()
 
 void MainWindow::newBattleEncounter()
 {
-    CampaignObjectBase* encounter = newEncounter(DMHelper::CampaignType_Battle, QString("New Combat"), QString("Enter new combat name:"));
+    if(!_campaign)
+        return;
+
+    bool ok;
+    QString encounterName = QInputDialog::getText(this, QString("New Combat"), QString("Enter new combat name:"), QLineEdit::Normal, QString(), &ok);
+    if(!ok)
+        return;
+
+    CampaignObjectBase* encounter = EncounterFactory().createObject(DMHelper::CampaignType_Battle, -1, encounterName, false);
     if(!encounter)
         return;
 
     EncounterBattle* battle = dynamic_cast<EncounterBattle*>(encounter);
-    if(battle)
+    if(!battle)
+        return;
+
+    battle->createBattleDialogModel();
+    if(!battle->getBattleDialogModel())
+        return;
+
+    LayerGrid* gridLayer = nullptr;
+    LayerTokens* monsterTokens = nullptr;
+    LayerTokens* pcTokens = nullptr;
+
+    qDebug() << "[Battle Frame] Selecting a new map...";
+
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        currentObject = _campaign;
+
+    Map* battleMap = nullptr;
+    MapSelectDialog mapSelectDlg(*_campaign, battle->getID());
+    if(mapSelectDlg.exec() == QDialog::Accepted)
+        battleMap = mapSelectDlg.getSelectedMap();
+
+    if(battleMap)
     {
-        battle->createBattleDialogModel();
-        BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
-        if(battleFrame)
+        battleMap->initialize();
+
+        // Create a grid after the first image layer, a monster token layer before the FoW
+        for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
         {
-            battleFrame->setBattle(battle);
-            battleFrame->selectBattleMap();
-            battleFrame->recenterCombatants();
+            Layer* layer = battleMap->getLayerScene().layerAt(i);
+            if(layer)
+            {
+                if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                {
+                    monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
+                    battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                }
+
+                battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
+
+                if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                {
+                     gridLayer = new LayerGrid(QString("Grid"));
+                     battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                }
+            }
         }
     }
+
+    if(!gridLayer)
+        battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerGrid(QString("Grid")));
+
+    if(!monsterTokens)
+    {
+        monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
+        battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+    }
+
+    pcTokens = new LayerTokens(battle->getBattleDialogModel(), QString("PC tokens"));
+    battle->getBattleDialogModel()->getLayerScene().appendLayer(pcTokens);
+
+    // Add the active characters
+    battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(pcTokens);
+    QPointF mapCenter = battle->getBattleDialogModel()->getLayerScene().boundingRect().center();
+    QList<Character*> activeCharacters = _campaign->getActiveCharacters();
+    for(int i = 0; i < activeCharacters.count(); ++i)
+    {
+        BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
+        newCharacter->setPosition(mapCenter);
+        battle->getBattleDialogModel()->appendCombatant(newCharacter);
+    }
+
+    // Select the monster layer as a default to add monsters
+    battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(monsterTokens);
+    battle->getBattleDialogModel()->setMapRect(battle->getBattleDialogModel()->getLayerScene().boundingRect().toRect());
+
+//    battleFrame->setBattle(battle);
+//    if(!battleFrame->createNewBattle())
+//        battleFrame->editLayers();
+    addNewObject(encounter);
+
+//    BattleFrame* battleFrame = dynamic_cast<BattleFrame*>(ui->stackedWidgetEncounter->getCurrentFrame());
+//    battleFrame->recenterCombatants();
 }
 
 void MainWindow::newMap()
