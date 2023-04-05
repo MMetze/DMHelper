@@ -290,7 +290,7 @@
           </size>
          </property>
          <property name="toolTip">
-          <string>The size of the map grid</string>
+          <string>The size of the grid</string>
          </property>
          <property name="minimum">
           <number>3</number>

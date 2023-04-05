@@ -5,6 +5,7 @@
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
+#include "publishglscene.h"
 #include "campaign.h"
 #include <QRectF>
 #include <QImage>
@@ -172,6 +173,9 @@ void LayerScene::setScale(int scale)
         return;
 
     _scale = scale;
+    if(_playerGLScene)
+        _playerGLScene->setGridScale(scale);
+
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->setScale(scale);
 

@@ -174,12 +174,14 @@ void BattleDialogGraphicsScene::updateBattleContents()
         return;
     }
 
+    /*
     if(_grid)
     {
         qDebug() << "[Battle Dialog Scene]     Rebuilding grid, grid scale = " << _model->getGridScale();
         // TODO: Layers Grid
         //_grid->rebuildGrid(*_model);
     }
+    */
 
     for(QGraphicsItem* item : qAsConst(_itemList))
     {

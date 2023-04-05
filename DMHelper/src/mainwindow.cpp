@@ -1089,6 +1089,7 @@ void MainWindow::newBattleEncounter()
     if(!battle->getBattleDialogModel())
         return;
 
+    int gridScale = DMHelper::STARTING_GRID_SCALE;
     LayerGrid* gridLayer = nullptr;
     LayerTokens* monsterTokens = nullptr;
     LayerTokens* pcTokens = nullptr;
@@ -1107,6 +1108,7 @@ void MainWindow::newBattleEncounter()
     if(battleMap)
     {
         battleMap->initialize();
+        gridScale = battleMap->getLayerScene().getScale();
 
         // Create a grid after the first image layer, a monster token layer before the FoW
         for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
@@ -1132,7 +1134,13 @@ void MainWindow::newBattleEncounter()
     }
 
     if(!gridLayer)
-        battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerGrid(QString("Grid")));
+    {
+        gridLayer = new LayerGrid(QString("Grid"));
+        battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+    }
+
+    gridLayer->getConfig().setGridScale(gridScale);
+    battle->getBattleDialogModel()->getLayerScene().setScale(gridScale);
 
     if(!monsterTokens)
     {
@@ -1191,13 +1199,15 @@ void MainWindow::newMap()
 //    map->setFileName(filename);
 
     ok = false;
+    int newScale = DMHelper::STARTING_GRID_SCALE;
     int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map have horizontally? Even if you don't use a grid on this map, this is used to set the size of tokens on the map."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
     if((ok) && (gridCount > 0))
     {
         int newScale = map->getLayerScene().sceneSize().width() / gridCount;
-        if(newScale > 0)
-            map->getLayerScene().setScale(newScale);
+        if(newScale < 1)
+            newScale = DMHelper::STARTING_GRID_SCALE;
     }
+    map->getLayerScene().setScale(newScale);
 
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
     if(result == QMessageBox::Yes)

@@ -409,10 +409,41 @@ void LayerTokens::uninitialize()
 
 void LayerTokens::setScale(int scale)
 {
-    if(_scale != scale)
+    if(_scale == scale)
+        return;
+
+    _scale = scale;
+
+    // Trigger each combatant to be rescaled
+    qreal scaleFactor;
+    foreach(BattleDialogModelCombatant* combatant, _combatants)
     {
-        // TODO: if the scale is changed, update the token scales
-        _scale = scale;
+        if(combatant)
+        {
+            PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
+            if(combatantToken)
+                combatantToken->combatantMoved();
+
+            QGraphicsPixmapItem* combatantIcon = _combatantIconHash.value(combatant);
+            if(combatantIcon)
+            {
+                scaleFactor = (static_cast<qreal>(scale-2)) * combatant->getSizeFactor() / static_cast<qreal>(qMax(combatantIcon->pixmap().width(),combatantIcon->pixmap().height()));
+                combatantIcon->setScale(scaleFactor);
+            }
+        }
+    }
+
+    // Trigger each effect to be rescaled
+    foreach(BattleDialogModelEffect* effect, _effects)
+    {
+        if(effect)
+        {
+            PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
+            if(effectToken)
+                effectToken->effectMoved();
+
+            effectChanged(effect);
+        }
     }
 }
 

@@ -521,8 +521,8 @@ void BattleDialogModel::removeEffectFromList(BattleDialogModelEffect* effect)
 int BattleDialogModel::getGridScale() const
 {
     // TODO: Layers - need to make this complete
-    if(!_map)
-        return 1;
+    //if(!_map)
+    //    return 1;
 
 //    LayerGrid* layer = dynamic_cast<LayerGrid*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Grid));
 //    return layer ? layer->getConfig().getGridScale() : DMHelper::STARTING_GRID_SCALE;
