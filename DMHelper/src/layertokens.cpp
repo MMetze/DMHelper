@@ -500,6 +500,11 @@ bool LayerTokens::containsCombatant(BattleDialogModelCombatant* combatant)
     return _combatants.contains(combatant);
 }
 
+BattleDialogModelCombatant* LayerTokens::getCombatantFromItem(QGraphicsPixmapItem* item)
+{
+    return _combatantIconHash.key(item, nullptr);
+}
+
 void LayerTokens::addEffect(BattleDialogModelEffect* effect)
 {
     if(!effect)

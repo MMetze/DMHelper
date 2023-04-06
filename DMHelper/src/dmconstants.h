@@ -118,14 +118,14 @@ namespace DMHelper
 
     enum BattleDialog_Z
     {
-        BattleDialog_Z_Background = -4,
-        BattleDialog_Z_Grid = -3,
-        BattleDialog_Z_Camera = -2,
-        BattleDialog_Z_BackHighlight = -1,
-        BattleDialog_Z_Combatant = 0,
-        BattleDialog_Z_SelectedCombatant = 1,
-        BattleDialog_Z_FrontHighlight = 2,
-        BattleDialog_Z_Overlay = 3
+        BattleDialog_Z_Background = 10000,
+        BattleDialog_Z_Grid = 10001,
+        BattleDialog_Z_Camera = 10002,
+        BattleDialog_Z_BackHighlight = 10003,
+        BattleDialog_Z_Combatant = 10004,
+        BattleDialog_Z_SelectedCombatant = 10005,
+        BattleDialog_Z_FrontHighlight = 10006,
+        BattleDialog_Z_Overlay = 10007
     };
 
     enum BattleFrameStates

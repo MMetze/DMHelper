@@ -2282,6 +2282,30 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
         return;
     }
 
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        if(layer)
+        {
+            LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+            if(tokenLayer)
+            {
+                BattleDialogModelCombatant* combatant = tokenLayer->getCombatantFromItem(item);
+                if(combatant)
+                {
+                    startMovement(combatant, item, combatant->getSpeed());
+                    _selectedCombatant = combatant;
+                    ui->frameCombatant->setCombatant(combatant);
+
+                    CombatantWidget* widget = _combatantWidgets.value(combatant, nullptr);
+                    if(widget)
+                        ui->scrollArea->ensureWidgetVisible(widget);
+                }
+            }
+        }
+    }
+
+    /*
     BattleDialogModelCombatant* combatant = _combatantIcons.key(item, nullptr);
     if(combatant)
     {
@@ -2293,6 +2317,7 @@ void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
         if(widget)
             ui->scrollArea->ensureWidgetVisible(widget);
     }
+    */
 }
 
 void BattleFrame::handleItemMoved(QGraphicsPixmapItem* item, bool* result)

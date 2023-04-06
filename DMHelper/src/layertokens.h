@@ -61,6 +61,7 @@ public slots:
     void addCombatant(BattleDialogModelCombatant* combatant);
     void removeCombatant(BattleDialogModelCombatant* combatant);
     bool containsCombatant(BattleDialogModelCombatant* combatant);
+    BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item);
 
     void addEffect(BattleDialogModelEffect* effect);
     void removeEffect(BattleDialogModelEffect* effect);
