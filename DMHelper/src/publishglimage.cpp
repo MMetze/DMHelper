@@ -45,7 +45,7 @@ PublishGLImage::~PublishGLImage()
 
 void PublishGLImage::cleanup()
 {
-    qDebug() << "[PublishGLImage] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+    // qDebug() << "[PublishGLImage] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
 
     if(QOpenGLContext::currentContext())
     {

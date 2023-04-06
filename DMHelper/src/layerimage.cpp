@@ -231,6 +231,12 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     if(!functions)
         return;
 
+    if((_shaderProgramRGBA == 0) || (_shaderModelMatrixRGBA == 0) || (_shaderAlphaRGBA == 0))
+    {
+        qDebug() << "[LayerImage] ERROR: invalid shaders set! _shaderProgramRGBA: " << _shaderProgramRGBA << ", _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA << ", _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << ", _shaderAlphaRGBA: " << _shaderAlphaRGBA;
+        return;
+    }
+
     functions->glUseProgram(_shaderProgramRGBA);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);
     functions->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture

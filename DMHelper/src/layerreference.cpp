@@ -261,7 +261,10 @@ void LayerReference::setScale(int scale)
 void LayerReference::handleReferenceDestroyed(Layer *layer)
 {
     if((layer) && (layer == _referenceLayer))
+    {
         emit referenceDestroyed(this);
+        _referenceLayer = nullptr;
+    }
 }
 
 void LayerReference::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

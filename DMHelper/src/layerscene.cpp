@@ -557,6 +557,12 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
     if(!functions)
         return;
 
+    if((shaderProgram == 0) || (defaultModelMatrix == 0))
+    {
+        qDebug() << "[LayerScene] playerGLPaint ERROR: invalid shaders program or matrix! shaderProgram: " << shaderProgram << ", defaultModelMatrix: " << defaultModelMatrix;
+        return;
+    }
+
     for(int i = 0; i < _layers.count(); ++i)
     {
         if((_layers.at(i)) && (_layers.at(i)->getLayerVisible()) && (_layers.at(i)->getOpacity() > 0.0))
@@ -586,6 +592,12 @@ void LayerScene::playerGLResize(int w, int h)
 
 void LayerScene::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
 {
+    if((programRGB == 0) || (programRGBA == 0))
+    {
+        qDebug() << "[LayerScene] ERROR: invalid shaders set! programRGB: " << programRGB << ", modelMatrixRGB: " << modelMatrixRGB << ", projectionMatrixRGB: " << projectionMatrixRGB << ", programRGBA: " << programRGBA << ", modelMatrixRGBA: " << modelMatrixRGBA << ", projectionMatrixRGBA: " << projectionMatrixRGBA << ", alphaRGBA: " << alphaRGBA;
+        return;
+    }
+
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->playerSetShaders(programRGB, modelMatrixRGB, projectionMatrixRGB, programRGBA, modelMatrixRGBA, projectionMatrixRGBA, alphaRGBA);
 }

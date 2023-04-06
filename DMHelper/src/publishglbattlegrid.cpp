@@ -40,7 +40,7 @@ void PublishGLBattleGrid::paintGL()
     if(!QOpenGLContext::currentContext())
         return;
 
-    qDebug() << "[PublishGLBattleGrid]::paintGL context: " << QOpenGLContext::currentContext();
+    //qDebug() << "[PublishGLBattleGrid]::paintGL context: " << QOpenGLContext::currentContext();
 
     QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
     QOpenGLExtraFunctions *e = QOpenGLContext::currentContext()->extraFunctions();
@@ -60,7 +60,7 @@ void PublishGLBattleGrid::paintGL()
     f->glUseProgram(previousProgram);
     */
 
-    qDebug() << "[PublishGLBattleGrid]::paintGL UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
+    //qDebug() << "[PublishGLBattleGrid]::paintGL UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
     f->glUseProgram(_shaderProgram);
     f->glUniformMatrix4fv(_shaderModelMatrix, 1, GL_FALSE, getMatrixData());
     e->glBindVertexArray(_VAO);
@@ -91,7 +91,7 @@ void PublishGLBattleGrid::setProjectionMatrix(const GLfloat* projectionMatrix)
     if(!f)
         return;
 
-    qDebug() << "[PublishGLBattleGrid]::setProjectionMatrix UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
+    //qDebug() << "[PublishGLBattleGrid]::setProjectionMatrix UseProgram: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
     f->glUseProgram(_shaderProgram);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix);
 }
@@ -248,12 +248,12 @@ void PublishGLBattleGrid::createGridObjects()
         return;
     }
 
-    qDebug() << "[PublishGLBattleGrid]::createGridObjects Program: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
+    //qDebug() << "[PublishGLBattleGrid]::createGridObjects Program: " << _shaderProgram << ", context: " << QOpenGLContext::currentContext();
     f->glUseProgram(_shaderProgram);
     f->glDeleteShader(vertexShader);
     f->glDeleteShader(fragmentShader);
     _shaderModelMatrix = f->glGetUniformLocation(_shaderProgram, "model");
-    qDebug() << "[PublishGLBattleGrid] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
+    //qDebug() << "[PublishGLBattleGrid] Program: " << _shaderProgram << ", model matrix: " << _shaderModelMatrix;
 
     // Matrices
     // Model
@@ -662,7 +662,7 @@ void PublishGLBattleGrid::rebuildGrid()
 
 void PublishGLBattleGrid::cleanupGrid()
 {
-    qDebug() << "[PublishGLBattleGrid] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+    //qDebug() << "[PublishGLBattleGrid] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
 
     if(QOpenGLContext::currentContext())
     {
