@@ -276,6 +276,18 @@ void PublishGLBattleRenderer::paintGL()
 
     _model->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
 
+    if((_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
+       ((_movementPC) || ((_movementCombatant->getKnown()) &&
+                          (_movementCombatant->getShown()) &&
+                          ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
+                          ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
+    {
+        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
+        _movementToken->paintGL();
+    }
+
+
+
     /*
     paintBackground(f);
 
