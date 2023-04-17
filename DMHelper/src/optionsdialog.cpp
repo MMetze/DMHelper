@@ -43,7 +43,7 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->spinBoxFontSize->setValue(_options->getFontSize());
         ui->cmbInitiativeType->setCurrentIndex(_options->getInitiativeType());
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
-        ui->edtCountdownDuration->setValidator(new QIntValidator(1,1000,this));
+        ui->edtCountdownDuration->setValidator(new QIntValidator(1, 1000, this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
         ui->edtPointerFile->setText(_options->getPointerFile());
         ui->edtSelectedIcon->setText(_options->getSelectedIcon());

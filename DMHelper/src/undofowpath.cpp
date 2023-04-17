@@ -49,8 +49,8 @@ void UndoFowPath::inputXML(const QDomElement &element, bool isImport)
 
     _mapDrawPath.setRadius(element.attribute( QString("radius")).toInt());
     _mapDrawPath.setBrushType(element.attribute( QString("brushtype")).toInt());
-    _mapDrawPath.setErase(static_cast<bool>(element.attribute("erase",QString::number(1)).toInt()));
-    _mapDrawPath.setSmooth(static_cast<bool>(element.attribute("smooth",QString::number(1)).toInt()));
+    _mapDrawPath.setErase(static_cast<bool>(element.attribute("erase", QString::number(1)).toInt()));
+    _mapDrawPath.setSmooth(static_cast<bool>(element.attribute("smooth", QString::number(1)).toInt()));
 
     QDomElement pointsElement = element.firstChildElement(QString("points"));
     if(!pointsElement.isNull())

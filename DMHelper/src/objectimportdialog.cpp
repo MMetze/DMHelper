@@ -45,7 +45,7 @@ ObjectImportDialog::~ObjectImportDialog()
 
 void ObjectImportDialog::selectImportFile()
 {
-    QString importFilename = QFileDialog::getOpenFileName(nullptr,QString("Select file to import"), QString(), QString("XML files (*.xml)"));
+    QString importFilename = QFileDialog::getOpenFileName(nullptr, QString("Select file to import"), QString(), QString("XML files (*.xml)"));
     if(!importFilename.isEmpty())
         ui->edtImportFile->setText(importFilename);
 }

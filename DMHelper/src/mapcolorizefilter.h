@@ -47,7 +47,7 @@ inline bool operator==(const MapColorizeFilter& lhs, const MapColorizeFilter& rh
 
 inline bool operator!=(const MapColorizeFilter& lhs, const MapColorizeFilter& rhs)
 {
-    return !operator==(lhs,rhs);
+    return !operator==(lhs, rhs);
 }
 
 #endif // MAPCOLORIZEFILTER_H

@@ -115,7 +115,7 @@ void MonsterClass::inputXML(const QDomElement &element, bool isImport)
 
     beginBatchChanges();
 
-    setPrivate(static_cast<bool>(element.attribute("private",QString::number(0)).toInt()));
+    setPrivate(static_cast<bool>(element.attribute("private", QString::number(0)).toInt()));
     setName(element.firstChildElement(QString("name")).text());
     setMonsterType(element.firstChildElement(QString("type")).text());
     setMonsterSubType(element.firstChildElement(QString("subtype")).text());
@@ -633,19 +633,19 @@ void MonsterClass::cloneMonster(MonsterClass& other)
 
 int MonsterClass::convertSizeToCategory(const QString& monsterSize)
 {
-    if(QString::compare(monsterSize, QString("Tiny"),Qt::CaseInsensitive) == 0)
+    if(QString::compare(monsterSize, QString("Tiny"), Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Tiny;
-    else if(QString::compare(monsterSize, QString("Small"),Qt::CaseInsensitive) == 0)
+    else if(QString::compare(monsterSize, QString("Small"), Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Small;
-    else if(QString::compare(monsterSize, QString("Medium"),Qt::CaseInsensitive) == 0)
+    else if(QString::compare(monsterSize, QString("Medium"), Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Medium;
-    else if(QString::compare(monsterSize, QString("Large"),Qt::CaseInsensitive) == 0)
+    else if(QString::compare(monsterSize, QString("Large"), Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Large;
-    else if(QString::compare(monsterSize, QString("Huge"),Qt::CaseInsensitive) == 0)
+    else if(QString::compare(monsterSize, QString("Huge"), Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Huge;
-    else if(QString::compare(monsterSize, QString("Gargantuan"),Qt::CaseInsensitive) == 0)
+    else if(QString::compare(monsterSize, QString("Gargantuan"), Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Gargantuan;
-    else if(QString::compare(monsterSize, QString("Colossal"),Qt::CaseInsensitive) == 0)
+    else if(QString::compare(monsterSize, QString("Colossal"), Qt::CaseInsensitive) == 0)
         return DMHelper::CombatantSize_Colossal;
     else
         return DMHelper::CombatantSize_Unknown;

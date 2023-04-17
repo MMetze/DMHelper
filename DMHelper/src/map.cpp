@@ -113,22 +113,22 @@ void Map::inputXML(const QDomElement &element, bool isImport)
             //_filterApplied = true;
 
             MapColorizeFilter filter;
-            filter._r2r = filterElement.attribute("r2r",QString::number(1.0)).toDouble();
-            filter._g2r = filterElement.attribute("g2r",QString::number(0.0)).toDouble();
-            filter._b2r = filterElement.attribute("b2r",QString::number(0.0)).toDouble();
-            filter._r2g = filterElement.attribute("r2g",QString::number(0.0)).toDouble();
-            filter._g2g = filterElement.attribute("g2g",QString::number(1.0)).toDouble();
-            filter._b2g = filterElement.attribute("b2g",QString::number(0.0)).toDouble();
-            filter._r2b = filterElement.attribute("r2b",QString::number(0.0)).toDouble();
-            filter._g2b = filterElement.attribute("g2b",QString::number(0.0)).toDouble();
-            filter._b2b = filterElement.attribute("b2b",QString::number(1.0)).toDouble();
-            filter._sr = filterElement.attribute("sr",QString::number(1.0)).toDouble();
-            filter._sg = filterElement.attribute("sg",QString::number(1.0)).toDouble();
-            filter._sb = filterElement.attribute("sb",QString::number(1.0)).toDouble();
+            filter._r2r = filterElement.attribute("r2r", QString::number(1.0)).toDouble();
+            filter._g2r = filterElement.attribute("g2r", QString::number(0.0)).toDouble();
+            filter._b2r = filterElement.attribute("b2r", QString::number(0.0)).toDouble();
+            filter._r2g = filterElement.attribute("r2g", QString::number(0.0)).toDouble();
+            filter._g2g = filterElement.attribute("g2g", QString::number(1.0)).toDouble();
+            filter._b2g = filterElement.attribute("b2g", QString::number(0.0)).toDouble();
+            filter._r2b = filterElement.attribute("r2b", QString::number(0.0)).toDouble();
+            filter._g2b = filterElement.attribute("g2b", QString::number(0.0)).toDouble();
+            filter._b2b = filterElement.attribute("b2b", QString::number(1.0)).toDouble();
+            filter._sr = filterElement.attribute("sr", QString::number(1.0)).toDouble();
+            filter._sg = filterElement.attribute("sg", QString::number(1.0)).toDouble();
+            filter._sb = filterElement.attribute("sb", QString::number(1.0)).toDouble();
 
-            filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay",QString::number(1)).toInt());
-            filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor",QString("#000000")));
-            filter._overlayAlpha = filterElement.attribute("overlayAlpha",QString::number(128)).toInt();
+            filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay", QString::number(1)).toInt());
+            filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor", QString("#000000")));
+            filter._overlayAlpha = filterElement.attribute("overlayAlpha", QString::number(128)).toInt();
 
             imageLayer->setFilter(filter);
         }
@@ -532,7 +532,7 @@ void Map::setExternalFoWImage(QImage externalImage)
 {
     /*
     _imgFow = externalImage;
-    applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
+    applyPaintTo(nullptr, QColor(0, 0, 0, 128), _undoStack->index());
     */
 }
 
@@ -621,7 +621,7 @@ QImage Map::getGrayImage()
     // TODO: Layers
     /*
     QImage grayFoWImage(result.size(), QImage::Format_ARGB32);
-    applyPaintTo(&grayFoWImage, QColor(0,0,0,128), _undoStack->index(), true);
+    applyPaintTo(&grayFoWImage, QColor(0, 0, 0, 128), _undoStack->index(), true);
 
     QPainter p;
     p.begin(&result);
@@ -644,7 +644,7 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
     {
         for(i = 0; (i < bwFoWImage.width()) && (top == -1); ++i)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 top = j;
             }
@@ -655,7 +655,7 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
     {
         for(i = 0; (i < bwFoWImage.width()) && (bottom == -1); ++i)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 bottom = j;
             }
@@ -666,7 +666,7 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
     {
         for(j = top; (j < bottom) && (left == -1); ++j)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 left = i;
             }
@@ -677,7 +677,7 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
     {
         for(j = top; (j < bottom) && (right == -1); ++j)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 right = i;
             }
@@ -719,7 +719,7 @@ QRect Map::getShrunkPublishRect()
     {
         for(i = 0; (i < bwFoWImage.width()) && (top == -1); ++i)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 top = j;
             }
@@ -730,7 +730,7 @@ QRect Map::getShrunkPublishRect()
     {
         for(i = 0; (i < bwFoWImage.width()) && (bottom == -1); ++i)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 bottom = j;
             }
@@ -741,7 +741,7 @@ QRect Map::getShrunkPublishRect()
     {
         for(j = top; (j < bottom) && (left == -1); ++j)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 left = i;
             }
@@ -752,7 +752,7 @@ QRect Map::getShrunkPublishRect()
     {
         for(j = top; (j < bottom) && (right == -1); ++j)
         {
-            if(bwFoWImage.pixelColor(i,j) != Qt::black)
+            if(bwFoWImage.pixelColor(i, j) != Qt::black)
             {
                 right = i;
             }
@@ -837,7 +837,7 @@ bool Map::initialize()
     */
 
     //_imgFow = QImage(_imgBackground.size(), QImage::Format_ARGB32);
-    //applyPaintTo(nullptr, QColor(0,0,0,128), _undoStack->index());
+    //applyPaintTo(nullptr, QColor(0, 0, 0, 128), _undoStack->index());
 
     //LayerFow* fowLayer = new LayerFow(QString("FoW"), imgBackground.size(), -1);
     /*

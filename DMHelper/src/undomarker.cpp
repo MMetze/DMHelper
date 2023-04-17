@@ -75,7 +75,7 @@ void UndoMarker::inputXML(const QDomElement &element, bool isImport)
     _marker.setEncounter(QUuid(element.attribute(QString("encounter"))));
 
     QString colorName = element.attribute("color");
-    _marker.setColor(QColor::isValidColor(colorName) ? QColor(colorName) : QColor(115,18,0));
+    _marker.setColor(QColor::isValidColor(colorName) ? QColor(colorName) : QColor(115, 18, 0));
 }
 
 void UndoMarker::setRemoved(bool removed)

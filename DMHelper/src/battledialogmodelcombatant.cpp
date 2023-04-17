@@ -42,9 +42,9 @@ void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImp
 {
     BattleDialogModelObject::inputXML(element, isImport);
 
-    _initiative = element.attribute("initiative",QString::number(0)).toInt();
-    _isShown = static_cast<bool>(element.attribute("isShown",QString::number(1)).toInt());
-    _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(1)).toInt());
+    _initiative = element.attribute("initiative", QString::number(0)).toInt();
+    _isShown = static_cast<bool>(element.attribute("isShown", QString::number(1)).toInt());
+    _isKnown = static_cast<bool>(element.attribute("isKnown", QString::number(1)).toInt());
 }
 
 void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)

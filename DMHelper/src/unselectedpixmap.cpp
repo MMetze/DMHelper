@@ -5,9 +5,9 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
 
-UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant, QGraphicsItem *parent) :
+UnselectedPixmap::UnselectedPixmap(BattleDialogModelObject* object, QGraphicsItem *parent) :
     QGraphicsPixmapItem(parent),
-    _combatant(combatant),
+    _object(object),
     _draw(true)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
@@ -15,9 +15,9 @@ UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant, QGraph
     //setAcceptHoverEvents(true);
 }
 
-UnselectedPixmap::UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant, QGraphicsItem *parent) :
+UnselectedPixmap::UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelObject* object, QGraphicsItem *parent) :
     QGraphicsPixmapItem(pixmap, parent),
-    _combatant(combatant),
+    _object(object),
     _draw(true)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
@@ -39,9 +39,9 @@ void UnselectedPixmap::setDraw(bool draw)
     _draw = draw;
 }
 
-BattleDialogModelCombatant* UnselectedPixmap::getCombatant()
+BattleDialogModelObject* UnselectedPixmap::getObject()
 {
-    return _combatant;
+    return _object;
 }
 
 QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -70,10 +70,10 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
     */
     else if(change == ItemScenePositionHasChanged)
     {
-        if(_combatant)
+        if(_object)
         {
             QPointF newPos = value.toPointF();
-            _combatant->setPosition(newPos);
+            _object->setPosition(newPos);
         }
     }
     else if(change == ItemSelectedHasChanged)
@@ -129,6 +129,6 @@ void UnselectedPixmap::selectionChanged()
         }
     }
 
-    if(_combatant)
-        _combatant->setSelected(isSelected());
+    if(_object)
+        _object->setSelected(isSelected());
 }

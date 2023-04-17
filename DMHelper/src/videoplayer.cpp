@@ -50,7 +50,7 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
     _buffers[1] = nullptr;
 
 #ifdef Q_OS_WIN
-    _videoFile.replace("/","\\\\");
+    _videoFile.replace("/", "\\\\");
 #endif
     _vlcError = !VideoPlayer::initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES

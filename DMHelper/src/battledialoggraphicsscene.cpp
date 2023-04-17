@@ -385,7 +385,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
         BattleDialogModelCombatant* newHoverItem = nullptr;
         UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(findTopObject(mouseEvent->scenePos()));
         if(pixmap)
-            newHoverItem = pixmap->getCombatant();
+            newHoverItem = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
 
         if(_mouseHoverItem != newHoverItem)
         {
@@ -416,7 +416,7 @@ bool BattleDialogGraphicsScene::handleMouseMoveEvent(QGraphicsSceneMouseEvent *m
                 QPointF eventPos = mouseEvent->scenePos() - _mouseDownItem->scenePos();
                 qreal cross = _mouseDownPos.x()*eventPos.y()-_mouseDownPos.y()*eventPos.x();
                 qreal dot = _mouseDownPos.x()*eventPos.x()+_mouseDownPos.y()*eventPos.y();
-                qreal angle = qRadiansToDegrees(qAtan2(cross,dot));
+                qreal angle = qRadiansToDegrees(qAtan2(cross, dot));
                 _mouseDownItem->setRotation(_previousRotation + angle);
                 _isRotation = true;
                 BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_mouseDownItem);
@@ -652,7 +652,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(item);
             if(pixmap)
             {
-                BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(pixmap->getCombatant());
+                BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(pixmap->getObject());
                 if(monster)
                 {
                     MonsterClass* monsterClass = monster->getMonsterClass();
@@ -1050,9 +1050,9 @@ void BattleDialogGraphicsScene::linkItem()
         UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
         if(pixmap)
         {
-            BattleDialogModelCombatant* combatant = pixmap->getCombatant();
-            if(combatant)
-                emit itemLink(combatant);
+            BattleDialogModelObject* object = pixmap->getObject();
+            if(object)
+                emit itemLink(object);
         }
     }
 
@@ -1078,9 +1078,9 @@ void BattleDialogGraphicsScene::unlinkItem()
         UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
         if(pixmap)
         {
-            BattleDialogModelCombatant* combatant = pixmap->getCombatant();
-            if(combatant)
-                emit itemUnlink(combatant);
+            BattleDialogModelObject* object = pixmap->getObject();
+            if(object)
+                emit itemUnlink(object);
         }
     }
 
@@ -1093,7 +1093,7 @@ void BattleDialogGraphicsScene::activateCombatant()
     if(!pixmap)
         return;
 
-    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantActivate(combatant);
 }
@@ -1104,7 +1104,7 @@ void BattleDialogGraphicsScene::removeCombatant()
     if(!pixmap)
         return;
 
-    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantRemove(combatant);
 }
@@ -1115,7 +1115,7 @@ void BattleDialogGraphicsScene::changeCombatantLayer()
     if(!pixmap)
         return;
 
-    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantChangeLayer(combatant);
 }
@@ -1126,7 +1126,7 @@ void BattleDialogGraphicsScene::damageCombatant()
     if(!pixmap)
         return;
 
-    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantDamage(combatant);
 }
@@ -1137,7 +1137,7 @@ void BattleDialogGraphicsScene::healCombatant()
     if(!pixmap)
         return;
 
-    BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantHeal(combatant);
 }

@@ -51,7 +51,7 @@ BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(int effect
 
 BattleDialogModelEffect* BattleDialogModelEffectFactory::createEffect(const QDomElement& element, bool isImport)
 {
-    int effectType = element.attribute("type",QString::number(BattleDialogModelEffect::BattleDialogModelEffect_Base)).toInt();
+    int effectType = element.attribute("type", QString::number(BattleDialogModelEffect::BattleDialogModelEffect_Base)).toInt();
     BattleDialogModelEffect* result = createEffect(effectType);
 
     if(result)

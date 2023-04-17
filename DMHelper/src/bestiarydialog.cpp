@@ -62,8 +62,8 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->btnAddSpecialAbility, SIGNAL(clicked()), this, SLOT(addSpecialAbility()));
     connect(ui->btnAddReaction, SIGNAL(clicked()), this, SLOT(addReaction()));
 
-    ui->edtArmorClass->setValidator(new QIntValidator(0,100));
-    ui->edtAverageHitPoints->setValidator(new QIntValidator(0,10000));
+    ui->edtArmorClass->setValidator(new QIntValidator(0, 100));
+    ui->edtAverageHitPoints->setValidator(new QIntValidator(0, 10000));
     //ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
 
     connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -278,7 +278,7 @@ void BestiaryDialog::createNewMonster()
     qDebug() << "[Bestiary Dialog] Creating a new monster...";
 
     bool ok;
-    QString monsterName = QInputDialog::getText(this, QString("Enter New Monster Name"),QString("New Monster"),QLineEdit::Normal,QString(),&ok);
+    QString monsterName = QInputDialog::getText(this, QString("Enter New Monster Name"), QString("New Monster"), QLineEdit::Normal, QString(), &ok);
     if((!ok)||(monsterName.isEmpty()))
     {
         qDebug() << "[Bestiary Dialog] New monster not created because the monster name dialog was cancelled";
@@ -655,7 +655,7 @@ void BestiaryDialog::showEvent(QShowEvent * event)
 {
     Q_UNUSED(event);
     qDebug() << "[Bestiary Dialog] Bestiary Dialog shown";
-    connect(Bestiary::Instance(),SIGNAL(changed()),this,SLOT(dataChanged()));
+    connect(Bestiary::Instance(), SIGNAL(changed()), this, SLOT(dataChanged()));
     setMonster(ui->cmbSearch->currentText());
     QDialog::showEvent(event);
 }

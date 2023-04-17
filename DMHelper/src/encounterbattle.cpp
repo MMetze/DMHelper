@@ -366,7 +366,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             BattleDialogModelCombatant* combatant = nullptr;
             int combatantIntId = DMH_GLOBAL_INVALID_ID;
             QUuid combatantId;
-            int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
+            int combatantType = combatantElement.attribute("type", QString::number(DMHelper::CombatantType_Base)).toInt();
             if(combatantType == DMHelper::CombatantType_Character)
             {
                 combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId);
@@ -381,7 +381,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             }
             else if(combatantType == DMHelper::CombatantType_Monster)
             {
-                int monsterType = combatantElement.attribute("monsterType",QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
+                int monsterType = combatantElement.attribute("monsterType", QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
                 if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Combatant)
                 {
                     combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId, true);
@@ -538,7 +538,7 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
     }
     */
 
-    connect(battleModel,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
+    connect(battleModel, SIGNAL(destroyed(QObject*)), this, SLOT(completeBattle()));
 
     return battleModel;
 }

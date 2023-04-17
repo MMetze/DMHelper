@@ -59,8 +59,8 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
 
         QString fontFamily = element.attribute("fontFamily");
         QString fontSize = element.attribute("fontSize");
-        QString fontBold = element.attribute("fontBold",QString::number(0));
-        QString fontItalics = element.attribute("fontItalics",QString::number(0));
+        QString fontBold = element.attribute("fontBold", QString::number(0));
+        QString fontItalics = element.attribute("fontItalics", QString::number(0));
 
         QTextCharFormat format = cursor.charFormat();
         QFont formatFont(fontFamily,

@@ -39,8 +39,8 @@ void UndoFowPoint::inputXML(const QDomElement &element, bool isImport)
     _mapDrawPoint.setY(element.attribute(QString("y")).toInt());
     _mapDrawPoint.setRadius(element.attribute(QString("radius")).toInt());
     _mapDrawPoint.setBrushType(element.attribute(QString("brushtype")).toInt());
-    _mapDrawPoint.setErase(static_cast<bool>(element.attribute("erase",QString::number(1)).toInt()));
-    _mapDrawPoint.setSmooth(static_cast<bool>(element.attribute("smooth",QString::number(1)).toInt()));
+    _mapDrawPoint.setErase(static_cast<bool>(element.attribute("erase", QString::number(1)).toInt()));
+    _mapDrawPoint.setSmooth(static_cast<bool>(element.attribute("smooth", QString::number(1)).toInt()));
 }
 
 int UndoFowPoint::getType() const

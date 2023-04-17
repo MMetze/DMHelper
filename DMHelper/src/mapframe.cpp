@@ -266,15 +266,15 @@ void MapFrame::resetFoW()
     LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
-        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0,0,0,255)));
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 0, 0, 255)));
         layer->getUndoStack()->push(undoFill);
         emit dirty();
     }
 
     /*
-    UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0,0,0,255)));
+    UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0, 0, 0, 255)));
     _mapSource->getUndoStack()->push(undoFill);
-    _mapSource->fillFoW(QColor(0,0,0,255), &_bwFoWImage);
+    _mapSource->fillFoW(QColor(0, 0, 0, 255), &_bwFoWImage);
     emit dirty();
     emit fowChanged(_bwFoWImage);
     */
@@ -292,15 +292,15 @@ void MapFrame::clearFoW()
     LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
-        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0,0,0,0)));
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 0, 0, 0)));
         layer->getUndoStack()->push(undoFill);
         emit dirty();
     }
 
     /*
-    UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0,0,0,0)));
+    UndoFowFill* undoFill = new UndoFowFill(_mapSource, MapEditFill(QColor(0, 0, 0, 0)));
     _mapSource->getUndoStack()->push(undoFill);
-    _mapSource->fillFoW(QColor(0,0,0,0), &_bwFoWImage);
+    _mapSource->fillFoW(QColor(0, 0, 0, 0), &_bwFoWImage);
     emit dirty();
     emit fowChanged(_bwFoWImage);
     */
@@ -312,7 +312,7 @@ void MapFrame::undoPaint()
         return;
 
     // TODO: layers
-    //_mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1)
+    //_mapSource->applyPaintTo(nullptr, QColor(0, 0, 0, 128), _mapSource->getUndoStack()->index() - 1)
     // updateFoW();
 }
 
@@ -1262,7 +1262,7 @@ bool MapFrame::execEventFilterSelectZoom(QObject *obj, QEvent *event)
 
             qreal hScale = (static_cast<qreal>(ui->graphicsView->width())) / (static_cast<qreal>(target.width()));
             qreal vScale = (static_cast<qreal>(ui->graphicsView->height())) / (static_cast<qreal>(target.height()));
-            qreal minScale = qMin(hScale,vScale);
+            qreal minScale = qMin(hScale, vScale);
 
             setScale(minScale);
             ui->graphicsView->horizontalScrollBar()->setValue(target.left() * minScale);
@@ -1553,7 +1553,7 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         QFont textFont = _distanceText->font();
         textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
         _distanceText->setFont(textFont);
-        _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5,5)));
+        _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5, 5)));
 
         _mapItem = new MapDrawPath(1, DMHelper::BrushType_Circle,
                                    false, true,
@@ -1597,7 +1597,7 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         QString distanceText;
         distanceText = QString::number(lineDistance, 'f', 1);
         _distanceText->setText(distanceText);
-        _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5,5)));
+        _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5, 5)));
 
         MapDrawPath* mapPath = dynamic_cast<MapDrawPath*>(_mapItem);
         if(mapPath)
@@ -1927,7 +1927,7 @@ void MapFrame::checkPartyUpdate()
             _partyIcon->setZValue(DMHelper::BattleDialog_Z_Combatant);
         }
 
-        qreal scaleFactor = (static_cast<qreal>(_mapSource->getPartyScale()-2)) / static_cast<qreal>(qMax(partyPixmap.width(),partyPixmap.height()));
+        qreal scaleFactor = (static_cast<qreal>(_mapSource->getPartyScale()-2)) / static_cast<qreal>(qMax(partyPixmap.width(), partyPixmap.height()));
         //_partyIcon->setScale(0.04 * static_cast<qreal>(_mapSource->getPartyScale())); //250 * 25 / 625  = 10;
         _partyIcon->setScale(scaleFactor);
 
@@ -1943,7 +1943,7 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     // TODO: Layers
     setBackgroundPixmap(QPixmap::fromImage(image));
     QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
-    fowImage.fill(QColor(0,0,0,0));
+    fowImage.fill(QColor(0, 0, 0, 0));
     /*
     _mapSource->setExternalFoWImage(fowImage);
 

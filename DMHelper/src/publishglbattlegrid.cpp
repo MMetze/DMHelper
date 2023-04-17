@@ -614,7 +614,7 @@ void PublishGLBattleGrid::rebuildGrid()
     };
     */
 
-    Grid* tempGrid = new Grid(nullptr, QRect(QPoint(0,0), _gridSize.toSize()));
+    Grid* tempGrid = new Grid(nullptr, QRect(QPoint(0, 0), _gridSize.toSize()));
     tempGrid->rebuildGrid(_config, 0, this);
     delete tempGrid;
 

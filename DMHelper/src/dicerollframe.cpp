@@ -107,5 +107,5 @@ void DiceRollFrame::init()
     QValidator *valTarget = new QIntValidator(0, 100, this);
     ui->editTarget->setValidator(valTarget);
 
-    connect(ui->btnRoll,SIGNAL(clicked()),this,SLOT(rollDice()));
+    connect(ui->btnRoll, SIGNAL(clicked()), this, SLOT(rollDice()));
 }

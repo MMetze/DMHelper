@@ -62,7 +62,7 @@ public:
 public slots:
     virtual void setShown(bool isShown);
     virtual void setKnown(bool isKnown);
-    virtual void setSelected(bool isSelected);
+    virtual void setSelected(bool isSelected) override;
     virtual void setConditions(int conditions) = 0;
     virtual void applyConditions(int conditions) = 0;
     virtual void removeConditions(int conditions) = 0;

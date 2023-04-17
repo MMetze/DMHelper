@@ -18,10 +18,10 @@ CustomTableFrame::CustomTableFrame(const QString& tableDirectory, QWidget *paren
     _usedTables()
 {
     ui->setupUi(this);
-    ui->vSplitter->setStretchFactor(0,1);
-    ui->vSplitter->setStretchFactor(1,5);
-    ui->hSplitter->setStretchFactor(0,1);
-    ui->hSplitter->setStretchFactor(1,3);
+    ui->vSplitter->setStretchFactor(0, 1);
+    ui->vSplitter->setStretchFactor(1, 5);
+    ui->hSplitter->setStretchFactor(0, 1);
+    ui->hSplitter->setStretchFactor(1, 3);
 
     ui->listWidget->setUniformItemSizes(true);
     //ui->listEntries->setUniformItemSizes(true);

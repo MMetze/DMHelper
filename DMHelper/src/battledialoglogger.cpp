@@ -71,7 +71,7 @@ void BattleDialogLogger::inputXML(const QDomElement &element, bool isImport)
     QDomElement eventElement = element.firstChildElement("battleevent");
     while(!eventElement.isNull())
     {
-        int eventType = eventElement.attribute("type",QString::number(DMHelper::BattleEvent_Blank)).toInt();
+        int eventType = eventElement.attribute("type", QString::number(DMHelper::BattleEvent_Blank)).toInt();
         switch(eventType)
         {
             case DMHelper::BattleEvent_Damage:

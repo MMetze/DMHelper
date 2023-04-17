@@ -12,10 +12,10 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(int sizeval, qreal rotati
     ui->setupUi(this);
 
     ui->edtName->setText(tip);
-    ui->edtSize->setValidator(new QIntValidator(1,999,this));
+    ui->edtSize->setValidator(new QIntValidator(1, 999, this));
     ui->edtSize->setText(QString::number(sizeval));
     ui->edtSize->selectAll();
-    ui->edtWidth->setValidator(new QIntValidator(1,999,this));
+    ui->edtWidth->setValidator(new QIntValidator(1, 999, this));
     ui->edtWidth->setText(QString::number(5));
     ui->edtWidth->selectAll();
     ui->edtWidth->hide();
@@ -24,7 +24,7 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(int sizeval, qreal rotati
     ui->edtRotation->setText(QString::number(rotation));
     ui->sliderTransparency->setSliderPosition(color.alpha());
 
-    connect(ui->btnColor,SIGNAL(clicked()),this,SLOT(selectNewColor()));
+    connect(ui->btnColor, SIGNAL(clicked()), this, SLOT(selectNewColor()));
 
     _color.setAlpha(255);
     setButtonColor(_color);
@@ -40,10 +40,10 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(const BattleDialogModelEf
     ui->edtName->setText(effect.getTip());
     ui->chkActive->setChecked(effect.getEffectActive());
     ui->chkVisible->setChecked(effect.getEffectVisible());
-    ui->edtSize->setValidator(new QIntValidator(1,999,this));
+    ui->edtSize->setValidator(new QIntValidator(1, 999, this));
     ui->edtSize->setText(QString::number(effect.getSize()));
     ui->edtSize->selectAll();
-    ui->edtWidth->setValidator(new QIntValidator(1,999,this));
+    ui->edtWidth->setValidator(new QIntValidator(1, 999, this));
     ui->edtWidth->setText(QString::number(effect.getWidth()));
     ui->edtWidth->selectAll();
     ui->edtWidth->hide();
@@ -52,7 +52,7 @@ BattleDialogEffectSettings::BattleDialogEffectSettings(const BattleDialogModelEf
     ui->edtRotation->setText(QString::number(effect.getRotation()));
     ui->sliderTransparency->setSliderPosition(effect.getColor().alpha());
 
-    connect(ui->btnColor,SIGNAL(clicked()),this,SLOT(selectNewColor()));
+    connect(ui->btnColor, SIGNAL(clicked()), this, SLOT(selectNewColor()));
 
     _color.setAlpha(255);
     setButtonColor(_color);

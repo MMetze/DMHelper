@@ -200,8 +200,8 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         return;
     }
 
-    _majorVersion = bestiaryElement.attribute("majorversion",QString::number(0)).toInt();
-    _minorVersion = bestiaryElement.attribute("minorversion",QString::number(0)).toInt();
+    _majorVersion = bestiaryElement.attribute("majorversion", QString::number(0)).toInt();
+    _minorVersion = bestiaryElement.attribute("minorversion", QString::number(0)).toInt();
     qDebug() << "[Bestiary]    Bestiary version: " << getVersion();
     if(!isVersionCompatible())
     {

@@ -74,7 +74,7 @@ void BestiaryExportDialog::exportSelected()
          return;
     }
 
-    QString bestiaryFileName = QFileDialog::getSaveFileName(this,QString("Save Bestiary"),QString(),QString("XML files (*.xml)"));
+    QString bestiaryFileName = QFileDialog::getSaveFileName(this, QString("Save Bestiary"), QString(), QString("XML files (*.xml)"));
     if(bestiaryFileName.isEmpty())
     {
         qDebug() << "[BestiaryExportDialog] No valid file selected for.";

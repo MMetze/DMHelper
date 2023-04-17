@@ -164,7 +164,7 @@ protected:
     QString _challenge; // changed from float to string, need both getters
 
     //QString _skills; // completely changed to individual values to be read
-    QMap<int,int> _skillValues;
+    QMap<int, int> _skillValues;
 
     int _strength;
     int _dexterity;

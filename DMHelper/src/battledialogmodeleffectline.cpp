@@ -69,7 +69,7 @@ QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale)
     qreal effectWidth = static_cast<qreal>(getWidth());
     qreal effectHeight = static_cast<qreal>(getSize());
     qreal rectWidth = (effectHeight > 0.1) ? 100.0 * effectWidth / effectHeight : 100.0 * effectWidth;
-    QGraphicsRectItem* rectItem = new UnselectedRect(-rectWidth / 2.0, 0.0, rectWidth, 100.0);
+    QGraphicsRectItem* rectItem = new UnselectedRect(this, -rectWidth / 2.0, 0.0, rectWidth, 100.0);
 
     setEffectItemData(rectItem);
 
@@ -110,7 +110,7 @@ void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal g
     QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
     if(shapeItem)
     {
-        shapeItem->setPen(QPen(QColor(getColor().red(),getColor().green(),getColor().blue(),255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        shapeItem->setPen(QPen(QColor(getColor().red(), getColor().green(), getColor().blue(), 255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         shapeItem->setBrush(QBrush(getColor()));
         registerChange();
     }

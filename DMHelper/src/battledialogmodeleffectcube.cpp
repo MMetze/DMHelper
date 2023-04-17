@@ -33,7 +33,7 @@ int BattleDialogModelEffectCube::getEffectType() const
 
 QGraphicsItem* BattleDialogModelEffectCube::createEffectShape(qreal gridScale)
 {
-    QGraphicsRectItem* rectItem = new UnselectedRect(0,0,100,100);
+    QGraphicsRectItem* rectItem = new UnselectedRect(this, 0, 0, 100, 100);
 
     setEffectItemData(rectItem);
 

@@ -154,10 +154,10 @@ void BattleFrameMapDrawer::resetFoW()
 
     // TODO: Layers
     /*
-    UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0,0,0,255)));
+    UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0, 0, 0, 255)));
     _map->getUndoStack()->push(undoFill);
-    //_map->fillFoW(QColor(0,0,0,128), _fow);
-    //_map->fillFoW(QColor(0,0,0,255), _glFow);
+    //_map->fillFoW(QColor(0, 0, 0, 128), _fow);
+    //_map->fillFoW(QColor(0, 0, 0, 255), _glFow);
     endPath();
     emit fowEdited(*_fow);
     emit fowChanged(*_glFow);
@@ -174,10 +174,10 @@ void BattleFrameMapDrawer::clearFoW()
 
     // TODO: Layers
     /*
-    UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0,0,0,0)));
+    UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0, 0, 0, 0)));
     _map->getUndoStack()->push(undoFill);
-    //_map->fillFoW(QColor(0,0,0,0), _fow);
-    //_map->fillFoW(QColor(0,0,0,0), _glFow);
+    //_map->fillFoW(QColor(0, 0, 0, 0), _fow);
+    //_map->fillFoW(QColor(0, 0, 0, 0), _glFow);
     endPath();
     emit fowEdited(*_fow);
     emit fowChanged(*_glFow);

@@ -42,22 +42,22 @@ void LayerImage::inputXML(const QDomElement &element, bool isImport)
     {
         _filterApplied = true;
 
-        _filter._r2r = filterElement.attribute("r2r",QString::number(1.0)).toDouble();
-        _filter._g2r = filterElement.attribute("g2r",QString::number(0.0)).toDouble();
-        _filter._b2r = filterElement.attribute("b2r",QString::number(0.0)).toDouble();
-        _filter._r2g = filterElement.attribute("r2g",QString::number(0.0)).toDouble();
-        _filter._g2g = filterElement.attribute("g2g",QString::number(1.0)).toDouble();
-        _filter._b2g = filterElement.attribute("b2g",QString::number(0.0)).toDouble();
-        _filter._r2b = filterElement.attribute("r2b",QString::number(0.0)).toDouble();
-        _filter._g2b = filterElement.attribute("g2b",QString::number(0.0)).toDouble();
-        _filter._b2b = filterElement.attribute("b2b",QString::number(1.0)).toDouble();
-        _filter._sr = filterElement.attribute("sr",QString::number(1.0)).toDouble();
-        _filter._sg = filterElement.attribute("sg",QString::number(1.0)).toDouble();
-        _filter._sb = filterElement.attribute("sb",QString::number(1.0)).toDouble();
+        _filter._r2r = filterElement.attribute("r2r", QString::number(1.0)).toDouble();
+        _filter._g2r = filterElement.attribute("g2r", QString::number(0.0)).toDouble();
+        _filter._b2r = filterElement.attribute("b2r", QString::number(0.0)).toDouble();
+        _filter._r2g = filterElement.attribute("r2g", QString::number(0.0)).toDouble();
+        _filter._g2g = filterElement.attribute("g2g", QString::number(1.0)).toDouble();
+        _filter._b2g = filterElement.attribute("b2g", QString::number(0.0)).toDouble();
+        _filter._r2b = filterElement.attribute("r2b", QString::number(0.0)).toDouble();
+        _filter._g2b = filterElement.attribute("g2b", QString::number(0.0)).toDouble();
+        _filter._b2b = filterElement.attribute("b2b", QString::number(1.0)).toDouble();
+        _filter._sr = filterElement.attribute("sr", QString::number(1.0)).toDouble();
+        _filter._sg = filterElement.attribute("sg", QString::number(1.0)).toDouble();
+        _filter._sb = filterElement.attribute("sb", QString::number(1.0)).toDouble();
 
-        _filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay",QString::number(1)).toInt());
-        _filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor",QString("#000000")));
-        _filter._overlayAlpha = filterElement.attribute("overlayAlpha",QString::number(128)).toInt();
+        _filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay", QString::number(1)).toInt());
+        _filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor", QString("#000000")));
+        _filter._overlayAlpha = filterElement.attribute("overlayAlpha", QString::number(128)).toInt();
     }
 
     Layer::inputXML(element, isImport);
@@ -121,7 +121,7 @@ void LayerImage::applyPosition(const QPoint& position)
 //        _imageGLObject->setPosition(QPoint(position.x() + pointTopLeft.x(),
 //                                           position.y()));
                                            //pointTopLeft.y() - position.y()));
-//        _imageGLObject->setPosition(QPoint(0,0));
+//        _imageGLObject->setPosition(QPoint(0, 0));
 //        _imageGLObject->setPosition(position);
         _imageGLObject->setPosition(QPoint(pointTopLeft.x() + position.x(), -pointTopLeft.y() - position.y()));
     }

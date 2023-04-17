@@ -1,6 +1,7 @@
 #include "battledialogmodeleffectobject.h"
 #include "battledialogeffectsettings.h"
 #include "dmconstants.h"
+#include "unselectedpixmap.h"
 #include <QDomElement>
 #include <QGraphicsPixmapItem>
 #include <QDir>
@@ -81,21 +82,22 @@ BattleDialogEffectSettings* BattleDialogModelEffectObject::getEffectEditor() con
 
 QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
 {
-    QGraphicsPixmapItem* pixmapItem = new QGraphicsPixmapItem();
+    QPixmap itemPixmap(_imageFile);
+    if(itemPixmap.isNull())
+    {
+        qDebug() << "[Battle Dialog Model Effect Object] ERROR: unable to load image file: " << _imageFile;
+        //delete pixmapItem;
+        return nullptr;
+    }
+
+    //QGraphicsPixmapItem* pixmapItem = new QGraphicsPixmapItem(); add effect ref and set position, use UnselectedPixmap
+    QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(this);
     setEffectItemData(pixmapItem);
     prepareItem(*pixmapItem);
 
     qDebug() << "[Battle Dialog Model Effect Object] applying extra object effect values...";
 
     // Now correct the special case information for the object effect
-    QPixmap itemPixmap(_imageFile);
-    if(itemPixmap.isNull())
-    {
-        qDebug() << "[Battle Dialog Model Effect Object] ERROR: unable to load image file: " << _imageFile;
-        delete pixmapItem;
-        return nullptr;
-    }
-
     _imageScaleFactor = 100.0 / itemPixmap.width();
     if(_imageRotation != 0)
     {

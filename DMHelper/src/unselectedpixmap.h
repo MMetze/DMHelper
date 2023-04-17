@@ -3,19 +3,19 @@
 
 #include <QGraphicsPixmapItem>
 
-class BattleDialogModelCombatant;
+class BattleDialogModelObject;
 
 class UnselectedPixmap : public QGraphicsPixmapItem
 {
 public:
-    explicit UnselectedPixmap(BattleDialogModelCombatant* combatant = nullptr, QGraphicsItem *parent = nullptr);
-    UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant, QGraphicsItem *parent = nullptr);
+    explicit UnselectedPixmap(BattleDialogModelObject* object = nullptr, QGraphicsItem *parent = nullptr);
+    UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelObject* object, QGraphicsItem *parent = nullptr);
 
     virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
     void setDraw(bool draw);
 
     void setHover(bool hover);
-    BattleDialogModelCombatant* getCombatant();
+    BattleDialogModelObject* getObject();
 
 protected:
 //    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
@@ -25,7 +25,7 @@ protected:
     void selectionChanged();
 
 private:
-    BattleDialogModelCombatant* _combatant;
+    BattleDialogModelObject* _object;
     bool _draw;
 };
 

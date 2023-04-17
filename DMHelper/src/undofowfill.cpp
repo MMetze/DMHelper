@@ -21,7 +21,7 @@ void UndoFowFill::apply()
         if(preview)
             applyColor.setAlpha(_mapEditFill.color().alpha() / 2);
 
-        _layer->fillFoW(applyColor,target);
+        _layer->fillFoW(applyColor, target);
     }
     */
 }

@@ -213,7 +213,7 @@ QUndoStack* LayerFow::getUndoStack() const
 
 void LayerFow::undoPaint()
 {
-    //_mapSource->applyPaintTo(nullptr, QColor(0,0,0,128), _mapSource->getUndoStack()->index() - 1)
+    //_mapSource->applyPaintTo(nullptr, QColor(0, 0, 0, 128), _mapSource->getUndoStack()->index() - 1)
     applyPaintTo(getUndoStack()->index() - 1);
 }
 
@@ -293,20 +293,20 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
             if(mapDraw.smooth())
             {
                 QRadialGradient grad(point, mapDraw.radius());
-                grad.setColorAt(0, QColor(0,0,0,0));
-                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())), QColor(0,0,0,0));
-                grad.setColorAt(1, QColor(255,255,255));
+                grad.setColorAt(0, QColor(0, 0, 0, 0));
+                grad.setColorAt(1.0 - (5.0/static_cast<qreal>(mapDraw.radius())), QColor(0, 0, 0, 0));
+                grad.setColorAt(1, QColor(255, 255, 255));
                 p.setBrush(grad);
             }
             else
             {
-                p.setBrush(QColor(0,0,0,0));
+                p.setBrush(QColor(0, 0, 0, 0));
             }
             p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
         }
         else
         {
-            p.setBrush(QColor(0,0,0,255));
+            p.setBrush(QColor(0, 0, 0, 255));
             p.setCompositionMode(QPainter::CompositionMode_Source);
         }
 
@@ -321,30 +321,30 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
             {
                 qreal border = static_cast<qreal>(mapDraw.radius()) / 20.0;
                 qreal radius = static_cast<qreal>(mapDraw.radius()) - (border * 4);
-                p.setBrush(QColor(0,0,0,0));
+                p.setBrush(QColor(0, 0, 0, 0));
                 p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
                 radius += border;
-                p.setBrush(QColor(0,0,0,50));
+                p.setBrush(QColor(0, 0, 0, 50));
                 p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
                 radius += border;
-                p.setBrush(QColor(0,0,0,100));
+                p.setBrush(QColor(0, 0, 0, 100));
                 p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
                 radius += border;
-                p.setBrush(QColor(0,0,0,150));
+                p.setBrush(QColor(0, 0, 0, 150));
                 p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
                 radius += border;
-                p.setBrush(QColor(0,0,0,200));
+                p.setBrush(QColor(0, 0, 0, 200));
                 p.drawRect(QRectF(point.x() - radius, point.y() - radius, radius * 2, radius * 2));
             }
             else
             {
-                p.setBrush(QColor(0,0,0,0));
+                p.setBrush(QColor(0, 0, 0, 0));
                 p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
             }
         }
         else
         {
-            p.setBrush(QColor(0,0,0,255));
+            p.setBrush(QColor(0, 0, 0, 255));
             p.setCompositionMode(QPainter::CompositionMode_Source);
             p.drawRect(point.x() - mapDraw.radius(), point.y() - mapDraw.radius(), mapDraw.radius() * 2, mapDraw.radius() * 2);
         }
@@ -371,38 +371,38 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
                             static_cast<qreal>(rect.y()) + rectHeight * 4,
                             static_cast<qreal>(rect.width()) - rectWidth * 4 * 2,
                             static_cast<qreal>(rect.height()) - rectHeight * 4 * 2 );
-            p.setBrush(QColor(0,0,0,0));
+            p.setBrush(QColor(0, 0, 0, 0));
             p.drawRect(baseRect);
             baseRect.translate(-rectWidth, -rectHeight);
             baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
             baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,50));
+            p.setBrush(QColor(0, 0, 0, 50));
             p.drawRect(baseRect);
             baseRect.translate(-rectWidth, -rectHeight);
             baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
             baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,100));
+            p.setBrush(QColor(0, 0, 0, 100));
             p.drawRect(baseRect);
             baseRect.translate(-rectWidth, -rectHeight);
             baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
             baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,150));
+            p.setBrush(QColor(0, 0, 0, 150));
             p.drawRect(baseRect);
             baseRect.translate(-rectWidth, -rectHeight);
             baseRect.setWidth(static_cast<qreal>(baseRect.width()) + rectWidth * 2);
             baseRect.setHeight(static_cast<qreal>(baseRect.height()) + rectHeight * 2);
-            p.setBrush(QColor(0,0,0,200));
+            p.setBrush(QColor(0, 0, 0, 200));
             p.drawRect(baseRect);
         }
         else
         {
-            p.setBrush(QColor(0,0,0,0));
+            p.setBrush(QColor(0, 0, 0, 0));
             p.drawRect(rect);
         }
     }
     else
     {
-        p.setBrush(QColor(0,0,0,255));
+        p.setBrush(QColor(0, 0, 0, 255));
         p.setCompositionMode(QPainter::CompositionMode_Source);
         p.drawRect(rect);
     }
@@ -443,7 +443,7 @@ QImage LayerFow::getBWFoWImage(const QSize &size)
         _indexBWFow = 0;
     }
 
-    applyPaintTo(&_imgBWFow, QColor(0,0,0,255), _undoStack->index(), false, _indexBWFow);
+    applyPaintTo(&_imgBWFow, QColor(0, 0, 0, 255), _undoStack->index(), false, _indexBWFow);
     _indexBWFow = qMax(_undoStack->index() - 1, 0);
 
     return _imgBWFow;

@@ -224,8 +224,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mruHandler, SIGNAL(triggerMRU(QString)), this, SLOT(openCampaign(QString)));
     _options->setMRUHandler(mruHandler);
     _options->readSettings();
-    connect(_options,SIGNAL(bestiaryFileNameChanged()),this,SLOT(readBestiary()));
-    connect(_options,SIGNAL(spellbookFileNameChanged()),this,SLOT(readSpellbook()));
+    connect(_options, SIGNAL(bestiaryFileNameChanged()), this, SLOT(readBestiary()));
+    connect(_options, SIGNAL(spellbookFileNameChanged()), this, SLOT(readSpellbook()));
     qDebug() << "[MainWindow] Settings Read";
 
     // Set the global font
@@ -243,7 +243,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QSize screenSize = screen != nullptr ? screen->availableSize() : QSize(1000, 1000);
     QSplashScreen splash(pixmap.scaled(screenSize.width() / 2, screenSize.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     splash.show();
-    splash.showMessage(QString("Initializing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Initializing DMHelper\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
 
     ui->setupUi(this);
@@ -257,8 +257,8 @@ MainWindow::MainWindow(QWidget *parent) :
     mruHandler->setActionsMenu(_ribbonTabFile->getMRUMenu());
 
     // TODO: find out why the following has no effect! There must be something in the frames that has "minimumexpanding" size policy
-    //ui->splitter->setStretchFactor(0,2);
-    //ui->splitter->setStretchFactor(1,2);
+    //ui->splitter->setStretchFactor(0, 2);
+    //ui->splitter->setStretchFactor(1, 2);
 
     qDebug() << "[MainWindow] Initializing Bestiary";
     Bestiary::Initialize();
@@ -293,11 +293,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabFile, SIGNAL(closeClicked()), this, SLOT(closeCampaign()));
     QShortcut* quitShortcut = new QShortcut(QKeySequence(tr("Ctrl+Q", "Quit")), this);
     connect(quitShortcut, SIGNAL(activated()), this, SLOT(close()));
-    connect(ui->actionE_xit,SIGNAL(triggered()),this,SLOT(close()));
+    connect(ui->actionE_xit, SIGNAL(triggered()), this, SLOT(close()));
 
     // Campaign Menu
-    connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(handleCampaignLoaded(Campaign*)));
-    connect(this,SIGNAL(campaignLoaded(Campaign*)),this,SLOT(clearDirty()));
+    connect(this, SIGNAL(campaignLoaded(Campaign*)), this, SLOT(handleCampaignLoaded(Campaign*)));
+    connect(this, SIGNAL(campaignLoaded(Campaign*)), this, SLOT(clearDirty()));
     connect(_ribbonTabCampaign, SIGNAL(newPartyClicked()), this, SLOT(newParty()));
     connect(_ribbonTabCampaign, SIGNAL(newCharacterClicked()), this, SLOT(newCharacter()));
     connect(_ribbonTabCampaign, SIGNAL(newMapClicked()), this, SLOT(newMap()));
@@ -337,8 +337,8 @@ MainWindow::MainWindow(QWidget *parent) :
     // Help Menu
     connect(_ribbonTabFile, SIGNAL(checkForUpdatesClicked()), this, SLOT(checkForUpdates()));
     connect(_ribbonTabFile, SIGNAL(aboutClicked()), this, SLOT(openAboutDialog()));
-    connect(ui->treeView,SIGNAL(expanded(QModelIndex)),this,SLOT(handleTreeItemExpanded(QModelIndex)));
-    connect(ui->treeView,SIGNAL(collapsed(QModelIndex)),this,SLOT(handleTreeItemCollapsed(QModelIndex)));
+    connect(ui->treeView, SIGNAL(expanded(QModelIndex)), this, SLOT(handleTreeItemExpanded(QModelIndex)));
+    connect(ui->treeView, SIGNAL(collapsed(QModelIndex)), this, SLOT(handleTreeItemCollapsed(QModelIndex)));
 
     // Battle Menu
     // connections set up elsewhere
@@ -376,15 +376,15 @@ MainWindow::MainWindow(QWidget *parent) :
     }
 
     connect(ui->treeView, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(handleCustomContextMenu(QPoint)));
-    connect(ui->treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(handleTreeItemSelected(QModelIndex,QModelIndex)));
+    connect(ui->treeView->selectionModel(), SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(handleTreeItemSelected(QModelIndex, QModelIndex)));
     connect(ui->treeView, SIGNAL(activated(QModelIndex)), this, SLOT(handleTreeItemDoubleClicked(QModelIndex)));
     connect(_treeModel, &CampaignTreeModel::campaignChanged, ui->treeView, &CampaignTree::campaignChanged);
     connect(_treeModel, &CampaignTreeModel::itemMoved, ui->treeView, &CampaignTree::handleItemMoved);
     connect(_treeModel, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(handleTreeItemChanged(QStandardItem*)));
     qDebug() << "[MainWindow] Tree Model Created";
 
-    connect(Bestiary::Instance(),SIGNAL(changed()),&_bestiaryDlg,SLOT(dataChanged()));
-    connect(Spellbook::Instance(),SIGNAL(changed()),&_spellDlg,SLOT(dataChanged()));
+    connect(Bestiary::Instance(), SIGNAL(changed()), &_bestiaryDlg, SLOT(dataChanged()));
+    connect(Spellbook::Instance(), SIGNAL(changed()), &_spellDlg, SLOT(dataChanged()));
 
     qDebug() << "[MainWindow] Loading Bestiary";
 #ifndef Q_OS_MAC
@@ -574,7 +574,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->stackedWidgetEncounter->addFrame(DMHelper::CampaignType_Map, _mapFrame);
     qDebug() << "[MainWindow]     Adding Map Frame widget as page #" << ui->stackedWidgetEncounter->count() - 1;
     _mapFrame->setPointerFile(_options->getPointerFile());
-    //connect(mapFrame,SIGNAL(publishImage(QImage)),this,SIGNAL(dispatchPublishImage(QImage)));
+    //connect(mapFrame, SIGNAL(publishImage(QImage)), this, SIGNAL(dispatchPublishImage(QImage)));
     connect(_mapFrame, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_mapFrame, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), _mapFrame, SLOT(targetResized(QSize)));
@@ -650,7 +650,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Load the quick reference tabs
 #ifndef Q_OS_MAC
-    splash.showMessage(QString("Initializing Quick Reference tabs...\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Initializing Quick Reference tabs...\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
     qDebug() << "[MainWindow] Creating Reference Tabs";
@@ -696,7 +696,7 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "[MainWindow] Reference Tabs Created";
 
 #ifndef Q_OS_MAC
-    splash.showMessage(QString("Preparing DMHelper\n"),Qt::AlignBottom | Qt::AlignHCenter);
+    splash.showMessage(QString("Preparing DMHelper\n"), Qt::AlignBottom | Qt::AlignHCenter);
 #endif
     qApp->processEvents();
 
@@ -721,7 +721,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(dispatchPublishImage(QImage)), _networkController, SLOT(uploadImage(QImage)));
     connect(_audioPlayer, SIGNAL(trackChanged(AudioTrack*)), _networkController, SLOT(uploadTrack(AudioTrack*)));
     connect(_options, SIGNAL(networkEnabledChanged(bool)), _networkController, SLOT(enableNetworkController(bool)));
-    connect(_options, SIGNAL(networkSettingsChanged(QString,QString,QString,QString,QString)), _networkController, SLOT(setNetworkLogin(QString,QString,QString,QString,QString)));
+    connect(_options, SIGNAL(networkSettingsChanged(QString, QString, QString, QString, QString)), _networkController, SLOT(setNetworkLogin(QString, QString, QString, QString, QString)));
     // TODO: _battleDlgMgr->setNetworkManager(_networkController);
     */
 #endif
@@ -796,7 +796,7 @@ bool MainWindow::saveCampaign()
 
     if(_campaignFileName.isEmpty())
     {
-        _campaignFileName = QFileDialog::getSaveFileName(this,QString("Save Campaign"),QString(),QString("XML files (*.xml)"));
+        _campaignFileName = QFileDialog::getSaveFileName(this, QString("Save Campaign"), QString(), QString("XML files (*.xml)"));
         if(_campaignFileName.isEmpty())
             return false;
     }
@@ -881,7 +881,7 @@ void MainWindow::saveCampaignAs()
 
 void MainWindow::openFileDialog()
 {
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select Campaign"), QString(), QString("XML files (*.xml)"));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Campaign"), QString(), QString("XML files (*.xml)"));
     if( (!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)) )
         openCampaign(filename);
 }
@@ -2212,7 +2212,7 @@ void MainWindow::handleCampaignLoaded(Campaign* campaign)
 
     if(campaign)
     {
-        QModelIndex firstIndex = _treeModel->index(0,0);
+        QModelIndex firstIndex = _treeModel->index(0, 0);
         if(firstIndex.isValid())
             selectIndex(firstIndex); //ui->treeView->setCurrentIndex(firstIndex); // Activate the first entry in the tree
         else
@@ -2267,18 +2267,18 @@ void MainWindow::updateClock()
 {
     if(_campaign)
     {
-        connect(_timeAndDateFrame,SIGNAL(dateChanged(BasicDate)),_campaign,SLOT(setDate(BasicDate)));
-        connect(_campaign,SIGNAL(dateChanged(BasicDate)),_timeAndDateFrame,SLOT(setDate(BasicDate)));
-        connect(_timeAndDateFrame,SIGNAL(timeChanged(QTime)),_campaign,SLOT(setTime(QTime)));
-        connect(_campaign,SIGNAL(timeChanged(QTime)),_timeAndDateFrame,SLOT(setTime(QTime)));
+        connect(_timeAndDateFrame, SIGNAL(dateChanged(BasicDate)), _campaign, SLOT(setDate(BasicDate)));
+        connect(_campaign, SIGNAL(dateChanged(BasicDate)), _timeAndDateFrame, SLOT(setDate(BasicDate)));
+        connect(_timeAndDateFrame, SIGNAL(timeChanged(QTime)), _campaign, SLOT(setTime(QTime)));
+        connect(_campaign, SIGNAL(timeChanged(QTime)), _timeAndDateFrame, SLOT(setTime(QTime)));
 
         _timeAndDateFrame->setDate(_campaign->getDate());
         _timeAndDateFrame->setTime(_campaign->getTime());
     }
     else
     {
-        _timeAndDateFrame->setDate(BasicDate(1,1,0));
-        _timeAndDateFrame->setTime(QTime(0,0));
+        _timeAndDateFrame->setDate(BasicDate(1, 1, 0));
+        _timeAndDateFrame->setTime(QTime(0, 0));
     }
 }
 
@@ -2369,7 +2369,7 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     if(campaignItem->isEditable())
     {
         QAction* editItem = new QAction(QIcon(":/img/data/icon_edit.png"), QString("Edit Item"), contextMenu);
-        connect(editItem,SIGNAL(triggered()),this,SLOT(editCurrentItem()));
+        connect(editItem, SIGNAL(triggered()), this, SLOT(editCurrentItem()));
         contextMenu->addAction(editItem);
 
         contextMenu->addSeparator();
@@ -2526,7 +2526,7 @@ void MainWindow::importBestiary()
     if(!Bestiary::Instance())
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select exported file for import"), QString(), QString("XML files (*.xml)"));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select exported file for import"), QString(), QString("XML files (*.xml)"));
     if((!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)))
     {
         qDebug() << "[MainWindow] Importing bestiary: " << filename;

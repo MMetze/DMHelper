@@ -43,7 +43,7 @@ VideoPlayerGLPlayer::VideoPlayerGLPlayer(const QString& videoFile, QOpenGLContex
     if(_context)
     {
 #ifdef Q_OS_WIN
-        _videoFile.replace("/","\\\\");
+        _videoFile.replace("/", "\\\\");
 #endif
         _vlcError = !VideoPlayerGLPlayer::initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES

@@ -16,7 +16,7 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
     // Not this: setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
 
     //setAutoFillBackground(true);
-    //setStyleSheet("background-color: rgba(0,0,0,255);");
+    //setStyleSheet("background-color: rgba(0, 0, 0, 255);");
 
     _publishFrame = new PublishGLFrame(this);
     setCentralWidget(_publishFrame);

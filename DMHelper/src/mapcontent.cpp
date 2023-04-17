@@ -37,7 +37,7 @@ MapMarker::MapMarker() :
     _playerVisible(false),
     _title(),
     _description(),
-    _color(115,18,0),
+    _color(115, 18, 0),
     _iconFile(),
     _iconScale(40),
     _coloredIcon(false),

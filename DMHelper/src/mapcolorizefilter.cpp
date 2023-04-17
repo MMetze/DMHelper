@@ -39,9 +39,9 @@ QImage MapColorizeFilter::apply(const QImage& in) const
             qreal r = static_cast<qreal>(qRed(inputLine[x]));
             qreal g = static_cast<qreal>(qGreen(inputLine[x]));
             qreal b = static_cast<qreal>(qBlue(inputLine[x]));
-            outputLine[x] = qRgba(qMin(qMax(static_cast<int>((_r2r*r + _g2r*g + _b2r*b) * _sr),0),255),
-                                  qMin(qMax(static_cast<int>((_r2g*r + _g2g*g + _b2g*b) * _sg),0),255),
-                                  qMin(qMax(static_cast<int>((_r2b*r + _g2b*g + _b2b*b) * _sb),0),255),
+            outputLine[x] = qRgba(qMin(qMax(static_cast<int>((_r2r*r + _g2r*g + _b2r*b) * _sr), 0), 255),
+                                  qMin(qMax(static_cast<int>((_r2g*r + _g2g*g + _b2g*b) * _sg), 0), 255),
+                                  qMin(qMax(static_cast<int>((_r2b*r + _g2b*g + _b2b*b) * _sb), 0), 255),
                                   qAlpha(inputLine[x]));
         }
     }

@@ -210,7 +210,7 @@ bool LayersEditDialog::eventFilter(QObject *obj, QEvent *event)
     if((event->type() == QEvent::MouseButtonRelease) && (_layerLayout))
         selectFrame(dynamic_cast<LayerFrame*>(obj));
 
-    return QDialog::eventFilter(obj,event);
+    return QDialog::eventFilter(obj, event);
 }
 
 void LayersEditDialog::resetLayout()

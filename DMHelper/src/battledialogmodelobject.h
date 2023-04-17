@@ -21,7 +21,8 @@ public:
     virtual void setPosition(qreal x, qreal y);
 
 public slots:
-    void setLinkedObject(BattleDialogModelObject* linkedObject);
+    virtual void setLinkedObject(BattleDialogModelObject* linkedObject);
+    virtual void setSelected(bool isSelected);
 
 signals:
     void linkChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);

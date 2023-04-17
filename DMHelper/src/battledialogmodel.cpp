@@ -45,22 +45,22 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    _background = QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
-                         element.attribute("backgroundColorG",QString::number(0)).toInt(),
-                         element.attribute("backgroundColorB",QString::number(0)).toInt());
-    _cameraRect = QRectF(element.attribute("cameraRectX",QString::number(0.0)).toDouble(),
-                         element.attribute("cameraRectY",QString::number(0.0)).toDouble(),
-                         element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
-                         element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
+    _background = QColor(element.attribute("backgroundColorR", QString::number(0)).toInt(),
+                         element.attribute("backgroundColorG", QString::number(0)).toInt(),
+                         element.attribute("backgroundColorB", QString::number(0)).toInt());
+    _cameraRect = QRectF(element.attribute("cameraRectX", QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectY", QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectWidth", QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectHeight", QString::number(0.0)).toDouble());
     // TODO: Layers - need this as backwards compability
-    int gridScale = element.attribute("gridScale",QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
+    int gridScale = element.attribute("gridScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
     _layerScene.setScale(gridScale);
 
-    _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
-    _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
-    _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
-    _showMovement = static_cast<bool>(element.attribute("showMovement",QString::number(1)).toInt());
-    _showLairActions = static_cast<bool>(element.attribute("showLairActions",QString::number(0)).toInt());
+    _showAlive = static_cast<bool>(element.attribute("showAlive", QString::number(1)).toInt());
+    _showDead = static_cast<bool>(element.attribute("showDead", QString::number(0)).toInt());
+    _showEffects = static_cast<bool>(element.attribute("showEffects", QString::number(1)).toInt());
+    _showMovement = static_cast<bool>(element.attribute("showMovement", QString::number(1)).toInt());
+    _showLairActions = static_cast<bool>(element.attribute("showLairActions", QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
 
@@ -72,10 +72,10 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         Map* battleMap = dynamic_cast<Map*>(campaign->getObjectById(mapId));
         if(battleMap)
         {
-            QRect mapRect(element.attribute("mapRectX",QString::number(0)).toInt(),
-                          element.attribute("mapRectY",QString::number(0)).toInt(),
-                          element.attribute("mapRectWidth",QString::number(0)).toInt(),
-                          element.attribute("mapRectHeight",QString::number(0)).toInt());
+            QRect mapRect(element.attribute("mapRectX", QString::number(0)).toInt(),
+                          element.attribute("mapRectY", QString::number(0)).toInt(),
+                          element.attribute("mapRectWidth", QString::number(0)).toInt(),
+                          element.attribute("mapRectHeight", QString::number(0)).toInt());
 
             setMap(battleMap, mapRect);
         }
@@ -134,15 +134,15 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         }
 
         /*
-        _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
-        _gridType = element.attribute("gridType",QString::number(0)).toInt();
-        _gridAngle = element.attribute("gridAngle",QString::number(50)).toInt();
-        _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
-        _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
-        int gridWidth = element.attribute("gridWidth",QString::number(1)).toInt();
-        QColor gridColor = element.attribute("gridColor",QString("#000000"));
+        _gridOn = static_cast<bool>(element.attribute("showGrid", QString::number(1)).toInt());
+        _gridType = element.attribute("gridType", QString::number(0)).toInt();
+        _gridAngle = element.attribute("gridAngle", QString::number(50)).toInt();
+        _gridOffsetX = element.attribute("gridOffsetX", QString::number(0)).toInt();
+        _gridOffsetY = element.attribute("gridOffsetY", QString::number(0)).toInt();
+        int gridWidth = element.attribute("gridWidth", QString::number(1)).toInt();
+        QColor gridColor = element.attribute("gridColor", QString("#000000"));
         _gridPen = QPen(QBrush(gridColor), gridWidth);
-        _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
+        _gridOffsetY = element.attribute("gridOffsetY", QString::number(0)).toInt();
         */
 
         //_layerScene.postProcessXML(element, isImport);

@@ -178,22 +178,22 @@ void Character::inputXML(const QDomElement &element, bool isImport)
 {
     beginBatchChanges();
 
-    setDndBeyondID(element.attribute(QString("dndBeyondID"),QString::number(-1)).toInt());
+    setDndBeyondID(element.attribute(QString("dndBeyondID"), QString::number(-1)).toInt());
 
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)
     {
-        setStringValue(static_cast<StringValue>(i), element.attribute(STRINGVALUE_NAMES[i],STRINGVALUE_DEFAULTS[i]));
+        setStringValue(static_cast<StringValue>(i), element.attribute(STRINGVALUE_NAMES[i], STRINGVALUE_DEFAULTS[i]));
     }
 
     for(i = 0; i < INTVALUE_COUNT; ++i)
     {
-        setIntValue(static_cast<IntValue>(i), element.attribute(INTVALUE_NAMES[i],QString::number(INTVALUE_DEFAULTS[i])).toInt());
+        setIntValue(static_cast<IntValue>(i), element.attribute(INTVALUE_NAMES[i], QString::number(INTVALUE_DEFAULTS[i])).toInt());
     }
 
     for(i = 0; i < SKILLS_COUNT; ++i)
     {
-        setSkillValue(static_cast<Skills>(i), element.attribute(SKILLVALUE_NAMES[i],QString::number(0)).toInt());
+        setSkillValue(static_cast<Skills>(i), element.attribute(SKILLVALUE_NAMES[i], QString::number(0)).toInt());
     }
 
     i = 0;
@@ -222,7 +222,7 @@ void Character::inputXML(const QDomElement &element, bool isImport)
         }
     }
 
-    setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
+    setActive(static_cast<bool>(element.attribute(QString("active"), QString::number(true)).toInt()));
 
     Combatant::inputXML(element, isImport);
 

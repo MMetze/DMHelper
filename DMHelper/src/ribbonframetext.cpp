@@ -17,7 +17,7 @@ RibbonFrameText::RibbonFrameText(QWidget *parent) :
     ui->cmbFont->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     connect(ui->cmbFont, SIGNAL(currentIndexChanged(QString)), this, SIGNAL(fontFamilyChanged(QString)));
 
-    ui->edtSize->setValidator(new QIntValidator(1,999,this));
+    ui->edtSize->setValidator(new QIntValidator(1, 999, this));
     connect(ui->edtSize, SIGNAL(editingFinished()), this, SLOT(handleFontSizeChanged()));
 
     connect(ui->btnBold, SIGNAL(clicked(bool)), this, SIGNAL(fontBoldChanged(bool)));

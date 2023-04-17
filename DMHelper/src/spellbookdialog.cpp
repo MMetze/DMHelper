@@ -30,7 +30,7 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
     connect(ui->btnDeleteSpell, SIGNAL(clicked()), this, SLOT(deleteCurrentSpell()));
     connect(ui->cmbSearch, SIGNAL(activated(QString)), this, SLOT(setSpell(QString)));
 
-    ui->edtLevel->setValidator(new QIntValidator(0,100));
+    ui->edtLevel->setValidator(new QIntValidator(0, 100));
     connect(ui->edtName, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
     connect(ui->edtLevel, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
     connect(ui->edtSchool, SIGNAL(editingFinished()), this, SIGNAL(spellDataEdit()));
@@ -45,9 +45,9 @@ SpellbookDialog::SpellbookDialog(QWidget *parent) :
 
     ui->cmbSearch->view()->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     ui->btnEffectColor->setRotationVisible(false);
-    ui->edtEffectWidth->setValidator(new QIntValidator(0,1000));
+    ui->edtEffectWidth->setValidator(new QIntValidator(0, 1000));
     ui->edtEffectWidth->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
-    ui->edtEffectHeight->setValidator(new QIntValidator(0,1000));
+    ui->edtEffectHeight->setValidator(new QIntValidator(0, 1000));
     ui->edtEffectHeight->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->edtEffectToken->setStyleSheet(QString("QLineEdit:disabled {color: rgb(196, 196, 196);}"));
     ui->btnEffectTokenBrowse->setStyleSheet(QString("QPushButton:disabled {color: rgb(196, 196, 196);}"));
@@ -176,7 +176,7 @@ void SpellbookDialog::createNewSpell()
     qDebug() << "[Spellbook Dialog] Creating a new spell...";
 
     bool ok;
-    QString spellName = QInputDialog::getText(this, QString("Enter New Spell Name"),QString("New Spell"),QLineEdit::Normal,QString(),&ok);
+    QString spellName = QInputDialog::getText(this, QString("Enter New Spell Name"), QString("New Spell"), QLineEdit::Normal, QString(), &ok);
     if((!ok)||(spellName.isEmpty()))
     {
         qDebug() << "[Spellbook Dialog] New monster not created because the monster name dialog was cancelled";
@@ -464,7 +464,7 @@ void SpellbookDialog::showEvent(QShowEvent * event)
 {
     Q_UNUSED(event);
     qDebug() << "[Spellbook Dialog] Spellbook Dialog shown";
-    connect(Spellbook::Instance(),SIGNAL(changed()),this,SLOT(dataChanged()));
+    connect(Spellbook::Instance(), SIGNAL(changed()), this, SLOT(dataChanged()));
     QDialog::showEvent(event);
 
     ui->edtEffectWidth->setMinimumWidth(ui->lblSize->width());
@@ -610,7 +610,7 @@ void SpellbookDialog::updateImage()
             {
                 if(_tokenRotation != 0)
                 {
-                    int rotatePoint = qMax(result.width(),result.height()) / 2;
+                    int rotatePoint = qMax(result.width(), result.height()) / 2;
 
                     QTransform tokenTransform;
                     tokenTransform.translate(rotatePoint, rotatePoint);

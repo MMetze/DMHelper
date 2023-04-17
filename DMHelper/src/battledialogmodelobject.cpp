@@ -14,8 +14,8 @@ BattleDialogModelObject::~BattleDialogModelObject()
 
 void BattleDialogModelObject::inputXML(const QDomElement &element, bool isImport)
 {
-    _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
-                        element.attribute("positionY",QString::number(0)).toDouble());
+    _position = QPointF(element.attribute("positionX", QString::number(0)).toDouble(),
+                        element.attribute("positionY", QString::number(0)).toDouble());
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -64,6 +64,11 @@ void BattleDialogModelObject::setLinkedObject(BattleDialogModelObject* linkedObj
         emit linkChanged(this, previousLink);
         emit dirty();
     }
+}
+
+void BattleDialogModelObject::setSelected(bool isSelected)
+{
+    Q_UNUSED(isSelected);
 }
 
 void BattleDialogModelObject::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

@@ -180,7 +180,7 @@ bool VideoPlayerGLScreenshot::startPlayer()
 
     QString localizedVideoFile = _videoFile;
 #ifdef Q_OS_WIN
-    localizedVideoFile.replace("/","\\\\");
+    localizedVideoFile.replace("/", "\\\\");
 #endif
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcMedia = libvlc_media_new_path(localizedVideoFile.toUtf8().constData());

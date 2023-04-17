@@ -668,8 +668,8 @@ void PublishGLBattleRenderer::createContents()
     movementImage.fill(Qt::transparent);
     QPainter movementPainter;
     movementPainter.begin(&movementImage);
-        movementPainter.setPen(QPen(QColor(23,23,23,200), 3, Qt::DashDotLine));
-        movementPainter.setBrush(QBrush(QColor(255,255,255,25)));
+        movementPainter.setPen(QPen(QColor(23, 23, 23, 200), 3, Qt::DashDotLine));
+        movementPainter.setBrush(QBrush(QColor(255, 255, 255, 25)));
         movementPainter.drawEllipse(0, 0, 512, 512);
     movementPainter.end();
     _movementToken = new PublishGLImage(movementImage);

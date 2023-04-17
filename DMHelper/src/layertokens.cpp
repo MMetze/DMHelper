@@ -59,7 +59,7 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
         while(!combatantElement.isNull())
         {
             BattleDialogModelCombatant* combatant = nullptr;
-            int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
+            int combatantType = combatantElement.attribute("type", QString::number(DMHelper::CombatantType_Base)).toInt();
             if(combatantType == DMHelper::CombatantType_Character)
             {
                 QUuid combatantId = QUuid(combatantElement.attribute("combatantId"));
@@ -74,7 +74,7 @@ void LayerTokens::postProcessXML(Campaign* campaign, const QDomElement &element,
             }
             else if(combatantType == DMHelper::CombatantType_Monster)
             {
-                int monsterType = combatantElement.attribute("monsterType",QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
+                int monsterType = combatantElement.attribute("monsterType", QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
                 if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Combatant)
                 {
                     QUuid combatantId = QUuid(combatantElement.attribute("combatantId"));
@@ -448,7 +448,7 @@ void LayerTokens::setScale(int scale)
             QGraphicsPixmapItem* combatantIcon = _combatantIconHash.value(combatant);
             if(combatantIcon)
             {
-                scaleFactor = (static_cast<qreal>(scale-2)) * combatant->getSizeFactor() / static_cast<qreal>(qMax(combatantIcon->pixmap().width(),combatantIcon->pixmap().height()));
+                scaleFactor = (static_cast<qreal>(scale-2)) * combatant->getSizeFactor() / static_cast<qreal>(qMax(combatantIcon->pixmap().width(), combatantIcon->pixmap().height()));
                 combatantIcon->setScale(scaleFactor);
             }
         }
@@ -725,7 +725,7 @@ void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCo
         pixmapItem->setPos(combatant->getPosition() + _position);
         pixmapItem->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
         qreal sizeFactor = combatant->getSizeFactor();
-        qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(),pix.height()));
+        qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(), pix.height()));
         pixmapItem->setScale(scaleFactor);
 
         QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b>");

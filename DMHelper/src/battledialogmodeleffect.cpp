@@ -12,7 +12,7 @@ BattleDialogModelEffect::BattleDialogModelEffect(const QString& name, QObject *p
     _visible(true),
     _size(20),
     _rotation(0),
-    _color(115,18,0,64),
+    _color(115, 18, 0, 64),
     _tip(),
     _batchChanges(false),
     _changesMade(false)
@@ -44,14 +44,14 @@ QDomElement BattleDialogModelEffect::outputXML(QDomDocument &doc, QDomElement &p
 
 void BattleDialogModelEffect::inputXML(const QDomElement &element, bool isImport)
 {
-    _active = static_cast<bool>(element.attribute("active",QString::number(1)).toInt());
-    _visible = static_cast<bool>(element.attribute("visible",QString::number(1)).toInt());
-    _size = element.attribute("size",QString::number(20)).toInt();
-    _rotation = element.attribute("rotation",QString::number(0)).toDouble();
-    _color = QColor(element.attribute("colorR",QString::number(115)).toInt(),
-                    element.attribute("colorG",QString::number(18)).toInt(),
-                    element.attribute("colorB",QString::number(0)).toInt(),
-                    element.attribute("colorA",QString::number(64)).toInt());
+    _active = static_cast<bool>(element.attribute("active", QString::number(1)).toInt());
+    _visible = static_cast<bool>(element.attribute("visible", QString::number(1)).toInt());
+    _size = element.attribute("size", QString::number(20)).toInt();
+    _rotation = element.attribute("rotation", QString::number(0)).toDouble();
+    _color = QColor(element.attribute("colorR", QString::number(115)).toInt(),
+                    element.attribute("colorG", QString::number(18)).toInt(),
+                    element.attribute("colorB", QString::number(0)).toInt(),
+                    element.attribute("colorA", QString::number(64)).toInt());
     _tip = element.attribute("tip");
 
     BattleDialogModelObject::inputXML(element, isImport);
