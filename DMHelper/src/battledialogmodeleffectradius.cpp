@@ -16,6 +16,11 @@ BattleDialogModelEffectRadius::~BattleDialogModelEffectRadius()
 {
 }
 
+QString BattleDialogModelEffectRadius::getName() const
+{
+    return _tip.isEmpty() ? QString("Radius Effect") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectRadius::clone() const
 {
     BattleDialogModelEffectRadius* newEffect = new BattleDialogModelEffectRadius(getName());

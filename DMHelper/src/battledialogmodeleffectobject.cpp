@@ -52,6 +52,11 @@ void BattleDialogModelEffectObject::copyValues(const CampaignObjectBase* other)
     BattleDialogModelEffect::copyValues(other);
 }
 
+QString BattleDialogModelEffectObject::getName() const
+{
+    return _tip.isEmpty() ? QString("Object") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectObject::clone() const
 {
     BattleDialogModelEffectObject* newEffect = new BattleDialogModelEffectObject(getName());

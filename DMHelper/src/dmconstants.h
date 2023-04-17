@@ -24,6 +24,8 @@ namespace DMHelper
         CampaignType_WelcomeScreen,
         CampaignType_LayerScene,
         CampaignType_LinkedText,
+        CampaignType_BattleContentCombatant,
+        CampaignType_BattleContentEffect,
 
         CampaignType_Placeholder = 0xffff
     };

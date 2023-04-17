@@ -562,7 +562,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 #endif
 
         QMenu menu(views().constFirst());
-        if((item)&&(!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
+        if((item) && (!BattleDialogModelEffect::getEffectIdFromItem(item).isNull()))
         {
 #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEEVENTS
             qDebug() << "[Battle Dialog Scene] right click identified on effect " << item;
@@ -574,6 +574,19 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 QAction* rollItem = new QAction(QString("Apply Effect..."), &menu);
                 connect(rollItem, SIGNAL(triggered()), this, SLOT(rollItem()));
                 menu.addAction(rollItem);
+
+                if(item->parentItem() == nullptr)
+                {
+                    QAction* linkItemAction = new QAction(QString("Link Effect..."), &menu);
+                    connect(linkItemAction, SIGNAL(triggered()), this, SLOT(linkItem()));
+                    menu.addAction(linkItemAction);
+                }
+                else
+                {
+                    QAction* unlinkItemAction = new QAction(QString("Unlink Effect"), &menu);
+                    connect(unlinkItemAction, SIGNAL(triggered()), this, SLOT(unlinkItem()));
+                    menu.addAction(unlinkItemAction);
+                }
 
                 menu.addSeparator();
 
@@ -603,6 +616,19 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             QAction* removeItem = new QAction(QString("Remove"), &menu);
             connect(removeItem, SIGNAL(triggered()), this, SLOT(removeCombatant()));
             menu.addAction(removeItem);
+
+            if(item->parentItem() == nullptr)
+            {
+                QAction* linkItemAction = new QAction(QString("Link Combatant..."), &menu);
+                connect(linkItemAction, SIGNAL(triggered()), this, SLOT(linkItem()));
+                menu.addAction(linkItemAction);
+            }
+            else
+            {
+                QAction* unlinkItemAction = new QAction(QString("Unlink Combatant"), &menu);
+                connect(unlinkItemAction, SIGNAL(triggered()), this, SLOT(unlinkItem()));
+                menu.addAction(unlinkItemAction);
+            }
 
             if((_model) && (_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 1))
             {
@@ -1003,6 +1029,62 @@ void BattleDialogGraphicsScene::deleteItem()
         delete _contextMenuItem;
         _contextMenuItem = nullptr;
     }
+}
+
+void BattleDialogGraphicsScene::linkItem()
+{
+    if(!_contextMenuItem)
+        return;
+
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
+    if(effect)
+    {
+        BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
+        if(parentEffect)
+            emit itemLink(parentEffect);
+        else
+           emit itemLink(effect);
+    }
+    else
+    {
+        UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+        if(pixmap)
+        {
+            BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+            if(combatant)
+                emit itemLink(combatant);
+        }
+    }
+
+    _contextMenuItem = nullptr;
+}
+
+void BattleDialogGraphicsScene::unlinkItem()
+{
+    if(!_contextMenuItem)
+        return;
+
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
+    if(effect)
+    {
+        BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
+        if(parentEffect)
+            emit itemUnlink(parentEffect);
+        else
+           emit itemUnlink(effect);
+    }
+    else
+    {
+        UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
+        if(pixmap)
+        {
+            BattleDialogModelCombatant* combatant = pixmap->getCombatant();
+            if(combatant)
+                emit itemUnlink(combatant);
+        }
+    }
+
+    _contextMenuItem = nullptr;
 }
 
 void BattleDialogGraphicsScene::activateCombatant()

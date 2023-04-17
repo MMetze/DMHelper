@@ -249,6 +249,16 @@ QList<BattleDialogModelCombatant*> LayerTokens::getCombatants()
     return _combatants;
 }
 
+const QList<BattleDialogModelEffect*> LayerTokens::getEffects() const
+{
+    return _effects;
+}
+
+QList<BattleDialogModelEffect*> LayerTokens::getEffects()
+{
+    return _effects;
+}
+
 void LayerTokens::dmInitialize(QGraphicsScene* scene)
 {
     if(!scene)
@@ -259,11 +269,22 @@ void LayerTokens::dmInitialize(QGraphicsScene* scene)
         createCombatantIcon(scene, _combatants.at(i));
     }
 
-//    QList<BattleDialogModelEffect*> effects = _model->getEffectList();
-//    for(BattleDialogModelEffect* effect : qAsConst(effects))
-    for(BattleDialogModelEffect* effect : _effects)
+    for(int i = 0; i < _effects.count(); ++i)
     {
-        createEffectIcon(scene, effect);
+        createEffectIcon(scene, _effects.at(i));
+    }
+
+    // Now go through the combatants and effects again to reestablish any existing links
+    for(int i = 0; i < _combatants.count(); ++i)
+    {
+        if((_combatants.at(i)) && (_combatants.at(i)->getLinkedObject()))
+            linkedObjectChanged(_combatants.at(i), nullptr);
+    }
+
+    for(int i = 0; i < _effects.count(); ++i)
+    {
+        if((_effects.at(i)) && (_effects.at(i)->getLinkedObject()))
+            linkedObjectChanged(_effects.at(i), nullptr);
     }
 
     Layer::dmInitialize(scene);
@@ -463,6 +484,7 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
 
     _combatants.append(combatant);
     _model->appendCombatantToList(combatant);
+    connect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
 
     if((getLayerScene()) && (getLayerScene()->getDMScene()))
         createCombatantIcon(getLayerScene()->getDMScene(), combatant);
@@ -473,6 +495,7 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
     if((!combatant) || (!_model))
         return;
 
+    disconnect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
     if(!_combatants.removeOne(combatant))
         return;
 
@@ -515,6 +538,7 @@ void LayerTokens::addEffect(BattleDialogModelEffect* effect)
 
     _effects.append(effect);
     connect(effect, &BattleDialogModelEffect::effectChanged, this, &LayerTokens::effectChanged);
+    connect(effect, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
     _model->appendEffectToList(effect);
 
     if((getLayerScene()) && (getLayerScene()->getDMScene()))
@@ -526,6 +550,8 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
     if((!effect) || (!_model))
         return;
 
+    disconnect(effect, &BattleDialogModelEffect::effectChanged, this, &LayerTokens::effectChanged);
+    disconnect(effect, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
     if(!_effects.removeOne(effect))
         return;
 
@@ -553,6 +579,14 @@ bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
     return _effects.contains(effect);
 }
 
+QGraphicsItem* LayerTokens::getEffectItem(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return nullptr;
+    else
+        return _effectIconHash.value(effect);
+}
+
 void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
 {
     if((!effect) || (!_model))
@@ -561,7 +595,59 @@ void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
     // Changes to the player item will be directly handled through the signal
     QGraphicsItem* graphicsItem = _effectIconHash.value(effect);
     if(graphicsItem)
-        effect->applyEffectValues(*graphicsItem, _model->getGridScale());
+        effect->applyEffectValues(*graphicsItem, _scale);
+    //effect->applyEffectValues(*graphicsItem, _model->getGridScale());
+}
+
+void LayerTokens::linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink)
+{
+    if(!object)
+        return;
+
+    QGraphicsItem* objectItem = findGraphicsItem(object);
+    if(!objectItem)
+        return;
+
+    if(object->getLinkedObject())
+    {
+        QGraphicsItem* linkedItem = findGraphicsItem(object->getLinkedObject());
+        if(linkedItem)
+        {
+            QPointF objectPos = linkedItem->mapFromScene(objectItem->scenePos());
+            objectItem->setParentItem(linkedItem);
+            objectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
+            objectItem->setScale(objectItem->scale() / (linkedItem->scale() > 0.0 ? linkedItem->scale() : 1.0));
+            objectItem->setPos(objectPos);
+        }
+    }
+    else
+    {
+        QPointF objectPos = objectItem->scenePos();
+        objectItem->setParentItem(nullptr);
+        objectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, false);
+        objectItem->setPos(objectPos);
+        if(object->getObjectType() == DMHelper::CampaignType_BattleContentCombatant)
+        {
+            BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
+            QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(objectItem);
+            if((combatant) && (pixmapItem))
+            {
+                qreal sizeFactor = combatant->getSizeFactor();
+                qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pixmapItem->pixmap().width(), pixmapItem->pixmap().height()));
+                objectItem->setScale(scaleFactor);
+            }
+        }
+        else
+        {
+            BattleDialogModelEffect* effect = nullptr;
+            if(object->children().count() == 1)
+                effect = dynamic_cast<BattleDialogModelEffect*>(object->children().at(0));
+            else
+                effect = dynamic_cast<BattleDialogModelEffect*>(object);
+            if(effect)
+                effect->applyEffectValues(*objectItem, _scale);
+        }
+    }
 }
 
 void LayerTokens::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
@@ -664,6 +750,7 @@ void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCo
         // applyPersonalEffectToItem(pixmapItem);
 
         _combatantIconHash.insert(combatant, pixmapItem);
+        linkedObjectChanged(combatant, nullptr);
 
         // TODO: Layers
         //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(handleCombatantMoved(BattleDialogModelCombatant*)), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
@@ -686,7 +773,8 @@ QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene* scene, BattleDialogMo
     if((!_model) || (!effect) || (_effectIconHash.contains(effect)))
         return nullptr;
 
-    QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
+//    QGraphicsItem* shape = effect->createEffectShape(_model->getGridScale());
+    QGraphicsItem* shape = effect->createEffectShape(_scale);
     if(shape)
     {
         shape->setPos(effect->getPosition() + _position);
@@ -759,6 +847,25 @@ QGraphicsItem* LayerTokens::addSpellEffect(QGraphicsScene* scene, BattleDialogMo
     effectItem->setPos(QPointF(0.0, 0.0));
 
     return tokenItem;
+}
+
+QGraphicsItem* LayerTokens::findGraphicsItem(BattleDialogModelObject* object)
+{
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
+    if(combatant)
+        return _combatantIconHash.value(combatant);
+
+    BattleDialogModelEffect* effect = nullptr;
+    QList<CampaignObjectBase*> childObjects = object->getChildObjects();
+    if(childObjects.count() == 1)
+        effect = dynamic_cast<BattleDialogModelEffectObject*>(childObjects.at(0));
+    else
+        effect = dynamic_cast<BattleDialogModelEffect*>(object);
+
+    if(effect)
+        return _effectIconHash.value(effect);
+
+    return nullptr;
 }
 
 void LayerTokens::cleanupPlayer()

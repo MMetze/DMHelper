@@ -15,6 +15,11 @@ BattleDialogModelEffectCone::~BattleDialogModelEffectCone()
 {
 }
 
+QString BattleDialogModelEffectCone::getName() const
+{
+    return _tip.isEmpty() ? QString("Cone Effect") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectCone::clone() const
 {
     BattleDialogModelEffectCone* newEffect = new BattleDialogModelEffectCone(getName());

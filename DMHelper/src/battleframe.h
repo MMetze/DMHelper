@@ -222,7 +222,7 @@ private slots:
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
     void handleEffectChanged(QGraphicsItem* effectItem);
     void handleEffectRemoved(QGraphicsItem* effectItem);
-    void handleCombatantMoved(BattleDialogModelCombatant* combatant);
+    void handleCombatantMoved(BattleDialogModelObject* object);
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleCombatantActivate(BattleDialogModelCombatant* combatant);
@@ -231,6 +231,9 @@ private slots:
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
     void handleApplyEffect(QGraphicsItem* effect);
+
+    void handleItemLink(BattleDialogModelObject* item);
+    void handleItemUnlink(BattleDialogModelObject* item);
 
     void handleItemMouseDown(QGraphicsPixmapItem* item);
     void handleItemMoved(QGraphicsPixmapItem* item, bool* result);
@@ -242,6 +245,9 @@ private slots:
     void handleMapMouseMove(const QPointF& pos);
     void handleMapMouseRelease(const QPointF& pos);
     void handleSceneChanged(const QList<QRectF> &region);
+
+    void itemLink();
+    void itemUnlink();
 
     void removeCombatant();
     void activateCombatant();

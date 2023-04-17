@@ -44,6 +44,7 @@
 #include "layergrid.h"
 #include "layerreference.h"
 #include "selectitemdialog.h"
+#include "selectcombatantdialog.h"
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QKeyEvent>
@@ -199,7 +200,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, SIGNAL(combatantChangeLayer(BattleDialogModelCombatant*)), this, SLOT(handleCombatantChangeLayer(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantDamage(BattleDialogModelCombatant*)), this, SLOT(handleCombatantDamage(BattleDialogModelCombatant*)));
     connect(_scene, SIGNAL(combatantHeal(BattleDialogModelCombatant*)), this, SLOT(handleCombatantHeal(BattleDialogModelCombatant*)));
-    connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));    
+    connect(_scene, SIGNAL(itemLink(BattleDialogModelObject*)), this, SLOT(handleItemLink(BattleDialogModelObject*)));
+    connect(_scene, SIGNAL(itemUnlink(BattleDialogModelObject*)), this, SLOT(handleItemUnlink(BattleDialogModelObject*)));
+    connect(_scene, SIGNAL(itemChanged(QGraphicsItem*)), this, SLOT(handleItemChanged(QGraphicsItem*)));
     connect(_scene, &BattleDialogGraphicsScene::mapMousePress, this, &BattleFrame::handleMapMousePress);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseMove, this, &BattleFrame::handleMapMouseMove);
     connect(_scene, &BattleDialogGraphicsScene::mapMouseRelease, this, &BattleFrame::handleMapMouseRelease);
@@ -1889,6 +1892,19 @@ void BattleFrame::handleContextMenu(BattleDialogModelCombatant* combatant, const
     connect(removeItem, SIGNAL(triggered()), this, SLOT(removeCombatant()));
     contextMenu->addAction(removeItem);
 
+    if(_contextMenuCombatant->getLinkedObject() == nullptr)
+    {
+        QAction* linkItem = new QAction(QString("Link Item..."), contextMenu);
+        connect(linkItem, SIGNAL(triggered()), this, SLOT(itemLink()));
+        contextMenu->addAction(linkItem);
+    }
+    else
+    {
+        QAction* unlinkItem = new QAction(QString("Unlink Item"), contextMenu);
+        connect(unlinkItem, SIGNAL(triggered()), this, SLOT(itemUnlink()));
+        contextMenu->addAction(unlinkItem);
+    }
+
     if((_model) && (_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 1))
     {
         QAction* shiftItem = new QAction(QString("Change Layer..."), contextMenu);
@@ -2038,8 +2054,10 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
     }
 }
 
-void BattleFrame::handleCombatantMoved(BattleDialogModelCombatant* combatant)
+void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
+
     if(!combatant)
         return;
 
@@ -2193,7 +2211,7 @@ void BattleFrame::handleCombatantChangeLayer(BattleDialogModelCombatant* combata
     QStringList tokenLayerNames;
     for(int i = 0; i < tokenLayers.count(); ++i)
     {
-        LayerTokens* tokenLayer= dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
         tokenLayerNames << (tokenLayer ? tokenLayer->getName() : QString(""));
         if((tokenLayer) && (tokenLayer->containsCombatant(combatant)))
         {
@@ -2272,6 +2290,35 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
     dlg->resize(800, 600);
 
     dlg->fireAndForget();
+}
+
+void BattleFrame::handleItemLink(BattleDialogModelObject* item)
+{
+    if(!_model)
+        return;
+
+    SelectCombatantDialog dlg(*_model, item);
+    dlg.resize(width() / 2, height() * 9 / 10);
+
+    int result = dlg.exec();
+    if(result != QDialog::Accepted)
+        return;
+
+    BattleDialogModelObject* selectedObject = dlg.getSelectedObject();
+    if(!selectedObject)
+        return;
+
+    if(dlg.isCentered())
+        item->setPosition(selectedObject->getPosition());
+    item->setLinkedObject(selectedObject);
+}
+
+void BattleFrame::handleItemUnlink(BattleDialogModelObject* item)
+{
+    if(!item)
+        return;
+
+    item->setLinkedObject(nullptr);
 }
 
 void BattleFrame::handleItemMouseDown(QGraphicsPixmapItem* item)
@@ -2399,6 +2446,16 @@ void BattleFrame::handleSceneChanged(const QList<QRectF> &region)
 
     if((_isPublishing) && (_renderer))
         _renderer->updateRender();
+}
+
+void BattleFrame::itemLink()
+{
+    handleItemLink(_contextMenuCombatant);
+}
+
+void BattleFrame::itemUnlink()
+{
+    handleItemUnlink(_contextMenuCombatant);
 }
 
 void BattleFrame::removeCombatant()
@@ -3359,8 +3416,8 @@ void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
 
         _combatantIcons.insert(combatant, pixmapItem);
 
-        connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(handleCombatantMoved(BattleDialogModelCombatant*)), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
-        connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+        connect(combatant, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(handleCombatantMoved(BattleDialogModelObject*)), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+        connect(combatant, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
         connect(combatant, SIGNAL(combatantSelected(BattleDialogModelCombatant*)), this, SLOT(handleCombatantSelected(BattleDialogModelCombatant*)));
     }
 }

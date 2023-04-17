@@ -29,11 +29,11 @@ PublishGLBattleEffect::PublishGLBattleEffect(PublishGLScene* scene, BattleDialog
 
     prepareObjects();
 
-    connect(_effect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
+    connect(_effect, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleEffect::effectMoved);
     connect(_effect, &BattleDialogModelEffect::effectChanged, this, &PublishGLBattleEffect::effectChanged);
     if(_childEffect)
     {
-        connect(_childEffect, &BattleDialogModelEffect::effectMoved, this, &PublishGLBattleEffect::effectMoved);
+        connect(_childEffect, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleEffect::effectMoved);
         connect(_childEffect, &BattleDialogModelEffect::effectChanged, this, &PublishGLBattleEffect::effectChanged);
     }
 }

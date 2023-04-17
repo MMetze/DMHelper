@@ -6,6 +6,7 @@
 #include "battledialoggraphicsscenemousehandler.h"
 
 class BattleDialogModel;
+class BattleDialogModelObject;
 class BattleDialogModelEffect;
 class BattleDialogModelCombatant;
 class Grid;
@@ -94,6 +95,9 @@ signals:
     void itemMouseUp(QGraphicsPixmapItem* item);
     void itemMouseDoubleClick(QGraphicsPixmapItem* item);
 
+    void itemLink(BattleDialogModelObject* item);
+    void itemUnlink(BattleDialogModelObject* item);
+
     void combatantActivate(BattleDialogModelCombatant* combatant);
     void combatantRemove(BattleDialogModelCombatant* combatant);
     void combatantChangeLayer(BattleDialogModelCombatant* combatant);
@@ -106,6 +110,9 @@ protected slots:
     void editItem();
     void rollItem();
     void deleteItem();
+
+    void linkItem();
+    void unlinkItem();
 
     void activateCombatant();
     void removeCombatant();

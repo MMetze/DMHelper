@@ -11,6 +11,7 @@ UnselectedPixmap::UnselectedPixmap(BattleDialogModelCombatant* combatant, QGraph
     _draw(true)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
     //setAcceptHoverEvents(true);
 }
 
@@ -20,6 +21,7 @@ UnselectedPixmap::UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelComba
     _draw(true)
 {
     setFlag(QGraphicsItem::ItemSendsGeometryChanges);
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
 }
 
 void UnselectedPixmap::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -46,17 +48,27 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
 {
     if((change == ItemPositionChange) && (scene()))
     {
-        QPointF newPos = value.toPointF();
+        QPointF newPos = mapToScene(value.toPointF());
         QRectF rect = scene()->sceneRect();
         bool posOutOfBounds = !rect.contains(newPos);
         if(posOutOfBounds)
         {
             newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
             newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
-            return newPos;
+            return mapFromScene(newPos);
         }
     }
+    /*
     else if(change == ItemPositionHasChanged)
+    {
+        if(_combatant)
+        {
+            QPointF newPos = value.toPointF();
+            _combatant->setPosition(newPos);
+        }
+    }
+    */
+    else if(change == ItemScenePositionHasChanged)
     {
         if(_combatant)
         {

@@ -47,6 +47,7 @@ SOURCES += main.cpp\
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
     battledialogmodeleffectshape.cpp \
+    battledialogmodelobject.cpp \
     battleframe.cpp \
     battleframemapdrawer.cpp \
     battleframestate.cpp \
@@ -149,6 +150,7 @@ SOURCES += main.cpp\
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     ribbontabworldmap.cpp \
+    selectcombatantdialog.cpp \
     selectitemdialog.cpp \
     selectstringdialog.cpp \
     soundboardframe.cpp \
@@ -296,6 +298,7 @@ HEADERS  += mainwindow.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
     battledialogmodeleffectshape.h \
+    battledialogmodelobject.h \
     battleframe.h \
     battleframemapdrawer.h \
     battleframestate.h \
@@ -399,6 +402,7 @@ HEADERS  += mainwindow.h \
     ribbontabtext.h \
     ribbontabtools.h \
     ribbontabworldmap.h \
+    selectcombatantdialog.h \
     selectitemdialog.h \
     selectstringdialog.h \
     soundboardframe.h \
@@ -561,6 +565,7 @@ FORMS    += mainwindow.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
     ribbontabworldmap.ui \
+    selectcombatantdialog.ui \
     selectitemdialog.ui \
     selectstringdialog.ui \
     soundboardframe.ui \

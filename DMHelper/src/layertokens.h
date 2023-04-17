@@ -7,6 +7,7 @@
 class BattleDialogModel;
 class BattleDialogModelCombatant;
 class BattleDialogModelEffect;
+class BattleDialogModelObject;
 class PublishGLBattleToken;
 class PublishGLBattleEffect;
 class QGraphicsPixmapItem;
@@ -37,6 +38,8 @@ public:
     // Local Interface
     const QList<BattleDialogModelCombatant*> getCombatants() const;
     QList<BattleDialogModelCombatant*> getCombatants();
+    const QList<BattleDialogModelEffect*> getEffects() const;
+    QList<BattleDialogModelEffect*> getEffects();
 
 public slots:
     // DM Window Generic Interface
@@ -66,12 +69,14 @@ public slots:
     void addEffect(BattleDialogModelEffect* effect);
     void removeEffect(BattleDialogModelEffect* effect);
     bool containsEffect(BattleDialogModelEffect* effect);
+    QGraphicsItem* getEffectItem(BattleDialogModelEffect* effect);
 
 signals:
 
 protected slots:
     // Local Interface
     void effectChanged(BattleDialogModelEffect* effect);
+    void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
 
 protected:
     // Layer Specific Interface
@@ -83,6 +88,7 @@ protected:
     void createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addSpellEffect(QGraphicsScene* scene, BattleDialogModelEffect* effect);
+    QGraphicsItem* findGraphicsItem(BattleDialogModelObject* object);
 
     // Player Window Methods
     void cleanupPlayer();

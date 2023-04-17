@@ -487,7 +487,7 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
     if(_activeCombatant == activeCombatant)
         return;
 
-    disconnect(_activeCombatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
+    disconnect(_activeCombatant, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
 
     _activeCombatant = activeCombatant;
     if(_activeCombatant)
@@ -495,7 +495,7 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
         PublishGLBattleToken* combatantToken = _combatantTokens.value(_activeCombatant);
         _activePC = combatantToken ? combatantToken->isPC() : false;
         activeCombatantMoved();
-        connect(_activeCombatant, &BattleDialogModelCombatant::combatantMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
+        connect(_activeCombatant, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
     }
 }
 

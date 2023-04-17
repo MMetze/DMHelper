@@ -1,7 +1,7 @@
 #ifndef BATTLEDIALOGMODELEFFECT_H
 #define BATTLEDIALOGMODELEFFECT_H
 
-#include "campaignobjectbase.h"
+#include "battledialogmodelobject.h"
 #include <QPointF>
 #include <QColor>
 
@@ -13,7 +13,7 @@ const int BATTLE_DIALOG_MODEL_EFFECT_ID = Qt::UserRole;
 const int BATTLE_DIALOG_MODEL_EFFECT_OBJECT = Qt::UserRole + 1;
 const int BATTLE_DIALOG_MODEL_EFFECT_ROLE = Qt::UserRole + 2;
 
-class BattleDialogModelEffect : public CampaignObjectBase
+class BattleDialogModelEffect : public BattleDialogModelObject
 {
     Q_OBJECT
 
@@ -44,6 +44,7 @@ public:
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) override;
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual int getObjectType() const override;
 
     virtual BattleDialogModelEffect* clone() const = 0;
 
@@ -70,10 +71,6 @@ public:
 
     virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor);
 
-    virtual QPointF getPosition() const;
-    virtual void setPosition(const QPointF& position);
-    virtual void setPosition(qreal x, qreal y);
-
     virtual qreal getRotation() const;
     virtual void setRotation(qreal rotation);
 
@@ -96,7 +93,6 @@ public:
     static bool getEffectVisibleFromItem(QGraphicsItem* item);
 
 signals:
-    void effectMoved(BattleDialogModelEffect* effect);
     void effectChanged(BattleDialogModelEffect* effect);
 
 protected:
@@ -110,7 +106,6 @@ protected:
     bool _active;
     bool _visible;
     int _size;
-    QPointF _position;
     qreal _rotation;
     QColor _color;
     QString _tip;

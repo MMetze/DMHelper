@@ -39,6 +39,11 @@ void BattleDialogModelEffectLine::copyValues(const CampaignObjectBase* other)
     BattleDialogModelEffect::copyValues(other);
 }
 
+QString BattleDialogModelEffectLine::getName() const
+{
+    return _tip.isEmpty() ? QString("Line Effect") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectLine::clone() const
 {
     BattleDialogModelEffectLine* newEffect = new BattleDialogModelEffectLine(getName());
