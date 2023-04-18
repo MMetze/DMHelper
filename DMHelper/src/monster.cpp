@@ -247,10 +247,10 @@ void Monster::setNotes(const QString& newNotes)
 
 void Monster::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute( "monsterClass", getMonsterClass() != nullptr ? getMonsterClass()->getName() : QString("") );
-    element.setAttribute( "passivePerception", getPassivePerception() );
-    element.setAttribute( "active", static_cast<int>(getActive()));
-    element.setAttribute( "notes", getNotes() );
+    element.setAttribute("monsterClass", getMonsterClass() != nullptr ? getMonsterClass()->getName() : QString(""));
+    element.setAttribute("passivePerception", getPassivePerception());
+    element.setAttribute("active", static_cast<int>(getActive()));
+    element.setAttribute("notes", getNotes());
 
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
 }

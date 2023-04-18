@@ -44,9 +44,9 @@ QDomElement BattleDialogEventDamage::outputXML(QDomElement &element, bool isExpo
 {
     Q_UNUSED(isExport);
 
-    element.setAttribute( "combatant", _combatant.toString() );
-    element.setAttribute( "target", _target.toString() );
-    element.setAttribute( "damage", _damage );
+    element.setAttribute("combatant", _combatant.toString());
+    element.setAttribute("target", _target.toString());
+    element.setAttribute("damage", _damage);
 
     return element;
 }

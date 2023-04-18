@@ -401,7 +401,7 @@ void MapFrame::setShowMarkers(bool show)
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
-    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i)
     {
         const UndoMarker* marker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
         if((marker) && (marker->getMarkerItem()) && (!marker->isRemoved()))
@@ -943,7 +943,7 @@ void MapFrame::createMarkerItems()
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
-    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i)
     {
         const UndoMarker* constMarker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
         if(constMarker)
@@ -962,7 +962,7 @@ void MapFrame::cleanupMarkerItems()
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
-    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i )
+    for(int i = 0; i < _mapSource->getUndoStack()->index(); ++i)
     {
         const UndoMarker* constMarker = dynamic_cast<const UndoMarker*>(_mapSource->getUndoStack()->command(i));
         if(constMarker)

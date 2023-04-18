@@ -179,7 +179,7 @@ void CustomTableFrame::readXMLFile(const QString& fileName)
 
     file.close();
 
-    if( contentResult == false )
+    if(contentResult == false)
     {
         qDebug() << "[CustomTableFrame] Error reading custom table file XML content.";
         qDebug() << errMsg << errRow << errColumn;

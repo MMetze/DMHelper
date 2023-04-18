@@ -479,7 +479,7 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
     if(!stack)
         return;
 
-    for( int i = 0; i < stack->index(); ++i )
+    for(int i = 0; i < stack->index(); ++i)
     {
         const UndoMarker* markerAction = dynamic_cast<const UndoMarker*>(stack->command(i));
         if((markerAction) && (markerAction->getMarker().isPlayerVisible()))

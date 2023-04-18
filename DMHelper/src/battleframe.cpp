@@ -3510,9 +3510,9 @@ BattleDialogModelCombatant* BattleFrame::getNextCombatant(BattleDialogModelComba
     {
         if(++nextHighlight >= _model->getCombatantCount())
             nextHighlight = 0;
-    } while( ( (_model->getCombatant(nextHighlight)->getHitPoints() <= 0) ||
-               (!_model->getCombatant(nextHighlight)->getKnown()) ) &&
-             (_model->getCombatant(nextHighlight) != _model->getActiveCombatant()));
+    } while(((_model->getCombatant(nextHighlight)->getHitPoints() <= 0) ||
+             (!_model->getCombatant(nextHighlight)->getKnown())) &&
+            (_model->getCombatant(nextHighlight) != _model->getActiveCombatant()));
 
     return _model->getCombatant(nextHighlight);
 }

@@ -1,6 +1,6 @@
 #include "complicationdata.h"
 
-ComplicationData::ComplicationData(QString title, QString description, QString check, QString failure, QString damage, QString obstacle, int length, bool sticky ) :
+ComplicationData::ComplicationData(QString title, QString description, QString check, QString failure, QString damage, QString obstacle, int length, bool sticky) :
     _title(title),
     _description(description),
     _check(check),

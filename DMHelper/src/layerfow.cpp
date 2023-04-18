@@ -51,7 +51,7 @@ void LayerFow::inputXML(const QDomElement &element, bool isImport)
         while(!actionElement.isNull())
         {
             UndoFowBase* newAction = nullptr;
-            switch( actionElement.attribute(QString("type")).toInt())
+            switch(actionElement.attribute(QString("type")).toInt())
             {
                 case DMHelper::ActionType_Fill:
                     newAction = new UndoFowFill(nullptr, MapEditFill(QColor()));
@@ -232,7 +232,7 @@ void LayerFow::applyPaintTo(int index, int startIndex)
     }
 
     // Need to add some batch processing to avoid updating every step
-    for( int i = startIndex; i < index; ++i )
+    for(int i = startIndex; i < index; ++i)
     {
         const UndoFowBase* constAction = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
         if(constAction)
@@ -272,7 +272,7 @@ void LayerFow::internalApplyPaintTo(QImage* target, const QColor& clearColor, in
     if(startIndex == 0)
         target->fill(clearColor);
 
-    for( int i = startIndex; i < index; ++i )
+    for(int i = startIndex; i < index; ++i)
     {
         const UndoFowBase* action = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
         if(action)
@@ -310,7 +310,7 @@ void LayerFow::paintFoWPoint(QPoint point, const MapDraw& mapDraw)
             p.setCompositionMode(QPainter::CompositionMode_Source);
         }
 
-        p.drawEllipse( point, mapDraw.radius(), mapDraw.radius() );
+        p.drawEllipse(point, mapDraw.radius(), mapDraw.radius());
     }
     else
     {
@@ -370,7 +370,7 @@ void LayerFow::paintFoWRect(QRect rect, const MapEditShape& mapEditShape)
             QRectF baseRect(static_cast<qreal>(rect.x()) + rectWidth * 4,
                             static_cast<qreal>(rect.y()) + rectHeight * 4,
                             static_cast<qreal>(rect.width()) - rectWidth * 4 * 2,
-                            static_cast<qreal>(rect.height()) - rectHeight * 4 * 2 );
+                            static_cast<qreal>(rect.height()) - rectHeight * 4 * 2);
             p.setBrush(QColor(0, 0, 0, 0));
             p.drawRect(baseRect);
             baseRect.translate(-rectWidth, -rectHeight);
@@ -607,7 +607,7 @@ void LayerFow::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& 
         challengeUndoStack();
 
         QDomElement actionsElement = doc.createElement("actions");
-        for(int i = 0; i < _undoStack->index(); ++i )
+        for(int i = 0; i < _undoStack->index(); ++i)
         {
             const UndoFowBase* action = dynamic_cast<const UndoFowBase*>(_undoStack->command(i));
             if((action) && (!action->isRemoved()))

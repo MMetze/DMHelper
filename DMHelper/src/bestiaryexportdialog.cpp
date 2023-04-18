@@ -81,17 +81,17 @@ void BestiaryExportDialog::exportSelected()
         return;
     }
 
-    QDomDocument doc( "DMHelperBestiaryXML" );
+    QDomDocument doc("DMHelperBestiaryXML");
 
-    QDomElement root = doc.createElement( "root" );
-    doc.appendChild( root );
+    QDomElement root = doc.createElement("root");
+    doc.appendChild(root);
 
     QFileInfo fileInfo(bestiaryFileName);
     QDir targetDirectory(fileInfo.absoluteDir());
 
-    QDomElement bestiaryElement = doc.createElement( "bestiary" );
-    bestiaryElement.setAttribute( "majorversion", Bestiary::Instance()->getMajorVersion() );
-    bestiaryElement.setAttribute( "minorversion", Bestiary::Instance()->getMinorVersion() );
+    QDomElement bestiaryElement = doc.createElement("bestiary");
+    bestiaryElement.setAttribute("majorversion", Bestiary::Instance()->getMajorVersion());
+    bestiaryElement.setAttribute("minorversion", Bestiary::Instance()->getMinorVersion());
 
     int monsterCount = 0;
     for(i = 0; i < ui->listMonsters->count(); ++i)
@@ -114,13 +114,13 @@ void BestiaryExportDialog::exportSelected()
 
     QString xmlString = doc.toString();
     QFile file(bestiaryFileName);
-    if( !file.open( QIODevice::WriteOnly ) )
+    if(!file.open(QIODevice::WriteOnly))
     {
         qDebug() << "[BestiaryExportDialog] Unable to open Bestiary export file for writing: " << bestiaryFileName;
         return;
     }
 
-    QTextStream ts( &file );
+    QTextStream ts(&file);
     ts.setCodec("UTF-8");
     ts << xmlString;
 

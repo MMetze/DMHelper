@@ -221,7 +221,7 @@ void LayersEditDialog::resetLayout()
 
 void LayersEditDialog::readScene()
 {
-    for(int i = 0; i < _scene.layerCount(); ++i )
+    for(int i = 0; i < _scene.layerCount(); ++i)
     {
         Layer* layer = _scene.layerAt(i);
         if(layer)

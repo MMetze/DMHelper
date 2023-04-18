@@ -190,7 +190,7 @@ QDomElement BattleDialogModelCombatant::createOutputXML(QDomDocument &doc)
 void BattleDialogModelCombatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
-    element.setAttribute("type", getCombatantType() );
+    element.setAttribute("type", getCombatantType());
     element.setAttribute("initiative", _initiative);
     element.setAttribute("isShown", _isShown);
     element.setAttribute("isKnown", _isKnown);

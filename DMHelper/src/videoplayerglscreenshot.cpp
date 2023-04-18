@@ -73,7 +73,7 @@ void VideoPlayerGLScreenshot::registerNewFrame()
     }
 }
 
-void VideoPlayerGLScreenshot::playerEventCallback( const struct libvlc_event_t *p_event, void *p_data )
+void VideoPlayerGLScreenshot::playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
 {
     if((!p_event) || (!p_data))
         return;

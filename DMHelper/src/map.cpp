@@ -147,7 +147,7 @@ void Map::inputXML(const QDomElement &element, bool isImport)
             while(!actionElement.isNull())
             {
                 UndoFowBase* newAction = nullptr;
-                switch( actionElement.attribute(QString("type")).toInt())
+                switch(actionElement.attribute(QString("type")).toInt())
                 {
                     case DMHelper::ActionType_Fill:
                         newAction = new UndoFowFill(nullptr, MapEditFill(QColor()));

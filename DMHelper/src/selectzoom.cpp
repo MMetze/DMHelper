@@ -38,7 +38,7 @@ QRect SelectZoom::getZoomRect()
     QRect imgSelection(selection.x() * _img.width() / ui->lblImage->width(),
                        selection.y() * _img.height() / ui->lblImage->height(),
                        selection.width() * _img.width() / ui->lblImage->width(),
-                       selection.height() * _img.height() / ui->lblImage->height() );
+                       selection.height() * _img.height() / ui->lblImage->height());
 
     int imgLeft = ((ui->lblImage->width() - _scaledSize.width()) / 2) + ui->lblImage->x();
     int imgTop = ((ui->lblImage->height() - _scaledSize.height()) / 2) + ui->lblImage->y();

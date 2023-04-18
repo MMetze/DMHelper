@@ -41,7 +41,7 @@ void TextPublishDialog::setPreviewImage(QImage img, const QColor& color)
 {
     Q_UNUSED(color);
 
-    QImage scaledImg = img.scaled(ui->lblPreview->size(),Qt::KeepAspectRatio);
+    QImage scaledImg = img.scaled(ui->lblPreview->size(), Qt::KeepAspectRatio);
     ui->lblPreview->setPixmap(QPixmap::fromImage(scaledImg));
 }
 
@@ -56,9 +56,7 @@ void TextPublishDialog::mousePressEvent(QMouseEvent * event)
 void TextPublishDialog::mouseReleaseEvent(QMouseEvent * event)
 {
     if((mouseDown)&&(mouseDownPos == event->pos())&&(ui->lblPreview->geometry().contains(event->pos())))
-    {
         emit openPreview();
-    }
 
     mouseDown = false;
     QDialog::mouseReleaseEvent(event);
@@ -66,14 +64,10 @@ void TextPublishDialog::mouseReleaseEvent(QMouseEvent * event)
 
 void TextPublishDialog::keyPressEvent(QKeyEvent * event)
 {
-    if( event->key() == Qt::Key_Escape )
-    {
+    if(event->key() == Qt::Key_Escape)
         hide();
-    }
     else
-    {
         QDialog::keyPressEvent(event);
-    }
 }
 
 void TextPublishDialog::hideEvent(QHideEvent * event)

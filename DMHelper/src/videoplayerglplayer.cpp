@@ -311,7 +311,7 @@ void VideoPlayerGLPlayer::cleanupVBObjects()
 }
 
 
-void VideoPlayerGLPlayer::playerEventCallback( const struct libvlc_event_t *p_event, void *p_data )
+void VideoPlayerGLPlayer::playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
 {
     if((!p_event) || (!p_data))
         return;

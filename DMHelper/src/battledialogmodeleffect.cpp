@@ -284,7 +284,7 @@ void BattleDialogModelEffect::internalOutputXML(QDomDocument &doc, QDomElement &
     element.setAttribute("active", _active);
     element.setAttribute("visible", _visible);
     element.setAttribute("size", _size);
-    element.setAttribute("rotation", _rotation );
+    element.setAttribute("rotation", _rotation);
     element.setAttribute("colorR", _color.red());
     element.setAttribute("colorG", _color.green());
     element.setAttribute("colorB", _color.blue());

@@ -410,7 +410,7 @@ void BestiaryDialog::updateAbilityMods()
 
 void BestiaryDialog::monsterRenamed()
 {
-    if( (!_monster) || (ui->edtName->text() == _monster->getName()) )
+    if((!_monster) || (ui->edtName->text() == _monster->getName()))
         return;
 
     Bestiary::Instance()->renameMonster(_monster, ui->edtName->text());

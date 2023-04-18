@@ -749,7 +749,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::newCampaign()
 {
-    if( !closeCampaign() )
+    if(!closeCampaign())
         return;
 
     bool ok;
@@ -782,7 +782,7 @@ bool MainWindow::saveCampaign()
         QMessageBox::StandardButton result = QMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
                                                                    QString("An invalid structure has been detected in the open campaign. Saving may corrupt the file and lead to data loss.\n\nIt is strongly recommended to back up your campaign file before saving!\n\nDo you wish to save now?"),
-                                                                   QMessageBox::Yes | QMessageBox::No );
+                                                                   QMessageBox::Yes | QMessageBox::No);
         if(result == QMessageBox::No)
         {
             qDebug() << "[MainWindow] Invalid campaign not saved";
@@ -851,7 +851,7 @@ bool MainWindow::saveCampaign()
         if(QMessageBox::critical(this,
                                  QString("Save Bestiary"),
                                  QString("The Bestiary has been changed. Would you like to save it as well?"),
-                                 QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes)
+                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
             writeBestiary();
     }
 
@@ -860,7 +860,7 @@ bool MainWindow::saveCampaign()
         if(QMessageBox::critical(this,
                                  QString("Save Spellbook"),
                                  QString("The Spellbook has been changed. Would you like to save it as well?"),
-                                 QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes)
+                                 QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
             writeSpellbook();
     }
 
@@ -882,7 +882,7 @@ void MainWindow::saveCampaignAs()
 void MainWindow::openFileDialog()
 {
     QString filename = QFileDialog::getOpenFileName(this, QString("Select Campaign"), QString(), QString("XML files (*.xml)"));
-    if( (!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)) )
+    if((!filename.isNull()) && (!filename.isEmpty()) && (QFile::exists(filename)))
         openCampaign(filename);
 }
 
@@ -895,7 +895,7 @@ bool MainWindow::closeCampaign()
         QMessageBox::StandardButton result = QMessageBox::question(this,
                                                                    QString("Save Campaign"),
                                                                    QString("Would you like to save the current campaign before proceeding? Unsaved changes will be lost."),
-                                                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel );
+                                                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
         if(result == QMessageBox::Cancel)
         {
             qDebug() << "[MainWindow] Closíng Campaign cancelled";
@@ -1708,9 +1708,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 {
     const QMimeData* data = event->mimeData();
-    if( (data->hasUrls()) &&
-        (data->urls().count() == 1) &&
-        (data->urls().first().isLocalFile()) )
+    if((data->hasUrls()) &&
+       (data->urls().count() == 1) &&
+       (data->urls().first().isLocalFile()))
     {
         // TODO: fix
         QImageReader reader(data->urls().first().toLocalFile());
@@ -1727,9 +1727,9 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event)
 void MainWindow::dragMoveEvent(QDragMoveEvent *event)
 {
     const QMimeData* data = event->mimeData();
-    if( (data->hasUrls()) &&
-        (data->urls().count() == 1) &&
-        (data->urls().first().isLocalFile()) )
+    if((data->hasUrls()) &&
+       (data->urls().count() == 1) &&
+       (data->urls().first().isLocalFile()))
     {
         // TODO: enhance to include non-images
         QImageReader reader(data->urls().first().toLocalFile());
@@ -1751,9 +1751,9 @@ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
 void MainWindow::dropEvent(QDropEvent *event)
 {
     const QMimeData* data = event->mimeData();
-    if( (data->hasUrls()) &&
-        (data->urls().count() == 1) &&
-        (data->urls().first().isLocalFile()) )
+    if((data->hasUrls()) &&
+       (data->urls().count() == 1) &&
+       (data->urls().first().isLocalFile()))
     {
         QString filename = data->urls().first().toLocalFile();
         openCampaign(filename);
@@ -2172,7 +2172,7 @@ void MainWindow::openCampaign(const QString& filename)
         QMessageBox::StandardButton result = QMessageBox::critical(this,
                                                                    QString("Invalid Campaign"),
                                                                    QString("The loaded campaign has an invalid structure: there is a high risk of data loss and/or program malfunction! Would you like to continue?"),
-                                                                   QMessageBox::Yes | QMessageBox::No );
+                                                                   QMessageBox::Yes | QMessageBox::No);
         if(result == QMessageBox::No)
         {
             QMessageBox::information(this,

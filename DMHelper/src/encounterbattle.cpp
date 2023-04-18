@@ -47,28 +47,28 @@ EncounterBattle::~EncounterBattle()
 void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 {
     /*
-    QDomElement rootCombatantsElement = element.firstChildElement( "combatants" );
+    QDomElement rootCombatantsElement = element.firstChildElement("combatants");
     if(rootCombatantsElement.isNull())
     {
-        QDomElement wavesElement = element.firstChildElement( "waves" );
-        if( !wavesElement.isNull() )
+        QDomElement wavesElement = element.firstChildElement("waves");
+        if(!wavesElement.isNull())
         {
             int wave = 0;
 
-            QDomElement waveElement = wavesElement.firstChildElement( QString("wave") );
-            while( !waveElement.isNull() )
+            QDomElement waveElement = wavesElement.firstChildElement(QString("wave"));
+            while(!waveElement.isNull())
             {
                 insertWave(wave);
 
-                QDomElement combatantsElement = waveElement.firstChildElement( "combatants" );
-                if( !combatantsElement.isNull() )
+                QDomElement combatantsElement = waveElement.firstChildElement("combatants");
+                if(!combatantsElement.isNull())
                 {
-                    QDomElement combatantPairElement = combatantsElement.firstChildElement( QString("combatantPair") );
-                    while( !combatantPairElement.isNull() )
+                    QDomElement combatantPairElement = combatantsElement.firstChildElement(QString("combatantPair"));
+                    while(!combatantPairElement.isNull())
                     {
                         int combatantCount = combatantPairElement.attribute("count").toInt();
-                        QDomElement combatantElement = combatantPairElement.firstChildElement( QString("combatant") );
-                        if( !combatantElement.isNull() )
+                        QDomElement combatantElement = combatantPairElement.firstChildElement(QString("combatant"));
+                        if(!combatantElement.isNull())
                         {
                             bool ok = false;
                             int combatantType = combatantElement.attribute("type").toInt(&ok);
@@ -81,11 +81,11 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
                                 }
                             }
                         }
-                        combatantPairElement = combatantPairElement.nextSiblingElement( QString("combatantPair") );
+                        combatantPairElement = combatantPairElement.nextSiblingElement(QString("combatantPair"));
                     }
                 }
 
-                waveElement = waveElement.nextSiblingElement( QString("wave") );
+                waveElement = waveElement.nextSiblingElement(QString("wave"));
                 ++wave;
             }
         }
@@ -186,9 +186,7 @@ void EncounterBattle::insertWave(int wave)
 
 void EncounterBattle::removeWave(int wave)
 {
-    if( (_combatantWaves.count() <= 0 ) ||
-        (wave < 0) ||
-        (wave >= _combatantWaves.count()) )
+    if((_combatantWaves.count() <= 0) || (wave < 0) || (wave >= _combatantWaves.count()))
         return;
 
     CombatantGroupList waveCombatants = _combatantWaves.takeAt(wave);
@@ -414,8 +412,8 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             {
                 combatant->inputXML(combatantElement, isImport);
                 _battleModel->appendCombatant(combatant);
-                if( ((!activeId.isNull()) && (combatant->getID() == activeId)) ||
-                    (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
+                if(((!activeId.isNull()) && (combatant->getID() == activeId)) ||
+                   ((activeId.isNull()) && (combatant->getIntID() == activeIdInt)))
                 {
                     _battleModel->setActiveCombatant(combatant);
                 }
