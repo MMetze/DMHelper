@@ -46,6 +46,7 @@ BattleDialogModelObject* UnselectedPixmap::getObject()
 
 QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant &value)
 {
+    /*
     if((change == ItemPositionChange) && (scene()))
     {
         QPointF newPos = mapToScene(value.toPointF());
@@ -56,6 +57,19 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
             newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
             newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
             return mapFromScene(newPos);
+        }
+    }
+    */
+    if((change == ItemPositionChange) && (scene()))
+    {
+        QPointF newPos = mapToScene(mapFromParent(value.toPointF()));
+        QRectF rect = scene()->sceneRect();
+        bool posOutOfBounds = !rect.contains(newPos);
+        if(posOutOfBounds)
+        {
+            newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
+            newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
+            return mapToParent(mapFromScene(newPos));
         }
     }
     /*
@@ -69,12 +83,26 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
     }
     */
     else if(change == ItemScenePositionHasChanged)
+    //if(change == ItemScenePositionHasChanged)
     {
-        if(_object)
+        QPointF newPos = value.toPointF();
+        /*
+        QRectF rect = scene()->sceneRect();
+        bool posOutOfBounds = !rect.contains(newPos);
+        if(posOutOfBounds)
         {
-            QPointF newPos = value.toPointF();
-            _object->setPosition(newPos);
+            newPos.setX(qMin(rect.right(), qMax(newPos.x(), rect.left())));
+            newPos.setY(qMin(rect.bottom(), qMax(newPos.y(), rect.top())));
         }
+        */
+
+        if(_object)
+            _object->setPosition(newPos);
+
+        /*
+        if(posOutOfBounds)
+            return mapFromScene(newPos);
+            */
     }
     else if(change == ItemSelectedHasChanged)
     {
