@@ -4,6 +4,10 @@
 #include <QStyleOptionGraphicsItem>
 #include <QPen>
 
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+    #include <QPainter>
+#endif
+
 UnselectedEllipse::UnselectedEllipse(BattleDialogModelObject* object, qreal x, qreal y, qreal width, qreal height, QGraphicsItem *parent) :
     QGraphicsEllipseItem(x, y, width, height, parent),
     _object(object)
@@ -16,6 +20,11 @@ void UnselectedEllipse::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     QStyleOptionGraphicsItem myoption = (*option);
     myoption.state &= ~QStyle::State_Selected;
     QGraphicsEllipseItem::paint(painter, &myoption, widget);
+
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+        if(painter)
+            painter->fillRect(boundingRect(), Qt::blue);
+#endif
 }
 
 QVariant UnselectedEllipse::itemChange(GraphicsItemChange change, const QVariant &value)

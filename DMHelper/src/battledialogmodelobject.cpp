@@ -1,5 +1,6 @@
 #include "battledialogmodelobject.h"
 #include <QDomElement>
+#include <QGraphicsItem>
 
 BattleDialogModelObject::BattleDialogModelObject(const QPointF& position, const QString& name, QObject *parent) :
     CampaignObjectBase{name, parent},
@@ -55,15 +56,37 @@ void BattleDialogModelObject::setPosition(qreal x, qreal y)
     setPosition(QPointF(x, y));
 }
 
+void BattleDialogModelObject::applyScale(QGraphicsItem& item, qreal gridScale)
+{
+    if(gridScale <= 0.0)
+        return;
+
+    item.setScale(gridScale);
+}
+
+qreal BattleDialogModelObject::getScale()
+{
+    return 1.0;
+}
+
 void BattleDialogModelObject::setLinkedObject(BattleDialogModelObject* linkedObject)
 {
-    if(_linkedObject != linkedObject)
-    {
-        BattleDialogModelObject* previousLink = _linkedObject;
-        _linkedObject = linkedObject;
-        emit linkChanged(this, previousLink);
-        emit dirty();
-    }
+    if(_linkedObject == linkedObject)
+        return;
+
+    BattleDialogModelObject* previousLink = _linkedObject;
+    _linkedObject = linkedObject;
+    emit linkChanged(this, previousLink);
+    emit dirty();
+}
+
+void BattleDialogModelObject::objectRemoved(BattleDialogModelObject* removedObject)
+{
+    if((!removedObject) || (_linkedObject != removedObject))
+        return;
+
+    setLinkedObject(nullptr);
+    setLinkedObject(dynamic_cast<BattleDialogModelObject*>(removedObject->getLinkedObject()));
 }
 
 void BattleDialogModelObject::setSelected(bool isSelected)

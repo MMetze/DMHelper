@@ -34,6 +34,8 @@ public:
     virtual const CampaignObjectBase* getParentById(const QUuid& id) const override;
     virtual CampaignObjectBase* getParentById(const QUuid& id) override;
 
+    QGraphicsItem* getObjectItem(BattleDialogModelObject* object) const;
+
     QList<BattleDialogModelCombatant*> getCombatantList() const;
     int getCombatantCount() const;
     BattleDialogModelCombatant* getCombatant(int index) const;

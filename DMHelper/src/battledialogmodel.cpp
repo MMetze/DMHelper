@@ -252,6 +252,31 @@ CampaignObjectBase* BattleDialogModel::getParentById(const QUuid& id)
     return _encounter->getParentById(id);
 }
 
+QGraphicsItem* BattleDialogModel::getObjectItem(BattleDialogModelObject* object) const
+{
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
+    BattleDialogModelEffect* effect = dynamic_cast<BattleDialogModelEffect*>(object);
+
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            QGraphicsItem* item = nullptr;
+            if(combatant)
+                item = tokenLayer->getCombatantItem(combatant);
+            else if(effect)
+                item = tokenLayer->getEffectItem(effect);
+
+            if(item)
+                return item;
+        }
+    }
+
+    return nullptr;
+}
+
 QList<BattleDialogModelCombatant*> BattleDialogModel::getCombatantList() const
 {
     return _combatants;

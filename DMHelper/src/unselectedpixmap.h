@@ -11,7 +11,8 @@ public:
     explicit UnselectedPixmap(BattleDialogModelObject* object = nullptr, QGraphicsItem *parent = nullptr);
     UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelObject* object, QGraphicsItem *parent = nullptr);
 
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+
     void setDraw(bool draw);
 
     void setHover(bool hover);
@@ -19,7 +20,7 @@ public:
 
 protected:
 //    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
-    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 //    virtual bool sceneEvent(QEvent *event);
 
     void selectionChanged();

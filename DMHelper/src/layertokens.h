@@ -64,6 +64,7 @@ public slots:
     void addCombatant(BattleDialogModelCombatant* combatant);
     void removeCombatant(BattleDialogModelCombatant* combatant);
     bool containsCombatant(BattleDialogModelCombatant* combatant);
+    QGraphicsItem* getCombatantItem(BattleDialogModelCombatant* combatant);
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item);
 
     void addEffect(BattleDialogModelEffect* effect);
@@ -72,6 +73,7 @@ public slots:
     QGraphicsItem* getEffectItem(BattleDialogModelEffect* effect);
 
 signals:
+    void objectRemoved(BattleDialogModelObject* object);
 
 protected slots:
     // Local Interface
@@ -89,6 +91,7 @@ protected:
     QGraphicsItem* addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addSpellEffect(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* findGraphicsItem(BattleDialogModelObject* object);
+    qreal getTotalScale(QGraphicsItem& item);
 
     // Player Window Methods
     void cleanupPlayer();

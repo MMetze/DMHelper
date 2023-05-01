@@ -109,8 +109,21 @@ void BattleDialogModelEffect::applyEffectValues(QGraphicsItem& item, qreal gridS
     item.setPos(getPosition());
     item.setRotation(getRotation());
     item.setToolTip(getTip());
-    item.setScale(static_cast<qreal>(getSize()) * gridScale / 500.0);
+    applyScale(item, gridScale);
     endBatchChanges();
+}
+
+void BattleDialogModelEffect::applyScale(QGraphicsItem& item, qreal gridScale)
+{
+    if(gridScale <= 0.0)
+        return;
+
+    item.setScale(static_cast<qreal>(getSize()) * gridScale / 500.0);
+}
+
+qreal BattleDialogModelEffect::getScale()
+{
+    return static_cast<qreal>(getSize()) / 500.0;
 }
 
 bool BattleDialogModelEffect::getEffectActive() const
@@ -163,15 +176,6 @@ int BattleDialogModelEffect::getWidth() const
 void BattleDialogModelEffect::setWidth(int width)
 {
     Q_UNUSED(width);
-}
-
-void BattleDialogModelEffect::setItemScale(QGraphicsItem* item, qreal scaleFactor)
-{
-    if((item) && (item->scale() != scaleFactor))
-    {
-        item->setScale(scaleFactor);
-        registerChange();
-    }
 }
 
 qreal BattleDialogModelEffect::getRotation() const

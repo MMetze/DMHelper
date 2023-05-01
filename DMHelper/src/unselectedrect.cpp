@@ -4,6 +4,10 @@
 #include <QStyleOptionGraphicsItem>
 #include <QPen>
 
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+    #include <QPainter>
+#endif
+
 UnselectedRect::UnselectedRect(BattleDialogModelObject* object, qreal x, qreal y, qreal width, qreal height, QGraphicsItem *parent) :
     QGraphicsRectItem(x, y, width, height, parent),
     _object(object)
@@ -16,6 +20,11 @@ void UnselectedRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     QStyleOptionGraphicsItem myoption = (*option);
     myoption.state &= ~QStyle::State_Selected;
     QGraphicsRectItem::paint(painter, &myoption, widget);
+
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+        if(painter)
+            painter->fillRect(boundingRect(), Qt::blue);
+#endif
 }
 
 QVariant UnselectedRect::itemChange(GraphicsItemChange change, const QVariant &value)

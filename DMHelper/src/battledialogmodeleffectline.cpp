@@ -105,7 +105,8 @@ void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal g
         qDebug() << "[Battle Dialog Model Effect Line] ERROR: Line Effect found without QGraphicsRectItem!";
     }
 
-    item.setScale(effectHeight * gridScale / 500.0);
+    // item.setScale(effectHeight * gridScale / 500.0);
+    applyScale(item, gridScale);
 
     QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
     if(shapeItem)

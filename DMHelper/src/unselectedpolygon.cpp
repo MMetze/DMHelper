@@ -4,6 +4,10 @@
 #include <QStyleOptionGraphicsItem>
 #include <QPen>
 
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+    #include <QPainter>
+#endif
+
 UnselectedPolygon::UnselectedPolygon(BattleDialogModelObject* object, const QPolygonF &polygon, QGraphicsItem *parent) :
     QGraphicsPolygonItem(polygon, parent),
     _object(object)
@@ -16,6 +20,11 @@ void UnselectedPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     QStyleOptionGraphicsItem myoption = (*option);
     myoption.state &= ~QStyle::State_Selected;
     QGraphicsPolygonItem::paint(painter, &myoption, widget);
+
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+        if(painter)
+            painter->fillRect(boundingRect(), Qt::blue);
+#endif
 }
 
 QVariant UnselectedPolygon::itemChange(GraphicsItemChange change, const QVariant &value)

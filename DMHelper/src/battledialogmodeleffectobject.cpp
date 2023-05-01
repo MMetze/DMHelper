@@ -118,8 +118,18 @@ void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal
     item.setRotation(getRotation());
     item.setToolTip(getTip());
     item.setOpacity(_color.alphaF());
-    setItemScale(&item, static_cast<qreal>(getSize()) * gridScale / 500.0);
+    applyScale(item, gridScale);
     endBatchChanges();
+}
+
+void BattleDialogModelEffectObject::applyScale(QGraphicsItem& item, qreal gridScale)
+{
+    item.setScale(static_cast<qreal>(getSize()) * _imageScaleFactor * gridScale / 500.0);
+}
+
+qreal BattleDialogModelEffectObject::getScale()
+{
+    return static_cast<qreal>(getSize()) * _imageScaleFactor / 500.0;
 }
 
 int BattleDialogModelEffectObject::getWidth() const
@@ -133,15 +143,6 @@ void BattleDialogModelEffectObject::setWidth(int width)
     {
         _width = width;
         emit effectChanged(this);
-    }
-}
-
-void BattleDialogModelEffectObject::setItemScale(QGraphicsItem* item, qreal scaleFactor)
-{
-    if((item) && (item->scale() != scaleFactor * _imageScaleFactor))
-    {
-        item->setScale(scaleFactor * _imageScaleFactor);
-        registerChange();
     }
 }
 

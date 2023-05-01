@@ -3,6 +3,8 @@
 
 #include "campaignobjectbase.h"
 
+class QGraphicsItem;
+
 class BattleDialogModelObject : public CampaignObjectBase
 {
     Q_OBJECT
@@ -20,8 +22,12 @@ public:
     virtual void setPosition(const QPointF& position);
     virtual void setPosition(qreal x, qreal y);
 
+    virtual void applyScale(QGraphicsItem& item, qreal gridScale);
+    virtual qreal getScale();
+
 public slots:
     virtual void setLinkedObject(BattleDialogModelObject* linkedObject);
+    virtual void objectRemoved(BattleDialogModelObject* removedObject);
     virtual void setSelected(bool isSelected);
 
 signals:

@@ -192,7 +192,7 @@ void BattleDialogGraphicsScene::updateBattleContents()
             {
                 qreal newScale = static_cast<qreal>(effect->getSize()) * static_cast<qreal>(_model->getGridScale()) / 500.0;
                 qreal oldScale = item->scale();
-                effect->setItemScale(item, newScale);
+                effect->applyScale(*item, newScale);
                 item->setPos(item->pos() * item->scale()/oldScale);
                 effect->setPosition(item->pos());
             }
@@ -1018,7 +1018,6 @@ void BattleDialogGraphicsScene::deleteItem()
     if(result == QMessageBox::Yes)
     {
         qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << deleteEffect;
-        _model->removeEffect(deleteEffect);
         _itemList.removeOne(_contextMenuItem);
         if(_mouseDownItem == _contextMenuItem)
         {
@@ -1026,8 +1025,9 @@ void BattleDialogGraphicsScene::deleteItem()
             _mouseDownItem = nullptr;
         }
         emit effectRemoved(_contextMenuItem);
-        delete _contextMenuItem;
-        _contextMenuItem = nullptr;
+        _model->removeEffect(deleteEffect);
+        //delete _contextMenuItem;
+        //_contextMenuItem = nullptr;
     }
 }
 

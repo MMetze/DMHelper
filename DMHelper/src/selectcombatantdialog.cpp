@@ -5,11 +5,13 @@
 #include <QGraphicsItem>
 #include <QPainter>
 
-SelectCombatantDialog::SelectCombatantDialog(BattleDialogModel& model, BattleDialogModelObject* thisItem, QWidget *parent) :
+SelectCombatantDialog::SelectCombatantDialog(BattleDialogModel& model, BattleDialogModelObject* thisItem, bool includeParents, bool includeChildren, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SelectCombatantDialog),
     _model(model),
-    _thisItem(thisItem)
+    _thisItem(thisItem),
+    _includeParents(includeParents),
+    _includeChildren(includeChildren)
 {
     ui->setupUi(this);
     readModel();
@@ -92,6 +94,9 @@ void SelectCombatantDialog::readModel()
             }
         }
     }
+
+    if(!_includeParents)
+        removeParents();
 }
 
 void SelectCombatantDialog::addCombatant(BattleDialogModelCombatant* combatant)
@@ -99,6 +104,9 @@ void SelectCombatantDialog::addCombatant(BattleDialogModelCombatant* combatant)
     if((!combatant) || (dynamic_cast<BattleDialogModelObject*>(combatant) == _thisItem))
         return;
     
+    if((!_includeChildren) && (isChild(combatant)))
+        return;
+
     QListWidgetItem* newItem = new QListWidgetItem(QIcon(combatant->getIconPixmap(DMHelper::PixmapSize_Showcase)), combatant->getName());
     newItem->setData(Qt::UserRole, QVariant::fromValue(dynamic_cast<BattleDialogModelObject*>(combatant)));
     ui->listWidget->addItem(newItem);
@@ -107,6 +115,9 @@ void SelectCombatantDialog::addCombatant(BattleDialogModelCombatant* combatant)
 void SelectCombatantDialog::addEffect(BattleDialogModelEffect* effect, BattleDialogModelEffect* childEffect, QGraphicsItem* effectItem)
 {
     if((!effect) || (!effectItem) || (dynamic_cast<BattleDialogModelObject*>(effect) == _thisItem))
+        return;
+
+    if((!_includeChildren) && (isChild(effect) || isChild(childEffect)))
         return;
 
     QPixmap effectPixmap(256, 256);
@@ -135,4 +146,39 @@ void SelectCombatantDialog::addEffect(BattleDialogModelEffect* effect, BattleDia
     QListWidgetItem* newItem = new QListWidgetItem(QIcon(effectPixmap), effectName);
     newItem->setData(Qt::UserRole, QVariant::fromValue(dynamic_cast<BattleDialogModelObject*>(effect)));
     ui->listWidget->addItem(newItem);
+}
+
+bool SelectCombatantDialog::isChild(BattleDialogModelObject* item)
+{
+    if((!item) || (!_thisItem) || (item == _thisItem))
+        return false;
+
+    BattleDialogModelObject* parentItem = item->getLinkedObject();
+    while(parentItem)
+    {
+        if(parentItem == _thisItem)
+            return true;
+
+        parentItem = parentItem->getLinkedObject();
+    }
+
+    return false;
+}
+
+void SelectCombatantDialog::removeParents()
+{
+    if(!_thisItem)
+        return;
+
+    BattleDialogModelObject* parentItem = _thisItem->getLinkedObject();
+    while(parentItem)
+    {
+        for(int i = 0; i < ui->listWidget->count(); ++i)
+        {
+            QListWidgetItem* item = ui->listWidget->item(i);
+            if((item) && (item->data(Qt::UserRole).value<BattleDialogModelObject*>() == parentItem))
+                delete item;
+        }
+        parentItem = parentItem->getLinkedObject();
+    }
 }

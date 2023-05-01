@@ -5,6 +5,10 @@
 #include <QStyleOptionGraphicsItem>
 #include <QGraphicsScene>
 
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+    #include <QPainter>
+#endif
+
 UnselectedPixmap::UnselectedPixmap(BattleDialogModelObject* object, QGraphicsItem *parent) :
     QGraphicsPixmapItem(parent),
     _object(object),
@@ -31,6 +35,11 @@ void UnselectedPixmap::paint(QPainter *painter, const QStyleOptionGraphicsItem *
         QStyleOptionGraphicsItem myoption = (*option);
         //myoption.state &= ~QStyle::State_Selected;
         QGraphicsPixmapItem::paint(painter, &myoption, widget);
+
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+        if(painter)
+            painter->fillRect(boundingRect(), Qt::red);
+#endif
     }
 }
 
@@ -62,6 +71,8 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
     */
     if((change == ItemPositionChange) && (scene()))
     {
+        scene()->update(mapRectToScene(boundingRect() | childrenBoundingRect()));
+
         QPointF newPos = mapToScene(mapFromParent(value.toPointF()));
         QRectF rect = scene()->sceneRect();
         bool posOutOfBounds = !rect.contains(newPos);
@@ -98,7 +109,6 @@ QVariant UnselectedPixmap::itemChange(GraphicsItemChange change, const QVariant 
 
         if(_object)
             _object->setPosition(newPos);
-
         /*
         if(posOutOfBounds)
             return mapFromScene(newPos);

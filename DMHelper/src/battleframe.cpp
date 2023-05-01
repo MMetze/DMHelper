@@ -2298,7 +2298,7 @@ void BattleFrame::handleItemLink(BattleDialogModelObject* item)
         return;
 
     SelectCombatantDialog dlg(*_model, item);
-    dlg.resize(width() / 2, height() * 9 / 10);
+    dlg.resize(width() / 2, height() / 2);
 
     int result = dlg.exec();
     if(result != QDialog::Accepted)
@@ -2309,7 +2309,13 @@ void BattleFrame::handleItemLink(BattleDialogModelObject* item)
         return;
 
     if(dlg.isCentered())
-        item->setPosition(selectedObject->getPosition());
+    {
+        QGraphicsItem* linkedItem = _model->getObjectItem(item);
+        QGraphicsItem* selectedItem = _model->getObjectItem(selectedObject);
+
+        if((linkedItem) && (selectedItem))
+            linkedItem->setPos(selectedItem->scenePos());
+    }
     item->setLinkedObject(selectedObject);
 }
 
@@ -3999,7 +4005,7 @@ void BattleFrame::startMovement(BattleDialogModelCombatant* combatant, QGraphics
     {
         int speedSquares = 2 * (speed / 5) + 1;
         _moveRadius = _model->getGridScale() * speedSquares;
-        _moveStart = item->pos();
+        _moveStart = item->scenePos();
         _movementPixmap->setPos(_moveStart);
         _movementPixmap->setRect(-_moveRadius/2.0, -_moveRadius/2.0, _moveRadius, _moveRadius);
         _movementPixmap->setVisible(true);
@@ -4013,7 +4019,7 @@ void BattleFrame::updateMovement(BattleDialogModelCombatant* combatant, QGraphic
     if((!combatant) || (!item) || (!_model))
         return;
 
-    QPointF combatantPos = item->pos();
+    QPointF combatantPos = item->scenePos();
     QPointF diff = _moveStart - combatantPos;
     _moveStart = combatantPos;
     qreal delta = qSqrt((diff.x() * diff.x()) + (diff.y() * diff.y()));

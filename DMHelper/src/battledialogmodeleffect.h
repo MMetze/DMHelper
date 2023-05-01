@@ -56,6 +56,8 @@ public:
 
     virtual QGraphicsItem* createEffectShape(qreal gridScale) = 0;
     virtual void applyEffectValues(QGraphicsItem& item, qreal gridScale);
+    virtual void applyScale(QGraphicsItem& item, qreal gridScale) override;
+    virtual qreal getScale() override;
 
     virtual bool getEffectActive() const;
     virtual void setEffectActive(bool active);
@@ -68,8 +70,6 @@ public:
 
     virtual int getWidth() const;
     virtual void setWidth(int width);
-
-    virtual void setItemScale(QGraphicsItem* item, qreal scaleFactor);
 
     virtual qreal getRotation() const;
     virtual void setRotation(qreal rotation);
