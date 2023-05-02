@@ -616,6 +616,10 @@ void LayerTokens::linkedObjectChanged(BattleDialogModelObject* object, BattleDia
     if(!objectItem)
         return;
 
+    BattleDialogModelObject* primaryObject = dynamic_cast<BattleDialogModelObject*>((object->children().count() == 1) ? object->children().at(0) : object);
+    if(!primaryObject)
+        return;
+
     if(object->getLinkedObject())
     {
         QGraphicsItem* linkedItem = findGraphicsItem(object->getLinkedObject());
@@ -629,9 +633,10 @@ void LayerTokens::linkedObjectChanged(BattleDialogModelObject* object, BattleDia
         objectItem->setParentItem(linkedItem);
         objectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
 
+        qreal primaryScale = primaryObject->getScale();
         qreal fullLinkedScale = getTotalScale(*linkedItem);
         qreal newScale = (fullLinkedScale > 0.0) ? objectItem->scale() / fullLinkedScale : objectItem->scale();
-        object->applyScale(*objectItem, newScale);
+        primaryObject->applyScale(*objectItem, primaryScale > 0 ? newScale / primaryScale : newScale);
 
         /*
         qreal childScale = newScale > 0.0 ? 1.0 / newScale : 1.0;
@@ -655,20 +660,16 @@ void LayerTokens::linkedObjectChanged(BattleDialogModelObject* object, BattleDia
         {
             BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
             QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(objectItem);
-            if((combatant) && (pixmapItem))
-            {
-                qreal sizeFactor = combatant->getSizeFactor();
-                qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pixmapItem->pixmap().width(), pixmapItem->pixmap().height()));
-                objectItem->setScale(scaleFactor);
-            }
+            if((!combatant) || (!pixmapItem))
+                return;
+
+            qreal sizeFactor = combatant->getSizeFactor();
+            qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pixmapItem->pixmap().width(), pixmapItem->pixmap().height()));
+            objectItem->setScale(scaleFactor);
         }
         else
         {
-            BattleDialogModelEffect* effect = nullptr;
-            if(object->children().count() == 1)
-                effect = dynamic_cast<BattleDialogModelEffect*>(object->children().at(0));
-            else
-                effect = dynamic_cast<BattleDialogModelEffect*>(object);
+            BattleDialogModelEffect* effect = dynamic_cast<BattleDialogModelEffect*>(primaryObject);
             if(effect)
                 effect->applyEffectValues(*objectItem, _scale);
         }

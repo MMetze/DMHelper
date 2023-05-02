@@ -30,7 +30,7 @@ namespace Ui {
 class BattleFrame;
 }
 
-#define DEBUG_FILL_BOUNDING_RECTS
+//#define DEBUG_FILL_BOUNDING_RECTS
 
 const int BattleDialogItemChild_Index = 0;
 const int BattleDialogItemChild_EffectId = 0;
