@@ -274,6 +274,8 @@ void LayerTokens::dmInitialize(QGraphicsScene* scene)
         createEffectIcon(scene, _effects.at(i));
     }
 
+    Layer::dmInitialize(scene);
+
     // Now go through the combatants and effects again to reestablish any existing links
     for(int i = 0; i < _combatants.count(); ++i)
     {
@@ -286,8 +288,6 @@ void LayerTokens::dmInitialize(QGraphicsScene* scene)
         if((_effects.at(i)) && (_effects.at(i)->getLinkedObject()))
             linkedObjectChanged(_effects.at(i), nullptr);
     }
-
-    Layer::dmInitialize(scene);
 }
 
 void LayerTokens::dmUninitialize()
