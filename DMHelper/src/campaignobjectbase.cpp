@@ -32,20 +32,29 @@ QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent
     qDebug() << "[CampaignBaseObject] Outputting object started: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
 #endif
     QDomElement newElement = createOutputXML(doc);
-    internalOutputXML(doc, newElement, targetDirectory, isExport);
-
-    if(!isExport)
+    if(!newElement.isNull())
     {
-        QList<CampaignObjectBase*> childList = getChildObjects();
-        for(int i = 0; i < childList.count(); ++i)
-        {
-            childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
-        }
-    }
+        internalOutputXML(doc, newElement, targetDirectory, isExport);
 
-    parent.appendChild(newElement);
+        if(!isExport)
+        {
+            QList<CampaignObjectBase*> childList = getChildObjects();
+            for(int i = 0; i < childList.count(); ++i)
+            {
+                childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+            }
+        }
+
+        parent.appendChild(newElement);
 #ifdef CAMPAIGN_OBJECT_LOGGING
-    qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+        qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+#endif
+    }
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    else
+    {
+        qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+    }
 #endif
 
     return newElement;

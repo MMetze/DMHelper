@@ -17,6 +17,7 @@ public:
     virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual BattleDialogModelObject* getLinkedObject() const;
+    QUuid getLinkedID() const;
 
     virtual QPointF getPosition() const;
     virtual void setPosition(const QPointF& position);
@@ -39,6 +40,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     BattleDialogModelObject* _linkedObject;
+    QUuid _linkedId;
     QPointF _position;
 };
 

@@ -612,7 +612,10 @@ void LayerScene::removeLayer(Layer* reference)
 
 QDomElement LayerScene::createOutputXML(QDomDocument &doc)
 {
-    return doc.createElement("layer-scene");
+    if(_layers.count() > 0)
+        return doc.createElement("layer-scene");
+    else
+        return QDomElement();
 }
 
 void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

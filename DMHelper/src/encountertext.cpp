@@ -341,7 +341,8 @@ bool EncounterText::belongsToObject(QDomElement& element)
         return true;
     }
     else if((element.tagName() == "text-data") ||
-            (element.tagName() == "translated-text-data"))
+            (element.tagName() == "translated-text-data") ||
+            (element.tagName() == "layer-scene"))
     {
         return true;
     }

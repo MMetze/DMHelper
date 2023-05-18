@@ -40,6 +40,7 @@ public:
     QList<BattleDialogModelCombatant*> getCombatants();
     const QList<BattleDialogModelEffect*> getEffects() const;
     QList<BattleDialogModelEffect*> getEffects();
+    BattleDialogModelObject* getObjectById(QUuid id);
 
 public slots:
     // DM Window Generic Interface

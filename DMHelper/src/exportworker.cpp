@@ -80,7 +80,7 @@ void ExportWorker::recursiveExport(QTreeWidgetItem* widgetItem, QDomDocument &do
             if(_campaignExport)
                 objectElement = object->outputXML(doc, parentElement, directory, true);
 
-            if(_referencesExport)
+            if((!objectElement.isNull()) && (_referencesExport))
                 exportObjectAssets(object, directory, doc, objectElement);
         }
     }
@@ -320,6 +320,12 @@ bool ExportWorker::tryToDoWork()
         doc.appendChild(root);
 
         campaignElement = _campaign.outputXML(doc, root, _directory, true);
+        if(campaignElement.isNull())
+        {
+            qDebug() << "[ExportWorker] ERROR: Not exporting anything because unabled to export campaign object!";
+            return false;
+        }
+
         campaignElement.setAttribute("name", _exportName);
 
         if(!_soundboardExport)

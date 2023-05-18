@@ -5,6 +5,7 @@
 BattleDialogModelObject::BattleDialogModelObject(const QPointF& position, const QString& name, QObject *parent) :
     CampaignObjectBase{name, parent},
     _linkedObject(nullptr),
+    _linkedId(),
     _position(position)
 {
 }
@@ -17,6 +18,9 @@ void BattleDialogModelObject::inputXML(const QDomElement &element, bool isImport
 {
     _position = QPointF(element.attribute("positionX", QString::number(0)).toDouble(),
                         element.attribute("positionY", QString::number(0)).toDouble());
+
+    if(element.hasAttribute("linkID"))
+        _linkedId = QUuid(element.attribute("linkID"));
 
     CampaignObjectBase::inputXML(element, isImport);
 }
@@ -35,6 +39,11 @@ void BattleDialogModelObject::copyValues(const CampaignObjectBase* other)
 BattleDialogModelObject* BattleDialogModelObject::getLinkedObject() const
 {
     return _linkedObject;
+}
+
+QUuid BattleDialogModelObject::getLinkedID() const
+{
+    return _linkedId;
 }
 
 QPointF BattleDialogModelObject::getPosition() const
@@ -98,6 +107,9 @@ void BattleDialogModelObject::internalOutputXML(QDomDocument &doc, QDomElement &
 {
     element.setAttribute("positionX", _position.x());
     element.setAttribute("positionY", _position.y());
+
+    if(_linkedObject)
+        element.setAttribute("linkID", _linkedObject->getID().toString());
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

@@ -259,6 +259,23 @@ QList<BattleDialogModelEffect*> LayerTokens::getEffects()
     return _effects;
 }
 
+BattleDialogModelObject* LayerTokens::getObjectById(QUuid id)
+{
+    for(int i = 0; i < _combatants.count(); ++i)
+    {
+        if((_combatants.at(i)) && (_combatants.at(i)->getID() == id))
+            return _combatants.at(i);
+    }
+
+    for(int i = 0; i < _effects.count(); ++i)
+    {
+        if((_effects.at(i)) && (_effects.at(i)->getID() == id))
+            return _effects.at(i);
+    }
+
+    return nullptr;
+}
+
 void LayerTokens::dmInitialize(QGraphicsScene* scene)
 {
     if(!scene)

@@ -168,6 +168,29 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             }
         }
     }
+
+    // Re-establish links to linked items
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                if(!combatant->getLinkedID().isNull())
+                    combatant->setLinkedObject(tokenLayer->getObjectById(combatant->getLinkedID()));
+            }
+
+            QList<BattleDialogModelEffect*> effects = tokenLayer->getEffects();
+            foreach(BattleDialogModelEffect* effect, effects)
+            {
+                if(!effect->getLinkedID().isNull())
+                    effect->setLinkedObject(tokenLayer->getObjectById(effect->getLinkedID()));
+            }
+        }
+    }
 }
 
 void BattleDialogModel::copyValues(const CampaignObjectBase* other)
