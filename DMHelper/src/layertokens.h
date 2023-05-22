@@ -80,6 +80,7 @@ protected slots:
     // Local Interface
     void effectChanged(BattleDialogModelEffect* effect);
     void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
+    void linkedObjectMoved(BattleDialogModelObject* object);
 
 protected:
     // Layer Specific Interface

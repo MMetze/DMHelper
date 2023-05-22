@@ -196,5 +196,5 @@ void BattleDialogModelEffectObject::internalOutputXML(QDomDocument &doc, QDomEle
 void BattleDialogModelEffectObject::prepareItem(QGraphicsItem& item) const
 {
     BattleDialogModelEffect::prepareItem(item);
-    item.setZValue(DMHelper::BattleDialog_Z_Camera);
+    //item.setZValue(DMHelper::BattleDialog_Z_Camera);
 }

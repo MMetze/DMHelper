@@ -96,7 +96,7 @@ void BattleDialogModelEffect::endBatchChanges()
         _batchChanges = false;
         if(_changesMade)
         {
-            emit effectChanged(this);
+//            emit effectChanged(this);
             emit dirty();
         }
     }
@@ -310,7 +310,7 @@ void BattleDialogModelEffect::prepareItem(QGraphicsItem& item) const
 {
     item.setFlag(QGraphicsItem::ItemIsMovable, true);
     item.setFlag(QGraphicsItem::ItemIsSelectable, true);
-    item.setZValue(DMHelper::BattleDialog_Z_BackHighlight);
+    //item.setZValue(DMHelper::BattleDialog_Z_BackHighlight);
 }
 
 void BattleDialogModelEffect::registerChange()

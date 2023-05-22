@@ -314,7 +314,7 @@ RibbonTabWorldMap_PartyAction::RibbonTabWorldMap_PartyAction(Party* party, int p
     if(_party)
     {
         connect(_party, &Party::dirty, this, &RibbonTabWorldMap_PartyAction::updateParty);
-        connect(_party, &Party::destroyed, this, &RibbonTabWorldMap_PartyAction::partyDestroyed);
+        connect(_party, &Party::CampaignObjectBase::campaignObjectDestroyed, this, &RibbonTabWorldMap_PartyAction::partyDestroyed);
     }
 }
 

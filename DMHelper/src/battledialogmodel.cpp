@@ -31,6 +31,9 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
     _logger(),
     _backgroundImage()
 {
+    if(_encounter)
+        connect(this, &BattleDialogModel::dirty, _encounter, &EncounterBattle::dirty);
+
     connect(&_layerScene, &LayerScene::dirty, this, &BattleDialogModel::dirty);
 }
 
@@ -677,8 +680,8 @@ void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
     _previousMap = _map;
     _map = map;
 
-    disconnect(_previousMap, &QObject::destroyed, this, &BattleDialogModel::mapDestroyed);
-    connect(_map, &QObject::destroyed, this, &BattleDialogModel::mapDestroyed);
+    disconnect(_previousMap, &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::mapDestroyed);
+    connect(_map, &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::mapDestroyed);
 
     _previousMapRect = _mapRect;
     _mapRect = mapRect;
@@ -810,9 +813,9 @@ void BattleDialogModel::sortCombatants()
     emit dirty();
 }
 
-void BattleDialogModel::mapDestroyed(QObject *obj)
+void BattleDialogModel::mapDestroyed(const QUuid& id)
 {
-    Q_UNUSED(obj);
+    Q_UNUSED(id);
     // TODO: Layers
     setMap(nullptr, QRect());
 }

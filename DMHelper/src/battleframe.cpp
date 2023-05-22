@@ -190,6 +190,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addEffectCone, this, &BattleFrame::addEffectCone);
     connect(_scene, &BattleDialogGraphicsScene::addEffectCube, this, &BattleFrame::addEffectCube);
     connect(_scene, &BattleDialogGraphicsScene::addEffectLine, this, &BattleFrame::addEffectLine);
+    connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
+    connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
@@ -3978,8 +3980,9 @@ void BattleFrame::applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModel
     effectItem->setPen(QPen(ellipseColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     ellipseColor.setAlpha(128);
     effectItem->setBrush(QBrush(ellipseColor));
-    effectItem->setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent);
-    effectItem->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+    //effectItem->setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent);
+    //effectItem->setFlag(QGraphicsItem::ItemStacksBehindParent);
+    //effectItem->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
     effectItem->setData(BattleDialogItemChild_Index, BattleDialogItemChild_AreaEffect);
     effectItem->setParentItem(item);
 

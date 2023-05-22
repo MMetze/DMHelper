@@ -67,6 +67,7 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             newLayer->inputXML(layerElement, isImport);
             newLayer->setScale(_scale);
             newLayer->setLayerScene(this);
+            connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
             _layers.append(newLayer);
         }
 
@@ -124,7 +125,11 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
     _selected = otherScene->_selected;
 
     for(int i = 0; i < otherScene->_layers.count(); ++i)
-        _layers.append(otherScene->_layers[i]->clone());
+    {
+        Layer* newLayer = otherScene->_layers[i]->clone();
+        connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
+        _layers.append(newLayer);
+    }
 
     CampaignObjectBase::copyValues(other);
 }
@@ -215,6 +220,7 @@ void LayerScene::insertLayer(int position, Layer* layer)
 
     layer->setScale(_scale);
     layer->setLayerScene(this);
+    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
 
     if(_dmScene)
         layer->dmInitialize(_dmScene);
@@ -236,6 +242,7 @@ void LayerScene::prependLayer(Layer* layer)
 
     layer->setScale(_scale);
     layer->setLayerScene(this);
+    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
 
     if(_dmScene)
         layer->dmInitialize(_dmScene);
@@ -257,6 +264,7 @@ void LayerScene::appendLayer(Layer* layer)
 
     layer->setScale(_scale);
     layer->setLayerScene(this);
+    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
 
     if(_dmScene)
         layer->dmInitialize(_dmScene);
@@ -277,6 +285,7 @@ void LayerScene::removeLayer(int position)
     if(!deleteLayer)
         return;
 
+    disconnect(deleteLayer, &Layer::dirty, this, &LayerScene::dirty);
     emit layerRemoved(deleteLayer);
     deleteLayer->deleteLater();
 

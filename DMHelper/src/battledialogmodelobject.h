@@ -30,10 +30,12 @@ public slots:
     virtual void setLinkedObject(BattleDialogModelObject* linkedObject);
     virtual void objectRemoved(BattleDialogModelObject* removedObject);
     virtual void setSelected(bool isSelected);
+    virtual void parentMoved(const QPointF& delta);
 
 signals:
     void linkChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
     void objectMoved(BattleDialogModelObject* object);
+    void objectMovedDelta(const QPointF& delta);
 
 protected:
     // From CampaignObjectBase

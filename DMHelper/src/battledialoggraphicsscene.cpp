@@ -575,17 +575,21 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 connect(rollItem, SIGNAL(triggered()), this, SLOT(rollItem()));
                 menu.addAction(rollItem);
 
-                if(item->parentItem() == nullptr)
+                BattleDialogModelObject* object = getFinalObjectFromItem(item);
+                if(object)
                 {
-                    QAction* linkItemAction = new QAction(QString("Link Effect..."), &menu);
-                    connect(linkItemAction, SIGNAL(triggered()), this, SLOT(linkItem()));
-                    menu.addAction(linkItemAction);
-                }
-                else
-                {
-                    QAction* unlinkItemAction = new QAction(QString("Unlink Effect"), &menu);
-                    connect(unlinkItemAction, SIGNAL(triggered()), this, SLOT(unlinkItem()));
-                    menu.addAction(unlinkItemAction);
+                    if(object->getLinkedObject() == nullptr)
+                    {
+                        QAction* linkItemAction = new QAction(QString("Link Effect..."), &menu);
+                        connect(linkItemAction, SIGNAL(triggered()), this, SLOT(linkItem()));
+                        menu.addAction(linkItemAction);
+                    }
+                    else
+                    {
+                        QAction* unlinkItemAction = new QAction(QString("Unlink Effect"), &menu);
+                        connect(unlinkItemAction, SIGNAL(triggered()), this, SLOT(unlinkItem()));
+                        menu.addAction(unlinkItemAction);
+                    }
                 }
 
                 menu.addSeparator();
@@ -617,17 +621,21 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
             connect(removeItem, SIGNAL(triggered()), this, SLOT(removeCombatant()));
             menu.addAction(removeItem);
 
-            if(item->parentItem() == nullptr)
+            BattleDialogModelObject* object = getFinalObjectFromItem(item);
+            if(object)
             {
-                QAction* linkItemAction = new QAction(QString("Link Combatant..."), &menu);
-                connect(linkItemAction, SIGNAL(triggered()), this, SLOT(linkItem()));
-                menu.addAction(linkItemAction);
-            }
-            else
-            {
-                QAction* unlinkItemAction = new QAction(QString("Unlink Combatant"), &menu);
-                connect(unlinkItemAction, SIGNAL(triggered()), this, SLOT(unlinkItem()));
-                menu.addAction(unlinkItemAction);
+                if(object->getLinkedObject() == nullptr)
+                {
+                    QAction* linkItemAction = new QAction(QString("Link Combatant..."), &menu);
+                    connect(linkItemAction, SIGNAL(triggered()), this, SLOT(linkItem()));
+                    menu.addAction(linkItemAction);
+                }
+                else
+                {
+                    QAction* unlinkItemAction = new QAction(QString("Unlink Combatant"), &menu);
+                    connect(unlinkItemAction, SIGNAL(triggered()), this, SLOT(unlinkItem()));
+                    menu.addAction(unlinkItemAction);
+                }
             }
 
             if((_model) && (_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 1))
@@ -649,10 +657,9 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 
             menu.addSeparator();
 
-            UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(item);
-            if(pixmap)
+            if(object)
             {
-                BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(pixmap->getObject());
+                BattleDialogModelMonsterClass* monster = dynamic_cast<BattleDialogModelMonsterClass*>(object);
                 if(monster)
                 {
                     MonsterClass* monsterClass = monster->getMonsterClass();
@@ -706,7 +713,7 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         menu.addAction(addObjectItem);
 
         QAction* castItem = new QAction(QString("Cast Spell..."), &menu);
-        connect(castItem, SIGNAL(triggered()), this, SLOT(castSpell()));
+        connect(castItem, SIGNAL(triggered()), this, SIGNAL(castSpell()));
         menu.addAction(castItem);
 
         _commandPosition = _mouseDownPos;
@@ -827,9 +834,9 @@ void BattleDialogGraphicsScene::addEffectObject()
 }
 */
 
+/*
 void BattleDialogGraphicsScene::castSpell()
 {
-    /*
     if(!_model)
     {
         qDebug() << "[Battle Dialog Scene] ERROR: unable to cast a spell, no model exists.";
@@ -917,8 +924,8 @@ void BattleDialogGraphicsScene::castSpell()
         // TODO: Layers - move to Frame
         //addSpellEffect(*effect);
     }
-    */
 }
+*/
 
 void BattleDialogGraphicsScene::setSelectedIcon(const QString& selectedIcon)
 {
@@ -1036,25 +1043,9 @@ void BattleDialogGraphicsScene::linkItem()
     if(!_contextMenuItem)
         return;
 
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
-    if(effect)
-    {
-        BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
-        if(parentEffect)
-            emit itemLink(parentEffect);
-        else
-           emit itemLink(effect);
-    }
-    else
-    {
-        UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
-        if(pixmap)
-        {
-            BattleDialogModelObject* object = pixmap->getObject();
-            if(object)
-                emit itemLink(object);
-        }
-    }
+    BattleDialogModelObject* object = getFinalObjectFromItem(_contextMenuItem);
+    if(object)
+        emit itemLink(object);
 
     _contextMenuItem = nullptr;
 }
@@ -1064,25 +1055,9 @@ void BattleDialogGraphicsScene::unlinkItem()
     if(!_contextMenuItem)
         return;
 
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
-    if(effect)
-    {
-        BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
-        if(parentEffect)
-            emit itemUnlink(parentEffect);
-        else
-           emit itemUnlink(effect);
-    }
-    else
-    {
-        UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(_contextMenuItem);
-        if(pixmap)
-        {
-            BattleDialogModelObject* object = pixmap->getObject();
-            if(object)
-                emit itemUnlink(object);
-        }
-    }
+    BattleDialogModelObject* object = getFinalObjectFromItem(_contextMenuItem);
+    if(object)
+        emit itemUnlink(object);
 
     _contextMenuItem = nullptr;
 }
@@ -1280,110 +1255,23 @@ BattleDialogModelEffect* BattleDialogGraphicsScene::createEffect(int type, int s
     return result;
 }
 
-/*
-QGraphicsItem* BattleDialogGraphicsScene::addEffect(BattleDialogModelEffect* effect)
+BattleDialogModelObject* BattleDialogGraphicsScene::getFinalObjectFromItem(QGraphicsItem* item)
 {
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to add new scene effect, no model exists.";
-        return nullptr;
-    }
-
-    if(!effect)
+    if(!item)
         return nullptr;
 
-    _model->appendEffect(effect);
-
-    return addEffectShape(*effect);
-}
-*/
-
-/*
-QGraphicsItem* BattleDialogGraphicsScene::addEffectShape(BattleDialogModelEffect& effect)
-{
-    if(!_model)
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
+    if(effect)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to add a new effect shape, no model exists.";
-        return nullptr;
-    }
-
-    QGraphicsItem* shape = effect.createEffectShape(_model->getGridScale());
-    if(shape)
-    {
-        addItem(shape);
-        _itemList.append(shape);
-    }
-
-    return shape;
-}
-
-QGraphicsItem* BattleDialogGraphicsScene::addSpellEffect(BattleDialogModelEffect& effect)
-{
-    if(!_model)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to add new spell effect, no model exists.";
-        return nullptr;
-    }
-
-    QList<CampaignObjectBase*> childEffects = effect.getChildObjects();
-    if(childEffects.count() != 1)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it does not have exactly one child object!";
-        return nullptr;
-    }
-
-    BattleDialogModelEffectObject* tokenEffect = dynamic_cast<BattleDialogModelEffectObject*>(childEffects.at(0));
-    if(!tokenEffect)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: cannot add spell effect because it's child is not an effect!";
-        return nullptr;
-    }
-
-    QGraphicsPixmapItem* tokenItem = dynamic_cast<QGraphicsPixmapItem*>(addEffectShape(*tokenEffect));
-    if(!tokenItem)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to add the spell effect's token object to the scene!";
-        return nullptr;
-    }
-
-    QGraphicsItem* effectItem = effect.createEffectShape(1.0);
-    if(!effectItem)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: unable to create the spell effect's basic shape!";
-        return nullptr;
-    }
-
-    if((effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cone) ||
-       (effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Line))
-    {
-        tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0, 0.0));
-    }
-    else if(effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Cube)
-    {
-        tokenItem->setOffset(QPointF(0.0, 0.0));
-    }
-
-    if(effect.getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Radius)
-    {
-        tokenItem->setOffset(QPointF(-tokenItem->boundingRect().width() / 2.0,
-                                     -tokenItem->boundingRect().height() / 2.0));
-        effectItem->setScale(1.0 / (2.0 * tokenEffect->getImageScaleFactor()));
+        BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
+        return parentEffect ? parentEffect : effect;
     }
     else
     {
-        effectItem->setScale(1.0 / tokenEffect->getImageScaleFactor());
+        UnselectedPixmap* pixmap = dynamic_cast<UnselectedPixmap*>(item);
+        return pixmap ? pixmap->getObject() : nullptr;
     }
-
-    effectItem->setParentItem(tokenItem);
-    effectItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
-    effectItem->setFlag(QGraphicsItem::ItemIsMovable, false);
-    effectItem->setFlag(QGraphicsItem::ItemStacksBehindParent, true);
-    effectItem->setData(BATTLE_DIALOG_MODEL_EFFECT_ROLE, BattleDialogModelEffect::BattleDialogModelEffectRole_Area);
-    effectItem->setPos(QPointF(0.0, 0.0));
-
-    return effectItem;
 }
-*/
 
 BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent)
 {

@@ -40,7 +40,14 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     setAutoFillBackground(true);
     setStyleSheet(getStyleString(false));
 
-    if(layer.getFinalType() == DMHelper::LayerType_Tokens)
+    if(layer.getType() == DMHelper::LayerType_Reference)
+    {
+        ui->spinX->setEnabled(false);
+        ui->spinY->setEnabled(false);
+        ui->spinWidth->setEnabled(false);
+        ui->spinHeight->setEnabled(false);
+    }
+    else if(layer.getFinalType() == DMHelper::LayerType_Tokens)
     {
         ui->spinWidth->setEnabled(false);
         ui->spinHeight->setEnabled(false);

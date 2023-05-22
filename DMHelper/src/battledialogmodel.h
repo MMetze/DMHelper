@@ -112,7 +112,7 @@ signals:
     void backgroundImageChanged(QImage backgroundImage);
 
 protected slots:
-    void mapDestroyed(QObject *obj);
+    void mapDestroyed(const QUuid& id);
     void characterDestroyed(const QUuid& destroyedId);
 
 protected:

@@ -517,6 +517,8 @@ void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool is
 
 BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
 {
+    Q_UNUSED(combatantPos);
+
     /*
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
@@ -536,7 +538,7 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
     }
     */
 
-    connect(battleModel, SIGNAL(destroyed(QObject*)), this, SLOT(completeBattle()));
+//    connect(battleModel, SIGNAL(destroyed(QObject*)), this, SLOT(completeBattle()));
 
     return battleModel;
 }

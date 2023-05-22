@@ -297,7 +297,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Campaign Menu
     connect(this, SIGNAL(campaignLoaded(Campaign*)), this, SLOT(handleCampaignLoaded(Campaign*)));
-    connect(this, SIGNAL(campaignLoaded(Campaign*)), this, SLOT(clearDirty()));
     connect(_ribbonTabCampaign, SIGNAL(newPartyClicked()), this, SLOT(newParty()));
     connect(_ribbonTabCampaign, SIGNAL(newCharacterClicked()), this, SLOT(newCharacter()));
     connect(_ribbonTabCampaign, SIGNAL(newMapClicked()), this, SLOT(newMap()));
@@ -888,6 +887,9 @@ void MainWindow::openFileDialog()
 
 bool MainWindow::closeCampaign()
 {
+    if(!_campaign)
+        return true;
+
     qDebug() << "[MainWindow] Closing Campaign: " << _campaignFileName;
 
     if(_dirty)
@@ -903,13 +905,9 @@ bool MainWindow::closeCampaign()
         }
 
         if(result == QMessageBox::Yes)
-        {
             saveCampaign();
-        }
         else
-        {
             qDebug() << "[MainWindow] User decided not to save Campaign: " << _campaignFileName;
-        }
     }
 
     deleteCampaign();
@@ -2195,6 +2193,8 @@ void MainWindow::openCampaign(const QString& filename)
 
     if(_options->getMRUHandler())
         _options->getMRUHandler()->addMRUFile(filename);
+
+    clearDirty();
 }
 
 void MainWindow::handleCampaignLoaded(Campaign* campaign)

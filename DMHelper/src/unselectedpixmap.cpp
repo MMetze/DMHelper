@@ -142,7 +142,7 @@ void UnselectedPixmap::selectionChanged()
 
         selectedPixmap->setTransformationMode(Qt::SmoothTransformation);
         //selectedPixmap->setScale(scale()); //(static_cast<qreal>(_model->getGridScale()) * _selectedScale / ACTIVE_PIXMAP_SIZE);
-        selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        //selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
 
         // QRect itemRect = item->boundingRect().toRect();
         // int maxSize = qMax(itemRect.width(), itemRect.height());
@@ -150,8 +150,9 @@ void UnselectedPixmap::selectionChanged()
         QSizeF pixmapSize = selectedPixmap->boundingRect().size();
         selectedPixmap->setPos(-pixmapSize.width() / 2.0, -pixmapSize.height() / 2.0);
 
-        selectedPixmap->setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent);
-        selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
+        //selectedPixmap->setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent);
+        //selectedPixmap->setFlag(QGraphicsItem::ItemStacksBehindParent);
+        //selectedPixmap->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
         selectedPixmap->setData(BattleDialogItemChild_Index, BattleFrame::BattleDialogItemChild_Selection);
         selectedPixmap->setParentItem(this);
     }

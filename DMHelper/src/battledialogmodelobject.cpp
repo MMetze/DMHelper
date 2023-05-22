@@ -55,8 +55,11 @@ void BattleDialogModelObject::setPosition(const QPointF& position)
 {
     if(_position != position)
     {
+        QPointF oldPosition = _position;
         _position = position;
+        emit objectMovedDelta(position - oldPosition);
         emit objectMoved(this);
+        emit dirty();
     }
 }
 
@@ -101,6 +104,11 @@ void BattleDialogModelObject::objectRemoved(BattleDialogModelObject* removedObje
 void BattleDialogModelObject::setSelected(bool isSelected)
 {
     Q_UNUSED(isSelected);
+}
+
+void BattleDialogModelObject::parentMoved(const QPointF& delta)
+{
+    setPosition(_position + delta);
 }
 
 void BattleDialogModelObject::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

@@ -1,3 +1,8 @@
+* remove selection icon for effects
+* Create spell gives object transparency from base shape
+* Effect markers on enemies not visible
+* create/edit/move effect doesn't dirty
+
 
 Effects
 * optional set of whether effect colors are applied or not

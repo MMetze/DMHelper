@@ -133,8 +133,8 @@ Layer* LayerReference::clone() const
 
 void LayerReference::applyOrder(int order)
 {
-//    if(_referenceLayer)
-//        _referenceLayer->applyOrder(order);
+    if(_referenceLayer)
+        _referenceLayer->applyOrder(order);
 }
 
 void LayerReference::applyPosition(const QPoint& position)
@@ -286,6 +286,16 @@ void LayerReference::internalOutputXML(QDomDocument &doc, QDomElement &element, 
         element.setAttribute("layerId", _referenceLayerId.toString());
 
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
+
+    // Reference Layers shouldn't retain size and position, those come from the reference object
+    if(element.hasAttribute("x"))
+        element.removeAttribute("x");
+    if(element.hasAttribute("y"))
+        element.removeAttribute("y");
+    if(element.hasAttribute("w"))
+        element.removeAttribute("w");
+    if(element.hasAttribute("h"))
+        element.removeAttribute("h");
 }
 
 void LayerReference::copyReferenceValues()
@@ -293,9 +303,9 @@ void LayerReference::copyReferenceValues()
     if(!_referenceLayer)
         return;
 
-    _order = _referenceLayer->getOrder();
-    _layerVisible = _referenceLayer->getLayerVisible();
-    _layerOpacity = _referenceLayer->getOpacity();
+//    _order = _referenceLayer->getOrder();
+//    _layerVisible = _referenceLayer->getLayerVisible();
+//    _layerOpacity = _referenceLayer->getOpacity();
     _position = _referenceLayer->getPosition();
     _size = _referenceLayer->getSize();
 }

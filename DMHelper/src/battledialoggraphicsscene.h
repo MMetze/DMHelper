@@ -61,8 +61,6 @@ public slots:
     void setDistanceLineWidth(int lineWidth);
     void setInputMode(int inputMode);
 
-    void castSpell();
-
     void setSelectedIcon(const QString& selectedIcon);
 
 signals:
@@ -71,6 +69,7 @@ signals:
     void addEffectCube();
     void addEffectLine();
     void addEffectObject();
+    void castSpell();
 
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);
@@ -130,9 +129,7 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent *keyEvent);
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
-//    QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
-//    QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
-//    QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
+    BattleDialogModelObject* getFinalObjectFromItem(QGraphicsItem* item);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
 
