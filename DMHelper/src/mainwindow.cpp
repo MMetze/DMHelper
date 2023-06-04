@@ -80,6 +80,8 @@
 #include "whatsnewdialog.h"
 #include "configurelockedgriddialog.h"
 #include "dmhwaitingdialog.h"
+#include "layerimage.h"
+#include "layervideo.h"
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
@@ -1184,16 +1186,33 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map File..."));
     if(filename.isEmpty())
         return;
 
+    Layer* mapLayer;
+    QImageReader reader(filename);
+    if(reader.canRead())
+    {
+        mapLayer = new LayerImage(QString("Map Image"), filename);
+    }
+    else
+    {
+        QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
+        if(result != QMessageBox::Yes)
+            return;
+
+        mapLayer = new LayerVideo(QString("Map Video"), filename);
+    }
+
     Map* map = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mapName, false));
     if(!map)
+    {
+        delete mapLayer;
         return;
+    }
 
-    LayerImage* imageLayer = new LayerImage(QString("Map"), filename);
-    map->getLayerScene().appendLayer(imageLayer);
+    map->getLayerScene().appendLayer(mapLayer);
 //    map->setFileName(filename);
 
     ok = false;
@@ -1201,7 +1220,7 @@ void MainWindow::newMap()
     int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map have horizontally? Even if you don't use a grid on this map, this is used to set the size of tokens on the map."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
     if((ok) && (gridCount > 0))
     {
-        int newScale = map->getLayerScene().sceneSize().width() / gridCount;
+        newScale = map->getLayerScene().sceneSize().width() / gridCount;
         if(newScale < 1)
             newScale = DMHelper::STARTING_GRID_SCALE;
     }

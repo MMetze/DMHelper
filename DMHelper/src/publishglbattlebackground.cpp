@@ -172,7 +172,7 @@ void PublishGLBattleBackground::createImageObjects(const QImage& image)
     f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
     f->glGenerateMipmap(GL_TEXTURE_2D);
 
-    qDebug() << "[BattleGLBackground] Created image object. w: " << image.width() << ", h: " << image.height() << ", VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID << ", context: " << QOpenGLContext::currentContext();
+    qDebug() << "[PublishGLBattleBackground] Created image object. w: " << image.width() << ", h: " << image.height() << ", VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID << ", context: " << QOpenGLContext::currentContext();
 
 }
 

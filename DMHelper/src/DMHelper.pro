@@ -228,6 +228,7 @@ SOURCES += main.cpp\
     videoplayerglplayer.cpp \
     videoplayerglscreenshot.cpp \
     videoplayerglvideo.cpp \
+    videoplayerscreenshot.cpp \
     welcomeframe.cpp \
     whatsnewdialog.cpp \
     widgetbattlecombatant.cpp \
@@ -481,6 +482,7 @@ HEADERS  += mainwindow.h \
     videoplayerglplayer.h \
     videoplayerglscreenshot.h \
     videoplayerglvideo.h \
+    videoplayerscreenshot.h \
     welcomeframe.h \
     whatsnewdialog.h \
     widgetbattlecombatant.h \

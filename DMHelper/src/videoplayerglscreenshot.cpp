@@ -42,6 +42,7 @@ void VideoPlayerGLScreenshot::retrieveScreenshot()
         QImage cacheImage(cacheFilePath);
         if(!cacheImage.isNull())
         {
+            qDebug() << "[VideoPlayerGLScreenshot] Using cached image for video file: " << _videoFile;
             emit screenshotReady(cacheImage);
             return;
         }
@@ -187,7 +188,7 @@ bool VideoPlayerGLScreenshot::startPlayer()
 #else
     _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), localizedVideoFile.toUtf8().constData());
 #endif
-    if (!_vlcMedia)
+    if(!_vlcMedia)
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, unable to open video file!";
         return false;

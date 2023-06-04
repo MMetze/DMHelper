@@ -3,12 +3,13 @@
 
 #ifdef LAYERVIDEO_USE_OPENGL
     #include "videoplayerglplayer.h"
+    #include "videoplayerglscreenshot.h"
 #else
     #include "videoplayer.h"
     #include "publishglbattlebackground.h"
+    #include "videoplayerscreenshot.h"
 #endif
 
-#include "videoplayerglscreenshot.h"
 #include "publishglrenderer.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
@@ -19,8 +20,10 @@ LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, 
     _graphicsItem(nullptr),
 #ifdef LAYERVIDEO_USE_OPENGL
     _videoGLPlayer(nullptr),
+    _screenshot(nullptr),
 #else
     _videoPlayer(nullptr),
+    _screenshot(nullptr),
     _videoObject(),
     _playerSize(),
 #endif
@@ -39,7 +42,9 @@ LayerVideo::~LayerVideo()
 
 void LayerVideo::inputXML(const QDomElement &element, bool isImport)
 {
-    // TODO: Layers - add storage for video layers
+    _filename = element.attribute("videoFile");
+
+    Layer::inputXML(element, isImport);
 }
 
 QRectF LayerVideo::boundingRect() const
@@ -130,16 +135,7 @@ void LayerVideo::dmInitialize(QGraphicsScene* scene)
 
     _dmScene = scene;
 
-    if(!_layerScreenshot.isNull())
-    {
-        handleScreenshotReady(_layerScreenshot);
-    }
-    else
-    {
-        VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(getVideoFile());
-        connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &LayerVideo::handleScreenshotReady);
-        screenshot->retrieveScreenshot();
-    }
+    requestScreenshot();
 
     Layer::dmInitialize(scene);
 }
@@ -287,12 +283,17 @@ bool LayerVideo::playerIsInitialized()
 
 void LayerVideo::initialize(const QSize& sceneSize)
 {
-
+    if(_size.isEmpty())
+    {
+        _size = sceneSize;
+        requestScreenshot();
+    }
 }
 
 void LayerVideo::uninitialize()
 {
     _layerScreenshot = QImage();
+    clearScreenshot();
 }
 
 void LayerVideo::handleScreenshotReady(const QImage& image)
@@ -300,15 +301,62 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
     if(image.isNull())
         return;
 
+    qDebug() << "[LayerVideo] Screenshot received for video: " << getVideoFile() << ", " << image;
     _layerScreenshot = image;
     if(_size.isEmpty())
         _size = _layerScreenshot.size();
-    createGraphicsItem();
+
+    if(_dmScene)
+        createGraphicsItem();
+}
+
+void LayerVideo::requestScreenshot()
+{
+    if(!_layerScreenshot.isNull())
+    {
+        handleScreenshotReady(_layerScreenshot);
+        return;
+    }
+
+    if(_screenshot)
+        return;
+
+    qDebug() << "[LayerVideo] New screenshot needed for video: " << getVideoFile();
+#ifdef LAYERVIDEO_USE_OPENGL
+    _screenshot = new VideoPlayerGLScreenshot(getVideoFile());
+    connect(_screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &LayerVideo::handleScreenshotReady);
+    connect(_screenshot, &QObject::destroyed, this, &LayerVideo::clearScreenshot);
+    _screenshot->retrieveScreenshot();
+#else
+    _screenshot = new VideoPlayerScreenshot(getVideoFile());
+    connect(_screenshot, &VideoPlayerScreenshot::screenshotReady, this, &LayerVideo::handleScreenshotReady);
+    connect(_screenshot, &QObject::destroyed, this, &LayerVideo::clearScreenshot);
+    _screenshot->retrieveScreenshot();
+#endif
+}
+
+void LayerVideo::clearScreenshot()
+{
+    if(!_screenshot)
+        return;
+
+    qDebug() << "[LayerVideo] Clearing screenshot requester";
+
+#ifdef LAYERVIDEO_USE_OPENGL
+    disconnect(_screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &LayerVideo::handleScreenshotReady);
+#else
+    disconnect(_screenshot, &VideoPlayerScreenshot::screenshotReady, this, &LayerVideo::handleScreenshotReady);
+#endif
+    disconnect(_screenshot, &QObject::destroyed, this, &LayerVideo::clearScreenshot);
+
+    _screenshot = nullptr;
 }
 
 void LayerVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    // todo
+    element.setAttribute("videoFile", targetDirectory.relativeFilePath(_filename));
+
+    Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 void LayerVideo::createGraphicsItem()
@@ -340,6 +388,8 @@ void LayerVideo::cleanupDM()
         delete _graphicsItem;
         _graphicsItem = nullptr;
     }
+
+    clearScreenshot();
 }
 
 void LayerVideo::cleanupPlayer()

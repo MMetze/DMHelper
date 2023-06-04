@@ -378,37 +378,37 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
         switch(p_event->type)
         {
             case libvlc_MediaPlayerOpening:
-                qDebug() << "[vlc] Video event received: OPENING = " << p_event->type;
+                qDebug() << "[VideoPlayer] Video event received: OPENING = " << p_event->type;
                 emit videoOpening();
                 break;
             case libvlc_MediaPlayerBuffering:
-                qDebug() << "[vlc] Video event received: BUFFERING = " << p_event->type;
+                qDebug() << "[VideoPlayer] Video event received: BUFFERING = " << p_event->type;
                 emit videoBuffering();
                 break;
             case libvlc_MediaPlayerPlaying:
-                qDebug() << "[vlc] Video event received: PLAYING = " << p_event->type;
+                qDebug() << "[VideoPlayer] Video event received: PLAYING = " << p_event->type;
                 internalAudioCheck(p_event->type);
                 emit videoPlaying();
                 break;
             case libvlc_MediaPlayerPaused:
-                qDebug() << "[vlc] Video event received: PAUSED = " << p_event->type;
+                qDebug() << "[VideoPlayer] Video event received: PAUSED = " << p_event->type;
                 emit videoPaused();
                 break;
             case libvlc_MediaPlayerStopped:
-                qDebug() << "[vlc] Video event received: STOPPED = " << p_event->type;
+                qDebug() << "[VideoPlayer] Video event received: STOPPED = " << p_event->type;
                 internalStopCheck(stopConfirmed);
                 emit videoStopped();
                 break;
             case libvlc_MediaListPlayerPlayed:
-                qDebug() << "[vlc] Video event received: LIST PLAYED = " << p_event->type;
+                qDebug() << "[VideoPlayer] Video event received: LIST PLAYED = " << p_event->type;
                 break;
             case libvlc_MediaListPlayerStopped:
-                qDebug() << "[vlc] Video event received: LIST STOPPED = " << p_event->type;
+                qDebug() << "[VideoPlayer] Video event received: LIST STOPPED = " << p_event->type;
                 internalStopCheck(stopConfirmed);
                 emit videoStopped();
                 break;
             default:
-                qDebug() << "[vlc] UNEXPECTED Video event received:  " << p_event->type;
+                qDebug() << "[VideoPlayer] UNEXPECTED Video event received:  " << p_event->type;
                 break;
         };
 
@@ -591,14 +591,18 @@ bool VideoPlayer::startPlayer()
     int result = libvlc_video_get_size(_vlcPlayer, 0, &x, &y);
     qDebug() << "[VideoPlayer] Video size (result: " << result << "): " << x << " x " << y << ". File: " << _videoFile;
 
-    libvlc_video_set_callbacks(_vlcPlayer, playerLockCallback, playerUnlockCallback, playerDisplayCallback, static_cast<void*>(this));
+    libvlc_video_set_callbacks(_vlcPlayer,
+                               playerLockCallback,
+                               playerUnlockCallback,
+                               playerDisplayCallback,
+                               static_cast<void*>(this));
     libvlc_video_set_format_callbacks(_vlcPlayer, playerFormatCallback, playerCleanupCallback);
 
     // And start playback
     //libvlc_media_list_player_play(_vlcListPlayer);
-    libvlc_media_player_play(_vlcPlayer);
+    int playResult = libvlc_media_player_play(_vlcPlayer);
 
-    qDebug() << "[VideoPlayer] Player started";
+    qDebug() << "[VideoPlayer] Player started: " << playResult;
 
     return true;
 }

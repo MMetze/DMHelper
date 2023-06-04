@@ -470,16 +470,15 @@ void LayerScene::initializeLayers()
     if(_initialized)
         return;
 
-    QSize currentSize;
 
     // First initialize images to find the size of the scene
     for(int i = 0; i < _layers.count(); ++i)
     {
         if(_layers[i]->getFinalType() == DMHelper::LayerType_Image)
-            _layers[i]->initialize(currentSize);
+            _layers[i]->initialize(QSize());
     }
 
-    currentSize = sceneSize().toSize();
+    QSize currentSize = sceneSize().toSize();
 
     // Initialize other layers, telling them how big they should be
     for(int i = 0; i < _layers.count(); ++i)

@@ -10,8 +10,10 @@ class QGraphicsPixmapItem;
 
 #ifdef LAYERVIDEO_USE_OPENGL
     class VideoPlayerGLPlayer;
+    class VideoPlayerGLScreenshot;
 #else
     class VideoPlayer;
+    class VideoPlayerScreenshot;
     class PublishGLBattleBackground;
 #endif
 
@@ -63,6 +65,8 @@ signals:
 protected slots:
     // Local Interface
     void handleScreenshotReady(const QImage& image);
+    void requestScreenshot();
+    void clearScreenshot();
 
 protected:
     // Layer Specific Interface
@@ -81,8 +85,10 @@ protected:
     // Player Window Members
 #ifdef LAYERVIDEO_USE_OPENGL
     VideoPlayerGLPlayer* _videoGLPlayer;
+    VideoPlayerGLScreenshot* _screenshot;
 #else
     VideoPlayer* _videoPlayer;
+    VideoPlayerScreenshot* _screenshot;
     PublishGLBattleBackground* _videoObject;
     QSize _playerSize;
 #endif
