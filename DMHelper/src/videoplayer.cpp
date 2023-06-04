@@ -1,7 +1,7 @@
 #include "videoplayer.h"
 #include <QDebug>
 
-//#define VIDEO_DEBUG_MESSAGES
+#define VIDEO_DEBUG_MESSAGES
 
 const int stopCallComplete = 0x01;
 const int stopConfirmed = 0x02;
@@ -560,8 +560,10 @@ bool VideoPlayer::startPlayer()
     if(!_vlcPlayer)
         return false;
 
+    libvlc_media_release(_vlcMedia);
+    _vlcMedia = nullptr;
     // TODO: Layers
-    libvlc_audio_set_volume(_vlcPlayer, 0);
+    //libvlc_audio_set_volume(_vlcPlayer, 0);
 
     //libvlc_media_list_player_set_media_list(_vlcListPlayer, vlcMediaList);
     //libvlc_media_list_player_set_media_player(_vlcListPlayer, player);
@@ -596,11 +598,15 @@ bool VideoPlayer::startPlayer()
                                playerUnlockCallback,
                                playerDisplayCallback,
                                static_cast<void*>(this));
-    libvlc_video_set_format_callbacks(_vlcPlayer, playerFormatCallback, playerCleanupCallback);
+    libvlc_video_set_format_callbacks(_vlcPlayer,
+                                      playerFormatCallback,
+                                      playerCleanupCallback);
 
     // And start playback
     //libvlc_media_list_player_play(_vlcListPlayer);
     int playResult = libvlc_media_player_play(_vlcPlayer);
+    result = libvlc_video_get_size(_vlcPlayer, 0, &x, &y);
+    qDebug() << "[VideoPlayer] Video size (result: " << result << "): " << x << " x " << y << ". File: " << _videoFile;
 
     qDebug() << "[VideoPlayer] Player started: " << playResult;
 

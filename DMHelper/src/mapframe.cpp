@@ -147,7 +147,7 @@ void MapFrame::setMap(Map* map)
     if(_mapSource)
     {
         editModeToggled(DMHelper::EditMode_Move);
-        uninitializeFoW();
+        uninitializeMap();
     }
 
     _mapSource = map;
@@ -156,7 +156,7 @@ void MapFrame::setMap(Map* map)
 
     connect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
-    initializeFoW();
+    initializeMap();
     setMapCursor();
 }
 
@@ -534,12 +534,12 @@ void MapFrame::editMapFile()
     QString filename = QFileDialog::getOpenFileName(this, QString("Select Map Image..."));
     if(!filename.isEmpty())
     {
-        uninitializeFoW();
+        uninitializeMap();
 #if defined(Q_OS_WIN32) && !defined(Q_OS_WIN64)
         _mapSource->uninitialize();
 #endif
         _mapSource->setFileName(filename);
-        initializeFoW();
+        initializeMap();
     }
 }
 
@@ -800,7 +800,7 @@ void MapFrame::editLayers()
     emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());
 }
 
-void MapFrame::initializeFoW()
+void MapFrame::initializeMap()
 {
 //    if((_backgroundImage) || (_fow) || (_scene))
 //    if((_fow) || (_scene))
@@ -880,6 +880,7 @@ void MapFrame::initializeFoW()
     connect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
     connect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
+    connect(&_mapSource->getLayerScene(), &LayerScene::sceneChanged, this, &MapFrame::handleMapSceneChanged);
     connect(this, &MapFrame::cameraRectChanged, _mapSource, QOverload<const QRectF&>::of(&Map::setCameraRect));
 
     if(_mapSource->getParty())
@@ -898,7 +899,7 @@ void MapFrame::initializeFoW()
     _isVideo = !_mapSource->isInitialized();
 }
 
-void MapFrame::uninitializeFoW()
+void MapFrame::uninitializeMap()
 {
     qDebug() << "[MapFrame] Uninitializing MapFrame...";
 
@@ -908,6 +909,7 @@ void MapFrame::uninitializeFoW()
     if(_mapSource)
     {
         disconnect(this, &MapFrame::cameraRectChanged, _mapSource, QOverload<const QRectF&>::of(&Map::setCameraRect));
+        disconnect(&_mapSource->getLayerScene(), &LayerScene::sceneChanged, this, &MapFrame::handleMapSceneChanged);
         disconnect(_mapSource, &Map::distanceLineColorChanged, this, &MapFrame::dirty);
         disconnect(_mapSource, &Map::distanceLineTypeChanged, this, &MapFrame::dirty);
         disconnect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
@@ -1017,7 +1019,7 @@ void MapFrame::cleanupSelectionItems()
 
 void MapFrame::hideEvent(QHideEvent * event)
 {
-    uninitializeFoW();
+    uninitializeMap();
     emit windowClosed(this);
 
     QWidget::hideEvent(event);
@@ -1780,11 +1782,13 @@ void MapFrame::cleanupBuffers()
     cleanupMarkerItems();
     cleanupSelectionItems();
 
+    /*
     if(_scene)
     {
         _scene->clear();
         _scene->update();
     }
+    */
 }
 
 void MapFrame::setMapCursor()
@@ -2084,6 +2088,12 @@ void MapFrame::handleSceneChanged(const QList<QRectF> &region)
 
     if((_isPublishing) && (_renderer))
         _renderer->updateRender();
+}
+
+void MapFrame::handleMapSceneChanged()
+{
+    if(_mapSource->getMapRect().isEmpty())
+        zoomFit();
 }
 
 bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)

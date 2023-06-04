@@ -302,12 +302,13 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
         return;
 
     qDebug() << "[LayerVideo] Screenshot received for video: " << getVideoFile() << ", " << image;
-    _layerScreenshot = image;
-    if(_size.isEmpty())
-        _size = _layerScreenshot.size();
+    _layerScreenshot = image.copy();
 
     if(_dmScene)
-        createGraphicsItem();
+        createGraphicsItem(_size.isEmpty() ? _layerScreenshot.size() : _size);
+
+    if(_size.isEmpty())
+        setSize(_layerScreenshot.size());
 }
 
 void LayerVideo::requestScreenshot()
@@ -359,9 +360,9 @@ void LayerVideo::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
     Layer::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
-void LayerVideo::createGraphicsItem()
+void LayerVideo::createGraphicsItem(const QSize& size)
 {
-    if((!_dmScene) || (_graphicsItem) || (_size.isEmpty()))
+    if((!_dmScene) || (_graphicsItem) || (size.isEmpty()))
         return;
 
     _graphicsItem = _dmScene->addPixmap(QPixmap::fromImage(_layerScreenshot));
@@ -372,21 +373,21 @@ void LayerVideo::createGraphicsItem()
         _graphicsItem->setFlag(QGraphicsItem::ItemIsSelectable, false);
         _graphicsItem->setZValue(getOrder());
 
-        applySize(_size);
+        applySize(size);
     }
 }
 
 void LayerVideo::cleanupDM()
 {
-    _dmScene = nullptr;
-
-    if(_graphicsItem)
+    if(_dmScene)
     {
-        if(_graphicsItem->scene())
-            _graphicsItem->scene()->removeItem(_graphicsItem);
-
-        delete _graphicsItem;
-        _graphicsItem = nullptr;
+        if(_graphicsItem)
+        {
+            _dmScene->removeItem(_graphicsItem);
+            delete _graphicsItem;
+            _graphicsItem = nullptr;
+        }
+        _dmScene = nullptr;
     }
 
     clearScreenshot();

@@ -23,6 +23,8 @@
 #ifndef VLC_FRAME_H
 #define VLC_FRAME_H 1
 
+#include <vlc_tick.h>
+
 struct vlc_ancillary;
 typedef uint32_t vlc_ancillary_id;
 
@@ -158,6 +160,24 @@ struct vlc_frame_t
 VLC_API vlc_frame_t *vlc_frame_Init(vlc_frame_t *frame,
                                     const struct vlc_frame_callbacks *cbs,
                                     void *base, size_t length);
+
+/**
+ * Creates a custom frame.
+ *
+ * This function initialize a frame of timed data allocated by custom means.
+ * This allows passing data without copying even if the data has been allocated
+ * with unusual means or outside of LibVLC.
+ *
+ * Normally, frames are allocated and initialized by vlc_frame_Alloc() instead.
+ *
+ * @param cbs structure of custom callbacks to handle the frame [IN]
+ * @param base start address of the frame data
+ * @param length byte length of the frame data
+ *
+ * @return the created frame, or NULL on memory error.
+ */
+VLC_API vlc_frame_t *vlc_frame_New(const struct vlc_frame_callbacks *cbs,
+                                   void *base, size_t length);
 
 /**
  * Allocates a frame.

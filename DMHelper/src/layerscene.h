@@ -81,9 +81,12 @@ public slots:
 signals:
     void layerAdded(Layer* layer);
     void layerRemoved(Layer* layer);
+    void sceneChanged();
 
 protected slots:
     void removeLayer(Layer* reference);
+    void layerMoved(const QPoint& position);
+    void layerResized(const QSize& size);
 
 protected:
     // From CampaignObjectBase
@@ -91,6 +94,8 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     // Local
+    void connectLayer(Layer* layer);
+    void disconnectLayer(Layer* layer);
     void resetLayerOrders();
 
     bool _initialized;

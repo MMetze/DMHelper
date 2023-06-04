@@ -181,8 +181,9 @@ LIBVLC_API void libvlc_release( libvlc_instance_t *p_instance );
  * The initial reference count is 1 after libvlc_new() returns.
  *
  * \param p_instance the instance to reference
+ * \return the same object
  */
-LIBVLC_API void libvlc_retain( libvlc_instance_t *p_instance );
+LIBVLC_API libvlc_instance_t *libvlc_retain( libvlc_instance_t *p_instance );
 
 /**
  * Get the ABI version of the libvlc library.
@@ -497,6 +498,7 @@ typedef struct libvlc_module_description_t
     char *psz_shortname;
     char *psz_longname;
     char *psz_help;
+    char *psz_help_html;
     struct libvlc_module_description_t *p_next;
 } libvlc_module_description_t;
 

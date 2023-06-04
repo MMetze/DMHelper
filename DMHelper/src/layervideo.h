@@ -73,7 +73,7 @@ protected:
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
 
     // DM Window Methods
-    void createGraphicsItem();
+    void createGraphicsItem(const QSize& size);
     void cleanupDM();
 
     // Player Window Methods

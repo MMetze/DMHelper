@@ -83,6 +83,8 @@ signals:
     void dirty();
     void orderChanged(int order);
     void layerDestroyed(Layer* layer);
+    void layerMoved(const QPoint& position);
+    void layerResized(const QSize& size);
 
 protected:
     // Layer Specific Interface

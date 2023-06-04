@@ -24,6 +24,8 @@
 #ifndef LIBVLC_MODULES_MACROS_H
 # define LIBVLC_MODULES_MACROS_H 1
 
+#include <stdint.h>
+
 /**
  * \file
  * This file implements plugin (module) macros used to define a vlc module.
@@ -48,6 +50,7 @@ enum vlc_module_properties
     VLC_MODULE_DESCRIPTION,
     VLC_MODULE_HELP,
     VLC_MODULE_TEXTDOMAIN,
+    VLC_MODULE_HELP_HTML,
     /* Insert new VLC_MODULE_* here */
 
     /* DO NOT EVER REMOVE, INSERT OR REPLACE ANY ITEM! It would break the ABI!
@@ -233,6 +236,8 @@ enum vlc_config_subcat
 /* I need to do _this_ to change « foo bar » to « module_foo_bar » ! */
 #define CONCATENATE( y, z ) CRUDE_HACK( y, z )
 #define CRUDE_HACK( y, z )  y##__##z
+#define STRINGIFY_NAME_( z ) #z
+#define STRINGIFY_NAME( z )   STRINGIFY_NAME_( z )
 
 #if defined(__cplusplus)
 #define EXTERN_SYMBOL extern "C"
@@ -240,9 +245,20 @@ enum vlc_config_subcat
 #define EXTERN_SYMBOL
 #endif
 
+#if !defined(MODULE_STRING) && defined(MODULE_NAME)
+# define MODULE_STRING  STRINGIFY_NAME(MODULE_NAME)
+#endif
+
+// defines a statically linked module entry point
+#define VLC_ENTRY_FUNC(name)          int (name)(vlc_set_cb, void *)
+// name of the module entry point table
+#define VLC_MODULE_ENTRY(name)        CONCATENATE(vlc_entry, name)
+// declare a vlc_plugin_cb
+#define VLC_DECL_MODULE_ENTRY(name)   VLC_ENTRY_FUNC(VLC_MODULE_ENTRY(name))
+
 /* If the module is built-in, then we need to define foo_InitModule instead
  * of InitModule. Same for Activate- and DeactivateModule. */
-#ifdef __PLUGIN__
+#ifdef VLC_DYNAMIC_PLUGIN
 # define VLC_SYMBOL(symbol) symbol
 # define VLC_MODULE_NAME_HIDDEN_SYMBOL \
     EXTERN_SYMBOL const char vlc_module_name[] = MODULE_STRING;
@@ -252,7 +268,7 @@ enum vlc_config_subcat
 #endif
 
 #define CDECL_SYMBOL
-#if defined (__PLUGIN__)
+#if defined (VLC_DYNAMIC_PLUGIN)
 # if defined (_WIN32)
 #   define DLL_SYMBOL              __declspec(dllexport)
 #   undef CDECL_SYMBOL
@@ -269,6 +285,9 @@ enum vlc_config_subcat
 struct vlc_param;
 
 EXTERN_SYMBOL typedef int (*vlc_set_cb) (void *, void *, int, ...);
+
+/** Plugin entry point prototype */
+typedef int (*vlc_plugin_cb) (vlc_set_cb, void *);
 
 #define vlc_plugin_set(...) vlc_set (opaque,   NULL, __VA_ARGS__)
 #define vlc_module_set(...) vlc_set (opaque, module, __VA_ARGS__)
@@ -340,6 +359,10 @@ VLC_METADATA_EXPORTS
     if (vlc_module_set (VLC_MODULE_HELP, VLC_CHECKED_TYPE(const char *, help))) \
         goto error;
 
+#define set_help_html( help_html ) \
+    if (vlc_module_set (VLC_MODULE_HELP_HTML, VLC_CHECKED_TYPE(const char *, help_html))) \
+        goto error;
+
 #define set_capability( cap, score ) \
     if (vlc_module_set (VLC_MODULE_CAPABILITY, VLC_CHECKED_TYPE(const char *, cap)) \
      || vlc_module_set (VLC_MODULE_SCORE, VLC_CHECKED_TYPE(int, score))) \
@@ -404,7 +427,7 @@ VLC_METADATA_EXPORTS
 #define set_section( text, longtext ) \
     add_typedesc_inner( CONFIG_SECTION, text, longtext )
 
-#ifndef __PLUGIN__
+#ifndef VLC_DYNAMIC_PLUGIN
 #define add_category_hint(text, longtext) \
     add_typedesc_inner( CONFIG_HINT_CATEGORY, text, longtext )
 #endif
@@ -435,15 +458,15 @@ VLC_METADATA_EXPORTS
     add_string_inner(CONFIG_ITEM_MODULE_LIST, name, text, longtext, value) \
     vlc_config_set (VLC_CONFIG_CAPABILITY, VLC_CHECKED_TYPE(const char *, cap));
 
-#ifndef __PLUGIN__
+#ifndef VLC_DYNAMIC_PLUGIN
 #define add_module_cat(name, subcategory, value, text, longtext) \
     add_string_inner(CONFIG_ITEM_MODULE_CAT, name, text, longtext, value) \
-    change_integer_range (subcategory /* gruik */, 0);
+    change_integer_range (subcategory /* gruik */, 0)
 
 #define add_module_list_cat(name, subcategory, value, text, longtext) \
     add_string_inner(CONFIG_ITEM_MODULE_LIST_CAT, name, text, longtext, \
                      value) \
-    change_integer_range (subcategory /* gruik */, 0);
+    change_integer_range (subcategory /* gruik */, 0)
 #endif
 
 #define add_integer( name, value, text, longtext ) \

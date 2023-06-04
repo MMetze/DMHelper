@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <vlc_common.h>
+#include <vlc_threads.h>
 
 /**
  * Opaque type for queue entry.
@@ -239,7 +240,7 @@ static inline void vlc_queue_Kill(vlc_queue_t *q,
  * @return an entry, or NULL if the queue is empty and has been ended.
  */
 static inline void *vlc_queue_DequeueKillable(vlc_queue_t *q,
-                                              bool *restrict tombstone)
+                                              const bool *tombstone)
 {
     void *entry;
 

@@ -157,8 +157,8 @@ public slots:
     virtual void editLayers() override;
 
 protected:
-    void initializeFoW();
-    void uninitializeFoW();
+    void initializeMap();
+    void uninitializeMap();
 
     void createMarkerItems();
     void cleanupMarkerItems();
@@ -208,6 +208,7 @@ protected slots:
 
     void handleItemChanged(QGraphicsItem* item);
     void handleSceneChanged(const QList<QRectF> &region);
+    void handleMapSceneChanged();
 
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);

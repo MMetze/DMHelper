@@ -220,7 +220,7 @@ void LayerScene::insertLayer(int position, Layer* layer)
 
     layer->setScale(_scale);
     layer->setLayerScene(this);
-    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
+    connectLayer(layer);
 
     if(_dmScene)
         layer->dmInitialize(_dmScene);
@@ -242,7 +242,7 @@ void LayerScene::prependLayer(Layer* layer)
 
     layer->setScale(_scale);
     layer->setLayerScene(this);
-    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
+    connectLayer(layer);
 
     if(_dmScene)
         layer->dmInitialize(_dmScene);
@@ -264,7 +264,7 @@ void LayerScene::appendLayer(Layer* layer)
 
     layer->setScale(_scale);
     layer->setLayerScene(this);
-    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
+    connectLayer(layer);
 
     if(_dmScene)
         layer->dmInitialize(_dmScene);
@@ -285,7 +285,7 @@ void LayerScene::removeLayer(int position)
     if(!deleteLayer)
         return;
 
-    disconnect(deleteLayer, &Layer::dirty, this, &LayerScene::dirty);
+    disconnectLayer(deleteLayer);
     emit layerRemoved(deleteLayer);
     deleteLayer->deleteLater();
 
@@ -508,11 +508,11 @@ void LayerScene::uninitializeLayers()
 
 void LayerScene::dmInitialize(QGraphicsScene* scene)
 {
+    _dmScene = scene;
+
     initializeLayers();
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->dmInitialize(scene);
-
-    _dmScene = scene;
 }
 
 void LayerScene::dmUninitialize()
@@ -618,6 +618,18 @@ void LayerScene::removeLayer(Layer* reference)
     removeLayer(reference->getOrder());
 }
 
+void LayerScene::layerMoved(const QPoint& position)
+{
+    Q_UNUSED(position);
+    emit sceneChanged();
+}
+
+void LayerScene::layerResized(const QSize& size)
+{
+    Q_UNUSED(size);
+    emit sceneChanged();
+}
+
 QDomElement LayerScene::createOutputXML(QDomDocument &doc)
 {
     if(_layers.count() > 0)
@@ -634,6 +646,26 @@ void LayerScene::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir
 
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->outputXML(doc, element, targetDirectory, isExport);
+}
+
+void LayerScene::connectLayer(Layer* layer)
+{
+    if(!layer)
+        return;
+
+    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
+    connect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
+    connect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
+}
+
+void LayerScene::disconnectLayer(Layer* layer)
+{
+    if(!layer)
+        return;
+
+    disconnect(layer, &Layer::dirty, this, &LayerScene::dirty);
+    disconnect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
+    disconnect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
 }
 
 void LayerScene::resetLayerOrders()

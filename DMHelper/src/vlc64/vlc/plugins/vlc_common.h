@@ -557,9 +557,6 @@ typedef int ( * vlc_list_callback_t ) ( vlc_object_t *,      /* variable's objec
 #   include <os2.h>
 #endif
 
-#include "vlc_tick.h"
-#include "vlc_threads.h"
-
 /**
  * \defgroup intops Integer operations
  * \ingroup cext
@@ -993,7 +990,7 @@ static inline bool mul_overflow(unsigned long long a, unsigned long long b,
 
 #define EMPTY_STR(str) (!str || !*str)
 
-#include <vlc_arrays.h>
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 /* MSB (big endian)/LSB (little endian) conversions - network order is always
  * MSB, and should be used for both network communications and files. */
@@ -1227,7 +1224,6 @@ VLC_API const char * VLC_Compiler( void ) VLC_USED;
 #include "vlc_messages.h"
 #include "vlc_objects.h"
 #include "vlc_variables.h"
-#include "vlc_configuration.h"
 
 #if defined( _WIN32 ) || defined( __OS2__ )
 #   define DIR_SEP_CHAR '\\'

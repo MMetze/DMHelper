@@ -224,6 +224,7 @@ void Layer::setPosition(const QPoint& position)
 
     applyPosition(position);
     _position = position;
+    emit layerMoved(_position);
     emit dirty();
 }
 
@@ -239,6 +240,7 @@ void Layer::setSize(const QSize& size)
 
     applySize(size);
     _size = size;
+    emit layerResized(_size);
     emit dirty();
 }
 
