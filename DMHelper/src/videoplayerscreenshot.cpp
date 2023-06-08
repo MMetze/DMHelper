@@ -45,7 +45,20 @@ void VideoPlayerScreenshot::handleScreenshot()
 {
     QImage* screenshot = getImage();
     qDebug() << "[VideoPlayerScreenshot] Screenshot frame received: " << screenshot;
-    emit screenshotReady(screenshot ? (*screenshot) : QImage());
+
+    if(screenshot)
+    {
+        // Try to add the screenshot to the cache
+        QString cacheFilePath = DMHCache().getCacheFilePath(_videoFile, QString("png"));
+        if((!cacheFilePath.isEmpty()) && (!QFile::exists(cacheFilePath)))
+            screenshot->save(cacheFilePath);
+
+        emit screenshotReady(*screenshot);
+    }
+    else
+    {
+        emit screenshotReady(QImage());
+    }
 
     stopThenDelete();
 }
