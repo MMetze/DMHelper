@@ -113,6 +113,7 @@ protected slots:
     void takeFocus();
     void loadImage();
     void handleScreenshotReady(const QImage& image);
+    void handleLayersChanged();
 
     void layerAdded(Layer* layer);
 

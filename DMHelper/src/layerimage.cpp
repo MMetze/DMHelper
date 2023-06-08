@@ -263,6 +263,9 @@ void LayerImage::initialize(const QSize& sceneSize)
 {
     Q_UNUSED(sceneSize);
 
+    if(!_layerImage.isNull())
+        return;
+
     DMHFileReader* reader = new DMHFileReader(getImageFile());
     if(reader)
     {

@@ -37,6 +37,7 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
     connect(this, SIGNAL(shareCancelPublish()), publishButton, SLOT(cancelPublish()));
     connect(this, SIGNAL(shareSetPlayersWindow(bool)), publishButton, SLOT(setPlayersWindow(bool)));
     connect(this, &PublishButtonProxy::shareSetLayers, publishButton, &PublishButtonRibbon::setLayers);
+    connect(this, &PublishButtonProxy::updateLayerIcons, publishButton, &PublishButtonRibbon::updateLayerIcons);
 }
 
 void PublishButtonProxy::removePublishButton(PublishButtonRibbon* publishButton)
@@ -94,6 +95,11 @@ void PublishButtonProxy::setPlayersWindow(bool checked)
 void PublishButtonProxy::setLayers(QList<Layer*> layers, int selected)
 {
     emit shareSetLayers(layers, selected);
+}
+
+void PublishButtonProxy::updateLayerIcons()
+{
+    emit shareUpdateLayerIcons();
 }
 
 void PublishButtonProxy::internalSetRotation(int rotation)

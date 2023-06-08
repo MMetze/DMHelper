@@ -247,6 +247,7 @@ private slots:
     void handleMapMouseMove(const QPointF& pos);
     void handleMapMouseRelease(const QPointF& pos);
     void handleSceneChanged(const QList<QRectF> &region);
+    void handleLayersChanged();
 
     void itemLink();
     void itemUnlink();

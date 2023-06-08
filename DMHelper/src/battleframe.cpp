@@ -2456,6 +2456,18 @@ void BattleFrame::handleSceneChanged(const QList<QRectF> &region)
         _renderer->updateRender();
 }
 
+void BattleFrame::handleLayersChanged()
+{
+    if(!_model)
+        return;
+
+    // If the map update was delayed due to loading, fix the map rect
+    if(_model->getMapRect().isEmpty())
+        zoomFit();
+
+    emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
+}
+
 void BattleFrame::itemLink()
 {
     handleItemLink(_contextMenuCombatant);
@@ -2876,6 +2888,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
+        disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         disconnect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, _model, &BattleDialogModel::dirty);
 
         clearBattleFrame();
@@ -2907,6 +2920,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
+        connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, _model, &BattleDialogModel::dirty);
 
         setBattleMap();

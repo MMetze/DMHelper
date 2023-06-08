@@ -2092,8 +2092,14 @@ void MapFrame::handleSceneChanged(const QList<QRectF> &region)
 
 void MapFrame::handleMapSceneChanged()
 {
+    if(!_mapSource)
+        return;
+
+    // If the map update was delayed due to loading, fix the map rect
     if(_mapSource->getMapRect().isEmpty())
         zoomFit();
+
+    emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());
 }
 
 bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition)

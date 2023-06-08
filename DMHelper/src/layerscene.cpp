@@ -470,7 +470,6 @@ void LayerScene::initializeLayers()
     if(_initialized)
         return;
 
-
     // First initialize images to find the size of the scene
     for(int i = 0; i < _layers.count(); ++i)
     {
@@ -627,6 +626,16 @@ void LayerScene::layerMoved(const QPoint& position)
 void LayerScene::layerResized(const QSize& size)
 {
     Q_UNUSED(size);
+
+    QSize currentSize = sceneSize().toSize();
+
+    // Check if there is a null-sized FoW layer
+    for(int i = 0; i < _layers.count(); ++i)
+    {
+        if((_layers[i]->getFinalType() == DMHelper::LayerType_Fow) && (_layers[i]->getSize().isEmpty()))
+            _layers[i]->setSize(currentSize);
+    }
+
     emit sceneChanged();
 }
 
@@ -655,6 +664,7 @@ void LayerScene::connectLayer(Layer* layer)
 
     connect(layer, &Layer::dirty, this, &LayerScene::dirty);
     connect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
+    connect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     connect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
 }
 
@@ -665,6 +675,7 @@ void LayerScene::disconnectLayer(Layer* layer)
 
     disconnect(layer, &Layer::dirty, this, &LayerScene::dirty);
     disconnect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
+    disconnect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     disconnect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
 }
 

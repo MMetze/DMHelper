@@ -93,7 +93,7 @@ QRectF LayerFow::boundingRect() const
 
 QImage LayerFow::getLayerIcon() const
 {
-    return getImage();
+    return QImage(":/img/data/icon_fow2.png");
 }
 
 DMHelper::LayerType LayerFow::getType() const
@@ -179,11 +179,10 @@ void LayerFow::applySize(const QSize& size)
         return;
 
     if(!_imageFow.isNull())
-    {
         uninitialize();
-        _size = size;
-        initialize(size);
-    }
+
+    _size = size;
+    initialize(size);
 
     QImage newImage = getImage();
 

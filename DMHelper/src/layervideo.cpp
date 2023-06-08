@@ -283,11 +283,11 @@ bool LayerVideo::playerIsInitialized()
 
 void LayerVideo::initialize(const QSize& sceneSize)
 {
-    if(_size.isEmpty())
-    {
-        _size = sceneSize;
-        requestScreenshot();
-    }
+    if(!_size.isEmpty())
+        return;
+
+    _size = sceneSize;
+    requestScreenshot();
 }
 
 void LayerVideo::uninitialize()
