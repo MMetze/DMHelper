@@ -5,7 +5,7 @@
 #include <QCursor>
 
 class UndoFowPath;
-class Map;
+class LayerScene;
 
 class BattleFrameMapDrawer : public QObject
 {
@@ -13,13 +13,16 @@ class BattleFrameMapDrawer : public QObject
 public:
     explicit BattleFrameMapDrawer(QObject *parent = nullptr);
 
-    void setMap(Map* map, QPixmap* fow, QImage* glFow);
-    Map* getMap() const;
+    //void setMap(Map* map, QPixmap* fow, QImage* glFow);
+    //Map* getMap() const;
+    void setScene(LayerScene* scene);
+    LayerScene* getScene() const;
     const QCursor& getCursor() const;
 
 signals:
-    void fowEdited(const QPixmap& fow);
-    void fowChanged(const QImage& glFow);
+    //void fowEdited(const QPixmap& fow);
+    //void fowChanged(const QImage& glFow);
+    void dirty();
     void cursorChanged(const QCursor& cursor);
 
 public slots:
@@ -46,9 +49,10 @@ private:
     bool _mouseDown;
     QPointF _mouseDownPos;
     UndoFowPath* _undoPath;
-    Map* _map;
-    QPixmap* _fow;
-    QImage* _glFow;
+    //Map* _map;
+    LayerScene* _scene;
+    //QPixmap* _fow;
+    //QImage* _glFow;
     QCursor _cursor;
 
     int _gridScale;

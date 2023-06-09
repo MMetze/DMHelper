@@ -12,9 +12,9 @@ BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     _mouseDown(false),
     _mouseDownPos(),
     _undoPath(nullptr),
-    _map(nullptr),
-    _fow(nullptr),
-    _glFow(nullptr),
+    //_map(nullptr),
+    _scene(nullptr),
+    //_glFow(nullptr),
     _cursor(),
     _gridScale(10),
     _viewWidth(10),
@@ -27,6 +27,7 @@ BattleFrameMapDrawer::BattleFrameMapDrawer(QObject *parent) :
     createCursor();
 }
 
+/*
 void BattleFrameMapDrawer::setMap(Map* map, QPixmap* fow, QImage* glFow)
 {
     _map = map;
@@ -44,6 +45,17 @@ Map* BattleFrameMapDrawer::getMap() const
 {
     return _map;
 }
+*/
+
+void BattleFrameMapDrawer::setScene(LayerScene* scene)
+{
+    _scene = scene;
+}
+
+LayerScene* BattleFrameMapDrawer::getScene() const
+{
+    return _scene;
+}
 
 const QCursor& BattleFrameMapDrawer::getCursor() const
 {
@@ -52,7 +64,10 @@ const QCursor& BattleFrameMapDrawer::getCursor() const
 
 void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
 {
-    if((!_map) || (!_fow) || (!_glFow))
+    //if((!_map) || (!_fow) || (!_glFow))
+    //    return;
+
+    if(!_scene)
         return;
 
     _mouseDownPos = pos;
@@ -60,14 +75,15 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
 
     // TODO: Layers
     // Math says divide by 10: radius of 5 to adjust scale to "one square"
-    LayerFow* layer = dynamic_cast<LayerFow*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Fow));
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
         _undoPath = new UndoFowPath(layer, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
         layer->getUndoStack()->push(_undoPath);
         //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
         //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
-        emit fowEdited(*_fow);
+        //emit fowEdited(*_fow);
+        emit dirty();
     }
 
     //_undoPath = new UndoFowPath(_map, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
@@ -79,27 +95,32 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
 
 void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos)
 {
-    if((!_map) || (!_undoPath) || (!_fow) || (!_glFow))
+    //if((!_map) || (!_undoPath) || (!_fow) || (!_glFow))
+
+    if(!_undoPath)
         return;
 
     _undoPath->addPoint(pos.toPoint());
     // TODO: Layers
     //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
     //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
-    emit fowEdited(*_fow);
+    //emit fowEdited(*_fow);
+    emit dirty();
 }
 
 void BattleFrameMapDrawer::handleMouseUp(const QPointF& pos)
 {
     Q_UNUSED(pos);
-    if(_glFow)
-        emit fowChanged(*_glFow);
+    //if(_glFow)
+    //    emit fowChanged(*_glFow);
     endPath();
+    emit dirty();
 }
 
 void BattleFrameMapDrawer::drawRect(const QRect& rect)
 {
-    if((!_map) || (!_fow) || (!_glFow))
+    //if((!_map) || (!_fow) || (!_glFow))
+    if(!_scene)
         return;
 
     // TODO: Layers
@@ -113,6 +134,7 @@ void BattleFrameMapDrawer::drawRect(const QRect& rect)
     emit fowChanged(*_glFow);
     endPath();
     */
+    emit dirty();
 }
 
 void BattleFrameMapDrawer::setSize(int size)
@@ -146,13 +168,21 @@ void BattleFrameMapDrawer::fillFoW()
 
 void BattleFrameMapDrawer::resetFoW()
 {
-    if((!_map) || (!_fow) || (!_glFow))
+    //if((!_map) || (!_fow) || (!_glFow))
+    if(!_scene)
         return;
 
     if(QMessageBox::question(nullptr, QString("Confirm Fill FoW"), QString("Are you sure you would like to fill the entire Fog of War?")) == QMessageBox::No)
         return;
 
     // TODO: Layers
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
+    if(layer)
+    {
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 0, 0, 255)));
+        layer->getUndoStack()->push(undoFill);
+        emit dirty();
+    }
     /*
     UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0, 0, 0, 255)));
     _map->getUndoStack()->push(undoFill);
@@ -166,13 +196,21 @@ void BattleFrameMapDrawer::resetFoW()
 
 void BattleFrameMapDrawer::clearFoW()
 {
-    if((!_map) || (!_fow) || (!_glFow))
+    //if((!_map) || (!_fow) || (!_glFow))
+    if(!_scene)
         return;
 
     if(QMessageBox::question(nullptr, QString("Confirm Clear FoW"), QString("Are you sure you would like to clear the entire Fog of War?")) == QMessageBox::No)
         return;
 
     // TODO: Layers
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
+    if(layer)
+    {
+        UndoFowFill* undoFill = new UndoFowFill(layer, MapEditFill(QColor(0, 0, 0, 0)));
+        layer->getUndoStack()->push(undoFill);
+        emit dirty();
+    }
     /*
     UndoFowFill* undoFill = new UndoFowFill(_map, MapEditFill(QColor(0, 0, 0, 0)));
     _map->getUndoStack()->push(undoFill);

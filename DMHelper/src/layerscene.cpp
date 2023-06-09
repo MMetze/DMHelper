@@ -367,7 +367,7 @@ Layer* LayerScene::getPriority(DMHelper::LayerType type) const
 {
     Layer* result = getSelectedLayer();
     if((result) && (result->getFinalType() == type))
-        return result;
+        return resolveReference(result);
     else
         return getFirst(type);
 }
@@ -386,7 +386,7 @@ Layer* LayerScene::getFirst(DMHelper::LayerType type) const
     for(int i = 0; i < _layers.count(); ++i)
     {
         if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
-            return _layers.at(i);
+            return resolveReference(_layers.at(i));
     }
 
     return nullptr;
@@ -683,4 +683,16 @@ void LayerScene::resetLayerOrders()
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->setOrder(i);
+}
+
+Layer* LayerScene::resolveReference(Layer* layer) const
+{
+    if(!layer)
+        return nullptr;
+
+    if(layer->getType() != DMHelper::LayerType_Reference)
+        return layer;
+
+    LayerReference* layerReference = dynamic_cast<LayerReference*>(layer);
+    return layerReference ? layerReference->getReferenceLayer() : nullptr;
 }

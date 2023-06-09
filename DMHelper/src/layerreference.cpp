@@ -9,14 +9,15 @@ LayerReference::LayerReference(CampaignObjectBase* referenceObject, Layer* refer
     Layer{QString(), order, parent},
     _referenceObject(referenceObject),
     _referenceObjectId(),
-    _referenceLayer(referenceLayer),
+    _referenceLayer(nullptr),
     _referenceLayerId()
 {
+    setReferenceLayer(referenceLayer);
 }
 
 LayerReference::~LayerReference()
 {
-    _referenceLayer = nullptr; // make sure no further destroy messages are propagated
+    setReferenceLayer(nullptr); // make sure no further destroy messages are propagated
 }
 
 void LayerReference::inputXML(const QDomElement &element, bool isImport)
@@ -65,13 +66,13 @@ void LayerReference::postProcessXML(Campaign* campaign, const QDomElement &eleme
         {
             Map* map = dynamic_cast<Map*>(_referenceObject);
             if(map)
-                _referenceLayer = map->getLayerScene().findLayer(_referenceLayerId);
+                setReferenceLayer(map->getLayerScene().findLayer(_referenceLayerId));
         }
         else if(_referenceObject->getObjectType() == DMHelper::CampaignType_Battle)
         {
             EncounterBattle* battle = dynamic_cast<EncounterBattle*>(_referenceObject);
             if((battle) && (battle->getBattleDialogModel()))
-                _referenceLayer = battle->getBattleDialogModel()->getLayerScene().findLayer(_referenceLayerId);
+                setReferenceLayer(battle->getBattleDialogModel()->getLayerScene().findLayer(_referenceLayerId));
         }
         else
         {
@@ -87,7 +88,6 @@ void LayerReference::postProcessXML(Campaign* campaign, const QDomElement &eleme
     }
 
     copyReferenceValues();
-    connect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
 }
 
 QRectF LayerReference::boundingRect() const
@@ -166,12 +166,12 @@ DMHelper::LayerType LayerReference::getReferencedType() const
     return _referenceLayer ? _referenceLayer->getType() : DMHelper::LayerType_Unknown;
 }
 
-Layer* LayerReference::getReferenceLayer()
+Layer* LayerReference::getReferenceLayer() const
 {
     return _referenceLayer;
 }
 
-CampaignObjectBase* LayerReference::getReferenceObject()
+CampaignObjectBase* LayerReference::getReferenceObject() const
 {
     return _referenceObject;
 }
@@ -264,6 +264,7 @@ void LayerReference::handleReferenceDestroyed(Layer *layer)
     {
         emit referenceDestroyed(this);
         _referenceLayer = nullptr;
+        _referenceObject = nullptr;
     }
 }
 
@@ -296,6 +297,20 @@ void LayerReference::internalOutputXML(QDomDocument &doc, QDomElement &element, 
         element.removeAttribute("w");
     if(element.hasAttribute("h"))
         element.removeAttribute("h");
+}
+
+void LayerReference::setReferenceLayer(Layer* layer)
+{
+    if(layer)
+    {
+        _referenceLayer = layer;
+        connect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
+    }
+    else if(_referenceLayer)
+    {
+        disconnect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
+        _referenceLayer = nullptr;
+    }
 }
 
 void LayerReference::copyReferenceValues()

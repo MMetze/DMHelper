@@ -34,8 +34,8 @@ public:
     virtual void applySize(const QSize& size) override;
 
     DMHelper::LayerType getReferencedType() const;
-    Layer* getReferenceLayer();
-    CampaignObjectBase* getReferenceObject();
+    Layer* getReferenceLayer() const;
+    CampaignObjectBase* getReferenceObject() const;
 
 public slots:
     // DM Window Generic Interface
@@ -66,6 +66,7 @@ protected slots:
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    void setReferenceLayer(Layer* layer);
     void copyReferenceValues();
 
     CampaignObjectBase* _referenceObject;

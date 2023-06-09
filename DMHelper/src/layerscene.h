@@ -97,6 +97,7 @@ protected:
     void connectLayer(Layer* layer);
     void disconnectLayer(Layer* layer);
     void resetLayerOrders();
+    Layer* resolveReference(Layer* layer) const;
 
     bool _initialized;
     QList<Layer*> _layers;

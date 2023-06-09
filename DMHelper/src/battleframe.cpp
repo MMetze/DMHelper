@@ -173,8 +173,8 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_countdownTimer, SIGNAL(timeout()), this, SLOT(countdownTimerExpired()));
 
     _mapDrawer = new BattleFrameMapDrawer(this);
-    connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, this, &BattleFrame::updateFowImage);
-    connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, this, &BattleFrame::updateFowImage);
+    //connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, this, &BattleFrame::updateFowImage);
+    //connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, this, &BattleFrame::updateFowImage);
 
     connect(ui->graphicsView, SIGNAL(rubberBandChanged(QRect, QPointF, QPointF)), this, SLOT(handleRubberBandChanged(QRect, QPointF, QPointF)));
 
@@ -1857,6 +1857,7 @@ void BattleFrame::updateMap()
         // TODO: Layers
         //_bwFoWImage = _model->getMap()->getBWFoWImage();
         //_mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
+        _mapDrawer->setScene(&_model->getLayerScene());
     }
     // TODO: Layers - video support
     /*
@@ -2892,7 +2893,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
-        disconnect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, _model, &BattleDialogModel::dirty);
+        disconnect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
         clearBattleFrame();
         cleanupBattleMap();
@@ -2924,7 +2925,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
-        connect(_mapDrawer, &BattleFrameMapDrawer::fowEdited, _model, &BattleDialogModel::dirty);
+        connect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
         setBattleMap();
         recreateCombatantWidgets();
@@ -3099,7 +3100,8 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
     _fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     // TODO: Layers
     //_bwFoWImage = _model->getMap()->getBWFoWImage(image.size());
-    _mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
+    //_mapDrawer->setMap(_model->getMap(), &_fowImage, &_bwFoWImage);
+    _mapDrawer->setScene(&_model->getLayerScene());
 
     if(!_model->getCameraRect().isValid())
         _model->setCameraRect(_model->getLayerScene().boundingRect().toRect());
@@ -3592,7 +3594,8 @@ void BattleFrame::cleanupBattleMap()
             _mapDrawer->getMap()->uninitialize();
 #endif
 
-        _mapDrawer->setMap(nullptr, nullptr, nullptr);
+        //_mapDrawer->setMap(nullptr, nullptr, nullptr);
+        _mapDrawer->setScene(nullptr);
     }
 
     // Clean up the old map
