@@ -2099,8 +2099,8 @@ void MapFrame::handleMapSceneChanged()
     if(_mapSource->getMapRect().isEmpty())
         zoomFit();
 
-    if(!_mapSource->getCameraRect().isValid())
-        _mapSource->setCameraRect(_mapSource->getLayerScene().boundingRect().toRect());
+    if(_mapSource->getCameraRect().isEmpty())
+        setCameraMap();
 
     emit setLayers(_mapSource->getLayerScene().getLayers(), _mapSource->getLayerScene().getSelectedLayerIndex());
 }
