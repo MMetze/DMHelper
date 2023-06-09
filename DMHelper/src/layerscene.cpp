@@ -535,7 +535,7 @@ void LayerScene::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene*
     _renderer = renderer;
 
     for(int i = 0; i < _layers.count(); ++i)
-        _layers[i]->playerGLInitialize(scene);
+        _layers[i]->playerGLInitialize(renderer, scene);
 
     _playerGLScene = scene;
 }
@@ -575,7 +575,7 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
         if((_layers.at(i)) && (_layers.at(i)->getLayerVisible()) && (_layers.at(i)->getOpacity() > 0.0))
         {
             if(!_layers.at(i)->playerIsInitialized())
-                _layers[i]->playerGLInitialize(_playerGLScene);
+                _layers[i]->playerGLInitialize(_renderer, _playerGLScene);
 
             if(_layers.at(i)->playerIsInitialized())
             {

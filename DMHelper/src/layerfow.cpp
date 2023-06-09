@@ -502,7 +502,7 @@ void LayerFow::dmUpdate()
 {
 }
 
-void LayerFow::playerGLInitialize(PublishGLScene* scene)
+void LayerFow::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     if(_fowGLObject)
     {
@@ -519,7 +519,7 @@ void LayerFow::playerGLInitialize(PublishGLScene* scene)
 
     _fowGLObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
 
-    Layer::playerGLInitialize(scene);
+    Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerFow::playerGLUninitialize()

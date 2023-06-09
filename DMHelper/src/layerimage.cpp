@@ -199,7 +199,7 @@ void LayerImage::dmUpdate()
 {
 }
 
-void LayerImage::playerGLInitialize(PublishGLScene* scene)
+void LayerImage::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     if(_imageGLObject)
     {
@@ -216,7 +216,7 @@ void LayerImage::playerGLInitialize(PublishGLScene* scene)
 
     _imageGLObject = new PublishGLBattleBackground(nullptr, getImage(), GL_NEAREST);
 
-    Layer::playerGLInitialize(scene);
+    Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerImage::playerGLUninitialize()

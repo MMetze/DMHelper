@@ -150,16 +150,21 @@ void LayerVideo::dmUpdate()
 
 }
 
-void LayerVideo::playerGLInitialize(PublishGLScene* scene)
+void LayerVideo::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     Q_UNUSED(scene);
 
+    if(!renderer)
+        return;
+
+    /*
     if(!_layerScene)
         return;
 
     PublishGLRenderer* renderer = _layerScene->getRenderer();
     if((!renderer) || (!renderer->getTargetWidget()))
         return;
+        */
 
 #ifdef LAYERVIDEO_USE_OPENGL
     if(_videoGLPlayer)
@@ -190,7 +195,7 @@ void LayerVideo::playerGLInitialize(PublishGLScene* scene)
     _videoPlayer->restartPlayer();
 #endif
 
-    Layer::playerGLInitialize(scene);
+    Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerVideo::playerGLUninitialize()

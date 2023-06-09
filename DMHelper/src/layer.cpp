@@ -135,8 +135,9 @@ void Layer::dmInitialize(QGraphicsScene* scene)
     applySize(_size);
 }
 
-void Layer::playerGLInitialize(PublishGLScene* scene)
+void Layer::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
+    Q_UNUSED(renderer);
     Q_UNUSED(scene);
 
     applyOrder(_order);

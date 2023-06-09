@@ -257,6 +257,7 @@
         <file>data/icon_image_max.png</file>
         <file>data/icon_image_min.png</file>
         <file>data/icon_image_original.png</file>
+        <file>data/icon_newmedia.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -10,6 +10,7 @@ RibbonTabCampaign::RibbonTabCampaign(QWidget *parent) :
     connect(ui->btnNewParty, SIGNAL(clicked(bool)), this, SIGNAL(newPartyClicked()));
     connect(ui->btnNewCharacter, SIGNAL(clicked(bool)), this, SIGNAL(newCharacterClicked()));
     connect(ui->btnNewMap, SIGNAL(clicked(bool)), this, SIGNAL(newMapClicked()));
+    connect(ui->btnNewMedia, SIGNAL(clicked(bool)), this, SIGNAL(newMediaClicked()));
     connect(ui->btnNewText, SIGNAL(clicked(bool)), this, SIGNAL(newTextClicked()));
     connect(ui->btnNewLinked, SIGNAL(clicked(bool)), this, SIGNAL(newLinkedClicked()));
     connect(ui->btnNewBattle, SIGNAL(clicked(bool)), this, SIGNAL(newBattleClicked()));
@@ -51,6 +52,7 @@ void RibbonTabCampaign::setCampaignEnabled(bool enabled)
     ui->btnNewParty->setEnabled(enabled);
     ui->btnNewCharacter->setEnabled(enabled);
     ui->btnNewMap->setEnabled(enabled);
+    ui->btnNewMedia->setEnabled(enabled);
     ui->btnNewText->setEnabled(enabled);
     ui->btnNewLinked->setEnabled(enabled);
     ui->btnNewBattle->setEnabled(enabled);
@@ -85,6 +87,7 @@ void RibbonTabCampaign::showEvent(QShowEvent *event)
 
     setStandardButtonSize(*ui->lblNewText, *ui->btnNewText, frameHeight);
     setStandardButtonSize(*ui->lblNewLinked, *ui->btnNewLinked, frameHeight);
+    setStandardButtonSize(*ui->lblNewMedia, *ui->btnNewMedia, frameHeight);
     setStandardButtonSize(*ui->lblNewParty, *ui->btnNewParty, frameHeight);
     setStandardButtonSize(*ui->lblNewCharacter, *ui->btnNewCharacter, frameHeight);
     setStandardButtonSize(*ui->lblNewMap, *ui->btnNewMap, frameHeight);

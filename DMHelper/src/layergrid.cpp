@@ -168,7 +168,7 @@ void LayerGrid::dmUpdate()
 {
 }
 
-void LayerGrid::playerGLInitialize(PublishGLScene* scene)
+void LayerGrid::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     if(_gridGLObject)
     {
@@ -180,7 +180,7 @@ void LayerGrid::playerGLInitialize(PublishGLScene* scene)
 
     _gridGLObject = new PublishGLBattleGrid(_config, getOpacity(), getSize());
 
-    Layer::playerGLInitialize(scene);
+    Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerGrid::playerGLUninitialize()

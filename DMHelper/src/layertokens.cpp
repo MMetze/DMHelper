@@ -317,7 +317,7 @@ void LayerTokens::dmUpdate()
 {
 }
 
-void LayerTokens::playerGLInitialize(PublishGLScene* scene)
+void LayerTokens::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     if(!scene)
         return;
@@ -361,7 +361,7 @@ void LayerTokens::playerGLInitialize(PublishGLScene* scene)
 
     _playerInitialized = true;
 
-    Layer::playerGLInitialize(scene);
+    Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerTokens::playerGLUninitialize()

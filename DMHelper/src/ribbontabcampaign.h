@@ -26,6 +26,7 @@ signals:
     void newPartyClicked();
     void newCharacterClicked();
     void newMapClicked();
+    void newMediaClicked();
     void newTextClicked();
     void newLinkedClicked();
     void newBattleClicked();

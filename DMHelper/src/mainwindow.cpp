@@ -302,6 +302,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_ribbonTabCampaign, SIGNAL(newPartyClicked()), this, SLOT(newParty()));
     connect(_ribbonTabCampaign, SIGNAL(newCharacterClicked()), this, SLOT(newCharacter()));
     connect(_ribbonTabCampaign, SIGNAL(newMapClicked()), this, SLOT(newMap()));
+    connect(_ribbonTabCampaign, SIGNAL(newMediaClicked()), this, SLOT(newMedia()));
     connect(_ribbonTabCampaign, SIGNAL(newTextClicked()), this, SLOT(newTextEncounter()));
     connect(_ribbonTabCampaign, SIGNAL(newLinkedClicked()), this, SLOT(newLinkedText()));
     connect(_ribbonTabCampaign, SIGNAL(newBattleClicked()), this, SLOT(newBattleEncounter()));
@@ -1234,6 +1235,48 @@ void MainWindow::newMap()
     }
 
     addNewObject(map);
+}
+
+void MainWindow::newMedia()
+{
+    if(!_campaign)
+        return;
+
+    bool ok = false;
+    QString mediaName = QInputDialog::getText(this, QString("Enter Media Entry Name"), QString("New Media"), QLineEdit::Normal, QString(), &ok);
+    if(!ok)
+        return;
+
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Media File..."));
+    if(filename.isEmpty())
+        return;
+
+    Layer* mediaLayer;
+    QImageReader reader(filename);
+    if(reader.canRead())
+    {
+        mediaLayer = new LayerImage(QString("Media Image"), filename);
+    }
+    else
+    {
+        QMessageBox::StandardButton result = QMessageBox::question(this, QString("Video"), QString("Is the selected media file a video?"));
+        if(result != QMessageBox::Yes)
+            return;
+
+        mediaLayer = new LayerVideo(QString("Media Video"), filename);
+    }
+
+    Map* mediaMap = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mediaName, false));
+    if(!mediaMap)
+    {
+        delete mediaLayer;
+        return;
+    }
+
+    mediaMap->getLayerScene().appendLayer(mediaLayer);
+    mediaMap->getLayerScene().setScale(DMHelper::STARTING_GRID_SCALE);
+
+    addNewObject(mediaMap);
 }
 
 void MainWindow::newAudioEntry()
@@ -2330,6 +2373,11 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     QAction* addLinkedEntry = new QAction(QIcon(":/img/data/icon_newlink.png"), QString("New Linked Entry"), contextMenu);
     connect(addLinkedEntry, SIGNAL(triggered()), this, SLOT(newLinkedText()));
     contextMenu->addAction(addLinkedEntry);
+
+    // New media
+    QAction* addMedia = new QAction(QIcon(":/img/data/icon_newmedia.png"), QString("New Media"), contextMenu);
+    connect(addMedia, SIGNAL(triggered()), this, SLOT(newMedia()));
+    contextMenu->addAction(addMedia);
 
     contextMenu->addSeparator();
 

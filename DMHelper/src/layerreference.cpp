@@ -198,12 +198,12 @@ void LayerReference::dmUpdate()
         _referenceLayer->dmUpdate();
 }
 
-void LayerReference::playerGLInitialize(PublishGLScene* scene)
+void LayerReference::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)
 {
     if(_referenceLayer)
-        _referenceLayer->playerGLInitialize(scene);
+        _referenceLayer->playerGLInitialize(renderer, scene);
 
-    Layer::playerGLInitialize(scene);
+    Layer::playerGLInitialize(renderer, scene);
 }
 
 void LayerReference::playerGLUninitialize()
