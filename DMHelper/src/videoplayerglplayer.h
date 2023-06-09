@@ -64,6 +64,7 @@ public slots:
 
 protected slots:
     void videoAvailable();
+    virtual void internalAudioCheck(int newStatus);
 
 protected:
     virtual void timerEvent(QTimerEvent *event) override;
@@ -73,8 +74,6 @@ protected:
     virtual bool stopPlayer(bool restart) override;
 
     void cleanupPlayer();
-
-    virtual void internalAudioCheck(int newStatus);
 
     virtual bool isPlaying() const;
     virtual bool isPaused() const;

@@ -2465,6 +2465,9 @@ void BattleFrame::handleLayersChanged()
     if(_model->getMapRect().isEmpty())
         zoomFit();
 
+    if(!_model->getCameraRect().isValid())
+        _model->setCameraRect(_model->getLayerScene().boundingRect().toRect());
+
     emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
 }
 

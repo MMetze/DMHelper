@@ -3,9 +3,10 @@
 
 #define VIDEO_DEBUG_MESSAGES
 
-const int stopCallComplete = 0x01;
-const int stopConfirmed = 0x02;
-const int stopComplete = stopCallComplete | stopConfirmed;
+const int VIDEOPLAYER_STOP_CALL_STARTED = 0x01;
+const int VIDEOPLAYER_STOP_CALL_COMPLETE = 0x02;
+const int VIDEOPLAYER_STOP_CONFIRMED = 0x04;
+const int VIDEOPLAYER_STOP_COMPLETE = VIDEOPLAYER_STOP_CALL_STARTED | VIDEOPLAYER_STOP_CALL_COMPLETE | VIDEOPLAYER_STOP_CONFIRMED;
 const int INVALID_TRACK_ID = -99999;
 
 // libvlc callback static functions
@@ -48,6 +49,8 @@ VideoPlayer::VideoPlayer(const QString& videoFile, QSize targetSize, bool playVi
 {
     _buffers[0] = nullptr;
     _buffers[1] = nullptr;
+
+    connect(this, &VideoPlayer::videoStopped, this, &VideoPlayer::handleVideoStopped, Qt::QueuedConnection);
 
 #ifdef Q_OS_WIN
     _videoFile.replace("/", "\\\\");
@@ -396,17 +399,18 @@ void VideoPlayer::eventCallback(const struct libvlc_event_t *p_event)
                 break;
             case libvlc_MediaPlayerStopped:
                 qDebug() << "[VideoPlayer] Video event received: STOPPED = " << p_event->type;
-                internalStopCheck(stopConfirmed);
                 emit videoStopped();
                 break;
+                /*
             case libvlc_MediaListPlayerPlayed:
                 qDebug() << "[VideoPlayer] Video event received: LIST PLAYED = " << p_event->type;
                 break;
             case libvlc_MediaListPlayerStopped:
                 qDebug() << "[VideoPlayer] Video event received: LIST STOPPED = " << p_event->type;
-                internalStopCheck(stopConfirmed);
+                internalStopCheck(VIDEOPLAYER_STOP_CONFIRMED);
                 emit videoStopped();
                 break;
+                */
             default:
                 qDebug() << "[VideoPlayer] UNEXPECTED Video event received:  " << p_event->type;
                 break;
@@ -459,6 +463,81 @@ bool VideoPlayer::restartPlayer()
     }
 }
 
+void VideoPlayer::internalStopCheck(int status)
+{
+    _stopStatus |= status;
+
+    qDebug() << "[VideoPlayer] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
+
+    // Check if the video just ended and should be restarted
+    if(_stopStatus == VIDEOPLAYER_STOP_CONFIRMED)
+    {
+        qDebug() << "[VideoPlayer] Internal Stop Check: Video ended, restarting playback";
+        _stopStatus = 0;
+        libvlc_media_player_release(_vlcPlayer);
+        _vlcPlayer = nullptr;
+        startPlayer();
+        return;
+    }
+
+    // Check if the video is not yet fully stopped
+    if(_stopStatus != VIDEOPLAYER_STOP_COMPLETE)
+        return;
+
+    if(_vlcPlayer)
+    {
+        libvlc_media_player_release(_vlcPlayer);
+        _vlcPlayer = nullptr;
+        qDebug() << "[VideoPlayer] Internal Stop Check: VLC player destroyed";
+    }
+
+    if(_vlcMedia)
+    {
+        libvlc_media_release(_vlcMedia);
+        _vlcMedia = nullptr;
+    }
+
+    cleanupBuffers();
+
+    if(_selfRestart)
+    {
+        _selfRestart = false;
+        qDebug() << "[VideoPlayer] Internal Stop Check: player restarting";
+        startPlayer();
+    }
+
+    if(_deleteOnStop)
+    {
+        qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed.";
+//        delete this;
+        return;
+    }
+}
+
+void VideoPlayer::internalAudioCheck(int newStatus)
+{
+    if((_playAudio) ||
+       (_originalTrack != INVALID_TRACK_ID) ||
+       (newStatus != libvlc_MediaPlayerPlaying) ||
+       (!_vlcPlayer))
+        return;
+
+    qDebug() << "[VideoPlayer] Internal Audio Check identified audio, shall be turned off";
+
+    // TODO: Layers
+    /*
+    libvlc_media_player_t * player = libvlc_media_list_player_get_media_player(_vlcListPlayer);
+    if(player)
+    {
+        _originalTrack = libvlc_audio_get_track(player);
+        if(_originalTrack != -1)
+            libvlc_audio_set_track(player, -1);
+    }
+    */
+
+    qDebug() << "[VideoPlayer] Audio turning off completed";
+}
+
 bool VideoPlayer::initializeVLC()
 {
     qDebug() << "[VideoPlayer] Initializing VLC!";
@@ -499,7 +578,7 @@ bool VideoPlayer::startPlayer()
 {
     if(!DMH_VLC::vlcInstance())
     {
-        qDebug() << "[VideoPlayer] VLC not instantiated - not able to start player!";
+        qDebug() << "[VideoPlayer] ERROR: VLC not instantiated - not able to start player!";
         return false;
     }
 
@@ -509,20 +588,13 @@ bool VideoPlayer::startPlayer()
         return false;
     }
 
+    qDebug() << "[VideoPlayer] Starting video player with " << _videoFile.toUtf8().constData();
+
     if(_videoFile.isEmpty())
     {
         qDebug() << "[VideoPlayer] Playback file empty - not able to start player!";
         return false;
     }
-
-    qDebug() << "[VideoPlayer] Starting video player with " << _videoFile.toUtf8().constData();
-
-    /*
-    // Create a new Media List and add the media to it
-    libvlc_media_list_t *vlcMediaList = libvlc_media_list_new();
-    if (!vlcMediaList)
-        return false;
-        */
 
     // Create a new Media
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
@@ -535,22 +607,6 @@ bool VideoPlayer::startPlayer()
     //libvlc_media_t *vlcMedia = libvlc_media_new_location(_vlcInstance, ytPath.toUtf8().constData());
     if (!_vlcMedia)
         return false;
-
-    /*
-    libvlc_media_list_add_media(vlcMediaList, vlcMedia);
-    libvlc_media_release(vlcMedia);
-
-    // Create a new libvlc player
-    _vlcListPlayer = libvlc_media_list_player_new(_vlcInstance);
-    if(!_vlcListPlayer)
-        return false;
-        */
-
-    /*
-    libvlc_media_player_t *player = libvlc_media_player_new(_vlcInstance);
-    if(!player)
-        return false;
-    */
 
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), _vlcMedia);
@@ -581,17 +637,12 @@ bool VideoPlayer::startPlayer()
         libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, playerEventCallback, static_cast<void*>(this));
     }
 
-    //libvlc_event_manager_t* listEventManager = libvlc_media_list_player_event_manager(_vlcListPlayer);
-    //if(eventManager)
-    //{
-    //    libvlc_event_attach(listEventManager, libvlc_MediaListPlayerPlayed, playerEventCallback, static_cast<void*>(this));
-    //    libvlc_event_attach(listEventManager, libvlc_MediaListPlayerStopped, playerEventCallback, static_cast<void*>(this));
-    //}
-
+    /*
     unsigned x = 0;
     unsigned y = 0;
     int result = libvlc_video_get_size(_vlcPlayer, 0, &x, &y);
     qDebug() << "[VideoPlayer] Video size (result: " << result << "): " << x << " x " << y << ". File: " << _videoFile;
+    */
 
     libvlc_video_set_callbacks(_vlcPlayer,
                                playerLockCallback,
@@ -601,12 +652,19 @@ bool VideoPlayer::startPlayer()
     libvlc_video_set_format_callbacks(_vlcPlayer,
                                       playerFormatCallback,
                                       playerCleanupCallback);
+/*    }
+    else
+    {
+        qDebug() << "[VideoPlayer] Restarting video player with " << _videoFile.toUtf8().constData();
+    }*/
 
     // And start playback
     //libvlc_media_list_player_play(_vlcListPlayer);
     int playResult = libvlc_media_player_play(_vlcPlayer);
+    /*
     result = libvlc_video_get_size(_vlcPlayer, 0, &x, &y);
     qDebug() << "[VideoPlayer] Video size (result: " << result << "): " << x << " x " << y << ". File: " << _videoFile;
+    */
 
     qDebug() << "[VideoPlayer] Player started: " << playResult;
 
@@ -618,13 +676,18 @@ bool VideoPlayer::stopPlayer()
     if(_vlcPlayer)
     {
         qDebug() << "[VideoPlayer] Stop Player called";
-        _stopStatus = 0;
+        _stopStatus = VIDEOPLAYER_STOP_CALL_STARTED;
         //libvlc_media_list_player_stop_async(_vlcListPlayer);
         libvlc_media_player_stop_async(_vlcPlayer);
-        VideoPlayer::internalStopCheck(stopCallComplete);
+        VideoPlayer::internalStopCheck(VIDEOPLAYER_STOP_CALL_COMPLETE);
     }
 
     return true;
+}
+
+void VideoPlayer::handleVideoStopped()
+{
+    internalStopCheck(VIDEOPLAYER_STOP_CONFIRMED);
 }
 
 void VideoPlayer::cleanupBuffers()
@@ -666,69 +729,6 @@ void VideoPlayer::cleanupBuffers()
     qDebug() << "[VideoPlayer] Buffer cleanup completed";
 #endif
 
-}
-
-void VideoPlayer::internalStopCheck(int status)
-{
-    _stopStatus |= status;
-
-    qDebug() << "[VideoPlayer] Internal Stop Check called with status " << status << ", overall status: " << _stopStatus;
-
-    if(_stopStatus != stopComplete)
-        return;
-
-    if(_vlcPlayer)
-    {
-        libvlc_media_player_release(_vlcPlayer);
-        _vlcPlayer = nullptr;
-        qDebug() << "[VideoPlayer] Internal Stop Check: vlc player destroyed.";
-    }
-
-    if(_vlcMedia)
-    {
-        libvlc_media_release(_vlcMedia);
-        _vlcMedia = nullptr;
-    }
-
-    cleanupBuffers();
-
-    if(_selfRestart)
-    {
-        _selfRestart = false;
-        startPlayer();
-        qDebug() << "[VideoPlayer] Internal Stop Check: player restarted.";
-    }
-
-    if(_deleteOnStop)
-    {
-        qDebug() << "[VideoPlayer] Internal Stop Check: video player being destroyed.";
-//        delete this;
-        return;
-    }
-}
-
-void VideoPlayer::internalAudioCheck(int newStatus)
-{
-    if((_playAudio) ||
-       (_originalTrack != INVALID_TRACK_ID) ||
-       (newStatus != libvlc_MediaPlayerPlaying) ||
-       (!_vlcPlayer))
-        return;
-
-    qDebug() << "[VideoPlayer] Internal Audio Check identified audio, shall be turned off";
-
-    // TODO: Layers
-    /*
-    libvlc_media_player_t * player = libvlc_media_list_player_get_media_player(_vlcListPlayer);
-    if(player)
-    {
-        _originalTrack = libvlc_audio_get_track(player);
-        if(_originalTrack != -1)
-            libvlc_audio_set_track(player, -1);
-    }
-    */
-
-    qDebug() << "[VideoPlayer] Audio turning off completed";
 }
 
 bool VideoPlayer::isPlaying() const

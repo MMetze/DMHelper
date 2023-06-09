@@ -15,6 +15,7 @@ public:
     virtual void paintGL() override;
 
     void setImage(const QImage& image);
+    void updateImage(const QImage& image);
     QSize getSize() const;
 
     void setPosition(const QPoint& position);
@@ -23,6 +24,7 @@ public:
 protected:
     void createImageObjects(const QImage& image);
     void updateModelMatrix();
+    void loadTexture(const QImage& image);
 
     QSize _imageSize;
     QPoint _position;

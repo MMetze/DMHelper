@@ -50,6 +50,11 @@ public slots:
     virtual void stopThenDelete();
     virtual bool restartPlayer();
 
+protected slots:
+
+    virtual void internalStopCheck(int status);
+    virtual void internalAudioCheck(int newStatus);
+
 protected:
 
     virtual bool initializeVLC();
@@ -57,8 +62,7 @@ protected:
     virtual bool stopPlayer();
     virtual void cleanupBuffers();
 
-    virtual void internalStopCheck(int status);
-    virtual void internalAudioCheck(int newStatus);
+    virtual void handleVideoStopped();
 
     virtual bool isPlaying() const;
     virtual bool isPaused() const;

@@ -243,7 +243,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     }
     else if(_videoPlayer->isNewImage())
     {
-        _videoObject->setImage(*(_videoPlayer->getImage()));
+        _videoObject->updateImage(*(_videoPlayer->getImage()));
     }
 
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGBA, 1, GL_FALSE, projectionMatrix);

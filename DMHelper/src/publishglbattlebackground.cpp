@@ -87,6 +87,19 @@ QSize PublishGLBattleBackground::getSize() const
     return _imageSize;
 }
 
+void PublishGLBattleBackground::updateImage(const QImage& image)
+{
+    if((_imageSize.isEmpty()) || (_imageSize != image.size()))
+    {
+        setImage(image);
+    }
+    else
+    {
+        loadTexture(image);
+        updateModelMatrix();
+    }
+}
+
 void PublishGLBattleBackground::setPosition(const QPoint& position)
 {
     if(_position == position)
@@ -160,17 +173,7 @@ void PublishGLBattleBackground::createImageObjects(const QImage& image)
 
     // Texture
     f->glGenTextures(1, &_textureID);
-    f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _textureParam);
-    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _textureParam);
-
-    // load and generate the background texture
-    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
-    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
-    f->glGenerateMipmap(GL_TEXTURE_2D);
+    loadTexture(image);
 
     qDebug() << "[PublishGLBattleBackground] Created image object. w: " << image.width() << ", h: " << image.height() << ", VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID << ", context: " << QOpenGLContext::currentContext();
 
@@ -184,4 +187,27 @@ void PublishGLBattleBackground::updateModelMatrix()
     if(_targetSize.isValid())
         _modelMatrix.scale(static_cast<qreal>(_targetSize.width()) / static_cast<qreal>(_imageSize.width()),
                            static_cast<qreal>(_targetSize.height()) / static_cast<qreal>(_imageSize.height()));
+}
+
+void PublishGLBattleBackground::loadTexture(const QImage& image)
+{
+    if((_textureID == 0) || (!QOpenGLContext::currentContext()))
+        return;
+
+    // Set up the rendering context, load shaders and other resources, etc.:
+    QOpenGLFunctions *f = QOpenGLContext::currentContext()->functions();
+    if(!f)
+        return;
+
+    f->glBindTexture(GL_TEXTURE_2D, _textureID);
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _textureParam);
+    f->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _textureParam);
+
+    // load and generate the background texture
+    QImage glBackgroundImage = image.convertToFormat(QImage::Format_RGBA8888).mirrored();
+    f->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, glBackgroundImage.width(), glBackgroundImage.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, glBackgroundImage.bits());
+    f->glGenerateMipmap(GL_TEXTURE_2D);
 }
