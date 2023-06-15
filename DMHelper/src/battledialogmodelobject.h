@@ -2,6 +2,7 @@
 #define BATTLEDIALOGMODELOBJECT_H
 
 #include "campaignobjectbase.h"
+#include <QPointF>
 
 class QGraphicsItem;
 

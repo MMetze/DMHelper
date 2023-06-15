@@ -8,6 +8,7 @@
 #include <QDir>
 #include "dmconstants.h"
 
+class Campaign;
 class LayerScene;
 class QGraphicsScene;
 class PublishGLRenderer;
