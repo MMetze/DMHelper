@@ -1712,7 +1712,14 @@ void BattleFrame::resizeEvent(QResizeEvent *event)
 {
     qDebug() << "[Battle Frame] resized: " << event->size().width() << "x" << event->size().height();
     if(_model)
+    {
+        if(!_model->getMapRect().isValid())
+        {
+            qDebug() << "[Battle Frame] ERROR: An invalid map rect was detected in resizeEvent - zooming the map to fit all content";
+            zoomFit();
+        }
         ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
+    }
 
     QFrame::resizeEvent(event);
 }
@@ -1720,9 +1727,17 @@ void BattleFrame::resizeEvent(QResizeEvent *event)
 void BattleFrame::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
-    qDebug() << "[Battle Frame]shown (" << isVisible() << ")";
+    qDebug() << "[Battle Frame] shown (" << isVisible() << ")";
     if(_model)
+    {
+        if(!_model->getMapRect().isValid())
+        {
+            qDebug() << "[Battle Frame] ERROR: An invalid map rect was detected in showEvent - zooming the map to fit all content";
+            zoomFit();
+        }
+
         ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
+    }
 
     QScreen* primary = QGuiApplication::primaryScreen();
     if(!primary)
@@ -3666,6 +3681,11 @@ void BattleFrame::createSceneContents()
     }
 
     _scene->setSceneRect(_scene->itemsBoundingRect());
+    if(!_model->getMapRect().isValid())
+    {
+        qDebug() << "[Battle Frame] ERROR: An invalid map rect was detected in createSceneContents - zooming the map to fit all content";
+        zoomFit();
+    }
     ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
 
     _scene->createBattleContents();

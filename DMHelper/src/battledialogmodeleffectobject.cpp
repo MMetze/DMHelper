@@ -86,11 +86,9 @@ QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
     if(itemPixmap.isNull())
     {
         qDebug() << "[Battle Dialog Model Effect Object] ERROR: unable to load image file: " << _imageFile;
-        //delete pixmapItem;
         return nullptr;
     }
 
-    //QGraphicsPixmapItem* pixmapItem = new QGraphicsPixmapItem(); add effect ref and set position, use UnselectedPixmap
     QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(this);
     setEffectItemData(pixmapItem);
     prepareItem(*pixmapItem);
@@ -196,5 +194,4 @@ void BattleDialogModelEffectObject::internalOutputXML(QDomDocument &doc, QDomEle
 void BattleDialogModelEffectObject::prepareItem(QGraphicsItem& item) const
 {
     BattleDialogModelEffect::prepareItem(item);
-    //item.setZValue(DMHelper::BattleDialog_Z_Camera);
 }

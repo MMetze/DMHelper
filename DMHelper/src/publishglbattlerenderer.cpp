@@ -8,6 +8,7 @@
 #include "publishglimage.h"
 #include "battledialogmodelcombatant.h"
 #include "map.h"
+#include "layer.h"
 #include "character.h"
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>

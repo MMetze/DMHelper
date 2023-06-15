@@ -10,6 +10,9 @@
 #include "audiotrack.h"
 #include "party.h"
 #include "dmhcache.h"
+#include "layerimage.h"
+#include "layervideo.h"
+#include "layerfow.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QUndoStack>
@@ -538,14 +541,30 @@ void Map::setExternalFoWImage(QImage externalImage)
 
 QImage Map::getUnfilteredBackgroundImage()
 {
-    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
-    return layer ? layer->getImageUnfiltered() : QImage();
+    LayerImage* imageLayer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    LayerVideo* videoLayer = dynamic_cast<LayerVideo*>(_layerScene.getFirst(DMHelper::LayerType_Video));
+
+    if(!videoLayer)
+        return imageLayer ? imageLayer->getImageUnfiltered() : QImage();
+
+    if(!imageLayer)
+        return videoLayer ? videoLayer->getScreenshot() : QImage();
+
+    return imageLayer->getOrder() <= videoLayer->getOrder() ? imageLayer->getImageUnfiltered() : videoLayer->getScreenshot();
 }
 
 QImage Map::getBackgroundImage()
 {
-    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
-    return layer ? layer->getImage() : QImage();
+    LayerImage* imageLayer = dynamic_cast<LayerImage*>(_layerScene.getFirst(DMHelper::LayerType_Image));
+    LayerVideo* videoLayer = dynamic_cast<LayerVideo*>(_layerScene.getFirst(DMHelper::LayerType_Video));
+
+    if(!videoLayer)
+        return imageLayer ? imageLayer->getImage() : QImage();
+
+    if(!imageLayer)
+        return videoLayer ? videoLayer->getScreenshot() : QImage();
+
+    return imageLayer->getOrder() <= videoLayer->getOrder() ? imageLayer->getImage() : videoLayer->getScreenshot();
 }
 
 QImage Map::getFoWImage()

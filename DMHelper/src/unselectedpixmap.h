@@ -19,9 +19,7 @@ public:
     BattleDialogModelObject* getObject();
 
 protected:
-//    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
-//    virtual bool sceneEvent(QEvent *event);
 
     void selectionChanged();
 

@@ -135,20 +135,6 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             _layerScene.insertLayer(fowPosition, tokenLayer);
             _layerScene.insertLayer(fowPosition, gridLayer);
         }
-
-        /*
-        _gridOn = static_cast<bool>(element.attribute("showGrid", QString::number(1)).toInt());
-        _gridType = element.attribute("gridType", QString::number(0)).toInt();
-        _gridAngle = element.attribute("gridAngle", QString::number(50)).toInt();
-        _gridOffsetX = element.attribute("gridOffsetX", QString::number(0)).toInt();
-        _gridOffsetY = element.attribute("gridOffsetY", QString::number(0)).toInt();
-        int gridWidth = element.attribute("gridWidth", QString::number(1)).toInt();
-        QColor gridColor = element.attribute("gridColor", QString("#000000"));
-        _gridPen = QPen(QBrush(gridColor), gridWidth);
-        _gridOffsetY = element.attribute("gridOffsetY", QString::number(0)).toInt();
-        */
-
-        //_layerScene.postProcessXML(element, isImport);
     }
 
     // Todo: Layers - include active ID
@@ -346,31 +332,6 @@ void BattleDialogModel::moveCombatant(int fromIndex, int toIndex)
     emit dirty();
 }
 
-/*
-BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
-{
-    BattleDialogModelCombatant* removedCombatant = nullptr;
-    if((index >= 0) && (index < _combatants.count()))
-    {
-        removedCombatant = _combatants.takeAt(index);
-        if(_activeCombatant == removedCombatant)
-            _activeCombatant = nullptr;
-    }
-
-    if((removedCombatant) && (removedCombatant->getCombatantType() == DMHelper::CombatantType_Monster))
-    {
-        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(removedCombatant);
-        if(monster)
-            disconnect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
-    }
-
-    emit combatantListChanged();
-    emit dirty();
-
-    return removedCombatant;
-}
-*/
-
 void BattleDialogModel::removeCombatant(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
@@ -491,31 +452,6 @@ BattleDialogModelEffect* BattleDialogModel::getEffectById(QUuid effectId) const
     return nullptr;
 }
 
-/*
-void BattleDialogModel::insertEffect(int index, BattleDialogModelEffect* effect)
-{
-    if(!effect)
-        return;
-
-    _effects.insert(index, effect);
-    emit effectListChanged();
-    emit dirty();
-}
-*/
-
-/*
-BattleDialogModelEffect* BattleDialogModel::removeEffect(int index)
-{
-    BattleDialogModelEffect* result = nullptr;
-    if((index >= 0) && (index < _effects.count()))
-        result = _effects.takeAt(index);
-
-    emit effectListChanged();
-    emit dirty();
-    return result;
-}
-*/
-
 void BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
 {
     if(!effect)
@@ -589,13 +525,6 @@ const QRect& BattleDialogModel::getMapRect() const
 {
     return _mapRect;
 }
-
-/*
-bool BattleDialogModel::isMapChanged() const
-{
-    return (_map != _previousMap);
-}
-*/
 
 const QRect& BattleDialogModel::getPreviousMapRect() const
 {

@@ -81,6 +81,7 @@
 #include "configurelockedgriddialog.h"
 #include "dmhwaitingdialog.h"
 #include "layerimage.h"
+#include "layerfow.h"
 #include "layervideo.h"
 #include "layergrid.h"
 #include "layertokens.h"

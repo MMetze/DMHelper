@@ -132,6 +132,9 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mouseMoveEvent(QGraphicsScen
     _distanceText->setPos(line.center());
     emit distanceChanged(distanceText);
 
+    _distanceLine->setZValue(100.0);
+    _distanceText->setZValue(100.0);
+
     mouseEvent->accept();
     return false;
 }
@@ -140,13 +143,18 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mousePressEvent(QGraphicsSce
 {
     if(_distanceLine)
         delete _distanceLine;
+
     _distanceLine = _scene.addLine(QLineF(mouseEvent->scenePos(), mouseEvent->scenePos()), QPen(QBrush(_color), _lineWidth, static_cast<Qt::PenStyle>(_lineType)));
+    _distanceLine->setZValue(100.0);
+    _distanceLine->setParentItem(nullptr);
 
     if(_distanceText)
         delete _distanceText;
     _distanceText = _scene.addSimpleText(QString("0"));
     _distanceText->setBrush(QBrush(_color));
     _distanceText->setPos(mouseEvent->scenePos());
+    _distanceText->setZValue(100.0);
+    _distanceText->setParentItem(nullptr);
 
     emit distanceItemChanged(_distanceLine, _distanceText);
 

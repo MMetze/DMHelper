@@ -3,9 +3,8 @@
 
 #include "campaignobjectbase.h"
 #include "mapcontent.h"
+#include "mapcolorizefilter.h"
 #include "layerscene.h"
-#include "layerimage.h"
-#include "layerfow.h"
 #include <QList>
 #include <QImage>
 #include <QPixmap>

@@ -89,9 +89,12 @@ protected:
     // DM Window Methods
     void cleanupDM();
     void createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant);
-    void createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect);
+    QGraphicsItem* createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addSpellEffect(QGraphicsScene* scene, BattleDialogModelEffect* effect);
+    QGraphicsItem* findCombatantItem(BattleDialogModelCombatant* combatant);
+    BattleDialogModelEffect* findEffectKey(BattleDialogModelEffect* effect);
+    QGraphicsItem* findEffectItem(BattleDialogModelEffect* effect);
     QGraphicsItem* findGraphicsItem(BattleDialogModelObject* object);
     qreal getTotalScale(QGraphicsItem& item);
 
@@ -99,6 +102,7 @@ protected:
     void cleanupPlayer();
 
     // DM Window Members
+    qreal getIconOrder(int iconType, qreal order);
 
     // Player Window Members
     PublishGLScene* _glScene;

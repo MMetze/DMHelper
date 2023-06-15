@@ -5,6 +5,7 @@
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
+#include "layervideo.h"
 #include "publishglscene.h"
 #include "campaign.h"
 #include <QRectF>
@@ -41,7 +42,8 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
     while(!layerElement.isNull())
     {
         Layer* newLayer = nullptr;
-        switch(layerElement.attribute(QString("type")).toInt())
+        int layerType = layerElement.attribute(QString("type")).toInt();
+        switch(layerType)
         {
             case DMHelper::LayerType_Image:
                 newLayer = new LayerImage();
@@ -58,7 +60,11 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             case DMHelper::LayerType_Reference:
                 newLayer = new LayerReference();
                 break;
+            case DMHelper::LayerType_Video:
+                newLayer = new LayerVideo();
+                break;
             default:
+                qDebug() << "[LayerScene] ERROR: unable to read layer for unexpected type: " << layerType;
                 break;
         }
 

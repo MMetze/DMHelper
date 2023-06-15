@@ -1,8 +1,14 @@
-* remove selection icon for effects
-* Create spell gives object transparency from base shape
+fixed * Create spell gives object transparency from base shape
+fixed * added effect doesn't then move with the Layer
+fixed * delete effect doesn't work
+* line and description not on the front
+* line and description not publishing
+* grid controls not working
+* need to be able to change layers for effects
 * Effect markers on enemies not visible
 * create/edit/move effect doesn't dirty
-
+* Include "add XYZ..." to right-click context menu
+* undo-redo on drawing fow
 
 Effects
 * optional set of whether effect colors are applied or not

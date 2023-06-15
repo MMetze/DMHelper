@@ -3,6 +3,7 @@
 #include "undofowfill.h"
 #include "undofowshape.h"
 #include "map.h"
+#include "layerfow.h"
 #include <QPixmap>
 #include <QPainter>
 #include <QMessageBox>

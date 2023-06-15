@@ -11,6 +11,7 @@
 #include "mapmarkerdialog.h"
 #include "mapcolorizedialog.h"
 #include "layerseditdialog.h"
+#include "layerfow.h"
 #include "selectzoom.h"
 #include "campaign.h"
 #include "party.h"

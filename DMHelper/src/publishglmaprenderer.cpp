@@ -1,6 +1,7 @@
 #include "publishglmaprenderer.h"
 #include "map.h"
 #include "party.h"
+#include "layer.h"
 #include "undomarker.h"
 #include "mapmarkergraphicsitem.h"
 #include "publishglbattlebackground.h"

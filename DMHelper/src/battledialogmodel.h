@@ -41,7 +41,6 @@ public:
     BattleDialogModelCombatant* getCombatant(int index) const;
     BattleDialogModelCombatant* getCombatantById(QUuid combatantId) const;
     void moveCombatant(int fromIndex, int toIndex);
-    //BattleDialogModelCombatant* removeCombatant(int index);
     void removeCombatant(BattleDialogModelCombatant* combatant);
     void appendCombatant(BattleDialogModelCombatant* combatant);
     void appendCombatantToList(BattleDialogModelCombatant* combatant);
@@ -52,8 +51,6 @@ public:
     int getEffectCount() const;
     BattleDialogModelEffect* getEffect(int index) const;
     BattleDialogModelEffect* getEffectById(QUuid effectId) const;
-    //void insertEffect(int index, BattleDialogModelEffect* effect);
-    //BattleDialogModelEffect* removeEffect(int index);
     void removeEffect(BattleDialogModelEffect* effect);
     void appendEffect(BattleDialogModelEffect* effect);
     void appendEffectToList(BattleDialogModelEffect* effect);
@@ -63,7 +60,6 @@ public:
 
     Map* getMap() const;
     const QRect& getMapRect() const;
-//    bool isMapChanged() const;
     const QRect& getPreviousMapRect() const;
     Map* getPreviousMap() const;
     QRectF getCameraRect() const;
