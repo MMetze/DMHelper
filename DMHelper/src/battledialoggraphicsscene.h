@@ -40,6 +40,9 @@ public:
     QString getSelectedIconFile() const;
     QPointF getCommandPosition() const;
 
+    QGraphicsItem* getDistanceLine() const;
+    QGraphicsSimpleTextItem* getDistanceText() const;
+
     QList<QGraphicsItem*> getEffectItems() const;
 
     bool isSceneEmpty() const;

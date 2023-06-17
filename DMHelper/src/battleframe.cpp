@@ -3150,6 +3150,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setSelectionToken(_scene->getSelectedIconFile());
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
+    renderer->distanceItemChanged(_scene->getDistanceLine(), _scene->getDistanceText());
     // TODO: Layers
     //_fowImage = QPixmap::fromImage(_model->getMap()->getFoWImage());
     //_bwFoWImage = _model->getMap()->getBWFoWImage(_fowImage.size());

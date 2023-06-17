@@ -164,6 +164,16 @@ bool BattleDialogGraphicsSceneMouseHandlerDistance::mouseReleaseEvent(QGraphicsS
     return false;
 }
 
+QGraphicsItem* BattleDialogGraphicsSceneMouseHandlerDistance::getDistanceLine() const
+{
+    return _distanceLine;
+}
+
+QGraphicsSimpleTextItem* BattleDialogGraphicsSceneMouseHandlerDistance::getDistanceText() const
+{
+    return _distanceText;
+}
+
 
 /******************************************************************************************************/
 
@@ -251,6 +261,17 @@ bool BattleDialogGraphicsSceneMouseHandlerFreeDistance::mouseReleaseEvent(QGraph
     mouseEvent->accept();
     return false;
 }
+
+QGraphicsItem* BattleDialogGraphicsSceneMouseHandlerFreeDistance::getDistanceLine() const
+{
+    return _distancePath;
+}
+
+QGraphicsSimpleTextItem* BattleDialogGraphicsSceneMouseHandlerFreeDistance::getDistanceText() const
+{
+    return _distanceText;
+}
+
 
 
 /******************************************************************************************************/

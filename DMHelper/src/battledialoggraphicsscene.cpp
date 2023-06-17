@@ -304,6 +304,24 @@ QPointF BattleDialogGraphicsScene::getCommandPosition() const
     return _commandPosition;
 }
 
+QGraphicsItem* BattleDialogGraphicsScene::getDistanceLine() const
+{
+    QGraphicsItem* result = _distanceMouseHandler.getDistanceLine();
+    if(!result)
+        result = _freeDistanceMouseHandler.getDistanceLine();
+
+    return result;
+}
+
+QGraphicsSimpleTextItem* BattleDialogGraphicsScene::getDistanceText() const
+{
+    QGraphicsSimpleTextItem* result = _distanceMouseHandler.getDistanceText();
+    if(!result)
+        result = _freeDistanceMouseHandler.getDistanceText();
+
+    return result;
+}
+
 QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
 {
     return _itemList;

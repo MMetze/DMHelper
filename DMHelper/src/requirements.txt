@@ -1,8 +1,8 @@
 fixed * Create spell gives object transparency from base shape
 fixed * added effect doesn't then move with the Layer
 fixed * delete effect doesn't work
-* line and description not on the front
-* line and description not publishing
+fixed * line and description not on the front
+fixed * line and description not publishing
 * grid controls not working
 * need to be able to change layers for effects
 * Effect markers on enemies not visible
