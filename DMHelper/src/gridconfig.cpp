@@ -5,7 +5,6 @@
 
 GridConfig::GridConfig(QObject *parent) :
     QObject{parent},
-    _gridOn(true),
     _gridType(Grid::GridType_Square),
     _gridScale(DMHelper::STARTING_GRID_SCALE),
     _gridAngle(50),
@@ -23,7 +22,6 @@ void GridConfig::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    _gridOn = static_cast<bool>(element.attribute("showGrid", QString::number(1)).toInt());
     _gridType = element.attribute("gridType", QString::number(0)).toInt();
     _gridScale = element.attribute("gridScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
     _gridAngle = element.attribute("gridAngle", QString::number(50)).toInt();
@@ -41,7 +39,6 @@ void GridConfig::outputXML(QDomDocument &doc, QDomElement &parentElement, bool i
 
     QDomElement gridElement = doc.createElement("grid");
 
-    gridElement.setAttribute("showGrid", _gridOn);
     gridElement.setAttribute("gridType", _gridType);
     gridElement.setAttribute("gridScale", _gridScale);
     gridElement.setAttribute("gridAngle", _gridAngle);
@@ -55,18 +52,12 @@ void GridConfig::outputXML(QDomDocument &doc, QDomElement &parentElement, bool i
 
 void GridConfig::copyValues(const GridConfig& other)
 {
-    _gridOn = other._gridOn;
     _gridType = other._gridType;
     _gridScale = other._gridScale;
     _gridAngle = other._gridAngle;
     _gridOffsetX = other._gridOffsetX;
     _gridOffsetY = other._gridOffsetY;
     _gridPen = other._gridPen;
-}
-
-bool GridConfig::getGridOn() const
-{
-    return _gridOn;
 }
 
 int GridConfig::getGridType() const
@@ -97,16 +88,6 @@ int GridConfig::getGridOffsetY() const
 const QPen& GridConfig::getGridPen() const
 {
     return _gridPen;
-}
-
-void GridConfig::setGridOn(bool gridOn)
-{
-    if(_gridOn != gridOn)
-    {
-        _gridOn = gridOn;
-        emit gridOnChanged(_gridOn);
-        emit dirty();
-    }
 }
 
 void GridConfig::setGridType(int gridType)

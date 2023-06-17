@@ -30,9 +30,9 @@
 BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     CameraScene(parent),
     _contextMenuItem(nullptr),
-    _grid(nullptr),
+//    _grid(nullptr),
     _model(nullptr),
-    _itemList(),
+//    _itemList(),
     _mouseDown(false),
     _mouseDownPos(),
     _mouseDownItem(nullptr),
@@ -92,11 +92,13 @@ void BattleDialogGraphicsScene::createBattleContents()
         return;
     }
 
+    /*
     if(!isSceneEmpty())
     {
         qDebug() << "[Battle Dialog Scene] ERROR: unable to create scene contents. Contents already exist!";
         return;
     }
+    */
 
     qDebug() << "[Battle Dialog Scene] Creating scene contents";
     //_grid = new Grid(*this, rect);
@@ -132,6 +134,7 @@ void BattleDialogGraphicsScene::createBattleContents()
     }
 }
 
+/*
 void BattleDialogGraphicsScene::resizeBattleContents()
 {
     qDebug() << "[Battle Dialog Scene] Resizing scene contents";
@@ -144,7 +147,6 @@ void BattleDialogGraphicsScene::resizeBattleContents()
 
     if(_grid)
     {
-        // TODO: Layers Grid
         //qDebug() << "[Battle Dialog Scene]     Resizing grid, grid shape = " << rect;
         //_grid->setGridShape(rect);
         //_grid->rebuildGrid(*_model);
@@ -163,7 +165,8 @@ void BattleDialogGraphicsScene::resizeBattleContents()
         }
     }
 }
-
+    */
+/*
 void BattleDialogGraphicsScene::updateBattleContents()
 {
     qDebug() << "[Battle Dialog Scene] Updating scene contents";
@@ -174,14 +177,11 @@ void BattleDialogGraphicsScene::updateBattleContents()
         return;
     }
 
-    /*
     if(_grid)
     {
         qDebug() << "[Battle Dialog Scene]     Rebuilding grid, grid scale = " << _model->getGridScale();
-        // TODO: Layers Grid
         //_grid->rebuildGrid(*_model);
     }
-    */
 
     for(QGraphicsItem* item : qAsConst(_itemList))
     {
@@ -199,6 +199,7 @@ void BattleDialogGraphicsScene::updateBattleContents()
         }
     }
 }
+    */
 
 void BattleDialogGraphicsScene::scaleBattleContents()
 {
@@ -215,6 +216,7 @@ void BattleDialogGraphicsScene::scaleBattleContents()
 
 void BattleDialogGraphicsScene::clearBattleContents()
 {
+    /*
     qDebug() << "[Battle Dialog Scene] Clearing battle contents.";
     if(_grid)
     {
@@ -225,10 +227,12 @@ void BattleDialogGraphicsScene::clearBattleContents()
 
     qDeleteAll(_itemList);
     _itemList.clear();
+    */
 
     delete _pointerPixmapItem; _pointerPixmapItem = nullptr;
 }
 
+/*
 void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffects)
 {
     bool newVisible = visible;
@@ -245,7 +249,9 @@ void BattleDialogGraphicsScene::setEffectVisibility(bool visible, bool allEffect
         }
     }
 }
+*/
 
+/*
 void BattleDialogGraphicsScene::setGridVisibility(bool visible)
 {
     if(_grid)
@@ -260,6 +266,7 @@ void BattleDialogGraphicsScene::paintGrid(QPainter* painter)
     // TODO: Layers Grid
     //_grid->rebuildGrid(*_model, painter);
 }
+*/
 
 void BattleDialogGraphicsScene::setPointerVisibility(bool visible)
 {
@@ -322,6 +329,7 @@ QGraphicsSimpleTextItem* BattleDialogGraphicsScene::getDistanceText() const
     return result;
 }
 
+/*
 QList<QGraphicsItem*> BattleDialogGraphicsScene::getEffectItems() const
 {
     return _itemList;
@@ -331,6 +339,7 @@ bool BattleDialogGraphicsScene::isSceneEmpty() const
 {
     return((_grid == nullptr) && (_itemList.count() == 0));
 }
+*/
 
 QGraphicsItem* BattleDialogGraphicsScene::findTopObject(const QPointF &pos)
 {
@@ -1043,7 +1052,7 @@ void BattleDialogGraphicsScene::deleteItem()
     if(result == QMessageBox::Yes)
     {
         qDebug() << "[Battle Dialog Scene] confirmed deleting effect " << deleteEffect;
-        _itemList.removeOne(_contextMenuItem);
+//        _itemList.removeOne(_contextMenuItem);
         if(_mouseDownItem == _contextMenuItem)
         {
             _mouseDown = false;

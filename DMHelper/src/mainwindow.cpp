@@ -527,7 +527,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // TODO: Layers - do we still do this?
     //connect(_ribbonTabBattleMap, SIGNAL(newMapClicked()), _battleFrame, SLOT(selectBattleMap()));
     connect(_ribbonTabBattleMap, SIGNAL(reloadMapClicked()), _battleFrame, SLOT(reloadMap()));
-    connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
+    //connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
     connect(_battleFrame, &BattleFrame::gridScaleChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridScale);
@@ -2730,17 +2730,18 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
         connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
-        // TODO: Layers
-        /*
-        _ribbonTabBattleMap->setGridOn(model->getGridOn());
-        _ribbonTabBattleMap->setGridType(model->getGridType());
-        _ribbonTabBattleMap->setGridScale(model->getGridScale());
-        _ribbonTabBattleMap->setGridAngle(model->getGridAngle());
-        _ribbonTabBattleMap->setGridXOffset(model->getGridOffsetX());
-        _ribbonTabBattleMap->setGridYOffset(model->getGridOffsetY());
-        _ribbonTabBattleMap->setGridWidth(model->getGridPen().width());
-        _ribbonTabBattleMap->setGridColor(model->getGridPen().color());
-        */
+        LayerGrid* layer = dynamic_cast<LayerGrid*>(model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+        if(layer)
+        {
+            //_ribbonTabBattleMap->setGridOn(model->getGridOn());
+            _ribbonTabBattleMap->setGridType(layer->getConfig().getGridType());
+            _ribbonTabBattleMap->setGridScale(layer->getConfig().getGridScale());
+            _ribbonTabBattleMap->setGridAngle(layer->getConfig().getGridAngle());
+            _ribbonTabBattleMap->setGridXOffset(layer->getConfig().getGridOffsetX());
+            _ribbonTabBattleMap->setGridYOffset(layer->getConfig().getGridOffsetY());
+            _ribbonTabBattleMap->setGridWidth(layer->getConfig().getGridPen().width());
+            _ribbonTabBattleMap->setGridColor(layer->getConfig().getGridPen().color());
+        }
     }
 }
 

@@ -24,13 +24,13 @@ public:
     BattleDialogModel* getModel() const;
 
     void createBattleContents();
-    void resizeBattleContents();
-    void updateBattleContents();
+//    void resizeBattleContents();
+//    void updateBattleContents();
     void scaleBattleContents();
     void clearBattleContents();
-    void setEffectVisibility(bool visible, bool allEffects = true);
-    void setGridVisibility(bool visible);
-    void paintGrid(QPainter* painter);
+//    void setEffectVisibility(bool visible, bool allEffects = true);
+//    void setGridVisibility(bool visible);
+//    void paintGrid(QPainter* painter);
 
     void setPointerVisibility(bool visible);
     void setPointerPos(const QPointF& pos);
@@ -43,9 +43,9 @@ public:
     QGraphicsItem* getDistanceLine() const;
     QGraphicsSimpleTextItem* getDistanceText() const;
 
-    QList<QGraphicsItem*> getEffectItems() const;
+//    QList<QGraphicsItem*> getEffectItems() const;
 
-    bool isSceneEmpty() const;
+//    bool isSceneEmpty() const;
 
     QGraphicsItem* findTopObject(const QPointF &pos);
 
@@ -137,9 +137,9 @@ protected:
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
 
     QGraphicsItem* _contextMenuItem;
-    Grid* _grid;
+//    Grid* _grid;
     BattleDialogModel* _model;
-    QList<QGraphicsItem*> _itemList;
+//    QList<QGraphicsItem*> _itemList;
 
     bool _mouseDown;
     QPointF _mouseDownPos;

@@ -113,8 +113,8 @@ void Grid::rebuildGrid(GridConfig& config, int zOrder, Grid_LineInterface* grid)
         grid = this;
     }
 
-    if(config.getGridOn() == false)
-        return;
+//    if(config.getGridOn() == false)
+//        return;
 
     switch(config.getGridType())
     {

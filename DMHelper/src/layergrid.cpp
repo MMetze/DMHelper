@@ -14,6 +14,7 @@ LayerGrid::LayerGrid(const QString& name, int order, QObject *parent) :
     _config() //,
 //    _layerSize()
 {
+    connect(&_config, &GridConfig::dirty, this, &LayerGrid::triggerRebuild);
 }
 
 LayerGrid::~LayerGrid()
@@ -97,7 +98,7 @@ void LayerGrid::applySize(const QSize& size)
     if(_grid)
     {
         _grid->setGridSize(size);
-        _grid->rebuildGrid(_config, getOrder());
+        triggerRebuild();
     }
 
     if(_gridGLObject)
@@ -231,19 +232,26 @@ void LayerGrid::uninitialize()
 void LayerGrid::setScale(int scale)
 {
     _config.setGridScale(scale);
-    if(_grid)
-        _grid->rebuildGrid(_config, getOrder());
+    triggerRebuild();
 }
 
 void LayerGrid::setConfig(const GridConfig& config)
 {
     _config.copyValues(config);
 
-    if(_grid)
-        _grid->rebuildGrid(_config, getOrder());
+    triggerRebuild();
 
     if(_gridGLObject)
         _gridGLObject->setConfig(_config);
+}
+
+void LayerGrid::triggerRebuild()
+{
+    if(!_grid)
+        return;
+
+    _grid->rebuildGrid(_config, getOrder());
+    emit dirty();
 }
 
 void LayerGrid::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)

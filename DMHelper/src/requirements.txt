@@ -3,12 +3,19 @@ fixed * added effect doesn't then move with the Layer
 fixed * delete effect doesn't work
 fixed * line and description not on the front
 fixed * line and description not publishing
-* grid controls not working
+fixed * grid controls not working
+* burning hands effect doesn't resize with grid size
+* Grid type should no be a button, not clickable
 * need to be able to change layers for effects
 * Effect markers on enemies not visible
 * create/edit/move effect doesn't dirty
 * Include "add XYZ..." to right-click context menu
 * undo-redo on drawing fow
+* Party icon on map not scaled right
+* Effect overlay of individual combatants
+* Check set visibilities for different token types
+* Make sure combatants disappear at zero HP, also when applying an effect
+* backwards compatibility - add a grid layer only if "showGrid==1" or true
 
 Effects
 * optional set of whether effect colors are applied or not

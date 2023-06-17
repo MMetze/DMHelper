@@ -55,6 +55,9 @@ public slots:
 
     void setConfig(const GridConfig& config);
 
+protected slots:
+    void triggerRebuild();
+
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;

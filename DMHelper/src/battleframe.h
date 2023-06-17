@@ -104,7 +104,7 @@ public slots:
     void setYOffset(int yOffset);
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
-    void setGridVisible(bool gridVisible);
+    //void setGridVisible(bool gridVisible);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
 
@@ -218,7 +218,7 @@ protected:
 
 private slots:
     void updateCombatantVisibility();
-    void updateEffectLayerVisibility();
+//    void updateEffectLayerVisibility();
     void updateMap();
     void updateRounds();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
@@ -274,7 +274,7 @@ private slots:
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
     void setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded);
-    void setEffectLayerVisibility(bool visibility);
+    //void setEffectLayerVisibility(bool visibility);
 
     void setMapCursor();
     void setCameraSelectable(bool selectable);
