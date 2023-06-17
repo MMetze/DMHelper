@@ -1482,6 +1482,7 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         _distanceLine->setPen(QPen(QBrush(_mapSource->getDistanceLineColor()),
                                    _mapSource->getDistanceLineWidth(),
                                    static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
+        _distanceLine->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
 
         _distanceText = _scene->addSimpleText(QString("0"));
         _distanceText->setBrush(QBrush(_mapSource->getDistanceLineColor()));
@@ -1489,6 +1490,7 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
         _distanceText->setFont(textFont);
         _distanceText->setPos(scenePos);
+        _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
 
         _mapItem = new MapDrawLine(QLine(scenePos.toPoint(), scenePos.toPoint()),
                                 false, true,
@@ -1523,9 +1525,6 @@ bool MapFrame::execEventFilterEditModeDistance(QObject *obj, QEvent *event)
         if(mapLine)
             mapLine->setP2(scenePos.toPoint());
 
-        #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
-            qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
-        #endif
         emit distanceChanged(distanceText);
         mouseEvent->accept();
     }
@@ -1557,6 +1556,7 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         textFont.setPointSize(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0] / 20);
         _distanceText->setFont(textFont);
         _distanceText->setPos(ui->graphicsView->mapToScene(mouseEvent->pos() + QPoint(5, 5)));
+        _distanceText->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
 
         _mapItem = new MapDrawPath(1, DMHelper::BrushType_Circle,
                                    false, true,
@@ -1584,8 +1584,6 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
             currentPath = _distancePath->path();
             currentPath.lineTo(scenePos);
             _distancePath->setPath(currentPath);
-            qDebug() << "[MapFrame] Move adding path lineto: " << scenePos;
-
         }
         else
         {
@@ -1594,7 +1592,7 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
             _distancePath = _scene->addPath(currentPath, QPen(QBrush(_mapSource->getDistanceLineColor()),
                                                               _mapSource->getDistanceLineWidth(),
                                                               static_cast<Qt::PenStyle>(_mapSource->getDistanceLineType())));
-            qDebug() << "[MapFrame] Move creating path at position: " << scenePos;
+            _distancePath->setZValue(DMHelper::BattleDialog_Z_FrontHighlight);
         }
         qreal lineDistance = _distancePath->path().length() * _mapSource->getMapScale() / 1000.0;
         QString distanceText;
@@ -1605,10 +1603,6 @@ bool MapFrame::execEventFilterEditModeFreeDistance(QObject *obj, QEvent *event)
         MapDrawPath* mapPath = dynamic_cast<MapDrawPath*>(_mapItem);
         if(mapPath)
             mapPath->addPoint(scenePos.toPoint());
-
-        #ifdef BATTLE_DIALOG_GRAPHICS_SCENE_LOG_MOUSEMOVE
-            qDebug() << "[Battle Dialog Scene] line set to " << line << ", text to " << _distanceText->text();
-        #endif
 
         emit distanceChanged(distanceText);
         mouseEvent->accept();
