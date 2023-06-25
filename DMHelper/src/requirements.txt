@@ -4,9 +4,9 @@ fixed * delete effect doesn't work
 fixed * line and description not on the front
 fixed * line and description not publishing
 fixed * grid controls not working
-* burning hands effect doesn't resize with grid size
-* Grid type should no be a button, not clickable
-* need to be able to change layers for effects
+fixed * burning hands effect doesn't resize with grid size
+fixed * Grid type should no be a button, not clickable
+fixed * need to be able to change layers for effects
 * Effect markers on enemies not visible
 * create/edit/move effect doesn't dirty
 * Include "add XYZ..." to right-click context menu
@@ -16,6 +16,11 @@ fixed * grid controls not working
 * Check set visibilities for different token types
 * Make sure combatants disappear at zero HP, also when applying an effect
 * backwards compatibility - add a grid layer only if "showGrid==1" or true
+1) The function that allows you to assign different tokens to the same monster works fine.
+2) As far as layer functions are concerned, the grid is not visible in any way. Also, sometimes adding elements (text, video, images) via the layer edit window crashes the program. Unfortunately, I have not been able to recognize a pattern in this behavior that would allow me to speculate what the step might be that causes the program to crash.
+3) Finally, a problem regarding combats. When creating a combat by assigning a map it is not visible in any way in the master window. You can see the map in the players window (however without a grid). Adding a monster shifts the view of the map in the players window by centering the view on the monster.
+* Make grid button a flat pushbutton that opens its own popup menu
+* Make the tooltip for a combatant or effect mention their layer
 
 Effects
 * optional set of whether effect colors are applied or not

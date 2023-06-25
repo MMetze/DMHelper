@@ -194,6 +194,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
     connect(_scene, SIGNAL(effectRemoved(QGraphicsItem*)), this, SLOT(handleEffectRemoved(QGraphicsItem*)));
+    connect(_scene, &BattleDialogGraphicsScene::effectChangeLayer, this, &BattleFrame::handleEffectChangeLayer);
     connect(_scene, SIGNAL(applyEffect(QGraphicsItem*)), this, SLOT(handleApplyEffect(QGraphicsItem*)));
     connect(_scene, SIGNAL(distanceChanged(const QString&)), this, SIGNAL(distanceChanged(const QString&)));
     connect(_scene, SIGNAL(combatantHover(BattleDialogModelCombatant*, bool)), this, SLOT(handleCombatantHover(BattleDialogModelCombatant*, bool)));
@@ -2093,6 +2094,48 @@ void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
         // OPTIMIZE: Optimize to only remove effects if not still relevant
         if(item)
             removeEffectsFromItem(item);
+    }
+}
+
+void BattleFrame::handleEffectChangeLayer(BattleDialogModelEffect* effect)
+{
+    if((!effect) || (!_model))
+        return;
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    if(tokenLayers.count() <= 1)
+        return;
+
+    int currentLayerIndex = 0;
+    LayerTokens* currentLayer = nullptr;
+    QStringList tokenLayerNames;
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        tokenLayerNames << (tokenLayer ? tokenLayer->getName() : QString(""));
+        if((tokenLayer) && (tokenLayer->containsEffect(effect)))
+        {
+            currentLayerIndex = i;
+            currentLayer = tokenLayer;
+        }
+    }
+
+    if(!currentLayer)
+        return;
+
+    SelectItemDialog dlg(tokenLayerNames);
+    dlg.setSelectedItem(currentLayerIndex);
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        if(dlg.getSelectedItem() == currentLayerIndex)
+            return;
+
+        LayerTokens* newLayer= dynamic_cast<LayerTokens*>(tokenLayers.at(dlg.getSelectedItem()));
+        if(!newLayer)
+            return;
+
+        currentLayer->removeEffect(effect);
+        newLayer->addEffect(effect);
     }
 }
 

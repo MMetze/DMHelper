@@ -482,13 +482,14 @@ void LayerTokens::setScale(int scale)
     // Trigger each effect to be rescaled
     foreach(BattleDialogModelEffect* effect, _effects)
     {
-        if(effect)
+        BattleDialogModelEffect* effectKey = findEffectKey(effect);
+        if(effectKey)
         {
-            PublishGLBattleEffect* effectToken = _effectTokenHash.value(effect);
+            PublishGLBattleEffect* effectToken = _effectTokenHash.value(effectKey);
             if(effectToken)
                 effectToken->effectMoved();
 
-            effectChanged(effect);
+            effectChanged(effectKey);
         }
     }
 }

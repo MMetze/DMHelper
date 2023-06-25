@@ -619,6 +619,13 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                     }
                 }
 
+                if((_model) && (_model->getLayerScene().layerCount(DMHelper::LayerType_Tokens) > 1))
+                {
+                    QAction* shiftItem = new QAction(QString("Change Layer..."), &menu);
+                    connect(shiftItem, SIGNAL(triggered()), this, SLOT(changeEffectLayer()));
+                    menu.addAction(shiftItem);
+                }
+
                 menu.addSeparator();
 
                 QAction* edtItem = new QAction(QString("Edit Effect..."), &menu);
@@ -1142,6 +1149,13 @@ void BattleDialogGraphicsScene::healCombatant()
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(pixmap->getObject());
     if(combatant)
         emit combatantHeal(combatant);
+}
+
+void BattleDialogGraphicsScene::changeEffectLayer()
+{
+    BattleDialogModelEffect* effect = dynamic_cast<BattleDialogModelEffect*>(getFinalObjectFromItem(_contextMenuItem));
+    if(effect)
+        emit effectChangeLayer(effect);
 }
 
 void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)

@@ -76,6 +76,7 @@ signals:
 
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);
+    void effectChangeLayer(BattleDialogModelEffect* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
@@ -121,6 +122,8 @@ protected slots:
     void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+
+    void changeEffectLayer();
 
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);

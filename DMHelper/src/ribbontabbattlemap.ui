@@ -214,14 +214,11 @@
          <height>40</height>
         </size>
        </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
        <property name="checked">
         <bool>false</bool>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::MenuButtonPopup</enum>
+        <enum>QToolButton::InstantPopup</enum>
        </property>
       </widget>
      </item>
