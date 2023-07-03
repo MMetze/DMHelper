@@ -5,6 +5,18 @@
 
 class BattleDialogModelObject;
 
+const int BATTLE_CONTENT_CHILD_INDEX = 0;
+const int BATTLE_CONTENT_CHILD_ID = 1;
+
+enum BattleDialogItemChild
+{
+    BattleDialogItemChild_Base = 0,
+    BattleDialogItemChild_Selection,
+    BattleDialogItemChild_AreaEffect,
+    BattleDialogItemChild_Area,
+    BattleDialogItemChild_PersonalEffect
+};
+
 class UnselectedPixmap : public QGraphicsPixmapItem
 {
 public:

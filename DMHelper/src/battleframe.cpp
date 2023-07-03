@@ -2059,6 +2059,7 @@ void BattleFrame::editLayers()
 
 void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
 {
+    /*
 #ifdef BATTLE_DIALOG_LOG_MOVEMENT
     qDebug() << "[Battle Frame] Handle effect changed for " << effectItem;
 #endif
@@ -2072,29 +2073,42 @@ void BattleFrame::handleEffectChanged(QGraphicsItem* effectItem)
         return;
     }
 
-    for(QGraphicsPixmapItem* item : _combatantIcons.values())
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    for(int i = 0; i < tokenLayers.count(); ++i)
     {
-        if(item)
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        if(tokenLayer)
         {
-            // OPTIMIZE: Optimize to only remove effects if not still relevant
-            removeEffectsFromItem(item);
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
+                if(item)
+                {
+                    // TODO: Optimize to only remove effects if not still relevant
+                    removeEffectsFromItem(item);
 
-            if(isItemInEffect(item, effectItem))
-                applyEffectToItem(item, effect);
+                    if(isItemInEffect(item, effectItem))
+                        applyEffectToItem(item, effect);
+                }
+            }
         }
     }
+    */
 }
 
 void BattleFrame::handleEffectRemoved(QGraphicsItem* effectItem)
 {
     Q_UNUSED(effectItem);
 
+    /*
     for(QGraphicsPixmapItem* item : _combatantIcons.values())
     {
-        // OPTIMIZE: Optimize to only remove effects if not still relevant
+        // TODO: Optimize to only remove effects if not still relevant
         if(item)
             removeEffectsFromItem(item);
     }
+    */
 }
 
 void BattleFrame::handleEffectChangeLayer(BattleDialogModelEffect* effect)
@@ -3481,8 +3495,8 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
 void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
 {
-    return;
 
+    /*
     if(!_model)
     {
         qDebug() << "[Battle Frame] ERROR: Not possible to create combatant icon, no battle model is set!";
@@ -3536,6 +3550,7 @@ void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)
         connect(combatant, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
         connect(combatant, SIGNAL(combatantSelected(BattleDialogModelCombatant*)), this, SLOT(handleCombatantSelected(BattleDialogModelCombatant*)));
     }
+    */
 }
 
 void BattleFrame::relocateCombatantIcon(QGraphicsPixmapItem* icon)
@@ -4047,7 +4062,7 @@ bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effec
     {
         for(QGraphicsItem* childItem : item->childItems())
         {
-            if((childItem) && (childItem->data(BattleDialogItemChild_Index).toInt() == BattleDialogItemChild_Area))
+            if((childItem) && (childItem->data(BATTLE_CONTENT_CHILD_INDEX).toInt() == BattleDialogItemChild_Area))
                 return childItem->collidesWithItem(collisionEffect);
         }
     }
@@ -4055,6 +4070,7 @@ bool BattleFrame::isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effec
     return item->collidesWithItem(collisionEffect);
 }
 
+/*
 void BattleFrame::removeEffectsFromItem(QGraphicsPixmapItem* item)
 {
     if(!item)
@@ -4077,13 +4093,19 @@ void BattleFrame::removeEffectsFromItem(QGraphicsPixmapItem* item)
         }
     }
 }
+*/
 
+/*
 void BattleFrame::applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect)
 {
     if((!item) || (!effect))
         return;
 
-    QColor ellipseColor = effect->getColor();
+    BattleDialogModelEffect* finalEffect = BattleDialogModelEffect::getFinalEffect(effect);
+    if(!finalEffect)
+        return;
+
+    QColor ellipseColor = finalEffect->getColor();
     if(!ellipseColor.isValid())
         return;
 
@@ -4104,6 +4126,7 @@ void BattleFrame::applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModel
     qDebug() << "[Battle Frame] applying effects to item. Item: " << item << ", effect: " << effect << " with effect item " << effectItem;
 #endif
 }
+*/
 
 void BattleFrame::applyPersonalEffectToItem(QGraphicsPixmapItem* item)
 {

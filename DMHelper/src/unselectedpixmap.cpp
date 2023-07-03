@@ -107,14 +107,14 @@ void UnselectedPixmap::selectionChanged()
         QSizeF pixmapSize = selectedPixmap->boundingRect().size();
         selectedPixmap->setPos(-pixmapSize.width() / 2.0, -pixmapSize.height() / 2.0);
 
-        selectedPixmap->setData(BattleDialogItemChild_Index, BattleFrame::BattleDialogItemChild_Selection);
+        selectedPixmap->setData(BATTLE_CONTENT_CHILD_INDEX, BattleDialogItemChild_Selection);
         selectedPixmap->setParentItem(this);
     }
     else
     {
         for(QGraphicsItem* childItem : childItems())
         {
-            if((childItem) && (childItem->data(BattleDialogItemChild_Index).toInt() == BattleFrame::BattleDialogItemChild_Selection))
+            if((childItem) && (childItem->data(BATTLE_CONTENT_CHILD_INDEX).toInt() == BattleDialogItemChild_Selection))
             {
                 childItem->setParentItem(nullptr);
                 delete childItem;

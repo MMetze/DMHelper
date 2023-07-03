@@ -8,9 +8,9 @@ fixed * burning hands effect doesn't resize with grid size
 fixed * Grid type should no be a button, not clickable
 fixed * need to be able to change layers for effects
 * Effect markers on enemies not visible
-* create/edit/move effect doesn't dirty
+* Create/edit/move effect doesn't dirty
 * Include "add XYZ..." to right-click context menu
-* undo-redo on drawing fow
+* Undo-redo on drawing fow
 * Party icon on map not scaled right
 * Effect overlay of individual combatants
 * Check set visibilities for different token types

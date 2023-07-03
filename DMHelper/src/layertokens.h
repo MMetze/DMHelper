@@ -79,6 +79,7 @@ signals:
 protected slots:
     // Local Interface
     void effectChanged(BattleDialogModelEffect* effect);
+    void effectMoved(BattleDialogModelObject* object);
     void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
     void linkedObjectMoved(BattleDialogModelObject* object);
 
@@ -97,6 +98,11 @@ protected:
     QGraphicsItem* findEffectItem(BattleDialogModelEffect* effect);
     QGraphicsItem* findGraphicsItem(BattleDialogModelObject* object);
     qreal getTotalScale(QGraphicsItem& item);
+    bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
+    bool isItemInEffectArea(QGraphicsPixmapItem* item, QGraphicsItem* collisionEffect);
+    void removeAllEffectsFromItem(QGraphicsPixmapItem* item);
+    void removeSpecificEffectFromItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
+    void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
 
     // Player Window Methods
     void cleanupPlayer();

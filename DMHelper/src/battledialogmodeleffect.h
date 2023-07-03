@@ -89,6 +89,7 @@ public:
     void setEffectItemData(QGraphicsItem* item) const;
     static QUuid getEffectIdFromItem(QGraphicsItem* item);
     static BattleDialogModelEffect* getEffectFromItem(QGraphicsItem* item);
+    static BattleDialogModelEffect* getFinalEffect(BattleDialogModelEffect* effect);
     static bool getEffectActiveFromItem(QGraphicsItem* item);
     static bool getEffectVisibleFromItem(QGraphicsItem* item);
 

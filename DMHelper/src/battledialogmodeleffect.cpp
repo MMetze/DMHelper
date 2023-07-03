@@ -265,6 +265,15 @@ BattleDialogModelEffect* BattleDialogModelEffect::getEffectFromItem(QGraphicsIte
     return reinterpret_cast<BattleDialogModelEffect*>(item->data(BATTLE_DIALOG_MODEL_EFFECT_OBJECT).value<quint64>());
 }
 
+BattleDialogModelEffect* BattleDialogModelEffect::getFinalEffect(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return nullptr;
+
+    BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
+    return parentEffect ? parentEffect : effect;
+}
+
 bool BattleDialogModelEffect::getEffectActiveFromItem(QGraphicsItem* item)
 {
     BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);

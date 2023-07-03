@@ -675,6 +675,7 @@ void PublishGLBattleRenderer::createContents()
     movementPainter.end();
     _movementToken = new PublishGLImage(movementImage);
 
+    /*
     for(int i = 0; i < _model->getEffectCount(); ++i)
     {
         BattleDialogModelEffect* effect = _model->getEffect(i);
@@ -685,6 +686,7 @@ void PublishGLBattleRenderer::createContents()
             connect(effectToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
         }
     }
+    */
 
     // Check if we need a pointer
     evaluatePointer();

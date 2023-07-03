@@ -32,8 +32,8 @@ class BattleFrame;
 
 //#define DEBUG_FILL_BOUNDING_RECTS
 
-const int BattleDialogItemChild_Index = 0;
-const int BattleDialogItemChild_EffectId = 0;
+//const int BattleDialogItemChild_Index = 0;
+//const int BattleDialogItemChild_EffectId = 0;
 
 class BattleFrame : public CampaignObjectFrame
 {
@@ -66,15 +66,6 @@ public:
     QPoint viewportCenter();
 
     BattleFrameMapDrawer* getMapDrawer() const;
-
-    enum BattleDialogItemChild
-    {
-        BattleDialogItemChild_Base = 0,
-        BattleDialogItemChild_Selection,
-        BattleDialogItemChild_AreaEffect,
-        BattleDialogItemChild_Area,
-        BattleDialogItemChild_PersonalEffect
-    };
 
     enum BattleFrameMode
     {
@@ -345,8 +336,8 @@ private:
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
-    void removeEffectsFromItem(QGraphicsPixmapItem* item);
-    void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
+//    void removeEffectsFromItem(QGraphicsPixmapItem* item);
+//    void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
     void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);

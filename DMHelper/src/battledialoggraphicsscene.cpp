@@ -1304,8 +1304,7 @@ BattleDialogModelObject* BattleDialogGraphicsScene::getFinalObjectFromItem(QGrap
     BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(item);
     if(effect)
     {
-        BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
-        return parentEffect ? parentEffect : effect;
+        return BattleDialogModelEffect::getFinalEffect(effect);
     }
     else
     {
