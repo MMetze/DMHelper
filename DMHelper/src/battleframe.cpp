@@ -1889,6 +1889,15 @@ void BattleFrame::updateMap()
 
         qDebug() << "[Battle Frame] Initializing battle map image";
         _model->getLayerScene().dmInitialize(_scene);
+        // Update all effect highlights
+        QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+        for(int i = 0; i < tokenLayers.count(); ++i)
+        {
+            LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+            if(tokenLayer)
+                tokenLayer->refreshEffects();
+        }
+
         // TODO: Layers
         //if(_model->getBackgroundImage().isNull())
         //    _model->setBackgroundImage(_model->getMap()->getBackgroundImage());

@@ -513,6 +513,7 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     _model->appendCombatantToList(combatant);
     connect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
     connect(combatant, &BattleDialogModelCombatant::dirty, this, &LayerTokens::dirty);
+    connect(combatant, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::combatantMoved);
     connect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
 
     if((getLayerScene()) && (getLayerScene()->getDMScene()))
@@ -525,6 +526,8 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
         return;
 
     disconnect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
+    disconnect(combatant, &BattleDialogModelCombatant::dirty, this, &LayerTokens::dirty);
+    disconnect(combatant, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::combatantMoved);
     disconnect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
     if(!_combatants.removeOne(combatant))
         return;
@@ -608,6 +611,22 @@ void LayerTokens::removeEffect(BattleDialogModelEffect* effect)
     _model->removeEffectFromList(effect);
     emit objectRemoved(effect);
 
+    QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        if(tokenLayer)
+        {
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                QGraphicsPixmapItem* combatantItem = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
+                if(combatantItem)
+                    removeSpecificEffectFromItem(combatantItem, effect);
+            }
+        }
+    }
+
     BattleDialogModelEffect* effectKey = findEffectKey(effect);
     if(!effectKey)
         return;
@@ -637,6 +656,58 @@ bool LayerTokens::containsEffect(BattleDialogModelEffect* effect)
 QGraphicsItem* LayerTokens::getEffectItem(BattleDialogModelEffect* effect)
 {
     return findEffectItem(effect);
+}
+
+void LayerTokens::refreshEffects()
+{
+    foreach(BattleDialogModelEffect* effect, _effects)
+    {
+        effectMoved(effect);
+    }
+}
+
+void LayerTokens::combatantMoved(BattleDialogModelObject* object)
+{
+    if(!_layerScene)
+        return;
+
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
+    if(!combatant)
+        return;
+
+    QGraphicsPixmapItem* combatantItem = _combatantIconHash.value(combatant);
+    if(!combatantItem)
+        return;
+
+    QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        if(tokenLayer)
+        {
+            QList<BattleDialogModelEffect*> effects = tokenLayer->getEffects();
+            foreach(BattleDialogModelEffect* effect, effects)
+            {
+                QGraphicsItem* effectItem = dynamic_cast<QGraphicsItem*>(tokenLayer->getEffectItem(effect));
+                if(effectItem)
+                {
+                    QGraphicsItem* collisionEffect = effectItem;
+                    foreach(QGraphicsItem* childEffect, effectItem->childItems())
+                    {
+                        if((childEffect) && (childEffect->data(BATTLE_DIALOG_MODEL_EFFECT_ROLE).toInt() == BattleDialogModelEffect::BattleDialogModelEffectRole_Area))
+                            collisionEffect = childEffect;
+                    }
+
+                    bool collision = isItemInEffectArea(combatantItem, collisionEffect);
+                    if(!collision)
+                        removeSpecificEffectFromItem(combatantItem, effect);
+                    else
+                        applyEffectToItem(combatantItem, effect);
+                }
+            }
+        }
+    }
+
 }
 
 void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
@@ -681,19 +752,18 @@ void LayerTokens::effectMoved(BattleDialogModelObject* object)
             QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
             foreach(BattleDialogModelCombatant* combatant, combatants)
             {
-                QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
-                if(item)
+                QGraphicsPixmapItem* combatantItem = dynamic_cast<QGraphicsPixmapItem*>(tokenLayer->getCombatantItem(combatant));
+                if(combatantItem)
                 {
-                    bool collision = isItemInEffectArea(item, collisionEffect);
+                    bool collision = isItemInEffectArea(combatantItem, collisionEffect);
                     if(!collision)
-                        removeSpecificEffectFromItem(item, movedEffect);
+                        removeSpecificEffectFromItem(combatantItem, movedEffect);
                     else
-                        applyEffectToItem(item, movedEffect);
+                        applyEffectToItem(combatantItem, movedEffect);
                 }
             }
         }
     }
-
 }
 
 void LayerTokens::linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink)
@@ -900,14 +970,18 @@ QGraphicsItem* LayerTokens::createEffectIcon(QGraphicsScene* scene, BattleDialog
     if((!effect) || (!scene))
         return nullptr;
 
-    if(effect->children().count() == 1)
-    {
-        QGraphicsItem* spellEffect = addSpellEffect(scene, effect);
-        if(spellEffect)
-            return spellEffect;
-    }
+    QGraphicsItem* result = nullptr;
 
-    return addEffectShape(scene, effect);
+    if(effect->children().count() == 1)
+        result = addSpellEffect(scene, effect);
+
+    if(!result)
+        result = addEffectShape(scene, effect);
+
+    if(result)
+        effectMoved(effect);
+
+    return result;
 
 //    if((effect->children().count() != 1) || (addSpellEffect(scene, effect) == nullptr))
 //        return addEffectShape(scene, effect);

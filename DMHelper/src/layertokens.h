@@ -72,12 +72,14 @@ public slots:
     void removeEffect(BattleDialogModelEffect* effect);
     bool containsEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* getEffectItem(BattleDialogModelEffect* effect);
+    void refreshEffects();
 
 signals:
     void objectRemoved(BattleDialogModelObject* object);
 
 protected slots:
     // Local Interface
+    void combatantMoved(BattleDialogModelObject* object);
     void effectChanged(BattleDialogModelEffect* effect);
     void effectMoved(BattleDialogModelObject* object);
     void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
