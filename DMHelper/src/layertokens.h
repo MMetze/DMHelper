@@ -66,6 +66,7 @@ public slots:
     void removeCombatant(BattleDialogModelCombatant* combatant);
     bool containsCombatant(BattleDialogModelCombatant* combatant);
     QGraphicsItem* getCombatantItem(BattleDialogModelCombatant* combatant);
+    PublishGLBattleToken* getCombatantToken(BattleDialogModelCombatant* combatant);
     BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item);
 
     void addEffect(BattleDialogModelEffect* effect);
@@ -105,6 +106,8 @@ protected:
     void removeAllEffectsFromItem(QGraphicsPixmapItem* item);
     void removeSpecificEffectFromItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
+    void applyEffectToToken(PublishGLBattleToken* token, BattleDialogModelEffect* effect);
+    void removeEffectFromToken(PublishGLBattleToken* token, BattleDialogModelEffect* effect);
 
     // Player Window Methods
     void cleanupPlayer();

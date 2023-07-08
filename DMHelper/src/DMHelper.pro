@@ -126,7 +126,6 @@ SOURCES += main.cpp\
     publishglbattlerenderer.cpp \
     publishglbattletoken.cpp \
     publishglbattlevideorenderer.cpp \
-    publishgleffect.cpp \
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
@@ -135,6 +134,9 @@ SOURCES += main.cpp\
     publishglrenderer.cpp \
     publishglscene.cpp \
     publishgltextrenderer.cpp \
+    publishgltokenhighlight.cpp \
+    publishgltokenhighlighteffect.cpp \
+    publishgltokenhighlightref.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -379,7 +381,6 @@ HEADERS  += mainwindow.h \
     publishglbattlerenderer.h \
     publishglbattletoken.h \
     publishglbattlevideorenderer.h \
-    publishgleffect.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \
@@ -388,6 +389,9 @@ HEADERS  += mainwindow.h \
     publishglrenderer.h \
     publishglscene.h \
     publishgltextrenderer.h \
+    publishgltokenhighlight.h \
+    publishgltokenhighlighteffect.h \
+    publishgltokenhighlightref.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \

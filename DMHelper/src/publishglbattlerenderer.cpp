@@ -9,6 +9,7 @@
 #include "battledialogmodelcombatant.h"
 #include "map.h"
 #include "layer.h"
+#include "layertokens.h"
 #include "character.h"
 #include <QOpenGLWidget>
 #include <QOpenGLFunctions>
@@ -139,6 +140,13 @@ void PublishGLBattleRenderer::initializeGL()
         createContents();
 
     _model->getLayerScene().playerGLInitialize(this, &_scene);
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        if(tokenLayer)
+            tokenLayer->refreshEffects();
+    }
 
     QMatrix4x4 modelMatrix;
     QMatrix4x4 viewMatrix;
@@ -599,8 +607,8 @@ void PublishGLBattleRenderer::updateSelectionTokens()
             PublishGLBattleToken* token = _combatantTokens.value(combatant);
             if(token)
             {
-                token->removeEffect(*_selectionToken);
-                token->addEffect(*newSelectionToken);
+                token->removeHighlight(*_selectionToken);
+                token->addHighlight(*newSelectionToken);
             }
         }
     }
@@ -639,7 +647,7 @@ void PublishGLBattleRenderer::createContents()
             if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
                 combatantToken->setPC(true);
             if(combatant->getSelected())
-                combatantToken->addEffect(*_selectionToken);
+                combatantToken->addHighlight(*_selectionToken);
             _combatantTokens.insert(combatant, combatantToken);
 
             if(_initiativeType == DMHelper::InitiativeType_ImageName)
@@ -1169,9 +1177,9 @@ void PublishGLBattleRenderer::tokenSelectionChanged(PublishGLBattleToken* token)
         return;
 
     if(token->getCombatant()->getSelected())
-        token->addEffect(*_selectionToken);
+        token->addHighlight(*_selectionToken);
     else
-        token->removeEffect(*_selectionToken);
+        token->removeHighlight(*_selectionToken);
 
     emit updateWidget();
 }

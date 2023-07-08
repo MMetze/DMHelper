@@ -1,12 +1,17 @@
 #include "publishglbattletoken.h"
 #include "battledialogmodelcombatant.h"
+#include "battledialogmodeleffect.h"
 #include "publishglimage.h"
-#include "publishgleffect.h"
+#include "publishgltokenhighlighteffect.h"
+#include "publishgltokenhighlightref.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
 #include <QImage>
 #include <QPixmap>
+#include <QPainter>
+#include <QBrush>
+#include <QPen>
 
 PublishGLBattleToken::PublishGLBattleToken(PublishGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
     PublishGLBattleObject(scene),
@@ -16,7 +21,7 @@ PublishGLBattleToken::PublishGLBattleToken(PublishGLScene* scene, BattleDialogMo
     _EBO(0),
     _textureSize(),
     _isPC(isPC),
-    _effectList(),
+    _highlightList(),
     _recreateToken(false)
 {
     if((!QOpenGLContext::currentContext()) || (!_combatant))
@@ -66,8 +71,8 @@ void PublishGLBattleToken::cleanup()
         }
     }
 
-    qDeleteAll(_effectList);
-    _effectList.clear();
+    qDeleteAll(_highlightList);
+    _highlightList.clear();
 
     PublishGLBattleObject::cleanup();
 }
@@ -103,13 +108,10 @@ void PublishGLBattleToken::paintEffects(int shaderModelMatrix)
     if(!f)
         return;
 
-    for(PublishGLEffect* effect : _effectList)
+    foreach(PublishGLTokenHighlight* effect, _highlightList)
     {
         if(effect)
-        {
-            f->glUniformMatrix4fv(shaderModelMatrix, 1, GL_FALSE, effect->getMatrixData());
-            effect->getImage().paintGL();
-        }
+            effect->paintGL(f, shaderModelMatrix);
     }
 }
 
@@ -128,28 +130,84 @@ bool PublishGLBattleToken::isPC() const
     return _isPC;
 }
 
-void PublishGLBattleToken::addEffect(PublishGLImage& effectImage)
+void PublishGLBattleToken::addHighlight(PublishGLImage& highlightImage)
 {
-    PublishGLEffect* newEffect = new PublishGLEffect(effectImage);
+    PublishGLTokenHighlightRef* newHighlight = new PublishGLTokenHighlightRef(highlightImage);
+
+    QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
+    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
+    newHighlight->setPositionScale(newPosition, sizeFactor);
+
+    _highlightList.append(newHighlight);
+}
+
+void PublishGLBattleToken::removeHighlight(const PublishGLImage& highlightImage)
+{
+    for(int i = 0; i < _highlightList.count(); ++i)
+    {
+        PublishGLTokenHighlightRef* highlight = dynamic_cast<PublishGLTokenHighlightRef*>(_highlightList.at(i));
+        if((highlight) && (highlight->getImage() == highlightImage))
+        {
+            PublishGLTokenHighlight* removeHighlight = _highlightList.takeAt(i);
+            delete removeHighlight;
+            return;
+        }
+    }
+}
+
+void PublishGLBattleToken::addEffectHighlight(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return;
+
+    QColor ellipseColor = effect->getColor();
+    if(!ellipseColor.isValid())
+        return;
+
+    QImage effectImage(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0], DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][1], QImage::Format_RGBA8888);
+    effectImage.fill(Qt::transparent);
+    QPainter p;
+    p.begin(&effectImage);
+        p.setPen(QPen(ellipseColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        ellipseColor.setAlpha(128);
+        p.setBrush(QBrush(ellipseColor));
+        p.drawEllipse(0, 0, effectImage.width(), effectImage.height());
+    p.end();
+
+    PublishGLTokenHighlightEffect* newEffect = new PublishGLTokenHighlightEffect(new PublishGLImage(effectImage), effect);
 
     QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
     qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
     newEffect->setPositionScale(newPosition, sizeFactor);
 
-    _effectList.append(newEffect);
+    _highlightList.append(newEffect);
 }
 
-void PublishGLBattleToken::removeEffect(const PublishGLImage& effectImage)
+void PublishGLBattleToken::removeEffectHighlight(BattleDialogModelEffect* effect)
 {
-    for(int i = 0; i < _effectList.count(); ++i)
+    for(int i = 0; i < _highlightList.count(); ++i)
     {
-        if((_effectList.at(i)) && (_effectList.at(i)->getImage() == effectImage))
+        PublishGLTokenHighlightEffect* highlight = dynamic_cast<PublishGLTokenHighlightEffect*>(_highlightList.at(i));
+        if((highlight) && (highlight->getEffect() == effect))
         {
-            PublishGLEffect* removeEffect = _effectList.takeAt(i);
-            delete removeEffect;
-            return;
+            PublishGLTokenHighlight* removeHighlight = _highlightList.takeAt(i);
+            delete removeHighlight;
         }
     }
+}
+
+bool PublishGLBattleToken::hasEffectHighlight(BattleDialogModelEffect* effect)
+{
+    for(int i = 0; i < _highlightList.count(); ++i)
+    {
+        PublishGLTokenHighlightEffect* highlight = dynamic_cast<PublishGLTokenHighlightEffect*>(_highlightList.at(i));
+        if((highlight) && (highlight->getEffect() == effect))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 void PublishGLBattleToken::combatantMoved()
@@ -165,7 +223,7 @@ void PublishGLBattleToken::combatantMoved()
     _modelMatrix.translate(newPosition);
     _modelMatrix.scale(scaleFactor, scaleFactor);
 
-    for(PublishGLEffect* effect : _effectList)
+    foreach(PublishGLTokenHighlight* effect, _highlightList)
         effect->setPositionScale(newPosition, sizeFactor);
 
     emit changed();

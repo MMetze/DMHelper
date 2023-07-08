@@ -4,6 +4,8 @@
 #include "unselectedpixmap.h"
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
+#include "publishglimage.h"
+#include "publishgltokenhighlighteffect.h"
 #include "campaign.h"
 #include "character.h"
 #include "bestiary.h"
@@ -17,6 +19,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsPixmapItem>
 #include <QImage>
+#include <QPainter>
 #include <QtGlobal>
 #include <QDebug>
 
@@ -562,6 +565,11 @@ QGraphicsItem* LayerTokens::getCombatantItem(BattleDialogModelCombatant* combata
     return findCombatantItem(combatant);
 }
 
+PublishGLBattleToken* LayerTokens::getCombatantToken(BattleDialogModelCombatant* combatant)
+{
+    return combatant ? _combatantTokenHash.value(combatant) : nullptr;
+}
+
 BattleDialogModelCombatant* LayerTokens::getCombatantFromItem(QGraphicsPixmapItem* item)
 {
     return _combatantIconHash.key(item, nullptr);
@@ -679,6 +687,8 @@ void LayerTokens::combatantMoved(BattleDialogModelObject* object)
     if(!combatantItem)
         return;
 
+    PublishGLBattleToken* combatantToken = _combatantTokenHash.value(combatant);
+
     QList<Layer*> tokenLayers = _layerScene->getLayers(DMHelper::LayerType_Tokens);
     for(int i = 0; i < tokenLayers.count(); ++i)
     {
@@ -700,9 +710,15 @@ void LayerTokens::combatantMoved(BattleDialogModelObject* object)
 
                     bool collision = isItemInEffectArea(combatantItem, collisionEffect);
                     if(!collision)
+                    {
                         removeSpecificEffectFromItem(combatantItem, effect);
+                        removeEffectFromToken(combatantToken, effect);
+                    }
                     else
+                    {
                         applyEffectToItem(combatantItem, effect);
+                        applyEffectToToken(combatantToken, effect);
+                    }
                 }
             }
         }
@@ -757,9 +773,15 @@ void LayerTokens::effectMoved(BattleDialogModelObject* object)
                 {
                     bool collision = isItemInEffectArea(combatantItem, collisionEffect);
                     if(!collision)
+                    {
                         removeSpecificEffectFromItem(combatantItem, movedEffect);
+                        removeEffectFromToken(tokenLayer->getCombatantToken(combatant), movedEffect);
+                    }
                     else
+                    {
                         applyEffectToItem(combatantItem, movedEffect);
+                        applyEffectToToken(tokenLayer->getCombatantToken(combatant), movedEffect);
+                    }
                 }
             }
         }
@@ -1240,6 +1262,26 @@ void LayerTokens::applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModel
     effectItem->setData(BATTLE_CONTENT_CHILD_INDEX, BattleDialogItemChild_AreaEffect);
     effectItem->setData(BATTLE_CONTENT_CHILD_ID, effectId);
     effectItem->setParentItem(item);
+}
+
+void LayerTokens::applyEffectToToken(PublishGLBattleToken* token, BattleDialogModelEffect* effect)
+{
+    if((!token) || (!effect))
+        return;
+
+    // Don't re-add the effect to the token
+    if(token->hasEffectHighlight(effect))
+        return;
+
+    token->addEffectHighlight(effect);
+}
+
+void LayerTokens::removeEffectFromToken(PublishGLBattleToken* token, BattleDialogModelEffect* effect)
+{
+    if((!token) || (!effect))
+        return;
+
+    token->removeEffectHighlight(effect);
 }
 
 void LayerTokens::cleanupPlayer()
