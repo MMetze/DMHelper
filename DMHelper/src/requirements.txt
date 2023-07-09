@@ -8,6 +8,7 @@ fixed * burning hands effect doesn't resize with grid size
 fixed * Grid type should no be a button, not clickable
 fixed * need to be able to change layers for effects
 * Effect markers on enemies not visible
+* Selection and Active markers in publish version
 * Create/edit/move effect doesn't dirty
 * Include "add XYZ..." to right-click context menu
 * Undo-redo on drawing fow

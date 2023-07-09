@@ -18,7 +18,7 @@ public:
     virtual int getWidth() const = 0;
     virtual int getHeight() const = 0;
 
-    void setPositionScale(const QVector3D& pos, float sizeFactor);
+    virtual void setPositionScale(const QVector3D& pos, float sizeFactor);
 
     QMatrix4x4 getMatrix() const;
     const float* getMatrixData() const;

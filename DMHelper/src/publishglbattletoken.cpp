@@ -12,6 +12,7 @@
 #include <QPainter>
 #include <QBrush>
 #include <QPen>
+#include <QDebug>
 
 PublishGLBattleToken::PublishGLBattleToken(PublishGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC) :
     PublishGLBattleObject(scene),
@@ -42,7 +43,7 @@ PublishGLBattleToken::~PublishGLBattleToken()
 
 void PublishGLBattleToken::cleanup()
 {
-    qDebug() << "[PublishGLBattleToken] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+//    qDebug() << "[PublishGLBattleToken] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
 
     if(QOpenGLContext::currentContext())
     {
@@ -96,7 +97,7 @@ void PublishGLBattleToken::paintGL()
 
     e->glBindVertexArray(_VAO);
     f->glBindTexture(GL_TEXTURE_2D, _textureID);
-    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);    
+    f->glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 void PublishGLBattleToken::paintEffects(int shaderModelMatrix)
@@ -160,21 +161,7 @@ void PublishGLBattleToken::addEffectHighlight(BattleDialogModelEffect* effect)
     if(!effect)
         return;
 
-    QColor ellipseColor = effect->getColor();
-    if(!ellipseColor.isValid())
-        return;
-
-    QImage effectImage(DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][0], DMHelper::PixmapSizes[DMHelper::PixmapSize_Battle][1], QImage::Format_RGBA8888);
-    effectImage.fill(Qt::transparent);
-    QPainter p;
-    p.begin(&effectImage);
-        p.setPen(QPen(ellipseColor, 3, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        ellipseColor.setAlpha(128);
-        p.setBrush(QBrush(ellipseColor));
-        p.drawEllipse(0, 0, effectImage.width(), effectImage.height());
-    p.end();
-
-    PublishGLTokenHighlightEffect* newEffect = new PublishGLTokenHighlightEffect(new PublishGLImage(effectImage), effect);
+    PublishGLTokenHighlightEffect* newEffect = new PublishGLTokenHighlightEffect(nullptr, effect);
 
     QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
     qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();

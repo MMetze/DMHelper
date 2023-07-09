@@ -18,12 +18,18 @@ public:
     virtual int getWidth() const override;
     virtual int getHeight() const override;
 
+    virtual void setPositionScale(const QVector3D& pos, float sizeFactor) override;
+
     PublishGLImage* getImage() const;
     BattleDialogModelEffect* getEffect() const;
 
 protected:
+    void createEffectHighlightGL();
+
     PublishGLImage* _effectImage;
     BattleDialogModelEffect* _effect;
+    QVector3D _position;
+    float _sizeFactor;
 };
 
 #endif // PUBLISHGLTOKENHIGHLIGHTEFFECT_H

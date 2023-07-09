@@ -5,7 +5,6 @@
 #include "publishglbattletoken.h"
 #include "publishglbattleeffect.h"
 #include "publishglimage.h"
-#include "publishgltokenhighlighteffect.h"
 #include "campaign.h"
 #include "character.h"
 #include "bestiary.h"
