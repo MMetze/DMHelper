@@ -106,7 +106,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _combatantLayout(nullptr),
     _logger(nullptr),
     _combatantWidgets(),
-    _combatantIcons(),
+//    _combatantIcons(),
     _stateMachine(),
     _selectedCombatant(nullptr),
     _contextMenuCombatant(nullptr),
@@ -601,19 +601,15 @@ void BattleFrame::publishWindowMouseDown(const QPointF& position)
     {
         if((graphicsItem->flags() & QGraphicsItem::ItemIsSelectable) == QGraphicsItem::ItemIsSelectable)
         {
-            QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(graphicsItem);
-            if(pixmapItem)
+            BattleDialogModelCombatant* selectedCombatant = getCombatantFromItem(graphicsItem);
+            if(selectedCombatant)
             {
-                BattleDialogModelCombatant* selectedCombatant = _combatantIcons.key(pixmapItem, nullptr);
-                if(selectedCombatant)
-                {
-                    setUniqueSelection(selectedCombatant);
-                    _selectedCombatant = selectedCombatant;
-                    _publishMouseDown = true;
-                    _publishMouseDownPos = newPosition;
-                    startMovement(selectedCombatant, pixmapItem, selectedCombatant->getSpeed());
-                    return;
-                }
+                setUniqueSelection(selectedCombatant);
+                _selectedCombatant = selectedCombatant;
+                _publishMouseDown = true;
+                _publishMouseDownPos = newPosition;
+                startMovement(selectedCombatant, dynamic_cast<QGraphicsPixmapItem*>(graphicsItem), selectedCombatant->getSpeed());
+                return;
             }
 
             if(!BattleDialogModelEffect::getEffectIdFromItem(graphicsItem).isNull())
@@ -648,9 +644,12 @@ void BattleFrame::publishWindowMouseMove(const QPointF& position)
 
     if(_selectedCombatant)
     {
-        QGraphicsPixmapItem* pixmapItem = _combatantIcons.value(_selectedCombatant);
-        pixmapItem->setPos(newPosition);
-        updateMovement(_selectedCombatant, pixmapItem);
+        QGraphicsPixmapItem* pixmapItem = getItemFromCombatant(_selectedCombatant);
+        if(pixmapItem)
+        {
+            pixmapItem->setPos(newPosition);
+            updateMovement(_selectedCombatant, pixmapItem);
+        }
     }
     else if(_publishEffectItem)
     {
@@ -2164,6 +2163,8 @@ void BattleFrame::handleEffectChangeLayer(BattleDialogModelEffect* effect)
 
 void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
 {
+    return;
+    /*
     BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
 
     if(!combatant)
@@ -2177,7 +2178,6 @@ void BattleFrame::handleCombatantMoved(BattleDialogModelObject* object)
     if(!item)
         return;
 
-    /*
     // Todo: optimize this to only make changes when needed
     removeEffectsFromItem(item);
 
@@ -2207,7 +2207,7 @@ void BattleFrame::handleCombatantSelected(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    QGraphicsPixmapItem* item = _combatantIcons.value(combatant, nullptr);
+    QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
     if(!item)
         return;
 
@@ -2369,6 +2369,8 @@ void BattleFrame::handleCombatantHeal(BattleDialogModelCombatant* combatant)
 
 void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
 {
+    return;
+    /*
     if(!effect)
         return;
 
@@ -2400,6 +2402,7 @@ void BattleFrame::handleApplyEffect(QGraphicsItem* effect)
     dlg->resize(800, 600);
 
     dlg->fireAndForget();
+    */
 }
 
 void BattleFrame::handleItemLink(BattleDialogModelObject* item)
@@ -2515,7 +2518,7 @@ void BattleFrame::handleItemMouseDoubleClick(QGraphicsPixmapItem* item)
     if(!item)
         return;
 
-    BattleDialogModelCombatant* combatant = _combatantIcons.key(item);
+    BattleDialogModelCombatant* combatant = getCombatantFromItem(item);
     if(!combatant)
         return;
 
@@ -2646,7 +2649,7 @@ void BattleFrame::setSelectedCombatant(BattleDialogModelCombatant* selected)
     {
         bool isSelected = selected->getSelected();
         combatantWidget = getWidgetFromCombatant(selected);
-        selectedItem = _combatantIcons.value(selected, nullptr);
+        selectedItem = getItemFromCombatant(selected);
 
         if(combatantWidget)
             combatantWidget->setSelected(!isSelected);
@@ -2692,7 +2695,7 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
-    QGraphicsPixmapItem* item = _combatantIcons.value(combatant, nullptr);
+    QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
     if(!item)
         return;
 
@@ -2751,7 +2754,7 @@ void BattleFrame::copyMonsters()
         QGraphicsPixmapItem* item = dynamic_cast<QGraphicsPixmapItem*>(selected.at(i));
         if(item)
         {
-            BattleDialogModelCombatant* combatant = _combatantIcons.key(item);
+            BattleDialogModelCombatant* combatant = getCombatantFromItem(item);
             if((combatant) && (combatant->getCombatantType() == DMHelper::CombatantType_Monster))
                 _copyList.append(combatant);
         }
@@ -2803,11 +2806,9 @@ void BattleFrame::updateHighlights()
         return;
     }
 
-    QGraphicsPixmapItem* item;
-
     if(_activePixmap)
     {
-        item = _combatantIcons.value(_model->getActiveCombatant(), nullptr);
+        QGraphicsPixmapItem* item = getItemFromCombatant(_model->getActiveCombatant());
         if(item)
         {
             moveRectToPixmap(_activePixmap, item);
@@ -2938,7 +2939,7 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible, bo
                 }
             }
 
-            QGraphicsPixmapItem* item = _combatantIcons.value(combatant);
+            QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
             if(item)
                 item->setVisible(vis);
 
@@ -3161,26 +3162,33 @@ void BattleFrame::setItemsInert(bool inert)
 
     bool enabled = !inert;
 
-    for(QGraphicsPixmapItem* item : _combatantIcons.values())
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
     {
-        if(item)
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
         {
-            item->setFlag(QGraphicsItem::ItemIsSelectable, enabled);
-            item->setFlag(QGraphicsItem::ItemIsMovable, enabled);
-        }
-    }
+            QList<QGraphicsPixmapItem*> combatantItems = tokenLayer->getCombatantItems();
+            foreach(QGraphicsPixmapItem* combatantItem, combatantItems)
+            {
+                if(combatantItem)
+                {
+                    combatantItem->setFlag(QGraphicsItem::ItemIsSelectable, enabled);
+                    combatantItem->setFlag(QGraphicsItem::ItemIsMovable, enabled);
+                }
+            }
 
-    /*
-    QList<QGraphicsItem*> effects = _scene->getEffectItems();
-    for(QGraphicsItem* effect : effects)
-    {
-        if(effect)
-        {
-            effect->setFlag(QGraphicsItem::ItemIsSelectable, enabled);
-            effect->setFlag(QGraphicsItem::ItemIsMovable, enabled);
+            QList<QGraphicsItem*> effectItems = tokenLayer->getEffectItems();
+            foreach(QGraphicsItem* effectItem, effectItems)
+            {
+                if(effectItem)
+                {
+                    effectItem->setFlag(QGraphicsItem::ItemIsSelectable, enabled);
+                    effectItem->setFlag(QGraphicsItem::ItemIsMovable, enabled);
+                }
+            }
         }
     }
-    */
 }
 
 void BattleFrame::removeRollover()
@@ -3481,7 +3489,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
 
     if(_activePixmap)
     {
-        QGraphicsPixmapItem* item = _combatantIcons.value(active, nullptr);
+        QGraphicsPixmapItem* item = getItemFromCombatant(active);
         if(item)
         {
             _activePixmap->setScale(_model->getGridScale() * _activeScale / ACTIVE_PIXMAP_SIZE);
@@ -3599,6 +3607,51 @@ QWidget* BattleFrame::findCombatantWidgetFromPosition(const QPoint& position) co
 
     qDebug() << "[Battle Frame] ...widget found: " << reinterpret_cast<quint64>(widget);
     return widget;
+}
+
+QGraphicsPixmapItem* BattleFrame::getItemFromCombatant(BattleDialogModelCombatant* combatant) const
+{
+    if((!_model) || (!combatant))
+        return nullptr;
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            QGraphicsItem* item = tokenLayer->getCombatantItem(combatant);
+            if(item)
+                return dynamic_cast<QGraphicsPixmapItem*>(item);
+        }
+    }
+
+    return nullptr;
+}
+
+BattleDialogModelCombatant* BattleFrame::getCombatantFromItem(QGraphicsItem* item) const
+{
+    return getCombatantFromItem(dynamic_cast<QGraphicsPixmapItem*>(item));
+}
+
+BattleDialogModelCombatant* BattleFrame::getCombatantFromItem(QGraphicsPixmapItem* item) const
+{
+    if((!_model) || (!item))
+        return nullptr;
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            BattleDialogModelCombatant* combatant = tokenLayer->getCombatantFromItem(item);
+            if(combatant)
+                return combatant;
+        }
+    }
+
+    return nullptr;
 }
 
 CombatantWidget* BattleFrame::getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const
@@ -3721,8 +3774,8 @@ void BattleFrame::cleanupBattleMap()
         _model->getLayerScene().dmUninitialize();
 
     // Clean up any existing icons
-    qDeleteAll(_combatantIcons.values());
-    _combatantIcons.clear();
+    //qDeleteAll(_combatantIcons.values());
+    //_combatantIcons.clear();
 }
 
 void BattleFrame::replaceBattleMap()
@@ -3763,8 +3816,8 @@ void BattleFrame::replaceBattleMap()
 bool BattleFrame::doSceneContentsExist()
 {
     return((_activePixmap != nullptr) ||
-           (_movementPixmap != nullptr) ||
-           (_combatantIcons.count() > 0));// ||
+           (_movementPixmap != nullptr));// ||
+           //(_combatantIcons.count() > 0));// ||
 //           (!_scene->isSceneEmpty()));
 }
 
@@ -3841,11 +3894,14 @@ void BattleFrame::resizeBattleMap()
     ui->graphicsView->fitInView(_model->getMapRect(), Qt::KeepAspectRatio);
 
     // try to move the icons with the map
+    // TODO: Layers - is this needed? Probably completely redo
+    /*
     QList<QGraphicsPixmapItem*> iconList = _combatantIcons.values();
     for(int i = 0; i < iconList.count(); ++i)
     {
         relocateCombatantIcon(iconList.at(i));
     }
+    */
 }
 
 // Returns the maximum background image width fitting into the given frame width

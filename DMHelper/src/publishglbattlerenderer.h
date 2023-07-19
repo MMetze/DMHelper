@@ -69,7 +69,7 @@ protected:
     virtual bool isBackgroundReady() = 0;
     virtual void resizeBackground(int w, int h) = 0;
     virtual void paintBackground(QOpenGLFunctions* functions) = 0;
-    virtual void paintTokens(QOpenGLFunctions* functions, bool drawPCs);
+//    virtual void paintTokens(QOpenGLFunctions* functions, bool drawPCs);
     virtual void updateBackground();
 
     virtual void updateSelectionTokens();
@@ -88,6 +88,8 @@ protected slots:
     void tokenSelectionChanged(PublishGLBattleToken* token);
     void createLineToken();
     void layerAdded(Layer* layer);
+    void layerRemoved(Layer* layer);
+    void handleCombatantDrawnGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant);
 
 protected:
     bool _initialized;

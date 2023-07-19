@@ -7,8 +7,11 @@ fixed * grid controls not working
 fixed * burning hands effect doesn't resize with grid size
 fixed * Grid type should no be a button, not clickable
 fixed * need to be able to change layers for effects
-* Effect markers on enemies not visible
-* Selection and Active markers in publish version
+fixed * Effect markers on enemies not visible
+fixed * Selection and Active markers in publish version
+* turning on and off layers ruins rendering
+* Selection and Active markers not visible from the beginning
+* Hide layers separately between DM and Player windows
 * Create/edit/move effect doesn't dirty
 * Include "add XYZ..." to right-click context menu
 * Undo-redo on drawing fow
@@ -20,6 +23,7 @@ fixed * need to be able to change layers for effects
 3) Finally, a problem regarding combats. When creating a combat by assigning a map it is not visible in any way in the master window. You can see the map in the players window (however without a grid). Adding a monster shifts the view of the map in the players window by centering the view on the monster.
 * Make grid button a flat pushbutton that opens its own popup menu
 * Make the tooltip for a combatant or effect mention their layer
+*
 
 Effects
 * optional set of whether effect colors are applied or not

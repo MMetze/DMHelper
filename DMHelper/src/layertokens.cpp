@@ -268,6 +268,11 @@ QList<BattleDialogModelCombatant*> LayerTokens::getCombatants()
     return _combatants;
 }
 
+QList<QGraphicsPixmapItem*> LayerTokens::getCombatantItems()
+{
+    return _combatantIconHash.values();
+}
+
 const QList<BattleDialogModelEffect*> LayerTokens::getEffects() const
 {
     return _effects;
@@ -276,6 +281,11 @@ const QList<BattleDialogModelEffect*> LayerTokens::getEffects() const
 QList<BattleDialogModelEffect*> LayerTokens::getEffects()
 {
     return _effects;
+}
+
+QList<QGraphicsItem*> LayerTokens::getEffectItems()
+{
+    return _effectIconHash.values();
 }
 
 BattleDialogModelObject* LayerTokens::getObjectById(QUuid id)
@@ -430,6 +440,8 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
             functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, localMatrix.constData());
             combatantToken->paintGL();
             combatantToken->paintEffects(defaultModelMatrix);
+
+            emit postCombatantDrawGL(functions, combatant);
         }
     }
 

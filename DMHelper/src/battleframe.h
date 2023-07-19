@@ -302,6 +302,9 @@ private:
     void relocateCombatantIcon(QGraphicsPixmapItem* icon);
 
     QWidget* findCombatantWidgetFromPosition(const QPoint& position) const;
+    QGraphicsPixmapItem* getItemFromCombatant(BattleDialogModelCombatant* combatant) const;
+    BattleDialogModelCombatant* getCombatantFromItem(QGraphicsItem* item) const;
+    BattleDialogModelCombatant* getCombatantFromItem(QGraphicsPixmapItem* item) const;
     CombatantWidget* getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const;
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
@@ -356,7 +359,7 @@ private:
     BattleDialogLogger* _logger;
 
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
-    QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
+//    QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
 
     BattleFrameStateMachine _stateMachine;
 

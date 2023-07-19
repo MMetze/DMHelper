@@ -38,8 +38,10 @@ public:
     // Local Interface
     const QList<BattleDialogModelCombatant*> getCombatants() const;
     QList<BattleDialogModelCombatant*> getCombatants();
+    QList<QGraphicsPixmapItem*> getCombatantItems();
     const QList<BattleDialogModelEffect*> getEffects() const;
     QList<BattleDialogModelEffect*> getEffects();
+    QList<QGraphicsItem*> getEffectItems();
     BattleDialogModelObject* getObjectById(QUuid id);
 
 public slots:
@@ -77,6 +79,7 @@ public slots:
 
 signals:
     void objectRemoved(BattleDialogModelObject* object);
+    void postCombatantDrawGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant);
 
 protected slots:
     // Local Interface

@@ -78,6 +78,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     if(_model)
     {
         connect(&_model->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLBattleRenderer::layerAdded);
+        connect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLBattleRenderer::layerRemoved);
         connect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
     }
 }
@@ -145,7 +146,25 @@ void PublishGLBattleRenderer::initializeGL()
     {
         LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
         if(tokenLayer)
+        {
+            connect(tokenLayer, &LayerTokens::postCombatantDrawGL, this, &PublishGLBattleRenderer::handleCombatantDrawnGL);
+
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                if(combatant)
+                {
+                    PublishGLBattleToken* token = tokenLayer->getCombatantToken(combatant);
+                    if(token)
+                    {
+                        connect(token, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
+                        connect(token, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
+                    }
+                }
+            }
+
             tokenLayer->refreshEffects();
+        }
     }
 
     QMatrix4x4 modelMatrix;
@@ -284,17 +303,6 @@ void PublishGLBattleRenderer::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _model->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
-
-    if((_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
-       ((_movementPC) || ((_movementCombatant->getKnown()) &&
-                          (_movementCombatant->getShown()) &&
-                          ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
-                          ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
-    {
-        f->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
-        _movementToken->paintGL();
-    }
-
 
 
     /*
@@ -515,7 +523,7 @@ void PublishGLBattleRenderer::setActiveToken(const QString& activeTokenFile)
 
     _activeTokenFile = activeTokenFile;
     _updateSelectionTokens = true;
-    updateWidget();
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::setSelectionToken(const QString& selectionTokenFile)
@@ -525,7 +533,7 @@ void PublishGLBattleRenderer::setSelectionToken(const QString& selectionTokenFil
 
     _selectionTokenFile = selectionTokenFile;
     _updateSelectionTokens = true;
-    updateWidget();
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::setCombatantFrame(const QString& combatantFrame)
@@ -535,7 +543,7 @@ void PublishGLBattleRenderer::setCombatantFrame(const QString& combatantFrame)
 
     _tokenFrameFile = combatantFrame;
     _updateInitiative = true;
-    updateWidget();
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::setCountdownFrame(const QString& countdownFrame)
@@ -545,7 +553,7 @@ void PublishGLBattleRenderer::setCountdownFrame(const QString& countdownFrame)
 
     _countdownFrameFile = countdownFrame;
     _updateInitiative = true;
-    updateWidget();
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::setShowCountdown(bool showCountdown)
@@ -554,16 +562,17 @@ void PublishGLBattleRenderer::setShowCountdown(bool showCountdown)
         return;
 
     _showCountdown = showCountdown;
-    updateWidget();
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::setCountdownValues(qreal countdown, const QColor& countdownColor)
 {
     _countdownScale = countdown;
     _countdownColor = countdownColor;
-    updateWidget();
+    emit updateWidget();
 }
 
+/*
 void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool drawPCs)
 {
     if((_activePC == drawPCs) && (_activeCombatant) && (_activeToken) &&
@@ -586,6 +595,7 @@ void PublishGLBattleRenderer::paintTokens(QOpenGLFunctions* functions, bool draw
         _movementToken->paintGL();
     }
 }
+*/
 
 void PublishGLBattleRenderer::updateBackground()
 {
@@ -600,7 +610,7 @@ void PublishGLBattleRenderer::updateSelectionTokens()
         selectImage.load(QString(":/img/data/selected.png"));
     PublishGLImage* newSelectionToken = new PublishGLImage(selectImage);
     QList<BattleDialogModelCombatant*> combatants = _combatantTokens.keys();
-    for(BattleDialogModelCombatant* combatant : combatants)
+    foreach(BattleDialogModelCombatant* combatant, combatants)
     {
         if(combatant->getSelected())
         {
@@ -646,8 +656,8 @@ void PublishGLBattleRenderer::createContents()
             BattleDialogModelCharacter* characterCombatant = dynamic_cast<BattleDialogModelCharacter*>(combatant);
             if((characterCombatant) && (characterCombatant->getCharacter()) && (characterCombatant->getCharacter()->isInParty()))
                 combatantToken->setPC(true);
-            if(combatant->getSelected())
-                combatantToken->addHighlight(*_selectionToken);
+//            if(combatant->getSelected())
+//                combatantToken->addHighlight(*_selectionToken);
             _combatantTokens.insert(combatant, combatantToken);
 
             if(_initiativeType == DMHelper::InitiativeType_ImageName)
@@ -664,8 +674,8 @@ void PublishGLBattleRenderer::createContents()
                 _combatantNames.insert(combatant, combatantName);
             }
 
-            connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
-            connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
+//            connect(combatantToken, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
+//            connect(combatantToken, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
         }
     }
 
@@ -1240,6 +1250,58 @@ void PublishGLBattleRenderer::layerAdded(Layer* layer)
     if(!layer)
         return;
 
+    if(layer->getFinalType() == DMHelper::LayerType_Tokens)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+            connect(tokenLayer, &LayerTokens::postCombatantDrawGL, this, &PublishGLBattleRenderer::handleCombatantDrawnGL);
+    }
+
     layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
     emit updateWidget();
+}
+
+void PublishGLBattleRenderer::layerRemoved(Layer* layer)
+{
+    if(!layer)
+        return;
+
+    if(layer->getFinalType() == DMHelper::LayerType_Tokens)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+            disconnect(tokenLayer, &LayerTokens::postCombatantDrawGL, this, &PublishGLBattleRenderer::handleCombatantDrawnGL);
+    }
+}
+
+void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant)
+{
+    if((!functions) || (!combatant))
+        return;
+
+    if(combatant == _activeCombatant)
+    {
+        if((_activePC) && (_activeCombatant) && (_activeToken) &&
+           ((_activePC) || ((_activeCombatant->getKnown()) &&
+                            (_activeCombatant->getShown()) &&
+                            ((_model->getShowDead()) || (_activeCombatant->getHitPoints() > 0)) &&
+                            ((_model->getShowAlive()) || (_activeCombatant->getHitPoints() <= 0)))))
+        {
+            functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _activeToken->getMatrixData());
+            _activeToken->paintGL();
+        }
+    }
+
+    if(combatant == _movementCombatant)
+    {
+        if((_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
+           ((_movementPC) || ((_movementCombatant->getKnown()) &&
+                              (_movementCombatant->getShown()) &&
+                              ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
+                              ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
+        {
+            functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
+            _movementToken->paintGL();
+        }
+    }
 }
