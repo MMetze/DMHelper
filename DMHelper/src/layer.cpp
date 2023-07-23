@@ -164,6 +164,10 @@ void Layer::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int pr
     _shaderAlphaRGBA = alphaRGBA;
 }
 
+void Layer::aboutToDelete()
+{
+}
+
 void Layer::setScale(int scale)
 {
     Q_UNUSED(scale);

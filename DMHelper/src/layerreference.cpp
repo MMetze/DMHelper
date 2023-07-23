@@ -252,6 +252,12 @@ void LayerReference::uninitialize()
         _referenceLayer->uninitialize();
 }
 
+void LayerReference::aboutToDelete()
+{
+    if(_referenceLayer)
+        disconnect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
+}
+
 void LayerReference::setScale(int scale)
 {
     if(_referenceLayer)
@@ -263,6 +269,7 @@ void LayerReference::handleReferenceDestroyed(Layer *layer)
     if((layer) && (layer == _referenceLayer))
     {
         emit referenceDestroyed(this);
+        disconnect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
         _referenceLayer = nullptr;
         _referenceObject = nullptr;
     }

@@ -9,7 +9,7 @@ fixed * Grid type should no be a button, not clickable
 fixed * need to be able to change layers for effects
 fixed * Effect markers on enemies not visible
 fixed * Selection and Active markers in publish version
-* turning on and off layers ruins rendering
+* moving pc between layers ruins rendering
 * Selection and Active markers not visible from the beginning
 * Hide layers separately between DM and Player windows
 * Create/edit/move effect doesn't dirty

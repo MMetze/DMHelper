@@ -28,7 +28,7 @@ LayerScene::LayerScene(QObject *parent) :
 
 LayerScene::~LayerScene()
 {
-    qDeleteAll(_layers);
+    clearLayers();
 }
 
 void LayerScene::inputXML(const QDomElement &element, bool isImport)
@@ -304,6 +304,12 @@ void LayerScene::removeLayer(int position)
 
 void LayerScene::clearLayers()
 {
+    foreach(Layer* layer, _layers)
+    {
+        if(layer)
+            layer->aboutToDelete();
+    }
+
     qDeleteAll(_layers);
     _layers.clear();
     _selected = -1;

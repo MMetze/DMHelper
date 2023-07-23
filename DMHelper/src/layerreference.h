@@ -55,6 +55,7 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
+    virtual void aboutToDelete() override;
     virtual void setScale(int scale) override;
 
 signals:

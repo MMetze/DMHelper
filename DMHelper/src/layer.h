@@ -67,6 +67,7 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) = 0;
     virtual void uninitialize() = 0;
+    virtual void aboutToDelete();
     virtual void setScale(int scale);
     virtual void setName(const QString& name);
 

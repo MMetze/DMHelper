@@ -73,6 +73,7 @@ protected:
     virtual void updateBackground();
 
     virtual void updateSelectionTokens();
+    void updateTokens();
     virtual void createContents();
     void cleanupContents();
 
@@ -86,6 +87,7 @@ protected slots:
     void recreateContents();
     void activeCombatantMoved();
     void tokenSelectionChanged(PublishGLBattleToken* token);
+    void tokensChanged();
     void createLineToken();
     void layerAdded(Layer* layer);
     void layerRemoved(Layer* layer);
@@ -148,6 +150,7 @@ protected:
 
     bool _updateSelectionTokens;
     bool _updateInitiative;
+    bool _updateTokens;
     bool _recreateContent;
 };
 

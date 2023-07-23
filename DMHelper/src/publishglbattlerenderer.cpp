@@ -73,6 +73,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _lineTextImage(nullptr),
     _updateSelectionTokens(false),
     _updateInitiative(false),
+    _updateTokens(false),
     _recreateContent(false)
 {
     if(_model)
@@ -189,7 +190,7 @@ void PublishGLBattleRenderer::initializeGL()
     // Projection - note, this is set later when resizing the window
     updateProjectionMatrix();
 
-    connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::recreateContents);
+    connect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::tokensChanged);
     connect(_model, &BattleDialogModel::initiativeOrderChanged, this, &PublishGLBattleRenderer::recreateContents);
     connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
     connect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
@@ -209,7 +210,7 @@ void PublishGLBattleRenderer::cleanupGL()
     disconnect(_model, &BattleDialogModel::initiativeOrderChanged, this, &PublishGLBattleRenderer::recreateContents);
     disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::activeCombatantChanged, this, &PublishGLBattleRenderer::activeCombatantChanged);
-    disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::recreateContents);
+    disconnect(_model, &BattleDialogModel::combatantListChanged, this, &PublishGLBattleRenderer::tokensChanged);
     disconnect(_model, &BattleDialogModel::showAliveChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::showDeadChanged, this, &PublishGLBattleRenderer::updateWidget);
     disconnect(_model, &BattleDialogModel::showEffectsChanged, this, &PublishGLBattleRenderer::updateWidget);
@@ -267,6 +268,7 @@ void PublishGLBattleRenderer::paintGL()
     {
         cleanupContents();
         createContents();
+        //updateProjectionMatrix();
     }
     else
     {
@@ -278,6 +280,9 @@ void PublishGLBattleRenderer::paintGL()
 
         if(_recreateLine)
             createLineToken();
+
+        if(_updateTokens)
+            updateTokens();
     }
 
     evaluatePointer();
@@ -635,12 +640,29 @@ void PublishGLBattleRenderer::updateSelectionTokens()
     _updateSelectionTokens = false;
 }
 
+void PublishGLBattleRenderer::updateTokens()
+{
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        if(layer)
+        {
+            layer->playerGLUninitialize();
+            layer->playerGLInitialize(this, &_scene);
+        }
+    }
+
+    _updateTokens = false;
+}
+
 void PublishGLBattleRenderer::createContents()
 {
     if(!_model)
         return;
 
     qDebug() << "[PublishGLBattleRenderer] Creating all battle content";
+
+    _model->getLayerScene().playerGLInitialize(this, &_scene);
 
     updateSelectionTokens();
     createLineToken();
@@ -1191,6 +1213,12 @@ void PublishGLBattleRenderer::tokenSelectionChanged(PublishGLBattleToken* token)
     else
         token->removeHighlight(*_selectionToken);
 
+    emit updateWidget();
+}
+
+void PublishGLBattleRenderer::tokensChanged()
+{
+    _updateTokens = true;
     emit updateWidget();
 }
 
