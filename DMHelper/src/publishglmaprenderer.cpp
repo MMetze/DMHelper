@@ -58,6 +58,16 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
 
 PublishGLMapRenderer::~PublishGLMapRenderer()
 {
+    if(_map)
+    {
+        disconnect(_map, &Map::partyChanged, this, &PublishGLMapRenderer::handlePartyChanged);
+        disconnect(_map, &Map::partyIconChanged, this, &PublishGLMapRenderer::handlePartyIconChanged);
+        disconnect(_map, &Map::partyIconPosChanged, this, &PublishGLMapRenderer::handlePartyIconPosChanged);
+        disconnect(_map, &Map::showPartyChanged, this, &PublishGLMapRenderer::handleShowPartyChanged);
+        disconnect(_map, &Map::partyScaleChanged, this, &PublishGLMapRenderer::handlePartyScaleChanged);
+        disconnect(&_map->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLMapRenderer::layerAdded);
+        disconnect(&_map->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+    }
 }
 
 CampaignObjectBase* PublishGLMapRenderer::getObject()

@@ -268,10 +268,10 @@ void LayerReference::handleReferenceDestroyed(Layer *layer)
 {
     if((layer) && (layer == _referenceLayer))
     {
-        emit referenceDestroyed(this);
         disconnect(_referenceLayer, &Layer::layerDestroyed, this, &LayerReference::handleReferenceDestroyed);
         _referenceLayer = nullptr;
         _referenceObject = nullptr;
+        emit referenceDestroyed(this);
     }
 }
 
