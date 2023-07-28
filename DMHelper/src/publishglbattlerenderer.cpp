@@ -125,7 +125,6 @@ void PublishGLBattleRenderer::setBackgroundColor(const QColor& color)
 
 void PublishGLBattleRenderer::initializeGL()
 {
-    //if((_initialized) || (!_model) || (_model->getBackgroundImage().isNull()) || (!_targetWidget) || (!_targetWidget->context()))
     if((_initialized) || (!_model) || (!_targetWidget) || (!_targetWidget->context()))
         return;
 
@@ -140,14 +139,9 @@ void PublishGLBattleRenderer::initializeGL()
     _model->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
 
     // Create the objects
-    // TODO: Layers
-    //initializeBackground();
     _scene.deriveSceneRectFromSize(_model->getLayerScene().sceneSize());
+    createContents();
 
-    //if(isBackgroundReady())
-        createContents();
-
-    _model->getLayerScene().playerGLInitialize(this, &_scene);
     QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
     for(int i = 0; i < tokenLayers.count(); ++i)
     {
@@ -155,22 +149,6 @@ void PublishGLBattleRenderer::initializeGL()
         if(tokenLayer)
         {
             connect(tokenLayer, &LayerTokens::postCombatantDrawGL, this, &PublishGLBattleRenderer::handleCombatantDrawnGL);
-
-            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
-            foreach(BattleDialogModelCombatant* combatant, combatants)
-            {
-                // TODO: need to do this when a new one is added?
-                if(combatant)
-                {
-                    PublishGLBattleToken* token = tokenLayer->getCombatantToken(combatant);
-                    if(token)
-                    {
-                        connect(token, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
-                        connect(token, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
-                    }
-                }
-            }
-
             tokenLayer->refreshEffects();
         }
     }
@@ -499,11 +477,7 @@ void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCom
     {
         _movementVisible = visible;
         if(combatant != _movementCombatant)
-        {
             _movementCombatant = combatant;
-            PublishGLBattleToken* combatantToken = _combatantTokens.value(combatant);
-            //_movementPC = combatantToken ? combatantToken->isPC() : false;
-        }
 
         _movementToken->setPositionScale(PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), combatant->getPosition()), remaining / MOVEMENT_TOKEN_SIZE);
     }
@@ -521,8 +495,6 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
     _activeCombatant = activeCombatant;
     if(_activeCombatant)
     {
-        PublishGLBattleToken* combatantToken = _combatantTokens.value(_activeCombatant);
-        //_activePC = combatantToken ? combatantToken->isPC() : false;
         activeCombatantMoved();
         connect(_activeCombatant, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
     }
@@ -652,10 +624,27 @@ void PublishGLBattleRenderer::updateTokens()
     QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
     foreach(Layer* layer, tokenLayers)
     {
-        if(layer)
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
         {
-            layer->playerGLUninitialize();
-            layer->playerGLInitialize(this, &_scene);
+            tokenLayer->playerGLUninitialize();
+            tokenLayer->playerGLInitialize(this, &_scene);
+
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                if(combatant)
+                {
+                    PublishGLBattleToken* token = tokenLayer->getCombatantToken(combatant);
+                    if(token)
+                    {
+                        connect(token, &PublishGLBattleObject::changed, this, &PublishGLBattleRenderer::updateWidget);
+                        connect(token, &PublishGLBattleToken::selectionChanged, this, &PublishGLBattleRenderer::tokenSelectionChanged);
+                    }
+                }
+            }
+
+            tokenLayer->refreshEffects();
         }
     }
 
@@ -673,8 +662,8 @@ void PublishGLBattleRenderer::createContents()
 
     activeCombatantChanged(_model->getActiveCombatant());
     updateSelectionTokens();
-
     createLineToken();
+    updateTokens();
 
     // Todo: move this into updateInitiative to avoid calling createContents when the init type is changed
     QFontMetrics fm(qApp->font());
