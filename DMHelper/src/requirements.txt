@@ -9,8 +9,9 @@ fixed * Grid type should no be a button, not clickable
 fixed * need to be able to change layers for effects
 fixed * Effect markers on enemies not visible
 fixed * Selection and Active markers in publish version
-* moving pc between layers ruins rendering
-* Selection and Active markers not visible from the beginning
+fixed * moving pc between layers ruins rendering
+fixed * Selection and Active markers not visible from the beginning
+* Moving character on the publish screen leaves the selection active, doesn't highlight on the dm screen, ctrl/shift doesnt work either
 * Hide layers separately between DM and Player windows
 * Create/edit/move effect doesn't dirty
 * Include "add XYZ..." to right-click context menu
@@ -23,12 +24,9 @@ fixed * Selection and Active markers in publish version
 3) Finally, a problem regarding combats. When creating a combat by assigning a map it is not visible in any way in the master window. You can see the map in the players window (however without a grid). Adding a monster shifts the view of the map in the players window by centering the view on the monster.
 * Make grid button a flat pushbutton that opens its own popup menu
 * Make the tooltip for a combatant or effect mention their layer
-*
 
-Effects
-* optional set of whether effect colors are applied or not
-* parent an effect to a token
-
+Next version
+* upgrade to latest Qt
 
 Checkpoint: when adding a new attribute/item to a campaign entry, consider:
 * presentation in the view

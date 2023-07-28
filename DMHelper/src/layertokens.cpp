@@ -441,7 +441,7 @@ void LayerTokens::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelM
             combatantToken->paintGL();
             combatantToken->paintEffects(defaultModelMatrix);
 
-            emit postCombatantDrawGL(functions, combatant);
+            emit postCombatantDrawGL(functions, combatant, combatantToken);
         }
     }
 
@@ -683,6 +683,16 @@ void LayerTokens::refreshEffects()
     {
         effectMoved(effect);
     }
+}
+
+void LayerTokens::handleCombatantSelected(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    QGraphicsPixmapItem* item = _combatantIconHash.value(combatant);
+    if(item)
+        item->setSelected(combatant->getSelected());
 }
 
 void LayerTokens::combatantMoved(BattleDialogModelObject* object)
@@ -946,56 +956,54 @@ void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCo
     if((!combatant) || (_combatantIconHash.contains(combatant)))
         return;
 
-    if(combatant)
+    QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
+    if(combatant->hasCondition(Combatant::Condition_Unconscious))
     {
-        QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
-        if(combatant->hasCondition(Combatant::Condition_Unconscious))
-        {
-            QImage originalImage = pix.toImage();
-            QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
-            pix = QPixmap::fromImage(grayscaleImage);
-        }
-        Combatant::drawConditions(&pix, combatant->getConditions());
-
-        QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(pix, combatant);
-        scene->addItem(pixmapItem);
-        pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
-        pixmapItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
-        pixmapItem->setPos(combatant->getPosition() + _position);
-        pixmapItem->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
-        qreal sizeFactor = combatant->getSizeFactor();
-        qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(), pix.height()));
-        pixmapItem->setScale(scaleFactor);
-
-        QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b>");
-        QStringList conditionString = Combatant::getConditionString(combatant->getConditions());
-        if(conditionString.count() > 0)
-            itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
-        pixmapItem->setToolTip(itemTooltip);
-
-        qDebug() << "[LayerTokens] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
-
-        qreal gridSize = (static_cast<qreal>(_scale)) / scaleFactor;
-        qreal gridOffset = gridSize * static_cast<qreal>(sizeFactor) / 2.0;
-        QGraphicsRectItem* rect = new QGraphicsRectItem(0, 0, gridSize * sizeFactor, gridSize * static_cast<qreal>(sizeFactor));
-        rect->setPos(-gridOffset, -gridOffset);
-        // TODO: Layers
-        //rect->setData(BattleDialogItemChild_Index, BattleDialogItemChild_Area);
-        rect->setParentItem(pixmapItem);
-        rect->setVisible(false);
-        qDebug() << "[LayerTokens] created " << pixmapItem << " with area child " << rect;
-
-        // TODO: Layers
-        // applyPersonalEffectToItem(pixmapItem);
-
-        _combatantIconHash.insert(combatant, pixmapItem);
-        //linkedObjectChanged(combatant, nullptr);
-
-        // TODO: Layers
-        //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(handleCombatantMoved(BattleDialogModelCombatant*)), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
-        //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
-        //connect(combatant, SIGNAL(combatantSelected(BattleDialogModelCombatant*)), this, SLOT(handleCombatantSelected(BattleDialogModelCombatant*)));
+        QImage originalImage = pix.toImage();
+        QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
+        pix = QPixmap::fromImage(grayscaleImage);
     }
+    Combatant::drawConditions(&pix, combatant->getConditions());
+
+    QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(pix, combatant);
+    scene->addItem(pixmapItem);
+    pixmapItem->setFlag(QGraphicsItem::ItemIsMovable, true);
+    pixmapItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    pixmapItem->setPos(combatant->getPosition() + _position);
+    pixmapItem->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
+    qreal sizeFactor = combatant->getSizeFactor();
+    qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(), pix.height()));
+    pixmapItem->setScale(scaleFactor);
+
+    QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b>");
+    QStringList conditionString = Combatant::getConditionString(combatant->getConditions());
+    if(conditionString.count() > 0)
+        itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
+    pixmapItem->setToolTip(itemTooltip);
+
+    qDebug() << "[LayerTokens] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
+
+    qreal gridSize = (static_cast<qreal>(_scale)) / scaleFactor;
+    qreal gridOffset = gridSize * static_cast<qreal>(sizeFactor) / 2.0;
+    QGraphicsRectItem* rect = new QGraphicsRectItem(0, 0, gridSize * sizeFactor, gridSize * static_cast<qreal>(sizeFactor));
+    rect->setPos(-gridOffset, -gridOffset);
+    // TODO: Layers
+    //rect->setData(BattleDialogItemChild_Index, BattleDialogItemChild_Area);
+    rect->setParentItem(pixmapItem);
+    rect->setVisible(false);
+    qDebug() << "[LayerTokens] created " << pixmapItem << " with area child " << rect;
+
+    // TODO: Layers
+    // applyPersonalEffectToItem(pixmapItem);
+
+    _combatantIconHash.insert(combatant, pixmapItem);
+    //linkedObjectChanged(combatant, nullptr);
+
+    // TODO: Layers
+    //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(handleCombatantMoved(BattleDialogModelCombatant*)), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
+    //connect(combatant, SIGNAL(combatantSelected(BattleDialogModelCombatant*)), this, SLOT(handleCombatantSelected(BattleDialogModelCombatant*)));
+    connect(combatant, &BattleDialogModelCombatant::combatantSelected, this, &LayerTokens::handleCombatantSelected);
 }
 
 QGraphicsItem* LayerTokens::createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect)

@@ -2666,11 +2666,19 @@ void BattleFrame::setUniqueSelection(BattleDialogModelCombatant* selected)
     if(!_model)
         return;
 
-    for(int i = 0; i < _model->getCombatantCount(); ++i)
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
     {
-        BattleDialogModelCombatant* combatant = _model->getCombatant(i);
-        if(combatant)
-            combatant->setSelected(combatant == selected);
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                if(combatant)
+                    combatant->setSelected(combatant == selected);
+            }
+        }
     }
 
     ui->frameCombatant->setCombatant(selected);
@@ -3465,14 +3473,20 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
         return;
     }
 
-    CombatantWidget* combatantWidget = getWidgetFromCombatant(_model->getActiveCombatant());
-    if(combatantWidget)
+    BattleDialogModelCombatant* previousActive = _model->getActiveCombatant();
+    if(previousActive)
     {
-        qDebug() << "[Battle Frame] removing active flag from widget " << reinterpret_cast<quint64>(combatantWidget);
-        combatantWidget->setActive(false);
+        disconnect(previousActive, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()));
+
+        CombatantWidget* previousWidget = getWidgetFromCombatant(_model->getActiveCombatant());
+        if(previousWidget)
+        {
+            qDebug() << "[Battle Frame] removing active flag from widget " << reinterpret_cast<quint64>(previousWidget);
+            previousWidget->setActive(false);
+        }
     }
 
-    combatantWidget = getWidgetFromCombatant(active);
+    CombatantWidget* combatantWidget = getWidgetFromCombatant(active);
     if(combatantWidget)
     {
         qDebug() << "[Battle Frame] adding active flag to widget " << reinterpret_cast<quint64>(combatantWidget);
@@ -3508,6 +3522,7 @@ void BattleFrame::setActiveCombatant(BattleDialogModelCombatant* active)
     }
 
     _model->setActiveCombatant(active);
+    connect(active, SIGNAL(objectMoved(BattleDialogModelObject*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
 }
 
 void BattleFrame::createCombatantIcon(BattleDialogModelCombatant* combatant)

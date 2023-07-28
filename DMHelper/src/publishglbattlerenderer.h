@@ -91,7 +91,7 @@ protected slots:
     void createLineToken();
     void layerAdded(Layer* layer);
     void layerRemoved(Layer* layer);
-    void handleCombatantDrawnGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant);
+    void handleCombatantDrawnGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant, PublishGLBattleToken* combatantToken);
 
 protected:
     bool _initialized;
@@ -123,7 +123,7 @@ protected:
     qreal _initiativeTokenHeight;
     bool _movementVisible;
     BattleDialogModelCombatant* _movementCombatant;
-    bool _movementPC;
+//    bool _movementPC;
     PublishGLImage* _movementToken;
     QString _tokenFrameFile;
     PublishGLImage* _tokenFrame;
@@ -135,7 +135,7 @@ protected:
     QColor _countdownColor;
 
     BattleDialogModelCombatant* _activeCombatant;
-    bool _activePC;
+    //bool _activePC;
 
     QString _activeTokenFile;
     PublishGLImage* _activeToken;

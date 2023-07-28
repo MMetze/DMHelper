@@ -79,10 +79,11 @@ public slots:
 
 signals:
     void objectRemoved(BattleDialogModelObject* object);
-    void postCombatantDrawGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant);
+    void postCombatantDrawGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant, PublishGLBattleToken* combatantToken);
 
 protected slots:
     // Local Interface
+    void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void combatantMoved(BattleDialogModelObject* object);
     void effectChanged(BattleDialogModelEffect* effect);
     void effectMoved(BattleDialogModelObject* object);

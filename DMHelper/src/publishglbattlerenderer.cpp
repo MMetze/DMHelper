@@ -50,7 +50,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _initiativeTokenHeight(0.0),
     _movementVisible(false),
     _movementCombatant(nullptr),
-    _movementPC(false),
+    //_movementPC(false),
     _movementToken(nullptr),
     _tokenFrameFile(),
     _tokenFrame(nullptr),
@@ -61,7 +61,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _countdownScale(1.0),
     _countdownColor(Qt::white),
     _activeCombatant(nullptr),
-    _activePC(false),
+    //_activePC(false),
     _activeTokenFile(),
     _activeToken(nullptr),
     _selectionTokenFile(),
@@ -159,6 +159,7 @@ void PublishGLBattleRenderer::initializeGL()
             QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
             foreach(BattleDialogModelCombatant* combatant, combatants)
             {
+                // TODO: need to do this when a new one is added?
                 if(combatant)
                 {
                     PublishGLBattleToken* token = tokenLayer->getCombatantToken(combatant);
@@ -492,7 +493,7 @@ void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCom
     {
         _movementVisible = false;
         _movementCombatant = nullptr;
-        _movementPC = false;
+        //_movementPC = false;
     }
     else
     {
@@ -501,7 +502,7 @@ void PublishGLBattleRenderer::movementChanged(bool visible, BattleDialogModelCom
         {
             _movementCombatant = combatant;
             PublishGLBattleToken* combatantToken = _combatantTokens.value(combatant);
-            _movementPC = combatantToken ? combatantToken->isPC() : false;
+            //_movementPC = combatantToken ? combatantToken->isPC() : false;
         }
 
         _movementToken->setPositionScale(PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), combatant->getPosition()), remaining / MOVEMENT_TOKEN_SIZE);
@@ -521,7 +522,7 @@ void PublishGLBattleRenderer::activeCombatantChanged(BattleDialogModelCombatant*
     if(_activeCombatant)
     {
         PublishGLBattleToken* combatantToken = _combatantTokens.value(_activeCombatant);
-        _activePC = combatantToken ? combatantToken->isPC() : false;
+        //_activePC = combatantToken ? combatantToken->isPC() : false;
         activeCombatantMoved();
         connect(_activeCombatant, &BattleDialogModelObject::objectMoved, this, &PublishGLBattleRenderer::activeCombatantMoved);
     }
@@ -670,7 +671,9 @@ void PublishGLBattleRenderer::createContents()
 
     _model->getLayerScene().playerGLInitialize(this, &_scene);
 
+    activeCombatantChanged(_model->getActiveCombatant());
     updateSelectionTokens();
+
     createLineToken();
 
     // Todo: move this into updateInitiative to avoid calling createContents when the init type is changed
@@ -763,7 +766,7 @@ void PublishGLBattleRenderer::cleanupContents()
     _initiativeTokenHeight = 0.0;
     _movementVisible = false;
     _movementCombatant = nullptr;
-    _movementPC = false;
+    //_movementPC = false;
 
     activeCombatantChanged(nullptr);
 }
@@ -1308,34 +1311,53 @@ void PublishGLBattleRenderer::layerRemoved(Layer* layer)
     }
 }
 
-void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant)
+void PublishGLBattleRenderer::handleCombatantDrawnGL(QOpenGLFunctions* functions, BattleDialogModelCombatant* combatant, PublishGLBattleToken* combatantToken)
 {
     if((!functions) || (!combatant))
         return;
 
+    if(combatant == _movementCombatant)
+    {
+        if((_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
+           ((combatantToken->isPC()) || ((_movementCombatant->getKnown()) &&
+                                         (_movementCombatant->getShown()) &&
+                                         ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
+                                         ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
+        {
+            functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
+            _movementToken->paintGL();
+        }
+    }
+
     if(combatant == _activeCombatant)
     {
-        if((_activePC) && (_activeCombatant) && (_activeToken) &&
-           ((_activePC) || ((_activeCombatant->getKnown()) &&
-                            (_activeCombatant->getShown()) &&
-                            ((_model->getShowDead()) || (_activeCombatant->getHitPoints() > 0)) &&
-                            ((_model->getShowAlive()) || (_activeCombatant->getHitPoints() <= 0)))))
+//        if((_activePC) && (_activeCombatant) && (_activeToken) &&
+        if((_activeCombatant) && (_activeToken) &&
+           ((combatantToken->isPC()) || ((_activeCombatant->getKnown()) &&
+                                         (_activeCombatant->getShown()) &&
+                                         ((_model->getShowDead()) || (_activeCombatant->getHitPoints() > 0)) &&
+                                         ((_model->getShowAlive()) || (_activeCombatant->getHitPoints() <= 0)))))
         {
             functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _activeToken->getMatrixData());
             _activeToken->paintGL();
         }
     }
 
-    if(combatant == _movementCombatant)
+    /*
+    if(combatant->getSelected())
     {
-        if((_movementVisible) && (_movementCombatant) && (_movementToken) && (_model->getShowMovement()) &&
-           ((_movementPC) || ((_movementCombatant->getKnown()) &&
-                              (_movementCombatant->getShown()) &&
-                              ((_model->getShowDead()) || (_movementCombatant->getHitPoints() > 0)) &&
-                              ((_model->getShowAlive()) || (_movementCombatant->getHitPoints() <= 0)))))
+        if((_selectionToken) &&
+           ((combatantToken->isPC()) || ((combatant->getKnown()) &&
+                                         (combatant->getShown()) &&
+                                         ((_model->getShowDead()) || (combatant->getHitPoints() > 0)) &&
+                                         ((_model->getShowAlive()) || (combatant->getHitPoints() <= 0)))))
         {
-            functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _movementToken->getMatrixData());
-            _movementToken->paintGL();
+            QSize textureSize = _selectionToken->getImageSize();
+            qreal scaleFactor = (static_cast<qreal>(_scene.getGridScale()-2)) * combatant->getSizeFactor() / qMax(textureSize.width(), textureSize.height());
+            _selectionToken->setPositionScale(PublishGLBattleObject::sceneToWorld(_scene.getSceneRect(), combatant->getPosition()), scaleFactor);
+            functions->glUniformMatrix4fv(_shaderModelMatrixRGB, 1, GL_FALSE, _selectionToken->getMatrixData());
+            _selectionToken->paintGL();
         }
     }
+    */
 }
