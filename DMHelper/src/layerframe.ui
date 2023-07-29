@@ -45,15 +45,48 @@
     <number>3</number>
    </property>
    <item>
-    <widget class="QCheckBox" name="chkVisible">
-     <property name="text">
-      <string/>
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="spacing">
+      <number>1</number>
      </property>
-     <property name="icon">
-      <iconset resource="resources.qrc">
-       <normaloff>:/img/data/small_icon_eye.png</normaloff>:/img/data/small_icon_eye.png</iconset>
+     <property name="leftMargin">
+      <number>3</number>
      </property>
-    </widget>
+     <item>
+      <widget class="QCheckBox" name="chkVisibleDM">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_dmscreen.png</normaloff>:/img/data/icon_dmscreen.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="chkVisiblePlayer">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/small_icon_eye.png</normaloff>:/img/data/small_icon_eye.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QLabel" name="lblIcon">

@@ -26,6 +26,9 @@ protected slots:
     void moveDown();
     void addLayer();
     void removeLayer();
+    void updateSceneSize();
+
+    void updateRenderer();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;

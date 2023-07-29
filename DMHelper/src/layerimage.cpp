@@ -95,10 +95,15 @@ void LayerImage::applyOrder(int order)
         _graphicsItem->setZValue(order);
 }
 
-void LayerImage::applyLayerVisible(bool layerVisible)
+void LayerImage::applyLayerVisibleDM(bool layerVisible)
 {
     if(_graphicsItem)
         _graphicsItem->setVisible(layerVisible);
+}
+
+void LayerImage::applyLayerVisiblePlayer(bool layerVisible)
+{
+    Q_UNUSED(layerVisible);
 }
 
 void LayerImage::applyOpacity(qreal opacity)

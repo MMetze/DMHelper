@@ -196,7 +196,7 @@ void LayerTokens::applyOrder(int order)
     }
 }
 
-void LayerTokens::applyLayerVisible(bool layerVisible)
+void LayerTokens::applyLayerVisibleDM(bool layerVisible)
 {
     foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
     {
@@ -209,6 +209,11 @@ void LayerTokens::applyLayerVisible(bool layerVisible)
         if(graphicsItem)
             graphicsItem->setVisible(layerVisible);
     }
+}
+
+void LayerTokens::applyLayerVisiblePlayer(bool layerVisible)
+{
+    Q_UNUSED(layerVisible)
 }
 
 void LayerTokens::applyOpacity(qreal opacity)
@@ -608,7 +613,7 @@ void LayerTokens::addEffect(BattleDialogModelEffect* effect)
         if(effectIcon)
         {
             effectIcon->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentEffect, getOrder()));
-            effectIcon->setVisible(getLayerVisible());
+            effectIcon->setVisible(getLayerVisibleDM());
             effectIcon->setOpacity(_opacityReference);
             effectIcon->setPos(effect->getPosition());
         }

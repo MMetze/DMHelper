@@ -30,7 +30,8 @@ public:
     virtual LayerScene* getLayerScene() const;
     virtual QString getName() const;
     virtual int getOrder() const;
-    virtual bool getLayerVisible() const;
+    virtual bool getLayerVisibleDM() const;
+    virtual bool getLayerVisiblePlayer() const;
     virtual qreal getOpacity() const;
     virtual QPoint getPosition() const;
     virtual QSize getSize() const;
@@ -44,7 +45,8 @@ public:
 
     // Local Layer Interface (generally should call set*() versions below
     virtual void applyOrder(int order) = 0;
-    virtual void applyLayerVisible(bool layerVisible) = 0;
+    virtual void applyLayerVisibleDM(bool layerVisible) = 0;
+    virtual void applyLayerVisiblePlayer(bool layerVisible) = 0;
     virtual void applyOpacity(qreal opacity) = 0;
     virtual void applyPosition(const QPoint& position) = 0;
     virtual void applySize(const QSize& size) = 0;
@@ -74,7 +76,8 @@ public slots:
     // Local Layer Interface (changing references doesn't change the source layer)
     virtual void setLayerScene(LayerScene* layerScene);
     virtual void setOrder(int order);
-    virtual void setLayerVisible(bool layerVisible);
+    virtual void setLayerVisibleDM(bool layerVisible);
+    virtual void setLayerVisiblePlayer(bool layerVisible);
     virtual void setOpacity(qreal opacity);
     virtual void setPosition(const QPoint& position);
     virtual void setPosition(int x, int y);
@@ -95,7 +98,8 @@ protected:
     LayerScene* _layerScene;
     QString _name;
     int _order;
-    bool _layerVisible;
+    bool _layerVisibleDM;
+    bool _layerVisiblePlayer;
     qreal _layerOpacity;
     qreal _opacityReference;
     QPoint _position;

@@ -17,7 +17,8 @@ public:
     explicit LayerFrame(Layer& layer, QWidget *parent = nullptr);
     ~LayerFrame();
 
-    void setLayerVisible(bool visible);
+    void setLayerVisibleDM(bool visible);
+    void setLayerVisiblePlayer(bool visible);
     void setIcon(const QImage& image);
     void setName(const QString& name);
     void setOpacity(int opacity);
@@ -33,13 +34,15 @@ public:
     Layer& getLayer();
 
 signals:
-    void visibleChanged(bool visible);
+    void visibleDMChanged(bool visible);
+    void visiblePlayerChanged(bool visible);
     void nameChanged(const QString& name);
     void opacityChanged(qreal opacity);
     void positionChanged(const QPoint& position);
     void sizeChanged(const QSize& size);
 
     void selectMe(LayerFrame* me);
+    void refreshPlayer();
 
 protected slots:
     void handleNameChanged();

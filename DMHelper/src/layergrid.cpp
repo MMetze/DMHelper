@@ -60,10 +60,15 @@ void LayerGrid::applyOrder(int order)
         _grid->setGridZValue(order);
 }
 
-void LayerGrid::applyLayerVisible(bool layerVisible)
+void LayerGrid::applyLayerVisibleDM(bool layerVisible)
 {
     if(_grid)
         _grid->setGridVisible(layerVisible);
+}
+
+void LayerGrid::applyLayerVisiblePlayer(bool layerVisible)
+{
+    Q_UNUSED(layerVisible);
 }
 
 void LayerGrid::applyOpacity(qreal opacity)

@@ -149,10 +149,16 @@ void LayerReference::applySize(const QSize& size)
         _referenceLayer->applySize(size);
 }
 
-void LayerReference::applyLayerVisible(bool layerVisible)
+void LayerReference::applyLayerVisibleDM(bool layerVisible)
 {
     if(_referenceLayer)
-        _referenceLayer->applyLayerVisible(layerVisible);
+        _referenceLayer->applyLayerVisibleDM(layerVisible);
+}
+
+void LayerReference::applyLayerVisiblePlayer(bool layerVisible)
+{
+    if(_referenceLayer)
+        _referenceLayer->applyLayerVisiblePlayer(layerVisible);
 }
 
 void LayerReference::applyOpacity(qreal opacity)
@@ -325,9 +331,6 @@ void LayerReference::copyReferenceValues()
     if(!_referenceLayer)
         return;
 
-//    _order = _referenceLayer->getOrder();
-//    _layerVisible = _referenceLayer->getLayerVisible();
-//    _layerOpacity = _referenceLayer->getOpacity();
     _position = _referenceLayer->getPosition();
     _size = _referenceLayer->getSize();
 }

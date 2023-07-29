@@ -77,10 +77,15 @@ void LayerVideo::applyOrder(int order)
         _graphicsItem->setZValue(order);
 }
 
-void LayerVideo::applyLayerVisible(bool layerVisible)
+void LayerVideo::applyLayerVisibleDM(bool layerVisible)
 {
     if(_graphicsItem)
         _graphicsItem->setVisible(layerVisible);
+}
+
+void LayerVideo::applyLayerVisiblePlayer(bool layerVisible)
+{
+    Q_UNUSED(layerVisible);
 }
 
 void LayerVideo::applyOpacity(qreal opacity)

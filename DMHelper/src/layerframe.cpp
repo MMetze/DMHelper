@@ -10,15 +10,24 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setLayerVisible(layer.getLayerVisible());
+    setLayerVisibleDM(layer.getLayerVisibleDM());
+    setLayerVisiblePlayer(layer.getLayerVisiblePlayer());
     setIcon(layer.getLayerIcon());
     setName(layer.getName());
     setOpacity(layer.getOpacity() * 100.0);
     setPosition(layer.getPosition());
     setSize(layer.getSize());
 
-    connect(ui->chkVisible, &QAbstractButton::clicked, this, &LayerFrame::visibleChanged);
+    connect(ui->chkVisibleDM, &QAbstractButton::clicked, this, &LayerFrame::visibleDMChanged);
+    connect(ui->chkVisiblePlayer, &QAbstractButton::clicked, this, &LayerFrame::visiblePlayerChanged);
     connect(ui->edtName, &QLineEdit::editingFinished, this, &LayerFrame::handleNameChanged);
+
+    connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
+    connect(this, &LayerFrame::visibleDMChanged, &layer, &Layer::setLayerVisibleDM);
+    connect(this, &LayerFrame::visiblePlayerChanged, &layer, &Layer::setLayerVisiblePlayer);
+    connect(this, &LayerFrame::opacityChanged, &layer, &Layer::setOpacity);
+    connect(this, &LayerFrame::positionChanged, &layer, QOverload<const QPoint&>::of(&Layer::setPosition));
+    connect(this, &LayerFrame::sizeChanged, &layer, QOverload<const QSize&>::of(&Layer::setSize));
 
     connect(ui->sliderOpacity, &QSlider::valueChanged, this, &LayerFrame::handleOpacityChanged);
     connect(ui->spinOpacity, &QSpinBox::editingFinished, this, &LayerFrame::handleOpacityChanged);
@@ -27,12 +36,6 @@ LayerFrame::LayerFrame(Layer& layer, QWidget *parent) :
     connect(ui->spinWidth, &QSpinBox::editingFinished, this, &LayerFrame::handleWidthChanged);
     connect(ui->spinHeight, &QSpinBox::editingFinished, this, &LayerFrame::handleHeightChanged);
     connect(ui->btnLockRatio, &QAbstractButton::clicked, this, &LayerFrame::handleLockClicked);
-
-    connect(this, &LayerFrame::nameChanged, &layer, &Layer::setName);
-    connect(this, &LayerFrame::visibleChanged, &layer, &Layer::setLayerVisible);
-    connect(this, &LayerFrame::opacityChanged, &layer, &Layer::setOpacity);
-    connect(this, &LayerFrame::positionChanged, &layer, QOverload<const QPoint&>::of(&Layer::setPosition));
-    connect(this, &LayerFrame::sizeChanged, &layer, QOverload<const QSize&>::of(&Layer::setSize));
 
     ui->edtName->installEventFilter(this);
 
@@ -59,10 +62,16 @@ LayerFrame::~LayerFrame()
     delete ui;
 }
 
-void LayerFrame::setLayerVisible(bool visible)
+void LayerFrame::setLayerVisibleDM(bool visible)
 {
-    if(ui->chkVisible->isChecked() != visible)
-        ui->chkVisible->setChecked(visible);
+    if(ui->chkVisibleDM->isChecked() != visible)
+        ui->chkVisibleDM->setChecked(visible);
+}
+
+void LayerFrame::setLayerVisiblePlayer(bool visible)
+{
+    if(ui->chkVisiblePlayer->isChecked() != visible)
+        ui->chkVisiblePlayer->setChecked(visible);
 }
 
 void LayerFrame::setIcon(const QImage& image)
@@ -168,18 +177,21 @@ void LayerFrame::handleOpacityChanged()
 
     emit selectMe(this);
     emit opacityChanged(static_cast<qreal>(newOpacity) / 100.0);
+    emit refreshPlayer();
 }
 
 void LayerFrame::handleXChanged()
 {
     updatePosition(ui->spinX->value(), ui->spinY->value());
     emit selectMe(this);
+    emit refreshPlayer();
 }
 
 void LayerFrame::handleYChanged()
 {
     updatePosition(ui->spinX->value(), ui->spinY->value());
     emit selectMe(this);
+    emit refreshPlayer();
 }
 
 void LayerFrame::handleWidthChanged()
@@ -192,6 +204,7 @@ void LayerFrame::handleWidthChanged()
 
     updateSize(ui->spinWidth->value(), newHeight);
     emit selectMe(this);
+    emit refreshPlayer();
 }
 
 void LayerFrame::handleHeightChanged()
@@ -204,6 +217,7 @@ void LayerFrame::handleHeightChanged()
 
     updateSize(newWidth, ui->spinHeight->value());
     emit selectMe(this);
+    emit refreshPlayer();
 }
 
 void LayerFrame::handleLockClicked()

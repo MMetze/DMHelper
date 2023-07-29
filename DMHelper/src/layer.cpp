@@ -8,7 +8,8 @@ Layer::Layer(const QString& name, int order, QObject *parent) :
     _layerScene(nullptr),
     _name(name),
     _order(order),
-    _layerVisible(true),
+    _layerVisibleDM(true),
+    _layerVisiblePlayer(true),
     _layerOpacity(1.0),
     _opacityReference(1.0),
     _position(),
@@ -40,7 +41,8 @@ void Layer::inputXML(const QDomElement &element, bool isImport)
 
     _name = element.attribute("layerName", QString("Layer"));
     _order = element.attribute("order", QString::number(0)).toInt();
-    _layerVisible = static_cast<bool>(element.attribute("visible", QString::number(1)).toInt());
+    _layerVisibleDM = static_cast<bool>(element.attribute("visibleDM", QString::number(1)).toInt());
+    _layerVisiblePlayer = static_cast<bool>(element.attribute("visiblePlayer", QString::number(1)).toInt());
     _layerOpacity = element.attribute(QString("opacity"), QString::number(1.0)).toDouble();
     _opacityReference = 1.0;
     _position = QPoint(element.attribute("x", QString::number(0)).toInt(),
@@ -78,9 +80,14 @@ int Layer::getOrder() const
     return _order;
 }
 
-bool Layer::getLayerVisible() const
+bool Layer::getLayerVisibleDM() const
 {
-    return _layerVisible;
+    return _layerVisibleDM;
+}
+
+bool Layer::getLayerVisiblePlayer() const
+{
+    return _layerVisiblePlayer;
 }
 
 qreal Layer::getOpacity() const
@@ -117,7 +124,8 @@ void Layer::copyBaseValues(Layer *other) const
 {
     other->_name = _name;
     other->_order = _order;
-    other->_layerVisible = _layerVisible;
+    other->_layerVisibleDM = _layerVisibleDM;
+    other->_layerVisiblePlayer = _layerVisiblePlayer;
     other->_layerOpacity = _layerOpacity;
     other->_opacityReference = _opacityReference;
     other->_position = _position;
@@ -129,7 +137,8 @@ void Layer::dmInitialize(QGraphicsScene* scene)
     Q_UNUSED(scene);
 
     applyOrder(_order);
-    applyLayerVisible(_layerVisible);
+    applyLayerVisibleDM(_layerVisibleDM);
+    applyLayerVisiblePlayer(_layerVisiblePlayer);
     applyOpacity(_layerOpacity);
     applyPosition(_position);
     applySize(_size);
@@ -141,7 +150,8 @@ void Layer::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scen
     Q_UNUSED(scene);
 
     applyOrder(_order);
-    applyLayerVisible(_layerVisible);
+    applyLayerVisibleDM(_layerVisibleDM);
+    applyLayerVisiblePlayer(_layerVisiblePlayer);
     applyOpacity(_layerOpacity);
     applyPosition(_position);
     applySize(_size);
@@ -202,13 +212,23 @@ void Layer::setOrder(int order)
     emit orderChanged(order);
 }
 
-void Layer::setLayerVisible(bool layerVisible)
+void Layer::setLayerVisibleDM(bool layerVisible)
 {
-    if(_layerVisible == layerVisible)
+    if(_layerVisibleDM == layerVisible)
         return;
 
-    applyLayerVisible(layerVisible);
-    _layerVisible = layerVisible;
+    applyLayerVisibleDM(layerVisible);
+    _layerVisibleDM = layerVisible;
+    emit dirty();
+}
+
+void Layer::setLayerVisiblePlayer(bool layerVisible)
+{
+    if(_layerVisiblePlayer == layerVisible)
+        return;
+
+    applyLayerVisiblePlayer(layerVisible);
+    _layerVisiblePlayer = layerVisible;
     emit dirty();
 }
 
@@ -261,8 +281,10 @@ void Layer::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& tar
         element.setAttribute("layerName", _name);
     if(_order > 0)
         element.setAttribute("order", _order);
-    if(!_layerVisible)
-        element.setAttribute("visible", _layerVisible);
+    if(!_layerVisibleDM)
+        element.setAttribute("visibleDM", _layerVisibleDM);
+    if(!_layerVisiblePlayer)
+        element.setAttribute("visiblePlayer", _layerVisiblePlayer);
     if(_layerOpacity < 1.0)
         element.setAttribute("opacity", _layerOpacity);
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>605</width>
-    <height>415</height>
+    <width>662</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -175,17 +175,23 @@
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
+      <widget class="Line" name="line">
+       <property name="minimumSize">
         <size>
-         <width>40</width>
-         <height>20</height>
+         <width>10</width>
+         <height>0</height>
         </size>
        </property>
-      </spacer>
+       <property name="maximumSize">
+        <size>
+         <width>10</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="btnUp">
@@ -393,14 +399,9 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>77</width>
+             <width>150</width>
              <height>16777215</height>
             </size>
-           </property>
-           <property name="font">
-            <font>
-             <bold>true</bold>
-            </font>
            </property>
            <property name="toolTip">
             <string>The scene's width</string>
@@ -470,7 +471,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>77</width>
+             <width>150</width>
              <height>16777215</height>
             </size>
            </property>
@@ -482,6 +483,51 @@
         </layout>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnClose">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>50</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Close</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/img/data/icon_close.png</normaloff>:/img/data/icon_close.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>40</width>
+         <height>40</height>
+        </size>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -506,58 +552,12 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>454</width>
-          <height>329</height>
+          <width>640</width>
+          <height>369</height>
          </rect>
         </property>
        </widget>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Preferred</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>3</number>
-       </property>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btnClose">
-         <property name="text">
-          <string>Close</string>
-         </property>
-         <property name="default">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
      </item>
     </layout>
    </item>
@@ -574,12 +574,12 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>430</x>
-     <y>344</y>
+     <x>630</x>
+     <y>37</y>
     </hint>
     <hint type="destinationlabel">
-     <x>242</x>
-     <y>183</y>
+     <x>332</x>
+     <y>221</y>
     </hint>
    </hints>
   </connection>

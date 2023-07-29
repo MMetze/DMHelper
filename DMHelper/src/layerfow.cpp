@@ -147,10 +147,15 @@ void LayerFow::applyOrder(int order)
         _graphicsItem->setZValue(order);
 }
 
-void LayerFow::applyLayerVisible(bool layerVisible)
+void LayerFow::applyLayerVisibleDM(bool layerVisible)
 {
     if(_graphicsItem)
         _graphicsItem->setVisible(layerVisible);
+}
+
+void LayerFow::applyLayerVisiblePlayer(bool layerVisible)
+{
+    Q_UNUSED(layerVisible);
 }
 
 void LayerFow::applyOpacity(qreal opacity)

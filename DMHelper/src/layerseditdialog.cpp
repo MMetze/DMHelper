@@ -9,6 +9,7 @@
 #include "layerframe.h"
 #include "layergrid.h"
 #include "ribbonframe.h"
+#include "publishglrenderer.h"
 #include <QImageReader>
 #include <QVBoxLayout>
 #include <QInputDialog>
@@ -162,6 +163,19 @@ void LayersEditDialog::removeLayer()
     resetLayout();
 }
 
+void LayersEditDialog::updateSceneSize()
+{
+    QSizeF currentSize = _scene.sceneSize();
+    ui->edtSceneWidth->setText(QString::number(currentSize.width()));
+    ui->edtSceneHeight->setText(QString::number(currentSize.height()));
+}
+
+void LayersEditDialog::updateRenderer()
+{
+    if(_scene.getRenderer())
+        _scene.getRenderer()->updateRender();
+}
+
 void LayersEditDialog::resizeEvent(QResizeEvent *event)
 {
     QDialog::resizeEvent(event);
@@ -186,6 +200,10 @@ void LayersEditDialog::showEvent(QShowEvent *event)
     ui->btnMaximumExpand->setIconSize(iconSize);
     RibbonFrame::setButtonSize(*ui->btnScaleOriginal, buttonSize, buttonSize);
     ui->btnScaleOriginal->setIconSize(iconSize);
+
+    ui->line->setMinimumHeight(labelHeight);
+    ui->line->setMaximumHeight(labelHeight);
+
     RibbonFrame::setButtonSize(*ui->btnUp, buttonSize, buttonSize);
     ui->btnUp->setIconSize(iconSize);
     RibbonFrame::setButtonSize(*ui->btnDown, buttonSize, buttonSize);
@@ -202,6 +220,9 @@ void LayersEditDialog::showEvent(QShowEvent *event)
     //setButtonSize(*ui->btnRemoveLayer, ribbonHeight, buttonWidth);
     //setStandardButtonSize(*ui->lblEditFile, *ui->btnEditFile, frameHeight);
 
+    RibbonFrame::setButtonSize(*ui->btnClose, buttonSize, buttonSize);
+    ui->btnClose->setIconSize(iconSize);
+
     QDialog::showEvent(event);
 }
 
@@ -217,6 +238,7 @@ void LayersEditDialog::resetLayout()
 {
     clearLayout();
     readScene();
+    updateRenderer();
 }
 
 void LayersEditDialog::readScene()
@@ -230,9 +252,14 @@ void LayersEditDialog::readScene()
             newFrame->installEventFilter(this);
             newFrame->setSelected(_scene.getSelectedLayerIndex() == i);
             connect(newFrame, &LayerFrame::selectMe, this, &LayersEditDialog::selectFrame);
+            connect(newFrame, &LayerFrame::refreshPlayer, this, &LayersEditDialog::updateRenderer);
+            connect(newFrame, &LayerFrame::positionChanged, this, &LayersEditDialog::updateSceneSize);
+            connect(newFrame, &LayerFrame::sizeChanged, this, &LayersEditDialog::updateSceneSize);
             _layerLayout->addWidget(newFrame);
         }
     }
+
+    updateSceneSize();
 }
 
 void LayersEditDialog::clearLayout()

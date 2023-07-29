@@ -24,7 +24,8 @@ public:
 
     // Local Layer Interface (generally should call set*() versions below
     virtual void applyOrder(int order) override;
-    virtual void applyLayerVisible(bool layerVisible) override;
+    virtual void applyLayerVisibleDM(bool layerVisible) override;
+    virtual void applyLayerVisiblePlayer(bool layerVisible) override;
     virtual void applyOpacity(qreal opacity) override;
     virtual void applyPosition(const QPoint& position) override;
     virtual void applySize(const QSize& size) override;
