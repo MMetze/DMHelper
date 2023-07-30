@@ -35,7 +35,8 @@ Map::Map(const QString& mapName, QObject *parent) :
     _partyId(),
     _partyIconPos(-1, -1),
     //_partyScale(DMHelper::STARTING_GRID_SCALE),
-    _mapScale(100),
+    _mapScale(0),
+    _gridCount(0),
     _showMarkers(true),
     _mapItems(),
     _initialized(false),
@@ -298,6 +299,16 @@ QSize Map::getMapSize() const
 void Map::setMapSize(QSize size)
 {
     _mapSize = size;
+}
+
+int Map::getGridCount() const
+{
+    return _gridCount;
+}
+
+void Map::setGridCount(int gridCount)
+{
+    _gridCount = gridCount;
 }
 
 AudioTrack* Map::getAudioTrack()
@@ -837,8 +848,12 @@ bool Map::initialize()
 
     //emitSignal(_imgBackground);
 
+    if(_layerScene.getScale() <= 0)
+        connect(&_layerScene, &LayerScene::sceneSizeChanged, this, &Map::initializePartyScale);
+
     _layerScene.initializeLayers();
-/*
+
+    /*
     Todo: create a basic color layer, move image loading into the layer
 
     LayerImage* backgroundLayer = new LayerImage(QString("Background"), imgBackground, -2);
@@ -1049,6 +1064,24 @@ void Map::setCameraRect(const QRect& cameraRect)
 void Map::setCameraRect(const QRectF& cameraRect)
 {
     setCameraRect(cameraRect.toRect());
+}
+
+void Map::initializePartyScale()
+{
+    disconnect(&_layerScene, &LayerScene::sceneSizeChanged, this, &Map::initializePartyScale);
+
+    if(_layerScene.getScale() > 0)
+        return;
+
+    int newScale = DMHelper::STARTING_GRID_SCALE;
+    if(_gridCount > 0)
+    {
+        newScale = _layerScene.sceneSize().width() / _gridCount;
+        if(newScale < 1)
+            newScale = DMHelper::STARTING_GRID_SCALE;
+    }
+
+    _layerScene.setScale(newScale);
 }
 
 QDomElement Map::createOutputXML(QDomDocument &doc)

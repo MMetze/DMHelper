@@ -1219,7 +1219,10 @@ void MainWindow::newMap()
 
     ok = false;
     int newScale = DMHelper::STARTING_GRID_SCALE;
-    int gridCount = QInputDialog::getInt(this, QString("Get Grid Count"), QString("How many grid squares should the map have horizontally? Even if you don't use a grid on this map, this is used to set the size of tokens on the map."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
+    int gridCount = QInputDialog::getInt(this, QString("Map Scale"), QString("How many grid squares should the map have horizontally? This is used to set the size of tokens on the map, even if you don't use the map for combat or with a grid."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
+    if(ok)
+        map->setGridCount(gridCount);
+    /*
     if((ok) && (gridCount > 0))
     {
         newScale = map->getLayerScene().sceneSize().width() / gridCount;
@@ -1227,6 +1230,7 @@ void MainWindow::newMap()
             newScale = DMHelper::STARTING_GRID_SCALE;
     }
     map->getLayerScene().setScale(newScale);
+    */
 
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
     if(result == QMessageBox::Yes)

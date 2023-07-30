@@ -40,6 +40,8 @@ public:
     void setMapColor(const QColor& color);
     QSize getMapSize() const;
     void setMapSize(QSize size);
+    int getGridCount() const;
+    void setGridCount(int gridCount);
 
     AudioTrack* getAudioTrack();
     QUuid getAudioTrackId() const;
@@ -153,6 +155,9 @@ public slots:
     void setCameraRect(const QRect& cameraRect);
     void setCameraRect(const QRectF& cameraRect);
 
+protected slots:
+    void initializePartyScale();
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
@@ -172,6 +177,7 @@ protected:
     QPoint _partyIconPos;
     //int _partyScale;
     int _mapScale;
+    int _gridCount;
 
     bool _showMarkers;
     QList<MapDraw*> _mapItems;

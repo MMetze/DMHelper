@@ -289,7 +289,8 @@ void LayerImage::initialize(const QSize& sceneSize)
         delete reader;
     }
 
-    _size = _layerImage.size();
+    //_size = _layerImage.size();
+    setSize(_layerImage.size());
 }
 
 void LayerImage::uninitialize()

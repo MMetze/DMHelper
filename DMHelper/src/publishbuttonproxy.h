@@ -27,7 +27,6 @@ public slots:
     void cancelPublish();
     void setPlayersWindow(bool checked);
     void setLayers(QList<Layer*> layers, int selected);
-    void updateLayerIcons();
 
 signals:
     void clicked(bool checked = false);
@@ -48,7 +47,6 @@ signals:
     void shareCancelPublish();
     void shareSetPlayersWindow(bool checked);
     void shareSetLayers(QList<Layer*> layers, int selected);
-    void shareUpdateLayerIcons();
 
 protected slots:
     void internalSetRotation(int rotation);

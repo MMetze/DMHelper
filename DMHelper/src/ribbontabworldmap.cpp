@@ -78,7 +78,7 @@ void RibbonTabWorldMap::setParty(Party* party)
         return;
 
     QList<QAction*> actionList = _menu->actions();
-    for(QAction* action : actionList)
+    foreach(QAction* action, actionList)
     {
         RibbonTabWorldMap_PartyAction* partyAction = dynamic_cast<RibbonTabWorldMap_PartyAction*>(action);
         if((partyAction) && (partyAction->getParty() == party))

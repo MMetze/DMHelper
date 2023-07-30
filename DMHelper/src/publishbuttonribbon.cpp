@@ -152,11 +152,6 @@ void PublishButtonRibbon::setLayers(QList<Layer*> layers, int selected)
     selectLayerAction(newDefaultAction);
 }
 
-void PublishButtonRibbon::updateLayerIcons()
-{
-
-}
-
 void PublishButtonRibbon::showEvent(QShowEvent *event)
 {
     RibbonFrame::showEvent(event);

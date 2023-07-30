@@ -18,7 +18,7 @@ LayerScene::LayerScene(QObject *parent) :
     CampaignObjectBase{QString(), parent},
     _initialized(false),
     _layers(),
-    _scale(DMHelper::STARTING_GRID_SCALE),
+    _scale(0),
     _selected(-1),
     _dmScene(nullptr),
     _playerGLScene(nullptr),
@@ -73,7 +73,8 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
             newLayer->inputXML(layerElement, isImport);
             newLayer->setScale(_scale);
             newLayer->setLayerScene(this);
-            connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
+            connectLayer(newLayer);
+            //connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
             _layers.append(newLayer);
         }
 
@@ -133,7 +134,8 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
     for(int i = 0; i < otherScene->_layers.count(); ++i)
     {
         Layer* newLayer = otherScene->_layers[i]->clone();
-        connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
+        connectLayer(newLayer);
+        //connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
         _layers.append(newLayer);
     }
 
@@ -649,6 +651,7 @@ void LayerScene::layerResized(const QSize& size)
     }
 
     emit sceneChanged();
+    emit sceneSizeChanged();
 }
 
 QDomElement LayerScene::createOutputXML(QDomDocument &doc)

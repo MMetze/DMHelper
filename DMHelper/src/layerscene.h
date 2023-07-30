@@ -82,6 +82,7 @@ signals:
     void layerAdded(Layer* layer);
     void layerRemoved(Layer* layer);
     void sceneChanged();
+    void sceneSizeChanged();
 
 protected slots:
     void removeLayer(Layer* reference);
