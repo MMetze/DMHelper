@@ -1,5 +1,6 @@
 #include "encounterfactory.h"
 #include "encountertext.h"
+#include "encountertextlinked.h"
 #include "encounterbattle.h"
 #include "party.h"
 #include "dmconstants.h"
@@ -21,6 +22,8 @@ CampaignObjectBase* EncounterFactory::createObject(int objectType, int subType, 
         case DMHelper::CampaignType_Text:
         case DMHelper::CampaignType_ScrollingText:
             return new EncounterText(objectName);
+        case DMHelper::CampaignType_LinkedText:
+            return new EncounterTextLinked(objectName);
         case DMHelper::CampaignType_Battle:
             return new EncounterBattle(objectName);
         case DMHelper::CampaignType_Party:
@@ -60,6 +63,10 @@ CampaignObjectBase* EncounterFactory::createObject(const QDomElement& element, b
     else if(element.tagName() == QString("entry-object"))
     {
         return new EncounterText();
+    }
+    else if(element.tagName() == QString("linked-object"))
+    {
+        return new EncounterTextLinked();
     }
     else if(element.tagName() == QString("battle-object"))
     {

@@ -26,11 +26,13 @@ public:
     virtual void deactivateObject() override;
 
     void setCharacter(Character* character);
+    void setHeroForgeToken(const QString& token);
 
 signals:
     void publishCharacterImage(QImage img);
     void characterChanged();
     void spellSelected(const QString& spellName);
+    void heroForgeTokenChanged(const QString& token);
 
 public slots:
     void calculateMods();
@@ -50,6 +52,7 @@ private slots:
     void updateCharacterName();
     void handlePublishClicked();
     void syncDndBeyond();
+    void importHeroForge();
     void openExpertiseDialog();
     void editConditions();
     void clearConditions();
@@ -78,6 +81,7 @@ private:
     bool _mouseDown;
     bool _reading;
     int _rotation;
+    QString _heroForgeToken;
     QGridLayout* _conditionGrid;
     QHBoxLayout* _pactSlots;
     QLineEdit* _edtPactLevel;

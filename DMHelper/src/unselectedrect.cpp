@@ -1,11 +1,18 @@
 #include "unselectedrect.h"
+#include "battledialogmodelobject.h"
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QPen>
 
-UnselectedRect::UnselectedRect(qreal x, qreal y, qreal width, qreal height, QGraphicsItem *parent) :
-    QGraphicsRectItem(x, y, width, height, parent)
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+    #include <QPainter>
+#endif
+
+UnselectedRect::UnselectedRect(BattleDialogModelObject* object, qreal x, qreal y, qreal width, qreal height, QGraphicsItem *parent) :
+    QGraphicsRectItem(x, y, width, height, parent),
+    _object(object)
 {
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
 }
 
 void UnselectedRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -13,6 +20,11 @@ void UnselectedRect::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     QStyleOptionGraphicsItem myoption = (*option);
     myoption.state &= ~QStyle::State_Selected;
     QGraphicsRectItem::paint(painter, &myoption, widget);
+
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+        if(painter)
+            painter->fillRect(boundingRect(), Qt::blue);
+#endif
 }
 
 QVariant UnselectedRect::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -22,6 +34,14 @@ QVariant UnselectedRect::itemChange(GraphicsItemChange change, const QVariant &v
         QPen itemPen = pen();
         itemPen.setWidth(isSelected() ? 3 : 1);
         setPen(itemPen);
+    }
+    else if(change == ItemScenePositionHasChanged)
+    {
+        if(_object)
+        {
+            QPointF newPos = value.toPointF();
+            _object->setPosition(newPos);
+        }
     }
 
     return QGraphicsItem::itemChange(change, value);

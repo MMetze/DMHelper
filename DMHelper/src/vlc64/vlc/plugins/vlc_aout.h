@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <vlc_list.h>
 #include <vlc_es.h>
+#include <vlc_threads.h>
 
 /* FIXME to remove once aout.h is cleaned a bit more */
 #include <vlc_block.h>
@@ -155,7 +156,7 @@ struct audio_output
 
     void *sys; /**< Private data for callbacks */
 
-    int (*start)(audio_output_t *, audio_sample_format_t *fmt);
+    int (*start)(audio_output_t *, audio_sample_format_t * restrict fmt);
     /**< Starts a new stream (mandatory, cannot be NULL).
       *
       * This callback changes the audio output from stopped to playing state
@@ -181,7 +182,7 @@ struct audio_output
       * \note This callback needs not be reentrant.
       */
 
-    int (*time_get)(audio_output_t *, vlc_tick_t *delay);
+    int (*time_get)(audio_output_t *, vlc_tick_t * restrict delay);
     /**< Estimates playback buffer latency (can be NULL).
       *
       * This callback computes an estimation of the delay until the current
@@ -316,7 +317,7 @@ struct audio_output
 static inline void aout_TimingReport(audio_output_t *aout, vlc_tick_t system_ts,
                                      vlc_tick_t audio_ts)
 {
-    return aout->events->timing_report(aout, system_ts, audio_ts);
+    aout->events->timing_report(aout, system_ts, audio_ts);
 }
 
 /**

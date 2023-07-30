@@ -5,15 +5,16 @@
 #include <QList>
 
 class BattleDialogModelCombatant;
+class BattleDialogModelEffect;
 class PublishGLImage;
-class PublishGLEffect;
+class PublishGLTokenHighlight;
 
 class PublishGLBattleToken : public PublishGLBattleObject
 {
     Q_OBJECT
 
 public:
-    PublishGLBattleToken(PublishGLBattleScene* scene, BattleDialogModelCombatant* combatant, bool isPC = false);
+    PublishGLBattleToken(PublishGLScene* scene, BattleDialogModelCombatant* combatant, bool isPC = false);
     virtual ~PublishGLBattleToken() override;
 
     virtual void cleanup() override;
@@ -24,8 +25,11 @@ public:
     QSizeF getTextureSize() const;
     bool isPC() const;
 
-    void addEffect(PublishGLImage& effectImage);
-    void removeEffect(const PublishGLImage& effectImage);
+    void addHighlight(PublishGLImage& highlightImage);
+    void removeHighlight(const PublishGLImage& highlightImage);
+    void addEffectHighlight(BattleDialogModelEffect* effect);
+    void removeEffectHighlight(BattleDialogModelEffect* effect);
+    bool hasEffectHighlight(BattleDialogModelEffect* effect);
 
 signals:
     void selectionChanged(PublishGLBattleToken* token);
@@ -47,7 +51,7 @@ protected:
     QSizeF _textureSize;
     bool _isPC;
 
-    QList<PublishGLEffect*> _effectList;
+    QList<PublishGLTokenHighlight*> _highlightList;
 
     bool _recreateToken;
 };

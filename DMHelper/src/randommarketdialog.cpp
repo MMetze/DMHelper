@@ -198,7 +198,7 @@ void RandomMarketDialog::randomizeMarket()
             for(EquipmentServer::GearSubItem subItem : gearItem._subitems)
             {
                 qreal randomValue = QRandomGenerator::global()->generateDouble();
-                if(randomValue < getProbability(location, shop, EquipmentServer::Category_Mundane, gearItem._probability != EquipmentServer::Probability_None ? gearItem._probability : subItem._probability ))
+                if(randomValue < getProbability(location, shop, EquipmentServer::Category_Mundane, gearItem._probability != EquipmentServer::Probability_None ? gearItem._probability : subItem._probability))
                 {
                     QString itemText(gearItem._name + ", " + subItem._name + " (" + subItem._weight + ", " + subItem._cost + ")");
                     ui->textEdit->append(itemText);
@@ -228,7 +228,7 @@ void RandomMarketDialog::randomizeMarket()
             for(EquipmentServer::ToolSubItem subitem : toolItem._subitems)
             {
                 qreal randomValue = QRandomGenerator::global()->generateDouble();
-                if(randomValue < getProbability(location, shop, EquipmentServer::Category_Mundane, toolItem._probability != EquipmentServer::Probability_None ? toolItem._probability : subitem._probability ))
+                if(randomValue < getProbability(location, shop, EquipmentServer::Category_Mundane, toolItem._probability != EquipmentServer::Probability_None ? toolItem._probability : subitem._probability))
                 {
                     QString itemText(toolItem._name + ", " + subitem._name + " (" + subitem._weight + ", " + subitem._cost + ")");
                     ui->textEdit->append(itemText);
@@ -276,7 +276,7 @@ void RandomMarketDialog::randomizeMarket()
             for(EquipmentServer::MagicSubItem subitem : magicItem._subitems)
             {
                 qreal randomValue = QRandomGenerator::global()->generateDouble();
-                if(randomValue < getProbability(location, shop, magicItem._category, magicItem._probability != EquipmentServer::Probability_None ? magicItem._probability : subitem._probability ))
+                if(randomValue < getProbability(location, shop, magicItem._category, magicItem._probability != EquipmentServer::Probability_None ? magicItem._probability : subitem._probability))
                 {
                     QString itemText(magicItem._name + ", " + subitem._name + " (" + magicItem._categoryText + ")");
                     if(magicItem._attunement)

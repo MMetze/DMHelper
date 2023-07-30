@@ -30,7 +30,7 @@ void QuickRefDataWidget::setIcon(const QString& icon)
     if(!iconPix.load(iconName))
         return;
 
-    QPixmap iconScaled = iconPix.scaled(30,30,Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QPixmap iconScaled = iconPix.scaled(30, 30, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     if(!iconScaled.isNull())
     {
         QPixmap finalPix = iconScaled;

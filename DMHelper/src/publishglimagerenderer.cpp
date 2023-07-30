@@ -11,29 +11,20 @@ PublishGLImageRenderer::PublishGLImageRenderer(CampaignObjectBase* renderObject,
     _color(color),
     _scene(),
     _initialized(false),
+    _newProjection(false),
     _shaderProgram(0),
-    _backgroundObject(nullptr)
+    _imageGLObject(nullptr)
 {
 }
 
 PublishGLImageRenderer::~PublishGLImageRenderer()
 {
-    cleanup();
+    PublishGLImageRenderer::cleanupGL();
 }
 
 QColor PublishGLImageRenderer::getBackgroundColor()
 {
     return _color;
-}
-
-void PublishGLImageRenderer::cleanup()
-{
-    _initialized = false;
-
-    delete _backgroundObject;
-    _backgroundObject = nullptr;
-
-    PublishGLRenderer::cleanup();
 }
 
 bool PublishGLImageRenderer::deleteOnDeactivation()
@@ -135,7 +126,7 @@ void PublishGLImageRenderer::initializeGL()
 
     // Create the objects
     _scene.deriveSceneRectFromSize(_image.size());
-    _backgroundObject = new PublishGLBattleBackground(nullptr, _image, GL_NEAREST);
+    _imageGLObject = new PublishGLBattleBackground(nullptr, _image, GL_NEAREST);
 
     // Matrices
     // Model
@@ -146,7 +137,7 @@ void PublishGLImageRenderer::initializeGL()
     viewMatrix.lookAt(QVector3D(0.f, 0.f, 500.f), QVector3D(0.f, 0.f, 0.f), QVector3D(0.f, 1.f, 0.f));
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "view"), 1, GL_FALSE, viewMatrix.constData());
     // Projection - note, this is set later when resizing the window
-    updateProjectionMatrix();
+    _newProjection = true;
 
     f->glUseProgram(_shaderProgram);
     f->glUniform1i(f->glGetUniformLocation(_shaderProgram, "texture1"), 0); // set it manually
@@ -154,12 +145,22 @@ void PublishGLImageRenderer::initializeGL()
     _initialized = true;
 }
 
+void PublishGLImageRenderer::cleanupGL()
+{
+    _initialized = false;
+
+    delete _imageGLObject;
+    _imageGLObject = nullptr;
+
+    PublishGLRenderer::cleanupGL();
+}
+
 void PublishGLImageRenderer::resizeGL(int w, int h)
 {
     _scene.setTargetSize(QSize(w, h));
     qDebug() << "[PublishGLImageRenderer] Resize w: " << w << ", h: " << h;
 
-    updateProjectionMatrix();
+    _newProjection = true;
     emit updateWidget();
 }
 
@@ -180,10 +181,16 @@ void PublishGLImageRenderer::paintGL()
     f->glUseProgram(_shaderProgram);
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    if(_backgroundObject)
+    if(_newProjection)
     {
-        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _backgroundObject->getMatrixData());
-        _backgroundObject->paintGL();
+        updateProjectionMatrix();
+        _newProjection = false;
+    }
+
+    if(_imageGLObject)
+    {
+        f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "model"), 1, GL_FALSE, _imageGLObject->getMatrixData());
+        _imageGLObject->paintGL();
     }
 }
 
@@ -196,29 +203,6 @@ QColor PublishGLImageRenderer::getColor() const
 {
     return _color;
 }
-
-void PublishGLImageRenderer::setImage(const QImage& image)
-{
-    if(image != _image)
-    {
-        _image = image;
-
-        if(_backgroundObject)
-        {
-            _backgroundObject->setImage(image);
-            updateProjectionMatrix();
-            emit updateWidget();
-        }
-    }
-}
-
-/*
-void PublishGLImageRenderer::setColor(QColor color)
-{
-    _color = color;
-    emit updateWidget();
-}
-*/
 
 void PublishGLImageRenderer::updateProjectionMatrix()
 {
@@ -234,4 +218,33 @@ void PublishGLImageRenderer::updateProjectionMatrix()
     QMatrix4x4 projectionMatrix;
     projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, projectionMatrix.constData());
+
+    if(_imageGLObject)
+    {
+        QPoint pointTopLeft = _scene.getSceneRect().toRect().topLeft();
+        _imageGLObject->setPosition(QPoint(pointTopLeft.x(), -pointTopLeft.y()));
+    }
 }
+
+void PublishGLImageRenderer::setImage(const QImage& image)
+{
+    if(image != _image)
+    {
+        _image = image;
+
+        if(_imageGLObject)
+        {
+            _imageGLObject->setImage(image);
+            _newProjection = true;
+            emit updateWidget();
+        }
+    }
+}
+
+/*
+void PublishGLImageRenderer::setColor(QColor color)
+{
+    _color = color;
+    emit updateWidget();
+}
+*/

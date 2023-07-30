@@ -43,7 +43,7 @@ VideoPlayerGLPlayer::VideoPlayerGLPlayer(const QString& videoFile, QOpenGLContex
     if(_context)
     {
 #ifdef Q_OS_WIN
-        _videoFile.replace("/","\\\\");
+        _videoFile.replace("/", "\\\\");
 #endif
         _vlcError = !VideoPlayerGLPlayer::initializeVLC();
 #ifdef VIDEO_DEBUG_MESSAGES
@@ -311,7 +311,7 @@ void VideoPlayerGLPlayer::cleanupVBObjects()
 }
 
 
-void VideoPlayerGLPlayer::playerEventCallback( const struct libvlc_event_t *p_event, void *p_data )
+void VideoPlayerGLPlayer::playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
 {
     if((!p_event) || (!p_data))
         return;
@@ -519,6 +519,7 @@ bool VideoPlayerGLPlayer::startPlayer()
     if(!_vlcPlayer)
         return false;
 
+    // TODO: Layers
     libvlc_audio_set_volume(_vlcPlayer, 0);
 
     // Set up event callbacks

@@ -8,9 +8,9 @@ CountdownSubFrame::CountdownSubFrame(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->edtHours->setValidator(new QIntValidator(0,99));
-    ui->edtMinutes->setValidator(new QIntValidator(0,99));
-    ui->edtSeconds->setValidator(new QIntValidator(0,99));
+    ui->edtHours->setValidator(new QIntValidator(0, 99));
+    ui->edtMinutes->setValidator(new QIntValidator(0, 99));
+    ui->edtSeconds->setValidator(new QIntValidator(0, 99));
 
     connect(ui->edtHours, SIGNAL(editingFinished()), this, SIGNAL(hoursEdited()));
     connect(ui->edtMinutes, SIGNAL(editingFinished()), this, SIGNAL(minutesEdited()));

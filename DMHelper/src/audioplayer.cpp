@@ -19,7 +19,7 @@ AudioPlayer::AudioPlayer(QObject *parent) :
     connect(_player, SIGNAL(positionChanged(qint64)), this, SLOT(handlePositionChanged(qint64)));
     connect(_player, SIGNAL(durationChanged(qint64)), this, SLOT(handleDurationChanged(qint64)));
     connect(_player, SIGNAL(volumeChanged(int)), this, SLOT(handleVolumeChanged(int)));
-    connect(_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(playerStatusChanged(QMediaPlayer::MediaStatus )));
+    connect(_player, SIGNAL(mediaStatusChanged(QMediaPlayer::MediaStatus)), this, SLOT(playerStatusChanged(QMediaPlayer::MediaStatus)));
     connect(_player, SIGNAL(currentMediaChanged(const QMediaContent &)), this, SLOT(handleCurrentMediaChanged(const QMediaContent &)));
     connect(_player, SIGNAL(stateChanged(QMediaPlayer::State)), this, SLOT(handleStateChanged(QMediaPlayer::State)));
 }

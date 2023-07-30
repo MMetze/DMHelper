@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>228</width>
-    <height>56</height>
+    <width>238</width>
+    <height>58</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,9 +27,6 @@
   </property>
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
-  </property>
-  <property name="lineWidth">
-   <number>1</number>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <property name="spacing">

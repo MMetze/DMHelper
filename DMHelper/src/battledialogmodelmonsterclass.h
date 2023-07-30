@@ -46,6 +46,7 @@ public:
 
     void setSizeFactor(qreal sizeFactor);
     void setMonsterName(const QString& monsterName);
+    void setIconIndex(int index);
 
 protected:
     // From BattleDialogModelCombatant
@@ -55,6 +56,7 @@ protected:
     QString _monsterName;
     int _monsterHP;
     qreal _monsterSize;
+    int _iconIndex;
 };
 
 

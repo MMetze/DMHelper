@@ -68,6 +68,8 @@ private slots:
     void editCountdownFrame();
     void setCountdownFrame(const QString& countdownFrame);
 
+    void heroForgeTokenEdited();
+
     void updateFileLocations();
     void resetFileLocations();
 

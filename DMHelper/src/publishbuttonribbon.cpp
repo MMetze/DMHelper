@@ -1,7 +1,9 @@
 #include "publishbuttonribbon.h"
 #include "colorpushbutton.h"
+#include "layer.h"
 #include "ui_publishbuttonribbon.h"
 #include <QKeyEvent>
+#include <QMenu>
 
 PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
     RibbonFrame(parent),
@@ -12,6 +14,7 @@ PublishButtonRibbon::PublishButtonRibbon(QWidget *parent) :
     connect(ui->btnPublish, SIGNAL(clicked(bool)), this, SLOT(handleClicked(bool)));
     connect(ui->btnPublish, SIGNAL(toggled(bool)), this, SLOT(handleToggle(bool)));
 
+    connect(ui->btnLayerTool, &QAbstractButton::clicked, this, &PublishButtonRibbon::layersClicked);
     connect(ui->btnCW, SIGNAL(clicked()), ui->btnColor, SLOT(rotateCW()));
     connect(ui->btnCW, SIGNAL(clicked()), this, SIGNAL(rotateCW()));
     connect(ui->btnCW, SIGNAL(clicked()), this, SLOT(handleRotation()));
@@ -91,12 +94,62 @@ void PublishButtonRibbon::clickPublish()
 void PublishButtonRibbon::cancelPublish()
 {
     if((ui->btnPublish->isCheckable()) && (ui->btnPublish->isChecked()))
+    {
         setChecked(false);
+        handleClicked(false);
+    }
 }
 
 void PublishButtonRibbon::setPlayersWindow(bool checked)
 {
     ui->btnPlayersWindow->setChecked(checked);
+}
+
+void PublishButtonRibbon::setLayersEnabled(bool enabled)
+{
+    ui->btnLayerTool->setEnabled(enabled);
+}
+
+void PublishButtonRibbon::setLayers(QList<Layer*> layers, int selected)
+{
+    QMenu* oldMenu = ui->btnLayerTool->menu();
+    if(oldMenu)
+    {
+        ui->btnLayerTool->setMenu(nullptr);
+        oldMenu->deleteLater();
+    }
+
+    //ui->btnLayerTool->setEnabled(layers.count() > 0);
+
+    QAction* newDefaultAction = nullptr;
+    if(layers.count() > 0)
+    {
+        QMenu* newMenu = new QMenu(this);
+        QAction* newAction = nullptr;
+
+        for(int i = 0; i < layers.count(); ++i)
+        {
+            if(layers.at(i))
+            {
+                newAction = new QAction(QIcon(QPixmap::fromImage(layers.at(i)->getLayerIcon())), layers.at(i)->getName());
+                newAction->setData(i);
+                newMenu->addAction(newAction);
+                if(selected == i)
+                    newDefaultAction = newAction;
+            }
+        }
+
+        if(!newDefaultAction)
+            newDefaultAction = newAction;
+
+        newMenu->addSeparator();
+        newMenu->addAction(new QAction(QIcon(":/img/data/icon_layers.png"), QString("Edit Layers...")));
+
+        connect(newMenu, &QMenu::triggered, this, &PublishButtonRibbon::selectLayerAction);
+        ui->btnLayerTool->setMenu(newMenu);
+    }
+
+    selectLayerAction(newDefaultAction);
 }
 
 void PublishButtonRibbon::showEvent(QShowEvent *event)
@@ -108,11 +161,14 @@ void PublishButtonRibbon::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblPublish, *ui->btnPublish, frameHeight);
 
     setLineHeight(*ui->line_2, frameHeight);
+    setLineHeight(*ui->line_4, frameHeight);
 
     int labelHeight = getLabelHeight(*ui->lblPublish, frameHeight);
     int buttonSize = height() - labelHeight;
     setButtonSize(*ui->btnPlayersWindow, buttonSize, buttonSize);
     setLineHeight(*ui->line_3, buttonSize);
+    setWidgetSize(*ui->btnLayerTool, buttonSize * 10 / 8, buttonSize);
+    setWidgetSize(*ui->lblLayers, buttonSize * 10 / 8, labelHeight);
     setButtonSize(*ui->btnCW, buttonSize, buttonSize);
     setButtonSize(*ui->btnColor, buttonSize, buttonSize);
     setButtonSize(*ui->btnCCW, buttonSize, buttonSize);
@@ -124,14 +180,10 @@ void PublishButtonRibbon::handleToggle(bool checked)
     if(checked)
     {
         emit colorChanged(ui->btnColor->getColor());
-        //ui->btnPublish->setStyleSheet(QString("QPushButton {color: red; font-weight: bold; }"));
-        //ui->btnPublish->setText(QString("Publishing!"));
         ui->btnPublish->setIcon(QIcon(QPixmap(":/img/data/icon_publishon.png")));
     }
     else
     {
-        //ui->btnPublish->setStyleSheet(QString("QPushButton {color: black; font-weight: bold; }"));
-        //ui->btnPublish->setText(QString("Publish"));
         ui->btnPublish->setIcon(QIcon(QPixmap(":/img/data/icon_publish.png")));
     }
 }
@@ -155,6 +207,22 @@ void PublishButtonRibbon::handleColorChanged(const QColor& color)
 
     if((ui->btnPublish->isCheckable()) && (ui->btnPublish->isChecked()))
         emit colorChanged(color);
+}
+
+void PublishButtonRibbon::selectLayerAction(QAction* action)
+{
+    if((action) && (action->text() == QString("Edit Layers...")))
+    {
+        emit layersClicked();
+        return;
+    }
+
+    ui->btnLayerTool->setIcon(action ? action->icon() : QIcon(":/img/data/icon_layers.png"));
+    if(ui->btnLayerTool->menu())
+        ui->btnLayerTool->menu()->setDefaultAction(action);
+
+    if(action)
+        emit layerSelected(action->data().toInt());
 }
 
 void PublishButtonRibbon::setDefaults()

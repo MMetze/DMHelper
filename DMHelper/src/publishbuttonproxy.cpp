@@ -16,6 +16,8 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
 
     connect(publishButton, SIGNAL(clicked(bool)), this, SIGNAL(clicked(bool)));
     connect(publishButton, SIGNAL(clicked(bool)), this, SIGNAL(shareSetChecked(bool)));
+    connect(publishButton, &PublishButtonRibbon::layerSelected, this, &PublishButtonProxy::layerSelected);
+    connect(publishButton, &PublishButtonRibbon::layersClicked, this, &PublishButtonProxy::layersClicked);
     connect(publishButton, SIGNAL(rotateCW()), this, SIGNAL(rotateCW()));
     connect(publishButton, SIGNAL(rotateCCW()), this, SIGNAL(rotateCCW()));
     connect(publishButton, SIGNAL(rotationChanged(int)), this, SIGNAL(rotationChanged(int)));
@@ -27,12 +29,14 @@ void PublishButtonProxy::addPublishButton(PublishButtonRibbon* publishButton)
     connect(publishButton, SIGNAL(playersWindowClicked(bool)), this, SIGNAL(shareSetPlayersWindow(bool)));
 
     connect(this, SIGNAL(sharePublishEnabled(bool)), publishButton, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(shareLayersEnabled(bool)), publishButton, SLOT(setLayersEnabled(bool)));
     connect(this, SIGNAL(shareSetChecked(bool)), publishButton, SLOT(setChecked(bool)));
     connect(this, SIGNAL(shareSetCheckable(bool)), publishButton, SLOT(setCheckable(bool)));
     connect(this, SIGNAL(shareSetRotation(int)), publishButton, SLOT(setRotation(int)));
     connect(this, SIGNAL(shareSetColor(const QColor&)), publishButton, SLOT(setColor(const QColor&)));
     connect(this, SIGNAL(shareCancelPublish()), publishButton, SLOT(cancelPublish()));
     connect(this, SIGNAL(shareSetPlayersWindow(bool)), publishButton, SLOT(setPlayersWindow(bool)));
+    connect(this, &PublishButtonProxy::shareSetLayers, publishButton, &PublishButtonRibbon::setLayers);
 }
 
 void PublishButtonProxy::removePublishButton(PublishButtonRibbon* publishButton)
@@ -49,9 +53,10 @@ int PublishButtonProxy::getRotation() const
     return _rotation;
 }
 
-void PublishButtonProxy::setPublishEnabled(bool enabled)
+void PublishButtonProxy::setPublishEnabled(bool enabled, bool layered)
 {
     emit sharePublishEnabled(enabled);
+    emit shareLayersEnabled(enabled && layered);
 }
 
 void PublishButtonProxy::setChecked(bool checked)
@@ -63,7 +68,6 @@ void PublishButtonProxy::setCheckable(bool checkable)
 {
     Q_UNUSED(checkable);
 
-    //emit shareSetCheckable(checkable);
     emit shareSetCheckable(true);
 }
 
@@ -85,6 +89,11 @@ void PublishButtonProxy::cancelPublish()
 void PublishButtonProxy::setPlayersWindow(bool checked)
 {
     emit shareSetPlayersWindow(checked);
+}
+
+void PublishButtonProxy::setLayers(QList<Layer*> layers, int selected)
+{
+    emit shareSetLayers(layers, selected);
 }
 
 void PublishButtonProxy::internalSetRotation(int rotation)

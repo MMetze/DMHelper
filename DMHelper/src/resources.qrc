@@ -92,7 +92,6 @@
         <file>data/active.png</file>
         <file>data/icon_countdown.png</file>
         <file>data/icon_music.png</file>
-        <file>data/compass.png</file>
         <file>data/dmhelper_large.png</file>
         <file>data/movement.png</file>
         <file>data/icon_reload.png</file>
@@ -247,6 +246,18 @@
         <file>data/icon_stop.png</file>
         <file>data/icon_lockedgrid.png</file>
         <file>data/icon_lockedscale.png</file>
+        <file>data/icon_layers.png</file>
+        <file>data/icon_forward.png</file>
+        <file>data/icon_plus.png</file>
+        <file>data/icon_dndbeyond.png</file>
+        <file>data/icon_heroforge.png</file>
+        <file>data/icon_newlink.png</file>
+        <file>data/icon_code.png</file>
+        <file>data/icon_image_fill.png</file>
+        <file>data/icon_image_max.png</file>
+        <file>data/icon_image_min.png</file>
+        <file>data/icon_image_original.png</file>
+        <file>data/icon_newmedia.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

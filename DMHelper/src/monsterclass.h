@@ -27,8 +27,10 @@ public:
     bool getPrivate() const;
 
     bool getLegendary() const; // bool equivalent to having existing legendary actions
-    QString getIcon() const;
-    QPixmap getIconPixmap(DMHelper::PixmapSize iconSize);
+    int getIconCount() const;
+    QStringList getIconList() const;
+    QString getIcon(int index = 0) const;
+    QPixmap getIconPixmap(DMHelper::PixmapSize iconSize, int index = 0);
     QString getName() const;
     QString getMonsterType() const;
     QString getMonsterSubType() const;
@@ -89,8 +91,13 @@ public:
 
 public slots:
     void setPrivate(bool isPrivate);
-    void setIcon(const QString& newIcon);
-    void searchForIcon(const QString &newIcon);
+    void addIcon(const QString& iconFile);
+    void setIcon(int index, const QString& iconFile);
+    void removeIcon(int index);
+    void removeIcon(const QString& iconFile);
+    void searchForIcons();
+    void refreshIconPixmaps();
+    //void searchForIcon(const QString &newIcon);
     void clearIcon();
     void setName(const QString& name);
     void setMonsterType(const QString& monsterType);
@@ -126,11 +133,13 @@ protected:
     void checkForSkill(const QDomElement& element, const QString& skillName, Combatant::Skills skill, bool isImport);
     void readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport);
     void writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const;
+    void readIcons(const QDomElement& element, bool isImport);
+    void writeIcons(QDomDocument &doc, QDomElement& element, QDir& targetDirectory, bool isExport) const;
 
     bool _private;
     // bool _legendary; Removed
 
-    QString _icon;
+    QStringList _icons;
 
     QString _name;
     QString _monsterType; // Now only type, no size
@@ -155,7 +164,7 @@ protected:
     QString _challenge; // changed from float to string, need both getters
 
     //QString _skills; // completely changed to individual values to be read
-    QMap<int,int> _skillValues;
+    QMap<int, int> _skillValues;
 
     int _strength;
     int _dexterity;
@@ -177,7 +186,7 @@ protected:
     bool _changesMade;
     bool _iconChanged;
 
-    ScaledPixmap _scaledPixmap;
+    QList<ScaledPixmap> _scaledPixmaps;
 
 public:
 

@@ -1,6 +1,5 @@
 #include "encounterbattle.h"
 #include "dmconstants.h"
-#include "encounterbattleedit.h"
 #include "battleframe.h"
 #include "combatant.h"
 #include "combatantfactory.h"
@@ -25,13 +24,14 @@
 EncounterBattle::EncounterBattle(const QString& encounterName, QObject *parent) :
     EncounterText(encounterName, parent),
     _audioTrackId(),
-    _combatantWaves(),
+//    _combatantWaves(),
     _battleModel(nullptr)
 {
 }
 
 EncounterBattle::~EncounterBattle()
 {
+    /*
     while(_combatantWaves.count() > 0)
     {
         CombatantGroupList wave = _combatantWaves.takeFirst();
@@ -41,32 +41,34 @@ EncounterBattle::~EncounterBattle()
             delete combatantPair.second;
         }
     }
+    */
 }
 
 void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
 {
-    QDomElement rootCombatantsElement = element.firstChildElement( "combatants" );
+    /*
+    QDomElement rootCombatantsElement = element.firstChildElement("combatants");
     if(rootCombatantsElement.isNull())
     {
-        QDomElement wavesElement = element.firstChildElement( "waves" );
-        if( !wavesElement.isNull() )
+        QDomElement wavesElement = element.firstChildElement("waves");
+        if(!wavesElement.isNull())
         {
             int wave = 0;
 
-            QDomElement waveElement = wavesElement.firstChildElement( QString("wave") );
-            while( !waveElement.isNull() )
+            QDomElement waveElement = wavesElement.firstChildElement(QString("wave"));
+            while(!waveElement.isNull())
             {
                 insertWave(wave);
 
-                QDomElement combatantsElement = waveElement.firstChildElement( "combatants" );
-                if( !combatantsElement.isNull() )
+                QDomElement combatantsElement = waveElement.firstChildElement("combatants");
+                if(!combatantsElement.isNull())
                 {
-                    QDomElement combatantPairElement = combatantsElement.firstChildElement( QString("combatantPair") );
-                    while( !combatantPairElement.isNull() )
+                    QDomElement combatantPairElement = combatantsElement.firstChildElement(QString("combatantPair"));
+                    while(!combatantPairElement.isNull())
                     {
                         int combatantCount = combatantPairElement.attribute("count").toInt();
-                        QDomElement combatantElement = combatantPairElement.firstChildElement( QString("combatant") );
-                        if( !combatantElement.isNull() )
+                        QDomElement combatantElement = combatantPairElement.firstChildElement(QString("combatant"));
+                        if(!combatantElement.isNull())
                         {
                             bool ok = false;
                             int combatantType = combatantElement.attribute("type").toInt(&ok);
@@ -79,15 +81,16 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
                                 }
                             }
                         }
-                        combatantPairElement = combatantPairElement.nextSiblingElement( QString("combatantPair") );
+                        combatantPairElement = combatantPairElement.nextSiblingElement(QString("combatantPair"));
                     }
                 }
 
-                waveElement = waveElement.nextSiblingElement( QString("wave") );
+                waveElement = waveElement.nextSiblingElement(QString("wave"));
                 ++wave;
             }
         }
     }
+    */
 
     extractTextNode(element, isImport);
     if(!getText().isEmpty())
@@ -111,7 +114,6 @@ void EncounterBattle::inputXML(const QDomElement &element, bool isImport)
     }
 
     CampaignObjectBase::inputXML(element, isImport);
-
 }
 
 void EncounterBattle::copyValues(const CampaignObjectBase* other)
@@ -159,6 +161,7 @@ void EncounterBattle::setAudioTrack(AudioTrack* track)
     }
 }
 
+/*
 int EncounterBattle::getWaveCount() const
 {
     return _combatantWaves.count();
@@ -183,9 +186,7 @@ void EncounterBattle::insertWave(int wave)
 
 void EncounterBattle::removeWave(int wave)
 {
-    if( (_combatantWaves.count() <= 0 ) ||
-        (wave < 0) ||
-        (wave >= _combatantWaves.count()) )
+    if((_combatantWaves.count() <= 0) || (wave < 0) || (wave >= _combatantWaves.count()))
         return;
 
     CombatantGroupList waveCombatants = _combatantWaves.takeAt(wave);
@@ -291,6 +292,7 @@ Combatant* EncounterBattle::getCombatantById(QUuid combatantId, int combatantInt
 
     return nullptr;
 }
+*/
 
 void EncounterBattle::createBattleDialogModel()
 {
@@ -335,7 +337,7 @@ void EncounterBattle::removeBattleDialogModel()
 
 void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
 {
-    if((_battleModel)||(isImport))
+    if((_battleModel) || (isImport))
         return;
 
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
@@ -349,25 +351,10 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
         return;
     }
 
-    _battleModel = new BattleDialogModel();
+    _battleModel = new BattleDialogModel(this);
     _battleModel->inputXML(rootBattleElement, isImport);
 
-    int mapIdInt = DMH_GLOBAL_INVALID_ID;
-    QUuid mapId = parseIdString(rootBattleElement.attribute("mapID"), &mapIdInt);
-    Map* battleMap = dynamic_cast<Map*>(campaign->getObjectById(mapId));
-    if(battleMap)
-    {
-        QRect mapRect(rootBattleElement.attribute("mapRectX",QString::number(0)).toInt(),
-                      rootBattleElement.attribute("mapRectY",QString::number(0)).toInt(),
-                      rootBattleElement.attribute("mapRectWidth",QString::number(0)).toInt(),
-                      rootBattleElement.attribute("mapRectHeight",QString::number(0)).toInt());
-
-        _battleModel->setMap(battleMap, mapRect);
-    }
-
-    int activeIdInt = DMH_GLOBAL_INVALID_ID;
-    QUuid activeId = parseIdString(rootBattleElement.attribute("activeId"), &activeIdInt, true);
-
+    /*
     QDomElement combatantsElement = rootBattleElement.firstChildElement("combatants");
     if(!combatantsElement.isNull())
     {
@@ -377,7 +364,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             BattleDialogModelCombatant* combatant = nullptr;
             int combatantIntId = DMH_GLOBAL_INVALID_ID;
             QUuid combatantId;
-            int combatantType = combatantElement.attribute("type",QString::number(DMHelper::CombatantType_Base)).toInt();
+            int combatantType = combatantElement.attribute("type", QString::number(DMHelper::CombatantType_Base)).toInt();
             if(combatantType == DMHelper::CombatantType_Character)
             {
                 combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId);
@@ -392,7 +379,7 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             }
             else if(combatantType == DMHelper::CombatantType_Monster)
             {
-                int monsterType = combatantElement.attribute("monsterType",QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
+                int monsterType = combatantElement.attribute("monsterType", QString::number(BattleDialogModelMonsterBase::BattleMonsterType_Base)).toInt();
                 if(monsterType == BattleDialogModelMonsterBase::BattleMonsterType_Combatant)
                 {
                     combatantId = parseIdString(combatantElement.attribute("combatantId"), &combatantIntId, true);
@@ -425,8 +412,8 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             {
                 combatant->inputXML(combatantElement, isImport);
                 _battleModel->appendCombatant(combatant);
-                if( ((!activeId.isNull()) && (combatant->getID() == activeId)) ||
-                    (( activeId.isNull()) && (combatant->getIntID() == activeIdInt)) )
+                if(((!activeId.isNull()) && (combatant->getID() == activeId)) ||
+                   ((activeId.isNull()) && (combatant->getIntID() == activeIdInt)))
                 {
                     _battleModel->setActiveCombatant(combatant);
                 }
@@ -435,10 +422,12 @@ void EncounterBattle::inputXMLBattle(const QDomElement &element, bool isImport)
             combatantElement = combatantElement.nextSiblingElement();
         }
     }
+    */
 
-    inputXMLEffects(rootBattleElement.firstChildElement("effects"), isImport);
+    //inputXMLEffects(rootBattleElement.firstChildElement("effects"), isImport);
 }
 
+/*
 void EncounterBattle::inputXMLEffects(const QDomElement &parentElement, bool isImport)
 {
     if((!_battleModel)||(isImport))
@@ -466,6 +455,7 @@ void EncounterBattle::inputXMLEffects(const QDomElement &parentElement, bool isI
         effectElement = effectElement.nextSiblingElement();
     }
 }
+*/
 
 QDomElement EncounterBattle::createOutputXML(QDomDocument &doc)
 {
@@ -476,6 +466,7 @@ void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element,
 {
     element.setAttribute("audiotrack", _audioTrackId.toString());
 
+    /*
     QDomElement wavesElement = doc.createElement("waves");
     element.appendChild(wavesElement);
     for(int wave = 0; wave < _combatantWaves.count(); ++wave)
@@ -496,6 +487,7 @@ void EncounterBattle::internalOutputXML(QDomDocument &doc, QDomElement &element,
             combatantsElement.appendChild(combatantPairElement);
         }
     }
+    */
 
     //if(_battleModel && !isExport)
     if(_battleModel)
@@ -525,12 +517,17 @@ void EncounterBattle::internalPostProcessXML(const QDomElement &element, bool is
 
 BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
 {
+    Q_UNUSED(combatantPos);
+
+    /*
     Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
     if(!campaign)
         return nullptr;
+    */
 
-    BattleDialogModel* battleModel = new BattleDialogModel();
+    BattleDialogModel* battleModel = new BattleDialogModel(this);
 
+    /*
     // Add the active characters
     QList<Character*> activeCharacters = campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
@@ -539,8 +536,9 @@ BattleDialogModel* EncounterBattle::createNewBattle(QPointF combatantPos)
         newCharacter->setPosition(combatantPos);
         battleModel->appendCombatant(newCharacter);
     }
+    */
 
-    connect(battleModel,SIGNAL(destroyed(QObject*)),this,SLOT(completeBattle()));
+//    connect(battleModel, SIGNAL(destroyed(QObject*)), this, SLOT(completeBattle()));
 
     return battleModel;
 }

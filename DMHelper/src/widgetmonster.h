@@ -26,6 +26,7 @@ public:
     virtual bool isKnown() override;
 
 public slots:
+    void clearImage();
     virtual void updateData() override;
     virtual void updateMove() override;
 

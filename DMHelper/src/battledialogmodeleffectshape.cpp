@@ -18,14 +18,16 @@ BattleDialogModelEffectShape::~BattleDialogModelEffectShape()
 {
 }
 
-void BattleDialogModelEffectShape::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
+void BattleDialogModelEffectShape::applyEffectValues(QGraphicsItem& item, qreal gridScale)
 {
-    BattleDialogModelEffect::applyEffectValues(item, gridScale);
-
+    beginBatchChanges();
     QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
     if(shapeItem)
     {
-        shapeItem->setPen(QPen(QColor(getColor().red(),getColor().green(),getColor().blue(),255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        shapeItem->setPen(QPen(QColor(getColor().red(), getColor().green(), getColor().blue(), 255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         shapeItem->setBrush(QBrush(getColor()));
+        registerChange();
     }
+    // NOTE: parent function will call endBatchChanges()
+    BattleDialogModelEffect::applyEffectValues(item, gridScale);
 }

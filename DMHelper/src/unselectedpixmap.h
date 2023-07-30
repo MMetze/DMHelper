@@ -3,29 +3,40 @@
 
 #include <QGraphicsPixmapItem>
 
-class BattleDialogModelCombatant;
+class BattleDialogModelObject;
+
+const int BATTLE_CONTENT_CHILD_INDEX = 0;
+const int BATTLE_CONTENT_CHILD_ID = 1;
+
+enum BattleDialogItemChild
+{
+    BattleDialogItemChild_Base = 0,
+    BattleDialogItemChild_Selection,
+    BattleDialogItemChild_AreaEffect,
+    BattleDialogItemChild_Area,
+    BattleDialogItemChild_PersonalEffect
+};
 
 class UnselectedPixmap : public QGraphicsPixmapItem
 {
 public:
-    explicit UnselectedPixmap(BattleDialogModelCombatant* combatant = nullptr, QGraphicsItem *parent = nullptr);
-    UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelCombatant* combatant, QGraphicsItem *parent = nullptr);
+    explicit UnselectedPixmap(BattleDialogModelObject* object = nullptr, QGraphicsItem *parent = nullptr);
+    UnselectedPixmap(const QPixmap &pixmap, BattleDialogModelObject* object, QGraphicsItem *parent = nullptr);
 
-    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR);
+    virtual void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = Q_NULLPTR) override;
+
     void setDraw(bool draw);
 
     void setHover(bool hover);
-    BattleDialogModelCombatant* getCombatant();
+    BattleDialogModelObject* getObject();
 
 protected:
-//    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
-    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value);
-//    virtual bool sceneEvent(QEvent *event);
+    virtual QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 
     void selectionChanged();
 
 private:
-    BattleDialogModelCombatant* _combatant;
+    BattleDialogModelObject* _object;
     bool _draw;
 };
 

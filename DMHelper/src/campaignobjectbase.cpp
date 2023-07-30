@@ -13,6 +13,9 @@ CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
     DMHObjectBase(parent),
     _expanded(true),
     _row(-1)
+#ifdef QT_DEBUG
+    , _DEBUG_NAME(name)
+#endif
 {
     if(!name.isEmpty())
         setObjectName(name);
@@ -29,20 +32,29 @@ QDomElement CampaignObjectBase::outputXML(QDomDocument &doc, QDomElement &parent
     qDebug() << "[CampaignBaseObject] Outputting object started: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
 #endif
     QDomElement newElement = createOutputXML(doc);
-    internalOutputXML(doc, newElement, targetDirectory, isExport);
-
-    if(!isExport)
+    if(!newElement.isNull())
     {
-        QList<CampaignObjectBase*> childList = getChildObjects();
-        for(int i = 0; i < childList.count(); ++i)
-        {
-            childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
-        }
-    }
+        internalOutputXML(doc, newElement, targetDirectory, isExport);
 
-    parent.appendChild(newElement);
+        if(!isExport)
+        {
+            QList<CampaignObjectBase*> childList = getChildObjects();
+            for(int i = 0; i < childList.count(); ++i)
+            {
+                childList.at(i)->outputXML(doc, newElement, targetDirectory, isExport);
+            }
+        }
+
+        parent.appendChild(newElement);
 #ifdef CAMPAIGN_OBJECT_LOGGING
-    qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+        qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+#endif
+    }
+#ifdef CAMPAIGN_OBJECT_LOGGING
+    else
+    {
+        qDebug() << "[CampaignBaseObject] Outputting object done: " << getName() << ", type: " << getObjectType() << ", id: " << getID();
+    }
 #endif
 
     return newElement;
@@ -65,6 +77,9 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
     {
         setObjectName(importName);
     }
+#ifdef QT_DEBUG
+    _DEBUG_NAME = objectName();
+#endif
 
 #ifdef CAMPAIGN_OBJECT_LOGGING
     qDebug() << "[CampaignBaseObject] Inputting object started: " << getName() << ", id: " << getID();
@@ -101,7 +116,7 @@ void CampaignObjectBase::postProcessXML(const QDomElement &element, bool isImpor
     QDomElement childElement = element.firstChildElement();
     while(!childElement.isNull())
     {
-//        if(!belongsToObject(childElement))
+        //if(!belongsToObject(childElement))
         {
             QString elTagName = childElement.tagName();
             QString elName = childElement.attribute(QString("name"));
@@ -147,6 +162,11 @@ QString CampaignObjectBase::getName() const
 int CampaignObjectBase::getRow() const
 {
     return _row;
+}
+
+bool CampaignObjectBase::isTreeVisible() const
+{
+    return true;
 }
 
 const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
@@ -359,6 +379,9 @@ void CampaignObjectBase::setName(const QString& name)
     if(objectName() != name)
     {
         setObjectName(name);
+#ifdef QT_DEBUG
+        _DEBUG_NAME = name;
+#endif
         emit nameChanged(this, objectName());
         handleInternalChange();
     }

@@ -8,8 +8,8 @@
 
 class Combatant;
 
-typedef QPair<int, Combatant*> CombatantGroup;
-typedef QList<CombatantGroup> CombatantGroupList;
+//typedef QPair<int, Combatant*> CombatantGroup;
+//typedef QList<CombatantGroup> CombatantGroupList;
 
 class Combatant : public CampaignObjectBase
 {
@@ -147,7 +147,7 @@ public:
     static QString convertModToStr(int modifier);
     static Ability getSkillAbility(Skills skill);
     static bool isSkillSavingThrow(Skills skill);
-    static QList<Combatant*> instantiateCombatants(CombatantGroup combatantGroup);
+//    static QList<Combatant*> instantiateCombatants(CombatantGroup combatantGroup);
 
     static int getConditionCount();
     static Condition getConditionByIndex(int index);

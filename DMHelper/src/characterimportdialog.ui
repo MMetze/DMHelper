@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Import D&amp;D Beyond Character</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QLabel" name="label">

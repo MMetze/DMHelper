@@ -10,7 +10,7 @@
 class QDomElement;
 class MonsterClass;
 
-typedef QPair<int,int> AbilitySkillPair;
+typedef QPair<int, int> AbilitySkillPair;
 Q_DECLARE_METATYPE(AbilitySkillPair);
 
 class Character : public Combatant

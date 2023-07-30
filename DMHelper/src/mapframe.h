@@ -5,7 +5,7 @@
 #include <QGraphicsScene>
 #include <QImage>
 #include <QRubberBand>
-#include "undopath.h"
+#include "undofowpath.h"
 #include "videoplayer.h"
 #include "unselectedpixmap.h"
 
@@ -21,6 +21,7 @@ class Party;
 class MapMarkerGraphicsItem;
 class UndoMarker;
 class CameraRect;
+class Layer;
 
 class MapFrame : public CampaignObjectFrame
 {
@@ -71,6 +72,7 @@ signals:
     void markerChanged();
 
     void registerRenderer(PublishGLRenderer* renderer);
+    void setLayers(QList<Layer*> layers, int selected);
 
     void mapEditChanged(bool enabled);
     void zoomSelectChanged(bool enabled);
@@ -86,12 +88,12 @@ signals:
     void publishCancelled();
 
 public slots:
-    void updateFoW();
+//    void updateFoW();
     void fillFoW();
     void resetFoW();
     void clearFoW();
     void undoPaint();
-    void clear();
+  // void clear();
 
     void colorize();
 
@@ -147,14 +149,16 @@ public slots:
     void publishWindowMouseRelease(const QPointF& position);
 
     void targetResized(const QSize& newSize);
+    void layerSelected(int selected);
 
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void editLayers() override;
 
 protected:
-    void initializeFoW();
-    void uninitializeFoW();
+    void initializeMap();
+    void uninitializeMap();
 
     void createMarkerItems();
     void cleanupMarkerItems();
@@ -204,6 +208,7 @@ protected slots:
 
     void handleItemChanged(QGraphicsItem* item);
     void handleSceneChanged(const QList<QRectF> &region);
+    void handleMapSceneChanged();
 
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
@@ -215,8 +220,9 @@ private:
     Ui::MapFrame *ui;
 
     MapFrameScene* _scene;
-    QGraphicsPixmapItem* _backgroundImage;
-    QGraphicsPixmapItem* _fow;
+    //QGraphicsPixmapItem* _backgroundImage;
+    //Layer* _backgroundLayer;
+    //QGraphicsPixmapItem* _fow;
     UnselectedPixmap* _partyIcon;
     CameraRect* _cameraRect;
 
@@ -234,7 +240,7 @@ private:
     bool _mapMoveMouseDown;
     bool _mouseDown;
     QPoint _mouseDownPos;
-    UndoPath* _undoPath;
+    UndoFowPath* _undoPath;
 
     QGraphicsLineItem* _distanceLine;
     MapDraw* _mapItem;

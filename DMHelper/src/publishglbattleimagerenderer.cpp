@@ -12,15 +12,15 @@ PublishGLBattleImageRenderer::PublishGLBattleImageRenderer(BattleDialogModel* mo
 
 PublishGLBattleImageRenderer::~PublishGLBattleImageRenderer()
 {
-    PublishGLBattleImageRenderer::cleanup();
+    PublishGLBattleImageRenderer::cleanupGL();
 }
 
-void PublishGLBattleImageRenderer::cleanup()
+void PublishGLBattleImageRenderer::cleanupGL()
 {
     delete _backgroundObject;
     _backgroundObject = nullptr;
 
-    PublishGLBattleRenderer::cleanup();
+    PublishGLBattleRenderer::cleanupGL();
 }
 
 QSizeF PublishGLBattleImageRenderer::getBackgroundSize()

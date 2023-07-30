@@ -44,6 +44,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _statisticsAccepted(false),
     _instanceUuid(),
     _lastUpdateDate(),
+    _heroForgeToken(),
 #ifdef INCLUDE_NETWORK_SUPPORT
     _networkEnabled(false),
     _urlString(),
@@ -227,6 +228,10 @@ QDate OptionsContainer::getLastUpdateCheck() const
     return _lastUpdateDate;
 }
 
+QString OptionsContainer::getHeroForgeToken() const
+{
+    return _heroForgeToken;
+}
 
 #ifdef INCLUDE_NETWORK_SUPPORT
 
@@ -317,13 +322,13 @@ void OptionsContainer::readSettings()
     setBestiaryFileName(getSettingsFile(settings, QString("bestiary"), QString("DMHelperBestiary.xml"), &bestiaryExists));
     if((!settings.contains(QString("bestiary"))) || (!bestiaryExists))
         getDataDirectory(QString("Images"), true);
-    setLastMonster(settings.value("lastMonster","").toString());
+    setLastMonster(settings.value("lastMonster", "").toString());
 
     bool spellbookExists = true;
     setSpellbookFileName(getSettingsFile(settings, QString("spellbook"), QString("spellbook.xml"), &spellbookExists));
     if((!settings.contains(QString("spellbook"))) || (!spellbookExists))
         getDataDirectory(QString("Images"), true);
-    setLastSpell(settings.value("lastSpell","").toString());
+    setLastSpell(settings.value("lastSpell", "").toString());
 
     setQuickReferenceFileName(getSettingsFile(settings, QString("quickReference"), QString("quickref_data.xml")));
     setCalendarFileName(getSettingsFile(settings, QString("calendar"), QString("calendar.xml")));
@@ -333,8 +338,8 @@ void OptionsContainer::readSettings()
     //setTablesDirectory(settings.value("tables", getTablesDirectory()).toString());
     setTablesDirectory(getSettingsDirectory(settings, QString("tables"), QString("tables")));
 
-    setShowAnimations(settings.value("showAnimations",QVariant(false)).toBool());
-    setFontFamily(settings.value("fontFamily","Trebuchet MS").toString());
+    setShowAnimations(settings.value("showAnimations", QVariant(false)).toBool());
+    setFontFamily(settings.value("fontFamily", "Trebuchet MS").toString());
 
     //12*96/72 = 16 Pixels
     //10*96/72 = 13 Pixels
@@ -342,32 +347,34 @@ void OptionsContainer::readSettings()
     int defaultFontSize = 10;
     if(_logicalDPI > 0)
         defaultFontSize = (20*72)/_logicalDPI;
-    setFontSize(settings.value("fontSize",QVariant(defaultFontSize)).toInt());
-    setPasteRich(settings.value("pasteRich",QVariant(false)).toBool());
-    setAudioVolume(settings.value("audioVolume",QVariant(100)).toInt());
+    setFontSize(settings.value("fontSize", QVariant(defaultFontSize)).toInt());
+    setPasteRich(settings.value("pasteRich", QVariant(false)).toBool());
+    setAudioVolume(settings.value("audioVolume", QVariant(100)).toInt());
     if(settings.contains("initiativeType"))
-        setInitiativeType(settings.value("initiativeType",QVariant(0)).toInt());
+        setInitiativeType(settings.value("initiativeType", QVariant(0)).toInt());
     else
-        setInitiativeType(settings.value("showOnDeck",QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
-    setShowCountdown(settings.value("showCountdown",QVariant(true)).toBool());
-    setCountdownDuration(settings.value("countdownDuration",QVariant(15)).toInt());
+        setInitiativeType(settings.value("showOnDeck", QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
+    setShowCountdown(settings.value("showCountdown", QVariant(true)).toBool());
+    setCountdownDuration(settings.value("countdownDuration", QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
     setSelectedIcon(settings.value("selectedIcon").toString());
     setActiveIcon(settings.value("activeIcon").toString());
     setCombatantFrame(settings.value("combatantFrame").toString());
     setCountdownFrame(settings.value("countdownFrame").toString());
-    setGridLocked(settings.value("gridLocked",QVariant(false)).toBool());
-    setGridLockScale(settings.value("gridLockScale",QVariant(0.0)).toReal());
+    setGridLocked(settings.value("gridLocked", QVariant(false)).toBool());
+    setGridLockScale(settings.value("gridLockScale", QVariant(0.0)).toReal());
 
     _lastAppVersion = settings.value("lastAppVersion").toString();
 
     _dataSettingsExist = (settings.contains("updatesEnabled") || settings.contains("statisticsAccepted"));
     if(_dataSettingsExist)
     {
-        setUpdatesEnabled(settings.value("updatesEnabled",QVariant(false)).toBool());
-        setStatisticsAccepted(settings.value("statisticsAccepted",QVariant(false)).toBool());
-        setLastUpdateDate(settings.value("lastUpdateCheck","").toDate());
+        setUpdatesEnabled(settings.value("updatesEnabled", QVariant(false)).toBool());
+        setStatisticsAccepted(settings.value("statisticsAccepted", QVariant(false)).toBool());
+        setLastUpdateDate(settings.value("lastUpdateCheck", "").toDate());
     }
+
+    setHeroForgeToken(settings.value("heroforgeToken").toString());
 
     QString uuidString = settings.value("instanceUuid").toString();
     if(uuidString.isEmpty())
@@ -376,13 +383,13 @@ void OptionsContainer::readSettings()
         _instanceUuid = QUuid::fromString(uuidString);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
-    setNetworkEnabled(settings.value("networkEnabled",QVariant(false)).toBool());
-    setURLString(settings.value("url","").toString());
-    setUserName(settings.value("username","").toString());
-    setSavePassword(settings.value("savePassword",QVariant(false)).toBool());
-    setPassword(settings.value("password","").toString());
-    setSessionID(settings.value("sessionID","").toString());
-    setInviteID(settings.value("inviteID","").toString());
+    setNetworkEnabled(settings.value("networkEnabled", QVariant(false)).toBool());
+    setURLString(settings.value("url", "").toString());
+    setUserName(settings.value("username", "").toString());
+    setSavePassword(settings.value("savePassword", QVariant(false)).toBool());
+    setPassword(settings.value("password", "").toString());
+    setSessionID(settings.value("sessionID", "").toString());
+    setInviteID(settings.value("inviteID", "").toString());
 #endif
 
     if(_mruHandler)
@@ -436,6 +443,7 @@ void OptionsContainer::writeSettings()
     {
         settings.setValue("updatesEnabled", isUpdatesEnabled());
         settings.setValue("statisticsAccepted", isStatisticsAccepted());
+
         if((!_instanceUuid.isNull()) && (_statisticsAccepted))
             settings.setValue("instanceUuid", _instanceUuid.toString());
         else
@@ -444,6 +452,11 @@ void OptionsContainer::writeSettings()
         if(isUpdatesEnabled())
             settings.setValue("lastUpdateCheck", _lastUpdateDate);
     }
+
+    if(_heroForgeToken == QString())
+        settings.remove("heroforgeToken");
+    else
+        settings.setValue("heroforgeToken", _heroForgeToken);
 
 #ifdef INCLUDE_NETWORK_SUPPORT
     settings.setValue("networkEnabled", getNetworkEnabled());
@@ -927,6 +940,17 @@ void OptionsContainer::setLastUpdateDate(const QDate& date)
     _lastUpdateDate = date;
 }
 
+void OptionsContainer::setHeroForgeToken(const QString& token)
+{
+    if(_heroForgeToken != token)
+    {
+        _heroForgeToken = token;
+        qDebug() << "[OptionsContainer] Heroforge Token set to: " << _heroForgeToken;
+        emit heroForgeTokenChanged(_heroForgeToken);
+    }
+}
+
+
 #ifdef INCLUDE_NETWORK_SUPPORT
 
 void OptionsContainer::setNetworkEnabled(bool enabled)
@@ -1036,6 +1060,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         _statisticsAccepted = other->_statisticsAccepted;
         _instanceUuid = QUuid::fromString(other->_instanceUuid.toString());
         _lastUpdateDate = other->_lastUpdateDate;
+        _heroForgeToken = other->_heroForgeToken;
 #ifdef INCLUDE_NETWORK_SUPPORT
         setNetworkEnabled(other->_networkEnabled);
         setURLString(other->_urlString);

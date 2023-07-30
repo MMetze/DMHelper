@@ -181,6 +181,7 @@ void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* ob
             item->setIcon(0, QIcon(":/img/data/icon_contentmap.png"));
             break;
         case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_LinkedText:
             item->setIcon(0, QIcon(":/img/data/icon_contenttextencounter.png"));
             break;
         case DMHelper::CampaignType_Battle:

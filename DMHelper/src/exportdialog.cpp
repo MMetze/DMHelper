@@ -314,6 +314,7 @@ void ExportDialog::setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem
             widgetItem->setIcon(0, QIcon(":/img/data/icon_contentmap.png"));
             break;
         case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_LinkedText:
             widgetItem->setIcon(0, QIcon(":/img/data/icon_contenttextencounter.png"));
             break;
         case DMHelper::CampaignType_Battle:

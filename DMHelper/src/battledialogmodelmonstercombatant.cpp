@@ -44,9 +44,9 @@ void BattleDialogModelMonsterCombatant::inputXML(const QDomElement &element, boo
 {
     BattleDialogModelMonsterBase::inputXML(element, isImport);
 
-    _monsterSize = element.attribute("monsterSize",QString::number(DMHelper::CombatantSize_Medium)).toInt();
+    _monsterSize = element.attribute("monsterSize", QString::number(DMHelper::CombatantSize_Medium)).toInt();
     _monsterName = element.attribute("monsterName");
-    _monsterHP = element.attribute("monsterHP",QString::number(0)).toInt();
+    _monsterHP = element.attribute("monsterHP", QString::number(0)).toInt();
 }
 
 void BattleDialogModelMonsterCombatant::copyValues(const CampaignObjectBase* other)

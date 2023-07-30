@@ -183,9 +183,10 @@ void AudioTrackYoutube::findDirectUrl(const QString& youtubeId)
         return;
 
     if(!_manager)
+    {
         _manager = new QNetworkAccessManager(this);
-
-    connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(urlRequestFinished(QNetworkReply*)));
+        connect(_manager, SIGNAL(finished(QNetworkReply*)), this, SLOT(urlRequestFinished(QNetworkReply*)));
+    }
 
     QString getString("https://api.dmhh.net/youtube?id=");
     getString.append(youtubeId);

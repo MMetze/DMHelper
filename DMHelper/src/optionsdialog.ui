@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>668</width>
-    <height>553</height>
+    <height>585</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -293,6 +293,20 @@
                <string>Browse...</string>
               </property>
              </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_14">
+            <item>
+             <widget class="QLabel" name="label_11">
+              <property name="text">
+               <string>Hero Forge Access Key</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="edtHeroForgeAccessKey"/>
             </item>
            </layout>
           </item>

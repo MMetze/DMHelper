@@ -39,13 +39,30 @@ typedef struct vlc_input_decoder_t vlc_input_decoder_t;
 typedef struct input_resource_t input_resource_t;
 
 /* */
+struct vlc_clock_t;
 VLC_API vlc_input_decoder_t *
-vlc_input_decoder_Create( vlc_object_t *, const es_format_t *, input_resource_t * ) VLC_USED;
-VLC_API void vlc_input_decoder_Delete( vlc_input_decoder_t * );
+vlc_input_decoder_Create( vlc_object_t *, const es_format_t *,
+                          struct vlc_clock_t *, input_resource_t * ) VLC_USED;
+
+/**
+ * Delete an existing vlc_input_decoder_t instance.
+ *
+ * Close the decoder implementation and delete the vlc_input_decoder_t
+ * instance.
+ * The instance must have been drained using vlc_input_decoder_Drain() or
+ * flushed using vlc_input_decoder_Flush() after any previous call to
+ * vlc_input_decoder_Decode() before calling the destructor.
+ *
+ * @param decoder The vlc_input_decoder_t to delete, created from
+ *        vlc_input_decoder_Create().
+ */
+VLC_API void vlc_input_decoder_Delete( vlc_input_decoder_t * decoder);
+
 VLC_API void vlc_input_decoder_Decode( vlc_input_decoder_t *, block_t *, bool b_do_pace );
 VLC_API void vlc_input_decoder_Drain( vlc_input_decoder_t * );
 VLC_API void vlc_input_decoder_Flush( vlc_input_decoder_t * );
 VLC_API int  vlc_input_decoder_SetSpuHighlight( vlc_input_decoder_t *, const vlc_spu_highlight_t * );
+VLC_API void vlc_input_decoder_ChangeDelay( vlc_input_decoder_t *, vlc_tick_t i_delay );
 
 /**
  * It creates an empty input resource handler.

@@ -2,10 +2,9 @@
 #include <QDomElement>
 
 BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObject *parent) :
-    CampaignObjectBase(name, parent),
+    BattleDialogModelObject(QPointF(), name, parent),
     _combatant(nullptr),
     _initiative(0),
-    _position(0,0),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
@@ -14,10 +13,9 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(const QString& name, QObj
 }
 
 BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
-    CampaignObjectBase(),
+    BattleDialogModelObject(),
     _combatant(combatant),
     _initiative(0),
-    _position(0,0),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
@@ -26,10 +24,9 @@ BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant) :
 }
 
 BattleDialogModelCombatant::BattleDialogModelCombatant(Combatant* combatant, int initiative, const QPointF& position) :
-    CampaignObjectBase(),
+    BattleDialogModelObject(position),
     _combatant(combatant),
     _initiative(initiative),
-    _position(position),
     _moved(0.0),
     _isShown(true),
     _isKnown(true),
@@ -43,13 +40,11 @@ BattleDialogModelCombatant::~BattleDialogModelCombatant()
 
 void BattleDialogModelCombatant::inputXML(const QDomElement &element, bool isImport)
 {
-    CampaignObjectBase::inputXML(element, isImport);
+    BattleDialogModelObject::inputXML(element, isImport);
 
-    _initiative = element.attribute("initiative",QString::number(0)).toInt();
-    _position = QPointF(element.attribute("positionX",QString::number(0)).toDouble(),
-                        element.attribute("positionY",QString::number(0)).toDouble());
-    _isShown = static_cast<bool>(element.attribute("isShown",QString::number(1)).toInt());
-    _isKnown = static_cast<bool>(element.attribute("isKnown",QString::number(1)).toInt());
+    _initiative = element.attribute("initiative", QString::number(0)).toInt();
+    _isShown = static_cast<bool>(element.attribute("isShown", QString::number(1)).toInt());
+    _isKnown = static_cast<bool>(element.attribute("isKnown", QString::number(1)).toInt());
 }
 
 void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
@@ -60,13 +55,17 @@ void BattleDialogModelCombatant::copyValues(const CampaignObjectBase* other)
 
     _combatant = otherCombatant->_combatant;
     _initiative = otherCombatant->_initiative;
-    _position = otherCombatant->_position;
     _moved = otherCombatant->_moved;
     _isShown = otherCombatant->_isShown;
     _isKnown = otherCombatant->_isKnown;
     _isSelected = otherCombatant->_isSelected;
 
-    CampaignObjectBase::copyValues(other);
+    BattleDialogModelObject::copyValues(other);
+}
+
+int BattleDialogModelCombatant::getObjectType() const
+{
+    return DMHelper::CampaignType_BattleContentCombatant;
 }
 
 bool BattleDialogModelCombatant::getShown() const
@@ -95,20 +94,6 @@ void BattleDialogModelCombatant::setInitiative(int initiative)
     {
         _initiative = initiative;
         emit initiativeChanged(this);
-    }
-}
-
-const QPointF& BattleDialogModelCombatant::getPosition() const
-{
-    return _position;
-}
-
-void BattleDialogModelCombatant::setPosition(const QPointF& position)
-{
-    if(_position != position)
-    {
-        _position = position;
-        emit combatantMoved(this);
     }
 }
 
@@ -205,14 +190,12 @@ QDomElement BattleDialogModelCombatant::createOutputXML(QDomDocument &doc)
 void BattleDialogModelCombatant::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
     element.setAttribute("combatantId", getCombatant() ? getCombatant()->getID().toString() : QUuid().toString());
-    element.setAttribute("type", getCombatantType() );
+    element.setAttribute("type", getCombatantType());
     element.setAttribute("initiative", _initiative);
-    element.setAttribute("positionX", _position.x());
-    element.setAttribute("positionY", _position.y());
     element.setAttribute("isShown", _isShown);
     element.setAttribute("isKnown", _isKnown);
 
-    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
+    BattleDialogModelObject::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool BattleDialogModelCombatant::belongsToObject(QDomElement& element)

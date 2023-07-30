@@ -1,6 +1,7 @@
 #include "battledialogmodeleffectobject.h"
 #include "battledialogeffectsettings.h"
 #include "dmconstants.h"
+#include "unselectedpixmap.h"
 #include <QDomElement>
 #include <QGraphicsPixmapItem>
 #include <QDir>
@@ -52,6 +53,11 @@ void BattleDialogModelEffectObject::copyValues(const CampaignObjectBase* other)
     BattleDialogModelEffect::copyValues(other);
 }
 
+QString BattleDialogModelEffectObject::getName() const
+{
+    return _tip.isEmpty() ? QString("Object") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectObject::clone() const
 {
     BattleDialogModelEffectObject* newEffect = new BattleDialogModelEffectObject(getName());
@@ -76,21 +82,20 @@ BattleDialogEffectSettings* BattleDialogModelEffectObject::getEffectEditor() con
 
 QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
 {
-    QGraphicsPixmapItem* pixmapItem = new QGraphicsPixmapItem();
+    QPixmap itemPixmap(_imageFile);
+    if(itemPixmap.isNull())
+    {
+        qDebug() << "[Battle Dialog Model Effect Object] ERROR: unable to load image file: " << _imageFile;
+        return nullptr;
+    }
+
+    QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(this);
     setEffectItemData(pixmapItem);
     prepareItem(*pixmapItem);
 
     qDebug() << "[Battle Dialog Model Effect Object] applying extra object effect values...";
 
     // Now correct the special case information for the object effect
-    QPixmap itemPixmap(_imageFile);
-    if(itemPixmap.isNull())
-    {
-        qDebug() << "[Battle Dialog Model Effect Object] ERROR: unable to load image file: " << _imageFile;
-        delete pixmapItem;
-        return nullptr;
-    }
-
     _imageScaleFactor = 100.0 / itemPixmap.width();
     if(_imageRotation != 0)
     {
@@ -104,14 +109,25 @@ QGraphicsItem* BattleDialogModelEffectObject::createEffectShape(qreal gridScale)
     return pixmapItem;
 }
 
-void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
+void BattleDialogModelEffectObject::applyEffectValues(QGraphicsItem& item, qreal gridScale)
 {
+    beginBatchChanges();
     item.setPos(getPosition());
     item.setRotation(getRotation());
     item.setToolTip(getTip());
     item.setOpacity(_color.alphaF());
+    applyScale(item, gridScale);
+    endBatchChanges();
+}
 
-    setItemScale(&item, static_cast<qreal>(getSize()) * gridScale / 500.0);
+void BattleDialogModelEffectObject::applyScale(QGraphicsItem& item, qreal gridScale)
+{
+    item.setScale(static_cast<qreal>(getSize()) * _imageScaleFactor * gridScale / 500.0);
+}
+
+qreal BattleDialogModelEffectObject::getScale()
+{
+    return static_cast<qreal>(getSize()) * _imageScaleFactor / 500.0;
 }
 
 int BattleDialogModelEffectObject::getWidth() const
@@ -128,12 +144,6 @@ void BattleDialogModelEffectObject::setWidth(int width)
     }
 }
 
-void BattleDialogModelEffectObject::setItemScale(QGraphicsItem* item, qreal scaleFactor) const
-{
-    if(item)
-        item->setScale(scaleFactor * _imageScaleFactor);
-}
-
 int BattleDialogModelEffectObject::getImageRotation() const
 {
     return _imageRotation;
@@ -144,7 +154,7 @@ void BattleDialogModelEffectObject::setImageRotation(int imageRotation)
     if(_imageRotation != imageRotation)
     {
         _imageRotation = imageRotation;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -158,7 +168,7 @@ void BattleDialogModelEffectObject::setImageFile(const QString& imageFile)
     if(_imageFile != imageFile)
     {
         _imageFile = imageFile;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 
@@ -184,5 +194,4 @@ void BattleDialogModelEffectObject::internalOutputXML(QDomDocument &doc, QDomEle
 void BattleDialogModelEffectObject::prepareItem(QGraphicsItem& item) const
 {
     BattleDialogModelEffect::prepareItem(item);
-    item.setZValue(DMHelper::BattleDialog_Z_Camera);
 }

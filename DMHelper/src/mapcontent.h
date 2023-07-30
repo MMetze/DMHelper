@@ -90,6 +90,7 @@ public:
 class MapEditFill : public MapEdit
 {
 public:
+    // TODO: remove color from MapEditFill
     explicit MapEditFill(const QColor& color);
     MapEditFill(const MapEditFill &obj);
     virtual ~MapEditFill() override;

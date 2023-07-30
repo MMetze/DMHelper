@@ -290,6 +290,7 @@ QIcon MapMarkerDialog::objectIcon(CampaignObjectBase* object)
         case DMHelper::CampaignType_Map:
             return QIcon(":/img/data/icon_contentmap.png");
         case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_LinkedText:
             return QIcon(":/img/data/icon_contenttextencounter.png");
         case DMHelper::CampaignType_Battle:
             return QIcon(":/img/data/icon_contentbattle.png");

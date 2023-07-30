@@ -23,6 +23,7 @@ WidgetMonsterInternal::WidgetMonsterInternal(BattleDialogModelMonsterBase* monst
     if(_monster)
     {
         connect(_monster, &BattleDialogModelMonsterBase::dataChanged, this, &WidgetMonsterInternal::updateData);
+        connect(_monster, &BattleDialogModelMonsterBase::imageChanged, this, &WidgetMonsterInternal::updateImage);
         connect(_monster, &BattleDialogModelCombatant::initiativeChanged, this, &WidgetMonsterInternal::updateData);
     }
 }
@@ -70,6 +71,15 @@ void WidgetMonsterInternal::setLegendaryMaximum(int legendaryMaximum)
 int WidgetMonsterInternal::getLegendaryMaximum() const
 {
     return _legendaryMaximum;
+}
+
+void WidgetMonsterInternal::updateImage()
+{
+    if(_widgetParent)
+    {
+        _widgetParent->clearImage();
+        _widgetParent->updateData();
+    }
 }
 
 void WidgetMonsterInternal::updateData()

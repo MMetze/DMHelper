@@ -42,6 +42,7 @@ void VideoPlayerGLScreenshot::retrieveScreenshot()
         QImage cacheImage(cacheFilePath);
         if(!cacheImage.isNull())
         {
+            qDebug() << "[VideoPlayerGLScreenshot] Using cached image for video file: " << _videoFile;
             emit screenshotReady(cacheImage);
             return;
         }
@@ -73,7 +74,7 @@ void VideoPlayerGLScreenshot::registerNewFrame()
     }
 }
 
-void VideoPlayerGLScreenshot::playerEventCallback( const struct libvlc_event_t *p_event, void *p_data )
+void VideoPlayerGLScreenshot::playerEventCallback(const struct libvlc_event_t *p_event, void *p_data)
 {
     if((!p_event) || (!p_data))
         return;
@@ -180,14 +181,14 @@ bool VideoPlayerGLScreenshot::startPlayer()
 
     QString localizedVideoFile = _videoFile;
 #ifdef Q_OS_WIN
-    localizedVideoFile.replace("/","\\\\");
+    localizedVideoFile.replace("/", "\\\\");
 #endif
 #if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
     _vlcMedia = libvlc_media_new_path(localizedVideoFile.toUtf8().constData());
 #else
     _vlcMedia = libvlc_media_new_path(DMH_VLC::vlcInstance(), localizedVideoFile.toUtf8().constData());
 #endif
-    if (!_vlcMedia)
+    if(!_vlcMedia)
     {
         qDebug() << "[VideoPlayerGLScreenshot] ERROR: Can't start screenshot grabber, unable to open video file!";
         return false;

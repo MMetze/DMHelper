@@ -27,6 +27,11 @@
 
 #include <assert.h>
 #include <vlc_atomic.h>
+#include <vlc_es.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct vlc_ancillary;
 typedef uint32_t vlc_ancillary_id;
@@ -38,8 +43,6 @@ typedef uint32_t vlc_ancillary_id;
  * \file
  * This file defines picture structures and functions in vlc
  */
-
-#include <vlc_es.h>
 
 /** Description of a planar graphic field */
 typedef struct plane_t
@@ -55,7 +58,7 @@ typedef struct plane_t
 
     /* Variables used for pictures with margins */
     int i_visible_lines;            /**< How many visible lines are there? */
-    int i_visible_pitch;            /**< How many visible pixels are there? */
+    int i_visible_pitch;            /**< How many bytes for visible pixels are there? */
 
 } plane_t;
 
@@ -98,6 +101,7 @@ enum vlc_video_context_type
     VLC_VIDEO_CONTEXT_NVDEC,     //!< empty
     VLC_VIDEO_CONTEXT_CVPX,      //!< private: cvpx_video_context*
     VLC_VIDEO_CONTEXT_MMAL,      //!< empty
+    VLC_VIDEO_CONTEXT_GSTDECODE, //!< empty
 };
 
 VLC_API vlc_video_context * vlc_video_context_Create(vlc_decoder_device *,
@@ -526,5 +530,9 @@ static inline void picture_SwapUV(picture_t *picture)
 }
 
 /** @} */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* VLC_PICTURE_H */

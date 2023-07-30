@@ -26,6 +26,7 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     _specialAbilitiesWidget(nullptr),
     _reactionsWidget(nullptr),
     _monster(nullptr),
+    _currentToken(0),
     _edit(false),
     _mouseDown(false)
 {
@@ -39,8 +40,12 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->framePublish, SIGNAL(clicked()), this, SLOT(handlePublishButton()));
     QShortcut* publishShortcut = new QShortcut(QKeySequence(tr("Ctrl+P", "Publish")), this);
     connect(publishShortcut, SIGNAL(activated()), ui->framePublish, SLOT(clickPublish()));
+
+    connect(ui->btnPreviousToken, &QPushButton::clicked, this, &BestiaryDialog::handlePreviousToken);
+    connect(ui->btnAddToken, &QPushButton::clicked, this, &BestiaryDialog::handleAddToken);
     connect(ui->btnReload, SIGNAL(clicked()), this, SLOT(handleReloadImage()));
     connect(ui->btnClear, SIGNAL(clicked()), this, SLOT(handleClearImage()));
+    connect(ui->btnNextToken, &QPushButton::clicked, this, &BestiaryDialog::handleNextToken);
 
     connect(ui->edtStrength, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
     connect(ui->edtDexterity, SIGNAL(editingFinished()), this, SLOT(abilityChanged()));
@@ -57,8 +62,8 @@ BestiaryDialog::BestiaryDialog(QWidget *parent) :
     connect(ui->btnAddSpecialAbility, SIGNAL(clicked()), this, SLOT(addSpecialAbility()));
     connect(ui->btnAddReaction, SIGNAL(clicked()), this, SLOT(addReaction()));
 
-    ui->edtArmorClass->setValidator(new QIntValidator(0,100));
-    ui->edtAverageHitPoints->setValidator(new QIntValidator(0,10000));
+    ui->edtArmorClass->setValidator(new QIntValidator(0, 100));
+    ui->edtAverageHitPoints->setValidator(new QIntValidator(0, 10000));
     //ui->edtChallenge->setValidator(new QDoubleValidator(0.0, 100.0, 2));
 
     connect(ui->edtName, SIGNAL(editingFinished()), this, SLOT(handleEditedData()));
@@ -118,7 +123,9 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     if(ui->cmbSearch->currentText() != _monster->getName())
         ui->cmbSearch->setCurrentText(_monster->getName());
 
-    loadMonsterImage();
+    if(_monster->getIconCount() == 0)
+        _monster->searchForIcons();
+    setTokenIndex(0);
 
     ui->chkPrivate->setChecked(_monster->getPrivate());
     ui->chkLegendary->setChecked(_monster->getLegendary());
@@ -145,12 +152,10 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtDamageVulnerabilities->setText(_monster->getDamageVulnerabilities());
     ui->edtSenses->setText(_monster->getSenses());
     ui->edtLanguages->setText(_monster->getLanguages());
+
     if(_monster->getLanguages().isEmpty())
-    {
         ui->edtLanguages->setText("---");
-    }
-    //ui->edtChallenge->setText(_monster->getChallenge());
-    //ui->edtXP->setText(QString::number(_monster->getXP()));
+
     interpretChallengeRating(_monster->getChallenge());
 
     clearActionWidgets();
@@ -259,7 +264,6 @@ void BestiaryDialog::setMonster(MonsterClass* monster, bool edit)
     ui->edtSenses->setReadOnly(!_edit);
     ui->edtLanguages->setReadOnly(!_edit);
     ui->edtChallenge->setReadOnly(!_edit);
-    //ui->edtXP->setReadOnly(!_edit);
 }
 
 void BestiaryDialog::setMonster(const QString& monsterName, bool edit)
@@ -274,7 +278,7 @@ void BestiaryDialog::createNewMonster()
     qDebug() << "[Bestiary Dialog] Creating a new monster...";
 
     bool ok;
-    QString monsterName = QInputDialog::getText(this, QString("Enter New Monster Name"),QString("New Monster"),QLineEdit::Normal,QString(),&ok);
+    QString monsterName = QInputDialog::getText(this, QString("Enter New Monster Name"), QString("New Monster"), QLineEdit::Normal, QString(), &ok);
     if((!ok)||(monsterName.isEmpty()))
     {
         qDebug() << "[Bestiary Dialog] New monster not created because the monster name dialog was cancelled";
@@ -406,7 +410,7 @@ void BestiaryDialog::updateAbilityMods()
 
 void BestiaryDialog::monsterRenamed()
 {
-    if( (!_monster) || (ui->edtName->text() == _monster->getName()) )
+    if((!_monster) || (ui->edtName->text() == _monster->getName()))
         return;
 
     Bestiary::Instance()->renameMonster(_monster, ui->edtName->text());
@@ -431,13 +435,32 @@ void BestiaryDialog::handlePublishButton()
     }
 }
 
+void BestiaryDialog::handlePreviousToken()
+{
+    setTokenIndex(_currentToken - 1);
+}
+
+void BestiaryDialog::handleAddToken()
+{
+    if(!_monster)
+        return;
+
+    QString filename = selectToken();
+    if(!filename.isEmpty())
+    {
+        _monster->addIcon(filename);
+        setTokenIndex(_monster->getIconList().indexOf(filename));
+    }
+}
+
 void BestiaryDialog::handleReloadImage()
 {
     if(!_monster)
         return;
 
-    _monster->searchForIcon(_monster->getIcon());
-    loadMonsterImage();
+    _monster->searchForIcons();
+    _monster->refreshIconPixmaps();
+    setTokenIndex(_currentToken);
 }
 
 void BestiaryDialog::handleClearImage()
@@ -445,8 +468,16 @@ void BestiaryDialog::handleClearImage()
     if(!_monster)
         return;
 
-    _monster->clearIcon();
-    loadMonsterImage();
+    _monster->removeIcon(_currentToken);
+    if(_monster->getIconCount() == 0)
+        ui->lblIcon->clear();
+    else
+        setTokenIndex(_currentToken > 0 ? _currentToken - 1 : 0);
+}
+
+void BestiaryDialog::handleNextToken()
+{
+    setTokenIndex(_currentToken + 1);
 }
 
 void BestiaryDialog::addAction()
@@ -610,10 +641,10 @@ void BestiaryDialog::mouseReleaseEvent(QMouseEvent * event)
         {
             ui->lblIcon->setFrameStyle(QFrame::Panel | QFrame::Raised);
             _mouseDown = false;
-            QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+            QString filename = selectToken();
             if(!filename.isEmpty())
             {
-                _monster->setIcon(filename);
+                _monster->setIcon(_currentToken, filename);
                 loadMonsterImage();
             }
         }
@@ -624,7 +655,7 @@ void BestiaryDialog::showEvent(QShowEvent * event)
 {
     Q_UNUSED(event);
     qDebug() << "[Bestiary Dialog] Bestiary Dialog shown";
-    connect(Bestiary::Instance(),SIGNAL(changed()),this,SLOT(dataChanged()));
+    connect(Bestiary::Instance(), SIGNAL(changed()), this, SLOT(dataChanged()));
     setMonster(ui->cmbSearch->currentText());
     QDialog::showEvent(event);
 }
@@ -666,14 +697,41 @@ void BestiaryDialog::nextMonster()
         setMonster(nextClass);
 }
 
+QString BestiaryDialog::selectToken()
+{
+    return QFileDialog::getOpenFileName(this, QString("Select New Image..."));
+}
+
+void BestiaryDialog::setTokenIndex(int index)
+{
+    if(!_monster)
+    {
+        ui->btnPreviousToken->setVisible(false);
+        ui->btnNextToken->setVisible(false);
+        ui->btnClear->setEnabled(false);
+        return;
+    }
+
+    if((index < 0) || (index >= _monster->getIconCount()))
+        return;
+
+    _currentToken = index;
+    loadMonsterImage();
+    ui->btnPreviousToken->setEnabled(_currentToken > 0);
+    ui->btnNextToken->setEnabled(_currentToken < _monster->getIconCount() - 1);
+    ui->btnClear->setEnabled(_monster->getIconCount() > 0);
+    ui->btnPreviousToken->setVisible(_monster->getIconCount() > 1);
+    ui->btnNextToken->setVisible(_monster->getIconCount() > 1);
+}
+
 void BestiaryDialog::loadMonsterImage()
 {
-    ui->lblIcon->setPixmap(_monster->getIconPixmap(DMHelper::PixmapSize_Showcase));
+    ui->lblIcon->setPixmap(_monster->getIconPixmap(DMHelper::PixmapSize_Showcase, _currentToken));
 }
 
 void BestiaryDialog::storeMonsterData()
 {
-    if((!_monster)||(!_edit))
+    if((!_monster) || (!_edit))
         return;
 
     qDebug() << "[Bestiary Dialog] Storing monster data for " << _monster->getName();

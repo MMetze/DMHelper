@@ -1,12 +1,13 @@
 #include "undomarker.h"
-#include "mapframe.h"
+#include "layerfow.h"
 #include "mapmarkergraphicsitem.h"
-#include "map.h"
 #include "dmconstants.h"
 #include <QDomElement>
 
-UndoMarker::UndoMarker(Map* map, const MapMarker& marker) :
-    UndoBase(map, QString("Set Marker")),
+// TODO: separate marker layer
+
+UndoMarker::UndoMarker(LayerFow* layer, const MapMarker& marker) :
+    UndoFowBase(layer, QString("Set Marker")),
     _marker(marker),
     _markerGraphicsItem(nullptr)
 {
@@ -24,6 +25,7 @@ void UndoMarker::undo()
 
 void UndoMarker::redo()
 {
+    /*
     if(_map)
     {
         if(_markerGraphicsItem)
@@ -31,12 +33,11 @@ void UndoMarker::redo()
 
         _map->addMapMarker(this, &_marker);
     }
+    */
 }
 
-void UndoMarker::apply(bool preview, QPaintDevice* target) const
+void UndoMarker::apply()
 {
-    Q_UNUSED(preview);
-    Q_UNUSED(target);
 }
 
 QDomElement UndoMarker::outputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) const
@@ -74,14 +75,14 @@ void UndoMarker::inputXML(const QDomElement &element, bool isImport)
     _marker.setEncounter(QUuid(element.attribute(QString("encounter"))));
 
     QString colorName = element.attribute("color");
-    _marker.setColor(QColor::isValidColor(colorName) ? QColor(colorName) : QColor(115,18,0));
+    _marker.setColor(QColor::isValidColor(colorName) ? QColor(colorName) : QColor(115, 18, 0));
 }
 
 void UndoMarker::setRemoved(bool removed)
 {
     if(isRemoved() != removed)
     {
-        UndoBase::setRemoved(removed);
+        UndoFowBase::setRemoved(removed);
         if(_markerGraphicsItem)
             _markerGraphicsItem->setVisible(removed);
     }
@@ -92,9 +93,9 @@ int UndoMarker::getType() const
     return DMHelper::ActionType_SetMarker;
 }
 
-UndoBase* UndoMarker::clone() const
+UndoFowBase* UndoMarker::clone() const
 {
-    return new UndoMarker(_map, _marker);
+    return new UndoMarker(_layer, _marker);
 }
 
 void UndoMarker::setMarker(const MapMarker& marker)

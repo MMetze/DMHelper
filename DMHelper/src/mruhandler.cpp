@@ -134,7 +134,7 @@ void MRUHandler::updateMRUActions()
         MRUAction* newAction = new MRUAction(_mruFiles.at(i), actionStr, nullptr);
         if(newAction)
         {
-            connect(newAction, SIGNAL(triggerFile(QString)),this,SIGNAL(triggerMRU(QString)));
+            connect(newAction, SIGNAL(triggerFile(QString)), this, SIGNAL(triggerMRU(QString)));
             _actionsMenu->addAction(newAction);
         }
     }

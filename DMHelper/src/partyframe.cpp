@@ -50,7 +50,7 @@ void PartyFrame::activateObject(CampaignObjectBase* object, PublishGLRenderer* c
     setParty(party);
 
     emit checkableChanged(false);
-    emit setPublishEnabled(true);
+    emit setPublishEnabled(true, false);
 }
 
 void PartyFrame::deactivateObject()
@@ -130,7 +130,7 @@ void PartyFrame::mouseReleaseEvent(QMouseEvent * event)
     if((!_party) || (!ui->lblIcon->frameGeometry().contains(event->pos())))
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select New Image..."));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select New Image..."));
     if(filename.isEmpty())
         return;
 
@@ -296,7 +296,7 @@ void PartyFrame::calculateThresholds()
         return;
     }
 
-    int thresholds[4] = {0,0,0,0};
+    int thresholds[4] = {0, 0, 0, 0};
 
     QList<Character*> activeCharacters = _party->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)

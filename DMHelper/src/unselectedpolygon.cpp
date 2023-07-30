@@ -1,11 +1,18 @@
 #include "unselectedpolygon.h"
+#include "battledialogmodelobject.h"
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QPen>
 
-UnselectedPolygon::UnselectedPolygon(const QPolygonF &polygon, QGraphicsItem *parent) :
-    QGraphicsPolygonItem(polygon, parent)
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+    #include <QPainter>
+#endif
+
+UnselectedPolygon::UnselectedPolygon(BattleDialogModelObject* object, const QPolygonF &polygon, QGraphicsItem *parent) :
+    QGraphicsPolygonItem(polygon, parent),
+    _object(object)
 {
+    setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
 }
 
 void UnselectedPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -13,6 +20,11 @@ void UnselectedPolygon::paint(QPainter *painter, const QStyleOptionGraphicsItem 
     QStyleOptionGraphicsItem myoption = (*option);
     myoption.state &= ~QStyle::State_Selected;
     QGraphicsPolygonItem::paint(painter, &myoption, widget);
+
+#ifdef DEBUG_FILL_BOUNDING_RECTS
+        if(painter)
+            painter->fillRect(boundingRect(), Qt::blue);
+#endif
 }
 
 QVariant UnselectedPolygon::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -22,6 +34,14 @@ QVariant UnselectedPolygon::itemChange(GraphicsItemChange change, const QVariant
         QPen itemPen = pen();
         itemPen.setWidth(isSelected() ? 3 : 1);
         setPen(itemPen);
+    }
+    else if(change == ItemScenePositionHasChanged)
+    {
+        if(_object)
+        {
+            QPointF newPos = value.toPointF();
+            _object->setPosition(newPos);
+        }
     }
 
     return QGraphicsItem::itemChange(change, value);

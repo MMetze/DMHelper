@@ -6,6 +6,7 @@
 #include "battledialoggraphicsscenemousehandler.h"
 
 class BattleDialogModel;
+class BattleDialogModelObject;
 class BattleDialogModelEffect;
 class BattleDialogModelCombatant;
 class Grid;
@@ -22,14 +23,14 @@ public:
     void setModel(BattleDialogModel* model);
     BattleDialogModel* getModel() const;
 
-    void createBattleContents(const QRect& rect);
-    void resizeBattleContents(const QRect& rect);
-    void updateBattleContents();
+    void createBattleContents();
+//    void resizeBattleContents();
+//    void updateBattleContents();
     void scaleBattleContents();
     void clearBattleContents();
-    void setEffectVisibility(bool visible, bool allEffects = true);
-    void setGridVisibility(bool visible);
-    void paintGrid(QPainter* painter);
+//    void setEffectVisibility(bool visible, bool allEffects = true);
+//    void setGridVisibility(bool visible);
+//    void paintGrid(QPainter* painter);
 
     void setPointerVisibility(bool visible);
     void setPointerPos(const QPointF& pos);
@@ -37,10 +38,14 @@ public:
 
     QPixmap getSelectedIcon() const;
     QString getSelectedIconFile() const;
+    QPointF getCommandPosition() const;
 
-    QList<QGraphicsItem*> getEffectItems() const;
+    QGraphicsItem* getDistanceLine() const;
+    QGraphicsSimpleTextItem* getDistanceText() const;
 
-    bool isSceneEmpty() const;
+//    QList<QGraphicsItem*> getEffectItems() const;
+
+//    bool isSceneEmpty() const;
 
     QGraphicsItem* findTopObject(const QPointF &pos);
 
@@ -48,6 +53,8 @@ public:
     bool handleMouseMoveEvent(QGraphicsSceneMouseEvent *mouseEvent);
     bool handleMousePressEvent(QGraphicsSceneMouseEvent *mouseEvent);
     bool handleMouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent);
+
+    QPointF getViewportCenter();
 
 public slots:
     void setDistanceHeight(qreal heightDelta);
@@ -57,19 +64,19 @@ public slots:
     void setDistanceLineWidth(int lineWidth);
     void setInputMode(int inputMode);
 
-    void addEffectObject();
+    void setSelectedIcon(const QString& selectedIcon);
+
+signals:
     void addEffectRadius();
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
-
+    void addEffectObject();
     void castSpell();
 
-    void setSelectedIcon(const QString& selectedIcon);
-
-signals:
     void effectChanged(QGraphicsItem* effect);
     void effectRemoved(QGraphicsItem* effect);
+    void effectChangeLayer(BattleDialogModelEffect* effect);
     void applyEffect(QGraphicsItem* effect);
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
@@ -91,8 +98,12 @@ signals:
     void itemMouseUp(QGraphicsPixmapItem* item);
     void itemMouseDoubleClick(QGraphicsPixmapItem* item);
 
+    void itemLink(BattleDialogModelObject* item);
+    void itemUnlink(BattleDialogModelObject* item);
+
     void combatantActivate(BattleDialogModelCombatant* combatant);
     void combatantRemove(BattleDialogModelCombatant* combatant);
+    void combatantChangeLayer(BattleDialogModelCombatant* combatant);
     void combatantDamage(BattleDialogModelCombatant* combatant);
     void combatantHeal(BattleDialogModelCombatant* combatant);
 
@@ -103,10 +114,16 @@ protected slots:
     void rollItem();
     void deleteItem();
 
+    void linkItem();
+    void unlinkItem();
+
     void activateCombatant();
     void removeCombatant();
+    void changeCombatantLayer();
     void damageCombatant();
     void healCombatant();
+
+    void changeEffectLayer();
 
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -118,17 +135,14 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent *keyEvent);
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
-    QGraphicsItem* addEffect(BattleDialogModelEffect* effect);
-    QGraphicsItem* addEffectShape(BattleDialogModelEffect& effect);
-    QGraphicsItem* addSpellEffect(BattleDialogModelEffect& effect);
+    BattleDialogModelObject* getFinalObjectFromItem(QGraphicsItem* item);
 
     BattleDialogGraphicsSceneMouseHandlerBase* getMouseHandler(QGraphicsSceneMouseEvent *mouseEvent);
-    QPointF getViewportCenter();
 
     QGraphicsItem* _contextMenuItem;
-    Grid* _grid;
+//    Grid* _grid;
     BattleDialogModel* _model;
-    QList<QGraphicsItem*> _itemList;
+//    QList<QGraphicsItem*> _itemList;
 
     bool _mouseDown;
     QPointF _mouseDownPos;
