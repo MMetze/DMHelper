@@ -190,6 +190,9 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addEffectCone, this, &BattleFrame::addEffectCone);
     connect(_scene, &BattleDialogGraphicsScene::addEffectCube, this, &BattleFrame::addEffectCube);
     connect(_scene, &BattleDialogGraphicsScene::addEffectLine, this, &BattleFrame::addEffectLine);
+    connect(_scene, &BattleDialogGraphicsScene::addPC, this, &BattleFrame::addCharacter);
+    connect(_scene, &BattleDialogGraphicsScene::addMonsters, this, &BattleFrame::addMonsters);
+    connect(_scene, &BattleDialogGraphicsScene::addNPC, this, &BattleFrame::addNPC);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
@@ -1290,13 +1293,17 @@ void BattleFrame::castSpell()
         return;
     }
 
+    QString tipText = spell->getName();
+    Layer* targetLayer = _model->getLayerScene().getPriority(DMHelper::LayerType_Tokens);
+    if(targetLayer)
+        tipText.append(QString(" (") + targetLayer->getName() + QString(")"));
+
     if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
     {
         // Either an Object or a basic shape without a token
         effect->setName(spell->getName());
-        effect->setTip(spell->getName());
-        // TODO: Layers - move to Frame
-        //addEffect(effect);
+        effect->setTip(tipText);
+        _model->appendEffect(effect);
     }
     else
     {
@@ -1327,14 +1334,12 @@ void BattleFrame::castSpell()
         }
 
         tokenEffect->setName(spell->getName());
-        tokenEffect->setTip(spell->getName());
+        tokenEffect->setTip(tipText);
         tokenEffect->setEffectActive(true);
         tokenEffect->setImageRotation(spell->getEffectTokenRotation());
 
         effect->addObject(tokenEffect);
         _model->appendEffect(effect);
-        // TODO: Layers - move to Frame
-        //addSpellEffect(*effect);
     }
 }
 
@@ -2703,6 +2708,7 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
+    /*
     QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
     if(!item)
         return;
@@ -2724,6 +2730,7 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
     if(conditionString.count() > 0)
         itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
     item->setToolTip(itemTooltip);
+    */
 }
 
 void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage)

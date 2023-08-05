@@ -1,3 +1,25 @@
+v2.5.6
+2) As far as layer functions are concerned, the grid is not visible in any way.
+Also, sometimes adding elements (text, video, images) via the layer edit window crashes the program.
+Unfortunately, I have not been able to recognize a pattern in this behavior that would allow me to speculate what the step might be that causes the program to crash.
+3) Finally, a problem regarding combats. When creating a combat by assigning a map it is not visible in any way in the master window. You can see the map in the players window (however without a grid). Adding a monster shifts the view of the map in the players window by centering the view on the monster.
+* dirty on load of campaign
+works * Create/edit/move effect doesn't dirty
+fixed * Include "add XYZ..." to right-click context menu
+* Undo-redo on drawing fow
+fixed * Party icon on map not scaled right
+* Check set visibilities for different token types
+* Make sure combatants disappear at zero HP, also when applying an effect
+* backwards compatibility - add a grid layer only if "showGrid==1" or true
+* Make grid button a flat pushbutton that opens its own popup menu
+* Make the tooltip for a combatant or effect mention their layer
+* Changes to effects or combatants only affects one, not all
+* Copy/Paste with Ctrl-C, Ctrl-V of effects or non-PC combatants
+
+Next version
+* upgrade to latest Qt
+
+v2.5.5
 fixed * Create spell gives object transparency from base shape
 fixed * added effect doesn't then move with the Layer
 fixed * delete effect doesn't work
@@ -13,25 +35,7 @@ fixed * moving pc between layers ruins rendering
 fixed * Selection and Active markers not visible from the beginning
 fixed * Moving character on the publish screen leaves the selection active, doesn't highlight on the dm screen
 fixed * Hide layers separately between DM and Player windows
-2) As far as layer functions are concerned, the grid is not visible in any way.
-Also, sometimes adding elements (text, video, images) via the layer edit window crashes the program.
-Unfortunately, I have not been able to recognize a pattern in this behavior that would allow me to speculate what the step might be that causes the program to crash.
-3) Finally, a problem regarding combats. When creating a combat by assigning a map it is not visible in any way in the master window. You can see the map in the players window (however without a grid). Adding a monster shifts the view of the map in the players window by centering the view on the monster.
-* Create/edit/move effect doesn't dirty
-* Include "add XYZ..." to right-click context menu
-* Undo-redo on drawing fow
-* Party icon on map not scaled right
-* Check set visibilities for different token types
-* Make sure combatants disappear at zero HP, also when applying an effect
-* backwards compatibility - add a grid layer only if "showGrid==1" or true
-* dirty on load of campaign
-* Make grid button a flat pushbutton that opens its own popup menu
-* Make the tooltip for a combatant or effect mention their layer
-* Changes to effects or combatants only affects one, not all
-* Copy/Paste with Ctrl-C, Ctrl-V of effects or non-PC combatants
 
-Next version
-* upgrade to latest Qt
 
 Checkpoint: when adding a new attribute/item to a campaign entry, consider:
 * presentation in the view

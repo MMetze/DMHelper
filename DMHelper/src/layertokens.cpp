@@ -980,7 +980,7 @@ void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCo
     qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(), pix.height()));
     pixmapItem->setScale(scaleFactor);
 
-    QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b>");
+    QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b> (") + getName() + QString(")");
     QStringList conditionString = Combatant::getConditionString(combatant->getConditions());
     if(conditionString.count() > 0)
         itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
@@ -1042,6 +1042,7 @@ QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene* scene, BattleDialogMo
     if(shape)
     {
         shape->setPos(effect->getPosition() + _position);
+        shape->setToolTip(QString("<b>") + effect->getName() + QString("</b> (") + getName() + QString(")"));
         scene->addItem(shape);
         _effectIconHash.insert(effect, shape);
     }

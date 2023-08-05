@@ -93,7 +93,7 @@ QRect PublishGLMapRenderer::getScissorRect()
 void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
 {
     _color = color;
-    emit updateWidget();
+    updateRender();
 }
 
 void PublishGLMapRenderer::initializeGL()
@@ -191,7 +191,7 @@ void PublishGLMapRenderer::resizeGL(int w, int h)
 
     updateProjectionMatrix();
 
-    emit updateWidget();
+    updateRender();
 }
 
 void PublishGLMapRenderer::paintGL()
@@ -341,7 +341,7 @@ void PublishGLMapRenderer::fowChanged(const QImage& fow)
 
 //    _fowImage = fow;
     _updateFow = true;
-    emit updateWidget();
+    updateRender();
 }
 
 void PublishGLMapRenderer::setCameraRect(const QRectF& cameraRect)
@@ -350,7 +350,7 @@ void PublishGLMapRenderer::setCameraRect(const QRectF& cameraRect)
     {
         _cameraRect = cameraRect;
         updateProjectionMatrix();
-        emit updateWidget();
+        updateRender();
     }
 }
 
@@ -379,7 +379,8 @@ void PublishGLMapRenderer::createPartyToken()
         if(!partyImage.isNull())
         {
             _partyToken = new PublishGLImage(partyImage, false);
-            _partyToken->setScale(0.04f * static_cast<float>(_map->getPartyScale()));
+            if(!partyImage.size().isEmpty())
+                _partyToken->setScale(static_cast<float>(_map->getPartyScale()) / static_cast<qreal>(qMax(partyImage.width(), partyImage.height())));
         }
     }
 
@@ -832,11 +833,15 @@ void PublishGLMapRenderer::handleShowPartyChanged(bool showParty)
 
 void PublishGLMapRenderer::handlePartyScaleChanged(int partyScale)
 {
-    if(_partyToken)
-    {
-        _partyToken->setScale(0.04f * static_cast<float>(partyScale));
-        updateRender();
-    }
+    if((!_partyToken) || (partyScale <= 0))
+        return;
+
+    QSize imageSize = _partyToken->getImageSize();
+    if(imageSize.isEmpty())
+        return;
+
+    _partyToken->setScale(static_cast<float>(_map->getPartyScale()) / static_cast<qreal>(qMax(imageSize.width(), imageSize.height())));
+    updateRender();
 }
 
 void PublishGLMapRenderer::layerAdded(Layer* layer)
@@ -846,5 +851,5 @@ void PublishGLMapRenderer::layerAdded(Layer* layer)
 
     layer->playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
     //layer->playerGLInitialize(this, &_scene);
-    emit updateWidget();
+    updateRender();
 }

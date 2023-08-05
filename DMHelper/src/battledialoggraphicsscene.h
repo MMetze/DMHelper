@@ -71,6 +71,9 @@ signals:
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void addPC();
+    void addMonsters();
+    void addNPC();
     void addEffectObject();
     void castSpell();
 

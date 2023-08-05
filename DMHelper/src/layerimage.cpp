@@ -134,8 +134,10 @@ void LayerImage::applyPosition(const QPoint& position)
 
 void LayerImage::applySize(const QSize& size)
 {
-    if(_layerImage.size() != size)
-        _layerImage = _originalImage.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    if(_layerImage.size() == size)
+        return;
+
+    _layerImage = _originalImage.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     QImage newImage = getImage();
     emit dirty();

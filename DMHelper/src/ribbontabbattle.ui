@@ -145,7 +145,7 @@
      <item>
       <widget class="QLabel" name="lblAddMonsters">
        <property name="text">
-        <string>Add Monster</string>
+        <string>Add Monsters</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignBottom|Qt::AlignHCenter</set>

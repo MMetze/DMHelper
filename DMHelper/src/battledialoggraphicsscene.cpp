@@ -742,6 +742,18 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
 
         menu.addSeparator();
 
+        QAction* addPCItem = new QAction(QString("Add PC..."), &menu);
+        connect(addPCItem, SIGNAL(triggered()), this, SIGNAL(addPC()));
+        menu.addAction(addPCItem);
+
+        QAction* addMonsterItem = new QAction(QString("Add Monsters..."), &menu);
+        connect(addMonsterItem, SIGNAL(triggered()), this, SIGNAL(addMonsters()));
+        menu.addAction(addMonsterItem);
+
+        QAction* addNPCItem = new QAction(QString("Add NPC..."), &menu);
+        connect(addNPCItem, SIGNAL(triggered()), this, SIGNAL(addNPC()));
+        menu.addAction(addNPCItem);
+
         QAction* addObjectItem = new QAction(QString("Add Object..."), &menu);
         connect(addObjectItem, SIGNAL(triggered()), this, SIGNAL(addEffectObject()));
         menu.addAction(addObjectItem);
@@ -980,35 +992,36 @@ void BattleDialogGraphicsScene::editItem()
         return;
     }
 
-    QGraphicsItem* abstractShape = _contextMenuItem;
-    if(!abstractShape)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit an item that is not an effect! ";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(abstractShape);
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
     if(!effect)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << abstractShape;
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << _contextMenuItem;
         return;
     }
 
     BattleDialogEffectSettings* settings = effect->getEffectEditor();
     if(!settings)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << abstractShape;
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << _contextMenuItem;
         return;
     }
 
     settings->exec();
     if(settings->result() == QDialog::Accepted)
     {
-        qDebug() << "[Battle Dialog Scene] Applying effect settings for effect " << abstractShape;
+        QList<QGraphicsItem*> selected = selectedItems();
 
-        settings->copyValues(*effect);
-        effect->applyEffectValues(*abstractShape, _model->getGridScale());
-        emit effectChanged(abstractShape);
+        for(int i = 0; i < selected.count(); ++i)
+        {
+            QGraphicsItem* effectItem = selected.at(i);
+            BattleDialogModelEffect* selectedEffect = BattleDialogModelEffect::getEffectFromItem(effectItem);
+            if(selectedEffect)
+            {
+                settings->copyValues(*selectedEffect);
+                selectedEffect->applyEffectValues(*effectItem, _model->getGridScale());
+                emit effectChanged(effectItem);
+            }
+        }
     }
     settings->deleteLater();
 }

@@ -85,6 +85,7 @@ signals:
     void sceneSizeChanged();
 
 protected slots:
+    void handleLayerDirty();
     void removeLayer(Layer* reference);
     void layerMoved(const QPoint& position);
     void layerResized(const QSize& size);
