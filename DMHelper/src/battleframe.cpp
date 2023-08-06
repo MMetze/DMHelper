@@ -1848,7 +1848,7 @@ void BattleFrame::updateCombatantVisibility()
     }
 
     qDebug() << "[Battle Frame] show alive/dead checked updated: Alive=" << _model->getShowAlive() << ", Dead=" << _model->getShowDead();
-    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead(), true);
+    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead());
 }
 
 /*
@@ -2930,7 +2930,7 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
     }
 }
 
-void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded)
+void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
 {
     if(!_model)
     {
@@ -2945,18 +2945,9 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible, bo
         {
             bool vis = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
 
-            if(widgetsIncluded)
-            {
-                QWidget* widget = _combatantLayout->itemAt(i)->widget();
-                if(widget)
-                {
-                    widget->setVisible(vis);
-                }
-            }
-
-            QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
-            if(item)
-                item->setVisible(vis);
+            QWidget* widget = _combatantLayout->itemAt(i)->widget();
+            if(widget)
+                widget->setVisible(vis);
 
             // Set the visibility of the active rect
             if((_activePixmap) && (combatant == _model->getActiveCombatant()))
@@ -3013,8 +3004,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
     {
         // TODO: Layers
         //disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
-//        disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
-//        disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
 //        disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
@@ -3045,8 +3036,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
         // TODO: Layers
         //connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
-//        connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
-//        connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
 //        connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
@@ -3446,7 +3437,7 @@ void BattleFrame::buildCombatantWidgets()
         }
     }
 
-    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead(), true);
+    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead());
     if(_model->getActiveCombatant())
         setActiveCombatant(_model->getActiveCombatant());
     else

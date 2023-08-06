@@ -114,10 +114,18 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
             }
         }
 
+        int gridScale = element.attribute("gridScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
+        _layerScene.setScale(gridScale);
+
         //use the grid Scale to seed the layer scale, if the grid is on, read the rest and create a grid layer
-        LayerGrid* gridLayer = new LayerGrid();
-        gridLayer->inputXML(element, isImport);
-        gridLayer->setName(QString("grid"));
+        LayerGrid* gridLayer = nullptr;
+        bool gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
+        if(gridOn)
+        {
+            gridLayer = new LayerGrid();
+            gridLayer->inputXML(element, isImport);
+            gridLayer->setName(QString("grid"));
+        }
 
         LayerTokens* tokenLayer = new LayerTokens(this);
         tokenLayer->inputXML(element, isImport);
@@ -127,13 +135,15 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         int fowPosition = _layerScene.getFirstIndex(DMHelper::LayerType_Fow);
         if(fowPosition == -1)
         {
-            _layerScene.appendLayer(gridLayer);
+            if(gridLayer)
+                _layerScene.appendLayer(gridLayer);
             _layerScene.appendLayer(tokenLayer);
         }
         else
         {
             _layerScene.insertLayer(fowPosition, tokenLayer);
-            _layerScene.insertLayer(fowPosition, gridLayer);
+            if(gridLayer)
+                _layerScene.insertLayer(fowPosition, gridLayer);
         }
     }
 

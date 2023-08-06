@@ -10,11 +10,15 @@ fixed * Include "add XYZ..." to right-click context menu
 fixed * Party icon on map not scaled right
 * Check set visibilities for different token types
 * Make sure combatants disappear at zero HP, also when applying an effect
-* backwards compatibility - add a grid layer only if "showGrid==1" or true
+done * backwards compatibility - add a grid layer only if "showGrid==1" or true
 * Make grid button a flat pushbutton that opens its own popup menu
-* Make the tooltip for a combatant or effect mention their layer
+fixed * Make the tooltip for a combatant or effect mention their layer
 * Changes to effects or combatants only affects one, not all
 * Copy/Paste with Ctrl-C, Ctrl-V of effects or non-PC combatants
+
+fixed * Add combatants have the wrong Z-value
+fixed * Show living, show dead don't work when battle is running (only when activated)
+fixed * Show effects never works
 
 Next version
 * upgrade to latest Qt

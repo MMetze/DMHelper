@@ -265,7 +265,7 @@ private slots:
     void updateCountdownText();
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
-    void setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded);
+    void setCombatantVisibility(bool aliveVisible, bool deadVisible);
     //void setEffectLayerVisibility(bool visibility);
 
     void setMapCursor();
