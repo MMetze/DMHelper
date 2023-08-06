@@ -651,7 +651,7 @@ void BattleDialogModel::setMapRect(const QRect& mapRect)
     {
         _mapRect = mapRect;
         emit mapRectChanged(_mapRect);
-        emit dirty();
+        //emit dirty();
     }
 }
 
