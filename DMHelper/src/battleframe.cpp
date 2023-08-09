@@ -190,6 +190,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addEffectCone, this, &BattleFrame::addEffectCone);
     connect(_scene, &BattleDialogGraphicsScene::addEffectCube, this, &BattleFrame::addEffectCube);
     connect(_scene, &BattleDialogGraphicsScene::addEffectLine, this, &BattleFrame::addEffectLine);
+    connect(_scene, &BattleDialogGraphicsScene::duplicateSelection, this, &BattleFrame::duplicateSelection);
     connect(_scene, &BattleDialogGraphicsScene::addPC, this, &BattleFrame::addCharacter);
     connect(_scene, &BattleDialogGraphicsScene::addMonsters, this, &BattleFrame::addMonsters);
     connect(_scene, &BattleDialogGraphicsScene::addNPC, this, &BattleFrame::addNPC);
@@ -1160,6 +1161,8 @@ void BattleFrame::addMonsters()
         if(!conversionResult)
             sizeFactor = 0.0;
 
+        qreal multipleShift = _model->getLayerScene().getScale() / 10.0;
+        QPointF multiplePos(multipleShift, multipleShift);
         qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
 
         for(int i = 0; i < monsterCount; ++i)
@@ -1171,7 +1174,7 @@ void BattleFrame::addMonsters()
             monster->setKnown(combatantDlg.isKnown());
             monster->setShown(combatantDlg.isShown());
             monster->setSizeFactor(sizeFactor);
-            monster->setPosition(combatantPos);
+            monster->setPosition(combatantPos + (multiplePos * i));
             monster->setIconIndex(combatantDlg.getIconIndex());
             addCombatant(monster);
         }
@@ -1385,9 +1388,102 @@ void BattleFrame::registerEffect(BattleDialogModelEffect* effect)
 
     settings->exec();
     if(settings->result() == QDialog::Accepted)
-        settings->copyValues(*effect);
+        settings->copyValuesFromSettings(*effect);
 
     settings->deleteLater();
+}
+
+void BattleFrame::duplicateSelection()
+{
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    bool combatantDuplicated = false;
+
+    foreach(QGraphicsItem* item, selected)
+        combatantDuplicated = duplicateItem(item) || combatantDuplicated;
+
+    if(combatantDuplicated)
+        recreateCombatantWidgets();
+}
+
+bool BattleFrame::duplicateItem(QGraphicsItem* item)
+{
+    if(!item)
+        return false;
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    /*
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        if(tokenLayer)
+            tokenLayer->refreshEffects();
+    }
+    */
+
+    QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            if(pixmapItem)
+            {
+                BattleDialogModelCombatant* combatant = tokenLayer->getCombatantFromItem(pixmapItem);
+                if(combatant)
+                    return duplicateCombatant(tokenLayer, combatant);
+            }
+
+            BattleDialogModelEffect* effect = tokenLayer->getEffectFromItem(item);
+            if(effect)
+            {
+                duplicateEffect(tokenLayer, effect);
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool BattleFrame::duplicateCombatant(LayerTokens* tokenLayer, BattleDialogModelCombatant* combatant)
+{
+    if((!tokenLayer) || (!combatant) || (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
+        return false;
+
+    BattleDialogModelCombatant* newCombatant = combatant->clone();
+    newCombatant->setPosition(combatant->getPosition());
+    tokenLayer->addCombatant(newCombatant);
+
+    return true;
+}
+
+bool BattleFrame::duplicateEffect(LayerTokens* tokenLayer, BattleDialogModelEffect* effect)
+{
+    if((!tokenLayer) || (!effect))
+        return false;
+
+    BattleDialogModelEffect* newEffect = effect->clone();
+    if(!newEffect)
+        return false;
+
+    BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
+    if(parentEffect)
+    {
+        BattleDialogModelEffect* newParentEffect = parentEffect->clone();
+        if(!newParentEffect)
+            return false;
+
+        newParentEffect->setPosition(parentEffect->getPosition());
+        newParentEffect->addObject(newEffect);
+        tokenLayer->addEffect(newParentEffect);
+    }
+    else
+    {
+        newEffect->setPosition(effect->getPosition());
+        tokenLayer->addEffect(newEffect);
+    }
+
+    return true;
 }
 
 void BattleFrame::setCameraCouple()

@@ -636,6 +636,10 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 connect(deleteItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
                 menu.addAction(deleteItem);
 
+                QAction* duplicateItem = new QAction(QString("Duplicate..."), &menu);
+                connect(duplicateItem, SIGNAL(triggered()), this, SIGNAL(duplicateSelection()));
+                menu.addAction(duplicateItem);
+
                 menu.addSeparator();
             }
         }
@@ -678,6 +682,10 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 connect(shiftItem, SIGNAL(triggered()), this, SLOT(changeCombatantLayer()));
                 menu.addAction(shiftItem);
             }
+
+            QAction* duplicateItem = new QAction(QString("Duplicate..."), &menu);
+            connect(duplicateItem, SIGNAL(triggered()), this, SIGNAL(duplicateSelection()));
+            menu.addAction(duplicateItem);
 
             menu.addSeparator();
 
@@ -1006,18 +1014,24 @@ void BattleDialogGraphicsScene::editItem()
         return;
     }
 
+    // Merge in any other selected effects of the same type
+    QList<QGraphicsItem*> selected = selectedItems();
+    foreach(QGraphicsItem* effectItem, selected)
+    {
+        BattleDialogModelEffect* selectedEffect = BattleDialogModelEffect::getEffectFromItem(effectItem);
+        if((selectedEffect) && (selectedEffect != effect) && (selectedEffect->getEffectType() == effect->getEffectType()))
+            settings->mergeValuesToSettings(*selectedEffect);
+    }
+
     settings->exec();
     if(settings->result() == QDialog::Accepted)
     {
-        QList<QGraphicsItem*> selected = selectedItems();
-
-        for(int i = 0; i < selected.count(); ++i)
+        foreach(QGraphicsItem* effectItem, selected)
         {
-            QGraphicsItem* effectItem = selected.at(i);
             BattleDialogModelEffect* selectedEffect = BattleDialogModelEffect::getEffectFromItem(effectItem);
-            if(selectedEffect)
+            if((selectedEffect) && (selectedEffect->getEffectType() == effect->getEffectType()))
             {
-                settings->copyValues(*selectedEffect);
+                settings->copyValuesFromSettings(*selectedEffect);
                 selectedEffect->applyEffectValues(*effectItem, _model->getGridScale());
                 emit effectChanged(effectItem);
             }

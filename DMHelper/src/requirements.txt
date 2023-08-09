@@ -12,13 +12,13 @@ fixed * Add combatants have the wrong Z-value
 fixed * Show living, show dead don't work when battle is running (only when activated)
 fixed * Show effects never works
 fixed * dirty on load of campaign
-* Changes to effects or combatants only affects one, not all
-* Undo-redo on drawing fow
-* Make grid button a flat pushbutton that opens its own popup menu
-* Copy/Paste with Ctrl-C, Ctrl-V of effects or non-PC combatants
+fixed * Changes to effects or combatants only affects one, not all
+done * Duplicate effects or non-PC combatants
 
 Next version
 * upgrade to latest Qt
+* Undo-redo on drawing fow
+* Make grid button a flat pushbutton that opens its own popup menu
 
 v2.5.5
 fixed * Create spell gives object transparency from base shape

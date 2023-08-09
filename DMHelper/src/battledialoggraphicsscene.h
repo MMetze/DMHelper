@@ -71,6 +71,7 @@ signals:
     void addEffectCone();
     void addEffectCube();
     void addEffectLine();
+    void duplicateSelection();
     void addPC();
     void addMonsters();
     void addNPC();

@@ -16,6 +16,7 @@ RibbonTabBattle::RibbonTabBattle(QWidget *parent) :
     connect(ui->btnAddCube, SIGNAL(clicked(bool)), this, SIGNAL(addEffectCubeClicked()));
     connect(ui->btnAddCone, SIGNAL(clicked(bool)), this, SIGNAL(addEffectConeClicked()));
     connect(ui->btnAddLine, SIGNAL(clicked(bool)), this, SIGNAL(addEffectLineClicked()));
+    connect(ui->btnDuplicate, SIGNAL(clicked(bool)), this, SIGNAL(duplicateClicked()));
     connect(ui->btnShowLiving, SIGNAL(clicked(bool)), this, SIGNAL(showLivingClicked(bool)));
     connect(ui->btnShowDead, SIGNAL(clicked(bool)), this, SIGNAL(showDeadClicked(bool)));
     connect(ui->btnShowEffects, SIGNAL(clicked(bool)), this, SIGNAL(showEffectsClicked(bool)));
@@ -76,6 +77,7 @@ void RibbonTabBattle::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblAddCube, *ui->btnAddCube, frameHeight);
     setStandardButtonSize(*ui->lblAddCone, *ui->btnAddCone, frameHeight);
     setStandardButtonSize(*ui->lblAddLine, *ui->btnAddLine, frameHeight);
+    setStandardButtonSize(*ui->lblDuplicate, *ui->btnDuplicate, frameHeight);
     setLineHeight(*ui->line_4, frameHeight);
     setStandardButtonSize(*ui->lblShowLiving, *ui->btnShowLiving, frameHeight);
     setStandardButtonSize(*ui->lblShowDead, *ui->btnShowDead, frameHeight);

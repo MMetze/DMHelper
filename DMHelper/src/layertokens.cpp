@@ -690,6 +690,11 @@ QGraphicsItem* LayerTokens::getEffectItem(BattleDialogModelEffect* effect)
     return findEffectItem(effect);
 }
 
+BattleDialogModelEffect* LayerTokens::getEffectFromItem(QGraphicsItem* item)
+{
+    return _effectIconHash.key(item, nullptr);
+}
+
 void LayerTokens::refreshEffects()
 {
     foreach(BattleDialogModelEffect* effect, _effects)

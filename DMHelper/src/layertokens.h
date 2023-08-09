@@ -76,6 +76,7 @@ public slots:
     void removeEffect(BattleDialogModelEffect* effect);
     bool containsEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* getEffectItem(BattleDialogModelEffect* effect);
+    BattleDialogModelEffect* getEffectFromItem(QGraphicsItem* item);
     void refreshEffects();
 
 signals:
