@@ -106,6 +106,7 @@ signals:
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
     void initiativeOrderChanged();
     void backgroundImageChanged(QImage backgroundImage);
+    void layerVisibilityChanged(Layer* layer);
 
 protected slots:
     void mapDestroyed(const QUuid& id);

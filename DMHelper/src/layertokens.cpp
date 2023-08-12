@@ -528,6 +528,7 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     if(_combatants.contains(combatant))
         return;
 
+    combatant->setLayer(this);
     _combatants.append(combatant);
     _model->appendCombatantToList(combatant);
     connect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
@@ -559,6 +560,7 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
     if(!_combatants.removeOne(combatant))
         return;
 
+    combatant->setLayer(nullptr);
     _model->removeCombatantFromList(combatant);
     emit objectRemoved(combatant);
 

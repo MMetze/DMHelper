@@ -1,4 +1,7 @@
-Video Playback not working?
+* Resizing video not always working
+* Resized video unsized when restarted
+fixed * Invisible token layer should be skipped in player initiative, not in initiative order DM Side when invisible on both
+fixed * DM View token layer of selection not visible, active token hidden
 
 Next version
 * upgrade to latest Qt

@@ -219,6 +219,7 @@ void Layer::setLayerVisibleDM(bool layerVisible)
 
     applyLayerVisibleDM(layerVisible);
     _layerVisibleDM = layerVisible;
+    emit layerVisibilityChanged(this);
     emit dirty();
 }
 
@@ -229,6 +230,7 @@ void Layer::setLayerVisiblePlayer(bool layerVisible)
 
     applyLayerVisiblePlayer(layerVisible);
     _layerVisiblePlayer = layerVisible;
+    emit layerVisibilityChanged(this);
     emit dirty();
 }
 

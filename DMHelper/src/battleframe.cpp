@@ -3039,7 +3039,12 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
         BattleDialogModelCombatant* combatant = _model->getCombatant(i);
         if(combatant)
         {
-            bool vis = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+            bool vis = ((combatant->getHitPoints() > 0) ||
+                        (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
+
+            LayerTokens* tokensLayer = combatant->getLayer();
+            if((tokensLayer) && (!tokensLayer->getLayerVisibleDM()) && (!tokensLayer->getLayerVisiblePlayer()))
+                vis = false;
 
             QWidget* widget = _combatantLayout->itemAt(i)->widget();
             if(widget)
@@ -3105,6 +3110,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
 //        disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
+        disconnect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
         disconnect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
         clearBattleFrame();
@@ -3137,6 +3143,7 @@ void BattleFrame::setModel(BattleDialogModel* model)
 //        connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
+        connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
         connect(_mapDrawer, &BattleFrameMapDrawer::dirty, _model, &BattleDialogModel::dirty);
 
         setBattleMap();

@@ -121,6 +121,13 @@ void LayerVideo::applySize(const QSize& size)
         qreal yScale = static_cast<qreal>(size.height()) / _layerScreenshot.height();
         _graphicsItem->setScale(qMin(xScale, yScale));
     }
+
+#ifdef LAYERVIDEO_USE_OPENGL
+    TODO, how should this work with: VideoPlayerGLPlayer* _videoGLPlayer;
+#else
+    if(_videoObject)
+        _videoObject->setTargetSize(size);
+#endif
 }
 
 QString LayerVideo::getVideoFile() const
