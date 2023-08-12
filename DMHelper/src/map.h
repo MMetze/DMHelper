@@ -29,7 +29,7 @@ public:
     virtual int getObjectType() const override;
 
     QString getFileName() const;
-    void setFileName(const QString& newFileName);
+    bool setFileName(const QString& newFileName);
 
     QColor getMapColor() const;
     void setMapColor(const QColor& color);
@@ -63,6 +63,7 @@ public:
 
     QUndoStack* getUndoStack() const;
     void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
+    void internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
 
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
@@ -83,6 +84,7 @@ public:
     void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
     void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
     void fillFoW(const QColor& color, QPaintDevice* target);
+    QImage getRawBWFowImage();
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);

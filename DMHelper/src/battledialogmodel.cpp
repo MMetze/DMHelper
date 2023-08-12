@@ -20,6 +20,7 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     _gridAngle(50),
     _gridOffsetX(0),
     _gridOffsetY(0),
+    _gridPen(),
     _showCompass(false),
     _showAlive(true),
     _showDead(false),
@@ -55,6 +56,10 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
     _gridAngle = element.attribute("gridAngle",QString::number(50)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
     _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
+    int gridWidth = element.attribute("gridWidth",QString::number(1)).toInt();
+    QColor gridColor = element.attribute("gridColor",QString("#000000"));
+    _gridPen = QPen(QBrush(gridColor), gridWidth);
+    _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
     // TODO: possibly re-enable compass at some point
     //_showCompass = static_cast<bool>(element.attribute("showCompass",QString::number(0)).toInt());
     _showCompass = false;
@@ -81,6 +86,7 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
     _gridAngle = otherModel->_gridAngle;
     _gridOffsetX = otherModel->_gridOffsetX;
     _gridOffsetY = otherModel->_gridOffsetY;
+    _gridPen = otherModel->_gridPen;
     _showCompass = otherModel->_showCompass;
     _showAlive = otherModel->_showAlive;
     _showDead = otherModel->_showDead;
@@ -331,6 +337,11 @@ int BattleDialogModel::getGridOffsetY() const
     return _gridOffsetY;
 }
 
+const QPen& BattleDialogModel::getGridPen() const
+{
+    return _gridPen;
+}
+
 bool BattleDialogModel::getShowCompass() const
 {
     return _showCompass;
@@ -501,6 +512,26 @@ void BattleDialogModel::setGridOffsetY(int gridOffsetY)
     }
 }
 
+void BattleDialogModel::setGridWidth(int gridWidth)
+{
+    if(_gridPen.width() != gridWidth)
+    {
+        _gridPen.setWidth(gridWidth);
+        emit gridPenChanged(_gridPen);
+        emit dirty();
+    }
+}
+
+void BattleDialogModel::setGridColor(const QColor& gridColor)
+{
+    if(_gridPen.color() != gridColor)
+    {
+        _gridPen.setColor(gridColor);
+        emit gridPenChanged(_gridPen);
+        emit dirty();
+    }
+}
+
 void BattleDialogModel::setShowCompass(bool showCompass)
 {
     if(_showCompass != showCompass)
@@ -584,6 +615,7 @@ void BattleDialogModel::setBackgroundImage(QImage backgroundImage)
 void BattleDialogModel::sortCombatants()
 {
     std::sort(_combatants.begin(), _combatants.end(), CompareCombatants);
+    emit initiativeOrderChanged();
     emit dirty();
 }
 
@@ -635,6 +667,8 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("gridAngle", _gridAngle);
     element.setAttribute("gridOffsetX", _gridOffsetX);
     element.setAttribute("gridOffsetY", _gridOffsetY);
+    element.setAttribute("gridWidth", _gridPen.width());
+    element.setAttribute("gridColor", _gridPen.color().name());
     element.setAttribute("showCompass", _showCompass);
     element.setAttribute("showAlive", _showAlive);
     element.setAttribute("showDead", _showDead);

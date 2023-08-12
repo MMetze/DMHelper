@@ -6,9 +6,9 @@
 #include "spellbookdialog.h"
 #include "dmconstants.h"
 #include "optionscontainer.h"
+#include "campaigntreeactivestack.h"
 #include <QMainWindow>
 #include <QLabel>
-#include <QFileInfo>
 #include <QList>
 #include <QMultiMap>
 #include <QUuid>
@@ -73,6 +73,7 @@ public slots:
     void openEncounter(QUuid id);
     void openCharacter(QUuid id);
     void openMonster(const QString& monsterClass);
+    void openSpell(const QString& spellName);
 
     void newCharacter();
     void importCharacter();
@@ -83,6 +84,7 @@ public slots:
     void newMap();
     void newAudioEntry();
     void newSyrinscapeEntry();
+    void newSyrinscapeOnlineEntry();
     void newYoutubeEntry();
     void removeCurrentItem();
     void showNotes();
@@ -165,6 +167,8 @@ protected slots:
 
     void handleAnimationStarted();
 
+    bool selectItemFromStack(const QUuid& itemId);
+
     // Bestiary
     void openBestiary();
     void exportBestiary();
@@ -176,6 +180,7 @@ protected slots:
 
     void openAboutDialog();
     void openRandomMarkets();
+    void configureGridLock();
 
     QDialog* createDialog(QWidget* contents, const QSize& dlgSize = QSize());
 
@@ -200,6 +205,7 @@ private:
     EncounterTextEdit* _encounterTextEdit;
 
     CampaignTreeModel* _treeModel;
+    CampaignTreeActiveStack* _activeItems;
     QVBoxLayout* _characterLayout;
     Campaign* _campaign;
     QString _campaignFileName;

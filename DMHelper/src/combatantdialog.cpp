@@ -41,6 +41,7 @@ CombatantDialog::~CombatantDialog()
     delete ui;
 }
 
+/*
 void CombatantDialog::setCombatant(int combatantCount, Combatant* combatant)
 {
     if((!combatant)||(combatant->getCombatantType() != DMHelper::CombatantType_Monster))
@@ -55,15 +56,18 @@ void CombatantDialog::setCombatant(int combatantCount, Combatant* combatant)
 
     ui->edtCount->setText(QString::number(_count));
     ui->edtNameLocal->setText(_combatant->getName());
-    ui->edtHitPointsLocal->setText(_combatant->getHitPoints() == 0 ? "" : QString::number(_combatant->getHitPoints()));
+
+    ui->chkUseAverage->setText(QString("Use Average HP (") + monster.get
+    //ui->edtHitPointsLocal->setText(_combatant->getHitPoints() == 0 ? "" : QString::number(_combatant->getHitPoints()));
+    ui->edtHitPointsLocal->setText(QString());
 
     ui->cmbMonsterClass->setCurrentText(monster->getMonsterClassName());
     ui->lblIcon->setPixmap(monster->getIconPixmap(DMHelper::PixmapSize_Animate));
 }
+*/
 
 int CombatantDialog::getCount() const
 {
-    //return _count;
     return ui->edtCount->text().toInt();
 }
 
@@ -75,9 +79,18 @@ QString CombatantDialog::getName() const
         return ui->edtName->text();
 }
 
-QString CombatantDialog::getLocalHitPoints() const
+int CombatantDialog::getCombatantHitPoints() const
 {
-    return ui->edtHitPointsLocal->text();
+    MonsterClass* monsterClass = getMonsterClass();
+    if(!monsterClass)
+        return 0;
+
+    if(ui->chkUseAverage->isChecked())
+        return monsterClass->getHitDice().average();
+    else if(ui->edtHitPointsLocal->text().isEmpty())
+        return monsterClass->getHitDice().roll();
+    else
+        return ui->edtHitPointsLocal->text().toInt();
 }
 
 bool CombatantDialog::isRandomInitiative() const
@@ -121,7 +134,7 @@ MonsterClass* CombatantDialog::getMonsterClass() const
 
 void CombatantDialog::writeCombatant(Combatant* combatant)
 {
-// TODO: Change to a reference
+    // TODO: Change to a reference
 
     if((!combatant)||(combatant->getCombatantType() != DMHelper::CombatantType_Monster))
         return;
@@ -203,13 +216,11 @@ void CombatantDialog::updateIcon()
 
 void CombatantDialog::setHitPointAverageChanged()
 {
-    QString localHitPoints;
-
     MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
     if(monsterClass)
-        localHitPoints = QString::number(monsterClass->getHitDice().average());
+        ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getHitDice().average()) + QString(")"));
 
-    ui->edtHitPointsLocal->setText(localHitPoints);
+    //ui->edtHitPointsLocal->setText(localHitPoints);
 }
 
 void CombatantDialog::openMonsterClicked()

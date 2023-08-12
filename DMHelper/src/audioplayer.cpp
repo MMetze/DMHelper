@@ -1,7 +1,6 @@
 #include "audioplayer.h"
 #include "audiotrack.h"
 #include "dmconstants.h"
-#include <QMessageBox>
 #include <QDebug>
 
 //track changed, volume, position, duration signals, show them in the control frame

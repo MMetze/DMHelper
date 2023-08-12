@@ -8,6 +8,7 @@
 #include <QImage>
 #include <QColor>
 #include <QMatrix4x4>
+#include <QPixmap>
 
 class BattleDialogModel;
 class PublishGLBattleObject;
@@ -42,7 +43,7 @@ public:
     virtual void paintGL() override;
 
 public slots:
-    void fowChanged();
+    void fowChanged(const QImage& glFow);
     void setCameraRect(const QRectF& cameraRect);
     void setGrid(QImage gridImage);
     void setInitiativeType(int initiativeType);
@@ -52,6 +53,13 @@ public slots:
 
     void movementChanged(bool visible, BattleDialogModelCombatant* combatant, qreal remaining);
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
+
+    void setActiveToken(const QString& activeTokenFile);
+    void setSelectionToken(const QString& selectionTokenFile);
+    void setCombatantFrame(const QString& combatantFrame);
+    void setCountdownFrame(const QString& countdownFrame);
+    void setShowCountdown(bool showCountdown);
+    void setCountdownValues(qreal countdown, const QColor& countdownColor);
 
 protected:
     // DMH OpenGL renderer calls
@@ -67,14 +75,15 @@ protected:
 
     virtual void updateGrid();
     virtual void updateFoW();
+    virtual void updateSelectionTokens();
     virtual void createContents();
-    virtual void cleanupContents();
+    void cleanupContents();
 
     virtual void updateInitiative();
     virtual void paintInitiative(QOpenGLFunctions* functions);
 
     virtual void createShaders();
-    virtual void destroyShaders();
+    void destroyShaders();
 
 protected slots:
     void recreateContents();
@@ -97,10 +106,15 @@ protected:
     int _shaderModelMatrixRGBA;
     int _shaderProjectionMatrixRGBA;
     int _shaderAlphaRGBA;
+    unsigned int _shaderProgramRGBColor;
+    int _shaderModelMatrixRGBColor;
+    int _shaderProjectionMatrixRGBColor;
+    int _shaderRGBColor;
 
     QImage _gridImage;
     PublishGLImage* _gridObject;
 
+    QImage _fowImage;
     PublishGLBattleBackground* _fowObject;
     QHash<BattleDialogModelCombatant*, PublishGLBattleToken*> _combatantTokens;
     QHash<BattleDialogModelCombatant*, PublishGLImage*> _combatantNames;
@@ -114,11 +128,21 @@ protected:
     BattleDialogModelCombatant* _movementCombatant;
     bool _movementPC;
     PublishGLImage* _movementToken;
+    QString _tokenFrameFile;
+    PublishGLImage* _tokenFrame;
+    QString _countdownFrameFile;
+    PublishGLImage* _countdownFrame;
+    PublishGLImage* _countdownFill;
+    bool _showCountdown;
+    qreal _countdownScale;
+    QColor _countdownColor;
 
     BattleDialogModelCombatant* _activeCombatant;
     bool _activePC;
-    PublishGLImage* _activeToken;
 
+    QString _activeTokenFile;
+    PublishGLImage* _activeToken;
+    QString _selectionTokenFile;
     PublishGLImage* _selectionToken;
 
     bool _recreateLine;
@@ -128,6 +152,8 @@ protected:
     PublishGLImage* _lineTextImage;
 
     bool _updateFow;
+    bool _updateSelectionTokens;
+    bool _updateInitiative;
     bool _recreateContent;
 };
 

@@ -17,10 +17,14 @@ public:
 
     void setImage(const QImage& image);
     void setScale(float scaleFactor);
+    void setScaleX(float scaleFactor);
+    void setScaleY(float scaleFactor);
     void setX(float x);
     void setY(float y);
     void setPosition(float x, float y);
     void setPosition(const QPointF& pos);
+    void setPositionScaleX(float x, float scaleFactor);
+    void setPositionScaleY(float y, float scaleFactor);
     void setPositionScale(float x, float y, float scaleFactor);
     void setPositionScale(const QPointF& pos, float scaleFactor);
 
@@ -29,6 +33,8 @@ public:
     QSize getSize() const;
     QSize getImageSize() const;
     float getScale() const;
+    float getScaleX() const;
+    float getScaleY() const;
 
 protected:
     void createImageObjects(const QImage& image);
@@ -41,6 +47,8 @@ protected:
     unsigned int _EBO;
 
     float _scaleFactor;
+    float _scaleX;
+    float _scaleY;
     float _x;
     float _y;
     QSize _imageSize;

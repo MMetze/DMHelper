@@ -25,11 +25,9 @@ PublishWindow::PublishWindow(const QString& title, QWidget *parent) :
 
     setBackgroundColor();
 
-    connect(_publishFrame, SIGNAL(arrowVisibleChanged(bool)), this, SIGNAL(arrowVisibleChanged(bool)));
     connect(_publishFrame, SIGNAL(publishMouseDown(QPointF)), this, SIGNAL(publishMouseDown(QPointF)));
     connect(_publishFrame, SIGNAL(publishMouseMove(QPointF)), this, SIGNAL(publishMouseMove(QPointF)));
     connect(_publishFrame, SIGNAL(publishMouseRelease(QPointF)), this, SIGNAL(publishMouseRelease(QPointF)));
-    connect(_publishFrame, SIGNAL(positionChanged(QPointF)), this, SIGNAL(positionChanged(QPointF)));
     connect(_publishFrame, SIGNAL(frameResized(QSize)), this, SIGNAL(frameResized(QSize)));
     connect(_publishFrame, SIGNAL(labelResized(QSize)), this, SIGNAL(labelResized(QSize)));
 }

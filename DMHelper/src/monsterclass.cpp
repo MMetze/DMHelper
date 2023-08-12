@@ -5,7 +5,6 @@
 #include "character.h"
 #include <QDomElement>
 #include <QDir>
-#include <QDebug>
 #include <QRegularExpression>
 
 static const char* SKILLELEMEMT_NAMES[Combatant::SKILLS_COUNT] =
@@ -99,6 +98,10 @@ MonsterClass::MonsterClass(const QDomElement &element, bool isImport, QObject *p
     _intelligence(10),
     _wisdom(10),
     _charisma(10),
+    _actions(),
+    _legendaryActions(),
+    _specialAbilities(),
+    _reactions(),
     _batchChanges(false),
     _changesMade(false),
     _iconChanged(false),
@@ -210,13 +213,10 @@ void MonsterClass::endBatchChanges()
     {
         _batchChanges = false;
         if(_iconChanged)
-        {
             emit iconChanged();
-        }
+
         if(_changesMade)
-        {
             emit dirty();
-        }
     }
 }
 
@@ -243,9 +243,7 @@ QString MonsterClass::getIcon() const
 QPixmap MonsterClass::getIconPixmap(DMHelper::PixmapSize iconSize)
 {
     if(!_scaledPixmap.isValid())
-    {
         searchForIcon(QString());
-    }
 
     return _scaledPixmap.getPixmap(iconSize);
 }
@@ -724,14 +722,11 @@ void MonsterClass::searchForIcon(const QString &newIcon)
         _icon = searchResult;
         _scaledPixmap.setBasePixmap(Bestiary::Instance()->getDirectory().filePath(_icon));
         registerChange();
+
         if(_batchChanges)
-        {
             _iconChanged = true;
-        }
         else
-        {
             emit iconChanged();
-        }
     }
 }
 
@@ -740,14 +735,11 @@ void MonsterClass::clearIcon()
     _icon = QString("");
     _scaledPixmap.invalidate();
     registerChange();
+
     if(_batchChanges)
-    {
         _iconChanged = true;
-    }
     else
-    {
         emit iconChanged();
-    }
 }
 
 void MonsterClass::setName(const QString& name)
@@ -839,16 +831,6 @@ void MonsterClass::setAverageHitPoints(int averageHitPoints)
         return;
 
     _averageHitPoints = averageHitPoints;
-
-    /*
-     * Removed as no longer needed to correct the hit dice bonus in the data!
-     *
-    if((_averageHitPoints != _hitDice.average()) && (_hitDice.getBonus() == 0))
-    {
-        _hitDice = Dice(_hitDice.getCount(), _hitDice.getType(), _averageHitPoints - _hitDice.average());
-    }
-    */
-
     registerChange();
 }
 
@@ -969,13 +951,9 @@ void MonsterClass::calculateHitDiceBonus()
 void MonsterClass::registerChange()
 {
     if(_batchChanges)
-    {
         _changesMade = true;
-    }
     else
-    {
         emit dirty();
-    }
 }
 
 void MonsterClass::checkForSkill(const QDomElement& element, const QString& skillName, Combatant::Skills skill, bool isImport)

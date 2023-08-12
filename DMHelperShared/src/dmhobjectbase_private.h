@@ -29,6 +29,7 @@ public:
     int getIntID() const;
     void setID(QUuid id);
     void setIntID(int id);
+    void renewID();
 
     // STATIC FUNCTIONS
     //static void setBaseId(int baseId);

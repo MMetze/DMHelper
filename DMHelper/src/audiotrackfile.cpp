@@ -65,6 +65,9 @@ void AudioTrackFile::play()
         return;
     }
 
+    fileString = fileInfo.canonicalFilePath();
+    QUrl url = QUrl(fileString);
+    url.setScheme(QString("file"));
     _player = new QMediaPlayer(this);
     _playlist = new QMediaPlaylist(this);
     _playlist->setPlaybackMode(_repeat ? QMediaPlaylist::Loop : QMediaPlaylist::CurrentItemOnce);
@@ -72,7 +75,7 @@ void AudioTrackFile::play()
     connect(_player, &QMediaPlayer::durationChanged, this, &AudioTrackFile::handleDurationChanged);
     connect(_player, &QMediaPlayer::positionChanged, this, &AudioTrackFile::handlePositionChanged);
 
-    _playlist->addMedia(getUrl());
+    _playlist->addMedia(url);
     _player->setPlaylist(_playlist);
     _player->play();
 }

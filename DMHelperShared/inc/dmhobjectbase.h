@@ -39,9 +39,14 @@ protected:
     void setID(QUuid id);
     void setIntID(int id);
 
+    // To be used with extreme caution!!
+    void renewID();
+
 private:
     std::unique_ptr<DMHObjectBase_Private> d;
 
+    // Allow the campaign to access protected functions, particularly renewID
+    friend class Campaign;
 };
 
 #endif // DMHOBJECTBASE_H

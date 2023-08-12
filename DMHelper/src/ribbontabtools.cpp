@@ -21,6 +21,9 @@ RibbonTabTools::RibbonTabTools(QWidget *parent) :
     connect(ui->btnRandomMarket, SIGNAL(clicked(bool)), this, SIGNAL(randomMarketClicked()));
     connect(ui->btnTimeDate, SIGNAL(clicked(bool)), this, SIGNAL(calendarClicked()));
     connect(ui->btnCountdown, SIGNAL(clicked(bool)), this, SIGNAL(countdownClicked()));
+
+    connect(ui->btnLockedGrid, &QAbstractButton::toggled, this, &RibbonTabTools::lockGridClicked);
+    connect(ui->btnConfigureGrid, &QAbstractButton::clicked, this, &RibbonTabTools::configureGridClicked);
 }
 
 RibbonTabTools::~RibbonTabTools()
@@ -31,6 +34,12 @@ RibbonTabTools::~RibbonTabTools()
 PublishButtonRibbon* RibbonTabTools::getPublishRibbon()
 {
     return ui->framePublish;
+}
+
+void RibbonTabTools::setGridLocked(bool locked)
+{
+    if(ui->btnLockedGrid->isChecked() != locked)
+        ui->btnLockedGrid->setChecked(locked);
 }
 
 void RibbonTabTools::showEvent(QShowEvent *event)
@@ -55,4 +64,7 @@ void RibbonTabTools::showEvent(QShowEvent *event)
     setStandardButtonSize(*ui->lblRandomMarket, *ui->btnRandomMarket, frameHeight);
     setStandardButtonSize(*ui->lblTimeDate, *ui->btnTimeDate, frameHeight);
     setStandardButtonSize(*ui->lblCountdown, *ui->btnCountdown, frameHeight);
+    setLineHeight(*ui->line_5, frameHeight);
+    setStandardButtonSize(*ui->lblLockedGrid, *ui->btnLockedGrid, frameHeight);
+    setStandardButtonSize(*ui->lblConfigureGrid, *ui->btnConfigureGrid, frameHeight);
 }

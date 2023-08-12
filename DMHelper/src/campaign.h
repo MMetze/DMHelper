@@ -62,6 +62,7 @@ public slots:
     void setNotes(const QString& notes);
     void addNote(const QString& note);
     bool validateCampaignIds();
+    bool correctDuplicateIds();
 
 protected slots:
     virtual void handleInternalChange() override;
@@ -73,7 +74,7 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
-    bool validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject);
+    bool validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject, bool correctDuplicates = false);
     bool isVersionCompatible(int majorVersion, int minorVersion) const;
 
     BasicDate _date;

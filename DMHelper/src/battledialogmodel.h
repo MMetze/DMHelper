@@ -6,6 +6,7 @@
 #include "battledialoglogger.h"
 #include <QList>
 #include <QRect>
+#include <QPen>
 
 class Map;
 
@@ -54,6 +55,7 @@ public:
     int getGridAngle() const;
     int getGridOffsetX() const;
     int getGridOffsetY() const;
+    const QPen& getGridPen() const;
     bool getShowCompass() const;
     bool getShowAlive() const;
     bool getShowDead() const;
@@ -76,6 +78,8 @@ public slots:
     void setGridAngle(int gridAngle);
     void setGridOffsetX(int gridOffsetX);
     void setGridOffsetY(int gridOffsetY);
+    void setGridWidth(int gridWidth);
+    void setGridColor(const QColor& gridColor);
     void setShowCompass(bool showCompass);
     void setShowAlive(bool showAlive);
     void setShowDead(bool showDead);
@@ -97,6 +101,7 @@ signals:
     void gridAngleChanged(int gridAngle);
     void gridOffsetXChanged(int gridOffsetX);
     void gridOffsetYChanged(int gridOffsetY);
+    void gridPenChanged(const QPen& gridPen);
     void showCompassChanged(bool showCompass);
     void showAliveChanged(bool showAlive);
     void showDeadChanged(bool showDead);
@@ -106,6 +111,7 @@ signals:
     void combatantListChanged();
     void effectListChanged();
     void activeCombatantChanged(BattleDialogModelCombatant* activeCombatant);
+    void initiativeOrderChanged();
     void backgroundImageChanged(QImage backgroundImage);
 
 protected slots:
@@ -140,6 +146,7 @@ private:
     int _gridAngle;
     int _gridOffsetX;
     int _gridOffsetY;
+    QPen _gridPen;
 
     bool _showCompass;
     bool _showAlive;

@@ -13,6 +13,7 @@ public:
     explicit MonsterAction(int attackBonus, const QString& description, const QString& name, Dice damageDice);
     explicit MonsterAction(const QDomElement &element, bool isImport);
     MonsterAction(const MonsterAction& other);
+    virtual ~MonsterAction();
 
     virtual QDomElement outputXML(QDomDocument &doc, QDomElement &element, bool isExport) const;
     QString summaryString() const;

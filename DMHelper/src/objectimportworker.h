@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QUuid>
 #include <QStringList>
-#include <QFileInfo>
 #include <QDir>
 
 class Campaign;

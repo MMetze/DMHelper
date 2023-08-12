@@ -8,7 +8,6 @@
 #include "combatantwidget.h"
 #include "ui_combatantrolloverframe.h"
 #include <QStringList>
-#include <QDebug>
 
 CombatantRolloverFrame::CombatantRolloverFrame(CombatantWidget* combatantWidget, QWidget *parent) :
     QFrame(parent),
@@ -128,12 +127,29 @@ void CombatantRolloverFrame::readCharacter(BattleDialogModelCharacter* character
     if(!characterBase)
         return;
 
-    QString proficiencyString = characterBase->getStringValue(Character::StringValue_proficiencies);
-    QStringList proficiencyList = proficiencyString.split(QChar::LineFeed);
-    for(const QString& oneItem : qAsConst(proficiencyList))
+    addSectionTitle(QString("Actions"));
+    const QList<MonsterAction>& actionList = characterBase->getActions();
+    for(const MonsterAction& action : qAsConst(actionList))
     {
-        ui->listActions->addItem(oneItem);
+        QListWidgetItem *item = new QListWidgetItem(action.getName());
+//        item->setToolTip(action.getDescription());
+        ui->listActions->addItem(item);
     }
+
+    /*
+    addActionList(characterBase->getActions(), QString("Actions"));
+
+    QString proficiencyString = characterBase->getStringValue(Character::StringValue_proficiencies);
+    if(!proficiencyString.isEmpty())
+    {
+        addSectionTitle(QString("Proficiencies"));
+        QStringList proficiencyList = proficiencyString.split(QChar::LineFeed);
+        for(const QString& oneItem : qAsConst(proficiencyList))
+        {
+            ui->listActions->addItem(oneItem);
+        }
+    }
+    */
 }
 
 void CombatantRolloverFrame::readMonster(BattleDialogModelMonsterBase* monster)
@@ -156,19 +172,14 @@ void CombatantRolloverFrame::addActionList(const QList<MonsterAction>& actionLis
     if(actionList.count() <= 0)
         return;
 
-    QListWidgetItem* actionTitle = new QListWidgetItem(listTitle);
-    QFont titleFont = actionTitle->font();
-    titleFont.setWeight(QFont::Bold);
-    if(titleFont.pointSize() > 0)
-        titleFont.setPointSize(titleFont.pointSize() + 2);
-    else
-        titleFont.setPixelSize(titleFont.pixelSize() + 2);
-    actionTitle->setFont(titleFont);
-    ui->listActions->addItem(actionTitle);
+    addSectionTitle(listTitle);
 
     for(const MonsterAction& action : qAsConst(actionList))
     {
-        ui->listActions->addItem(action.summaryString());
+        QListWidgetItem *item = new QListWidgetItem(action.summaryString());
+        item->setToolTip(action.getDescription());
+        ui->listActions->addItem(item);
+//        ui->listActions->addItem(action.summaryString());
     }
 
     QListWidgetItem* separator = new QListWidgetItem();
@@ -178,4 +189,21 @@ void CombatantRolloverFrame::addActionList(const QList<MonsterAction>& actionLis
     QFrame* separatorFrame = new QFrame();
     separatorFrame->setFrameShape(QFrame::HLine);
     ui->listActions->setItemWidget(separator, separatorFrame);
+}
+
+void CombatantRolloverFrame::addSectionTitle(const QString& sectionTitle)
+{
+    if(sectionTitle.isEmpty())
+        return;
+
+    QListWidgetItem* actionTitle = new QListWidgetItem(sectionTitle);
+    QFont titleFont = actionTitle->font();
+    titleFont.setWeight(QFont::Bold);
+    if(titleFont.pointSize() > 0)
+        titleFont.setPointSize(titleFont.pointSize() + 2);
+    else
+        titleFont.setPixelSize(titleFont.pixelSize() + 2);
+    actionTitle->setFont(titleFont);
+    ui->listActions->addItem(actionTitle);
+
 }

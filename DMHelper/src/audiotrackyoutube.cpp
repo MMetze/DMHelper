@@ -16,13 +16,12 @@ AudioTrackYoutube::AudioTrackYoutube(const QString& trackName, const QUrl& track
     AudioTrackUrl(trackName, trackUrl, parent),
     _manager(nullptr),
     _urlString(),
-    _vlcInstance(nullptr),
-    _vlcListPlayer(nullptr),
     _vlcPlayer(nullptr),
     _stopStatus(0),
     _lastVolume(100),
     _timerId(0),
-    _repeat(false)
+    _repeat(false),
+    _mute(false)
 {
 }
 
@@ -31,7 +30,7 @@ AudioTrackYoutube::~AudioTrackYoutube()
     if(_timerId)
         killTimer(_timerId);
 
-    stop();
+    AudioTrackYoutube::stop();
 }
 
 int AudioTrackYoutube::getAudioType() const
@@ -55,10 +54,33 @@ void AudioTrackYoutube::eventCallback(const struct libvlc_event_t *p_event)
     }
 }
 
+bool AudioTrackYoutube::isPlaying() const
+{
+    return((_vlcPlayer) && (_stopStatus < stopCallComplete));
+}
+
+bool AudioTrackYoutube::isRepeat() const
+{
+    return _repeat;
+}
+
+bool AudioTrackYoutube::isMuted() const
+{
+    return _mute;
+}
+
+int AudioTrackYoutube::getVolume() const
+{
+    if(isPlaying())
+        return libvlc_audio_get_volume(_vlcPlayer);
+    else
+        return 0;
+}
+
 void AudioTrackYoutube::play()
 {
     // Check if the track is already playing
-    if((_vlcInstance) || (_vlcListPlayer) || (_vlcPlayer))
+    if(isPlaying())
         return;
 
     if(_urlString.isEmpty())
@@ -69,34 +91,22 @@ void AudioTrackYoutube::play()
 
 void AudioTrackYoutube::stop()
 {
-    if((!_vlcInstance) || (!_vlcListPlayer) || (!_vlcPlayer))
+    if(!AudioTrackYoutube::isPlaying())
         return;
 
     _stopStatus = 0;
-    libvlc_media_list_player_stop_async(_vlcListPlayer);
+    libvlc_media_player_stop_async(_vlcPlayer);
     internalStopCheck(stopCallComplete);
-
-    /*
-    libvlc_media_list_player_stop(_vlcListPlayer);
-
-
-    libvlc_media_list_player_release(_vlcListPlayer);
-    _vlcListPlayer = nullptr;
-    if(_vlcInstance)
-    {
-        libvlc_release(_vlcInstance);
-        _vlcInstance = nullptr;
-    }
-    */
-
 }
 
 void AudioTrackYoutube::setMute(bool mute)
 {
-    if((!_vlcInstance) || (!_vlcListPlayer) || (!_vlcPlayer))
+    if((!isPlaying()) || (mute == _mute))
         return;
 
-    if(mute)
+    _mute = mute;
+
+    if(_mute)
     {
         _lastVolume = libvlc_audio_get_volume(_vlcPlayer);
         libvlc_audio_set_volume(_vlcPlayer, 0);
@@ -109,7 +119,7 @@ void AudioTrackYoutube::setMute(bool mute)
 
 void AudioTrackYoutube::setVolume(int volume)
 {
-    if((!_vlcInstance) || (!_vlcListPlayer) || (!_vlcPlayer))
+    if(!isPlaying())
         return;
 
     libvlc_audio_set_volume(_vlcPlayer, volume);
@@ -122,10 +132,7 @@ void AudioTrackYoutube::setRepeat(bool repeat)
 
     _repeat = repeat;
 
-    if(!_vlcListPlayer)
-        return;
-
-    libvlc_media_list_player_set_playback_mode(_vlcListPlayer, _repeat ? libvlc_playback_mode_loop : libvlc_playback_mode_default);
+    // TODO - need to add a repeat capability
 }
 
 void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
@@ -139,7 +146,7 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
         return;
     }
 
-    if((!_vlcInstance) && (!_vlcListPlayer) && (!_vlcPlayer))
+    if(!isPlaying())
     {
         if(reply->error() != QNetworkReply::NoError)
         {
@@ -162,7 +169,6 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
         {
             QByteArray bytes = reply->readAll();
             qDebug() << "[AudioTrackYoutube] Request received; payload " << bytes.size() << " bytes";
-            //qDebug() << "[AudioTrackYoutube] Payload contents: " << QString(bytes.left(20000));
 
             handleReplyDirect(bytes);
         }
@@ -173,7 +179,7 @@ void AudioTrackYoutube::urlRequestFinished(QNetworkReply *reply)
 
 void AudioTrackYoutube::findDirectUrl(const QString& youtubeId)
 {
-    if((_vlcInstance) || (_vlcListPlayer) || (_vlcPlayer))
+    if(isPlaying())
         return;
 
     if(!_manager)
@@ -203,8 +209,16 @@ void AudioTrackYoutube::timerEvent(QTimerEvent *event)
 {
     Q_UNUSED(event);
 
-    if(!_vlcPlayer)
+    if((!_vlcPlayer) || (_stopStatus == stopComplete))
+    {
+        if(_timerId)
+        {
+            killTimer(_timerId);
+            _timerId = 0;
+        }
+
         return;
+    }
 
     libvlc_time_t currentTime = libvlc_media_player_get_time(_vlcPlayer);
     emit trackPositionChanged(currentTime / 1000);
@@ -212,7 +226,7 @@ void AudioTrackYoutube::timerEvent(QTimerEvent *event)
 
 bool AudioTrackYoutube::handleReplyDirect(const QByteArray& data)
 {
-    if((_vlcInstance) || (_vlcListPlayer) || (_vlcPlayer))
+    if(isPlaying())
         return false;
 
     QDomDocument doc;
@@ -263,39 +277,39 @@ bool AudioTrackYoutube::handleReplyDirect(const QByteArray& data)
 
 void AudioTrackYoutube::playDirectUrl()
 {
-    if((_vlcInstance) || (_vlcListPlayer) || (_vlcPlayer))
+    if(isPlaying())
         return;
 
-    _vlcInstance = libvlc_new(0, nullptr);
     libvlc_media_list_t *vlcMediaList = libvlc_media_list_new();
 
-    libvlc_media_t *vlcMedia = libvlc_media_new_location(_vlcInstance, _urlString.toUtf8().constData());
+#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+    libvlc_media_t *vlcMedia = libvlc_media_new_location(_urlString.toUtf8().constData());
+#else
+    libvlc_media_t *vlcMedia = libvlc_media_new_location(DMH_VLC::vlcInstance(), _urlString.toUtf8().constData());
+#endif
     libvlc_media_list_add_media(vlcMediaList, vlcMedia);
     libvlc_media_release(vlcMedia);
 
-    _vlcListPlayer = libvlc_media_list_player_new(_vlcInstance);
-    if(!_vlcListPlayer)
-        return;
-
-    _vlcPlayer = libvlc_media_player_new(_vlcInstance);
+#if defined(Q_OS_WIN64) || defined(Q_OS_MAC)
+    _vlcPlayer = libvlc_media_player_new_from_media(DMH_VLC::vlcInstance(), vlcMedia);
+#else
+    _vlcPlayer = libvlc_media_player_new_from_media(vlcMedia);
+#endif
     if(!_vlcPlayer)
         return;
-
-    libvlc_media_list_player_set_media_list(_vlcListPlayer, vlcMediaList);
-    libvlc_media_list_player_set_media_player(_vlcListPlayer, _vlcPlayer);
-    libvlc_media_list_player_set_playback_mode(_vlcListPlayer, _repeat ? libvlc_playback_mode_loop : libvlc_playback_mode_default);
 
     libvlc_event_manager_t* eventManager = libvlc_media_player_event_manager(_vlcPlayer);
     if(eventManager)
     {
-        //libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, playerEventCallback, this);
-        //libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, playerEventCallback, this);
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerOpening, youtubeEventCallback, this);
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerBuffering, youtubeEventCallback, this);
         libvlc_event_attach(eventManager, libvlc_MediaPlayerPlaying, youtubeEventCallback, this);
-        //libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, playerEventCallback, this);
+        libvlc_event_attach(eventManager, libvlc_MediaPlayerPaused, youtubeEventCallback, this);
         libvlc_event_attach(eventManager, libvlc_MediaPlayerStopped, youtubeEventCallback, this);
     }
 
-    libvlc_media_list_player_play(_vlcListPlayer);
+    // Start playback
+    libvlc_media_player_play(_vlcPlayer);
 
     if(_timerId == 0)
         _timerId = startTimer(500);
@@ -310,12 +324,8 @@ void AudioTrackYoutube::internalStopCheck(int status)
     if(_stopStatus != stopComplete)
         return;
 
-    libvlc_media_list_player_release(_vlcListPlayer);
-    _vlcListPlayer = nullptr;
     libvlc_media_player_release(_vlcPlayer);
     _vlcPlayer = nullptr;
-    libvlc_release(_vlcInstance);
-    _vlcInstance = nullptr;
 }
 
 QString AudioTrackYoutube::extractYoutubeIDFromUrl()

@@ -401,6 +401,17 @@ bool Campaign::validateCampaignIds()
     return _isValid;
 }
 
+bool Campaign::correctDuplicateIds()
+{
+    QList<QUuid> knownIds;
+
+    bool validCampaign = validateSingleId(knownIds, this, true);
+
+    qDebug() << "[Campaign] Duplicate IDs corrected: result = " << validCampaign << ",  " << knownIds.count() << " unique IDs";
+
+    return validCampaign;
+}
+
 void Campaign::handleInternalChange()
 {
     if(_batchChanges)
@@ -526,7 +537,7 @@ void Campaign::internalPostProcessXML(const QDomElement &element, bool isImport)
     CampaignObjectBase::internalPostProcessXML(element, isImport);
 }
 
-bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject)
+bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* baseObject, bool correctDuplicates)
 {
     if(!baseObject)
         return false;
@@ -534,7 +545,9 @@ bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* base
     bool result = false;
     if(knownIds.contains(baseObject->getID()))
     {
-        qCritical() << "[Campaign] duplicated campaign id: " << baseObject->getID();
+        qCritical() << "[Campaign] duplicated campaign id: " << baseObject->getID() << " with name " << baseObject->getName();
+        if(correctDuplicates)
+            baseObject->renewID();
         result = false;
     }
     else
@@ -549,7 +562,7 @@ bool Campaign::validateSingleId(QList<QUuid>& knownIds, CampaignObjectBase* base
     QList<CampaignObjectBase*> childList = baseObject->getChildObjects();
     for(int i = 0; i < childList.count(); ++i)
     {
-        if(!validateSingleId(knownIds, childList.at(i)))
+        if(!validateSingleId(knownIds, childList.at(i), correctDuplicates))
             result = false;
     }
 

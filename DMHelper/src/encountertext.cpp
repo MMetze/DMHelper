@@ -241,10 +241,14 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
         textElement.appendChild(textData);
     element.appendChild(textElement);
 
-    QDomElement translatedTextElement = doc.createElement("translated-text-data");
-        QDomCDATASection translatedTextData = doc.createCDATASection(getTranslatedText());
-        translatedTextElement.appendChild(translatedTextData);
-    element.appendChild(translatedTextElement);
+    // Check to only write really translated text, correcting also for a previous error that has created a lot of duplicate entries!
+    if((_translatedText.isEmpty()) || (_translatedText != _text))
+    {
+        QDomElement translatedTextElement = doc.createElement("translated-text-data");
+            QDomCDATASection translatedTextData = doc.createCDATASection(getTranslatedText());
+            translatedTextElement.appendChild(translatedTextData);
+        element.appendChild(translatedTextElement);
+    }
 }
 
 bool EncounterText::belongsToObject(QDomElement& element)

@@ -61,7 +61,7 @@ void PublishGLImageRenderer::initializeGL()
     //f->glEnable(GL_BLEND);// you enable blending function
     //f->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    const char *vertexShaderSource = "#version 330 core\n"
+    const char *vertexShaderSource = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
         "layout (location = 2) in vec2 aTexCoord;\n"
@@ -93,7 +93,7 @@ void PublishGLImageRenderer::initializeGL()
         return;
     }
 
-    const char *fragmentShaderSource = "#version 330 core\n"
+    const char *fragmentShaderSource = "#version 410 core\n"
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"

@@ -3,7 +3,6 @@
 #include "party.h"
 #include "undomarker.h"
 #include "mapmarkergraphicsitem.h"
-#include "videoplayerglplayer.h"
 #include "publishglbattlebackground.h"
 #include "publishglobject.h"
 #include "publishglimage.h"
@@ -26,6 +25,7 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     _initialized(false),
     _shaderProgram(0),
     _shaderModelMatrix(0),
+    _fowImage(),
     _fowObject(nullptr),
     _partyToken(nullptr),
     _lineImage(nullptr),
@@ -44,7 +44,6 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
 
 PublishGLMapRenderer::~PublishGLMapRenderer()
 {
-    cleanup();
 }
 
 CampaignObjectBase* PublishGLMapRenderer::getObject()
@@ -119,7 +118,7 @@ void PublishGLMapRenderer::initializeGL()
 
     qDebug() << "[PublishGLMapRenderer] Initializing renderer";
 
-    const char *vertexShaderSource = "#version 330 core\n"
+    const char *vertexShaderSource = "#version 410 core\n"
         "layout (location = 0) in vec3 aPos;   // the position variable has attribute position 0\n"
         "layout (location = 1) in vec3 aColor; // the color variable has attribute position 1\n"
         "layout (location = 2) in vec2 aTexCoord;\n"
@@ -151,15 +150,18 @@ void PublishGLMapRenderer::initializeGL()
         return;
     }
 
-    const char *fragmentShaderSource = "#version 330 core\n"
+    const char *fragmentShaderSource = "#version 410 core\n"
         "out vec4 FragColor;\n"
         "in vec3 ourColor;\n"
         "in vec2 TexCoord;\n"
         "uniform sampler2D texture1;\n"
         "void main()\n"
         "{\n"
-        "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+        "    FragColor = texture(texture1, TexCoord);\n"
         "}\0";
+
+//    "    FragColor = texture(texture1, TexCoord); // FragColor = vec4(ourColor, 1.0f);\n"
+//    "    FragColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);\n"
 
     unsigned int fragmentShader;
     fragmentShader = f->glCreateShader(GL_FRAGMENT_SHADER);
@@ -223,9 +225,6 @@ void PublishGLMapRenderer::initializeGL()
 
 void PublishGLMapRenderer::resizeGL(int w, int h)
 {
-    if(_targetSize == QSize(w, h))
-        return;
-
     _targetSize = QSize(w, h);
     qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
     resizeBackground(w, h);
@@ -244,7 +243,10 @@ void PublishGLMapRenderer::paintGL()
         if(!isBackgroundReady())
             return;
 
+        updateProjectionMatrix();
+
         _recreatePartyToken = true;
+        _recreateLineToken = true;
         _recreateMarkers = true;
         _updateFow = true;
     }
@@ -269,12 +271,11 @@ void PublishGLMapRenderer::paintGL()
     if((!f) || (!e))
         return;
 
-    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
-
     if(!_scissorRect.isEmpty())
     {
+        int pixelRatio = _targetWidget->devicePixelRatio();
         f->glEnable(GL_SCISSOR_TEST);
-        f->glScissor(_scissorRect.x(), _scissorRect.y(), _scissorRect.width(), _scissorRect.height());
+        f->glScissor(_scissorRect.x()*pixelRatio, _scissorRect.y()*pixelRatio, _scissorRect.width()*pixelRatio, _scissorRect.height()*pixelRatio);
     }
 
     // Draw the scene
@@ -282,6 +283,7 @@ void PublishGLMapRenderer::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     f->glUseProgram(_shaderProgram);
+    f->glUniformMatrix4fv(f->glGetUniformLocation(_shaderProgram, "projection"), 1, GL_FALSE, _projectionMatrix.constData());
 
     paintBackground(f);
 
@@ -327,8 +329,12 @@ void PublishGLMapRenderer::distanceChanged()
     _recreateLineToken = true;
 }
 
-void PublishGLMapRenderer::fowChanged()
+void PublishGLMapRenderer::fowChanged(const QImage& fow)
 {
+    if(fow.isNull())
+        return;
+
+    _fowImage = fow;
     _updateFow = true;
     emit updateWidget();
 }
@@ -373,19 +379,29 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
 
-    //qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
-    //qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+    qDebug() << "[PublishGLMapImageRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
+    qDebug() << "[PublishGLMapImageRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
+
+
+    int l = cameraMiddle.x() - backgroundMiddle.width() - halfRect.width();
+    int r = cameraMiddle.x() - backgroundMiddle.width() + halfRect.width();
+    int t = backgroundMiddle.height() - cameraMiddle.y() - halfRect.height();
+    int b = backgroundMiddle.height() - cameraMiddle.y() + halfRect.height();
+    qDebug() << "[PublishGLMapImageRenderer] l: " << l << ", r: " << r << ", t: " << t << ", b: " << b;
+
+
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
                             0.1f, 1000.f);
+    //_projectionMatrix.ortho(-401, 401, -301, 301, 0.1f, 1000.f);
 
     setPointerScale(rectSize.width() / transformedTarget.width());
 
     QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
-    //qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
+    qDebug() << "[PublishGLMapImageRenderer] scissor size: " << scissorSize;
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
@@ -507,9 +523,12 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
     qDeleteAll(_markerTokens);
     _markerTokens.clear();
 
+    if((!_map) || (sceneSize.isEmpty()))
+        return;
+
     _recreateMarkers = false;
 
-    if((!_map) || (!_map->getShowMarkers()) || (sceneSize.isEmpty()))
+    if(!_map->getShowMarkers())
         return;
 
     QUndoStack* stack = _map->getUndoStack();
@@ -538,25 +557,23 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
 
 void PublishGLMapRenderer::updateFoW()
 {
-    if(!_map)
+    if((!_map) || (_fowImage.isNull()))
         return;
 
     QSize backgroundSize = getBackgroundSize().toSize();
+    if(backgroundSize.isEmpty())
+        return;
 
-    if(!backgroundSize.isEmpty())
-    {
-        if(!_fowObject)
-            _fowObject = new PublishGLBattleBackground(nullptr, _map->getBWFoWImage(backgroundSize), GL_NEAREST);
-        else
-            _fowObject->setImage(_map->getBWFoWImage(backgroundSize));
+    if(_fowObject)
+        _fowObject->setImage(_fowImage);
+    else
+        _fowObject = new PublishGLBattleBackground(nullptr, _fowImage, GL_NEAREST);
 
-        _updateFow = false;
-    }
+    _updateFow = false;
 }
 
 void PublishGLMapRenderer::updateContents()
 {
-
 }
 
 void PublishGLMapRenderer::handlePartyChanged(Party* party)

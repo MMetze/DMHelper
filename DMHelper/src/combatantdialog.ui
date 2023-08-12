@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>552</width>
+    <width>559</width>
     <height>477</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Edit Combatant</string>
+   <string>Add Monsters</string>
   </property>
   <property name="styleSheet">
    <string notr="true">background-image: url(:/img/data/parchment.jpg);</string>
@@ -346,6 +346,9 @@
               <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
                 <widget class="QLabel" name="label_6">
+                 <property name="toolTip">
+                  <string>User-defined HP. Leave blank for random HP</string>
+                 </property>
                  <property name="text">
                   <string>Hit Points:</string>
                  </property>
@@ -369,6 +372,9 @@
                    <horstretch>0</horstretch>
                    <verstretch>0</verstretch>
                   </sizepolicy>
+                 </property>
+                 <property name="toolTip">
+                  <string>Leave blank for random HP</string>
                  </property>
                 </widget>
                </item>

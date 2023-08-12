@@ -6,7 +6,6 @@
 #include <QDropEvent>
 #include <QStandardItemModel>
 #include <QMimeData>
-#include <QDebug>
 
 CampaignTree::CampaignTree(QWidget *parent) :
     QTreeView(parent)
@@ -62,6 +61,17 @@ void CampaignTree::dragMoveEvent(QDragMoveEvent * event)
         return;
 
     event->accept();
+}
+
+void CampaignTree::keyPressEvent(QKeyEvent *event)
+{
+    if((event) && (event->modifiers() == Qt::AltModifier))
+    {
+        event->ignore();
+        return;
+    }
+
+    QTreeView::keyPressEvent(event);
 }
 
 void CampaignTree::updateExpandedState()

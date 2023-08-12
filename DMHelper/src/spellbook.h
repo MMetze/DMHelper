@@ -24,6 +24,8 @@ public:
     static void Initialize();
     static void Shutdown();
 
+    bool writeSpellbook(const QString& targetFilename);
+    bool readSpellbook(const QString& targetFilename);
     int outputXML(QDomDocument &doc, QDomElement &parent, QDir& targetDirectory, bool isExport) const;
     void inputXML(const QDomElement &element, bool isImport);
     void input_START_CONVERSION(const QDomElement &element);
@@ -39,6 +41,8 @@ public:
     int count() const;
     QList<QString> getSpellList() const;
     QStringList getLicenseText() const;
+
+    bool isDirty();
 
     Spell* getSpell(const QString& name);
     Spell* getFirstSpell() const;
@@ -62,6 +66,9 @@ public slots:
     void startBatchProcessing();
     void finishBatchProcessing();
 
+    void registerDirty();
+    void setDirty(bool dirty = true);
+
 private:
     void showSpellWarning(const QString& spell);
 
@@ -72,6 +79,7 @@ private:
     int _majorVersion;
     int _minorVersion;
     QStringList _licenseText;
+    bool _dirty;
 
     bool _batchProcessing;
     bool _batchAcknowledge;

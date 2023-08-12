@@ -1,6 +1,5 @@
 #include "dmhnetworkmanager.h"
 #include "dmhnetworkmanager_private.h"
-#include <QDebug>
 
 DMHNetworkManager::DMHNetworkManager(const DMHLogon& logon, QObject *parent) :
     QObject(parent),

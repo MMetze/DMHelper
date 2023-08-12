@@ -56,11 +56,16 @@ void MapSelectDialog::handleItemChanged(QTreeWidgetItem *current, QTreeWidgetIte
     if(current)
     {
         Map* map = current->data(0, Qt::UserRole).value<Map*>();
-        if((map) && (map->initialize()) && (map->isInitialized()))
+        if(map)
+        {
+            if(!map->isInitialized())
+                map->initialize();
+
             img = map->getPreviewImage();
+        }
     }
 
-    ui->lblPreview->setPixmap(QPixmap::fromImage(img).scaled(ui->lblPreview->size(),Qt::KeepAspectRatio));
+    ui->lblPreview->setPixmap(QPixmap::fromImage(img).scaled(ui->lblPreview->size(), Qt::KeepAspectRatio));
 }
 
 void MapSelectDialog::setupSelectTree(Campaign& campaign, const QUuid& currentId)

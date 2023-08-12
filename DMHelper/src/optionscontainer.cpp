@@ -36,6 +36,8 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _activeIcon(),
     _combatantFrame(),
     _countdownFrame(),
+    _gridLocked(false),
+    _gridLockScale(100.0),
     _lastAppVersion(),
     _dataSettingsExist(false),
     _updatesEnabled(false),
@@ -172,6 +174,16 @@ QString OptionsContainer::getCombatantFrame() const
 QString OptionsContainer::getCountdownFrame() const
 {
     return _countdownFrame;
+}
+
+bool OptionsContainer::getGridLocked() const
+{
+    return _gridLocked;
+}
+
+qreal OptionsContainer::getGridLockScale() const
+{
+    return _gridLockScale;
 }
 
 QString OptionsContainer::getLastAppVersion() const
@@ -344,6 +356,8 @@ void OptionsContainer::readSettings()
     setActiveIcon(settings.value("activeIcon").toString());
     setCombatantFrame(settings.value("combatantFrame").toString());
     setCountdownFrame(settings.value("countdownFrame").toString());
+    setGridLocked(settings.value("gridLocked",QVariant(false)).toBool());
+    setGridLockScale(settings.value("gridLockScale",QVariant(0.0)).toReal());
 
     _lastAppVersion = settings.value("lastAppVersion").toString();
 
@@ -410,6 +424,8 @@ void OptionsContainer::writeSettings()
     settings.setValue("activeIcon", getActiveIcon());
     settings.setValue("combatantFrame", getCombatantFrame());
     settings.setValue("countdownFrame", getCountdownFrame());
+    settings.setValue("gridLocked", getGridLocked());
+    settings.setValue("gridLockScale", getGridLockScale());
 
     QString versionString = QString("%1.%2.%3").arg(DMHelper::DMHELPER_MAJOR_VERSION)
                                                .arg(DMHelper::DMHELPER_MINOR_VERSION)
@@ -874,6 +890,26 @@ void OptionsContainer::setCountdownDuration(const QString& countdownDuration)
     }
 }
 
+void OptionsContainer::setGridLocked(bool gridLocked)
+{
+    if(_gridLocked != gridLocked)
+    {
+        _gridLocked = gridLocked;
+        qDebug() << "[OptionsContainer] Grid locked set to: " << _gridLocked;
+        emit gridLockedChanged(_gridLocked);
+    }
+}
+
+void OptionsContainer::setGridLockScale(qreal gridLockScale)
+{
+    if(_gridLockScale != gridLockScale)
+    {
+        _gridLockScale = gridLockScale;
+        qDebug() << "[OptionsContainer] Grid lock scale set to: " << _gridLockScale;
+        emit gridLockScaleChanged(_gridLockScale);
+    }
+}
+
 void OptionsContainer::setUpdatesEnabled(bool updatesEnabled)
 {
     _updatesEnabled = updatesEnabled;
@@ -992,6 +1028,8 @@ void OptionsContainer::copy(OptionsContainer* other)
         setActiveIcon(other->_activeIcon);
         setCombatantFrame(other->_combatantFrame);
         setCountdownFrame(other->_countdownFrame);
+        setGridLocked(other->_gridLocked);
+        setGridLockScale(other->_gridLockScale);
         _lastAppVersion = other->_lastAppVersion;
         _dataSettingsExist = other->_dataSettingsExist;
         _updatesEnabled = other->_updatesEnabled;

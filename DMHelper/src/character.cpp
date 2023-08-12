@@ -4,7 +4,7 @@
 #include "bestiary.h"
 #include <QDomElement>
 #include <QDir>
-#include <QtDebug>
+#include <QDebug>
 
 const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
 {
@@ -24,9 +24,9 @@ const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
     "",         // StringValue_hair
     "",         // StringValue_equipment
     "",         // StringValue_proficiencies
-    "",         // StringValue_spells
     "",         // StringValue_notes
-    "medium"    // StringValue_size
+    "medium",   // StringValue_size
+    "0"         // StringValue_experience
 };
 
 const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
@@ -47,9 +47,9 @@ const char* STRINGVALUE_NAMES[Character::STRINGVALUE_COUNT] =
     "hair",             // StringValue_hair
     "equipment",        // StringValue_equipment
     "proficiencies",    // StringValue_proficiencies
-    "spells",           // StringValue_spells
     "notes",            // StringValue_notes
-    "size"              // StringValue_size
+    "size",             // StringValue_size
+    "experience"        // StringValue_experience
 };
 
 const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
@@ -68,9 +68,12 @@ const int INTVALUE_DEFAULTS[Character::INTVALUE_COUNT] =
     0,      // IntValue_gold
     0,      // IntValue_silver
     0,      // IntValue_copper
-    0,      // IntValue_experience
     0,      // IntValue_jackofalltrades
-    1       // IntValue_maximumHP
+    1,      // IntValue_maximumHP
+    0,      // IntValue_pactMagicSlots
+    0,      // IntValue_pactMagicUsed
+    0,      // IntValue_pactMagicLevel
+    0,      // IntValue_cantrips
 };
 
 const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
@@ -89,9 +92,12 @@ const char* INTVALUE_NAMES[Character::INTVALUE_COUNT] =
     "gold",             // IntValue_gold
     "silver",           // IntValue_silver
     "copper",           // IntValue_copper
-    "experience",       // IntValue_experience
     "jackofalltrades",  // IntValue_jackofalltrades
-    "maximumhp"         // IntValue_maximumHP
+    "maximumhp",        // IntValue_maximumHP
+    "pactmagicslots",   // IntValue_pactMagicSlots
+    "pactmagicused",    // IntValue_pactMagicUsed
+    "pactmagiclevel",   // IntValue_pactMagicLevel
+    "cantrips",         // IntValue_cantrips
 };
 
 const char* SKILLVALUE_NAMES[Combatant::SKILLS_COUNT] =
@@ -156,6 +162,9 @@ Character::Character(const QString& name, QObject *parent) :
     _stringValues(STRINGVALUE_COUNT),
     _intValues(INTVALUE_COUNT),
     _skillValues(SKILLS_COUNT),
+    _spellSlots(),
+    _spellSlotsUsed(),
+    _spellList(),
     _active(true),
     _iconChanged(false)
 {
@@ -187,6 +196,32 @@ void Character::inputXML(const QDomElement &element, bool isImport)
         setSkillValue(static_cast<Skills>(i), element.attribute(SKILLVALUE_NAMES[i],QString::number(0)).toInt());
     }
 
+    i = 0;
+    while(element.hasAttribute(QString("slots") + QString::number(i+1)))
+    {
+        setSpellSlots(i+1, element.attribute(QString("slots") + QString::number(i+1)).toInt());
+        setSpellSlotsUsed(i+1, element.attribute(QString("slotsused") + QString::number(i+1)).toInt());
+        ++i;
+    }
+
+    if(element.hasAttribute(QString("spells")))
+    {
+        _spellList = element.attribute("spells"); // backwards compatibility
+    }
+    else
+    {
+        QDomElement spellElement = element.firstChildElement("spell-data");
+        if(!spellElement.isNull())
+        {
+            QDomNode spellDataChildNode = spellElement.firstChild();
+            if((!spellDataChildNode.isNull()) && (spellDataChildNode.isCDATASection()))
+            {
+                QDomCDATASection spellData = spellDataChildNode.toCDATASection();
+                _spellList = spellData.data();
+            }
+        }
+    }
+
     setActive(static_cast<bool>(element.attribute(QString("active"),QString::number(true)).toInt()));
 
     Combatant::inputXML(element, isImport);
@@ -195,6 +230,8 @@ void Character::inputXML(const QDomElement &element, bool isImport)
     {
         setIntValue(IntValue_maximumHP, getHitPoints());
     }
+
+    readActionList(element, QString("actions"), _actions, isImport);
 
     endBatchChanges();
 }
@@ -209,7 +246,14 @@ void Character::copyValues(const CampaignObjectBase* other)
     _stringValues = otherCharacter->_stringValues;
     _intValues = otherCharacter->_intValues;
     _skillValues = otherCharacter->_skillValues;
+    _spellSlots = otherCharacter->_spellSlots;
+    _spellSlotsUsed = otherCharacter->_spellSlotsUsed;
+    _spellList = otherCharacter->_spellList;
     _active = otherCharacter->_active;
+
+    _actions.clear();
+    for(const MonsterAction& action : otherCharacter->_actions)
+        addAction(action);
 
     Combatant::copyValues(other);
 }
@@ -236,7 +280,7 @@ void Character::endBatchChanges()
 
 Combatant* Character::clone() const
 {
-    qDebug("[Character] WARNING: Character cloned - this is a highly questionable action!");
+    qDebug() << "[Character] WARNING: Character cloned - this is a highly questionable action!";
 
     Character* newCharacter = new Character(getName());
     newCharacter->copyValues(this);
@@ -466,6 +510,90 @@ void Character::setSkillExpertise(Skills key, bool value)
     }
 }
 
+int Character::spellSlotLevels() const
+{
+    return _spellSlots.size();
+}
+
+QVector<int> Character::getSpellSlots() const
+{
+    return _spellSlots;
+}
+
+QVector<int> Character::getSpellSlotsUsed() const
+{
+    return _spellSlotsUsed;
+}
+
+void Character::setSpellSlots(int level, int slotCount)
+{
+    if((level <= 0) || (slotCount < 0))
+        return;
+
+    while(level > _spellSlots.size())
+    {
+        _spellSlots.append(0);
+        _spellSlotsUsed.append(0);
+    }
+
+    if(slotCount == 0)
+    {
+        while(level <= _spellSlots.size())
+            _spellSlots.takeLast();
+
+        _spellSlotsUsed.resize(_spellSlots.size());
+    }
+    else
+    {
+        _spellSlots[level - 1] = slotCount;
+    }
+
+    registerChange();
+}
+
+int Character::getSpellSlots(int level)
+{
+    return ((level <= 0) || (level > _spellSlots.size())) ? 0 : _spellSlots.at(level - 1);
+}
+
+void Character::setSpellSlotsUsed(int level, int slotsUsed)
+{
+    if((level <= 0) || (level > _spellSlotsUsed.size()) || (slotsUsed < 0))
+        return;
+
+    int newSlotsUsed = (slotsUsed > _spellSlots.at(level - 1)) ? _spellSlots.at(level - 1) : slotsUsed;
+    if(_spellSlotsUsed[level - 1] == newSlotsUsed)
+        return;
+
+    _spellSlotsUsed[level - 1] = newSlotsUsed;
+    registerChange();
+}
+
+int Character::getSpellSlotsUsed(int level)
+{
+    return ((level <= 0) || (level > _spellSlotsUsed.size())) ? 0 : _spellSlotsUsed.at(level - 1);
+}
+
+void Character::clearSpellSlotsUsed()
+{
+    _spellSlotsUsed.fill(0);
+    registerChange();
+}
+
+QString Character::getSpellString()
+{
+    return _spellList;
+}
+
+void Character::setSpellString(const QString& spellString)
+{
+    if(_spellList != spellString)
+    {
+        _spellList = spellString;
+        registerChange();
+    }
+}
+
 bool Character::getActive() const
 {
     return _active;
@@ -507,6 +635,31 @@ int Character::getProficiencyBonus() const
 int Character::getPassivePerception() const
 {
     return 10 + getSkillBonus(Skills_perception);
+}
+
+QList<MonsterAction> Character::getActions() const
+{
+    return _actions;
+}
+
+void Character::addAction(const MonsterAction& action)
+{
+    _actions.append(action);
+}
+
+void Character::setAction(int index, const MonsterAction& action)
+{
+    if((index < 0) || (index >= _actions.count()))
+        return;
+
+    if(_actions.at(index) != action)
+        _actions[index] = action;
+}
+
+int Character::removeAction(const MonsterAction& action)
+{
+    _actions.removeAll(action);
+    return _actions.count();
 }
 
 void Character::copyMonsterValues(MonsterClass& monster)
@@ -613,27 +766,51 @@ QString Character::getWrittenSkillName(int skill)
 
 void Character::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
 {
-    element.setAttribute( "dndBeyondID", getDndBeyondID() );
+    element.setAttribute("dndBeyondID", getDndBeyondID());
 
     int i;
     for(i = 0; i < STRINGVALUE_COUNT; ++i)
     {
-        element.setAttribute( STRINGVALUE_NAMES[i], getStringValue(static_cast<StringValue>(i)) );
+        element.setAttribute(STRINGVALUE_NAMES[i], getStringValue(static_cast<StringValue>(i)));
     }
 
     for(i = 0; i < INTVALUE_COUNT; ++i)
     {
-        element.setAttribute( INTVALUE_NAMES[i], getIntValue(static_cast<IntValue>(i)) );
+        element.setAttribute(INTVALUE_NAMES[i], getIntValue(static_cast<IntValue>(i)));
     }
 
     for(i = 0; i < SKILLS_COUNT; ++i)
     {
-        element.setAttribute( SKILLVALUE_NAMES[i], _skillValues[static_cast<Skills>(i)] );
+        element.setAttribute(SKILLVALUE_NAMES[i], _skillValues[static_cast<Skills>(i)]);
+    }
+
+    for(i = 0; i < _spellSlots.size(); ++i)
+    {
+        element.setAttribute(QString("slots") + QString::number(i+1), _spellSlots.at(i));
+        element.setAttribute(QString("slotsused") + QString::number(i+1), _spellSlotsUsed.at(i));
     }
 
     element.setAttribute("active", static_cast<int>(getActive()));
 
+    if(!_spellList.isEmpty())
+    {
+        QDomElement spellElement = doc.createElement("spell-data");
+            QDomCDATASection spellData = doc.createCDATASection(_spellList);
+            spellElement.appendChild(spellData);
+        element.appendChild(spellElement);
+    }
+
+    writeActionList(doc, element, QString("actions"), _actions, isExport);
+
     Combatant::internalOutputXML(doc, element, targetDirectory, isExport);
+}
+
+bool Character::belongsToObject(QDomElement& element)
+{
+    if((element.tagName() == QString("actions")) || (element.tagName() == QString("spell-data")))
+        return true;
+    else
+        return Combatant::belongsToObject(element);
 }
 
 void Character::setDefaultValues()
@@ -655,5 +832,37 @@ void Character::setDefaultValues()
         _skillValues[i] = 0;
     }
 
+    _spellSlots.clear();
+    _spellSlotsUsed.clear();
+
     _active = true;
+}
+
+void Character::readActionList(const QDomElement& element, const QString& actionName, QList<MonsterAction>& actionList, bool isImport)
+{
+    QDomElement actionListElement = element.firstChildElement(actionName);
+    if(actionListElement.isNull())
+        return;
+
+    QDomElement actionElement = actionListElement.firstChildElement("action");
+    while(!actionElement.isNull())
+    {
+        MonsterAction newAction(actionElement, isImport);
+        actionList.append(newAction);
+        actionElement = actionElement.nextSiblingElement("action");
+    }
+}
+
+void Character::writeActionList(QDomDocument &doc, QDomElement& element, const QString& actionName, const QList<MonsterAction>& actionList, bool isExport) const
+{
+    QDomElement actionListElement = doc.createElement(actionName);
+
+    for(int i = 0; i < actionList.count(); ++i)
+    {
+        QDomElement actionElement = doc.createElement("action");
+        actionList.at(i).outputXML(doc, actionElement, isExport);
+        actionListElement.appendChild(actionElement);
+    }
+
+    element.appendChild(actionListElement);
 }

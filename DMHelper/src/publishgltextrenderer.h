@@ -23,6 +23,10 @@ public:
 
     // DMH OpenGL renderer calls
     virtual void cleanup() override;
+    virtual bool deleteOnDeactivation() override;
+    virtual QRect getScissorRect() override;
+
+    virtual void setBackgroundColor(const QColor& color) override;
 
     // Standard OpenGL calls
     virtual void initializeGL() override;
@@ -31,12 +35,19 @@ public:
 
 public slots:
     // DMH OpenGL renderer calls
-    virtual void setBackgroundColor(const QColor& color) override;
     virtual void setRotation(int rotation) override;
 
-    void rewind();
-    void play();
-    void stop();
+    virtual void rewind();
+    virtual void play();
+    virtual void stop();
+    virtual void playPause(bool play);
+
+signals:
+    void playPauseChanged(bool playing);
+
+protected slots:
+    void contentChanged();
+    void startScrollingTimer();
 
 protected:
     // QObject overrides
@@ -54,6 +65,7 @@ protected:
     virtual void updateBackground();
 
     int getRotatedHeight(int rotation);
+    void recreateContent();
 
     EncounterText* _encounter;
     QSize _targetSize;
@@ -65,11 +77,14 @@ protected:
     int _shaderModelMatrix;
     int _shaderProjectionMatrix;
     QMatrix4x4 _projectionMatrix;
+    QRect _scissorRect;
     PublishGLImage* _textObject;
 
     QPointF _textPos;
     QElapsedTimer _elapsed;
     int _timerId;
+
+    bool _recreateContent;
 };
 
 #endif // PUBLISHGLTEXTRENDERER_H
