@@ -1,12 +1,13 @@
 #include "encountertextedit.h"
 #include "ui_encountertextedit.h"
 #include "encountertext.h"
-#include "publishgltextimagerenderer.h"
-#include "publishgltextvideorenderer.h"
+#include "encountertextlinked.h"
+#include "publishgltextrenderer.h"
 #include "dmconstants.h"
 #include "campaign.h"
 #include "texttranslatedialog.h"
 #include "videoplayerglscreenshot.h"
+#include "layerseditdialog.h"
 #include <QKeyEvent>
 #include <QTextCharFormat>
 #include <QUrl>
@@ -31,6 +32,7 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _isDMPlayer(false),
     _isPublishing(false),
     _isVideo(false),
+    _isCodeView(false),
     _targetSize(),
     _rotation(0),
     _textPos()
@@ -93,7 +95,8 @@ void EncounterTextEdit::activateObject(CampaignObjectBase* object, PublishGLRend
             _renderer->setRotation(_rotation);
     }
 
-    emit setPublishEnabled(true);
+    emit setPublishEnabled(true, true);
+    emit setLayers(_encounter->getLayerScene().getLayers(), _encounter->getLayerScene().getSelectedLayerIndex());
 }
 
 void EncounterTextEdit::deactivateObject()
@@ -108,6 +111,8 @@ void EncounterTextEdit::deactivateObject()
 
     storeEncounter();
     unsetEncounter(_encounter);
+
+    emit setLayers(QList<Layer*>(), 0);
 }
 
 void EncounterTextEdit::setKeys(const QList<QString>& keys)
@@ -140,6 +145,13 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
 
     _encounter = encounter;
 
+    _encounter->initialize();
+//    if(_encounter->isInitialized())
+//    {
+//        qDebug() << "[EncounterTextEdit] Initializing encounter background image";
+//        _encounter->getLayerScene().dmInitialize(nullptr);
+//    }
+
     readEncounter();
     connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
     connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
@@ -148,6 +160,18 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
     connect(_encounter, &EncounterText::animatedChanged, this, &EncounterTextEdit::animatedChanged);
     connect(_encounter, &EncounterText::translatedChanged, this, &EncounterTextEdit::translatedChanged);
+    connect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::layerAdded);
+    connect(&_encounter->getLayerScene(), &LayerScene::sceneChanged, this, &EncounterTextEdit::handleLayersChanged);
+
+    if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+        if(linkedText)
+        {
+            connect(_encounter, &EncounterText::textChanged, this, &EncounterTextEdit::updateEncounter);
+            linkedText->setWatcher(true);
+        }
+    }
 }
 
 void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
@@ -157,6 +181,17 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
     if(_encounter)
     {
+        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+        {
+            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+            if(linkedText)
+                linkedText->setWatcher(false);
+        }
+
+        _encounter->uninitialize();
+
+        disconnect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::layerAdded);
+        disconnect(&_encounter->getLayerScene(), &LayerScene::sceneChanged, this, &EncounterTextEdit::handleLayersChanged);
         disconnect(_encounter, nullptr, this, nullptr);
         _encounter = nullptr;
     }
@@ -168,7 +203,25 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
 QString EncounterTextEdit::toHtml() const
 {
-    return ui->textBrowser->toHtml();
+    if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
+    {
+        return ui->textBrowser->toHtml();
+    }
+    else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+        if(linkedText)
+        {
+            if((_isCodeView) || (linkedText->getFileType() == DMHelper::FileType_Text))
+                return ui->textBrowser->toPlainText();
+            else if(linkedText->getFileType() == DMHelper::FileType_HTML)
+                ui->textBrowser->toHtml();
+            else if(linkedText->getFileType() == DMHelper::FileType_Markdown)
+                ui->textBrowser->toMarkdown();
+        }
+    }
+
+    return QString();
 }
 
 QString EncounterTextEdit::toPlainText() const
@@ -187,37 +240,23 @@ bool EncounterTextEdit::eventFilter(QObject *watched, QEvent *event)
         if(!keyEvent)
             return false;
 
-        switch(keyEvent->key())
+        if((_formatter) && ((keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
         {
-            case Qt::Key_B:
-                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-                {
-                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                    format.setFontWeight(format.fontWeight() == QFont::Bold ? QFont::Normal : QFont::Bold);
-                    ui->textBrowser->setCurrentCharFormat(format);
-                    return true;
-                }
-                break;
-
-            case Qt::Key_I:
-                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-                {
-                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                    format.setFontItalic(!format.fontItalic());
-                    ui->textBrowser->setCurrentCharFormat(format);
-                    return true;
-                }
-                break;
-
-            case Qt::Key_U:
-                if( (keyEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier)
-                {
-                    QTextCharFormat format = ui->textBrowser->currentCharFormat();
-                    format.setFontUnderline(!format.fontUnderline());
-                    ui->textBrowser->setCurrentCharFormat(format);
-                    return true;
-                }
-                break;
+            if(keyEvent->key() == Qt::Key_B)
+            {
+                _formatter->setBold(ui->textBrowser->fontWeight() == QFont::Normal);
+                return true;
+            }
+            else if(keyEvent->key() == Qt::Key_I)
+            {
+                _formatter->setItalics(!ui->textBrowser->fontItalic());
+                return true;
+            }
+            else if(keyEvent->key() == Qt::Key_U)
+            {
+                _formatter->setUnterline(!ui->textBrowser->fontUnderline());
+                return true;
+            }
         }
     }
     else if(event->type() == QEvent::Paint)
@@ -246,10 +285,28 @@ void EncounterTextEdit::setHtml()
         return;
     }
 
-    if(_encounter->getTranslated())
-        ui->textBrowser->setHtml(_encounter->getTranslatedText());
-    else
-        ui->textBrowser->setHtml(_encounter->getText());
+    if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
+    {
+        if(_encounter->getTranslated())
+            ui->textBrowser->setHtml(_encounter->getTranslatedText());
+        else
+            ui->textBrowser->setHtml(_encounter->getText());
+    }
+    else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+        if(linkedText)
+        {
+            if((_isCodeView) || (linkedText->getFileType() == DMHelper::FileType_Text))
+                ui->textBrowser->setPlainText(_encounter->getText());
+            else if(linkedText->getFileType() == DMHelper::FileType_HTML)
+                ui->textBrowser->setHtml(_encounter->getText());
+            else if(linkedText->getFileType() == DMHelper::FileType_Markdown)
+                ui->textBrowser->setMarkdown(_encounter->getText());
+            else
+                return;
+        }
+    }
 
     updateAnchors();
 }
@@ -348,8 +405,7 @@ void EncounterTextEdit::setPasteRich(bool pasteRich)
 
 void EncounterTextEdit::hyperlinkClicked()
 {
-    QTextCursor cursor = ui->textBrowser->textCursor();
-    QTextCharFormat format = cursor.charFormat();
+    QTextCharFormat format = ui->textBrowser->currentCharFormat();
 
     bool result = false;
     QString newHRef = QInputDialog::getText(nullptr,
@@ -369,12 +425,14 @@ void EncounterTextEdit::hyperlinkClicked()
             QMessageBox::critical(nullptr,
                                   QString("Hyperlink Error"),
                                   QString("The provided hyperlink is not valid: ") + newHRef);
+            return;
         }
     }
 
     format.setAnchor(!newHRef.isEmpty());
     format.setAnchorHref(newHRef);
-    cursor.mergeCharFormat(format);
+    format.setFontUnderline(!newHRef.isEmpty());
+    ui->textBrowser->mergeCurrentCharFormat(format);
 }
 
 void EncounterTextEdit::setTextWidth(int textWidth)
@@ -442,10 +500,26 @@ void EncounterTextEdit::setTranslated(bool translated)
     setHtml();
 }
 
+void EncounterTextEdit::setCodeView(bool active)
+{
+    if(active == _isCodeView)
+        return;
+
+    _isCodeView = active;
+    setHtml();
+    emit codeViewChanged(active);
+}
+
 void EncounterTextEdit::targetResized(const QSize& newSize)
 {
     if(newSize != _targetSize)
         _targetSize = newSize;
+}
+
+void EncounterTextEdit::layerSelected(int selected)
+{
+    if(_encounter)
+        _encounter->getLayerScene().setSelectedLayerIndex(selected);
 }
 
 void EncounterTextEdit::publishClicked(bool checked)
@@ -467,10 +541,11 @@ void EncounterTextEdit::publishClicked(bool checked)
             emit showPublishWindow();
             prepareImages();
 
-            if(isVideo())
-                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
-            else
-                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
+//            if(isVideo())
+//                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
+//            else
+//                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
+            _renderer = new PublishGLTextRenderer(_encounter, _textImage);
 
             _renderer->setRotation(_rotation);
             connect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);
@@ -495,6 +570,18 @@ void EncounterTextEdit::setRotation(int rotation)
     _rotation = rotation;
     if(_renderer)
         _renderer->setRotation(_rotation);
+}
+
+void EncounterTextEdit::editLayers()
+{
+    if(!_encounter)
+        return;
+
+    LayersEditDialog dlg(_encounter->getLayerScene());
+    dlg.resize(width() * 9 / 10, height() * 9 / 10);
+    dlg.exec();
+
+    emit setLayers(_encounter->getLayerScene().getLayers(), _encounter->getLayerScene().getSelectedLayerIndex());
 }
 
 void EncounterTextEdit::updateAnchors()
@@ -554,22 +641,44 @@ void EncounterTextEdit::storeEncounter()
     if(!_encounter)
         return;
 
-    if(_encounter->getTranslated())
-        _encounter->setTranslatedText(toHtml());
-    else
+    if(_encounter->getObjectType() == DMHelper::CampaignType_Text)
+    {
+        if(_encounter->getTranslated())
+            _encounter->setTranslatedText(toHtml());
+        else
+            _encounter->setText(toHtml());
+    }
+    else if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
         _encounter->setText(toHtml());
+    }
 }
 
 void EncounterTextEdit::readEncounter()
 {
+    if(!_encounter)
+        return;
+
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
-    if(_encounter)
-    {
+
         emit imageFileChanged(_encounter->getImageFile());
         emit textWidthChanged(_encounter->getTextWidth());
         emit animatedChanged(_encounter->getAnimated());
         emit scrollSpeedChanged(_encounter->getScrollSpeed());
         emit translatedChanged(_encounter->getTranslated());
+
+        bool showCodeView = false;
+        _isCodeView = false;
+        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+        {
+            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+            if((linkedText->getFileType() == DMHelper::FileType_HTML) || (linkedText->getFileType() == DMHelper::FileType_Markdown))
+            {
+                showCodeView = true;
+                emit codeViewChanged(_isCodeView);
+            }
+        }
+        emit codeViewVisible(showCodeView);
 
         ui->textBrowser->setTextWidth(_encounter->getTextWidth());
         loadImage();
@@ -577,7 +686,25 @@ void EncounterTextEdit::readEncounter()
         setAnimated(_encounter->getAnimated());
         setTranslated(_encounter->getTranslated());
         setHtml();
-    }
+
+    connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+}
+
+void EncounterTextEdit::updateEncounter()
+{
+    if(!_encounter)
+        return;
+
+    disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
+        bool showCodeView = false;
+        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+        {
+            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+            if((linkedText->getFileType() == DMHelper::FileType_HTML) || (linkedText->getFileType() == DMHelper::FileType_Markdown))
+                showCodeView = true;
+        }
+        emit codeViewVisible(showCodeView);
+        setHtml();
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
 }
 
@@ -597,6 +724,9 @@ void EncounterTextEdit::loadImage()
     _backgroundImageScaled = QImage();
 
     _isVideo = false;
+    _backgroundImage = _encounter->getLayerScene().mergedImage();
+    scaleBackgroundImage();
+    /*
     if(!_encounter->getImageFile().isEmpty())
     {
         QFileInfo fileInfo(_encounter->getImageFile());
@@ -613,6 +743,7 @@ void EncounterTextEdit::loadImage()
             }
         }
     }
+    */
 
     setPublishCheckable();
 }
@@ -622,6 +753,21 @@ void EncounterTextEdit::handleScreenshotReady(const QImage& image)
     _backgroundImage = image;
     _backgroundImageScaled = QImage();
     scaleBackgroundImage();
+    update();
+}
+
+void EncounterTextEdit::handleLayersChanged()
+{
+    if(!_encounter)
+        return;
+
+    emit setLayers(_encounter->getLayerScene().getLayers(), _encounter->getLayerScene().getSelectedLayerIndex());
+}
+
+void EncounterTextEdit::layerAdded(Layer* layer)
+{
+    Q_UNUSED(layer);
+    loadImage();
     update();
 }
 

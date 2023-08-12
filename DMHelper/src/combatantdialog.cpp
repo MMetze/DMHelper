@@ -3,24 +3,27 @@
 #include "monsterclass.h"
 #include "bestiary.h"
 #include "dmconstants.h"
+#include "dice.h"
 #include "ui_combatantdialog.h"
 #include <QInputDialog>
 #include <QLineEdit>
 #include <QDebug>
 
-// TODO: Add option to use average HPs instead of rolling HitDice
-
 CombatantDialog::CombatantDialog(QDialogButtonBox::StandardButtons buttons, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CombatantDialog),
-    _combatant(nullptr),
-    _count(1)
+    //_combatant(nullptr),
+    _iconIndex(0)
+//    _count(1)
 {
     ui->setupUi(this);
 
     ui->edtCount->setValidator(new QIntValidator(1, 100, this));
     ui->edtHitPointsLocal->setValidator(new QIntValidator(-10, 1000, this));
     ui->buttonBox->setStandardButtons(buttons);
+
+    connect(ui->btnPreviousToken, &QAbstractButton::clicked, this, &CombatantDialog::previousIcon);
+    connect(ui->btnNextToken, &QAbstractButton::clicked, this, &CombatantDialog::nextIcon);
 
     connect(ui->cmbMonsterClass, SIGNAL(currentIndexChanged(QString)), this, SLOT(monsterClassChanged(QString)));
     connect(ui->chkUseAverage, SIGNAL(clicked(bool)), ui->edtHitPointsLocal, SLOT(setDisabled(bool)));
@@ -40,31 +43,6 @@ CombatantDialog::~CombatantDialog()
 {
     delete ui;
 }
-
-/*
-void CombatantDialog::setCombatant(int combatantCount, Combatant* combatant)
-{
-    if((!combatant)||(combatant->getCombatantType() != DMHelper::CombatantType_Monster))
-        return;
-
-    Monster* monster = dynamic_cast<Monster*>(combatant);
-    if(!monster)
-        return;
-
-    _combatant = combatant;
-    _count = combatantCount;
-
-    ui->edtCount->setText(QString::number(_count));
-    ui->edtNameLocal->setText(_combatant->getName());
-
-    ui->chkUseAverage->setText(QString("Use Average HP (") + monster.get
-    //ui->edtHitPointsLocal->setText(_combatant->getHitPoints() == 0 ? "" : QString::number(_combatant->getHitPoints()));
-    ui->edtHitPointsLocal->setText(QString());
-
-    ui->cmbMonsterClass->setCurrentText(monster->getMonsterClassName());
-    ui->lblIcon->setPixmap(monster->getIconPixmap(DMHelper::PixmapSize_Animate));
-}
-*/
 
 int CombatantDialog::getCount() const
 {
@@ -132,22 +110,32 @@ MonsterClass* CombatantDialog::getMonsterClass() const
     return monsterClass;
 }
 
+int CombatantDialog::getIconIndex() const
+{
+    if(ui->chkRandomTokens->isChecked())
+    {
+        MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+        if(monsterClass)
+            return Dice::dX(monsterClass->getIconCount()) - 1;
+    }
+
+    return _iconIndex;
+}
+
 void CombatantDialog::writeCombatant(Combatant* combatant)
 {
-    // TODO: Change to a reference
-
-    if((!combatant)||(combatant->getCombatantType() != DMHelper::CombatantType_Monster))
+    if((!combatant) || (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
         return;
 
     Monster* monster = dynamic_cast<Monster*>(combatant);
     if(!monster)
         return;
 
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
+    MonsterClass* monsterClass = getMonsterClass();
     if(monsterClass == nullptr)
         return;
 
-    _count = ui->edtCount->text().toInt();
+    //_count = ui->edtCount->text().toInt();
 
     monster->setMonsterClass(monsterClass);
 
@@ -157,8 +145,8 @@ void CombatantDialog::writeCombatant(Combatant* combatant)
 
 void CombatantDialog::accept()
 {
-    if(_combatant)
-        writeCombatant(_combatant);
+    //if(_combatant)
+    //    writeCombatant(_combatant);
     QDialog::accept();
 }
 
@@ -177,13 +165,17 @@ void CombatantDialog::resizeEvent(QResizeEvent *event)
 void CombatantDialog::monsterClassChanged(const QString &text)
 {
     MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(text);
-    if(monsterClass == nullptr)
+    if(!monsterClass)
     {
         qDebug() << "[Combatant Dialog] invalid monster class change detected, monster class not found: " << text;
         return;
     }
 
+    setIconIndex(0);
     updateIcon();
+    ui->btnNextToken->setVisible(monsterClass->getIconCount() > 1);
+    ui->btnPreviousToken->setVisible(monsterClass->getIconCount() > 1);
+    ui->chkRandomTokens->setEnabled(monsterClass->getIconCount() > 1);
 
     ui->edtName->setText(text);
     ui->edtHitDice->setText(monsterClass->getHitDice().toString());
@@ -192,6 +184,22 @@ void CombatantDialog::monsterClassChanged(const QString &text)
 
     if(ui->cmbSize->currentData().toInt() != DMHelper::CombatantSize_Unknown)
         ui->cmbSize->setCurrentIndex(monsterClass->getMonsterSizeCategory() - 1);
+}
+
+void CombatantDialog::setIconIndex(int index)
+{
+    MonsterClass* monsterClass = getMonsterClass();
+    if(!monsterClass)
+        return;
+
+    if((index < 0) || (index >= monsterClass->getIconCount()))
+        return;
+
+    _iconIndex = index;
+    updateIcon();
+
+    ui->btnNextToken->setVisible(_iconIndex < monsterClass->getIconCount() - 1);
+    ui->btnPreviousToken->setEnabled(_iconIndex > 0);
 }
 
 void CombatantDialog::updateIcon()
@@ -203,7 +211,7 @@ void CombatantDialog::updateIcon()
     if(!monsterClass)
         return;
 
-    QPixmap pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Full);
+    QPixmap pmp = monsterClass->getIconPixmap(DMHelper::PixmapSize_Full, _iconIndex);
     if(pmp.isNull())
     {
         pmp = ScaledPixmap::defaultPixmap()->getPixmap(DMHelper::PixmapSize_Full);
@@ -214,13 +222,23 @@ void CombatantDialog::updateIcon()
     ui->lblIcon->setPixmap(pmp.scaled(ui->lblIcon->size(), Qt::KeepAspectRatio));
 }
 
+void CombatantDialog::previousIcon()
+{
+    setIconIndex(_iconIndex - 1);
+}
+
+void CombatantDialog::nextIcon()
+{
+    setIconIndex(_iconIndex + 1);
+}
+
 void CombatantDialog::setHitPointAverageChanged()
 {
-    MonsterClass* monsterClass = Bestiary::Instance()->getMonsterClass(ui->cmbMonsterClass->currentText());
-    if(monsterClass)
-        ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getHitDice().average()) + QString(")"));
+    MonsterClass* monsterClass = getMonsterClass();
+    if(!monsterClass)
+        return;
 
-    //ui->edtHitPointsLocal->setText(localHitPoints);
+    ui->chkUseAverage->setText(QString("Use Average HP (") + QString::number(monsterClass->getHitDice().average()) + QString(")"));
 }
 
 void CombatantDialog::openMonsterClicked()

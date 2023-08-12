@@ -45,7 +45,7 @@ ObjectImportDialog::~ObjectImportDialog()
 
 void ObjectImportDialog::selectImportFile()
 {
-    QString importFilename = QFileDialog::getOpenFileName(nullptr,QString("Select file to import"), QString(), QString("XML files (*.xml)"));
+    QString importFilename = QFileDialog::getOpenFileName(nullptr, QString("Select file to import"), QString(), QString("XML files (*.xml)"));
     if(!importFilename.isEmpty())
         ui->edtImportFile->setText(importFilename);
 }
@@ -219,6 +219,7 @@ QIcon ObjectImportDialog::objectIcon(CampaignObjectBase* object)
         case DMHelper::CampaignType_Map:
             return QIcon(":/img/data/icon_contentmap.png");
         case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_LinkedText:
             return QIcon(":/img/data/icon_contenttextencounter.png");
         case DMHelper::CampaignType_Battle:
             return QIcon(":/img/data/icon_contentbattle.png");

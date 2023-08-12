@@ -18,7 +18,7 @@ public:
     virtual void deactivateObject();
 
 signals:
-    void setPublishEnabled(bool enabled);
+    void setPublishEnabled(bool enabled, bool layered);
     void checkedChanged(bool checked);
     void checkableChanged(bool checkable);
     void rotationChanged(int rotation);
@@ -28,7 +28,8 @@ public slots:
     virtual void publishClicked(bool checked);
     virtual void setRotation(int rotation);
     virtual void setBackgroundColor(const QColor& color);
-    virtual void reloadObject();
+    //virtual void reloadObject();
+    virtual void editLayers();
 };
 
 #endif // CAMPAIGNOBJECTFRAME_H

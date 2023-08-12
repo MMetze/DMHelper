@@ -4,22 +4,23 @@
 #include "campaignobjectbase.h"
 #include "mapcontent.h"
 #include "mapcolorizefilter.h"
+#include "layerscene.h"
 #include <QList>
 #include <QImage>
 #include <QPixmap>
 
 class QDomDocument;
 class QDomElement;
-class QUndoStack;
+class UndoFowBase;
 class AudioTrack;
 class Party;
 class UndoMarker;
 
-class Map : public CampaignObjectBase
+class Map : public CampaignObjectBase//, public ILayerImageSource
 {
     Q_OBJECT
 public:
-    explicit Map(const QString& mapName = QString(), const QString& fileName = QString(), QObject *parent = nullptr);
+    explicit Map(const QString& mapName = QString(), QObject *parent = nullptr);
     virtual ~Map() override;
 
     // From CampaignObjectBase
@@ -28,6 +29,10 @@ public:
 
     virtual int getObjectType() const override;
 
+    // From ILayerImageSource
+    //virtual const QImage& getImage() const override;
+
+    // Local
     QString getFileName() const;
     bool setFileName(const QString& newFileName);
 
@@ -35,6 +40,8 @@ public:
     void setMapColor(const QColor& color);
     QSize getMapSize() const;
     void setMapSize(QSize size);
+    int getGridCount() const;
+    void setGridCount(int gridCount);
 
     AudioTrack* getAudioTrack();
     QUuid getAudioTrackId() const;
@@ -61,10 +68,6 @@ public:
 
     const QRect& getCameraRect() const;
 
-    QUndoStack* getUndoStack() const;
-    void applyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
-    void internalApplyPaintTo(QImage* target, const QColor& clearColor, int index, bool preview = false, int startIndex = 0);
-
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
     int getMarkerCount() const;
@@ -76,22 +79,27 @@ public:
 
     bool isInitialized();
     bool isValid();
+    LayerScene& getLayerScene();
+    const LayerScene& getLayerScene() const;
+    // TODO - remove
     void setExternalFoWImage(QImage externalImage);
+    QImage getUnfilteredBackgroundImage();
     QImage getBackgroundImage();
     QImage getFoWImage();
     bool isCleared();
 
+    /*
     void paintFoWPoint(QPoint point, const MapDraw& mapDraw, QPaintDevice* target, bool preview);
     void paintFoWRect(QRect rect, const MapEditShape& mapEditShape, QPaintDevice* target, bool preview);
     void fillFoW(const QColor& color, QPaintDevice* target);
-    QImage getRawBWFowImage();
     QImage getBWFoWImage();
     QImage getBWFoWImage(const QImage &img);
     QImage getBWFoWImage(const QSize &size);
-    QImage getPublishImage();
-    QImage getPublishImage(const QRect& rect);
+    */
+//    QImage getPublishImage();
+//    QImage getPublishImage(const QRect& rect);
     QImage getGrayImage();
-    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
+//    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
     QRect getShrunkPublishRect();
 
     bool isFilterApplied() const;
@@ -100,8 +108,8 @@ public:
     QImage getPreviewImage();
 
 signals:
-    void executeUndo();
-    void requestFoWUpdate();
+    //void executeUndo();
+    //void requestFoWUpdate();
     void requestMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void partyChanged(Party* party);
@@ -116,6 +124,8 @@ signals:
     void distanceLineWidthChanged(int lineWidth);
 
     void showMarkersChanged(bool showMarkers);
+
+    void mapImageChanged(const QImage& image);
 
 public slots:
     bool initialize(); // returns false only if reasonably believe this is a video file
@@ -145,15 +155,17 @@ public slots:
     void setCameraRect(const QRect& cameraRect);
     void setCameraRect(const QRectF& cameraRect);
 
+protected slots:
+    void initializePartyScale();
+
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
-    void challengeUndoStack();
 
-    QString _filename;
-    QUndoStack* _undoStack;
+    QString _filename; // for compatibility only
+    //QUndoStack* _undoStack;
     QUuid _audioTrackId;
     bool _playAudio;
     QRect _mapRect;
@@ -163,19 +175,22 @@ protected:
     QUuid _partyId;
     QString _partyAltIcon;
     QPoint _partyIconPos;
-    int _partyScale;
+    //int _partyScale;
     int _mapScale;
+    int _gridCount;
 
     bool _showMarkers;
     QList<MapDraw*> _mapItems;
 
     bool _initialized;
-    QImage _imgBackground;
-    QImage _imgFow;
-    QImage _imgBWFow;
-    int _indexBWFow;
-    bool _filterApplied;
-    MapColorizeFilter _filter;
+    LayerScene _layerScene;
+    //QImage _imgBackground;
+    //QImage _imgFow;
+    QList<UndoFowBase*> _undoItems;
+    //QImage _imgBWFow;
+    //int _indexBWFow;
+    //bool _filterApplied;
+    //MapColorizeFilter _filter;
     int _lineType;
     QColor _lineColor;
     int _lineWidth;

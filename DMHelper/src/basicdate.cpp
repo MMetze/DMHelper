@@ -178,11 +178,11 @@ void BasicDate::setDate(int year, int month, int day)
 
 QString BasicDate::toStringDDMMYYYY() const
 {
-    QString result = QString::number(_day).rightJustified(2,QChar('0'));
+    QString result = QString::number(_day).rightJustified(2, QChar('0'));
     result.append(QString("/"));
-    result.append(QString::number(_month).rightJustified(2,QChar('0')));
+    result.append(QString::number(_month).rightJustified(2, QChar('0')));
     result.append(QString("/"));
-    result.append(QString::number(_year).rightJustified(4,QChar('0')));
+    result.append(QString::number(_year).rightJustified(4, QChar('0')));
     return result;
 }
 

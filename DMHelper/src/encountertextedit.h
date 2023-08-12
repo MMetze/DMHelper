@@ -4,6 +4,7 @@
 #include "campaignobjectframe.h"
 #include "texteditformatterframe.h"
 #include "videoplayer.h"
+#include "layer.h"
 #include <QElapsedTimer>
 
 namespace Ui {
@@ -63,12 +64,15 @@ public slots:
     void playPause(bool play);
 
     void setTranslated(bool translated);
+    void setCodeView(bool active);
 
     void targetResized(const QSize& newSize);
+    void layerSelected(int selected);
 
     // Publish slots from CampaignObjectFrame
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
+    virtual void editLayers() override;
 
 signals:
     void anchorClicked(const QUrl &link);
@@ -91,8 +95,11 @@ signals:
     void animatedChanged(bool animated);
     void scrollSpeedChanged(int scrollSpeed);
     void translatedChanged(bool translated);
+    void codeViewChanged(bool active);
+    void codeViewVisible(bool visible);
 
     void registerRenderer(PublishGLRenderer* renderer);
+    void setLayers(QList<Layer*> layers, int selected);
 
     void publishImage(QImage image);
     void showPublishWindow();
@@ -101,10 +108,14 @@ protected slots:
     void updateAnchors();
     void storeEncounter();
     void readEncounter();
+    void updateEncounter();
 
     void takeFocus();
     void loadImage();
     void handleScreenshotReady(const QImage& image);
+    void handleLayersChanged();
+
+    void layerAdded(Layer* layer);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -137,6 +148,7 @@ protected:
     bool _isDMPlayer;
     bool _isPublishing;
     bool _isVideo;
+    bool _isCodeView;
 
     QSize _targetSize;
     int _rotation;

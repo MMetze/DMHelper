@@ -80,8 +80,10 @@ public slots:
     void importItem();
     void newParty();
     void newTextEncounter();
+    void newLinkedText();
     void newBattleEncounter();
     void newMap();
+    void newMedia();
     void newAudioEntry();
     void newSyrinscapeEntry();
     void newSyrinscapeOnlineEntry();

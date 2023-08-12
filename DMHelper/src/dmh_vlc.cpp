@@ -4,7 +4,7 @@
 #include <QTimerEvent>
 #include <QDebug>
 
-//#define VIDEO_DEBUG_MESSAGES
+#define VIDEO_DEBUG_MESSAGES
 //#define VIDEO_CREATE_CACHE
 
 DMH_VLC* DMH_VLC::_instance = nullptr;
@@ -106,7 +106,10 @@ libvlc_instance_t* DMH_VLC::vlcInstance()
     {
         Initialize();
         if(!_instance)
+        {
+            qDebug() << "[DMH_VLC] ERROR: unable to find or initialize a VLC instance for playback!";
             return nullptr;
+        }
     }
 
     return _instance->_vlcInstance;

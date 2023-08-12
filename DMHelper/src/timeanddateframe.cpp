@@ -10,8 +10,8 @@
 TimeAndDateFrame::TimeAndDateFrame(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::TimeAndDateFrame),
-    _time(0,0),
-    _date(1,1,0)
+    _time(0, 0),
+    _date(1, 1, 0)
 {
     ui->setupUi(this);
     ui->frame->setSmallHandActive(false);
@@ -21,13 +21,13 @@ TimeAndDateFrame::TimeAndDateFrame(QWidget *parent) :
     ui->edtDay->setValidator(new QIntValidator());
     ui->edtYear->setValidator(new QIntValidator());
 
-    connect(ui->btnNextDay,SIGNAL(clicked(bool)),this,SLOT(nextDay()));
-    connect(ui->cmbCalendar,SIGNAL(activated(int)),this,SLOT(calendarChanged()));
-    connect(ui->edtDay,SIGNAL(textEdited(QString)),this,SLOT(dateEdited()));
-    connect(ui->cmbMonth,SIGNAL(activated(int)),this,SLOT(dateEdited()));
-    connect(ui->edtYear,SIGNAL(textEdited(QString)),this,SLOT(dateEdited()));
-    connect(ui->timeEdit,SIGNAL(timeChanged(QTime)),this,SLOT(setTimeTarget(QTime)));
-    connect(ui->frame,SIGNAL(handsChanged()),this,SLOT(handsChanged()));
+    connect(ui->btnNextDay, SIGNAL(clicked(bool)), this, SLOT(nextDay()));
+    connect(ui->cmbCalendar, SIGNAL(activated(int)), this, SLOT(calendarChanged()));
+    connect(ui->edtDay, SIGNAL(textEdited(QString)), this, SLOT(dateEdited()));
+    connect(ui->cmbMonth, SIGNAL(activated(int)), this, SLOT(dateEdited()));
+    connect(ui->edtYear, SIGNAL(textEdited(QString)), this, SLOT(dateEdited()));
+    connect(ui->timeEdit, SIGNAL(timeChanged(QTime)), this, SLOT(setTimeTarget(QTime)));
+    connect(ui->frame, SIGNAL(handsChanged()), this, SLOT(handsChanged()));
 
     if(BasicDateServer::Instance())
     {
@@ -94,7 +94,7 @@ void TimeAndDateFrame::nextDay()
     BasicDate today = getDate();
     today.addDay();
     setDate(today);
-    setTimeTarget(QTime(7,0));
+    setTimeTarget(QTime(7, 0));
 }
 
 void TimeAndDateFrame::dateEdited()

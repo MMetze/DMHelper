@@ -45,8 +45,10 @@ bool CampaignExporter::populateExport()
     QDomElement rootObject = _exportDocument->createElement("root");
     _exportDocument->appendChild(rootObject);
     QDomElement campaignElement = _exportCampaign->outputXML(*_exportDocument, rootObject, _exportDirectory, true);
-
-    return addObjectTree(_exportId, *_exportDocument, campaignElement, _exportDirectory);
+    if(campaignElement.isNull())
+        return false;
+    else
+        return addObjectTree(_exportId, *_exportDocument, campaignElement, _exportDirectory);
 }
 
 bool CampaignExporter::addObjectTree(QUuid exportId, QDomDocument &doc, QDomElement &parent, QDir& targetDirectory)
@@ -61,6 +63,8 @@ bool CampaignExporter::addObjectTree(QUuid exportId, QDomDocument &doc, QDomElem
 
     // Export the object
     QDomElement exportElement = exportObject->outputXML(doc, parent, targetDirectory, true);
+    if(exportElement.isNull())
+        return false;
 
     // Check for any further dependencies and export them as well
     addObjectAndChildrenIds(exportObject);
@@ -94,6 +98,8 @@ bool CampaignExporter::checkObjectReferences(CampaignObjectBase* exportObject, Q
         EncounterBattle* battle = dynamic_cast<EncounterBattle*>(exportObject);
         if(battle)
         {
+            // TODO: Layers - change export/import
+            /*
             addObjectTree(battle->getAudioTrackId(), doc, parent, targetDirectory);
             CombatantGroupList combatants = battle->getCombatantsAllWaves();
             for(int i = 0; i < combatants.count(); ++i)
@@ -106,6 +112,7 @@ bool CampaignExporter::checkObjectReferences(CampaignObjectBase* exportObject, Q
                         addObjectTree(reference->getReferenceId(), doc, parent, targetDirectory);
                 }
             }
+            */
         }
     }
     else if(exportObject->getObjectType() == DMHelper::CampaignType_Map)

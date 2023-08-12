@@ -12,6 +12,7 @@ public:
     explicit BattleDialogModelEffectCone(int size, const QPointF& position, qreal rotation, const QColor& color, const QString& tip);
     virtual ~BattleDialogModelEffectCone() override;
 
+    virtual QString getName() const override;
     virtual BattleDialogModelEffect* clone() const override;
 
     virtual int getEffectType() const override;

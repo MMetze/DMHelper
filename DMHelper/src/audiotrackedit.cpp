@@ -181,7 +181,7 @@ void AudioTrackEdit::addLocalFile()
     if(!_campaign)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this,QString("Select music file.."));
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select music file.."));
     if(!filename.isEmpty())
         addTrack(QUrl(filename));
 }
@@ -191,7 +191,7 @@ void AudioTrackEdit::addGlobalUrl()
     if(!_campaign)
         return;
 
-    QUrl url = QFileDialog::getOpenFileUrl(this,QString("Select music file.."));
+    QUrl url = QFileDialog::getOpenFileUrl(this, QString("Select music file.."));
     if(!url.isEmpty())
         addTrack(url);
 }

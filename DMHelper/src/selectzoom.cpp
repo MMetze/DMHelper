@@ -34,11 +34,11 @@ QRect SelectZoom::getZoomRect()
         return _img.rect();
 
     QRect selection = ui->lblImage->geometry().intersected(_rubberBand->geometry());
-    selection.translate(-ui->lblImage->x(),-ui->lblImage->y());
+    selection.translate(-ui->lblImage->x(), -ui->lblImage->y());
     QRect imgSelection(selection.x() * _img.width() / ui->lblImage->width(),
                        selection.y() * _img.height() / ui->lblImage->height(),
                        selection.width() * _img.width() / ui->lblImage->width(),
-                       selection.height() * _img.height() / ui->lblImage->height() );
+                       selection.height() * _img.height() / ui->lblImage->height());
 
     int imgLeft = ((ui->lblImage->width() - _scaledSize.width()) / 2) + ui->lblImage->x();
     int imgTop = ((ui->lblImage->height() - _scaledSize.height()) / 2) + ui->lblImage->y();
@@ -84,7 +84,7 @@ bool SelectZoom::eventFilter(QObject *obj, QEvent *event)
         }
     }
 
-    return QDialog::eventFilter(obj,event);
+    return QDialog::eventFilter(obj, event);
 }
 
 void SelectZoom::setScaledImg()
@@ -92,7 +92,7 @@ void SelectZoom::setScaledImg()
     if(!_img.isNull())
     {
         QSize targetSize = ui->scrollArea->viewport()->size();
-        QImage scaledImg = _img.scaled(targetSize,Qt::KeepAspectRatio,Qt::SmoothTransformation);
+        QImage scaledImg = _img.scaled(targetSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
         _scaledSize = scaledImg.size();
         ui->lblImage->setPixmap(QPixmap::fromImage(scaledImg));
     }

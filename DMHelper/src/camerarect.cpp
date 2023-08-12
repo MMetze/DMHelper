@@ -101,13 +101,13 @@ void CameraRect::setPublishing(bool publishing)
 
     if(publishing)
     {
-        _drawItem->setPen(QPen(QColor(255,0,0,255), CAMERA_RECT_BORDER_WIDTH));
-        _drawTextRect->setBrush(QBrush(QColor(255,0,0)));
+        _drawItem->setPen(QPen(QColor(255, 0, 0, 255), CAMERA_RECT_BORDER_WIDTH));
+        _drawTextRect->setBrush(QBrush(QColor(255, 0, 0)));
     }
     else
     {
-        _drawItem->setPen(QPen(QColor(0,0,255,255), CAMERA_RECT_BORDER_WIDTH));
-        _drawTextRect->setBrush(QBrush(QColor(0,0,255)));
+        _drawItem->setPen(QPen(QColor(0, 0, 255, 255), CAMERA_RECT_BORDER_WIDTH));
+        _drawTextRect->setBrush(QBrush(QColor(0, 0, 255)));
     }
 }
 

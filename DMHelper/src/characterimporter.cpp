@@ -599,8 +599,8 @@ bool CharacterImporter::interpretReply(QNetworkReply* reply)
     // Read the classes and levels
     QString classString;
     QString classFeatureString;
-    QVector<int> spellSlots(9,0);
-    //QVector<int> pactMagicSlots(5,0);
+    QVector<int> spellSlots(9, 0);
+    //QVector<int> pactMagicSlots(5, 0);
     int pactMagicSlots;
     int pactMagicUsed;
     int pactMagicLevel;
@@ -1087,7 +1087,7 @@ void CharacterImporter::startImport(QString characterId)
 
     initializeValues();
 
-    _msgBox = new QMessageBox(QMessageBox::Information,"Character Import", messageStr, QMessageBox::Cancel);
+    _msgBox = new QMessageBox(QMessageBox::Information, "Character Import", messageStr, QMessageBox::Cancel);
     connect(_msgBox, &QMessageBox::buttonClicked, this, &CharacterImporter::messageBoxCancelled);
     _msgBox->show();
 

@@ -169,6 +169,7 @@ void CampaignTreeItem::setVisualization()
             setIcon(QIcon(":/img/data/icon_contentmap.png"));
             break;
         case DMHelper::CampaignType_Text:
+        case DMHelper::CampaignType_LinkedText:
             setIcon(QIcon(":/img/data/icon_contenttextencounter.png"));
             break;
         case DMHelper::CampaignType_Battle:

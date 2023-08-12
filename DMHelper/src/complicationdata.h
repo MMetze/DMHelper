@@ -13,7 +13,7 @@ public:
                      QString damage = QString(""),
                      QString obstacle = QString(""),
                      int length = 0,
-                     bool sticky = true );
+                     bool sticky = true);
     ComplicationData(const ComplicationData& other);
     ~ComplicationData();
 

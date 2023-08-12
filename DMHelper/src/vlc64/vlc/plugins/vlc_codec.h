@@ -105,8 +105,9 @@ struct decoder_t
     module_t *          p_module;
     void               *p_sys;
 
-    /* Input format ie from demuxer (XXX: a lot of field could be invalid) */
-    es_format_t         fmt_in;
+    /* Input format ie from demuxer (XXX: a lot of fields could be invalid),
+       cannot be NULL */
+    const es_format_t   *fmt_in;
 
     /* Output format of decoder/packetizer */
     es_format_t         fmt_out;
@@ -327,8 +328,8 @@ vlc_encoder_EncodeSub(encoder_t *encoder, subpicture_t *sub)
  */
 static inline vlc_decoder_device * decoder_GetDecoderDevice( decoder_t *dec )
 {
-    vlc_assert( dec->fmt_in.i_cat == VIDEO_ES && dec->cbs != NULL );
-    if ( unlikely(dec->fmt_in.i_cat != VIDEO_ES || dec->cbs == NULL ) )
+    vlc_assert( dec->fmt_in->i_cat == VIDEO_ES && dec->cbs != NULL );
+    if ( unlikely(dec->fmt_in->i_cat != VIDEO_ES || dec->cbs == NULL ) )
         return NULL;
 
     vlc_assert(dec->cbs->video.get_device != NULL);
@@ -393,8 +394,12 @@ VLC_API picture_t *decoder_NewPicture( decoder_t *dec );
  *
  * To be used by decoder owners.
  * By default frame drop is not allowed.
+ *
+ * @param dec the decoder to be initialized
+ * @param fmt_in the es_format_t where the decoder owner stores the input ES format
+ * @param fmt the input es_format_t used to initialize the decoder
  */
-VLC_API void decoder_Init( decoder_t *dec, const es_format_t * );
+VLC_API void decoder_Init( decoder_t *dec, es_format_t *fmt_in, const es_format_t *fmt );
 
 /**
  * Destroy a decoder and reset the structure.
@@ -420,7 +425,7 @@ VLC_API void decoder_Clean( decoder_t *p_dec );
  */
 static inline void decoder_QueueVideo( decoder_t *dec, picture_t *p_pic )
 {
-    vlc_assert( dec->fmt_in.i_cat == VIDEO_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == VIDEO_ES && dec->cbs != NULL );
     vlc_assert( !picture_HasChainedPics( p_pic ) );
     vlc_assert( dec->cbs->video.queue != NULL );
     dec->cbs->video.queue( dec, p_pic );
@@ -436,7 +441,7 @@ static inline void decoder_QueueVideo( decoder_t *dec, picture_t *p_pic )
 static inline void decoder_QueueCc( decoder_t *dec, vlc_frame_t *p_cc,
                                    const decoder_cc_desc_t *p_desc )
 {
-    vlc_assert( dec->fmt_in.i_cat == VIDEO_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == VIDEO_ES && dec->cbs != NULL );
 
     if( dec->cbs->video.queue_cc == NULL )
         block_Release( p_cc );
@@ -453,7 +458,7 @@ static inline void decoder_QueueCc( decoder_t *dec, vlc_frame_t *p_cc,
  */
 static inline void decoder_QueueAudio( decoder_t *dec, vlc_frame_t *p_aout_buf )
 {
-    vlc_assert( dec->fmt_in.i_cat == AUDIO_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == AUDIO_ES && dec->cbs != NULL );
     vlc_assert( p_aout_buf->p_next == NULL );
     vlc_assert( dec->cbs->audio.queue != NULL );
     dec->cbs->audio.queue( dec, p_aout_buf );
@@ -468,7 +473,7 @@ static inline void decoder_QueueAudio( decoder_t *dec, vlc_frame_t *p_aout_buf )
  */
 static inline void decoder_QueueSub( decoder_t *dec, subpicture_t *p_spu )
 {
-    vlc_assert( dec->fmt_in.i_cat == SPU_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == SPU_ES && dec->cbs != NULL );
     vlc_assert( p_spu->p_next == NULL );
     vlc_assert( dec->cbs->spu.queue != NULL );
     dec->cbs->spu.queue( dec, p_spu );
@@ -482,9 +487,9 @@ static inline void decoder_QueueSub( decoder_t *dec, subpicture_t *p_spu )
 VLC_USED
 static inline int decoder_UpdateAudioFormat( decoder_t *dec )
 {
-    vlc_assert( dec->fmt_in.i_cat == AUDIO_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == AUDIO_ES && dec->cbs != NULL );
 
-    if( dec->fmt_in.i_cat == AUDIO_ES && dec->cbs->audio.format_update != NULL )
+    if( dec->fmt_in->i_cat == AUDIO_ES && dec->cbs->audio.format_update != NULL )
         return dec->cbs->audio.format_update( dec );
     else
         return -1;
@@ -506,7 +511,7 @@ VLC_USED
 static inline subpicture_t *decoder_NewSubpicture( decoder_t *dec,
                                                    const subpicture_updater_t *p_dyn )
 {
-    vlc_assert( dec->fmt_in.i_cat == SPU_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == SPU_ES && dec->cbs != NULL );
 
     subpicture_t *p_subpicture = dec->cbs->spu.buffer_new( dec, p_dyn );
     if( !p_subpicture )
@@ -541,7 +546,7 @@ static inline vlc_tick_t decoder_GetDisplayDate( decoder_t *dec,
                                                  vlc_tick_t system_now,
                                                  vlc_tick_t i_ts )
 {
-    vlc_assert( dec->fmt_in.i_cat == VIDEO_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == VIDEO_ES && dec->cbs != NULL );
 
     if( !dec->cbs->video.get_display_date )
         return VLC_TICK_INVALID;
@@ -556,7 +561,7 @@ static inline vlc_tick_t decoder_GetDisplayDate( decoder_t *dec,
 VLC_USED
 static inline float decoder_GetDisplayRate( decoder_t *dec )
 {
-    vlc_assert( dec->fmt_in.i_cat == VIDEO_ES && dec->cbs != NULL );
+    vlc_assert( dec->fmt_in->i_cat == VIDEO_ES && dec->cbs != NULL );
 
     if( !dec->cbs->video.get_display_rate )
         return 1.f;
@@ -583,6 +588,7 @@ enum vlc_decoder_device_type
     VLC_DECODER_DEVICE_AWINDOW,
     VLC_DECODER_DEVICE_NVDEC,
     VLC_DECODER_DEVICE_MMAL,
+    VLC_DECODER_DEVICE_GSTDECODE,
 };
 
 struct vlc_decoder_device_operations

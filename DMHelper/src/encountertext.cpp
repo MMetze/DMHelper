@@ -1,33 +1,42 @@
 #include "encountertext.h"
 #include "dmconstants.h"
 #include "encountertextedit.h"
+#include "layerimage.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomCDATASection>
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QDir>
+#include <QMessageBox>
 #include <QDebug>
 
 const int ENCOUNTERTYPE_SCROLLINGTEXT = 5;
 
 EncounterText::EncounterText(const QString& encounterName, QObject *parent) :
     CampaignObjectBase(encounterName, parent),
+    _layerScene(this),
     _text(),
     _translatedText(),
     _imageFile(),
     _textWidth(100),
+    _initialized(false),
     _animated(false),
     _translated(false),
     _scrollSpeed(25)
 {
+    connect(&_layerScene, &LayerScene::dirty, this, &EncounterText::dirty);
+}
+
+EncounterText::~EncounterText()
+{
+    _layerScene.clearLayers();
 }
 
 void EncounterText::inputXML(const QDomElement &element, bool isImport)
 {
     extractTextNode(element, isImport);
 
-    _imageFile = element.attribute("imageFile"); // Want to keep the filename even if the file was accidentally moved
     setTextWidth(element.attribute("textWidth", "100").toInt());
     int scrollSpeed = element.attribute("scrollSpeed").toInt();
     setScrollSpeed(scrollSpeed > 0 ? scrollSpeed : 25);
@@ -50,8 +59,8 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
 
         QString fontFamily = element.attribute("fontFamily");
         QString fontSize = element.attribute("fontSize");
-        QString fontBold = element.attribute("fontBold",QString::number(0));
-        QString fontItalics = element.attribute("fontItalics",QString::number(0));
+        QString fontBold = element.attribute("fontBold", QString::number(0));
+        QString fontItalics = element.attribute("fontItalics", QString::number(0));
 
         QTextCharFormat format = cursor.charFormat();
         QFont formatFont(fontFamily,
@@ -75,6 +84,22 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
         setAnimated(true);
     }
 
+    QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
+    if(!layersElement.isNull())
+    {
+        _layerScene.inputXML(layersElement, isImport);
+    }
+    else
+    {
+        _imageFile = element.attribute("imageFile"); // Want to keep the filename even if the file was accidentally moved
+        if(!_imageFile.isEmpty())
+        {
+            LayerImage* imageLayer = new LayerImage(QString("Map"), _imageFile);
+            imageLayer->inputXML(element, isImport);
+            _layerScene.appendLayer(imageLayer);
+        }
+    }
+
     CampaignObjectBase::inputXML(element, isImport);
 }
 
@@ -93,6 +118,8 @@ void EncounterText::copyValues(const CampaignObjectBase* other)
     _translated = otherEntry->_translated;
     _scrollSpeed = otherEntry->_scrollSpeed;
 
+    _layerScene.copyValues(&otherEntry->_layerScene);
+
     CampaignObjectBase::copyValues(other);
 }
 
@@ -108,7 +135,8 @@ QString EncounterText::getText() const
 
 QString EncounterText::getImageFile() const
 {
-    return _imageFile;
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getPriority(DMHelper::LayerType_Image));
+    return layer ? layer->getImageFile() : QString();
 }
 
 bool EncounterText::getAnimated() const
@@ -139,6 +167,37 @@ QString EncounterText::getTranslatedText() const
         return _translatedText;
 }
 
+bool EncounterText::isInitialized() const
+{
+    return _initialized;
+}
+
+LayerScene& EncounterText::getLayerScene()
+{
+    return _layerScene;
+}
+
+const LayerScene& EncounterText::getLayerScene() const
+{
+    return _layerScene;
+}
+
+bool EncounterText::initialize()
+{
+    if(_initialized)
+        return true;
+
+    _layerScene.initializeLayers();
+    _initialized = true;
+    return true;
+}
+
+void EncounterText::uninitialize()
+{
+    _layerScene.uninitializeLayers();
+    _initialized = false;
+}
+
 void EncounterText::setText(const QString& newText)
 {
     if(newText.isEmpty())
@@ -157,11 +216,34 @@ void EncounterText::setText(const QString& newText)
 
 void EncounterText::setImageFile(const QString& imageFile)
 {
-    if(_imageFile == imageFile)
+    if(imageFile.isEmpty())
         return;
 
-    _imageFile = imageFile;
+    LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getPriority(DMHelper::LayerType_Image));
+    if((!layer) || (layer->getImageFile() == imageFile))
+        return;
 
+    if(!QFile::exists(imageFile))
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DMHelper Image File Not Found"),
+                              QString("The new image file could not be found: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
+        qDebug() << "[EncounterText] setImageFile - New image file not found: " << imageFile << " for entry " << getName();
+        return;
+    }
+
+    QFileInfo fileInfo(imageFile);
+    if(!fileInfo.isFile())
+    {
+        QMessageBox::critical(nullptr,
+                              QString("DMHelper Image File Not Valid"),
+                              QString("The new image isn't a file: ") + imageFile + QString(", keeping image file: ") + layer->getImageFile() + QString(" for entry: ") + getName());
+        qDebug() << "[EncounterText] setImageFile - Image file not a file: " << imageFile << " for entry " << getName();
+        return;
+    }
+
+    layer->setFileName(imageFile);
+    _imageFile = imageFile;
     emit imageFileChanged(_imageFile);
     emit dirty();
 }
@@ -236,10 +318,7 @@ void EncounterText::internalOutputXML(QDomDocument &doc, QDomElement &element, Q
     element.setAttribute("animated", getAnimated());
     element.setAttribute("translated", getTranslated());
 
-    QDomElement textElement = doc.createElement("text-data");
-        QDomCDATASection textData = doc.createCDATASection(getText());
-        textElement.appendChild(textData);
-    element.appendChild(textElement);
+    createTextNode(doc, element, targetDirectory, isExport);
 
     // Check to only write really translated text, correcting also for a previous error that has created a lot of duplicate entries!
     if((_translatedText.isEmpty()) || (_translatedText != _text))
@@ -262,7 +341,8 @@ bool EncounterText::belongsToObject(QDomElement& element)
         return true;
     }
     else if((element.tagName() == "text-data") ||
-            (element.tagName() == "translated-text-data"))
+            (element.tagName() == "translated-text-data") ||
+            (element.tagName() == "layer-scene"))
     {
         return true;
     }
@@ -287,10 +367,25 @@ void EncounterText::internalPostProcessXML(const QDomElement &element, bool isIm
     if((childElement.isNull()) || (childElement.attribute("name") != QString("")))
         return;
 
+    QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
+    if(!layersElement.isNull())
+        _layerScene.postProcessXML(element, isImport);
+
     // Grab the text from the child node for this node
     //extractTextNode(childElement, isImport);
 
     CampaignObjectBase::internalPostProcessXML(element, isImport);
+}
+
+void EncounterText::createTextNode(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport)
+{
+    Q_UNUSED(targetDirectory);
+    Q_UNUSED(isExport);
+
+    QDomElement textElement = doc.createElement("text-data");
+        QDomCDATASection textData = doc.createCDATASection(getText());
+        textElement.appendChild(textData);
+    element.appendChild(textElement);
 }
 
 void EncounterText::extractTextNode(const QDomElement &element, bool isImport)

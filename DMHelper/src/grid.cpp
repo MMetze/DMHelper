@@ -1,18 +1,18 @@
 #include "grid.h"
-#include "dmconstants.h"
-#include "battledialogmodel.h"
+#include "gridconfig.h"
 #include <QGraphicsScene>
 #include <QPainter>
 #include <QtMath>
 #include <QDebug>
 
-Grid::Grid(QGraphicsScene& graphicsScene, const QRect& gridShape) :
+Grid::Grid(QGraphicsScene* graphicsScene, const QRect& gridShape) :
     QGraphicsItemGroup(),
     _gridShape(gridShape),
     _grid(),
     _localPen()
 {
-    graphicsScene.addItem(this);
+    if(graphicsScene)
+        graphicsScene->addItem(this);
 }
 
 Grid::~Grid()
@@ -25,15 +25,59 @@ void Grid::setGridShape(const QRect& gridShape)
         _gridShape = gridShape;
 }
 
+void Grid::setGridSize(const QSize& gridSize)
+{
+    if(_gridShape.size() != gridSize)
+        _gridShape.setSize(gridSize);
+}
+
+void Grid::setGridPosition(const QPoint& position)
+{
+    if(_gridShape.topLeft() == position)
+        return;
+
+    qreal dx = position.x() - _gridShape.left();
+    qreal dy = position.y() - _gridShape.top();
+
+    for(int i = 0; i < _grid.count(); ++i)
+    {
+        if(_grid[i])
+            _grid[i]->moveBy(dx, dy);
+    }
+
+    _gridShape.moveTopLeft(position);
+}
+
 QRect Grid::getGridShape() const
 {
     return _gridShape;
 }
 
+void Grid::setGridZValue(int zOrder)
+{
+    for(int i = 0; i < _grid.count(); ++i)
+    {
+        if(_grid[i])
+            _grid[i]->setZValue(zOrder);
+    }
+}
+
 void Grid::setGridVisible(bool gridVisible)
 {
-    for(QGraphicsItem* item : _grid)
-        item->setVisible(gridVisible);
+    for(int i = 0; i < _grid.count(); ++i)
+    {
+        if(_grid[i])
+            _grid[i]->setVisible(gridVisible);
+    }
+}
+
+void Grid::setGridOpacity(qreal gridOpacity)
+{
+    for(int i = 0; i < _grid.count(); ++i)
+    {
+        if(_grid[i])
+            _grid[i]->setOpacity(gridOpacity);
+    }
 }
 
 void Grid::clear()
@@ -42,47 +86,62 @@ void Grid::clear()
     _grid.clear();
 }
 
-void Grid::rebuildGrid(BattleDialogModel& model, QPainter* painter)
+void Grid::addLine(int x0, int y0, int x1, int y1, int zOrder)
 {
-    if(painter)
-    {
-        painter->setPen(model.getGridPen());
-    }
-    else
-    {
-        clear();
-        _localPen = model.getGridPen();
-    }
-
-    if(model.getGridOn() == false)
+    if(!scene())
         return;
 
-    switch(model.getGridType())
+    QGraphicsItem* newLineItem = scene()->addLine(_gridShape.left() + x0,
+                                                  _gridShape.top() + y0,
+                                                  _gridShape.left() + x1,
+                                                  _gridShape.top() + y1,
+                                                  _localPen);
+
+    if(newLineItem)
+    {
+        newLineItem->setZValue(zOrder);
+        _grid.append(newLineItem);
+    }
+}
+
+void Grid::rebuildGrid(GridConfig& config, int zOrder, Grid_LineInterface* grid)
+{
+    if(!grid)
+    {
+        clear();
+        _localPen = config.getGridPen();
+        grid = this;
+    }
+
+//    if(config.getGridOn() == false)
+//        return;
+
+    switch(config.getGridType())
     {
         case GridType_Square:
-            rebuildGrid_Square(model, painter);
+            rebuildGrid_Square(config, zOrder, grid);
             break;
         case GridType_Hex:
-            rebuildGrid_Hex(model, painter);
+            rebuildGrid_Hex(config, zOrder, grid);
             break;
         case GridType_Isosquare:
-            rebuildGrid_Isosquare(model, painter);
+            rebuildGrid_Isosquare(config, zOrder, grid);
             break;
         case GridType_Isohex:
-            rebuildGrid_Isohex(model, painter);
+            rebuildGrid_Isohex(config, zOrder, grid);
             break;
         default:
-            qDebug() << "[Grid] ERROR: Invalid grid type requested (" << model.getGridType() << "). No grid drawn";
+            qDebug() << "[Grid] ERROR: Invalid grid type requested (" << config.getGridType() << "). No grid drawn";
             break;
     }
 }
 
-void Grid::rebuildGrid_Square(BattleDialogModel& model, QPainter* painter)
+void Grid::rebuildGrid_Square(GridConfig& config, int zOrder, Grid_LineInterface* grid)
 {
-    int xOffset = model.getGridScale() * model.getGridOffsetX() / 100;
-    int yOffset = model.getGridScale() * model.getGridOffsetY() / 100;
-    int xCount = (_gridShape.width() - xOffset) / model.getGridScale();
-    int yCount = (_gridShape.height() - yOffset) / model.getGridScale();
+    int xOffset = config.getGridScale() * config.getGridOffsetX() / 100;
+    int yOffset = config.getGridScale() * config.getGridOffsetY() / 100;
+    int xCount = (_gridShape.width() - xOffset) / config.getGridScale();
+    int yCount = (_gridShape.height() - yOffset) / config.getGridScale();
 
     // Set an outline
     //QGraphicsItem* newItem = scene()->addRect(_gridShape, QPen(Qt::SolidLine));
@@ -91,23 +150,23 @@ void Grid::rebuildGrid_Square(BattleDialogModel& model, QPainter* painter)
 
     for(int x = 0; x <= xCount; ++x)
     {
-        createLine((x*model.getGridScale()) + xOffset, 0, (x*model.getGridScale()) + xOffset, _gridShape.height(), painter);
+        createLine((x*config.getGridScale()) + xOffset, 0, (x*config.getGridScale()) + xOffset, _gridShape.height(), zOrder, grid);
     }
 
     for(int y = 0; y <= yCount; ++y)
     {
-        createLine(0, (y*model.getGridScale()) + yOffset, _gridShape.width(), (y*model.getGridScale()) + yOffset, painter);
+        createLine(0, (y*config.getGridScale()) + yOffset, _gridShape.width(), (y*config.getGridScale()) + yOffset, zOrder, grid);
     }
 }
 
-void Grid::rebuildGrid_Hex(BattleDialogModel& model, QPainter* painter)
+void Grid::rebuildGrid_Hex(GridConfig& config, int zOrder, Grid_LineInterface* grid)
 {
-    int hexScale = model.getGridScale();
-    int hexScaleShort = model.getGridScale() * 0.5;
-    int hexScaleLong = model.getGridScale() * 0.866;
+    int hexScale = config.getGridScale();
+    int hexScaleShort = config.getGridScale() * 0.5;
+    int hexScaleLong = config.getGridScale() * 0.866;
     int hexScaleStep = 3 * hexScale;
-    int xOffset = hexScale * model.getGridOffsetX() / 100;
-    int yOffset = hexScale * model.getGridOffsetY() / 100;
+    int xOffset = hexScale * config.getGridOffsetX() / 100;
+    int yOffset = hexScale * config.getGridOffsetY() / 100;
     //int xCount = (_gridShape.width() - xOffset) / hexScale;
     int xCount = (_gridShape.width() - xOffset) / hexScaleStep;
     int yCount = (_gridShape.height() - yOffset) / hexScale;
@@ -122,30 +181,30 @@ void Grid::rebuildGrid_Hex(BattleDialogModel& model, QPainter* painter)
         for(int x = 0; x <= xCount; ++x)
         {
             createLine((x*hexScaleStep) + xOffset, (y*hexScaleLong*2) + yOffset,
-                       (x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset, painter);
+                       (x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset, zOrder, grid);
             createLine((x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset,
-                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong, painter);
+                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong, zOrder, grid);
             createLine((x*hexScaleStep) + xOffset + hexScale, (y*hexScaleLong*2) + yOffset,
-                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset - hexScaleLong, painter);
+                       (x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset - hexScaleLong, zOrder, grid);
             createLine((x*hexScaleStep) + xOffset + hexScale + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong,
-                       (x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong, painter);
+                       (x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong, zOrder, grid);
             createLine((x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong,
-                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset, painter);
+                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset, zOrder, grid);
             createLine((x*hexScaleStep) + xOffset + (2*hexScale) + hexScaleShort, (y*hexScaleLong*2) + yOffset + hexScaleLong,
-                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset + (hexScaleLong*2), painter);
+                       (x*hexScaleStep) + xOffset + (2*hexScale) + (2*hexScaleShort), (y*hexScaleLong*2) + yOffset + (hexScaleLong*2), zOrder, grid);
         }
     }
 }
 
-void Grid::rebuildGrid_Isosquare(BattleDialogModel& model, QPainter* painter)
+void Grid::rebuildGrid_Isosquare(GridConfig& config, int zOrder, Grid_LineInterface* grid)
 {
-    int isoScale = model.getGridScale() * 3;
-    int xOffset = isoScale * model.getGridOffsetX() / 100;
-    int yOffset = isoScale * model.getGridOffsetY() / 100;
+    int isoScale = config.getGridScale() * 3;
+    int xOffset = isoScale * config.getGridOffsetX() / 100;
+    int yOffset = isoScale * config.getGridOffsetY() / 100;
     int totalOffset = xOffset + yOffset;
     int xCount = (_gridShape.width() - totalOffset) / isoScale;
     //    int xDelta = static_cast<int>(static_cast<qreal>(_gridShape.height()) / qTan(qDegreesToRadians(30.0)));
-    int xDelta = static_cast<int>(static_cast<qreal>(_gridShape.height()) / qTan(qDegreesToRadians(static_cast<qreal>(model.getGridAngle()) / 2.0)));
+    int xDelta = static_cast<int>(static_cast<qreal>(_gridShape.height()) / qTan(qDegreesToRadians(static_cast<qreal>(config.getGridAngle()) / 2.0)));
     int xStart = xDelta / isoScale;
 
     if(xDelta <= 0)
@@ -177,7 +236,7 @@ void Grid::rebuildGrid_Isosquare(BattleDialogModel& model, QPainter* painter)
             right = _gridShape.width();
         }
 
-        createLine(left, top, right, bottom, painter);
+        createLine(left, top, right, bottom, zOrder, grid);
     }
 
     // Lines from the top to the right
@@ -198,19 +257,19 @@ void Grid::rebuildGrid_Isosquare(BattleDialogModel& model, QPainter* painter)
             right = _gridShape.width();
         }
 
-        createLine(right, top, left, bottom, painter);
+        createLine(right, top, left, bottom, zOrder, grid);
     }
 }
 
-void Grid::rebuildGrid_Isohex(BattleDialogModel& model, QPainter* painter)
+void Grid::rebuildGrid_Isohex(GridConfig& config, int zOrder, Grid_LineInterface* grid)
 {
-    qreal isoAngle = qCos(qDegreesToRadians(static_cast<qreal>(model.getGridAngle())));
-    int hexScale = static_cast<int>(static_cast<qreal>(model.getGridScale()) * isoAngle);
-    int hexScaleShort = static_cast<int>(static_cast<qreal>(model.getGridScale()) * 0.5 * isoAngle);
-    int hexScaleLong = static_cast<int>(static_cast<qreal>(model.getGridScale()) * 0.866);
+    qreal isoAngle = qCos(qDegreesToRadians(static_cast<qreal>(config.getGridAngle())));
+    int hexScale = static_cast<int>(static_cast<qreal>(config.getGridScale()) * isoAngle);
+    int hexScaleShort = static_cast<int>(static_cast<qreal>(config.getGridScale()) * 0.5 * isoAngle);
+    int hexScaleLong = static_cast<int>(static_cast<qreal>(config.getGridScale()) * 0.866);
     int hexScaleStep = 3 * hexScale;
-    int xOffset = model.getGridScale() * model.getGridOffsetX() / 100;
-    int yOffset = hexScale * model.getGridOffsetY() / 100;
+    int xOffset = config.getGridScale() * config.getGridOffsetX() / 100;
+    int yOffset = hexScale * config.getGridOffsetY() / 100;
     int xCount = (_gridShape.width() - xOffset) / (hexScaleLong * 2);
     int yCount = (_gridShape.height() - yOffset) / hexScaleStep;
 
@@ -224,20 +283,20 @@ void Grid::rebuildGrid_Isohex(BattleDialogModel& model, QPainter* painter)
         for(int y = 0; y <= yCount; ++y)
         {
             createLine((x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset,
-                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale, painter);
+                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale, zOrder, grid);
 
             createLine((x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale,
-                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort, painter);
+                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort, zOrder, grid);
             createLine((x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + hexScale,
-                       (x*hexScaleLong*2) + xOffset - hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort, painter);
+                       (x*hexScaleLong*2) + xOffset - hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort, zOrder, grid);
 
             createLine((x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + hexScale + hexScaleShort,
-                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort, painter);
+                       (x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort, zOrder, grid);
 
             createLine((x*hexScaleLong*2) + xOffset + hexScaleLong,     (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort,
-                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2), painter);
+                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2), zOrder, grid);
             createLine((x*hexScaleLong*2) + xOffset - (hexScaleLong), (y*hexScaleStep) + yOffset + (2*hexScale) + hexScaleShort,
-                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2), painter);
+                       (x*hexScaleLong*2) + xOffset,                    (y*hexScaleStep) + yOffset + (2*hexScale) + (hexScaleShort*2), zOrder, grid);
         }
     }
 }
@@ -272,7 +331,7 @@ int Grid::computeOutCode(int x, int y)
 // P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
 // diagonal from (xmin, ymin) to (xmax, ymax).
 
-void Grid::createLine(int x0, int y0, int x1, int y1, QPainter* painter)
+void Grid::createLine(int x0, int y0, int x1, int y1, int zOrder, Grid_LineInterface* grid)
 {
     // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
     int outcode0 = computeOutCode(x0, y0);
@@ -323,17 +382,5 @@ void Grid::createLine(int x0, int y0, int x1, int y1, QPainter* painter)
         }
     }
 
-    if(painter)
-    {
-        painter->drawLine(x0, y0, x1, y1);
-    }
-    else if(scene())
-    {
-        QGraphicsItem* newLineItem = scene()->addLine(x0, y0, x1, y1, _localPen);
-        if(newLineItem)
-        {
-            newLineItem->setZValue(DMHelper::BattleDialog_Z_Grid);
-            _grid.append(newLineItem);
-        }
-    }
+    grid->addLine(x0, y0, x1, y1, zOrder);
 }

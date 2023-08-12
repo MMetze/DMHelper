@@ -31,6 +31,8 @@
 
 # ifdef __cplusplus
 extern "C" {
+# else
+#  include <stdbool.h>
 # endif
 
 typedef struct libvlc_renderer_item_t libvlc_renderer_item_t;
@@ -147,6 +149,7 @@ enum libvlc_event_e {
      */
     libvlc_MediaPlayerTitleSelectionChanged,
     libvlc_MediaPlayerChapterChanged,
+    libvlc_MediaPlayerRecordChanged,
 
     /**
      * A \link #libvlc_media_t media item\endlink was added to a
@@ -285,7 +288,7 @@ typedef struct libvlc_event_t
         } media_player_chapter_changed;
         struct
         {
-            float new_position;
+            double new_position;
         } media_player_position_changed;
         struct
         {
@@ -399,6 +402,13 @@ typedef struct libvlc_event_t
         {
             const char *device;
         } media_player_audio_device;
+
+        struct
+        {
+            bool recording;
+            /** Only valid when recording ends (recording == false) */
+            const char *recorded_file_path;
+        } media_player_record_changed;
 
         struct
         {

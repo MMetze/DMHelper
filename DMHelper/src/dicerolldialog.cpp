@@ -135,7 +135,7 @@ void DiceRollDialog::rollDiceSpecified(int& resultValue, QString& resultString)
     rollOnce(Dice(diceCount, diceType, bonus), resultValue, resultString);
 
     // If there was somehow more than one number shown, then we should bother showing the overall sum
-    if((diceCount > 1) || (bonus > 0 ))
+    if((diceCount > 1) || (bonus > 0))
         resultString.append(QString(" = ") + QString::number(resultValue));
 }
 

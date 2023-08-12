@@ -47,6 +47,7 @@ SOURCES += main.cpp\
     battledialoggraphicsscenemousehandler.cpp \
     battledialogmodeleffectobject.cpp \
     battledialogmodeleffectshape.cpp \
+    battledialogmodelobject.cpp \
     battleframe.cpp \
     battleframemapdrawer.cpp \
     battleframestate.cpp \
@@ -62,11 +63,14 @@ SOURCES += main.cpp\
     campaigntreeactivestack.cpp \
     campaigntreeitem.cpp \
     characterimportdialog.cpp \
+    characterimportheroforge.cpp \
+    characterimportheroforgedata.cpp \
+    characterimportheroforgedialog.cpp \
     colorpushbutton.cpp \
     combatantrolloverframe.cpp \
     combatantwidget.cpp \
     conditionseditdialog.cpp \
-    configuregriddialog.cpp \
+    configurelockedgriddialog.cpp \
     customtable.cpp \
     customtableentry.cpp \
     customtableframe.cpp \
@@ -74,13 +78,26 @@ SOURCES += main.cpp\
     dmh_vlc.cpp \
     dmhcache.cpp \
     dmhelperribbon.cpp \
+    dmhfilereader.cpp \
     dmhlogger.cpp \
     dmhwaitingdialog.cpp \
     emptycampaignframe.cpp \
+    encountertextlinked.cpp \
     equipmentserver.cpp \
     expertisedialog.cpp \
     exportdialog.cpp \
     exportworker.cpp \
+    gridconfig.cpp \
+    layer.cpp \
+    layerfow.cpp \
+    layerframe.cpp \
+    layergrid.cpp \
+    layerimage.cpp \
+    layerreference.cpp \
+    layerscene.cpp \
+    layerseditdialog.cpp \
+    layertokens.cpp \
+    layervideo.cpp \
     legaldialog.cpp \
     mainwindow.cpp \
     mapblankdialog.cpp \
@@ -103,24 +120,23 @@ SOURCES += main.cpp\
     publishbuttonribbon.cpp \
     publishglbattlebackground.cpp \
     publishglbattleeffect.cpp \
+    publishglbattlegrid.cpp \
     publishglbattleimagerenderer.cpp \
     publishglbattleobject.cpp \
     publishglbattlerenderer.cpp \
-    publishglbattlescene.cpp \
     publishglbattletoken.cpp \
     publishglbattlevideorenderer.cpp \
-    publishgleffect.cpp \
     publishglframe.cpp \
     publishglimage.cpp \
     publishglimagerenderer.cpp \
-    publishglmapimagerenderer.cpp \
     publishglmaprenderer.cpp \
-    publishglmapvideorenderer.cpp \
     publishglobject.cpp \
     publishglrenderer.cpp \
-    publishgltextimagerenderer.cpp \
+    publishglscene.cpp \
     publishgltextrenderer.cpp \
-    publishgltextvideorenderer.cpp \
+    publishgltokenhighlight.cpp \
+    publishgltokenhighlighteffect.cpp \
+    publishgltokenhighlightref.cpp \
     publishwindow.cpp \
     randommarketdialog.cpp \
     ribbonframe.cpp \
@@ -136,6 +152,8 @@ SOURCES += main.cpp\
     ribbontabtext.cpp \
     ribbontabtools.cpp \
     ribbontabworldmap.cpp \
+    selectcombatantdialog.cpp \
+    selectitemdialog.cpp \
     selectstringdialog.cpp \
     soundboardframe.cpp \
     soundboardgroup.cpp \
@@ -148,10 +166,9 @@ SOURCES += main.cpp\
     spellslotradiobutton.cpp \
     textbrowsermargins.cpp \
     texteditmargins.cpp \
-    undopoint.cpp \
-    undopath.cpp \
-    undofill.cpp \
-    undobase.cpp \
+    undofowbase.cpp \
+    undofowfill.cpp \
+    undofowpath.cpp \
     dicerolldialog.cpp \
     map.cpp \
     character.cpp \
@@ -179,6 +196,8 @@ SOURCES += main.cpp\
     quickref.cpp \
     quickrefdatawidget.cpp \
     mapmarkerdialog.cpp \
+    undofowpoint.cpp \
+    undofowshape.cpp \
     undomarker.cpp \
     mapcontent.cpp \
     mapmarkergraphicsitem.cpp \
@@ -193,7 +212,6 @@ SOURCES += main.cpp\
     clockframe.cpp \
     timeanddateframe.cpp \
     basicdate.cpp \
-    undoshape.cpp \
     unselectedellipse.cpp \
     unselectedpixmap.cpp \
     publishframe.cpp \
@@ -212,6 +230,7 @@ SOURCES += main.cpp\
     videoplayerglplayer.cpp \
     videoplayerglscreenshot.cpp \
     videoplayerglvideo.cpp \
+    videoplayerscreenshot.cpp \
     welcomeframe.cpp \
     whatsnewdialog.cpp \
     widgetbattlecombatant.cpp \
@@ -244,7 +263,6 @@ SOURCES += main.cpp\
     networkcontroller.cpp \
     monsteractionframe.cpp \
     monsteraction.cpp \
-    encounterbattleedit.cpp \
     battledialoglogger.cpp \
     battledialogevent.cpp \
     battledialogeventnewround.cpp \
@@ -283,6 +301,7 @@ HEADERS  += mainwindow.h \
     battledialoggraphicsscenemousehandler.h \
     battledialogmodeleffectobject.h \
     battledialogmodeleffectshape.h \
+    battledialogmodelobject.h \
     battleframe.h \
     battleframemapdrawer.h \
     battleframestate.h \
@@ -298,11 +317,14 @@ HEADERS  += mainwindow.h \
     campaigntreeactivestack.h \
     campaigntreeitem.h \
     characterimportdialog.h \
+    characterimportheroforge.h \
+    characterimportheroforgedata.h \
+    characterimportheroforgedialog.h \
     colorpushbutton.h \
     combatantrolloverframe.h \
     combatantwidget.h \
     conditionseditdialog.h \
-    configuregriddialog.h \
+    configurelockedgriddialog.h \
     customtable.h \
     customtableentry.h \
     customtableframe.h \
@@ -310,14 +332,27 @@ HEADERS  += mainwindow.h \
     dmh_vlc.h \
     dmhcache.h \
     dmhelperribbon.h \
+    dmhfilereader.h \
     dmhlogger.h \
     dmhwaitingdialog.h \
     dmversion.h \
     emptycampaignframe.h \
+    encountertextlinked.h \
     equipmentserver.h \
     expertisedialog.h \
     exportdialog.h \
     exportworker.h \
+    gridconfig.h \
+    layer.h \
+    layerfow.h \
+    layerframe.h \
+    layergrid.h \
+    layerimage.h \
+    layerreference.h \
+    layerscene.h \
+    layerseditdialog.h \
+    layertokens.h \
+    layervideo.h \
     legaldialog.h \
     mapblankdialog.h \
     mapcolorizedialog.h \
@@ -340,24 +375,23 @@ HEADERS  += mainwindow.h \
     publishbuttonribbon.h \
     publishglbattlebackground.h \
     publishglbattleeffect.h \
+    publishglbattlegrid.h \
     publishglbattleimagerenderer.h \
     publishglbattleobject.h \
     publishglbattlerenderer.h \
-    publishglbattlescene.h \
     publishglbattletoken.h \
     publishglbattlevideorenderer.h \
-    publishgleffect.h \
     publishglframe.h \
     publishglimage.h \
     publishglimagerenderer.h \
-    publishglmapimagerenderer.h \
     publishglmaprenderer.h \
-    publishglmapvideorenderer.h \
     publishglobject.h \
     publishglrenderer.h \
-    publishgltextimagerenderer.h \
+    publishglscene.h \
     publishgltextrenderer.h \
-    publishgltextvideorenderer.h \
+    publishgltokenhighlight.h \
+    publishgltokenhighlighteffect.h \
+    publishgltokenhighlightref.h \
     publishwindow.h \
     randommarketdialog.h \
     ribbonframe.h \
@@ -373,6 +407,8 @@ HEADERS  += mainwindow.h \
     ribbontabtext.h \
     ribbontabtools.h \
     ribbontabworldmap.h \
+    selectcombatantdialog.h \
+    selectitemdialog.h \
     selectstringdialog.h \
     soundboardframe.h \
     soundboardgroup.h \
@@ -385,10 +421,9 @@ HEADERS  += mainwindow.h \
     spellslotradiobutton.h \
     textbrowsermargins.h \
     texteditmargins.h \
-    undopoint.h \
-    undopath.h \
-    undofill.h \
-    undobase.h \
+    undofowbase.h \
+    undofowfill.h \
+    undofowpath.h \
     dicerolldialog.h \
     map.h \
     character.h \
@@ -417,6 +452,8 @@ HEADERS  += mainwindow.h \
     quickref.h \
     quickrefdatawidget.h \
     mapmarkerdialog.h \
+    undofowpoint.h \
+    undofowshape.h \
     undomarker.h \
     mapcontent.h \
     mapmarkergraphicsitem.h \
@@ -431,7 +468,6 @@ HEADERS  += mainwindow.h \
     clockframe.h \
     timeanddateframe.h \
     basicdate.h \
-    undoshape.h \
     unselectedellipse.h \
     unselectedpixmap.h \
     publishframe.h \
@@ -450,6 +486,7 @@ HEADERS  += mainwindow.h \
     videoplayerglplayer.h \
     videoplayerglscreenshot.h \
     videoplayerglvideo.h \
+    videoplayerscreenshot.h \
     welcomeframe.h \
     whatsnewdialog.h \
     widgetbattlecombatant.h \
@@ -482,7 +519,6 @@ HEADERS  += mainwindow.h \
     networkcontroller.h \
     monsteractionframe.h \
     monsteraction.h \
-    encounterbattleedit.h \
     battledialoglogger.h \
     battledialogevent.h \
     battledialogeventnewround.h \
@@ -500,9 +536,10 @@ FORMS    += mainwindow.ui \
     bestiaryexportdialog.ui \
     campaignnotesdialog.ui \
     characterimportdialog.ui \
+    characterimportheroforgedialog.ui \
     combatantrolloverframe.ui \
     conditionseditdialog.ui \
-    configuregriddialog.ui \
+    configurelockedgriddialog.ui \
     customtableframe.ui \
     dicerolldialog.ui \
     combatantdialog.ui \
@@ -510,6 +547,8 @@ FORMS    += mainwindow.ui \
     dmhwaitingdialog.ui \
     emptycampaignframe.ui \
     expertisedialog.ui \
+    layerframe.ui \
+    layerseditdialog.ui \
     legaldialog.ui \
     mapblankdialog.ui \
     mapcolorizedialog.ui \
@@ -532,6 +571,8 @@ FORMS    += mainwindow.ui \
     ribbontabtext.ui \
     ribbontabtools.ui \
     ribbontabworldmap.ui \
+    selectcombatantdialog.ui \
+    selectitemdialog.ui \
     selectstringdialog.ui \
     soundboardframe.ui \
     soundboardgroupframe.ui \
@@ -565,7 +606,6 @@ FORMS    += mainwindow.ui \
     audioplaybackframe.ui \
     audiotrackedit.ui \
     monsteractionframe.ui \
-    encounterbattleedit.ui \
     battledialoglogview.ui \
     monsteractioneditdialog.ui \
     aboutdialog.ui \

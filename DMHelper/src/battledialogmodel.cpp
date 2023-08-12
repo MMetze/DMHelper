@@ -1,27 +1,27 @@
 #include "battledialogmodel.h"
+#include "battledialogmodelmonsterbase.h"
 #include "dmconstants.h"
+#include "campaign.h"
 #include "map.h"
 #include "grid.h"
+#include "layergrid.h"
+#include "layertokens.h"
+#include "layerreference.h"
+#include "encounterbattle.h"
 #include <QDebug>
 
-BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
+BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& name, QObject *parent) :
     CampaignObjectBase(name, parent),
+    _encounter(encounter),
     _combatants(),
     _effects(),
+    _layerScene(this),
     _map(nullptr),
     _mapRect(),
     _previousMap(nullptr),
     _previousMapRect(),
     _cameraRect(),
     _background(Qt::black),
-    _gridOn(true),
-    _gridType(Grid::GridType_Square),
-    _gridScale(DMHelper::STARTING_GRID_SCALE),
-    _gridAngle(50),
-    _gridOffsetX(0),
-    _gridOffsetY(0),
-    _gridPen(),
-    _showCompass(false),
     _showAlive(true),
     _showDead(false),
     _showEffects(true),
@@ -31,45 +31,165 @@ BattleDialogModel::BattleDialogModel(const QString& name, QObject *parent) :
     _logger(),
     _backgroundImage()
 {
+    if(_encounter)
+        connect(this, &BattleDialogModel::dirty, _encounter, &EncounterBattle::dirty);
+
+    connect(&_layerScene, &LayerScene::dirty, this, &BattleDialogModel::dirty);
 }
 
 BattleDialogModel::~BattleDialogModel()
 {
-    qDeleteAll(_combatants);
+    //qDeleteAll(_combatants);
     qDeleteAll(_effects);
+    _layerScene.clearLayers();
 }
 
 void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
 {
     Q_UNUSED(isImport);
 
-    _background = QColor(element.attribute("backgroundColorR",QString::number(0)).toInt(),
-                         element.attribute("backgroundColorG",QString::number(0)).toInt(),
-                         element.attribute("backgroundColorB",QString::number(0)).toInt());
-    _cameraRect = QRectF(element.attribute("cameraRectX",QString::number(0.0)).toDouble(),
-                         element.attribute("cameraRectY",QString::number(0.0)).toDouble(),
-                         element.attribute("cameraRectWidth",QString::number(0.0)).toDouble(),
-                         element.attribute("cameraRectHeight",QString::number(0.0)).toDouble());
-    _gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
-    _gridType = element.attribute("gridType",QString::number(0)).toInt();
-    _gridScale = element.attribute("gridScale",QString::number(0)).toInt();
-    _gridAngle = element.attribute("gridAngle",QString::number(50)).toInt();
-    _gridOffsetX = element.attribute("gridOffsetX",QString::number(0)).toInt();
-    _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
-    int gridWidth = element.attribute("gridWidth",QString::number(1)).toInt();
-    QColor gridColor = element.attribute("gridColor",QString("#000000"));
-    _gridPen = QPen(QBrush(gridColor), gridWidth);
-    _gridOffsetY = element.attribute("gridOffsetY",QString::number(0)).toInt();
-    // TODO: possibly re-enable compass at some point
-    //_showCompass = static_cast<bool>(element.attribute("showCompass",QString::number(0)).toInt());
-    _showCompass = false;
-    _showAlive = static_cast<bool>(element.attribute("showAlive",QString::number(1)).toInt());
-    _showDead = static_cast<bool>(element.attribute("showDead",QString::number(0)).toInt());
-    _showEffects = static_cast<bool>(element.attribute("showEffects",QString::number(1)).toInt());
-    _showMovement = static_cast<bool>(element.attribute("showMovement",QString::number(1)).toInt());
-    _showLairActions = static_cast<bool>(element.attribute("showLairActions",QString::number(0)).toInt());
+    _background = QColor(element.attribute("backgroundColorR", QString::number(0)).toInt(),
+                         element.attribute("backgroundColorG", QString::number(0)).toInt(),
+                         element.attribute("backgroundColorB", QString::number(0)).toInt());
+    _cameraRect = QRectF(element.attribute("cameraRectX", QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectY", QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectWidth", QString::number(0.0)).toDouble(),
+                         element.attribute("cameraRectHeight", QString::number(0.0)).toDouble());
+    // TODO: Layers - need this as backwards compability
+    int gridScale = element.attribute("gridScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
+    _layerScene.setScale(gridScale);
+
+    _showAlive = static_cast<bool>(element.attribute("showAlive", QString::number(1)).toInt());
+    _showDead = static_cast<bool>(element.attribute("showDead", QString::number(0)).toInt());
+    _showEffects = static_cast<bool>(element.attribute("showEffects", QString::number(1)).toInt());
+    _showMovement = static_cast<bool>(element.attribute("showMovement", QString::number(1)).toInt());
+    _showLairActions = static_cast<bool>(element.attribute("showLairActions", QString::number(0)).toInt());
 
     _logger.inputXML(element.firstChildElement("battlelogger"), isImport);
+
+    Campaign* campaign = dynamic_cast<Campaign*>(getParentByType(DMHelper::CampaignType_Campaign));
+    if(campaign)
+    {
+        int mapIdInt = DMH_GLOBAL_INVALID_ID;
+        QUuid mapId = parseIdString(element.attribute("mapID"), &mapIdInt);
+        Map* battleMap = dynamic_cast<Map*>(campaign->getObjectById(mapId));
+        if(battleMap)
+        {
+            QRect mapRect(element.attribute("mapRectX", QString::number(0)).toInt(),
+                          element.attribute("mapRectY", QString::number(0)).toInt(),
+                          element.attribute("mapRectWidth", QString::number(0)).toInt(),
+                          element.attribute("mapRectHeight", QString::number(0)).toInt());
+
+            setMap(battleMap, mapRect);
+        }
+    }
+
+    QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
+    if(!layersElement.isNull())
+    {
+        _layerScene.inputXML(layersElement, isImport);
+
+        // Set the model for any token layers
+        for(int i = 0; i < _layerScene.layerCount(); ++i)
+        {
+            Layer* layer = _layerScene.layerAt(i);
+            if((layer) && (layer->getType() == DMHelper::LayerType_Tokens))
+            {
+                LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+                if(tokenLayer)
+                    tokenLayer->setModel(this);
+            }
+        }
+        _layerScene.postProcessXML(layersElement, isImport);
+    }
+    else
+    {
+        if(_map)
+        {
+            for(int i = 0; i < _map->getLayerScene().layerCount(); ++i)
+            {
+                Layer* layer = _map->getLayerScene().layerAt(i);
+                if(layer)
+                    _layerScene.appendLayer(new LayerReference(_map, layer, layer->getOrder()));
+            }
+        }
+
+        int gridScale = element.attribute("gridScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
+        _layerScene.setScale(gridScale);
+
+        //use the grid Scale to seed the layer scale, if the grid is on, read the rest and create a grid layer
+        LayerGrid* gridLayer = nullptr;
+        bool gridOn = static_cast<bool>(element.attribute("showGrid",QString::number(1)).toInt());
+        if(gridOn)
+        {
+            gridLayer = new LayerGrid();
+            gridLayer->inputXML(element, isImport);
+            gridLayer->setName(QString("grid"));
+        }
+
+        LayerTokens* tokenLayer = new LayerTokens(this);
+        tokenLayer->inputXML(element, isImport);
+        tokenLayer->setName(QString("tokens"));
+        tokenLayer->postProcessXML(campaign, element, isImport);
+
+        int fowPosition = _layerScene.getFirstIndex(DMHelper::LayerType_Fow);
+        if(fowPosition == -1)
+        {
+            if(gridLayer)
+                _layerScene.appendLayer(gridLayer);
+            _layerScene.appendLayer(tokenLayer);
+        }
+        else
+        {
+            _layerScene.insertLayer(fowPosition, tokenLayer);
+            if(gridLayer)
+                _layerScene.insertLayer(fowPosition, gridLayer);
+        }
+    }
+
+    // Todo: Layers - include active ID
+    QUuid activeId(element.attribute("activeId"));
+
+    if(!activeId.isNull())
+    {
+        QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+        foreach(Layer* layer, tokenLayers)
+        {
+            LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+            if(tokenLayer)
+            {
+                QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+                foreach(BattleDialogModelCombatant* combatant, combatants)
+                {
+                    if(combatant->getID() == activeId)
+                        setActiveCombatant(combatant);
+                }
+            }
+        }
+    }
+
+    // Re-establish links to linked items
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            QList<BattleDialogModelCombatant*> combatants = tokenLayer->getCombatants();
+            foreach(BattleDialogModelCombatant* combatant, combatants)
+            {
+                if(!combatant->getLinkedID().isNull())
+                    combatant->setLinkedObject(tokenLayer->getObjectById(combatant->getLinkedID()));
+            }
+
+            QList<BattleDialogModelEffect*> effects = tokenLayer->getEffects();
+            foreach(BattleDialogModelEffect* effect, effects)
+            {
+                if(!effect->getLinkedID().isNull())
+                    effect->setLinkedObject(tokenLayer->getObjectById(effect->getLinkedID()));
+            }
+        }
+    }
 }
 
 void BattleDialogModel::copyValues(const CampaignObjectBase* other)
@@ -80,14 +200,6 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
 
     _background = otherModel->_background;
     _cameraRect = otherModel->_cameraRect;
-    _gridOn = otherModel->_gridOn;
-    _gridType = otherModel->_gridType;
-    _gridScale = otherModel->_gridScale;
-    _gridAngle = otherModel->_gridAngle;
-    _gridOffsetX = otherModel->_gridOffsetX;
-    _gridOffsetY = otherModel->_gridOffsetY;
-    _gridPen = otherModel->_gridPen;
-    _showCompass = otherModel->_showCompass;
     _showAlive = otherModel->_showAlive;
     _showDead = otherModel->_showDead;
     _showEffects = otherModel->_showEffects;
@@ -96,7 +208,95 @@ void BattleDialogModel::copyValues(const CampaignObjectBase* other)
 
     _logger = otherModel->_logger;
 
+    _layerScene.copyValues(&otherModel->_layerScene);
+
     CampaignObjectBase::copyValues(other);
+}
+
+int BattleDialogModel::getObjectType() const
+{
+    return DMHelper::CampaignType_BattleContent;
+}
+
+const CampaignObjectBase* BattleDialogModel::getParentByType(int parentType) const
+{
+    if(parentType == DMHelper::CampaignType_BattleContent)
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(parentType == _encounter->getObjectType())
+        return _encounter;
+
+    return _encounter->getParentByType(parentType);
+}
+
+CampaignObjectBase* BattleDialogModel::getParentByType(int parentType)
+{
+    if(parentType == DMHelper::CampaignType_BattleContent)
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(parentType == _encounter->getObjectType())
+        return _encounter;
+
+    return _encounter->getParentByType(parentType);
+}
+
+const CampaignObjectBase* BattleDialogModel::getParentById(const QUuid& id) const
+{
+    if(id == getID())
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(id == _encounter->getID())
+        return _encounter;
+
+    return _encounter->getParentById(id);
+}
+
+CampaignObjectBase* BattleDialogModel::getParentById(const QUuid& id)
+{
+    if(id == getID())
+        return this;
+
+    if(!_encounter)
+        return nullptr;
+
+    if(id == _encounter->getID())
+        return _encounter;
+
+    return _encounter->getParentById(id);
+}
+
+QGraphicsItem* BattleDialogModel::getObjectItem(BattleDialogModelObject* object) const
+{
+    BattleDialogModelCombatant* combatant = dynamic_cast<BattleDialogModelCombatant*>(object);
+    BattleDialogModelEffect* effect = dynamic_cast<BattleDialogModelEffect*>(object);
+
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            QGraphicsItem* item = nullptr;
+            if(combatant)
+                item = tokenLayer->getCombatantItem(combatant);
+            else if(effect)
+                item = tokenLayer->getEffectItem(effect);
+
+            if(item)
+                return item;
+        }
+    }
+
+    return nullptr;
 }
 
 QList<BattleDialogModelCombatant*> BattleDialogModel::getCombatantList() const
@@ -128,33 +328,51 @@ BattleDialogModelCombatant* BattleDialogModel::getCombatantById(QUuid combatantI
     return nullptr;
 }
 
-void BattleDialogModel::insertCombatant(int index, BattleDialogModelCombatant* combatant)
+void BattleDialogModel::moveCombatant(int fromIndex, int toIndex)
+{
+    if((fromIndex < 0) || (fromIndex >= _combatants.size()) || (toIndex < 0) || (toIndex >= _combatants.size()))
+    {
+        qDebug() << "[Battle Dialog Model] ERROR: move from or to an invalid index! from: " << fromIndex << ", to: " << toIndex;
+        return;
+    }
+
+    _combatants.move(fromIndex, toIndex);
+
+    emit combatantListChanged();
+    emit dirty();
+}
+
+void BattleDialogModel::removeCombatant(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
         return;
 
-    _combatants.insert(index, combatant);
-    emit combatantListChanged();
-    emit dirty();
-}
-
-BattleDialogModelCombatant* BattleDialogModel::removeCombatant(int index)
-{
-    BattleDialogModelCombatant* removedCombatant = nullptr;
-    if((index >= 0) && (index < _combatants.count()))
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    for(Layer* layer : tokenLayers)
     {
-        removedCombatant = _combatants.takeAt(index);
-        if(_activeCombatant == removedCombatant)
-            _activeCombatant = nullptr;
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if((tokenLayer) && (tokenLayer->containsCombatant(combatant)))
+        {
+            tokenLayer->removeCombatant(combatant);
+            delete combatant;
+            return;
+        }
     }
-
-    emit combatantListChanged();
-    emit dirty();
-
-    return removedCombatant;
 }
 
 void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    LayerTokens* layer = dynamic_cast<LayerTokens*>(_layerScene.getPriority(DMHelper::LayerType_Tokens));
+    if(!layer)
+        return;
+
+    layer->addCombatant(combatant);
+}
+
+void BattleDialogModel::appendCombatantToList(BattleDialogModelCombatant* combatant)
 {
     if(!combatant)
         return;
@@ -165,14 +383,35 @@ void BattleDialogModel::appendCombatant(BattleDialogModelCombatant* combatant)
     if((combatant->getCombatantType() == DMHelper::CombatantType_Character) && (combatant->getCombatant()))
         connect(combatant->getCombatant(), &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::characterDestroyed);
 
+    // For a monster addition, also react to image changes
+    if((combatant->getCombatantType() == DMHelper::CombatantType_Monster))
+    {
+        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
+        if(monster)
+            connect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
+    }
+
     emit combatantListChanged();
     emit dirty();
 }
 
-void BattleDialogModel::appendCombatants(QList<BattleDialogModelCombatant*> combatants)
+void BattleDialogModel::removeCombatantFromList(BattleDialogModelCombatant* combatant)
 {
-    for(BattleDialogModelCombatant* combatant : combatants)
-        appendCombatant(combatant);
+    if(!combatant)
+        return;
+
+    if(!_combatants.removeOne(combatant))
+        return;
+
+    if(combatant->getCombatantType() == DMHelper::CombatantType_Monster)
+    {
+        BattleDialogModelMonsterBase* monster = dynamic_cast<BattleDialogModelMonsterBase*>(combatant);
+        if(monster)
+            disconnect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
+    }
+
+    emit combatantListChanged();
+    emit dirty();
 }
 
 bool BattleDialogModel::isCombatantInList(Combatant* combatant) const
@@ -223,43 +462,22 @@ BattleDialogModelEffect* BattleDialogModel::getEffectById(QUuid effectId) const
     return nullptr;
 }
 
-void BattleDialogModel::insertEffect(int index, BattleDialogModelEffect* effect)
+void BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
 {
     if(!effect)
         return;
 
-    _effects.insert(index, effect);
-    emit effectListChanged();
-    emit dirty();
-}
-
-BattleDialogModelEffect* BattleDialogModel::removeEffect(int index)
-{
-    BattleDialogModelEffect* result = nullptr;
-    if((index >= 0) && (index < _effects.count()))
-        result = _effects.takeAt(index);
-
-    emit effectListChanged();
-    emit dirty();
-    return result;
-}
-
-bool BattleDialogModel::removeEffect(BattleDialogModelEffect* effect)
-{
-    if(!effect)
+    QList<Layer*> tokenLayers = _layerScene.getLayers(DMHelper::LayerType_Tokens);
+    for(Layer* layer : tokenLayers)
     {
-        qDebug() << "[Battle Dialog Model] ERROR: attempted to remove NULL effect!";
-        return false;
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if((tokenLayer) && (tokenLayer->containsEffect(effect)))
+        {
+            tokenLayer->removeEffect(effect);
+            delete effect;
+            return;
+        }
     }
-
-    bool result = _effects.removeOne(effect);
-
-    if(!result)
-        qDebug() << "[Battle Dialog Model] ERROR: Unable to remove effect " << effect;
-
-    emit effectListChanged();
-    emit dirty();
-    return result;
 }
 
 void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
@@ -267,9 +485,45 @@ void BattleDialogModel::appendEffect(BattleDialogModelEffect* effect)
     if(!effect)
         return;
 
+    LayerTokens* layer = dynamic_cast<LayerTokens*>(_layerScene.getPriority(DMHelper::LayerType_Tokens));
+    if(!layer)
+        return;
+
+    layer->addEffect(effect);
+}
+
+void BattleDialogModel::appendEffectToList(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return;
+
     _effects.append(effect);
+
     emit effectListChanged();
     emit dirty();
+}
+
+void BattleDialogModel::removeEffectFromList(BattleDialogModelEffect* effect)
+{
+    if(!effect)
+        return;
+
+    if(!_effects.removeOne(effect))
+        return;
+
+    emit effectListChanged();
+    emit dirty();
+}
+
+int BattleDialogModel::getGridScale() const
+{
+    // TODO: Layers - need to make this complete
+    //if(!_map)
+    //    return 1;
+
+//    LayerGrid* layer = dynamic_cast<LayerGrid*>(_map->getLayerScene().getPriority(DMHelper::LayerType_Grid));
+//    return layer ? layer->getConfig().getGridScale() : DMHelper::STARTING_GRID_SCALE;
+    return _layerScene.getScale();
 }
 
 Map* BattleDialogModel::getMap() const
@@ -280,11 +534,6 @@ Map* BattleDialogModel::getMap() const
 const QRect& BattleDialogModel::getMapRect() const
 {
     return _mapRect;
-}
-
-bool BattleDialogModel::isMapChanged() const
-{
-    return (_map != _previousMap);
 }
 
 const QRect& BattleDialogModel::getPreviousMapRect() const
@@ -305,46 +554,6 @@ QRectF BattleDialogModel::getCameraRect() const
 QColor BattleDialogModel::getBackgroundColor() const
 {
     return _background;
-}
-
-bool BattleDialogModel::getGridOn() const
-{
-    return _gridOn;
-}
-
-int BattleDialogModel::getGridType() const
-{
-    return _gridType;
-}
-
-int BattleDialogModel::getGridScale() const
-{
-    return _gridScale;
-}
-
-int BattleDialogModel::getGridAngle() const
-{
-    return _gridAngle;
-}
-
-int BattleDialogModel::getGridOffsetX() const
-{
-    return _gridOffsetX;
-}
-
-int BattleDialogModel::getGridOffsetY() const
-{
-    return _gridOffsetY;
-}
-
-const QPen& BattleDialogModel::getGridPen() const
-{
-    return _gridPen;
-}
-
-bool BattleDialogModel::getShowCompass() const
-{
-    return _showCompass;
 }
 
 bool BattleDialogModel::getShowAlive() const
@@ -392,6 +601,16 @@ QImage BattleDialogModel::getBackgroundImage() const
     return _backgroundImage;
 }
 
+LayerScene& BattleDialogModel::getLayerScene()
+{
+    return _layerScene;
+}
+
+const LayerScene& BattleDialogModel::getLayerScene() const
+{
+    return _layerScene;
+}
+
 void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
 {
     if(_map == map)
@@ -400,8 +619,8 @@ void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
     _previousMap = _map;
     _map = map;
 
-    disconnect(_previousMap, &QObject::destroyed, this, &BattleDialogModel::mapDestroyed);
-    connect(_map, &QObject::destroyed, this, &BattleDialogModel::mapDestroyed);
+    disconnect(_previousMap, &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::mapDestroyed);
+    connect(_map, &CampaignObjectBase::campaignObjectDestroyed, this, &BattleDialogModel::mapDestroyed);
 
     _previousMapRect = _mapRect;
     _mapRect = mapRect;
@@ -409,6 +628,10 @@ void BattleDialogModel::setMap(Map* map, const QRect& mapRect)
     if((_map) && (_previousMap != _map) && (_combatants.count() > 0))
     {
         _map->initialize();
+
+        // TODO: Layers
+
+
         QRect mapRect(QPoint(), _map->getBackgroundImage().size());
         qDebug() << "[Battle Dialog Model] new map set in model: " << _map->getFileName() << " and setting all contents outside the map to the middle.";
         for(BattleDialogModelCombatant* combatant : _combatants)
@@ -428,7 +651,7 @@ void BattleDialogModel::setMapRect(const QRect& mapRect)
     {
         _mapRect = mapRect;
         emit mapRectChanged(_mapRect);
-        emit dirty();
+        //emit dirty();
     }
 }
 
@@ -448,96 +671,6 @@ void BattleDialogModel::setBackgroundColor(const QColor& color)
     {
         _background = color;
         emit backgroundColorChanged(color);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridOn(bool gridOn)
-{
-    if(_gridOn != gridOn)
-    {
-        _gridOn = gridOn;
-        emit gridOnChanged(_gridOn);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridType(int gridType)
-{
-    if(_gridType != gridType)
-    {
-        _gridType = gridType;
-        emit gridTypeChanged(_gridType);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridScale(int gridScale)
-{
-    if(_gridScale != gridScale)
-    {
-        _gridScale = gridScale;
-        emit gridScaleChanged(_gridScale);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridAngle(int gridAngle)
-{
-    if(_gridAngle != gridAngle)
-    {
-        _gridAngle = gridAngle;
-        emit gridAngleChanged(_gridAngle);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridOffsetX(int gridOffsetX)
-{
-    if(_gridOffsetX != gridOffsetX)
-    {
-        _gridOffsetX = gridOffsetX;
-        emit gridOffsetXChanged(_gridOffsetX);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridOffsetY(int gridOffsetY)
-{
-    if(_gridOffsetY != gridOffsetY)
-    {
-        _gridOffsetY = gridOffsetY;
-        emit gridOffsetYChanged(_gridOffsetY);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridWidth(int gridWidth)
-{
-    if(_gridPen.width() != gridWidth)
-    {
-        _gridPen.setWidth(gridWidth);
-        emit gridPenChanged(_gridPen);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setGridColor(const QColor& gridColor)
-{
-    if(_gridPen.color() != gridColor)
-    {
-        _gridPen.setColor(gridColor);
-        emit gridPenChanged(_gridPen);
-        emit dirty();
-    }
-}
-
-void BattleDialogModel::setShowCompass(bool showCompass)
-{
-    if(_showCompass != showCompass)
-    {
-        _showCompass = showCompass;
-        emit showCompassChanged(_showCompass);
         emit dirty();
     }
 }
@@ -619,9 +752,10 @@ void BattleDialogModel::sortCombatants()
     emit dirty();
 }
 
-void BattleDialogModel::mapDestroyed(QObject *obj)
+void BattleDialogModel::mapDestroyed(const QUuid& id)
 {
-    Q_UNUSED(obj);
+    Q_UNUSED(id);
+    // TODO: Layers
     setMap(nullptr, QRect());
 }
 
@@ -635,7 +769,7 @@ void BattleDialogModel::characterDestroyed(const QUuid& destroyedId)
            (combatant->getCombatant()) &&
            (combatant->getCombatant()->getID() == destroyedId))
         {
-            removeCombatant(i);
+            removeCombatant(combatant);
             return;
         }
     }
@@ -661,15 +795,6 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
     element.setAttribute("backgroundColorG", _background.green());
     element.setAttribute("backgroundColorB", _background.blue());
     element.setAttribute("background", _mapRect.height());
-    element.setAttribute("showGrid", _gridOn);
-    element.setAttribute("gridType", _gridType);
-    element.setAttribute("gridScale", _gridScale);
-    element.setAttribute("gridAngle", _gridAngle);
-    element.setAttribute("gridOffsetX", _gridOffsetX);
-    element.setAttribute("gridOffsetY", _gridOffsetY);
-    element.setAttribute("gridWidth", _gridPen.width());
-    element.setAttribute("gridColor", _gridPen.color().name());
-    element.setAttribute("showCompass", _showCompass);
     element.setAttribute("showAlive", _showAlive);
     element.setAttribute("showDead", _showDead);
     element.setAttribute("showEffects", _showEffects);
@@ -679,21 +804,7 @@ void BattleDialogModel::internalOutputXML(QDomDocument &doc, QDomElement &elemen
 
     _logger.outputXML(doc, element, targetDirectory, isExport);
 
-    QDomElement combatantsElement = doc.createElement("combatants");
-    for(BattleDialogModelCombatant* combatant : _combatants)
-    {
-        if(combatant)
-            combatant->outputXML(doc, combatantsElement, targetDirectory, isExport);
-    }
-    element.appendChild(combatantsElement);
-
-    QDomElement effectsElement = doc.createElement("effects");
-    for(BattleDialogModelEffect* effect : _effects)
-    {
-        if(effect)
-            effect->outputXML(doc, effectsElement, targetDirectory, isExport);
-    }
-    element.appendChild(effectsElement);
+    CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }
 
 bool BattleDialogModel::belongsToObject(QDomElement& element)

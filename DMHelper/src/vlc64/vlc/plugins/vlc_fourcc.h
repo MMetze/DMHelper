@@ -93,6 +93,7 @@
 #define VLC_CODEC_TRUEMOTION2     VLC_FOURCC('T','M','2','0')
 #define VLC_CODEC_QTRLE           VLC_FOURCC('r','l','e',' ')
 #define VLC_CODEC_QDRAW           VLC_FOURCC('q','d','r','w')
+#define VLC_CODEC_QOI             VLC_FOURCC('q','o','i','f')
 #define VLC_CODEC_QPEG            VLC_FOURCC('Q','P','E','G')
 #define VLC_CODEC_ULTI            VLC_FOURCC('U','L','T','I')
 #define VLC_CODEC_VIXL            VLC_FOURCC('V','I','X','L')
@@ -438,6 +439,9 @@
 #define VLC_CODEC_CVPX_I420       VLC_FOURCC('C','V','P','I')
 #define VLC_CODEC_CVPX_BGRA       VLC_FOURCC('C','V','P','B')
 #define VLC_CODEC_CVPX_P010       VLC_FOURCC('C','V','P','P')
+
+/* GStreamer Memory opaque buffer type */
+#define VLC_CODEC_GST_MEM_OPAQUE  VLC_FOURCC('G','S','T','M')
 
 /* Image codec (video) */
 #define VLC_CODEC_PNG             VLC_FOURCC('p','n','g',' ')

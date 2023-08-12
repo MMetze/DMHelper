@@ -9,6 +9,8 @@
 #include <QPixmap>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
+#include <QRegularExpressionMatch>
 #include <QDebug>
 
 Bestiary* Bestiary::_instance = nullptr;
@@ -198,8 +200,8 @@ void Bestiary::inputXML(const QDomElement &element, const QString& importFile)
         return;
     }
 
-    _majorVersion = bestiaryElement.attribute("majorversion",QString::number(0)).toInt();
-    _minorVersion = bestiaryElement.attribute("minorversion",QString::number(0)).toInt();
+    _majorVersion = bestiaryElement.attribute("majorversion", QString::number(0)).toInt();
+    _minorVersion = bestiaryElement.attribute("minorversion", QString::number(0)).toInt();
     qDebug() << "[Bestiary]    Bestiary version: " << getVersion();
     if(!isVersionCompatible())
     {
@@ -439,6 +441,49 @@ QString Bestiary::findMonsterImage(const QDir& sourceDir, const QString& monster
     }
 
     return fileName;
+}
+
+QStringList Bestiary::findMonsterImages(const QString& monsterName)
+{
+    QStringList monsterNameFilter;
+    monsterNameFilter << (monsterName + QString("*.png")) << (monsterName + QString("*.jpg"));
+    QStringList imageNameFilter;
+    imageNameFilter << QString("*.png") << QString("*.jpg");
+
+    QStringList entries = findSpecificImages(_bestiaryDirectory, monsterNameFilter, monsterName);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/") + monsterName + QString("/")), imageNameFilter);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/Images/")), monsterNameFilter, monsterName);
+    entries << findSpecificImages(QDir(_bestiaryDirectory.absolutePath() + QString("/Images/") + monsterName + QString("/")), imageNameFilter);
+
+    return entries;
+}
+
+QStringList Bestiary::findSpecificImages(const QDir& sourceDir, const QStringList& filterList, const QString& filterName)
+{
+    QStringList result;
+
+    QFileInfoList entries = sourceDir.entryInfoList(filterList);
+    for(int i = 0; i < entries.count(); ++i)
+    {
+        bool accept = false;
+        if(filterName.isEmpty())
+        {
+            accept = true;
+        }
+        else
+        {
+            QRegularExpression re(QString("([a-zA-Z\\s]*)"));
+            QRegularExpressionMatch reMatch = re.match(entries.at(i).baseName());
+            QString matchName = reMatch.captured(1);
+            if((!reMatch.hasMatch()) || (matchName.isEmpty()) || (matchName == filterName) || (!exists(matchName)))
+                accept = true;
+        }
+
+        if(accept)
+            result << _bestiaryDirectory.relativeFilePath(entries.at(i).absoluteFilePath());
+    }
+
+    return result;
 }
 
 void Bestiary::startBatchProcessing()

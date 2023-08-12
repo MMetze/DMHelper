@@ -39,6 +39,11 @@ void BattleDialogModelEffectLine::copyValues(const CampaignObjectBase* other)
     BattleDialogModelEffect::copyValues(other);
 }
 
+QString BattleDialogModelEffectLine::getName() const
+{
+    return _tip.isEmpty() ? QString("Line Effect") : _tip;
+}
+
 BattleDialogModelEffect* BattleDialogModelEffectLine::clone() const
 {
     BattleDialogModelEffectLine* newEffect = new BattleDialogModelEffectLine(getName());
@@ -64,7 +69,7 @@ QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale)
     qreal effectWidth = static_cast<qreal>(getWidth());
     qreal effectHeight = static_cast<qreal>(getSize());
     qreal rectWidth = (effectHeight > 0.1) ? 100.0 * effectWidth / effectHeight : 100.0 * effectWidth;
-    QGraphicsRectItem* rectItem = new UnselectedRect(-rectWidth / 2.0, 0.0, rectWidth, 100.0);
+    QGraphicsRectItem* rectItem = new UnselectedRect(this, -rectWidth / 2.0, 0.0, rectWidth, 100.0);
 
     setEffectItemData(rectItem);
 
@@ -74,8 +79,9 @@ QGraphicsItem* BattleDialogModelEffectLine::createEffectShape(qreal gridScale)
     return rectItem;
 }
 
-void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal gridScale) const
+void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal gridScale)
 {
+    beginBatchChanges();
     // First apply the base information
     qDebug() << "[Battle Dialog Model Effect] applying effect values for " << this << " to " << &item;
     item.setPos(getPosition());
@@ -92,20 +98,25 @@ void BattleDialogModelEffectLine::applyEffectValues(QGraphicsItem& item, qreal g
     if(rectItem)
     {
         rectItem->setRect(QRectF(-rectWidth / 2.0, 0.0, rectWidth, 100.0));
+        registerChange();
     }
     else
     {
         qDebug() << "[Battle Dialog Model Effect Line] ERROR: Line Effect found without QGraphicsRectItem!";
     }
 
-    item.setScale(effectHeight * gridScale / 500.0);
+    // item.setScale(effectHeight * gridScale / 500.0);
+    applyScale(item, gridScale);
 
     QAbstractGraphicsShapeItem* shapeItem = dynamic_cast<QAbstractGraphicsShapeItem*>(&item);
     if(shapeItem)
     {
-        shapeItem->setPen(QPen(QColor(getColor().red(),getColor().green(),getColor().blue(),255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        shapeItem->setPen(QPen(QColor(getColor().red(), getColor().green(), getColor().blue(), 255), 1, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         shapeItem->setBrush(QBrush(getColor()));
+        registerChange();
     }
+
+    endBatchChanges();
 }
 
 int BattleDialogModelEffectLine::getWidth() const
@@ -118,7 +129,7 @@ void BattleDialogModelEffectLine::setWidth(int width)
     if(_width != width)
     {
         _width = width;
-        emit effectChanged(this);
+        registerChange();
     }
 }
 

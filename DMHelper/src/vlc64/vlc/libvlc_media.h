@@ -147,25 +147,29 @@ typedef enum libvlc_media_parse_flag_t
     /**
      * Parse media if it's a local file
      */
-    libvlc_media_parse_local    = 0x00,
+    libvlc_media_parse_local    = 0x01,
     /**
      * Parse media even if it's a network file
      */
-    libvlc_media_parse_network  = 0x01,
+    libvlc_media_parse_network  = 0x02,
+    /**
+     * Force parsing the media even if it would be skipped.
+     */
+    libvlc_media_parse_forced   = 0x04,
     /**
      * Fetch meta and cover art using local resources
      */
-    libvlc_media_fetch_local    = 0x02,
+    libvlc_media_fetch_local    = 0x08,
     /**
      * Fetch meta and cover art using network resources
      */
-    libvlc_media_fetch_network  = 0x04,
+    libvlc_media_fetch_network  = 0x10,
     /**
      * Interact with the user (via libvlc_dialog_cbs) when preparsing this item
      * (and not its sub items). Set this flag in order to receive a callback
      * when the input is asking for credentials.
      */
-    libvlc_media_do_interact    = 0x08,
+    libvlc_media_do_interact    = 0x20,
 } libvlc_media_parse_flag_t;
 
 /**
@@ -409,8 +413,9 @@ LIBVLC_API void libvlc_media_add_option_flag(
  * media descriptor object.
  *
  * \param p_md the media descriptor
+ * \return the same object
  */
-LIBVLC_API void libvlc_media_retain( libvlc_media_t *p_md );
+LIBVLC_API libvlc_media_t *libvlc_media_retain( libvlc_media_t *p_md );
 
 /**
  * Decrement the reference count of a media descriptor object. If the
@@ -700,8 +705,9 @@ typedef enum libvlc_thumbnailer_seek_speed_t
 /**
  * \brief libvlc_media_request_thumbnail_by_time Start an asynchronous thumbnail generation
  *
- * If the request is successfully queued, the libvlc_MediaThumbnailGenerated
- * is guaranteed to be emitted.
+ * If the request is successfully queued, the libvlc_MediaThumbnailGenerated is
+ * guaranteed to be emitted (except if the request is destroyed early by the
+ * user).
  * The resulting thumbnail size can either be:
  * - Hardcoded by providing both width & height. In which case, the image will
  *   be stretched to match the provided aspect ratio, or cropped if crop is true.
@@ -719,8 +725,8 @@ typedef enum libvlc_thumbnailer_seek_speed_t
  * \param timeout A timeout value in ms, or 0 to disable timeout
  *
  * \return A valid opaque request object, or NULL in case of failure.
- * It may be cancelled by libvlc_media_thumbnail_request_cancel().
- * It must be released by libvlc_media_thumbnail_request_destroy().
+ * It must be released by libvlc_media_thumbnail_request_destroy() and
+ * can be cancelled by calling it early.
  *
  * \version libvlc 4.0 or later
  *
@@ -738,8 +744,9 @@ libvlc_media_thumbnail_request_by_time( libvlc_instance_t *inst,
 /**
  * \brief libvlc_media_request_thumbnail_by_pos Start an asynchronous thumbnail generation
  *
- * If the request is successfully queued, the libvlc_MediaThumbnailGenerated
- * is guaranteed to be emitted.
+ * If the request is successfully queued, the libvlc_MediaThumbnailGenerated is
+ * guaranteed to be emitted (except if the request is destroyed early by the
+ * user).
  * The resulting thumbnail size can either be:
  * - Hardcoded by providing both width & height. In which case, the image will
  *   be stretched to match the provided aspect ratio, or cropped if crop is true.
@@ -757,7 +764,6 @@ libvlc_media_thumbnail_request_by_time( libvlc_instance_t *inst,
  * \param timeout A timeout value in ms, or 0 to disable timeout
  *
  * \return A valid opaque request object, or NULL in case of failure.
- * It may be cancelled by libvlc_media_thumbnail_request_cancel().
  * It must be released by libvlc_media_thumbnail_request_destroy().
  *
  * \version libvlc 4.0 or later
@@ -767,29 +773,18 @@ libvlc_media_thumbnail_request_by_time( libvlc_instance_t *inst,
  */
 LIBVLC_API libvlc_media_thumbnail_request_t*
 libvlc_media_thumbnail_request_by_pos( libvlc_instance_t *inst,
-                                       libvlc_media_t *md, float pos,
+                                       libvlc_media_t *md, double pos,
                                        libvlc_thumbnailer_seek_speed_t speed,
                                        unsigned int width, unsigned int height,
                                        bool crop, libvlc_picture_type_t picture_type,
                                        libvlc_time_t timeout );
 
 /**
- * @brief libvlc_media_thumbnail_cancel cancels a thumbnailing request
- * @param p_req An opaque thumbnail request object.
- *
- * Cancelling the request will still cause libvlc_MediaThumbnailGenerated event
- * to be emitted, with a NULL libvlc_picture_t
- * If the request is cancelled after its completion, the behavior is undefined.
- */
-LIBVLC_API void
-libvlc_media_thumbnail_request_cancel( libvlc_media_thumbnail_request_t *p_req );
-
-/**
  * @brief libvlc_media_thumbnail_destroy destroys a thumbnail request
  * @param p_req An opaque thumbnail request object.
  *
- * If the request has not completed or hasn't been cancelled yet, the behavior
- * is undefined
+ * This will also cancel the thumbnail request, no events will be emitted after
+ * this call.
  */
 LIBVLC_API void
 libvlc_media_thumbnail_request_destroy( libvlc_media_thumbnail_request_t *p_req );

@@ -10,10 +10,10 @@ CustomTableEntry::CustomTableEntry(const QString& text, int weight, const QStrin
 CustomTableEntry::CustomTableEntry(const QDomElement& element) :
     _text(element.text()),
     _weight(1),
-    _subtable(element.attribute(QString("subtable"),QString()))
+    _subtable(element.attribute(QString("subtable"), QString()))
 {
     bool ok = false;
-    _weight = element.attribute(QString("weight"),QString("1")).toInt(&ok);
+    _weight = element.attribute(QString("weight"), QString("1")).toInt(&ok);
     if(!ok)
         _weight = 1;
 }

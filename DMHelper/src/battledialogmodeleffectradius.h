@@ -13,6 +13,7 @@ public:
     //BattleDialogModelEffectRadius(const BattleDialogModelEffectRadius& other);
     virtual ~BattleDialogModelEffectRadius() override;
 
+    virtual QString getName() const override;
     virtual BattleDialogModelEffect* clone() const override;
 
     virtual int getEffectType() const override;

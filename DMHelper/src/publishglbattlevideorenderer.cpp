@@ -24,10 +24,10 @@ PublishGLBattleVideoRenderer::PublishGLBattleVideoRenderer(BattleDialogModel* mo
 
 PublishGLBattleVideoRenderer::~PublishGLBattleVideoRenderer()
 {
-    PublishGLBattleVideoRenderer::cleanup();
+    PublishGLBattleVideoRenderer::cleanupGL();
 }
 
-void PublishGLBattleVideoRenderer::cleanup()
+void PublishGLBattleVideoRenderer::cleanupGL()
 {
 #ifdef BATTLEVIDEO_USE_SCREENSHOT_ONLY
     delete _backgroundObject;
@@ -43,7 +43,7 @@ void PublishGLBattleVideoRenderer::cleanup()
         deletePlayer->stopThenDelete();
     }
 
-    PublishGLBattleRenderer::cleanup();
+    PublishGLBattleRenderer::cleanupGL();
 }
 
 QSizeF PublishGLBattleVideoRenderer::getBackgroundSize()
@@ -64,7 +64,6 @@ void PublishGLBattleVideoRenderer::handleScreenshotReady(const QImage& image)
         return;
 
     _backgroundImage = image;
-    _updateFow = true;
     emit updateWidget();
     initializationComplete();
 }
@@ -142,7 +141,6 @@ void PublishGLBattleVideoRenderer::updateBackground()
     if((!_backgroundObject) && (!_backgroundImage.isNull()))
     {
         _backgroundObject = new PublishGLBattleBackground(nullptr, _backgroundImage, GL_NEAREST);
-        updateFoW();
         updateProjectionMatrix();
     }
 #else
