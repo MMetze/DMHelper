@@ -14,6 +14,7 @@ fixed * Show effects never works
 fixed * dirty on load of campaign
 fixed * Changes to effects or combatants only affects one, not all
 done * Duplicate effects or non-PC combatants
+fixed * Pointer position doesn't work
 
 Next version
 * upgrade to latest Qt

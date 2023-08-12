@@ -43,6 +43,7 @@ signals:
     void deactivated();
 
 public slots:
+    // DMH OpenGL renderer calls
     virtual void updateProjectionMatrix() = 0;
     virtual void setBackgroundColor(const QColor& color);
     virtual void setRotation(int rotation);
