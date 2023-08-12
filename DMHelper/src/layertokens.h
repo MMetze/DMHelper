@@ -76,6 +76,7 @@ public slots:
     void removeEffect(BattleDialogModelEffect* effect);
     bool containsEffect(BattleDialogModelEffect* effect);
     QGraphicsItem* getEffectItem(BattleDialogModelEffect* effect);
+    BattleDialogModelEffect* getEffectFromItem(QGraphicsItem* item);
     void refreshEffects();
 
 signals:
@@ -86,8 +87,12 @@ protected slots:
     // Local Interface
     void handleCombatantSelected(BattleDialogModelCombatant* combatant);
     void combatantMoved(BattleDialogModelObject* object);
+    void combatantConditionChanged(BattleDialogModelCombatant* combatant);
+    void aliveVisibilityChanged(bool showAlive);
+    void deadVisibilityChanged(bool showDead);
     void effectChanged(BattleDialogModelEffect* effect);
     void effectMoved(BattleDialogModelObject* object);
+    void effectVisibilityChanged(bool showEffects);
     void linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink);
     void linkedObjectMoved(BattleDialogModelObject* object);
 
@@ -97,7 +102,7 @@ protected:
 
     // DM Window Methods
     void cleanupDM();
-    void createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant);
+    QGraphicsPixmapItem* createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant);
     QGraphicsItem* createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addEffectShape(QGraphicsScene* scene, BattleDialogModelEffect* effect);
     QGraphicsItem* addSpellEffect(QGraphicsScene* scene, BattleDialogModelEffect* effect);
@@ -113,6 +118,10 @@ protected:
     void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
     void applyEffectToToken(PublishGLBattleToken* token, BattleDialogModelEffect* effect);
     void removeEffectFromToken(PublishGLBattleToken* token, BattleDialogModelEffect* effect);
+    QPixmap generateCombatantPixmap(BattleDialogModelCombatant* combatant);
+    void applyCombatantTooltip(QGraphicsItem* item, BattleDialogModelCombatant* combatant);
+    void applyCombatantVisibility(bool layerVisible, bool aliveVisible, bool deadVisible);
+    void applyEffectVisibility(bool visible);
 
     // Player Window Methods
     void cleanupPlayer();

@@ -190,6 +190,10 @@ BattleFrame::BattleFrame(QWidget *parent) :
     connect(_scene, &BattleDialogGraphicsScene::addEffectCone, this, &BattleFrame::addEffectCone);
     connect(_scene, &BattleDialogGraphicsScene::addEffectCube, this, &BattleFrame::addEffectCube);
     connect(_scene, &BattleDialogGraphicsScene::addEffectLine, this, &BattleFrame::addEffectLine);
+    connect(_scene, &BattleDialogGraphicsScene::duplicateSelection, this, &BattleFrame::duplicateSelection);
+    connect(_scene, &BattleDialogGraphicsScene::addPC, this, &BattleFrame::addCharacter);
+    connect(_scene, &BattleDialogGraphicsScene::addMonsters, this, &BattleFrame::addMonsters);
+    connect(_scene, &BattleDialogGraphicsScene::addNPC, this, &BattleFrame::addNPC);
     connect(_scene, &BattleDialogGraphicsScene::addEffectObject, this, &BattleFrame::addEffectObject);
     connect(_scene, &BattleDialogGraphicsScene::castSpell, this, &BattleFrame::castSpell);
     connect(_scene, SIGNAL(effectChanged(QGraphicsItem*)), this, SLOT(handleEffectChanged(QGraphicsItem*)));
@@ -1157,6 +1161,8 @@ void BattleFrame::addMonsters()
         if(!conversionResult)
             sizeFactor = 0.0;
 
+        qreal multipleShift = _model->getLayerScene().getScale() / 10.0;
+        QPointF multiplePos(multipleShift, multipleShift);
         qDebug() << "[Battle Dialog Manager] ... adding " << monsterCount << " monsters of name " << baseName;
 
         for(int i = 0; i < monsterCount; ++i)
@@ -1168,7 +1174,7 @@ void BattleFrame::addMonsters()
             monster->setKnown(combatantDlg.isKnown());
             monster->setShown(combatantDlg.isShown());
             monster->setSizeFactor(sizeFactor);
-            monster->setPosition(combatantPos);
+            monster->setPosition(combatantPos + (multiplePos * i));
             monster->setIconIndex(combatantDlg.getIconIndex());
             addCombatant(monster);
         }
@@ -1290,13 +1296,17 @@ void BattleFrame::castSpell()
         return;
     }
 
+    QString tipText = spell->getName();
+    Layer* targetLayer = _model->getLayerScene().getPriority(DMHelper::LayerType_Tokens);
+    if(targetLayer)
+        tipText.append(QString(" (") + targetLayer->getName() + QString(")"));
+
     if((spell->getEffectType() == BattleDialogModelEffect::BattleDialogModelEffect_Object) || (spell->getEffectToken().isEmpty()))
     {
         // Either an Object or a basic shape without a token
         effect->setName(spell->getName());
-        effect->setTip(spell->getName());
-        // TODO: Layers - move to Frame
-        //addEffect(effect);
+        effect->setTip(tipText);
+        _model->appendEffect(effect);
     }
     else
     {
@@ -1327,14 +1337,12 @@ void BattleFrame::castSpell()
         }
 
         tokenEffect->setName(spell->getName());
-        tokenEffect->setTip(spell->getName());
+        tokenEffect->setTip(tipText);
         tokenEffect->setEffectActive(true);
         tokenEffect->setImageRotation(spell->getEffectTokenRotation());
 
         effect->addObject(tokenEffect);
         _model->appendEffect(effect);
-        // TODO: Layers - move to Frame
-        //addSpellEffect(*effect);
     }
 }
 
@@ -1380,9 +1388,102 @@ void BattleFrame::registerEffect(BattleDialogModelEffect* effect)
 
     settings->exec();
     if(settings->result() == QDialog::Accepted)
-        settings->copyValues(*effect);
+        settings->copyValuesFromSettings(*effect);
 
     settings->deleteLater();
+}
+
+void BattleFrame::duplicateSelection()
+{
+    QList<QGraphicsItem*> selected = _scene->selectedItems();
+    bool combatantDuplicated = false;
+
+    foreach(QGraphicsItem* item, selected)
+        combatantDuplicated = duplicateItem(item) || combatantDuplicated;
+
+    if(combatantDuplicated)
+        recreateCombatantWidgets();
+}
+
+bool BattleFrame::duplicateItem(QGraphicsItem* item)
+{
+    if(!item)
+        return false;
+
+    QList<Layer*> tokenLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Tokens);
+    /*
+    for(int i = 0; i < tokenLayers.count(); ++i)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(tokenLayers.at(i));
+        if(tokenLayer)
+            tokenLayer->refreshEffects();
+    }
+    */
+
+    QGraphicsPixmapItem* pixmapItem = dynamic_cast<QGraphicsPixmapItem*>(item);
+    foreach(Layer* layer, tokenLayers)
+    {
+        LayerTokens* tokenLayer = dynamic_cast<LayerTokens*>(layer);
+        if(tokenLayer)
+        {
+            if(pixmapItem)
+            {
+                BattleDialogModelCombatant* combatant = tokenLayer->getCombatantFromItem(pixmapItem);
+                if(combatant)
+                    return duplicateCombatant(tokenLayer, combatant);
+            }
+
+            BattleDialogModelEffect* effect = tokenLayer->getEffectFromItem(item);
+            if(effect)
+            {
+                duplicateEffect(tokenLayer, effect);
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool BattleFrame::duplicateCombatant(LayerTokens* tokenLayer, BattleDialogModelCombatant* combatant)
+{
+    if((!tokenLayer) || (!combatant) || (combatant->getCombatantType() != DMHelper::CombatantType_Monster))
+        return false;
+
+    BattleDialogModelCombatant* newCombatant = combatant->clone();
+    newCombatant->setPosition(combatant->getPosition());
+    tokenLayer->addCombatant(newCombatant);
+
+    return true;
+}
+
+bool BattleFrame::duplicateEffect(LayerTokens* tokenLayer, BattleDialogModelEffect* effect)
+{
+    if((!tokenLayer) || (!effect))
+        return false;
+
+    BattleDialogModelEffect* newEffect = effect->clone();
+    if(!newEffect)
+        return false;
+
+    BattleDialogModelEffect* parentEffect = qobject_cast<BattleDialogModelEffect*>(effect->parent());
+    if(parentEffect)
+    {
+        BattleDialogModelEffect* newParentEffect = parentEffect->clone();
+        if(!newParentEffect)
+            return false;
+
+        newParentEffect->setPosition(parentEffect->getPosition());
+        newParentEffect->addObject(newEffect);
+        tokenLayer->addEffect(newParentEffect);
+    }
+    else
+    {
+        newEffect->setPosition(effect->getPosition());
+        tokenLayer->addEffect(newEffect);
+    }
+
+    return true;
 }
 
 void BattleFrame::setCameraCouple()
@@ -1843,7 +1944,7 @@ void BattleFrame::updateCombatantVisibility()
     }
 
     qDebug() << "[Battle Frame] show alive/dead checked updated: Alive=" << _model->getShowAlive() << ", Dead=" << _model->getShowDead();
-    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead(), true);
+    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead());
 }
 
 /*
@@ -2703,6 +2804,7 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
     if(!combatant)
         return;
 
+    /*
     QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
     if(!item)
         return;
@@ -2724,6 +2826,7 @@ void BattleFrame::updateCombatantIcon(BattleDialogModelCombatant* combatant)
     if(conditionString.count() > 0)
         itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
     item->setToolTip(itemTooltip);
+    */
 }
 
 void BattleFrame::registerCombatantDamage(BattleDialogModelCombatant* combatant, int damage)
@@ -2923,7 +3026,7 @@ void BattleFrame::handleRubberBandChanged(QRect rubberBandRect, QPointF fromScen
     }
 }
 
-void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded)
+void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible)
 {
     if(!_model)
     {
@@ -2938,18 +3041,9 @@ void BattleFrame::setCombatantVisibility(bool aliveVisible, bool deadVisible, bo
         {
             bool vis = ((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible;
 
-            if(widgetsIncluded)
-            {
-                QWidget* widget = _combatantLayout->itemAt(i)->widget();
-                if(widget)
-                {
-                    widget->setVisible(vis);
-                }
-            }
-
-            QGraphicsPixmapItem* item = getItemFromCombatant(combatant);
-            if(item)
-                item->setVisible(vis);
+            QWidget* widget = _combatantLayout->itemAt(i)->widget();
+            if(widget)
+                widget->setVisible(vis);
 
             // Set the visibility of the active rect
             if((_activePixmap) && (combatant == _model->getActiveCombatant()))
@@ -3006,8 +3100,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
     {
         // TODO: Layers
         //disconnect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
-//        disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
-//        disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
 //        disconnect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
@@ -3038,8 +3132,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
         // TODO: Layers
         //connect(_model, &BattleDialogModel::gridScaleChanged, this, &BattleFrame::gridScaleChanged);
-//        connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
-//        connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
+        connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
 //        connect(_model, SIGNAL(showEffectsChanged(bool)), this, SLOT(updateEffectLayerVisibility()));
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
@@ -3247,7 +3341,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 
     // TODO: Layers
 //    connect(_mapDrawer, &BattleFrameMapDrawer::fowChanged, renderer, &PublishGLBattleRenderer::fowChanged);
-//    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
+    connect(_scene, &BattleDialogGraphicsScene::pointerMove, renderer, &PublishGLRenderer::setPointerPosition);
     connect(_scene, &BattleDialogGraphicsScene::distanceChanged, renderer, &PublishGLBattleRenderer::distanceChanged);
     connect(_scene, &BattleDialogGraphicsScene::distanceItemChanged, renderer, &PublishGLBattleRenderer::distanceItemChanged);
     connect(this, &BattleFrame::cameraRectChanged, renderer, &PublishGLBattleRenderer::setCameraRect);
@@ -3439,7 +3533,7 @@ void BattleFrame::buildCombatantWidgets()
         }
     }
 
-    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead(), true);
+    setCombatantVisibility(_model->getShowAlive(), _model->getShowDead());
     if(_model->getActiveCombatant())
         setActiveCombatant(_model->getActiveCombatant());
     else

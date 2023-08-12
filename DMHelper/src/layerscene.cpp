@@ -135,7 +135,7 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
     {
         Layer* newLayer = otherScene->_layers[i]->clone();
         connectLayer(newLayer);
-        //connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
+        //connect(newLayer, &Layer::dirty, this, &LayerScene::handleLayerDirty);
         _layers.append(newLayer);
     }
 
@@ -192,7 +192,7 @@ void LayerScene::setScale(int scale)
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->setScale(scale);
 
-    emit dirty();
+    handleLayerDirty();
 }
 
 int LayerScene::layerCount() const
@@ -237,7 +237,7 @@ void LayerScene::insertLayer(int position, Layer* layer)
     resetLayerOrders();
     _selected = position;
     emit layerAdded(layer);
-    emit dirty();
+    handleLayerDirty();
 }
 
 void LayerScene::prependLayer(Layer* layer)
@@ -259,7 +259,7 @@ void LayerScene::prependLayer(Layer* layer)
     resetLayerOrders();
     _selected = 0;
     emit layerAdded(layer);
-    emit dirty();
+    handleLayerDirty();
 }
 
 void LayerScene::appendLayer(Layer* layer)
@@ -281,7 +281,7 @@ void LayerScene::appendLayer(Layer* layer)
     resetLayerOrders();
     _selected = _layers.count() - 1;
     emit layerAdded(layer);
-    emit dirty();
+    handleLayerDirty();
 }
 
 void LayerScene::removeLayer(int position)
@@ -301,7 +301,7 @@ void LayerScene::removeLayer(int position)
     if(_selected >= position)
         --_selected;
 
-    emit dirty();
+    handleLayerDirty();
 }
 
 void LayerScene::clearLayers()
@@ -325,7 +325,7 @@ void LayerScene::moveLayer(int from, int to)
     _layers.move(from, to);
     resetLayerOrders();
     _selected = to;
-    emit dirty();
+    handleLayerDirty();
 }
 
 Layer* LayerScene::findLayer(QUuid id)
@@ -350,7 +350,7 @@ void LayerScene::setSelectedLayerIndex(int selected)
         return;
 
     _selected = selected;
-    emit dirty();
+    handleLayerDirty();
 }
 
 Layer* LayerScene::getSelectedLayer() const
@@ -371,7 +371,7 @@ void LayerScene::setSelectedLayer(Layer* layer)
         if((_layers.at(i)) && (_layers.at(i) == layer))
         {
             _selected = i;
-            emit dirty();
+            handleLayerDirty();
             return;
         }
     }
@@ -623,6 +623,12 @@ void LayerScene::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, i
         _layers[i]->playerSetShaders(programRGB, modelMatrixRGB, projectionMatrixRGB, programRGBA, modelMatrixRGBA, projectionMatrixRGBA, alphaRGBA);
 }
 
+void LayerScene::handleLayerDirty()
+{
+    if(_initialized)
+        emit dirty();
+}
+
 void LayerScene::removeLayer(Layer* reference)
 {
     if(!reference)
@@ -677,7 +683,7 @@ void LayerScene::connectLayer(Layer* layer)
     if(!layer)
         return;
 
-    connect(layer, &Layer::dirty, this, &LayerScene::dirty);
+    connect(layer, &Layer::dirty, this, &LayerScene::handleLayerDirty);
     connect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
     connect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     connect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
@@ -688,7 +694,7 @@ void LayerScene::disconnectLayer(Layer* layer)
     if(!layer)
         return;
 
-    disconnect(layer, &Layer::dirty, this, &LayerScene::dirty);
+    disconnect(layer, &Layer::dirty, this, &LayerScene::handleLayerDirty);
     disconnect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
     disconnect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     disconnect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);

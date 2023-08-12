@@ -26,7 +26,7 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     Layer{name, order, parent},
     _glScene(nullptr),
     _playerInitialized(false),
-    _model(model),
+    _model(),
     _combatants(),
     _combatantTokens(),
     _combatantIconHash(),
@@ -37,6 +37,7 @@ LayerTokens::LayerTokens(BattleDialogModel* model, const QString& name, int orde
     _effectTokenHash(),
     _scale(DMHelper::STARTING_GRID_SCALE)
 {
+    setModel(model);
 }
 
 LayerTokens::~LayerTokens()
@@ -198,17 +199,11 @@ void LayerTokens::applyOrder(int order)
 
 void LayerTokens::applyLayerVisibleDM(bool layerVisible)
 {
-    foreach(QGraphicsPixmapItem* pixmapItem, _combatantIconHash)
-    {
-        if(pixmapItem)
-            pixmapItem->setVisible(layerVisible);
-    }
+    if(!_model)
+        return;
 
-    foreach(QGraphicsItem* graphicsItem, _effectIconHash)
-    {
-        if(graphicsItem)
-            graphicsItem->setVisible(layerVisible);
-    }
+    applyCombatantVisibility(layerVisible, _model->getShowAlive(), _model->getShowDead());
+    applyEffectVisibility(layerVisible && _model->getShowEffects());
 }
 
 void LayerTokens::applyLayerVisiblePlayer(bool layerVisible)
@@ -516,8 +511,13 @@ void LayerTokens::setScale(int scale)
 
 void LayerTokens::setModel(BattleDialogModel* model)
 {
-    if(!_model)
-        _model = model;
+    if((_model) || (!model))
+        return;
+
+    _model = model;
+    connect(_model, &BattleDialogModel::showEffectsChanged, this, &LayerTokens::effectVisibilityChanged);
+    connect(_model, &BattleDialogModel::showAliveChanged, this, &LayerTokens::aliveVisibilityChanged);
+    connect(_model, &BattleDialogModel::showDeadChanged, this, &LayerTokens::deadVisibilityChanged);
 }
 
 void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
@@ -533,10 +533,16 @@ void LayerTokens::addCombatant(BattleDialogModelCombatant* combatant)
     connect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
     connect(combatant, &BattleDialogModelCombatant::dirty, this, &LayerTokens::dirty);
     connect(combatant, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::combatantMoved);
+    connect(combatant, &BattleDialogModelCombatant::conditionsChanged, this, &LayerTokens::combatantConditionChanged);
     connect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
 
     if((getLayerScene()) && (getLayerScene()->getDMScene()))
-        createCombatantIcon(getLayerScene()->getDMScene(), combatant);
+    {
+        QGraphicsPixmapItem* combatantItem = createCombatantIcon(getLayerScene()->getDMScene(), combatant);
+        combatantItem->setZValue(getIconOrder(DMHelper::CampaignType_BattleContentCombatant, getOrder()));
+        combatantItem->setVisible(getLayerVisibleDM());
+        combatantItem->setOpacity(_opacityReference);
+    }
 }
 
 void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
@@ -544,10 +550,12 @@ void LayerTokens::removeCombatant(BattleDialogModelCombatant* combatant)
     if((!combatant) || (!_model))
         return;
 
-    disconnect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
+    disconnect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
     disconnect(combatant, &BattleDialogModelCombatant::dirty, this, &LayerTokens::dirty);
     disconnect(combatant, &BattleDialogModelEffect::objectMoved, this, &LayerTokens::combatantMoved);
-    disconnect(combatant, &BattleDialogModelObject::linkChanged, this, &LayerTokens::linkedObjectChanged);
+    disconnect(combatant, &BattleDialogModelCombatant::conditionsChanged, this, &LayerTokens::combatantConditionChanged);
+    disconnect(this, &LayerTokens::objectRemoved, combatant, &BattleDialogModelObject::objectRemoved);
+
     if(!_combatants.removeOne(combatant))
         return;
 
@@ -682,6 +690,11 @@ QGraphicsItem* LayerTokens::getEffectItem(BattleDialogModelEffect* effect)
     return findEffectItem(effect);
 }
 
+BattleDialogModelEffect* LayerTokens::getEffectFromItem(QGraphicsItem* item)
+{
+    return _effectIconHash.key(item, nullptr);
+}
+
 void LayerTokens::refreshEffects()
 {
     foreach(BattleDialogModelEffect* effect, _effects)
@@ -749,7 +762,40 @@ void LayerTokens::combatantMoved(BattleDialogModelObject* object)
             }
         }
     }
+}
 
+void LayerTokens::combatantConditionChanged(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    QGraphicsPixmapItem* item = _combatantIconHash.value(combatant);
+    if(!item)
+        return;
+
+    QPixmap pix = generateCombatantPixmap(combatant);
+    if(pix.isNull())
+        return;
+
+    item->setPixmap(pix);
+    item->setOffset(-static_cast<qreal>(pix.width())/2.0, -static_cast<qreal>(pix.height())/2.0);
+    applyCombatantTooltip(item, combatant);
+}
+
+void LayerTokens::aliveVisibilityChanged(bool showAlive)
+{
+    if(!_model)
+        return;
+
+    applyCombatantVisibility(getLayerVisibleDM(), showAlive, _model->getShowDead());
+}
+
+void LayerTokens::deadVisibilityChanged(bool showDead)
+{
+    if(!_model)
+        return;
+
+    applyCombatantVisibility(getLayerVisibleDM(), _model->getShowAlive(), showDead);
 }
 
 void LayerTokens::effectChanged(BattleDialogModelEffect* effect)
@@ -812,6 +858,14 @@ void LayerTokens::effectMoved(BattleDialogModelObject* object)
             }
         }
     }
+}
+
+void LayerTokens::effectVisibilityChanged(bool showEffects)
+{
+    if(!_model)
+        return;
+
+    applyEffectVisibility(getLayerVisibleDM() && showEffects);
 }
 
 void LayerTokens::linkedObjectChanged(BattleDialogModelObject* object, BattleDialogModelObject* previousLink)
@@ -956,19 +1010,14 @@ void LayerTokens::cleanupDM()
     }
 }
 
-void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant)
+QGraphicsPixmapItem* LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCombatant* combatant)
 {
     if((!combatant) || (_combatantIconHash.contains(combatant)))
-        return;
+        return nullptr;
 
-    QPixmap pix = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
-    if(combatant->hasCondition(Combatant::Condition_Unconscious))
-    {
-        QImage originalImage = pix.toImage();
-        QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
-        pix = QPixmap::fromImage(grayscaleImage);
-    }
-    Combatant::drawConditions(&pix, combatant->getConditions());
+    QPixmap pix = generateCombatantPixmap(combatant);
+    if(pix.isNull())
+        return nullptr;
 
     QGraphicsPixmapItem* pixmapItem = new UnselectedPixmap(pix, combatant);
     scene->addItem(pixmapItem);
@@ -979,12 +1028,7 @@ void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCo
     qreal sizeFactor = combatant->getSizeFactor();
     qreal scaleFactor = (static_cast<qreal>(_scale-2)) * sizeFactor / static_cast<qreal>(qMax(pix.width(), pix.height()));
     pixmapItem->setScale(scaleFactor);
-
-    QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b>");
-    QStringList conditionString = Combatant::getConditionString(combatant->getConditions());
-    if(conditionString.count() > 0)
-        itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
-    pixmapItem->setToolTip(itemTooltip);
+    applyCombatantTooltip(pixmapItem, combatant);
 
     qDebug() << "[LayerTokens] combatant icon added " << combatant->getName() << ", scale " << scaleFactor;
 
@@ -1009,6 +1053,8 @@ void LayerTokens::createCombatantIcon(QGraphicsScene* scene, BattleDialogModelCo
     //connect(combatant, SIGNAL(combatantMoved(BattleDialogModelCombatant*)), this, SLOT(updateHighlights()), static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
     //connect(combatant, SIGNAL(combatantSelected(BattleDialogModelCombatant*)), this, SLOT(handleCombatantSelected(BattleDialogModelCombatant*)));
     connect(combatant, &BattleDialogModelCombatant::combatantSelected, this, &LayerTokens::handleCombatantSelected);
+
+    return pixmapItem;
 }
 
 QGraphicsItem* LayerTokens::createEffectIcon(QGraphicsScene* scene, BattleDialogModelEffect* effect)
@@ -1042,6 +1088,7 @@ QGraphicsItem* LayerTokens::addEffectShape(QGraphicsScene* scene, BattleDialogMo
     if(shape)
     {
         shape->setPos(effect->getPosition() + _position);
+        shape->setToolTip(QString("<b>") + effect->getName() + QString("</b> (") + getName() + QString(")"));
         scene->addItem(shape);
         _effectIconHash.insert(effect, shape);
     }
@@ -1306,6 +1353,63 @@ void LayerTokens::removeEffectFromToken(PublishGLBattleToken* token, BattleDialo
         return;
 
     token->removeEffectHighlight(effect);
+}
+
+QPixmap LayerTokens::generateCombatantPixmap(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return QPixmap();
+
+    QPixmap result = combatant->getIconPixmap(DMHelper::PixmapSize_Battle);
+    if(combatant->hasCondition(Combatant::Condition_Unconscious))
+    {
+        QImage originalImage = result.toImage();
+        QImage grayscaleImage = originalImage.convertToFormat(QImage::Format_Grayscale8);
+        result = QPixmap::fromImage(grayscaleImage);
+    }
+
+    Combatant::drawConditions(&result, combatant->getConditions());
+
+    return result;
+}
+
+void LayerTokens::applyCombatantTooltip(QGraphicsItem* item, BattleDialogModelCombatant* combatant)
+{
+    if((!item) || (!combatant))
+        return;
+
+    QString itemTooltip = QString("<b>") + combatant->getName() + QString("</b> (") + getName() + QString(")");
+    QStringList conditionString = Combatant::getConditionString(combatant->getConditions());
+    if(conditionString.count() > 0)
+        itemTooltip += QString("<p>") + conditionString.join(QString("<br/>"));
+
+    item->setToolTip(itemTooltip);
+}
+
+void LayerTokens::applyCombatantVisibility(bool layerVisible, bool aliveVisible, bool deadVisible)
+{
+
+    foreach(BattleDialogModelCombatant* combatant, _combatants)
+    {
+        if(combatant)
+        {
+            QGraphicsPixmapItem* pixmapItem = _combatantIconHash.value(combatant);
+            if(pixmapItem)
+            {
+                bool combatantVisible = layerVisible && (((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible);
+                pixmapItem->setVisible(combatantVisible);
+            }
+        }
+    }
+}
+
+void LayerTokens::applyEffectVisibility(bool visible)
+{
+    foreach(QGraphicsItem* graphicsItem, _effectIconHash)
+    {
+        if(graphicsItem)
+            graphicsItem->setVisible(visible);
+    }
 }
 
 void LayerTokens::cleanupPlayer()

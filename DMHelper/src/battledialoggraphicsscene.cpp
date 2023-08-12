@@ -636,6 +636,10 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 connect(deleteItem, SIGNAL(triggered()), this, SLOT(deleteItem()));
                 menu.addAction(deleteItem);
 
+                QAction* duplicateItem = new QAction(QString("Duplicate..."), &menu);
+                connect(duplicateItem, SIGNAL(triggered()), this, SIGNAL(duplicateSelection()));
+                menu.addAction(duplicateItem);
+
                 menu.addSeparator();
             }
         }
@@ -678,6 +682,10 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
                 connect(shiftItem, SIGNAL(triggered()), this, SLOT(changeCombatantLayer()));
                 menu.addAction(shiftItem);
             }
+
+            QAction* duplicateItem = new QAction(QString("Duplicate..."), &menu);
+            connect(duplicateItem, SIGNAL(triggered()), this, SIGNAL(duplicateSelection()));
+            menu.addAction(duplicateItem);
 
             menu.addSeparator();
 
@@ -741,6 +749,18 @@ bool BattleDialogGraphicsScene::handleMouseReleaseEvent(QGraphicsSceneMouseEvent
         menu.addAction(addLineItem);
 
         menu.addSeparator();
+
+        QAction* addPCItem = new QAction(QString("Add PC..."), &menu);
+        connect(addPCItem, SIGNAL(triggered()), this, SIGNAL(addPC()));
+        menu.addAction(addPCItem);
+
+        QAction* addMonsterItem = new QAction(QString("Add Monsters..."), &menu);
+        connect(addMonsterItem, SIGNAL(triggered()), this, SIGNAL(addMonsters()));
+        menu.addAction(addMonsterItem);
+
+        QAction* addNPCItem = new QAction(QString("Add NPC..."), &menu);
+        connect(addNPCItem, SIGNAL(triggered()), this, SIGNAL(addNPC()));
+        menu.addAction(addNPCItem);
 
         QAction* addObjectItem = new QAction(QString("Add Object..."), &menu);
         connect(addObjectItem, SIGNAL(triggered()), this, SIGNAL(addEffectObject()));
@@ -980,35 +1000,42 @@ void BattleDialogGraphicsScene::editItem()
         return;
     }
 
-    QGraphicsItem* abstractShape = _contextMenuItem;
-    if(!abstractShape)
-    {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit an item that is not an effect! ";
-        return;
-    }
-
-    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(abstractShape);
+    BattleDialogModelEffect* effect = BattleDialogModelEffect::getEffectFromItem(_contextMenuItem);
     if(!effect)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << abstractShape;
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, no model data available! " << _contextMenuItem;
         return;
     }
 
     BattleDialogEffectSettings* settings = effect->getEffectEditor();
     if(!settings)
     {
-        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << abstractShape;
+        qDebug() << "[Battle Dialog Scene] ERROR: attempted to edit item, not effect editor available for this effect: " << _contextMenuItem;
         return;
+    }
+
+    // Merge in any other selected effects of the same type
+    QList<QGraphicsItem*> selected = selectedItems();
+    foreach(QGraphicsItem* effectItem, selected)
+    {
+        BattleDialogModelEffect* selectedEffect = BattleDialogModelEffect::getEffectFromItem(effectItem);
+        if((selectedEffect) && (selectedEffect != effect) && (selectedEffect->getEffectType() == effect->getEffectType()))
+            settings->mergeValuesToSettings(*selectedEffect);
     }
 
     settings->exec();
     if(settings->result() == QDialog::Accepted)
     {
-        qDebug() << "[Battle Dialog Scene] Applying effect settings for effect " << abstractShape;
-
-        settings->copyValues(*effect);
-        effect->applyEffectValues(*abstractShape, _model->getGridScale());
-        emit effectChanged(abstractShape);
+        foreach(QGraphicsItem* effectItem, selected)
+        {
+            BattleDialogModelEffect* selectedEffect = BattleDialogModelEffect::getEffectFromItem(effectItem);
+            if((selectedEffect) && (selectedEffect->getEffectType() == effect->getEffectType()))
+            {
+                settings->copyValuesFromSettings(*selectedEffect);
+                selectedEffect->applyEffectValues(*effectItem, _model->getGridScale());
+                emit effectChanged(effectItem);
+            }
+        }
     }
     settings->deleteLater();
 }

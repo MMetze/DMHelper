@@ -374,7 +374,8 @@ void PublishGLBattleRenderer::paintGL()
 
     paintInitiative(f);
 
-    paintPointer(f, getBackgroundSize().toSize(), _shaderModelMatrixRGB);
+    if(_pointerImage)
+        paintPointer(f, _model->getLayerScene().sceneSize().toSize(), _shaderModelMatrixRGB);
 }
 
 void PublishGLBattleRenderer::updateProjectionMatrix()

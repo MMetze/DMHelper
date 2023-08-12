@@ -1,5 +1,6 @@
 #include "unselectedellipse.h"
 #include "battledialogmodelobject.h"
+#include "dmconstants.h"
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QPen>
@@ -17,9 +18,13 @@ UnselectedEllipse::UnselectedEllipse(BattleDialogModelObject* object, qreal x, q
 
 void UnselectedEllipse::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+#ifdef SHOW_UNSELECTED_SHAPE_SELECTION
+    QGraphicsEllipseItem::paint(painter, option, widget);
+#else
     QStyleOptionGraphicsItem myoption = (*option);
     myoption.state &= ~QStyle::State_Selected;
     QGraphicsEllipseItem::paint(painter, &myoption, widget);
+#endif
 
 #ifdef DEBUG_FILL_BOUNDING_RECTS
         if(painter)

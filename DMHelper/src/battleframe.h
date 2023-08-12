@@ -25,6 +25,7 @@ class CombatantRolloverFrame;
 class PublishGLRenderer;
 class PublishGLBattleRenderer;
 class Layer;
+class LayerTokens;
 
 namespace Ui {
 class BattleFrame;
@@ -132,6 +133,11 @@ public slots:
     void addEffectCube();
     void addEffectLine();
     void registerEffect(BattleDialogModelEffect* effect);
+
+    void duplicateSelection();
+    bool duplicateItem(QGraphicsItem* item);
+    bool duplicateCombatant(LayerTokens* tokenLayer, BattleDialogModelCombatant* combatant);
+    bool duplicateEffect(LayerTokens* tokenLayer, BattleDialogModelEffect* effect);
 
     // Public for connection to map ribbon
     void setCameraCouple();
@@ -265,7 +271,7 @@ private slots:
     void updateCountdownText();
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
-    void setCombatantVisibility(bool aliveVisible, bool deadVisible, bool widgetsIncluded);
+    void setCombatantVisibility(bool aliveVisible, bool deadVisible);
     //void setEffectLayerVisibility(bool visibility);
 
     void setMapCursor();

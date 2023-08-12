@@ -13,22 +13,26 @@
 
 <h3>New Features:</h3>
 <ul>
-<li>Layers
+<li><b>Layers:</b> this is so big that it's hard to even fathom, let alone summarize. Just as a few examples, you can:
+    <ul>
+    <li> have multiple map levels, with their own fog of war
+    <li> put monsters in groups on different layers, and hide or reveal them all at once
+    <li> make individual layers partially transparent, hide them for the player or the DM (imagine a player version and DM version of a map!)
+    <li> scale and shift layers relative to one another
+    <li> ...and so much more...
+    </ul>
 <li>Monsters can have multiple tokens
-<li>Copy & Paste of monsters in a battle
-<li>
+<li>Duplication of monsters or effects in a battle
 </ul>
 
 <p>
 
 <h3>Fixes:</h3>
 <ul>
-<li>
-<li>
-<li>
-<li>
+<li>Video playback is back! Just add a video layer to your entry/map/battle! DMH now also caches a screenshot of each video, so loading videos should go quite a bit quicker
 </ul>
 
+<!--
 <p>
 
 <h3>Other Improvements:</h3>
@@ -36,6 +40,7 @@
 <li>
 <li>
 </ul>
+//-->
 
 <p>
 <h3>And don't forget</h3>

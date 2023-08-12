@@ -5,7 +5,11 @@
 #include <QPoint>
 #include <QPointF>
 
+// Uncomment this to include network (client/server) support
 //#define INCLUDE_NETWORK_SUPPORT
+
+// Uncomment this to make sure shapes (for effects) do indeed show their selection boxes. Does not include pixmaps
+#define SHOW_UNSELECTED_SHAPE_SELECTION
 
 namespace DMHelper
 {
