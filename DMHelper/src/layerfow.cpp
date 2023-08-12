@@ -25,9 +25,8 @@ LayerFow::LayerFow(const QString& name, const QSize& imageSize, int order, QObje
     _undoStack(nullptr),
     _undoItems()
 {
-    setSize(imageSize);
-
     _undoStack = new QUndoStack(); // TODO: why does not leaking this avoid a crash at shutdown?
+    setSize(imageSize);
 
     //connect(this, &LayerFow::dirty, this, &LayerFow::updateFowInternal);
 }

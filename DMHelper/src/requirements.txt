@@ -1,3 +1,12 @@
+Video Playback not working?
+
+Next version
+* upgrade to latest Qt
+* Undo-redo on drawing fow
+* Make grid button a flat pushbutton that opens its own popup menu
+* Asset library
+* Save new campaign --> default file name is campaign name
+
 v2.5.6
 2) As far as layer functions are concerned, the grid is not visible in any way.
 Also, sometimes adding elements (text, video, images) via the layer edit window crashes the program.
@@ -15,11 +24,6 @@ fixed * dirty on load of campaign
 fixed * Changes to effects or combatants only affects one, not all
 done * Duplicate effects or non-PC combatants
 fixed * Pointer position doesn't work
-
-Next version
-* upgrade to latest Qt
-* Undo-redo on drawing fow
-* Make grid button a flat pushbutton that opens its own popup menu
 
 v2.5.5
 fixed * Create spell gives object transparency from base shape
