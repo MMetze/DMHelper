@@ -844,7 +844,8 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
     do
     {
         BattleDialogModelCombatant* combatant = _model->getCombatant(currentCombatant);
-        if((combatant) && (combatant->getHitPoints() > 0) && (combatant->getKnown()))
+        bool layerVisible = ((combatant) && ((!combatant->getLayer()) || (combatant->getLayer()->getLayerVisiblePlayer())));
+        if((combatant) && (layerVisible) && (combatant->getHitPoints() > 0) && (combatant->getKnown()))
         {
             PublishGLObject* tokenObject = nullptr;
             QSizeF textureSize;

@@ -83,6 +83,7 @@ signals:
     void layerRemoved(Layer* layer);
     void sceneChanged();
     void sceneSizeChanged();
+    void layerVisibilityChanged(Layer* layer);
 
 protected slots:
     void handleLayerDirty();

@@ -90,6 +90,7 @@ signals:
     void layerDestroyed(Layer* layer);
     void layerMoved(const QPoint& position);
     void layerResized(const QSize& size);
+    void layerVisibilityChanged(Layer* layer);
 
 protected:
     // Layer Specific Interface

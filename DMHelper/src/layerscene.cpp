@@ -687,6 +687,7 @@ void LayerScene::connectLayer(Layer* layer)
     connect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
     connect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     connect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
+    connect(layer, &Layer::layerVisibilityChanged, this, &LayerScene::layerVisibilityChanged);
 }
 
 void LayerScene::disconnectLayer(Layer* layer)
@@ -698,6 +699,7 @@ void LayerScene::disconnectLayer(Layer* layer)
     disconnect(layer, &Layer::layerMoved, this, &LayerScene::sceneChanged);
     disconnect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     disconnect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
+    disconnect(layer, &Layer::layerVisibilityChanged, this, &LayerScene::layerVisibilityChanged);
 }
 
 void LayerScene::resetLayerOrders()

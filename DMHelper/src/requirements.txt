@@ -1,11 +1,16 @@
-Video Playback not working?
-
 Next version
 * upgrade to latest Qt
 * Undo-redo on drawing fow
 * Make grid button a flat pushbutton that opens its own popup menu
 * Asset library
 * Save new campaign --> default file name is campaign name
+
+v2.5.7
+fixed * Crashes when adding an FOW layer
+fixed * Resizing video not always working
+fixed * Resized video unsized when restarted
+fixed * Invisible token layer should be skipped in player initiative, not in initiative order DM Side when invisible on both
+fixed * DM View token layer of selection not visible, active token hidden
 
 v2.5.6
 2) As far as layer functions are concerned, the grid is not visible in any way.

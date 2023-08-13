@@ -121,6 +121,13 @@ void LayerVideo::applySize(const QSize& size)
         qreal yScale = static_cast<qreal>(size.height()) / _layerScreenshot.height();
         _graphicsItem->setScale(qMin(xScale, yScale));
     }
+
+#ifdef LAYERVIDEO_USE_OPENGL
+    TODO, how should this work with: VideoPlayerGLPlayer* _videoGLPlayer;
+#else
+    if(_videoObject)
+        _videoObject->setTargetSize(size);
+#endif
 }
 
 QString LayerVideo::getVideoFile() const
@@ -250,6 +257,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         _videoObject = new PublishGLBattleBackground(nullptr, *(_videoPlayer->getImage()), GL_NEAREST);
         QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
         _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
+        _videoObject->setTargetSize(_size);
     }
     else if(_videoPlayer->isNewImage())
     {
@@ -294,9 +302,8 @@ bool LayerVideo::playerIsInitialized()
 void LayerVideo::initialize(const QSize& sceneSize)
 {
     if(!_size.isEmpty())
-        return;
+        setSize(sceneSize);
 
-    _size = sceneSize;
     requestScreenshot();
 }
 

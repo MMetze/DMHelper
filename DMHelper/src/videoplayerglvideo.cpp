@@ -5,7 +5,7 @@
 #include <QOffscreenSurface>
 #include <QDebug>
 
-#define VIDEO_DEBUG_MESSAGES
+//#define VIDEO_DEBUG_MESSAGES
 
 VideoPlayerGLVideo::VideoPlayerGLVideo(VideoPlayerGL* player) :
     _player(player),

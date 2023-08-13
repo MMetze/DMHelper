@@ -292,7 +292,8 @@ void LayerImage::initialize(const QSize& sceneSize)
     }
 
     //_size = _layerImage.size();
-    setSize(_layerImage.size());
+    if(_size.isEmpty())
+        setSize(_layerImage.size());
 }
 
 void LayerImage::uninitialize()
