@@ -257,6 +257,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         _videoObject = new PublishGLBattleBackground(nullptr, *(_videoPlayer->getImage()), GL_NEAREST);
         QPoint pointTopLeft = _scene ? _scene->getSceneRect().toRect().topLeft() : QPoint();
         _videoObject->setPosition(QPoint(pointTopLeft.x() + _position.x(), -pointTopLeft.y() - _position.y()));
+        _videoObject->setTargetSize(_size);
     }
     else if(_videoPlayer->isNewImage())
     {
@@ -301,9 +302,8 @@ bool LayerVideo::playerIsInitialized()
 void LayerVideo::initialize(const QSize& sceneSize)
 {
     if(!_size.isEmpty())
-        return;
+        setSize(sceneSize);
 
-    _size = sceneSize;
     requestScreenshot();
 }
 
