@@ -238,7 +238,7 @@ void LayerImage::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     if(!functions)
         return;
 
-    if((_shaderProgramRGBA == 0) || (_shaderModelMatrixRGBA == 0) || (_shaderAlphaRGBA == 0))
+    if((_shaderProgramRGBA == 0) || (_shaderModelMatrixRGBA == -1) || (_shaderAlphaRGBA == -1))
     {
         qDebug() << "[LayerImage] ERROR: invalid shaders set! _shaderProgramRGBA: " << _shaderProgramRGBA << ", _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA << ", _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << ", _shaderAlphaRGBA: " << _shaderAlphaRGBA;
         return;

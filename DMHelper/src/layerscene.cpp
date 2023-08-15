@@ -14,6 +14,8 @@
 #include <QDomElement>
 #include <QDebug>
 
+//#define DEBUG_LAYERSCENE
+
 LayerScene::LayerScene(QObject *parent) :
     CampaignObjectBase{QString(), parent},
     _initialized(false),
@@ -578,7 +580,7 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
     if(!functions)
         return;
 
-    if((shaderProgram == 0) || (defaultModelMatrix == 0))
+    if((shaderProgram == 0) || (defaultModelMatrix == -1))
     {
         qDebug() << "[LayerScene] playerGLPaint ERROR: invalid shaders program or matrix! shaderProgram: " << shaderProgram << ", defaultModelMatrix: " << defaultModelMatrix;
         return;
@@ -595,7 +597,9 @@ void LayerScene::playerGLPaint(QOpenGLFunctions* functions, unsigned int shaderP
             {
                 if(_layers.at(i)->defaultShader())
                 {
-                    // qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
+#ifdef DEBUG_LAYERSCENE
+                    qDebug() << "[LayerScene]::playerGLPaint UseProgram: " << shaderProgram;
+#endif
                     functions->glUseProgram(shaderProgram);
                 }
 
@@ -613,6 +617,10 @@ void LayerScene::playerGLResize(int w, int h)
 
 void LayerScene::playerSetShaders(unsigned int programRGB, int modelMatrixRGB, int projectionMatrixRGB, unsigned int programRGBA, int modelMatrixRGBA, int projectionMatrixRGBA, int alphaRGBA)
 {
+#ifdef DEBUG_LAYERSCENE
+    qDebug() << "[LayerScene] playerSetShaders: programRGB: " << programRGB << ", modelMatrixRGB: " << modelMatrixRGB << ", projectionMatrixRGB: " << projectionMatrixRGB << ", programRGBA: " << programRGBA << ", modelMatrixRGBA: " << modelMatrixRGBA << ", projectionMatrixRGBA: " << projectionMatrixRGBA << ", alphaRGBA: " << alphaRGBA;
+#endif
+
     if((programRGB == 0) || (programRGBA == 0))
     {
         qDebug() << "[LayerScene] ERROR: invalid shaders set! programRGB: " << programRGB << ", modelMatrixRGB: " << modelMatrixRGB << ", projectionMatrixRGB: " << projectionMatrixRGB << ", programRGBA: " << programRGBA << ", modelMatrixRGBA: " << modelMatrixRGBA << ", projectionMatrixRGBA: " << projectionMatrixRGBA << ", alphaRGBA: " << alphaRGBA;
