@@ -45,6 +45,8 @@ public:
     QList<QGraphicsItem*> getEffectItems();
     BattleDialogModelObject* getObjectById(QUuid id);
 
+    int getScale() const;
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene* scene) override;

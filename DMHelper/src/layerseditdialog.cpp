@@ -61,14 +61,14 @@ void LayersEditDialog::selectFrame(LayerFrame* frame)
 void LayersEditDialog::moveUp()
 {
     int currentSelected = _scene.getSelectedLayerIndex();
-    _scene.moveLayer(currentSelected, currentSelected - 1);
+    _scene.moveLayer(currentSelected, currentSelected + 1);
     resetLayout();
 }
 
 void LayersEditDialog::moveDown()
 {
     int currentSelected = _scene.getSelectedLayerIndex();
-    _scene.moveLayer(currentSelected, currentSelected + 1);
+    _scene.moveLayer(currentSelected, currentSelected - 1);
     resetLayout();
 }
 
@@ -255,7 +255,7 @@ void LayersEditDialog::readScene()
             connect(newFrame, &LayerFrame::refreshPlayer, this, &LayersEditDialog::updateRenderer);
             connect(newFrame, &LayerFrame::positionChanged, this, &LayersEditDialog::updateSceneSize);
             connect(newFrame, &LayerFrame::sizeChanged, this, &LayersEditDialog::updateSceneSize);
-            _layerLayout->addWidget(newFrame);
+            _layerLayout->insertWidget(0, newFrame);
         }
     }
 

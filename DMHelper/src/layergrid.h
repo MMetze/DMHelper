@@ -30,9 +30,6 @@ public:
     virtual void applyPosition(const QPoint& position) override;
     virtual void applySize(const QSize& size) override;
 
-    //QSize getLayerSize() const;
-    //void setLayerSize(const QSize& layerSize);
-
     GridConfig& getConfig();
     const GridConfig& getConfig() const;
 
@@ -78,7 +75,6 @@ protected:
 
     // Core contents
     GridConfig _config;
-    //QSize _layerSize;
 
 };
 

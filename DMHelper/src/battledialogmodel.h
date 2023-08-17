@@ -11,9 +11,8 @@
 
 class EncounterBattle;
 class Map;
-
-// TODO: Layers - probably remove this
-class LayerTokens;
+class LayerGrid;
+class GridConfig;
 
 class BattleDialogModel : public CampaignObjectBase
 {
@@ -107,10 +106,12 @@ signals:
     void initiativeOrderChanged();
     void backgroundImageChanged(QImage backgroundImage);
     void layerVisibilityChanged(Layer* layer);
+    void gridScaleChanged(const GridConfig& config);
 
 protected slots:
     void mapDestroyed(const QUuid& id);
     void characterDestroyed(const QUuid& destroyedId);
+    void handleScaleChanged(Layer* layer);
 
 protected:
     virtual QDomElement createOutputXML(QDomDocument &doc) override;

@@ -2,6 +2,7 @@
 #include "ui_ribbontabbattlemap.h"
 #include "dmconstants.h"
 #include "grid.h"
+#include "gridconfig.h"
 #include <QMenu>
 
 const int GRID_SIZE_PAUSE_TIMER = 750;
@@ -77,6 +78,17 @@ PublishButtonRibbon* RibbonTabBattleMap::getPublishRibbon()
     return ui->framePublish;
 }
 
+void RibbonTabBattleMap::setGridConfig(const GridConfig& config)
+{
+    setGridType(config.getGridType());
+    setGridScale(config.getGridScale());
+    setGridAngle(config.getGridAngle());
+    setGridXOffset(config.getGridOffsetX());
+    setGridYOffset(config.getGridOffsetY());
+    setGridWidth(config.getGridPen().width());
+    setGridColor(config.getGridPen().color());
+}
+
 /*
 void RibbonTabBattleMap::setGridOn(bool checked)
 {
@@ -90,7 +102,7 @@ void RibbonTabBattleMap::setGridType(int gridType)
         return;
 
     QList<QAction*> actionList = _menu->actions();
-    for(QAction* action : actionList)
+    foreach(QAction* action, actionList)
     {
         RibbonTabBattleMap_GridAction* gridAction = dynamic_cast<RibbonTabBattleMap_GridAction*>(action);
         if((gridAction) && (gridAction->getGridType() == gridType))

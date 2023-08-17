@@ -305,6 +305,11 @@ BattleDialogModelObject* LayerTokens::getObjectById(QUuid id)
     return nullptr;
 }
 
+int LayerTokens::getScale() const
+{
+    return _scale;
+}
+
 void LayerTokens::dmInitialize(QGraphicsScene* scene)
 {
     if(!scene)

@@ -120,6 +120,11 @@ DMHelper::LayerType LayerReference::getFinalType() const
     return getReferencedType();
 }
 
+Layer* LayerReference::getFinalLayer()
+{
+    return getReferenceLayer();
+}
+
 Layer* LayerReference::clone() const
 {
     LayerReference* newLayer = new LayerReference(_referenceObject, _referenceLayer, _order);

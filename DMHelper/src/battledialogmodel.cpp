@@ -35,6 +35,7 @@ BattleDialogModel::BattleDialogModel(EncounterBattle* encounter, const QString& 
         connect(this, &BattleDialogModel::dirty, _encounter, &EncounterBattle::dirty);
 
     connect(&_layerScene, &LayerScene::dirty, this, &BattleDialogModel::dirty);
+    connect(&_layerScene, &LayerScene::layerScaleChanged, this, &BattleDialogModel::handleScaleChanged);
 }
 
 BattleDialogModel::~BattleDialogModel()
@@ -132,7 +133,7 @@ void BattleDialogModel::inputXML(const QDomElement &element, bool isImport)
         tokenLayer->setName(QString("tokens"));
         tokenLayer->postProcessXML(campaign, element, isImport);
 
-        int fowPosition = _layerScene.getFirstIndex(DMHelper::LayerType_Fow);
+        int fowPosition = _layerScene.getLayerIndex(_layerScene.getFirst(DMHelper::LayerType_Fow));
         if(fowPosition == -1)
         {
             if(gridLayer)
@@ -773,6 +774,24 @@ void BattleDialogModel::characterDestroyed(const QUuid& destroyedId)
             return;
         }
     }
+}
+
+void BattleDialogModel::handleScaleChanged(Layer* layer)
+{
+    if(!layer)
+        return;
+
+    Layer* selectedLayer = _layerScene.getSelectedLayer();
+    if(!selectedLayer)
+        return;
+
+    Layer* nearestLayer = _layerScene.getNearest(selectedLayer, DMHelper::LayerType_Grid);
+    if(nearestLayer != layer)
+        return;
+
+    LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(nearestLayer);
+    if(gridLayer)
+        emit gridScaleChanged(gridLayer->getConfig());
 }
 
 QDomElement BattleDialogModel::createOutputXML(QDomDocument &doc)

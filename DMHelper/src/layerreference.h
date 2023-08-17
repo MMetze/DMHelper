@@ -24,6 +24,7 @@ public:
 
     virtual DMHelper::LayerType getType() const override;
     virtual DMHelper::LayerType getFinalType() const override;
+    virtual Layer* getFinalLayer() override;
     virtual Layer* clone() const override;
 
     // Local Layer Interface (generally should call set*() versions below

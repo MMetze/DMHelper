@@ -1,6 +1,11 @@
 v2.5.8
-* Black screen rendering map/battle
-* Grid causes strange initiative rendering
+feature * Change layer with multiple selections
+feature * Double-click in change layer dialog to pick dialog
+fixed * Black screen rendering map/battle
+fixed * Ctrl and mouse move should not move map, but enable multiple selections
+fixed * resizing grid needs to resize tokens
+fixed * editing DM-invisible layer makes it visible
+fixed * changing layer with no selection doesn't do anything (should take the target item)
 
 Next version
 * upgrade to latest Qt
@@ -8,6 +13,7 @@ Next version
 * Make grid button a flat pushbutton that opens its own popup menu
 * Asset library
 * Save new campaign --> default file name is campaign name
+* Remove dead code (e.g. battleframe)
 
 v2.5.7
 fixed * Crashes when adding an FOW layer

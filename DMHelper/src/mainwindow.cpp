@@ -531,7 +531,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
-    connect(_battleFrame, &BattleFrame::gridScaleChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridScale);
+    connect(_battleFrame, &BattleFrame::gridConfigChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridConfig);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selectGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
@@ -2735,8 +2735,11 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
         connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
-        LayerGrid* layer = dynamic_cast<LayerGrid*>(model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
-        if(layer)
+        Layer* selectedLayer = model->getLayerScene().getSelectedLayer();
+        LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));
+        if(gridLayer)
+            _ribbonTabBattleMap->setGridConfig(gridLayer->getConfig());
+            /*
         {
             //_ribbonTabBattleMap->setGridOn(model->getGridOn());
             _ribbonTabBattleMap->setGridType(layer->getConfig().getGridType());
@@ -2747,6 +2750,7 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
             _ribbonTabBattleMap->setGridWidth(layer->getConfig().getGridPen().width());
             _ribbonTabBattleMap->setGridColor(layer->getConfig().getGridPen().color());
         }
+        */
     }
 }
 

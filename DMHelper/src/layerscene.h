@@ -49,10 +49,12 @@ public:
     Layer* getSelectedLayer() const;
     void setSelectedLayer(Layer* layer);
 
+    int getLayerIndex(Layer* layer) const;
     Layer* getPriority(DMHelper::LayerType type) const;
-    int getPriorityIndex(DMHelper::LayerType type) const;
     Layer* getFirst(DMHelper::LayerType type) const;
-    int getFirstIndex(DMHelper::LayerType type) const;
+    Layer* getPrevious(Layer* layer, DMHelper::LayerType type) const;
+    Layer* getNext(Layer* layer, DMHelper::LayerType type) const;
+    Layer* getNearest(Layer* layer, DMHelper::LayerType type) const;
     QImage mergedImage();
 
     PublishGLRenderer* getRenderer() const;
@@ -84,9 +86,13 @@ signals:
     void sceneChanged();
     void sceneSizeChanged();
     void layerVisibilityChanged(Layer* layer);
+    void layerSelected(Layer* layer);
+    void layerScaleChanged(Layer* layer);
 
 protected slots:
     void handleLayerDirty();
+    void handleLayerScaleChanged(Layer* layer);
+    void updateLayerScales();
     void removeLayer(Layer* reference);
     void layerMoved(const QPoint& position);
     void layerResized(const QSize& size);
@@ -100,7 +106,6 @@ protected:
     void connectLayer(Layer* layer);
     void disconnectLayer(Layer* layer);
     void resetLayerOrders();
-    Layer* resolveReference(Layer* layer) const;
 
     bool _initialized;
     QList<Layer*> _layers;

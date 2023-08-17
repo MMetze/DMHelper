@@ -72,8 +72,8 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
 
         if(newLayer)
         {
-            newLayer->inputXML(layerElement, isImport);
             newLayer->setScale(_scale);
+            newLayer->inputXML(layerElement, isImport);
             newLayer->setLayerScene(this);
             connectLayer(newLayer);
             //connect(newLayer, &Layer::dirty, this, &LayerScene::dirty);
@@ -120,6 +120,8 @@ void LayerScene::postProcessXML(const QDomElement &element, bool isImport)
 
         layerElement = layerElement.nextSiblingElement(QString("layer"));
     }
+
+    updateLayerScales();
 }
 
 void LayerScene::copyValues(const CampaignObjectBase* other)
@@ -139,6 +141,7 @@ void LayerScene::copyValues(const CampaignObjectBase* other)
         connectLayer(newLayer);
         //connect(newLayer, &Layer::dirty, this, &LayerScene::handleLayerDirty);
         _layers.append(newLayer);
+        updateLayerScales();
     }
 
     CampaignObjectBase::copyValues(other);
@@ -223,7 +226,10 @@ Layer* LayerScene::layerAt(int position) const
 void LayerScene::insertLayer(int position, Layer* layer)
 {
     if((position < 0) || (position >= _layers.count()) || (!layer) || (_layers.contains(layer)))
+    {
+        qDebug() << "[LayerScene] ERROR: invalid layer insertion, position: " << position << ", layer: " << layer;
         return;
+    }
 
     if(_initialized)
         layer->initialize(sceneSize().toSize());
@@ -239,13 +245,17 @@ void LayerScene::insertLayer(int position, Layer* layer)
     resetLayerOrders();
     _selected = position;
     emit layerAdded(layer);
+    updateLayerScales();
     handleLayerDirty();
 }
 
 void LayerScene::prependLayer(Layer* layer)
 {
     if((!layer) || (_layers.contains(layer)))
+    {
+        qDebug() << "[LayerScene] ERROR: invalid layer prepend, layer: " << layer;
         return;
+    }
 
     if(_initialized)
         layer->initialize(sceneSize().toSize());
@@ -261,13 +271,17 @@ void LayerScene::prependLayer(Layer* layer)
     resetLayerOrders();
     _selected = 0;
     emit layerAdded(layer);
+    updateLayerScales();
     handleLayerDirty();
 }
 
 void LayerScene::appendLayer(Layer* layer)
 {
     if((!layer) || (_layers.contains(layer)))
+    {
+        qDebug() << "[LayerScene] ERROR: invalid layer append, layer: " << layer;
         return;
+    }
 
     if(_initialized)
         layer->initialize(sceneSize().toSize());
@@ -283,13 +297,17 @@ void LayerScene::appendLayer(Layer* layer)
     resetLayerOrders();
     _selected = _layers.count() - 1;
     emit layerAdded(layer);
+    updateLayerScales();
     handleLayerDirty();
 }
 
 void LayerScene::removeLayer(int position)
 {
     if((position < 0) || (position >= _layers.count()))
+    {
+        qDebug() << "[LayerScene] ERROR: invalid layer removal, position: " << position;
         return;
+    }
 
     Layer* deleteLayer = _layers.takeAt(position);
     if(!deleteLayer)
@@ -303,6 +321,7 @@ void LayerScene::removeLayer(int position)
     if(_selected >= position)
         --_selected;
 
+    updateLayerScales();
     handleLayerDirty();
 }
 
@@ -322,11 +341,15 @@ void LayerScene::clearLayers()
 void LayerScene::moveLayer(int from, int to)
 {
     if((from < 0) || (from >= _layers.count()) || (to < 0) || (to >= _layers.count()) || (from == to))
+    {
+        qDebug() << "[LayerScene] ERROR: invalid layer movement, from: " << from << ", to: " << to;
         return;
+    }
 
     _layers.move(from, to);
     resetLayerOrders();
     _selected = to;
+    updateLayerScales();
     handleLayerDirty();
 }
 
@@ -348,10 +371,14 @@ int LayerScene::getSelectedLayerIndex() const
 
 void LayerScene::setSelectedLayerIndex(int selected)
 {
-    if(_selected == selected)
+    if((_selected == selected) || (_selected < 0) || (_selected >= _layers.count()))
+    {
+        qDebug() << "[LayerScene] ERROR: invalid layer selection, selected: " << selected;
         return;
+    }
 
     _selected = selected;
+    emit layerSelected(getSelectedLayer());
     handleLayerDirty();
 }
 
@@ -365,36 +392,30 @@ Layer* LayerScene::getSelectedLayer() const
 
 void LayerScene::setSelectedLayer(Layer* layer)
 {
-    if(getSelectedLayer() == layer)
-        return;
+    setSelectedLayerIndex(getLayerIndex(layer));
+}
 
-    for(int i = 0; i < _layers.count(); ++i)
+int LayerScene::getLayerIndex(Layer* layer) const
+{
+    if(layer)
     {
-        if((_layers.at(i)) && (_layers.at(i) == layer))
+        for(int i = 0; i < _layers.count(); ++i)
         {
-            _selected = i;
-            handleLayerDirty();
-            return;
+            if((_layers.at(i)) && (_layers.at(i) == layer))
+                return i;
         }
     }
+
+    return -1;
 }
 
 Layer* LayerScene::getPriority(DMHelper::LayerType type) const
 {
     Layer* result = getSelectedLayer();
     if((result) && (result->getFinalType() == type))
-        return resolveReference(result);
+        return result->getFinalLayer();
     else
         return getFirst(type);
-}
-
-int LayerScene::getPriorityIndex(DMHelper::LayerType type) const
-{
-    Layer* result = getSelectedLayer();
-    if((result) && (result->getFinalType() == type))
-        return result->getOrder();
-    else
-        return getFirstIndex(type);
 }
 
 Layer* LayerScene::getFirst(DMHelper::LayerType type) const
@@ -402,21 +423,57 @@ Layer* LayerScene::getFirst(DMHelper::LayerType type) const
     for(int i = 0; i < _layers.count(); ++i)
     {
         if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
-            return resolveReference(_layers.at(i));
+            return _layers.at(i)->getFinalLayer();
     }
 
     return nullptr;
 }
 
-int LayerScene::getFirstIndex(DMHelper::LayerType type) const
+Layer* LayerScene::getPrevious(Layer* layer, DMHelper::LayerType type) const
 {
+    if(!layer)
+        return getPriority(type);
+
+    int latest = -1;
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
-            return i;
+        if(_layers.at(i))
+        {
+            if(_layers.at(i) == layer)
+                return latest >= 0 ? _layers.at(latest)->getFinalLayer() : nullptr;
+
+            if(_layers.at(i)->getFinalType() == type)
+                latest = i;
+        }
     }
 
-    return -1;
+    return nullptr;
+}
+
+Layer* LayerScene::getNext(Layer* layer, DMHelper::LayerType type) const
+{
+    if(!layer)
+        return getPriority(type);
+
+    for(int i = getLayerIndex(layer); i < _layers.count(); ++i)
+    {
+        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == type))
+            return _layers.at(i)->getFinalLayer();
+    }
+
+    return nullptr;
+}
+
+Layer* LayerScene::getNearest(Layer* layer, DMHelper::LayerType type) const
+{
+    if(!layer)
+        return getFirst(type);
+
+    if(layer->getFinalType() == type)
+        return layer->getFinalLayer();
+
+    Layer* previousLayer = getPrevious(layer, type);
+    return previousLayer ? previousLayer : getNext(layer, type);
 }
 
 QImage LayerScene::mergedImage()
@@ -637,6 +694,22 @@ void LayerScene::handleLayerDirty()
         emit dirty();
 }
 
+void LayerScene::handleLayerScaleChanged(Layer* layer)
+{
+    updateLayerScales();
+    emit layerScaleChanged(layer);
+    handleLayerDirty();
+}
+
+void LayerScene::updateLayerScales()
+{
+    foreach(Layer* singleLayer, _layers)
+    {
+        LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(getNearest(singleLayer, DMHelper::LayerType_Grid));
+        singleLayer->setScale(gridLayer ? gridLayer->getConfig().getGridScale() : _scale);
+    }
+}
+
 void LayerScene::removeLayer(Layer* reference)
 {
     if(!reference)
@@ -696,6 +769,7 @@ void LayerScene::connectLayer(Layer* layer)
     connect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     connect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
     connect(layer, &Layer::layerVisibilityChanged, this, &LayerScene::layerVisibilityChanged);
+    connect(layer, &Layer::layerScaleChanged, this, &LayerScene::handleLayerScaleChanged);
 }
 
 void LayerScene::disconnectLayer(Layer* layer)
@@ -708,22 +782,11 @@ void LayerScene::disconnectLayer(Layer* layer)
     disconnect(layer, &Layer::layerResized, this, &LayerScene::layerResized);
     disconnect(layer, &Layer::layerResized, this, &LayerScene::sceneChanged);
     disconnect(layer, &Layer::layerVisibilityChanged, this, &LayerScene::layerVisibilityChanged);
+    disconnect(layer, &Layer::layerScaleChanged, this, &LayerScene::handleLayerScaleChanged);
 }
 
 void LayerScene::resetLayerOrders()
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->setOrder(i);
-}
-
-Layer* LayerScene::resolveReference(Layer* layer) const
-{
-    if(!layer)
-        return nullptr;
-
-    if(layer->getType() != DMHelper::LayerType_Reference)
-        return layer;
-
-    LayerReference* layerReference = dynamic_cast<LayerReference*>(layer);
-    return layerReference ? layerReference->getReferenceLayer() : nullptr;
 }

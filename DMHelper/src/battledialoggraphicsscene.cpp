@@ -46,6 +46,7 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     _pointerVisible(false),
     _pointerPixmap(),
     _selectedIcon(),
+    _selectionCount(0),
     _distanceMouseHandler(*this),
     _freeDistanceMouseHandler(*this),
     _pointerMouseHandler(*this),
@@ -68,6 +69,8 @@ BattleDialogGraphicsScene::BattleDialogGraphicsScene(QObject *parent) :
     connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMousePress, this, &BattleDialogGraphicsScene::mapMousePress);
     connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseMove, this, &BattleDialogGraphicsScene::mapMouseMove);
     connect(&_mapsMouseHandler, &BattleDialogGraphicsSceneMouseHandlerMaps::mapMouseRelease, this, &BattleDialogGraphicsScene::mapMouseRelease);
+
+    connect(this, &BattleDialogGraphicsScene::selectionChanged, this, &BattleDialogGraphicsScene::handleSelectionChanged);
 }
 
 BattleDialogGraphicsScene::~BattleDialogGraphicsScene()
@@ -1185,6 +1188,11 @@ void BattleDialogGraphicsScene::changeEffectLayer()
         emit effectChangeLayer(effect);
 }
 
+void BattleDialogGraphicsScene::handleSelectionChanged()
+{
+    _selectionCount = selectedItems().count();
+}
+
 void BattleDialogGraphicsScene::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent)
 {
     if(!mouseEvent)
@@ -1380,7 +1388,11 @@ BattleDialogGraphicsSceneMouseHandlerBase* BattleDialogGraphicsScene::getMouseHa
                 break;
         }
 
-        if((result == &_combatantMouseHandler) && (mouseEvent) && ((mouseEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier))
+        if((result == &_combatantMouseHandler) &&
+           (mouseEvent) &&
+           ((mouseEvent->modifiers() & Qt::ControlModifier) == Qt::ControlModifier) &&
+           (mouseEvent->buttons() != Qt::NoButton) &&
+           (_selectionCount == 0))
         {
             QGraphicsItem* item = findTopObject(mouseEvent->scenePos());
             if((!item) || ((item->flags() & QGraphicsItem::ItemIsSelectable) != QGraphicsItem::ItemIsSelectable))

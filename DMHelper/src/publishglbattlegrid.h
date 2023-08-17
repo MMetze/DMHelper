@@ -6,6 +6,8 @@
 #include "grid.h"
 #include <QOpenGLFunctions>
 
+//#define DEBUG_BATTLE_GRID
+
 class PublishGLBattleGrid : public PublishGLBattleObject, public Grid_LineInterface
 {
     Q_OBJECT
@@ -18,6 +20,7 @@ public:
     QSize getSize() const;
 
     void setPosition(const QPoint& position);
+    void setSize(const QSize& size);
 
     void setProjectionMatrix(const GLfloat* projectionMatrix);
     void setConfig(const GridConfig& config);
@@ -26,10 +29,12 @@ public:
     virtual void addLine(int x0, int y0, int x1, int y1, int zOrder) override;
 
 protected:
-    void createGridObjects();
-    void rebuildGrid();
-    void cleanupGrid();
+    void createGridObjectsGL();
+    void rebuildGridGL();
+    void cleanupGridGL();
     void updateModelMatrix();
+
+    void rebuildGrid();
 
     unsigned int _VAO;
     unsigned int _VBO;
@@ -44,6 +49,8 @@ protected:
 
     QVector<float> _vertices;
     QVector<unsigned int> _indices;
+
+    bool _recreateGrid;
 };
 
 #endif // PUBLISHGLBATTLEGRID_H
