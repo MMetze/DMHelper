@@ -36,7 +36,7 @@ void LayerBlank::inputXML(const QDomElement &element, bool isImport)
 
 QRectF LayerBlank::boundingRect() const
 {
-    return _publishRect ? _publishRect->getRect() : QRectF();
+    return QRectF(_position, _size);
 }
 
 QImage LayerBlank::getLayerIcon() const

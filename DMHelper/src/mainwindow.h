@@ -21,6 +21,7 @@ class Encounter;
 class EncounterTextEdit;
 class TimeAndDateFrame;
 class Map;
+class Layer;
 class MRUHandler;
 class QStandardItem;
 class CampaignTreeModel;
@@ -152,6 +153,7 @@ protected:
 
     CampaignObjectBase* newEncounter(int encounterType, const QString& dialogTitle, const QString& dialogText);
     void addNewAudioObject(const QString& audioFile);
+    Layer* selectMapFile();
 
 protected slots:
     void openCampaign(const QString& filename);

@@ -1098,6 +1098,7 @@ void MainWindow::newBattleEncounter()
     LayerGrid* gridLayer = nullptr;
     LayerTokens* monsterTokens = nullptr;
     LayerTokens* pcTokens = nullptr;
+    bool hasGrid = false;
 
     qDebug() << "[Battle Frame] Selecting a new map...";
 
@@ -1105,7 +1106,7 @@ void MainWindow::newBattleEncounter()
     if(!currentObject)
         currentObject = _campaign;
 
-    MapSelectDialog mapSelectDlg(*_campaign, battle->getID());
+    MapSelectDialog mapSelectDlg(*_campaign, currentObject->getID());
     if(mapSelectDlg.exec() == QDialog::Accepted)
     {
         if(mapSelectDlg.isMapSelected())
@@ -1115,6 +1116,7 @@ void MainWindow::newBattleEncounter()
             {
                 battleMap->initialize();
                 gridScale = battleMap->getLayerScene().getScale();
+                hasGrid = battleMap->getLayerScene().layerCount(DMHelper::LayerType_Grid) > 0;
 
                 // Create a grid after the first image layer, a monster token layer before the FoW
                 for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
@@ -1130,10 +1132,11 @@ void MainWindow::newBattleEncounter()
 
                         battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
 
-                        if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                        if((!hasGrid) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
                         {
                              gridLayer = new LayerGrid(QString("Grid"));
                              battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                             hasGrid = true;
                         }
                     }
                 }
@@ -1152,17 +1155,23 @@ void MainWindow::newBattleEncounter()
         }
         else if(mapSelectDlg.isNewMapImage())
         {
-            // TODO
+            Layer* mapLayer = selectMapFile();
+            if(mapLayer)
+            {
+                mapLayer->initialize(QSize());
+                battle->getBattleDialogModel()->getLayerScene().appendLayer(mapLayer);
+            }
         }
     }
 
-    if(!gridLayer)
+    if((!gridLayer) && (!hasGrid))
     {
         gridLayer = new LayerGrid(QString("Grid"));
         battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
     }
 
-    gridLayer->getConfig().setGridScale(gridScale);
+    if(gridLayer)
+        gridLayer->getConfig().setGridScale(gridScale);
     battle->getBattleDialogModel()->getLayerScene().setScale(gridScale);
 
     if(!monsterTokens)
@@ -1177,11 +1186,14 @@ void MainWindow::newBattleEncounter()
     // Add the active characters
     battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(pcTokens);
     QPointF mapCenter = battle->getBattleDialogModel()->getLayerScene().boundingRect().center();
+    if(mapCenter.isNull())
+            mapCenter = QPointF(gridScale, gridScale);
+    QPointF multiplePos(gridScale / 10.0, gridScale / 10.0);
     QList<Character*> activeCharacters = _campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
     {
         BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
-        newCharacter->setPosition(mapCenter);
+        newCharacter->setPosition(mapCenter + (multiplePos * i));
         battle->getBattleDialogModel()->appendCombatant(newCharacter);
     }
 
@@ -1209,24 +1221,9 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map File..."));
-    if(filename.isEmpty())
+    Layer* mapLayer = selectMapFile();
+    if(!mapLayer)
         return;
-
-    Layer* mapLayer;
-    QImageReader reader(filename);
-    if(reader.canRead())
-    {
-        mapLayer = new LayerImage(QString("Map Image"), filename);
-    }
-    else
-    {
-        QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
-        if(result != QMessageBox::Yes)
-            return;
-
-        mapLayer = new LayerVideo(QString("Map Video"), filename);
-    }
 
     Map* map = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mapName, false));
     if(!map)
@@ -1236,22 +1233,11 @@ void MainWindow::newMap()
     }
 
     map->getLayerScene().appendLayer(mapLayer);
-//    map->setFileName(filename);
 
     ok = false;
-    int newScale = DMHelper::STARTING_GRID_SCALE;
     int gridCount = QInputDialog::getInt(this, QString("Map Scale"), QString("How many grid squares should the map have horizontally? This is used to set the size of tokens on the map, even if you don't use the map for combat or with a grid."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
     if(ok)
         map->setGridCount(gridCount);
-    /*
-    if((ok) && (gridCount > 0))
-    {
-        newScale = map->getLayerScene().sceneSize().width() / gridCount;
-        if(newScale < 1)
-            newScale = DMHelper::STARTING_GRID_SCALE;
-    }
-    map->getLayerScene().setScale(newScale);
-    */
 
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
     if(result == QMessageBox::Yes)
@@ -2191,6 +2177,23 @@ void MainWindow::addNewAudioObject(const QString& audioFile)
 
     addNewObject(track);
     emit audioTrackAdded(track);
+}
+
+Layer* MainWindow::selectMapFile()
+{
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map File..."));
+    if(filename.isEmpty())
+        return nullptr;
+
+    QImageReader reader(filename);
+    if(reader.canRead())
+        return new LayerImage(QString("Map Image"), filename);
+
+    QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
+    if(result == QMessageBox::Yes)
+        return new LayerVideo(QString("Map Video"), filename);
+
+    return nullptr;
 }
 
 void MainWindow::openCampaign(const QString& filename)

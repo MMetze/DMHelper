@@ -29,6 +29,7 @@ Next version
 * Asset library
 * Save new campaign --> default file name is campaign name
 * Remove dead code (e.g. battleframe)
+* Add new item dialog instead of pseudo-wizards
 
 v2.5.7
 fixed * Crashes when adding an FOW layer
