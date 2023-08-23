@@ -20,6 +20,11 @@ public:
     virtual void setSize(const QSize& size);
     virtual void setPosition(const QPoint& position);
 
+    virtual QColor getColor() const;
+    virtual QRectF getRect() const;
+    virtual QSize getSize() const;
+    virtual QPoint getPosition() const;
+
     QMatrix4x4 getMatrix() const;
     const float * getMatrixData() const;
 

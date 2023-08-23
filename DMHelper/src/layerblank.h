@@ -7,14 +7,6 @@
 class QGraphicsRectItem;
 class PublishGLRect;
 
-
-
-class PublishGLBattleBackground;
-#include <QImage>
-
-
-
-
 class LayerBlank : public Layer
 {
     Q_OBJECT
@@ -80,13 +72,6 @@ protected:
     static int _shaderModelMatrixRGBColorBlank;
     static int _shaderProjectionMatrixRGBColorBlank;
     static int _shaderRGBColorBlank;
-
-
-
-    PublishGLBattleBackground* _imageGLObject;
-    QImage _layerImage;
-    QImage _originalImage;
-
 };
 
 #endif // LAYERBLANK_H

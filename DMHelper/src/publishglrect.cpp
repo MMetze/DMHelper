@@ -107,6 +107,26 @@ void PublishGLRect::setPosition(const QPoint& position)
     emit changed();
 }
 
+QColor PublishGLRect::getColor() const
+{
+    return _color;
+}
+
+QRectF PublishGLRect::getRect() const
+{
+    return _rect;
+}
+
+QSize PublishGLRect::getSize() const
+{
+    return getRect().size().toSize();
+}
+
+QPoint PublishGLRect::getPosition() const
+{
+    return _position;
+}
+
 QMatrix4x4 PublishGLRect::getMatrix() const
 {
     return _modelMatrix;
