@@ -42,6 +42,7 @@
 #include "layerseditdialog.h"
 #include "layertokens.h"
 #include "layergrid.h"
+#include "layerfow.h"
 #include "layerreference.h"
 #include "selectitemdialog.h"
 #include "selectcombatantdialog.h"
@@ -1401,17 +1402,32 @@ void BattleFrame::setCameraVisible()
     if((!_cameraRect) || (!_model) || (!_model->getMap()))
         return;
 
-    QRectF newCameraRect = _model->getMap()->getShrunkPublishRect();
+    QRectF visibleRect = _model->getLayerScene().boundingRect();
+
+    QList<Layer*> fowLayers = _model->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+    foreach(Layer* layer, fowLayers)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        if((fowLayer) && (fowLayer->getLayerVisiblePlayer()))
+        {
+            QRectF newRect = fowLayer->getFoWVisibleRect();
+            visibleRect = visibleRect.intersected(newRect);
+        }
+    }
+
+    if(visibleRect.isEmpty())
+        return;
+
     if(_isGridLocked)
     {
         //QRectF currentRect(QPointF(0.0, 0.0), QSizeF(_targetSize).scaled(newCameraRect.size(), Qt::KeepAspectRatioByExpanding));
         QRectF currentRect = _cameraRect->getCameraRect();
-        QPointF newCenter = newCameraRect.center();
+        QPointF newCenter = visibleRect.center();
         currentRect.moveTo(newCenter.x() - (currentRect.width() / 2.0), newCenter.y() - (currentRect.height() / 2.0));
-        newCameraRect = currentRect;
+        visibleRect = currentRect;
     }
-    _cameraRect->setCameraRect(newCameraRect);
-    emit cameraRectChanged(newCameraRect);
+    _cameraRect->setCameraRect(visibleRect);
+    emit cameraRectChanged(visibleRect);
 }
 
 void BattleFrame::setCameraSelect(bool enabled)

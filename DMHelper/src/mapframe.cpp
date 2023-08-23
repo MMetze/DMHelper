@@ -666,9 +666,24 @@ void MapFrame::setCameraVisible()
     if((!_cameraRect) || (!_mapSource))
         return;
 
-    QRectF newRect = _mapSource->getShrunkPublishRect();
-    _cameraRect->setCameraRect(newRect);
-    emit cameraRectChanged(newRect);
+    QRectF visibleRect = _mapSource->getLayerScene().boundingRect();
+
+    QList<Layer*> fowLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+    foreach(Layer* layer, fowLayers)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        if((fowLayer) && (fowLayer->getLayerVisiblePlayer()))
+        {
+            QRectF newRect = fowLayer->getFoWVisibleRect();
+            visibleRect = visibleRect.intersected(newRect);
+        }
+    }
+
+    if(visibleRect.isEmpty())
+        return;
+
+    _cameraRect->setCameraRect(visibleRect);
+    emit cameraRectChanged(visibleRect);
 }
 
 void MapFrame::setCameraSelect(bool enabled)

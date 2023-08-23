@@ -6,12 +6,11 @@ fixed * Ctrl and mouse move should not move map, but enable multiple selections
 fixed * resizing grid needs to resize tokens
 fixed * editing DM-invisible layer makes it visible
 fixed * changing layer with no selection doesn't do anything (should take the target item)
-Players side of blank layer
-create blank map
-create combat on map/video
-edit dialog: create new blank layer
+done * Players side of blank layer
+done * create blank map
+done * create combat on map/video
+done * edit dialog: create new blank layer
 edit dialog: create new text layer
-clean up mainwindow: newbattle function
 invisible player video should not start the video playback
 
 Fog of war from old to new
@@ -29,7 +28,7 @@ Next version
 * Asset library
 * Save new campaign --> default file name is campaign name
 * Remove dead code (e.g. battleframe)
-* Add new item dialog instead of pseudo-wizards
+* Add new item dialog instead of pseudo-wizards / clean up mainwindow: newbattle function
 
 v2.5.7
 fixed * Crashes when adding an FOW layer

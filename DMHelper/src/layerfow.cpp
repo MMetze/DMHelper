@@ -474,6 +474,61 @@ void LayerFow::setImageSize(const QSize& imageSize)
 }
 */
 
+QRect LayerFow::getFoWVisibleRect() const
+{
+    //QImage bwFoWImage = getBWFoWImage(_imgBackground);
+    //QImage bwFoWImage;// = getBWFoWImage();
+
+    int top, bottom, left, right;
+    top = bottom = left = right = -1;
+    int i, j;
+    for(j = 0; (j < _imageFow.height()) && (top == -1); ++j)
+    {
+        for(i = 0; (i < _imageFow.width()) && (top == -1); ++i)
+        {
+            if(_imageFow.pixelColor(i, j) != Qt::black)
+            {
+                top = j;
+            }
+        }
+    }
+
+    for(j = _imageFow.height() - 1; (j > top) && (bottom == -1); --j)
+    {
+        for(i = 0; (i < _imageFow.width()) && (bottom == -1); ++i)
+        {
+            if(_imageFow.pixelColor(i, j) != Qt::black)
+            {
+                bottom = j;
+            }
+        }
+    }
+
+    for(i = 0; (i < _imageFow.width()) && (left == -1); ++i)
+    {
+        for(j = top; (j < bottom) && (left == -1); ++j)
+        {
+            if(_imageFow.pixelColor(i, j) != Qt::black)
+            {
+                left = i;
+            }
+        }
+    }
+
+    for(i = _imageFow.width() - 1; (i > left) && (right == -1); --i)
+    {
+        for(j = top; (j < bottom) && (right == -1); ++j)
+        {
+            if(_imageFow.pixelColor(i, j) != Qt::black)
+            {
+                right = i;
+            }
+        }
+    }
+
+    return QRect(left, top, right - left, bottom - top);
+}
+
 void LayerFow::dmInitialize(QGraphicsScene* scene)
 {
     if(!scene)

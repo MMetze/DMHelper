@@ -100,7 +100,7 @@ public:
 //    QImage getPublishImage(const QRect& rect);
     QImage getGrayImage();
 //    QImage getShrunkPublishImage(QRect* targetRect = nullptr);
-    QRect getShrunkPublishRect();
+//    QRect getShrunkPublishRect();
 
     bool isFilterApplied() const;
     MapColorizeFilter getFilter() const;

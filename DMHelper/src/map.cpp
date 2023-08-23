@@ -736,6 +736,7 @@ QImage Map::getShrunkPublishImage(QRect* targetRect)
 }
 */
 
+/*
 QRect Map::getShrunkPublishRect()
 {
     // TODO: Layers
@@ -791,6 +792,7 @@ QRect Map::getShrunkPublishRect()
 
     return QRect(left, top, right - left, bottom - top);
 }
+*/
 
 bool Map::isFilterApplied() const
 {
