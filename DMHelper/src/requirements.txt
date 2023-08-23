@@ -6,6 +6,21 @@ fixed * Ctrl and mouse move should not move map, but enable multiple selections
 fixed * resizing grid needs to resize tokens
 fixed * editing DM-invisible layer makes it visible
 fixed * changing layer with no selection doesn't do anything (should take the target item)
+Players side of blank layer
+create blank map
+create combat on map/video
+edit dialog: create new blank layer
+edit dialog: create new text layer
+clean up mainwindow: newbattle function
+invisible player video should not start the video playback
+
+Fog of war from old to new
+Resize to visible
+resize camera view
+find map fitting to battle doesn't work
+Dead don't disappear when HP set to zero
+Select on the map doesn't select on the widget list
+Scale the initiative list freely
 
 Next version
 * upgrade to latest Qt

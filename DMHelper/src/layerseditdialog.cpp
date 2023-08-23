@@ -6,10 +6,12 @@
 #include "layerimage.h"
 #include "layertokens.h"
 #include "layervideo.h"
+#include "layerblank.h"
 #include "layerframe.h"
 #include "layergrid.h"
 #include "ribbonframe.h"
 #include "publishglrenderer.h"
+#include "mapblankdialog.h"
 #include <QImageReader>
 #include <QVBoxLayout>
 #include <QInputDialog>
@@ -78,7 +80,7 @@ void LayersEditDialog::addLayer()
     items << tr("Image") << tr("Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
-    items << tr("Grid") << tr("Text");
+    items << tr("Grid") << tr("Text") << tr("Blank");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -145,6 +147,19 @@ void LayersEditDialog::addLayer()
     {
         qDebug() << "[LayersEditDialog] Trying to add Text layer which is not yet implemented!";
         return;
+    }
+    else if(selectedItem == tr("Blank"))
+    {
+        MapBlankDialog blankDlg;
+        int result = blankDlg.exec();
+        if(result != QDialog::Accepted)
+            return;
+
+        LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
+        blankLayer->setSize(blankDlg.getMapSize());
+        newLayer = blankLayer;
+        //qDebug() << "[LayersEditDialog] Trying to add Text layer which is not yet implemented!";
+        //return;
     }
     else
     {

@@ -6,6 +6,7 @@
 #include "layertokens.h"
 #include "layerreference.h"
 #include "layervideo.h"
+#include "layerblank.h"
 #include "publishglscene.h"
 #include "campaign.h"
 #include <QRectF>
@@ -64,6 +65,9 @@ void LayerScene::inputXML(const QDomElement &element, bool isImport)
                 break;
             case DMHelper::LayerType_Video:
                 newLayer = new LayerVideo();
+                break;
+            case DMHelper::LayerType_Blank:
+                newLayer = new LayerBlank();
                 break;
             default:
                 qDebug() << "[LayerScene] ERROR: unable to read layer for unexpected type: " << layerType;

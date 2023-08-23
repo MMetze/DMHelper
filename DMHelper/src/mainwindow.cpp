@@ -86,7 +86,9 @@
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
+#include "layerblank.h"
 #include "mapselectdialog.h"
+#include "mapblankdialog.h"
 #include "battledialogmodelcharacter.h"
 #include <QResizeEvent>
 #include <QFileDialog>
@@ -1103,36 +1105,54 @@ void MainWindow::newBattleEncounter()
     if(!currentObject)
         currentObject = _campaign;
 
-    Map* battleMap = nullptr;
     MapSelectDialog mapSelectDlg(*_campaign, battle->getID());
     if(mapSelectDlg.exec() == QDialog::Accepted)
-        battleMap = mapSelectDlg.getSelectedMap();
-
-    if(battleMap)
     {
-        battleMap->initialize();
-        gridScale = battleMap->getLayerScene().getScale();
-
-        // Create a grid after the first image layer, a monster token layer before the FoW
-        for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
+        if(mapSelectDlg.isMapSelected())
         {
-            Layer* layer = battleMap->getLayerScene().layerAt(i);
-            if(layer)
+            Map* battleMap = mapSelectDlg.getSelectedMap();
+            if(battleMap)
             {
-                if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
-                {
-                    monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
-                    battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
-                }
+                battleMap->initialize();
+                gridScale = battleMap->getLayerScene().getScale();
 
-                battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
-
-                if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                // Create a grid after the first image layer, a monster token layer before the FoW
+                for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
                 {
-                     gridLayer = new LayerGrid(QString("Grid"));
-                     battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                    Layer* layer = battleMap->getLayerScene().layerAt(i);
+                    if(layer)
+                    {
+                        if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                        {
+                            monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
+                            battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                        }
+
+                        battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
+
+                        if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                        {
+                             gridLayer = new LayerGrid(QString("Grid"));
+                             battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                        }
+                    }
                 }
             }
+        }
+        else if(mapSelectDlg.isBlankMap())
+        {
+            MapBlankDialog blankDlg;
+            int result = blankDlg.exec();
+            if(result == QDialog::Accepted)
+            {
+                LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
+                blankLayer->setSize(blankDlg.getMapSize());
+                battle->getBattleDialogModel()->getLayerScene().appendLayer(blankLayer);
+            }
+        }
+        else if(mapSelectDlg.isNewMapImage())
+        {
+            // TODO
         }
     }
 

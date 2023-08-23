@@ -29,8 +29,6 @@ LayerImage::~LayerImage()
 
 void LayerImage::inputXML(const QDomElement &element, bool isImport)
 {
-    Q_UNUSED(isImport);
-
     _filename = element.attribute("imageFile");
     if(_filename.isEmpty()) // Backwards compatibility
         _filename = element.attribute("filename");
@@ -280,18 +278,11 @@ void LayerImage::initialize(const QSize& sceneSize)
         if(!_originalImage.isNull())
         {
             _filename = reader->getFilename();
-            /*
-            if(layerSize.isEmpty())
-                _layerImage = _originalImage;
-            else
-                _layerImage = _originalImage.scaled(layerSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            */
             _layerImage = _originalImage;
         }
         delete reader;
     }
 
-    //_size = _layerImage.size();
     if(_size.isEmpty())
         setSize(_layerImage.size());
 }

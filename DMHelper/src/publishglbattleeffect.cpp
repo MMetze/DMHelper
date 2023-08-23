@@ -45,7 +45,7 @@ PublishGLBattleEffect::~PublishGLBattleEffect()
 
 void PublishGLBattleEffect::cleanup()
 {
-    qDebug() << "[PublishGLBattleEffect] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
+//    qDebug() << "[PublishGLBattleEffect] Cleaning up image object. VAO: " << _VAO << ", VBO: " << _VBO << ", EBO: " << _EBO << ", texture: " << _textureID;
 
     if(QOpenGLContext::currentContext())
     {
