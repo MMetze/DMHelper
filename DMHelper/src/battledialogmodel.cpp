@@ -392,6 +392,7 @@ void BattleDialogModel::appendCombatantToList(BattleDialogModelCombatant* combat
             connect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
     }
 
+    emit combatantAdded(combatant);
     emit combatantListChanged();
     emit dirty();
 }
@@ -411,6 +412,7 @@ void BattleDialogModel::removeCombatantFromList(BattleDialogModelCombatant* comb
             disconnect(monster, &BattleDialogModelMonsterBase::imageChanged, this, &BattleDialogModel::combatantListChanged);
     }
 
+    emit combatantRemoved(combatant);
     emit combatantListChanged();
     emit dirty();
 }

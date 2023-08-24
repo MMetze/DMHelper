@@ -329,7 +329,7 @@ void BattleFrame::addCombatant(BattleDialogModelCombatant* combatant)
 
     _model->appendCombatant(combatant);
     createCombatantWidget(combatant);
-    createCombatantIcon(combatant);
+    //createCombatantIcon(combatant);
 }
 
 void BattleFrame::addCombatants(QList<BattleDialogModelCombatant*> combatants)
@@ -2234,6 +2234,22 @@ void BattleFrame::handleCombatantRemove(BattleDialogModelCombatant* combatant)
     _model->removeCombatant(combatant);
 }
 
+void BattleFrame::handleCombatantAdded(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    connect(combatant, &BattleDialogModelCombatant::combatantSelected, this, &BattleFrame::handleCombatantSelected);
+}
+
+void BattleFrame::handleCombatantRemoved(BattleDialogModelCombatant* combatant)
+{
+    if(!combatant)
+        return;
+
+    disconnect(combatant, &BattleDialogModelCombatant::combatantSelected, this, &BattleFrame::handleCombatantSelected);
+}
+
 void BattleFrame::handleCombatantChangeLayer(BattleDialogModelCombatant* combatant)
 {
     if((!combatant) || (!_model))
@@ -2912,6 +2928,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
         disconnect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         disconnect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
+        disconnect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
+        disconnect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
         disconnect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         disconnect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
         disconnect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
@@ -2920,6 +2938,13 @@ void BattleFrame::setModel(BattleDialogModel* model)
         clearBattleFrame();
         cleanupBattleMap();
         clearCombatantWidgets();
+
+        QList<BattleDialogModelCombatant*> combatants = _model->getCombatantList();
+        foreach(BattleDialogModelCombatant* combatant, combatants)
+        {
+            if(combatant)
+                disconnect(combatant, &BattleDialogModelCombatant::combatantSelected, this, &BattleFrame::handleCombatantSelected);
+        }
 
         emit setLayers(QList<Layer*>(), 0);
     }
@@ -2943,6 +2968,8 @@ void BattleFrame::setModel(BattleDialogModel* model)
         connect(_model, SIGNAL(showAliveChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, SIGNAL(showDeadChanged(bool)), this, SLOT(updateCombatantVisibility()));
         connect(_model, &BattleDialogModel::combatantListChanged, this, &BattleFrame::clearCopy);
+        connect(_model, &BattleDialogModel::combatantAdded, this, &BattleFrame::handleCombatantAdded);
+        connect(_model, &BattleDialogModel::combatantRemoved, this, &BattleFrame::handleCombatantRemoved);
         connect(&_model->getLayerScene(), &LayerScene::sceneChanged, this, &BattleFrame::handleLayersChanged);
         connect(&_model->getLayerScene(), &LayerScene::layerSelected, this, &BattleFrame::handleLayerSelected);
         connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &BattleFrame::updateCombatantVisibility);
@@ -2950,6 +2977,13 @@ void BattleFrame::setModel(BattleDialogModel* model)
 
         setBattleMap();
         recreateCombatantWidgets();
+
+        QList<BattleDialogModelCombatant*> combatants = _model->getCombatantList();
+        foreach(BattleDialogModelCombatant* combatant, combatants)
+        {
+            if(combatant)
+                connect(combatant, &BattleDialogModelCombatant::combatantSelected, this, &BattleFrame::handleCombatantSelected);
+        }
 
         emit setLayers(_model->getLayerScene().getLayers(), _model->getLayerScene().getSelectedLayerIndex());
 
@@ -3746,10 +3780,12 @@ void BattleFrame::createSceneContents()
     updateCameraRect();
 
     // Add icons for existing combatants
+    /*
     for(int i = 0; i < _model->getCombatantCount(); ++i)
     {
         createCombatantIcon(_model->getCombatant(i));
     }
+    */
 
     updateHighlights();
 }

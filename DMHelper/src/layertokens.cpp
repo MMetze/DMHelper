@@ -1375,6 +1375,8 @@ QPixmap LayerTokens::generateCombatantPixmap(BattleDialogModelCombatant* combata
         result = QPixmap::fromImage(grayscaleImage);
     }
 
+    applySingleCombatantVisibility(combatant, getLayerVisibleDM(), _model->getShowAlive(), _model->getShowDead());
+
     Combatant::drawConditions(&result, combatant->getConditions());
 
     return result;
@@ -1398,16 +1400,21 @@ void LayerTokens::applyCombatantVisibility(bool layerVisible, bool aliveVisible,
 
     foreach(BattleDialogModelCombatant* combatant, _combatants)
     {
-        if(combatant)
-        {
-            QGraphicsPixmapItem* pixmapItem = _combatantIconHash.value(combatant);
-            if(pixmapItem)
-            {
-                bool combatantVisible = layerVisible && (((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible);
-                pixmapItem->setVisible(combatantVisible);
-            }
-        }
+        applySingleCombatantVisibility(combatant, layerVisible, aliveVisible, deadVisible);
     }
+}
+
+void LayerTokens::applySingleCombatantVisibility(BattleDialogModelCombatant* combatant, bool layerVisible, bool aliveVisible, bool deadVisible)
+{
+    if(!combatant)
+        return;
+
+    QGraphicsPixmapItem* pixmapItem = _combatantIconHash.value(combatant);
+    if(!pixmapItem)
+        return;
+
+    bool combatantVisible = layerVisible && (((combatant->getHitPoints() > 0) || (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ? aliveVisible : deadVisible);
+    pixmapItem->setVisible(combatantVisible);
 }
 
 void LayerTokens::applyEffectVisibility(bool visible)

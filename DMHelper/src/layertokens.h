@@ -123,6 +123,7 @@ protected:
     QPixmap generateCombatantPixmap(BattleDialogModelCombatant* combatant);
     void applyCombatantTooltip(QGraphicsItem* item, BattleDialogModelCombatant* combatant);
     void applyCombatantVisibility(bool layerVisible, bool aliveVisible, bool deadVisible);
+    void applySingleCombatantVisibility(BattleDialogModelCombatant* combatant, bool layerVisible, bool aliveVisible, bool deadVisible);
     void applyEffectVisibility(bool visible);
 
     // Player Window Methods

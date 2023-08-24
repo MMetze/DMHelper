@@ -656,7 +656,7 @@ void MapFrame::setCameraMap()
     if((!_cameraRect) || (!_mapSource))
         return;
 
-    QRectF newRect = _mapSource->getLayerScene().boundingRect(); //_backgroundImage->boundingRect();
+    QRectF newRect = _mapSource->getLayerScene().boundingRect();
     _cameraRect->setCameraRect(newRect);
     emit cameraRectChanged(newRect);
 }

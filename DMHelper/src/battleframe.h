@@ -224,6 +224,8 @@ private slots:
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleCombatantActivate(BattleDialogModelCombatant* combatant);
     void handleCombatantRemove(BattleDialogModelCombatant* combatant);
+    void handleCombatantAdded(BattleDialogModelCombatant* combatant);
+    void handleCombatantRemoved(BattleDialogModelCombatant* combatant);
     void handleCombatantChangeLayer(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);

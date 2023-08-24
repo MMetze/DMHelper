@@ -108,6 +108,9 @@ signals:
     void layerVisibilityChanged(Layer* layer);
     void gridScaleChanged(const GridConfig& config);
 
+    void combatantAdded(BattleDialogModelCombatant* combatant);
+    void combatantRemoved(BattleDialogModelCombatant* combatant);
+
 protected slots:
     void mapDestroyed(const QUuid& id);
     void characterDestroyed(const QUuid& destroyedId);
