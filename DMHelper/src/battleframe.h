@@ -100,6 +100,7 @@ public slots:
     void setGridLockScale(qreal gridLockScale);
 
     void setInitiativeType(int initiativeType);
+    void setInitiativeScale(qreal initiativeScale);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
@@ -409,6 +410,7 @@ private:
     PublishGLBattleRenderer* _renderer;
 
     int _initiativeType;
+    qreal _initiativeScale;
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;

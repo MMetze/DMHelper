@@ -48,6 +48,8 @@ private slots:
     void editTables();
     void setTables(const QString& tablesDirectory);
 
+    void handleInitiativeScaleChanged(qreal initiativeScale);
+
     void browsePointerFile();
     void editPointerFile();
     void setPointerFile(const QString& pointerFile);

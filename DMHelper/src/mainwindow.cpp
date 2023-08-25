@@ -481,6 +481,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_Battle
     _battleFrame = new BattleFrame;
     _battleFrame->setInitiativeType(_options->getInitiativeType());
+    _battleFrame->setInitiativeScale(_options->getInitiativeScale());
     _battleFrame->setShowCountdown(_options->getShowCountdown());
     _battleFrame->setCountdownDuration(_options->getCountdownDuration());
     _battleFrame->setPointerFile(_options->getPointerFile());
@@ -491,6 +492,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleFrame->setGridLocked(_options->getGridLocked());
     _battleFrame->setGridLockScale(_options->getGridLockScale());
     connect(_options, SIGNAL(initiativeTypeChanged(int)), _battleFrame, SLOT(setInitiativeType(int)));
+    connect(_options, SIGNAL(initiativeScaleChanged(qreal)), _battleFrame, SLOT(setInitiativeScale(qreal)));
     connect(_options, SIGNAL(showCountdownChanged(bool)), _battleFrame, SLOT(setShowCountdown(bool)));
     connect(_options, SIGNAL(countdownDurationChanged(int)), _battleFrame, SLOT(setCountdownDuration(int)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _battleFrame, SLOT(setPointerFile(const QString&)));

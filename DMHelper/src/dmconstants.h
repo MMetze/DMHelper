@@ -159,7 +159,8 @@ namespace DMHelper
     {
         InitiativeType_None = 0,
         InitiativeType_Image,
-        InitiativeType_ImageName
+        InitiativeType_ImageName,
+        InitiativeType_ImagePCNames
     };
 
     enum LayerType

@@ -42,6 +42,7 @@ public:
 
     // Battle settings
     int getInitiativeType() const;
+    qreal getInitiativeScale() const;
     bool getShowCountdown() const;
     int getCountdownDuration() const;
     QString getPointerFile() const;
@@ -99,6 +100,7 @@ signals:
 
     // Battle settings
     void initiativeTypeChanged(int initiativeType);
+    void initiativeScaleChanged(qreal initiativeScale);
     void showCountdownChanged(bool showCountdown);
     void countdownDurationChanged(int countdownDuration);
     void pointerFileNameChanged(const QString& filename);
@@ -163,6 +165,8 @@ public slots:
 
     // Battle settings
     void setInitiativeType(int initiativeType);
+    void setInitiativeScale(int initiativeScale);
+    void setInitiativeScale(qreal initiativeScale);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setCountdownDuration(const QString& countdownDuration);
@@ -225,6 +229,7 @@ private:
 
     // Battle settings
     int _initiativeType;
+    qreal _initiativeScale;
     bool _showCountdown;
     int _countdownDuration;
     QString _pointerFile;

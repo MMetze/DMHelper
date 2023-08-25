@@ -49,6 +49,7 @@ public slots:
 
     void setCameraRect(const QRectF& cameraRect);
     void setInitiativeType(int initiativeType);
+    void setInitiativeScale(qreal initiativeScale);
 
     void distanceChanged(const QString& distance);
     void distanceItemChanged(QGraphicsItem* shapeItem, QGraphicsSimpleTextItem* textItem);
@@ -120,6 +121,7 @@ protected:
     QList<PublishGLBattleEffect*> _effectTokens;
 
     int _initiativeType;
+    qreal _initiativeScale;
     qreal _initiativeTokenHeight;
     bool _movementVisible;
     BattleDialogModelCombatant* _movementCombatant;

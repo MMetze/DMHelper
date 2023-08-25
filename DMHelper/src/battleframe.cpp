@@ -140,6 +140,7 @@ BattleFrame::BattleFrame(QWidget *parent) :
     _mapDrawer(nullptr),
     _renderer(nullptr),
     _initiativeType(DMHelper::InitiativeType_ImageName),
+    _initiativeScale(1.0),
     _showCountdown(true),
     _countdownDuration(15),
     _countdownColor(0, 0, 0),
@@ -796,6 +797,13 @@ void BattleFrame::setInitiativeType(int initiativeType)
     _initiativeType = initiativeType;
     if(_renderer)
         _renderer->setInitiativeType(_initiativeType);
+}
+
+void BattleFrame::setInitiativeScale(qreal initiativeScale)
+{
+    _initiativeScale = initiativeScale;
+    if(_renderer)
+        _renderer->setInitiativeScale(_initiativeScale);
 }
 
 void BattleFrame::setShowCountdown(bool showCountdown)
@@ -3189,6 +3197,7 @@ void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
     renderer->setSelectionToken(_scene->getSelectedIconFile());
     renderer->setRotation(_rotation);
     renderer->setInitiativeType(_initiativeType);
+    renderer->setInitiativeScale(_initiativeScale);
     renderer->distanceItemChanged(_scene->getDistanceLine(), _scene->getDistanceText());
     renderer->setCombatantFrame(_combatantFile);
     renderer->setCountdownFrame(_countdownFile);

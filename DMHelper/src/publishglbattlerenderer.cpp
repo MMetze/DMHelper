@@ -49,6 +49,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _initiativeBackground(nullptr),
     _effectTokens(),
     _initiativeType(DMHelper::InitiativeType_ImageName),
+    _initiativeScale(1.0),
     _initiativeTokenHeight(0.0),
     _movementVisible(false),
     _movementCombatant(nullptr),
@@ -455,7 +456,19 @@ void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
         return;
 
     _initiativeType = initiativeType;
-    recreateContents(); // Todo: can we change this to updateInitiative?
+    _updateInitiative = true;
+    emit updateWidget();
+//    recreateContents(); // Todo: can we change this to updateInitiative?
+}
+
+void PublishGLBattleRenderer::setInitiativeScale(qreal initiativeScale)
+{
+    if(_initiativeScale == initiativeScale)
+        return;
+
+    _initiativeScale = initiativeScale;
+    _updateInitiative = true;
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::distanceChanged(const QString& distance)
@@ -790,18 +803,18 @@ void PublishGLBattleRenderer::updateInitiative()
 
     QList<PublishGLImage*> nameTokens = _combatantNames.values();
 
-    _initiativeTokenHeight = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
+    _initiativeTokenHeight = static_cast<qreal>(_scene.getTargetSize().height()) * _initiativeScale / 24.0;
     QSize initiativeArea;
     initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + 5);
 
-    if(_initiativeType == DMHelper::InitiativeType_ImageName)
+    if((_initiativeType == DMHelper::InitiativeType_ImageName) || (_initiativeType == DMHelper::InitiativeType_ImagePCNames))
     {
         for(PublishGLImage* nameToken : nameTokens)
         {
             if(nameToken)
             {
-                if(initiativeArea.width() < (_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5)
-                    initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5);
+                if(initiativeArea.width() < (_initiativeTokenHeight * 1.25) + nameToken->getSize().width() + 5)
+                    initiativeArea.setWidth((_initiativeTokenHeight * 1.25) + nameToken->getSize().width() + 5);
 
                 if(_initiativeTokenHeight < nameToken->getSize().height())
                     _initiativeTokenHeight = nameToken->getSize().height();
@@ -850,7 +863,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
     screenCoords.ortho(0.f, _scene.getTargetSize().width(), 0.f, _scene.getTargetSize().height(), 0.1f, 1000.f);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, screenCoords.constData());
     QMatrix4x4 tokenScreenCoords;
-    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
+    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) * _initiativeScale / 24.0;
     qreal tokenY = _scene.getTargetSize().height() - tokenSize / 2.0 - 5.0;
 
     if(_initiativeBackground)
@@ -914,7 +927,8 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 }
             }
 
-            if((_initiativeType == DMHelper::InitiativeType_ImageName) && (combatant->getShown()))
+            if((combatant->getShown()) && (((_initiativeType == DMHelper::InitiativeType_ImagePCNames) && (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ||
+                                           (_initiativeType == DMHelper::InitiativeType_ImageName)))
             {
                 PublishGLImage* combatantName = _combatantNames.value(combatant);
                 if(combatantName)
