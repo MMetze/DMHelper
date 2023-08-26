@@ -311,60 +311,6 @@ void EncounterTextEdit::setHtml()
     updateAnchors();
 }
 
-/*
-void EncounterTextEdit::setBackgroundImage(bool on)
-{
-    if(!_encounter)
-        return;
-
-    if(on)
-    {
-        browseImageFile();
-    }
-    else
-    {
-        setImageFile(QString());
-        ui->textBrowser->update();
-    }
-}
-
-void EncounterTextEdit::setImageFile(const QString& imageFile)
-{
-    if(_encounter)
-        _encounter->setImageFile(imageFile);
-}
-
-void EncounterTextEdit::browseImageFile()
-{
-    QString imageFileName = QFileDialog::getOpenFileName(this, QString("Select Image File"));
-
-    if(imageFileName.isEmpty())
-    {
-        qDebug() << "[EncounterTextEdit] Select Image File was cancelled";
-        return;
-    }
-
-    if(!QFile::exists(imageFileName))
-    {
-        QMessageBox::critical(this, QString("Invalid Image File"), QString("The selected image could not be found!"));
-        qDebug() << "[EncounterTextEdit] Invalid image file selected for text background";
-        return;
-    }
-
-    QFileInfo fileInfo(imageFileName);
-    if(!fileInfo.isFile())
-    {
-        QMessageBox::critical(nullptr,
-                              QString("DMHelper Image Not Valid"),
-                              QString("The selected image file isn't a file: ") + imageFileName);
-        qDebug() << "[EncounterTextEdit] Image file not a file: " << imageFileName;
-        return;
-    }
-
-    setImageFile(imageFileName);
-}
-*/
-
 void EncounterTextEdit::setFont(const QString& fontFamily)
 {
     _formatter->setFont(fontFamily);
