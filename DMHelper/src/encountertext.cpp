@@ -94,7 +94,7 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
         _imageFile = element.attribute("imageFile"); // Want to keep the filename even if the file was accidentally moved
         if(!_imageFile.isEmpty())
         {
-            LayerImage* imageLayer = new LayerImage(QString("Map"), _imageFile);
+            LayerImage* imageLayer = new LayerImage(QString("Background"), _imageFile);
             imageLayer->inputXML(element, isImport);
             _layerScene.appendLayer(imageLayer);
         }
@@ -220,7 +220,7 @@ void EncounterText::setImageFile(const QString& imageFile)
         return;
 
     LayerImage* layer = dynamic_cast<LayerImage*>(_layerScene.getPriority(DMHelper::LayerType_Image));
-    if((!layer) || (layer->getImageFile() == imageFile))
+    if((layer) && (layer->getImageFile() == imageFile))
         return;
 
     if(!QFile::exists(imageFile))
@@ -242,7 +242,11 @@ void EncounterText::setImageFile(const QString& imageFile)
         return;
     }
 
-    layer->setFileName(imageFile);
+    if(layer)
+        layer->setFileName(imageFile);
+    else
+        _layerScene.appendLayer(new LayerImage(QString("Background"), _imageFile));
+
     _imageFile = imageFile;
     emit imageFileChanged(_imageFile);
     emit dirty();

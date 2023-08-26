@@ -1,7 +1,7 @@
 v2.5.8
 edit dialog: create new text layer
 invisible player video should not start the video playback
-    why does the video need a new screenshot every time?
+why does the video need a new screenshot every time?
 Fog of war from old to new
 
 feature * Scale the initiative list freely

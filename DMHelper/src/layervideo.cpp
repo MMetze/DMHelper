@@ -159,7 +159,6 @@ void LayerVideo::dmUninitialize()
 
 void LayerVideo::dmUpdate()
 {
-
 }
 
 void LayerVideo::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene* scene)

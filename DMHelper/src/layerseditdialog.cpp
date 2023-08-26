@@ -80,7 +80,7 @@ void LayersEditDialog::addLayer()
     items << tr("Image") << tr("Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
-    items << tr("Grid") << tr("Text") << tr("Blank");
+    items << tr("Grid") << tr("Blank");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -93,27 +93,8 @@ void LayersEditDialog::addLayer()
         QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Image File"));
         if(newFileName.isEmpty())
             return;
-/*
-        QImageReader reader(newFileName);
-        QImage imgBackground = reader.read();
-        if(imgBackground.isNull())
-        {
-            qDebug() << "[Map] Not able to read new image file " << newFileName << ": " << reader.error() <<", " << reader.errorString();
-#if !defined(Q_OS_MAC)
-            QMessageBox::critical(nullptr,
-                                  QString("DMHelper Image File Read Error"),
-                                  QString("The selected image """) + newFileName + QString(""" could not be read. It may be too high resolution for DMHelper!"));
-#endif
-            return;
-        }
-
-        if(imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
-            imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
-            */
 
         newLayer = new LayerImage(QString("Image"), newFileName);
-        //qDebug() << "[LayersEditDialog] Trying to add Image layer which is not yet implemented!";
-        //return;
     }
     else if(selectedItem == tr("Video"))
     {
@@ -140,13 +121,6 @@ void LayersEditDialog::addLayer()
     else if(selectedItem == tr("Grid"))
     {
         newLayer = new LayerGrid(QString("Grid"));
-        //qDebug() << "[LayersEditDialog] Trying to add Grid layer which is not yet implemented!";
-        //return;
-    }
-    else if(selectedItem == tr("Text"))
-    {
-        qDebug() << "[LayersEditDialog] Trying to add Text layer which is not yet implemented!";
-        return;
     }
     else if(selectedItem == tr("Blank"))
     {
@@ -158,8 +132,6 @@ void LayersEditDialog::addLayer()
         LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
         blankLayer->setSize(blankDlg.getMapSize());
         newLayer = blankLayer;
-        //qDebug() << "[LayersEditDialog] Trying to add Text layer which is not yet implemented!";
-        //return;
     }
     else
     {
