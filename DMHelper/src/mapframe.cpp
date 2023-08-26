@@ -1341,21 +1341,14 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                // TODO: Layers
                 LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
                 if(layer)
                 {
+                    shapeRect.translate(-layer->getPosition());
                     UndoFowShape* undoShape = new UndoFowShape(layer, MapEditShape(shapeRect, _erase, false));
                     layer->getUndoStack()->push(undoShape);
                     emit dirty();
                 }
-                /*
-                UndoFowShape* undoShape = new UndoFowShape(_mapSource, MapEditShape(shapeRect, _erase, false));
-                _mapSource->getUndoStack()->push(undoShape);
-                _mapSource->paintFoWRect(shapeRect, undoShape->mapEditShape(), &_bwFoWImage, false);
-                emit dirty();
-                emit fowChanged(_bwFoWImage);
-                */
                 cleanupSelectionItems();
             }
             return true;
@@ -1388,21 +1381,14 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDown = true;
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
-            // TODO: Layers
             LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
             if(layer)
             {
+                drawPoint -= layer->getPosition();
                 _undoPath = new UndoFowPath(layer, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
                 layer->getUndoStack()->push(_undoPath);
                 emit dirty();
             }
-            /*
-            _undoPath = new UndoFowPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
-            _mapSource->getUndoStack()->push(_undoPath);
-            _mapSource->paintFoWPoint(drawPoint, _undoPath->mapDrawPath(), &_bwFoWImage, false);
-
-            emit fowChanged(_bwFoWImage);
-            */
             return true;
         }
         else if(event->type() == QEvent::MouseButtonRelease)
@@ -1420,14 +1406,10 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 QPoint drawPoint =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
+                if(_undoPath->getLayer())
+                    drawPoint -= _undoPath->getLayer()->getPosition();
                 _undoPath->addPoint(drawPoint);
                 emit dirty();
-                // TODO: Layers
-                /*
-                _undoPath->addPoint(drawPoint);
-                _mapSource->paintFoWPoint(drawPoint, _undoPath->mapDrawPath(), &_bwFoWImage, false);
-                emit fowChanged(_bwFoWImage);
-                */
             }
             return true;
         }

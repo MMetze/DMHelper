@@ -3,7 +3,6 @@ edit dialog: create new text layer
 invisible player video should not start the video playback
     why does the video need a new screenshot every time?
 Fog of war from old to new
-Editing FoW has an offset based on negative position of scene rect
 
 feature * Scale the initiative list freely
 feature * Change layer with multiple selections
@@ -21,6 +20,8 @@ fixed * Select on the map doesn't select on the widget list
 fixed * find map fitting to battle doesn't work
 fixed * Dead don't disappear when HP set to zero
 fixed * Resize to visible
+fixed * Editing FoW has an offset based on negative position of scene rect
+fixed * Editing area on battle doesn't work
 Not reproducible * resize camera view
 
 Next version

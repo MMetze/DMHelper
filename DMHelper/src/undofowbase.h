@@ -29,6 +29,7 @@ public:
     virtual UndoFowBase* clone() const = 0;
 
     void setLayer(LayerFow* layer);
+    LayerFow* getLayer() const;
 
 protected:
     LayerFow* _layer;

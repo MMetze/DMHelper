@@ -79,7 +79,7 @@ void BattleFrameMapDrawer::handleMouseDown(const QPointF& pos)
     LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
     if(layer)
     {
-        _undoPath = new UndoFowPath(layer, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint()));
+        _undoPath = new UndoFowPath(layer, MapDrawPath(_gridScale * _size / 10, _brushMode, _erase, _smooth, pos.toPoint() - layer->getPosition()));
         layer->getUndoStack()->push(_undoPath);
         //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
         //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
@@ -98,10 +98,10 @@ void BattleFrameMapDrawer::handleMouseMoved(const QPointF& pos)
 {
     //if((!_map) || (!_undoPath) || (!_fow) || (!_glFow))
 
-    if(!_undoPath)
+    if((!_undoPath) || (!_undoPath->getLayer()))
         return;
 
-    _undoPath->addPoint(pos.toPoint());
+    _undoPath->addPoint(pos.toPoint() - _undoPath->getLayer()->getPosition());
     // TODO: Layers
     //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _fow, true);
     //_map->paintFoWPoint(pos.toPoint(), _undoPath->mapDrawPath(), _glFow, false);
@@ -125,6 +125,13 @@ void BattleFrameMapDrawer::drawRect(const QRect& rect)
         return;
 
     // TODO: Layers
+    LayerFow* layer = dynamic_cast<LayerFow*>(_scene->getPriority(DMHelper::LayerType_Fow));
+    if(layer)
+    {
+        UndoFowShape* undoShape = new UndoFowShape(layer, MapEditShape(rect.translated(-layer->getPosition()), _erase, false));
+        layer->getUndoStack()->push(undoShape);
+        emit dirty();
+    }
     /*
     // Changed to ignore smoothing on an area
     UndoFowShape* undoShape = new UndoFowShape(_map, MapEditShape(rect, _erase, false));
