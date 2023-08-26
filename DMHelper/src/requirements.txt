@@ -1,7 +1,4 @@
 v2.5.8
-edit dialog: create new text layer
-invisible player video should not start the video playback
-why does the video need a new screenshot every time?
 Fog of war from old to new
 
 feature * Scale the initiative list freely
@@ -22,6 +19,8 @@ fixed * Dead don't disappear when HP set to zero
 fixed * Resize to visible
 fixed * Editing FoW has an offset based on negative position of scene rect
 fixed * Editing area on battle doesn't work
+fixed * edit dialog: create new text layer
+fixed * invisible player video should not start the video playback
 Not reproducible * resize camera view
 
 Next version

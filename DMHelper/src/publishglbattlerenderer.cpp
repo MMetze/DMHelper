@@ -84,6 +84,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
         connect(&_model->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLBattleRenderer::layerAdded);
         connect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLBattleRenderer::layerRemoved);
         connect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+        connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &PublishGLRenderer::updateWidget);
     }
 }
 

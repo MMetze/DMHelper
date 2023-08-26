@@ -28,6 +28,7 @@ LayerVideo::LayerVideo(const QString& name, const QString& filename, int order, 
     _playerSize(),
 #endif
     _scene(nullptr),
+    _renderer(nullptr),
     _filename(filename),
     _layerScreenshot(),
     _dmScene(nullptr)
@@ -85,7 +86,8 @@ void LayerVideo::applyLayerVisibleDM(bool layerVisible)
 
 void LayerVideo::applyLayerVisiblePlayer(bool layerVisible)
 {
-    Q_UNUSED(layerVisible);
+    if(!layerVisible)
+        cleanupPlayerObject();
 }
 
 void LayerVideo::applyOpacity(qreal opacity)
@@ -110,7 +112,6 @@ void LayerVideo::applyPosition(const QPoint& position)
         _videoObject->setPosition(QPoint(pointTopLeft.x() + position.x(), -pointTopLeft.y() - position.y()));
     }
 #endif
-
 }
 
 void LayerVideo::applySize(const QSize& size)
@@ -168,15 +169,6 @@ void LayerVideo::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene*
     if(!renderer)
         return;
 
-    /*
-    if(!_layerScene)
-        return;
-
-    PublishGLRenderer* renderer = _layerScene->getRenderer();
-    if((!renderer) || (!renderer->getTargetWidget()))
-        return;
-        */
-
 #ifdef LAYERVIDEO_USE_OPENGL
     if(_videoGLPlayer)
         return;
@@ -189,22 +181,8 @@ void LayerVideo::playerGLInitialize(PublishGLRenderer* renderer, PublishGLScene*
 
     connect(this, &LayerVideo::updateProjectionMatrix, renderer, &PublishGLRenderer::updateProjectionMatrix);
 
-    // Create the objects
-#ifdef LAYERVIDEO_USE_OPENGL
-    _videoGLPlayer = new VideoPlayerGLPlayer(_filename,
-                                             renderer->getTargetWidget()->context(),
-                                             renderer->getTargetWidget()->format(),
-                                             true,
-                                             false);
-    connect(_videoGLPlayer, &VideoPlayerGLPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
-    connect(_videoGLPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, renderer, &PublishGLRenderer::updateProjectionMatrix);
-    _videoGLPlayer->restartPlayer();
-#else
-    //_videoPlayer = new VideoPlayer(_filename, _playerSize, true, false);
-    _videoPlayer = new VideoPlayer(_filename, QSize(), true, false);
-    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
-    _videoPlayer->restartPlayer();
-#endif
+    if(_layerVisiblePlayer)
+        createPlayerObjectGL(renderer);
 
     Layer::playerGLInitialize(renderer, scene);
 }
@@ -235,6 +213,7 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
         return;
 
 #ifdef LAYERVIDEO_USE_OPENGL
+    TODO: handle layer visibility like below
     if(!_videoGLPlayer)
         return;
 
@@ -243,6 +222,9 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     _videoGLPlayer->paintGL();
 #else
+    if((!_videoPlayer) && (_renderer))
+        createPlayerObjectGL(_renderer);
+
     if((!_videoPlayer) || (!_videoPlayer->getImage()))
         return;
 
@@ -268,8 +250,6 @@ void LayerVideo::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMa
     functions->glUniformMatrix4fv(_shaderModelMatrixRGBA, 1, GL_FALSE, _videoObject->getMatrixData());
     functions->glUniform1f(_shaderAlphaRGBA, _opacityReference);
 
-    //QMatrix4x4 modelMatrix;
-    //functions->glUniformMatrix4fv(defaultModelMatrix, 1, GL_FALSE, modelMatrix.constData());
     _videoObject->paintGL();
 
     functions->glUseProgram(_shaderProgramRGB);
@@ -409,10 +389,28 @@ void LayerVideo::cleanupDM()
     clearScreenshot();
 }
 
-void LayerVideo::cleanupPlayer()
-{    
-    disconnect(this, &LayerVideo::updateProjectionMatrix, nullptr, nullptr);
+void LayerVideo::createPlayerObjectGL(PublishGLRenderer* renderer)
+{
+    // Create the objects
+#ifdef LAYERVIDEO_USE_OPENGL
+    _videoGLPlayer = new VideoPlayerGLPlayer(_filename,
+                                             renderer->getTargetWidget()->context(),
+                                             renderer->getTargetWidget()->format(),
+                                             true,
+                                             false);
+    connect(_videoGLPlayer, &VideoPlayerGLPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
+    connect(_videoGLPlayer, &VideoPlayerGLPlayer::vbObjectsCreated, renderer, &PublishGLRenderer::updateProjectionMatrix);
+    _videoGLPlayer->restartPlayer();
+#else
+    //_videoPlayer = new VideoPlayer(_filename, _playerSize, true, false);
+    _videoPlayer = new VideoPlayer(_filename, QSize(), true, false);
+    connect(_videoPlayer, &VideoPlayer::frameAvailable, renderer, &PublishGLRenderer::updateWidget);
+    _videoPlayer->restartPlayer();
+#endif
+}
 
+void LayerVideo::cleanupPlayerObject()
+{
 #ifdef LAYERVIDEO_USE_OPENGL
     if(_videoGLPlayer)
     {
@@ -434,6 +432,14 @@ void LayerVideo::cleanupPlayer()
     _videoObject = nullptr;
     _playerSize = QSize();
 #endif
+}
+
+void LayerVideo::cleanupPlayer()
+{    
+    disconnect(this, &LayerVideo::updateProjectionMatrix, nullptr, nullptr);
+
+    cleanupPlayerObject();
 
     _scene = nullptr;
+    _renderer = nullptr;
 }

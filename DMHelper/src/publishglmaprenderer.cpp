@@ -55,6 +55,7 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
         connect(_map, &Map::partyScaleChanged, this, &PublishGLMapRenderer::handlePartyScaleChanged);
         connect(&_map->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLMapRenderer::layerAdded);
         connect(&_map->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+        connect(&_map->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &PublishGLRenderer::updateWidget);
     }
 }
 

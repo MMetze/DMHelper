@@ -42,6 +42,7 @@ PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage te
     {
         connect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLTextRenderer::layerAdded);
         connect(&_encounter->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+        connect(&_encounter->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &PublishGLRenderer::updateWidget);
     }
 }
 
