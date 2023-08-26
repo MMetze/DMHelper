@@ -19,7 +19,6 @@ public:
 
 public slots:
     void setAnimation(bool checked);
-    void setImageFile(const QString& imageFile);
 
     void setColor(const QColor& color);
     void setFontFamily(const QString& fontFamily);
@@ -42,8 +41,6 @@ public slots:
     void showCodeView(bool visible);
 
 signals:
-    void backgroundClicked(bool checked);
-
     // Animation
     void animationClicked(bool checked);
     void speedChanged(int speed);

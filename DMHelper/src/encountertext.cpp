@@ -245,7 +245,7 @@ void EncounterText::setImageFile(const QString& imageFile)
     if(layer)
         layer->setFileName(imageFile);
     else
-        _layerScene.appendLayer(new LayerImage(QString("Background"), _imageFile));
+        _layerScene.appendLayer(new LayerImage(QString("Background"), imageFile));
 
     _imageFile = imageFile;
     emit imageFileChanged(_imageFile);

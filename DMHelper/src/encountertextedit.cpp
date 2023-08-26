@@ -311,6 +311,7 @@ void EncounterTextEdit::setHtml()
     updateAnchors();
 }
 
+/*
 void EncounterTextEdit::setBackgroundImage(bool on)
 {
     if(!_encounter)
@@ -362,6 +363,7 @@ void EncounterTextEdit::browseImageFile()
 
     setImageFile(imageFileName);
 }
+*/
 
 void EncounterTextEdit::setFont(const QString& fontFamily)
 {
@@ -545,7 +547,7 @@ void EncounterTextEdit::publishClicked(bool checked)
 //                _renderer = new PublishGLTextVideoRenderer(_encounter, _textImage);
 //            else
 //                _renderer = new PublishGLTextImageRenderer(_encounter, _prescaledImage, _textImage);
-            _renderer = new PublishGLTextRenderer(_encounter, _textImage);
+            _renderer = new PublishGLTextRenderer(_encounter, _textImage, size());
 
             _renderer->setRotation(_rotation);
             connect(_renderer, &PublishGLTextRenderer::playPauseChanged, this, &EncounterTextEdit::playPauseChanged);

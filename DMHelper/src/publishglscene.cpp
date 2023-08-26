@@ -27,13 +27,6 @@ QRectF PublishGLScene::getSceneRect() const
     return _sceneRect;
 }
 
-/*
-void PublishGLScene::setSceneRect(const QRectF& rect)
-{
-    _sceneRect = rect;
-}
-*/
-
 void PublishGLScene::deriveSceneRectFromSize(const QSizeF& size)
 {
     _sceneRect.setLeft(-size.width() / 2.0);

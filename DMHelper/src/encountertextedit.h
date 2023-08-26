@@ -42,9 +42,11 @@ public slots:
     void clear();
     void setHtml();
 
+    /*
     void setBackgroundImage(bool on);
     void setImageFile(const QString& imageFile);
     void browseImageFile();
+    */
 
     void setFont(const QString& fontFamily);
     void setFontSize(int fontSize);

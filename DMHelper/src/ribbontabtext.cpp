@@ -8,8 +8,6 @@ RibbonTabText::RibbonTabText(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    connect(ui->btnBackground, &QAbstractButton::clicked, this, &RibbonTabText::backgroundClicked);
-
     connect(ui->frameText, &RibbonFrameText::colorChanged, this, &RibbonTabText::colorChanged);
     connect(ui->frameText, &RibbonFrameText::fontFamilyChanged, this, &RibbonTabText::fontFamilyChanged);
     connect(ui->frameText, &RibbonFrameText::fontSizeChanged, this, &RibbonTabText::fontSizeChanged);
@@ -48,11 +46,6 @@ void RibbonTabText::setAnimation(bool checked)
     ui->spinSpeed->setEnabled(checked);
     ui->btnRewind->setEnabled(checked);
     ui->btnPlayPause->setEnabled(checked);
-}
-
-void RibbonTabText::setImageFile(const QString& imageFile)
-{
-    ui->btnBackground->setChecked(!imageFile.isEmpty());
 }
 
 void RibbonTabText::setColor(const QColor& color)
@@ -151,7 +144,6 @@ void RibbonTabText::showEvent(QShowEvent *event)
 
     int frameHeight = height();
 
-    setStandardButtonSize(*ui->lblBackground, *ui->btnBackground, frameHeight);
     setLineHeight(*ui->line_1, frameHeight);
     setStandardButtonSize(*ui->lblPasteRich, *ui->btnPasteRich, frameHeight);
     setStandardButtonSize(*ui->lblHyperlink, *ui->btnHyperlink, frameHeight);
