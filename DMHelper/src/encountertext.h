@@ -57,7 +57,7 @@ public slots:
 signals:
     // Text
     void textChanged(const QString& text);
-    void imageFileChanged(const QString& imageFile);
+//    void imageFileChanged(const QString& imageFile);
 
     // Animation
     void animatedChanged(bool animated);

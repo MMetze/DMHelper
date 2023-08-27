@@ -164,7 +164,7 @@ protected:
     virtual bool belongsToObject(QDomElement& element) override;
     virtual void internalPostProcessXML(const QDomElement &element, bool isImport) override;
 
-    QString _filename; // for compatibility only
+    //QString _filename; // for compatibility only
     //QUndoStack* _undoStack;
     QUuid _audioTrackId;
     bool _playAudio;

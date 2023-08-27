@@ -1,4 +1,8 @@
 v2.5.8
+fixed * old scrolling text doesn't scroll
+fixed * old videos are not recognized, leads to broken mapframe
+party icon not visible
+markers (neverwinter region) seem to not work
 Fog of war from old to new
 
 feature * Scale the initiative list freely
@@ -29,8 +33,9 @@ Next version
 * Make grid button a flat pushbutton that opens its own popup menu
 * Asset library
 * Save new campaign --> default file name is campaign name
-* Remove dead code (e.g. battleframe)
+* Remove dead code (e.g. battleframe, map, layerfow)
 * Add new item dialog instead of pseudo-wizards / clean up mainwindow: newbattle function
+* Switch between party icon and players on a battle (aka toggle initiative)
 
 v2.5.7
 fixed * Crashes when adding an FOW layer

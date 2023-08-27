@@ -482,39 +482,22 @@ Layer* LayerScene::getNearest(Layer* layer, DMHelper::LayerType type) const
 
 QImage LayerScene::mergedImage()
 {
-    QImage result;
+    QImage result(sceneSize().toSize(), QImage::Format_ARGB32_Premultiplied);
+    QPainter painter;
 
-    // TODO: add different layer types here
+    painter.begin(&result);
+
     for(int i = 0; i < _layers.count(); ++i)
     {
-        if((_layers.at(i)) && (_layers.at(i)->getFinalType() == DMHelper::LayerType_Image))
+        if(_layers.at(i))
         {
-            LayerImage* layerImage = nullptr;
-            if(_layers.at(i)->getType() == DMHelper::LayerType_Image)
-            {
-                layerImage = dynamic_cast<LayerImage*>(_layers.at(i));
-            }
-            else if(_layers.at(i)->getType() == DMHelper::LayerType_Reference)
-            {
-                LayerReference* layerReference = dynamic_cast<LayerReference*>(_layers.at(i));
-                if(layerReference)
-                    layerImage = dynamic_cast<LayerImage*>(layerReference->getReferenceLayer());
-            }
-
-            if(layerImage)
-            {
-                if(result.isNull())
-                {
-                    result = layerImage->getImage();
-                }
-                else
-                {
-                    QPainter painter(&result);
-                    painter.drawImage(0, 0, layerImage->getImage());
-                }
-            }
+            QImage oneImage = getLayerImage(_layers.at(i));
+            if(!oneImage.isNull())
+                painter.drawImage(_layers.at(i)->getPosition(), oneImage);
         }
     }
+
+    painter.end();
 
     return result;
 }
@@ -793,4 +776,43 @@ void LayerScene::resetLayerOrders()
 {
     for(int i = 0; i < _layers.count(); ++i)
         _layers[i]->setOrder(i);
+}
+
+QImage LayerScene::getLayerImage(Layer* layer)
+{
+    if(!layer)
+        return QImage();
+
+    if(layer->getType() == DMHelper::LayerType_Image)
+    {
+        LayerImage* layerImage = dynamic_cast<LayerImage*>(layer);
+        if(layerImage)
+            return layerImage->getImage();
+    }
+    else if(layer->getType() == DMHelper::LayerType_Video)
+    {
+        LayerVideo* layerVideo = dynamic_cast<LayerVideo*>(layer);
+        if(layerVideo)
+            return layerVideo->getScreenshot();
+    }
+    else if(layer->getType() == DMHelper::LayerType_Fow)
+    {
+        LayerFow* layerFow = dynamic_cast<LayerFow*>(layer);
+        if(layerFow)
+            return layerFow->getImage();
+    }
+    else if(layer->getType() == DMHelper::LayerType_Blank)
+    {
+        LayerBlank* layerBlank = dynamic_cast<LayerBlank*>(layer);
+        if(layerBlank)
+            return layerBlank->getImage();
+    }
+    else if(layer->getType() == DMHelper::LayerType_Reference)
+    {
+        LayerReference* layerReference = dynamic_cast<LayerReference*>(layer);
+        if(layerReference)
+            return getLayerImage(layerReference->getReferenceLayer());
+    }
+
+    return QImage();
 }

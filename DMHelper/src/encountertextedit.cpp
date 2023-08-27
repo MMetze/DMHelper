@@ -31,7 +31,6 @@ EncounterTextEdit::EncounterTextEdit(QWidget *parent) :
     _textImage(),
     _isDMPlayer(false),
     _isPublishing(false),
-    _isVideo(false),
     _isCodeView(false),
     _targetSize(),
     _rotation(0),
@@ -153,15 +152,18 @@ void EncounterTextEdit::setEncounter(EncounterText* encounter)
 //    }
 
     readEncounter();
-    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
-    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
+//    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SIGNAL(imageFileChanged(const QString&)));
+//    connect(_encounter, SIGNAL(imageFileChanged(const QString&)), this, SLOT(loadImage()));
     connect(_encounter, SIGNAL(textWidthChanged(int)), this, SIGNAL(textWidthChanged(int)));
     connect(_encounter, &EncounterText::textWidthChanged, ui->textBrowser, &TextBrowserMargins::setTextWidth);
     connect(_encounter, &EncounterText::scrollSpeedChanged, this, &EncounterTextEdit::scrollSpeedChanged);
     connect(_encounter, &EncounterText::animatedChanged, this, &EncounterTextEdit::animatedChanged);
     connect(_encounter, &EncounterText::translatedChanged, this, &EncounterTextEdit::translatedChanged);
-    connect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::layerAdded);
     connect(&_encounter->getLayerScene(), &LayerScene::sceneChanged, this, &EncounterTextEdit::handleLayersChanged);
+    connect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::refreshImage);
+    connect(&_encounter->getLayerScene(), &LayerScene::layerRemoved, this, &EncounterTextEdit::refreshImage);
+    connect(&_encounter->getLayerScene(), &LayerScene::sceneChanged, this, &EncounterTextEdit::refreshImage);
+    connect(&_encounter->getLayerScene(), &LayerScene::dirty, this, &EncounterTextEdit::refreshImage);
 
     if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
     {
@@ -190,8 +192,11 @@ void EncounterTextEdit::unsetEncounter(EncounterText* encounter)
 
         _encounter->uninitialize();
 
-        disconnect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::layerAdded);
         disconnect(&_encounter->getLayerScene(), &LayerScene::sceneChanged, this, &EncounterTextEdit::handleLayersChanged);
+        disconnect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &EncounterTextEdit::refreshImage);
+        disconnect(&_encounter->getLayerScene(), &LayerScene::layerRemoved, this, &EncounterTextEdit::refreshImage);
+        disconnect(&_encounter->getLayerScene(), &LayerScene::sceneChanged, this, &EncounterTextEdit::refreshImage);
+        disconnect(&_encounter->getLayerScene(), &LayerScene::dirty, this, &EncounterTextEdit::refreshImage);
         disconnect(_encounter, nullptr, this, nullptr);
         _encounter = nullptr;
     }
@@ -609,31 +614,31 @@ void EncounterTextEdit::readEncounter()
 
     disconnect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
 
-        emit imageFileChanged(_encounter->getImageFile());
-        emit textWidthChanged(_encounter->getTextWidth());
-        emit animatedChanged(_encounter->getAnimated());
-        emit scrollSpeedChanged(_encounter->getScrollSpeed());
-        emit translatedChanged(_encounter->getTranslated());
+//    emit imageFileChanged(_encounter->getImageFile());
+    emit textWidthChanged(_encounter->getTextWidth());
+    emit animatedChanged(_encounter->getAnimated());
+    emit scrollSpeedChanged(_encounter->getScrollSpeed());
+    emit translatedChanged(_encounter->getTranslated());
 
-        bool showCodeView = false;
-        _isCodeView = false;
-        if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    bool showCodeView = false;
+    _isCodeView = false;
+    if(_encounter->getObjectType() == DMHelper::CampaignType_LinkedText)
+    {
+        EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
+        if((linkedText->getFileType() == DMHelper::FileType_HTML) || (linkedText->getFileType() == DMHelper::FileType_Markdown))
         {
-            EncounterTextLinked* linkedText = dynamic_cast<EncounterTextLinked*>(_encounter);
-            if((linkedText->getFileType() == DMHelper::FileType_HTML) || (linkedText->getFileType() == DMHelper::FileType_Markdown))
-            {
-                showCodeView = true;
-                emit codeViewChanged(_isCodeView);
-            }
+            showCodeView = true;
+            emit codeViewChanged(_isCodeView);
         }
-        emit codeViewVisible(showCodeView);
+    }
+    emit codeViewVisible(showCodeView);
 
-        ui->textBrowser->setTextWidth(_encounter->getTextWidth());
-        loadImage();
+    ui->textBrowser->setTextWidth(_encounter->getTextWidth());
+    loadImage();
 
-        setAnimated(_encounter->getAnimated());
-        setTranslated(_encounter->getTranslated());
-        setHtml();
+    setAnimated(_encounter->getAnimated());
+    setTranslated(_encounter->getTranslated());
+    setHtml();
 
     connect(ui->textBrowser, SIGNAL(textChanged()), this, SLOT(storeEncounter()));
 }
@@ -671,31 +676,13 @@ void EncounterTextEdit::loadImage()
     _backgroundImage = QImage();
     _backgroundImageScaled = QImage();
 
-    _isVideo = false;
     _backgroundImage = _encounter->getLayerScene().mergedImage();
-    scaleBackgroundImage();
-    /*
-    if(!_encounter->getImageFile().isEmpty())
-    {
-        QFileInfo fileInfo(_encounter->getImageFile());
-        if(fileInfo.isFile())
-        {
-            if(_backgroundImage.load(_encounter->getImageFile()))
-            {
-                scaleBackgroundImage();
-            }
-            else
-            {
-                extractDMScreenshot();
-                _isVideo = true;
-            }
-        }
-    }
-    */
 
+    scaleBackgroundImage();
     setPublishCheckable();
 }
 
+/*
 void EncounterTextEdit::handleScreenshotReady(const QImage& image)
 {
     _backgroundImage = image;
@@ -703,6 +690,7 @@ void EncounterTextEdit::handleScreenshotReady(const QImage& image)
     scaleBackgroundImage();
     update();
 }
+*/
 
 void EncounterTextEdit::handleLayersChanged()
 {
@@ -712,9 +700,8 @@ void EncounterTextEdit::handleLayersChanged()
     emit setLayers(_encounter->getLayerScene().getLayers(), _encounter->getLayerScene().getSelectedLayerIndex());
 }
 
-void EncounterTextEdit::layerAdded(Layer* layer)
+void EncounterTextEdit::refreshImage()
 {
-    Q_UNUSED(layer);
     loadImage();
     update();
 }
@@ -806,32 +793,9 @@ void EncounterTextEdit::drawTextImage(QPaintDevice* target)
     painter.drawImage(drawPoint, _textImage, _textImage.rect());
 }
 
-void EncounterTextEdit::extractDMScreenshot()
-{
-    if(!_encounter)
-        return;
-
-    VideoPlayerGLScreenshot* screenshot = new VideoPlayerGLScreenshot(_encounter->getImageFile());
-    connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &EncounterTextEdit::handleScreenshotReady);
-    screenshot->retrieveScreenshot();
-}
-
-bool EncounterTextEdit::isVideo() const
-{
-    return _isVideo;
-}
-
-bool EncounterTextEdit::isAnimated() const
-{
-    if(!_encounter)
-        return false;
-    else
-        return((isVideo()) || (_encounter->getAnimated()));
-}
-
 void EncounterTextEdit::setPublishCheckable()
 {
-    emit checkableChanged(isAnimated());
+    emit checkableChanged(_encounter ? _encounter->getAnimated() : false);
 }
 
 QSize EncounterTextEdit::getRotatedTargetSize()

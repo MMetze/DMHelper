@@ -108,10 +108,9 @@ protected slots:
 
     void takeFocus();
     void loadImage();
-    void handleScreenshotReady(const QImage& image);
     void handleLayersChanged();
 
-    void layerAdded(Layer* layer);
+    void refreshImage();
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -122,10 +121,6 @@ protected:
     QImage getDocumentTextImage();
     void drawTextImage(QPaintDevice* target);
 
-    void extractDMScreenshot();
-
-    bool isVideo() const;
-    bool isAnimated() const;
     void setPublishCheckable();
     QSize getRotatedTargetSize();
 
@@ -143,7 +138,6 @@ protected:
 
     bool _isDMPlayer;
     bool _isPublishing;
-    bool _isVideo;
     bool _isCodeView;
 
     QSize _targetSize;

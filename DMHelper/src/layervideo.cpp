@@ -43,7 +43,8 @@ LayerVideo::~LayerVideo()
 
 void LayerVideo::inputXML(const QDomElement &element, bool isImport)
 {
-    _filename = element.attribute("videoFile");
+    if(element.hasAttribute("videoFile"))
+        _filename = element.attribute("videoFile");
 
     Layer::inputXML(element, isImport);
 }
@@ -305,6 +306,8 @@ void LayerVideo::handleScreenshotReady(const QImage& image)
 
     if(_size.isEmpty())
         setSize(_layerScreenshot.size());
+
+    emit dirty();
 }
 
 void LayerVideo::requestScreenshot()

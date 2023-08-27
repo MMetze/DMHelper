@@ -30,6 +30,8 @@ public:
     virtual void applyPosition(const QPoint& position) override;
     virtual void applySize(const QSize& size) override;
 
+    QImage getImage() const;
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene* scene) override;

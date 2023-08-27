@@ -25,7 +25,7 @@
 
 Map::Map(const QString& mapName, QObject *parent) :
     CampaignObjectBase(mapName, parent),
-    _filename(), // for compatibility only
+    //_filename(), // for compatibility only
     //_undoStack(nullptr),
     _audioTrackId(),
     _playAudio(false),
@@ -101,90 +101,31 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     {
         int partyScale = element.attribute("partyScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
         _layerScene.setScale(partyScale);
-        LayerImage* imageLayer = new LayerImage(QString("Map"), _filename);
-        imageLayer->inputXML(element, isImport);
-        /*
-        // For backwards compatibility only, should be part of a layer
-        _filename = element.attribute("filename"); // Even if it can't be found, don't want to lose the data
-        if(_filename == QString(".")) // In case the map file is this trivial, it can be ignored
-            _filename.clear();
 
-        // For backwards compatibility only, should be part of a layer
-        QDomElement filterElement = element.firstChildElement(QString("filter"));
-        if(!filterElement.isNull())
+        Layer* imageLayer = nullptr;
+        QString filename = element.attribute("filename");
+        if((filename.isEmpty()) || (filename == QString(".")))
         {
-            imageLayer->setApplyFilter(true);
-            //_filterApplied = true;
-
-            MapColorizeFilter filter;
-            filter._r2r = filterElement.attribute("r2r", QString::number(1.0)).toDouble();
-            filter._g2r = filterElement.attribute("g2r", QString::number(0.0)).toDouble();
-            filter._b2r = filterElement.attribute("b2r", QString::number(0.0)).toDouble();
-            filter._r2g = filterElement.attribute("r2g", QString::number(0.0)).toDouble();
-            filter._g2g = filterElement.attribute("g2g", QString::number(1.0)).toDouble();
-            filter._b2g = filterElement.attribute("b2g", QString::number(0.0)).toDouble();
-            filter._r2b = filterElement.attribute("r2b", QString::number(0.0)).toDouble();
-            filter._g2b = filterElement.attribute("g2b", QString::number(0.0)).toDouble();
-            filter._b2b = filterElement.attribute("b2b", QString::number(1.0)).toDouble();
-            filter._sr = filterElement.attribute("sr", QString::number(1.0)).toDouble();
-            filter._sg = filterElement.attribute("sg", QString::number(1.0)).toDouble();
-            filter._sb = filterElement.attribute("sb", QString::number(1.0)).toDouble();
-
-            filter._isOverlay = static_cast<bool>(filterElement.attribute("isOverlay", QString::number(1)).toInt());
-            filter._overlayColor.setNamedColor(filterElement.attribute("overlayColor", QString("#000000")));
-            filter._overlayAlpha = filterElement.attribute("overlayAlpha", QString::number(128)).toInt();
-
-            imageLayer->setFilter(filter);
+            imageLayer = new LayerImage(QString("Map"), QString());
         }
-        */
-
-        _layerScene.appendLayer(imageLayer);
-
-        LayerFow* fowLayer = new LayerFow(QString("FoW"));
-        fowLayer->inputXML(element, isImport);
-        _layerScene.appendLayer(fowLayer);
-        /*
-        QDomElement actionsElement = element.firstChildElement(QString("actions"));
-        if(!actionsElement.isNull())
+        else
         {
-            QDomElement actionElement = actionsElement.firstChildElement(QString("action"));
-            while(!actionElement.isNull())
-            {
-                UndoFowBase* newAction = nullptr;
-                switch(actionElement.attribute(QString("type")).toInt())
-                {
-                    case DMHelper::ActionType_Fill:
-                        newAction = new UndoFowFill(nullptr, MapEditFill(QColor()));
-                        break;
-                    case DMHelper::ActionType_Path:
-                        newAction = new UndoFowPath(nullptr, MapDrawPath());
-                        break;
-                    case DMHelper::ActionType_Point:
-                        newAction = new UndoFowPoint(nullptr, MapDrawPoint(0, DMHelper::BrushType_Circle, true, true, QPoint()));
-                        break;
-                    case DMHelper::ActionType_Rect:
-                        newAction = new UndoFowShape(nullptr, MapEditShape(QRect(), true, true));
-                        break;
-                        // TODO: Layers - where should the markers go?
-                    case DMHelper::ActionType_SetMarker:
-                        newAction = new UndoMarker(nullptr, MapMarker());
-                        break;
-                    case DMHelper::ActionType_Base:
-                    default:
-                        break;
-                }
-
-                if(newAction)
-                {
-                    newAction->inputXML(actionElement, isImport);
-                    _undoItems.append(newAction);
-                }
-
-                actionElement = actionElement.nextSiblingElement(QString("action"));
-            }
+            QImageReader reader(filename);
+            if(reader.canRead())
+                imageLayer = new LayerImage(QString("Map"), filename);
+            else
+                imageLayer = new LayerVideo(QString("Map"), filename);
         }
-        */
 
+        if(imageLayer)
+        {
+            imageLayer->inputXML(element, isImport);
+            _layerScene.appendLayer(imageLayer);
+
+            LayerFow* fowLayer = new LayerFow(QString("FoW"));
+            fowLayer->inputXML(element, isImport);
+            _layerScene.appendLayer(fowLayer);
+        }
     }
 
     CampaignObjectBase::inputXML(element, isImport);
@@ -196,7 +137,7 @@ void Map::copyValues(const CampaignObjectBase* other)
     if(!otherMap)
         return;
 
-    _filename = otherMap->_filename;
+    //_filename = otherMap->_filename;
     _audioTrackId = otherMap->getAudioTrackId();
     _playAudio = otherMap->getPlayAudio();
     _mapRect = otherMap->getMapRect();

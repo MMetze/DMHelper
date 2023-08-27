@@ -2,6 +2,7 @@
 #include "dmconstants.h"
 #include "encountertextedit.h"
 #include "layerimage.h"
+#include "layervideo.h"
 #include <QDomDocument>
 #include <QDomElement>
 #include <QDomCDATASection>
@@ -9,6 +10,7 @@
 #include <QTextCursor>
 #include <QDir>
 #include <QMessageBox>
+#include <QImageReader>
 #include <QDebug>
 
 const int ENCOUNTERTYPE_SCROLLINGTEXT = 5;
@@ -94,7 +96,13 @@ void EncounterText::inputXML(const QDomElement &element, bool isImport)
         _imageFile = element.attribute("imageFile"); // Want to keep the filename even if the file was accidentally moved
         if(!_imageFile.isEmpty())
         {
-            LayerImage* imageLayer = new LayerImage(QString("Background"), _imageFile);
+            Layer* imageLayer = nullptr;
+            QImageReader reader(_imageFile);
+            if(reader.canRead())
+                imageLayer = new LayerImage(QString("Background"), _imageFile);
+            else
+                imageLayer = new LayerVideo(QString("Background"), _imageFile);
+
             imageLayer->inputXML(element, isImport);
             _layerScene.appendLayer(imageLayer);
         }
@@ -248,7 +256,7 @@ void EncounterText::setImageFile(const QString& imageFile)
         _layerScene.appendLayer(new LayerImage(QString("Background"), imageFile));
 
     _imageFile = imageFile;
-    emit imageFileChanged(_imageFile);
+//    emit imageFileChanged(_imageFile);
     emit dirty();
 }
 

@@ -104,6 +104,13 @@ void LayerBlank::applySize(const QSize& size)
         _publishRect->setSize(size);
 }
 
+QImage LayerBlank::getImage() const
+{
+    QImage result(_size, QImage::Format_ARGB32_Premultiplied);
+    result.fill(_color);
+    return result;
+}
+
 void LayerBlank::dmInitialize(QGraphicsScene* scene)
 {
     if(!scene)
