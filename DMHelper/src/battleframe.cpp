@@ -3152,6 +3152,7 @@ void BattleFrame::removeRollover()
     _hoverFrame = nullptr;
 }
 
+/*
 void BattleFrame::handleScreenshotReady(const QImage& image)
 {
     if((image.isNull()) || (!_mapDrawer) || (!_model) || (!_model->getMap()))
@@ -3177,6 +3178,7 @@ void BattleFrame::handleScreenshotReady(const QImage& image)
         _cameraRect = new CameraRect(_model->getCameraRect(), *_scene, ui->graphicsView->viewport(), _isGridLocked);
     emit cameraRectChanged(_model->getCameraRect());
 }
+*/
 
 void BattleFrame::rendererActivated(PublishGLBattleRenderer* renderer)
 {
@@ -3982,6 +3984,7 @@ void BattleFrame::setCameraToView()
     emit cameraRectChanged(viewRect);
 }
 
+/*
 void BattleFrame::extractDMScreenshot()
 {
     if((!_model) || (!_model->getMap()))
@@ -3991,6 +3994,7 @@ void BattleFrame::extractDMScreenshot()
     connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &BattleFrame::handleScreenshotReady);
     screenshot->retrieveScreenshot();
 }
+*/
 
 BattleDialogModelEffect* BattleFrame::createEffect(int type, int size, int width, const QColor& color, const QString& filename)
 {

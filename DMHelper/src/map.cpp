@@ -13,9 +13,10 @@
 #include "layerimage.h"
 #include "layervideo.h"
 #include "layerfow.h"
+#include "undomarker.h"
+#include "mapmarkergraphicsitem.h"
 #include <QDomDocument>
 #include <QDomElement>
-#include <QUndoStack>
 #include <QDir>
 #include <QPainter>
 #include <QImageReader>
@@ -52,9 +53,11 @@ Map::Map(const QString& mapName, QObject *parent) :
     _lineColor(Qt::yellow),
     _lineWidth(1),
     _mapColor(Qt::white),
-    _mapSize()
+    _mapSize(),
+    _markerList()
 {
 //    _undoStack = new QUndoStack(this);
+    //_markerStack = new QUndoStack(); // TODO: why does not leaking this avoid a crash at shutdown?
     connect(&_layerScene, &LayerScene::dirty, this, &Map::dirty);
 }
 
@@ -92,6 +95,21 @@ void Map::inputXML(const QDomElement &element, bool isImport)
     _mapScale = element.attribute("mapScale", QString::number(100)).toInt();
     _showMarkers = static_cast<bool>(element.attribute("showMarkers", QString::number(1)).toInt());
 
+    // Load the markers
+    QDomElement markersElement = element.firstChildElement(QString("markers"));
+    if(!markersElement.isNull())
+    {
+        QDomElement markerElement = markersElement.firstChildElement(QString("marker"));
+        while(!markerElement.isNull())
+        {
+            UndoMarker* newMarker = new UndoMarker(MapMarker());
+            newMarker->inputXML(markerElement, isImport);
+            addMarker(newMarker);
+
+            markerElement = markerElement.nextSiblingElement(QString("marker"));
+        }
+    }
+
     QDomElement layersElement = element.firstChildElement(QString("layer-scene"));
     if(!layersElement.isNull())
     {
@@ -125,6 +143,24 @@ void Map::inputXML(const QDomElement &element, bool isImport)
             LayerFow* fowLayer = new LayerFow(QString("FoW"));
             fowLayer->inputXML(element, isImport);
             _layerScene.appendLayer(fowLayer);
+
+            // Step through the FoW stack and pick out any markers for the Map's marker stack
+            QDomElement actionsElement = element.firstChildElement(QString("actions"));
+            if(!actionsElement.isNull())
+            {
+                QDomElement actionElement = actionsElement.firstChildElement(QString("action"));
+                while(!actionElement.isNull())
+                {
+                    if(actionElement.attribute(QString("type")).toInt() == DMHelper::ActionType_SetMarker)
+                    {
+                        UndoMarker* newMarker = new UndoMarker(MapMarker());
+                        newMarker->inputXML(actionElement, isImport);
+                        addMarker(newMarker);
+                    }
+
+                    actionElement = actionElement.nextSiblingElement(QString("action"));
+                }
+            }
         }
     }
 
@@ -173,6 +209,13 @@ int Map::getObjectType() const
 const QImage& Map::getImage() const
 {
     return _imgBackground;
+}
+*/
+
+/*
+QUndoStack* Map::getMarkerStack()
+{
+    return _markerStack;
 }
 */
 
@@ -384,19 +427,37 @@ const QRect& Map::getCameraRect() const
     return _cameraRect;
 }
 
+void Map::initializeMarkers(QGraphicsScene* scene)
+{
+    if(!scene)
+        return;
+
+    foreach(UndoMarker* marker, _markerList)
+    {
+        if(marker)
+        {
+            marker->createMarkerItem(scene, 0.04 * static_cast<qreal>(getPartyScale()));
+            addMarker(marker);
+        }
+    }
+}
+
+void Map::cleanupMarkers()
+{
+    foreach(UndoMarker* marker, _markerList)
+    {
+        if(marker)
+            marker->cleanupMarkerItem();
+    }
+}
+
 UndoMarker* Map::getMapMarker(int id)
 {
-    // TODO: Layers
-    /*
-    // Search the undo stack for new markers
-    for(int i = 0; i < _undoStack->count(); ++i)
+    foreach(UndoMarker* marker, _markerList)
     {
-        // This is a little evil, will need to do it better with a full undo/redo implementation...
-        UndoMarker* undoItem = const_cast<UndoMarker*>(dynamic_cast<const UndoMarker*>(_undoStack->command(i)));
-        if((undoItem) && (undoItem->getMarker().getID() == id))
-            return undoItem;
+        if((marker) && (marker->getMarker().getID() == id))
+            return marker;
     }
-    */
 
     return nullptr;
 }
@@ -408,9 +469,7 @@ bool Map::getShowMarkers() const
 
 int Map::getMarkerCount() const
 {
-    // TODO: Layers
-    //return _undoStack->count();
-    return 0;
+    return _markerList.count();
 }
 
 void Map::addMapItem(MapDraw* mapItem)
@@ -769,6 +828,38 @@ QImage Map::getPreviewImage()
     return isFilterApplied() ? getFilter().apply(previewImage) : previewImage;
 }
 
+void Map::addMarker(UndoMarker* marker)
+{
+    if(!marker)
+        return;
+
+    if(marker->getMarkerItem())
+        marker->getMarkerItem()->setVisible(getShowMarkers());
+
+    connect(marker, &UndoMarker::mapMarkerMoved, this, &Map::mapMarkerMoved);
+    connect(marker, &UndoMarker::mapMarkerEdited, this, &Map::mapMarkerEdited);
+    connect(marker, &UndoMarker::unselectParty, this, &Map::unselectParty);
+    connect(marker, &UndoMarker::mapMarkerActivated, this, &Map::mapMarkerActivated);
+
+    _markerList.append(marker);
+}
+
+void Map::removeMarker(UndoMarker* marker)
+{
+    if(!marker)
+        return;
+
+    if(_markerList.contains(marker))
+    {
+        disconnect(marker, &UndoMarker::mapMarkerMoved, this, &Map::mapMarkerMoved);
+        disconnect(marker, &UndoMarker::mapMarkerEdited, this, &Map::mapMarkerEdited);
+        disconnect(marker, &UndoMarker::unselectParty, this, &Map::unselectParty);
+        disconnect(marker, &UndoMarker::mapMarkerActivated, this, &Map::mapMarkerActivated);
+
+        _markerList.removeAll(marker);
+    }
+}
+
 bool Map::initialize()
 {
     if(_initialized)
@@ -856,10 +947,12 @@ void Map::updateFoW()
     //emit requestFoWUpdate();
 }
 
+/*
 void Map::addMapMarker(UndoMarker* undoEntry, MapMarker* marker)
 {
     emit requestMapMarker(undoEntry, marker);
 }
+*/
 
 void Map::setParty(Party* party)
 {
@@ -1059,6 +1152,18 @@ void Map::internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targe
     element.setAttribute("cameraRectY", _cameraRect.y());
     element.setAttribute("cameraRectWidth", _cameraRect.width());
     element.setAttribute("cameraRectHeight", _cameraRect.height());
+
+    QDomElement markersElement = doc.createElement("markers");
+    foreach(UndoMarker* marker, _markerList)
+    {
+        if(marker)
+        {
+            QDomElement markerElement = doc.createElement("marker");
+            marker->outputXML(doc, markerElement, targetDirectory, isExport);
+            markersElement.appendChild(markerElement);
+        }
+    }
+    element.appendChild(markersElement);
 
     CampaignObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

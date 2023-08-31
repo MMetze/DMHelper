@@ -3,6 +3,8 @@
 
 #include "camerascene.h"
 
+class UndoMarker;
+
 class MapFrameScene : public CameraScene
 {
     Q_OBJECT
@@ -16,8 +18,8 @@ signals:
     void mapZoom(int delta);
 
     void addMarker(const QPointF& pos);
-    void editMarker(int marker);
-    void deleteMarker(int marker);
+    void editMarker(UndoMarker* marker);
+    void deleteMarker(UndoMarker* marker);
     void centerView(const QPointF& pos);
     void clearFoW();
 

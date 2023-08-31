@@ -289,7 +289,7 @@ private slots:
 
     void removeRollover();
 
-    void handleScreenshotReady(const QImage& image);
+//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
 
@@ -342,7 +342,7 @@ private:
     void setCameraToView();
 
     // Helper functions to simplify rendering
-    void extractDMScreenshot();
+    //void extractDMScreenshot();
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 

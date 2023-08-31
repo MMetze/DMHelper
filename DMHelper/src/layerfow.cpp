@@ -64,9 +64,7 @@ void LayerFow::inputXML(const QDomElement &element, bool isImport)
                 case DMHelper::ActionType_Rect:
                     newAction = new UndoFowShape(nullptr, MapEditShape(QRect(), true, true));
                     break;
-                case DMHelper::ActionType_SetMarker: // TODO: Layers - should markers be on the FOW layer? I think not...
-                    newAction = new UndoMarker(nullptr, MapMarker());
-                    break;
+                case DMHelper::ActionType_SetMarker: // Don't do anything with these in an FOW layer
                 case DMHelper::ActionType_Base:
                 default:
                     break;

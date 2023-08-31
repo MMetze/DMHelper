@@ -31,6 +31,7 @@ public:
 
     // From ILayerImageSource
     //virtual const QImage& getImage() const override;
+//    QUndoStack* getMarkerStack();
 
     // Local
     QString getFileName() const;
@@ -68,6 +69,8 @@ public:
 
     const QRect& getCameraRect() const;
 
+    void initializeMarkers(QGraphicsScene* scene);
+    void cleanupMarkers();
     UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
     int getMarkerCount() const;
@@ -107,10 +110,13 @@ public:
 
     QImage getPreviewImage();
 
+    void addMarker(UndoMarker* marker);
+    void removeMarker(UndoMarker* marker);
+
 signals:
     //void executeUndo();
     //void requestFoWUpdate();
-    void requestMapMarker(UndoMarker* undoEntry, MapMarker* marker);
+    //void requestMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void partyChanged(Party* party);
     void partyIconChanged(const QString& partyIcon);
@@ -123,6 +129,11 @@ signals:
     void distanceLineTypeChanged(int lineType);
     void distanceLineWidthChanged(int lineWidth);
 
+    void mapMarkerMoved(UndoMarker* marker);
+    void mapMarkerEdited(UndoMarker* marker);
+    void unselectParty(bool unselect);
+    void mapMarkerActivated(UndoMarker* marker);
+
     void showMarkersChanged(bool showMarkers);
 
     void mapImageChanged(const QImage& image);
@@ -134,7 +145,7 @@ public slots:
     void undoPaint();
     void updateFoW();
 
-    void addMapMarker(UndoMarker* undoEntry, MapMarker* marker);
+//    void addMapMarker(UndoMarker* undoEntry, MapMarker* marker);
 
     void setParty(Party* party);
     void setPartyIcon(const QString& partyIcon);
@@ -198,6 +209,8 @@ protected:
     // For a generic map
     QColor _mapColor;
     QSize _mapSize;
+
+    QList<UndoMarker*> _markerList;
 };
 
 #endif // MAP_H
