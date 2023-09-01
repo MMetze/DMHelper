@@ -435,10 +435,7 @@ void Map::initializeMarkers(QGraphicsScene* scene)
     foreach(UndoMarker* marker, _markerList)
     {
         if(marker)
-        {
             marker->createMarkerItem(scene, 0.04 * static_cast<qreal>(getPartyScale()));
-            addMarker(marker);
-        }
     }
 }
 
