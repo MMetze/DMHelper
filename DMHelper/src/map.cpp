@@ -448,6 +448,7 @@ void Map::cleanupMarkers()
     }
 }
 
+/*
 UndoMarker* Map::getMapMarker(int id)
 {
     foreach(UndoMarker* marker, _markerList)
@@ -458,10 +459,16 @@ UndoMarker* Map::getMapMarker(int id)
 
     return nullptr;
 }
+*/
 
 bool Map::getShowMarkers() const
 {
     return _showMarkers;
+}
+
+QList<UndoMarker*> Map::getMarkers()
+{
+    return _markerList;
 }
 
 int Map::getMarkerCount() const

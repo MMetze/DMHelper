@@ -500,6 +500,24 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
     if(!_map->getShowMarkers())
         return;
 
+    QList<UndoMarker*> markerList = _map->getMarkers();
+    foreach(UndoMarker* marker, markerList)
+    {
+        if((marker) && (marker->getMarker().isPlayerVisible()))
+        {
+            MapMarkerGraphicsItem* markerItem = marker->getMarkerItem();
+            if((markerItem) && (!markerItem->getGraphicsItemPixmap().isNull()))
+            {
+                QImage markerImage = markerItem->getGraphicsItemPixmap().toImage();
+                PublishGLImage* newMarkerItem = new PublishGLImage(markerImage, false);
+                QPointF markerTopLeft = markerItem->getTopLeft();
+                newMarkerItem->setPosition(markerItem->x() + markerTopLeft.x() - (sceneSize.width() / 2),
+                                           (sceneSize.height() / 2) - (markerItem->y() + markerTopLeft.y() + markerImage.height()));
+
+                _markerTokens.append(newMarkerItem);
+            }
+        }
+    }
     // TODO: Layers
     /*
     QUndoStack* stack = _map->getUndoStack();

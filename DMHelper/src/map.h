@@ -71,8 +71,9 @@ public:
 
     void initializeMarkers(QGraphicsScene* scene);
     void cleanupMarkers();
-    UndoMarker* getMapMarker(int id);
+//    UndoMarker* getMapMarker(int id);
     bool getShowMarkers() const;
+    QList<UndoMarker*> getMarkers();
     int getMarkerCount() const;
 
     void addMapItem(MapDraw* mapItem);
