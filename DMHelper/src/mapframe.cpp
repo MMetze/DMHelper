@@ -167,10 +167,10 @@ void MapFrame::mapMarkerMoved(UndoMarker* marker)
         return;
 
     if(marker->getMarkerItem())
-    {
         marker->getMarker().setPosition(marker->getMarkerItem()->pos().toPoint());
-        emit dirty();
-    }
+
+    emit dirty();
+    emit markerChanged();
 }
 
 void MapFrame::activateMapMarker(UndoMarker* marker)
