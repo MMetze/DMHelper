@@ -15,6 +15,7 @@ class EncounterBattle;
 class BattleDialogModel;
 class BattleDialogLogger;
 class Grid;
+class GridConfig;
 class Character;
 class Map;
 class QTimer;
@@ -61,7 +62,6 @@ public:
     QList<BattleDialogModelCombatant*> getLivingMonsters() const;
 
     void recreateCombatantWidgets();
-//    void recenterCombatants();
 
     QRect viewportRect();
     QPoint viewportCenter();
@@ -96,11 +96,11 @@ public slots:
     void setYOffset(int yOffset);
     void setGridWidth(int gridWidth);
     void setGridColor(const QColor& gridColor);
-    //void setGridVisible(bool gridVisible);
     void setGridLocked(bool gridLocked);
     void setGridLockScale(qreal gridLockScale);
 
     void setInitiativeType(int initiativeType);
+    void setInitiativeScale(qreal initiativeScale);
     void setShowCountdown(bool showCountdown);
     void setCountdownDuration(int countdownDuration);
     void setPointerFile(const QString& filename);
@@ -169,7 +169,6 @@ public slots:
     virtual void publishClicked(bool checked) override;
     virtual void setRotation(int rotation) override;
     virtual void setBackgroundColor(const QColor& color) override;
-    //virtual void reloadObject() override;
     virtual void editLayers() override;
 
 signals:
@@ -184,7 +183,7 @@ signals:
 
     void modelChanged(BattleDialogModel* model);
 
-    void gridScaleChanged(int gridScale);
+    void gridConfigChanged(const GridConfig& config);
     void zoomSelectToggled(bool enabled);
 
     void cameraSelectToggled(bool enabled);
@@ -215,7 +214,6 @@ protected:
 
 private slots:
     void updateCombatantVisibility();
-//    void updateEffectLayerVisibility();
     void updateMap();
     void updateRounds();
     void handleContextMenu(BattleDialogModelCombatant* combatant, const QPoint& position);
@@ -227,6 +225,8 @@ private slots:
     void handleCombatantHover(BattleDialogModelCombatant* combatant, bool hover);
     void handleCombatantActivate(BattleDialogModelCombatant* combatant);
     void handleCombatantRemove(BattleDialogModelCombatant* combatant);
+    void handleCombatantAdded(BattleDialogModelCombatant* combatant);
+    void handleCombatantRemoved(BattleDialogModelCombatant* combatant);
     void handleCombatantChangeLayer(BattleDialogModelCombatant* combatant);
     void handleCombatantDamage(BattleDialogModelCombatant* combatant);
     void handleCombatantHeal(BattleDialogModelCombatant* combatant);
@@ -246,6 +246,7 @@ private slots:
     void handleMapMouseRelease(const QPointF& pos);
     void handleSceneChanged(const QList<QRectF> &region);
     void handleLayersChanged();
+    void handleLayerSelected(Layer* layer);
 
     void itemLink();
     void itemUnlink();
@@ -272,7 +273,6 @@ private slots:
     void handleRubberBandChanged(QRect rubberBandRect, QPointF fromScenePoint, QPointF toScenePoint);
 
     void setCombatantVisibility(bool aliveVisible, bool deadVisible);
-    //void setEffectLayerVisibility(bool visibility);
 
     void setMapCursor();
     void setCameraSelectable(bool selectable);
@@ -289,10 +289,9 @@ private slots:
 
     void removeRollover();
 
-    void handleScreenshotReady(const QImage& image);
+//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLBattleRenderer* renderer);
     void rendererDeactivated();
-//      void updateRendererGrid();
 
     // State Machine
     void stateUpdated();
@@ -314,6 +313,9 @@ private:
     CombatantWidget* getWidgetFromCombatant(BattleDialogModelCombatant* combatant) const;
     void moveRectToPixmap(QGraphicsItem* rectItem, QGraphicsPixmapItem* pixmapItem);
     BattleDialogModelCombatant* getNextCombatant(BattleDialogModelCombatant* combatant);
+
+    void moveCombatantToLayer(BattleDialogModelCombatant* combatant, LayerTokens* newLayer);
+    void moveEffectToLayer(BattleDialogModelEffect* effect, LayerTokens* newLayer, QList<Layer*> tokenLayers);
 
     void updatePublishEnable();
 
@@ -340,13 +342,12 @@ private:
     void setCameraToView();
 
     // Helper functions to simplify rendering
-    void extractDMScreenshot();
+    //void extractDMScreenshot();
 
     BattleDialogModelEffect* createEffect(int type, int size, int width, const QColor& color, const QString& filename);
 
     bool isItemInEffect(QGraphicsPixmapItem* item, QGraphicsItem* effect);
-//    void removeEffectsFromItem(QGraphicsPixmapItem* item);
-//    void applyEffectToItem(QGraphicsPixmapItem* item, BattleDialogModelEffect* effect);
+    LayerTokens* getLayerFromEffect(QList<Layer*> tokenLayers, BattleDialogModelEffect* effect);
     void applyPersonalEffectToItem(QGraphicsPixmapItem* item);
 
     void startMovement(BattleDialogModelCombatant* combatant, QGraphicsPixmapItem* item, int speed);
@@ -365,7 +366,6 @@ private:
     BattleDialogLogger* _logger;
 
     QMap<BattleDialogModelCombatant*, CombatantWidget*> _combatantWidgets;
-//    QMap<BattleDialogModelCombatant*, QGraphicsPixmapItem*> _combatantIcons;
 
     BattleFrameStateMachine _stateMachine;
 
@@ -380,8 +380,6 @@ private:
     QGraphicsItem* _publishEffectItem;
 
     BattleDialogGraphicsScene* _scene;
-//    QGraphicsPixmapItem* _background;
-//    QGraphicsPixmapItem* _fow;
     QGraphicsPixmapItem* _activePixmap;
     qreal _activeScale;
     qreal _selectedScale;
@@ -412,6 +410,7 @@ private:
     PublishGLBattleRenderer* _renderer;
 
     int _initiativeType;
+    qreal _initiativeScale;
     bool _showCountdown;
     int _countdownDuration;
     QColor _countdownColor;

@@ -206,7 +206,10 @@ QIcon ObjectImportDialog::objectIcon(CampaignObjectBase* object)
 {
     if(!object)
         return QIcon();
+    else
+        return object->getIcon();
 
+    /*
     switch(object->getObjectType())
     {
         case DMHelper::CampaignType_Party:
@@ -238,5 +241,6 @@ QIcon ObjectImportDialog::objectIcon(CampaignObjectBase* object)
         default:
             return QIcon();
     }
+    */
 }
 

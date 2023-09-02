@@ -3,6 +3,7 @@
 #include "monsterclass.h"
 #include <QDomElement>
 #include <QDir>
+#include <QIcon>
 #include <QDebug>
 
 Monster::Monster(MonsterClass* monsterClass, const QString& name, QObject *parent) :
@@ -42,6 +43,11 @@ void Monster::copyValues(const CampaignObjectBase* other)
     Combatant::copyValues(other);
 }
 
+QIcon Monster::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_bestiary.png");
+}
+
 void Monster::beginBatchChanges()
 {
     _iconChanged = false;
@@ -51,13 +57,8 @@ void Monster::beginBatchChanges()
 
 void Monster::endBatchChanges()
 {
-    if(_batchChanges)
-    {
-        if(_iconChanged)
-        {
-            emit iconChanged();
-        }
-    }
+    if((_batchChanges) && (_iconChanged))
+        emit iconChanged(this);
 
     Combatant::endBatchChanges();
 }
@@ -208,14 +209,11 @@ void Monster::setIcon(const QString& newIcon)
     _iconPixmap.setBasePixmap(_icon);
     qDebug() << "Monster has a local icon:" << getName() << ": " << _icon;
     registerChange();
+
     if(_batchChanges)
-    {
         _iconChanged = true;
-    }
     else
-    {
-        emit iconChanged();
-    }
+        emit iconChanged(this);
 }
 
 void Monster::setPassivePerception(int value)

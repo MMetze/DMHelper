@@ -19,6 +19,7 @@
 #include <QDomElement>
 #include <QDomCDATASection>
 #include <QTextDocument>
+#include <QIcon>
 #include <QDebug>
 
 EncounterBattle::EncounterBattle(const QString& encounterName, QObject *parent) :
@@ -130,6 +131,11 @@ void EncounterBattle::copyValues(const CampaignObjectBase* other)
 int EncounterBattle::getObjectType() const
 {
     return DMHelper::CampaignType_Battle;
+}
+
+QIcon EncounterBattle::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_contentbattle.png");
 }
 
 bool EncounterBattle::hasData() const

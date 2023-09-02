@@ -1,9 +1,41 @@
+v2.5.8
+fixed * old scrolling text doesn't scroll
+fixed * old videos are not recognized, leads to broken mapframe
+fixed * party icon not visible
+fixed * markers (neverwinter region) seem to not work
+Fog of war from old to new
+
+feature * Scale the initiative list freely
+feature * Change layer with multiple selections
+feature * Double-click in change layer dialog to pick dialog
+fixed * Black screen rendering map/battle
+fixed * Ctrl and mouse move should not move map, but enable multiple selections
+fixed * resizing grid needs to resize tokens
+fixed * editing DM-invisible layer makes it visible
+fixed * changing layer with no selection doesn't do anything (should take the target item)
+done * Players side of blank layer
+done * create blank map
+done * create combat on map/video
+done * edit dialog: create new blank layer
+fixed * Select on the map doesn't select on the widget list
+fixed * find map fitting to battle doesn't work
+fixed * Dead don't disappear when HP set to zero
+fixed * Resize to visible
+fixed * Editing FoW has an offset based on negative position of scene rect
+fixed * Editing area on battle doesn't work
+fixed * edit dialog: create new text layer
+fixed * invisible player video should not start the video playback
+Not reproducible * resize camera view
+
 Next version
-* upgrade to latest Qt
+* upgrade to latest Qt, activate Copilot for Qt
 * Undo-redo on drawing fow
 * Make grid button a flat pushbutton that opens its own popup menu
 * Asset library
 * Save new campaign --> default file name is campaign name
+* Remove dead code (e.g. battleframe, map, layerfow)
+* Add new item dialog instead of pseudo-wizards / clean up mainwindow: newbattle function
+* Switch between party icon and players on a battle (aka toggle initiative)
 
 v2.5.7
 fixed * Crashes when adding an FOW layer

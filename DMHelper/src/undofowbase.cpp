@@ -51,3 +51,9 @@ void UndoFowBase::setLayer(LayerFow* layer)
 {
     _layer = layer;
 }
+
+LayerFow* UndoFowBase::getLayer() const
+{
+    return _layer;
+}
+

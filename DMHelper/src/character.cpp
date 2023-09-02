@@ -4,6 +4,7 @@
 #include "bestiary.h"
 #include <QDomElement>
 #include <QDir>
+#include <QIcon>
 #include <QDebug>
 
 const char* STRINGVALUE_DEFAULTS[Character::STRINGVALUE_COUNT] =
@@ -258,6 +259,14 @@ void Character::copyValues(const CampaignObjectBase* other)
     Combatant::copyValues(other);
 }
 
+QIcon Character::getDefaultIcon()
+{
+    if(_iconPixmap.isValid())
+        return QIcon(_iconPixmap.getPixmap(DMHelper::PixmapSize_Battle).scaled(128,128, Qt::KeepAspectRatio));
+    else
+        return isInParty() ? QIcon(":/img/data/icon_contentcharacter.png") : QIcon(":/img/data/icon_contentnpc.png");
+}
+
 void Character::beginBatchChanges()
 {
     _iconChanged = false;
@@ -267,13 +276,8 @@ void Character::beginBatchChanges()
 
 void Character::endBatchChanges()
 {
-    if(_batchChanges)
-    {
-        if(_iconChanged)
-        {
-            emit iconChanged();
-        }
-    }
+    if((_batchChanges) && (_iconChanged))
+        emit iconChanged(this);
 
     Combatant::endBatchChanges();
 }
@@ -315,14 +319,11 @@ void Character::setIcon(const QString &newIcon)
         _icon = newIcon;
         _iconPixmap.setBasePixmap(_icon);
         registerChange();
+
         if(_batchChanges)
-        {
             _iconChanged = true;
-        }
         else
-        {
-            emit iconChanged();
-        }
+            emit iconChanged(this);
     }
 }
 

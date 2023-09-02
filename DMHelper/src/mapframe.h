@@ -36,8 +36,8 @@ public:
 
     void setMap(Map* map);
 
-    void mapMarkerMoved(int markerId);
-    void activateMapMarker(int markerId);
+    void mapMarkerMoved(UndoMarker* marker);
+    void activateMapMarker(UndoMarker* marker);
 
     virtual bool eventFilter(QObject *obj, QEvent *event) override;
 
@@ -106,9 +106,9 @@ public slots:
     void setShowMarkers(bool show);
     void addNewMarker();
     void addMarker(const QPointF& markerPosition);
-    void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
-    void editMapMarker(int markerId);
-    void deleteMapMarker(int markerId);
+//    void createMapMarker(UndoMarker* undoEntry, MapMarker* marker);
+    void editMapMarker(UndoMarker* marker);
+    void deleteMapMarker(UndoMarker* marker);
 
     void setMapEdit(bool enabled);
     void setBrushMode(int brushMode);
@@ -160,8 +160,8 @@ protected:
     void initializeMap();
     void uninitializeMap();
 
-    void createMarkerItems();
-    void cleanupMarkerItems();
+//    void createMarkerItems();
+//    void cleanupMarkerItems();
     void cleanupSelectionItems();
 
     virtual void hideEvent(QHideEvent * event) override;
@@ -185,7 +185,7 @@ protected:
     bool execEventFilterCameraEdit(QObject *obj, QEvent *event);
     bool execEventFilterPointer(QObject *obj, QEvent *event);
 
-    void extractDMScreenshot();
+//    void extractDMScreenshot();
     void cleanupBuffers();
 
 protected slots:
@@ -196,7 +196,7 @@ protected slots:
     void loadViewRect();
     void checkPartyUpdate();
 
-    void handleScreenshotReady(const QImage& image);
+//    void handleScreenshotReady(const QImage& image);
     void rendererActivated(PublishGLMapRenderer* renderer);
     void rendererDeactivated();
 
@@ -212,7 +212,7 @@ protected slots:
 
 private:
     bool convertPublishToScene(const QPointF& publishPosition, QPointF& scenePosition);
-    void setBackgroundPixmap(const QPixmap& pixmap);
+//    void setBackgroundPixmap(const QPixmap& pixmap);
     void setCameraToView();
     QGraphicsItem* findTopObject(const QPoint &pos);
     QPixmap getPointerPixmap();

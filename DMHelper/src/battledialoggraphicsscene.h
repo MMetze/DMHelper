@@ -128,6 +128,7 @@ protected slots:
     void healCombatant();
 
     void changeEffectLayer();
+    void handleSelectionChanged();
 
 protected:
     virtual void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *mouseEvent);
@@ -164,6 +165,7 @@ protected:
     QPixmap _pointerPixmap;
 
     QString _selectedIcon;
+    int _selectionCount;
 
     BattleDialogGraphicsSceneMouseHandlerDistance _distanceMouseHandler;
     BattleDialogGraphicsSceneMouseHandlerFreeDistance _freeDistanceMouseHandler;

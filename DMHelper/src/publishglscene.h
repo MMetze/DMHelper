@@ -14,7 +14,6 @@ public:
     void setTargetSize(const QSize& size);
 
     QRectF getSceneRect() const;
-    //void setSceneRect(const QRectF& rect);
     void deriveSceneRectFromSize(const QSizeF& size);
 
     int getGridScale() const;

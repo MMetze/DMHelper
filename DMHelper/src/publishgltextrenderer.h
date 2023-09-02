@@ -16,7 +16,7 @@ class PublishGLTextRenderer : public PublishGLRenderer
 {
     Q_OBJECT
 public:
-    PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent = nullptr);
+    PublishGLTextRenderer(EncounterText* encounter, QImage textImage, const QSize& frameSize, QObject *parent = nullptr);
     virtual ~PublishGLTextRenderer() override;
 
     virtual CampaignObjectBase* getObject() override;
@@ -73,6 +73,7 @@ protected:
     void destroyShaders();
 
     EncounterText* _encounter;
+    QSize _frameSize;
     QSize _targetSize;
     QColor _color;
     QImage _textImage;

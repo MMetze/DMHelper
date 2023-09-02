@@ -45,6 +45,7 @@ protected slots:
     void handleTimer();
     void handleItemChanged(QStandardItem *item);
     void handleObjectNameChanged(CampaignObjectBase* object, const QString& name);
+    void handleObjectIconChanged(CampaignObjectBase* object);
 
 protected:
     void updateCampaignEntries();

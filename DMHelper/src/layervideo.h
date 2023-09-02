@@ -78,6 +78,8 @@ protected:
     void cleanupDM();
 
     // Player Window Methods
+    void createPlayerObjectGL(PublishGLRenderer* renderer);
+    void cleanupPlayerObject();
     void cleanupPlayer();
 
     // DM Window Members
@@ -94,6 +96,7 @@ protected:
     QSize _playerSize;
 #endif
     PublishGLScene* _scene;
+    PublishGLRenderer* _renderer;
 
     // Core contents
     QString _filename;

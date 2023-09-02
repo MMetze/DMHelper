@@ -76,6 +76,7 @@ public:
     // From CampaignObjectBase
     virtual void inputXML(const QDomElement &element, bool isImport) override;
     virtual void copyValues(const CampaignObjectBase* other) override;
+    virtual QIcon getDefaultIcon() override;
 
     // From Combatant
     virtual void beginBatchChanges() override;
@@ -142,7 +143,7 @@ public:
     static QString getWrittenSkillName(int skill);
 
 signals:
-    void iconChanged();
+    void iconChanged(CampaignObjectBase* character);
 
 public slots:
     virtual void setIcon(const QString &newIcon) override;

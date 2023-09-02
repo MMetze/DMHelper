@@ -89,6 +89,7 @@ SOURCES += main.cpp\
     exportworker.cpp \
     gridconfig.cpp \
     layer.cpp \
+    layerblank.cpp \
     layerfow.cpp \
     layerframe.cpp \
     layergrid.cpp \
@@ -131,6 +132,7 @@ SOURCES += main.cpp\
     publishglimagerenderer.cpp \
     publishglmaprenderer.cpp \
     publishglobject.cpp \
+    publishglrect.cpp \
     publishglrenderer.cpp \
     publishglscene.cpp \
     publishgltextrenderer.cpp \
@@ -344,6 +346,7 @@ HEADERS  += mainwindow.h \
     exportworker.h \
     gridconfig.h \
     layer.h \
+    layerblank.h \
     layerfow.h \
     layerframe.h \
     layergrid.h \
@@ -386,6 +389,7 @@ HEADERS  += mainwindow.h \
     publishglimagerenderer.h \
     publishglmaprenderer.h \
     publishglobject.h \
+    publishglrect.h \
     publishglrenderer.h \
     publishglscene.h \
     publishgltextrenderer.h \

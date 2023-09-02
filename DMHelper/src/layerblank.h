@@ -1,28 +1,28 @@
-#ifndef LAYERGRID_H
-#define LAYERGRID_H
+#ifndef LAYERBLANK_H
+#define LAYERBLANK_H
 
 #include "layer.h"
-#include "gridconfig.h"
+#include <QColor>
 
-class Grid;
-class PublishGLBattleGrid;
+class QGraphicsRectItem;
+class PublishGLRect;
 
-class LayerGrid : public Layer
+class LayerBlank : public Layer
 {
     Q_OBJECT
 public:
-    explicit LayerGrid(const QString& name = QString(), int order = 0, QObject *parent = nullptr);
-    virtual ~LayerGrid() override;
+    explicit LayerBlank(const QString& name = QString(), const QColor& color = QColor(), int order = 0, QObject *parent = nullptr);
+    virtual ~LayerBlank() override;
 
     virtual void inputXML(const QDomElement &element, bool isImport) override;
 
-    virtual QImage getLayerIcon() const override;
-    virtual bool defaultShader() const override;
+    virtual QRectF boundingRect() const override;
 
+    virtual QImage getLayerIcon() const override;
     virtual DMHelper::LayerType getType() const override;
     virtual Layer* clone() const override;
 
-    // Local Layer Interface (generally should call set*() versions below
+    // Local Layer Interface
     virtual void applyOrder(int order) override;
     virtual void applyLayerVisibleDM(bool layerVisible) override;
     virtual void applyLayerVisiblePlayer(bool layerVisible) override;
@@ -30,8 +30,7 @@ public:
     virtual void applyPosition(const QPoint& position) override;
     virtual void applySize(const QSize& size) override;
 
-    GridConfig& getConfig();
-    const GridConfig& getConfig() const;
+    QImage getImage() const;
 
 public slots:
     // DM Window Generic Interface
@@ -49,16 +48,11 @@ public slots:
     // Layer Specific Interface
     virtual void initialize(const QSize& sceneSize) override;
     virtual void uninitialize() override;
-    virtual void setScale(int scale) override;
-
-    void setConfig(const GridConfig& config);
-
-protected slots:
-    void triggerRebuild();
 
 protected:
     // Layer Specific Interface
     virtual void internalOutputXML(QDomDocument &doc, QDomElement &element, QDir& targetDirectory, bool isExport) override;
+    bool createShadersGL();
 
     // DM Window Methods
     void cleanupDM();
@@ -67,15 +61,19 @@ protected:
     void cleanupPlayer();
 
     // DM Window Members
-    Grid* _grid;
+    QGraphicsRectItem* _graphicsItem;
 
     // Player Window Members
-    PublishGLBattleGrid* _gridGLObject;
+    PublishGLRect* _publishRect;
     PublishGLScene* _scene;
 
     // Core contents
-    GridConfig _config;
+    QColor _color;
 
+    static unsigned int _shaderProgramRGBColorBlank;
+    static int _shaderModelMatrixRGBColorBlank;
+    static int _shaderProjectionMatrixRGBColorBlank;
+    static int _shaderRGBColorBlank;
 };
 
-#endif // LAYERGRID_H
+#endif // LAYERBLANK_H

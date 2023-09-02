@@ -13,6 +13,8 @@ public:
     explicit AudioTrackYoutube(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
     virtual ~AudioTrackYoutube() override;
 
+    virtual QIcon getDefaultIcon() override;
+
     virtual int getAudioType() const override;
     virtual void eventCallback(const struct libvlc_event_t *p_event);
 

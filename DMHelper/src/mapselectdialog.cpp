@@ -6,6 +6,7 @@
 #include "campaign.h"
 #include "mapfactory.h"
 #include "mapblankdialog.h"
+#include "layerblank.h"
 #include <QBrush>
 #include <QMessageBox>
 
@@ -13,7 +14,8 @@ MapSelectDialog::MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWi
     QDialog(parent),
     ui(new Ui::MapSelectDialog),
     _currentItem(nullptr),
-    _createNewMapEntry(nullptr),
+    _createBlankMap(nullptr),
+    _loadNewMap(nullptr),
     _blankMap(nullptr)
 {
     ui->setupUi(this);
@@ -26,18 +28,54 @@ MapSelectDialog::~MapSelectDialog()
     delete ui;
 }
 
+bool MapSelectDialog::isMapSelected() const
+{
+    QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
+    return ((currentItem) && (currentItem != _createBlankMap) && (currentItem != _loadNewMap));
+}
+
 Map* MapSelectDialog::getSelectedMap() const
 {
     QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
     if(!currentItem)
         return nullptr;
 
-    if(currentItem == _createNewMapEntry)
-        return _blankMap;
-
     return currentItem->data(0, Qt::UserRole).value<Map*>();
 }
 
+bool MapSelectDialog::isBlankMap() const
+{
+    QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
+    return ((currentItem) && (currentItem == _createBlankMap));
+}
+
+Layer* MapSelectDialog::getBlankLayer() const
+{
+    if(!isBlankMap())
+        return nullptr;
+
+    MapBlankDialog blankDlg;
+    int result = blankDlg.exec();
+    if(result != QDialog::Accepted)
+        return nullptr;
+
+    LayerBlank* newLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
+    newLayer->setSize(blankDlg.getMapSize());
+    return newLayer;
+}
+
+bool MapSelectDialog::isNewMapImage() const
+{
+    QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
+    return ((currentItem) && (currentItem == _loadNewMap));
+}
+
+Layer* MapSelectDialog::getNewImageLayer() const
+{
+    return nullptr;
+}
+
+/*
 void MapSelectDialog::accept()
 {
     QTreeWidgetItem* currentItem = ui->lstMaps->currentItem();
@@ -46,6 +84,7 @@ void MapSelectDialog::accept()
 
     QDialog::accept();
 }
+*/
 
 void MapSelectDialog::handleItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
 {
@@ -74,22 +113,18 @@ void MapSelectDialog::setupSelectTree(Campaign& campaign, const QUuid& currentId
 
     _currentItem = nullptr;
 
-    _createNewMapEntry = new QTreeWidgetItem();
-    _createNewMapEntry->setText(0, QString("Create Blank Map..."));
-    ui->lstMaps->invisibleRootItem()->addChild(_createNewMapEntry);
+    _loadNewMap = new QTreeWidgetItem();
+    _loadNewMap->setText(0, QString("Load New Map Image..."));
+    ui->lstMaps->invisibleRootItem()->addChild(_loadNewMap);
+
+    _createBlankMap = new QTreeWidgetItem();
+    _createBlankMap->setText(0, QString("Create Blank Map..."));
+    ui->lstMaps->invisibleRootItem()->addChild(_createBlankMap);
 
     QList<CampaignObjectBase*> campaignObjects = campaign.getChildObjects();
     for(CampaignObjectBase* object : campaignObjects)
     {
         insertObject(object, ui->lstMaps->invisibleRootItem(), currentId);
-    }
-
-    if(ui->lstMaps->topLevelItemCount() == 0)
-    {
-        QMessageBox::critical(nullptr,
-                              QString("DMHelper Map Not Found"),
-                              QString("You need to add a map to the campaign before you can add one to a combat!"));
-        return;
     }
 
     ui->lstMaps->expandAll();
@@ -162,9 +197,12 @@ bool MapSelectDialog::insertObject(CampaignObjectBase* object, QTreeWidgetItem* 
 
 void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* object)
 {
-    if(!item)
+    if((!item) || (!object))
         return;
 
+    item->setIcon(0, object->getIcon());
+
+    /*
     switch(object->getObjectType())
     {
         case DMHelper::CampaignType_Party:
@@ -207,30 +245,5 @@ void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* ob
         default:
             break;
     }
-}
-
-void MapSelectDialog::createBlankMap()
-{
-    if(!_currentItem)
-        return;
-
-    CampaignObjectBase* parentObject = _currentItem->data(0, Qt::UserRole + 1).value<CampaignObjectBase*>();
-    if(!parentObject)
-        return;
-
-    MapBlankDialog blankDlg;
-    int result = blankDlg.exec();
-    if(result != QDialog::Accepted)
-        return;
-
-    CampaignObjectBase* mapObject = MapFactory().createObject(DMHelper::CampaignType_Map, 0, _currentItem->text(0) + QString(" map"), false);
-    _blankMap = dynamic_cast<Map*>(mapObject);
-    if(_blankMap)
-    {
-        _blankMap->setMapColor(blankDlg.getMapColor());
-        _blankMap->setMapSize(blankDlg.getMapSize());
-
-        parentObject->addObject(_blankMap);
-        emit mapCreated();
-    }
+    */
 }

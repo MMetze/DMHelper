@@ -120,6 +120,11 @@ DMHelper::LayerType Layer::getFinalType() const
     return getType();
 }
 
+Layer* Layer::getFinalLayer()
+{
+    return this;
+}
+
 void Layer::copyBaseValues(Layer *other) const
 {
     other->_name = _name;

@@ -11,8 +11,7 @@ LayerGrid::LayerGrid(const QString& name, int order, QObject *parent) :
     _grid(nullptr),
     _gridGLObject(nullptr),
     _scene(nullptr),
-    _config() //,
-//    _layerSize()
+    _config()
 {
     connect(&_config, &GridConfig::dirty, this, &LayerGrid::triggerRebuild);
 }
@@ -101,38 +100,13 @@ void LayerGrid::applySize(const QSize& size)
         return;
 
     if(_grid)
-    {
         _grid->setGridSize(size);
-        triggerRebuild();
-    }
 
     if(_gridGLObject)
-    {
-        delete _gridGLObject;
-        _gridGLObject = nullptr;
-    }
+        _gridGLObject->setSize(size);
+
+    triggerRebuild();
 }
-
-/*
-QSize LayerGrid::getLayerSize() const
-{
-    return _layerSize;
-}
-
-void LayerGrid::setLayerSize(const QSize& layerSize)
-{
-    if(layerSize == _layerSize)
-        return;
-
-    _layerSize = layerSize;
-
-    if(_grid)
-    {
-        uninitialize();
-        initialize(_layerSize);
-    }
-}
-*/
 
 GridConfig& LayerGrid::getConfig()
 {
@@ -198,7 +172,7 @@ void LayerGrid::playerGLPaint(QOpenGLFunctions* functions, GLint defaultModelMat
 {
     Q_UNUSED(defaultModelMatrix);
 
-    if((!functions) || (!projectionMatrix))
+    if((!functions) || (!projectionMatrix) || (!_gridGLObject))
         return;
 
     _gridGLObject->setProjectionMatrix(projectionMatrix);
@@ -223,39 +197,40 @@ void LayerGrid::initialize(const QSize& sceneSize)
 
     if(getSize().isEmpty())
         setSize(sceneSize);
-
-    //_layerSize = sceneSize;
-    //_grid = new Grid(*this, rect);
-    //_grid->rebuildGrid(*_model);
 }
 
 void LayerGrid::uninitialize()
 {
-    //_layerSize = QSize();
 }
 
 void LayerGrid::setScale(int scale)
 {
+    if(_config.getGridScale() == scale)
+        return;
+
     _config.setGridScale(scale);
     triggerRebuild();
+
+    emit layerScaleChanged(this);
 }
 
 void LayerGrid::setConfig(const GridConfig& config)
 {
     _config.copyValues(config);
-
     triggerRebuild();
-
-    if(_gridGLObject)
-        _gridGLObject->setConfig(_config);
 }
 
 void LayerGrid::triggerRebuild()
 {
-    if(!_grid)
-        return;
+    if(_grid)
+    {
+        _grid->rebuildGrid(_config, getOrder());
+        _grid->setGridVisible(_layerVisibleDM);
+    }
 
-    _grid->rebuildGrid(_config, getOrder());
+    if(_gridGLObject)
+        _gridGLObject->setConfig(_config);
+
     emit dirty();
 }
 

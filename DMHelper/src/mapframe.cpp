@@ -131,7 +131,7 @@ void MapFrame::deactivateObject()
     // TODO: make sure FOW editing works properly on DM and Player views
     // disconnect(_mapSource, &Map::executeUndo, this, &MapFrame::undoPaint);
     // disconnect(_mapSource, &Map::requestFoWUpdate, this, &MapFrame::updateFoW);
-    disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
+    //disconnect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
 #if defined(Q_OS_WIN32) && !defined(Q_OS_WIN64)
     _mapSource->uninitialize();
@@ -155,41 +155,33 @@ void MapFrame::setMap(Map* map)
     if(!_mapSource)
         return;
 
-    connect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
+//    connect(_mapSource, &Map::requestMapMarker, this, &MapFrame::createMapMarker);
 
     initializeMap();
     setMapCursor();
 }
 
-void MapFrame::mapMarkerMoved(int markerId)
+void MapFrame::mapMarkerMoved(UndoMarker* marker)
 {
-    if(!_mapSource)
+    if((!_mapSource) || (!marker))
         return;
 
-    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
-    if(!undoMarker)
-        return;
+    if(marker->getMarkerItem())
+        marker->getMarker().setPosition(marker->getMarkerItem()->pos().toPoint());
 
-    if(undoMarker->getMarkerItem())
-    {
-        undoMarker->getMarker().setPosition(undoMarker->getMarkerItem()->pos().toPoint());
-        emit dirty();
-    }
+    emit dirty();
+    emit markerChanged();
 }
 
-void MapFrame::activateMapMarker(int markerId)
+void MapFrame::activateMapMarker(UndoMarker* marker)
 {
-    if(!_mapSource)
+    if((!_mapSource) || (!marker))
         return;
 
-    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
-    if(!undoMarker)
+    if(marker->getMarker().getEncounter().isNull())
         return;
 
-    if(undoMarker->getMarker().getEncounter().isNull())
-        return;
-
-    _activatedId = undoMarker->getMarker().getEncounter();
+    _activatedId = marker->getMarker().getEncounter();
     QTimer::singleShot(0, this, SLOT(handleActivateMapMarker()));
 }
 
@@ -422,23 +414,25 @@ void MapFrame::addNewMarker()
 
 void MapFrame::addMarker(const QPointF& markerPosition)
 {
-    // TODO: Layers
-    /*
+    if((!_scene) || (!_mapSource))
+        return;
+
     MapMarkerDialog dlg(MapMarker(), *_mapSource, this);
-    dlg.resize(width() / 3, height() / 3);
+    dlg.resize(width() / 2, height() / 2);
     dlg.move(ui->graphicsView->mapFromScene(markerPosition) + mapToGlobal(ui->graphicsView->pos()));
     if(dlg.exec() == QDialog::Accepted)
     {
         MapMarker marker = dlg.getMarker();
         marker.setPosition(markerPosition.toPoint());
-        UndoMarker* undoMarker = new UndoMarker(_mapSource, marker);
-        _mapSource->getUndoStack()->push(undoMarker);
+        UndoMarker* undoMarker = new UndoMarker(marker);
+        undoMarker->createMarkerItem(_scene, 0.04 * static_cast<qreal>(_mapSource->getPartyScale()));
+        _mapSource->addMarker(undoMarker);
         emit dirty();
         setShowMarkers(true);
     }
-    */
 }
 
+/*
 void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
 {
     if((!undoEntry) || (!marker) || (!_scene))
@@ -447,7 +441,7 @@ void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
     if(!_mapSource)
         return;
 
-    MapMarkerGraphicsItem* markerItem = new MapMarkerGraphicsItem(_scene, *marker, 0.04 * static_cast<qreal>(_mapSource->getPartyScale()), *this);
+    MapMarkerGraphicsItem* markerItem = new MapMarkerGraphicsItem(_scene, undoEntry, 0.04 * static_cast<qreal>(_mapSource->getPartyScale()));
     markerItem->setPos(marker->getPosition());
     markerItem->setZValue(DMHelper::BattleDialog_Z_BackHighlight);
 
@@ -456,39 +450,32 @@ void MapFrame::createMapMarker(UndoMarker* undoEntry, MapMarker* marker)
 
     emit markerChanged();
 }
+*/
 
-void MapFrame::editMapMarker(int markerId)
+void MapFrame::editMapMarker(UndoMarker* marker)
 {
-    if(!_mapSource)
+    if((!_mapSource) || (!marker))
         return;
 
-    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
-    if(!undoMarker)
-        return;
-
-    MapMarkerDialog dlg(undoMarker->getMarker(), *_mapSource, this);
-    dlg.resize(width() / 3, height() / 3);
-    dlg.move(ui->graphicsView->mapFromScene(undoMarker->getMarker().getPosition()) + mapToGlobal(ui->graphicsView->pos()));
+    MapMarkerDialog dlg(marker->getMarker(), *_mapSource, this);
+    dlg.resize(width() / 2, height() / 2);
+    dlg.move(ui->graphicsView->mapFromScene(marker->getMarker().getPosition()) + mapToGlobal(ui->graphicsView->pos()));
     int result = dlg.exec();
     if(result == QDialog::Accepted)
     {
-        undoMarker->setMarker(dlg.getMarker());
+        marker->setMarker(dlg.getMarker());
         emit dirty();
         emit markerChanged();
     }
     else if(result == MapMarkerDialog::MAPMARKERDIALOG_DELETE)
     {
-        deleteMapMarker(undoMarker->getMarker().getID());
+        deleteMapMarker(marker);
     }
 }
 
-void MapFrame::deleteMapMarker(int markerId)
+void MapFrame::deleteMapMarker(UndoMarker* marker)
 {
-    if(!_mapSource)
-        return;
-
-    UndoMarker* undoMarker = _mapSource->getMapMarker(markerId);
-    if(!undoMarker)
+    if((!_mapSource) || (!marker))
         return;
 
     QMessageBox::StandardButton deleteConfirm = QMessageBox::question(this,
@@ -497,7 +484,10 @@ void MapFrame::deleteMapMarker(int markerId)
 
     if(deleteConfirm == QMessageBox::Yes)
     {
-        undoMarker->setRemoved(false);
+        //undoMarker->setRemoved(false);
+        if(marker->getMarkerItem())
+            marker->getMarkerItem()->setVisible(false);
+        _mapSource->removeMarker(marker);
         emit dirty();
         emit markerChanged();
     }
@@ -656,7 +646,7 @@ void MapFrame::setCameraMap()
     if((!_cameraRect) || (!_mapSource))
         return;
 
-    QRectF newRect = _mapSource->getLayerScene().boundingRect(); //_backgroundImage->boundingRect();
+    QRectF newRect = _mapSource->getLayerScene().boundingRect();
     _cameraRect->setCameraRect(newRect);
     emit cameraRectChanged(newRect);
 }
@@ -666,9 +656,24 @@ void MapFrame::setCameraVisible()
     if((!_cameraRect) || (!_mapSource))
         return;
 
-    QRectF newRect = _mapSource->getShrunkPublishRect();
-    _cameraRect->setCameraRect(newRect);
-    emit cameraRectChanged(newRect);
+    QRectF visibleRect = _mapSource->getLayerScene().boundingRect();
+
+    QList<Layer*> fowLayers = _mapSource->getLayerScene().getLayers(DMHelper::LayerType_Fow);
+    foreach(Layer* layer, fowLayers)
+    {
+        LayerFow* fowLayer = dynamic_cast<LayerFow*>(layer);
+        if((fowLayer) && (fowLayer->getLayerVisiblePlayer()))
+        {
+            QRectF newRect = fowLayer->getFoWVisibleRect();
+            visibleRect = visibleRect.intersected(newRect);
+        }
+    }
+
+    if(visibleRect.isEmpty())
+        return;
+
+    _cameraRect->setCameraRect(visibleRect);
+    emit cameraRectChanged(visibleRect);
 }
 
 void MapFrame::setCameraSelect(bool enabled)
@@ -838,6 +843,7 @@ void MapFrame::initializeMap()
         qDebug() << "[MapFrame] Initializing map frame image";
         //setBackgroundPixmap(QPixmap::fromImage(_mapSource->getBackgroundImage()));
         _mapSource->getLayerScene().dmInitialize(_scene);
+        _mapSource->initializeMarkers(_scene);
 
         //_fow = _scene->addPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
         //_fow->setEnabled(false);
@@ -846,7 +852,7 @@ void MapFrame::initializeMap()
 
         loadViewRect();
         checkPartyUpdate();
-        createMarkerItems();
+        //createMarkerItems();
 
         if(_cameraRect)
             _cameraRect->setCameraRect(_mapSource->getCameraRect());
@@ -856,11 +862,13 @@ void MapFrame::initializeMap()
         emit cameraRectChanged(_mapSource->getCameraRect());
         emit fowChanged(_bwFoWImage);
     }
+    /*
     else
     {
         if(_mapSource->isValid())
             extractDMScreenshot();
     }
+    */
 
     connect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
     connect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
@@ -883,6 +891,11 @@ void MapFrame::initializeMap()
     connect(_mapSource, &Map::distanceLineWidthChanged, this, &MapFrame::dirty);
     connect(&_mapSource->getLayerScene(), &LayerScene::sceneChanged, this, &MapFrame::handleMapSceneChanged);
     connect(this, &MapFrame::cameraRectChanged, _mapSource, QOverload<const QRectF&>::of(&Map::setCameraRect));
+
+    connect(_mapSource, &Map::mapMarkerMoved, this, &MapFrame::mapMarkerMoved);
+    connect(_mapSource, &Map::mapMarkerEdited, this, &MapFrame::editMapMarker);
+    connect(_mapSource, &Map::unselectParty, this, &MapFrame::setPartySelected);
+    connect(_mapSource, &Map::mapMarkerActivated, this, &MapFrame::activateMapMarker);
 
     if(_mapSource->getParty())
         emit partyChanged(_mapSource->getParty());
@@ -930,6 +943,12 @@ void MapFrame::uninitializeMap()
         disconnect(_mapSource, &Map::partyScaleChanged, this, &MapFrame::partyScaleChanged);
         disconnect(ui->graphicsView->horizontalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
         disconnect(ui->graphicsView->verticalScrollBar(), SIGNAL(valueChanged(int)), this, SLOT(storeViewRect()));
+
+        disconnect(_mapSource, &Map::mapMarkerMoved, this, &MapFrame::mapMarkerMoved);
+        disconnect(_mapSource, &Map::mapMarkerEdited, this, &MapFrame::editMapMarker);
+        disconnect(_mapSource, &Map::unselectParty, this, &MapFrame::setPartySelected);
+        disconnect(_mapSource, &Map::mapMarkerActivated, this, &MapFrame::activateMapMarker);
+
     }
 
     cleanupBuffers();
@@ -939,10 +958,10 @@ void MapFrame::uninitializeMap()
     _scene = nullptr;
 }
 
+/*
 void MapFrame::createMarkerItems()
 {
     // TODO: Layers
-    /*
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
@@ -955,13 +974,13 @@ void MapFrame::createMarkerItems()
             marker->redo();
         }
     }
-    */
 }
+    */
 
+/*
 void MapFrame::cleanupMarkerItems()
 {
     // TODO: Layers
-    /*
     if((!_mapSource) || (!_mapSource->getUndoStack()))
         return;
 
@@ -974,8 +993,8 @@ void MapFrame::cleanupMarkerItems()
             marker->undo();
         }
     }
-    */
 }
+    */
 
 void MapFrame::cleanupSelectionItems()
 {
@@ -1326,21 +1345,14 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
                 bandRect.moveTo(_rubberBand->pos());
                 QRect shapeRect(ui->graphicsView->mapToScene(bandRect.topLeft()).toPoint(),
                                 ui->graphicsView->mapToScene(bandRect.bottomRight()).toPoint());
-                // TODO: Layers
                 LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
                 if(layer)
                 {
+                    shapeRect.translate(-layer->getPosition());
                     UndoFowShape* undoShape = new UndoFowShape(layer, MapEditShape(shapeRect, _erase, false));
                     layer->getUndoStack()->push(undoShape);
                     emit dirty();
                 }
-                /*
-                UndoFowShape* undoShape = new UndoFowShape(_mapSource, MapEditShape(shapeRect, _erase, false));
-                _mapSource->getUndoStack()->push(undoShape);
-                _mapSource->paintFoWRect(shapeRect, undoShape->mapEditShape(), &_bwFoWImage, false);
-                emit dirty();
-                emit fowChanged(_bwFoWImage);
-                */
                 cleanupSelectionItems();
             }
             return true;
@@ -1373,21 +1385,14 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             _mouseDown = true;
 
             QPoint drawPoint = ui->graphicsView->mapToScene(_mouseDownPos).toPoint();
-            // TODO: Layers
             LayerFow* layer = dynamic_cast<LayerFow*>(_mapSource->getLayerScene().getPriority(DMHelper::LayerType_Fow));
             if(layer)
             {
+                drawPoint -= layer->getPosition();
                 _undoPath = new UndoFowPath(layer, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
                 layer->getUndoStack()->push(_undoPath);
                 emit dirty();
             }
-            /*
-            _undoPath = new UndoFowPath(_mapSource, MapDrawPath(_brushSize, _brushMode, _erase, _smooth, drawPoint));
-            _mapSource->getUndoStack()->push(_undoPath);
-            _mapSource->paintFoWPoint(drawPoint, _undoPath->mapDrawPath(), &_bwFoWImage, false);
-
-            emit fowChanged(_bwFoWImage);
-            */
             return true;
         }
         else if(event->type() == QEvent::MouseButtonRelease)
@@ -1405,14 +1410,10 @@ bool MapFrame::execEventFilterEditModeFoW(QObject *obj, QEvent *event)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
                 QPoint drawPoint =  ui->graphicsView->mapToScene(mouseEvent->pos()).toPoint();
+                if(_undoPath->getLayer())
+                    drawPoint -= _undoPath->getLayer()->getPosition();
                 _undoPath->addPoint(drawPoint);
                 emit dirty();
-                // TODO: Layers
-                /*
-                _undoPath->addPoint(drawPoint);
-                _mapSource->paintFoWPoint(drawPoint, _undoPath->mapDrawPath(), &_bwFoWImage, false);
-                emit fowChanged(_bwFoWImage);
-                */
             }
             return true;
         }
@@ -1711,6 +1712,7 @@ bool MapFrame::execEventFilterPointer(QObject *obj, QEvent *event)
            (event->type() == QEvent::MouseButtonDblClick));
 }
 
+/*
 void MapFrame::extractDMScreenshot()
 {
     if(!_mapSource)
@@ -1720,6 +1722,7 @@ void MapFrame::extractDMScreenshot()
     connect(screenshot, &VideoPlayerGLScreenshot::screenshotReady, this, &MapFrame::handleScreenshotReady);
     screenshot->retrieveScreenshot();
 }
+*/
 
 void MapFrame::cleanupBuffers()
 {
@@ -1741,7 +1744,10 @@ void MapFrame::cleanupBuffers()
     }
 
     if(_mapSource)
+    {
         _mapSource->getLayerScene().dmUninitialize();
+        _mapSource->cleanupMarkers();
+    }
 
     /*
     if(_backgroundImage)
@@ -1774,7 +1780,7 @@ void MapFrame::cleanupBuffers()
 */
     _bwFoWImage = QImage();
 
-    cleanupMarkerItems();
+    //cleanupMarkerItems();
     cleanupSelectionItems();
 
     /*
@@ -1934,16 +1940,16 @@ void MapFrame::checkPartyUpdate()
     }
 }
 
+/*
 void MapFrame::handleScreenshotReady(const QImage& image)
 {
     if((image.isNull()) || (!_mapSource))
         return;
 
     // TODO: Layers
-    setBackgroundPixmap(QPixmap::fromImage(image));
-    QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
-    fowImage.fill(QColor(0, 0, 0, 0));
-    /*
+    //setBackgroundPixmap(QPixmap::fromImage(image));
+    //QImage fowImage = QImage(image.size(), QImage::Format_ARGB32);
+    //fowImage.fill(QColor(0, 0, 0, 0));
     _mapSource->setExternalFoWImage(fowImage);
 
     if(!_fow)
@@ -1956,7 +1962,6 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     {
         _fow->setPixmap(QPixmap::fromImage(_mapSource->getFoWImage()));
     }
-    */
 
     // TODO: Layers
     //_bwFoWImage = _mapSource->getBWFoWImage(image.size());
@@ -1976,6 +1981,7 @@ void MapFrame::handleScreenshotReady(const QImage& image)
     emit cameraRectChanged(_mapSource->getCameraRect());
     emit fowChanged(_bwFoWImage);
 }
+*/
 
 void MapFrame::rendererActivated(PublishGLMapRenderer* renderer)
 {
@@ -2143,9 +2149,9 @@ bool MapFrame::convertPublishToScene(const QPointF& publishPosition, QPointF& sc
     return true;
 }
 
+/*
 void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
 {
-    /*
     if(!_backgroundImage)
     {
             _backgroundImage = _scene->addPixmap(pixmap);
@@ -2157,8 +2163,8 @@ void MapFrame::setBackgroundPixmap(const QPixmap& pixmap)
         _backgroundImage->setPixmap(pixmap);
         _backgroundImage->show();
     }
-    */
 }
+    */
 
 void MapFrame::setCameraToView()
 {

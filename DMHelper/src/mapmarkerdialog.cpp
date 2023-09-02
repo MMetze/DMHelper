@@ -277,7 +277,10 @@ QIcon MapMarkerDialog::objectIcon(CampaignObjectBase* object)
 {
     if(!object)
         return QIcon();
+    else
+        return object->getIcon();
 
+    /*
     switch(object->getObjectType())
     {
         case DMHelper::CampaignType_Party:
@@ -309,6 +312,7 @@ QIcon MapMarkerDialog::objectIcon(CampaignObjectBase* object)
         default:
             return QIcon();
     }
+    */
 }
 
 

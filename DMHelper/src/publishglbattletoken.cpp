@@ -4,6 +4,7 @@
 #include "publishglimage.h"
 #include "publishgltokenhighlighteffect.h"
 #include "publishgltokenhighlightref.h"
+#include "layertokens.h"
 #include <QOpenGLContext>
 #include <QOpenGLFunctions>
 #include <QOpenGLExtraFunctions>
@@ -133,10 +134,13 @@ bool PublishGLBattleToken::isPC() const
 
 void PublishGLBattleToken::addHighlight(PublishGLImage& highlightImage)
 {
+    if((!_combatant) || (!_combatant->getLayer()))
+        return;
+
     PublishGLTokenHighlightRef* newHighlight = new PublishGLTokenHighlightRef(highlightImage);
 
     QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
-    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
+    qreal sizeFactor = (static_cast<qreal>(_combatant->getLayer()->getScale()-2)) * _combatant->getSizeFactor();
     newHighlight->setPositionScale(newPosition, sizeFactor);
 
     _highlightList.append(newHighlight);
@@ -158,13 +162,13 @@ void PublishGLBattleToken::removeHighlight(const PublishGLImage& highlightImage)
 
 void PublishGLBattleToken::addEffectHighlight(BattleDialogModelEffect* effect)
 {
-    if(!effect)
+    if((!effect) || (!_combatant) || (!_combatant->getLayer()))
         return;
 
     PublishGLTokenHighlightEffect* newEffect = new PublishGLTokenHighlightEffect(nullptr, effect);
 
     QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
-    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
+    qreal sizeFactor = (static_cast<qreal>(_combatant->getLayer()->getScale()-2)) * _combatant->getSizeFactor();
     newEffect->setPositionScale(newPosition, sizeFactor);
 
     _highlightList.append(newEffect);
@@ -199,11 +203,11 @@ bool PublishGLBattleToken::hasEffectHighlight(BattleDialogModelEffect* effect)
 
 void PublishGLBattleToken::combatantMoved()
 {
-    if((!_scene) || (_textureSize.isEmpty()))
+    if((!_combatant) || (!_combatant->getLayer()) || (_textureSize.isEmpty()))
         return;
 
     QVector3D newPosition(sceneToWorld(_combatant->getPosition()));
-    qreal sizeFactor = (static_cast<qreal>(_scene->getGridScale()-2)) * _combatant->getSizeFactor();
+    qreal sizeFactor = (static_cast<qreal>(_combatant->getLayer()->getScale()-2)) * _combatant->getSizeFactor();
     qreal scaleFactor = sizeFactor / qMax(_textureSize.width(), _textureSize.height());
 
     _modelMatrix.setToIdentity();

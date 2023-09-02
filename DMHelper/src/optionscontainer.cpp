@@ -29,6 +29,7 @@ OptionsContainer::OptionsContainer(QMainWindow *parent) :
     _pasteRich(false),
     _audioVolume(100),
     _initiativeType(DMHelper::InitiativeType_None),
+    _initiativeScale(1.0),
     _showCountdown(true),
     _countdownDuration(15),
     _pointerFile(),
@@ -140,6 +141,11 @@ int OptionsContainer::getAudioVolume() const
 int OptionsContainer::getInitiativeType() const
 {
     return _initiativeType;
+}
+
+qreal OptionsContainer::getInitiativeScale() const
+{
+    return _initiativeScale;
 }
 
 bool OptionsContainer::getShowCountdown() const
@@ -354,6 +360,7 @@ void OptionsContainer::readSettings()
         setInitiativeType(settings.value("initiativeType", QVariant(0)).toInt());
     else
         setInitiativeType(settings.value("showOnDeck", QVariant(true)).toBool() ? DMHelper::InitiativeType_ImageName : DMHelper::InitiativeType_None);
+    setInitiativeScale(settings.value("initiativeScale", QVariant(1.0)).toReal());
     setShowCountdown(settings.value("showCountdown", QVariant(true)).toBool());
     setCountdownDuration(settings.value("countdownDuration", QVariant(15)).toInt());
     setPointerFileName(settings.value("pointerFile").toString());
@@ -424,6 +431,7 @@ void OptionsContainer::writeSettings()
     settings.setValue("pasteRich", getPasteRich());
     settings.setValue("audioVolume", getAudioVolume());
     settings.setValue("initiativeType", getInitiativeType());
+    settings.setValue("initiativeScale", getInitiativeScale());
     settings.setValue("showCountdown", getShowCountdown());
     settings.setValue("countdownDuration", getCountdownDuration());
     settings.setValue("pointerFile", getPointerFile());
@@ -825,6 +833,20 @@ void OptionsContainer::setInitiativeType(int initiativeType)
     }
 }
 
+void OptionsContainer::setInitiativeScale(int initiativeScale)
+{
+    setInitiativeScale(static_cast<qreal>(initiativeScale) / 100.0);
+}
+
+void OptionsContainer::setInitiativeScale(qreal initiativeScale)
+{
+    if(_initiativeScale != initiativeScale)
+    {
+        _initiativeScale = initiativeScale;
+        emit initiativeScaleChanged(_initiativeScale);
+    }
+}
+
 void OptionsContainer::setShowCountdown(bool showCountdown)
 {
     if(_showCountdown != showCountdown)
@@ -1045,6 +1067,7 @@ void OptionsContainer::copy(OptionsContainer* other)
         setFontFamily(other->_fontFamily);
         setFontSize(other->_fontSize);
         setInitiativeType(other->_initiativeType);
+        setInitiativeScale(other->_initiativeScale);
         setShowCountdown(other->_showCountdown);
         setCountdownDuration(other->_countdownDuration);
         setPointerFileName(other->_pointerFile);

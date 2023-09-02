@@ -23,7 +23,8 @@ void GridConfig::inputXML(const QDomElement &element, bool isImport)
     Q_UNUSED(isImport);
 
     _gridType = element.attribute("gridType", QString::number(0)).toInt();
-    _gridScale = element.attribute("gridScale", QString::number(DMHelper::STARTING_GRID_SCALE)).toInt();
+    if(element.hasAttribute("gridScale"))
+        _gridScale = element.attribute("gridScale").toInt();
     _gridAngle = element.attribute("gridAngle", QString::number(50)).toInt();
     _gridOffsetX = element.attribute("gridOffsetX", QString::number(0)).toInt();
     _gridOffsetY = element.attribute("gridOffsetY", QString::number(0)).toInt();

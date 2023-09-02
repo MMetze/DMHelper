@@ -86,7 +86,9 @@
 #include "layergrid.h"
 #include "layertokens.h"
 #include "layerreference.h"
+#include "layerblank.h"
 #include "mapselectdialog.h"
+#include "mapblankdialog.h"
 #include "battledialogmodelcharacter.h"
 #include <QResizeEvent>
 #include <QFileDialog>
@@ -431,8 +433,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(_encounterTextEdit, SIGNAL(showPublishWindow()), this, SLOT(showPublishWindow()));
     connect(_encounterTextEdit, SIGNAL(registerRenderer(PublishGLRenderer*)), _pubWindow, SLOT(setRenderer(PublishGLRenderer*)));
     connect(_pubWindow, SIGNAL(frameResized(QSize)), _encounterTextEdit, SLOT(targetResized(QSize)));
-    connect(_ribbonTabText, &RibbonTabText::backgroundClicked, _encounterTextEdit, &EncounterTextEdit::setBackgroundImage);
-    connect(_encounterTextEdit, &EncounterTextEdit::imageFileChanged, _ribbonTabText, &RibbonTabText::setImageFile);
     connect(_ribbonTabText, SIGNAL(animationClicked(bool)), _encounterTextEdit, SLOT(setAnimated(bool)));
     connect(_ribbonTabText, SIGNAL(speedChanged(int)), _encounterTextEdit, SLOT(setScrollSpeed(int)));
     connect(_ribbonTabText, SIGNAL(widthChanged(int)), _encounterTextEdit, SLOT(setTextWidth(int)));
@@ -479,6 +479,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // EncounterType_Battle
     _battleFrame = new BattleFrame;
     _battleFrame->setInitiativeType(_options->getInitiativeType());
+    _battleFrame->setInitiativeScale(_options->getInitiativeScale());
     _battleFrame->setShowCountdown(_options->getShowCountdown());
     _battleFrame->setCountdownDuration(_options->getCountdownDuration());
     _battleFrame->setPointerFile(_options->getPointerFile());
@@ -489,6 +490,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _battleFrame->setGridLocked(_options->getGridLocked());
     _battleFrame->setGridLockScale(_options->getGridLockScale());
     connect(_options, SIGNAL(initiativeTypeChanged(int)), _battleFrame, SLOT(setInitiativeType(int)));
+    connect(_options, SIGNAL(initiativeScaleChanged(qreal)), _battleFrame, SLOT(setInitiativeScale(qreal)));
     connect(_options, SIGNAL(showCountdownChanged(bool)), _battleFrame, SLOT(setShowCountdown(bool)));
     connect(_options, SIGNAL(countdownDurationChanged(int)), _battleFrame, SLOT(setCountdownDuration(int)));
     connect(_options, SIGNAL(pointerFileNameChanged(const QString&)), _battleFrame, SLOT(setPointerFile(const QString&)));
@@ -531,7 +533,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //connect(_ribbonTabBattleMap, SIGNAL(gridClicked(bool)), _battleFrame, SLOT(setGridVisible(bool)));
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridTypeChanged, _battleFrame, &BattleFrame::setGridType);
     connect(_ribbonTabBattleMap, SIGNAL(gridScaleChanged(int)), _battleFrame, SLOT(setGridScale(int)));
-    connect(_battleFrame, &BattleFrame::gridScaleChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridScale);
+    connect(_battleFrame, &BattleFrame::gridConfigChanged, _ribbonTabBattleMap, &RibbonTabBattleMap::setGridConfig);
     connect(_ribbonTabBattleMap, &RibbonTabBattleMap::gridScaleSetClicked, _battleFrame, &BattleFrame::selectGridCount);
     connect(_ribbonTabBattleMap, SIGNAL(gridAngleChanged(int)), _battleFrame, SLOT(setGridAngle(int)));
     connect(_ribbonTabBattleMap, SIGNAL(gridXOffsetChanged(int)), _battleFrame, SLOT(setXOffset(int)));
@@ -1096,6 +1098,7 @@ void MainWindow::newBattleEncounter()
     LayerGrid* gridLayer = nullptr;
     LayerTokens* monsterTokens = nullptr;
     LayerTokens* pcTokens = nullptr;
+    bool hasGrid = false;
 
     qDebug() << "[Battle Frame] Selecting a new map...";
 
@@ -1103,46 +1106,72 @@ void MainWindow::newBattleEncounter()
     if(!currentObject)
         currentObject = _campaign;
 
-    Map* battleMap = nullptr;
-    MapSelectDialog mapSelectDlg(*_campaign, battle->getID());
+    MapSelectDialog mapSelectDlg(*_campaign, currentObject->getID());
     if(mapSelectDlg.exec() == QDialog::Accepted)
-        battleMap = mapSelectDlg.getSelectedMap();
-
-    if(battleMap)
     {
-        battleMap->initialize();
-        gridScale = battleMap->getLayerScene().getScale();
-
-        // Create a grid after the first image layer, a monster token layer before the FoW
-        for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
+        if(mapSelectDlg.isMapSelected())
         {
-            Layer* layer = battleMap->getLayerScene().layerAt(i);
-            if(layer)
+            Map* battleMap = mapSelectDlg.getSelectedMap();
+            if(battleMap)
             {
-                if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
-                {
-                    monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
-                    battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
-                }
+                battleMap->initialize();
+                gridScale = battleMap->getLayerScene().getScale();
+                hasGrid = battleMap->getLayerScene().layerCount(DMHelper::LayerType_Grid) > 0;
 
-                battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
-
-                if((!gridLayer) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                // Create a grid after the first image layer, a monster token layer before the FoW
+                for(int i = 0; i < battleMap->getLayerScene().layerCount(); ++i)
                 {
-                     gridLayer = new LayerGrid(QString("Grid"));
-                     battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                    Layer* layer = battleMap->getLayerScene().layerAt(i);
+                    if(layer)
+                    {
+                        if((!monsterTokens) && (layer->getFinalType() == DMHelper::LayerType_Fow))
+                        {
+                            monsterTokens = new LayerTokens(battle->getBattleDialogModel(), QString("Monster tokens"));
+                            battle->getBattleDialogModel()->getLayerScene().appendLayer(monsterTokens);
+                        }
+
+                        battle->getBattleDialogModel()->getLayerScene().appendLayer(new LayerReference(battleMap, layer, layer->getOrder()));
+
+                        if((!hasGrid) && ((layer->getFinalType() == DMHelper::LayerType_Image) || (layer->getFinalType() == DMHelper::LayerType_Video)))
+                        {
+                             gridLayer = new LayerGrid(QString("Grid"));
+                             battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
+                             hasGrid = true;
+                        }
+                    }
                 }
+            }
+        }
+        else if(mapSelectDlg.isBlankMap())
+        {
+            MapBlankDialog blankDlg;
+            int result = blankDlg.exec();
+            if(result == QDialog::Accepted)
+            {
+                LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
+                blankLayer->setSize(blankDlg.getMapSize());
+                battle->getBattleDialogModel()->getLayerScene().appendLayer(blankLayer);
+            }
+        }
+        else if(mapSelectDlg.isNewMapImage())
+        {
+            Layer* mapLayer = selectMapFile();
+            if(mapLayer)
+            {
+                mapLayer->initialize(QSize());
+                battle->getBattleDialogModel()->getLayerScene().appendLayer(mapLayer);
             }
         }
     }
 
-    if(!gridLayer)
+    if((!gridLayer) && (!hasGrid))
     {
         gridLayer = new LayerGrid(QString("Grid"));
         battle->getBattleDialogModel()->getLayerScene().appendLayer(gridLayer);
     }
 
-    gridLayer->getConfig().setGridScale(gridScale);
+    if(gridLayer)
+        gridLayer->getConfig().setGridScale(gridScale);
     battle->getBattleDialogModel()->getLayerScene().setScale(gridScale);
 
     if(!monsterTokens)
@@ -1157,11 +1186,14 @@ void MainWindow::newBattleEncounter()
     // Add the active characters
     battle->getBattleDialogModel()->getLayerScene().setSelectedLayer(pcTokens);
     QPointF mapCenter = battle->getBattleDialogModel()->getLayerScene().boundingRect().center();
+    if(mapCenter.isNull())
+            mapCenter = QPointF(gridScale, gridScale);
+    QPointF multiplePos(gridScale / 10.0, gridScale / 10.0);
     QList<Character*> activeCharacters = _campaign->getActiveCharacters();
     for(int i = 0; i < activeCharacters.count(); ++i)
     {
         BattleDialogModelCharacter* newCharacter = new BattleDialogModelCharacter(activeCharacters.at(i));
-        newCharacter->setPosition(mapCenter);
+        newCharacter->setPosition(mapCenter + (multiplePos * i));
         battle->getBattleDialogModel()->appendCombatant(newCharacter);
     }
 
@@ -1189,24 +1221,9 @@ void MainWindow::newMap()
     if(!ok)
         return;
 
-    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map File..."));
-    if(filename.isEmpty())
+    Layer* mapLayer = selectMapFile();
+    if(!mapLayer)
         return;
-
-    Layer* mapLayer;
-    QImageReader reader(filename);
-    if(reader.canRead())
-    {
-        mapLayer = new LayerImage(QString("Map Image"), filename);
-    }
-    else
-    {
-        QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
-        if(result != QMessageBox::Yes)
-            return;
-
-        mapLayer = new LayerVideo(QString("Map Video"), filename);
-    }
 
     Map* map = dynamic_cast<Map*>(MapFactory().createObject(DMHelper::CampaignType_Map, -1, mapName, false));
     if(!map)
@@ -1216,22 +1233,11 @@ void MainWindow::newMap()
     }
 
     map->getLayerScene().appendLayer(mapLayer);
-//    map->setFileName(filename);
 
     ok = false;
-    int newScale = DMHelper::STARTING_GRID_SCALE;
     int gridCount = QInputDialog::getInt(this, QString("Map Scale"), QString("How many grid squares should the map have horizontally? This is used to set the size of tokens on the map, even if you don't use the map for combat or with a grid."), DMHelper::DEFAULT_GRID_COUNT, 1, 100000, 1, &ok);
     if(ok)
         map->setGridCount(gridCount);
-    /*
-    if((ok) && (gridCount > 0))
-    {
-        newScale = map->getLayerScene().sceneSize().width() / gridCount;
-        if(newScale < 1)
-            newScale = DMHelper::STARTING_GRID_SCALE;
-    }
-    map->getLayerScene().setScale(newScale);
-    */
 
     QMessageBox::StandardButton result = QMessageBox::question(this, QString("Map Fog of War"), QString("Do you want to add a Fog of War onto your map?"));
     if(result == QMessageBox::Yes)
@@ -1447,6 +1453,30 @@ void MainWindow::editCurrentItem()
                 map->setName(mapName);
         }
     }
+}
+
+void MainWindow::setCurrentItemIcon()
+{
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        return;
+
+    QString newIconFileName = QFileDialog::getOpenFileName(this, QString("Select Icon"));
+    if(newIconFileName.isEmpty())
+        return;
+
+    QImageReader reader(newIconFileName);
+    if(reader.canRead())
+        currentObject->setIconFile(newIconFileName);
+}
+
+void MainWindow::clearCurrentItemIcon()
+{
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        return;
+
+    currentObject->setIconFile(QString());
 }
 
 void MainWindow::exportCurrentItem()
@@ -2173,6 +2203,23 @@ void MainWindow::addNewAudioObject(const QString& audioFile)
     emit audioTrackAdded(track);
 }
 
+Layer* MainWindow::selectMapFile()
+{
+    QString filename = QFileDialog::getOpenFileName(this, QString("Select Map File..."));
+    if(filename.isEmpty())
+        return nullptr;
+
+    QImageReader reader(filename);
+    if(reader.canRead())
+        return new LayerImage(QString("Map Image"), filename);
+
+    QMessageBox::StandardButton result = QMessageBox::question(this, QString("Animated Map"), QString("Is the selected map file an animated map or video?"));
+    if(result == QMessageBox::Yes)
+        return new LayerVideo(QString("Map Video"), filename);
+
+    return nullptr;
+}
+
 void MainWindow::openCampaign(const QString& filename)
 {
     if(!closeCampaign())
@@ -2438,6 +2485,17 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     contextMenu->addAction(removeItem);
 
     contextMenu->addSeparator();
+
+    QAction* setIconItem = new QAction(QIcon(":/img/data/icon_contentscrollingtext.png"), QString("Set Icon..."), contextMenu);
+    connect(setIconItem, SIGNAL(triggered()), this, SLOT(setCurrentItemIcon()));
+    contextMenu->addAction(setIconItem);
+
+    if(!campaignObject->getIconFile().isEmpty())
+    {
+        QAction* clearIconItem = new QAction(QIcon(":/img/data/icon_contentscrollingtext.png"), QString("Clear Icon"), contextMenu);
+        connect(clearIconItem, SIGNAL(triggered()), this, SLOT(clearCurrentItemIcon()));
+        contextMenu->addAction(clearIconItem);
+    }
 
     if(campaignItem->isEditable())
     {
@@ -2735,8 +2793,11 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
         connect(_ribbonTabBattle, SIGNAL(showMovementClicked(bool)), model, SLOT(setShowMovement(bool)));
         connect(_ribbonTabBattle, SIGNAL(lairActionsClicked(bool)), model, SLOT(setShowLairActions(bool)));
 
-        LayerGrid* layer = dynamic_cast<LayerGrid*>(model->getLayerScene().getPriority(DMHelper::LayerType_Grid));
-        if(layer)
+        Layer* selectedLayer = model->getLayerScene().getSelectedLayer();
+        LayerGrid* gridLayer = dynamic_cast<LayerGrid*>(model->getLayerScene().getNearest(selectedLayer, DMHelper::LayerType_Grid));
+        if(gridLayer)
+            _ribbonTabBattleMap->setGridConfig(gridLayer->getConfig());
+            /*
         {
             //_ribbonTabBattleMap->setGridOn(model->getGridOn());
             _ribbonTabBattleMap->setGridType(layer->getConfig().getGridType());
@@ -2747,6 +2808,7 @@ void MainWindow::battleModelChanged(BattleDialogModel* model)
             _ribbonTabBattleMap->setGridWidth(layer->getConfig().getGridPen().width());
             _ribbonTabBattleMap->setGridColor(layer->getConfig().getGridPen().color());
         }
+        */
     }
 }
 

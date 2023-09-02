@@ -15,6 +15,8 @@
 #include <QUndoStack>
 #include <QDebug>
 
+// #define DEBUG_MAP_RENDERER
+
 PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
     PublishGLRenderer(parent),
     _map(map),
@@ -53,6 +55,7 @@ PublishGLMapRenderer::PublishGLMapRenderer(Map* map, QObject *parent) :
         connect(_map, &Map::partyScaleChanged, this, &PublishGLMapRenderer::handlePartyScaleChanged);
         connect(&_map->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLMapRenderer::layerAdded);
         connect(&_map->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+        connect(&_map->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &PublishGLRenderer::updateWidget);
     }
 }
 
@@ -97,7 +100,7 @@ void PublishGLMapRenderer::setBackgroundColor(const QColor& color)
 }
 
 void PublishGLMapRenderer::initializeGL()
-{    
+{
     if((_initialized) || (!_targetWidget) || (!_targetWidget->context()) || (!_map))
         return;
 
@@ -108,7 +111,7 @@ void PublishGLMapRenderer::initializeGL()
     if(!f)
         return;
 
-    qDebug() << "[PublishGLMapRenderer] Initializing renderer";
+    qDebug() << "[PublishGLMapRenderer] Initializing map renderer";
 
     createShaders();
     _map->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
@@ -158,6 +161,8 @@ void PublishGLMapRenderer::initializeGL()
 
 void PublishGLMapRenderer::cleanupGL()
 {
+    qDebug() << "[PublishGLMapRenderer] Cleaning up map renderer";
+
     _initialized = false;
 
     qDeleteAll(_markerTokens);
@@ -183,7 +188,10 @@ void PublishGLMapRenderer::cleanupGL()
 void PublishGLMapRenderer::resizeGL(int w, int h)
 {
     _targetSize = QSize(w, h);
-    qDebug() << "[PublishGLMapRenderer] Resize w: " << w << ", h: " << h;
+
+#ifdef DEBUG_MAP_RENDERER
+    qDebug() << "[PublishGLMapRenderer] Resize to: " << _targetSize;
+#endif
 
     _scene.setTargetSize(_targetSize);
     if(_map)
@@ -235,14 +243,15 @@ void PublishGLMapRenderer::paintGL()
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set the default render program
-    //qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #1: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
+#ifdef DEBUG_MAP_RENDERER
+    qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
+#endif
     f->glUseProgram(_shaderProgramRGB);
     f->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, _projectionMatrix.constData());
 
     _map->getLayerScene().playerGLPaint(f, _shaderProgramRGB, _shaderModelMatrixRGB, _projectionMatrix.constData());
 
     // Set the current program, in case the layers changed the program
-    //qDebug() << "[PublishGLMapRenderer]::paintGL UseProgram #2: " << _shaderProgramRGB << ", context: " << _targetWidget->context();
     f->glUseProgram(_shaderProgramRGB);
 
     if(_lineImage)
@@ -302,8 +311,10 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     //QSizeF backgroundMiddle = getBackgroundSize() / 2.0;
     QSizeF backgroundMiddle = _map->getLayerScene().sceneSize() / 2.0;
 
+#ifdef DEBUG_MAP_RENDERER
     qDebug() << "[PublishGLMapRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _targetSize << ", transformed target: " << transformedTarget;
     qDebug() << "[PublishGLMapRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+#endif
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
@@ -312,7 +323,9 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     int r = cameraMiddle.x() - backgroundMiddle.width() + halfRect.width();
     int t = backgroundMiddle.height() - cameraMiddle.y() - halfRect.height();
     int b = backgroundMiddle.height() - cameraMiddle.y() + halfRect.height();
+#ifdef DEBUG_MAP_RENDERER
     qDebug() << "[PublishGLMapRenderer] l: " << l << ", r: " << r << ", t: " << t << ", b: " << b;
+#endif
 
     _projectionMatrix.ortho(cameraMiddle.x() - backgroundMiddle.width() - halfRect.width(), cameraMiddle.x() - backgroundMiddle.width() + halfRect.width(),
                             backgroundMiddle.height() - cameraMiddle.y() - halfRect.height(), backgroundMiddle.height() - cameraMiddle.y() + halfRect.height(),
@@ -322,7 +335,9 @@ void PublishGLMapRenderer::updateProjectionMatrix()
     setPointerScale(rectSize.width() / transformedTarget.width());
 
     QSizeF scissorSize = transformedCamera.size().scaled(_targetSize, Qt::KeepAspectRatio);
+#ifdef DEBUG_MAP_RENDERER
     qDebug() << "[PublishGLMapRenderer] scissor size: " << scissorSize;
+#endif
     _scissorRect.setX((_targetSize.width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_targetSize.height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
@@ -485,6 +500,24 @@ void PublishGLMapRenderer::createMarkerTokens(const QSize& sceneSize)
     if(!_map->getShowMarkers())
         return;
 
+    QList<UndoMarker*> markerList = _map->getMarkers();
+    foreach(UndoMarker* marker, markerList)
+    {
+        if((marker) && (marker->getMarker().isPlayerVisible()))
+        {
+            MapMarkerGraphicsItem* markerItem = marker->getMarkerItem();
+            if((markerItem) && (!markerItem->getGraphicsItemPixmap().isNull()))
+            {
+                QImage markerImage = markerItem->getGraphicsItemPixmap().toImage();
+                PublishGLImage* newMarkerItem = new PublishGLImage(markerImage, false);
+                QPointF markerTopLeft = markerItem->getTopLeft();
+                newMarkerItem->setPosition(markerItem->x() + markerTopLeft.x() - (sceneSize.width() / 2),
+                                           (sceneSize.height() / 2) - (markerItem->y() + markerTopLeft.y() + markerImage.height()));
+
+                _markerTokens.append(newMarkerItem);
+            }
+        }
+    }
     // TODO: Layers
     /*
     QUndoStack* stack = _map->getUndoStack();
@@ -610,7 +643,8 @@ void PublishGLMapRenderer::createShaders()
     f->glLinkProgram(_shaderProgramRGB);
 
     f->glGetProgramiv(_shaderProgramRGB, GL_LINK_STATUS, &success);
-    if(!success) {
+    if(!success)
+    {
         f->glGetProgramInfoLog(_shaderProgramRGB, 512, NULL, infoLog);
         qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
@@ -687,7 +721,8 @@ void PublishGLMapRenderer::createShaders()
     f->glLinkProgram(_shaderProgramRGBA);
 
     f->glGetProgramiv(_shaderProgramRGBA, GL_LINK_STATUS, &success);
-    if(!success) {
+    if(!success)
+    {
         f->glGetProgramInfoLog(_shaderProgramRGBA, 512, NULL, infoLog);
         qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
@@ -762,7 +797,8 @@ void PublishGLMapRenderer::createShaders()
     f->glLinkProgram(_shaderProgramRGBColor);
 
     f->glGetProgramiv(_shaderProgramRGBColor, GL_LINK_STATUS, &success);
-    if(!success) {
+    if(!success)
+    {
         f->glGetProgramInfoLog(_shaderProgramRGBColor, 512, NULL, infoLog);
         qDebug() << "[PublishGLMapRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
@@ -774,6 +810,10 @@ void PublishGLMapRenderer::createShaders()
     _shaderModelMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "model");
     _shaderProjectionMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "projection");
     _shaderRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "inColor");
+
+#ifdef DEBUG_MAP_RENDERER
+    qDebug() << "[PublishGLMapRenderer] _shaderProgramRGB: " << _shaderProgramRGB << ", _shaderModelMatrixRGB: " << _shaderModelMatrixRGB << ", _shaderProjectionMatrixRGB: " << _shaderProjectionMatrixRGB << ", _shaderProgramRGBA: " << _shaderProgramRGBA << ", _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << ", _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA << ", _shaderAlphaRGBA: " << _shaderAlphaRGBA << ", _shaderProgramRGBColor: " << _shaderProgramRGBColor << ", _shaderModelMatrixRGBColor: " << _shaderModelMatrixRGBColor << ", _shaderProjectionMatrixRGBColor: " << _shaderProjectionMatrixRGBColor << ", _shaderRGBColor: " << _shaderRGBColor;
+#endif
 }
 
 void PublishGLMapRenderer::destroyShaders()

@@ -6,10 +6,12 @@
 #include "layerimage.h"
 #include "layertokens.h"
 #include "layervideo.h"
+#include "layerblank.h"
 #include "layerframe.h"
 #include "layergrid.h"
 #include "ribbonframe.h"
 #include "publishglrenderer.h"
+#include "mapblankdialog.h"
 #include <QImageReader>
 #include <QVBoxLayout>
 #include <QInputDialog>
@@ -61,14 +63,14 @@ void LayersEditDialog::selectFrame(LayerFrame* frame)
 void LayersEditDialog::moveUp()
 {
     int currentSelected = _scene.getSelectedLayerIndex();
-    _scene.moveLayer(currentSelected, currentSelected - 1);
+    _scene.moveLayer(currentSelected, currentSelected + 1);
     resetLayout();
 }
 
 void LayersEditDialog::moveDown()
 {
     int currentSelected = _scene.getSelectedLayerIndex();
-    _scene.moveLayer(currentSelected, currentSelected + 1);
+    _scene.moveLayer(currentSelected, currentSelected - 1);
     resetLayout();
 }
 
@@ -78,7 +80,7 @@ void LayersEditDialog::addLayer()
     items << tr("Image") << tr("Video") << tr("FoW");
     if(_model)
         items << tr("Tokens") ;
-    items << tr("Grid") << tr("Text");
+    items << tr("Grid") << tr("Blank");
 
     bool ok;
     QString selectedItem = QInputDialog::getItem(this, tr("New Layer"), tr("Select New Layer Type:"), items, 0, false, &ok);
@@ -91,27 +93,8 @@ void LayersEditDialog::addLayer()
         QString newFileName = QFileDialog::getOpenFileName(nullptr, QString("DMHelper New Image File"));
         if(newFileName.isEmpty())
             return;
-/*
-        QImageReader reader(newFileName);
-        QImage imgBackground = reader.read();
-        if(imgBackground.isNull())
-        {
-            qDebug() << "[Map] Not able to read new image file " << newFileName << ": " << reader.error() <<", " << reader.errorString();
-#if !defined(Q_OS_MAC)
-            QMessageBox::critical(nullptr,
-                                  QString("DMHelper Image File Read Error"),
-                                  QString("The selected image """) + newFileName + QString(""" could not be read. It may be too high resolution for DMHelper!"));
-#endif
-            return;
-        }
-
-        if(imgBackground.format() != QImage::Format_ARGB32_Premultiplied)
-            imgBackground.convertTo(QImage::Format_ARGB32_Premultiplied);
-            */
 
         newLayer = new LayerImage(QString("Image"), newFileName);
-        //qDebug() << "[LayersEditDialog] Trying to add Image layer which is not yet implemented!";
-        //return;
     }
     else if(selectedItem == tr("Video"))
     {
@@ -138,13 +121,17 @@ void LayersEditDialog::addLayer()
     else if(selectedItem == tr("Grid"))
     {
         newLayer = new LayerGrid(QString("Grid"));
-        //qDebug() << "[LayersEditDialog] Trying to add Grid layer which is not yet implemented!";
-        //return;
     }
-    else if(selectedItem == tr("Text"))
+    else if(selectedItem == tr("Blank"))
     {
-        qDebug() << "[LayersEditDialog] Trying to add Text layer which is not yet implemented!";
-        return;
+        MapBlankDialog blankDlg;
+        int result = blankDlg.exec();
+        if(result != QDialog::Accepted)
+            return;
+
+        LayerBlank* blankLayer = new LayerBlank(QString("Blank Layer"), blankDlg.getMapColor());
+        blankLayer->setSize(blankDlg.getMapSize());
+        newLayer = blankLayer;
     }
     else
     {
@@ -255,7 +242,7 @@ void LayersEditDialog::readScene()
             connect(newFrame, &LayerFrame::refreshPlayer, this, &LayersEditDialog::updateRenderer);
             connect(newFrame, &LayerFrame::positionChanged, this, &LayersEditDialog::updateSceneSize);
             connect(newFrame, &LayerFrame::sizeChanged, this, &LayersEditDialog::updateSceneSize);
-            _layerLayout->addWidget(newFrame);
+            _layerLayout->insertWidget(0, newFrame);
         }
     }
 

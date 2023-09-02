@@ -49,7 +49,7 @@ bool ScaledPixmap::setBasePixmap(const QString& basePixmap)
     return _pixmaps[DMHelper::PixmapSize_Full].load(basePixmap);
 }
 
-bool ScaledPixmap::isValid()
+bool ScaledPixmap::isValid() const
 {
     return _pixmaps.at(DMHelper::PixmapSize_Full).isNull() == false;
 }

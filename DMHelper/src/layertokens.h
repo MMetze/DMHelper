@@ -45,6 +45,8 @@ public:
     QList<QGraphicsItem*> getEffectItems();
     BattleDialogModelObject* getObjectById(QUuid id);
 
+    int getScale() const;
+
 public slots:
     // DM Window Generic Interface
     virtual void dmInitialize(QGraphicsScene* scene) override;
@@ -121,6 +123,7 @@ protected:
     QPixmap generateCombatantPixmap(BattleDialogModelCombatant* combatant);
     void applyCombatantTooltip(QGraphicsItem* item, BattleDialogModelCombatant* combatant);
     void applyCombatantVisibility(bool layerVisible, bool aliveVisible, bool deadVisible);
+    void applySingleCombatantVisibility(BattleDialogModelCombatant* combatant, bool layerVisible, bool aliveVisible, bool deadVisible);
     void applyEffectVisibility(bool visible);
 
     // Player Window Methods

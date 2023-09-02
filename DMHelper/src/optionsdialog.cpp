@@ -14,7 +14,10 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
 
     ui->cmbInitiativeType->addItem("No Initiative", QVariant(DMHelper::InitiativeType_None));
     ui->cmbInitiativeType->addItem("Icons Only", QVariant(DMHelper::InitiativeType_Image));
-    ui->cmbInitiativeType->addItem("Icons and Names", QVariant(DMHelper::InitiativeType_ImageName));
+    ui->cmbInitiativeType->addItem("Icons and All Names", QVariant(DMHelper::InitiativeType_ImageName));
+    ui->cmbInitiativeType->addItem("Icons and PC Names Only", QVariant(DMHelper::InitiativeType_ImagePCNames));
+
+    ui->edtInitiativeScale->setValidator(new QDoubleValidator(0.1, 10.0, 2));
 
     if(_options)
     {
@@ -42,6 +45,8 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         ui->fontComboBox->setCurrentFont(font);
         ui->spinBoxFontSize->setValue(_options->getFontSize());
         ui->cmbInitiativeType->setCurrentIndex(_options->getInitiativeType());
+        ui->edtInitiativeScale->setText(QString::number(_options->getInitiativeScale()));
+        ui->sliderInitiativeScale->setValue(static_cast<int>(_options->getInitiativeScale() * 100.0));
         ui->chkShowCountdown->setChecked(_options->getShowCountdown());
         ui->edtCountdownDuration->setValidator(new QIntValidator(1, 1000, this));
         ui->edtCountdownDuration->setText(QString::number(_options->getCountdownDuration()));
@@ -79,6 +84,10 @@ OptionsDialog::OptionsDialog(OptionsContainer* options, QWidget *parent) :
         connect(ui->fontComboBox, SIGNAL(currentFontChanged(const QFont &)), _options, SLOT(setFontFamilyFromFont(const QFont&)));
         connect(ui->spinBoxFontSize, SIGNAL(valueChanged(int)), _options, SLOT(setFontSize(int)));
         connect(ui->cmbInitiativeType, SIGNAL(currentIndexChanged(int)), _options, SLOT(setInitiativeType(int)));
+        connect(ui->sliderInitiativeScale, &QAbstractSlider::valueChanged,
+                [=](int newValue) { this->handleInitiativeScaleChanged(static_cast<qreal>(newValue) / 100.0); });
+        connect(ui->edtInitiativeScale, &QLineEdit::editingFinished,
+                [=]() { this->handleInitiativeScaleChanged(ui->edtInitiativeScale->text().toDouble()); });
         connect(ui->chkShowCountdown, SIGNAL(clicked(bool)), _options, SLOT(setShowCountdown(bool)));
         connect(ui->edtCountdownDuration, SIGNAL(textChanged(QString)), _options, SLOT(setCountdownDuration(QString)));
         connect(ui->btnPointer, &QAbstractButton::clicked, this, &OptionsDialog::browsePointerFile);
@@ -306,6 +315,17 @@ void OptionsDialog::setTables(const QString& tablesDirectory)
 
     ui->edtTables->setText(tablesDirectory);
     _options->setTablesDirectory(tablesDirectory);
+}
+
+void OptionsDialog::handleInitiativeScaleChanged(qreal initiativeScale)
+{
+    if(ui->edtInitiativeScale->text().toDouble() != initiativeScale)
+        ui->edtInitiativeScale->setText(QString::number(initiativeScale));
+
+    if(ui->sliderInitiativeScale->value() != static_cast<int>(initiativeScale * 100.0))
+        ui->sliderInitiativeScale->setValue(static_cast<int>(initiativeScale * 100.0));
+
+    _options->setInitiativeScale(initiativeScale);
 }
 
 void OptionsDialog::browsePointerFile()

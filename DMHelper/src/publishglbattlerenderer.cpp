@@ -20,6 +20,8 @@
 #include <QStyleOptionGraphicsItem>
 #include <QDebug>
 
+// #define DEBUG_BATTLE_RENDERER
+
 const int MOVEMENT_TOKEN_SIZE = 512;
 
 PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObject *parent) :
@@ -47,6 +49,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
     _initiativeBackground(nullptr),
     _effectTokens(),
     _initiativeType(DMHelper::InitiativeType_ImageName),
+    _initiativeScale(1.0),
     _initiativeTokenHeight(0.0),
     _movementVisible(false),
     _movementCombatant(nullptr),
@@ -81,6 +84,7 @@ PublishGLBattleRenderer::PublishGLBattleRenderer(BattleDialogModel* model, QObje
         connect(&_model->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLBattleRenderer::layerAdded);
         connect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLBattleRenderer::layerRemoved);
         connect(&_model->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+        connect(&_model->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &PublishGLRenderer::updateWidget);
     }
 }
 
@@ -134,6 +138,8 @@ void PublishGLBattleRenderer::initializeGL()
     QOpenGLFunctions *f = _targetWidget->context()->functions();
     if(!f)
         return;
+
+    qDebug() << "[PublishGLBattleRenderer] Initializing battle renderer";
 
     createShaders();
     _model->getLayerScene().playerSetShaders(_shaderProgramRGB, _shaderModelMatrixRGB, _shaderProjectionMatrixRGB, _shaderProgramRGBA, _shaderModelMatrixRGBA, _shaderProjectionMatrixRGBA, _shaderAlphaRGBA);
@@ -189,6 +195,8 @@ void PublishGLBattleRenderer::initializeGL()
 
 void PublishGLBattleRenderer::cleanupGL()
 {
+    qDebug() << "[PublishGLBattleRenderer] Cleaning up battle renderer";
+
     _initialized = false;
 
     disconnect(_model, &BattleDialogModel::effectListChanged, this, &PublishGLBattleRenderer::recreateContents);
@@ -213,7 +221,11 @@ void PublishGLBattleRenderer::cleanupGL()
 void PublishGLBattleRenderer::resizeGL(int w, int h)
 {
     QSize targetSize(w, h);
-    qDebug() << "[BattleGLRenderer] Resize to: " << targetSize;
+
+#ifdef DEBUG_BATTLE_RENDERER
+    qDebug() << "[PublishGLBattleRenderer] Resize to: " << targetSize;
+#endif
+
     _scene.setTargetSize(targetSize);
     if(_model)
         _model->getLayerScene().playerGLResize(w, h);
@@ -406,8 +418,10 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     QPointF cameraMiddle(_cameraRect.x() + (_cameraRect.width() / 2.0), _cameraRect.y() + (_cameraRect.height() / 2.0));
     QSizeF backgroundMiddle = _model->getLayerScene().sceneSize() / 2.0;
 
-    // qDebug() << "[PublishGLBattleRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
-    // qDebug() << "[PublishGLBattleRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+#ifdef DEBUG_BATTLE_RENDERER
+    qDebug() << "[PublishGLBattleRenderer] camera rect: " << _cameraRect << ", transformed camera: " << transformedCamera << ", target size: " << _scene.getTargetSize() << ", transformed target: " << transformedTarget;
+    qDebug() << "[PublishGLBattleRenderer] rectSize: " << rectSize << ", camera top left: " << cameraTopLeft << ", camera middle: " << cameraMiddle << ", background middle: " << backgroundMiddle;
+#endif
 
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
@@ -418,7 +432,9 @@ void PublishGLBattleRenderer::updateProjectionMatrix()
     setPointerScale(rectSize.width() / transformedTarget.width());
 
     QSizeF scissorSize = transformedCamera.size().scaled(_scene.getTargetSize(), Qt::KeepAspectRatio);
-    // qDebug() << "[PublishGLBattleRenderer] scissor size: " << scissorSize;
+#ifdef DEBUG_BATTLE_RENDERER
+    qDebug() << "[PublishGLBattleRenderer] scissor size: " << scissorSize;
+#endif
     _scissorRect.setX((_scene.getTargetSize().width() - scissorSize.width()) / 2.0);
     _scissorRect.setY((_scene.getTargetSize().height() - scissorSize.height()) / 2.0);
     _scissorRect.setWidth(scissorSize.width());
@@ -441,7 +457,19 @@ void PublishGLBattleRenderer::setInitiativeType(int initiativeType)
         return;
 
     _initiativeType = initiativeType;
-    recreateContents(); // Todo: can we change this to updateInitiative?
+    _updateInitiative = true;
+    emit updateWidget();
+//    recreateContents(); // Todo: can we change this to updateInitiative?
+}
+
+void PublishGLBattleRenderer::setInitiativeScale(qreal initiativeScale)
+{
+    if(_initiativeScale == initiativeScale)
+        return;
+
+    _initiativeScale = initiativeScale;
+    _updateInitiative = true;
+    emit updateWidget();
 }
 
 void PublishGLBattleRenderer::distanceChanged(const QString& distance)
@@ -588,7 +616,9 @@ void PublishGLBattleRenderer::updateBackground()
 
 void PublishGLBattleRenderer::updateSelectionTokens()
 {
+#ifdef DEBUG_BATTLE_RENDERER
     qDebug() << "[PublishGLBattleRenderer] Updating Selection Tokens";
+#endif
 
     QImage selectImage;
     if((_selectionTokenFile.isEmpty()) || (!selectImage.load(_selectionTokenFile)))
@@ -657,7 +687,9 @@ void PublishGLBattleRenderer::createContents()
     if(!_model)
         return;
 
+#ifdef DEBUG_BATTLE_RENDERER
     qDebug() << "[PublishGLBattleRenderer] Creating all battle content";
+#endif
 
     _model->getLayerScene().playerGLInitialize(this, &_scene);
 
@@ -763,25 +795,27 @@ void PublishGLBattleRenderer::cleanupContents()
 
 void PublishGLBattleRenderer::updateInitiative()
 {
+#ifdef DEBUG_BATTLE_RENDERER
     qDebug() << "[PublishGLBattleRenderer] Updating Initiative resources";
+#endif
 
     delete _initiativeBackground;
     _initiativeBackground = nullptr;
 
     QList<PublishGLImage*> nameTokens = _combatantNames.values();
 
-    _initiativeTokenHeight = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
+    _initiativeTokenHeight = static_cast<qreal>(_scene.getTargetSize().height()) * _initiativeScale / 24.0;
     QSize initiativeArea;
     initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + 5);
 
-    if(_initiativeType == DMHelper::InitiativeType_ImageName)
+    if((_initiativeType == DMHelper::InitiativeType_ImageName) || (_initiativeType == DMHelper::InitiativeType_ImagePCNames))
     {
         for(PublishGLImage* nameToken : nameTokens)
         {
             if(nameToken)
             {
-                if(initiativeArea.width() < (_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5)
-                    initiativeArea.setWidth((_initiativeTokenHeight * 1.2) + nameToken->getSize().width() + 5);
+                if(initiativeArea.width() < (_initiativeTokenHeight * 1.25) + nameToken->getSize().width() + 5)
+                    initiativeArea.setWidth((_initiativeTokenHeight * 1.25) + nameToken->getSize().width() + 5);
 
                 if(_initiativeTokenHeight < nameToken->getSize().height())
                     _initiativeTokenHeight = nameToken->getSize().height();
@@ -830,7 +864,7 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
     screenCoords.ortho(0.f, _scene.getTargetSize().width(), 0.f, _scene.getTargetSize().height(), 0.1f, 1000.f);
     functions->glUniformMatrix4fv(_shaderProjectionMatrixRGB, 1, GL_FALSE, screenCoords.constData());
     QMatrix4x4 tokenScreenCoords;
-    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) / 24.0;
+    qreal tokenSize = static_cast<qreal>(_scene.getTargetSize().height()) * _initiativeScale / 24.0;
     qreal tokenY = _scene.getTargetSize().height() - tokenSize / 2.0 - 5.0;
 
     if(_initiativeBackground)
@@ -894,7 +928,8 @@ void PublishGLBattleRenderer::paintInitiative(QOpenGLFunctions* functions)
                 }
             }
 
-            if((_initiativeType == DMHelper::InitiativeType_ImageName) && (combatant->getShown()))
+            if((combatant->getShown()) && (((_initiativeType == DMHelper::InitiativeType_ImagePCNames) && (combatant->getCombatantType() == DMHelper::CombatantType_Character)) ||
+                                           (_initiativeType == DMHelper::InitiativeType_ImageName)))
             {
                 PublishGLImage* combatantName = _combatantNames.value(combatant);
                 if(combatantName)
@@ -953,7 +988,7 @@ void PublishGLBattleRenderer::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(vertexShaderRGB, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -979,7 +1014,7 @@ void PublishGLBattleRenderer::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(fragmentShaderRGB, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -990,9 +1025,10 @@ void PublishGLBattleRenderer::createShaders()
     f->glLinkProgram(_shaderProgramRGB);
 
     f->glGetProgramiv(_shaderProgramRGB, GL_LINK_STATUS, &success);
-    if(!success) {
+    if(!success)
+    {
         f->glGetProgramInfoLog(_shaderProgramRGB, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -1029,7 +1065,7 @@ void PublishGLBattleRenderer::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(vertexShaderRGBA, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -1056,7 +1092,7 @@ void PublishGLBattleRenderer::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(fragmentShaderRGBA, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -1067,9 +1103,10 @@ void PublishGLBattleRenderer::createShaders()
     f->glLinkProgram(_shaderProgramRGBA);
 
     f->glGetProgramiv(_shaderProgramRGBA, GL_LINK_STATUS, &success);
-    if(!success) {
+    if(!success)
+    {
         f->glGetProgramInfoLog(_shaderProgramRGBA, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -1107,7 +1144,7 @@ void PublishGLBattleRenderer::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(vertexShaderRGBColor, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::VERTEX::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -1131,7 +1168,7 @@ void PublishGLBattleRenderer::createShaders()
     if(!success)
     {
         f->glGetShaderInfoLog(fragmentShaderRGBColor, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::FRAGMENT::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -1142,9 +1179,10 @@ void PublishGLBattleRenderer::createShaders()
     f->glLinkProgram(_shaderProgramRGBColor);
 
     f->glGetProgramiv(_shaderProgramRGBColor, GL_LINK_STATUS, &success);
-    if(!success) {
+    if(!success)
+    {
         f->glGetProgramInfoLog(_shaderProgramRGBColor, 512, NULL, infoLog);
-        qDebug() << "[BattleGLRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
+        qDebug() << "[PublishGLBattleRenderer] ERROR::SHADER::PROGRAM::COMPILATION_FAILED: " << infoLog;
         return;
     }
 
@@ -1154,6 +1192,10 @@ void PublishGLBattleRenderer::createShaders()
     _shaderModelMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "model");
     _shaderProjectionMatrixRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "projection");
     _shaderRGBColor = f->glGetUniformLocation(_shaderProgramRGBColor, "inColor");
+
+#ifdef DEBUG_BATTLE_RENDERER
+    qDebug() << "[PublishGLBattleRenderer] _shaderProgramRGB: " << _shaderProgramRGB << ", _shaderModelMatrixRGB: " << _shaderModelMatrixRGB << ", _shaderProjectionMatrixRGB: " << _shaderProjectionMatrixRGB << ", _shaderProgramRGBA: " << _shaderProgramRGBA << ", _shaderModelMatrixRGBA: " << _shaderModelMatrixRGBA << ", _shaderProjectionMatrixRGBA: " << _shaderProjectionMatrixRGBA << ", _shaderAlphaRGBA: " << _shaderAlphaRGBA << ", _shaderProgramRGBColor: " << _shaderProgramRGBColor << ", _shaderModelMatrixRGBColor: " << _shaderModelMatrixRGBColor << ", _shaderProjectionMatrixRGBColor: " << _shaderProjectionMatrixRGBColor << ", _shaderRGBColor: " << _shaderRGBColor;
+#endif
 }
 
 void PublishGLBattleRenderer::destroyShaders()

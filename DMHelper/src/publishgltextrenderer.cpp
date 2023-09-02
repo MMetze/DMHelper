@@ -10,9 +10,10 @@
 #include <QTextDocument>
 #include <QPainter>
 
-PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, QObject *parent) :
+PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage textImage, const QSize& frameSize, QObject *parent) :
     PublishGLRenderer(parent),
     _encounter(encounter),
+    _frameSize(frameSize),
     _targetSize(),
     _color(),
     _textImage(textImage),
@@ -41,6 +42,7 @@ PublishGLTextRenderer::PublishGLTextRenderer(EncounterText* encounter, QImage te
     {
         connect(&_encounter->getLayerScene(), &LayerScene::layerAdded, this, &PublishGLTextRenderer::layerAdded);
         connect(&_encounter->getLayerScene(), &LayerScene::layerRemoved, this, &PublishGLRenderer::updateWidget);
+        connect(&_encounter->getLayerScene(), &LayerScene::layerVisibilityChanged, this, &PublishGLRenderer::updateWidget);
     }
 }
 
@@ -91,7 +93,10 @@ void PublishGLTextRenderer::initializeGL()
 
     f->glActiveTexture(GL_TEXTURE0); // activate the texture unit first before binding texture
 
-    _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
+    if(_encounter->getLayerScene().sceneSize().isEmpty())
+        _scene.deriveSceneRectFromSize(_frameSize);
+    else
+        _scene.deriveSceneRectFromSize(_encounter->getLayerScene().sceneSize());
 
     // Create the objects
     _encounter->getLayerScene().playerGLInitialize(this, &_scene);
@@ -214,13 +219,19 @@ void PublishGLTextRenderer::updateProjectionMatrix()
 
     // Update projection matrix and other size related settings:
     QSizeF rectSize = transformedTarget.scaled(_scene.getSceneRect().size(), Qt::KeepAspectRatioByExpanding);
+    if(rectSize.isEmpty())
+        qDebug() << "[PublishGLTextRenderer] updateProjectionMatrix ERROR -publish scene size empty!";
+
     _projectionMatrix.setToIdentity();
     _projectionMatrix.rotate(_rotation, 0.0, 0.0, -1.0);
     _projectionMatrix.ortho(-rectSize.width() / 2, rectSize.width() / 2, -rectSize.height() / 2, rectSize.height() / 2, 0.1f, 1000.f);
     //_projectionMatrix.ortho(0.0, 0.0, -rectSize.height(), rectSize.height(), 0.1f, 1000.f);
     //_projectionMatrix.ortho(0.0, rectSize.width(), -rectSize.height(), 0.0, 0.1f, 1000.f);
 
-    QSizeF transformedBackgroundSize = _encounter->getLayerScene().sceneSize();
+    QSizeF transformedBackgroundSize = _scene.getSceneRect().size(); //_encounter->getLayerScene().sceneSize();
+    if(transformedBackgroundSize.isEmpty())
+        qDebug() << "[PublishGLTextRenderer] updateProjectionMatrix ERROR - background size empty!";
+
     if((_rotation == 90) || (_rotation == 270))
         transformedBackgroundSize.transpose();
 
@@ -339,7 +350,7 @@ void PublishGLTextRenderer::recreateContent()
 
     delete _textObject;
     _textObject = new PublishGLImage(_textImage, GL_NEAREST, false);
-    _textObject->setX(-_encounter->getLayerScene().sceneSize().width() / 2);
+    _textObject->setX(-_scene.getSceneRect().width() / 2);
 
     rewind();
 

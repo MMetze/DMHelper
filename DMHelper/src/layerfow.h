@@ -53,6 +53,8 @@ public:
     QImage getBWFoWImage(const QSize &size);
     */
 
+    QRect getFoWVisibleRect() const;
+
     //QSize getImageSize() const;
     //void setImageSize(const QSize& imageSize);
 

@@ -40,6 +40,7 @@ public:
 
     virtual DMHelper::LayerType getType() const = 0;
     virtual DMHelper::LayerType getFinalType() const;
+    virtual Layer* getFinalLayer();
     virtual Layer* clone() const = 0;
     virtual void copyBaseValues(Layer *other) const;
 
@@ -91,6 +92,7 @@ signals:
     void layerMoved(const QPoint& position);
     void layerResized(const QSize& size);
     void layerVisibilityChanged(Layer* layer);
+    void layerScaleChanged(Layer* layer);
 
 protected:
     // Layer Specific Interface

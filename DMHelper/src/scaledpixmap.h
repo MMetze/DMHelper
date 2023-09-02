@@ -38,7 +38,7 @@ public:
     static void cleanupDefaultPixmap();
 
     bool setBasePixmap(const QString& basePixmap);
-    bool isValid();
+    bool isValid() const;
     void invalidate();
 
     QPixmap getPixmap(DMHelper::PixmapSize pixmapSize);

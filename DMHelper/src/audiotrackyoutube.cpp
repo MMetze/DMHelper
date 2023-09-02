@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QDomDocument>
 #include <QDomElement>
+#include <QIcon>
 
 const int stopCallComplete = 0x01;
 const int stopConfirmed = 0x02;
@@ -31,6 +32,11 @@ AudioTrackYoutube::~AudioTrackYoutube()
         killTimer(_timerId);
 
     AudioTrackYoutube::stop();
+}
+
+QIcon AudioTrackYoutube::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_playerswindow.png");
 }
 
 int AudioTrackYoutube::getAudioType() const

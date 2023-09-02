@@ -4,6 +4,7 @@
 #include "dmconstants.h"
 #include <QDomDocument>
 #include <QDomElement>
+#include <QIcon>
 #include <QDebug>
 
 // Uncomment the next line to log in detail all of the campaign item input, output and postprocessing
@@ -12,7 +13,8 @@
 CampaignObjectBase::CampaignObjectBase(const QString& name, QObject *parent) :
     DMHObjectBase(parent),
     _expanded(true),
-    _row(-1)
+    _row(-1),
+    _iconFile()
 #ifdef QT_DEBUG
     , _DEBUG_NAME(name)
 #endif
@@ -77,6 +79,9 @@ void CampaignObjectBase::inputXML(const QDomElement &element, bool isImport)
     {
         setObjectName(importName);
     }
+
+    _iconFile = element.attribute("base-icon");
+
 #ifdef QT_DEBUG
     _DEBUG_NAME = objectName();
 #endif
@@ -167,6 +172,28 @@ int CampaignObjectBase::getRow() const
 bool CampaignObjectBase::isTreeVisible() const
 {
     return true;
+}
+
+QIcon CampaignObjectBase::getIcon()
+{
+    if(!_iconFile.isEmpty())
+    {
+        QPixmap pixmap(_iconFile);
+        if(!pixmap.isNull())
+            return QIcon(pixmap.scaled(128, 128, Qt::KeepAspectRatio));
+    }
+
+    return getDefaultIcon();
+}
+
+QIcon CampaignObjectBase::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_contenttextencounter.png");
+}
+
+QString CampaignObjectBase::getIconFile() const
+{
+    return _iconFile;
 }
 
 const QList<CampaignObjectBase*> CampaignObjectBase::getChildObjects() const
@@ -396,6 +423,15 @@ void CampaignObjectBase::setRow(int row)
     }
 }
 
+void CampaignObjectBase::setIconFile(const QString& iconFile)
+{
+    if(iconFile == _iconFile)
+        return;
+
+    _iconFile = iconFile;
+    emit iconFileChanged(this);
+}
+
 void CampaignObjectBase::handleInternalChange()
 {
     emit changed();
@@ -412,6 +448,8 @@ void CampaignObjectBase::internalOutputXML(QDomDocument &doc, QDomElement &eleme
     element.setAttribute("expanded", getExpanded());
     element.setAttribute("row", getRow());
     element.setAttribute("name", getName());
+    if(!_iconFile.isEmpty())
+        element.setAttribute("base-icon", getIconFile());
 
     DMHObjectBase::internalOutputXML(doc, element, targetDirectory, isExport);
 }

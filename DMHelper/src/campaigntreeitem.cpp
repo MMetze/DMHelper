@@ -148,6 +148,21 @@ void CampaignTreeItem::setVisualization()
         return;
     }
 
+    setIcon(object->getIcon());
+
+    // Set the check-box for
+    if(object->getObjectType() == DMHelper::CampaignType_Combatant)
+    {
+        Character* character = dynamic_cast<Character*>(object);
+        bool isPC = ((character) && (character->isInParty()));
+        setCheckable(isPC);
+        if(isPC)
+            setCheckState(character->getActive() ? Qt::Checked : Qt::Unchecked);
+        else
+            setData(QVariant(), Qt::CheckStateRole); // Needed to actively remove the checkbox on the entry
+    }
+
+    /*
     switch(object->getObjectType())
     {
         case DMHelper::CampaignType_Party:
@@ -193,4 +208,5 @@ void CampaignTreeItem::setVisualization()
             }
             break;
     }
+    */
 }

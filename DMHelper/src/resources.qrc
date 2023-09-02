@@ -259,6 +259,7 @@
         <file>data/icon_image_original.png</file>
         <file>data/icon_newmedia.png</file>
         <file>data/icon_duplicate.png</file>
+        <file>data/icon_rectangle.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

@@ -10,11 +10,13 @@ class QGraphicsScene;
 class MapFrame;
 class MapMarkerGraphicsPixmapItem;
 class MapMarkerGraphicsSimpleTextItem;
+class UndoMarker;
 
 class MapMarkerGraphicsItem : public QGraphicsItemGroup
 {
 public:
-    MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, qreal initialScale, MapFrame& mapFrame);
+//    MapMarkerGraphicsItem(QGraphicsScene* scene, const MapMarker& marker, qreal initialScale/*, MapFrame& mapFrame*/);
+    MapMarkerGraphicsItem(QGraphicsScene* scene, UndoMarker* marker, qreal initialScale);
 
     enum { Type = UserType + 1 };
 
@@ -22,11 +24,13 @@ public:
     void setMarker(const MapMarker& marker);
     void setDetailsVisible(bool visible);
 
-    int getMarkerId() const;
+//    int getMarkerId() const;
 
     void drawGraphicsItem(QPainter& painter);
     QPixmap getGraphicsItemPixmap() const;
     QPointF getTopLeft() const;
+
+    UndoMarker* getMarker();
 
 protected:
     virtual QVariant itemChange(GraphicsItemChange change, const QVariant & value) override;
@@ -39,8 +43,9 @@ protected:
 
     virtual int type() const override;
 
-    int _marker;
-    MapFrame& _mapFrame;
+    //int _marker;
+    //MapFrame& _mapFrame;
+    UndoMarker* _marker;
 
     MapMarkerGraphicsPixmapItem* _markerIcon;
     MapMarkerGraphicsSimpleTextItem* _title;

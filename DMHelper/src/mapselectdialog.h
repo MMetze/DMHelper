@@ -12,6 +12,7 @@ class Campaign;
 class CampaignObjectBase;
 class Map;
 class QTreeWidgetItem;
+class Layer;
 
 class MapSelectDialog : public QDialog
 {
@@ -21,13 +22,20 @@ public:
     explicit MapSelectDialog(Campaign& campaign, const QUuid& currentId, QWidget *parent = nullptr);
     ~MapSelectDialog();
 
+    bool isMapSelected() const;
     Map* getSelectedMap() const;
+    bool isBlankMap() const;
+    Layer* getBlankLayer() const;
+    bool isNewMapImage() const;
+    Layer* getNewImageLayer() const;
 
 signals:
     void mapCreated();
 
+    /*
 public slots:
     virtual void accept() override;
+*/
 
 protected slots:
     void handleItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
@@ -36,12 +44,11 @@ protected slots:
     void decorateItem(QTreeWidgetItem* item, CampaignObjectBase* object);
 
 protected:
-    void createBlankMap();
-
     Ui::MapSelectDialog *ui;
 
     QTreeWidgetItem* _currentItem;
-    QTreeWidgetItem* _createNewMapEntry;
+    QTreeWidgetItem* _createBlankMap;
+    QTreeWidgetItem* _loadNewMap;
     Map* _blankMap;
 };
 
