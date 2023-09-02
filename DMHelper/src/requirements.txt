@@ -1,8 +1,8 @@
 v2.5.8
 fixed * old scrolling text doesn't scroll
 fixed * old videos are not recognized, leads to broken mapframe
-party icon not visible
-markers (neverwinter region) seem to not work
+fixed * party icon not visible
+fixed * markers (neverwinter region) seem to not work
 Fog of war from old to new
 
 feature * Scale the initiative list freely
