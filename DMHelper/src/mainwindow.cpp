@@ -1455,6 +1455,30 @@ void MainWindow::editCurrentItem()
     }
 }
 
+void MainWindow::setCurrentItemIcon()
+{
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        return;
+
+    QString newIconFileName = QFileDialog::getOpenFileName(this, QString("Select Icon"));
+    if(newIconFileName.isEmpty())
+        return;
+
+    QImageReader reader(newIconFileName);
+    if(reader.canRead())
+        currentObject->setIconFile(newIconFileName);
+}
+
+void MainWindow::clearCurrentItemIcon()
+{
+    CampaignObjectBase* currentObject = ui->treeView->currentCampaignObject();
+    if(!currentObject)
+        return;
+
+    currentObject->setIconFile(QString());
+}
+
 void MainWindow::exportCurrentItem()
 {
     if((!_campaign)||(!_treeModel))
@@ -2461,6 +2485,17 @@ void MainWindow::handleCustomContextMenu(const QPoint& point)
     contextMenu->addAction(removeItem);
 
     contextMenu->addSeparator();
+
+    QAction* setIconItem = new QAction(QIcon(":/img/data/icon_contentscrollingtext.png"), QString("Set Icon..."), contextMenu);
+    connect(setIconItem, SIGNAL(triggered()), this, SLOT(setCurrentItemIcon()));
+    contextMenu->addAction(setIconItem);
+
+    if(!campaignObject->getIconFile().isEmpty())
+    {
+        QAction* clearIconItem = new QAction(QIcon(":/img/data/icon_contentscrollingtext.png"), QString("Clear Icon"), contextMenu);
+        connect(clearIconItem, SIGNAL(triggered()), this, SLOT(clearCurrentItemIcon()));
+        contextMenu->addAction(clearIconItem);
+    }
 
     if(campaignItem->isEditable())
     {

@@ -338,6 +338,7 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
             connect(partyObject, &Party::iconChanged, this, &CampaignTreeModel::handleObjectIconChanged);
     }
 
+    connect(object, &CampaignObjectBase::iconFileChanged, this, &CampaignTreeModel::handleObjectIconChanged);
     connect(object, &CampaignObjectBase::nameChanged, this, &CampaignTreeModel::handleObjectNameChanged);
 
     addTreeEntry(treeEntry, parentEntry);

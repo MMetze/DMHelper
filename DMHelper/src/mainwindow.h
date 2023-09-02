@@ -93,6 +93,8 @@ public slots:
     void showNotes();
     void addNote();
     void editCurrentItem();
+    void setCurrentItemIcon();
+    void clearCurrentItemIcon();
     void exportCurrentItem();
     void addNewObject(CampaignObjectBase* newObject);
 
