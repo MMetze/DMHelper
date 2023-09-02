@@ -12,6 +12,8 @@ public:
     explicit AudioTrackSyrinscapeOnline(const QString& trackName = QString(), const QUrl& trackUrl = QUrl(), QObject *parent = nullptr);
     virtual ~AudioTrackSyrinscapeOnline() override;
 
+    virtual QIcon getDefaultIcon() override;
+
     virtual int getAudioType() const override;
 
 public slots:

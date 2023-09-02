@@ -22,6 +22,7 @@
 #include <QImageReader>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QIcon>
 #include <QDebug>
 
 Map::Map(const QString& mapName, QObject *parent) :
@@ -203,6 +204,11 @@ void Map::copyValues(const CampaignObjectBase* other)
 int Map::getObjectType() const
 {
     return DMHelper::CampaignType_Map;
+}
+
+QIcon Map::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_contentmap.png");
 }
 
 /*

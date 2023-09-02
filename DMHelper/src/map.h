@@ -28,6 +28,7 @@ public:
     virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual int getObjectType() const override;
+    virtual QIcon getDefaultIcon() override;
 
     // From ILayerImageSource
     //virtual const QImage& getImage() const override;

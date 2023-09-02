@@ -123,7 +123,7 @@ public slots:
     void setCharisma(int score);
 
 signals:
-    void iconChanged();
+    void iconChanged(MonsterClass* monsterClass);
     void dirty();
 
 protected:

@@ -11,6 +11,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QImageReader>
+#include <QIcon>
 #include <QDebug>
 
 const int ENCOUNTERTYPE_SCROLLINGTEXT = 5;
@@ -134,6 +135,11 @@ void EncounterText::copyValues(const CampaignObjectBase* other)
 int EncounterText::getObjectType() const
 {
     return DMHelper::CampaignType_Text;
+}
+
+QIcon EncounterText::getDefaultIcon()
+{
+    return QIcon(":/img/data/icon_contenttextencounter.png");
 }
 
 QString EncounterText::getText() const

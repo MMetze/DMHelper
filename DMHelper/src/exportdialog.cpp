@@ -298,6 +298,12 @@ void ExportDialog::setRecursiveParentChecked(QTreeWidgetItem *item)
 
 void ExportDialog::setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem* widgetItem)
 {
+    if((!baseObject) || (!widgetItem))
+        return;
+
+    widgetItem->setIcon(0, baseObject->getIcon());
+
+    /*
     switch(baseObject->getObjectType())
     {
         case DMHelper::CampaignType_Party:
@@ -338,6 +344,7 @@ void ExportDialog::setObjectIcon(CampaignObjectBase* baseObject, QTreeWidgetItem
             }
             break;
     }
+    */
 }
 
 void ExportDialog::checkCharacters()

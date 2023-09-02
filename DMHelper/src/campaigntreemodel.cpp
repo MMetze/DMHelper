@@ -2,6 +2,7 @@
 #include "combatant.h"
 #include "character.h"
 #include "map.h"
+#include "party.h"
 #include "campaigntreeitem.h"
 #include "dmconstants.h"
 #include <QMimeData>
@@ -266,9 +267,17 @@ void CampaignTreeModel::handleObjectNameChanged(CampaignObjectBase* object, cons
     qDebug() << "[CampaignTreeModel] Item " << item << ", item ID: " << item->getCampaignItemId() << " object ID: " << object->getID() << ", name: " << item->text();
 
     if(item->text() != name)
-    {
         item->setText(name);
-    }
+}
+
+void CampaignTreeModel::handleObjectIconChanged(CampaignObjectBase* object)
+{
+    if(!object)
+        return;
+
+    CampaignTreeItem* item = getObjectItem(object->getID());
+    if(item)
+        item->updateVisualization();
 }
 
 void CampaignTreeModel::updateCampaignEntries()
@@ -313,7 +322,20 @@ QStandardItem* CampaignTreeModel::createTreeEntry(CampaignObjectBase* object, QS
     if(object->getObjectType() == DMHelper::CampaignType_Map)
     {
         Map* mapObject = dynamic_cast<Map*>(object);
-        treeEntry->setToolTip(mapObject->getFileName());
+        if(mapObject)
+            treeEntry->setToolTip(mapObject->getFileName());
+    }
+    else if(object->getObjectType() == DMHelper::CampaignType_Combatant)
+    {
+        Character* characterObject = dynamic_cast<Character*>(object);
+        if(characterObject)
+            connect(characterObject, &Character::iconChanged, this, &CampaignTreeModel::handleObjectIconChanged);
+    }
+    else if(object->getObjectType() == DMHelper::CampaignType_Party)
+    {
+        Party* partyObject = dynamic_cast<Party*>(object);
+        if(partyObject)
+            connect(partyObject, &Party::iconChanged, this, &CampaignTreeModel::handleObjectIconChanged);
     }
 
     connect(object, &CampaignObjectBase::nameChanged, this, &CampaignTreeModel::handleObjectNameChanged);

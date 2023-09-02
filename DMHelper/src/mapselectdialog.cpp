@@ -197,9 +197,12 @@ bool MapSelectDialog::insertObject(CampaignObjectBase* object, QTreeWidgetItem* 
 
 void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* object)
 {
-    if(!item)
+    if((!item) || (!object))
         return;
 
+    item->setIcon(0, object->getIcon());
+
+    /*
     switch(object->getObjectType())
     {
         case DMHelper::CampaignType_Party:
@@ -242,4 +245,5 @@ void MapSelectDialog::decorateItem(QTreeWidgetItem* item, CampaignObjectBase* ob
         default:
             break;
     }
+    */
 }

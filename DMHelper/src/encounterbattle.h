@@ -22,6 +22,7 @@ public:
     virtual void copyValues(const CampaignObjectBase* other) override;
 
     virtual int getObjectType() const override;
+    virtual QIcon getDefaultIcon() override;
 
     virtual bool hasData() const;
 

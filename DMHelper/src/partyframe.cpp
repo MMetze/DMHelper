@@ -323,7 +323,7 @@ void PartyFrame::handlePublishClicked()
         return;
 
     QImage iconImg;
-    QString iconFile = _party->getIcon();
+    QString iconFile = _party->getPartyIcon();
     if(!iconImg.load(iconFile))
         iconImg = _party->getIconPixmap(DMHelper::PixmapSize_Full).toImage();
 

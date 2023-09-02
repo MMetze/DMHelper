@@ -208,7 +208,7 @@ void MonsterClass::endBatchChanges()
     {
         _batchChanges = false;
         if(_iconChanged)
-            emit iconChanged();
+            emit iconChanged(this);
 
         if(_changesMade)
             emit dirty();
@@ -738,7 +738,7 @@ void MonsterClass::addIcon(const QString &newIcon)
     if(_batchChanges)
         _iconChanged = true;
     else
-        emit iconChanged();
+        emit iconChanged(this);
 }
 
 void MonsterClass::setIcon(int index, const QString& iconFile)
@@ -759,7 +759,7 @@ void MonsterClass::setIcon(int index, const QString& iconFile)
     if(_batchChanges)
         _iconChanged = true;
     else
-        emit iconChanged();
+        emit iconChanged(this);
 }
 
 void MonsterClass::removeIcon(int index)
@@ -818,7 +818,7 @@ void MonsterClass::refreshIconPixmaps()
     if(_batchChanges)
         _iconChanged = true;
     else
-        emit iconChanged();
+        emit iconChanged(this);
 }
 
 void MonsterClass::clearIcon()
@@ -830,7 +830,7 @@ void MonsterClass::clearIcon()
     if(_batchChanges)
         _iconChanged = true;
     else
-        emit iconChanged();
+        emit iconChanged(this);
 }
 
 void MonsterClass::setName(const QString& name)
